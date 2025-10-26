@@ -16,11 +16,11 @@ class LandStatReply : SLMessage() {
         public Float LocationX
         public Float LocationY
         public Float LocationZ
-        public Byte[] OwnerName
+        public ByteArray OwnerName
         public Float Score
         public UUID TaskID
         public Int TaskLocalID
-        public Byte[] TaskName
+        public ByteArray TaskName
     }
 
     @JvmStatic
@@ -35,24 +35,24 @@ class LandStatReply : SLMessage() {
         this.RequestData_Field = RequestData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 17
-        Iterator<T> it = this.ReportData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 17
+        val it: Iterator<T> = this.ReportData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
-            ReportData reportData = (ReportData) it.next()
+            val reportData: ReportData = (ReportData) it.next()
             i = reportData.OwnerName.length + reportData.TaskName.length + 37 + 1 + i2
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleLandStatReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -90)
@@ -72,13 +72,13 @@ class LandStatReply : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.RequestData_Field.ReportType = unpackInt(byteBuffer)
         this.RequestData_Field.RequestFlags = unpackInt(byteBuffer)
         this.RequestData_Field.TotalObjectCount = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ReportData reportData = ReportData()
+            val reportData: ReportData = ReportData()
             reportData.TaskLocalID = unpackInt(byteBuffer)
             reportData.TaskID = unpackUUID(byteBuffer)
             reportData.LocationX = unpackFloat(byteBuffer)

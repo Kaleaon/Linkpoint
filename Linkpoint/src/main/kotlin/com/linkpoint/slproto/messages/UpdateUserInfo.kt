@@ -16,7 +16,7 @@ class UpdateUserInfo : SLMessage() {
 
     @JvmStatic
     class UserData {
-        public Byte[] DirectoryVisibility
+        public ByteArray DirectoryVisibility
         public Boolean IMViaEMail
     }
 
@@ -24,15 +24,15 @@ class UpdateUserInfo : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.UserData_Field.DirectoryVisibility.length + 2 + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleUpdateUserInfo(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -111)
@@ -42,7 +42,7 @@ class UpdateUserInfo : SLMessage() {
         packVariable(byteBuffer, this.UserData_Field.DirectoryVisibility, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.UserData_Field.IMViaEMail = unpackBoolean(byteBuffer)

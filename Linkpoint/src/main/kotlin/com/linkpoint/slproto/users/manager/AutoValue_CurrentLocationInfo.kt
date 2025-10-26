@@ -17,14 +17,14 @@ final class AutoValue_CurrentLocationInfo : CurrentLocationInfo() {
         this.parcelVoiceChannel = voiceChannelInfo
     }
 
-    public Boolean equals(Object obj) {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
         if (!(obj instanceof CurrentLocationInfo)) {
             return false
         }
-        CurrentLocationInfo currentLocationInfo = (CurrentLocationInfo) obj
+        val currentLocationInfo: CurrentLocationInfo = (CurrentLocationInfo) obj
         if (this.parcelData != null ? this.parcelData.equals(currentLocationInfo.parcelData()) : currentLocationInfo.parcelData() == null) {
             if (this.nearbyUsers == currentLocationInfo.nearbyUsers() && this.inChatRangeUsers == currentLocationInfo.inChatRangeUsers()) {
                 return this.parcelVoiceChannel == null ? currentLocationInfo.parcelVoiceChannel() == null : this.parcelVoiceChannel.equals(currentLocationInfo.parcelVoiceChannel())
@@ -33,32 +33,32 @@ final class AutoValue_CurrentLocationInfo : CurrentLocationInfo() {
         return false
     }
 
-    public Int hashCode() {
-        Int i = 0
-        Int hashCode = ((((((this.parcelData == null ? 0 : this.parcelData.hashCode()) ^ 1000003) * 1000003) ^ this.nearbyUsers) * 1000003) ^ this.inChatRangeUsers) * 1000003
+     public override fun hashCode(): Int {
+        val i: Int = 0
+        val hashCode: Int = ((((((this.parcelData == null ? 0 : this.parcelData.hashCode()) ^ 1000003) * 1000003) ^ this.nearbyUsers) * 1000003) ^ this.inChatRangeUsers) * 1000003
         if (this.parcelVoiceChannel != null) {
             i = this.parcelVoiceChannel.hashCode()
         }
         return hashCode ^ i
     }
 
-    public Int inChatRangeUsers() {
+     public fun inChatRangeUsers(): Int {
         return this.inChatRangeUsers
     }
 
-    public Int nearbyUsers() {
+     public fun nearbyUsers(): Int {
         return this.nearbyUsers
     }
 
-    public ParcelData parcelData() {
+     public fun parcelData(): ParcelData {
         return this.parcelData
     }
 
-    public VoiceChannelInfo parcelVoiceChannel() {
+     public fun parcelVoiceChannel(): VoiceChannelInfo {
         return this.parcelVoiceChannel
     }
 
-    public String toString() {
+     public override fun toString(): String {
         return "CurrentLocationInfo{parcelData=" + this.parcelData + ", " + "nearbyUsers=" + this.nearbyUsers + ", " + "inChatRangeUsers=" + this.inChatRangeUsers + ", " + "parcelVoiceChannel=" + this.parcelVoiceChannel + "}"
     }
 }

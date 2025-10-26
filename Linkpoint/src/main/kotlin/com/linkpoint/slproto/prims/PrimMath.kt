@@ -7,16 +7,16 @@ class PrimMath {
     const val F_PI: Float = 3.1415927f
 
     @JvmStatic
-    Float lerp(Float f, Float f2, Float f3) {
+     fun lerp(f: Float, f2: Float, f3: Float): Float {
         return ((f2 - f) * f3) + f
     }
 
     @JvmStatic
-    Float[] lookAt(LLVector3 lLVector3, LLVector3 lLVector32, LLVector3 lLVector33) {
-        Float[] fArr = Float[16]
-        LLVector3 sub = LLVector3.sub(lLVector32, lLVector3)
+     fun lookAt(lLVector3: LLVector3, lLVector32: LLVector3, lLVector33: LLVector3): FloatArray {
+        val fArr: FloatArray = Float[16]
+        val sub: LLVector3 = LLVector3.sub(lLVector32, lLVector3)
         sub.normVec()
-        LLVector3 lLVector34 = LLVector3(sub)
+        val lLVector34: LLVector3 = LLVector3(sub)
         lLVector34.setCross(lLVector33)
         fArr[0] = lLVector34.x
         fArr[4] = lLVector34.y

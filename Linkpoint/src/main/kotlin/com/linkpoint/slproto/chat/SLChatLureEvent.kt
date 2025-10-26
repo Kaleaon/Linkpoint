@@ -31,36 +31,36 @@ val class SLChatLureEvent : SLChatYesNoEvent() {
         return SLChatEvent.ChatMessageType.Lure
     }
 
-    public String getNoButton(Context context) {
+     public fun getNoButton(context: Context): String {
         return context.getString(R.string.teleport_lure_no)
     }
 
-    public String getNoMessage(Context context) {
+     public fun getNoMessage(context: Context): String {
         return context.getString(R.string.teleport_lure_declined)
     }
 
-    public String getQuestion(Context context) {
+     public fun getQuestion(context: Context): String {
         return context.getString(R.string.teleport_lure_question)
     }
 
-    public String getYesButton(Context context) {
+     public fun getYesButton(context: Context): String {
         return context.getString(R.string.teleport_lure_yes)
     }
 
-    public String getYesMessage(Context context) {
+     public fun getYesMessage(context: Context): String {
         return context.getString(R.string.teleport_lure_accepted)
     }
 
-    fun onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(context: Context, userManager: UserManager) {
         super.onYesAction(context, userManager)
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+        val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
             TeleportProgressDialog(context, userManager, R.string.teleporting_progress_message).show()
             activeAgentCircuit.TeleportToLure(this.lureID)
         }
     }
 
-    fun serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setSessionID(this.lureID)
     }

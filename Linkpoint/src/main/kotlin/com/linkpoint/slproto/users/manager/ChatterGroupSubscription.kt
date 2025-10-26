@@ -20,8 +20,8 @@ class ChatterGroupSubscription : ChatterSubscription() {
 
     /* access modifiers changed from: private */
     /* renamed from: onGroupProfile */
-    fun m289com_lumiyaviewer_lumiya_slproto_users_manager_ChatterGroupSubscriptionmthref0(GroupProfileReply groupProfileReply) {
-        String stringFromVariableOEM = SLMessage.stringFromVariableOEM(groupProfileReply.GroupData_Field.Name)
+    fun m289com_lumiyaviewer_lumiya_slproto_users_manager_ChatterGroupSubscriptionmthref0(groupProfileReply: GroupProfileReply) {
+        val stringFromVariableOEM: String = SLMessage.stringFromVariableOEM(groupProfileReply.GroupData_Field.Name)
         if (!Objects.equal(stringFromVariableOEM, this.displayData.displayName)) {
             setChatterDisplayData(this.displayData.withDisplayName(stringFromVariableOEM))
         }

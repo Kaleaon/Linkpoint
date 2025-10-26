@@ -23,7 +23,7 @@ import java.nio.ByteBuffer
 
 class OpenJPEG : GLTexture {
     /* renamed from: -com-lumiyaviewer-lumiya-openjpeg-OpenJPEG$ImageFormatSwitchesValues */
-    private const val /* synthetic */ Int[] syntheticField = null
+    private const val /* synthetic */ IntArray syntheticField = null
     private const val ETC1_BYTES_PER_PIXEL: Int = 888
     public Int bytes_per_pixel
     public Int error_code
@@ -45,11 +45,11 @@ class OpenJPEG : GLTexture {
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$ImageFormatSwitchesValues */
     @JvmStatic
-private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$ImageFormatSwitchesValues() {
+private /* synthetic */ IntArray m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$ImageFormatSwitchesValues() {
         if (syntheticField != null) {
             return syntheticField
         }
-        Int[] iArr = Int[ImageFormat.values().length]
+        val iArr: IntArray = Int[ImageFormat.values().length]
         try {
             iArr[ImageFormat.JPEG2000.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -103,17 +103,17 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
     }
 
     public OpenJPEG(File file, TextureClass textureClass, ImageFormat imageFormat, Boolean z) throws IOException {
-        Boolean z2 = true
+        val z2: Boolean = true
         if (file == null) {
             throw IOException("Null source file")
         }
         Debug.Log("OpenJPEG: decompressing " + file.getName() + " class " + textureClass + " format " + imageFormat)
-        Int i = textureClass == TextureClass.Prim ? z ^ 1 : 0
+        val i: Int = textureClass == TextureClass.Prim ? z ^ 1 : 0
         switch (m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$ImageFormatSwitchesValues()[imageFormat.ordinal()]) {
             case 1:
-                String absolutePath = file.getAbsolutePath()
-                Int i2 = i != 0 ? 1 : 0
-                Int i3 = i != 0 ? 6 : 0
+                val absolutePath: String = file.getAbsolutePath()
+                val i2: Int = i != 0 ? 1 : 0
+                val i3: Int = i != 0 ? 6 : 0
                 if (textureClass != TextureClass.Prim) {
                     z2 = false
                 }
@@ -136,7 +136,7 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
 
     public OpenJPEG(InputStream inputStream, ImageFormat imageFormat, Boolean z, Boolean z2, Float f, Float f2, Boolean z3) throws IOException {
         if (imageFormat == ImageFormat.TGA) {
-            Byte[] bArr = Byte[inputStream.available()]
+            val bArr: ByteArray = Byte[inputStream.available()]
             inputStream.read(bArr)
             this.rawBuffer = decompressTGA(bArr, z, z2, f, f2, z3)
             if (this.rawBuffer == null) {
@@ -151,7 +151,7 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
                 throw IOException("Failed to initialize Basis Universal transcoder")
             }
             
-            Byte[] ktx2Data = Byte[inputStream.available()]
+            val ktx2Data: ByteArray = Byte[inputStream.available()]
             inputStream.read(ktx2Data)
             
             // Verify it's actually KTX2 format
@@ -160,7 +160,7 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
             }
             
             // Get dimensions
-            Int[] dimensions = getKTX2Dimensions(ktx2Data)
+            val dimensions: IntArray = getKTX2Dimensions(ktx2Data)
             if (dimensions == null || dimensions.length != 3) {
                 throw IOException("Failed to get KTX2 texture dimensions")
             }
@@ -191,24 +191,24 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
     private native ByteBuffer allocateRaw(Int i)
 
     @JvmStatic
-    native Unit applyFlexibleMorph(ByteBuffer byteBuffer, ByteBuffer byteBuffer2, Int i, Float[] fArr)
+    native Unit applyFlexibleMorph(ByteBuffer byteBuffer, ByteBuffer byteBuffer2, Int i, FloatArray fArr)
 
     @JvmStatic
     native Unit applyMeshMorph(Float f, ByteBuffer byteBuffer, ByteBuffer byteBuffer2, Int i, ByteBuffer byteBuffer3, ByteBuffer byteBuffer4, ByteBuffer byteBuffer5, Int i2, Int i3, Int i4, ByteBuffer byteBuffer6)
 
     @JvmStatic
-    native Unit applyMorphingTransform(Int i, ByteBuffer byteBuffer, ByteBuffer byteBuffer2, ByteBuffer byteBuffer3, Int[] iArr, Float[] fArr)
+    native Unit applyMorphingTransform(Int i, ByteBuffer byteBuffer, ByteBuffer byteBuffer2, ByteBuffer byteBuffer3, IntArray iArr, FloatArray fArr)
 
     @JvmStatic
-    native Unit applyRiggedMeshMorph(ByteBuffer byteBuffer, Int i, Float[] fArr, Float[] fArr2, ByteBuffer byteBuffer2, ByteBuffer byteBuffer3, Int i2)
+    native Unit applyRiggedMeshMorph(ByteBuffer byteBuffer, Int i, FloatArray fArr, FloatArray fArr2, ByteBuffer byteBuffer2, ByteBuffer byteBuffer3, Int i2)
 
     @JvmStatic
-    OpenJPEG bakeTerrain(Int i, Int i2, OpenJPEG[] openJPEGArr, Float[] fArr, Int i3, Int i4) {
-        OpenJPEG openJPEG = OpenJPEG(i, i2, 3, 2, 0, 0)
-        ByteBuffer[] byteBufferArr = ByteBuffer[openJPEGArr.length]
-        Int[] iArr = Int[openJPEGArr.length]
-        Int[] iArr2 = Int[openJPEGArr.length]
-        Int[] iArr3 = Int[openJPEGArr.length]
+     fun bakeTerrain(i: Int, i2: Int, openJPEGArr: Array<OpenJPEG>, fArr: FloatArray, i3: Int, i4: Int): OpenJPEG {
+        val openJPEG: OpenJPEG = OpenJPEG(i, i2, 3, 2, 0, 0)
+        val byteBufferArr: Array<ByteBuffer> = ByteBuffer[openJPEGArr.length]
+        val iArr: IntArray = Int[openJPEGArr.length]
+        val iArr2: IntArray = Int[openJPEGArr.length]
+        val iArr3: IntArray = Int[openJPEGArr.length]
         for (Int i5 = 0; i5 < openJPEGArr.length; i5++) {
             if (openJPEGArr[i5] != null) {
                 byteBufferArr[i5] = openJPEGArr[i5].rawBuffer
@@ -226,17 +226,17 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
         return openJPEG
     }
 
-    private native Unit bakeTerrainRaw(ByteBuffer byteBuffer, Int i, Int i2, ByteBuffer[] byteBufferArr, Int[] iArr, Int[] iArr2, Int[] iArr3, Float[] fArr, Int i3, Int i4)
+    private native Unit bakeTerrainRaw(ByteBuffer byteBuffer, Int i, Int i2, Array<ByteBuffer> byteBufferArr, IntArray iArr, IntArray iArr2, IntArray iArr3, FloatArray fArr, Int i3, Int i4)
 
     @JvmStatic
-    native Unit calcFlexiSections(Float[] fArr, Int i, Float[] fArr2, Float[] fArr3, Int i2, Float f, Float f2, Float f3, Float f4, Float f5, Float f6, Float f7, Float f8, Float f9, Float f10, Boolean z)
+    native Unit calcFlexiSections(FloatArray fArr, Int i, FloatArray fArr2, FloatArray fArr3, Int i2, Float f, Float f2, Float f3, Float f4, Float f5, Float f6, Float f7, Float f8, Float f9, Float f10, Boolean z)
 
     @JvmStatic
-    native Int checkFrustrumOcclusion(Float[] fArr, Float[] fArr2, Float f, Float f2, Float f3)
+    native Int checkFrustrumOcclusion(FloatArray fArr, FloatArray fArr2, Float f, Float f2, Float f3)
 
     private native ByteBuffer decompress(String str, Int i, Int i2, Boolean z, Int i3, Int i4)
 
-    private native ByteBuffer decompressTGA(Byte[] bArr, Boolean z, Boolean z2, Float f, Float f2, Boolean z3)
+    private native ByteBuffer decompressTGA(ByteArray bArr, Boolean z, Boolean z2, Float f, Float f2, Boolean z3)
 
     private native Unit drawBuf(ByteBuffer byteBuffer, Int i, Int i2, Int i3, ByteBuffer byteBuffer2, Int i4, Int i5, Int i6, Int i7, Boolean z, Boolean z2, Boolean z3, Boolean z4)
 
@@ -261,15 +261,15 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
 
     // KTX2/Basis Universal transcoding methods
     private native Boolean initBasisTranscoder()
-    private native ByteBuffer decompressKTX2(Byte[] ktx2Data, Int targetFormat)
-    private native Int[] getKTX2Dimensions(Byte[] ktx2Data)
-    private native Boolean isKTX2Format(Byte[] data)
+    private native ByteBuffer decompressKTX2(ByteArray ktx2Data, Int targetFormat)
+    private native IntArray getKTX2Dimensions(ByteArray ktx2Data)
+    private native Boolean isKTX2Format(ByteArray data)
     
     /**
      * Auto-detect texture format from data
      */
     @JvmStatic
-    ImageFormat detectTextureFormat(Byte[] data) {
+     fun detectTextureFormat(data: ByteArray): ImageFormat {
         if (data == null || data.length < 12) {
             return ImageFormat.JPEG2000; // Default fallback
         }
@@ -291,7 +291,7 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
         if (data.length >= 18) {
             // TGA files don't have a clear magic number, but we can check some characteristics
             // This is a basic check - may need refinement
-            Byte imageType = data[2]
+            val imageType: Byte = data[2]
             if (imageType == 2 || imageType == 3 || imageType == 10 || imageType == 11) {
                 return ImageFormat.TGA
             }
@@ -301,12 +301,12 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
         return ImageFormat.JPEG2000
     }
 
-    public Boolean CompressETC1() throws IOException {
+    public fun CompressETC1(): Boolean throws IOException {
         if (VERSION.SDK_INT < 8 || this.rawBuffer == null || this.num_components != 3 || this.num_extra_components != 0 || (this.bytes_per_pixel != 2 && this.bytes_per_pixel != 3)) {
             return false
         }
-        Int encodedDataSize = ETC1.getEncodedDataSize(this.width, this.height)
-        Buffer allocateRaw = allocateRaw(encodedDataSize)
+        val encodedDataSize: Int = ETC1.getEncodedDataSize(this.width, this.height)
+        val allocateRaw: Buffer = allocateRaw(encodedDataSize)
         if (allocateRaw == null) {
             throw IOException("Out of memory for " + Integer.toString(encodedDataSize) + " allocation")
         }
@@ -319,7 +319,7 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
         return true
     }
 
-    fun SaveJPEG2K(File file) throws IOException {
+    fun SaveJPEG2K(file: File) throws IOException {
         if (this.rawBuffer != null) {
             if (writeJPEG2K(file.getAbsolutePath(), this.rawBuffer, this.width, this.height, this.num_components, this.num_extra_components) != 0) {
                 throw IOException("Failed to save JPEG2k to " + file.getAbsolutePath())
@@ -327,15 +327,15 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
         }
     }
 
-    fun SaveRaw(File file) {
+    fun SaveRaw(file: File) {
         if (this.rawBuffer != null) {
             writeRaw(this.rawBuffer, file.getAbsolutePath())
         }
     }
 
-    fun SaveToFile(File file) {
+    fun SaveToFile(file: File) {
         try {
-            FileOutputStream fileOutputStream = FileOutputStream(file, false)
+            val fileOutputStream: FileOutputStream = FileOutputStream(file, false)
             fileOutputStream.getChannel().write(this.rawBuffer)
             fileOutputStream.close()
         } catch (IOException e) {
@@ -344,13 +344,13 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
     }
 
     @TargetApi(18)
-    public Int SetAsImmutableTexture() {
+    public fun SetAsImmutableTexture(): Int {
         if (this.rawBuffer != null) {
             if (this.bytes_per_pixel == ETC1_BYTES_PER_PIXEL) {
                 GLES30.glTexStorage2D(3553, 1, 37492, this.width, this.height)
                 GLES30.glCompressedTexSubImage2D(3553, 0, 0, 0, this.width, this.height, 37492, this.rawBuffer.capacity(), this.rawBuffer)
             } else {
-                Int i3 = 5121
+                val i3: Int = 5121
                 switch (this.num_components) {
                     case 1:
                         i = 33321
@@ -371,7 +371,7 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
                     default:
                         return SetAsTexture()
                 }
-                Int i4 = (this.bytes_per_pixel == 2 && this.num_components == 3) ? 33635 : i3
+                val i4: Int = (this.bytes_per_pixel == 2 && this.num_components == 3) ? 33635 : i3
                 GLES30.glTexStorage2D(3553, 1, i, this.width, this.height)
                 GLES30.glTexSubImage2D(3553, 0, 0, 0, this.width, this.height, i2, i4, this.rawBuffer)
                 if (this.num_components == 1) {
@@ -385,12 +385,12 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
         return getLoadedSize()
     }
 
-    public Int SetAsTexture() {
+    public fun SetAsTexture(): Int {
         if (this.rawBuffer != null) {
             if (this.bytes_per_pixel == ETC1_BYTES_PER_PIXEL) {
                 GLES10.glCompressedTexImage2D(3553, 0, 36196, this.width, this.height, 0, this.rawBuffer.capacity(), this.rawBuffer)
             } else {
-                Int i2 = 5121
+                val i2: Int = 5121
                 switch (this.num_components) {
                     case 1:
                         i = 6406
@@ -414,16 +414,16 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
         return getLoadedSize()
     }
 
-    public Int SetAsTextureTarget(Int i) {
+    public fun SetAsTextureTarget(i: Int): Int {
         if (this.rawBuffer == null) {
             return 0
         }
         if (this.bytes_per_pixel == ETC1_BYTES_PER_PIXEL) {
-            Int capacity = this.rawBuffer.capacity()
+            val capacity: Int = this.rawBuffer.capacity()
             GLES20.glCompressedTexImage2D(i, 0, 36196, this.width, this.height, 0, capacity, this.rawBuffer)
             return capacity
         }
-        Int i3 = 5121
+        val i3: Int = 5121
         switch (this.num_components) {
             case 1:
                 i2 = 6406
@@ -445,25 +445,25 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
         return (this.width * this.height) * this.bytes_per_pixel
     }
 
-    fun blendAlpha(OpenJPEG openJPEG, Boolean z) {
+    fun blendAlpha(openJPEG: OpenJPEG, z: Boolean) {
         if (this.rawBuffer != null && openJPEG.rawBuffer != null && this.num_components >= 4 && openJPEG.num_components >= 4) {
             drawBuf(this.rawBuffer, this.width, this.height, this.num_components, openJPEG.rawBuffer, openJPEG.width, openJPEG.height, openJPEG.num_components, 0, false, true, z, false)
         }
     }
 
-    fun draw(OpenJPEG openJPEG, Int i, Boolean z) {
+    fun draw(openJPEG: OpenJPEG, i: Int, z: Boolean) {
         if (this.rawBuffer != null && openJPEG.rawBuffer != null) {
             drawBuf(this.rawBuffer, this.width, this.height, this.num_components, openJPEG.rawBuffer, openJPEG.width, openJPEG.height, openJPEG.num_components, i, z, false, false, false)
         }
     }
 
-    fun drawBump(OpenJPEG openJPEG, Int i, Boolean z, Boolean z2) {
+    fun drawBump(openJPEG: OpenJPEG, i: Int, z: Boolean, z2: Boolean) {
         if (this.rawBuffer != null && openJPEG.rawBuffer != null && this.num_extra_components >= 1 && openJPEG.num_components >= 4) {
             drawBuf(this.rawBuffer, this.width, this.height, this.num_components, openJPEG.rawBuffer, openJPEG.width, openJPEG.height, openJPEG.num_components, 0, false, false, z2, true)
         }
     }
 
-    protected Unit finalize() throws Throwable {
+     protected fun finalize() throws Throwable {
         if (this.rawBuffer != null) {
             TextureMemoryTracker.releaseOpenJpegMemory(this.rawBuffer.capacity(), this.mmapped)
             release(this.rawBuffer)
@@ -472,8 +472,8 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
         super.finalize()
     }
 
-    public Bitmap getAsBitmap() {
-        Bitmap createBitmap = Bitmap.createBitmap(this.width, this.height, Config.ARGB_8888)
+     public fun getAsBitmap(): Bitmap {
+        val createBitmap: Bitmap = Bitmap.createBitmap(this.width, this.height, Config.ARGB_8888)
         if (createBitmap == null) {
             return null
         }
@@ -483,9 +483,9 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
                     i3 = getByte(((this.width * i) + i2) * this.num_components) & 255
                     i3 |= ((i3 << 16) | ViewCompat.MEASURED_STATE_MASK) | (i3 << 8)
                 } else {
-                    Int i4 = getByte((((this.width * i) + i2) * this.num_components) + 0) & 255
-                    Int i5 = getByte((((this.width * i) + i2) * this.num_components) + 1) & 255
-                    Int i6 = getByte((((this.width * i) + i2) * this.num_components) + 2) & 255
+                    val i4: Int = getByte((((this.width * i) + i2) * this.num_components) + 0) & 255
+                    val i5: Int = getByte((((this.width * i) + i2) * this.num_components) + 1) & 255
+                    val i6: Int = getByte((((this.width * i) + i2) * this.num_components) + 2) & 255
                     i3 = 255
                     if (this.num_components >= 4) {
                         i3 = getByte((((this.width * i) + i2) * this.num_components) + 3) & 255
@@ -498,12 +498,12 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
         return createBitmap
     }
 
-    public Byte getByte(Int i) {
+     public fun getByte(i: Int): Byte {
         return this.rawBuffer != null ? this.rawBuffer.get(i) : (Byte) 0
     }
 
-    public Bitmap getExtraAsBitmap() {
-        Bitmap createBitmap = Bitmap.createBitmap(this.width, this.height, Config.ARGB_8888)
+     public fun getExtraAsBitmap(): Bitmap {
+        val createBitmap: Bitmap = Bitmap.createBitmap(this.width, this.height, Config.ARGB_8888)
         for (Int i = 0; i < this.height; i++) {
             for (Int i2 = 0; i2 < this.width; i2++) {
                 if (this.num_extra_components == 1) {
@@ -518,10 +518,10 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
         return createBitmap
     }
 
-    public ByteBuffer getExtraComponentsBuffer() {
+     public fun getExtraComponentsBuffer(): ByteBuffer {
         if (!(this.num_extra_components == 0 || this.rawBuffer == null)) {
-            ByteBuffer asReadOnlyBuffer = this.rawBuffer.asReadOnlyBuffer()
-            Int i = (this.width * this.height) * this.num_components
+            val asReadOnlyBuffer: ByteBuffer = this.rawBuffer.asReadOnlyBuffer()
+            val i: Int = (this.width * this.height) * this.num_components
             if (i >= 0 && i <= asReadOnlyBuffer.limit()) {
                 asReadOnlyBuffer.position(i)
                 return asReadOnlyBuffer
@@ -530,34 +530,34 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
         return null
     }
 
-    public Int getHeight() {
+     public fun getHeight(): Int {
         return this.height
     }
 
-    public Int getLoadedSize() {
+     public fun getLoadedSize(): Int {
         return this.rawBuffer != null ? this.bytes_per_pixel == ETC1_BYTES_PER_PIXEL ? this.rawBuffer.capacity() : (this.bytes_per_pixel == 3 && this.num_components == 3) ? (this.width * this.height) * (this.bytes_per_pixel + 1) : (this.width * this.height) * this.bytes_per_pixel : 0
     }
 
-    public Int getNumComponents() {
+     public fun getNumComponents(): Int {
         return this.num_components
     }
 
-    public Int getRGB(Int i) {
+     public fun getRGB(i: Int): Int {
         return this.rawBuffer != null ? (((this.rawBuffer.get(i) << 16) & 16711680) | ((this.rawBuffer.get(i + 1) << 8) & MotionEventCompat.ACTION_POINTER_INDEX_MASK)) | (this.rawBuffer.get(i + 2) & 255) : 0
     }
 
-    public Int getWidth() {
+     public fun getWidth(): Int {
         return this.width
     }
 
-    public Boolean hasAlphaLayer() {
+     public fun hasAlphaLayer(): Boolean {
         return this.bytes_per_pixel != ETC1_BYTES_PER_PIXEL && (this.num_components >= 4 || this.num_components == 1)
     }
 
-    fun putPixelRow(Int i, Int[] iArr, Int i2) {
-        Int i3 = 0
+    fun putPixelRow(i: Int, iArr: IntArray, i2: Int) {
+        val i3: Int = 0
         if (this.rawBuffer != null) {
-            Int i4 = (this.width * this.num_components) * i
+            val i4: Int = (this.width * this.num_components) * i
             if (this.num_components == 3) {
                 while (i3 < i2) {
                     i5 = iArr[i3]
@@ -586,7 +586,7 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
         }
     }
 
-    fun setComponent(Int i, Byte b) {
+    fun setComponent(i: Int, b: Byte) {
         if (this.rawBuffer != null) {
             setComponentBuf(this.rawBuffer, this.width, this.height, this.num_components, this.num_extra_components, i, b)
         }

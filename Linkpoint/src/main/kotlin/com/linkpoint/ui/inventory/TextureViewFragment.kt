@@ -44,7 +44,7 @@ class TextureViewFragment : StateAwareFragment() {
             this()
         }
 
-        fun OnResourceReady(Object obj, Boolean z) {
+        fun OnResourceReady(obj: Object, z: Boolean) {
             if (obj instanceof OpenJPEG) {
                 this.texture = (OpenJPEG) obj
             }
@@ -54,7 +54,7 @@ class TextureViewFragment : StateAwareFragment() {
         }
 
         /* access modifiers changed from: protected */
-        public Bitmap doInBackground(UUID... uuidArr) {
+         public override fun doInBackground(vararg uuidArr: UUID): Bitmap {
             Debug.Printf("loading asset ID %s", uuidArr[0].toString())
             TextureCache.getInstance().RequestResource(DrawableTextureParams.create(uuidArr[0], TextureClass.Asset), this)
             synchronized (this.textureReady) {
@@ -78,7 +78,7 @@ class TextureViewFragment : StateAwareFragment() {
         }
 
         /* access modifiers changed from: protected */
-        fun onPostExecute(Bitmap bitmap) {
+        override fun onPostExecute(bitmap: Bitmap) {
             if (!(!TextureViewFragment.this.isFragmentStarted() || TextureViewFragment.this.textureImageView == null || TextureViewFragment.this.loadingLayout == null)) {
                 if (bitmap != null) {
                     TextureViewFragment.this.loadingLayout.showContent((String) null)
@@ -90,11 +90,11 @@ class TextureViewFragment : StateAwareFragment() {
                     TextureViewFragment.this.photoViewAttacher.update()
                 }
             }
-            LoadAssetImageTask unused = TextureViewFragment.this.loadAssetImageTask = null
+            val unused: LoadAssetImageTask = TextureViewFragment.this.loadAssetImageTask = null
         }
 
         /* access modifiers changed from: protected */
-        fun onPreExecute() {
+        override fun onPreExecute() {
             if (TextureViewFragment.this.isFragmentStarted() && TextureViewFragment.this.loadingLayout != null) {
                 TextureViewFragment.this.loadingLayout.showLoading()
             }
@@ -102,35 +102,35 @@ class TextureViewFragment : StateAwareFragment() {
     }
 
     @JvmStatic
-    Bundle makeArguments(UUID uuid, UUID uuid2) {
-        Bundle bundle = Bundle()
+     fun makeArguments(uuid: UUID, uuid2: UUID): Bundle {
+        val bundle: Bundle = Bundle()
         bundle.putString("activeAgentUUID", uuid.toString())
         bundle.putString(ASSET_UUID_KEY, uuid2.toString())
         return bundle
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View inflate = layoutInflater.inflate(R.layout.texture_view_fragment, viewGroup, false)
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+        val inflate: View = layoutInflater.inflate(R.layout.texture_view_fragment, viewGroup, false)
         this.loadingLayout = (LoadingLayout) inflate.findViewById(R.id.loading_layout)
         this.textureImageView = (ImageView) inflate.findViewById(R.id.texture_image_view)
         this.photoViewAttacher = PhotoViewAttacher(this.textureImageView)
         return inflate
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
-        UUID uuid = UUIDPool.getUUID(getArguments().getString(ASSET_UUID_KEY))
+        val uuid: UUID = UUIDPool.getUUID(getArguments().getString(ASSET_UUID_KEY))
         if (uuid != null) {
             if (this.loadAssetImageTask != null) {
                 this.loadAssetImageTask.cancel(true)
                 this.loadAssetImageTask = null
             }
             this.loadAssetImageTask = LoadAssetImageTask(this, (LoadAssetImageTask) null)
-            this.loadAssetImageTask.execute(UUID[]{uuid})
+            this.loadAssetImageTask.execute(Array<UUID>{uuid})
         }
     }
 
-    fun onStop() {
+    override fun onStop() {
         if (this.loadAssetImageTask != null) {
             this.loadAssetImageTask.cancel(true)
             this.loadAssetImageTask = null

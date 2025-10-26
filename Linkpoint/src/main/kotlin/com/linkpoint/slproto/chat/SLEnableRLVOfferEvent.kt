@@ -28,41 +28,41 @@ val class SLEnableRLVOfferEvent : SLChatYesNoEvent() {
         return SLChatEvent.ChatMessageType.EnableRLVOffer
     }
 
-    public String getNoButton(Context context) {
+     public fun getNoButton(context: Context): String {
         return context.getString(R.string.enable_rlv_no)
     }
 
-    public String getNoMessage(Context context) {
+     public fun getNoMessage(context: Context): String {
         return context.getString(R.string.enable_rlv_declined)
     }
 
-    public String getQuestion(Context context) {
+     public fun getQuestion(context: Context): String {
         return context.getString(R.string.enable_rlv_question)
     }
 
-    public String getText(Context context, UserManager userManager) {
+     public fun getText(context: Context, userManager: UserManager): String {
         return context.getString(R.string.rlv_enable_chat_message)
     }
 
-    public String getYesButton(Context context) {
+     public fun getYesButton(context: Context): String {
         return context.getString(R.string.enable_rlv_yes)
     }
 
-    public String getYesMessage(Context context) {
+     public fun getYesMessage(context: Context): String {
         return context.getString(R.string.enable_rlv_accepted)
     }
 
-    public Boolean isObjectPopup() {
+     public fun isObjectPopup(): Boolean {
         return true
     }
 
     /* access modifiers changed from: protected */
-    fun onNoAction(Context context, UserManager userManager) {
+    fun onNoAction(context: Context, userManager: UserManager) {
         super.onNoAction(context, userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    fun onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(context: Context, userManager: UserManager) {
         super.onYesAction(context, userManager)
         SharedPreferences.Editor edit = LinkpointApp.getDefaultSharedPreferences().edit()
         edit.putBoolean("rlv_enabled", true)
@@ -70,7 +70,7 @@ val class SLEnableRLVOfferEvent : SLChatYesNoEvent() {
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    fun serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

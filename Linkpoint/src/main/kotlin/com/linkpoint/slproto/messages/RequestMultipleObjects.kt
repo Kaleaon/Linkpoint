@@ -27,15 +27,15 @@ class RequestMultipleObjects : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.ObjectData_Fields.size() * 5) + 35
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleRequestMultipleObjects(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) 3)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
@@ -47,12 +47,12 @@ class RequestMultipleObjects : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ObjectData objectData = ObjectData()
+            val objectData: ObjectData = ObjectData()
             objectData.CacheMissType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             objectData.ID = unpackInt(byteBuffer)
             this.ObjectData_Fields.add(objectData)

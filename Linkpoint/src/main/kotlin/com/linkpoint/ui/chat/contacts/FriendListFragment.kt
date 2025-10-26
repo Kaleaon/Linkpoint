@@ -10,7 +10,7 @@ import com.linkpoint.ui.common.UserListFragment
 
 class FriendListFragment : UserListFragment() {
     /* access modifiers changed from: protected */
-    public ListAdapter createListAdapter(Context context, LoaderManager loaderManager, UserManager userManager) {
+     public fun createListAdapter(context: Context, loaderManager: LoaderManager, userManager: UserManager): ListAdapter {
         return ChatterListSubscriptionAdapter(context, userManager, ChatterListType.Friends)
     }
 }

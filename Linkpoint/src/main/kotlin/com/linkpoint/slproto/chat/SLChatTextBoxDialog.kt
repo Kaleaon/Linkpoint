@@ -31,15 +31,15 @@ val class SLChatTextBoxDialog : SLChatDialogEvent() {
         this.textBoxButtonIndex = i
     }
 
-    fun bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, ChatEventTimestampUpdater chatEventTimestampUpdater) {
+    fun bindViewHolder(chatEventViewHolder: ChatEventViewHolder, userManager: UserManager, chatEventTimestampUpdater: ChatEventTimestampUpdater) {
         super.bindViewHolder(chatEventViewHolder, userManager, chatEventTimestampUpdater)
         if (chatEventViewHolder instanceof ChatTextBoxViewHolder) {
-            ChatTextBoxViewHolder chatTextBoxViewHolder = (ChatTextBoxViewHolder) chatEventViewHolder
+            val chatTextBoxViewHolder: ChatTextBoxViewHolder = (ChatTextBoxViewHolder) chatEventViewHolder
             if (this.enteredValue != null || this.ignored) {
                 if (this.ignored) {
                     chatTextBoxViewHolder.dialogResultTextView.setText(R.string.dialog_ignored)
                 } else {
-                    chatTextBoxViewHolder.dialogResultTextView.setText(chatTextBoxViewHolder.dialogResultTextView.getContext().getString(R.string.text_box_entered, Object[]{this.enteredValue}))
+                    chatTextBoxViewHolder.dialogResultTextView.setText(chatTextBoxViewHolder.dialogResultTextView.getContext().getString(R.string.text_box_entered, Array<Any>{this.enteredValue}))
                 }
                 chatTextBoxViewHolder.dialogResultTextView.setVisibility(0)
                 chatTextBoxViewHolder.dialogButtonsLayout.setVisibility(8)
@@ -60,34 +60,34 @@ val class SLChatTextBoxDialog : SLChatDialogEvent() {
         return SLChatEvent.ChatMessageViewType.VIEW_TYPE_TEXTBOX
     }
 
-    public Boolean isObjectPopup() {
+     public fun isObjectPopup(): Boolean {
         return true
     }
 
     /* renamed from: onDialogIgnored */
-    fun m147lambda$com_lumiyaviewer_lumiya_slproto_chat_SLChatTextBoxDialog_4314(UserManager userManager) {
+    fun m147lambda$com_lumiyaviewer_lumiya_slproto_chat_SLChatTextBoxDialog_4314(userManager: UserManager) {
         super.onDialogIgnored(userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
     /* renamed from: onEnteredText */
-    fun m146lambda$com_lumiyaviewer_lumiya_slproto_chat_SLChatTextBoxDialog_4223(UserManager userManager, String str) {
+    fun m146lambda$com_lumiyaviewer_lumiya_slproto_chat_SLChatTextBoxDialog_4223(userManager: UserManager, str: String) {
         this.enteredValue = str
-        UUID sourceUUID = this.source.getSourceUUID()
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+        val sourceUUID: UUID = this.source.getSourceUUID()
+        val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (!(sourceUUID == null || activeAgentCircuit == null)) {
             activeAgentCircuit.SendScriptDialogReply(sourceUUID, this.chatChannel, this.textBoxButtonIndex, str)
         }
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    fun serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setTextBoxButtonIndex(Integer.valueOf(this.textBoxButtonIndex))
         chatMessage.setDialogSelectedOption(this.enteredValue)
     }
 
-    fun showDialog(Context context, UserManager userManager) {
+    fun showDialog(context: Context, userManager: UserManager) {
         TextFieldDialogBuilder(context).setTitle(this.text).setOnTextEnteredListener(TextFieldDialogBuilder.OnTextEnteredListener(this, userManager) {
 
             /* renamed from: -$f0 */

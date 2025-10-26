@@ -7,14 +7,14 @@ import java.util.Arrays
 
 class AnimationSkeletonData {
     private const val Int numAnimatedBones = 133
-    private Float[] animMatrix = Float[2128]
-    private Float[] animMatrix_Swap = Float[2128]
-    private Float[] animOffsets = Float[532]
-    private Float[] animOffsets_Swap = Float[532]
-    private val LLVector3[] animPosArray = LLVector3[133]
-    private val Float[] animPriorityPosArray = Float[133]
-    private val Float[] animPriorityRotArray = Float[133]
-    private val LLQuaternion[] animRotArray = LLQuaternion[133]
+    private FloatArray animMatrix = Float[2128]
+    private FloatArray animMatrix_Swap = Float[2128]
+    private FloatArray animOffsets = Float[532]
+    private FloatArray animOffsets_Swap = Float[532]
+    private val Array<LLVector3> animPosArray = LLVector3[133]
+    private val FloatArray animPriorityPosArray = Float[133]
+    private val FloatArray animPriorityRotArray = Float[133]
+    private val Array<LLQuaternion> animRotArray = LLQuaternion[133]
 
     AnimationSkeletonData() {
         for (Int i = 0; i < 133; i++) {
@@ -25,7 +25,7 @@ class AnimationSkeletonData {
         Arrays.fill(this.animOffsets, 0.0f)
     }
 
-    Unit animate(AvatarSkeleton avatarSkeleton, AvatarAnimationList avatarAnimationList) {
+     fun animate(avatarSkeleton: AvatarSkeleton, avatarAnimationList: AvatarAnimationList) {
         Arrays.fill(this.animPriorityRotArray, 1.0f)
         Arrays.fill(this.animPriorityPosArray, 1.0f)
         for (i = 0; i < 133; i++) {
@@ -40,7 +40,7 @@ class AnimationSkeletonData {
             this.animOffsets_Swap[(i * 4) + 2] = this.animPosArray[i].z
             this.animOffsets_Swap[(i * 4) + 3] = 1.0f - this.animPriorityPosArray[i]
         }
-        Float[] fArr = this.animMatrix
+        val fArr: FloatArray = this.animMatrix
         this.animMatrix = this.animMatrix_Swap
         this.animMatrix_Swap = fArr
         fArr = this.animOffsets
@@ -48,11 +48,11 @@ class AnimationSkeletonData {
         this.animOffsets_Swap = fArr
     }
 
-    val Float[] getAnimMatrix() {
+    val FloatArray getAnimMatrix() {
         return this.animMatrix
     }
 
-    val Float[] getAnimOffsets() {
+    val FloatArray getAnimOffsets() {
         return this.animOffsets
     }
 }

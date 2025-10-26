@@ -20,67 +20,67 @@ import org.xmlpull.v1.XmlPullParserException
 class LLSDNodeFactory {
     @JvmStatic
 private LLSDNodeConstructor createArray = LLSDNodeConstructor() {
-        public LLSDNode createNodeFromXML(XmlPullParser xmlPullParser) throws LLSDXMLException, XmlPullParserException, IOException {
+         public fun createNodeFromXML(xmlPullParser: XmlPullParser) throws LLSDXMLException, XmlPullParserException, IOException {
             return LLSDArray(xmlPullParser)
         }
     }
     @JvmStatic
 private LLSDNodeConstructor createBinary = LLSDNodeConstructor() {
-        public LLSDNode createNodeFromXML(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+         public fun createNodeFromXML(xmlPullParser: XmlPullParser) throws XmlPullParserException, IOException {
             return LLSDBinary(xmlPullParser.nextText())
         }
     }
     @JvmStatic
 private LLSDNodeConstructor createBoolean = LLSDNodeConstructor() {
-        public LLSDNode createNodeFromXML(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+         public fun createNodeFromXML(xmlPullParser: XmlPullParser) throws XmlPullParserException, IOException {
             return LLSDBoolean(xmlPullParser.nextText())
         }
     }
     @JvmStatic
 private LLSDNodeConstructor createDate = LLSDNodeConstructor() {
-        public LLSDNode createNodeFromXML(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+         public fun createNodeFromXML(xmlPullParser: XmlPullParser) throws XmlPullParserException, IOException {
             return LLSDDate(xmlPullParser.nextText())
         }
     }
     @JvmStatic
 private LLSDNodeConstructor createDouble = LLSDNodeConstructor() {
-        public LLSDNode createNodeFromXML(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+         public fun createNodeFromXML(xmlPullParser: XmlPullParser) throws XmlPullParserException, IOException {
             return LLSDDouble(xmlPullParser.nextText())
         }
     }
     @JvmStatic
 private LLSDNodeConstructor createInt = LLSDNodeConstructor() {
-        public LLSDNode createNodeFromXML(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+         public fun createNodeFromXML(xmlPullParser: XmlPullParser) throws XmlPullParserException, IOException {
             return LLSDInt(xmlPullParser.nextText())
         }
     }
     @JvmStatic
 private LLSDNodeConstructor createMap = LLSDNodeConstructor() {
-        public LLSDNode createNodeFromXML(XmlPullParser xmlPullParser) throws LLSDXMLException, XmlPullParserException, IOException {
+         public fun createNodeFromXML(xmlPullParser: XmlPullParser) throws LLSDXMLException, XmlPullParserException, IOException {
             return LLSDMap(xmlPullParser)
         }
     }
     @JvmStatic
 private LLSDNodeConstructor createString = LLSDNodeConstructor() {
-        public LLSDNode createNodeFromXML(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+         public fun createNodeFromXML(xmlPullParser: XmlPullParser) throws XmlPullParserException, IOException {
             return LLSDString(xmlPullParser.nextText())
         }
     }
     @JvmStatic
 private LLSDNodeConstructor createURI = LLSDNodeConstructor() {
-        public LLSDNode createNodeFromXML(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+         public fun createNodeFromXML(xmlPullParser: XmlPullParser) throws XmlPullParserException, IOException {
             return LLSDURI(xmlPullParser.nextText())
         }
     }
     @JvmStatic
 private LLSDNodeConstructor createUUID = LLSDNodeConstructor() {
-        public LLSDNode createNodeFromXML(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+         public fun createNodeFromXML(xmlPullParser: XmlPullParser) throws XmlPullParserException, IOException {
             return LLSDUUID(xmlPullParser.nextText())
         }
     }
     @JvmStatic
 private LLSDNodeConstructor createUndef = LLSDNodeConstructor() {
-        public LLSDNode createNodeFromXML(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+         public fun createNodeFromXML(xmlPullParser: XmlPullParser) throws XmlPullParserException, IOException {
             xmlPullParser.nextTag()
             return LLSDUndefined()
         }
@@ -89,7 +89,7 @@ private LLSDNodeConstructor createUndef = LLSDNodeConstructor() {
 private Map<String, LLSDNodeConstructor> tagMap = HashMap(22)
 
     private interface LLSDNodeConstructor {
-        LLSDNode createNodeFromXML(XmlPullParser xmlPullParser) throws LLSDXMLException, XmlPullParserException, IOException
+         fun createNodeFromXML(XmlPullParser xmlPullParser): LLSDNode) throws LLSDXMLException, XmlPullParserException, IOException
     }
 
     static {
@@ -107,9 +107,9 @@ private Map<String, LLSDNodeConstructor> tagMap = HashMap(22)
     }
 
     @JvmStatic
-    LLSDNode parseNode(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException, LLSDXMLException {
-        String name = xmlPullParser.getName()
-        LLSDNodeConstructor lLSDNodeConstructor = tagMap.get(name)
+     fun parseNode(xmlPullParser: XmlPullParser) throws XmlPullParserException, IOException, LLSDXMLException {
+        val name: String = xmlPullParser.getName()
+        val lLSDNodeConstructor: LLSDNodeConstructor = tagMap.get(name)
         if (lLSDNodeConstructor != null) {
             return lLSDNodeConstructor.createNodeFromXML(xmlPullParser)
         }

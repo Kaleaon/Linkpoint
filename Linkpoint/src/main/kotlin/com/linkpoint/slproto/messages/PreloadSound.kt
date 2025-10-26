@@ -20,15 +20,15 @@ class PreloadSound : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.DataBlock_Fields.size() * 48) + 3
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandlePreloadSound(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) 15)
         byteBuffer.put((Byte) this.DataBlock_Fields.size())
@@ -39,10 +39,10 @@ class PreloadSound : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            DataBlock dataBlock = DataBlock()
+            val dataBlock: DataBlock = DataBlock()
             dataBlock.ObjectID = unpackUUID(byteBuffer)
             dataBlock.OwnerID = unpackUUID(byteBuffer)
             dataBlock.SoundID = unpackUUID(byteBuffer)

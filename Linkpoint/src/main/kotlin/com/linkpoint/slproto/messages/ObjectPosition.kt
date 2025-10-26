@@ -28,15 +28,15 @@ class ObjectPosition : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.ObjectData_Fields.size() * 16) + 35
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleObjectPosition(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) 4)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
@@ -48,12 +48,12 @@ class ObjectPosition : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ObjectData objectData = ObjectData()
+            val objectData: ObjectData = ObjectData()
             objectData.ObjectLocalID = unpackInt(byteBuffer)
             objectData.Position = unpackLLVector3(byteBuffer)
             this.ObjectData_Fields.add(objectData)

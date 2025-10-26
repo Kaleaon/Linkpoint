@@ -29,8 +29,8 @@ abstract class TextFieldEditFragment : ChatterFragment() : BackButtonHandler {
     /* access modifiers changed from: private */
     public MenuItem undoMenuItem
 
-    private Unit closeFragment() {
-        FragmentActivity activity = getActivity()
+     private fun closeFragment() {
+        val activity: FragmentActivity = getActivity()
         if (activity instanceof DetailsActivity) {
             ((DetailsActivity) activity).closeDetailsFragment(this)
         }
@@ -64,12 +64,12 @@ abstract class TextFieldEditFragment : ChatterFragment() : BackButtonHandler {
         closeFragment()
     }
 
-    public Boolean onBackButtonPressed() {
-        View view = getView()
+     public fun onBackButtonPressed(): Boolean {
+        val view: View = getView()
         if (view == null) {
             return false
         }
-        String charSequence = ((TextView) view.findViewById(R.id.field_edit_text)).getText().toString()
+        val charSequence: String = ((TextView) view.findViewById(R.id.field_edit_text)).getText().toString()
         if (Objects.equal(charSequence, this.originalText)) {
             return false
         }
@@ -239,45 +239,45 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$Dt
         return true
     }
 
-    fun onCreate(Bundle bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.user_notes_edit_menu, menu)
         this.undoMenuItem = menu.findItem(R.id.item_undo)
         this.undoMenuItem.setVisible(this.hasChanged)
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View inflate = layoutInflater.inflate(R.layout.user_text_field_edit, viewGroup, false)
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+        val inflate: View = layoutInflater.inflate(R.layout.user_text_field_edit, viewGroup, false)
         final TextView textView = (TextView) inflate.findViewById(R.id.field_edit_text)
         textView.setHint(getFieldHint(layoutInflater.getContext()))
         textView.addTextChangedListener(TextWatcher() {
-            fun afterTextChanged(Editable editable) {
-                Boolean z = !Objects.equal(textView.getText().toString(), TextFieldEditFragment.this.originalText)
+            fun afterTextChanged(editable: Editable) {
+                val z: Boolean = !Objects.equal(textView.getText().toString(), TextFieldEditFragment.this.originalText)
                 if (z != TextFieldEditFragment.this.hasChanged) {
-                    Boolean unused = TextFieldEditFragment.this.hasChanged = z
+                    val unused: Boolean = TextFieldEditFragment.this.hasChanged = z
                     if (TextFieldEditFragment.this.undoMenuItem != null) {
                         TextFieldEditFragment.this.undoMenuItem.setVisible(TextFieldEditFragment.this.hasChanged)
                     }
                 }
             }
 
-            fun beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+            fun beforeTextChanged(charSequence: CharSequence, i: Int, i2: Int, i3: Int) {
             }
 
-            fun onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+            fun onTextChanged(charSequence: CharSequence, i: Int, i2: Int, i3: Int) {
             }
         return inflate
     }
 
-    public Boolean onOptionsItemSelected(MenuItem menuItem) {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_undo:
-                View view = getView()
+                val view: View = getView()
                 if (view != null && !Objects.equal(((TextView) view.findViewById(R.id.field_edit_text)).getText().toString(), this.originalText)) {
                     AlertDialog.Builder builder = AlertDialog.Builder(getContext())
                     builder.setMessage(getString(R.string.discard_changes_question)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this, view) {
@@ -380,9 +380,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$Dt
     public abstract Unit saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str)
 
     /* access modifiers changed from: protected */
-    fun setOriginalText(String str) {
+    fun setOriginalText(str: String) {
         this.originalText = str
-        View view = getView()
+        val view: View = getView()
         if (view != null) {
             ((TextView) view.findViewById(R.id.field_edit_text)).setText(str)
         }

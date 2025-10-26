@@ -27,7 +27,7 @@ private class MeshGeometryRequest : ResourceRequest()<PrimVolumeParams, Drawable
             this.meshCache = meshCache2
         }
 
-        fun OnResourceReady(Object obj, Boolean z) {
+        fun OnResourceReady(obj: Object, z: Boolean) {
             if (obj instanceof MeshData) {
                 this.meshData = (MeshData) obj
                 PrimComputeExecutor.getInstance().execute(this)
@@ -45,7 +45,7 @@ private class MeshGeometryRequest : ResourceRequest()<PrimVolumeParams, Drawable
             this.meshCache.RequestResource(((PrimVolumeParams) getParams()).SculptID, this)
         }
 
-        fun run() {
+        override fun run() {
             try {
                 completeRequest(DrawableGeometry(this.meshData))
             } catch (Exception e) {
@@ -63,7 +63,7 @@ private class SculptGeometryRequest : ResourceRequest()<PrimVolumeParams, Drawab
             super(primVolumeParams, resourceManager)
         }
 
-        fun OnResourceReady(Object obj, Boolean z) {
+        fun OnResourceReady(obj: Object, z: Boolean) {
             if (obj instanceof OpenJPEG) {
                 this.sculptData = (OpenJPEG) obj
                 PrimComputeExecutor.getInstance().execute(this)
@@ -82,7 +82,7 @@ private class SculptGeometryRequest : ResourceRequest()<PrimVolumeParams, Drawab
             TextureCache.getInstance().RequestResource(this.sculptTextureParams, this)
         }
 
-        fun run() {
+        override fun run() {
             try {
                 completeRequest(DrawableGeometry((PrimVolumeParams) getParams(), this.sculptData))
             } catch (Exception e) {
@@ -106,7 +106,7 @@ private class SimpleGeometryRequest : ResourceRequest()<PrimVolumeParams, Drawab
             PrimComputeExecutor.getInstance().execute(this)
         }
 
-        fun run() {
+        override fun run() {
             try {
                 completeRequest(DrawableGeometry((PrimVolumeParams) getParams(), (OpenJPEG) null))
             } catch (Exception e) {

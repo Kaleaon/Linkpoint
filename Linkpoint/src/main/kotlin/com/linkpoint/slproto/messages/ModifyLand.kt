@@ -46,15 +46,15 @@ class ModifyLand : SLMessage() {
         this.ModifyBlock_Field = ModifyBlock()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.ParcelData_Fields.size() * 20) + 47 + 1 + (this.ModifyBlockExtended_Fields.size() * 4)
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleModifyLand(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 124)
@@ -78,16 +78,16 @@ class ModifyLand : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ModifyBlock_Field.Action = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.ModifyBlock_Field.BrushSize = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.ModifyBlock_Field.Seconds = unpackFloat(byteBuffer)
         this.ModifyBlock_Field.Height = unpackFloat(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ParcelData parcelData = ParcelData()
+            val parcelData: ParcelData = ParcelData()
             parcelData.LocalID = unpackInt(byteBuffer)
             parcelData.West = unpackFloat(byteBuffer)
             parcelData.South = unpackFloat(byteBuffer)
@@ -95,9 +95,9 @@ class ModifyLand : SLMessage() {
             parcelData.North = unpackFloat(byteBuffer)
             this.ParcelData_Fields.add(parcelData)
         }
-        Byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b2: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i2 = 0; i2 < b2; i2++) {
-            ModifyBlockExtended modifyBlockExtended = ModifyBlockExtended()
+            val modifyBlockExtended: ModifyBlockExtended = ModifyBlockExtended()
             modifyBlockExtended.BrushSize = unpackFloat(byteBuffer)
             this.ModifyBlockExtended_Fields.add(modifyBlockExtended)
         }

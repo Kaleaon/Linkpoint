@@ -38,15 +38,15 @@ class ParcelClaim : SLMessage() {
         this.Data_Field = Data()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.ParcelData_Fields.size() * 16) + 55
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleParcelClaim(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -47)
@@ -64,15 +64,15 @@ class ParcelClaim : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.Data_Field.GroupID = unpackUUID(byteBuffer)
         this.Data_Field.IsGroupOwned = unpackBoolean(byteBuffer)
         this.Data_Field.Final = unpackBoolean(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ParcelData parcelData = ParcelData()
+            val parcelData: ParcelData = ParcelData()
             parcelData.West = unpackFloat(byteBuffer)
             parcelData.South = unpackFloat(byteBuffer)
             parcelData.East = unpackFloat(byteBuffer)

@@ -34,11 +34,11 @@ class ChatMessageLoader : ChunkedListLoader()<ChatMessage> {
         if (this.chatter == null) {
             return ChunkedListLoader.LoadResult<>(ArrayList(), false, j)
         }
-        QueryBuilder where = this.chatMessageDao.queryBuilder().where(ChatMessageDao.Properties.ChatterID.eq(this.chatter.getId()), WhereCondition[0])
-        QueryBuilder orderAsc = z ? where.where(ChatMessageDao.Properties.Id.gt(Long.valueOf(j)), WhereCondition[0]).orderAsc(ChatMessageDao.Properties.Id) : where.where(ChatMessageDao.Properties.Id.lt(Long.valueOf(j)), WhereCondition[0]).orderDesc(ChatMessageDao.Properties.Id)
+        val where: QueryBuilder = this.chatMessageDao.queryBuilder().where(ChatMessageDao.Properties.ChatterID.eq(this.chatter.getId()), WhereCondition[0])
+        val orderAsc: QueryBuilder = z ? where.where(ChatMessageDao.Properties.Id.gt(Long.valueOf(j)), WhereCondition[0]).orderAsc(ChatMessageDao.Properties.Id) : where.where(ChatMessageDao.Properties.Id.lt(Long.valueOf(j)), WhereCondition[0]).orderDesc(ChatMessageDao.Properties.Id)
         orderAsc.limit(i + 1)
-        List list = orderAsc.list()
-        Boolean z2 = list.size() > i
+        val list: List = orderAsc.list()
+        val z2: Boolean = list.size() > i
         if (z2) {
             list.remove(list.size() - 1)
         }

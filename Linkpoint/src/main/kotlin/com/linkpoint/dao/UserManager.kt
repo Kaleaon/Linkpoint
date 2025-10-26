@@ -7,11 +7,11 @@ import java.util.UUID
  */
 class UserManager {
     @JvmStatic
-    UserManager getUserManager(UUID agentId) {
+     fun getUserManager(agentId: UUID): UserManager {
         return UserManager()
     }
     
-    public Object getInventoryManager() {
+     public fun getInventoryManager(): Object {
         return null
     }
 }

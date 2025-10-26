@@ -14,7 +14,7 @@ class MuteListCachedDataDao : AbstractDao()<MuteListCachedData, Long> {
     @JvmStatic
     class Properties {
         const val Property CRC = Property(1, Integer.TYPE, "CRC", false, "CRC")
-        const val Property Data = Property(2, Byte[].class, "data", false, "DATA")
+        const val Property Data = Property(2, ByteArray.class, "data", false, "DATA")
         const val Property Id = Property(0, Long.class, "id", true, "_id")
     }
 
@@ -27,18 +27,18 @@ class MuteListCachedDataDao : AbstractDao()<MuteListCachedData, Long> {
     }
 
     @JvmStatic
-    Unit createTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'MUTE_LIST_CACHED_DATA' (" + "'_id' INTEGER PRIMARY KEY ," + "'CRC' INTEGER NOT NULL ," + "'DATA' BLOB NOT NULL );")
     }
 
     @JvmStatic
-    Unit dropTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'MUTE_LIST_CACHED_DATA'")
     }
 
-    protected Unit bindValues(SQLiteStatement sQLiteStatement, MuteListCachedData muteListCachedData) {
+     protected fun bindValues(sQLiteStatement: SQLiteStatement, muteListCachedData: MuteListCachedData) {
         sQLiteStatement.clearBindings()
-        Long id = muteListCachedData.getId()
+        val id: Long = muteListCachedData.getId()
         if (id != null) {
             sQLiteStatement.bindLong(1, id.longValue())
         }
@@ -46,29 +46,29 @@ class MuteListCachedDataDao : AbstractDao()<MuteListCachedData, Long> {
         sQLiteStatement.bindBlob(3, muteListCachedData.getData())
     }
 
-    public Long getKey(MuteListCachedData muteListCachedData) {
+     public fun getKey(muteListCachedData: MuteListCachedData): Long {
         return muteListCachedData != null ? muteListCachedData.getId() : null
     }
 
-    protected Boolean isEntityUpdateable() {
+     protected fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    public MuteListCachedData readEntity(Cursor cursor, Int i) {
+     public fun readEntity(cursor: Cursor, i: Int): MuteListCachedData {
         return MuteListCachedData(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)), cursor.getInt(i + 1), cursor.getBlob(i + 2))
     }
 
-    fun readEntity(Cursor cursor, MuteListCachedData muteListCachedData, Int i) {
+    fun readEntity(cursor: Cursor, muteListCachedData: MuteListCachedData, i: Int) {
         muteListCachedData.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
         muteListCachedData.setCRC(cursor.getInt(i + 1))
         muteListCachedData.setData(cursor.getBlob(i + 2))
     }
 
-    public Long readKey(Cursor cursor, Int i) {
+     public fun readKey(cursor: Cursor, i: Int): Long {
         return cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
     }
 
-    protected Long updateKeyAfterInsert(MuteListCachedData muteListCachedData, Long j) {
+     protected fun updateKeyAfterInsert(muteListCachedData: MuteListCachedData, j: Long): Long {
         muteListCachedData.setId(Long.valueOf(j))
         return Long.valueOf(j)
     }

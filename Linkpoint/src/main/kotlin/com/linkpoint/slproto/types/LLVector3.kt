@@ -337,7 +337,7 @@ class LLVector3 {
     }
     
     // Comparison
-    fun equals(other: LLVector3, epsilon: Float): Boolean {
+    override fun equals(other: LLVector3, epsilon: Float): Boolean {
         return abs(mV[VX] - other.mV[VX]) < epsilon &&
                abs(mV[VY] - other.mV[VY]) < epsilon &&
                abs(mV[VZ] - other.mV[VZ]) < epsilon

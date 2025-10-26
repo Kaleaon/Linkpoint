@@ -47,13 +47,13 @@ class InventoryManager {
     private val RequestHandler<InventoryQuery> queryRequestHandler = RequestHandler<InventoryQuery>() {
         private val Map<InventoryQuery, FolderSubscription> folderQueries = ConcurrentHashMap()
 
-        fun onRequest(InventoryQuery inventoryQuery) {
+        fun onRequest(inventoryQuery: InventoryQuery) {
             FolderSubscription put
             if (inventoryQuery.containsString() != null) {
                 InventoryManager.this.entryListPool.onResultData(inventoryQuery, inventoryQuery.query((SLInventoryEntry) null, InventoryManager.this.inventoryDB))
                 return
             }
-            UUID folderId = inventoryQuery.folderId()
+            val folderId: UUID = inventoryQuery.folderId()
             if (folderId == null) {
                 folderId = (UUID) InventoryManager.this.rootFolderID.get()
             }
@@ -63,8 +63,8 @@ class InventoryManager {
             }
         }
 
-        fun onRequestCancelled(InventoryQuery inventoryQuery) {
-            FolderSubscription folderSubscription = this.folderQueries.get(inventoryQuery)
+        fun onRequestCancelled(inventoryQuery: InventoryQuery) {
+            val folderSubscription: FolderSubscription = this.folderQueries.get(inventoryQuery)
             if (folderSubscription != null) {
                 folderSubscription.unsubscribe()
             }
@@ -89,14 +89,14 @@ class InventoryManager {
             this(inventoryQuery, uuid)
         }
 
-        fun onData(SLInventoryEntry sLInventoryEntry) {
+        fun onData(sLInventoryEntry: SLInventoryEntry) {
             if (sLInventoryEntry != null) {
                 Debug.Printf("Inventory: folder subscription got name: %s with folderId = '%s'", sLInventoryEntry.name, sLInventoryEntry.uuid)
             }
             InventoryManager.this.entryListPool.onResultData(this.query, this.query.query(sLInventoryEntry, InventoryManager.this.inventoryDB))
         }
 
-        fun onError(Throwable th) {
+        fun onError(th: Throwable) {
             Debug.Printf("Inventory: subscription error: %s", th)
             Debug.Warning(th)
             InventoryManager.this.entryListPool.onResultError(this.query, th)
@@ -126,17 +126,17 @@ class InventoryManager {
         this.inventoryDB = userInventoryDB
         this.folderRequestProcessor = RequestProcessor<UUID, SLInventoryEntry, SLInventoryEntry>(this.folderEntryPool, this.inventoryDbExecutor) {
             /* access modifiers changed from: protected */
-            public Boolean isRequestComplete(UUID uuid, SLInventoryEntry sLInventoryEntry) {
+             public fun isRequestComplete(uuid: UUID, sLInventoryEntry: SLInventoryEntry): Boolean {
                 return sLInventoryEntry != null && Objects.equal(sLInventoryEntry.sessionID, InventoryManager.this.currentSessionID.get())
             }
 
             /* access modifiers changed from: protected */
-            public SLInventoryEntry processRequest(UUID uuid) {
+             public fun processRequest(uuid: UUID): SLInventoryEntry {
                 return userInventoryDB.findEntry(uuid)
             }
 
             /* access modifiers changed from: protected */
-            public SLInventoryEntry processResult(UUID uuid, SLInventoryEntry sLInventoryEntry) {
+             public fun processResult(uuid: UUID, sLInventoryEntry: SLInventoryEntry): SLInventoryEntry {
                 if (sLInventoryEntry != null) {
                     Debug.Printf("Inventory: entry subscription got name: %s with folderId = '%s'", sLInventoryEntry.name, sLInventoryEntry.uuid)
                 }
@@ -290,8 +290,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_InventoryManager_3450  reason: not valid java name */
-    static /* synthetic */ Unit m324lambda$com_lumiyaviewer_lumiya_slproto_users_manager_InventoryManager_3450(InventoryDB inventoryDB2, UUID uuid) {
-        SLInventoryEntry findEntry = inventoryDB2.findEntry(uuid)
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m324lambda$com_lumiyaviewer_lumiya_slproto_users_manager_InventoryManager_3450(InventoryDB inventoryDB2, UUID uuid) {
+        val findEntry: SLInventoryEntry = inventoryDB2.findEntry(uuid)
         if (findEntry != null) {
             findEntry.sessionID = null
             try {
@@ -303,7 +303,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_InventoryManager_6838  reason: not valid java name */
-    static /* synthetic */ Boolean m325lambda$com_lumiyaviewer_lumiya_slproto_users_manager_InventoryManager_6838(InventoryQuery inventoryQuery) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Boolean m325lambda$com_lumiyaviewer_lumiya_slproto_users_manager_InventoryManager_6838(InventoryQuery inventoryQuery) {
         if (inventoryQuery != null) {
             return !Strings.isNullOrEmpty(inventoryQuery.containsString())
         }
@@ -315,7 +315,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         this.entryListPool.requestUpdateSome($Lambda$JIBenvPHaOomPgMJhTFPuiVXBzY())
     }
 
-    fun copyToClipboard(InventoryClipboardEntry inventoryClipboardEntry) {
+    fun copyToClipboard(inventoryClipboardEntry: InventoryClipboardEntry) {
         this.clipboardPool.setData(SubscriptionSingleKey.Value, inventoryClipboardEntry)
     }
 
@@ -323,11 +323,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return this.clipboardPool
     }
 
-    public InventoryDB getDatabase() {
+     public fun getDatabase(): InventoryDB {
         return this.inventoryDB
     }
 
-    public Executor getExecutor() {
+     public fun getExecutor(): Executor {
         return this.inventoryDbExecutor
     }
 
@@ -351,7 +351,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return this.entryListPool
     }
 
-    public UUID getRootFolder() {
+     public fun getRootFolder(): UUID {
         return this.rootFolderID.get()
     }
 
@@ -367,15 +367,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return this.searchRunningPool
     }
 
-    fun requestFolderUpdate(UUID uuid) {
+    fun requestFolderUpdate(uuid: UUID) {
         this.folderEntryPool.requestUpdate(uuid)
     }
 
-    fun setCurrentSessionID(UUID uuid) {
+    fun setCurrentSessionID(uuid: UUID) {
         this.currentSessionID.set(uuid)
     }
 
-    fun setRootFolder(UUID uuid) {
+    fun setRootFolder(uuid: UUID) {
         this.rootFolderID.set(uuid)
     }
 }

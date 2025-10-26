@@ -17,7 +17,7 @@ abstract class RequestProcessor<K, Tup, Tdown> : RequestHandler<K>, RequestSourc
     /* access modifiers changed from: private */
     /* renamed from: processRequestInternal */
     fun m35lambda$com_lumiyaviewer_lumiya_react_RequestProcessor_940(K k) {
-        Object processRequest = processRequest(k)
+        val processRequest: Object = processRequest(k)
         if (processRequest != null) {
             this.resultHandler.onResultData(k, processRequest)
         }
@@ -39,13 +39,13 @@ abstract class RequestProcessor<K, Tup, Tdown> : RequestHandler<K>, RequestSourc
         return this
     }
 
-    fun detachRequestHandler(RequestHandler<K> requestHandler) {
+    fun detachRequestHandler(requestHandler: RequestHandler<K>) {
         if (this.requestHandler == requestHandler) {
             this.requestHandler = null
         }
     }
 
-    protected Boolean isRequestComplete(K k, Tup tup) {
+     protected fun isRequestComplete(K k, tup: Tup): Boolean {
         return tup != null
     }
 
@@ -69,7 +69,7 @@ abstract class RequestProcessor<K, Tup, Tdown> : RequestHandler<K>, RequestSourc
         }
     }
 
-    fun onResultData(K k, Tdown tdown) {
+    fun onResultData(K k, tdown: Tdown) {
         if (this.executor != null) {
             this.executor.execute(() -> this.resultHandler.onResultData(k, processResult(k, tdown)))
         } else {
@@ -77,7 +77,7 @@ abstract class RequestProcessor<K, Tup, Tdown> : RequestHandler<K>, RequestSourc
         }
     }
 
-    fun onResultError(K k, Throwable th) {
+    fun onResultError(K k, th: Throwable) {
         this.resultHandler.onResultError(k, th)
     }
 

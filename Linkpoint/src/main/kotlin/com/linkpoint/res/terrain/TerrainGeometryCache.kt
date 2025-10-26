@@ -26,7 +26,7 @@ private class TerrainGeometryRequest : ResourceRequest()<TerrainPatchHeightMap, 
             PrimComputeExecutor.getInstance().execute(this)
         }
 
-        fun run() {
+        override fun run() {
             try {
                 completeRequest(TerrainPatchGeometry((TerrainPatchHeightMap) getParams()))
             } catch (Exception e) {

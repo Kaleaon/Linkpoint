@@ -13,21 +13,21 @@ class InventoryDBManager {
     private const val Map<UUID, InventoryDB> userDBs = HashMap()
 
     @JvmStatic
-    InventoryDB getUserInventoryDB(UUID uuid) {
+     fun getUserInventoryDB(uuid: UUID): InventoryDB {
         if (uuid == null) {
             return null
         }
         
         synchronized (lock) {
-            InventoryDB inventoryDB = userDBs.get(uuid)
+            val inventoryDB: InventoryDB = userDBs.get(uuid)
             if (inventoryDB == null) {
                 try {
-                    File cacheDir = GlobalOptions.getInstance().getCacheDir("database")
+                    val cacheDir: File = GlobalOptions.getInstance().getCacheDir("database")
                     if (cacheDir == null) {
                         throw IllegalStateException("Database cache directory is null")
                     }
                     
-                    File dbFile = File(cacheDir, "inventory-" + uuid.toString() + ".db")
+                    val dbFile: File = File(cacheDir, "inventory-" + uuid.toString() + ".db")
                     inventoryDB = InventoryDB(SLInventoryOpenHelper.getInstance().openOrCreateDatabase(dbFile.getAbsolutePath()))
                     userDBs.put(uuid, inventoryDB)
                 } catch (Exception e) {
@@ -43,13 +43,13 @@ class InventoryDBManager {
      * Closes and removes the InventoryDB for the given user UUID
      */
     @JvmStatic
-    Unit closeInventoryDB(UUID uuid) {
+     fun closeInventoryDB(uuid: UUID) {
         if (uuid == null) {
             return
         }
         
         synchronized (lock) {
-            InventoryDB inventoryDB = userDBs.remove(uuid)
+            val inventoryDB: InventoryDB = userDBs.remove(uuid)
             if (inventoryDB != null) {
                 try {
                     inventoryDB.getDatabase().close()
@@ -64,7 +64,7 @@ class InventoryDBManager {
      * Closes all open InventoryDBs - should be called on app shutdown
      */
     @JvmStatic
-    Unit closeAllInventoryDBs() {
+     fun closeAllInventoryDBs() {
         synchronized (lock) {
             for (Map.Entry<UUID, InventoryDB> entry : userDBs.entrySet()) {
                 try {

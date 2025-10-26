@@ -21,7 +21,7 @@ class ScriptSensorReply : SLMessage() {
     @JvmStatic
     class SensedData {
         public UUID GroupID
-        public Byte[] Name
+        public ByteArray Name
         public UUID ObjectID
         public UUID OwnerID
         public LLVector3 Position
@@ -36,11 +36,11 @@ class ScriptSensorReply : SLMessage() {
         this.Requester_Field = Requester()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 21
-        Iterator<T> it = this.SensedData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 21
+        val it: Iterator<T> = this.SensedData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -48,11 +48,11 @@ class ScriptSensorReply : SLMessage() {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleScriptSensorReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -8)
@@ -71,11 +71,11 @@ class ScriptSensorReply : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.Requester_Field.SourceID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            SensedData sensedData = SensedData()
+            val sensedData: SensedData = SensedData()
             sensedData.ObjectID = unpackUUID(byteBuffer)
             sensedData.OwnerID = unpackUUID(byteBuffer)
             sensedData.GroupID = unpackUUID(byteBuffer)

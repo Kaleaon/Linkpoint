@@ -87,15 +87,15 @@ class UserMainProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadab
     @BindView(2131755717)
     TextView userWebProfileLink
 
-    private String getAge(AvatarPropertiesReply avatarPropertiesReply) {
-        String trim = SLMessage.stringFromVariableOEM(avatarPropertiesReply.PropertiesData_Field.BornOn).trim()
+     private fun getAge(avatarPropertiesReply: AvatarPropertiesReply): String {
+        val trim: String = SLMessage.stringFromVariableOEM(avatarPropertiesReply.PropertiesData_Field.BornOn).trim()
         if (trim.equals("")) {
             return trim
         }
-        String format = String.format(getString(R.string.born_since), Object[]{trim})
+        val format: String = String.format(getString(R.string.born_since), Array<Any>{trim})
         try {
-            Date parse = SimpleDateFormat("MM/dd/yyyy").parse(trim)
-            return String.format(getString(R.string.age_days), Object[]{Long.valueOf((Date().getTime() - parse.getTime()) / 86400000)})
+            val parse: Date = SimpleDateFormat("MM/dd/yyyy").parse(trim)
+            return String.format(getString(R.string.age_days), Array<Any>{Long.valueOf((Date().getTime() - parse.getTime()) / 86400000)})
         } catch (ParseException e) {
             return format
         }
@@ -112,7 +112,7 @@ class UserMainProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadab
 
     /* access modifiers changed from: protected */
     @OnClick({2131755706})
-    fun onAboutEditClicked(View view) {
+    fun onAboutEditClicked(view: View) {
         if (this.chatterID != null) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserAboutTextEditFragment.class, UserAboutTextEditFragment.makeSelection(this.chatterID, false))
         }
@@ -120,18 +120,18 @@ class UserMainProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadab
 
     /* access modifiers changed from: protected */
     @OnClick({2131755698})
-    fun onChangePicClicked(View view) {
-        AvatarPropertiesReply data = this.avatarProperties.getData()
+    fun onChangePicClicked(view: View) {
+        val data: AvatarPropertiesReply = this.avatarProperties.getData()
         if (this.chatterID != null && data != null) {
-            Bundle bundle = Bundle()
+            val bundle: Bundle = Bundle()
             bundle.putParcelable("oldProfileData", data)
             getContext().startActivity(InventoryActivity.makeSelectActionIntent(getContext(), this.chatterID.agentUUID, InventoryActivity.SelectAction.applyUserProfile, bundle, SLAssetType.AT_TEXTURE))
         }
     }
 
-    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
+    fun onChatterNameUpdated(chatterNameRetriever: ChatterNameRetriever) {
         super.onChatterNameUpdated(chatterNameRetriever)
-        View view = getView()
+        val view: View = getView()
         if (this.chatterID != null && Objects.equal(chatterNameRetriever.chatterID, this.chatterID) && view != null) {
             this.textProfilePrimaryName.setText(chatterNameRetriever.getResolvedName())
             this.textProfileSecondaryName.setText(chatterNameRetriever.getResolvedSecondaryName())
@@ -140,9 +140,9 @@ class UserMainProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadab
 
     /* access modifiers changed from: protected */
     @OnClick({2131755720})
-    fun onCopyAgentKeyClicked(View view) {
+    fun onCopyAgentKeyClicked(view: View) {
         if (this.chatterID instanceof ChatterID.ChatterIDUser) {
-            String uuid = ((ChatterID.ChatterIDUser) this.chatterID).getChatterUUID().toString()
+            val uuid: String = ((ChatterID.ChatterIDUser) this.chatterID).getChatterUUID().toString()
             if (Build.VERSION.SDK_INT < 11) {
                 ((ClipboardManager) getActivity().getSystemService("clipboard")).setText(uuid)
             } else {
@@ -152,8 +152,8 @@ class UserMainProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadab
         }
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View inflate = layoutInflater.inflate(R.layout.user_profile_tab_main, viewGroup, false)
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+        val inflate: View = layoutInflater.inflate(R.layout.user_profile_tab_main, viewGroup, false)
         this.unbinder = ButterKnife.bind((Object) this, inflate)
         this.userPicView.setAlignTop(true)
         this.userPicView.setVerticalFit(true)
@@ -163,7 +163,7 @@ class UserMainProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadab
         return inflate
     }
 
-    fun onDestroyView() {
+    override fun onDestroyView() {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -173,7 +173,7 @@ class UserMainProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadab
 
     /* access modifiers changed from: protected */
     @OnClick({2131755724})
-    fun onEditNotesClicked(View view) {
+    fun onEditNotesClicked(view: View) {
         if (this.chatterID != null) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserNotesEditFragment.class, UserNotesEditFragment.makeSelection(this.chatterID))
         }
@@ -182,7 +182,7 @@ class UserMainProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadab
     fun onLoadableDataChanged() {
         if (getView() != null) {
             try {
-                AvatarPropertiesReply avatarPropertiesReply = this.avatarProperties.get()
+                val avatarPropertiesReply: AvatarPropertiesReply = this.avatarProperties.get()
                 this.userPicView.setAssetID(avatarPropertiesReply.PropertiesData_Field.ImageID)
                 this.userProfileAboutText.setText(SLMessage.stringFromVariableUTF(avatarPropertiesReply.PropertiesData_Field.AboutText))
                 this.textProfileAge.setText(getAge(avatarPropertiesReply))
@@ -190,7 +190,7 @@ class UserMainProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadab
                     this.partnerNameRetriever.dispose()
                     this.partnerNameRetriever = null
                 }
-                UUID uuid = avatarPropertiesReply.PropertiesData_Field.PartnerID
+                val uuid: UUID = avatarPropertiesReply.PropertiesData_Field.PartnerID
                 if (uuid == null || !(!uuid.equals(UUIDPool.ZeroUUID)) || this.chatterID == null) {
                     this.userPartnerCardView.setVisibility(8)
                     this.userProfilePartnerPic.setChatterID((ChatterID) null, (String) null)
@@ -199,7 +199,7 @@ class UserMainProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadab
                     this.userPartnerCardView.setVisibility(0)
                     this.partnerNameRetriever = ChatterNameRetriever(userChatterID, this.onPartnerNameReady, UIThreadExecutor.getInstance())
                 }
-                String trim = SLMessage.stringFromVariableOEM(avatarPropertiesReply.PropertiesData_Field.ProfileURL).trim()
+                val trim: String = SLMessage.stringFromVariableOEM(avatarPropertiesReply.PropertiesData_Field.ProfileURL).trim()
                 if (!trim.isEmpty()) {
                     this.userWebProfileLink.setText(trim)
                     Linkify.addLinks(this.userWebProfileLink, 15)
@@ -207,7 +207,7 @@ class UserMainProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadab
                 } else {
                     this.userWebProfileCardView.setVisibility(8)
                 }
-                String trim2 = SLMessage.stringFromVariableUTF(this.avatarNotes.get().Data_Field.Notes).trim()
+                val trim2: String = SLMessage.stringFromVariableUTF(this.avatarNotes.get().Data_Field.Notes).trim()
                 if (trim2.isEmpty()) {
                     this.textProfileNotesText.setText(R.string.user_notes_no_notes)
                     this.textProfileNotesText.setTypeface((Typeface) null, 2)
@@ -225,24 +225,24 @@ class UserMainProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadab
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(ChatterID chatterID) {
-        Int i = 0
-        View view = getView()
+    fun onShowUser(chatterID: ChatterID) {
+        val i: Int = 0
+        val view: View = getView()
         this.loadableMonitor.unsubscribeAll()
         if (this.partnerNameRetriever != null) {
             this.partnerNameRetriever.dispose()
             this.partnerNameRetriever = null
         }
         if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDUser)) {
-            UUID chatterUUID = ((ChatterID.ChatterIDUser) chatterID).getChatterUUID()
+            val chatterUUID: UUID = ((ChatterID.ChatterIDUser) chatterID).getChatterUUID()
             this.avatarProperties.subscribe(this.userManager.getAvatarProperties().getPool(), chatterUUID)
             this.onlineStatus.subscribe(this.userManager.getChatterList().getFriendManager().getOnlineStatus(), chatterUUID)
             this.avatarNotes.subscribe(this.userManager.getAvatarNotes().getPool(), chatterUUID)
             if (view != null) {
                 this.textProfileAgentKey.setText(chatterUUID.toString())
-                Boolean equals = chatterUUID.equals(this.userManager.getUserID())
+                val equals: Boolean = chatterUUID.equals(this.userManager.getUserID())
                 this.aboutEditButton.setVisibility(equals ? 0 : 8)
-                Button button = this.changePicButton
+                val button: Button = this.changePicButton
                 if (!equals) {
                     i = 8
                 }
@@ -257,10 +257,10 @@ class UserMainProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadab
 
     /* access modifiers changed from: protected */
     @OnClick({2131755715})
-    fun onViewProfileClicked(View view) {
+    fun onViewProfileClicked(view: View) {
         if (this.chatterID != null) {
             try {
-                UUID uuid = this.avatarProperties.get().PropertiesData_Field.PartnerID
+                val uuid: UUID = this.avatarProperties.get().PropertiesData_Field.PartnerID
                 if (uuid != null && (!uuid.equals(UUIDPool.ZeroUUID)) && this.chatterID != null) {
                     DetailsActivity.showEmbeddedDetails(getActivity(), UserProfileFragment.class, UserProfileFragment.makeSelection(ChatterID.getUserChatterID(this.chatterID.agentUUID, uuid)))
                 }

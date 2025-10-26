@@ -25,7 +25,7 @@ import java.util.UUID
 
 class SLGridConnection : SLConnection() {
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues */
-    private const val /* synthetic */ Int[] syntheticField = null
+    private const val /* synthetic */ IntArray syntheticField = null
     private const val DEFAULT_SYSTEM_ACCOUNT: String = "Second Life"
     @JvmStatic
 private Boolean autoresponseEnabled = false
@@ -66,11 +66,11 @@ private String autoresponseText = ""
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues */
     @JvmStatic
-private /* synthetic */ Int[] m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues() {
+private /* synthetic */ IntArray m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues() {
         if (syntheticField != null) {
             return syntheticField
         }
-        Int[] iArr = Int[ConnectionState.values().length]
+        val iArr: IntArray = Int[ConnectionState.values().length]
         try {
             iArr[ConnectionState.Connected.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -87,9 +87,9 @@ private /* synthetic */ Int[] m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConne
         return iArr
     }
 
-    private Unit DoConnect(SLAuthParams sLAuthParams, String str) {
+    private fun DoConnect(sLAuthParams: SLAuthParams, str: String) {
         try {
-            SLAuthReply Login = SLAuth().Login(sLAuthParams.withLocation(str))
+            val Login: SLAuthReply = SLAuth().Login(sLAuthParams.withLocation(str))
             if (Login.success) {
                 synchronized (this) {
                     if (this.connectionState == ConnectionState.Idle) {
@@ -156,11 +156,11 @@ private /* synthetic */ Int[] m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConne
     }
 
     @JvmStatic
-    String getAutoresponse() {
+     fun getAutoresponse(): String {
         return !autoresponseEnabled ? null : autoresponseText
     }
 
-    private Unit reconnectOrDrop(Boolean z, Boolean z2, String str) {
+     private fun reconnectOrDrop(z: Boolean, z2: Boolean, str: String) {
         if (!Reconnect()) {
             if (this.activeAgentUUID != null) {
                 GridConnectionManager.removeConnection(this.activeAgentUUID, this)
@@ -174,26 +174,26 @@ private /* synthetic */ Int[] m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConne
     }
 
     @JvmStatic
-    Unit setAutoresponseInfo(Boolean z, String str) {
+     fun setAutoresponseInfo(z: Boolean, str: String) {
         autoresponseEnabled = z
         autoresponseText = str
     }
 
-    private Unit setConnectionState(ConnectionState connectionState) {
+     private fun setConnectionState(connectionState: ConnectionState) {
         if (this.connectionState != connectionState) {
             this.connectionState = connectionState
             this.eventBus.publish(SLConnectionStateChangedEvent(connectionState))
         }
     }
 
-    private Unit startCircuit(SLAuthReply sLAuthReply, SLTempCircuit sLTempCircuit) {
+     private fun startCircuit(sLAuthReply: SLAuthReply, sLTempCircuit: SLTempCircuit) {
         Debug.Log("login reply: ip = " + sLAuthReply.simAddress.toString() + ", port = " + sLAuthReply.simPort + ", ccode = " + sLAuthReply.circuitCode)
         if (sLAuthReply.inventoryRoot != null) {
             Debug.Log("inventory root: " + sLAuthReply.inventoryRoot.toString())
         } else {
             Debug.Log("inventory root is null")
         }
-        SLCaps sLCaps = SLCaps()
+        val sLCaps: SLCaps = SLCaps()
         sLCaps.GetCapabilites(this.authReply.loginURL, this.authReply.seedCapability)
         try {
             this.agentCircuit = SLAgentCircuit(this, SLCircuitInfo(sLAuthReply), sLAuthReply, sLCaps, sLTempCircuit)
@@ -214,9 +214,9 @@ private /* synthetic */ Int[] m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConne
         }
     }
 
-    private Unit startConnecting(final Boolean z, final String str) {
+     private fun startConnecting(final Boolean z, final String str) {
         this.loginThread = Thread(Runnable() {
-            fun run() {
+            override fun run() {
                 if (z) {
                     try {
                         Thread.sleep(3000)
@@ -277,7 +277,7 @@ private /* synthetic */ Int[] m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConne
     synchronized Unit addTempCircuit(SLAuthReply sLAuthReply) {
         if (!this.tempCircuits.containsKey(sLAuthReply)) {
             try {
-                SLCircuit sLTempCircuit = SLTempCircuit(this, SLCircuitInfo(sLAuthReply), sLAuthReply)
+                val sLTempCircuit: SLCircuit = SLTempCircuit(this, SLCircuitInfo(sLAuthReply), sLAuthReply)
                 this.tempCircuits.put(sLAuthReply, sLTempCircuit)
                 AddCircuit(sLTempCircuit)
                 sLTempCircuit.SendUseCode()
@@ -289,7 +289,7 @@ private /* synthetic */ Int[] m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConne
     }
 
     public synchronized Unit closeConnectionObjects() {
-        Thread thread = this.loginThread
+        val thread: Thread = this.loginThread
         if (thread != null) {
             thread.interrupt()
         }
@@ -330,11 +330,11 @@ private /* synthetic */ Int[] m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConne
         }
     }
 
-    public UUID getActiveAgentUUID() {
+     public fun getActiveAgentUUID(): UUID {
         return this.activeAgentUUID
     }
 
-    public SLAgentCircuit getAgentCircuit() throws NotConnectedException {
+     public fun getAgentCircuit() throws NotConnectedException {
         if (this.agentCircuit != null) {
             return this.agentCircuit
         }
@@ -345,7 +345,7 @@ private /* synthetic */ Int[] m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConne
         return this.connectionState
     }
 
-    public Boolean getIsReconnecting() {
+     public fun getIsReconnecting(): Boolean {
         return this.isReconnecting
     }
 
@@ -356,11 +356,11 @@ private /* synthetic */ Int[] m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConne
         return this.modules
     }
 
-    public Int getReconnectAttempt() {
+     public fun getReconnectAttempt(): Int {
         return this.reconnectAttempts
     }
 
-    public Boolean isFirstConnect() {
+     public fun isFirstConnect(): Boolean {
         return this.firstConnect
     }
 
@@ -388,7 +388,7 @@ private /* synthetic */ Int[] m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConne
     }
 
     synchronized Unit removeTempCircuit(SLTempCircuit sLTempCircuit) {
-        Iterator it = this.tempCircuits.entrySet().iterator()
+        val it: Iterator = this.tempCircuits.entrySet().iterator()
         while (it.hasNext()) {
             if (((Entry) it.next()).getValue() == sLTempCircuit) {
                 it.remove()

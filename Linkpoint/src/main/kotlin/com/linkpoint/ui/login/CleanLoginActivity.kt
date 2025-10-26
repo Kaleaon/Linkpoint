@@ -59,7 +59,7 @@ class CleanLoginActivity : AppCompatActivity() {
     /**
      * Create a basic fallback layout when normal initialization fails
      */
-    private Unit createFallbackLayout(Exception originalError) {
+     private fun createFallbackLayout(originalError: Exception) {
         try {
             Log.w("CleanLoginActivity", "Creating fallback layout due to: " + originalError.getMessage())
             
@@ -67,7 +67,7 @@ class CleanLoginActivity : AppCompatActivity() {
             setTitle("Linkpoint - Second Life Viewer")
             
             // Since we can't rely on the XML layout, create a simple text view
-            TextView errorText = TextView(this)
+            val errorText: TextView = TextView(this)
             errorText.setText("Linkpoint Second Life Viewer\n\n" +
                             "The app is starting in safe mode.\n" +
                             "Some features may be limited.\n\n" +
@@ -84,7 +84,7 @@ class CleanLoginActivity : AppCompatActivity() {
         }
     }
     
-    private Unit initializeViews() {
+     private fun initializeViews() {
         try {
             firstNameEdit = findViewById(R.id.edit_first_name)
             lastNameEdit = findViewById(R.id.edit_last_name)
@@ -104,7 +104,7 @@ class CleanLoginActivity : AppCompatActivity() {
             lastNameEdit.setText("User")
             
             // Show app status in the status text for debugging
-            String appStatus = com.lumiyaviewer.lumiya.LinkpointApp.getStartupStatus()
+            val appStatus: String = com.lumiyaviewer.lumiya.LinkpointApp.getStartupStatus()
             statusText.setText("Ready to login to Second Life\n\n" + appStatus)
             
             // Add debug log upload button for debug builds
@@ -118,7 +118,7 @@ class CleanLoginActivity : AppCompatActivity() {
         }
     }
     
-    private Unit setupLoginButton() {
+     private fun setupLoginButton() {
         loginButton.setOnClickListener(View.OnClickListener() {
             override Unit onClick(View v) {
                 performLogin()
@@ -126,10 +126,10 @@ class CleanLoginActivity : AppCompatActivity() {
         })
     }
     
-    private Unit performLogin() {
-        String firstName = firstNameEdit.getText().toString().trim()
-        String lastName = lastNameEdit.getText().toString().trim()
-        String password = passwordEdit.getText().toString()
+     private fun performLogin() {
+        val firstName: String = firstNameEdit.getText().toString().trim()
+        val lastName: String = lastNameEdit.getText().toString().trim()
+        val password: String = passwordEdit.getText().toString()
         
         if (firstName.isEmpty() || lastName.isEmpty() || password.isEmpty()) {
             showError("Please fill in all fields")
@@ -144,8 +144,8 @@ class CleanLoginActivity : AppCompatActivity() {
         CompletableFuture.runAsync(() -> {
             try {
                 // Use the same authentication logic as comprehensive_operational_test.java
-                String hashedPassword = hashPassword(password)
-                String xmlRequest = buildLoginXMLRequest(firstName, lastName, hashedPassword, "last")
+                val hashedPassword: String = hashPassword(password)
+                val xmlRequest: String = buildLoginXMLRequest(firstName, lastName, hashedPassword, "last")
                 
                 // Simulate successful authentication for now
                 runOnUiThread(() -> {
@@ -166,7 +166,7 @@ class CleanLoginActivity : AppCompatActivity() {
         })
     }
     
-    private Unit setLoginInProgress(Boolean inProgress) {
+     private fun setLoginInProgress(inProgress: Boolean) {
         loginButton.setEnabled(!inProgress)
         loginProgress.setVisibility(inProgress ? View.VISIBLE : View.GONE)
         firstNameEdit.setEnabled(!inProgress)
@@ -174,23 +174,23 @@ class CleanLoginActivity : AppCompatActivity() {
         passwordEdit.setEnabled(!inProgress)
     }
     
-    private Unit showError(String message) {
+     private fun showError(message: String) {
         statusText.setText("Error: " + message)
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
     
     // Authentication methods from comprehensive_operational_test.java
-    private String hashPassword(String password) throws NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("MD5")
-        Byte[] digest = md.digest(password.getBytes())
-        StringBuilder sb = StringBuilder()
+     private fun hashPassword(password: String) throws NoSuchAlgorithmException {
+        val md: MessageDigest = MessageDigest.getInstance("MD5")
+        val digest: ByteArray = md.digest(password.getBytes())
+        val sb: StringBuilder = StringBuilder()
         for (Byte b : digest) {
             sb.append(String.format("%02x", b))
         }
         return "$1$" + sb.toString()
     }
     
-    private String buildLoginXMLRequest(String first, String last, String password, String start) {
+     private fun buildLoginXMLRequest(first: String, last: String, password: String, start: String): String {
         return "<?xml version=\"1.0\"?>" +
                 "<methodCall>" +
                 "<methodName>login_to_simulator</methodName>" +
@@ -210,14 +210,14 @@ class CleanLoginActivity : AppCompatActivity() {
                 "</methodCall>"
     }
     
-    private String generateClientID() {
+     private fun generateClientID(): String {
         return java.util.UUID.randomUUID().toString()
     }
     
     /**
      * Add debug log upload button for debug builds
      */
-    private Unit addDebugLogUploadButton() {
+     private fun addDebugLogUploadButton() {
         // Only add for debug builds
         if (!BuildConfig.DEBUG) {
             return
@@ -225,10 +225,10 @@ class CleanLoginActivity : AppCompatActivity() {
         
         try {
             // Find the parent layout
-            ViewGroup parentLayout = (ViewGroup) statusText.getParent()
+            val parentLayout: ViewGroup = (ViewGroup) statusText.getParent()
             
             // Create debug log upload button
-            Button debugUploadButton = Button(this)
+            val debugUploadButton: Button = Button(this)
             debugUploadButton.setText("📤 Upload Debug Logs")
             debugUploadButton.setTextSize(12)
             

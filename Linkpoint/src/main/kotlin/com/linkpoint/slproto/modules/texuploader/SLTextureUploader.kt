@@ -18,7 +18,7 @@ class SLTextureUploader : SLModule() {
         }
     }
 
-    fun BeginUpload(SLTextureUploadRequest sLTextureUploadRequest) {
+    fun BeginUpload(sLTextureUploadRequest: SLTextureUploadRequest) {
         if (this.executor != null && this.capURL != null) {
             sLTextureUploadRequest.setCapURL(this.capURL)
             this.executor.execute(sLTextureUploadRequest)

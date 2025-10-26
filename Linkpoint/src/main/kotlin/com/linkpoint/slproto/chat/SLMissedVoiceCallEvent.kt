@@ -26,36 +26,36 @@ val class SLMissedVoiceCallEvent : SLChatYesNoEvent() {
         return SLChatEvent.ChatMessageType.MissedVoiceCall
     }
 
-    public String getNoButton(Context context) {
+     public fun getNoButton(context: Context): String {
         return context.getString(R.string.missed_voice_call_no)
     }
 
-    public String getNoMessage(Context context) {
+     public fun getNoMessage(context: Context): String {
         return context.getString(R.string.missed_voice_call_declined)
     }
 
-    public String getQuestion(Context context) {
+     public fun getQuestion(context: Context): String {
         return context.getString(R.string.missed_voice_call_question)
     }
 
-    public String getYesButton(Context context) {
+     public fun getYesButton(context: Context): String {
         return context.getString(R.string.missed_voice_call_yes)
     }
 
-    public String getYesMessage(Context context) {
+     public fun getYesMessage(context: Context): String {
         return ""
     }
 
-    fun onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(context: Context, userManager: UserManager) {
         SLModules modules
         super.onYesAction(context, userManager)
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+        val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null && (modules = activeAgentCircuit.getModules()) != null) {
             modules.voice.userVoiceChatRequest(this.source.getSourceUUID())
         }
     }
 
-    fun serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

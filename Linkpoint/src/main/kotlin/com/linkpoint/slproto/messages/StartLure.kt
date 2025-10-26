@@ -20,7 +20,7 @@ class StartLure : SLMessage() {
     @JvmStatic
     class Info {
         public Int LureType
-        public Byte[] Message
+        public ByteArray Message
     }
 
     @JvmStatic
@@ -34,15 +34,15 @@ class StartLure : SLMessage() {
         this.Info_Field = Info()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.Info_Field.Message.length + 2 + 36 + 1 + (this.TargetData_Fields.size() * 16)
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleStartLure(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 70)
@@ -56,14 +56,14 @@ class StartLure : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.Info_Field.LureType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.Info_Field.Message = unpackVariable(byteBuffer, 1)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            TargetData targetData = TargetData()
+            val targetData: TargetData = TargetData()
             targetData.TargetID = unpackUUID(byteBuffer)
             this.TargetData_Fields.add(targetData)
         }

@@ -19,10 +19,10 @@ class SLInventoryUDPFetchRequest : SLInventoryFetchRequest() {
     }
 
     /* access modifiers changed from: package-private */
-    public Boolean HandleInventoryDescendents(InventoryDescendents inventoryDescendents) {
+    public fun HandleInventoryDescendents(inventoryDescendents: InventoryDescendents): Boolean {
         Debug.Log("Inventory: UDP fetch: exp count " + inventoryDescendents.AgentData_Field.Descendents + ", recv count " + this.receivedCount + ", " + " with this: " + (this.receivedCount + inventoryDescendents.FolderData_Fields.size() + inventoryDescendents.ItemData_Fields.size()))
-        Int i = inventoryDescendents.AgentData_Field.Descendents
-        Int i2 = 0
+        val i: Int = inventoryDescendents.AgentData_Field.Descendents
+        val i2: Int = 0
         this.db.beginTransaction()
         if (this.folderEntry.version != inventoryDescendents.AgentData_Field.Version) {
             this.folderEntry.version = inventoryDescendents.AgentData_Field.Version
@@ -31,7 +31,7 @@ class SLInventoryUDPFetchRequest : SLInventoryFetchRequest() {
         for (InventoryDescendents.FolderData folderData : inventoryDescendents.FolderData_Fields) {
             if (folderData.ParentID.equals(this.folderEntry.uuid) && !(folderData.FolderID.getLeastSignificantBits() == 0 && folderData.FolderID.getMostSignificantBits() == 0)) {
                 try {
-                    SLInventoryEntry sLInventoryEntry = SLInventoryEntry()
+                    val sLInventoryEntry: SLInventoryEntry = SLInventoryEntry()
                     sLInventoryEntry.uuid = folderData.FolderID
                     sLInventoryEntry.parent_id = this.folderEntry.getId()
                     sLInventoryEntry.name = SLMessage.stringFromVariableOEM(folderData.Name)
@@ -63,7 +63,7 @@ class SLInventoryUDPFetchRequest : SLInventoryFetchRequest() {
         for (InventoryDescendents.ItemData itemData : inventoryDescendents.ItemData_Fields) {
             if (!(itemData.ItemID.getLeastSignificantBits() == 0 && itemData.ItemID.getMostSignificantBits() == 0)) {
                 try {
-                    SLInventoryEntry sLInventoryEntry2 = SLInventoryEntry()
+                    val sLInventoryEntry2: SLInventoryEntry = SLInventoryEntry()
                     sLInventoryEntry2.uuid = itemData.ItemID
                     sLInventoryEntry2.name = SLMessage.stringFromVariableOEM(itemData.Name)
                     sLInventoryEntry2.description = SLMessage.stringFromVariableUTF(itemData.Description)
@@ -71,7 +71,7 @@ class SLInventoryUDPFetchRequest : SLInventoryFetchRequest() {
                         sLInventoryEntry2.parent_id = this.folderEntry.getId()
                         sLInventoryEntry2.parentUUID = itemData.FolderID
                     } else {
-                        SLInventoryEntry findEntry = this.db.findEntry(itemData.FolderID)
+                        val findEntry: SLInventoryEntry = this.db.findEntry(itemData.FolderID)
                         if (findEntry != null) {
                             sLInventoryEntry2.parent_id = findEntry.getId()
                         } else {
@@ -99,7 +99,7 @@ class SLInventoryUDPFetchRequest : SLInventoryFetchRequest() {
                     sLInventoryEntry2.salePrice = itemData.SalePrice
                     sLInventoryEntry2.saleType = itemData.SaleType
                     sLInventoryEntry2.updateOrInsert(this.db.getDatabase())
-                    Int i3 = i2 + 1
+                    val i3: Int = i2 + 1
                     if (i3 > 16) {
                         this.db.yieldIfContendedSafely()
                         i3 = 0
@@ -128,7 +128,7 @@ class SLInventoryUDPFetchRequest : SLInventoryFetchRequest() {
 
     fun start() {
         Debug.Log("Inventory: UDP fetching folder " + this.folderUUID.toString())
-        FetchInventoryDescendents fetchInventoryDescendents = FetchInventoryDescendents()
+        val fetchInventoryDescendents: FetchInventoryDescendents = FetchInventoryDescendents()
         fetchInventoryDescendents.AgentData_Field.AgentID = this.inventory.getCircuitInfo().agentID
         fetchInventoryDescendents.AgentData_Field.SessionID = this.inventory.getCircuitInfo().sessionID
         fetchInventoryDescendents.InventoryData_Field.FolderID = this.folderUUID

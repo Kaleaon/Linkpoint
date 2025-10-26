@@ -13,15 +13,15 @@ class ParcelMediaUpdate : SLMessage() {
     class DataBlock {
         public Int MediaAutoScale
         public UUID MediaID
-        public Byte[] MediaURL
+        public ByteArray MediaURL
     }
 
     @JvmStatic
     class DataBlockExtended {
-        public Byte[] MediaDesc
+        public ByteArray MediaDesc
         public Int MediaHeight
         public Int MediaLoop
-        public Byte[] MediaType
+        public ByteArray MediaType
         public Int MediaWidth
     }
 
@@ -29,15 +29,15 @@ class ParcelMediaUpdate : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.DataBlock_Field.MediaURL.length + 1 + 16 + 1 + 4 + this.DataBlockExtended_Field.MediaType.length + 1 + 1 + this.DataBlockExtended_Field.MediaDesc.length + 4 + 4 + 1
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleParcelMediaUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -92)
@@ -51,7 +51,7 @@ class ParcelMediaUpdate : SLMessage() {
         packByte(byteBuffer, (Byte) this.DataBlockExtended_Field.MediaLoop)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.DataBlock_Field.MediaURL = unpackVariable(byteBuffer, 1)
         this.DataBlock_Field.MediaID = unpackUUID(byteBuffer)
         this.DataBlock_Field.MediaAutoScale = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE

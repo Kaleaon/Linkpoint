@@ -18,7 +18,7 @@ class DaoMaster : AbstractDaoMaster() {
             super(context, str, cursorFactory, 71)
         }
 
-        fun onCreate(SQLiteDatabase sQLiteDatabase) {
+        override fun onCreate(sQLiteDatabase: SQLiteDatabase) {
             Log.i("greenDAO", "Creating tables for schema version 71")
             DaoMaster.createAllTables(sQLiteDatabase, false)
         }
@@ -30,7 +30,7 @@ class DaoMaster : AbstractDaoMaster() {
             super(context, str, cursorFactory)
         }
 
-        fun onUpgrade(SQLiteDatabase sQLiteDatabase, Int i, Int i2) {
+        fun onUpgrade(sQLiteDatabase: SQLiteDatabase, i: Int, i2: Int) {
             Log.i("greenDAO", "Upgrading schema from version " + i + " to " + i2 + " by dropping all tables")
             DaoMaster.dropAllTables(sQLiteDatabase, true)
             onCreate(sQLiteDatabase)
@@ -57,7 +57,7 @@ class DaoMaster : AbstractDaoMaster() {
     }
 
     @JvmStatic
-    Unit createAllTables(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun createAllTables(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         CachedResponseDao.createTable(sQLiteDatabase, z)
         CachedAssetDao.createTable(sQLiteDatabase, z)
         MoneyTransactionDao.createTable(sQLiteDatabase, z)
@@ -76,7 +76,7 @@ class DaoMaster : AbstractDaoMaster() {
     }
 
     @JvmStatic
-    Unit dropAllTables(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun dropAllTables(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         CachedResponseDao.dropTable(sQLiteDatabase, z)
         CachedAssetDao.dropTable(sQLiteDatabase, z)
         MoneyTransactionDao.dropTable(sQLiteDatabase, z)
@@ -94,11 +94,11 @@ class DaoMaster : AbstractDaoMaster() {
         ChatterDao.dropTable(sQLiteDatabase, z)
     }
 
-    public DaoSession newSession() {
+     public fun newSession(): DaoSession {
         return DaoSession(this.db, IdentityScopeType.Session, this.daoConfigMap)
     }
 
-    public DaoSession newSession(IdentityScopeType identityScopeType) {
+     public fun newSession(identityScopeType: IdentityScopeType): DaoSession {
         return DaoSession(this.db, identityScopeType, this.daoConfigMap)
     }
 }

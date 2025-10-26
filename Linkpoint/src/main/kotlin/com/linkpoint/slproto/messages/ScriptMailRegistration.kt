@@ -10,7 +10,7 @@ class ScriptMailRegistration : SLMessage() {
     @JvmStatic
     class DataBlock {
         public Int Flags
-        public Byte[] TargetIP
+        public ByteArray TargetIP
         public Int TargetPort
         public UUID TaskID
     }
@@ -19,15 +19,15 @@ class ScriptMailRegistration : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.DataBlock_Field.TargetIP.length + 1 + 2 + 16 + 4 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleScriptMailRegistration(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -94)
@@ -37,7 +37,7 @@ class ScriptMailRegistration : SLMessage() {
         packInt(byteBuffer, this.DataBlock_Field.Flags)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.DataBlock_Field.TargetIP = unpackVariable(byteBuffer, 1)
         this.DataBlock_Field.TargetPort = unpackShort(byteBuffer) & 65535
         this.DataBlock_Field.TaskID = unpackUUID(byteBuffer)

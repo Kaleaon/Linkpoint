@@ -18,13 +18,13 @@ import okhttp3.Response
 class SLTextureUploadRequest : Runnable {
     private const val MediaType MEDIA_TYPE_JP2 = MediaType.parse("image/x-j2c")
     private String capURL
-    TextureUploadCompleteListener onUploadComplete = null
+    val onUploadComplete: TextureUploadCompleteListener = null
     private File sourceFile
     private UUID textureID
     private Int textureLayer
 
     interface TextureUploadCompleteListener {
-        Unit OnTextureUploadComplete(SLTextureUploadRequest sLTextureUploadRequest)
+        fun OnTextureUploadComplete(sLTextureUploadRequest: SLTextureUploadRequest)
     }
 
     public SLTextureUploadRequest(File file, Int i) {
@@ -32,14 +32,14 @@ class SLTextureUploadRequest : Runnable {
         this.textureLayer = i
     }
 
-    public UUID getTextureID() {
+     public fun getTextureID(): UUID {
         return this.textureID
     }
 
-    fun run() {
+    override fun run() {
         Response execute
         try {
-            String asString = LLSDXMLRequest().PerformRequest(this.capURL, LLSDUndefined()).byKey("uploader").asString()
+            val asString: String = LLSDXMLRequest().PerformRequest(this.capURL, LLSDUndefined()).byKey("uploader").asString()
             Debug.Log("TextureUploader: uploader URL = " + asString)
             execute = SLHTTPSConnection.getOkHttpClient().newCall(Request.Builder().url(asString).header(HttpHeaders.ACCEPT, "application/llsd+xml").post(RequestBody.create(MEDIA_TYPE_JP2, this.sourceFile)).build()).execute()
             if (execute == null) {
@@ -47,7 +47,7 @@ class SLTextureUploadRequest : Runnable {
             } else if (!execute.isSuccessful()) {
                 throw IOException("Error code " + execute.code())
             } else {
-                LLSDNode parseXML = LLSDNode.parseXML(execute.body().byteStream(), (String) null)
+                val parseXML: LLSDNode = LLSDNode.parseXML(execute.body().byteStream(), (String) null)
                 Debug.Log("TextureUploader: LLSD response = " + parseXML.serializeToXML())
                 this.textureID = parseXML.byKey("new_asset").asUUID()
                 execute.close()
@@ -65,11 +65,11 @@ class SLTextureUploadRequest : Runnable {
         }
     }
 
-    fun setCapURL(String str) {
+    fun setCapURL(str: String) {
         this.capURL = str
     }
 
-    fun setOnUploadComplete(TextureUploadCompleteListener textureUploadCompleteListener) {
+    fun setOnUploadComplete(textureUploadCompleteListener: TextureUploadCompleteListener) {
         this.onUploadComplete = textureUploadCompleteListener
     }
 }

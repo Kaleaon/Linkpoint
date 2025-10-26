@@ -2,5 +2,5 @@ package com.linkpoint.slproto.users.manager
 import java.util.*
 
 interface OnListUpdated {
-    Unit onListUpdated()
+     fun onListUpdated()
 }

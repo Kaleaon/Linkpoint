@@ -60,7 +60,7 @@ class HybridProtocolManager {
         
         // Executor for async operations
         this.executor = Executors.newCachedThreadPool(r -> {
-            Thread t = Thread(r, "HybridProtocol-" + r.hashCode())
+            val t: Thread = Thread(r, "HybridProtocol-" + r.hashCode())
             t.setDaemon(true)
             return t
         })
@@ -75,19 +75,19 @@ class HybridProtocolManager {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 // Initialize WebSocket connection for real-time events
-                Boolean wsConnected = webSocketManager.connectAsync(websocketURL).get(15, TimeUnit.SECONDS)
+                val wsConnected: Boolean = webSocketManager.connectAsync(websocketURL).get(15, TimeUnit.SECONDS)
                 if (!wsConnected) {
                     Log.w(TAG, "WebSocket connection failed, real-time features may be limited")
                 }
                 
                 // Test HTTP/2 CAPS connectivity
-                Boolean capsWorking = testCapsConnectivity(capsURL)
+                val capsWorking: Boolean = testCapsConnectivity(capsURL)
                 if (!capsWorking) {
                     Log.w(TAG, "CAPS HTTP/2 connection issues detected")
                 }
                 
                 // Initialize UDP legacy support
-                Boolean udpInitialized = udpManager.initialize()
+                val udpInitialized: Boolean = udpManager.initialize()
                 
                 isConnected = wsConnected || capsWorking || udpInitialized
                 
@@ -118,7 +118,7 @@ class HybridProtocolManager {
         }
         
         // Determine optimal transport for this message
-        Transport transport = router.getOptimalTransport(message)
+        val transport: Transport = router.getOptimalTransport(message)
         
         Log.d(TAG, "Sending message via " + transport + ": " + message.getClass().getSimpleName())
         
@@ -139,10 +139,10 @@ class HybridProtocolManager {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 // Convert SL message to HTTP/2 request
-                Byte[] messageData = serializeMessage(message)
-                RequestBody body = RequestBody.create(messageData, MediaType.get("application/octet-stream"))
+                val messageData: ByteArray = serializeMessage(message)
+                val body: RequestBody = RequestBody.create(messageData, MediaType.get("application/octet-stream"))
                 
-                Request request = Request.Builder()
+                val request: Request = Request.Builder()
                     .url("https://example.com/caps/" + message.getClass().getSimpleName()) // This would be actual CAPS URL
                     .post(body)
                     .header("Content-Type", "application/octet-stream")
@@ -150,7 +150,7 @@ class HybridProtocolManager {
                     .build()
                 
                 try (Response response = http2Client.newCall(request).execute()) {
-                    Boolean success = response.isSuccessful()
+                    val success: Boolean = response.isSuccessful()
                     Log.d(TAG, "HTTP/2 message result: " + response.code())
                     return success
                 }
@@ -170,9 +170,9 @@ class HybridProtocolManager {
         return udpManager.sendMessage(message)
     }
     
-    private Boolean testCapsConnectivity(String capsURL) {
+     private fun testCapsConnectivity(capsURL: String): Boolean {
         try {
-            Request testRequest = Request.Builder()
+            val testRequest: Request = Request.Builder()
                 .url(capsURL)
                 .head()
                 .build()
@@ -186,7 +186,7 @@ class HybridProtocolManager {
         }
     }
     
-    private Byte[] serializeMessage(SLMessage message) {
+     private fun serializeMessage(message: SLMessage): ByteArray {
         // In a real implementation, this would use modern serialization
         // For now, use the existing message serialization
         try {
@@ -208,11 +208,11 @@ private class WebSocketManager {
         public CompletableFuture<Boolean> connectAsync(String websocketURL) {
             return CompletableFuture.supplyAsync(() -> {
                 try {
-                    OkHttpClient client = OkHttpClient.Builder()
+                    val client: OkHttpClient = OkHttpClient.Builder()
                         .readTimeout(0, TimeUnit.MILLISECONDS) // Keep connection alive
                         .build()
                     
-                    Request request = Request.Builder()
+                    val request: Request = Request.Builder()
                         .url(websocketURL)
                         .build()
                     
@@ -261,8 +261,8 @@ private class WebSocketManager {
                 }
                 
                 try {
-                    Byte[] messageData = message.serialize()
-                    Boolean sent = webSocket.send(ByteString.of(messageData))
+                    val messageData: ByteArray = message.serialize()
+                    val sent: Boolean = webSocket.send(ByteString.of(messageData))
                     Log.d(TAG, "WebSocket message sent: " + sent)
                     return sent
                 } catch (Exception e) {
@@ -278,7 +278,7 @@ private class WebSocketManager {
      */
     @JvmStatic
 private class LegacyUDPManager {
-        public Boolean initialize() {
+         public fun initialize(): Boolean {
             // Initialize UDP socket for legacy protocol
             Log.d(TAG, "Legacy UDP manager initialized")
             return true; // Simplified for now
@@ -303,8 +303,8 @@ private class LegacyUDPManager {
      */
     @JvmStatic
 private class ProtocolRouter {
-        public Transport getOptimalTransport(SLMessage message) {
-            String messageType = message.getClass().getSimpleName()
+         public fun getOptimalTransport(message: SLMessage): Transport {
+            val messageType: String = message.getClass().getSimpleName()
             
             // Route based on message characteristics
             if (messageType.contains("Chat") || messageType.contains("IM")) {
@@ -340,7 +340,7 @@ private class ProtocolRouter {
         }
     }
     
-    public Boolean isConnected() {
+     public fun isConnected(): Boolean {
         return isConnected
     }
 }

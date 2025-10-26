@@ -24,9 +24,9 @@ val class SLChatGroupInvitationSentEvent : SLChatEvent() {
     }
 
     /* access modifiers changed from: protected */
-    public String getText(Context context, UserManager userManager) {
-        String sourceName = this.source.getSourceName(userManager)
-        Object[] objArr = Object[1]
+     public fun getText(context: Context, userManager: UserManager): String {
+        val sourceName: String = this.source.getSourceName(userManager)
+        val objArr: Array<Any> = Object[1]
         if (sourceName == null) {
             sourceName = "(unknown)"
         }
@@ -39,11 +39,11 @@ val class SLChatGroupInvitationSentEvent : SLChatEvent() {
     }
 
     /* access modifiers changed from: protected */
-    public Boolean isActionMessage(UserManager userManager) {
+     public fun isActionMessage(userManager: UserManager): Boolean {
         return false
     }
 
-    fun serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

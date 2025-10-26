@@ -39,14 +39,14 @@ class WebSocketEventClient : WebSocketListener() {
             .build()
     }
     
-    fun setAuthToken(String token) {
+    fun setAuthToken(token: String) {
         this.authToken = token
     }
     
     /**
      * Connect to Second Life event queue via WebSocket
      */
-    fun connect(String eventQueueUrl) {
+    fun connect(eventQueueUrl: String) {
         this.lastConnectionUrl = eventQueueUrl
         this.reconnectAttempts.set(0); // Reset reconnect attempts on manual connect
         
@@ -61,7 +61,7 @@ class WebSocketEventClient : WebSocketListener() {
             requestBuilder.addHeader("Authorization", "Bearer " + authToken)
         }
         
-        Request request = requestBuilder.build()
+        val request: Request = requestBuilder.build()
         webSocket = client.newWebSocket(request, this)
         
         Log.i(TAG, "Connecting to event queue: " + eventQueueUrl)
@@ -81,12 +81,12 @@ class WebSocketEventClient : WebSocketListener() {
     /**
      * Subscribe to a specific event type
      */
-    fun subscribe(String eventType, EventListener listener) {
+    fun subscribe(eventType: String, listener: EventListener) {
         eventListeners.computeIfAbsent(eventType, k -> CopyOnWriteArrayList<>()).add(listener)
         
         // Send subscription message if connected
         if (connected && webSocket != null) {
-            String subscriptionMessage = String.format(
+            val subscriptionMessage: String = String.format(
                 "{\"action\":\"subscribe\",\"eventType\":\"%s\"}", 
                 eventType
             )
@@ -98,8 +98,8 @@ class WebSocketEventClient : WebSocketListener() {
     /**
      * Unsubscribe from an event type
      */
-    fun unsubscribe(String eventType, EventListener listener) {
-        CopyOnWriteArrayList<EventListener> listeners = eventListeners.get(eventType)
+    fun unsubscribe(eventType: String, listener: EventListener) {
+        val listeners: CopyOnWriteArrayList<EventListener> = eventListeners.get(eventType)
         if (listeners != null) {
             listeners.remove(listener)
             if (listeners.isEmpty()) {
@@ -107,7 +107,7 @@ class WebSocketEventClient : WebSocketListener() {
                 
                 // Send unsubscription message if connected
                 if (connected && webSocket != null) {
-                    String unsubscribeMessage = String.format(
+                    val unsubscribeMessage: String = String.format(
                         "{\"action\":\"unsubscribe\",\"eventType\":\"%s\"}", 
                         eventType
                     )
@@ -125,12 +125,12 @@ class WebSocketEventClient : WebSocketListener() {
         return java.util.concurrent.CompletableFuture.supplyAsync(() -> {
             if (connected && webSocket != null) {
                 try {
-                    String message = String.format(
+                    val message: String = String.format(
                         "{\"type\":\"%s\",\"payload\":%s}", 
                         messageType, 
                         payload
                     )
-                    Boolean success = webSocket.send(message)
+                    val success: Boolean = webSocket.send(message)
                     Log.d(TAG, "Sent message: " + messageType + " (success: " + success + ")")
                     return success
                 } catch (Exception e) {
@@ -146,7 +146,7 @@ class WebSocketEventClient : WebSocketListener() {
     /**
      * Send raw message through WebSocket connection (enhanced version)
      */
-    public Boolean sendRawMessage(String message) {
+     public fun sendRawMessage(message: String): Boolean {
         if (webSocket == null || !connected) {
             Log.w(TAG, "Cannot send message: WebSocket not connected")
             return false
@@ -163,7 +163,7 @@ class WebSocketEventClient : WebSocketListener() {
     /**
      * Send binary message through WebSocket connection (enhanced version)
      */
-    public Boolean sendBinaryMessage(Byte[] data) {
+     public fun sendBinaryMessage(data: ByteArray): Boolean {
         if (webSocket == null || !connected) {
             Log.w(TAG, "Cannot send binary message: WebSocket not connected")
             return false
@@ -188,7 +188,7 @@ class WebSocketEventClient : WebSocketListener() {
         
         // Re-subscribe to all event types
         for (String eventType : eventListeners.keySet()) {
-            String subscriptionMessage = String.format(
+            val subscriptionMessage: String = String.format(
                 "{\"action\":\"subscribe\",\"eventType\":\"%s\"}", 
                 eventType
             )
@@ -200,7 +200,7 @@ class WebSocketEventClient : WebSocketListener() {
         Log.d(TAG, "Received text message: " + text.substring(0, Math.min(100, text.length())))
         
         try {
-            EventMessage event = EventMessage.parseFromJson(text)
+            val event: EventMessage = EventMessage.parseFromJson(text)
             dispatchEvent(event)
         } catch (Exception e) {
             Log.e(TAG, "Failed to parse text event message", e)
@@ -211,7 +211,7 @@ class WebSocketEventClient : WebSocketListener() {
         Log.d(TAG, "Received binary message: " + bytes.size() + " bytes")
         
         try {
-            EventMessage event = EventMessage.parseFromBytes(bytes.toByteArray())
+            val event: EventMessage = EventMessage.parseFromBytes(bytes.toByteArray())
             dispatchEvent(event)
         } catch (Exception e) {
             Log.e(TAG, "Failed to parse binary event message", e)
@@ -239,8 +239,8 @@ class WebSocketEventClient : WebSocketListener() {
     /**
      * Dispatch event to registered listeners
      */
-    private Unit dispatchEvent(EventMessage event) {
-        CopyOnWriteArrayList<EventListener> listeners = eventListeners.get(event.getType())
+     private fun dispatchEvent(event: EventMessage) {
+        val listeners: CopyOnWriteArrayList<EventListener> = eventListeners.get(event.getType())
         if (listeners != null) {
             for (EventListener listener : listeners) {
                 try {
@@ -255,20 +255,20 @@ class WebSocketEventClient : WebSocketListener() {
     /**
      * Schedule reconnection with exponential backoff
      */
-    private Unit scheduleReconnect() {
+     private fun scheduleReconnect() {
         if (lastConnectionUrl == null) {
             Log.w(TAG, "No last connection URL available for reconnection")
             return
         }
         
-        Int currentAttempt = reconnectAttempts.incrementAndGet()
+        val currentAttempt: Int = reconnectAttempts.incrementAndGet()
         if (currentAttempt > MAX_RECONNECT_ATTEMPTS) {
             Log.e(TAG, "Maximum reconnection attempts reached (" + MAX_RECONNECT_ATTEMPTS + ")")
             return
         }
         
         // Exponential backoff: 1s, 2s, 4s, 8s, 16s
-        Long delaySeconds = (Long) Math.pow(2, currentAttempt - 1)
+        val delaySeconds: Long = (Long) Math.pow(2, currentAttempt - 1)
         
         Log.i(TAG, "Scheduling reconnection attempt " + currentAttempt + " in " + delaySeconds + " seconds")
         
@@ -281,7 +281,7 @@ class WebSocketEventClient : WebSocketListener() {
         }, delaySeconds * 1000); // Convert to milliseconds
     }
     
-    public Boolean isConnected() {
+     public fun isConnected(): Boolean {
         return connected
     }
     
@@ -289,7 +289,7 @@ class WebSocketEventClient : WebSocketListener() {
      * Event listener interface
      */
     interface EventListener {
-        Unit onEvent(EventMessage event)
+         fun onEvent(event: EventMessage)
     }
     
     /**
@@ -307,15 +307,15 @@ class WebSocketEventClient : WebSocketListener() {
             this.timestamp = timestamp
         }
         
-        public String getType() {
+         public fun getType(): String {
             return type
         }
         
-        public String getData() {
+         public fun getData(): String {
             return data
         }
         
-        public Long getTimestamp() {
+         public fun getTimestamp(): Long {
             return timestamp
         }
         
@@ -324,22 +324,22 @@ class WebSocketEventClient : WebSocketListener() {
          * Supports Second Life event queue format
          */
         @JvmStatic
-    EventMessage parseFromJson(String json) {
+     fun parseFromJson(json: String): EventMessage {
             try {
                 // Simple JSON parsing for Second Life event format
                 // Expected format: {"message": "type:data", "timestamp": 123456}
-                String type = "unknown"
-                String data = json
-                Long timestamp = System.currentTimeMillis()
+                val type: String = "unknown"
+                val data: String = json
+                val timestamp: Long = System.currentTimeMillis()
                 
                 // Extract message type from common SL event patterns
                 if (json.contains("\"message\"")) {
-                    Pattern messagePattern = Pattern.compile("\"message\"\\s*:\\s*\"([^\"]+)\"")
-                    Matcher matcher = messagePattern.matcher(json)
+                    val messagePattern: Pattern = Pattern.compile("\"message\"\\s*:\\s*\"([^\"]+)\"")
+                    val matcher: Matcher = messagePattern.matcher(json)
                     if (matcher.find()) {
-                        String messageContent = matcher.group(1)
+                        val messageContent: String = matcher.group(1)
                         if (messageContent.contains(":")) {
-                            String[] parts = messageContent.split(":", 2)
+                            val parts: Array<String> = messageContent.split(":", 2)
                             type = parts[0].trim()
                             data = parts[1].trim()
                         } else {
@@ -349,8 +349,8 @@ class WebSocketEventClient : WebSocketListener() {
                 }
                 
                 // Extract timestamp if present
-                Pattern timestampPattern = Pattern.compile("\"timestamp\"\\s*:\\s*(\\d+)")
-                Matcher timestampMatcher = timestampPattern.matcher(json)
+                val timestampPattern: Pattern = Pattern.compile("\"timestamp\"\\s*:\\s*(\\d+)")
+                val timestampMatcher: Matcher = timestampPattern.matcher(json)
                 if (timestampMatcher.find()) {
                     timestamp = Long.parseLong(timestampMatcher.group(1))
                 }
@@ -377,20 +377,20 @@ class WebSocketEventClient : WebSocketListener() {
          * Handles Second Life UDP-style binary messages
          */
         @JvmStatic
-    EventMessage parseFromBytes(Byte[] bytes) {
+     fun parseFromBytes(bytes: ByteArray): EventMessage {
             try {
                 if (bytes == null || bytes.length == 0) {
                     return EventMessage("empty", "", System.currentTimeMillis())
                 }
                 
                 // Second Life binary messages often start with message type flags
-                String type = "binary"
-                String data = ""
+                val type: String = "binary"
+                val data: String = ""
                 
                 // Check for common Second Life binary message patterns
                 if (bytes.length > 4) {
                     // First 4 bytes often contain message type information
-                    Int messageType = ((bytes[0] & 0xFF) << 24) | 
+                    val messageType: Int = ((bytes[0] & 0xFF) << 24) | 
                                     ((bytes[1] & 0xFF) << 16) |
                                     ((bytes[2] & 0xFF) << 8) | 
                                     (bytes[3] & 0xFF)
@@ -412,7 +412,7 @@ class WebSocketEventClient : WebSocketListener() {
                 }
                 
                 // Convert bytes to hex string for debugging
-                StringBuilder hexString = StringBuilder()
+                val hexString: StringBuilder = StringBuilder()
                 for (Int i = 0; i < Math.min(bytes.length, 32); i++) { // Limit to first 32 bytes
                     hexString.append(String.format("%02X ", bytes[i]))
                 }

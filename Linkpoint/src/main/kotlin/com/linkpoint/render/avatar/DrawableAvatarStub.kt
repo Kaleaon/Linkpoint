@@ -25,11 +25,11 @@ class DrawableAvatarStub : OnChatterNameUpdated {
         this.chatterNameRetriever = ChatterNameRetriever(ChatterID.getUserChatterID(uuid, sLObjectAvatarInfo.getId()), this, null)
     }
 
-    private Unit setNameTag(String str) {
+     private fun setNameTag(str: String) {
         if (!Objects.equal(this.nameTag, str)) {
             this.nameTag = str
-            String str2 = "DrawableAvatar: setting: nameTag = %s"
-            Object[] objArr = Object[1]
+            val str2: String = "DrawableAvatar: setting: nameTag = %s"
+            val objArr: Array<Any> = Object[1]
             objArr[0] = str != null ? str : "null"
             Debug.Printf(str2, objArr)
             if (str != null) {
@@ -38,20 +38,20 @@ class DrawableAvatarStub : OnChatterNameUpdated {
         }
     }
 
-    fun DrawNameTag(RenderContext renderContext) {
-        DrawableHoverText drawableHoverText = this.drawableNameTag
-        Float[] worldMatrix = getWorldMatrix(renderContext)
+    fun DrawNameTag(renderContext: RenderContext) {
+        val drawableHoverText: DrawableHoverText = this.drawableNameTag
+        val worldMatrix: FloatArray = getWorldMatrix(renderContext)
         if (drawableHoverText != null && worldMatrix != null) {
             drawableHoverText.DrawAtWorld(renderContext, worldMatrix[12], worldMatrix[13], 0.75f + worldMatrix[14], 0.5f, renderContext.projectionMatrix, false, 0)
         }
     }
 
-    Float[] getWorldMatrix(RenderContext renderContext) {
+     fun getWorldMatrix(renderContext: RenderContext): FloatArray {
         if (!this.avatarObject.isMyAvatar() || this.avatarObject.parentID != 0) {
             return this.avatarObject.worldMatrix
         }
-        Float[] fArr = Float[32]
-        LLQuaternion rotation = this.avatarObject.getRotation()
+        val fArr: FloatArray = Float[32]
+        val rotation: LLQuaternion = this.avatarObject.getRotation()
         if (rotation != null) {
             Matrix.setIdentityM(fArr, 16)
             Matrix.translateM(fArr, 16, renderContext.myAviPosition.x, renderContext.myAviPosition.y, renderContext.myAviPosition.z)
@@ -60,7 +60,7 @@ class DrawableAvatarStub : OnChatterNameUpdated {
         return fArr
     }
 
-    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
+    fun onChatterNameUpdated(chatterNameRetriever: ChatterNameRetriever) {
         setNameTag(chatterNameRetriever.getResolvedName())
     }
 }

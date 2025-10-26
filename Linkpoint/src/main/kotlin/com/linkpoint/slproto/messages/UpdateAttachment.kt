@@ -29,7 +29,7 @@ class UpdateAttachment : SLMessage() {
         public Int CRC
         public Int CreationDate
         public UUID CreatorID
-        public Byte[] Description
+        public ByteArray Description
         public Int EveryoneMask
         public Int Flags
         public UUID FolderID
@@ -38,7 +38,7 @@ class UpdateAttachment : SLMessage() {
         public Boolean GroupOwned
         public Int InvType
         public UUID ItemID
-        public Byte[] Name
+        public ByteArray Name
         public Int NextOwnerMask
         public UUID OwnerID
         public Int OwnerMask
@@ -57,15 +57,15 @@ class UpdateAttachment : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.InventoryData_Field.Name.length + 129 + 1 + this.InventoryData_Field.Description.length + 4 + 4 + 39
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleUpdateAttachment(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 75)
@@ -97,7 +97,7 @@ class UpdateAttachment : SLMessage() {
         packInt(byteBuffer, this.InventoryData_Field.CRC)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AttachmentBlock_Field.AttachmentPoint = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE

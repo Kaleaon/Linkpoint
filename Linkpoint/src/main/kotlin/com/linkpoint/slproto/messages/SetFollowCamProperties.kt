@@ -26,15 +26,15 @@ class SetFollowCamProperties : SLMessage() {
         this.ObjectData_Field = ObjectData()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.CameraProperty_Fields.size() * 8) + 21
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleSetFollowCamProperties(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -97)
@@ -46,11 +46,11 @@ class SetFollowCamProperties : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.ObjectData_Field.ObjectID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            CameraProperty cameraProperty = CameraProperty()
+            val cameraProperty: CameraProperty = CameraProperty()
             cameraProperty.Type = unpackInt(byteBuffer)
             cameraProperty.Value = unpackFloat(byteBuffer)
             this.CameraProperty_Fields.add(cameraProperty)

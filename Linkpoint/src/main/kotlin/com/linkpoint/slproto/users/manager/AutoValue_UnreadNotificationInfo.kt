@@ -46,29 +46,29 @@ final class AutoValue_UnreadNotificationInfo : UnreadNotificationInfo() {
         this.objectPopupInfo = objectPopupNotification
     }
 
-    public UUID agentUUID() {
+     public fun agentUUID(): UUID {
         return this.agentUUID
     }
 
-    public Boolean equals(Object obj) {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
         if (!(obj instanceof UnreadNotificationInfo)) {
             return false
         }
-        UnreadNotificationInfo unreadNotificationInfo = (UnreadNotificationInfo) obj
+        val unreadNotificationInfo: UnreadNotificationInfo = (UnreadNotificationInfo) obj
         if (!this.agentUUID.equals(unreadNotificationInfo.agentUUID()) || this.totalUnreadCount != unreadNotificationInfo.totalUnreadCount() || !this.unreadSources.equals(unreadNotificationInfo.unreadSources()) || !this.mostImportantType.equals(unreadNotificationInfo.mostImportantType()) || this.freshMessagesCount != unreadNotificationInfo.freshMessagesCount() || !this.mostImportantFreshType.equals(unreadNotificationInfo.mostImportantFreshType()) || !this.singleFreshSource.equals(unreadNotificationInfo.singleFreshSource())) {
             return false
         }
         return this.objectPopupInfo.equals(unreadNotificationInfo.objectPopupInfo())
     }
 
-    public Int freshMessagesCount() {
+     public fun freshMessagesCount(): Int {
         return this.freshMessagesCount
     }
 
-    public Int hashCode() {
+     public override fun hashCode(): Int {
         return ((((((((((((((this.agentUUID.hashCode() ^ 1000003) * 1000003) ^ this.totalUnreadCount) * 1000003) ^ this.unreadSources.hashCode()) * 1000003) ^ this.mostImportantType.hashCode()) * 1000003) ^ this.freshMessagesCount) * 1000003) ^ this.mostImportantFreshType.hashCode()) * 1000003) ^ this.singleFreshSource.hashCode()) * 1000003) ^ this.objectPopupInfo.hashCode()
     }
 
@@ -88,11 +88,11 @@ final class AutoValue_UnreadNotificationInfo : UnreadNotificationInfo() {
         return this.singleFreshSource
     }
 
-    public String toString() {
+     public override fun toString(): String {
         return "UnreadNotificationInfo{agentUUID=" + this.agentUUID + ", " + "totalUnreadCount=" + this.totalUnreadCount + ", " + "unreadSources=" + this.unreadSources + ", " + "mostImportantType=" + this.mostImportantType + ", " + "freshMessagesCount=" + this.freshMessagesCount + ", " + "mostImportantFreshType=" + this.mostImportantFreshType + ", " + "singleFreshSource=" + this.singleFreshSource + ", " + "objectPopupInfo=" + this.objectPopupInfo + "}"
     }
 
-    public Int totalUnreadCount() {
+     public fun totalUnreadCount(): Int {
         return this.totalUnreadCount
     }
 

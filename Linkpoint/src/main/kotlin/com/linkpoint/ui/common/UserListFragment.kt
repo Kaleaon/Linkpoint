@@ -29,9 +29,9 @@ import javax.annotation.Nullable
 abstract class UserListFragment : Fragment() {
     protected UserManager userManager = null
 
-    private Unit updateListViews() {
+     private fun updateListViews() {
         ListView listView
-        View view = getView()
+        val view: View = getView()
         if (view != null && (listView = (ListView) view.findViewById(R.id.contactList)) != null) {
             listView.invalidateViews()
         }
@@ -41,10 +41,10 @@ abstract class UserListFragment : Fragment() {
     public abstract ListAdapter createListAdapter(Context context, LoaderManager loaderManager, UserManager userManager2)
 
     /* access modifiers changed from: protected */
-    fun handleUserDefaultAction(ChatterID chatterID) {
+    fun handleUserDefaultAction(chatterID: ChatterID) {
         if (this.userManager != null) {
-            Bundle makeSelection = ChatFragment.makeSelection(chatterID)
-            Bundle arguments = getArguments()
+            val makeSelection: Bundle = ChatFragment.makeSelection(chatterID)
+            val arguments: Bundle = getArguments()
             if (arguments.containsKey(CardboardActivity.VR_MODE_TAG)) {
                 makeSelection.putBoolean(CardboardActivity.VR_MODE_TAG, arguments.getBoolean(CardboardActivity.VR_MODE_TAG))
             }
@@ -53,7 +53,7 @@ abstract class UserListFragment : Fragment() {
     }
 
     /* access modifiers changed from: protected */
-    public Boolean itemsMayBeDismissed() {
+     public fun itemsMayBeDismissed(): Boolean {
         return false
     }
 
@@ -61,31 +61,31 @@ abstract class UserListFragment : Fragment() {
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_UserListFragment_1689  reason: not valid java name */
     public /* synthetic */ Unit m578lambda$com_lumiyaviewer_lumiya_ui_common_UserListFragment_1689(AdapterView adapterView, View view, Int i, Long j) {
         ChatterID chatterID
-        Object itemAtPosition = adapterView.getItemAtPosition(i)
+        val itemAtPosition: Object = adapterView.getItemAtPosition(i)
         if ((itemAtPosition instanceof ChatterDisplayInfo) && this.userManager != null && (chatterID = ((ChatterDisplayInfo) itemAtPosition).getChatterID(this.userManager)) != null) {
             handleUserDefaultAction(chatterID)
         }
     }
 
-    fun onActivityCreated(Bundle bundle) {
+    override fun onActivityCreated(bundle: Bundle) {
         super.onActivityCreated(bundle)
-        View view = getView()
+        val view: View = getView()
         if (view != null) {
-            ListView listView = (ListView) view.findViewById(R.id.contactList)
+            val listView: ListView = (ListView) view.findViewById(R.id.contactList)
             listView.setOnItemClickListener($Lambda$1wR8wJi1eGgAIYEhals_u5j3nM(this))
             registerForContextMenu(listView)
             if (itemsMayBeDismissed()) {
-                SwipeDismissListViewTouchListener swipeDismissListViewTouchListener = SwipeDismissListViewTouchListener(listView, SwipeDismissListViewTouchListener.DismissCallbacks() {
-                    public Boolean canDismiss(ListView listView, Int i) {
-                        ListAdapter adapter = listView.getAdapter()
+                val swipeDismissListViewTouchListener: SwipeDismissListViewTouchListener = SwipeDismissListViewTouchListener(listView, SwipeDismissListViewTouchListener.DismissCallbacks() {
+                     public fun canDismiss(listView: ListView, i: Int): Boolean {
+                        val adapter: ListAdapter = listView.getAdapter()
                         if (adapter instanceof DismissableAdapter) {
                             return ((DismissableAdapter) adapter).canDismiss(i)
                         }
                         return false
                     }
 
-                    fun onDismiss(ListView listView, Int i) {
-                        ListAdapter adapter = listView.getAdapter()
+                    fun onDismiss(listView: ListView, i: Int) {
+                        val adapter: ListAdapter = listView.getAdapter()
                         if (adapter instanceof DismissableAdapter) {
                             ((DismissableAdapter) adapter).onDismiss(i)
                         }
@@ -96,23 +96,23 @@ abstract class UserListFragment : Fragment() {
         }
     }
 
-    fun onCreate(Bundle bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         this.userManager = ActivityUtils.getUserManager(getArguments())
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         return layoutInflater.inflate(R.layout.contacts_group, viewGroup, false)
     }
 
-    fun onStart() {
+    override fun onStart() {
         ListView listView
-        ListAdapter listAdapter = null
+        val listAdapter: ListAdapter = null
         super.onStart()
-        View view = getView()
+        val view: View = getView()
         Debug.Printf("UserListFragment: onStart, rootView = %s", view)
         if (view != null && (listView = (ListView) view.findViewById(R.id.contactList)) != null && listView.getAdapter() == null) {
-            UserManager userManager2 = ActivityUtils.getUserManager(getArguments())
+            val userManager2: UserManager = ActivityUtils.getUserManager(getArguments())
             if (userManager2 != null) {
                 listAdapter = createListAdapter(getActivity(), getLoaderManager(), userManager2)
             }
@@ -120,12 +120,12 @@ abstract class UserListFragment : Fragment() {
         }
     }
 
-    fun onStop() {
+    override fun onStop() {
         ListView listView
-        View view = getView()
+        val view: View = getView()
         Debug.Printf("UserListFragment: onStop, rootView = %s", view)
         if (!(view == null || (listView = (ListView) view.findViewById(R.id.contactList)) == null)) {
-            ListAdapter adapter = listView.getAdapter()
+            val adapter: ListAdapter = listView.getAdapter()
             if (adapter instanceof Closeable) {
                 try {
                     ((Closeable) adapter).close()
@@ -139,7 +139,7 @@ abstract class UserListFragment : Fragment() {
     }
 
     @EventHandler
-    fun onUserInfoChanged(EventUserInfoChanged eventUserInfoChanged) {
+    fun onUserInfoChanged(eventUserInfoChanged: EventUserInfoChanged) {
         if (this.userManager != null && this.userManager.getUserID().equals(eventUserInfoChanged.agentUUID) && eventUserInfoChanged.isProfileChanged()) {
             updateListViews()
         }

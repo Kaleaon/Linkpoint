@@ -48,7 +48,7 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentHasTitle {
         }
 
         /* access modifiers changed from: protected */
-        public Void doInBackground(Void... voidArr) {
+         public override fun doInBackground(vararg voidArr: Void): Void {
             if (this.cacheDirs != null) {
                 for (File clearFolder : this.cacheDirs) {
                     FileUtils.clearFolder(clearFolder)
@@ -64,7 +64,7 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentHasTitle {
         }
 
         /* access modifiers changed from: protected */
-        fun onPostExecute(Void voidR) {
+        override fun onPostExecute(voidR: Void) {
             if (this.progressDialog != null) {
                 this.progressDialog.dismiss()
             }
@@ -74,7 +74,7 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentHasTitle {
         }
 
         /* access modifiers changed from: protected */
-        fun onPreExecute() {
+        override fun onPreExecute() {
             this.cacheDirs = GlobalOptions.getInstance().getAvailableCacheDirs()
             this.progressDialog = ProgressDialog.show(SettingsFragment.this.getContext(), (CharSequence) null, SettingsFragment.this.getString(R.string.clearing_cache), true, true, DialogInterface.OnCancelListener(this) {
 
@@ -240,20 +240,20 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
     }
 
     @SuppressLint({"DefaultLocale"})
-    private Unit handleCacheLocationPreference(CacheLocationPreference cacheLocationPreference) {
-        Int i = -1
-        ImmutableList<File> availableCacheDirs = GlobalOptions.getInstance().getAvailableCacheDirs()
-        File baseCacheDir = GlobalOptions.getInstance().getBaseCacheDir()
-        String[] strArr = String[availableCacheDirs.size()]
-        Int i2 = 0
+     private fun handleCacheLocationPreference(cacheLocationPreference: CacheLocationPreference) {
+        val i: Int = -1
+        val availableCacheDirs: ImmutableList<File> = GlobalOptions.getInstance().getAvailableCacheDirs()
+        val baseCacheDir: File = GlobalOptions.getInstance().getBaseCacheDir()
+        val strArr: Array<String> = String[availableCacheDirs.size()]
+        val i2: Int = 0
         while (i2 < availableCacheDirs.size()) {
-            Int i3 = Objects.equal(availableCacheDirs.get(i2), baseCacheDir) ? i2 : i
-            StatFs statFs = StatFs(((File) availableCacheDirs.get(i2)).getAbsolutePath())
-            strArr[i2] = String.format("%s (%.1f Gb free)", Object[]{CacheLocationPreference.makeDisplayableCacheLocation(((File) availableCacheDirs.get(i2)).getAbsolutePath()), Float.valueOf(((Float) (Build.VERSION.SDK_INT >= 18 ? statFs.getBlockSizeLong() * statFs.getAvailableBlocksLong() : (Long) (statFs.getAvailableBlocks() * statFs.getBlockSize()))) / 1.07374182E9f)})
+            val i3: Int = Objects.equal(availableCacheDirs.get(i2), baseCacheDir) ? i2 : i
+            val statFs: StatFs = StatFs(((File) availableCacheDirs.get(i2)).getAbsolutePath())
+            strArr[i2] = String.format("%s (%.1f Gb free)", Array<Any>{CacheLocationPreference.makeDisplayableCacheLocation(((File) availableCacheDirs.get(i2)).getAbsolutePath()), Float.valueOf(((Float) (Build.VERSION.SDK_INT >= 18 ? statFs.getBlockSizeLong() * statFs.getAvailableBlocksLong() : (Long) (statFs.getAvailableBlocks() * statFs.getBlockSize()))) / 1.07374182E9f)})
             i2++
             i = i3
         }
-        ArrayAdapter arrayAdapter = ArrayAdapter(getContext(), 17367058, strArr)
+        val arrayAdapter: ArrayAdapter = ArrayAdapter(getContext(), 17367058, strArr)
         AlertDialog.Builder builder = AlertDialog.Builder(getContext())
         builder.setTitle(R.string.select_cache_location)
         builder.setSingleChoiceItems(arrayAdapter, i, DialogInterface.OnClickListener(this, availableCacheDirs, cacheLocationPreference, baseCacheDir) {
@@ -337,7 +337,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
         builder.create().show()
     }
 
-    private Unit handleClearCachePreference() {
+     private fun handleClearCachePreference() {
         AlertDialog.Builder builder = AlertDialog.Builder(getContext())
         builder.setMessage(R.string.clear_cache_dialog_message)
         builder.setCancelable(true)
@@ -476,13 +476,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
         builder.create().show()
     }
 
-    private Unit handleRingtonePreference(RingtonePreference ringtonePreference) {
-        Intent intent = Intent("android.intent.action.RINGTONE_PICKER")
+     private fun handleRingtonePreference(ringtonePreference: RingtonePreference) {
+        val intent: Intent = Intent("android.intent.action.RINGTONE_PICKER")
         intent.putExtra("android.intent.extra.ringtone.TYPE", 2)
         intent.putExtra("android.intent.extra.ringtone.SHOW_DEFAULT", true)
         intent.putExtra("android.intent.extra.ringtone.SHOW_SILENT", true)
         intent.putExtra("android.intent.extra.ringtone.DEFAULT_URI", NotificationSounds.getResourceUri(ringtonePreference.getDefaultRawResource()))
-        String string = ringtonePreference.getSharedPreferences().getString(ringtonePreference.getKey(), (String) null)
+        val string: String = ringtonePreference.getSharedPreferences().getString(ringtonePreference.getKey(), (String) null)
         if (string == null) {
             intent.putExtra("android.intent.extra.ringtone.EXISTING_URI", NotificationSounds.getResourceUri(ringtonePreference.getDefaultRawResource()))
         } else if (string.length() == 0) {
@@ -495,33 +495,33 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_settings_SettingsFragment_7498  reason: not valid java name */
-    static /* synthetic */ Unit m856lambda$com_lumiyaviewer_lumiya_ui_settings_SettingsFragment_7498(DialogInterface dialogInterface, Int i) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m856lambda$com_lumiyaviewer_lumiya_ui_settings_SettingsFragment_7498(DialogInterface dialogInterface, Int i) {
         dialogInterface.dismiss()
         LinkpointApp.restartApp()
     }
 
     @JvmStatic
-    Bundle makeSelection(Int i) {
-        Bundle bundle = Bundle()
+     fun makeSelection(i: Int): Bundle {
+        val bundle: Bundle = Bundle()
         bundle.putInt(PREF_RESOURCE_KEY, i)
         return bundle
     }
 
-    private Unit updatePreferencesDisplay() {
+     private fun updatePreferencesDisplay() {
         RecyclerView.Adapter adapter
-        RecyclerView listView = getListView()
+        val listView: RecyclerView = getListView()
         if (listView != null && (adapter = listView.getAdapter()) != null) {
             adapter.notifyDataSetChanged()
         }
     }
 
-    public String getSubTitle() {
+     public fun getSubTitle(): String {
         return null
     }
 
-    public String getTitle() {
+     public fun getTitle(): String {
         CharSequence title
-        PreferenceScreen preferenceScreen = getPreferenceScreen()
+        val preferenceScreen: PreferenceScreen = getPreferenceScreen()
         if (preferenceScreen == null || (title = preferenceScreen.getTitle()) == null) {
             return null
         }
@@ -531,7 +531,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_settings_SettingsFragment_6434  reason: not valid java name */
     public /* synthetic */ Unit m858lambda$com_lumiyaviewer_lumiya_ui_settings_SettingsFragment_6434(ImmutableList immutableList, CacheLocationPreference cacheLocationPreference, File file, DialogInterface dialogInterface, Int i) {
-        File file2 = File(((File) immutableList.get(i)).toString())
+        val file2: File = File(((File) immutableList.get(i)).toString())
         SharedPreferences.Editor edit = cacheLocationPreference.getSharedPreferences().edit()
         edit.putString(cacheLocationPreference.getKey(), ((File) immutableList.get(i)).toString())
         edit.commit()
@@ -550,10 +550,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
     }
 
     @SuppressLint({"CommitPrefEdits"})
-    fun onActivityResult(Int i, Int i2, Intent intent) {
+    override fun onActivityResult(i: Int, i2: Int, intent: Intent) {
         if (i == 2 && i2 == -1 && intent != null && this.requestedRingtonePreference != null) {
-            Uri uri = (Uri) intent.getParcelableExtra("android.intent.extra.ringtone.PICKED_URI")
-            String uri2 = uri != null ? uri.toString() : ""
+            val uri: Uri = (Uri) intent.getParcelableExtra("android.intent.extra.ringtone.PICKED_URI")
+            val uri2: String = uri != null ? uri.toString() : ""
             SharedPreferences.Editor edit = this.requestedRingtonePreference.getSharedPreferences().edit()
             edit.putString(this.requestedRingtonePreference.getKey(), uri2)
             edit.commit()
@@ -565,31 +565,31 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
         }
     }
 
-    fun onCreatePreferences(Bundle bundle, String str) {
+    override fun onCreatePreferences(bundle: Bundle, str: String) {
         addPreferencesFromResource(getArguments().getInt(PREF_RESOURCE_KEY))
-        FragmentActivity activity = getActivity()
+        val activity: FragmentActivity = getActivity()
         if (activity instanceof DetailsActivity) {
             ((DetailsActivity) activity).onFragmentTitleUpdated()
         }
-        Preference findPreference = findPreference("soundOnNotify")
+        val findPreference: Preference = findPreference("soundOnNotify")
         if (findPreference != null) {
             findPreference.setVisible(!NotificationChannels.getInstance().areNotificationsSystemControlled())
         }
     }
 
-    fun onDetach() {
+    override fun onDetach() {
         super.onDetach()
-        FragmentActivity activity = getActivity()
+        val activity: FragmentActivity = getActivity()
         if (activity instanceof DetailsActivity) {
             ((DetailsActivity) activity).onFragmentTitleUpdated()
         }
     }
 
-    public Boolean onPreferenceTreeClick(Preference preference) {
+     public fun onPreferenceTreeClick(preference: Preference): Boolean {
         NotificationChannels.Channel channelByType
         if (preference instanceof PreferenceSubPage) {
-            PreferenceSubPage preferenceSubPage = (PreferenceSubPage) preference
-            NotificationType notificationType = preferenceSubPage.getNotificationType()
+            val preferenceSubPage: PreferenceSubPage = (PreferenceSubPage) preference
+            val notificationType: NotificationType = preferenceSubPage.getNotificationType()
             if (notificationType != null && (channelByType = NotificationChannels.getInstance().getChannelByType(notificationType)) != null && NotificationChannels.getInstance().showSystemNotificationSettings(getContext(), this, channelByType)) {
                 return true
             }
@@ -609,9 +609,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
-        FragmentActivity activity = getActivity()
+        val activity: FragmentActivity = getActivity()
         if (activity instanceof DetailsActivity) {
             ((DetailsActivity) activity).onFragmentTitleUpdated()
         }

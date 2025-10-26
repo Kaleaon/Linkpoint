@@ -9,22 +9,22 @@ import java.io.InputStream
 
 class WindlightPreset {
     private const val WINDLIGHT_GAMMA: Float = 2.2f
-    public Float[] ambient = Float[4]
-    public Float[] ambientBelowWater = Float[4]
-    public Float[] blue_density = Float[4]
-    public Float[] blue_horizon = Float[4]
-    public Float[] cloud_color = Float[4]
-    public Float[] cloud_pos_density1 = Float[4]
-    public Float[] cloud_pos_density2 = Float[4]
-    public Float[] cloud_shadow = Float[4]
-    private String[] defaultPresets = {"A%2D12AM", "A%2D3AM", "A%2D6AM", "A%2D9AM", "A%2D12PM", "A%2D3PM", "A%2D6PM", "A%2D9PM"}
-    public Float[] haze_density = Float[4]
-    public Float[] haze_horizon = Float[4]
-    private Float[] hourTable = {0.0f, 0.125f, 0.25f, 0.375f, 0.5f, 0.625f, 0.75f, 0.875f}
-    public Float[] lightnorm = Float[4]
+    public FloatArray ambient = Float[4]
+    public FloatArray ambientBelowWater = Float[4]
+    public FloatArray blue_density = Float[4]
+    public FloatArray blue_horizon = Float[4]
+    public FloatArray cloud_color = Float[4]
+    public FloatArray cloud_pos_density1 = Float[4]
+    public FloatArray cloud_pos_density2 = Float[4]
+    public FloatArray cloud_shadow = Float[4]
+    private Array<String> defaultPresets = {"A%2D12AM", "A%2D3AM", "A%2D6AM", "A%2D9AM", "A%2D12PM", "A%2D3PM", "A%2D6PM", "A%2D9PM"}
+    public FloatArray haze_density = Float[4]
+    public FloatArray haze_horizon = Float[4]
+    private FloatArray hourTable = {0.0f, 0.125f, 0.25f, 0.375f, 0.5f, 0.625f, 0.75f, 0.875f}
+    public FloatArray lightnorm = Float[4]
     public Float star_brightness
-    public Float[] sunlightBelowWater = Float[4]
-    public Float[] sunlight_color = Float[4]
+    public FloatArray sunlightBelowWater = Float[4]
+    public FloatArray sunlight_color = Float[4]
 
     public WindlightPreset() {
         reset()
@@ -34,7 +34,7 @@ class WindlightPreset {
         loadFromAssetFile(str)
     }
 
-    private Unit darkenUnderWater(Float[] fArr, Float[] fArr2) {
+     private fun darkenUnderWater(fArr: FloatArray, fArr2: FloatArray) {
         for (Int i = 0; i < fArr2.length; i++) {
             if (i == 2 || i == 3) {
                 fArr[i] = fArr2[i]
@@ -44,31 +44,31 @@ class WindlightPreset {
         }
     }
 
-    private Unit gammaFloatArray(Float[] fArr, Float f, Float f2) {
+     private fun gammaFloatArray(fArr: FloatArray, f: Float, f2: Float) {
         for (Int i = 0; i < fArr.length; i++) {
             fArr[i] = ((Float) Math.pow((Double) fArr[i], (Double) (1.0f / f))) * f2
         }
     }
 
-    private Unit getFloatArray(LLSDNode lLSDNode, Float[] fArr, Float f) throws LLSDException {
+     private fun getFloatArray(lLSDNode: LLSDNode, fArr: FloatArray, f: Float) throws LLSDException {
         for (Int i = 0; i < fArr.length; i++) {
             fArr[i] = ((Float) lLSDNode.byIndex(i).asDouble()) / f
         }
     }
 
-    private const val Unit lerpFloatArray(Float[] fArr, Float[] fArr2, Float[] fArr3, Float f) {
-        Int i = 0
+    private const val Unit lerpFloatArray(FloatArray fArr, FloatArray fArr2, FloatArray fArr3, Float f) {
+        val i: Int = 0
         while (i < fArr.length && i < fArr2.length && i < fArr3.length) {
             fArr[i] = (fArr2[i] * (1.0f - f)) + (fArr3[i] * f)
             i++
         }
     }
 
-    private Unit loadFromAssetFile(String str) {
+     private fun loadFromAssetFile(str: String) {
         Debug.Printf("Windlight preset loading from '%s'", str)
         try {
-            InputStream open = LinkpointApp.getAssetManager().open(str)
-            LLSDNode parseXML = LLSDNode.parseXML(open, "UTF-8")
+            val open: InputStream = LinkpointApp.getAssetManager().open(str)
+            val parseXML: LLSDNode = LLSDNode.parseXML(open, "UTF-8")
             open.close()
             getFloatArray(parseXML.byKey("ambient"), this.ambient, 3.0f)
             getFloatArray(parseXML.byKey("sunlight_color"), this.sunlight_color, 3.0f)
@@ -97,7 +97,7 @@ class WindlightPreset {
         loadFromAssetFile("windlight/A%2D12PM.xml")
     }
 
-    fun setByInterpolation(WindlightPreset windlightPreset, WindlightPreset windlightPreset2, Float f) {
+    fun setByInterpolation(windlightPreset: WindlightPreset, windlightPreset2: WindlightPreset, f: Float) {
         this.star_brightness = (windlightPreset.star_brightness * (1.0f - f)) + (windlightPreset2.star_brightness * f)
         lerpFloatArray(this.ambient, windlightPreset.ambient, windlightPreset2.ambient, f)
         lerpFloatArray(this.ambientBelowWater, windlightPreset.ambientBelowWater, windlightPreset2.ambientBelowWater, f)

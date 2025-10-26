@@ -40,13 +40,13 @@ class SLFinancialInfo : SLModule() {
         this.moneyTransactionDao = null
     }
 
-    private Unit RequestEconomyData() {
-        EconomyDataRequest economyDataRequest = EconomyDataRequest()
+    private fun RequestEconomyData() {
+        val economyDataRequest: EconomyDataRequest = EconomyDataRequest()
         economyDataRequest.isReliable = true
         SendMessage(economyDataRequest)
     }
 
-    private Unit setKnownBalance(Int i) {
+     private fun setKnownBalance(i: Int) {
         synchronized (this.balanceLock) {
             this.balanceKnown = true
             this.balance = i
@@ -57,7 +57,7 @@ class SLFinancialInfo : SLModule() {
     }
 
     fun AskForMoneyBalance() {
-        MoneyBalanceRequest moneyBalanceRequest = MoneyBalanceRequest()
+        val moneyBalanceRequest: MoneyBalanceRequest = MoneyBalanceRequest()
         moneyBalanceRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         moneyBalanceRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
         moneyBalanceRequest.MoneyData_Field.TransactionID = UUID(0, 0)
@@ -65,8 +65,8 @@ class SLFinancialInfo : SLModule() {
         SendMessage(moneyBalanceRequest)
     }
 
-    fun DoPayObject(UUID uuid, Int i) {
-        MoneyTransferRequest moneyTransferRequest = MoneyTransferRequest()
+    fun DoPayObject(uuid: UUID, i: Int) {
+        val moneyTransferRequest: MoneyTransferRequest = MoneyTransferRequest()
         moneyTransferRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         moneyTransferRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
         moneyTransferRequest.MoneyData_Field.SourceID = this.circuitInfo.agentID
@@ -81,8 +81,8 @@ class SLFinancialInfo : SLModule() {
         SendMessage(moneyTransferRequest)
     }
 
-    fun DoPayUser(UUID uuid, Int i, String str) {
-        MoneyTransferRequest moneyTransferRequest = MoneyTransferRequest()
+    fun DoPayUser(uuid: UUID, i: Int, str: String) {
+        val moneyTransferRequest: MoneyTransferRequest = MoneyTransferRequest()
         moneyTransferRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         moneyTransferRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
         moneyTransferRequest.MoneyData_Field.SourceID = this.circuitInfo.agentID
@@ -111,16 +111,16 @@ class SLFinancialInfo : SLModule() {
     }
 
     @SLMessageHandler
-    fun HandleEconomyData(EconomyData economyData) {
+    fun HandleEconomyData(economyData: EconomyData) {
         this.uploadCost.set(economyData.Info_Field.PriceUpload)
         Debug.Printf("Upload: upload cost %d", Integer.valueOf(this.uploadCost.get()))
     }
 
     @SLMessageHandler
-    fun HandleMoneyBalanceReply(MoneyBalanceReply moneyBalanceReply) {
+    fun HandleMoneyBalanceReply(moneyBalanceReply: MoneyBalanceReply) {
         UUID uuid
-        UUID uuid2 = null
-        SLBalanceChangedEvent sLBalanceChangedEvent = SLBalanceChangedEvent(this.balanceKnown, this.balance, moneyBalanceReply.MoneyData_Field.MoneyBalance)
+        val uuid2: UUID = null
+        val sLBalanceChangedEvent: SLBalanceChangedEvent = SLBalanceChangedEvent(this.balanceKnown, this.balance, moneyBalanceReply.MoneyData_Field.MoneyBalance)
         setKnownBalance(moneyBalanceReply.MoneyData_Field.MoneyBalance)
         if (sLBalanceChangedEvent.oldBalanceValid && sLBalanceChangedEvent.oldBalance != sLBalanceChangedEvent.newBalance) {
             if (moneyBalanceReply.TransactionInfo_Field.SourceID.equals(this.circuitInfo.agentID)) {
@@ -141,7 +141,7 @@ class SLFinancialInfo : SLModule() {
         this.eventBus.publish(sLBalanceChangedEvent)
     }
 
-    fun RecordChatEvent(UUID uuid, Int i, Int i2) {
+    fun RecordChatEvent(uuid: UUID, i: Int, i2: Int) {
         if (this.moneyTransactionDao != null) {
             this.moneyTransactionDao.insert(MoneyTransaction((Long) null, Date(), uuid, i, i2))
             if (this.userManager != null) {
@@ -150,21 +150,21 @@ class SLFinancialInfo : SLModule() {
         }
     }
 
-    public Int getBalance() {
+     public fun getBalance(): Int {
         synchronized (this.balanceLock) {
             i = this.balance
         }
         return i
     }
 
-    public Boolean getBalanceKnown() {
+     public fun getBalanceKnown(): Boolean {
         synchronized (this.balanceLock) {
             z = this.balanceKnown
         }
         return z
     }
 
-    public Int getUploadCost() {
+     public fun getUploadCost(): Int {
         return this.uploadCost.get()
     }
 

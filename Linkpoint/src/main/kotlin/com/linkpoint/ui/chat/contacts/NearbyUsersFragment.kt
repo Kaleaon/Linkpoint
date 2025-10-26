@@ -10,8 +10,8 @@ import com.linkpoint.ui.common.UserListFragment
 
 class NearbyUsersFragment : UserListFragment() {
     /* access modifiers changed from: protected */
-    public ListAdapter createListAdapter(Context context, LoaderManager loaderManager, UserManager userManager) {
-        ChatterListSubscriptionAdapter chatterListSubscriptionAdapter = ChatterListSubscriptionAdapter(context, userManager, ChatterListType.Nearby)
+     public fun createListAdapter(context: Context, loaderManager: LoaderManager, userManager: UserManager): ListAdapter {
+        val chatterListSubscriptionAdapter: ChatterListSubscriptionAdapter = ChatterListSubscriptionAdapter(context, userManager, ChatterListType.Nearby)
         chatterListSubscriptionAdapter.setUserDistanceInline(false)
         return chatterListSubscriptionAdapter
     }

@@ -193,18 +193,18 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     public ValueAnimator buttonsFadeAnimator = null
     /* access modifiers changed from: private */
     val Runnable buttonsFadeTask = Runnable() {
-        fun run() {
-            Boolean unused = WorldViewActivity.this.buttonsFadeTimerStarted = false
+        override fun run() {
+            val unused: Boolean = WorldViewActivity.this.buttonsFadeTimerStarted = false
             if (!WorldViewActivity.this.detailsVisible() && (!WorldViewActivity.this.isDragging) && WorldViewActivity.this.agentCircuit.hasData()) {
-                VoiceChatInfo voiceChatInfo = (VoiceChatInfo) WorldViewActivity.this.voiceChatInfo.getData()
+                val voiceChatInfo: VoiceChatInfo = (VoiceChatInfo) WorldViewActivity.this.voiceChatInfo.getData()
                 if (!((voiceChatInfo == null || voiceChatInfo.state != VoiceChatInfo.VoiceChatState.Active) ? false : voiceChatInfo.localMicActive)) {
-                    Long r2 = (WorldViewActivity.this.lastActivityTime + WorldViewActivity.BUTTONS_FADE_TIMEOUT_MILLIS) - SystemClock.uptimeMillis()
+                    val r2: Long = (WorldViewActivity.this.lastActivityTime + WorldViewActivity.BUTTONS_FADE_TIMEOUT_MILLIS) - SystemClock.uptimeMillis()
                     Debug.Printf("ButtonsFade: remaining %d", Long.valueOf(r2))
                     if (r2 <= 0) {
                         WorldViewActivity.this.startFadingButtons()
                         return
                     }
-                    Boolean unused2 = WorldViewActivity.this.buttonsFadeTimerStarted = true
+                    val unused2: Boolean = WorldViewActivity.this.buttonsFadeTimerStarted = true
                     WorldViewActivity.this.mHandler.postDelayed(WorldViewActivity.this.buttonsFadeTask, r2)
                 }
             }
@@ -213,7 +213,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     /* access modifiers changed from: private */
     public Boolean buttonsFadeTimerStarted = false
     private val Runnable buttonsRestoreTask = Runnable() {
-        fun run() {
+        override fun run() {
             if (Build.VERSION.SDK_INT >= 11) {
                 if (WorldViewActivity.this.buttonsFadeAnimator != null) {
                     WorldViewActivity.this.buttonsFadeAnimator.cancel()
@@ -391,12 +391,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     /* access modifiers changed from: private */
     public GestureDetectorCompat gestureDetector
     private val GestureDetector.OnGestureListener gestureListener = GestureDetector.SimpleOnGestureListener() {
-        public Boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent2, Float f, Float f2) {
+         public fun onFling(motionEvent: MotionEvent, motionEvent2: MotionEvent, f: Float, f2: Float): Boolean {
             if (WorldViewActivity.this.isInScaling || !(!WorldViewActivity.this.wasInScaling) || !(!WorldViewActivity.this.isDragging)) {
                 return false
             }
-            Float height = (f * 60.0f) / ((Float) WorldViewActivity.this.worldViewHolder.getHeight())
-            Float height2 = ((-f2) * 60.0f) / ((Float) WorldViewActivity.this.worldViewHolder.getHeight())
+            val height: Float = (f * 60.0f) / ((Float) WorldViewActivity.this.worldViewHolder.getHeight())
+            val height2: Float = ((-f2) * 60.0f) / ((Float) WorldViewActivity.this.worldViewHolder.getHeight())
             if (WorldViewActivity.this.avatarControl == null) {
                 return true
             }
@@ -404,19 +404,19 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             return true
         }
 
-        fun onLongPress(MotionEvent motionEvent) {
-            Float rawX = motionEvent.getRawX()
-            Float rawY = motionEvent.getRawY()
+        fun onLongPress(motionEvent: MotionEvent) {
+            val rawX: Float = motionEvent.getRawX()
+            val rawY: Float = motionEvent.getRawY()
             if (WorldViewActivity.this.isDragging) {
                 WorldViewActivity.this.dragSelectorSetRawPosition((Int) rawX, (Int) rawY)
             } else if (!WorldViewActivity.this.isInScaling && (!WorldViewActivity.this.wasInScaling)) {
-                Int[] iArr = Int[2]
+                val iArr: IntArray = Int[2]
                 WorldViewActivity.this.worldViewHolder.getLocationOnScreen(iArr)
                 WorldViewActivity.this.mGLView.pickObjectHover(rawX - ((Float) iArr[0]), rawY - ((Float) iArr[1]))
             }
         }
 
-        public Boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent2, Float f, Float f2) {
+         public fun onScroll(motionEvent: MotionEvent, motionEvent2: MotionEvent, f: Float, f2: Float): Boolean {
             if (WorldViewActivity.this.isDragging) {
                 AbsoluteLayout.LayoutParams layoutParams = (AbsoluteLayout.LayoutParams) WorldViewActivity.this.dragPointer.getLayoutParams()
                 if (layoutParams != null) {
@@ -430,14 +430,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
                 return false
             } else {
                 if (WorldViewActivity.this.displayedHUDid != 0) {
-                    WorldViewActivity worldViewActivity = WorldViewActivity.this
-                    Float unused = worldViewActivity.hudOffsetX = worldViewActivity.hudOffsetX + ((f / ((Float) WorldViewActivity.this.worldViewHolder.getHeight())) / 2.0f)
-                    WorldViewActivity worldViewActivity2 = WorldViewActivity.this
-                    Float unused2 = worldViewActivity2.hudOffsetY = worldViewActivity2.hudOffsetY + ((f2 / ((Float) WorldViewActivity.this.worldViewHolder.getHeight())) / 2.0f)
+                    val worldViewActivity: WorldViewActivity = WorldViewActivity.this
+                    val unused: Float = worldViewActivity.hudOffsetX = worldViewActivity.hudOffsetX + ((f / ((Float) WorldViewActivity.this.worldViewHolder.getHeight())) / 2.0f)
+                    val worldViewActivity2: WorldViewActivity = WorldViewActivity.this
+                    val unused2: Float = worldViewActivity2.hudOffsetY = worldViewActivity2.hudOffsetY + ((f2 / ((Float) WorldViewActivity.this.worldViewHolder.getHeight())) / 2.0f)
                     WorldViewActivity.this.mGLView.setHUDOffset(WorldViewActivity.this.hudOffsetX, WorldViewActivity.this.hudOffsetY)
                 } else {
-                    Float height = ((-f) * 60.0f) / ((Float) WorldViewActivity.this.worldViewHolder.getHeight())
-                    Float height2 = (f2 * 60.0f) / ((Float) WorldViewActivity.this.worldViewHolder.getHeight())
+                    val height: Float = ((-f) * 60.0f) / ((Float) WorldViewActivity.this.worldViewHolder.getHeight())
+                    val height2: Float = (f2 * 60.0f) / ((Float) WorldViewActivity.this.worldViewHolder.getHeight())
                     if (WorldViewActivity.this.avatarControl != null) {
                         WorldViewActivity.this.avatarControl.processCameraRotate(height, height2)
                     }
@@ -446,11 +446,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             }
         }
 
-        public Boolean onSingleTapUp(MotionEvent motionEvent) {
+         public fun onSingleTapUp(motionEvent: MotionEvent): Boolean {
             if (WorldViewActivity.this.isDragging) {
                 WorldViewActivity.this.dragSelectorSetRawPosition((Int) motionEvent.getRawX(), (Int) motionEvent.getRawY())
             } else if (WorldViewActivity.this.displayedHUDid != 0) {
-                Int[] iArr = Int[2]
+                val iArr: IntArray = Int[2]
                 WorldViewActivity.this.worldViewHolder.getLocationOnScreen(iArr)
                 WorldViewActivity.this.mGLView.touchHUD(motionEvent.getRawX() - ((Float) iArr[0]), motionEvent.getRawY() - ((Float) iArr[1]))
             } else {
@@ -550,16 +550,16 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     public Boolean objectDeselectTimerStarted = false
     /* access modifiers changed from: private */
     val Runnable objectDeselectTimerTask = Runnable() {
-        fun run() {
-            Boolean unused = WorldViewActivity.this.objectDeselectTimerStarted = false
+        override fun run() {
+            val unused: Boolean = WorldViewActivity.this.objectDeselectTimerStarted = false
             if (!WorldViewActivity.this.detailsVisible() && (!WorldViewActivity.this.isDragging)) {
-                Long r0 = (WorldViewActivity.this.lastObjectActivityTime + WorldViewActivity.OBJECT_DESELECT_TIMEOUT_MILLIS) - SystemClock.uptimeMillis()
+                val r0: Long = (WorldViewActivity.this.lastObjectActivityTime + WorldViewActivity.OBJECT_DESELECT_TIMEOUT_MILLIS) - SystemClock.uptimeMillis()
                 Debug.Printf("ObjectDeselect: remaining %d", Long.valueOf(r0))
                 if (r0 <= 0) {
                     WorldViewActivity.this.handlePickedObject((ObjectIntersectInfo) null)
                     return
                 }
-                Boolean unused2 = WorldViewActivity.this.objectDeselectTimerStarted = true
+                val unused2: Boolean = WorldViewActivity.this.objectDeselectTimerStarted = true
                 WorldViewActivity.this.mHandler.postDelayed(WorldViewActivity.this.objectDeselectTimerTask, r0)
             }
         }
@@ -590,22 +590,22 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     /* access modifiers changed from: private */
     public ScaleGestureDetector scaleGestureDetector
     private val ScaleGestureDetector.OnScaleGestureListener scaleGestureListener = ScaleGestureDetector.SimpleOnScaleGestureListener() {
-        public Boolean onScale(ScaleGestureDetector scaleGestureDetector) {
+         public fun onScale(scaleGestureDetector: ScaleGestureDetector): Boolean {
             Debug.Printf("Gesture: scale factor: %f", Float.valueOf(scaleGestureDetector.getScaleFactor()))
             if (WorldViewActivity.this.displayedHUDid != 0) {
-                Float unused = WorldViewActivity.this.hudScaleFactor = Math.max(0.1f, Math.min(WorldViewActivity.this.hudScaleFactor * scaleGestureDetector.getScaleFactor(), 10.0f))
+                val unused: Float = WorldViewActivity.this.hudScaleFactor = Math.max(0.1f, Math.min(WorldViewActivity.this.hudScaleFactor * scaleGestureDetector.getScaleFactor(), 10.0f))
                 WorldViewActivity.this.mGLView.setHUDScaleFactor(WorldViewActivity.this.hudScaleFactor)
             } else {
-                Float width = (Float) WorldViewActivity.this.worldViewTouchReceiver.getWidth()
-                Float height = (Float) WorldViewActivity.this.worldViewTouchReceiver.getHeight()
-                Float focusX = scaleGestureDetector.getFocusX()
-                Float focusY = scaleGestureDetector.getFocusY()
-                Float f = ((focusX / width) - 0.5f) * (height / width)
-                Float f2 = (focusY / height) - 0.5f
-                Float r4 = (focusX - WorldViewActivity.this.oldScaleFocusX) / height
-                Float r5 = (focusY - WorldViewActivity.this.oldScaleFocusY) / height
-                Float unused2 = WorldViewActivity.this.oldScaleFocusX = focusX
-                Float unused3 = WorldViewActivity.this.oldScaleFocusY = focusY
+                val width: Float = (Float) WorldViewActivity.this.worldViewTouchReceiver.getWidth()
+                val height: Float = (Float) WorldViewActivity.this.worldViewTouchReceiver.getHeight()
+                val focusX: Float = scaleGestureDetector.getFocusX()
+                val focusY: Float = scaleGestureDetector.getFocusY()
+                val f: Float = ((focusX / width) - 0.5f) * (height / width)
+                val f2: Float = (focusY / height) - 0.5f
+                val r4: Float = (focusX - WorldViewActivity.this.oldScaleFocusX) / height
+                val r5: Float = (focusY - WorldViewActivity.this.oldScaleFocusY) / height
+                val unused2: Float = WorldViewActivity.this.oldScaleFocusX = focusX
+                val unused3: Float = WorldViewActivity.this.oldScaleFocusY = focusY
                 if (WorldViewActivity.this.avatarControl != null) {
                     WorldViewActivity.this.avatarControl.processCameraZoom(scaleGestureDetector.getScaleFactor(), (-f) * 2.0f, (-f2) * 2.0f, r4, r5)
                 }
@@ -613,15 +613,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             return true
         }
 
-        public Boolean onScaleBegin(ScaleGestureDetector scaleGestureDetector) {
-            Boolean unused = WorldViewActivity.this.isInScaling = true
-            Float unused2 = WorldViewActivity.this.oldScaleFocusX = scaleGestureDetector.getFocusX()
-            Float unused3 = WorldViewActivity.this.oldScaleFocusY = scaleGestureDetector.getFocusY()
+         public fun onScaleBegin(scaleGestureDetector: ScaleGestureDetector): Boolean {
+            val unused: Boolean = WorldViewActivity.this.isInScaling = true
+            val unused2: Float = WorldViewActivity.this.oldScaleFocusX = scaleGestureDetector.getFocusX()
+            val unused3: Float = WorldViewActivity.this.oldScaleFocusY = scaleGestureDetector.getFocusY()
             return true
         }
 
-        fun onScaleEnd(ScaleGestureDetector scaleGestureDetector) {
-            Boolean unused = WorldViewActivity.this.isInScaling = false
+        fun onScaleEnd(scaleGestureDetector: ScaleGestureDetector) {
+            val unused: Boolean = WorldViewActivity.this.isInScaling = false
         }
     }
     private val SubscriptionData<Integer, SLObjectProfileData> selectedObjectProfile = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
@@ -800,15 +800,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     @BindView(2131755743)
     FrameLayout worldViewHolder
     private val View.OnTouchListener worldViewTouchListener = View.OnTouchListener() {
-        public Boolean onTouch(View view, MotionEvent motionEvent) {
-            Boolean r3 = WorldViewActivity.this.isInteracting
+         public override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+            val r3: Boolean = WorldViewActivity.this.isInteracting
             switch (motionEvent.getActionMasked()) {
                 case 0:
-                    Boolean unused = WorldViewActivity.this.isInteracting = true
+                    val unused: Boolean = WorldViewActivity.this.isInteracting = true
                     z = true
                     break
                 case 1:
-                    Boolean unused2 = WorldViewActivity.this.isInteracting = false
+                    val unused2: Boolean = WorldViewActivity.this.isInteracting = false
                     z = true
                     break
                 default:
@@ -818,8 +818,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             if (WorldViewActivity.this.isInteracting && (!r3)) {
                 WorldViewActivity.this.mGLView.setIsInteracting(true)
             }
-            Boolean unused3 = WorldViewActivity.this.wasInScaling = WorldViewActivity.this.isInScaling
-            Boolean onTouchEvent = z | WorldViewActivity.this.scaleGestureDetector.onTouchEvent(motionEvent) | WorldViewActivity.this.gestureDetector.onTouchEvent(motionEvent)
+            val unused3: Boolean = WorldViewActivity.this.wasInScaling = WorldViewActivity.this.isInScaling
+            val onTouchEvent: Boolean = z | WorldViewActivity.this.scaleGestureDetector.onTouchEvent(motionEvent) | WorldViewActivity.this.gestureDetector.onTouchEvent(motionEvent)
             if (r3 && (!WorldViewActivity.this.isInteracting)) {
                 WorldViewActivity.this.mGLView.setIsInteracting(false)
             }
@@ -839,22 +839,22 @@ private class SelectableAttachment {
             this.attachmentName = str
         }
 
-        public Int getLocalID() {
+         public fun getLocalID(): Int {
             return this.localID
         }
 
-        public String toString() {
+         public override fun toString(): String {
             return this.attachmentName
         }
     }
 
-    private Unit beginCountingButtonsFade() {
+     private fun beginCountingButtonsFade() {
         this.lastActivityTime = SystemClock.uptimeMillis()
         this.lastObjectActivityTime = this.lastActivityTime
         startFadingButtonsTimer()
     }
 
-    private Unit beginCountingObjectDeselect() {
+     private fun beginCountingObjectDeselect() {
         if (this.pickedObject != null) {
             this.lastObjectActivityTime = SystemClock.uptimeMillis()
             if (!this.objectDeselectTimerStarted) {
@@ -864,7 +864,7 @@ private class SelectableAttachment {
         }
     }
 
-    private Unit beginDragSelection() {
+     private fun beginDragSelection() {
         this.isDragging = true
         removeAllDetails()
         AbsoluteLayout.LayoutParams layoutParams = (AbsoluteLayout.LayoutParams) this.dragPointer.getLayoutParams()
@@ -876,7 +876,7 @@ private class SelectableAttachment {
         updateObjectPanel()
     }
 
-    private Unit chatWithObject(SLObjectInfo sLObjectInfo) {
+     private fun chatWithObject(sLObjectInfo: SLObjectInfo) {
         if ((sLObjectInfo instanceof SLObjectAvatarInfo) && !((SLObjectAvatarInfo) sLObjectInfo).isMyAvatar() && sLObjectInfo.getId() != null) {
             DetailsActivity.showEmbeddedDetails(this, ChatFragment.class, ChatFragment.makeSelection(ChatterID.getUserChatterID(this.userManager.getUserID(), sLObjectInfo.getId())))
         }
@@ -887,7 +887,7 @@ private class SelectableAttachment {
         r0 = r0.findFragmentById(com.lumiyaviewer.lumiya.R.id.details)
      */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    public Boolean detailsVisible() {
+     public fun detailsVisible(): Boolean {
         /*
             r2 = this
             android.support.v4.app.FragmentManager r0 = r2.getSupportFragmentManager()
@@ -895,7 +895,7 @@ private class SelectableAttachment {
             r1 = 2131755284(0x7f100114, Float:1.9141443E38)
             android.support.v4.app.Fragment r0 = r0.findFragmentById(r1)
             if (r0 == 0) goto L_0x0017
-            Boolean r0 = r0.isVisible()
+            val r0: Boolean = r0.isVisible()
             if (r0 == 0) goto L_0x0017
             r0 = 1
             return r0
@@ -906,7 +906,7 @@ private class SelectableAttachment {
         throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.ui.render.WorldViewActivity.detailsVisible():Boolean")
     }
 
-    private Unit displayHUD(Int i) {
+     private fun displayHUD(i: Int) {
         Debug.Printf("Displaying HUD with ID %d", Integer.valueOf(i))
         this.displayedHUDid = i
         this.mGLView.setDisplayedHUDid(i)
@@ -925,11 +925,11 @@ private class SelectableAttachment {
     }
 
     /* access modifiers changed from: private */
-    fun dragSelectorSetRawPosition(Int i, Int i2) {
-        Int[] iArr = Int[2]
+    fun dragSelectorSetRawPosition(i: Int, i2: Int) {
+        val iArr: IntArray = Int[2]
         this.dragPointerLayout.getLocationOnScreen(iArr)
-        Int width = i - (this.dragPointer.getWidth() / 2)
-        Int height = i2 - (this.dragPointer.getHeight() / 2)
+        val width: Int = i - (this.dragPointer.getWidth() / 2)
+        val height: Int = i2 - (this.dragPointer.getHeight() / 2)
         AbsoluteLayout.LayoutParams layoutParams = (AbsoluteLayout.LayoutParams) this.dragPointer.getLayoutParams()
         if (layoutParams != null) {
             layoutParams.x = Math.max(Math.min(width - iArr[0], this.dragPointerLayout.getWidth() - this.dragPointer.getWidth()), 0)
@@ -939,7 +939,7 @@ private class SelectableAttachment {
         }
     }
 
-    private Unit endDragSelection() {
+     private fun endDragSelection() {
         this.isDragging = false
         this.mGLView.setOwnAvatarHidden(false)
         updateObjectPanel()
@@ -947,17 +947,17 @@ private class SelectableAttachment {
         beginCountingObjectDeselect()
     }
 
-    private Unit enterCardboardView() {
+     private fun enterCardboardView() {
         if (ContextCompat.checkSelfPermission(this, "android.permission.RECORD_AUDIO") != 0) {
             Debug.Printf("Cardboard: audio permission not yet granted", Object[0])
-            ActivityCompat.requestPermissions(this, String[]{"android.permission.RECORD_AUDIO"}, 100)
+            ActivityCompat.requestPermissions(this, Array<String>{"android.permission.RECORD_AUDIO"}, 100)
             return
         }
         Debug.Printf("Cardboard: audio permission already granted", Object[0])
         startCardboardActivity()
     }
 
-    private Unit initContentView() {
+     private fun initContentView() {
         setContentView((Int) R.layout.world_view)
         ButterKnife.bind((Activity) this)
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar))
@@ -978,17 +978,17 @@ private class SelectableAttachment {
         this.voiceStatusView.setShowActiveChatterName(true)
         this.worldViewTouchReceiver.setOnTouchListener(this.worldViewTouchListener)
         this.objectControlsPanel.setVisibility(8)
-        View findViewById = findViewById(R.id.offline_notify_status_layout)
+        val findViewById: View = findViewById(R.id.offline_notify_status_layout)
         if (findViewById != null) {
             findViewById.setBackgroundColor(Color.argb(128, 0, 0, 0))
-            Int applyDimension = (Int) TypedValue.applyDimension(1, 10.0f, getResources().getDisplayMetrics())
+            val applyDimension: Int = (Int) TypedValue.applyDimension(1, 10.0f, getResources().getDisplayMetrics())
             findViewById.setPadding(applyDimension, applyDimension, applyDimension, applyDimension)
         }
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onAgentCircuit */
-    fun m836com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref0(SLAgentCircuit sLAgentCircuit) {
+    fun m836com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref0(sLAgentCircuit: SLAgentCircuit) {
         if (sLAgentCircuit != null) {
             this.avatarControl = sLAgentCircuit.getModules().avatarControl
             this.drawDistance = sLAgentCircuit.getModules().drawDistance
@@ -1011,9 +1011,9 @@ private class SelectableAttachment {
 
     /* access modifiers changed from: private */
     /* renamed from: onCurrentLocation */
-    fun m839com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref3(CurrentLocationInfo currentLocationInfo2) {
-        ParcelData parcelData = currentLocationInfo2 != null ? currentLocationInfo2.parcelData() : null
-        String name = parcelData != null ? parcelData.getName() : null
+    fun m839com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref3(currentLocationInfo2: CurrentLocationInfo) {
+        val parcelData: ParcelData = currentLocationInfo2 != null ? currentLocationInfo2.parcelData() : null
+        val name: String = parcelData != null ? parcelData.getName() : null
         if (name == null) {
             name = getString(R.string.name_loading_title)
         }
@@ -1022,13 +1022,13 @@ private class SelectableAttachment {
 
     /* access modifiers changed from: private */
     /* renamed from: onMyAvatarState */
-    fun m837com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref1(MyAvatarState myAvatarState2) {
+    fun m837com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref1(myAvatarState2: MyAvatarState) {
         updateObjectPanel()
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onPickedAvatarNameUpdated */
-    fun m842com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref6(ChatterNameRetriever chatterNameRetriever) {
+    fun m842com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref6(chatterNameRetriever: ChatterNameRetriever) {
         if (chatterNameRetriever == this.pickedAvatarNameRetriever) {
             updateObjectPanel()
         }
@@ -1036,11 +1036,11 @@ private class SelectableAttachment {
 
     /* access modifiers changed from: private */
     /* renamed from: onSelectedObjectProfile */
-    fun m838com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref2(SLObjectProfileData sLObjectProfileData) {
+    fun m838com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref2(sLObjectProfileData: SLObjectProfileData) {
         Debug.Printf("got selected object profile: %s", sLObjectProfileData)
         updateObjectPanel()
         if (sLObjectProfileData != null) {
-            SLAgentCircuit data = this.agentCircuit.getData()
+            val data: SLAgentCircuit = this.agentCircuit.getData()
             if (sLObjectProfileData.isPayable() && sLObjectProfileData.payInfo() == null && data != null) {
                 data.DoRequestPayPrice(sLObjectProfileData.objectUUID())
             }
@@ -1049,7 +1049,7 @@ private class SelectableAttachment {
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceActiveChatter */
-    fun m840com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref4(ChatterID chatterID) {
+    fun m840com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref4(chatterID: ChatterID) {
         if (this.voiceStatusView != null) {
             this.voiceStatusView.setChatterID(chatterID)
         }
@@ -1062,24 +1062,24 @@ private class SelectableAttachment {
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceChatInfo */
-    fun m841com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref5(VoiceChatInfo voiceChatInfo2) {
+    fun m841com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref5(voiceChatInfo2: VoiceChatInfo) {
     }
 
     /* access modifiers changed from: private */
-    fun selectByDragPointer(Int i, Int i2) {
-        Int[] iArr = Int[2]
+    fun selectByDragPointer(i: Int, i2: Int) {
+        val iArr: IntArray = Int[2]
         this.dragPointerLayout.getLocationOnScreen(iArr)
-        Int[] iArr2 = Int[2]
+        val iArr2: IntArray = Int[2]
         this.worldViewHolder.getLocationOnScreen(iArr2)
         this.mGLView.pickObjectHover((Float) (((iArr[0] + (this.dragPointer.getWidth() / 2)) + i) - iArr2[0]), (Float) (((iArr[1] + (this.dragPointer.getHeight() / 2)) + i2) - iArr2[1]))
     }
 
-    private Unit selectHUDtoDisplay() {
+     private fun selectHUDtoDisplay() {
         SLAttachmentPoint sLAttachmentPoint
-        ArrayList arrayList = ArrayList()
-        SLAgentCircuit data = this.agentCircuit.getData()
+        val arrayList: ArrayList = ArrayList()
+        val data: SLAgentCircuit = this.agentCircuit.getData()
         if (data != null) {
-            SLObjectAvatarInfo agentAvatar = data.getGridConnection().parcelInfo.getAgentAvatar()
+            val agentAvatar: SLObjectAvatarInfo = data.getGridConnection().parcelInfo.getAgentAvatar()
             if (agentAvatar != null) {
                 try {
                     for (SLObjectInfo sLObjectInfo : agentAvatar.treeNode) {
@@ -1098,7 +1098,7 @@ private class SelectableAttachment {
                 displayHUD(((SelectableAttachment) arrayList.get(0)).getLocalID())
                 return
             }
-            ArrayAdapter arrayAdapter = ArrayAdapter(this, 17367043, arrayList)
+            val arrayAdapter: ArrayAdapter = ArrayAdapter(this, 17367043, arrayList)
             AlertDialog.Builder builder = AlertDialog.Builder(this)
             builder.setTitle((Int) R.string.select_hud_title)
             builder.setAdapter(arrayAdapter, DialogInterface.OnClickListener(this, arrayList) {
@@ -1191,7 +1191,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
     }
 
-    private Unit showObjectInfo(SLObjectInfo sLObjectInfo) {
+     private fun showObjectInfo(sLObjectInfo: SLObjectInfo) {
         if (sLObjectInfo.getId() != null && this.userManager != null) {
             if (!sLObjectInfo.isAvatar()) {
                 DetailsActivity.showEmbeddedDetails(this, ObjectDetailsFragment.class, ObjectDetailsFragment.makeSelection(this.userManager.getUserID(), sLObjectInfo.localID))
@@ -1201,9 +1201,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
     }
 
-    private Unit startCardboardActivity() {
+     private fun startCardboardActivity() {
         if (this.userManager != null) {
-            Intent intent = Intent(this, CardboardTransitionActivity.class)
+            val intent: Intent = Intent(this, CardboardTransitionActivity.class)
             ActivityUtils.setActiveAgentID(intent, this.userManager.getUserID())
             intent.addFlags(16777216)
             startActivity(intent)
@@ -1218,7 +1218,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
     }
 
-    private Unit startFadingButtonsTimer() {
+     private fun startFadingButtonsTimer() {
         if (!this.buttonsFadeTimerStarted) {
             Debug.Printf("ButtonsFade: starting timer", Object[0])
             this.buttonsFadeTimerStarted = true
@@ -1226,28 +1226,28 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
     }
 
-    private Unit stopAvatarAnimations() {
+     private fun stopAvatarAnimations() {
         if (this.avatarControl != null) {
             this.avatarControl.StopAvatarAnimations()
         }
     }
 
-    private Unit takeScreenshot() {
+     private fun takeScreenshot() {
         Toast.makeText(this, R.string.taking_screenshot, 0).show()
         this.mGLView.takeScreenshot()
     }
 
-    private Unit touchObject(SLObjectInfo sLObjectInfo, ObjectIntersectInfo objectIntersectInfo) {
-        SLAgentCircuit data = this.agentCircuit.getData()
+     private fun touchObject(sLObjectInfo: SLObjectInfo, objectIntersectInfo: ObjectIntersectInfo) {
+        val data: SLAgentCircuit = this.agentCircuit.getData()
         if (data != null && sLObjectInfo != null) {
             if (!sLObjectInfo.isAvatar()) {
                 this.lastTouchUUID = sLObjectInfo.getId()
-                Boolean z = false
+                val z: Boolean = false
                 if (objectIntersectInfo != null) {
                     z = objectIntersectInfo.intersectInfo.faceKnown
                 }
                 if (z) {
-                    LLVector3 absolutePosition = sLObjectInfo.getAbsolutePosition()
+                    val absolutePosition: LLVector3 = sLObjectInfo.getAbsolutePosition()
                     data.TouchObjectFace(sLObjectInfo, objectIntersectInfo.intersectInfo.faceID, absolutePosition.x, absolutePosition.y, absolutePosition.z, objectIntersectInfo.intersectInfo.u, objectIntersectInfo.intersectInfo.v, objectIntersectInfo.intersectInfo.s, objectIntersectInfo.intersectInfo.t)
                     return
                 }
@@ -1276,7 +1276,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     /* JADX WARNING: Removed duplicated region for block: B:94:0x012f  */
     /* JADX WARNING: Removed duplicated region for block: B:99:0x013b  */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    private Unit updateObjectPanel() {
+     private fun updateObjectPanel() {
         /*
             r12 = this
             com.lumiyaviewer.lumiya.react.SubscriptionData<com.lumiyaviewer.lumiya.react.SubscriptionSingleKey, com.lumiyaviewer.lumiya.slproto.users.manager.MyAvatarState> r0 = r12.myAvatarState
@@ -1290,27 +1290,27 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             r8 = r2
         L_0x0014:
             if (r0 == 0) goto L_0x0147
-            Boolean r2 = r0.isSitting()
+            val r2: Boolean = r0.isSitting()
             r7 = r2
         L_0x001b:
             if (r0 == 0) goto L_0x014b
-            Boolean r2 = r0.hasHUDs()
+            val r2: Boolean = r0.hasHUDs()
             r6 = r2
         L_0x0022:
             if (r0 == 0) goto L_0x014f
-            Boolean r2 = r0.isFlying()
+            val r2: Boolean = r0.isFlying()
             r5 = r2
         L_0x0029:
             if (r1 == 0) goto L_0x0153
             com.lumiyaviewer.lumiya.slproto.modules.SLModules r2 = r1.getModules()
             com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVController r2 = r2.rlvController
-            Boolean r2 = r2.canStandUp()
+            val r2: Boolean = r2.canStandUp()
             r4 = r2
         L_0x0036:
             if (r1 == 0) goto L_0x0157
             com.lumiyaviewer.lumiya.slproto.modules.SLModules r1 = r1.getModules()
             com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVController r1 = r1.rlvController
-            Boolean r1 = r1.canSit()
+            val r1: Boolean = r1.canSit()
         L_0x0042:
             com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r2 = r12.pickedObject
             if (r2 == 0) goto L_0x015a
@@ -1318,7 +1318,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         L_0x0047:
             java.lang.String r3 = "isSitting %b, isFlying %b, hasHUDs %b, isDragging %b"
             r9 = 4
-            java.lang.Object[] r9 = java.lang.Object[r9]
+            java.lang.Array<Any> r9 = java.lang.Object[r9]
             java.lang.Boolean r10 = java.lang.Boolean.valueOf(r7)
             r11 = 0
             r9[r11] = r10
@@ -1328,19 +1328,19 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             java.lang.Boolean r10 = java.lang.Boolean.valueOf(r6)
             r11 = 2
             r9[r11] = r10
-            Boolean r10 = r12.isDragging
+            val r10: Boolean = r12.isDragging
             java.lang.Boolean r10 = java.lang.Boolean.valueOf(r10)
             r11 = 3
             r9[r11] = r10
             com.lumiyaviewer.lumiya.Debug.Printf(r3, r9)
             android.view.ViewGroup r9 = r12.dragPointerLayout
-            Boolean r3 = r12.isDragging
+            val r3: Boolean = r12.isDragging
             if (r3 == 0) goto L_0x015d
             r3 = 0
         L_0x0075:
             r9.setVisibility(r3)
             android.view.View r9 = r12.dragPointer
-            Boolean r3 = r12.isDragging
+            val r3: Boolean = r12.isDragging
             if (r3 == 0) goto L_0x0160
             r3 = 0
         L_0x007f:
@@ -1350,14 +1350,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             r3 = r8 ^ 1
             if (r3 == 0) goto L_0x0094
         L_0x008a:
-            Boolean r3 = r12.camButtonEnabled
+            val r3: Boolean = r12.camButtonEnabled
             if (r3 == 0) goto L_0x0163
-            Boolean r3 = r12.manualCamMode
+            val r3: Boolean = r12.manualCamMode
         L_0x0090:
             r3 = r3 ^ 1
             if (r3 != 0) goto L_0x009a
         L_0x0094:
-            Boolean r3 = r12.isDragging
+            val r3: Boolean = r12.isDragging
             if (r3 != 0) goto L_0x009a
             if (r2 == 0) goto L_0x0166
         L_0x009a:
@@ -1369,14 +1369,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             r3 = r8 ^ 1
             if (r3 == 0) goto L_0x00b1
         L_0x00a7:
-            Boolean r3 = r12.camButtonEnabled
+            val r3: Boolean = r12.camButtonEnabled
             if (r3 == 0) goto L_0x0169
-            Boolean r3 = r12.manualCamMode
+            val r3: Boolean = r12.manualCamMode
         L_0x00ad:
             r3 = r3 ^ 1
             if (r3 != 0) goto L_0x00b7
         L_0x00b1:
-            Boolean r3 = r12.isDragging
+            val r3: Boolean = r12.isDragging
             if (r3 != 0) goto L_0x00b7
             if (r2 == 0) goto L_0x016c
         L_0x00b7:
@@ -1386,7 +1386,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             android.widget.ImageButton r9 = r12.buttonStandUp
             if (r4 == 0) goto L_0x016f
             if (r7 == 0) goto L_0x016f
-            Boolean r3 = r12.isDragging
+            val r3: Boolean = r12.isDragging
             r3 = r3 ^ 1
             if (r3 == 0) goto L_0x016f
             r3 = 0
@@ -1394,7 +1394,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             r9.setVisibility(r3)
             android.widget.Button r9 = r12.buttonHUD
             if (r6 == 0) goto L_0x0173
-            Boolean r3 = r12.isDragging
+            val r3: Boolean = r12.isDragging
             r3 = r3 ^ 1
             if (r3 == 0) goto L_0x0173
             if (r8 == 0) goto L_0x0173
@@ -1405,9 +1405,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             if (r5 == 0) goto L_0x00e1
             if (r8 != 0) goto L_0x00e9
         L_0x00e1:
-            Boolean r3 = r12.camButtonEnabled
+            val r3: Boolean = r12.camButtonEnabled
             if (r3 == 0) goto L_0x0177
-            Boolean r3 = r12.manualCamMode
+            val r3: Boolean = r12.manualCamMode
             if (r3 == 0) goto L_0x0177
         L_0x00e9:
             r3 = 0
@@ -1416,9 +1416,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             android.widget.ImageButton r6 = r12.buttonStopFlying
             if (r5 == 0) goto L_0x017e
             if (r8 == 0) goto L_0x017e
-            Boolean r3 = r12.camButtonEnabled
+            val r3: Boolean = r12.camButtonEnabled
             if (r3 == 0) goto L_0x017b
-            Boolean r3 = r12.manualCamMode
+            val r3: Boolean = r12.manualCamMode
         L_0x00f9:
             r3 = r3 ^ 1
             if (r3 == 0) goto L_0x017e
@@ -1426,12 +1426,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         L_0x00fe:
             r6.setVisibility(r3)
             android.widget.ImageButton r5 = r12.buttonCamOn
-            Boolean r3 = r12.camButtonEnabled
+            val r3: Boolean = r12.camButtonEnabled
             if (r3 == 0) goto L_0x0182
-            Boolean r3 = r12.manualCamMode
+            val r3: Boolean = r12.manualCamMode
             r3 = r3 ^ 1
             if (r3 == 0) goto L_0x0182
-            Boolean r3 = r12.isDragging
+            val r3: Boolean = r12.isDragging
             r3 = r3 ^ 1
             if (r3 == 0) goto L_0x0182
             r3 = r2 ^ 1
@@ -1440,11 +1440,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         L_0x0118:
             r5.setVisibility(r3)
             android.widget.ImageButton r3 = r12.buttonCamOff
-            Boolean r5 = r12.camButtonEnabled
+            val r5: Boolean = r12.camButtonEnabled
             if (r5 == 0) goto L_0x0185
-            Boolean r5 = r12.manualCamMode
+            val r5: Boolean = r12.manualCamMode
             if (r5 == 0) goto L_0x0185
-            Boolean r5 = r12.isDragging
+            val r5: Boolean = r12.isDragging
             r5 = r5 ^ 1
             if (r5 == 0) goto L_0x0185
             r2 = r2 ^ 1
@@ -1532,12 +1532,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             r3 = 0
             r2.setVisibility(r3)
             com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r2 = r12.pickedObject
-            Boolean r2 = r2.isTouchable()
+            val r2: Boolean = r2.isTouchable()
             com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r3 = r12.pickedObject
-            Boolean r3 = r3.isAvatar()
+            val r3: Boolean = r3.isAvatar()
             if (r3 == 0) goto L_0x01a3
             com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r3 = r12.pickedObject
-            Boolean r3 = r3.hasTouchableChildren()
+            val r3: Boolean = r3.hasTouchableChildren()
             r2 = r2 | r3
         L_0x01a3:
             android.widget.ImageButton r3 = r12.objectTouchButton
@@ -1546,11 +1546,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         L_0x01a8:
             r3.setVisibility(r2)
             com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r2 = r12.pickedObject
-            Boolean r3 = r2.isAvatar()
+            val r3: Boolean = r2.isAvatar()
             if (r7 == 0) goto L_0x0222
             com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r2 = r12.pickedObject
-            Int r2 = r2.localID
-            Int r0 = r0.sittingOn()
+            val r2: Int = r2.localID
+            val r0: Int = r0.sittingOn()
             if (r2 != r0) goto L_0x0222
             r0 = 1
         L_0x01be:
@@ -1583,10 +1583,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             r1.setVisibility(r0)
             android.widget.ImageButton r1 = r12.objectPayButton
             com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r0 = r12.pickedObject
-            Boolean r0 = r0.isPayable()
+            val r0: Boolean = r0.isPayable()
             if (r0 != 0) goto L_0x01f8
             com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r0 = r12.pickedObject
-            Byte r0 = r0.saleType
+            val r0: Byte = r0.saleType
             if (r0 == 0) goto L_0x0234
         L_0x01f8:
             r0 = 0
@@ -1594,7 +1594,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             r1.setVisibility(r0)
             r1 = 0
             com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r0 = r12.pickedObject
-            Boolean r0 = r0.isAvatar()
+            val r0: Boolean = r0.isAvatar()
             if (r0 == 0) goto L_0x0237
             com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever r0 = r12.pickedAvatarNameRetriever
             if (r0 == 0) goto L_0x0264
@@ -1643,7 +1643,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             java.util.UUID r2 = r0.objectUUID()
             com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r3 = r12.pickedObject
             java.util.UUID r3 = r3.getId()
-            Boolean r2 = com.google.common.base.Objects.equal(r2, r3)
+            val r2: Boolean = com.google.common.base.Objects.equal(r2, r3)
             if (r2 == 0) goto L_0x0262
             com.google.common.base.Optional r0 = r0.name()
             java.lang.Object r0 = r0.orNull()
@@ -1663,17 +1663,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.ui.render.WorldViewActivity.updateObjectPanel():Unit")
     }
 
-    private Unit updateSimTimeOverride() {
+     private fun updateSimTimeOverride() {
         if (this.mGLView != null) {
-            GlobalOptions instance = GlobalOptions.getInstance()
+            val instance: GlobalOptions = GlobalOptions.getInstance()
             this.mGLView.setForcedTime(instance.getForceDaylightTime(), instance.getForceDaylightHour())
         }
     }
 
-    private Unit updateSplitScreenLayout() {
-        Int i = 0
-        Fragment findFragmentById = getSupportFragmentManager().findFragmentById(R.id.details)
-        Object[] objArr = Object[3]
+     private fun updateSplitScreenLayout() {
+        val i: Int = 0
+        val findFragmentById: Fragment = getSupportFragmentManager().findFragmentById(R.id.details)
+        val objArr: Array<Any> = Object[3]
         objArr[0] = Boolean.valueOf(this.isSplitScreen)
         objArr[1] = Boolean.valueOf(findFragmentById != null)
         objArr[2] = Boolean.valueOf(findFragmentById != null ? findFragmentById.isDetached() : false)
@@ -1684,14 +1684,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             this.detailsContainer.setVisibility(0)
             this.worldOverlaysContainer.setVisibility(this.isSplitScreen ? 0 : 8)
         }
-        View view = this.objectPopupLeftSpacer
+        val view: View = this.objectPopupLeftSpacer
         if (!this.isSplitScreen) {
             i = 8
         }
         view.setVisibility(i)
     }
 
-    public Boolean dispatchKeyEvent(KeyEvent keyEvent) {
+     public fun dispatchKeyEvent(keyEvent: KeyEvent): Boolean {
         if (this.detailsContainer.getVisibility() == 0) {
             return super.dispatchKeyEvent(keyEvent)
         }
@@ -1760,7 +1760,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     @EventHandler
-    fun handleBakingProgressEvent(SLBakingProgressEvent sLBakingProgressEvent) {
+    fun handleBakingProgressEvent(sLBakingProgressEvent: SLBakingProgressEvent) {
         if (sLBakingProgressEvent.first) {
             Toast.makeText(this, "Updating avatar appearance...", 0).show()
         }
@@ -1772,7 +1772,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
     }
 
-    fun handlePickedObject(ObjectIntersectInfo objectIntersectInfo) {
+    fun handlePickedObject(objectIntersectInfo: ObjectIntersectInfo) {
         this.pickedIntersectInfo = objectIntersectInfo
         this.pickedObject = objectIntersectInfo != null ? objectIntersectInfo.objInfo : null
         if (this.pickedObject != null) {
@@ -1890,7 +1890,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     /* access modifiers changed from: protected */
-    public Boolean isRootDetailsFragment(Class<? : Fragment> cls) {
+     public fun isRootDetailsFragment(cls: Class<? : Fragment>): Boolean {
         return cls == ContactsFragment.class || cls == ChatFragment.class || cls == ObjectDetailsFragment.class || cls == OutfitsFragment.class || cls == UserProfileFragment.class
     }
 
@@ -1918,13 +1918,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
     }
 
-    public Int mapThemeResourceId(Int i) {
+     public fun mapThemeResourceId(i: Int): Int {
         return i == 2131427372 ? R.style.Theme_Linkpoint_Light_NoActionBar : i == 2131427375 ? R.style.Theme_Linkpoint_Pink_NoActionBar : R.style.Theme_Linkpoint_NoActionBar
     }
 
-    fun moveTouchEvent(Int i, MotionEvent motionEvent) {
-        Float f = 1.0f
-        Float f2 = -1.0f
+    fun moveTouchEvent(i: Int, motionEvent: MotionEvent) {
+        val f: Float = 1.0f
+        val f2: Float = -1.0f
         if (this.avatarControl == null) {
             return
         }
@@ -1938,8 +1938,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
                 }
                 return
             }
-            Float f3 = (i & 16) != 0 ? -1.0f : (i & 8) != 0 ? 1.0f : 0.0f
-            Float f4 = (i & 2) != 0 ? 1.0f : 0.0f
+            val f3: Float = (i & 16) != 0 ? -1.0f : (i & 8) != 0 ? 1.0f : 0.0f
+            val f4: Float = (i & 2) != 0 ? 1.0f : 0.0f
             if ((i & 4) != 0) {
                 f4 = -1.0f
             }
@@ -1982,13 +1982,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
     }
 
-    fun onConfigurationChanged(Configuration configuration) {
+    override fun onConfigurationChanged(configuration: Configuration) {
         super.onConfigurationChanged(configuration)
         this.isSplitScreen = LinkpointApp.isSplitScreenNeeded(this)
         updateSplitScreenLayout()
     }
 
-    fun onCreate(Bundle bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         this.userManager = ActivityUtils.getUserManager(getIntent())
         if (this.userManager == null) {
@@ -2004,7 +2004,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         initContentView()
         this.fadingTextViewLog = FadingTextViewLog(this.userManager, this, this.chatsOverlayLayout, Color.rgb(192, 192, 192), Color.argb(160, 0, 0, 0))
         if (Build.VERSION.SDK_INT >= 12) {
-            this.buttonsFadeAnimator = ValueAnimator.ofFloat(Float[]{0.0f, 1.0f})
+            this.buttonsFadeAnimator = ValueAnimator.ofFloat(FloatArray{0.0f, 1.0f})
             this.buttonsFadeAnimator.setDuration(1000)
             this.buttonsFadeAnimator.addUpdateListener(ValueAnimator.AnimatorUpdateListener(this) {
 
@@ -2088,14 +2088,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         startFadingButtonsTimer()
     }
 
-    public Boolean onCreateOptionsMenu(Menu menu) {
+     public override fun onCreateOptionsMenu(menu: Menu): Boolean {
         super.onCreateOptionsMenu(menu)
         getMenuInflater().inflate(R.menu.world_view_menu, menu)
         return true
     }
 
     /* access modifiers changed from: protected */
-    public Boolean onDetailsStackEmpty() {
+     public fun onDetailsStackEmpty(): Boolean {
         if (super.onDetailsStackEmpty()) {
             return true
         }
@@ -2108,9 +2108,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         return false
     }
 
-    public Intent onGetNotifyCaptureIntent(UnreadNotificationInfo unreadNotificationInfo, Intent intent) {
+     public fun onGetNotifyCaptureIntent(unreadNotificationInfo: UnreadNotificationInfo, intent: Intent): Intent {
         Debug.Printf("NotifyCapture: returning intent", Object[0])
-        Intent intent2 = Intent(this, WorldViewActivity.class)
+        val intent2: Intent = Intent(this, WorldViewActivity.class)
         intent2.putExtras(intent)
         intent2.putExtra(FROM_NOTIFICATION_TAG, true)
         intent2.addFlags(536870912)
@@ -2134,14 +2134,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     /* access modifiers changed from: protected */
-    fun onNewIntent(Intent intent) {
+    fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         Debug.Printf("NotifyCapture: got newIntent: %s", intent)
         this.mHandler.post(this.buttonsRestoreTask)
         beginCountingButtonsFade()
         beginCountingObjectDeselect()
         if (intent.hasExtra(FROM_NOTIFICATION_TAG)) {
-            Bundle bundleExtra = intent.hasExtra(MasterDetailsActivity.INTENT_SELECTION_KEY) ? intent.getBundleExtra(MasterDetailsActivity.INTENT_SELECTION_KEY) : null
+            val bundleExtra: Bundle = intent.hasExtra(MasterDetailsActivity.INTENT_SELECTION_KEY) ? intent.getBundleExtra(MasterDetailsActivity.INTENT_SELECTION_KEY) : null
             if (bundleExtra != null) {
                 DetailsActivity.showEmbeddedDetails(this, ChatFragment.class, bundleExtra)
             } else if (this.userManager != null) {
@@ -2168,13 +2168,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     fun onObjectPayButton() {
         SLObjectProfileData data
         if (this.pickedObject != null) {
-            String name = this.pickedObject.getName()
+            val name: String = this.pickedObject.getName()
             if (Strings.isNullOrEmpty(name)) {
                 name = getString(R.string.object_name_loading)
             }
             if (this.pickedObject.saleType != 0) {
                 AlertDialog.Builder builder = AlertDialog.Builder(this)
-                builder.setMessage((CharSequence) String.format(getString(R.string.object_buy_confirm), Object[]{name, Integer.valueOf(this.pickedObject.salePrice)})).setCancelable(false).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
+                builder.setMessage((CharSequence) String.format(getString(R.string.object_buy_confirm), Array<Any>{name, Integer.valueOf(this.pickedObject.salePrice)})).setCancelable(false).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
 
                     /* renamed from: -$f0 */
                     private val /* synthetic */ Object f534$f0
@@ -2287,7 +2287,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
     }
 
-    public Boolean onOptionsItemSelected(MenuItem menuItem) {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_chat:
                 DetailsActivity.showEmbeddedDetails(this, ContactsFragment.class, ActivityUtils.makeFragmentArguments(this.userManager.getUserID(), (Bundle) null))
@@ -2316,7 +2316,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
     }
 
-    fun onPause() {
+    override fun onPause() {
         Debug.Printf("WorldViewActivity: onPause", Object[0])
         if (this.userManager != null) {
             this.userManager.getUnreadNotificationManager().clearNotifyCapture(this)
@@ -2344,25 +2344,25 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         super.onPause()
     }
 
-    public Boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem findItem = menu.findItem(R.id.item_cardboard_view)
+     public override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        val findItem: MenuItem = menu.findItem(R.id.item_cardboard_view)
         if (findItem != null) {
             findItem.setVisible(Build.VERSION.SDK_INT >= 23)
         }
         return super.onPrepareOptionsMenu(menu)
     }
 
-    fun onRequestPermissionsResult(Int i, String[] strArr, Int[] iArr) {
+    override fun onRequestPermissionsResult(i: Int, strArr: Array<String>, iArr: IntArray) {
         Debug.Printf("Cardboard: onRequestPermissionResult, code %d", Integer.valueOf(i))
         if (i == 100) {
             startCardboardActivity()
         }
     }
 
-    fun onResume() {
+    override fun onResume() {
         super.onResume()
         Debug.Printf("WorldViewActivity: onResume", Object[0])
-        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext())
+        val defaultSharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext())
         this.chatOver3D = defaultSharedPreferences.getBoolean("chat_over_3d", true)
         this.arrowsToTurn = defaultSharedPreferences.getBoolean("arrows_rotate_avatar", false)
         this.camButtonEnabled = defaultSharedPreferences.getBoolean("cam_button_enabled", false)
@@ -2372,7 +2372,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             this.currentLocationInfo.subscribe(this.userManager.getCurrentLocationInfo(), SubscriptionSingleKey.Value)
             this.userManager.getChatterList().getActiveChattersManager().getChatEventBus().register(this.chatEventHandler)
         }
-        RenderSettings renderSettings = RenderSettings(defaultSharedPreferences)
+        val renderSettings: RenderSettings = RenderSettings(defaultSharedPreferences)
         this.prefDrawDistance = renderSettings.drawDistance
         this.localDrawingEnabled = true
         if (this.drawDistance != null) {
@@ -2391,7 +2391,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     /* access modifiers changed from: protected */
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         if (this.userManager != null) {
             this.agentCircuit.subscribe(UserManager.agentCircuits(), this.userManager.getUserID())
@@ -2401,7 +2401,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     /* access modifiers changed from: protected */
-    fun onStop() {
+    override fun onStop() {
         this.agentCircuit.unsubscribe()
         this.voiceActiveChatter.unsubscribe()
         this.voiceChatInfo.unsubscribe()
@@ -2417,7 +2417,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
     }
 
-    public Boolean onTouch(View view, MotionEvent motionEvent) {
+     public override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
         switch (view.getId()) {
             case R.id.button_move_forward:
                 moveTouchEvent(2, motionEvent)
@@ -2499,19 +2499,19 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         beginCountingObjectDeselect()
     }
 
-    fun processScreenshot(Bitmap bitmap) {
+    fun processScreenshot(bitmap: Bitmap) {
         try {
-            File file = File(getCacheDir(), "screenshots")
+            val file: File = File(getCacheDir(), "screenshots")
             file.mkdirs()
-            File file2 = File(file, "Linkpoint-" + SimpleDateFormat("yyyy-MM-dd-HHmmss", Locale.US).format(Date()) + ".jpg")
-            FileOutputStream fileOutputStream = FileOutputStream(file2)
+            val file2: File = File(file, "Linkpoint-" + SimpleDateFormat("yyyy-MM-dd-HHmmss", Locale.US).format(Date()) + ".jpg")
+            val fileOutputStream: FileOutputStream = FileOutputStream(file2)
             bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fileOutputStream)
             fileOutputStream.close()
-            Uri uriForFile = FileProvider.getUriForFile(this, "com.lumiyaviewer.files", file2)
-            SLAgentCircuit data = this.agentCircuit.getData()
-            String agentSLURL = data != null ? data.getAgentSLURL() : null
-            String string = agentSLURL != null ? getString(R.string.screenshot_taken_slurl, Object[]{agentSLURL}) : getString(R.string.screenshot_taken_lumiya)
-            Intent intent = Intent()
+            val uriForFile: Uri = FileProvider.getUriForFile(this, "com.lumiyaviewer.files", file2)
+            val data: SLAgentCircuit = this.agentCircuit.getData()
+            val agentSLURL: String = data != null ? data.getAgentSLURL() : null
+            val string: String = agentSLURL != null ? getString(R.string.screenshot_taken_slurl, Array<Any>{agentSLURL}) : getString(R.string.screenshot_taken_lumiya)
+            val intent: Intent = Intent()
             intent.setAction("android.intent.action.SEND")
             intent.putExtra("android.intent.extra.TEXT", string)
             intent.putExtra("android.intent.extra.STREAM", uriForFile)
@@ -2525,7 +2525,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     fun rendererAdvancedRenderingChanged() {
-        Intent intent = getIntent()
+        val intent: Intent = getIntent()
         finish()
         startActivity(intent)
     }
@@ -2548,11 +2548,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
     }
 
-    fun setLastTouchUUID(UUID uuid) {
+    fun setLastTouchUUID(uuid: UUID) {
         this.lastTouchUUID = uuid
     }
 
-    fun setTouchedObject(SLObjectInfo sLObjectInfo) {
+    fun setTouchedObject(sLObjectInfo: SLObjectInfo) {
         if (sLObjectInfo != null) {
             this.lastTouchUUID = sLObjectInfo.getId()
             if (this.lastTouchUUID != null) {
@@ -2561,7 +2561,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
     }
 
-    public Fragment showDetailsFragment(Class<? : Fragment> cls, Intent intent, Bundle bundle) {
+     public fun showDetailsFragment(cls: Class<? : Fragment>, intent: Intent, bundle: Bundle): Fragment {
         this.detailsContainer.setVisibility(0)
         if (!this.isSplitScreen) {
             this.worldOverlaysContainer.setVisibility(8)

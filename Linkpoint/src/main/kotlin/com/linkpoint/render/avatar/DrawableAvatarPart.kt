@@ -22,9 +22,9 @@ class DrawableAvatarPart : ResourceConsumer {
     private volatile SLAnimatedMeshData meshData
     private volatile Boolean meshDataUpdated
     private val Runnable meshUpdate = Runnable() {
-        fun run() {
+        override fun run() {
             GLTexture -get3
-            Float[] -get2
+            FloatArray -get2
             Debug.Printf("Avatar: meshUpdate entered for part %s", DrawableAvatarPart.this.faceIndex.toString())
             synchronized (DrawableAvatarPart.this.updateLock) {
                 -get3 = DrawableAvatarPart.this.rawTexture
@@ -32,7 +32,7 @@ class DrawableAvatarPart : ResourceConsumer {
             }
             if (-get2 != null && -get3 != null) {
                 Debug.Printf("Avatar: meshUpdate: part %s params %s", DrawableAvatarPart.this.faceIndex.toString(), Arrays.toString(-get2))
-                SLMeshData sLAnimatedMeshData = SLAnimatedMeshData(DrawableAvatarPart.this.referenceMeshData, DrawableAvatarPart.this.hasGL20)
+                val sLAnimatedMeshData: SLMeshData = SLAnimatedMeshData(DrawableAvatarPart.this.referenceMeshData, DrawableAvatarPart.this.hasGL20)
                 DrawableAvatarPart.this.referenceMeshData.applyMorphData(sLAnimatedMeshData, -get2, -get3)
                 synchronized (DrawableAvatarPart.this.updateLock) {
                     DrawableAvatarPart.this.meshData = sLAnimatedMeshData
@@ -41,7 +41,7 @@ class DrawableAvatarPart : ResourceConsumer {
             }
         }
     }
-    private volatile Float[] partMorphParams
+    private volatile FloatArray partMorphParams
     private volatile OpenJPEG rawTexture
     private val SLPolyMesh referenceMeshData
     private volatile DrawableFaceTexture texture
@@ -55,11 +55,11 @@ class DrawableAvatarPart : ResourceConsumer {
         this.hasGL20 = z
     }
 
-    private Unit RequestMeshUpdate() {
+    private fun RequestMeshUpdate() {
         PrimComputeExecutor.getInstance().execute(this.meshUpdate)
     }
 
-    val Unit GLDraw(RenderContext renderContext, Float[] fArr, Boolean z) {
+    val Unit GLDraw(RenderContext renderContext, FloatArray fArr, Boolean z) {
         SLAnimatedMeshData sLAnimatedMeshData
         DrawableFaceTexture drawableFaceTexture
         if (renderContext.hasGL20) {
@@ -82,9 +82,9 @@ class DrawableAvatarPart : ResourceConsumer {
         }
     }
 
-    fun OnResourceReady(Object obj, Boolean z) {
-        String str = "Avatar: (requesting meshUpdate) face %s texture %s"
-        Object[] objArr = Object[2]
+    fun OnResourceReady(obj: Object, z: Boolean) {
+        val str: String = "Avatar: (requesting meshUpdate) face %s texture %s"
+        val objArr: Array<Any> = Object[2]
         objArr[0] = this.faceIndex.toString()
         objArr[1] = obj != null ? obj.toString() : "null"
         Debug.Printf(str, objArr)
@@ -96,11 +96,11 @@ class DrawableAvatarPart : ResourceConsumer {
         }
     }
 
-    public AvatarTextureFaceIndex getFaceIndex() {
+     public fun getFaceIndex(): AvatarTextureFaceIndex {
         return this.faceIndex
     }
 
-    Unit setPartMorphParams(Float[] fArr) {
+     fun setPartMorphParams(fArr: FloatArray) {
         Int equals
         synchronized (this.updateLock) {
             equals = Arrays.equals(this.partMorphParams, fArr) ^ 1
@@ -117,7 +117,7 @@ class DrawableAvatarPart : ResourceConsumer {
     /* DevToolsApp WARNING: Missing block: B:31:0x0065, code:
             return
      */
-    Unit setTexture(com.lumiyaviewer.lumiya.render.glres.textures.GLTextureCache glTextureCache, UUID textureUUID) {
+     fun setTexture(com.lumiyaviewer.lumiya.render.glres.textures.GLTextureCache glTextureCache, textureUUID: UUID) {
         synchronized (this.updateLock) {
             // Log texture change for debugging
             Debug.Printf("Avatar: face %s texture %s", 

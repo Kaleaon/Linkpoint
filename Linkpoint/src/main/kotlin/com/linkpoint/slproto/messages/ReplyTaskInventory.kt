@@ -9,7 +9,7 @@ class ReplyTaskInventory : SLMessage() {
 
     @JvmStatic
     class InventoryData {
-        public Byte[] Filename
+        public ByteArray Filename
         public Int Serial
         public UUID TaskID
     }
@@ -18,15 +18,15 @@ class ReplyTaskInventory : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.InventoryData_Field.Filename.length + 19 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleReplyTaskInventory(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 34)
@@ -35,7 +35,7 @@ class ReplyTaskInventory : SLMessage() {
         packVariable(byteBuffer, this.InventoryData_Field.Filename, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.InventoryData_Field.TaskID = unpackUUID(byteBuffer)
         this.InventoryData_Field.Serial = unpackShort(byteBuffer)
         this.InventoryData_Field.Filename = unpackVariable(byteBuffer, 1)

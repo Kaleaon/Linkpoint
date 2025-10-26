@@ -8,34 +8,34 @@ import java.util.ArrayList
 class PrimPath {
     private const val MIN_DETAIL_FACES: Int = 6
     @JvmStatic
-private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 0.5f}
-    Boolean Dirty = true
-    Boolean Open = false
-    ArrayList<PathPoint> Path = ArrayList<>()
-    Float Step = 1.0f
-    Int Total = 0
+private FloatArray tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 0.5f}
+    val Dirty: Boolean = true
+    val Open: Boolean = false
+    val Path: ArrayList<PathPoint> = ArrayList<>()
+    val Step: Float = 1.0f
+    val Total: Int = 0
 
     @JvmStatic
     class PathPoint {
-        Float TexT = 0.0f
-        LLVector3 pos = LLVector3()
-        LLQuaternion rot = LLQuaternion()
-        LLVector2 scale = LLVector2()
+        val TexT: Float = 0.0f
+        val pos: LLVector3 = LLVector3()
+        val rot: LLQuaternion = LLQuaternion()
+        val scale: LLVector2 = LLVector2()
     }
 
-    private Unit genNGon(PrimPathParams primPathParams, Int i, Float f, Float f2, Float f3) {
+     private fun genNGon(primPathParams: PrimPathParams, i: Int, f: Float, f2: Float, f3: Float) {
         Float f4
         Float f5
         Float f6
         Float f7
         Float f8
-        Float f9 = primPathParams.Revolutions
-        Float f10 = primPathParams.Skew
-        Float abs = Math.abs(f10)
-        Float f11 = primPathParams.ScaleX * (1.0f - abs)
-        Float f12 = primPathParams.ScaleY
-        Float f13 = 1.0f - primPathParams.TaperX
-        Float f14 = 1.0f - primPathParams.TaperY
+        val f9: Float = primPathParams.Revolutions
+        val f10: Float = primPathParams.Skew
+        val abs: Float = Math.abs(f10)
+        val f11: Float = primPathParams.ScaleX * (1.0f - abs)
+        val f12: Float = primPathParams.ScaleY
+        val f13: Float = 1.0f - primPathParams.TaperX
+        val f14: Float = 1.0f - primPathParams.TaperY
         if (f13 > 1.0f) {
             f4 = 1.0f
             f5 = 2.0f - f13
@@ -50,30 +50,30 @@ private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 
             f6 = f14
             f7 = 1.0f
         }
-        Float f15 = 0.5f
+        val f15: Float = 0.5f
         if (i < 8) {
             f15 = tableScale[i]
         }
-        Float f16 = f15 * (1.0f - f12)
-        Float f17 = primPathParams.RadiusOffset
+        val f16: Float = f15 * (1.0f - f12)
+        val f17: Float = primPathParams.RadiusOffset
         if (f17 < 0.0f) {
             f8 = (f17 + 1.0f) * f16
         } else {
-            Float f18 = (1.0f - f17) * f16
+            val f18: Float = (1.0f - f17) * f16
             f8 = f16
             f16 = f18
         }
         this.Open = ((primPathParams.End * f2) - primPathParams.Begin < 1.0f || abs > 0.001f || Math.abs(f4 - f5) > 0.001f || Math.abs(f6 - f7) > 0.001f) ? true : Math.abs(f16 - f8) > 0.001f
-        LLQuaternion lLQuaternion = LLQuaternion()
-        LLQuaternion lLQuaternion2 = LLQuaternion()
-        LLVector3 lLVector3 = LLVector3(1.0f, 0.0f, 0.0f)
-        Float f19 = primPathParams.TwistBegin * f3
-        Float f20 = primPathParams.TwistEnd * f3
-        Float f21 = 1.0f / ((Float) i)
-        Float f22 = primPathParams.Begin
-        PathPoint pathPoint = PathPoint()
-        Float f23 = 6.2831855f * f9 * f22
-        Float sin = (Float) (Math.sin((Double) f23) * ((Double) PrimMath.lerp(f8, f16, f22)))
+        val lLQuaternion: LLQuaternion = LLQuaternion()
+        val lLQuaternion2: LLQuaternion = LLQuaternion()
+        val lLVector3: LLVector3 = LLVector3(1.0f, 0.0f, 0.0f)
+        val f19: Float = primPathParams.TwistBegin * f3
+        val f20: Float = primPathParams.TwistEnd * f3
+        val f21: Float = 1.0f / ((Float) i)
+        val f22: Float = primPathParams.Begin
+        val pathPoint: PathPoint = PathPoint()
+        val f23: Float = 6.2831855f * f9 * f22
+        val sin: Float = (Float) (Math.sin((Double) f23) * ((Double) PrimMath.lerp(f8, f16, f22)))
         pathPoint.pos.set(PrimMath.lerp(0.0f, primPathParams.ShearX, sin) + 0.0f + (PrimMath.lerp(-f10, f10, f22) * 0.5f), ((Float) (Math.cos((Double) f23) * ((Double) PrimMath.lerp(f8, f16, f22)))) + PrimMath.lerp(0.0f, primPathParams.ShearY, sin), sin)
         pathPoint.scale.x = PrimMath.lerp(f5, f4, f22) * f11
         pathPoint.scale.y = PrimMath.lerp(f7, f6, f22) * f12
@@ -83,10 +83,10 @@ private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 
         pathPoint.rot.setMul(lLQuaternion, lLQuaternion2)
         this.Path.add(pathPoint)
         for (Float f24 = ((Float) ((Int) ((f22 + f21) * ((Float) i)))) / ((Float) i); f24 < primPathParams.End; f24 += f21) {
-            PathPoint pathPoint2 = PathPoint()
-            Float f25 = 6.2831855f * f9 * f24
-            Float cos = (Float) (Math.cos((Double) f25) * ((Double) PrimMath.lerp(f8, f16, f24)))
-            Float sin2 = (Float) (Math.sin((Double) f25) * ((Double) PrimMath.lerp(f8, f16, f24)))
+            val pathPoint2: PathPoint = PathPoint()
+            val f25: Float = 6.2831855f * f9 * f24
+            val cos: Float = (Float) (Math.cos((Double) f25) * ((Double) PrimMath.lerp(f8, f16, f24)))
+            val sin2: Float = (Float) (Math.sin((Double) f25) * ((Double) PrimMath.lerp(f8, f16, f24)))
             pathPoint2.pos.set(PrimMath.lerp(0.0f, primPathParams.ShearX, sin2) + 0.0f + (PrimMath.lerp(-f10, f10, f24) * 0.5f), cos + PrimMath.lerp(0.0f, primPathParams.ShearY, sin2), sin2)
             pathPoint2.scale.x = PrimMath.lerp(f5, f4, f24) * f11
             pathPoint2.scale.y = PrimMath.lerp(f7, f6, f24) * f12
@@ -96,11 +96,11 @@ private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 
             pathPoint2.rot.setMul(lLQuaternion, lLQuaternion2)
             this.Path.add(pathPoint2)
         }
-        Float f26 = primPathParams.End
-        PathPoint pathPoint3 = PathPoint()
-        Float f27 = f9 * 6.2831855f * f26
-        Float cos2 = (Float) (Math.cos((Double) f27) * ((Double) PrimMath.lerp(f8, f16, f26)))
-        Float lerp = (Float) (((Double) PrimMath.lerp(f8, f16, f26)) * Math.sin((Double) f27))
+        val f26: Float = primPathParams.End
+        val pathPoint3: PathPoint = PathPoint()
+        val f27: Float = f9 * 6.2831855f * f26
+        val cos2: Float = (Float) (Math.cos((Double) f27) * ((Double) PrimMath.lerp(f8, f16, f26)))
+        val lerp: Float = (Float) (((Double) PrimMath.lerp(f8, f16, f26)) * Math.sin((Double) f27))
         pathPoint3.pos.set((PrimMath.lerp(-f10, f10, f26) * 0.5f) + PrimMath.lerp(0.0f, primPathParams.ShearX, lerp) + 0.0f, cos2 + PrimMath.lerp(0.0f, primPathParams.ShearY, lerp), lerp)
         pathPoint3.scale.x = PrimMath.lerp(f5, f4, f26) * f11
         pathPoint3.scale.y = PrimMath.lerp(f7, f6, f26) * f12
@@ -112,7 +112,7 @@ private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 
         this.Total = this.Path.size()
     }
 
-    public Boolean generate(PrimPathParams primPathParams, Float f, Int i, Boolean z, Int i2) {
+     public fun generate(primPathParams: PrimPathParams, f: Float, i: Int, z: Boolean, i2: Int): Boolean {
         if (!this.Dirty && (!z)) {
             return false
         }
@@ -124,7 +124,7 @@ private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 
         this.Open = true
         switch (primPathParams.CurveType & PrimProfileParams.LL_PCODE_HOLE_MASK) {
             case 32:
-                Int floor = (Int) Math.floor(Math.floor((Double) ((Math.abs(primPathParams.TwistBegin - primPathParams.TwistEnd) * 3.5f * (f - 0.5f)) + (6.0f * f))) * ((Double) primPathParams.Revolutions))
+                val floor: Int = (Int) Math.floor(Math.floor((Double) ((Math.abs(primPathParams.TwistBegin - primPathParams.TwistEnd) * 3.5f * (f - 0.5f)) + (6.0f * f))) * ((Double) primPathParams.Revolutions))
                 if (z) {
                     floor = i2
                 }
@@ -135,11 +135,11 @@ private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 
                     this.Open = false
                 }
                 genNGon(primPathParams, (Int) Math.floor((Double) (6.0f * f)), 0.0f, 1.0f, 1.0f)
-                Float size = 1.0f / ((Float) this.Path.size())
-                Int i3 = 0
-                Float f2 = 0.5f
+                val size: Float = 1.0f / ((Float) this.Path.size())
+                val i3: Int = 0
+                val f2: Float = 0.5f
                 while (true) {
-                    Int i4 = i3
+                    val i4: Int = i3
                     if (i4 >= this.Path.size()) {
                         break
                     } else {
@@ -152,8 +152,8 @@ private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 
                 this.Step = 1.0f / ((Float) 4)
                 this.Path.ensureCapacity(5)
                 for (Int i5 = 0; i5 < 5; i5++) {
-                    Float f3 = ((Float) i5) * this.Step
-                    PathPoint pathPoint = PathPoint()
+                    val f3: Float = ((Float) i5) * this.Step
+                    val pathPoint: PathPoint = PathPoint()
                     pathPoint.pos.set(0.0f, PrimMath.lerp(0.0f, (Float) ((-Math.sin((Double) (primPathParams.TwistEnd * 3.1415927f * f3))) * 0.5d), f3), PrimMath.lerp(-0.5f, (Float) (Math.cos((Double) (primPathParams.TwistEnd * 3.1415927f * f3)) * 0.5d), f3))
                     pathPoint.scale.x = PrimMath.lerp(1.0f, primPathParams.ScaleX, f3)
                     pathPoint.scale.y = PrimMath.lerp(1.0f, primPathParams.ScaleY, f3)
@@ -163,17 +163,17 @@ private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 
                 }
                 break
             default:
-                Int floor2 = ((Int) Math.floor((Double) (Math.abs(primPathParams.TwistBegin - primPathParams.TwistEnd) * 3.5f * (f - 0.5f)))) + 2
+                val floor2: Int = ((Int) Math.floor((Double) (Math.abs(primPathParams.TwistBegin - primPathParams.TwistEnd) * 3.5f * (f - 0.5f)))) + 2
                 if (floor2 < i + 2) {
                     floor2 = i + 2
                 }
                 this.Step = 1.0f / ((Float) (floor2 - 1))
                 this.Path.ensureCapacity(floor2)
-                LLVector2 beginScale = primPathParams.getBeginScale()
-                LLVector2 endScale = primPathParams.getEndScale()
+                val beginScale: LLVector2 = primPathParams.getBeginScale()
+                val endScale: LLVector2 = primPathParams.getEndScale()
                 for (Int i6 = 0; i6 < floor2; i6++) {
-                    Float lerp = PrimMath.lerp(primPathParams.Begin, primPathParams.End, ((Float) i6) * this.Step)
-                    PathPoint pathPoint2 = PathPoint()
+                    val lerp: Float = PrimMath.lerp(primPathParams.Begin, primPathParams.End, ((Float) i6) * this.Step)
+                    val pathPoint2: PathPoint = PathPoint()
                     pathPoint2.pos.set(PrimMath.lerp(0.0f, primPathParams.ShearX, lerp), PrimMath.lerp(0.0f, primPathParams.ShearY, lerp), lerp - 0.5f)
                     pathPoint2.rot.setQuat(PrimMath.lerp(primPathParams.TwistBegin * 3.1415927f, primPathParams.TwistEnd * 3.1415927f, lerp), 0.0f, 0.0f, 1.0f)
                     pathPoint2.scale.x = PrimMath.lerp(beginScale.x, endScale.x, lerp)

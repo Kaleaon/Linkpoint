@@ -13,7 +13,7 @@ class UUIDPool {
      * Get UUID from string, with caching
      */
     @JvmStatic
-    UUID getUUID(String uuidString) {
+     fun getUUID(uuidString: String): UUID {
         if (uuidString == null || uuidString.isEmpty()) {
             return UUID.randomUUID()
         }
@@ -32,7 +32,7 @@ class UUIDPool {
      * Generate random UUID
      */
     @JvmStatic
-    UUID generateUUID() {
+     fun generateUUID(): UUID {
         return UUID.randomUUID()
     }
     
@@ -40,7 +40,7 @@ class UUIDPool {
      * Clear UUID cache
      */
     @JvmStatic
-    Unit clearCache() {
+     fun clearCache() {
         uuidCache.clear()
     }
 }

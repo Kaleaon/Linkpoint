@@ -13,8 +13,8 @@ class ChatPass : SLMessage() {
     class ChatData {
         public Int Channel
         public UUID ID
-        public Byte[] Message
-        public Byte[] Name
+        public ByteArray Message
+        public ByteArray Name
         public UUID OwnerID
         public LLVector3 Position
         public Float Radius
@@ -27,15 +27,15 @@ class ChatPass : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.ChatData_Field.Name.length + 49 + 1 + 1 + 4 + 1 + 2 + this.ChatData_Field.Message.length + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleChatPass(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -17)
@@ -51,7 +51,7 @@ class ChatPass : SLMessage() {
         packVariable(byteBuffer, this.ChatData_Field.Message, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.ChatData_Field.Channel = unpackInt(byteBuffer)
         this.ChatData_Field.Position = unpackLLVector3(byteBuffer)
         this.ChatData_Field.ID = unpackUUID(byteBuffer)

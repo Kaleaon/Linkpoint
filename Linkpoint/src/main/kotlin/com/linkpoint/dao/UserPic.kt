@@ -1,7 +1,7 @@
 package com.linkpoint.dao
 
 class UserPic {
-    private Byte[] bitmap
+    private ByteArray bitmap
     private Long id
     private String uuid
 
@@ -9,33 +9,33 @@ class UserPic {
         this.id = l
     }
 
-    public UserPic(Long l, String str, Byte[] bArr) {
+    public UserPic(Long l, String str, ByteArray bArr) {
         this.id = l
         this.uuid = str
         this.bitmap = bArr
     }
 
-    public Byte[] getBitmap() {
+     public fun getBitmap(): ByteArray {
         return this.bitmap
     }
 
-    public Long getId() {
+     public fun getId(): Long {
         return this.id
     }
 
-    public String getUuid() {
+     public fun getUuid(): String {
         return this.uuid
     }
 
-    fun setBitmap(Byte[] bArr) {
+    fun setBitmap(bArr: ByteArray) {
         this.bitmap = bArr
     }
 
-    fun setId(Long l) {
+    fun setId(l: Long) {
         this.id = l
     }
 
-    fun setUuid(String str) {
+    fun setUuid(str: String) {
         this.uuid = str
     }
 }

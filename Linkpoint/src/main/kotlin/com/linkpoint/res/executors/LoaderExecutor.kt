@@ -20,7 +20,7 @@ private class InstanceHolder {
     }
 
     @JvmStatic
-    LoaderExecutor getInstance() {
+     fun getInstance(): LoaderExecutor {
         return InstanceHolder.Instance
     }
 }

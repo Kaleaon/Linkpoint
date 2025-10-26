@@ -18,23 +18,23 @@ class GLTerrainTextureCache : GLResourceCache()<TerrainPatchInfo, OpenJPEG, GLLo
     }
 
     /* access modifiers changed from: protected */
-    fun CancelRawResource(ResourceConsumer resourceConsumer) {
+    fun CancelRawResource(resourceConsumer: ResourceConsumer) {
         this.terrainTextureCache.CancelRequest(resourceConsumer)
     }
 
     /* access modifiers changed from: protected */
-    public Int GetResourceSize(OpenJPEG openJPEG) {
+    public fun GetResourceSize(openJPEG: OpenJPEG): Int {
         return openJPEG.getLoadedSize()
     }
 
     /* access modifiers changed from: protected */
-    public GLLoadedTexture LoadResource(TerrainPatchInfo terrainPatchInfo, OpenJPEG openJPEG, RenderContext renderContext) {
+    public fun LoadResource(terrainPatchInfo: TerrainPatchInfo, openJPEG: OpenJPEG, renderContext: RenderContext): GLLoadedTexture {
         Debug.Printf("Terrain: Loading baked texture into GL", Object[0])
         return GLLoadedTexture(renderContext, openJPEG)
     }
 
     /* access modifiers changed from: protected */
-    fun RequestRawResource(TerrainPatchInfo terrainPatchInfo, ResourceConsumer resourceConsumer) {
+    fun RequestRawResource(terrainPatchInfo: TerrainPatchInfo, resourceConsumer: ResourceConsumer) {
         this.terrainTextureCache.RequestResource(terrainPatchInfo, resourceConsumer)
     }
 }

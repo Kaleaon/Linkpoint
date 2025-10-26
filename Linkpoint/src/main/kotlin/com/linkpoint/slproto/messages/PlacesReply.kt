@@ -23,16 +23,16 @@ class PlacesReply : SLMessage() {
     class QueryData {
         public Int ActualArea
         public Int BillableArea
-        public Byte[] Desc
+        public ByteArray Desc
         public Float Dwell
         public Int Flags
         public Float GlobalX
         public Float GlobalY
         public Float GlobalZ
-        public Byte[] Name
+        public ByteArray Name
         public UUID OwnerID
         public Int Price
-        public Byte[] SimName
+        public ByteArray SimName
         public UUID SnapshotID
     }
 
@@ -47,24 +47,24 @@ class PlacesReply : SLMessage() {
         this.TransactionData_Field = TransactionData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 53
-        Iterator<T> it = this.QueryData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 53
+        val it: Iterator<T> = this.QueryData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
-            QueryData queryData = (QueryData) it.next()
+            val queryData: QueryData = (QueryData) it.next()
             i = queryData.SimName.length + queryData.Name.length + 17 + 1 + queryData.Desc.length + 4 + 4 + 1 + 4 + 4 + 4 + 1 + 16 + 4 + 4 + i2
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandlePlacesReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.RS)
@@ -89,13 +89,13 @@ class PlacesReply : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.QueryID = unpackUUID(byteBuffer)
         this.TransactionData_Field.TransactionID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            QueryData queryData = QueryData()
+            val queryData: QueryData = QueryData()
             queryData.OwnerID = unpackUUID(byteBuffer)
             queryData.Name = unpackVariable(byteBuffer, 1)
             queryData.Desc = unpackVariable(byteBuffer, 1)

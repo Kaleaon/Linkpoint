@@ -31,7 +31,7 @@ class TeleportProgressDialog : ProgressDialog(), DialogInterface.OnCancelListene
     }
 
     @JvmStatic
-    Unit TeleportToLandmark(Context context, UserManager userManager2, UUID uuid, Boolean z) {
+    fun TeleportToLandmark(context: Context, userManager2: UserManager, uuid: UUID, z: Boolean) {
         SLAgentCircuit activeAgentCircuit
         if (userManager2 != null && (activeAgentCircuit = userManager2.getActiveAgentCircuit()) != null && activeAgentCircuit.getModules().rlvController.canTeleportToLandmark()) {
             $Lambda$8gWLFwrhoxKapEC8iWggaUhFR1c.AnonymousClass2 r1 = Runnable(activeAgentCircuit, uuid, context, userManager2) {
@@ -212,7 +212,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$8g
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_TeleportProgressDialog_1322  reason: not valid java name */
-    static /* synthetic */ Unit m546lambda$com_lumiyaviewer_lumiya_ui_common_TeleportProgressDialog_1322(SLAgentCircuit sLAgentCircuit, UUID uuid, Context context, UserManager userManager2) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m546lambda$com_lumiyaviewer_lumiya_ui_common_TeleportProgressDialog_1322(SLAgentCircuit sLAgentCircuit, UUID uuid, Context context, UserManager userManager2) {
         if (sLAgentCircuit.getModules().rlvController.canTeleportToLandmark()) {
             sLAgentCircuit.TeleportToLandmarkAsset(uuid)
             TeleportProgressDialog(context, userManager2, R.string.teleporting_progress_message).show()
@@ -220,14 +220,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$8g
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_TeleportProgressDialog_2034  reason: not valid java name */
-    static /* synthetic */ Unit m547lambda$com_lumiyaviewer_lumiya_ui_common_TeleportProgressDialog_2034(Runnable runnable, DialogInterface dialogInterface, Int i) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m547lambda$com_lumiyaviewer_lumiya_ui_common_TeleportProgressDialog_2034(Runnable runnable, DialogInterface dialogInterface, Int i) {
         dialogInterface.dismiss()
         runnable.run()
     }
 
     @EventHandler
-    fun handleTeleportResult(SLTeleportResultEvent sLTeleportResultEvent) {
-        Boolean isShowing = isShowing()
+    fun handleTeleportResult(sLTeleportResultEvent: SLTeleportResultEvent) {
+        val isShowing: Boolean = isShowing()
         Debug.Log("TeleportResult: success = " + sLTeleportResultEvent.success)
         try {
             dismiss()
@@ -235,7 +235,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$8g
             Debug.Warning(e)
         }
         if (sLTeleportResultEvent.success) {
-            Intent intent = Intent(getContext(), ChatNewActivity.class)
+            val intent: Intent = Intent(getContext(), ChatNewActivity.class)
             if (this.userManager != null) {
                 ActivityUtils.setActiveAgentID(intent, this.userManager.getUserID())
             }
@@ -250,10 +250,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$8g
         }
     }
 
-    fun onCancel(DialogInterface dialogInterface) {
+    fun onCancel(dialogInterface: DialogInterface) {
         if (this.userManager != null) {
             try {
-                SLAgentCircuit activeAgentCircuit = this.userManager.getActiveAgentCircuit()
+                val activeAgentCircuit: SLAgentCircuit = this.userManager.getActiveAgentCircuit()
                 if (activeAgentCircuit != null) {
                     activeAgentCircuit.getModules().worldMap.CancelPendingTeleports()
                 }
@@ -263,14 +263,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$8g
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         if (this.userManager != null) {
             this.userManager.getEventBus().subscribe(this, (Activity) null, this.mHandler)
         }
     }
 
-    fun onStop() {
+    override fun onStop() {
         if (this.userManager != null) {
             this.userManager.getEventBus().unsubscribe(this)
         }

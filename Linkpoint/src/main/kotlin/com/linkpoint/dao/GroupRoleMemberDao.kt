@@ -28,18 +28,18 @@ class GroupRoleMemberDao : AbstractDao()<GroupRoleMember, Void> {
     }
 
     @JvmStatic
-    Unit createTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
-        String str = z ? "IF NOT EXISTS " : ""
+     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
+        val str: String = z ? "IF NOT EXISTS " : ""
         sQLiteDatabase.execSQL("CREATE TABLE " + str + "'GroupRoleMembers' (" + "'GROUP_ID' TEXT NOT NULL ," + "'REQUEST_ID' TEXT NOT NULL ," + "'ROLE_ID' TEXT NOT NULL ," + "'USER_ID' TEXT NOT NULL );")
         sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_GroupRoleMembers_GROUP_ID_ROLE_ID_REQUEST_ID ON GroupRoleMembers" + " (GROUP_ID,ROLE_ID,REQUEST_ID);")
     }
 
     @JvmStatic
-    Unit dropTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'GroupRoleMembers'")
     }
 
-    protected Unit bindValues(SQLiteStatement sQLiteStatement, GroupRoleMember groupRoleMember) {
+     protected fun bindValues(sQLiteStatement: SQLiteStatement, groupRoleMember: GroupRoleMember) {
         sQLiteStatement.clearBindings()
         sQLiteStatement.bindString(1, groupRoleMember.getGroupID().toString())
         sQLiteStatement.bindString(2, groupRoleMember.getRequestID().toString())
@@ -47,30 +47,30 @@ class GroupRoleMemberDao : AbstractDao()<GroupRoleMember, Void> {
         sQLiteStatement.bindString(4, groupRoleMember.getUserID().toString())
     }
 
-    public Void getKey(GroupRoleMember groupRoleMember) {
+     public fun getKey(groupRoleMember: GroupRoleMember): Void {
         return null
     }
 
-    protected Boolean isEntityUpdateable() {
+     protected fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    public GroupRoleMember readEntity(Cursor cursor, Int i) {
+     public fun readEntity(cursor: Cursor, i: Int): GroupRoleMember {
         return GroupRoleMember(UUID.fromString(cursor.getString(i + 0)), UUID.fromString(cursor.getString(i + 1)), UUID.fromString(cursor.getString(i + 2)), UUID.fromString(cursor.getString(i + 3)))
     }
 
-    fun readEntity(Cursor cursor, GroupRoleMember groupRoleMember, Int i) {
+    fun readEntity(cursor: Cursor, groupRoleMember: GroupRoleMember, i: Int) {
         groupRoleMember.setGroupID(UUID.fromString(cursor.getString(i + 0)))
         groupRoleMember.setRequestID(UUID.fromString(cursor.getString(i + 1)))
         groupRoleMember.setRoleID(UUID.fromString(cursor.getString(i + 2)))
         groupRoleMember.setUserID(UUID.fromString(cursor.getString(i + 3)))
     }
 
-    public Void readKey(Cursor cursor, Int i) {
+     public fun readKey(cursor: Cursor, i: Int): Void {
         return null
     }
 
-    protected Void updateKeyAfterInsert(GroupRoleMember groupRoleMember, Long j) {
+     protected fun updateKeyAfterInsert(groupRoleMember: GroupRoleMember, j: Long): Void {
         return null
     }
 }

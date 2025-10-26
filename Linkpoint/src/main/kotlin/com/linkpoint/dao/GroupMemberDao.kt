@@ -32,18 +32,18 @@ class GroupMemberDao : AbstractDao()<GroupMember, Void> {
     }
 
     @JvmStatic
-    Unit createTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
-        String str = z ? "IF NOT EXISTS " : ""
+     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
+        val str: String = z ? "IF NOT EXISTS " : ""
         sQLiteDatabase.execSQL("CREATE TABLE " + str + "'GroupMembers' (" + "'GROUP_ID' TEXT NOT NULL ," + "'REQUEST_ID' TEXT NOT NULL ," + "'USER_ID' TEXT NOT NULL ," + "'CONTRIBUTION' INTEGER NOT NULL ," + "'ONLINE_STATUS' TEXT NOT NULL ," + "'AGENT_POWERS' INTEGER NOT NULL ," + "'TITLE' TEXT NOT NULL ," + "'IS_OWNER' INTEGER NOT NULL );")
         sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_GroupMembers_GROUP_ID_REQUEST_ID ON GroupMembers" + " (GROUP_ID,REQUEST_ID);")
     }
 
     @JvmStatic
-    Unit dropTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'GroupMembers'")
     }
 
-    protected Unit bindValues(SQLiteStatement sQLiteStatement, GroupMember groupMember) {
+     protected fun bindValues(sQLiteStatement: SQLiteStatement, groupMember: GroupMember) {
         sQLiteStatement.clearBindings()
         sQLiteStatement.bindString(1, groupMember.getGroupID().toString())
         sQLiteStatement.bindString(2, groupMember.getRequestID().toString())
@@ -55,31 +55,31 @@ class GroupMemberDao : AbstractDao()<GroupMember, Void> {
         sQLiteStatement.bindLong(8, groupMember.getIsOwner() ? 1 : 0)
     }
 
-    public Void getKey(GroupMember groupMember) {
+     public fun getKey(groupMember: GroupMember): Void {
         return null
     }
 
-    protected Boolean isEntityUpdateable() {
+     protected fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    public GroupMember readEntity(Cursor cursor, Int i) {
-        Boolean z = false
-        UUID fromString = UUID.fromString(cursor.getString(i + 0))
-        UUID fromString2 = UUID.fromString(cursor.getString(i + 1))
-        UUID fromString3 = UUID.fromString(cursor.getString(i + 2))
-        Int i2 = cursor.getInt(i + 3)
-        String string = cursor.getString(i + 4)
-        Long j = cursor.getLong(i + 5)
-        String string2 = cursor.getString(i + 6)
+     public fun readEntity(cursor: Cursor, i: Int): GroupMember {
+        val z: Boolean = false
+        val fromString: UUID = UUID.fromString(cursor.getString(i + 0))
+        val fromString2: UUID = UUID.fromString(cursor.getString(i + 1))
+        val fromString3: UUID = UUID.fromString(cursor.getString(i + 2))
+        val i2: Int = cursor.getInt(i + 3)
+        val string: String = cursor.getString(i + 4)
+        val j: Long = cursor.getLong(i + 5)
+        val string2: String = cursor.getString(i + 6)
         if (cursor.getShort(i + 7) != (Short) 0) {
             z = true
         }
         return GroupMember(fromString, fromString2, fromString3, i2, string, j, string2, z)
     }
 
-    fun readEntity(Cursor cursor, GroupMember groupMember, Int i) {
-        Boolean z = false
+    fun readEntity(cursor: Cursor, groupMember: GroupMember, i: Int) {
+        val z: Boolean = false
         groupMember.setGroupID(UUID.fromString(cursor.getString(i + 0)))
         groupMember.setRequestID(UUID.fromString(cursor.getString(i + 1)))
         groupMember.setUserID(UUID.fromString(cursor.getString(i + 2)))
@@ -93,11 +93,11 @@ class GroupMemberDao : AbstractDao()<GroupMember, Void> {
         groupMember.setIsOwner(z)
     }
 
-    public Void readKey(Cursor cursor, Int i) {
+     public fun readKey(cursor: Cursor, i: Int): Void {
         return null
     }
 
-    protected Void updateKeyAfterInsert(GroupMember groupMember, Long j) {
+     protected fun updateKeyAfterInsert(groupMember: GroupMember, j: Long): Void {
         return null
     }
 }

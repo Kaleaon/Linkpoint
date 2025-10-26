@@ -13,17 +13,17 @@ class ParcelData : Serializable {
     private val String mediaURL
     private val String name
     private val UUID ownerID
-    private val Boolean[] parcelBitmap = Boolean[4096]
+    private val BooleanArray parcelBitmap = Boolean[4096]
     private val Int parcelID
     private val UUID snapshotUUID
 
     public ParcelData(LLSDNode lLSDNode) throws LLSDException {
-        UUID uuid = null
+        val uuid: UUID = null
         this.parcelID = lLSDNode.byKey("LocalID").asInt()
         this.name = lLSDNode.byKey("Name").asString()
         this.description = lLSDNode.byKey("Desc").asString()
         this.mediaURL = lLSDNode.byKey("MusicURL").asString()
-        UUID asUUID = lLSDNode.byKey("SnapshotID").asUUID()
+        val asUUID: UUID = lLSDNode.byKey("SnapshotID").asUUID()
         if (asUUID != null && asUUID.equals(UUIDPool.ZeroUUID)) {
             asUUID = null
         }
@@ -31,10 +31,10 @@ class ParcelData : Serializable {
         this.ownerID = lLSDNode.keyExists("OwnerID") ? lLSDNode.byKey("OwnerID").asUUID() : uuid
         this.isGroupOwned = lLSDNode.keyExists("IsGroupOwned") ? lLSDNode.byKey("IsGroupOwned").asBoolean() : false
         this.area = lLSDNode.keyExists("Area") ? lLSDNode.byKey("Area").asInt() : 0
-        Byte[] asBinary = lLSDNode.byKey("Bitmap").asBinary()
-        Int i = 0
+        val asBinary: ByteArray = lLSDNode.byKey("Bitmap").asBinary()
+        val i: Int = 0
         while (i < asBinary.length && i < 512) {
-            Byte b = asBinary[i]
+            val b: Byte = asBinary[i]
             for (Int i2 = 0; i2 < 8; i2++) {
                 if ((b & 1) != 0) {
                     this.parcelBitmap[(i * 8) + i2] = true
@@ -45,39 +45,39 @@ class ParcelData : Serializable {
         }
     }
 
-    public Int getArea() {
+     public fun getArea(): Int {
         return this.area
     }
 
-    public String getDescription() {
+     public fun getDescription(): String {
         return this.description
     }
 
-    public String getMediaURL() {
+     public fun getMediaURL(): String {
         return this.mediaURL
     }
 
-    public String getName() {
+     public fun getName(): String {
         return this.name
     }
 
-    public UUID getOwnerID() {
+     public fun getOwnerID(): UUID {
         return this.ownerID
     }
 
-    public Boolean[] getParcelBitmap() {
+     public fun getParcelBitmap(): BooleanArray {
         return this.parcelBitmap
     }
 
-    public Int getParcelID() {
+     public fun getParcelID(): Int {
         return this.parcelID
     }
 
-    public UUID getSnapshotUUID() {
+     public fun getSnapshotUUID(): UUID {
         return this.snapshotUUID
     }
 
-    public Boolean isGroupOwned() {
+     public fun isGroupOwned(): Boolean {
         return this.isGroupOwned
     }
 }

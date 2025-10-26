@@ -34,15 +34,15 @@ class CoarseLocationUpdate : SLMessage() {
         this.Index_Field = Index()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.Location_Fields.size() * 3) + 3 + 4 + 1 + (this.AgentData_Fields.size() * 16)
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleCoarseLocationUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) 6)
         byteBuffer.put((Byte) this.Location_Fields.size())
@@ -59,10 +59,10 @@ class CoarseLocationUpdate : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            Location location = Location()
+            val location: Location = Location()
             location.X = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             location.Y = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             location.Z = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
@@ -70,9 +70,9 @@ class CoarseLocationUpdate : SLMessage() {
         }
         this.Index_Field.You = unpackShort(byteBuffer)
         this.Index_Field.Prey = unpackShort(byteBuffer)
-        Byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b2: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i2 = 0; i2 < b2; i2++) {
-            AgentData agentData = AgentData()
+            val agentData: AgentData = AgentData()
             agentData.AgentID = unpackUUID(byteBuffer)
             this.AgentData_Fields.add(agentData)
         }

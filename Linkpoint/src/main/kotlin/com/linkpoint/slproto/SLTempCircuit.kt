@@ -13,7 +13,7 @@ class SLTempCircuit : SLCircuit() {
         super(sLGridConnection, sLCircuitInfo, sLAuthReply, null)
     }
 
-    fun DefaultMessageHandler(SLMessage sLMessage) {
+    fun DefaultMessageHandler(sLMessage: SLMessage) {
         this.pendingMessages.add(sLMessage)
     }
 
@@ -26,7 +26,7 @@ class SLTempCircuit : SLCircuit() {
     }
 
     fun SendUseCode() {
-        SLMessage useCircuitCode = UseCircuitCode()
+        val useCircuitCode: SLMessage = UseCircuitCode()
         useCircuitCode.CircuitCode_Field.Code = this.circuitInfo.circuitCode
         useCircuitCode.CircuitCode_Field.SessionID = this.circuitInfo.sessionID
         useCircuitCode.CircuitCode_Field.ID = this.circuitInfo.agentID

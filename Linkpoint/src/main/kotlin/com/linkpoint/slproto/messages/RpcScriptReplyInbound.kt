@@ -12,7 +12,7 @@ class RpcScriptReplyInbound : SLMessage() {
         public UUID ChannelID
         public Int IntValue
         public UUID ItemID
-        public Byte[] StringValue
+        public ByteArray StringValue
         public UUID TaskID
     }
 
@@ -20,15 +20,15 @@ class RpcScriptReplyInbound : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.DataBlock_Field.StringValue.length + 54 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleRpcScriptReplyInbound(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -95)
@@ -39,7 +39,7 @@ class RpcScriptReplyInbound : SLMessage() {
         packVariable(byteBuffer, this.DataBlock_Field.StringValue, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.DataBlock_Field.TaskID = unpackUUID(byteBuffer)
         this.DataBlock_Field.ItemID = unpackUUID(byteBuffer)
         this.DataBlock_Field.ChannelID = unpackUUID(byteBuffer)

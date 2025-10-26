@@ -22,40 +22,40 @@ class UserPickFragment_ViewBinding : Unbinder {
     @UiThread
     public UserPickFragment_ViewBinding(final UserPickFragment userPickFragment, View view) {
         this.target = userPickFragment
-        View findRequiredView = Utils.findRequiredView(view, R.id.user_pick_set_location_button, "field 'setLocationButton' and method 'onSetLocation'")
+        val findRequiredView: View = Utils.findRequiredView(view, R.id.user_pick_set_location_button, "field 'setLocationButton' and method 'onSetLocation'")
         userPickFragment.setLocationButton = (Button) Utils.castView(findRequiredView, R.id.user_pick_set_location_button, "field 'setLocationButton'", Button.class)
         this.view2131755696 = findRequiredView
         findRequiredView.setOnClickListener(DebouncingOnClickListener() {
-            fun doClick(View view) {
+            fun doClick(view: View) {
                 userPickFragment.onSetLocation(view)
             }
-        View findRequiredView2 = Utils.findRequiredView(view, R.id.change_pic_button, "field 'changePicButton' and method 'onChangePic'")
+        val findRequiredView2: View = Utils.findRequiredView(view, R.id.change_pic_button, "field 'changePicButton' and method 'onChangePic'")
         userPickFragment.changePicButton = (Button) Utils.castView(findRequiredView2, R.id.change_pic_button, "field 'changePicButton'", Button.class)
         this.view2131755698 = findRequiredView2
         findRequiredView2.setOnClickListener(DebouncingOnClickListener() {
-            fun doClick(View view) {
+            fun doClick(view: View) {
                 userPickFragment.onChangePic(view)
             }
         userPickFragment.userPickImageView = (ImageAssetView) Utils.findRequiredViewAsType(view, R.id.user_pick_image_view, "field 'userPickImageView'", ImageAssetView.class)
         userPickFragment.pickDescription = (TextView) Utils.findRequiredViewAsType(view, R.id.pick_description, "field 'pickDescription'", TextView.class)
-        View findRequiredView3 = Utils.findRequiredView(view, R.id.user_pick_desc_edit_button, "field 'userPickDescEditButton' and method 'onDescEdit'")
+        val findRequiredView3: View = Utils.findRequiredView(view, R.id.user_pick_desc_edit_button, "field 'userPickDescEditButton' and method 'onDescEdit'")
         userPickFragment.userPickDescEditButton = (Button) Utils.castView(findRequiredView3, R.id.user_pick_desc_edit_button, "field 'userPickDescEditButton'", Button.class)
         this.view2131755700 = findRequiredView3
         findRequiredView3.setOnClickListener(DebouncingOnClickListener() {
-            fun doClick(View view) {
+            fun doClick(view: View) {
                 userPickFragment.onDescEdit(view)
             }
-        View findRequiredView4 = Utils.findRequiredView(view, R.id.user_pick_teleport_button, "method 'onTeleportToPickClick'")
+        val findRequiredView4: View = Utils.findRequiredView(view, R.id.user_pick_teleport_button, "method 'onTeleportToPickClick'")
         this.view2131755697 = findRequiredView4
         findRequiredView4.setOnClickListener(DebouncingOnClickListener() {
-            fun doClick(View view) {
+            fun doClick(view: View) {
                 userPickFragment.onTeleportToPickClick(view)
             }
     }
 
     @CallSuper
     fun unbind() {
-        UserPickFragment userPickFragment = this.target
+        val userPickFragment: UserPickFragment = this.target
         if (userPickFragment == null) {
             throw IllegalStateException("Bindings already cleared.")
         }

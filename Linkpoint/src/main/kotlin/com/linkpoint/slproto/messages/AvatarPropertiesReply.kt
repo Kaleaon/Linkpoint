@@ -16,30 +16,30 @@ class AvatarPropertiesReply : SLMessage() {
 
     @JvmStatic
     class PropertiesData {
-        public Byte[] AboutText
-        public Byte[] BornOn
-        public Byte[] CharterMember
-        public Byte[] FLAboutText
+        public ByteArray AboutText
+        public ByteArray BornOn
+        public ByteArray CharterMember
+        public ByteArray FLAboutText
         public UUID FLImageID
         public Int Flags
         public UUID ImageID
         public UUID PartnerID
-        public Byte[] ProfileURL
+        public ByteArray ProfileURL
     }
 
     public AvatarPropertiesReply() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.PropertiesData_Field.AboutText.length + 50 + 1 + this.PropertiesData_Field.FLAboutText.length + 1 + this.PropertiesData_Field.BornOn.length + 1 + this.PropertiesData_Field.ProfileURL.length + 1 + this.PropertiesData_Field.CharterMember.length + 4 + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAvatarPropertiesReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -85)
@@ -56,7 +56,7 @@ class AvatarPropertiesReply : SLMessage() {
         packInt(byteBuffer, this.PropertiesData_Field.Flags)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.AvatarID = unpackUUID(byteBuffer)
         this.PropertiesData_Field.ImageID = unpackUUID(byteBuffer)

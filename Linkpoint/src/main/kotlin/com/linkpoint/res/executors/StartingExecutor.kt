@@ -38,17 +38,17 @@ class StartingExecutor {
         return
      */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    private Unit runQueue() {
+     private fun runQueue() {
         /*
             r3 = this
         L_0x0000:
-            Boolean r0 = r3.paused
+            val r0: Boolean = r3.paused
             if (r0 != 0) goto L_0x0012
             java.lang.Object r1 = r3.lock
             monitor-enter(r1)
             java.util.Set<com.lumiyaviewer.lumiya.res.executors.Startable> r0 = r3.activeRequests     // Catch:{ all -> 0x0027 }
-            Int r0 = r0.size()     // Catch:{ all -> 0x0027 }
-            Int r2 = r3.maxConcurrentRequests     // Catch:{ all -> 0x0027 }
+            val r0: Int = r0.size()     // Catch:{ all -> 0x0027 }
+            val r2: Int = r3.maxConcurrentRequests     // Catch:{ all -> 0x0027 }
             if (r0 < r2) goto L_0x0013
         L_0x0011:
             monitor-exit(r1)
@@ -72,7 +72,7 @@ class StartingExecutor {
         throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.res.executors.StartingExecutor.runQueue():Unit")
     }
 
-    fun cancelRequest(Startable startable) {
+    fun cancelRequest(startable: Startable) {
         synchronized (this.lock) {
             this.waitingRequests.remove(startable)
             this.activeRequests.remove(startable)
@@ -80,7 +80,7 @@ class StartingExecutor {
         runQueue()
     }
 
-    fun completeRequest(Startable startable) {
+    fun completeRequest(startable: Startable) {
         synchronized (this.lock) {
             this.activeRequests.remove(startable)
         }
@@ -91,14 +91,14 @@ class StartingExecutor {
         this.paused = true
     }
 
-    fun queueRequest(Startable startable) {
+    fun queueRequest(startable: Startable) {
         synchronized (this.lock) {
             this.waitingRequests.add(startable)
         }
         runQueue()
     }
 
-    fun setMaxConcurrentTasks(Int i) {
+    fun setMaxConcurrentTasks(i: Int) {
         this.maxConcurrentRequests = i
     }
 

@@ -37,15 +37,15 @@ class LogParcelChanges : SLMessage() {
         this.RegionData_Field = RegionData()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.ParcelData_Fields.size() * 54) + 29
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleLogParcelChanges(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -32)
@@ -62,12 +62,12 @@ class LogParcelChanges : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.RegionData_Field.RegionHandle = unpackLong(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ParcelData parcelData = ParcelData()
+            val parcelData: ParcelData = ParcelData()
             parcelData.ParcelID = unpackUUID(byteBuffer)
             parcelData.OwnerID = unpackUUID(byteBuffer)
             parcelData.IsOwnerGroup = unpackBoolean(byteBuffer)

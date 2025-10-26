@@ -18,7 +18,7 @@ class ChatFromViewer : SLMessage() {
     @JvmStatic
     class ChatData {
         public Int Channel
-        public Byte[] Message
+        public ByteArray Message
         public Int Type
     }
 
@@ -26,15 +26,15 @@ class ChatFromViewer : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.ChatData_Field.Message.length + 2 + 1 + 4 + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleChatFromViewer(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 80)
@@ -45,7 +45,7 @@ class ChatFromViewer : SLMessage() {
         packInt(byteBuffer, this.ChatData_Field.Channel)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ChatData_Field.Message = unpackVariable(byteBuffer, 2)

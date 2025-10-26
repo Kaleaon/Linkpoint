@@ -13,13 +13,13 @@ import javax.annotation.Nonnull
 
 abstract class UnreadNotifications {
     @JvmStatic
-    UnreadNotifications create(UUID uuid, ImmutableMap<NotificationType, UnreadNotificationInfo> immutableMap) {
+     fun create(uuid: UUID, immutableMap: ImmutableMap<NotificationType, UnreadNotificationInfo>): UnreadNotifications {
         return AutoValue_UnreadNotifications(uuid, immutableMap)
     }
 
     public abstract UUID agentUUID()
 
-    public UnreadNotifications filter(ImmutableSet<NotificationType> immutableSet) {
+     public fun filter(immutableSet: ImmutableSet<NotificationType>): UnreadNotifications {
         if (immutableSet.containsAll(notificationGroups().keySet())) {
             return this
         }
@@ -32,10 +32,10 @@ abstract class UnreadNotifications {
         return create(agentUUID(), builder.build())
     }
 
-    public UnreadNotificationInfo merge() {
+     public fun merge(): UnreadNotificationInfo {
         UnreadNotificationInfo.ObjectPopupNotification objectPopupNotification
         ImmutableList.Builder builder
-        ImmutableMap<NotificationType, UnreadNotificationInfo> notificationGroups = notificationGroups()
+        val notificationGroups: ImmutableMap<NotificationType, UnreadNotificationInfo> = notificationGroups()
         if (notificationGroups.isEmpty()) {
             return UnreadNotificationInfo.create(agentUUID(), 0, (List<UnreadNotificationInfo.UnreadMessageSource>) null, (NotificationType) null, 0, (NotificationType) null, (UnreadNotificationInfo.UnreadMessageSource) null, UnreadNotificationInfo.ObjectPopupNotification.create(0, 0, (UnreadNotificationInfo.ObjectPopupMessage) null))
         }
@@ -43,36 +43,36 @@ abstract class UnreadNotifications {
             return (UnreadNotificationInfo) ((Map.Entry) notificationGroups.entrySet().iterator().next()).getValue()
         }
         UnreadNotificationInfo.ObjectPopupNotification objectPopupNotification2 = null
-        NotificationType notificationType = null
-        NotificationType notificationType2 = null
+        val notificationType: NotificationType = null
+        val notificationType2: NotificationType = null
         UnreadNotificationInfo.UnreadMessageSource unreadMessageSource = null
-        Int i2 = 0
-        Int i3 = 0
+        val i2: Int = 0
+        val i3: Int = 0
         ImmutableList.Builder builder2 = null
-        Boolean z = false
-        Iterator<T> it = NotificationType.VALUES_BY_DESCENDING_PRIORITY.iterator()
+        val z: Boolean = false
+        val it: Iterator<T> = NotificationType.VALUES_BY_DESCENDING_PRIORITY.iterator()
         while (true) {
             objectPopupNotification = objectPopupNotification2
             builder = builder2
             i = i2
-            Boolean z2 = z
+            val z2: Boolean = z
             if (!it.hasNext()) {
                 break
             }
-            UnreadNotificationInfo unreadNotificationInfo = notificationGroups.get((NotificationType) it.next())
+            val unreadNotificationInfo: UnreadNotificationInfo = notificationGroups.get((NotificationType) it.next())
             if (unreadNotificationInfo != null) {
-                Int i4 = unreadNotificationInfo.totalUnreadCount() + i
+                val i4: Int = unreadNotificationInfo.totalUnreadCount() + i
                 if (!unreadNotificationInfo.unreadSources().isEmpty()) {
                     if (builder == null) {
                         builder = ImmutableList.builder()
                     }
                     builder.addAll((Iterable) unreadNotificationInfo.unreadSources())
                 }
-                NotificationType orNull = unreadNotificationInfo.mostImportantType().orNull()
+                val orNull: NotificationType = unreadNotificationInfo.mostImportantType().orNull()
                 if (orNull != null && (notificationType == null || orNull.compareTo(notificationType) > 0)) {
                     notificationType = orNull
                 }
-                NotificationType orNull2 = unreadNotificationInfo.mostImportantFreshType().orNull()
+                val orNull2: NotificationType = unreadNotificationInfo.mostImportantFreshType().orNull()
                 if (orNull2 != null && (notificationType2 == null || orNull2.compareTo(notificationType2) > 0)) {
                     notificationType2 = orNull2
                 }

@@ -41,15 +41,15 @@ class SimStats : SLMessage() {
         this.PidStat_Field = PidStat()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.Stat_Fields.size() * 8) + 21 + 4 + 1 + (this.RegionInfo_Fields.size() * 8)
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleSimStats(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -116)
@@ -69,22 +69,22 @@ class SimStats : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.Region_Field.RegionX = unpackInt(byteBuffer)
         this.Region_Field.RegionY = unpackInt(byteBuffer)
         this.Region_Field.RegionFlags = unpackInt(byteBuffer)
         this.Region_Field.ObjectCapacity = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            Stat stat = Stat()
+            val stat: Stat = Stat()
             stat.StatID = unpackInt(byteBuffer)
             stat.StatValue = unpackFloat(byteBuffer)
             this.Stat_Fields.add(stat)
         }
         this.PidStat_Field.PID = unpackInt(byteBuffer)
-        Byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b2: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i2 = 0; i2 < b2; i2++) {
-            RegionInfo regionInfo = RegionInfo()
+            val regionInfo: RegionInfo = RegionInfo()
             regionInfo.RegionFlagsExtended = unpackLong(byteBuffer)
             this.RegionInfo_Fields.add(regionInfo)
         }

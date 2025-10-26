@@ -22,15 +22,15 @@ class MeanCollisionAlert : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.MeanCollision_Fields.size() * 41) + 5
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleMeanCollisionAlert(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -120)
@@ -44,10 +44,10 @@ class MeanCollisionAlert : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            MeanCollision meanCollision = MeanCollision()
+            val meanCollision: MeanCollision = MeanCollision()
             meanCollision.Victim = unpackUUID(byteBuffer)
             meanCollision.Perp = unpackUUID(byteBuffer)
             meanCollision.Time = unpackInt(byteBuffer)

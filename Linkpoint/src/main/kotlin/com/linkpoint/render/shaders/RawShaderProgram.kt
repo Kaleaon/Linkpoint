@@ -13,7 +13,7 @@ class RawShaderProgram : ShaderProgram() {
         super(z ? Shader.ExtTextureVertexShader : Shader.RawVertexShader, z ? Shader.ExtTextureFragmentShader : Shader.RawFragmentShader)
     }
 
-    protected Unit bindVariables() {
+     protected fun bindVariables() {
         this.vPosition = GLES20.glGetAttribLocation(this.handle, "vPosition")
         this.vTexCoord = GLES20.glGetAttribLocation(this.handle, "vTexCoord")
         this.uMVPMatrix = GLES20.glGetUniformLocation(this.handle, "uMVPMatrix")

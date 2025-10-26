@@ -17,11 +17,11 @@ class GridEditDialog : AppCompatDialog(), View.OnClickListener {
     private OnGridEditResultListener onGridEditResultListener = null
 
     interface OnGridEditResultListener {
-        Unit onGridAdded(GridList.GridInfo gridInfo, Boolean z)
+         fun onGridAdded(GridList.GridInfo gridInfo, z: Boolean)
 
-        Unit onGridDeleted(GridList.GridInfo gridInfo)
+         fun onGridDeleted(GridList.GridInfo gridInfo)
 
-        Unit onGridEditCancelled()
+         fun onGridEditCancelled()
     }
 
     public GridEditDialog(Context context, GridList gridList2, GridList.GridInfo gridInfo) {
@@ -30,7 +30,7 @@ class GridEditDialog : AppCompatDialog(), View.OnClickListener {
         this.editGrid = gridInfo
     }
 
-    private Unit prepare() {
+     private fun prepare() {
         if (this.editGrid != null) {
             ((TextView) findViewById(R.id.gridNameText)).setText(this.editGrid.getGridName())
             ((TextView) findViewById(R.id.gridLoginURIText)).setText(this.editGrid.getLoginURL())
@@ -47,12 +47,12 @@ class GridEditDialog : AppCompatDialog(), View.OnClickListener {
         findViewById(R.id.gridNameText).requestFocus()
     }
 
-    fun onClick(View view) {
-        Boolean z = false
+    override fun onClick(view: View) {
+        val z: Boolean = false
         switch (view.getId()) {
             case R.id.okButton:
-                String charSequence = ((TextView) findViewById(R.id.gridNameText)).getText().toString()
-                String charSequence2 = ((TextView) findViewById(R.id.gridLoginURIText)).getText().toString()
+                val charSequence: String = ((TextView) findViewById(R.id.gridNameText)).getText().toString()
+                val charSequence2: String = ((TextView) findViewById(R.id.gridLoginURIText)).getText().toString()
                 if (charSequence.equals("")) {
                     Toast.makeText(getContext(), getContext().getString(R.string.grid_name_empty_error), 0).show()
                     return
@@ -99,7 +99,7 @@ class GridEditDialog : AppCompatDialog(), View.OnClickListener {
         }
     }
 
-    fun onCreate(Bundle bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setTitle((Int) R.string.new_grid_dialog_title)
         setContentView((Int) R.layout.grid_edit_dialog)
@@ -109,7 +109,7 @@ class GridEditDialog : AppCompatDialog(), View.OnClickListener {
         prepare()
     }
 
-    fun setOnGridEditResultListener(OnGridEditResultListener onGridEditResultListener2) {
+    fun setOnGridEditResultListener(onGridEditResultListener2: OnGridEditResultListener) {
         this.onGridEditResultListener = onGridEditResultListener2
     }
 }

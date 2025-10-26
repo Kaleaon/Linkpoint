@@ -11,7 +11,7 @@ class RLVCmdSit : RLVCmdGenericRestriction() {
     }
 
     /* access modifiers changed from: protected */
-    fun HandleForce(RLVController rLVController, UUID uuid, String str) {
+    fun HandleForce(rLVController: RLVController, uuid: UUID, str: String) {
         if (str != null) {
             try {
                 rLVController.getModules().avatarControl.ForceSitOnObject(UUID.fromString(str))

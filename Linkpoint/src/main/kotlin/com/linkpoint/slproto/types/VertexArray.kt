@@ -11,7 +11,7 @@ class VertexArray {
         this.texCoords = Vector2Array(i)
     }
 
-    fun LerpPlanarVertex(Int i, VertexArray vertexArray, Int i2, VertexArray vertexArray2, Int i3, VertexArray vertexArray3, Int i4, Float f, Float f2, LLVector3 lLVector3, LLVector3 lLVector32, LLVector2 lLVector2, LLVector2 lLVector22) {
+    fun LerpPlanarVertex(i: Int, vertexArray: VertexArray, i2: Int, vertexArray2: VertexArray, i3: Int, vertexArray3: VertexArray, i4: Int, f: Float, f2: Float, lLVector3: LLVector3, lLVector32: LLVector3, lLVector2: LLVector2, lLVector22: LLVector2) {
         vertexArray2.vertices.getSub(i3, vertexArray.vertices, i2, lLVector3)
         lLVector3.mul(f)
         vertexArray3.vertices.getSub(i4, vertexArray.vertices, i2, lLVector32)
@@ -29,27 +29,27 @@ class VertexArray {
         this.texCoords.set(i, lLVector22.x, lLVector22.y)
     }
 
-    public Float[] getData() {
+     public fun getData(): FloatArray {
         return this.vertexAndNormalsData.getData()
     }
 
-    public Int getLength() {
+     public fun getLength(): Int {
         return this.vertexAndNormalsData.getLength()
     }
 
-    public Vector3Array getNormals() {
+     public fun getNormals(): Vector3Array {
         return this.normals
     }
 
-    public Vector2Array getTexCoords() {
+     public fun getTexCoords(): Vector2Array {
         return this.texCoords
     }
 
-    public Float[] getTexCoordsData() {
+     public fun getTexCoordsData(): FloatArray {
         return this.texCoords.getData()
     }
 
-    public Vector3Array getVertices() {
+     public fun getVertices(): Vector3Array {
         return this.vertices
     }
 }

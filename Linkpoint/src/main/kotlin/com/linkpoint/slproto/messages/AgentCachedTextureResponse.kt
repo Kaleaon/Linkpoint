@@ -20,7 +20,7 @@ class AgentCachedTextureResponse : SLMessage() {
 
     @JvmStatic
     class WearableData {
-        public Byte[] HostName
+        public ByteArray HostName
         public UUID TextureID
         public Int TextureIndex
     }
@@ -30,11 +30,11 @@ class AgentCachedTextureResponse : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 41
-        Iterator<T> it = this.WearableData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 41
+        val it: Iterator<T> = this.WearableData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -42,11 +42,11 @@ class AgentCachedTextureResponse : SLMessage() {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAgentCachedTextureResponse(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -127)
@@ -61,13 +61,13 @@ class AgentCachedTextureResponse : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.SerialNum = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            WearableData wearableData = WearableData()
+            val wearableData: WearableData = WearableData()
             wearableData.TextureID = unpackUUID(byteBuffer)
             wearableData.TextureIndex = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             wearableData.HostName = unpackVariable(byteBuffer, 1)

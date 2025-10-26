@@ -2,7 +2,7 @@ package com.linkpoint.res.text
 
 abstract class DrawableTextParams {
     @JvmStatic
-    DrawableTextParams create(String str, Int i) {
+     fun create(str: String, i: Int): DrawableTextParams {
         return AutoValue_DrawableTextParams(str, i)
     }
 

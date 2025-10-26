@@ -24,7 +24,7 @@ class WeakQueue<T> : BlockingQueue<T> {
     interface LowPriority {
     }
 
-    public Boolean add(T t) {
+     public fun add(T t): Boolean {
         if (t == null) {
             return false
         }
@@ -42,7 +42,7 @@ class WeakQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public Boolean addAll(Collection<? : T> collection) {
+     public fun addAll(collection: Collection<? : T>): Boolean {
         this.lock.lock()
         try {
             for (T next : collection) {
@@ -69,7 +69,7 @@ class WeakQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public Boolean contains(Object obj) {
+     public fun contains(obj: Object): Boolean {
         this.lock.lock()
         try {
             return !this.queue.contains(obj) ? this.lowPriorityQueue.contains(obj) : true
@@ -78,7 +78,7 @@ class WeakQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public Boolean containsAll(Collection<?> collection) {
+     public fun containsAll(collection: Collection<?>): Boolean {
         this.lock.lock()
         try {
             return !this.queue.containsAll(collection) ? this.lowPriorityQueue.containsAll(collection) : true
@@ -87,9 +87,9 @@ class WeakQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public Int drainTo(Collection<? super T> collection) {
+     public fun drainTo(collection: Collection<? super T>): Int {
         this.lock.lock()
-        Int i = 0
+        val i: Int = 0
         try {
             for (T next : this.queue) {
                 if (next != null) {
@@ -111,11 +111,11 @@ class WeakQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public Int drainTo(Collection<? super T> collection, Int i) {
+     public fun drainTo(collection: Collection<? super T>, i: Int): Int {
         this.lock.lock()
-        Int i2 = 0
+        val i2: Int = 0
         try {
-            Iterator<T> it = this.queue.iterator()
+            val it: Iterator<T> = this.queue.iterator()
             while (it.hasNext() && i2 < i) {
                 T next = it.next()
                 if (next != null) {
@@ -124,7 +124,7 @@ class WeakQueue<T> : BlockingQueue<T> {
                 }
                 it.remove()
             }
-            Iterator<T> it2 = this.lowPriorityQueue.iterator()
+            val it2: Iterator<T> = this.lowPriorityQueue.iterator()
             while (it2.hasNext() && i2 < i) {
                 T next2 = it2.next()
                 if (next2 != null) {
@@ -147,7 +147,7 @@ class WeakQueue<T> : BlockingQueue<T> {
         throw NoSuchElementException()
     }
 
-    public Boolean isEmpty() {
+     public fun isEmpty(): Boolean {
         this.lock.lock()
         try {
             return this.queue.isEmpty() ? this.lowPriorityQueue.isEmpty() : false
@@ -160,11 +160,11 @@ class WeakQueue<T> : BlockingQueue<T> {
         throw UnsupportedOperationException("Iterating over WeakQueue is not supported")
     }
 
-    public Boolean offer(T t) {
+     public fun offer(T t): Boolean {
         return add(t)
     }
 
-    public Boolean offer(T t, Long j, TimeUnit timeUnit) throws InterruptedException {
+     public fun offer(T t, j: Long, timeUnit: TimeUnit) throws InterruptedException {
         return add(t)
     }
 
@@ -197,7 +197,7 @@ class WeakQueue<T> : BlockingQueue<T> {
         this.lock.lock()
         try {
             if (!this.queue.isEmpty()) {
-                Iterator<T> it = this.queue.iterator()
+                val it: Iterator<T> = this.queue.iterator()
                 while (it.hasNext()) {
                     T next = it.next()
                     if (next != null) {
@@ -207,7 +207,7 @@ class WeakQueue<T> : BlockingQueue<T> {
                 }
             }
             if (!this.lowPriorityQueue.isEmpty()) {
-                Iterator<T> it2 = this.lowPriorityQueue.iterator()
+                val it2: Iterator<T> = this.lowPriorityQueue.iterator()
                 while (it2.hasNext()) {
                     T next2 = it2.next()
                     if (next2 != null) {
@@ -244,7 +244,7 @@ class WeakQueue<T> : BlockingQueue<T> {
         add(t)
     }
 
-    public Int remainingCapacity() {
+     public fun remainingCapacity(): Int {
         return Integer.MAX_VALUE
     }
 
@@ -256,7 +256,7 @@ class WeakQueue<T> : BlockingQueue<T> {
         throw NoSuchElementException()
     }
 
-    public Boolean remove(Object obj) {
+     public fun remove(obj: Object): Boolean {
         this.lock.lock()
         try {
             return this.queue.remove(obj) | this.lowPriorityQueue.remove(obj)
@@ -265,7 +265,7 @@ class WeakQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public Boolean removeAll(Collection<?> collection) {
+     public fun removeAll(collection: Collection<?>): Boolean {
         this.lock.lock()
         try {
             return this.queue.removeAll(collection) | this.lowPriorityQueue.removeAll(collection)
@@ -274,7 +274,7 @@ class WeakQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public Boolean retainAll(Collection<?> collection) {
+     public fun retainAll(collection: Collection<?>): Boolean {
         this.lock.lock()
         try {
             return this.queue.retainAll(collection) | this.lowPriorityQueue.retainAll(collection)
@@ -283,7 +283,7 @@ class WeakQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public Int size() {
+     public fun size(): Int {
         this.lock.lock()
         try {
             return this.queue.size() + this.lowPriorityQueue.size()
@@ -307,7 +307,7 @@ class WeakQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public Object[] toArray() {
+    public Array<Any> toArray() {
         this.lock.lock()
         try {
             return ObjectArrays.concat(this.queue.toArray(), this.lowPriorityQueue.toArray(), Object.class)
@@ -316,10 +316,10 @@ class WeakQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public <T1> T1[] toArray(T1[] t1Arr) {
+    public <T1> Array<T1> toArray(Array<T1> t1Arr) {
         this.lock.lock()
         try {
-            T1[] array = toArray()
+            val array: Array<T1> = toArray()
             if (array.length <= t1Arr.length) {
                 Arrays.fill(t1Arr, (Object) null)
                 System.arraycopy(array, 0, t1Arr, 0, array.length)

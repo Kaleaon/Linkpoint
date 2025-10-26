@@ -22,14 +22,14 @@ private class InstanceHolder {
         }
     }
 
-    private Unit enableWriteAheadLogging(SQLiteDatabase sQLiteDatabase) {
+     private fun enableWriteAheadLogging(sQLiteDatabase: SQLiteDatabase) {
         if (sQLiteDatabase == null) {
             Debug.Printf("Cannot enable WAL on null database")
             return
         }
         
         try {
-            Method method = sQLiteDatabase.getClass().getMethod("enableWriteAheadLogging")
+            val method: Method = sQLiteDatabase.getClass().getMethod("enableWriteAheadLogging")
             if (method != null) {
                 method.invoke(sQLiteDatabase)
                 Debug.Printf("Write-ahead logging enabled successfully.")
@@ -46,18 +46,18 @@ private class InstanceHolder {
     }
 
     @JvmStatic
-    SLInventoryOpenHelper getInstance() {
+     fun getInstance(): SLInventoryOpenHelper {
         return InstanceHolder.Instance
     }
 
-    private Boolean initTables(SQLiteDatabase sQLiteDatabase) throws SQLiteException {
+     private fun initTables(sQLiteDatabase: SQLiteDatabase) throws SQLiteException {
         sQLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS DBVersion (Version INTEGER);")
-        Cursor query = null
-        Boolean isNewDb = false
-        Boolean needsUpgrade = false
+        val query: Cursor = null
+        val isNewDb: Boolean = false
+        val needsUpgrade: Boolean = false
         
         try {
-            query = sQLiteDatabase.query("DBVersion", String[]{"Version"}, null, null, null, null, null)
+            query = sQLiteDatabase.query("DBVersion", Array<String>{"Version"}, null, null, null, null, null)
             if (!query.moveToFirst()) {
                 isNewDb = true
                 needsUpgrade = true
@@ -84,7 +84,7 @@ private class InstanceHolder {
                         Debug.Printf("Inventory init: %s", createStatement)
                         sQLiteDatabase.execSQL(createStatement)
                     }
-                    ContentValues contentValues = ContentValues()
+                    val contentValues: ContentValues = ContentValues()
                     contentValues.put("Version", DB_VERSION)
                     if (isNewDb) {
                         sQLiteDatabase.insert("DBVersion", null, contentValues)
@@ -98,7 +98,7 @@ private class InstanceHolder {
                 Debug.Printf("Upgraded database to version %d", DB_VERSION)
                 return true
             } catch (Exception e) {
-                SQLiteException sQLiteException = SQLiteException("Database initialization failed: " + e.getMessage())
+                val sQLiteException: SQLiteException = SQLiteException("Database initialization failed: " + e.getMessage())
                 sQLiteException.initCause(e)
                 throw sQLiteException
             }
@@ -123,12 +123,12 @@ private class InstanceHolder {
         }
     }
 
-    public SQLiteDatabase openOrCreateDatabase(String str) throws SQLiteException {
+     public fun openOrCreateDatabase(str: String) throws SQLiteException {
         if (str == null || str.trim().isEmpty()) {
             throw SQLiteException("Database path cannot be null or empty")
         }
         
-        SQLiteDatabase openOrCreateDatabase = SQLiteDatabase.openOrCreateDatabase(str, null)
+        val openOrCreateDatabase: SQLiteDatabase = SQLiteDatabase.openOrCreateDatabase(str, null)
         if (openOrCreateDatabase == null) {
             throw SQLiteException("Failed to open database: " + str)
         }

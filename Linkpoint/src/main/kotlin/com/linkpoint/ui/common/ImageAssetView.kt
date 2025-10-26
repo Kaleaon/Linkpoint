@@ -47,7 +47,7 @@ class ImageAssetView : View() {
             this()
         }
 
-        fun OnResourceReady(Object obj, Boolean z) {
+        fun OnResourceReady(obj: Object, z: Boolean) {
             if (obj instanceof OpenJPEG) {
                 this.texture = (OpenJPEG) obj
             }
@@ -57,7 +57,7 @@ class ImageAssetView : View() {
         }
 
         /* access modifiers changed from: protected */
-        public Bitmap doInBackground(UUID... uuidArr) {
+         public override fun doInBackground(vararg uuidArr: UUID): Bitmap {
             Debug.Printf("loading asset ID %s", uuidArr[0].toString())
             TextureCache.getInstance().RequestResource(DrawableTextureParams.create(uuidArr[0], TextureClass.Asset), this)
             synchronized (this.textureReady) {
@@ -81,13 +81,13 @@ class ImageAssetView : View() {
         }
 
         /* access modifiers changed from: protected */
-        fun onPostExecute(Bitmap bitmap) {
-            Bitmap unused = ImageAssetView.this.imageBitmap = bitmap
+        override fun onPostExecute(bitmap: Bitmap) {
+            val unused: Bitmap = ImageAssetView.this.imageBitmap = bitmap
             if (ImageAssetView.this.verticalFit) {
                 ImageAssetView.this.requestLayout()
             }
             ImageAssetView.this.invalidate()
-            LoadAssetImageTask unused2 = ImageAssetView.this.loadTask = null
+            val unused2: LoadAssetImageTask = ImageAssetView.this.loadTask = null
         }
     }
 
@@ -104,12 +104,12 @@ class ImageAssetView : View() {
     }
 
     /* access modifiers changed from: protected */
-    fun onAttachedToWindow() {
+    override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        DisplayMetrics displayMetrics = getResources().getDisplayMetrics()
-        TypedValue typedValue = TypedValue()
+        val displayMetrics: DisplayMetrics = getResources().getDisplayMetrics()
+        val typedValue: TypedValue = TypedValue()
         getContext().getTheme().resolveAttribute(R.attr.chatBubbleText, typedValue, true)
-        Int i = typedValue.data
+        val i: Int = typedValue.data
         this.textPaint.setStyle(Paint.Style.STROKE)
         this.textPaint.setColor(i)
         this.textPaint.setTextAlign(Paint.Align.CENTER)
@@ -118,26 +118,26 @@ class ImageAssetView : View() {
     }
 
     /* access modifiers changed from: protected */
-    fun onDraw(Canvas canvas) {
-        Int width = getWidth()
-        Int height = getHeight()
+    override fun onDraw(canvas: Canvas) {
+        val width: Int = getWidth()
+        val height: Int = getHeight()
         this.bitmapPaint.setStyle(Paint.Style.STROKE)
         this.bitmapPaint.setARGB(255, 192, 192, 192)
         this.bitmapPaint.setTextAlign(Paint.Align.CENTER)
         if (this.imageBitmap == null || width == 0 || height == 0) {
             canvas.drawARGB(50, 0, 0, 0)
-            String str = (this.assetID == null || UUIDPool.ZeroUUID.equals(this.assetID)) ? "No image" : this.loadTask == null ? "Failed to load" : this.loadTask.getStatus() == AsyncTask.Status.FINISHED ? "Failed to load" : "Loading..."
+            val str: String = (this.assetID == null || UUIDPool.ZeroUUID.equals(this.assetID)) ? "No image" : this.loadTask == null ? "Failed to load" : this.loadTask.getStatus() == AsyncTask.Status.FINISHED ? "Failed to load" : "Loading..."
             this.textPaint.getTextBounds(str, 0, str.length(), this.bitmapSrcRect)
             canvas.drawText(str, ((Float) width) / 2.0f, (((Float) height) / 2.0f) + (((Float) this.bitmapSrcRect.height()) / 2.0f), this.textPaint)
             return
         }
-        Int width2 = this.imageBitmap.getWidth()
-        Int height2 = this.imageBitmap.getHeight()
-        Float max = Math.max(((Float) width2) / ((Float) width), ((Float) height2) / ((Float) height))
-        Int round = Math.round(((Float) width2) / max)
-        Int round2 = Math.round(((Float) height2) / max)
-        Int i = (width / 2) - (round / 2)
-        Int i2 = this.alignTop ? 0 : (height / 2) - (round2 / 2)
+        val width2: Int = this.imageBitmap.getWidth()
+        val height2: Int = this.imageBitmap.getHeight()
+        val max: Float = Math.max(((Float) width2) / ((Float) width), ((Float) height2) / ((Float) height))
+        val round: Int = Math.round(((Float) width2) / max)
+        val round2: Int = Math.round(((Float) height2) / max)
+        val i: Int = (width / 2) - (round / 2)
+        val i2: Int = this.alignTop ? 0 : (height / 2) - (round2 / 2)
         this.bitmapDestRect.left = i + 1
         this.bitmapDestRect.top = i2 + 1
         this.bitmapDestRect.right = (round + i) - 1
@@ -159,21 +159,21 @@ class ImageAssetView : View() {
         this.bitmapSrcRect.right = width2
         this.bitmapSrcRect.bottom = height2
         canvas.drawBitmap(this.imageBitmap, this.bitmapSrcRect, this.bitmapDestRect, this.bitmapPaint)
-        Rect rect = this.bitmapDestRect
+        val rect: Rect = this.bitmapDestRect
         rect.left--
-        Rect rect2 = this.bitmapDestRect
+        val rect2: Rect = this.bitmapDestRect
         rect2.top--
         canvas.drawRect(this.bitmapDestRect, this.bitmapPaint)
     }
 
     /* access modifiers changed from: protected */
-    fun onMeasure(Int i, Int i2) {
+    override fun onMeasure(i: Int, i2: Int) {
         if (View.MeasureSpec.getMode(i) == 0 && View.MeasureSpec.getMode(i2) == 0) {
             super.onMeasure(i, i2)
             return
         }
-        Int min = Math.min(View.MeasureSpec.getMode(i2) != 0 ? View.MeasureSpec.getSize(i2) : Integer.MAX_VALUE, View.MeasureSpec.getMode(i) != 0 ? View.MeasureSpec.getSize(i) : Integer.MAX_VALUE)
-        Int size = View.MeasureSpec.getMode(i) == 1073741824 ? View.MeasureSpec.getSize(i) : min
+        val min: Int = Math.min(View.MeasureSpec.getMode(i2) != 0 ? View.MeasureSpec.getSize(i2) : Integer.MAX_VALUE, View.MeasureSpec.getMode(i) != 0 ? View.MeasureSpec.getSize(i) : Integer.MAX_VALUE)
+        val size: Int = View.MeasureSpec.getMode(i) == 1073741824 ? View.MeasureSpec.getSize(i) : min
         if (View.MeasureSpec.getMode(i2) == 1073741824) {
             min = View.MeasureSpec.getSize(i2)
         }
@@ -183,13 +183,13 @@ class ImageAssetView : View() {
         setMeasuredDimension(size, min)
     }
 
-    fun setAlignTop(Boolean z) {
+    fun setAlignTop(z: Boolean) {
         this.alignTop = z
         invalidate()
     }
 
-    fun setAssetID(UUID uuid) {
-        Object[] objArr = Object[1]
+    fun setAssetID(uuid: UUID) {
+        val objArr: Array<Any> = Object[1]
         objArr[0] = uuid != null ? uuid.toString() : null
         Debug.Printf("asset ID: %s", objArr)
         if (uuid != null && uuid.equals(UUIDPool.ZeroUUID)) {
@@ -208,13 +208,13 @@ class ImageAssetView : View() {
             if (this.assetID != null) {
                 Debug.Printf("requested to view asset ID %s", uuid)
                 this.loadTask = LoadAssetImageTask(this, (LoadAssetImageTask) null)
-                this.loadTask.execute(UUID[]{uuid})
+                this.loadTask.execute(Array<UUID>{uuid})
             }
             invalidate()
         }
     }
 
-    fun setVerticalFit(Boolean z) {
+    fun setVerticalFit(z: Boolean) {
         this.verticalFit = z
         requestLayout()
     }

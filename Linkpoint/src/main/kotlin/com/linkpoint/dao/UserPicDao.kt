@@ -12,7 +12,7 @@ class UserPicDao : AbstractDao()<UserPic, Long> {
 
     @JvmStatic
     class Properties {
-        const val Property Bitmap = Property(2, Byte[].class, "bitmap", false, "BITMAP")
+        const val Property Bitmap = Property(2, ByteArray.class, "bitmap", false, "BITMAP")
         const val Property Id = Property(0, Long.class, "id", true, "_id")
         const val Property Uuid = Property(1, String.class, "uuid", false, "UUID")
     }
@@ -26,53 +26,53 @@ class UserPicDao : AbstractDao()<UserPic, Long> {
     }
 
     @JvmStatic
-    Unit createTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
-        String str = z ? "IF NOT EXISTS " : ""
+     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
+        val str: String = z ? "IF NOT EXISTS " : ""
         sQLiteDatabase.execSQL("CREATE TABLE " + str + "'USER_PIC' (" + "'_id' INTEGER PRIMARY KEY ," + "'UUID' TEXT," + "'BITMAP' BLOB);")
         sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_USER_PIC_UUID ON USER_PIC" + " (UUID);")
     }
 
     @JvmStatic
-    Unit dropTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'USER_PIC'")
     }
 
-    protected Unit bindValues(SQLiteStatement sQLiteStatement, UserPic userPic) {
+     protected fun bindValues(sQLiteStatement: SQLiteStatement, userPic: UserPic) {
         sQLiteStatement.clearBindings()
-        Long id = userPic.getId()
+        val id: Long = userPic.getId()
         if (id != null) {
             sQLiteStatement.bindLong(1, id.longValue())
         }
-        String uuid = userPic.getUuid()
+        val uuid: String = userPic.getUuid()
         if (uuid != null) {
             sQLiteStatement.bindString(2, uuid)
         }
-        Byte[] bitmap = userPic.getBitmap()
+        val bitmap: ByteArray = userPic.getBitmap()
         if (bitmap != null) {
             sQLiteStatement.bindBlob(3, bitmap)
         }
     }
 
-    public Long getKey(UserPic userPic) {
+     public fun getKey(userPic: UserPic): Long {
         return userPic != null ? userPic.getId() : null
     }
 
-    protected Boolean isEntityUpdateable() {
+     protected fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    public UserPic readEntity(Cursor cursor, Int i) {
-        Byte[] bArr = null
-        Long valueOf = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
-        String string = cursor.isNull(i + 1) ? null : cursor.getString(i + 1)
+     public fun readEntity(cursor: Cursor, i: Int): UserPic {
+        val bArr: ByteArray = null
+        val valueOf: Long = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
+        val string: String = cursor.isNull(i + 1) ? null : cursor.getString(i + 1)
         if (!cursor.isNull(i + 2)) {
             bArr = cursor.getBlob(i + 2)
         }
         return UserPic(valueOf, string, bArr)
     }
 
-    fun readEntity(Cursor cursor, UserPic userPic, Int i) {
-        Byte[] bArr = null
+    fun readEntity(cursor: Cursor, userPic: UserPic, i: Int) {
+        val bArr: ByteArray = null
         userPic.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
         userPic.setUuid(cursor.isNull(i + 1) ? null : cursor.getString(i + 1))
         if (!cursor.isNull(i + 2)) {
@@ -81,11 +81,11 @@ class UserPicDao : AbstractDao()<UserPic, Long> {
         userPic.setBitmap(bArr)
     }
 
-    public Long readKey(Cursor cursor, Int i) {
+     public fun readKey(cursor: Cursor, i: Int): Long {
         return cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
     }
 
-    protected Long updateKeyAfterInsert(UserPic userPic, Long j) {
+     protected fun updateKeyAfterInsert(userPic: UserPic, j: Long): Long {
         userPic.setId(Long.valueOf(j))
         return Long.valueOf(j)
     }

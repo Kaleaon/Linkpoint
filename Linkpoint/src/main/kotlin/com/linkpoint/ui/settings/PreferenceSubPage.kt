@@ -33,12 +33,12 @@ class PreferenceSubPage : Preference() {
         applyAttributes(context, attributeSet, i, i2)
     }
 
-    private Unit applyAttributes(Context context, AttributeSet attributeSet, Int i, Int i2) {
-        TypedArray obtainStyledAttributes = context.getTheme().obtainStyledAttributes(attributeSet, R.styleable.PreferenceSubPage, i, i2)
+     private fun applyAttributes(context: Context, attributeSet: AttributeSet, i: Int, i2: Int) {
+        val obtainStyledAttributes: TypedArray = context.getTheme().obtainStyledAttributes(attributeSet, R.styleable.PreferenceSubPage, i, i2)
         try {
             this.pageResource = obtainStyledAttributes.getResourceId(0, this.pageResource)
             this.pageNotificationDetails = obtainStyledAttributes.getBoolean(1, this.pageNotificationDetails)
-            String string = obtainStyledAttributes.getString(2)
+            val string: String = obtainStyledAttributes.getString(2)
             if (string != null) {
                 this.notificationType = NotificationType.valueOf(string)
             }
@@ -52,7 +52,7 @@ class PreferenceSubPage : Preference() {
     }
 
     /* access modifiers changed from: package-private */
-    public NotificationType getNotificationType() {
+     public fun getNotificationType(): NotificationType {
         if (this.pageNotificationDetails) {
             return this.notificationType
         }
@@ -60,20 +60,20 @@ class PreferenceSubPage : Preference() {
     }
 
     /* access modifiers changed from: package-private */
-    public Int getPageResource() {
+     public fun getPageResource(): Int {
         return this.pageResource
     }
 
-    public CharSequence getSummary() {
+     public fun getSummary(): CharSequence {
         if (!this.pageNotificationDetails || this.notificationType == null) {
             return super.getSummary()
         }
-        NotificationChannels instance = NotificationChannels.getInstance()
+        val instance: NotificationChannels = NotificationChannels.getInstance()
         if (instance.areNotificationsSystemControlled()) {
-            String notificationSummary = instance.getNotificationSummary(getContext(), instance.getChannelByType(this.notificationType))
+            val notificationSummary: String = instance.getNotificationSummary(getContext(), instance.getChannelByType(this.notificationType))
             return notificationSummary != null ? notificationSummary : super.getSummary()
         }
-        NotificationSettings notificationSettings = NotificationSettings(this.notificationType)
+        val notificationSettings: NotificationSettings = NotificationSettings(this.notificationType)
         notificationSettings.Load(getSharedPreferences())
         return notificationSettings.getSummary(getContext())
     }

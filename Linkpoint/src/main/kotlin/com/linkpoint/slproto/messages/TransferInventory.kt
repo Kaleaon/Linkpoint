@@ -28,15 +28,15 @@ class TransferInventory : SLMessage() {
         this.InfoBlock_Field = InfoBlock()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.InventoryBlock_Fields.size() * 17) + 53
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleTransferInventory(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 39)
@@ -50,13 +50,13 @@ class TransferInventory : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.InfoBlock_Field.SourceID = unpackUUID(byteBuffer)
         this.InfoBlock_Field.DestID = unpackUUID(byteBuffer)
         this.InfoBlock_Field.TransactionID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            InventoryBlock inventoryBlock = InventoryBlock()
+            val inventoryBlock: InventoryBlock = InventoryBlock()
             inventoryBlock.InventoryID = unpackUUID(byteBuffer)
             inventoryBlock.Type = unpackByte(byteBuffer)
             this.InventoryBlock_Fields.add(inventoryBlock)

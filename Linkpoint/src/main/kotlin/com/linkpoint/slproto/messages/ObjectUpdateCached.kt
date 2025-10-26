@@ -28,15 +28,15 @@ class ObjectUpdateCached : SLMessage() {
         this.RegionData_Field = RegionData()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.ObjectData_Fields.size() * 12) + 12
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleObjectUpdateCached(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.put(Ascii.SO)
         packLong(byteBuffer, this.RegionData_Field.RegionHandle)
         packShort(byteBuffer, (Short) this.RegionData_Field.TimeDilation)
@@ -48,12 +48,12 @@ class ObjectUpdateCached : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.RegionData_Field.RegionHandle = unpackLong(byteBuffer)
         this.RegionData_Field.TimeDilation = unpackShort(byteBuffer) & 65535
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ObjectData objectData = ObjectData()
+            val objectData: ObjectData = ObjectData()
             objectData.ID = unpackInt(byteBuffer)
             objectData.CRC = unpackInt(byteBuffer)
             objectData.UpdateFlags = unpackInt(byteBuffer)

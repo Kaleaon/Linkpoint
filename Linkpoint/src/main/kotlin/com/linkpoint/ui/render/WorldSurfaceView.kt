@@ -24,11 +24,11 @@ class WorldSurfaceView : GLSurfaceView() {
     val WorldViewActivity activity
     @SuppressLint({"HandlerLeak"})
     private val Handler mHandler = Handler() {
-        fun handleMessage(Message message) {
+        fun handleMessage(message: Message) {
             switch (message.what) {
                 case 1:
                     if (message.obj != null && (message.obj instanceof ObjectIntersectInfo)) {
-                        ObjectIntersectInfo objectIntersectInfo = (ObjectIntersectInfo) message.obj
+                        val objectIntersectInfo: ObjectIntersectInfo = (ObjectIntersectInfo) message.obj
                         Debug.Log("UI!!! PICKED OBJECT isAvatar " + objectIntersectInfo.objInfo.isAvatar() + " local ID " + Integer.toString(objectIntersectInfo.objInfo.localID))
                         if (!(objectIntersectInfo.objInfo instanceof SLObjectAvatarInfo ? ((SLObjectAvatarInfo) objectIntersectInfo.objInfo).isMyAvatar() : false)) {
                             WorldSurfaceView.this.activity.handlePickedObject(objectIntersectInfo)
@@ -68,13 +68,13 @@ class WorldSurfaceView : GLSurfaceView() {
     WorldSurfaceView(WorldViewActivity worldViewActivity, UserManager userManager) {
         super(worldViewActivity)
         this.activity = worldViewActivity
-        Int applyDimension = (Int) TypedValue.applyDimension(2, 16.0f, getResources().getDisplayMetrics())
+        val applyDimension: Int = (Int) TypedValue.applyDimension(2, 16.0f, getResources().getDisplayMetrics())
         this.supportsGL20 = ((ActivityManager) getContext().getSystemService("activity")).getDeviceConfigurationInfo().reqGlEsVersion >= 131072
         if (Debug.isDebugBuild()) {
             setDebugFlags(3)
         }
         this.wantGL20 = getWantGL20()
-        Object[] objArr = Object[2]
+        val objArr: Array<Any> = Object[2]
         objArr[0] = Integer.valueOf(Build.VERSION.SDK_INT)
         objArr[1] = this.wantGL20 ? "yes" : "no"
         Debug.Printf("WorldSurfaceView: API level %d, wantGL20 %s", objArr)
@@ -89,7 +89,7 @@ class WorldSurfaceView : GLSurfaceView() {
         setRenderer(this.renderer)
     }
 
-    private Boolean getWantGL20() {
+     private fun getWantGL20(): Boolean {
         if (GlobalOptions.getInstance().getAdvancedRendering()) {
             return this.supportsGL20
         }
@@ -138,7 +138,7 @@ class WorldSurfaceView : GLSurfaceView() {
         this.renderer.requestScreenshot(this.mHandler)
     }
 
-    fun onPause() {
+    override fun onPause() {
         Debug.Log("GLView: onPause () entered.")
         this.renderer.disableDrawing()
         Debug.Log("GLView: calling super.onPause ().")
@@ -146,10 +146,10 @@ class WorldSurfaceView : GLSurfaceView() {
         Debug.Log("GLView: onPause () exiting")
     }
 
-    fun onResume() {
+    override fun onResume() {
         super.onResume()
         if (this.wantGL20 == getWantGL20() || this.activity == null) {
-            WorldViewRenderer worldViewRenderer = this.renderer
+            val worldViewRenderer: WorldViewRenderer = this.renderer
             worldViewRenderer.getClass()
             queueEvent($Lambda$WbegR8yVWPTDY8X58dwHEd9HRSQ(worldViewRenderer))
             return
@@ -158,16 +158,16 @@ class WorldSurfaceView : GLSurfaceView() {
     }
 
     /* access modifiers changed from: package-private */
-    fun pickObjectHover(Float f, Float f2) {
+    fun pickObjectHover(f: Float, f2: Float) {
         this.renderer.pickObject(f, f2, this.mHandler)
     }
 
-    fun setAvatarCountLimit(Int i) {
+    fun setAvatarCountLimit(i: Int) {
         this.renderer.setAvatarCountLimit(i)
     }
 
     /* access modifiers changed from: package-private */
-    fun setDisplayedHUDid(Int i) {
+    fun setDisplayedHUDid(i: Int) {
         queueEvent(Runnable(i, this) {
 
             /* renamed from: -$f0 */
@@ -241,12 +241,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Wb
 
     }
 
-    fun setDrawDistance(Int i) {
+    fun setDrawDistance(i: Int) {
         this.renderer.setDrawDistance(i)
     }
 
     /* access modifiers changed from: package-private */
-    fun setDrawPickedObject(SLObjectInfo sLObjectInfo) {
+    fun setDrawPickedObject(sLObjectInfo: SLObjectInfo) {
         queueEvent(Runnable(this, sLObjectInfo) {
 
             /* renamed from: -$f0 */
@@ -321,14 +321,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Wb
     }
 
     /* access modifiers changed from: package-private */
-    fun setForcedTime(Boolean z, Float f) {
+    fun setForcedTime(z: Boolean, f: Float) {
         if (this.renderer != null) {
             this.renderer.setForcedTime(z, f)
         }
     }
 
     /* access modifiers changed from: package-private */
-    fun setHUDOffset(Float f, Float f2) {
+    fun setHUDOffset(f: Float, f2: Float) {
         queueEvent(Runnable(f, f2, this) {
 
             /* renamed from: -$f0 */
@@ -406,7 +406,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Wb
     }
 
     /* access modifiers changed from: package-private */
-    fun setHUDScaleFactor(Float f) {
+    fun setHUDScaleFactor(f: Float) {
         queueEvent(Runnable(f, this) {
 
             /* renamed from: -$f0 */
@@ -481,12 +481,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Wb
     }
 
     /* access modifiers changed from: package-private */
-    fun setIsInteracting(Boolean z) {
+    fun setIsInteracting(z: Boolean) {
         this.renderer.setIsInteracting(z)
     }
 
     /* access modifiers changed from: package-private */
-    fun setOwnAvatarHidden(Boolean z) {
+    fun setOwnAvatarHidden(z: Boolean) {
         if (this.ownAvatarHidden != z) {
             this.ownAvatarHidden = z
             queueEvent(Runnable(z, this) {
@@ -643,7 +643,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Wb
     }
 
     /* access modifiers changed from: package-private */
-    fun touchHUD(Float f, Float f2) {
+    fun touchHUD(f: Float, f2: Float) {
         queueEvent(Runnable(f, f2, this) {
 
             /* renamed from: -$f0 */

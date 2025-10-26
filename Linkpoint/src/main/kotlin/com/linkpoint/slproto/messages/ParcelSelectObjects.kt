@@ -34,15 +34,15 @@ class ParcelSelectObjects : SLMessage() {
         this.ParcelData_Field = ParcelData()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.ReturnIDs_Fields.size() * 16) + 45
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleParcelSelectObjects(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -54)
@@ -56,14 +56,14 @@ class ParcelSelectObjects : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ParcelData_Field.LocalID = unpackInt(byteBuffer)
         this.ParcelData_Field.ReturnType = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ReturnIDs returnIDs = ReturnIDs()
+            val returnIDs: ReturnIDs = ReturnIDs()
             returnIDs.ReturnID = unpackUUID(byteBuffer)
             this.ReturnIDs_Fields.add(returnIDs)
         }

@@ -114,28 +114,28 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             this.layoutInflater = LayoutInflater.from(context)
         }
 
-        public Int getItemCount() {
+         public fun getItemCount(): Int {
             if (this.data != null) {
                 return this.data.size()
             }
             return 0
         }
 
-        fun onBindViewHolder(MemberViewHolder memberViewHolder, Int i) {
+        fun onBindViewHolder(memberViewHolder: MemberViewHolder, i: Int) {
             if (this.data != null && i >= 0 && i < this.data.size()) {
                 memberViewHolder.bindToData(this.data.get(i), this.canDeleteMembers, this.canDeleteMyself)
             }
         }
 
-        public MemberViewHolder onCreateViewHolder(ViewGroup viewGroup, Int i) {
+         public override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): MemberViewHolder {
             return MemberViewHolder(this.layoutInflater.inflate(R.layout.group_role_member_list_item, viewGroup, false), GroupRoleMembersFragment.this.userManager.getUserID())
         }
 
-        fun onViewRecycled(MemberViewHolder memberViewHolder) {
+        fun onViewRecycled(memberViewHolder: MemberViewHolder) {
             memberViewHolder.recycle()
         }
 
-        fun setData(LazyList<GroupRoleMember> lazyList, Boolean z, Boolean z2) {
+        fun setData(lazyList: LazyList<GroupRoleMember>, z: Boolean, z2: Boolean) {
             this.data = lazyList
             this.canDeleteMembers = z
             this.canDeleteMyself = z2
@@ -162,8 +162,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
 
         /* access modifiers changed from: package-private */
-        fun bindToData(GroupRoleMember groupRoleMember, Boolean z, Boolean z2) {
-            Int i = 0
+        fun bindToData(groupRoleMember: GroupRoleMember, z: Boolean, z2: Boolean) {
+            val i: Int = 0
             ChatterID.ChatterIDUser userChatterID = groupRoleMember != null ? ChatterID.getUserChatterID(this.agentUUID, groupRoleMember.getUserID()) : null
             if (!Objects.equal(userChatterID, this.boundChatterID)) {
                 if (this.chatterNameRetriever != null) {
@@ -185,21 +185,21 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                 z2 = false
             }
             this.canDelete = z2
-            ImageButton imageButton = this.roleMemberRemoveButton
+            val imageButton: ImageButton = this.roleMemberRemoveButton
             if (!this.canDelete) {
                 i = 8
             }
             imageButton.setVisibility(i)
         }
 
-        fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever2) {
+        fun onChatterNameUpdated(chatterNameRetriever2: ChatterNameRetriever) {
             if (chatterNameRetriever2 != null) {
                 this.userNameTextView.setText(chatterNameRetriever2.getResolvedName())
                 this.userPicView.setChatterID(chatterNameRetriever2.chatterID, chatterNameRetriever2.getResolvedName())
             }
         }
 
-        fun onClick(View view) {
+        override fun onClick(view: View) {
             switch (view.getId()) {
                 case R.id.role_member_remove_button:
                     if (this.boundChatterID != null && this.canDelete) {
@@ -234,7 +234,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    private Long getMyGroupPowers() {
+     private fun getMyGroupPowers(): Long {
         AvatarGroupList.AvatarGroupEntry myGroupEntry = getMyGroupEntry()
         if (myGroupEntry != null) {
             return myGroupEntry.GroupPowers
@@ -243,8 +243,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     @JvmStatic
-    Bundle makeSelection(ChatterID chatterID, UUID uuid) {
-        Bundle makeSelection = ChatterFragment.makeSelection(chatterID)
+     fun makeSelection(chatterID: ChatterID, uuid: UUID): Bundle {
+        val makeSelection: Bundle = ChatterFragment.makeSelection(chatterID)
         if (uuid != null) {
             makeSelection.putString(ROLE_ID_KEY, uuid.toString())
         }
@@ -253,7 +253,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onGroupRoleMemberList */
-    fun m494com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRoleMembersFragmentmthref0(UUID uuid) {
+    fun m494com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRoleMembersFragmentmthref0(uuid: UUID) {
         if (this.userManager != null && (this.chatterID instanceof ChatterID.ChatterIDGroup) && this.RoleID != null) {
             this.roleMembers.subscribe(this.userManager.getChatterList().getGroupManager().getGroupRoleMemberList(), GroupManager.GroupRoleMembersQuery.create(((ChatterID.ChatterIDGroup) this.chatterID).getChatterUUID(), this.RoleID, uuid))
         }
@@ -372,8 +372,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View inflate = layoutInflater.inflate(R.layout.group_profile_role_members, viewGroup, false)
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+        val inflate: View = layoutInflater.inflate(R.layout.group_profile_role_members, viewGroup, false)
         ((LoadingLayout) inflate.findViewById(R.id.loading_layout)).setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout))
         inflate.findViewById(R.id.add_role_member_button).setOnClickListener(View.OnClickListener(this) {
 
@@ -453,17 +453,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     fun onLoadableDataChanged() {
         GroupTitlesReply data
         AvatarGroupList.AvatarGroupEntry myGroupEntry
-        Boolean z3 = true
-        Int i = 0
+        val z3: Boolean = true
+        val i: Int = 0
         if (!(this.userManager == null || (myGroupEntry = getMyGroupEntry()) == null || this.groupTitles.isSubscribed())) {
             this.groupTitles.subscribe(this.userManager.getGroupTitles().getPool(), myGroupEntry.GroupID)
         }
         this.canAddMembers = false
-        Long myGroupPowers = getMyGroupPowers()
+        val myGroupPowers: Long = getMyGroupPowers()
         if ((256 & myGroupPowers) != 0) {
             this.canAddMembers = true
         } else if (!((128 & myGroupPowers) == 0 || (data = this.groupTitles.getData()) == null)) {
-            Iterator<T> it = data.GroupData_Fields.iterator()
+            val it: Iterator<T> = data.GroupData_Fields.iterator()
             while (true) {
                 if (it.hasNext()) {
                     if (((GroupTitlesReply.GroupData) it.next()).RoleID.equals(this.RoleID)) {
@@ -480,7 +480,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             }
         }
         if ((myGroupPowers & 512) != 0) {
-            GroupProfileReply data2 = this.groupProfile.getData()
+            val data2: GroupProfileReply = this.groupProfile.getData()
             if ((data2 == null || this.RoleID == null) ? false : this.RoleID.equals(data2.GroupData_Field.OwnerRole)) {
                 z2 = false
             } else {
@@ -491,9 +491,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             z3 = false
             z2 = false
         }
-        View view = getView()
+        val view: View = getView()
         if (view != null) {
-            View findViewById = view.findViewById(R.id.add_role_member_button)
+            val findViewById: View = view.findViewById(R.id.add_role_member_button)
             if (!this.canAddMembers) {
                 i = 8
             }
@@ -505,11 +505,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(ChatterID chatterID) {
+    fun onShowUser(chatterID: ChatterID) {
         this.loadableMonitor.unsubscribeAll()
         this.RoleID = UUIDPool.getUUID(getArguments().getString(ROLE_ID_KEY))
         if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDGroup)) {
-            UUID chatterUUID = ((ChatterID.ChatterIDGroup) chatterID).getChatterUUID()
+            val chatterUUID: UUID = ((ChatterID.ChatterIDGroup) chatterID).getChatterUUID()
             Debug.Printf("GroupRoleMemberList: subscribing for group %s", chatterUUID)
             this.agentCircuit.subscribe(UserManager.agentCircuits(), chatterID.agentUUID)
             this.groupProfile.subscribe(this.userManager.getCachedGroupProfiles().getPool(), chatterUUID)

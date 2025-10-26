@@ -22,7 +22,7 @@ abstract class ResourceFileCache<ResourceParams, ResourceType> : ResourceMemoryC
             LoaderExecutor.getInstance().execute(this)
         }
 
-        fun run() {
+        override fun run() {
             try {
                 completeRequest(ResourceFileCache.this.createResourceFromFile(getParams(), this.file))
             } catch (Exception e) {
@@ -33,7 +33,7 @@ abstract class ResourceFileCache<ResourceParams, ResourceType> : ResourceMemoryC
 
     /* access modifiers changed from: protected */
     public ResourceRequest<ResourceParams, ResourceType> CreateNewRequest(ResourceParams resourceparams, ResourceManager<ResourceParams, ResourceType> resourceManager) {
-        File resourceFile = getResourceFile(resourceparams)
+        val resourceFile: File = getResourceFile(resourceparams)
         return resourceFile.exists() ? ResourceLoadRequest(resourceparams, resourceManager, resourceFile) : createResourceGenRequest(resourceparams, resourceManager, resourceFile)
     }
 

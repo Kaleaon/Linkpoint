@@ -21,7 +21,7 @@ class TransactionLogFragment_ViewBinding : Unbinder {
 
     @CallSuper
     fun unbind() {
-        TransactionLogFragment transactionLogFragment = this.target
+        val transactionLogFragment: TransactionLogFragment = this.target
         if (transactionLogFragment == null) {
             throw IllegalStateException("Bindings already cleared.")
         }

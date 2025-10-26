@@ -100,7 +100,7 @@ abstract class SLObjectInfo : Identifiable<UUID> {
     public String touchName = ""
     val LinkedTreeNode<SLObjectInfo> treeNode = LinkedTreeNode<>(this)
     protected UUID uuid
-    public Float[] worldMatrix
+    public FloatArray worldMatrix
 
     /* JADX WARNING: Code restructure failed: missing block: B:3:0x001f, code lost:
         r7.objectCoords.set(0, com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseFloatVec(r8))
@@ -121,7 +121,7 @@ abstract class SLObjectInfo : Identifiable<UUID> {
         return
      */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    private Unit ParseObjectData(java.nio.ByteBuffer r8) {
+    private fun ParseObjectData(java.nio.ByteBuffer r8) {
         /*
             r7 = this
             r6 = 0
@@ -131,7 +131,7 @@ abstract class SLObjectInfo : Identifiable<UUID> {
             r2 = -1015021568(0xffffffffc3800000, Float:-256.0)
             java.nio.ByteOrder r0 = java.nio.ByteOrder.LITTLE_ENDIAN
             r8.order(r0)
-            Int r0 = r8.limit()
+            val r0: Int = r8.limit()
             switch(r0) {
                 case 16: goto L_0x0074
                 case 32: goto L_0x004b
@@ -143,8 +143,8 @@ abstract class SLObjectInfo : Identifiable<UUID> {
         L_0x0015:
             return
         L_0x0016:
-            Int r0 = r8.position()
-            Int r0 = r0 + 16
+            val r0: Int = r8.position()
+            val r0: Int = r0 + 16
             r8.position(r0)
         L_0x001f:
             com.lumiyaviewer.lumiya.slproto.types.Vector3Array r0 = r7.objectCoords
@@ -154,15 +154,15 @@ abstract class SLObjectInfo : Identifiable<UUID> {
             com.lumiyaviewer.lumiya.slproto.types.LLVector3 r1 = com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseFloatVec(r8)
             r2 = 2
             r0.set(r2, r1)
-            Int r0 = r8.position()
-            Int r0 = r0 + 12
+            val r0: Int = r8.position()
+            val r0: Int = r0 + 12
             r8.position(r0)
             com.lumiyaviewer.lumiya.slproto.types.LLQuaternion r0 = com.lumiyaviewer.lumiya.slproto.types.LLQuaternion.parseFloatVec3(r8)
             r7.rotation = r0
             goto L_0x0015
         L_0x0042:
-            Int r0 = r8.position()
-            Int r0 = r0 + 16
+            val r0: Int = r8.position()
+            val r0: Int = r0 + 16
             r8.position(r0)
         L_0x004b:
             com.lumiyaviewer.lumiya.slproto.types.Vector3Array r0 = r7.objectCoords
@@ -173,8 +173,8 @@ abstract class SLObjectInfo : Identifiable<UUID> {
             com.lumiyaviewer.lumiya.slproto.types.LLVector3 r1 = com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseU16Vec(r8, r2, r3, r2, r3)
             r2 = 2
             r0.set(r2, r1)
-            Int r0 = r8.position()
-            Int r0 = r0 + 6
+            val r0: Int = r8.position()
+            val r0: Int = r0 + 6
             r8.position(r0)
             r0 = -1082130432(0xffffffffbf800000, Float:-1.0)
             r1 = 1065353216(0x3f800000, Float:1.0)
@@ -189,8 +189,8 @@ abstract class SLObjectInfo : Identifiable<UUID> {
             com.lumiyaviewer.lumiya.slproto.types.LLVector3 r1 = com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseU8Vec(r8, r2, r3, r2, r3)
             r2 = 2
             r0.set(r2, r1)
-            Int r0 = r8.position()
-            Int r0 = r0 + 3
+            val r0: Int = r8.position()
+            val r0: Int = r0 + 3
             r8.position(r0)
             r0 = -1082130432(0xffffffffbf800000, Float:-1.0)
             r1 = 1065353216(0x3f800000, Float:1.0)
@@ -201,10 +201,10 @@ abstract class SLObjectInfo : Identifiable<UUID> {
         throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo.ParseObjectData(java.nio.ByteBuffer):Unit")
     }
 
-    private Unit applyHoverText(HoverText hoverText2) {
+     private fun applyHoverText(hoverText2: HoverText) {
         if (!Objects.equal(this.hoverText, hoverText2)) {
             this.hoverText = hoverText2
-            DrawableObject drawableObject = getDrawableObject()
+            val drawableObject: DrawableObject = getDrawableObject()
             if (drawableObject != null) {
                 drawableObject.setHoverText(hoverText2)
             }
@@ -212,38 +212,38 @@ abstract class SLObjectInfo : Identifiable<UUID> {
     }
 
     @JvmStatic
-private Int attachmentIDFromState(Int i) {
+ private fun attachmentIDFromState(i: Int): Int {
         return (((i & 255) & AGENT_ATTACH_MASK) >> 4) | (((i & 255) & -241) << 4)
     }
 
-    private Float[] calculateWorldMatrix(Float[] fArr) {
-        LLQuaternion lLQuaternion = this.rotation
+     private fun calculateWorldMatrix(fArr: FloatArray): FloatArray {
+        val lLQuaternion: LLQuaternion = this.rotation
         if (lLQuaternion == null) {
             return null
         }
-        Float[] fArr2 = Float[16]
-        Float[] fArr3 = Float[16]
+        val fArr2: FloatArray = Float[16]
+        val fArr3: FloatArray = Float[16]
         this.objectCoords.MatrixTranslate(fArr3, 0, fArr, 0, 0)
         Matrix.multiplyMM(fArr2, 0, fArr3, 0, lLQuaternion.getInverseMatrix(), 0)
         return fArr2
     }
 
     @JvmStatic
-    SLObjectInfo create(ObjectUpdateCompressed.ObjectData objectData) throws UnsupportedObjectTypeException {
-        SLObjectPrimInfo sLObjectPrimInfo = SLObjectPrimInfo()
+     fun create(ObjectUpdateCompressed.ObjectData objectData) throws UnsupportedObjectTypeException {
+        val sLObjectPrimInfo: SLObjectPrimInfo = SLObjectPrimInfo()
         sLObjectPrimInfo.ApplyObjectUpdate(objectData)
         return sLObjectPrimInfo
     }
 
     @JvmStatic
-    SLObjectInfo create(UUID uuid2, ObjectUpdate.ObjectData objectData, UUID uuid3) {
-        SLObjectInfo sLObjectAvatarInfo = objectData.PCode == 47 ? SLObjectAvatarInfo(uuid2, UUIDPool.getUUID(objectData.FullID), uuid3.equals(objectData.FullID)) : SLObjectPrimInfo()
+     fun create(uuid2: UUID, ObjectUpdate.ObjectData objectData, uuid3: UUID): SLObjectInfo {
+        val sLObjectAvatarInfo: SLObjectInfo = objectData.PCode == 47 ? SLObjectAvatarInfo(uuid2, UUIDPool.getUUID(objectData.FullID), uuid3.equals(objectData.FullID)) : SLObjectPrimInfo()
         sLObjectAvatarInfo.ApplyObjectUpdate(objectData)
         return sLObjectAvatarInfo
     }
 
-    private DrawableObject getDrawableObject() {
-        DrawListObjectEntry existingDrawListEntry = getExistingDrawListEntry()
+     private fun getDrawableObject(): DrawableObject {
+        val existingDrawListEntry: DrawListObjectEntry = getExistingDrawListEntry()
         if (existingDrawListEntry instanceof DrawListPrimEntry) {
             return ((DrawListPrimEntry) existingDrawListEntry).getDrawableObject()
         }
@@ -251,26 +251,26 @@ private Int attachmentIDFromState(Int i) {
     }
 
     @JvmStatic
-    Int getLocalID(ImprovedTerseObjectUpdate.ObjectData objectData) {
-        ByteBuffer wrap = ByteBuffer.wrap(objectData.Data)
+     fun getLocalID(ImprovedTerseObjectUpdate.ObjectData objectData): Int {
+        val wrap: ByteBuffer = ByteBuffer.wrap(objectData.Data)
         wrap.order(ByteOrder.LITTLE_ENDIAN)
         return wrap.getInt()
     }
 
     @JvmStatic
-    Int getLocalID(ObjectUpdateCompressed.ObjectData objectData) {
-        ByteBuffer wrap = ByteBuffer.wrap(objectData.Data)
+     fun getLocalID(ObjectUpdateCompressed.ObjectData objectData): Int {
+        val wrap: ByteBuffer = ByteBuffer.wrap(objectData.Data)
         wrap.position(16)
         wrap.order(ByteOrder.LITTLE_ENDIAN)
         return wrap.getInt()
     }
 
-    private Unit parseNameValuePairs(String str) {
+     private fun parseNameValuePairs(str: String) {
         for (String str2 : str.split("\n")) {
             if (str2.startsWith("AttachItemID ")) {
-                Int i = 0
+                val i: Int = 0
                 while (i < 4) {
-                    Int indexOf = str2.indexOf(32)
+                    val indexOf: Int = str2.indexOf(32)
                     if (indexOf >= 0) {
                         str2 = str2.substring(indexOf + 1)
                     }
@@ -283,9 +283,9 @@ private Int attachmentIDFromState(Int i) {
                     this.attachedToUUID = null
                 }
             } else if (str2.startsWith("DisplayName ")) {
-                Int i2 = 0
+                val i2: Int = 0
                 while (i2 < 4) {
-                    Int indexOf2 = str2.indexOf(32)
+                    val indexOf2: Int = str2.indexOf(32)
                     if (indexOf2 >= 0) {
                         str2 = str2.substring(indexOf2 + 1)
                     }
@@ -298,14 +298,14 @@ private Int attachmentIDFromState(Int i) {
         }
     }
 
-    private Unit updateAttachments() {
+     private fun updateAttachments() {
         DrawableAvatar drawableAvatar
         if (isAvatar() && (drawableAvatar = SpatialIndex.getInstance().getDrawableAvatar(this)) != null) {
             drawableAvatar.updateAttachments()
         }
     }
 
-    private Unit updateSpatialIndex(SpatialObjectIndex spatialObjectIndex, Boolean z) {
+     private fun updateSpatialIndex(spatialObjectIndex: SpatialObjectIndex, z: Boolean) {
         updateWorldMatrix(false)
         if (z) {
             synchronized (this) {
@@ -339,7 +339,7 @@ private Int attachmentIDFromState(Int i) {
     }
 
     fun ApplyObjectUpdate(ObjectUpdate.ObjectData objectData) {
-        PrimVolumeParams primVolumeParams = null
+        val primVolumeParams: PrimVolumeParams = null
         this.localID = objectData.ID
         this.uuid = UUIDPool.getUUID(objectData.FullID)
         this.UpdateFlags = objectData.UpdateFlags
@@ -349,9 +349,9 @@ private Int attachmentIDFromState(Int i) {
             this.ownerUUID = UUIDPool.getUUID(objectData.OwnerID)
         }
         this.objectCoords.set(1, objectData.Scale)
-        String stringFromVariableOEM = SLMessage.stringFromVariableOEM(objectData.Text)
+        val stringFromVariableOEM: String = SLMessage.stringFromVariableOEM(objectData.Text)
         applyHoverText(Strings.isNullOrEmpty(stringFromVariableOEM) ? null : HoverText.create(stringFromVariableOEM, objectData.TextColor.length >= 4 ? (objectData.TextColor[0] & UnsignedBytes.MAX_VALUE) | ((objectData.TextColor[1] << 8) & 65280) | ((objectData.TextColor[2] << 16) & 16711680) | ((objectData.TextColor[3] << Ascii.CAN) & -16777216) : 0))
-        PrimVolumeParams createFromObjectUpdate = PrimVolumeParams.createFromObjectUpdate(objectData)
+        val createFromObjectUpdate: PrimVolumeParams = PrimVolumeParams.createFromObjectUpdate(objectData)
         if (!(createFromObjectUpdate == null || objectData.ExtraParams == null)) {
             createFromObjectUpdate.unpackExtraParams(ByteBuffer.wrap(objectData.ExtraParams).order(ByteOrder.LITTLE_ENDIAN))
         }
@@ -359,11 +359,11 @@ private Int attachmentIDFromState(Int i) {
         if (createFromObjectUpdate != null) {
             primVolumeParams = PrimParamsPool.get(createFromObjectUpdate)
         }
-        PrimDrawParams primDrawParams2 = PrimParamsPool.get(PrimDrawParams(primVolumeParams, SLTextureEntry.create(ByteBuffer.wrap(objectData.TextureEntry), objectData.TextureEntry.length)))
+        val primDrawParams2: PrimDrawParams = PrimParamsPool.get(PrimDrawParams(primVolumeParams, SLTextureEntry.create(ByteBuffer.wrap(objectData.TextureEntry), objectData.TextureEntry.length)))
         onTexturesUpdate(primDrawParams2.getTextures())
         if (!Objects.equal(this.primDrawParams, primDrawParams2)) {
             this.primDrawParams = primDrawParams2
-            DrawableObject drawableObject = getDrawableObject()
+            val drawableObject: DrawableObject = getDrawableObject()
             if (drawableObject != null) {
                 drawableObject.setPrimDrawParams(this.primDrawParams)
             }
@@ -383,35 +383,35 @@ private Int attachmentIDFromState(Int i) {
             r10 = 0
             r3 = 0
             r1 = 0
-            Int r0 = r13.UpdateFlags
+            val r0: Int = r13.UpdateFlags
             r12.UpdateFlags = r0
-            Byte[] r0 = r13.Data
+            val r0: ByteArray = r13.Data
             java.nio.ByteBuffer r4 = java.nio.ByteBuffer.wrap(r0)
             java.nio.ByteOrder r0 = java.nio.ByteOrder.BIG_ENDIAN
             r4.order(r0)
-            Long r6 = r4.getLong()
-            Long r8 = r4.getLong()
+            val r6: Long = r4.getLong()
+            val r8: Long = r4.getLong()
             java.util.UUID r0 = r12.uuid
             java.util.UUID r0 = com.lumiyaviewer.lumiya.utils.UUIDPool.setUUID(r0, r6, r8)
             r12.uuid = r0
             java.nio.ByteOrder r0 = java.nio.ByteOrder.LITTLE_ENDIAN
             r4.order(r0)
-            Int r0 = r4.getInt()
+            val r0: Int = r4.getInt()
             r12.localID = r0
-            Byte r0 = r4.get()
+            val r0: Byte = r4.get()
             r2 = 9
             if (r0 == r2) goto L_0x003c
             com.lumiyaviewer.lumiya.slproto.objects.UnsupportedObjectTypeException r1 = com.lumiyaviewer.lumiya.slproto.objects.UnsupportedObjectTypeException
             r1.<init>(r0)
             throw r1
         L_0x003c:
-            Byte r0 = r4.get()
-            Int r0 = attachmentIDFromState(r0)
+            val r0: Byte = r4.get()
+            val r0: Int = attachmentIDFromState(r0)
             r12.attachmentID = r0
-            Int r0 = r4.position()
-            Int r0 = r0 + 4
-            Int r0 = r0 + 1
-            Int r0 = r0 + 1
+            val r0: Int = r4.position()
+            val r0: Int = r0 + 4
+            val r0: Int = r0 + 1
+            val r0: Int = r0 + 1
             r4.position(r0)
             com.lumiyaviewer.lumiya.slproto.types.LLVector3 r0 = com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseFloatVec(r4)
             com.lumiyaviewer.lumiya.slproto.types.LLVector3 r2 = com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseFloatVec(r4)
@@ -422,16 +422,16 @@ private Int attachmentIDFromState(Int i) {
             r0.set(r1, r2)
             com.lumiyaviewer.lumiya.slproto.types.LLQuaternion r0 = com.lumiyaviewer.lumiya.slproto.types.LLQuaternion.parseFloatVec3(r4)
             r12.rotation = r0
-            Int r5 = r4.getInt()
+            val r5: Int = r4.getInt()
             java.nio.ByteOrder r0 = java.nio.ByteOrder.BIG_ENDIAN
             r4.order(r0)
-            Long r6 = r4.getLong()
-            Long r8 = r4.getLong()
+            val r6: Long = r4.getLong()
+            val r8: Long = r4.getLong()
             java.util.UUID r0 = r12.ownerUUID
             if (r0 == 0) goto L_0x0089
-            Int r0 = (r6 > r10 ? 1 : (r6 == r10 ? 0 : -1))
+            val r0: Int = (r6 > r10 ? 1 : (r6 == r10 ? 0 : -1))
             if (r0 == 0) goto L_0x0091
-            Int r0 = (r8 > r10 ? 1 : (r8 == r10 ? 0 : -1))
+            val r0: Int = (r8 > r10 ? 1 : (r8 == r10 ? 0 : -1))
             if (r0 == 0) goto L_0x0091
         L_0x0089:
             java.util.UUID r0 = r12.ownerUUID
@@ -442,45 +442,45 @@ private Int attachmentIDFromState(Int i) {
             r4.order(r0)
             r0 = r5 & 128(0x80, Float:1.794E-43)
             if (r0 == 0) goto L_0x00a3
-            Int r0 = r4.position()
-            Int r0 = r0 + 12
+            val r0: Int = r4.position()
+            val r0: Int = r0 + 12
             r4.position(r0)
         L_0x00a3:
             r0 = r5 & 32
             if (r0 == 0) goto L_0x00ad
-            Int r0 = r4.getInt()
+            val r0: Int = r4.getInt()
             r12.parentID = r0
         L_0x00ad:
             r0 = r5 & 2
             if (r0 == 0) goto L_0x012c
-            Int r0 = r4.position()
-            Int r0 = r0 + 1
+            val r0: Int = r4.position()
+            val r0: Int = r0 + 1
             r4.position(r0)
         L_0x00ba:
             r0 = r5 & 4
             if (r0 == 0) goto L_0x00f6
-            Int r6 = r4.position()
+            val r6: Int = r4.position()
             r0 = r1
         L_0x00c3:
-            Int r2 = r6 + r0
-            Int r7 = r4.capacity()
+            val r2: Int = r6 + r0
+            val r7: Int = r4.capacity()
             if (r2 >= r7) goto L_0x00d3
-            Int r2 = r6 + r0
-            Byte r2 = r4.get(r2)
+            val r2: Int = r6 + r0
+            val r2: Byte = r4.get(r2)
             if (r2 != 0) goto L_0x013e
         L_0x00d3:
             if (r0 == 0) goto L_0x01b7
-            Byte[] r7 = Byte[r0]
+            val r7: ByteArray = Byte[r0]
             r4.get(r7, r1, r0)
             java.lang.String r2 = java.lang.String     // Catch:{ UnsupportedEncodingException -> 0x0141 }
             java.lang.String r8 = "ISO-8859-1"
             r2.<init>(r7, r8)     // Catch:{ UnsupportedEncodingException -> 0x0141 }
         L_0x00e2:
-            Int r0 = r0 + r6
-            Int r0 = r0 + 1
+            val r0: Int = r0 + r6
+            val r0: Int = r0 + 1
             r4.position(r0)
-            Int r0 = r4.getInt()
-            Boolean r6 = com.google.common.base.Strings.isNullOrEmpty(r2)
+            val r0: Int = r4.getInt()
+            val r6: Boolean = com.google.common.base.Strings.isNullOrEmpty(r2)
             if (r6 == 0) goto L_0x0144
             r0 = r3
         L_0x00f3:
@@ -489,38 +489,38 @@ private Int attachmentIDFromState(Int i) {
             r0 = r5 & 512(0x200, Float:7.175E-43)
             if (r0 == 0) goto L_0x0100
         L_0x00fa:
-            Byte r0 = r4.get()
+            val r0: Byte = r4.get()
             if (r0 != 0) goto L_0x00fa
         L_0x0100:
             r0 = r5 & 8
             if (r0 == 0) goto L_0x010d
-            Int r0 = r4.position()
-            Int r0 = r0 + 86
+            val r0: Int = r4.position()
+            val r0: Int = r0 + 86
             r4.position(r0)
         L_0x010d:
-            Int r2 = r4.position()
-            Byte r0 = r4.get()
+            val r2: Int = r4.position()
+            val r0: Byte = r4.get()
             r6 = r0 & 255(0xff, Float:3.57E-43)
             r0 = r1
         L_0x0118:
             if (r0 >= r6) goto L_0x0149
             r4.getShort()
-            Int r7 = r4.getInt()
-            Int r8 = r4.position()
-            Int r7 = r7 + r8
+            val r7: Int = r4.getInt()
+            val r8: Int = r4.position()
+            val r7: Int = r7 + r8
             r4.position(r7)
-            Int r0 = r0 + 1
+            val r0: Int = r0 + 1
             goto L_0x0118
         L_0x012c:
             r0 = r5 & 1
             if (r0 == 0) goto L_0x00ba
-            Byte r0 = r4.get()
-            Int r2 = r4.position()
-            Int r0 = r0 + r2
+            val r0: Byte = r4.get()
+            val r2: Int = r4.position()
+            val r0: Int = r0 + r2
             r4.position(r0)
             goto L_0x00ba
         L_0x013e:
-            Int r0 = r0 + 1
+            val r0: Int = r0 + 1
             goto L_0x00c3
         L_0x0141:
             r2 = move-exception
@@ -532,23 +532,23 @@ private Int attachmentIDFromState(Int i) {
         L_0x0149:
             r0 = r5 & 16
             if (r0 == 0) goto L_0x0163
-            Int r0 = r4.position()
-            Int r0 = r0 + 16
+            val r0: Int = r4.position()
+            val r0: Int = r0 + 16
             r4.position(r0)
-            Int r0 = r4.position()
-            Int r0 = r0 + 4
-            Int r0 = r0 + 1
-            Int r0 = r0 + 4
+            val r0: Int = r4.position()
+            val r0: Int = r0 + 4
+            val r0: Int = r0 + 1
+            val r0: Int = r0 + 4
             r4.position(r0)
         L_0x0163:
             r0 = r5 & 256(0x100, Float:3.59E-43)
             if (r0 == 0) goto L_0x016d
         L_0x0167:
-            Byte r0 = r4.get()
+            val r0: Byte = r4.get()
             if (r0 != 0) goto L_0x0167
         L_0x016d:
             com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeParams r5 = com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeParams.createFromPackedData(r4)
-            Int r0 = r4.getInt()     // Catch:{ Exception -> 0x01ac }
+            val r0: Int = r4.getInt()     // Catch:{ Exception -> 0x01ac }
             com.lumiyaviewer.lumiya.slproto.textures.SLTextureEntry r0 = com.lumiyaviewer.lumiya.slproto.textures.SLTextureEntry.create((java.nio.ByteBuffer) r4, (Int) r0)     // Catch:{ Exception -> 0x01ac }
             r12.onTexturesUpdate(r0)     // Catch:{ Exception -> 0x01b5 }
         L_0x017c:
@@ -563,7 +563,7 @@ private Int attachmentIDFromState(Int i) {
             r2.<init>(r3, r0)
             com.lumiyaviewer.lumiya.slproto.prims.PrimDrawParams r0 = com.lumiyaviewer.lumiya.slproto.prims.PrimParamsPool.get((com.lumiyaviewer.lumiya.slproto.prims.PrimDrawParams) r2)
             com.lumiyaviewer.lumiya.slproto.prims.PrimDrawParams r2 = r12.primDrawParams
-            Boolean r2 = com.google.common.base.Objects.equal(r2, r0)
+            val r2: Boolean = com.google.common.base.Objects.equal(r2, r0)
             if (r2 != 0) goto L_0x01a8
             r12.primDrawParams = r0
             com.lumiyaviewer.lumiya.render.DrawableObject r0 = r12.getDrawableObject()
@@ -591,31 +591,31 @@ private Int attachmentIDFromState(Int i) {
     }
 
     fun ApplyTerseObjectUpdate(ImprovedTerseObjectUpdate.ObjectData objectData) {
-        ByteBuffer wrap = ByteBuffer.wrap(objectData.Data)
+        val wrap: ByteBuffer = ByteBuffer.wrap(objectData.Data)
         wrap.order(ByteOrder.LITTLE_ENDIAN)
         wrap.getInt()
         this.attachmentID = attachmentIDFromState(wrap.get())
         if (wrap.get() != 0) {
             wrap.position(wrap.position() + 16)
         }
-        LLVector3 parseFloatVec = LLVector3.parseFloatVec(wrap)
-        LLVector3 parseU16Vec = LLVector3.parseU16Vec(wrap, -128.0f, 128.0f, -128.0f, 128.0f)
+        val parseFloatVec: LLVector3 = LLVector3.parseFloatVec(wrap)
+        val parseU16Vec: LLVector3 = LLVector3.parseU16Vec(wrap, -128.0f, 128.0f, -128.0f, 128.0f)
         this.objectCoords.set(0, parseFloatVec)
         this.objectCoords.set(2, parseU16Vec)
         wrap.position(wrap.position() + 6)
         this.rotation = LLQuaternion.parseU16Vec3(wrap, -1.0f, 1.0f)
         wrap.position(wrap.position() + 6)
         if (objectData.TextureEntry.length > 4) {
-            ByteBuffer wrap2 = ByteBuffer.wrap(objectData.TextureEntry)
+            val wrap2: ByteBuffer = ByteBuffer.wrap(objectData.TextureEntry)
             wrap2.position(4)
-            SLTextureEntry create = SLTextureEntry.create(wrap2, wrap2.remaining())
+            val create: SLTextureEntry = SLTextureEntry.create(wrap2, wrap2.remaining())
             onTexturesUpdate(create)
-            PrimDrawParams primDrawParams2 = this.primDrawParams
+            val primDrawParams2: PrimDrawParams = this.primDrawParams
             if (primDrawParams2 != null && !create.equals(primDrawParams2.getTextures())) {
-                PrimDrawParams primDrawParams3 = PrimParamsPool.get(PrimDrawParams(primDrawParams2.getVolumeParams(), create))
+                val primDrawParams3: PrimDrawParams = PrimParamsPool.get(PrimDrawParams(primDrawParams2.getVolumeParams(), create))
                 if (!Objects.equal(this.primDrawParams, primDrawParams3)) {
                     this.primDrawParams = primDrawParams3
-                    DrawableObject drawableObject = getDrawableObject()
+                    val drawableObject: DrawableObject = getDrawableObject()
                     if (drawableObject != null) {
                         drawableObject.setPrimDrawParams(this.primDrawParams)
                     }
@@ -642,9 +642,9 @@ private Int attachmentIDFromState(Int i) {
     /* access modifiers changed from: protected */
     public abstract DrawListObjectEntry createDrawListEntry()
 
-    public LLVector3 getAbsolutePosition() {
-        SLObjectInfo parentObject = getParentObject()
-        LLVector3 lLVector3 = this.objectCoords.get(0)
+     public fun getAbsolutePosition(): LLVector3 {
+        val parentObject: SLObjectInfo = getParentObject()
+        val lLVector3: LLVector3 = this.objectCoords.get(0)
         if (parentObject == null) {
             return lLVector3
         }
@@ -655,24 +655,24 @@ private Int attachmentIDFromState(Int i) {
         return lLVector3
     }
 
-    public SLObjectInfo getAttachedTo() {
-        SLObjectInfo parentObject = getParentObject()
+     public fun getAttachedTo(): SLObjectInfo {
+        val parentObject: SLObjectInfo = getParentObject()
         if (parentObject != null) {
             return parentObject.isAvatar() ? parentObject : parentObject.getAttachedTo()
         }
         return null
     }
 
-    public String getDescription() {
+     public fun getDescription(): String {
         return this.description
     }
 
-    public DrawListObjectEntry getDrawListEntry() {
-        WeakReference<DrawListObjectEntry> weakReference = this.drawListEntry
-        DrawListObjectEntry drawListObjectEntry = weakReference != null ? (DrawListObjectEntry) weakReference.get() : null
+     public fun getDrawListEntry(): DrawListObjectEntry {
+        val weakReference: WeakReference<DrawListObjectEntry> = this.drawListEntry
+        val drawListObjectEntry: DrawListObjectEntry = weakReference != null ? (DrawListObjectEntry) weakReference.get() : null
         if (drawListObjectEntry == null) {
             synchronized (this) {
-                WeakReference<DrawListObjectEntry> weakReference2 = this.drawListEntry
+                val weakReference2: WeakReference<DrawListObjectEntry> = this.drawListEntry
                 drawListObjectEntry = weakReference2 != null ? (DrawListObjectEntry) weakReference2.get() : null
                 if (drawListObjectEntry == null) {
                     drawListObjectEntry = createDrawListEntry()
@@ -683,35 +683,35 @@ private Int attachmentIDFromState(Int i) {
         return drawListObjectEntry
     }
 
-    public DrawListObjectEntry getExistingDrawListEntry() {
-        WeakReference<DrawListObjectEntry> weakReference = this.drawListEntry
+     public fun getExistingDrawListEntry(): DrawListObjectEntry {
+        val weakReference: WeakReference<DrawListObjectEntry> = this.drawListEntry
         if (weakReference != null) {
             return (DrawListObjectEntry) weakReference.get()
         }
         return null
     }
 
-    public HoverText getHoverText() {
+     public fun getHoverText(): HoverText {
         return this.hoverText
     }
 
-    public UUID getId() {
+     public fun getId(): UUID {
         return this.uuid
     }
 
-    public String getName() {
+     public fun getName(): String {
         return this.name
     }
 
-    public Vector3Array getObjectCoords() {
+     public fun getObjectCoords(): Vector3Array {
         return this.objectCoords
     }
 
-    fun getObjectExtents(MatrixStack matrixStack, Boolean z, LLVector3 lLVector3, LLVector3 lLVector32) {
-        Float[] fArr = Float[8]
-        Int elementOffset = this.objectCoords.getElementOffset(0)
-        Int elementOffset2 = this.objectCoords.getElementOffset(1)
-        Float[] data = this.objectCoords.getData()
+    fun getObjectExtents(matrixStack: MatrixStack, z: Boolean, lLVector3: LLVector3, lLVector32: LLVector3) {
+        val fArr: FloatArray = Float[8]
+        val elementOffset: Int = this.objectCoords.getElementOffset(0)
+        val elementOffset2: Int = this.objectCoords.getElementOffset(1)
+        val data: FloatArray = this.objectCoords.getData()
         matrixStack.glPushMatrix()
         matrixStack.glTranslatef(data[elementOffset + 0], data[elementOffset + 1], data[elementOffset + 2])
         matrixStack.glMultMatrixf(this.rotation.getInverseMatrix(), 0)
@@ -756,24 +756,24 @@ private Int attachmentIDFromState(Int i) {
         matrixStack.glPopMatrix()
     }
 
-    public UUID getOwnerUUID() {
+     public fun getOwnerUUID(): UUID {
         return (this.ownerUUID != null && this.ownerUUID.getLeastSignificantBits() == 0 && this.ownerUUID.getMostSignificantBits() == 0) ? this.creatorUUID : this.ownerUUID
     }
 
-    public SLObjectInfo getParentObject() {
+     public fun getParentObject(): SLObjectInfo {
         return this.treeNode.getParent()
     }
 
-    public PayInfo getPayInfo() {
+     public fun getPayInfo(): PayInfo {
         return this.payInfo
     }
 
-    public PrimDrawParams getPrimDrawParams() {
+     public fun getPrimDrawParams(): PrimDrawParams {
         return this.primDrawParams
     }
 
-    public SLObjectInfo getRootPrim() {
-        SLObjectInfo parent = this.treeNode.getParent()
+     public fun getRootPrim(): SLObjectInfo {
+        val parent: SLObjectInfo = this.treeNode.getParent()
         return (parent != null && !parent.isAvatar()) ? parent.getRootPrim() : this
     }
 
@@ -781,11 +781,11 @@ private Int attachmentIDFromState(Int i) {
         return this.rotation
     }
 
-    public String getTouchName() {
+     public fun getTouchName(): String {
         return this.touchName
     }
 
-    public Boolean hasTouchableChildren() {
+     public fun hasTouchableChildren(): Boolean {
         try {
             for (SLObjectInfo isTouchable : this.treeNode) {
                 if (isTouchable.isTouchable()) {
@@ -814,8 +814,8 @@ private Int attachmentIDFromState(Int i) {
         return false
     }
 
-    public Boolean isMyAttachment() {
-        SLObjectInfo parentObject = getParentObject()
+     public fun isMyAttachment(): Boolean {
+        val parentObject: SLObjectInfo = getParentObject()
         if (parentObject instanceof SLObjectAvatarInfo) {
             return ((SLObjectAvatarInfo) parentObject).isMyAvatar()
         }
@@ -831,7 +831,7 @@ private Int attachmentIDFromState(Int i) {
     }
 
     /* access modifiers changed from: protected */
-    fun onTexturesUpdate(SLTextureEntry sLTextureEntry) {
+    fun onTexturesUpdate(sLTextureEntry: SLTextureEntry) {
     }
 
     public synchronized Unit removeChild(SLObjectInfo sLObjectInfo) {
@@ -843,7 +843,7 @@ private Int attachmentIDFromState(Int i) {
     }
 
     fun removeFromSpatialIndex() {
-        DrawListObjectEntry existingDrawListEntry = getExistingDrawListEntry()
+        val existingDrawListEntry: DrawListObjectEntry = getExistingDrawListEntry()
         if (existingDrawListEntry != null) {
             existingDrawListEntry.requestEntryRemoval()
         }
@@ -868,21 +868,21 @@ private Int attachmentIDFromState(Int i) {
         return
     }
 
-    fun setPayInfo(PayInfo payInfo2) {
+    fun setPayInfo(payInfo2: PayInfo) {
         this.payInfo = payInfo2
     }
 
-    fun updateSpatialIndex(Boolean z) {
+    fun updateSpatialIndex(z: Boolean) {
         updateSpatialIndex(SpatialIndex.getInstance().getObjectIndex(), z)
     }
 
-    fun updateWorldMatrix(Boolean z) {
-        SLObjectInfo parentObject = getParentObject()
-        Float[] matrix = parentObject == null ? IdentityMatrix.getMatrix() : parentObject.isAvatar() ? IdentityMatrix.getMatrix() : parentObject.worldMatrix
+    fun updateWorldMatrix(z: Boolean) {
+        val parentObject: SLObjectInfo = getParentObject()
+        val matrix: FloatArray = parentObject == null ? IdentityMatrix.getMatrix() : parentObject.isAvatar() ? IdentityMatrix.getMatrix() : parentObject.worldMatrix
         if (matrix != null) {
             this.objRadius = this.objectCoords.getMaxComponent(1) / 2.0f
-            Float[] calculateWorldMatrix = calculateWorldMatrix(matrix)
-            Float[] fArr = this.worldMatrix
+            val calculateWorldMatrix: FloatArray = calculateWorldMatrix(matrix)
+            val fArr: FloatArray = this.worldMatrix
             if (fArr == null || !Arrays.equals(calculateWorldMatrix, fArr)) {
                 this.worldMatrix = calculateWorldMatrix
                 this.objectCoords.set(3, this.worldMatrix[12], this.worldMatrix[13], this.worldMatrix[14])

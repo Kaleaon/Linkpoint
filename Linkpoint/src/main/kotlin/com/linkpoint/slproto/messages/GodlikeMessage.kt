@@ -22,12 +22,12 @@ class GodlikeMessage : SLMessage() {
     @JvmStatic
     class MethodData {
         public UUID Invoice
-        public Byte[] Method
+        public ByteArray Method
     }
 
     @JvmStatic
     class ParamList {
-        public Byte[] Parameter
+        public ByteArray Parameter
     }
 
     public GodlikeMessage() {
@@ -36,11 +36,11 @@ class GodlikeMessage : SLMessage() {
         this.MethodData_Field = MethodData()
     }
 
-    public Int CalcPayloadSize() {
-        Int length = this.MethodData_Field.Method.length + 1 + 16 + 52 + 1
-        Iterator<T> it = this.ParamList_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val length: Int = this.MethodData_Field.Method.length + 1 + 16 + 52 + 1
+        val it: Iterator<T> = this.ParamList_Fields.iterator()
         while (true) {
-            Int i = length
+            val i: Int = length
             if (!it.hasNext()) {
                 return i
             }
@@ -48,11 +48,11 @@ class GodlikeMessage : SLMessage() {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleGodlikeMessage(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 3)
@@ -67,15 +67,15 @@ class GodlikeMessage : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.TransactionID = unpackUUID(byteBuffer)
         this.MethodData_Field.Method = unpackVariable(byteBuffer, 1)
         this.MethodData_Field.Invoice = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ParamList paramList = ParamList()
+            val paramList: ParamList = ParamList()
             paramList.Parameter = unpackVariable(byteBuffer, 1)
             this.ParamList_Fields.add(paramList)
         }

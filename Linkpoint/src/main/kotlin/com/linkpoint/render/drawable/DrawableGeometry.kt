@@ -20,8 +20,8 @@ import com.linkpoint.rawbuffers.DirectByteBuffer
 
 val class DrawableGeometry : GLCleanable {
     private val Int FaceCount
-    private val Int[] FaceIndexStartsCounts
-    private val Int[] FaceVertexStartsCounts
+    private val IntArray FaceIndexStartsCounts
+    private val IntArray FaceVertexStartsCounts
     private val GLLoadableBuffer IndexBuffer
     private val Int IndexCount
     private val Int IndexSizeBytes
@@ -37,10 +37,10 @@ val class DrawableGeometry : GLCleanable {
     public DrawableGeometry(MeshData meshData2) throws CreateFailureException {
         this.isRiggedMesh = meshData2.isRiggedMesh()
         this.FaceCount = meshData2.getFaceCount()
-        Int i = 0
-        Int i2 = 0
+        val i: Int = 0
+        val i2: Int = 0
         for (Int i3 = 0; i3 < this.FaceCount; i3++) {
-            MeshFace face = meshData2.getFace(i3)
+            val face: MeshFace = meshData2.getFace(i3)
             if (face.getVertices() != null) {
                 i += face.getNumVertices()
                 i2 += face.getNumIndices()
@@ -55,19 +55,19 @@ val class DrawableGeometry : GLCleanable {
         this.FaceVertexStartsCounts = Int[(this.FaceCount * 2)]
         this.VertexSizeBytes = i * 4 * 6
         this.IndexSizeBytes = i2 * 2
-        DirectByteBuffer directByteBuffer = DirectByteBuffer(this.VertexSizeBytes)
-        DirectByteBuffer directByteBuffer2 = DirectByteBuffer(this.IndexSizeBytes)
-        DirectByteBuffer directByteBuffer3 = DirectByteBuffer(i * 4 * 2)
-        Int i4 = 0
-        Int i5 = 0
-        Int i6 = 0
-        Int i7 = 0
+        val directByteBuffer: DirectByteBuffer = DirectByteBuffer(this.VertexSizeBytes)
+        val directByteBuffer2: DirectByteBuffer = DirectByteBuffer(this.IndexSizeBytes)
+        val directByteBuffer3: DirectByteBuffer = DirectByteBuffer(i * 4 * 2)
+        val i4: Int = 0
+        val i5: Int = 0
+        val i6: Int = 0
+        val i7: Int = 0
         this.facesCombined = false
         for (Int i8 = 0; i8 < this.FaceCount; i8++) {
-            MeshFace face2 = meshData2.getFace(i8)
-            DirectByteBuffer vertices = face2.getVertices()
-            DirectByteBuffer texCoords = face2.getTexCoords()
-            Int numVertices = face2.getNumVertices()
+            val face2: MeshFace = meshData2.getFace(i8)
+            val vertices: DirectByteBuffer = face2.getVertices()
+            val texCoords: DirectByteBuffer = face2.getTexCoords()
+            val numVertices: Int = face2.getNumVertices()
             if (face2.getNumVertices() == 0 || face2.getNumIndices() == 0) {
                 throw CreateFailureException("Empty mesh")
             }
@@ -76,8 +76,8 @@ val class DrawableGeometry : GLCleanable {
                 if (texCoords != null) {
                     directByteBuffer3.copyFromFloat(i5 * 2, texCoords, 0, numVertices * 2)
                 }
-                DirectByteBuffer indices = face2.getIndices()
-                Int numIndices = face2.getNumIndices()
+                val indices: DirectByteBuffer = face2.getIndices()
+                val numIndices: Int = face2.getNumIndices()
                 for (Int i9 = 0; i9 < numIndices; i9++) {
                     if ((indices.getShort(i9) & 65535) >= numVertices) {
                         throw CreateFailureException("Too many vertices")
@@ -85,13 +85,13 @@ val class DrawableGeometry : GLCleanable {
                 }
                 directByteBuffer2.copyFromShort(i4, face2.getIndices(), 0, face2.getNumIndices())
             }
-            Int i10 = i6 + 1
+            val i10: Int = i6 + 1
             this.FaceIndexStartsCounts[i6] = i8
-            Int i11 = i10 + 1
+            val i11: Int = i10 + 1
             this.FaceIndexStartsCounts[i10] = i4
             i6 = i11 + 1
             this.FaceIndexStartsCounts[i11] = face2.getNumIndices()
-            Int i12 = i7 + 1
+            val i12: Int = i7 + 1
             this.FaceVertexStartsCounts[i7] = i5
             i7 = i12 + 1
             this.FaceVertexStartsCounts[i12] = numVertices
@@ -112,7 +112,7 @@ val class DrawableGeometry : GLCleanable {
         }
     }
 
-    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v13, resolved type: Int[]} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v13, resolved type: IntArray} */
     /* JADX WARNING: type inference failed for: r5v6 */
     /* JADX WARNING: type inference failed for: r5v7, types: [Short, Int] */
     /* JADX WARNING: type inference failed for: r5v10 */
@@ -141,14 +141,14 @@ val class DrawableGeometry : GLCleanable {
             r1 = r3
             r2 = r3
         L_0x0026:
-            Boolean r0 = r5.hasNext()
+            val r0: Boolean = r5.hasNext()
             if (r0 == 0) goto L_0x003a
             java.lang.Object r0 = r5.next()
             com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace r0 = (com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace) r0
-            Int r6 = r0.NumVertices
-            Int r2 = r2 + r6
-            Int r0 = r0.NumIndices
-            Int r0 = r0 + r1
+            val r6: Int = r0.NumVertices
+            val r2: Int = r2 + r6
+            val r0: Int = r0.NumIndices
+            val r0: Int = r0 + r1
             r1 = r0
             goto L_0x0026
         L_0x003a:
@@ -163,28 +163,28 @@ val class DrawableGeometry : GLCleanable {
             throw r0
         L_0x004b:
             java.util.ArrayList<com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace> r0 = r4.VolumeFaces
-            Int r0 = r0.size()
+            val r0: Int = r0.size()
             r13.FaceCount = r0
-            Int r0 = r13.FaceCount
-            Int r0 = r0 * 3
-            Int[] r0 = Int[r0]
+            val r0: Int = r13.FaceCount
+            val r0: Int = r0 * 3
+            val r0: IntArray = Int[r0]
             r13.FaceIndexStartsCounts = r0
-            Int r0 = r13.FaceCount
-            Int r0 = r0 * 2
-            Int[] r0 = Int[r0]
+            val r0: Int = r13.FaceCount
+            val r0: Int = r0 * 2
+            val r0: IntArray = Int[r0]
             r13.FaceVertexStartsCounts = r0
-            Int r0 = r2 * 4
-            Int r0 = r0 * 6
+            val r0: Int = r2 * 4
+            val r0: Int = r0 * 6
             r13.VertexSizeBytes = r0
-            Int r0 = r1 * 2
+            val r0: Int = r1 * 2
             r13.IndexSizeBytes = r0
-            Int r0 = r2 * 4
-            Int r5 = r0 * 2
+            val r0: Int = r2 * 4
+            val r5: Int = r0 * 2
             com.lumiyaviewer.rawbuffers.DirectByteBuffer r9 = com.lumiyaviewer.rawbuffers.DirectByteBuffer
-            Int r0 = r13.VertexSizeBytes
+            val r0: Int = r13.VertexSizeBytes
             r9.<init>((Int) r0)
             com.lumiyaviewer.rawbuffers.DirectByteBuffer r0 = com.lumiyaviewer.rawbuffers.DirectByteBuffer
-            Int r6 = r13.IndexSizeBytes
+            val r6: Int = r13.IndexSizeBytes
             r0.<init>((Int) r6)
             com.lumiyaviewer.rawbuffers.DirectByteBuffer r10 = com.lumiyaviewer.rawbuffers.DirectByteBuffer
             r10.<init>((Int) r5)
@@ -193,7 +193,7 @@ val class DrawableGeometry : GLCleanable {
             r1 = 1
         L_0x0089:
             r13.facesCombined = r1
-            Boolean r1 = r13.facesCombined
+            val r1: Boolean = r13.facesCombined
             if (r1 == 0) goto L_0x00fb
             java.util.ArrayList<com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace> r1 = r4.VolumeFaces
             java.util.Iterator r11 = r1.iterator()
@@ -202,49 +202,49 @@ val class DrawableGeometry : GLCleanable {
             r8 = r3
             r1 = r3
         L_0x0099:
-            Boolean r2 = r11.hasNext()
+            val r2: Boolean = r11.hasNext()
             if (r2 == 0) goto L_0x0162
             java.lang.Object r2 = r11.next()
             r6 = r2
             com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace r6 = (com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace) r6
-            Int r2 = r5 * 6
+            val r2: Int = r5 * 6
             com.lumiyaviewer.lumiya.slproto.types.VertexArray r4 = r6.vertexArray
-            Float[] r4 = r4.getData()
-            Int r12 = r6.NumVertices
-            Int r12 = r12 * 6
+            val r4: FloatArray = r4.getData()
+            val r12: Int = r6.NumVertices
+            val r12: Int = r12 * 6
             r9.loadFromFloatArray(r2, r4, r3, r12)
-            Int r2 = r5 * 2
+            val r2: Int = r5 * 2
             com.lumiyaviewer.lumiya.slproto.types.VertexArray r4 = r6.vertexArray
-            Float[] r4 = r4.getTexCoordsData()
-            Int r12 = r6.NumVertices
-            Int r12 = r12 * 2
+            val r4: FloatArray = r4.getTexCoordsData()
+            val r12: Int = r6.NumVertices
+            val r12: Int = r12 * 2
             r10.loadFromFloatArray(r2, r4, r3, r12)
-            Short[] r2 = r6.Indices
-            Int r4 = r6.NumIndices
+            val r2: ShortArray = r6.Indices
+            val r4: Int = r6.NumIndices
             r0.loadFromShortArrayOffset(r1, r2, r3, r4, r5)
-            Int[] r2 = r13.FaceIndexStartsCounts
-            Int r4 = r8 + 1
-            Int r12 = r6.ID
+            val r2: IntArray = r13.FaceIndexStartsCounts
+            val r4: Int = r8 + 1
+            val r12: Int = r6.ID
             r2[r8] = r12
-            Int[] r2 = r13.FaceIndexStartsCounts
-            Int r8 = r4 + 1
+            val r2: IntArray = r13.FaceIndexStartsCounts
+            val r8: Int = r4 + 1
             r2[r4] = r1
-            Int[] r2 = r13.FaceIndexStartsCounts
-            Int r4 = r8 + 1
-            Int r12 = r6.NumIndices
+            val r2: IntArray = r13.FaceIndexStartsCounts
+            val r4: Int = r8 + 1
+            val r12: Int = r6.NumIndices
             r2[r8] = r12
-            Int[] r2 = r13.FaceVertexStartsCounts
-            Int r8 = r7 + 1
+            val r2: IntArray = r13.FaceVertexStartsCounts
+            val r8: Int = r7 + 1
             r2[r7] = r5
-            Int[] r7 = r13.FaceVertexStartsCounts
-            Int r2 = r8 + 1
-            Int r12 = r6.NumVertices
+            val r7: IntArray = r13.FaceVertexStartsCounts
+            val r2: Int = r8 + 1
+            val r12: Int = r6.NumVertices
             r7[r8] = r12
-            Int r7 = r6.NumVertices
-            Int r5 = r5 + r7
-            Short r5 = (Short) r5
-            Int r6 = r6.NumIndices
-            Int r1 = r1 + r6
+            val r7: Int = r6.NumVertices
+            val r5: Int = r5 + r7
+            val r5: Short = (Short) r5
+            val r6: Int = r6.NumIndices
+            val r1: Int = r1 + r6
             r7 = r2
             r8 = r4
             goto L_0x0099
@@ -259,47 +259,47 @@ val class DrawableGeometry : GLCleanable {
             r5 = r3
             r6 = r3
         L_0x0105:
-            Boolean r1 = r7.hasNext()
+            val r1: Boolean = r7.hasNext()
             if (r1 == 0) goto L_0x0162
             java.lang.Object r1 = r7.next()
             com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace r1 = (com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace) r1
-            Int r8 = r2 * 6
+            val r8: Int = r2 * 6
             com.lumiyaviewer.lumiya.slproto.types.VertexArray r11 = r1.vertexArray
-            Float[] r11 = r11.getData()
-            Int r12 = r1.NumVertices
-            Int r12 = r12 * 6
+            val r11: FloatArray = r11.getData()
+            val r12: Int = r1.NumVertices
+            val r12: Int = r12 * 6
             r9.loadFromFloatArray(r8, r11, r3, r12)
-            Int r8 = r2 * 2
+            val r8: Int = r2 * 2
             com.lumiyaviewer.lumiya.slproto.types.VertexArray r11 = r1.vertexArray
-            Float[] r11 = r11.getTexCoordsData()
-            Int r12 = r1.NumVertices
-            Int r12 = r12 * 2
+            val r11: FloatArray = r11.getTexCoordsData()
+            val r12: Int = r1.NumVertices
+            val r12: Int = r12 * 2
             r10.loadFromFloatArray(r8, r11, r3, r12)
-            Short[] r8 = r1.Indices
-            Int r11 = r1.NumIndices
+            val r8: ShortArray = r1.Indices
+            val r11: Int = r1.NumIndices
             r0.loadFromShortArray(r6, r8, r3, r11)
-            Int[] r8 = r13.FaceIndexStartsCounts
-            Int r11 = r5 + 1
-            Int r12 = r1.ID
+            val r8: IntArray = r13.FaceIndexStartsCounts
+            val r11: Int = r5 + 1
+            val r12: Int = r1.ID
             r8[r5] = r12
-            Int[] r5 = r13.FaceIndexStartsCounts
-            Int r8 = r11 + 1
+            val r5: IntArray = r13.FaceIndexStartsCounts
+            val r8: Int = r11 + 1
             r5[r11] = r6
-            Int[] r11 = r13.FaceIndexStartsCounts
-            Int r5 = r8 + 1
-            Int r12 = r1.NumIndices
+            val r11: IntArray = r13.FaceIndexStartsCounts
+            val r5: Int = r8 + 1
+            val r12: Int = r1.NumIndices
             r11[r8] = r12
-            Int[] r8 = r13.FaceVertexStartsCounts
-            Int r11 = r4 + 1
+            val r8: IntArray = r13.FaceVertexStartsCounts
+            val r11: Int = r4 + 1
             r8[r4] = r2
-            Int[] r8 = r13.FaceVertexStartsCounts
-            Int r4 = r11 + 1
-            Int r12 = r1.NumVertices
+            val r8: IntArray = r13.FaceVertexStartsCounts
+            val r4: Int = r11 + 1
+            val r12: Int = r1.NumVertices
             r8[r11] = r12
-            Int r8 = r1.NumVertices
-            Int r2 = r2 + r8
-            Int r1 = r1.NumIndices
-            Int r1 = r1 + r6
+            val r8: Int = r1.NumVertices
+            val r2: Int = r2 + r8
+            val r1: Int = r1.NumIndices
+            val r1: Int = r1 + r6
             r6 = r1
             goto L_0x0105
         L_0x0162:
@@ -330,7 +330,7 @@ val class DrawableGeometry : GLCleanable {
 
     /* access modifiers changed from: package-private */
     val GLLoadableBuffer GLBindBuffers10(RenderContext renderContext, PrimFlexibleInfo primFlexibleInfo) {
-        GLLoadableBuffer flexedVertexBuffer = primFlexibleInfo != null ? primFlexibleInfo.getFlexedVertexBuffer(renderContext, this.VertexBuffer, this.VertexCount) : this.VertexBuffer
+        val flexedVertexBuffer: GLLoadableBuffer = primFlexibleInfo != null ? primFlexibleInfo.getFlexedVertexBuffer(renderContext, this.VertexBuffer, this.VertexCount) : this.VertexBuffer
         if (this.facesCombined) {
             flexedVertexBuffer.Bind(renderContext, 32884, 3, 5126, 24, 0)
             flexedVertexBuffer.Bind(renderContext, 32885, 3, 5126, 24, 12)
@@ -356,9 +356,9 @@ val class DrawableGeometry : GLCleanable {
                 } else {
                     this.vertexArrayObject = GLVertexArrayObject(renderContext.glResourceManager, this.FaceCount)
                     renderContext.glResourceManager.addCleanable(this)
-                    Int i = 0
+                    val i: Int = 0
                     while (true) {
-                        Int i2 = i
+                        val i2: Int = i
                         if (i2 >= this.FaceCount) {
                             break
                         }
@@ -393,9 +393,9 @@ val class DrawableGeometry : GLCleanable {
             if (this.vertexArrayObject == null) {
                 this.vertexArrayObject = GLVertexArrayObject(renderContext.glResourceManager, this.FaceCount)
                 renderContext.glResourceManager.addCleanable(this)
-                Int i = 0
+                val i: Int = 0
                 while (true) {
-                    Int i2 = i
+                    val i2: Int = i
                     if (i2 < this.FaceCount) {
                         this.vertexArrayObject.Bind(i2)
                         this.VertexBuffer.Bind20(renderContext, renderContext.curPrimProgram.vPosition, 3, 5126, 24, this.FaceVertexStartsCounts[i2 * 2] * 24)
@@ -435,7 +435,7 @@ val class DrawableGeometry : GLCleanable {
 
     /* access modifiers changed from: package-private */
     val Unit GLDrawFace10(RenderContext renderContext, Int i, GLLoadableBuffer gLLoadableBuffer) {
-        Int i2 = i * 3
+        val i2: Int = i * 3
         if (!this.facesCombined) {
             gLLoadableBuffer.Bind(renderContext, 32884, 3, 5126, 24, this.FaceVertexStartsCounts[i * 2] * 24)
             gLLoadableBuffer.Bind(renderContext, 32885, 3, 5126, 24, (this.FaceVertexStartsCounts[i * 2] * 24) + 12)
@@ -446,7 +446,7 @@ val class DrawableGeometry : GLCleanable {
 
     /* access modifiers changed from: package-private */
     val Unit GLDrawFace20(RenderContext renderContext, Int i) {
-        Int i2 = i * 3
+        val i2: Int = i * 3
         if (!renderContext.hasGL30) {
             if (!this.facesCombined) {
                 this.VertexBuffer.Bind20(renderContext, renderContext.curPrimProgram.vPosition, 3, 5126, 24, this.FaceVertexStartsCounts[i * 2] * 24)
@@ -458,7 +458,7 @@ val class DrawableGeometry : GLCleanable {
             }
             this.IndexBuffer.DrawElements20(4, this.FaceIndexStartsCounts[i2 + 2], 5123, this.FaceIndexStartsCounts[i2 + 1] * 2)
         } else if (this.vertexArrayObject != null) {
-            GLVertexArrayObject gLVertexArrayObject = this.vertexArrayObject
+            val gLVertexArrayObject: GLVertexArrayObject = this.vertexArrayObject
             if (this.facesCombined) {
                 i = 0
             }
@@ -471,40 +471,40 @@ val class DrawableGeometry : GLCleanable {
     /* access modifiers changed from: package-private */
     val Unit GLDrawRiggedFace30(RenderContext renderContext, Int i) {
         if (this.vertexArrayObject != null) {
-            Int i2 = i * 3
+            val i2: Int = i * 3
             this.vertexArrayObject.Bind(i)
             this.IndexBuffer.DrawElements20(4, this.FaceIndexStartsCounts[i2 + 2], 5123, this.FaceIndexStartsCounts[i2 + 1] * 2)
         }
     }
 
     /* access modifiers changed from: package-private */
-    public IntersectInfo IntersectRay(LLVector3 lLVector3, LLVector3 lLVector32) {
+    public fun IntersectRay(lLVector3: LLVector3, lLVector32: LLVector3): IntersectInfo {
         GLRayTrace.RayIntersectInfo rayIntersectInfo = null
-        Int i = -1
-        Int i2 = 0
-        Float f = 0.0f
-        LLVector3[] lLVector3Arr = LLVector3[3]
+        val i: Int = -1
+        val i2: Int = 0
+        val f: Float = 0.0f
+        val lLVector3Arr: Array<LLVector3> = LLVector3[3]
         for (Int i3 = 0; i3 < 3; i3++) {
             lLVector3Arr[i3] = LLVector3()
         }
         for (Int i4 = 0; i4 < this.FaceCount; i4++) {
-            Int i5 = i4 * 3
-            Int i6 = this.FaceIndexStartsCounts[i5 + 1]
-            Int i7 = this.FaceIndexStartsCounts[i5 + 2]
+            val i5: Int = i4 * 3
+            val i6: Int = this.FaceIndexStartsCounts[i5 + 1]
+            val i7: Int = this.FaceIndexStartsCounts[i5 + 2]
             for (Int i8 = 0; i8 < i7; i8 += 3) {
-                Int i9 = 0
+                val i9: Int = 0
                 while (true) {
-                    Int i10 = i9
+                    val i10: Int = i9
                     if (i10 >= 3) {
                         break
                     }
-                    Int i11 = (this.facesCombined ? this.IndexBuffer.getShort(i6 + i8 + i10) : this.IndexBuffer.getShort(i6 + i8 + i10) + this.FaceVertexStartsCounts[i4 * 2]) * 6
+                    val i11: Int = (this.facesCombined ? this.IndexBuffer.getShort(i6 + i8 + i10) : this.IndexBuffer.getShort(i6 + i8 + i10) + this.FaceVertexStartsCounts[i4 * 2]) * 6
                     lLVector3Arr[i10].set(this.VertexBuffer.getFloat(i11 + 0), this.VertexBuffer.getFloat(i11 + 1), this.VertexBuffer.getFloat(i11 + 2))
                     i9 = i10 + 1
                 }
                 GLRayTrace.RayIntersectInfo intersect_RayTriangle = GLRayTrace.intersect_RayTriangle(lLVector3, lLVector32, lLVector3Arr, 0)
                 if (intersect_RayTriangle != null) {
-                    Float f2 = intersect_RayTriangle.intersectPoint.w
+                    val f2: Float = intersect_RayTriangle.intersectPoint.w
                     if (rayIntersectInfo == null || f2 < f) {
                         f = f2
                         i2 = i4
@@ -517,13 +517,13 @@ val class DrawableGeometry : GLCleanable {
         if (rayIntersectInfo == null) {
             return null
         }
-        Int i12 = this.FaceIndexStartsCounts[(i2 * 3) + 1]
-        LLVector2[] lLVector2Arr = LLVector2[3]
-        Int i13 = 0
+        val i12: Int = this.FaceIndexStartsCounts[(i2 * 3) + 1]
+        val lLVector2Arr: Array<LLVector2> = LLVector2[3]
+        val i13: Int = 0
         while (true) {
-            Int i14 = i13
+            val i14: Int = i13
             if (i14 < 3) {
-                Int i15 = (this.facesCombined ? this.IndexBuffer.getShort(i12 + i + i14) : this.IndexBuffer.getShort(i12 + i + i14) + this.FaceVertexStartsCounts[i2 * 2]) * 2
+                val i15: Int = (this.facesCombined ? this.IndexBuffer.getShort(i12 + i + i14) : this.IndexBuffer.getShort(i12 + i + i14) + this.FaceVertexStartsCounts[i2 * 2]) * 2
                 lLVector2Arr[i14] = LLVector2(this.TexCoordsBuffer.getFloat(i15), this.TexCoordsBuffer.getFloat(i15 + 1))
                 i13 = i14 + 1
             } else {
@@ -540,7 +540,7 @@ val class DrawableGeometry : GLCleanable {
         }
         meshData2.UpdateRiggedMatrices(avatarSkeleton)
         if (!renderContext.hasGL20 || (!meshData2.riggingFitsGL20())) {
-            DirectByteBuffer rawBuffer = this.VertexBuffer.getRawBuffer()
+            val rawBuffer: DirectByteBuffer = this.VertexBuffer.getRawBuffer()
             for (Int i = 0; i < this.FaceCount; i++) {
                 meshData2.UpdateRigged(i, rawBuffer, this.FaceVertexStartsCounts[i * 2])
             }

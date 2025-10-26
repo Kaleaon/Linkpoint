@@ -40,7 +40,7 @@ class AsyncCancellableRequestHandler<K> : RequestHandler<K> {
 
     fun onRequestCancelled(K k) {
         synchronized (this.lock) {
-            Future future = (Future) this.activeRequests.remove(k)
+            val future: Future = (Future) this.activeRequests.remove(k)
             if (future != null) {
                 future.cancel(true)
             }

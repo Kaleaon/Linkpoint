@@ -24,7 +24,7 @@ class FetchInventoryReply : SLMessage() {
         public Int CRC
         public Int CreationDate
         public UUID CreatorID
-        public Byte[] Description
+        public ByteArray Description
         public Int EveryoneMask
         public Int Flags
         public UUID FolderID
@@ -33,7 +33,7 @@ class FetchInventoryReply : SLMessage() {
         public Boolean GroupOwned
         public Int InvType
         public UUID ItemID
-        public Byte[] Name
+        public ByteArray Name
         public Int NextOwnerMask
         public UUID OwnerID
         public Int OwnerMask
@@ -47,24 +47,24 @@ class FetchInventoryReply : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 21
-        Iterator<T> it = this.InventoryData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 21
+        val it: Iterator<T> = this.InventoryData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
-            InventoryData inventoryData = (InventoryData) it.next()
+            val inventoryData: InventoryData = (InventoryData) it.next()
             i = inventoryData.Description.length + inventoryData.Name.length + 129 + 1 + 4 + 4 + i2
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleFetchInventoryReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put(Ascii.CAN)
@@ -95,11 +95,11 @@ class FetchInventoryReply : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            InventoryData inventoryData = InventoryData()
+            val inventoryData: InventoryData = InventoryData()
             inventoryData.ItemID = unpackUUID(byteBuffer)
             inventoryData.FolderID = unpackUUID(byteBuffer)
             inventoryData.CreatorID = unpackUUID(byteBuffer)

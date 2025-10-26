@@ -32,14 +32,14 @@ class CameraParams {
     private Boolean useOffset = false
 
     @JvmStatic
-    Float angleMinusAngle(Float f, Float f2) {
+     fun angleMinusAngle(f: Float, f2: Float): Float {
         return wrapAngle(wrapAngle(f) - wrapAngle(f2))
     }
 
-    private Unit processFling() {
+     private fun processFling() {
         if (this.isFlinging) {
-            Long currentTimeMillis = System.currentTimeMillis()
-            Float f = ((Float) (currentTimeMillis - this.flingStartTime)) / 1000.0f
+            val currentTimeMillis: Long = System.currentTimeMillis()
+            val f: Float = ((Float) (currentTimeMillis - this.flingStartTime)) / 1000.0f
             this.heading = wrapAngle(this.heading + (this.headingFlingSpeed * f))
             this.tilt = Math.max(Math.min(this.tilt + (this.tiltFlingSpeed * f), MAX_PITCH), MIN_PITCH)
             if (this.headingFlingSpeed > 0.0f) {
@@ -71,12 +71,12 @@ class CameraParams {
         }
     }
 
-    private Unit processManualControl(HeadTransformCompat headTransformCompat) {
+     private fun processManualControl(headTransformCompat: HeadTransformCompat) {
         Float f
         Float f2
         if (this.isManualControl) {
-            Long currentTimeMillis = System.currentTimeMillis()
-            Float f3 = ((Float) (currentTimeMillis - this.manualControlStartTime)) / 1000.0f
+            val currentTimeMillis: Long = System.currentTimeMillis()
+            val f3: Float = ((Float) (currentTimeMillis - this.manualControlStartTime)) / 1000.0f
             if (headTransformCompat != null) {
                 f = wrapAngle(headTransformCompat.yawDegrees + headTransformCompat.viewExtraYaw)
                 f2 = headTransformCompat.pitchDegrees
@@ -86,10 +86,10 @@ class CameraParams {
                 f2 = this.tilt
             }
             if (!(this.manualMoveSpeed == 0.0f && this.manualFlySpeed == 0.0f && this.manualStrafeSpeed == 0.0f)) {
-                LLQuaternion mayaQ = LLQuaternion.mayaQ(0.0f, f2, f, LLQuaternion.Order.YZX)
-                LLVector3 lLVector3 = LLVector3(1.0f, 0.0f, 0.0f)
-                LLVector3 lLVector32 = LLVector3(0.0f, 0.0f, 1.0f)
-                LLVector3 lLVector33 = LLVector3(0.0f, 1.0f, 0.0f)
+                val mayaQ: LLQuaternion = LLQuaternion.mayaQ(0.0f, f2, f, LLQuaternion.Order.YZX)
+                val lLVector3: LLVector3 = LLVector3(1.0f, 0.0f, 0.0f)
+                val lLVector32: LLVector3 = LLVector3(0.0f, 0.0f, 1.0f)
+                val lLVector33: LLVector3 = LLVector3(0.0f, 1.0f, 0.0f)
                 lLVector3.mul(mayaQ)
                 lLVector32.mul(mayaQ)
                 lLVector33.mul(mayaQ)
@@ -102,15 +102,15 @@ class CameraParams {
     }
 
     @JvmStatic
-    Float wrapAngle(Float f) {
-        Float f2 = (f + 180.0f) % 360.0f
+     fun wrapAngle(f: Float): Float {
+        val f2: Float = (f + 180.0f) % 360.0f
         if (f2 < 0.0f) {
             f2 += 360.0f
         }
         return f2 - 180.0f
     }
 
-    fun copyFrom(CameraParams cameraParams) {
+    fun copyFrom(cameraParams: CameraParams) {
         Float f
         Float f2
         Float f3
@@ -127,7 +127,7 @@ class CameraParams {
                 f5 = cameraParams.tilt
                 z = cameraParams.isValid
                 if (cameraParams.useOffset) {
-                    LLVector3 lLVector3 = LLVector3(this.offset)
+                    val lLVector3: LLVector3 = LLVector3(this.offset)
                     lLVector3.mul(LLQuaternion.mayaQ(0.0f, f5, f4, LLQuaternion.Order.YZX))
                     f += lLVector3.x
                     f2 += lLVector3.y
@@ -143,7 +143,7 @@ class CameraParams {
         }
     }
 
-    fun fling(Float f, Float f2) {
+    fun fling(f: Float, f2: Float) {
         synchronized (this.lock) {
             this.headingFlingSpeed = f
             this.tiltFlingSpeed = f2
@@ -152,7 +152,7 @@ class CameraParams {
         }
     }
 
-    public Float getHeading() {
+     public fun getHeading(): Float {
         Float f
         synchronized (this.lock) {
             f = this.heading
@@ -160,7 +160,7 @@ class CameraParams {
         return f
     }
 
-    public LLVector3 getPosition() {
+     public fun getPosition(): LLVector3 {
         LLVector3 lLVector3
         synchronized (this.lock) {
             lLVector3 = this.position
@@ -168,7 +168,7 @@ class CameraParams {
         return lLVector3
     }
 
-    public Float getTilt() {
+     public fun getTilt(): Float {
         Float f
         synchronized (this.lock) {
             f = this.tilt
@@ -176,7 +176,7 @@ class CameraParams {
         return f
     }
 
-    fun getVRCamera(CameraParams cameraParams, HeadTransformCompat headTransformCompat) {
+    fun getVRCamera(cameraParams: CameraParams, headTransformCompat: HeadTransformCompat) {
         Float f
         Float f2
         Float f3
@@ -192,7 +192,7 @@ class CameraParams {
                 f5 = cameraParams.tilt
                 z = cameraParams.isValid
                 if (cameraParams.useOffset) {
-                    LLVector3 lLVector3 = LLVector3(this.offsetVR)
+                    val lLVector3: LLVector3 = LLVector3(this.offsetVR)
                     lLVector3.mul(LLQuaternion.mayaQ(0.0f, f5, f4, LLQuaternion.Order.YZX))
                     f += lLVector3.x
                     f2 += lLVector3.y
@@ -208,21 +208,21 @@ class CameraParams {
         }
     }
 
-    public Boolean isFlinging() {
+     public fun isFlinging(): Boolean {
         synchronized (this.lock) {
             z = this.isFlinging
         }
         return z
     }
 
-    public Boolean isValid() {
+     public fun isValid(): Boolean {
         synchronized (this.lock) {
             z = this.isValid
         }
         return z
     }
 
-    fun rotate(Float f, Float f2) {
+    fun rotate(f: Float, f2: Float) {
         synchronized (this.lock) {
             this.heading = wrapAngle(this.heading + f)
             this.tilt = Math.max(Math.min(this.tilt + f2, MAX_PITCH), MIN_PITCH)
@@ -230,7 +230,7 @@ class CameraParams {
         }
     }
 
-    fun set(LLVector3 lLVector3, Float f, Float f2) {
+    fun set(lLVector3: LLVector3, f: Float, f2: Float) {
         synchronized (this.lock) {
             if (lLVector3 != null) {
                 this.position.set(lLVector3)
@@ -241,13 +241,13 @@ class CameraParams {
         }
     }
 
-    fun setHeading(Float f) {
+    fun setHeading(f: Float) {
         synchronized (this.lock) {
             this.heading = f
         }
     }
 
-    fun setPosition(LLVector3 lLVector3) {
+    fun setPosition(lLVector3: LLVector3) {
         synchronized (this.lock) {
             if (lLVector3 != null) {
                 this.position.set(lLVector3)
@@ -257,7 +257,7 @@ class CameraParams {
         }
     }
 
-    fun setPosition(LLVector3 lLVector3, Float f) {
+    fun setPosition(lLVector3: LLVector3, f: Float) {
         synchronized (this.lock) {
             if (lLVector3 != null) {
                 this.position.set(lLVector3)
@@ -270,13 +270,13 @@ class CameraParams {
         }
     }
 
-    fun startManualControl(Float f, Float f2, Float f3, Float f4) {
+    fun startManualControl(f: Float, f2: Float, f3: Float, f4: Float) {
         synchronized (this.lock) {
             if (!this.isManualControl) {
-                LLVector3 lLVector3 = LLVector3(this.position)
-                LLQuaternion mayaQ = LLQuaternion.mayaQ(0.0f, this.tilt, this.heading, LLQuaternion.Order.YZX)
+                val lLVector3: LLVector3 = LLVector3(this.position)
+                val mayaQ: LLQuaternion = LLQuaternion.mayaQ(0.0f, this.tilt, this.heading, LLQuaternion.Order.YZX)
                 if (!this.useOffset) {
-                    LLVector3 lLVector32 = LLVector3(this.offset)
+                    val lLVector32: LLVector3 = LLVector3(this.offset)
                     lLVector32.mul(mayaQ)
                     lLVector3.add(lLVector32)
                     this.useOffset = true
@@ -298,20 +298,20 @@ class CameraParams {
         }
     }
 
-    fun zoom(Float f, Float f2, Float f3, Float f4, Float f5) {
+    fun zoom(f: Float, f2: Float, f3: Float, f4: Float, f5: Float) {
         synchronized (this.lock) {
-            Float f6 = f - 1.0f
-            LLVector3 lLVector3 = LLVector3(this.position)
-            LLQuaternion mayaQ = LLQuaternion.mayaQ(0.0f, this.tilt, this.heading, LLQuaternion.Order.YZX)
+            val f6: Float = f - 1.0f
+            val lLVector3: LLVector3 = LLVector3(this.position)
+            val mayaQ: LLQuaternion = LLQuaternion.mayaQ(0.0f, this.tilt, this.heading, LLQuaternion.Order.YZX)
             if (!this.useOffset) {
-                LLVector3 lLVector32 = LLVector3(this.offset)
+                val lLVector32: LLVector3 = LLVector3(this.offset)
                 lLVector32.mul(mayaQ)
                 lLVector3.add(lLVector32)
                 this.useOffset = true
             }
-            LLVector3 lLVector33 = LLVector3(1.0f, 0.0f, 0.0f)
-            LLVector3 lLVector34 = LLVector3(0.0f, 0.0f, 1.0f)
-            LLVector3 lLVector35 = LLVector3(0.0f, 1.0f, 0.0f)
+            val lLVector33: LLVector3 = LLVector3(1.0f, 0.0f, 0.0f)
+            val lLVector34: LLVector3 = LLVector3(0.0f, 0.0f, 1.0f)
+            val lLVector35: LLVector3 = LLVector3(0.0f, 1.0f, 0.0f)
             lLVector33.mul(mayaQ)
             lLVector33.mul(f6)
             lLVector34.mul(mayaQ)

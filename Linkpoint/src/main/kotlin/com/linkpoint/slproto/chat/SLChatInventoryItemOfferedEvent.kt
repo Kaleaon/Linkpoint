@@ -53,30 +53,30 @@ class SLChatInventoryItemOfferedEvent : SLChatYesNoEvent() {
     }
 
     @JvmStatic
-protected SLAssetType extractAssetType(ImprovedInstantMessage improvedInstantMessage) {
+ protected fun extractAssetType(improvedInstantMessage: ImprovedInstantMessage): SLAssetType {
         return improvedInstantMessage.MessageBlock_Field.BinaryBucket.length >= 1 ? SLAssetType.getByType(improvedInstantMessage.MessageBlock_Field.BinaryBucket[0]) : SLAssetType.AT_UNKNOWN
     }
 
     @JvmStatic
-protected UUID extractItemID(ImprovedInstantMessage improvedInstantMessage) {
+ protected fun extractItemID(improvedInstantMessage: ImprovedInstantMessage): UUID {
         if (improvedInstantMessage.MessageBlock_Field.BinaryBucket.length < 17) {
             return null
         }
-        ByteBuffer wrap = ByteBuffer.wrap(improvedInstantMessage.MessageBlock_Field.BinaryBucket)
+        val wrap: ByteBuffer = ByteBuffer.wrap(improvedInstantMessage.MessageBlock_Field.BinaryBucket)
         wrap.order(ByteOrder.BIG_ENDIAN)
         wrap.get()
         return UUID(wrap.getLong(), wrap.getLong())
     }
 
-    public SLAssetType getAssetType() {
+     public fun getAssetType(): SLAssetType {
         return this.assetType
     }
 
-    public UUID getItemID() {
+     public fun getItemID(): UUID {
         return this.itemID
     }
 
-    public String getItemName() {
+     public fun getItemName(): String {
         return this.itemName
     }
 
@@ -85,40 +85,40 @@ protected UUID extractItemID(ImprovedInstantMessage improvedInstantMessage) {
         return SLChatEvent.ChatMessageType.InventoryItemOffered
     }
 
-    public String getNoButton(Context context) {
+     public fun getNoButton(context: Context): String {
         return context.getString(R.string.inv_offer_no)
     }
 
-    public String getNoMessage(Context context) {
+     public fun getNoMessage(context: Context): String {
         return context.getString(R.string.inv_offer_declined)
     }
 
-    public String getQuestion(Context context) {
+     public fun getQuestion(context: Context): String {
         return context.getString(R.string.inv_offer_question)
     }
 
-    public String getText(Context context, UserManager userManager) {
-        return context.getString(R.string.chat_inventory_other_offer_format, Object[]{this.itemName})
+     public fun getText(context: Context, userManager: UserManager): String {
+        return context.getString(R.string.chat_inventory_other_offer_format, Array<Any>{this.itemName})
     }
 
-    public String getYesButton(Context context) {
+     public fun getYesButton(context: Context): String {
         return context.getString(R.string.inv_offer_yes)
     }
 
-    public String getYesMessage(Context context) {
+     public fun getYesMessage(context: Context): String {
         return context.getString(R.string.inv_offer_accepted)
     }
 
     /* access modifiers changed from: protected */
-    public Boolean isActionMessage(UserManager userManager) {
+     public fun isActionMessage(userManager: UserManager): Boolean {
         return true
     }
 
     /* access modifiers changed from: protected */
-    fun onNoAction(Context context, UserManager userManager) {
+    fun onNoAction(context: Context, userManager: UserManager) {
         super.onNoAction(context, userManager)
-        UUID sourceUUID = this.source.getSourceUUID()
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+        val sourceUUID: UUID = this.source.getSourceUUID()
+        val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (sourceUUID != null && activeAgentCircuit != null) {
             activeAgentCircuit.AcceptInventoryOffer(this.origIMType, false, sourceUUID, this.sessionID, (UUID) null)
             if (this.itemID != null) {
@@ -127,9 +127,9 @@ protected UUID extractItemID(ImprovedInstantMessage improvedInstantMessage) {
         }
     }
 
-    fun onOfferAccepted(Context context, UserManager userManager, UUID uuid) {
+    fun onOfferAccepted(context: Context, userManager: UserManager, uuid: UUID) {
         super.onYesAction(context, userManager)
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+        val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
             activeAgentCircuit.AcceptInventoryOffer(this.origIMType, true, this.source.getSourceUUID(), this.sessionID, uuid)
             if (this.itemID != null) {
@@ -138,14 +138,14 @@ protected UUID extractItemID(ImprovedInstantMessage improvedInstantMessage) {
         }
     }
 
-    fun onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(context: Context, userManager: UserManager) {
         if (this.dbMessage != null) {
             context.startActivity(InventoryActivity.makeSaveItemIntent(context, this.agentUUID, InventorySaveInfo(InventorySaveInfo.InventorySaveType.InventoryOffer, this.itemID, getItemName(), (UUID) null, this.assetType, this.dbMessage.getId().longValue())))
         }
     }
 
-    fun serializeToDatabaseObject(ChatMessage chatMessage) {
-        Integer num = null
+    fun serializeToDatabaseObject(chatMessage: ChatMessage) {
+        val num: Integer = null
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setOrigIMType(Integer.valueOf(this.origIMType))
         chatMessage.setSessionID(this.sessionID)

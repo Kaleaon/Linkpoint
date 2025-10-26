@@ -36,22 +36,22 @@ class MinimapActivity : ConnectedActivity() {
 
     /* access modifiers changed from: private */
     /* renamed from: onCurrentLocationInfo */
-    fun m639com_lumiyaviewer_lumiya_ui_minimap_MinimapActivitymthref0(CurrentLocationInfo currentLocationInfo2) {
-        String str = null
+    fun m639com_lumiyaviewer_lumiya_ui_minimap_MinimapActivitymthref0(currentLocationInfo2: CurrentLocationInfo) {
+        val str: String = null
         if (currentLocationInfo2 != null) {
-            ParcelData parcelData = currentLocationInfo2.parcelData()
+            val parcelData: ParcelData = currentLocationInfo2.parcelData()
             if (parcelData != null) {
                 str = parcelData.getName()
             }
             if (str == null) {
                 str = getString(R.string.name_loading_title)
             }
-            setActivityTitle(str, getString(R.string.nearby_users_format, Object[]{Integer.valueOf(currentLocationInfo2.nearbyUsers())}))
+            setActivityTitle(str, getString(R.string.nearby_users_format, Array<Any>{Integer.valueOf(currentLocationInfo2.nearbyUsers())}))
         }
     }
 
-    private Unit setActivityTitle(String str, String str2) {
-        ActionBar supportActionBar = getSupportActionBar()
+     private fun setActivityTitle(str: String, str2: String) {
+        val supportActionBar: ActionBar = getSupportActionBar()
         if (supportActionBar != null) {
             supportActionBar.setTitle((CharSequence) str)
             supportActionBar.setSubtitle((CharSequence) str2)
@@ -60,7 +60,7 @@ class MinimapActivity : ConnectedActivity() {
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(Bundle bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setContentView((Int) R.layout.split_two_panels)
         ButterKnife.bind((Activity) this)
@@ -90,13 +90,13 @@ class MinimapActivity : ConnectedActivity() {
             this.detailsLayout.setLayoutParams(layoutParams4)
             this.splitObjectPopupsLeftSpacer.setVisibility(8)
         }
-        UUID activeAgentID = ActivityUtils.getActiveAgentID(getIntent())
-        FragmentManager supportFragmentManager = getSupportFragmentManager()
+        val activeAgentID: UUID = ActivityUtils.getActiveAgentID(getIntent())
+        val supportFragmentManager: FragmentManager = getSupportFragmentManager()
         if (supportFragmentManager == null || activeAgentID == null) {
             finish()
             return
         }
-        FragmentTransaction beginTransaction = supportFragmentManager.beginTransaction()
+        val beginTransaction: FragmentTransaction = supportFragmentManager.beginTransaction()
         if (supportFragmentManager.findFragmentById(R.id.selector) == null) {
             beginTransaction.add((Int) R.id.selector, MinimapFragment.newInstance(activeAgentID))
         }
@@ -107,9 +107,9 @@ class MinimapActivity : ConnectedActivity() {
     }
 
     /* access modifiers changed from: protected */
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
-        UserManager userManager = ActivityUtils.getUserManager(getIntent())
+        val userManager: UserManager = ActivityUtils.getUserManager(getIntent())
         if (userManager != null) {
             this.currentLocationInfo.subscribe(userManager.getCurrentLocationInfo(), SubscriptionSingleKey.Value)
         } else {
@@ -118,7 +118,7 @@ class MinimapActivity : ConnectedActivity() {
     }
 
     /* access modifiers changed from: protected */
-    fun onStop() {
+    override fun onStop() {
         this.currentLocationInfo.unsubscribe()
         super.onStop()
     }

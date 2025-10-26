@@ -14,7 +14,7 @@ class TeleportFinish : SLMessage() {
         public UUID AgentID
         public Int LocationID
         public Long RegionHandle
-        public Byte[] SeedCapability
+        public ByteArray SeedCapability
         public Int SimAccess
         public Inet4Address SimIP
         public Int SimPort
@@ -25,15 +25,15 @@ class TeleportFinish : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.Info_Field.SeedCapability.length + 36 + 1 + 4 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleTeleportFinish(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 69)
@@ -47,7 +47,7 @@ class TeleportFinish : SLMessage() {
         packInt(byteBuffer, this.Info_Field.TeleportFlags)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.Info_Field.AgentID = unpackUUID(byteBuffer)
         this.Info_Field.LocationID = unpackInt(byteBuffer)
         this.Info_Field.SimIP = unpackIPAddress(byteBuffer)

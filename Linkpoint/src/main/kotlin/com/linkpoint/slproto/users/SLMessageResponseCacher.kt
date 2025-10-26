@@ -25,10 +25,10 @@ class SLMessageResponseCacher<Key, MessageType : SLMessage>, ResponseCacher<Key,
     }
 
     /* access modifiers changed from: protected */
-    public MessageType loadCached(Byte[] bArr) {
-        ByteBuffer order = ByteBuffer.wrap(bArr).order(ByteOrder.nativeOrder())
-        Int DecodeMessageIDGeneric = SLMessage.DecodeMessageIDGeneric(order)
-        MessageType CreateByID = SLMessageFactory.CreateByID(DecodeMessageIDGeneric)
+     public fun loadCached(bArr: ByteArray): MessageType {
+        val order: ByteBuffer = ByteBuffer.wrap(bArr).order(ByteOrder.nativeOrder())
+        val DecodeMessageIDGeneric: Int = SLMessage.DecodeMessageIDGeneric(order)
+        val CreateByID: MessageType = SLMessageFactory.CreateByID(DecodeMessageIDGeneric)
         if (CreateByID != null) {
             CreateByID.UnpackPayload(order)
             return CreateByID
@@ -42,8 +42,8 @@ class SLMessageResponseCacher<Key, MessageType : SLMessage>, ResponseCacher<Key,
     }
 
     /* access modifiers changed from: protected */
-    public Byte[] storeCached(MessageType messagetype) {
-        Byte[] bArr = Byte[messagetype.CalcPayloadSize()]
+     public fun storeCached(messagetype: MessageType): ByteArray {
+        val bArr: ByteArray = Byte[messagetype.CalcPayloadSize()]
         messagetype.PackPayload(ByteBuffer.wrap(bArr).order(ByteOrder.nativeOrder()))
         return bArr
     }

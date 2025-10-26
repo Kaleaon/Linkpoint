@@ -52,7 +52,7 @@ import javax.annotation.Nullable
 
 class ObjectDetailsFragment : FragmentWithTitle(), ReloadableFragment, View.OnClickListener, LoadableMonitor.OnLoadableDataChangedListener {
     private const val LOCAL_ID_KEY: String = "localID"
-    private const val Int[] objectPayButtons = {R.id.object_pay_button1, R.id.object_pay_button2, R.id.object_pay_button3, R.id.object_pay_button4}
+    private const val IntArray objectPayButtons = {R.id.object_pay_button1, R.id.object_pay_button2, R.id.object_pay_button3, R.id.object_pay_button4}
     private val SubscriptionData<SubscriptionSingleKey, Integer> balanceSubscription = SubscriptionData<>(UIThreadExecutor.getInstance())
     private val OnChatEventListener chatEventListener = OnChatEventListener(this) {
 
@@ -115,13 +115,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
     private SLObjectProfileData objectProfileData = null
     private val ChatterNameDisplayer ownerNameDisplayer = ChatterNameDisplayer()
 
-    private Unit buyObject() {
-        SLObjectProfileData sLObjectProfileData = this.objectProfileData
-        UserManager userManager = getUserManager()
-        Int i = this.objectLocalID
+     private fun buyObject() {
+        val sLObjectProfileData: SLObjectProfileData = this.objectProfileData
+        val userManager: UserManager = getUserManager()
+        val i: Int = this.objectLocalID
         if (sLObjectProfileData != null && userManager != null) {
             AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
-            builder.setMessage((CharSequence) String.format(getString(R.string.object_buy_confirm), Object[]{sLObjectProfileData.name().or(getString(R.string.object_name_loading)), Integer.valueOf(sLObjectProfileData.salePrice())})).setCancelable(false).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(i, userManager, sLObjectProfileData) {
+            builder.setMessage((CharSequence) String.format(getString(R.string.object_buy_confirm), Array<Any>{sLObjectProfileData.name().or(getString(R.string.object_name_loading)), Integer.valueOf(sLObjectProfileData.salePrice())})).setCancelable(false).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(i, userManager, sLObjectProfileData) {
 
                 /* renamed from: -$f0 */
                 private val /* synthetic */ Int f478$f0
@@ -213,19 +213,19 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         }
     }
 
-    private UserManager getUserManager() {
+     private fun getUserManager(): UserManager {
         return ActivityUtils.getUserManager(getArguments())
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_11291  reason: not valid java name */
-    static /* synthetic */ Unit m669lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_11291(SLAgentCircuit sLAgentCircuit, SLObjectProfileData sLObjectProfileData, String str, DialogInterface dialogInterface, Int i) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m669lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_11291(SLAgentCircuit sLAgentCircuit, SLObjectProfileData sLObjectProfileData, String str, DialogInterface dialogInterface, Int i) {
         sLAgentCircuit.getModules().muteList.Block(MuteListEntry(MuteType.OBJECT, sLObjectProfileData.objectUUID(), str, 15))
         dialogInterface.dismiss()
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_24012  reason: not valid java name */
-    static /* synthetic */ Unit m671lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_24012(UserManager userManager, Int i, SLObjectProfileData sLObjectProfileData, DialogInterface dialogInterface, Int i2) {
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m671lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_24012(UserManager userManager, Int i, SLObjectProfileData sLObjectProfileData, DialogInterface dialogInterface, Int i2) {
+        val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
             activeAgentCircuit.BuyObject(i, sLObjectProfileData.saleType(), sLObjectProfileData.salePrice())
         }
@@ -233,9 +233,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_25106  reason: not valid java name */
-    static /* synthetic */ Unit m673lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_25106(UserManager userManager, SLObjectProfileData sLObjectProfileData, Int i, DialogInterface dialogInterface, Int i2) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m673lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_25106(UserManager userManager, SLObjectProfileData sLObjectProfileData, Int i, DialogInterface dialogInterface, Int i2) {
         SLModules modules
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+        val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (!(activeAgentCircuit == null || (modules = activeAgentCircuit.getModules()) == null)) {
             modules.financialInfo.DoPayObject(sLObjectProfileData.objectUUID(), i)
         }
@@ -243,26 +243,26 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
     }
 
     @JvmStatic
-    Bundle makeSelection(UUID uuid, Int i) {
-        Bundle bundle = Bundle()
+     fun makeSelection(uuid: UUID, i: Int): Bundle {
+        val bundle: Bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         bundle.putInt(LOCAL_ID_KEY, i)
         return bundle
     }
 
-    private Unit openObjectContents() {
-        UserManager userManager = getUserManager()
+     private fun openObjectContents() {
+        val userManager: UserManager = getUserManager()
         if (this.objectProfileData != null && this.objectLocalID != 0 && userManager != null) {
             DetailsActivity.showEmbeddedDetails(getActivity(), TaskInventoryFragment.class, TaskInventoryFragment.makeSelection(userManager.getUserID(), this.objectProfileData.objectUUID(), this.objectLocalID))
         }
     }
 
-    private Unit payObject(Int i) {
-        SLObjectProfileData sLObjectProfileData = this.objectProfileData
-        UserManager userManager = getUserManager()
+     private fun payObject(i: Int) {
+        val sLObjectProfileData: SLObjectProfileData = this.objectProfileData
+        val userManager: UserManager = getUserManager()
         if (sLObjectProfileData != null && userManager != null) {
             AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
-            builder.setMessage((CharSequence) String.format(getString(R.string.object_pay_confirm), Object[]{sLObjectProfileData.name().or(getString(R.string.object_name_loading)), Integer.valueOf(i)})).setCancelable(false).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(i, userManager, sLObjectProfileData) {
+            builder.setMessage((CharSequence) String.format(getString(R.string.object_pay_confirm), Array<Any>{sLObjectProfileData.name().or(getString(R.string.object_name_loading)), Integer.valueOf(i)})).setCancelable(false).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(i, userManager, sLObjectProfileData) {
 
                 /* renamed from: -$f0 */
                 private val /* synthetic */ Int f481$f0
@@ -424,7 +424,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         }
     }
 
-    private Unit payObjectQuick(Int i) {
+     private fun payObjectQuick(i: Int) {
         PayInfo payInfo
         ImmutableList<Integer> payPrices
         Int intValue
@@ -433,8 +433,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         }
     }
 
-    private Unit showDeadObject() {
-        View view = getView()
+     private fun showDeadObject() {
+        val view: View = getView()
         if (view != null) {
             view.findViewById(R.id.no_object_selected).setVisibility(8)
             view.findViewById(R.id.object_fail_to_load).setVisibility(0)
@@ -443,9 +443,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         }
     }
 
-    private Unit showObject(Int i) {
+     private fun showObject(i: Int) {
         this.objectLocalID = i
-        UserManager userManager = getUserManager()
+        val userManager: UserManager = getUserManager()
         if (userManager != null) {
             this.objectProfile.subscribe(userManager.getObjectsManager().getObjectProfile(), Integer.valueOf(i))
             this.myAvatarState.subscribe(userManager.getObjectsManager().myAvatarState(), SubscriptionSingleKey.Value)
@@ -453,8 +453,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         }
     }
 
-    private Unit showObjectNotLoaded() {
-        View view = getView()
+     private fun showObjectNotLoaded() {
+        val view: View = getView()
         if (view != null) {
             view.findViewById(R.id.no_object_selected).setVisibility(8)
             view.findViewById(R.id.object_fail_to_load).setVisibility(0)
@@ -463,20 +463,20 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         }
     }
 
-    private Unit showObjectOwnerInfo() {
+     private fun showObjectOwnerInfo() {
         UUID ownerUUID
-        UserManager userManager = getUserManager()
+        val userManager: UserManager = getUserManager()
         if (this.objectProfileData != null && userManager != null && (ownerUUID = this.objectProfileData.ownerUUID()) != null) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserProfileFragment.class, UserProfileFragment.makeSelection(ChatterID.getUserChatterID(userManager.getUserID(), ownerUUID)))
         }
     }
 
-    private Unit showObjectProfile(SLObjectProfileData sLObjectProfileData) {
+     private fun showObjectProfile(sLObjectProfileData: SLObjectProfileData) {
         SLAgentCircuit activeAgentCircuit
         SLModules modules
         this.objectProfileData = sLObjectProfileData
-        View view = getView()
-        UserManager userManager = getUserManager()
+        val view: View = getView()
+        val userManager: UserManager = getUserManager()
         if (view != null) {
             view.findViewById(R.id.no_object_selected).setVisibility(8)
             if (sLObjectProfileData.isDead()) {
@@ -488,8 +488,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
                 view.findViewById(R.id.object_fail_to_load).setVisibility(8)
                 view.findViewById(R.id.object_touch_button).setVisibility(sLObjectProfileData.isTouchable() ? 0 : 8)
                 ((Button) view.findViewById(R.id.object_touch_button)).setText(Strings.isNullOrEmpty(sLObjectProfileData.touchName()) ? getString(R.string.object_touch_button) : sLObjectProfileData.touchName())
-                Boolean canSit = (userManager == null || (activeAgentCircuit = userManager.getActiveAgentCircuit()) == null || (modules = activeAgentCircuit.getModules()) == null) ? false : modules.rlvController.canSit()
-                MyAvatarState data = this.myAvatarState.getData()
+                val canSit: Boolean = (userManager == null || (activeAgentCircuit = userManager.getActiveAgentCircuit()) == null || (modules = activeAgentCircuit.getModules()) == null) ? false : modules.rlvController.canSit()
+                val data: MyAvatarState = this.myAvatarState.getData()
                 if (data == null) {
                     z = false
                 } else if (!data.isSitting() || data.sittingOn() != this.objectLocalID) {
@@ -507,26 +507,26 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
                 ((TextView) view.findViewById(R.id.object_hover_text)).setText(sLObjectProfileData.floatingText().or(""))
                 view.findViewById(R.id.buy_object_card_view).setVisibility(sLObjectProfileData.saleType() != 0 ? 0 : 8)
                 ((TextView) view.findViewById(R.id.object_buy_details)).setText(getString(R.string.object_buy_price_format, Integer.valueOf(sLObjectProfileData.salePrice())))
-                Integer data2 = this.balanceSubscription.getData()
+                val data2: Integer = this.balanceSubscription.getData()
                 if (data2 != null) {
                     ((TextView) view.findViewById(R.id.object_buy_details_balance)).setText(getString(R.string.object_balance_format, data2))
                 } else {
                     ((TextView) view.findViewById(R.id.object_buy_details_balance)).setText("")
                 }
-                PayInfo payInfo = sLObjectProfileData.isPayable() ? sLObjectProfileData.payInfo() : null
+                val payInfo: PayInfo = sLObjectProfileData.isPayable() ? sLObjectProfileData.payInfo() : null
                 if (payInfo != null) {
-                    ImmutableList<Integer> payPrices = payInfo.payPrices()
+                    val payPrices: ImmutableList<Integer> = payInfo.payPrices()
                     if (payPrices != null) {
-                        Int i = 0
-                        Int i2 = 0
+                        val i: Int = 0
+                        val i2: Int = 0
                         while (i < objectPayButtons.length && i < payPrices.size()) {
-                            Int intValue = ((Integer) payPrices.get(i)).intValue()
-                            Int defaultPayPrice = intValue == -2 ? payInfo.defaultPayPrice() : intValue
+                            val intValue: Int = ((Integer) payPrices.get(i)).intValue()
+                            val defaultPayPrice: Int = intValue == -2 ? payInfo.defaultPayPrice() : intValue
                             if (defaultPayPrice <= 0) {
                                 view.findViewById(objectPayButtons[i]).setVisibility(8)
                                 view.findViewById(objectPayButtons[i]).setTag(R.id.object_pay_price_tag, 0)
                             } else {
-                                ((Button) view.findViewById(objectPayButtons[i])).setText(String.format(getString(R.string.pay_button_format), Object[]{Integer.valueOf(defaultPayPrice)}))
+                                ((Button) view.findViewById(objectPayButtons[i])).setText(String.format(getString(R.string.pay_button_format), Array<Any>{Integer.valueOf(defaultPayPrice)}))
                                 view.findViewById(objectPayButtons[i]).setVisibility(0)
                                 view.findViewById(objectPayButtons[i]).setTag(R.id.object_pay_price_tag, Integer.valueOf(defaultPayPrice))
                                 i2++
@@ -557,13 +557,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         }
         if (userManager != null && (!sLObjectProfileData.isDead())) {
             if (sLObjectProfileData.isPayable() && sLObjectProfileData.payInfo() == null) {
-                UUID objectUUID = sLObjectProfileData.objectUUID()
-                SLAgentCircuit activeAgentCircuit2 = userManager.getActiveAgentCircuit()
+                val objectUUID: UUID = sLObjectProfileData.objectUUID()
+                val activeAgentCircuit2: SLAgentCircuit = userManager.getActiveAgentCircuit()
                 if (!(activeAgentCircuit2 == null || objectUUID == null)) {
                     activeAgentCircuit2.DoRequestPayPrice(objectUUID)
                 }
             }
-            UUID ownerUUID = sLObjectProfileData.ownerUUID()
+            val ownerUUID: UUID = sLObjectProfileData.ownerUUID()
             if (ownerUUID != null) {
                 this.ownerNameDisplayer.setChatterID(ChatterID.getUserChatterID(userManager.getUserID(), ownerUUID))
             }
@@ -571,35 +571,35 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         updateOptionsMenu()
     }
 
-    private Unit sitOnObject() {
+     private fun sitOnObject() {
         SLAgentCircuit activeAgentCircuit
         SLModules modules
-        UserManager userManager = getUserManager()
+        val userManager: UserManager = getUserManager()
         if (userManager != null && this.objectProfileData != null && (activeAgentCircuit = userManager.getActiveAgentCircuit()) != null && (modules = activeAgentCircuit.getModules()) != null) {
             modules.avatarControl.SitOnObject(this.objectProfileData.objectUUID())
         }
     }
 
-    private Unit standUp() {
+     private fun standUp() {
         SLAgentCircuit activeAgentCircuit
         SLModules modules
-        UserManager userManager = getUserManager()
+        val userManager: UserManager = getUserManager()
         if (userManager != null && this.objectProfileData != null && (activeAgentCircuit = userManager.getActiveAgentCircuit()) != null && (modules = activeAgentCircuit.getModules()) != null) {
             modules.avatarControl.Stand()
         }
     }
 
-    private Unit touchObject() {
+     private fun touchObject() {
         SLAgentCircuit activeAgentCircuit
-        UserManager userManager = getUserManager()
+        val userManager: UserManager = getUserManager()
         if (userManager != null && this.objectLocalID != 0 && (activeAgentCircuit = userManager.getActiveAgentCircuit()) != null) {
             activeAgentCircuit.TouchObject(this.objectLocalID)
         }
     }
 
-    private Unit updateOptionsMenu() {
-        Boolean z4 = false
-        UserManager userManager = getUserManager()
+     private fun updateOptionsMenu() {
+        val z4: Boolean = false
+        val userManager: UserManager = getUserManager()
         if (userManager == null || this.objectProfileData == null) {
             z = false
             z2 = false
@@ -635,16 +635,16 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_6633  reason: not valid java name */
     public /* synthetic */ Unit m675lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_6633(SLChatEvent sLChatEvent) {
         if (isFragmentVisible()) {
-            UserManager userManager = getUserManager()
-            ChatMessageSource source = sLChatEvent.getSource()
+            val userManager: UserManager = getUserManager()
+            val source: ChatMessageSource = sLChatEvent.getSource()
             if ((source instanceof ChatMessageSourceObject) && this.objectProfileData != null && userManager != null && Objects.equal(source.getSourceUUID(), this.objectProfileData.objectUUID())) {
                 Toast.makeText(getContext(), sLChatEvent.getPlainTextMessage(getContext(), userManager, false), 1).show()
             }
         }
     }
 
-    fun onClick(View view) {
-        Int id = view.getId()
+    override fun onClick(view: View) {
+        val id: Int = view.getId()
         for (Int i = 0; i < objectPayButtons.length; i++) {
             if (objectPayButtons[i] == id) {
                 payObjectQuick(i)
@@ -672,7 +672,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
                 return
             case R.id.object_pay_button:
                 try {
-                    View view2 = getView()
+                    val view2: View = getView()
                     if (view2 != null) {
                         payObject(Integer.parseInt(((EditText) view2.findViewById(R.id.object_pay_amount)).getText().toString()))
                         return
@@ -687,12 +687,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         }
     }
 
-    fun onCreate(@android.support.annotation.Nullable Bundle bundle) {
+    override fun onCreate(@android.support.annotation.Nullable Bundle bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.object_details_menu, menu)
         this.menuItemObjectTake = menu.findItem(R.id.item_object_take)
@@ -702,10 +702,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         updateOptionsMenu()
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         Debug.Log("ObjectDetailsFragment: onCreateView called")
-        View inflate = layoutInflater.inflate(R.layout.object_details, viewGroup, false)
+        val inflate: View = layoutInflater.inflate(R.layout.object_details, viewGroup, false)
         this.ownerNameDisplayer.bindViews((TextView) inflate.findViewById(R.id.object_details_owner), (ChatterPicView) inflate.findViewById(R.id.userPicView))
         inflate.findViewById(R.id.no_object_selected).setVisibility(0)
         inflate.findViewById(R.id.object_fail_to_load).setVisibility(8)
@@ -722,7 +722,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         }
         final Button button = (Button) inflate.findViewById(R.id.object_pay_button)
         ((EditText) inflate.findViewById(R.id.object_pay_amount)).addTextChangedListener(TextWatcher() {
-            fun afterTextChanged(Editable editable) {
+            fun afterTextChanged(editable: Editable) {
                 try {
                     Integer.parseInt(editable.toString())
                     button.setEnabled(true)
@@ -731,22 +731,22 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
                 }
             }
 
-            fun beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+            fun beforeTextChanged(charSequence: CharSequence, i: Int, i2: Int, i3: Int) {
             }
 
-            fun onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+            fun onTextChanged(charSequence: CharSequence, i: Int, i2: Int, i3: Int) {
             }
         return inflate
     }
 
-    fun onDestroyView() {
+    override fun onDestroyView() {
         this.ownerNameDisplayer.unbindViews()
         super.onDestroyView()
     }
 
     fun onLoadableDataChanged() {
-        Throwable error = this.objectProfile.getError()
-        SLObjectProfileData data = this.objectProfile.getData()
+        val error: Throwable = this.objectProfile.getError()
+        val data: SLObjectProfileData = this.objectProfile.getData()
         if (error instanceof ObjectsManager.ObjectDoesNotExistException) {
             showDeadObject()
         } else if (error != null || data == null) {
@@ -756,10 +756,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         }
     }
 
-    public Boolean onOptionsItemSelected(MenuItem menuItem) {
-        String str = null
-        UserManager userManager = getUserManager()
-        Int i = getArguments().getInt(LOCAL_ID_KEY)
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+        val str: String = null
+        val userManager: UserManager = getUserManager()
+        val i: Int = getArguments().getInt(LOCAL_ID_KEY)
         if (!(userManager == null || this.objectLocalID == 0)) {
             switch (menuItem.getItemId()) {
                 case R.id.item_object_take:
@@ -772,8 +772,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
                     ObjectDerezDialog.askForObjectDerez(getContext(), ObjectDerezDialog.DerezAction.Delete, userManager.getUserID(), i)
                     return true
                 case R.id.item_object_block:
-                    SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
-                    SLObjectProfileData data = this.objectProfile.getData()
+                    val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
+                    val data: SLObjectProfileData = this.objectProfile.getData()
                     if (data != null) {
                         str = data.name().orNull()
                     }
@@ -957,38 +957,38 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         return super.onOptionsItemSelected(menuItem)
     }
 
-    fun onPause() {
-        UserManager userManager = getUserManager()
+    override fun onPause() {
+        val userManager: UserManager = getUserManager()
         if (userManager != null) {
             userManager.getChatterList().getActiveChattersManager().removeObjectMessageListener(this.chatEventListener)
         }
         super.onPause()
     }
 
-    fun onResume() {
+    override fun onResume() {
         super.onResume()
-        UserManager userManager = getUserManager()
+        val userManager: UserManager = getUserManager()
         if (userManager != null) {
             userManager.getChatterList().getActiveChattersManager().addObjectMessageListener(this.chatEventListener, UIThreadExecutor.getInstance())
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         setTitle(getString(R.string.object_details_caption), (String) null)
         showObject(getArguments().getInt(LOCAL_ID_KEY))
     }
 
-    fun onStop() {
+    override fun onStop() {
         this.loadableMonitor.unsubscribeAll()
         this.ownerNameDisplayer.setChatterID((ChatterID) null)
         super.onStop()
     }
 
-    fun setFragmentArgs(Intent intent, Bundle bundle) {
+    fun setFragmentArgs(intent: Intent, bundle: Bundle) {
         if (bundle != null) {
             getArguments().putAll(bundle)
-            Int i = bundle.getInt(LOCAL_ID_KEY)
+            val i: Int = bundle.getInt(LOCAL_ID_KEY)
             if (isFragmentStarted()) {
                 showObject(i)
             }

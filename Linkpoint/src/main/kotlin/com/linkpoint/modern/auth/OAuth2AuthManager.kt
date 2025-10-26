@@ -56,7 +56,7 @@ class OAuth2AuthManager {
                 Log.i(TAG, "Starting Second Life authentication for user: " + username)
                 
                 // Parse username (handle both "First Last" and "first.last" formats)
-                String[] nameParts = parseUsername(username)
+                val nameParts: Array<String> = parseUsername(username)
                 if (nameParts == null) {
                     return AuthResult(false, null, "Invalid username format. Use 'First Last' or 'first.last'")
                 }
@@ -65,19 +65,19 @@ class OAuth2AuthManager {
                 lastName = nameParts[1]
                 
                 // Choose login URL based on grid selection
-                String loginUrl = useTestGrid ? ADITI_LOGIN_URL : SL_LOGIN_URL
-                String gridName = useTestGrid ? "Aditi (test grid)" : "Second Life main grid"
+                val loginUrl: String = useTestGrid ? ADITI_LOGIN_URL : SL_LOGIN_URL
+                val gridName: String = useTestGrid ? "Aditi (test grid)" : "Second Life main grid"
                 
                 Log.i(TAG, "Connecting to " + gridName)
                 
                 // Create login request
-                String loginRequest = createLoginRequest(firstName, lastName, password)
+                val loginRequest: String = createLoginRequest(firstName, lastName, password)
                 
                 // Send login request
-                String response = sendHttpRequest(loginUrl, loginRequest)
+                val response: String = sendHttpRequest(loginUrl, loginRequest)
                 
                 // Parse response
-                AuthResult result = parseLoginResponse(response)
+                val result: AuthResult = parseLoginResponse(response)
                 
                 if (result.isSuccess()) {
                     Log.i(TAG, "Authentication successful for: " + firstName + " " + lastName)
@@ -97,7 +97,7 @@ class OAuth2AuthManager {
     /**
      * Set grid preference (main or test grid)
      */
-    fun setUseTestGrid(Boolean useTestGrid) {
+    fun setUseTestGrid(useTestGrid: Boolean) {
         this.useTestGrid = useTestGrid
         Log.i(TAG, "Grid set to: " + (useTestGrid ? "Aditi (test)" : "Second Life (main)"))
     }
@@ -105,15 +105,15 @@ class OAuth2AuthManager {
     /**
      * Get current session information
      */
-    public SessionInfo getSessionInfo() {
+     public fun getSessionInfo(): SessionInfo {
         return SessionInfo(sessionId, agentId, firstName, lastName)
     }
     
-    public Boolean isTokenValid() {
+     public fun isTokenValid(): Boolean {
         return accessToken != null && System.currentTimeMillis() < tokenExpiryTime
     }
     
-    public String getAccessToken() {
+     public fun getAccessToken(): String {
         return accessToken
     }
     
@@ -130,7 +130,7 @@ class OAuth2AuthManager {
     
     // Private helper methods
     
-    private String[] parseUsername(String username) {
+    private Array<String> parseUsername(String username) {
         if (username == null || username.trim().isEmpty()) {
             return null
         }
@@ -139,27 +139,27 @@ class OAuth2AuthManager {
         
         if (username.contains(" ")) {
             // "First Last" format
-            String[] parts = username.split("\\s+")
+            val parts: Array<String> = username.split("\\s+")
             if (parts.length >= 2) {
-                return String[]{parts[0], parts[1]}
+                return Array<String>{parts[0], parts[1]}
             }
         } else if (username.contains(".")) {
             // "first.last" format
-            String[] parts = username.split("\\.")
+            val parts: Array<String> = username.split("\\.")
             if (parts.length >= 2) {
                 // Capitalize first letters
-                String first = parts[0].substring(0, 1).toUpperCase() + parts[0].substring(1).toLowerCase()
-                String last = parts[1].substring(0, 1).toUpperCase() + parts[1].substring(1).toLowerCase()
-                return String[]{first, last}
+                val first: String = parts[0].substring(0, 1).toUpperCase() + parts[0].substring(1).toLowerCase()
+                val last: String = parts[1].substring(0, 1).toUpperCase() + parts[1].substring(1).toLowerCase()
+                return Array<String>{first, last}
             }
         }
         
         return null
     }
     
-    private String createLoginRequest(String firstName, String lastName, String password) {
+     private fun createLoginRequest(firstName: String, lastName: String, password: String): String {
         // Create LLSD-style login request for Second Life
-        StringBuilder request = StringBuilder()
+        val request: StringBuilder = StringBuilder()
         request.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
         request.append("<llsd>\n")
         request.append("<map>\n")
@@ -193,9 +193,9 @@ class OAuth2AuthManager {
         return request.toString()
     }
     
-    private String sendHttpRequest(String urlString, String requestData) throws Exception {
-        URL url = URL(urlString)
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection()
+     private fun sendHttpRequest(urlString: String, requestData: String) throws Exception {
+        val url: URL = URL(urlString)
+        val connection: HttpURLConnection = (HttpURLConnection) url.openConnection()
         
         try {
             // Configure connection
@@ -207,7 +207,7 @@ class OAuth2AuthManager {
             connection.setReadTimeout(60000);    // 60 seconds
             
             // Send request
-            Byte[] requestBytes = requestData.getBytes(StandardCharsets.UTF_8)
+            val requestBytes: ByteArray = requestData.getBytes(StandardCharsets.UTF_8)
             connection.setRequestProperty("Content-Length", String.valueOf(requestBytes.length))
             
             try (OutputStream out = connection.getOutputStream()) {
@@ -216,21 +216,21 @@ class OAuth2AuthManager {
             }
             
             // Read response
-            Int responseCode = connection.getResponseCode()
-            InputStream inputStream = responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream()
+            val responseCode: Int = connection.getResponseCode()
+            val inputStream: InputStream = responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream()
             
             if (inputStream == null) {
                 throw Exception("No response from server (HTTP " + responseCode + ")")
             }
             
-            ByteArrayOutputStream result = ByteArrayOutputStream()
-            Byte[] buffer = Byte[1024]
+            val result: ByteArrayOutputStream = ByteArrayOutputStream()
+            val buffer: ByteArray = Byte[1024]
             Int length
             while ((length = inputStream.read(buffer)) != -1) {
                 result.write(buffer, 0, length)
             }
             
-            String response = result.toString(StandardCharsets.UTF_8.name())
+            val response: String = result.toString(StandardCharsets.UTF_8.name())
             Log.d(TAG, "Login response received (" + responseCode + "): " + response.substring(0, Math.min(500, response.length())))
             
             return response
@@ -240,7 +240,7 @@ class OAuth2AuthManager {
         }
     }
     
-    private AuthResult parseLoginResponse(String response) {
+     private fun parseLoginResponse(response: String): AuthResult {
         try {
             // Simple XML parsing for login response
             if (response.contains("<key>login</key><string>true</string>") || 
@@ -262,10 +262,10 @@ class OAuth2AuthManager {
                 
             } else {
                 // Extract error message
-                String reason = extractXmlValue(response, "reason")
-                String message = extractXmlValue(response, "message")
+                val reason: String = extractXmlValue(response, "reason")
+                val message: String = extractXmlValue(response, "message")
                 
-                String errorMsg = reason != null ? reason : (message != null ? message : "Login failed")
+                val errorMsg: String = reason != null ? reason : (message != null ? message : "Login failed")
                 return AuthResult(false, null, errorMsg)
             }
             
@@ -275,32 +275,32 @@ class OAuth2AuthManager {
         }
     }
     
-    private String extractXmlValue(String xml, String key) {
-        String keyTag = "<key>" + key + "</key>"
-        Int keyIndex = xml.indexOf(keyTag)
+     private fun extractXmlValue(xml: String, key: String): String {
+        val keyTag: String = "<key>" + key + "</key>"
+        val keyIndex: Int = xml.indexOf(keyTag)
         if (keyIndex == -1) return null
         
-        Int valueStart = keyIndex + keyTag.length()
+        val valueStart: Int = keyIndex + keyTag.length()
         
         // Look for string value
-        String stringStart = "<string>"
-        String stringEnd = "</string>"
-        Int stringIndex = xml.indexOf(stringStart, valueStart)
+        val stringStart: String = "<string>"
+        val stringEnd: String = "</string>"
+        val stringIndex: Int = xml.indexOf(stringStart, valueStart)
         if (stringIndex != -1 && stringIndex < valueStart + 100) { // Reasonable distance
-            Int contentStart = stringIndex + stringStart.length()
-            Int contentEnd = xml.indexOf(stringEnd, contentStart)
+            val contentStart: Int = stringIndex + stringStart.length()
+            val contentEnd: Int = xml.indexOf(stringEnd, contentStart)
             if (contentEnd != -1) {
                 return xml.substring(contentStart, contentEnd)
             }
         }
         
         // Look for UUID value
-        String uuidStart = "<uuid>"
-        String uuidEnd = "</uuid>"
-        Int uuidIndex = xml.indexOf(uuidStart, valueStart)
+        val uuidStart: String = "<uuid>"
+        val uuidEnd: String = "</uuid>"
+        val uuidIndex: Int = xml.indexOf(uuidStart, valueStart)
         if (uuidIndex != -1 && uuidIndex < valueStart + 100) {
-            Int contentStart = uuidIndex + uuidStart.length()
-            Int contentEnd = xml.indexOf(uuidEnd, contentStart)
+            val contentStart: Int = uuidIndex + uuidStart.length()
+            val contentEnd: Int = xml.indexOf(uuidEnd, contentStart)
             if (contentEnd != -1) {
                 return xml.substring(contentStart, contentEnd)
             }
@@ -309,7 +309,7 @@ class OAuth2AuthManager {
         return null
     }
     
-    private String escapeXml(String text) {
+     private fun escapeXml(text: String): String {
         if (text == null) return ""
         return text.replace("&", "&amp;")
                   .replace("<", "&lt;")
@@ -333,15 +333,15 @@ class OAuth2AuthManager {
             this.message = message
         }
         
-        public Boolean isSuccess() {
+         public fun isSuccess(): Boolean {
             return success
         }
         
-        public String getToken() {
+         public fun getToken(): String {
             return token
         }
         
-        public String getMessage() {
+         public fun getMessage(): String {
             return message
         }
     }
@@ -363,11 +363,11 @@ class OAuth2AuthManager {
             this.lastName = lastName
         }
         
-        public String getSessionId() { return sessionId; }
-        public String getAgentId() { return agentId; }
-        public String getFirstName() { return firstName; }
-        public String getLastName() { return lastName; }
-        public String getFullName() { 
+         public fun getSessionId(): String { return sessionId; }
+         public fun getAgentId(): String { return agentId; }
+         public fun getFirstName(): String { return firstName; }
+         public fun getLastName(): String { return lastName; }
+         public fun getFullName(): String { 
             return (firstName != null && lastName != null) ? firstName + " " + lastName : null 
         }
     }

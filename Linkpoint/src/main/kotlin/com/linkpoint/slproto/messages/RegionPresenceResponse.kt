@@ -15,7 +15,7 @@ class RegionPresenceResponse : SLMessage() {
     class RegionData {
         public Inet4Address ExternalRegionIP
         public Inet4Address InternalRegionIP
-        public Byte[] Message
+        public ByteArray Message
         public Long RegionHandle
         public UUID RegionID
         public Int RegionPort
@@ -26,11 +26,11 @@ class RegionPresenceResponse : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 5
-        Iterator<T> it = this.RegionData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 5
+        val it: Iterator<T> = this.RegionData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -38,11 +38,11 @@ class RegionPresenceResponse : SLMessage() {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleRegionPresenceResponse(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 16)
@@ -58,10 +58,10 @@ class RegionPresenceResponse : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            RegionData regionData = RegionData()
+            val regionData: RegionData = RegionData()
             regionData.RegionID = unpackUUID(byteBuffer)
             regionData.RegionHandle = unpackLong(byteBuffer)
             regionData.InternalRegionIP = unpackIPAddress(byteBuffer)

@@ -28,7 +28,7 @@ val class SLChatOnlineOfflineEvent : SLChatEvent() {
     }
 
     /* access modifiers changed from: protected */
-    public String getText(Context context, UserManager userManager) {
+     public fun getText(context: Context, userManager: UserManager): String {
         return context.getString(this.wentOnline ? R.string.went_online : R.string.went_offline)
     }
 
@@ -37,11 +37,11 @@ val class SLChatOnlineOfflineEvent : SLChatEvent() {
     }
 
     /* access modifiers changed from: protected */
-    public Boolean isActionMessage(UserManager userManager) {
+     public fun isActionMessage(userManager: UserManager): Boolean {
         return true
     }
 
-    fun serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

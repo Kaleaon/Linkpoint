@@ -22,11 +22,11 @@ class ChatMessageSourceObject : ChatMessageSource() {
         this.name = str
     }
 
-    public ChatterID getDefaultChatter(UUID uuid2) {
+     public fun getDefaultChatter(uuid2: UUID): ChatterID {
         return ChatterID.getLocalChatterID(uuid2)
     }
 
-    public String getSourceName(UserManager userManager) {
+     public fun getSourceName(userManager: UserManager): String {
         return this.name
     }
 
@@ -34,11 +34,11 @@ class ChatMessageSourceObject : ChatMessageSource() {
         return ChatMessageSource.ChatMessageSourceType.Object
     }
 
-    public UUID getSourceUUID() {
+     public fun getSourceUUID(): UUID {
         return this.uuid
     }
 
-    fun serializeTo(ChatMessage chatMessage) {
+    fun serializeTo(chatMessage: ChatMessage) {
         super.serializeTo(chatMessage)
         chatMessage.setSenderUUID(this.uuid)
         chatMessage.setSenderName(this.name)

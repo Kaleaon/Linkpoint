@@ -15,18 +15,18 @@ class GroupDataUpdate : SLMessage() {
         public UUID AgentID
         public Long AgentPowers
         public UUID GroupID
-        public Byte[] GroupTitle
+        public ByteArray GroupTitle
     }
 
     public GroupDataUpdate() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 5
-        Iterator<T> it = this.AgentGroupData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 5
+        val it: Iterator<T> = this.AgentGroupData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -34,11 +34,11 @@ class GroupDataUpdate : SLMessage() {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleGroupDataUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -124)
@@ -51,10 +51,10 @@ class GroupDataUpdate : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            AgentGroupData agentGroupData = AgentGroupData()
+            val agentGroupData: AgentGroupData = AgentGroupData()
             agentGroupData.AgentID = unpackUUID(byteBuffer)
             agentGroupData.GroupID = unpackUUID(byteBuffer)
             agentGroupData.AgentPowers = unpackLong(byteBuffer)

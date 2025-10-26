@@ -3,5 +3,5 @@ package com.linkpoint.render.picking
 import com.linkpoint.render.RenderContext
 
 interface IntersectPickable {
-    ObjectIntersectInfo PickObject(RenderContext renderContext, Float f, Float f2, Float f3)
+    fun PickObject(renderContext: RenderContext, f: Float, f2: Float, f3: Float): ObjectIntersectInfo
 }

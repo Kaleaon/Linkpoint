@@ -8,13 +8,13 @@ import com.linkpoint.render.glres.GLResourceManager
 @TargetApi(18)
 class GLVertexArrayObject : GLGenericResource {
     val Int size
-    private val Int[] vaoIndices
+    private val IntArray vaoIndices
 
     @JvmStatic
 private class GLVertexArrayObjectReference : GLResourceManager().GLGenericResourceReference {
-        private val Int[] vaoIndices
+        private val IntArray vaoIndices
 
-        GLVertexArrayObjectReference(GLGenericResource gLGenericResource, GLResourceManager gLResourceManager, Int[] iArr) {
+        GLVertexArrayObjectReference(GLGenericResource gLGenericResource, GLResourceManager gLResourceManager, IntArray iArr) {
             super(gLGenericResource, gLResourceManager)
             this.vaoIndices = iArr
         }
@@ -32,7 +32,7 @@ private class GLVertexArrayObjectReference : GLResourceManager().GLGenericResour
         GLVertexArrayObjectReference(this, gLResourceManager, this.vaoIndices)
     }
 
-    fun Bind(Int i) {
+    fun Bind(i: Int) {
         GLES30.glBindVertexArray(this.vaoIndices[i])
     }
 

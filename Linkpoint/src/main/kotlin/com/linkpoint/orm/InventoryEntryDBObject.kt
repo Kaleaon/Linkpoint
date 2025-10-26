@@ -13,15 +13,15 @@ import java.util.UUID
 
 class InventoryEntryDBObject : DBObject(), Parcelable {
     const val Parcelable.Creator<InventoryEntryDBObject> CREATOR = Parcelable.Creator<InventoryEntryDBObject>() {
-        public InventoryEntryDBObject createFromParcel(Parcel parcel) {
+         public fun createFromParcel(parcel: Parcel): InventoryEntryDBObject {
             return InventoryEntryDBObject(parcel)
         }
 
-        public InventoryEntryDBObject[] newArray(Int i) {
+        public Array<InventoryEntryDBObject> newArray(Int i) {
             return InventoryEntryDBObject[i]
         }
     }
-    protected const val String[] fieldNames = {"_id", "parent_id", "uuid_high", "uuid_low", "parentUUID_high", "parentUUID_low", "name", "isFolder", "typeDefault", "version", "sessionID_high", "sessionID_low", "fetchFailed", "description", "flags", "invType", "assetType", "creationDate", "_blobField"}
+    protected const val Array<String> fieldNames = {"_id", "parent_id", "uuid_high", "uuid_low", "parentUUID_high", "parentUUID_low", "name", "isFolder", "typeDefault", "version", "sessionID_high", "sessionID_low", "fetchFailed", "description", "flags", "invType", "assetType", "creationDate", "_blobField"}
     const val String insertQuery = "INSERT INTO Entries (parent_id,uuid_high,uuid_low,parentUUID_high,parentUUID_low,name,isFolder,typeDefault,version,sessionID_high,sessionID_low,fetchFailed,description,flags,invType,assetType,creationDate,_blobField) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);"
     const val Int insertUpdateParamCount = 18
     const val String tableName = "Entries"
@@ -67,7 +67,7 @@ class InventoryEntryDBObject : DBObject(), Parcelable {
     }
 
     protected InventoryEntryDBObject(Parcel parcel) {
-        Boolean z = true
+        val z: Boolean = true
         this._id = parcel.readLong()
         this.parent_id = parcel.readLong()
         this.uuid = UUID(parcel.readLong(), parcel.readLong())
@@ -100,12 +100,12 @@ class InventoryEntryDBObject : DBObject(), Parcelable {
     }
 
     @JvmStatic
-    String[] getCreateTableStatements() {
-        return String[]{"DROP TABLE IF EXISTS Entries;", "CREATE TABLE Entries (_id INTEGER PRIMARY KEY,parent_id BIGINT,uuid_high BIGINT,uuid_low BIGINT,parentUUID_high BIGINT,parentUUID_low BIGINT,name TEXT,isFolder BOOLEAN,typeDefault INTEGER,version INTEGER,sessionID_high BIGINT,sessionID_low BIGINT,fetchFailed BOOLEAN,description TEXT,flags INTEGER,invType INTEGER,assetType INTEGER,creationDate INTEGER,_blobField BLOB);", "CREATE INDEX Entries_parent_id ON Entries (parent_id);", "CREATE INDEX Entries_uuid ON Entries (uuid_high, uuid_low);"}
+    Array<String> getCreateTableStatements() {
+        return Array<String>{"DROP TABLE IF EXISTS Entries;", "CREATE TABLE Entries (_id INTEGER PRIMARY KEY,parent_id BIGINT,uuid_high BIGINT,uuid_low BIGINT,parentUUID_high BIGINT,parentUUID_low BIGINT,name TEXT,isFolder BOOLEAN,typeDefault INTEGER,version INTEGER,sessionID_high BIGINT,sessionID_low BIGINT,fetchFailed BOOLEAN,description TEXT,flags INTEGER,invType INTEGER,assetType INTEGER,creationDate INTEGER,_blobField BLOB);", "CREATE INDEX Entries_parent_id ON Entries (parent_id);", "CREATE INDEX Entries_uuid ON Entries (uuid_high, uuid_low);"}
     }
 
     @JvmStatic
-    Cursor query(SQLiteDatabase sQLiteDatabase, String str, String[] strArr, String str2) throws DBObject.DatabaseBindingException {
+     fun query(sQLiteDatabase: SQLiteDatabase, str: String, strArr: Array<String>, str2: String) throws DBObject.DatabaseBindingException {
         if (sQLiteDatabase == null) {
             throw DBObject.DatabaseBindingException("Database not opened")
         }
@@ -113,15 +113,15 @@ class InventoryEntryDBObject : DBObject(), Parcelable {
     }
 
     @JvmStatic
-    Cursor query(DBHandle dBHandle, String str, String[] strArr, String str2) throws DBObject.DatabaseBindingException {
+     fun query(dBHandle: DBHandle, str: String, strArr: Array<String>, str2: String) throws DBObject.DatabaseBindingException {
         if (dBHandle == null) {
             throw DBObject.DatabaseBindingException("Database not opened")
         }
         return dBHandle.getDB().queryWithFactory(dBHandle, false, tableName, fieldNames, str, strArr, (String) null, (String) null, str2, (String) null)
     }
 
-    fun bindInsertOrUpdate(SQLiteStatement sQLiteStatement) {
-        Int i = 1
+    fun bindInsertOrUpdate(sQLiteStatement: SQLiteStatement) {
+        val i: Int = 1
         sQLiteStatement.bindLong(1, this.parent_id)
         if (this.uuid != null) {
             sQLiteStatement.bindLong(2, this.uuid.getMostSignificantBits())
@@ -162,7 +162,7 @@ class InventoryEntryDBObject : DBObject(), Parcelable {
         sQLiteStatement.bindLong(15, (Long) this.invType)
         sQLiteStatement.bindLong(16, (Long) this.assetType)
         sQLiteStatement.bindLong(17, (Long) this.creationDate)
-        ByteBuffer wrap = ByteBuffer.wrap(Byte[Vr.VREvent.VrCore.ErrorCode.CONTROLLER_BATTERY_READ_FAILED])
+        val wrap: ByteBuffer = ByteBuffer.wrap(Byte[Vr.VREvent.VrCore.ErrorCode.CONTROLLER_BATTERY_READ_FAILED])
         if (this.agentUUID != null) {
             wrap.putLong(this.agentUUID.getMostSignificantBits())
             wrap.putLong(this.agentUUID.getLeastSignificantBits())
@@ -219,12 +219,12 @@ class InventoryEntryDBObject : DBObject(), Parcelable {
         sQLiteStatement.bindBlob(18, wrap.array())
     }
 
-    public Int describeContents() {
+     public fun describeContents(): Int {
         return 0
     }
 
-    public ContentValues getContentValues() {
-        ContentValues contentValues = ContentValues()
+     public fun getContentValues(): ContentValues {
+        val contentValues: ContentValues = ContentValues()
         contentValues.put("parent_id", Long.valueOf(this.parent_id))
         if (this.uuid != null) {
             contentValues.put("uuid_high", Long.valueOf(this.uuid.getMostSignificantBits()))
@@ -257,7 +257,7 @@ class InventoryEntryDBObject : DBObject(), Parcelable {
         contentValues.put("invType", Integer.valueOf(this.invType))
         contentValues.put("assetType", Integer.valueOf(this.assetType))
         contentValues.put("creationDate", Integer.valueOf(this.creationDate))
-        ByteBuffer wrap = ByteBuffer.wrap(Byte[Vr.VREvent.VrCore.ErrorCode.CONTROLLER_BATTERY_READ_FAILED])
+        val wrap: ByteBuffer = ByteBuffer.wrap(Byte[Vr.VREvent.VrCore.ErrorCode.CONTROLLER_BATTERY_READ_FAILED])
         if (this.agentUUID != null) {
             wrap.putLong(this.agentUUID.getMostSignificantBits())
             wrap.putLong(this.agentUUID.getLeastSignificantBits())
@@ -312,16 +312,16 @@ class InventoryEntryDBObject : DBObject(), Parcelable {
         return contentValues
     }
 
-    public String[] getFieldNames() {
+    public Array<String> getFieldNames() {
         return fieldNames
     }
 
-    public String getTableName() {
+     public fun getTableName(): String {
         return tableName
     }
 
-    fun loadFromCursor(Cursor cursor) {
-        Boolean z = true
+    fun loadFromCursor(cursor: Cursor) {
+        val z: Boolean = true
         this._id = cursor.getLong(0)
         this.parent_id = cursor.getLong(1)
         this.uuid = UUID(cursor.getLong(2), cursor.getLong(3))
@@ -337,7 +337,7 @@ class InventoryEntryDBObject : DBObject(), Parcelable {
         this.invType = cursor.getInt(15)
         this.assetType = cursor.getInt(16)
         this.creationDate = cursor.getInt(17)
-        ByteBuffer wrap = ByteBuffer.wrap(cursor.getBlob(18))
+        val wrap: ByteBuffer = ByteBuffer.wrap(cursor.getBlob(18))
         this.agentUUID = UUID(wrap.getLong(), wrap.getLong())
         this.assetUUID = UUID(wrap.getLong(), wrap.getLong())
         this.creatorUUID = UUID(wrap.getLong(), wrap.getLong())
@@ -357,8 +357,8 @@ class InventoryEntryDBObject : DBObject(), Parcelable {
         this.salePrice = wrap.getInt()
     }
 
-    fun writeToParcel(Parcel parcel, Int i) {
-        Int i2 = 1
+    fun writeToParcel(parcel: Parcel, i: Int) {
+        val i2: Int = 1
         parcel.writeLong(this._id)
         parcel.writeLong(this.parent_id)
         if (this.uuid != null) {

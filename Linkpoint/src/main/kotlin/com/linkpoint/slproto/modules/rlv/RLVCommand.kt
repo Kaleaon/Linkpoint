@@ -3,5 +3,5 @@ package com.linkpoint.slproto.modules.rlv
 import java.util.UUID
 
 interface RLVCommand {
-    Unit Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2)
+    fun Handle(rLVController: RLVController, uuid: UUID, rLVCommands: RLVCommands, str: String, str2: String)
 }

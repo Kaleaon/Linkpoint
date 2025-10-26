@@ -20,11 +20,11 @@ class GroupRoleUpdate : SLMessage() {
 
     @JvmStatic
     class RoleData {
-        public Byte[] Description
-        public Byte[] Name
+        public ByteArray Description
+        public ByteArray Name
         public Long Powers
         public UUID RoleID
-        public Byte[] Title
+        public ByteArray Title
         public Int UpdateType
     }
 
@@ -33,24 +33,24 @@ class GroupRoleUpdate : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 53
-        Iterator<T> it = this.RoleData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 53
+        val it: Iterator<T> = this.RoleData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
-            RoleData roleData = (RoleData) it.next()
+            val roleData: RoleData = (RoleData) it.next()
             i = roleData.Title.length + roleData.Name.length + 17 + 1 + roleData.Description.length + 1 + 8 + 1 + i2
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleGroupRoleUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 122)
@@ -68,13 +68,13 @@ class GroupRoleUpdate : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            RoleData roleData = RoleData()
+            val roleData: RoleData = RoleData()
             roleData.RoleID = unpackUUID(byteBuffer)
             roleData.Name = unpackVariable(byteBuffer, 1)
             roleData.Description = unpackVariable(byteBuffer, 1)

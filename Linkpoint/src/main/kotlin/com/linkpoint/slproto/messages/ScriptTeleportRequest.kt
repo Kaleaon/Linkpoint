@@ -10,8 +10,8 @@ class ScriptTeleportRequest : SLMessage() {
     @JvmStatic
     class Data {
         public LLVector3 LookAt
-        public Byte[] ObjectName
-        public Byte[] SimName
+        public ByteArray ObjectName
+        public ByteArray SimName
         public LLVector3 SimPosition
     }
 
@@ -19,15 +19,15 @@ class ScriptTeleportRequest : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.Data_Field.ObjectName.length + 1 + 1 + this.Data_Field.SimName.length + 12 + 12 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleScriptTeleportRequest(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -61)
@@ -37,7 +37,7 @@ class ScriptTeleportRequest : SLMessage() {
         packLLVector3(byteBuffer, this.Data_Field.LookAt)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.Data_Field.ObjectName = unpackVariable(byteBuffer, 1)
         this.Data_Field.SimName = unpackVariable(byteBuffer, 1)
         this.Data_Field.SimPosition = unpackLLVector3(byteBuffer)

@@ -38,11 +38,11 @@ class SLChatSessionMarkEvent : SLChatEvent() {
     }
 
     /* access modifiers changed from: protected */
-    public String getText(Context context, UserManager userManager) {
+     public fun getText(context: Context, userManager: UserManager): String {
         if (this.sessionMarkType == SessionMarkType.Teleport) {
-            return context.getString(R.string.teleport_complete_format, Object[]{this.description})
+            return context.getString(R.string.teleport_complete_format, Array<Any>{this.description})
         }
-        return context.getString(R.string.new_session_mark_format, Object[]{DateFormat.getDateTimeInstance(3, 3).format(getTimestamp())})
+        return context.getString(R.string.new_session_mark_format, Array<Any>{DateFormat.getDateTimeInstance(3, 3).format(getTimestamp())})
     }
 
     public SLChatEvent.ChatMessageViewType getViewType() {
@@ -50,11 +50,11 @@ class SLChatSessionMarkEvent : SLChatEvent() {
     }
 
     /* access modifiers changed from: protected */
-    public Boolean isActionMessage(UserManager userManager) {
+     public fun isActionMessage(userManager: UserManager): Boolean {
         return true
     }
 
-    fun serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setMessageText(this.description)
         chatMessage.setChatChannel(Integer.valueOf(this.sessionMarkType.ordinal()))

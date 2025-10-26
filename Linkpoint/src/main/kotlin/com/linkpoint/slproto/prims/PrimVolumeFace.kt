@@ -23,29 +23,29 @@ class PrimVolumeFace {
     public Int BeginS
     public Int BeginT
     public LLVector3 Center
-    public Int[] Edge
-    public LLVector3[] Extents = {LLVector3(), LLVector3()}
+    public IntArray Edge
+    public Array<LLVector3> Extents = {LLVector3(), LLVector3()}
     public Int ID
-    public Short[] Indices
+    public ShortArray Indices
     public Vector3Array Normals
     public Int NumIndices
     public Int NumS
     public Int NumT
     public Int NumVertices
     public Vector3Array Positions
-    public LLVector2[] TexCoordExtents = {LLVector2(), LLVector2()}
+    public Array<LLVector2> TexCoordExtents = {LLVector2(), LLVector2()}
     public Vector2Array TexCoords
     public Int TypeMask
     public VertexArray vertexArray
 
-    private Boolean createCap(PrimVolume primVolume) {
+     private fun createCap(primVolume: PrimVolume): Boolean {
         if ((this.TypeMask & 64) == 0 && (this.TypeMask & 128) == 0 && primVolume.volumeParams.PathParams.Begin == 0.0f && primVolume.volumeParams.PathParams.End == 1.0f && primVolume.getProfileType() == 1 && primVolume.getPathType() == 16) {
             return createUnCutCubeCap(primVolume)
         }
-        Vector3Array vector3Array = primVolume.Mesh
-        ArrayList<LLVector3> arrayList = primVolume.Profile.Profile
-        Int size = arrayList.size()
-        Int size2 = (arrayList.size() - 2) * 3
+        val vector3Array: Vector3Array = primVolume.Mesh
+        val arrayList: ArrayList<LLVector3> = primVolume.Profile.Profile
+        val size: Int = arrayList.size()
+        val size2: Int = (arrayList.size() - 2) * 3
         if ((this.TypeMask & 64) == 0 && (this.TypeMask & 128) == 0) {
             resizeVertices(size + 1)
             resizeIndices(size2 + 3)
@@ -53,14 +53,14 @@ class PrimVolumeFace {
             resizeVertices(size)
             resizeIndices(size2)
         }
-        Int size3 = (this.TypeMask & 512) != 0 ? primVolume.Profile.Total * (primVolume.Path.Path.size() - 1) : this.BeginS
-        LLVector2 lLVector2 = LLVector2()
-        LLVector2 lLVector22 = LLVector2()
-        LLVector3 lLVector3 = this.Extents[0]
-        LLVector3 lLVector32 = this.Extents[1]
-        Vector2Array vector2Array = this.TexCoords
-        Vector3Array vector3Array2 = this.Positions
-        Vector3Array vector3Array3 = this.Normals
+        val size3: Int = (this.TypeMask & 512) != 0 ? primVolume.Profile.Total * (primVolume.Path.Path.size() - 1) : this.BeginS
+        val lLVector2: LLVector2 = LLVector2()
+        val lLVector22: LLVector2 = LLVector2()
+        val lLVector3: LLVector3 = this.Extents[0]
+        val lLVector32: LLVector3 = this.Extents[1]
+        val vector2Array: Vector2Array = this.TexCoords
+        val vector3Array2: Vector3Array = this.Positions
+        val vector3Array3: Vector3Array = this.Normals
         for (Int i2 = 0; i2 < size; i2++) {
             if ((this.TypeMask & 512) != 0) {
                 vector2Array.set(i2, 0.5f + arrayList.get(i2).x, arrayList.get(i2).y + 0.5f)
@@ -81,13 +81,13 @@ class PrimVolumeFace {
         this.Center = LLVector3(lLVector3)
         this.Center.add(lLVector32)
         this.Center.mul(0.5f)
-        LLVector2 sum = LLVector2.sum(lLVector2, lLVector22)
+        val sum: LLVector2 = LLVector2.sum(lLVector2, lLVector22)
         sum.mul(0.5f)
-        LLVector3 lLVector33 = LLVector3(this.Center)
-        LLVector3 lLVector34 = LLVector3(this.Center)
+        val lLVector33: LLVector3 = LLVector3(this.Center)
+        val lLVector34: LLVector3 = LLVector3(this.Center)
         vector3Array2.subFromVector(lLVector33, 0)
         vector3Array2.subFromVector(lLVector34, 1)
-        LLVector3 cross = (this.TypeMask & 512) != 0 ? LLVector3.cross(lLVector33, lLVector34) : LLVector3.cross(lLVector34, lLVector33)
+        val cross: LLVector3 = (this.TypeMask & 512) != 0 ? LLVector3.cross(lLVector33, lLVector34) : LLVector3.cross(lLVector34, lLVector33)
         cross.normVec()
         if ((this.TypeMask & 64) == 0 && (this.TypeMask & 128) == 0) {
             vector3Array2.set(size, this.Center)
@@ -98,8 +98,8 @@ class PrimVolumeFace {
         }
         vector3Array3.fill(0, i, cross)
         if ((this.TypeMask & 64) == 0) {
-            Int i3 = 2
-            Int i4 = 1
+            val i3: Int = 2
+            val i4: Int = 1
             if ((this.TypeMask & 512) != 0) {
                 i3 = 1
                 i4 = 2
@@ -111,28 +111,28 @@ class PrimVolumeFace {
             }
             return true
         } else if ((this.TypeMask & 512) != 0) {
-            Int i6 = 0
-            Int i7 = i - 1
-            Int i8 = 0
+            val i6: Int = 0
+            val i7: Int = i - 1
+            val i8: Int = 0
             while (true) {
-                Int i9 = i8
+                val i9: Int = i8
                 if (i7 - i6 <= 1) {
                     return true
                 }
-                LLVector3 lLVector35 = LLVector3(arrayList.get(i6))
-                LLVector3 lLVector36 = LLVector3(arrayList.get(i7))
-                LLVector3 lLVector37 = LLVector3(arrayList.get(i6 + 1))
-                LLVector3 lLVector38 = LLVector3(arrayList.get(i7 - 1))
+                val lLVector35: LLVector3 = LLVector3(arrayList.get(i6))
+                val lLVector36: LLVector3 = LLVector3(arrayList.get(i7))
+                val lLVector37: LLVector3 = LLVector3(arrayList.get(i6 + 1))
+                val lLVector38: LLVector3 = LLVector3(arrayList.get(i7 - 1))
                 lLVector35.z = 0.0f
                 lLVector36.z = 0.0f
                 lLVector37.z = 0.0f
                 lLVector38.z = 0.0f
-                Float f = ((lLVector35.x * lLVector37.y) - (lLVector37.x * lLVector35.y)) + ((lLVector37.x * lLVector36.y) - (lLVector36.x * lLVector37.y)) + ((lLVector36.x * lLVector35.y) - (lLVector35.x * lLVector36.y))
-                Float f2 = ((lLVector35.x * lLVector38.y) - (lLVector38.x * lLVector35.y)) + ((lLVector38.x * lLVector37.y) - (lLVector37.x * lLVector38.y)) + ((lLVector37.x * lLVector35.y) - (lLVector35.x * lLVector37.y))
-                Float f3 = ((lLVector36.x * lLVector35.y) - (lLVector35.x * lLVector36.y)) + ((lLVector35.x * lLVector38.y) - (lLVector38.x * lLVector35.y)) + ((lLVector38.x * lLVector36.y) - (lLVector36.x * lLVector38.y))
-                Float f4 = ((lLVector36.x * lLVector37.y) - (lLVector37.x * lLVector36.y)) + ((lLVector37.x * lLVector38.y) - (lLVector38.x * lLVector37.y)) + ((lLVector38.x * lLVector36.y) - (lLVector36.x * lLVector38.y))
-                Boolean z3 = true
-                Boolean z4 = true
+                val f: Float = ((lLVector35.x * lLVector37.y) - (lLVector37.x * lLVector35.y)) + ((lLVector37.x * lLVector36.y) - (lLVector36.x * lLVector37.y)) + ((lLVector36.x * lLVector35.y) - (lLVector35.x * lLVector36.y))
+                val f2: Float = ((lLVector35.x * lLVector38.y) - (lLVector38.x * lLVector35.y)) + ((lLVector38.x * lLVector37.y) - (lLVector37.x * lLVector38.y)) + ((lLVector37.x * lLVector35.y) - (lLVector35.x * lLVector37.y))
+                val f3: Float = ((lLVector36.x * lLVector35.y) - (lLVector35.x * lLVector36.y)) + ((lLVector35.x * lLVector38.y) - (lLVector38.x * lLVector35.y)) + ((lLVector38.x * lLVector36.y) - (lLVector36.x * lLVector38.y))
+                val f4: Float = ((lLVector36.x * lLVector37.y) - (lLVector37.x * lLVector36.y)) + ((lLVector37.x * lLVector38.y) - (lLVector38.x * lLVector37.y)) + ((lLVector38.x * lLVector36.y) - (lLVector36.x * lLVector38.y))
+                val z3: Boolean = true
+                val z4: Boolean = true
                 if (f < 0.0f) {
                     z3 = false
                 }
@@ -153,17 +153,17 @@ class PrimVolumeFace {
                     z2 = LLVector3.sub(lLVector35, lLVector37).magVecSquared() < LLVector3.sub(lLVector36, lLVector38).magVecSquared()
                 }
                 if (z2) {
-                    Int i10 = i9 + 1
+                    val i10: Int = i9 + 1
                     this.Indices[i9] = (Short) i6
-                    Int i11 = i10 + 1
+                    val i11: Int = i10 + 1
                     this.Indices[i10] = (Short) (i6 + 1)
                     i8 = i11 + 1
                     this.Indices[i11] = (Short) i7
                     i6++
                 } else {
-                    Int i12 = i9 + 1
+                    val i12: Int = i9 + 1
                     this.Indices[i9] = (Short) i6
-                    Int i13 = i12 + 1
+                    val i13: Int = i12 + 1
                     this.Indices[i12] = (Short) (i7 - 1)
                     i8 = i13 + 1
                     this.Indices[i13] = (Short) i7
@@ -171,28 +171,28 @@ class PrimVolumeFace {
                 }
             }
         } else {
-            Int i14 = 0
-            Int i15 = i - 1
-            Int i16 = 0
+            val i14: Int = 0
+            val i15: Int = i - 1
+            val i16: Int = 0
             while (true) {
-                Int i17 = i16
+                val i17: Int = i16
                 if (i15 - i14 <= 1) {
                     return true
                 }
-                LLVector3 lLVector39 = LLVector3(arrayList.get(i14))
-                LLVector3 lLVector310 = LLVector3(arrayList.get(i15))
-                LLVector3 lLVector311 = LLVector3(arrayList.get(i14 + 1))
-                LLVector3 lLVector312 = LLVector3(arrayList.get(i15 - 1))
+                val lLVector39: LLVector3 = LLVector3(arrayList.get(i14))
+                val lLVector310: LLVector3 = LLVector3(arrayList.get(i15))
+                val lLVector311: LLVector3 = LLVector3(arrayList.get(i14 + 1))
+                val lLVector312: LLVector3 = LLVector3(arrayList.get(i15 - 1))
                 lLVector39.z = 0.0f
                 lLVector310.z = 0.0f
                 lLVector311.z = 0.0f
                 lLVector312.z = 0.0f
-                Float f5 = ((lLVector39.x * lLVector311.y) - (lLVector311.x * lLVector39.y)) + ((lLVector311.x * lLVector310.y) - (lLVector310.x * lLVector311.y)) + ((lLVector310.x * lLVector39.y) - (lLVector39.x * lLVector310.y))
-                Float f6 = ((lLVector39.x * lLVector312.y) - (lLVector312.x * lLVector39.y)) + ((lLVector312.x * lLVector311.y) - (lLVector311.x * lLVector312.y)) + ((lLVector311.x * lLVector39.y) - (lLVector39.x * lLVector311.y))
-                Float f7 = ((lLVector310.x * lLVector39.y) - (lLVector39.x * lLVector310.y)) + ((lLVector39.x * lLVector312.y) - (lLVector312.x * lLVector39.y)) + ((lLVector312.x * lLVector310.y) - (lLVector310.x * lLVector312.y))
-                Float f8 = ((lLVector310.x * lLVector311.y) - (lLVector311.x * lLVector310.y)) + ((lLVector311.x * lLVector312.y) - (lLVector312.x * lLVector311.y)) + ((lLVector312.x * lLVector310.y) - (lLVector310.x * lLVector312.y))
-                Boolean z5 = true
-                Boolean z6 = true
+                val f5: Float = ((lLVector39.x * lLVector311.y) - (lLVector311.x * lLVector39.y)) + ((lLVector311.x * lLVector310.y) - (lLVector310.x * lLVector311.y)) + ((lLVector310.x * lLVector39.y) - (lLVector39.x * lLVector310.y))
+                val f6: Float = ((lLVector39.x * lLVector312.y) - (lLVector312.x * lLVector39.y)) + ((lLVector312.x * lLVector311.y) - (lLVector311.x * lLVector312.y)) + ((lLVector311.x * lLVector39.y) - (lLVector39.x * lLVector311.y))
+                val f7: Float = ((lLVector310.x * lLVector39.y) - (lLVector39.x * lLVector310.y)) + ((lLVector39.x * lLVector312.y) - (lLVector312.x * lLVector39.y)) + ((lLVector312.x * lLVector310.y) - (lLVector310.x * lLVector312.y))
+                val f8: Float = ((lLVector310.x * lLVector311.y) - (lLVector311.x * lLVector310.y)) + ((lLVector311.x * lLVector312.y) - (lLVector312.x * lLVector311.y)) + ((lLVector312.x * lLVector310.y) - (lLVector310.x * lLVector312.y))
+                val z5: Boolean = true
+                val z6: Boolean = true
                 if (f5 < 0.0f) {
                     z5 = false
                 }
@@ -213,17 +213,17 @@ class PrimVolumeFace {
                     z = LLVector3.sub(lLVector39, lLVector311).magVecSquared() < LLVector3.sub(lLVector310, lLVector312).magVecSquared()
                 }
                 if (z) {
-                    Int i18 = i17 + 1
+                    val i18: Int = i17 + 1
                     this.Indices[i17] = (Short) i14
-                    Int i19 = i18 + 1
+                    val i19: Int = i18 + 1
                     this.Indices[i18] = (Short) i15
                     i16 = i19 + 1
                     this.Indices[i19] = (Short) (i14 + 1)
                     i14++
                 } else {
-                    Int i20 = i17 + 1
+                    val i20: Int = i17 + 1
                     this.Indices[i17] = (Short) i14
-                    Int i21 = i20 + 1
+                    val i21: Int = i20 + 1
                     this.Indices[i20] = (Short) i15
                     i16 = i21 + 1
                     this.Indices[i21] = (Short) (i15 - 1)
@@ -233,45 +233,45 @@ class PrimVolumeFace {
         }
     }
 
-    private Boolean createSide(PrimVolume primVolume) {
-        Boolean z = (this.TypeMask & 256) != 0
-        Byte b = primVolume.volumeParams.SculptType
-        Byte b2 = (Byte) (b & 7)
-        Boolean z2 = (b & 64) != 0
-        Boolean z3 = (b & Byte.MIN_VALUE) != 0
-        Boolean z4 = z2 ? !z3 : z3
-        Vector3Array vector3Array = primVolume.Mesh
-        ArrayList<LLVector3> arrayList = primVolume.Profile.Profile
-        ArrayList<PrimPath.PathPoint> arrayList2 = primVolume.Path.Path
-        Int i6 = primVolume.Profile.Total
-        Int i7 = (this.NumS - 1) * (this.NumT - 1) * 6
+     private fun createSide(primVolume: PrimVolume): Boolean {
+        val z: Boolean = (this.TypeMask & 256) != 0
+        val b: Byte = primVolume.volumeParams.SculptType
+        val b2: Byte = (Byte) (b & 7)
+        val z2: Boolean = (b & 64) != 0
+        val z3: Boolean = (b & Byte.MIN_VALUE) != 0
+        val z4: Boolean = z2 ? !z3 : z3
+        val vector3Array: Vector3Array = primVolume.Mesh
+        val arrayList: ArrayList<LLVector3> = primVolume.Profile.Profile
+        val arrayList2: ArrayList<PrimPath.PathPoint> = primVolume.Path.Path
+        val i6: Int = primVolume.Profile.Total
+        val i7: Int = (this.NumS - 1) * (this.NumT - 1) * 6
         resizeVertices(this.NumS * this.NumT)
         resizeIndices(i7)
         this.Edge = Int[i7]
-        Vector3Array vector3Array2 = this.Positions
-        Vector3Array vector3Array3 = this.Normals
-        Vector2Array vector2Array = this.TexCoords
-        Int floor = (Int) Math.floor((Double) arrayList.get(this.BeginS).z)
-        Int i8 = ((this.TypeMask & 16) == 0 || (this.TypeMask & 256) == 0 || this.NumS <= 2) ? this.NumS : this.NumS / 2
-        Int i9 = this.BeginT
-        Int i10 = 0
+        val vector3Array2: Vector3Array = this.Positions
+        val vector3Array3: Vector3Array = this.Normals
+        val vector2Array: Vector2Array = this.TexCoords
+        val floor: Int = (Int) Math.floor((Double) arrayList.get(this.BeginS).z)
+        val i8: Int = ((this.TypeMask & 16) == 0 || (this.TypeMask & 256) == 0 || this.NumS <= 2) ? this.NumS : this.NumS / 2
+        val i9: Int = this.BeginT
+        val i10: Int = 0
         while (true) {
-            Int i11 = i9
+            val i11: Int = i9
             if (i11 >= this.BeginT + this.NumT) {
                 break
             }
-            Float f = arrayList2.get(i11).TexT
-            Int i12 = 0
-            Int i13 = i10
+            val f: Float = arrayList2.get(i11).TexT
+            val i12: Int = 0
+            val i13: Int = i10
             while (i12 < i8) {
-                Float f2 = ((this.TypeMask & 4) != 0 || this.BeginS + i12 >= arrayList.size()) ? i12 != 0 ? 1.0f : 0.0f : !z ? arrayList.get(this.BeginS + i12).z : arrayList.get(this.BeginS + i12).z - ((Float) floor)
+                val f2: Float = ((this.TypeMask & 4) != 0 || this.BeginS + i12 >= arrayList.size()) ? i12 != 0 ? 1.0f : 0.0f : !z ? arrayList.get(this.BeginS + i12).z : arrayList.get(this.BeginS + i12).z - ((Float) floor)
                 if (z4) {
                     f2 = 1.0f - f2
                 }
-                Int i14 = this.BeginS + i12 >= i6 ? this.BeginS + i12 + ((i11 - 1) * i6) : this.BeginS + i12 + (i6 * i11)
+                val i14: Int = this.BeginS + i12 >= i6 ? this.BeginS + i12 + ((i11 - 1) * i6) : this.BeginS + i12 + (i6 * i11)
                 vector3Array2.set(i13, vector3Array, i14)
                 vector2Array.set(i13, f2, f)
-                Int i15 = i13 + 1
+                val i15: Int = i13 + 1
                 if ((this.TypeMask & 16) == 0 || (this.TypeMask & 256) == 0 || this.NumS <= 2 || i12 <= 0) {
                     i5 = i15
                 } else {
@@ -285,41 +285,41 @@ class PrimVolumeFace {
             if ((this.TypeMask & 16) == 0 || (this.TypeMask & 256) == 0 || this.NumS <= 2) {
                 i10 = i13
             } else {
-                Int i16 = (this.TypeMask & 128) != 0 ? i8 - 1 : 0
-                Int i17 = this.BeginS + i16 + (i6 * i11)
-                Float f3 = this.BeginS + i16 < arrayList.size() ? arrayList.get(i16 + this.BeginS).z - ((Float) floor) : i16 != 0 ? 1.0f : 0.0f
+                val i16: Int = (this.TypeMask & 128) != 0 ? i8 - 1 : 0
+                val i17: Int = this.BeginS + i16 + (i6 * i11)
+                val f3: Float = this.BeginS + i16 < arrayList.size() ? arrayList.get(i16 + this.BeginS).z - ((Float) floor) : i16 != 0 ? 1.0f : 0.0f
                 vector3Array2.set(i13, vector3Array, i17)
                 vector2Array.set(i13, f3, f)
                 i10 = i13 + 1
             }
             i9 = i11 + 1
         }
-        LLVector3 lLVector3 = this.Extents[0]
-        LLVector3 lLVector32 = this.Extents[1]
+        val lLVector3: LLVector3 = this.Extents[0]
+        val lLVector32: LLVector3 = this.Extents[1]
         vector3Array2.get(0, lLVector3)
         vector3Array2.get(0, lLVector32)
         vector3Array2.minMaxVector(lLVector3, lLVector32)
         this.Center = LLVector3(lLVector3)
         this.Center.add(lLVector32)
         this.Center.mul(0.5f)
-        Int i18 = 0
-        Int i19 = 0
-        Boolean z5 = (this.TypeMask & 256) != 0
+        val i18: Int = 0
+        val i19: Int = 0
+        val z5: Boolean = (this.TypeMask & 256) != 0
         for (Int i20 = 0; i20 < this.NumT - 1; i20++) {
             for (Int i21 = 0; i21 < this.NumS - 1; i21++) {
-                Int i22 = i18 + 1
+                val i22: Int = i18 + 1
                 this.Indices[i18] = (Short) ((this.NumS * i20) + i21)
-                Int i23 = i22 + 1
+                val i23: Int = i22 + 1
                 this.Indices[i22] = (Short) (i21 + 1 + (this.NumS * (i20 + 1)))
-                Int i24 = i23 + 1
+                val i24: Int = i23 + 1
                 this.Indices[i23] = (Short) ((this.NumS * (i20 + 1)) + i21)
-                Int i25 = i24 + 1
+                val i25: Int = i24 + 1
                 this.Indices[i24] = (Short) ((this.NumS * i20) + i21)
-                Int i26 = i25 + 1
+                val i26: Int = i25 + 1
                 this.Indices[i25] = (Short) (i21 + 1 + (this.NumS * i20))
                 i18 = i26 + 1
                 this.Indices[i26] = (Short) (i21 + 1 + (this.NumS * (i20 + 1)))
-                Int i27 = i19 + 1
+                val i27: Int = i19 + 1
                 this.Edge[i19] = ((this.NumS - 1) * 2 * i20) + (i21 * 2) + 1
                 if (i20 < this.NumT - 2) {
                     this.Edge[i27] = ((this.NumS - 1) * 2 * (i20 + 1)) + (i21 * 2) + 1
@@ -366,13 +366,13 @@ class PrimVolumeFace {
             }
         }
         this.Normals.clear()
-        LLVector3[] lLVector3Arr = LLVector3[3]
-        Short[] sArr = Short[3]
+        val lLVector3Arr: Array<LLVector3> = LLVector3[3]
+        val sArr: ShortArray = Short[3]
         for (Int i28 = 0; i28 < 3; i28++) {
             lLVector3Arr[i28] = LLVector3()
         }
-        LLVector3 lLVector33 = LLVector3()
-        LLVector3 lLVector34 = LLVector3()
+        val lLVector33: LLVector3 = LLVector3()
+        val lLVector34: LLVector3 = LLVector3()
         for (Int i29 = 0; i29 < this.NumIndices / 3; i29++) {
             for (Int i30 = 0; i30 < 3; i30++) {
                 sArr[i30] = this.Indices[(i29 * 3) + i30]
@@ -386,17 +386,17 @@ class PrimVolumeFace {
             }
             this.Normals.add(sArr[(i29 & 1) + 1], lLVector33)
         }
-        LLVector3 lLVector35 = LLVector3()
-        LLVector3 lLVector36 = LLVector3()
-        LLVector3 lLVector37 = LLVector3()
+        val lLVector35: LLVector3 = LLVector3()
+        val lLVector36: LLVector3 = LLVector3()
+        val lLVector37: LLVector3 = LLVector3()
         vector3Array2.get(0, lLVector36)
         vector3Array2.get(this.NumS * (this.NumT - 2), lLVector37)
         lLVector35.setSub(lLVector36, lLVector37)
-        Boolean z6 = lLVector35.dot(lLVector35) < 1.0E-6f
+        val z6: Boolean = lLVector35.dot(lLVector35) < 1.0E-6f
         vector3Array2.get(this.NumS - 1, lLVector36)
         vector3Array2.get(((this.NumS * (this.NumT - 2)) + this.NumS) - 1, lLVector37)
         lLVector35.setSub(lLVector36, lLVector37)
-        Boolean z7 = lLVector35.dot(lLVector35) < 1.0E-6f
+        val z7: Boolean = lLVector35.dot(lLVector35) < 1.0E-6f
         if (b2 == 0) {
             if (!primVolume.Path.Open) {
                 for (Int i32 = 0; i32 < this.NumS; i32++) {
@@ -424,11 +424,11 @@ class PrimVolumeFace {
             }
             return true
         }
-        Boolean z8 = b2 == 1
-        Boolean z9 = b2 == 1 || b2 == 2 || b2 == 4
-        Boolean z10 = b2 == 2
+        val z8: Boolean = b2 == 1
+        val z9: Boolean = b2 == 1 || b2 == 2 || b2 == 4
+        val z10: Boolean = b2 == 2
         if (z8) {
-            LLVector3 lLVector38 = LLVector3()
+            val lLVector38: LLVector3 = LLVector3()
             for (Int i36 = 0; i36 < this.NumS; i36++) {
                 vector3Array3.addToVector(i36, lLVector38)
             }
@@ -457,22 +457,22 @@ class PrimVolumeFace {
         return true
     }
 
-    private Boolean createUnCutCubeCap(PrimVolume primVolume) {
-        Vector3Array vector3Array = primVolume.Mesh
-        ArrayList<LLVector3> arrayList = primVolume.Profile.Profile
-        Int i2 = primVolume.Profile.Total
-        Int size = primVolume.Path.Path.size()
-        Int size2 = (arrayList.size() - 1) / 4
-        LLVector3 lLVector3 = this.Extents[0]
-        LLVector3 lLVector32 = this.Extents[1]
-        Int i3 = (this.TypeMask & 512) != 0 ? i2 * (size - 1) : this.BeginS
-        VertexArray vertexArray2 = VertexArray(4)
-        LLVector3 lLVector33 = LLVector3()
-        Vector3Array vertices = vertexArray2.getVertices()
-        Vector2Array texCoords = vertexArray2.getTexCoords()
-        Int i4 = 0
+     private fun createUnCutCubeCap(primVolume: PrimVolume): Boolean {
+        val vector3Array: Vector3Array = primVolume.Mesh
+        val arrayList: ArrayList<LLVector3> = primVolume.Profile.Profile
+        val i2: Int = primVolume.Profile.Total
+        val size: Int = primVolume.Path.Path.size()
+        val size2: Int = (arrayList.size() - 1) / 4
+        val lLVector3: LLVector3 = this.Extents[0]
+        val lLVector32: LLVector3 = this.Extents[1]
+        val i3: Int = (this.TypeMask & 512) != 0 ? i2 * (size - 1) : this.BeginS
+        val vertexArray2: VertexArray = VertexArray(4)
+        val lLVector33: LLVector3 = LLVector3()
+        val vertices: Vector3Array = vertexArray2.getVertices()
+        val texCoords: Vector2Array = vertexArray2.getTexCoords()
+        val i4: Int = 0
         while (true) {
-            Int i5 = i4
+            val i5: Int = i4
             if (i5 >= 4) {
                 break
             }
@@ -480,7 +480,7 @@ class PrimVolumeFace {
             texCoords.set(i5, 0.5f + arrayList.get(size2 * i5).x, 0.5f - arrayList.get(size2 * i5).y)
             i4 = i5 + 1
         }
-        LLVector3 lLVector34 = LLVector3()
+        val lLVector34: LLVector3 = LLVector3()
         vertices.getSub(1, 0, lLVector33)
         vertices.getSub(2, 1, lLVector34)
         lLVector33.setCross(lLVector34)
@@ -492,21 +492,21 @@ class PrimVolumeFace {
             texCoords.swap(1, 2)
         }
         resizeVertices((size2 + 1) * (size2 + 1))
-        Vector3Array vector3Array2 = this.Positions
-        Int i6 = 0
-        LLVector3 lLVector35 = LLVector3()
-        LLVector3 lLVector36 = LLVector3()
-        LLVector2 lLVector2 = LLVector2()
-        LLVector2 lLVector22 = LLVector2()
-        Int i7 = 0
+        val vector3Array2: Vector3Array = this.Positions
+        val i6: Int = 0
+        val lLVector35: LLVector3 = LLVector3()
+        val lLVector36: LLVector3 = LLVector3()
+        val lLVector2: LLVector2 = LLVector2()
+        val lLVector22: LLVector2 = LLVector2()
+        val i7: Int = 0
         while (true) {
-            Int i8 = i7
+            val i8: Int = i7
             if (i8 >= size2 + 1) {
                 break
             }
-            Int i9 = 0
+            val i9: Int = 0
             while (true) {
-                Int i10 = i9
+                val i10: Int = i9
                 if (i10 >= size2 + 1) {
                     break
                 }
@@ -527,28 +527,28 @@ class PrimVolumeFace {
         this.Center.add(lLVector32)
         this.Center.mul(0.5f)
         resizeIndices(size2 * size2 * 6)
-        Short[] sArr = this.Indices
-        Short[] sArr2 = {0, 1, (Short) (size2 + 1 + 1), (Short) (size2 + 1 + 1), (Short) (size2 + 1), 0}
-        Int i11 = 0
-        Int i12 = 0
+        val sArr: ShortArray = this.Indices
+        val sArr2: ShortArray = {0, 1, (Short) (size2 + 1 + 1), (Short) (size2 + 1 + 1), (Short) (size2 + 1), 0}
+        val i11: Int = 0
+        val i12: Int = 0
         while (true) {
-            Int i13 = i12
+            val i13: Int = i12
             if (i13 >= size2) {
                 return true
             }
-            Int i14 = 0
+            val i14: Int = 0
             while (i14 < size2) {
                 if ((this.TypeMask & 512) != 0) {
                     i = i11
-                    Int i15 = 5
+                    val i15: Int = 5
                     while (i15 >= 0) {
                         sArr[i] = (Short) (((size2 + 1) * i14) + i13 + sArr2[i15])
                         i15--
                         i++
                     }
                 } else {
-                    Int i16 = i11
-                    Int i17 = 0
+                    val i16: Int = i11
+                    val i17: Int = 0
                     while (i17 < 6) {
                         sArr[i] = (Short) (((size2 + 1) * i14) + i13 + sArr2[i17])
                         i17++
@@ -562,7 +562,7 @@ class PrimVolumeFace {
         }
     }
 
-    private Unit resizeIndices(Int i) {
+     private fun resizeIndices(i: Int) {
         if (i != this.NumIndices) {
             if (i != 0) {
                 this.Indices = Short[i]
@@ -573,7 +573,7 @@ class PrimVolumeFace {
         }
     }
 
-    private Unit resizeVertices(Int i) {
+     private fun resizeVertices(i: Int) {
         if (this.NumVertices != i) {
             if (i != 0) {
                 this.vertexArray = VertexArray(i)
@@ -590,8 +590,8 @@ class PrimVolumeFace {
         }
     }
 
-    public Boolean create(PrimVolume primVolume) {
-        Boolean createCap = (this.TypeMask & 2) != 0 ? createCap(primVolume) : ((this.TypeMask & 4) == 0 && (this.TypeMask & 8) == 0) ? false : createSide(primVolume)
+     public fun create(primVolume: PrimVolume): Boolean {
+        val createCap: Boolean = (this.TypeMask & 2) != 0 ? createCap(primVolume) : ((this.TypeMask & 4) == 0 && (this.TypeMask & 8) == 0) ? false : createSide(primVolume)
         if (createCap) {
             this.TexCoordExtents[0] = LLVector2(1.0f, 1.0f)
             this.TexCoordExtents[1] = LLVector2(0.0f, 0.0f)

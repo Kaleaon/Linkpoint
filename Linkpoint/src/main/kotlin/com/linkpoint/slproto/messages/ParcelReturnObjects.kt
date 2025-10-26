@@ -40,15 +40,15 @@ class ParcelReturnObjects : SLMessage() {
         this.ParcelData_Field = ParcelData()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.TaskIDs_Fields.size() * 16) + 45 + 1 + (this.OwnerIDs_Fields.size() * 16)
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleParcelReturnObjects(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -57)
@@ -66,20 +66,20 @@ class ParcelReturnObjects : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ParcelData_Field.LocalID = unpackInt(byteBuffer)
         this.ParcelData_Field.ReturnType = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            TaskIDs taskIDs = TaskIDs()
+            val taskIDs: TaskIDs = TaskIDs()
             taskIDs.TaskID = unpackUUID(byteBuffer)
             this.TaskIDs_Fields.add(taskIDs)
         }
-        Byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b2: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i2 = 0; i2 < b2; i2++) {
-            OwnerIDs ownerIDs = OwnerIDs()
+            val ownerIDs: OwnerIDs = OwnerIDs()
             ownerIDs.OwnerID = unpackUUID(byteBuffer)
             this.OwnerIDs_Fields.add(ownerIDs)
         }

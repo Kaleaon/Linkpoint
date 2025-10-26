@@ -106,63 +106,63 @@ class DaoSession : AbstractDaoSession() {
         this.chatterDaoConfig.getIdentityScope().clear()
     }
 
-    public CachedAssetDao getCachedAssetDao() {
+     public fun getCachedAssetDao(): CachedAssetDao {
         return this.cachedAssetDao
     }
 
-    public CachedResponseDao getCachedResponseDao() {
+     public fun getCachedResponseDao(): CachedResponseDao {
         return this.cachedResponseDao
     }
 
-    public ChatMessageDao getChatMessageDao() {
+     public fun getChatMessageDao(): ChatMessageDao {
         return this.chatMessageDao
     }
 
-    public ChatterDao getChatterDao() {
+     public fun getChatterDao(): ChatterDao {
         return this.chatterDao
     }
 
-    public FriendDao getFriendDao() {
+     public fun getFriendDao(): FriendDao {
         return this.friendDao
     }
 
-    public GroupMemberDao getGroupMemberDao() {
+     public fun getGroupMemberDao(): GroupMemberDao {
         return this.groupMemberDao
     }
 
-    public GroupMemberListDao getGroupMemberListDao() {
+     public fun getGroupMemberListDao(): GroupMemberListDao {
         return this.groupMemberListDao
     }
 
-    public GroupRoleMemberDao getGroupRoleMemberDao() {
+     public fun getGroupRoleMemberDao(): GroupRoleMemberDao {
         return this.groupRoleMemberDao
     }
 
-    public GroupRoleMemberListDao getGroupRoleMemberListDao() {
+     public fun getGroupRoleMemberListDao(): GroupRoleMemberListDao {
         return this.groupRoleMemberListDao
     }
 
-    public MoneyTransactionDao getMoneyTransactionDao() {
+     public fun getMoneyTransactionDao(): MoneyTransactionDao {
         return this.moneyTransactionDao
     }
 
-    public MuteListCachedDataDao getMuteListCachedDataDao() {
+     public fun getMuteListCachedDataDao(): MuteListCachedDataDao {
         return this.muteListCachedDataDao
     }
 
-    public SearchGridResultDao getSearchGridResultDao() {
+     public fun getSearchGridResultDao(): SearchGridResultDao {
         return this.searchGridResultDao
     }
 
-    public UserDao getUserDao() {
+     public fun getUserDao(): UserDao {
         return this.userDao
     }
 
-    public UserNameDao getUserNameDao() {
+     public fun getUserNameDao(): UserNameDao {
         return this.userNameDao
     }
 
-    public UserPicDao getUserPicDao() {
+     public fun getUserPicDao(): UserPicDao {
         return this.userPicDao
     }
 }

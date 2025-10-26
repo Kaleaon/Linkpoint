@@ -32,7 +32,7 @@ class ChildAgentUpdate : SLMessage() {
         public Int AgentAccess
         public UUID AgentID
         public LLVector3 AgentPos
-        public Byte[] AgentTextures
+        public ByteArray AgentTextures
         public LLVector3 AgentVel
         public Boolean AlwaysRun
         public Float Aspect
@@ -51,7 +51,7 @@ class ChildAgentUpdate : SLMessage() {
         public Long RegionHandle
         public UUID SessionID
         public LLVector3 Size
-        public Byte[] Throttles
+        public ByteArray Throttles
         public LLVector3 UpAxis
         public Int ViewerCircuitCode
     }
@@ -81,7 +81,7 @@ class ChildAgentUpdate : SLMessage() {
 
     @JvmStatic
     class NVPairData {
-        public Byte[] NVPairs
+        public ByteArray NVPairs
     }
 
     @JvmStatic
@@ -94,11 +94,11 @@ class ChildAgentUpdate : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
-        Int length = this.AgentData_Field.Throttles.length + 138 + 4 + 12 + 12 + 4 + 4 + 1 + 1 + 16 + 1 + 2 + this.AgentData_Field.AgentTextures.length + 16 + 1 + 1 + (this.GroupData_Fields.size() * 25) + 1 + (this.AnimationData_Fields.size() * 32) + 1 + (this.GranterBlock_Fields.size() * 16) + 1
-        Iterator<T> it = this.NVPairData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val length: Int = this.AgentData_Field.Throttles.length + 138 + 4 + 12 + 12 + 4 + 4 + 1 + 1 + 16 + 1 + 2 + this.AgentData_Field.AgentTextures.length + 16 + 1 + 1 + (this.GroupData_Fields.size() * 25) + 1 + (this.AnimationData_Fields.size() * 32) + 1 + (this.GranterBlock_Fields.size() * 16) + 1
+        val it: Iterator<T> = this.NVPairData_Fields.iterator()
         while (true) {
-            Int i = length
+            val i: Int = length
             if (!it.hasNext()) {
                 return i + 1 + (this.VisualParam_Fields.size() * 1) + 1 + (this.AgentAccess_Fields.size() * 2) + 1 + (this.AgentInfo_Fields.size() * 4)
             }
@@ -106,11 +106,11 @@ class ChildAgentUpdate : SLMessage() {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleChildAgentUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.put(Ascii.EM)
         packLong(byteBuffer, this.AgentData_Field.RegionHandle)
         packInt(byteBuffer, this.AgentData_Field.ViewerCircuitCode)
@@ -172,7 +172,7 @@ class ChildAgentUpdate : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.RegionHandle = unpackLong(byteBuffer)
         this.AgentData_Field.ViewerCircuitCode = unpackInt(byteBuffer)
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
@@ -199,49 +199,49 @@ class ChildAgentUpdate : SLMessage() {
         this.AgentData_Field.AgentAccess = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.AgentData_Field.AgentTextures = unpackVariable(byteBuffer, 2)
         this.AgentData_Field.ActiveGroupID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            GroupData groupData = GroupData()
+            val groupData: GroupData = GroupData()
             groupData.GroupID = unpackUUID(byteBuffer)
             groupData.GroupPowers = unpackLong(byteBuffer)
             groupData.AcceptNotices = unpackBoolean(byteBuffer)
             this.GroupData_Fields.add(groupData)
         }
-        Byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b2: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i2 = 0; i2 < b2; i2++) {
-            AnimationData animationData = AnimationData()
+            val animationData: AnimationData = AnimationData()
             animationData.Animation = unpackUUID(byteBuffer)
             animationData.ObjectID = unpackUUID(byteBuffer)
             this.AnimationData_Fields.add(animationData)
         }
-        Byte b3 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b3: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i3 = 0; i3 < b3; i3++) {
-            GranterBlock granterBlock = GranterBlock()
+            val granterBlock: GranterBlock = GranterBlock()
             granterBlock.GranterID = unpackUUID(byteBuffer)
             this.GranterBlock_Fields.add(granterBlock)
         }
-        Byte b4 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b4: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i4 = 0; i4 < b4; i4++) {
-            NVPairData nVPairData = NVPairData()
+            val nVPairData: NVPairData = NVPairData()
             nVPairData.NVPairs = unpackVariable(byteBuffer, 2)
             this.NVPairData_Fields.add(nVPairData)
         }
-        Byte b5 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b5: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i5 = 0; i5 < b5; i5++) {
-            VisualParam visualParam = VisualParam()
+            val visualParam: VisualParam = VisualParam()
             visualParam.ParamValue = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             this.VisualParam_Fields.add(visualParam)
         }
-        Byte b6 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b6: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i6 = 0; i6 < b6; i6++) {
-            AgentAccess agentAccess = AgentAccess()
+            val agentAccess: AgentAccess = AgentAccess()
             agentAccess.AgentLegacyAccess = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             agentAccess.AgentMaxAccess = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             this.AgentAccess_Fields.add(agentAccess)
         }
-        Byte b7 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b7: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i7 = 0; i7 < b7; i7++) {
-            AgentInfo agentInfo = AgentInfo()
+            val agentInfo: AgentInfo = AgentInfo()
             agentInfo.Flags = unpackInt(byteBuffer)
             this.AgentInfo_Fields.add(agentInfo)
         }

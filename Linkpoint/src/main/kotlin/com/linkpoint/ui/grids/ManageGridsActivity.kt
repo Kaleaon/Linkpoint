@@ -37,14 +37,14 @@ private class GridListAdapter : ArrayAdapter()<GridList.GridInfo> {
             super(context, R.layout.grid_list_item, list)
         }
 
-        public View getView(Int i, View view, ViewGroup viewGroup) {
-            LayoutInflater from = LayoutInflater.from(getContext())
+         public fun getView(i: Int, view: View, viewGroup: ViewGroup): View {
+            val from: LayoutInflater = LayoutInflater.from(getContext())
             if (view == null) {
                 view = from.inflate(R.layout.grid_list_item, viewGroup, false)
             }
-            TextView textView = (TextView) view.findViewById(R.id.gridNameTextView)
-            TextView textView2 = (TextView) view.findViewById(R.id.gridURLTextView)
-            Object item = getItem(i)
+            val textView: TextView = (TextView) view.findViewById(R.id.gridNameTextView)
+            val textView2: TextView = (TextView) view.findViewById(R.id.gridURLTextView)
+            val item: Object = getItem(i)
             if (item != null) {
                 GridList.GridInfo gridInfo = (GridList.GridInfo) item
                 textView.setText(gridInfo.getGridName())
@@ -60,7 +60,7 @@ private class GridListAdapter : ArrayAdapter()<GridList.GridInfo> {
         }
     }
 
-    private Unit deleteGrid(GridList.GridInfo gridInfo) {
+     private fun deleteGrid(GridList.GridInfo gridInfo) {
         this.gridList.deleteGrid(gridInfo)
         this.gridList.getGridList(this.displayList)
         this.adapter.updateList()
@@ -75,18 +75,18 @@ private class GridListAdapter : ArrayAdapter()<GridList.GridInfo> {
 
     @OnClick({2131755484})
     fun onAddNewGridButton() {
-        GridEditDialog gridEditDialog = GridEditDialog(this, this.gridList, (GridList.GridInfo) null)
+        val gridEditDialog: GridEditDialog = GridEditDialog(this, this.gridList, (GridList.GridInfo) null)
         gridEditDialog.setOnGridEditResultListener(this)
         gridEditDialog.show()
     }
 
-    public Boolean onContextItemSelected(MenuItem menuItem) {
-        Object item = this.adapter.getItem(((AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo()).position)
+     public override fun onContextItemSelected(menuItem: MenuItem): Boolean {
+        val item: Object = this.adapter.getItem(((AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo()).position)
         if (item != null) {
             GridList.GridInfo gridInfo = (GridList.GridInfo) item
             switch (menuItem.getItemId()) {
                 case R.id.item_grid_edit:
-                    GridEditDialog gridEditDialog = GridEditDialog(this, this.gridList, gridInfo)
+                    val gridEditDialog: GridEditDialog = GridEditDialog(this, this.gridList, gridInfo)
                     gridEditDialog.setOnGridEditResultListener(this)
                     gridEditDialog.show()
                     return true
@@ -187,7 +187,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.grids.-$Lambda$mB5
         return super.onContextItemSelected(menuItem)
     }
 
-    fun onCreate(Bundle bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setContentView((Int) R.layout.manage_grids)
         ButterKnife.bind((Activity) this)
@@ -199,15 +199,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.grids.-$Lambda$mB5
         registerForContextMenu(this.gridListView)
     }
 
-    fun onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+    override fun onCreateContextMenu(contextMenu: ContextMenu, view: View, ContextMenu.ContextMenuInfo contextMenuInfo) {
         super.onCreateContextMenu(contextMenu, view, contextMenuInfo)
-        Object item = this.adapter.getItem(((AdapterView.AdapterContextMenuInfo) contextMenuInfo).position)
+        val item: Object = this.adapter.getItem(((AdapterView.AdapterContextMenuInfo) contextMenuInfo).position)
         if (item != null && !((GridList.GridInfo) item).isPredefinedGrid()) {
             getMenuInflater().inflate(R.menu.grid_list_context_menu, contextMenu)
         }
     }
 
-    fun onGridAdded(GridList.GridInfo gridInfo, Boolean z) {
+    fun onGridAdded(GridList.GridInfo gridInfo, z: Boolean) {
         if (z) {
             this.gridList.addNewGrid(gridInfo)
         } else {
@@ -215,7 +215,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.grids.-$Lambda$mB5
         }
         this.gridList.getGridList(this.displayList)
         this.adapter.updateList()
-        ListView listView = (ListView) findViewById(R.id.gridList)
+        val listView: ListView = (ListView) findViewById(R.id.gridList)
         if (listView.getAdapter().getCount() > 0) {
             listView.setSelection(listView.getAdapter().getCount() - 1)
         }
@@ -228,10 +228,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.grids.-$Lambda$mB5
     fun onGridEditCancelled() {
     }
 
-    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
+    fun onItemClick(adapterView: AdapterView<?>, view: View, i: Int, j: Long) {
         GridList.GridInfo gridInfo
         if (this.adapter != null && (gridInfo = (GridList.GridInfo) this.adapter.getItem(i)) != null && !gridInfo.isPredefinedGrid()) {
-            GridEditDialog gridEditDialog = GridEditDialog(this, this.gridList, gridInfo)
+            val gridEditDialog: GridEditDialog = GridEditDialog(this, this.gridList, gridInfo)
             gridEditDialog.setOnGridEditResultListener(this)
             gridEditDialog.show()
         }

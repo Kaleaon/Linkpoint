@@ -83,10 +83,10 @@ class GLLoadedTexture : GLResourceTexture() {
     }
 
     @JvmStatic
-    GLLoadedTexture loadFromAssets(RenderContext renderContext, Context context, String str) {
+     fun loadFromAssets(renderContext: RenderContext, context: Context, str: String): GLLoadedTexture {
         try {
-            InputStream open = context.getAssets().open(str)
-            Bitmap decodeStream = BitmapFactory.decodeStream(open)
+            val open: InputStream = context.getAssets().open(str)
+            val decodeStream: Bitmap = BitmapFactory.decodeStream(open)
             open.close()
             if (decodeStream != null) {
                 return GLLoadedTexture(renderContext, decodeStream)
@@ -102,15 +102,15 @@ class GLLoadedTexture : GLResourceTexture() {
         GLES10.glBindTexture(3553, this.handle)
     }
 
-    public Int getHeight() {
+     public fun getHeight(): Int {
         return this.height
     }
 
-    public Int getWidth() {
+     public fun getWidth(): Int {
         return this.width
     }
 
-    public Boolean hasAlphaLayer() {
+     public fun hasAlphaLayer(): Boolean {
         return this.hasAlphaLayer
     }
 }

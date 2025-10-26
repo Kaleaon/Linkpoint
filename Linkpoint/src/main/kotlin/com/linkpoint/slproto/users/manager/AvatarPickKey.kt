@@ -7,11 +7,11 @@ import javax.annotation.Nonnull
 
 class AvatarPickKey : Parcelable {
     const val Parcelable.Creator<AvatarPickKey> CREATOR = Parcelable.Creator<AvatarPickKey>() {
-        public AvatarPickKey createFromParcel(Parcel parcel) {
+         public fun createFromParcel(parcel: Parcel): AvatarPickKey {
             return AvatarPickKey(parcel)
         }
 
-        public AvatarPickKey[] newArray(Int i) {
+        public Array<AvatarPickKey> newArray(Int i) {
             return AvatarPickKey[i]
         }
     }
@@ -28,33 +28,33 @@ class AvatarPickKey : Parcelable {
         this.pickID = uuid2
     }
 
-    public Int describeContents() {
+     public fun describeContents(): Int {
         return 0
     }
 
-    public Boolean equals(Object obj) {
+     public override fun equals(obj: Object): Boolean {
         if (this == obj) {
             return true
         }
         if (obj == null || getClass() != obj.getClass()) {
             return false
         }
-        AvatarPickKey avatarPickKey = (AvatarPickKey) obj
+        val avatarPickKey: AvatarPickKey = (AvatarPickKey) obj
         if (!this.avatarID.equals(avatarPickKey.avatarID)) {
             return false
         }
         return this.pickID.equals(avatarPickKey.pickID)
     }
 
-    public Int hashCode() {
+     public override fun hashCode(): Int {
         return (this.avatarID.hashCode() * 31) + this.pickID.hashCode()
     }
 
-    public String toString() {
+     public override fun toString(): String {
         return "AvatarPicksKey{avatarID=" + this.avatarID + ", pickID=" + this.pickID + '}'
     }
 
-    fun writeToParcel(Parcel parcel, Int i) {
+    fun writeToParcel(parcel: Parcel, i: Int) {
         parcel.writeString(this.avatarID.toString())
         parcel.writeString(this.pickID.toString())
     }

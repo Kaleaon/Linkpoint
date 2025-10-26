@@ -13,12 +13,12 @@ class UserReportInternal : SLMessage() {
     @JvmStatic
     class ReportData {
         public UUID AbuseRegionID
-        public Byte[] AbuseRegionName
+        public ByteArray AbuseRegionName
         public UUID AbuserID
         public LLVector3 AgentPosition
         public Int Category
         public UUID CreatorID
-        public Byte[] Details
+        public ByteArray Details
         public UUID LastOwnerID
         public UUID ObjectID
         public UUID OwnerID
@@ -26,8 +26,8 @@ class UserReportInternal : SLMessage() {
         public Int ReportType
         public UUID ReporterID
         public UUID ScreenshotID
-        public Byte[] Summary
-        public Byte[] VersionString
+        public ByteArray Summary
+        public ByteArray VersionString
         public LLVector3 ViewerPosition
     }
 
@@ -35,15 +35,15 @@ class UserReportInternal : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.ReportData_Field.AbuseRegionName.length + 155 + 16 + 1 + this.ReportData_Field.Summary.length + 2 + this.ReportData_Field.Details.length + 1 + this.ReportData_Field.VersionString.length + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleUserReportInternal(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.NAK)
@@ -66,7 +66,7 @@ class UserReportInternal : SLMessage() {
         packVariable(byteBuffer, this.ReportData_Field.VersionString, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.ReportData_Field.ReportType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.ReportData_Field.Category = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.ReportData_Field.ReporterID = unpackUUID(byteBuffer)

@@ -21,8 +21,8 @@ class AvatarPickerReply : SLMessage() {
     @JvmStatic
     class Data {
         public UUID AvatarID
-        public Byte[] FirstName
-        public Byte[] LastName
+        public ByteArray FirstName
+        public ByteArray LastName
     }
 
     public AvatarPickerReply() {
@@ -30,24 +30,24 @@ class AvatarPickerReply : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 37
-        Iterator<T> it = this.Data_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 37
+        val it: Iterator<T> = this.Data_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
-            Data data = (Data) it.next()
+            val data: Data = (Data) it.next()
             i = data.LastName.length + data.FirstName.length + 17 + 1 + i2
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAvatarPickerReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.FS)
@@ -61,12 +61,12 @@ class AvatarPickerReply : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.QueryID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            Data data = Data()
+            val data: Data = Data()
             data.AvatarID = unpackUUID(byteBuffer)
             data.FirstName = unpackVariable(byteBuffer, 1)
             data.LastName = unpackVariable(byteBuffer, 1)

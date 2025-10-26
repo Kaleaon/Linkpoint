@@ -6,7 +6,7 @@ class TerrainPatchInfo {
     private val Int hashCode = getHashCode()
     private val TerrainPatchHeightMap heightMap
     private val Int layerMask
-    private val Float[] textureHeightMap
+    private val FloatArray textureHeightMap
     private val TerrainTextures textures
 
     public TerrainPatchInfo(TerrainPatchHeightMap terrainPatchHeightMap, TerrainTextures terrainTextures, Float f, Float f2, Float f3, Float f4) {
@@ -16,22 +16,22 @@ class TerrainPatchInfo {
         this.layerMask = terrainTextures.getNeededLayerMask(this.textureHeightMap)
     }
 
-    private Int getHashCode() {
+     private fun getHashCode(): Int {
         return this.heightMap.hashCode() + this.textures.hashCode() + this.layerMask + Arrays.hashCode(this.textureHeightMap)
     }
 
-    public Boolean equals(Object obj) {
+     public override fun equals(obj: Object): Boolean {
         if (!(obj instanceof TerrainPatchInfo)) {
             return false
         }
-        TerrainPatchInfo terrainPatchInfo = (TerrainPatchInfo) obj
+        val terrainPatchInfo: TerrainPatchInfo = (TerrainPatchInfo) obj
         if (!this.heightMap.equals(terrainPatchInfo.heightMap) || !this.textures.equals(terrainPatchInfo.textures) || this.layerMask != terrainPatchInfo.layerMask) {
             return false
         }
         return Arrays.equals(this.textureHeightMap, terrainPatchInfo.textureHeightMap)
     }
 
-    public TerrainPatchHeightMap getHeightMap() {
+     public fun getHeightMap(): TerrainPatchHeightMap {
         return this.heightMap
     }
 
@@ -39,23 +39,23 @@ class TerrainPatchInfo {
         return this.layerMask
     }
 
-    public Float getMaxHeight() {
+     public fun getMaxHeight(): Float {
         return this.heightMap.getMaxHeight()
     }
 
-    public Float getMinHeight() {
+     public fun getMinHeight(): Float {
         return this.heightMap.getMinHeight()
     }
 
-    val Float[] getTextureHeightMap() {
+    val FloatArray getTextureHeightMap() {
         return this.textureHeightMap
     }
 
-    public TerrainTextures getTextures() {
+     public fun getTextures(): TerrainTextures {
         return this.textures
     }
 
-    public Int hashCode() {
+     public override fun hashCode(): Int {
         return this.hashCode
     }
 }

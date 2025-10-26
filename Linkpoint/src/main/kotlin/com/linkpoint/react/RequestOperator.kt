@@ -30,7 +30,7 @@ abstract class RequestOperator<K, T> : RequestHandler<K> {
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_RequestOperator_996  reason: not valid java name */
     public /* synthetic */ Unit m32lambda$com_lumiyaviewer_lumiya_react_RequestOperator_996(Object obj) {
-        Object processRequest = processRequest(obj)
+        val processRequest: Object = processRequest(obj)
         if (processRequest != null) {
             this.resultHandler.onResultData(obj, processRequest)
         } else {
@@ -43,7 +43,7 @@ abstract class RequestOperator<K, T> : RequestHandler<K> {
             this.executor.execute(() -> m32lambda$com_lumiyaviewer_lumiya_react_RequestOperator_996(k))
             return
         }
-        Object processRequest = processRequest(k)
+        val processRequest: Object = processRequest(k)
         if (processRequest != null) {
             this.resultHandler.onResultData(k, processRequest)
         } else {

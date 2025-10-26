@@ -18,7 +18,7 @@ class LogWriteTracker {
         this.isLoggingSuspended = false
     }
 
-    Unit addPendingLogEntry(DriveLogEntry driveLogEntry) {
+     fun addPendingLogEntry(driveLogEntry: DriveLogEntry) {
         this.pendingLogEntries.add(driveLogEntry)
         if (this.onLoggingDone != null) {
             this.onLoggingDone.onLoggingNeeded()
@@ -33,7 +33,7 @@ class LogWriteTracker {
      * Enabled force condition propagation
      * Lifted jumps to return sites
      */
-    Boolean hasOpenedFiles() {
+     fun hasOpenedFiles(): Boolean {
         if (this.openedFiles.isEmpty()) return false
         return true
     }
@@ -42,41 +42,41 @@ class LogWriteTracker {
      * Enabled force condition propagation
      * Lifted jumps to return sites
      */
-    Boolean hasPendingLogEntries() {
+     fun hasPendingLogEntries(): Boolean {
         if (this.pendingLogEntries.isEmpty()) return false
         return true
     }
 
-    Boolean isLoggingSuspended() {
+     fun isLoggingSuspended(): Boolean {
         return this.isLoggingSuspended
     }
 
-    Unit markFileClosed(DriveTextFile driveTextFile) {
+     fun markFileClosed(driveTextFile: DriveTextFile) {
         this.openedFiles.remove(driveTextFile)
         if (this.openedFiles.isEmpty() && this.pendingLogEntries.isEmpty() && this.onLoggingDone != null) {
             this.onLoggingDone.onLoggingDone()
         }
     }
 
-    Unit markFileOpened(DriveTextFile driveTextFile) {
+     fun markFileOpened(driveTextFile: DriveTextFile) {
         this.openedFiles.add(driveTextFile)
         if (this.onLoggingDone != null) {
             this.onLoggingDone.onLoggingNeeded()
         }
     }
 
-    Unit markLoggingSuspended(Boolean bl) {
+     fun markLoggingSuspended(bl: Boolean) {
         this.isLoggingSuspended = bl
     }
 
-    Unit removePendingLogEntry(DriveLogEntry driveLogEntry) {
+     fun removePendingLogEntry(driveLogEntry: DriveLogEntry) {
         this.pendingLogEntries.remove(driveLogEntry)
         if (this.openedFiles.isEmpty() && this.pendingLogEntries.isEmpty() && this.onLoggingDone != null) {
             this.onLoggingDone.onLoggingDone()
         }
     }
 
-    static interface OnLoggingDoneListener {
+    interface OnLoggingDoneListener {
         fun onLoggingDone()
 
         fun onLoggingNeeded()

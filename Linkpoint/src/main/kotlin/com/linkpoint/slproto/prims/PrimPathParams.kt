@@ -85,7 +85,7 @@ class PrimPathParams {
         this.Skew = ((Float) LLTersePacking.getSignedByte(byteBuffer.get())) * 0.01f
     }
 
-    private Int getHashValue() {
+     private fun getHashValue(): Int {
         return (this.CurveType * 17) + 0 + Float.floatToIntBits(this.Begin) + Float.floatToIntBits(this.End) + Float.floatToIntBits(this.ScaleX) + Float.floatToIntBits(this.ScaleY) + Float.floatToIntBits(this.ShearX) + Float.floatToIntBits(this.ShearY) + Float.floatToIntBits(this.TwistBegin) + Float.floatToIntBits(this.TwistEnd) + Float.floatToIntBits(this.RadiusOffset) + Float.floatToIntBits(this.TaperX) + Float.floatToIntBits(this.TaperY) + Float.floatToIntBits(this.Revolutions) + Float.floatToIntBits(this.Skew)
     }
 
@@ -96,15 +96,15 @@ class PrimPathParams {
         if (!(obj instanceof PrimPathParams)) {
             return false
         }
-        PrimPathParams primPathParams = (PrimPathParams) obj
+        val primPathParams: PrimPathParams = (PrimPathParams) obj
         if (this.CurveType == primPathParams.CurveType && this.Begin == primPathParams.Begin && this.End == primPathParams.End && this.ScaleX == primPathParams.ScaleX && this.ScaleY == primPathParams.ScaleY && this.ShearX == primPathParams.ShearX && this.ShearY == primPathParams.ShearY && this.TwistBegin == primPathParams.TwistBegin && this.TwistEnd == primPathParams.TwistEnd && this.RadiusOffset == primPathParams.RadiusOffset && this.TaperX == primPathParams.TaperX && this.TaperY == primPathParams.TaperY && this.Revolutions == primPathParams.Revolutions) {
             return this.Skew == primPathParams.Skew
         }
         return false
     }
 
-    public LLVector2 getBeginScale() {
-        LLVector2 lLVector2 = LLVector2(1.0f, 1.0f)
+     public fun getBeginScale(): LLVector2 {
+        val lLVector2: LLVector2 = LLVector2(1.0f, 1.0f)
         if (this.ScaleX > 1.0f) {
             lLVector2.x = 2.0f - this.ScaleX
         }
@@ -114,8 +114,8 @@ class PrimPathParams {
         return lLVector2
     }
 
-    public LLVector2 getEndScale() {
-        LLVector2 lLVector2 = LLVector2(1.0f, 1.0f)
+     public fun getEndScale(): LLVector2 {
+        val lLVector2: LLVector2 = LLVector2(1.0f, 1.0f)
         if (this.ScaleX < 1.0f) {
             lLVector2.x = this.ScaleX
         }
@@ -129,7 +129,7 @@ class PrimPathParams {
         return this.hashValue
     }
 
-    public String toString() {
-        return String.format("CurveType: 0x%02x, Begin: %f, End: %f, Scale: (%f, %f), Shear: (%f, %f), TwistBegin: %f, TwistEnd: %f, RadiusOffset: %f, Taper: (%f, %f), Revolutions: %f, Skew: %f", Object[]{Byte.valueOf(this.CurveType), Float.valueOf(this.Begin), Float.valueOf(this.End), Float.valueOf(this.ScaleX), Float.valueOf(this.ScaleY), Float.valueOf(this.ShearX), Float.valueOf(this.ShearY), Float.valueOf(this.TwistBegin), Float.valueOf(this.TwistEnd), Float.valueOf(this.RadiusOffset), Float.valueOf(this.TaperX), Float.valueOf(this.TaperY), Float.valueOf(this.Revolutions), Float.valueOf(this.Skew)})
+     public override fun toString(): String {
+        return String.format("CurveType: 0x%02x, Begin: %f, End: %f, Scale: (%f, %f), Shear: (%f, %f), TwistBegin: %f, TwistEnd: %f, RadiusOffset: %f, Taper: (%f, %f), Revolutions: %f, Skew: %f", Array<Any>{Byte.valueOf(this.CurveType), Float.valueOf(this.Begin), Float.valueOf(this.End), Float.valueOf(this.ScaleX), Float.valueOf(this.ScaleY), Float.valueOf(this.ShearX), Float.valueOf(this.ShearY), Float.valueOf(this.TwistBegin), Float.valueOf(this.TwistEnd), Float.valueOf(this.RadiusOffset), Float.valueOf(this.TaperX), Float.valueOf(this.TaperY), Float.valueOf(this.Revolutions), Float.valueOf(this.Skew)})
     }
 }

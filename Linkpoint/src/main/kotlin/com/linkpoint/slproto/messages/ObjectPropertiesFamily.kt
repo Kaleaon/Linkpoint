@@ -12,12 +12,12 @@ class ObjectPropertiesFamily : SLMessage() {
     class ObjectData {
         public Int BaseMask
         public Int Category
-        public Byte[] Description
+        public ByteArray Description
         public Int EveryoneMask
         public UUID GroupID
         public Int GroupMask
         public UUID LastOwnerID
-        public Byte[] Name
+        public ByteArray Name
         public Int NextOwnerMask
         public UUID ObjectID
         public UUID OwnerID
@@ -32,15 +32,15 @@ class ObjectPropertiesFamily : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.ObjectData_Field.Name.length + 102 + 1 + this.ObjectData_Field.Description.length + 2
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleObjectPropertiesFamily(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) 10)
         packInt(byteBuffer, this.ObjectData_Field.RequestFlags)
@@ -61,7 +61,7 @@ class ObjectPropertiesFamily : SLMessage() {
         packVariable(byteBuffer, this.ObjectData_Field.Description, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.ObjectData_Field.RequestFlags = unpackInt(byteBuffer)
         this.ObjectData_Field.ObjectID = unpackUUID(byteBuffer)
         this.ObjectData_Field.OwnerID = unpackUUID(byteBuffer)

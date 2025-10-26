@@ -20,11 +20,11 @@ class SLXfer {
     private Boolean hasCompleted = false
     private Long id
     private List<XferListenerInvocation> listeners = LinkedList()
-    private Byte[] receivedData
+    private ByteArray receivedData
     private Int receivedDataLen
 
     interface SLXferCompletionListener {
-        Unit onXferComplete(Object obj, String str, Byte[] bArr)
+         fun onXferComplete(obj: Object, str: String, bArr: ByteArray)
     }
 
     @JvmStatic
@@ -37,7 +37,7 @@ private class XferListenerInvocation {
             this.listener = sLXferCompletionListener
         }
 
-        fun invokeListener(String str, Byte[] bArr) {
+        fun invokeListener(str: String, bArr: ByteArray) {
             this.listener.onXferComplete(this.tag, str, bArr)
         }
     }
@@ -53,12 +53,12 @@ private class XferListenerInvocation {
         this.expectedPacketNum = 0
     }
 
-    fun HandleDataPacket(SLXferManager sLXferManager, SendXferPacket sendXferPacket) {
+    fun HandleDataPacket(sLXferManager: SLXferManager, sendXferPacket: SendXferPacket) {
         Int length
-        Int i = 4
+        val i: Int = 4
         Debug.Printf("XferPacket: packetNum %d (0x%x), dataLen %d", Integer.valueOf(sendXferPacket.XferID_Field.Packet), Integer.valueOf(sendXferPacket.XferID_Field.Packet), Integer.valueOf(sendXferPacket.DataPacket_Field.Data.length))
-        Int i2 = Integer.MAX_VALUE & sendXferPacket.XferID_Field.Packet
-        Boolean z = (sendXferPacket.XferID_Field.Packet & Integer.MIN_VALUE) != 0
+        val i2: Int = Integer.MAX_VALUE & sendXferPacket.XferID_Field.Packet
+        val z: Boolean = (sendXferPacket.XferID_Field.Packet & Integer.MIN_VALUE) != 0
         if (i2 == this.expectedPacketNum) {
             if (i2 != 0) {
                 i = 0
@@ -83,7 +83,7 @@ private class XferListenerInvocation {
             }
         }
         if (i2 <= this.expectedPacketNum) {
-            ConfirmXferPacket confirmXferPacket = ConfirmXferPacket()
+            val confirmXferPacket: ConfirmXferPacket = ConfirmXferPacket()
             confirmXferPacket.XferID_Field.ID = this.id
             confirmXferPacket.XferID_Field.Packet = sendXferPacket.XferID_Field.Packet
             confirmXferPacket.isReliable = true
@@ -91,8 +91,8 @@ private class XferListenerInvocation {
         }
     }
 
-    fun StartTransfer(SLXferManager sLXferManager) {
-        RequestXfer requestXfer = RequestXfer()
+    fun StartTransfer(sLXferManager: SLXferManager) {
+        val requestXfer: RequestXfer = RequestXfer()
         requestXfer.XferID_Field.ID = this.id
         requestXfer.XferID_Field.Filename = SLMessage.stringToVariableOEM(this.fileName)
         requestXfer.XferID_Field.FilePath = this.filePath.getCode()
@@ -104,15 +104,15 @@ private class XferListenerInvocation {
         sLXferManager.SendMessage(requestXfer)
     }
 
-    fun addListener(SLXferCompletionListener sLXferCompletionListener, Object obj) {
+    fun addListener(sLXferCompletionListener: SLXferCompletionListener, obj: Object) {
         this.listeners.add(XferListenerInvocation(obj, sLXferCompletionListener))
     }
 
-    public Byte[] getData() {
+     public fun getData(): ByteArray {
         return this.receivedData
     }
 
-    public String getFilename() {
+     public fun getFilename(): String {
         return this.fileName
     }
 
@@ -122,7 +122,7 @@ private class XferListenerInvocation {
         }
     }
 
-    public Boolean isCompleted() {
+     public fun isCompleted(): Boolean {
         return this.hasCompleted
     }
 }

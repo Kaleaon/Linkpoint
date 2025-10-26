@@ -76,7 +76,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.minimap.-$Lambda$X
 
 
     static Fragment newInstance(UUID uuid) {
-        MinimapFragment minimapFragment = MinimapFragment()
+        val minimapFragment: MinimapFragment = MinimapFragment()
         minimapFragment.setArguments(ActivityUtils.makeFragmentArguments(uuid, (Bundle) null))
         return minimapFragment
     }
@@ -84,7 +84,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.minimap.-$Lambda$X
     /* access modifiers changed from: private */
     /* renamed from: onMinimapBitmap */
     fun m640com_lumiyaviewer_lumiya_ui_minimap_MinimapFragmentmthref0(SLMinimap.MinimapBitmap minimapBitmap2) {
-        View view = getView()
+        val view: View = getView()
         if (view != null) {
             ((MinimapView) view.findViewById(R.id.minimapView)).setMinimapBitmap(minimapBitmap2)
         }
@@ -93,26 +93,26 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.minimap.-$Lambda$X
     /* access modifiers changed from: private */
     /* renamed from: onUserLocations */
     fun m641com_lumiyaviewer_lumiya_ui_minimap_MinimapFragmentmthref1(SLMinimap.UserLocations userLocations2) {
-        View view = getView()
+        val view: View = getView()
         if (view != null) {
             ((MinimapView) view.findViewById(R.id.minimapView)).setUserLocations(userLocations2)
         }
     }
 
-    fun onCreate(Bundle bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
-        View inflate = layoutInflater.inflate(R.layout.minimap_fragment, viewGroup, false)
+        val inflate: View = layoutInflater.inflate(R.layout.minimap_fragment, viewGroup, false)
         ((MinimapView) inflate.findViewById(R.id.minimapView)).setOnUserClickListener(this)
         return inflate
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
             this.minimapBitmap.subscribe(userManager.getMinimapBitmapPool(), SubscriptionSingleKey.Value)
             this.userLocations.subscribe(userManager.getUserLocationsPool(), SubscriptionSingleKey.Value)
@@ -122,21 +122,21 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.minimap.-$Lambda$X
         this.userLocations.unsubscribe()
     }
 
-    fun onStop() {
+    override fun onStop() {
         this.minimapBitmap.unsubscribe()
         this.userLocations.unsubscribe()
         super.onStop()
     }
 
-    fun onUserClick(UUID uuid) {
-        FragmentManager fragmentManager = getFragmentManager()
+    fun onUserClick(uuid: UUID) {
+        val fragmentManager: FragmentManager = getFragmentManager()
         if (fragmentManager != null) {
-            Fragment findFragmentById = fragmentManager.findFragmentById(R.id.details)
+            val findFragmentById: Fragment = fragmentManager.findFragmentById(R.id.details)
             if (findFragmentById instanceof NearbyPeopleMinimapFragment) {
                 ((NearbyPeopleMinimapFragment) findFragmentById).setSelectedUser(uuid)
             }
         }
-        View view = getView()
+        val view: View = getView()
         if (view != null) {
             ((MinimapView) view.findViewById(R.id.minimapView)).setSelectedUser(uuid)
         }

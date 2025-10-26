@@ -26,29 +26,29 @@ class DrawablePrim {
     const val RENDER_PASS_ALL: Int = 3
     const val RENDER_PASS_OPAQUE: Int = 1
     const val RENDER_PASS_TRANSPARENT: Int = 2
-    private val Int[] FaceColorsIDs
+    private val IntArray FaceColorsIDs
     private val Int FaceCount
-    private val DrawableFaceTexture[] FaceTextures
-    private val Float[] FaceUVMatrices
+    private val Array<DrawableFaceTexture> FaceTextures
+    private val FloatArray FaceUVMatrices
     private Boolean drawingTextureEnabled
     private Boolean firstFace
     private val Boolean isRiggedMesh
     private val Boolean isSingleFace
     private val Boolean riggingFitsGL20
     private val Int singleFaceColor
-    private val Float[] singleFaceMatrix
+    private val FloatArray singleFaceMatrix
     private val DrawableFaceTexture singleFaceTexture
     private val DrawableGeometry volumeGeometry
 
     public DrawablePrim(PrimDrawParams primDrawParams, DrawableGeometry drawableGeometry) {
         this.volumeGeometry = drawableGeometry
-        Boolean isFacesCombined = drawableGeometry.isFacesCombined()
+        val isFacesCombined: Boolean = drawableGeometry.isFacesCombined()
         this.isRiggedMesh = drawableGeometry.isRiggedMesh()
         this.riggingFitsGL20 = this.isRiggedMesh ? drawableGeometry.riggingFitsGL20() : false
         this.FaceCount = drawableGeometry.getFaceCount()
-        SLTextureEntry textures = primDrawParams.getTextures()
+        val textures: SLTextureEntry = primDrawParams.getTextures()
         if (textures != null) {
-            SLTextureEntryFace GetDefaultTexture = textures.GetDefaultTexture()
+            val GetDefaultTexture: SLTextureEntryFace = textures.GetDefaultTexture()
             if (!textures.isSingleFace() || !isFacesCombined) {
                 this.isSingleFace = false
                 this.singleFaceColor = 0
@@ -57,13 +57,13 @@ class DrawablePrim {
                 this.FaceColorsIDs = Int[(this.FaceCount * 2)]
                 this.FaceTextures = DrawableFaceTexture[this.FaceCount]
                 this.FaceUVMatrices = Float[(this.FaceCount * 16)]
-                Int i = 0
+                val i: Int = 0
                 for (Int i2 = 0; i2 < this.FaceCount; i2++) {
-                    SLTextureEntryFace GetFace = textures.GetFace(drawableGeometry.getFaceID(i2))
+                    val GetFace: SLTextureEntryFace = textures.GetFace(drawableGeometry.getFaceID(i2))
                     if (GetFace != null) {
                         this.FaceColorsIDs[i] = GetFace.getRGBA(GetDefaultTexture)
                         this.FaceColorsIDs[i + 1] = 0
-                        UUID textureID = GetFace.getTextureID(GetDefaultTexture)
+                        val textureID: UUID = GetFace.getTextureID(GetDefaultTexture)
                         if (textureID != null) {
                             this.FaceTextures[i2] = DrawableFaceTexture(DrawableTextureParams.create(textureID, TextureClass.Prim))
                         }
@@ -75,10 +75,10 @@ class DrawablePrim {
             }
             this.isSingleFace = true
             this.singleFaceMatrix = Float[16]
-            SLTextureEntryFace GetFace2 = textures.GetFace(0)
+            val GetFace2: SLTextureEntryFace = textures.GetFace(0)
             if (GetFace2 != null) {
                 this.singleFaceColor = GetFace2.getRGBA(GetDefaultTexture)
-                UUID textureID2 = GetFace2.getTextureID(GetDefaultTexture)
+                val textureID2: UUID = GetFace2.getTextureID(GetDefaultTexture)
                 if (textureID2 != null) {
                     this.singleFaceTexture = DrawableFaceTexture(DrawableTextureParams.create(textureID2, TextureClass.Prim))
                 } else {
@@ -103,12 +103,12 @@ class DrawablePrim {
         this.FaceUVMatrices = Float[(this.FaceCount * 16)]
     }
 
-    private Int DrawFace(RenderContext renderContext, DrawableGeometry drawableGeometry, GLLoadableBuffer gLLoadableBuffer, Boolean z, Int i, Int i2, DrawableFaceTexture drawableFaceTexture, Float[] fArr, Int i3, Int i4) {
-        Int faceRenderMask = getFaceRenderMask(i2, drawableFaceTexture)
+    private fun DrawFace(renderContext: RenderContext, drawableGeometry: DrawableGeometry, gLLoadableBuffer: GLLoadableBuffer, z: Boolean, i: Int, i2: Int, drawableFaceTexture: DrawableFaceTexture, fArr: FloatArray, i3: Int, i4: Int): Int {
+        val faceRenderMask: Int = getFaceRenderMask(i2, drawableFaceTexture)
         if ((faceRenderMask & i4) == 0) {
             return faceRenderMask
         }
-        Boolean z2 = false
+        val z2: Boolean = false
         if (!z) {
             if (renderContext.hasGL20) {
                 GLES20.glUniform4f(renderContext.curPrimProgram.vColor, ((Float) (255 - ((i2 >> 0) & 255))) / 255.0f, ((Float) (255 - ((i2 >> 8) & 255))) / 255.0f, ((Float) (255 - ((i2 >> 16) & 255))) / 255.0f, ((Float) (255 - ((i2 >> 24) & 255))) / 255.0f)
@@ -163,8 +163,8 @@ class DrawablePrim {
         return faceRenderMask
     }
 
-    private Int DrawFaceFast20(RenderContext renderContext, DrawableGeometry drawableGeometry, Int i, Int i2, DrawableFaceTexture drawableFaceTexture, Float[] fArr, Int i3, Int i4) {
-        Int faceRenderMask = getFaceRenderMask(i2, drawableFaceTexture)
+    private fun DrawFaceFast20(renderContext: RenderContext, drawableGeometry: DrawableGeometry, i: Int, i2: Int, drawableFaceTexture: DrawableFaceTexture, fArr: FloatArray, i3: Int, i4: Int): Int {
+        val faceRenderMask: Int = getFaceRenderMask(i2, drawableFaceTexture)
         if ((faceRenderMask & i4) == 0) {
             return faceRenderMask
         }
@@ -179,8 +179,8 @@ class DrawablePrim {
         return faceRenderMask
     }
 
-    private Int getFaceRenderMask(Int i, DrawableFaceTexture drawableFaceTexture) {
-        Boolean z = false
+     private fun getFaceRenderMask(i: Int, drawableFaceTexture: DrawableFaceTexture): Int {
+        val z: Boolean = false
         if ((i & ViewCompat.MEASURED_STATE_MASK) == -16777216) {
             return 0
         }
@@ -193,8 +193,8 @@ class DrawablePrim {
         return z ? 2 : 1
     }
 
-    private Unit initFaceUVMatrix(SLTextureEntryFace sLTextureEntryFace, SLTextureEntryFace sLTextureEntryFace2, Float[] fArr, Int i) {
-        Float[] fArr2 = Float[16]
+     private fun initFaceUVMatrix(sLTextureEntryFace: SLTextureEntryFace, sLTextureEntryFace2: SLTextureEntryFace, fArr: FloatArray, i: Int) {
+        val fArr2: FloatArray = Float[16]
         Matrix.setIdentityM(fArr2, 0)
         Matrix.translateM(fArr2, 0, sLTextureEntryFace2.getOffsetU(sLTextureEntryFace) + 0.5f, sLTextureEntryFace2.getOffsetV(sLTextureEntryFace) + 0.5f, 0.0f)
         Matrix.scaleM(fArr2, 0, sLTextureEntryFace2.getRepeatU(sLTextureEntryFace), sLTextureEntryFace2.getRepeatV(sLTextureEntryFace), 1.0f)
@@ -210,17 +210,17 @@ class DrawablePrim {
 
     val Int Draw(RenderContext renderContext, Boolean z, PrimFlexibleInfo primFlexibleInfo, Int i) {
         GLLoadableBuffer GLBindBuffers10
-        DrawableGeometry drawableGeometry = this.volumeGeometry
+        val drawableGeometry: DrawableGeometry = this.volumeGeometry
         this.firstFace = true
         if (renderContext.hasGL20) {
-            Float[] matrices = primFlexibleInfo != null ? primFlexibleInfo.getMatrices() : null
+            val matrices: FloatArray = primFlexibleInfo != null ? primFlexibleInfo.getMatrices() : null
             renderContext.curPrimProgram = (!this.isRiggedMesh || !this.riggingFitsGL20) ? matrices != null ? renderContext.flexiPrimProgram : renderContext.primProgram : renderContext.riggedMeshProgram
             GLES20.glUseProgram(renderContext.curPrimProgram.getHandle())
             renderContext.glModelApplyMatrix(renderContext.curPrimProgram.uMVPMatrix)
             renderContext.glObjWorldApplyMatrix(renderContext.curPrimProgram.uObjWorldMatrix)
             renderContext.glObjScaleApplyVector(renderContext.curPrimProgram.uObjCoordScale)
             if (matrices != null && (renderContext.curPrimProgram instanceof FlexiPrimProgram)) {
-                FlexiPrimProgram flexiPrimProgram = (FlexiPrimProgram) renderContext.curPrimProgram
+                val flexiPrimProgram: FlexiPrimProgram = (FlexiPrimProgram) renderContext.curPrimProgram
                 GLES20.glUniform1i(flexiPrimProgram.uNumSectionMatrices, matrices.length / 16)
                 GLES20.glUniformMatrix4fv(flexiPrimProgram.uSectionMatrices, matrices.length / 16, false, matrices, 0)
             }
@@ -232,10 +232,10 @@ class DrawablePrim {
         if (this.isSingleFace) {
             return DrawFace(renderContext, drawableGeometry, GLBindBuffers10, z, -1, this.singleFaceColor, this.singleFaceTexture, this.singleFaceMatrix, 0, i)
         }
-        Int i2 = 0
-        Int i3 = 0
+        val i2: Int = 0
+        val i3: Int = 0
         while (true) {
-            Int i4 = i2
+            val i4: Int = i2
             if (i3 >= this.FaceCount) {
                 return i4
             }
@@ -245,17 +245,17 @@ class DrawablePrim {
     }
 
     val Int DrawFast20(RenderContext renderContext, Boolean z, PrimFlexibleInfo primFlexibleInfo, Int i) {
-        Boolean z2 = true
-        Float[] fArr = null
-        Int i2 = 0
-        DrawableGeometry drawableGeometry = this.volumeGeometry
+        val z2: Boolean = true
+        val fArr: FloatArray = null
+        val i2: Int = 0
+        val drawableGeometry: DrawableGeometry = this.volumeGeometry
         if (primFlexibleInfo != null) {
             fArr = primFlexibleInfo.getMatrices()
         }
         if (i != 1) {
             z2 = false
         }
-        PrimProgram primProgram = (!this.isRiggedMesh || !this.riggingFitsGL20) ? fArr != null ? z2 ? renderContext.flexiPrimOpaqueProgram : renderContext.flexiPrimProgram : z2 ? renderContext.primOpaqueProgram : renderContext.primProgram : renderContext.riggedMeshProgram
+        val primProgram: PrimProgram = (!this.isRiggedMesh || !this.riggingFitsGL20) ? fArr != null ? z2 ? renderContext.flexiPrimOpaqueProgram : renderContext.flexiPrimProgram : z2 ? renderContext.primOpaqueProgram : renderContext.primProgram : renderContext.riggedMeshProgram
         if (renderContext.curPrimProgram != primProgram) {
             renderContext.curPrimProgram = primProgram
             GLES20.glUseProgram(renderContext.curPrimProgram.getHandle())
@@ -271,9 +271,9 @@ class DrawablePrim {
         if (this.isSingleFace) {
             return DrawFaceFast20(renderContext, drawableGeometry, -1, this.singleFaceColor, this.singleFaceTexture, this.singleFaceMatrix, 0, i)
         }
-        Int i3 = 0
+        val i3: Int = 0
         while (true) {
-            Int i4 = i2
+            val i4: Int = i2
             if (i3 >= this.FaceCount) {
                 return i4
             }
@@ -284,13 +284,13 @@ class DrawablePrim {
 
     @TargetApi(18)
     val Int DrawRigged30(RenderContext renderContext, Int i) {
-        DrawableGeometry drawableGeometry = this.volumeGeometry
-        Boolean z = false
-        Int i2 = 0
+        val drawableGeometry: DrawableGeometry = this.volumeGeometry
+        val z: Boolean = false
+        val i2: Int = 0
         for (Int i3 = 0; i3 < this.FaceCount; i3++) {
-            Int i4 = this.FaceColorsIDs[i3 * 2]
-            DrawableFaceTexture drawableFaceTexture = this.FaceTextures[i3]
-            Int faceRenderMask = getFaceRenderMask(i4, drawableFaceTexture)
+            val i4: Int = this.FaceColorsIDs[i3 * 2]
+            val drawableFaceTexture: DrawableFaceTexture = this.FaceTextures[i3]
+            val faceRenderMask: Int = getFaceRenderMask(i4, drawableFaceTexture)
             i2 |= faceRenderMask
             if ((faceRenderMask & i) != 0) {
                 if (!z) {
@@ -306,8 +306,8 @@ class DrawablePrim {
         return i2
     }
 
-    public IntersectInfo IntersectRay(LLVector3 lLVector3, LLVector3 lLVector32) {
-        IntersectInfo IntersectRay = this.volumeGeometry.IntersectRay(lLVector3, lLVector32)
+    public fun IntersectRay(lLVector3: LLVector3, lLVector32: LLVector3): IntersectInfo {
+        val IntersectRay: IntersectInfo = this.volumeGeometry.IntersectRay(lLVector3, lLVector32)
         return (IntersectRay == null || !IntersectRay.faceKnown) ? IntersectRay : (!this.isSingleFace || this.singleFaceMatrix == null) ? (this.isSingleFace || this.FaceUVMatrices == null) ? IntersectRay : IntersectInfo(IntersectRay, this.FaceUVMatrices, IntersectRay.faceID * 16) : IntersectInfo(IntersectRay, this.singleFaceMatrix, 0)
     }
 
@@ -318,7 +318,7 @@ class DrawablePrim {
         return false
     }
 
-    public Boolean hasExtendedBones() {
+     public fun hasExtendedBones(): Boolean {
         return this.volumeGeometry.hasExtendedBones()
     }
 

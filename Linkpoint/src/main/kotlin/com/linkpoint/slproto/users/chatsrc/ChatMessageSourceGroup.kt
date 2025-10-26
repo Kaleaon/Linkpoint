@@ -17,11 +17,11 @@ class ChatMessageSourceGroup : ChatMessageSource() {
         this.name = chatMessage.getSenderName()
     }
 
-    public ChatterID getDefaultChatter(UUID uuid2) {
+     public fun getDefaultChatter(uuid2: UUID): ChatterID {
         return ChatterID.getGroupChatterID(uuid2, this.uuid)
     }
 
-    public String getSourceName(UserManager userManager) {
+     public fun getSourceName(userManager: UserManager): String {
         return this.name
     }
 
@@ -29,11 +29,11 @@ class ChatMessageSourceGroup : ChatMessageSource() {
         return ChatMessageSource.ChatMessageSourceType.Group
     }
 
-    public UUID getSourceUUID() {
+     public fun getSourceUUID(): UUID {
         return this.uuid
     }
 
-    fun serializeTo(ChatMessage chatMessage) {
+    fun serializeTo(chatMessage: ChatMessage) {
         super.serializeTo(chatMessage)
         chatMessage.setSenderUUID(this.uuid)
         chatMessage.setSenderName(this.name)

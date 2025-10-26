@@ -4,31 +4,31 @@ import com.linkpoint.utils.InternPool
 
 class PrimParamsPool {
     @JvmStatic
-    InternPool<PrimDrawParams> drawParamsPool = InternPool<>()
+    val drawParamsPool: InternPool<PrimDrawParams> = InternPool<>()
     @JvmStatic
-    InternPool<PrimPathParams> pathParamsPool = InternPool<>()
+    val pathParamsPool: InternPool<PrimPathParams> = InternPool<>()
     @JvmStatic
-    InternPool<PrimProfileParams> profileParamsPool = InternPool<>()
+    val profileParamsPool: InternPool<PrimProfileParams> = InternPool<>()
     @JvmStatic
-    InternPool<PrimVolumeParams> volumeParamsPool = InternPool<>()
+    val volumeParamsPool: InternPool<PrimVolumeParams> = InternPool<>()
 
     @JvmStatic
-    PrimDrawParams get(PrimDrawParams primDrawParams) {
+     fun get(primDrawParams: PrimDrawParams): PrimDrawParams {
         return drawParamsPool.intern(primDrawParams)
     }
 
     @JvmStatic
-    PrimPathParams get(PrimPathParams primPathParams) {
+     fun get(primPathParams: PrimPathParams): PrimPathParams {
         return pathParamsPool.intern(primPathParams)
     }
 
     @JvmStatic
-    PrimProfileParams get(PrimProfileParams primProfileParams) {
+     fun get(primProfileParams: PrimProfileParams): PrimProfileParams {
         return profileParamsPool.intern(primProfileParams)
     }
 
     @JvmStatic
-    PrimVolumeParams get(PrimVolumeParams primVolumeParams) {
+     fun get(primVolumeParams: PrimVolumeParams): PrimVolumeParams {
         return volumeParamsPool.intern(primVolumeParams)
     }
 }

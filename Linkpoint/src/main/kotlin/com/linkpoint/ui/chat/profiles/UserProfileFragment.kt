@@ -29,22 +29,22 @@ class UserProfileFragment : UserFunctionsFragment() {
             super(fragmentManager)
         }
 
-        fun destroyItem(ViewGroup viewGroup, Int i, Object obj) {
-            ProfileTab profileTab = ProfileTab.values()[i]
+        fun destroyItem(viewGroup: ViewGroup, i: Int, obj: Object) {
+            val profileTab: ProfileTab = ProfileTab.values()[i]
             if (profileTab != null) {
                 UserProfileFragment.this.activeFragments.remove(profileTab)
             }
             super.destroyItem(viewGroup, i, obj)
         }
 
-        public Int getCount() {
+         public fun getCount(): Int {
             return ProfileTab.values().length
         }
 
-        public Fragment getItem(Int i) {
-            ProfileTab profileTab = ProfileTab.values()[i]
+         public fun getItem(i: Int): Fragment {
+            val profileTab: ProfileTab = ProfileTab.values()[i]
             try {
-                Fragment fragment = (Fragment) profileTab.tabClass.newInstance()
+                val fragment: Fragment = (Fragment) profileTab.tabClass.newInstance()
                 fragment.setArguments(UserProfileFragment.makeSelection(UserProfileFragment.this.chatterID))
                 UserProfileFragment.this.activeFragments.put(profileTab, WeakReference(fragment))
                 return fragment
@@ -55,11 +55,11 @@ class UserProfileFragment : UserFunctionsFragment() {
             }
         }
 
-        public CharSequence getPageTitle(Int i) {
+         public fun getPageTitle(i: Int): CharSequence {
             return UserProfileFragment.this.getString(ProfileTab.values()[i].tabCaption)
         }
 
-        public Parcelable saveState() {
+         public fun saveState(): Parcelable {
             return null
         }
     }
@@ -82,27 +82,27 @@ class UserProfileFragment : UserFunctionsFragment() {
     }
 
     @JvmStatic
-    Bundle makeSelection(ChatterID chatterID) {
+     fun makeSelection(chatterID: ChatterID): Bundle {
         return UserFunctionsFragment.makeSelection(chatterID)
     }
 
-    fun onCreate(Bundle bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
-        View inflate = layoutInflater.inflate(R.layout.user_profile_new, viewGroup, false)
-        ViewPager viewPager = (ViewPager) inflate.findViewById(R.id.user_profile_pager)
+        val inflate: View = layoutInflater.inflate(R.layout.user_profile_new, viewGroup, false)
+        val viewPager: ViewPager = (ViewPager) inflate.findViewById(R.id.user_profile_pager)
         viewPager.setAdapter(ProfilePagerAdapter(getChildFragmentManager()))
         ((PagerSlidingTabStrip) inflate.findViewById(R.id.user_profile_tabs)).setViewPager(viewPager)
         return inflate
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(ChatterID chatterID) {
+    fun onShowUser(chatterID: ChatterID) {
         for (WeakReference weakReference : this.activeFragments.values()) {
-            Fragment fragment = (Fragment) weakReference.get()
+            val fragment: Fragment = (Fragment) weakReference.get()
             if (fragment instanceof ReloadableFragment) {
                 ((ReloadableFragment) fragment).setFragmentArgs(getActivity() != null ? getActivity().getIntent() : null, ChatterReloadableFragment.makeSelection(chatterID))
             }

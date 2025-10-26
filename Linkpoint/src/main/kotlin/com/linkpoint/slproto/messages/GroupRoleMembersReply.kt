@@ -29,15 +29,15 @@ class GroupRoleMembersReply : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.MemberData_Fields.size() * 32) + 57
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleGroupRoleMembersReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 118)
@@ -52,14 +52,14 @@ class GroupRoleMembersReply : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
         this.AgentData_Field.RequestID = unpackUUID(byteBuffer)
         this.AgentData_Field.TotalPairs = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            MemberData memberData = MemberData()
+            val memberData: MemberData = MemberData()
             memberData.RoleID = unpackUUID(byteBuffer)
             memberData.MemberID = unpackUUID(byteBuffer)
             this.MemberData_Fields.add(memberData)

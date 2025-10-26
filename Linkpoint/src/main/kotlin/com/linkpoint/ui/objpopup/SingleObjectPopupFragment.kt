@@ -23,37 +23,37 @@ import javax.annotation.Nullable
 
 class SingleObjectPopupFragment : Fragment() {
     private val SwipeDismissAdvancedBehavior.OnDismissListener dismissListener = SwipeDismissAdvancedBehavior.OnDismissListener() {
-        fun onDismiss(View view) {
+        fun onDismiss(view: View) {
             SingleObjectPopupFragment.this.hideAndDismiss()
         }
 
-        fun onDragStateChanged(Int i) {
+        fun onDragStateChanged(i: Int) {
         }
     }
     private val View.OnClickListener frameClickListener = $Lambda$gmgx9kG_frukRCwYiu6KI4GSv6k(this)
 
     @JvmStatic
-    SingleObjectPopupFragment create(UUID uuid) {
-        SingleObjectPopupFragment singleObjectPopupFragment = SingleObjectPopupFragment()
+     fun create(uuid: UUID): SingleObjectPopupFragment {
+        val singleObjectPopupFragment: SingleObjectPopupFragment = SingleObjectPopupFragment()
         singleObjectPopupFragment.setArguments(ActivityUtils.makeFragmentArguments(uuid, (Bundle) null))
         return singleObjectPopupFragment
     }
 
-    private SLChatEvent getEvent() {
-        UserManager userManager = getUserManager()
+     private fun getEvent(): SLChatEvent {
+        val userManager: UserManager = getUserManager()
         if (userManager != null) {
             return userManager.getObjectPopupsManager().getDisplayedObjectPopup()
         }
         return null
     }
 
-    private UserManager getUserManager() {
+     private fun getUserManager(): UserManager {
         return ActivityUtils.getUserManager(getArguments())
     }
 
     /* access modifiers changed from: private */
     fun hideAndDismiss() {
-        FragmentActivity activity = getActivity()
+        val activity: FragmentActivity = getActivity()
         if (activity instanceof ConnectedActivity) {
             ((ConnectedActivity) activity).dismissSingleObjectPopup()
         }
@@ -65,12 +65,12 @@ class SingleObjectPopupFragment : Fragment() {
         hideAndDismiss()
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         SLChatEvent sLChatEvent
-        View inflate = layoutInflater.inflate(R.layout.object_popups_single_fragment_layout, viewGroup, false)
-        UserManager userManager = getUserManager()
+        val inflate: View = layoutInflater.inflate(R.layout.object_popups_single_fragment_layout, viewGroup, false)
+        val userManager: UserManager = getUserManager()
         if (userManager != null) {
-            SLChatEvent displayedObjectPopup = userManager.getObjectPopupsManager().getDisplayedObjectPopup()
+            val displayedObjectPopup: SLChatEvent = userManager.getObjectPopupsManager().getDisplayedObjectPopup()
             if (displayedObjectPopup != null) {
                 sLChatEvent = displayedObjectPopup
                 z = userManager.getObjectPopupsManager().mustAnimatePopup(displayedObjectPopup)
@@ -85,13 +85,13 @@ class SingleObjectPopupFragment : Fragment() {
         if (sLChatEvent == null) {
             hideAndDismiss()
         } else {
-            CoordinatorLayout coordinatorLayout = (CoordinatorLayout) inflate.findViewById(R.id.single_object_popup_container)
-            ChatEventViewHolder createViewHolder = SLChatEvent.createViewHolder(LayoutInflater.from(getContext()), sLChatEvent.getViewType().ordinal(), coordinatorLayout, (RecyclerView.Adapter) null)
+            val coordinatorLayout: CoordinatorLayout = (CoordinatorLayout) inflate.findViewById(R.id.single_object_popup_container)
+            val createViewHolder: ChatEventViewHolder = SLChatEvent.createViewHolder(LayoutInflater.from(getContext()), sLChatEvent.getViewType().ordinal(), coordinatorLayout, (RecyclerView.Adapter) null)
             sLChatEvent.bindViewHolder(createViewHolder, userManager, (ChatEventTimestampUpdater) null)
             coordinatorLayout.addView(createViewHolder.itemView)
             ViewGroup.LayoutParams layoutParams = createViewHolder.itemView.getLayoutParams()
             if (layoutParams instanceof CoordinatorLayout.LayoutParams) {
-                SwipeDismissAdvancedBehavior swipeDismissAdvancedBehavior = SwipeDismissAdvancedBehavior()
+                val swipeDismissAdvancedBehavior: SwipeDismissAdvancedBehavior = SwipeDismissAdvancedBehavior()
                 swipeDismissAdvancedBehavior.setSwipeDirection(7)
                 swipeDismissAdvancedBehavior.setListener(this.dismissListener)
                 ((CoordinatorLayout.LayoutParams) layoutParams).setBehavior(swipeDismissAdvancedBehavior)
@@ -100,21 +100,21 @@ class SingleObjectPopupFragment : Fragment() {
                 createViewHolder.itemView.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.slide_from_above))
             }
         }
-        View findViewById = inflate.findViewById(R.id.touch_capture_view)
+        val findViewById: View = inflate.findViewById(R.id.touch_capture_view)
         if (findViewById != null) {
             findViewById.setOnClickListener(this.frameClickListener)
         }
         return inflate
     }
 
-    fun onResume() {
+    override fun onResume() {
         super.onResume()
         if (getEvent() == null) {
             hideAndDismiss()
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         if (getEvent() == null) {
             hideAndDismiss()

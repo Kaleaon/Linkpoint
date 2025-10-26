@@ -23,7 +23,7 @@ class MoveInventoryItem : SLMessage() {
     class InventoryData {
         public UUID FolderID
         public UUID ItemID
-        public Byte[] NewName
+        public ByteArray NewName
     }
 
     public MoveInventoryItem() {
@@ -31,11 +31,11 @@ class MoveInventoryItem : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 38
-        Iterator<T> it = this.InventoryData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 38
+        val it: Iterator<T> = this.InventoryData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -43,11 +43,11 @@ class MoveInventoryItem : SLMessage() {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleMoveInventoryItem(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put(Ascii.FF)
@@ -62,13 +62,13 @@ class MoveInventoryItem : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.Stamp = unpackBoolean(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            InventoryData inventoryData = InventoryData()
+            val inventoryData: InventoryData = InventoryData()
             inventoryData.ItemID = unpackUUID(byteBuffer)
             inventoryData.FolderID = unpackUUID(byteBuffer)
             inventoryData.NewName = unpackVariable(byteBuffer, 1)

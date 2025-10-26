@@ -25,7 +25,7 @@ class InventoryDescendents : SLMessage() {
     @JvmStatic
     class FolderData {
         public UUID FolderID
-        public Byte[] Name
+        public ByteArray Name
         public UUID ParentID
         public Int Type
     }
@@ -37,7 +37,7 @@ class InventoryDescendents : SLMessage() {
         public Int CRC
         public Int CreationDate
         public UUID CreatorID
-        public Byte[] Description
+        public ByteArray Description
         public Int EveryoneMask
         public Int Flags
         public UUID FolderID
@@ -46,7 +46,7 @@ class InventoryDescendents : SLMessage() {
         public Boolean GroupOwned
         public Int InvType
         public UUID ItemID
-        public Byte[] Name
+        public ByteArray Name
         public Int NextOwnerMask
         public UUID OwnerID
         public Int OwnerMask
@@ -60,9 +60,9 @@ class InventoryDescendents : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i2 = 61
-        Iterator<T> it = this.FolderData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i2: Int = 61
+        val it: Iterator<T> = this.FolderData_Fields.iterator()
         while (true) {
             i = i2
             if (!it.hasNext()) {
@@ -70,23 +70,23 @@ class InventoryDescendents : SLMessage() {
             }
             i2 = ((FolderData) it.next()).Name.length + 34 + i
         }
-        Int i3 = i + 1
-        Iterator<T> it2 = this.ItemData_Fields.iterator()
+        val i3: Int = i + 1
+        val it2: Iterator<T> = this.ItemData_Fields.iterator()
         while (true) {
-            Int i4 = i3
+            val i4: Int = i3
             if (!it2.hasNext()) {
                 return i4
             }
-            ItemData itemData = (ItemData) it2.next()
+            val itemData: ItemData = (ItemData) it2.next()
             i3 = itemData.Description.length + itemData.Name.length + 129 + 1 + 4 + 4 + i4
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleInventoryDescendents(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put(Ascii.SYN)
@@ -128,24 +128,24 @@ class InventoryDescendents : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.FolderID = unpackUUID(byteBuffer)
         this.AgentData_Field.OwnerID = unpackUUID(byteBuffer)
         this.AgentData_Field.Version = unpackInt(byteBuffer)
         this.AgentData_Field.Descendents = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            FolderData folderData = FolderData()
+            val folderData: FolderData = FolderData()
             folderData.FolderID = unpackUUID(byteBuffer)
             folderData.ParentID = unpackUUID(byteBuffer)
             folderData.Type = unpackByte(byteBuffer)
             folderData.Name = unpackVariable(byteBuffer, 1)
             this.FolderData_Fields.add(folderData)
         }
-        Byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b2: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i2 = 0; i2 < b2; i2++) {
-            ItemData itemData = ItemData()
+            val itemData: ItemData = ItemData()
             itemData.ItemID = unpackUUID(byteBuffer)
             itemData.FolderID = unpackUUID(byteBuffer)
             itemData.CreatorID = unpackUUID(byteBuffer)

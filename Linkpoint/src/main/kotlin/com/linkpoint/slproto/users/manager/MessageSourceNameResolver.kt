@@ -19,13 +19,13 @@ class MessageSourceNameResolver {
     val Object lock = Object()
     /* access modifiers changed from: private */
     val Subscription.OnData<UserName> onUserName = Subscription.OnData<UserName>() {
-        fun onData(UserName userName) {
+        fun onData(userName: UserName) {
             NameRequestEntry nameRequestEntry
-            HashSet hashSet = null
+            val hashSet: HashSet = null
             synchronized (MessageSourceNameResolver.this.lock) {
                 nameRequestEntry = (NameRequestEntry) MessageSourceNameResolver.this.requestEntryMap.get(userName.getUuid())
                 if (nameRequestEntry != null) {
-                    HashSet hashSet2 = HashSet(nameRequestEntry.getMessageIDs())
+                    val hashSet2: HashSet = HashSet(nameRequestEntry.getMessageIDs())
                     if (userName.isComplete()) {
                         MessageSourceNameResolver.this.requestEntryMap.remove(userName.getUuid())
                         hashSet = hashSet2
@@ -60,7 +60,7 @@ class MessageSourceNameResolver {
             this.messageDatabaseIDs.add(l)
         }
 
-        fun addMessageID(Long l) {
+        fun addMessageID(l: Long) {
             this.messageDatabaseIDs.add(l)
         }
 
@@ -79,7 +79,7 @@ class MessageSourceNameResolver {
     }
 
     interface OnMessageSourcesResolvedListener {
-        Unit onMessageSourcesResolved(Set<Long> set, UserName userName)
+         fun onMessageSourcesResolved(set: Set<Long>, userName: UserName)
     }
 
     public MessageSourceNameResolver(UserManager userManager2, OnMessageSourcesResolvedListener onMessageSourcesResolvedListener) {
@@ -88,9 +88,9 @@ class MessageSourceNameResolver {
         this.dbExecutor = userManager2.getDatabaseExecutor()
     }
 
-    fun requestResolve(UUID uuid, Long l) {
+    fun requestResolve(uuid: UUID, l: Long) {
         NameRequestEntry nameRequestEntry
-        Boolean z = false
+        val z: Boolean = false
         synchronized (this.lock) {
             nameRequestEntry = this.requestEntryMap.get(uuid)
             if (nameRequestEntry == null) {

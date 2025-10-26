@@ -11,15 +11,15 @@ class TerrainData {
 const val P: IntatchesPerEdge = 16
 const val P: IntatchesSize = 16
 const val T: InterrainPerEdge = 256
-    private val Float[] heightMap = Float[65536]
-    private val Boolean[] patchDirtyMap = Boolean[256]
+    private val FloatArray heightMap = Float[65536]
+    private val BooleanArray patchDirtyMap = Boolean[256]
     private volatile TerrainTextures terrainTextures = TerrainTextures()
     private Int validCount = 0
-    private val Boolean[] validMap = Boolean[65536]
-    private val Float[] vertexHeights = Float[66049]
+    private val BooleanArray validMap = Boolean[65536]
+    private val FloatArray vertexHeights = Float[66049]
     private val Object vertexLock = Object()
-    private val Float[] vertexNormals = Float[132098]
-    private val Boolean[] vertexValids = Boolean[66049]
+    private val FloatArray vertexNormals = Float[132098]
+    private val BooleanArray vertexValids = Boolean[66049]
     private Float waterHeight = 0.0f
     private Boolean waterHeightValid = false
 
@@ -31,11 +31,11 @@ const val T: InterrainPerEdge = 256
         }
     }
 
-    private Unit markVerticesDirty(Int i, Int i2, Int i3, Int i4) {
-        Int i5 = i / 16
-        Int i6 = i2 / 16
-        Int i7 = i3 / 16
-        Int i8 = i4 / 16
+     private fun markVerticesDirty(i: Int, i2: Int, i3: Int, i4: Int) {
+        val i5: Int = i / 16
+        val i6: Int = i2 / 16
+        val i7: Int = i3 / 16
+        val i8: Int = i4 / 16
         synchronized (this.vertexLock) {
             for (Int i9 = i6; i9 <= i8; i9++) {
                 for (Int i10 = i5; i10 <= i7; i10++) {
@@ -54,15 +54,15 @@ const val T: InterrainPerEdge = 256
         }
     }
 
-    private Unit updateVerticesInRegion(Int i, Int i2, Int i3, Int i4) {
+     private fun updateVerticesInRegion(i: Int, i2: Int, i3: Int, i4: Int) {
         while (i2 <= i4) {
             for (Int i5 = i; i5 <= i3; i5++) {
-                Int min = Math.min(Math.max(0, i5 - 1), 255)
-                Int min2 = Math.min(Math.max(0, i2 - 1), 255)
-                Int min3 = Math.min(Math.max(0, i5), 255)
-                Int min4 = Math.min(Math.max(0, i2), 255)
-                Float f = 0.0f
-                Int i6 = 0
+                val min: Int = Math.min(Math.max(0, i5 - 1), 255)
+                val min2: Int = Math.min(Math.max(0, i2 - 1), 255)
+                val min3: Int = Math.min(Math.max(0, i5), 255)
+                val min4: Int = Math.min(Math.max(0, i2), 255)
+                val f: Float = 0.0f
+                val i6: Int = 0
                 if (min >= 0 && min < 256 && min2 >= 0 && min2 < 256 && this.validMap[(min2 * 256) + min]) {
                     f = 0.0f + this.heightMap[(min2 * 256) + min]
                     i6 = 1
@@ -81,8 +81,8 @@ const val T: InterrainPerEdge = 256
                 }
                 if (i6 == 4) {
                     this.vertexHeights[(i2 * InputDeviceCompat.SOURCE_KEYBOARD) + i5] = f / ((Float) i6)
-                    Float f2 = this.heightMap[(min4 * 256) + min3] - this.heightMap[min + (min4 * 256)]
-                    Float f3 = this.heightMap[(min4 * 256) + min3] - this.heightMap[(min2 * 256) + min3]
+                    val f2: Float = this.heightMap[(min4 * 256) + min3] - this.heightMap[min + (min4 * 256)]
+                    val f3: Float = this.heightMap[(min4 * 256) + min3] - this.heightMap[(min2 * 256) + min3]
                     this.vertexNormals[((i2 * InputDeviceCompat.SOURCE_KEYBOARD) + i5) * 2] = f2
                     this.vertexNormals[(((i2 * InputDeviceCompat.SOURCE_KEYBOARD) + i5) * 2) + 1] = f3
                     this.vertexValids[(i2 * InputDeviceCompat.SOURCE_KEYBOARD) + i5] = true
@@ -96,29 +96,29 @@ const val T: InterrainPerEdge = 256
 
     public synchronized Unit ApplyRegionInfo(RegionHandshake.RegionInfo regionInfo) {
         SetWaterHeight(regionInfo.WaterHeight)
-        TerrainTextures terrainTextures2 = TerrainTextures(regionInfo)
+        val terrainTextures2: TerrainTextures = TerrainTextures(regionInfo)
         if (!terrainTextures2.equals(this.terrainTextures)) {
             this.terrainTextures = terrainTextures2
             updateEntireTerrain()
         }
     }
 
-    fun ProcessLayerData(Byte[] bArr) {
+    fun ProcessLayerData(bArr: ByteArray) {
         TerrainPatch DecompressPatch
-        BitBuffer bitBuffer = BitBuffer(bArr)
-        Int bits = bitBuffer.getBits(16)
-        Int bits2 = bitBuffer.getBits(8)
-        Debug.Log(String.format("Terrain: ProcessLayerData: stride 0x%x patchSize 0x%x type 0x%x", Object[]{Integer.valueOf(bits), Integer.valueOf(bits2), Integer.valueOf(bitBuffer.getBits(8))}))
+        val bitBuffer: BitBuffer = BitBuffer(bArr)
+        val bits: Int = bitBuffer.getBits(16)
+        val bits2: Int = bitBuffer.getBits(8)
+        Debug.Log(String.format("Terrain: ProcessLayerData: stride 0x%x patchSize 0x%x type 0x%x", Array<Any>{Integer.valueOf(bits), Integer.valueOf(bits2), Integer.valueOf(bitBuffer.getBits(8))}))
         synchronized (this.vertexLock) {
             while (!bitBuffer.isEOF() && (DecompressPatch = TerrainPatch.DecompressPatch(bitBuffer, bits2)) != null) {
-                Int x = DecompressPatch.getX()
-                Int y = DecompressPatch.getY()
+                val x: Int = DecompressPatch.getX()
+                val y: Int = DecompressPatch.getY()
                 if (x < 16 && y < 16) {
                     for (Int i = 0; i < bits2; i++) {
-                        Int i2 = (y * 16) + i
+                        val i2: Int = (y * 16) + i
                         if (i2 >= 0 && i2 < 256) {
                             for (Int i3 = 0; i3 < bits2; i3++) {
-                                Int i4 = (x * 16) + i3
+                                val i4: Int = (x * 16) + i3
                                 if (i4 >= 0 && i4 < 256) {
                                     this.heightMap[(i2 * 256) + i4] = DecompressPatch.heightMap[(i * bits2) + i3]
                                     if (!this.validMap[(i2 * 256) + i4]) {
@@ -136,17 +136,17 @@ const val T: InterrainPerEdge = 256
         Debug.Printf("Terrain: LayerData received, valid count is now %d", Integer.valueOf(this.validCount))
     }
 
-    public TerrainPatchInfo getPatchInfo(Int i, Int i2) {
+     public fun getPatchInfo(i: Int, i2: Int): TerrainPatchInfo {
         synchronized (this.vertexLock) {
             if (this.patchDirtyMap[(i2 * 16) + i]) {
                 this.patchDirtyMap[(i2 * 16) + i] = false
                 updateVerticesInRegion(i * 16, i2 * 16, (i + 1) * 16, (i2 + 1) * 16)
             }
         }
-        Boolean z = true
+        val z: Boolean = true
         for (Int i3 = 0; i3 < 17; i3++) {
-            Int i4 = ((i2 * 16) + i3) * InputDeviceCompat.SOURCE_KEYBOARD
-            Int i5 = 0
+            val i4: Int = ((i2 * 16) + i3) * InputDeviceCompat.SOURCE_KEYBOARD
+            val i5: Int = 0
             while (true) {
                 if (i5 >= 17) {
                     break
@@ -161,17 +161,17 @@ const val T: InterrainPerEdge = 256
         if (!z) {
             return null
         }
-        Float[] fArr = Float[289]
-        Float[] fArr2 = Float[578]
-        Int i6 = 0
+        val fArr: FloatArray = Float[289]
+        val fArr2: FloatArray = Float[578]
+        val i6: Int = 0
         while (true) {
-            Int i7 = i6
+            val i7: Int = i6
             if (i7 < 17) {
-                Int i8 = ((i2 * 16) + i7) * InputDeviceCompat.SOURCE_KEYBOARD
+                val i8: Int = ((i2 * 16) + i7) * InputDeviceCompat.SOURCE_KEYBOARD
                 for (Int i9 = 0; i9 < 17; i9++) {
-                    Float f = this.vertexHeights[i8 + i9 + (i * 16)]
-                    Float f2 = this.vertexNormals[(i8 + i9 + (i * 16)) * 2]
-                    Float f3 = this.vertexNormals[((i8 + i9 + (i * 16)) * 2) + 1]
+                    val f: Float = this.vertexHeights[i8 + i9 + (i * 16)]
+                    val f2: Float = this.vertexNormals[(i8 + i9 + (i * 16)) * 2]
+                    val f3: Float = this.vertexNormals[((i8 + i9 + (i * 16)) * 2) + 1]
                     fArr[(i7 * 17) + i9] = f
                     fArr2[((i7 * 17) + i9) * 2] = f2
                     fArr2[(((i7 * 17) + i9) * 2) + 1] = f3

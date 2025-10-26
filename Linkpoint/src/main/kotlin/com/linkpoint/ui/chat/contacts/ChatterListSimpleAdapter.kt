@@ -14,45 +14,45 @@ class ChatterListSimpleAdapter : ChatterListAdapter() {
         super(context, userManager)
     }
 
-    public Boolean areAllItemsEnabled() {
+     public fun areAllItemsEnabled(): Boolean {
         return true
     }
 
-    public Int getCount() {
+     public fun getCount(): Int {
         if (this.data != null) {
             return this.data.size()
         }
         return 0
     }
 
-    public Object getItem(Int i) {
+     public fun getItem(i: Int): Object {
         if (this.data == null || i < 0 || i >= this.data.size()) {
             return null
         }
         return this.data.get(i)
     }
 
-    public Long getItemId(Int i) {
+     public fun getItemId(i: Int): Long {
         return 0
     }
 
-    public Boolean hasStableIds() {
+     public fun hasStableIds(): Boolean {
         return false
     }
 
-    public Boolean isEmpty() {
+     public fun isEmpty(): Boolean {
         if (this.data != null) {
             return this.data.isEmpty()
         }
         return true
     }
 
-    public Boolean isEnabled(Int i) {
+     public fun isEnabled(i: Int): Boolean {
         return true
     }
 
     /* access modifiers changed from: protected */
-    fun setData(ImmutableList<? : ChatterDisplayInfo> immutableList) {
+    fun setData(immutableList: ImmutableList<? : ChatterDisplayInfo>) {
         this.data = immutableList
         notifyDataSetChanged()
     }

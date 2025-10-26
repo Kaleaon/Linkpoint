@@ -13,7 +13,7 @@ abstract class ShaderProgram {
         this.fragmentShader = shader2
     }
 
-    public Int Compile(ShaderPreprocessor shaderPreprocessor) throws ShaderCompileException {
+    public fun Compile(shaderPreprocessor: ShaderPreprocessor): Int throws ShaderCompileException {
         this.vertexShader.Compile(shaderPreprocessor)
         this.fragmentShader.Compile(shaderPreprocessor)
         Debug.Printf("Shaders: Linking...", Object[0])
@@ -21,10 +21,10 @@ abstract class ShaderProgram {
         GLES20.glAttachShader(this.handle, this.vertexShader.getHandle())
         GLES20.glAttachShader(this.handle, this.fragmentShader.getHandle())
         GLES20.glLinkProgram(this.handle)
-        Int[] iArr = Int[1]
+        val iArr: IntArray = Int[1]
         GLES20.glGetProgramiv(this.handle, 35714, iArr, 0)
         if (iArr[0] != 1) {
-            throw ShaderCompileException(String.format("Shader link error: '%s'", Object[]{GLES20.glGetProgramInfoLog(this.handle)}))
+            throw ShaderCompileException(String.format("Shader link error: '%s'", Array<Any>{GLES20.glGetProgramInfoLog(this.handle)}))
         }
         Debug.Printf("Shaders: Binding variables...", Object[0])
         bindVariables()
@@ -34,7 +34,7 @@ abstract class ShaderProgram {
 
     protected abstract Unit bindVariables()
 
-    public Int getHandle() {
+     public fun getHandle(): Int {
         return this.handle
     }
 }

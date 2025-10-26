@@ -19,15 +19,15 @@ class InventoryAssetResponse : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return 37
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleInventoryAssetResponse(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put(Ascii.ESC)
@@ -36,7 +36,7 @@ class InventoryAssetResponse : SLMessage() {
         packBoolean(byteBuffer, this.QueryData_Field.IsReadable)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
         this.QueryData_Field.AssetID = unpackUUID(byteBuffer)
         this.QueryData_Field.IsReadable = unpackBoolean(byteBuffer)

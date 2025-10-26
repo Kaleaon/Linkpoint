@@ -18,8 +18,8 @@ class PickDescriptionEditFragment : TextFieldEditFragment() {
     private const val AVATAR_PICK_KEY: String = "avatarPickKey"
     private val SubscriptionData<AvatarPickKey, PickInfoReply> pickInfo = SubscriptionData<>(UIThreadExecutor.getInstance(), $Lambda$Y7Ne2VWglUcvjFUgJydWWKVgIXM(this))
 
-    private AvatarPickKey getPickKey() {
-        Bundle arguments = getArguments()
+     private fun getPickKey(): AvatarPickKey {
+        val arguments: Bundle = getArguments()
         if (arguments == null || !arguments.containsKey(AVATAR_PICK_KEY)) {
             return null
         }
@@ -27,28 +27,28 @@ class PickDescriptionEditFragment : TextFieldEditFragment() {
     }
 
     @JvmStatic
-    Bundle makeSelection(ChatterID chatterID, AvatarPickKey avatarPickKey) {
-        Bundle makeSelection = ChatterFragment.makeSelection(chatterID)
+     fun makeSelection(chatterID: ChatterID, avatarPickKey: AvatarPickKey): Bundle {
+        val makeSelection: Bundle = ChatterFragment.makeSelection(chatterID)
         makeSelection.putParcelable(AVATAR_PICK_KEY, avatarPickKey)
         return makeSelection
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onPickInfoReply */
-    fun m506com_lumiyaviewer_lumiya_ui_chat_profiles_PickDescriptionEditFragmentmthref0(PickInfoReply pickInfoReply) {
+    fun m506com_lumiyaviewer_lumiya_ui_chat_profiles_PickDescriptionEditFragmentmthref0(pickInfoReply: PickInfoReply) {
         if (pickInfoReply != null) {
             setOriginalText(SLMessage.stringFromVariableUTF(pickInfoReply.Data_Field.Desc))
         }
     }
 
     /* access modifiers changed from: protected */
-    public String getFieldHint(Context context) {
+     public fun getFieldHint(context: Context): String {
         return getString(R.string.pick_description_edit_hint)
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(ChatterID chatterID) {
-        AvatarPickKey pickKey = getPickKey()
+    fun onShowUser(chatterID: ChatterID) {
+        val pickKey: AvatarPickKey = getPickKey()
         if (this.userManager == null || !(chatterID instanceof ChatterID.ChatterIDUser) || pickKey == null) {
             this.pickInfo.unsubscribe()
         } else {
@@ -57,9 +57,9 @@ class PickDescriptionEditFragment : TextFieldEditFragment() {
     }
 
     /* access modifiers changed from: protected */
-    fun saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str) {
-        AvatarPickKey pickKey = getPickKey()
-        PickInfoReply data = this.pickInfo.getData()
+    fun saveEditedText(sLAgentCircuit: SLAgentCircuit, chatterID: ChatterID, str: String) {
+        val pickKey: AvatarPickKey = getPickKey()
+        val data: PickInfoReply = this.pickInfo.getData()
         if (sLAgentCircuit != null && pickKey != null && data != null) {
             sLAgentCircuit.getModules().userProfiles.UpdatePickInfo(pickKey.pickID, data.Data_Field.CreatorID, data.Data_Field.ParcelID, SLMessage.stringFromVariableOEM(data.Data_Field.Name), str, data.Data_Field.SnapshotID, data.Data_Field.PosGlobal, data.Data_Field.SortOrder, data.Data_Field.Enabled)
         }

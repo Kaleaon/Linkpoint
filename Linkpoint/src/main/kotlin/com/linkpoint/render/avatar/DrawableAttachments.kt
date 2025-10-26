@@ -30,7 +30,7 @@ class DrawableAttachments {
 
     DrawableAttachments(Multimap<Integer, DrawableObject> multimap) {
         this.glAnimationDataBuffer = null
-        Builder builder = ImmutableMultimap.builder()
+        val builder: Builder = ImmutableMultimap.builder()
         ImmutableList.Builder builder2 = ImmutableList.builder()
         if (multimap != null) {
             for (Integer num : multimap.keySet()) {
@@ -50,7 +50,7 @@ class DrawableAttachments {
 
     DrawableAttachments(DrawableAttachments drawableAttachments) {
         this.glAnimationDataBuffer = null
-        Builder builder = ImmutableMultimap.builder()
+        val builder: Builder = ImmutableMultimap.builder()
         ImmutableList.Builder builder2 = ImmutableList.builder()
         builder2.addAll(drawableAttachments.rigged)
         for (Object obj : drawableAttachments.nonRigged.keySet()) {
@@ -69,7 +69,7 @@ class DrawableAttachments {
     }
 
     @SuppressLint({"NewApi"})
-    Boolean Draw(RenderContext renderContext, AvatarSkeleton avatarSkeleton, Boolean z) {
+    fun Draw(renderContext: RenderContext, avatarSkeleton: AvatarSkeleton, z: Boolean): Boolean {
         if (!this.rigged.isEmpty()) {
             if (renderContext.hasGL30) {
                 renderContext.setupRiggedMeshProgram(true)
@@ -82,12 +82,12 @@ class DrawableAttachments {
                 if (z || r0) {
                     this.glAnimationDataBuffer.getRawBuffer().loadFromFloatArray(0, avatarSkeleton.jointWorldMatrix, 0, (SLSkeletonBoneID.VALUES.length + 47) * 16)
                 }
-                GLLoadableBuffer gLLoadableBuffer = this.glAnimationDataBuffer
+                val gLLoadableBuffer: GLLoadableBuffer = this.glAnimationDataBuffer
                 if (z) {
                     z2 = true
                 }
                 gLLoadableBuffer.BindUniformDynamic(renderContext, 1, z2)
-                Int i = 0
+                val i: Int = 0
                 for (DrawableObject DrawRigged30 : this.rigged) {
                     i = DrawRigged30.DrawRigged30(renderContext, 1) | i
                 }
@@ -104,9 +104,9 @@ class DrawableAttachments {
                 }
             }
         }
-        Boolean z3 = false
+        val z3: Boolean = false
         for (Object obj : this.nonRigged.keySet()) {
-            Float[] attachmentMatrix = avatarSkeleton.getAttachmentMatrix(obj.intValue())
+            val attachmentMatrix: FloatArray = avatarSkeleton.getAttachmentMatrix(obj.intValue())
             if (attachmentMatrix != null) {
                 renderContext.glObjWorldPushAndMultMatrixf(attachmentMatrix, 0)
                 for (DrawableObject DrawRigged30222 : this.nonRigged.get(obj)) {

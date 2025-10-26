@@ -30,17 +30,17 @@ class FullWorkflowDemo {
         Log.i(TAG, "=== COMPLETE WORKFLOW DEMONSTRATION FINISHED ===")
     }
     
-    private Unit demonstrateAuthentication() {
+     private fun demonstrateAuthentication() {
         Log.i(TAG, "--- Phase 1: Modern Authentication ---")
         modernDemo.demonstrateModernAuthentication("demo_user", "demo_password")
     }
     
-    private Unit demonstrateAssetLoading() {
+     private fun demonstrateAssetLoading() {
         Log.i(TAG, "--- Phase 2: Asset Streaming ---")
         modernDemo.demonstrateAssetStreaming()
     }
     
-    public String getPerformanceSummary() {
+     public fun getPerformanceSummary(): String {
         return "Modern Linkpoint: OAuth2 + HTTP/2 + Intelligent Assets + Modern Graphics"
     }
 }

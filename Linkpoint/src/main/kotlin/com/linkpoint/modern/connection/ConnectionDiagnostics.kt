@@ -22,12 +22,12 @@ class ConnectionDiagnostics {
     private const val TAG: String = "ConnectionDiagnostics"
     
     // Second Life endpoints for testing
-    private const val String[] SL_LOGIN_ENDPOINTS = {
+    private const val Array<String> SL_LOGIN_ENDPOINTS = {
         "https://login.agni.lindenlab.com/cgi-bin/login.cgi",  // Main grid
         "https://login.aditi.lindenlab.com/cgi-bin/login.cgi"   // Beta grid
     }
     
-    private const val String[] SL_TEST_DOMAINS = {
+    private const val Array<String> SL_TEST_DOMAINS = {
         "login.agni.lindenlab.com",
         "login.aditi.lindenlab.com",
         "secondlife.com",
@@ -53,7 +53,7 @@ class ConnectionDiagnostics {
         return CompletableFuture.supplyAsync(() -> {
             Log.i(TAG, "Starting comprehensive Second Life connection diagnosis")
             
-            DiagnosticResult result = DiagnosticResult()
+            val result: DiagnosticResult = DiagnosticResult()
             
             // Test 1: Network availability
             result.networkAvailable = isNetworkAvailable()
@@ -91,14 +91,14 @@ class ConnectionDiagnostics {
         })
     }
 
-    private Boolean isNetworkAvailable() {
+     private fun isNetworkAvailable(): Boolean {
         try {
-            ConnectivityManager cm = (ConnectivityManager) 
+            val cm: ConnectivityManager = (ConnectivityManager) 
                 context.getSystemService(Context.CONNECTIVITY_SERVICE)
             
             if (cm == null) return false
             
-            NetworkInfo activeNetwork = cm.getActiveNetworkInfo()
+            val activeNetwork: NetworkInfo = cm.getActiveNetworkInfo()
             return activeNetwork != null && activeNetwork.isConnectedOrConnecting()
         } catch (Exception e) {
             Log.e(TAG, "Error checking network availability", e)
@@ -106,10 +106,10 @@ class ConnectionDiagnostics {
         }
     }
 
-    private Boolean testDNSResolution() {
+     private fun testDNSResolution(): Boolean {
         for (String domain : SL_TEST_DOMAINS) {
             try {
-                InetAddress[] addresses = InetAddress.getAllByName(domain)
+                val addresses: Array<InetAddress> = InetAddress.getAllByName(domain)
                 if (addresses.length > 0) {
                     Log.d(TAG, "DNS resolution successful for " + domain + 
                         " -> " + addresses[0].getHostAddress())
@@ -122,9 +122,9 @@ class ConnectionDiagnostics {
         return false
     }
 
-    private Boolean testHTTPSConnectivity() {
+     private fun testHTTPSConnectivity(): Boolean {
         try {
-            Request request = Request.Builder()
+            val request: Request = Request.Builder()
                 .url("https://secondlife.com")
                 .head() // Use HEAD to minimize data transfer
                 .build()
@@ -138,10 +138,10 @@ class ConnectionDiagnostics {
         }
     }
 
-    private Boolean testLoginServerAccess() {
+     private fun testLoginServerAccess(): Boolean {
         for (String endpoint : SL_LOGIN_ENDPOINTS) {
             try {
-                Request request = Request.Builder()
+                val request: Request = Request.Builder()
                     .url(endpoint)
                     .head()
                     .build()
@@ -159,11 +159,11 @@ class ConnectionDiagnostics {
         return false
     }
 
-    private Boolean detectProxyOrFirewall() {
+     private fun detectProxyOrFirewall(): Boolean {
         // Simple heuristic: if we can reach general internet but not SL-specific endpoints
         try {
             // Test general connectivity
-            Request googleTest = Request.Builder()
+            val googleTest: Request = Request.Builder()
                 .url("https://www.google.com")
                 .head()
                 .build()
@@ -195,18 +195,18 @@ class ConnectionDiagnostics {
         
         private StringBuilder issues = StringBuilder()
         
-        fun addIssue(String issue) {
+        fun addIssue(issue: String) {
             if (issues.length() > 0) {
                 issues.append("; ")
             }
             issues.append(issue)
         }
         
-        public String getIssues() {
+         public fun getIssues(): String {
             return issues.toString()
         }
         
-        public HealthLevel getOverallHealth() {
+         public fun getOverallHealth(): HealthLevel {
             if (loginServerWorking) {
                 return HealthLevel.EXCELLENT
             } else if (httpsWorking) {

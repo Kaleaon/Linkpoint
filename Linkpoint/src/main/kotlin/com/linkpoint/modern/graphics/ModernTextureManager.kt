@@ -55,28 +55,28 @@ const val FORMAT_ASTC_4: Intx4_RGBA = 0x93B0
                 Log.d(TAG, "Loading texture: " + textureId + " with priority: " + priority)
                 
                 // Check cache first
-                Integer cachedTexture = getCachedTexture(textureId)
+                val cachedTexture: Integer = getCachedTexture(textureId)
                 if (cachedTexture != null) {
                     Log.d(TAG, "Texture found in cache: " + textureId)
                     return cachedTexture
                 }
                 
                 // Load and transcode texture
-                Byte[] textureData = loadTextureData(textureId)
+                val textureData: ByteArray = loadTextureData(textureId)
                 if (textureData == null) {
                     Log.w(TAG, "Failed to load texture data: " + textureId)
                     return -1
                 }
                 
                 // Transcode to optimal format
-                Byte[] transcodedData = transcodeTexture(textureData, optimalFormat)
+                val transcodedData: ByteArray = transcodeTexture(textureData, optimalFormat)
                 if (transcodedData == null) {
                     Log.w(TAG, "Failed to transcode texture: " + textureId)
                     return -1
                 }
                 
                 // Upload to GPU
-                Int textureHandle = uploadToGPU(transcodedData, optimalFormat)
+                val textureHandle: Int = uploadToGPU(transcodedData, optimalFormat)
                 if (textureHandle > 0) {
                     cacheTexture(textureId, textureHandle)
                     Log.d(TAG, "Texture loaded successfully: " + textureId + " -> " + textureHandle)
@@ -94,9 +94,9 @@ const val FORMAT_ASTC_4: Intx4_RGBA = 0x93B0
     /**
      * Detect optimal texture format for current device
      */
-    private Int detectOptimalFormat() {
+     private fun detectOptimalFormat(): Int {
         // Check for ASTC support (high-end devices)
-        String extensions = GLES30.glGetString(GLES30.GL_EXTENSIONS)
+        val extensions: String = GLES30.glGetString(GLES30.GL_EXTENSIONS)
         if (extensions != null) {
             if (extensions.contains("GL_KHR_texture_compression_astc_ldr")) {
                 Log.i(TAG, "ASTC compression supported")
@@ -115,7 +115,7 @@ const val FORMAT_ASTC_4: Intx4_RGBA = 0x93B0
     /**
      * Load texture data from asset or network
      */
-    private Byte[] loadTextureData(String textureId) {
+     private fun loadTextureData(textureId: String): ByteArray {
         // TODO: Implement actual texture loading from SL asset system
         Log.d(TAG, "TODO: Load texture data for " + textureId)
         return null
@@ -125,7 +125,7 @@ const val FORMAT_ASTC_4: Intx4_RGBA = 0x93B0
      * Transcode texture using Basis Universal
      * Enhanced with advanced Java-based processing
      */
-    private Byte[] transcodeTexture(Byte[] sourceData, Int targetFormat) {
+     private fun transcodeTexture(sourceData: ByteArray, targetFormat: Int): ByteArray {
         if (nativeLibraryLoaded) {
             try {
                 // Call native transcoding function when available
@@ -143,17 +143,17 @@ const val FORMAT_ASTC_4: Intx4_RGBA = 0x93B0
      * Advanced Java texture processing implementation
      * Provides sophisticated format conversion and optimization
      */
-    private Byte[] processTextureJava(Byte[] sourceData, Int targetFormat) {
+     private fun processTextureJava(sourceData: ByteArray, targetFormat: Int): ByteArray {
         Log.d(TAG, "Processing texture with advanced Java implementation")
         
         try {
             // Analyze source data format
-            TextureInfo info = analyzeTextureData(sourceData)
+            val info: TextureInfo = analyzeTextureData(sourceData)
             Log.d(TAG, "Source texture: " + info.width + "x" + info.height + 
                       " format=" + info.format + " size=" + sourceData.length)
             
             // Apply quality optimizations based on target format
-            Byte[] processedData = applyQualityOptimizations(sourceData, info, targetFormat)
+            val processedData: ByteArray = applyQualityOptimizations(sourceData, info, targetFormat)
             
             // Apply mobile-specific optimizations
             processedData = applyMobileOptimizations(processedData, info, targetFormat)
@@ -176,8 +176,8 @@ const val FORMAT_ASTC_4: Intx4_RGBA = 0x93B0
     /**
      * Analyze texture data to determine format and properties
      */
-    private TextureInfo analyzeTextureData(Byte[] data) {
-        TextureInfo info = TextureInfo()
+     private fun analyzeTextureData(data: ByteArray): TextureInfo {
+        val info: TextureInfo = TextureInfo()
         
         // Check for common texture format headers
         if (data.length >= 12) {
@@ -213,7 +213,7 @@ const val FORMAT_ASTC_4: Intx4_RGBA = 0x93B0
     /**
      * Apply quality optimizations based on target format
      */
-    private Byte[] applyQualityOptimizations(Byte[] data, TextureInfo info, Int targetFormat) {
+     private fun applyQualityOptimizations(data: ByteArray, info: TextureInfo, targetFormat: Int): ByteArray {
         switch (targetFormat) {
             case FORMAT_ASTC_4x4_RGBA:
                 Log.d(TAG, "Applying ASTC quality optimizations")
@@ -233,14 +233,14 @@ const val FORMAT_ASTC_4: Intx4_RGBA = 0x93B0
     /**
      * Apply mobile-specific optimizations
      */
-    private Byte[] applyMobileOptimizations(Byte[] data, TextureInfo info, Int targetFormat) {
+     private fun applyMobileOptimizations(data: ByteArray, info: TextureInfo, targetFormat: Int): ByteArray {
         Log.d(TAG, "Applying mobile GPU optimizations for " + info.format + " texture")
         
         // Simulate memory bandwidth optimization
-        Int maxSize = getMaxTextureSize(targetFormat)
+        val maxSize: Int = getMaxTextureSize(targetFormat)
         if (data.length > maxSize) {
             Log.d(TAG, "Texture size reduced from " + data.length + " to " + maxSize + " bytes")
-            Byte[] optimized = Byte[maxSize]
+            val optimized: ByteArray = Byte[maxSize]
             System.arraycopy(data, 0, optimized, 0, maxSize)
             return optimized
         }
@@ -251,12 +251,12 @@ const val FORMAT_ASTC_4: Intx4_RGBA = 0x93B0
     /**
      * Generate mipmaps for large textures
      */
-    private Byte[] generateMipmaps(Byte[] data, TextureInfo info) {
+     private fun generateMipmaps(data: ByteArray, info: TextureInfo): ByteArray {
         Log.d(TAG, "Generating mipmaps for " + info.width + "x" + info.height + " texture")
         
         // Simulate mipmap generation (33% size increase for mipmap chain)
-        Int mipmapSize = data.length / 3
-        Byte[] withMipmaps = Byte[data.length + mipmapSize]
+        val mipmapSize: Int = data.length / 3
+        val withMipmaps: ByteArray = Byte[data.length + mipmapSize]
         
         System.arraycopy(data, 0, withMipmaps, 0, data.length)
         // Simulate mipmap data with downscaled values
@@ -268,42 +268,42 @@ const val FORMAT_ASTC_4: Intx4_RGBA = 0x93B0
     }
     
     // Format-specific optimization methods
-    private Byte[] optimizeForAstc(Byte[] data, TextureInfo info) {
+     private fun optimizeForAstc(data: ByteArray, info: TextureInfo): ByteArray {
         // ASTC provides excellent quality at small sizes
         return data
     }
     
-    private Byte[] optimizeForEtc2(Byte[] data, TextureInfo info) {
+     private fun optimizeForEtc2(data: ByteArray, info: TextureInfo): ByteArray {
         // ETC2 provides good compression for mobile
         return data
     }
     
-    private Byte[] optimizeForRgba32(Byte[] data, TextureInfo info) {
+     private fun optimizeForRgba32(data: ByteArray, info: TextureInfo): ByteArray {
         // For uncompressed RGBA, we might reduce quality on mobile
         return data
     }
     
-    private Int getMaxTextureSize(Int format) {
+     private fun getMaxTextureSize(format: Int): Int {
         // Mobile GPU memory limits (in bytes)
         switch (format) {
             case FORMAT_ASTC_4x4_RGBA: {
                 // ASTC 4x4 block: 16 bytes per 4x4 block
-                Int width = 2048, height = 2048
-                Int blocksX = (width + 3) / 4
-                Int blocksY = (height + 3) / 4
+                val width: Int = 2048, height = 2048
+                val blocksX: Int = (width + 3) / 4
+                val blocksY: Int = (height + 3) / 4
                 return blocksX * blocksY * 16; // ~256KB compressed
             }
             case FORMAT_ETC2_RGBA: {
                 // ETC2 RGBA: 8 bits per pixel (1 Byte per pixel), but ETC2 is block compressed (4x4 blocks, 8 bytes per block)
-                Int width = 1024, height = 1024
-                Int blocksX = (width + 3) / 4
-                Int blocksY = (height + 3) / 4
+                val width: Int = 1024, height = 1024
+                val blocksX: Int = (width + 3) / 4
+                val blocksY: Int = (height + 3) / 4
                 return blocksX * blocksY * 8; // ~256KB compressed
             }
             case FORMAT_RGBA32:
             default: {
                 // Uncompressed RGBA: 4 bytes per pixel
-                Int width = 512, height = 512
+                val width: Int = 512, height = 512
                 return width * height * 4; // 1MB uncompressed
             }
         }
@@ -314,16 +314,16 @@ const val FORMAT_ASTC_4: Intx4_RGBA = 0x93B0
      */
     @JvmStatic
 private class TextureInfo {
-        Int width = 128
-        Int height = 128
-        String format = "Unknown"
+        val width: Int = 128
+        val height: Int = 128
+        val format: String = "Unknown"
     }
     
     /**
      * Upload texture data to GPU
      */
-    private Int uploadToGPU(Byte[] textureData, Int format) {
-        Int[] textureHandle = Int[1]
+     private fun uploadToGPU(textureData: ByteArray, format: Int): Int {
+        val textureHandle: IntArray = Int[1]
         GLES30.glGenTextures(1, textureHandle, 0)
         
         if (textureHandle[0] == 0) {
@@ -354,7 +354,7 @@ private class TextureInfo {
                 break
         }
         
-        Int error = GLES30.glGetError()
+        val error: Int = GLES30.glGetError()
         if (error != GLES30.GL_NO_ERROR) {
             Log.e(TAG, "OpenGL error during texture upload: " + error)
             GLES30.glDeleteTextures(1, textureHandle, 0)
@@ -367,7 +367,7 @@ private class TextureInfo {
     /**
      * Get cached texture handle
      */
-    private Integer getCachedTexture(String textureId) {
+     private fun getCachedTexture(textureId: String): Integer {
         // TODO: Implement texture cache
         return null
     }
@@ -375,7 +375,7 @@ private class TextureInfo {
     /**
      * Cache texture handle
      */
-    private Unit cacheTexture(String textureId, Int textureHandle) {
+     private fun cacheTexture(textureId: String, textureHandle: Int) {
         // TODO: Implement texture caching
         Log.d(TAG, "TODO: Cache texture " + textureId + " -> " + textureHandle)
     }
@@ -383,7 +383,7 @@ private class TextureInfo {
     /**
      * Get optimal texture format for current device
      */
-    public Int getOptimalTextureFormat() {
+     public fun getOptimalTextureFormat(): Int {
         return optimalFormat
     }
     
@@ -391,7 +391,7 @@ private class TextureInfo {
      * Get human-readable format name
      */
     @JvmStatic
-    String getFormatName(Int format) {
+     fun getFormatName(format: Int): String {
         switch (format) {
             case FORMAT_ASTC_4x4_RGBA:
                 return "ASTC_4x4_RGBA"
@@ -415,7 +415,7 @@ private class TextureInfo {
     /**
      * Process modern texture data from asset manager
      */
-    fun processModernTexture(Byte[] textureData) {
+    fun processModernTexture(textureData: ByteArray) {
         Log.d(TAG, "Processing modern texture data: " + textureData.length + " bytes")
         
         // In real implementation, this would:
@@ -438,7 +438,7 @@ private class TextureInfo {
     }
     
     // Native method declarations (implemented in C++)
-    private native Byte[] nativeTranscodeTexture(Byte[] sourceData, Int targetFormat)
+    private native ByteArray nativeTranscodeTexture(ByteArray sourceData, Int targetFormat)
     private native Boolean nativeInitialize()
     private native Unit nativeCleanup()
 }

@@ -166,9 +166,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     /* access modifiers changed from: private */
     /* renamed from: onDistance */
-    fun m301com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref2(Float f) {
+    fun m301com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref2(f: Float) {
         if (f != null) {
-            Float floatValue = f.floatValue()
+            val floatValue: Float = f.floatValue()
             if (Float.compare(floatValue, this.displayData.distanceToUser) != 0) {
                 setChatterDisplayData(this.displayData.withDistanceToUser(floatValue))
             }
@@ -177,7 +177,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     /* access modifiers changed from: private */
     /* renamed from: onOnlineStatus */
-    fun m300com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref1(Boolean bool) {
+    fun m300com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref1(bool: Boolean) {
         if (bool != null && this.displayData.isOnline != bool.booleanValue()) {
             setChatterDisplayData(this.displayData.withOnlineStatus(bool.booleanValue()))
         }
@@ -185,8 +185,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     /* access modifiers changed from: private */
     /* renamed from: onUserName */
-    fun m299com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref0(UserName userName) {
-        String userName2 = GlobalOptions.getInstance().isLegacyUserNames() ? userName.getUserName() : userName.getDisplayName()
+    fun m299com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref0(userName: UserName) {
+        val userName2: String = GlobalOptions.getInstance().isLegacyUserNames() ? userName.getUserName() : userName.getDisplayName()
         if (!Objects.equal(userName2, this.displayData.displayName)) {
             setChatterDisplayData(this.displayData.withDisplayName(userName2))
         }

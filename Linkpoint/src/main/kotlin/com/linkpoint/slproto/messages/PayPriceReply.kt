@@ -26,15 +26,15 @@ class PayPriceReply : SLMessage() {
         this.ObjectData_Field = ObjectData()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.ButtonData_Fields.size() * 4) + 25
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandlePayPriceReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -94)
@@ -46,12 +46,12 @@ class PayPriceReply : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.ObjectData_Field.ObjectID = unpackUUID(byteBuffer)
         this.ObjectData_Field.DefaultPayPrice = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ButtonData buttonData = ButtonData()
+            val buttonData: ButtonData = ButtonData()
             buttonData.PayButton = unpackInt(byteBuffer)
             this.ButtonData_Fields.add(buttonData)
         }

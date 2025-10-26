@@ -55,7 +55,7 @@ class SLCapEventQueue : Runnable {
     }
 
     interface ICapsEventHandler {
-        Unit OnCapsEvent(CapsEvent capsEvent)
+        fun OnCapsEvent(capsEvent: CapsEvent)
     }
 
     public SLCapEventQueue(String str, ICapsEventHandler iCapsEventHandler) {
@@ -65,18 +65,18 @@ class SLCapEventQueue : Runnable {
         this.workingThread.start()
     }
 
-    fun run() {
+    override fun run() {
         Debug.Log("CapEventQueue: working thread starting with capURL = " + this.capURL)
-        Boolean z2 = false
+        val z2: Boolean = false
         while (true) {
             if (this.threadMustExit) {
                 break
             }
-            LLSDMap.LLSDMapEntry[] lLSDMapEntryArr = LLSDMap.LLSDMapEntry[2]
+            LLSDMap.Array<LLSDMapEntry> lLSDMapEntryArr = LLSDMap.LLSDMapEntry[2]
             lLSDMapEntryArr[0] = LLSDMap.LLSDMapEntry("ack", this.lastEventID != 0 ? LLSDInt(this.lastEventID) : LLSDUndefined())
             lLSDMapEntryArr[1] = LLSDMap.LLSDMapEntry("done", LLSDBoolean(this.done))
             try {
-                LLSDNode PerformRequest = this.xmlReq.PerformRequest(this.capURL, LLSDMap(lLSDMapEntryArr))
+                val PerformRequest: LLSDNode = this.xmlReq.PerformRequest(this.capURL, LLSDMap(lLSDMapEntryArr))
                 if (this.done) {
                     Debug.Log("CapEventQueue: Done sent and confirmed, exiting gracefully.")
                     break
@@ -84,11 +84,11 @@ class SLCapEventQueue : Runnable {
                 try {
                     this.lastEventID = PerformRequest.byKey("id").asInt()
                     Debug.Log("CapEventQueue: lastEventID = " + this.lastEventID)
-                    Int count = PerformRequest.byKey("events").getCount()
+                    val count: Int = PerformRequest.byKey("events").getCount()
                     for (Int i = 0; i < count; i++) {
-                        LLSDNode byIndex = PerformRequest.byKey("events").byIndex(i)
-                        String asString = byIndex.byKey("message").asString()
-                        LLSDNode byKey = byIndex.byKey("body")
+                        val byIndex: LLSDNode = PerformRequest.byKey("events").byIndex(i)
+                        val asString: String = byIndex.byKey("message").asString()
+                        val byKey: LLSDNode = byIndex.byKey("body")
                         Debug.Log("CapEventQueue: event name = " + asString)
                         if (asString.equalsIgnoreCase("TeleportFinish")) {
                             this.done = true
@@ -106,7 +106,7 @@ class SLCapEventQueue : Runnable {
                         if (this.nextQueue.size() <= 0) {
                             break
                         }
-                        CapsEvent remove = this.nextQueue.remove(0)
+                        val remove: CapsEvent = this.nextQueue.remove(0)
                         if (z || this.eventHandler == null) {
                             z2 = z
                         } else {

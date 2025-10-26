@@ -19,17 +19,17 @@ import javax.annotation.Nullable
 class MuteListAdapter : BaseAdapter() {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-modules-mutelist-MuteTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f461comlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f461comlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues = null
     private val LayoutInflater layoutInflater
     private ImmutableList<MuteListEntry> muteList = ImmutableList.of()
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-modules-mutelist-MuteTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m646getcomlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues() {
+private /* synthetic */ IntArray m646getcomlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues() {
         if (f461comlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues != null) {
             return f461comlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues
         }
-        Int[] iArr = Int[MuteType.values().length]
+        val iArr: IntArray = Int[MuteType.values().length]
         try {
             iArr[MuteType.AGENT.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -58,23 +58,23 @@ private /* synthetic */ Int[] m646getcomlumiyaviewerlumiyaslprotomodulesmutelist
         this.layoutInflater = LayoutInflater.from(context)
     }
 
-    public Int getCount() {
+     public fun getCount(): Int {
         return this.muteList.size()
     }
 
-    public MuteListEntry getItem(Int i) {
+     public fun getItem(i: Int): MuteListEntry {
         if (i < 0 || i >= this.muteList.size()) {
             return null
         }
         return (MuteListEntry) this.muteList.get(i)
     }
 
-    public Long getItemId(Int i) {
+     public fun getItemId(i: Int): Long {
         return 0
     }
 
-    public View getView(Int i, View view, ViewGroup viewGroup) {
-        MuteListEntry item = getItem(i)
+     public fun getView(i: Int, view: View, viewGroup: ViewGroup): View {
+        val item: MuteListEntry = getItem(i)
         if (item != null) {
             if (view == null) {
                 view = this.layoutInflater.inflate(R.layout.mute_list_item, viewGroup, false)
@@ -102,12 +102,12 @@ private /* synthetic */ Int[] m646getcomlumiyaviewerlumiyaslprotomodulesmutelist
         return null
     }
 
-    public Boolean hasStableIds() {
+     public fun hasStableIds(): Boolean {
         return false
     }
 
     /* access modifiers changed from: package-private */
-    fun setData(List<MuteListEntry> list) {
+    fun setData(list: List<MuteListEntry>) {
         this.muteList = list != null ? ImmutableList.copyOf(list) : ImmutableList.of()
         notifyDataSetChanged()
     }

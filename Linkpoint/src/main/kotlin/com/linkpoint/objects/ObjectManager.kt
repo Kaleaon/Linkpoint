@@ -18,7 +18,7 @@ enum class PrimType(val typeId: Int) {
     TUBE(5),
     RING(6),
     SCULPT(7),
-    MESH(8);
+    MESH(8)
     
     companion object {
         fun fromId(id: Int) = values().find { it.typeId == id }

@@ -36,7 +36,7 @@ abstract class GLResourceCache<ResourceParams, RawType, ResourceType : GLSizedRe
             }
         }
 
-        public Int GLGetLoadSize() {
+        public fun GLGetLoadSize(): Int {
             Raw raw
             synchronized (this) {
                 raw = this.rawResource
@@ -47,14 +47,14 @@ abstract class GLResourceCache<ResourceParams, RawType, ResourceType : GLSizedRe
             return 0
         }
 
-        public Int GLLoad(RenderContext renderContext, GLLoadQueue.GLLoadHandler gLLoadHandler) {
+        public fun GLLoad(renderContext: RenderContext, GLLoadQueue.GLLoadHandler gLLoadHandler): Int {
             Raw raw
             synchronized (this) {
                 raw = this.rawResource
                 z = this.finalResult
             }
-            ResourceType LoadResource = GLResourceCache.this.LoadResource(getParams(), raw, renderContext)
-            Int loadedSize = LoadResource != null ? LoadResource.getLoadedSize() : 0
+            val LoadResource: ResourceType = GLResourceCache.this.LoadResource(getParams(), raw, renderContext)
+            val loadedSize: Int = LoadResource != null ? LoadResource.getLoadedSize() : 0
             synchronized (this) {
                 this.loadedResource = LoadResource
                 this.loadedFinal = z
@@ -65,7 +65,7 @@ abstract class GLResourceCache<ResourceParams, RawType, ResourceType : GLSizedRe
             return loadedSize
         }
 
-        fun OnResourceReady(Object obj, Boolean z) {
+        fun OnResourceReady(obj: Object, z: Boolean) {
             if (obj != null) {
                 try {
                     synchronized (this) {

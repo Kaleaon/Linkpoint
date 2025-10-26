@@ -61,12 +61,12 @@ class DriveSynchronizer {
         this.chatLogsFolder = DriveConnectibleFolder(context, this, "ChatLogsFolderId", this.lumiyaFolder, googleApiClient, "Chat Logs")
     }
 
-    static /* synthetic */ Boolean access$002(DriveSynchronizer driveSynchronizer, Boolean bl) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Boolean access$002(DriveSynchronizer driveSynchronizer, Boolean bl) {
         driveSynchronizer.isSyncing = bl
         return bl
     }
 
-    static /* synthetic */ Boolean access$102(DriveSynchronizer driveSynchronizer, Boolean bl) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Boolean access$102(DriveSynchronizer driveSynchronizer, Boolean bl) {
         driveSynchronizer.syncCompleted = bl
         return bl
     }
@@ -75,14 +75,14 @@ class DriveSynchronizer {
      * Enabled force condition propagation
      * Lifted jumps to return sites
      */
-    private DriveTextFile getChatLogFile(AgentSyncConnections object, UUID uUID, String object2, String string2, Boolean bl) {
+     private fun getChatLogFile(object: AgentSyncConnections, uUID: UUID, object2: String, string2: String, bl: Boolean): DriveTextFile {
         if ((object2 = this.getChatLogFolder((String)object2, bl)) == null) return null
         return ((DriveChatLogFolder)object2).getChatLogFile((AgentSyncConnections)object, uUID, string2, this.logWriteTracker, bl)
     }
 
-    private DriveChatLogFolder getChatLogFolder(String string2, Boolean bl) {
+     private fun getChatLogFolder(string2: String, bl: Boolean): DriveChatLogFolder {
         DriveChatLogFolder driveChatLogFolder
-        DriveChatLogFolder driveChatLogFolder2 = driveChatLogFolder = this.chatLogFolders.get(string2)
+        val driveChatLogFolder2: DriveChatLogFolder = driveChatLogFolder = this.chatLogFolders.get(string2)
         if (driveChatLogFolder == null) {
             driveChatLogFolder2 = driveChatLogFolder
             if (bl) {
@@ -93,13 +93,13 @@ class DriveSynchronizer {
         return driveChatLogFolder2
     }
 
-    Unit flushFile(AgentSyncConnections object, UUID uUID, String string2, String string3) {
+     fun flushFile(object: AgentSyncConnections, uUID: UUID, string2: String, string3: String) {
         if ((object = this.getChatLogFile((AgentSyncConnections)object, uUID, string2, string3, false)) != null) {
             ((DriveTextFile)object).flush()
         }
     }
 
-    Unit flushOpenFiles(Boolean bl, Long l) {
+     fun flushOpenFiles(bl: Boolean, l: Long) {
         for (DriveTextFile driveTextFile : this.logWriteTracker.getOpenedFiles()) {
             Debug.Printf("FlushOpenFiles: file opened for %d millis", driveTextFile.getOpenedTimeMillis(l))
             if (!bl && driveTextFile.getOpenedTimeMillis(l) < 300000L) continue
@@ -107,7 +107,7 @@ class DriveSynchronizer {
         }
     }
 
-    Unit invalidateSync() {
+     fun invalidateSync() {
         this.syncCompleted = false
     }
 
@@ -115,13 +115,13 @@ class DriveSynchronizer {
      * Enabled force condition propagation
      * Lifted jumps to return sites
      */
-    Boolean isLoggingDone() {
+     fun isLoggingDone(): Boolean {
         if (this.logWriteTracker.hasOpenedFiles()) return false
         if (this.logWriteTracker.hasPendingLogEntries()) return false
         return true
     }
 
-    Unit logString(AgentSyncConnections object, UUID uUID, String string2, String string3, DriveLogEntry driveLogEntry) {
+     fun logString(object: AgentSyncConnections, uUID: UUID, string2: String, string3: String, driveLogEntry: DriveLogEntry) {
         if ((object = this.getChatLogFile((AgentSyncConnections)object, uUID, string2, string3, true)) != null) {
             ((DriveTextFile)object).appendString(driveLogEntry)
         }
@@ -130,7 +130,7 @@ class DriveSynchronizer {
     /*
      * Enabled aggressive block sorting
      */
-    Unit requestSync(OnSyncCompletedListener onSyncCompletedListener) {
+     fun requestSync(onSyncCompletedListener: OnSyncCompletedListener) {
         if (this.syncCompleted) {
             onSyncCompletedListener.onSyncCompleted()
             return
@@ -142,7 +142,7 @@ class DriveSynchronizer {
         Drive.DriveApi.requestSync(this.googleApiClient).setResultCallback(this.onRequestSyncResult)
     }
 
-    Unit resumeSyncing() {
+     fun resumeSyncing() {
         if (this.logWriteTracker.isLoggingSuspended()) {
             this.logWriteTracker.markLoggingSuspended(false)
             Iterator<Map.Entry<String, DriveChatLogFolder>> iterator = this.chatLogFolders.entrySet().iterator()
@@ -152,7 +152,7 @@ class DriveSynchronizer {
         }
     }
 
-    Unit suspendSyncing() {
+     fun suspendSyncing() {
         if (!this.logWriteTracker.isLoggingSuspended()) {
             this.logWriteTracker.markLoggingSuspended(true)
             Iterator<Map.Entry<String, DriveChatLogFolder>> iterator = this.chatLogFolders.entrySet().iterator()
@@ -162,7 +162,7 @@ class DriveSynchronizer {
         }
     }
 
-    static interface OnSyncCompletedListener {
+    interface OnSyncCompletedListener {
         fun onSyncCompleted()
     }
 }

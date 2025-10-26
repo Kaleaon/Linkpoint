@@ -36,13 +36,13 @@ private Method mRequestAudioFocus
                     break
                 }
             }
-            Class cls2 = null
+            val cls2: Class = null
             if (cls2 == null) {
                 throw Exception("Failed to get OnAudioFocusChangeListener interface")
             }
-            mRequestAudioFocus = AudioManager.class.getMethod("requestAudioFocus", Class[]{cls2, Integer.TYPE, Integer.TYPE})
-            mAbandonAudioFocus = AudioManager.class.getMethod("abandonAudioFocus", Class[]{cls2})
-            this.audioFocusHandler = Proxy.newProxyInstance(cls2.getClassLoader(), Class[]{cls2}, this)
+            mRequestAudioFocus = AudioManager.class.getMethod("requestAudioFocus", Array<Class>{cls2, Integer.TYPE, Integer.TYPE})
+            mAbandonAudioFocus = AudioManager.class.getMethod("abandonAudioFocus", Array<Class>{cls2})
+            this.audioFocusHandler = Proxy.newProxyInstance(cls2.getClassLoader(), Array<Class>{cls2}, this)
             this.hasAudioFocusAPI = true
             Debug.Log("AudioManagerWrapper: has audio focus api = " + this.hasAudioFocusAPI)
         } catch (Exception e) {
@@ -52,7 +52,7 @@ private Method mRequestAudioFocus
         }
     }
 
-    private Unit onAudioFocusChange(Int i) {
+     private fun onAudioFocusChange(i: Int) {
         if (this.mHandler != null) {
             this.mHandler.sendMessage(this.mHandler.obtainMessage(this.msgCode, i, 0))
         }
@@ -62,13 +62,13 @@ private Method mRequestAudioFocus
         Debug.Log("AudioManagerWrapper: abandoning audio focus")
         if (this.hasAudioFocusAPI) {
             try {
-                mAbandonAudioFocus.invoke(this.audioManager, Object[]{this.audioFocusHandler})
+                mAbandonAudioFocus.invoke(this.audioManager, Array<Any>{this.audioFocusHandler})
             } catch (Exception e) {
             }
         }
     }
 
-    public Object invoke(Object obj, Method method, Object[] objArr) throws Throwable {
+     public fun invoke(obj: Object, method: Method, objArr: Array<Any>) throws Throwable {
         try {
             if (method.getName().equalsIgnoreCase("onAudioFocusChange") && objArr.length >= 1 && (objArr[0] instanceof Integer)) {
                 onAudioFocusChange(((Integer) objArr[0]).intValue())
@@ -79,19 +79,19 @@ private Method mRequestAudioFocus
         }
     }
 
-    public Boolean requestAudioFocus() {
+     public fun requestAudioFocus(): Boolean {
         Debug.Log("AudioManagerWrapper: requesting audio focus")
         if (!this.hasAudioFocusAPI) {
             return true
         }
         try {
-            return ((Integer) mRequestAudioFocus.invoke(this.audioManager, Object[]{this.audioFocusHandler, Integer.valueOf(3), Integer.valueOf(1)})).intValue() == 1
+            return ((Integer) mRequestAudioFocus.invoke(this.audioManager, Array<Any>{this.audioFocusHandler, Integer.valueOf(3), Integer.valueOf(1)})).intValue() == 1
         } catch (Exception e) {
             return true
         }
     }
 
-    fun setHandler(Handler handler, Int i) {
+    fun setHandler(handler: Handler, i: Int) {
         this.mHandler = handler
         this.msgCode = i
     }

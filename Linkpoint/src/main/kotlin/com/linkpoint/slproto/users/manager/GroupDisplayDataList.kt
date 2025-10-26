@@ -14,7 +14,7 @@ class GroupDisplayDataList : ChatterDisplayDataList() {
 
     /* access modifiers changed from: protected */
     public List<ChatterID> getChatters() {
-        AvatarGroupList avatarGroupList = this.userManager.getChatterList().getGroupManager().getAvatarGroupList()
+        val avatarGroupList: AvatarGroupList = this.userManager.getChatterList().getGroupManager().getAvatarGroupList()
         if (avatarGroupList == null) {
             return ImmutableList.of()
         }

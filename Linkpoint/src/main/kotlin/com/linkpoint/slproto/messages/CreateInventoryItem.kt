@@ -18,10 +18,10 @@ class CreateInventoryItem : SLMessage() {
     @JvmStatic
     class InventoryBlock {
         public Int CallbackID
-        public Byte[] Description
+        public ByteArray Description
         public UUID FolderID
         public Int InvType
-        public Byte[] Name
+        public ByteArray Name
         public Int NextOwnerMask
         public UUID TransactionID
         public Int Type
@@ -32,15 +32,15 @@ class CreateInventoryItem : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.InventoryBlock_Field.Name.length + 44 + 1 + this.InventoryBlock_Field.Description.length + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleCreateInventoryItem(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 49)
@@ -57,7 +57,7 @@ class CreateInventoryItem : SLMessage() {
         packVariable(byteBuffer, this.InventoryBlock_Field.Description, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.InventoryBlock_Field.CallbackID = unpackInt(byteBuffer)

@@ -9,27 +9,27 @@ class LoadURL : SLMessage() {
 
     @JvmStatic
     class Data {
-        public Byte[] Message
+        public ByteArray Message
         public UUID ObjectID
-        public Byte[] ObjectName
+        public ByteArray ObjectName
         public UUID OwnerID
         public Boolean OwnerIsGroup
-        public Byte[] URL
+        public ByteArray URL
     }
 
     public LoadURL() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.Data_Field.ObjectName.length + 1 + 16 + 16 + 1 + 1 + this.Data_Field.Message.length + 1 + this.Data_Field.URL.length + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleLoadURL(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -62)
@@ -41,7 +41,7 @@ class LoadURL : SLMessage() {
         packVariable(byteBuffer, this.Data_Field.URL, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.Data_Field.ObjectName = unpackVariable(byteBuffer, 1)
         this.Data_Field.ObjectID = unpackUUID(byteBuffer)
         this.Data_Field.OwnerID = unpackUUID(byteBuffer)

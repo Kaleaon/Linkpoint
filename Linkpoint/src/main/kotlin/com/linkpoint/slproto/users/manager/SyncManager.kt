@@ -31,7 +31,7 @@ import javax.annotation.Nullable
 class SyncManager {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f226comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f226comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues = null
     private const val MAX_MESSAGES_PER_BATCH: Int = 100
     private val ChatMessageDao chatMessageDao
     private val ChatterDao chatterDao
@@ -53,11 +53,11 @@ class SyncManager {
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m355getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues() {
+private /* synthetic */ IntArray m355getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues() {
         if (f226comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues != null) {
             return f226comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues
         }
-        Int[] iArr = Int[ChatterID.ChatterType.values().length]
+        val iArr: IntArray = Int[ChatterID.ChatterType.values().length]
         try {
             iArr[ChatterID.ChatterType.Group.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -78,7 +78,7 @@ private /* synthetic */ Int[] m355getcomlumiyaviewerlumiyaslprotousersChatterID$
     SyncManager(UserManager userManager2) {
         this.userManager = userManager2
         this.dbExecutor = userManager2.getDatabaseExecutor()
-        DaoSession daoSession = userManager2.getDaoSession()
+        val daoSession: DaoSession = userManager2.getDaoSession()
         this.chatMessageDao = daoSession.getChatMessageDao()
         this.chatterDao = daoSession.getChatterDao()
         this.context = LinkpointApp.getContext()
@@ -89,7 +89,7 @@ private /* synthetic */ Int[] m355getcomlumiyaviewerlumiyaslprotousersChatterID$
 
     /* access modifiers changed from: private */
     /* renamed from: onChatterNameRetrieved */
-    fun m361com_lumiyaviewer_lumiya_slproto_users_manager_SyncManagermthref5(ChatterNameRetriever chatterNameRetriever2) {
+    fun m361com_lumiyaviewer_lumiya_slproto_users_manager_SyncManagermthref5(chatterNameRetriever2: ChatterNameRetriever) {
         this.dbExecutor.execute(Runnable(this) {
 
             /* renamed from: -$f0 */
@@ -162,8 +162,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     /* access modifiers changed from: private */
     /* renamed from: onFlushChatterNameRetrieved */
-    fun m362com_lumiyaviewer_lumiya_slproto_users_manager_SyncManagermthref6(ChatterNameRetriever chatterNameRetriever2) {
-        String resolvedName = chatterNameRetriever2.getResolvedName()
+    fun m362com_lumiyaviewer_lumiya_slproto_users_manager_SyncManagermthref6(chatterNameRetriever2: ChatterNameRetriever) {
+        val resolvedName: String = chatterNameRetriever2.getResolvedName()
         this.flushChatters.remove(chatterNameRetriever2.chatterID)
         chatterNameRetriever2.dispose()
         if (!Strings.isNullOrEmpty(resolvedName) && this.flushChatterNames.add(resolvedName)) {
@@ -173,7 +173,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     /* access modifiers changed from: private */
     /* renamed from: onMyNameRetrieved */
-    fun m357com_lumiyaviewer_lumiya_slproto_users_manager_SyncManagermthref1(ChatterNameRetriever chatterNameRetriever2) {
+    fun m357com_lumiyaviewer_lumiya_slproto_users_manager_SyncManagermthref1(chatterNameRetriever2: ChatterNameRetriever) {
         this.dbExecutor.execute(Runnable(this) {
 
             /* renamed from: -$f0 */
@@ -246,9 +246,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     /* access modifiers changed from: private */
     /* renamed from: processMessagesFlushed */
-    fun m366lambda$com_lumiyaviewer_lumiya_slproto_users_manager_SyncManager_9859(ImmutableList<Long> immutableList) {
+    fun m366lambda$com_lumiyaviewer_lumiya_slproto_users_manager_SyncManager_9859(immutableList: ImmutableList<Long>) {
         for (Long load : immutableList) {
-            ChatMessage chatMessage = (ChatMessage) this.chatMessageDao.load(load)
+            val chatMessage: ChatMessage = (ChatMessage) this.chatMessageDao.load(load)
             if (chatMessage != null && !chatMessage.getSyncedToGoogleDrive()) {
                 chatMessage.setSyncedToGoogleDrive(true)
                 this.chatMessageDao.update(chatMessage)
@@ -256,11 +256,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         }
     }
 
-    private String resolveChatterName(Chatter chatter) {
+     private fun resolveChatterName(chatter: Chatter): String {
         if (chatter.getType() != ChatterID.ChatterType.User.ordinal() && chatter.getType() != ChatterID.ChatterType.Group.ordinal()) {
             return this.localChatName
         }
-        ChatterID fromDatabaseObject = ChatterID.fromDatabaseObject(this.userManager.getUserID(), chatter)
+        val fromDatabaseObject: ChatterID = ChatterID.fromDatabaseObject(this.userManager.getUserID(), chatter)
         if (this.chatterNameRetriever == null || (!this.chatterNameRetriever.chatterID.equals(fromDatabaseObject))) {
             if (this.chatterNameRetriever != null) {
                 this.chatterNameRetriever.dispose()
@@ -361,7 +361,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             r0 = r18
             java.util.concurrent.atomic.AtomicBoolean r2 = r0.syncMessageSent
             r3 = 1
-            Boolean r2 = r2.getAndSet(r3)
+            val r2: Boolean = r2.getAndSet(r3)
             if (r2 != 0) goto L_0x0171
             r11 = 0
             r0 = r18
@@ -393,7 +393,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             de.greenrobot.dao.query.Query<com.lumiyaviewer.lumiya.dao.ChatMessage> r2 = r0.messagesQuery
             de.greenrobot.dao.query.Query r2 = r2.forCurrentThread()
             r0 = r18
-            Long r4 = r0.lastConfirmedMessageID
+            val r4: Long = r0.lastConfirmedMessageID
             java.lang.Long r3 = java.lang.Long.valueOf(r4)
             r4 = 0
             r2.setParameter(r4, r3)
@@ -405,7 +405,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             r6 = r2
             r10 = r4
         L_0x006a:
-            Boolean r2 = r15.hasNext()
+            val r2: Boolean = r15.hasNext()
             if (r2 == 0) goto L_0x0101
             java.lang.Object r2 = r15.next()
             com.lumiyaviewer.lumiya.dao.ChatMessage r2 = (com.lumiyaviewer.lumiya.dao.ChatMessage) r2
@@ -416,7 +416,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             if (r4 == 0) goto L_0x01b1
             r0 = r18
             com.lumiyaviewer.lumiya.dao.ChatterDao r3 = r0.chatterDao
-            Long r8 = r2.getChatterID()
+            val r8: Long = r2.getChatterID()
             java.lang.Long r5 = java.lang.Long.valueOf(r8)
             java.lang.Object r3 = r3.load(r5)
             r5 = r3
@@ -432,10 +432,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             r7 = 0
             java.lang.CharSequence r9 = r4.getPlainTextMessage(r3, r6, r7)
             com.lumiyaviewer.lumiya.cloud.common.LogChatMessage r3 = com.lumiyaviewer.lumiya.cloud.common.LogChatMessage
-            Int r4 = r5.getType()
+            val r4: Int = r5.getType()
             java.util.UUID r5 = r5.getUuid()
             java.lang.Long r6 = r2.getId()
-            Long r6 = r6.longValue()
+            val r6: Long = r6.longValue()
             java.lang.StringBuilder r16 = java.lang.StringBuilder
             r16.<init>()
             java.lang.String r17 = "["
@@ -455,8 +455,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             java.lang.String r9 = r2.toString()
             r3.<init>(r4, r5, r6, r8, r9)
             r14.add((java.lang.Object) r3)
-            Long r6 = r3.messageID
-            Int r10 = r10 + 1
+            val r6: Long = r3.messageID
+            val r10: Int = r10 + 1
             r2 = 100
             if (r10 < r2) goto L_0x01b1
         L_0x0101:
@@ -475,12 +475,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             com.lumiyaviewer.lumiya.sync.CloudSyncServiceConnection r3 = (com.lumiyaviewer.lumiya.sync.CloudSyncServiceConnection) r3
             if (r3 == 0) goto L_0x01b7
             com.lumiyaviewer.lumiya.cloud.common.MessageType r4 = com.lumiyaviewer.lumiya.cloud.common.MessageType.LogMessageBatch
-            Boolean r2 = r3.sendMessage(r4, r2)
+            val r2: Boolean = r3.sendMessage(r4, r2)
             r4 = r2
         L_0x012b:
             r0 = r18
             java.util.Set<java.lang.String> r2 = r0.flushChatterNames
-            Boolean r2 = r2.isEmpty()
+            val r2: Boolean = r2.isEmpty()
             if (r2 != 0) goto L_0x016a
             r0 = r18
             java.util.concurrent.atomic.AtomicReference<com.lumiyaviewer.lumiya.sync.CloudSyncServiceConnection> r2 = r0.syncServiceConnection
@@ -490,7 +490,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             r0 = r18
             java.util.Set<java.lang.String> r3 = r0.flushChatterNames
             java.util.Iterator r5 = r3.iterator()
-            Boolean r3 = r5.hasNext()
+            val r3: Boolean = r5.hasNext()
             if (r3 == 0) goto L_0x016a
             java.lang.Object r3 = r5.next()
             java.lang.String r3 = (java.lang.String) r3
@@ -510,7 +510,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             r0 = r18
             java.util.concurrent.atomic.AtomicBoolean r2 = r0.needsStopSyncing
             r3 = 0
-            Boolean r2 = r2.getAndSet(r3)
+            val r2: Boolean = r2.getAndSet(r3)
             if (r2 == 0) goto L_0x01b0
             r0 = r18
             java.util.concurrent.atomic.AtomicBoolean r2 = r0.syncingEnabled
@@ -555,7 +555,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     }
 
     /* access modifiers changed from: package-private */
-    fun flushChatter(ChatterID chatterID) {
+    fun flushChatter(chatterID: ChatterID) {
         if (this.syncingEnabled.get()) {
             this.dbExecutor.execute(Runnable(this, chatterID) {
 
@@ -675,7 +675,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         m360com_lumiyaviewer_lumiya_slproto_users_manager_SyncManagermthref4()
     }
 
-    fun onMessagesFlushed(ImmutableList<Long> immutableList) {
+    fun onMessagesFlushed(immutableList: ImmutableList<Long>) {
         this.dbExecutor.execute(Runnable(this, immutableList) {
 
             /* renamed from: -$f0 */
@@ -749,7 +749,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     }
 
-    fun onMessagesWritten(Long j) {
+    fun onMessagesWritten(j: Long) {
         this.dbExecutor.execute(Runnable(j, this) {
 
             /* renamed from: -$f0 */
@@ -823,7 +823,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     }
 
-    fun startSyncing(CloudSyncServiceConnection cloudSyncServiceConnection) {
+    fun startSyncing(cloudSyncServiceConnection: CloudSyncServiceConnection) {
         this.syncServiceConnection.set(cloudSyncServiceConnection)
         this.syncingEnabled.set(true)
         this.needsStopSyncing.set(false)

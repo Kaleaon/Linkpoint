@@ -21,17 +21,17 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
         List<E> createEmptyChunk()
     }
 
-    private Unit checkConsistency() {
-        Int i = 0
+     private fun checkConsistency() {
+        val i: Int = 0
         for (List size : this.chunks) {
             i = size.size() + i
         }
         if (i != this.count) {
-            throw IllegalStateException(String.format("newCount %d, count %d", Object[]{Integer.valueOf(i), Integer.valueOf(this.count)}))
+            throw IllegalStateException(String.format("newCount %d, count %d", Array<Any>{Integer.valueOf(i), Integer.valueOf(this.count)}))
         }
     }
 
-    private Int replaceElementInChunk(List<E> list, E e, Comparator<E> comparator) {
+     private fun replaceElementInChunk(list: List<E>, E e, comparator: Comparator<E>): Int {
         Int binarySearch
         if (list.isEmpty() || (binarySearch = Collections.binarySearch(list, e, comparator)) < 0) {
             return -1
@@ -39,16 +39,16 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
         return replaceFoundElement(list, binarySearch, e)
     }
 
-    private Int replaceFoundElement(List<E> list, Int i, E e) {
+     private fun replaceFoundElement(list: List<E>, i: Int, E e): Int {
         list.set(i, e)
-        Int i2 = 0
-        Iterator<T> it = this.chunks.iterator()
+        val i2: Int = 0
+        val it: Iterator<T> = this.chunks.iterator()
         while (true) {
-            Int i3 = i2
+            val i3: Int = i2
             if (!it.hasNext()) {
                 return -1
             }
-            List<E> list2 = (List) it.next()
+            val list2: List<E> = (List) it.next()
             if (list2 == list) {
                 return i3 + i
             }
@@ -56,14 +56,14 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
         }
     }
 
-    private Unit resetLastPosition() {
+     private fun resetLastPosition() {
         this.lastChunk = null
         checkConsistency()
     }
 
-    private Unit setLastChunk(Int i) {
+     private fun setLastChunk(i: Int) {
         if (i < 0 || i >= this.count) {
-            throw IndexOutOfBoundsException(String.format("index %d, count %d", Object[]{Integer.valueOf(i), Integer.valueOf(this.count)}))
+            throw IndexOutOfBoundsException(String.format("index %d, count %d", Array<Any>{Integer.valueOf(i), Integer.valueOf(this.count)}))
         }
         checkConsistency()
         if (this.lastChunk == null) {
@@ -82,7 +82,7 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
             this.lastChunkIndex++
             this.lastChunkStart += this.lastChunkSize
             if (this.lastChunkIndex >= this.chunks.size()) {
-                throw IllegalStateException(String.format("lastChunkIndex runaway, position %d, count %d, lastChunkStart %d", Object[]{Integer.valueOf(i), Integer.valueOf(this.count), Integer.valueOf(this.lastChunkStart)}))
+                throw IllegalStateException(String.format("lastChunkIndex runaway, position %d, count %d, lastChunkStart %d", Array<Any>{Integer.valueOf(i), Integer.valueOf(this.count), Integer.valueOf(this.lastChunkStart)}))
             } else {
                 this.lastChunk = this.chunks.get(this.lastChunkIndex)
                 this.lastChunkSize = this.lastChunk.size()
@@ -90,25 +90,25 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
         }
     }
 
-    fun addChunkAtEnd(List<E> list) {
+    fun addChunkAtEnd(list: List<E>) {
         this.chunks.add(list)
         this.count += list.size()
         resetLastPosition()
     }
 
-    fun addChunkAtStart(List<E> list) {
+    fun addChunkAtStart(list: List<E>) {
         this.chunks.add(0, list)
         this.count += list.size()
         resetLastPosition()
     }
 
-    fun addElement(E e, Int i, ChunkFactory<E> chunkFactory) {
-        List<E> list = null
+    fun addElement(E e, i: Int, chunkFactory: ChunkFactory<E>) {
+        val list: List<E> = null
         if (this.chunks.size() > 0) {
             list = this.chunks.get(this.chunks.size() - 1)
         }
         if (list == null || list.size() >= i) {
-            List<E> createEmptyChunk = chunkFactory.createEmptyChunk()
+            val createEmptyChunk: List<E> = chunkFactory.createEmptyChunk()
             createEmptyChunk.add(e)
             this.chunks.add(createEmptyChunk)
             this.count++
@@ -133,32 +133,32 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
         if (i >= this.lastChunkStart && i < this.lastChunkStart + this.lastChunkSize) {
             return this.lastChunk.get(i - this.lastChunkStart)
         }
-        throw IndexOutOfBoundsException(String.format("index %d, count %d", Object[]{Integer.valueOf(i), Integer.valueOf(this.count)}))
+        throw IndexOutOfBoundsException(String.format("index %d, count %d", Array<Any>{Integer.valueOf(i), Integer.valueOf(this.count)}))
     }
 
-    public Int removeChunkAtEnd() {
+     public fun removeChunkAtEnd(): Int {
         if (this.chunks.size() <= 0) {
             return 0
         }
-        List remove = this.chunks.remove(this.chunks.size() - 1)
-        Int size = remove != null ? remove.size() : 0
+        val remove: List = this.chunks.remove(this.chunks.size() - 1)
+        val size: Int = remove != null ? remove.size() : 0
         this.count -= size
         resetLastPosition()
         return size
     }
 
-    public Int removeChunkAtStart() {
+     public fun removeChunkAtStart(): Int {
         if (this.chunks.size() <= 0) {
             return 0
         }
-        List remove = this.chunks.remove(0)
-        Int size = remove != null ? remove.size() : 0
+        val remove: List = this.chunks.remove(0)
+        val size: Int = remove != null ? remove.size() : 0
         this.count -= size
         resetLastPosition()
         return size
     }
 
-    public Int removeElementsAfter(Int i) {
+     public fun removeElementsAfter(i: Int): Int {
         checkConsistency()
         if (i < 0 || i >= this.count) {
             return 0
@@ -167,8 +167,8 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
         if (i < this.lastChunkStart || i >= this.lastChunkStart + this.lastChunkSize) {
             return 0
         }
-        Int i2 = this.lastChunkIndex + 2
-        Int i3 = 0
+        val i2: Int = this.lastChunkIndex + 2
+        val i3: Int = 0
         for (Int size = this.chunks.size() - 1; size >= i2; size--) {
             i3 += this.chunks.get(size).size()
             this.chunks.remove(size)
@@ -178,7 +178,7 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
         return i3
     }
 
-    public Int removeElementsBefore(Int i) {
+     public fun removeElementsBefore(i: Int): Int {
         checkConsistency()
         if (i < 0 || i >= this.count) {
             return 0
@@ -187,7 +187,7 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
         if (i < this.lastChunkStart || i >= this.lastChunkStart + this.lastChunkSize) {
             return 0
         }
-        Int i4 = this.lastChunkIndex - 2
+        val i4: Int = this.lastChunkIndex - 2
         if (i4 >= 0) {
             i3 = i4 + 1
             i2 = 0
@@ -205,19 +205,19 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
         return i2
     }
 
-    public Int replaceElement(E e, Comparator<E> comparator) {
+     public fun replaceElement(E e, comparator: Comparator<E>): Int {
         Char c
         if (this.chunks.isEmpty()) {
             return -1
         }
-        Char c2 = 0
-        Int size = this.chunks.size() / 2
+        val c2: Char = 0
+        val size: Int = this.chunks.size() / 2
         while (true) {
-            List list = this.chunks.get(size)
+            val list: List = this.chunks.get(size)
             if (!list.isEmpty()) {
-                Object obj = list.get(0)
-                Object obj2 = list.get(list.size() - 1)
-                Int compare = comparator.compare(e, obj)
+                val obj: Object = list.get(0)
+                val obj2: Object = list.get(list.size() - 1)
+                val compare: Int = comparator.compare(e, obj)
                 if (compare == 0) {
                     return replaceFoundElement(list, 0, e)
                 }
@@ -230,7 +230,7 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
                     size = i
                     c2 = c
                 } else {
-                    Int compare2 = comparator.compare(e, obj2)
+                    val compare2: Int = comparator.compare(e, obj2)
                     if (compare2 == 0) {
                         return replaceFoundElement(list, list.size() - 1, e)
                     }
@@ -254,7 +254,7 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
                     return -1
                 }
             } else {
-                Int i3 = 0
+                val i3: Int = 0
                 while (true) {
                     if (i3 >= this.chunks.size()) {
                         i2 = -1
@@ -270,7 +270,7 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
                     return -1
                 }
             }
-            Char c3 = c2
+            val c3: Char = c2
             i = i2
             c = c3
             size = i
@@ -278,7 +278,7 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
         }
     }
 
-    public Int size() {
+     public fun size(): Int {
         return this.count
     }
 }

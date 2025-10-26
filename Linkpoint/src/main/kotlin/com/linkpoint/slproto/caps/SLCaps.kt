@@ -44,23 +44,23 @@ class SLCaps {
         ChatSessionRequest
     }
 
-    private Unit GetCapabilitesOnce(String str, String str2) throws LLSDException, IOException {
+    private fun GetCapabilitesOnce(str: String, str2: String) throws LLSDException, IOException {
         try {
             z = URL(str).getHost().equals("login.agni.lindenlab.com")
         } catch (Exception e) {
             Debug.Warning(e)
             z = false
         }
-        String repairCapabilityURL = repairCapabilityURL(z, str2)
-        LLSDXMLRequest lLSDXMLRequest = LLSDXMLRequest()
-        LLSDArray lLSDArray = LLSDArray()
+        val repairCapabilityURL: String = repairCapabilityURL(z, str2)
+        val lLSDXMLRequest: LLSDXMLRequest = LLSDXMLRequest()
+        val lLSDArray: LLSDArray = LLSDArray()
         for (SLCapability name : SLCapability.values()) {
             lLSDArray.add(LLSDString(name.name()))
         }
-        LLSDNode PerformRequest = lLSDXMLRequest.PerformRequest(repairCapabilityURL, lLSDArray)
+        val PerformRequest: LLSDNode = lLSDXMLRequest.PerformRequest(repairCapabilityURL, lLSDArray)
         for (SLCapability sLCapability : SLCapability.values()) {
             if (PerformRequest.keyExists(sLCapability.name())) {
-                String repairCapabilityURL2 = repairCapabilityURL(z, PerformRequest.byKey(sLCapability.name()).asString())
+                val repairCapabilityURL2: String = repairCapabilityURL(z, PerformRequest.byKey(sLCapability.name()).asString())
                 this.caps.put(sLCapability, repairCapabilityURL2)
                 Debug.Log("GetCapabilities: " + sLCapability.name() + " = " + repairCapabilityURL2)
             } else {
@@ -70,16 +70,16 @@ class SLCaps {
     }
 
     @JvmStatic
-private String repairCapabilityURL(Boolean z, String str) {
+ private fun repairCapabilityURL(z: Boolean, str: String): String {
         if (!z) {
             return str
         }
         try {
-            String host = URL(str).getHost()
+            val host: String = URL(str).getHost()
             if (host.contains(".") || !host.startsWith("sim")) {
                 return str
             }
-            String replace = str.replace(host, host + ".agni.lindenlab.com")
+            val replace: String = str.replace(host, host + ".agni.lindenlab.com")
             Debug.Printf("Repaired capability URL to %s", replace)
             return replace
         } catch (Exception e) {
@@ -89,7 +89,7 @@ private String repairCapabilityURL(Boolean z, String str) {
     }
 
     @JvmStatic
-    String repairURL(String str, String str2) {
+     fun repairURL(str: String, str2: String): String {
         try {
             return URL(str).getHost().endsWith(".lindenlab.com") ? repairCapabilityURL(true, str2) : str2
         } catch (Exception e) {
@@ -98,8 +98,8 @@ private String repairCapabilityURL(Boolean z, String str) {
         }
     }
 
-    fun GetCapabilites(String str, String str2) {
-        Int i = 0
+    fun GetCapabilites(str: String, str2: String) {
+        val i: Int = 0
         while (i < 1) {
             try {
                 GetCapabilitesOnce(str, str2)
@@ -111,12 +111,12 @@ private String repairCapabilityURL(Boolean z, String str) {
         }
     }
 
-    public String getCapability(SLCapability sLCapability) {
+     public fun getCapability(sLCapability: SLCapability): String {
         return this.caps.get(sLCapability)
     }
 
-    public String getCapabilityOrThrow(SLCapability sLCapability) throws NoSuchCapabilityException {
-        String str = this.caps.get(sLCapability)
+     public fun getCapabilityOrThrow(sLCapability: SLCapability) throws NoSuchCapabilityException {
+        val str: String = this.caps.get(sLCapability)
         if (str != null) {
             return str
         }

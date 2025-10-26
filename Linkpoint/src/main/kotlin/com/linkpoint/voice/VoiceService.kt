@@ -64,7 +64,7 @@ private VoiceService serviceInstance = null
                 this.this$0 = voiceService
             }
 
-            fun onReceive(Context context, Intent intent) {
+            fun onReceive(context: Context, intent: Intent) {
                 this.this$0.handleBluetoothStateIntent(intent)
             }
         }
@@ -81,47 +81,47 @@ private VoiceService serviceInstance = null
         }
     }
 
-    static /* synthetic */ Unit access$000(VoiceService voiceService, VoiceInitialize voiceInitialize, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$000(VoiceService voiceService, VoiceInitialize voiceInitialize, Messenger messenger) {
         voiceService.onVoiceInitialize(voiceInitialize, messenger)
     }
 
-    static /* synthetic */ Unit access$100(VoiceService voiceService, VoiceLogin voiceLogin, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$100(VoiceService voiceService, VoiceLogin voiceLogin, Messenger messenger) {
         voiceService.onVoiceLogin(voiceLogin, messenger)
     }
 
-    static /* synthetic */ Unit access$1000(VoiceService voiceService, Messenger messenger, Boolean bl) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$1000(VoiceService voiceService, Messenger messenger, Boolean bl) {
         voiceService.onVoicePermissionResults(messenger, bl)
     }
 
-    static /* synthetic */ Unit access$200(VoiceService voiceService, VoiceConnectChannel voiceConnectChannel, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$200(VoiceService voiceService, VoiceConnectChannel voiceConnectChannel, Messenger messenger) {
         voiceService.onVoiceConnectChannel(voiceConnectChannel, messenger)
     }
 
-    static /* synthetic */ Unit access$300(VoiceService voiceService, VoiceSet3DPosition voiceSet3DPosition, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$300(VoiceService voiceService, VoiceSet3DPosition voiceSet3DPosition, Messenger messenger) {
         voiceService.onVoiceSet3DPosition(voiceSet3DPosition, messenger)
     }
 
-    static /* synthetic */ Unit access$400(VoiceService voiceService, VoiceRejectCall voiceRejectCall, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$400(VoiceService voiceService, VoiceRejectCall voiceRejectCall, Messenger messenger) {
         voiceService.onVoiceRejectCall(voiceRejectCall, messenger)
     }
 
-    static /* synthetic */ Unit access$500(VoiceService voiceService, VoiceAcceptCall voiceAcceptCall, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$500(VoiceService voiceService, VoiceAcceptCall voiceAcceptCall, Messenger messenger) {
         voiceService.onVoiceAcceptCall(voiceAcceptCall, messenger)
     }
 
-    static /* synthetic */ Unit access$600(VoiceService voiceService, VoiceTerminateCall voiceTerminateCall, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$600(VoiceService voiceService, VoiceTerminateCall voiceTerminateCall, Messenger messenger) {
         voiceService.onVoiceTerminateCall(voiceTerminateCall, messenger)
     }
 
-    static /* synthetic */ Unit access$700(VoiceService voiceService, VoiceEnableMic voiceEnableMic) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$700(VoiceService voiceService, VoiceEnableMic voiceEnableMic) {
         voiceService.onVoiceEnableMic(voiceEnableMic)
     }
 
-    static /* synthetic */ Unit access$800(VoiceService voiceService, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$800(VoiceService voiceService, Messenger messenger) {
         voiceService.onVoiceLogout(messenger)
     }
 
-    static /* synthetic */ Unit access$900(VoiceService voiceService, VoiceSetAudioProperties voiceSetAudioProperties) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$900(VoiceService voiceService, VoiceSetAudioProperties voiceSetAudioProperties) {
         voiceService.onVoiceSetAudioProperties(voiceSetAudioProperties)
     }
 
@@ -129,8 +129,8 @@ private VoiceService serviceInstance = null
         return serviceInstance
     }
 
-    private Unit handleBluetoothStateIntent(Intent intent) {
-        Int n = intent.getIntExtra("android.media.extra.SCO_AUDIO_STATE", 0)
+     private fun handleBluetoothStateIntent(intent: Intent) {
+        val n: Int = intent.getIntExtra("android.media.extra.SCO_AUDIO_STATE", 0)
         this.bluetoothScoState.set(n)
         if (this.vivoxController != null) {
             this.vivoxController.onBluetoothScoStateChanged(n)
@@ -138,19 +138,19 @@ private VoiceService serviceInstance = null
         this.updateAudioProperties()
     }
 
-    private Unit onVoiceAcceptCall(VoiceAcceptCall voiceAcceptCall, Messenger messenger) {
+     private fun onVoiceAcceptCall(voiceAcceptCall: VoiceAcceptCall, messenger: Messenger) {
         if (this.vivoxController != null) {
             this.vivoxController.AcceptCall(voiceAcceptCall)
         }
     }
 
-    private Unit onVoiceConnectChannel(VoiceConnectChannel voiceConnectChannel, Messenger messenger) {
+     private fun onVoiceConnectChannel(voiceConnectChannel: VoiceConnectChannel, messenger: Messenger) {
         if (this.vivoxController != null) {
             this.vivoxController.ConnectChannel(voiceConnectChannel.voiceChannelInfo, voiceConnectChannel.channelCredentials, messenger)
         }
     }
 
-    private Unit onVoiceEnableMic(VoiceEnableMic voiceEnableMic) {
+     private fun onVoiceEnableMic(voiceEnableMic: VoiceEnableMic) {
         if (this.vivoxController != null) {
             this.vivoxController.EnableVoiceMic(voiceEnableMic)
         }
@@ -162,12 +162,12 @@ private VoiceService serviceInstance = null
      * Enabled unnecessary exception pruning
      * Enabled aggressive exception aggregation
      */
-    private Unit onVoiceInitialize(VoiceInitialize object, Messenger messenger) {
+     private fun onVoiceInitialize(object: VoiceInitialize, messenger: Messenger) {
         try {
-            PackageInfo packageInfo = this.getPackageManager().getPackageInfo(this.getPackageName(), 0)
+            val packageInfo: PackageInfo = this.getPackageManager().getPackageInfo(this.getPackageName(), 0)
             if (((VoiceInitialize)object).appVersionCode < 60) {
                 object = VoicePluginMessageType.VoiceInitializeReply
-                VoiceInitializeReply voiceInitializeReply = VoiceInitializeReply(packageInfo.versionCode, this.getString(2131099681), false)
+                val voiceInitializeReply: VoiceInitializeReply = VoiceInitializeReply(packageInfo.versionCode, this.getString(2131099681), false)
                 VoicePluginMessenger.sendMessage(messenger, (VoicePluginMessageType)((Object)object), voiceInitializeReply, null)
                 return
             }
@@ -190,13 +190,13 @@ private VoiceService serviceInstance = null
         }
     }
 
-    private Unit onVoiceLogin(VoiceLogin voiceLogin, Messenger messenger) {
+     private fun onVoiceLogin(voiceLogin: VoiceLogin, messenger: Messenger) {
         if (this.vivoxController != null) {
             this.vivoxController.Login(voiceLogin.voiceLoginInfo, messenger)
         }
     }
 
-    private Unit onVoiceLogout(Messenger messenger) {
+     private fun onVoiceLogout(messenger: Messenger) {
         if (this.vivoxController != null) {
             this.vivoxController.Logout(messenger)
         }
@@ -207,11 +207,11 @@ private VoiceService serviceInstance = null
      * Enabled unnecessary exception pruning
      * Enabled aggressive exception aggregation
      */
-    private Unit onVoicePermissionResults(Messenger messenger, Boolean bl) {
+     private fun onVoicePermissionResults(messenger: Messenger, bl: Boolean) {
         try {
             String string2
-            PackageInfo packageInfo = this.getPackageManager().getPackageInfo(this.getPackageName(), 0)
-            Object object = null
+            val packageInfo: PackageInfo = this.getPackageManager().getPackageInfo(this.getPackageName(), 0)
+            val object: Object = null
             if (bl) {
                 string2 = object
                 if (this.vivoxController == null) {
@@ -229,7 +229,7 @@ private VoiceService serviceInstance = null
                 string2 = this.getString(2131099683)
             }
             object = VoicePluginMessageType.VoiceInitializeReply
-            VoiceInitializeReply voiceInitializeReply = VoiceInitializeReply(packageInfo.versionCode, string2, true)
+            val voiceInitializeReply: VoiceInitializeReply = VoiceInitializeReply(packageInfo.versionCode, string2, true)
             VoicePluginMessenger.sendMessage(messenger, (VoicePluginMessageType)((Object)object), voiceInitializeReply, null)
             if (string2 != null) return
             this.toAppMessenger = messenger
@@ -243,25 +243,25 @@ private VoiceService serviceInstance = null
         }
     }
 
-    private Unit onVoiceRejectCall(VoiceRejectCall voiceRejectCall, Messenger messenger) {
+     private fun onVoiceRejectCall(voiceRejectCall: VoiceRejectCall, messenger: Messenger) {
         if (this.vivoxController != null) {
             this.vivoxController.RejectCall(voiceRejectCall)
         }
     }
 
-    private Unit onVoiceSet3DPosition(VoiceSet3DPosition voiceSet3DPosition, Messenger messenger) {
+     private fun onVoiceSet3DPosition(voiceSet3DPosition: VoiceSet3DPosition, messenger: Messenger) {
         if (this.vivoxController != null) {
             this.vivoxController.Set3DPosition(voiceSet3DPosition)
         }
     }
 
-    private Unit onVoiceSetAudioProperties(VoiceSetAudioProperties voiceSetAudioProperties) {
+     private fun onVoiceSetAudioProperties(voiceSetAudioProperties: VoiceSetAudioProperties) {
         if (this.vivoxController != null) {
             this.vivoxController.SetAudioProperties(voiceSetAudioProperties)
         }
     }
 
-    private Unit onVoiceTerminateCall(VoiceTerminateCall voiceTerminateCall, Messenger messenger) {
+     private fun onVoiceTerminateCall(voiceTerminateCall: VoiceTerminateCall, messenger: Messenger) {
         if (this.vivoxController != null) {
             this.vivoxController.TerminateCall(voiceTerminateCall)
         }
@@ -272,12 +272,12 @@ private VoiceService serviceInstance = null
      * Enabled unnecessary exception pruning
      * Enabled aggressive exception aggregation
      */
-    private Unit registerForBluetoothScoIntentBroadcast() {
+     private fun registerForBluetoothScoIntentBroadcast() {
         if (Build.VERSION.SDK_INT < 14) return
         if (this.bluetoothReceiverRegistered) return
         try {
             this.bluetoothReceiverRegistered = true
-            IntentFilter intentFilter = IntentFilter("android.media.ACTION_SCO_AUDIO_STATE_UPDATED")
+            val intentFilter: IntentFilter = IntentFilter("android.media.ACTION_SCO_AUDIO_STATE_UPDATED")
             intentFilter = this.registerReceiver(this.bluetoothScoIntentReceiver, intentFilter)
             if (intentFilter == null) return
             this.handleBluetoothStateIntent((Intent)intentFilter)
@@ -293,14 +293,14 @@ private VoiceService serviceInstance = null
      * Enabled force condition propagation
      * Lifted jumps to return sites
      */
-    Unit listenForVolumeChanges(Boolean bl) {
+     fun listenForVolumeChanges(bl: Boolean) {
         block4: {
             block3: {
                 if (this.audioStreamVolumeObserver == null) break block3
                 if (!bl) break block4
-                AudioStreamVolumeObserver audioStreamVolumeObserver = this.audioStreamVolumeObserver
+                val audioStreamVolumeObserver: AudioStreamVolumeObserver = this.audioStreamVolumeObserver
                 AudioStreamVolumeObserver.OnAudioStreamVolumeChangedListener onAudioStreamVolumeChangedListener = this.audioVolumeChangeListener
-                audioStreamVolumeObserver.start(Int[]{0, 6}, onAudioStreamVolumeChangedListener)
+                audioStreamVolumeObserver.start(IntArray{0, 6}, onAudioStreamVolumeChangedListener)
                 this.updateAudioProperties()
             }
             return
@@ -308,19 +308,19 @@ private VoiceService serviceInstance = null
         this.audioStreamVolumeObserver.stop()
     }
 
-    public IBinder onBind(Intent intent) {
+     public override fun onBind(intent: Intent): IBinder {
         this.isServiceBound = true
         return this.mMessenger.getBinder()
     }
 
-    fun onCreate() {
+    override fun onCreate() {
         super.onCreate()
         serviceInstance = this
         this.audioManager = (AudioManager)this.getSystemService("audio")
         this.audioStreamVolumeObserver = AudioStreamVolumeObserver((Context)this)
     }
 
-    fun onDestroy() {
+    override fun onDestroy() {
         if (this.vivoxController != null) {
             this.vivoxController.setIncomingMessenger(null)
         }
@@ -338,11 +338,11 @@ private VoiceService serviceInstance = null
         super.onDestroy()
     }
 
-    public Int onStartCommand(Intent intent, Int n, Int n2) {
+     public override fun onStartCommand(intent: Intent, n: Int, n2: Int): Int {
         return 2
     }
 
-    public Boolean onUnbind(Intent intent) {
+     public override fun onUnbind(intent: Intent): Boolean {
         Debug.Printf("Voice: service is unbound", Object[0])
         this.isServiceBound = false
         if (this.vivoxController != null) {
@@ -354,10 +354,10 @@ private VoiceService serviceInstance = null
     /*
      * Enabled aggressive block sorting
      */
-    fun setVolume(Float f) {
+    fun setVolume(f: Float) {
         if (this.audioManager != null) {
-            Int n = this.audioManager.isBluetoothScoOn() ? 6 : 0
-            Int n2 = Math.round((Float)this.audioManager.getStreamMaxVolume(n) * f)
+            val n: Int = this.audioManager.isBluetoothScoOn() ? 6 : 0
+            val n2: Int = Math.round((Float)this.audioManager.getStreamMaxVolume(n) * f)
             this.audioManager.setStreamVolume(n, n2, 0)
         }
     }
@@ -365,16 +365,16 @@ private VoiceService serviceInstance = null
     /*
      * Enabled aggressive block sorting
      */
-    Unit updateAudioProperties() {
+     fun updateAudioProperties() {
         Messenger messenger
         if (this.vivoxController != null && this.audioManager != null && (messenger = this.toAppMessenger) != null) {
             VoiceBluetoothState voiceBluetoothState
-            Boolean bl = this.audioManager.isBluetoothScoOn()
-            Int n = bl ? 6 : 0
-            Int n2 = this.audioManager.getStreamVolume(n)
+            val bl: Boolean = this.audioManager.isBluetoothScoOn()
+            val n: Int = bl ? 6 : 0
+            val n2: Int = this.audioManager.getStreamVolume(n)
             n = this.audioManager.getStreamMaxVolume(n)
-            Float f = (Float)n2 / (Float)n
-            Boolean bl2 = this.audioManager.isSpeakerphoneOn()
+            val f: Float = (Float)n2 / (Float)n
+            val bl2: Boolean = this.audioManager.isSpeakerphoneOn()
             if (bl) {
                 voiceBluetoothState = VoiceBluetoothState.Active
             } else {
@@ -411,7 +411,7 @@ private VoiceService serviceInstance = null
         /*
          * Exception decompiling
          */
-        fun handleMessage(Message var1_1) {
+        fun handleMessage(var1_1: Message) {
             /*
              * This method has failed to decompile.  When submitting a bug report, please provide this stack trace, and (if you hold appropriate legal rights) the relevant class file.
              * 

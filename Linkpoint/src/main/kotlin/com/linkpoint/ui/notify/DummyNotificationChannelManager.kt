@@ -13,7 +13,7 @@ class DummyNotificationChannelManager : NotificationChannelManager {
     const val DEFAULT_NOTIFICATION_CHANNEL: String = "miscellaneous"
     private const val ImmutableSet<NotificationType> allChannels = ImmutableSet.of(NotificationType.LocalChat, NotificationType.Group, NotificationType.Private)
 
-    public Boolean areNotificationsSystemControlled() {
+     public fun areNotificationsSystemControlled(): Boolean {
         return false
     }
 
@@ -21,19 +21,19 @@ class DummyNotificationChannelManager : NotificationChannelManager {
         return allChannels
     }
 
-    public String getNotificationChannelName(NotificationChannels.Channel channel) {
+     public fun getNotificationChannelName(NotificationChannels.Channel channel): String {
         return DEFAULT_NOTIFICATION_CHANNEL
     }
 
-    public String getNotificationSummary(Context context, NotificationChannels.Channel channel) {
+     public fun getNotificationSummary(context: Context, NotificationChannels.Channel channel): String {
         return null
     }
 
-    public Boolean showSystemNotificationSettings(Context context, Fragment fragment, NotificationChannels.Channel channel) {
+     public fun showSystemNotificationSettings(context: Context, fragment: Fragment, NotificationChannels.Channel channel): Boolean {
         return false
     }
 
-    public Boolean useNotificationGroups() {
+     public fun useNotificationGroups(): Boolean {
         return Build.VERSION.SDK_INT >= 24
     }
 }

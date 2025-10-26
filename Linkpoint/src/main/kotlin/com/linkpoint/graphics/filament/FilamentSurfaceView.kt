@@ -137,7 +137,7 @@ class FilamentSurfaceView @JvmOverloads constructor(
     /**
      * Resume rendering (call from Activity.onResume())
      */
-    fun onResume() {
+    override fun onResume() {
         if (!isPaused) {
             Log.d(TAG, "Already resumed, skipping")
             return
@@ -157,7 +157,7 @@ class FilamentSurfaceView @JvmOverloads constructor(
     /**
      * Pause rendering (call from Activity.onPause())
      */
-    fun onPause() {
+    override fun onPause() {
         if (isPaused) return
         
         isPaused = true

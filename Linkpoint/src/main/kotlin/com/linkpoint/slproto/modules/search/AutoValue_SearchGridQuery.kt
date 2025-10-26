@@ -23,25 +23,25 @@ final class AutoValue_SearchGridQuery : SearchGridQuery() {
         this.searchType = searchType2
     }
 
-    public Boolean equals(Object obj) {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
         if (!(obj instanceof SearchGridQuery)) {
             return false
         }
-        SearchGridQuery searchGridQuery = (SearchGridQuery) obj
+        val searchGridQuery: SearchGridQuery = (SearchGridQuery) obj
         if (!this.searchUUID.equals(searchGridQuery.searchUUID()) || !this.searchText.equals(searchGridQuery.searchText())) {
             return false
         }
         return this.searchType.equals(searchGridQuery.searchType())
     }
 
-    public Int hashCode() {
+     public override fun hashCode(): Int {
         return ((((this.searchUUID.hashCode() ^ 1000003) * 1000003) ^ this.searchText.hashCode()) * 1000003) ^ this.searchType.hashCode()
     }
 
-    public String searchText() {
+     public fun searchText(): String {
         return this.searchText
     }
 
@@ -49,11 +49,11 @@ final class AutoValue_SearchGridQuery : SearchGridQuery() {
         return this.searchType
     }
 
-    public UUID searchUUID() {
+     public fun searchUUID(): UUID {
         return this.searchUUID
     }
 
-    public String toString() {
+     public override fun toString(): String {
         return "SearchGridQuery{searchUUID=" + this.searchUUID + ", " + "searchText=" + this.searchText + ", " + "searchType=" + this.searchType + "}"
     }
 }

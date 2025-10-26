@@ -13,11 +13,11 @@ class VoicePluginMessenger {
      * Lifted jumps to return sites
      */
     @JvmStatic
-    Boolean sendMessage(Messenger messenger, VoicePluginMessageType voicePluginMessageType, VoicePluginMessage voicePluginMessage, Messenger messenger2) {
+     fun sendMessage(messenger: Messenger, voicePluginMessageType: VoicePluginMessageType, voicePluginMessage: VoicePluginMessage, messenger2: Messenger): Boolean {
         Boolean bl
-        Boolean bl2 = bl = false
+        val bl2: Boolean = bl = false
         if (messenger == null) return bl2
-        Bundle bundle = Bundle()
+        val bundle: Bundle = Bundle()
         bundle.putString("messageType", voicePluginMessageType.toString())
         bundle.putBundle("message", voicePluginMessage.toBundle())
         voicePluginMessageType = Message.obtain(null, (Int)200, (Object)bundle)

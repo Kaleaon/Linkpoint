@@ -22,7 +22,7 @@ class TextureUDPTransfer {
     private Boolean headerReceived = false
     private Long lastReceivedPacket = 0
     private Int nextExpectedPacket = 0
-    private Map<Integer, Byte[]> outOfOrderPackets = HashMap()
+    private Map<Integer, ByteArray> outOfOrderPackets = HashMap()
     private File outputFile
     private FileOutputStream outputStream
     private Int packets
@@ -34,7 +34,7 @@ class TextureUDPTransfer {
         this.outputFile = file
     }
 
-    private Unit HandleDataPacket(Int i, Byte[] bArr) {
+    private fun HandleDataPacket(i: Int, bArr: ByteArray) {
         this.lastReceivedPacket = System.currentTimeMillis()
         if (!this.headerReceived || this.nextExpectedPacket != i) {
             this.outOfOrderPackets.put(Integer.valueOf(i), bArr)
@@ -42,7 +42,7 @@ class TextureUDPTransfer {
         }
         HandleNextDataPacket(bArr)
         while (true) {
-            Byte[] remove = this.outOfOrderPackets.remove(Integer.valueOf(this.nextExpectedPacket))
+            val remove: ByteArray = this.outOfOrderPackets.remove(Integer.valueOf(this.nextExpectedPacket))
             if (remove != null) {
                 HandleNextDataPacket(remove)
             } else {
@@ -51,7 +51,7 @@ class TextureUDPTransfer {
         }
     }
 
-    private Unit HandleNextDataPacket(Byte[] bArr) {
+    private fun HandleNextDataPacket(bArr: ByteArray) {
         this.lastReceivedPacket = System.currentTimeMillis()
         try {
             if (this.nextExpectedPacket == 0 && this.outputStream == null) {
@@ -72,7 +72,7 @@ class TextureUDPTransfer {
         }
     }
 
-    fun HandleImageData(ImageData imageData) {
+    fun HandleImageData(imageData: ImageData) {
         this.lastReceivedPacket = System.currentTimeMillis()
         this.headerReceived = true
         this.size = imageData.ImageID_Field.Size
@@ -81,11 +81,11 @@ class TextureUDPTransfer {
         HandleDataPacket(0, imageData.ImageDataData_Field.Data)
     }
 
-    fun HandleImagePacket(ImagePacket imagePacket) {
+    fun HandleImagePacket(imagePacket: ImagePacket) {
         HandleDataPacket(imagePacket.ImageID_Field.Packet, imagePacket.ImageData_Field.Data)
     }
 
-    public Boolean RetryTransfer(SLAgentCircuit sLAgentCircuit, SLCircuitInfo sLCircuitInfo) {
+    public fun RetryTransfer(sLAgentCircuit: SLAgentCircuit, sLCircuitInfo: SLCircuitInfo): Boolean {
         this.retries++
         if (this.retries > 2) {
             return false
@@ -94,11 +94,11 @@ class TextureUDPTransfer {
         return true
     }
 
-    fun StartTransfer(SLAgentCircuit sLAgentCircuit, SLCircuitInfo sLCircuitInfo) {
-        Int i = 0
+    fun StartTransfer(sLAgentCircuit: SLAgentCircuit, sLCircuitInfo: SLCircuitInfo) {
+        val i: Int = 0
         Debug.Log("TextureUDP: starting transfer, image ID = " + this.fetchReq.textureID)
         this.lastReceivedPacket = System.currentTimeMillis()
-        RequestImage requestImage = RequestImage()
+        val requestImage: RequestImage = RequestImage()
         requestImage.AgentData_Field.AgentID = sLCircuitInfo.agentID
         requestImage.AgentData_Field.SessionID = sLCircuitInfo.sessionID
         RequestImage.RequestImageData requestImageData = RequestImage.RequestImageData()
@@ -115,15 +115,15 @@ class TextureUDPTransfer {
         sLAgentCircuit.SendMessage(requestImage)
     }
 
-    public File getOutputFile() {
+     public fun getOutputFile(): File {
         return this.outputFile
     }
 
-    public Boolean hasStalled() {
+     public fun hasStalled(): Boolean {
         return System.currentTimeMillis() > this.lastReceivedPacket + PACKET_TIMEOUT
     }
 
-    public Boolean isCompleted() {
+     public fun isCompleted(): Boolean {
         return this.completed
     }
 }

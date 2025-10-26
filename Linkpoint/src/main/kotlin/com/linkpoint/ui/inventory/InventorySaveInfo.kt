@@ -9,11 +9,11 @@ import javax.annotation.Nullable
 
 class InventorySaveInfo : Parcelable {
     const val Parcelable.Creator<InventorySaveInfo> CREATOR = Parcelable.Creator<InventorySaveInfo>() {
-        public InventorySaveInfo createFromParcel(Parcel parcel) {
+         public fun createFromParcel(parcel: Parcel): InventorySaveInfo {
             return InventorySaveInfo(parcel)
         }
 
-        public InventorySaveInfo[] newArray(Int i) {
+        public Array<InventorySaveInfo> newArray(Int i) {
             return InventorySaveInfo[i]
         }
     }
@@ -59,11 +59,11 @@ class InventorySaveInfo : Parcelable {
         this.inventoryOfferMessageId = j
     }
 
-    public Int describeContents() {
+     public fun describeContents(): Int {
         return 0
     }
 
-    fun writeToParcel(Parcel parcel, Int i) {
+    fun writeToParcel(parcel: Parcel, i: Int) {
         parcel.writeInt(this.saveType.ordinal())
         if (this.saveItemUUID != null) {
             parcel.writeByte((Byte) 1)

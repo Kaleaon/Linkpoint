@@ -9,15 +9,15 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 interface NotificationChannelManager {
-    Boolean areNotificationsSystemControlled()
+     fun areNotificationsSystemControlled(): Boolean)
 
     ImmutableSet<NotificationType> getEnabledTypes(Context context)
 
-    String getNotificationChannelName(NotificationChannels.Channel channel)
+     fun getNotificationChannelName(NotificationChannels.Channel channel): String)
 
-    String getNotificationSummary(Context context, NotificationChannels.Channel channel)
+     fun getNotificationSummary(context: Context, NotificationChannels.Channel channel): String)
 
-    Boolean showSystemNotificationSettings(Context context, Fragment fragment, NotificationChannels.Channel channel)
+     fun showSystemNotificationSettings(context: Context, fragment: Fragment, NotificationChannels.Channel channel): Boolean)
 
-    Boolean useNotificationGroups()
+     fun useNotificationGroups(): Boolean)
 }

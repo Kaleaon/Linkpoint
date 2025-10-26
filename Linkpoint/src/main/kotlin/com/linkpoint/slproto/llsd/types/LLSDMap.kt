@@ -49,26 +49,26 @@ class LLSDMap : LLSDNode() {
     }
 
     public LLSDMap(XmlPullParser xmlPullParser) throws LLSDXMLException, XmlPullParserException, IOException {
-        HashMap hashMap = HashMap()
+        val hashMap: HashMap = HashMap()
         while (xmlPullParser.nextTag() != 3) {
             xmlPullParser.require(2, (String) null, "key")
-            String nextText = xmlPullParser.nextText()
+            val nextText: String = xmlPullParser.nextText()
             xmlPullParser.nextTag()
             hashMap.put(nextText, LLSDNodeFactory.parseNode(xmlPullParser))
         }
         this.items = ImmutableMap.copyOf(hashMap)
     }
 
-    public LLSDMap(LLSDMapEntry... lLSDMapEntryArr) {
-        HashMap hashMap = HashMap(lLSDMapEntryArr.length)
+    public LLSDMap(vararg lLSDMapEntryArr: LLSDMapEntry) {
+        val hashMap: HashMap = HashMap(lLSDMapEntryArr.length)
         for (LLSDMapEntry lLSDMapEntry : lLSDMapEntryArr) {
             hashMap.put(lLSDMapEntry.key, lLSDMapEntry.value)
         }
         this.items = ImmutableMap.copyOf(hashMap)
     }
 
-    public LLSDNode byKey(String str) throws LLSDInvalidKeyException {
-        LLSDNode lLSDNode = this.items.get(str)
+     public fun byKey(str: String) throws LLSDInvalidKeyException {
+        val lLSDNode: LLSDNode = this.items.get(str)
         if (lLSDNode != null) {
             return lLSDNode
         }
@@ -79,17 +79,17 @@ class LLSDMap : LLSDNode() {
         return this.items.entrySet()
     }
 
-    public Boolean keyExists(String str) {
+     public fun keyExists(str: String): Boolean {
         return this.items.containsKey(str)
     }
 
-    fun toBinary(DataOutputStream dataOutputStream) throws IOException {
+    fun toBinary(dataOutputStream: DataOutputStream) throws IOException {
         dataOutputStream.writeByte(Vr.VREvent.VrCore.ErrorCode.CONTROLLER_GATT_CHARACTERISTIC_NOT_FOUND)
         ImmutableSet<Map.Entry<String, LLSDNode>> entrySet = this.items.entrySet()
         dataOutputStream.writeInt(entrySet.size())
         for (Map.Entry entry : entrySet) {
             dataOutputStream.writeByte(107)
-            Byte[] stringToVariableUTF = SLMessage.stringToVariableUTF((String) entry.getKey())
+            val stringToVariableUTF: ByteArray = SLMessage.stringToVariableUTF((String) entry.getKey())
             dataOutputStream.writeInt(stringToVariableUTF.length)
             dataOutputStream.write(stringToVariableUTF)
             ((LLSDNode) entry.getValue()).toBinary(dataOutputStream)
@@ -101,15 +101,15 @@ class LLSDMap : LLSDNode() {
         try {
             T newInstance = cls.newInstance()
             for (Field field : cls.getDeclaredFields()) {
-                LLSDSerialized lLSDSerialized = (LLSDSerialized) field.getAnnotation(LLSDSerialized.class)
+                val lLSDSerialized: LLSDSerialized = (LLSDSerialized) field.getAnnotation(LLSDSerialized.class)
                 if (lLSDSerialized != null) {
-                    String name = lLSDSerialized.name()
+                    val name: String = lLSDSerialized.name()
                     if (Strings.isNullOrEmpty(name)) {
                         name = field.getName()
                     }
-                    Class<?> type = field.getType()
+                    val type: Class<?> = field.getType()
                     if (keyExists(name)) {
-                        LLSDNode byKey = byKey(name)
+                        val byKey: LLSDNode = byKey(name)
                         if (type.equals(Boolean.TYPE)) {
                             field.setBoolean(newInstance, byKey.asBoolean())
                         } else if (type.equals(Integer.TYPE)) {
@@ -126,19 +126,19 @@ class LLSDMap : LLSDNode() {
                             field.set(newInstance, byKey.asURI())
                         } else if (type.equals(Date.class)) {
                             field.set(newInstance, byKey.asDate())
-                        } else if (type.equals(Byte[].class)) {
+                        } else if (type.equals(ByteArray.class)) {
                             field.set(newInstance, byKey.asBinary())
                         } else if (type.isAssignableFrom(List.class)) {
-                            Type genericType = field.getGenericType()
+                            val genericType: Type = field.getGenericType()
                             if (genericType instanceof ParameterizedType) {
-                                Type[] actualTypeArguments = ((ParameterizedType) genericType).getActualTypeArguments()
+                                val actualTypeArguments: Array<Type> = ((ParameterizedType) genericType).getActualTypeArguments()
                                 if (actualTypeArguments.length != 1) {
                                     throw LLSDValueTypeException(type.getName(), byKey)
                                 }
-                                Type type2 = actualTypeArguments[0]
+                                val type2: Type = actualTypeArguments[0]
                                 if (type2 instanceof Class) {
-                                    Int count = byKey.getCount()
-                                    ArrayList arrayList = ArrayList(count)
+                                    val count: Int = byKey.getCount()
+                                    val arrayList: ArrayList = ArrayList(count)
                                     for (Int i = 0; i < count; i++) {
                                         arrayList.add(byKey.byIndex(i).toObject((Class) type2))
                                     }
@@ -165,7 +165,7 @@ class LLSDMap : LLSDNode() {
         }
     }
 
-    fun toXML(XmlSerializer xmlSerializer) throws IOException {
+    fun toXML(xmlSerializer: XmlSerializer) throws IOException {
         xmlSerializer.startTag("", "map")
         for (Map.Entry entry : this.items.entrySet()) {
             xmlSerializer.startTag("", "key")

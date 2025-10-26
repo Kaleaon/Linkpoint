@@ -39,15 +39,15 @@ class ObjectDeGrab : SLMessage() {
         this.ObjectData_Field = ObjectData()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.SurfaceInfo_Fields.size() * 64) + 41
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleObjectDeGrab(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 119)
@@ -65,13 +65,13 @@ class ObjectDeGrab : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ObjectData_Field.LocalID = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            SurfaceInfo surfaceInfo = SurfaceInfo()
+            val surfaceInfo: SurfaceInfo = SurfaceInfo()
             surfaceInfo.UVCoord = unpackLLVector3(byteBuffer)
             surfaceInfo.STCoord = unpackLLVector3(byteBuffer)
             surfaceInfo.FaceIndex = unpackInt(byteBuffer)

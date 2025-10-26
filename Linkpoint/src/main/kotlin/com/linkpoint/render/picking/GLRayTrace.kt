@@ -19,15 +19,15 @@ class GLRayTrace {
             this.t = f2
         }
 
-        public String toString() {
+         public override fun toString(): String {
             return "RayIntersectInfo{intersectPoint=" + this.intersectPoint + ", s=" + this.s + ", t=" + this.t + '}'
         }
     }
 
     @JvmStatic
-    Float getIntersectionDepth(RenderContext renderContext, LLVector4 lLVector4, Float[] fArr) {
+     fun getIntersectionDepth(renderContext: RenderContext, lLVector4: LLVector4, fArr: FloatArray): Float {
         r4 = Float[4]
-        Float[] fArr2 = Float[8]
+        val fArr2: FloatArray = Float[8]
         r4[0] = lLVector4.x
         r4[1] = lLVector4.y
         r4[2] = lLVector4.z
@@ -42,16 +42,16 @@ class GLRayTrace {
     }
 
     @JvmStatic
-    RayIntersectInfo intersect_RayTriangle(LLVector3 lLVector3, LLVector3 lLVector32, LLVector3[] lLVector3Arr, Int i) {
-        LLVector3 sub = LLVector3.sub(lLVector3Arr[i + 1], lLVector3Arr[i + 0])
-        LLVector3 sub2 = LLVector3.sub(lLVector3Arr[i + 2], lLVector3Arr[i + 0])
-        LLVector3 cross = LLVector3.cross(sub, sub2)
+     fun intersect_RayTriangle(lLVector3: LLVector3, lLVector32: LLVector3, lLVector3Arr: Array<LLVector3>, i: Int): RayIntersectInfo {
+        val sub: LLVector3 = LLVector3.sub(lLVector3Arr[i + 1], lLVector3Arr[i + 0])
+        val sub2: LLVector3 = LLVector3.sub(lLVector3Arr[i + 2], lLVector3Arr[i + 0])
+        val cross: LLVector3 = LLVector3.cross(sub, sub2)
         if (cross.isZero()) {
             return null
         }
-        LLVector3 sub3 = LLVector3.sub(lLVector32, lLVector3)
-        Float f = -cross.dot(LLVector3.sub(lLVector3, lLVector3Arr[i + 0]))
-        Float dot = cross.dot(sub3)
+        val sub3: LLVector3 = LLVector3.sub(lLVector32, lLVector3)
+        val f: Float = -cross.dot(LLVector3.sub(lLVector3, lLVector3Arr[i + 0]))
+        val dot: Float = cross.dot(sub3)
         if (Math.abs(dot) < 1.0E-7f) {
             return null
         }
@@ -59,16 +59,16 @@ class GLRayTrace {
         if (((Double) dot) < 0.0d) {
             return null
         }
-        LLVector3 lLVector33 = LLVector3(sub3)
+        val lLVector33: LLVector3 = LLVector3(sub3)
         lLVector33.mul(dot)
         lLVector33.add(lLVector3)
-        Float dot2 = sub.dot(sub)
-        Float dot3 = sub.dot(sub2)
-        Float dot4 = sub2.dot(sub2)
-        LLVector3 sub4 = LLVector3.sub(lLVector33, lLVector3Arr[i + 0])
-        Float dot5 = sub4.dot(sub)
-        Float dot6 = sub4.dot(sub2)
-        Float f2 = (dot3 * dot3) - (dot2 * dot4)
+        val dot2: Float = sub.dot(sub)
+        val dot3: Float = sub.dot(sub2)
+        val dot4: Float = sub2.dot(sub2)
+        val sub4: LLVector3 = LLVector3.sub(lLVector33, lLVector3Arr[i + 0])
+        val dot5: Float = sub4.dot(sub)
+        val dot6: Float = sub4.dot(sub2)
+        val f2: Float = (dot3 * dot3) - (dot2 * dot4)
         if (Math.abs(f2) < 1.0E-7f) {
             return null
         }

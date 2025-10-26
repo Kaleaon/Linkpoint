@@ -8,8 +8,8 @@ import java.util.HashSet
 import java.util.UUID
 
 class RLVCmdClear : RLVCommand {
-    fun Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2) {
-        HashSet hashSet = HashSet()
+    fun Handle(rLVController: RLVController, uuid: UUID, rLVCommands: RLVCommands, str: String, str2: String) {
+        val hashSet: HashSet = HashSet()
         for (RLVRestrictionType rLVRestrictionType : RLVRestrictionType.values()) {
             if (str == "") {
                 hashSet.add(rLVRestrictionType)

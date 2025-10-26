@@ -50,10 +50,10 @@ class LLSDIntegrationBridge {
      * Parse LLSD from XML string using the external library
      */
     @JvmStatic
-    LLSDNode parseFromXML(String xmlString) throws LLSDXMLException {
+     fun parseFromXML(xmlString: String) throws LLSDXMLException {
         try {
-            LLSDParser parser = LLSDParser()
-            LLSD externalLLSD = parser.parse(StringReader(xmlString))
+            val parser: LLSDParser = LLSDParser()
+            val externalLLSD: LLSD = parser.parse(StringReader(xmlString))
             return convertExternalToLinkpoint(externalLLSD.getContent())
         } catch (Exception e) {
             Log.e(TAG, "Failed to parse LLSD XML", e)
@@ -65,10 +65,10 @@ class LLSDIntegrationBridge {
      * Parse LLSD from InputStream using the external library
      */
     @JvmStatic
-    LLSDNode parseFromStream(InputStream inputStream) throws LLSDXMLException {
+     fun parseFromStream(inputStream: InputStream) throws LLSDXMLException {
         try {
-            LLSDParser parser = LLSDParser()
-            LLSD externalLLSD = parser.parse(inputStream)
+            val parser: LLSDParser = LLSDParser()
+            val externalLLSD: LLSD = parser.parse(inputStream)
             return convertExternalToLinkpoint(externalLLSD.getContent())
         } catch (Exception e) {
             Log.e(TAG, "Failed to parse LLSD from stream", e)
@@ -81,7 +81,7 @@ class LLSDIntegrationBridge {
      */
     @SuppressWarnings("unchecked")
     @JvmStatic
-    LLSDNode convertExternalToLinkpoint(Object externalObject) throws LLSDXMLException {
+     fun convertExternalToLinkpoint(externalObject: Object) throws LLSDXMLException {
         if (externalObject == null) {
             return LLSDUndefined()
         }
@@ -104,15 +104,15 @@ class LLSDIntegrationBridge {
             } else if (externalObject instanceof Date) {
                 return LLSDDate((Date) externalObject)
             } else if (externalObject instanceof List) {
-                List<Object> list = (List<Object>) externalObject
-                LLSDArray array = LLSDArray()
+                val list: List<Object> = (List<Object>) externalObject
+                val array: LLSDArray = LLSDArray()
                 for (Object item : list) {
                     array.add(convertExternalToLinkpoint(item))
                 }
                 return array
             } else if (externalObject instanceof Map) {
-                Map<String, Object> map = (Map<String, Object>) externalObject
-                Map<String, LLSDNode> nodeMap = HashMap<>()
+                val map: Map<String, Object> = (Map<String, Object>) externalObject
+                val nodeMap: Map<String, LLSDNode> = HashMap<>()
                 for (Map.Entry<String, Object> entry : map.entrySet()) {
                     nodeMap.put(entry.getKey(), convertExternalToLinkpoint(entry.getValue()))
                 }
@@ -134,7 +134,7 @@ class LLSDIntegrationBridge {
      * Currently falls back to XML parsing for compatibility
      */
     @JvmStatic
-    LLSDNode parseFromJSON(String jsonString) throws LLSDXMLException {
+     fun parseFromJSON(jsonString: String) throws LLSDXMLException {
         try {
             // FUTURE: Use @Kaleaon's LLSDJsonParser when Android-compatible
             // For now, treat as XML if it looks like LLSD-XML, otherwise create simple string node
@@ -155,7 +155,7 @@ class LLSDIntegrationBridge {
      * Currently creates a simple string representation for compatibility
      */
     @JvmStatic
-    LLSDNode parseFromNotation(String notationString) throws LLSDXMLException {
+     fun parseFromNotation(notationString: String) throws LLSDXMLException {
         try {
             // FUTURE: Use @Kaleaon's LLSDNotationParser when Android-compatible
             // For now, wrap in basic LLSD XML structure
@@ -171,10 +171,10 @@ class LLSDIntegrationBridge {
      * Currently performs basic format detection with fallback parsing
      */
     @JvmStatic
-    LLSDNode parseAuto(String llsdData) throws LLSDXMLException {
+     fun parseAuto(llsdData: String) throws LLSDXMLException {
         try {
             // Simple format detection - enhanced detection coming with @Kaleaon's library
-            String trimmed = llsdData.trim()
+            val trimmed: String = llsdData.trim()
             if (trimmed.startsWith("<?xml") || trimmed.startsWith("<llsd")) {
                 return parseFromXML(llsdData)
             } else if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
@@ -195,7 +195,7 @@ class LLSDIntegrationBridge {
      * FUTURE: Will use @Kaleaon's enhanced library with advanced features
      */
     @JvmStatic
-    LLSDNode parseWithFallback(InputStream inputStream, String contentType) throws LLSDXMLException {
+     fun parseWithFallback(inputStream: InputStream, contentType: String) throws LLSDXMLException {
         // Try external library first (currently jacobilinden, future: @Kaleaon's enhanced)
         try {
             return parseFromStream(inputStream)
@@ -221,7 +221,7 @@ class LLSDIntegrationBridge {
      * This method provides migration status and feature availability
      */
     @JvmStatic
-    String getIntegrationInfo() {
+     fun getIntegrationInfo(): String {
         return "LLSD Integration Status:\n" +
                "- Current: jacobilinden/llsd-java (base functionality)\n" + 
                "- Enhanced: @Kaleaon's Kotlin LLSD features (Android-compatible)\n" +
@@ -237,7 +237,7 @@ class LLSDIntegrationBridge {
      * This shows the enhanced capabilities now available
      */
     @JvmStatic
-    Unit demonstrateKotlinFeatures() {
+     fun demonstrateKotlinFeatures() {
         try {
             // This would typically be called from Kotlin code, but we can demonstrate from Java
             Log.i(TAG, "Kotlin LLSD features now available!")

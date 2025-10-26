@@ -36,14 +36,14 @@ class OpportunisticExecutor : Executor {
                     }
                     
                     // Process run-once runnables
-                    Boolean hasRunOnceWork = false
+                    val hasRunOnceWork: Boolean = false
                     if (!runOnceRunnables.isEmpty()) {
                         hasRunOnceWork = true
                         
                         // Process all run-once runnables
                         var iterator = runOnceRunnables.iterator()
                         while (iterator.hasNext()) {
-                            Runnable runOnceTask = iterator.next()
+                            val runOnceTask: Runnable = iterator.next()
                             iterator.remove()
                             
                             lock.unlock()
@@ -87,7 +87,7 @@ class OpportunisticExecutor : Executor {
             this()
         }
 
-        fun execute(Runnable runnable) {
+        fun execute(runnable: Runnable) {
             try {
                 OpportunisticExecutor.this.lock.lock()
                 OpportunisticExecutor.this.runOnceRunnables.add(runnable)
@@ -103,7 +103,7 @@ class OpportunisticExecutor : Executor {
         this.thread.start()
     }
 
-    fun execute(Runnable runnable) {
+    fun execute(runnable: Runnable) {
         try {
             this.lock.lock()
             if (Thread.currentThread().getId() == this.thread.getId() && this.queue.isEmpty()) {
@@ -122,7 +122,7 @@ class OpportunisticExecutor : Executor {
         this.lock.unlock()
     }
 
-    public RunOnceExecutor getRunOnceExecutor() {
+     public fun getRunOnceExecutor(): RunOnceExecutor {
         return RunOnceExecutor(this, null)
     }
 }

@@ -12,8 +12,8 @@ class AgentPosition {
     private val LLVector3 position = LLVector3()
     private val LLVector3 velocity = LLVector3()
 
-    public ImmutableVector getImmutablePosition() {
-        ImmutableVector immutableVector = null
+     public fun getImmutablePosition(): ImmutableVector {
+        val immutableVector: ImmutableVector = null
         synchronized (this.lock) {
             if (this.isValid) {
                 immutableVector = ImmutableVector(this.position)
@@ -22,7 +22,7 @@ class AgentPosition {
         return immutableVector
     }
 
-    public Boolean getInterpolatedPosition(LLVector3 lLVector3) {
+     public fun getInterpolatedPosition(lLVector3: LLVector3): Boolean {
         synchronized (this.lock) {
             if (this.isValid) {
                 if (this.velocity.x == 0.0f && this.velocity.y == 0.0f && this.velocity.z == 0.0f) {
@@ -39,8 +39,8 @@ class AgentPosition {
         return z
     }
 
-    public LLVector3 getPosition() {
-        LLVector3 lLVector3 = LLVector3()
+     public fun getPosition(): LLVector3 {
+        val lLVector3: LLVector3 = LLVector3()
         synchronized (this.lock) {
             if (this.isValid) {
                 lLVector3.set(this.position)
@@ -49,7 +49,7 @@ class AgentPosition {
         return lLVector3
     }
 
-    public Boolean getPosition(LLVector3 lLVector3) {
+     public fun getPosition(lLVector3: LLVector3): Boolean {
         synchronized (this.lock) {
             if (this.isValid) {
                 lLVector3.set(this.position)
@@ -61,17 +61,17 @@ class AgentPosition {
         return z
     }
 
-    public Boolean isValid() {
+     public fun isValid(): Boolean {
         synchronized (this.lock) {
             z = this.isValid
         }
         return z
     }
 
-    fun set(LLVector3 lLVector3, LLVector3 lLVector32) {
+    fun set(lLVector3: LLVector3, lLVector32: LLVector3) {
         synchronized (this.lock) {
             this.position.set(lLVector3)
-            LLVector3 lLVector33 = this.velocity
+            val lLVector33: LLVector3 = this.velocity
             if (lLVector32 == null) {
                 lLVector32 = LLVector3.Zero
             }
