@@ -47,7 +47,7 @@ class TouchableObjectsFragment : Fragment(), AdapterView.OnItemClickListener {
         }
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         val inflate: View = layoutInflater.inflate(R.layout.touchable_object_list, viewGroup, false)
         this.listAdapter = TouchableObjectListAdapter(layoutInflater.getContext())
@@ -71,7 +71,7 @@ class TouchableObjectsFragment : Fragment(), AdapterView.OnItemClickListener {
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
         val objectUUID: UUID = getObjectUUID()
@@ -82,7 +82,7 @@ class TouchableObjectsFragment : Fragment(), AdapterView.OnItemClickListener {
         }
     }
 
-    fun onStop() {
+    override fun onStop() {
         this.touchableObjects.unsubscribe()
         super.onStop()
     }

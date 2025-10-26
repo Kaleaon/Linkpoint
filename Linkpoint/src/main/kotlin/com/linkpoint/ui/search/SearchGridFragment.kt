@@ -101,7 +101,7 @@ private /* synthetic */ IntArray m851getcomlumiyaviewerlumiyaslprotomodulessearc
         return searchGridFragment
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         val inflate: View = layoutInflater.inflate(R.layout.search_fragment, viewGroup, false)
         this.unbinder = ButterKnife.bind((Object) this, inflate)
@@ -112,7 +112,7 @@ private /* synthetic */ IntArray m851getcomlumiyaviewerlumiyaslprotomodulessearc
         return inflate
     }
 
-    fun onDestroyView() {
+    override fun onDestroyView() {
         this.unbinder.unbind()
         super.onDestroyView()
     }

@@ -45,7 +45,7 @@ private class PrimRequest : ResourceRequest()<PrimDrawParams, DrawablePrim> : Ru
             this.geometryCache.RequestResource(((PrimDrawParams) getParams()).getVolumeParams(), this)
         }
 
-        fun run() {
+        override fun run() {
             try {
                 completeRequest(DrawablePrim((PrimDrawParams) getParams(), this.geometry))
             } catch (Exception e) {

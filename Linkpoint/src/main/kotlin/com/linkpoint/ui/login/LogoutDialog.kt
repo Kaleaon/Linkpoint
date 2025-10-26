@@ -145,7 +145,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.login.-$Lambda$Ido
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setProgressStyle(0)
         setMessage(getContext().getString(R.string.logging_out))
@@ -154,7 +154,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.login.-$Lambda$Ido
         }
     }
 
-     public fun onSaveInstanceState(): Bundle {
+     public override fun onSaveInstanceState(): Bundle {
         val onSaveInstanceState: Bundle = super.onSaveInstanceState()
         if (onSaveInstanceState == null) {
             onSaveInstanceState = Bundle()
@@ -165,7 +165,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.login.-$Lambda$Ido
         return onSaveInstanceState
     }
 
-    fun onStart() {
+    override fun onStart() {
         SLAgentCircuit activeAgentCircuit
         SLGridConnection gridConnection
         val z: Boolean = false
@@ -185,7 +185,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.login.-$Lambda$Ido
     }
 
     /* access modifiers changed from: protected */
-    fun onStop() {
+    override fun onStop() {
         this.handler.removeCallbacks(this.onDisconnectTimeout)
         this.eventBus.unsubscribe(this)
         super.onStop()

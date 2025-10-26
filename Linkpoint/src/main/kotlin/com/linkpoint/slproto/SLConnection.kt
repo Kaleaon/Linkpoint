@@ -53,7 +53,7 @@ class SLConnection : Runnable {
         return timer
     }
 
-    fun run() {
+    override fun run() {
         Debug.Log("working thread started")
         while (!this.selector.keys().isEmpty()) {
             SLCircuit sLCircuit

@@ -23,7 +23,7 @@ final class AutoValue_GroupManager_GroupRoleMembersQuery : GroupManager().GroupR
         this.requestID = uuid3
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
@@ -41,7 +41,7 @@ final class AutoValue_GroupManager_GroupRoleMembersQuery : GroupManager().GroupR
         return this.groupID
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         return ((((this.groupID.hashCode() ^ 1000003) * 1000003) ^ this.roleID.hashCode()) * 1000003) ^ this.requestID.hashCode()
     }
 
@@ -53,7 +53,7 @@ final class AutoValue_GroupManager_GroupRoleMembersQuery : GroupManager().GroupR
         return this.roleID
     }
 
-     public fun toString(): String {
+     public override fun toString(): String {
         return "GroupRoleMembersQuery{groupID=" + this.groupID + ", " + "roleID=" + this.roleID + ", " + "requestID=" + this.requestID + "}"
     }
 }

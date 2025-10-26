@@ -75,21 +75,21 @@ class CardboardActivity_ViewBinding : Unbinder {
         cardboardActivity.cardboardAimControls = (ViewGroup) Utils.castView(findRequiredView4, R.id.cardboard_aim_controls, "field 'cardboardAimControls'", ViewGroup.class)
         this.view2131755265 = findRequiredView4
         findRequiredView4.setOnTouchListener(View.OnTouchListener() {
-             public fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+             public override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 return cardboardActivity.onAimControlsTouch(view, motionEvent)
             }
         val findRequiredView5: View = Utils.findRequiredView(view, R.id.cardboard_speak_controls, "field 'cardboardSpeakControls' and method 'onSpeakControlsTouch'")
         cardboardActivity.cardboardSpeakControls = (ViewGroup) Utils.castView(findRequiredView5, R.id.cardboard_speak_controls, "field 'cardboardSpeakControls'", ViewGroup.class)
         this.view2131755277 = findRequiredView5
         findRequiredView5.setOnTouchListener(View.OnTouchListener() {
-             public fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+             public override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 return cardboardActivity.m768com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref6(view, motionEvent)
             }
         val findRequiredView6: View = Utils.findRequiredView(view, R.id.cardboard_object_controls, "field 'cardboardObjectControls' and method 'onObjectControlsTouch'")
         cardboardActivity.cardboardObjectControls = (ViewGroup) Utils.castView(findRequiredView6, R.id.cardboard_object_controls, "field 'cardboardObjectControls'", ViewGroup.class)
         this.view2131755266 = findRequiredView6
         findRequiredView6.setOnTouchListener(View.OnTouchListener() {
-             public fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+             public override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 return cardboardActivity.m769com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref7(view, motionEvent)
             }
         val findRequiredView7: View = Utils.findRequiredView(view, R.id.object_touch_button, "field 'buttonTouchObject' and method 'onObjectTouch'")
@@ -103,7 +103,7 @@ class CardboardActivity_ViewBinding : Unbinder {
         cardboardActivity.cardboardScriptDialog = (ViewGroup) Utils.castView(findRequiredView8, R.id.cardboard_script_dialog, "field 'cardboardScriptDialog'", ViewGroup.class)
         this.view2131755282 = findRequiredView8
         findRequiredView8.setOnTouchListener(View.OnTouchListener() {
-             public fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+             public override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 return cardboardActivity.m770com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref8(view, motionEvent)
             }
         cardboardActivity.speakLevelIndicator = (ProgressBar) Utils.findRequiredViewAsType(view, R.id.speak_level_indicator, "field 'speakLevelIndicator'", ProgressBar.class)
@@ -136,7 +136,7 @@ class CardboardActivity_ViewBinding : Unbinder {
         cardboardActivity.buttonMoveForward = (ImageButton) Utils.castView(findRequiredView12, R.id.button_move_forward, "field 'buttonMoveForward'", ImageButton.class)
         this.view2131755260 = findRequiredView12
         findRequiredView12.setOnTouchListener(View.OnTouchListener() {
-             public fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+             public override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 return cardboardActivity.onCamButtonTouch(view, motionEvent)
             }
         cardboardActivity.dialogQuestionText = (TextView) Utils.findRequiredViewAsType(view, R.id.dialogQuestionText, "field 'dialogQuestionText'", TextView.class)
@@ -145,7 +145,7 @@ class CardboardActivity_ViewBinding : Unbinder {
         cardboardActivity.buttonMoveBackward = (ImageButton) Utils.castView(findRequiredView13, R.id.button_move_backward, "field 'buttonMoveBackward'", ImageButton.class)
         this.view2131755262 = findRequiredView13
         findRequiredView13.setOnTouchListener(View.OnTouchListener() {
-             public fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+             public override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 return cardboardActivity.onCamButtonTouch(view, motionEvent)
             }
         cardboardActivity.voiceStatusView = (VoiceStatusView) Utils.findRequiredViewAsType(view, R.id.cardboard_voice_status_view, "field 'voiceStatusView'", VoiceStatusView.class)
@@ -167,14 +167,14 @@ class CardboardActivity_ViewBinding : Unbinder {
         cardboardActivity.buttonTurnLeft = (ImageButton) Utils.castView(findRequiredView16, R.id.button_turn_left, "field 'buttonTurnLeft'", ImageButton.class)
         this.view2131755261 = findRequiredView16
         findRequiredView16.setOnTouchListener(View.OnTouchListener() {
-             public fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+             public override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 return cardboardActivity.onCamButtonTouch(view, motionEvent)
             }
         val findRequiredView17: View = Utils.findRequiredView(view, R.id.button_turn_right, "field 'buttonTurnRight' and method 'onCamButtonTouch'")
         cardboardActivity.buttonTurnRight = (ImageButton) Utils.castView(findRequiredView17, R.id.button_turn_right, "field 'buttonTurnRight'", ImageButton.class)
         this.view2131755263 = findRequiredView17
         findRequiredView17.setOnTouchListener(View.OnTouchListener() {
-             public fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+             public override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 return cardboardActivity.onCamButtonTouch(view, motionEvent)
             }
         val findRequiredView18: View = Utils.findRequiredView(view, R.id.object_sit_button, "field 'buttonSit' and method 'onObjectSit'")
@@ -188,7 +188,7 @@ class CardboardActivity_ViewBinding : Unbinder {
         val findRequiredView19: View = Utils.findRequiredView(view, R.id.cardboard_yesno_dialog, "method 'onYesNoOutsideTouch'")
         this.view2131755272 = findRequiredView19
         findRequiredView19.setOnTouchListener(View.OnTouchListener() {
-             public fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+             public override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 return cardboardActivity.m771com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref9(view, motionEvent)
             }
     }

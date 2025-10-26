@@ -44,7 +44,7 @@ class CardboardControlsPlaceholder : ViewGroup() {
     }
 
     /* access modifiers changed from: protected */
-    fun onLayout(z: Boolean, i: Int, i2: Int, i3: Int, i4: Int) {
+    override fun onLayout(z: Boolean, i: Int, i2: Int, i3: Int, i4: Int) {
         val childCount: Int = getChildCount()
         for (Int i5 = 0; i5 < childCount; i5++) {
             getChildAt(i5).layout(0, 0, this.fixedWidth, this.fixedHeight)
@@ -52,7 +52,7 @@ class CardboardControlsPlaceholder : ViewGroup() {
     }
 
     /* access modifiers changed from: protected */
-    fun onMeasure(i: Int, i2: Int) {
+    override fun onMeasure(i: Int, i2: Int) {
         val childCount: Int = getChildCount()
         for (Int i3 = 0; i3 < childCount; i3++) {
             val childAt: View = getChildAt(i3)

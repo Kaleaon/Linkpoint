@@ -27,7 +27,7 @@ class ObjectPopupsActionProvider : ActionProvider(), View.OnClickListener {
         return this.objectPopupCount != 0
     }
 
-    fun onClick(view: View) {
+    override fun onClick(view: View) {
         if (this.objectPopupsClickListener != null) {
             this.objectPopupsClickListener.onObjectPopupsClicked()
         }

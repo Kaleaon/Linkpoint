@@ -259,7 +259,7 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
         return false
     }
 
-     public fun onTouchEvent(motionEvent: MotionEvent): Boolean {
+     public override fun onTouchEvent(motionEvent: MotionEvent): Boolean {
         return false
     }
 }

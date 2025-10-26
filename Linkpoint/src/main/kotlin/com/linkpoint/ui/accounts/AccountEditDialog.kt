@@ -82,7 +82,7 @@ class AccountEditDialog : AppCompatDialog(), View.OnClickListener, TextWatcher {
         }
     }
 
-    fun onClick(view: View) {
+    override fun onClick(view: View) {
         AccountList.AccountInfo accountInfo
         val z2: Boolean = false
         switch (view.getId()) {
@@ -137,7 +137,7 @@ class AccountEditDialog : AppCompatDialog(), View.OnClickListener, TextWatcher {
         }
     }
 
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setTitle((Int) R.string.new_account_dialog_title)
         setContentView((Int) R.layout.account_edit_dialog)

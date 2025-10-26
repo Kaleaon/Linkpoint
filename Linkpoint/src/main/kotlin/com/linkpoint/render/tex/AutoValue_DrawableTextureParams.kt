@@ -31,7 +31,7 @@ final class AutoValue_DrawableTextureParams : DrawableTextureParams() {
         return this.avatarUUID
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         val z: Boolean = true
         if (obj == this) {
             return true
@@ -50,7 +50,7 @@ final class AutoValue_DrawableTextureParams : DrawableTextureParams() {
         return z
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         val i: Int = 0
         val hashCode: Int = ((this.avatarFaceIndex == null ? 0 : this.avatarFaceIndex.hashCode()) ^ ((((this.uuid.hashCode() ^ 1000003) * 1000003) ^ this.textureClass.hashCode()) * 1000003)) * 1000003
         if (this.avatarUUID != null) {
@@ -63,7 +63,7 @@ final class AutoValue_DrawableTextureParams : DrawableTextureParams() {
         return this.textureClass
     }
 
-     public fun toString(): String {
+     public override fun toString(): String {
         return "DrawableTextureParams{uuid=" + this.uuid + ", " + "textureClass=" + this.textureClass + ", " + "avatarFaceIndex=" + this.avatarFaceIndex + ", " + "avatarUUID=" + this.avatarUUID + "}"
     }
 

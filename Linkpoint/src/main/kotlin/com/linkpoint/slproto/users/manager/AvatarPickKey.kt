@@ -32,7 +32,7 @@ class AvatarPickKey : Parcelable {
         return 0
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (this == obj) {
             return true
         }
@@ -46,11 +46,11 @@ class AvatarPickKey : Parcelable {
         return this.pickID.equals(avatarPickKey.pickID)
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         return (this.avatarID.hashCode() * 31) + this.pickID.hashCode()
     }
 
-     public fun toString(): String {
+     public override fun toString(): String {
         return "AvatarPicksKey{avatarID=" + this.avatarID + ", pickID=" + this.pickID + '}'
     }
 

@@ -16,7 +16,7 @@ final class AutoValue_DrawableTextParams : DrawableTextParams() {
         return this.backgroundColor
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
@@ -30,7 +30,7 @@ final class AutoValue_DrawableTextParams : DrawableTextParams() {
         return false
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         return ((this.text.hashCode() ^ 1000003) * 1000003) ^ this.backgroundColor
     }
 
@@ -38,7 +38,7 @@ final class AutoValue_DrawableTextParams : DrawableTextParams() {
         return this.text
     }
 
-     public fun toString(): String {
+     public override fun toString(): String {
         return "DrawableTextParams{text=" + this.text + ", " + "backgroundColor=" + this.backgroundColor + "}"
     }
 }

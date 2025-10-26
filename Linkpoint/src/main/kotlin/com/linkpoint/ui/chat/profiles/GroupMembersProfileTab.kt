@@ -254,7 +254,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             }
         }
 
-        fun onClick(view: View) {
+        override fun onClick(view: View) {
             switch (view.getId()) {
                 case R.id.group_member_card_view:
                     if (GroupMembersProfileTab.this.getArguments().containsKey(GroupMembersProfileTab.ROLE_TO_ADD_KEY)) {
@@ -636,7 +636,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         dialogInterface.dismiss()
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         val inflate: View = layoutInflater.inflate(R.layout.group_profile_tab_members, viewGroup, false)
         ((LoadingLayout) inflate.findViewById(R.id.loading_layout)).setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout))
         this.adapter = GroupMemberListRecyclerAdapter(getContext())

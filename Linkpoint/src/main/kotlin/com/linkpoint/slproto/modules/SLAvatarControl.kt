@@ -109,7 +109,7 @@ class SLAvatarControl : SLModule() {
             return this.scheduledInterval
         }
 
-        fun run() {
+        override fun run() {
             if (SLAvatarControl.this.enableAgentUpdates) {
                 SLAvatarControl.this.SendAgentUpdate(SLAvatarControl.this.agentCircuit.getModules().drawDistance)
             }

@@ -35,7 +35,7 @@ class CurrentOutfitFragment : Fragment(), LoadableMonitor.OnLoadableDataChangedL
         return bundle
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         val inflate: View = layoutInflater.inflate(R.layout.current_outfit_fragment, viewGroup, false)
         this.listAdapter = CurrentOutfitAdapter(layoutInflater.getContext())
@@ -79,7 +79,7 @@ class CurrentOutfitFragment : Fragment(), LoadableMonitor.OnLoadableDataChangedL
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
@@ -90,7 +90,7 @@ class CurrentOutfitFragment : Fragment(), LoadableMonitor.OnLoadableDataChangedL
         this.loadableMonitor.unsubscribeAll()
     }
 
-    fun onStop() {
+    override fun onStop() {
         this.loadableMonitor.unsubscribeAll()
         super.onStop()
     }

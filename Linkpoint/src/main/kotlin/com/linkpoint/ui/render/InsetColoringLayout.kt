@@ -52,7 +52,7 @@ class InsetColoringLayout : FrameLayout() {
     }
 
     /* access modifiers changed from: protected */
-    fun onDraw(canvas: Canvas) {
+    override fun onDraw(canvas: Canvas) {
         val width: Int = getWidth()
         val height: Int = getHeight()
         this.backgroundPaint.setColor(this.backgroundColor)
@@ -71,7 +71,7 @@ class InsetColoringLayout : FrameLayout() {
     }
 
     /* access modifiers changed from: protected */
-    fun onLayout(z: Boolean, i: Int, i2: Int, i3: Int, i4: Int) {
+    override fun onLayout(z: Boolean, i: Int, i2: Int, i3: Int, i4: Int) {
         View childAt
         super.onLayout(z, i, i2, i3, i4)
         if (getChildCount() > 0 && (childAt = getChildAt(0)) != null) {

@@ -58,7 +58,7 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
         }
     }
 
-    static class DefaultTextureException : Exception() {
+    class DefaultTextureException : Exception() {
         DefaultTextureException() {
         }
     }

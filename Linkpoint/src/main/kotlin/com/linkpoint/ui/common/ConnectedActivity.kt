@@ -176,7 +176,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
         }
     }
 
-    fun onBackPressed() {
+    override fun onBackPressed() {
         if (!this.navDrawerHelper.onBackPressed()) {
             if ((!handleConnectionEvents() || !removeObjectPopupsFragment()) && !handleBackPressed()) {
                 super.onBackPressed()
@@ -184,13 +184,13 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
         }
     }
 
-    fun onConfigurationChanged(configuration: Configuration) {
+    override fun onConfigurationChanged(configuration: Configuration) {
         super.onConfigurationChanged(configuration)
         this.navDrawerHelper.onConfigurationChanged(configuration)
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         if (!handleConnectionEvents()) {
             return
@@ -204,7 +204,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
         this.wantedShowObjectPopups = getIntent().getBooleanExtra(OBJECT_POPUP_NOTIFICATION, false)
     }
 
-     public fun onCreateOptionsMenu(menu: Menu): Boolean {
+     public override fun onCreateOptionsMenu(menu: Menu): Boolean {
         Debug.Printf("ObjectPopup: createOptionsMenu", Object[0])
         if (!handleConnectionEvents()) {
             return super.onCreateOptionsMenu(menu)
@@ -309,7 +309,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
         }
     }
 
-     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         if (!this.navDrawerHelper.onOptionsItemSelected(menuItem)) {
             return super.onOptionsItemSelected(menuItem)
         }
@@ -317,7 +317,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
     }
 
     /* access modifiers changed from: protected */
-    fun onPause() {
+    override fun onPause() {
         val userManager: UserManager = ActivityUtils.getUserManager(getIntent())
         if (userManager != null && handleConnectionEvents()) {
             userManager.getObjectPopupsManager().removeObjectPopupListener(this)
@@ -340,7 +340,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
     }
 
     /* access modifiers changed from: protected */
-    fun onResume() {
+    override fun onResume() {
         super.onResume()
         val userManager: UserManager = ActivityUtils.getUserManager(getIntent())
         if (userManager != null && handleConnectionEvents()) {
@@ -361,7 +361,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
     }
 
     /* access modifiers changed from: protected */
-    fun onSaveInstanceState(bundle: Bundle) {
+    override fun onSaveInstanceState(bundle: Bundle) {
         super.onSaveInstanceState(bundle)
         if (handleConnectionEvents()) {
             bundle.putBoolean("objectPopupsDisplayed", this.objectPopupsDisplayed)

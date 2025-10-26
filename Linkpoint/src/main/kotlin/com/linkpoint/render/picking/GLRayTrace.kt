@@ -19,7 +19,7 @@ class GLRayTrace {
             this.t = f2
         }
 
-         public fun toString(): String {
+         public override fun toString(): String {
             return "RayIntersectInfo{intersectPoint=" + this.intersectPoint + ", s=" + this.s + ", t=" + this.t + '}'
         }
     }

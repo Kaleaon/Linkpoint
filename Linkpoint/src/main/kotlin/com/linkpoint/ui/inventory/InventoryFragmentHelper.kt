@@ -83,7 +83,7 @@ class InventoryFragmentHelper {
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentHelper_12001  reason: not valid java name */
-    static /* synthetic */ Unit m610lambda$com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentHelper_12001(Dialog dialog, SLInventory sLInventory, SLInventoryEntry sLInventoryEntry, String str, View view) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m610lambda$com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentHelper_12001(Dialog dialog, SLInventory sLInventory, SLInventoryEntry sLInventoryEntry, String str, View view) {
         val trim: String = ((EditText) dialog.findViewById(R.id.itemNameText)).getText().toString().trim()
         if (!trim.isEmpty()) {
             sLInventory.DoCreateNewLandmark(sLInventoryEntry, trim, str)
@@ -92,7 +92,7 @@ class InventoryFragmentHelper {
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentHelper_8206  reason: not valid java name */
-    static /* synthetic */ Unit m615lambda$com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentHelper_8206(Boolean z, SLInventory sLInventory, SLInventoryEntry sLInventoryEntry, Runnable runnable, DialogInterface dialogInterface, Int i) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m615lambda$com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentHelper_8206(Boolean z, SLInventory sLInventory, SLInventoryEntry sLInventoryEntry, Runnable runnable, DialogInterface dialogInterface, Int i) {
         dialogInterface.dismiss()
         if (z) {
             sLInventory.DeleteInventoryItem(sLInventoryEntry)
@@ -105,7 +105,7 @@ class InventoryFragmentHelper {
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentHelper_9777  reason: not valid java name */
-    static /* synthetic */ Unit m617lambda$com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentHelper_9777(Runnable runnable, SLAgentCircuit sLAgentCircuit, ChatterID chatterID, SLInventoryEntry sLInventoryEntry, DialogInterface dialogInterface, Int i) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m617lambda$com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentHelper_9777(Runnable runnable, SLAgentCircuit sLAgentCircuit, ChatterID chatterID, SLInventoryEntry sLInventoryEntry, DialogInterface dialogInterface, Int i) {
         dialogInterface.dismiss()
         if (runnable != null) {
             runnable.run()

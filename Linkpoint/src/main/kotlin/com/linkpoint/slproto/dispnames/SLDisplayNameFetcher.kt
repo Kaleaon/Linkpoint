@@ -29,7 +29,7 @@ class SLDisplayNameFetcher : SLModule() {
     private const val MAX_BATCH_SIZE: Int = 4
     private val String capsURL
     private val Runnable httpThreadRunnable = Runnable() {
-        fun run() {
+        override fun run() {
             UUID nextRequest
             val userNameRequestQueue: RequestQueue<UUID, UserName> = SLDisplayNameFetcher.this.userManager.getUserNameRequestQueue()
             val hashSet: HashSet<UUID> = HashSet<>()

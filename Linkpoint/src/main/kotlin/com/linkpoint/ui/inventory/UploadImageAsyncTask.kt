@@ -54,7 +54,7 @@ protected class UploadImageResult {
     }
 
     /* access modifiers changed from: protected */
-     public fun doInBackground(vararg uploadImageParamsArr: UploadImageParams): UploadImageResult {
+     public override fun doInBackground(vararg uploadImageParamsArr: UploadImageParams): UploadImageResult {
         Bitmap bitmap
         String str
         val z2: Boolean = true
@@ -194,7 +194,7 @@ protected class UploadImageResult {
     /* access modifiers changed from: protected */
     /* JADX WARNING: Multi-variable type inference failed */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    fun onPostExecute(com.lumiyaviewer.lumiya.ui.inventory.UploadImageAsyncTask.UploadImageResult r4) {
+    override fun onPostExecute(com.lumiyaviewer.lumiya.ui.inventory.UploadImageAsyncTask.UploadImageResult r4) {
         /*
             r3 = this
             r2 = 0
@@ -256,7 +256,7 @@ protected class UploadImageResult {
     }
 
     /* access modifiers changed from: protected */
-    fun onPreExecute() {
+    override fun onPreExecute() {
         super.onPreExecute()
         this.progressDialog = ProgressDialog(this.context)
         this.progressDialog.setMessage(this.context.getString(R.string.uploading_picture))

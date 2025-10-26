@@ -199,7 +199,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             }
         }
 
-        fun onClick(view: View) {
+        override fun onClick(view: View) {
             switch (view.getId()) {
                 case R.id.role_member_remove_button:
                     if (this.boundChatterID != null && this.canDelete) {
@@ -372,7 +372,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         val inflate: View = layoutInflater.inflate(R.layout.group_profile_role_members, viewGroup, false)
         ((LoadingLayout) inflate.findViewById(R.id.loading_layout)).setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout))
         inflate.findViewById(R.id.add_role_member_button).setOnClickListener(View.OnClickListener(this) {

@@ -31,7 +31,7 @@ class ObjectDerezDialog {
         val i2: Int = derezAction.derezQuestionId
         AlertDialog.Builder builder = AlertDialog.Builder(context)
         builder.setMessage(context.getString(i2)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener() {
-            fun onClick(dialogInterface: DialogInterface, i: Int) {
+            override fun onClick(dialogInterface: DialogInterface, i: Int) {
                 SLAgentCircuit activeAgentCircuit
                 dialogInterface.dismiss()
                 val userManager: UserManager = UserManager.getUserManager(uuid)
@@ -40,7 +40,7 @@ class ObjectDerezDialog {
                 }
             }
         }).setNegativeButton("No", DialogInterface.OnClickListener() {
-            fun onClick(dialogInterface: DialogInterface, i: Int) {
+            override fun onClick(dialogInterface: DialogInterface, i: Int) {
                 dialogInterface.cancel()
             }
         builder.create().show()

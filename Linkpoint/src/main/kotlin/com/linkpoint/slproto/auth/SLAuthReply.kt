@@ -301,7 +301,7 @@ val class SLAuthReply {
         return false
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
@@ -312,7 +312,7 @@ val class SLAuthReply {
         return this.simAddress.equals(sLAuthReply.simAddress) && this.simPort == sLAuthReply.simPort && this.agentID.equals(sLAuthReply.agentID) && this.sessionID.equals(sLAuthReply.sessionID) && this.circuitCode == sLAuthReply.circuitCode
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         return this.simAddress.hashCode() + 0 + this.simPort + this.agentID.hashCode() + this.sessionID.hashCode() + this.circuitCode
     }
 }

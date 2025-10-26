@@ -30,7 +30,7 @@ class SLAuthParams {
         this.gridName = str5
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (this == obj) {
             return true
         }
@@ -56,7 +56,7 @@ class SLAuthParams {
         return this.gridName != null ? this.gridName.equals(sLAuthParams.gridName) : sLAuthParams.gridName == null
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         val i: Int = 0
         val hashCode: Int = ((this.loginURL != null ? this.loginURL.hashCode() : 0) + (((this.startLocation != null ? this.startLocation.hashCode() : 0) + (((this.clientID != null ? this.clientID.hashCode() : 0) + (((this.passwordHash != null ? this.passwordHash.hashCode() : 0) + ((this.loginName != null ? this.loginName.hashCode() : 0) * 31)) * 31)) * 31)) * 31)) * 31
         if (this.gridName != null) {

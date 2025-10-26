@@ -47,7 +47,7 @@ class ChunkedListLoader<E : Identifiable<Long>>, AbstractList<E> : ChunkedList.C
     /* access modifiers changed from: private */
     public Boolean loadBelowWanted = false
     private val Runnable loadMoreData = Runnable() {
-        fun run() {
+        override fun run() {
             Long r4
             Long r6
             val z4: Boolean = true
@@ -92,7 +92,7 @@ class ChunkedListLoader<E : Identifiable<Long>>, AbstractList<E> : ChunkedList.C
     /* access modifiers changed from: private */
     val Object lock = Object()
     private val Runnable processUpdate = Runnable() {
-        fun run() {
+        override fun run() {
             LoadResult r3
             LoadResult r32
             Identifiable identifiable

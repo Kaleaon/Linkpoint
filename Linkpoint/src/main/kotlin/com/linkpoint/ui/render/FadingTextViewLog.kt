@@ -21,7 +21,7 @@ import java.util.Map
 class FadingTextViewLog {
     private const val STALE_CHAT_TIMEOUT: Long = 5000
     private val Runnable RemoveStaleChatsTask = Runnable() {
-        fun run() {
+        override fun run() {
             val unused: Boolean = FadingTextViewLog.this.removeStaleChatsPosted = false
             if (FadingTextViewLog.this.chatsOverlayLayout != null) {
                 val uptimeMillis: Long = SystemClock.uptimeMillis()

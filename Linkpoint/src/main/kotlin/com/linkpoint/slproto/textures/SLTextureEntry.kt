@@ -383,7 +383,7 @@ private fun CreateFace(mutableSLTextureEntryFaceArr: Array<MutableSLTextureEntry
         return i >= this.FaceTextures.length ? this.DefaultTexture : this.FaceTextures[i] != null ? this.FaceTextures[i] : this.DefaultTexture
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }

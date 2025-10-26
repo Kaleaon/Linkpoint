@@ -65,7 +65,7 @@ class SLCapEventQueue : Runnable {
         this.workingThread.start()
     }
 
-    fun run() {
+    override fun run() {
         Debug.Log("CapEventQueue: working thread starting with capURL = " + this.capURL)
         val z2: Boolean = false
         while (true) {

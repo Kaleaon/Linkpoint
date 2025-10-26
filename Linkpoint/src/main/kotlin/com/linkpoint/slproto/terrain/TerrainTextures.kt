@@ -46,7 +46,7 @@ private Array<UUID> defaultTerrainTextures = {UUID.fromString("0bc58228-74a0-7e8
         return (((fArr[0] * f) + (fArr[1] * (1.0f - f))) * f2) + (((fArr[2] * f) + (fArr[3] * (1.0f - f))) * (1.0f - f2))
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (!(obj instanceof TerrainTextures)) {
             return false
         }
@@ -86,7 +86,7 @@ private Array<UUID> defaultTerrainTextures = {UUID.fromString("0bc58228-74a0-7e8
         return this.textureIDs[i]
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         return Arrays.hashCode(this.textureIDs) + Arrays.hashCode(this.terrainStartHeight) + Arrays.hashCode(this.terrainHeightRange)
     }
 }

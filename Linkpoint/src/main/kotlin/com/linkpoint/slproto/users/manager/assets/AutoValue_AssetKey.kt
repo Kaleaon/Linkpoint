@@ -34,7 +34,7 @@ final class AutoValue_AssetKey : AssetKey() {
         return this.channelType
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
@@ -48,7 +48,7 @@ final class AutoValue_AssetKey : AssetKey() {
         return this.taskUUID == null ? assetKey.taskUUID() == null : this.taskUUID.equals(assetKey.taskUUID())
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         val i: Int = 0
         val hashCode: Int = ((this.itemUUID == null ? 0 : this.itemUUID.hashCode()) ^ (((this.ownerUUID == null ? 0 : this.ownerUUID.hashCode()) ^ (((((this.assetUUID == null ? 0 : this.assetUUID.hashCode()) ^ ((((this.channelType ^ 1000003) * 1000003) ^ this.sourceType) * 1000003)) * 1000003) ^ this.assetType) * 1000003)) * 1000003)) * 1000003
         if (this.taskUUID != null) {

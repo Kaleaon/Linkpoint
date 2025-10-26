@@ -53,7 +53,7 @@ private class WeakRunnable : Runnable {
                 this(runnable)
             }
 
-            fun run() {
+            override fun run() {
                 val runnable: Runnable = (Runnable) this.runnableRef.get()
                 if (runnable != null) {
                     runnable.run()
@@ -229,7 +229,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.res.executors.-$Lambd
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_res_executors_WeakExecutor_1106  reason: not valid java name */
-    static /* synthetic */ Thread m107lambda$com_lumiyaviewer_lumiya_res_executors_WeakExecutor_1106(String str, Runnable runnable) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Thread m107lambda$com_lumiyaviewer_lumiya_res_executors_WeakExecutor_1106(String str, Runnable runnable) {
         val thread: Thread = Thread(runnable, str)
         Debug.Printf("Creating thread %s got %d", str, Long.valueOf(thread.getId()))
         thread.setPriority(4)
@@ -237,7 +237,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.res.executors.-$Lambd
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_res_executors_WeakExecutor_531  reason: not valid java name */
-    static /* synthetic */ Thread m108lambda$com_lumiyaviewer_lumiya_res_executors_WeakExecutor_531(String str, Runnable runnable) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Thread m108lambda$com_lumiyaviewer_lumiya_res_executors_WeakExecutor_531(String str, Runnable runnable) {
         val thread: Thread = Thread(runnable, str)
         Debug.Printf("Creating thread %s got %d", str, Long.valueOf(thread.getId()))
         thread.setPriority(4)

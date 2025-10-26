@@ -39,7 +39,7 @@ class ChatTextBoxViewHolder : ChatEventViewHolder(), View.OnClickListener, View.
         }
     }
 
-    fun onClick(view: View) {
+    override fun onClick(view: View) {
         switch (view.getId()) {
             case R.id.buttonDialogIgnore:
                 if (this.textBoxEvent != null) {

@@ -52,7 +52,7 @@ private Array<TrustManager> trustAllCerts = {trustEverythingManager}
         }
     }
 
-    static class CharsetStripInterceptor : Interceptor {
+    class CharsetStripInterceptor : Interceptor {
         CharsetStripInterceptor() {
         }
 
@@ -70,7 +70,7 @@ private Array<TrustManager> trustAllCerts = {trustEverythingManager}
         }
     }
 
-    static class DNSforDNS : Dns {
+    class DNSforDNS : Dns {
         private val Dns systemDns = Dns.SYSTEM
 
         DNSforDNS() {
@@ -103,7 +103,7 @@ private Array<TrustManager> trustAllCerts = {trustEverythingManager}
         }
     }
 
-    static class SLDNS : Dns {
+    class SLDNS : Dns {
         private val OkHttpClient httpResolverClient = OkHttpClient.Builder().dns(DNSforDNS()).connectTimeout(60, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).build()
         private val Dns systemDns = Dns.SYSTEM
 

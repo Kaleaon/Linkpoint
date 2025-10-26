@@ -21,7 +21,7 @@ enum class NotificationType {
     private String ringtoneKey
 
     static {
-        VALUES = ImmutableList.copyOf((E[]) values())
+        VALUES = ImmutableList.copyOf((Array<E>) values())
         VALUES_BY_DESCENDING_PRIORITY = ImmutableList.of(Private, Group, LocalChat)
     }
 

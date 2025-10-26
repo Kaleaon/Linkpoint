@@ -22,7 +22,7 @@ class Subscription<K, T> : RefreshableOne {
          fun onError(th: Throwable)
     }
 
-    static class SubscriptionReference<K, T> : WeakReference<Subscription<K, T>> {
+    class SubscriptionReference<K, T> : WeakReference<Subscription<K, T>> {
         private val K key
 
         SubscriptionReference(Subscription<K, T> subscription, ReferenceQueue<? super Subscription<K, T>> referenceQueue) {

@@ -222,12 +222,12 @@ abstract class DriveConnectibleResource {
         this.resourceName = string3
     }
 
-    static /* synthetic */ Boolean access$002(DriveConnectibleResource driveConnectibleResource, Boolean bl) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Boolean access$002(DriveConnectibleResource driveConnectibleResource, Boolean bl) {
         driveConnectibleResource.needInvalidate = bl
         return bl
     }
 
-    static /* synthetic */ Boolean access$102(DriveConnectibleResource driveConnectibleResource, Boolean bl) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Boolean access$102(DriveConnectibleResource driveConnectibleResource, Boolean bl) {
         driveConnectibleResource.needRecreate = bl
         return bl
     }
@@ -353,7 +353,7 @@ abstract class DriveConnectibleResource {
         this.createResource(Drive.DriveApi.getRootFolder(this.googleApiClient))
     }
 
-    static interface OnResourceReadyListener {
+    interface OnResourceReadyListener {
         fun onResourceReady(var1: DriveResource, var2: String)
     }
 

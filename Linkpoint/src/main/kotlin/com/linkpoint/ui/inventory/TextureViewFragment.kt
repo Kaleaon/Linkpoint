@@ -54,7 +54,7 @@ class TextureViewFragment : StateAwareFragment() {
         }
 
         /* access modifiers changed from: protected */
-         public fun doInBackground(vararg uuidArr: UUID): Bitmap {
+         public override fun doInBackground(vararg uuidArr: UUID): Bitmap {
             Debug.Printf("loading asset ID %s", uuidArr[0].toString())
             TextureCache.getInstance().RequestResource(DrawableTextureParams.create(uuidArr[0], TextureClass.Asset), this)
             synchronized (this.textureReady) {
@@ -78,7 +78,7 @@ class TextureViewFragment : StateAwareFragment() {
         }
 
         /* access modifiers changed from: protected */
-        fun onPostExecute(bitmap: Bitmap) {
+        override fun onPostExecute(bitmap: Bitmap) {
             if (!(!TextureViewFragment.this.isFragmentStarted() || TextureViewFragment.this.textureImageView == null || TextureViewFragment.this.loadingLayout == null)) {
                 if (bitmap != null) {
                     TextureViewFragment.this.loadingLayout.showContent((String) null)
@@ -94,7 +94,7 @@ class TextureViewFragment : StateAwareFragment() {
         }
 
         /* access modifiers changed from: protected */
-        fun onPreExecute() {
+        override fun onPreExecute() {
             if (TextureViewFragment.this.isFragmentStarted() && TextureViewFragment.this.loadingLayout != null) {
                 TextureViewFragment.this.loadingLayout.showLoading()
             }
@@ -109,7 +109,7 @@ class TextureViewFragment : StateAwareFragment() {
         return bundle
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         val inflate: View = layoutInflater.inflate(R.layout.texture_view_fragment, viewGroup, false)
         this.loadingLayout = (LoadingLayout) inflate.findViewById(R.id.loading_layout)
         this.textureImageView = (ImageView) inflate.findViewById(R.id.texture_image_view)
@@ -117,7 +117,7 @@ class TextureViewFragment : StateAwareFragment() {
         return inflate
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         val uuid: UUID = UUIDPool.getUUID(getArguments().getString(ASSET_UUID_KEY))
         if (uuid != null) {
@@ -130,7 +130,7 @@ class TextureViewFragment : StateAwareFragment() {
         }
     }
 
-    fun onStop() {
+    override fun onStop() {
         if (this.loadAssetImageTask != null) {
             this.loadAssetImageTask.cancel(true)
             this.loadAssetImageTask = null

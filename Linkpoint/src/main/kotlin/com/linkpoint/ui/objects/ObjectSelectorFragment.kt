@@ -204,12 +204,12 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
         return true
     }
 
-    fun onCreate(@android.support.annotation.Nullable Bundle bundle) {
+    override fun onCreate(@android.support.annotation.Nullable Bundle bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.menu_object_selector, menu)
         this.searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.action_search))
@@ -248,7 +248,7 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
             }
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         val inflate: View = layoutInflater.inflate(R.layout.object_list, viewGroup, false)
         ((ExpandableListView) inflate.findViewById(R.id.objectListView)).setAdapter(ObjectListAdapter(layoutInflater.getContext()))
@@ -287,7 +287,7 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         SLModules modules
         val i: Int = 256
         super.onStart()
@@ -315,7 +315,7 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
     fun onStartTrackingTouch(seekBar: SeekBar) {
     }
 
-    fun onStop() {
+    override fun onStop() {
         SLAgentCircuit activeAgentCircuit
         SLModules modules
         if (this.subscription != null) {

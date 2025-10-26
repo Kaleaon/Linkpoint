@@ -497,7 +497,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         dialog.dismiss()
     }
 
-    fun onClick(view: View) {
+    override fun onClick(view: View) {
         val data: SLInventoryEntry = this.entrySubscription.getData()
         if (data != null) {
             switch (view.getId()) {
@@ -544,12 +544,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         }
     }
 
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.inventory_item_menu, menu)
         this.menuItemDelete = menu.findItem(R.id.inventory_item_delete_item)
         this.menuItemRename = menu.findItem(R.id.inventory_item_rename_item)
@@ -559,7 +559,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         updateMenuItems()
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         val inflate: View = layoutInflater.inflate(R.layout.asset_info, viewGroup, false)
         ((LoadingLayout) inflate.findViewById(R.id.loading_layout)).setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout))
@@ -594,7 +594,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         }
     }
 
-     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
             try {
@@ -707,17 +707,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         return super.onOptionsItemSelected(menuItem)
     }
 
-    fun onPrepareOptionsMenu(menu: Menu) {
+    override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
         updateMenuItems()
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         showEntry(UUIDPool.getUUID(getArguments().getString(ITEM_UUID_KEY)))
     }
 
-    fun onStop() {
+    override fun onStop() {
         showEntry((UUID) null)
         super.onStop()
     }

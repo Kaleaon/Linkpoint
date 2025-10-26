@@ -39,7 +39,7 @@ class VoicePermissionRequestActivity : AppCompatActivity() {
     }
     private Messenger serviceMessenger = null
 
-    static /* synthetic */ Messenger access$002(VoicePermissionRequestActivity voicePermissionRequestActivity, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Messenger access$002(VoicePermissionRequestActivity voicePermissionRequestActivity, Messenger messenger) {
         voicePermissionRequestActivity.serviceMessenger = messenger
         return messenger
     }

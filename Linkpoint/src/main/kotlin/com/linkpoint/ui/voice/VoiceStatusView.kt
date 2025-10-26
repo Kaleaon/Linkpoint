@@ -1136,7 +1136,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_voice_VoiceStatusView_6407  reason: not valid java name */
-    static /* synthetic */ Boolean m866lambda$com_lumiyaviewer_lumiya_ui_voice_VoiceStatusView_6407(OnHoverListenerCompat onHoverListenerCompat, View view, MotionEvent motionEvent) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Boolean m866lambda$com_lumiyaviewer_lumiya_ui_voice_VoiceStatusView_6407(OnHoverListenerCompat onHoverListenerCompat, View view, MotionEvent motionEvent) {
         if (!(view instanceof ImageButton)) {
             return false
         }

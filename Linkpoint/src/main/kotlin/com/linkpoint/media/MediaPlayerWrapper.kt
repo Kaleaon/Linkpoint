@@ -61,7 +61,7 @@ class MediaPlayerWrapper : Runnable, OnErrorListener, OnInfoListener, OnPrepared
         }
     }
 
-    fun run() {
+    override fun run() {
         Debug.Log("MediaPlayerWrapper: working thread started")
         while (!this.mustExit) {
             if (this.mustPlay) {

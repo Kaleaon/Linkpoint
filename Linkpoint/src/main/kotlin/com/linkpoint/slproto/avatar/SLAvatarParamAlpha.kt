@@ -15,7 +15,7 @@ class SLAvatarParamAlpha {
         this.multiplyBlend = z2
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (this == obj) {
             return true
         }
@@ -29,7 +29,7 @@ class SLAvatarParamAlpha {
         return false
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         val i: Int = 1
         val hashCode: Int = ((this.skipIfZero ? 1 : 0) + (((this.tgaFile != null ? this.tgaFile.hashCode() : 0) + ((this.domain != 0.0f ? Float.floatToIntBits(this.domain) : 0) * 31)) * 31)) * 31
         if (!this.multiplyBlend) {

@@ -191,7 +191,7 @@ class SwipeDismissAdvancedBehavior<V : View>, CoordinatorLayout.Behavior<V> {
             this.mDismiss = z
         }
 
-        fun run() {
+        override fun run() {
             if (SwipeDismissAdvancedBehavior.this.mViewDragHelper != null && SwipeDismissAdvancedBehavior.this.mViewDragHelper.continueSettling(true)) {
                 ViewCompat.postOnAnimation(this.mView, this)
             } else if (this.mDismiss && SwipeDismissAdvancedBehavior.this.mListener != null) {
@@ -257,7 +257,7 @@ class SwipeDismissAdvancedBehavior<V : View>, CoordinatorLayout.Behavior<V> {
         return this.mViewDragHelper.shouldInterceptTouchEvent(motionEvent)
     }
 
-     public fun onTouchEvent(coordinatorLayout: CoordinatorLayout, V v, motionEvent: MotionEvent): Boolean {
+     public override fun onTouchEvent(coordinatorLayout: CoordinatorLayout, V v, motionEvent: MotionEvent): Boolean {
         if (this.mViewDragHelper == null) {
             return false
         }

@@ -125,7 +125,7 @@ class LLVector4 {
         this.w = Math.min(this.w, lLVector4.w)
     }
 
-     public fun toString(): String {
+     public override fun toString(): String {
         return String.format("(%f, %f, %f)", Array<Any>{Float.valueOf(this.x), Float.valueOf(this.y), Float.valueOf(this.z)})
     }
 }

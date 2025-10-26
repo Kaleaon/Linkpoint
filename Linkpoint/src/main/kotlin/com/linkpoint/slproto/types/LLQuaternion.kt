@@ -494,7 +494,7 @@ class LLQuaternion {
     }
     
     // Comparison
-    fun equals(other: LLQuaternion, epsilon: Float): Boolean {
+    override fun equals(other: LLQuaternion, epsilon: Float): Boolean {
         return abs(mQ[VX] - other.mQ[VX]) < epsilon &&
                abs(mQ[VY] - other.mQ[VY]) < epsilon &&
                abs(mQ[VZ] - other.mQ[VZ]) < epsilon &&

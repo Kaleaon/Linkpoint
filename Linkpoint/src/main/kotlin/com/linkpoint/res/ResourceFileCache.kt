@@ -22,7 +22,7 @@ abstract class ResourceFileCache<ResourceParams, ResourceType> : ResourceMemoryC
             LoaderExecutor.getInstance().execute(this)
         }
 
-        fun run() {
+        override fun run() {
             try {
                 completeRequest(ResourceFileCache.this.createResourceFromFile(getParams(), this.file))
             } catch (Exception e) {

@@ -192,27 +192,27 @@ class DriveTextFile {
         this.connectibleFile = DriveConnectibleFile(context, driveSynchronizer, driveConnectibleResource, googleApiClient, string2, "text/plain")
     }
 
-    static /* synthetic */ DriveFile access$1002(DriveTextFile driveTextFile, DriveFile driveFile) {
+    // TODO: Review synthetic accessor - static /* synthetic */ DriveFile access$1002(DriveTextFile driveTextFile, DriveFile driveFile) {
         driveTextFile.driveFile = driveFile
         return driveFile
     }
 
-    static /* synthetic */ Long access$1302(DriveTextFile driveTextFile, Long l) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Long access$1302(DriveTextFile driveTextFile, Long l) {
         driveTextFile.openSinceMillis = l
         return l
     }
 
-    static /* synthetic */ DriveContents access$1402(DriveTextFile driveTextFile, DriveContents driveContents) {
+    // TODO: Review synthetic accessor - static /* synthetic */ DriveContents access$1402(DriveTextFile driveTextFile, DriveContents driveContents) {
         driveTextFile.driveContents = driveContents
         return driveContents
     }
 
-    static /* synthetic */ FileOutputStream access$1502(DriveTextFile driveTextFile, FileOutputStream fileOutputStream) {
+    // TODO: Review synthetic accessor - static /* synthetic */ FileOutputStream access$1502(DriveTextFile driveTextFile, FileOutputStream fileOutputStream) {
         driveTextFile.fileOutputStream = fileOutputStream
         return fileOutputStream
     }
 
-    static /* synthetic */ State access$202(DriveTextFile driveTextFile, State state) {
+    // TODO: Review synthetic accessor - static /* synthetic */ State access$202(DriveTextFile driveTextFile, State state) {
         driveTextFile.state = state
         return state
     }

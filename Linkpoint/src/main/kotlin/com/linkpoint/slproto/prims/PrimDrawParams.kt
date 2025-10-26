@@ -11,7 +11,7 @@ class PrimDrawParams {
         this.textures = sLTextureEntry
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
@@ -39,7 +39,7 @@ class PrimDrawParams {
         return this.volumeParams
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         val i: Int = 0
         if (this.volumeParams != null) {
             i = this.volumeParams.hashCode() + 0

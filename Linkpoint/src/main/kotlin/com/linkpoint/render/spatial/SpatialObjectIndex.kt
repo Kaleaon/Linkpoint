@@ -41,7 +41,7 @@ class SpatialObjectIndex {
     private val Map<Integer, TerrainData> terrainDirty = HashMap()
     private val Object terrainLock = Object()
     private val Runnable terrainUpdate = Runnable() {
-        fun run() {
+        override fun run() {
             val z: Boolean = false
             while (SpatialObjectIndex.this.initialUpdateCompleted && (SpatialObjectIndex.this.indexDisabled ^ 1) != 0) {
                 TerrainData terrainData
@@ -110,7 +110,7 @@ class SpatialObjectIndex {
             this()
         }
 
-        fun run() {
+        override fun run() {
             if (SpatialObjectIndex.this.initialUpdateCompleted && (SpatialObjectIndex.this.indexDisabled ^ 1) != 0) {
                 if (!SpatialObjectIndex.this.frustrumChanged.getAndSet(false) ? SpatialObjectIndex.this.spatialTree.isTreeWalkNeeded() : true) {
                     FrustrumPlanes -get4 = SpatialObjectIndex.this.frustrumPlanes
@@ -134,7 +134,7 @@ class SpatialObjectIndex {
             this()
         }
 
-        fun run() {
+        override fun run() {
             if (SpatialObjectIndex.this.initialUpdateCompleted && (SpatialObjectIndex.this.indexDisabled ^ 1) != 0) {
                 Array<DrawListObjectEntry> drawListObjectEntryArr
                 synchronized (SpatialObjectIndex.this.objectUpdateRemoveLock) {

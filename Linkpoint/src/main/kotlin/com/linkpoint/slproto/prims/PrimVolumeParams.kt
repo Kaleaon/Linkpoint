@@ -46,7 +46,7 @@ class PrimVolumeParams {
         return primVolumeParams
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
@@ -81,7 +81,7 @@ class PrimVolumeParams {
         return this.FlexiParams == null || this.FlexiParams.equals(primVolumeParams.FlexiParams)
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         val i: Int = (this.SculptType * 17) + 0
         if (this.SculptID != null) {
             i += this.SculptID.hashCode() * 3
@@ -102,7 +102,7 @@ class PrimVolumeParams {
         return this.SculptID != null
     }
 
-     public fun toString(): String {
+     public override fun toString(): String {
         return "{Volume: SculptType 0x" + Integer.toHexString(this.SculptType) + ", SculptID " + (this.SculptID != null ? this.SculptID.toString() : "null") + ", Path = (" + this.PathParams.toString() + "), Profile = (" + this.ProfileParams.toString() + ")}"
     }
 

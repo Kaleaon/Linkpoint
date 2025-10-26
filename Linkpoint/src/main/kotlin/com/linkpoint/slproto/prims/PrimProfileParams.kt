@@ -46,7 +46,7 @@ class PrimProfileParams {
         return (this.CurveType * 17) + Float.floatToIntBits(this.Begin) + Float.floatToIntBits(this.End) + Float.floatToIntBits(this.Hollow)
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
@@ -61,7 +61,7 @@ class PrimProfileParams {
         return this.hashValue
     }
 
-     public fun toString(): String {
+     public override fun toString(): String {
         return String.format("CurveType: 0x%02x, Begin: %f, End: %f, Hollow: %f", Array<Any>{Byte.valueOf(this.CurveType), Float.valueOf(this.Begin), Float.valueOf(this.End), Float.valueOf(this.Hollow)})
     }
 }

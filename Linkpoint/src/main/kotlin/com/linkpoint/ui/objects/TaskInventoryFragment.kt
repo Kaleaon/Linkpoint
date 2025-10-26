@@ -604,17 +604,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
         }
     }
 
-    fun onCreate(@android.support.annotation.Nullable Bundle bundle) {
+    override fun onCreate(@android.support.annotation.Nullable Bundle bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.task_inventory_menu, menu)
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         val inflate: View = layoutInflater.inflate(R.layout.task_inventory, viewGroup, false)
         ((ListView) inflate.findViewById(R.id.taskInventoryListView)).setAdapter(TaskInventoryListAdapter(layoutInflater.getContext()))
@@ -690,7 +690,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
         return inflate
     }
 
-     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_copy_all:
                 copyAllToInventory(false)
@@ -700,7 +700,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         setTitle(getString(R.string.object_contents_title), (String) null)
         val userManager: UserManager = getUserManager()
@@ -711,7 +711,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
         }
     }
 
-    fun onStop() {
+    override fun onStop() {
         if (this.taskInventorySubscription != null) {
             this.taskInventorySubscription.unsubscribe()
             this.taskInventorySubscription = null

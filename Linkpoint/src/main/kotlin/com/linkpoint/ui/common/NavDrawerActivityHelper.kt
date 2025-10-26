@@ -50,7 +50,7 @@ private class DrawerToggle : ActionBarDrawerToggle() {
         this.drawerAdapter = null
     }
 
-     public fun onBackPressed(): Boolean {
+     public override fun onBackPressed(): Boolean {
         if (this.drawerLayout == null || !this.drawerLayout.isDrawerOpen(this.drawerLayout.findViewById(R.id.left_drawer))) {
             return false
         }
@@ -58,7 +58,7 @@ private class DrawerToggle : ActionBarDrawerToggle() {
         return true
     }
 
-    fun onConfigurationChanged(configuration: Configuration) {
+    override fun onConfigurationChanged(configuration: Configuration) {
         if (this.drawerToggle != null) {
             this.drawerToggle.onConfigurationChanged(configuration)
         }
@@ -73,7 +73,7 @@ private class DrawerToggle : ActionBarDrawerToggle() {
         }
     }
 
-     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         return this.drawerToggle != null && this.drawerToggle.onOptionsItemSelected(menuItem)
     }
 

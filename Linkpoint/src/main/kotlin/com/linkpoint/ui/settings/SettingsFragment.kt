@@ -48,7 +48,7 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentHasTitle {
         }
 
         /* access modifiers changed from: protected */
-         public fun doInBackground(vararg voidArr: Void): Void {
+         public override fun doInBackground(vararg voidArr: Void): Void {
             if (this.cacheDirs != null) {
                 for (File clearFolder : this.cacheDirs) {
                     FileUtils.clearFolder(clearFolder)
@@ -64,7 +64,7 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentHasTitle {
         }
 
         /* access modifiers changed from: protected */
-        fun onPostExecute(voidR: Void) {
+        override fun onPostExecute(voidR: Void) {
             if (this.progressDialog != null) {
                 this.progressDialog.dismiss()
             }
@@ -74,7 +74,7 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentHasTitle {
         }
 
         /* access modifiers changed from: protected */
-        fun onPreExecute() {
+        override fun onPreExecute() {
             this.cacheDirs = GlobalOptions.getInstance().getAvailableCacheDirs()
             this.progressDialog = ProgressDialog.show(SettingsFragment.this.getContext(), (CharSequence) null, SettingsFragment.this.getString(R.string.clearing_cache), true, true, DialogInterface.OnCancelListener(this) {
 
@@ -495,7 +495,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_settings_SettingsFragment_7498  reason: not valid java name */
-    static /* synthetic */ Unit m856lambda$com_lumiyaviewer_lumiya_ui_settings_SettingsFragment_7498(DialogInterface dialogInterface, Int i) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m856lambda$com_lumiyaviewer_lumiya_ui_settings_SettingsFragment_7498(DialogInterface dialogInterface, Int i) {
         dialogInterface.dismiss()
         LinkpointApp.restartApp()
     }
@@ -550,7 +550,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
     }
 
     @SuppressLint({"CommitPrefEdits"})
-    fun onActivityResult(i: Int, i2: Int, intent: Intent) {
+    override fun onActivityResult(i: Int, i2: Int, intent: Intent) {
         if (i == 2 && i2 == -1 && intent != null && this.requestedRingtonePreference != null) {
             val uri: Uri = (Uri) intent.getParcelableExtra("android.intent.extra.ringtone.PICKED_URI")
             val uri2: String = uri != null ? uri.toString() : ""
@@ -577,7 +577,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
         }
     }
 
-    fun onDetach() {
+    override fun onDetach() {
         super.onDetach()
         val activity: FragmentActivity = getActivity()
         if (activity instanceof DetailsActivity) {
@@ -609,7 +609,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         val activity: FragmentActivity = getActivity()
         if (activity instanceof DetailsActivity) {

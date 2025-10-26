@@ -61,7 +61,7 @@ val class SLChatScriptDialog : SLChatDialogEvent() {
             dismiss()
         }
 
-        fun onClick(view: View) {
+        override fun onClick(view: View) {
             val i: Int = 0
             while (true) {
                 if (i >= SLChatScriptDialog.dialogButtonIds.length) {

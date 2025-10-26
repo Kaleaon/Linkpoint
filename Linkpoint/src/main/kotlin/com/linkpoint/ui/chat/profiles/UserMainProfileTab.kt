@@ -152,7 +152,7 @@ class UserMainProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadab
         }
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         val inflate: View = layoutInflater.inflate(R.layout.user_profile_tab_main, viewGroup, false)
         this.unbinder = ButterKnife.bind((Object) this, inflate)
         this.userPicView.setAlignTop(true)
@@ -163,7 +163,7 @@ class UserMainProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadab
         return inflate
     }
 
-    fun onDestroyView() {
+    override fun onDestroyView() {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null

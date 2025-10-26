@@ -116,32 +116,32 @@ private VivoxController instance
         }
     }
 
-    static /* synthetic */ Boolean access$1002(VivoxController vivoxController, Boolean bl) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Boolean access$1002(VivoxController vivoxController, Boolean bl) {
         vivoxController.localMicEnabled = bl
         return bl
     }
 
-    static /* synthetic */ Messenger access$1102(VivoxController vivoxController, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Messenger access$1102(VivoxController vivoxController, Messenger messenger) {
         vivoxController.connectedMessenger = messenger
         return messenger
     }
 
-    static /* synthetic */ Int access$1602(VivoxController vivoxController, Int n) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Int access$1602(VivoxController vivoxController, Int n) {
         vivoxController.bluetoothScoState = n
         return n
     }
 
-    static /* synthetic */ Boolean access$402(VivoxController vivoxController, Boolean bl) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Boolean access$402(VivoxController vivoxController, Boolean bl) {
         vivoxController.controllerReady = bl
         return bl
     }
 
-    static /* synthetic */ VoiceAccountConnection access$602(VivoxController vivoxController, VoiceAccountConnection voiceAccountConnection) {
+    // TODO: Review synthetic accessor - static /* synthetic */ VoiceAccountConnection access$602(VivoxController vivoxController, VoiceAccountConnection voiceAccountConnection) {
         vivoxController.voiceAccountConnection = voiceAccountConnection
         return voiceAccountConnection
     }
 
-    static /* synthetic */ VoiceConnector access$802(VivoxController vivoxController, VoiceConnector voiceConnector) {
+    // TODO: Review synthetic accessor - static /* synthetic */ VoiceConnector access$802(VivoxController vivoxController, VoiceConnector voiceConnector) {
         vivoxController.voiceConnector = voiceConnector
         return voiceConnector
     }

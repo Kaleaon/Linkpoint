@@ -19,7 +19,7 @@ abstract class ResourceManager<ResourceParams, ResourceType> {
     /* access modifiers changed from: private */
     val Queue<ResourceRequest<ResourceParams, ResourceType>> cancelledRequests = ConcurrentLinkedQueue()
     private val Runnable cleanup = Runnable() {
-        fun run() {
+        override fun run() {
             ResourceManager.this.collectReferences()
         }
     }

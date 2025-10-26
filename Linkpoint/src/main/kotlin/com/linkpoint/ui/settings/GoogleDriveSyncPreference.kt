@@ -39,7 +39,7 @@ class GoogleDriveSyncPreference : CheckBoxPreference() {
     }
 
     /* access modifiers changed from: protected */
-    fun onClick() {
+    override fun onClick() {
         super.onClick()
         if (isChecked() && !CloudSyncServiceConnection.checkPluginInstalled(getContext())) {
             AlertDialog.Builder(getContext()).setTitle((Int) R.string.enable_google_drive).setMessage((CharSequence) getContext().getString(R.string.enable_google_drive_message, Array<Any>{LicenseChecker.APP_STORE_NAME})).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {

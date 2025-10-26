@@ -81,7 +81,7 @@ class GLAsyncLoadQueue : GLLoadQueue(), GLLoadQueue.GLLoadHandler {
             return eglCreateContext
         }
 
-        fun run() {
+        override fun run() {
             val andSet: RenderContext = this.renderContext.getAndSet((Object) null)
             val createContext: EGLContext = createContext()
             val i: Int = 0

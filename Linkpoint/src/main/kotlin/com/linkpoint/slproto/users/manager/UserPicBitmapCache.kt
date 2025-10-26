@@ -28,7 +28,7 @@ class UserPicBitmapCache : ResourceMemoryCache()<UUID, Bitmap> {
         /* access modifiers changed from: private */
         public volatile File compressedFile = null
         private val Runnable decompressRunnable = Runnable() {
-            fun run() {
+            override fun run() {
                 try {
                     val asBitmap: Bitmap = OpenJPEG(UserPicBitmapRequest.this.compressedFile, 128, 128, false).getAsBitmap()
                     val byteArrayOutputStream: ByteArrayOutputStream = ByteArrayOutputStream()
@@ -44,7 +44,7 @@ class UserPicBitmapCache : ResourceMemoryCache()<UUID, Bitmap> {
         }
         private volatile Future<?> decompressorFuture
         private val Runnable loadRunnable = Runnable() {
-            fun run() {
+            override fun run() {
                 val userPic: ByteArray = UserPicBitmapCache.this.userManager.getUserPic((UUID) UserPicBitmapRequest.this.getParams())
                 val objArr: Array<Any> = Object[2]
                 objArr[0] = UserPicBitmapRequest.this.getParams()

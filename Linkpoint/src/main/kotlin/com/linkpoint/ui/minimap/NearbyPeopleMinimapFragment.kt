@@ -190,7 +190,7 @@ class NearbyPeopleMinimapFragment : Fragment() {
             this.chatterDisplayData = chatterDisplayData2
         }
 
-        fun onClick(view: View) {
+        override fun onClick(view: View) {
             switch (view.getId()) {
                 case R.id.user_item_view_holder:
                     val fragmentManager: FragmentManager = NearbyPeopleMinimapFragment.this.getFragmentManager()
@@ -239,7 +239,7 @@ class NearbyPeopleMinimapFragment : Fragment() {
         }
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         val inflate: View = layoutInflater.inflate(R.layout.minimap_users, viewGroup, false)
         ButterKnife.bind((Object) this, inflate)
@@ -251,7 +251,7 @@ class NearbyPeopleMinimapFragment : Fragment() {
         return inflate
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
@@ -261,7 +261,7 @@ class NearbyPeopleMinimapFragment : Fragment() {
         }
     }
 
-    fun onStop() {
+    override fun onStop() {
         this.chatterList.unsubscribe()
         super.onStop()
     }

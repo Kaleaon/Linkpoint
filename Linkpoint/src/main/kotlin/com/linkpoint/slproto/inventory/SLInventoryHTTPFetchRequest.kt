@@ -27,7 +27,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
         /* JADX WARNING: Removed duplicated region for block: B:39:0x0170  */
         /* JADX WARNING: Removed duplicated region for block: B:40:0x0172  */
         /* Code decompiled incorrectly, please refer to instructions dump. */
-        fun run() {
+        override fun run() {
             /*
                 r15 = this
                 r14 = 3
@@ -248,7 +248,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
         /* JADX WARNING: Removed duplicated region for block: B:27:0x007f  */
         /* JADX WARNING: Removed duplicated region for block: B:65:? A[RETURN, SYNTHETIC] */
         /* Code decompiled incorrectly, please refer to instructions dump. */
-        fun run() {
+        override fun run() {
             /*
                 r11 = this
                 r3 = 1

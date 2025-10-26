@@ -50,7 +50,7 @@ class AvatarShapeParams {
         return AvatarShapeParams(iArr2)
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         return obj instanceof AvatarShapeParams ? Arrays.equals(this.visualParamValues, ((AvatarShapeParams) obj).visualParamValues) : false
     }
 
@@ -62,7 +62,7 @@ class AvatarShapeParams {
         return (i < 0 || i >= 218) ? 0 : this.visualParamValues[i]
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         return Arrays.hashCode(this.visualParamValues)
     }
 }

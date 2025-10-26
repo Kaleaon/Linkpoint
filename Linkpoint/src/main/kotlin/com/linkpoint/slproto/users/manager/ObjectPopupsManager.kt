@@ -49,7 +49,7 @@ class ObjectPopupsManager {
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_ObjectPopupsManager_8558  reason: not valid java name */
-    static /* synthetic */ Unit m337lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ObjectPopupsManager_8558(ObjectPopupListener objectPopupListener2) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m337lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ObjectPopupsManager_8558(ObjectPopupListener objectPopupListener2) {
         objectPopupListener2.onObjectPopupCountChanged(0)
         objectPopupListener2.onNewObjectPopup((SLChatEvent) null)
     }

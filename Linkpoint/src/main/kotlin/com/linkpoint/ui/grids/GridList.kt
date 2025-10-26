@@ -77,7 +77,7 @@ class GridList {
             this.LoginURL = str
         }
 
-         public fun toString(): String {
+         public override fun toString(): String {
             return this.GridName
         }
     }

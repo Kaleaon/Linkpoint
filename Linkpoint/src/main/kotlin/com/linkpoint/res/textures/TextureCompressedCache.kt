@@ -118,7 +118,7 @@ private /* synthetic */ IntArray m119getcomlumiyaviewerlumiyarendertexTextureCla
         /* JADX WARNING: Removed duplicated region for block: B:66:0x01d2 A[LOOP:0: B:11:0x00bc->B:66:0x01d2, LOOP_END] */
         /* JADX WARNING: Removed duplicated region for block: B:75:0x00fc A[SYNTHETIC] */
         /* Code decompiled incorrectly, please refer to instructions dump. */
-        fun run() {
+        override fun run() {
             /*
                 r10 = this
                 r9 = 2

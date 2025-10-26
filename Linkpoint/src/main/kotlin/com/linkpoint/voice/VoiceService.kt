@@ -81,47 +81,47 @@ private VoiceService serviceInstance = null
         }
     }
 
-    static /* synthetic */ Unit access$000(VoiceService voiceService, VoiceInitialize voiceInitialize, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$000(VoiceService voiceService, VoiceInitialize voiceInitialize, Messenger messenger) {
         voiceService.onVoiceInitialize(voiceInitialize, messenger)
     }
 
-    static /* synthetic */ Unit access$100(VoiceService voiceService, VoiceLogin voiceLogin, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$100(VoiceService voiceService, VoiceLogin voiceLogin, Messenger messenger) {
         voiceService.onVoiceLogin(voiceLogin, messenger)
     }
 
-    static /* synthetic */ Unit access$1000(VoiceService voiceService, Messenger messenger, Boolean bl) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$1000(VoiceService voiceService, Messenger messenger, Boolean bl) {
         voiceService.onVoicePermissionResults(messenger, bl)
     }
 
-    static /* synthetic */ Unit access$200(VoiceService voiceService, VoiceConnectChannel voiceConnectChannel, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$200(VoiceService voiceService, VoiceConnectChannel voiceConnectChannel, Messenger messenger) {
         voiceService.onVoiceConnectChannel(voiceConnectChannel, messenger)
     }
 
-    static /* synthetic */ Unit access$300(VoiceService voiceService, VoiceSet3DPosition voiceSet3DPosition, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$300(VoiceService voiceService, VoiceSet3DPosition voiceSet3DPosition, Messenger messenger) {
         voiceService.onVoiceSet3DPosition(voiceSet3DPosition, messenger)
     }
 
-    static /* synthetic */ Unit access$400(VoiceService voiceService, VoiceRejectCall voiceRejectCall, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$400(VoiceService voiceService, VoiceRejectCall voiceRejectCall, Messenger messenger) {
         voiceService.onVoiceRejectCall(voiceRejectCall, messenger)
     }
 
-    static /* synthetic */ Unit access$500(VoiceService voiceService, VoiceAcceptCall voiceAcceptCall, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$500(VoiceService voiceService, VoiceAcceptCall voiceAcceptCall, Messenger messenger) {
         voiceService.onVoiceAcceptCall(voiceAcceptCall, messenger)
     }
 
-    static /* synthetic */ Unit access$600(VoiceService voiceService, VoiceTerminateCall voiceTerminateCall, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$600(VoiceService voiceService, VoiceTerminateCall voiceTerminateCall, Messenger messenger) {
         voiceService.onVoiceTerminateCall(voiceTerminateCall, messenger)
     }
 
-    static /* synthetic */ Unit access$700(VoiceService voiceService, VoiceEnableMic voiceEnableMic) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$700(VoiceService voiceService, VoiceEnableMic voiceEnableMic) {
         voiceService.onVoiceEnableMic(voiceEnableMic)
     }
 
-    static /* synthetic */ Unit access$800(VoiceService voiceService, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$800(VoiceService voiceService, Messenger messenger) {
         voiceService.onVoiceLogout(messenger)
     }
 
-    static /* synthetic */ Unit access$900(VoiceService voiceService, VoiceSetAudioProperties voiceSetAudioProperties) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$900(VoiceService voiceService, VoiceSetAudioProperties voiceSetAudioProperties) {
         voiceService.onVoiceSetAudioProperties(voiceSetAudioProperties)
     }
 
@@ -308,19 +308,19 @@ private VoiceService serviceInstance = null
         this.audioStreamVolumeObserver.stop()
     }
 
-     public fun onBind(intent: Intent): IBinder {
+     public override fun onBind(intent: Intent): IBinder {
         this.isServiceBound = true
         return this.mMessenger.getBinder()
     }
 
-    fun onCreate() {
+    override fun onCreate() {
         super.onCreate()
         serviceInstance = this
         this.audioManager = (AudioManager)this.getSystemService("audio")
         this.audioStreamVolumeObserver = AudioStreamVolumeObserver((Context)this)
     }
 
-    fun onDestroy() {
+    override fun onDestroy() {
         if (this.vivoxController != null) {
             this.vivoxController.setIncomingMessenger(null)
         }
@@ -338,11 +338,11 @@ private VoiceService serviceInstance = null
         super.onDestroy()
     }
 
-     public fun onStartCommand(intent: Intent, n: Int, n2: Int): Int {
+     public override fun onStartCommand(intent: Intent, n: Int, n2: Int): Int {
         return 2
     }
 
-     public fun onUnbind(intent: Intent): Boolean {
+     public override fun onUnbind(intent: Intent): Boolean {
         Debug.Printf("Voice: service is unbound", Object[0])
         this.isServiceBound = false
         if (this.vivoxController != null) {

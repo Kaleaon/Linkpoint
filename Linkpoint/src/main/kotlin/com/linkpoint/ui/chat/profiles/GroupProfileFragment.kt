@@ -122,11 +122,11 @@ class GroupProfileFragment : ChatterReloadableFragment(), LoadableMonitor.OnLoad
         }
     }
 
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         if (bundle != null) {
             if (bundle.containsKey("lastSelectedTab")) {
@@ -192,7 +192,7 @@ class GroupProfileFragment : ChatterReloadableFragment(), LoadableMonitor.OnLoad
         }
     }
 
-    fun onSaveInstanceState(bundle: Bundle) {
+    override fun onSaveInstanceState(bundle: Bundle) {
         super.onSaveInstanceState(bundle)
         Debug.Printf("GroupProfile tabs: saving lastSelectedTab %s, lastSelectedChatterID %s", this.lastSelectedTab, this.lastSelectedChatterID)
         if (this.lastSelectedTab != null) {

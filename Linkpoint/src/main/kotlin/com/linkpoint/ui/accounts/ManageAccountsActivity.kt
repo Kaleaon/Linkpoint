@@ -179,7 +179,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.accounts.-$Lambda$
         }
     }
 
-    fun onClick(view: View) {
+    override fun onClick(view: View) {
         switch (view.getId()) {
             case R.id.add_new_account_button:
                 val accountEditDialog: AccountEditDialog = AccountEditDialog(this, (AccountList.AccountInfo) null)
@@ -191,7 +191,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.accounts.-$Lambda$
         }
     }
 
-     public fun onContextItemSelected(menuItem: MenuItem): Boolean {
+     public override fun onContextItemSelected(menuItem: MenuItem): Boolean {
         val item: Object = this.adapter.getItem(((AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo()).position)
         if (item != null) {
             AccountList.AccountInfo accountInfo = (AccountList.AccountInfo) item
@@ -209,7 +209,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.accounts.-$Lambda$
         return super.onContextItemSelected(menuItem)
     }
 
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setContentView((Int) R.layout.manage_accounts)
         this.accountList = AccountList(this)
@@ -222,12 +222,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.accounts.-$Lambda$
         registerForContextMenu(listView)
     }
 
-    fun onCreateContextMenu(contextMenu: ContextMenu, view: View, ContextMenu.ContextMenuInfo contextMenuInfo) {
+    override fun onCreateContextMenu(contextMenu: ContextMenu, view: View, ContextMenu.ContextMenuInfo contextMenuInfo) {
         super.onCreateContextMenu(contextMenu, view, contextMenuInfo)
         getMenuInflater().inflate(R.menu.account_list_context_menu, contextMenu)
     }
 
-     public fun onCreateOptionsMenu(menu: Menu): Boolean {
+     public override fun onCreateOptionsMenu(menu: Menu): Boolean {
         getMenuInflater().inflate(R.menu.manage_accounts_menu, menu)
         return true
     }
@@ -242,7 +242,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.accounts.-$Lambda$
         }
     }
 
-     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_manage_grids:
                 startActivity(Intent(this, ManageGridsActivity.class))
@@ -252,7 +252,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.accounts.-$Lambda$
         }
     }
 
-    fun onResume() {
+    override fun onResume() {
         super.onResume()
         this.adapter.updateGridList()
     }

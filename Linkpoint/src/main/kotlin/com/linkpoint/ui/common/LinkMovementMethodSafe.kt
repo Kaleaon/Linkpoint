@@ -14,7 +14,7 @@ class LinkMovementMethodSafe : LinkMovementMethod() {
         fun OnLinkOpenError(str: String)
     }
 
-     public fun onKeyDown(textView: TextView, spannable: Spannable, i: Int, keyEvent: KeyEvent): Boolean {
+     public override fun onKeyDown(textView: TextView, spannable: Spannable, i: Int, keyEvent: KeyEvent): Boolean {
         try {
             return super.onKeyDown(textView, spannable, i, keyEvent)
         } catch (Exception e) {
@@ -26,7 +26,7 @@ class LinkMovementMethodSafe : LinkMovementMethod() {
         }
     }
 
-     public fun onKeyUp(textView: TextView, spannable: Spannable, i: Int, keyEvent: KeyEvent): Boolean {
+     public override fun onKeyUp(textView: TextView, spannable: Spannable, i: Int, keyEvent: KeyEvent): Boolean {
         try {
             return super.onKeyUp(textView, spannable, i, keyEvent)
         } catch (Exception e) {
@@ -38,7 +38,7 @@ class LinkMovementMethodSafe : LinkMovementMethod() {
         }
     }
 
-     public fun onTouchEvent(textView: TextView, spannable: Spannable, motionEvent: MotionEvent): Boolean {
+     public override fun onTouchEvent(textView: TextView, spannable: Spannable, motionEvent: MotionEvent): Boolean {
         try {
             return super.onTouchEvent(textView, spannable, motionEvent)
         } catch (Exception e) {

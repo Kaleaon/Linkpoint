@@ -17,7 +17,7 @@ import com.linkpoint.slproto.users.manager.UserManager
 
 class ObjectPayDialog {
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_1356  reason: not valid java name */
-    static /* synthetic */ Unit m677lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_1356(AlertDialog alertDialog, PayInfo payInfo, Context context, UserManager userManager, SLObjectProfileData sLObjectProfileData, DialogInterface dialogInterface) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m677lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_1356(AlertDialog alertDialog, PayInfo payInfo, Context context, UserManager userManager, SLObjectProfileData sLObjectProfileData, DialogInterface dialogInterface) {
         alertDialog.findViewById(R.id.object_pay_cancel).setOnClickListener($Lambda$X9q_n5C700PWS1S1Fm8NWTXuec(dialogInterface))
         val iArr: IntArray = {R.id.object_pay_button1, R.id.object_pay_button2, R.id.object_pay_button3, R.id.object_pay_button4}
         val payPrices: ImmutableList<Integer> = payInfo.payPrices()
@@ -222,7 +222,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$X
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_2986  reason: not valid java name */
-    static /* synthetic */ Unit m679lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_2986(UserManager userManager, SLObjectProfileData sLObjectProfileData, Int i, DialogInterface dialogInterface, View view) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m679lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_2986(UserManager userManager, SLObjectProfileData sLObjectProfileData, Int i, DialogInterface dialogInterface, View view) {
         val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
             activeAgentCircuit.getModules().financialInfo.DoPayObject(sLObjectProfileData.objectUUID(), i)
@@ -231,7 +231,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$X
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_4340  reason: not valid java name */
-    static /* synthetic */ Unit m680lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_4340(AlertDialog alertDialog, UserManager userManager, SLObjectProfileData sLObjectProfileData, DialogInterface dialogInterface, View view) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m680lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_4340(AlertDialog alertDialog, UserManager userManager, SLObjectProfileData sLObjectProfileData, DialogInterface dialogInterface, View view) {
         try {
             val parseInt: Int = Integer.parseInt(((EditText) alertDialog.findViewById(R.id.object_pay_amount)).getText().toString())
             val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()

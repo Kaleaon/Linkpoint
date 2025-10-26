@@ -65,7 +65,7 @@ class SingleObjectPopupFragment : Fragment() {
         hideAndDismiss()
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         SLChatEvent sLChatEvent
         val inflate: View = layoutInflater.inflate(R.layout.object_popups_single_fragment_layout, viewGroup, false)
         val userManager: UserManager = getUserManager()
@@ -107,14 +107,14 @@ class SingleObjectPopupFragment : Fragment() {
         return inflate
     }
 
-    fun onResume() {
+    override fun onResume() {
         super.onResume()
         if (getEvent() == null) {
             hideAndDismiss()
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         if (getEvent() == null) {
             hideAndDismiss()

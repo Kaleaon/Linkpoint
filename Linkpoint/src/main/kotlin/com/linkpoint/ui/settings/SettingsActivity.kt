@@ -41,7 +41,7 @@ class SettingsActivity : MasterDetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setDefaultTitle(getString(R.string.settings_title), (String) null)
     }

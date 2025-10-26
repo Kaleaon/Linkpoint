@@ -231,7 +231,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         dialogInterface.dismiss()
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         val inflate: View = layoutInflater.inflate(R.layout.user_profile_tab_picks, viewGroup, false)
         this.picksAdapter = PicksAdapter(layoutInflater.getContext(), (PicksAdapter) null)
         inflate.findViewById(R.id.add_new_pick_button).setOnClickListener(View.OnClickListener(this) {

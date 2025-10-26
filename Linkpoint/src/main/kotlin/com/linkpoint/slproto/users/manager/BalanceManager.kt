@@ -42,7 +42,7 @@ class BalanceManager {
     val SubscriptionPool<SubscriptionSingleKey, LazyList<MoneyTransaction>> moneyTransactionPool = SubscriptionPool<>()
     /* access modifiers changed from: private */
     val Runnable requestBalanceRunnable = Runnable() {
-        fun run() {
+        override fun run() {
             val sLFinancialInfo: SLFinancialInfo = (SLFinancialInfo) BalanceManager.this.financialInfo.get()
             if (sLFinancialInfo != null) {
                 sLFinancialInfo.AskForMoneyBalance()
@@ -67,7 +67,7 @@ class BalanceManager {
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_BalanceManager_1705  reason: not valid java name */
-    static /* synthetic */ Unit m286lambda$com_lumiyaviewer_lumiya_slproto_users_manager_BalanceManager_1705(LazyList lazyList) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m286lambda$com_lumiyaviewer_lumiya_slproto_users_manager_BalanceManager_1705(LazyList lazyList) {
         if (!lazyList.isClosed()) {
             lazyList.close()
         }

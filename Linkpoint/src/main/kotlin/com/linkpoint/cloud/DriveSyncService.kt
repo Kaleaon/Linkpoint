@@ -140,29 +140,29 @@ class DriveSyncService : Service()
         }
     }
 
-    static /* synthetic */ Unit access$000(DriveSyncService driveSyncService, LogSyncStart logSyncStart, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$000(DriveSyncService driveSyncService, LogSyncStart logSyncStart, Messenger messenger) {
         driveSyncService.onLogSyncStart(logSyncStart, messenger)
     }
 
-    static /* synthetic */ Unit access$100(DriveSyncService driveSyncService, LogMessageBatch logMessageBatch, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$100(DriveSyncService driveSyncService, LogMessageBatch logMessageBatch, Messenger messenger) {
         driveSyncService.onLogMessageBatch(logMessageBatch, messenger)
     }
 
-    static /* synthetic */ Boolean access$1002(DriveSyncService driveSyncService, Boolean bl) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Boolean access$1002(DriveSyncService driveSyncService, Boolean bl) {
         driveSyncService.periodicSyncEnabled = bl
         return bl
     }
 
-    static /* synthetic */ Unit access$200(DriveSyncService driveSyncService, LogFlushMessages logFlushMessages) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit access$200(DriveSyncService driveSyncService, LogFlushMessages logFlushMessages) {
         driveSyncService.onFlushMessages(logFlushMessages)
     }
 
-    static /* synthetic */ DriveSynchronizer access$602(DriveSyncService driveSyncService, DriveSynchronizer driveSynchronizer) {
+    // TODO: Review synthetic accessor - static /* synthetic */ DriveSynchronizer access$602(DriveSyncService driveSyncService, DriveSynchronizer driveSynchronizer) {
         driveSyncService.synchronizer = driveSynchronizer
         return driveSynchronizer
     }
 
-    static /* synthetic */ GoogleApiState access$702(DriveSyncService driveSyncService, GoogleApiState googleApiState) {
+    // TODO: Review synthetic accessor - static /* synthetic */ GoogleApiState access$702(DriveSyncService driveSyncService, GoogleApiState googleApiState) {
         driveSyncService.googleApiState = googleApiState
         return googleApiState
     }
@@ -317,13 +317,13 @@ class DriveSyncService : Service()
         this.stopSelf()
     }
 
-     public fun onBind(intent: Intent): IBinder {
+     public override fun onBind(intent: Intent): IBinder {
         Debug.Printf("DriveSyncService is bound", Object[0])
         this.isServiceBound = true
         return this.mMessenger.getBinder()
     }
 
-    fun onDestroy() {
+    override fun onDestroy() {
         Debug.Printf("Service destroyed", Object[0])
         super.onDestroy()
     }
@@ -339,7 +339,7 @@ class DriveSyncService : Service()
         }
     }
 
-     public fun onStartCommand(object: Intent, n: Int, n2: Int): Int {
+     public override fun onStartCommand(object: Intent, n: Int, n2: Int): Int {
         Debug.Printf("Service started.", Object[0])
         if (object.hasExtra("deleteResolvableError")) {
             object = UUID.fromString(object.getStringExtra("deleteResolvableError"))
@@ -349,7 +349,7 @@ class DriveSyncService : Service()
         return 2
     }
 
-     public fun onUnbind(intent: Intent): Boolean {
+     public override fun onUnbind(intent: Intent): Boolean {
         Debug.Printf("DriveSyncService is unbound", Object[0])
         this.isServiceBound = false
         if (this.synchronizer != null) {

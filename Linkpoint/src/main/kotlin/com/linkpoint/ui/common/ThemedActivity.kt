@@ -23,7 +23,7 @@ class ThemedActivity : AppCompatActivity() {
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         this.selectedThemeId = GlobalOptions.getInstance().getThemeResourceId()
         Debug.Printf("Theme: activity theme 0x%x", Integer.valueOf(this.selectedThemeId))
         val i: Int = this.selectedThemeId
@@ -32,7 +32,7 @@ class ThemedActivity : AppCompatActivity() {
     }
 
     /* access modifiers changed from: protected */
-    fun onResume() {
+    override fun onResume() {
         super.onResume()
         val themeResourceId: Int = GlobalOptions.getInstance().getThemeResourceId()
         Debug.Printf("Theme: resume, activity theme 0x%x", Integer.valueOf(themeResourceId))
@@ -42,13 +42,13 @@ class ThemedActivity : AppCompatActivity() {
     }
 
     /* access modifiers changed from: protected */
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         EventBus.getInstance().subscribe((Activity) this)
     }
 
     /* access modifiers changed from: protected */
-    fun onStop() {
+    override fun onStop() {
         EventBus.getInstance().unsubscribeActivity(this)
         super.onStop()
     }

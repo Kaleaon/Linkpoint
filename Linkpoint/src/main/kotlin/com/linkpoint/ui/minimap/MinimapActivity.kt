@@ -60,7 +60,7 @@ class MinimapActivity : ConnectedActivity() {
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setContentView((Int) R.layout.split_two_panels)
         ButterKnife.bind((Activity) this)
@@ -107,7 +107,7 @@ class MinimapActivity : ConnectedActivity() {
     }
 
     /* access modifiers changed from: protected */
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         val userManager: UserManager = ActivityUtils.getUserManager(getIntent())
         if (userManager != null) {
@@ -118,7 +118,7 @@ class MinimapActivity : ConnectedActivity() {
     }
 
     /* access modifiers changed from: protected */
-    fun onStop() {
+    override fun onStop() {
         this.currentLocationInfo.unsubscribe()
         super.onStop()
     }

@@ -36,7 +36,7 @@ class SLUserNameFetcher : SLModule(), RequestListener {
     private val Runnable threadRunnable = Runnable() {
         /* JADX WARNING: No exception handlers in catch block: Catch:{  } */
         /* Code decompiled incorrectly, please refer to instructions dump. */
-        fun run() {
+        override fun run() {
             /*
                 r2 = this
             L_0x0000:

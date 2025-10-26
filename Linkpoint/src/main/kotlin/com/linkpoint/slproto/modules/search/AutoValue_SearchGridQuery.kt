@@ -23,7 +23,7 @@ final class AutoValue_SearchGridQuery : SearchGridQuery() {
         this.searchType = searchType2
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
@@ -37,7 +37,7 @@ final class AutoValue_SearchGridQuery : SearchGridQuery() {
         return this.searchType.equals(searchGridQuery.searchType())
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         return ((((this.searchUUID.hashCode() ^ 1000003) * 1000003) ^ this.searchText.hashCode()) * 1000003) ^ this.searchType.hashCode()
     }
 
@@ -53,7 +53,7 @@ final class AutoValue_SearchGridQuery : SearchGridQuery() {
         return this.searchUUID
     }
 
-     public fun toString(): String {
+     public override fun toString(): String {
         return "SearchGridQuery{searchUUID=" + this.searchUUID + ", " + "searchText=" + this.searchText + ", " + "searchType=" + this.searchType + "}"
     }
 }

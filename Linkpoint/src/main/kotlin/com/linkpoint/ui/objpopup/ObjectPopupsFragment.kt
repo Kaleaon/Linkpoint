@@ -54,7 +54,7 @@ class ObjectPopupsFragment : Fragment() {
         return UserManager.getUserManager(UUID.fromString(arguments.getString(AGENT_UUID_KEY)))
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         val inflate: View = layoutInflater.inflate(R.layout.object_popups_fragment_layout, viewGroup, false)
         val recyclerView: RecyclerView = (RecyclerView) inflate.findViewById(R.id.objectPopupsList)
         recyclerView.setHasFixedSize(true)
@@ -63,7 +63,7 @@ class ObjectPopupsFragment : Fragment() {
         return inflate
     }
 
-    fun onStart() {
+    override fun onStart() {
         RecyclerView recyclerView
         super.onStart()
         val userManager: UserManager = getUserManager()
@@ -73,7 +73,7 @@ class ObjectPopupsFragment : Fragment() {
         }
     }
 
-    fun onStop() {
+    override fun onStop() {
         RecyclerView recyclerView
         val view: View = getView()
         if (!(view == null || (recyclerView = (RecyclerView) view.findViewById(R.id.objectPopupsList)) == null)) {

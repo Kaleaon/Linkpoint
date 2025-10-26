@@ -898,7 +898,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         val inflate: View = layoutInflater.inflate(R.layout.group_profile_tab_main, viewGroup, false)
         ((ImageAssetView) inflate.findViewById(R.id.group_pic_view)).setAlignTop(true)
         ((ImageAssetView) inflate.findViewById(R.id.group_pic_view)).setVerticalFit(true)

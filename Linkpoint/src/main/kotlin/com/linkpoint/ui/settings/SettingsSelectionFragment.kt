@@ -32,7 +32,7 @@ class SettingsSelectionFragment : Fragment(), AdapterView.OnItemClickListener {
         }
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         val inflate: View = layoutInflater.inflate(R.layout.settings_page_selector, viewGroup, false)
         val listView: ListView = (ListView) inflate.findViewById(R.id.settings_page_list)
         listView.setAdapter(SettingPagesAdapter(getContext()))

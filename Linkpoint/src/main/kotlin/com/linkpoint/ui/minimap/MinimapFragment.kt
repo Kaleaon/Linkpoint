@@ -99,18 +99,18 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.minimap.-$Lambda$X
         }
     }
 
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         val inflate: View = layoutInflater.inflate(R.layout.minimap_fragment, viewGroup, false)
         ((MinimapView) inflate.findViewById(R.id.minimapView)).setOnUserClickListener(this)
         return inflate
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
@@ -122,7 +122,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.minimap.-$Lambda$X
         this.userLocations.unsubscribe()
     }
 
-    fun onStop() {
+    override fun onStop() {
         this.minimapBitmap.unsubscribe()
         this.userLocations.unsubscribe()
         super.onStop()

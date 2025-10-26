@@ -50,7 +50,7 @@ abstract class MasterDetailsActivity : DetailsActivity() {
     /* JADX WARNING: Removed duplicated region for block: B:88:0x01f2  */
     /* JADX WARNING: Removed duplicated region for block: B:97:0x0222 A[ADDED_TO_REGION] */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    fun onCreate(@android.support.annotation.Nullable android.os.Bundle r15) {
+    override fun onCreate(@android.support.annotation.Nullable android.os.Bundle r15) {
         /*
             r14 = this
             r13 = 2131755654(0x7f100286, Float:1.9142193E38)
@@ -386,7 +386,7 @@ abstract class MasterDetailsActivity : DetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-    fun onSaveInstanceState(bundle: Bundle) {
+    override fun onSaveInstanceState(bundle: Bundle) {
         super.onSaveInstanceState(bundle)
     }
 

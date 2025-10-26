@@ -212,7 +212,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$8g
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_TeleportProgressDialog_1322  reason: not valid java name */
-    static /* synthetic */ Unit m546lambda$com_lumiyaviewer_lumiya_ui_common_TeleportProgressDialog_1322(SLAgentCircuit sLAgentCircuit, UUID uuid, Context context, UserManager userManager2) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m546lambda$com_lumiyaviewer_lumiya_ui_common_TeleportProgressDialog_1322(SLAgentCircuit sLAgentCircuit, UUID uuid, Context context, UserManager userManager2) {
         if (sLAgentCircuit.getModules().rlvController.canTeleportToLandmark()) {
             sLAgentCircuit.TeleportToLandmarkAsset(uuid)
             TeleportProgressDialog(context, userManager2, R.string.teleporting_progress_message).show()
@@ -220,7 +220,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$8g
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_TeleportProgressDialog_2034  reason: not valid java name */
-    static /* synthetic */ Unit m547lambda$com_lumiyaviewer_lumiya_ui_common_TeleportProgressDialog_2034(Runnable runnable, DialogInterface dialogInterface, Int i) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m547lambda$com_lumiyaviewer_lumiya_ui_common_TeleportProgressDialog_2034(Runnable runnable, DialogInterface dialogInterface, Int i) {
         dialogInterface.dismiss()
         runnable.run()
     }
@@ -263,14 +263,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$8g
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         if (this.userManager != null) {
             this.userManager.getEventBus().subscribe(this, (Activity) null, this.mHandler)
         }
     }
 
-    fun onStop() {
+    override fun onStop() {
         if (this.userManager != null) {
             this.userManager.getEventBus().unsubscribe(this)
         }

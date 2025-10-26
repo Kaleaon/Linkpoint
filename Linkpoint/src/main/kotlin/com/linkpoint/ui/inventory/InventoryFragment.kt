@@ -1539,7 +1539,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         }
     }
 
-    fun onActivityCreated(bundle: Bundle) {
+    override fun onActivityCreated(bundle: Bundle) {
         Intent intent
         super.onActivityCreated(bundle)
         val activity: FragmentActivity = getActivity()
@@ -1558,7 +1558,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         ((TextView) view.findViewById(R.id.save_as_message)).setText(getString(R.string.inventory_save_format, this.saveInfo.saveItemName))
     }
 
-    fun onActivityResult(i: Int, i2: Int, intent: Intent) {
+    override fun onActivityResult(i: Int, i2: Int, intent: Intent) {
         Uri data
         val sLAgentCircuit: SLAgentCircuit = null
         super.onActivityResult(i, i2, intent)
@@ -1785,12 +1785,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         }
     }
 
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         if (folderActionsVisible()) {
             menuInflater.inflate(R.menu.inventory_fragment_menu, menu)
@@ -1803,7 +1803,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         }
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         Debug.Printf("InventoryFragment: onCreateView", Object[0])
         val inflate: View = layoutInflater.inflate(R.layout.inventory_folder, viewGroup, false)
         this.loadableMonitor.setLoadingLayout((LoadingLayout) inflate.findViewById(R.id.loading_layout), getString(R.string.no_folder_selected), getString(R.string.inventory_folder_fail))
@@ -1821,7 +1821,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         }
     }
 
-     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         SLInventoryEntry folder
         val userManager: UserManager = getUserManager()
         val data: InventoryEntryList = this.entryList.getData()
@@ -1965,18 +1965,18 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         return false
     }
 
-    fun onPrepareOptionsMenu(menu: Menu) {
+    override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
         updateFolderActionItems()
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         EventBus.getInstance().subscribe((Object) this)
         showInventoryList(getInventoryQuery())
     }
 
-    fun onStop() {
+    override fun onStop() {
         showInventoryList((InventoryQuery) null)
         EventBus.getInstance().unsubscribe(this)
         super.onStop()

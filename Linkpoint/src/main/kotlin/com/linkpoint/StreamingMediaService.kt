@@ -164,17 +164,17 @@ private class AudioFocusChangeHandler : Handler() {
         }
     }
 
-     public fun onBind(intent: Intent): IBinder {
+     public override fun onBind(intent: Intent): IBinder {
         return null
     }
 
-    fun onCreate() {
+    override fun onCreate() {
         super.onCreate()
         this.audioManagerWrapper = AudioManagerWrapper(this)
         this.audioManagerWrapper.setHandler(this.mHandler, 100)
     }
 
-    fun onDestroy() {
+    override fun onDestroy() {
         this.mediaWrapper.release()
         if (this.audioManagerWrapper != null) {
             this.audioManagerWrapper.abandonAudioFocus()
@@ -185,7 +185,7 @@ private class AudioFocusChangeHandler : Handler() {
         isPlayingMedia.setData(SubscriptionSingleKey.Value, Boolean.FALSE)
     }
 
-     public fun onStartCommand(intent: Intent, i: Int, i2: Int): Int {
+     public override fun onStartCommand(intent: Intent, i: Int, i2: Int): Int {
         handleStartService(intent)
         return 2
     }

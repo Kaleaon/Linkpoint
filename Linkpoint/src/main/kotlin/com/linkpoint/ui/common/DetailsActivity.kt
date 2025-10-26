@@ -192,7 +192,7 @@ private class DetailsStackEntry : Parcelable {
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         if (bundle != null) {
             val parcelableArrayList: ArrayList = bundle.getParcelableArrayList(DETAILS_STACK_TAG)
@@ -228,7 +228,7 @@ private class DetailsStackEntry : Parcelable {
         updateTitle()
     }
 
-    fun onRequestPermissionsResult(i: Int, strArr: Array<String>, iArr: IntArray) {
+    override fun onRequestPermissionsResult(i: Int, strArr: Array<String>, iArr: IntArray) {
         super.onRequestPermissionsResult(i, strArr, iArr)
         val fragments: List<Fragment> = getSupportFragmentManager().getFragments()
         if (fragments != null) {
@@ -239,7 +239,7 @@ private class DetailsStackEntry : Parcelable {
     }
 
     /* access modifiers changed from: protected */
-    fun onSaveInstanceState(bundle: Bundle) {
+    override fun onSaveInstanceState(bundle: Bundle) {
         bundle.putParcelableArrayList(DETAILS_STACK_TAG, this.detailsStack)
         bundle.putString(DEFAULT_TITLE_TAG, this.defaultTitle)
         bundle.putString(DEFAULT_SUBTITLE_TAG, this.defaultSubTitle)

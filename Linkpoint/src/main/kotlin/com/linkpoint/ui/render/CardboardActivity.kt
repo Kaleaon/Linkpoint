@@ -1203,7 +1203,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     @BindView(2131755271)
     TextView objectNameView
     private val View.OnClickListener onDialogButtonClick = View.OnClickListener() {
-        fun onClick(view: View) {
+        override fun onClick(view: View) {
             if (CardboardActivity.this.activeScriptDialog != null) {
                 val i: Int = 0
                 while (true) {
@@ -3616,7 +3616,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         setTheme(R.style.Theme_Linkpoint_Light)
         super.onCreate(bundle)
         requestWindowFeature(1)
@@ -4106,7 +4106,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: protected */
-    fun onDestroy() {
+    override fun onDestroy() {
         if (this.gvrView != null) {
             this.gvrView.setOnCardboardTriggerListener((Runnable) null)
             this.gvrView.shutdown()
@@ -4211,7 +4211,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: protected */
-    fun onPause() {
+    override fun onPause() {
         if (this.speechRecognizer != null) {
             this.speechRecognizer.destroy()
             this.speechRecognizer = null
@@ -4235,7 +4235,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: protected */
-    fun onResume() {
+    override fun onResume() {
         super.onResume()
         if (this.gvrView != null) {
             this.gvrView.onResume()
@@ -4319,7 +4319,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: protected */
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         this.voiceEnabled = GlobalOptions.getInstance().getVoiceEnabled()
         this.controllerManager.start()
@@ -4341,7 +4341,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: protected */
-    fun onStop() {
+    override fun onStop() {
         this.voiceActiveChatter.unsubscribe()
         this.voiceLoggedIn.unsubscribe()
         this.currentLocationInfo.unsubscribe()
@@ -4357,7 +4357,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         setControlsPage(ControlsPage.pageTouchAim)
     }
 
-    fun onWindowFocusChanged(z: Boolean) {
+    override fun onWindowFocusChanged(z: Boolean) {
         super.onWindowFocusChanged(z)
         this.fullscreenMode.onWindowFocusChanged(z)
     }

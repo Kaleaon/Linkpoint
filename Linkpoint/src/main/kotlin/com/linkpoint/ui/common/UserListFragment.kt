@@ -67,7 +67,7 @@ abstract class UserListFragment : Fragment() {
         }
     }
 
-    fun onActivityCreated(bundle: Bundle) {
+    override fun onActivityCreated(bundle: Bundle) {
         super.onActivityCreated(bundle)
         val view: View = getView()
         if (view != null) {
@@ -96,16 +96,16 @@ abstract class UserListFragment : Fragment() {
         }
     }
 
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         this.userManager = ActivityUtils.getUserManager(getArguments())
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         return layoutInflater.inflate(R.layout.contacts_group, viewGroup, false)
     }
 
-    fun onStart() {
+    override fun onStart() {
         ListView listView
         val listAdapter: ListAdapter = null
         super.onStart()
@@ -120,7 +120,7 @@ abstract class UserListFragment : Fragment() {
         }
     }
 
-    fun onStop() {
+    override fun onStop() {
         ListView listView
         val view: View = getView()
         Debug.Printf("UserListFragment: onStop, rootView = %s", view)

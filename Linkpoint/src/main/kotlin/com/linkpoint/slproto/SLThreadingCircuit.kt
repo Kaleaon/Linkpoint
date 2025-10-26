@@ -13,7 +13,7 @@ class SLThreadingCircuit : SLCircuit(), Executor {
     private val BlockingQueue<Runnable> queue = LinkedBlockingQueue()
     private volatile Boolean workEnabled = true
     private val Runnable workingRunnable = Runnable() {
-        fun run() {
+        override fun run() {
             Debug.Printf("SLThreadingCircuit: working thread started.", Object[0])
             while (SLThreadingCircuit.this.workEnabled) {
                 try {

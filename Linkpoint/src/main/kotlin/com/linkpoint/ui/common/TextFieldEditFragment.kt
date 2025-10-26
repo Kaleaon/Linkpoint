@@ -239,19 +239,19 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$Dt
         return true
     }
 
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.user_notes_edit_menu, menu)
         this.undoMenuItem = menu.findItem(R.id.item_undo)
         this.undoMenuItem.setVisible(this.hasChanged)
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         val inflate: View = layoutInflater.inflate(R.layout.user_text_field_edit, viewGroup, false)
         final TextView textView = (TextView) inflate.findViewById(R.id.field_edit_text)
         textView.setHint(getFieldHint(layoutInflater.getContext()))
@@ -274,7 +274,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$Dt
         return inflate
     }
 
-     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_undo:
                 val view: View = getView()

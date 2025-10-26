@@ -218,13 +218,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_11291  reason: not valid java name */
-    static /* synthetic */ Unit m669lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_11291(SLAgentCircuit sLAgentCircuit, SLObjectProfileData sLObjectProfileData, String str, DialogInterface dialogInterface, Int i) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m669lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_11291(SLAgentCircuit sLAgentCircuit, SLObjectProfileData sLObjectProfileData, String str, DialogInterface dialogInterface, Int i) {
         sLAgentCircuit.getModules().muteList.Block(MuteListEntry(MuteType.OBJECT, sLObjectProfileData.objectUUID(), str, 15))
         dialogInterface.dismiss()
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_24012  reason: not valid java name */
-    static /* synthetic */ Unit m671lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_24012(UserManager userManager, Int i, SLObjectProfileData sLObjectProfileData, DialogInterface dialogInterface, Int i2) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m671lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_24012(UserManager userManager, Int i, SLObjectProfileData sLObjectProfileData, DialogInterface dialogInterface, Int i2) {
         val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
             activeAgentCircuit.BuyObject(i, sLObjectProfileData.saleType(), sLObjectProfileData.salePrice())
@@ -233,7 +233,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_25106  reason: not valid java name */
-    static /* synthetic */ Unit m673lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_25106(UserManager userManager, SLObjectProfileData sLObjectProfileData, Int i, DialogInterface dialogInterface, Int i2) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m673lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_25106(UserManager userManager, SLObjectProfileData sLObjectProfileData, Int i, DialogInterface dialogInterface, Int i2) {
         SLModules modules
         val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (!(activeAgentCircuit == null || (modules = activeAgentCircuit.getModules()) == null)) {
@@ -643,7 +643,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         }
     }
 
-    fun onClick(view: View) {
+    override fun onClick(view: View) {
         val id: Int = view.getId()
         for (Int i = 0; i < objectPayButtons.length; i++) {
             if (objectPayButtons[i] == id) {
@@ -687,12 +687,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         }
     }
 
-    fun onCreate(@android.support.annotation.Nullable Bundle bundle) {
+    override fun onCreate(@android.support.annotation.Nullable Bundle bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.object_details_menu, menu)
         this.menuItemObjectTake = menu.findItem(R.id.item_object_take)
@@ -702,7 +702,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         updateOptionsMenu()
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         Debug.Log("ObjectDetailsFragment: onCreateView called")
         val inflate: View = layoutInflater.inflate(R.layout.object_details, viewGroup, false)
@@ -739,7 +739,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         return inflate
     }
 
-    fun onDestroyView() {
+    override fun onDestroyView() {
         this.ownerNameDisplayer.unbindViews()
         super.onDestroyView()
     }
@@ -756,7 +756,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         }
     }
 
-     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         val str: String = null
         val userManager: UserManager = getUserManager()
         val i: Int = getArguments().getInt(LOCAL_ID_KEY)
@@ -957,7 +957,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         return super.onOptionsItemSelected(menuItem)
     }
 
-    fun onPause() {
+    override fun onPause() {
         val userManager: UserManager = getUserManager()
         if (userManager != null) {
             userManager.getChatterList().getActiveChattersManager().removeObjectMessageListener(this.chatEventListener)
@@ -965,7 +965,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         super.onPause()
     }
 
-    fun onResume() {
+    override fun onResume() {
         super.onResume()
         val userManager: UserManager = getUserManager()
         if (userManager != null) {
@@ -973,13 +973,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         setTitle(getString(R.string.object_details_caption), (String) null)
         showObject(getArguments().getInt(LOCAL_ID_KEY))
     }
 
-    fun onStop() {
+    override fun onStop() {
         this.loadableMonitor.unsubscribeAll()
         this.ownerNameDisplayer.setChatterID((ChatterID) null)
         super.onStop()

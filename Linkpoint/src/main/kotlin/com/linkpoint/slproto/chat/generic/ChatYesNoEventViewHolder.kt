@@ -90,7 +90,7 @@ class ChatYesNoEventViewHolder : ChatEventViewHolder(), View.OnClickListener {
         this.textView.setTextColor(this.cardViewDefaultText)
     }
 
-    fun onClick(view: View) {
+    override fun onClick(view: View) {
         switch (view.getId()) {
             case R.id.buttonYesNoAccept:
                 if (this.yesNoEvent != null && this.yesNoEvent.getEventState() == SLChatYesNoEvent.EventState.EventNew) {

@@ -77,12 +77,12 @@ abstract class ChatterFragment : FragmentWithTitle() : ChatterNameRetriever.OnCh
     /* access modifiers changed from: protected */
     public abstract Unit onShowUser(ChatterID chatterID2)
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         setNewUser((ChatterID) getArguments().getParcelable(CHATTER_ID_KEY))
     }
 
-    fun onStop() {
+    override fun onStop() {
         setNewUser((ChatterID) null)
         super.onStop()
     }

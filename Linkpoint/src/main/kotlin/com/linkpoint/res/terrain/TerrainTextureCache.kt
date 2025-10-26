@@ -114,7 +114,7 @@ private class TerrainTextureRequest : ResourceRequest()<TerrainPatchInfo, OpenJP
             }
         }
 
-        fun run() {
+        override fun run() {
             try {
                 val terrainPatchInfo: TerrainPatchInfo = (TerrainPatchInfo) getParams()
                 val bakeTerrain: OpenJPEG = OpenJPEG.bakeTerrain(256, 256, this.rawTextures, terrainPatchInfo.getTextureHeightMap(), terrainPatchInfo.getHeightMap().getMapWidth(), terrainPatchInfo.getHeightMap().getMapHeight())

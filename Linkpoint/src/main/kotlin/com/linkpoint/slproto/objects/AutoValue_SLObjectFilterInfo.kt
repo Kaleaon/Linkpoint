@@ -18,7 +18,7 @@ final class AutoValue_SLObjectFilterInfo : SLObjectFilterInfo() {
         this.range = f
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
@@ -36,7 +36,7 @@ final class AutoValue_SLObjectFilterInfo : SLObjectFilterInfo() {
         return this.filterText
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         val i: Int = 1231
         val hashCode: Int = ((this.showNonDescriptive ? 1231 : 1237) ^ (((this.showAttachments ? 1231 : 1237) ^ ((this.filterText.hashCode() ^ 1000003) * 1000003)) * 1000003)) * 1000003
         if (!this.showNonTouchable) {
@@ -61,7 +61,7 @@ final class AutoValue_SLObjectFilterInfo : SLObjectFilterInfo() {
         return this.showNonTouchable
     }
 
-     public fun toString(): String {
+     public override fun toString(): String {
         return "SLObjectFilterInfo{filterText=" + this.filterText + ", " + "showAttachments=" + this.showAttachments + ", " + "showNonDescriptive=" + this.showNonDescriptive + ", " + "showNonTouchable=" + this.showNonTouchable + ", " + "range=" + this.range + "}"
     }
 }

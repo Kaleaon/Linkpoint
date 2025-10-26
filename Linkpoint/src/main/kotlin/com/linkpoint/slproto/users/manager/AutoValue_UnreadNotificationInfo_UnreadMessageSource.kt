@@ -38,7 +38,7 @@ final class AutoValue_UnreadNotificationInfo_UnreadMessageSource : UnreadNotific
         return this.chatterName
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
@@ -52,11 +52,11 @@ final class AutoValue_UnreadNotificationInfo_UnreadMessageSource : UnreadNotific
         return this.unreadMessagesCount == unreadMessageSource.unreadMessagesCount()
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         return ((((((this.chatterID.hashCode() ^ 1000003) * 1000003) ^ this.chatterName.hashCode()) * 1000003) ^ this.unreadMessages.hashCode()) * 1000003) ^ this.unreadMessagesCount
     }
 
-     public fun toString(): String {
+     public override fun toString(): String {
         return "UnreadMessageSource{chatterID=" + this.chatterID + ", " + "chatterName=" + this.chatterName + ", " + "unreadMessages=" + this.unreadMessages + ", " + "unreadMessagesCount=" + this.unreadMessagesCount + "}"
     }
 

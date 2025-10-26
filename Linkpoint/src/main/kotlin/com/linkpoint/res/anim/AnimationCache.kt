@@ -74,7 +74,7 @@ private class AssetLoadRequest : ResourceRequest()<UUID, AnimationData> : Runnab
         /* JADX WARNING: Removed duplicated region for block: B:30:0x0070 A[SYNTHETIC, Splitter:B:30:0x0070] */
         /* JADX WARNING: Removed duplicated region for block: B:35:0x0079 A[ExcHandler: all (th java.lang.Throwable), Splitter:B:5:0x0023] */
         /* Code decompiled incorrectly, please refer to instructions dump. */
-        fun run() {
+        override fun run() {
             /*
                 r6 = this
                 r2 = 0

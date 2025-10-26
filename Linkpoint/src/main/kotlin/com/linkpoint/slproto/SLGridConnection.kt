@@ -216,7 +216,7 @@ private /* synthetic */ IntArray m71-getcom-lumiyaviewer-lumiya-slproto-SLGridCo
 
      private fun startConnecting(final Boolean z, final String str) {
         this.loginThread = Thread(Runnable() {
-            fun run() {
+            override fun run() {
                 if (z) {
                     try {
                         Thread.sleep(3000)

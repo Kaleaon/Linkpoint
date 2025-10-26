@@ -43,7 +43,7 @@ class TransactionLogFragment : FragmentWithTitle(), LoadableMonitor.OnLoadableDa
     private val SubscriptionData<SubscriptionSingleKey, LazyList<MoneyTransaction>> moneyTransactions = SubscriptionData<>(UIThreadExecutor.getInstance())
     /* access modifiers changed from: private */
     val Runnable scrollToBottomRunnable = Runnable() {
-        fun run() {
+        override fun run() {
             Int itemCount
             val unused: Boolean = TransactionLogFragment.this.scrollToBottomRunnablePosted = false
             if (TransactionLogFragment.this.unbinder != null) {
@@ -172,17 +172,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_x
         performClearTransactionLog()
     }
 
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.transaction_log_menu, menu)
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         val inflate: View = layoutInflater.inflate(R.layout.transaction_log, viewGroup, false)
         this.unbinder = ButterKnife.bind((Object) this, inflate)
@@ -192,7 +192,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_x
         return inflate
     }
 
-    fun onDestroyView() {
+    override fun onDestroyView() {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -211,7 +211,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_x
         }
     }
 
-     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_clear_transaction_log:
                 clearTransactionLog()
@@ -221,7 +221,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_x
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
@@ -229,7 +229,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_x
         }
     }
 
-    fun onStop() {
+    override fun onStop() {
         this.loadableMonitor.unsubscribeAll()
         super.onStop()
     }

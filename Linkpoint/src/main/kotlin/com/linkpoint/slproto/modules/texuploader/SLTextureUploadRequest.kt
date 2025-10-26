@@ -36,7 +36,7 @@ class SLTextureUploadRequest : Runnable {
         return this.textureID
     }
 
-    fun run() {
+    override fun run() {
         Response execute
         try {
             val asString: String = LLSDXMLRequest().PerformRequest(this.capURL, LLSDUndefined()).byKey("uploader").asString()

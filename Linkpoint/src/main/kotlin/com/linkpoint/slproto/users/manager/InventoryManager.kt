@@ -290,7 +290,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_InventoryManager_3450  reason: not valid java name */
-    static /* synthetic */ Unit m324lambda$com_lumiyaviewer_lumiya_slproto_users_manager_InventoryManager_3450(InventoryDB inventoryDB2, UUID uuid) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m324lambda$com_lumiyaviewer_lumiya_slproto_users_manager_InventoryManager_3450(InventoryDB inventoryDB2, UUID uuid) {
         val findEntry: SLInventoryEntry = inventoryDB2.findEntry(uuid)
         if (findEntry != null) {
             findEntry.sessionID = null
@@ -303,7 +303,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_InventoryManager_6838  reason: not valid java name */
-    static /* synthetic */ Boolean m325lambda$com_lumiyaviewer_lumiya_slproto_users_manager_InventoryManager_6838(InventoryQuery inventoryQuery) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Boolean m325lambda$com_lumiyaviewer_lumiya_slproto_users_manager_InventoryManager_6838(InventoryQuery inventoryQuery) {
         if (inventoryQuery != null) {
             return !Strings.isNullOrEmpty(inventoryQuery.containsString())
         }

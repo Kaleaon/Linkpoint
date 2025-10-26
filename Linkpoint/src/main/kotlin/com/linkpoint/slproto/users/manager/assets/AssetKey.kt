@@ -33,7 +33,7 @@ abstract class AssetKey {
 
     public abstract UUID taskUUID()
 
-     public fun toString(): String {
+     public override fun toString(): String {
         return toStringJoiner.join(Integer.valueOf(channelType()), Integer.valueOf(sourceType()), assetUUID(), Integer.valueOf(assetType()), ownerUUID(), itemUUID(), taskUUID())
     }
 }

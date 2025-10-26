@@ -1563,11 +1563,11 @@ private /* synthetic */ IntArray m9-getcom-lumiyaviewer-lumiya-utils-LEDActionSw
         updateOnlineNotification()
     }
 
-     public fun onBind(intent: Intent): IBinder {
+     public override fun onBind(intent: Intent): IBinder {
         return this.mBinder
     }
 
-    fun onCreate() {
+    override fun onCreate() {
         super.onCreate()
         serviceInstance = WeakReference(this)
         this.prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext())
@@ -1576,7 +1576,7 @@ private /* synthetic */ IntArray m9-getcom-lumiyaviewer-lumiya-utils-LEDActionSw
         updateOnlineNotification()
     }
 
-    fun onDestroy() {
+    override fun onDestroy() {
         if (this.prefs != null) {
             this.prefs.unregisterOnSharedPreferenceChangeListener(this)
             this.prefs = null
@@ -1601,7 +1601,7 @@ private /* synthetic */ IntArray m9-getcom-lumiyaviewer-lumiya-utils-LEDActionSw
         updateOnlineNotification()
     }
 
-     public fun onStartCommand(intent: Intent, i: Int, i2: Int): Int {
+     public override fun onStartCommand(intent: Intent, i: Int, i2: Int): Int {
         val str: String = "onStartCommand: intent is %s, flags %08x"
         val objArr: Array<Any> = Object[2]
         objArr[0] = intent != null ? "not null" : "null"
@@ -1614,7 +1614,7 @@ private /* synthetic */ IntArray m9-getcom-lumiyaviewer-lumiya-utils-LEDActionSw
         return 2
     }
 
-     public fun onUnbind(intent: Intent): Boolean {
+     public override fun onUnbind(intent: Intent): Boolean {
         Debug.Log("GridConnectionService: onUnbind called, connection state = " + gridConnection.getConnectionState())
         if (gridConnection.getConnectionState() == ConnectionState.Idle) {
             Debug.Log("GridConnectionService: Stopping self because unbind and no clients are bound")

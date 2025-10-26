@@ -140,7 +140,7 @@ class MinimapView : View() {
     }
 
     /* access modifiers changed from: protected */
-    fun onDraw(canvas: Canvas) {
+    override fun onDraw(canvas: Canvas) {
         if (this.minimapBitmap != null) {
             val width: Int = getWidth()
             val height: Int = getHeight()
@@ -192,7 +192,7 @@ class MinimapView : View() {
     }
 
     /* access modifiers changed from: protected */
-    fun onMeasure(i: Int, i2: Int) {
+    override fun onMeasure(i: Int, i2: Int) {
         val defaultDisplay: Display = ((WindowManager) getContext().getSystemService("window")).getDefaultDisplay()
         if (Build.VERSION.SDK_INT >= 13) {
             defaultDisplay.getSize(this.displaySize)
@@ -209,7 +209,7 @@ class MinimapView : View() {
         setMeasuredDimension(min, min)
     }
 
-     public fun onTouchEvent(motionEvent: MotionEvent): Boolean {
+     public override fun onTouchEvent(motionEvent: MotionEvent): Boolean {
         val i: Int = 0
         this.scaleGestureDetector.onTouchEvent(motionEvent)
         switch (motionEvent.getActionMasked()) {

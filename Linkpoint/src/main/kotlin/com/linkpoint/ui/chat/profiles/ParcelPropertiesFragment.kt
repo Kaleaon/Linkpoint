@@ -190,13 +190,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
 
         /* access modifiers changed from: protected */
-         public fun doInBackground(vararg voidArr: Void): Boolean {
+         public override fun doInBackground(vararg voidArr: Void): Boolean {
             val sLAgentCircuit: SLAgentCircuit = (SLAgentCircuit) ParcelPropertiesFragment.this.agentCircuit.getData()
             return Boolean.valueOf(sLAgentCircuit != null ? sLAgentCircuit.getModules().userProfiles.SetHomeLocation() : false)
         }
 
         /* access modifiers changed from: protected */
-        fun onPostExecute(bool: Boolean) {
+        override fun onPostExecute(bool: Boolean) {
             this.progressDialog.dismiss()
             if (bool == null || (!bool.booleanValue())) {
                 AlertDialog.Builder(ParcelPropertiesFragment.this.getContext()).setMessage((Int) R.string.set_home_failed).setCancelable(true).create().show()
@@ -206,7 +206,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
 
         /* access modifiers changed from: protected */
-        fun onPreExecute() {
+        override fun onPreExecute() {
             this.progressDialog = ProgressDialog.show(ParcelPropertiesFragment.this.getContext(), (CharSequence) null, ParcelPropertiesFragment.this.getString(R.string.setting_home_location), true)
         }
     }
@@ -273,7 +273,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         SetHomeLocationAsyncTask(this, (SetHomeLocationAsyncTask) null).execute(Void[0])
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         val inflate: View = layoutInflater.inflate(R.layout.parcel_properties_fragment, viewGroup, false)
         this.unbinder = ButterKnife.bind((Object) this, inflate)
         this.ownerNameDisplayer.bindViews(this.parcelOwnerName, this.parcelOwnerPic)
@@ -282,7 +282,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         return inflate
     }
 
-    fun onDestroyView() {
+    override fun onDestroyView() {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.ownerNameDisplayer.unbindViews()
@@ -622,7 +622,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         this.userManager = UserManager.getUserManager(UUIDPool.getUUID(getArguments().getString("activeAgentUUID")))
         this.parcelData = (ParcelData) getArguments().getSerializable(PARCEL_DATA_KEY)
@@ -643,7 +643,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    fun onStop() {
+    override fun onStop() {
         this.userManager = null
         this.parcelData = null
         this.ownerNameDisplayer.setChatterID((ChatterID) null)

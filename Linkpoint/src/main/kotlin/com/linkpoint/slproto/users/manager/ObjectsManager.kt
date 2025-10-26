@@ -271,7 +271,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     }
     /* access modifiers changed from: private */
     val Runnable updateObjectListRunnable = Runnable() {
-        fun run() {
+        override fun run() {
             SLObjectFilterInfo r2
             synchronized (ObjectsManager.this.filterLock) {
                 r2 = ObjectsManager.this.filterInfo

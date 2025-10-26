@@ -72,7 +72,7 @@ class TransactionLogAdapter : RecyclerView().Adapter<TransactionViewHolder> {
             this.timestampTextView.setText(DateUtils.getRelativeTimeSpanString(TransactionLogAdapter.this.context, this.calendar.getTimeInMillis(), false))
         }
 
-        fun onClick(view: View) {
+        override fun onClick(view: View) {
             if (TransactionLogAdapter.this.onTransactionClickListener != null && this.moneyTransaction != null) {
                 TransactionLogAdapter.this.onTransactionClickListener.onTransactionClicked(this.moneyTransaction)
             }

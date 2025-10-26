@@ -18,7 +18,7 @@ class DaoMaster : AbstractDaoMaster() {
             super(context, str, cursorFactory, 71)
         }
 
-        fun onCreate(sQLiteDatabase: SQLiteDatabase) {
+        override fun onCreate(sQLiteDatabase: SQLiteDatabase) {
             Log.i("greenDAO", "Creating tables for schema version 71")
             DaoMaster.createAllTables(sQLiteDatabase, false)
         }

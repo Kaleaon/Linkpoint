@@ -19,7 +19,7 @@ class FragmentWithTitle : StateAwareFragment(), FragmentHasTitle {
         return this.fragmentTitle
     }
 
-    fun onCreate(@android.support.annotation.Nullable Bundle bundle) {
+    override fun onCreate(@android.support.annotation.Nullable Bundle bundle) {
         super.onCreate(bundle)
         if (bundle != null) {
             this.fragmentTitle = bundle.getString(FRAGMENT_TITLE_TAG)
@@ -27,7 +27,7 @@ class FragmentWithTitle : StateAwareFragment(), FragmentHasTitle {
         }
     }
 
-    fun onDetach() {
+    override fun onDetach() {
         super.onDetach()
         val activity: FragmentActivity = getActivity()
         if (activity instanceof DetailsActivity) {
@@ -43,13 +43,13 @@ class FragmentWithTitle : StateAwareFragment(), FragmentHasTitle {
         }
     }
 
-    fun onSaveInstanceState(bundle: Bundle) {
+    override fun onSaveInstanceState(bundle: Bundle) {
         super.onSaveInstanceState(bundle)
         bundle.putString(FRAGMENT_TITLE_TAG, this.fragmentTitle)
         bundle.putString(FRAGMENT_SUBTITLE_TAG, this.fragmentSubTitle)
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         val activity: FragmentActivity = getActivity()
         if (activity instanceof DetailsActivity) {

@@ -10,7 +10,7 @@ class SLWearableData {
     val ImmutableList<WearableParam> params
     val ImmutableList<WearableTexture> textures
 
-    static class WearableFormatException : AssetFormatException() {
+    class WearableFormatException : AssetFormatException() {
         WearableFormatException() {
             super("Unsupported wearable format")
         }

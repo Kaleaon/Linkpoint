@@ -66,7 +66,7 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnL
         }
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         val inflate: View = layoutInflater.inflate(R.layout.user_profile_tab_first, viewGroup, false)
         this.unbinder = ButterKnife.bind((Object) this, inflate)
         this.loadingLayout.setSwipeRefreshLayout(this.swipeRefreshLayout)
@@ -75,7 +75,7 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnL
         return inflate
     }
 
-    fun onDestroyView() {
+    override fun onDestroyView() {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null

@@ -67,7 +67,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
     val SubscriptionPool<Boolean, UnreadNotifications> unreadNotificationInfoPool = SubscriptionPool<>()
     /* access modifiers changed from: private */
     val Runnable updateChatterDataRunnable = Runnable() {
-        fun run() {
+        override fun run() {
             UnreadNotificationManager.this.updateUnreadChatterData()
             UnreadNotificationManager.this.updateExecutor.execute(UnreadNotificationManager.this.updateNotificationDataRunnable)
         }
@@ -76,7 +76,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
     val Executor updateExecutor
     /* access modifiers changed from: private */
     val Runnable updateNotificationDataRunnable = Runnable() {
-        fun run() {
+        override fun run() {
             UnreadNotificationManager.this.unreadNotificationInfoPool.onResultData(UnreadNotificationManager.unreadNotificationKey, UnreadNotificationManager.this.getUnreadNotification())
         }
     }

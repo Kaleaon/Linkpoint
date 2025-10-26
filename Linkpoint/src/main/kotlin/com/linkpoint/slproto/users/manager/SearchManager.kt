@@ -21,7 +21,7 @@ class SearchManager {
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_SearchManager_1019  reason: not valid java name */
-    static /* synthetic */ Unit m350lambda$com_lumiyaviewer_lumiya_slproto_users_manager_SearchManager_1019(LazyList lazyList) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m350lambda$com_lumiyaviewer_lumiya_slproto_users_manager_SearchManager_1019(LazyList lazyList) {
         if (!lazyList.isClosed()) {
             lazyList.close()
         }

@@ -31,7 +31,7 @@ class FrustrumInfo {
     /* DevToolsApp WARNING: Missing block: B:7:0x0018, code:
             return false
      */
-     public fun equals(java.lang.Object obj): Boolean {
+     public override fun equals(java.lang.Object obj): Boolean {
         if (!(obj instanceof FrustrumInfo)) {
             return false
         }
@@ -49,7 +49,7 @@ class FrustrumInfo {
     }
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         return ((((Float.floatToIntBits(this.viewX) + 0) + Float.floatToIntBits(this.viewY)) + Float.floatToIntBits(this.viewZ)) + Float.floatToIntBits(this.viewDistance)) + Arrays.hashCode(this.mvpMatrix)
     }
 }

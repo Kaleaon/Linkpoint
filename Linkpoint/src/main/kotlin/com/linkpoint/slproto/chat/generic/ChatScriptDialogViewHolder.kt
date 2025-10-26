@@ -43,7 +43,7 @@ class ChatScriptDialogViewHolder : ChatEventViewHolder(), View.OnClickListener {
         }
     }
 
-    fun onClick(view: View) {
+    override fun onClick(view: View) {
         switch (view.getId()) {
             case R.id.buttonDialogIgnore:
                 if (this.dialogEvent != null) {

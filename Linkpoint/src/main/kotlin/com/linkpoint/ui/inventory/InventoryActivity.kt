@@ -183,7 +183,7 @@ class InventoryActivity : MasterDetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         if (bundle != null) {
             this.searchActive = bundle.getBoolean(SEARCH_ACTIVE_TAG)
@@ -209,7 +209,7 @@ class InventoryActivity : MasterDetailsActivity() {
         return InventoryFragment.newInstance(bundle, true)
     }
 
-     public fun onCreateOptionsMenu(menu: Menu): Boolean {
+     public override fun onCreateOptionsMenu(menu: Menu): Boolean {
         getMenuInflater().inflate(R.menu.inventory_menu, menu)
         this.searchMenuItem = menu.findItem(R.id.inventory_search_item)
         val searchView: SearchView = (SearchView) MenuItemCompat.getActionView(this.searchMenuItem)
@@ -242,7 +242,7 @@ class InventoryActivity : MasterDetailsActivity() {
         return true
     }
 
-     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_sort_order:
                 selectSortOrder()
@@ -253,7 +253,7 @@ class InventoryActivity : MasterDetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-    fun onSaveInstanceState(bundle: Bundle) {
+    override fun onSaveInstanceState(bundle: Bundle) {
         super.onSaveInstanceState(bundle)
         if (bundle != null) {
             bundle.putBoolean(SEARCH_ACTIVE_TAG, this.searchActive)
@@ -262,14 +262,14 @@ class InventoryActivity : MasterDetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         this.activityStarted = true
         updateSearchAction()
     }
 
     /* access modifiers changed from: protected */
-    fun onStop() {
+    override fun onStop() {
         this.activityStarted = false
         updateSearchAction()
         super.onStop()

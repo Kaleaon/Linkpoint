@@ -150,7 +150,7 @@ class GroupRolesProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoad
         }
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         val inflate: View = layoutInflater.inflate(R.layout.group_profile_tab_roles, viewGroup, false)
         if (this.adapter == null) {
             this.adapter = GroupRoleAdapter(this, (GroupRoleAdapter) null)

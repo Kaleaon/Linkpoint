@@ -50,7 +50,7 @@ final class AutoValue_UnreadNotificationInfo : UnreadNotificationInfo() {
         return this.agentUUID
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
@@ -68,7 +68,7 @@ final class AutoValue_UnreadNotificationInfo : UnreadNotificationInfo() {
         return this.freshMessagesCount
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         return ((((((((((((((this.agentUUID.hashCode() ^ 1000003) * 1000003) ^ this.totalUnreadCount) * 1000003) ^ this.unreadSources.hashCode()) * 1000003) ^ this.mostImportantType.hashCode()) * 1000003) ^ this.freshMessagesCount) * 1000003) ^ this.mostImportantFreshType.hashCode()) * 1000003) ^ this.singleFreshSource.hashCode()) * 1000003) ^ this.objectPopupInfo.hashCode()
     }
 
@@ -88,7 +88,7 @@ final class AutoValue_UnreadNotificationInfo : UnreadNotificationInfo() {
         return this.singleFreshSource
     }
 
-     public fun toString(): String {
+     public override fun toString(): String {
         return "UnreadNotificationInfo{agentUUID=" + this.agentUUID + ", " + "totalUnreadCount=" + this.totalUnreadCount + ", " + "unreadSources=" + this.unreadSources + ", " + "mostImportantType=" + this.mostImportantType + ", " + "freshMessagesCount=" + this.freshMessagesCount + ", " + "mostImportantFreshType=" + this.mostImportantFreshType + ", " + "singleFreshSource=" + this.singleFreshSource + ", " + "objectPopupInfo=" + this.objectPopupInfo + "}"
     }
 

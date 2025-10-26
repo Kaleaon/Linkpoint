@@ -168,7 +168,7 @@ private /* synthetic */ IntArray m653getcomlumiyaviewerlumiyauimyavaMyAvatarDeta
         setTitle(resolvedName, (String) null)
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         val inflate: View = layoutInflater.inflate(R.layout.my_avatar, viewGroup, false)
         this.unbinder = ButterKnife.bind((Object) this, inflate)
@@ -177,7 +177,7 @@ private /* synthetic */ IntArray m653getcomlumiyaviewerlumiyauimyavaMyAvatarDeta
         return inflate
     }
 
-    fun onDestroyView() {
+    override fun onDestroyView() {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -208,7 +208,7 @@ private /* synthetic */ IntArray m653getcomlumiyaviewerlumiyauimyavaMyAvatarDeta
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         val agentUUID: UUID = getAgentUUID()
         val userManager: UserManager = UserManager.getUserManager(agentUUID)
@@ -220,7 +220,7 @@ private /* synthetic */ IntArray m653getcomlumiyaviewerlumiyauimyavaMyAvatarDeta
         }
     }
 
-    fun onStop() {
+    override fun onStop() {
         if (this.myAvatarNameRetriever != null) {
             this.myAvatarNameRetriever.dispose()
             this.myAvatarNameRetriever = null

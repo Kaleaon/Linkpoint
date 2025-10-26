@@ -91,7 +91,7 @@ class SLAvatarParamColor {
         return (i3 << 24) | (i6 << 16) | (i5 << 8) | i4
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (this == obj) {
             return true
         }
@@ -122,7 +122,7 @@ class SLAvatarParamColor {
         return colorLerp(this.colorValues[i], this.colorValues[i2], f2 - ((Float) i))
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         return (this.colorOperation.hashCode() * 31) + Arrays.hashCode(this.colorValues)
     }
 }

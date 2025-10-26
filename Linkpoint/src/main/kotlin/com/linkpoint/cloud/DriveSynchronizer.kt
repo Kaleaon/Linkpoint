@@ -61,12 +61,12 @@ class DriveSynchronizer {
         this.chatLogsFolder = DriveConnectibleFolder(context, this, "ChatLogsFolderId", this.lumiyaFolder, googleApiClient, "Chat Logs")
     }
 
-    static /* synthetic */ Boolean access$002(DriveSynchronizer driveSynchronizer, Boolean bl) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Boolean access$002(DriveSynchronizer driveSynchronizer, Boolean bl) {
         driveSynchronizer.isSyncing = bl
         return bl
     }
 
-    static /* synthetic */ Boolean access$102(DriveSynchronizer driveSynchronizer, Boolean bl) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Boolean access$102(DriveSynchronizer driveSynchronizer, Boolean bl) {
         driveSynchronizer.syncCompleted = bl
         return bl
     }
@@ -162,7 +162,7 @@ class DriveSynchronizer {
         }
     }
 
-    static interface OnSyncCompletedListener {
+    interface OnSyncCompletedListener {
         fun onSyncCompleted()
     }
 }

@@ -97,7 +97,7 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
         }
     }
 
-     public fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+     public override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
         val z2: Boolean = true
         if (this.mViewWidth < 2) {
             this.mViewWidth = this.mListView.getWidth()

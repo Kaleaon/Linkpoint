@@ -80,7 +80,7 @@ private class GridListAdapter : ArrayAdapter()<GridList.GridInfo> {
         gridEditDialog.show()
     }
 
-     public fun onContextItemSelected(menuItem: MenuItem): Boolean {
+     public override fun onContextItemSelected(menuItem: MenuItem): Boolean {
         val item: Object = this.adapter.getItem(((AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo()).position)
         if (item != null) {
             GridList.GridInfo gridInfo = (GridList.GridInfo) item
@@ -187,7 +187,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.grids.-$Lambda$mB5
         return super.onContextItemSelected(menuItem)
     }
 
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setContentView((Int) R.layout.manage_grids)
         ButterKnife.bind((Activity) this)
@@ -199,7 +199,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.grids.-$Lambda$mB5
         registerForContextMenu(this.gridListView)
     }
 
-    fun onCreateContextMenu(contextMenu: ContextMenu, view: View, ContextMenu.ContextMenuInfo contextMenuInfo) {
+    override fun onCreateContextMenu(contextMenu: ContextMenu, view: View, ContextMenu.ContextMenuInfo contextMenuInfo) {
         super.onCreateContextMenu(contextMenu, view, contextMenuInfo)
         val item: Object = this.adapter.getItem(((AdapterView.AdapterContextMenuInfo) contextMenuInfo).position)
         if (item != null && !((GridList.GridInfo) item).isPredefinedGrid()) {

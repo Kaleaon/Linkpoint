@@ -82,7 +82,7 @@ class MuteListData {
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_3795  reason: not valid java name */
-    static /* synthetic */ Boolean m226lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_3795(MuteListEntry muteListEntry, Map.Entry entry) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Boolean m226lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_3795(MuteListEntry muteListEntry, Map.Entry entry) {
         if (entry != null) {
             return !((String) entry.getKey()).equals(muteListEntry.name)
         }
@@ -90,7 +90,7 @@ class MuteListData {
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4217  reason: not valid java name */
-    static /* synthetic */ Boolean m227lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4217(MuteListKey muteListKey, Map.Entry entry) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Boolean m227lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4217(MuteListKey muteListKey, Map.Entry entry) {
         if (entry != null) {
             return !((MuteListKey) entry.getKey()).equals(muteListKey)
         }
@@ -98,7 +98,7 @@ class MuteListData {
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4795  reason: not valid java name */
-    static /* synthetic */ Boolean m228lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4795(MuteListEntry muteListEntry, Map.Entry entry) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Boolean m228lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4795(MuteListEntry muteListEntry, Map.Entry entry) {
         if (entry != null) {
             return !((String) entry.getKey()).equals(muteListEntry.name)
         }
@@ -106,7 +106,7 @@ class MuteListData {
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_5273  reason: not valid java name */
-    static /* synthetic */ Boolean m229lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_5273(MuteListKey muteListKey, Map.Entry entry) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Boolean m229lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_5273(MuteListKey muteListKey, Map.Entry entry) {
         if (entry != null) {
             return !((MuteListKey) entry.getKey()).equals(muteListKey)
         }

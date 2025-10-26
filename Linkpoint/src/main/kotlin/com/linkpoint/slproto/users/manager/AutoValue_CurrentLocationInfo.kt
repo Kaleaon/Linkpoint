@@ -17,7 +17,7 @@ final class AutoValue_CurrentLocationInfo : CurrentLocationInfo() {
         this.parcelVoiceChannel = voiceChannelInfo
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
@@ -33,7 +33,7 @@ final class AutoValue_CurrentLocationInfo : CurrentLocationInfo() {
         return false
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         val i: Int = 0
         val hashCode: Int = ((((((this.parcelData == null ? 0 : this.parcelData.hashCode()) ^ 1000003) * 1000003) ^ this.nearbyUsers) * 1000003) ^ this.inChatRangeUsers) * 1000003
         if (this.parcelVoiceChannel != null) {
@@ -58,7 +58,7 @@ final class AutoValue_CurrentLocationInfo : CurrentLocationInfo() {
         return this.parcelVoiceChannel
     }
 
-     public fun toString(): String {
+     public override fun toString(): String {
         return "CurrentLocationInfo{parcelData=" + this.parcelData + ", " + "nearbyUsers=" + this.nearbyUsers + ", " + "inChatRangeUsers=" + this.inChatRangeUsers + ", " + "parcelVoiceChannel=" + this.parcelVoiceChannel + "}"
     }
 }

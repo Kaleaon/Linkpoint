@@ -57,7 +57,7 @@ class ImageAssetView : View() {
         }
 
         /* access modifiers changed from: protected */
-         public fun doInBackground(vararg uuidArr: UUID): Bitmap {
+         public override fun doInBackground(vararg uuidArr: UUID): Bitmap {
             Debug.Printf("loading asset ID %s", uuidArr[0].toString())
             TextureCache.getInstance().RequestResource(DrawableTextureParams.create(uuidArr[0], TextureClass.Asset), this)
             synchronized (this.textureReady) {
@@ -81,7 +81,7 @@ class ImageAssetView : View() {
         }
 
         /* access modifiers changed from: protected */
-        fun onPostExecute(bitmap: Bitmap) {
+        override fun onPostExecute(bitmap: Bitmap) {
             val unused: Bitmap = ImageAssetView.this.imageBitmap = bitmap
             if (ImageAssetView.this.verticalFit) {
                 ImageAssetView.this.requestLayout()
@@ -104,7 +104,7 @@ class ImageAssetView : View() {
     }
 
     /* access modifiers changed from: protected */
-    fun onAttachedToWindow() {
+    override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         val displayMetrics: DisplayMetrics = getResources().getDisplayMetrics()
         val typedValue: TypedValue = TypedValue()
@@ -118,7 +118,7 @@ class ImageAssetView : View() {
     }
 
     /* access modifiers changed from: protected */
-    fun onDraw(canvas: Canvas) {
+    override fun onDraw(canvas: Canvas) {
         val width: Int = getWidth()
         val height: Int = getHeight()
         this.bitmapPaint.setStyle(Paint.Style.STROKE)
@@ -167,7 +167,7 @@ class ImageAssetView : View() {
     }
 
     /* access modifiers changed from: protected */
-    fun onMeasure(i: Int, i2: Int) {
+    override fun onMeasure(i: Int, i2: Int) {
         if (View.MeasureSpec.getMode(i) == 0 && View.MeasureSpec.getMode(i2) == 0) {
             super.onMeasure(i, i2)
             return

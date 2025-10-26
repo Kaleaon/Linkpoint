@@ -30,7 +30,7 @@ final class AutoValue_InventoryQuery : InventoryQuery() {
         return this.containsString
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
@@ -56,7 +56,7 @@ final class AutoValue_InventoryQuery : InventoryQuery() {
         return this.folderType
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         val i: Int = 0
         val i2: Int = 1231
         val hashCode: Int = ((this.folderId == null ? 0 : this.folderId.hashCode()) ^ 1000003) * 1000003
@@ -82,7 +82,7 @@ final class AutoValue_InventoryQuery : InventoryQuery() {
         return this.newestFirst
     }
 
-     public fun toString(): String {
+     public override fun toString(): String {
         return "InventoryQuery{folderId=" + this.folderId + ", " + "containsString=" + this.containsString + ", " + "includeFolders=" + this.includeFolders + ", " + "includeItems=" + this.includeItems + ", " + "newestFirst=" + this.newestFirst + ", " + "folderType=" + this.folderType + ", " + "assetType=" + this.assetType + "}"
     }
 }

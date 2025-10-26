@@ -17,7 +17,7 @@ final class AutoValue_PayInfo : PayInfo() {
         return this.defaultPayPrice
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
@@ -31,7 +31,7 @@ final class AutoValue_PayInfo : PayInfo() {
         return false
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         return (this.payPrices == null ? 0 : this.payPrices.hashCode()) ^ (1000003 * (this.defaultPayPrice ^ 1000003))
     }
 
@@ -39,7 +39,7 @@ final class AutoValue_PayInfo : PayInfo() {
         return this.payPrices
     }
 
-     public fun toString(): String {
+     public override fun toString(): String {
         return "PayInfo{defaultPayPrice=" + this.defaultPayPrice + ", " + "payPrices=" + this.payPrices + "}"
     }
 }

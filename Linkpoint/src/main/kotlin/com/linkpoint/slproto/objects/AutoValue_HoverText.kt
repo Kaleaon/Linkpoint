@@ -16,7 +16,7 @@ final class AutoValue_HoverText : HoverText() {
         return this.color
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
@@ -30,7 +30,7 @@ final class AutoValue_HoverText : HoverText() {
         return false
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         return ((this.text.hashCode() ^ 1000003) * 1000003) ^ this.color
     }
 
@@ -38,7 +38,7 @@ final class AutoValue_HoverText : HoverText() {
         return this.text
     }
 
-     public fun toString(): String {
+     public override fun toString(): String {
         return "HoverText{text=" + this.text + ", " + "color=" + this.color + "}"
     }
 }

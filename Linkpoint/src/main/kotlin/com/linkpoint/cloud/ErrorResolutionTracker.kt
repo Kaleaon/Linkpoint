@@ -89,7 +89,7 @@ private ErrorResolutionTracker instance = null
         return this.resolvableErrors.get(uUID)
     }
 
-    static class ResolvableError {
+    class ResolvableError {
         final RestartableOperation operation
         final String resourceName
         final Status status
@@ -101,7 +101,7 @@ private ErrorResolutionTracker instance = null
         }
     }
 
-    static interface RestartableOperation {
+    interface RestartableOperation {
         fun tryRestartingOperation()
     }
 }

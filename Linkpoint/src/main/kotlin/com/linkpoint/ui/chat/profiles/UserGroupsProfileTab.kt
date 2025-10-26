@@ -95,7 +95,7 @@ private class GroupsAdapter : BaseAdapter() {
         }
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         val inflate: View = layoutInflater.inflate(R.layout.user_profile_tab_groups, viewGroup, false)
         this.groupsAdapter = GroupsAdapter(layoutInflater.getContext(), (GroupsAdapter) null)
         ((ListView) inflate.findViewById(R.id.groups_list_view)).setAdapter(this.groupsAdapter)

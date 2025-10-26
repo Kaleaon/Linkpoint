@@ -158,7 +158,7 @@ class InventoryFolderAdapter : BaseAdapter(), View.OnClickListener {
         return true
     }
 
-    fun onClick(view: View) {
+    override fun onClick(view: View) {
         if (this.onItemCheckboxClickListener != null) {
             val tag: Object = view.getTag(R.id.tag_outfit_object)
             if (tag instanceof SLInventoryEntry) {

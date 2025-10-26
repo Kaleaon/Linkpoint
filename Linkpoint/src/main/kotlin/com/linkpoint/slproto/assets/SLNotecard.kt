@@ -39,7 +39,7 @@ private class AttachmentClickableSpan : ClickableSpan() : InventoryEntrySpan {
             return this.entry
         }
 
-        fun onClick(view: View) {
+        override fun onClick(view: View) {
             if (this.clickListener != null) {
                 this.clickListener.onAttachmentClick(this.entry)
             }

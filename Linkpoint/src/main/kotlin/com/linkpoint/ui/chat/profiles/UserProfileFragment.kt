@@ -86,11 +86,11 @@ class UserProfileFragment : UserFunctionsFragment() {
         return UserFunctionsFragment.makeSelection(chatterID)
     }
 
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         val inflate: View = layoutInflater.inflate(R.layout.user_profile_new, viewGroup, false)
         val viewPager: ViewPager = (ViewPager) inflate.findViewById(R.id.user_profile_pager)

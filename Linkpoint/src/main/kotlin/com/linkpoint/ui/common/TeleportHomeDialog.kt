@@ -11,7 +11,7 @@ import com.linkpoint.utils.UUIDPool
 
 class TeleportHomeDialog {
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_TeleportHomeDialog_956  reason: not valid java name */
-    static /* synthetic */ Unit m545lambda$com_lumiyaviewer_lumiya_ui_common_TeleportHomeDialog_956(Activity activity, UserManager userManager, SLAgentCircuit sLAgentCircuit, DialogInterface dialogInterface, Int i) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m545lambda$com_lumiyaviewer_lumiya_ui_common_TeleportHomeDialog_956(Activity activity, UserManager userManager, SLAgentCircuit sLAgentCircuit, DialogInterface dialogInterface, Int i) {
         TeleportProgressDialog(activity, userManager, R.string.teleporting_progress_message).show()
         sLAgentCircuit.TeleportToLandmarkAsset(UUIDPool.ZeroUUID)
         dialogInterface.dismiss()

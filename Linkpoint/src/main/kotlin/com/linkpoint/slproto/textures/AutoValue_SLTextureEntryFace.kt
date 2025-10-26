@@ -30,7 +30,7 @@ final class AutoValue_SLTextureEntryFace : SLTextureEntryFace() {
         this.hasAttribute = i2
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
@@ -54,7 +54,7 @@ final class AutoValue_SLTextureEntryFace : SLTextureEntryFace() {
         return this.hasAttribute
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         return (((((((((((((((((((((this.textureID == null ? 0 : this.textureID.hashCode()) ^ 1000003) * 1000003) ^ this.rgba) * 1000003) ^ Float.floatToIntBits(this.repeatU)) * 1000003) ^ Float.floatToIntBits(this.repeatV)) * 1000003) ^ Float.floatToIntBits(this.offsetU)) * 1000003) ^ Float.floatToIntBits(this.offsetV)) * 1000003) ^ Float.floatToIntBits(this.rotation)) * 1000003) ^ Float.floatToIntBits(this.glow)) * 1000003) ^ this.materialb) * 1000003) ^ this.mediab) * 1000003) ^ this.hasAttribute
     }
 
@@ -94,7 +94,7 @@ final class AutoValue_SLTextureEntryFace : SLTextureEntryFace() {
         return this.textureID
     }
 
-     public fun toString(): String {
+     public override fun toString(): String {
         return "SLTextureEntryFace{textureID=" + this.textureID + ", " + "rgba=" + this.rgba + ", " + "repeatU=" + this.repeatU + ", " + "repeatV=" + this.repeatV + ", " + "offsetU=" + this.offsetU + ", " + "offsetV=" + this.offsetV + ", " + "rotation=" + this.rotation + ", " + "glow=" + this.glow + ", " + "materialb=" + this.materialb + ", " + "mediab=" + this.mediab + ", " + "hasAttribute=" + this.hasAttribute + "}"
     }
 }

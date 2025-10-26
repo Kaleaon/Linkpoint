@@ -25,7 +25,7 @@ class TerrainPatchHeightMap {
         return Float.floatToIntBits(this.waterHeight) + 0 + Arrays.hashCode(this.heightMap) + Arrays.hashCode(this.normalMap) + this.mapWidth + this.mapHeight
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (!(obj instanceof TerrainPatchHeightMap)) {
             return false
         }
@@ -64,7 +64,7 @@ class TerrainPatchHeightMap {
         return this.waterHeight
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         return this.hashCode
     }
 }

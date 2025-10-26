@@ -98,7 +98,7 @@ class ParcelInfoFragment : FragmentWithTitle(), ReloadableFragment, LoadableMoni
         }
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         val inflate: View = layoutInflater.inflate(R.layout.parcel_info, viewGroup, false)
         this.unbinder = ButterKnife.bind((Object) this, inflate)
@@ -109,7 +109,7 @@ class ParcelInfoFragment : FragmentWithTitle(), ReloadableFragment, LoadableMoni
         return inflate
     }
 
-    fun onDestroyView() {
+    override fun onDestroyView() {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -267,12 +267,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.search.-$Lambda$5J
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         showParcelInfo(UUIDPool.getUUID(getArguments().getString(PARCEL_UUID_KEY)))
     }
 
-    fun onStop() {
+    override fun onStop() {
         this.loadableMonitor.unsubscribeAll()
         if (this.ownerNameRetriever != null) {
             this.ownerNameRetriever.dispose()

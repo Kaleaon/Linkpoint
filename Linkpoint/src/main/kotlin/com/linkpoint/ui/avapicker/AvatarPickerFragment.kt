@@ -147,7 +147,7 @@ private /* synthetic */ IntArray m388getcomlumiyaviewerlumiyauiavapickerAvatarPi
     /* access modifiers changed from: protected */
     public abstract Unit onAvatarSelected(ChatterID chatterID, String str)
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         val inflate: View = layoutInflater.inflate(R.layout.avatar_picker, viewGroup, false)
         val viewPager: ViewPager = (ViewPager) inflate.findViewById(R.id.avatar_picker_pager)
         viewPager.setAdapter(AvatarPickerPagerAdapter(layoutInflater.getContext()))

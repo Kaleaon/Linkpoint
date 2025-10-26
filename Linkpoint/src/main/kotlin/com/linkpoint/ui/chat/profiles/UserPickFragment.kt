@@ -218,7 +218,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_UserPickFragment_13525  reason: not valid java name */
-    static /* synthetic */ Unit m513lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserPickFragment_13525(UserManager userManager, AvatarPickKey avatarPickKey, PickInfoReply pickInfoReply, String str) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m513lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserPickFragment_13525(UserManager userManager, AvatarPickKey avatarPickKey, PickInfoReply pickInfoReply, String str) {
         val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
             activeAgentCircuit.getModules().userProfiles.UpdatePickInfo(avatarPickKey.pickID, pickInfoReply.Data_Field.CreatorID, pickInfoReply.Data_Field.ParcelID, str, SLMessage.stringFromVariableUTF(pickInfoReply.Data_Field.Desc), pickInfoReply.Data_Field.SnapshotID, pickInfoReply.Data_Field.PosGlobal, pickInfoReply.Data_Field.SortOrder, pickInfoReply.Data_Field.Enabled)
@@ -407,12 +407,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.pick_menu, menu)
         this.menuItemRename = menu.findItem(R.id.item_pick_rename)
@@ -420,7 +420,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         updateMenuItems()
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         val inflate: View = layoutInflater.inflate(R.layout.user_pick, viewGroup, false)
         this.unbinder = ButterKnife.bind((Object) this, inflate)
@@ -439,7 +439,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    fun onDestroyView() {
+    override fun onDestroyView() {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -447,7 +447,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         super.onDestroyView()
     }
 
-     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_pick_rename:
                 renamePick()
@@ -632,7 +632,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         val i: Int = 0
         super.onStart()
         setTitle(getString(R.string.name_loading_title), (String) null)
@@ -653,7 +653,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         this.pickInfo.unsubscribe()
     }
 
-    fun onStop() {
+    override fun onStop() {
         this.pickInfo.unsubscribe()
         super.onStop()
     }

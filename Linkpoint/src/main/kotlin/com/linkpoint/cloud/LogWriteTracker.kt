@@ -76,7 +76,7 @@ class LogWriteTracker {
         }
     }
 
-    static interface OnLoggingDoneListener {
+    interface OnLoggingDoneListener {
         fun onLoggingDone()
 
         fun onLoggingNeeded()

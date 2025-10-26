@@ -193,7 +193,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     public ValueAnimator buttonsFadeAnimator = null
     /* access modifiers changed from: private */
     val Runnable buttonsFadeTask = Runnable() {
-        fun run() {
+        override fun run() {
             val unused: Boolean = WorldViewActivity.this.buttonsFadeTimerStarted = false
             if (!WorldViewActivity.this.detailsVisible() && (!WorldViewActivity.this.isDragging) && WorldViewActivity.this.agentCircuit.hasData()) {
                 val voiceChatInfo: VoiceChatInfo = (VoiceChatInfo) WorldViewActivity.this.voiceChatInfo.getData()
@@ -213,7 +213,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     /* access modifiers changed from: private */
     public Boolean buttonsFadeTimerStarted = false
     private val Runnable buttonsRestoreTask = Runnable() {
-        fun run() {
+        override fun run() {
             if (Build.VERSION.SDK_INT >= 11) {
                 if (WorldViewActivity.this.buttonsFadeAnimator != null) {
                     WorldViewActivity.this.buttonsFadeAnimator.cancel()
@@ -550,7 +550,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     public Boolean objectDeselectTimerStarted = false
     /* access modifiers changed from: private */
     val Runnable objectDeselectTimerTask = Runnable() {
-        fun run() {
+        override fun run() {
             val unused: Boolean = WorldViewActivity.this.objectDeselectTimerStarted = false
             if (!WorldViewActivity.this.detailsVisible() && (!WorldViewActivity.this.isDragging)) {
                 val r0: Long = (WorldViewActivity.this.lastObjectActivityTime + WorldViewActivity.OBJECT_DESELECT_TIMEOUT_MILLIS) - SystemClock.uptimeMillis()
@@ -800,7 +800,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     @BindView(2131755743)
     FrameLayout worldViewHolder
     private val View.OnTouchListener worldViewTouchListener = View.OnTouchListener() {
-         public fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+         public override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
             val r3: Boolean = WorldViewActivity.this.isInteracting
             switch (motionEvent.getActionMasked()) {
                 case 0:
@@ -843,7 +843,7 @@ private class SelectableAttachment {
             return this.localID
         }
 
-         public fun toString(): String {
+         public override fun toString(): String {
             return this.attachmentName
         }
     }
@@ -1982,13 +1982,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
     }
 
-    fun onConfigurationChanged(configuration: Configuration) {
+    override fun onConfigurationChanged(configuration: Configuration) {
         super.onConfigurationChanged(configuration)
         this.isSplitScreen = LinkpointApp.isSplitScreenNeeded(this)
         updateSplitScreenLayout()
     }
 
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         this.userManager = ActivityUtils.getUserManager(getIntent())
         if (this.userManager == null) {
@@ -2088,7 +2088,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         startFadingButtonsTimer()
     }
 
-     public fun onCreateOptionsMenu(menu: Menu): Boolean {
+     public override fun onCreateOptionsMenu(menu: Menu): Boolean {
         super.onCreateOptionsMenu(menu)
         getMenuInflater().inflate(R.menu.world_view_menu, menu)
         return true
@@ -2287,7 +2287,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
     }
 
-     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_chat:
                 DetailsActivity.showEmbeddedDetails(this, ContactsFragment.class, ActivityUtils.makeFragmentArguments(this.userManager.getUserID(), (Bundle) null))
@@ -2316,7 +2316,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
     }
 
-    fun onPause() {
+    override fun onPause() {
         Debug.Printf("WorldViewActivity: onPause", Object[0])
         if (this.userManager != null) {
             this.userManager.getUnreadNotificationManager().clearNotifyCapture(this)
@@ -2344,7 +2344,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         super.onPause()
     }
 
-     public fun onPrepareOptionsMenu(menu: Menu): Boolean {
+     public override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         val findItem: MenuItem = menu.findItem(R.id.item_cardboard_view)
         if (findItem != null) {
             findItem.setVisible(Build.VERSION.SDK_INT >= 23)
@@ -2352,14 +2352,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         return super.onPrepareOptionsMenu(menu)
     }
 
-    fun onRequestPermissionsResult(i: Int, strArr: Array<String>, iArr: IntArray) {
+    override fun onRequestPermissionsResult(i: Int, strArr: Array<String>, iArr: IntArray) {
         Debug.Printf("Cardboard: onRequestPermissionResult, code %d", Integer.valueOf(i))
         if (i == 100) {
             startCardboardActivity()
         }
     }
 
-    fun onResume() {
+    override fun onResume() {
         super.onResume()
         Debug.Printf("WorldViewActivity: onResume", Object[0])
         val defaultSharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext())
@@ -2391,7 +2391,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     /* access modifiers changed from: protected */
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         if (this.userManager != null) {
             this.agentCircuit.subscribe(UserManager.agentCircuits(), this.userManager.getUserID())
@@ -2401,7 +2401,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     /* access modifiers changed from: protected */
-    fun onStop() {
+    override fun onStop() {
         this.agentCircuit.unsubscribe()
         this.voiceActiveChatter.unsubscribe()
         this.voiceChatInfo.unsubscribe()
@@ -2417,7 +2417,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
     }
 
-     public fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+     public override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
         switch (view.getId()) {
             case R.id.button_move_forward:
                 moveTouchEvent(2, motionEvent)

@@ -1532,13 +1532,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragment_20370  reason: not valid java name */
-    static /* synthetic */ Unit m561lambda$com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragment_20370(DialogInterface dialogInterface, Int i) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m561lambda$com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragment_20370(DialogInterface dialogInterface, Int i) {
         dialogInterface.dismiss()
         GlobalOptions.getInstance().enableVoice()
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragment_23327  reason: not valid java name */
-    static /* synthetic */ Unit m563lambda$com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragment_23327(UserManager userManager, ChatterID chatterID, String str, DialogInterface dialogInterface, Int i) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m563lambda$com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragment_23327(UserManager userManager, ChatterID chatterID, String str, DialogInterface dialogInterface, Int i) {
         userManager.getChatterList().getActiveChattersManager().unmuteChatter(chatterID)
         val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit == null) {
@@ -1552,7 +1552,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragment_29514  reason: not valid java name */
-    static /* synthetic */ Unit m568lambda$com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragment_29514(SLAgentCircuit sLAgentCircuit, ChatterID.ChatterIDUser chatterIDUser, DialogInterface dialogInterface, Int i) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m568lambda$com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragment_29514(SLAgentCircuit sLAgentCircuit, ChatterID.ChatterIDUser chatterIDUser, DialogInterface dialogInterface, Int i) {
         dialogInterface.dismiss()
         sLAgentCircuit.RemoveFriend(chatterIDUser.getChatterUUID())
     }
@@ -1651,12 +1651,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         performTeleportTo(sLAgentCircuit, chatterIDUser)
     }
 
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.user_list_context_menu, menu)
     }
@@ -1679,7 +1679,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         }
     }
 
-     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         val userManager: UserManager = this.chatterID != null ? this.chatterID.getUserManager() : null
         if (!(this.chatterID == null || userManager == null)) {
             val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
@@ -1765,7 +1765,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         return super.onOptionsItemSelected(menuItem)
     }
 
-    fun onPrepareOptionsMenu(menu: Menu) {
+    override fun onPrepareOptionsMenu(menu: Menu) {
         AvatarGroupList avatarGroupList
         AvatarGroupList.AvatarGroupEntry avatarGroupEntry
         super.onPrepareOptionsMenu(menu)
@@ -1920,7 +1920,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         val userManager: UserManager = null
         super.onStart()
         if (this.chatterID != null) {
@@ -1936,7 +1936,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         EventBus.getInstance().subscribe((Object) this)
     }
 
-    fun onStop() {
+    override fun onStop() {
         this.voiceLoggedIn.unsubscribe()
         this.currentLocationInfo.unsubscribe()
         EventBus.getInstance().unsubscribe(this)

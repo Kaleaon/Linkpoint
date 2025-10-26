@@ -88,7 +88,7 @@ private class ExponentialInterpolator : Interpolator {
     }
 
     /* access modifiers changed from: protected */
-    fun onDraw(canvas: Canvas) {
+    override fun onDraw(canvas: Canvas) {
         if (this.mAnimator.isStarted()) {
             this.mShadow.draw(canvas)
             val floatValue: Float = ((Float) this.mAnimator.getAnimatedValue()).floatValue()
@@ -104,7 +104,7 @@ private class ExponentialInterpolator : Interpolator {
     }
 
     /* access modifiers changed from: protected */
-    fun onLayout(z: Boolean, i: Int, i2: Int, i3: Int, i4: Int) {
+    override fun onLayout(z: Boolean, i: Int, i2: Int, i3: Int, i4: Int) {
         if (z) {
             val width: Int = getWidth()
             this.mShadow.setBounds(0, this.mSolidBarHeight, width, getHeight() - this.mSolidBarHeight)

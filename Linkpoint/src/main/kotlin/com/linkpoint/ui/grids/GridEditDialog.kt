@@ -47,7 +47,7 @@ class GridEditDialog : AppCompatDialog(), View.OnClickListener {
         findViewById(R.id.gridNameText).requestFocus()
     }
 
-    fun onClick(view: View) {
+    override fun onClick(view: View) {
         val z: Boolean = false
         switch (view.getId()) {
             case R.id.okButton:
@@ -99,7 +99,7 @@ class GridEditDialog : AppCompatDialog(), View.OnClickListener {
         }
     }
 
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setTitle((Int) R.string.new_grid_dialog_title)
         setContentView((Int) R.layout.grid_edit_dialog)

@@ -138,7 +138,7 @@ class WorldSurfaceView : GLSurfaceView() {
         this.renderer.requestScreenshot(this.mHandler)
     }
 
-    fun onPause() {
+    override fun onPause() {
         Debug.Log("GLView: onPause () entered.")
         this.renderer.disableDrawing()
         Debug.Log("GLView: calling super.onPause ().")
@@ -146,7 +146,7 @@ class WorldSurfaceView : GLSurfaceView() {
         Debug.Log("GLView: onPause () exiting")
     }
 
-    fun onResume() {
+    override fun onResume() {
         super.onResume()
         if (this.wantGL20 == getWantGL20() || this.activity == null) {
             val worldViewRenderer: WorldViewRenderer = this.renderer

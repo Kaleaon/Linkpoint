@@ -428,20 +428,20 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         return true
     }
 
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
         setShowChatterTitle(false)
     }
 
-    fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.group_member_roles_menu, menu)
         this.undoMenuItem = menu.findItem(R.id.item_undo)
         this.undoMenuItem.setVisible(this.hasChanged)
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         val inflate: View = layoutInflater.inflate(R.layout.group_member_roles, viewGroup, false)
         if (this.adapter == null) {
             this.adapter = MemberRoleAdapter(this, (MemberRoleAdapter) null)
@@ -542,7 +542,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_undo:
                 try {

@@ -22,7 +22,7 @@ class DrawableAvatarPart : ResourceConsumer {
     private volatile SLAnimatedMeshData meshData
     private volatile Boolean meshDataUpdated
     private val Runnable meshUpdate = Runnable() {
-        fun run() {
+        override fun run() {
             GLTexture -get3
             FloatArray -get2
             Debug.Printf("Avatar: meshUpdate entered for part %s", DrawableAvatarPart.this.faceIndex.toString())

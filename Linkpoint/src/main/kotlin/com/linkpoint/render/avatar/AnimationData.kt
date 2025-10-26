@@ -116,7 +116,7 @@ private <T> Boolean animateArray(Float f, Float f2, T t, AnimationKeyframe<T>[] 
             }
         }
 
-         public fun toString(): String {
+         public override fun toString(): String {
             val i: Int = 0
             val stringBuilder: StringBuilder = StringBuilder()
             stringBuilder.append("Priority ").append(this.Priority)
@@ -136,7 +136,7 @@ private <T> Boolean animateArray(Float f, Float f2, T t, AnimationKeyframe<T>[] 
         }
     }
 
-    static class AnimationJointSet {
+    class AnimationJointSet {
         private val Float animLength
         private val UUID animationUUID
         private val SparseArray<AnimationJointData> jointAnims
@@ -224,7 +224,7 @@ private class AnimationPosKeyframe : AnimationKeyframe()<LLVector3> {
             lLVector3.set(this.position)
         }
 
-         public fun toString(): String {
+         public override fun toString(): String {
             return this.position.toString()
         }
     }
@@ -250,7 +250,7 @@ private class AnimationRotKeyframe : AnimationKeyframe()<LLQuaternion> {
             lLQuaternion.set(this.quaternion)
         }
 
-         public fun toString(): String {
+         public override fun toString(): String {
             return this.quaternion.toString()
         }
     }

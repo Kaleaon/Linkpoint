@@ -55,7 +55,7 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
             return super.compareTo(chatterID)
         }
 
-         public fun equals(obj: Object): Boolean {
+         public override fun equals(obj: Object): Boolean {
             if (obj instanceof ChatterIDGroup) {
                 return super.equals(obj)
             }
@@ -127,7 +127,7 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
             this(uuid)
         }
 
-         public fun equals(obj: Object): Boolean {
+         public override fun equals(obj: Object): Boolean {
             if (obj instanceof ChatterIDLocal) {
                 return ChatterID.super.equals(obj)
             }
@@ -171,7 +171,7 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
             return super.compareTo(chatterID)
         }
 
-         public fun equals(obj: Object): Boolean {
+         public override fun equals(obj: Object): Boolean {
             if (obj instanceof ChatterIDUser) {
                 return super.equals(obj)
             }
@@ -334,7 +334,7 @@ private abstract class ChatterIDWithUUID : ChatterID() {
             return 0
         }
 
-         public fun equals(obj: Object): Boolean {
+         public override fun equals(obj: Object): Boolean {
             if (!ChatterID.super.equals(obj) || !(obj instanceof ChatterIDWithUUID)) {
                 return false
             }
@@ -349,7 +349,7 @@ private abstract class ChatterIDWithUUID : ChatterID() {
             return this.uuid
         }
 
-         public fun hashCode(): Int {
+         public override fun hashCode(): Int {
             return (this.uuid != null ? this.uuid.hashCode() : 0) + ChatterID.super.hashCode()
         }
 
@@ -366,7 +366,7 @@ private abstract class ChatterIDWithUUID : ChatterID() {
             return bundle
         }
 
-         public fun toString(): String {
+         public override fun toString(): String {
             return ChatterID.super.toString() + ":" + (this.uuid != null ? this.uuid.toString() : "null")
         }
 
@@ -499,7 +499,7 @@ private /* synthetic */ IntArray m259getcomlumiyaviewerlumiyaslprotousersChatter
         return 0
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (obj instanceof ChatterID) {
             return ((ChatterID) obj).agentUUID.equals(this.agentUUID)
         }
@@ -524,7 +524,7 @@ private /* synthetic */ IntArray m259getcomlumiyaviewerlumiyaslprotousersChatter
         return UserManager.getUserManager(this.agentUUID)
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         return this.agentUUID.hashCode() + 1 + getChatterType().ordinal()
     }
 
@@ -544,7 +544,7 @@ private /* synthetic */ IntArray m259getcomlumiyaviewerlumiyaslprotousersChatter
         chatter.setUuid(getOptionalChatterUUID())
     }
 
-     public fun toString(): String {
+     public override fun toString(): String {
         return "Chatter:" + getChatterType().toString()
     }
 

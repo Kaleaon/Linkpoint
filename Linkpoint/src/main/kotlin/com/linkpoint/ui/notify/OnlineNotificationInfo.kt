@@ -159,7 +159,7 @@ private /* synthetic */ IntArray m668getcomlumiyaviewerlumiyaslprotoSLGridConnec
         throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.ui.notify.OnlineNotificationInfo.<init>(Boolean, android.content.Context, java.lang.String, com.lumiyaviewer.lumiya.slproto.SLGridConnection, com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever, com.lumiyaviewer.lumiya.slproto.users.manager.CurrentLocationInfo):Unit")
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (!(obj instanceof OnlineNotificationInfo)) {
             return false
         }

@@ -90,7 +90,7 @@ class SearchGridAdapter : RecyclerView().Adapter<SearchViewHolder> {
             }
         }
 
-        fun onClick(view: View) {
+        override fun onClick(view: View) {
             if (SearchGridAdapter.this.onSearchResultClickListener != null && this.searchGridResult != null) {
                 SearchGridAdapter.this.onSearchResultClickListener.onSearchResultClicked(this.searchGridResult)
             }

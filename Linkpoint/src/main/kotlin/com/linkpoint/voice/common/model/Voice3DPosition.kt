@@ -39,7 +39,7 @@ class Voice3DPosition {
         return bundle
     }
 
-     public fun toString(): String {
+     public override fun toString(): String {
         return String.format("(pos %s vel %s at %s up %s left %s)", this.position.toString(), this.velocity.toString(), this.atOrientation.toString(), this.upOrientation.toString(), this.leftOrientation.toString())
     }
 }

@@ -224,7 +224,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
         }
     }
 
-     public fun onContextItemSelected(menuItem: MenuItem): Boolean {
+     public override fun onContextItemSelected(menuItem: MenuItem): Boolean {
         MuteListEntry item
         AdapterView.AdapterContextMenuInfo adapterContextMenuInfo = (AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo()
         if (adapterContextMenuInfo == null || this.adapter == null || (item = this.adapter.getItem(adapterContextMenuInfo.position)) == null) {
@@ -239,11 +239,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
         }
     }
 
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         val inflate: View = layoutInflater.inflate(R.layout.mute_list, viewGroup, false)
         this.unbinder = ButterKnife.bind((Object) this, inflate)
@@ -335,7 +335,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
         return inflate
     }
 
-    fun onDestroyView() {
+    override fun onDestroyView() {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -343,7 +343,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
         super.onDestroyView()
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         setTitle(getString(R.string.mute_list_fragment_title), (String) null)
         val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
@@ -353,7 +353,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
         }
     }
 
-    fun onStop() {
+    override fun onStop() {
         this.muteListData.unsubscribe()
         this.agentCircuit.unsubscribe()
         super.onStop()

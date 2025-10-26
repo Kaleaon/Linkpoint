@@ -20,7 +20,7 @@ class TerrainPatchInfo {
         return this.heightMap.hashCode() + this.textures.hashCode() + this.layerMask + Arrays.hashCode(this.textureHeightMap)
     }
 
-     public fun equals(obj: Object): Boolean {
+     public override fun equals(obj: Object): Boolean {
         if (!(obj instanceof TerrainPatchInfo)) {
             return false
         }
@@ -55,7 +55,7 @@ class TerrainPatchInfo {
         return this.textures
     }
 
-     public fun hashCode(): Int {
+     public override fun hashCode(): Int {
         return this.hashCode
     }
 }

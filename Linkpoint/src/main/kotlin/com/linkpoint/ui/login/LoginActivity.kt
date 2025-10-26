@@ -329,7 +329,7 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
     }
 
     /* access modifiers changed from: protected */
-    fun onActivityResult(i: Int, i2: Int, intent: Intent) {
+    override fun onActivityResult(i: Int, i2: Int, intent: Intent) {
         AccountList.AccountInfo accountInfo
         Debug.Log("LoginActivity: onActivityResult: requestCode = " + i + ", resultCode = " + i2)
         if (intent != null) {
@@ -386,7 +386,7 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
         }
     }
 
-    fun onClick(view: View) {
+    override fun onClick(view: View) {
         switch (view.getId()) {
             case R.id.whatsnewText:
                 startActivity(Intent(this, WhatsNewActivity.class))
@@ -407,7 +407,7 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
         }
     }
 
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         val gridConnection: SLGridConnection = GridConnectionService.getGridConnection()
         if (gridConnection != null) {
@@ -484,7 +484,7 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
         findViewById(R.id.loginCancelButton).setOnClickListener(this)
     }
 
-     public fun onCreateOptionsMenu(menu: Menu): Boolean {
+     public override fun onCreateOptionsMenu(menu: Menu): Boolean {
         getMenuInflater().inflate(R.menu.login_menu, menu)
         ImmutableList.Builder builder = ImmutableList.builder()
         builder.add((Object) menu.findItem(R.id.item_manage_accounts))
@@ -519,7 +519,7 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
         ((Spinner) findViewById(R.id.spinnerGrid)).setSelection(this.lastSelectedGrid)
     }
 
-     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_settings:
                 startActivity(Intent(this, SettingsActivity.class))
@@ -541,7 +541,7 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
     }
 
     /* access modifiers changed from: protected */
-    fun onResume() {
+    override fun onResume() {
         super.onResume()
         Debug.Printf("LoginActivity: Resumed.", Object[0])
         checkIfGridAvailable()
@@ -564,13 +564,13 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
     }
 
     /* access modifiers changed from: protected */
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         checkIfGridAvailable()
     }
 
     /* access modifiers changed from: protected */
-    fun onStop() {
+    override fun onStop() {
         super.onStop()
     }
 

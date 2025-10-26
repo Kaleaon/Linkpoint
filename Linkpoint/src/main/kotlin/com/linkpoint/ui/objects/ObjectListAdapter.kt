@@ -87,7 +87,7 @@ class ObjectListAdapter : BaseExpandableListAdapter() {
         if (viewGroup instanceof ExpandableListView) {
             final ExpandableListView expandableListView = (ExpandableListView) viewGroup
             val r1: AnonymousClass1 = View.OnClickListener() {
-                fun onClick(view: View) {
+                override fun onClick(view: View) {
                     if (view.getVisibility() == 0) {
                         switch (view.getId()) {
                             case R.id.groupIndicatorCollapsed:

@@ -486,7 +486,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: protected */
-    fun onActivityResult(i: Int, i2: Int, intent: Intent) {
+    override fun onActivityResult(i: Int, i2: Int, intent: Intent) {
         SLInventoryEntry sLInventoryEntry
         switch (i) {
             case 1:
@@ -671,7 +671,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         builder2.create().show()
     }
 
-    fun onClick(view: View) {
+    override fun onClick(view: View) {
         switch (view.getId()) {
             case R.id.notecardErrorDiscard:
                 this.lastErrorMessage = null
@@ -691,7 +691,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         }
     }
 
-    fun onCreate(bundle: Bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         val intent: Intent = getIntent()
         if (intent != null) {
@@ -728,7 +728,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         updateButtonsForMode()
     }
 
-     public fun onCreateOptionsMenu(menu: Menu): Boolean {
+     public override fun onCreateOptionsMenu(menu: Menu): Boolean {
         getMenuInflater().inflate(R.menu.notecard_menu, menu)
         this.menuItemNewAttachment = menu.findItem(R.id.item_new_attachment)
         if (this.menuItemNewAttachment == null) {
@@ -738,7 +738,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         return true
     }
 
-     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_new_attachment:
                 createNewAttachment()

@@ -683,7 +683,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
         }
     }
 
-    fun onClick(view: View) {
+    override fun onClick(view: View) {
         switch (view.getId()) {
             case R.id.outfit_folder_wear_button:
                 changeOutfit(true)
@@ -696,7 +696,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
         }
     }
 
-     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         Debug.Printf("InventoryFragment: onCreateView", Object[0])
         val inflate: View = layoutInflater.inflate(R.layout.outfit_folder, viewGroup, false)
         this.loadableMonitor.setLoadingLayout((LoadingLayout) inflate.findViewById(R.id.loading_layout), getString(R.string.no_folder_selected), getString(R.string.inventory_folder_fail))
@@ -742,13 +742,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         EventBus.getInstance().subscribe((Object) this)
         showInventoryList(getFolderUUID())
     }
 
-    fun onStop() {
+    override fun onStop() {
         showInventoryList((UUID) null)
         EventBus.getInstance().unsubscribe(this)
         super.onStop()
