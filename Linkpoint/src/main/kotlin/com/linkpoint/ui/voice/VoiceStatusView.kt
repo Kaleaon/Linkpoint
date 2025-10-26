@@ -319,7 +319,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
                 }
             }
 
-            fun onStartTrackingTouch(seekBar: SeekBar) {
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
             }
 
             fun onStopTrackingTouch(seekBar: SeekBar) {
@@ -563,7 +563,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
                 }
             }
 
-            fun onStartTrackingTouch(seekBar: SeekBar) {
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
             }
 
             fun onStopTrackingTouch(seekBar: SeekBar) {
@@ -807,7 +807,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
                 }
             }
 
-            fun onStartTrackingTouch(seekBar: SeekBar) {
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
             }
 
             fun onStopTrackingTouch(seekBar: SeekBar) {

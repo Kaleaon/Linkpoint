@@ -159,7 +159,7 @@ class SearchGridAdapter : RecyclerView().Adapter<SearchViewHolder> {
         }
     }
 
-     public fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): SearchViewHolder {
+     public override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): SearchViewHolder {
         return SearchViewHolder(this.inflater.inflate(R.layout.search_result_item, viewGroup, false))
     }
 

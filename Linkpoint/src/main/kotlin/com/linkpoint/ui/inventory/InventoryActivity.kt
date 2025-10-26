@@ -192,7 +192,7 @@ class InventoryActivity : MasterDetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-     public fun onCreateMasterFragment(intent: Intent, bundle: Bundle): Fragment {
+     public override fun onCreateMasterFragment(intent: Intent, bundle: Bundle): Fragment {
         InventorySaveInfo inventorySaveInfo
         SLInventoryEntry findSpecialFolder
         if (bundle == null || bundle.isEmpty()) {

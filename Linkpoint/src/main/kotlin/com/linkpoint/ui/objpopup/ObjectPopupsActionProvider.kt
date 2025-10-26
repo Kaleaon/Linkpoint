@@ -33,7 +33,7 @@ class ObjectPopupsActionProvider : ActionProvider(), View.OnClickListener {
         }
     }
 
-     public fun onCreateActionView(): View {
+     public override fun onCreateActionView(): View {
         val inflate: View = LayoutInflater.from(getContext()).inflate(R.layout.object_popups_action_provider, (ViewGroup) null)
         this.popupCountTextView = (TextView) inflate.findViewById(R.id.popupCountTextView)
         if (this.popupCountTextView != null) {

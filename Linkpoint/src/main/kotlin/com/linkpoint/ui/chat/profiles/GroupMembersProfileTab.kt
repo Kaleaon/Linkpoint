@@ -138,7 +138,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             }
         }
 
-         public fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): GroupMemberViewHolder {
+         public override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): GroupMemberViewHolder {
             return GroupMemberViewHolder(this.layoutInflater.inflate(R.layout.group_member_list_item, viewGroup, false), GroupMembersProfileTab.this.userManager.getUserID(), this.cardSelectedColor)
         }
 

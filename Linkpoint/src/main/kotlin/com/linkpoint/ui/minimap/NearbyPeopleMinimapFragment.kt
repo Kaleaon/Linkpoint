@@ -88,7 +88,7 @@ class NearbyPeopleMinimapFragment : Fragment() {
             }
         }
 
-         public fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): NearbyUserViewHolder {
+         public override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): NearbyUserViewHolder {
             return NearbyUserViewHolder(this.layoutInflater.inflate(R.layout.minimap_user_item, viewGroup, false))
         }
 

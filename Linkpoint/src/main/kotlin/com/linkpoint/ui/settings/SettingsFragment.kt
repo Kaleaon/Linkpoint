@@ -565,7 +565,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
         }
     }
 
-    fun onCreatePreferences(bundle: Bundle, str: String) {
+    override fun onCreatePreferences(bundle: Bundle, str: String) {
         addPreferencesFromResource(getArguments().getInt(PREF_RESOURCE_KEY))
         val activity: FragmentActivity = getActivity()
         if (activity instanceof DetailsActivity) {

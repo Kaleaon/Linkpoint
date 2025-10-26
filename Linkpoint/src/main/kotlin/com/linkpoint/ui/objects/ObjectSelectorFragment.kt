@@ -312,7 +312,7 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
         }
     }
 
-    fun onStartTrackingTouch(seekBar: SeekBar) {
+    override fun onStartTrackingTouch(seekBar: SeekBar) {
     }
 
     override fun onStop() {

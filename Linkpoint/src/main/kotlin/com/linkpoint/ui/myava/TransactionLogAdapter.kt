@@ -141,7 +141,7 @@ class TransactionLogAdapter : RecyclerView().Adapter<TransactionViewHolder> {
         }
     }
 
-     public fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): TransactionViewHolder {
+     public override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): TransactionViewHolder {
         return TransactionViewHolder(this.inflater.inflate(R.layout.transaction_log_item, viewGroup, false))
     }
 

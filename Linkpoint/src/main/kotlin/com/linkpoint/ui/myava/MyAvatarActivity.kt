@@ -55,7 +55,7 @@ class MyAvatarActivity : MasterDetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-     public fun onCreateMasterFragment(intent: Intent, bundle: Bundle): Fragment {
+     public override fun onCreateMasterFragment(intent: Intent, bundle: Bundle): Fragment {
         return MyAvatarFragment.newInstance(ActivityUtils.getActiveAgentID(intent))
     }
 }

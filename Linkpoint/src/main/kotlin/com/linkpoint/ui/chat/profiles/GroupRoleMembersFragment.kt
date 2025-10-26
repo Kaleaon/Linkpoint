@@ -127,7 +127,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             }
         }
 
-         public fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): MemberViewHolder {
+         public override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): MemberViewHolder {
             return MemberViewHolder(this.layoutInflater.inflate(R.layout.group_role_member_list_item, viewGroup, false), GroupRoleMembersFragment.this.userManager.getUserID())
         }
 
