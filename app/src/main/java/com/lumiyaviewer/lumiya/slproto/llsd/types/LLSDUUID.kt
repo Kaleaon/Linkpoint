@@ -2,29 +2,35 @@ package com.lumiyaviewer.lumiya.slproto.llsd.types
 
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode
 import java.io.DataOutputStream
-import java.io.IOException
 import java.util.UUID
 import org.xmlpull.v1.XmlSerializer
 
 class LLSDUUID : LLSDNode {
-    private UUID value
+    private val value: UUID?
 
-    LLSDUUID() {
+    constructor() {
         this.value = null
     }
 
-    LLSDUUID(String str) {
-        Int length = str.length()
-        Long j = 0
-        Int i = 0
-        Int i2 = 0
-        Long j2 = 0
-        Long j3 = 0
-        Int i3 = 0
+    constructor(str: String) {
+        val length = str.length
+        var j: Long = 0
+        var i = 0
+        var i2 = 0
+        var j2: Long = 0
+        var j3: Long = 0
+        var i3 = 0
+        
         while (i3 < length) {
-            char charAt = str.charAt(i3)
+            val charAt = str[i3]
             if (charAt != '-') {
-                j = (j << 4) | ((Long) ((charAt < '0' || charAt > '9') ? (charAt < 'a' || charAt > 'f') ? (charAt < 'A' || charAt > 'F') ? 0 : (charAt - 'A') + 10 : (charAt - 'a') + 10 : charAt - '0'))
+                val digitValue = when {
+                    charAt in '0'..'9' -> charAt - '0'
+                    charAt in 'a'..'f' -> (charAt - 'a') + 10
+                    charAt in 'A'..'F' -> (charAt - 'A') + 10
+                    else -> 0
+                }
+                j = (j shl 4) or digitValue.toLong()
                 i++
                 if (i >= 16) {
                     if (i2 == 0) {
@@ -36,33 +42,29 @@ class LLSDUUID : LLSDNode {
                 }
             }
             i3++
-            j2 = j2
-            j3 = j3
-            i = i
-            i2 = i2
         }
         this.value = UUID(j3, j2)
     }
 
-    LLSDUUID(UUID uuid) {
+    constructor(uuid: UUID) {
         this.value = uuid
     }
 
-    String asString() {
-        return this.value.toString()
+    override fun asString(): String {
+        return this.value?.toString() ?: ""
     }
 
-    UUID asUUID() {
-        return this.value
+    override fun asUUID(): UUID {
+        return this.value ?: UUID(0, 0)
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    override fun toBinary(dataOutputStream: DataOutputStream) {
         dataOutputStream.writeByte(117)
-        dataOutputStream.writeLong(this.value.getMostSignificantBits())
-        dataOutputStream.writeLong(this.value.getLeastSignificantBits())
+        dataOutputStream.writeLong(this.value?.mostSignificantBits ?: 0)
+        dataOutputStream.writeLong(this.value?.leastSignificantBits ?: 0)
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    override fun toXML(xmlSerializer: XmlSerializer) {
         xmlSerializer.startTag("", "uuid")
         if (this.value != null) {
             xmlSerializer.text(this.value.toString())

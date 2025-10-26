@@ -2,30 +2,29 @@ package com.lumiyaviewer.lumiya.slproto.llsd.types
 
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode
 import java.io.DataOutputStream
-import java.io.IOException
 import org.xmlpull.v1.XmlSerializer
 
 class LLSDDouble : LLSDNode {
-    private double value
+    private val value: Double
 
-    LLSDDouble(double d) {
+    constructor(d: Double) {
         this.value = d
     }
 
-    LLSDDouble(String str) {
+    constructor(str: String) {
         this.value = Double.parseDouble(str)
     }
 
-    double asDouble() {
+    override fun asDouble(): Double {
         return this.value
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    override fun toBinary(dataOutputStream: DataOutputStream) {
         dataOutputStream.writeByte(114)
         dataOutputStream.writeDouble(this.value)
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    override fun toXML(xmlSerializer: XmlSerializer) {
         xmlSerializer.startTag("", "real")
         xmlSerializer.text(Double.toString(this.value))
         xmlSerializer.endTag("", "real")

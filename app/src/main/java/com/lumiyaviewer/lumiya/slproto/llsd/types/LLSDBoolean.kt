@@ -2,38 +2,34 @@ package com.lumiyaviewer.lumiya.slproto.llsd.types
 
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode
 import java.io.DataOutputStream
-import java.io.IOException
 import org.xmlpull.v1.XmlSerializer
 
 class LLSDBoolean : LLSDNode {
-    private Boolean value
+    private val value: Boolean
 
-    LLSDBoolean(String str) {
-        Boolean z = true
-        if (str.equalsIgnoreCase("true")) {
-            this.value = true
-        } else if (str.equalsIgnoreCase("false")) {
-            this.value = false
-        } else {
-            this.value = Integer.parseInt(str) == 0 ? false : z
+    constructor(str: String) {
+        this.value = when {
+            str.equals("true", ignoreCase = true) -> true
+            str.equals("false", ignoreCase = true) -> false
+            else -> Integer.parseInt(str) != 0
         }
     }
 
-    LLSDBoolean(Boolean z) {
+    constructor(z: Boolean) {
         this.value = z
     }
 
-    Boolean asBoolean() {
+    override fun asBoolean(): Boolean {
         return this.value
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
-        dataOutputStream.writeByte(this.value ? 49 : 48)
+    override fun toBinary(dataOutputStream: DataOutputStream) {
+        dataOutputStream.writeByte(if (this.value) 49 else 48)
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    override fun toXML(xmlSerializer: XmlSerializer) {
         xmlSerializer.startTag("", "Boolean")
-        xmlSerializer.text(this.value ? "1" : "0")
+        xmlSerializer.text(if (this.value) "1" else "0")
         xmlSerializer.endTag("", "Boolean")
     }
 }

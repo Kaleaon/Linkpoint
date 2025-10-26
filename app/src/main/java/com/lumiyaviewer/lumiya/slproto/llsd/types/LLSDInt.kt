@@ -2,38 +2,37 @@ package com.lumiyaviewer.lumiya.slproto.llsd.types
 
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode
 import java.io.DataOutputStream
-import java.io.IOException
 import org.xmlpull.v1.XmlSerializer
 
 class LLSDInt : LLSDNode {
-    private Int value
+    private val value: Int
 
-    LLSDInt(Int i) {
+    constructor(i: Int) {
         this.value = i
     }
 
-    LLSDInt(String str) {
-        try {
-            this.value = Integer.parseInt(str)
-        } catch (Exception e) {
-            this.value = 0
+    constructor(str: String) {
+        this.value = try {
+            Integer.parseInt(str)
+        } catch (e: Exception) {
+            0
         }
     }
 
-    Boolean asBoolean() {
+    override fun asBoolean(): Boolean {
         return this.value != 0
     }
 
-    Int asInt() {
+    override fun asInt(): Int {
         return this.value
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    override fun toBinary(dataOutputStream: DataOutputStream) {
         dataOutputStream.writeByte(105)
         dataOutputStream.writeInt(this.value)
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    override fun toXML(xmlSerializer: XmlSerializer) {
         xmlSerializer.startTag("", "integer")
         xmlSerializer.text(Integer.toString(this.value))
         xmlSerializer.endTag("", "integer")
