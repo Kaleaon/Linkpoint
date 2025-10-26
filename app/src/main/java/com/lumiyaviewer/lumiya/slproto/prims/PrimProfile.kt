@@ -5,8 +5,8 @@ import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 import java.util.ArrayList
 
 class PrimProfile {
-    Int MIN_DETAIL_FACES = 6
-    private FloatArray tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 0.5f}
+    val MIN_DETAIL_FACES: Int = 6
+    private val tableScale: FloatArray = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 0.5f}
     Boolean Concave = false
     Boolean Dirty = true
     LLVector3[] EdgeCenters
@@ -19,15 +19,15 @@ class PrimProfile {
     Int TotalOut = 0
 
     class Face {
-        Short LL_FACE_INNER_SIDE = 4
-        Short LL_FACE_OUTER_SIDE_0 = 32
-        Short LL_FACE_OUTER_SIDE_1 = 64
-        Short LL_FACE_OUTER_SIDE_2 = 128
-        Short LL_FACE_OUTER_SIDE_3 = 256
-        Short LL_FACE_PATH_BEGIN = 1
-        Short LL_FACE_PATH_END = 2
-        Short LL_FACE_PROFILE_BEGIN = 8
-        Short LL_FACE_PROFILE_END = 16
+        val LL_FACE_INNER_SIDE: Short = 4
+        val LL_FACE_OUTER_SIDE_0: Short = 32
+        val LL_FACE_OUTER_SIDE_1: Short = 64
+        val LL_FACE_OUTER_SIDE_2: Short = 128
+        val LL_FACE_OUTER_SIDE_3: Short = 256
+        val LL_FACE_PATH_BEGIN: Short = 1
+        val LL_FACE_PATH_END: Short = 2
+        val LL_FACE_PROFILE_BEGIN: Short = 8
+        val LL_FACE_PROFILE_END: Short = 16
         Boolean Cap
         Int Count
         Short FaceID

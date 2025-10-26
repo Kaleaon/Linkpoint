@@ -10,10 +10,10 @@ class RLVCmdVersion : RLVCommand {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-modules-rlv-RLVCommandsSwitchesValues  reason: not valid java name */
     private /* synthetic */ IntArray f128comlumiyaviewerlumiyaslprotomodulesrlvRLVCommandsSwitchesValues = null
-    private Int RLV_VERSION_BUILD = 0
-    private Int RLV_VERSION_MAJOR = 1
-    private Int RLV_VERSION_MINOR = 10
-    private Int RLV_VERSION_PATCH = 1
+    private val RLV_VERSION_BUILD: Int = 0
+    private val RLV_VERSION_MAJOR: Int = 1
+    private val RLV_VERSION_MINOR: Int = 10
+    private val RLV_VERSION_PATCH: Int = 1
     private Int RLVa_VERSION_MAJOR = 1
     private Int RLVa_VERSION_MINOR = 10
     private Int RLVa_VERSION_PATCH = 1

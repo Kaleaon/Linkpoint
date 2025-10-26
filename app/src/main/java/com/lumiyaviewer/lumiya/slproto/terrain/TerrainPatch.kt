@@ -9,8 +9,8 @@ class TerrainPatch {
     private FloatArray CosineTable16 = FloatArray(256)
     private FloatArray DequantizeTable16 = FloatArray(256)
     private FloatArray DequantizeTable32 = FloatArray(256)
-    Int END_OF_PATCHES = 97
-    private Float OO_SQRT2 = 0.70710677f
+    val END_OF_PATCHES: Int = 97
+    private val OO_SQRT2: Float = 0.70710677f
     private FloatArray QuantizeTable16 = FloatArray(256)
     Float DCOffset
     Int PatchIDs

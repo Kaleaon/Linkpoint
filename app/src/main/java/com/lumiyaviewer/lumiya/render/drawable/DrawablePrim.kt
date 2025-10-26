@@ -23,9 +23,9 @@ import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 import java.util.UUID
 
 class DrawablePrim {
-    Int RENDER_PASS_ALL = 3
-    Int RENDER_PASS_OPAQUE = 1
-    Int RENDER_PASS_TRANSPARENT = 2
+    val RENDER_PASS_ALL: Int = 3
+    val RENDER_PASS_OPAQUE: Int = 1
+    val RENDER_PASS_TRANSPARENT: Int = 2
     private IntArray FaceColorsIDs
     private Int FaceCount
     private DrawableFaceTexture[] FaceTextures

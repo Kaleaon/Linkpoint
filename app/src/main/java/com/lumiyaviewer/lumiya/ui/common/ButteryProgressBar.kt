@@ -16,11 +16,11 @@ import com.lumiyaviewer.lumiya.R
 
 @TargetApi(14)
 class ButteryProgressBar : View {
-    private Int BASE_DURATION_MS = 500
-    private Int BASE_SEGMENT_COUNT = 5
-    private Int BASE_WIDTH_DP = 300
-    private Int DEFAULT_BAR_HEIGHT_DP = 4
-    private Int DEFAULT_DETENT_WIDTH_DP = 3
+    private val BASE_DURATION_MS: Int = 500
+    private val BASE_SEGMENT_COUNT: Int = 5
+    private val BASE_WIDTH_DP: Int = 300
+    private val DEFAULT_BAR_HEIGHT_DP: Int = 4
+    private val DEFAULT_DETENT_WIDTH_DP: Int = 3
     private ValueAnimator mAnimator
     private Int mBarColor
     private Float mDensity

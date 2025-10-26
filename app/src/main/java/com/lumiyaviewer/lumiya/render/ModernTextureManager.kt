@@ -16,13 +16,13 @@ import java.io.InputStream
  * GPU-native approach using KTX2 container format and runtime transcoding.
  */
 class ModernTextureManager {
-    private String TAG = "ModernTextureManager"
+    private val TAG: String = "ModernTextureManager"
     
     // Texture format constants matching JNI implementation
     Int FORMAT_ASTC_4x4_RGBA = 0
-    Int FORMAT_ETC2_RGBA = 1
-    Int FORMAT_BC7_RGBA = 2
-    Int FORMAT_RGBA32 = 3
+    val FORMAT_ETC2_RGBA: Int = 1
+    val FORMAT_BC7_RGBA: Int = 2
+    val FORMAT_RGBA32: Int = 3
     
     // GPU capability flags
     private var supportsASTC: Boolean = false

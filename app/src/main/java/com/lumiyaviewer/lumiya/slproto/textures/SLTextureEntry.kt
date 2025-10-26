@@ -11,7 +11,7 @@ import java.nio.ByteOrder
 import java.util.UUID
 
 class SLTextureEntry {
-    Int MAX_FACES = 32
+    val MAX_FACES: Int = 32
     private SLTextureEntryFace[] emptyFaces = SLTextureEntryFace[0]
     private InternPool<SLTextureEntry> pool = InternPool<>()
     private SLTextureEntryFace DefaultTexture

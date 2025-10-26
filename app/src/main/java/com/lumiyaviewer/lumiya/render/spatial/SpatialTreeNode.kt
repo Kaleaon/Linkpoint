@@ -4,7 +4,7 @@ import java.util.*
 import com.lumiyaviewer.lumiya.utils.InlineList
 
 class SpatialTreeNode : InlineList<DrawListEntry> {
-    private Float MIN_SIZE = 2.0f
+    private val MIN_SIZE: Float = 2.0f
     private SpatialTreeNode[] children = null
     Int depthBin = -1
     private Int indexInParent

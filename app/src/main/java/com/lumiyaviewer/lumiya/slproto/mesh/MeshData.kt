@@ -23,7 +23,7 @@ import java.util.zip.InflaterInputStream
 import javax.annotation.Nullable
 
 class MeshData {
-    Int MAX_RIGGED_MESH_JOINTS = 163
+    val MAX_RIGGED_MESH_JOINTS: Int = 163
     @Nullable
     private float[] bindShapeMatrix
     private MeshFace[] faces

@@ -13,7 +13,7 @@ class ParcelData : Serializable {
     private String mediaURL
     private String name
     private UUID ownerID
-    private BooleanArray parcelBitmap = BooleanArray(4096)
+    private val parcelBitmap: BooleanArray = BooleanArray(4096)
     private Int parcelID
     private UUID snapshotUUID
 

@@ -11,9 +11,9 @@ import com.lumiyaviewer.lumiya.R
 
 abstract class MasterDetailsActivity : DetailsActivity {
     protected String FROM_SAME_ACTIVITY = "fromSameActivity"
-    private String IMPLICIT_DETAILS_TAG = "MasterDetailsActivityIsImplicitDetails"
-    String INTENT_SELECTION_KEY = "selection"
-    String WEAK_SELECTION_KEY = "weakSelection"
+    private val IMPLICIT_DETAILS_TAG: String = "MasterDetailsActivityIsImplicitDetails"
+    val INTENT_SELECTION_KEY: String = "selection"
+    val WEAK_SELECTION_KEY: String = "weakSelection"
     private Boolean isSplitScreen = false
 
     /* access modifiers changed from: protected */

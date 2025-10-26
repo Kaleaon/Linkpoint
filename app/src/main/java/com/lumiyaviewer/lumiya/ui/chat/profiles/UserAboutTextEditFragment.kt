@@ -12,7 +12,7 @@ import com.lumiyaviewer.lumiya.ui.common.ChatterFragment
 import java.util.UUID
 
 class UserAboutTextEditFragment : ProfileTextFieldEditFragment {
-    private String IS_FIRST_LIFE_KEY = "isFirstLife"
+    private val IS_FIRST_LIFE_KEY: String = "isFirstLife"
     private AvatarPropertiesReply avatarProperties
 
     private Boolean isFirstLife() {

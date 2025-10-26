@@ -17,10 +17,10 @@ class WindlightPreset {
     public FloatArray cloud_pos_density1 = FloatArray(4)
     public FloatArray cloud_pos_density2 = FloatArray(4)
     public FloatArray cloud_shadow = FloatArray(4)
-    private Array<String> defaultPresets = {"A%2D12AM", "A%2D3AM", "A%2D6AM", "A%2D9AM", "A%2D12PM", "A%2D3PM", "A%2D6PM", "A%2D9PM"}
+    private val defaultPresets: Array<String> = {"A%2D12AM", "A%2D3AM", "A%2D6AM", "A%2D9AM", "A%2D12PM", "A%2D3PM", "A%2D6PM", "A%2D9PM"}
     public FloatArray haze_density = FloatArray(4)
     public FloatArray haze_horizon = FloatArray(4)
-    private FloatArray hourTable = {0.0f, 0.125f, 0.25f, 0.375f, 0.5f, 0.625f, 0.75f, 0.875f}
+    private val hourTable: FloatArray = {0.0f, 0.125f, 0.25f, 0.375f, 0.5f, 0.625f, 0.75f, 0.875f}
     public FloatArray lightnorm = FloatArray(4)
     public Float star_brightness
     public FloatArray sunlightBelowWater = FloatArray(4)

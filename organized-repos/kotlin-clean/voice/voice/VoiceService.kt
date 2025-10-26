@@ -52,7 +52,7 @@ private VoiceService serviceInstance = null
     private Boolean isServiceBound = false
     private val Messenger mMessenger
     private val Handler mainThreadHandler = Handler()
-    private Messenger toAppMessenger = null
+    private val toAppMessenger: Messenger = null
     private VivoxController vivoxController = null
 
     public VoiceService() {

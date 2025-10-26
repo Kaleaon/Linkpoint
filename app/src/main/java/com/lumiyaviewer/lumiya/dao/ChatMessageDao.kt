@@ -11,7 +11,7 @@ import java.util.Date
 import java.util.UUID
 
 class ChatMessageDao : AbstractDao<ChatMessage, Long> {
-    String TABLENAME = "CHAT_MESSAGE"
+    val TABLENAME: String = "CHAT_MESSAGE"
 
     class Properties {
         Property Accepted = Property(22, Boolean.class, "accepted", false, "ACCEPTED")

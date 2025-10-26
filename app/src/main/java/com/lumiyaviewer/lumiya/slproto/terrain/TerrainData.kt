@@ -11,15 +11,15 @@ class TerrainData {
     Int PatchesPerEdge = 16
     Int PatchesSize = 16
     Int TerrainPerEdge = 256
-    private FloatArray heightMap = FloatArray(65536)
-    private BooleanArray patchDirtyMap = BooleanArray(256)
+    private val heightMap: FloatArray = FloatArray(65536)
+    private val patchDirtyMap: BooleanArray = BooleanArray(256)
     private volatile TerrainTextures terrainTextures = TerrainTextures()
     private Int validCount = 0
-    private BooleanArray validMap = BooleanArray(65536)
-    private FloatArray vertexHeights = FloatArray(66049)
+    private val validMap: BooleanArray = BooleanArray(65536)
+    private val vertexHeights: FloatArray = FloatArray(66049)
     private Any vertexLock = Any()
-    private FloatArray vertexNormals = FloatArray(132098)
-    private BooleanArray vertexValids = BooleanArray(66049)
+    private val vertexNormals: FloatArray = FloatArray(132098)
+    private val vertexValids: BooleanArray = BooleanArray(66049)
     private Float waterHeight = 0.0f
     private Boolean waterHeightValid = false
 

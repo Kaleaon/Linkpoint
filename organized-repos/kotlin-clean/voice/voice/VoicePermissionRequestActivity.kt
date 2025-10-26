@@ -37,7 +37,7 @@ class VoicePermissionRequestActivity : AppCompatActivity() {
             VoicePermissionRequestActivity.access$002(this.this$0, null)
         }
     }
-    private Messenger serviceMessenger = null
+    private val serviceMessenger: Messenger = null
 
     static /* synthetic */ Messenger access$002(VoicePermissionRequestActivity voicePermissionRequestActivity, Messenger messenger) {
         voicePermissionRequestActivity.serviceMessenger = messenger

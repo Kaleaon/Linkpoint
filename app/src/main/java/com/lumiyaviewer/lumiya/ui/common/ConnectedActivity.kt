@@ -36,7 +36,7 @@ import com.lumiyaviewer.lumiya.ui.objpopup.SingleObjectPopupFragment
 import java.util.UUID
 
 class ConnectedActivity : ThemedActivity : ObjectPopupsActionProvider.ObjectPopupsClickListener, ObjectPopupsManager.ObjectPopupListener {
-    String OBJECT_POPUP_NOTIFICATION = "objectPopupNotification"
+    val OBJECT_POPUP_NOTIFICATION: String = "objectPopupNotification"
     private NavDrawerActivityHelper navDrawerHelper
     @Nullable
     private ObjectPopupsActionProvider objectPopupsActionProvider

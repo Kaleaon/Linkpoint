@@ -14,19 +14,19 @@ import java.lang.annotation.Retention
 import java.lang.annotation.RetentionPolicy
 
 class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
-    private Float DEFAULT_ALPHA_END_DISTANCE = 1.0f
-    private Float DEFAULT_ALPHA_START_DISTANCE = 0.0f
-    private Float DEFAULT_DRAG_DISMISS_THRESHOLD = 1.0f
-    Int STATE_DRAGGING = 1
-    Int STATE_IDLE = 0
-    Int STATE_SETTLING = 2
-    Int SWIPE_DIRECTION_ANY = 15
-    Int SWIPE_DIRECTION_DOWN = 8
-    Int SWIPE_DIRECTION_LEFT = 1
-    Int SWIPE_DIRECTION_RIGHT = 2
-    Int SWIPE_DIRECTION_UP = 4
-    Int SWIPE_DIRECTION_X = 3
-    Int SWIPE_DIRECTION_Y = 12
+    private val DEFAULT_ALPHA_END_DISTANCE: Float = 1.0f
+    private val DEFAULT_ALPHA_START_DISTANCE: Float = 0.0f
+    private val DEFAULT_DRAG_DISMISS_THRESHOLD: Float = 1.0f
+    val STATE_DRAGGING: Int = 1
+    val STATE_IDLE: Int = 0
+    val STATE_SETTLING: Int = 2
+    val SWIPE_DIRECTION_ANY: Int = 15
+    val SWIPE_DIRECTION_DOWN: Int = 8
+    val SWIPE_DIRECTION_LEFT: Int = 1
+    val SWIPE_DIRECTION_RIGHT: Int = 2
+    val SWIPE_DIRECTION_UP: Int = 4
+    val SWIPE_DIRECTION_X: Int = 3
+    val SWIPE_DIRECTION_Y: Int = 12
     /* access modifiers changed from: private */
     Float mAlphaEndSwipeDistance = 1.0f
     /* access modifiers changed from: private */

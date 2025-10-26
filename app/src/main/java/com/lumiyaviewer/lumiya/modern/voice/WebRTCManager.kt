@@ -15,7 +15,7 @@ import java.util.concurrent.Executors
  * Note: This is a framework implementation that can be integrated with actual WebRTC libraries
  */
 class WebRTCManager {
-    private String TAG = "WebRTCManager"
+    private val TAG: String = "WebRTCManager"
     
     private Context context
     private ExecutorService executor
@@ -30,7 +30,7 @@ class WebRTCManager {
     // Voice configuration
     private boolean voiceEnabled = false
     private boolean isConnected = false
-    private String currentVoiceChannel = null
+    private val currentVoiceChannel: String = null
     
     // WebRTC connection listeners
     interface VoiceConnectionListener {

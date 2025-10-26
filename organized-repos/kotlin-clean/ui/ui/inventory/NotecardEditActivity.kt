@@ -108,16 +108,16 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     private Boolean editMode = false
     private Boolean isEditingScript = false
     private Boolean isSaving = false
-    private String lastErrorMessage = null
+    private val lastErrorMessage: String = null
     private MenuItem menuItemNewAttachment
     private SLInventoryEntry noteEntry = null
     private SLNotecard notecard = null
     private val SubscriptionData<AssetKey, AssetData> notecardAssetSubscription = SubscriptionData<>(UIThreadExecutor.getInstance(), $Lambda$srzsajEQjSwYc3yok0XsNFeAjNk(this))
     private String notecardDescription
     private String notecardTitle
-    private UUID parentFolderUUID = null
+    private val parentFolderUUID: UUID = null
     private Int taskLocalID = 0
-    private UUID taskUUID = null
+    private val taskUUID: UUID = null
     private UserManager userManager
 
     private Unit copyAttachmentToInventory(SLInventoryEntry sLInventoryEntry) {

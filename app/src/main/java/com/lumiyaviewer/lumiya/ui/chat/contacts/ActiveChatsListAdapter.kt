@@ -31,9 +31,9 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class ActiveChatsListAdapter : BaseAdapter : Closeable, DismissableAdapter {
-    private Int VIEW_TYPE_COUNT = 2
-    private Int VIEW_TYPE_HEADER = 1
-    private Int VIEW_TYPE_ROW = 0
+    private val VIEW_TYPE_COUNT: Int = 2
+    private val VIEW_TYPE_HEADER: Int = 1
+    private val VIEW_TYPE_ROW: Int = 0
     @Nonnull
     private ImmutableList<? : ChatterDisplayInfo> activeChatters = ImmutableList.of()
     private Subscription<ChatterListType, ImmutableList<ChatterDisplayData>> activeChattersSubscription

@@ -32,7 +32,7 @@ val class SLChatScriptDialog : SLChatDialogEvent() {
     const val IntArray dialogButtonIds = {R.id.buttonDialog1, R.id.buttonDialog2, R.id.buttonDialog3, R.id.buttonDialog4, R.id.buttonDialog5, R.id.buttonDialog6, R.id.buttonDialog7, R.id.buttonDialog8, R.id.buttonDialog9, R.id.buttonDialog10, R.id.buttonDialog11, R.id.buttonDialog12}
     /* access modifiers changed from: private */
     val Array<String> buttons
-    private String selectedOption = null
+    private val selectedOption: String = null
 
     class ScriptDialogDialog : Dialog() : View.OnClickListener, DialogInterface.OnCancelListener {
         private val UserManager userManager

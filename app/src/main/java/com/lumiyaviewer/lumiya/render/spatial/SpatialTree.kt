@@ -5,9 +5,9 @@ import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.utils.InlineList
 
 class SpatialTree {
-    Int INVALID_BIN = -1
+    val INVALID_BIN: Int = -1
     private SpatialTreeNode[] bins
-    private FloatArray depthBuf = FloatArray(1)
+    private val depthBuf: FloatArray = FloatArray(1)
     private var drawDistance: Float = 1.0f
     private var drawListChanged: Boolean = false
     private MyAvatarTreeNode myAvatarTreeNode

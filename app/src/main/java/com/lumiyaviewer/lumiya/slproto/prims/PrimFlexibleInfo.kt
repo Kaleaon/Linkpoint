@@ -9,8 +9,8 @@ import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 import com.lumiyaviewer.rawbuffers.DirectByteBuffer
 
 class PrimFlexibleInfo {
-    private Float FLEXIBLE_OBJECT_MAX_INTERNAL_TENSION_FORCE = 0.99f
-    private Long MIN_UPDATE_INTERVAL = 200
+    private val FLEXIBLE_OBJECT_MAX_INTERNAL_TENSION_FORCE: Float = 0.99f
+    private val MIN_UPDATE_INTERVAL: Long = 200
     private Int NumSections = 0
     private Long lastUpdateMillis
     private volatile Boolean needVertexBufferUpdate = false

@@ -1,12 +1,12 @@
 package com.lumiyaviewer.lumiya.render.spatial
 
 class FrustrumPlanes {
-    Int INSIDE = 1
-    Int INTERSECT = 0
-    private Int NUM_PLANES = 6
-    Int OUTSIDE = -1
-    private FloatArray params = FloatArray(24)
-    private IntArray pnIndex = IntArray(36)
+    val INSIDE: Int = 1
+    val INTERSECT: Int = 0
+    private val NUM_PLANES: Int = 6
+    val OUTSIDE: Int = -1
+    private val params: FloatArray = FloatArray(24)
+    private val pnIndex: IntArray = IntArray(36)
 
     constructor(fArr: FloatArray) {
         Int i = 0

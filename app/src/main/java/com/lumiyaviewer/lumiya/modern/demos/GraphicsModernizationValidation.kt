@@ -10,7 +10,7 @@ import com.lumiyaviewer.lumiya.modern.samples.ModernLinkpointDemo
  * Shows before/after comparison and validates all modern features
  */
 object GraphicsModernizationValidation {
-    private String TAG = "GraphicsModernization"
+    private val TAG: String = "GraphicsModernization"
     
     fun validateModernization(context: Context): Unit {
         Log.i(TAG, "==========================================")

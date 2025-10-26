@@ -1,7 +1,7 @@
 package com.lumiyaviewer.lumiya.slproto.types
 
 class LLVector4 {
-    Float FP_MAG_THRESHOLD = 1.0E-7f
+    val FP_MAG_THRESHOLD: Float = 1.0E-7f
     Float w
     Float x
     Float y

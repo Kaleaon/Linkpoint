@@ -14,9 +14,9 @@ import com.lumiyaviewer.lumiya.utils.LEDAction
 
 class NotificationSettings {
     private LEDAction blinkAction = LEDAction.None
-    private String blinkColor = "red"
+    private val blinkColor: String = "red"
     private Boolean notificationEnabled = false
-    private String ringtone = ""
+    private val ringtone: String = ""
     private Boolean soundEnabled = false
     private NotificationType type
 

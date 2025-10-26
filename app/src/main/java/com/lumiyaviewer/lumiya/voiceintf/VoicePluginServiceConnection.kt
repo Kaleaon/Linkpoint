@@ -73,16 +73,16 @@ import java.util.concurrent.atomic.AtomicReference
 import javax.annotation.Nullable
 
 class VoicePluginServiceConnection : ServiceConnection {
-    String ACTION_VOICE_ACCEPT = "accept"
-    String ACTION_VOICE_REJECT = "reject"
-    private Int INCOMING_CALL_NOTIFICATION_ID = 1001
-    private String INTENT_EXTRA_CHATTER_ID = "chatterID"
-    private String INTENT_EXTRA_OPEN_CHATTER = "openChatterIntent"
-    private String INTENT_EXTRA_RINGING_MESSSAGE = "ringingMessage"
-    private Int REQUIRED_PLUGIN_VERSION = 3
+    val ACTION_VOICE_ACCEPT: String = "accept"
+    val ACTION_VOICE_REJECT: String = "reject"
+    private val INCOMING_CALL_NOTIFICATION_ID: Int = 1001
+    private val INTENT_EXTRA_CHATTER_ID: String = "chatterID"
+    private val INTENT_EXTRA_OPEN_CHATTER: String = "openChatterIntent"
+    private val INTENT_EXTRA_RINGING_MESSSAGE: String = "ringingMessage"
+    private val REQUIRED_PLUGIN_VERSION: Int = 3
     private AtomicBoolean installOfferDisplayed = AtomicBoolean(false)
     private Context context
-    private Handler fromPluginHandler = Handler() {
+    private val fromPluginHandler: Handler = Handler() {
 
         /* renamed from: -com-lumiyaviewer-lumiya-voice-common-VoicePluginMessageTypeSwitchesValues  reason: not valid java name */
         private /* synthetic */ IntArray f611comlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues = null
@@ -196,7 +196,7 @@ class VoicePluginServiceConnection : ServiceConnection {
     }
     private Messenger fromPluginMessenger
     private Set<String> incomingCallNotificationTags = Collections.synchronizedSet(HashSet())
-    private Handler mainThreadHandler = Handler()
+    private val mainThreadHandler: Handler = Handler()
     @Nullable
     private ChatterNameRetriever ringingChatterNameRetriever = null
     @Nullable

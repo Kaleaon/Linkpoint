@@ -17,7 +17,7 @@ import java.util.List
  * for CLI-based Android emulator management functionality.
  */
 class EmulatorManager {
-    private String TAG = "EmulatorManager"
+    private val TAG: String = "EmulatorManager"
     
     private Context context
     private File scriptPath
@@ -151,10 +151,10 @@ class EmulatorManager {
      * Get default configuration for AVDs
      */
     class EmulatorDefaults {
-        String DEFAULT_DEVICE = "pixel_2"
-        String DEFAULT_API = "34"
-        String DEFAULT_ABI = "x86_64"
-        String DEFAULT_TAG = "google_apis"
+        val DEFAULT_DEVICE: String = "pixel_2"
+        val DEFAULT_API: String = "34"
+        val DEFAULT_ABI: String = "x86_64"
+        val DEFAULT_TAG: String = "google_apis"
         
         Array<String> SUPPORTED_APIS = {"30", "31", "32", "33", "34"}
         Array<String> SUPPORTED_ABIS = {"x86_64", "arm64-v8a", "x86"}

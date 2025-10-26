@@ -3,8 +3,8 @@ package com.lumiyaviewer.lumiya.slproto.prims
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 
 class PrimMath {
-    Float F_DEG_TO_RAD = 0.017453292f
-    Float F_PI = 3.1415927f
+    val F_DEG_TO_RAD: Float = 0.017453292f
+    val F_PI: Float = 3.1415927f
 
     Float lerp(Float f, Float f2, Float f3) {
         return ((f2 - f) * f3) + f

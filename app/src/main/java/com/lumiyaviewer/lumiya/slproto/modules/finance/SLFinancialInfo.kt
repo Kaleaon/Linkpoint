@@ -21,7 +21,7 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
 
 class SLFinancialInfo : SLModule {
-    private Int DEFAULT_UPLOAD_COST = 10
+    private val DEFAULT_UPLOAD_COST: Int = 10
     private Int balance = 0
     private Boolean balanceKnown = false
     private Any balanceLock = Any()

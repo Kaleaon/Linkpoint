@@ -10,8 +10,8 @@ import com.lumiyaviewer.lumiya.memory.MemoryPressureListener
  * Texture cache that integrates with MemoryManager for proper memory management
  */
 class TextureCache : MemoryPressureListener {
-    private String TAG = "TextureCache"
-    private Int DEFAULT_CACHE_SIZE_MB = 32
+    private val TAG: String = "TextureCache"
+    private val DEFAULT_CACHE_SIZE_MB: Int = 32
     
     private MemoryManager memoryManager
     private LruCache<String, CachedTexture> cache

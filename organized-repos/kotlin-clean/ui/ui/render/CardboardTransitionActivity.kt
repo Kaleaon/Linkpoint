@@ -14,7 +14,7 @@ import java.util.UUID
 class CardboardTransitionActivity : AppCompatActivity() {
     private const val MAX_WAIT_ATTEMPTS: Int = 15
     private const val WAIT_INTERVAL: Long = 250
-    private Handler handler = Handler()
+    private val handler: Handler = Handler()
     private Int waitAttempts = 0
 
     /* access modifiers changed from: private */

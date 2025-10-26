@@ -8,7 +8,7 @@ import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig
 
 class UserPicDao : AbstractDao<UserPic, Long> {
-    String TABLENAME = "USER_PIC"
+    val TABLENAME: String = "USER_PIC"
 
     class Properties {
         Property Bitmap = Property(2, ByteArray.class, "bitmap", false, "BITMAP")

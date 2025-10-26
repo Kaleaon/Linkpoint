@@ -19,7 +19,7 @@ import com.lumiyaviewer.lumiya.slproto.objects.SLPrimObjectDisplayInfo
 import javax.annotation.Nonnull
 
 class ObjectListAdapter : BaseExpandableListAdapter {
-    private Int HIERARCHY_PADDING_DP = 10
+    private val HIERARCHY_PADDING_DP: Int = 10
     private Context context
     @Nonnull
     private ImmutableList<SLObjectDisplayInfo> objects = ImmutableList.of()

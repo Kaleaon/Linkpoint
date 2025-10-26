@@ -23,7 +23,7 @@ import java.util.UUID
 import javax.annotation.Nullable
 
 class MinimapView : View {
-    private Float USER_MARK_TOUCH_SLACK = 50.0f
+    private val USER_MARK_TOUCH_SLACK: Float = 50.0f
     private Int activePointerId = -1
     /* access modifiers changed from: private */
     Float actualZoomFactor = 1.0f
@@ -48,7 +48,7 @@ class MinimapView : View {
         }
     }
     @Nullable
-    private UUID selectedUser = null
+    private val selectedUser: UUID = null
     @Nullable
     private SLMinimap.UserLocations userLocations
     private Paint userMarkPaint = Paint()

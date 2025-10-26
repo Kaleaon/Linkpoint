@@ -10,7 +10,7 @@ import android.util.Log
  * Implements PBR-style rendering for capable mobile devices
  */
 class ModernRenderPipeline {
-    private String TAG = "ModernRenderPipeline"
+    private val TAG: String = "ModernRenderPipeline"
     
     private var isES3Available: Boolean = false
     private var pbrShaderProgram: Int = -1
@@ -30,10 +30,10 @@ class ModernRenderPipeline {
     private var uPointLights: Int? = null
     private var uNumPointLights: Int? = null
     
-    private FloatArray mvpMatrix = FloatArray(16)
-    private FloatArray modelMatrix = FloatArray(16)
-    private FloatArray viewMatrix = FloatArray(16)
-    private FloatArray projectionMatrix = FloatArray(16)
+    private val mvpMatrix: FloatArray = FloatArray(16)
+    private val modelMatrix: FloatArray = FloatArray(16)
+    private val viewMatrix: FloatArray = FloatArray(16)
+    private val projectionMatrix: FloatArray = FloatArray(16)
     
     fun initialize(): Boolean {
         // Check OpenGL ES version

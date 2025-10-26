@@ -15,7 +15,7 @@ import java.io.InputStream
 import java.io.OutputStream
 
 class CABundleHelper {
-    String TAG = "vivoxsdk"
+    val TAG: String = "vivoxsdk"
 
     /*
      * Enabled force condition propagation

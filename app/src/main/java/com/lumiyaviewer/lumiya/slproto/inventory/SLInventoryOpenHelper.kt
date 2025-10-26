@@ -11,7 +11,7 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 
 class SLInventoryOpenHelper : DBHandleCache.DBOpenHelper {
-    private Int DB_VERSION = 21
+    private val DB_VERSION: Int = 21
 
     private class InstanceHolder {
         /* access modifiers changed from: private */

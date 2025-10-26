@@ -9,7 +9,7 @@ import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig
 
 class MuteListCachedDataDao : AbstractDao<MuteListCachedData, Long> {
-    String TABLENAME = "MUTE_LIST_CACHED_DATA"
+    val TABLENAME: String = "MUTE_LIST_CACHED_DATA"
 
     class Properties {
         Property CRC = Property(1, Int.TYPE, "CRC", false, "CRC")

@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * This provides a clean interface to the native OpenJPEG implementation.
  */
 class OpenJPEGDecoder {
-    private String TAG = "OpenJPEGDecoder"
+    private val TAG: String = "OpenJPEGDecoder"
     private val initialized = AtomicBoolean(false)
     
     {

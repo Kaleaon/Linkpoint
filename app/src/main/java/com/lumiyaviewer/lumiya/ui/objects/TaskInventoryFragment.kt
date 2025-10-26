@@ -41,8 +41,8 @@ class TaskInventoryFragment : FragmentWithTitle {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-inventory-SLAssetTypeSwitchesValues  reason: not valid java name */
     private /* synthetic */ IntArray f501comlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues = null
-    private String OBJECT_LOCAL_ID_KEY = "objectLocalId"
-    private String OBJECT_UUID_KEY = "objectUUID"
+    private val OBJECT_LOCAL_ID_KEY: String = "objectLocalId"
+    private val OBJECT_UUID_KEY: String = "objectUUID"
     @Nullable
     private SLObjectProfileData objectProfileData = null
     private Subscription<Int, SLObjectProfileData> objectProfileSubscription

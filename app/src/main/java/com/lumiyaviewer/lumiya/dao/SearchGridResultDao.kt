@@ -9,7 +9,7 @@ import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
 class SearchGridResultDao : AbstractDao<SearchGridResult, Long> {
-    String TABLENAME = "SearchGridResults"
+    val TABLENAME: String = "SearchGridResults"
 
     class Properties {
         Property Id = Property(0, Long.class, "id", true, "_id")

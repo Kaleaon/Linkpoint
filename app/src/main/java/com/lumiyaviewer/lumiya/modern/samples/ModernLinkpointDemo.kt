@@ -17,7 +17,7 @@ import com.lumiyaviewer.lumiya.modern.llsd.ModernLLSDCodec
  * Shows integration of HTTP/2, WebSocket, LLSD codec, and advanced graphics
  */
 class ModernLinkpointDemo {
-    private String TAG = "ModernLinkpointDemo"
+    private val TAG: String = "ModernLinkpointDemo"
     
     private Context context
     private HybridSLTransport transport

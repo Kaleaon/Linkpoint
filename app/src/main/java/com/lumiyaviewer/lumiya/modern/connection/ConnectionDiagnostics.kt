@@ -19,7 +19,7 @@ import okhttp3.Response
  * Provides comprehensive testing and troubleshooting capabilities.
  */
 class ConnectionDiagnostics {
-    private String TAG = "ConnectionDiagnostics"
+    private val TAG: String = "ConnectionDiagnostics"
     
     // Second Life endpoints for testing
     private Array<String> SL_LOGIN_ENDPOINTS = {

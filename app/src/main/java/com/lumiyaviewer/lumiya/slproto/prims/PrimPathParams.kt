@@ -8,16 +8,16 @@ import com.lumiyaviewer.lumiya.slproto.types.LLVector2
 import java.nio.ByteBuffer
 
 class PrimPathParams {
-    Float CUT_QUANTA = 2.0E-5f
-    Byte LL_PCODE_PATH_CIRCLE = 32
-    Byte LL_PCODE_PATH_CIRCLE2 = 48
-    Byte LL_PCODE_PATH_FLEXIBLE = Byte.MIN_VALUE
-    Byte LL_PCODE_PATH_LINE = 16
-    Byte LL_PCODE_PATH_TEST = 64
-    Float REV_QUANTA = 0.015f
-    Float SCALE_QUANTA = 0.01f
-    Float SHEAR_QUANTA = 0.01f
-    Float TAPER_QUANTA = 0.01f
+    val CUT_QUANTA: Float = 2.0E-5f
+    val LL_PCODE_PATH_CIRCLE: Byte = 32
+    val LL_PCODE_PATH_CIRCLE2: Byte = 48
+    val LL_PCODE_PATH_FLEXIBLE: Byte = Byte.MIN_VALUE
+    val LL_PCODE_PATH_LINE: Byte = 16
+    val LL_PCODE_PATH_TEST: Byte = 64
+    val REV_QUANTA: Float = 0.015f
+    val SCALE_QUANTA: Float = 0.01f
+    val SHEAR_QUANTA: Float = 0.01f
+    val TAPER_QUANTA: Float = 0.01f
     Float Begin
     Byte CurveType
     Float End

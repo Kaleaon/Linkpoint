@@ -7,13 +7,13 @@ import java.util.Arrays
 
 class AnimationSkeletonData {
     private Int numAnimatedBones = 133
-    private FloatArray animMatrix = FloatArray(2128)
-    private FloatArray animMatrix_Swap = FloatArray(2128)
-    private FloatArray animOffsets = FloatArray(532)
-    private FloatArray animOffsets_Swap = FloatArray(532)
+    private val animMatrix: FloatArray = FloatArray(2128)
+    private val animMatrix_Swap: FloatArray = FloatArray(2128)
+    private val animOffsets: FloatArray = FloatArray(532)
+    private val animOffsets_Swap: FloatArray = FloatArray(532)
     private LLVector3[] animPosArray = LLVector3[133]
-    private FloatArray animPriorityPosArray = FloatArray(133)
-    private FloatArray animPriorityRotArray = FloatArray(133)
+    private val animPriorityPosArray: FloatArray = FloatArray(133)
+    private val animPriorityRotArray: FloatArray = FloatArray(133)
     private LLQuaternion[] animRotArray = LLQuaternion[133]
 
     AnimationSkeletonData() {

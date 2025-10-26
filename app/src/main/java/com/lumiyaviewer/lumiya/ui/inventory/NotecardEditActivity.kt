@@ -44,12 +44,12 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class NotecardEditActivity : ThemedActivity : SLNotecard.OnAttachmentClickListener, View.OnClickListener {
-    private String INVENTORY_ENTRY_KEY = "inventoryEntry"
-    private String IS_SCRIPT_KEY = "isScript"
-    private Int ITEM_FOR_ATTACHMENT_REQUEST = 1
-    private String PARENT_FOLDER_KEY = "parentFolderUUID"
-    private String TASK_LOCAL_ID_KEY = "taskLocalID"
-    private String TASK_UUID_KEY = "taskUUID"
+    private val INVENTORY_ENTRY_KEY: String = "inventoryEntry"
+    private val IS_SCRIPT_KEY: String = "isScript"
+    private val ITEM_FOR_ATTACHMENT_REQUEST: Int = 1
+    private val PARENT_FOLDER_KEY: String = "parentFolderUUID"
+    private val TASK_LOCAL_ID_KEY: String = "taskLocalID"
+    private val TASK_UUID_KEY: String = "taskUUID"
     private SubscriptionData<UUID, SLAgentCircuit> agentCircuit = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
 
         /* renamed from: -$f0 */
@@ -108,16 +108,16 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     private Boolean editMode = false
     private Boolean isEditingScript = false
     private Boolean isSaving = false
-    private String lastErrorMessage = null
+    private val lastErrorMessage: String = null
     private MenuItem menuItemNewAttachment
     private SLInventoryEntry noteEntry = null
     private SLNotecard notecard = null
     private SubscriptionData<AssetKey, AssetData> notecardAssetSubscription = SubscriptionData<>(UIThreadExecutor.getInstance(), $Lambda$srzsajEQjSwYc3yok0XsNFeAjNk(this))
     private String notecardDescription
     private String notecardTitle
-    private UUID parentFolderUUID = null
+    private val parentFolderUUID: UUID = null
     private Int taskLocalID = 0
-    private UUID taskUUID = null
+    private val taskUUID: UUID = null
     private UserManager userManager
 
     private Unit copyAttachmentToInventory(SLInventoryEntry sLInventoryEntry) {

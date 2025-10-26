@@ -32,7 +32,7 @@ import java.io.File
 import javax.annotation.Nullable
 
 class SettingsFragment : PreferenceFragmentCompat : FragmentHasTitle {
-    private String PREF_RESOURCE_KEY = "prefResourceId"
+    private val PREF_RESOURCE_KEY: String = "prefResourceId"
     private RingtonePreference requestedRingtonePreference = null
 
     private class ClearCacheTask : AsyncTask<Void, Void, Void> {

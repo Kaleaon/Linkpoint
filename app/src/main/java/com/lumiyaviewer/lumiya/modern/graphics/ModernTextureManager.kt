@@ -13,7 +13,7 @@ import java.util.concurrent.Executors
  * Based on C++ Integration Guide specifications
  */
 class ModernTextureManager {
-    private String TAG = "ModernTextureManager"
+    private val TAG: String = "ModernTextureManager"
     
     private Context context
     private ExecutorService transcodingExecutor

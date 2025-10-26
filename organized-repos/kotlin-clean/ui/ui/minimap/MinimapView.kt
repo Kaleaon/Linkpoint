@@ -46,7 +46,7 @@ class MinimapView : View() {
             return true
         }
     }
-    private UUID selectedUser = null
+    private val selectedUser: UUID = null
     private SLMinimap.UserLocations userLocations
     private val Paint userMarkPaint = Paint()
 

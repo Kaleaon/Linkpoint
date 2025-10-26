@@ -17,13 +17,13 @@ class LoadableMonitor : Loadable.LoadableStatusListener, SwipeRefreshLayout.OnRe
     /* renamed from: -com-lumiyaviewer-lumiya-ui-common-loadmon-Loadable$StatusSwitchesValues  reason: not valid java name */
     private /* synthetic */ IntArray f379comlumiyaviewerlumiyauicommonloadmonLoadable$StatusSwitchesValues = null
     @Nullable
-    private String emptyMessage = null
+    private val emptyMessage: String = null
     private Boolean isExtraLoading = false
     private List<Loadable> loadables = ArrayList()
     @Nullable
-    private String loadingErrorMessage = null
+    private val loadingErrorMessage: String = null
     @Nullable
-    private String loadingIdleMessage = null
+    private val loadingIdleMessage: String = null
     @Nullable
     private LoadingLayout loadingLayout = null
     @Nullable

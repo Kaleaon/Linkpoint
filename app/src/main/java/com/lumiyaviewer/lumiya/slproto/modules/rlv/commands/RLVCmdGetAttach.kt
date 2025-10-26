@@ -9,7 +9,7 @@ import com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVController
 import java.util.UUID
 
 class RLVCmdGetAttach : RLVCommand {
-    private Int NUM_ATTACHMENT_POINTS_LSL = 41
+    private val NUM_ATTACHMENT_POINTS_LSL: Int = 41
 
     Unit Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2) {
         try {

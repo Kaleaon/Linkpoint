@@ -11,9 +11,9 @@ import android.widget.FrameLayout
 class TextFieldDialogBuilder {
     private OnTextCancelledListener cancelledListener = null
     private Context context
-    private String defaultText = ""
+    private val defaultText: String = ""
     private OnTextEnteredListener listener = null
-    private String title = null
+    private val title: String = null
 
     interface OnTextCancelledListener {
         Unit onTextCancelled()

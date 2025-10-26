@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture
  * This class provides backwards compatibility while adding modern reliability features.
  */
 class ConnectionIntegrationBridge {
-    private String TAG = "ConnectionBridge"
+    private val TAG: String = "ConnectionBridge"
     
     private Context context
     private ModernConnectionManager modernManager

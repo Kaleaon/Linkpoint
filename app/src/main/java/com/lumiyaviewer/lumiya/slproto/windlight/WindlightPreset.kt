@@ -8,7 +8,7 @@ import java.io.IOException
 import java.io.InputStream
 
 class WindlightPreset {
-    private Float WINDLIGHT_GAMMA = 2.2f
+    private val WINDLIGHT_GAMMA: Float = 2.2f
     FloatArray ambient = FloatArray(4)
     FloatArray ambientBelowWater = FloatArray(4)
     FloatArray blue_density = FloatArray(4)
@@ -17,10 +17,10 @@ class WindlightPreset {
     FloatArray cloud_pos_density1 = FloatArray(4)
     FloatArray cloud_pos_density2 = FloatArray(4)
     FloatArray cloud_shadow = FloatArray(4)
-    private Array<String> defaultPresets = {"A%2D12AM", "A%2D3AM", "A%2D6AM", "A%2D9AM", "A%2D12PM", "A%2D3PM", "A%2D6PM", "A%2D9PM"}
+    private val defaultPresets: Array<String> = {"A%2D12AM", "A%2D3AM", "A%2D6AM", "A%2D9AM", "A%2D12PM", "A%2D3PM", "A%2D6PM", "A%2D9PM"}
     FloatArray haze_density = FloatArray(4)
     FloatArray haze_horizon = FloatArray(4)
-    private FloatArray hourTable = {0.0f, 0.125f, 0.25f, 0.375f, 0.5f, 0.625f, 0.75f, 0.875f}
+    private val hourTable: FloatArray = {0.0f, 0.125f, 0.25f, 0.375f, 0.5f, 0.625f, 0.75f, 0.875f}
     FloatArray lightnorm = FloatArray(4)
     Float star_brightness
     FloatArray sunlightBelowWater = FloatArray(4)

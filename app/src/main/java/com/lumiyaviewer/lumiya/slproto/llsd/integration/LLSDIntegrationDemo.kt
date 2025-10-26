@@ -10,7 +10,7 @@ import com.lumiyaviewer.lumiya.slproto.llsd.types.*
  * Demo class showing the LLSD integration working with the external library
  */
 class LLSDIntegrationDemo {
-    private String TAG = "LLSDIntegrationDemo"
+    private val TAG: String = "LLSDIntegrationDemo"
     
     /**
      * Demonstrate LLSD integration with simple examples

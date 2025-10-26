@@ -8,8 +8,8 @@ import javax.annotation.Nullable
 class FragmentWithTitle : StateAwareFragment(), FragmentHasTitle {
     private const val FRAGMENT_SUBTITLE_TAG: String = "FragmentWithTitle:fragmentSubTitle"
     private const val FRAGMENT_TITLE_TAG: String = "FragmentWithTitle:fragmentTitle"
-    private String fragmentSubTitle = null
-    private String fragmentTitle = null
+    private val fragmentSubTitle: String = null
+    private val fragmentTitle: String = null
 
     public String getSubTitle() {
         return this.fragmentSubTitle

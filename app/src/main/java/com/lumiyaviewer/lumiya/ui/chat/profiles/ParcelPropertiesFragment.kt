@@ -40,7 +40,7 @@ import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.UUID
 
 class ParcelPropertiesFragment : FragmentWithTitle {
-    String PARCEL_DATA_KEY = "parcelData"
+    val PARCEL_DATA_KEY: String = "parcelData"
     /* access modifiers changed from: private */
     SubscriptionData<UUID, SLAgentCircuit> agentCircuit = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
 

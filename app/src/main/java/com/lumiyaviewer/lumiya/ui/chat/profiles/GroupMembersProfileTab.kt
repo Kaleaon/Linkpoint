@@ -42,7 +42,7 @@ import java.util.UUID
 import javax.annotation.Nullable
 
 class GroupMembersProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadableDataChangedListener {
-    private String ROLE_TO_ADD_KEY = "roleToAdd"
+    private val ROLE_TO_ADD_KEY: String = "roleToAdd"
     /* access modifiers changed from: private */
     GroupMemberListRecyclerAdapter adapter = null
     /* access modifiers changed from: private */

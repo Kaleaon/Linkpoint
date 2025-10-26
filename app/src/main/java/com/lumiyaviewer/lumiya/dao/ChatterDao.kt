@@ -9,7 +9,7 @@ import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
 class ChatterDao : AbstractDao<Chatter, Long> {
-    String TABLENAME = "CHATTER"
+    val TABLENAME: String = "CHATTER"
 
     class Properties {
         Property Active = Property(3, Boolean.TYPE, "active", false, "ACTIVE")

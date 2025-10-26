@@ -46,9 +46,9 @@ import java.util.UUID
 import javax.annotation.Nullable
 
 class SLVoice : SLModule {
-    private Int INVALID_PARCEL_ID = -1
-    private Int LOGIN_DELAY = 5
-    private Int MAX_LOGIN_ATTEMPTS = 3
+    private val INVALID_PARCEL_ID: Int = -1
+    private val LOGIN_DELAY: Int = 5
+    private val MAX_LOGIN_ATTEMPTS: Int = 3
     private String capURL
     private String chatSessionRequestURL
     private volatile VoiceChannelInfo connectedVoiceChannel = null

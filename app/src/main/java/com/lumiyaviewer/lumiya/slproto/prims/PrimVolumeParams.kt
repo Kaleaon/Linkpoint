@@ -9,21 +9,21 @@ import java.nio.ByteOrder
 import java.util.UUID
 
 class PrimVolumeParams {
-    Byte LL_SCULPT_FLAG_INVERT = 64
-    Byte LL_SCULPT_FLAG_MIRROR = Byte.MIN_VALUE
-    Byte LL_SCULPT_TYPE_CYLINDER = 4
-    Byte LL_SCULPT_TYPE_MASK = 7
-    Byte LL_SCULPT_TYPE_MESH = 5
-    Byte LL_SCULPT_TYPE_NONE = 0
-    Byte LL_SCULPT_TYPE_PLANE = 3
-    Byte LL_SCULPT_TYPE_SPHERE = 1
-    Byte LL_SCULPT_TYPE_TORUS = 2
-    Short PARAMS_FLEXIBLE = 16
-    Short PARAMS_LIGHT = 32
-    Short PARAMS_LIGHT_IMAGE = 64
-    Short PARAMS_MESH = 96
-    Short PARAMS_RESERVED = 80
-    Short PARAMS_SCULPT = 48
+    val LL_SCULPT_FLAG_INVERT: Byte = 64
+    val LL_SCULPT_FLAG_MIRROR: Byte = Byte.MIN_VALUE
+    val LL_SCULPT_TYPE_CYLINDER: Byte = 4
+    val LL_SCULPT_TYPE_MASK: Byte = 7
+    val LL_SCULPT_TYPE_MESH: Byte = 5
+    val LL_SCULPT_TYPE_NONE: Byte = 0
+    val LL_SCULPT_TYPE_PLANE: Byte = 3
+    val LL_SCULPT_TYPE_SPHERE: Byte = 1
+    val LL_SCULPT_TYPE_TORUS: Byte = 2
+    val PARAMS_FLEXIBLE: Short = 16
+    val PARAMS_LIGHT: Short = 32
+    val PARAMS_LIGHT_IMAGE: Short = 64
+    val PARAMS_MESH: Short = 96
+    val PARAMS_RESERVED: Short = 80
+    val PARAMS_SCULPT: Short = 48
     PrimFlexibleParams FlexiParams
     PrimPathParams PathParams
     PrimProfileParams ProfileParams

@@ -7,7 +7,7 @@ class LLQuaternion {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-types-LLQuaternion$OrderSwitchesValues  reason: not valid java name */
     private /* synthetic */ IntArray f143comlumiyaviewerlumiyaslprototypesLLQuaternion$OrderSwitchesValues = null
-    Float FP_MAG_THRESHOLD = 1.0E-7f
+    val FP_MAG_THRESHOLD: Float = 1.0E-7f
     private FloatArray inverseMatrix
     private FloatArray matrix
     Float w

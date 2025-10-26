@@ -5,20 +5,20 @@ import com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdate
 import java.nio.ByteBuffer
 
 class PrimProfileParams {
-    Float CUT_QUANTA = 2.0E-5f
-    Float HOLLOW_QUANTA = 2.0E-5f
-    Byte LL_PCODE_HOLE_CIRCLE = 16
-    Byte LL_PCODE_HOLE_MASK = -16
-    Byte LL_PCODE_HOLE_SAME = 0
-    Byte LL_PCODE_HOLE_SQUARE = 32
-    Byte LL_PCODE_HOLE_TRIANGLE = 48
-    Byte LL_PCODE_PROFILE_CIRCLE = 0
-    Byte LL_PCODE_PROFILE_CIRCLE_HALF = 5
-    Byte LL_PCODE_PROFILE_EQUALTRI = 3
-    Byte LL_PCODE_PROFILE_ISOTRI = 2
-    Byte LL_PCODE_PROFILE_MASK = 15
-    Byte LL_PCODE_PROFILE_RIGHTTRI = 4
-    Byte LL_PCODE_PROFILE_SQUARE = 1
+    val CUT_QUANTA: Float = 2.0E-5f
+    val HOLLOW_QUANTA: Float = 2.0E-5f
+    val LL_PCODE_HOLE_CIRCLE: Byte = 16
+    val LL_PCODE_HOLE_MASK: Byte = -16
+    val LL_PCODE_HOLE_SAME: Byte = 0
+    val LL_PCODE_HOLE_SQUARE: Byte = 32
+    val LL_PCODE_HOLE_TRIANGLE: Byte = 48
+    val LL_PCODE_PROFILE_CIRCLE: Byte = 0
+    val LL_PCODE_PROFILE_CIRCLE_HALF: Byte = 5
+    val LL_PCODE_PROFILE_EQUALTRI: Byte = 3
+    val LL_PCODE_PROFILE_ISOTRI: Byte = 2
+    val LL_PCODE_PROFILE_MASK: Byte = 15
+    val LL_PCODE_PROFILE_RIGHTTRI: Byte = 4
+    val LL_PCODE_PROFILE_SQUARE: Byte = 1
     Float Begin
     Byte CurveType
     Float End

@@ -36,7 +36,7 @@ import com.lumiyaviewer.lumiya.ui.settings.ModernSettingsActivity
  * - Material Design 3 UI with comprehensive testing interface
  */
 class ModernMainActivity : AppCompatActivity {
-    private String TAG = "ModernMainActivity"
+    private val TAG: String = "ModernMainActivity"
     
     // UI Components with enhanced Material Design
     private Toolbar toolbar

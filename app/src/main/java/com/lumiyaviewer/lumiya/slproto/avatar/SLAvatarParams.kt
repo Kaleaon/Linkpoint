@@ -9,7 +9,7 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class SLAvatarParams {
-    Int NUM_PARAMS = 218
+    val NUM_PARAMS: Int = 218
     @Nonnull
     ImmutableMap<Integer, ParamSet> paramByIDs
     @Nonnull

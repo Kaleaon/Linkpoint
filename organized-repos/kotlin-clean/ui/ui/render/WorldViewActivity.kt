@@ -478,7 +478,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     public Long lastActivityTime = SystemClock.uptimeMillis()
     /* access modifiers changed from: private */
     public Long lastObjectActivityTime = SystemClock.uptimeMillis()
-    private UUID lastTouchUUID = null
+    private val lastTouchUUID: UUID = null
     private Boolean localDrawingEnabled = false
     /* access modifiers changed from: private */
     public WorldSurfaceView mGLView

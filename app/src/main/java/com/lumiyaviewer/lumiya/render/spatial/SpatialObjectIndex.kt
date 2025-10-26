@@ -18,9 +18,9 @@ import java.util.Set
 import java.util.concurrent.atomic.AtomicBoolean
 
 class SpatialObjectIndex {
-    private Int NUM_DEPTH_BINS = 16
-    private Float REGION_SIZE_XY = 256.0f
-    private Float REGION_SIZE_Z = 4096.0f
+    private val NUM_DEPTH_BINS: Int = 16
+    private val REGION_SIZE_XY: Float = 256.0f
+    private val REGION_SIZE_Z: Float = 4096.0f
     private volatile Int avatarCountLimit = 5
     private val drawListUpdateRequested: AtomicBoolean = AtomicBoolean(false)
     private val drawListUpdateTask: DrawListUpdateTask = DrawListUpdateTask(this, null)

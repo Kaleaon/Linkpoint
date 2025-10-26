@@ -9,7 +9,7 @@ import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig
 
 class CachedAssetDao : AbstractDao<CachedAsset, String> {
-    String TABLENAME = "CachedAssets"
+    val TABLENAME: String = "CachedAssets"
 
     class Properties {
         Property Data = Property(2, ByteArray.class, "data", false, "DATA")

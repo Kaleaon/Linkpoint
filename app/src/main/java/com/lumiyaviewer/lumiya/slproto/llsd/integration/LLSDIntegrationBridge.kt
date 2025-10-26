@@ -44,7 +44,7 @@ import java.util.UUID
  * 5. Provide foundation for future enhanced features migration
  */
 class LLSDIntegrationBridge {
-    private String TAG = "LLSDIntegrationBridge"
+    private val TAG: String = "LLSDIntegrationBridge"
     
     /**
      * Parse LLSD from XML string using the external library

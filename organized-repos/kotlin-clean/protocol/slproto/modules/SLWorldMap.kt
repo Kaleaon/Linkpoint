@@ -19,7 +19,7 @@ class SLWorldMap : SLModule() {
     private Int teleportTargetX
     private Int teleportTargetY
     private Int teleportTargetZ
-    private UUID teleportToAgentUUID = null
+    private val teleportToAgentUUID: UUID = null
 
     public SLWorldMap(SLAgentCircuit sLAgentCircuit) {
         super(sLAgentCircuit)

@@ -30,7 +30,7 @@ class SLGridConnection : SLConnection() {
     @JvmStatic
 private Boolean autoresponseEnabled = false
     @JvmStatic
-private String autoresponseText = ""
+private val autoresponseText: String = ""
     private UUID activeAgentUUID
     private SLAgentCircuit agentCircuit
     private SLAuthParams authParams

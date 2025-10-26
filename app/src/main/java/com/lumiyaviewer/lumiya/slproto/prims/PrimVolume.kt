@@ -10,11 +10,11 @@ import com.lumiyaviewer.lumiya.slproto.types.Vector3Array
 import java.util.ArrayList
 
 class PrimVolume {
-    private Int FLEXI_PATH_REZ = 16
-    private Int SCULPT_REZ_1 = 6
-    private Int SCULPT_REZ_2 = 8
-    private Int SCULPT_REZ_3 = 16
-    private Int SCULPT_REZ_4 = 32
+    private val FLEXI_PATH_REZ: Int = 16
+    private val SCULPT_REZ_1: Int = 6
+    private val SCULPT_REZ_2: Int = 8
+    private val SCULPT_REZ_3: Int = 16
+    private val SCULPT_REZ_4: Int = 32
     private Float Detail
     private Int FaceMask
     private Boolean GenerateSingleFace

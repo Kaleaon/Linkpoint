@@ -29,7 +29,7 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class SLMinimap : SLModule {
-    Float CHAT_RANGE = 20.0f
+    val CHAT_RANGE: Float = 20.0f
     private Int parcelBitmapSize = 256
     Int parcelDataSize = 64
     private Byte parcelOverlayFlagBorderSouth = Byte.MIN_VALUE
@@ -52,7 +52,7 @@ class SLMinimap : SLModule {
     @Nullable
     ImmutableVector myAvatarPosition = null
     private Int nearbyUsersCount = 0
-    private IntArray parcelIDs = IntArray(4096)
+    private val parcelIDs: IntArray = IntArray(4096)
     private Map<Int, ParcelData> parcels = ConcurrentHashMap()
     private RequestHandler<SubscriptionSingleKey> userLocationRequestHandler = SimpleRequestHandler<SubscriptionSingleKey>() {
         Unit onRequest(@Nonnull SubscriptionSingleKey subscriptionSingleKey) {

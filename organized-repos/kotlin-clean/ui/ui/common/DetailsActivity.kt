@@ -24,8 +24,8 @@ class DetailsActivity : ConnectedActivity() {
     private const val DEFAULT_SUBTITLE_TAG: String = "DetailsActivity:defaultSubTitle"
     private const val DEFAULT_TITLE_TAG: String = "DetailsActivity:defaultTitle"
     private const val DETAILS_STACK_TAG: String = "DetailsActivity:DetailsStack"
-    private String defaultSubTitle = null
-    private String defaultTitle = null
+    private val defaultSubTitle: String = null
+    private val defaultTitle: String = null
     private val ArrayList<DetailsStackEntry> detailsStack = ArrayList<>()
 
     @JvmStatic

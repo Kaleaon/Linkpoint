@@ -17,7 +17,7 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 val class SLChatTextBoxDialog : SLChatDialogEvent() {
-    private String enteredValue = null
+    private val enteredValue: String = null
     private val Int textBoxButtonIndex
 
     public SLChatTextBoxDialog(ChatMessage chatMessage, UUID uuid) {

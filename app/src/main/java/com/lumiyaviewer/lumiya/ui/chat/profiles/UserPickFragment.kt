@@ -42,7 +42,7 @@ import com.lumiyaviewer.lumiya.ui.inventory.InventoryActivity
 import java.util.UUID
 
 class UserPickFragment : FragmentWithTitle {
-    private String PICK_ID_KEY = "pickID"
+    private val PICK_ID_KEY: String = "pickID"
     @BindView(2131755698)
     Button changePicButton
     private MenuItem menuItemDelete = null

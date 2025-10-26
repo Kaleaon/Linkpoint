@@ -48,8 +48,8 @@ import java.util.UUID
 import javax.annotation.Nullable
 
 class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, CompoundButton.OnCheckedChangeListener, ExpandableListView.OnGroupClickListener, ExpandableListView.OnChildClickListener {
-    private Int MAX_FILTER_DISTANCE = 256
-    private Int PROGRESS_BAR_SIZE_DIP = 4
+    private val MAX_FILTER_DISTANCE: Int = 256
+    private val PROGRESS_BAR_SIZE_DIP: Int = 4
     private SLObjectFilterInfo filterInfo = SLObjectFilterInfo.create()
     private Subscription.OnData<ObjectsManager.ObjectDisplayList> onObjectListData = $Lambda$rXtKRyOts6GGB3GxWNYA5oEvU2Y(this)
     private Subscription.OnError onObjectListError = Subscription.OnError(this) {

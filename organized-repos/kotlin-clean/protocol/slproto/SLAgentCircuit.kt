@@ -167,8 +167,8 @@ class SLAgentCircuit : SLThreadingCircuit(), ICapsEventHandler {
     }
     private List<ImprovedInstantMessage> pendingGroupMessages = LinkedList()
     private Long regionHandle = 0
-    private UUID regionID = null
-    private String regionName = null
+    private val regionID: UUID = null
+    private val regionName: String = null
     private val Set<UUID> startedGroupSessions = HashSet()
     private Boolean teleportRequestSent = false
     private val Set<UUID> typingUsers = Collections.synchronizedSet(HashSet())

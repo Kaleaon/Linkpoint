@@ -9,17 +9,17 @@ import com.lumiyaviewer.lumiya.slproto.types.VertexArray
 import java.util.ArrayList
 
 class PrimVolumeFace {
-    Int BOTTOM_MASK = 1024
-    Int CAP_MASK = 2
-    Int END_MASK = 4
-    Int FLAT_MASK = 256
-    Int HOLLOW_MASK = 64
-    Int INNER_MASK = 16
-    Int OPEN_MASK = 128
-    Int OUTER_MASK = 32
-    Int SIDE_MASK = 8
-    Int SINGLE_MASK = 1
-    Int TOP_MASK = 512
+    val BOTTOM_MASK: Int = 1024
+    val CAP_MASK: Int = 2
+    val END_MASK: Int = 4
+    val FLAT_MASK: Int = 256
+    val HOLLOW_MASK: Int = 64
+    val INNER_MASK: Int = 16
+    val OPEN_MASK: Int = 128
+    val OUTER_MASK: Int = 32
+    val SIDE_MASK: Int = 8
+    val SINGLE_MASK: Int = 1
+    val TOP_MASK: Int = 512
     Int BeginS
     Int BeginT
     LLVector3 Center

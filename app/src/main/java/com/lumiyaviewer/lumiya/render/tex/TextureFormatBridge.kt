@@ -13,7 +13,7 @@ import java.io.InputStream
  * This class provides a migration path and fallback mechanisms
  */
 class TextureFormatBridge {
-    private String TAG = "TextureFormatBridge"
+    private val TAG: String = "TextureFormatBridge"
     
     private ModernTextureManager modernManager
     private boolean modernManagerInitialized = false

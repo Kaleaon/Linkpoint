@@ -10,7 +10,7 @@ import java.io.ByteArrayInputStream
  * Test object for enhanced OpenJPEG with KTX2 support
  */
 object OpenJPEGIntegrationTest {
-    private String TAG = "OpenJPEGIntegrationTest"
+    private val TAG: String = "OpenJPEGIntegrationTest"
     
     fun runIntegrationTests(context: Context): Unit {
         Log.i(TAG, "Starting OpenJPEG integration tests...")

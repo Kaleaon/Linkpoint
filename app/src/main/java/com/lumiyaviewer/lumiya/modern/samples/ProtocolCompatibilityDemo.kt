@@ -17,7 +17,7 @@ import java.util.Date
  * Shows modern LLSD codec working with existing protocol implementations
  */
 class ProtocolCompatibilityDemo {
-    private String TAG = "ProtocolCompatibility"
+    private val TAG: String = "ProtocolCompatibility"
     
     private Context context
     private HybridProtocolManager protocolManager

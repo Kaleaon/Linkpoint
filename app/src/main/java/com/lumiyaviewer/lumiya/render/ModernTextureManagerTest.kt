@@ -9,7 +9,7 @@ import java.io.IOException
  * Test object for ModernTextureManager functionality
  */
 object ModernTextureManagerTest {
-    private String TAG = "ModernTextureManagerTest"
+    private val TAG: String = "ModernTextureManagerTest"
     
     fun runBasicTests(context: Context): Unit {
         Log.i(TAG, "Starting ModernTextureManager tests...")

@@ -19,8 +19,8 @@ import java.util.UUID
 import java.util.concurrent.Future
 
 class UserPicBitmapCache : ResourceMemoryCache<UUID, Bitmap> {
-    private Int MAX_USERPIC_HEIGHT = 128
-    private Int MAX_USERPIC_WIDTH = 128
+    private val MAX_USERPIC_HEIGHT: Int = 128
+    private val MAX_USERPIC_WIDTH: Int = 128
     /* access modifiers changed from: private */
     UserManager userManager
 

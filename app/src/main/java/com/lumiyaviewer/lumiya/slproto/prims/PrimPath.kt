@@ -6,8 +6,8 @@ import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 import java.util.ArrayList
 
 class PrimPath {
-    private Int MIN_DETAIL_FACES = 6
-    private FloatArray tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 0.5f}
+    private val MIN_DETAIL_FACES: Int = 6
+    private val tableScale: FloatArray = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 0.5f}
     Boolean Dirty = true
     Boolean Open = false
     ArrayList<PathPoint> Path = ArrayList<>()

@@ -12,11 +12,11 @@ import com.lumiyaviewer.lumiya.modern.graphics.ModernRenderPipeline
  * Implements the modernization plan from Graphics_Engine_Modernization_Plan.md
  */
 class ModernRenderContext {
-    private String TAG = "ModernRenderContext"
+    private val TAG: String = "ModernRenderContext"
     
     // OpenGL ES version requirements
-    private Int MIN_GL_VERSION = 30; // ES 3.0 minimum
-    Float NEAR_PLANE = 0.5f
+    private val MIN_GL_VERSION: Int = 30; // ES 3.0 minimum
+    val NEAR_PLANE: Float = 0.5f
     
     // Modern capabilities
     private var hasComputeShaders: Boolean = false  // ES 3.1+
@@ -27,10 +27,10 @@ class ModernRenderContext {
     private ModernRenderPipeline renderPipeline
     
     // Matrix management (modern shader-based approach)
-    private FloatArray modelMatrix = FloatArray(16)
-    private FloatArray viewMatrix = FloatArray(16)
-    private FloatArray projectionMatrix = FloatArray(16)
-    private FloatArray mvpMatrix = FloatArray(16)
+    private val modelMatrix: FloatArray = FloatArray(16)
+    private val viewMatrix: FloatArray = FloatArray(16)
+    private val projectionMatrix: FloatArray = FloatArray(16)
+    private val mvpMatrix: FloatArray = FloatArray(16)
     
     // Rendering state
     Float FOVAngle = 60.0f
@@ -42,7 +42,7 @@ class ModernRenderContext {
     Float scaleX = 1.0f
     Float scaleY = 1.0f 
     Float scaleZ = 1.0f
-    private IntArray viewport = IntArray(4)
+    private val viewport: IntArray = IntArray(4)
     
     constructor() {
         Log.i(TAG, "Initializing Modern Render Context for OpenGL ES 3.0+")

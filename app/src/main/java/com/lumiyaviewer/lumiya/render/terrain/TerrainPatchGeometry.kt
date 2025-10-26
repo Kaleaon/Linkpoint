@@ -16,10 +16,10 @@ class TerrainPatchGeometry {
     Int DrawPatchSize = 16
     private Int index_size_bytes = 3072
     private Int vertex_size_bytes = 9248
-    private FloatArray waterAmplitude = {0.5f, 0.5f, 0.3f, 0.4f}
-    private FloatArray waterDirection = {1.0f, 0.3f, 0.4f, 0.75f, -0.5f, 0.7f, 0.63f, -0.3f}
-    private FloatArray waterFrequency = {17.951958f, 12.566371f, 8.975979f, 15.707963f}
-    private FloatArray waterPhase = {1.73f, 0.64f, 1.27f, 0.9f}
+    private val waterAmplitude: FloatArray = {0.5f, 0.5f, 0.3f, 0.4f}
+    private val waterDirection: FloatArray = {1.0f, 0.3f, 0.4f, 0.75f, -0.5f, 0.7f, 0.63f, -0.3f}
+    private val waterFrequency: FloatArray = {17.951958f, 12.566371f, 8.975979f, 15.707963f}
+    private val waterPhase: FloatArray = {1.73f, 0.64f, 1.27f, 0.9f}
     private Int water_vertex_size_bytes = 3468
     private GLLoadableBuffer indexBuffer
     private var index_count: Int = 0

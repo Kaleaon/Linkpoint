@@ -11,7 +11,7 @@ import java.util.UUID
 import javax.annotation.Nullable
 
 class AvatarPickerForShare : AvatarPickerFragment {
-    private String INVENTORY_ENTRY_KEY = "inventoryEntry"
+    private val INVENTORY_ENTRY_KEY: String = "inventoryEntry"
     private InventoryFragmentHelper inventoryFragmentHelper = InventoryFragmentHelper(this)
 
     Bundle makeArguments(UUID uuid, SLInventoryEntry sLInventoryEntry) {
