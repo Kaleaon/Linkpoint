@@ -75,35 +75,35 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
     private SearchView searchView
     private Subscription<SubscriptionSingleKey, ObjectsManager.ObjectDisplayList> subscription
 
-    private SLObjectFilterInfo getFilter() {
-        Float f = 1.0f
-        View view = getView()
+     private fun getFilter(): SLObjectFilterInfo {
+        val f: Float = 1.0f
+        val view: View = getView()
         if (view == null) {
             return SLObjectFilterInfo.create()
         }
         if (view.findViewById(R.id.filterPanel).getVisibility() != 0) {
             return SLObjectFilterInfo.create()
         }
-        Float progress = (Float) ((SeekBar) view.findViewById(R.id.objectListSeekBar)).getProgress()
+        val progress: Float = (Float) ((SeekBar) view.findViewById(R.id.objectListSeekBar)).getProgress()
         if (progress >= 1.0f) {
             f = progress
         }
         return SLObjectFilterInfo.create(this.searchView.getQuery().toString(), ((CheckBox) view.findViewById(R.id.includeAttachments)).isChecked(), ((CheckBox) view.findViewById(R.id.includeStubs)).isChecked(), ((CheckBox) view.findViewById(R.id.includeNonTouchable)).isChecked(), f)
     }
 
-    private UserManager getUserManager() {
+     private fun getUserManager(): UserManager {
         return ActivityUtils.getUserManager(getArguments())
     }
 
     @JvmStatic
-    ObjectSelectorFragment newInstance(Bundle bundle) {
-        ObjectSelectorFragment objectSelectorFragment = ObjectSelectorFragment()
+     fun newInstance(bundle: Bundle): ObjectSelectorFragment {
+        val objectSelectorFragment: ObjectSelectorFragment = ObjectSelectorFragment()
         objectSelectorFragment.setArguments(bundle)
         return objectSelectorFragment
     }
 
-    private Unit showObjectDetails(SLObjectDisplayInfo sLObjectDisplayInfo) {
-        UUID activeAgentID = ActivityUtils.getActiveAgentID(getArguments())
+     private fun showObjectDetails(sLObjectDisplayInfo: SLObjectDisplayInfo) {
+        val activeAgentID: UUID = ActivityUtils.getActiveAgentID(getArguments())
         if (activeAgentID == null) {
             return
         }
@@ -118,10 +118,10 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
     fun updateFilter() {
         SLAgentCircuit activeAgentCircuit
         SLModules modules
-        SLObjectFilterInfo filter = getFilter()
+        val filter: SLObjectFilterInfo = getFilter()
         if (!filter.equals(this.filterInfo)) {
             this.filterInfo = filter
-            UserManager userManager = getUserManager()
+            val userManager: UserManager = getUserManager()
             if (userManager != null) {
                 userManager.getObjectsManager().setFilter(this.filterInfo)
                 if (this.filterInfo.range() != 0.0f && (activeAgentCircuit = userManager.getActiveAgentCircuit()) != null && (modules = activeAgentCircuit.getModules()) != null) {
@@ -136,7 +136,7 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
     public /* synthetic */ Unit m682lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectSelectorFragment_10042(Throwable th) {
         View view
         if ((th instanceof SLGridConnection.NotConnectedException) && (view = getView()) != null) {
-            View findViewById = view.findViewById(R.id.object_progress_bar)
+            val findViewById: View = view.findViewById(R.id.object_progress_bar)
             if (findViewById != null) {
                 findViewById.setVisibility(8)
             }
@@ -150,34 +150,34 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectSelectorFragment_10971  reason: not valid java name */
     public /* synthetic */ Unit m683lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectSelectorFragment_10971(ObjectsManager.ObjectDisplayList objectDisplayList) {
-        Int i = 8
-        ImmutableList<SLObjectDisplayInfo> immutableList = objectDisplayList.objects
-        View view = getView()
+        val i: Int = 8
+        val immutableList: ImmutableList<SLObjectDisplayInfo> = objectDisplayList.objects
+        val view: View = getView()
         if (view != null) {
-            View findViewById = view.findViewById(R.id.object_progress_bar)
+            val findViewById: View = view.findViewById(R.id.object_progress_bar)
             if (findViewById != null) {
                 findViewById.setVisibility(objectDisplayList.isLoading ? 0 : 8)
             }
             view.findViewById(R.id.empty_object_list_progress).setVisibility(objectDisplayList.isLoading ? 0 : 8)
             ((TextView) view.findViewById(R.id.empty_object_list_message)).setText(objectDisplayList.isLoading ? R.string.object_list_loading : R.string.object_list_result_empty)
             view.findViewById(R.id.empty_object_list).setVisibility(immutableList.isEmpty() ? 0 : 8)
-            View findViewById2 = view.findViewById(R.id.objectListView)
+            val findViewById2: View = view.findViewById(R.id.objectListView)
             if (!immutableList.isEmpty()) {
                 i = 0
             }
             findViewById2.setVisibility(i)
-            ExpandableListView expandableListView = (ExpandableListView) view.findViewById(R.id.objectListView)
-            ExpandableListAdapter expandableListAdapter = expandableListView.getExpandableListAdapter()
+            val expandableListView: ExpandableListView = (ExpandableListView) view.findViewById(R.id.objectListView)
+            val expandableListAdapter: ExpandableListAdapter = expandableListView.getExpandableListAdapter()
             if (expandableListAdapter instanceof ObjectListAdapter) {
-                HashSet hashSet = HashSet()
+                val hashSet: HashSet = HashSet()
                 for (SLObjectDisplayInfo sLObjectDisplayInfo : ((ObjectListAdapter) expandableListAdapter).getData()) {
                     if ((sLObjectDisplayInfo instanceof SLPrimObjectDisplayInfoWithChildren) && !((SLPrimObjectDisplayInfoWithChildren) sLObjectDisplayInfo).isImplicitlyAdded()) {
                         hashSet.add(Integer.valueOf(sLObjectDisplayInfo.localID))
                     }
                 }
-                ArrayList<Integer> arrayList = ArrayList<>()
+                val arrayList: ArrayList<Integer> = ArrayList<>()
                 for (Int i2 = 0; i2 < immutableList.size(); i2++) {
-                    SLObjectDisplayInfo sLObjectDisplayInfo2 = (SLObjectDisplayInfo) immutableList.get(i2)
+                    val sLObjectDisplayInfo2: SLObjectDisplayInfo = (SLObjectDisplayInfo) immutableList.get(i2)
                     if ((sLObjectDisplayInfo2 instanceof SLPrimObjectDisplayInfoWithChildren) && ((SLPrimObjectDisplayInfoWithChildren) sLObjectDisplayInfo2).isImplicitlyAdded() && !hashSet.contains(Integer.valueOf(sLObjectDisplayInfo2.localID))) {
                         arrayList.add(Integer.valueOf(i2))
                     }
@@ -190,13 +190,13 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
         }
     }
 
-    fun onCheckedChanged(CompoundButton compoundButton, Boolean z) {
+    fun onCheckedChanged(compoundButton: CompoundButton, z: Boolean) {
         updateFilter()
     }
 
-    public Boolean onChildClick(ExpandableListView expandableListView, View view, Int i, Int i2, Long j) {
+     public fun onChildClick(expandableListView: ExpandableListView, view: View, i: Int, i2: Int, j: Long): Boolean {
         SLObjectDisplayInfo child
-        ExpandableListAdapter expandableListAdapter = expandableListView.getExpandableListAdapter()
+        val expandableListAdapter: ExpandableListAdapter = expandableListView.getExpandableListAdapter()
         if (!(expandableListAdapter instanceof ObjectListAdapter) || (child = ((ObjectListAdapter) expandableListAdapter).getChild(i, i2)) == null) {
             return true
         }
@@ -209,26 +209,26 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.menu_object_selector, menu)
         this.searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.action_search))
         this.searchView.setOnQueryTextListener(SearchView.OnQueryTextListener() {
-            public Boolean onQueryTextChange(String str) {
+             public fun onQueryTextChange(str: String): Boolean {
                 Debug.Printf("searchview: textchange", Object[0])
                 ObjectSelectorFragment.this.updateFilter()
                 return true
             }
 
-            public Boolean onQueryTextSubmit(String str) {
+             public fun onQueryTextSubmit(str: String): Boolean {
                 return true
             }
         MenuItemCompat.setOnActionExpandListener(menu.findItem(R.id.action_search), MenuItemCompat.OnActionExpandListener() {
-            public Boolean onMenuItemActionCollapse(MenuItem menuItem) {
-                View view = ObjectSelectorFragment.this.getView()
+             public fun onMenuItemActionCollapse(menuItem: MenuItem): Boolean {
+                val view: View = ObjectSelectorFragment.this.getView()
                 if (view != null) {
                     view.findViewById(R.id.filterPanel).setVisibility(8)
-                    Animation animation = view.findViewById(R.id.filterPanel).getAnimation()
+                    val animation: Animation = view.findViewById(R.id.filterPanel).getAnimation()
                     if (animation != null) {
                         animation.cancel()
                     }
@@ -237,8 +237,8 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
                 return true
             }
 
-            public Boolean onMenuItemActionExpand(MenuItem menuItem) {
-                View view = ObjectSelectorFragment.this.getView()
+             public fun onMenuItemActionExpand(menuItem: MenuItem): Boolean {
+                val view: View = ObjectSelectorFragment.this.getView()
                 if (view != null) {
                     view.findViewById(R.id.filterPanel).setVisibility(0)
                     view.findViewById(R.id.filterPanel).startAnimation(AnimationUtils.loadAnimation(ObjectSelectorFragment.this.getContext(), R.anim.slide_from_above))
@@ -248,9 +248,9 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
             }
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
-        View inflate = layoutInflater.inflate(R.layout.object_list, viewGroup, false)
+        val inflate: View = layoutInflater.inflate(R.layout.object_list, viewGroup, false)
         ((ExpandableListView) inflate.findViewById(R.id.objectListView)).setAdapter(ObjectListAdapter(layoutInflater.getContext()))
         ((ExpandableListView) inflate.findViewById(R.id.objectListView)).setOnGroupClickListener(this)
         ((ExpandableListView) inflate.findViewById(R.id.objectListView)).setOnChildClickListener(this)
@@ -260,25 +260,25 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
         ((CheckBox) inflate.findViewById(R.id.includeStubs)).setOnCheckedChangeListener(this)
         ((CheckBox) inflate.findViewById(R.id.includeNonTouchable)).setOnCheckedChangeListener(this)
         if (Build.VERSION.SDK_INT >= 14) {
-            ButteryProgressBar butteryProgressBar = ButteryProgressBar(layoutInflater.getContext())
+            val butteryProgressBar: ButteryProgressBar = ButteryProgressBar(layoutInflater.getContext())
             butteryProgressBar.setId(R.id.object_progress_bar)
             ((FrameLayout) inflate.findViewById(R.id.object_list_root_layout)).addView(butteryProgressBar, FrameLayout.LayoutParams(-1, (Int) TypedValue.applyDimension(1, 4.0f, layoutInflater.getContext().getResources().getDisplayMetrics())))
         }
         return inflate
     }
 
-    public Boolean onGroupClick(ExpandableListView expandableListView, View view, Int i, Long j) {
+     public fun onGroupClick(expandableListView: ExpandableListView, view: View, i: Int, j: Long): Boolean {
         SLObjectDisplayInfo group
         Debug.Printf("displayObjects: onGroupClick: view %s id %d", view, Integer.valueOf(view.getId()))
-        ExpandableListAdapter expandableListAdapter = expandableListView.getExpandableListAdapter()
+        val expandableListAdapter: ExpandableListAdapter = expandableListView.getExpandableListAdapter()
         if ((expandableListAdapter instanceof ObjectListAdapter) && (group = ((ObjectListAdapter) expandableListAdapter).getGroup(i)) != null) {
             showObjectDetails(group)
         }
         return true
     }
 
-    fun onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
-        View view = getView()
+    fun onProgressChanged(seekBar: SeekBar, i: Int, z: Boolean) {
+        val view: View = getView()
         if (view != null) {
             ((TextView) view.findViewById(R.id.objectListRangeDisplay)).setText(getString(R.string.object_range_format, Integer.valueOf(i)))
             if (z) {
@@ -289,18 +289,18 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
 
     fun onStart() {
         SLModules modules
-        Int i = 256
+        val i: Int = 256
         super.onStart()
-        UserManager userManager = getUserManager()
+        val userManager: UserManager = getUserManager()
         if (userManager != null) {
             userManager.getObjectsManager().setFilter(this.filterInfo)
             this.subscription = userManager.getObjectsManager().getObjectDisplayList().subscribe(SubscriptionSingleKey.Value, UIThreadExecutor.getInstance(), this.onObjectListData, this.onObjectListError)
-            SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+            val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
             if (activeAgentCircuit != null && (modules = activeAgentCircuit.getModules()) != null) {
                 modules.drawDistance.EnableObjectSelect()
-                View view = getView()
+                val view: View = getView()
                 if (view != null) {
-                    Int objectSelectRange = (Int) modules.drawDistance.getObjectSelectRange()
+                    val objectSelectRange: Int = (Int) modules.drawDistance.getObjectSelectRange()
                     if (objectSelectRange < 1) {
                         i = 1
                     } else if (objectSelectRange <= 256) {
@@ -312,7 +312,7 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
         }
     }
 
-    fun onStartTrackingTouch(SeekBar seekBar) {
+    fun onStartTrackingTouch(seekBar: SeekBar) {
     }
 
     fun onStop() {
@@ -322,13 +322,13 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
             this.subscription.unsubscribe()
             this.subscription = null
         }
-        UserManager userManager = getUserManager()
+        val userManager: UserManager = getUserManager()
         if (!(userManager == null || (activeAgentCircuit = userManager.getActiveAgentCircuit()) == null || (modules = activeAgentCircuit.getModules()) == null)) {
             modules.drawDistance.DisableObjectSelect()
         }
         super.onStop()
     }
 
-    fun onStopTrackingTouch(SeekBar seekBar) {
+    fun onStopTrackingTouch(seekBar: SeekBar) {
     }
 }

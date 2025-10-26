@@ -14,7 +14,7 @@ abstract class RequestFinalProcessor<K, T> : RequestHandler<K> {
     }
 
     /* renamed from: cancelRequest */
-    protected Unit handleRequestCancellation(K k) {
+     protected fun handleRequestCancellation(K k) {
     }
 
     /* access modifiers changed from: private */

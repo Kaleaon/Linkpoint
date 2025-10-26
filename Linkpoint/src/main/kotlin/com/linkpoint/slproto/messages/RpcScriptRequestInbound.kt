@@ -13,7 +13,7 @@ class RpcScriptRequestInbound : SLMessage() {
         public UUID ChannelID
         public Int IntValue
         public UUID ItemID
-        public Byte[] StringValue
+        public ByteArray StringValue
         public UUID TaskID
     }
 
@@ -27,15 +27,15 @@ class RpcScriptRequestInbound : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.DataBlock_Field.StringValue.length + 54 + 12
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleRpcScriptRequestInbound(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -97)
@@ -48,7 +48,7 @@ class RpcScriptRequestInbound : SLMessage() {
         packVariable(byteBuffer, this.DataBlock_Field.StringValue, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.TargetBlock_Field.GridX = unpackInt(byteBuffer)
         this.TargetBlock_Field.GridY = unpackInt(byteBuffer)
         this.DataBlock_Field.TaskID = unpackUUID(byteBuffer)

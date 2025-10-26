@@ -53,29 +53,29 @@ class SLParcelInfo {
     val Map<Integer, UUID> uuidsNearby = HashMap()
 
     private ArrayList<SLObjectDisplayInfo> addDisplayObjects(Iterable<SLObjectInfo> iterable, SLObjectFilterInfo sLObjectFilterInfo, ImmutableVector immutableVector, Boolean z, MultipleChatterNameRetriever multipleChatterNameRetriever, Set<UUID> set, Boolean z2) {
-        ArrayList<SLObjectDisplayInfo> arrayList = null
-        Iterator it = iterable.iterator()
+        val arrayList: ArrayList<SLObjectDisplayInfo> = null
+        val it: Iterator = iterable.iterator()
         while (true) {
-            ArrayList<SLObjectDisplayInfo> arrayList2 = arrayList
+            val arrayList2: ArrayList<SLObjectDisplayInfo> = arrayList
             if (!it.hasNext()) {
                 return arrayList2
             }
-            SLObjectInfo sLObjectInfo = (SLObjectInfo) it.next()
+            val sLObjectInfo: SLObjectInfo = (SLObjectInfo) it.next()
             if (sLObjectInfo != null) {
                 Collection addDisplayObjects
-                Iterable iterable2 = sLObjectInfo.treeNode
+                val iterable2: Iterable = sLObjectInfo.treeNode
                 if (iterable2.hasChildren()) {
                     addDisplayObjects = addDisplayObjects(iterable2, sLObjectFilterInfo, immutableVector, false, multipleChatterNameRetriever, set, !sLObjectInfo.isAvatar() ? z2 : true)
                 } else {
                     addDisplayObjects = null
                 }
-                LLVector3 absolutePosition = sLObjectInfo.getAbsolutePosition()
-                Float distanceTo = immutableVector.distanceTo(absolutePosition.x, absolutePosition.y, absolutePosition.z)
-                Int isEmpty = addDisplayObjects != null ? addDisplayObjects.isEmpty() ^ 1 : 0
-                Boolean objectMatches = sLObjectFilterInfo.objectMatches(sLObjectInfo, distanceTo, z2)
+                val absolutePosition: LLVector3 = sLObjectInfo.getAbsolutePosition()
+                val distanceTo: Float = immutableVector.distanceTo(absolutePosition.x, absolutePosition.y, absolutePosition.z)
+                val isEmpty: Int = addDisplayObjects != null ? addDisplayObjects.isEmpty() ^ 1 : 0
+                val objectMatches: Boolean = sLObjectFilterInfo.objectMatches(sLObjectInfo, distanceTo, z2)
                 if (isEmpty != 0 || objectMatches) {
-                    String knownName = getKnownName(sLObjectInfo, multipleChatterNameRetriever, set)
-                    Boolean nameMatches = sLObjectFilterInfo.nameMatches(knownName)
+                    val knownName: String = getKnownName(sLObjectInfo, multipleChatterNameRetriever, set)
+                    val nameMatches: Boolean = sLObjectFilterInfo.nameMatches(knownName)
                     if (isEmpty != 0 || nameMatches) {
                         if (isEmpty != 0) {
                             z3 = (objectMatches ? nameMatches : 0) ^ 1
@@ -104,10 +104,10 @@ class SLParcelInfo {
         }
     }
 
-    private String getKnownName(SLObjectInfo sLObjectInfo, MultipleChatterNameRetriever multipleChatterNameRetriever, Set<UUID> set) {
-        String str = null
+     private fun getKnownName(sLObjectInfo: SLObjectInfo, multipleChatterNameRetriever: MultipleChatterNameRetriever, set: Set<UUID>): String {
+        val str: String = null
         if (sLObjectInfo.isAvatar()) {
-            UUID id = sLObjectInfo.getId()
+            val id: UUID = sLObjectInfo.getId()
             if (id == null) {
                 return null
             }
@@ -124,9 +124,9 @@ class SLParcelInfo {
     }
 
     synchronized Unit ApplyAvatarAnimation(AvatarAnimation avatarAnimation, SLAvatarControl sLAvatarControl) {
-        SLObjectInfo sLObjectInfo = (SLObjectInfo) this.allObjectsNearby.get(avatarAnimation.Sender_Field.ID)
+        val sLObjectInfo: SLObjectInfo = (SLObjectInfo) this.allObjectsNearby.get(avatarAnimation.Sender_Field.ID)
         if (sLObjectInfo instanceof SLObjectAvatarInfo) {
-            SLObjectAvatarInfo sLObjectAvatarInfo = (SLObjectAvatarInfo) sLObjectInfo
+            val sLObjectAvatarInfo: SLObjectAvatarInfo = (SLObjectAvatarInfo) sLObjectInfo
             sLObjectAvatarInfo.ApplyAvatarAnimation(avatarAnimation)
             if (sLObjectAvatarInfo.isMyAvatar() && sLAvatarControl != null) {
                 sLAvatarControl.ApplyAvatarAnimation(sLObjectAvatarInfo, avatarAnimation)
@@ -135,7 +135,7 @@ class SLParcelInfo {
     }
 
     synchronized Unit ApplyAvatarAppearance(AvatarAppearance avatarAppearance) {
-        SLObjectInfo sLObjectInfo = (SLObjectInfo) this.allObjectsNearby.get(avatarAppearance.Sender_Field.ID)
+        val sLObjectInfo: SLObjectInfo = (SLObjectInfo) this.allObjectsNearby.get(avatarAppearance.Sender_Field.ID)
         if (sLObjectInfo instanceof SLObjectAvatarInfo) {
             ((SLObjectAvatarInfo) sLObjectInfo).ApplyAvatarAppearance(avatarAppearance)
         }
@@ -156,9 +156,9 @@ class SLParcelInfo {
         this.allObjectsNearby.put(objectInfo.getId(), objectInfo)
         
         // Handle parent-child relationships
-        SLObjectInfo parentObject = null
+        val parentObject: SLObjectInfo = null
         if (objectInfo.parentID != null && objectInfo.parentID != 0) {
-            UUID parentUUID = this.uuidsNearby.get(objectInfo.parentID)
+            val parentUUID: UUID = this.uuidsNearby.get(objectInfo.parentID)
             if (parentUUID != null) {
                 parentObject = this.allObjectsNearby.get(parentUUID)
             }
@@ -169,14 +169,14 @@ class SLParcelInfo {
             objectInfo.hierLevel = parentObject.hierLevel + 1
             
             // Handle attachment flag propagation
-            Boolean isAttachment = parentObject.isAvatar() || parentObject.isAttachment
+            val isAttachment: Boolean = parentObject.isAvatar() || parentObject.isAttachment
             objectInfo.setIsAttachmentAll(isAttachment)
             
             // Add to parent's children
             parentObject.addChild(objectInfo)
         } else if (objectInfo.parentID != null && objectInfo.parentID != 0) {
             // This is an orphan - parent not found yet
-            LinkedList<SLObjectInfo> orphanList = this.orphanObjects.get(objectInfo.parentID)
+            val orphanList: LinkedList<SLObjectInfo> = this.orphanObjects.get(objectInfo.parentID)
             if (orphanList == null) {
                 orphanList = LinkedList<>()
                 this.orphanObjects.put(objectInfo.parentID, orphanList)
@@ -188,13 +188,13 @@ class SLParcelInfo {
         }
         
         // Process any orphan objects that were waiting for this object as parent
-        LinkedList<SLObjectInfo> orphans = this.orphanObjects.remove(objectInfo.localID)
+        val orphans: LinkedList<SLObjectInfo> = this.orphanObjects.remove(objectInfo.localID)
         if (orphans != null) {
             for (SLObjectInfo orphan : orphans) {
                 orphan.hierLevel = objectInfo.hierLevel + 1
                 
                 // Handle attachment propagation for orphans
-                Boolean isAttachment = objectInfo.isAttachment
+                val isAttachment: Boolean = objectInfo.isAttachment
                 orphan.setIsAttachmentAll(isAttachment)
                 
                 objectInfo.addChild(orphan)
@@ -207,7 +207,7 @@ class SLParcelInfo {
         return true
     }
 
-    public SLObjectAvatarInfo getAgentAvatar() {
+     public fun getAgentAvatar(): SLObjectAvatarInfo {
         SLObjectAvatarInfo sLObjectAvatarInfo
         synchronized (this.agentAvatarLock) {
             sLObjectAvatarInfo = this.agentAvatar
@@ -219,18 +219,18 @@ class SLParcelInfo {
         return (SLObjectInfo) this.allObjectsNearby.get(uuid)
     }
 
-    public ObjectDisplayList getDisplayObjects(ImmutableVector immutableVector, SLObjectFilterInfo sLObjectFilterInfo, MultipleChatterNameRetriever multipleChatterNameRetriever) {
+     public fun getDisplayObjects(immutableVector: ImmutableVector, sLObjectFilterInfo: SLObjectFilterInfo, multipleChatterNameRetriever: MultipleChatterNameRetriever): ObjectDisplayList {
         Collection addDisplayObjects
         Int size
-        Boolean z = true
-        Set hashSet = HashSet()
+        val z: Boolean = true
+        val hashSet: Set = HashSet()
         synchronized (this) {
             addDisplayObjects = addDisplayObjects(this.rootObjects.values(), sLObjectFilterInfo, immutableVector, true, multipleChatterNameRetriever, hashSet, false)
             size = this.objectNamesQueue.size()
         }
         multipleChatterNameRetriever.retainChatters(hashSet)
-        String str = "getDisplayObjects: objectList is %s, load queue %d"
-        Object[] objArr = Object[2]
+        val str: String = "getDisplayObjects: objectList is %s, load queue %d"
+        val objArr: Array<Any> = Object[2]
         objArr[0] = addDisplayObjects != null ? Integer.toString(addDisplayObjects.size()) : "null"
         objArr[1] = Integer.valueOf(size)
         Debug.Printf(str, objArr)
@@ -238,7 +238,7 @@ class SLParcelInfo {
             Collections.sort(addDisplayObjects, this.objectDisplayInfoComparator)
             return ObjectDisplayList(ImmutableList.copyOf(addDisplayObjects), size != 0)
         }
-        ImmutableList of = ImmutableList.of()
+        val of: ImmutableList = ImmutableList.of()
         if (size == 0) {
             z = false
         }
@@ -246,17 +246,17 @@ class SLParcelInfo {
     }
 
     public synchronized SLObjectInfo getObjectInfo(Int i) {
-        UUID uuid = (UUID) this.uuidsNearby.get(Integer.valueOf(i))
+        val uuid: UUID = (UUID) this.uuidsNearby.get(Integer.valueOf(i))
         if (uuid == null) {
             return null
         }
         return (SLObjectInfo) this.allObjectsNearby.get(uuid)
     }
 
-    public Int getObjectLocalID(UUID uuid) {
+     public fun getObjectLocalID(uuid: UUID): Int {
         synchronized (this) {
             if (uuid != null) {
-                SLObjectInfo sLObjectInfo = (SLObjectInfo) this.allObjectsNearby.get(uuid)
+                val sLObjectInfo: SLObjectInfo = (SLObjectInfo) this.allObjectsNearby.get(uuid)
                 if (sLObjectInfo != null) {
                     i = sLObjectInfo.localID
                 }
@@ -266,7 +266,7 @@ class SLParcelInfo {
         return i
     }
 
-    public UUID getObjectUUID(Int i) {
+     public fun getObjectUUID(i: Int): UUID {
         UUID uuid
         synchronized (this) {
             uuid = (UUID) this.uuidsNearby.get(Integer.valueOf(i))
@@ -274,7 +274,7 @@ class SLParcelInfo {
         return uuid
     }
 
-    public Boolean getSunHour(Float[] fArr, Boolean z) {
+     public fun getSunHour(fArr: FloatArray, z: Boolean): Boolean {
         synchronized (this.simSunHourLock) {
             if (this.simSunHourDirty || z) {
                 fArr[0] = this.simSunHour
@@ -286,9 +286,9 @@ class SLParcelInfo {
     }
 
     public ImmutableList<SLObjectInfo> getUserTouchableObjects(SLAgentCircuit sLAgentCircuit, UUID uuid) {
-        Builder builder = ImmutableList.builder()
+        val builder: Builder = ImmutableList.builder()
         synchronized (this) {
-            SLObjectInfo sLObjectInfo = (SLObjectInfo) this.allObjectsNearby.get(uuid)
+            val sLObjectInfo: SLObjectInfo = (SLObjectInfo) this.allObjectsNearby.get(uuid)
             if (sLObjectInfo != null) {
                 try {
                     for (Object obj : sLObjectInfo.treeNode) {
@@ -322,7 +322,7 @@ class SLParcelInfo {
         if (uuid2.equals(uuid)) {
             return true
         }
-        SLObjectInfo sLObjectInfo = (SLObjectInfo) this.allObjectsNearby.get(uuid2)
+        val sLObjectInfo: SLObjectInfo = (SLObjectInfo) this.allObjectsNearby.get(uuid2)
         if (sLObjectInfo != null) {
             for (sLObjectInfo = sLObjectInfo.getParentObject(); sLObjectInfo != null; sLObjectInfo = sLObjectInfo.getParentObject()) {
                 if (sLObjectInfo.getId().equals(uuid)) {
@@ -338,20 +338,20 @@ class SLParcelInfo {
     /* DevToolsApp WARNING: Removed duplicated region for block: B:64:0x00f7  */
     /* DevToolsApp WARNING: Removed duplicated region for block: B:60:0x00f1  */
     /* DevToolsApp WARNING: Removed duplicated region for block: B:64:0x00f7  */
-    Boolean killObject(com.lumiyaviewer.lumiya.slproto.SLAgentCircuit agentCircuit, Int localID) {
-        Boolean wasMyAvatarUpdated = false
-        Boolean returnValue = false
+     fun killObject(com.lumiyaviewer.lumiya.slproto.SLAgentCircuit agentCircuit, localID: Int): Boolean {
+        val wasMyAvatarUpdated: Boolean = false
+        val returnValue: Boolean = false
         
         synchronized (this) {
             // Remove the object from UUID mapping
-            UUID objectUUID = this.uuidsNearby.remove(localID)
+            val objectUUID: UUID = this.uuidsNearby.remove(localID)
             if (objectUUID == null) {
                 return false
             }
             
             // Remove from name queue and main object map
             this.objectNamesQueue.remove(objectUUID)
-            SLObjectInfo objectInfo = this.allObjectsNearby.remove(objectUUID)
+            val objectInfo: SLObjectInfo = this.allObjectsNearby.remove(objectUUID)
             if (objectInfo == null) {
                 return false
             }
@@ -365,8 +365,8 @@ class SLParcelInfo {
                 this.rootObjects.remove(localID)
             } else {
                 // Remove from parent object
-                UUID parentUUID = this.uuidsNearby.get(objectInfo.parentID)
-                SLObjectInfo parentObject = null
+                val parentUUID: UUID = this.uuidsNearby.get(objectInfo.parentID)
+                val parentObject: SLObjectInfo = null
                 if (parentUUID != null) {
                     parentObject = this.allObjectsNearby.get(parentUUID)
                 }
@@ -376,14 +376,14 @@ class SLParcelInfo {
                     
                     // Check if parent is my avatar for attachment updates
                     if (parentObject instanceof SLObjectAvatarInfo) {
-                        SLObjectAvatarInfo avatarInfo = (SLObjectAvatarInfo) parentObject
+                        val avatarInfo: SLObjectAvatarInfo = (SLObjectAvatarInfo) parentObject
                         if (avatarInfo.isMyAvatar()) {
                             agentCircuit.processMyAttachmentUpdate(avatarInfo)
                         }
                     }
                 } else {
                     // Remove from orphan objects if parent wasn't found
-                    LinkedList<SLObjectInfo> orphanList = this.orphanObjects.get(objectInfo.parentID)
+                    val orphanList: LinkedList<SLObjectInfo> = this.orphanObjects.get(objectInfo.parentID)
                     if (orphanList != null) {
                         orphanList.remove(objectInfo)
                         if (orphanList.isEmpty()) {
@@ -394,11 +394,11 @@ class SLParcelInfo {
             }
             
             // Handle children - collect avatars separately for special processing
-            LinkedList<SLObjectInfo> avatarChildren = null
+            val avatarChildren: LinkedList<SLObjectInfo> = null
             try {
-                Iterator<SLObjectInfo> childIterator = objectInfo.treeNode.iterator()
+                val childIterator: Iterator<SLObjectInfo> = objectInfo.treeNode.iterator()
                 while (childIterator.hasNext()) {
-                    SLObjectInfo child = childIterator.next()
+                    val child: SLObjectInfo = childIterator.next()
                     
                     if (child.isAvatar()) {
                         // Collect avatar children for special handling
@@ -420,7 +420,7 @@ class SLParcelInfo {
                         
                         // Check if this is my avatar
                         if (avatarChild instanceof SLObjectAvatarInfo) {
-                            SLObjectAvatarInfo avatarInfo = (SLObjectAvatarInfo) avatarChild
+                            val avatarInfo: SLObjectAvatarInfo = (SLObjectAvatarInfo) avatarChild
                             if (avatarInfo.isMyAvatar()) {
                                 wasMyAvatarUpdated = true
                             }
@@ -464,7 +464,7 @@ class SLParcelInfo {
         }
         this.uuidsNearby.clear()
         for (SLObjectInfo sLObjectInfo : this.allObjectsNearby.values()) {
-            DrawListObjectEntry existingDrawListEntry = sLObjectInfo.getExistingDrawListEntry()
+            val existingDrawListEntry: DrawListObjectEntry = sLObjectInfo.getExistingDrawListEntry()
             if (existingDrawListEntry != null) {
                 existingDrawListEntry.requestEntryRemoval()
             }
@@ -479,13 +479,13 @@ class SLParcelInfo {
         this.simSunHourDirty = false
     }
 
-    fun setAgentAvatar(SLObjectAvatarInfo sLObjectAvatarInfo) {
+    fun setAgentAvatar(sLObjectAvatarInfo: SLObjectAvatarInfo) {
         synchronized (this.agentAvatarLock) {
             this.agentAvatar = sLObjectAvatarInfo
         }
     }
 
-    fun setDrawDistance(Float f) {
+    fun setDrawDistance(f: Float) {
         synchronized (this) {
             if (this.drawDistance != f) {
                 this.drawDistance = f
@@ -493,7 +493,7 @@ class SLParcelInfo {
         }
     }
 
-    Unit setSunHour(Float f) {
+     fun setSunHour(f: Float) {
         Debug.Printf("Windlight: Simulator sun hour set to %f", Float.valueOf(f))
         synchronized (this.simSunHourLock) {
             this.simSunHour = f
@@ -502,7 +502,7 @@ class SLParcelInfo {
     }
 
     synchronized Boolean updateObjectParent(Int i, SLObjectInfo sLObjectInfo) {
-        SLObjectInfo sLObjectInfo2 = null
+        val sLObjectInfo2: SLObjectInfo = null
         synchronized (this) {
             if (i == sLObjectInfo.parentID) {
                 return false
@@ -511,7 +511,7 @@ class SLParcelInfo {
             LinkedList linkedList
             if (i != 0) {
                 uuid = (UUID) this.uuidsNearby.get(Integer.valueOf(i))
-                SLObjectInfo sLObjectInfo3 = uuid != null ? (SLObjectInfo) this.allObjectsNearby.get(uuid) : null
+                val sLObjectInfo3: SLObjectInfo = uuid != null ? (SLObjectInfo) this.allObjectsNearby.get(uuid) : null
                 if (sLObjectInfo3 != null) {
                     sLObjectInfo3.removeChild(sLObjectInfo)
                     sLObjectInfo3.updateSpatialIndex(false)

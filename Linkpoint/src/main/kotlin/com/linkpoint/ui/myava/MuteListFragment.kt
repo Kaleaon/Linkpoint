@@ -95,9 +95,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
 
     private Unbinder unbinder
 
-    private Unit askForUnblock(MuteListEntry muteListEntry) {
+     private fun askForUnblock(muteListEntry: MuteListEntry) {
         AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
-        builder.setMessage(String.format(getString(R.string.unblock_confirm_message), Object[]{muteListEntry.name})).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this, muteListEntry) {
+        builder.setMessage(String.format(getString(R.string.unblock_confirm_message), Array<Any>{muteListEntry.name})).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this, muteListEntry) {
 
             /* renamed from: -$f0 */
             private val /* synthetic */ Object f459$f0
@@ -179,7 +179,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
     }
 
     /* access modifiers changed from: private */
-    fun doUnblock(MuteListEntry muteListEntry) {
+    fun doUnblock(muteListEntry: MuteListEntry) {
         try {
             this.agentCircuit.get().getModules().muteList.Unblock(muteListEntry)
         } catch (SubscriptionData.DataNotReadyException e) {
@@ -188,15 +188,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
     }
 
     @JvmStatic
-    Bundle makeSelection(UUID uuid) {
-        Bundle bundle = Bundle()
+     fun makeSelection(uuid: UUID): Bundle {
+        val bundle: Bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         return bundle
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onMuteList */
-    fun m649com_lumiyaviewer_lumiya_ui_myava_MuteListFragmentmthref0(ImmutableList<MuteListEntry> immutableList) {
+    fun m649com_lumiyaviewer_lumiya_ui_myava_MuteListFragmentmthref0(immutableList: ImmutableList<MuteListEntry>) {
         if (this.adapter != null) {
             this.adapter.setData(immutableList)
         }
@@ -217,14 +217,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
 
     @OnClick({2131755492})
     fun onAddMuteListButtonClick() {
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
-        FragmentActivity activity = getActivity()
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
+        val activity: FragmentActivity = getActivity()
         if (activity != null && userManager != null) {
             DetailsActivity.showEmbeddedDetails(activity, AvatarPickerForMute.class, AvatarPickerForMute.makeArguments(userManager.getUserID()))
         }
     }
 
-    public Boolean onContextItemSelected(MenuItem menuItem) {
+     public fun onContextItemSelected(menuItem: MenuItem): Boolean {
         MuteListEntry item
         AdapterView.AdapterContextMenuInfo adapterContextMenuInfo = (AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo()
         if (adapterContextMenuInfo == null || this.adapter == null || (item = this.adapter.getItem(adapterContextMenuInfo.position)) == null) {
@@ -239,24 +239,24 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
         }
     }
 
-    fun onCreate(Bundle bundle) {
+    fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
-        View inflate = layoutInflater.inflate(R.layout.mute_list, viewGroup, false)
+        val inflate: View = layoutInflater.inflate(R.layout.mute_list, viewGroup, false)
         this.unbinder = ButterKnife.bind((Object) this, inflate)
         this.adapter = MuteListAdapter(layoutInflater.getContext())
         this.muteList.setAdapter(this.adapter)
-        SwipeDismissListViewTouchListener swipeDismissListViewTouchListener = SwipeDismissListViewTouchListener(this.muteList, SwipeDismissListViewTouchListener.DismissCallbacks() {
-            public Boolean canDismiss(ListView listView, Int i) {
+        val swipeDismissListViewTouchListener: SwipeDismissListViewTouchListener = SwipeDismissListViewTouchListener(this.muteList, SwipeDismissListViewTouchListener.DismissCallbacks() {
+             public fun canDismiss(listView: ListView, i: Int): Boolean {
                 return true
             }
 
-            fun onDismiss(ListView listView, Int i) {
+            fun onDismiss(listView: ListView, i: Int) {
                 MuteListEntry item
-                ListAdapter adapter = listView.getAdapter()
+                val adapter: ListAdapter = listView.getAdapter()
                 if ((adapter instanceof MuteListAdapter) && (item = ((MuteListAdapter) adapter).getItem(i)) != null) {
                     MuteListFragment.this.doUnblock(item)
                 }
@@ -346,7 +346,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
     fun onStart() {
         super.onStart()
         setTitle(getString(R.string.mute_list_fragment_title), (String) null)
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
             this.muteListData.subscribe(userManager.muteListPool(), SubscriptionSingleKey.Value)
             this.agentCircuit.subscribe(UserManager.agentCircuits(), userManager.getUserID())

@@ -34,20 +34,20 @@ class SLHTTPSConnection {
     private const val CONNECT_TIMEOUT: Long = 60
     private const val READ_TIMEOUT: Long = 60
     private const val OkHttpClient okHttpClient = OkHttpClient.Builder().proxy(Proxy.NO_PROXY).dns(SLDNS()).connectionPool(ConnectionPool(8, 5, TimeUnit.MINUTES)).connectTimeout(60, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).hostnameVerifier(HostnameVerifier() {
-        public Boolean verify(String str, SSLSession sSLSession) {
+         public fun verify(str: String, sSLSession: SSLSession): Boolean {
             return true
         }
     }).addNetworkInterceptor(CharsetStripInterceptor()).sslSocketFactory(getSocketFactory(), trustEverythingManager).build()
     @JvmStatic
-private TrustManager[] trustAllCerts = {trustEverythingManager}
+private Array<TrustManager> trustAllCerts = {trustEverythingManager}
     private const val X509TrustManager trustEverythingManager = X509TrustManager() {
-        fun checkClientTrusted(X509Certificate[] x509CertificateArr, String str) throws CertificateException {
+        fun checkClientTrusted(x509CertificateArr: Array<X509Certificate>, str: String) throws CertificateException {
         }
 
-        fun checkServerTrusted(X509Certificate[] x509CertificateArr, String str) throws CertificateException {
+        fun checkServerTrusted(x509CertificateArr: Array<X509Certificate>, str: String) throws CertificateException {
         }
 
-        public X509Certificate[] getAcceptedIssuers() {
+        public Array<X509Certificate> getAcceptedIssuers() {
             return X509Certificate[0]
         }
     }
@@ -56,13 +56,13 @@ private TrustManager[] trustAllCerts = {trustEverythingManager}
         CharsetStripInterceptor() {
         }
 
-        public Response intercept(Interceptor.Chain chain) throws IOException {
-            Request request = chain.request()
-            String header = request.header(HttpHeaders.CONTENT_TYPE)
+         public fun intercept(Interceptor.Chain chain) throws IOException {
+            val request: Request = chain.request()
+            val header: String = request.header(HttpHeaders.CONTENT_TYPE)
             if (header == null || (!header.contains(";"))) {
                 return chain.proceed(request)
             }
-            Int indexOf = header.indexOf(";")
+            val indexOf: Int = header.indexOf(";")
             if (indexOf != -1) {
                 header = header.substring(0, indexOf)
             }
@@ -78,7 +78,7 @@ private TrustManager[] trustAllCerts = {trustEverythingManager}
 
         public List<InetAddress> lookup(String str) throws UnknownHostException {
             try {
-                List<InetAddress> lookup = this.systemDns.lookup(str)
+                val lookup: List<InetAddress> = this.systemDns.lookup(str)
                 if (lookup == null) {
                     throw UnknownHostException(str)
                 } else if (!lookup.isEmpty()) {
@@ -89,7 +89,7 @@ private TrustManager[] trustAllCerts = {trustEverythingManager}
             } catch (UnknownHostException e) {
                 if (str.equalsIgnoreCase("dns.google.com")) {
                     Debug.Printf("DNS: Falling back to static IP addresses for %s", str)
-                    ArrayList arrayList = ArrayList()
+                    val arrayList: ArrayList = ArrayList()
                     arrayList.add(InetAddress.getByName("64.233.164.101"))
                     arrayList.add(InetAddress.getByName("64.233.164.113"))
                     arrayList.add(InetAddress.getByName("64.233.164.139"))
@@ -113,25 +113,25 @@ private TrustManager[] trustAllCerts = {trustEverythingManager}
         private List<InetAddress> tryResolveOverHTTP(String str) throws UnknownHostException {
             Debug.Printf("DNS: Trying to resolve over HTTPS: hostname = %s", str)
             try {
-                Response execute = this.httpResolverClient.newCall(Request.Builder().url(HttpUrl.Builder().scheme("https").host("dns.google.com").addPathSegment("resolve").addQueryParameter("name", str).addQueryParameter("type", "A").build()).get().build()).execute()
+                val execute: Response = this.httpResolverClient.newCall(Request.Builder().url(HttpUrl.Builder().scheme("https").host("dns.google.com").addPathSegment("resolve").addQueryParameter("name", str).addQueryParameter("type", "A").build()).get().build()).execute()
                 if (execute == null) {
                     throw UnknownHostException(str)
                 } else if (!execute.isSuccessful()) {
                     Debug.Printf("DNS: Failed to resolve over HTTPS: error code %d, error message %s", Integer.valueOf(execute.code()), execute.message())
                     throw UnknownHostException(str)
                 } else {
-                    JsonObject asJsonObject = JsonParser().parse(execute.body().string()).getAsJsonObject()
-                    ArrayList arrayList = ArrayList()
+                    val asJsonObject: JsonObject = JsonParser().parse(execute.body().string()).getAsJsonObject()
+                    val arrayList: ArrayList = ArrayList()
                     for (JsonElement jsonElement : asJsonObject.getAsJsonArray("Answer")) {
                         if (jsonElement.isJsonObject()) {
-                            JsonObject asJsonObject2 = jsonElement.getAsJsonObject()
+                            val asJsonObject2: JsonObject = jsonElement.getAsJsonObject()
                             if (asJsonObject2.has("name") && asJsonObject2.has("type") && asJsonObject2.has("data")) {
-                                String asString = asJsonObject2.get("name").getAsString()
-                                Int asInt = asJsonObject2.get("type").getAsInt()
-                                String asString2 = asJsonObject2.get("data").getAsString()
+                                val asString: String = asJsonObject2.get("name").getAsString()
+                                val asInt: Int = asJsonObject2.get("type").getAsInt()
+                                val asString2: String = asJsonObject2.get("data").getAsString()
                                 if (asString.equalsIgnoreCase(str + ".") && asInt == 1 && asString2 != null && (!asString2.isEmpty())) {
                                     Debug.Printf("DNS: Resolving '%s': found good result '%s'", str, asString2)
-                                    InetAddress byName = InetAddress.getByName(asString2)
+                                    val byName: InetAddress = InetAddress.getByName(asString2)
                                     if (byName != null) {
                                         arrayList.add(byName)
                                     }
@@ -153,7 +153,7 @@ private TrustManager[] trustAllCerts = {trustEverythingManager}
 
         public List<InetAddress> lookup(String str) throws UnknownHostException {
             try {
-                List<InetAddress> lookup = this.systemDns.lookup(str)
+                val lookup: List<InetAddress> = this.systemDns.lookup(str)
                 if (lookup == null) {
                     throw UnknownHostException(str)
                 } else if (!lookup.isEmpty()) {
@@ -162,7 +162,7 @@ private TrustManager[] trustAllCerts = {trustEverythingManager}
                     throw UnknownHostException(str)
                 }
             } catch (UnknownHostException e) {
-                List<InetAddress> tryResolveOverHTTP = tryResolveOverHTTP(str)
+                val tryResolveOverHTTP: List<InetAddress> = tryResolveOverHTTP(str)
                 if (tryResolveOverHTTP == null) {
                     throw UnknownHostException(str)
                 } else if (!tryResolveOverHTTP.isEmpty()) {
@@ -173,7 +173,7 @@ private TrustManager[] trustAllCerts = {trustEverythingManager}
             } catch (UnknownHostException e2) {
                 if (str.equalsIgnoreCase("login.agni.lindenlab.com")) {
                     Debug.Printf("DNS: Falling back to static address for %s", str)
-                    ArrayList arrayList = ArrayList()
+                    val arrayList: ArrayList = ArrayList()
                     arrayList.add(InetAddress.getByName("216.82.57.58"))
                     return arrayList
                 }
@@ -183,15 +183,15 @@ private TrustManager[] trustAllCerts = {trustEverythingManager}
     }
 
     @JvmStatic
-    OkHttpClient getOkHttpClient() {
+     fun getOkHttpClient(): OkHttpClient {
         return okHttpClient
     }
 
     @JvmStatic
-private SSLSocketFactory getSocketFactory() {
+ private fun getSocketFactory(): SSLSocketFactory {
         try {
-            SSLContext instance = SSLContext.getInstance("TLS")
-            instance.init((KeyManager[]) null, trustAllCerts, SecureRandom())
+            val instance: SSLContext = SSLContext.getInstance("TLS")
+            instance.init((Array<KeyManager>) null, trustAllCerts, SecureRandom())
             return instance.getSocketFactory()
         } catch (Exception e) {
             return null

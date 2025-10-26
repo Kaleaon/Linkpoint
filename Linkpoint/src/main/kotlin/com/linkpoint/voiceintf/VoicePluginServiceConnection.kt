@@ -85,16 +85,16 @@ class VoicePluginServiceConnection : ServiceConnection {
     private val Handler fromPluginHandler = Handler() {
 
         /* renamed from: -com-lumiyaviewer-lumiya-voice-common-VoicePluginMessageTypeSwitchesValues  reason: not valid java name */
-        private const val /* synthetic */ Int[] f611comlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues = null
-        final /* synthetic */ Int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$voice$common$VoicePluginMessageType
+        private const val /* synthetic */ IntArray f611comlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues = null
+        final /* synthetic */ IntArray $SWITCH_TABLE$com$lumiyaviewer$lumiya$voice$common$VoicePluginMessageType
 
         /* renamed from: -getcom-lumiyaviewer-lumiya-voice-common-VoicePluginMessageTypeSwitchesValues  reason: not valid java name */
         @JvmStatic
-private /* synthetic */ Int[] m906getcomlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues() {
+private /* synthetic */ IntArray m906getcomlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues() {
             if (f611comlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues != null) {
                 return f611comlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues
             }
-            Int[] iArr = Int[VoicePluginMessageType.values().length]
+            val iArr: IntArray = Int[VoicePluginMessageType.values().length]
             try {
                 iArr[VoicePluginMessageType.VoiceAcceptCall.ordinal()] = 6
             } catch (NoSuchFieldError e) {
@@ -163,9 +163,9 @@ private /* synthetic */ Int[] m906getcomlumiyaviewerlumiyavoicecommonVoicePlugin
             return iArr
         }
 
-        fun handleMessage(Message message) {
+        fun handleMessage(message: Message) {
             if (message.what == 200 && (message.obj instanceof Bundle)) {
-                Bundle bundle = (Bundle) message.obj
+                val bundle: Bundle = (Bundle) message.obj
                 if (bundle.containsKey("message") && bundle.containsKey("messageType")) {
                     try {
                         switch (m906getcomlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues()[VoicePluginMessageType.valueOf(bundle.getString("messageType")).ordinal()]) {
@@ -210,8 +210,8 @@ private /* synthetic */ Int[] m906getcomlumiyaviewerlumiyavoicecommonVoicePlugin
         this.fromPluginMessenger = Messenger(this.fromPluginHandler)
     }
 
-    private Unit cancelNotifications(String str) {
-        NotificationManager notificationManager = (NotificationManager) this.context.getSystemService("notification")
+     private fun cancelNotifications(str: String) {
+        val notificationManager: NotificationManager = (NotificationManager) this.context.getSystemService("notification")
         if (str != null) {
             notificationManager.cancel(str, 1001)
             this.incomingCallNotificationTags.remove(str)
@@ -224,20 +224,20 @@ private /* synthetic */ Int[] m906getcomlumiyaviewerlumiyavoicecommonVoicePlugin
     }
 
     @JvmStatic
-    Boolean checkPluginInstalled(Context context2) {
-        Intent intent = Intent()
+     fun checkPluginInstalled(context2: Context): Boolean {
+        val intent: Intent = Intent()
         intent.setComponent(ComponentName("com.linkpoint.voice", "com.linkpoint.voice.VoiceService"))
-        List<ResolveInfo> queryIntentServices = context2.getPackageManager().queryIntentServices(intent, 0)
+        val queryIntentServices: List<ResolveInfo> = context2.getPackageManager().queryIntentServices(intent, 0)
         return queryIntentServices != null && queryIntentServices.size() > 0
     }
 
     @JvmStatic
-    Boolean isPluginSupported() {
-        String[] strArr
+     fun isPluginSupported(): Boolean {
+        Array<String> strArr
         if (Build.VERSION.SDK_INT >= 21) {
             strArr = Build.SUPPORTED_ABIS
         } else {
-            strArr = String[]{Build.CPU_ABI, Build.CPU_ABI2}
+            strArr = Array<String>{Build.CPU_ABI, Build.CPU_ABI2}
         }
         if (strArr == null) {
             return false
@@ -251,29 +251,29 @@ private /* synthetic */ Int[] m906getcomlumiyaviewerlumiyavoicecommonVoicePlugin
     }
 
     /* access modifiers changed from: private */
-    fun onVoiceAudioProperties(VoiceAudioProperties voiceAudioProperties) {
-        VoiceBluetoothState voiceBluetoothState = null
-        Object[] objArr = Object[1]
+    fun onVoiceAudioProperties(voiceAudioProperties: VoiceAudioProperties) {
+        val voiceBluetoothState: VoiceBluetoothState = null
+        val objArr: Array<Any> = Object[1]
         if (voiceAudioProperties != null) {
             voiceBluetoothState = voiceAudioProperties.bluetoothState
         }
         objArr[0] = voiceBluetoothState
         Debug.Printf("Voice: voice audio properties received, bluetooth state %s", objArr)
-        UserManager userManager2 = this.userManager.get()
+        val userManager2: UserManager = this.userManager.get()
         if (userManager2 != null) {
             userManager2.setVoiceAudioProperties(voiceAudioProperties)
         }
     }
 
     /* access modifiers changed from: private */
-    fun onVoiceChannelStatus(VoiceChannelStatus voiceChannelStatus) {
+    fun onVoiceChannelStatus(voiceChannelStatus: VoiceChannelStatus) {
         SLModules modules
         if (voiceChannelStatus.chatInfo.state == VoiceChatInfo.VoiceChatState.None) {
             cancelNotifications(voiceChannelStatus.channelInfo.voiceChannelURI)
         }
-        UserManager userManager2 = this.userManager.get()
+        val userManager2: UserManager = this.userManager.get()
         if (userManager2 != null) {
-            ChatterID chatterID = (ChatterID) this.voiceChannels.inverse().get(voiceChannelStatus.channelInfo)
+            val chatterID: ChatterID = (ChatterID) this.voiceChannels.inverse().get(voiceChannelStatus.channelInfo)
             if (chatterID != null) {
                 userManager2.setVoiceChatInfo(chatterID, voiceChannelStatus.chatInfo)
                 if (voiceChannelStatus.chatInfo.state == VoiceChatInfo.VoiceChatState.None && voiceChannelStatus.chatInfo.previousState == VoiceChatInfo.VoiceChatState.Ringing && (chatterID instanceof ChatterID.ChatterIDUser)) {
@@ -283,7 +283,7 @@ private /* synthetic */ Int[] m906getcomlumiyaviewerlumiyavoicecommonVoicePlugin
                     userManager2.setVoiceActiveChatter(chatterID)
                 }
             }
-            SLAgentCircuit activeAgentCircuit = userManager2.getActiveAgentCircuit()
+            val activeAgentCircuit: SLAgentCircuit = userManager2.getActiveAgentCircuit()
             if (activeAgentCircuit != null && (modules = activeAgentCircuit.getModules()) != null) {
                 modules.voice.onVoiceChannelStatus(voiceChannelStatus)
             }
@@ -291,37 +291,37 @@ private /* synthetic */ Int[] m906getcomlumiyaviewerlumiyavoicecommonVoicePlugin
     }
 
     /* access modifiers changed from: private */
-    fun onVoiceInitializeReply(VoiceInitializeReply voiceInitializeReply) {
+    fun onVoiceInitializeReply(voiceInitializeReply: VoiceInitializeReply) {
         if (!voiceInitializeReply.appVersionOk) {
-            UserManager userManager2 = this.userManager.get()
+            val userManager2: UserManager = this.userManager.get()
             if (userManager2 != null) {
                 userManager2.getChatterList().getActiveChattersManager().HandleChatEvent(ChatterID.getLocalChatterID(userManager2.getUserID()), SLVoiceUpgradeEvent(userManager2.getUserID(), LinkpointApp.getContext().getString(R.string.app_upgrade_for_voice_needed), false, LicenseChecker.APP_STORE_URL), false)
             }
         } else if (voiceInitializeReply.pluginVersionCode < 3) {
-            UserManager userManager3 = this.userManager.get()
+            val userManager3: UserManager = this.userManager.get()
             if (userManager3 != null) {
                 userManager3.getChatterList().getActiveChattersManager().HandleChatEvent(ChatterID.getLocalChatterID(userManager3.getUserID()), SLVoiceUpgradeEvent(userManager3.getUserID(), LinkpointApp.getContext().getString(R.string.plugin_upgrade_for_voice_needed), false, LicenseChecker.VOICE_PLUGIN_URL), false)
             }
         } else if (voiceInitializeReply.errorMessage == null) {
             this.voiceInitialized.set(true)
-            VoiceLoginInfo voiceLoginInfo2 = this.voiceLoginInfo.get()
+            val voiceLoginInfo2: VoiceLoginInfo = this.voiceLoginInfo.get()
             if (voiceLoginInfo2 != null) {
                 sendMessage(VoicePluginMessageType.VoiceLogin, VoiceLogin(voiceLoginInfo2))
             }
         } else {
-            UserManager userManager4 = this.userManager.get()
+            val userManager4: UserManager = this.userManager.get()
             if (userManager4 != null) {
-                userManager4.getChatterList().getActiveChattersManager().HandleChatEvent(ChatterID.getLocalChatterID(userManager4.getUserID()), SLChatSystemMessageEvent(ChatMessageSourceUnknown.getInstance(), userManager4.getUserID(), LinkpointApp.getContext().getString(R.string.voice_plugin_error_format, Object[]{voiceInitializeReply.errorMessage})), false)
+                userManager4.getChatterList().getActiveChattersManager().HandleChatEvent(ChatterID.getLocalChatterID(userManager4.getUserID()), SLChatSystemMessageEvent(ChatMessageSourceUnknown.getInstance(), userManager4.getUserID(), LinkpointApp.getContext().getString(R.string.voice_plugin_error_format, Array<Any>{voiceInitializeReply.errorMessage})), false)
             }
         }
     }
 
     /* access modifiers changed from: private */
-    fun onVoiceLoginStatus(VoiceLoginStatus voiceLoginStatus) {
+    fun onVoiceLoginStatus(voiceLoginStatus: VoiceLoginStatus) {
         SLModules modules
-        UserManager userManager2 = this.userManager.get()
+        val userManager2: UserManager = this.userManager.get()
         if (userManager2 != null) {
-            SLAgentCircuit activeAgentCircuit = userManager2.getActiveAgentCircuit()
+            val activeAgentCircuit: SLAgentCircuit = userManager2.getActiveAgentCircuit()
             if (!(activeAgentCircuit == null || (modules = activeAgentCircuit.getModules()) == null)) {
                 modules.voice.onVoiceLoginStatus(this, voiceLoginStatus)
             }
@@ -330,8 +330,8 @@ private /* synthetic */ Int[] m906getcomlumiyaviewerlumiyavoicecommonVoicePlugin
     }
 
     /* access modifiers changed from: private */
-    fun onVoiceRinging(VoiceRinging voiceRinging) {
-        UserManager userManager2 = this.userManager.get()
+    fun onVoiceRinging(voiceRinging: VoiceRinging) {
+        val userManager2: UserManager = this.userManager.get()
         if (userManager2 != null && voiceRinging != null && voiceRinging.agentUUID != null) {
             ChatterID.ChatterIDUser userChatterID = ChatterID.getUserChatterID(userManager2.getUserID(), voiceRinging.agentUUID)
             this.voiceChannels.forcePut(userChatterID, voiceRinging.voiceChannelInfo)
@@ -423,50 +423,50 @@ Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KE
     }
 
     @JvmStatic
-    Unit setInstallOfferDisplayed(Boolean z) {
+     fun setInstallOfferDisplayed(z: Boolean) {
         installOfferDisplayed.set(z)
     }
 
     @JvmStatic
-    Boolean shouldDisplayInstallOffer() {
+     fun shouldDisplayInstallOffer(): Boolean {
         return !installOfferDisplayed.getAndSet(true)
     }
 
-    private Unit showIncomingCallNotification(VoiceRinging voiceRinging, String str, ChatterID chatterID) {
+     private fun showIncomingCallNotification(voiceRinging: VoiceRinging, str: String, chatterID: ChatterID) {
         Intent intent
-        Intent intent2 = Intent(this.context, GridConnectionService.class)
+        val intent2: Intent = Intent(this.context, GridConnectionService.class)
         intent2.setAction(ACTION_VOICE_REJECT)
         intent2.setData(voiceRinging.toUri())
         intent2.putExtra(INTENT_EXTRA_RINGING_MESSSAGE, voiceRinging.toBundle())
-        Intent createIntent = ChatFragmentActivityFactory.getInstance().createIntent(this.context, ChatFragment.makeSelection(chatterID))
+        val createIntent: Intent = ChatFragmentActivityFactory.getInstance().createIntent(this.context, ChatFragment.makeSelection(chatterID))
         createIntent.addFlags(536870912)
         ActivityUtils.setActiveAgentID(createIntent, chatterID.agentUUID)
-        UserManager userManager2 = this.userManager.get()
+        val userManager2: UserManager = this.userManager.get()
         if (userManager2 == null || (intent = userManager2.getUnreadNotificationManager().captureNotify(UnreadNotificationInfo.create(userManager2.getUserID(), 0, (List<UnreadNotificationInfo.UnreadMessageSource>) null, (NotificationType) null, 1, NotificationType.Private, UnreadNotificationInfo.UnreadMessageSource.create(chatterID, (String) null, (List<SLChatEvent>) null, 0), UnreadNotificationInfo.ObjectPopupNotification.create(0, 0, (UnreadNotificationInfo.ObjectPopupMessage) null)), createIntent)) == null) {
             intent = createIntent
         }
-        Intent intent3 = Intent(this.context, GridConnectionService.class)
+        val intent3: Intent = Intent(this.context, GridConnectionService.class)
         intent3.setAction(ACTION_VOICE_ACCEPT)
         intent3.setData(voiceRinging.toUri())
         intent3.putExtra(INTENT_EXTRA_RINGING_MESSSAGE, voiceRinging.toBundle())
         intent3.putExtra("chatterID", chatterID.toBundle())
         intent3.putExtra(INTENT_EXTRA_OPEN_CHATTER, PendingIntent.getActivity(this.context, 0, intent, 0))
-        Notification build = NotificationCompat.Builder(this.context).setSmallIcon(R.drawable.ic_incoming_voice_call).setContentTitle(str).setContentText(this.context.getString(R.string.incoming_voice_call_text)).setDefaults(-1).setPriority(1).setDeleteIntent(PendingIntent.getService(this.context, 0, intent2, 0)).setContentIntent(PendingIntent.getActivity(this.context, 0, intent, 0)).setAutoCancel(true).addAction(R.drawable.ic_voice_call_accept, this.context.getString(R.string.voice_call_accept), PendingIntent.getService(this.context, 0, intent3, 0)).addAction(R.drawable.ic_voice_call_reject, this.context.getString(R.string.voice_call_reject), PendingIntent.getService(this.context, 0, intent2, 0)).build()
-        String str2 = voiceRinging.voiceChannelInfo.voiceChannelURI
+        val build: Notification = NotificationCompat.Builder(this.context).setSmallIcon(R.drawable.ic_incoming_voice_call).setContentTitle(str).setContentText(this.context.getString(R.string.incoming_voice_call_text)).setDefaults(-1).setPriority(1).setDeleteIntent(PendingIntent.getService(this.context, 0, intent2, 0)).setContentIntent(PendingIntent.getActivity(this.context, 0, intent, 0)).setAutoCancel(true).addAction(R.drawable.ic_voice_call_accept, this.context.getString(R.string.voice_call_accept), PendingIntent.getService(this.context, 0, intent3, 0)).addAction(R.drawable.ic_voice_call_reject, this.context.getString(R.string.voice_call_reject), PendingIntent.getService(this.context, 0, intent2, 0)).build()
+        val str2: String = voiceRinging.voiceChannelInfo.voiceChannelURI
         this.incomingCallNotificationTags.add(str2)
         ((NotificationManager) this.context.getSystemService("notification")).notify(str2, 1001, build)
     }
 
-    fun acceptCall(Intent intent) {
+    fun acceptCall(intent: Intent) {
         if (intent.hasExtra(INTENT_EXTRA_RINGING_MESSSAGE)) {
-            VoiceRinging voiceRinging = VoiceRinging(intent.getBundleExtra(INTENT_EXTRA_RINGING_MESSSAGE))
+            val voiceRinging: VoiceRinging = VoiceRinging(intent.getBundleExtra(INTENT_EXTRA_RINGING_MESSSAGE))
             Debug.Printf("Voice: accepting session '%s', url '%s'", voiceRinging.sessionHandle, voiceRinging.voiceChannelInfo.voiceChannelURI)
             sendMessage(VoicePluginMessageType.VoiceAcceptCall, VoiceAcceptCall(voiceRinging.sessionHandle, voiceRinging.voiceChannelInfo))
         }
         Debug.Printf("Voice: cancelling notifications", Object[0])
         cancelNotifications((String) null)
         if (intent.hasExtra(INTENT_EXTRA_OPEN_CHATTER)) {
-            Parcelable parcelableExtra = intent.getParcelableExtra(INTENT_EXTRA_OPEN_CHATTER)
+            val parcelableExtra: Parcelable = intent.getParcelableExtra(INTENT_EXTRA_OPEN_CHATTER)
             if (parcelableExtra instanceof PendingIntent) {
                 try {
                     Debug.Printf("Voice: starting pending open chatter intent", Object[0])
@@ -478,8 +478,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KE
         }
     }
 
-    fun acceptVoiceCall(ChatterID chatterID) {
-        VoiceChannelInfo voiceChannelInfo = (VoiceChannelInfo) this.voiceChannels.get(chatterID)
+    fun acceptVoiceCall(chatterID: ChatterID) {
+        val voiceChannelInfo: VoiceChannelInfo = (VoiceChannelInfo) this.voiceChannels.get(chatterID)
         if (voiceChannelInfo != null) {
             Debug.Printf("Voice: cancelling notification", Object[0])
             cancelNotifications((String) null)
@@ -488,14 +488,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KE
         }
     }
 
-    fun acceptVoiceCall(VoiceRinging voiceRinging) {
+    fun acceptVoiceCall(voiceRinging: VoiceRinging) {
         Debug.Printf("Voice: cancelling notification", Object[0])
         cancelNotifications((String) null)
         Debug.Printf("Voice: accepting voice call (session handle %s)", voiceRinging.sessionHandle)
         sendMessage(VoicePluginMessageType.VoiceAcceptCall, VoiceAcceptCall(voiceRinging.sessionHandle, voiceRinging.voiceChannelInfo))
     }
 
-    fun addChannel(ChatterID chatterID, VoiceChannelInfo voiceChannelInfo) {
+    fun addChannel(chatterID: ChatterID, voiceChannelInfo: VoiceChannelInfo) {
         this.voiceChannels.forcePut(chatterID, voiceChannelInfo)
     }
 
@@ -503,7 +503,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KE
         this.mainThreadHandler.post($Lambda$KEiwggiQxhrsJugAMeHgzXJrgrA(this))
     }
 
-    fun enableVoiceMic(Boolean z) {
+    fun enableVoiceMic(z: Boolean) {
         sendMessage(VoicePluginMessageType.VoiceEnableMic, VoiceEnableMic(z))
     }
 
@@ -511,7 +511,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KE
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_voiceintf_VoicePluginServiceConnection_13701  reason: not valid java name */
     public /* synthetic */ Unit m904lambda$com_lumiyaviewer_lumiya_voiceintf_VoicePluginServiceConnection_13701(VoiceRinging voiceRinging, ChatterNameRetriever chatterNameRetriever) {
         if (chatterNameRetriever == this.ringingChatterNameRetriever) {
-            String resolvedName = chatterNameRetriever.getResolvedName()
+            val resolvedName: String = chatterNameRetriever.getResolvedName()
             if (!Strings.isNullOrEmpty(resolvedName)) {
                 showIncomingCallNotification(voiceRinging, resolvedName, chatterNameRetriever.chatterID)
             }
@@ -522,7 +522,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KE
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_voiceintf_VoicePluginServiceConnection_17898  reason: not valid java name */
     public /* synthetic */ Unit m905lambda$com_lumiyaviewer_lumiya_voiceintf_VoicePluginServiceConnection_17898() {
         Debug.Printf("LinkpointVoice: disconnecting from voice plugin", Object[0])
-        UserManager userManager2 = this.userManager.get()
+        val userManager2: UserManager = this.userManager.get()
         if (userManager2 != null) {
             userManager2.setVoiceLoggedIn(false)
         }
@@ -530,7 +530,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KE
         this.context.unbindService(this)
     }
 
-    fun onServiceConnected(ComponentName componentName, IBinder iBinder) {
+    fun onServiceConnected(componentName: ComponentName, iBinder: IBinder) {
         Debug.Printf("LinkpointVoice: service connected", Object[0])
         this.toPluginMessenger = Messenger(iBinder)
         try {
@@ -540,17 +540,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KE
         }
     }
 
-    fun onServiceDisconnected(ComponentName componentName) {
+    fun onServiceDisconnected(componentName: ComponentName) {
         Debug.Printf("LinkpointCloud: service disconnected", Object[0])
-        UserManager userManager2 = this.userManager.get()
+        val userManager2: UserManager = this.userManager.get()
         if (userManager2 != null) {
             userManager2.setVoiceLoggedIn(false)
         }
     }
 
-    fun rejectCall(Intent intent) {
+    fun rejectCall(intent: Intent) {
         if (intent.hasExtra(INTENT_EXTRA_RINGING_MESSSAGE)) {
-            VoiceRinging voiceRinging = VoiceRinging(intent.getBundleExtra(INTENT_EXTRA_RINGING_MESSSAGE))
+            val voiceRinging: VoiceRinging = VoiceRinging(intent.getBundleExtra(INTENT_EXTRA_RINGING_MESSSAGE))
             Debug.Printf("Voice: requesting to reject session '%s', url '%s'", voiceRinging.sessionHandle, voiceRinging.voiceChannelInfo.voiceChannelURI)
             sendMessage(VoicePluginMessageType.VoiceRejectCall, VoiceRejectCall(voiceRinging.sessionHandle, voiceRinging.voiceChannelInfo))
             cancelNotifications(voiceRinging.voiceChannelInfo.voiceChannelURI)
@@ -559,26 +559,26 @@ Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KE
         cancelNotifications((String) null)
     }
 
-    public Boolean sendMessage(VoicePluginMessageType voicePluginMessageType, VoicePluginMessage voicePluginMessage) {
+     public fun sendMessage(voicePluginMessageType: VoicePluginMessageType, voicePluginMessage: VoicePluginMessage): Boolean {
         if (this.toPluginMessenger != null) {
             return VoicePluginMessenger.sendMessage(this.toPluginMessenger, voicePluginMessageType, voicePluginMessage, this.fromPluginMessenger)
         }
         return false
     }
 
-    fun setVoiceAudioProperties(VoiceSetAudioProperties voiceSetAudioProperties) {
+    fun setVoiceAudioProperties(voiceSetAudioProperties: VoiceSetAudioProperties) {
         sendMessage(VoicePluginMessageType.VoiceSetAudioProperties, voiceSetAudioProperties)
     }
 
-    fun setVoiceLoginInfo(VoiceLoginInfo voiceLoginInfo2, UserManager userManager2) {
+    fun setVoiceLoginInfo(voiceLoginInfo2: VoiceLoginInfo, userManager2: UserManager) {
         this.userManager.set(userManager2)
         if (!Objects.equal(this.voiceLoginInfo.getAndSet(voiceLoginInfo2), voiceLoginInfo2) && this.voiceInitialized.get() && voiceLoginInfo2 != null) {
             sendMessage(VoicePluginMessageType.VoiceLogin, VoiceLogin(voiceLoginInfo2))
         }
     }
 
-    fun terminateVoiceCall(ChatterID chatterID) {
-        VoiceChannelInfo voiceChannelInfo = (VoiceChannelInfo) this.voiceChannels.get(chatterID)
+    fun terminateVoiceCall(chatterID: ChatterID) {
+        val voiceChannelInfo: VoiceChannelInfo = (VoiceChannelInfo) this.voiceChannels.get(chatterID)
         if (voiceChannelInfo != null) {
             sendMessage(VoicePluginMessageType.VoiceTerminateCall, VoiceTerminateCall(voiceChannelInfo))
         }

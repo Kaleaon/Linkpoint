@@ -31,7 +31,7 @@ class TeleportProgressDialog : ProgressDialog(), DialogInterface.OnCancelListene
     }
 
     @JvmStatic
-    Unit TeleportToLandmark(Context context, UserManager userManager2, UUID uuid, Boolean z) {
+    fun TeleportToLandmark(context: Context, userManager2: UserManager, uuid: UUID, z: Boolean) {
         SLAgentCircuit activeAgentCircuit
         if (userManager2 != null && (activeAgentCircuit = userManager2.getActiveAgentCircuit()) != null && activeAgentCircuit.getModules().rlvController.canTeleportToLandmark()) {
             $Lambda$8gWLFwrhoxKapEC8iWggaUhFR1c.AnonymousClass2 r1 = Runnable(activeAgentCircuit, uuid, context, userManager2) {
@@ -226,8 +226,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$8g
     }
 
     @EventHandler
-    fun handleTeleportResult(SLTeleportResultEvent sLTeleportResultEvent) {
-        Boolean isShowing = isShowing()
+    fun handleTeleportResult(sLTeleportResultEvent: SLTeleportResultEvent) {
+        val isShowing: Boolean = isShowing()
         Debug.Log("TeleportResult: success = " + sLTeleportResultEvent.success)
         try {
             dismiss()
@@ -235,7 +235,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$8g
             Debug.Warning(e)
         }
         if (sLTeleportResultEvent.success) {
-            Intent intent = Intent(getContext(), ChatNewActivity.class)
+            val intent: Intent = Intent(getContext(), ChatNewActivity.class)
             if (this.userManager != null) {
                 ActivityUtils.setActiveAgentID(intent, this.userManager.getUserID())
             }
@@ -250,10 +250,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$8g
         }
     }
 
-    fun onCancel(DialogInterface dialogInterface) {
+    fun onCancel(dialogInterface: DialogInterface) {
         if (this.userManager != null) {
             try {
-                SLAgentCircuit activeAgentCircuit = this.userManager.getActiveAgentCircuit()
+                val activeAgentCircuit: SLAgentCircuit = this.userManager.getActiveAgentCircuit()
                 if (activeAgentCircuit != null) {
                     activeAgentCircuit.getModules().worldMap.CancelPendingTeleports()
                 }

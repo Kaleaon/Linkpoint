@@ -13,7 +13,7 @@ class CachedAssetDao : AbstractDao()<CachedAsset, String> {
 
     @JvmStatic
     class Properties {
-        const val Property Data = Property(2, Byte[].class, "data", false, "DATA")
+        const val Property Data = Property(2, ByteArray.class, "data", false, "DATA")
         const val Property Key = Property(0, String.class, "key", true, "KEY")
         const val Property MustRevalidate = Property(3, Boolean.TYPE, "mustRevalidate", false, "MUST_REVALIDATE")
         const val Property Status = Property(1, Integer.TYPE, NotificationCompat.CATEGORY_STATUS, false, "STATUS")
@@ -28,42 +28,42 @@ class CachedAssetDao : AbstractDao()<CachedAsset, String> {
     }
 
     @JvmStatic
-    Unit createTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'CachedAssets' (" + "'KEY' TEXT PRIMARY KEY NOT NULL ," + "'STATUS' INTEGER NOT NULL ," + "'DATA' BLOB," + "'MUST_REVALIDATE' INTEGER NOT NULL );")
     }
 
     @JvmStatic
-    Unit dropTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'CachedAssets'")
     }
 
-    protected Unit bindValues(SQLiteStatement sQLiteStatement, CachedAsset cachedAsset) {
+     protected fun bindValues(sQLiteStatement: SQLiteStatement, cachedAsset: CachedAsset) {
         sQLiteStatement.clearBindings()
-        String key = cachedAsset.getKey()
+        val key: String = cachedAsset.getKey()
         if (key != null) {
             sQLiteStatement.bindString(1, key)
         }
         sQLiteStatement.bindLong(2, (Long) cachedAsset.getStatus())
-        Byte[] data = cachedAsset.getData()
+        val data: ByteArray = cachedAsset.getData()
         if (data != null) {
             sQLiteStatement.bindBlob(3, data)
         }
         sQLiteStatement.bindLong(4, cachedAsset.getMustRevalidate() ? 1 : 0)
     }
 
-    public String getKey(CachedAsset cachedAsset) {
+     public fun getKey(cachedAsset: CachedAsset): String {
         return cachedAsset != null ? cachedAsset.getKey() : null
     }
 
-    protected Boolean isEntityUpdateable() {
+     protected fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    public CachedAsset readEntity(Cursor cursor, Int i) {
-        Byte[] bArr = null
-        Boolean z = false
-        String string = cursor.isNull(i + 0) ? null : cursor.getString(i + 0)
-        Int i2 = cursor.getInt(i + 1)
+     public fun readEntity(cursor: Cursor, i: Int): CachedAsset {
+        val bArr: ByteArray = null
+        val z: Boolean = false
+        val string: String = cursor.isNull(i + 0) ? null : cursor.getString(i + 0)
+        val i2: Int = cursor.getInt(i + 1)
         if (!cursor.isNull(i + 2)) {
             bArr = cursor.getBlob(i + 2)
         }
@@ -73,8 +73,8 @@ class CachedAssetDao : AbstractDao()<CachedAsset, String> {
         return CachedAsset(string, i2, bArr, z)
     }
 
-    fun readEntity(Cursor cursor, CachedAsset cachedAsset, Int i) {
-        Byte[] bArr = null
+    fun readEntity(cursor: Cursor, cachedAsset: CachedAsset, i: Int) {
+        val bArr: ByteArray = null
         cachedAsset.setKey(cursor.isNull(i + 0) ? null : cursor.getString(i + 0))
         cachedAsset.setStatus(cursor.getInt(i + 1))
         if (!cursor.isNull(i + 2)) {
@@ -84,11 +84,11 @@ class CachedAssetDao : AbstractDao()<CachedAsset, String> {
         cachedAsset.setMustRevalidate(cursor.getShort(i + 3) != (Short) 0)
     }
 
-    public String readKey(Cursor cursor, Int i) {
+     public fun readKey(cursor: Cursor, i: Int): String {
         return cursor.isNull(i + 0) ? null : cursor.getString(i + 0)
     }
 
-    protected String updateKeyAfterInsert(CachedAsset cachedAsset, Long j) {
+     protected fun updateKeyAfterInsert(cachedAsset: CachedAsset, j: Long): String {
         return cachedAsset.getKey()
     }
 }

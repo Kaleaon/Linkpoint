@@ -25,12 +25,12 @@ abstract class ChatterDisplayDataList {
         this.chatters = SortedChatterList(onListUpdated, comparator)
     }
 
-    private Unit refreshList() {
+     private fun refreshList() {
         for (ChatterSubscription chatterSubscription : this.chatterSubscriptions.values()) {
             chatterSubscription.isValid = false
         }
         for (ChatterID chatterID : getChatters()) {
-            ChatterSubscription chatterSubscription2 = this.chatterSubscriptions.get(chatterID)
+            val chatterSubscription2: ChatterSubscription = this.chatterSubscriptions.get(chatterID)
             if (chatterSubscription2 == null) {
                 if (chatterID instanceof ChatterID.ChatterIDUser) {
                     chatterSubscription2 = ChatterUserSubscription(this.chatters, (ChatterID.ChatterIDUser) chatterID, this.userManager)
@@ -47,7 +47,7 @@ abstract class ChatterDisplayDataList {
         }
         Iterator<Map.Entry<ChatterID, ChatterSubscription>> it = this.chatterSubscriptions.entrySet().iterator()
         while (it.hasNext()) {
-            ChatterSubscription chatterSubscription3 = (ChatterSubscription) it.next().getValue()
+            val chatterSubscription3: ChatterSubscription = (ChatterSubscription) it.next().getValue()
             if (!chatterSubscription3.isValid) {
                 it.remove()
                 chatterSubscription3.dispose()
@@ -77,7 +77,7 @@ abstract class ChatterDisplayDataList {
     }
 
     /* access modifiers changed from: package-private */
-    fun requestRefresh(Executor executor) {
+    fun requestRefresh(executor: Executor) {
         Debug.Printf("FriendList: requestRefresh: needsRefresh = %s", Boolean.toString(this.needsRefresh.get()))
         if (this.needsRefresh.getAndSet(true)) {
             return

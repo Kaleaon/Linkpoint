@@ -26,11 +26,11 @@ private class HandlerInfo {
             this.subscriber = WeakReference<>(obj)
         }
 
-        fun invoke(Object obj) {
+        fun invoke(obj: Object) {
             try {
-                Object obj2 = this.subscriber.get()
+                val obj2: Object = this.subscriber.get()
                 if (obj2 != null) {
-                    this.method.invoke(obj2, Object[]{obj})
+                    this.method.invoke(obj2, Array<Any>{obj})
                 }
             } catch (IllegalArgumentException e) {
                 e.printStackTrace()
@@ -38,7 +38,7 @@ private class HandlerInfo {
                 e2.printStackTrace()
             } catch (InvocationTargetException e3) {
                 Debug.Log("InvocationTargetException in handler for " + obj.getClass().getSimpleName())
-                Throwable cause = e3.getCause()
+                val cause: Throwable = e3.getCause()
                 if (cause != null) {
                     cause.printStackTrace()
                 } else {
@@ -57,12 +57,12 @@ private class HandlerList : LinkedList()<HandlerInfo> {
             this()
         }
 
-        fun deleteAll(Object obj) {
-            LinkedList linkedList = LinkedList()
-            Iterator it = iterator()
+        fun deleteAll(obj: Object) {
+            val linkedList: LinkedList = LinkedList()
+            val it: Iterator = iterator()
             while (it.hasNext()) {
-                HandlerInfo handlerInfo = (HandlerInfo) it.next()
-                Object obj2 = handlerInfo.subscriber.get()
+                val handlerInfo: HandlerInfo = (HandlerInfo) it.next()
+                val obj2: Object = handlerInfo.subscriber.get()
                 if (obj2 == null || obj2 == obj) {
                     linkedList.add(handlerInfo)
                 }
@@ -70,8 +70,8 @@ private class HandlerList : LinkedList()<HandlerInfo> {
             removeAll(linkedList)
         }
 
-        fun invokeAll(Object obj) {
-            Iterator it = iterator()
+        fun invokeAll(obj: Object) {
+            val it: Iterator = iterator()
             while (it.hasNext()) {
                 ((HandlerInfo) it.next()).invoke(obj)
             }
@@ -79,7 +79,7 @@ private class HandlerList : LinkedList()<HandlerInfo> {
     }
 
     public synchronized Boolean handleEventQueueMessage(SLCapEventQueue.CapsEventType capsEventType, LLSDNode lLSDNode) {
-        HandlerList handlerList = this.eventQueueMessageHandlers.get(capsEventType)
+        val handlerList: HandlerList = this.eventQueueMessageHandlers.get(capsEventType)
         if (handlerList == null) {
             return false
         }
@@ -88,7 +88,7 @@ private class HandlerList : LinkedList()<HandlerInfo> {
     }
 
     public synchronized Boolean handleMessage(Object obj) {
-        HandlerList handlerList = this.messageHandlers.get(obj.getClass())
+        val handlerList: HandlerList = this.messageHandlers.get(obj.getClass())
         if (handlerList == null) {
             return false
         }
@@ -99,27 +99,27 @@ private class HandlerList : LinkedList()<HandlerInfo> {
     public synchronized Unit registerHandler(Object obj) {
         for (Method method : obj.getClass().getMethods()) {
             if (((SLMessageHandler) method.getAnnotation(SLMessageHandler.class)) != null) {
-                Class[] parameterTypes = method.getParameterTypes()
+                val parameterTypes: Array<Class> = method.getParameterTypes()
                 if (parameterTypes.length != 1) {
                     throw IllegalArgumentException("SLMessageHandler methods must specify a single SLMessage paramter.")
                 }
-                Class cls = parameterTypes[0]
-                HandlerInfo handlerInfo = HandlerInfo(method, obj)
-                HandlerList handlerList = this.messageHandlers.get(cls)
+                val cls: Class = parameterTypes[0]
+                val handlerInfo: HandlerInfo = HandlerInfo(method, obj)
+                val handlerList: HandlerList = this.messageHandlers.get(cls)
                 if (handlerList == null) {
                     handlerList = HandlerList((HandlerList) null)
                     this.messageHandlers.put(cls, handlerList)
                 }
                 handlerList.add(handlerInfo)
             }
-            SLEventQueueMessageHandler sLEventQueueMessageHandler = (SLEventQueueMessageHandler) method.getAnnotation(SLEventQueueMessageHandler.class)
+            val sLEventQueueMessageHandler: SLEventQueueMessageHandler = (SLEventQueueMessageHandler) method.getAnnotation(SLEventQueueMessageHandler.class)
             if (sLEventQueueMessageHandler != null) {
                 if (method.getParameterTypes().length != 1) {
                     throw IllegalArgumentException("SLMessageHandler methods must specify a single LLSDNode paramter.")
                 }
                 SLCapEventQueue.CapsEventType eventName = sLEventQueueMessageHandler.eventName()
-                HandlerInfo handlerInfo2 = HandlerInfo(method, obj)
-                HandlerList handlerList2 = this.eventQueueMessageHandlers.get(eventName)
+                val handlerInfo2: HandlerInfo = HandlerInfo(method, obj)
+                val handlerList2: HandlerList = this.eventQueueMessageHandlers.get(eventName)
                 if (handlerList2 == null) {
                     handlerList2 = HandlerList((HandlerList) null)
                     this.eventQueueMessageHandlers.put(eventName, handlerList2)

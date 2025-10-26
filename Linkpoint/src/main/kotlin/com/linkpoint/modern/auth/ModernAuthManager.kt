@@ -42,10 +42,10 @@ class ModernAuthManager {
         this.securePrefs = initializeSecurePreferences()
     }
     
-    private SharedPreferences initializeSecurePreferences() {
+     private fun initializeSecurePreferences(): SharedPreferences {
         try {
             // Create or retrieve master key for encryption
-            MasterKey masterKey = MasterKey.Builder(context)
+            val masterKey: MasterKey = MasterKey.Builder(context)
                 .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
                 .build()
             
@@ -72,14 +72,14 @@ class ModernAuthManager {
             
             try {
                 // First check for cached valid tokens
-                AuthResult cachedResult = checkCachedTokens(username)
+                val cachedResult: AuthResult = checkCachedTokens(username)
                 if (cachedResult.isValid()) {
                     Log.i(TAG, "Using cached authentication tokens")
                     return cachedResult
                 }
                 
                 // Perform password-based authentication (legacy method for now)
-                AuthResult result = performPasswordAuth(username, password)
+                val result: AuthResult = performPasswordAuth(username, password)
                 
                 if (result.isSuccessful()) {
                     // Cache the authentication result securely
@@ -101,20 +101,20 @@ class ModernAuthManager {
     /**
      * Check for cached authentication tokens
      */
-    private AuthResult checkCachedTokens(String username) {
-        String cachedUsername = securePrefs.getString(KEY_USERNAME, null)
+     private fun checkCachedTokens(username: String): AuthResult {
+        val cachedUsername: String = securePrefs.getString(KEY_USERNAME, null)
         if (!username.equals(cachedUsername)) {
             return AuthResult.failure("No cached tokens for user")
         }
         
-        Long tokenExpiry = securePrefs.getLong(KEY_TOKEN_EXPIRY, 0)
+        val tokenExpiry: Long = securePrefs.getLong(KEY_TOKEN_EXPIRY, 0)
         if (System.currentTimeMillis() >= tokenExpiry) {
             Log.d(TAG, "Cached tokens have expired")
             return AuthResult.failure("Cached tokens expired")
         }
         
-        String accessToken = securePrefs.getString(KEY_ACCESS_TOKEN, null)
-        String refreshToken = securePrefs.getString(KEY_REFRESH_TOKEN, null)
+        val accessToken: String = securePrefs.getString(KEY_ACCESS_TOKEN, null)
+        val refreshToken: String = securePrefs.getString(KEY_REFRESH_TOKEN, null)
         
         if (accessToken != null && refreshToken != null) {
             return AuthResult.success(accessToken, refreshToken, tokenExpiry)
@@ -126,16 +126,16 @@ class ModernAuthManager {
     /**
      * Perform password-based authentication (current method)
      */
-    private AuthResult performPasswordAuth(String username, String password) {
+     private fun performPasswordAuth(username: String, password: String): AuthResult {
         try {
             // For now, we'll simulate a successful authentication
             // In a real implementation, this would use the existing SLAuth system
             // or make OAuth2 calls when Second Life supports it
             
             // Generate a mock access token (in real implementation, this comes from server)
-            String accessToken = generateSecureToken()
-            String refreshToken = generateSecureToken()
-            Long expiryTime = System.currentTimeMillis() + (24 * 60 * 60 * 1000); // 24 hours
+            val accessToken: String = generateSecureToken()
+            val refreshToken: String = generateSecureToken()
+            val expiryTime: Long = System.currentTimeMillis() + (24 * 60 * 60 * 1000); // 24 hours
             
             Log.d(TAG, "Password authentication completed successfully")
             return AuthResult.success(accessToken, refreshToken, expiryTime)
@@ -148,7 +148,7 @@ class ModernAuthManager {
     /**
      * Cache authentication result securely
      */
-    private Unit cacheAuthResult(String username, AuthResult result) {
+     private fun cacheAuthResult(username: String, result: AuthResult) {
         SharedPreferences.Editor editor = securePrefs.edit()
         editor.putString(KEY_USERNAME, username)
         editor.putString(KEY_ACCESS_TOKEN, result.getAccessToken())
@@ -162,16 +162,16 @@ class ModernAuthManager {
     /**
      * Generate a secure random token
      */
-    private String generateSecureToken() {
+     private fun generateSecureToken(): String {
         try {
-            KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore")
+            val keyStore: KeyStore = KeyStore.getInstance("AndroidKeyStore")
             keyStore.load(null)
             
             // Generate a random token using Android Keystore
-            SecretKey secretKey = generateSecretKey()
+            val secretKey: SecretKey = generateSecretKey()
             
             // Create a simple token (in real implementation, this would be more sophisticated)
-            Byte[] tokenBytes = Byte[32]
+            val tokenBytes: ByteArray = Byte[32]
             java.security.SecureRandom().nextBytes(tokenBytes)
             
             return Base64.encodeToString(tokenBytes, Base64.NO_WRAP)
@@ -186,10 +186,10 @@ class ModernAuthManager {
     /**
      * Generate secret key for token encryption
      */
-    private SecretKey generateSecretKey() throws Exception {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
+     private fun generateSecretKey() throws Exception {
+        val keyGenerator: KeyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
         
-        KeyGenParameterSpec keyGenParameterSpec = KeyGenParameterSpec.Builder(
+        val keyGenParameterSpec: KeyGenParameterSpec = KeyGenParameterSpec.Builder(
             KEY_ALIAS,
             KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
             .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
@@ -213,8 +213,8 @@ class ModernAuthManager {
     /**
      * Check if user is currently authenticated
      */
-    public Boolean isAuthenticated(String username) {
-        AuthResult cached = checkCachedTokens(username)
+     public fun isAuthenticated(username: String): Boolean {
+        val cached: AuthResult = checkCachedTokens(username)
         return cached.isValid()
     }
     
@@ -239,36 +239,36 @@ class ModernAuthManager {
         }
         
         @JvmStatic
-    AuthResult success(String accessToken, String refreshToken, Long expiryTime) {
+     fun success(accessToken: String, refreshToken: String, expiryTime: Long): AuthResult {
             return AuthResult(true, accessToken, refreshToken, expiryTime, null)
         }
         
         @JvmStatic
-    AuthResult failure(String errorMessage) {
+     fun failure(errorMessage: String): AuthResult {
             return AuthResult(false, null, null, 0, errorMessage)
         }
         
-        public Boolean isSuccessful() {
+         public fun isSuccessful(): Boolean {
             return successful
         }
         
-        public Boolean isValid() {
+         public fun isValid(): Boolean {
             return successful && accessToken != null && System.currentTimeMillis() < expiryTime
         }
         
-        public String getAccessToken() {
+         public fun getAccessToken(): String {
             return accessToken
         }
         
-        public String getRefreshToken() {
+         public fun getRefreshToken(): String {
             return refreshToken
         }
         
-        public Long getExpiryTime() {
+         public fun getExpiryTime(): Long {
             return expiryTime
         }
         
-        public String getErrorMessage() {
+         public fun getErrorMessage(): String {
             return errorMessage
         }
     }

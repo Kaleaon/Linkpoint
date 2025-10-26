@@ -9,12 +9,12 @@ import com.linkpoint.ui.common.UserListFragment
 
 class ActiveChattersFragment : UserListFragment() {
     /* access modifiers changed from: protected */
-    public ListAdapter createListAdapter(Context context, LoaderManager loaderManager, UserManager userManager) {
+     public fun createListAdapter(context: Context, loaderManager: LoaderManager, userManager: UserManager): ListAdapter {
         return ActiveChatsListAdapter(getActivity(), userManager)
     }
 
     /* access modifiers changed from: protected */
-    public Boolean itemsMayBeDismissed() {
+     public fun itemsMayBeDismissed(): Boolean {
         return true
     }
 }

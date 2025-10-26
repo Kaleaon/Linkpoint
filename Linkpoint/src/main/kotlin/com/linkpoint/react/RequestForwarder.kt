@@ -35,7 +35,7 @@ abstract class RequestForwarder<Kup, Tup, Kdown, Tdown> : RequestHandler<Kup> {
             RequestForwarder.this.processResultInternal(this.key, obj)
         }
 
-        fun onData(Tdown tdown) {
+        fun onData(tdown: Tdown) {
             if (RequestForwarder.this.executor != null) {
                 RequestForwarder.this.executor.execute(-$Lambda$swF2K5wPKI2_xA-bWP-XwHVnywU(this, tdown))
             } else {
@@ -43,7 +43,7 @@ abstract class RequestForwarder<Kup, Tup, Kdown, Tdown> : RequestHandler<Kup> {
             }
         }
 
-        fun onError(Throwable th) {
+        fun onError(th: Throwable) {
             RequestForwarder.this.resultHandler.onResultError(this.key, th)
         }
 
@@ -58,8 +58,8 @@ abstract class RequestForwarder<Kup, Tup, Kdown, Tdown> : RequestHandler<Kup> {
         this.resultHandler = requestSource.attachRequestHandler(this)
     }
 
-    private Unit processRequestInternal(Kup kup) {
-        DownstreamSubscription downstreamSubscription = DownstreamSubscription(this, kup, getDownstreamKey(kup), null)
+     private fun processRequestInternal(kup: Kup) {
+        val downstreamSubscription: DownstreamSubscription = DownstreamSubscription(this, kup, getDownstreamKey(kup), null)
         synchronized (this.lock) {
             downstreamSubscription = (DownstreamSubscription) this.subscriptions.put(kup, downstreamSubscription)
         }
@@ -68,7 +68,7 @@ abstract class RequestForwarder<Kup, Tup, Kdown, Tdown> : RequestHandler<Kup> {
         }
     }
 
-    private Unit processResultInternal(Kup kup, Tdown tdown) {
+     private fun processResultInternal(kup: Kup, tdown: Tdown) {
         this.resultHandler.onResultData(kup, processResult(tdown))
     }
 
@@ -78,7 +78,7 @@ abstract class RequestForwarder<Kup, Tup, Kdown, Tdown> : RequestHandler<Kup> {
         processRequestInternal(obj)
     }
 
-    fun onRequest(Kup kup) {
+    fun onRequest(kup: Kup) {
         if (this.executor != null) {
             this.executor.execute(AnonymousClass1(this, kup))
         } else {
@@ -86,7 +86,7 @@ abstract class RequestForwarder<Kup, Tup, Kdown, Tdown> : RequestHandler<Kup> {
         }
     }
 
-    fun onRequestCancelled(Kup kup) {
+    fun onRequestCancelled(kup: Kup) {
         DownstreamSubscription downstreamSubscription
         synchronized (this.lock) {
             downstreamSubscription = (DownstreamSubscription) this.subscriptions.remove(kup)

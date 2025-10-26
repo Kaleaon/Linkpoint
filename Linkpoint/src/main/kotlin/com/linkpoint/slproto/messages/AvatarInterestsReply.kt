@@ -16,26 +16,26 @@ class AvatarInterestsReply : SLMessage() {
 
     @JvmStatic
     class PropertiesData {
-        public Byte[] LanguagesText
+        public ByteArray LanguagesText
         public Int SkillsMask
-        public Byte[] SkillsText
+        public ByteArray SkillsText
         public Int WantToMask
-        public Byte[] WantToText
+        public ByteArray WantToText
     }
 
     public AvatarInterestsReply() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.PropertiesData_Field.WantToText.length + 5 + 4 + 1 + this.PropertiesData_Field.SkillsText.length + 1 + this.PropertiesData_Field.LanguagesText.length + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAvatarInterestsReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -84)
@@ -48,7 +48,7 @@ class AvatarInterestsReply : SLMessage() {
         packVariable(byteBuffer, this.PropertiesData_Field.LanguagesText, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.AvatarID = unpackUUID(byteBuffer)
         this.PropertiesData_Field.WantToMask = unpackInt(byteBuffer)

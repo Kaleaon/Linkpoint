@@ -23,15 +23,15 @@ class MuteListRequest : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return 40
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleMuteListRequest(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 6)
@@ -40,7 +40,7 @@ class MuteListRequest : SLMessage() {
         packInt(byteBuffer, this.MuteData_Field.MuteCRC)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.MuteData_Field.MuteCRC = unpackInt(byteBuffer)

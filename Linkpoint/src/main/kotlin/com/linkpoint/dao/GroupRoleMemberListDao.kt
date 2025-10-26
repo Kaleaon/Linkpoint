@@ -27,18 +27,18 @@ class GroupRoleMemberListDao : AbstractDao()<GroupRoleMemberList, UUID> {
     }
 
     @JvmStatic
-    Unit createTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'GroupRoleMemberLists' (" + "'GROUP_ID' TEXT PRIMARY KEY ," + "'REQUEST_ID' TEXT NOT NULL ," + "'MUST_REVALIDATE' INTEGER NOT NULL );")
     }
 
     @JvmStatic
-    Unit dropTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'GroupRoleMemberLists'")
     }
 
-    protected Unit bindValues(SQLiteStatement sQLiteStatement, GroupRoleMemberList groupRoleMemberList) {
+     protected fun bindValues(sQLiteStatement: SQLiteStatement, groupRoleMemberList: GroupRoleMemberList) {
         sQLiteStatement.clearBindings()
-        UUID groupID = groupRoleMemberList.getGroupID()
+        val groupID: UUID = groupRoleMemberList.getGroupID()
         if (groupID != null) {
             sQLiteStatement.bindString(1, groupID.toString())
         }
@@ -46,35 +46,35 @@ class GroupRoleMemberListDao : AbstractDao()<GroupRoleMemberList, UUID> {
         sQLiteStatement.bindLong(3, groupRoleMemberList.getMustRevalidate() ? 1 : 0)
     }
 
-    public UUID getKey(GroupRoleMemberList groupRoleMemberList) {
+     public fun getKey(groupRoleMemberList: GroupRoleMemberList): UUID {
         return groupRoleMemberList != null ? groupRoleMemberList.getGroupID() : null
     }
 
-    protected Boolean isEntityUpdateable() {
+     protected fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    public GroupRoleMemberList readEntity(Cursor cursor, Int i) {
-        Boolean z = false
-        UUID fromString = cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0))
-        UUID fromString2 = UUID.fromString(cursor.getString(i + 1))
+     public fun readEntity(cursor: Cursor, i: Int): GroupRoleMemberList {
+        val z: Boolean = false
+        val fromString: UUID = cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0))
+        val fromString2: UUID = UUID.fromString(cursor.getString(i + 1))
         if (cursor.getShort(i + 2) != (Short) 0) {
             z = true
         }
         return GroupRoleMemberList(fromString, fromString2, z)
     }
 
-    fun readEntity(Cursor cursor, GroupRoleMemberList groupRoleMemberList, Int i) {
+    fun readEntity(cursor: Cursor, groupRoleMemberList: GroupRoleMemberList, i: Int) {
         groupRoleMemberList.setGroupID(cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0)))
         groupRoleMemberList.setRequestID(UUID.fromString(cursor.getString(i + 1)))
         groupRoleMemberList.setMustRevalidate(cursor.getShort(i + 2) != (Short) 0)
     }
 
-    public UUID readKey(Cursor cursor, Int i) {
+     public fun readKey(cursor: Cursor, i: Int): UUID {
         return cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0))
     }
 
-    protected UUID updateKeyAfterInsert(GroupRoleMemberList groupRoleMemberList, Long j) {
+     protected fun updateKeyAfterInsert(groupRoleMemberList: GroupRoleMemberList, j: Long): UUID {
         return groupRoleMemberList.getGroupID()
     }
 }

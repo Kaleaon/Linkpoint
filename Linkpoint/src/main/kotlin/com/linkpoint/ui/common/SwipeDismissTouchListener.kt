@@ -44,20 +44,20 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
     private Int mViewWidth = 1
 
     interface DismissCallbacks {
-        Boolean canDismiss(Object obj)
+         fun canDismiss(Object obj): Boolean)
 
-        Unit onDismiss(View view, Object obj)
+         fun onDismiss(view: View, obj: Object)
     }
 
     public SwipeDismissTouchListener(View view, Object obj, DismissCallbacks dismissCallbacks, Boolean z, Boolean z2, Boolean z3, Boolean z4) {
-        Boolean z5 = true
+        val z5: Boolean = true
         this.canSwipeUp = z
         this.canSwipeDown = z2
         this.canSwipeLeft = z3
         this.canSwipeRight = z4
         this.canSwipeX = z3 ? true : z4
         this.canSwipeY = !z ? z2 : z5
-        ViewConfiguration viewConfiguration = ViewConfiguration.get(view.getContext())
+        val viewConfiguration: ViewConfiguration = ViewConfiguration.get(view.getContext())
         this.mSlop = viewConfiguration.getScaledTouchSlop()
         this.mMinFlingVelocity = viewConfiguration.getScaledMinimumFlingVelocity() * 16
         this.mMaxFlingVelocity = viewConfiguration.getScaledMaximumFlingVelocity()
@@ -71,9 +71,9 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
     fun performDismiss() {
         final ViewGroup.LayoutParams layoutParams = this.mView.getLayoutParams()
         final Int height = this.mView.getHeight()
-        ValueAnimator duration = ValueAnimator.ofInt(Int[]{height, 1}).setDuration(this.mAnimationTime)
+        val duration: ValueAnimator = ValueAnimator.ofInt(IntArray{height, 1}).setDuration(this.mAnimationTime)
         duration.addListener(AnimatorListenerAdapter() {
-            fun onAnimationEnd(Animator animator) {
+            fun onAnimationEnd(animator: Animator) {
                 SwipeDismissTouchListener.this.mCallbacks.onDismiss(SwipeDismissTouchListener.this.mView, SwipeDismissTouchListener.this.mToken)
                 SwipeDismissTouchListener.this.mView.setAlpha(1.0f)
                 SwipeDismissTouchListener.this.mView.setTranslationX(0.0f)
@@ -82,21 +82,21 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
                 SwipeDismissTouchListener.this.mView.setLayoutParams(layoutParams)
             }
         duration.addUpdateListener(ValueAnimator.AnimatorUpdateListener() {
-            fun onAnimationUpdate(ValueAnimator valueAnimator) {
+            fun onAnimationUpdate(valueAnimator: ValueAnimator) {
                 layoutParams.height = ((Integer) valueAnimator.getAnimatedValue()).intValue()
                 SwipeDismissTouchListener.this.mView.setLayoutParams(layoutParams)
             }
         duration.start()
     }
 
-    public Boolean dispatchTouchEvent(MotionEvent motionEvent) {
+     public fun dispatchTouchEvent(motionEvent: MotionEvent): Boolean {
         return false
     }
 
-    public Boolean onInterceptTouchEvent(MotionEvent motionEvent) {
+     public fun onInterceptTouchEvent(motionEvent: MotionEvent): Boolean {
         Float f
         Float f2
-        Boolean z3 = true
+        val z3: Boolean = true
         motionEvent.offsetLocation(this.mTranslationX, this.mTranslationY)
         if (this.mViewWidth < 2) {
             this.mViewWidth = this.mView.getWidth()
@@ -116,14 +116,14 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
                 return true
             case 1:
                 if (this.mVelocityTracker != null) {
-                    Float rawX = motionEvent.getRawX() - this.mDownX
-                    Float rawY = motionEvent.getRawY() - this.mDownY
+                    val rawX: Float = motionEvent.getRawX() - this.mDownX
+                    val rawY: Float = motionEvent.getRawY() - this.mDownY
                     this.mVelocityTracker.addMovement(motionEvent)
                     this.mVelocityTracker.computeCurrentVelocity(1000)
-                    Float xVelocity = this.mVelocityTracker.getXVelocity()
-                    Float yVelocity = this.mVelocityTracker.getYVelocity()
-                    Float abs = Math.abs(xVelocity)
-                    Float abs2 = Math.abs(yVelocity)
+                    val xVelocity: Float = this.mVelocityTracker.getXVelocity()
+                    val yVelocity: Float = this.mVelocityTracker.getYVelocity()
+                    val abs: Float = Math.abs(xVelocity)
+                    val abs2: Float = Math.abs(yVelocity)
                     if (this.mSwiping && this.mSwipingX && this.canSwipeRight && rawX > ((Float) (this.mViewWidth / 2))) {
                         f2 = (Float) this.mViewWidth
                         f = 0.0f
@@ -137,8 +137,8 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
                         f = (Float) (-this.mViewHeight)
                         f2 = 0.0f
                     } else if (((Float) this.mMinFlingVelocity) <= abs && abs <= ((Float) this.mMaxFlingVelocity) && abs2 < abs && this.mSwiping && this.mSwipingX) {
-                        Boolean z4 = xVelocity < 0.0f ? this.canSwipeLeft : this.canSwipeRight
-                        Boolean z5 = xVelocity < 0.0f
+                        val z4: Boolean = xVelocity < 0.0f ? this.canSwipeLeft : this.canSwipeRight
+                        val z5: Boolean = xVelocity < 0.0f
                         if (rawX >= 0.0f) {
                             z3 = false
                         }
@@ -150,8 +150,8 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
                         f2 = 0.0f
                         z3 = false
                     } else if (this.mSwipingY) {
-                        Boolean z6 = yVelocity < 0.0f ? this.canSwipeUp : this.canSwipeDown
-                        Boolean z7 = yVelocity < 0.0f
+                        val z6: Boolean = yVelocity < 0.0f ? this.canSwipeUp : this.canSwipeDown
+                        val z7: Boolean = yVelocity < 0.0f
                         if (rawY >= 0.0f) {
                             z3 = false
                         }
@@ -165,7 +165,7 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
                     }
                     if (z3) {
                         this.mView.animate().translationX(f2).translationY(f).alpha(0.0f).setDuration(this.mAnimationTime).setListener(AnimatorListenerAdapter() {
-                            fun onAnimationEnd(Animator animator) {
+                            fun onAnimationEnd(animator: Animator) {
                                 SwipeDismissTouchListener.this.performDismiss()
                             }
                     } else if (this.mSwiping) {
@@ -187,23 +187,23 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
                 Debug.Printf("SwipeSwipe: action move x %f y %f", Float.valueOf(this.mDownX), Float.valueOf(this.mDownY))
                 if (this.mVelocityTracker != null) {
                     this.mVelocityTracker.addMovement(motionEvent)
-                    Float rawX2 = motionEvent.getRawX() - this.mDownX
-                    Float rawY2 = motionEvent.getRawY() - this.mDownY
+                    val rawX2: Float = motionEvent.getRawX() - this.mDownX
+                    val rawY2: Float = motionEvent.getRawY() - this.mDownY
                     if (!this.mSwiping) {
-                        Boolean z8 = (rawX2 >= ((Float) (-this.mSlop)) || Math.abs(rawY2) >= Math.abs(rawX2) / 2.0f) ? false : this.canSwipeLeft
-                        Boolean z9 = (rawX2 <= ((Float) this.mSlop) || Math.abs(rawY2) >= Math.abs(rawX2) / 2.0f) ? false : this.canSwipeRight
-                        Boolean z10 = (rawY2 >= ((Float) (-this.mSlop)) || Math.abs(rawX2) >= Math.abs(rawY2) / 2.0f) ? false : this.canSwipeUp
-                        Boolean z11 = (rawY2 <= ((Float) this.mSlop) || Math.abs(rawX2) >= Math.abs(rawY2) / 2.0f) ? false : this.canSwipeDown
+                        val z8: Boolean = (rawX2 >= ((Float) (-this.mSlop)) || Math.abs(rawY2) >= Math.abs(rawX2) / 2.0f) ? false : this.canSwipeLeft
+                        val z9: Boolean = (rawX2 <= ((Float) this.mSlop) || Math.abs(rawY2) >= Math.abs(rawX2) / 2.0f) ? false : this.canSwipeRight
+                        val z10: Boolean = (rawY2 >= ((Float) (-this.mSlop)) || Math.abs(rawX2) >= Math.abs(rawY2) / 2.0f) ? false : this.canSwipeUp
+                        val z11: Boolean = (rawY2 <= ((Float) this.mSlop) || Math.abs(rawX2) >= Math.abs(rawY2) / 2.0f) ? false : this.canSwipeDown
                         if (z8) {
                             z9 = true
                         }
-                        Boolean z12 = !z10 ? z11 : true
+                        val z12: Boolean = !z10 ? z11 : true
                         if (!z9) {
-                            Boolean z13 = z12
+                            val z13: Boolean = z12
                             z = z9
                             z2 = z13
                         } else if (!z12) {
-                            Boolean z14 = z12
+                            val z14: Boolean = z12
                             z = z9
                             z2 = z14
                         } else if (Math.abs(rawX2) >= Math.abs(rawY2)) {
@@ -220,7 +220,7 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
                             this.mSwipingSlopX = z ? rawX2 > 0.0f ? this.mSlop : -this.mSlop : 0
                             this.mSwipingSlopY = z2 ? rawY2 > 0.0f ? this.mSlop : -this.mSlop : 0
                             this.mView.getParent().requestDisallowInterceptTouchEvent(true)
-                            MotionEvent obtain = MotionEvent.obtain(motionEvent)
+                            val obtain: MotionEvent = MotionEvent.obtain(motionEvent)
                             obtain.setAction((motionEvent.getActionIndex() << 8) | 3)
                             this.mView.onTouchEvent(obtain)
                             obtain.recycle()
@@ -259,7 +259,7 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
         return false
     }
 
-    public Boolean onTouchEvent(MotionEvent motionEvent) {
+     public fun onTouchEvent(motionEvent: MotionEvent): Boolean {
         return false
     }
 }

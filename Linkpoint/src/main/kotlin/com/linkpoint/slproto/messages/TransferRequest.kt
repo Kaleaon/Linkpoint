@@ -10,7 +10,7 @@ class TransferRequest : SLMessage() {
     @JvmStatic
     class TransferInfo {
         public Int ChannelType
-        public Byte[] Params
+        public ByteArray Params
         public Float Priority
         public Int SourceType
         public UUID TransferID
@@ -20,15 +20,15 @@ class TransferRequest : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.TransferInfo_Field.Params.length + 30 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleTransferRequest(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -103)
@@ -39,7 +39,7 @@ class TransferRequest : SLMessage() {
         packVariable(byteBuffer, this.TransferInfo_Field.Params, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.TransferInfo_Field.TransferID = unpackUUID(byteBuffer)
         this.TransferInfo_Field.ChannelType = unpackInt(byteBuffer)
         this.TransferInfo_Field.SourceType = unpackInt(byteBuffer)

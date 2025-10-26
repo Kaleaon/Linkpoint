@@ -31,29 +31,29 @@ class PrimVolumeParams {
     public Byte SculptType
 
     @JvmStatic
-    PrimVolumeParams createFromObjectUpdate(ObjectUpdate.ObjectData objectData) {
-        PrimVolumeParams primVolumeParams = PrimVolumeParams()
+     fun createFromObjectUpdate(ObjectUpdate.ObjectData objectData): PrimVolumeParams {
+        val primVolumeParams: PrimVolumeParams = PrimVolumeParams()
         primVolumeParams.PathParams = PrimParamsPool.get(PrimPathParams(objectData))
         primVolumeParams.ProfileParams = PrimParamsPool.get(PrimProfileParams.createFromObjectUpdate(objectData))
         return primVolumeParams
     }
 
     @JvmStatic
-    PrimVolumeParams createFromPackedData(ByteBuffer byteBuffer) {
-        PrimVolumeParams primVolumeParams = PrimVolumeParams()
+     fun createFromPackedData(byteBuffer: ByteBuffer): PrimVolumeParams {
+        val primVolumeParams: PrimVolumeParams = PrimVolumeParams()
         primVolumeParams.PathParams = PrimParamsPool.get(PrimPathParams(byteBuffer))
         primVolumeParams.ProfileParams = PrimParamsPool.get(PrimProfileParams.createFromPackedData(byteBuffer))
         return primVolumeParams
     }
 
-    public Boolean equals(Object obj) {
+     public fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
         if (!(obj instanceof PrimVolumeParams)) {
             return false
         }
-        PrimVolumeParams primVolumeParams = (PrimVolumeParams) obj
+        val primVolumeParams: PrimVolumeParams = (PrimVolumeParams) obj
         if (this.SculptType != primVolumeParams.SculptType) {
             return false
         }
@@ -81,37 +81,37 @@ class PrimVolumeParams {
         return this.FlexiParams == null || this.FlexiParams.equals(primVolumeParams.FlexiParams)
     }
 
-    public Int hashCode() {
-        Int i = (this.SculptType * 17) + 0
+     public fun hashCode(): Int {
+        val i: Int = (this.SculptType * 17) + 0
         if (this.SculptID != null) {
             i += this.SculptID.hashCode() * 3
         }
-        Int hashCode = i + (this.PathParams.hashCode() * 37) + this.ProfileParams.hashCode()
+        val hashCode: Int = i + (this.PathParams.hashCode() * 37) + this.ProfileParams.hashCode()
         return this.FlexiParams != null ? hashCode + this.FlexiParams.hashCode() : hashCode
     }
 
-    public Boolean isFlexible() {
+     public fun isFlexible(): Boolean {
         return this.FlexiParams != null
     }
 
-    public Boolean isMesh() {
+     public fun isMesh(): Boolean {
         return this.SculptID != null && (this.SculptType & 7) == 5
     }
 
-    public Boolean isSculpt() {
+     public fun isSculpt(): Boolean {
         return this.SculptID != null
     }
 
-    public String toString() {
+     public fun toString(): String {
         return "{Volume: SculptType 0x" + Integer.toHexString(this.SculptType) + ", SculptID " + (this.SculptID != null ? this.SculptID.toString() : "null") + ", Path = (" + this.PathParams.toString() + "), Profile = (" + this.ProfileParams.toString() + ")}"
     }
 
-    fun unpackExtraParams(ByteBuffer byteBuffer) {
+    fun unpackExtraParams(byteBuffer: ByteBuffer) {
         try {
-            Byte b = byteBuffer.get()
+            val b: Byte = byteBuffer.get()
             for (Int i = 0; i < b; i++) {
-                Short s = byteBuffer.getShort()
-                Int i2 = byteBuffer.getInt() + byteBuffer.position()
+                val s: Short = byteBuffer.getShort()
+                val i2: Int = byteBuffer.getInt() + byteBuffer.position()
                 switch (s) {
                     case 16:
                         this.FlexiParams = PrimFlexibleParams(byteBuffer, i2)

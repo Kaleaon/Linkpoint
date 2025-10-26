@@ -16,11 +16,11 @@ class GroupNoticeAdd : SLMessage() {
 
     @JvmStatic
     class MessageBlock {
-        public Byte[] BinaryBucket
+        public ByteArray BinaryBucket
         public Int Dialog
-        public Byte[] FromAgentName
+        public ByteArray FromAgentName
         public UUID ID
-        public Byte[] Message
+        public ByteArray Message
         public UUID ToGroupID
     }
 
@@ -28,15 +28,15 @@ class GroupNoticeAdd : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.MessageBlock_Field.FromAgentName.length + 34 + 2 + this.MessageBlock_Field.Message.length + 2 + this.MessageBlock_Field.BinaryBucket.length + 20
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleGroupNoticeAdd(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 61)
@@ -49,7 +49,7 @@ class GroupNoticeAdd : SLMessage() {
         packVariable(byteBuffer, this.MessageBlock_Field.BinaryBucket, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.MessageBlock_Field.ToGroupID = unpackUUID(byteBuffer)
         this.MessageBlock_Field.ID = unpackUUID(byteBuffer)

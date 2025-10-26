@@ -18,9 +18,9 @@ class TeleportHomeDialog {
     }
 
     @JvmStatic
-    Unit show(Activity activity) {
+     fun show(activity: Activity) {
         SLAgentCircuit activeAgentCircuit
-        UserManager userManager = ActivityUtils.getUserManager(activity.getIntent())
+        val userManager: UserManager = ActivityUtils.getUserManager(activity.getIntent())
         if (userManager != null && (activeAgentCircuit = userManager.getActiveAgentCircuit()) != null && activeAgentCircuit.getModules().rlvController.canTeleportToLocation()) {
             AlertDialog.Builder(activity).setMessage((Int) R.string.teleport_home_confirm_title).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(activity, userManager, activeAgentCircuit) {
 

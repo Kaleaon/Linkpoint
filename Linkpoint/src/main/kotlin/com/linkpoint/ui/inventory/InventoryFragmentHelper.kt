@@ -42,40 +42,40 @@ class InventoryFragmentHelper {
         this.fragment = fragment2
     }
 
-    private Unit ViewTexture(UUID uuid) {
-        UserManager userManager = getUserManager()
-        FragmentActivity activity = this.fragment.getActivity()
+    private fun ViewTexture(uuid: UUID) {
+        val userManager: UserManager = getUserManager()
+        val activity: FragmentActivity = this.fragment.getActivity()
         if (activity != null && userManager != null) {
             DetailsActivity.showEmbeddedDetails(activity, TextureViewFragment.class, TextureViewFragment.makeArguments(userManager.getUserID(), uuid))
         }
     }
 
-    private SLAgentCircuit getActiveAgentCircuit() {
-        UserManager userManager = getUserManager()
+     private fun getActiveAgentCircuit(): SLAgentCircuit {
+        val userManager: UserManager = getUserManager()
         if (userManager != null) {
             return userManager.getActiveAgentCircuit()
         }
         return null
     }
 
-    private Context getContext() {
+     private fun getContext(): Context {
         return this.fragment.getContext()
     }
 
     @JvmStatic
-    Int getSortOrder(Context context) {
+     fun getSortOrder(context: Context): Int {
         if (context != null) {
             return PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext()).getInt(SORT_ORDER_KEY, 0)
         }
         return 0
     }
 
-    private UserManager getUserManager() {
-        UserManager userManager = UserManager.getUserManager(ActivityUtils.getActiveAgentID(this.fragment.getArguments()))
+     private fun getUserManager(): UserManager {
+        val userManager: UserManager = UserManager.getUserManager(ActivityUtils.getActiveAgentID(this.fragment.getArguments()))
         if (userManager != null) {
             return userManager
         }
-        FragmentActivity activity = this.fragment.getActivity()
+        val activity: FragmentActivity = this.fragment.getActivity()
         if (activity != null) {
             return UserManager.getUserManager(ActivityUtils.getActiveAgentID(activity.getIntent()))
         }
@@ -84,7 +84,7 @@ class InventoryFragmentHelper {
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentHelper_12001  reason: not valid java name */
     static /* synthetic */ Unit m610lambda$com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentHelper_12001(Dialog dialog, SLInventory sLInventory, SLInventoryEntry sLInventoryEntry, String str, View view) {
-        String trim = ((EditText) dialog.findViewById(R.id.itemNameText)).getText().toString().trim()
+        val trim: String = ((EditText) dialog.findViewById(R.id.itemNameText)).getText().toString().trim()
         if (!trim.isEmpty()) {
             sLInventory.DoCreateNewLandmark(sLInventoryEntry, trim, str)
         }
@@ -119,7 +119,7 @@ class InventoryFragmentHelper {
         edit.apply()
     }
 
-    private Unit showRezDialog(SLInventoryEntry sLInventoryEntry) {
+     private fun showRezDialog(sLInventoryEntry: SLInventoryEntry) {
         AlertDialog.Builder builder = AlertDialog.Builder(getContext())
         builder.setMessage(getContext().getString(R.string.rez_confirm_title)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this, sLInventoryEntry) {
 
@@ -265,17 +265,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         builder.create().show()
     }
 
-    private Unit showTeleportDialog(SLInventoryEntry sLInventoryEntry) {
+     private fun showTeleportDialog(sLInventoryEntry: SLInventoryEntry) {
         if (getUserManager() != null && sLInventoryEntry != null) {
             TeleportProgressDialog.TeleportToLandmark(getContext(), getUserManager(), sLInventoryEntry.assetUUID, true)
         }
     }
 
-    fun ConfirmShareInventoryEntry(SLInventoryEntry sLInventoryEntry, ChatterID chatterID, String str, Runnable runnable) {
-        SLAgentCircuit activeAgentCircuit = getActiveAgentCircuit()
+    fun ConfirmShareInventoryEntry(sLInventoryEntry: SLInventoryEntry, chatterID: ChatterID, str: String, runnable: Runnable) {
+        val activeAgentCircuit: SLAgentCircuit = getActiveAgentCircuit()
         if (sLInventoryEntry != null && chatterID != null && activeAgentCircuit != null) {
             AlertDialog.Builder builder = AlertDialog.Builder(getContext())
-            builder.setMessage(String.format(getContext().getString(R.string.share_inv_item_title), Object[]{sLInventoryEntry.name, str})).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(runnable, activeAgentCircuit, chatterID, sLInventoryEntry) {
+            builder.setMessage(String.format(getContext().getString(R.string.share_inv_item_title), Array<Any>{sLInventoryEntry.name, str})).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(runnable, activeAgentCircuit, chatterID, sLInventoryEntry) {
 
                 /* renamed from: -$f0 */
                 private val /* synthetic */ Object f401$f0
@@ -371,8 +371,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: package-private */
-    fun CreateNewFolder(SLInventoryEntry sLInventoryEntry) {
-        Dialog dialog = Dialog(getContext())
+    fun CreateNewFolder(sLInventoryEntry: SLInventoryEntry) {
+        val dialog: Dialog = Dialog(getContext())
         dialog.setContentView(R.layout.inv_rename_dialog)
         dialog.setTitle(R.string.new_folder_dialog_title)
         ((Button) dialog.findViewById(R.id.okButton)).setText(R.string.create_folder_button)
@@ -522,28 +522,28 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: package-private */
-    fun CreateNewLandmark(SLInventoryEntry sLInventoryEntry) {
+    fun CreateNewLandmark(sLInventoryEntry: SLInventoryEntry) {
         ParcelData parcelData
-        String str = null
-        UserManager userManager = getUserManager()
-        SLAgentCircuit activeAgentCircuit = getActiveAgentCircuit()
-        SLInventory inventory = getInventory()
+        val str: String = null
+        val userManager: UserManager = getUserManager()
+        val activeAgentCircuit: SLAgentCircuit = getActiveAgentCircuit()
+        val inventory: SLInventory = getInventory()
         if (activeAgentCircuit != null && userManager != null && inventory != null) {
-            LLVector3 lLVector3 = LLVector3()
-            String regionName = activeAgentCircuit.getRegionName()
+            val lLVector3: LLVector3 = LLVector3()
+            val regionName: String = activeAgentCircuit.getRegionName()
             if (regionName == null) {
                 regionName = "Simulator"
             }
             activeAgentCircuit.getModules().avatarControl.getAgentPosition().getPosition(lLVector3)
-            CurrentLocationInfo currentLocationInfoSnapshot = userManager.getCurrentLocationInfoSnapshot()
+            val currentLocationInfoSnapshot: CurrentLocationInfo = userManager.getCurrentLocationInfoSnapshot()
             if (!(currentLocationInfoSnapshot == null || (parcelData = currentLocationInfoSnapshot.parcelData()) == null)) {
                 str = parcelData.getName()
             }
             if (Strings.isNullOrEmpty(str)) {
                 str = "Landmark"
             }
-            String format = String.format("%s, %s (%d, %d, %d)", Object[]{str, regionName, Integer.valueOf((Int) lLVector3.x), Integer.valueOf((Int) lLVector3.y), Integer.valueOf((Int) lLVector3.z)})
-            Dialog dialog = Dialog(getContext())
+            val format: String = String.format("%s, %s (%d, %d, %d)", Array<Any>{str, regionName, Integer.valueOf((Int) lLVector3.x), Integer.valueOf((Int) lLVector3.y), Integer.valueOf((Int) lLVector3.z)})
+            val dialog: Dialog = Dialog(getContext())
             dialog.setContentView(R.layout.inv_rename_dialog)
             dialog.setTitle(R.string.new_landmark_dialog_title)
             ((Button) dialog.findViewById(R.id.okButton)).setText(R.string.create_folder_button)
@@ -712,10 +712,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: package-private */
-    fun DeleteInventoryEntry(SLInventoryEntry sLInventoryEntry, Runnable runnable) {
-        SLInventory inventory = getInventory()
+    fun DeleteInventoryEntry(sLInventoryEntry: SLInventoryEntry, runnable: Runnable) {
+        val inventory: SLInventory = getInventory()
         if (inventory != null && sLInventoryEntry != null) {
-            Boolean isLink = inventory.canMoveToTrash(sLInventoryEntry) ? sLInventoryEntry.isLink() : true
+            val isLink: Boolean = inventory.canMoveToTrash(sLInventoryEntry) ? sLInventoryEntry.isLink() : true
             AlertDialog.Builder builder = AlertDialog.Builder(getContext())
             builder.setMessage(getContext().getString(isLink ? R.string.delete_inv_item_title : R.string.trash_inv_item_title)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(isLink, inventory, sLInventoryEntry, runnable) {
 
@@ -883,11 +883,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: package-private */
-    fun PerformInventoryAction(SLInventoryEntry sLInventoryEntry, Int i) {
+    fun PerformInventoryAction(sLInventoryEntry: SLInventoryEntry, i: Int) {
         Debug.Log("PerformInventoryAction: entry = " + sLInventoryEntry)
         switch (i) {
             case R.string.asset_action_edit:
-                UserManager userManager = getUserManager()
+                val userManager: UserManager = getUserManager()
                 if (userManager != null) {
                     getContext().startActivity(NotecardEditActivity.createIntent(getContext(), userManager.getUserID(), sLInventoryEntry.parentUUID, sLInventoryEntry, sLInventoryEntry.invType == 10, (UUID) null, 0))
                     return
@@ -912,8 +912,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: package-private */
-    fun RenameInventoryEntry(SLInventoryEntry sLInventoryEntry) {
-        Dialog dialog = Dialog(getContext())
+    fun RenameInventoryEntry(sLInventoryEntry: SLInventoryEntry) {
+        val dialog: Dialog = Dialog(getContext())
         dialog.setContentView(R.layout.inv_rename_dialog)
         dialog.setTitle(R.string.rename_inv_item_title)
         ((EditText) dialog.findViewById(R.id.itemNameText)).setText(sLInventoryEntry.name)
@@ -1063,17 +1063,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: package-private */
-    fun ShareInventoryEntry(SLInventoryEntry sLInventoryEntry) {
-        UserManager userManager = getUserManager()
-        FragmentActivity activity = this.fragment.getActivity()
+    fun ShareInventoryEntry(sLInventoryEntry: SLInventoryEntry) {
+        val userManager: UserManager = getUserManager()
+        val activity: FragmentActivity = this.fragment.getActivity()
         if (activity != null && userManager != null) {
             DetailsActivity.showEmbeddedDetails(activity, AvatarPickerForShare.class, AvatarPickerForShare.makeArguments(userManager.getUserID(), sLInventoryEntry))
         }
     }
 
     /* access modifiers changed from: package-private */
-    public SLInventory getInventory() {
-        SLAgentCircuit activeAgentCircuit = getActiveAgentCircuit()
+     public fun getInventory(): SLInventory {
+        val activeAgentCircuit: SLAgentCircuit = getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
             return activeAgentCircuit.getModules().inventory
         }
@@ -1081,8 +1081,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: package-private */
-    public Boolean isActionAllowed(SLInventoryEntry sLInventoryEntry, Int i) {
-        SLAgentCircuit activeAgentCircuit = getActiveAgentCircuit()
+     public fun isActionAllowed(sLInventoryEntry: SLInventoryEntry, i: Int): Boolean {
+        val activeAgentCircuit: SLAgentCircuit = getActiveAgentCircuit()
         if (activeAgentCircuit == null) {
             return false
         }
@@ -1094,7 +1094,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     public /* synthetic */ Unit m618lambda$com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentHelper_3806(Dialog dialog, SLInventoryEntry sLInventoryEntry, View view) {
         UserManager userManager
         SLAgentCircuit activeAgentCircuit
-        String trim = ((EditText) dialog.findViewById(R.id.itemNameText)).getText().toString().trim()
+        val trim: String = ((EditText) dialog.findViewById(R.id.itemNameText)).getText().toString().trim()
         if (!(trim.isEmpty() || (userManager = getUserManager()) == null || (activeAgentCircuit = userManager.getActiveAgentCircuit()) == null)) {
             activeAgentCircuit.getModules().inventory.DoCreateNewFolder(sLInventoryEntry, trim, false, (Function<UUID, Void>) null)
         }
@@ -1115,7 +1115,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentHelper_7038  reason: not valid java name */
     public /* synthetic */ Unit m620lambda$com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentHelper_7038(Dialog dialog, SLInventoryEntry sLInventoryEntry, View view) {
         SLInventory inventory
-        String trim = ((EditText) dialog.findViewById(R.id.itemNameText)).getText().toString().trim()
+        val trim: String = ((EditText) dialog.findViewById(R.id.itemNameText)).getText().toString().trim()
         if (!trim.isEmpty() && (inventory = getInventory()) != null) {
             inventory.RenameInventoryItem(sLInventoryEntry, trim)
         }

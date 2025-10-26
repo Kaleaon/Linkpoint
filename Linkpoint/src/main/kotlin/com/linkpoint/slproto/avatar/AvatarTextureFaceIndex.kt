@@ -37,7 +37,7 @@ enum class AvatarTextureFaceIndex {
         this.bakedTextureName = str
     }
 
-    public String getBakedTextureName() {
+     public fun getBakedTextureName(): String {
         return this.bakedTextureName
     }
 }

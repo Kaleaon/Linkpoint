@@ -4,5 +4,5 @@ import java.util.UUID
 import javax.annotation.Nullable
 
 interface AgentRelated {
-    UUID getRelatedAgentID()
+     fun getRelatedAgentID(): UUID)
 }

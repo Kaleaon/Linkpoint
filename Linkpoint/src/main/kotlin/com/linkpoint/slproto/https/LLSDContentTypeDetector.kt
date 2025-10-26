@@ -25,39 +25,39 @@ class LLSDContentTypeDetector {
             r1 = 0
             r0 = 64
             r11.mark(r0)
-            Byte[] r2 = Byte[r10]
+            val r2: ByteArray = Byte[r10]
             r2 = {-17, -69, -65} // fill-array
             r0 = 32
-            Byte[] r4 = Byte[r0]
-            Int r0 = r4.length
-            Int r5 = r11.read(r4, r1, r0)
-            Int r0 = r2.length
+            val r4: ByteArray = Byte[r0]
+            val r0: Int = r4.length
+            val r5: Int = r11.read(r4, r1, r0)
+            val r0: Int = r2.length
             if (r5 < r0) goto L_0x00c7
             r0 = r1
         L_0x001a:
             if (r0 >= r5) goto L_0x008c
-            Int r6 = r2.length
+            val r6: Int = r2.length
             if (r0 >= r6) goto L_0x008c
-            Byte r6 = r4[r0]
-            Byte r7 = r2[r0]
+            val r6: Byte = r4[r0]
+            val r7: Byte = r2[r0]
             if (r6 == r7) goto L_0x008e
             r0 = r1
         L_0x0026:
             if (r0 == 0) goto L_0x00c7
-            Int r0 = r2.length
+            val r0: Int = r2.length
         L_0x0029:
             java.lang.String r6 = java.lang.String
-            Int r2 = r5 - r0
+            val r2: Int = r5 - r0
             java.lang.String r5 = "UTF-8"
             r6.<init>(r4, r0, r2, r5)
             r11.reset()
-            Long r4 = (Long) r0
+            val r4: Long = (Long) r0
             r11.skip(r4)
             java.lang.String r2 = "<llsd>"
-            Boolean r2 = r6.startsWith(r2)
+            val r2: Boolean = r6.startsWith(r2)
             if (r2 != 0) goto L_0x004c
             java.lang.String r2 = "<?xml"
-            Boolean r2 = r6.startsWith(r2)
+            val r2: Boolean = r6.startsWith(r2)
             if (r2 == 0) goto L_0x0091
         L_0x004c:
             r2 = r3
@@ -65,7 +65,7 @@ class LLSDContentTypeDetector {
         L_0x004e:
             java.lang.String r7 = "LLSD: contentType '%s', detected binary %s, xml %s, skipBytes %d, firstString '%s'"
             r5 = 5
-            java.lang.Object[] r8 = java.lang.Object[r5]
+            java.lang.Array<Any> r8 = java.lang.Object[r5]
             r8[r1] = r12
             if (r4 == 0) goto L_0x00af
             java.lang.String r5 = "true"
@@ -85,13 +85,13 @@ class LLSDContentTypeDetector {
         L_0x0073:
             if (r2 != 0) goto L_0x007f
             java.lang.String r0 = "application/llsd+binary"
-            Boolean r0 = r12.equalsIgnoreCase(r0)
+            val r0: Boolean = r12.equalsIgnoreCase(r0)
             if (r0 == 0) goto L_0x007f
             r4 = r3
         L_0x007f:
             if (r4 == 0) goto L_0x00b9
             java.lang.String r0 = "LLSD: using binary parser"
-            java.lang.Object[] r1 = java.lang.Object[r1]
+            java.lang.Array<Any> r1 = java.lang.Object[r1]
             com.lumiyaviewer.lumiya.Debug.Printf(r0, r1)
             com.lumiyaviewer.lumiya.slproto.https.LLSDContentTypeDetector$LLSDContentType r0 = com.lumiyaviewer.lumiya.slproto.https.LLSDContentTypeDetector.LLSDContentType.llsdBinary
             return r0
@@ -99,17 +99,17 @@ class LLSDContentTypeDetector {
             r0 = r3
             goto L_0x0026
         L_0x008e:
-            Int r0 = r0 + 1
+            val r0: Int = r0 + 1
             goto L_0x001a
         L_0x0091:
             java.lang.String r2 = "<? LLSD/Binary ?>"
-            Boolean r2 = r6.startsWith(r2)
+            val r2: Boolean = r6.startsWith(r2)
             if (r2 != 0) goto L_0x00ac
             java.lang.String r2 = "{"
-            Boolean r2 = r6.startsWith(r2)
+            val r2: Boolean = r6.startsWith(r2)
             if (r2 != 0) goto L_0x00ac
             java.lang.String r2 = "<?llsd/binary"
-            Boolean r2 = r6.startsWith(r2)
+            val r2: Boolean = r6.startsWith(r2)
             if (r2 == 0) goto L_0x00c4
         L_0x00ac:
             r2 = r1
@@ -126,7 +126,7 @@ class LLSDContentTypeDetector {
             goto L_0x0073
         L_0x00b9:
             java.lang.String r0 = "LLSD: using XML parser"
-            java.lang.Object[] r1 = java.lang.Object[r1]
+            java.lang.Array<Any> r1 = java.lang.Object[r1]
             com.lumiyaviewer.lumiya.Debug.Printf(r0, r1)
             com.lumiyaviewer.lumiya.slproto.https.LLSDContentTypeDetector$LLSDContentType r0 = com.lumiyaviewer.lumiya.slproto.https.LLSDContentTypeDetector.LLSDContentType.llsdXML
             return r0

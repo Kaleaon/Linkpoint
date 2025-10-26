@@ -24,17 +24,17 @@ class RateLimitRequestHandler<K, T> : RequestHandler<K>, RequestQueue<K, T>, Req
         this.resultHandler = requestSource.attachRequestHandler(this)
     }
 
-    private Unit runPendingRequests() {
+     private fun runPendingRequests() {
         synchronized (this.lock) {
             Debug.Printf("UserPic: RateLimitHandler: pending count %d, in flight %d", Integer.valueOf(this.pendingRequests.size()), Integer.valueOf(this.requestsInFlight.size()))
             if (this.requestHandler != null) {
-                Long currentTimeMillis = System.currentTimeMillis()
+                val currentTimeMillis: Long = System.currentTimeMillis()
                 if (this.requestsInFlight.size() >= this.maxInFlight && this.requestTimeout != Long.MAX_VALUE) {
-                    Iterator it = this.requestsInFlight.entrySet().iterator()
+                    val it: Iterator = this.requestsInFlight.entrySet().iterator()
                     while (it.hasNext()) {
-                        Entry entry = (Entry) it.next()
+                        val entry: Entry = (Entry) it.next()
                         if (currentTimeMillis >= ((Long) entry.getValue()).longValue() + this.requestTimeout) {
-                            Object key = entry.getKey()
+                            val key: Object = entry.getKey()
                             it.remove()
                             if (this.cancellable) {
                                 this.requestHandler.onRequestCancelled(key)
@@ -44,9 +44,9 @@ class RateLimitRequestHandler<K, T> : RequestHandler<K>, RequestQueue<K, T>, Req
                     }
                 }
                 if (this.requestsInFlight.size() < this.maxInFlight) {
-                    Iterator it2 = this.pendingRequests.iterator()
+                    val it2: Iterator = this.pendingRequests.iterator()
                     if (it2.hasNext()) {
-                        Object next = it2.next()
+                        val next: Object = it2.next()
                         it2.remove()
                         this.requestsInFlight.put(next, Long.valueOf(currentTimeMillis))
                         this.requestHandler.onRequest(next)
@@ -68,7 +68,7 @@ class RateLimitRequestHandler<K, T> : RequestHandler<K>, RequestQueue<K, T>, Req
                 }
                 this.requestHandler = requestHandler
                 if (requestHandler instanceof RequestHandlerLimits) {
-                    RequestHandlerLimits requestHandlerLimits = (RequestHandlerLimits) requestHandler
+                    val requestHandlerLimits: RequestHandlerLimits = (RequestHandlerLimits) requestHandler
                     this.cancellable = requestHandlerLimits.isRequestCancellable()
                     this.maxInFlight = requestHandlerLimits.getMaxRequestsInFlight()
                     this.requestTimeout = requestHandlerLimits.getRequestTimeout()
@@ -83,7 +83,7 @@ class RateLimitRequestHandler<K, T> : RequestHandler<K>, RequestQueue<K, T>, Req
         return this
     }
 
-    fun detachRequestHandler(RequestHandler<K> requestHandler) {
+    fun detachRequestHandler(requestHandler: RequestHandler<K>) {
         synchronized (this.lock) {
             if (this.requestHandler == requestHandler) {
                 this.requestHandler = null
@@ -95,7 +95,7 @@ class RateLimitRequestHandler<K, T> : RequestHandler<K>, RequestQueue<K, T>, Req
     public K getNextRequest() {
         K k = null
         synchronized (this.lock) {
-            Iterator it = this.pendingRequests.iterator()
+            val it: Iterator = this.pendingRequests.iterator()
             if (it.hasNext()) {
                 k = it.next()
                 it.remove()
@@ -137,7 +137,7 @@ class RateLimitRequestHandler<K, T> : RequestHandler<K>, RequestQueue<K, T>, Req
         runPendingRequests()
     }
 
-    fun onResultError(K k, Throwable th) {
+    fun onResultError(K k, th: Throwable) {
         synchronized (this.lock) {
             this.pendingRequests.remove(k)
             this.requestsInFlight.remove(k)
@@ -159,7 +159,7 @@ class RateLimitRequestHandler<K, T> : RequestHandler<K>, RequestQueue<K, T>, Req
         K next
         synchronized (this.lock) {
             while (true) {
-                Iterator it = this.pendingRequests.iterator()
+                val it: Iterator = this.pendingRequests.iterator()
                 if (it.hasNext()) {
                     next = it.next()
                     it.remove()

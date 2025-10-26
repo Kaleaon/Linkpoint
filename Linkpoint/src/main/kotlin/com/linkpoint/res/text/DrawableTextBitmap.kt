@@ -10,44 +10,44 @@ class DrawableTextBitmap {
     private val Bitmap bitmap
 
     DrawableTextBitmap(DrawableTextParams drawableTextParams, Int i) {
-        Paint paint = Paint()
-        Rect rect = Rect()
+        val paint: Paint = Paint()
+        val rect: Rect = Rect()
         paint.setTextSize((Float) i)
         paint.setAntiAlias(true)
         paint.setTextAlign(Paint.Align.CENTER)
-        String[] split = drawableTextParams.text().split("\n")
-        Int length = split.length
-        Int i2 = 0
-        Int i3 = 1
+        val split: Array<String> = drawableTextParams.text().split("\n")
+        val length: Int = split.length
+        val i2: Int = 0
+        val i3: Int = 1
         while (i2 < length) {
-            String str = split[i2]
+            val str: String = split[i2]
             paint.getTextBounds(str, 0, str.length(), rect)
             i2++
             i3 = rect.width() > i3 ? rect.width() : i3
         }
-        Float descent = paint.descent() - paint.ascent()
-        Int round = Math.round((((Float) split.length) * descent) + 1.0f)
-        Int i4 = drawableTextParams.backgroundColor() != 0 ? i : 0
-        Int i5 = drawableTextParams.backgroundColor() != 0 ? i / 2 : 0
-        Int i6 = 1
+        val descent: Float = paint.descent() - paint.ascent()
+        val round: Int = Math.round((((Float) split.length) * descent) + 1.0f)
+        val i4: Int = drawableTextParams.backgroundColor() != 0 ? i : 0
+        val i5: Int = drawableTextParams.backgroundColor() != 0 ? i / 2 : 0
+        val i6: Int = 1
         while (i6 < i3 + i4 && i6 < 512) {
             i6 <<= 1
         }
-        Int i7 = 1
+        val i7: Int = 1
         while (i7 < round + i5 && i7 < 256) {
             i7 <<= 1
         }
-        Int max = Math.max(i6, i7)
+        val max: Int = Math.max(i6, i7)
         this.bitmap = Bitmap.createBitmap(max, max, drawableTextParams.backgroundColor() == 0 ? Bitmap.Config.ALPHA_8 : Bitmap.Config.ARGB_8888)
-        Canvas canvas = Canvas(this.bitmap)
+        val canvas: Canvas = Canvas(this.bitmap)
         if (drawableTextParams.backgroundColor() != 0) {
             paint.setColor(drawableTextParams.backgroundColor())
-            Int i8 = i3 + i4
-            Int i9 = round + i5
+            val i8: Int = i3 + i4
+            val i9: Int = round + i5
             canvas.drawRect((Float) ((max - i8) / 2), (Float) ((max - i9) / 2), (Float) (max - ((max - i8) / 2)), (Float) (max - ((max - i9) / 2)), paint)
         }
         paint.setARGB(255, 255, 255, 255)
-        Int i10 = (max - round) / 2
+        val i10: Int = (max - round) / 2
         for (String drawText : split) {
             canvas.drawText(drawText, (Float) (max / 2), ((Float) i10) - paint.ascent(), paint)
             i10 = (Int) (((Float) i10) + (paint.descent() - paint.ascent()))
@@ -55,11 +55,11 @@ class DrawableTextBitmap {
         this.baselineOffset = (((Float) round) + descent) / ((Float) max)
     }
 
-    public Float getBaselineOffset() {
+     public fun getBaselineOffset(): Float {
         return this.baselineOffset
     }
 
-    public Bitmap getBitmap() {
+     public fun getBitmap(): Bitmap {
         return this.bitmap
     }
 }

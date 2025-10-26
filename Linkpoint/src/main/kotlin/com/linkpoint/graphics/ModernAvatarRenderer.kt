@@ -37,38 +37,38 @@ class ModernAvatarRenderer(
         // Vertex shader with skinning support for Animesh
         private const val AVATAR_VERTEX_SHADER = """
             #version 320 es
-            precision highp float;
+            precision highp float
             
             // Vertex attributes
-            layout(location = 0) in vec3 aPosition;
-            layout(location = 1) in vec3 aNormal;
-            layout(location = 2) in vec2 aTexCoord;
-            layout(location = 3) in vec3 aTangent;
+            layout(location = 0) in vec3 aPosition
+            layout(location = 1) in vec3 aNormal
+            layout(location = 2) in vec2 aTexCoord
+            layout(location = 3) in vec3 aTangent
             layout(location = 4) in vec4 aBoneIndices;  // For animesh skinning
             layout(location = 5) in vec4 aBoneWeights;  // For animesh skinning
             
             // Matrices
-            uniform mat4 uMVPMatrix;
-            uniform mat4 uModelMatrix;
-            uniform mat4 uViewMatrix;
-            uniform mat4 uProjectionMatrix;
-            uniform mat3 uNormalMatrix;
+            uniform mat4 uMVPMatrix
+            uniform mat4 uModelMatrix
+            uniform mat4 uViewMatrix
+            uniform mat4 uProjectionMatrix
+            uniform mat3 uNormalMatrix
             
             // Skinning (for Animesh)
-            uniform bool uUseAnimesh;
-            uniform mat4 uBoneMatrices[64];
+            uniform bool uUseAnimesh
+            uniform mat4 uBoneMatrices[64]
             
             // Outputs
-            out vec3 vWorldPos;
-            out vec3 vNormal;
-            out vec2 vTexCoord;
-            out vec3 vTangent;
-            out vec3 vViewPos;
+            out vec3 vWorldPos
+            out vec3 vNormal
+            out vec2 vTexCoord
+            out vec3 vTangent
+            out vec3 vViewPos
             
             void main() {
-                vec4 position = vec4(aPosition, 1.0);
-                vec3 normal = aNormal;
-                vec3 tangent = aTangent;
+                vec4 position = vec4(aPosition, 1.0)
+                vec3 normal = aNormal
+                vec3 tangent = aTangent
                 
                 // Apply skinning for animesh
                 if (uUseAnimesh) {
@@ -77,172 +77,172 @@ class ModernAvatarRenderer(
                         uBoneMatrices[int(aBoneIndices.x)] * aBoneWeights.x +
                         uBoneMatrices[int(aBoneIndices.y)] * aBoneWeights.y +
                         uBoneMatrices[int(aBoneIndices.z)] * aBoneWeights.z +
-                        uBoneMatrices[int(aBoneIndices.w)] * aBoneWeights.w;
+                        uBoneMatrices[int(aBoneIndices.w)] * aBoneWeights.w
                     
-                    position = boneTransform * position;
-                    normal = mat3(boneTransform) * normal;
-                    tangent = mat3(boneTransform) * tangent;
+                    position = boneTransform * position
+                    normal = mat3(boneTransform) * normal
+                    tangent = mat3(boneTransform) * tangent
                 }
                 
                 // World space position
-                vec4 worldPos = uModelMatrix * position;
-                vWorldPos = worldPos.xyz;
+                vec4 worldPos = uModelMatrix * position
+                vWorldPos = worldPos.xyz
                 
                 // View space position
-                vViewPos = (uViewMatrix * worldPos).xyz;
+                vViewPos = (uViewMatrix * worldPos).xyz
                 
                 // Transform normal and tangent
-                vNormal = normalize(uNormalMatrix * normal);
-                vTangent = normalize(uNormalMatrix * tangent);
+                vNormal = normalize(uNormalMatrix * normal)
+                vTangent = normalize(uNormalMatrix * tangent)
                 
                 // Pass through texture coordinates
-                vTexCoord = aTexCoord;
+                vTexCoord = aTexCoord
                 
                 // Final position
-                gl_Position = uProjectionMatrix * uViewMatrix * worldPos;
+                gl_Position = uProjectionMatrix * uViewMatrix * worldPos
             }
         """
         
         // Fragment shader with BOM and EEP support
         private const val AVATAR_FRAGMENT_SHADER = """
             #version 320 es
-            precision highp float;
+            precision highp float
             
             // Inputs from vertex shader
-            in vec3 vWorldPos;
-            in vec3 vNormal;
-            in vec2 vTexCoord;
-            in vec3 vTangent;
-            in vec3 vViewPos;
+            in vec3 vWorldPos
+            in vec3 vNormal
+            in vec2 vTexCoord
+            in vec3 vTangent
+            in vec3 vViewPos
             
             // Bakes on Mesh textures
-            uniform sampler2D uBakeHead;
-            uniform sampler2D uBakeUpperBody;
-            uniform sampler2D uBakeLowerBody;
-            uniform sampler2D uBakeEyes;
-            uniform sampler2D uBakeHair;
+            uniform sampler2D uBakeHead
+            uniform sampler2D uBakeUpperBody
+            uniform sampler2D uBakeLowerBody
+            uniform sampler2D uBakeEyes
+            uniform sampler2D uBakeHair
             uniform sampler2D uBakeLeftArm;   // BOM
             uniform sampler2D uBakeLeftLeg;   // BOM
             uniform sampler2D uBakeAux1;      // BOM
-            uniform int uActiveBakeIndex;
+            uniform int uActiveBakeIndex
             
             // PBR material properties
-            uniform sampler2D uNormalMap;
-            uniform sampler2D uMetallicRoughnessMap;
-            uniform float uMetallic;
-            uniform float uRoughness;
+            uniform sampler2D uNormalMap
+            uniform sampler2D uMetallicRoughnessMap
+            uniform float uMetallic
+            uniform float uRoughness
             
             // Enhanced Environment (EEP)
-            uniform vec3 uSunDirection;
-            uniform vec3 uSunColor;
-            uniform vec3 uAmbientColor;
-            uniform vec3 uFogColor;
-            uniform float uFogDensity;
+            uniform vec3 uSunDirection
+            uniform vec3 uSunColor
+            uniform vec3 uAmbientColor
+            uniform vec3 uFogColor
+            uniform float uFogDensity
             
             // Camera
-            uniform vec3 uCameraPos;
+            uniform vec3 uCameraPos
             
-            out vec4 FragColor;
+            out vec4 FragColor
             
-            const float PI = 3.14159265359;
+            const float PI = 3.14159265359
             
             // PBR functions (same as ModernGraphicsEngine)
             float DistributionGGX(vec3 N, vec3 H, float roughness) {
-                float a = roughness * roughness;
-                float a2 = a * a;
-                float NdotH = max(dot(N, H), 0.0);
-                float NdotH2 = NdotH * NdotH;
-                float num = a2;
-                float denom = (NdotH2 * (a2 - 1.0) + 1.0);
-                denom = PI * denom * denom;
-                return num / max(denom, 0.0001);
+                float a = roughness * roughness
+                float a2 = a * a
+                float NdotH = max(dot(N, H), 0.0)
+                float NdotH2 = NdotH * NdotH
+                float num = a2
+                float denom = (NdotH2 * (a2 - 1.0) + 1.0)
+                denom = PI * denom * denom
+                return num / max(denom, 0.0001)
             }
             
             float GeometrySchlickGGX(float NdotV, float roughness) {
-                float r = (roughness + 1.0);
-                float k = (r * r) / 8.0;
-                float num = NdotV;
-                float denom = NdotV * (1.0 - k) + k;
-                return num / max(denom, 0.0001);
+                float r = (roughness + 1.0)
+                float k = (r * r) / 8.0
+                float num = NdotV
+                float denom = NdotV * (1.0 - k) + k
+                return num / max(denom, 0.0001)
             }
             
             float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
-                float NdotV = max(dot(N, V), 0.0);
-                float NdotL = max(dot(N, L), 0.0);
-                float ggx2 = GeometrySchlickGGX(NdotV, roughness);
-                float ggx1 = GeometrySchlickGGX(NdotL, roughness);
-                return ggx1 * ggx2;
+                float NdotV = max(dot(N, V), 0.0)
+                float NdotL = max(dot(N, L), 0.0)
+                float ggx2 = GeometrySchlickGGX(NdotV, roughness)
+                float ggx1 = GeometrySchlickGGX(NdotL, roughness)
+                return ggx1 * ggx2
             }
             
             vec3 FresnelSchlick(float cosTheta, vec3 F0) {
-                return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+                return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0)
             }
             
             void main() {
                 // Sample appropriate baked texture based on body part
-                vec4 albedo;
+                vec4 albedo
                 switch(uActiveBakeIndex) {
-                    case 0: albedo = texture(uBakeHead, vTexCoord); break;
-                    case 1: albedo = texture(uBakeUpperBody, vTexCoord); break;
-                    case 2: albedo = texture(uBakeLowerBody, vTexCoord); break;
-                    case 3: albedo = texture(uBakeEyes, vTexCoord); break;
-                    case 5: albedo = texture(uBakeHair, vTexCoord); break;
+                    case 0: albedo = texture(uBakeHead, vTexCoord); break
+                    case 1: albedo = texture(uBakeUpperBody, vTexCoord); break
+                    case 2: albedo = texture(uBakeLowerBody, vTexCoord); break
+                    case 3: albedo = texture(uBakeEyes, vTexCoord); break
+                    case 5: albedo = texture(uBakeHair, vTexCoord); break
                     case 6: albedo = texture(uBakeLeftArm, vTexCoord); break;  // BOM
                     case 7: albedo = texture(uBakeLeftLeg, vTexCoord); break;  // BOM
                     case 8: albedo = texture(uBakeAux1, vTexCoord); break;     // BOM
-                    default: albedo = vec4(0.8, 0.8, 0.8, 1.0);
+                    default: albedo = vec4(0.8, 0.8, 0.8, 1.0)
                 }
                 
                 // Convert from sRGB to linear
-                albedo.rgb = pow(albedo.rgb, vec3(2.2));
+                albedo.rgb = pow(albedo.rgb, vec3(2.2))
                 
                 // Sample PBR maps
-                vec3 normal = normalize(vNormal);
-                float metallic = uMetallic;
-                float roughness = uRoughness;
+                vec3 normal = normalize(vNormal)
+                float metallic = uMetallic
+                float roughness = uRoughness
                 
                 // View direction
-                vec3 V = normalize(uCameraPos - vWorldPos);
+                vec3 V = normalize(uCameraPos - vWorldPos)
                 
                 // Sun lighting (from EEP)
-                vec3 L = normalize(uSunDirection);
-                vec3 H = normalize(V + L);
+                vec3 L = normalize(uSunDirection)
+                vec3 H = normalize(V + L)
                 
                 // PBR lighting calculation
-                vec3 F0 = vec3(0.04);
-                F0 = mix(F0, albedo.rgb, metallic);
+                vec3 F0 = vec3(0.04)
+                F0 = mix(F0, albedo.rgb, metallic)
                 
-                float NDF = DistributionGGX(normal, H, roughness);
-                float G = GeometrySmith(normal, V, L, roughness);
-                vec3 F = FresnelSchlick(max(dot(H, V), 0.0), F0);
+                float NDF = DistributionGGX(normal, H, roughness)
+                float G = GeometrySmith(normal, V, L, roughness)
+                vec3 F = FresnelSchlick(max(dot(H, V), 0.0), F0)
                 
-                vec3 kS = F;
-                vec3 kD = vec3(1.0) - kS;
-                kD *= 1.0 - metallic;
+                vec3 kS = F
+                vec3 kD = vec3(1.0) - kS
+                kD *= 1.0 - metallic
                 
-                vec3 numerator = NDF * G * F;
-                float denominator = 4.0 * max(dot(normal, V), 0.0) * max(dot(normal, L), 0.0) + 0.0001;
-                vec3 specular = numerator / denominator;
+                vec3 numerator = NDF * G * F
+                float denominator = 4.0 * max(dot(normal, V), 0.0) * max(dot(normal, L), 0.0) + 0.0001
+                vec3 specular = numerator / denominator
                 
-                float NdotL = max(dot(normal, L), 0.0);
-                vec3 Lo = (kD * albedo.rgb / PI + specular) * uSunColor * NdotL;
+                float NdotL = max(dot(normal, L), 0.0)
+                vec3 Lo = (kD * albedo.rgb / PI + specular) * uSunColor * NdotL
                 
                 // Ambient from EEP
-                vec3 ambient = uAmbientColor * albedo.rgb;
-                vec3 color = ambient + Lo;
+                vec3 ambient = uAmbientColor * albedo.rgb
+                vec3 color = ambient + Lo
                 
                 // Apply fog (from EEP)
-                float fogDistance = length(vViewPos);
-                float fogAmount = 1.0 - exp(-uFogDensity * fogDistance);
-                color = mix(color, uFogColor, fogAmount);
+                float fogDistance = length(vViewPos)
+                float fogAmount = 1.0 - exp(-uFogDensity * fogDistance)
+                color = mix(color, uFogColor, fogAmount)
                 
                 // HDR tone mapping
-                color = color / (color + vec3(1.0));
+                color = color / (color + vec3(1.0))
                 
                 // Gamma correction
-                color = pow(color, vec3(1.0/2.2));
+                color = pow(color, vec3(1.0/2.2))
                 
-                FragColor = vec4(color, albedo.a);
+                FragColor = vec4(color, albedo.a)
             }
         """
     }

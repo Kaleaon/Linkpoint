@@ -37,20 +37,20 @@ class SpatialObjectIndex {
     private val Set<DrawListObjectEntry> objectsToUpdate = Collections.newSetFromMap(IdentityHashMap())
     private val ObjectsUpdateTask objectsUpdateTask = ObjectsUpdateTask(this, null)
     private val SpatialTree spatialTree
-    private val DrawListTerrainEntry[][] terrain = ((DrawListTerrainEntry[][]) Array.newInstance(DrawListTerrainEntry.class, Int[]{16, 16}))
+    private val Array<DrawListTerrainEntry>[] terrain = ((Array<DrawListTerrainEntry>[]) Array.newInstance(DrawListTerrainEntry.class, IntArray{16, 16}))
     private val Map<Integer, TerrainData> terrainDirty = HashMap()
     private val Object terrainLock = Object()
     private val Runnable terrainUpdate = Runnable() {
         fun run() {
-            Boolean z = false
+            val z: Boolean = false
             while (SpatialObjectIndex.this.initialUpdateCompleted && (SpatialObjectIndex.this.indexDisabled ^ 1) != 0) {
                 TerrainData terrainData
                 synchronized (SpatialObjectIndex.this.terrainLock) {
-                    Iterator it = SpatialObjectIndex.this.terrainDirty.entrySet().iterator()
+                    val it: Iterator = SpatialObjectIndex.this.terrainDirty.entrySet().iterator()
                     if (it.hasNext()) {
-                        Entry entry = (Entry) it.next()
-                        Int intValue = ((Integer) entry.getKey()).intValue()
-                        TerrainData terrainData2 = (TerrainData) entry.getValue()
+                        val entry: Entry = (Entry) it.next()
+                        val intValue: Int = ((Integer) entry.getKey()).intValue()
+                        val terrainData2: TerrainData = (TerrainData) entry.getValue()
                         it.remove()
                         i = intValue
                         terrainData = terrainData2
@@ -67,15 +67,15 @@ class SpatialObjectIndex {
                 if (i < 0 || terrainData == null) {
                     z2 = z
                 } else {
-                    Int i2 = i % 16
+                    val i2: Int = i % 16
                     i /= 16
-                    TerrainPatchInfo patchInfo = terrainData.getPatchInfo(i2, i)
+                    val patchInfo: TerrainPatchInfo = terrainData.getPatchInfo(i2, i)
                     DrawListEntry drawListEntry
                     if (patchInfo != null) {
                         synchronized (SpatialObjectIndex.this.terrainLock) {
                             drawListEntry = SpatialObjectIndex.this.terrain[i2][i]
                             if (drawListEntry == null) {
-                                DrawListTerrainEntry[] drawListTerrainEntryArr = SpatialObjectIndex.this.terrain[i2]
+                                val drawListTerrainEntryArr: Array<DrawListTerrainEntry> = SpatialObjectIndex.this.terrain[i2]
                                 drawListEntry = DrawListTerrainEntry(patchInfo, i2, i)
                                 drawListTerrainEntryArr[i] = drawListEntry
                             } else {
@@ -136,14 +136,14 @@ class SpatialObjectIndex {
 
         fun run() {
             if (SpatialObjectIndex.this.initialUpdateCompleted && (SpatialObjectIndex.this.indexDisabled ^ 1) != 0) {
-                DrawListObjectEntry[] drawListObjectEntryArr
+                Array<DrawListObjectEntry> drawListObjectEntryArr
                 synchronized (SpatialObjectIndex.this.objectUpdateRemoveLock) {
-                    DrawListObjectEntry[] drawListObjectEntryArr2 = (DrawListObjectEntry[]) SpatialObjectIndex.this.objectsToUpdate.toArray(DrawListObjectEntry[SpatialObjectIndex.this.objectsToUpdate.size()])
-                    drawListObjectEntryArr = (DrawListObjectEntry[]) SpatialObjectIndex.this.objectsToRemove.toArray(DrawListObjectEntry[SpatialObjectIndex.this.objectsToRemove.size()])
+                    val drawListObjectEntryArr2: Array<DrawListObjectEntry> = (Array<DrawListObjectEntry>) SpatialObjectIndex.this.objectsToUpdate.toArray(DrawListObjectEntry[SpatialObjectIndex.this.objectsToUpdate.size()])
+                    drawListObjectEntryArr = (Array<DrawListObjectEntry>) SpatialObjectIndex.this.objectsToRemove.toArray(DrawListObjectEntry[SpatialObjectIndex.this.objectsToRemove.size()])
                     SpatialObjectIndex.this.objectsToUpdate.clear()
                     SpatialObjectIndex.this.objectsToRemove.clear()
                 }
-                Int i = 0
+                val i: Int = 0
                 for (DrawListObjectEntry drawListObjectEntry : drawListObjectEntryArr2) {
                     i |= !drawListObjectEntry.getObjectInfo().isDead ? SpatialObjectIndex.this.handleUpdateObject(drawListObjectEntry) : SpatialObjectIndex.this.handleRemoveObject(drawListObjectEntry)
                 }
@@ -164,26 +164,26 @@ class SpatialObjectIndex {
         this.objectsInFrustrum = DrawList.create(drawableStore, null, i)
     }
 
-    private DrawList getObjectsInCells(Int i) {
-        DrawList create = DrawList.create(this.drawableStore, this.objectsInFrustrum, i)
+     private fun getObjectsInCells(i: Int): DrawList {
+        val create: DrawList = DrawList.create(this.drawableStore, this.objectsInFrustrum, i)
         this.spatialTree.addDrawables(create)
         create.initRenderPasses()
         return create
     }
 
-    private Boolean handleRemoveObject(DrawListObjectEntry drawListObjectEntry) {
+     private fun handleRemoveObject(drawListObjectEntry: DrawListObjectEntry): Boolean {
         this.spatialTree.removeObject(drawListObjectEntry)
         drawListObjectEntry.getObjectInfo().clearDrawListEntry()
         return false
     }
 
-    private Boolean handleUpdateObject(DrawListObjectEntry drawListObjectEntry) {
+     private fun handleUpdateObject(drawListObjectEntry: DrawListObjectEntry): Boolean {
         drawListObjectEntry.updateBoundingBox()
         this.spatialTree.updateObject(drawListObjectEntry)
         return false
     }
 
-    private Unit removeObject(DrawListObjectEntry drawListObjectEntry) {
+     private fun removeObject(drawListObjectEntry: DrawListObjectEntry) {
         Int remove
         synchronized (this.objectUpdateRemoveLock) {
             remove = this.objectsToUpdate.remove(drawListObjectEntry) | this.objectsToRemove.add(drawListObjectEntry)
@@ -202,30 +202,30 @@ class SpatialObjectIndex {
         }
     }
 
-    Unit disableIndex() {
+     fun disableIndex() {
         this.indexDisabled = true
     }
 
-    DrawableAvatar getDrawableAvatar(SLObjectInfo sLObjectInfo) {
+     fun getDrawableAvatar(sLObjectInfo: SLObjectInfo): DrawableAvatar {
         return (DrawableAvatar) this.drawableStore.drawableAvatarCache.getIfPresent(sLObjectInfo)
     }
 
-    public DrawList getObjectsInFrustrum() {
+     public fun getObjectsInFrustrum(): DrawList {
         return this.objectsInFrustrum
     }
 
-    Unit requestEntryRemoval(DrawListEntry drawListEntry) {
+     fun requestEntryRemoval(drawListEntry: DrawListEntry) {
         if (drawListEntry instanceof DrawListObjectEntry) {
             removeObject((DrawListObjectEntry) drawListEntry)
         }
     }
 
-    fun setAvatarCountLimit(Int i) {
+    fun setAvatarCountLimit(i: Int) {
         this.avatarCountLimit = i
     }
 
-    fun setViewport(FrustrumInfo frustrumInfo, FrustrumPlanes frustrumPlanes) {
-        Object obj = 1
+    fun setViewport(frustrumInfo: FrustrumInfo, frustrumPlanes: FrustrumPlanes) {
+        val obj: Object = 1
         synchronized (this.lock) {
             if (this.frustrumInfo == null) {
                 this.frustrumInfo = frustrumInfo
@@ -244,7 +244,7 @@ class SpatialObjectIndex {
         }
     }
 
-    public Boolean updateDrawListIfNeeded() {
+     public fun updateDrawListIfNeeded(): Boolean {
         if (!this.drawListUpdateRequested.getAndSet(false)) {
             return false
         }
@@ -252,7 +252,7 @@ class SpatialObjectIndex {
         return true
     }
 
-    fun updateObject(DrawListObjectEntry drawListObjectEntry) {
+    fun updateObject(drawListObjectEntry: DrawListObjectEntry) {
         Boolean add
         synchronized (this.objectUpdateRemoveLock) {
             add = !drawListObjectEntry.getObjectInfo().isDead ? this.objectsToUpdate.add(drawListObjectEntry) : this.objectsToRemove.add(drawListObjectEntry)
@@ -262,7 +262,7 @@ class SpatialObjectIndex {
         }
     }
 
-    Unit updateTerrainPatch(Int i, Int i2, TerrainData terrainData) {
+     fun updateTerrainPatch(i: Int, i2: Int, terrainData: TerrainData) {
         synchronized (this.terrainLock) {
             this.terrainDirty.put(Integer.valueOf((i2 * 16) + i), terrainData)
         }

@@ -8,68 +8,68 @@ class MutableSLTextureEntryFace {
     const val Byte MEDIA_MASK = 1
     const val Byte SHINY_MASK = -64
     const val Byte TEX_MAP_MASK = 6
-    Float glow = 0.0f
+    val glow: Float = 0.0f
     Int hasAttribute
-    Byte materialb = 0
-    Byte mediab = 0
-    Float offsetU = 1.0f
-    Float offsetV = 1.0f
-    Float repeatU = 1.0f
-    Float repeatV = 1.0f
-    Int rgba = -1
-    Float rotation = 0.0f
+    val materialb: Byte = 0
+    val mediab: Byte = 0
+    val offsetU: Float = 1.0f
+    val offsetV: Float = 1.0f
+    val repeatU: Float = 1.0f
+    val repeatV: Float = 1.0f
+    val rgba: Int = -1
+    val rotation: Float = 0.0f
     UUID textureID
 
     public MutableSLTextureEntryFace(Int i) {
         this.hasAttribute = i
     }
 
-    fun setGlow(Float f) {
+    fun setGlow(f: Float) {
         this.glow = f
         this.hasAttribute |= 512
     }
 
-    fun setMaterial(Byte b) {
+    fun setMaterial(b: Byte) {
         this.materialb = b
         this.hasAttribute |= 128
     }
 
-    fun setMedia(Byte b) {
+    fun setMedia(b: Byte) {
         this.mediab = b
         this.hasAttribute |= 256
     }
 
-    fun setOffsetU(Float f) {
+    fun setOffsetU(f: Float) {
         this.offsetU = f
         this.hasAttribute |= 16
     }
 
-    fun setOffsetV(Float f) {
+    fun setOffsetV(f: Float) {
         this.offsetV = f
         this.hasAttribute |= 32
     }
 
-    fun setRGBA(Int i) {
+    fun setRGBA(i: Int) {
         this.rgba = i
         this.hasAttribute |= 2
     }
 
-    fun setRepeatU(Float f) {
+    fun setRepeatU(f: Float) {
         this.repeatU = f
         this.hasAttribute |= 4
     }
 
-    fun setRepeatV(Float f) {
+    fun setRepeatV(f: Float) {
         this.repeatV = f
         this.hasAttribute |= 8
     }
 
-    fun setRotation(Float f) {
+    fun setRotation(f: Float) {
         this.rotation = f
         this.hasAttribute |= 64
     }
 
-    fun setTextureID(UUID uuid) {
+    fun setTextureID(uuid: UUID) {
         this.textureID = uuid
         this.hasAttribute |= 1
     }

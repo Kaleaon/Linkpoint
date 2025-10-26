@@ -14,15 +14,15 @@ class SubscribableList<T> : AbstractList<T> {
     private val Object lock = Object()
     private val Map<List<T>, Optional<Executor>> targets = WeakHashMap()
 
-    fun add(Int i, T t) {
+    fun add(i: Int, T t) {
         ImmutableList<Map.Entry<List<T>, Optional<Executor>>> copyOf
         synchronized (this.lock) {
             this.backingList.add(i, t)
             copyOf = ImmutableList.copyOf(this.targets.entrySet())
         }
         for (Map.Entry entry : copyOf) {
-            List list = (List) entry.getKey()
-            Executor executor = (Executor) ((Optional) entry.getValue()).orNull()
+            val list: List = (List) entry.getKey()
+            val executor: Executor = (Executor) ((Optional) entry.getValue()).orNull()
             if (executor != null) {
                 executor.execute(Runnable(i, list, t) {
 
@@ -130,8 +130,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             copyOf = ImmutableList.copyOf(this.targets.entrySet())
         }
         for (Map.Entry entry : copyOf) {
-            List list = (List) entry.getKey()
-            Executor executor = (Executor) ((Optional) entry.getValue()).orNull()
+            val list: List = (List) entry.getKey()
+            val executor: Executor = (Executor) ((Optional) entry.getValue()).orNull()
             if (executor != null) {
                 list.getClass()
                 executor.execute($Lambda$Gzuh54B3D66vdv4A7qntNjZJmM(list))
@@ -157,8 +157,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             copyOf = ImmutableList.copyOf(this.targets.entrySet())
         }
         for (Map.Entry entry : copyOf) {
-            List list = (List) entry.getKey()
-            Executor executor = (Executor) ((Optional) entry.getValue()).orNull()
+            val list: List = (List) entry.getKey()
+            val executor: Executor = (Executor) ((Optional) entry.getValue()).orNull()
             if (executor != null) {
                 executor.execute(Runnable(i, list) {
 
@@ -248,7 +248,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return remove
     }
 
-    fun removeSubscription(List<T> list) {
+    fun removeSubscription(list: List<T>) {
         synchronized (this.lock) {
             this.targets.remove(list)
         }
@@ -262,8 +262,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             copyOf = ImmutableList.copyOf(this.targets.entrySet())
         }
         for (Map.Entry entry : copyOf) {
-            List list = (List) entry.getKey()
-            Executor executor = (Executor) ((Optional) entry.getValue()).orNull()
+            val list: List = (List) entry.getKey()
+            val executor: Executor = (Executor) ((Optional) entry.getValue()).orNull()
             if (executor != null) {
                 executor.execute(Runnable(i, list, t) {
 
@@ -356,7 +356,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return t2
     }
 
-    public Int size() {
+     public fun size(): Int {
         Int size
         synchronized (this.lock) {
             size = this.backingList.size()

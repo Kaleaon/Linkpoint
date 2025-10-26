@@ -23,23 +23,23 @@ final class AutoValue_DrawableTextureParams : DrawableTextureParams() {
         this.avatarUUID = uuid2
     }
 
-    public AvatarTextureFaceIndex avatarFaceIndex() {
+     public fun avatarFaceIndex(): AvatarTextureFaceIndex {
         return this.avatarFaceIndex
     }
 
-    public UUID avatarUUID() {
+     public fun avatarUUID(): UUID {
         return this.avatarUUID
     }
 
-    public Boolean equals(Object obj) {
-        Boolean z = true
+     public fun equals(obj: Object): Boolean {
+        val z: Boolean = true
         if (obj == this) {
             return true
         }
         if (!(obj instanceof DrawableTextureParams)) {
             return false
         }
-        DrawableTextureParams drawableTextureParams = (DrawableTextureParams) obj
+        val drawableTextureParams: DrawableTextureParams = (DrawableTextureParams) obj
         if (!this.uuid.equals(drawableTextureParams.uuid()) || !this.textureClass.equals(drawableTextureParams.textureClass()) || (this.avatarFaceIndex != null ? this.avatarFaceIndex.equals(drawableTextureParams.avatarFaceIndex()) : drawableTextureParams.avatarFaceIndex() == null)) {
             z = false
         } else if (this.avatarUUID != null) {
@@ -50,24 +50,24 @@ final class AutoValue_DrawableTextureParams : DrawableTextureParams() {
         return z
     }
 
-    public Int hashCode() {
-        Int i = 0
-        Int hashCode = ((this.avatarFaceIndex == null ? 0 : this.avatarFaceIndex.hashCode()) ^ ((((this.uuid.hashCode() ^ 1000003) * 1000003) ^ this.textureClass.hashCode()) * 1000003)) * 1000003
+     public fun hashCode(): Int {
+        val i: Int = 0
+        val hashCode: Int = ((this.avatarFaceIndex == null ? 0 : this.avatarFaceIndex.hashCode()) ^ ((((this.uuid.hashCode() ^ 1000003) * 1000003) ^ this.textureClass.hashCode()) * 1000003)) * 1000003
         if (this.avatarUUID != null) {
             i = this.avatarUUID.hashCode()
         }
         return hashCode ^ i
     }
 
-    public TextureClass textureClass() {
+     public fun textureClass(): TextureClass {
         return this.textureClass
     }
 
-    public String toString() {
+     public fun toString(): String {
         return "DrawableTextureParams{uuid=" + this.uuid + ", " + "textureClass=" + this.textureClass + ", " + "avatarFaceIndex=" + this.avatarFaceIndex + ", " + "avatarUUID=" + this.avatarUUID + "}"
     }
 
-    public UUID uuid() {
+     public fun uuid(): UUID {
         return this.uuid
     }
 }

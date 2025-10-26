@@ -28,7 +28,7 @@ class LLSDResponseCacher<Key> : ResponseCacher<Key, LLSDNode> {
     }
 
     /* access modifiers changed from: protected */
-    public LLSDNode loadCached(Byte[] bArr) {
+     public fun loadCached(bArr: ByteArray): LLSDNode {
         try {
             return LLSDNode.fromBinary(DataInputStream(ByteArrayInputStream(bArr)))
         } catch (LLSDException e) {
@@ -42,9 +42,9 @@ class LLSDResponseCacher<Key> : ResponseCacher<Key, LLSDNode> {
     }
 
     /* access modifiers changed from: protected */
-    public Byte[] storeCached(LLSDNode lLSDNode) {
-        ByteArrayOutputStream byteArrayOutputStream = ByteArrayOutputStream()
-        DataOutputStream dataOutputStream = DataOutputStream(byteArrayOutputStream)
+     public fun storeCached(lLSDNode: LLSDNode): ByteArray {
+        val byteArrayOutputStream: ByteArrayOutputStream = ByteArrayOutputStream()
+        val dataOutputStream: DataOutputStream = DataOutputStream(byteArrayOutputStream)
         try {
             lLSDNode.toBinary(dataOutputStream)
             dataOutputStream.flush()

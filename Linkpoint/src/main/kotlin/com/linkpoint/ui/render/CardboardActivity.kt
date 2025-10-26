@@ -102,7 +102,7 @@ import javax.microedition.khronos.opengles.GL10
 class CardboardActivity : DetailsActivity(), ObjectPopupsManager.ObjectPopupListener {
 
     /* renamed from: -com-lumiyaviewer-lumiya-ui-render-MoveControlSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f580comlumiyaviewerlumiyauirenderMoveControlSwitchesValues = null
+    private const val /* synthetic */ IntArray f580comlumiyaviewerlumiyauirenderMoveControlSwitchesValues = null
     private const val DEFAULT_FONT_SIZE_SP: Int = 16
     private const val LISTVIEW_SCROLL_DURATION: Int = 500
     private const val LISTVIEW_SCROLL_OFFSET: Int = 100
@@ -114,7 +114,7 @@ class CardboardActivity : DetailsActivity(), ObjectPopupsManager.ObjectPopupList
     private const val Float controlSizeFactorY = 0.75f
     private const val Float crosshairSize = 0.1f
     /* access modifiers changed from: private */
-    const val Int[] dialogButtonIds = {R.id.buttonDialog1, R.id.buttonDialog2, R.id.buttonDialog3, R.id.buttonDialog4, R.id.buttonDialog5, R.id.buttonDialog6, R.id.buttonDialog7, R.id.buttonDialog8, R.id.buttonDialog9, R.id.buttonDialog10, R.id.buttonDialog11, R.id.buttonDialog12}
+    const val IntArray dialogButtonIds = {R.id.buttonDialog1, R.id.buttonDialog2, R.id.buttonDialog3, R.id.buttonDialog4, R.id.buttonDialog5, R.id.buttonDialog6, R.id.buttonDialog7, R.id.buttonDialog8, R.id.buttonDialog9, R.id.buttonDialog10, R.id.buttonDialog11, R.id.buttonDialog12}
     /* access modifiers changed from: private */
     public SLChatScriptDialog activeScriptDialog = null
     private SLChatYesNoEvent activeYesNoEvent = null
@@ -356,9 +356,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             CardboardActivity.this.handleMoveControl(moveControl, 0.0f)
         }
 
-        fun onConnectionStateChanged(Int i) {
+        fun onConnectionStateChanged(i: Int) {
             super.onConnectionStateChanged(i)
-            Object[] objArr = Object[1]
+            val objArr: Array<Any> = Object[1]
             objArr[0] = i == 3 ? "connected" : "disconnected"
             Debug.Printf("Cardboard: Daydream controller is now %s", objArr)
             CardboardActivity.this.controllerConnectionState.set(i)
@@ -366,7 +366,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
         fun onUpdate() {
             MoveControl moveControl
-            Float f = 0.0f
+            val f: Float = 0.0f
             super.onUpdate()
             CardboardActivity.this.controller.update()
             if (CardboardActivity.this.controller.appButtonState && (!this.appButtonPressed)) {
@@ -548,8 +548,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             }
             this.appButtonPressed = CardboardActivity.this.controller.appButtonState
             if (CardboardActivity.this.controller.isTouching) {
-                Float f2 = (CardboardActivity.this.controller.touch.x * 2.0f) - 1.0f
-                Float f3 = -((CardboardActivity.this.controller.touch.y * 2.0f) - 1.0f)
+                val f2: Float = (CardboardActivity.this.controller.touch.x * 2.0f) - 1.0f
+                val f3: Float = -((CardboardActivity.this.controller.touch.y * 2.0f) - 1.0f)
                 if (Math.abs(f2) < 0.5f) {
                     f2 = 0.0f
                 }
@@ -982,7 +982,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
     private ControllerManager controllerManager
     private val ControllerManager.EventListener controllerManagerEventListener = ControllerManager.EventListener() {
-        fun onApiStatusChanged(Int i) {
+        fun onApiStatusChanged(i: Int) {
             Debug.Printf("Cardboard: controller API status: %d", Integer.valueOf(i))
         }
 
@@ -1061,12 +1061,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     /* access modifiers changed from: private */
     @SuppressLint({"HandlerLeak"})
     val Handler handler = Handler() {
-        fun handleMessage(Message message) {
-            Boolean z = false
+        fun handleMessage(message: Message) {
+            val z: Boolean = false
             switch (message.what) {
                 case 1:
                     if (message.obj != null && (message.obj instanceof ObjectIntersectInfo)) {
-                        ObjectIntersectInfo objectIntersectInfo = (ObjectIntersectInfo) message.obj
+                        val objectIntersectInfo: ObjectIntersectInfo = (ObjectIntersectInfo) message.obj
                         Debug.Printf("Cardboard: PICKED OBJECT isAvatar %b localID %d", Boolean.valueOf(objectIntersectInfo.objInfo.isAvatar()), Integer.valueOf(objectIntersectInfo.objInfo.localID))
                         if (objectIntersectInfo.objInfo instanceof SLObjectAvatarInfo) {
                             z = ((SLObjectAvatarInfo) objectIntersectInfo.objInfo).isMyAvatar()
@@ -1080,7 +1080,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                     return
                 case 2:
                     if (message.obj != null && (message.obj instanceof SLObjectInfo)) {
-                        SLObjectInfo sLObjectInfo = (SLObjectInfo) message.obj
+                        val sLObjectInfo: SLObjectInfo = (SLObjectInfo) message.obj
                         Debug.Printf("Cardboard: touched object isAvatar %b localID %d", Boolean.valueOf(sLObjectInfo.isAvatar()), Integer.valueOf(sLObjectInfo.localID))
                         return
                     }
@@ -1101,19 +1101,19 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     /* access modifiers changed from: private */
     public Int hitPointY = 0
     private val OnHoverListenerCompat hoverListener = OnHoverListenerCompat() {
-        public Boolean onHoverEnter(View view) {
+         public fun onHoverEnter(view: View): Boolean {
             view.setAlpha(1.0f)
             Debug.Printf("Cardboard: hovering enter %d", Integer.valueOf(view.getId()))
-            View unused = CardboardActivity.this.hoveringOverButton = view
+            val unused: View = CardboardActivity.this.hoveringOverButton = view
             CardboardActivity.this.m758com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref12()
             return false
         }
 
-        public Boolean onHoverExit(View view) {
+         public fun onHoverExit(view: View): Boolean {
             view.setAlpha(0.5f)
             Debug.Printf("Cardboard: hovering exit %d", Integer.valueOf(view.getId()))
             if (CardboardActivity.this.hoveringOverButton == view) {
-                View unused = CardboardActivity.this.hoveringOverButton = null
+                val unused: View = CardboardActivity.this.hoveringOverButton = null
             }
             CardboardActivity.this.m758com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref12()
             return false
@@ -1136,7 +1136,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     val AtomicDouble keypadTurning = AtomicDouble(0.0d)
     /* access modifiers changed from: private */
     public String lastSpeechRecognitionResults = ""
-    private val Int[] locationInWindow = Int[2]
+    private val IntArray locationInWindow = Int[2]
     @BindView(2131755259)
     ViewGroup moveButtonsLayout
     /* access modifiers changed from: private */
@@ -1203,9 +1203,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     @BindView(2131755271)
     TextView objectNameView
     private val View.OnClickListener onDialogButtonClick = View.OnClickListener() {
-        fun onClick(View view) {
+        fun onClick(view: View) {
             if (CardboardActivity.this.activeScriptDialog != null) {
-                Int i = 0
+                val i: Int = 0
                 while (true) {
                     if (i >= CardboardActivity.dialogButtonIds.length) {
                         i = -1
@@ -1217,7 +1217,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                     }
                 }
                 CardboardActivity.this.activeScriptDialog.onDialogButton(CardboardActivity.this.userManager, i)
-                SLChatScriptDialog unused = CardboardActivity.this.activeScriptDialog = null
+                val unused: SLChatScriptDialog = CardboardActivity.this.activeScriptDialog = null
             }
             CardboardActivity.this.handlePickedObject((ObjectIntersectInfo) null)
             CardboardActivity.this.setControlsPage(ControlsPage.pageDefault)
@@ -1854,7 +1854,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             Debug.Printf("Cardboard: beginning of speech", Object[0])
         }
 
-        fun onBufferReceived(Byte[] bArr) {
+        fun onBufferReceived(bArr: ByteArray) {
         }
 
         fun onEndOfSpeech() {
@@ -1863,7 +1863,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             CardboardActivity.this.speakNowText.setVisibility(4)
         }
 
-        fun onError(Int i) {
+        fun onError(i: Int) {
             String string
             Debug.Printf("Cardboard: speech error %d", Integer.valueOf(i))
             switch (i) {
@@ -1896,15 +1896,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             CardboardActivity.this.showSpeechRecognitionError(string)
         }
 
-        fun onEvent(Int i, Bundle bundle) {
+        fun onEvent(i: Int, bundle: Bundle) {
         }
 
-        fun onPartialResults(Bundle bundle) {
+        fun onPartialResults(bundle: Bundle) {
             Debug.Printf("Cardboard: speech recognition: got partial results", Object[0])
-            ArrayList<String> stringArrayList = bundle.getStringArrayList("results_recognition")
+            val stringArrayList: ArrayList<String> = bundle.getStringArrayList("results_recognition")
             if (stringArrayList != null && stringArrayList.size() > 0) {
-                String str = stringArrayList.get(0)
-                String unused = CardboardActivity.this.lastSpeechRecognitionResults = str
+                val str: String = stringArrayList.get(0)
+                val unused: String = CardboardActivity.this.lastSpeechRecognitionResults = str
                 CardboardActivity.this.speechRecognitionResults.setText(str)
                 if (!Strings.isNullOrEmpty(str)) {
                     CardboardActivity.this.buttonSpeechSend.setVisibility(0)
@@ -1912,38 +1912,38 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             }
         }
 
-        fun onReadyForSpeech(Bundle bundle) {
+        fun onReadyForSpeech(bundle: Bundle) {
             CardboardActivity.this.speakNowText.setVisibility(0)
         }
 
-        fun onResults(Bundle bundle) {
+        fun onResults(bundle: Bundle) {
             Debug.Printf("Cardboard: speech recognition: got some results", Object[0])
-            ArrayList<String> stringArrayList = bundle.getStringArrayList("results_recognition")
+            val stringArrayList: ArrayList<String> = bundle.getStringArrayList("results_recognition")
             if (stringArrayList != null && stringArrayList.size() > 0) {
-                String str = stringArrayList.get(0)
+                val str: String = stringArrayList.get(0)
                 CardboardActivity.this.speechRecognitionResults.setText(str)
-                String unused = CardboardActivity.this.lastSpeechRecognitionResults = str
+                val unused: String = CardboardActivity.this.lastSpeechRecognitionResults = str
                 if (!Strings.isNullOrEmpty(str)) {
                     CardboardActivity.this.buttonSpeechSend.setVisibility(0)
                     CardboardActivity.this.speakLevelIndicator.setVisibility(4)
-                    Boolean unused2 = CardboardActivity.this.isSpeechFinished = true
+                    val unused2: Boolean = CardboardActivity.this.isSpeechFinished = true
                 }
             }
         }
 
-        fun onRmsChanged(Float f) {
+        fun onRmsChanged(f: Float) {
             if (!CardboardActivity.this.isSpeechFinished) {
                 if (Float.isNaN(CardboardActivity.this.speechRmsMin) || f < CardboardActivity.this.speechRmsMin) {
-                    Float unused = CardboardActivity.this.speechRmsMin = f
+                    val unused: Float = CardboardActivity.this.speechRmsMin = f
                 }
                 if (Float.isNaN(CardboardActivity.this.speechRmsMax) || f > CardboardActivity.this.speechRmsMax) {
-                    Float unused2 = CardboardActivity.this.speechRmsMax = f
+                    val unused2: Float = CardboardActivity.this.speechRmsMax = f
                 }
-                Float r0 = CardboardActivity.this.speechRmsMax
+                val r0: Float = CardboardActivity.this.speechRmsMax
                 if (r0 - CardboardActivity.this.speechRmsMin < 1.0f) {
                     r0 = CardboardActivity.this.speechRmsMin + 1.0f
                 }
-                Int round = Math.round(((f - CardboardActivity.this.speechRmsMin) * 100.0f) / (r0 - CardboardActivity.this.speechRmsMin))
+                val round: Int = Math.round(((f - CardboardActivity.this.speechRmsMin) * 100.0f) / (r0 - CardboardActivity.this.speechRmsMin))
                 if (round < 0) {
                     round = 0
                 }
@@ -2233,15 +2233,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         private const val YAW_AVERAGE_FACTOR: Float = 1.0E-4f
         private Boolean agentHeadingAcquired = false
         private Boolean crosshairVisible = false
-        private val Float[] extTextureMatrixUV = Float[16]
+        private val FloatArray extTextureMatrixUV = Float[16]
         private GLExternalTexture externalTexture
-        private val Float[] eyeHitTests = Float[4]
-        private val Float[] eyeOffset = Float[4]
-        private val Float[] eyeOffsetMatrix = Float[16]
-        private val Float[] eyeProjection = Float[32]
-        private val Boolean[] eyeProjectionValid = Boolean[2]
+        private val FloatArray eyeHitTests = Float[4]
+        private val FloatArray eyeOffset = Float[4]
+        private val FloatArray eyeOffsetMatrix = Float[16]
+        private val FloatArray eyeProjection = Float[32]
+        private val BooleanArray eyeProjectionValid = Boolean[2]
         private Float eyeSeparation = 0.0f
-        private val Int[] eyeViewport = Int[4]
+        private val IntArray eyeViewport = Int[4]
         private val HeadTransformCompat headTransformCompat = HeadTransformCompat()
         private Long lastFrameTime = 0
         private Int viewportHeight = 0
@@ -2265,19 +2265,19 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             CardboardActivity.this.draw2DUI()
         }
 
-        fun onDrawEye(Eye eye) {
-            Int type = eye.getType()
-            Float f = (type == 1 ? -0.5f : 0.5f) * this.eyeSeparation
+        fun onDrawEye(eye: Eye) {
+            val type: Int = eye.getType()
+            val f: Float = (type == 1 ? -0.5f : 0.5f) * this.eyeSeparation
             for (Int i = 0; i < 4; i++) {
                 this.eyeOffset[i] = this.headTransformCompat.rightVector[i] * f
             }
             eye.getViewport().getAsArray(this.eyeViewport, 0)
             eye.getEyeView()
-            Int i2 = type == 1 ? 0 : 1
+            val i2: Int = type == 1 ? 0 : 1
             if (CardboardActivity.this.renderSettings != null && (!this.eyeProjectionValid[i2] || eye.getProjectionChanged())) {
                 System.arraycopy(eye.getPerspective(0.5f, (Float) CardboardActivity.this.renderSettings.drawDistance), 0, this.eyeProjection, i2 * 16, 16)
             }
-            CardboardActivity.this.renderer.onDrawFrame((GL10) null, this.headTransformCompat, this.eyeOffset, this.eyeViewport, (Float[]) null, (Float[]) null, 0)
+            CardboardActivity.this.renderer.onDrawFrame((GL10) null, this.headTransformCompat, this.eyeOffset, this.eyeViewport, (FloatArray) null, (FloatArray) null, 0)
             if (this.externalTexture != null) {
                 CardboardActivity.this.renderer.drawExternalTexture(this.externalTexture, this.extTextureMatrixUV, f, this.headTransformCompat.pitchDegrees, this.headTransformCompat.useButtonsYaw, CardboardActivity.controlDrawSizeFactor, 1.125f, this.eyeHitTests, type == 1 ? 0 : 2)
                 if (this.crosshairVisible) {
@@ -2286,14 +2286,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             }
         }
 
-        fun onFinishFrame(Viewport viewport) {
+        fun onFinishFrame(viewport: Viewport) {
             CardboardActivity.this.renderer.onFinishFrame()
             if (this.externalTexture != null) {
-                Int width = (Int) (((((this.eyeHitTests[0] + this.eyeHitTests[2]) / 2.0f) * 2.0f) + 0.5f) * ((Float) this.externalTexture.getWidth()))
-                Int height = (Int) (((-(((this.eyeHitTests[1] + this.eyeHitTests[3]) / 2.0f) * 2.0f)) + 0.5f) * ((Float) this.externalTexture.getHeight()))
+                val width: Int = (Int) (((((this.eyeHitTests[0] + this.eyeHitTests[2]) / 2.0f) * 2.0f) + 0.5f) * ((Float) this.externalTexture.getWidth()))
+                val height: Int = (Int) (((-(((this.eyeHitTests[1] + this.eyeHitTests[3]) / 2.0f) * 2.0f)) + 0.5f) * ((Float) this.externalTexture.getHeight()))
                 synchronized (CardboardActivity.this.hitPointLock) {
-                    Int unused = CardboardActivity.this.postedHitPointX = width
-                    Int unused2 = CardboardActivity.this.postedHitPointY = height
+                    val unused: Int = CardboardActivity.this.postedHitPointX = width
+                    val unused2: Int = CardboardActivity.this.postedHitPointY = height
                 }
                 if (!CardboardActivity.this.hitPointUpdatePosted.getAndSet(true)) {
                     CardboardActivity.this.runOnUiThread(Runnable(this) {
@@ -2397,9 +2397,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             }
         }
 
-        fun onNewFrame(HeadTransform headTransform) {
-            SLAvatarControl sLAvatarControl = (SLAvatarControl) CardboardActivity.this.avatarControl.get()
-            Long uptimeMillis = SystemClock.uptimeMillis()
+        fun onNewFrame(headTransform: HeadTransform) {
+            val sLAvatarControl: SLAvatarControl = (SLAvatarControl) CardboardActivity.this.avatarControl.get()
+            val uptimeMillis: Long = SystemClock.uptimeMillis()
             headTransform.getQuaternion(this.headTransformCompat.rotationQuat, 0)
             headTransform.getTranslation(this.headTransformCompat.translationVector, 0)
             headTransform.getHeadView(this.headTransformCompat.headTransformMatrix, 0)
@@ -2421,7 +2421,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                 this.headTransformCompat.useButtonsYaw = (this.headTransformCompat.eulerAngles[1] - this.headTransformCompat.lastYaw) / 0.017453292f
             } else {
                 this.headTransformCompat.pitchDegrees = this.headTransformCompat.eulerAngles[0] / 0.017453292f
-                Boolean z = false
+                val z: Boolean = false
                 if (CardboardActivity.this.currentControlsPage == ControlsPage.pageSpeech) {
                     z = true
                 } else if (CardboardActivity.this.currentControlsPage == ControlsPage.pageDefault) {
@@ -2444,14 +2444,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                 this.headTransformCompat.neutralYawValid = true
                 this.headTransformCompat.neutralYaw = this.headTransformCompat.yawDegrees
             } else {
-                Long j = uptimeMillis - this.lastFrameTime
-                Float angleMinusAngle = CameraParams.angleMinusAngle(this.headTransformCompat.yawDegrees, this.headTransformCompat.neutralYaw)
-                Boolean z2 = CardboardActivity.this.keypadActive.get() || CardboardActivity.this.controllerConnectionState.get() == 3
-                Boolean z3 = false
-                Boolean z4 = false
-                Float f = 1.0f
+                val j: Long = uptimeMillis - this.lastFrameTime
+                val angleMinusAngle: Float = CameraParams.angleMinusAngle(this.headTransformCompat.yawDegrees, this.headTransformCompat.neutralYaw)
+                val z2: Boolean = CardboardActivity.this.keypadActive.get() || CardboardActivity.this.controllerConnectionState.get() == 3
+                val z3: Boolean = false
+                val z4: Boolean = false
+                val f: Float = 1.0f
                 if (z2) {
-                    Double d = CardboardActivity.this.keypadTurning.get()
+                    val d: Double = CardboardActivity.this.keypadTurning.get()
                     z3 = d < 0.0d
                     z4 = d > 0.0d
                     f = (Float) Math.abs(d)
@@ -2465,9 +2465,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                 }
             }
             if (this.headTransformCompat.viewExtraYaw != CardboardActivity.this.neutralAgentHeading || Float.isNaN(CardboardActivity.this.neutralAgentHeading)) {
-                Float unused = CardboardActivity.this.neutralAgentHeading = CameraParams.wrapAngle(this.headTransformCompat.viewExtraYaw)
+                val unused: Float = CardboardActivity.this.neutralAgentHeading = CameraParams.wrapAngle(this.headTransformCompat.viewExtraYaw)
             }
-            Float unused2 = CardboardActivity.this.headAgentHeading = CameraParams.wrapAngle(this.headTransformCompat.yawDegrees + this.headTransformCompat.viewExtraYaw)
+            val unused2: Float = CardboardActivity.this.headAgentHeading = CameraParams.wrapAngle(this.headTransformCompat.yawDegrees + this.headTransformCompat.viewExtraYaw)
             if (!Float.isNaN(CardboardActivity.this.neutralAgentHeading) && sLAvatarControl != null) {
                 sLAvatarControl.setAgentHeading(CardboardActivity.this.isWalking ? CardboardActivity.this.headAgentHeading : CardboardActivity.this.neutralAgentHeading)
             }
@@ -2477,7 +2477,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             if (CardboardActivity.this.touchRequested.getAndSet(false)) {
                 CardboardActivity.this.renderer.pickObject((Float) (this.viewportWidth / 2), (Float) (this.viewportHeight / 2), CardboardActivity.this.handler)
             }
-            ObjectIntersectInfo objectIntersectInfo = (ObjectIntersectInfo) CardboardActivity.this.pickedObject.get()
+            val objectIntersectInfo: ObjectIntersectInfo = (ObjectIntersectInfo) CardboardActivity.this.pickedObject.get()
             CardboardActivity.this.renderer.setDrawPickedObject(objectIntersectInfo != null ? objectIntersectInfo.objInfo : null)
             this.crosshairVisible = CardboardActivity.this.currentControlsPage == ControlsPage.pageDetails ? CardboardActivity.this.insideControls : false
             if (this.externalTexture != null) {
@@ -2491,7 +2491,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             CardboardActivity.this.renderer.onRendererShutdown()
         }
 
-        fun onSurfaceChanged(Int i, Int i2) {
+        fun onSurfaceChanged(i: Int, i2: Int) {
             this.viewportWidth = i
             this.viewportHeight = i2
             CardboardActivity.this.renderer.onSurfaceChanged((GL10) null, i, i2)
@@ -2586,18 +2586,18 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
         }
 
-        fun onSurfaceCreated(EGLConfig eGLConfig) {
+        fun onSurfaceCreated(eGLConfig: EGLConfig) {
             CardboardActivity.this.renderer.onSurfaceCreated((GL10) null, eGLConfig, true)
         }
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-ui-render-MoveControlSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m734getcomlumiyaviewerlumiyauirenderMoveControlSwitchesValues() {
+private /* synthetic */ IntArray m734getcomlumiyaviewerlumiyauirenderMoveControlSwitchesValues() {
         if (f580comlumiyaviewerlumiyauirenderMoveControlSwitchesValues != null) {
             return f580comlumiyaviewerlumiyauirenderMoveControlSwitchesValues
         }
-        Int[] iArr = Int[MoveControl.values().length]
+        val iArr: IntArray = Int[MoveControl.values().length]
         try {
             iArr[MoveControl.Backward.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -2618,7 +2618,7 @@ private /* synthetic */ Int[] m734getcomlumiyaviewerlumiyauirenderMoveControlSwi
         return iArr
     }
 
-    private Unit closeSpeechControls() {
+     private fun closeSpeechControls() {
         if (this.speechRecognizer != null) {
             this.speechRecognizer.stopListening()
         }
@@ -2631,10 +2631,10 @@ private /* synthetic */ Int[] m734getcomlumiyaviewerlumiyauirenderMoveControlSwi
 
     /* access modifiers changed from: private */
     fun draw2DUI() {
-        GLExternalTexture gLExternalTexture = this.externalTextureRef.get()
+        val gLExternalTexture: GLExternalTexture = this.externalTextureRef.get()
         if (gLExternalTexture != null) {
             try {
-                Canvas canvas = gLExternalTexture.getCanvas()
+                val canvas: Canvas = gLExternalTexture.getCanvas()
                 drawExternalViews(canvas)
                 gLExternalTexture.postCanvas(canvas)
             } catch (IllegalStateException e) {
@@ -2642,7 +2642,7 @@ private /* synthetic */ Int[] m734getcomlumiyaviewerlumiyauirenderMoveControlSwi
         }
     }
 
-    private Unit drawExternalViews(Canvas canvas) {
+     private fun drawExternalViews(canvas: Canvas) {
         canvas.drawColor(0, PorterDuff.Mode.CLEAR)
         this.onScreenControlsLayout.draw(canvas)
     }
@@ -2656,27 +2656,27 @@ private /* synthetic */ Int[] m734getcomlumiyaviewerlumiyauirenderMoveControlSwi
     }
 
     @TargetApi(19)
-    private View findMatchingView(ViewGroup viewGroup, Int i, Int i2, Int i3, Int i4, Predicate<View> predicate, Point point) {
+     private fun findMatchingView(viewGroup: ViewGroup, i: Int, i2: Int, i3: Int, i4: Int, predicate: Predicate<View>, point: Point): View {
         View findMatchingView
         for (Int i5 = 0; i5 < viewGroup.getChildCount(); i5++) {
-            View childAt = viewGroup.getChildAt(i5)
+            val childAt: View = viewGroup.getChildAt(i5)
             if (childAt.getVisibility() == 0 && childAt.isAttachedToWindow() && predicate.apply(childAt)) {
                 childAt.getLocationInWindow(this.locationInWindow)
-                Int i6 = this.locationInWindow[0]
-                Int i7 = this.locationInWindow[1]
+                val i6: Int = this.locationInWindow[0]
+                val i7: Int = this.locationInWindow[1]
                 if (Rect(i6, i7, childAt.getWidth() + i6, childAt.getHeight() + i7).contains(i, i2)) {
                     point.set(i - i6, i2 - i7)
                     return childAt
                 }
             }
         }
-        Int i8 = 0
+        val i8: Int = 0
         while (true) {
-            Int i9 = i8
+            val i9: Int = i8
             if (i9 >= viewGroup.getChildCount()) {
                 return null
             }
-            View childAt2 = viewGroup.getChildAt(i9)
+            val childAt2: View = viewGroup.getChildAt(i9)
             if (childAt2.getVisibility() == 0 && childAt2.isAttachedToWindow() && (childAt2 instanceof ViewGroup) && (findMatchingView = findMatchingView((ViewGroup) childAt2, i, i2, 0, 0, predicate, point)) != null) {
                 return findMatchingView
             }
@@ -2685,8 +2685,8 @@ private /* synthetic */ Int[] m734getcomlumiyaviewerlumiyauirenderMoveControlSwi
     }
 
     /* access modifiers changed from: private */
-    fun handleMoveControl(MoveControl moveControl, Float f) {
-        SLAvatarControl sLAvatarControl = this.avatarControl.get()
+    fun handleMoveControl(moveControl: MoveControl, f: Float) {
+        val sLAvatarControl: SLAvatarControl = this.avatarControl.get()
         if (sLAvatarControl != null) {
             switch (m734getcomlumiyaviewerlumiyauirenderMoveControlSwitchesValues()[moveControl.ordinal()]) {
                 case 1:
@@ -2746,8 +2746,8 @@ private /* synthetic */ Int[] m734getcomlumiyaviewerlumiyauirenderMoveControlSwi
     }
 
     /* access modifiers changed from: private */
-    fun handlePickedObject(ObjectIntersectInfo objectIntersectInfo) {
-        SLObjectInfo sLObjectInfo = objectIntersectInfo != null ? objectIntersectInfo.objInfo : null
+    fun handlePickedObject(objectIntersectInfo: ObjectIntersectInfo) {
+        val sLObjectInfo: SLObjectInfo = objectIntersectInfo != null ? objectIntersectInfo.objInfo : null
         if (sLObjectInfo != null) {
             this.pickedObject.set(objectIntersectInfo)
             if (sLObjectInfo.isAvatar()) {
@@ -2867,15 +2867,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     /* access modifiers changed from: private */
     /* renamed from: isViewScrollable */
-    public Boolean m762com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref16(View view) {
+     public fun m762com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref16(view: View): Boolean {
         if (!(view instanceof ListView)) {
             return view instanceof RecyclerView
         }
         return true
     }
 
-    private Boolean isVoiceLoggedIn() {
-        Boolean data = this.voiceLoggedIn.getData()
+     private fun isVoiceLoggedIn(): Boolean {
+        val data: Boolean = this.voiceLoggedIn.getData()
         if (data != null) {
             return data.booleanValue()
         }
@@ -2884,10 +2884,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     /* access modifiers changed from: private */
     /* renamed from: onAgentCircuit */
-    fun m754com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref0(SLAgentCircuit sLAgentCircuit) {
-        SLAvatarControl sLAvatarControl = null
+    fun m754com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref0(sLAgentCircuit: SLAgentCircuit) {
+        val sLAvatarControl: SLAvatarControl = null
         updateDrawingEnabled()
-        AtomicReference<SLAvatarControl> atomicReference = this.avatarControl
+        val atomicReference: AtomicReference<SLAvatarControl> = this.avatarControl
         if (sLAgentCircuit != null) {
             sLAvatarControl = sLAgentCircuit.getModules().avatarControl
         }
@@ -2897,13 +2897,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     /* access modifiers changed from: private */
     /* renamed from: onCardboardTrigger */
     fun m759com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref13() {
-        Object[] objArr = Object[3]
+        val objArr: Array<Any> = Object[3]
         objArr[0] = Integer.valueOf(this.hoveringOverButton != null ? this.hoveringOverButton.getId() : -1)
         objArr[1] = Integer.valueOf(this.hoveringPressedButton != null ? this.hoveringPressedButton.getId() : -1)
         objArr[2] = Boolean.valueOf(this.hitPointValid)
         Debug.Printf("Cardboard: trigger, hover over %d, hover pressed %d, hitPointValid %b", objArr)
         if (this.hoveringPressedButton == null && this.hitPointValid) {
-            Long uptimeMillis = SystemClock.uptimeMillis()
+            val uptimeMillis: Long = SystemClock.uptimeMillis()
             if (!this.insideControls) {
                 View.OnTouchListener onTouchListener = this.outsideTouchListeners.get(this.currentControlsPage)
                 Debug.Printf("Cardboard: outside touch, listener %s", onTouchListener)
@@ -2911,10 +2911,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                     onTouchListener.onTouch(findViewById(this.currentControlsPage.pageViewId), MotionEvent.obtain(uptimeMillis, uptimeMillis + 100, 1, 0.0f, 0.0f, 0))
                 }
             } else if (this.hoveringOverButton == null || (!this.touchActivatedButtons.contains(this.hoveringOverButton))) {
-                MotionEvent obtain = MotionEvent.obtain(this.insideSince, uptimeMillis, 0, (Float) this.hitPointX, (Float) this.hitPointY, 0)
+                val obtain: MotionEvent = MotionEvent.obtain(this.insideSince, uptimeMillis, 0, (Float) this.hitPointX, (Float) this.hitPointY, 0)
                 obtain.setSource(2)
                 this.onScreenControlsLayout.dispatchTouchEvent(obtain)
-                MotionEvent obtain2 = MotionEvent.obtain(this.insideSince, uptimeMillis + 1, 1, (Float) this.hitPointX, (Float) this.hitPointY, 0)
+                val obtain2: MotionEvent = MotionEvent.obtain(this.insideSince, uptimeMillis + 1, 1, (Float) this.hitPointX, (Float) this.hitPointY, 0)
                 obtain2.setSource(2)
                 this.onScreenControlsLayout.dispatchTouchEvent(obtain2)
             }
@@ -2923,13 +2923,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     /* access modifiers changed from: private */
     /* renamed from: onCurrentLocationChanged */
-    fun m765com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref3(CurrentLocationInfo currentLocationInfo2) {
+    fun m765com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref3(currentLocationInfo2: CurrentLocationInfo) {
         updateVoiceIndication()
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onDetailsOutsideTouch */
-    public Boolean m756com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref10(View view, MotionEvent motionEvent) {
+     public fun m756com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref10(view: View, motionEvent: MotionEvent): Boolean {
         switch (motionEvent.getActionMasked()) {
             case 1:
                 handleBackPressed()
@@ -2940,37 +2940,37 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: private */
-    fun onExternalButtonAction(Boolean z) {
-        Long uptimeMillis = SystemClock.uptimeMillis()
+    fun onExternalButtonAction(z: Boolean) {
+        val uptimeMillis: Long = SystemClock.uptimeMillis()
         if (z) {
-            MotionEvent obtain = MotionEvent.obtain(uptimeMillis, uptimeMillis, 0, (Float) this.hitPointX, (Float) this.hitPointY, 0)
+            val obtain: MotionEvent = MotionEvent.obtain(uptimeMillis, uptimeMillis, 0, (Float) this.hitPointX, (Float) this.hitPointY, 0)
             obtain.setSource(2)
             onVrTouchInternal(obtain, true)
             m759com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref13()
             return
         }
-        MotionEvent obtain2 = MotionEvent.obtain(uptimeMillis, uptimeMillis, 1, (Float) this.hitPointX, (Float) this.hitPointY, 0)
+        val obtain2: MotionEvent = MotionEvent.obtain(uptimeMillis, uptimeMillis, 1, (Float) this.hitPointX, (Float) this.hitPointY, 0)
         obtain2.setSource(2)
         onVrTouchInternal(obtain2, true)
     }
 
     @TargetApi(14)
-    private Unit onExternalTexturePointer(Int i, Int i2) {
+     private fun onExternalTexturePointer(i: Int, i2: Int) {
         View findMatchingView
         this.hitPointValid = true
         this.hitPointX = i
         this.hitPointY = i2
-        GLExternalTexture gLExternalTexture = this.externalTextureRef.get()
+        val gLExternalTexture: GLExternalTexture = this.externalTextureRef.get()
         if (gLExternalTexture != null) {
             if (i >= 0 && i < gLExternalTexture.getWidth() && i2 >= 0 && i2 < gLExternalTexture.getHeight()) {
                 if (!this.insideControls) {
                     this.insideControls = true
                     this.insideSince = SystemClock.uptimeMillis()
-                    MotionEvent obtain = MotionEvent.obtain(this.insideSince, this.insideSince, 9, (Float) i, (Float) i2, 0)
+                    val obtain: MotionEvent = MotionEvent.obtain(this.insideSince, this.insideSince, 9, (Float) i, (Float) i2, 0)
                     obtain.setSource(2)
                     this.onScreenControlsLayout.dispatchGenericMotionEvent(obtain)
                 }
-                MotionEvent obtain2 = MotionEvent.obtain(this.insideSince, SystemClock.uptimeMillis(), 7, (Float) i, (Float) i2, 0)
+                val obtain2: MotionEvent = MotionEvent.obtain(this.insideSince, SystemClock.uptimeMillis(), 7, (Float) i, (Float) i2, 0)
                 obtain2.setSource(2)
                 this.onScreenControlsLayout.dispatchGenericMotionEvent(obtain2)
                 if (this.currentControlsPage == ControlsPage.pageDetails && (findMatchingView = findMatchingView(this.cardboardDetailsPage, i, i2, 0, 0, Predicate(this) {
@@ -3138,7 +3138,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                     
 */
                 }, this.scrollableViewPoint)) != null) {
-                    Int height = findMatchingView.getHeight()
+                    val height: Int = findMatchingView.getHeight()
                     if (this.scrollableViewPoint.y < height / 4) {
                         Debug.Printf("Cardboard: want to scroll up %s", findMatchingView)
                         if (findMatchingView instanceof ListView) {
@@ -3157,7 +3157,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                 }
             } else if (this.insideControls) {
                 this.insideControls = false
-                MotionEvent obtain3 = MotionEvent.obtain(this.insideSince, SystemClock.uptimeMillis(), 10, (Float) i, (Float) i2, 0)
+                val obtain3: MotionEvent = MotionEvent.obtain(this.insideSince, SystemClock.uptimeMillis(), 10, (Float) i, (Float) i2, 0)
                 obtain3.setSource(2)
                 this.onScreenControlsLayout.dispatchGenericMotionEvent(obtain3)
             }
@@ -3166,7 +3166,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     /* access modifiers changed from: private */
     /* renamed from: onMyAvatarState */
-    fun m755com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref1(MyAvatarState myAvatarState2) {
+    fun m755com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref1(myAvatarState2: MyAvatarState) {
         SLAvatarControl sLAvatarControl
         if (myAvatarState2.isSitting()) {
             this.moveButtonsLayout.setVisibility(0)
@@ -3184,20 +3184,20 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: private */
-    fun onNewExternalTexture(GLExternalTexture gLExternalTexture) {
+    fun onNewExternalTexture(gLExternalTexture: GLExternalTexture) {
         this.externalTextureRef.set(gLExternalTexture)
         ((CardboardControlsPlaceholder) findViewById(R.id.controls_placeholder)).setFixedSize(gLExternalTexture.getWidth(), gLExternalTexture.getHeight())
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onPickedAvatarNameUpdated */
-    fun m763com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref17(ChatterNameRetriever chatterNameRetriever) {
+    fun m763com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref17(chatterNameRetriever: ChatterNameRetriever) {
         this.objectNameView.setText(chatterNameRetriever.getResolvedName())
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onSelectedObjectProfile */
-    fun m757com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref11(SLObjectProfileData sLObjectProfileData) {
+    fun m757com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref11(sLObjectProfileData: SLObjectProfileData) {
         this.objectNameView.setText(sLObjectProfileData.name().or(getString(R.string.object_name_loading)))
     }
 
@@ -3286,7 +3286,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceActiveChatter */
-    fun m766com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref4(ChatterID chatterID) {
+    fun m766com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref4(chatterID: ChatterID) {
         if (this.voiceStatusView != null) {
             this.voiceStatusView.setChatterID(chatterID)
         }
@@ -3299,28 +3299,28 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceChatInfo */
-    fun m767com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref5(VoiceChatInfo voiceChatInfo2) {
+    fun m767com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref5(voiceChatInfo2: VoiceChatInfo) {
         updateVoiceIndication()
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceLoginStatusChanged */
-    fun m764com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref2(Boolean bool) {
+    fun m764com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref2(bool: Boolean) {
         updateVoiceIndication()
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onVrTouch */
-    public Boolean m760com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref14(View view, MotionEvent motionEvent) {
+     public fun m760com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref14(view: View, motionEvent: MotionEvent): Boolean {
         return onVrTouchInternal(motionEvent, false)
     }
 
-    private Boolean onVrTouchInternal(MotionEvent motionEvent, Boolean z) {
-        Int i = -1
-        Int actionMasked = motionEvent.getActionMasked()
-        String str = actionMasked == 0 ? "down" : actionMasked == 1 ? "up" : null
+     private fun onVrTouchInternal(motionEvent: MotionEvent, z: Boolean): Boolean {
+        val i: Int = -1
+        val actionMasked: Int = motionEvent.getActionMasked()
+        val str: String = actionMasked == 0 ? "down" : actionMasked == 1 ? "up" : null
         if (str != null) {
-            Object[] objArr = Object[3]
+            val objArr: Array<Any> = Object[3]
             objArr[0] = str
             objArr[1] = Integer.valueOf(this.hoveringOverButton != null ? this.hoveringOverButton.getId() : -1)
             if (this.hoveringPressedButton != null) {
@@ -3360,18 +3360,18 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: private */
-    fun setControlsPage(ControlsPage controlsPage) {
-        ControlsPage[] values = ControlsPage.values()
-        Int length = values.length
+    fun setControlsPage(controlsPage: ControlsPage) {
+        val values: Array<ControlsPage> = ControlsPage.values()
+        val length: Int = values.length
         for (Int i = 0; i < length; i++) {
-            ControlsPage controlsPage2 = values[i]
+            val controlsPage2: ControlsPage = values[i]
             findViewById(controlsPage2.pageViewId).setVisibility(controlsPage2 == controlsPage ? 0 : 4)
         }
         this.currentControlsPage = controlsPage
     }
 
     /* access modifiers changed from: private */
-    fun showSpeechRecognitionError(String str) {
+    fun showSpeechRecognitionError(str: String) {
         this.speakNowText.setVisibility(4)
         this.speakLevelIndicator.setVisibility(4)
         this.buttonSpeechSend.setVisibility(4)
@@ -3379,26 +3379,26 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         this.isSpeechFinished = true
     }
 
-    private Unit startWalking(Boolean z) {
-        SLAgentCircuit data = this.agentCircuit.getData()
+     private fun startWalking(z: Boolean) {
+        val data: SLAgentCircuit = this.agentCircuit.getData()
         if (data != null) {
             this.isWalking = true
-            SLAvatarControl sLAvatarControl = data.getModules().avatarControl
+            val sLAvatarControl: SLAvatarControl = data.getModules().avatarControl
             sLAvatarControl.setAgentHeading(this.headAgentHeading)
             sLAvatarControl.StartAgentMotion(z ? 2 : 4)
         }
     }
 
-    private Unit stopWalking() {
-        SLAgentCircuit data = this.agentCircuit.getData()
+     private fun stopWalking() {
+        val data: SLAgentCircuit = this.agentCircuit.getData()
         if (data != null) {
             data.getModules().avatarControl.StopAgentMotion()
             this.isWalking = false
         }
     }
 
-    private Unit updateDrawingEnabled() {
-        SLAgentCircuit data = this.agentCircuit.getData()
+     private fun updateDrawingEnabled() {
+        val data: SLAgentCircuit = this.agentCircuit.getData()
         if (data != null && this.renderSettings != null) {
             if (this.isResumed) {
                 data.getModules().drawDistance.Enable3DView(this.renderSettings.drawDistance)
@@ -3419,9 +3419,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         }
     }
 
-    private Unit updateObjectPanel() {
-        ObjectIntersectInfo objectIntersectInfo = this.pickedObject.get()
-        SLObjectInfo sLObjectInfo = objectIntersectInfo != null ? objectIntersectInfo.objInfo : null
+     private fun updateObjectPanel() {
+        val objectIntersectInfo: ObjectIntersectInfo = this.pickedObject.get()
+        val sLObjectInfo: SLObjectInfo = objectIntersectInfo != null ? objectIntersectInfo.objInfo : null
         if (sLObjectInfo == null) {
             setControlsPage(ControlsPage.pageDefault)
         } else if (sLObjectInfo.isAvatar()) {
@@ -3435,12 +3435,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         }
     }
 
-    private Unit updateVoiceIndication() {
-        Boolean isVoiceLoggedIn = isVoiceLoggedIn()
-        CurrentLocationInfo data = this.currentLocationInfo.getData()
+     private fun updateVoiceIndication() {
+        val isVoiceLoggedIn: Boolean = isVoiceLoggedIn()
+        val data: CurrentLocationInfo = this.currentLocationInfo.getData()
         this.voiceStatusView.setCanConnect((!isVoiceLoggedIn || data == null || data.parcelVoiceChannel() == null) ? false : true)
-        ChatterID data2 = this.voiceActiveChatter.getData()
-        VoiceChatInfo data3 = this.voiceChatInfo.getData()
+        val data2: ChatterID = this.voiceActiveChatter.getData()
+        val data3: VoiceChatInfo = this.voiceChatInfo.getData()
         if (data2 == null || data3 == null || data3.state == VoiceChatInfo.VoiceChatState.None) {
             this.buttonSpeak.setVisibility(0)
         } else {
@@ -3449,14 +3449,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: protected */
-    public Boolean acceptsDetailFragment(Class<? : Fragment> cls) {
+     public fun acceptsDetailFragment(cls: Class<? : Fragment>): Boolean {
         if (!ContactsFragment.class.isAssignableFrom(cls)) {
             return ChatFragment.class.isAssignableFrom(cls)
         }
         return true
     }
 
-    public Boolean dispatchKeyEvent(KeyEvent keyEvent) {
+     public fun dispatchKeyEvent(keyEvent: KeyEvent): Boolean {
         Debug.Printf("Cardboard: dispatch key event: keycode %d", Integer.valueOf(keyEvent.getKeyCode()))
         if (this.avatarControl.get() != null) {
             switch (keyEvent.getKeyCode()) {
@@ -3506,7 +3506,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         return super.dispatchKeyEvent(keyEvent)
     }
 
-    public Boolean handleBackPressed() {
+     public fun handleBackPressed(): Boolean {
         if (this.currentControlsPage != ControlsPage.pageDetails) {
             return false
         }
@@ -3516,8 +3516,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_render_CardboardActivity_16797  reason: not valid java name */
     public /* synthetic */ Unit m772lambda$com_lumiyaviewer_lumiya_ui_render_CardboardActivity_16797() {
-        Int i = 1
-        Int height = this.speechRecognitionResults.getHeight() / this.speechRecognitionResults.getLineHeight()
+        val i: Int = 1
+        val height: Int = this.speechRecognitionResults.getHeight() / this.speechRecognitionResults.getLineHeight()
         Debug.Printf("Cardboard: setting max lines = %d", Integer.valueOf(height))
         if (height >= 1) {
             i = height
@@ -3551,15 +3551,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_render_CardboardActivity_71435  reason: not valid java name */
     public /* synthetic */ Unit m775lambda$com_lumiyaviewer_lumiya_ui_render_CardboardActivity_71435(View view) {
-        SLAgentCircuit data = this.agentCircuit.getData()
-        CurrentLocationInfo data2 = this.currentLocationInfo.getData()
+        val data: SLAgentCircuit = this.agentCircuit.getData()
+        val data2: CurrentLocationInfo = this.currentLocationInfo.getData()
         if (this.voiceEnabled && data != null && isVoiceLoggedIn() && data2 != null && data2.parcelVoiceChannel() != null) {
             data.getModules().voice.nearbyVoiceChatRequest(data2.parcelVoiceChannel())
         }
     }
 
     @OnTouch({2131755265})
-    public Boolean onAimControlsTouch(View view, MotionEvent motionEvent) {
+     public fun onAimControlsTouch(view: View, motionEvent: MotionEvent): Boolean {
         Debug.Printf("Cardboard: aim controls touched, view %s", view)
         switch (motionEvent.getActionMasked()) {
             case 1:
@@ -3570,11 +3570,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     @OnTouch({2131755260, 2131755262, 2131755261, 2131755263})
-    public Boolean onCamButtonTouch(View view, MotionEvent motionEvent) {
-        Float f = 1.0f
-        Float f2 = -1.0f
+     public fun onCamButtonTouch(view: View, motionEvent: MotionEvent): Boolean {
+        val f: Float = 1.0f
+        val f2: Float = -1.0f
         Debug.Printf("Cardboard: cam button: event %s button %s", motionEvent, view)
-        SLAvatarControl sLAvatarControl = this.avatarControl.get()
+        val sLAvatarControl: SLAvatarControl = this.avatarControl.get()
         if (sLAvatarControl != null) {
             if (motionEvent.getActionMasked() == 0) {
                 switch (view.getId()) {
@@ -3609,14 +3609,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     fun onChatButton() {
         if (this.userManager != null) {
             setControlsPage(ControlsPage.pageDetails)
-            Bundle makeFragmentArguments = ActivityUtils.makeFragmentArguments(this.userManager.getUserID(), (Bundle) null)
+            val makeFragmentArguments: Bundle = ActivityUtils.makeFragmentArguments(this.userManager.getUserID(), (Bundle) null)
             makeFragmentArguments.putBoolean(VR_MODE_TAG, true)
             DetailsActivity.showEmbeddedDetails(this, ContactsFragment.class, makeFragmentArguments)
         }
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(Bundle bundle) {
+    fun onCreate(bundle: Bundle) {
         setTheme(R.style.Theme_Linkpoint_Light)
         super.onCreate(bundle)
         requestWindowFeature(1)
@@ -3633,8 +3633,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         this.renderSettings = RenderSettings(PreferenceManager.getDefaultSharedPreferences(getBaseContext()))
         this.stateHandler = Handler()
         Debug.Printf("Cardboard: creating VR view", Object[0])
-        GlobalOptions instance = GlobalOptions.getInstance()
-        CardboardControlsPlaceholder cardboardControlsPlaceholder = (CardboardControlsPlaceholder) findViewById(R.id.controls_placeholder)
+        val instance: GlobalOptions = GlobalOptions.getInstance()
+        val cardboardControlsPlaceholder: CardboardControlsPlaceholder = (CardboardControlsPlaceholder) findViewById(R.id.controls_placeholder)
         this.onScreenControlsLayout = (ViewGroup) getLayoutInflater().inflate(R.layout.cardboard_controls, cardboardControlsPlaceholder, true)
         cardboardControlsPlaceholder.setOnViewInvalidateListener(CardboardControlsPlaceholder.OnViewInvalidateListener(this) {
 
@@ -3708,7 +3708,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             
 */
 
-        Int applyDimension = (Int) TypedValue.applyDimension(2, 16.0f, getResources().getDisplayMetrics())
+        val applyDimension: Int = (Int) TypedValue.applyDimension(2, 16.0f, getResources().getDisplayMetrics())
         this.voiceViewHeightAllowance = instance.getVoiceEnabled() ? (Int) TypedValue.applyDimension(1, VOICE_VIEW_HEIGHT_ALLOWANCE_DP, getResources().getDisplayMetrics()) : 0
         this.renderer = WorldViewRenderer(this.stateHandler, true, this.userManager, applyDimension)
         this.renderer.setDrawDistance(this.renderSettings.drawDistance)
@@ -3794,7 +3794,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 */
 
         ButterKnife.bind((Object) this, (View) this.onScreenControlsLayout)
-        for (View view : View[]{this.buttonTouch, this.buttonSpeak, this.buttonChat, this.buttonSpeechSend, this.buttonSit, this.buttonTouchObject, this.buttonObjectChat, this.buttonMoveForward, this.buttonMoveBackward, this.buttonTurnLeft, this.buttonTurnRight, this.buttonStandUp, this.yesButton, this.noButton}) {
+        for (View view : Array<View>{this.buttonTouch, this.buttonSpeak, this.buttonChat, this.buttonSpeechSend, this.buttonSit, this.buttonTouchObject, this.buttonObjectChat, this.buttonMoveForward, this.buttonMoveBackward, this.buttonTurnLeft, this.buttonTurnRight, this.buttonStandUp, this.yesButton, this.noButton}) {
             view.setAlpha(0.5f)
             view.setOnHoverListener(this.onHoverListener)
         }
@@ -3809,9 +3809,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         this.voiceStatusView.setLightTheme()
         this.voiceStatusView.enableHover(this.hoverListener)
         this.voiceStatusView.setOnCallButtonListener(this.onVoiceCallButtonListener)
-        Int applyDimension2 = (Int) TypedValue.applyDimension(1, 1.0f, getResources().getDisplayMetrics())
+        val applyDimension2: Int = (Int) TypedValue.applyDimension(1, 1.0f, getResources().getDisplayMetrics())
         for (Int findViewById : dialogButtonIds) {
-            Button button = (Button) findViewById(findViewById)
+            val button: Button = (Button) findViewById(findViewById)
             button.setAlpha(0.5f)
             button.setOnHoverListener(this.onHoverListener)
             button.setOnClickListener(this.onDialogButtonClick)
@@ -4116,21 +4116,21 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: protected */
-    public Boolean onDetailsStackEmpty() {
+     public fun onDetailsStackEmpty(): Boolean {
         super.onDetailsStackEmpty()
         setControlsPage(ControlsPage.pageDefault)
         return true
     }
 
-    fun onNewObjectPopup(SLChatEvent sLChatEvent) {
+    fun onNewObjectPopup(sLChatEvent: SLChatEvent) {
         if (sLChatEvent instanceof SLChatScriptDialog) {
             if (this.currentControlsPage != ControlsPage.pageYesNo) {
-                SLChatScriptDialog sLChatScriptDialog = (SLChatScriptDialog) sLChatEvent
+                val sLChatScriptDialog: SLChatScriptDialog = (SLChatScriptDialog) sLChatEvent
                 this.activeScriptDialog = sLChatScriptDialog
                 setControlsPage(ControlsPage.pageScriptDialog)
-                String[] buttons = sLChatScriptDialog.getButtons()
+                val buttons: Array<String> = sLChatScriptDialog.getButtons()
                 for (Int i = 0; i < dialogButtonIds.length; i++) {
-                    Button button = (Button) findViewById(dialogButtonIds[i])
+                    val button: Button = (Button) findViewById(dialogButtonIds[i])
                     if (i < buttons.length) {
                         button.setVisibility(0)
                         button.setText(buttons[i])
@@ -4159,9 +4159,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     @OnClick({2131755270})
     fun onObjectChat() {
-        SLAgentCircuit data = this.agentCircuit.getData()
-        ObjectIntersectInfo objectIntersectInfo = this.pickedObject.get()
-        SLObjectInfo sLObjectInfo = objectIntersectInfo != null ? objectIntersectInfo.objInfo : null
+        val data: SLAgentCircuit = this.agentCircuit.getData()
+        val objectIntersectInfo: ObjectIntersectInfo = this.pickedObject.get()
+        val sLObjectInfo: SLObjectInfo = objectIntersectInfo != null ? objectIntersectInfo.objInfo : null
         if (data != null && sLObjectInfo != null && this.userManager != null && sLObjectInfo.isAvatar()) {
             startDictation(ChatterID.getUserChatterID(this.userManager.getUserID(), sLObjectInfo.getId()))
         }
@@ -4169,7 +4169,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     @OnTouch({2131755266})
     /* renamed from: onObjectControlsTouch */
-    public Boolean m769com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref7(View view, MotionEvent motionEvent) {
+     public fun m769com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref7(view: View, motionEvent: MotionEvent): Boolean {
         switch (motionEvent.getActionMasked()) {
             case 1:
                 handlePickedObject((ObjectIntersectInfo) null)
@@ -4180,14 +4180,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         }
     }
 
-    fun onObjectPopupCountChanged(Int i) {
+    fun onObjectPopupCountChanged(i: Int) {
     }
 
     @OnClick({2131755269})
     fun onObjectSit() {
-        SLAgentCircuit data = this.agentCircuit.getData()
-        ObjectIntersectInfo objectIntersectInfo = this.pickedObject.get()
-        SLObjectInfo sLObjectInfo = objectIntersectInfo != null ? objectIntersectInfo.objInfo : null
+        val data: SLAgentCircuit = this.agentCircuit.getData()
+        val objectIntersectInfo: ObjectIntersectInfo = this.pickedObject.get()
+        val sLObjectInfo: SLObjectInfo = objectIntersectInfo != null ? objectIntersectInfo.objInfo : null
         if (data != null && sLObjectInfo != null) {
             data.getModules().avatarControl.SitOnObject(sLObjectInfo.getId())
             handlePickedObject((ObjectIntersectInfo) null)
@@ -4197,12 +4197,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     @OnClick({2131755268})
     fun onObjectTouch() {
-        SLAgentCircuit data = this.agentCircuit.getData()
-        ObjectIntersectInfo objectIntersectInfo = this.pickedObject.get()
-        SLObjectInfo sLObjectInfo = objectIntersectInfo != null ? objectIntersectInfo.objInfo : null
+        val data: SLAgentCircuit = this.agentCircuit.getData()
+        val objectIntersectInfo: ObjectIntersectInfo = this.pickedObject.get()
+        val sLObjectInfo: SLObjectInfo = objectIntersectInfo != null ? objectIntersectInfo.objInfo : null
         if (data != null && sLObjectInfo != null && !sLObjectInfo.isAvatar()) {
             if (objectIntersectInfo.intersectInfo.faceKnown) {
-                LLVector3 absolutePosition = sLObjectInfo.getAbsolutePosition()
+                val absolutePosition: LLVector3 = sLObjectInfo.getAbsolutePosition()
                 data.TouchObjectFace(sLObjectInfo, objectIntersectInfo.intersectInfo.faceID, absolutePosition.x, absolutePosition.y, absolutePosition.z, objectIntersectInfo.intersectInfo.u, objectIntersectInfo.intersectInfo.v, objectIntersectInfo.intersectInfo.s, objectIntersectInfo.intersectInfo.t)
                 return
             }
@@ -4264,7 +4264,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     @OnTouch({2131755282})
     /* renamed from: onScriptDialogOutsideTouch */
-    public Boolean m770com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref8(View view, MotionEvent motionEvent) {
+     public fun m770com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref8(view: View, motionEvent: MotionEvent): Boolean {
         switch (motionEvent.getActionMasked()) {
             case 1:
                 if (this.activeScriptDialog != null) {
@@ -4288,7 +4288,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     @OnTouch({2131755277})
     /* renamed from: onSpeakControlsTouch */
-    public Boolean m768com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref6(View view, MotionEvent motionEvent) {
+     public fun m768com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref6(view: View, motionEvent: MotionEvent): Boolean {
         Debug.Printf("Cardboard: speak controls touched, view %s", view)
         switch (motionEvent.getActionMasked()) {
             case 1:
@@ -4312,7 +4312,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     @OnClick({2131755264})
     fun onStandUpButton() {
-        SLAvatarControl sLAvatarControl = this.avatarControl.get()
+        val sLAvatarControl: SLAvatarControl = this.avatarControl.get()
         if (sLAvatarControl != null) {
             sLAvatarControl.Stand()
         }
@@ -4357,7 +4357,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         setControlsPage(ControlsPage.pageTouchAim)
     }
 
-    fun onWindowFocusChanged(Boolean z) {
+    fun onWindowFocusChanged(z: Boolean) {
         super.onWindowFocusChanged(z)
         this.fullscreenMode.onWindowFocusChanged(z)
     }
@@ -4374,7 +4374,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     @OnTouch({2131755272})
     /* renamed from: onYesNoOutsideTouch */
-    public Boolean m771com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref9(View view, MotionEvent motionEvent) {
+     public fun m771com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref9(view: View, motionEvent: MotionEvent): Boolean {
         switch (motionEvent.getActionMasked()) {
             case 1:
                 this.activeYesNoEvent = null
@@ -4386,7 +4386,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         }
     }
 
-    fun startDictation(ChatterID chatterID) {
+    fun startDictation(chatterID: ChatterID) {
         setControlsPage(ControlsPage.pageSpeech)
         this.dictationChatterID = chatterID
         this.speakNowText.setVisibility(4)
@@ -4395,7 +4395,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         this.speechRecognitionResults.setText("")
         if (this.speechRecognizer != null) {
             this.isSpeechFinished = false
-            Intent intent = Intent()
+            val intent: Intent = Intent()
             intent.putExtra("android.speech.extra.PARTIAL_RESULTS", true)
             this.speechRecognizer.startListening(intent)
             return

@@ -34,10 +34,10 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
                 r13 = 2
                 r2 = 0
                 r3 = 1
-                Long r6 = java.lang.System.currentTimeMillis()     // Catch:{ Exception -> 0x0176 }
+                val r6: Long = java.lang.System.currentTimeMillis()     // Catch:{ Exception -> 0x0176 }
                 java.lang.String r0 = "InventoryFetcher: Going to fetch folder: %s"
                 r1 = 1
-                java.lang.Object[] r1 = java.lang.Object[r1]     // Catch:{ Exception -> 0x0176 }
+                java.lang.Array<Any> r1 = java.lang.Object[r1]     // Catch:{ Exception -> 0x0176 }
                 com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r4 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ Exception -> 0x0176 }
                 java.util.UUID r4 = r4.folderUUID     // Catch:{ Exception -> 0x0176 }
                 r5 = 0
@@ -49,7 +49,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
                 r0.<init>()     // Catch:{ Exception -> 0x0176 }
                 com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap r1 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap     // Catch:{ Exception -> 0x0176 }
                 r4 = 3
-                com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap$LLSDMapEntry[] r4 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry[r4]     // Catch:{ Exception -> 0x0176 }
+                com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap$Array<LLSDMapEntry> r4 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry[r4]     // Catch:{ Exception -> 0x0176 }
                 com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap$LLSDMapEntry r8 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap$LLSDMapEntry     // Catch:{ Exception -> 0x0176 }
                 java.lang.String r9 = "folder_id"
                 com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDUUID r10 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDUUID     // Catch:{ Exception -> 0x0176 }
@@ -75,17 +75,17 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
                 r8.<init>(r9, r10)     // Catch:{ Exception -> 0x0176 }
                 r9 = 2
                 r4[r9] = r8     // Catch:{ Exception -> 0x0176 }
-                r1.<init>((com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry[]) r4)     // Catch:{ Exception -> 0x0176 }
+                r1.<init>((com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.Array<LLSDMapEntry>) r4)     // Catch:{ Exception -> 0x0176 }
                 r0.add(r1)     // Catch:{ Exception -> 0x0176 }
                 com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap r8 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap     // Catch:{ Exception -> 0x0176 }
                 r1 = 1
-                com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap$LLSDMapEntry[] r1 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry[r1]     // Catch:{ Exception -> 0x0176 }
+                com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap$Array<LLSDMapEntry> r1 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry[r1]     // Catch:{ Exception -> 0x0176 }
                 com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap$LLSDMapEntry r4 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap$LLSDMapEntry     // Catch:{ Exception -> 0x0176 }
                 java.lang.String r9 = "folders"
                 r4.<init>(r9, r0)     // Catch:{ Exception -> 0x0176 }
                 r0 = 0
                 r1[r0] = r4     // Catch:{ Exception -> 0x0176 }
-                r8.<init>((com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry[]) r1)     // Catch:{ Exception -> 0x0176 }
+                r8.<init>((com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.Array<LLSDMapEntry>) r1)     // Catch:{ Exception -> 0x0176 }
                 com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ Exception -> 0x0176 }
                 java.util.concurrent.atomic.AtomicReference r0 = r0.streamingXmlReqRef     // Catch:{ Exception -> 0x0176 }
                 r0.set(r5)     // Catch:{ Exception -> 0x0176 }
@@ -100,7 +100,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
                 r9.start()     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
                 java.lang.String r0 = "InventoryFetcher: Starting HTTP request for folder: %s"
                 r10 = 1
-                java.lang.Object[] r10 = java.lang.Object[r10]     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
+                java.lang.Array<Any> r10 = java.lang.Object[r10]     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
                 com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r11 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
                 java.util.UUID r11 = r11.folderUUID     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
                 r12 = 0
@@ -115,13 +115,13 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
                 r5.PerformRequest(r0, r8, r10)     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
                 java.lang.String r0 = "InvFetch: done parsing,  waiting for commit thread"
                 r10 = 0
-                java.lang.Object[] r10 = java.lang.Object[r10]     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
+                java.lang.Array<Any> r10 = java.lang.Object[r10]     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
                 com.lumiyaviewer.lumiya.Debug.Printf(r0, r10)     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
                 r0 = 1
                 r9.stopAndWait(r0)     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
                 java.lang.String r0 = "InvFetch: commit thread finished"
                 r10 = 0
-                java.lang.Object[] r10 = java.lang.Object[r10]     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
+                java.lang.Array<Any> r10 = java.lang.Object[r10]     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
                 com.lumiyaviewer.lumiya.Debug.Printf(r0, r10)     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
                 r1 = r3
             L_0x00c6:
@@ -129,14 +129,14 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
             L_0x00c8:
                 java.lang.String r0 = "InventoryFetcher: Fetched folder: %s (fetch time = %d)"
                 r4 = 2
-                java.lang.Object[] r4 = java.lang.Object[r4]     // Catch:{ Exception -> 0x012d }
+                java.lang.Array<Any> r4 = java.lang.Object[r4]     // Catch:{ Exception -> 0x012d }
                 com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r5 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ Exception -> 0x012d }
                 java.util.UUID r5 = r5.folderUUID     // Catch:{ Exception -> 0x012d }
                 java.lang.String r5 = r5.toString()     // Catch:{ Exception -> 0x012d }
                 r8 = 0
                 r4[r8] = r5     // Catch:{ Exception -> 0x012d }
-                Long r8 = java.lang.System.currentTimeMillis()     // Catch:{ Exception -> 0x012d }
-                Long r6 = r8 - r6
+                val r8: Long = java.lang.System.currentTimeMillis()     // Catch:{ Exception -> 0x012d }
+                val r6: Long = r8 - r6
                 java.lang.Long r5 = java.lang.Long.valueOf(r6)     // Catch:{ Exception -> 0x012d }
                 r6 = 1
                 r4[r6] = r5     // Catch:{ Exception -> 0x012d }
@@ -146,14 +146,14 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
                 r4 = 0
                 r0.set(r4)     // Catch:{ Exception -> 0x012d }
             L_0x00f3:
-                Boolean r0 = java.lang.Thread.interrupted()
+                val r0: Boolean = java.lang.Thread.interrupted()
                 if (r0 != 0) goto L_0x0170
                 com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this
                 java.util.concurrent.atomic.AtomicBoolean r0 = r0.isCancelled
-                Boolean r0 = r0.get()
+                val r0: Boolean = r0.get()
             L_0x0103:
                 java.lang.String r4 = "InventoryFetcher: done processing folder %s: success %s cancelled %b"
-                java.lang.Object[] r5 = java.lang.Object[r14]
+                java.lang.Array<Any> r5 = java.lang.Object[r14]
                 com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r6 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this
                 java.util.UUID r6 = r6.folderUUID
                 java.lang.String r6 = r6.toString()
@@ -194,13 +194,13 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
                 goto L_0x00c6
             L_0x0156:
                 r9.interrupt()     // Catch:{ Exception -> 0x012d }
-                Boolean r0 = java.lang.Thread.interrupted()     // Catch:{ Exception -> 0x012d }
+                val r0: Boolean = java.lang.Thread.interrupted()     // Catch:{ Exception -> 0x012d }
                 if (r0 != 0) goto L_0x00c8
                 com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ Exception -> 0x012d }
                 java.util.concurrent.atomic.AtomicBoolean r0 = r0.isCancelled     // Catch:{ Exception -> 0x012d }
-                Boolean r0 = r0.get()     // Catch:{ Exception -> 0x012d }
+                val r0: Boolean = r0.get()     // Catch:{ Exception -> 0x012d }
                 if (r0 != 0) goto L_0x00c8
-                Int r0 = r4 + 1
+                val r0: Int = r4 + 1
                 r4 = r0
                 goto L_0x0081
             L_0x0170:
@@ -238,7 +238,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
         }
 
         /* access modifiers changed from: package-private */
-        fun addEntry(SLInventoryEntry sLInventoryEntry) throws InterruptedException {
+        fun addEntry(sLInventoryEntry: SLInventoryEntry) throws InterruptedException {
             this.commitEntryQueue.put(sLInventoryEntry)
         }
 
@@ -260,7 +260,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
                 r5 = r4
                 r6 = r4
             L_0x000b:
-                Boolean r0 = java.lang.Thread.interrupted()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
+                val r0: Boolean = java.lang.Thread.interrupted()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
                 if (r0 != 0) goto L_0x003b
                 java.util.concurrent.BlockingQueue<com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry> r0 = r11.commitEntryQueue     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
                 java.lang.Object r0 = r0.poll()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
@@ -285,7 +285,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
                 com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry r6 = r11.stopEntry     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
                 if (r7 != r6) goto L_0x0093
             L_0x003b:
-                Boolean r0 = java.lang.Thread.interrupted()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
+                val r0: Boolean = java.lang.Thread.interrupted()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
                 if (r0 != 0) goto L_0x0105
                 r0 = r3
             L_0x0042:
@@ -294,12 +294,12 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
                 if (r5 == 0) goto L_0x006d
                 java.lang.String r5 = "InvFetch: commit thread ending transaction (success: %s, count %d)."
                 r0 = 2
-                java.lang.Object[] r7 = java.lang.Object[r0]
+                java.lang.Array<Any> r7 = java.lang.Object[r0]
                 if (r6 == 0) goto L_0x00f6
                 java.lang.String r0 = "true"
             L_0x0050:
                 r7[r4] = r0
-                Int r0 = r8.size()
+                val r0: Int = r8.size()
                 java.lang.Integer r0 = java.lang.Integer.valueOf(r0)
                 r7[r3] = r0
                 com.lumiyaviewer.lumiya.Debug.Printf(r5, r7)
@@ -317,16 +317,16 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
                 r1.close()
             L_0x0077:
                 if (r6 == 0) goto L_0x0092
-                Boolean r0 = r11.aborted
+                val r0: Boolean = r11.aborted
                 r0 = r0 ^ 1
                 if (r0 == 0) goto L_0x0092
                 java.lang.String r0 = "InvFetch: commit thread successful, calling retainChildren."
-                java.lang.Object[] r1 = java.lang.Object[r4]
+                java.lang.Array<Any> r1 = java.lang.Object[r4]
                 com.lumiyaviewer.lumiya.Debug.Printf(r0, r1)
                 com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this
                 com.lumiyaviewer.lumiya.orm.InventoryDB r0 = r0.db
                 com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r1 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this
-                Long r2 = r1.folderId
+                val r2: Long = r1.folderId
                 r0.retainChildren(r2, r8)
             L_0x0092:
                 return
@@ -337,7 +337,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
                 r6.beginTransaction()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
                 r5 = r3
             L_0x009d:
-                Int r0 = r0 + 1
+                val r0: Int = r0 + 1
                 r6 = 16
                 if (r0 < r6) goto L_0x010a
                 com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
@@ -347,7 +347,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
             L_0x00ab:
                 java.util.UUID r0 = r7.uuid     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
                 r8.add(r0)     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                Int r0 = android.os.Build.VERSION.SDK_INT     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
+                val r0: Int = android.os.Build.VERSION.SDK_INT     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
                 r9 = 11
                 if (r0 < r9) goto L_0x00da
                 if (r2 != 0) goto L_0x00c4
@@ -421,7 +421,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
         }
 
         /* access modifiers changed from: package-private */
-        fun stopAndWait(Boolean z) throws InterruptedException {
+        fun stopAndWait(z: Boolean) throws InterruptedException {
             if (!z) {
                 this.aborted = true
             }
@@ -456,14 +456,14 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
             } : super.onArrayBegin(str)
         }
 
-        fun onMapEnd(String str) throws LLSDXMLException, InterruptedException {
+        fun onMapEnd(str: String) throws LLSDXMLException, InterruptedException {
             if (this.gotUUID != null && this.gotUUID.equals(SLInventoryHTTPFetchRequest.this.folderUUID) && this.gotVersion != SLInventoryHTTPFetchRequest.this.folderEntry.version) {
                 SLInventoryHTTPFetchRequest.this.folderEntry.version = this.gotVersion
                 this.commitThread.addEntry(SLInventoryHTTPFetchRequest.this.folderEntry)
             }
         }
 
-        fun onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
+        fun onPrimitiveValue(str: String, lLSDNode: LLSDNode) throws LLSDXMLException, LLSDValueTypeException {
             Debug.Printf("InvFetch: FolderDataContentHandler: key '%s' value '%s'", str, lLSDNode)
             if (str.equals("version")) {
                 this.gotVersion = lLSDNode.asInt()
@@ -476,18 +476,18 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
     private class FolderEntryContentHandler : LLSDStreamingParser().LLSDDefaultContentHandler {
 
         /* renamed from: -com-lumiyaviewer-lumiya-slproto-inventory-SLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues  reason: not valid java name */
-        private const val /* synthetic */ Int[] f111comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues = null
-        final /* synthetic */ Int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$inventory$SLInventoryHTTPFetchRequest$FolderValueKey
+        private const val /* synthetic */ IntArray f111comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues = null
+        final /* synthetic */ IntArray $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$inventory$SLInventoryHTTPFetchRequest$FolderValueKey
         private val DatabaseCommitThread commitThread
         private val SLInventoryEntry entry = SLInventoryEntry()
 
         /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-inventory-SLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues  reason: not valid java name */
         @JvmStatic
-private /* synthetic */ Int[] m189getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues() {
+private /* synthetic */ IntArray m189getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues() {
             if (f111comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues != null) {
                 return f111comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues
             }
-            Int[] iArr = Int[FolderValueKey.values().length]
+            val iArr: IntArray = Int[FolderValueKey.values().length]
             try {
                 iArr[FolderValueKey.agent_id.ordinal()] = 1
             } catch (NoSuchFieldError e) {
@@ -533,7 +533,7 @@ private /* synthetic */ Int[] m189getcomlumiyaviewerlumiyaslprotoinventorySLInve
             this.entry.isFolder = true
         }
 
-        fun onMapEnd(String str) throws LLSDXMLException, InterruptedException {
+        fun onMapEnd(str: String) throws LLSDXMLException, InterruptedException {
             if (this.entry.parentUUID == null) {
                 this.entry.parentUUID = SLInventoryHTTPFetchRequest.this.folderEntry.parentUUID
                 this.entry.parent_id = SLInventoryHTTPFetchRequest.this.folderEntry.getId()
@@ -544,8 +544,8 @@ private /* synthetic */ Int[] m189getcomlumiyaviewerlumiyaslprotoinventorySLInve
             this.commitThread.addEntry(this.entry)
         }
 
-        fun onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
-            FolderValueKey byTag = FolderValueKey.byTag(str)
+        fun onPrimitiveValue(str: String, lLSDNode: LLSDNode) throws LLSDXMLException, LLSDValueTypeException {
+            val byTag: FolderValueKey = FolderValueKey.byTag(str)
             if (byTag != null) {
                 switch (m189getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues()[byTag.ordinal()]) {
                     case 1:
@@ -566,7 +566,7 @@ private /* synthetic */ Int[] m189getcomlumiyaviewerlumiyaslprotoinventorySLInve
                             this.entry.parent_id = SLInventoryHTTPFetchRequest.this.folderEntry.getId()
                             return
                         }
-                        SLInventoryEntry findEntry = SLInventoryHTTPFetchRequest.this.db.findEntry(this.entry.parentUUID)
+                        val findEntry: SLInventoryEntry = SLInventoryHTTPFetchRequest.this.db.findEntry(this.entry.parentUUID)
                         if (findEntry != null) {
                             this.entry.parent_id = findEntry.getId()
                             return
@@ -578,7 +578,7 @@ private /* synthetic */ Int[] m189getcomlumiyaviewerlumiyaslprotoinventorySLInve
                             this.entry.typeDefault = lLSDNode.asInt()
                             return
                         }
-                        SLAssetType byString = SLAssetType.getByString(lLSDNode.asString())
+                        val byString: SLAssetType = SLAssetType.getByString(lLSDNode.asString())
                         if (byString != SLAssetType.AT_UNKNOWN) {
                             this.entry.typeDefault = byString.getInventoryType().getTypeCode()
                             return
@@ -621,7 +621,7 @@ private /* synthetic */ Int[] m189getcomlumiyaviewerlumiyaslprotoinventorySLInve
         }
 
         @JvmStatic
-    FolderValueKey byTag(String str) {
+     fun byTag(str: String): FolderValueKey {
             return tagMap.get(str)
         }
     }
@@ -629,24 +629,24 @@ private /* synthetic */ Int[] m189getcomlumiyaviewerlumiyaslprotoinventorySLInve
     private class ItemEntryContentHandler : LLSDStreamingParser().LLSDDefaultContentHandler {
 
         /* renamed from: -com-lumiyaviewer-lumiya-slproto-inventory-SLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues  reason: not valid java name */
-        private const val /* synthetic */ Int[] f112comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues = null
-        final /* synthetic */ Int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$inventory$SLInventoryHTTPFetchRequest$ItemValueKey
+        private const val /* synthetic */ IntArray f112comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues = null
+        final /* synthetic */ IntArray $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$inventory$SLInventoryHTTPFetchRequest$ItemValueKey
         private val DatabaseCommitThread commitThread
         /* access modifiers changed from: private */
         val SLInventoryEntry entry
         private val LLSDStreamingParser.LLSDContentHandler permissionsHandler = LLSDStreamingParser.LLSDDefaultContentHandler() {
 
             /* renamed from: -com-lumiyaviewer-lumiya-slproto-inventory-SLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues  reason: not valid java name */
-            private const val /* synthetic */ Int[] f113comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues = null
-            final /* synthetic */ Int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$inventory$SLInventoryHTTPFetchRequest$PermissionsValueKey
+            private const val /* synthetic */ IntArray f113comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues = null
+            final /* synthetic */ IntArray $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$inventory$SLInventoryHTTPFetchRequest$PermissionsValueKey
 
             /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-inventory-SLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues  reason: not valid java name */
             @JvmStatic
-private /* synthetic */ Int[] m192getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues() {
+private /* synthetic */ IntArray m192getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues() {
                 if (f113comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues != null) {
                     return f113comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues
                 }
-                Int[] iArr = Int[PermissionsValueKey.values().length]
+                val iArr: IntArray = Int[PermissionsValueKey.values().length]
                 try {
                     iArr[PermissionsValueKey.base_mask.ordinal()] = 1
                 } catch (NoSuchFieldError e) {
@@ -691,8 +691,8 @@ private /* synthetic */ Int[] m192getcomlumiyaviewerlumiyaslprotoinventorySLInve
                 return iArr
             }
 
-            fun onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
-                PermissionsValueKey byTag = PermissionsValueKey.byTag(str)
+            fun onPrimitiveValue(str: String, lLSDNode: LLSDNode) throws LLSDXMLException, LLSDValueTypeException {
+                val byTag: PermissionsValueKey = PermissionsValueKey.byTag(str)
                 if (byTag != null) {
                     switch (m192getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues()[byTag.ordinal()]) {
                         case 1:
@@ -734,7 +734,7 @@ private /* synthetic */ Int[] m192getcomlumiyaviewerlumiyaslprotoinventorySLInve
             }
         }
         private val LLSDStreamingParser.LLSDContentHandler saleInfoHandler = LLSDStreamingParser.LLSDDefaultContentHandler() {
-            fun onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
+            fun onPrimitiveValue(str: String, lLSDNode: LLSDNode) throws LLSDXMLException, LLSDValueTypeException {
                 if (str.equals("sale_type")) {
                     if (lLSDNode.isString()) {
                         ItemEntryContentHandler.this.entry.saleType = SLSaleType.getByString(lLSDNode.asString()).getTypeCode()
@@ -751,11 +751,11 @@ private /* synthetic */ Int[] m192getcomlumiyaviewerlumiyaslprotoinventorySLInve
 
         /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-inventory-SLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues  reason: not valid java name */
         @JvmStatic
-private /* synthetic */ Int[] m191getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues() {
+private /* synthetic */ IntArray m191getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues() {
             if (f112comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues != null) {
                 return f112comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues
             }
-            Int[] iArr = Int[ItemValueKey.values().length]
+            val iArr: IntArray = Int[ItemValueKey.values().length]
             try {
                 iArr[ItemValueKey.agent_id.ordinal()] = 1
             } catch (NoSuchFieldError e) {
@@ -810,7 +810,7 @@ private /* synthetic */ Int[] m191getcomlumiyaviewerlumiyaslprotoinventorySLInve
             return str.equals("permissions") ? this.permissionsHandler : str.equals("sale_info") ? this.saleInfoHandler : super.onMapBegin(str)
         }
 
-        fun onMapEnd(String str) throws LLSDXMLException, InterruptedException {
+        fun onMapEnd(str: String) throws LLSDXMLException, InterruptedException {
             if (this.entry.parentUUID == null) {
                 this.entry.parentUUID = SLInventoryHTTPFetchRequest.this.folderEntry.parentUUID
                 this.entry.parent_id = SLInventoryHTTPFetchRequest.this.folderEntry.getId()
@@ -821,8 +821,8 @@ private /* synthetic */ Int[] m191getcomlumiyaviewerlumiyaslprotoinventorySLInve
             this.commitThread.addEntry(this.entry)
         }
 
-        fun onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
-            ItemValueKey byTag = ItemValueKey.byTag(str)
+        fun onPrimitiveValue(str: String, lLSDNode: LLSDNode) throws LLSDXMLException, LLSDValueTypeException {
+            val byTag: ItemValueKey = ItemValueKey.byTag(str)
             if (byTag != null) {
                 switch (m191getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues()[byTag.ordinal()]) {
                     case 1:
@@ -859,7 +859,7 @@ private /* synthetic */ Int[] m191getcomlumiyaviewerlumiyaslprotoinventorySLInve
                             this.entry.parent_id = SLInventoryHTTPFetchRequest.this.folderEntry.getId()
                             return
                         }
-                        SLInventoryEntry findEntry = SLInventoryHTTPFetchRequest.this.db.findEntry(this.entry.parentUUID)
+                        val findEntry: SLInventoryEntry = SLInventoryHTTPFetchRequest.this.db.findEntry(this.entry.parentUUID)
                         if (findEntry != null) {
                             this.entry.parent_id = findEntry.getId()
                             return
@@ -904,7 +904,7 @@ private /* synthetic */ Int[] m191getcomlumiyaviewerlumiyaslprotoinventorySLInve
         }
 
         @JvmStatic
-    ItemValueKey byTag(String str) {
+     fun byTag(str: String): ItemValueKey {
             return tagMap.get(str)
         }
     }
@@ -931,7 +931,7 @@ private /* synthetic */ Int[] m191getcomlumiyaviewerlumiyaslprotoinventorySLInve
         }
 
         @JvmStatic
-    PermissionsValueKey byTag(String str) {
+     fun byTag(str: String): PermissionsValueKey {
             return tagMap.get(str)
         }
     }
@@ -968,11 +968,11 @@ private /* synthetic */ Int[] m191getcomlumiyaviewerlumiyaslprotoinventorySLInve
 
     fun cancel() {
         this.isCancelled.set(true)
-        LLSDStreamingXMLRequest lLSDStreamingXMLRequest = this.streamingXmlReqRef.get()
+        val lLSDStreamingXMLRequest: LLSDStreamingXMLRequest = this.streamingXmlReqRef.get()
         if (lLSDStreamingXMLRequest != null) {
             lLSDStreamingXMLRequest.InterruptRequest()
         }
-        Future andSet = this.futureRef.getAndSet((Object) null)
+        val andSet: Future = this.futureRef.getAndSet((Object) null)
         if (andSet != null) {
             andSet.cancel(true)
         }

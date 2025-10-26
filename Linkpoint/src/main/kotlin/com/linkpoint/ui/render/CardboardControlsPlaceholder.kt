@@ -15,7 +15,7 @@ class CardboardControlsPlaceholder : ViewGroup() {
     private OnViewInvalidateListener onViewInvalidateListener = null
 
     interface OnViewInvalidateListener {
-        Unit onViewInvalidated()
+         fun onViewInvalidated()
     }
 
     public CardboardControlsPlaceholder(Context context) {
@@ -35,8 +35,8 @@ class CardboardControlsPlaceholder : ViewGroup() {
         super(context, attributeSet, i, i2)
     }
 
-    public ViewParent invalidateChildInParent(Int[] iArr, Rect rect) {
-        ViewParent invalidateChildInParent = super.invalidateChildInParent(iArr, rect)
+     public fun invalidateChildInParent(iArr: IntArray, rect: Rect): ViewParent {
+        val invalidateChildInParent: ViewParent = super.invalidateChildInParent(iArr, rect)
         if (this.onViewInvalidateListener != null) {
             this.onViewInvalidateListener.onViewInvalidated()
         }
@@ -44,18 +44,18 @@ class CardboardControlsPlaceholder : ViewGroup() {
     }
 
     /* access modifiers changed from: protected */
-    fun onLayout(Boolean z, Int i, Int i2, Int i3, Int i4) {
-        Int childCount = getChildCount()
+    fun onLayout(z: Boolean, i: Int, i2: Int, i3: Int, i4: Int) {
+        val childCount: Int = getChildCount()
         for (Int i5 = 0; i5 < childCount; i5++) {
             getChildAt(i5).layout(0, 0, this.fixedWidth, this.fixedHeight)
         }
     }
 
     /* access modifiers changed from: protected */
-    fun onMeasure(Int i, Int i2) {
-        Int childCount = getChildCount()
+    fun onMeasure(i: Int, i2: Int) {
+        val childCount: Int = getChildCount()
         for (Int i3 = 0; i3 < childCount; i3++) {
-            View childAt = getChildAt(i3)
+            val childAt: View = getChildAt(i3)
             if (childAt.getVisibility() != 8) {
                 measureChild(childAt, View.MeasureSpec.makeMeasureSpec(this.fixedWidth, 1073741824), View.MeasureSpec.makeMeasureSpec(this.fixedHeight, 1073741824))
             }
@@ -63,13 +63,13 @@ class CardboardControlsPlaceholder : ViewGroup() {
         setMeasuredDimension(0, 0)
     }
 
-    fun setFixedSize(Int i, Int i2) {
+    fun setFixedSize(i: Int, i2: Int) {
         this.fixedWidth = i
         this.fixedHeight = i2
         requestLayout()
     }
 
-    fun setOnViewInvalidateListener(OnViewInvalidateListener onViewInvalidateListener2) {
+    fun setOnViewInvalidateListener(onViewInvalidateListener2: OnViewInvalidateListener) {
         this.onViewInvalidateListener = onViewInvalidateListener2
     }
 }

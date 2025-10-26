@@ -34,10 +34,10 @@ class WebRTCManager {
     
     // WebRTC connection listeners
     interface VoiceConnectionListener {
-        Unit onVoiceConnected(String channelId)
-        Unit onVoiceDisconnected(String channelId)
-        Unit onVoiceError(String error)
-        Unit onAudioReceived(String speakerId, Byte[] audioData)
+         fun onVoiceConnected(channelId: String)
+         fun onVoiceDisconnected(channelId: String)
+         fun onVoiceError(error: String)
+         fun onAudioReceived(speakerId: String, audioData: ByteArray)
     }
     
     private VoiceConnectionListener connectionListener
@@ -53,7 +53,7 @@ class WebRTCManager {
     /**
      * Initialize WebRTC components
      */
-    private Unit initializeWebRTC() {
+     private fun initializeWebRTC() {
         try {
             // Mock initialization for WebRTC components
             // In a real implementation, this would initialize PeerConnectionFactory
@@ -133,7 +133,7 @@ class WebRTCManager {
                     peerConnection = null
                 }
                 
-                String channelId = currentVoiceChannel
+                val channelId: String = currentVoiceChannel
                 currentVoiceChannel = null
                 isConnected = false
                 
@@ -158,10 +158,10 @@ class WebRTCManager {
         return CompletableFuture.supplyAsync(() -> {
             if (peerConnection != null) {
                 // Mock SDP offer creation
-                String mockSdp = "v=0\no=- 123456789 987654321 IN IP4 0.0.0.0\ns=WebRTC Audio\n" +
+                val mockSdp: String = "v=0\no=- 123456789 987654321 IN IP4 0.0.0.0\ns=WebRTC Audio\n" +
                                 "t=0 0\nm=audio 9 RTP/SAVPF 111\na=sendrecv\n"
                 
-                MockSessionDescription offer = MockSessionDescription("offer", mockSdp)
+                val offer: MockSessionDescription = MockSessionDescription("offer", mockSdp)
                 Log.d(TAG, "Mock offer created: " + offer.description.substring(0, Math.min(100, offer.description.length())))
                 return offer
             } else {
@@ -187,7 +187,7 @@ class WebRTCManager {
     /**
      * Add ICE candidate (mock implementation)
      */
-    fun addIceCandidate(MockIceCandidate candidate) {
+    fun addIceCandidate(candidate: MockIceCandidate) {
         executor.execute(() -> {
             if (peerConnection != null) {
                 Log.d(TAG, "Mock ICE candidate added: " + candidate.sdp)
@@ -197,22 +197,22 @@ class WebRTCManager {
     /**
      * Set voice connection listener
      */
-    fun setConnectionListener(VoiceConnectionListener listener) {
+    fun setConnectionListener(listener: VoiceConnectionListener) {
         this.connectionListener = listener
     }
     
     /**
      * Get connection status
      */
-    public Boolean isVoiceEnabled() {
+     public fun isVoiceEnabled(): Boolean {
         return voiceEnabled
     }
     
-    public Boolean isConnected() {
+     public fun isConnected(): Boolean {
         return isConnected
     }
     
-    public String getCurrentVoiceChannel() {
+     public fun getCurrentVoiceChannel(): String {
         return currentVoiceChannel
     }
     

@@ -24,17 +24,17 @@ class CacheLocationPreference : Preference() {
     }
 
     @JvmStatic
-    String makeDisplayableCacheLocation(String str) {
-        Int indexOf = str.indexOf("/Android")
+     fun makeDisplayableCacheLocation(str: String): String {
+        val indexOf: Int = str.indexOf("/Android")
         if (indexOf >= 0) {
             str = str.substring(0, indexOf)
         }
-        Int indexOf2 = str.indexOf("/com.lumiyaviewer.lumiya")
+        val indexOf2: Int = str.indexOf("/com.lumiyaviewer.lumiya")
         return indexOf2 >= 0 ? str.substring(0, indexOf2) : str
     }
 
-    public CharSequence getSummary() {
-        String persistedString = getPersistedString((String) null)
+     public fun getSummary(): CharSequence {
+        val persistedString: String = getPersistedString((String) null)
         return Strings.isNullOrEmpty(persistedString) ? getContext().getString(R.string.default_cache_location) : makeDisplayableCacheLocation(persistedString)
     }
 }

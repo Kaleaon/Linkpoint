@@ -33,27 +33,27 @@ class PrimProfileParams {
     }
 
     @JvmStatic
-    PrimProfileParams createFromObjectUpdate(ObjectUpdate.ObjectData objectData) {
+     fun createFromObjectUpdate(ObjectUpdate.ObjectData objectData): PrimProfileParams {
         return PrimProfileParams((Byte) objectData.ProfileCurve, ((Float) (objectData.ProfileBegin & SupportMenu.USER_MASK)) * 2.0E-5f, 1.0f - (((Float) (objectData.ProfileEnd & SupportMenu.USER_MASK)) * 2.0E-5f), ((Float) (objectData.ProfileHollow & SupportMenu.USER_MASK)) * 2.0E-5f)
     }
 
     @JvmStatic
-    PrimProfileParams createFromPackedData(ByteBuffer byteBuffer) {
+     fun createFromPackedData(byteBuffer: ByteBuffer): PrimProfileParams {
         return PrimProfileParams(byteBuffer.get(), ((Float) (byteBuffer.getShort() & 65535)) * 2.0E-5f, 1.0f - (((Float) (byteBuffer.getShort() & 65535)) * 2.0E-5f), ((Float) (byteBuffer.getShort() & 65535)) * 2.0E-5f)
     }
 
-    private Int getHashValue() {
+     private fun getHashValue(): Int {
         return (this.CurveType * 17) + Float.floatToIntBits(this.Begin) + Float.floatToIntBits(this.End) + Float.floatToIntBits(this.Hollow)
     }
 
-    public Boolean equals(Object obj) {
+     public fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
         if (!(obj instanceof PrimProfileParams)) {
             return false
         }
-        PrimProfileParams primProfileParams = (PrimProfileParams) obj
+        val primProfileParams: PrimProfileParams = (PrimProfileParams) obj
         return this.CurveType == primProfileParams.CurveType && this.Begin == primProfileParams.Begin && this.End == primProfileParams.End && this.Hollow == primProfileParams.Hollow
     }
 
@@ -61,7 +61,7 @@ class PrimProfileParams {
         return this.hashValue
     }
 
-    public String toString() {
-        return String.format("CurveType: 0x%02x, Begin: %f, End: %f, Hollow: %f", Object[]{Byte.valueOf(this.CurveType), Float.valueOf(this.Begin), Float.valueOf(this.End), Float.valueOf(this.Hollow)})
+     public fun toString(): String {
+        return String.format("CurveType: 0x%02x, Begin: %f, End: %f, Hollow: %f", Array<Any>{Byte.valueOf(this.CurveType), Float.valueOf(this.Begin), Float.valueOf(this.End), Float.valueOf(this.Hollow)})
     }
 }

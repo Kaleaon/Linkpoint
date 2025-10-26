@@ -15,7 +15,7 @@ class RpcScriptRequestInboundForward : SLMessage() {
         public UUID ItemID
         public Inet4Address RPCServerIP
         public Int RPCServerPort
-        public Byte[] StringValue
+        public ByteArray StringValue
         public UUID TaskID
     }
 
@@ -23,15 +23,15 @@ class RpcScriptRequestInboundForward : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.DataBlock_Field.StringValue.length + 60 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleRpcScriptRequestInboundForward(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -96)
@@ -44,7 +44,7 @@ class RpcScriptRequestInboundForward : SLMessage() {
         packVariable(byteBuffer, this.DataBlock_Field.StringValue, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.DataBlock_Field.RPCServerIP = unpackIPAddress(byteBuffer)
         this.DataBlock_Field.RPCServerPort = unpackShort(byteBuffer) & 65535
         this.DataBlock_Field.TaskID = unpackUUID(byteBuffer)

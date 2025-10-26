@@ -27,12 +27,12 @@ private class InstanceHolder {
         }
 
         @JvmStatic
-    ObjectDetailsActivityFactory getInstance() {
+     fun getInstance(): ObjectDetailsActivityFactory {
             return InstanceHolder.Instance
         }
 
-        public Intent createIntent(Context context, Bundle bundle) {
-            Intent intent = Intent(context, ObjectListNewActivity.class)
+         public fun createIntent(context: Context, bundle: Bundle): Intent {
+            val intent: Intent = Intent(context, ObjectListNewActivity.class)
             intent.putExtra(MasterDetailsActivity.INTENT_SELECTION_KEY, bundle)
             ActivityUtils.setActiveAgentID(intent, ActivityUtils.getActiveAgentID(bundle))
             return intent
@@ -44,12 +44,12 @@ private class InstanceHolder {
     }
 
     /* access modifiers changed from: protected */
-    public FragmentActivityFactory getDetailsFragmentFactory() {
+     public fun getDetailsFragmentFactory(): FragmentActivityFactory {
         return ObjectDetailsActivityFactory.getInstance()
     }
 
     /* access modifiers changed from: protected */
-    public Boolean isRootDetailsFragment(Class<? : Fragment> cls) {
+     public fun isRootDetailsFragment(cls: Class<? : Fragment>): Boolean {
         if (cls != UserProfileFragment.class) {
             return super.isRootDetailsFragment(cls)
         }
@@ -57,13 +57,13 @@ private class InstanceHolder {
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(Bundle bundle) {
+    fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setDefaultTitle(getString(R.string.objects_activity_caption), (String) null)
     }
 
     /* access modifiers changed from: protected */
-    public Fragment onCreateMasterFragment(Intent intent, Bundle bundle) {
+     public fun onCreateMasterFragment(intent: Intent, bundle: Bundle): Fragment {
         return ObjectSelectorFragment.newInstance(ActivityUtils.makeFragmentArguments(ActivityUtils.getActiveAgentID(intent), (Bundle) null))
     }
 }

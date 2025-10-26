@@ -11,7 +11,7 @@ class GridConnectionManager {
     private const val Object lock = Object()
 
     @JvmStatic
-    SLGridConnection getConnection(UUID uuid) {
+     fun getConnection(uuid: UUID): SLGridConnection {
         if (uuid == null) {
             return null
         }
@@ -23,7 +23,7 @@ class GridConnectionManager {
     }
 
     @JvmStatic
-    Unit removeConnection(UUID uuid, SLGridConnection sLGridConnection) {
+     fun removeConnection(uuid: UUID, sLGridConnection: SLGridConnection) {
         synchronized (lock) {
             if (((SLGridConnection) connections.get(uuid)) == sLGridConnection) {
                 connections.remove(uuid)
@@ -32,7 +32,7 @@ class GridConnectionManager {
     }
 
     @JvmStatic
-    Unit setConnection(UUID uuid, SLGridConnection sLGridConnection) {
+     fun setConnection(uuid: UUID, sLGridConnection: SLGridConnection) {
         synchronized (lock) {
             connections.put(uuid, sLGridConnection)
         }

@@ -57,7 +57,7 @@ class VoiceAccountConnection {
         this.handle = object
     }
 
-    fun createVoiceSession(VoiceChannelInfo object, String string2) throws VoiceException {
+    fun createVoiceSession(object: VoiceChannelInfo, string2: String) throws VoiceException {
         vx_req_session_create_t vx_req_session_create_t2 = vx_req_session_create_t()
         vx_req_session_create_t2.setAccount_handle(this.handle)
         if (string2 != null) {
@@ -92,11 +92,11 @@ class VoiceAccountConnection {
         }
     }
 
-    public String getHandle() {
+     public fun getHandle(): String {
         return this.handle
     }
 
-    public VoiceLoginInfo getVoiceLoginInfo() {
+     public fun getVoiceLoginInfo(): VoiceLoginInfo {
         return this.voiceLoginInfo
     }
 }

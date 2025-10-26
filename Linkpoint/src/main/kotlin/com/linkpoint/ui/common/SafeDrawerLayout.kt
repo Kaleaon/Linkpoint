@@ -19,7 +19,7 @@ class SafeDrawerLayout : DrawerLayout() {
         super(context, attributeSet, i)
     }
 
-    public Boolean onInterceptTouchEvent(MotionEvent motionEvent) {
+     public fun onInterceptTouchEvent(motionEvent: MotionEvent): Boolean {
         try {
             return super.onInterceptTouchEvent(motionEvent)
         } catch (Exception e) {

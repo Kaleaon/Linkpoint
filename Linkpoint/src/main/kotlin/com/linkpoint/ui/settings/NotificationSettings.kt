@@ -24,7 +24,7 @@ class NotificationSettings {
         this.type = notificationType
     }
 
-    private Int getPrefColor(String str) {
+     private fun getPrefColor(str: String): Int {
         if (str.length() != 6) {
             return 0
         }
@@ -36,9 +36,9 @@ class NotificationSettings {
         }
     }
 
-    private String getPreferenceValueName(Context context, String str, Int i, Int i2) {
-        String[] stringArray = context.getResources().getStringArray(i)
-        String[] stringArray2 = context.getResources().getStringArray(i2)
+     private fun getPreferenceValueName(context: Context, str: String, i: Int, i2: Int): String {
+        val stringArray: Array<String> = context.getResources().getStringArray(i)
+        val stringArray2: Array<String> = context.getResources().getStringArray(i2)
         for (Int i3 = 0; i3 < stringArray.length; i3++) {
             if (stringArray[i3].equals(str)) {
                 return stringArray2[i3]
@@ -47,24 +47,24 @@ class NotificationSettings {
         return ""
     }
 
-    fun Load(SharedPreferences sharedPreferences) {
+    fun Load(sharedPreferences: SharedPreferences) {
         this.notificationEnabled = sharedPreferences.getBoolean(this.type.getEnableKey(), true)
         this.soundEnabled = sharedPreferences.getBoolean(this.type.getPlaySoundKey(), true)
-        NotificationSounds notificationSounds = NotificationSounds.defaultSounds.get(this.type)
+        val notificationSounds: NotificationSounds = NotificationSounds.defaultSounds.get(this.type)
         this.ringtone = sharedPreferences.getString(this.type.getRingtoneKey(), notificationSounds != null ? notificationSounds.getUri().toString() : null)
         this.blinkAction = LEDAction.getByPreferenceString(sharedPreferences.getString(this.type.getBlinkKey(), "none"))
         this.blinkColor = sharedPreferences.getString(this.type.getBlinkColorKey(), "FF0000")
     }
 
-    public LEDAction getLEDAction() {
+     public fun getLEDAction(): LEDAction {
         return this.blinkAction
     }
 
-    public Int getLEDColor() {
+     public fun getLEDColor(): Int {
         return getPrefColor(this.blinkColor)
     }
 
-    public String getRingtone() {
+     public fun getRingtone(): String {
         if (this.soundEnabled) {
             return this.ringtone
         }
@@ -72,34 +72,34 @@ class NotificationSettings {
     }
 
     /* access modifiers changed from: package-private */
-    public String getSummary(Context context) {
+     public fun getSummary(context: Context): String {
         String str
         if (this.ringtone != null) {
-            Uri parse = Uri.parse(this.ringtone)
-            NotificationSounds notificationSounds = NotificationSounds.defaultSounds.get(this.type)
+            val parse: Uri = Uri.parse(this.ringtone)
+            val notificationSounds: NotificationSounds = NotificationSounds.defaultSounds.get(this.type)
             if (Objects.equal(notificationSounds != null ? notificationSounds.getUri() : null, parse)) {
                 str = "Default"
             } else if (this.ringtone.isEmpty()) {
                 str = "Silent"
             } else {
-                Ringtone ringtone2 = RingtoneManager.getRingtone(context, parse)
+                val ringtone2: Ringtone = RingtoneManager.getRingtone(context, parse)
                 str = ringtone2 != null ? ringtone2.getTitle(context) : "No sound selected"
             }
         } else {
             str = "Default"
         }
-        String preferenceValueName = getPreferenceValueName(context, this.blinkColor, R.array.pref_led_color_values, R.array.pref_led_color)
+        val preferenceValueName: String = getPreferenceValueName(context, this.blinkColor, R.array.pref_led_color_values, R.array.pref_led_color)
         if (!this.notificationEnabled) {
             return "Do nothing"
         }
-        String str2 = this.soundEnabled ? "Notify" + ", play sound (" + str + ")" : "Notify"
+        val str2: String = this.soundEnabled ? "Notify" + ", play sound (" + str + ")" : "Notify"
         if (this.blinkAction == LEDAction.None) {
             return str2
         }
         return str2 + ", blink " + (!Strings.isNullOrEmpty(preferenceValueName) ? preferenceValueName.toLowerCase() + " " : "") + "LED"
     }
 
-    public Boolean isEnabled() {
+     public fun isEnabled(): Boolean {
         return this.notificationEnabled
     }
 }

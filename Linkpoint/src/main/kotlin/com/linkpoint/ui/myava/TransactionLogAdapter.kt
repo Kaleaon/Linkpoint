@@ -35,7 +35,7 @@ class TransactionLogAdapter : RecyclerView().Adapter<TransactionViewHolder> {
     val OnTransactionClickListener onTransactionClickListener
 
     interface OnTransactionClickListener {
-        Unit onTransactionClicked(MoneyTransaction moneyTransaction)
+         fun onTransactionClicked(moneyTransaction: MoneyTransaction)
     }
 
     class TransactionViewHolder : RecyclerView().ViewHolder : View.OnClickListener {
@@ -63,16 +63,16 @@ class TransactionLogAdapter : RecyclerView().Adapter<TransactionViewHolder> {
 
         /* access modifiers changed from: package-private */
         @SuppressLint({"DefaultLocale", "SetTextI18n"})
-        fun bindToData(MoneyTransaction moneyTransaction2) {
+        fun bindToData(moneyTransaction2: MoneyTransaction) {
             this.moneyTransaction = moneyTransaction2
             this.chatterNameDisplayer.setChatterID(ChatterID.getUserChatterID(TransactionLogAdapter.this.agentUUID, moneyTransaction2.getAgentUUID()))
-            this.amountTextView.setText(TransactionLogAdapter.this.context.getString(R.string.transaction_amount_format, Object[]{Integer.valueOf(moneyTransaction2.getTransactionAmount())}))
-            this.finalBalanceTextView.setText(TransactionLogAdapter.this.context.getString(R.string.transaction_balance_amount, Object[]{Integer.valueOf(moneyTransaction2.getNewBalance())}))
+            this.amountTextView.setText(TransactionLogAdapter.this.context.getString(R.string.transaction_amount_format, Array<Any>{Integer.valueOf(moneyTransaction2.getTransactionAmount())}))
+            this.finalBalanceTextView.setText(TransactionLogAdapter.this.context.getString(R.string.transaction_balance_amount, Array<Any>{Integer.valueOf(moneyTransaction2.getNewBalance())}))
             this.calendar.setTime(moneyTransaction2.getTimestamp())
             this.timestampTextView.setText(DateUtils.getRelativeTimeSpanString(TransactionLogAdapter.this.context, this.calendar.getTimeInMillis(), false))
         }
 
-        fun onClick(View view) {
+        fun onClick(view: View) {
             if (TransactionLogAdapter.this.onTransactionClickListener != null && this.moneyTransaction != null) {
                 TransactionLogAdapter.this.onTransactionClickListener.onTransactionClicked(this.moneyTransaction)
             }
@@ -100,7 +100,7 @@ class TransactionLogAdapter : RecyclerView().Adapter<TransactionViewHolder> {
 
         @CallSuper
         fun unbind() {
-            TransactionViewHolder transactionViewHolder = this.target
+            val transactionViewHolder: TransactionViewHolder = this.target
             if (transactionViewHolder == null) {
                 throw IllegalStateException("Bindings already cleared.")
             }
@@ -121,35 +121,35 @@ class TransactionLogAdapter : RecyclerView().Adapter<TransactionViewHolder> {
         setHasStableIds(true)
     }
 
-    public Int getItemCount() {
+     public fun getItemCount(): Int {
         if (this.data != null) {
             return this.data.size()
         }
         return 0
     }
 
-    public Long getItemId(Int i) {
+     public fun getItemId(i: Int): Long {
         if (this.data == null || i < 0 || i >= this.data.size()) {
             return -1
         }
         return this.data.get(i).getId().longValue()
     }
 
-    fun onBindViewHolder(TransactionViewHolder transactionViewHolder, Int i) {
+    fun onBindViewHolder(transactionViewHolder: TransactionViewHolder, i: Int) {
         if (this.data != null && i >= 0 && i < this.data.size()) {
             transactionViewHolder.bindToData(this.data.get(i))
         }
     }
 
-    public TransactionViewHolder onCreateViewHolder(ViewGroup viewGroup, Int i) {
+     public fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): TransactionViewHolder {
         return TransactionViewHolder(this.inflater.inflate(R.layout.transaction_log_item, viewGroup, false))
     }
 
-    fun onViewRecycled(TransactionViewHolder transactionViewHolder) {
+    fun onViewRecycled(transactionViewHolder: TransactionViewHolder) {
         transactionViewHolder.onRecycled()
     }
 
-    fun setData(LazyList<MoneyTransaction> lazyList) {
+    fun setData(lazyList: LazyList<MoneyTransaction>) {
         this.data = lazyList
         notifyDataSetChanged()
     }

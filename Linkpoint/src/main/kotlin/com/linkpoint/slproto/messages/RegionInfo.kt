@@ -23,8 +23,8 @@ class RegionInfo : SLMessage() {
         public Int HardMaxAgents
         public Int HardMaxObjects
         public Int MaxAgents32
-        public Byte[] ProductName
-        public Byte[] ProductSKU
+        public ByteArray ProductName
+        public ByteArray ProductSKU
     }
 
     @JvmStatic
@@ -44,7 +44,7 @@ class RegionInfo : SLMessage() {
         public Int RedirectGridY
         public Int RegionFlags
         public Int SimAccess
-        public Byte[] SimName
+        public ByteArray SimName
         public Float SunHour
         public Float TerrainLowerLimit
         public Float TerrainRaiseLimit
@@ -59,15 +59,15 @@ class RegionInfo : SLMessage() {
         this.RegionInfo2_Field = RegionInfo2()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.RegionInfoData_Field.SimName.length + 1 + 4 + 4 + 4 + 1 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + 4 + 36 + this.RegionInfo2_Field.ProductSKU.length + 1 + 1 + this.RegionInfo2_Field.ProductName.length + 4 + 4 + 4 + 1 + (this.RegionInfo3_Fields.size() * 8)
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleRegionInfo(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -114)
@@ -100,7 +100,7 @@ class RegionInfo : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.RegionInfoData_Field.SimName = unpackVariable(byteBuffer, 1)
@@ -124,9 +124,9 @@ class RegionInfo : SLMessage() {
         this.RegionInfo2_Field.MaxAgents32 = unpackInt(byteBuffer)
         this.RegionInfo2_Field.HardMaxAgents = unpackInt(byteBuffer)
         this.RegionInfo2_Field.HardMaxObjects = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            RegionInfo3 regionInfo3 = RegionInfo3()
+            val regionInfo3: RegionInfo3 = RegionInfo3()
             regionInfo3.RegionFlagsExtended = unpackLong(byteBuffer)
             this.RegionInfo3_Fields.add(regionInfo3)
         }

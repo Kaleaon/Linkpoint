@@ -23,15 +23,15 @@ class DataHomeLocationRequest : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return 28
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleDataHomeLocationRequest(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 67)
@@ -40,7 +40,7 @@ class DataHomeLocationRequest : SLMessage() {
         packInt(byteBuffer, this.AgentInfo_Field.AgentEffectiveMaturity)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.Info_Field.AgentID = unpackUUID(byteBuffer)
         this.Info_Field.KickedFromEstateID = unpackInt(byteBuffer)
         this.AgentInfo_Field.AgentEffectiveMaturity = unpackInt(byteBuffer)

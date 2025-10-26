@@ -111,7 +111,7 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
                     java.util.UUID r1 = r1.getUserID()
                     com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent r0 = com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.loadFromDatabaseObject(r0, r1)
                 L_0x002b:
-                    Int r1 = r2.getUnreadCount()
+                    val r1: Int = r2.getUnreadCount()
                     com.lumiyaviewer.lumiya.slproto.users.manager.UnreadMessageInfo r0 = com.lumiyaviewer.lumiya.slproto.users.manager.UnreadMessageInfo.create(r1, r0)
                     return r0
                 L_0x0034:
@@ -129,7 +129,7 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
 
     /* access modifiers changed from: private */
     /* renamed from: clearChatHistoryInternal */
-    fun m274lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_23064(ChatterID chatterID) {
+    fun m274lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_23064(chatterID: ChatterID) {
         Chatter chatter
         synchronized (this.chatEventLock) {
             chatter = getChatter(chatterID)
@@ -140,7 +140,7 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
         if (chatter != null) {
             this.userManager.getUnreadNotificationManager().clearFreshMessages(chatter)
         }
-        List<ChatMessageLoader> loaders = getLoaders(chatterID)
+        val loaders: List<ChatMessageLoader> = getLoaders(chatterID)
         if (loaders != null) {
             for (ChatMessageLoader reload : loaders) {
                 reload.reload()
@@ -151,9 +151,9 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
 
     /* access modifiers changed from: private */
     /* renamed from: clearUnreadCount */
-    fun m279lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_5516(ChatterID chatterID) {
-        Chatter chatter = null
-        Boolean z = false
+    fun m279lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_5516(chatterID: ChatterID) {
+        val chatter: Chatter = null
+        val z: Boolean = false
         synchronized (this.chatEventLock) {
             if (!(!this.displayedChatters.contains(chatterID) || (chatter = getChatter(chatterID)) == null || chatter.getUnreadCount() == 0)) {
                 z = true
@@ -169,13 +169,13 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
     }
 
     private List<ChatMessageLoader> getLoaders(ChatterID chatterID) {
-        LinkedList linkedList = null
+        val linkedList: LinkedList = null
         synchronized (this.messageLoadersLock) {
-            List list = this.messageLoaders.get(chatterID)
+            val list: List = this.messageLoaders.get(chatterID)
             if (list != null) {
-                Iterator it = list.iterator()
+                val it: Iterator = list.iterator()
                 while (it.hasNext()) {
-                    ChatMessageLoader chatMessageLoader = (ChatMessageLoader) ((WeakReference) it.next()).get()
+                    val chatMessageLoader: ChatMessageLoader = (ChatMessageLoader) ((WeakReference) it.next()).get()
                     if (chatMessageLoader == null) {
                         it.remove()
                     } else {
@@ -195,13 +195,13 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
     /* JADX WARNING: Removed duplicated region for block: B:48:0x00d2  */
     /* renamed from: handleChatEventInternal */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    fun m273lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_13379(com.lumiyaviewer.lumiya.slproto.users.ChatterID r12, com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent r13, Boolean r14) {
+    fun m273lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_13379(com.lumiyaviewer.lumiya.slproto.users.ChatterID r12, com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent r13, r14: Boolean) {
         /*
             r11 = this
             r8 = 0
             r7 = 1
             r5 = 0
-            Boolean r2 = r13.isObjectPopup()
+            val r2: Boolean = r13.isObjectPopup()
             if (r2 == 0) goto L_0x0025
             com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r2 = r11.userManager
             com.lumiyaviewer.lumiya.slproto.users.manager.ObjectPopupsManager r2 = r2.getObjectPopupsManager()
@@ -222,7 +222,7 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
             java.lang.Object r3 = r11.objectMessageListenersLock
             monitor-enter(r3)
             java.util.Map<com.lumiyaviewer.lumiya.slproto.chat.generic.OnChatEventListener, java.util.concurrent.Executor> r2 = r11.objectMessageListeners     // Catch:{ all -> 0x0072 }
-            Boolean r2 = r2.isEmpty()     // Catch:{ all -> 0x0072 }
+            val r2: Boolean = r2.isEmpty()     // Catch:{ all -> 0x0072 }
             if (r2 != 0) goto L_0x0070
             java.util.Map<com.lumiyaviewer.lumiya.slproto.chat.generic.OnChatEventListener, java.util.concurrent.Executor> r2 = r11.objectMessageListeners     // Catch:{ all -> 0x0072 }
             java.util.Set r2 = r2.entrySet()     // Catch:{ all -> 0x0072 }
@@ -232,7 +232,7 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
             if (r2 == 0) goto L_0x0079
             java.util.Iterator r6 = r2.iterator()
         L_0x004d:
-            Boolean r2 = r6.hasNext()
+            val r2: Boolean = r6.hasNext()
             if (r2 == 0) goto L_0x0079
             java.lang.Object r2 = r6.next()
             java.util.Map$Entry r2 = (java.util.Map.Entry) r2
@@ -267,7 +267,7 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
             com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource$ChatMessageSourceType r2 = r4.getSourceType()     // Catch:{ all -> 0x01da }
             com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource$ChatMessageSourceType r3 = com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource.ChatMessageSourceType.User     // Catch:{ all -> 0x01da }
             if (r2 != r3) goto L_0x01d5
-            Boolean r2 = r4 instanceof com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUser     // Catch:{ all -> 0x01da }
+            val r2: Boolean = r4 instanceof com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUser     // Catch:{ all -> 0x01da }
             if (r2 == 0) goto L_0x01f0
             com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r2 = r11.userManager     // Catch:{ all -> 0x01da }
             com.lumiyaviewer.lumiya.dao.DaoSession r2 = r2.getDaoSession()     // Catch:{ all -> 0x01da }
@@ -289,7 +289,7 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
             java.lang.String r9 = r2.getUserName()     // Catch:{ all -> 0x01da }
             r3.setLegacyName(r9)     // Catch:{ all -> 0x01da }
         L_0x00c9:
-            Boolean r2 = r2.isComplete()     // Catch:{ all -> 0x01da }
+            val r2: Boolean = r2.isComplete()     // Catch:{ all -> 0x01da }
             if (r2 == 0) goto L_0x01f3
             r2 = r7
         L_0x00d0:
@@ -297,14 +297,14 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
             java.util.UUID r2 = r4.getSourceUUID()     // Catch:{ all -> 0x01da }
             r9 = r2
         L_0x00d7:
-            Boolean r2 = r13.opensNewChatter()     // Catch:{ all -> 0x01da }
+            val r2: Boolean = r13.opensNewChatter()     // Catch:{ all -> 0x01da }
             if (r2 != 0) goto L_0x01ed
             com.lumiyaviewer.lumiya.slproto.users.ChatterID$ChatterType r2 = r12.getChatterType()     // Catch:{ all -> 0x01da }
             com.lumiyaviewer.lumiya.slproto.users.ChatterID$ChatterType r3 = com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.Local     // Catch:{ all -> 0x01da }
             if (r2 == r3) goto L_0x01ed
             com.lumiyaviewer.lumiya.dao.Chatter r2 = r11.getChatter(r12)     // Catch:{ all -> 0x01da }
             if (r2 == 0) goto L_0x01ea
-            Boolean r3 = r2.getActive()     // Catch:{ all -> 0x01da }
+            val r3: Boolean = r2.getActive()     // Catch:{ all -> 0x01da }
             if (r3 != 0) goto L_0x01ea
         L_0x00f1:
             if (r5 != 0) goto L_0x01e7
@@ -312,7 +312,7 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
             r2 = r5
         L_0x00f6:
             java.util.Set<com.lumiyaviewer.lumiya.slproto.users.ChatterID> r3 = r11.displayedChatters     // Catch:{ all -> 0x01da }
-            Boolean r5 = r3.contains(r12)     // Catch:{ all -> 0x01da }
+            val r5: Boolean = r3.contains(r12)     // Catch:{ all -> 0x01da }
             if (r2 != 0) goto L_0x01e4
             com.lumiyaviewer.lumiya.dao.Chatter r2 = r11.getChatter(r12)     // Catch:{ all -> 0x01da }
             if (r2 != 0) goto L_0x01e4
@@ -326,26 +326,26 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
         L_0x0113:
             if (r6 == 0) goto L_0x0135
             java.util.UUID r2 = r4.getLastSessionID()     // Catch:{ all -> 0x01da }
-            Boolean r2 = com.google.common.base.Objects.equal(r6, r2)     // Catch:{ all -> 0x01da }
+            val r2: Boolean = com.google.common.base.Objects.equal(r6, r2)     // Catch:{ all -> 0x01da }
             r2 = r2 ^ 1
             if (r2 == 0) goto L_0x0135
             java.util.UUID r2 = r4.getLastSessionID()     // Catch:{ all -> 0x01da }
             if (r2 == 0) goto L_0x0132
             java.lang.Long r2 = r4.getId()     // Catch:{ all -> 0x01da }
-            Long r2 = r2.longValue()     // Catch:{ all -> 0x01da }
+            val r2: Long = r2.longValue()     // Catch:{ all -> 0x01da }
             r11.makeSessionMark(r12, r2)     // Catch:{ all -> 0x01da }
         L_0x0132:
             r4.setLastSessionID(r6)     // Catch:{ all -> 0x01da }
         L_0x0135:
             com.lumiyaviewer.lumiya.dao.ChatMessage r6 = r13.getDatabaseObject()     // Catch:{ all -> 0x01da }
             java.lang.Long r2 = r4.getId()     // Catch:{ all -> 0x01da }
-            Long r2 = r2.longValue()     // Catch:{ all -> 0x01da }
+            val r2: Long = r2.longValue()     // Catch:{ all -> 0x01da }
             r6.setChatterID(r2)     // Catch:{ all -> 0x01da }
             com.lumiyaviewer.lumiya.dao.ChatMessageDao r2 = r11.chatMessageDao     // Catch:{ all -> 0x01da }
             r2.insert(r6)     // Catch:{ all -> 0x01da }
-            Boolean r2 = r4.getActive()     // Catch:{ all -> 0x01da }
+            val r2: Boolean = r4.getActive()     // Catch:{ all -> 0x01da }
             if (r2 != 0) goto L_0x01d8
-            Boolean r2 = r4.getMuted()     // Catch:{ all -> 0x01da }
+            val r2: Boolean = r4.getMuted()     // Catch:{ all -> 0x01da }
             r2 = r2 ^ 1
             if (r2 == 0) goto L_0x01e1
             r2 = 1
@@ -354,8 +354,8 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
         L_0x015c:
             if (r14 == 0) goto L_0x01df
             if (r5 != 0) goto L_0x01df
-            Int r2 = r4.getUnreadCount()     // Catch:{ all -> 0x01da }
-            Int r2 = r2 + 1
+            val r2: Int = r4.getUnreadCount()     // Catch:{ all -> 0x01da }
+            val r2: Int = r2 + 1
             r4.setUnreadCount(r2)     // Catch:{ all -> 0x01da }
             r2 = r7
         L_0x016a:
@@ -364,7 +364,7 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
             com.lumiyaviewer.lumiya.dao.ChatterDao r5 = r11.chatterDao     // Catch:{ all -> 0x01da }
             r5.update(r4)     // Catch:{ all -> 0x01da }
             monitor-exit(r10)
-            Boolean r5 = r4.getMuted()
+            val r5: Boolean = r4.getMuted()
             if (r5 != 0) goto L_0x019f
             if (r2 == 0) goto L_0x019f
             com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r2 = r11.userManager
@@ -372,9 +372,9 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
             r2.addFreshMessage(r4)
             com.google.common.eventbus.EventBus r5 = r11.chatEventBus
             com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager$ChatMessageEvent r10 = com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager$ChatMessageEvent
-            Int r2 = r4.getType()
+            val r2: Int = r4.getType()
             com.lumiyaviewer.lumiya.slproto.users.ChatterID$ChatterType r4 = com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.User
-            Int r4 = r4.ordinal()
+            val r4: Int = r4.ordinal()
             if (r2 != r4) goto L_0x01dd
             r2 = r7
         L_0x0199:
@@ -397,7 +397,7 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
             if (r2 == 0) goto L_0x0012
             java.util.Iterator r3 = r2.iterator()
         L_0x01c2:
-            Boolean r2 = r3.hasNext()
+            val r2: Boolean = r3.hasNext()
             if (r2 == 0) goto L_0x0012
             java.lang.Object r2 = r3.next()
             com.lumiyaviewer.lumiya.slproto.users.manager.ChatMessageLoader r2 = (com.lumiyaviewer.lumiya.slproto.users.manager.ChatMessageLoader) r2
@@ -447,12 +447,12 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
         throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager.m273lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_13379(com.lumiyaviewer.lumiya.slproto.users.ChatterID, com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent, Boolean):Unit")
     }
 
-    private Unit makeSessionMark(ChatterID chatterID, Long j) {
+     private fun makeSessionMark(chatterID: ChatterID, j: Long) {
         ChatMessage chatMessage
         ChatMessage chatMessage2
-        Boolean z = false
+        val z: Boolean = false
         synchronized (this.chatEventLock) {
-            List list = this.chatMessageDao.queryBuilder().where(ChatMessageDao.Properties.ChatterID.eq(Long.valueOf(j)), WhereCondition[0]).orderDesc(ChatMessageDao.Properties.Id).limit(1).list()
+            val list: List = this.chatMessageDao.queryBuilder().where(ChatMessageDao.Properties.ChatterID.eq(Long.valueOf(j)), WhereCondition[0]).orderDesc(ChatMessageDao.Properties.Id).limit(1).list()
             if (list == null || list.size() <= 0) {
                 chatMessage = null
             } else {
@@ -468,7 +468,7 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
                 }
             }
             if (chatMessage == null) {
-                ChatMessage databaseObject = SLChatSessionMarkEvent(ChatMessageSourceUnknown.getInstance(), this.userManager.getUserID(), SLChatSessionMarkEvent.SessionMarkType.NewSession, (String) null).getDatabaseObject()
+                val databaseObject: ChatMessage = SLChatSessionMarkEvent(ChatMessageSourceUnknown.getInstance(), this.userManager.getUserID(), SLChatSessionMarkEvent.SessionMarkType.NewSession, (String) null).getDatabaseObject()
                 databaseObject.setChatterID(j)
                 this.chatMessageDao.insert(databaseObject)
                 chatMessage2 = databaseObject
@@ -477,7 +477,7 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
             }
             Debug.Printf("markNewSession: added session mark, chatterDbID %d", Long.valueOf(j))
         }
-        List<ChatMessageLoader> loaders = getLoaders(chatterID)
+        val loaders: List<ChatMessageLoader> = getLoaders(chatterID)
         if (loaders != null) {
             for (ChatMessageLoader chatMessageLoader : loaders) {
                 if (z) {
@@ -491,12 +491,12 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
 
     /* access modifiers changed from: private */
     /* renamed from: markChatterInactiveInternal */
-    fun m275lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_25047(ChatterID chatterID, Boolean z) {
-        Boolean z2 = false
-        Boolean z3 = true
+    fun m275lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_25047(chatterID: ChatterID, z: Boolean) {
+        val z2: Boolean = false
+        val z3: Boolean = true
         if (chatterID != null && chatterID.getChatterType() != ChatterID.ChatterType.Local) {
             synchronized (this.chatEventLock) {
-                Chatter chatter = getChatter(chatterID)
+                val chatter: Chatter = getChatter(chatterID)
                 if (chatter != null) {
                     if (chatter.getActive()) {
                         chatter.setActive(false)
@@ -530,7 +530,7 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
 
     /* access modifiers changed from: private */
     /* renamed from: notifyChatEventUpdatedInternal */
-    fun m277lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_26357(SLChatEvent sLChatEvent) {
+    fun m277lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_26357(sLChatEvent: SLChatEvent) {
         ChatMessage databaseObject
         synchronized (this.chatEventLock) {
             databaseObject = sLChatEvent.getDatabaseObject()
@@ -542,15 +542,15 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
 
     /* access modifiers changed from: private */
     /* renamed from: notifyTeleportCompleteInternal */
-    fun m278lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_26532(String str) {
-        Chatter chatter = getChatter(this.localChatterID)
+    fun m278lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_26532(str: String) {
+        val chatter: Chatter = getChatter(this.localChatterID)
         if (chatter != null) {
-            ChatMessage databaseObject = SLChatSessionMarkEvent(ChatMessageSourceUnknown.getInstance(), this.userManager.getUserID(), SLChatSessionMarkEvent.SessionMarkType.Teleport, str).getDatabaseObject()
+            val databaseObject: ChatMessage = SLChatSessionMarkEvent(ChatMessageSourceUnknown.getInstance(), this.userManager.getUserID(), SLChatSessionMarkEvent.SessionMarkType.Teleport, str).getDatabaseObject()
             synchronized (this.chatEventLock) {
                 databaseObject.setChatterID(chatter.getId().longValue())
                 this.chatMessageDao.insert(databaseObject)
             }
-            List<ChatMessageLoader> loaders = getLoaders(this.localChatterID)
+            val loaders: List<ChatMessageLoader> = getLoaders(this.localChatterID)
             if (loaders != null) {
                 for (ChatMessageLoader addElement : loaders) {
                     addElement.addElement(databaseObject)
@@ -559,11 +559,11 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
         }
     }
 
-    private Unit onMessageUpdated(ChatMessage chatMessage) {
-        Chatter chatter = (Chatter) this.chatterDao.load(Long.valueOf(chatMessage.getChatterID()))
-        ChatterID fromDatabaseObject = chatter != null ? ChatterID.fromDatabaseObject(this.userManager.getUserID(), chatter) : null
+     private fun onMessageUpdated(chatMessage: ChatMessage) {
+        val chatter: Chatter = (Chatter) this.chatterDao.load(Long.valueOf(chatMessage.getChatterID()))
+        val fromDatabaseObject: ChatterID = chatter != null ? ChatterID.fromDatabaseObject(this.userManager.getUserID(), chatter) : null
         if (fromDatabaseObject != null) {
-            List<ChatMessageLoader> loaders = getLoaders(fromDatabaseObject)
+            val loaders: List<ChatMessageLoader> = getLoaders(fromDatabaseObject)
             if (loaders != null) {
                 for (ChatMessageLoader updateElement : loaders) {
                     updateElement.updateElement(chatMessage)
@@ -577,7 +577,7 @@ class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolved
         }
     }
 
-    fun HandleChatEvent(ChatterID chatterID, SLChatEvent sLChatEvent, Boolean z) {
+    fun HandleChatEvent(chatterID: ChatterID, sLChatEvent: SLChatEvent, z: Boolean) {
         this.userManager.getDatabaseExecutor().execute(Runnable(z, this, chatterID, sLChatEvent) {
 
             /* renamed from: -$f0 */
@@ -657,19 +657,19 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     }
 
-    fun addDisplayedChatter(ChatterID chatterID) {
+    fun addDisplayedChatter(chatterID: ChatterID) {
         if (this.displayedChatters.add(chatterID)) {
             this.userManager.getDatabaseExecutor().execute($Lambda$bC26PUjVA14BMgZPIZxiNFWFltI(this, chatterID))
         }
     }
 
-    fun addObjectMessageListener(OnChatEventListener onChatEventListener, Executor executor) {
+    fun addObjectMessageListener(onChatEventListener: OnChatEventListener, executor: Executor) {
         synchronized (this.objectMessageListenersLock) {
             this.objectMessageListeners.put(onChatEventListener, executor)
         }
     }
 
-    fun clearChatHistory(ChatterID chatterID) {
+    fun clearChatHistory(chatterID: ChatterID) {
         this.userManager.getDatabaseExecutor().execute(Runnable(this, chatterID) {
 
             /* renamed from: -$f0 */
@@ -744,15 +744,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     }
 
     /* access modifiers changed from: package-private */
-    public ChatterDisplayDataList getActiveChattersList() {
+     public fun getActiveChattersList(): ChatterDisplayDataList {
         return ActiveChattersDisplayDataList(this.userManager, this.onListUpdated)
     }
 
-    public EventBus getChatEventBus() {
+     public fun getChatEventBus(): EventBus {
         return this.chatEventBus
     }
 
-    public ChatMessage getChatMessage(Long j) {
+     public fun getChatMessage(j: Long): ChatMessage {
         ChatMessage chatMessage
         synchronized (this.chatEventLock) {
             chatMessage = (ChatMessage) this.chatMessageDao.load(Long.valueOf(j))
@@ -760,19 +760,19 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return chatMessage
     }
 
-    public Chatter getChatter(ChatterID chatterID) {
+     public fun getChatter(chatterID: ChatterID): Chatter {
         return getChatter(chatterID, false)
     }
 
     /* access modifiers changed from: package-private */
-    public Chatter getChatter(ChatterID chatterID, Boolean z) {
+     public fun getChatter(chatterID: ChatterID, z: Boolean): Chatter {
         Query<Chatter> forCurrentThread
         Chatter unique
-        UUID uuid = null
-        SLAgentCircuit activeAgentCircuit = this.userManager.getActiveAgentCircuit()
-        UUID sessionID = activeAgentCircuit != null ? activeAgentCircuit.getSessionID() : null
+        val uuid: UUID = null
+        val activeAgentCircuit: SLAgentCircuit = this.userManager.getActiveAgentCircuit()
+        val sessionID: UUID = activeAgentCircuit != null ? activeAgentCircuit.getSessionID() : null
         synchronized (this.chatEventLock) {
-            UUID optionalChatterUUID = chatterID.getOptionalChatterUUID()
+            val optionalChatterUUID: UUID = chatterID.getOptionalChatterUUID()
             if (optionalChatterUUID != null) {
                 forCurrentThread = this.findChatterQuery.forCurrentThread()
                 forCurrentThread.setParameter(0, Integer.valueOf(chatterID.getChatterType().ordinal()))
@@ -783,7 +783,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             }
             unique = forCurrentThread.unique()
             if (z) {
-                Object[] objArr = Object[3]
+                val objArr: Array<Any> = Object[3]
                 objArr[0] = Boolean.valueOf(unique != null)
                 objArr[1] = sessionID
                 if (unique != null) {
@@ -795,7 +795,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             if (!z || unique == null || sessionID == null) {
                 z2 = false
             } else if (!Objects.equal(sessionID, unique.getLastSessionID())) {
-                Boolean z3 = unique.getLastSessionID() != null
+                val z3: Boolean = unique.getLastSessionID() != null
                 unique.setLastSessionID(sessionID)
                 this.chatterDao.update(unique)
                 z2 = z3
@@ -887,19 +887,19 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return unique
     }
 
-    public ChatMessageLoader getMessageLoader(ChatterID chatterID, ChunkedListLoader.EventListener eventListener) {
+     public fun getMessageLoader(chatterID: ChatterID, ChunkedListLoader.EventListener eventListener): ChatMessageLoader {
         LinkedList linkedList
-        ChatMessageLoader chatMessageLoader = ChatMessageLoader(this.userManager, chatterID, 100, this.userManager.getDatabaseExecutor(), false, eventListener)
+        val chatMessageLoader: ChatMessageLoader = ChatMessageLoader(this.userManager, chatterID, 100, this.userManager.getDatabaseExecutor(), false, eventListener)
         synchronized (this.messageLoadersLock) {
-            List list = this.messageLoaders.get(chatterID)
+            val list: List = this.messageLoaders.get(chatterID)
             if (list == null) {
-                LinkedList linkedList2 = LinkedList()
+                val linkedList2: LinkedList = LinkedList()
                 this.messageLoaders.put(chatterID, linkedList2)
                 linkedList = linkedList2
             } else {
                 linkedList = list
             }
-            Iterator it = linkedList.iterator()
+            val it: Iterator = linkedList.iterator()
             while (it.hasNext()) {
                 if (((WeakReference) it.next()).get() == null) {
                     it.remove()
@@ -911,7 +911,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     }
 
     public LazyList<ChatMessage> getMessages(ChatterID chatterID) {
-        Chatter chatter = getChatter(chatterID)
+        val chatter: Chatter = getChatter(chatterID)
         if (chatter == null) {
             return null
         }
@@ -931,10 +931,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_25217  reason: not valid java name */
     public /* synthetic */ Unit m276lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_25217(ChatterID chatterID) {
-        Boolean z = false
+        val z: Boolean = false
         if (chatterID != null && chatterID.getChatterType() != ChatterID.ChatterType.Local) {
             synchronized (this.chatEventLock) {
-                Chatter chatter = getChatter(chatterID)
+                val chatter: Chatter = getChatter(chatterID)
                 if (chatter != null && chatter.getMuted()) {
                     chatter.setMuted(false)
                     z = true
@@ -946,7 +946,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         }
     }
 
-    fun markChatterInactive(ChatterID chatterID, Boolean z) {
+    fun markChatterInactive(chatterID: ChatterID, z: Boolean) {
         this.userManager.getDatabaseExecutor().execute(Runnable(z, this, chatterID) {
 
             /* renamed from: -$f0 */
@@ -1023,7 +1023,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     }
 
-    fun notifyChatEventUpdated(SLChatEvent sLChatEvent) {
+    fun notifyChatEventUpdated(sLChatEvent: SLChatEvent) {
         this.userManager.getDatabaseExecutor().execute(Runnable(this, sLChatEvent) {
 
             /* renamed from: -$f0 */
@@ -1097,7 +1097,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     }
 
-    fun notifyTeleportComplete(String str) {
+    fun notifyTeleportComplete(str: String) {
         this.userManager.getDatabaseExecutor().execute(Runnable(this, str) {
 
             /* renamed from: -$f0 */
@@ -1171,7 +1171,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     }
 
-    fun onMessageSourcesResolved(Set<Long> set, UserName userName) {
+    fun onMessageSourcesResolved(set: Set<Long>, userName: UserName) {
         ChatMessage chatMessage
         for (Long l : set) {
             if (!(l == null || (chatMessage = (ChatMessage) this.chatMessageDao.load(l)) == null)) {
@@ -1183,13 +1183,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         }
     }
 
-    fun releaseMessageLoader(ChatterID chatterID, ChatMessageLoader chatMessageLoader) {
+    fun releaseMessageLoader(chatterID: ChatterID, chatMessageLoader: ChatMessageLoader) {
         synchronized (this.messageLoadersLock) {
-            List list = this.messageLoaders.get(chatterID)
+            val list: List = this.messageLoaders.get(chatterID)
             if (list != null) {
-                Iterator it = list.iterator()
+                val it: Iterator = list.iterator()
                 while (it.hasNext()) {
-                    ChatMessageLoader chatMessageLoader2 = (ChatMessageLoader) ((WeakReference) it.next()).get()
+                    val chatMessageLoader2: ChatMessageLoader = (ChatMessageLoader) ((WeakReference) it.next()).get()
                     if (chatMessageLoader2 == null || chatMessageLoader2 == chatMessageLoader) {
                         it.remove()
                     }
@@ -1198,17 +1198,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         }
     }
 
-    fun removeDisplayedChatter(ChatterID chatterID) {
+    fun removeDisplayedChatter(chatterID: ChatterID) {
         this.displayedChatters.remove(chatterID)
     }
 
-    fun removeObjectMessageListener(OnChatEventListener onChatEventListener) {
+    fun removeObjectMessageListener(onChatEventListener: OnChatEventListener) {
         synchronized (this.objectMessageListenersLock) {
             this.objectMessageListeners.remove(onChatEventListener)
         }
     }
 
-    fun unmuteChatter(ChatterID chatterID) {
+    fun unmuteChatter(chatterID: ChatterID) {
         this.userManager.getDatabaseExecutor().execute(Runnable(this, chatterID) {
 
             /* renamed from: -$f0 */

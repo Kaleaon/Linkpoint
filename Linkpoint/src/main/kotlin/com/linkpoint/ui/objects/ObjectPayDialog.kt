@@ -19,21 +19,21 @@ class ObjectPayDialog {
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_1356  reason: not valid java name */
     static /* synthetic */ Unit m677lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_1356(AlertDialog alertDialog, PayInfo payInfo, Context context, UserManager userManager, SLObjectProfileData sLObjectProfileData, DialogInterface dialogInterface) {
         alertDialog.findViewById(R.id.object_pay_cancel).setOnClickListener($Lambda$X9q_n5C700PWS1S1Fm8NWTXuec(dialogInterface))
-        Int[] iArr = {R.id.object_pay_button1, R.id.object_pay_button2, R.id.object_pay_button3, R.id.object_pay_button4}
-        ImmutableList<Integer> payPrices = payInfo.payPrices()
-        Int i = 0
+        val iArr: IntArray = {R.id.object_pay_button1, R.id.object_pay_button2, R.id.object_pay_button3, R.id.object_pay_button4}
+        val payPrices: ImmutableList<Integer> = payInfo.payPrices()
+        val i: Int = 0
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (i2 >= iArr.length) {
                 break
             }
-            Int intValue = (payPrices == null || i2 > payPrices.size()) ? -1 : ((Integer) payPrices.get(i2)).intValue()
-            Int defaultPayPrice = intValue == -2 ? payInfo.defaultPayPrice() : intValue
+            val intValue: Int = (payPrices == null || i2 > payPrices.size()) ? -1 : ((Integer) payPrices.get(i2)).intValue()
+            val defaultPayPrice: Int = intValue == -2 ? payInfo.defaultPayPrice() : intValue
             if (defaultPayPrice <= 0) {
                 alertDialog.findViewById(iArr[i2]).setVisibility(8)
                 alertDialog.findViewById(iArr[i2]).setTag(R.id.object_pay_price_tag, 0)
             } else {
-                ((Button) alertDialog.findViewById(iArr[i2])).setText(String.format(context.getString(R.string.pay_button_format), Object[]{Integer.valueOf(defaultPayPrice)}))
+                ((Button) alertDialog.findViewById(iArr[i2])).setText(String.format(context.getString(R.string.pay_button_format), Array<Any>{Integer.valueOf(defaultPayPrice)}))
                 alertDialog.findViewById(iArr[i2]).setVisibility(0)
                 alertDialog.findViewById(iArr[i2]).setTag(R.id.object_pay_price_tag, Integer.valueOf(defaultPayPrice))
                 alertDialog.findViewById(iArr[i2]).setOnClickListener(View.OnClickListener(defaultPayPrice, userManager, sLObjectProfileData, dialogInterface) {
@@ -133,7 +133,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$X
         if (payInfo.defaultPayPrice() != -1) {
             if (((EditText) alertDialog.findViewById(R.id.object_pay_amount)).getText().toString().equals("")) {
                 if (payInfo.defaultPayPrice() > 0) {
-                    ((EditText) alertDialog.findViewById(R.id.object_pay_amount)).setText(context.getString(R.string.object_pay_amount_format, Object[]{Integer.valueOf(payInfo.defaultPayPrice())}))
+                    ((EditText) alertDialog.findViewById(R.id.object_pay_amount)).setText(context.getString(R.string.object_pay_amount_format, Array<Any>{Integer.valueOf(payInfo.defaultPayPrice())}))
                 } else {
                     ((EditText) alertDialog.findViewById(R.id.object_pay_amount)).setText("")
                 }
@@ -223,7 +223,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$X
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_2986  reason: not valid java name */
     static /* synthetic */ Unit m679lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_2986(UserManager userManager, SLObjectProfileData sLObjectProfileData, Int i, DialogInterface dialogInterface, View view) {
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+        val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
             activeAgentCircuit.getModules().financialInfo.DoPayObject(sLObjectProfileData.objectUUID(), i)
         }
@@ -233,8 +233,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$X
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_4340  reason: not valid java name */
     static /* synthetic */ Unit m680lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_4340(AlertDialog alertDialog, UserManager userManager, SLObjectProfileData sLObjectProfileData, DialogInterface dialogInterface, View view) {
         try {
-            Int parseInt = Integer.parseInt(((EditText) alertDialog.findViewById(R.id.object_pay_amount)).getText().toString())
-            SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+            val parseInt: Int = Integer.parseInt(((EditText) alertDialog.findViewById(R.id.object_pay_amount)).getText().toString())
+            val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
             if (activeAgentCircuit != null) {
                 activeAgentCircuit.getModules().financialInfo.DoPayObject(sLObjectProfileData.objectUUID(), parseInt)
             }
@@ -245,14 +245,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$X
     }
 
     @JvmStatic
-    Unit show(Context context, UserManager userManager, SLObjectProfileData sLObjectProfileData) {
-        PayInfo payInfo = sLObjectProfileData.payInfo()
+     fun show(context: Context, userManager: UserManager, sLObjectProfileData: SLObjectProfileData) {
+        val payInfo: PayInfo = sLObjectProfileData.payInfo()
         if (payInfo != null) {
             AlertDialog.Builder builder = AlertDialog.Builder(context)
-            builder.setTitle((CharSequence) context.getString(R.string.object_pay_dialog_caption, Object[]{sLObjectProfileData.name().or(context.getString(R.string.name_loading_title))}))
+            builder.setTitle((CharSequence) context.getString(R.string.object_pay_dialog_caption, Array<Any>{sLObjectProfileData.name().or(context.getString(R.string.name_loading_title))}))
             builder.setCancelable(true)
             builder.setView((Int) R.layout.object_pay_dialog)
-            AlertDialog create = builder.create()
+            val create: AlertDialog = builder.create()
             create.setOnShowListener(DialogInterface.OnShowListener(create, payInfo, context, userManager, sLObjectProfileData) {
 
                 /* renamed from: -$f0 */

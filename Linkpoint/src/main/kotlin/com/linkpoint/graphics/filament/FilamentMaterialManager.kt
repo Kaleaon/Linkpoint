@@ -154,8 +154,8 @@ class FilamentMaterialManager(
             .require(MaterialBuilder.VertexAttribute.COLOR)
             .material("""
                 void material(inout MaterialInputs material) {
-                    prepareMaterial(material);
-                    material.baseColor = getColor();
+                    prepareMaterial(material)
+                    material.baseColor = getColor()
                 }
             """.trimIndent())
             .optimization(MaterialBuilder.Optimization.NONE)
@@ -175,11 +175,11 @@ class FilamentMaterialManager(
             .parameter(MaterialBuilder.UniformType.FLOAT, "roughness")
             .material("""
                 void material(inout MaterialInputs material) {
-                    prepareMaterial(material);
-                    vec2 uv = getUV0();
-                    vec4 baseColor = texture(materialParams_baseColorMap, uv);
-                    material.baseColor = baseColor;
-                    material.roughness = materialParams.roughness;
+                    prepareMaterial(material)
+                    vec2 uv = getUV0()
+                    vec4 baseColor = texture(materialParams_baseColorMap, uv)
+                    material.baseColor = baseColor
+                    material.roughness = materialParams.roughness
                 }
             """.trimIndent())
             .optimization(MaterialBuilder.Optimization.NONE)
@@ -200,11 +200,11 @@ class FilamentMaterialManager(
             .parameter(MaterialBuilder.UniformType.FLOAT, "roughness")
             .material("""
                 void material(inout MaterialInputs material) {
-                    prepareMaterial(material);
-                    vec2 uv = getUV0();
-                    vec4 texColor = texture(materialParams_baseColorMap, uv);
-                    material.baseColor = vec4(texColor.rgb * materialParams.baseColor, texColor.a);
-                    material.roughness = materialParams.roughness;
+                    prepareMaterial(material)
+                    vec2 uv = getUV0()
+                    vec4 texColor = texture(materialParams_baseColorMap, uv)
+                    material.baseColor = vec4(texColor.rgb * materialParams.baseColor, texColor.a)
+                    material.roughness = materialParams.roughness
                 }
             """.trimIndent())
             .optimization(MaterialBuilder.Optimization.NONE)
@@ -228,16 +228,16 @@ class FilamentMaterialManager(
             .parameter(MaterialBuilder.UniformType.FLOAT, "roughnessFactor")
             .material("""
                 void material(inout MaterialInputs material) {
-                    prepareMaterial(material);
-                    vec2 uv = getUV0();
-                    vec4 baseColor = texture(materialParams_baseColorMap, uv);
-                    vec3 normal = texture(materialParams_normalMap, uv).rgb * 2.0 - 1.0;
-                    vec4 mr = texture(materialParams_metallicRoughnessMap, uv);
+                    prepareMaterial(material)
+                    vec2 uv = getUV0()
+                    vec4 baseColor = texture(materialParams_baseColorMap, uv)
+                    vec3 normal = texture(materialParams_normalMap, uv).rgb * 2.0 - 1.0
+                    vec4 mr = texture(materialParams_metallicRoughnessMap, uv)
                     
-                    material.baseColor = baseColor;
-                    material.normal = normal;
-                    material.metallic = mr.b * materialParams.metallicFactor;
-                    material.roughness = mr.g * materialParams.roughnessFactor;
+                    material.baseColor = baseColor
+                    material.normal = normal
+                    material.metallic = mr.b * materialParams.metallicFactor
+                    material.roughness = mr.g * materialParams.roughnessFactor
                 }
             """.trimIndent())
             .optimization(MaterialBuilder.Optimization.NONE)
@@ -257,11 +257,11 @@ class FilamentMaterialManager(
             .parameter(MaterialBuilder.UniformType.FLOAT, "roughness")
             .material("""
                 void material(inout MaterialInputs material) {
-                    prepareMaterial(material);
-                    vec2 uv = getUV0();
-                    vec4 skinColor = texture(materialParams_skinTexture, uv);
-                    material.baseColor = skinColor;
-                    material.roughness = materialParams.roughness;
+                    prepareMaterial(material)
+                    vec2 uv = getUV0()
+                    vec4 skinColor = texture(materialParams_skinTexture, uv)
+                    material.baseColor = skinColor
+                    material.roughness = materialParams.roughness
                 }
             """.trimIndent())
             .optimization(MaterialBuilder.Optimization.NONE)
@@ -282,9 +282,9 @@ class FilamentMaterialManager(
             .blending(MaterialBuilder.BlendingMode.TRANSPARENT)
             .material("""
                 void material(inout MaterialInputs material) {
-                    prepareMaterial(material);
-                    material.baseColor = vec4(materialParams.waterColor, 0.7);
-                    material.roughness = materialParams.roughness;
+                    prepareMaterial(material)
+                    material.baseColor = vec4(materialParams.waterColor, 0.7)
+                    material.roughness = materialParams.roughness
                 }
             """.trimIndent())
             .optimization(MaterialBuilder.Optimization.NONE)
@@ -302,8 +302,8 @@ class FilamentMaterialManager(
             .parameter(MaterialBuilder.UniformType.FLOAT3, "skyColor")
             .material("""
                 void material(inout MaterialInputs material) {
-                    prepareMaterial(material);
-                    material.baseColor = vec4(materialParams.skyColor, 1.0);
+                    prepareMaterial(material)
+                    material.baseColor = vec4(materialParams.skyColor, 1.0)
                 }
             """.trimIndent())
             .optimization(MaterialBuilder.Optimization.NONE)
@@ -324,10 +324,10 @@ class FilamentMaterialManager(
             .blending(MaterialBuilder.BlendingMode.TRANSPARENT)
             .material("""
                 void material(inout MaterialInputs material) {
-                    prepareMaterial(material);
-                    vec2 uv = getUV0();
-                    vec4 texColor = texture(materialParams_baseColorMap, uv);
-                    material.baseColor = vec4(texColor.rgb, texColor.a * materialParams.alpha);
+                    prepareMaterial(material)
+                    vec2 uv = getUV0()
+                    vec4 texColor = texture(materialParams_baseColorMap, uv)
+                    material.baseColor = vec4(texColor.rgb, texColor.a * materialParams.alpha)
                 }
             """.trimIndent())
             .optimization(MaterialBuilder.Optimization.NONE)

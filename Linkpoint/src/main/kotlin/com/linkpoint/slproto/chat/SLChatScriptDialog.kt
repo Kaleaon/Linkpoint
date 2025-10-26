@@ -29,9 +29,9 @@ import javax.annotation.Nullable
 
 val class SLChatScriptDialog : SLChatDialogEvent() {
     /* access modifiers changed from: private */
-    const val Int[] dialogButtonIds = {R.id.buttonDialog1, R.id.buttonDialog2, R.id.buttonDialog3, R.id.buttonDialog4, R.id.buttonDialog5, R.id.buttonDialog6, R.id.buttonDialog7, R.id.buttonDialog8, R.id.buttonDialog9, R.id.buttonDialog10, R.id.buttonDialog11, R.id.buttonDialog12}
+    const val IntArray dialogButtonIds = {R.id.buttonDialog1, R.id.buttonDialog2, R.id.buttonDialog3, R.id.buttonDialog4, R.id.buttonDialog5, R.id.buttonDialog6, R.id.buttonDialog7, R.id.buttonDialog8, R.id.buttonDialog9, R.id.buttonDialog10, R.id.buttonDialog11, R.id.buttonDialog12}
     /* access modifiers changed from: private */
-    val String[] buttons
+    val Array<String> buttons
     private String selectedOption = null
 
     class ScriptDialogDialog : Dialog() : View.OnClickListener, DialogInterface.OnCancelListener {
@@ -56,13 +56,13 @@ val class SLChatScriptDialog : SLChatDialogEvent() {
             setOnCancelListener(this)
         }
 
-        fun onCancel(DialogInterface dialogInterface) {
+        fun onCancel(dialogInterface: DialogInterface) {
             SLChatScriptDialog.this.onDialogIgnored(this.userManager)
             dismiss()
         }
 
-        fun onClick(View view) {
-            Int i = 0
+        fun onClick(view: View) {
+            val i: Int = 0
             while (true) {
                 if (i >= SLChatScriptDialog.dialogButtonIds.length) {
                     break
@@ -79,10 +79,10 @@ val class SLChatScriptDialog : SLChatDialogEvent() {
 
     public SLChatScriptDialog(ChatMessage chatMessage, UUID uuid) {
         super(chatMessage, uuid)
-        String[] strArr
+        Array<String> strArr
         this.selectedOption = chatMessage.getDialogSelectedOption()
         try {
-            strArr = (String[]) ObjectInputStream(ByteArrayInputStream(chatMessage.getDialogButtons())).readObject()
+            strArr = (Array<String>) ObjectInputStream(ByteArrayInputStream(chatMessage.getDialogButtons())).readObject()
         } catch (IOException | ClassNotFoundException e) {
             Debug.Warning(e)
             strArr = null
@@ -90,21 +90,21 @@ val class SLChatScriptDialog : SLChatDialogEvent() {
         this.buttons = strArr
     }
 
-    public SLChatScriptDialog(ScriptDialog scriptDialog, UUID uuid, String[] strArr) {
+    public SLChatScriptDialog(ScriptDialog scriptDialog, UUID uuid, Array<String> strArr) {
         super(scriptDialog, uuid)
         this.buttons = strArr
     }
 
-    fun bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, ChatEventTimestampUpdater chatEventTimestampUpdater) {
+    fun bindViewHolder(chatEventViewHolder: ChatEventViewHolder, userManager: UserManager, chatEventTimestampUpdater: ChatEventTimestampUpdater) {
         super.bindViewHolder(chatEventViewHolder, userManager, chatEventTimestampUpdater)
         if (chatEventViewHolder instanceof ChatScriptDialogViewHolder) {
-            ChatScriptDialogViewHolder chatScriptDialogViewHolder = (ChatScriptDialogViewHolder) chatEventViewHolder
+            val chatScriptDialogViewHolder: ChatScriptDialogViewHolder = (ChatScriptDialogViewHolder) chatEventViewHolder
             chatScriptDialogViewHolder.setDialogEvent(this)
             if (this.selectedOption != null || this.ignored) {
                 if (this.ignored) {
                     chatScriptDialogViewHolder.dialogResultTextView.setText(R.string.dialog_ignored)
                 } else {
-                    chatScriptDialogViewHolder.dialogResultTextView.setText(chatScriptDialogViewHolder.dialogResultTextView.getContext().getString(R.string.dialog_selected_format, Object[]{this.selectedOption}))
+                    chatScriptDialogViewHolder.dialogResultTextView.setText(chatScriptDialogViewHolder.dialogResultTextView.getContext().getString(R.string.dialog_selected_format, Array<Any>{this.selectedOption}))
                 }
                 chatScriptDialogViewHolder.dialogResultTextView.findViewById(R.id.dialogResultTextView).setVisibility(0)
                 chatScriptDialogViewHolder.dialogButtonsLayout.findViewById(R.id.dialogButtonsLayout).setVisibility(8)
@@ -125,7 +125,7 @@ val class SLChatScriptDialog : SLChatDialogEvent() {
         }
     }
 
-    public String[] getButtons() {
+    public Array<String> getButtons() {
         return this.buttons
     }
 
@@ -138,15 +138,15 @@ val class SLChatScriptDialog : SLChatDialogEvent() {
         return SLChatEvent.ChatMessageViewType.VIEW_TYPE_DIALOG
     }
 
-    public Boolean isObjectPopup() {
+     public fun isObjectPopup(): Boolean {
         return true
     }
 
-    fun onDialogButton(UserManager userManager, Int i) {
+    fun onDialogButton(userManager: UserManager, i: Int) {
         if (i >= 0 && i < this.buttons.length) {
             this.selectedOption = this.buttons[i]
-            UUID sourceUUID = this.source.getSourceUUID()
-            SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+            val sourceUUID: UUID = this.source.getSourceUUID()
+            val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
             if (!(sourceUUID == null || activeAgentCircuit == null)) {
                 activeAgentCircuit.SendScriptDialogReply(sourceUUID, this.chatChannel, i, this.selectedOption)
             }
@@ -154,15 +154,15 @@ val class SLChatScriptDialog : SLChatDialogEvent() {
         }
     }
 
-    fun onDialogIgnored(UserManager userManager) {
+    fun onDialogIgnored(userManager: UserManager) {
         super.onDialogIgnored(userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    fun serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         try {
-            ByteArrayOutputStream byteArrayOutputStream = ByteArrayOutputStream()
+            val byteArrayOutputStream: ByteArrayOutputStream = ByteArrayOutputStream()
             ObjectOutputStream(byteArrayOutputStream).writeObject(this.buttons)
             chatMessage.setDialogButtons(byteArrayOutputStream.toByteArray())
         } catch (IOException e) {
@@ -171,7 +171,7 @@ val class SLChatScriptDialog : SLChatDialogEvent() {
         chatMessage.setDialogSelectedOption(this.selectedOption)
     }
 
-    fun showDialog(Context context, UserManager userManager) {
+    fun showDialog(context: Context, userManager: UserManager) {
         ScriptDialogDialog(context, userManager, this.source.getSourceName(userManager), this.text).show()
     }
 }

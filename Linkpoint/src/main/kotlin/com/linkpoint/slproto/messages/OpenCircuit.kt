@@ -17,15 +17,15 @@ class OpenCircuit : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return 10
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleOpenCircuit(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) -4)
@@ -33,7 +33,7 @@ class OpenCircuit : SLMessage() {
         packShort(byteBuffer, (Short) this.CircuitInfo_Field.Port)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.CircuitInfo_Field.IP = unpackIPAddress(byteBuffer)
         this.CircuitInfo_Field.Port = unpackShort(byteBuffer) & 65535
     }

@@ -29,15 +29,15 @@ class SimulatorLoad : SLMessage() {
         this.SimulatorLoadData_Field = SimulatorLoadData()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.AgentList_Fields.size() * 6) + 14
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleSimulatorLoad(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.FF)
@@ -52,13 +52,13 @@ class SimulatorLoad : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.SimulatorLoadData_Field.TimeDilation = unpackFloat(byteBuffer)
         this.SimulatorLoadData_Field.AgentCount = unpackInt(byteBuffer)
         this.SimulatorLoadData_Field.CanAcceptAgents = unpackBoolean(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            AgentList agentList = AgentList()
+            val agentList: AgentList = AgentList()
             agentList.CircuitCode = unpackInt(byteBuffer)
             agentList.X = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             agentList.Y = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE

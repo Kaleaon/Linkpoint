@@ -13,7 +13,7 @@ class ActivityUtils {
     const val FRAGMENT_SELECTION_KEY: String = "fragmentSelection"
 
     @JvmStatic
-    UUID getActiveAgentID(Intent intent) {
+     fun getActiveAgentID(intent: Intent): UUID {
         String stringExtra
         if (intent == null || (stringExtra = intent.getStringExtra("activeAgentUUID")) == null) {
             return null
@@ -22,7 +22,7 @@ class ActivityUtils {
     }
 
     @JvmStatic
-    UUID getActiveAgentID(Bundle bundle) {
+     fun getActiveAgentID(bundle: Bundle): UUID {
         String string
         if (bundle == null || (string = bundle.getString("activeAgentUUID")) == null) {
             return null
@@ -31,7 +31,7 @@ class ActivityUtils {
     }
 
     @JvmStatic
-    Bundle getFragmentSelection(Bundle bundle) {
+     fun getFragmentSelection(bundle: Bundle): Bundle {
         if (bundle != null) {
             return bundle.getBundle(FRAGMENT_SELECTION_KEY)
         }
@@ -39,8 +39,8 @@ class ActivityUtils {
     }
 
     @JvmStatic
-    UserManager getUserManager(Intent intent) {
-        UUID activeAgentID = getActiveAgentID(intent)
+     fun getUserManager(intent: Intent): UserManager {
+        val activeAgentID: UUID = getActiveAgentID(intent)
         if (activeAgentID != null) {
             return UserManager.getUserManager(activeAgentID)
         }
@@ -48,8 +48,8 @@ class ActivityUtils {
     }
 
     @JvmStatic
-    UserManager getUserManager(Bundle bundle) {
-        UUID activeAgentID = getActiveAgentID(bundle)
+     fun getUserManager(bundle: Bundle): UserManager {
+        val activeAgentID: UUID = getActiveAgentID(bundle)
         if (activeAgentID != null) {
             return UserManager.getUserManager(activeAgentID)
         }
@@ -57,8 +57,8 @@ class ActivityUtils {
     }
 
     @JvmStatic
-    Bundle makeFragmentArguments(UUID uuid, Bundle bundle) {
-        Bundle bundle2 = Bundle()
+     fun makeFragmentArguments(uuid: UUID, bundle: Bundle): Bundle {
+        val bundle2: Bundle = Bundle()
         if (uuid != null) {
             bundle2.putString("activeAgentUUID", uuid.toString())
         }
@@ -69,21 +69,21 @@ class ActivityUtils {
     }
 
     @JvmStatic
-    Unit setActiveAgentID(Intent intent, UUID uuid) {
+     fun setActiveAgentID(intent: Intent, uuid: UUID) {
         if (uuid != null) {
             intent.putExtra("activeAgentUUID", uuid.toString())
         }
     }
 
     @JvmStatic
-    Unit setActiveAgentID(Bundle bundle, UUID uuid) {
+     fun setActiveAgentID(bundle: Bundle, uuid: UUID) {
         if (uuid != null) {
             bundle.putString("activeAgentUUID", uuid.toString())
         }
     }
 
     @JvmStatic
-    Unit setFragmentSelection(Bundle bundle, Bundle bundle2) {
+     fun setFragmentSelection(bundle: Bundle, bundle2: Bundle) {
         if (bundle == null) {
             return
         }

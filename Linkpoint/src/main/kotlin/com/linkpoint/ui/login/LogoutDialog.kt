@@ -104,7 +104,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.login.-$Lambda$Ido
         }
     }
 
-    private UserManager getUserManager() {
+     private fun getUserManager(): UserManager {
         if (this.agentUUID != null) {
             return UserManager.getUserManager(this.agentUUID)
         }
@@ -112,17 +112,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.login.-$Lambda$Ido
     }
 
     @JvmStatic
-    Unit show(Activity activity) {
-        UUID activeAgentID = ActivityUtils.getActiveAgentID(activity.getIntent())
+     fun show(activity: Activity) {
+        val activeAgentID: UUID = ActivityUtils.getActiveAgentID(activity.getIntent())
         if (activeAgentID != null) {
-            LogoutDialog logoutDialog = LogoutDialog(activity)
+            val logoutDialog: LogoutDialog = LogoutDialog(activity)
             logoutDialog.setAgentUUID(activeAgentID)
             logoutDialog.show()
         }
     }
 
     @EventHandler
-    fun handleDisconnectEvent(SLDisconnectEvent sLDisconnectEvent) {
+    fun handleDisconnectEvent(sLDisconnectEvent: SLDisconnectEvent) {
         Debug.Printf("LogoutDialog: disconnect event", Object[0])
         dismiss()
     }
@@ -132,8 +132,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.login.-$Lambda$Ido
     public /* synthetic */ Unit m637lambda$com_lumiyaviewer_lumiya_ui_login_LogoutDialog_3137() {
         SLAgentCircuit activeAgentCircuit
         SLGridConnection gridConnection
-        Boolean z = true
-        UserManager userManager = getUserManager()
+        val z: Boolean = true
+        val userManager: UserManager = getUserManager()
         if (userManager == null || (activeAgentCircuit = userManager.getActiveAgentCircuit()) == null || (gridConnection = activeAgentCircuit.getGridConnection()) == null) {
             z = false
         } else {
@@ -145,7 +145,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.login.-$Lambda$Ido
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(Bundle bundle) {
+    fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setProgressStyle(0)
         setMessage(getContext().getString(R.string.logging_out))
@@ -154,8 +154,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.login.-$Lambda$Ido
         }
     }
 
-    public Bundle onSaveInstanceState() {
-        Bundle onSaveInstanceState = super.onSaveInstanceState()
+     public fun onSaveInstanceState(): Bundle {
+        val onSaveInstanceState: Bundle = super.onSaveInstanceState()
         if (onSaveInstanceState == null) {
             onSaveInstanceState = Bundle()
         }
@@ -168,10 +168,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.login.-$Lambda$Ido
     fun onStart() {
         SLAgentCircuit activeAgentCircuit
         SLGridConnection gridConnection
-        Boolean z = false
+        val z: Boolean = false
         super.onStart()
         this.eventBus.subscribe(this, (Activity) null, this.handler)
-        UserManager userManager = getUserManager()
+        val userManager: UserManager = getUserManager()
         if (!(userManager == null || (activeAgentCircuit = userManager.getActiveAgentCircuit()) == null || (gridConnection = activeAgentCircuit.getGridConnection()) == null)) {
             Debug.Printf("LogoutDialog: connection is not null", Object[0])
             this.handler.postDelayed(this.onDisconnectTimeout, DISCONNECT_TIMEOUT)
@@ -191,7 +191,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.login.-$Lambda$Ido
         super.onStop()
     }
 
-    fun setAgentUUID(UUID uuid) {
+    fun setAgentUUID(uuid: UUID) {
         this.agentUUID = uuid
     }
 }

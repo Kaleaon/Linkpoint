@@ -27,15 +27,15 @@ class RemoveInventoryItem : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.InventoryData_Fields.size() * 16) + 37
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleRemoveInventoryItem(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put(Ascii.SO)
@@ -47,12 +47,12 @@ class RemoveInventoryItem : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            InventoryData inventoryData = InventoryData()
+            val inventoryData: InventoryData = InventoryData()
             inventoryData.ItemID = unpackUUID(byteBuffer)
             this.InventoryData_Fields.add(inventoryData)
         }

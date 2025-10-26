@@ -46,7 +46,7 @@ class ModernLinkpointDemo {
     /**
      * Initialize transport with error handling
      */
-    private HybridSLTransport initializeTransport() {
+     private fun initializeTransport(): HybridSLTransport {
         try {
             return HybridSLTransport()
         } catch (Exception e) {
@@ -58,7 +58,7 @@ class ModernLinkpointDemo {
     /**
      * Initialize texture manager with error handling
      */
-    private ModernTextureManager initializeTextureManager(Context context) {
+     private fun initializeTextureManager(context: Context): ModernTextureManager {
         try {
             return ModernTextureManager(context)
         } catch (Exception e) {
@@ -70,7 +70,7 @@ class ModernLinkpointDemo {
     /**
      * Initialize render pipeline with error handling
      */
-    private ModernRenderPipeline initializeRenderPipeline() {
+     private fun initializeRenderPipeline(): ModernRenderPipeline {
         try {
             return ModernRenderPipeline()
         } catch (Exception e) {
@@ -82,7 +82,7 @@ class ModernLinkpointDemo {
     /**
      * Initialize auth manager with error handling
      */
-    private OAuth2AuthManager initializeAuthManager(Context context) {
+     private fun initializeAuthManager(context: Context): OAuth2AuthManager {
         try {
             return OAuth2AuthManager(context)
         } catch (Exception e) {
@@ -94,7 +94,7 @@ class ModernLinkpointDemo {
     /**
      * Initialize asset manager with error handling
      */
-    private ModernAssetManager initializeAssetManager(Context context) {
+     private fun initializeAssetManager(context: Context): ModernAssetManager {
         try {
             return ModernAssetManager(context)
         } catch (Exception e) {
@@ -106,7 +106,7 @@ class ModernLinkpointDemo {
     /**
      * Initialize protocol demo with error handling
      */
-    private ProtocolCompatibilityDemo initializeProtocolDemo(Context context) {
+     private fun initializeProtocolDemo(context: Context): ProtocolCompatibilityDemo {
         try {
             return ProtocolCompatibilityDemo(context)
         } catch (Exception e) {
@@ -118,7 +118,7 @@ class ModernLinkpointDemo {
     /**
      * Initialize modern Second Life connection
      */
-    fun connectToSecondLife(String eventQueueUrl, String seedCapability, String authToken) {
+    fun connectToSecondLife(eventQueueUrl: String, seedCapability: String, authToken: String) {
         Log.i(TAG, "Connecting to Second Life with modern protocols...")
         
         if (transport == null) {
@@ -167,7 +167,7 @@ class ModernLinkpointDemo {
         
         try {
             // Initialize render pipeline with mandatory OpenGL ES 3.0+ features
-            Boolean success = renderPipeline.initialize()
+            val success: Boolean = renderPipeline.initialize()
             if (success) {
                 if (renderPipeline.isModernPipelineAvailable()) {
                     Log.i(TAG, "Modern PBR rendering pipeline enabled (ES 3.0+)")
@@ -182,8 +182,8 @@ class ModernLinkpointDemo {
             // Initialize modernized texture manager  
             if (textureManager != null) {
                 try {
-                    Int optimalFormat = textureManager.getOptimalTextureFormat()
-                    String formatName = getFormatName(optimalFormat)
+                    val optimalFormat: Int = textureManager.getOptimalTextureFormat()
+                    val formatName: String = getFormatName(optimalFormat)
                     Log.i(TAG, "Optimal texture format: " + formatName + " (ES 3.0 ETC2+ only)")
                     Log.i(TAG, "Legacy JPEG2000 format support removed")
                 } catch (Exception e) {
@@ -202,7 +202,7 @@ class ModernLinkpointDemo {
     /**
      * Load texture with modern transcoding
      */
-    fun loadTexture(String textureId) {
+    fun loadTexture(textureId: String) {
         Log.d(TAG, "Loading texture with modern pipeline: " + textureId)
         
         if (textureManager == null) {
@@ -232,7 +232,7 @@ class ModernLinkpointDemo {
     /**
      * Send modern message
      */
-    fun sendMessage(String messageType, String content) {
+    fun sendMessage(messageType: String, content: String) {
         Log.d(TAG, "Sending modern message: " + messageType)
         
         if (transport == null) {
@@ -265,7 +265,7 @@ class ModernLinkpointDemo {
     /**
      * Render frame with modern pipeline
      */
-    fun renderFrame(Float[] viewMatrix, Float[] projectionMatrix) {
+    fun renderFrame(viewMatrix: FloatArray, projectionMatrix: FloatArray) {
         if (renderPipeline == null) {
             Log.w(TAG, "Render pipeline not available - frame rendering skipped")
             return
@@ -327,7 +327,7 @@ class ModernLinkpointDemo {
     /**
      * Demonstrate modern authentication with OAuth2
      */
-    fun demonstrateModernAuthentication(String username, String password) {
+    fun demonstrateModernAuthentication(username: String, password: String) {
         Log.i(TAG, "Demonstrating modern OAuth2 authentication...")
         
         authManager.authenticateUser(username, password)
@@ -347,7 +347,7 @@ class ModernLinkpointDemo {
     fun demonstrateAssetStreaming() {
         Log.i(TAG, "Demonstrating intelligent asset streaming...")
         
-        String[] textureIds = {"texture_001", "texture_002", "texture_003"}
+        val textureIds: Array<String> = {"texture_001", "texture_002", "texture_003"}
         
         for (String textureId : textureIds) {
             assetManager.loadAsset(textureId, ModernAssetManager.AssetType.TEXTURE)
@@ -363,14 +363,14 @@ class ModernLinkpointDemo {
     /**
      * Get authentication manager
      */
-    public OAuth2AuthManager getAuthManager() {
+     public fun getAuthManager(): OAuth2AuthManager {
         return authManager
     }
     
     /**
      * Get asset manager  
      */
-    public ModernAssetManager getAssetManager() {
+     public fun getAssetManager(): ModernAssetManager {
         return assetManager
     }
     
@@ -385,7 +385,7 @@ class ModernLinkpointDemo {
     /**
      * Get connection status
      */
-    public Boolean isConnected() {
+     public fun isConnected(): Boolean {
         if (transport == null) {
             return false
         }
@@ -400,15 +400,15 @@ class ModernLinkpointDemo {
     /**
      * Get graphics capabilities info
      */
-    public String getGraphicsInfo() {
+     public fun getGraphicsInfo(): String {
         try {
-            Boolean modernPipeline = (renderPipeline != null) && renderPipeline.isModernPipelineAvailable()
+            val modernPipeline: Boolean = (renderPipeline != null) && renderPipeline.isModernPipelineAvailable()
             
-            Int textureFormat = 0
+            val textureFormat: Int = 0
             if (textureManager != null) {
                 textureFormat = textureManager.getOptimalTextureFormat()
             }
-            String formatName = getFormatName(textureFormat)
+            val formatName: String = getFormatName(textureFormat)
             
             return String.format("Modern Pipeline: %s, Optimal Texture: %s", 
                                modernPipeline ? "Available" : "Legacy", formatName)
@@ -463,7 +463,7 @@ class ModernLinkpointDemo {
     /**
      * Helper method to get texture format name
      */
-    private String getFormatName(Int format) {
+     private fun getFormatName(format: Int): String {
         switch (format) {
             case 0x93B0: return "ASTC 4x4 RGBA"
             case 0x9278: return "ETC2 RGBA" 

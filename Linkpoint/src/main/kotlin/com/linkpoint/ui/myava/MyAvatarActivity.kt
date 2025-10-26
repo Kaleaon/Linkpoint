@@ -13,7 +13,7 @@ import com.linkpoint.ui.outfits.OutfitsFragment
 
 class MyAvatarActivity : MasterDetailsActivity() {
     private val FragmentActivityFactory detailsFragmentFactory = FragmentActivityFactory() {
-        public Intent createIntent(Context context, Bundle bundle) {
+         public fun createIntent(context: Context, bundle: Bundle): Intent {
             return null
         }
 
@@ -23,7 +23,7 @@ class MyAvatarActivity : MasterDetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-    public FragmentActivityFactory getDetailsFragmentFactory() {
+     public fun getDetailsFragmentFactory(): FragmentActivityFactory {
         return this.detailsFragmentFactory
     }
 
@@ -50,12 +50,12 @@ class MyAvatarActivity : MasterDetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-    public Boolean isRootDetailsFragment(Class<? : Fragment> cls) {
+     public fun isRootDetailsFragment(cls: Class<? : Fragment>): Boolean {
         return cls == MyProfileFragment.class || cls == OutfitsFragment.class || cls == MuteListFragment.class
     }
 
     /* access modifiers changed from: protected */
-    public Fragment onCreateMasterFragment(Intent intent, Bundle bundle) {
+     public fun onCreateMasterFragment(intent: Intent, bundle: Bundle): Fragment {
         return MyAvatarFragment.newInstance(ActivityUtils.getActiveAgentID(intent))
     }
 }

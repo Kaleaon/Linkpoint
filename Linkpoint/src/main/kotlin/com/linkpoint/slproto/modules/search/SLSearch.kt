@@ -63,9 +63,9 @@ class SLSearch : SLModule() {
     /* access modifiers changed from: private */
     val AtomicReference<SearchGridQuery> currentSearchQuery = AtomicReference<>((Object) null)
     private val RequestHandler<UUID> parcelInfoRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        fun onRequest(UUID uuid) {
+        fun onRequest(uuid: UUID) {
             Debug.Printf("ParcelInfo: Requesting for %s", uuid)
-            ParcelInfoRequest parcelInfoRequest = ParcelInfoRequest()
+            val parcelInfoRequest: ParcelInfoRequest = ParcelInfoRequest()
             parcelInfoRequest.AgentData_Field.AgentID = SLSearch.this.circuitInfo.agentID
             parcelInfoRequest.AgentData_Field.SessionID = SLSearch.this.circuitInfo.sessionID
             parcelInfoRequest.Data_Field.ParcelID = uuid
@@ -77,16 +77,16 @@ class SLSearch : SLModule() {
     private val RequestHandler<SearchGridQuery> searchRequestHandler = AsyncRequestHandler(this.agentCircuit, SimpleRequestHandler<SearchGridQuery>() {
 
         /* renamed from: -com-lumiyaviewer-lumiya-slproto-modules-search-SearchGridQuery$SearchTypeSwitchesValues  reason: not valid java name */
-        private const val /* synthetic */ Int[] f129comlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues = null
-        final /* synthetic */ Int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$modules$search$SearchGridQuery$SearchType
+        private const val /* synthetic */ IntArray f129comlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues = null
+        final /* synthetic */ IntArray $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$modules$search$SearchGridQuery$SearchType
 
         /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-modules-search-SearchGridQuery$SearchTypeSwitchesValues  reason: not valid java name */
         @JvmStatic
-private /* synthetic */ Int[] m238getcomlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues() {
+private /* synthetic */ IntArray m238getcomlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues() {
             if (f129comlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues != null) {
                 return f129comlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues
             }
-            Int[] iArr = Int[SearchGridQuery.SearchType.values().length]
+            val iArr: IntArray = Int[SearchGridQuery.SearchType.values().length]
             try {
                 iArr[SearchGridQuery.SearchType.Groups.ordinal()] = 1
             } catch (NoSuchFieldError e) {
@@ -103,7 +103,7 @@ private /* synthetic */ Int[] m238getcomlumiyaviewerlumiyaslprotomodulessearchSe
             return iArr
         }
 
-        fun onRequest(SearchGridQuery searchGridQuery) {
+        fun onRequest(searchGridQuery: SearchGridQuery) {
             SLSearch.this.currentSearchQuery.set(searchGridQuery)
             switch (m238getcomlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues()[searchGridQuery.searchType().ordinal()]) {
                 case 1:
@@ -135,8 +135,8 @@ private /* synthetic */ Int[] m238getcomlumiyaviewerlumiyaslprotomodulessearchSe
     }
 
     /* access modifiers changed from: private */
-    fun SearchGroups(String str, UUID uuid) {
-        DirFindQuery dirFindQuery = DirFindQuery()
+    fun SearchGroups(str: String, uuid: UUID) {
+        val dirFindQuery: DirFindQuery = DirFindQuery()
         dirFindQuery.AgentData_Field.AgentID = this.circuitInfo.agentID
         dirFindQuery.AgentData_Field.SessionID = this.circuitInfo.sessionID
         dirFindQuery.QueryData_Field.QueryID = uuid
@@ -148,8 +148,8 @@ private /* synthetic */ Int[] m238getcomlumiyaviewerlumiyaslprotomodulessearchSe
     }
 
     /* access modifiers changed from: private */
-    fun SearchPeople(String str, UUID uuid) {
-        DirFindQuery dirFindQuery = DirFindQuery()
+    fun SearchPeople(str: String, uuid: UUID) {
+        val dirFindQuery: DirFindQuery = DirFindQuery()
         dirFindQuery.AgentData_Field.AgentID = this.circuitInfo.agentID
         dirFindQuery.AgentData_Field.SessionID = this.circuitInfo.sessionID
         dirFindQuery.QueryData_Field.QueryID = uuid
@@ -161,8 +161,8 @@ private /* synthetic */ Int[] m238getcomlumiyaviewerlumiyaslprotomodulessearchSe
     }
 
     /* access modifiers changed from: private */
-    fun SearchPlaces(String str, UUID uuid) {
-        DirPlacesQuery dirPlacesQuery = DirPlacesQuery()
+    fun SearchPlaces(str: String, uuid: UUID) {
+        val dirPlacesQuery: DirPlacesQuery = DirPlacesQuery()
         dirPlacesQuery.AgentData_Field.AgentID = this.circuitInfo.agentID
         dirPlacesQuery.AgentData_Field.SessionID = this.circuitInfo.sessionID
         dirPlacesQuery.QueryData_Field.QueryID = uuid
@@ -174,7 +174,7 @@ private /* synthetic */ Int[] m238getcomlumiyaviewerlumiyaslprotomodulessearchSe
         SendMessage(dirPlacesQuery)
     }
 
-    private Unit updateSearchResults(SearchGridResultDao searchGridResultDao, SearchGridQuery searchGridQuery) {
+     private fun updateSearchResults(searchGridResultDao: SearchGridResultDao, searchGridQuery: SearchGridQuery) {
         if (this.searchResultHandler != null) {
             this.searchResultHandler.onResultData(searchGridQuery, searchGridResultDao.queryBuilder().where(SearchGridResultDao.Properties.SearchUUID.eq(searchGridQuery.searchUUID()), WhereCondition[0]).orderAsc(SearchGridResultDao.Properties.LevensteinDistance).listLazyUncached())
             searchGridResultDao.queryBuilder().where(SearchGridResultDao.Properties.SearchUUID.notEq(searchGridQuery.searchUUID()), WhereCondition[0]).buildDelete().executeDeleteWithoutDetachingEntities()
@@ -182,14 +182,14 @@ private /* synthetic */ Int[] m238getcomlumiyaviewerlumiyaslprotomodulessearchSe
     }
 
     @SLMessageHandler
-    fun DirGroupsReply(DirGroupsReply dirGroupsReply) {
-        UUID uuid = dirGroupsReply.QueryData_Field.QueryID
-        SearchGridQuery searchGridQuery = this.currentSearchQuery.get()
+    fun DirGroupsReply(dirGroupsReply: DirGroupsReply) {
+        val uuid: UUID = dirGroupsReply.QueryData_Field.QueryID
+        val searchGridQuery: SearchGridQuery = this.currentSearchQuery.get()
         if (Objects.equal(searchGridQuery.searchUUID(), uuid) && this.userManager != null && this.searchResultHandler != null) {
-            SearchGridResultDao searchGridResultDao = this.userManager.getSearchManager().getSearchGridResultDao()
+            val searchGridResultDao: SearchGridResultDao = this.userManager.getSearchManager().getSearchGridResultDao()
             for (DirGroupsReply.QueryReplies queryReplies : dirGroupsReply.QueryReplies_Fields) {
                 if (!queryReplies.GroupID.equals(UUIDPool.ZeroUUID)) {
-                    String stringFromVariableOEM = SLMessage.stringFromVariableOEM(queryReplies.GroupName)
+                    val stringFromVariableOEM: String = SLMessage.stringFromVariableOEM(queryReplies.GroupName)
                     searchGridResultDao.insert(SearchGridResult((Long) null, uuid, SearchGridQuery.SearchType.Groups.ordinal(), queryReplies.GroupID, stringFromVariableOEM, LevensteinDistance.computeLevensteinDistance(stringFromVariableOEM, searchGridQuery.searchText()), Integer.valueOf(queryReplies.Members)))
                 }
             }
@@ -198,15 +198,15 @@ private /* synthetic */ Int[] m238getcomlumiyaviewerlumiyaslprotomodulessearchSe
     }
 
     @SLMessageHandler
-    fun DirPeopleReply(DirPeopleReply dirPeopleReply) {
-        SearchGridQuery searchGridQuery = this.currentSearchQuery.get()
-        UUID uuid = dirPeopleReply.QueryData_Field.QueryID
+    fun DirPeopleReply(dirPeopleReply: DirPeopleReply) {
+        val searchGridQuery: SearchGridQuery = this.currentSearchQuery.get()
+        val uuid: UUID = dirPeopleReply.QueryData_Field.QueryID
         if (Objects.equal(searchGridQuery.searchUUID(), uuid) && this.userManager != null && this.searchResultHandler != null) {
-            SearchGridResultDao searchGridResultDao = this.userManager.getSearchManager().getSearchGridResultDao()
+            val searchGridResultDao: SearchGridResultDao = this.userManager.getSearchManager().getSearchGridResultDao()
             for (DirPeopleReply.QueryReplies queryReplies : dirPeopleReply.QueryReplies_Fields) {
-                UUID uuid2 = queryReplies.AgentID
+                val uuid2: UUID = queryReplies.AgentID
                 if (uuid2.getLeastSignificantBits() != 0 || uuid2.getMostSignificantBits() != 0) {
-                    String str = SLMessage.stringFromVariableOEM(queryReplies.FirstName) + " " + SLMessage.stringFromVariableOEM(queryReplies.LastName)
+                    val str: String = SLMessage.stringFromVariableOEM(queryReplies.FirstName) + " " + SLMessage.stringFromVariableOEM(queryReplies.LastName)
                     searchGridResultDao.insert(SearchGridResult((Long) null, uuid, SearchGridQuery.SearchType.People.ordinal(), uuid2, str, LevensteinDistance.computeLevensteinDistance(str, searchGridQuery.searchText()), 0))
                 }
             }
@@ -215,15 +215,15 @@ private /* synthetic */ Int[] m238getcomlumiyaviewerlumiyaslprotomodulessearchSe
     }
 
     @SLMessageHandler
-    fun DirPlacesReply(DirPlacesReply dirPlacesReply) {
-        SearchGridQuery searchGridQuery = this.currentSearchQuery.get()
+    fun DirPlacesReply(dirPlacesReply: DirPlacesReply) {
+        val searchGridQuery: SearchGridQuery = this.currentSearchQuery.get()
         for (DirPlacesReply.QueryData queryData : dirPlacesReply.QueryData_Fields) {
-            UUID uuid = queryData.QueryID
+            val uuid: UUID = queryData.QueryID
             if (!(!Objects.equal(searchGridQuery.searchUUID(), uuid) || this.userManager == null || this.searchResultHandler == null)) {
-                SearchGridResultDao searchGridResultDao = this.userManager.getSearchManager().getSearchGridResultDao()
+                val searchGridResultDao: SearchGridResultDao = this.userManager.getSearchManager().getSearchGridResultDao()
                 for (DirPlacesReply.QueryReplies queryReplies : dirPlacesReply.QueryReplies_Fields) {
                     if (!queryReplies.ParcelID.equals(UUIDPool.ZeroUUID)) {
-                        String stringFromVariableOEM = SLMessage.stringFromVariableOEM(queryReplies.Name)
+                        val stringFromVariableOEM: String = SLMessage.stringFromVariableOEM(queryReplies.Name)
                         searchGridResultDao.insert(SearchGridResult((Long) null, uuid, SearchGridQuery.SearchType.Places.ordinal(), queryReplies.ParcelID, stringFromVariableOEM, LevensteinDistance.computeLevensteinDistance(stringFromVariableOEM, searchGridQuery.searchText()), 0))
                     }
                 }
@@ -241,7 +241,7 @@ private /* synthetic */ Int[] m238getcomlumiyaviewerlumiyaslprotomodulessearchSe
     }
 
     @SLMessageHandler
-    fun ParcelInfoReply(ParcelInfoReply parcelInfoReply) {
+    fun ParcelInfoReply(parcelInfoReply: ParcelInfoReply) {
         Debug.Printf("ParcelInfo: Got reply for %s", parcelInfoReply.Data_Field.ParcelID)
         if (this.parcelInfoResultHandler != null) {
             this.parcelInfoResultHandler.onResultData(parcelInfoReply.Data_Field.ParcelID, parcelInfoReply)

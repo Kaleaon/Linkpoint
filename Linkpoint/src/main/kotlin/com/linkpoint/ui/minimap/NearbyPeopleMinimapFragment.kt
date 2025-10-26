@@ -61,11 +61,11 @@ class NearbyPeopleMinimapFragment : Fragment() {
             setHasStableIds(true)
         }
 
-        public Int getItemCount() {
+         public fun getItemCount(): Int {
             return this.chatters.size()
         }
 
-        public Long getItemId(Int i) {
+         public fun getItemId(i: Int): Long {
             UUID optionalChatterUUID
             Long l
             if (i < 0 || i >= this.chatters.size() || (optionalChatterUUID = ((ChatterDisplayData) this.chatters.get(i)).chatterID.getOptionalChatterUUID()) == null || (l = this.stableIds.get(optionalChatterUUID)) == null) {
@@ -74,13 +74,13 @@ class NearbyPeopleMinimapFragment : Fragment() {
             return l.longValue()
         }
 
-        fun onBindViewHolder(NearbyUserViewHolder nearbyUserViewHolder, Int i) {
-            Boolean z = false
+        fun onBindViewHolder(nearbyUserViewHolder: NearbyUserViewHolder, i: Int) {
+            val z: Boolean = false
             if (i >= 0 && i < this.chatters.size()) {
-                Context context2 = this.context
-                LayoutInflater layoutInflater2 = this.layoutInflater
-                UserManager userManager2 = this.userManager
-                ChatterDisplayData chatterDisplayData = (ChatterDisplayData) this.chatters.get(i)
+                val context2: Context = this.context
+                val layoutInflater2: LayoutInflater = this.layoutInflater
+                val userManager2: UserManager = this.userManager
+                val chatterDisplayData: ChatterDisplayData = (ChatterDisplayData) this.chatters.get(i)
                 if (i == this.selectedPosition) {
                     z = true
                 }
@@ -88,22 +88,22 @@ class NearbyPeopleMinimapFragment : Fragment() {
             }
         }
 
-        public NearbyUserViewHolder onCreateViewHolder(ViewGroup viewGroup, Int i) {
+         public fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): NearbyUserViewHolder {
             return NearbyUserViewHolder(this.layoutInflater.inflate(R.layout.minimap_user_item, viewGroup, false))
         }
 
-        fun setChatters(ImmutableList<ChatterDisplayData> immutableList) {
+        fun setChatters(immutableList: ImmutableList<ChatterDisplayData>) {
             if (immutableList == null) {
                 immutableList = ImmutableList.of()
             }
             this.chatters = immutableList
             this.selectedPosition = -1
-            HashSet hashSet = HashSet()
-            Int i = 0
+            val hashSet: HashSet = HashSet()
+            val i: Int = 0
             while (true) {
-                Int i2 = i
+                val i2: Int = i
                 if (i2 < this.chatters.size()) {
-                    UUID optionalChatterUUID = ((ChatterDisplayData) this.chatters.get(i2)).chatterID.getOptionalChatterUUID()
+                    val optionalChatterUUID: UUID = ((ChatterDisplayData) this.chatters.get(i2)).chatterID.getOptionalChatterUUID()
                     if (optionalChatterUUID != null) {
                         hashSet.add(optionalChatterUUID)
                         if (!this.stableIds.containsKey(optionalChatterUUID)) {
@@ -123,16 +123,16 @@ class NearbyPeopleMinimapFragment : Fragment() {
             }
         }
 
-        fun setSelected(UUID uuid) {
+        fun setSelected(uuid: UUID) {
             this.selectedUUID = uuid
             if (uuid != null) {
-                Int i2 = 0
+                val i2: Int = 0
                 while (true) {
                     i = i2
                     if (i >= this.chatters.size()) {
                         break
                     }
-                    UUID optionalChatterUUID = ((ChatterDisplayData) this.chatters.get(i)).chatterID.getOptionalChatterUUID()
+                    val optionalChatterUUID: UUID = ((ChatterDisplayData) this.chatters.get(i)).chatterID.getOptionalChatterUUID()
                     if (optionalChatterUUID != null && Objects.equal(uuid, optionalChatterUUID)) {
                         break
                     }
@@ -141,7 +141,7 @@ class NearbyPeopleMinimapFragment : Fragment() {
             }
             i = -1
             if (i != this.selectedPosition) {
-                Int i3 = this.selectedPosition
+                val i3: Int = this.selectedPosition
                 this.selectedPosition = i
                 notifyItemChanged(this.selectedPosition)
                 notifyItemChanged(i3)
@@ -167,11 +167,11 @@ class NearbyPeopleMinimapFragment : Fragment() {
             view.findViewById(R.id.user_item_chat_button).setOnClickListener(this)
         }
 
-        fun bindToData(Context context, LayoutInflater layoutInflater, UserManager userManager, ChatterDisplayData chatterDisplayData2, Boolean z) {
+        fun bindToData(context: Context, layoutInflater: LayoutInflater, userManager: UserManager, chatterDisplayData2: ChatterDisplayData, z: Boolean) {
             this.viewBuilder.reset()
             chatterDisplayData2.buildView(context, this.viewBuilder, userManager)
-            View childAt = this.userItemViewHolder.getChildAt(0)
-            View view = this.viewBuilder.getView(layoutInflater, childAt, this.userItemViewHolder, true)
+            val childAt: View = this.userItemViewHolder.getChildAt(0)
+            val view: View = this.viewBuilder.getView(layoutInflater, childAt, this.userItemViewHolder, true)
             if (view != childAt) {
                 if (childAt != null) {
                     this.userItemViewHolder.removeView(childAt)
@@ -190,12 +190,12 @@ class NearbyPeopleMinimapFragment : Fragment() {
             this.chatterDisplayData = chatterDisplayData2
         }
 
-        fun onClick(View view) {
+        fun onClick(view: View) {
             switch (view.getId()) {
                 case R.id.user_item_view_holder:
-                    FragmentManager fragmentManager = NearbyPeopleMinimapFragment.this.getFragmentManager()
+                    val fragmentManager: FragmentManager = NearbyPeopleMinimapFragment.this.getFragmentManager()
                     if (fragmentManager != null) {
-                        Fragment findFragmentById = fragmentManager.findFragmentById(R.id.selector)
+                        val findFragmentById: Fragment = fragmentManager.findFragmentById(R.id.selector)
                         if (findFragmentById instanceof MinimapView.OnUserClickListener) {
                             ((MinimapView.OnUserClickListener) findFragmentById).onUserClick(this.chatterDisplayData.chatterID.getOptionalChatterUUID())
                             return
@@ -216,22 +216,22 @@ class NearbyPeopleMinimapFragment : Fragment() {
     }
 
     static Fragment newInstance(UUID uuid) {
-        NearbyPeopleMinimapFragment nearbyPeopleMinimapFragment = NearbyPeopleMinimapFragment()
+        val nearbyPeopleMinimapFragment: NearbyPeopleMinimapFragment = NearbyPeopleMinimapFragment()
         nearbyPeopleMinimapFragment.setArguments(ActivityUtils.makeFragmentArguments(uuid, (Bundle) null))
         return nearbyPeopleMinimapFragment
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onChatterList */
-    fun m645com_lumiyaviewer_lumiya_ui_minimap_NearbyPeopleMinimapFragmentmthref0(ImmutableList<ChatterDisplayData> immutableList) {
-        Int i = 8
+    fun m645com_lumiyaviewer_lumiya_ui_minimap_NearbyPeopleMinimapFragmentmthref0(immutableList: ImmutableList<ChatterDisplayData>) {
+        val i: Int = 8
         if (this.adapter != null) {
             this.adapter.setChatters(immutableList)
         }
         if (getView() != null) {
-            Boolean isEmpty = immutableList.isEmpty()
+            val isEmpty: Boolean = immutableList.isEmpty()
             this.emptyView.setVisibility(isEmpty ? 0 : 8)
-            RecyclerView recyclerView = this.userListView
+            val recyclerView: RecyclerView = this.userListView
             if (!isEmpty) {
                 i = 0
             }
@@ -239,11 +239,11 @@ class NearbyPeopleMinimapFragment : Fragment() {
         }
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
-        View inflate = layoutInflater.inflate(R.layout.minimap_users, viewGroup, false)
+        val inflate: View = layoutInflater.inflate(R.layout.minimap_users, viewGroup, false)
         ButterKnife.bind((Object) this, inflate)
-        TypedValue typedValue = TypedValue()
+        val typedValue: TypedValue = TypedValue()
         layoutInflater.getContext().getTheme().resolveAttribute(R.attr.CardViewDetailsBackground, typedValue, true)
         this.cardSelectedColor = typedValue.data
         this.adapter = NearbyUserRecyclerAdapter(getContext(), ActivityUtils.getUserManager(getArguments()))
@@ -253,7 +253,7 @@ class NearbyPeopleMinimapFragment : Fragment() {
 
     fun onStart() {
         super.onStart()
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
             this.chatterList.subscribe(userManager.getChatterList().getChatterList(), ChatterListType.Nearby)
         } else {
@@ -266,7 +266,7 @@ class NearbyPeopleMinimapFragment : Fragment() {
         super.onStop()
     }
 
-    fun setSelectedUser(UUID uuid) {
+    fun setSelectedUser(uuid: UUID) {
         if (this.adapter != null) {
             this.adapter.setSelected(uuid)
         }

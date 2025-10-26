@@ -30,11 +30,11 @@ val class SLChatLureRequestedEvent : SLChatEvent() {
     }
 
     /* access modifiers changed from: protected */
-    public String getText(Context context, UserManager userManager) {
+     public fun getText(context: Context, userManager: UserManager): String {
         if (Strings.isNullOrEmpty(this.message)) {
             return context.getString(R.string.chat_teleport_requested_no_message)
         }
-        return context.getString(R.string.chat_teleport_requested_message, Object[]{this.message})
+        return context.getString(R.string.chat_teleport_requested_message, Array<Any>{this.message})
     }
 
     public SLChatEvent.ChatMessageViewType getViewType() {
@@ -42,11 +42,11 @@ val class SLChatLureRequestedEvent : SLChatEvent() {
     }
 
     /* access modifiers changed from: protected */
-    public Boolean isActionMessage(UserManager userManager) {
+     public fun isActionMessage(userManager: UserManager): Boolean {
         return false
     }
 
-    fun serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setMessageText(this.message)
     }

@@ -21,8 +21,8 @@ abstract class ChatterFragment : FragmentWithTitle() : ChatterNameRetriever.OnCh
     /* access modifiers changed from: protected */
     public UserManager userManager
 
-    private ChatterNameRetriever getNameRetriever(ChatterID chatterID2) {
-        Object[] objArr = Object[1]
+     private fun getNameRetriever(chatterID2: ChatterID): ChatterNameRetriever {
+        val objArr: Array<Any> = Object[1]
         objArr[0] = chatterID2 != null ? chatterID2.toString() : "null"
         Debug.Printf("UserFunctionsFragment: ChatterNameRetriever: requesting for %s", objArr)
         if (chatterID2 != null) {
@@ -32,13 +32,13 @@ abstract class ChatterFragment : FragmentWithTitle() : ChatterNameRetriever.OnCh
     }
 
     @JvmStatic
-    Bundle makeSelection(ChatterID chatterID2) {
-        Bundle bundle = Bundle()
+     fun makeSelection(chatterID2: ChatterID): Bundle {
+        val bundle: Bundle = Bundle()
         bundle.putParcelable(CHATTER_ID_KEY, chatterID2)
         return bundle
     }
 
-    private Unit updateFragmentTitle(ChatterNameRetriever chatterNameRetriever) {
+     private fun updateFragmentTitle(chatterNameRetriever: ChatterNameRetriever) {
         Debug.Printf("updateTitle: updating fragment title: retriever = %s, showChatterTitle %b", chatterNameRetriever, Boolean.valueOf(this.showChatterTitle))
         if (!this.showChatterTitle) {
             return
@@ -47,7 +47,7 @@ abstract class ChatterFragment : FragmentWithTitle() : ChatterNameRetriever.OnCh
             setTitle((String) null, (String) null)
             return
         }
-        String resolvedName = chatterNameRetriever.getResolvedName()
+        val resolvedName: String = chatterNameRetriever.getResolvedName()
         if (resolvedName != null) {
             setTitle(decorateFragmentTitle(resolvedName), (String) null)
         } else {
@@ -56,18 +56,18 @@ abstract class ChatterFragment : FragmentWithTitle() : ChatterNameRetriever.OnCh
     }
 
     /* access modifiers changed from: protected */
-    public String decorateFragmentTitle(String str) {
+     public fun decorateFragmentTitle(str: String): String {
         return str
     }
 
-    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
-        Object[] objArr = Object[1]
+    fun onChatterNameUpdated(chatterNameRetriever: ChatterNameRetriever) {
+        val objArr: Array<Any> = Object[1]
         objArr[0] = this.chatterID != null ? this.chatterID.toString() : "null"
         Debug.Printf("updateTitle: ChatterNameRetriever: retrieved for %s", objArr)
         if (this.chatterID != null && Objects.equal(chatterNameRetriever.chatterID, this.chatterID)) {
             Debug.Printf("UserFunctionsFragment: updating fragment title", Object[0])
             updateFragmentTitle(chatterNameRetriever)
-            FragmentActivity activity = getActivity()
+            val activity: FragmentActivity = getActivity()
             if (activity != null) {
                 ActivityCompat.invalidateOptionsMenu(activity)
             }
@@ -88,8 +88,8 @@ abstract class ChatterFragment : FragmentWithTitle() : ChatterNameRetriever.OnCh
     }
 
     /* access modifiers changed from: package-private */
-    fun setNewUser(ChatterID chatterID2) {
-        UserManager userManager2 = null
+    fun setNewUser(chatterID2: ChatterID) {
+        val userManager2: UserManager = null
         this.chatterID = chatterID2
         if (chatterID2 != null) {
             userManager2 = chatterID2.getUserManager()
@@ -106,7 +106,7 @@ abstract class ChatterFragment : FragmentWithTitle() : ChatterNameRetriever.OnCh
     }
 
     /* access modifiers changed from: protected */
-    fun setShowChatterTitle(Boolean z) {
+    fun setShowChatterTitle(z: Boolean) {
         this.showChatterTitle = z
     }
 }

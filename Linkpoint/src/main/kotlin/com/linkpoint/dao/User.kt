@@ -32,80 +32,80 @@ class User : ChatterDisplayInfo {
         this.rightsHas = i2
     }
 
-    fun buildView(Context context, ChatterItemViewBuilder chatterItemViewBuilder, UserManager userManager) {
+    fun buildView(context: Context, chatterItemViewBuilder: ChatterItemViewBuilder, userManager: UserManager) {
         chatterItemViewBuilder.setLabel(this.displayName)
         chatterItemViewBuilder.setThumbnailChatterID(getChatterID(userManager), this.displayName)
     }
 
-    public Boolean getBadUUID() {
+     public fun getBadUUID(): Boolean {
         return this.badUUID
     }
 
-    public ChatterID getChatterID(UserManager userManager) {
+     public fun getChatterID(userManager: UserManager): ChatterID {
         return ChatterID.getUserChatterID(userManager.getUserID(), this.uuid)
     }
 
-    public String getDisplayName() {
+     public fun getDisplayName(): String {
         return this.displayName
     }
 
-    public Long getId() {
+     public fun getId(): Long {
         return this.id
     }
 
-    public Boolean getIsFriend() {
+     public fun getIsFriend(): Boolean {
         return this.isFriend
     }
 
-    public Int getRightsGiven() {
+     public fun getRightsGiven(): Int {
         return this.rightsGiven
     }
 
-    public Int getRightsHas() {
+     public fun getRightsHas(): Int {
         return this.rightsHas
     }
 
-    public String getUserName() {
+     public fun getUserName(): String {
         return this.userName
     }
 
-    public UUID getUuid() {
+     public fun getUuid(): UUID {
         return this.uuid
     }
 
-    public Boolean nameNeedsFetching() {
+     public fun nameNeedsFetching(): Boolean {
         return (this.userName == null || this.displayName == null) ? this.badUUID ^ 1 : false
     }
 
-    fun setBadUUID(Boolean z) {
+    fun setBadUUID(z: Boolean) {
         this.badUUID = z
     }
 
-    fun setDisplayName(String str) {
+    fun setDisplayName(str: String) {
         this.displayName = str
     }
 
-    fun setId(Long l) {
+    fun setId(l: Long) {
         this.id = l
     }
 
-    fun setIsFriend(Boolean z) {
+    fun setIsFriend(z: Boolean) {
         this.isFriend = z
     }
 
-    fun setRightsGiven(Int i) {
+    fun setRightsGiven(i: Int) {
         this.rightsGiven = i
     }
 
-    fun setRightsHas(Int i) {
+    fun setRightsHas(i: Int) {
         this.rightsHas = i
     }
 
-    fun setUserName(String str) {
+    fun setUserName(str: String) {
         this.userName = str
     }
 
-    fun setUuid(UUID uuid) {
+    fun setUuid(uuid: UUID) {
         this.uuid = uuid
     }
 }

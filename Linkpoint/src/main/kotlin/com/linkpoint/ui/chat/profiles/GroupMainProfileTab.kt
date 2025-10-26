@@ -158,7 +158,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onActiveGroupCheckboxClicked */
-    fun m440com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref3(View view) {
+    fun m440com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref3(view: View) {
         try {
             if (((CheckBox) view).isChecked()) {
                 this.agentCircuit.get().getModules().groupManager.ActivateGroup(this.groupProfile.get().GroupData_Field.GroupID)
@@ -172,10 +172,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onAgentCircuit */
-    fun m437com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref0(SLAgentCircuit sLAgentCircuit) {
-        View view = getView()
+    fun m437com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref0(sLAgentCircuit: SLAgentCircuit) {
+        val view: View = getView()
         if (view != null) {
-            for (Int findViewById : Int[]{R.id.show_in_profile_checkbox, R.id.active_group_checkbox, R.id.group_profile_contribution_button, R.id.group_join_button, R.id.group_leave_button, R.id.group_invite_button, R.id.group_change_role_button}) {
+            for (Int findViewById : IntArray{R.id.show_in_profile_checkbox, R.id.active_group_checkbox, R.id.group_profile_contribution_button, R.id.group_join_button, R.id.group_leave_button, R.id.group_invite_button, R.id.group_change_role_button}) {
                 view.findViewById(findViewById).setEnabled(this.agentCircuit.hasData())
             }
         }
@@ -183,20 +183,20 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onChangeRoleClicked */
-    fun m442com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref5(View view) {
-        Int i = 0
+    fun m442com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref5(view: View) {
+        val i: Int = 0
         try {
             this.agentCircuit.assertHasData()
-            UUID uuid = this.groupProfile.get().GroupData_Field.GroupID
-            CharSequence[] charSequenceArr = CharSequence[this.groupTitles.get().GroupData_Fields.size()]
-            Int i2 = 0
+            val uuid: UUID = this.groupProfile.get().GroupData_Field.GroupID
+            val charSequenceArr: Array<CharSequence> = CharSequence[this.groupTitles.get().GroupData_Fields.size()]
+            val i2: Int = 0
             while (i < this.groupTitles.get().GroupData_Fields.size()) {
                 charSequenceArr[i] = SLMessage.stringFromVariableOEM(this.groupTitles.get().GroupData_Fields.get(i).Title)
-                Int i3 = this.groupTitles.get().GroupData_Fields.get(i).Selected ? i : i2
+                val i3: Int = this.groupTitles.get().GroupData_Fields.get(i).Selected ? i : i2
                 i++
                 i2 = i3
             }
-            AtomicInteger atomicInteger = AtomicInteger(i2)
+            val atomicInteger: AtomicInteger = AtomicInteger(i2)
             AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
             builder.setTitle((Int) R.string.select_group_role_title).setSingleChoiceItems(charSequenceArr, i2, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(atomicInteger) {
 
@@ -364,14 +364,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onContributeLandClicked */
-    fun m443com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref6(View view) {
+    fun m443com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref6(view: View) {
         try {
             this.agentCircuit.assertHasData()
             AvatarGroupList.AvatarGroupEntry avatarGroupEntry = this.myGroupList.get().Groups.get(this.groupProfile.get().GroupData_Field.GroupID)
             if (avatarGroupEntry != null) {
                 AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
                 builder.setTitle((Int) R.string.set_land_contribution_title)
-                View inflate = LayoutInflater.from(getContext()).inflate(R.layout.contribute_land_dialog_box_layout, (ViewGroup) getView(), false)
+                val inflate: View = LayoutInflater.from(getContext()).inflate(R.layout.contribute_land_dialog_box_layout, (ViewGroup) getView(), false)
                 builder.setView(inflate)
                 ((EditText) inflate.findViewById(R.id.land_contribution_value)).setText(getString(R.string.generic_int_format, Integer.valueOf(avatarGroupEntry.Contribution)))
                 builder.setPositiveButton((Int) R.string.set_land_contribution_ok_button, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, inflate) {
@@ -466,9 +466,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onCopyGroupKeyClicked */
-    fun m439com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref2(View view) {
+    fun m439com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref2(view: View) {
         if (this.chatterID instanceof ChatterID.ChatterIDGroup) {
-            String uuid = ((ChatterID.ChatterIDGroup) this.chatterID).getChatterUUID().toString()
+            val uuid: String = ((ChatterID.ChatterIDGroup) this.chatterID).getChatterUUID().toString()
             if (Build.VERSION.SDK_INT < 11) {
                 ((ClipboardManager) getActivity().getSystemService("clipboard")).setText(uuid)
             } else {
@@ -490,7 +490,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             com.lumiyaviewer.lumiya.slproto.users.ChatterID r0 = r8.chatterID     // Catch:{ DataNotReadyException -> 0x0067 }
             if (r0 == 0) goto L_0x0066
             com.lumiyaviewer.lumiya.react.SubscriptionData<java.util.UUID, com.lumiyaviewer.lumiya.slproto.SLAgentCircuit> r0 = r8.agentCircuit     // Catch:{ DataNotReadyException -> 0x0067 }
-            Boolean r0 = r0.hasData()     // Catch:{ DataNotReadyException -> 0x0067 }
+            val r0: Boolean = r0.hasData()     // Catch:{ DataNotReadyException -> 0x0067 }
             if (r0 == 0) goto L_0x0066
             com.lumiyaviewer.lumiya.react.SubscriptionData<java.util.UUID, com.lumiyaviewer.lumiya.slproto.messages.GroupProfileReply> r0 = r8.groupProfile     // Catch:{ DataNotReadyException -> 0x0067 }
             java.lang.Object r0 = r0.get()     // Catch:{ DataNotReadyException -> 0x0067 }
@@ -504,11 +504,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             java.lang.Object r0 = r0.get(r1)     // Catch:{ DataNotReadyException -> 0x0067 }
             com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList$AvatarGroupEntry r0 = (com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList.AvatarGroupEntry) r0     // Catch:{ DataNotReadyException -> 0x0067 }
             if (r0 == 0) goto L_0x0066
-            Long r2 = r0.GroupPowers     // Catch:{ DataNotReadyException -> 0x0067 }
+            val r2: Long = r0.GroupPowers     // Catch:{ DataNotReadyException -> 0x0067 }
             r4 = 2
-            Long r2 = r2 & r4
+            val r2: Long = r2 & r4
             r4 = 0
-            Int r0 = (r2 > r4 ? 1 : (r2 == r4 ? 0 : -1))
+            val r0: Int = (r2 > r4 ? 1 : (r2 == r4 ? 0 : -1))
             if (r0 == 0) goto L_0x0066
             android.support.v4.app.FragmentActivity r6 = r8.getActivity()     // Catch:{ DataNotReadyException -> 0x0067 }
             java.lang.Class<com.lumiyaviewer.lumiya.ui.chat.AvatarPickerForInvite> r7 = com.lumiyaviewer.lumiya.ui.chat.AvatarPickerForInvite.class
@@ -540,10 +540,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onJoinClicked */
-    fun m444com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref7(View view) {
+    fun m444com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref7(view: View) {
         try {
             this.agentCircuit.assertHasData()
-            UUID uuid = this.groupProfile.get().GroupData_Field.GroupID
+            val uuid: UUID = this.groupProfile.get().GroupData_Field.GroupID
             if (this.myGroupList.get().Groups.get(uuid) == null) {
                 AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
                 builder.setTitle((Int) R.string.join_group_dialog_title)
@@ -645,10 +645,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onLeaveClicked */
-    fun m445com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref8(View view) {
+    fun m445com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref8(view: View) {
         try {
             this.agentCircuit.assertHasData()
-            UUID uuid = this.groupProfile.get().GroupData_Field.GroupID
+            val uuid: UUID = this.groupProfile.get().GroupData_Field.GroupID
             if (this.myGroupList.get().Groups.get(uuid) != null) {
                 AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
                 builder.setTitle((Int) R.string.leave_group_confirm)
@@ -820,7 +820,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onShowInProfileCheckboxClicked */
-    fun m441com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref4(View view) {
+    fun m441com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref4(view: View) {
         try {
             AvatarGroupList.AvatarGroupEntry avatarGroupEntry = this.myGroupList.get().Groups.get(this.groupProfile.get().GroupData_Field.GroupID)
             if (avatarGroupEntry != null) {
@@ -833,9 +833,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onViewProfileClicked */
-    fun m438com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref1(View view) {
+    fun m438com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref1(view: View) {
         UUID uuid
-        GroupProfileReply data = this.groupProfile.getData()
+        val data: GroupProfileReply = this.groupProfile.getData()
         if (data != null && this.chatterID != null && (uuid = data.GroupData_Field.FounderID) != null && (!uuid.equals(UUIDPool.ZeroUUID)) && this.chatterID != null) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserProfileFragment.class, UserProfileFragment.makeSelection(ChatterID.getUserChatterID(this.chatterID.agentUUID, uuid)))
         }
@@ -844,7 +844,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTab_11438  reason: not valid java name */
     public /* synthetic */ Unit m447lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTab_11438(AtomicInteger atomicInteger, UUID uuid, DialogInterface dialogInterface, Int i) {
-        Int i2 = atomicInteger.get()
+        val i2: Int = atomicInteger.get()
         if (i2 >= 0) {
             try {
                 if (i2 < this.groupTitles.get().GroupData_Fields.size()) {
@@ -859,7 +859,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTab_21725  reason: not valid java name */
     public /* synthetic */ Unit m448lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTab_21725(ChatterNameRetriever chatterNameRetriever) {
-        View view = getView()
+        val view: View = getView()
         if (view != null) {
             ((TextView) view.findViewById(R.id.group_founder_name)).setText(chatterNameRetriever.getResolvedName())
             ((ChatterPicView) view.findViewById(R.id.group_founder_pic)).setChatterID(chatterNameRetriever.chatterID, chatterNameRetriever.getResolvedName())
@@ -898,8 +898,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View inflate = layoutInflater.inflate(R.layout.group_profile_tab_main, viewGroup, false)
+     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+        val inflate: View = layoutInflater.inflate(R.layout.group_profile_tab_main, viewGroup, false)
         ((ImageAssetView) inflate.findViewById(R.id.group_pic_view)).setAlignTop(true)
         ((ImageAssetView) inflate.findViewById(R.id.group_pic_view)).setVerticalFit(true)
         inflate.findViewById(R.id.group_profile_view_founder_button).setOnClickListener(View.OnClickListener(this) {
@@ -1521,8 +1521,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     fun onLoadableDataChanged() {
-        Int i = 0
-        View view = getView()
+        val i: Int = 0
+        val view: View = getView()
         try {
             AvatarGroupList.AvatarGroupEntry avatarGroupEntry = this.myGroupList.get().Groups.get(this.groupProfile.get().GroupData_Field.GroupID)
             if (avatarGroupEntry != null && Strings.isNullOrEmpty(avatarGroupEntry.GroupTitle) && !this.groupTitles.isSubscribed()) {
@@ -1530,7 +1530,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             }
             if (view != null) {
                 ((ImageAssetView) view.findViewById(R.id.group_pic_view)).setAssetID(this.groupProfile.get().GroupData_Field.InsigniaID)
-                String stringFromVariableUTF = SLMessage.stringFromVariableUTF(this.groupProfile.get().GroupData_Field.Charter)
+                val stringFromVariableUTF: String = SLMessage.stringFromVariableUTF(this.groupProfile.get().GroupData_Field.Charter)
                 view.findViewById(R.id.group_profile_charter_card_view).setVisibility(Strings.isNullOrEmpty(stringFromVariableUTF) ? 8 : 0)
                 ((TextView) view.findViewById(R.id.group_profile_charter_text)).setText(stringFromVariableUTF)
                 ((TextView) view.findViewById(R.id.text_profile_member_count)).setText(getString(R.string.group_member_count_format, Integer.valueOf(this.groupProfile.get().GroupData_Field.GroupMembershipCount)))
@@ -1541,7 +1541,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                     this.founderNameRetriever.dispose()
                     this.founderNameRetriever = null
                 }
-                UUID uuid = this.groupProfile.get().GroupData_Field.FounderID
+                val uuid: UUID = this.groupProfile.get().GroupData_Field.FounderID
                 Debug.Printf("GroupProfile: founderID = %s", uuid)
                 if (uuid == null || !(!uuid.equals(UUIDPool.ZeroUUID)) || this.chatterID == null) {
                     view.findViewById(R.id.group_founder_card_view).setVisibility(8)
@@ -1555,17 +1555,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                     ((TextView) view.findViewById(R.id.group_membership_caption)).setText(R.string.membership_caption)
                     view.findViewById(R.id.group_join_button).setVisibility(8)
                     view.findViewById(R.id.group_leave_button).setVisibility(0)
-                    Boolean z = (avatarGroupEntry.GroupPowers & 2) != 0
-                    View findViewById = view.findViewById(R.id.group_invite_button)
+                    val z: Boolean = (avatarGroupEntry.GroupPowers & 2) != 0
+                    val findViewById: View = view.findViewById(R.id.group_invite_button)
                     if (!z) {
                         i = 8
                     }
                     findViewById.setVisibility(i)
                     view.findViewById(R.id.group_change_role_button).setVisibility(0)
                     view.findViewById(R.id.group_membership_role).setVisibility(0)
-                    String str = avatarGroupEntry.GroupTitle
+                    val str: String = avatarGroupEntry.GroupTitle
                     if (Strings.isNullOrEmpty(str) && this.groupTitles.hasData()) {
-                        Iterator<T> it = this.groupTitles.get().GroupData_Fields.iterator()
+                        val it: Iterator<T> = this.groupTitles.get().GroupData_Fields.iterator()
                         while (true) {
                             if (!it.hasNext()) {
                                 break
@@ -1598,12 +1598,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(ChatterID chatterID) {
-        View view = getView()
+    fun onShowUser(chatterID: ChatterID) {
+        val view: View = getView()
         this.loadableMonitor.unsubscribeAll()
         this.agentCircuit.unsubscribe()
         if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDGroup)) {
-            UUID chatterUUID = ((ChatterID.ChatterIDGroup) chatterID).getChatterUUID()
+            val chatterUUID: UUID = ((ChatterID.ChatterIDGroup) chatterID).getChatterUUID()
             if (view != null) {
                 ((TextView) view.findViewById(R.id.text_profile_group_key)).setText(chatterUUID.toString())
             }

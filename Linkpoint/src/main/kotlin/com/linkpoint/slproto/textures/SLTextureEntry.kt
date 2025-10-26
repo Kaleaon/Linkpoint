@@ -12,17 +12,17 @@ import java.util.UUID
 
 class SLTextureEntry {
     const val MAX_FACES: Int = 32
-    private const val SLTextureEntryFace[] emptyFaces = SLTextureEntryFace[0]
+    private const val Array<SLTextureEntryFace> emptyFaces = SLTextureEntryFace[0]
     private const val InternPool<SLTextureEntry> pool = InternPool<>()
     private val SLTextureEntryFace DefaultTexture
-    private val SLTextureEntryFace[] FaceTextures
+    private val Array<SLTextureEntryFace> FaceTextures
     private val Int faceMask
     private val Int hashValue
 
-    private SLTextureEntry(SLTextureEntryFace sLTextureEntryFace, SLTextureEntryFace[] sLTextureEntryFaceArr) {
+    private SLTextureEntry(SLTextureEntryFace sLTextureEntryFace, Array<SLTextureEntryFace> sLTextureEntryFaceArr) {
         this.DefaultTexture = sLTextureEntryFace
         this.FaceTextures = sLTextureEntryFaceArr
-        Int i = 0
+        val i: Int = 0
         for (Int i2 = 0; i2 < sLTextureEntryFaceArr.length; i2++) {
             if (sLTextureEntryFaceArr[i2] != null) {
                 i |= 1 << i2
@@ -33,7 +33,7 @@ class SLTextureEntry {
     }
 
     private SLTextureEntry(ByteBuffer byteBuffer, Int i) {
-        MutableSLTextureEntryFace mutableSLTextureEntryFace = MutableSLTextureEntryFace(-1)
+        val mutableSLTextureEntryFace: MutableSLTextureEntryFace = MutableSLTextureEntryFace(-1)
         if (byteBuffer.limit() - byteBuffer.position() < 16) {
             this.DefaultTexture = SLTextureEntryFace.create(mutableSLTextureEntryFace)
             this.FaceTextures = emptyFaces
@@ -41,18 +41,18 @@ class SLTextureEntry {
             this.hashValue = getHashValue()
             return
         }
-        MutableSLTextureEntryFace[] mutableSLTextureEntryFaceArr = MutableSLTextureEntryFace[32]
-        Int[] iArr = Int[1]
-        Int[] iArr2 = Int[1]
+        val mutableSLTextureEntryFaceArr: Array<MutableSLTextureEntryFace> = MutableSLTextureEntryFace[32]
+        val iArr: IntArray = Int[1]
+        val iArr2: IntArray = Int[1]
         mutableSLTextureEntryFace.setTextureID(UUIDPool.getUUID(getUUID(byteBuffer)))
         while (true) {
-            Int ReadFaceBitfield = ReadFaceBitfield(byteBuffer, iArr2)
+            val ReadFaceBitfield: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield == 0) {
                 break
             }
-            UUID uuid = UUIDPool.getUUID(getUUID(byteBuffer))
-            Int i2 = 1
-            Int i3 = 0
+            val uuid: UUID = UUIDPool.getUUID(getUUID(byteBuffer))
+            val i2: Int = 1
+            val i3: Int = 0
             while (i3 < iArr2[0]) {
                 if ((ReadFaceBitfield & i2) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i3, iArr).setTextureID(uuid)
@@ -63,13 +63,13 @@ class SLTextureEntry {
         }
         mutableSLTextureEntryFace.setRGBA(byteBuffer.getInt())
         while (true) {
-            Int ReadFaceBitfield2 = ReadFaceBitfield(byteBuffer, iArr2)
+            val ReadFaceBitfield2: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield2 == 0) {
                 break
             }
-            Int i4 = byteBuffer.getInt()
-            Int i5 = 1
-            Int i6 = 0
+            val i4: Int = byteBuffer.getInt()
+            val i5: Int = 1
+            val i6: Int = 0
             while (i6 < iArr2[0]) {
                 if ((ReadFaceBitfield2 & i5) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i6, iArr).setRGBA(i4)
@@ -80,13 +80,13 @@ class SLTextureEntry {
         }
         mutableSLTextureEntryFace.setRepeatU(byteBuffer.getFloat())
         while (true) {
-            Int ReadFaceBitfield3 = ReadFaceBitfield(byteBuffer, iArr2)
+            val ReadFaceBitfield3: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield3 == 0) {
                 break
             }
-            Float f = byteBuffer.getFloat()
-            Int i7 = 1
-            Int i8 = 0
+            val f: Float = byteBuffer.getFloat()
+            val i7: Int = 1
+            val i8: Int = 0
             while (i8 < iArr2[0]) {
                 if ((ReadFaceBitfield3 & i7) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i8, iArr).setRepeatU(f)
@@ -97,13 +97,13 @@ class SLTextureEntry {
         }
         mutableSLTextureEntryFace.setRepeatV(byteBuffer.getFloat())
         while (true) {
-            Int ReadFaceBitfield4 = ReadFaceBitfield(byteBuffer, iArr2)
+            val ReadFaceBitfield4: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield4 == 0) {
                 break
             }
-            Float f2 = byteBuffer.getFloat()
-            Int i9 = 1
-            Int i10 = 0
+            val f2: Float = byteBuffer.getFloat()
+            val i9: Int = 1
+            val i10: Int = 0
             while (i10 < iArr2[0]) {
                 if ((ReadFaceBitfield4 & i9) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i10, iArr).setRepeatV(f2)
@@ -114,13 +114,13 @@ class SLTextureEntry {
         }
         mutableSLTextureEntryFace.setOffsetU(getOffset(byteBuffer))
         while (true) {
-            Int ReadFaceBitfield5 = ReadFaceBitfield(byteBuffer, iArr2)
+            val ReadFaceBitfield5: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield5 == 0) {
                 break
             }
-            Float offset = getOffset(byteBuffer)
-            Int i11 = 1
-            Int i12 = 0
+            val offset: Float = getOffset(byteBuffer)
+            val i11: Int = 1
+            val i12: Int = 0
             while (i12 < iArr2[0]) {
                 if ((ReadFaceBitfield5 & i11) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i12, iArr).setOffsetU(offset)
@@ -131,13 +131,13 @@ class SLTextureEntry {
         }
         mutableSLTextureEntryFace.setOffsetV(getOffset(byteBuffer))
         while (true) {
-            Int ReadFaceBitfield6 = ReadFaceBitfield(byteBuffer, iArr2)
+            val ReadFaceBitfield6: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield6 == 0) {
                 break
             }
-            Float offset2 = getOffset(byteBuffer)
-            Int i13 = 1
-            Int i14 = 0
+            val offset2: Float = getOffset(byteBuffer)
+            val i13: Int = 1
+            val i14: Int = 0
             while (i14 < iArr2[0]) {
                 if ((ReadFaceBitfield6 & i13) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i14, iArr).setOffsetV(offset2)
@@ -148,13 +148,13 @@ class SLTextureEntry {
         }
         mutableSLTextureEntryFace.setRotation(getRotation(byteBuffer))
         while (true) {
-            Int ReadFaceBitfield7 = ReadFaceBitfield(byteBuffer, iArr2)
+            val ReadFaceBitfield7: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield7 == 0) {
                 break
             }
-            Float rotation = getRotation(byteBuffer)
-            Int i15 = 1
-            Int i16 = 0
+            val rotation: Float = getRotation(byteBuffer)
+            val i15: Int = 1
+            val i16: Int = 0
             while (i16 < iArr2[0]) {
                 if ((ReadFaceBitfield7 & i15) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i16, iArr).setRotation(rotation)
@@ -165,13 +165,13 @@ class SLTextureEntry {
         }
         mutableSLTextureEntryFace.setMaterial(byteBuffer.get())
         while (true) {
-            Int ReadFaceBitfield8 = ReadFaceBitfield(byteBuffer, iArr2)
+            val ReadFaceBitfield8: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield8 == 0) {
                 break
             }
-            Byte b = byteBuffer.get()
-            Int i17 = 1
-            Int i18 = 0
+            val b: Byte = byteBuffer.get()
+            val i17: Int = 1
+            val i18: Int = 0
             while (i18 < iArr2[0]) {
                 if ((ReadFaceBitfield8 & i17) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i18, iArr).setMaterial(b)
@@ -182,13 +182,13 @@ class SLTextureEntry {
         }
         mutableSLTextureEntryFace.setMedia(byteBuffer.get())
         while (true) {
-            Int ReadFaceBitfield9 = ReadFaceBitfield(byteBuffer, iArr2)
+            val ReadFaceBitfield9: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield9 == 0) {
                 break
             }
-            Byte b2 = byteBuffer.get()
-            Int i19 = 1
-            Int i20 = 0
+            val b2: Byte = byteBuffer.get()
+            val i19: Int = 1
+            val i20: Int = 0
             while (i20 < iArr2[0]) {
                 if ((ReadFaceBitfield9 & i19) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i20, iArr).setMedia(b2)
@@ -199,13 +199,13 @@ class SLTextureEntry {
         }
         mutableSLTextureEntryFace.setGlow(getGlow(byteBuffer))
         while (true) {
-            Int ReadFaceBitfield10 = ReadFaceBitfield(byteBuffer, iArr2)
+            val ReadFaceBitfield10: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield10 == 0) {
                 break
             }
-            Float glow = getGlow(byteBuffer)
-            Int i21 = 1
-            Int i22 = 0
+            val glow: Float = getGlow(byteBuffer)
+            val i21: Int = 1
+            val i22: Int = 0
             while (i22 < iArr2[0]) {
                 if ((ReadFaceBitfield10 & i21) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i22, iArr).setGlow(glow)
@@ -215,8 +215,8 @@ class SLTextureEntry {
             }
         }
         this.faceMask = iArr[0]
-        Int i23 = 0
-        Int i24 = -1
+        val i23: Int = 0
+        val i24: Int = -1
         while (true) {
             if (i23 >= 33) {
                 i23 = 0
@@ -241,7 +241,7 @@ class SLTextureEntry {
     }
 
     @JvmStatic
-private MutableSLTextureEntryFace CreateFace(MutableSLTextureEntryFace[] mutableSLTextureEntryFaceArr, Int i, Int[] iArr) {
+private fun CreateFace(mutableSLTextureEntryFaceArr: Array<MutableSLTextureEntryFace>, i: Int, iArr: IntArray): MutableSLTextureEntryFace {
         if (i >= 32) {
             return null
         }
@@ -253,13 +253,13 @@ private MutableSLTextureEntryFace CreateFace(MutableSLTextureEntryFace[] mutable
         return mutableSLTextureEntryFaceArr[i]
     }
 
-    private Int ReadFaceBitfield(ByteBuffer byteBuffer, Int[] iArr) {
+    private fun ReadFaceBitfield(byteBuffer: ByteBuffer, iArr: IntArray): Int {
         Byte b
         iArr[0] = 0
         if (byteBuffer.position() >= byteBuffer.limit()) {
             return 0
         }
-        Byte b2 = 0
+        val b2: Byte = 0
         do {
             b = byteBuffer.get()
             b2 = (b2 << 7) | (b & Ascii.DEL)
@@ -268,9 +268,9 @@ private MutableSLTextureEntryFace CreateFace(MutableSLTextureEntryFace[] mutable
         return b2
     }
 
-    private Unit WriteFaceBitfield(ByteBuffer byteBuffer, Int i) {
-        Int i3 = 0
-        Int i4 = i
+    private fun WriteFaceBitfield(byteBuffer: ByteBuffer, i: Int) {
+        val i3: Int = 0
+        val i4: Int = i
         while (true) {
             if (i3 >= 6) {
                 i2 = 0
@@ -283,37 +283,37 @@ private MutableSLTextureEntryFace CreateFace(MutableSLTextureEntryFace[] mutable
                 i3++
             }
         }
-        Debug.Log(String.format("WriteFaceBitfield: faceBits = 0x%08x, count %d", Object[]{Integer.valueOf(i), Integer.valueOf(i2)}))
-        Int i5 = (i2 - 1) * 7
+        Debug.Log(String.format("WriteFaceBitfield: faceBits = 0x%08x, count %d", Array<Any>{Integer.valueOf(i), Integer.valueOf(i2)}))
+        val i5: Int = (i2 - 1) * 7
         for (Int i6 = 0; i6 < i2; i6++) {
-            Byte b = (Byte) ((i >> i5) & Vr.VREvent.VrCore.ErrorCode.CONTROLLER_UNSTUCK)
+            val b: Byte = (Byte) ((i >> i5) & Vr.VREvent.VrCore.ErrorCode.CONTROLLER_UNSTUCK)
             if (i6 != i2 - 1) {
                 b = (Byte) (b | 128)
             }
-            Debug.Log(String.format("WriteFaceBitfield: i = %d, shift = %d, Byte 0x%02x", Object[]{Integer.valueOf(i6), Integer.valueOf(i5), Byte.valueOf(b)}))
+            Debug.Log(String.format("WriteFaceBitfield: i = %d, shift = %d, Byte 0x%02x", Array<Any>{Integer.valueOf(i6), Integer.valueOf(i5), Byte.valueOf(b)}))
             byteBuffer.put(b)
             i5 -= 7
         }
     }
 
     @JvmStatic
-    SLTextureEntry create(SLTextureEntryFace sLTextureEntryFace, SLTextureEntryFace[] sLTextureEntryFaceArr) {
+     fun create(sLTextureEntryFace: SLTextureEntryFace, sLTextureEntryFaceArr: Array<SLTextureEntryFace>): SLTextureEntry {
         return pool.intern(SLTextureEntry(sLTextureEntryFace, sLTextureEntryFaceArr))
     }
 
     @JvmStatic
-    SLTextureEntry create(ByteBuffer byteBuffer, Int i) {
+     fun create(byteBuffer: ByteBuffer, i: Int): SLTextureEntry {
         return pool.intern(SLTextureEntry(byteBuffer, i))
     }
 
     @JvmStatic
-private Float getGlow(ByteBuffer byteBuffer) {
+ private fun getGlow(byteBuffer: ByteBuffer): Float {
         return ((Float) byteBuffer.get()) / 255.0f
     }
 
-    private Int getHashValue() {
-        Int length = this.FaceTextures.length + this.faceMask + this.DefaultTexture.hashCode()
-        Int i = 1
+     private fun getHashValue(): Int {
+        val length: Int = this.FaceTextures.length + this.faceMask + this.DefaultTexture.hashCode()
+        val i: Int = 1
         for (Int i2 = 0; i2 < this.FaceTextures.length; i2++) {
             if ((this.faceMask & i) != 0) {
                 length += this.FaceTextures[i2].hashCode()
@@ -324,42 +324,42 @@ private Float getGlow(ByteBuffer byteBuffer) {
     }
 
     @JvmStatic
-private Float getOffset(ByteBuffer byteBuffer) {
+ private fun getOffset(byteBuffer: ByteBuffer): Float {
         return ((Float) byteBuffer.getShort()) / 32767.0f
     }
 
     @JvmStatic
-private Float getRotation(ByteBuffer byteBuffer) {
+ private fun getRotation(byteBuffer: ByteBuffer): Float {
         return (((Float) byteBuffer.getShort()) / 32767.0f) * 3.1415927f * 2.0f
     }
 
     @JvmStatic
-private UUID getUUID(ByteBuffer byteBuffer) {
+ private fun getUUID(byteBuffer: ByteBuffer): UUID {
         byteBuffer.order(ByteOrder.BIG_ENDIAN)
-        UUID uuid = UUID(byteBuffer.getLong(), byteBuffer.getLong())
+        val uuid: UUID = UUID(byteBuffer.getLong(), byteBuffer.getLong())
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN)
         return uuid
     }
 
     @JvmStatic
-private Unit putGlow(ByteBuffer byteBuffer, Float f) {
+ private fun putGlow(byteBuffer: ByteBuffer, f: Float) {
         byteBuffer.put((Byte) ((Int) (255.0f * f)))
     }
 
     @JvmStatic
-private Unit putOffset(ByteBuffer byteBuffer, Float f) {
+ private fun putOffset(byteBuffer: ByteBuffer, f: Float) {
         byteBuffer.putShort((Short) ((Int) (32767.0f * f)))
     }
 
     @JvmStatic
-private Unit putRotation(ByteBuffer byteBuffer, Float f) {
+ private fun putRotation(byteBuffer: ByteBuffer, f: Float) {
         byteBuffer.putShort((Short) ((Int) ((f / 6.2831855f) * 32767.0f)))
     }
 
     @JvmStatic
-private Unit putUUID(ByteBuffer byteBuffer, UUID uuid) {
+ private fun putUUID(byteBuffer: ByteBuffer, uuid: UUID) {
         Long j
-        Long j2 = 0
+        val j2: Long = 0
         byteBuffer.order(ByteOrder.BIG_ENDIAN)
         if (uuid != null) {
             j = uuid.getMostSignificantBits()
@@ -383,18 +383,18 @@ private Unit putUUID(ByteBuffer byteBuffer, UUID uuid) {
         return i >= this.FaceTextures.length ? this.DefaultTexture : this.FaceTextures[i] != null ? this.FaceTextures[i] : this.DefaultTexture
     }
 
-    public Boolean equals(Object obj) {
+     public fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
         if (obj == null || !(obj instanceof SLTextureEntry)) {
             return false
         }
-        SLTextureEntry sLTextureEntry = (SLTextureEntry) obj
+        val sLTextureEntry: SLTextureEntry = (SLTextureEntry) obj
         if (this.faceMask != sLTextureEntry.faceMask || this.FaceTextures.length != sLTextureEntry.FaceTextures.length || !this.DefaultTexture.equals(sLTextureEntry.DefaultTexture)) {
             return false
         }
-        Int i = 1
+        val i: Int = 1
         for (Int i2 = 0; i2 < this.FaceTextures.length; i2++) {
             if ((this.faceMask & i) != 0 && !this.FaceTextures[i2].equals(sLTextureEntry.FaceTextures[i2])) {
                 return false
@@ -404,7 +404,7 @@ private Unit putUUID(ByteBuffer byteBuffer, UUID uuid) {
         return true
     }
 
-    public Int getFaceMask() {
+     public fun getFaceMask(): Int {
         return this.faceMask
     }
 
@@ -412,12 +412,12 @@ private Unit putUUID(ByteBuffer byteBuffer, UUID uuid) {
         return this.hashValue
     }
 
-    public Boolean isSingleFace() {
+     public fun isSingleFace(): Boolean {
         return this.faceMask == 0
     }
 
-    public Byte[] packByteArray() {
-        ByteBuffer allocate = ByteBuffer.allocate(SupportMenu.USER_MASK)
+     public fun packByteArray(): ByteArray {
+        val allocate: ByteBuffer = ByteBuffer.allocate(SupportMenu.USER_MASK)
         putUUID(allocate, this.DefaultTexture.textureID())
         for (Int i = 0; i < this.FaceTextures.length; i++) {
             if (this.FaceTextures[i] != null) {
@@ -500,7 +500,7 @@ private Unit putUUID(ByteBuffer byteBuffer, UUID uuid) {
             }
         }
         WriteFaceBitfield(allocate, 0)
-        Byte[] bArr = Byte[allocate.position()]
+        val bArr: ByteArray = Byte[allocate.position()]
         allocate.position(0)
         allocate.get(bArr)
         Debug.DumpBuffer("Baking: TEpacked: ", bArr)

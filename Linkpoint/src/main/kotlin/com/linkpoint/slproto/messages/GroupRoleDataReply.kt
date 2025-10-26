@@ -26,12 +26,12 @@ class GroupRoleDataReply : SLMessage() {
 
     @JvmStatic
     class RoleData {
-        public Byte[] Description
+        public ByteArray Description
         public Int Members
-        public Byte[] Name
+        public ByteArray Name
         public Long Powers
         public UUID RoleID
-        public Byte[] Title
+        public ByteArray Title
     }
 
     public GroupRoleDataReply() {
@@ -40,24 +40,24 @@ class GroupRoleDataReply : SLMessage() {
         this.GroupData_Field = GroupData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 57
-        Iterator<T> it = this.RoleData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 57
+        val it: Iterator<T> = this.RoleData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
-            RoleData roleData = (RoleData) it.next()
+            val roleData: RoleData = (RoleData) it.next()
             i = roleData.Description.length + roleData.Name.length + 17 + 1 + roleData.Title.length + 1 + 8 + 4 + i2
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleGroupRoleDataReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 116)
@@ -76,14 +76,14 @@ class GroupRoleDataReply : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.GroupData_Field.GroupID = unpackUUID(byteBuffer)
         this.GroupData_Field.RequestID = unpackUUID(byteBuffer)
         this.GroupData_Field.RoleCount = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            RoleData roleData = RoleData()
+            val roleData: RoleData = RoleData()
             roleData.RoleID = unpackUUID(byteBuffer)
             roleData.Name = unpackVariable(byteBuffer, 1)
             roleData.Title = unpackVariable(byteBuffer, 1)

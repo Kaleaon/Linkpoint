@@ -20,11 +20,11 @@ import javax.annotation.Nullable
 
 class SLInventoryEntry : InventoryEntryDBObject(), Parcelable {
     const val Parcelable.Creator<SLInventoryEntry> CREATOR = Parcelable.Creator<SLInventoryEntry>() {
-        public SLInventoryEntry createFromParcel(Parcel parcel) {
+         public fun createFromParcel(parcel: Parcel): SLInventoryEntry {
             return SLInventoryEntry(parcel, (SLInventoryEntry) null)
         }
 
-        public SLInventoryEntry[] newArray(Int i) {
+        public Array<SLInventoryEntry> newArray(Int i) {
             return SLInventoryEntry[i]
         }
     }
@@ -108,11 +108,11 @@ class SLInventoryEntry : InventoryEntryDBObject(), Parcelable {
     }
 
     @JvmStatic
-    SLInventoryEntry find(SQLiteDatabase sQLiteDatabase, UUID uuid) {
+     fun find(sQLiteDatabase: SQLiteDatabase, uuid: UUID): SLInventoryEntry {
         try {
-            Cursor query = sQLiteDatabase.query(InventoryEntryDBObject.tableName, fieldNames, "uuid_low = ? AND uuid_high = ?", String[]{Long.toString(uuid.getLeastSignificantBits()), Long.toString(uuid.getMostSignificantBits())}, (String) null, (String) null, (String) null)
+            val query: Cursor = sQLiteDatabase.query(InventoryEntryDBObject.tableName, fieldNames, "uuid_low = ? AND uuid_high = ?", Array<String>{Long.toString(uuid.getLeastSignificantBits()), Long.toString(uuid.getMostSignificantBits())}, (String) null, (String) null, (String) null)
             if (query.moveToFirst()) {
-                SLInventoryEntry sLInventoryEntry = SLInventoryEntry(query)
+                val sLInventoryEntry: SLInventoryEntry = SLInventoryEntry(query)
                 query.close()
                 return sLInventoryEntry
             }
@@ -125,49 +125,49 @@ class SLInventoryEntry : InventoryEntryDBObject(), Parcelable {
     }
 
     @JvmStatic
-    SLInventoryEntry findOrCreate(SQLiteDatabase sQLiteDatabase, UUID uuid) throws DBObject.DatabaseBindingException {
+     fun findOrCreate(sQLiteDatabase: SQLiteDatabase, uuid: UUID) throws DBObject.DatabaseBindingException {
         if (sQLiteDatabase == null) {
             throw DBObject.DatabaseBindingException(SLInventoryEntry.class, "database is null")
         } else if (uuid == null) {
             throw DBObject.DatabaseBindingException(SLInventoryEntry.class, "folderUUID is null")
         } else {
-            Cursor query = sQLiteDatabase.query(InventoryEntryDBObject.tableName, fieldNames, "uuid_low = ? AND uuid_high = ?", String[]{Long.toString(uuid.getLeastSignificantBits()), Long.toString(uuid.getMostSignificantBits())}, (String) null, (String) null, (String) null)
+            val query: Cursor = sQLiteDatabase.query(InventoryEntryDBObject.tableName, fieldNames, "uuid_low = ? AND uuid_high = ?", Array<String>{Long.toString(uuid.getLeastSignificantBits()), Long.toString(uuid.getMostSignificantBits())}, (String) null, (String) null, (String) null)
             if (query.moveToFirst()) {
-                SLInventoryEntry sLInventoryEntry = SLInventoryEntry(query)
+                val sLInventoryEntry: SLInventoryEntry = SLInventoryEntry(query)
                 query.close()
                 return sLInventoryEntry
             }
             query.close()
-            SLInventoryEntry sLInventoryEntry2 = SLInventoryEntry()
+            val sLInventoryEntry2: SLInventoryEntry = SLInventoryEntry()
             sLInventoryEntry2.uuid = uuid
             return sLInventoryEntry2
         }
     }
 
     @JvmStatic
-    SLInventoryEntry findOrCreateForUpdate(SQLiteDatabase sQLiteDatabase, UUID uuid) throws DBObject.DatabaseBindingException {
+     fun findOrCreateForUpdate(sQLiteDatabase: SQLiteDatabase, uuid: UUID) throws DBObject.DatabaseBindingException {
         if (sQLiteDatabase == null) {
             throw DBObject.DatabaseBindingException(SLInventoryEntry.class, "database is null")
         } else if (uuid == null) {
             throw DBObject.DatabaseBindingException(SLInventoryEntry.class, "folderUUID is null")
         } else {
-            Cursor query = sQLiteDatabase.query(InventoryEntryDBObject.tableName, String[]{"_id"}, "uuid_low = ? AND uuid_high = ?", String[]{Long.toString(uuid.getLeastSignificantBits()), Long.toString(uuid.getMostSignificantBits())}, (String) null, (String) null, (String) null)
+            val query: Cursor = sQLiteDatabase.query(InventoryEntryDBObject.tableName, Array<String>{"_id"}, "uuid_low = ? AND uuid_high = ?", Array<String>{Long.toString(uuid.getLeastSignificantBits()), Long.toString(uuid.getMostSignificantBits())}, (String) null, (String) null, (String) null)
             if (query.moveToFirst()) {
-                SLInventoryEntry sLInventoryEntry = SLInventoryEntry()
+                val sLInventoryEntry: SLInventoryEntry = SLInventoryEntry()
                 sLInventoryEntry._id = query.getLong(0)
                 sLInventoryEntry.uuid = uuid
                 query.close()
                 return sLInventoryEntry
             }
             query.close()
-            SLInventoryEntry sLInventoryEntry2 = SLInventoryEntry()
+            val sLInventoryEntry2: SLInventoryEntry = SLInventoryEntry()
             sLInventoryEntry2.uuid = uuid
             return sLInventoryEntry2
         }
     }
 
     @JvmStatic
-private Int getDrawableResourceForType(Int i) {
+ private fun getDrawableResourceForType(i: Int): Int {
         switch (i) {
             case 0:
             case 12:
@@ -210,7 +210,7 @@ private Int getDrawableResourceForType(Int i) {
     }
 
     @JvmStatic
-    SQLiteStatement getInsertStatement(SQLiteDatabase sQLiteDatabase) throws DBObject.DatabaseBindingException {
+     fun getInsertStatement(sQLiteDatabase: SQLiteDatabase) throws DBObject.DatabaseBindingException {
         if (sQLiteDatabase == null) {
             throw DBObject.DatabaseBindingException("Database is closed")
         } else if (!sQLiteDatabase.isOpen()) {
@@ -227,7 +227,7 @@ private Int getDrawableResourceForType(Int i) {
     }
 
     @JvmStatic
-    SQLiteStatement getUpdateStatement(SQLiteDatabase sQLiteDatabase) throws DBObject.DatabaseBindingException {
+     fun getUpdateStatement(sQLiteDatabase: SQLiteDatabase) throws DBObject.DatabaseBindingException {
         if (sQLiteDatabase == null) {
             throw DBObject.DatabaseBindingException("Database is closed")
         } else if (!sQLiteDatabase.isOpen()) {
@@ -244,10 +244,10 @@ private Int getDrawableResourceForType(Int i) {
     }
 
     @JvmStatic
-private Unit parsePermissions(SimpleStringParser simpleStringParser, SLInventoryEntry sLInventoryEntry) throws SimpleStringParser.StringParsingException {
+ private fun parsePermissions(simpleStringParser: SimpleStringParser, sLInventoryEntry: SLInventoryEntry) throws SimpleStringParser.StringParsingException {
         simpleStringParser.expectToken("{", DELIM_EOL)
         while (true) {
-            String nextToken = simpleStringParser.nextToken(DELIM_ANY)
+            val nextToken: String = simpleStringParser.nextToken(DELIM_ANY)
             if (!nextToken.equals("}")) {
                 if (nextToken.equals("base_mask")) {
                     sLInventoryEntry.baseMask = simpleStringParser.getHexToken(DELIM_EOL)
@@ -277,10 +277,10 @@ private Unit parsePermissions(SimpleStringParser simpleStringParser, SLInventory
     }
 
     @JvmStatic
-private Unit parseSaleInfo(SimpleStringParser simpleStringParser, SLInventoryEntry sLInventoryEntry) throws SimpleStringParser.StringParsingException {
+ private fun parseSaleInfo(simpleStringParser: SimpleStringParser, sLInventoryEntry: SLInventoryEntry) throws SimpleStringParser.StringParsingException {
         simpleStringParser.expectToken("{", DELIM_EOL)
         while (true) {
-            String nextToken = simpleStringParser.nextToken(DELIM_ANY)
+            val nextToken: String = simpleStringParser.nextToken(DELIM_ANY)
             if (!nextToken.equals("}")) {
                 if (nextToken.equals("sale_type")) {
                     sLInventoryEntry.saleType = SLSaleType.getByString(simpleStringParser.nextToken(DELIM_EOL)).getTypeCode()
@@ -296,11 +296,11 @@ private Unit parseSaleInfo(SimpleStringParser simpleStringParser, SLInventoryEnt
     }
 
     @JvmStatic
-    SLInventoryEntry parseString(SimpleStringParser simpleStringParser) throws SimpleStringParser.StringParsingException {
-        SLInventoryEntry sLInventoryEntry = SLInventoryEntry()
+     fun parseString(simpleStringParser: SimpleStringParser) throws SimpleStringParser.StringParsingException {
+        val sLInventoryEntry: SLInventoryEntry = SLInventoryEntry()
         simpleStringParser.expectToken("{", DELIM_EOL)
         while (true) {
-            String nextToken = simpleStringParser.nextToken(DELIM_ANY)
+            val nextToken: String = simpleStringParser.nextToken(DELIM_ANY)
             if (nextToken.equals("}")) {
                 return sLInventoryEntry
             }
@@ -335,7 +335,7 @@ private Unit parseSaleInfo(SimpleStringParser simpleStringParser, SLInventoryEnt
     }
 
     @JvmStatic
-    Cursor query(SQLiteDatabase sQLiteDatabase, String str, String[] strArr, String str2) {
+     fun query(sQLiteDatabase: SQLiteDatabase, str: String, strArr: Array<String>, str2: String): Cursor {
         if (sQLiteDatabase == null) {
             return null
         }
@@ -348,7 +348,7 @@ private Unit parseSaleInfo(SimpleStringParser simpleStringParser, SLInventoryEnt
     }
 
     @JvmStatic
-    Cursor query(DBHandle dBHandle, String str, String[] strArr, String str2) {
+     fun query(dBHandle: DBHandle, str: String, strArr: Array<String>, str2: String): Cursor {
         if (dBHandle == null) {
             return null
         }
@@ -360,8 +360,8 @@ private Unit parseSaleInfo(SimpleStringParser simpleStringParser, SLInventoryEnt
         }
     }
 
-    public Int getActionDescriptionResId() {
-        SLAssetType byType = SLAssetType.getByType(this.assetType)
+     public fun getActionDescriptionResId(): Int {
+        val byType: SLAssetType = SLAssetType.getByType(this.assetType)
         if (byType != null) {
             return byType.getActionDescription()
         }
@@ -386,34 +386,34 @@ private Unit parseSaleInfo(SimpleStringParser simpleStringParser, SLInventoryEnt
         r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLAssetType.getByType(r1.assetType)
      */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    public Int getDrawableResource() {
+     public fun getDrawableResource(): Int {
         /*
             r1 = this
-            Boolean r0 = r1.isFolder
+            val r0: Boolean = r1.isFolder
             if (r0 == 0) goto L_0x0008
             r0 = 2130837696(0x7f0200c0, Float:1.7280353E38)
             return r0
         L_0x0008:
-            Boolean r0 = r1.isLink()
+            val r0: Boolean = r1.isLink()
             if (r0 != 0) goto L_0x001b
-            Int r0 = r1.assetType
+            val r0: Int = r1.assetType
             com.lumiyaviewer.lumiya.slproto.inventory.SLAssetType r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLAssetType.getByType(r0)
             if (r0 == 0) goto L_0x001b
-            Int r0 = r0.getDrawableResource()
+            val r0: Int = r0.getDrawableResource()
             return r0
         L_0x001b:
-            Int r0 = r1.invType
-            Int r0 = getDrawableResourceForType(r0)
+            val r0: Int = r1.invType
+            val r0: Int = getDrawableResourceForType(r0)
             return r0
         */
         throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry.getDrawableResource():Int")
     }
 
-    public String getReadableTextForLink() {
+     public fun getReadableTextForLink(): String {
         return SLInventoryType.getByType(this.invType).getReadableName() + ": " + this.name
     }
 
-    public Int getSubtypeDrawableResource() {
+     public fun getSubtypeDrawableResource(): Int {
         if (this.isFolder) {
             switch (this.typeDefault) {
                 case 0:
@@ -458,8 +458,8 @@ private Unit parseSaleInfo(SimpleStringParser simpleStringParser, SLInventoryEnt
         }
     }
 
-    public Int getTypeDescriptionResId() {
-        SLAssetType byType = SLAssetType.getByType(this.assetType)
+     public fun getTypeDescriptionResId(): Int {
+        val byType: SLAssetType = SLAssetType.getByType(this.assetType)
         if (byType != null) {
             return byType.getTypeDescription()
         }
@@ -511,55 +511,55 @@ private Unit parseSaleInfo(SimpleStringParser simpleStringParser, SLInventoryEnt
         }
     }
 
-    public Boolean isAnimation() {
+     public fun isAnimation(): Boolean {
         if (this.assetType == SLAssetType.AT_ANIMATION.getTypeCode()) {
             return true
         }
         return this.assetType == SLAssetType.AT_LINK.getTypeCode() && this.invType == 19
     }
 
-    public Boolean isCopyable() {
+     public fun isCopyable(): Boolean {
         return ((this.ownerMask & this.baseMask) & 32768) != 0
     }
 
-    public Boolean isFolderOrFolderLink() {
+     public fun isFolderOrFolderLink(): Boolean {
         return this.isFolder || this.assetType == SLAssetType.AT_LINK_FOLDER.getTypeCode()
     }
 
-    public Boolean isLink() {
+     public fun isLink(): Boolean {
         return this.assetType == SLAssetType.AT_LINK.getTypeCode() || this.assetType == SLAssetType.AT_LINK_FOLDER.getTypeCode()
     }
 
-    public Boolean isWearable() {
+     public fun isWearable(): Boolean {
         if (this.assetType == SLAssetType.AT_BODYPART.getTypeCode() || this.assetType == SLAssetType.AT_CLOTHING.getTypeCode()) {
             return true
         }
         return this.assetType == SLAssetType.AT_LINK.getTypeCode() && this.invType == SLInventoryType.IT_WEARABLE.getTypeCode()
     }
 
-    fun updateOrInsert(SQLiteDatabase sQLiteDatabase) throws DBObject.DatabaseBindingException {
-        super.updateOrInsert(sQLiteDatabase, "uuid_low = ? AND uuid_high = ?", String[]{Long.toString(this.uuid.getLeastSignificantBits()), Long.toString(this.uuid.getMostSignificantBits())})
+    fun updateOrInsert(sQLiteDatabase: SQLiteDatabase) throws DBObject.DatabaseBindingException {
+        super.updateOrInsert(sQLiteDatabase, "uuid_low = ? AND uuid_high = ?", Array<String>{Long.toString(this.uuid.getLeastSignificantBits()), Long.toString(this.uuid.getMostSignificantBits())})
     }
 
-    fun updateOrInsert(SQLiteStatement sQLiteStatement, SQLiteStatement sQLiteStatement2) throws DBObject.DatabaseBindingException {
+    fun updateOrInsert(sQLiteStatement: SQLiteStatement, sQLiteStatement2: SQLiteStatement) throws DBObject.DatabaseBindingException {
         sQLiteStatement.bindLong(19, this.uuid.getMostSignificantBits())
         sQLiteStatement.bindLong(20, this.uuid.getLeastSignificantBits())
         super.updateOrInsert(sQLiteStatement, sQLiteStatement2)
     }
 
-    public Object whatIsItemWornOn(ImmutableMap<UUID, String> immutableMap, Table<SLWearableType, UUID, SLWearable> table, Boolean z) {
+     public fun whatIsItemWornOn(immutableMap: ImmutableMap<UUID, String>, table: Table<SLWearableType, UUID, SLWearable>, z: Boolean): Object {
         if (this.assetType == SLAssetType.AT_LINK.getTypeCode()) {
             if (this.invType == SLInventoryType.IT_WEARABLE.getTypeCode()) {
                 if (table != null) {
                     for (Table.Cell cell : table.cellSet()) {
-                        SLWearableType sLWearableType = (SLWearableType) cell.getRowKey()
-                        UUID uuid = (UUID) cell.getColumnKey()
+                        val sLWearableType: SLWearableType = (SLWearableType) cell.getRowKey()
+                        val uuid: UUID = (UUID) cell.getColumnKey()
                         if (!(sLWearableType == null || uuid == null)) {
                             if (!z || sLWearableType.isBodyPart()) {
                                 if (uuid.equals(this.assetUUID)) {
                                     return sLWearableType
                                 }
-                                SLWearable sLWearable = (SLWearable) cell.getValue()
+                                val sLWearable: SLWearable = (SLWearable) cell.getValue()
                                 if (sLWearable != null && sLWearable.itemID.equals(this.assetUUID)) {
                                     return sLWearableType
                                 }
@@ -571,7 +571,7 @@ private Unit parseSaleInfo(SimpleStringParser simpleStringParser, SLInventoryEnt
                 return Boolean.TRUE
             }
         } else if (this.assetType == SLAssetType.AT_BODYPART.getTypeCode() || this.assetType == SLAssetType.AT_CLOTHING.getTypeCode()) {
-            SLWearableType byCode = SLWearableType.getByCode(this.flags & 255)
+            val byCode: SLWearableType = SLWearableType.getByCode(this.flags & 255)
             if (byCode == null || table == null || ((z && (!byCode.isBodyPart())) || !table.contains(byCode, this.assetUUID))) {
                 return null
             }

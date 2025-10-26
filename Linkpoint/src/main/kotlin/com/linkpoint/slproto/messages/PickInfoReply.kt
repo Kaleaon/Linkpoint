@@ -17,33 +17,33 @@ class PickInfoReply : SLMessage() {
     @JvmStatic
     class Data {
         public UUID CreatorID
-        public Byte[] Desc
+        public ByteArray Desc
         public Boolean Enabled
-        public Byte[] Name
-        public Byte[] OriginalName
+        public ByteArray Name
+        public ByteArray OriginalName
         public UUID ParcelID
         public UUID PickID
         public LLVector3d PosGlobal
-        public Byte[] SimName
+        public ByteArray SimName
         public UUID SnapshotID
         public Int SortOrder
         public Boolean TopPick
-        public Byte[] User
+        public ByteArray User
     }
 
     public PickInfoReply() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.Data_Field.Name.length + 50 + 2 + this.Data_Field.Desc.length + 16 + 1 + this.Data_Field.User.length + 1 + this.Data_Field.OriginalName.length + 1 + this.Data_Field.SimName.length + 24 + 4 + 1 + 20
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandlePickInfoReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -72)
@@ -63,7 +63,7 @@ class PickInfoReply : SLMessage() {
         packBoolean(byteBuffer, this.Data_Field.Enabled)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.Data_Field.PickID = unpackUUID(byteBuffer)
         this.Data_Field.CreatorID = unpackUUID(byteBuffer)

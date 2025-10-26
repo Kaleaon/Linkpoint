@@ -13,8 +13,8 @@ class ChatFromSimulator : SLMessage() {
     class ChatData {
         public Int Audible
         public Int ChatType
-        public Byte[] FromName
-        public Byte[] Message
+        public ByteArray FromName
+        public ByteArray Message
         public UUID OwnerID
         public LLVector3 Position
         public UUID SourceID
@@ -25,15 +25,15 @@ class ChatFromSimulator : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.ChatData_Field.FromName.length + 1 + 16 + 16 + 1 + 1 + 1 + 12 + 2 + this.ChatData_Field.Message.length + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleChatFromSimulator(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -117)
@@ -47,7 +47,7 @@ class ChatFromSimulator : SLMessage() {
         packVariable(byteBuffer, this.ChatData_Field.Message, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.ChatData_Field.FromName = unpackVariable(byteBuffer, 1)
         this.ChatData_Field.SourceID = unpackUUID(byteBuffer)
         this.ChatData_Field.OwnerID = unpackUUID(byteBuffer)

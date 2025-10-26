@@ -22,35 +22,35 @@ class Friend {
         this.isOnline = z
     }
 
-    public Boolean getIsOnline() {
+     public fun getIsOnline(): Boolean {
         return this.isOnline
     }
 
-    public Int getRightsGiven() {
+     public fun getRightsGiven(): Int {
         return this.rightsGiven
     }
 
-    public Int getRightsHas() {
+     public fun getRightsHas(): Int {
         return this.rightsHas
     }
 
-    public UUID getUuid() {
+     public fun getUuid(): UUID {
         return this.uuid
     }
 
-    fun setIsOnline(Boolean z) {
+    fun setIsOnline(z: Boolean) {
         this.isOnline = z
     }
 
-    fun setRightsGiven(Int i) {
+    fun setRightsGiven(i: Int) {
         this.rightsGiven = i
     }
 
-    fun setRightsHas(Int i) {
+    fun setRightsHas(i: Int) {
         this.rightsHas = i
     }
 
-    fun setUuid(UUID uuid) {
+    fun setUuid(uuid: UUID) {
         this.uuid = uuid
     }
 }

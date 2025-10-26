@@ -60,10 +60,10 @@ import javax.annotation.Nullable
 abstract class SLChatEvent : View.OnLongClickListener {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-chat-generic-SLChatEvent$ChatMessageTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f72comlumiyaviewerlumiyaslprotochatgenericSLChatEvent$ChatMessageTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f72comlumiyaviewerlumiyaslprotochatgenericSLChatEvent$ChatMessageTypeSwitchesValues = null
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-chatsrc-ChatMessageSource$ChatMessageSourceTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f73comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f73comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues = null
     const val CHAT_AUDIBLE_BARELY: Int = 0
     const val CHAT_AUDIBLE_FULLY: Int = 1
     const val CHAT_AUDIBLE_NOT: Int = -1
@@ -151,7 +151,7 @@ abstract class SLChatEvent : View.OnLongClickListener {
         VoiceUpgrade,
         MissedVoiceCall
         
-        const val ChatMessageType[] VALUES = null
+        const val Array<ChatMessageType> VALUES = null
 
         static {
             VALUES = values()
@@ -725,7 +725,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.chat.generic.
             
 */
         
-        const val ChatMessageViewType[] VALUES = null
+        const val Array<ChatMessageViewType> VALUES = null
         private val Boolean alwaysInflate
         private val Int resourceId
         private val ChatEventViewHolder.Factory viewHolderFactory
@@ -755,11 +755,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.chat.generic.
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-chat-generic-SLChatEvent$ChatMessageTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m148getcomlumiyaviewerlumiyaslprotochatgenericSLChatEvent$ChatMessageTypeSwitchesValues() {
+private /* synthetic */ IntArray m148getcomlumiyaviewerlumiyaslprotochatgenericSLChatEvent$ChatMessageTypeSwitchesValues() {
         if (f72comlumiyaviewerlumiyaslprotochatgenericSLChatEvent$ChatMessageTypeSwitchesValues != null) {
             return f72comlumiyaviewerlumiyaslprotochatgenericSLChatEvent$ChatMessageTypeSwitchesValues
         }
-        Int[] iArr = Int[ChatMessageType.values().length]
+        val iArr: IntArray = Int[ChatMessageType.values().length]
         try {
             iArr[ChatMessageType.BalanceChanged.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -854,11 +854,11 @@ private /* synthetic */ Int[] m148getcomlumiyaviewerlumiyaslprotochatgenericSLCh
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-chatsrc-ChatMessageSource$ChatMessageSourceTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m149getcomlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues() {
+private /* synthetic */ IntArray m149getcomlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues() {
         if (f73comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues != null) {
             return f73comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues
         }
-        Int[] iArr = Int[ChatMessageSource.ChatMessageSourceType.values().length]
+        val iArr: IntArray = Int[ChatMessageSource.ChatMessageSourceType.values().length]
         try {
             iArr[ChatMessageSource.ChatMessageSourceType.Group.ordinal()] = 25
         } catch (NoSuchFieldError e) {
@@ -919,13 +919,13 @@ private /* synthetic */ Int[] m149getcomlumiyaviewerlumiyaslprotouserschatsrcCha
     }
 
     @JvmStatic
-    ChatEventViewHolder createViewHolder(LayoutInflater layoutInflater, Int i, ViewGroup viewGroup, RecyclerView.Adapter adapter) {
-        ChatMessageViewType chatMessageViewType = ChatMessageViewType.VALUES[i]
+     fun createViewHolder(layoutInflater: LayoutInflater, i: Int, viewGroup: ViewGroup, RecyclerView.Adapter adapter): ChatEventViewHolder {
+        val chatMessageViewType: ChatMessageViewType = ChatMessageViewType.VALUES[i]
         return chatMessageViewType.createViewHolder(layoutInflater.inflate(chatMessageViewType.getResourceId(), viewGroup, false), adapter)
     }
 
     @JvmStatic
-    SLChatEvent loadFromDatabaseObject(ChatMessage chatMessage, UUID uuid) {
+     fun loadFromDatabaseObject(chatMessage: ChatMessage, uuid: UUID): SLChatEvent {
         if (chatMessage == null) {
             return null
         }
@@ -979,9 +979,9 @@ private /* synthetic */ Int[] m149getcomlumiyaviewerlumiyaslprotouserschatsrcCha
         }
     }
 
-    fun bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, ChatEventTimestampUpdater chatEventTimestampUpdater) {
-        ChatterPicView chatterPicView = chatEventViewHolder.chatSourceIcon
-        Boolean equal = this.source.getSourceType() == ChatMessageSource.ChatMessageSourceType.User ? Objects.equal(this.source.getSourceUUID(), this.agentUUID) : false
+    fun bindViewHolder(chatEventViewHolder: ChatEventViewHolder, userManager: UserManager, chatEventTimestampUpdater: ChatEventTimestampUpdater) {
+        val chatterPicView: ChatterPicView = chatEventViewHolder.chatSourceIcon
+        val equal: Boolean = this.source.getSourceType() == ChatMessageSource.ChatMessageSourceType.User ? Objects.equal(this.source.getSourceUUID(), this.agentUUID) : false
         if (chatEventViewHolder.chatSourceIconRight != null && equal) {
             chatterPicView = chatEventViewHolder.chatSourceIconRight
         }
@@ -1005,9 +1005,9 @@ private /* synthetic */ Int[] m149getcomlumiyaviewerlumiyaslprotouserschatsrcCha
             } else {
                 chatEventViewHolder.bubbleView.setBackgroundResource(R.drawable.msg_bubble_left)
             }
-            TypedValue typedValue = TypedValue()
+            val typedValue: TypedValue = TypedValue()
             chatEventViewHolder.bubbleView.getContext().getTheme().resolveAttribute(equal ? R.attr.chatBubbleMyBackground : R.attr.chatBubbleBackground, typedValue, true)
-            Drawable background = chatEventViewHolder.bubbleView.getBackground()
+            val background: Drawable = chatEventViewHolder.bubbleView.getBackground()
             if (background != null) {
                 background.setColorFilter(typedValue.data, PorterDuff.Mode.MULTIPLY)
             }
@@ -1022,7 +1022,7 @@ private /* synthetic */ Int[] m149getcomlumiyaviewerlumiyaslprotouserschatsrcCha
                     chatterPicView.setAttachedMessageSource(this.source)
                     break
                 case 2:
-                    UUID sourceUUID = this.source.getSourceUUID()
+                    val sourceUUID: UUID = this.source.getSourceUUID()
                     if (sourceUUID == null) {
                         chatterPicView.setChatterID((ChatterID) null, (String) null)
                         chatterPicView.setDefaultIcon(-1, false)
@@ -1045,7 +1045,7 @@ private /* synthetic */ Int[] m149getcomlumiyaviewerlumiyaslprotouserschatsrcCha
                     break
             }
         }
-        TextView textView = chatEventViewHolder.timestampView
+        val textView: TextView = chatEventViewHolder.timestampView
         if (textView != null) {
             if (GlobalOptions.getInstance().getShowTimestamps()) {
                 chatEventViewHolder.setupTimestampUpdate(textView.getContext(), this.timestamp.getTime())
@@ -1056,11 +1056,11 @@ private /* synthetic */ Int[] m149getcomlumiyaviewerlumiyaslprotouserschatsrcCha
                 textView.setVisibility(8)
             }
         }
-        TextView textView2 = chatEventViewHolder.textView
+        val textView2: TextView = chatEventViewHolder.textView
         if (textView2 != null) {
-            String sourceName = this.source.getSourceName(userManager)
-            String text = getText(textView2.getContext(), userManager)
-            SpannableStringBuilder spannableStringBuilder = SpannableStringBuilder()
+            val sourceName: String = this.source.getSourceName(userManager)
+            val text: String = getText(textView2.getContext(), userManager)
+            val spannableStringBuilder: SpannableStringBuilder = SpannableStringBuilder()
             if (!Strings.isNullOrEmpty(sourceName)) {
                 spannableStringBuilder.append(sourceName)
                 if (!Strings.isNullOrEmpty(text)) {
@@ -1076,7 +1076,7 @@ private /* synthetic */ Int[] m149getcomlumiyaviewerlumiyaslprotouserschatsrcCha
                 spannableStringBuilder.append(text)
             }
             if (this.isOffline) {
-                String str = " (sent at " + DateFormat.getDateTimeInstance(2, 2).format(this.originalTimestamp) + ")"
+                val str: String = " (sent at " + DateFormat.getDateTimeInstance(2, 2).format(this.originalTimestamp) + ")"
                 spannableStringBuilder.append(str)
                 spannableStringBuilder.setSpan(StyleSpan(2), spannableStringBuilder.length() - str.length(), spannableStringBuilder.length(), 33)
             }
@@ -1088,12 +1088,12 @@ private /* synthetic */ Int[] m149getcomlumiyaviewerlumiyaslprotouserschatsrcCha
         }
     }
 
-    public UUID getAgentUUID() {
+     public fun getAgentUUID(): UUID {
         return this.agentUUID
     }
 
-    public ChatMessage getDatabaseObject() {
-        ChatMessage chatMessage = this.dbMessage
+     public fun getDatabaseObject(): ChatMessage {
+        val chatMessage: ChatMessage = this.dbMessage
         if (chatMessage == null) {
             chatMessage = ChatMessage()
         }
@@ -1104,14 +1104,14 @@ private /* synthetic */ Int[] m149getcomlumiyaviewerlumiyaslprotouserschatsrcCha
     /* access modifiers changed from: protected */
     public abstract ChatMessageType getMessageType()
 
-    public CharSequence getPlainTextMessage(Context context, UserManager userManager, Boolean z) {
+     public fun getPlainTextMessage(context: Context, userManager: UserManager, z: Boolean): CharSequence {
         return getPlainTextMessage(context, userManager, z, ": ", " ")
     }
 
-    public CharSequence getPlainTextMessage(Context context, UserManager userManager, Boolean z, String str, String str2) {
-        String sourceName = (!z || !(isActionMessage(userManager) ^ true)) ? this.source.getSourceName(userManager) : null
-        String text = getText(context, userManager)
-        SpannableStringBuilder spannableStringBuilder = SpannableStringBuilder()
+     public fun getPlainTextMessage(context: Context, userManager: UserManager, z: Boolean, str: String, str2: String): CharSequence {
+        val sourceName: String = (!z || !(isActionMessage(userManager) ^ true)) ? this.source.getSourceName(userManager) : null
+        val text: String = getText(context, userManager)
+        val spannableStringBuilder: SpannableStringBuilder = SpannableStringBuilder()
         if (Strings.isNullOrEmpty(sourceName)) {
             return text
         }
@@ -1128,14 +1128,14 @@ private /* synthetic */ Int[] m149getcomlumiyaviewerlumiyaslprotouserschatsrcCha
         return spannableStringBuilder
     }
 
-    public ChatMessageSource getSource() {
+     public fun getSource(): ChatMessageSource {
         return this.source
     }
 
     /* access modifiers changed from: protected */
     public abstract String getText(Context context, UserManager userManager)
 
-    public Date getTimestamp() {
+     public fun getTimestamp(): Date {
         return this.timestamp
     }
 
@@ -1144,7 +1144,7 @@ private /* synthetic */ Int[] m149getcomlumiyaviewerlumiyaslprotouserschatsrcCha
     /* access modifiers changed from: protected */
     public abstract Boolean isActionMessage(UserManager userManager)
 
-    public Boolean isObjectPopup() {
+     public fun isObjectPopup(): Boolean {
         return false
     }
 
@@ -1153,9 +1153,9 @@ private /* synthetic */ Int[] m149getcomlumiyaviewerlumiyaslprotouserschatsrcCha
     public /* synthetic */ Boolean m150lambda$com_lumiyaviewer_lumiya_slproto_chat_generic_SLChatEvent_21084(Context context, MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.item_copy_message_text:
-                UserManager userManager = UserManager.getUserManager(this.agentUUID)
+                val userManager: UserManager = UserManager.getUserManager(this.agentUUID)
                 if (userManager != null) {
-                    CharSequence plainTextMessage = getPlainTextMessage(context, userManager, true)
+                    val plainTextMessage: CharSequence = getPlainTextMessage(context, userManager, true)
                     if (Build.VERSION.SDK_INT < 11) {
                         ((ClipboardManager) context.getSystemService("clipboard")).setText(plainTextMessage)
                     } else {
@@ -1170,18 +1170,18 @@ private /* synthetic */ Int[] m149getcomlumiyaviewerlumiyaslprotouserschatsrcCha
     }
 
     /* access modifiers changed from: protected */
-    fun notifyEventUpdated(UserManager userManager) {
+    fun notifyEventUpdated(userManager: UserManager) {
         if (this.dbMessage != null) {
             userManager.getChatterList().getActiveChattersManager().notifyChatEventUpdated(this)
         }
     }
 
     val Boolean onLongClick(View view) {
-        Context context = view.getContext()
+        val context: Context = view.getContext()
         if (context == null) {
             return false
         }
-        PopupMenu popupMenu = PopupMenu(context, view)
+        val popupMenu: PopupMenu = PopupMenu(context, view)
         popupMenu.inflate(R.menu.chat_messages_context_menu)
         popupMenu.setOnMenuItemClickListener(PopupMenu.OnMenuItemClickListener(this, context) {
 
@@ -1328,12 +1328,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.chat.generic.
         return true
     }
 
-    public Boolean opensNewChatter() {
+     public fun opensNewChatter(): Boolean {
         return true
     }
 
     /* access modifiers changed from: protected */
-    fun serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         chatMessage.setTimestamp(this.timestamp)
         chatMessage.setIsOffline(Boolean.valueOf(this.isOffline))
         chatMessage.setOrigTimestamp(this.originalTimestamp)

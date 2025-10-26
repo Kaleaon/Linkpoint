@@ -6,11 +6,11 @@ class BakeLayerSet {
     public BakedTextureIndex bakedTextureIndex
     public Boolean clear_alpha
     public Int height
-    public BakeLayer[] layers
-    public BakeLayer[] maskLayers
+    public Array<BakeLayer> layers
+    public Array<BakeLayer> maskLayers
     public Int width
 
-    public BakeLayerSet(BakedTextureIndex bakedTextureIndex2, Int i, Int i2, Boolean z, BakeLayer[] bakeLayerArr, BakeLayer[] bakeLayerArr2) {
+    public BakeLayerSet(BakedTextureIndex bakedTextureIndex2, Int i, Int i2, Boolean z, Array<BakeLayer> bakeLayerArr, Array<BakeLayer> bakeLayerArr2) {
         this.bakedTextureIndex = bakedTextureIndex2
         this.width = i
         this.height = i2

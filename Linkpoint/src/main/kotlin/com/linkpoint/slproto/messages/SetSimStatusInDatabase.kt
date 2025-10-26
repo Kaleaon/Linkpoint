@@ -11,10 +11,10 @@ class SetSimStatusInDatabase : SLMessage() {
     @JvmStatic
     class Data {
         public Int AgentCount
-        public Byte[] HostName
+        public ByteArray HostName
         public Int PID
         public UUID RegionID
-        public Byte[] Status
+        public ByteArray Status
         public Int TimeToLive
         public Int X
         public Int Y
@@ -24,15 +24,15 @@ class SetSimStatusInDatabase : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.Data_Field.HostName.length + 17 + 4 + 4 + 4 + 4 + 4 + 1 + this.Data_Field.Status.length + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleSetSimStatusInDatabase(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.SYN)
@@ -46,7 +46,7 @@ class SetSimStatusInDatabase : SLMessage() {
         packVariable(byteBuffer, this.Data_Field.Status, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.Data_Field.RegionID = unpackUUID(byteBuffer)
         this.Data_Field.HostName = unpackVariable(byteBuffer, 1)
         this.Data_Field.X = unpackInt(byteBuffer)

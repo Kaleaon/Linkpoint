@@ -15,7 +15,7 @@ class StartAuction : SLMessage() {
 
     @JvmStatic
     class ParcelData {
-        public Byte[] Name
+        public ByteArray Name
         public UUID ParcelID
         public UUID SnapshotID
     }
@@ -24,15 +24,15 @@ class StartAuction : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.ParcelData_Field.Name.length + 33 + 20
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleStartAuction(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -27)
@@ -42,7 +42,7 @@ class StartAuction : SLMessage() {
         packVariable(byteBuffer, this.ParcelData_Field.Name, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.ParcelData_Field.ParcelID = unpackUUID(byteBuffer)
         this.ParcelData_Field.SnapshotID = unpackUUID(byteBuffer)

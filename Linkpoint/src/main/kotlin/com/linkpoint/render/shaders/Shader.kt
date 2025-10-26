@@ -44,10 +44,10 @@ enum class Shader {
         this.fileName = str
     }
 
-    private String getShaderCode(ShaderPreprocessor shaderPreprocessor) {
+     private fun getShaderCode(shaderPreprocessor: ShaderPreprocessor): String {
         try {
-            BufferedReader bufferedReader = BufferedReader(InputStreamReader(LinkpointApp.getAssetManager().open("shaders/" + this.fileName)))
-            String processCode = shaderPreprocessor.processCode(bufferedReader)
+            val bufferedReader: BufferedReader = BufferedReader(InputStreamReader(LinkpointApp.getAssetManager().open("shaders/" + this.fileName)))
+            val processCode: String = shaderPreprocessor.processCode(bufferedReader)
             bufferedReader.close()
             return processCode
         } catch (IOException e) {
@@ -55,9 +55,9 @@ enum class Shader {
         }
     }
 
-    public Int Compile(ShaderPreprocessor shaderPreprocessor) throws ShaderCompileException {
+    public fun Compile(shaderPreprocessor: ShaderPreprocessor): Int throws ShaderCompileException {
         Debug.Printf("Shaders: Compiling shader '%s'...", this.fileName)
-        String shaderCode = getShaderCode(shaderPreprocessor)
+        val shaderCode: String = getShaderCode(shaderPreprocessor)
         if (shaderCode == null) {
             this.handle = 0
             throw ShaderCompileException("No shader code for " + this.fileName)
@@ -65,16 +65,16 @@ enum class Shader {
         this.handle = GLES20.glCreateShader(this.type)
         GLES20.glShaderSource(this.handle, shaderCode)
         GLES20.glCompileShader(this.handle)
-        Int[] iArr = Int[1]
+        val iArr: IntArray = Int[1]
         GLES20.glGetShaderiv(this.handle, 35713, iArr, 0)
         if (iArr[0] == 1) {
             return this.handle
         }
         shaderCode = GLES20.glGetShaderInfoLog(this.handle)
-        throw ShaderCompileException(String.format("Shader (%s) compile error: '%s'", Object[]{this.fileName, shaderCode}))
+        throw ShaderCompileException(String.format("Shader (%s) compile error: '%s'", Array<Any>{this.fileName, shaderCode}))
     }
 
-    public Int getHandle() {
+     public fun getHandle(): Int {
         return this.handle
     }
 }

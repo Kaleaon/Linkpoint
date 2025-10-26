@@ -4,7 +4,7 @@ import com.linkpoint.slproto.SLMessage
 import java.nio.ByteBuffer
 
 class TestMessage : SLMessage() {
-    public NeighborBlock[] NeighborBlock_Fields = NeighborBlock[4]
+    public Array<NeighborBlock> NeighborBlock_Fields = NeighborBlock[4]
     public TestBlock1 TestBlock1_Field
 
     @JvmStatic
@@ -27,15 +27,15 @@ class TestMessage : SLMessage() {
         }
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return 56
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleTestMessage(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 1)
@@ -47,7 +47,7 @@ class TestMessage : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.TestBlock1_Field.Test1 = unpackInt(byteBuffer)
         for (Int i = 0; i < 4; i++) {
             this.NeighborBlock_Fields[i].Test0 = unpackInt(byteBuffer)

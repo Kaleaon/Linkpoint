@@ -12,10 +12,10 @@ import com.linkpoint.slproto.users.manager.UserManager
 import javax.annotation.Nullable
 
 class ChatScriptDialogViewHolder : ChatEventViewHolder(), View.OnClickListener {
-    private const val Int[] dialogButtonIds = {R.id.buttonDialog1, R.id.buttonDialog2, R.id.buttonDialog3, R.id.buttonDialog4, R.id.buttonDialog5, R.id.buttonDialog6, R.id.buttonDialog7, R.id.buttonDialog8, R.id.buttonDialog9, R.id.buttonDialog10, R.id.buttonDialog11, R.id.buttonDialog12}
+    private const val IntArray dialogButtonIds = {R.id.buttonDialog1, R.id.buttonDialog2, R.id.buttonDialog3, R.id.buttonDialog4, R.id.buttonDialog5, R.id.buttonDialog6, R.id.buttonDialog7, R.id.buttonDialog8, R.id.buttonDialog9, R.id.buttonDialog10, R.id.buttonDialog11, R.id.buttonDialog12}
     val CardView cardView
     val Button dialogButtonIgnore
-    val Button[] dialogButtons = Button[dialogButtonIds.length]
+    val Array<Button> dialogButtons = Button[dialogButtonIds.length]
     val View dialogButtonsLayout
     private SLChatScriptDialog dialogEvent
     val TextView dialogResultTextView
@@ -25,9 +25,9 @@ class ChatScriptDialogViewHolder : ChatEventViewHolder(), View.OnClickListener {
         this.dialogResultTextView = (TextView) view.findViewById(R.id.dialogResultTextView)
         this.dialogButtonsLayout = view.findViewById(R.id.dialogButtonsLayout)
         this.cardView = (CardView) view.findViewById(R.id.chatMessageCardView)
-        Int i = 0
+        val i: Int = 0
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (i2 >= dialogButtonIds.length) {
                 break
             }
@@ -43,7 +43,7 @@ class ChatScriptDialogViewHolder : ChatEventViewHolder(), View.OnClickListener {
         }
     }
 
-    fun onClick(View view) {
+    fun onClick(view: View) {
         switch (view.getId()) {
             case R.id.buttonDialogIgnore:
                 if (this.dialogEvent != null) {
@@ -53,7 +53,7 @@ class ChatScriptDialogViewHolder : ChatEventViewHolder(), View.OnClickListener {
                 }
                 return
             default:
-                Int i = 0
+                val i: Int = 0
                 while (i < dialogButtonIds.length) {
                     if (view.getId() != dialogButtonIds[i]) {
                         i++
@@ -69,7 +69,7 @@ class ChatScriptDialogViewHolder : ChatEventViewHolder(), View.OnClickListener {
         }
     }
 
-    fun setDialogEvent(SLChatScriptDialog sLChatScriptDialog) {
+    fun setDialogEvent(sLChatScriptDialog: SLChatScriptDialog) {
         this.dialogEvent = sLChatScriptDialog
     }
 }

@@ -17,33 +17,33 @@ class EventInfoReply : SLMessage() {
     @JvmStatic
     class EventData {
         public Int Amount
-        public Byte[] Category
+        public ByteArray Category
         public Int Cover
-        public Byte[] Creator
-        public Byte[] Date
+        public ByteArray Creator
+        public ByteArray Date
         public Int DateUTC
-        public Byte[] Desc
+        public ByteArray Desc
         public Int Duration
         public Int EventFlags
         public Int EventID
         public LLVector3d GlobalPos
-        public Byte[] Name
-        public Byte[] SimName
+        public ByteArray Name
+        public ByteArray SimName
     }
 
     public EventInfoReply() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.EventData_Field.Creator.length + 5 + 1 + this.EventData_Field.Name.length + 1 + this.EventData_Field.Category.length + 2 + this.EventData_Field.Desc.length + 1 + this.EventData_Field.Date.length + 4 + 4 + 4 + 4 + 1 + this.EventData_Field.SimName.length + 24 + 4 + 20
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleEventInfoReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -76)
@@ -63,7 +63,7 @@ class EventInfoReply : SLMessage() {
         packInt(byteBuffer, this.EventData_Field.EventFlags)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.EventData_Field.EventID = unpackInt(byteBuffer)
         this.EventData_Field.Creator = unpackVariable(byteBuffer, 1)

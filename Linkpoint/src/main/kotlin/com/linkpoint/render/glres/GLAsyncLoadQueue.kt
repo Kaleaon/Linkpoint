@@ -53,23 +53,23 @@ class GLAsyncLoadQueue : GLLoadQueue(), GLLoadQueue.GLLoadHandler {
             this(renderContext2)
         }
 
-        private EGLContext createContext() {
-            Int i = 3
+         private fun createContext(): EGLContext {
+            val i: Int = 3
             Debug.Printf("TexLoad: create[1]: eglGetError = %d", Integer.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
-            EGL10 r2 = GLAsyncLoadQueue.this.egl10
-            EGLDisplay r3 = GLAsyncLoadQueue.this.eglDisplay
-            EGLConfig r4 = GLAsyncLoadQueue.this.eglConfig
-            EGLContext r5 = GLAsyncLoadQueue.this.eglBaseContext
-            Int[] iArr = Int[3]
+            val r2: EGL10 = GLAsyncLoadQueue.this.egl10
+            val r3: EGLDisplay = GLAsyncLoadQueue.this.eglDisplay
+            val r4: EGLConfig = GLAsyncLoadQueue.this.eglConfig
+            val r5: EGLContext = GLAsyncLoadQueue.this.eglBaseContext
+            val iArr: IntArray = Int[3]
             iArr[0] = 12440
             if (!GLAsyncLoadQueue.this.requestGL30) {
                 i = 2
             }
             iArr[1] = i
             iArr[2] = 12344
-            EGLContext eglCreateContext = r2.eglCreateContext(r3, r4, r5, iArr)
+            val eglCreateContext: EGLContext = r2.eglCreateContext(r3, r4, r5, iArr)
             Debug.Printf("TexLoad: create[2]: eglGetError = %d", Integer.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
-            EGLSurface eglCreatePbufferSurface = GLAsyncLoadQueue.this.egl10.eglCreatePbufferSurface(GLAsyncLoadQueue.this.eglDisplay, GLAsyncLoadQueue.this.eglConfig, Int[]{12374, 128, 12375, 128, 12344})
+            val eglCreatePbufferSurface: EGLSurface = GLAsyncLoadQueue.this.egl10.eglCreatePbufferSurface(GLAsyncLoadQueue.this.eglDisplay, GLAsyncLoadQueue.this.eglConfig, IntArray{12374, 128, 12375, 128, 12344})
             Debug.Printf("TexLoad: create[3]: eglGetError = %d", Integer.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
             if (eglCreateContext == null || eglCreateContext == EGL10.EGL_NO_CONTEXT) {
                 Debug.Printf("TexLoad: Failed to create loader context", Object[0])
@@ -82,21 +82,21 @@ class GLAsyncLoadQueue : GLLoadQueue(), GLLoadQueue.GLLoadHandler {
         }
 
         fun run() {
-            RenderContext andSet = this.renderContext.getAndSet((Object) null)
-            EGLContext createContext = createContext()
-            Int i = 0
-            Long j = 0
+            val andSet: RenderContext = this.renderContext.getAndSet((Object) null)
+            val createContext: EGLContext = createContext()
+            val i: Int = 0
+            val j: Long = 0
             Debug.Printf("TexLoad: Signaling context readiness.", Object[0])
             synchronized (GLAsyncLoadQueue.this.contextReadyLock) {
-                Boolean unused = GLAsyncLoadQueue.this.contextFailed = createContext == null
-                Boolean unused2 = GLAsyncLoadQueue.this.contextReady = true
+                val unused: Boolean = GLAsyncLoadQueue.this.contextFailed = createContext == null
+                val unused2: Boolean = GLAsyncLoadQueue.this.contextReady = true
                 GLAsyncLoadQueue.this.contextReadyLock.notifyAll()
             }
             if (createContext != null) {
                 Debug.Printf("TexLoad: thread init: eglGetError = %d", Integer.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
                 Debug.Printf("TexLoad: thread init: rc = %b, eglGetError = %d", Boolean.valueOf(GLAsyncLoadQueue.this.egl10.eglMakeCurrent(GLAsyncLoadQueue.this.eglDisplay, this.eglSurface, this.eglSurface, createContext)), Integer.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
                 while (true) {
-                    Int i2 = i
+                    val i2: Int = i
                     if (GLAsyncLoadQueue.this.mustExit.get()) {
                         break
                     }
@@ -107,7 +107,7 @@ class GLAsyncLoadQueue : GLLoadQueue(), GLLoadQueue.GLLoadHandler {
                             Thread.sleep(1000)
                             i = i2 + 1
                             if (i >= 10) {
-                                Long uptimeMillis = SystemClock.uptimeMillis()
+                                val uptimeMillis: Long = SystemClock.uptimeMillis()
                                 if (uptimeMillis - j >= AnimationSequenceInfo.MAX_ANIMATION_LENGTH) {
                                     Debug.Printf("TexLoad: invoking GC.", Object[0])
                                     System.gc()
@@ -165,7 +165,7 @@ class GLAsyncLoadQueue : GLLoadQueue(), GLLoadQueue.GLLoadHandler {
         this.loadedQueue.offer(gLLoadable)
     }
 
-    fun RunLoadQueue(RenderContext renderContext) {
+    fun RunLoadQueue(renderContext: RenderContext) {
         while (true) {
             GLLoadQueue.GLLoadable poll = this.loadedQueue.poll()
             if (poll != null) {

@@ -39,9 +39,9 @@ class ChatterList {
         this.activeChattersManager = ActiveChattersManager(userManager2, this.daoSession, this)
         RequestFinalProcessor<UUID, Float>(this.nearbyDistancePool, userManager2.getDatabaseExecutor()) {
             /* access modifiers changed from: protected */
-            public Float processRequest(UUID uuid) throws Throwable {
+             public fun processRequest(uuid: UUID) throws Throwable {
                 SLModules modules
-                SLAgentCircuit activeAgentCircuit = userManager2.getActiveAgentCircuit()
+                val activeAgentCircuit: SLAgentCircuit = userManager2.getActiveAgentCircuit()
                 if (activeAgentCircuit == null || (modules = activeAgentCircuit.getModules()) == null) {
                     return null
                 }
@@ -50,8 +50,8 @@ class ChatterList {
         }
         RequestFinalProcessor<UUID, Boolean>(this.typingUsersPool, userManager2.getDatabaseExecutor()) {
             /* access modifiers changed from: protected */
-            public Boolean processRequest(UUID uuid) throws Throwable {
-                SLAgentCircuit activeAgentCircuit = userManager2.getActiveAgentCircuit()
+             public fun processRequest(uuid: UUID) throws Throwable {
+                val activeAgentCircuit: SLAgentCircuit = userManager2.getActiveAgentCircuit()
                 if (activeAgentCircuit != null) {
                     return activeAgentCircuit.isUserTyping(uuid)
                 }
@@ -61,16 +61,16 @@ class ChatterList {
         RequestFinalProcessor<ChatterListType, ImmutableList<ChatterDisplayData>>(this.chatterListPool, userManager2.getDatabaseExecutor()) {
 
             /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-manager-ChatterListTypeSwitchesValues  reason: not valid java name */
-            private const val /* synthetic */ Int[] f225comlumiyaviewerlumiyaslprotousersmanagerChatterListTypeSwitchesValues = null
-            final /* synthetic */ Int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$users$manager$ChatterListType
+            private const val /* synthetic */ IntArray f225comlumiyaviewerlumiyaslprotousersmanagerChatterListTypeSwitchesValues = null
+            final /* synthetic */ IntArray $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$users$manager$ChatterListType
 
             /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-manager-ChatterListTypeSwitchesValues  reason: not valid java name */
             @JvmStatic
-private /* synthetic */ Int[] m296getcomlumiyaviewerlumiyaslprotousersmanagerChatterListTypeSwitchesValues() {
+private /* synthetic */ IntArray m296getcomlumiyaviewerlumiyaslprotousersmanagerChatterListTypeSwitchesValues() {
                 if (f225comlumiyaviewerlumiyaslprotousersmanagerChatterListTypeSwitchesValues != null) {
                     return f225comlumiyaviewerlumiyaslprotousersmanagerChatterListTypeSwitchesValues
                 }
-                Int[] iArr = Int[ChatterListType.values().length]
+                val iArr: IntArray = Int[ChatterListType.values().length]
                 try {
                     iArr[ChatterListType.Active.ordinal()] = 1
                 } catch (NoSuchFieldError e) {
@@ -96,8 +96,8 @@ private /* synthetic */ Int[] m296getcomlumiyaviewerlumiyaslprotousersmanagerCha
             }
 
             /* access modifiers changed from: protected */
-            fun cancelRequest(ChatterListType chatterListType) {
-                ChatterDisplayDataList chatterDisplayDataList = (ChatterDisplayDataList) ChatterList.this.chatterLists.remove(chatterListType)
+            fun cancelRequest(chatterListType: ChatterListType) {
+                val chatterDisplayDataList: ChatterDisplayDataList = (ChatterDisplayDataList) ChatterList.this.chatterLists.remove(chatterListType)
                 if (chatterDisplayDataList != null) {
                     chatterDisplayDataList.dispose()
                 }
@@ -105,7 +105,7 @@ private /* synthetic */ Int[] m296getcomlumiyaviewerlumiyaslprotousersmanagerCha
 
             /* access modifiers changed from: protected */
             public ImmutableList<ChatterDisplayData> processRequest(ChatterListType chatterListType) {
-                ChatterDisplayDataList chatterDisplayDataList = (ChatterDisplayDataList) ChatterList.this.chatterLists.get(chatterListType)
+                val chatterDisplayDataList: ChatterDisplayDataList = (ChatterDisplayDataList) ChatterList.this.chatterLists.get(chatterListType)
                 if (chatterDisplayDataList == null) {
                     switch (m296getcomlumiyaviewerlumiyaslprotousersmanagerChatterListTypeSwitchesValues()[chatterListType.ordinal()]) {
                         case 1:
@@ -132,7 +132,7 @@ private /* synthetic */ Int[] m296getcomlumiyaviewerlumiyaslprotousersmanagerCha
         }
     }
 
-    public ActiveChattersManager getActiveChattersManager() {
+     public fun getActiveChattersManager(): ActiveChattersManager {
         return this.activeChattersManager
     }
 
@@ -144,11 +144,11 @@ private /* synthetic */ Int[] m296getcomlumiyaviewerlumiyaslprotousersmanagerCha
         return this.nearbyDistancePool
     }
 
-    public FriendManager getFriendManager() {
+     public fun getFriendManager(): FriendManager {
         return this.friendManager
     }
 
-    public GroupManager getGroupManager() {
+     public fun getGroupManager(): GroupManager {
         return this.groupManager
     }
 
@@ -163,7 +163,7 @@ private /* synthetic */ Int[] m296getcomlumiyaviewerlumiyaslprotousersmanagerCha
     }
 
     /* access modifiers changed from: package-private */
-    fun notifyListUpdated(ChatterListType chatterListType) {
+    fun notifyListUpdated(chatterListType: ChatterListType) {
         this.chatterListPool.requestUpdate(chatterListType)
     }
 
@@ -171,18 +171,18 @@ private /* synthetic */ Int[] m296getcomlumiyaviewerlumiyaslprotousersmanagerCha
         this.nearbyDistancePool.requestUpdateAll()
     }
 
-    fun updateDistanceToUser(UUID uuid) {
+    fun updateDistanceToUser(uuid: UUID) {
         this.nearbyDistancePool.requestUpdate(uuid)
     }
 
-    fun updateList(ChatterListType chatterListType) {
-        ChatterDisplayDataList chatterDisplayDataList = this.chatterLists.get(chatterListType)
+    fun updateList(chatterListType: ChatterListType) {
+        val chatterDisplayDataList: ChatterDisplayDataList = this.chatterLists.get(chatterListType)
         if (chatterDisplayDataList != null) {
             chatterDisplayDataList.requestRefresh(this.userManager.getDatabaseExecutor())
         }
     }
 
-    fun updateUserTypingStatus(UUID uuid) {
+    fun updateUserTypingStatus(uuid: UUID) {
         this.typingUsersPool.requestUpdate(uuid)
     }
 }

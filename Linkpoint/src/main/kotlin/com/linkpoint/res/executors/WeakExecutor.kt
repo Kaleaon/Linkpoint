@@ -33,7 +33,7 @@ private class WeakCallable<T> : Callable<T> {
             }
 
             public T call() throws Exception {
-                Callable callable = (Callable) this.callableRef.get()
+                val callable: Callable = (Callable) this.callableRef.get()
                 if (callable != null) {
                     return callable.call()
                 }
@@ -54,7 +54,7 @@ private class WeakRunnable : Runnable {
             }
 
             fun run() {
-                Runnable runnable = (Runnable) this.runnableRef.get()
+                val runnable: Runnable = (Runnable) this.runnableRef.get()
                 if (runnable != null) {
                     runnable.run()
                 }
@@ -79,7 +79,7 @@ private class WeakRunnable : Runnable {
             }
         }
 
-        public Int compareTo(ComparableFutureTask<T> comparableFutureTask) {
+         public fun compareTo(comparableFutureTask: ComparableFutureTask<T>): Int {
             if (comparableFutureTask == this) {
                 return 0
             }
@@ -230,7 +230,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.res.executors.-$Lambd
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_res_executors_WeakExecutor_1106  reason: not valid java name */
     static /* synthetic */ Thread m107lambda$com_lumiyaviewer_lumiya_res_executors_WeakExecutor_1106(String str, Runnable runnable) {
-        Thread thread = Thread(runnable, str)
+        val thread: Thread = Thread(runnable, str)
         Debug.Printf("Creating thread %s got %d", str, Long.valueOf(thread.getId()))
         thread.setPriority(4)
         return thread
@@ -238,7 +238,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.res.executors.-$Lambd
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_res_executors_WeakExecutor_531  reason: not valid java name */
     static /* synthetic */ Thread m108lambda$com_lumiyaviewer_lumiya_res_executors_WeakExecutor_531(String str, Runnable runnable) {
-        Thread thread = Thread(runnable, str)
+        val thread: Thread = Thread(runnable, str)
         Debug.Printf("Creating thread %s got %d", str, Long.valueOf(thread.getId()))
         thread.setPriority(4)
         return thread

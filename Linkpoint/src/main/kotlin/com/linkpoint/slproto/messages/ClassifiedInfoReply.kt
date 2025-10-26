@@ -22,15 +22,15 @@ class ClassifiedInfoReply : SLMessage() {
         public UUID ClassifiedID
         public Int CreationDate
         public UUID CreatorID
-        public Byte[] Desc
+        public ByteArray Desc
         public Int ExpirationDate
-        public Byte[] Name
+        public ByteArray Name
         public UUID ParcelID
-        public Byte[] ParcelName
+        public ByteArray ParcelName
         public Int ParentEstate
         public LLVector3d PosGlobal
         public Int PriceForListing
-        public Byte[] SimName
+        public ByteArray SimName
         public UUID SnapshotID
     }
 
@@ -38,15 +38,15 @@ class ClassifiedInfoReply : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.Data_Field.Name.length + 45 + 2 + this.Data_Field.Desc.length + 16 + 4 + 16 + 1 + this.Data_Field.SimName.length + 24 + 1 + this.Data_Field.ParcelName.length + 1 + 4 + 20
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleClassifiedInfoReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 44)
@@ -68,7 +68,7 @@ class ClassifiedInfoReply : SLMessage() {
         packInt(byteBuffer, this.Data_Field.PriceForListing)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.Data_Field.ClassifiedID = unpackUUID(byteBuffer)
         this.Data_Field.CreatorID = unpackUUID(byteBuffer)

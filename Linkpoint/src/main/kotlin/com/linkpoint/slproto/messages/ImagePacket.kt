@@ -10,7 +10,7 @@ class ImagePacket : SLMessage() {
 
     @JvmStatic
     class ImageData {
-        public Byte[] Data
+        public ByteArray Data
     }
 
     @JvmStatic
@@ -23,22 +23,22 @@ class ImagePacket : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.ImageData_Field.Data.length + 2 + 19
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleImagePacket(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.put((Byte) 10)
         packUUID(byteBuffer, this.ImageID_Field.ID)
         packShort(byteBuffer, (Short) this.ImageID_Field.Packet)
         packVariable(byteBuffer, this.ImageData_Field.Data, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.ImageID_Field.ID = unpackUUID(byteBuffer)
         this.ImageID_Field.Packet = unpackShort(byteBuffer) & 65535
         this.ImageData_Field.Data = unpackVariable(byteBuffer, 2)

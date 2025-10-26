@@ -49,7 +49,7 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnL
 
     /* access modifiers changed from: protected */
     @OnClick({2131755706})
-    fun onAboutEditClicked(View view) {
+    fun onAboutEditClicked(view: View) {
         if (this.chatterID != null) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserAboutTextEditFragment.class, UserAboutTextEditFragment.makeSelection(this.chatterID, true))
         }
@@ -57,17 +57,17 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnL
 
     /* access modifiers changed from: protected */
     @OnClick({2131755698})
-    fun onChangePicClicked(View view) {
-        AvatarPropertiesReply data = this.avatarProperties.getData()
+    fun onChangePicClicked(view: View) {
+        val data: AvatarPropertiesReply = this.avatarProperties.getData()
         if (this.chatterID != null && data != null) {
-            Bundle bundle = Bundle()
+            val bundle: Bundle = Bundle()
             bundle.putParcelable("oldProfileData", data)
             getContext().startActivity(InventoryActivity.makeSelectActionIntent(getContext(), this.chatterID.agentUUID, InventoryActivity.SelectAction.applyFirstLife, bundle, SLAssetType.AT_TEXTURE))
         }
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View inflate = layoutInflater.inflate(R.layout.user_profile_tab_first, viewGroup, false)
+     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+        val inflate: View = layoutInflater.inflate(R.layout.user_profile_tab_first, viewGroup, false)
         this.unbinder = ButterKnife.bind((Object) this, inflate)
         this.loadingLayout.setSwipeRefreshLayout(this.swipeRefreshLayout)
         this.loadableMonitor.setLoadingLayout(this.loadingLayout, getString(R.string.no_user_selected), getString(R.string.user_profile_fail))
@@ -84,11 +84,11 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnL
     }
 
     fun onLoadableDataChanged() {
-        Boolean z = true
+        val z: Boolean = true
         if (getView() != null) {
             try {
-                AvatarPropertiesReply avatarPropertiesReply = this.avatarProperties.get()
-                Boolean z2 = (avatarPropertiesReply.PropertiesData_Field.Flags & 8) != 0
+                val avatarPropertiesReply: AvatarPropertiesReply = this.avatarProperties.get()
+                val z2: Boolean = (avatarPropertiesReply.PropertiesData_Field.Flags & 8) != 0
                 if ((avatarPropertiesReply.PropertiesData_Field.Flags & 4) == 0) {
                     z = false
                 }
@@ -102,16 +102,16 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnL
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(ChatterID chatterID) {
-        Int i = 0
+    fun onShowUser(chatterID: ChatterID) {
+        val i: Int = 0
         this.loadableMonitor.unsubscribeAll()
         if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDUser)) {
-            UUID chatterUUID = ((ChatterID.ChatterIDUser) chatterID).getChatterUUID()
+            val chatterUUID: UUID = ((ChatterID.ChatterIDUser) chatterID).getChatterUUID()
             this.avatarProperties.subscribe(this.userManager.getAvatarProperties().getPool(), chatterUUID)
             if (this.unbinder != null) {
-                Boolean equals = chatterUUID.equals(this.userManager.getUserID())
+                val equals: Boolean = chatterUUID.equals(this.userManager.getUserID())
                 this.aboutEditButton.setVisibility(equals ? 0 : 8)
-                Button button = this.changePicButton
+                val button: Button = this.changePicButton
                 if (!equals) {
                     i = 8
                 }

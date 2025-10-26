@@ -25,10 +25,10 @@ class ModernAvatarManager {
     
     // Avatar events
     interface AvatarEventListener {
-        Unit onAvatarAppearanceChanged(UUID avatarId, AvatarAppearance appearance)
-        Unit onAvatarTextureUpdated(UUID avatarId, String textureId)
-        Unit onAvatarAnimationChanged(UUID avatarId, String animationId)
-        Unit onAvatarRenderingError(UUID avatarId, String error)
+         fun onAvatarAppearanceChanged(avatarId: UUID, appearance: AvatarAppearance)
+         fun onAvatarTextureUpdated(avatarId: UUID, textureId: String)
+         fun onAvatarAnimationChanged(avatarId: UUID, animationId: String)
+         fun onAvatarRenderingError(avatarId: UUID, error: String)
     }
     
     private AvatarEventListener avatarListener
@@ -67,15 +67,15 @@ class ModernAvatarManager {
                 Log.i(TAG, "Creating avatar: " + avatarId)
                 
                 // Create avatar state
-                AvatarState state = AvatarState(avatarId, avatarObject)
+                val state: AvatarState = AvatarState(avatarId, avatarObject)
                 avatarStates.put(avatarId, state)
                 
                 // Create mock visual state
-                Object visualState = Object(); // Mock AvatarVisualState
+                val visualState: Object = Object(); // Mock AvatarVisualState
                 visualStates.put(avatarId, visualState)
                 
                 // Initialize default appearance
-                AvatarAppearance defaultAppearance = createDefaultAppearance()
+                val defaultAppearance: AvatarAppearance = createDefaultAppearance()
                 updateAvatarAppearance(avatarId, defaultAppearance).join()
                 
                 Log.i(TAG, "Avatar created successfully: " + avatarId)
@@ -97,8 +97,8 @@ class ModernAvatarManager {
     public CompletableFuture<Boolean> updateAvatarAppearance(UUID avatarId, AvatarAppearance appearance) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                AvatarState state = avatarStates.get(avatarId)
-                Object visualState = visualStates.get(avatarId)
+                val state: AvatarState = avatarStates.get(avatarId)
+                val visualState: Object = visualStates.get(avatarId)
                 
                 if (state == null || visualState == null) {
                     Log.w(TAG, "Avatar not found for appearance update: " + avatarId)
@@ -129,11 +129,11 @@ class ModernAvatarManager {
     /**
      * Update avatar texture
      */
-    public CompletableFuture<Boolean> updateAvatarTexture(UUID avatarId, String textureType, UUID textureId, Byte[] textureData) {
+    public CompletableFuture<Boolean> updateAvatarTexture(UUID avatarId, String textureType, UUID textureId, ByteArray textureData) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                AvatarState state = avatarStates.get(avatarId)
-                Object visualState = visualStates.get(avatarId)
+                val state: AvatarState = avatarStates.get(avatarId)
+                val visualState: Object = visualStates.get(avatarId)
                 
                 if (state == null || visualState == null) {
                     Log.w(TAG, "Avatar not found for texture update: " + avatarId)
@@ -142,7 +142,7 @@ class ModernAvatarManager {
                 
                 // Create texture entry for the specific texture type
                 // This integrates with the existing texture system
-                AvatarTextureInfo textureInfo = AvatarTextureInfo(textureType, textureId, textureData)
+                val textureInfo: AvatarTextureInfo = AvatarTextureInfo(textureType, textureId, textureData)
                 state.updateTexture(textureInfo)
                 
                 // Apply texture through visual state system
@@ -171,8 +171,8 @@ class ModernAvatarManager {
     public CompletableFuture<Boolean> startAvatarAnimation(UUID avatarId, String animationId, Boolean loop) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                AvatarState state = avatarStates.get(avatarId)
-                Object visualState = visualStates.get(avatarId)
+                val state: AvatarState = avatarStates.get(avatarId)
+                val visualState: Object = visualStates.get(avatarId)
                 
                 if (state == null || visualState == null) {
                     Log.w(TAG, "Avatar not found for animation: " + avatarId)
@@ -180,7 +180,7 @@ class ModernAvatarManager {
                 }
                 
                 // Start animation through existing system
-                UUID animUUID = UUID.fromString(animationId)
+                val animUUID: UUID = UUID.fromString(animationId)
                 // The visual state system handles animation management
                 
                 state.setCurrentAnimation(animationId)
@@ -205,14 +205,14 @@ class ModernAvatarManager {
     /**
      * Get avatar visual state for rendering system
      */
-    public Object getAvatarVisualState(UUID avatarId) {
+     public fun getAvatarVisualState(avatarId: UUID): Object {
         return visualStates.get(avatarId)
     }
     
     /**
      * Get avatar state information
      */
-    public AvatarState getAvatarState(UUID avatarId) {
+     public fun getAvatarState(avatarId: UUID): AvatarState {
         return avatarStates.get(avatarId)
     }
     
@@ -222,8 +222,8 @@ class ModernAvatarManager {
     public CompletableFuture<Boolean> removeAvatar(UUID avatarId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                AvatarState state = avatarStates.remove(avatarId)
-                Object visualState = visualStates.remove(avatarId)
+                val state: AvatarState = avatarStates.remove(avatarId)
+                val visualState: Object = visualStates.remove(avatarId)
                 
                 if (state != null && visualState != null) {
                     // Cleanup resources
@@ -253,9 +253,9 @@ class ModernAvatarManager {
                 
                 // Check if we have the necessary rendering components
                 // This ensures the integration between old and systems works
-                Boolean hasVisualStateSystem = true; // AvatarVisualState is available
-                Boolean hasDrawableSystem = true;    // DrawableAvatar system is available
-                Boolean hasTextureSystem = true;     // Texture management is available
+                val hasVisualStateSystem: Boolean = true; // AvatarVisualState is available
+                val hasDrawableSystem: Boolean = true;    // DrawableAvatar system is available
+                val hasTextureSystem: Boolean = true;     // Texture management is available
                 
                 if (hasVisualStateSystem && hasDrawableSystem && hasTextureSystem) {
                     Log.i(TAG, "Avatar rendering system validation passed")
@@ -275,13 +275,13 @@ class ModernAvatarManager {
     /**
      * Set avatar event listener
      */
-    fun setAvatarEventListener(AvatarEventListener listener) {
+    fun setAvatarEventListener(listener: AvatarEventListener) {
         this.avatarListener = listener
     }
     
     // Helper methods
     
-    private AvatarAppearance createDefaultAppearance() {
+     private fun createDefaultAppearance(): AvatarAppearance {
         // Create basic default appearance
         return AvatarAppearance.Builder()
             .withBodyHeight(1.8f)
@@ -328,15 +328,15 @@ class ModernAvatarManager {
             this.createdTime = System.currentTimeMillis()
         }
         
-        fun setAppearance(AvatarAppearance appearance) {
+        fun setAppearance(appearance: AvatarAppearance) {
             this.appearance = appearance
         }
         
-        fun setCurrentAnimation(String animationId) {
+        fun setCurrentAnimation(animationId: String) {
             this.currentAnimation = animationId
         }
         
-        fun updateTexture(AvatarTextureInfo textureInfo) {
+        fun updateTexture(textureInfo: AvatarTextureInfo) {
             textures.put(textureInfo.getType(), textureInfo)
         }
         
@@ -345,38 +345,38 @@ class ModernAvatarManager {
         }
         
         // Getters
-        public UUID getAvatarId() { return avatarId; }
-        public MockSLObject getAvatarObject() { return avatarObject; }
-        public AvatarAppearance getAppearance() { return appearance; }
-        public String getCurrentAnimation() { return currentAnimation; }
-        public AvatarTextureInfo getTexture(String type) { return textures.get(type); }
-        public Long getCreatedTime() { return createdTime; }
+         public fun getAvatarId(): UUID { return avatarId; }
+         public fun getAvatarObject(): MockSLObject { return avatarObject; }
+         public fun getAppearance(): AvatarAppearance { return appearance; }
+         public fun getCurrentAnimation(): String { return currentAnimation; }
+         public fun getTexture(String type): AvatarTextureInfo { return textures.get(type); }
+         public fun getCreatedTime(): Long { return createdTime; }
     }
     
     @JvmStatic
     class AvatarTextureInfo {
         private val String type
         private val UUID textureId
-        private val Byte[] textureData
+        private val ByteArray textureData
         
-        public AvatarTextureInfo(String type, UUID textureId, Byte[] textureData) {
+        public AvatarTextureInfo(String type, UUID textureId, ByteArray textureData) {
             this.type = type
             this.textureId = textureId
             this.textureData = textureData
         }
         
-        public String getType() { return type; }
-        public UUID getTextureId() { return textureId; }
-        public Byte[] getTextureData() { return textureData; }
+         public fun getType(): String { return type; }
+         public fun getTextureId(): UUID { return textureId; }
+         public fun getTextureData(): ByteArray { return textureData; }
     }
     
     @JvmStatic
     class AvatarAppearance {
         private val Float bodyHeight
         private val Float bodyWidth
-        private val Float[] skinColor
-        private val Float[] hairColor
-        private val Float[] eyeColor
+        private val FloatArray skinColor
+        private val FloatArray hairColor
+        private val FloatArray eyeColor
         
         private AvatarAppearance(Builder builder) {
             this.bodyHeight = builder.bodyHeight
@@ -387,46 +387,46 @@ class ModernAvatarManager {
         }
         
         // Getters
-        public Float getBodyHeight() { return bodyHeight; }
-        public Float getBodyWidth() { return bodyWidth; }
-        public Float[] getSkinColor() { return skinColor.clone(); }
-        public Float[] getHairColor() { return hairColor.clone(); }
-        public Float[] getEyeColor() { return eyeColor.clone(); }
+         public fun getBodyHeight(): Float { return bodyHeight; }
+         public fun getBodyWidth(): Float { return bodyWidth; }
+         public fun getSkinColor(): FloatArray { return skinColor.clone(); }
+         public fun getHairColor(): FloatArray { return hairColor.clone(); }
+         public fun getEyeColor(): FloatArray { return eyeColor.clone(); }
         
         @JvmStatic
     class Builder {
             private Float bodyHeight = 1.8f
             private Float bodyWidth = 0.5f
-            private Float[] skinColor = {0.8f, 0.7f, 0.6f, 1.0f}
-            private Float[] hairColor = {0.4f, 0.3f, 0.2f, 1.0f}
-            private Float[] eyeColor = {0.2f, 0.4f, 0.8f, 1.0f}
+            private FloatArray skinColor = {0.8f, 0.7f, 0.6f, 1.0f}
+            private FloatArray hairColor = {0.4f, 0.3f, 0.2f, 1.0f}
+            private FloatArray eyeColor = {0.2f, 0.4f, 0.8f, 1.0f}
             
-            public Builder withBodyHeight(Float height) {
+             public fun withBodyHeight(height: Float): Builder {
                 this.bodyHeight = height
                 return this
             }
             
-            public Builder withBodyWidth(Float width) {
+             public fun withBodyWidth(width: Float): Builder {
                 this.bodyWidth = width
                 return this
             }
             
-            public Builder withSkinColor(Float r, Float g, Float b, Float a) {
-                this.skinColor = Float[]{r, g, b, a}
+             public fun withSkinColor(r: Float, g: Float, b: Float, a: Float): Builder {
+                this.skinColor = FloatArray{r, g, b, a}
                 return this
             }
             
-            public Builder withHairColor(Float r, Float g, Float b, Float a) {
-                this.hairColor = Float[]{r, g, b, a}
+             public fun withHairColor(r: Float, g: Float, b: Float, a: Float): Builder {
+                this.hairColor = FloatArray{r, g, b, a}
                 return this
             }
             
-            public Builder withEyeColor(Float r, Float g, Float b, Float a) {
-                this.eyeColor = Float[]{r, g, b, a}
+             public fun withEyeColor(r: Float, g: Float, b: Float, a: Float): Builder {
+                this.eyeColor = FloatArray{r, g, b, a}
                 return this
             }
             
-            public AvatarAppearance build() {
+             public fun build(): AvatarAppearance {
                 return AvatarAppearance(this)
             }
         }
@@ -441,7 +441,7 @@ class ModernAvatarManager {
             this.objectUUID = objectUUID
         }
         
-        public UUID getObjectUUID() {
+         public fun getObjectUUID(): UUID {
             return objectUUID
         }
     }

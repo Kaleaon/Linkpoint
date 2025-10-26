@@ -31,11 +31,11 @@ class SLModule {
     fun HandleGlobalOptionsChange() {
     }
 
-    fun SendMessage(SLMessage sLMessage) {
+    fun SendMessage(sLMessage: SLMessage) {
         this.agentCircuit.SendMessage(sLMessage)
     }
 
-    public SLCircuitInfo getCircuitInfo() {
+     public fun getCircuitInfo(): SLCircuitInfo {
         return this.circuitInfo
     }
 }

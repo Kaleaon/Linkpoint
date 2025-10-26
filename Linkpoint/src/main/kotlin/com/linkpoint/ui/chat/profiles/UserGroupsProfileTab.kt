@@ -44,7 +44,7 @@ private class GroupsAdapter : BaseAdapter() {
             this(context)
         }
 
-        public Int getCount() {
+         public fun getCount(): Int {
             if (this.avatarGroupList != null) {
                 return this.avatarGroupList.size()
             }
@@ -58,11 +58,11 @@ private class GroupsAdapter : BaseAdapter() {
             return (AvatarGroupList.AvatarGroupEntry) this.avatarGroupList.get(i)
         }
 
-        public Long getItemId(Int i) {
+         public fun getItemId(i: Int): Long {
             return (Long) i
         }
 
-        public View getView(Int i, View view, ViewGroup viewGroup) {
+         public fun getView(i: Int, view: View, viewGroup: ViewGroup): View {
             if (view == null) {
                 view = this.inflater.inflate(17367043, viewGroup, false)
             }
@@ -73,12 +73,12 @@ private class GroupsAdapter : BaseAdapter() {
             return view
         }
 
-        public Boolean hasStableIds() {
+         public fun hasStableIds(): Boolean {
             return false
         }
 
         /* access modifiers changed from: package-private */
-        fun setData(AvatarGroupList avatarGroupList2) {
+        fun setData(avatarGroupList2: AvatarGroupList) {
             ImmutableList.Builder builder = ImmutableList.Builder()
             builder.addAll((Iterable) avatarGroupList2.Groups.values())
             this.avatarGroupList = builder.build()
@@ -89,14 +89,14 @@ private class GroupsAdapter : BaseAdapter() {
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_UserGroupsProfileTab_2041  reason: not valid java name */
     public /* synthetic */ Unit m508lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserGroupsProfileTab_2041(AdapterView adapterView, View view, Int i, Long j) {
-        Object item = adapterView.getAdapter().getItem(i)
+        val item: Object = adapterView.getAdapter().getItem(i)
         if ((item instanceof AvatarGroupList.AvatarGroupEntry) && (this.chatterID instanceof ChatterID.ChatterIDUser)) {
             DetailsActivity.showEmbeddedDetails(getActivity(), GroupProfileFragment.class, GroupProfileFragment.makeSelection(ChatterID.getGroupChatterID(this.chatterID.agentUUID, ((AvatarGroupList.AvatarGroupEntry) item).GroupID)))
         }
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View inflate = layoutInflater.inflate(R.layout.user_profile_tab_groups, viewGroup, false)
+     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+        val inflate: View = layoutInflater.inflate(R.layout.user_profile_tab_groups, viewGroup, false)
         this.groupsAdapter = GroupsAdapter(layoutInflater.getContext(), (GroupsAdapter) null)
         ((ListView) inflate.findViewById(R.id.groups_list_view)).setAdapter(this.groupsAdapter)
         ((ListView) inflate.findViewById(R.id.groups_list_view)).setOnItemClickListener($Lambda$929W_sYALf9zQuqLbMSJpktRAzI(this))
@@ -118,7 +118,7 @@ private class GroupsAdapter : BaseAdapter() {
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(ChatterID chatterID) {
+    fun onShowUser(chatterID: ChatterID) {
         UserManager userManager
         this.loadableMonitor.unsubscribeAll()
         if ((chatterID instanceof ChatterID.ChatterIDUser) && (userManager = chatterID.getUserManager()) != null) {

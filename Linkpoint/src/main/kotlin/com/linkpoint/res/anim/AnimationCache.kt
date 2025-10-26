@@ -93,13 +93,13 @@ private class AssetLoadRequest : ResourceRequest()<UUID, AnimationData> : Runnab
                 java.lang.Object r0 = r6.getParams()     // Catch:{ IOException -> 0x007e, all -> 0x0079 }
                 java.util.UUID r0 = (java.util.UUID) r0     // Catch:{ IOException -> 0x007e, all -> 0x0079 }
                 r1.<init>(r0, r3)     // Catch:{ IOException -> 0x007e, all -> 0x0079 }
-                Int r0 = r1.getPriority()     // Catch:{ IOException -> 0x0082, all -> 0x0079 }
+                val r0: Int = r1.getPriority()     // Catch:{ IOException -> 0x0082, all -> 0x0079 }
                 r2 = 6
                 if (r0 < r2) goto L_0x004e
                 java.lang.String r0 = "Animation: priority %d loaded from asset %s"
                 r2 = 2
-                java.lang.Object[] r2 = java.lang.Object[r2]     // Catch:{ IOException -> 0x0082, all -> 0x0079 }
-                Int r4 = r1.getPriority()     // Catch:{ IOException -> 0x0082, all -> 0x0079 }
+                java.lang.Array<Any> r2 = java.lang.Object[r2]     // Catch:{ IOException -> 0x0082, all -> 0x0079 }
+                val r4: Int = r1.getPriority()     // Catch:{ IOException -> 0x0082, all -> 0x0079 }
                 java.lang.Integer r4 = java.lang.Integer.valueOf(r4)     // Catch:{ IOException -> 0x0082, all -> 0x0079 }
                 r5 = 0
                 r2[r5] = r4     // Catch:{ IOException -> 0x0082, all -> 0x0079 }
@@ -176,15 +176,15 @@ private class AssetLoadRequest : ResourceRequest()<UUID, AnimationData> : Runnab
         }
 
         fun cancelRequest() {
-            Subscription<AssetKey, AssetData> subscription = this.assetSubscription
+            val subscription: Subscription<AssetKey, AssetData> = this.assetSubscription
             if (subscription != null) {
                 subscription.unsubscribe()
             }
             super.cancelRequest()
         }
 
-        fun completeRequest(AnimationData animationData) {
-            Subscription<AssetKey, AssetData> subscription = this.assetSubscription
+        fun completeRequest(animationData: AnimationData) {
+            val subscription: Subscription<AssetKey, AssetData> = this.assetSubscription
             if (subscription != null) {
                 subscription.unsubscribe()
             }
@@ -192,7 +192,7 @@ private class AssetLoadRequest : ResourceRequest()<UUID, AnimationData> : Runnab
         }
 
         fun execute() {
-            AssetResponseCacher assetResponseCacher = (AssetResponseCacher) AnimationCache.this.assetResponseCacher.get()
+            val assetResponseCacher: AssetResponseCacher = (AssetResponseCacher) AnimationCache.this.assetResponseCacher.get()
             if (assetResponseCacher != null) {
                 this.assetSubscription = assetResponseCacher.getPool().subscribe(AssetKey.createAssetKey((UUID) null, (UUID) null, (UUID) getParams(), 20), LoaderExecutor.getInstance(), this, this)
             } else {
@@ -200,13 +200,13 @@ private class AssetLoadRequest : ResourceRequest()<UUID, AnimationData> : Runnab
             }
         }
 
-        fun onData(AssetData assetData) {
+        fun onData(assetData: AssetData) {
             AnimationData animationData
             if (assetData == null || assetData.getData() == null || assetData.getStatus() != 1) {
                 completeRequest((AnimationData) null)
                 return
             }
-            ByteArrayInputStream byteArrayInputStream = ByteArrayInputStream(assetData.getData())
+            val byteArrayInputStream: ByteArrayInputStream = ByteArrayInputStream(assetData.getData())
             try {
                 animationData = AnimationData((UUID) getParams(), byteArrayInputStream)
                 try {
@@ -225,7 +225,7 @@ private class AssetLoadRequest : ResourceRequest()<UUID, AnimationData> : Runnab
             completeRequest(animationData)
         }
 
-        fun onError(Throwable th) {
+        fun onError(th: Throwable) {
             completeRequest((AnimationData) null)
         }
     }
@@ -242,10 +242,10 @@ private class InstanceHolder {
     private AnimationCache() {
         this.assetResponseCacher = AtomicReference<>((Object) null)
         ImmutableSet.Builder builder = ImmutableSet.builder()
-        AssetManager assetManager = LinkpointApp.getAssetManager()
+        val assetManager: AssetManager = LinkpointApp.getAssetManager()
         if (assetManager != null) {
             try {
-                String[] list = assetManager.list("anims")
+                val list: Array<String> = assetManager.list("anims")
                 if (list != null) {
                     builder.addAll((Iterable) Arrays.asList(list))
                 }
@@ -261,17 +261,17 @@ private class InstanceHolder {
     }
 
     @JvmStatic
-    AnimationCache getInstance() {
+     fun getInstance(): AnimationCache {
         return InstanceHolder.Instance
     }
 
     /* access modifiers changed from: protected */
     public ResourceRequest<UUID, AnimationData> CreateNewRequest(UUID uuid, ResourceManager<UUID, AnimationData> resourceManager) {
-        String uuid2 = uuid.toString()
+        val uuid2: String = uuid.toString()
         return this.assetAnimations.contains(uuid2) ? AssetLoadRequest(uuid, resourceManager, uuid2) : DownloadRequest(uuid, resourceManager)
     }
 
-    fun setAssetResponseCacher(AssetResponseCacher assetResponseCacher2) {
+    fun setAssetResponseCacher(assetResponseCacher2: AssetResponseCacher) {
         this.assetResponseCacher.set(assetResponseCacher2)
     }
 }

@@ -34,7 +34,7 @@ class SearchGridAdapter : RecyclerView().Adapter<SearchViewHolder> {
     val OnSearchResultClickListener onSearchResultClickListener
 
     interface OnSearchResultClickListener {
-        Unit onSearchResultClicked(SearchGridResult searchGridResult)
+         fun onSearchResultClicked(searchGridResult: SearchGridResult)
     }
 
     class SearchViewHolder : RecyclerView().ViewHolder : ChatterNameRetriever.OnChatterNameUpdated, View.OnClickListener {
@@ -55,11 +55,11 @@ class SearchGridAdapter : RecyclerView().Adapter<SearchViewHolder> {
 
         /* access modifiers changed from: package-private */
         @SuppressLint({"DefaultLocale", "SetTextI18n"})
-        fun bindToData(SearchGridResult searchGridResult2) {
+        fun bindToData(searchGridResult2: SearchGridResult) {
             this.searchGridResult = searchGridResult2
             this.resultItemName.setText(searchGridResult2.getItemName())
             if (searchGridResult2.getItemType() == SearchGridQuery.SearchType.Groups.ordinal()) {
-                Integer memberCount = searchGridResult2.getMemberCount()
+                val memberCount: Integer = searchGridResult2.getMemberCount()
                 this.resultMemberCount.setVisibility(0)
                 this.resultMemberCount.setText(Integer.toString(memberCount != null ? memberCount.intValue() : 0))
             } else {
@@ -83,14 +83,14 @@ class SearchGridAdapter : RecyclerView().Adapter<SearchViewHolder> {
             }
         }
 
-        fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever2) {
+        fun onChatterNameUpdated(chatterNameRetriever2: ChatterNameRetriever) {
             String resolvedName
             if (chatterNameRetriever2 == this.chatterNameRetriever && (resolvedName = chatterNameRetriever2.getResolvedName()) != null) {
                 this.resultItemName.setText(resolvedName)
             }
         }
 
-        fun onClick(View view) {
+        fun onClick(view: View) {
             if (SearchGridAdapter.this.onSearchResultClickListener != null && this.searchGridResult != null) {
                 SearchGridAdapter.this.onSearchResultClickListener.onSearchResultClicked(this.searchGridResult)
             }
@@ -120,7 +120,7 @@ class SearchGridAdapter : RecyclerView().Adapter<SearchViewHolder> {
 
         @CallSuper
         fun unbind() {
-            SearchViewHolder searchViewHolder = this.target
+            val searchViewHolder: SearchViewHolder = this.target
             if (searchViewHolder == null) {
                 throw IllegalStateException("Bindings already cleared.")
             }
@@ -139,35 +139,35 @@ class SearchGridAdapter : RecyclerView().Adapter<SearchViewHolder> {
         setHasStableIds(true)
     }
 
-    public Int getItemCount() {
+     public fun getItemCount(): Int {
         if (this.data != null) {
             return this.data.size()
         }
         return 0
     }
 
-    public Long getItemId(Int i) {
+     public fun getItemId(i: Int): Long {
         if (this.data == null || i < 0 || i >= this.data.size()) {
             return -1
         }
         return this.data.get(i).getId().longValue()
     }
 
-    fun onBindViewHolder(SearchViewHolder searchViewHolder, Int i) {
+    fun onBindViewHolder(searchViewHolder: SearchViewHolder, i: Int) {
         if (this.data != null && i >= 0 && i < this.data.size()) {
             searchViewHolder.bindToData(this.data.get(i))
         }
     }
 
-    public SearchViewHolder onCreateViewHolder(ViewGroup viewGroup, Int i) {
+     public fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): SearchViewHolder {
         return SearchViewHolder(this.inflater.inflate(R.layout.search_result_item, viewGroup, false))
     }
 
-    fun onViewRecycled(SearchViewHolder searchViewHolder) {
+    fun onViewRecycled(searchViewHolder: SearchViewHolder) {
         searchViewHolder.onRecycled()
     }
 
-    fun setData(LazyList<SearchGridResult> lazyList) {
+    fun setData(lazyList: LazyList<SearchGridResult>) {
         this.data = lazyList
         notifyDataSetChanged()
     }

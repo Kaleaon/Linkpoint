@@ -45,11 +45,11 @@ class TransactionLogFragment : FragmentWithTitle(), LoadableMonitor.OnLoadableDa
     val Runnable scrollToBottomRunnable = Runnable() {
         fun run() {
             Int itemCount
-            Boolean unused = TransactionLogFragment.this.scrollToBottomRunnablePosted = false
+            val unused: Boolean = TransactionLogFragment.this.scrollToBottomRunnablePosted = false
             if (TransactionLogFragment.this.unbinder != null) {
-                RecyclerView recyclerView = TransactionLogFragment.this.transactionLogView
+                val recyclerView: RecyclerView = TransactionLogFragment.this.transactionLogView
                 if (recyclerView.hasPendingAdapterUpdates()) {
-                    Boolean unused2 = TransactionLogFragment.this.scrollToBottomRunnablePosted = true
+                    val unused2: Boolean = TransactionLogFragment.this.scrollToBottomRunnablePosted = true
                     TransactionLogFragment.this.mHandler.post(TransactionLogFragment.this.scrollToBottomRunnable)
                 } else if (TransactionLogFragment.this.adapter != null && (itemCount = TransactionLogFragment.this.adapter.getItemCount()) > 0) {
                     recyclerView.scrollToPosition(itemCount - 1)
@@ -64,7 +64,7 @@ class TransactionLogFragment : FragmentWithTitle(), LoadableMonitor.OnLoadableDa
     /* access modifiers changed from: private */
     public Unbinder unbinder
 
-    private Unit clearTransactionLog() {
+     private fun clearTransactionLog() {
         AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
         builder.setMessage(R.string.clear_transaction_log_message).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this) {
 
@@ -145,20 +145,20 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_x
     }
 
     @JvmStatic
-    Bundle makeSelection(UUID uuid) {
-        Bundle bundle = Bundle()
+     fun makeSelection(uuid: UUID): Bundle {
+        val bundle: Bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         return bundle
     }
 
-    private Unit performClearTransactionLog() {
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
+     private fun performClearTransactionLog() {
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
             userManager.getBalanceManager().clearMoneyTransactions()
         }
     }
 
-    private Unit scrollToBottom() {
+     private fun scrollToBottom() {
         if (!this.scrollToBottomRunnablePosted) {
             this.scrollToBottomRunnablePosted = true
             this.mHandler.post(this.scrollToBottomRunnable)
@@ -172,19 +172,19 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_x
         performClearTransactionLog()
     }
 
-    fun onCreate(Bundle bundle) {
+    fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.transaction_log_menu, menu)
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
-        View inflate = layoutInflater.inflate(R.layout.transaction_log, viewGroup, false)
+        val inflate: View = layoutInflater.inflate(R.layout.transaction_log, viewGroup, false)
         this.unbinder = ButterKnife.bind((Object) this, inflate)
         this.adapter = TransactionLogAdapter(getContext(), ActivityUtils.getActiveAgentID(getArguments()), this)
         this.transactionLogView.setAdapter(this.adapter)
@@ -201,7 +201,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_x
     }
 
     fun onLoadableDataChanged() {
-        LazyList data = this.moneyTransactions.getData()
+        val data: LazyList = this.moneyTransactions.getData()
         if (data != null) {
             this.loadableMonitor.setEmptyMessage(data.isEmpty(), getString(R.string.no_transactions_per_session))
             if (this.adapter != null) {
@@ -211,7 +211,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_x
         }
     }
 
-    public Boolean onOptionsItemSelected(MenuItem menuItem) {
+     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_clear_transaction_log:
                 clearTransactionLog()
@@ -223,7 +223,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_x
 
     fun onStart() {
         super.onStart()
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
             this.moneyTransactions.subscribe(userManager.getBalanceManager().moneyTransactions(), SubscriptionSingleKey.Value)
         }
@@ -234,8 +234,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_x
         super.onStop()
     }
 
-    fun onTransactionClicked(MoneyTransaction moneyTransaction) {
-        UUID activeAgentID = ActivityUtils.getActiveAgentID(getArguments())
+    fun onTransactionClicked(moneyTransaction: MoneyTransaction) {
+        val activeAgentID: UUID = ActivityUtils.getActiveAgentID(getArguments())
         if (activeAgentID != null) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserProfileFragment.class, UserProfileFragment.makeSelection(ChatterID.getUserChatterID(activeAgentID, moneyTransaction.getAgentUUID())))
         }

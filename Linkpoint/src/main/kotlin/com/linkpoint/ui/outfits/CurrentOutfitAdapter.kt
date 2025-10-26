@@ -25,7 +25,7 @@ class CurrentOutfitAdapter : BaseAdapter(), DismissableAdapter {
         this.inflater = LayoutInflater.from(context)
     }
 
-    public Boolean canDismiss(Int i) {
+     public fun canDismiss(i: Int): Boolean {
         SLAvatarAppearance.WornItem item = getItem(i)
         if (item == null || this.avatarAppearance == null) {
             return false
@@ -39,7 +39,7 @@ class CurrentOutfitAdapter : BaseAdapter(), DismissableAdapter {
         return false
     }
 
-    public Int getCount() {
+     public fun getCount(): Int {
         return this.wornItems.size()
     }
 
@@ -50,20 +50,20 @@ class CurrentOutfitAdapter : BaseAdapter(), DismissableAdapter {
         return (SLAvatarAppearance.WornItem) this.wornItems.get(i)
     }
 
-    public Long getItemId(Int i) {
+     public fun getItemId(i: Int): Long {
         return (Long) i
     }
 
-    public Int getItemViewType(Int i) {
+     public fun getItemViewType(i: Int): Int {
         return 0
     }
 
-    public View getView(Int i, View view, ViewGroup viewGroup) {
-        View view2 = null
+     public fun getView(i: Int, view: View, viewGroup: ViewGroup): View {
+        val view2: View = null
         if (view == null || view.getId() == R.id.outfitItemLayout) {
             view2 = view
         }
-        View inflate = view2 == null ? this.inflater.inflate(R.layout.outfit_item, viewGroup, false) : view2
+        val inflate: View = view2 == null ? this.inflater.inflate(R.layout.outfit_item, viewGroup, false) : view2
         SLAvatarAppearance.WornItem wornItem = (SLAvatarAppearance.WornItem) this.wornItems.get(i)
         ((TextView) inflate.findViewById(R.id.itemNameTextView)).setText(wornItem.getName())
         if (wornItem.getWornOn() != null) {
@@ -77,15 +77,15 @@ class CurrentOutfitAdapter : BaseAdapter(), DismissableAdapter {
         return inflate
     }
 
-    public Boolean hasStableIds() {
+     public fun hasStableIds(): Boolean {
         return false
     }
 
-    public Boolean isEmpty() {
+     public fun isEmpty(): Boolean {
         return this.wornItems.isEmpty()
     }
 
-    fun onDismiss(Int i) {
+    fun onDismiss(i: Int) {
         SLAvatarAppearance.WornItem item = getItem(i)
         if (item != null && this.avatarAppearance != null) {
             if (item.getWornOn() != null) {
@@ -96,11 +96,11 @@ class CurrentOutfitAdapter : BaseAdapter(), DismissableAdapter {
         }
     }
 
-    fun setAvatarAppearance(SLAvatarAppearance sLAvatarAppearance) {
+    fun setAvatarAppearance(sLAvatarAppearance: SLAvatarAppearance) {
         this.avatarAppearance = sLAvatarAppearance
     }
 
-    fun setData(ImmutableList<SLAvatarAppearance.WornItem> immutableList) {
+    fun setData(immutableList: ImmutableList<SLAvatarAppearance.WornItem>) {
         if (immutableList == null) {
             immutableList = ImmutableList.of()
         }

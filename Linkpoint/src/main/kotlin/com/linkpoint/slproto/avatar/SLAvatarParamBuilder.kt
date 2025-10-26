@@ -21,53 +21,53 @@ class SLAvatarParamBuilder {
     SLAvatarParamBuilder() {
     }
 
-    static Unit buildParams(SLAvatarParams.ParamSet[] paramSetArr, Map<Integer, SLAvatarParams.ParamSet> map) {
+    static Unit buildParams(SLAvatarParams.Array<ParamSet> paramSetArr, Map<Integer, SLAvatarParams.ParamSet> map) {
         try {
-            AssetManager assetManager = LinkpointApp.getAssetManager()
+            val assetManager: AssetManager = LinkpointApp.getAssetManager()
             if (assetManager != null) {
-                InputStream open = assetManager.open("character/avatar_params.xml", 3)
-                LLSDNode parseXML = LLSDNode.parseXML(open, "UTF-8")
-                Int count = parseXML.getCount()
+                val open: InputStream = assetManager.open("character/avatar_params.xml", 3)
+                val parseXML: LLSDNode = LLSDNode.parseXML(open, "UTF-8")
+                val count: Int = parseXML.getCount()
                 for (Int i = 0; i < count; i++) {
-                    LLSDNode byIndex = parseXML.byIndex(i)
-                    LLSDNode byKey = byIndex.byKey("params")
-                    Int count2 = byKey.getCount()
+                    val byIndex: LLSDNode = parseXML.byIndex(i)
+                    val byKey: LLSDNode = byIndex.byKey("params")
+                    val count2: Int = byKey.getCount()
                     ImmutableList.Builder builder = ImmutableList.builder()
                     for (Int i2 = 0; i2 < count2; i2++) {
-                        LLSDNode byIndex2 = byKey.byIndex(i2)
-                        SLAvatarParamColor sLAvatarParamColor = null
-                        SLAvatarParamAlpha sLAvatarParamAlpha = null
+                        val byIndex2: LLSDNode = byKey.byIndex(i2)
+                        val sLAvatarParamColor: SLAvatarParamColor = null
+                        val sLAvatarParamAlpha: SLAvatarParamAlpha = null
                         if (byIndex2.keyExists("paramColor")) {
-                            LLSDNode byKey2 = byIndex2.byKey("paramColor")
-                            LLSDNode byKey3 = byKey2.byKey("values")
-                            Int[] iArr = Int[byKey3.getCount()]
+                            val byKey2: LLSDNode = byIndex2.byKey("paramColor")
+                            val byKey3: LLSDNode = byKey2.byKey("values")
+                            val iArr: IntArray = Int[byKey3.getCount()]
                             for (Int i3 = 0; i3 < iArr.length; i3++) {
                                 iArr[i3] = byKey3.byIndex(i3).asInt()
                             }
                             sLAvatarParamColor = SLAvatarParamColor(SLAvatarParamColor.ColorOperation.valueOf(byKey2.byKey("opcode").asString()), iArr)
                         }
                         if (byIndex2.keyExists("paramAlpha")) {
-                            LLSDNode byKey4 = byIndex2.byKey("paramAlpha")
+                            val byKey4: LLSDNode = byIndex2.byKey("paramAlpha")
                             sLAvatarParamAlpha = SLAvatarParamAlpha((Float) byKey4.byKey("domain").asDouble(), byKey4.keyExists("tgaFile") ? byKey4.byKey("tgaFile").asString() : null, byKey4.byKey("skipIfZero").asBoolean(), byKey4.byKey("multiplyBlend").asBoolean())
                         }
-                        MeshIndex valueOf = byIndex2.keyExists("meshIndex") ? MeshIndex.valueOf(byIndex2.byKey("meshIndex").asString()) : null
-                        ImmutableList immutableList = null
+                        val valueOf: MeshIndex = byIndex2.keyExists("meshIndex") ? MeshIndex.valueOf(byIndex2.byKey("meshIndex").asString()) : null
+                        val immutableList: ImmutableList = null
                         if (byIndex2.keyExists("driven")) {
                             ImmutableList.Builder builder2 = ImmutableList.builder()
-                            LLSDNode byKey5 = byIndex2.byKey("driven")
+                            val byKey5: LLSDNode = byIndex2.byKey("driven")
                             for (Int i4 = 0; i4 < byKey5.getCount(); i4++) {
-                                LLSDNode byIndex3 = byKey5.byIndex(i4)
+                                val byIndex3: LLSDNode = byKey5.byIndex(i4)
                                 builder2.add((Object) SLAvatarParams.DrivenParam(byIndex3.byKey("driven_id").asInt(), (Float) byIndex3.byKey("min1").asDouble(), (Float) byIndex3.byKey("max1").asDouble(), (Float) byIndex3.byKey("min2").asDouble(), (Float) byIndex3.byKey("max2").asDouble()))
                             }
                             immutableList = builder2.build()
                         }
-                        ImmutableMap immutableMap = null
+                        val immutableMap: ImmutableMap = null
                         if (byIndex2.keyExists("skeleton")) {
-                            EnumMap enumMap = EnumMap(SLSkeletonBoneID.class)
-                            LLSDNode byKey6 = byIndex2.byKey("skeleton")
+                            val enumMap: EnumMap = EnumMap(SLSkeletonBoneID.class)
+                            val byKey6: LLSDNode = byIndex2.byKey("skeleton")
                             for (Int i5 = 0; i5 < byKey6.getCount(); i5++) {
-                                LLSDNode byIndex4 = byKey6.byIndex(i5)
-                                SLSkeletonBoneID sLSkeletonBoneID = SLSkeletonBoneID.bones.get(byIndex4.byKey("bone_id").asString())
+                                val byIndex4: LLSDNode = byKey6.byIndex(i5)
+                                val sLSkeletonBoneID: SLSkeletonBoneID = SLSkeletonBoneID.bones.get(byIndex4.byKey("bone_id").asString())
                                 if (sLSkeletonBoneID != null) {
                                     enumMap.put(sLSkeletonBoneID, SLAvatarParams.SkeletonParamDefinition(vectorFromNode(byIndex4, "scale"), vectorFromNode(byIndex4, "offset")))
                                 }
@@ -92,11 +92,11 @@ class SLAvatarParamBuilder {
     }
 
     @JvmStatic
-private ImmutableVector vectorFromNode(LLSDNode lLSDNode, String str) throws LLSDException {
+ private fun vectorFromNode(lLSDNode: LLSDNode, str: String) throws LLSDException {
         if (!lLSDNode.keyExists(str)) {
             return null
         }
-        LLSDNode byKey = lLSDNode.byKey(str)
+        val byKey: LLSDNode = lLSDNode.byKey(str)
         return ImmutableVector((Float) byKey.byKey("x").asDouble(), (Float) byKey.byKey("y").asDouble(), (Float) byKey.byKey("z").asDouble())
     }
 }

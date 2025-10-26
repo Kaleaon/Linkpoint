@@ -43,41 +43,41 @@ class GridList {
             this.GridUUID = uuid
         }
 
-        public String getGridName() {
+         public fun getGridName(): String {
             return this.GridName
         }
 
-        public UUID getGridUUID() {
+         public fun getGridUUID(): UUID {
             return this.GridUUID
         }
 
-        public String getLoginURL() {
+         public fun getLoginURL(): String {
             return this.LoginURL
         }
 
-        public Boolean isLindenGrid() {
+         public fun isLindenGrid(): Boolean {
             return this.GridUUID.equals(UUID.fromString("f14c5be7-0849-402c-946a-c80a52e9eccf"))
         }
 
-        public Boolean isPredefinedGrid() {
+         public fun isPredefinedGrid(): Boolean {
             return this.predefinedGrid
         }
 
-        fun saveToPreferences(SharedPreferences.Editor editor, String str) {
+        fun saveToPreferences(SharedPreferences.Editor editor, str: String) {
             editor.putString(str + "_grid_name", this.GridName)
             editor.putString(str + "_login_url", this.LoginURL)
             editor.putString(str + "_grid", this.GridUUID.toString())
         }
 
-        fun setGridName(String str) {
+        fun setGridName(str: String) {
             this.GridName = str
         }
 
-        fun setLoginURL(String str) {
+        fun setLoginURL(str: String) {
             this.LoginURL = str
         }
 
-        public String toString() {
+         public fun toString(): String {
             return this.GridName
         }
     }
@@ -85,28 +85,28 @@ class GridList {
     public GridList(Context context2) {
         this.context = context2
         for (String split : context2.getResources().getStringArray(R.array.grids)) {
-            String[] split2 = split.split(";")
+            val split2: Array<String> = split.split(";")
             this.predefGrids.add(GridInfo(split2[0], split2[1], true, UUID.fromString(split2[2])))
         }
         this.customGrids = ArrayList<>()
         loadGrids()
     }
 
-    fun addNewGrid(GridInfo gridInfo) {
+    fun addNewGrid(gridInfo: GridInfo) {
         this.customGrids.add(gridInfo)
         savePreferences()
     }
 
-    fun deleteGrid(GridInfo gridInfo) {
+    fun deleteGrid(gridInfo: GridInfo) {
         this.customGrids.remove(gridInfo)
         savePreferences()
     }
 
-    public GridInfo getDefaultGrid() {
+     public fun getDefaultGrid(): GridInfo {
         return this.predefGrids.get(0)
     }
 
-    public GridInfo getGridByName(String str) {
+     public fun getGridByName(str: String): GridInfo {
         for (GridInfo gridInfo : this.predefGrids) {
             if (gridInfo.getGridName().equals(str)) {
                 return gridInfo
@@ -120,7 +120,7 @@ class GridList {
         return null
     }
 
-    public GridInfo getGridByUUID(UUID uuid) {
+     public fun getGridByUUID(uuid: UUID): GridInfo {
         for (GridInfo gridInfo : this.predefGrids) {
             if (gridInfo.getGridUUID().equals(uuid)) {
                 return gridInfo
@@ -134,8 +134,8 @@ class GridList {
         return null
     }
 
-    public Int getGridIndex(UUID uuid) {
-        Int i = 0
+     public fun getGridIndex(uuid: UUID): Int {
+        val i: Int = 0
         for (GridInfo gridUUID : this.predefGrids) {
             if (gridUUID.getGridUUID().equals(uuid)) {
                 return i
@@ -162,7 +162,7 @@ class GridList {
     }
 
     public List<GridInfo> getGridList(List<GridInfo> list, Boolean z) {
-        List<GridInfo> gridList = getGridList(list)
+        val gridList: List<GridInfo> = getGridList(list)
         if (z) {
             gridList.add(GridInfo("Add another grid", (String) null, false, (UUID) null))
         }
@@ -171,8 +171,8 @@ class GridList {
 
     fun loadGrids() {
         this.customGrids.clear()
-        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.context.getApplicationContext())
-        Int i = defaultSharedPreferences.getInt("custom_grid_1_count", 0)
+        val defaultSharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.context.getApplicationContext())
+        val i: Int = defaultSharedPreferences.getInt("custom_grid_1_count", 0)
         for (Int i2 = 0; i2 < i; i2++) {
             this.customGrids.add(GridInfo(defaultSharedPreferences, "custom_grid_1_" + i2))
         }
@@ -181,9 +181,9 @@ class GridList {
     fun savePreferences() {
         SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(this.context.getApplicationContext()).edit()
         edit.putInt("custom_grid_1_count", this.customGrids.size())
-        Int i = 0
+        val i: Int = 0
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (i2 < this.customGrids.size()) {
                 this.customGrids.get(i2).saveToPreferences(edit, "custom_grid_1_" + i2)
                 i = i2 + 1

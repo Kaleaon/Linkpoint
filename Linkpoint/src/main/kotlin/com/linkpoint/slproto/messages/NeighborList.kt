@@ -7,12 +7,12 @@ import java.nio.ByteBuffer
 import java.util.UUID
 
 class NeighborList : SLMessage() {
-    public NeighborBlock[] NeighborBlock_Fields = NeighborBlock[4]
+    public Array<NeighborBlock> NeighborBlock_Fields = NeighborBlock[4]
 
     @JvmStatic
     class NeighborBlock {
         public Inet4Address IP
-        public Byte[] Name
+        public ByteArray Name
         public Int Port
         public Inet4Address PublicIP
         public Int PublicPort
@@ -27,19 +27,19 @@ class NeighborList : SLMessage() {
         }
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 1
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 1
         for (Int i2 = 0; i2 < 4; i2++) {
             i += this.NeighborBlock_Fields[i2].Name.length + 29 + 1
         }
         return i
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleNeighborList(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.put((Byte) 3)
         for (Int i = 0; i < 4; i++) {
             packIPAddress(byteBuffer, this.NeighborBlock_Fields[i].IP)
@@ -52,7 +52,7 @@ class NeighborList : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         for (Int i = 0; i < 4; i++) {
             this.NeighborBlock_Fields[i].IP = unpackIPAddress(byteBuffer)
             this.NeighborBlock_Fields[i].Port = unpackShort(byteBuffer) & 65535

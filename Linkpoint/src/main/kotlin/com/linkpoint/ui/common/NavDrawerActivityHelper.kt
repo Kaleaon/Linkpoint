@@ -31,7 +31,7 @@ private class DrawerToggle : ActionBarDrawerToggle() {
         if (this.drawerLayout != null) {
             this.drawerToggle = DrawerToggle(activity, this.drawerLayout, R.string.open_menu, R.string.close_menu)
             this.drawerLayout.setDrawerListener(this.drawerToggle)
-            ListView listView = (ListView) this.drawerLayout.findViewById(R.id.left_drawer)
+            val listView: ListView = (ListView) this.drawerLayout.findViewById(R.id.left_drawer)
             if (listView != null) {
                 this.drawerAdapter = NavDrawerAdapter(activity)
                 listView.setAdapter(this.drawerAdapter)
@@ -50,7 +50,7 @@ private class DrawerToggle : ActionBarDrawerToggle() {
         this.drawerAdapter = null
     }
 
-    public Boolean onBackPressed() {
+     public fun onBackPressed(): Boolean {
         if (this.drawerLayout == null || !this.drawerLayout.isDrawerOpen(this.drawerLayout.findViewById(R.id.left_drawer))) {
             return false
         }
@@ -58,13 +58,13 @@ private class DrawerToggle : ActionBarDrawerToggle() {
         return true
     }
 
-    fun onConfigurationChanged(Configuration configuration) {
+    fun onConfigurationChanged(configuration: Configuration) {
         if (this.drawerToggle != null) {
             this.drawerToggle.onConfigurationChanged(configuration)
         }
     }
 
-    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
+    fun onItemClick(adapterView: AdapterView<?>, view: View, i: Int, j: Long) {
         if (this.drawerLayout != null) {
             this.drawerLayout.closeDrawers()
         }
@@ -73,7 +73,7 @@ private class DrawerToggle : ActionBarDrawerToggle() {
         }
     }
 
-    public Boolean onOptionsItemSelected(MenuItem menuItem) {
+     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         return this.drawerToggle != null && this.drawerToggle.onOptionsItemSelected(menuItem)
     }
 

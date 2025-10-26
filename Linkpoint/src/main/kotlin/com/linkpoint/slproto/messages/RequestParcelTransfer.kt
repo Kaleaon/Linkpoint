@@ -35,15 +35,15 @@ class RequestParcelTransfer : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return 114
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleRequestParcelTransfer(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -36)
@@ -63,7 +63,7 @@ class RequestParcelTransfer : SLMessage() {
         packInt(byteBuffer, this.RegionData_Field.GridY)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.Data_Field.TransactionID = unpackUUID(byteBuffer)
         this.Data_Field.TransactionTime = unpackInt(byteBuffer)
         this.Data_Field.SourceID = unpackUUID(byteBuffer)

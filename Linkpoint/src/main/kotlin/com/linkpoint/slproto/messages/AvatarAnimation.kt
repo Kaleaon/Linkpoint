@@ -27,7 +27,7 @@ class AvatarAnimation : SLMessage() {
 
     @JvmStatic
     class PhysicalAvatarEventList {
-        public Byte[] TypeData
+        public ByteArray TypeData
     }
 
     @JvmStatic
@@ -40,11 +40,11 @@ class AvatarAnimation : SLMessage() {
         this.Sender_Field = Sender()
     }
 
-    public Int CalcPayloadSize() {
-        Int size = (this.AnimationList_Fields.size() * 20) + 18 + 1 + (this.AnimationSourceList_Fields.size() * 16) + 1
-        Iterator<T> it = this.PhysicalAvatarEventList_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val size: Int = (this.AnimationList_Fields.size() * 20) + 18 + 1 + (this.AnimationSourceList_Fields.size() * 16) + 1
+        val it: Iterator<T> = this.PhysicalAvatarEventList_Fields.iterator()
         while (true) {
-            Int i = size
+            val i: Int = size
             if (!it.hasNext()) {
                 return i
             }
@@ -52,11 +52,11 @@ class AvatarAnimation : SLMessage() {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAvatarAnimation(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.put(Ascii.DC4)
         packUUID(byteBuffer, this.Sender_Field.ID)
         byteBuffer.put((Byte) this.AnimationList_Fields.size())
@@ -74,24 +74,24 @@ class AvatarAnimation : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.Sender_Field.ID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            AnimationList animationList = AnimationList()
+            val animationList: AnimationList = AnimationList()
             animationList.AnimID = unpackUUID(byteBuffer)
             animationList.AnimSequenceID = unpackInt(byteBuffer)
             this.AnimationList_Fields.add(animationList)
         }
-        Byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b2: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i2 = 0; i2 < b2; i2++) {
-            AnimationSourceList animationSourceList = AnimationSourceList()
+            val animationSourceList: AnimationSourceList = AnimationSourceList()
             animationSourceList.ObjectID = unpackUUID(byteBuffer)
             this.AnimationSourceList_Fields.add(animationSourceList)
         }
-        Byte b3 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b3: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i3 = 0; i3 < b3; i3++) {
-            PhysicalAvatarEventList physicalAvatarEventList = PhysicalAvatarEventList()
+            val physicalAvatarEventList: PhysicalAvatarEventList = PhysicalAvatarEventList()
             physicalAvatarEventList.TypeData = unpackVariable(byteBuffer, 1)
             this.PhysicalAvatarEventList_Fields.add(physicalAvatarEventList)
         }

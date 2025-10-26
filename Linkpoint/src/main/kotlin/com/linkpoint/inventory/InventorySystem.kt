@@ -27,7 +27,7 @@ enum class InventoryType(val typeId: Int) {
     GESTURE(20),
     MESH(22),
     WIDGET(23),
-    PERSON(24);
+    PERSON(24)
     
     companion object {
         fun fromId(id: Int) = values().find { it.typeId == id }
@@ -59,7 +59,7 @@ enum class FolderType(val typeId: Int, val folderName: String) {
     MY_OUTFITS(48, "My Outfits"),
     MESH(49, "Meshes"),
     INBOX(50, "Received Items"),
-    OUTBOX(51, "Merchant Outbox");
+    OUTBOX(51, "Merchant Outbox")
     
     companion object {
         fun fromId(id: Int) = values().find { it.typeId == id }

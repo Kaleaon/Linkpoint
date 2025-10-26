@@ -11,7 +11,7 @@ import javax.annotation.Nullable
 class SLAvatarParams {
     const val NUM_PARAMS: Int = 218
     const val ImmutableMap<Integer, ParamSet> paramByIDs
-    const val ParamSet[] paramDefs = ParamSet[218]
+    const val Array<ParamSet> paramDefs = ParamSet[218]
 
     @JvmStatic
     class AvatarParam {
@@ -93,7 +93,7 @@ class SLAvatarParams {
     }
 
     static {
-        HashMap hashMap = HashMap()
+        val hashMap: HashMap = HashMap()
         SLAvatarParamBuilder.buildParams(paramDefs, hashMap)
         paramByIDs = ImmutableMap.copyOf(hashMap)
     }

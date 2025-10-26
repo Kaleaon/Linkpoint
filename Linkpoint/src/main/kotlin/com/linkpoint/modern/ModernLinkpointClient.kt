@@ -60,7 +60,7 @@ class ModernLinkpointClient {
         
         // Executor for async operations
         this.executor = Executors.newCachedThreadPool(r -> {
-            Thread t = Thread(r, "ModernLinkpoint-" + r.hashCode())
+            val t: Thread = Thread(r, "ModernLinkpoint-" + r.hashCode())
             t.setDaemon(true)
             return t
         })
@@ -107,9 +107,9 @@ class ModernLinkpointClient {
                 Log.i(TAG, "Step 3: Establishing connection...")
                 
                 // Create SL auth params with corrected URL
-                SLAuthParams authParams = createAuthParams(username, password, gridUrl)
+                val authParams: SLAuthParams = createAuthParams(username, password, gridUrl)
                 
-                Boolean connectionSuccess = connectionBridge.connectWithModernReliability(authParams).get()
+                val connectionSuccess: Boolean = connectionBridge.connectWithModernReliability(authParams).get()
                 
                 if (!connectionSuccess) {
                     throw LoginException("Connection to Second Life failed")
@@ -121,10 +121,10 @@ class ModernLinkpointClient {
                 // Step 4: Initialize protocol layer
                 Log.i(TAG, "Step 4: Initializing protocol layer...")
                 
-                String capsUrl = deriveCapsUrl(gridUrl)
-                String wsUrl = deriveWebSocketUrl(gridUrl)
+                val capsUrl: String = deriveCapsUrl(gridUrl)
+                val wsUrl: String = deriveWebSocketUrl(gridUrl)
                 
-                Boolean protocolReady = protocolManager.initializeAsync(capsUrl, wsUrl).get()
+                val protocolReady: Boolean = protocolManager.initializeAsync(capsUrl, wsUrl).get()
                 
                 if (!protocolReady) {
                     Log.w(TAG, "Protocol initialization had issues, some features may be limited")
@@ -134,7 +134,7 @@ class ModernLinkpointClient {
                 setState(ClientState.FEATURES_LOADING)
                 Log.i(TAG, "Step 5: Loading modern Second Life features...")
                 
-                Boolean featuresReady = featuresManager.initializeAsync().get()
+                val featuresReady: Boolean = featuresManager.initializeAsync().get()
                 
                 if (!featuresReady) {
                     Log.w(TAG, "Some features failed to initialize, client will work with limited functionality")
@@ -160,7 +160,7 @@ class ModernLinkpointClient {
      */
     public CompletableFuture<String> getStatusReportAsync() {
         return CompletableFuture.supplyAsync(() -> {
-            StringBuilder report = StringBuilder()
+            val report: StringBuilder = StringBuilder()
             report.append("=== MODERN LINKPOINT CLIENT STATUS ===\n")
             report.append("Generated: ").append(java.util.Date()).append("\n\n")
             
@@ -205,7 +205,7 @@ class ModernLinkpointClient {
         }, executor)
     }
     
-    private String getSystemStatus(String state) {
+     private fun getSystemStatus(state: String): String {
         switch (state.toLowerCase()) {
             case "connected": return "✅ " + state
             case "connecting": return "🔄 " + state
@@ -214,17 +214,17 @@ class ModernLinkpointClient {
         }
     }
     
-    private SLAuthParams createAuthParams(String username, String password, String gridUrl) {
+     private fun createAuthParams(username: String, password: String, gridUrl: String): SLAuthParams {
         // Create proper auth params with modern defaults
         java.util.UUID clientId = java.util.UUID.randomUUID()
-        String startLocation = "last"; // or "home"
-        String loginUrl = gridUrl != null ? gridUrl : "https://login.agni.lindenlab.com/cgi-bin/login.cgi"
-        String gridName = deriveGridName(loginUrl)
+        val startLocation: String = "last"; // or "home"
+        val loginUrl: String = gridUrl != null ? gridUrl : "https://login.agni.lindenlab.com/cgi-bin/login.cgi"
+        val gridName: String = deriveGridName(loginUrl)
         
         return SLAuthParams(username, password, clientId, startLocation, loginUrl, gridName)
     }
     
-    private String deriveGridName(String loginUrl) {
+     private fun deriveGridName(loginUrl: String): String {
         if (loginUrl.contains("agni")) {
             return "Second Life Main Grid"
         } else if (loginUrl.contains("aditi")) {
@@ -234,19 +234,19 @@ class ModernLinkpointClient {
         }
     }
     
-    private String deriveCapsUrl(String gridUrl) {
+     private fun deriveCapsUrl(gridUrl: String): String {
         // In real implementation, this would come from login response
         return "https://sim1.agni.lindenlab.com/caps/example"
     }
     
-    private String deriveWebSocketUrl(String gridUrl) {
+     private fun deriveWebSocketUrl(gridUrl: String): String {
         // In real implementation, this would be provided by the grid
         return "wss://events.agni.lindenlab.com/websocket"
     }
     
-    private Unit setState(ClientState newState) {
+     private fun setState(newState: ClientState) {
         if (this.currentState != newState) {
-            ClientState oldState = this.currentState
+            val oldState: ClientState = this.currentState
             this.currentState = newState
             Log.d(TAG, "Client state changed: " + oldState + " -> " + newState)
             // TODO: Emit state change event for UI updates
@@ -254,27 +254,27 @@ class ModernLinkpointClient {
     }
     
     // Getter methods for accessing subsystems
-    public ModernConnectionManager getConnectionManager() {
+     public fun getConnectionManager(): ModernConnectionManager {
         return connectionManager
     }
     
-    public ModernAuthManager getAuthManager() {
+     public fun getAuthManager(): ModernAuthManager {
         return authManager
     }
     
-    public HybridProtocolManager getProtocolManager() {
+     public fun getProtocolManager(): HybridProtocolManager {
         return protocolManager
     }
     
-    public ModernSecondLifeFeatures getFeaturesManager() {
+     public fun getFeaturesManager(): ModernSecondLifeFeatures {
         return featuresManager
     }
     
-    public ClientState getCurrentState() {
+     public fun getCurrentState(): ClientState {
         return currentState
     }
     
-    public String getLastError() {
+     public fun getLastError(): String {
         return lastError
     }
     

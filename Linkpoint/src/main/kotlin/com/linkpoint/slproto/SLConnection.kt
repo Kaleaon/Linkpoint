@@ -29,7 +29,7 @@ class SLConnection : Runnable {
         this.timer = null
     }
 
-    fun AddCircuit(SLCircuit sLCircuit) {
+    fun AddCircuit(sLCircuit: SLCircuit) {
         synchronized (this) {
             if (this.workingThread == null) {
                 this.workingThread = Thread(this, "SLConnection")
@@ -38,11 +38,11 @@ class SLConnection : Runnable {
         }
     }
 
-    public Selector getSelector() {
+     public fun getSelector(): Selector {
         return this.selector
     }
 
-    public Timer getTimer() {
+     public fun getTimer(): Timer {
         Timer timer
         synchronized (this) {
             if (this.timer == null) {
@@ -58,7 +58,7 @@ class SLConnection : Runnable {
         while (!this.selector.keys().isEmpty()) {
             SLCircuit sLCircuit
             SelectionKey selectionKey
-            Int i = 1000
+            val i: Int = 1000
             for (SelectionKey selectionKey2 : this.selector.keys()) {
                 try {
                     Int idleInterval
@@ -79,7 +79,7 @@ class SLConnection : Runnable {
                 } catch (ConcurrentModificationException e2) {
                 }
             }
-            Iterator it = this.selector.selectedKeys().iterator()
+            val it: Iterator = this.selector.selectedKeys().iterator()
             while (it.hasNext()) {
                 try {
                     selectionKey2 = (SelectionKey) it.next()

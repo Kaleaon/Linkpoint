@@ -55,9 +55,9 @@ private class AudioFocusChangeHandler : Handler() {
             this(streamingMediaService)
         }
 
-        fun handleMessage(Message message) {
+        fun handleMessage(message: Message) {
             if (message.what == 100) {
-                StreamingMediaService streamingMediaService = (StreamingMediaService) this.streamingMediaService.get()
+                val streamingMediaService: StreamingMediaService = (StreamingMediaService) this.streamingMediaService.get()
                 if (streamingMediaService != null) {
                     streamingMediaService.handleAudioFocusChange(message.arg1)
                 }
@@ -65,7 +65,7 @@ private class AudioFocusChangeHandler : Handler() {
         }
     }
 
-    private Unit handleAudioFocusChange(Int i) {
+     private fun handleAudioFocusChange(i: Int) {
         Debug.Log("StreamingMediaService: focusChange = " + i)
         if (i == -1) {
             isPlayingMedia.setData(SubscriptionSingleKey.Value, Boolean.FALSE)
@@ -80,21 +80,21 @@ private class AudioFocusChangeHandler : Handler() {
         }
     }
 
-    private Unit handleStartService(Intent intent) {
+     private fun handleStartService(intent: Intent) {
         if (intent != null) {
-            String action = intent.getAction()
+            val action: String = intent.getAction()
             if (action == null) {
                 action = ""
             }
             if (action.equals("com.linkpoint.ACTION_PLAY_MEDIA")) {
-                String stringExtra = intent.getStringExtra(MEDIA_URL_KEY)
+                val stringExtra: String = intent.getStringExtra(MEDIA_URL_KEY)
                 Debug.Log("StreamingMediaService: service is started, playing " + stringExtra)
                 this.lastURL = stringExtra
                 this.lastLocationName = intent.getStringExtra(LOCATION_NAME_KEY)
                 this.lastLocationDesc = intent.getStringExtra(LOCATION_DESC_KEY)
                 this.lastParcelData = intent.hasExtra(ParcelPropertiesFragment.PARCEL_DATA_KEY) ? (ParcelData) intent.getSerializableExtra(ParcelPropertiesFragment.PARCEL_DATA_KEY) : null
                 this.lastActiveAgentUUID = ActivityUtils.getActiveAgentID(intent)
-                Boolean z = this.audioManagerWrapper == null || this.audioManagerWrapper.requestAudioFocus()
+                val z: Boolean = this.audioManagerWrapper == null || this.audioManagerWrapper.requestAudioFocus()
                 if (z) {
                     showNotification()
                     safeRegisterReceiver()
@@ -116,7 +116,7 @@ private class AudioFocusChangeHandler : Handler() {
         }
     }
 
-    private Unit safeRegisterReceiver() {
+     private fun safeRegisterReceiver() {
         try {
             registerReceiver(this.noisyReceiver, IntentFilter("android.media.AUDIO_BECOMING_NOISY"))
         } catch (Exception e) {
@@ -124,7 +124,7 @@ private class AudioFocusChangeHandler : Handler() {
         }
     }
 
-    private Unit safeUnregisterReceiver() {
+     private fun safeUnregisterReceiver() {
         try {
             unregisterReceiver(this.noisyReceiver)
         } catch (Exception e) {
@@ -132,26 +132,26 @@ private class AudioFocusChangeHandler : Handler() {
         }
     }
 
-    private Unit showNotification() {
-        PendingIntent service = PendingIntent.getService(this, 0, Intent(this, StreamingMediaService.class), 1073741824)
-        Intent intent = Intent(this, StreamingMediaActivity.class)
+     private fun showNotification() {
+        val service: PendingIntent = PendingIntent.getService(this, 0, Intent(this, StreamingMediaService.class), 1073741824)
+        val intent: Intent = Intent(this, StreamingMediaActivity.class)
         ActivityUtils.setActiveAgentID(intent, this.lastActiveAgentUUID)
         intent.putExtra(ParcelPropertiesFragment.PARCEL_DATA_KEY, this.lastParcelData)
-        Builder builder = Builder(this)
+        val builder: Builder = Builder(this)
         builder.setSmallIcon(R.drawable.ic_playing_media).setContentTitle("Playing media").setContentText(this.lastLocationName).setDefaults(0).setOngoing(true).setContentIntent(PendingIntent.getActivity(this, 0, intent, SLMoveEvents.AGENT_CONTROL_AWAY)).addAction(R.drawable.icon_material_stop, "Stop", service).setDeleteIntent(service).setOnlyAlertOnce(true)
         startForeground(R.id.media_notify_id, builder.build())
     }
 
     @JvmStatic
-    Unit startStreamingMediaService(Context context, UserManager userManager) {
+     fun startStreamingMediaService(context: Context, userManager: UserManager) {
         if (userManager != null) {
-            CurrentLocationInfo currentLocationInfoSnapshot = userManager.getCurrentLocationInfoSnapshot()
+            val currentLocationInfoSnapshot: CurrentLocationInfo = userManager.getCurrentLocationInfoSnapshot()
             if (currentLocationInfoSnapshot != null) {
-                Object parcelData = currentLocationInfoSnapshot.parcelData()
+                val parcelData: Object = currentLocationInfoSnapshot.parcelData()
                 if (parcelData != null) {
-                    String mediaURL = parcelData.getMediaURL()
+                    val mediaURL: String = parcelData.getMediaURL()
                     if (!Strings.isNullOrEmpty(parcelData.getMediaURL())) {
-                        Intent intent = Intent(context, StreamingMediaService.class)
+                        val intent: Intent = Intent(context, StreamingMediaService.class)
                         intent.setAction("com.linkpoint.ACTION_PLAY_MEDIA")
                         ActivityUtils.setActiveAgentID(intent, userManager.getUserID())
                         intent.putExtra(ParcelPropertiesFragment.PARCEL_DATA_KEY, parcelData)
@@ -164,7 +164,7 @@ private class AudioFocusChangeHandler : Handler() {
         }
     }
 
-    public IBinder onBind(Intent intent) {
+     public fun onBind(intent: Intent): IBinder {
         return null
     }
 
@@ -185,7 +185,7 @@ private class AudioFocusChangeHandler : Handler() {
         isPlayingMedia.setData(SubscriptionSingleKey.Value, Boolean.FALSE)
     }
 
-    public Int onStartCommand(Intent intent, Int i, Int i2) {
+     public fun onStartCommand(intent: Intent, i: Int, i2: Int): Int {
         handleStartService(intent)
         return 2
     }

@@ -6,11 +6,11 @@ class StateAwareFragment : Fragment() {
     private Boolean fragmentStarted = false
     private Boolean fragmentVisible = false
 
-    public Boolean isFragmentStarted() {
+     public fun isFragmentStarted(): Boolean {
         return this.fragmentStarted
     }
 
-    public Boolean isFragmentVisible() {
+     public fun isFragmentVisible(): Boolean {
         return this.fragmentVisible
     }
 

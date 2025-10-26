@@ -102,7 +102,7 @@ class DriveSyncService : Service()
             override Unit run() {
                 if (this.this$0.synchronizer != null) {
                     Debug.Printf("FlushFiles: checking for files to flush", Object[0])
-                    Long l = System.currentTimeMillis()
+                    val l: Long = System.currentTimeMillis()
                     this.this$0.synchronizer.flushOpenFiles(false, l)
                     this.this$0.periodicSyncHandler.removeCallbacks(this.this$0.periodicSync)
                     DriveSyncService.access$1002(this.this$0, false)
@@ -131,9 +131,9 @@ class DriveSyncService : Service()
                     return
                 }
                 Debug.Printf("LinkpointCloud: no resolution at all (%d), error message %s", connectionResult.getErrorCode(), connectionResult.getErrorMessage())
-                String string3 = string2 = connectionResult.getErrorMessage()
+                val string3: String = string2 = connectionResult.getErrorMessage()
                 if (Strings.isNullOrEmpty(string2)) {
-                    string3 = this.this$0.getString(2131099702, Object[]{connectionResult.getErrorCode()})
+                    string3 = this.this$0.getString(2131099702, Array<Any>{connectionResult.getErrorCode()})
                 }
                 this.this$0.notifyError(string3)
             }
@@ -167,7 +167,7 @@ class DriveSyncService : Service()
         return googleApiState
     }
 
-    private String logFileNameForChatter(String string2) {
+     private fun logFileNameForChatter(string2: String): String {
         return string2.replaceAll("[/.:*\\\\]", "_").trim() + ".txt"
     }
 
@@ -177,12 +177,12 @@ class DriveSyncService : Service()
      * Enabled unnecessary exception pruning
      * Enabled aggressive exception aggregation
      */
-    private Unit notifyError(String string2) {
+     private fun notifyError(string2: String) {
         try {
-            PackageInfo packageInfo = this.getPackageManager().getPackageInfo(this.getPackageName(), 0)
+            val packageInfo: PackageInfo = this.getPackageManager().getPackageInfo(this.getPackageName(), 0)
             for (Messenger messenger : this.syncRequestSources) {
-                MessageType messageType = MessageType.LogSyncStatus
-                LogSyncStatus logSyncStatus = LogSyncStatus(packageInfo.versionCode, LogSyncStatus.Status.GoogleDriveError, string2)
+                val messageType: MessageType = MessageType.LogSyncStatus
+                val logSyncStatus: LogSyncStatus = LogSyncStatus(packageInfo.versionCode, LogSyncStatus.Status.GoogleDriveError, string2)
                 CloudSyncMessenger.sendMessage(messenger, messageType, logSyncStatus, null)
             }
         }
@@ -200,7 +200,7 @@ class DriveSyncService : Service()
      * Enabled force condition propagation
      * Lifted jumps to return sites
      */
-    private Unit onFlushMessages(LogFlushMessages logFlushMessages) {
+     private fun onFlushMessages(logFlushMessages: LogFlushMessages) {
         if (logFlushMessages.agentName != null && logFlushMessages.chatterName != null) {
             if (this.synchronizer != null) {
                 this.synchronizer.flushFile(this.agentSyncConnections, logFlushMessages.agentUUID, logFlushMessages.agentName, this.logFileNameForChatter(logFlushMessages.chatterName))
@@ -210,9 +210,9 @@ class DriveSyncService : Service()
         this.synchronizer.flushOpenFiles(true, System.currentTimeMillis())
     }
 
-    private Unit onLogMessageBatch(LogMessageBatch logMessageBatch, Messenger object) {
+     private fun onLogMessageBatch(logMessageBatch: LogMessageBatch, object: Messenger) {
         if (this.synchronizer != null && logMessageBatch != null && logMessageBatch.agentName != null) {
-            MessageSyncBatch messageSyncBatch = MessageSyncBatch(logMessageBatch, MessageSyncBatch.OnMessageBatchSyncedListener(this, (Messenger)object, logMessageBatch){
+            val messageSyncBatch: MessageSyncBatch = MessageSyncBatch(logMessageBatch, MessageSyncBatch.OnMessageBatchSyncedListener(this, (Messenger)object, logMessageBatch){
                 final DriveSyncService this$0
                 final LogMessageBatch val$message
                 final Messenger val$replyTo
@@ -237,13 +237,13 @@ class DriveSyncService : Service()
      * Enabled force condition propagation
      * Lifted jumps to return sites
      */
-    private Unit onLogSyncStart(LogSyncStart bundleable, Messenger messenger) {
+     private fun onLogSyncStart(bundleable: LogSyncStart, messenger: Messenger) {
         try {
             Unit var2_4
             if (bundleable.appVersionCode < 58) {
-                PackageInfo packageInfo = this.getPackageManager().getPackageInfo(this.getPackageName(), 0)
-                MessageType messageType = MessageType.LogSyncStatus
-                LogSyncStatus logSyncStatus = LogSyncStatus(packageInfo.versionCode, LogSyncStatus.Status.AppVersionRejected, null)
+                val packageInfo: PackageInfo = this.getPackageManager().getPackageInfo(this.getPackageName(), 0)
+                val messageType: MessageType = MessageType.LogSyncStatus
+                val logSyncStatus: LogSyncStatus = LogSyncStatus(packageInfo.versionCode, LogSyncStatus.Status.AppVersionRejected, null)
                 CloudSyncMessenger.sendMessage((Messenger)var2_4, messageType, logSyncStatus, null)
                 return
             }
@@ -264,13 +264,13 @@ class DriveSyncService : Service()
      * Enabled unnecessary exception pruning
      * Enabled aggressive exception aggregation
      */
-    private Unit processSyncReady() {
+     private fun processSyncReady() {
         try {
-            PackageInfo packageInfo = this.getPackageManager().getPackageInfo(this.getPackageName(), 0)
+            val packageInfo: PackageInfo = this.getPackageManager().getPackageInfo(this.getPackageName(), 0)
             if (this.synchronizer == null) return
             for (Messenger messenger : this.syncRequestSources) {
-                MessageType messageType = MessageType.LogSyncStatus
-                LogSyncStatus logSyncStatus = LogSyncStatus(packageInfo.versionCode, LogSyncStatus.Status.Ready, null)
+                val messageType: MessageType = MessageType.LogSyncStatus
+                val logSyncStatus: LogSyncStatus = LogSyncStatus(packageInfo.versionCode, LogSyncStatus.Status.Ready, null)
                 CloudSyncMessenger.sendMessage(messenger, messageType, logSyncStatus, null)
             }
             this.syncRequestSources.clear()
@@ -284,7 +284,7 @@ class DriveSyncService : Service()
     /*
      * Enabled aggressive block sorting
      */
-    private Unit updateGoogleApiConnection() {
+     private fun updateGoogleApiConnection() {
         switch (5.$SwitchMap$com$lumiyaviewer$lumiya$cloud$DriveSyncService$GoogleApiState[this.googleApiState.ordinal()]) {
             case 1: {
                 if (this.syncRequestSources.isEmpty()) return
@@ -317,7 +317,7 @@ class DriveSyncService : Service()
         this.stopSelf()
     }
 
-    public IBinder onBind(Intent intent) {
+     public fun onBind(intent: Intent): IBinder {
         Debug.Printf("DriveSyncService is bound", Object[0])
         this.isServiceBound = true
         return this.mMessenger.getBinder()
@@ -339,7 +339,7 @@ class DriveSyncService : Service()
         }
     }
 
-    public Int onStartCommand(Intent object, Int n, Int n2) {
+     public fun onStartCommand(object: Intent, n: Int, n2: Int): Int {
         Debug.Printf("Service started.", Object[0])
         if (object.hasExtra("deleteResolvableError")) {
             object = UUID.fromString(object.getStringExtra("deleteResolvableError"))
@@ -349,7 +349,7 @@ class DriveSyncService : Service()
         return 2
     }
 
-    public Boolean onUnbind(Intent intent) {
+     public fun onUnbind(intent: Intent): Boolean {
         Debug.Printf("DriveSyncService is unbound", Object[0])
         this.isServiceBound = false
         if (this.synchronizer != null) {
@@ -378,7 +378,7 @@ private enum GoogleApiState {
         /*
          * Exception decompiling
          */
-        fun handleMessage(Message var1_1) {
+        fun handleMessage(var1_1: Message) {
             /*
              * This method has failed to decompile.  When submitting a bug report, please provide this stack trace, and (if you hold appropriate legal rights) the relevant class file.
              * 

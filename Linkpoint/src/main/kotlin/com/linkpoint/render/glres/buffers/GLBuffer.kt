@@ -10,9 +10,9 @@ import com.linkpoint.rawbuffers.DirectByteBuffer
 class GLBuffer : GLResource() {
     /* access modifiers changed from: private */
     @JvmStatic
-    ThreadLocal<Int[]> idBuffer = ThreadLocal<Int[]>() {
+    val idBuffer: ThreadLocal<IntArray> = ThreadLocal<IntArray>() {
         /* access modifiers changed from: protected */
-        public Int[] initialValue() {
+         public fun initialValue(): IntArray {
             return Int[1]
         }
     }
@@ -28,7 +28,7 @@ private class GLResourceBufferReference : GLResourceManager().GLResourceReferenc
         }
 
         fun GLFree() {
-            Int[] iArr = (Int[]) GLBuffer.idBuffer.get()
+            val iArr: IntArray = (IntArray) GLBuffer.idBuffer.get()
             iArr[0] = this.handle
             Debug.Printf("GLBuffer: deleted buffer %d", Integer.valueOf(iArr[0]))
             GLES11.glDeleteBuffers(1, iArr, 0)
@@ -48,8 +48,8 @@ private class GLResourceBufferReference : GLResourceManager().GLResourceReferenc
     }
 
     /* access modifiers changed from: protected */
-    public Int Allocate(GLResourceManager gLResourceManager) {
-        Int[] iArr = idBuffer.get()
+    public fun Allocate(gLResourceManager: GLResourceManager): Int {
+        val iArr: IntArray = idBuffer.get()
         GLES11.glGenBuffers(1, iArr, 0)
         Debug.Printf("GLBuffer: allocated buffer %d", Integer.valueOf(iArr[0]))
         return iArr[0]

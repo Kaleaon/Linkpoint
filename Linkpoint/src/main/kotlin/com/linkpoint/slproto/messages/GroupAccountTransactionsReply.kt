@@ -21,10 +21,10 @@ class GroupAccountTransactionsReply : SLMessage() {
     @JvmStatic
     class HistoryData {
         public Int Amount
-        public Byte[] Item
-        public Byte[] Time
+        public ByteArray Item
+        public ByteArray Time
         public Int Type
-        public Byte[] User
+        public ByteArray User
     }
 
     @JvmStatic
@@ -32,7 +32,7 @@ class GroupAccountTransactionsReply : SLMessage() {
         public Int CurrentInterval
         public Int IntervalDays
         public UUID RequestID
-        public Byte[] StartDate
+        public ByteArray StartDate
     }
 
     public GroupAccountTransactionsReply() {
@@ -41,24 +41,24 @@ class GroupAccountTransactionsReply : SLMessage() {
         this.MoneyData_Field = MoneyData()
     }
 
-    public Int CalcPayloadSize() {
-        Int length = this.MoneyData_Field.StartDate.length + 25 + 36 + 1
-        Iterator<T> it = this.HistoryData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val length: Int = this.MoneyData_Field.StartDate.length + 25 + 36 + 1
+        val it: Iterator<T> = this.HistoryData_Fields.iterator()
         while (true) {
-            Int i = length
+            val i: Int = length
             if (!it.hasNext()) {
                 return i
             }
-            HistoryData historyData = (HistoryData) it.next()
+            val historyData: HistoryData = (HistoryData) it.next()
             length = historyData.Item.length + historyData.Time.length + 1 + 1 + historyData.User.length + 4 + 1 + 4 + i
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleGroupAccountTransactionsReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 102)
@@ -78,16 +78,16 @@ class GroupAccountTransactionsReply : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
         this.MoneyData_Field.RequestID = unpackUUID(byteBuffer)
         this.MoneyData_Field.IntervalDays = unpackInt(byteBuffer)
         this.MoneyData_Field.CurrentInterval = unpackInt(byteBuffer)
         this.MoneyData_Field.StartDate = unpackVariable(byteBuffer, 1)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            HistoryData historyData = HistoryData()
+            val historyData: HistoryData = HistoryData()
             historyData.Time = unpackVariable(byteBuffer, 1)
             historyData.User = unpackVariable(byteBuffer, 1)
             historyData.Type = unpackInt(byteBuffer)

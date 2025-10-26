@@ -68,7 +68,7 @@ class SLAvatarControl : SLModule() {
     private val Object agentUpdateScheduleLock = Object()
     private volatile AgentUpdateTimerTask agentUpdateTask
     private val RequestHandler<SubscriptionSingleKey> avatarStateRequestHandler = AsyncRequestHandler(this.agentCircuit, SimpleRequestHandler<SubscriptionSingleKey>() {
-        fun onRequest(SubscriptionSingleKey subscriptionSingleKey) {
+        fun onRequest(subscriptionSingleKey: SubscriptionSingleKey) {
             if (SLAvatarControl.this.myAvatarStateResultHandler != null) {
                 SLAvatarControl.this.myAvatarStateResultHandler.onResultData(subscriptionSingleKey, SLAvatarControl.this.getMyAvatarState())
             }
@@ -105,7 +105,7 @@ class SLAvatarControl : SLModule() {
         }
 
         /* access modifiers changed from: package-private */
-        public Int getScheduledInterval() {
+         public fun getScheduledInterval(): Int {
             return this.scheduledInterval
         }
 
@@ -125,8 +125,8 @@ class SLAvatarControl : SLModule() {
         }
     }
 
-    private Unit SendAgentAnimation() {
-        AgentAnimation agentAnimation = AgentAnimation()
+    private fun SendAgentAnimation() {
+        val agentAnimation: AgentAnimation = AgentAnimation()
         agentAnimation.AgentData_Field.AgentID = this.circuitInfo.agentID
         agentAnimation.AgentData_Field.SessionID = this.circuitInfo.sessionID
         AgentAnimation.AnimationList animationList = AgentAnimation.AnimationList()
@@ -135,7 +135,7 @@ class SLAvatarControl : SLModule() {
         agentAnimation.AnimationList_Fields.add(animationList)
         agentAnimation.isReliable = true
         SendMessage(agentAnimation)
-        AgentAnimation agentAnimation2 = AgentAnimation()
+        val agentAnimation2: AgentAnimation = AgentAnimation()
         agentAnimation2.AgentData_Field.AgentID = this.circuitInfo.agentID
         agentAnimation2.AgentData_Field.SessionID = this.circuitInfo.sessionID
         AgentAnimation.AnimationList animationList2 = AgentAnimation.AnimationList()
@@ -147,20 +147,20 @@ class SLAvatarControl : SLModule() {
     }
 
     /* access modifiers changed from: private */
-    fun SendAgentUpdate(SLDrawDistance sLDrawDistance) {
+    fun SendAgentUpdate(sLDrawDistance: SLDrawDistance) {
         if (this.agentPosition.getPosition(this.agentUpdateCameraCenter)) {
             this.ActiveMotionMask = this.AgentMotionMask
-            AgentUpdate agentUpdate = AgentUpdate()
+            val agentUpdate: AgentUpdate = AgentUpdate()
             agentUpdate.AgentData_Field.AgentID = this.circuitInfo.agentID
             agentUpdate.AgentData_Field.SessionID = this.circuitInfo.sessionID
             if (!this.isCamming) {
                 this.agentHeading = this.cameraParams.getHeading()
             }
-            Double d = (((Double) this.agentHeading) * 3.141592653589793d) / 180.0d
+            val d: Double = (((Double) this.agentHeading) * 3.141592653589793d) / 180.0d
             Debug.Printf("AgentUpdate: agent heading %.2f", Float.valueOf(this.agentHeading))
-            Float cos = (Float) Math.cos(d)
-            Float sin = (Float) Math.sin(d)
-            LLQuaternion mayaQ = LLQuaternion.mayaQ(0.0f, 0.0f, this.agentHeading, LLQuaternion.Order.YZX)
+            val cos: Float = (Float) Math.cos(d)
+            val sin: Float = (Float) Math.sin(d)
+            val mayaQ: LLQuaternion = LLQuaternion.mayaQ(0.0f, 0.0f, this.agentHeading, LLQuaternion.Order.YZX)
             agentUpdate.AgentData_Field.BodyRotation = mayaQ
             agentUpdate.AgentData_Field.HeadRotation = mayaQ
             agentUpdate.AgentData_Field.CameraCenter = this.agentUpdateCameraCenter
@@ -227,13 +227,13 @@ class SLAvatarControl : SLModule() {
     }
 
     /* access modifiers changed from: private */
-    public MyAvatarState getMyAvatarState() {
+     public fun getMyAvatarState(): MyAvatarState {
         SLAttachmentPoint sLAttachmentPoint
-        Boolean z4 = false
-        Boolean isFlying2 = getIsFlying()
-        SLObjectAvatarInfo agentAvatar = this.parcelInfo.getAgentAvatar()
+        val z4: Boolean = false
+        val isFlying2: Boolean = getIsFlying()
+        val agentAvatar: SLObjectAvatarInfo = this.parcelInfo.getAgentAvatar()
         if (agentAvatar != null) {
-            SLObjectInfo parentObject = agentAvatar.getParentObject()
+            val parentObject: SLObjectInfo = agentAvatar.getParentObject()
             if (parentObject != null) {
                 i2 = parentObject.localID
                 z2 = true
@@ -242,13 +242,13 @@ class SLAvatarControl : SLModule() {
                 z2 = false
             }
             try {
-                Iterator it = agentAvatar.treeNode.iterator()
+                val it: Iterator = agentAvatar.treeNode.iterator()
                 while (true) {
                     if (!it.hasNext()) {
                         z3 = false
                         break
                     }
-                    SLObjectInfo sLObjectInfo = (SLObjectInfo) it.next()
+                    val sLObjectInfo: SLObjectInfo = (SLObjectInfo) it.next()
                     if (!Strings.nullToEmpty(sLObjectInfo.getName()).startsWith("#") && (i3 = sLObjectInfo.attachmentID) >= 0 && i3 < 56 && (sLAttachmentPoint = SLAttachmentPoint.attachmentPoints[i3]) != null && sLAttachmentPoint.isHUD) {
                         z3 = true
                         break
@@ -269,10 +269,10 @@ class SLAvatarControl : SLModule() {
         return MyAvatarState.create(z, i, isFlying2, z4)
     }
 
-    private Unit processStopAvatarAnimations() {
+     private fun processStopAvatarAnimations() {
         SLObjectAvatarInfo agentAvatar
-        Set<UUID> set = null
-        AgentAnimation agentAnimation = AgentAnimation()
+        val set: Set<UUID> = null
+        val agentAnimation: AgentAnimation = AgentAnimation()
         agentAnimation.AgentData_Field.AgentID = this.circuitInfo.agentID
         agentAnimation.AgentData_Field.SessionID = this.circuitInfo.sessionID
         AgentAnimation.AnimationList animationList = AgentAnimation.AnimationList()
@@ -281,7 +281,7 @@ class SLAvatarControl : SLModule() {
         agentAnimation.AnimationList_Fields.add(animationList)
         agentAnimation.isReliable = true
         SendMessage(agentAnimation)
-        AgentAnimation agentAnimation2 = AgentAnimation()
+        val agentAnimation2: AgentAnimation = AgentAnimation()
         agentAnimation2.AgentData_Field.AgentID = this.circuitInfo.agentID
         agentAnimation2.AgentData_Field.SessionID = this.circuitInfo.sessionID
         if (!(this.gridConn == null || this.gridConn.parcelInfo == null || (agentAvatar = this.gridConn.parcelInfo.getAgentAvatar()) == null)) {
@@ -301,7 +301,7 @@ class SLAvatarControl : SLModule() {
             agentAnimation2.isReliable = true
             SendMessage(agentAnimation2)
         }
-        AgentAnimation agentAnimation3 = AgentAnimation()
+        val agentAnimation3: AgentAnimation = AgentAnimation()
         agentAnimation3.AgentData_Field.AgentID = this.circuitInfo.agentID
         agentAnimation3.AgentData_Field.SessionID = this.circuitInfo.sessionID
         AgentAnimation.AnimationList animationList3 = AgentAnimation.AnimationList()
@@ -312,13 +312,13 @@ class SLAvatarControl : SLModule() {
         SendMessage(agentAnimation3)
     }
 
-    private Unit rescheduleAgentUpdate() {
-        Boolean z = true
-        Int i2 = 0
+     private fun rescheduleAgentUpdate() {
+        val z: Boolean = true
+        val i2: Int = 0
         if (!this.enableAgentUpdates) {
             i = 0
         } else if (this.agentPosition.isValid()) {
-            SLDrawDistance sLDrawDistance = this.agentCircuit.getModules().drawDistance
+            val sLDrawDistance: SLDrawDistance = this.agentCircuit.getModules().drawDistance
             if (this.AgentMotionMask == this.ActiveMotionMask && !sLDrawDistance.needUpdateDrawDistance() && !sLDrawDistance.is3DViewEnabled() && !this.AgentWantStand && this.needFastUpdates <= 0) {
                 z = false
             }
@@ -335,13 +335,13 @@ class SLAvatarControl : SLModule() {
         scheduleAgentUpdate(i, i2)
     }
 
-    private Unit scheduleAgentUpdate(Int i, Int i2) {
+     private fun scheduleAgentUpdate(i: Int, i2: Int) {
         SLGridConnection gridConnection
         Timer timer
-        Int i3 = 0
+        val i3: Int = 0
         if (this.agentCircuit != null && (gridConnection = this.agentCircuit.getGridConnection()) != null && (timer = gridConnection.getTimer()) != null) {
             synchronized (this.agentUpdateScheduleLock) {
-                AgentUpdateTimerTask agentUpdateTimerTask = this.agentUpdateTask
+                val agentUpdateTimerTask: AgentUpdateTimerTask = this.agentUpdateTask
                 if (agentUpdateTimerTask != null) {
                     i3 = agentUpdateTimerTask.getScheduledInterval()
                 }
@@ -359,11 +359,11 @@ class SLAvatarControl : SLModule() {
         }
     }
 
-    fun ApplyAvatarAnimation(SLObjectAvatarInfo sLObjectAvatarInfo, AvatarAnimation avatarAnimation) {
-        HashSet hashSet = HashSet()
+    fun ApplyAvatarAnimation(sLObjectAvatarInfo: SLObjectAvatarInfo, avatarAnimation: AvatarAnimation) {
+        val hashSet: HashSet = HashSet()
         synchronized (this) {
             for (AvatarAnimation.AnimationList animationList : avatarAnimation.AnimationList_Fields) {
-                UUID uuid = animationList.AnimID
+                val uuid: UUID = animationList.AnimID
                 Debug.Log("Own animation: " + uuid.toString() + ", sequence ID = " + animationList.AnimSequenceID)
                 if (uuid.equals(animUUID_PreJump) || uuid.equals(animUUID_Land) || uuid.equals(animUUID_Softland) || uuid.equals(animUUID_Standup)) {
                     this.needClearAnims = true
@@ -371,7 +371,7 @@ class SLAvatarControl : SLModule() {
                 hashSet.add(uuid)
             }
         }
-        ImmutableSet copyOf = ImmutableSet.copyOf(hashSet)
+        val copyOf: ImmutableSet = ImmutableSet.copyOf(hashSet)
         if (this.userManager != null) {
             this.userManager.getObjectsManager().runningAnimations().setData(SubscriptionSingleKey.Value, copyOf)
         }
@@ -389,10 +389,10 @@ class SLAvatarControl : SLModule() {
         rescheduleAgentUpdate()
     }
 
-    fun ForceSitOnObject(UUID uuid) {
+    fun ForceSitOnObject(uuid: UUID) {
         if (uuid != null) {
             Debug.Log("AvatarSit: Attempting to sit on object " + uuid.toString())
-            AgentRequestSit agentRequestSit = AgentRequestSit()
+            val agentRequestSit: AgentRequestSit = AgentRequestSit()
             agentRequestSit.AgentData_Field.AgentID = this.circuitInfo.agentID
             agentRequestSit.AgentData_Field.SessionID = this.circuitInfo.sessionID
             agentRequestSit.TargetObject_Field.TargetID = uuid
@@ -408,14 +408,14 @@ class SLAvatarControl : SLModule() {
     }
 
     @SLMessageHandler
-    fun HandleAvatarSitResponse(AvatarSitResponse avatarSitResponse) {
-        UUID uuid = avatarSitResponse.SitObject_Field.ID
+    fun HandleAvatarSitResponse(avatarSitResponse: AvatarSitResponse) {
+        val uuid: UUID = avatarSitResponse.SitObject_Field.ID
         if (uuid.getLeastSignificantBits() == 0 && uuid.getMostSignificantBits() == 0) {
             Debug.Log("AvatarSit: Got null sit response")
             return
         }
         Debug.Log("AvatarSit: Got sit response for object " + uuid.toString())
-        AgentSit agentSit = AgentSit()
+        val agentSit: AgentSit = AgentSit()
         agentSit.AgentData_Field.AgentID = this.circuitInfo.agentID
         agentSit.AgentData_Field.SessionID = this.circuitInfo.sessionID
         agentSit.isReliable = true
@@ -430,16 +430,16 @@ class SLAvatarControl : SLModule() {
     }
 
     @SLMessageHandler
-    fun HandleScriptQuestion(ScriptQuestion scriptQuestion) {
-        Debug.Log("ScriptQuestion: ItemID = " + scriptQuestion.Data_Field.ItemID + ", questions = " + String.format("%08x", Object[]{Integer.valueOf(scriptQuestion.Data_Field.Questions)}))
-        SLChatPermissionRequestEvent sLChatPermissionRequestEvent = SLChatPermissionRequestEvent(scriptQuestion, this.agentCircuit.getAgentUUID())
+    fun HandleScriptQuestion(scriptQuestion: ScriptQuestion) {
+        Debug.Log("ScriptQuestion: ItemID = " + scriptQuestion.Data_Field.ItemID + ", questions = " + String.format("%08x", Array<Any>{Integer.valueOf(scriptQuestion.Data_Field.Questions)}))
+        val sLChatPermissionRequestEvent: SLChatPermissionRequestEvent = SLChatPermissionRequestEvent(scriptQuestion, this.agentCircuit.getAgentUUID())
         if (sLChatPermissionRequestEvent.getQuestions() != 0) {
             this.agentCircuit.HandleChatEvent(this.agentCircuit.getLocalChatterID(), sLChatPermissionRequestEvent, true)
         }
     }
 
-    fun ScriptAnswerYes(UUID uuid, UUID uuid2, Int i) {
-        ScriptAnswerYes scriptAnswerYes = ScriptAnswerYes()
+    fun ScriptAnswerYes(uuid: UUID, uuid2: UUID, i: Int) {
+        val scriptAnswerYes: ScriptAnswerYes = ScriptAnswerYes()
         scriptAnswerYes.AgentData_Field.AgentID = this.circuitInfo.agentID
         scriptAnswerYes.AgentData_Field.SessionID = this.circuitInfo.sessionID
         scriptAnswerYes.Data_Field.TaskID = uuid2
@@ -449,14 +449,14 @@ class SLAvatarControl : SLModule() {
         SendMessage(scriptAnswerYes)
     }
 
-    fun SitOnObject(UUID uuid) {
+    fun SitOnObject(uuid: UUID) {
         if (this.agentCircuit.getModules().rlvController.canSit()) {
             try {
                 if (this.parcelInfo != null) {
-                    SLObjectInfo sLObjectInfo = this.parcelInfo.allObjectsNearby.get(uuid)
-                    ImmutableVector immutablePosition = this.agentPosition.getImmutablePosition()
+                    val sLObjectInfo: SLObjectInfo = this.parcelInfo.allObjectsNearby.get(uuid)
+                    val immutablePosition: ImmutableVector = this.agentPosition.getImmutablePosition()
                     if (!(sLObjectInfo == null || immutablePosition == null)) {
-                        Float distanceTo = immutablePosition.getDistanceTo(sLObjectInfo.getAbsolutePosition())
+                        val distanceTo: Float = immutablePosition.getDistanceTo(sLObjectInfo.getAbsolutePosition())
                         Debug.Printf("RLV: Distance to object for sitting: %f", Float.valueOf(distanceTo))
                         if (distanceTo > 1.5f && !this.gridConn.getModules().rlvController.canTeleportBySitting()) {
                             return
@@ -476,8 +476,8 @@ class SLAvatarControl : SLModule() {
         }
     }
 
-    fun StartAgentMotion(Int i) {
-        Boolean z = false
+    fun StartAgentMotion(i: Int) {
+        val z: Boolean = false
         synchronized (this) {
             if (!((i & 8) == 0 && (i & 16) == 0)) {
                 if (!this.isFlying) {
@@ -509,12 +509,12 @@ class SLAvatarControl : SLModule() {
         rescheduleAgentUpdate()
     }
 
-    public Boolean getAgentAndCameraPosition(LLVector3 lLVector3, CameraParams cameraParams2) {
+     public fun getAgentAndCameraPosition(lLVector3: LLVector3, cameraParams2: CameraParams): Boolean {
         Float f
         this.agentPosition.getInterpolatedPosition(lLVector3)
         synchronized (this.turningLock) {
             if (this.isTurning) {
-                Float currentTimeMillis = this.turningSpeed * (((Float) (System.currentTimeMillis() - this.turningStartTime)) / 1000.0f)
+                val currentTimeMillis: Float = this.turningSpeed * (((Float) (System.currentTimeMillis() - this.turningStartTime)) / 1000.0f)
                 f = currentTimeMillis - this.lastTurnedAngle
                 this.lastTurnedAngle = currentTimeMillis
             } else {
@@ -535,22 +535,22 @@ class SLAvatarControl : SLModule() {
         return this.cameraParams.isFlinging()
     }
 
-    public Float getAgentHeading() {
+     public fun getAgentHeading(): Float {
         return this.agentHeading
     }
 
-    public AgentPosition getAgentPosition() {
+     public fun getAgentPosition(): AgentPosition {
         return this.agentPosition
     }
 
-    public Boolean getIsManualCamming() {
+     public fun getIsManualCamming(): Boolean {
         synchronized (this.cammingLock) {
             z = this.isManualCamming
         }
         return z
     }
 
-    fun getVRCamera(HeadTransformCompat headTransformCompat, LLVector3 lLVector3, CameraParams cameraParams2) {
+    fun getVRCamera(headTransformCompat: HeadTransformCompat, lLVector3: LLVector3, cameraParams2: CameraParams) {
         this.agentPosition.getInterpolatedPosition(lLVector3)
         synchronized (this.cammingLock) {
             if (!this.isManualCamming) {
@@ -560,8 +560,8 @@ class SLAvatarControl : SLModule() {
         cameraParams2.getVRCamera(this.cameraParams, headTransformCompat)
     }
 
-    fun playAnimation(UUID uuid, Boolean z) {
-        AgentAnimation agentAnimation = AgentAnimation()
+    fun playAnimation(uuid: UUID, z: Boolean) {
+        val agentAnimation: AgentAnimation = AgentAnimation()
         agentAnimation.AgentData_Field.AgentID = this.circuitInfo.agentID
         agentAnimation.AgentData_Field.SessionID = this.circuitInfo.sessionID
         AgentAnimation.AnimationList animationList = AgentAnimation.AnimationList()
@@ -572,13 +572,13 @@ class SLAvatarControl : SLModule() {
         SendMessage(agentAnimation)
     }
 
-    fun processCameraFling(Float f, Float f2) {
+    fun processCameraFling(f: Float, f2: Float) {
         synchronized (this.cammingLock) {
             this.cameraParams.fling(f, f2)
         }
     }
 
-    fun processCameraRotate(Float f, Float f2) {
+    fun processCameraRotate(f: Float, f2: Float) {
         synchronized (this.cammingLock) {
             this.cameraParams.rotate(f, f2)
             if (!this.isCamming) {
@@ -587,34 +587,34 @@ class SLAvatarControl : SLModule() {
         }
     }
 
-    fun processCameraZoom(Float f, Float f2, Float f3, Float f4, Float f5) {
+    fun processCameraZoom(f: Float, f2: Float, f3: Float, f4: Float, f5: Float) {
         synchronized (this.cammingLock) {
             this.isCamming = true
             this.cameraParams.zoom(f, f2, f3, f4, f5)
         }
     }
 
-    fun setAgentHeading(Float f) {
+    fun setAgentHeading(f: Float) {
         synchronized (this.cammingLock) {
             this.cameraParams.setHeading(f)
             this.agentHeading = this.cameraParams.getHeading()
         }
     }
 
-    fun setAgentPosition(LLVector3 lLVector3, LLVector3 lLVector32) {
+    fun setAgentPosition(lLVector3: LLVector3, lLVector32: LLVector3) {
         synchronized (this.cammingLock) {
             this.agentPosition.set(lLVector3, lLVector32)
             if (!this.cameraParams.isValid() || (!this.isCamming && (!this.isManualCamming))) {
                 this.cameraParams.setPosition(lLVector3)
             }
         }
-        SLModules modules = this.agentCircuit.getModules()
+        val modules: SLModules = this.agentCircuit.getModules()
         if (modules != null) {
             modules.voice.updateSpatialVoicePosition()
         }
     }
 
-    fun setCameraManualControl(Boolean z) {
+    fun setCameraManualControl(z: Boolean) {
         synchronized (this.cammingLock) {
             this.isManualCamming = z
             if (!z) {
@@ -626,7 +626,7 @@ class SLAvatarControl : SLModule() {
         }
     }
 
-    fun setEnableAgentUpdates(Boolean z) {
+    fun setEnableAgentUpdates(z: Boolean) {
         this.enableAgentUpdates = z
         if (z) {
             scheduleAgentUpdate(0, 1000)
@@ -635,7 +635,7 @@ class SLAvatarControl : SLModule() {
         }
     }
 
-    fun startCameraManualControl(Float f, Float f2, Float f3, Float f4) {
+    fun startCameraManualControl(f: Float, f2: Float, f3: Float, f4: Float) {
         synchronized (this.cammingLock) {
             this.isCamming = true
             this.isManualCamming = true
@@ -643,7 +643,7 @@ class SLAvatarControl : SLModule() {
         }
     }
 
-    fun startTurning(Float f) {
+    fun startTurning(f: Float) {
         synchronized (this.turningLock) {
             if (!this.isTurning || this.turningSpeed != f) {
                 this.isTurning = true
@@ -672,7 +672,7 @@ class SLAvatarControl : SLModule() {
     }
 
     fun stopFlying() {
-        Boolean z = true
+        val z: Boolean = true
         synchronized (this) {
             if (this.isFlying) {
                 this.isFlying = false

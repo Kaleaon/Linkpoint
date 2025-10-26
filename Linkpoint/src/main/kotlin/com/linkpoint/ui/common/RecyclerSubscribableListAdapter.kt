@@ -35,7 +35,7 @@ abstract class RecyclerSubscribableListAdapter<T> : RecyclerView.Adapter {
             throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.ui.common.RecyclerSubscribableListAdapter.LocalItemList.<init>(com.lumiyaviewer.lumiya.ui.common.RecyclerSubscribableListAdapter, com.lumiyaviewer.lumiya.slproto.users.manager.SubscribableList, com.google.common.base.Optional):Unit")
         }
 
-        fun add(Int i, T t) {
+        fun add(i: Int, T t) {
             this.backingList.add(i, t)
             RecyclerSubscribableListAdapter.this.notifyItemInserted(i)
         }
@@ -61,7 +61,7 @@ abstract class RecyclerSubscribableListAdapter<T> : RecyclerView.Adapter {
             return t2
         }
 
-        public Int size() {
+         public fun size(): Int {
             return this.backingList.size()
         }
     }
@@ -76,11 +76,11 @@ abstract class RecyclerSubscribableListAdapter<T> : RecyclerView.Adapter {
     /* access modifiers changed from: protected */
     public abstract RecyclerView.ViewHolder createObjectViewHolder(ViewGroup viewGroup, Int i)
 
-    public Int getItemCount() {
+     public fun getItemCount(): Int {
         return this.localItemList.size()
     }
 
-    public Int getItemViewType(Int i) {
+     public fun getItemViewType(i: Int): Int {
         return getObjectViewType(this.localItemList.get(i))
     }
 
@@ -94,7 +94,7 @@ abstract class RecyclerSubscribableListAdapter<T> : RecyclerView.Adapter {
     /* access modifiers changed from: protected */
     public abstract Int getObjectViewType(T t)
 
-    fun onBindViewHolder(RecyclerView.ViewHolder viewHolder, Int i) {
+    fun onBindViewHolder(RecyclerView.ViewHolder viewHolder, i: Int) {
         bindObjectViewHolder(viewHolder, this.localItemList.get(i))
     }
 

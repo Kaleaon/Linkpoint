@@ -31,20 +31,20 @@ class SearchGridResultDao : AbstractDao()<SearchGridResult, Long> {
     }
 
     @JvmStatic
-    Unit createTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
-        String str = z ? "IF NOT EXISTS " : ""
+     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
+        val str: String = z ? "IF NOT EXISTS " : ""
         sQLiteDatabase.execSQL("CREATE TABLE " + str + "'SearchGridResults' (" + "'_id' INTEGER PRIMARY KEY ," + "'SEARCH_UUID' TEXT NOT NULL ," + "'ITEM_TYPE' INTEGER NOT NULL ," + "'ITEM_UUID' TEXT NOT NULL ," + "'ITEM_NAME' TEXT NOT NULL ," + "'LEVENSTEIN_DISTANCE' INTEGER NOT NULL ," + "'MEMBER_COUNT' INTEGER);")
         sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_SearchGridResults_SEARCH_UUID ON SearchGridResults" + " (SEARCH_UUID);")
     }
 
     @JvmStatic
-    Unit dropTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'SearchGridResults'")
     }
 
-    protected Unit bindValues(SQLiteStatement sQLiteStatement, SearchGridResult searchGridResult) {
+     protected fun bindValues(sQLiteStatement: SQLiteStatement, searchGridResult: SearchGridResult) {
         sQLiteStatement.clearBindings()
-        Long id = searchGridResult.getId()
+        val id: Long = searchGridResult.getId()
         if (id != null) {
             sQLiteStatement.bindLong(1, id.longValue())
         }
@@ -53,36 +53,36 @@ class SearchGridResultDao : AbstractDao()<SearchGridResult, Long> {
         sQLiteStatement.bindString(4, searchGridResult.getItemUUID().toString())
         sQLiteStatement.bindString(5, searchGridResult.getItemName())
         sQLiteStatement.bindLong(6, (Long) searchGridResult.getLevensteinDistance())
-        Integer memberCount = searchGridResult.getMemberCount()
+        val memberCount: Integer = searchGridResult.getMemberCount()
         if (memberCount != null) {
             sQLiteStatement.bindLong(7, (Long) memberCount.intValue())
         }
     }
 
-    public Long getKey(SearchGridResult searchGridResult) {
+     public fun getKey(searchGridResult: SearchGridResult): Long {
         return searchGridResult != null ? searchGridResult.getId() : null
     }
 
-    protected Boolean isEntityUpdateable() {
+     protected fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    public SearchGridResult readEntity(Cursor cursor, Int i) {
-        Integer num = null
-        Long valueOf = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
-        UUID fromString = UUID.fromString(cursor.getString(i + 1))
-        Int i2 = cursor.getInt(i + 2)
-        UUID fromString2 = UUID.fromString(cursor.getString(i + 3))
-        String string = cursor.getString(i + 4)
-        Int i3 = cursor.getInt(i + 5)
+     public fun readEntity(cursor: Cursor, i: Int): SearchGridResult {
+        val num: Integer = null
+        val valueOf: Long = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
+        val fromString: UUID = UUID.fromString(cursor.getString(i + 1))
+        val i2: Int = cursor.getInt(i + 2)
+        val fromString2: UUID = UUID.fromString(cursor.getString(i + 3))
+        val string: String = cursor.getString(i + 4)
+        val i3: Int = cursor.getInt(i + 5)
         if (!cursor.isNull(i + 6)) {
             num = Integer.valueOf(cursor.getInt(i + 6))
         }
         return SearchGridResult(valueOf, fromString, i2, fromString2, string, i3, num)
     }
 
-    fun readEntity(Cursor cursor, SearchGridResult searchGridResult, Int i) {
-        Integer num = null
+    fun readEntity(cursor: Cursor, searchGridResult: SearchGridResult, i: Int) {
+        val num: Integer = null
         searchGridResult.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
         searchGridResult.setSearchUUID(UUID.fromString(cursor.getString(i + 1)))
         searchGridResult.setItemType(cursor.getInt(i + 2))
@@ -95,11 +95,11 @@ class SearchGridResultDao : AbstractDao()<SearchGridResult, Long> {
         searchGridResult.setMemberCount(num)
     }
 
-    public Long readKey(Cursor cursor, Int i) {
+     public fun readKey(cursor: Cursor, i: Int): Long {
         return cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
     }
 
-    protected Long updateKeyAfterInsert(SearchGridResult searchGridResult, Long j) {
+     protected fun updateKeyAfterInsert(searchGridResult: SearchGridResult, j: Long): Long {
         searchGridResult.setId(Long.valueOf(j))
         return Long.valueOf(j)
     }

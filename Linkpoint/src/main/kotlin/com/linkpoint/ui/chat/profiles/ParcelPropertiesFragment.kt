@@ -190,13 +190,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
 
         /* access modifiers changed from: protected */
-        public Boolean doInBackground(Void... voidArr) {
-            SLAgentCircuit sLAgentCircuit = (SLAgentCircuit) ParcelPropertiesFragment.this.agentCircuit.getData()
+         public fun doInBackground(vararg voidArr: Void): Boolean {
+            val sLAgentCircuit: SLAgentCircuit = (SLAgentCircuit) ParcelPropertiesFragment.this.agentCircuit.getData()
             return Boolean.valueOf(sLAgentCircuit != null ? sLAgentCircuit.getModules().userProfiles.SetHomeLocation() : false)
         }
 
         /* access modifiers changed from: protected */
-        fun onPostExecute(Boolean bool) {
+        fun onPostExecute(bool: Boolean) {
             this.progressDialog.dismiss()
             if (bool == null || (!bool.booleanValue())) {
                 AlertDialog.Builder(ParcelPropertiesFragment.this.getContext()).setMessage((Int) R.string.set_home_failed).setCancelable(true).create().show()
@@ -212,8 +212,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     @JvmStatic
-    Bundle makeSelection(UUID uuid, ParcelData parcelData2) {
-        Bundle bundle = Bundle()
+     fun makeSelection(uuid: UUID, parcelData2: ParcelData): Bundle {
+        val bundle: Bundle = Bundle()
         bundle.putString("activeAgentUUID", uuid.toString())
         bundle.putSerializable(PARCEL_DATA_KEY, parcelData2)
         return bundle
@@ -221,23 +221,23 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onAgentCircuit */
-    fun m503com_lumiyaviewer_lumiya_ui_chat_profiles_ParcelPropertiesFragmentmthref1(SLAgentCircuit sLAgentCircuit) {
+    fun m503com_lumiyaviewer_lumiya_ui_chat_profiles_ParcelPropertiesFragmentmthref1(sLAgentCircuit: SLAgentCircuit) {
         updateSimOptions()
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onIsPlayingMedia */
-    fun m502com_lumiyaviewer_lumiya_ui_chat_profiles_ParcelPropertiesFragmentmthref0(Boolean bool) {
+    fun m502com_lumiyaviewer_lumiya_ui_chat_profiles_ParcelPropertiesFragmentmthref0(bool: Boolean) {
         updatePlayingStatus()
     }
 
-    private Unit updatePlayingStatus() {
-        Int i = 0
+     private fun updatePlayingStatus() {
+        val i: Int = 0
         if (this.unbinder != null) {
-            Boolean data = this.isPlayingMedia.getData()
-            Boolean booleanValue = data != null ? data.booleanValue() : false
+            val data: Boolean = this.isPlayingMedia.getData()
+            val booleanValue: Boolean = data != null ? data.booleanValue() : false
             this.mediaPlayButton.setVisibility(booleanValue ? 8 : 0)
-            Button button = this.mediaStopButton
+            val button: Button = this.mediaStopButton
             if (!booleanValue) {
                 i = 8
             }
@@ -245,12 +245,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    private Unit updateSimOptions() {
-        Int i = 0
+     private fun updateSimOptions() {
+        val i: Int = 0
         if (this.unbinder != null) {
-            SLAgentCircuit data = this.agentCircuit.getData()
-            Boolean isEstateManager = data != null ? data.getIsEstateManager() : false
-            CardView cardView = this.simRestartCardView
+            val data: SLAgentCircuit = this.agentCircuit.getData()
+            val isEstateManager: Boolean = data != null ? data.getIsEstateManager() : false
+            val cardView: CardView = this.simRestartCardView
             if (!isEstateManager) {
                 i = 8
             }
@@ -273,8 +273,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         SetHomeLocationAsyncTask(this, (SetHomeLocationAsyncTask) null).execute(Void[0])
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View inflate = layoutInflater.inflate(R.layout.parcel_properties_fragment, viewGroup, false)
+     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+        val inflate: View = layoutInflater.inflate(R.layout.parcel_properties_fragment, viewGroup, false)
         this.unbinder = ButterKnife.bind((Object) this, inflate)
         this.ownerNameDisplayer.bindViews(this.parcelOwnerName, this.parcelOwnerPic)
         this.parcelImageView.setVerticalFit(true)
@@ -306,7 +306,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     @OnClick({2131755614})
     fun onParcelMediaPlay() {
         if (this.parcelData != null && (!Strings.isNullOrEmpty(this.parcelData.getMediaURL())) && this.userManager != null) {
-            Intent intent = Intent(getContext(), StreamingMediaService.class)
+            val intent: Intent = Intent(getContext(), StreamingMediaService.class)
             intent.setAction("com.linkpoint.ACTION_PLAY_MEDIA")
             ActivityUtils.setActiveAgentID(intent, this.userManager.getUserID())
             intent.putExtra(PARCEL_DATA_KEY, this.parcelData)
@@ -318,7 +318,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     @OnClick({2131755615})
     fun onParcelMediaStop() {
-        Intent intent = Intent(getContext(), StreamingMediaService.class)
+        val intent: Intent = Intent(getContext(), StreamingMediaService.class)
         intent.setAction("com.linkpoint.ACTION_STOP_MEDIA")
         getContext().startService(intent)
     }
@@ -425,7 +425,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     @OnClick({2131755617})
     fun onSimRestartButton() {
-        SLAgentCircuit data = this.agentCircuit.getData()
+        val data: SLAgentCircuit = this.agentCircuit.getData()
         if (data != null) {
             AlertDialog.Builder(getContext()).setMessage((Int) R.string.restart_region_confirm_title).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, data) {
 

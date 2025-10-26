@@ -26,7 +26,7 @@ class AvatarTextureUpdate : SLMessage() {
     @JvmStatic
     class WearableData {
         public UUID CacheID
-        public Byte[] HostName
+        public ByteArray HostName
         public Int TextureIndex
     }
 
@@ -35,11 +35,11 @@ class AvatarTextureUpdate : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 22
-        Iterator<T> it = this.WearableData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 22
+        val it: Iterator<T> = this.WearableData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2 + 1 + (this.TextureData_Fields.size() * 16)
             }
@@ -47,11 +47,11 @@ class AvatarTextureUpdate : SLMessage() {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAvatarTextureUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 4)
@@ -69,20 +69,20 @@ class AvatarTextureUpdate : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.TexturesChanged = unpackBoolean(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            WearableData wearableData = WearableData()
+            val wearableData: WearableData = WearableData()
             wearableData.CacheID = unpackUUID(byteBuffer)
             wearableData.TextureIndex = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             wearableData.HostName = unpackVariable(byteBuffer, 1)
             this.WearableData_Fields.add(wearableData)
         }
-        Byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b2: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i2 = 0; i2 < b2; i2++) {
-            TextureData textureData = TextureData()
+            val textureData: TextureData = TextureData()
             textureData.TextureID = unpackUUID(byteBuffer)
             this.TextureData_Fields.add(textureData)
         }

@@ -14,22 +14,22 @@ class GLTextureCache : GLResourceCache()<DrawableTextureParams, OpenJPEG, GLLoad
     }
 
     /* access modifiers changed from: protected */
-    fun CancelRawResource(ResourceConsumer resourceConsumer) {
+    fun CancelRawResource(resourceConsumer: ResourceConsumer) {
         TextureCache.getInstance().CancelRequest(resourceConsumer)
     }
 
     /* access modifiers changed from: protected */
-    public Int GetResourceSize(OpenJPEG openJPEG) {
+    public fun GetResourceSize(openJPEG: OpenJPEG): Int {
         return openJPEG.getLoadedSize()
     }
 
     /* access modifiers changed from: protected */
-    public GLLoadedTexture LoadResource(DrawableTextureParams drawableTextureParams, OpenJPEG openJPEG, RenderContext renderContext) {
+    public fun LoadResource(drawableTextureParams: DrawableTextureParams, openJPEG: OpenJPEG, renderContext: RenderContext): GLLoadedTexture {
         return GLLoadedTexture(renderContext, openJPEG)
     }
 
     /* access modifiers changed from: protected */
-    fun RequestRawResource(DrawableTextureParams drawableTextureParams, ResourceConsumer resourceConsumer) {
+    fun RequestRawResource(drawableTextureParams: DrawableTextureParams, resourceConsumer: ResourceConsumer) {
         TextureCache.getInstance().RequestResource(drawableTextureParams, resourceConsumer)
     }
 }

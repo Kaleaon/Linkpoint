@@ -21,13 +21,13 @@ class GroupActiveProposalItemReply : SLMessage() {
     @JvmStatic
     class ProposalData {
         public Boolean AlreadyVoted
-        public Byte[] EndDateTime
+        public ByteArray EndDateTime
         public Float Majority
-        public Byte[] ProposalText
+        public ByteArray ProposalText
         public Int Quorum
-        public Byte[] StartDateTime
-        public Byte[] TerseDateID
-        public Byte[] VoteCast
+        public ByteArray StartDateTime
+        public ByteArray TerseDateID
+        public ByteArray VoteCast
         public UUID VoteID
         public UUID VoteInitiator
     }
@@ -44,24 +44,24 @@ class GroupActiveProposalItemReply : SLMessage() {
         this.TransactionData_Field = TransactionData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 57
-        Iterator<T> it = this.ProposalData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 57
+        val it: Iterator<T> = this.ProposalData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
-            ProposalData proposalData = (ProposalData) it.next()
+            val proposalData: ProposalData = (ProposalData) it.next()
             i = proposalData.ProposalText.length + proposalData.TerseDateID.length + 33 + 1 + proposalData.StartDateTime.length + 1 + proposalData.EndDateTime.length + 1 + 1 + proposalData.VoteCast.length + 4 + 4 + 1 + i2
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleGroupActiveProposalItemReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 104)
@@ -84,14 +84,14 @@ class GroupActiveProposalItemReply : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
         this.TransactionData_Field.TransactionID = unpackUUID(byteBuffer)
         this.TransactionData_Field.TotalNumItems = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ProposalData proposalData = ProposalData()
+            val proposalData: ProposalData = ProposalData()
             proposalData.VoteID = unpackUUID(byteBuffer)
             proposalData.VoteInitiator = unpackUUID(byteBuffer)
             proposalData.TerseDateID = unpackVariable(byteBuffer, 1)

@@ -42,8 +42,8 @@ class InsetColoringLayout : FrameLayout() {
         setWillNotDraw(false)
     }
 
-    private Unit applyAttributes(Context context, AttributeSet attributeSet, Int i, Int i2) {
-        TypedArray obtainStyledAttributes = context.getTheme().obtainStyledAttributes(attributeSet, R.styleable.InsetColoringLayout, i, i2)
+     private fun applyAttributes(context: Context, attributeSet: AttributeSet, i: Int, i2: Int) {
+        val obtainStyledAttributes: TypedArray = context.getTheme().obtainStyledAttributes(attributeSet, R.styleable.InsetColoringLayout, i, i2)
         try {
             this.backgroundColor = obtainStyledAttributes.getColor(0, this.backgroundColor)
         } finally {
@@ -52,9 +52,9 @@ class InsetColoringLayout : FrameLayout() {
     }
 
     /* access modifiers changed from: protected */
-    fun onDraw(Canvas canvas) {
-        Int width = getWidth()
-        Int height = getHeight()
+    fun onDraw(canvas: Canvas) {
+        val width: Int = getWidth()
+        val height: Int = getHeight()
         this.backgroundPaint.setColor(this.backgroundColor)
         if (this.childPaddingTop != 0) {
             canvas.drawRect(0.0f, 0.0f, (Float) width, (Float) this.childPaddingTop, this.backgroundPaint)
@@ -71,7 +71,7 @@ class InsetColoringLayout : FrameLayout() {
     }
 
     /* access modifiers changed from: protected */
-    fun onLayout(Boolean z, Int i, Int i2, Int i3, Int i4) {
+    fun onLayout(z: Boolean, i: Int, i2: Int, i3: Int, i4: Int) {
         View childAt
         super.onLayout(z, i, i2, i3, i4)
         if (getChildCount() > 0 && (childAt = getChildAt(0)) != null) {

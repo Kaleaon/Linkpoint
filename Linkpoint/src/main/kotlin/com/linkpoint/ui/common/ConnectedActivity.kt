@@ -44,35 +44,35 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
     private Boolean singleObjectPopupsDisplayed = false
     private Boolean wantedShowObjectPopups = false
 
-    private Unit displayObjectPopups() {
-        FragmentManager supportFragmentManager = getSupportFragmentManager()
-        UUID activeAgentID = ActivityUtils.getActiveAgentID(getIntent())
+     private fun displayObjectPopups() {
+        val supportFragmentManager: FragmentManager = getSupportFragmentManager()
+        val activeAgentID: UUID = ActivityUtils.getActiveAgentID(getIntent())
         if (activeAgentID != null) {
-            UserManager userManager = UserManager.getUserManager(activeAgentID)
+            val userManager: UserManager = UserManager.getUserManager(activeAgentID)
             if (userManager != null) {
                 userManager.getObjectPopupsManager().dismissDisplayedObjectPopup((SLChatEvent) null)
             }
             this.singleObjectPopupsDisplayed = false
             this.objectPopupsDisplayed = true
-            View currentFocus = getCurrentFocus()
+            val currentFocus: View = getCurrentFocus()
             if (currentFocus != null) {
                 currentFocus.clearFocus()
                 ((InputMethodManager) getSystemService("input_method")).hideSoftInputFromWindow(currentFocus.getWindowToken(), 0)
             }
-            FragmentTransaction beginTransaction = supportFragmentManager.beginTransaction()
+            val beginTransaction: FragmentTransaction = supportFragmentManager.beginTransaction()
             beginTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
             beginTransaction.replace(R.id.object_popups_container, ObjectPopupsFragment.create(activeAgentID))
             beginTransaction.commit()
         }
     }
 
-    private Unit hideSingleObjectPopup() {
+     private fun hideSingleObjectPopup() {
         if (this.singleObjectPopupsDisplayed) {
             this.singleObjectPopupsDisplayed = false
-            FragmentManager supportFragmentManager = getSupportFragmentManager()
-            Fragment findFragmentById = supportFragmentManager.findFragmentById(R.id.object_popups_container)
+            val supportFragmentManager: FragmentManager = getSupportFragmentManager()
+            val findFragmentById: Fragment = supportFragmentManager.findFragmentById(R.id.object_popups_container)
             if (findFragmentById instanceof SingleObjectPopupFragment) {
-                FragmentTransaction beginTransaction = supportFragmentManager.beginTransaction()
+                val beginTransaction: FragmentTransaction = supportFragmentManager.beginTransaction()
                 beginTransaction.setCustomAnimations(0, R.anim.slide_to_above)
                 beginTransaction.remove(findFragmentById)
                 beginTransaction.commit()
@@ -80,36 +80,36 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
         }
     }
 
-    private Boolean removeObjectPopupsFragment() {
+     private fun removeObjectPopupsFragment(): Boolean {
         if (!this.objectPopupsDisplayed && !this.singleObjectPopupsDisplayed) {
             return false
         }
         this.objectPopupsDisplayed = false
         this.singleObjectPopupsDisplayed = false
-        FragmentManager supportFragmentManager = getSupportFragmentManager()
-        Fragment findFragmentById = supportFragmentManager.findFragmentById(R.id.object_popups_container)
+        val supportFragmentManager: FragmentManager = getSupportFragmentManager()
+        val findFragmentById: Fragment = supportFragmentManager.findFragmentById(R.id.object_popups_container)
         if (findFragmentById == null) {
             return true
         }
-        FragmentTransaction beginTransaction = supportFragmentManager.beginTransaction()
+        val beginTransaction: FragmentTransaction = supportFragmentManager.beginTransaction()
         beginTransaction.setTransition(8194)
         beginTransaction.remove(findFragmentById)
         beginTransaction.commit()
         return true
     }
 
-    private Unit updateConnectionStatus() {
+     private fun updateConnectionStatus() {
         if (handleConnectionEvents() && !isFinishing()) {
-            View findViewById = findViewById(R.id.offline_notify_status_layout)
+            val findViewById: View = findViewById(R.id.offline_notify_status_layout)
             if (findViewById instanceof ViewGroup) {
-                SLGridConnection gridConnection = GridConnectionService.getGridConnection()
+                val gridConnection: SLGridConnection = GridConnectionService.getGridConnection()
                 SLGridConnection.ConnectionState connectionState = gridConnection.getConnectionState()
                 if (connectionState == SLGridConnection.ConnectionState.Connected) {
                     findViewById.setVisibility(8)
                 } else if (connectionState == SLGridConnection.ConnectionState.Connecting) {
                     findViewById.setVisibility(0)
                     if (gridConnection.getIsReconnecting()) {
-                        ((TextView) findViewById.findViewById(R.id.offline_notify_message)).setText(getString(R.string.reconnecting_offline_message, Object[]{Integer.valueOf(gridConnection.getReconnectAttempt())}))
+                        ((TextView) findViewById.findViewById(R.id.offline_notify_message)).setText(getString(R.string.reconnecting_offline_message, Array<Any>{Integer.valueOf(gridConnection.getReconnectAttempt())}))
                     } else {
                         ((TextView) findViewById.findViewById(R.id.offline_notify_message)).setText(R.string.connecting_message)
                     }
@@ -127,29 +127,29 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
 
     fun dismissSingleObjectPopup() {
         hideSingleObjectPopup()
-        UserManager userManager = ActivityUtils.getUserManager(getIntent())
+        val userManager: UserManager = ActivityUtils.getUserManager(getIntent())
         if (userManager != null) {
             userManager.getObjectPopupsManager().dismissDisplayedObjectPopup((SLChatEvent) null)
         }
     }
 
     /* access modifiers changed from: protected */
-    public Boolean handleBackPressed() {
+     public fun handleBackPressed(): Boolean {
         return false
     }
 
     /* access modifiers changed from: protected */
-    public Boolean handleConnectionEvents() {
+     public fun handleConnectionEvents(): Boolean {
         return true
     }
 
     @EventHandler
-    fun handleConnectionStateChangedEvent(SLConnectionStateChangedEvent sLConnectionStateChangedEvent) {
+    fun handleConnectionStateChangedEvent(sLConnectionStateChangedEvent: SLConnectionStateChangedEvent) {
         updateConnectionStatus()
     }
 
     @EventHandler
-    fun handleDisconnectEvent(SLDisconnectEvent sLDisconnectEvent) {
+    fun handleDisconnectEvent(sLDisconnectEvent: SLDisconnectEvent) {
         if (handleConnectionEvents()) {
             Debug.Printf("ConnectedActivity: disconnect event, normalDisconnect %b", Boolean.valueOf(sLDisconnectEvent.normalDisconnect))
             if (sLDisconnectEvent.normalDisconnect) {
@@ -165,7 +165,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_ConnectedActivity_3108  reason: not valid java name */
     public /* synthetic */ Unit m527lambda$com_lumiyaviewer_lumiya_ui_common_ConnectedActivity_3108(View view) {
-        SLGridConnection gridConnection = GridConnectionService.getGridConnection()
+        val gridConnection: SLGridConnection = GridConnectionService.getGridConnection()
         SLGridConnection.ConnectionState connectionState = gridConnection.getConnectionState()
         if (connectionState == SLGridConnection.ConnectionState.Connecting) {
             gridConnection.Disconnect()
@@ -184,13 +184,13 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
         }
     }
 
-    fun onConfigurationChanged(Configuration configuration) {
+    fun onConfigurationChanged(configuration: Configuration) {
         super.onConfigurationChanged(configuration)
         this.navDrawerHelper.onConfigurationChanged(configuration)
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(Bundle bundle) {
+    fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         if (!handleConnectionEvents()) {
             return
@@ -204,17 +204,17 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
         this.wantedShowObjectPopups = getIntent().getBooleanExtra(OBJECT_POPUP_NOTIFICATION, false)
     }
 
-    public Boolean onCreateOptionsMenu(Menu menu) {
+     public fun onCreateOptionsMenu(menu: Menu): Boolean {
         Debug.Printf("ObjectPopup: createOptionsMenu", Object[0])
         if (!handleConnectionEvents()) {
             return super.onCreateOptionsMenu(menu)
         }
         getMenuInflater().inflate(R.menu.object_popups_action_menu, menu)
-        ActionProvider actionProvider = MenuItemCompat.getActionProvider(menu.findItem(R.id.item_object_popups))
+        val actionProvider: ActionProvider = MenuItemCompat.getActionProvider(menu.findItem(R.id.item_object_popups))
         if (actionProvider instanceof ObjectPopupsActionProvider) {
             this.objectPopupsActionProvider = (ObjectPopupsActionProvider) actionProvider
             this.objectPopupsActionProvider.setObjectPopupsClickListener(this)
-            UserManager userManager = ActivityUtils.getUserManager(getIntent())
+            val userManager: UserManager = ActivityUtils.getUserManager(getIntent())
             if (userManager == null || this.objectPopupsActionProvider == null) {
                 return true
             }
@@ -226,7 +226,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
     }
 
     /* access modifiers changed from: protected */
-    fun onNewIntent(Intent intent) {
+    fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         if (!handleConnectionEvents()) {
             return
@@ -235,28 +235,28 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
             this.wantedShowObjectPopups = true
             return
         }
-        UserManager userManager = ActivityUtils.getUserManager(getIntent())
+        val userManager: UserManager = ActivityUtils.getUserManager(getIntent())
         if (userManager != null) {
             userManager.getObjectPopupsManager().dismissDisplayedObjectPopup((SLChatEvent) null)
         }
         removeObjectPopupsFragment()
     }
 
-    fun onNewObjectPopup(SLChatEvent sLChatEvent) {
+    fun onNewObjectPopup(sLChatEvent: SLChatEvent) {
         UUID activeAgentID
         if (findViewById(R.id.object_popups_container) != null && (activeAgentID = ActivityUtils.getActiveAgentID(getIntent())) != null) {
-            FragmentManager supportFragmentManager = getSupportFragmentManager()
+            val supportFragmentManager: FragmentManager = getSupportFragmentManager()
             if (this.objectPopupsDisplayed) {
-                UserManager userManager = UserManager.getUserManager(activeAgentID)
+                val userManager: UserManager = UserManager.getUserManager(activeAgentID)
                 if (userManager != null) {
                     userManager.getObjectPopupsManager().dismissDisplayedObjectPopup(sLChatEvent)
                     return
                 }
             } else if (this.singleObjectPopupsDisplayed && sLChatEvent == null) {
                 this.singleObjectPopupsDisplayed = false
-                Fragment findFragmentById = supportFragmentManager.findFragmentById(R.id.object_popups_container)
+                val findFragmentById: Fragment = supportFragmentManager.findFragmentById(R.id.object_popups_container)
                 if (findFragmentById != null) {
-                    FragmentTransaction beginTransaction = supportFragmentManager.beginTransaction()
+                    val beginTransaction: FragmentTransaction = supportFragmentManager.beginTransaction()
                     beginTransaction.setTransition(8194)
                     beginTransaction.remove(findFragmentById)
                     beginTransaction.commit()
@@ -265,7 +265,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
             if (sLChatEvent != null) {
                 this.singleObjectPopupsDisplayed = true
                 this.objectPopupsDisplayed = false
-                FragmentTransaction beginTransaction2 = supportFragmentManager.beginTransaction()
+                val beginTransaction2: FragmentTransaction = supportFragmentManager.beginTransaction()
                 beginTransaction2.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 beginTransaction2.replace(R.id.object_popups_container, SingleObjectPopupFragment.create(activeAgentID))
                 beginTransaction2.commit()
@@ -273,16 +273,16 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
         }
     }
 
-    fun onObjectPopupCountChanged(Int i) {
+    fun onObjectPopupCountChanged(i: Int) {
         if (this.objectPopupsActionProvider != null) {
             this.objectPopupsActionProvider.setObjectPopupCount(i)
         }
         if (i == 0 && this.objectPopupsDisplayed) {
             this.objectPopupsDisplayed = false
-            FragmentManager supportFragmentManager = getSupportFragmentManager()
-            Fragment findFragmentById = supportFragmentManager.findFragmentById(R.id.object_popups_container)
+            val supportFragmentManager: FragmentManager = getSupportFragmentManager()
+            val findFragmentById: Fragment = supportFragmentManager.findFragmentById(R.id.object_popups_container)
             if (findFragmentById instanceof ObjectPopupsFragment) {
-                FragmentTransaction beginTransaction = supportFragmentManager.beginTransaction()
+                val beginTransaction: FragmentTransaction = supportFragmentManager.beginTransaction()
                 beginTransaction.setTransition(8194)
                 beginTransaction.remove(findFragmentById)
                 beginTransaction.commit()
@@ -292,12 +292,12 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
 
     fun onObjectPopupsClicked() {
         if (findViewById(R.id.object_popups_container) != null) {
-            FragmentManager supportFragmentManager = getSupportFragmentManager()
+            val supportFragmentManager: FragmentManager = getSupportFragmentManager()
             if (this.objectPopupsDisplayed) {
                 this.objectPopupsDisplayed = false
-                Fragment findFragmentById = supportFragmentManager.findFragmentById(R.id.object_popups_container)
+                val findFragmentById: Fragment = supportFragmentManager.findFragmentById(R.id.object_popups_container)
                 if (findFragmentById != null) {
-                    FragmentTransaction beginTransaction = supportFragmentManager.beginTransaction()
+                    val beginTransaction: FragmentTransaction = supportFragmentManager.beginTransaction()
                     beginTransaction.setTransition(8194)
                     beginTransaction.remove(findFragmentById)
                     beginTransaction.commit()
@@ -309,7 +309,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
         }
     }
 
-    public Boolean onOptionsItemSelected(MenuItem menuItem) {
+     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         if (!this.navDrawerHelper.onOptionsItemSelected(menuItem)) {
             return super.onOptionsItemSelected(menuItem)
         }
@@ -318,7 +318,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
 
     /* access modifiers changed from: protected */
     fun onPause() {
-        UserManager userManager = ActivityUtils.getUserManager(getIntent())
+        val userManager: UserManager = ActivityUtils.getUserManager(getIntent())
         if (userManager != null && handleConnectionEvents()) {
             userManager.getObjectPopupsManager().removeObjectPopupListener(this)
             userManager.getObjectPopupsManager().removePopupWatcher(this)
@@ -327,10 +327,10 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
     }
 
     /* access modifiers changed from: protected */
-    fun onPostCreate(Bundle bundle) {
+    fun onPostCreate(bundle: Bundle) {
         super.onPostCreate(bundle)
         if (handleConnectionEvents()) {
-            View findViewById = findViewById(R.id.offline_notify_status_layout)
+            val findViewById: View = findViewById(R.id.offline_notify_status_layout)
             if (findViewById instanceof ViewGroup) {
                 findViewById.findViewById(R.id.offline_connect_button).setOnClickListener(this.reconnectButtonListener)
             }
@@ -342,9 +342,9 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
     /* access modifiers changed from: protected */
     fun onResume() {
         super.onResume()
-        UserManager userManager = ActivityUtils.getUserManager(getIntent())
+        val userManager: UserManager = ActivityUtils.getUserManager(getIntent())
         if (userManager != null && handleConnectionEvents()) {
-            Int objectPopupCount = userManager.getObjectPopupsManager().getObjectPopupCount()
+            val objectPopupCount: Int = userManager.getObjectPopupsManager().getObjectPopupCount()
             if (this.objectPopupsActionProvider != null) {
                 onObjectPopupCountChanged(objectPopupCount)
             }
@@ -361,7 +361,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
     }
 
     /* access modifiers changed from: protected */
-    fun onSaveInstanceState(Bundle bundle) {
+    fun onSaveInstanceState(bundle: Bundle) {
         super.onSaveInstanceState(bundle)
         if (handleConnectionEvents()) {
             bundle.putBoolean("objectPopupsDisplayed", this.objectPopupsDisplayed)

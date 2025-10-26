@@ -13,46 +13,46 @@ final class AutoValue_MyAvatarState : MyAvatarState() {
         this.hasHUDs = z3
     }
 
-    public Boolean equals(Object obj) {
+     public fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
         if (!(obj instanceof MyAvatarState)) {
             return false
         }
-        MyAvatarState myAvatarState = (MyAvatarState) obj
+        val myAvatarState: MyAvatarState = (MyAvatarState) obj
         if (this.isSitting == myAvatarState.isSitting() && this.sittingOn == myAvatarState.sittingOn() && this.isFlying == myAvatarState.isFlying()) {
             return this.hasHUDs == myAvatarState.hasHUDs()
         }
         return false
     }
 
-    public Boolean hasHUDs() {
+     public fun hasHUDs(): Boolean {
         return this.hasHUDs
     }
 
-    public Int hashCode() {
-        Int i = 1231
-        Int i2 = ((this.isFlying ? 1231 : 1237) ^ (((((this.isSitting ? 1231 : 1237) ^ 1000003) * 1000003) ^ this.sittingOn) * 1000003)) * 1000003
+     public fun hashCode(): Int {
+        val i: Int = 1231
+        val i2: Int = ((this.isFlying ? 1231 : 1237) ^ (((((this.isSitting ? 1231 : 1237) ^ 1000003) * 1000003) ^ this.sittingOn) * 1000003)) * 1000003
         if (!this.hasHUDs) {
             i = 1237
         }
         return i2 ^ i
     }
 
-    public Boolean isFlying() {
+     public fun isFlying(): Boolean {
         return this.isFlying
     }
 
-    public Boolean isSitting() {
+     public fun isSitting(): Boolean {
         return this.isSitting
     }
 
-    public Int sittingOn() {
+     public fun sittingOn(): Int {
         return this.sittingOn
     }
 
-    public String toString() {
+     public fun toString(): String {
         return "MyAvatarState{isSitting=" + this.isSitting + ", " + "sittingOn=" + this.sittingOn + ", " + "isFlying=" + this.isFlying + ", " + "hasHUDs=" + this.hasHUDs + "}"
     }
 }

@@ -12,33 +12,33 @@ final class AutoValue_DrawableTextParams : DrawableTextParams() {
         this.backgroundColor = i
     }
 
-    public Int backgroundColor() {
+     public fun backgroundColor(): Int {
         return this.backgroundColor
     }
 
-    public Boolean equals(Object obj) {
+     public fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
         if (!(obj instanceof DrawableTextParams)) {
             return false
         }
-        DrawableTextParams drawableTextParams = (DrawableTextParams) obj
+        val drawableTextParams: DrawableTextParams = (DrawableTextParams) obj
         if (this.text.equals(drawableTextParams.text())) {
             return this.backgroundColor == drawableTextParams.backgroundColor()
         }
         return false
     }
 
-    public Int hashCode() {
+     public fun hashCode(): Int {
         return ((this.text.hashCode() ^ 1000003) * 1000003) ^ this.backgroundColor
     }
 
-    public String text() {
+     public fun text(): String {
         return this.text
     }
 
-    public String toString() {
+     public fun toString(): String {
         return "DrawableTextParams{text=" + this.text + ", " + "backgroundColor=" + this.backgroundColor + "}"
     }
 }

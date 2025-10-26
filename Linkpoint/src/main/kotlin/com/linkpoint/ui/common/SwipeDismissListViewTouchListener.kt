@@ -36,9 +36,9 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
     private Int mViewWidth = 1
 
     interface DismissCallbacks {
-        Boolean canDismiss(ListView listView, Int i)
+         fun canDismiss(listView: ListView, Int i): Boolean)
 
-        Unit onDismiss(ListView listView, Int i)
+         fun onDismiss(listView: ListView, i: Int)
     }
 
     class PendingDismissData : Comparable<PendingDismissData> {
@@ -50,13 +50,13 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
             this.view = view2
         }
 
-        public Int compareTo(PendingDismissData pendingDismissData) {
+         public fun compareTo(pendingDismissData: PendingDismissData): Int {
             return pendingDismissData.position - this.position
         }
     }
 
     public SwipeDismissListViewTouchListener(ListView listView, DismissCallbacks dismissCallbacks) {
-        ViewConfiguration viewConfiguration = ViewConfiguration.get(listView.getContext())
+        val viewConfiguration: ViewConfiguration = ViewConfiguration.get(listView.getContext())
         this.mSlop = viewConfiguration.getScaledTouchSlop()
         this.mMinFlingVelocity = viewConfiguration.getScaledMinimumFlingVelocity() * 16
         this.mMaxFlingVelocity = viewConfiguration.getScaledMaximumFlingVelocity()
@@ -66,12 +66,12 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
     }
 
     /* access modifiers changed from: private */
-    fun performDismiss(View view, Int i) {
+    fun performDismiss(view: View, i: Int) {
         this.mCallbacks.onDismiss(this.mListView, i)
     }
 
     @JvmStatic
-    Unit restoreViewState(View view) {
+     fun restoreViewState(view: View) {
         if (Build.VERSION.SDK_INT >= 11) {
             view.setAlpha(1.0f)
             view.setTranslationX(0.0f)
@@ -83,12 +83,12 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
 
     public AbsListView.OnScrollListener makeScrollListener() {
         return AbsListView.OnScrollListener() {
-            fun onScroll(AbsListView absListView, Int i, Int i2, Int i3) {
+            fun onScroll(absListView: AbsListView, i: Int, i2: Int, i3: Int) {
             }
 
-            fun onScrollStateChanged(AbsListView absListView, Int i) {
-                Boolean z = true
-                SwipeDismissListViewTouchListener swipeDismissListViewTouchListener = SwipeDismissListViewTouchListener.this
+            fun onScrollStateChanged(absListView: AbsListView, i: Int) {
+                val z: Boolean = true
+                val swipeDismissListViewTouchListener: SwipeDismissListViewTouchListener = SwipeDismissListViewTouchListener.this
                 if (i == 1) {
                     z = false
                 }
@@ -97,8 +97,8 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
         }
     }
 
-    public Boolean onTouch(View view, MotionEvent motionEvent) {
-        Boolean z2 = true
+     public fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+        val z2: Boolean = true
         if (this.mViewWidth < 2) {
             this.mViewWidth = this.mListView.getWidth()
         }
@@ -107,16 +107,16 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
                 if (this.mPaused) {
                     return false
                 }
-                Rect rect = Rect()
-                Int childCount = this.mListView.getChildCount()
-                Int[] iArr = Int[2]
+                val rect: Rect = Rect()
+                val childCount: Int = this.mListView.getChildCount()
+                val iArr: IntArray = Int[2]
                 this.mListView.getLocationOnScreen(iArr)
-                Int rawX = ((Int) motionEvent.getRawX()) - iArr[0]
-                Int rawY = ((Int) motionEvent.getRawY()) - iArr[1]
-                Int i = 0
+                val rawX: Int = ((Int) motionEvent.getRawX()) - iArr[0]
+                val rawY: Int = ((Int) motionEvent.getRawY()) - iArr[1]
+                val i: Int = 0
                 while (true) {
                     if (i < childCount) {
-                        View childAt = this.mListView.getChildAt(i)
+                        val childAt: View = this.mListView.getChildAt(i)
                         childAt.getHitRect(rect)
                         if (rect.contains(rawX, rawY)) {
                             this.mDownView = childAt
@@ -139,12 +139,12 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
                 return false
             case 1:
                 if (this.mVelocityTracker != null) {
-                    Float rawX2 = motionEvent.getRawX() - this.mDownX
+                    val rawX2: Float = motionEvent.getRawX() - this.mDownX
                     this.mVelocityTracker.addMovement(motionEvent)
                     this.mVelocityTracker.computeCurrentVelocity(1000)
-                    Float xVelocity = this.mVelocityTracker.getXVelocity()
-                    Float abs = Math.abs(xVelocity)
-                    Float abs2 = Math.abs(this.mVelocityTracker.getYVelocity())
+                    val xVelocity: Float = this.mVelocityTracker.getXVelocity()
+                    val abs: Float = Math.abs(xVelocity)
+                    val abs2: Float = Math.abs(this.mVelocityTracker.getYVelocity())
                     if (Math.abs(rawX2) <= ((Float) (this.mViewWidth / 2)) || !this.mSwiping) {
                         if (((Float) this.mMinFlingVelocity) > abs || abs > ((Float) this.mMaxFlingVelocity) || abs2 >= abs) {
                             z2 = false
@@ -170,7 +170,7 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
                         this.mDismissAnimationRefCount++
                         if (Build.VERSION.SDK_INT >= 12) {
                             this.mDownView.animate().translationX((Float) (z2 ? this.mViewWidth : -this.mViewWidth)).alpha(0.0f).setDuration(this.mAnimationTime).setListener(AnimatorListenerAdapter() {
-                                fun onAnimationEnd(Animator animator) {
+                                fun onAnimationEnd(animator: Animator) {
                                     SwipeDismissListViewTouchListener.this.performDismiss(view2, i2)
                                 }
                         } else {
@@ -197,13 +197,13 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
             case 2:
                 if (this.mVelocityTracker != null && !this.mPaused) {
                     this.mVelocityTracker.addMovement(motionEvent)
-                    Float rawX3 = motionEvent.getRawX() - this.mDownX
-                    Float rawY2 = motionEvent.getRawY() - this.mDownY
+                    val rawX3: Float = motionEvent.getRawX() - this.mDownX
+                    val rawY2: Float = motionEvent.getRawY() - this.mDownY
                     if (Math.abs(rawX3) > ((Float) this.mSlop) && Math.abs(rawY2) < Math.abs(rawX3) / 2.0f) {
                         this.mSwiping = true
                         this.mSwipingSlop = rawX3 > 0.0f ? this.mSlop : -this.mSlop
                         this.mListView.requestDisallowInterceptTouchEvent(true)
-                        MotionEvent obtain = MotionEvent.obtain(motionEvent)
+                        val obtain: MotionEvent = MotionEvent.obtain(motionEvent)
                         obtain.setAction((motionEvent.getActionIndex() << 8) | 3)
                         this.mListView.onTouchEvent(obtain)
                         obtain.recycle()
@@ -243,7 +243,7 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
         return false
     }
 
-    fun setEnabled(Boolean z) {
+    fun setEnabled(z: Boolean) {
         this.mPaused = !z
     }
 }

@@ -34,15 +34,15 @@ class InviteGroupRequest : SLMessage() {
         this.GroupData_Field = GroupData()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.InviteData_Fields.size() * 32) + 53
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleInviteGroupRequest(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 93)
@@ -56,13 +56,13 @@ class InviteGroupRequest : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.GroupData_Field.GroupID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            InviteData inviteData = InviteData()
+            val inviteData: InviteData = InviteData()
             inviteData.InviteeID = unpackUUID(byteBuffer)
             inviteData.RoleID = unpackUUID(byteBuffer)
             this.InviteData_Fields.add(inviteData)

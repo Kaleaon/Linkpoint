@@ -19,7 +19,7 @@ val class SLVoiceUpgradeEvent : SLChatYesNoEvent() {
     /* JADX INFO: super call moved to the top of the method (can break code semantics) */
     public SLVoiceUpgradeEvent(ChatMessage chatMessage, UUID uuid) {
         super(chatMessage, uuid)
-        Boolean z = false
+        val z: Boolean = false
         this.upgradeURL = chatMessage.getItemName()
         this.isInstall = chatMessage.getAssetType().intValue() != 0 ? true : z
     }
@@ -35,49 +35,49 @@ val class SLVoiceUpgradeEvent : SLChatYesNoEvent() {
         return SLChatEvent.ChatMessageType.VoiceUpgrade
     }
 
-    public String getNoButton(Context context) {
+     public fun getNoButton(context: Context): String {
         return context.getString(R.string.voice_upgrade_no)
     }
 
-    public String getNoMessage(Context context) {
+     public fun getNoMessage(context: Context): String {
         return this.isInstall ? context.getString(R.string.voice_install_declined) : context.getString(R.string.voice_upgrade_declined)
     }
 
-    public String getQuestion(Context context) {
+     public fun getQuestion(context: Context): String {
         return this.isInstall ? context.getString(R.string.install_now_question) : context.getString(R.string.upgrade_now_question)
     }
 
-    public String getText(Context context, UserManager userManager) {
+     public fun getText(context: Context, userManager: UserManager): String {
         return this.text
     }
 
-    public String getYesButton(Context context) {
+     public fun getYesButton(context: Context): String {
         return this.isInstall ? context.getString(R.string.voice_install_yes) : context.getString(R.string.voice_upgrade_yes)
     }
 
-    public String getYesMessage(Context context) {
+     public fun getYesMessage(context: Context): String {
         return ""
     }
 
-    public Boolean isObjectPopup() {
+     public fun isObjectPopup(): Boolean {
         return false
     }
 
     /* access modifiers changed from: protected */
-    fun onNoAction(Context context, UserManager userManager) {
+    fun onNoAction(context: Context, userManager: UserManager) {
         super.onNoAction(context, userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    fun onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(context: Context, userManager: UserManager) {
         super.onYesAction(context, userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
-        Intent intent = Intent("android.intent.action.VIEW")
+        val intent: Intent = Intent("android.intent.action.VIEW")
         intent.setData(Uri.parse(this.upgradeURL))
         context.startActivity(intent)
     }
 
-    fun serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setItemName(this.upgradeURL)
         chatMessage.setAssetType(Integer.valueOf(this.isInstall ? 1 : 0))

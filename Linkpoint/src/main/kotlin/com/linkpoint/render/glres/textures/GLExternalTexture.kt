@@ -14,7 +14,7 @@ class GLExternalTexture {
     private val Int handle
     private val Int height
     private val SurfaceTexture.OnFrameAvailableListener onFrameAvailableListener = SurfaceTexture.OnFrameAvailableListener() {
-        fun onFrameAvailable(SurfaceTexture surfaceTexture) {
+        fun onFrameAvailable(surfaceTexture: SurfaceTexture) {
         }
     }
     private val Surface surface
@@ -25,7 +25,7 @@ class GLExternalTexture {
     public GLExternalTexture(Int i, Int i2) {
         this.width = i
         this.height = i2
-        Int[] iArr = Int[1]
+        val iArr: IntArray = Int[1]
         GLES11.glGenTextures(1, iArr, 0)
         this.handle = iArr[0]
         bind()
@@ -43,19 +43,19 @@ class GLExternalTexture {
         GLES11.glBindTexture(36197, this.handle)
     }
 
-    public Canvas getCanvas() {
+     public fun getCanvas(): Canvas {
         return this.surface.lockCanvas((Rect) null)
     }
 
-    public Int getHeight() {
+     public fun getHeight(): Int {
         return this.height
     }
 
-    public Int getWidth() {
+     public fun getWidth(): Int {
         return this.width
     }
 
-    fun postCanvas(Canvas canvas) {
+    fun postCanvas(canvas: Canvas) {
         this.surface.unlockCanvasAndPost(canvas)
     }
 
@@ -63,11 +63,11 @@ class GLExternalTexture {
     fun release() {
         this.surface.release()
         this.surfaceTexture.release()
-        GLES11.glDeleteTextures(1, Int[]{this.handle}, 0)
+        GLES11.glDeleteTextures(1, IntArray{this.handle}, 0)
     }
 
     @TargetApi(11)
-    fun update(Float[] fArr) {
+    fun update(fArr: FloatArray) {
         this.surfaceTexture.updateTexImage()
         this.surfaceTexture.getTransformMatrix(fArr)
     }

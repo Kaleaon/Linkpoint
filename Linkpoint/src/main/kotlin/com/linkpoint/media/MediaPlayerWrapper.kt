@@ -14,29 +14,29 @@ class MediaPlayerWrapper : Runnable, OnErrorListener, OnInfoListener, OnPrepared
     private volatile Boolean mustPlay = false
     private Thread workingThread = null
 
-    public Boolean onError(MediaPlayer mediaPlayer, Int i, Int i2) {
+     public fun onError(mediaPlayer: MediaPlayer, i: Int, i2: Int): Boolean {
         Debug.Log("MediaPlayerWrapper: onError: what = " + i + ", extra = " + i2)
         return false
     }
 
-    public Boolean onInfo(MediaPlayer mediaPlayer, Int i, Int i2) {
+     public fun onInfo(mediaPlayer: MediaPlayer, i: Int, i2: Int): Boolean {
         Debug.Log("MediaPlayerWrapper: onInfo: what = " + i + ", extra = " + i2)
         return false
     }
 
-    fun onPrepared(MediaPlayer mediaPlayer) {
+    fun onPrepared(mediaPlayer: MediaPlayer) {
         Debug.Log("MediaPlayerWrapper: prepared, starting playback")
         mediaPlayer.start()
     }
 
-    fun play(String str) {
+    fun play(str: String) {
         synchronized (this) {
             if (this.mustExit) {
                 return
             }
             this.mustPlay = true
             this.mustExit = false
-            String trim = str.trim()
+            val trim: String = str.trim()
             if (trim.toLowerCase().startsWith("http://")) {
                 trim = "http://" + trim.substring(7)
             } else if (trim.toLowerCase().startsWith("https://")) {

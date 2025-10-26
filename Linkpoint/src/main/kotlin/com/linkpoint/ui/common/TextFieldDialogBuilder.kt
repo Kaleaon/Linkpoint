@@ -16,11 +16,11 @@ class TextFieldDialogBuilder {
     private String title = null
 
     interface OnTextCancelledListener {
-        Unit onTextCancelled()
+         fun onTextCancelled()
     }
 
     interface OnTextEnteredListener {
-        Unit onTextEntered(String str)
+         fun onTextEntered(str: String)
     }
 
     public TextFieldDialogBuilder(Context context2) {
@@ -45,22 +45,22 @@ class TextFieldDialogBuilder {
         }
     }
 
-    public TextFieldDialogBuilder setDefaultText(String str) {
+     public fun setDefaultText(str: String): TextFieldDialogBuilder {
         this.defaultText = str
         return this
     }
 
-    public TextFieldDialogBuilder setOnTextCancelledListener(OnTextCancelledListener onTextCancelledListener) {
+     public fun setOnTextCancelledListener(onTextCancelledListener: OnTextCancelledListener): TextFieldDialogBuilder {
         this.cancelledListener = onTextCancelledListener
         return this
     }
 
-    public TextFieldDialogBuilder setOnTextEnteredListener(OnTextEnteredListener onTextEnteredListener) {
+     public fun setOnTextEnteredListener(onTextEnteredListener: OnTextEnteredListener): TextFieldDialogBuilder {
         this.listener = onTextEnteredListener
         return this
     }
 
-    public TextFieldDialogBuilder setTitle(String str) {
+     public fun setTitle(str: String): TextFieldDialogBuilder {
         this.title = str
         return this
     }
@@ -68,11 +68,11 @@ class TextFieldDialogBuilder {
     fun show() {
         AlertDialog.Builder builder = AlertDialog.Builder(this.context)
         builder.setTitle(this.title)
-        EditText editText = EditText(this.context)
+        val editText: EditText = EditText(this.context)
         editText.setText(this.defaultText)
         editText.setSingleLine(true)
-        FrameLayout frameLayout = FrameLayout(this.context)
-        Int applyDimension = (Int) TypedValue.applyDimension(1, 10.0f, this.context.getResources().getDisplayMetrics())
+        val frameLayout: FrameLayout = FrameLayout(this.context)
+        val applyDimension: Int = (Int) TypedValue.applyDimension(1, 10.0f, this.context.getResources().getDisplayMetrics())
         FrameLayout.LayoutParams layoutParams = FrameLayout.LayoutParams(-1, -2)
         layoutParams.leftMargin = applyDimension
         layoutParams.rightMargin = applyDimension

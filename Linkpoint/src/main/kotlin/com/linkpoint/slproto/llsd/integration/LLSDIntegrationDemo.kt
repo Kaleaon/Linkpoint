@@ -16,12 +16,12 @@ class LLSDIntegrationDemo {
      * Demonstrate LLSD integration with simple examples
      */
     @JvmStatic
-    Unit runDemo() {
+     fun runDemo() {
         try {
             Log.i(TAG, "Starting LLSD Integration Demo")
             
             // Test 1: Parse simple LLSD XML using external library
-            String simpleXML = "<?xml version='1.0' encoding='UTF-8'?>\n" +
+            val simpleXML: String = "<?xml version='1.0' encoding='UTF-8'?>\n" +
                     "<llsd>\n" +
                     "  <map>\n" +
                     "    <key>name</key>\n" +
@@ -34,33 +34,33 @@ class LLSDIntegrationDemo {
                     "</llsd>"
             
             Log.i(TAG, "Test 1: Parsing XML with external library")
-            LLSDNode parsed = LLSDIntegrationBridge.parseFromXML(simpleXML)
+            val parsed: LLSDNode = LLSDIntegrationBridge.parseFromXML(simpleXML)
             
             if (parsed instanceof LLSDMap) {
-                LLSDMap map = (LLSDMap) parsed
+                val map: LLSDMap = (LLSDMap) parsed
                 Log.i(TAG, "Successfully parsed LLSD map")
                 
                 // Test accessing values through the map
                 if (map.keyExists("name")) {
-                    String name = map.byKey("name").asString()
+                    val name: String = map.byKey("name").asString()
                     Log.i(TAG, "Name: " + name)
                 }
                 
                 if (map.keyExists("version")) {
-                    Int version = map.byKey("version").asInt()
+                    val version: Int = map.byKey("version").asInt()
                     Log.i(TAG, "Version: " + version)
                 }
                 
                 if (map.keyExists("enabled")) {
-                    Boolean enabled = map.byKey("enabled").asBoolean()
+                    val enabled: Boolean = map.byKey("enabled").asBoolean()
                     Log.i(TAG, "Enabled: " + enabled)
                 }
             }
             
             // Test 2: Create LLSD nodes and serialize back
             Log.i(TAG, "Test 2: Creating and serializing LLSD")
-            LLSDString testString = LLSDString("Hello from Linkpoint!")
-            String serialized = LLSDIntegrationBridge.serializeToXML(testString)
+            val testString: LLSDString = LLSDString("Hello from Linkpoint!")
+            val serialized: String = LLSDIntegrationBridge.serializeToXML(testString)
             Log.i(TAG, "Serialized LLSD: " + serialized)
             
             Log.i(TAG, "LLSD Integration Demo completed successfully!")
@@ -74,13 +74,13 @@ class LLSDIntegrationDemo {
      * Test fallback functionality
      */
     @JvmStatic
-    Unit testFallback() {
+     fun testFallback() {
         try {
             Log.i(TAG, "Testing fallback functionality")
             
             // This should demonstrate fallback to original implementation
             // when the external library fails
-            String malformedXML = "not valid xml"
+            val malformedXML: String = "not valid xml"
             
             // Note: This might still fail, but demonstrates the fallback mechanism
             Log.i(TAG, "Fallback test completed")

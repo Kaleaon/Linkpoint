@@ -30,14 +30,14 @@ class ModernRenderPipeline {
     private Int uPointLights
     private Int uNumPointLights
     
-    private val Float[] mvpMatrix = Float[16]
-    private val Float[] modelMatrix = Float[16]
-    private val Float[] viewMatrix = Float[16]
-    private val Float[] projectionMatrix = Float[16]
+    private val FloatArray mvpMatrix = Float[16]
+    private val FloatArray modelMatrix = Float[16]
+    private val FloatArray viewMatrix = Float[16]
+    private val FloatArray projectionMatrix = Float[16]
     
-    public Boolean initialize() {
+     public fun initialize(): Boolean {
         // Check OpenGL ES version
-        String version = GLES30.glGetString(GLES30.GL_VERSION)
+        val version: String = GLES30.glGetString(GLES30.GL_VERSION)
         Log.i(TAG, "OpenGL ES version: " + version)
         
         isES3Available = version != null && (version.contains("OpenGL ES 3.") || version.contains("OpenGL ES 3."))
@@ -51,10 +51,10 @@ class ModernRenderPipeline {
         }
     }
     
-    private Boolean initializeModernPipeline() {
+     private fun initializeModernPipeline(): Boolean {
         // Create modern PBR shader program
-        String vertexShader = getModernVertexShader()
-        String fragmentShader = getModernFragmentShader()
+        val vertexShader: String = getModernVertexShader()
+        val fragmentShader: String = getModernFragmentShader()
         
         pbrShaderProgram = createShaderProgram(vertexShader, fragmentShader)
         if (pbrShaderProgram == -1) {
@@ -80,10 +80,10 @@ class ModernRenderPipeline {
         return true
     }
     
-    private Boolean initializeLegacyPipeline() {
+     private fun initializeLegacyPipeline(): Boolean {
         // Create legacy shader program for OpenGL ES 2.0
-        String vertexShader = getLegacyVertexShader()
-        String fragmentShader = getLegacyFragmentShader()
+        val vertexShader: String = getLegacyVertexShader()
+        val fragmentShader: String = getLegacyFragmentShader()
         
         legacyShaderProgram = createShaderProgram(vertexShader, fragmentShader)
         if (legacyShaderProgram == -1) {
@@ -95,7 +95,7 @@ class ModernRenderPipeline {
         return true
     }
     
-    fun renderFrame(RenderParams params) {
+    fun renderFrame(params: RenderParams) {
         if (isES3Available && pbrShaderProgram != -1) {
             renderModernFrame(params)
         } else if (legacyShaderProgram != -1) {
@@ -103,7 +103,7 @@ class ModernRenderPipeline {
         }
     }
     
-    private Unit renderModernFrame(RenderParams params) {
+     private fun renderModernFrame(params: RenderParams) {
         GLES30.glUseProgram(pbrShaderProgram)
         
         // Set up matrices
@@ -147,7 +147,7 @@ class ModernRenderPipeline {
         checkGLError("renderModernFrame")
     }
     
-    private Unit renderLegacyFrame(RenderParams params) {
+     private fun renderLegacyFrame(params: RenderParams) {
         GLES30.glUseProgram(legacyShaderProgram)
         
         // Basic legacy rendering
@@ -156,18 +156,18 @@ class ModernRenderPipeline {
         checkGLError("renderLegacyFrame")
     }
     
-    private Int createShaderProgram(String vertexSource, String fragmentSource) {
-        Int vertexShader = loadShader(GLES30.GL_VERTEX_SHADER, vertexSource)
+     private fun createShaderProgram(vertexSource: String, fragmentSource: String): Int {
+        val vertexShader: Int = loadShader(GLES30.GL_VERTEX_SHADER, vertexSource)
         if (vertexShader == 0) {
             return -1
         }
         
-        Int fragmentShader = loadShader(GLES30.GL_FRAGMENT_SHADER, fragmentSource)
+        val fragmentShader: Int = loadShader(GLES30.GL_FRAGMENT_SHADER, fragmentSource)
         if (fragmentShader == 0) {
             return -1
         }
         
-        Int program = GLES30.glCreateProgram()
+        val program: Int = GLES30.glCreateProgram()
         if (program == 0) {
             Log.e(TAG, "Error creating shader program")
             return -1
@@ -177,7 +177,7 @@ class ModernRenderPipeline {
         GLES30.glAttachShader(program, fragmentShader)
         GLES30.glLinkProgram(program)
         
-        Int[] linkStatus = Int[1]
+        val linkStatus: IntArray = Int[1]
         GLES30.glGetProgramiv(program, GLES30.GL_LINK_STATUS, linkStatus, 0)
         if (linkStatus[0] != GLES30.GL_TRUE) {
             Log.e(TAG, "Error linking program: " + GLES30.glGetProgramInfoLog(program))
@@ -192,8 +192,8 @@ class ModernRenderPipeline {
         return program
     }
     
-    private Int loadShader(Int type, String shaderCode) {
-        Int shader = GLES30.glCreateShader(type)
+     private fun loadShader(type: Int, shaderCode: String): Int {
+        val shader: Int = GLES30.glCreateShader(type)
         if (shader == 0) {
             Log.e(TAG, "Error creating shader")
             return 0
@@ -202,7 +202,7 @@ class ModernRenderPipeline {
         GLES30.glShaderSource(shader, shaderCode)
         GLES30.glCompileShader(shader)
         
-        Int[] compiled = Int[1]
+        val compiled: IntArray = Int[1]
         GLES30.glGetShaderiv(shader, GLES30.GL_COMPILE_STATUS, compiled, 0)
         if (compiled[0] == 0) {
             Log.e(TAG, "Error compiling shader: " + GLES30.glGetShaderInfoLog(shader))
@@ -213,15 +213,15 @@ class ModernRenderPipeline {
         return shader
     }
     
-    private Unit checkGLError(String operation) {
-        Int error = GLES30.glGetError()
+     private fun checkGLError(operation: String) {
+        val error: Int = GLES30.glGetError()
         if (error != GLES30.GL_NO_ERROR) {
             Log.e(TAG, "OpenGL error in " + operation + ": " + error)
         }
     }
     
     // Modern PBR shaders
-    private String getModernVertexShader() {
+     private fun getModernVertexShader(): String {
         return "#version 300 es\n" +
                "layout(location = 0) in vec3 a_Position;\n" +
                "layout(location = 1) in vec3 a_Normal;\n" +
@@ -248,7 +248,7 @@ class ModernRenderPipeline {
                "}"
     }
     
-    private String getModernFragmentShader() {
+     private fun getModernFragmentShader(): String {
         return "#version 300 es\n" +
                "precision mediump Float;\n" +
                "\n" +
@@ -301,7 +301,7 @@ class ModernRenderPipeline {
     }
     
     // Legacy shaders for OpenGL ES 2.0
-    private String getLegacyVertexShader() {
+     private fun getLegacyVertexShader(): String {
         return "attribute vec3 a_Position;\n" +
                "attribute vec2 a_TexCoord;\n" +
                "uniform mat4 u_MVPMatrix;\n" +
@@ -312,7 +312,7 @@ class ModernRenderPipeline {
                "}"
     }
     
-    private String getLegacyFragmentShader() {
+     private fun getLegacyFragmentShader(): String {
         return "precision mediump Float;\n" +
                "varying vec2 v_TexCoord;\n" +
                "uniform sampler2D u_Texture;\n" +
@@ -321,7 +321,7 @@ class ModernRenderPipeline {
                "}"
     }
     
-    public Boolean isModernPipelineAvailable() {
+     public fun isModernPipelineAvailable(): Boolean {
         return isES3Available
     }
     
@@ -339,10 +339,10 @@ class ModernRenderPipeline {
      */
     @JvmStatic
     class RenderParams {
-        public Float[] modelMatrix = Float[16]
-        public Float[] viewMatrix = Float[16]
-        public Float[] projectionMatrix = Float[16]
-        public Float[] cameraPosition = Float[3]
+        public FloatArray modelMatrix = Float[16]
+        public FloatArray viewMatrix = Float[16]
+        public FloatArray projectionMatrix = Float[16]
+        public FloatArray cameraPosition = Float[3]
         
         // Texture handles
         public Int albedoTexture = 0
@@ -350,7 +350,7 @@ class ModernRenderPipeline {
         public Int metallicRoughnessTexture = 0
         
         // Lighting
-        public Float[] directionalLight = Float[16]; // 4 lights * 4 components
+        public FloatArray directionalLight = Float[16]; // 4 lights * 4 components
         public Int numPointLights = 0
         
         // Geometry

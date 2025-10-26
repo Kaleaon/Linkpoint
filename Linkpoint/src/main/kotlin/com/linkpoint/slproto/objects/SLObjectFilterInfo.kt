@@ -4,22 +4,22 @@ import javax.annotation.Nullable
 
 abstract class SLObjectFilterInfo {
     @JvmStatic
-    SLObjectFilterInfo create() {
+     fun create(): SLObjectFilterInfo {
         return AutoValue_SLObjectFilterInfo("", false, false, false, 0.0f)
     }
 
     @JvmStatic
-    SLObjectFilterInfo create(String str, Boolean z, Boolean z2, Boolean z3, Float f) {
+     fun create(str: String, z: Boolean, z2: Boolean, z3: Boolean, f: Float): SLObjectFilterInfo {
         return AutoValue_SLObjectFilterInfo(str, z, z2, z3, f)
     }
 
     public abstract String filterText()
 
-    public Boolean nameMatches(String str) {
+     public fun nameMatches(str: String): Boolean {
         if (str == null) {
             return false
         }
-        String filterText = filterText()
+        val filterText: String = filterText()
         if (filterText.length() != 0 && !str.toLowerCase().contains(filterText.toLowerCase())) {
             return false
         }
@@ -29,7 +29,7 @@ abstract class SLObjectFilterInfo {
         return true
     }
 
-    public Boolean objectMatches(SLObjectInfo sLObjectInfo, Float f, Boolean z) {
+     public fun objectMatches(sLObjectInfo: SLObjectInfo, f: Float, z: Boolean): Boolean {
         if (z && (!showAttachments())) {
             return false
         }

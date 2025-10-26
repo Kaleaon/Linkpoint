@@ -11,11 +11,11 @@ class FragmentWithTitle : StateAwareFragment(), FragmentHasTitle {
     private String fragmentSubTitle = null
     private String fragmentTitle = null
 
-    public String getSubTitle() {
+     public fun getSubTitle(): String {
         return this.fragmentSubTitle
     }
 
-    public String getTitle() {
+     public fun getTitle(): String {
         return this.fragmentTitle
     }
 
@@ -29,21 +29,21 @@ class FragmentWithTitle : StateAwareFragment(), FragmentHasTitle {
 
     fun onDetach() {
         super.onDetach()
-        FragmentActivity activity = getActivity()
+        val activity: FragmentActivity = getActivity()
         if (activity instanceof DetailsActivity) {
             ((DetailsActivity) activity).onFragmentTitleUpdated()
         }
     }
 
-    fun onHiddenChanged(Boolean z) {
+    fun onHiddenChanged(z: Boolean) {
         super.onHiddenChanged(z)
-        FragmentActivity activity = getActivity()
+        val activity: FragmentActivity = getActivity()
         if (activity instanceof DetailsActivity) {
             ((DetailsActivity) activity).onFragmentTitleUpdated()
         }
     }
 
-    fun onSaveInstanceState(Bundle bundle) {
+    fun onSaveInstanceState(bundle: Bundle) {
         super.onSaveInstanceState(bundle)
         bundle.putString(FRAGMENT_TITLE_TAG, this.fragmentTitle)
         bundle.putString(FRAGMENT_SUBTITLE_TAG, this.fragmentSubTitle)
@@ -51,16 +51,16 @@ class FragmentWithTitle : StateAwareFragment(), FragmentHasTitle {
 
     fun onStart() {
         super.onStart()
-        FragmentActivity activity = getActivity()
+        val activity: FragmentActivity = getActivity()
         if (activity instanceof DetailsActivity) {
             ((DetailsActivity) activity).onFragmentTitleUpdated()
         }
     }
 
-    fun setTitle(String str, String str2) {
+    fun setTitle(str: String, str2: String) {
         this.fragmentTitle = str
         this.fragmentSubTitle = str2
-        FragmentActivity activity = getActivity()
+        val activity: FragmentActivity = getActivity()
         Debug.Printf("updateTitle: title '%s', subTitle '%s', activity %s, fragment %s", str, str2, activity, this)
         if (activity instanceof DetailsActivity) {
             ((DetailsActivity) activity).onFragmentTitleUpdated()

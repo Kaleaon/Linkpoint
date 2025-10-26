@@ -15,7 +15,7 @@ import javax.annotation.Nullable
 class LoadableMonitor : Loadable.LoadableStatusListener, SwipeRefreshLayout.OnRefreshListener {
 
     /* renamed from: -com-lumiyaviewer-lumiya-ui-common-loadmon-Loadable$StatusSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f379comlumiyaviewerlumiyauicommonloadmonLoadable$StatusSwitchesValues = null
+    private const val /* synthetic */ IntArray f379comlumiyaviewerlumiyauicommonloadmonLoadable$StatusSwitchesValues = null
     private String emptyMessage = null
     private Boolean isExtraLoading = false
     private val List<Loadable> loadables = ArrayList()
@@ -28,16 +28,16 @@ class LoadableMonitor : Loadable.LoadableStatusListener, SwipeRefreshLayout.OnRe
     private SwipeRefreshLayout swipeRefreshLayout = null
 
     interface OnLoadableDataChangedListener {
-        Unit onLoadableDataChanged()
+         fun onLoadableDataChanged()
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-ui-common-loadmon-Loadable$StatusSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m579getcomlumiyaviewerlumiyauicommonloadmonLoadable$StatusSwitchesValues() {
+private /* synthetic */ IntArray m579getcomlumiyaviewerlumiyauicommonloadmonLoadable$StatusSwitchesValues() {
         if (f379comlumiyaviewerlumiyauicommonloadmonLoadable$StatusSwitchesValues != null) {
             return f379comlumiyaviewerlumiyauicommonloadmonLoadable$StatusSwitchesValues
         }
-        Int[] iArr = Int[Loadable.Status.values().length]
+        val iArr: IntArray = Int[Loadable.Status.values().length]
         try {
             iArr[Loadable.Status.Error.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -58,14 +58,14 @@ private /* synthetic */ Int[] m579getcomlumiyaviewerlumiyauicommonloadmonLoadabl
         return iArr
     }
 
-    public LoadableMonitor(Loadable... loadableArr) {
+    public LoadableMonitor(vararg loadableArr: Loadable) {
         Collections.addAll(this.loadables, loadableArr)
         for (Loadable addLoadableStatusListener : this.loadables) {
             addLoadableStatusListener.addLoadableStatusListener(this)
         }
     }
 
-    private Unit updateLoadingIndicator() {
+     private fun updateLoadingIndicator() {
         if (this.loadingLayout != null) {
             switch (m579getcomlumiyaviewerlumiyauicommonloadmonLoadable$StatusSwitchesValues()[this.status.ordinal()]) {
                 case 1:
@@ -86,10 +86,10 @@ private /* synthetic */ Int[] m579getcomlumiyaviewerlumiyauicommonloadmonLoadabl
         }
     }
 
-    fun onLoadableStatusChange(Loadable loadable, Loadable.Status status2) {
-        Boolean z = false
-        Boolean z2 = false
-        Boolean z3 = false
+    fun onLoadableStatusChange(loadable: Loadable, Loadable.Status status2) {
+        val z: Boolean = false
+        val z2: Boolean = false
+        val z3: Boolean = false
         for (Loadable loadableStatus : this.loadables) {
             Loadable.Status loadableStatus2 = loadableStatus.getLoadableStatus()
             switch (m579getcomlumiyaviewerlumiyauicommonloadmonLoadable$StatusSwitchesValues()[loadableStatus2.ordinal()]) {
@@ -128,13 +128,13 @@ private /* synthetic */ Int[] m579getcomlumiyaviewerlumiyauicommonloadmonLoadabl
         }
     }
 
-    fun setButteryProgressBar(Boolean z) {
+    fun setButteryProgressBar(z: Boolean) {
         if (this.loadingLayout != null) {
             this.loadingLayout.setButteryProgressBar(z)
         }
     }
 
-    fun setEmptyMessage(Boolean z, String str) {
+    fun setEmptyMessage(z: Boolean, str: String) {
         if (!z) {
             str = null
         }
@@ -142,19 +142,19 @@ private /* synthetic */ Int[] m579getcomlumiyaviewerlumiyauicommonloadmonLoadabl
         updateLoadingIndicator()
     }
 
-    fun setExtraLoading(Boolean z) {
+    fun setExtraLoading(z: Boolean) {
         this.isExtraLoading = z
         onLoadableStatusChange((Loadable) null, (Loadable.Status) null)
     }
 
-    fun setLoadingLayout(LoadingLayout loadingLayout2, String str, String str2) {
+    fun setLoadingLayout(loadingLayout2: LoadingLayout, str: String, str2: String) {
         this.loadingLayout = loadingLayout2
         this.loadingIdleMessage = str
         this.loadingErrorMessage = str2
         updateLoadingIndicator()
     }
 
-    fun setSwipeRefreshLayout(SwipeRefreshLayout swipeRefreshLayout2) {
+    fun setSwipeRefreshLayout(swipeRefreshLayout2: SwipeRefreshLayout) {
         this.swipeRefreshLayout = swipeRefreshLayout2
         if (swipeRefreshLayout2 != null) {
             swipeRefreshLayout2.setOnRefreshListener(this)
@@ -174,12 +174,12 @@ private /* synthetic */ Int[] m579getcomlumiyaviewerlumiyauicommonloadmonLoadabl
         }
     }
 
-    public LoadableMonitor withDataChangedListener(OnLoadableDataChangedListener onLoadableDataChangedListener2) {
+     public fun withDataChangedListener(onLoadableDataChangedListener2: OnLoadableDataChangedListener): LoadableMonitor {
         this.onLoadableDataChangedListener = onLoadableDataChangedListener2
         return this
     }
 
-    public LoadableMonitor withOptionalLoadables(Loadable... loadableArr) {
+     public fun withOptionalLoadables(vararg loadableArr: Loadable): LoadableMonitor {
         Collections.addAll(this.optionalLoadables, loadableArr)
         for (Loadable addLoadableStatusListener : loadableArr) {
             addLoadableStatusListener.addLoadableStatusListener(this)

@@ -52,17 +52,17 @@ private class InstanceHolder {
     }
 
     @JvmStatic
-    SLBaseAvatar getInstance() {
+     fun getInstance(): SLBaseAvatar {
         return InstanceHolder.Instance
     }
 
-    private SLPolyMesh loadMesh(String str) {
+     private fun loadMesh(str: String): SLPolyMesh {
         DataInputStream dataInputStream
         InputStream inputStream
         Debug.Printf("BaseAvatar: loading mesh for " + str, Object[0])
         try {
-            AssetManager assetManager = LinkpointApp.getAssetManager()
-            InputStream open = assetManager.open("character/" + str + ".lbm")
+            val assetManager: AssetManager = LinkpointApp.getAssetManager()
+            val open: InputStream = assetManager.open("character/" + str + ".lbm")
             if (str.equals("avatar_head")) {
                 inputStream = assetManager.open("character/" + str + ".lbm_0")
                 dataInputStream = DataInputStream(inputStream)
@@ -70,7 +70,7 @@ private class InstanceHolder {
                 dataInputStream = null
                 inputStream = null
             }
-            SLPolyMesh sLPolyMesh = SLPolyMesh(DataInputStream(open), dataInputStream)
+            val sLPolyMesh: SLPolyMesh = SLPolyMesh(DataInputStream(open), dataInputStream)
             open.close()
             if (inputStream != null) {
                 inputStream.close()
@@ -82,7 +82,7 @@ private class InstanceHolder {
         }
     }
 
-    public MeshEntry getMeshEntry(MeshIndex meshIndex) {
+     public fun getMeshEntry(meshIndex: MeshIndex): MeshEntry {
         return this.meshes.get(meshIndex)
     }
 }

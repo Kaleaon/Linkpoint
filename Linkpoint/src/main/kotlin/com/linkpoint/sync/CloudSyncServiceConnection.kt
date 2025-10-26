@@ -35,22 +35,22 @@ import javax.annotation.Nullable
 class CloudSyncServiceConnection : ServiceConnection {
 
     /* renamed from: -com-lumiyaviewer-lumiya-cloud-common-LogSyncStatus$StatusSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f229comlumiyaviewerlumiyacloudcommonLogSyncStatus$StatusSwitchesValues = null
+    private const val /* synthetic */ IntArray f229comlumiyaviewerlumiyacloudcommonLogSyncStatus$StatusSwitchesValues = null
     private const val REQUIRED_PLUGIN_VERSION: Int = 1
     private val Context context
     private val Handler fromPluginHandler = Handler() {
 
         /* renamed from: -com-lumiyaviewer-lumiya-cloud-common-MessageTypeSwitchesValues  reason: not valid java name */
-        private const val /* synthetic */ Int[] f230comlumiyaviewerlumiyacloudcommonMessageTypeSwitchesValues = null
-        final /* synthetic */ Int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$cloud$common$MessageType
+        private const val /* synthetic */ IntArray f230comlumiyaviewerlumiyacloudcommonMessageTypeSwitchesValues = null
+        final /* synthetic */ IntArray $SWITCH_TABLE$com$lumiyaviewer$lumiya$cloud$common$MessageType
 
         /* renamed from: -getcom-lumiyaviewer-lumiya-cloud-common-MessageTypeSwitchesValues  reason: not valid java name */
         @JvmStatic
-private /* synthetic */ Int[] m384getcomlumiyaviewerlumiyacloudcommonMessageTypeSwitchesValues() {
+private /* synthetic */ IntArray m384getcomlumiyaviewerlumiyacloudcommonMessageTypeSwitchesValues() {
             if (f230comlumiyaviewerlumiyacloudcommonMessageTypeSwitchesValues != null) {
                 return f230comlumiyaviewerlumiyacloudcommonMessageTypeSwitchesValues
             }
-            Int[] iArr = Int[MessageType.values().length]
+            val iArr: IntArray = Int[MessageType.values().length]
             try {
                 iArr[MessageType.LogFlushMessages.ordinal()] = 4
             } catch (NoSuchFieldError e) {
@@ -79,9 +79,9 @@ private /* synthetic */ Int[] m384getcomlumiyaviewerlumiyacloudcommonMessageType
             return iArr
         }
 
-        fun handleMessage(Message message) {
+        fun handleMessage(message: Message) {
             if (message.what == 100 && (message.obj instanceof Bundle)) {
-                Bundle bundle = (Bundle) message.obj
+                val bundle: Bundle = (Bundle) message.obj
                 if (bundle.containsKey("message") && bundle.containsKey("messageType")) {
                     try {
                         switch (m384getcomlumiyaviewerlumiyacloudcommonMessageTypeSwitchesValues()[MessageType.valueOf(bundle.getString("messageType")).ordinal()]) {
@@ -113,11 +113,11 @@ private /* synthetic */ Int[] m384getcomlumiyaviewerlumiyacloudcommonMessageType
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-cloud-common-LogSyncStatus$StatusSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m379getcomlumiyaviewerlumiyacloudcommonLogSyncStatus$StatusSwitchesValues() {
+private /* synthetic */ IntArray m379getcomlumiyaviewerlumiyacloudcommonLogSyncStatus$StatusSwitchesValues() {
         if (f229comlumiyaviewerlumiyacloudcommonLogSyncStatus$StatusSwitchesValues != null) {
             return f229comlumiyaviewerlumiyacloudcommonLogSyncStatus$StatusSwitchesValues
         }
-        Int[] iArr = Int[LogSyncStatus.Status.values().length]
+        val iArr: IntArray = Int[LogSyncStatus.Status.values().length]
         try {
             iArr[LogSyncStatus.Status.AppVersionRejected.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -141,15 +141,15 @@ private /* synthetic */ Int[] m379getcomlumiyaviewerlumiyacloudcommonLogSyncStat
     }
 
     @JvmStatic
-    Boolean checkPluginInstalled(Context context2) {
-        Intent intent = Intent()
+     fun checkPluginInstalled(context2: Context): Boolean {
+        val intent: Intent = Intent()
         intent.setComponent(ComponentName("com.linkpoint.cloud", "com.linkpoint.cloud.DriveSyncService"))
-        List<ResolveInfo> queryIntentServices = context2.getPackageManager().queryIntentServices(intent, 0)
+        val queryIntentServices: List<ResolveInfo> = context2.getPackageManager().queryIntentServices(intent, 0)
         return queryIntentServices != null && queryIntentServices.size() > 0
     }
 
     /* access modifiers changed from: private */
-    fun onLogMessagesCompleted(LogMessagesCompleted logMessagesCompleted) {
+    fun onLogMessagesCompleted(logMessagesCompleted: LogMessagesCompleted) {
         Debug.Printf("LinkpointCloud: written messages until %d for agent %s", Long.valueOf(logMessagesCompleted.lastWrittenMessageID), logMessagesCompleted.agentUUID)
         if (this.userManager.getUserID().equals(logMessagesCompleted.agentUUID)) {
             this.userManager.getSyncManager().onMessagesWritten(logMessagesCompleted.lastWrittenMessageID)
@@ -157,7 +157,7 @@ private /* synthetic */ Int[] m379getcomlumiyaviewerlumiyacloudcommonLogSyncStat
     }
 
     /* access modifiers changed from: private */
-    fun onLogMessagesFlushed(LogMessagesFlushed logMessagesFlushed) {
+    fun onLogMessagesFlushed(logMessagesFlushed: LogMessagesFlushed) {
         Debug.Printf("LinkpointCloud: flushed some messages for agent %s", logMessagesFlushed.agentUUID)
         if (this.userManager.getUserID().equals(logMessagesFlushed.agentUUID)) {
             this.userManager.getSyncManager().onMessagesFlushed(logMessagesFlushed.messageIDs)
@@ -165,24 +165,24 @@ private /* synthetic */ Int[] m379getcomlumiyaviewerlumiyacloudcommonLogSyncStat
     }
 
     /* access modifiers changed from: private */
-    fun onLogSyncStatus(LogSyncStatus logSyncStatus) {
+    fun onLogSyncStatus(logSyncStatus: LogSyncStatus) {
         String string
         Debug.Printf("LinkpointCloud: got logSyncStatus %s, plugin version %d", logSyncStatus.status, Integer.valueOf(logSyncStatus.pluginVersionCode))
         if (this.toPluginMessenger != null) {
             switch (m379getcomlumiyaviewerlumiyacloudcommonLogSyncStatus$StatusSwitchesValues()[logSyncStatus.status.ordinal()]) {
                 case 1:
-                    Intent intent = Intent("android.intent.action.VIEW")
+                    val intent: Intent = Intent("android.intent.action.VIEW")
                     intent.setData(Uri.parse(LicenseChecker.APP_STORE_URL))
                     showSyncingError(this.context.getString(R.string.cloud_sync_app_outdated), this.context.getString(R.string.cloud_sync_app_outdated_long), intent)
                     return
                 case 2:
-                    Intent intent2 = Intent("android.intent.action.VIEW")
+                    val intent2: Intent = Intent("android.intent.action.VIEW")
                     intent2.setData(Uri.parse("https://drive.google.com/"))
-                    String string2 = this.context.getString(R.string.cloud_sync_drive_error)
+                    val string2: String = this.context.getString(R.string.cloud_sync_drive_error)
                     if (Strings.isNullOrEmpty(logSyncStatus.errorMessage)) {
                         string = this.context.getString(R.string.cloud_sync_drive_error_long)
                     } else {
-                        string = this.context.getString(R.string.cloud_sync_drive_error_message, Object[]{logSyncStatus.errorMessage})
+                        string = this.context.getString(R.string.cloud_sync_drive_error_message, Array<Any>{logSyncStatus.errorMessage})
                     }
                     showSyncingError(string2, string, intent2)
                     return
@@ -192,7 +192,7 @@ private /* synthetic */ Int[] m379getcomlumiyaviewerlumiyacloudcommonLogSyncStat
                         this.userManager.getSyncManager().startSyncing(this)
                         return
                     }
-                    Intent intent3 = Intent("android.intent.action.VIEW")
+                    val intent3: Intent = Intent("android.intent.action.VIEW")
                     intent3.setData(Uri.parse(LicenseChecker.CLOUD_PLUGIN_URL))
                     showSyncingError(this.context.getString(R.string.cloud_sync_plugin_outdated), this.context.getString(R.string.cloud_sync_plugin_outdated_long), intent3)
                     return
@@ -213,7 +213,7 @@ private /* synthetic */ Int[] m379getcomlumiyaviewerlumiyacloudcommonLogSyncStat
         this.context.unbindService(this)
     }
 
-    fun onServiceConnected(ComponentName componentName, IBinder iBinder) {
+    fun onServiceConnected(componentName: ComponentName, iBinder: IBinder) {
         Debug.Printf("LinkpointCloud: service connected", Object[0])
         this.toPluginMessenger = Messenger(iBinder)
         try {
@@ -223,18 +223,18 @@ private /* synthetic */ Int[] m379getcomlumiyaviewerlumiyacloudcommonLogSyncStat
         }
     }
 
-    fun onServiceDisconnected(ComponentName componentName) {
+    fun onServiceDisconnected(componentName: ComponentName) {
         Debug.Printf("LinkpointCloud: service disconnected", Object[0])
     }
 
-    public Boolean sendMessage(MessageType messageType, Bundleable bundleable) {
+     public fun sendMessage(messageType: MessageType, bundleable: Bundleable): Boolean {
         if (this.toPluginMessenger != null) {
             return CloudSyncMessenger.sendMessage(this.toPluginMessenger, messageType, bundleable, this.fromPluginMessenger)
         }
         return false
     }
 
-    fun showSyncingError(String str, String str2, Intent intent) {
+    fun showSyncingError(str: String, str2: String, intent: Intent) {
         NotificationCompat.Builder builder = NotificationCompat.Builder(this.context)
         builder.setSmallIcon(R.drawable.ic_cloud_sync_notify).setContentTitle(str).setContentText(str2).setDefaults(0).setOngoing(false).setAutoCancel(true).setContentIntent(PendingIntent.getActivity(this.context, 0, intent, SLMoveEvents.AGENT_CONTROL_AWAY)).setOnlyAlertOnce(true)
         ((NotificationManager) this.context.getSystemService("notification")).notify(R.id.google_drive_problem_notify, builder.build())

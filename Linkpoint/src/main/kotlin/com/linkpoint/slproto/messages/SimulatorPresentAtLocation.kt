@@ -10,7 +10,7 @@ import java.util.ArrayList
 import java.util.UUID
 
 class SimulatorPresentAtLocation : SLMessage() {
-    public NeighborBlock[] NeighborBlock_Fields = NeighborBlock[4]
+    public Array<NeighborBlock> NeighborBlock_Fields = NeighborBlock[4]
     public SimulatorBlock SimulatorBlock_Field
     public SimulatorPublicHostBlock SimulatorPublicHostBlock_Field
     public ArrayList<TelehubBlock> TelehubBlock_Fields = ArrayList<>()
@@ -28,7 +28,7 @@ class SimulatorPresentAtLocation : SLMessage() {
         public Int RegionFlags
         public UUID RegionID
         public Int SimAccess
-        public Byte[] SimName
+        public ByteArray SimName
     }
 
     @JvmStatic
@@ -54,15 +54,15 @@ class SimulatorPresentAtLocation : SLMessage() {
         this.SimulatorBlock_Field = SimulatorBlock()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.SimulatorBlock_Field.SimName.length + 1 + 1 + 4 + 16 + 4 + 4 + 42 + 1 + (this.TelehubBlock_Fields.size() * 13)
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleSimulatorPresentAtLocation(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.VT)
@@ -87,7 +87,7 @@ class SimulatorPresentAtLocation : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.SimulatorPublicHostBlock_Field.Port = unpackShort(byteBuffer) & 65535
         this.SimulatorPublicHostBlock_Field.SimulatorIP = unpackIPAddress(byteBuffer)
         this.SimulatorPublicHostBlock_Field.GridX = unpackInt(byteBuffer)
@@ -102,9 +102,9 @@ class SimulatorPresentAtLocation : SLMessage() {
         this.SimulatorBlock_Field.RegionID = unpackUUID(byteBuffer)
         this.SimulatorBlock_Field.EstateID = unpackInt(byteBuffer)
         this.SimulatorBlock_Field.ParentEstateID = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i2 = 0; i2 < b; i2++) {
-            TelehubBlock telehubBlock = TelehubBlock()
+            val telehubBlock: TelehubBlock = TelehubBlock()
             telehubBlock.HasTelehub = unpackBoolean(byteBuffer)
             telehubBlock.TelehubPos = unpackLLVector3(byteBuffer)
             this.TelehubBlock_Fields.add(telehubBlock)

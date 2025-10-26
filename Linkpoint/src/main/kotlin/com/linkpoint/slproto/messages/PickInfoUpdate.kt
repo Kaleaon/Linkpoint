@@ -18,9 +18,9 @@ class PickInfoUpdate : SLMessage() {
     @JvmStatic
     class Data {
         public UUID CreatorID
-        public Byte[] Desc
+        public ByteArray Desc
         public Boolean Enabled
-        public Byte[] Name
+        public ByteArray Name
         public UUID ParcelID
         public UUID PickID
         public LLVector3d PosGlobal
@@ -33,15 +33,15 @@ class PickInfoUpdate : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.Data_Field.Name.length + 50 + 2 + this.Data_Field.Desc.length + 16 + 24 + 4 + 1 + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandlePickInfoUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -71)
@@ -59,7 +59,7 @@ class PickInfoUpdate : SLMessage() {
         packBoolean(byteBuffer, this.Data_Field.Enabled)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.Data_Field.PickID = unpackUUID(byteBuffer)

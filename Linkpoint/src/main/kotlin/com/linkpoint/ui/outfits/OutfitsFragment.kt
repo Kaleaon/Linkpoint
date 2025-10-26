@@ -441,9 +441,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
 */
 
 
-    private Unit changeOutfit(Boolean z) {
-        InventoryEntryList<SLInventoryEntry> data = this.entryList.getData()
-        SLAgentCircuit data2 = this.agentCircuit.getData()
+     private fun changeOutfit(z: Boolean) {
+        val data: InventoryEntryList<SLInventoryEntry> = this.entryList.getData()
+        val data2: SLAgentCircuit = this.agentCircuit.getData()
         if (data != null && data2 != null) {
             ImmutableList.Builder builder = ImmutableList.builder()
             for (SLInventoryEntry sLInventoryEntry : data) {
@@ -455,30 +455,30 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
         }
     }
 
-    private UUID getFolderUUID() {
-        String str = null
-        Bundle arguments = getArguments()
+     private fun getFolderUUID(): UUID {
+        val str: String = null
+        val arguments: Bundle = getArguments()
         if (arguments != null) {
             str = arguments.getString(FOLDER_ID_KEY)
         }
         return UUIDPool.getUUID(str)
     }
 
-    private InventoryQuery getInventoryQuery(UUID uuid) {
-        Boolean z = false
+     private fun getInventoryQuery(uuid: UUID): InventoryQuery {
+        val z: Boolean = false
         if (InventoryFragmentHelper.getSortOrder(getContext()) == 0) {
             z = true
         }
         return InventoryQuery.create(uuid, (String) null, true, true, z, (SLAssetType) null)
     }
 
-    private UserManager getUserManager() {
+     private fun getUserManager(): UserManager {
         return ActivityUtils.getUserManager(getArguments())
     }
 
     @JvmStatic
-    Bundle makeSelection(UUID uuid, UUID uuid2) {
-        Bundle bundle = Bundle()
+     fun makeSelection(uuid: UUID, uuid2: UUID): Bundle {
+        val bundle: Bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         if (uuid2 != null) {
             bundle.putString(FOLDER_ID_KEY, uuid2.toString())
@@ -486,17 +486,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
         return bundle
     }
 
-    private Unit navigateToFolder(UUID uuid) {
+     private fun navigateToFolder(uuid: UUID) {
         getArguments().putString(FOLDER_ID_KEY, uuid.toString())
         showInventoryList(uuid)
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onAgentCircuit */
-    fun m696com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref1(SLAgentCircuit sLAgentCircuit) {
-        SLAvatarAppearance sLAvatarAppearance = null
+    fun m696com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref1(sLAgentCircuit: SLAgentCircuit) {
+        val sLAvatarAppearance: SLAvatarAppearance = null
         if (this.adapter != null) {
-            InventoryFolderAdapter inventoryFolderAdapter = this.adapter
+            val inventoryFolderAdapter: InventoryFolderAdapter = this.adapter
             if (sLAgentCircuit != null) {
                 sLAvatarAppearance = sLAgentCircuit.getModules().avatarAppearance
             }
@@ -506,7 +506,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
 
     /* access modifiers changed from: private */
     /* renamed from: onInventoryEntryList */
-    fun m695com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref0(InventoryEntryList inventoryEntryList) {
+    fun m695com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref0(inventoryEntryList: InventoryEntryList) {
         Debug.Printf("InventoryFragment (%s): onInventoryEntryList: %d entries", this, Integer.valueOf(inventoryEntryList.size()))
         setTitle(inventoryEntryList.getTitle(), (String) null)
         if (this.adapter != null) {
@@ -517,17 +517,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
 
     /* access modifiers changed from: private */
     /* renamed from: onLoadingStatusChanged */
-    fun m697com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref2(Boolean bool) {
+    fun m697com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref2(bool: Boolean) {
         updateLoadingStatus()
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onRootFolderEntryList */
-    fun m700com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref5(InventoryEntryList inventoryEntryList) {
+    fun m700com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref5(inventoryEntryList: InventoryEntryList) {
         if (inventoryEntryList != null) {
-            Iterator it = inventoryEntryList.iterator()
+            val it: Iterator = inventoryEntryList.iterator()
             while (it.hasNext()) {
-                SLInventoryEntry sLInventoryEntry = (SLInventoryEntry) it.next()
+                val sLInventoryEntry: SLInventoryEntry = (SLInventoryEntry) it.next()
                 if (sLInventoryEntry.isFolder && sLInventoryEntry.typeDefault == 48) {
                     this.myOutfitsFolderUUID = sLInventoryEntry.uuid
                     this.rootFolderEntryList.unsubscribe()
@@ -543,7 +543,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
 
     /* access modifiers changed from: private */
     /* renamed from: onWornAttachmentsChanged */
-    fun m698com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref3(ImmutableMap<UUID, String> immutableMap) {
+    fun m698com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref3(immutableMap: ImmutableMap<UUID, String>) {
         if (this.adapter != null) {
             this.adapter.setWornAttachments(immutableMap)
         }
@@ -551,7 +551,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
 
     /* access modifiers changed from: private */
     /* renamed from: onWornOutfitFolder */
-    fun m701com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref6(UUID uuid) {
+    fun m701com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref6(uuid: UUID) {
         if (this.adapter != null) {
             this.adapter.setWornOutfitFolder(uuid)
         }
@@ -559,23 +559,23 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
 
     /* access modifiers changed from: private */
     /* renamed from: onWornWearablesChanged */
-    fun m699com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref4(Table<SLWearableType, UUID, SLWearable> table) {
+    fun m699com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref4(table: Table<SLWearableType, UUID, SLWearable>) {
         if (this.adapter != null) {
             this.adapter.setWornWearables(table)
         }
     }
 
-    private Unit showInventoryList(UUID uuid) {
+     private fun showInventoryList(uuid: UUID) {
         UUID rootFolder
         Debug.Printf("OutfitsNewFragment (%s): showInventoryList '%s'", this, uuid)
-        View view = getView()
+        val view: View = getView()
         this.entryList.unsubscribe()
         this.agentCircuit.unsubscribe()
         this.folderLoading.unsubscribe()
         this.rootFolderEntryList.unsubscribe()
-        UserManager userManager = getUserManager()
+        val userManager: UserManager = getUserManager()
         if (userManager != null) {
-            InventoryDB database = userManager.getInventoryManager().getDatabase()
+            val database: InventoryDB = userManager.getInventoryManager().getDatabase()
             this.wornAttachments.subscribe(userManager.getWornAttachmentsPool(), SubscriptionSingleKey.Value)
             this.wornWearables.subscribe(userManager.getWornWearablesPool(), SubscriptionSingleKey.Value)
             this.wornOutfitFolder.subscribe(userManager.wornOutfitLink(), SubscriptionSingleKey.Value)
@@ -585,7 +585,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
             }
             Debug.Printf("After checking myoutfits: %s", uuid)
             if (uuid == null && (rootFolder = userManager.getInventoryManager().getRootFolder()) != null) {
-                SLInventoryEntry findSpecialFolder = database.findSpecialFolder(rootFolder, 48)
+                val findSpecialFolder: SLInventoryEntry = database.findSpecialFolder(rootFolder, 48)
                 if (findSpecialFolder != null) {
                     this.myOutfitsFolderUUID = findSpecialFolder.uuid
                     uuid = findSpecialFolder.uuid
@@ -632,12 +632,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
         updateLoadingStatus()
     }
 
-    private Unit updateLoadingStatus() {
-        Context context = getContext()
+     private fun updateLoadingStatus() {
+        val context: Context = getContext()
         if (context != null) {
-            Boolean z2 = true
+            val z2: Boolean = true
             if (this.folderLoading.isSubscribed()) {
-                Boolean data = this.folderLoading.getData()
+                val data: Boolean = this.folderLoading.getData()
                 z = data != null ? data.booleanValue() : false
             } else {
                 z = false
@@ -646,7 +646,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
                 z2 = this.adapter.isEmpty()
             }
             this.loadableMonitor.setExtraLoading(z2 ? z : false)
-            LoadableMonitor loadableMonitor2 = this.loadableMonitor
+            val loadableMonitor2: LoadableMonitor = this.loadableMonitor
             if (z2) {
                 z = false
             }
@@ -659,23 +659,23 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragment_13544  reason: not valid java name */
     public /* synthetic */ Unit m702lambda$com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragment_13544(AdapterView adapterView, View view, Int i, Long j) {
         SLInventoryEntry folder
-        UserManager userManager = getUserManager()
+        val userManager: UserManager = getUserManager()
         if (userManager != null) {
-            Object item = adapterView.getAdapter().getItem(i)
+            val item: Object = adapterView.getAdapter().getItem(i)
             if (item == this.listHeaderData) {
-                UUID folderUUID = getFolderUUID()
+                val folderUUID: UUID = getFolderUUID()
                 if (folderUUID == null || Objects.equal(folderUUID, this.myOutfitsFolderUUID)) {
                     DetailsActivity.showEmbeddedDetails(getActivity(), CurrentOutfitFragment.class, CurrentOutfitFragment.makeSelection(userManager.getUserID()))
                     return
                 }
-                InventoryEntryList data = this.entryList.getData()
+                val data: InventoryEntryList = this.entryList.getData()
                 if (data != null && (folder = data.getFolder()) != null) {
                     navigateToFolder(folder.parentUUID)
                 }
             } else if (item instanceof SLInventoryEntry) {
-                SLInventoryEntry sLInventoryEntry = (SLInventoryEntry) item
+                val sLInventoryEntry: SLInventoryEntry = (SLInventoryEntry) item
                 Debug.Printf("Inventory: Item click: item isFolder %b invType %d typeDefault %d assetType %d", Boolean.valueOf(sLInventoryEntry.isFolder), Integer.valueOf(sLInventoryEntry.invType), Integer.valueOf(sLInventoryEntry.typeDefault), Integer.valueOf(sLInventoryEntry.assetType))
-                UUID uuid = (!sLInventoryEntry.isFolder || sLInventoryEntry.uuid == null) ? (!sLInventoryEntry.isLink() || sLInventoryEntry.invType != 8) ? null : sLInventoryEntry.assetUUID : sLInventoryEntry.uuid
+                val uuid: UUID = (!sLInventoryEntry.isFolder || sLInventoryEntry.uuid == null) ? (!sLInventoryEntry.isLink() || sLInventoryEntry.invType != 8) ? null : sLInventoryEntry.assetUUID : sLInventoryEntry.uuid
                 if (uuid != null) {
                     navigateToFolder(uuid)
                 }
@@ -683,7 +683,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
         }
     }
 
-    fun onClick(View view) {
+    fun onClick(view: View) {
         switch (view.getId()) {
             case R.id.outfit_folder_wear_button:
                 changeOutfit(true)
@@ -696,9 +696,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
         }
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         Debug.Printf("InventoryFragment: onCreateView", Object[0])
-        View inflate = layoutInflater.inflate(R.layout.outfit_folder, viewGroup, false)
+        val inflate: View = layoutInflater.inflate(R.layout.outfit_folder, viewGroup, false)
         this.loadableMonitor.setLoadingLayout((LoadingLayout) inflate.findViewById(R.id.loading_layout), getString(R.string.no_folder_selected), getString(R.string.inventory_folder_fail))
         this.listHeader = (ViewGroup) layoutInflater.inflate(R.layout.inventory_item, (ListView) inflate.findViewById(R.id.item_list), false)
         this.adapter = InventoryFolderAdapter(layoutInflater, true)
@@ -712,19 +712,19 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
     }
 
     @EventHandler
-    fun onInventorySortOrderChanged(InventorySortOrderChangedEvent inventorySortOrderChangedEvent) {
+    fun onInventorySortOrderChanged(inventorySortOrderChangedEvent: InventorySortOrderChangedEvent) {
         if (isFragmentStarted()) {
             showInventoryList(getFolderUUID())
         }
     }
 
-    fun onItemCheckboxClicked(SLInventoryEntry sLInventoryEntry) {
+    fun onItemCheckboxClicked(sLInventoryEntry: SLInventoryEntry) {
         SLInventoryEntry resolveLink
-        UserManager userManager = getUserManager()
-        SLAgentCircuit data = this.agentCircuit.getData()
+        val userManager: UserManager = getUserManager()
+        val data: SLAgentCircuit = this.agentCircuit.getData()
         if (data != null && userManager != null) {
-            SLAvatarAppearance sLAvatarAppearance = data.getModules().avatarAppearance
-            InventoryDB database = userManager.getInventoryManager().getDatabase()
+            val sLAvatarAppearance: SLAvatarAppearance = data.getModules().avatarAppearance
+            val database: InventoryDB = userManager.getInventoryManager().getDatabase()
             if (!(database == null || (resolveLink = database.resolveLink(sLInventoryEntry)) == null)) {
                 sLInventoryEntry = resolveLink
             }
@@ -754,7 +754,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
         super.onStop()
     }
 
-    fun setFragmentArgs(Intent intent, Bundle bundle) {
+    fun setFragmentArgs(intent: Intent, bundle: Bundle) {
         Debug.Printf("InventoryFragment: setFragmentArgs '%s'", bundle)
         if (bundle != null) {
             getArguments().putAll(bundle)

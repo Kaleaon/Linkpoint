@@ -20,15 +20,15 @@ class InviteGroupResponse : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return 72
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleInviteGroupResponse(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 94)
@@ -39,7 +39,7 @@ class InviteGroupResponse : SLMessage() {
         packInt(byteBuffer, this.InviteData_Field.MembershipFee)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.InviteData_Field.AgentID = unpackUUID(byteBuffer)
         this.InviteData_Field.InviteeID = unpackUUID(byteBuffer)
         this.InviteData_Field.GroupID = unpackUUID(byteBuffer)

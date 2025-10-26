@@ -38,14 +38,14 @@ private class AccountListAdapter : ArrayAdapter()<AccountList.AccountInfo> {
             this.gridList = GridList(context)
         }
 
-        public View getView(Int i, View view, ViewGroup viewGroup) {
-            LayoutInflater layoutInflater = (LayoutInflater) getContext().getSystemService("layout_inflater")
+         public fun getView(i: Int, view: View, viewGroup: ViewGroup): View {
+            val layoutInflater: LayoutInflater = (LayoutInflater) getContext().getSystemService("layout_inflater")
             if (view == null) {
                 view = layoutInflater.inflate(R.layout.account_list_item, viewGroup, false)
             }
-            TextView textView = (TextView) view.findViewById(R.id.accountNameTextView)
-            TextView textView2 = (TextView) view.findViewById(R.id.gridNameTextView)
-            Object item = getItem(i)
+            val textView: TextView = (TextView) view.findViewById(R.id.accountNameTextView)
+            val textView2: TextView = (TextView) view.findViewById(R.id.gridNameTextView)
+            val item: Object = getItem(i)
             if (item != null) {
                 AccountList.AccountInfo accountInfo = (AccountList.AccountInfo) item
                 GridList.GridInfo gridByUUID = this.gridList.getGridByUUID(accountInfo.getGridUUID())
@@ -66,14 +66,14 @@ private class AccountListAdapter : ArrayAdapter()<AccountList.AccountInfo> {
         }
     }
 
-    private Unit deleteAccount(AccountList.AccountInfo accountInfo) {
+     private fun deleteAccount(AccountList.AccountInfo accountInfo) {
         this.accountList.deleteAccount(accountInfo)
         this.accountList.savePreferences()
         this.accountList.getAccountList(this.displayList)
         this.adapter.updateList()
     }
 
-    private Unit showAccountDeleteDialog(AccountList.AccountInfo accountInfo) {
+     private fun showAccountDeleteDialog(AccountList.AccountInfo accountInfo) {
         AlertDialog.Builder builder = AlertDialog.Builder(this)
         builder.setMessage(getString(R.string.account_delete_confirm_title)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this, accountInfo) {
 
@@ -166,23 +166,23 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.accounts.-$Lambda$
     fun onAccountEditCancelled() {
     }
 
-    fun onAccountEdited(AccountList.AccountInfo accountInfo, Boolean z) {
+    fun onAccountEdited(AccountList.AccountInfo accountInfo, z: Boolean) {
         if (z) {
             this.accountList.addNewAccount(accountInfo)
         }
         this.accountList.savePreferences()
         this.accountList.getAccountList(this.displayList)
         this.adapter.updateList()
-        ListView listView = (ListView) findViewById(R.id.accountList)
+        val listView: ListView = (ListView) findViewById(R.id.accountList)
         if (listView.getAdapter().getCount() > 0) {
             listView.setSelection(listView.getAdapter().getCount() - 1)
         }
     }
 
-    fun onClick(View view) {
+    fun onClick(view: View) {
         switch (view.getId()) {
             case R.id.add_new_account_button:
-                AccountEditDialog accountEditDialog = AccountEditDialog(this, (AccountList.AccountInfo) null)
+                val accountEditDialog: AccountEditDialog = AccountEditDialog(this, (AccountList.AccountInfo) null)
                 accountEditDialog.setOnAccountEditResultListener(this)
                 accountEditDialog.show()
                 return
@@ -191,13 +191,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.accounts.-$Lambda$
         }
     }
 
-    public Boolean onContextItemSelected(MenuItem menuItem) {
-        Object item = this.adapter.getItem(((AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo()).position)
+     public fun onContextItemSelected(menuItem: MenuItem): Boolean {
+        val item: Object = this.adapter.getItem(((AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo()).position)
         if (item != null) {
             AccountList.AccountInfo accountInfo = (AccountList.AccountInfo) item
             switch (menuItem.getItemId()) {
                 case R.id.item_account_edit:
-                    AccountEditDialog accountEditDialog = AccountEditDialog(this, accountInfo)
+                    val accountEditDialog: AccountEditDialog = AccountEditDialog(this, accountInfo)
                     accountEditDialog.setOnAccountEditResultListener(this)
                     accountEditDialog.show()
                     return true
@@ -209,40 +209,40 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.accounts.-$Lambda$
         return super.onContextItemSelected(menuItem)
     }
 
-    fun onCreate(Bundle bundle) {
+    fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setContentView((Int) R.layout.manage_accounts)
         this.accountList = AccountList(this)
         this.accountList.getAccountList(this.displayList)
         this.adapter = AccountListAdapter(this, this.displayList)
-        ListView listView = (ListView) findViewById(R.id.accountList)
+        val listView: ListView = (ListView) findViewById(R.id.accountList)
         listView.setAdapter(this.adapter)
         listView.setOnItemClickListener(this)
         findViewById(R.id.add_new_account_button).setOnClickListener(this)
         registerForContextMenu(listView)
     }
 
-    fun onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+    fun onCreateContextMenu(contextMenu: ContextMenu, view: View, ContextMenu.ContextMenuInfo contextMenuInfo) {
         super.onCreateContextMenu(contextMenu, view, contextMenuInfo)
         getMenuInflater().inflate(R.menu.account_list_context_menu, contextMenu)
     }
 
-    public Boolean onCreateOptionsMenu(Menu menu) {
+     public fun onCreateOptionsMenu(menu: Menu): Boolean {
         getMenuInflater().inflate(R.menu.manage_accounts_menu, menu)
         return true
     }
 
-    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
-        Object itemAtPosition = adapterView.getItemAtPosition(i)
+    fun onItemClick(adapterView: AdapterView<?>, view: View, i: Int, j: Long) {
+        val itemAtPosition: Object = adapterView.getItemAtPosition(i)
         if (itemAtPosition instanceof AccountList.AccountInfo) {
-            Intent intent = Intent()
+            val intent: Intent = Intent()
             intent.putExtra("selected_account", (AccountList.AccountInfo) itemAtPosition)
             setResult(-1, intent)
             finish()
         }
     }
 
-    public Boolean onOptionsItemSelected(MenuItem menuItem) {
+     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_manage_grids:
                 startActivity(Intent(this, ManageGridsActivity.class))

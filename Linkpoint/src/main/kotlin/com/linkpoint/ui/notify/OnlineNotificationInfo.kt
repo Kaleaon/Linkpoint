@@ -15,7 +15,7 @@ import com.linkpoint.ui.notify.NotificationChannels
 class OnlineNotificationInfo {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f465comlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues = null
+    private const val /* synthetic */ IntArray f465comlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues = null
     private val String contentText
     private val Boolean hasProgress
     private val String titleText
@@ -23,11 +23,11 @@ class OnlineNotificationInfo {
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m668getcomlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues() {
+private /* synthetic */ IntArray m668getcomlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues() {
         if (f465comlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues != null) {
             return f465comlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues
         }
-        Int[] iArr = Int[SLGridConnection.ConnectionState.values().length]
+        val iArr: IntArray = Int[SLGridConnection.ConnectionState.values().length]
         try {
             iArr[SLGridConnection.ConnectionState.Connected.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -63,9 +63,9 @@ private /* synthetic */ Int[] m668getcomlumiyaviewerlumiyaslprotoSLGridConnectio
         L_0x0012:
             return
         L_0x0013:
-            Int[] r0 = m668getcomlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues()
+            val r0: IntArray = m668getcomlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues()
             com.lumiyaviewer.lumiya.slproto.SLGridConnection$ConnectionState r2 = r10.getConnectionState()
-            Int r2 = r2.ordinal()
+            val r2: Int = r2.ordinal()
             r0 = r0[r2]
             switch(r0) {
                 case 1: goto L_0x0065
@@ -81,12 +81,12 @@ private /* synthetic */ Int[] m668getcomlumiyaviewerlumiyaslprotoSLGridConnectio
         L_0x002d:
             r6.visible = r5
             r6.titleText = r9
-            Boolean r0 = r10.getIsReconnecting()
+            val r0: Boolean = r10.getIsReconnecting()
             if (r0 == 0) goto L_0x004f
             android.content.res.Resources r0 = r8.getResources()
             r1 = 2131296568(0x7f090138, Float:1.8211056E38)
             java.lang.String r0 = r0.getString(r1)
-            java.lang.Object[] r1 = java.lang.Object[r5]
+            java.lang.Array<Any> r1 = java.lang.Object[r5]
             r1[r4] = r9
             java.lang.String r0 = java.lang.String.format(r0, r1)
             r6.contentText = r0
@@ -97,7 +97,7 @@ private /* synthetic */ Int[] m668getcomlumiyaviewerlumiyaslprotoSLGridConnectio
             android.content.res.Resources r0 = r8.getResources()
             r1 = 2131296567(0x7f090137, Float:1.8211054E38)
             java.lang.String r0 = r0.getString(r1)
-            java.lang.Object[] r1 = java.lang.Object[r5]
+            java.lang.Array<Any> r1 = java.lang.Object[r5]
             r1[r4] = r9
             java.lang.String r0 = java.lang.String.format(r0, r1)
             r6.contentText = r0
@@ -122,14 +122,14 @@ private /* synthetic */ Int[] m668getcomlumiyaviewerlumiyaslprotoSLGridConnectio
         L_0x0093:
             if (r0 == 0) goto L_0x00d9
             java.lang.String r2 = "(loading)"
-            Boolean r2 = r0.equals(r2)
+            val r2: Boolean = r0.equals(r2)
             if (r2 != 0) goto L_0x00d9
-            Int r1 = r12.nearbyUsers()
+            val r1: Int = r12.nearbyUsers()
             android.content.res.Resources r2 = r8.getResources()
             r3 = 2131296566(0x7f090136, Float:1.8211052E38)
             java.lang.String r2 = r2.getString(r3)
             r3 = 2
-            java.lang.Object[] r3 = java.lang.Object[r3]
+            java.lang.Array<Any> r3 = java.lang.Object[r3]
             r3[r4] = r0
             java.lang.Integer r0 = java.lang.Integer.valueOf(r1)
             r3[r5] = r0
@@ -139,7 +139,7 @@ private /* synthetic */ Int[] m668getcomlumiyaviewerlumiyaslprotoSLGridConnectio
             android.content.res.Resources r0 = r8.getResources()
             r1 = 2131296565(0x7f090135, Float:1.821105E38)
             java.lang.String r0 = r0.getString(r1)
-            java.lang.Object[] r1 = java.lang.Object[r5]
+            java.lang.Array<Any> r1 = java.lang.Object[r5]
             r1[r4] = r9
             java.lang.String r0 = java.lang.String.format(r0, r1)
         L_0x00d1:
@@ -159,15 +159,15 @@ private /* synthetic */ Int[] m668getcomlumiyaviewerlumiyaslprotoSLGridConnectio
         throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.ui.notify.OnlineNotificationInfo.<init>(Boolean, android.content.Context, java.lang.String, com.lumiyaviewer.lumiya.slproto.SLGridConnection, com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever, com.lumiyaviewer.lumiya.slproto.users.manager.CurrentLocationInfo):Unit")
     }
 
-    public Boolean equals(Object obj) {
+     public fun equals(obj: Object): Boolean {
         if (!(obj instanceof OnlineNotificationInfo)) {
             return false
         }
-        OnlineNotificationInfo onlineNotificationInfo = (OnlineNotificationInfo) obj
+        val onlineNotificationInfo: OnlineNotificationInfo = (OnlineNotificationInfo) obj
         return Objects.equal(this.titleText, onlineNotificationInfo.titleText) && Objects.equal(this.contentText, onlineNotificationInfo.contentText) && this.visible == onlineNotificationInfo.visible && this.hasProgress == onlineNotificationInfo.hasProgress
     }
 
-    public Notification getNotification(Context context) {
+     public fun getNotification(context: Context): Notification {
         if (!this.visible) {
             return null
         }

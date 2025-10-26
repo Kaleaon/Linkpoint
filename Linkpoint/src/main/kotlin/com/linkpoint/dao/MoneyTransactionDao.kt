@@ -30,23 +30,23 @@ class MoneyTransactionDao : AbstractDao()<MoneyTransaction, Long> {
     }
 
     @JvmStatic
-    Unit createTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'MONEY_TRANSACTION' (" + "'_id' INTEGER PRIMARY KEY ," + "'TIMESTAMP' INTEGER NOT NULL ," + "'AGENT_UUID' TEXT," + "'TRANSACTION_AMOUNT' INTEGER NOT NULL ," + "'NEW_BALANCE' INTEGER NOT NULL );")
     }
 
     @JvmStatic
-    Unit dropTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'MONEY_TRANSACTION'")
     }
 
-    protected Unit bindValues(SQLiteStatement sQLiteStatement, MoneyTransaction moneyTransaction) {
+     protected fun bindValues(sQLiteStatement: SQLiteStatement, moneyTransaction: MoneyTransaction) {
         sQLiteStatement.clearBindings()
-        Long id = moneyTransaction.getId()
+        val id: Long = moneyTransaction.getId()
         if (id != null) {
             sQLiteStatement.bindLong(1, id.longValue())
         }
         sQLiteStatement.bindLong(2, moneyTransaction.getTimestamp().getTime())
-        UUID agentUUID = moneyTransaction.getAgentUUID()
+        val agentUUID: UUID = moneyTransaction.getAgentUUID()
         if (agentUUID != null) {
             sQLiteStatement.bindString(3, agentUUID.toString())
         }
@@ -54,26 +54,26 @@ class MoneyTransactionDao : AbstractDao()<MoneyTransaction, Long> {
         sQLiteStatement.bindLong(5, (Long) moneyTransaction.getNewBalance())
     }
 
-    public Long getKey(MoneyTransaction moneyTransaction) {
+     public fun getKey(moneyTransaction: MoneyTransaction): Long {
         return moneyTransaction != null ? moneyTransaction.getId() : null
     }
 
-    protected Boolean isEntityUpdateable() {
+     protected fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    public MoneyTransaction readEntity(Cursor cursor, Int i) {
-        UUID uuid = null
-        Long valueOf = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
-        Date date = Date(cursor.getLong(i + 1))
+     public fun readEntity(cursor: Cursor, i: Int): MoneyTransaction {
+        val uuid: UUID = null
+        val valueOf: Long = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
+        val date: Date = Date(cursor.getLong(i + 1))
         if (!cursor.isNull(i + 2)) {
             uuid = UUID.fromString(cursor.getString(i + 2))
         }
         return MoneyTransaction(valueOf, date, uuid, cursor.getInt(i + 3), cursor.getInt(i + 4))
     }
 
-    fun readEntity(Cursor cursor, MoneyTransaction moneyTransaction, Int i) {
-        UUID uuid = null
+    fun readEntity(cursor: Cursor, moneyTransaction: MoneyTransaction, i: Int) {
+        val uuid: UUID = null
         moneyTransaction.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
         moneyTransaction.setTimestamp(Date(cursor.getLong(i + 1)))
         if (!cursor.isNull(i + 2)) {
@@ -84,11 +84,11 @@ class MoneyTransactionDao : AbstractDao()<MoneyTransaction, Long> {
         moneyTransaction.setNewBalance(cursor.getInt(i + 4))
     }
 
-    public Long readKey(Cursor cursor, Int i) {
+     public fun readKey(cursor: Cursor, i: Int): Long {
         return cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
     }
 
-    protected Long updateKeyAfterInsert(MoneyTransaction moneyTransaction, Long j) {
+     protected fun updateKeyAfterInsert(moneyTransaction: MoneyTransaction, j: Long): Long {
         moneyTransaction.setId(Long.valueOf(j))
         return Long.valueOf(j)
     }

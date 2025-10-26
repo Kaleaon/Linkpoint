@@ -11,7 +11,7 @@ import com.linkpoint.ui.common.MasterDetailsActivity
 
 class SettingsActivity : MasterDetailsActivity() {
     private val FragmentActivityFactory detailsFragmentFactory = FragmentActivityFactory() {
-        public Intent createIntent(Context context, Bundle bundle) {
+         public fun createIntent(context: Context, bundle: Bundle): Intent {
             return null
         }
 
@@ -21,33 +21,33 @@ class SettingsActivity : MasterDetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-    public FragmentActivityFactory getDetailsFragmentFactory() {
+     public fun getDetailsFragmentFactory(): FragmentActivityFactory {
         return this.detailsFragmentFactory
     }
 
     /* access modifiers changed from: protected */
-    public Bundle getNewDetailsFragmentArguments(Bundle bundle, Bundle bundle2) {
+     public fun getNewDetailsFragmentArguments(bundle: Bundle, bundle2: Bundle): Bundle {
         return bundle == null ? SettingsFragment.makeSelection(SettingsPage.PageConnection.getPageResourceId()) : super.getNewDetailsFragmentArguments(bundle, bundle2)
     }
 
     /* access modifiers changed from: protected */
-    public Boolean handleConnectionEvents() {
+     public fun handleConnectionEvents(): Boolean {
         return false
     }
 
     /* access modifiers changed from: protected */
-    public Boolean isRootDetailsFragment(Class<? : Fragment> cls) {
+     public fun isRootDetailsFragment(cls: Class<? : Fragment>): Boolean {
         return cls == SettingsFragment.class
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(Bundle bundle) {
+    fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setDefaultTitle(getString(R.string.settings_title), (String) null)
     }
 
     /* access modifiers changed from: protected */
-    public Fragment onCreateMasterFragment(Intent intent, Bundle bundle) {
+     public fun onCreateMasterFragment(intent: Intent, bundle: Bundle): Fragment {
         return SettingsSelectionFragment()
     }
 }

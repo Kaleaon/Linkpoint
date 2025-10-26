@@ -43,7 +43,7 @@ class GLResourceManager {
             this.glCleanables.size()
         }
         while (true) {
-            Reference<? : GLGenericResource> poll = this.refQueue.poll()
+            val poll: Reference<? : GLGenericResource> = this.refQueue.poll()
             if (poll == null) {
                 return
             }
@@ -69,7 +69,7 @@ class GLResourceManager {
         TextureMemoryTracker.releaseAllGLMemory()
     }
 
-    fun addCleanable(GLCleanable gLCleanable) {
+    fun addCleanable(gLCleanable: GLCleanable) {
         synchronized (this.glCleanableLock) {
             this.glCleanables.add(gLCleanable)
         }

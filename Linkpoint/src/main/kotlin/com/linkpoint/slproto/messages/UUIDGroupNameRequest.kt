@@ -18,15 +18,15 @@ class UUIDGroupNameRequest : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.UUIDNameBlock_Fields.size() * 16) + 5
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleUUIDGroupNameRequest(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -19)
@@ -36,10 +36,10 @@ class UUIDGroupNameRequest : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            UUIDNameBlock uUIDNameBlock = UUIDNameBlock()
+            val uUIDNameBlock: UUIDNameBlock = UUIDNameBlock()
             uUIDNameBlock.ID = unpackUUID(byteBuffer)
             this.UUIDNameBlock_Fields.add(uUIDNameBlock)
         }

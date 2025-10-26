@@ -121,7 +121,7 @@ class GLLoadableBuffer : GLCleanable {
 
     @TargetApi(18)
     val Unit BindUniform(RenderContext renderContext, Int i) {
-        Boolean z = false
+        val z: Boolean = false
         if (this.glBuffer == null) {
             this.glBuffer = GLBuffer(renderContext.glResourceManager, this.rawBuffer)
             renderContext.glResourceManager.addCleanable(this)
@@ -174,15 +174,15 @@ class GLLoadableBuffer : GLCleanable {
         }
     }
 
-    public Float getFloat(Int i) {
+     public fun getFloat(i: Int): Float {
         return this.rawBuffer.getFloat(i)
     }
 
-    public DirectByteBuffer getRawBuffer() {
+     public fun getRawBuffer(): DirectByteBuffer {
         return this.rawBuffer
     }
 
-    public Int getShort(Int i) {
+     public fun getShort(i: Int): Int {
         return this.rawBuffer.getShort(i)
     }
 }

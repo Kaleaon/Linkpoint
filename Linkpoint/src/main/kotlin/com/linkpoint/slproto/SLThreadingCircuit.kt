@@ -17,7 +17,7 @@ class SLThreadingCircuit : SLCircuit(), Executor {
             Debug.Printf("SLThreadingCircuit: working thread started.", Object[0])
             while (SLThreadingCircuit.this.workEnabled) {
                 try {
-                    Runnable runnable = (Runnable) SLThreadingCircuit.this.queue.poll(1000, TimeUnit.MILLISECONDS)
+                    val runnable: Runnable = (Runnable) SLThreadingCircuit.this.queue.poll(1000, TimeUnit.MILLISECONDS)
                     if (runnable != null) {
                         runnable.run()
                     } else {
@@ -39,12 +39,12 @@ class SLThreadingCircuit : SLCircuit(), Executor {
         this.workingThread.start()
     }
 
-    private Unit stopThread() {
+     private fun stopThread() {
         this.workEnabled = false
         this.workingThread.interrupt()
     }
 
-    fun HandleMessage(SLMessage sLMessage) {
+    fun HandleMessage(sLMessage: SLMessage) {
         this.queue.offer(() -> super.HandleMessage(sLMessage))
     }
 
@@ -60,7 +60,7 @@ class SLThreadingCircuit : SLCircuit(), Executor {
         stopThread()
     }
 
-    fun execute(Runnable runnable) {
+    fun execute(runnable: Runnable) {
         this.queue.offer(runnable)
     }
 }

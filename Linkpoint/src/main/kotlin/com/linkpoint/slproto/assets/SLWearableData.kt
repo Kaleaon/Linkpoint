@@ -42,9 +42,9 @@ class SLWearableData {
         }
     }
 
-    SLWearableData(Byte[] bArr) throws WearableFormatException {
+    SLWearableData(ByteArray bArr) throws WearableFormatException {
         try {
-            String[] split = String(bArr, "ISO-8859-1").trim().split("\n+")
+            val split: Array<String> = String(bArr, "ISO-8859-1").trim().split("\n+")
             if (split.length < 2) {
                 throw WearableFormatException()
             } else if (!split[0].trim().startsWith("LLWearable")) {
@@ -54,9 +54,9 @@ class SLWearableData {
                     this.name = split[1]
                     ImmutableList.Builder builder = ImmutableList.builder()
                     ImmutableList.Builder builder2 = ImmutableList.builder()
-                    Int i2 = 2
+                    val i2: Int = 2
                     while (i2 < split.length) {
-                        String[] split2 = split[i2].trim().split("\\s+")
+                        val split2: Array<String> = split[i2].trim().split("\\s+")
                         if (split2.length < 1) {
                             i2++
                         } else if (split2[0].equalsIgnoreCase("permissions") || split2[0].equalsIgnoreCase("sale_info")) {
@@ -79,15 +79,15 @@ class SLWearableData {
                             }
                         } else {
                             if (split2[0].equalsIgnoreCase("parameters")) {
-                                Int parseInt = Integer.parseInt(split2[1])
+                                val parseInt: Int = Integer.parseInt(split2[1])
                                 i = i2 + 1
-                                Int i3 = 0
+                                val i3: Int = 0
                                 while (i3 < parseInt) {
                                     if (i >= split.length) {
                                         throw WearableFormatException()
                                     }
                                     try {
-                                        String[] split3 = split[i].trim().split("\\s+")
+                                        val split3: Array<String> = split[i].trim().split("\\s+")
                                         if (split3.length < 2) {
                                             throw WearableFormatException()
                                         }
@@ -101,15 +101,15 @@ class SLWearableData {
                                     }
                                 }
                             } else if (split2[0].equalsIgnoreCase("textures")) {
-                                Int parseInt2 = Integer.parseInt(split2[1])
-                                Int i4 = i2 + 1
-                                Int i5 = 0
+                                val parseInt2: Int = Integer.parseInt(split2[1])
+                                val i4: Int = i2 + 1
+                                val i5: Int = 0
                                 while (i5 < parseInt2) {
                                     if (i >= split.length) {
                                         throw WearableFormatException()
                                     }
                                     try {
-                                        String[] split4 = split[i].trim().split("\\s+")
+                                        val split4: Array<String> = split[i].trim().split("\\s+")
                                         if (split4.length < 2) {
                                             throw WearableFormatException()
                                         }

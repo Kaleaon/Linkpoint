@@ -23,11 +23,11 @@ class ParcelProperties : SLMessage() {
         public Int Area
         public Int AuctionID
         public UUID AuthBuyerID
-        public Byte[] Bitmap
+        public ByteArray Bitmap
         public Int Category
         public Int ClaimDate
         public Int ClaimPrice
-        public Byte[] Desc
+        public ByteArray Desc
         public UUID GroupID
         public Int GroupPrims
         public Boolean IsGroupOwned
@@ -36,9 +36,9 @@ class ParcelProperties : SLMessage() {
         public Int MaxPrims
         public Int MediaAutoScale
         public UUID MediaID
-        public Byte[] MediaURL
-        public Byte[] MusicURL
-        public Byte[] Name
+        public ByteArray MediaURL
+        public ByteArray MusicURL
+        public ByteArray Name
         public Int OtherCleanTime
         public Int OtherCount
         public Int OtherPrims
@@ -73,15 +73,15 @@ class ParcelProperties : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.ParcelData_Field.Bitmap.length + 84 + 4 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + this.ParcelData_Field.Name.length + 1 + this.ParcelData_Field.Desc.length + 1 + this.ParcelData_Field.MusicURL.length + 1 + this.ParcelData_Field.MediaURL.length + 16 + 1 + 16 + 4 + 4 + 1 + 16 + 16 + 12 + 12 + 1 + 1 + 1 + 1 + 1 + 1 + 1
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleParcelProperties(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.put(Ascii.ETB)
         packInt(byteBuffer, this.ParcelData_Field.RequestResult)
         packInt(byteBuffer, this.ParcelData_Field.SequenceID)
@@ -135,7 +135,7 @@ class ParcelProperties : SLMessage() {
         packBoolean(byteBuffer, this.AgeVerificationBlock_Field.RegionDenyAgeUnverified)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.ParcelData_Field.RequestResult = unpackInt(byteBuffer)
         this.ParcelData_Field.SequenceID = unpackInt(byteBuffer)
         this.ParcelData_Field.SnapSelection = unpackBoolean(byteBuffer)

@@ -22,15 +22,15 @@ class SetStartLocation : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return 72
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleSetStartLocation(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 69)
@@ -42,7 +42,7 @@ class SetStartLocation : SLMessage() {
         packLLVector3(byteBuffer, this.StartLocationData_Field.LocationLookAt)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.StartLocationData_Field.AgentID = unpackUUID(byteBuffer)
         this.StartLocationData_Field.RegionID = unpackUUID(byteBuffer)
         this.StartLocationData_Field.LocationID = unpackInt(byteBuffer)

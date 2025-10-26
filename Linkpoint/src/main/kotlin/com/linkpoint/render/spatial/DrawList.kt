@@ -16,7 +16,7 @@ class DrawList {
     final DrawableStore drawableStore
     public DrawableAvatar myAvatar
     val ArrayList<DrawableObject> objects
-    public Int[] renderPasses
+    public IntArray renderPasses
     val ArrayList<DrawableTerrainPatch> terrain
 
     private DrawList(DrawableStore drawableStore, Int i) {
@@ -40,14 +40,14 @@ class DrawList {
     }
 
     @JvmStatic
-    DrawList create(DrawableStore drawableStore, DrawList drawList, Int i) {
+     fun create(drawableStore: DrawableStore, drawList: DrawList, i: Int): DrawList {
         if (drawList == null) {
             return DrawList(drawableStore, i)
         }
         return DrawList(drawableStore, (drawList.objects.size() * 4) / 3, (drawList.avatars.size() * 4) / 3, (drawList.avatarStubs.size() * 4) / 3, (drawList.terrain.size() * 4) / 3, i)
     }
 
-    Unit initRenderPasses() {
+     fun initRenderPasses() {
         this.renderPasses = Int[this.objects.size()]
     }
 }

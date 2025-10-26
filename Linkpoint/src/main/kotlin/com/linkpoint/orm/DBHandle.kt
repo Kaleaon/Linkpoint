@@ -26,7 +26,7 @@ val class DBHandle : SQLiteDatabase.CursorFactory {
         return this.sqliteDB
     }
 
-    public Cursor newCursor(SQLiteDatabase sQLiteDatabase, SQLiteCursorDriver sQLiteCursorDriver, String str, SQLiteQuery sQLiteQuery) {
+     public fun newCursor(sQLiteDatabase: SQLiteDatabase, sQLiteCursorDriver: SQLiteCursorDriver, str: String, sQLiteQuery: SQLiteQuery): Cursor {
         if (sQLiteDatabase == null) {
             throw IllegalArgumentException("SQLiteDatabase cannot be null")
         }

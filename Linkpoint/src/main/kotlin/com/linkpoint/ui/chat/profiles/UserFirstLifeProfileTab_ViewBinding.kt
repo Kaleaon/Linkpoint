@@ -24,19 +24,19 @@ class UserFirstLifeProfileTab_ViewBinding : Unbinder {
         this.target = userFirstLifeProfileTab
         userFirstLifeProfileTab.userProfilePaymentInfo = (TextView) Utils.findRequiredViewAsType(view, R.id.text_profile_payment_info, "field 'userProfilePaymentInfo'", TextView.class)
         userFirstLifeProfileTab.swipeRefreshLayout = (SwipeRefreshLayout) Utils.findRequiredViewAsType(view, R.id.swipe_refresh_layout, "field 'swipeRefreshLayout'", SwipeRefreshLayout.class)
-        View findRequiredView = Utils.findRequiredView(view, R.id.about_edit_button, "field 'aboutEditButton' and method 'onAboutEditClicked'")
+        val findRequiredView: View = Utils.findRequiredView(view, R.id.about_edit_button, "field 'aboutEditButton' and method 'onAboutEditClicked'")
         userFirstLifeProfileTab.aboutEditButton = (Button) Utils.castView(findRequiredView, R.id.about_edit_button, "field 'aboutEditButton'", Button.class)
         this.view2131755706 = findRequiredView
         findRequiredView.setOnClickListener(DebouncingOnClickListener() {
-            fun doClick(View view) {
+            fun doClick(view: View) {
                 userFirstLifeProfileTab.onAboutEditClicked(view)
             }
         userFirstLifeProfileTab.loadingLayout = (LoadingLayout) Utils.findRequiredViewAsType(view, R.id.loading_layout, "field 'loadingLayout'", LoadingLayout.class)
-        View findRequiredView2 = Utils.findRequiredView(view, R.id.change_pic_button, "field 'changePicButton' and method 'onChangePicClicked'")
+        val findRequiredView2: View = Utils.findRequiredView(view, R.id.change_pic_button, "field 'changePicButton' and method 'onChangePicClicked'")
         userFirstLifeProfileTab.changePicButton = (Button) Utils.castView(findRequiredView2, R.id.change_pic_button, "field 'changePicButton'", Button.class)
         this.view2131755698 = findRequiredView2
         findRequiredView2.setOnClickListener(DebouncingOnClickListener() {
-            fun doClick(View view) {
+            fun doClick(view: View) {
                 userFirstLifeProfileTab.onChangePicClicked(view)
             }
         userFirstLifeProfileTab.userProfileAboutText = (TextView) Utils.findRequiredViewAsType(view, R.id.user_profile_about_text, "field 'userProfileAboutText'", TextView.class)
@@ -45,7 +45,7 @@ class UserFirstLifeProfileTab_ViewBinding : Unbinder {
 
     @CallSuper
     fun unbind() {
-        UserFirstLifeProfileTab userFirstLifeProfileTab = this.target
+        val userFirstLifeProfileTab: UserFirstLifeProfileTab = this.target
         if (userFirstLifeProfileTab == null) {
             throw IllegalStateException("Bindings already cleared.")
         }

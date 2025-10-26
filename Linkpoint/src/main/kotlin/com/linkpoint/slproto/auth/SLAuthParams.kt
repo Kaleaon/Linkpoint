@@ -30,14 +30,14 @@ class SLAuthParams {
         this.gridName = str5
     }
 
-    public Boolean equals(Object obj) {
+     public fun equals(obj: Object): Boolean {
         if (this == obj) {
             return true
         }
         if (obj == null || getClass() != obj.getClass()) {
             return false
         }
-        SLAuthParams sLAuthParams = (SLAuthParams) obj
+        val sLAuthParams: SLAuthParams = (SLAuthParams) obj
         if (this.loginName == null ? sLAuthParams.loginName != null : (!this.loginName.equals(sLAuthParams.loginName))) {
             return false
         }
@@ -56,16 +56,16 @@ class SLAuthParams {
         return this.gridName != null ? this.gridName.equals(sLAuthParams.gridName) : sLAuthParams.gridName == null
     }
 
-    public Int hashCode() {
-        Int i = 0
-        Int hashCode = ((this.loginURL != null ? this.loginURL.hashCode() : 0) + (((this.startLocation != null ? this.startLocation.hashCode() : 0) + (((this.clientID != null ? this.clientID.hashCode() : 0) + (((this.passwordHash != null ? this.passwordHash.hashCode() : 0) + ((this.loginName != null ? this.loginName.hashCode() : 0) * 31)) * 31)) * 31)) * 31)) * 31
+     public fun hashCode(): Int {
+        val i: Int = 0
+        val hashCode: Int = ((this.loginURL != null ? this.loginURL.hashCode() : 0) + (((this.startLocation != null ? this.startLocation.hashCode() : 0) + (((this.clientID != null ? this.clientID.hashCode() : 0) + (((this.passwordHash != null ? this.passwordHash.hashCode() : 0) + ((this.loginName != null ? this.loginName.hashCode() : 0) * 31)) * 31)) * 31)) * 31)) * 31
         if (this.gridName != null) {
             i = this.gridName.hashCode()
         }
         return hashCode + i
     }
 
-    public SLAuthParams withLocation(String str) {
+     public fun withLocation(str: String): SLAuthParams {
         return SLAuthParams(this.loginName, this.passwordHash, this.clientID, str, this.loginURL, this.gridName)
     }
 }

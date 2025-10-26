@@ -20,11 +20,11 @@ class ViewerEffect : SLMessage() {
     @JvmStatic
     class Effect {
         public UUID AgentID
-        public Byte[] Color
+        public ByteArray Color
         public Float Duration
         public UUID ID
         public Int Type
-        public Byte[] TypeData
+        public ByteArray TypeData
     }
 
     public ViewerEffect() {
@@ -32,11 +32,11 @@ class ViewerEffect : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 35
-        Iterator<T> it = this.Effect_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 35
+        val it: Iterator<T> = this.Effect_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -44,11 +44,11 @@ class ViewerEffect : SLMessage() {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleViewerEffect(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) 17)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
@@ -64,12 +64,12 @@ class ViewerEffect : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            Effect effect = Effect()
+            val effect: Effect = Effect()
             effect.ID = unpackUUID(byteBuffer)
             effect.AgentID = unpackUUID(byteBuffer)
             effect.Type = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE

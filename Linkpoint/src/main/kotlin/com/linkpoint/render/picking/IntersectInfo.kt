@@ -12,14 +12,14 @@ class IntersectInfo {
     val Float u
     val Float v
 
-    public IntersectInfo(IntersectInfo intersectInfo, Float[] fArr, Int i) {
+    public IntersectInfo(IntersectInfo intersectInfo, FloatArray fArr, Int i) {
         this.intersectPoint = intersectInfo.intersectPoint
         this.faceID = intersectInfo.faceID
         this.s = intersectInfo.s
         this.t = intersectInfo.t
         this.faceKnown = intersectInfo.faceKnown
         if (this.faceKnown) {
-            Float[] fArr2 = Float[8]
+            val fArr2: FloatArray = Float[8]
             fArr2[0] = this.s
             fArr2[1] = this.t
             fArr2[3] = 1.0f

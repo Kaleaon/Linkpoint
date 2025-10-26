@@ -12,7 +12,7 @@ class BoundingBoxProgram : ShaderProgram() {
         super(Shader.BoundingBoxVertexShader, Shader.BoundingBoxFragmentShader)
     }
 
-    protected Unit bindVariables() {
+     protected fun bindVariables() {
         this.vPosition = GLES20.glGetAttribLocation(this.handle, "vPosition")
         this.uMVPMatrix = GLES20.glGetUniformLocation(this.handle, "uMVPMatrix")
         this.uObjWorldMatrix = GLES20.glGetUniformLocation(this.handle, "uObjWorldMatrix")

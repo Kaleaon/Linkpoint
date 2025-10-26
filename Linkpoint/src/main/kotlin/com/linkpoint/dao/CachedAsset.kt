@@ -1,7 +1,7 @@
 package com.linkpoint.dao
 
 class CachedAsset {
-    private Byte[] data
+    private ByteArray data
     private String key
     private Boolean mustRevalidate
     private Int status
@@ -10,42 +10,42 @@ class CachedAsset {
         this.key = str
     }
 
-    public CachedAsset(String str, Int i, Byte[] bArr, Boolean z) {
+    public CachedAsset(String str, Int i, ByteArray bArr, Boolean z) {
         this.key = str
         this.status = i
         this.data = bArr
         this.mustRevalidate = z
     }
 
-    public Byte[] getData() {
+     public fun getData(): ByteArray {
         return this.data
     }
 
-    public String getKey() {
+     public fun getKey(): String {
         return this.key
     }
 
-    public Boolean getMustRevalidate() {
+     public fun getMustRevalidate(): Boolean {
         return this.mustRevalidate
     }
 
-    public Int getStatus() {
+     public fun getStatus(): Int {
         return this.status
     }
 
-    fun setData(Byte[] bArr) {
+    fun setData(bArr: ByteArray) {
         this.data = bArr
     }
 
-    fun setKey(String str) {
+    fun setKey(str: String) {
         this.key = str
     }
 
-    fun setMustRevalidate(Boolean z) {
+    fun setMustRevalidate(z: Boolean) {
         this.mustRevalidate = z
     }
 
-    fun setStatus(Int i) {
+    fun setStatus(i: Int) {
         this.status = i
     }
 }

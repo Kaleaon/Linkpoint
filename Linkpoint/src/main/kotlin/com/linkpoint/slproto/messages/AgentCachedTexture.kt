@@ -28,15 +28,15 @@ class AgentCachedTexture : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.WearableData_Fields.size() * 17) + 41
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAgentCachedTexture(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put(Byte.MIN_VALUE)
@@ -50,13 +50,13 @@ class AgentCachedTexture : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.SerialNum = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            WearableData wearableData = WearableData()
+            val wearableData: WearableData = WearableData()
             wearableData.ID = unpackUUID(byteBuffer)
             wearableData.TextureIndex = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             this.WearableData_Fields.add(wearableData)

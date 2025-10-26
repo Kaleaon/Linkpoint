@@ -4,13 +4,13 @@ import android.opengl.Matrix
 import java.util.Arrays
 
 class FrustrumInfo {
-    val Float[] mvpMatrix
+    val FloatArray mvpMatrix
     val Float viewDistance
     val Float viewX
     val Float viewY
     val Float viewZ
 
-    public FrustrumInfo(Float f, Float f2, Float f3, Float f4, Float[] fArr, Int i) {
+    public FrustrumInfo(Float f, Float f2, Float f3, Float f4, FloatArray fArr, Int i) {
         this.viewX = f
         this.viewY = f2
         this.viewZ = f3
@@ -19,7 +19,7 @@ class FrustrumInfo {
         System.arraycopy(fArr, i, this.mvpMatrix, 0, 16)
     }
 
-    public FrustrumInfo(Float f, Float f2, Float f3, Float f4, Float[] fArr, Int i, Float[] fArr2, Int i2) {
+    public FrustrumInfo(Float f, Float f2, Float f3, Float f4, FloatArray fArr, Int i, FloatArray fArr2, Int i2) {
         this.viewX = f
         this.viewY = f2
         this.viewZ = f3
@@ -31,12 +31,12 @@ class FrustrumInfo {
     /* DevToolsApp WARNING: Missing block: B:7:0x0018, code:
             return false
      */
-    public Boolean equals(java.lang.Object obj) {
+     public fun equals(java.lang.Object obj): Boolean {
         if (!(obj instanceof FrustrumInfo)) {
             return false
         }
         
-        FrustrumInfo other = (FrustrumInfo) obj
+        val other: FrustrumInfo = (FrustrumInfo) obj
         
         // Compare all Float fields
         if (Float.compare(other.viewX, this.viewX) != 0) return false
@@ -49,7 +49,7 @@ class FrustrumInfo {
     }
     }
 
-    public Int hashCode() {
+     public fun hashCode(): Int {
         return ((((Float.floatToIntBits(this.viewX) + 0) + Float.floatToIntBits(this.viewY)) + Float.floatToIntBits(this.viewZ)) + Float.floatToIntBits(this.viewDistance)) + Arrays.hashCode(this.mvpMatrix)
     }
 }

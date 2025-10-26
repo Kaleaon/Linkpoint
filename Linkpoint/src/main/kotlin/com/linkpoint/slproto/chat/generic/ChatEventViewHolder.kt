@@ -22,7 +22,7 @@ class ChatEventViewHolder : RecyclerView().ViewHolder {
     private Long updateTimestamp = 0
 
     interface Factory {
-        ChatEventViewHolder createViewHolder(View view, RecyclerView.Adapter adapter)
+         fun createViewHolder(view: View, RecyclerView.Adapter adapter): ChatEventViewHolder)
     }
 
     public ChatEventViewHolder(View view, RecyclerView.Adapter adapter2) {
@@ -53,17 +53,17 @@ class ChatEventViewHolder : RecyclerView().ViewHolder {
     }
 
     /* access modifiers changed from: package-private */
-    fun setupTimestampUpdate(Context context, Long j) {
+    fun setupTimestampUpdate(context: Context, j: Long) {
         this.updateTimestamp = j
         updateTimestamp(context)
     }
 
-    fun updateTimestamp(Context context) {
+    fun updateTimestamp(context: Context) {
         if (this.timestampView == null) {
             return
         }
         if (this.updateTimestamp != 0) {
-            Long currentTimeMillis = System.currentTimeMillis()
+            val currentTimeMillis: Long = System.currentTimeMillis()
             this.timestampView.setText(currentTimeMillis < this.updateTimestamp + AnimationSequenceInfo.MAX_ANIMATION_LENGTH ? context.getString(R.string.now) : DateUtils.getRelativeTimeSpanString(this.updateTimestamp, currentTimeMillis, AnimationSequenceInfo.MAX_ANIMATION_LENGTH, 262144))
             this.timestampView.setVisibility(0)
             return

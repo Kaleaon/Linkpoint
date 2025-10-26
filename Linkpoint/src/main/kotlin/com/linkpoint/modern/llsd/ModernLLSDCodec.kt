@@ -25,7 +25,7 @@ class ModernLLSDCodec {
      * Convert LLSD to JSON with modern streaming support
      */
     @JvmStatic
-    JSONObject toJSON(LLSDNode llsd) {
+     fun toJSON(llsd: LLSDNode): JSONObject {
         try {
             // Simplified approach for now - just return basic JSON structure
             return JSONObject().put("simplified", true)
@@ -41,8 +41,8 @@ class ModernLLSDCodec {
     class Primitives {
         
         @JvmStatic
-    LLSDMap createVector3(LLVector3 vector) {
-            Map<String, LLSDNode> map = HashMap<>()
+     fun createVector3(vector: LLVector3): LLSDMap {
+            val map: Map<String, LLSDNode> = HashMap<>()
             map.put("X", LLSDDouble(vector.x))
             map.put("Y", LLSDDouble(vector.y))
             map.put("Z", LLSDDouble(vector.z))
@@ -50,8 +50,8 @@ class ModernLLSDCodec {
         }
         
         @JvmStatic
-    LLSDMap createQuaternion(LLQuaternion quat) {
-            Map<String, LLSDNode> map = HashMap<>()
+     fun createQuaternion(quat: LLQuaternion): LLSDMap {
+            val map: Map<String, LLSDNode> = HashMap<>()
             map.put("X", LLSDDouble(quat.x))
             map.put("Y", LLSDDouble(quat.y))
             map.put("Z", LLSDDouble(quat.z))
@@ -60,18 +60,18 @@ class ModernLLSDCodec {
         }
         
         @JvmStatic
-    LLSDUUID createUUID(UUID uuid) {
+     fun createUUID(uuid: UUID): LLSDUUID {
             return LLSDUUID(uuid)
         }
         
         @JvmStatic
-    LLSDDate createDate(Date date) {
+     fun createDate(date: Date): LLSDDate {
             return LLSDDate(date)
         }
         
         @JvmStatic
-    LLSDMap createColor4(Float r, Float g, Float b, Float a) {
-            Map<String, LLSDNode> map = HashMap<>()
+     fun createColor4(r: Float, g: Float, b: Float, a: Float): LLSDMap {
+            val map: Map<String, LLSDNode> = HashMap<>()
             map.put("R", LLSDDouble(r))
             map.put("G", LLSDDouble(g))
             map.put("B", LLSDDouble(b))
@@ -87,7 +87,7 @@ class ModernLLSDCodec {
     class StreamingParser {
         
         @JvmStatic
-    LLSDNode parseModern(String input) {
+     fun parseModern(input: String): LLSDNode {
             try {
                 // Use simplified parsing approach
                 if (input == null || input.trim().isEmpty()) {
@@ -101,7 +101,7 @@ class ModernLLSDCodec {
         }
         
         @JvmStatic
-    String serializeModern(LLSDNode node) {
+     fun serializeModern(node: LLSDNode): String {
             try {
                 // Simplified serialization for now
                 return "<llsd><map /></llsd>"

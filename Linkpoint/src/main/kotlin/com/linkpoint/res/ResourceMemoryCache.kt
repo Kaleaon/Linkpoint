@@ -17,7 +17,7 @@ abstract class ResourceMemoryCache<ResourceParams, ResourceType> : ResourceManag
                 .weakValues()
                 .removalListener(notification -> {
                     if (notification.getValue() != null) {
-                        String key = "final_" + String.valueOf(notification.getKey().hashCode())
+                        val key: String = "final_" + String.valueOf(notification.getKey().hashCode())
                         this.memoryManager.trackDeallocation(key, estimateSize(notification.getValue()))
                     }
                 })
@@ -27,7 +27,7 @@ abstract class ResourceMemoryCache<ResourceParams, ResourceType> : ResourceManag
                 .weakValues()
                 .removalListener(notification -> {
                     if (notification.getValue() != null) {
-                        String key = "intermediate_" + String.valueOf(notification.getKey().hashCode())
+                        val key: String = "intermediate_" + String.valueOf(notification.getKey().hashCode())
                         this.memoryManager.trackDeallocation(key, estimateSize(notification.getValue()))
                     }
                 })
@@ -38,9 +38,9 @@ abstract class ResourceMemoryCache<ResourceParams, ResourceType> : ResourceManag
     
     protected abstract Long estimateSize(ResourceType resource)
 
-    fun CompleteRequest(ResourceParams resourceparams, ResourceType resourcetype, Set<ResourceConsumer> set) {
+    fun CompleteRequest(resourceparams: ResourceParams, resourcetype: ResourceType, set: Set<ResourceConsumer>) {
         if (resourcetype != null) {
-            String key = "final_" + String.valueOf(resourceparams.hashCode())
+            val key: String = "final_" + String.valueOf(resourceparams.hashCode())
             memoryManager.trackAllocation(key, resourcetype, estimateSize(resourcetype))
             this.finalResults.put(resourceparams, resourcetype)
         } else {
@@ -49,9 +49,9 @@ abstract class ResourceMemoryCache<ResourceParams, ResourceType> : ResourceManag
         super.CompleteRequest(resourceparams, resourcetype, set)
     }
 
-    fun IntermediateResult(ResourceParams resourceparams, ResourceType resourcetype, Set<ResourceConsumer> set) {
+    fun IntermediateResult(resourceparams: ResourceParams, resourcetype: ResourceType, set: Set<ResourceConsumer>) {
         if (resourcetype != null) {
-            String key = "intermediate_" + String.valueOf(resourceparams.hashCode())
+            val key: String = "intermediate_" + String.valueOf(resourceparams.hashCode())
             memoryManager.trackAllocation(key, resourcetype, estimateSize(resourcetype))
             this.intermediateResults.put(resourceparams, resourcetype)
         } else {
@@ -60,13 +60,13 @@ abstract class ResourceMemoryCache<ResourceParams, ResourceType> : ResourceManag
         super.IntermediateResult(resourceparams, resourcetype, set)
     }
 
-    fun RequestResource(ResourceParams resourceparams, ResourceConsumer resourceConsumer) {
-        ResourceType ifPresent = this.finalResults.getIfPresent(resourceparams)
+    fun RequestResource(resourceparams: ResourceParams, resourceConsumer: ResourceConsumer) {
+        val ifPresent: ResourceType = this.finalResults.getIfPresent(resourceparams)
         if (ifPresent != null) {
             resourceConsumer.OnResourceReady(ifPresent, false)
             return
         }
-        ResourceType ifPresent2 = this.intermediateResults.getIfPresent(resourceparams)
+        val ifPresent2: ResourceType = this.intermediateResults.getIfPresent(resourceparams)
         if (ifPresent2 != null) {
             resourceConsumer.OnResourceReady(ifPresent2, true)
         }
@@ -78,14 +78,14 @@ abstract class ResourceMemoryCache<ResourceParams, ResourceType> : ResourceManag
         intermediateResults.invalidateAll()
         
         // Trim final results cache by 50%
-        Long currentSize = finalResults.size()
+        val currentSize: Long = finalResults.size()
         if (currentSize > 10) { // Only trim if we have a reasonable number of items
             finalResults.asMap().entrySet().removeIf(entry -> 
                 entry.getKey().hashCode() % 2 == 0); // Remove roughly half
         }
     }
     
-    public Long getCacheSize() {
+     public fun getCacheSize(): Long {
         return finalResults.size() + intermediateResults.size()
     }
 }

@@ -20,17 +20,17 @@ import javax.annotation.Nullable
 abstract class ChatterID : Parcelable, Comparable<ChatterID> {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f150comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f150comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues = null
     val UUID agentUUID
 
     @JvmStatic
     class ChatterIDGroup : ChatterIDWithUUID() {
         const val Parcelable.Creator<ChatterIDGroup> CREATOR = Parcelable.Creator<ChatterIDGroup>() {
-            public ChatterIDGroup createFromParcel(Parcel parcel) {
+             public fun createFromParcel(parcel: Parcel): ChatterIDGroup {
                 return ChatterIDGroup(parcel, (ChatterIDGroup) null)
             }
 
-            public ChatterIDGroup[] newArray(Int i) {
+            public Array<ChatterIDGroup> newArray(Int i) {
                 return ChatterIDGroup[i]
             }
         }
@@ -55,14 +55,14 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
             return super.compareTo(chatterID)
         }
 
-        public Boolean equals(Object obj) {
+         public fun equals(obj: Object): Boolean {
             if (obj instanceof ChatterIDGroup) {
                 return super.equals(obj)
             }
             return false
         }
 
-        public ChatterType getChatterType() {
+         public fun getChatterType(): ChatterType {
             return ChatterType.Group
         }
 
@@ -74,7 +74,7 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
             return super.getOptionalChatterUUID()
         }
 
-        public Subscription getPictureID(UserManager userManager, Executor executor, OnChatterPictureIDListener onChatterPictureIDListener) {
+         public fun getPictureID(userManager: UserManager, executor: Executor, onChatterPictureIDListener: OnChatterPictureIDListener): Subscription {
             return userManager.getCachedGroupProfiles().getPool().subscribe(this.uuid, UIThreadExecutor.getInstance(), $Lambda$0dEDWURupJXcv_HDGgfxSQl02DE(onChatterPictureIDListener))
         }
 
@@ -102,11 +102,11 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
     @JvmStatic
     class ChatterIDLocal : ChatterID() {
         const val Parcelable.Creator<ChatterIDLocal> CREATOR = Parcelable.Creator<ChatterIDLocal>() {
-            public ChatterIDLocal createFromParcel(Parcel parcel) {
+             public fun createFromParcel(parcel: Parcel): ChatterIDLocal {
                 return ChatterIDLocal(parcel, (ChatterIDLocal) null)
             }
 
-            public ChatterIDLocal[] newArray(Int i) {
+            public Array<ChatterIDLocal> newArray(Int i) {
                 return ChatterIDLocal[i]
             }
         }
@@ -127,14 +127,14 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
             this(uuid)
         }
 
-        public Boolean equals(Object obj) {
+         public fun equals(obj: Object): Boolean {
             if (obj instanceof ChatterIDLocal) {
                 return ChatterID.super.equals(obj)
             }
             return false
         }
 
-        public ChatterType getChatterType() {
+         public fun getChatterType(): ChatterType {
             return ChatterType.Local
         }
     }
@@ -142,11 +142,11 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
     @JvmStatic
     class ChatterIDUser : ChatterIDWithUUID() {
         const val Parcelable.Creator<ChatterIDUser> CREATOR = Parcelable.Creator<ChatterIDUser>() {
-            public ChatterIDUser createFromParcel(Parcel parcel) {
+             public fun createFromParcel(parcel: Parcel): ChatterIDUser {
                 return ChatterIDUser(parcel, (ChatterIDUser) null)
             }
 
-            public ChatterIDUser[] newArray(Int i) {
+            public Array<ChatterIDUser> newArray(Int i) {
                 return ChatterIDUser[i]
             }
         }
@@ -171,14 +171,14 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
             return super.compareTo(chatterID)
         }
 
-        public Boolean equals(Object obj) {
+         public fun equals(obj: Object): Boolean {
             if (obj instanceof ChatterIDUser) {
                 return super.equals(obj)
             }
             return false
         }
 
-        public ChatterType getChatterType() {
+         public fun getChatterType(): ChatterType {
             return ChatterType.User
         }
 
@@ -190,7 +190,7 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
             return super.getOptionalChatterUUID()
         }
 
-        public Subscription getPictureID(UserManager userManager, Executor executor, OnChatterPictureIDListener onChatterPictureIDListener) {
+         public fun getPictureID(userManager: UserManager, executor: Executor, onChatterPictureIDListener: OnChatterPictureIDListener): Subscription {
             return userManager.getAvatarProperties().getPool().subscribe(this.uuid, executor, Subscription.OnData(onChatterPictureIDListener) {
 
                 /* renamed from: -$f0 */
@@ -323,8 +323,8 @@ private abstract class ChatterIDWithUUID : ChatterID() {
             this(uuid2, uuid3)
         }
 
-        public Int compareTo(ChatterID chatterID) {
-            Int compareTo = ChatterID.super.compareTo(chatterID)
+         public fun compareTo(chatterID: ChatterID): Int {
+            val compareTo: Int = ChatterID.super.compareTo(chatterID)
             if (compareTo != 0) {
                 return compareTo
             }
@@ -334,43 +334,43 @@ private abstract class ChatterIDWithUUID : ChatterID() {
             return 0
         }
 
-        public Boolean equals(Object obj) {
+         public fun equals(obj: Object): Boolean {
             if (!ChatterID.super.equals(obj) || !(obj instanceof ChatterIDWithUUID)) {
                 return false
             }
             return Objects.equal(this.uuid, ((ChatterIDWithUUID) obj).uuid)
         }
 
-        public UUID getChatterUUID() {
+         public fun getChatterUUID(): UUID {
             return this.uuid
         }
 
-        public UUID getOptionalChatterUUID() {
+         public fun getOptionalChatterUUID(): UUID {
             return this.uuid
         }
 
-        public Int hashCode() {
+         public fun hashCode(): Int {
             return (this.uuid != null ? this.uuid.hashCode() : 0) + ChatterID.super.hashCode()
         }
 
-        public Boolean isValidUUID() {
+         public fun isValidUUID(): Boolean {
             if (this.uuid != null) {
                 return !UUIDPool.ZeroUUID.equals(this.uuid)
             }
             return false
         }
 
-        public Bundle toBundle() {
-            Bundle bundle = ChatterID.super.toBundle()
+         public fun toBundle(): Bundle {
+            val bundle: Bundle = ChatterID.super.toBundle()
             bundle.putString("chatterUUID", this.uuid != null ? this.uuid.toString() : UUIDPool.ZeroUUID.toString())
             return bundle
         }
 
-        public String toString() {
+         public fun toString(): String {
             return ChatterID.super.toString() + ":" + (this.uuid != null ? this.uuid.toString() : "null")
         }
 
-        fun writeToParcel(Parcel parcel, Int i) {
+        fun writeToParcel(parcel: Parcel, i: Int) {
             ChatterID.super.writeToParcel(parcel, i)
             if (this.uuid != null) {
                 parcel.writeLong(this.uuid.getMostSignificantBits())
@@ -387,7 +387,7 @@ private abstract class ChatterIDWithUUID : ChatterID() {
         User(NotificationType.Private),
         Group(NotificationType.Group)
         
-        const val ChatterType[] VALUES = null
+        const val Array<ChatterType> VALUES = null
         private val NotificationType notificationType
 
         static {
@@ -398,22 +398,22 @@ private abstract class ChatterIDWithUUID : ChatterID() {
             this.notificationType = notificationType2
         }
 
-        public NotificationType getNotificationType() {
+         public fun getNotificationType(): NotificationType {
             return this.notificationType
         }
     }
 
     interface OnChatterPictureIDListener {
-        Unit onChatterPictureID(UUID uuid)
+         fun onChatterPictureID(uuid: UUID)
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m259getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues() {
+private /* synthetic */ IntArray m259getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues() {
         if (f150comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues != null) {
             return f150comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues
         }
-        Int[] iArr = Int[ChatterType.values().length]
+        val iArr: IntArray = Int[ChatterType.values().length]
         try {
             iArr[ChatterType.Group.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -447,8 +447,8 @@ private /* synthetic */ Int[] m259getcomlumiyaviewerlumiyaslprotousersChatterID$
     }
 
     @JvmStatic
-    ChatterID fromBundle(Bundle bundle) {
-        UUID fromString = UUID.fromString(bundle.getString("chatterAgentUUID"))
+     fun fromBundle(bundle: Bundle): ChatterID {
+        val fromString: UUID = UUID.fromString(bundle.getString("chatterAgentUUID"))
         switch (m259getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues()[ChatterType.VALUES[bundle.getInt("chatterType", 0)].ordinal()]) {
             case 1:
                 return getGroupChatterID(fromString, UUID.fromString(bundle.getString("chatterUUID")))
@@ -462,7 +462,7 @@ private /* synthetic */ Int[] m259getcomlumiyaviewerlumiyaslprotousersChatterID$
     }
 
     @JvmStatic
-    ChatterID fromDatabaseObject(UUID uuid, Chatter chatter) {
+     fun fromDatabaseObject(uuid: UUID, chatter: Chatter): ChatterID {
         switch (m259getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues()[ChatterType.VALUES[chatter.getType()].ordinal()]) {
             case 1:
                 return getGroupChatterID(uuid, chatter.getUuid())
@@ -476,30 +476,30 @@ private /* synthetic */ Int[] m259getcomlumiyaviewerlumiyaslprotousersChatterID$
     }
 
     @JvmStatic
-    ChatterID getGroupChatterID(UUID uuid, UUID uuid2) {
+     fun getGroupChatterID(uuid: UUID, uuid2: UUID): ChatterID {
         return ChatterIDGroup(uuid, uuid2, (ChatterIDGroup) null)
     }
 
     @JvmStatic
-    ChatterID getLocalChatterID(UUID uuid) {
+     fun getLocalChatterID(uuid: UUID): ChatterID {
         return ChatterIDLocal(uuid, (ChatterIDLocal) null)
     }
 
     @JvmStatic
-    ChatterIDUser getUserChatterID(UUID uuid, UUID uuid2) {
+     fun getUserChatterID(uuid: UUID, uuid2: UUID): ChatterIDUser {
         return ChatterIDUser(uuid, uuid2, (ChatterIDUser) null)
     }
 
-    public Int compareTo(ChatterID chatterID) {
-        Int compareTo = this.agentUUID.compareTo(chatterID.agentUUID)
+     public fun compareTo(chatterID: ChatterID): Int {
+        val compareTo: Int = this.agentUUID.compareTo(chatterID.agentUUID)
         return compareTo != 0 ? compareTo : getChatterType().compareTo(chatterID.getChatterType())
     }
 
-    public Int describeContents() {
+     public fun describeContents(): Int {
         return 0
     }
 
-    public Boolean equals(Object obj) {
+     public fun equals(obj: Object): Boolean {
         if (obj instanceof ChatterID) {
             return ((ChatterID) obj).agentUUID.equals(this.agentUUID)
         }
@@ -508,47 +508,47 @@ private /* synthetic */ Int[] m259getcomlumiyaviewerlumiyaslprotousersChatterID$
 
     public abstract ChatterType getChatterType()
 
-    public SLGridConnection getConnection() {
+     public fun getConnection(): SLGridConnection {
         return GridConnectionManager.getConnection(this.agentUUID)
     }
 
-    public UUID getOptionalChatterUUID() {
+     public fun getOptionalChatterUUID(): UUID {
         return null
     }
 
-    public Subscription getPictureID(UserManager userManager, Executor executor, OnChatterPictureIDListener onChatterPictureIDListener) {
+     public fun getPictureID(userManager: UserManager, executor: Executor, onChatterPictureIDListener: OnChatterPictureIDListener): Subscription {
         return null
     }
 
-    public UserManager getUserManager() {
+     public fun getUserManager(): UserManager {
         return UserManager.getUserManager(this.agentUUID)
     }
 
-    public Int hashCode() {
+     public fun hashCode(): Int {
         return this.agentUUID.hashCode() + 1 + getChatterType().ordinal()
     }
 
-    public Boolean isValidUUID() {
+     public fun isValidUUID(): Boolean {
         return false
     }
 
-    public Bundle toBundle() {
-        Bundle bundle = Bundle()
+     public fun toBundle(): Bundle {
+        val bundle: Bundle = Bundle()
         bundle.putInt("chatterType", getChatterType().ordinal())
         bundle.putString("chatterAgentUUID", this.agentUUID.toString())
         return bundle
     }
 
-    fun toDatabaseObject(Chatter chatter) {
+    fun toDatabaseObject(chatter: Chatter) {
         chatter.setType(getChatterType().ordinal())
         chatter.setUuid(getOptionalChatterUUID())
     }
 
-    public String toString() {
+     public fun toString(): String {
         return "Chatter:" + getChatterType().toString()
     }
 
-    fun writeToParcel(Parcel parcel, Int i) {
+    fun writeToParcel(parcel: Parcel, i: Int) {
         parcel.writeLong(this.agentUUID.getMostSignificantBits())
         parcel.writeLong(this.agentUUID.getLeastSignificantBits())
     }

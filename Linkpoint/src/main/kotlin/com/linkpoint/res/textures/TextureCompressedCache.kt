@@ -26,9 +26,9 @@ class TextureCompressedCache : ResourceManager()<DrawableTextureParams, File> {
     private class TextureFetchRequest : ResourceRequest()<DrawableTextureParams, File> : Startable, SLTextureFetchRequest.TextureFetchCompleteListener, Runnable, HasPriority {
 
         /* renamed from: -com-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues  reason: not valid java name */
-        private const val /* synthetic */ Int[] f53comlumiyaviewerlumiyarendertexTextureClassSwitchesValues = null
+        private const val /* synthetic */ IntArray f53comlumiyaviewerlumiyarendertexTextureClassSwitchesValues = null
         private const val MAX_RETRIES: Int = 2
-        final /* synthetic */ Int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$render$tex$TextureClass
+        final /* synthetic */ IntArray $SWITCH_TABLE$com$lumiyaviewer$lumiya$render$tex$TextureClass
         private val File compressedFile
         private volatile SLTextureFetchRequest fetchRequest
         private volatile Future<?> fetchTask
@@ -36,11 +36,11 @@ class TextureCompressedCache : ResourceManager()<DrawableTextureParams, File> {
 
         /* renamed from: -getcom-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues  reason: not valid java name */
         @JvmStatic
-private /* synthetic */ Int[] m119getcomlumiyaviewerlumiyarendertexTextureClassSwitchesValues() {
+private /* synthetic */ IntArray m119getcomlumiyaviewerlumiyarendertexTextureClassSwitchesValues() {
             if (f53comlumiyaviewerlumiyarendertexTextureClassSwitchesValues != null) {
                 return f53comlumiyaviewerlumiyarendertexTextureClassSwitchesValues
             }
-            Int[] iArr = Int[TextureClass.values().length]
+            val iArr: IntArray = Int[TextureClass.values().length]
             try {
                 iArr[TextureClass.Asset.ordinal()] = 3
             } catch (NoSuchFieldError e) {
@@ -71,7 +71,7 @@ private /* synthetic */ Int[] m119getcomlumiyaviewerlumiyarendertexTextureClassS
             this.fetcher = sLTextureFetcher
         }
 
-        fun OnTextureFetchComplete(SLTextureFetchRequest sLTextureFetchRequest) {
+        fun OnTextureFetchComplete(sLTextureFetchRequest: SLTextureFetchRequest) {
             completeRequest(sLTextureFetchRequest.outputFile)
         }
 
@@ -95,7 +95,7 @@ private /* synthetic */ Int[] m119getcomlumiyaviewerlumiyarendertexTextureClassS
             super.cancelRequest()
         }
 
-        fun completeRequest(File file) {
+        fun completeRequest(file: File) {
             TextureCompressedCache.this.downloadExecutor.completeRequest(this)
             super.completeRequest(file)
         }
@@ -104,7 +104,7 @@ private /* synthetic */ Int[] m119getcomlumiyaviewerlumiyarendertexTextureClassS
             this.fetchTask = HTTPFetchExecutor.getInstance().submit(this)
         }
 
-        public Int getPriority() {
+         public fun getPriority(): Int {
             switch (m119getcomlumiyaviewerlumiyarendertexTextureClassSwitchesValues()[((DrawableTextureParams) getParams()).textureClass().ordinal()]) {
                 case 1:
                     return 1
@@ -176,14 +176,14 @@ private /* synthetic */ Int[] m119getcomlumiyaviewerlumiyarendertexTextureClassS
                 java.lang.String r0 = r0.toString()
                 r6.<init>(r0)
                 java.io.File r0 = r6.getParentFile()
-                Boolean r2 = r0.mkdirs()
+                val r2: Boolean = r0.mkdirs()
                 java.lang.String r5 = "TextureFetchRequest: tempOutputDir = %s, createResult = %b, exists = %b"
                 r7 = 3
-                java.lang.Object[] r7 = java.lang.Object[r7]
+                java.lang.Array<Any> r7 = java.lang.Object[r7]
                 r7[r3] = r0
                 java.lang.Boolean r2 = java.lang.Boolean.valueOf(r2)
                 r7[r4] = r2
-                Boolean r0 = r0.exists()
+                val r0: Boolean = r0.exists()
                 java.lang.Boolean r0 = java.lang.Boolean.valueOf(r0)
                 r7[r9] = r0
                 com.lumiyaviewer.lumiya.Debug.Printf(r5, r7)
@@ -192,7 +192,7 @@ private /* synthetic */ Int[] m119getcomlumiyaviewerlumiyarendertexTextureClassS
                 if (r5 >= r9) goto L_0x01d7
                 java.lang.String r0 = "TextureFetchRequest: getting connection"
                 r2 = 0
-                java.lang.Object[] r2 = java.lang.Object[r2]     // Catch:{ IOException -> 0x00f5 }
+                java.lang.Array<Any> r2 = java.lang.Object[r2]     // Catch:{ IOException -> 0x00f5 }
                 com.lumiyaviewer.lumiya.Debug.Printf(r0, r2)     // Catch:{ IOException -> 0x00f5 }
                 okhttp3.Request$Builder r0 = okhttp3.Request$Builder     // Catch:{ IOException -> 0x00f5 }
                 r0.<init>()     // Catch:{ IOException -> 0x00f5 }
@@ -228,7 +228,7 @@ private /* synthetic */ Int[] m119getcomlumiyaviewerlumiyarendertexTextureClassS
             L_0x010f:
                 if (r6 == 0) goto L_0x002a
                 java.lang.String r2 = "/"
-                Boolean r2 = r1.endsWith(r2)     // Catch:{ MalformedURLException -> 0x0173 }
+                val r2: Boolean = r1.endsWith(r2)     // Catch:{ MalformedURLException -> 0x0173 }
                 if (r2 != 0) goto L_0x012e
                 java.lang.StringBuilder r2 = java.lang.StringBuilder     // Catch:{ MalformedURLException -> 0x0173 }
                 r2.<init>()     // Catch:{ MalformedURLException -> 0x0173 }
@@ -263,14 +263,14 @@ private /* synthetic */ Int[] m119getcomlumiyaviewerlumiyarendertexTextureClassS
                 r10.completeRequest((java.io.File) r7)
                 return
             L_0x017b:
-                Boolean r0 = r7.isSuccessful()     // Catch:{ all -> 0x01a3 }
+                val r0: Boolean = r7.isSuccessful()     // Catch:{ all -> 0x01a3 }
                 if (r0 != 0) goto L_0x01ac
                 java.io.IOException r0 = java.io.IOException     // Catch:{ all -> 0x01a3 }
                 java.lang.StringBuilder r2 = java.lang.StringBuilder     // Catch:{ all -> 0x01a3 }
                 r2.<init>()     // Catch:{ all -> 0x01a3 }
                 java.lang.String r8 = "Response code "
                 java.lang.StringBuilder r2 = r2.append(r8)     // Catch:{ all -> 0x01a3 }
-                Int r8 = r7.code()     // Catch:{ all -> 0x01a3 }
+                val r8: Int = r7.code()     // Catch:{ all -> 0x01a3 }
                 java.lang.String r8 = java.lang.Integer.toString(r8)     // Catch:{ all -> 0x01a3 }
                 java.lang.StringBuilder r2 = r2.append(r8)     // Catch:{ all -> 0x01a3 }
                 java.lang.String r2 = r2.toString()     // Catch:{ all -> 0x01a3 }
@@ -306,12 +306,12 @@ private /* synthetic */ Int[] m119getcomlumiyaviewerlumiyarendertexTextureClassS
                 monitor-exit(r1)
                 throw r0
             L_0x01d2:
-                Int r0 = r5 + 1
+                val r0: Int = r5 + 1
                 r5 = r0
                 goto L_0x00bc
             L_0x01d7:
                 java.util.concurrent.Future<?> r0 = r10.fetchTask
-                Boolean r0 = r0.isCancelled()
+                val r0: Boolean = r0.isCancelled()
                 if (r0 != 0) goto L_0x01ee
                 java.lang.String r0 = "TextureFetchRequest: HTTP fetch unsuccessful. Trying UDP."
                 com.lumiyaviewer.lumiya.Debug.Log(r0)
@@ -334,12 +334,12 @@ private /* synthetic */ Int[] m119getcomlumiyaviewerlumiyarendertexTextureClassS
 
         fun start() {
             SLTextureFetchRequest sLTextureFetchRequest
-            SLTextureFetcher sLTextureFetcher = this.fetcher
+            val sLTextureFetcher: SLTextureFetcher = this.fetcher
             if (sLTextureFetcher == null) {
                 completeRequest((File) null)
                 return
             }
-            DrawableTextureParams drawableTextureParams = (DrawableTextureParams) getParams()
+            val drawableTextureParams: DrawableTextureParams = (DrawableTextureParams) getParams()
             synchronized (this) {
                 sLTextureFetchRequest = SLTextureFetchRequest(drawableTextureParams.uuid(), 0, drawableTextureParams.textureClass(), drawableTextureParams.avatarFaceIndex(), drawableTextureParams.avatarUUID(), this.compressedFile)
                 sLTextureFetchRequest.setOnFetchComplete(this)
@@ -354,9 +354,9 @@ private /* synthetic */ Int[] m119getcomlumiyaviewerlumiyarendertexTextureClassS
         return TextureFetchRequest(drawableTextureParams, resourceManager, TextureCache.getInstance().getTextureCompressedFile(drawableTextureParams), this.fetcher)
     }
 
-    fun RequestResource(DrawableTextureParams drawableTextureParams, ResourceConsumer resourceConsumer) {
-        File textureCompressedFileOld = TextureCache.getInstance().getTextureCompressedFileOld(drawableTextureParams)
-        File textureCompressedFile = TextureCache.getInstance().getTextureCompressedFile(drawableTextureParams)
+    fun RequestResource(drawableTextureParams: DrawableTextureParams, resourceConsumer: ResourceConsumer) {
+        val textureCompressedFileOld: File = TextureCache.getInstance().getTextureCompressedFileOld(drawableTextureParams)
+        val textureCompressedFile: File = TextureCache.getInstance().getTextureCompressedFile(drawableTextureParams)
         synchronized (this.lock) {
             if (!textureCompressedFileOld.exists()) {
                 textureCompressedFileOld = textureCompressedFile.exists() ? textureCompressedFile : null
@@ -369,11 +369,11 @@ private /* synthetic */ Int[] m119getcomlumiyaviewerlumiyarendertexTextureClassS
         }
     }
 
-    fun setFetcher(SLTextureFetcher sLTextureFetcher) {
+    fun setFetcher(sLTextureFetcher: SLTextureFetcher) {
         this.fetcher = sLTextureFetcher
     }
 
-    fun setMaxTextureDownloads(Int i) {
+    fun setMaxTextureDownloads(i: Int) {
         if (i > 0) {
             this.downloadExecutor.setMaxConcurrentTasks(i)
             HTTPFetchExecutor.getInstance().setCorePoolSize(i)

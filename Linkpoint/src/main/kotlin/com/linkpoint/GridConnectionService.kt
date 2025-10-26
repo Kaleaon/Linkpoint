@@ -94,11 +94,11 @@ private Boolean soundOnNotify = true
     @JvmStatic
 private Set<Activity> visibleActivities = Collections.synchronizedSet(HashSet())
     private val BroadcastReceiver cloudPluginInstalledReceiver = BroadcastReceiver() {
-        fun onReceive(Context context, Intent intent) {
+        fun onReceive(context: Context, intent: Intent) {
             if (Strings.nullToEmpty(intent.getData().getSchemeSpecificPart()).equals("com.linkpoint.cloud") && GridConnectionService.gridConnection != null && GridConnectionService.gridConnection.getConnectionState() == ConnectionState.Connected) {
-                UUID activeAgentUUID = GridConnectionService.gridConnection.getActiveAgentUUID()
+                val activeAgentUUID: UUID = GridConnectionService.gridConnection.getActiveAgentUUID()
                 if (activeAgentUUID != null) {
-                    UserManager userManager = UserManager.getUserManager(activeAgentUUID)
+                    val userManager: UserManager = UserManager.getUserManager(activeAgentUUID)
                     if (userManager != null) {
                         GridConnectionService.this.startCloudSync(userManager)
                     }
@@ -114,7 +114,7 @@ private Set<Activity> visibleActivities = Collections.synchronizedSet(HashSet())
     private val SubscriptionData<SubscriptionSingleKey, CurrentLocationInfo> currentLocationInfo = SubscriptionData(UIThreadExecutor.getInstance(), () -> { // Lambda implementation })
     private val EventBus eventBus = EventBus.getInstance()
     private Handler licenseCheckHandler = Handler() {
-        fun handleMessage(Message message) {
+        fun handleMessage(message: Message) {
             switch (message.what) {
                 case R.id.msg_licensing_allow /*2131755033*/:
                     Debug.Printf("License: License check ok.", Object[0])
@@ -144,15 +144,15 @@ private Set<Activity> visibleActivities = Collections.synchronizedSet(HashSet())
     private val Set<Integer> shownNotificationIds = Collections.newSetFromMap(Collections.synchronizedMap(HashMap()))
     private Subscription<Boolean, UnreadNotifications> unreadNotifySubscription
     private val BroadcastReceiver voicePluginInstalledReceiver = BroadcastReceiver() {
-        fun onReceive(Context context, Intent intent) {
+        fun onReceive(context: Context, intent: Intent) {
             if (Strings.nullToEmpty(intent.getData().getSchemeSpecificPart()).equals("com.linkpoint.voice") && GridConnectionService.gridConnection != null && GridConnectionService.gridConnection.getConnectionState() == ConnectionState.Connected) {
-                UUID activeAgentUUID = GridConnectionService.gridConnection.getActiveAgentUUID()
+                val activeAgentUUID: UUID = GridConnectionService.gridConnection.getActiveAgentUUID()
                 if (activeAgentUUID != null) {
-                    UserManager userManager = UserManager.getUserManager(activeAgentUUID)
+                    val userManager: UserManager = UserManager.getUserManager(activeAgentUUID)
                     if (userManager != null) {
-                        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+                        val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
                         if (activeAgentCircuit != null) {
-                            SLModules modules = activeAgentCircuit.getModules()
+                            val modules: SLModules = activeAgentCircuit.getModules()
                             if (modules != null) {
                                 modules.voice.updateVoiceEnabledStatus()
                             }
@@ -167,22 +167,22 @@ private Set<Activity> visibleActivities = Collections.synchronizedSet(HashSet())
     private WifiLock wifiLock = null
 
     class GridServiceBinder : Binder() {
-        public EventBus getEventBus() {
+         public fun getEventBus(): EventBus {
             return GridConnectionService.this.eventBus
         }
 
-        public SLGridConnection getGridConn() {
+         public fun getGridConn(): SLGridConnection {
             return GridConnectionService.gridConnection
         }
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-ui-settings-NotificationTypeSwitchesValues */
     @JvmStatic
-private /* synthetic */ Int[] m8-getcom-lumiyaviewer-lumiya-ui-settings-NotificationTypeSwitchesValues() {
+private /* synthetic */ IntArray m8-getcom-lumiyaviewer-lumiya-ui-settings-NotificationTypeSwitchesValues() {
         if (f442-com-lumiyaviewer-lumiya-ui-settings-NotificationTypeSwitchesValues != null) {
             return f442-com-lumiyaviewer-lumiya-ui-settings-NotificationTypeSwitchesValues
         }
-        Int[] iArr = Int[NotificationType.values().length]
+        val iArr: IntArray = Int[NotificationType.values().length]
         try {
             iArr[NotificationType.Group.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -201,11 +201,11 @@ private /* synthetic */ Int[] m8-getcom-lumiyaviewer-lumiya-ui-settings-Notifica
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-utils-LEDActionSwitchesValues */
     @JvmStatic
-private /* synthetic */ Int[] m9-getcom-lumiyaviewer-lumiya-utils-LEDActionSwitchesValues() {
+private /* synthetic */ IntArray m9-getcom-lumiyaviewer-lumiya-utils-LEDActionSwitchesValues() {
         if (f443-com-lumiyaviewer-lumiya-utils-LEDActionSwitchesValues != null) {
             return f443-com-lumiyaviewer-lumiya-utils-LEDActionSwitchesValues
         }
-        Int[] iArr = Int[LEDAction.values().length]
+        val iArr: IntArray = Int[LEDAction.values().length]
         try {
             iArr[LEDAction.Always.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -231,11 +231,11 @@ private /* synthetic */ Int[] m9-getcom-lumiyaviewer-lumiya-utils-LEDActionSwitc
         this.eventBus.subscribe(this, null, this.mHandler)
     }
 
-    private Unit connectToVoicePlugin(VoiceLoginInfo voiceLoginInfo, UserManager userManager) {
+     private fun connectToVoicePlugin(voiceLoginInfo: VoiceLoginInfo, userManager: UserManager) {
         if (this.voicePluginServiceConnection == null) {
             Boolean bindService
             this.voicePluginServiceConnection = VoicePluginServiceConnection(this)
-            Intent intent = Intent()
+            val intent: Intent = Intent()
             intent.setComponent(ComponentName("com.linkpoint.voice", "com.linkpoint.voice.VoiceService"))
             try {
                 bindService = bindService(intent, this.voicePluginServiceConnection, 1)
@@ -246,7 +246,7 @@ private /* synthetic */ Int[] m9-getcom-lumiyaviewer-lumiya-utils-LEDActionSwitc
             Debug.Printf("LinkpointVoice: bindService = %b", Boolean.valueOf(bindService))
             if (!bindService) {
                 this.voicePluginServiceConnection = null
-                IntentFilter intentFilter = IntentFilter()
+                val intentFilter: IntentFilter = IntentFilter()
                 intentFilter.addAction("android.intent.action.PACKAGE_ADDED")
                 intentFilter.addDataScheme("package")
                 if (VERSION.SDK_INT >= 19) {
@@ -265,7 +265,7 @@ private /* synthetic */ Int[] m9-getcom-lumiyaviewer-lumiya-utils-LEDActionSwitc
     }
 
     @JvmStatic
-    SLGridConnection getGridConnection() {
+     fun getGridConnection(): SLGridConnection {
         if (gridConnection == null) {
             gridConnection = SLGridConnection()
         }
@@ -273,20 +273,20 @@ private /* synthetic */ Int[] m9-getcom-lumiyaviewer-lumiya-utils-LEDActionSwitc
     }
 
     @JvmStatic
-    GridConnectionService getServiceInstance() {
+     fun getServiceInstance(): GridConnectionService {
         return serviceInstance != null ? (GridConnectionService) serviceInstance.get() : null
     }
 
-    private Unit handleStartService(Intent intent) {
-        String str = "GridConnectionService: service is now started, intent is %s"
-        Object[] objArr = Object[1]
+     private fun handleStartService(intent: Intent) {
+        val str: String = "GridConnectionService: service is now started, intent is %s"
+        val objArr: Array<Any> = Object[1]
         objArr[0] = intent != null ? "not null" : "null"
         Debug.Printf(str, objArr)
         updateOnlineNotification()
         if (intent != null) {
-            String nullToEmpty = Strings.nullToEmpty(intent.getAction())
+            val nullToEmpty: String = Strings.nullToEmpty(intent.getAction())
             if (nullToEmpty.equals(LOGIN_ACTION)) {
-                LicenseChecker licenseChecker = LicenseChecker(getApplicationContext(), this.licenseCheckHandler, SLAuthParams(intent))
+                val licenseChecker: LicenseChecker = LicenseChecker(getApplicationContext(), this.licenseCheckHandler, SLAuthParams(intent))
             } else if (nullToEmpty.equals(VoicePluginServiceConnection.ACTION_VOICE_REJECT)) {
                 if (this.voicePluginServiceConnection != null) {
                     this.voicePluginServiceConnection.rejectCall(intent)
@@ -298,11 +298,11 @@ private /* synthetic */ Int[] m9-getcom-lumiyaviewer-lumiya-utils-LEDActionSwitc
     }
 
     @JvmStatic
-    Boolean hasVisibleActivities() {
+     fun hasVisibleActivities(): Boolean {
         return visibleActivities.isEmpty() ^ 1
     }
 
-    private Unit hideUnreadNotificationSingle(Int i) {
+     private fun hideUnreadNotificationSingle(i: Int) {
         if (this.shownNotificationIds.contains(Integer.valueOf(i))) {
             this.shownNotificationIds.remove(Integer.valueOf(i))
             ((NotificationManager) getSystemService("notification")).cancel(i)
@@ -310,7 +310,7 @@ private /* synthetic */ Int[] m9-getcom-lumiyaviewer-lumiya-utils-LEDActionSwitc
     }
 
     @JvmStatic
-private NotificationSettings notifySettingsByType(NotificationType notificationType) {
+ private fun notifySettingsByType(notificationType: NotificationType): NotificationSettings {
         switch (m8-getcom-lumiyaviewer-lumiya-ui-settings-NotificationTypeSwitchesValues()[notificationType.ordinal()]) {
             case 1:
                 return notifyGroup
@@ -323,20 +323,20 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
         }
     }
 
-    private Unit onCurrentLocationInfo(CurrentLocationInfo currentLocationInfo) {
+     private fun onCurrentLocationInfo(currentLocationInfo: CurrentLocationInfo) {
         updateOnlineNotification()
     }
 
-    private Unit onUnreadNotification(UnreadNotifications unreadNotifications) {
+     private fun onUnreadNotification(unreadNotifications: UnreadNotifications) {
         showUnreadNotification(unreadNotifications)
     }
 
-    private Unit performLogin(SLAuthParams sLAuthParams) {
+     private fun performLogin(sLAuthParams: SLAuthParams) {
         gridName = sLAuthParams.gridName
         gridConnection.Connect(sLAuthParams)
     }
 
-    private Unit readPreferences(SharedPreferences sharedPreferences) {
+     private fun readPreferences(sharedPreferences: SharedPreferences) {
         onlineNotify = sharedPreferences.getBoolean("onlineNotify", true)
         soundOnNotify = sharedPreferences.getBoolean("soundOnNotify", true)
         this.cloudSyncEnabled = sharedPreferences.getBoolean("sync_to_gdrive", false)
@@ -357,7 +357,7 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
     }
 
     @JvmStatic
-    Unit setActivityVisible(Activity activity, Boolean z) {
+     fun setActivityVisible(activity: Activity, z: Boolean) {
         if (z) {
             visibleActivities.add(activity)
         } else {
@@ -374,26 +374,26 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
         }
     }
 
-    private Unit showUnreadNotification(UnreadNotifications unreadNotifications) {
-        NotificationChannels instance = NotificationChannels.getInstance()
+     private fun showUnreadNotification(unreadNotifications: UnreadNotifications) {
+        val instance: NotificationChannels = NotificationChannels.getInstance()
         if (instance.useNotificationGroups()) {
             if (instance.areNotificationsSystemControlled()) {
                 unreadNotifications = unreadNotifications.filter(instance.getEnabledTypes(this))
             }
             if (!unreadNotifications.notificationGroups().isEmpty()) {
-                UnreadNotificationInfo merge = unreadNotifications.merge()
+                val merge: UnreadNotificationInfo = unreadNotifications.merge()
                 showUnreadNotificationSingle(merge, R.id.unread_notify_id, instance.getChannelName(instance.getChannelByType((NotificationType) merge.mostImportantFreshType().or((NotificationType) merge.mostImportantType().or(NotificationType.LocalChat)))), NotificationChannels.MESSAGE_NOTIFICATION_GROUP, true, null)
                 for (NotificationType notificationType : NotificationType.VALUES) {
-                    Channel channelByType = instance.getChannelByType(notificationType)
+                    val channelByType: Channel = instance.getChannelByType(notificationType)
                     if (channelByType != null) {
                         merge = (UnreadNotificationInfo) unreadNotifications.notificationGroups().get(notificationType)
-                        String num = Integer.toString(9 - notificationType.getPriority())
+                        val num: String = Integer.toString(9 - notificationType.getPriority())
                         showUnreadNotificationSingle(merge, channelByType.notificationId, instance.getChannelName(channelByType), NotificationChannels.MESSAGE_NOTIFICATION_GROUP, false, num)
                     }
                 }
                 return
             } else if (!this.shownNotificationIds.isEmpty()) {
-                NotificationManager notificationManager = (NotificationManager) getSystemService("notification")
+                val notificationManager: NotificationManager = (NotificationManager) getSystemService("notification")
                 for (Integer intValue : this.shownNotificationIds) {
                     notificationManager.cancel(intValue.intValue())
                 }
@@ -410,7 +410,7 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
     /* DevToolsApp WARNING: Removed duplicated region for block: B:65:0x01e1  */
     /* DevToolsApp WARNING: Removed duplicated region for block: B:110:0x046c  */
     /* DevToolsApp WARNING: Removed duplicated region for block: B:62:0x01d2  */
-    private Unit showUnreadNotificationSingle(com.lumiyaviewer.lumiya.slproto.users.manager.UnreadNotificationInfo r18, Int r19, @javax.annotation.Nonnull java.lang.String r20, @android.support.annotation.Nullable java.lang.String r21, Boolean r22, @android.support.annotation.Nullable java.lang.String r23) {
+     private fun showUnreadNotificationSingle(com.lumiyaviewer.lumiya.slproto.users.manager.UnreadNotificationInfo r18, r19: Int, @javax.annotation.Nonnull java.lang.String r20, @android.support.annotation.Nullable java.lang.String r21, r22: Boolean, @android.support.annotation.Nullable java.lang.String r23) {
         /*
         r17 = this
         r2 = "notification"
@@ -1293,7 +1293,7 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
         }
         
         try {
-            NotificationManager notificationManager = (NotificationManager) getSystemService("notification")
+            val notificationManager: NotificationManager = (NotificationManager) getSystemService("notification")
             
             // Determine notification content based on type and count
             String notificationTitle
@@ -1343,7 +1343,7 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
             }
             
             // Create intent for opening the app
-            Intent openIntent = Intent(this, com.lumiyaviewer.lumiya.ui.render.WorldViewActivity.class)
+            val openIntent: Intent = Intent(this, com.lumiyaviewer.lumiya.ui.render.WorldViewActivity.class)
             openIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK)
             android.app.PendingIntent pendingIntent = android.app.PendingIntent.getActivity(this, 0, openIntent, 
                                                                                             android.app.PendingIntent.FLAG_UPDATE_CURRENT)
@@ -1372,7 +1372,7 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
             }
             
             // Configure notification lights and sound based on user preferences
-            NotificationSettings settings = notifySettingsByType(NotificationType.LocalChat)
+            val settings: NotificationSettings = notifySettingsByType(NotificationType.LocalChat)
             if (settings != null) {
                 if (settings.getNotifySound()) {
                     builder.setDefaults(Notification.DEFAULT_SOUND)
@@ -1388,7 +1388,7 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
             }
             
             // Show the notification
-            Notification notification = builder.build()
+            val notification: Notification = builder.build()
             notificationManager.notify(notificationId, notification)
             this.shownNotificationIds.add(Integer.valueOf(notificationId))
             
@@ -1397,17 +1397,17 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
         }
     }
 
-    private Unit startCloudSync(UserManager userManager) {
+     private fun startCloudSync(userManager: UserManager) {
         this.cloudSyncUserManager = userManager
         updateCloudSyncStatus()
     }
 
-    private Unit stopCloudSync() {
+     private fun stopCloudSync() {
         this.cloudSyncUserManager = null
         updateCloudSyncStatus()
     }
 
-    private Unit updateCloudSyncStatus() {
+     private fun updateCloudSyncStatus() {
         if (!this.cloudSyncEnabled || this.cloudSyncUserManager == null) {
             if (this.cloudSyncServiceConnection != null) {
                 this.cloudSyncServiceConnection.stopSyncing()
@@ -1424,7 +1424,7 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
         } else if (this.cloudSyncServiceConnection == null) {
             Boolean bindService
             this.cloudSyncServiceConnection = CloudSyncServiceConnection(this, this.cloudSyncUserManager)
-            Intent intent = Intent()
+            val intent: Intent = Intent()
             intent.setComponent(ComponentName("com.linkpoint.cloud", "com.linkpoint.cloud.DriveSyncService"))
             try {
                 bindService = bindService(intent, this.cloudSyncServiceConnection, 1)
@@ -1439,7 +1439,7 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
                 intent.setData(Uri.parse(LicenseChecker.CLOUD_PLUGIN_URL))
                 this.cloudSyncServiceConnection.showSyncingError(getString(R.string.cloud_sync_not_installed), getString(R.string.cloud_sync_not_installed_long), intent)
                 this.cloudSyncServiceConnection = null
-                IntentFilter intentFilter = IntentFilter()
+                val intentFilter: IntentFilter = IntentFilter()
                 intentFilter.addAction("android.intent.action.PACKAGE_ADDED")
                 intentFilter.addDataScheme("package")
                 if (VERSION.SDK_INT >= 19) {
@@ -1451,11 +1451,11 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
         }
     }
 
-    private Unit updateOnlineNotification() {
+     private fun updateOnlineNotification() {
         if (gridConnection != null) {
-            ConnectionState connectionState = gridConnection.getConnectionState()
+            val connectionState: ConnectionState = gridConnection.getConnectionState()
             i = connectionState != ConnectionState.Idle ? GlobalOptions.getInstance().getKeepWifiOn() ? 1 : 0 : 0
-            UUID activeAgentUUID = gridConnection.getActiveAgentUUID()
+            val activeAgentUUID: UUID = gridConnection.getActiveAgentUUID()
             if (activeAgentUUID == null || connectionState == ConnectionState.Idle) {
                 if (this.connectedAgentNameRetriever != null) {
                     this.connectedAgentNameRetriever.dispose()
@@ -1468,7 +1468,7 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
             i = 0
         }
         if (i != 0 && this.wifiLock == null) {
-            Context applicationContext = getApplicationContext()
+            val applicationContext: Context = getApplicationContext()
             if (applicationContext != null) {
                 this.wifiLock = ((WifiManager) applicationContext.getSystemService("wifi")).createWifiLock(1, "Linkpoint")
                 this.wifiLock.acquire()
@@ -1479,10 +1479,10 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
             this.wifiLock = null
             Debug.Printf("WiFi lock released", Object[0])
         }
-        OnlineNotificationInfo onlineNotificationInfo = OnlineNotificationInfo(onlineNotify, this, gridName, gridConnection, this.connectedAgentNameRetriever, (CurrentLocationInfo) this.currentLocationInfo.getData())
+        val onlineNotificationInfo: OnlineNotificationInfo = OnlineNotificationInfo(onlineNotify, this, gridName, gridConnection, this.connectedAgentNameRetriever, (CurrentLocationInfo) this.currentLocationInfo.getData())
         if (!onlineNotificationInfo.equals(this.onlineNotificationInfo)) {
             this.onlineNotificationInfo = onlineNotificationInfo
-            Notification notification = onlineNotificationInfo.getNotification(this)
+            val notification: Notification = onlineNotificationInfo.getNotification(this)
             if (notification != null) {
                 startForeground(R.id.online_notify_id, notification)
             } else {
@@ -1501,32 +1501,32 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
         onUnreadNotification(unreadNotifications)
     }
 
-    fun acceptVoiceCall(ChatterID chatterID) {
+    fun acceptVoiceCall(chatterID: ChatterID) {
         if (this.voicePluginServiceConnection != null) {
             this.voicePluginServiceConnection.acceptVoiceCall(chatterID)
         }
     }
 
-    fun acceptVoiceCall(VoiceRinging voiceRinging) {
+    fun acceptVoiceCall(voiceRinging: VoiceRinging) {
         if (this.voicePluginServiceConnection != null) {
             this.voicePluginServiceConnection.acceptVoiceCall(voiceRinging)
         }
     }
 
-    fun enableVoiceMic(Boolean z) {
+    fun enableVoiceMic(z: Boolean) {
         if (this.voicePluginServiceConnection != null) {
             this.voicePluginServiceConnection.enableVoiceMic(z)
         }
     }
 
     @javax.annotation.Nullable
-    public VoicePluginServiceConnection getVoicePluginServiceConnection() {
+     public fun getVoicePluginServiceConnection(): VoicePluginServiceConnection {
         return this.voicePluginServiceConnection
     }
 
     @EventHandler
-    fun handleConnectEvent(SLLoginResultEvent sLLoginResultEvent) {
-        UserManager userManager = UserManager.getUserManager(sLLoginResultEvent.activeAgentUUID)
+    fun handleConnectEvent(sLLoginResultEvent: SLLoginResultEvent) {
+        val userManager: UserManager = UserManager.getUserManager(sLLoginResultEvent.activeAgentUUID)
         if (userManager != null) {
             this.unreadNotifySubscription = userManager.getUnreadNotificationManager().getUnreadNotifications().subscribe(UnreadNotificationManager.unreadNotificationKey, UIThreadExecutor.getSerialInstance(), com.lumiyaviewer.lumiya.-$Lambda$3DowF6pLKgVjVrTY9aZKQ2J3cf0.AnonymousClass1(this))
             this.currentLocationInfo.subscribe(userManager.getCurrentLocationInfo(), SubscriptionSingleKey.Value)
@@ -1543,12 +1543,12 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
     }
 
     @EventHandler
-    fun handleConnectionStateChangedEvent(SLConnectionStateChangedEvent sLConnectionStateChangedEvent) {
+    fun handleConnectionStateChangedEvent(sLConnectionStateChangedEvent: SLConnectionStateChangedEvent) {
         updateOnlineNotification()
     }
 
     @EventHandler
-    fun handleDisconnectEvent(SLDisconnectEvent sLDisconnectEvent) {
+    fun handleDisconnectEvent(sLDisconnectEvent: SLDisconnectEvent) {
         updateOnlineNotification()
         Debug.Log("GridConnectionService: stopping self because of disconnect.")
         stopCloudSync()
@@ -1563,7 +1563,7 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
         updateOnlineNotification()
     }
 
-    public IBinder onBind(Intent intent) {
+     public fun onBind(intent: Intent): IBinder {
         return this.mBinder
     }
 
@@ -1592,18 +1592,18 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
     }
 
     @EventHandler
-    fun onGlobalPreferencesChanged(GlobalOptionsChangedEvent globalOptionsChangedEvent) {
+    fun onGlobalPreferencesChanged(globalOptionsChangedEvent: GlobalOptionsChangedEvent) {
         readPreferences(globalOptionsChangedEvent.preferences)
     }
 
-    fun onSharedPreferenceChanged(SharedPreferences sharedPreferences, String str) {
+    fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, str: String) {
         readPreferences(sharedPreferences)
         updateOnlineNotification()
     }
 
-    public Int onStartCommand(Intent intent, Int i, Int i2) {
-        String str = "onStartCommand: intent is %s, flags %08x"
-        Object[] objArr = Object[2]
+     public fun onStartCommand(intent: Intent, i: Int, i2: Int): Int {
+        val str: String = "onStartCommand: intent is %s, flags %08x"
+        val objArr: Array<Any> = Object[2]
         objArr[0] = intent != null ? "not null" : "null"
         objArr[1] = Integer.valueOf(i)
         Debug.Printf(str, objArr)
@@ -1614,7 +1614,7 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
         return 2
     }
 
-    public Boolean onUnbind(Intent intent) {
+     public fun onUnbind(intent: Intent): Boolean {
         Debug.Log("GridConnectionService: onUnbind called, connection state = " + gridConnection.getConnectionState())
         if (gridConnection.getConnectionState() == ConnectionState.Idle) {
             Debug.Log("GridConnectionService: Stopping self because unbind and no clients are bound")
@@ -1624,7 +1624,7 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
         return super.onUnbind(intent)
     }
 
-    fun startVoice(VoiceLoginInfo voiceLoginInfo, UserManager userManager) {
+    fun startVoice(voiceLoginInfo: VoiceLoginInfo, userManager: UserManager) {
         connectToVoicePlugin(voiceLoginInfo, userManager)
     }
 
@@ -1635,7 +1635,7 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
         }
     }
 
-    fun terminateVoiceCall(ChatterID chatterID) {
+    fun terminateVoiceCall(chatterID: ChatterID) {
         if (this.voicePluginServiceConnection != null) {
             this.voicePluginServiceConnection.terminateVoiceCall(chatterID)
         }

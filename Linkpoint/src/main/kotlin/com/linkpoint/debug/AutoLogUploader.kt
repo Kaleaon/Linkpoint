@@ -72,13 +72,13 @@ private AutoLogUploader instance
         Log.i(TAG, "🚀 Initializing automatic log upload for debug build")
         
         // Upload immediately if it's been a while
-        Long lastUpload = prefs.getLong(PREF_LAST_UPLOAD, 0)
-        Long now = System.currentTimeMillis()
+        val lastUpload: Long = prefs.getLong(PREF_LAST_UPLOAD, 0)
+        val now: Long = System.currentTimeMillis()
         
         if (now - lastUpload > UPLOAD_INTERVAL_MS) {
             uploadLogsAsync("Automatic startup log upload")
         } else {
-            Long timeUntilNext = UPLOAD_INTERVAL_MS - (now - lastUpload)
+            val timeUntilNext: Long = UPLOAD_INTERVAL_MS - (now - lastUpload)
             Log.i(TAG, "Next automatic upload in " + (timeUntilNext / 1000 / 60) + " minutes")
         }
     }
@@ -86,7 +86,7 @@ private AutoLogUploader instance
     /**
      * Upload logs immediately with a specific reason
      */
-    fun uploadLogsNow(String reason) {
+    fun uploadLogsNow(reason: String) {
         if (!BuildConfig.DEBUG) {
             Log.d(TAG, "Log upload disabled for release builds")
             return
@@ -99,25 +99,25 @@ private AutoLogUploader instance
     /**
      * Upload crash report immediately
      */
-    fun uploadCrashReport(Throwable crash, String additionalInfo) {
+    fun uploadCrashReport(crash: Throwable, additionalInfo: String) {
         if (!BuildConfig.DEBUG) {
             return
         }
         
         Log.i(TAG, "💥 Uploading crash report to GitHub")
         
-        String crashLog = formatCrashReport(crash, additionalInfo)
+        val crashLog: String = formatCrashReport(crash, additionalInfo)
         uploadLogContent(crashLog, "Crash Report", "crash")
     }
     
     /**
      * Upload logs asynchronously
      */
-    private Unit uploadLogsAsync(String reason) {
+     private fun uploadLogsAsync(reason: String) {
         Thread(() -> {
             try {
                 Log.i(TAG, "📊 Collecting application logs for upload...")
-                String logContent = collectApplicationLogs()
+                val logContent: String = collectApplicationLogs()
                 uploadLogContent(logContent, reason, "application")
                 
                 // Update last upload time
@@ -132,8 +132,8 @@ private AutoLogUploader instance
     /**
      * Collect application logs and system information
      */
-    private String collectApplicationLogs() {
-        StringBuilder logContent = StringBuilder()
+     private fun collectApplicationLogs(): String {
+        val logContent: StringBuilder = StringBuilder()
         
         // Header information
         logContent.append("=== LINKPOINT DEBUG LOG UPLOAD ===\n")
@@ -151,7 +151,7 @@ private AutoLogUploader instance
         // Application status
         logContent.append("\n=== APPLICATION STATUS ===\n")
         try {
-            String appStatus = LinkpointApp.getStartupStatus()
+            val appStatus: String = LinkpointApp.getStartupStatus()
             logContent.append(appStatus).append("\n")
         } catch (Exception e) {
             logContent.append("Could not get app status: ").append(e.getMessage()).append("\n")
@@ -159,11 +159,11 @@ private AutoLogUploader instance
         
         // Memory information
         logContent.append("\n=== MEMORY INFORMATION ===\n")
-        Runtime runtime = Runtime.getRuntime()
-        Long maxMemory = runtime.maxMemory()
-        Long totalMemory = runtime.totalMemory()
-        Long freeMemory = runtime.freeMemory()
-        Long usedMemory = totalMemory - freeMemory
+        val runtime: Runtime = Runtime.getRuntime()
+        val maxMemory: Long = runtime.maxMemory()
+        val totalMemory: Long = runtime.totalMemory()
+        val freeMemory: Long = runtime.freeMemory()
+        val usedMemory: Long = totalMemory - freeMemory
         
         logContent.append("Max Memory: ").append(maxMemory / 1024 / 1024).append(" MB\n")
         logContent.append("Total Memory: ").append(totalMemory / 1024 / 1024).append(" MB\n")
@@ -189,13 +189,13 @@ private AutoLogUploader instance
         logContent.append("Log Size Limit: 50KB\n")
         logContent.append("Auto Upload Enabled: ").append(isAutoUploadEnabled()).append("\n")
         
-        Date lastUploadDate = Date(getLastUploadTime())
+        val lastUploadDate: Date = Date(getLastUploadTime())
         logContent.append("Last Upload: ").append(lastUploadDate.toString()).append("\n")
         
         logContent.append("\n=== END OF LOG ===\n")
         
         // Truncate if too large
-        String result = logContent.toString()
+        val result: String = logContent.toString()
         if (result.length() > MAX_LOG_SIZE) {
             result = result.substring(0, MAX_LOG_SIZE - 100) + "\n\n[LOG TRUNCATED - TOO LARGE]\n"
         }
@@ -206,8 +206,8 @@ private AutoLogUploader instance
     /**
      * Format crash report
      */
-    private String formatCrashReport(Throwable crash, String additionalInfo) {
-        StringBuilder crashContent = StringBuilder()
+     private fun formatCrashReport(crash: Throwable, additionalInfo: String): String {
+        val crashContent: StringBuilder = StringBuilder()
         
         crashContent.append("=== LINKPOINT CRASH REPORT ===\n")
         crashContent.append("Timestamp: ").append(SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.US).format(Date())).append("\n")
@@ -222,8 +222,8 @@ private AutoLogUploader instance
         }
         
         crashContent.append("\n=== STACK TRACE ===\n")
-        StringWriter sw = StringWriter()
-        PrintWriter pw = PrintWriter(sw)
+        val sw: StringWriter = StringWriter()
+        val pw: PrintWriter = PrintWriter(sw)
         crash.printStackTrace(pw)
         crashContent.append(sw.toString())
         
@@ -235,30 +235,30 @@ private AutoLogUploader instance
     /**
      * Upload log content to GitHub as a Gist
      */
-    private Unit uploadLogContent(String content, String reason, String type) {
+     private fun uploadLogContent(content: String, reason: String, type: String) {
         try {
             // Create filename with timestamp
-            String timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-            String deviceId = getDeviceIdentifier()
-            String filename = String.format("linkpoint_%s_%s_%s.log", type, timestamp, deviceId)
+            val timestamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+            val deviceId: String = getDeviceIdentifier()
+            val filename: String = String.format("linkpoint_%s_%s_%s.log", type, timestamp, deviceId)
             
             // Create GitHub Gist
-            JSONObject gistJson = JSONObject()
+            val gistJson: JSONObject = JSONObject()
             gistJson.put("description", String.format("Linkpoint %s - %s (Device: %s)", type, reason, deviceId))
             gistJson.put("public", false); // Private gist
             
-            JSONObject files = JSONObject()
-            JSONObject fileContent = JSONObject()
+            val files: JSONObject = JSONObject()
+            val fileContent: JSONObject = JSONObject()
             fileContent.put("content", content)
             files.put(filename, fileContent)
             gistJson.put("files", files)
             
-            RequestBody body = RequestBody.create(
+            val body: RequestBody = RequestBody.create(
                 gistJson.toString(),
                 MediaType.parse("application/json")
             )
             
-            Request request = Request.Builder()
+            val request: Request = Request.Builder()
                 .url("https://api.github.com/gists")
                 .post(body)
                 .addHeader("Accept", "application/vnd.github.v3+json")
@@ -266,13 +266,13 @@ private AutoLogUploader instance
                 .build()
             
             Log.i(TAG, "🌐 Uploading to GitHub Gist...")
-            Response response = httpClient.newCall(request).execute()
+            val response: Response = httpClient.newCall(request).execute()
             
             if (response.isSuccessful()) {
-                String responseBody = response.body().string()
-                JSONObject responseJson = JSONObject(responseBody)
-                String gistUrl = responseJson.getString("html_url")
-                String gistId = responseJson.getString("id")
+                val responseBody: String = response.body().string()
+                val responseJson: JSONObject = JSONObject(responseBody)
+                val gistUrl: String = responseJson.getString("html_url")
+                val gistId: String = responseJson.getString("id")
                 
                 Log.i(TAG, String.format("✅ Log uploaded successfully!"))
                 Log.i(TAG, String.format("📋 Gist ID: %s", gistId))
@@ -283,7 +283,7 @@ private AutoLogUploader instance
                 Log.i("LINKPOINT_DEBUG_UPLOAD", String.format("GIST_ID: %s", gistId))
                 
             } else {
-                String errorBody = response.body() != null ? response.body().string() : "No response body"
+                val errorBody: String = response.body() != null ? response.body().string() : "No response body"
                 Log.e(TAG, String.format("❌ Failed to upload log: HTTP %d", response.code()))
                 Log.e(TAG, "Response: " + errorBody)
             }
@@ -298,12 +298,12 @@ private AutoLogUploader instance
     /**
      * Get a device identifier for log files
      */
-    private String getDeviceIdentifier() {
+     private fun getDeviceIdentifier(): String {
         try {
             // Use a combination of model and a part of Android ID for identification
-            String androidId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID)
-            String model = Build.MODEL.replaceAll("[^a-zA-Z0-9]", "")
-            String shortId = androidId != null ? androidId.substring(0, Math.min(6, androidId.length())) : "unknown"
+            val androidId: String = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID)
+            val model: String = Build.MODEL.replaceAll("[^a-zA-Z0-9]", "")
+            val shortId: String = androidId != null ? androidId.substring(0, Math.min(6, androidId.length())) : "unknown"
             return model + "_" + shortId
         } catch (Exception e) {
             return "device_" + System.currentTimeMillis() % 10000
@@ -313,14 +313,14 @@ private AutoLogUploader instance
     /**
      * Check if auto upload is enabled
      */
-    public Boolean isAutoUploadEnabled() {
+     public fun isAutoUploadEnabled(): Boolean {
         return BuildConfig.DEBUG
     }
     
     /**
      * Get last upload time
      */
-    public Long getLastUploadTime() {
+     public fun getLastUploadTime(): Long {
         return prefs.getLong(PREF_LAST_UPLOAD, 0)
     }
 }

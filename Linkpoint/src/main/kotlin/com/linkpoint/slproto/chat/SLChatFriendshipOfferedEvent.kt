@@ -30,36 +30,36 @@ val class SLChatFriendshipOfferedEvent : SLChatYesNoEvent() {
         return SLChatEvent.ChatMessageType.FriendshipOffered
     }
 
-    public String getNoButton(Context context) {
+     public fun getNoButton(context: Context): String {
         return context.getString(R.string.friendship_request_no)
     }
 
-    public String getNoMessage(Context context) {
+     public fun getNoMessage(context: Context): String {
         return context.getString(R.string.friendship_request_declined)
     }
 
-    public String getQuestion(Context context) {
+     public fun getQuestion(context: Context): String {
         return context.getString(R.string.friendship_request_question)
     }
 
-    public String getYesButton(Context context) {
+     public fun getYesButton(context: Context): String {
         return context.getString(R.string.friendship_request_yes)
     }
 
-    public String getYesMessage(Context context) {
+     public fun getYesMessage(context: Context): String {
         return context.getString(R.string.friendship_request_accepted)
     }
 
-    fun onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(context: Context, userManager: UserManager) {
         super.onYesAction(context, userManager)
-        UUID sourceUUID = this.source.getSourceUUID()
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+        val sourceUUID: UUID = this.source.getSourceUUID()
+        val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (sourceUUID != null && activeAgentCircuit != null) {
             activeAgentCircuit.AcceptFriendship(sourceUUID, this.sessionID)
         }
     }
 
-    fun serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setSessionID(this.sessionID)
     }

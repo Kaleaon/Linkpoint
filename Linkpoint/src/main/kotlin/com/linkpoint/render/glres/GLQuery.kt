@@ -12,9 +12,9 @@ class GLQuery : GLResource() {
     private const val MIN_OCCLUSION_QUERY_FRAMES: Int = 0
     /* access modifiers changed from: private */
     @JvmStatic
-    ThreadLocal<Int[]> idQuery = ThreadLocal<Int[]>() {
+    val idQuery: ThreadLocal<IntArray> = ThreadLocal<IntArray>() {
         /* access modifiers changed from: protected */
-        public Int[] initialValue() {
+         public fun initialValue(): IntArray {
             return Int[1]
         }
     }
@@ -29,7 +29,7 @@ private class GLQueryReference : GLResourceManager().GLResourceReference {
         }
 
         fun GLFree() {
-            Int[] iArr = (Int[]) GLQuery.idQuery.get()
+            val iArr: IntArray = (IntArray) GLQuery.idQuery.get()
             iArr[0] = this.handle
             Debug.Printf("GLBuffer: deleted buffer %d", Integer.valueOf(iArr[0]))
             GLES30.glDeleteQueries(1, iArr, 0)
@@ -48,13 +48,13 @@ private class GLQueryReference : GLResourceManager().GLResourceReference {
     }
 
     /* access modifiers changed from: protected */
-    public Int Allocate(GLResourceManager gLResourceManager) {
-        Int[] iArr = idQuery.get()
+    public fun Allocate(gLResourceManager: GLResourceManager): Int {
+        val iArr: IntArray = idQuery.get()
         GLES30.glGenQueries(1, iArr, 0)
         return iArr[0]
     }
 
-    fun BeginOcclusionQuery(RenderContext renderContext) {
+    fun BeginOcclusionQuery(renderContext: RenderContext) {
         GLES30.glBeginQuery(35887, this.handle)
         this.isQueryRunning = true
         this.queryResult = OcclusionQueryResult.NotReady
@@ -66,12 +66,12 @@ private class GLQueryReference : GLResourceManager().GLResourceReference {
         GLES30.glEndQuery(35887)
     }
 
-    public Boolean checkResult() {
+     public fun checkResult(): Boolean {
         if (!this.isQueryRunning) {
             this.queryResult = OcclusionQueryResult.NotReady
             return true
         }
-        Int[] iArr = idQuery.get()
+        val iArr: IntArray = idQuery.get()
         GLES30.glGetQueryObjectuiv(this.handle, 34919, iArr, 0)
         if (iArr[0] == 0) {
             return false
@@ -82,11 +82,11 @@ private class GLQueryReference : GLResourceManager().GLResourceReference {
         return true
     }
 
-    public OcclusionQueryResult getOcclusionQueryResult() {
+     public fun getOcclusionQueryResult(): OcclusionQueryResult {
         return this.queryResult
     }
 
-    public Boolean isQueryRunning() {
+     public fun isQueryRunning(): Boolean {
         return this.isQueryRunning
     }
 }

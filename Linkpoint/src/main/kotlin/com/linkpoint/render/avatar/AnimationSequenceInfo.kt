@@ -27,12 +27,12 @@ class AnimationSequenceInfo {
     }
 
     @JvmStatic
-    AnimationSequenceInfo newSequence(UUID uuid, Long j, Int i) {
+     fun newSequence(uuid: UUID, j: Long, i: Int): AnimationSequenceInfo {
         return AnimationSequenceInfo(uuid, i, j, 0, -1, -1, false)
     }
 
     @JvmStatic
-    AnimationSequenceInfo restartSequence(Long j, Int i, AnimationSequenceInfo animationSequenceInfo) {
+     fun restartSequence(j: Long, i: Int, animationSequenceInfo: AnimationSequenceInfo): AnimationSequenceInfo {
         if (animationSequenceInfo.sequenceID != 0) {
             return AnimationSequenceInfo(animationSequenceInfo.animationID, i, j, animationSequenceInfo.sequenceID, animationSequenceInfo.runningSince, j, true)
         }
@@ -40,14 +40,14 @@ class AnimationSequenceInfo {
     }
 
     @JvmStatic
-    AnimationSequenceInfo stopSequence(Long j, AnimationSequenceInfo animationSequenceInfo) {
+     fun stopSequence(j: Long, animationSequenceInfo: AnimationSequenceInfo): AnimationSequenceInfo {
         if (animationSequenceInfo.sequenceID == 0) {
             return null
         }
         return AnimationSequenceInfo(animationSequenceInfo.animationID, 0, -1, animationSequenceInfo.sequenceID, animationSequenceInfo.runningSince, j, animationSequenceInfo.dontEaseIn)
     }
 
-    public Boolean hasStopped(Long j) {
+     public fun hasStopped(j: Long): Boolean {
         return this.sequenceID == 0 && (this.stoppingSequenceID == 0 || j >= this.stoppingEasingOutSince + MAX_ANIMATION_LENGTH)
     }
 }

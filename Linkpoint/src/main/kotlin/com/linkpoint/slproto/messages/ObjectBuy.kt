@@ -30,15 +30,15 @@ class ObjectBuy : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.ObjectData_Fields.size() * 9) + 69
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleObjectBuy(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 102)
@@ -54,14 +54,14 @@ class ObjectBuy : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
         this.AgentData_Field.CategoryID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ObjectData objectData = ObjectData()
+            val objectData: ObjectData = ObjectData()
             objectData.ObjectLocalID = unpackInt(byteBuffer)
             objectData.SaleType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             objectData.SalePrice = unpackInt(byteBuffer)

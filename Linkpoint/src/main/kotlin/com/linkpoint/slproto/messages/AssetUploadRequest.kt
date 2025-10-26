@@ -9,7 +9,7 @@ class AssetUploadRequest : SLMessage() {
 
     @JvmStatic
     class AssetBlock {
-        public Byte[] AssetData
+        public ByteArray AssetData
         public Boolean StoreLocal
         public Boolean Tempfile
         public UUID TransactionID
@@ -20,15 +20,15 @@ class AssetUploadRequest : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.AssetBlock_Field.AssetData.length + 21 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAssetUploadRequest(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 77)
@@ -39,7 +39,7 @@ class AssetUploadRequest : SLMessage() {
         packVariable(byteBuffer, this.AssetBlock_Field.AssetData, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AssetBlock_Field.TransactionID = unpackUUID(byteBuffer)
         this.AssetBlock_Field.Type = unpackByte(byteBuffer)
         this.AssetBlock_Field.Tempfile = unpackBoolean(byteBuffer)

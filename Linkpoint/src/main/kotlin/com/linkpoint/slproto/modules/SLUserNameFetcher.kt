@@ -41,11 +41,11 @@ class SLUserNameFetcher : SLModule(), RequestListener {
                 r2 = this
             L_0x0000:
                 com.lumiyaviewer.lumiya.slproto.modules.SLUserNameFetcher r0 = com.lumiyaviewer.lumiya.slproto.modules.SLUserNameFetcher.this
-                Boolean r0 = r0.threadMustExit
+                val r0: Boolean = r0.threadMustExit
                 if (r0 != 0) goto L_0x002d
             L_0x0008:
                 com.lumiyaviewer.lumiya.slproto.modules.SLUserNameFetcher r0 = com.lumiyaviewer.lumiya.slproto.modules.SLUserNameFetcher.this     // Catch:{ InterruptedException -> 0x002c }
-                Boolean r0 = r0.FetchSomeNamesOverHTTP()     // Catch:{ InterruptedException -> 0x002c }
+                val r0: Boolean = r0.FetchSomeNamesOverHTTP()     // Catch:{ InterruptedException -> 0x002c }
                 if (r0 != 0) goto L_0x0008
                 com.lumiyaviewer.lumiya.slproto.modules.SLUserNameFetcher r0 = com.lumiyaviewer.lumiya.slproto.modules.SLUserNameFetcher.this     // Catch:{ InterruptedException -> 0x002c }
                 java.util.concurrent.locks.Lock r0 = r0.lock     // Catch:{ InterruptedException -> 0x002c }
@@ -100,16 +100,16 @@ class SLUserNameFetcher : SLModule(), RequestListener {
     }
 
     /* access modifiers changed from: private */
-    public Boolean FetchSomeNamesOverHTTP() {
+    public fun FetchSomeNamesOverHTTP(): Boolean {
         String str
         LLSDNode lLSDNode
-        List<UUID> uUIDsToFetch = getUUIDsToFetch(4)
+        val uUIDsToFetch: List<UUID> = getUUIDsToFetch(4)
         if (uUIDsToFetch.isEmpty()) {
             return false
         }
-        String str2 = this.caps.getCapability(SLCaps.SLCapability.GetDisplayNames) + "/"
-        Iterator<T> it = uUIDsToFetch.iterator()
-        Boolean z = true
+        val str2: String = this.caps.getCapability(SLCaps.SLCapability.GetDisplayNames) + "/"
+        val it: Iterator<T> = uUIDsToFetch.iterator()
+        val z: Boolean = true
         while (true) {
             str = str2
             if (it.hasNext()) {
@@ -131,12 +131,12 @@ class SLUserNameFetcher : SLModule(), RequestListener {
         if (lLSDNode != null) {
             try {
                 if (lLSDNode.keyExists("agents")) {
-                    LLSDNode byKey = lLSDNode.byKey("agents")
+                    val byKey: LLSDNode = lLSDNode.byKey("agents")
                     for (Int i = 0; i < byKey.getCount(); i++) {
-                        LLSDNode byIndex = byKey.byIndex(i)
-                        UUID asUUID = byIndex.byKey("id").asUUID()
-                        String asString = byIndex.byKey("display_name").asString()
-                        String asString2 = byIndex.byKey("username").asString()
+                        val byIndex: LLSDNode = byKey.byIndex(i)
+                        val asUUID: UUID = byIndex.byKey("id").asUUID()
+                        val asString: String = byIndex.byKey("display_name").asString()
+                        val asString2: String = byIndex.byKey("username").asString()
                         if (this.userManager != null) {
                             this.userManager.updateUserNames(asUUID, asString2, asString)
                             this.userNameRequests.completeRequest(asUUID)
@@ -144,9 +144,9 @@ class SLUserNameFetcher : SLModule(), RequestListener {
                     }
                 }
                 if (lLSDNode.keyExists("bad_ids")) {
-                    LLSDNode byKey2 = lLSDNode.byKey("bad_ids")
+                    val byKey2: LLSDNode = lLSDNode.byKey("bad_ids")
                     for (Int i2 = 0; i2 < byKey2.getCount(); i2++) {
-                        UUID fromString = UUID.fromString(byKey2.byIndex(i2).asString())
+                        val fromString: UUID = UUID.fromString(byKey2.byIndex(i2).asString())
                         if (this.userManager != null) {
                             this.userManager.setUserBadUUID(fromString)
                             this.userNameRequests.completeRequest(fromString)
@@ -160,13 +160,13 @@ class SLUserNameFetcher : SLModule(), RequestListener {
         return true
     }
 
-    private Unit FetchSomeNamesOverUDP() {
-        List<UUID> uUIDsToFetch = getUUIDsToFetch(4)
+    private fun FetchSomeNamesOverUDP() {
+        val uUIDsToFetch: List<UUID> = getUUIDsToFetch(4)
         if (uUIDsToFetch.isEmpty()) {
             this.isWaitingReply = false
             return
         }
-        UUIDNameRequest uUIDNameRequest = UUIDNameRequest()
+        val uUIDNameRequest: UUIDNameRequest = UUIDNameRequest()
         for (UUID uuid : uUIDsToFetch) {
             UUIDNameRequest.UUIDNameBlock uUIDNameBlock = UUIDNameRequest.UUIDNameBlock()
             uUIDNameBlock.ID = uuid
@@ -180,7 +180,7 @@ class SLUserNameFetcher : SLModule(), RequestListener {
 
     private List<UUID> getUUIDsToFetch(Int i) {
         UUID request
-        ArrayList arrayList = ArrayList(i)
+        val arrayList: ArrayList = ArrayList(i)
         if (this.userNameRequests != null) {
             while (arrayList.size() < i && (request = this.userNameRequests.getRequest()) != null) {
                 arrayList.add(request)
@@ -205,8 +205,8 @@ class SLUserNameFetcher : SLModule(), RequestListener {
     @SLMessageHandler
     public synchronized Unit HandleUUIDNameReply(UUIDNameReply uUIDNameReply) {
         for (UUIDNameReply.UUIDNameBlock uUIDNameBlock : uUIDNameReply.UUIDNameBlock_Fields) {
-            UUID uuid = uUIDNameBlock.ID
-            String str = SLMessage.stringFromVariableOEM(uUIDNameBlock.FirstName) + " " + SLMessage.stringFromVariableOEM(uUIDNameBlock.LastName)
+            val uuid: UUID = uUIDNameBlock.ID
+            val str: String = SLMessage.stringFromVariableOEM(uUIDNameBlock.FirstName) + " " + SLMessage.stringFromVariableOEM(uUIDNameBlock.LastName)
             if (this.userManager != null) {
                 this.userManager.updateUserNames(uuid, str, str)
                 this.userNameRequests.completeRequest(uuid)

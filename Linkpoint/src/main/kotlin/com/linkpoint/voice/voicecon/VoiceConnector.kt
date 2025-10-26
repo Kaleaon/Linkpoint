@@ -54,7 +54,7 @@ class VoiceConnector {
         this.handle = object
     }
 
-    public VoiceAccountConnection createAccountConnection(VoiceLoginInfo voiceLoginInfo) throws VoiceException {
+     public fun createAccountConnection(voiceLoginInfo: VoiceLoginInfo) throws VoiceException {
         return VoiceAccountConnection(this.messageController, this, voiceLoginInfo)
     }
 
@@ -68,22 +68,22 @@ class VoiceConnector {
         }
     }
 
-    public String getHandle() {
+     public fun getHandle(): String {
         return this.handle
     }
 
-    public String getVoiceAccountServerName() {
+     public fun getVoiceAccountServerName(): String {
         return this.voiceAccountServerName
     }
 
-    fun setLocalMicVolume(Int n) {
+    fun setLocalMicVolume(n: Int) {
         vx_req_connector_set_local_mic_volume_t vx_req_connector_set_local_mic_volume_t2 = vx_req_connector_set_local_mic_volume_t()
         vx_req_connector_set_local_mic_volume_t2.setConnector_handle(this.handle)
         vx_req_connector_set_local_mic_volume_t2.setVolume(n)
         this.messageController.sendRequest(vx_req_connector_set_local_mic_volume_t2.getBase())
     }
 
-    fun setLocalSpeakerVolume(Int n) {
+    fun setLocalSpeakerVolume(n: Int) {
         vx_req_connector_set_local_speaker_volume_t vx_req_connector_set_local_speaker_volume_t2 = vx_req_connector_set_local_speaker_volume_t()
         vx_req_connector_set_local_speaker_volume_t2.setConnector_handle(this.handle)
         vx_req_connector_set_local_speaker_volume_t2.setVolume(n)
@@ -93,10 +93,10 @@ class VoiceConnector {
     /*
      * Enabled aggressive block sorting
      */
-    fun setMuteLocalMic(Boolean bl) {
+    fun setMuteLocalMic(bl: Boolean) {
         vx_req_connector_mute_local_mic_t vx_req_connector_mute_local_mic_t2 = vx_req_connector_mute_local_mic_t()
         vx_req_connector_mute_local_mic_t2.setConnector_handle(this.handle)
-        Int n = bl ? 1 : 0
+        val n: Int = bl ? 1 : 0
         vx_req_connector_mute_local_mic_t2.setMute_level(n)
         this.messageController.sendRequest(vx_req_connector_mute_local_mic_t2.getBase())
     }
@@ -104,10 +104,10 @@ class VoiceConnector {
     /*
      * Enabled aggressive block sorting
      */
-    fun setMuteLocalSpeaker(Boolean bl) {
+    fun setMuteLocalSpeaker(bl: Boolean) {
         vx_req_connector_mute_local_speaker_t vx_req_connector_mute_local_speaker_t2 = vx_req_connector_mute_local_speaker_t()
         vx_req_connector_mute_local_speaker_t2.setConnector_handle(this.handle)
-        Int n = bl ? 1 : 0
+        val n: Int = bl ? 1 : 0
         vx_req_connector_mute_local_speaker_t2.setMute_level(n)
         this.messageController.sendRequest(vx_req_connector_mute_local_speaker_t2.getBase())
     }

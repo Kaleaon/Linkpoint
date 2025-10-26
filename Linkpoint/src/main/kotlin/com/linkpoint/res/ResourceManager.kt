@@ -28,8 +28,8 @@ abstract class ResourceManager<ResourceParams, ResourceType> {
     private val Object lock = Object()
     private val RemovalListener<ResourceConsumer, ResourceRequest<ResourceParams, ResourceType>> removalListener = RemovalListener<ResourceConsumer, ResourceRequest<ResourceParams, ResourceType>>() {
         fun onRemoval(RemovalNotification<ResourceConsumer, ResourceRequest<ResourceParams, ResourceType>> removalNotification) {
-            ResourceConsumer key = removalNotification.getKey()
-            ResourceRequest value = removalNotification.getValue()
+            val key: ResourceConsumer = removalNotification.getKey()
+            val value: ResourceRequest = removalNotification.getValue()
             if (value != null && !value.isCompleted() && (!value.isCancelled())) {
                 if (key != null) {
                     value.removeConsumer(key)
@@ -50,7 +50,7 @@ abstract class ResourceManager<ResourceParams, ResourceType> {
             return ResourceManager.this.CreateNewRequest(resourceparams, ResourceManager.this)
         }
 
-    fun CancelRequest(ResourceConsumer resourceConsumer) {
+    fun CancelRequest(resourceConsumer: ResourceConsumer) {
         if (resourceConsumer != null) {
             synchronized (this.lock) {
                 this.consumerMap.invalidate(resourceConsumer)
@@ -59,7 +59,7 @@ abstract class ResourceManager<ResourceParams, ResourceType> {
         }
     }
 
-    fun CompleteRequest(ResourceParams resourceparams, ResourceType resourcetype, Set<ResourceConsumer> set) {
+    fun CompleteRequest(resourceparams: ResourceParams, resourcetype: ResourceType, set: Set<ResourceConsumer>) {
         ArrayList<ResourceConsumer> arrayList
         synchronized (this.lock) {
             this.requestMap.invalidate(resourceparams)
@@ -81,7 +81,7 @@ abstract class ResourceManager<ResourceParams, ResourceType> {
     /* access modifiers changed from: protected */
     public abstract ResourceRequest<ResourceParams, ResourceType> CreateNewRequest(ResourceParams resourceparams, ResourceManager<ResourceParams, ResourceType> resourceManager)
 
-    fun IntermediateResult(ResourceParams resourceparams, ResourceType resourcetype, Set<ResourceConsumer> set) {
+    fun IntermediateResult(resourceparams: ResourceParams, resourcetype: ResourceType, set: Set<ResourceConsumer>) {
         ArrayList<ResourceConsumer> arrayList
         synchronized (this.lock) {
             arrayList = ArrayList<>(set.size())
@@ -98,7 +98,7 @@ abstract class ResourceManager<ResourceParams, ResourceType> {
         collectReferences()
     }
 
-    fun RequestResource(ResourceParams resourceparams, ResourceConsumer resourceConsumer) {
+    fun RequestResource(resourceparams: ResourceParams, resourceConsumer: ResourceConsumer) {
         ResourceRequest unchecked
         Boolean willStart
         synchronized (this.lock) {
@@ -117,12 +117,12 @@ abstract class ResourceManager<ResourceParams, ResourceType> {
 
     /* access modifiers changed from: protected */
     fun collectReferences() {
-        ArrayList<ResourceRequest> arrayList = null
+        val arrayList: ArrayList<ResourceRequest> = null
         synchronized (this.lock) {
             this.requestMap.cleanUp()
             this.consumerMap.cleanUp()
             while (true) {
-                ResourceRequest poll = this.cancelledRequests.poll()
+                val poll: ResourceRequest = this.cancelledRequests.poll()
                 if (poll == null) {
                     break
                 }

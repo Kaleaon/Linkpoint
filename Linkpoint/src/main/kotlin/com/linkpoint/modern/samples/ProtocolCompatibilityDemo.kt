@@ -38,26 +38,26 @@ class ProtocolCompatibilityDemo {
         Log.i(TAG, "=== LLSD Primitives Compatibility Demo ===")
         
         // Vector3 compatibility 
-        LLVector3 position = LLVector3(128.0f, 128.0f, 25.0f)
-        LLSDMap positionLLSD = ModernLLSDCodec.Primitives.createVector3(position)
+        val position: LLVector3 = LLVector3(128.0f, 128.0f, 25.0f)
+        val positionLLSD: LLSDMap = ModernLLSDCodec.Primitives.createVector3(position)
         Log.i(TAG, "Vector3 LLSD: " + positionLLSD.toString())
         
         // Quaternion compatibility
-        LLQuaternion rotation = LLQuaternion()
-        LLSDMap rotationLLSD = ModernLLSDCodec.Primitives.createQuaternion(rotation)
+        val rotation: LLQuaternion = LLQuaternion()
+        val rotationLLSD: LLSDMap = ModernLLSDCodec.Primitives.createQuaternion(rotation)
         Log.i(TAG, "Quaternion LLSD: " + rotationLLSD.toString())
         
         // UUID compatibility
-        UUID agentId = UUID.randomUUID()
-        LLSDUUID agentLLSD = ModernLLSDCodec.Primitives.createUUID(agentId)
+        val agentId: UUID = UUID.randomUUID()
+        val agentLLSD: LLSDUUID = ModernLLSDCodec.Primitives.createUUID(agentId)
         Log.i(TAG, "UUID LLSD: " + agentLLSD.toString())
         
         // Color4 compatibility  
-        LLSDMap colorLLSD = ModernLLSDCodec.Primitives.createColor4(1.0f, 0.5f, 0.2f, 1.0f)
+        val colorLLSD: LLSDMap = ModernLLSDCodec.Primitives.createColor4(1.0f, 0.5f, 0.2f, 1.0f)
         Log.i(TAG, "Color4 LLSD: " + colorLLSD.toString())
         
         // Date compatibility
-        LLSDDate dateLLSD = ModernLLSDCodec.Primitives.createDate(Date())
+        val dateLLSD: LLSDDate = ModernLLSDCodec.Primitives.createDate(Date())
         Log.i(TAG, "Date LLSD: " + dateLLSD.toString())
     }
     

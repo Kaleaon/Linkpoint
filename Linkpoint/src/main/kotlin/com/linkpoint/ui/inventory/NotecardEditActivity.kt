@@ -120,15 +120,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     private UUID taskUUID = null
     private UserManager userManager
 
-    private Unit copyAttachmentToInventory(SLInventoryEntry sLInventoryEntry) {
+     private fun copyAttachmentToInventory(sLInventoryEntry: SLInventoryEntry) {
         if (this.userManager != null && this.noteEntry != null && sLInventoryEntry != null) {
             startActivity(InventoryActivity.makeSaveItemIntent(this, this.userManager.getUserID(), InventorySaveInfo(InventorySaveInfo.InventorySaveType.NotecardItem, sLInventoryEntry.uuid, sLInventoryEntry.name, this.noteEntry.uuid, SLAssetType.getByType(this.noteEntry.assetType), 0)))
         }
     }
 
     @JvmStatic
-    Intent createIntent(Context context, UUID uuid, UUID uuid2, SLInventoryEntry sLInventoryEntry, Boolean z, UUID uuid3, Int i) {
-        Intent intent = Intent(context, NotecardEditActivity.class)
+     fun createIntent(context: Context, uuid: UUID, uuid2: UUID, sLInventoryEntry: SLInventoryEntry, z: Boolean, uuid3: UUID, i: Int): Intent {
+        val intent: Intent = Intent(context, NotecardEditActivity.class)
         intent.putExtra("activeAgentUUID", uuid.toString())
         if (uuid2 != null) {
             intent.putExtra(PARENT_FOLDER_KEY, uuid2.toString())
@@ -144,13 +144,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         return intent
     }
 
-    private Unit createNewAttachment() {
+     private fun createNewAttachment() {
         if (this.editMode && this.userManager != null) {
             startActivityForResult(InventoryActivity.makeSelectIntent(this, this.userManager.getUserID()), 1)
         }
     }
 
-    private Unit discardChanges() {
+     private fun discardChanges() {
         if (this.editMode && this.notecard != null) {
             this.editMode = false
             ((EditText) findViewById(R.id.notecardEditTitle)).clearComposingText()
@@ -168,7 +168,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
 
     /* access modifiers changed from: private */
     /* renamed from: onAgentCircuit */
-    fun m622com_lumiyaviewer_lumiya_ui_inventory_NotecardEditActivitymthref1(SLAgentCircuit sLAgentCircuit) {
+    fun m622com_lumiyaviewer_lumiya_ui_inventory_NotecardEditActivitymthref1(sLAgentCircuit: SLAgentCircuit) {
         if (sLAgentCircuit != null && !sLAgentCircuit.getModules().rlvController.canViewNotecard()) {
             finish()
         }
@@ -177,7 +177,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
 
     /* access modifiers changed from: private */
     /* renamed from: onNotecardLoaded */
-    fun m621com_lumiyaviewer_lumiya_ui_inventory_NotecardEditActivitymthref0(AssetData assetData) {
+    fun m621com_lumiyaviewer_lumiya_ui_inventory_NotecardEditActivitymthref0(assetData: AssetData) {
         if (assetData.getStatus() == 1) {
             try {
                 this.notecard = SLNotecard(assetData.getData(), this.isEditingScript)
@@ -190,17 +190,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         }
     }
 
-    private Unit saveChanges() {
-        Boolean z = true
-        Byte[] bArr = null
+     private fun saveChanges() {
+        val z: Boolean = true
+        val bArr: ByteArray = null
         if (this.editMode && this.notecard != null) {
-            String editable = ((EditText) findViewById(R.id.notecardEditTitle)).getText().toString()
-            String editable2 = ((EditText) findViewById(R.id.notecardEditDescription)).getText().toString()
+            val editable: String = ((EditText) findViewById(R.id.notecardEditTitle)).getText().toString()
+            val editable2: String = ((EditText) findViewById(R.id.notecardEditDescription)).getText().toString()
             if (this.noteEntry != null) {
                 z = !(Objects.equal(editable, this.noteEntry.name) ? Objects.equal(editable2, this.noteEntry.description) : false)
             }
-            SLNotecard sLNotecard = SLNotecard((Spanned) ((EditText) findViewById(R.id.notecardEditContents)).getText(), this.isEditingScript)
-            Byte[] lindenText = sLNotecard.toLindenText()
+            val sLNotecard: SLNotecard = SLNotecard((Spanned) ((EditText) findViewById(R.id.notecardEditContents)).getText(), this.isEditingScript)
+            val lindenText: ByteArray = sLNotecard.toLindenText()
             if (!Arrays.equals(lindenText, this.notecard.toLindenText()) || this.noteEntry == null || this.noteEntry.getId() == 0) {
                 this.notecard = sLNotecard
                 bArr = lindenText
@@ -209,7 +209,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
                 this.notecardTitle = editable
                 this.notecardDescription = editable2
                 try {
-                    SLInventory sLInventory = this.agentCircuit.get().getModules().inventory
+                    val sLInventory: SLInventory = this.agentCircuit.get().getModules().inventory
                     this.isSaving = true
                     updateButtonsForMode()
                     sLInventory.UpdateNotecard(this.noteEntry, this.parentFolderUUID, this.isEditingScript, editable, editable2, bArr, this.taskUUID, this.taskLocalID, SLInventory.OnNotecardUpdatedListener(this) {
@@ -305,7 +305,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         }
     }
 
-    private Unit startEditing() {
+     private fun startEditing() {
         if (!this.editMode && this.notecard != null) {
             this.editMode = true
             ((EditText) findViewById(R.id.notecardEditTitle)).clearComposingText()
@@ -321,11 +321,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         }
     }
 
-    private Unit updateButtonsForMode() {
-        Boolean z = true
-        Int i2 = 8
-        TextKeyListener textKeyListener = null
-        Boolean z2 = this.notecardAssetSubscription.getLoadableStatus() == Loadable.Status.Loading
+     private fun updateButtonsForMode() {
+        val z: Boolean = true
+        val i2: Int = 8
+        val textKeyListener: TextKeyListener = null
+        val z2: Boolean = this.notecardAssetSubscription.getLoadableStatus() == Loadable.Status.Loading
         if (this.noteEntry != null && (this.noteEntry.ownerMask & 16384) == 0) {
             z = false
         }
@@ -354,14 +354,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         } else {
             findViewById(R.id.notecard_error_layout).setVisibility(8)
         }
-        View findViewById = findViewById(R.id.notecardProgressIndicator)
+        val findViewById: View = findViewById(R.id.notecardProgressIndicator)
         if (z2 || this.isSaving) {
             i2 = 0
         }
         findViewById.setVisibility(i2)
         ((EditText) findViewById(R.id.notecardEditContents)).setKeyListener(this.editMode ? TextKeyListener.getInstance() : null)
         ((EditText) findViewById(R.id.notecardEditTitle)).setKeyListener(this.editMode ? TextKeyListener.getInstance() : null)
-        EditText editText = (EditText) findViewById(R.id.notecardEditDescription)
+        val editText: EditText = (EditText) findViewById(R.id.notecardEditDescription)
         if (this.editMode) {
             textKeyListener = TextKeyListener.getInstance()
         }
@@ -486,15 +486,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: protected */
-    fun onActivityResult(Int i, Int i2, Intent intent) {
+    fun onActivityResult(i: Int, i2: Int, intent: Intent) {
         SLInventoryEntry sLInventoryEntry
         switch (i) {
             case 1:
                 if (i2 == -1 && this.editMode && (sLInventoryEntry = (SLInventoryEntry) intent.getParcelableExtra(InventoryFragment.SELECTED_INVENTORY_ENTRY)) != null) {
-                    Spanned createSingleEditableAttachment = SLNotecard.createSingleEditableAttachment(sLInventoryEntry)
-                    EditText editText = (EditText) findViewById(R.id.notecardEditContents)
-                    Int selectionStart = editText.getSelectionStart()
-                    Int selectionEnd = editText.getSelectionEnd()
+                    val createSingleEditableAttachment: Spanned = SLNotecard.createSingleEditableAttachment(sLInventoryEntry)
+                    val editText: EditText = (EditText) findViewById(R.id.notecardEditContents)
+                    val selectionStart: Int = editText.getSelectionStart()
+                    val selectionEnd: Int = editText.getSelectionEnd()
                     editText.getText().replace(Math.min(selectionStart, selectionEnd), Math.max(selectionStart, selectionEnd), createSingleEditableAttachment, 0, createSingleEditableAttachment.length())
                     return
                 }
@@ -504,9 +504,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         }
     }
 
-    fun onAttachmentClick(SLInventoryEntry sLInventoryEntry) {
+    fun onAttachmentClick(sLInventoryEntry: SLInventoryEntry) {
         if (sLInventoryEntry.invType == SLInventoryType.IT_LANDMARK.getTypeCode()) {
-            CharSequence[] charSequenceArr = {getString(R.string.attachment_action_teleport), getString(R.string.attachment_action_copy)}
+            val charSequenceArr: Array<CharSequence> = {getString(R.string.attachment_action_teleport), getString(R.string.attachment_action_copy)}
             AlertDialog.Builder builder = AlertDialog.Builder(this)
             builder.setTitle(getString(R.string.attachment_action_title))
             builder.setItems(charSequenceArr, DialogInterface.OnClickListener(this, sLInventoryEntry) {
@@ -590,7 +590,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
             builder.create().show()
             return
         }
-        CharSequence[] charSequenceArr2 = {getString(R.string.attachment_action_copy)}
+        val charSequenceArr2: Array<CharSequence> = {getString(R.string.attachment_action_copy)}
         AlertDialog.Builder builder2 = AlertDialog.Builder(this)
         builder2.setTitle(getString(R.string.attachment_action_title))
         builder2.setItems(charSequenceArr2, DialogInterface.OnClickListener(this, sLInventoryEntry) {
@@ -671,7 +671,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         builder2.create().show()
     }
 
-    fun onClick(View view) {
+    fun onClick(view: View) {
         switch (view.getId()) {
             case R.id.notecardErrorDiscard:
                 this.lastErrorMessage = null
@@ -691,9 +691,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         }
     }
 
-    fun onCreate(Bundle bundle) {
+    fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
-        Intent intent = getIntent()
+        val intent: Intent = getIntent()
         if (intent != null) {
             this.userManager = ActivityUtils.getUserManager(intent)
             this.isEditingScript = intent.getBooleanExtra(IS_SCRIPT_KEY, false)
@@ -714,7 +714,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         findViewById(R.id.notecardErrorDiscard).setOnClickListener(this)
         this.editMode = false
         this.notecardTitle = this.noteEntry != null ? this.noteEntry.name : getString(R.string.new_notecard_title)
-        this.notecardDescription = this.noteEntry != null ? this.noteEntry.description : getString(R.string.new_notecard_description_format, Object[]{DateFormat.getDateTimeInstance(3, 3).format(Date())})
+        this.notecardDescription = this.noteEntry != null ? this.noteEntry.description : getString(R.string.new_notecard_description_format, Array<Any>{DateFormat.getDateTimeInstance(3, 3).format(Date())})
         ((EditText) findViewById(R.id.notecardEditTitle)).setText(this.notecardTitle)
         ((EditText) findViewById(R.id.notecardEditDescription)).setText(this.notecardDescription)
         this.agentCircuit.subscribe(UserManager.agentCircuits(), this.userManager.getUserID())
@@ -728,7 +728,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         updateButtonsForMode()
     }
 
-    public Boolean onCreateOptionsMenu(Menu menu) {
+     public fun onCreateOptionsMenu(menu: Menu): Boolean {
         getMenuInflater().inflate(R.menu.notecard_menu, menu)
         this.menuItemNewAttachment = menu.findItem(R.id.item_new_attachment)
         if (this.menuItemNewAttachment == null) {
@@ -738,7 +738,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         return true
     }
 
-    public Boolean onOptionsItemSelected(MenuItem menuItem) {
+     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_new_attachment:
                 createNewAttachment()

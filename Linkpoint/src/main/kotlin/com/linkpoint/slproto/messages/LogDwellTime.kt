@@ -18,22 +18,22 @@ class LogDwellTime : SLMessage() {
         public Int RegionX
         public Int RegionY
         public UUID SessionID
-        public Byte[] SimName
+        public ByteArray SimName
     }
 
     public LogDwellTime() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.DwellInfo_Field.SimName.length + 37 + 4 + 4 + 1 + 1 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleLogDwellTime(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.DC2)
@@ -47,7 +47,7 @@ class LogDwellTime : SLMessage() {
         packByte(byteBuffer, (Byte) this.DwellInfo_Field.AvgViewerFPS)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.DwellInfo_Field.AgentID = unpackUUID(byteBuffer)
         this.DwellInfo_Field.SessionID = unpackUUID(byteBuffer)
         this.DwellInfo_Field.Duration = unpackFloat(byteBuffer)

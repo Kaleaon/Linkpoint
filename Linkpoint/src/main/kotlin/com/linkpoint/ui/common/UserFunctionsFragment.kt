@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicInteger
 abstract class UserFunctionsFragment : ChatterReloadableFragment() : ReloadableFragment {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f378comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f378comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues = null
     protected val SubscriptionData<SubscriptionSingleKey, CurrentLocationInfo> currentLocationInfo = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
 
         /* renamed from: -$f0 */
@@ -168,11 +168,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m559getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues() {
+private /* synthetic */ IntArray m559getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues() {
         if (f378comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues != null) {
             return f378comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues
         }
-        Int[] iArr = Int[ChatterID.ChatterType.values().length]
+        val iArr: IntArray = Int[ChatterID.ChatterType.values().length]
         try {
             iArr[ChatterID.ChatterType.Group.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -189,9 +189,9 @@ private /* synthetic */ Int[] m559getcomlumiyaviewerlumiyaslprotousersChatterID$
         return iArr
     }
 
-    private Unit handleEnableVoice() {
+     private fun handleEnableVoice() {
         if (!VoicePluginServiceConnection.checkPluginInstalled(getContext())) {
-            AlertDialog.Builder(getContext()).setTitle((Int) R.string.enable_voice).setMessage((CharSequence) getContext().getString(R.string.enable_voice_plugin_message, Object[]{LicenseChecker.APP_STORE_NAME})).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
+            AlertDialog.Builder(getContext()).setTitle((Int) R.string.enable_voice).setMessage((CharSequence) getContext().getString(R.string.enable_voice_plugin_message, Array<Any>{LicenseChecker.APP_STORE_NAME})).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
 
                 /* renamed from: -$f0 */
                 private val /* synthetic */ Object f368$f0
@@ -474,11 +474,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         }).setCancelable(true).create().show()
     }
 
-    private Unit handlePlayParcelMedia() {
+     private fun handlePlayParcelMedia() {
         StreamingMediaService.startStreamingMediaService(getContext(), this.userManager)
     }
 
-    private Unit handleTeleportTo(SLAgentCircuit sLAgentCircuit, ChatterID.ChatterIDUser chatterIDUser) {
+     private fun handleTeleportTo(sLAgentCircuit: SLAgentCircuit, ChatterID.ChatterIDUser chatterIDUser) {
         if (sLAgentCircuit != null) {
             AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
             builder.setMessage(getString(R.string.teleport_to_user_title)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this, sLAgentCircuit, chatterIDUser) {
@@ -643,8 +643,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         }
     }
 
-    private Unit handleUserAddFriend(SLAgentCircuit sLAgentCircuit, ChatterID.ChatterIDUser chatterIDUser) {
-        TextFieldDialogBuilder textFieldDialogBuilder = TextFieldDialogBuilder(getContext())
+     private fun handleUserAddFriend(sLAgentCircuit: SLAgentCircuit, ChatterID.ChatterIDUser chatterIDUser) {
+        val textFieldDialogBuilder: TextFieldDialogBuilder = TextFieldDialogBuilder(getContext())
         textFieldDialogBuilder.setTitle(getString(R.string.offer_friendship_title))
         textFieldDialogBuilder.setDefaultText(getString(R.string.default_friendship_message))
         textFieldDialogBuilder.setOnTextEnteredListener(TextFieldDialogBuilder.OnTextEnteredListener(sLAgentCircuit, chatterIDUser) {
@@ -721,17 +721,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         textFieldDialogBuilder.show()
     }
 
-    private Unit handleUserCloseChat(ChatterID chatterID, Boolean z) {
+     private fun handleUserCloseChat(chatterID: ChatterID, z: Boolean) {
         UserManager userManager
-        Boolean z2 = true
+        val z2: Boolean = true
         if (chatterID != null && (userManager = chatterID.getUserManager()) != null) {
-            ActiveChattersManager activeChattersManager = userManager.getChatterList().getActiveChattersManager()
+            val activeChattersManager: ActiveChattersManager = userManager.getChatterList().getActiveChattersManager()
             if (!z && chatterID.getChatterType() != ChatterID.ChatterType.Group) {
                 z2 = false
             }
             activeChattersManager.markChatterInactive(chatterID, z2)
             if (this instanceof ChatFragment) {
-                FragmentActivity activity = getActivity()
+                val activity: FragmentActivity = getActivity()
                 if ((activity instanceof DetailsActivity) && !((DetailsActivity) activity).closeDetailsFragment(this) && (activity instanceof ChatNewActivity)) {
                     DetailsActivity.showDetails(activity, ChatFragmentActivityFactory.getInstance(), ChatFragment.makeSelection(ChatterID.getLocalChatterID(userManager.getUserID())))
                 }
@@ -739,9 +739,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         }
     }
 
-    private Unit handleUserMute(ChatterID chatterID) {
-        String str = null
-        UserManager userManager = this.userManager
+     private fun handleUserMute(chatterID: ChatterID) {
+        val str: String = null
+        val userManager: UserManager = this.userManager
         if (chatterID != null && userManager != null) {
             if (this.nameRetriever != null) {
                 str = this.nameRetriever.getResolvedName()
@@ -751,8 +751,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
             }
             AlertDialog.Builder builder = AlertDialog.Builder(getContext())
             builder.setTitle(getString(R.string.block_confirm_message, str)).setCancelable(true)
-            CharSequence[] charSequenceArr = userManager.getActiveAgentCircuit() != null ? CharSequence[]{getString(R.string.mute_action_description), getString(R.string.block_action_description)} : CharSequence[]{getString(R.string.mute_action_description)}
-            AtomicInteger atomicInteger = AtomicInteger(0)
+            val charSequenceArr: Array<CharSequence> = userManager.getActiveAgentCircuit() != null ? Array<CharSequence>{getString(R.string.mute_action_description), getString(R.string.block_action_description)} : Array<CharSequence>{getString(R.string.mute_action_description)}
+            val atomicInteger: AtomicInteger = AtomicInteger(0)
             builder.setSingleChoiceItems(charSequenceArr, 0, DialogInterface.OnClickListener(atomicInteger) {
 
                 /* renamed from: -$f0 */
@@ -990,14 +990,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         }
     }
 
-    private Unit handleUserOfferTeleport(UserManager userManager, SLAgentCircuit sLAgentCircuit, ChatterID.ChatterIDUser chatterIDUser) {
+     private fun handleUserOfferTeleport(userManager: UserManager, sLAgentCircuit: SLAgentCircuit, ChatterID.ChatterIDUser chatterIDUser) {
         ParcelData parcelData
-        CurrentLocationInfo currentLocationInfoSnapshot = userManager.getCurrentLocationInfoSnapshot()
-        String str = ""
+        val currentLocationInfoSnapshot: CurrentLocationInfo = userManager.getCurrentLocationInfoSnapshot()
+        val str: String = ""
         if (!(currentLocationInfoSnapshot == null || (parcelData = currentLocationInfoSnapshot.parcelData()) == null)) {
             str = Strings.nullToEmpty(parcelData.getName())
         }
-        TextFieldDialogBuilder textFieldDialogBuilder = TextFieldDialogBuilder(getContext())
+        val textFieldDialogBuilder: TextFieldDialogBuilder = TextFieldDialogBuilder(getContext())
         textFieldDialogBuilder.setTitle(getString(R.string.offer_teleport_title))
         textFieldDialogBuilder.setDefaultText("Join me in " + str)
         textFieldDialogBuilder.setOnTextEnteredListener(TextFieldDialogBuilder.OnTextEnteredListener(sLAgentCircuit, chatterIDUser) {
@@ -1074,16 +1074,16 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         textFieldDialogBuilder.show()
     }
 
-    private Unit handleUserOpenChat(ChatterID chatterID) {
+     private fun handleUserOpenChat(chatterID: ChatterID) {
         DetailsActivity.showDetails(getActivity(), ChatFragmentActivityFactory.getInstance(), ChatFragment.makeSelection(chatterID))
     }
 
-    private Unit handleUserPayUser(ChatterID.ChatterIDUser chatterIDUser) {
+     private fun handleUserPayUser(ChatterID.ChatterIDUser chatterIDUser) {
         DetailsActivity.showEmbeddedDetails(getActivity(), PayUserFragment.class, PayUserFragment.makeSelection(chatterIDUser))
     }
 
-    private Unit handleUserRemoveFriend(SLAgentCircuit sLAgentCircuit, ChatterID.ChatterIDUser chatterIDUser) {
-        String str = null
+     private fun handleUserRemoveFriend(sLAgentCircuit: SLAgentCircuit, ChatterID.ChatterIDUser chatterIDUser) {
+        val str: String = null
         AlertDialog.Builder builder = AlertDialog.Builder(getContext())
         if (this.nameRetriever != null) {
             str = this.nameRetriever.getResolvedName()
@@ -1091,7 +1091,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         if (str == null) {
             str = getString(R.string.name_loading_title)
         }
-        builder.setMessage(String.format(getString(R.string.delete_friend_title_format), Object[]{str})).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(sLAgentCircuit, chatterIDUser) {
+        builder.setMessage(String.format(getString(R.string.delete_friend_title_format), Array<Any>{str})).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(sLAgentCircuit, chatterIDUser) {
 
             /* renamed from: -$f0 */
             private val /* synthetic */ Object f349$f0
@@ -1235,8 +1235,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         builder.create().show()
     }
 
-    private Unit handleUserRequestTeleport(SLAgentCircuit sLAgentCircuit, ChatterID.ChatterIDUser chatterIDUser) {
-        TextFieldDialogBuilder textFieldDialogBuilder = TextFieldDialogBuilder(getContext())
+     private fun handleUserRequestTeleport(sLAgentCircuit: SLAgentCircuit, ChatterID.ChatterIDUser chatterIDUser) {
+        val textFieldDialogBuilder: TextFieldDialogBuilder = TextFieldDialogBuilder(getContext())
         textFieldDialogBuilder.setTitle(getString(R.string.request_teleport_title))
         textFieldDialogBuilder.setOnTextEnteredListener(TextFieldDialogBuilder.OnTextEnteredListener(sLAgentCircuit, chatterIDUser) {
 
@@ -1312,17 +1312,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         textFieldDialogBuilder.show()
     }
 
-    private Unit handleUserShareObject(ChatterID.ChatterIDUser chatterIDUser) {
-        String str = null
+     private fun handleUserShareObject(ChatterID.ChatterIDUser chatterIDUser) {
+        val str: String = null
         if (this.nameRetriever != null) {
             str = this.nameRetriever.getResolvedName()
         }
         startActivity(InventoryActivity.makeTransferIntent(getContext(), chatterIDUser.agentUUID, chatterIDUser.getChatterUUID(), str))
     }
 
-    private Unit handleUserUnblock(ChatterID chatterID) {
-        String str = null
-        UserManager userManager = this.userManager
+     private fun handleUserUnblock(chatterID: ChatterID) {
+        val str: String = null
+        val userManager: UserManager = this.userManager
         if (chatterID != null && userManager != null) {
             if (this.nameRetriever != null) {
                 str = this.nameRetriever.getResolvedName()
@@ -1516,14 +1516,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         }
     }
 
-    private Unit handleUserUnmute(ChatterID chatterID) {
-        UserManager userManager = this.userManager
+     private fun handleUserUnmute(chatterID: ChatterID) {
+        val userManager: UserManager = this.userManager
         if (chatterID != null && userManager != null) {
             userManager.getChatterList().getActiveChattersManager().unmuteChatter(chatterID)
         }
     }
 
-    private Unit handleViewLocationDetails() {
+     private fun handleViewLocationDetails() {
         CurrentLocationInfo currentLocationInfoSnapshot
         ParcelData parcelData
         if (this.userManager != null && (currentLocationInfoSnapshot = this.userManager.getCurrentLocationInfoSnapshot()) != null && (parcelData = currentLocationInfoSnapshot.parcelData()) != null) {
@@ -1540,7 +1540,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragment_23327  reason: not valid java name */
     static /* synthetic */ Unit m563lambda$com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragment_23327(UserManager userManager, ChatterID chatterID, String str, DialogInterface dialogInterface, Int i) {
         userManager.getChatterList().getActiveChattersManager().unmuteChatter(chatterID)
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+        val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit == null) {
             return
         }
@@ -1557,9 +1557,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         sLAgentCircuit.RemoveFriend(chatterIDUser.getChatterUUID())
     }
 
-    private Unit performTeleportTo(SLAgentCircuit sLAgentCircuit, ChatterID.ChatterIDUser chatterIDUser) {
+     private fun performTeleportTo(sLAgentCircuit: SLAgentCircuit, ChatterID.ChatterIDUser chatterIDUser) {
         if (sLAgentCircuit != null) {
-            LLVector3 nearbyAgentLocation = sLAgentCircuit.getModules().minimap.getNearbyAgentLocation(chatterIDUser.getChatterUUID())
+            val nearbyAgentLocation: LLVector3 = sLAgentCircuit.getModules().minimap.getNearbyAgentLocation(chatterIDUser.getChatterUUID())
             if (nearbyAgentLocation != null) {
                 if (sLAgentCircuit.TeleportToLocalPosition(nearbyAgentLocation)) {
                     TeleportProgressDialog(getContext(), this.userManager, R.string.teleporting_progress_message).show()
@@ -1571,11 +1571,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
     }
 
     /* access modifiers changed from: protected */
-    fun handleStartVoice(ChatterID chatterID) {
+    fun handleStartVoice(chatterID: ChatterID) {
         CurrentLocationInfo currentLocationInfoSnapshot
         VoiceChannelInfo parcelVoiceChannel
-        SLAgentCircuit sLAgentCircuit = null
-        UserManager userManager = chatterID != null ? chatterID.getUserManager() : null
+        val sLAgentCircuit: SLAgentCircuit = null
+        val userManager: UserManager = chatterID != null ? chatterID.getUserManager() : null
         if (userManager != null) {
             sLAgentCircuit = userManager.getActiveAgentCircuit()
         }
@@ -1591,7 +1591,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
     }
 
     /* access modifiers changed from: protected */
-    fun handleUserViewProfile(ChatterID chatterID) {
+    fun handleUserViewProfile(chatterID: ChatterID) {
         if (chatterID != null && chatterID.isValidUUID()) {
             switch (m559getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues()[chatterID.getChatterType().ordinal()]) {
                 case 1:
@@ -1607,8 +1607,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
     }
 
     /* access modifiers changed from: protected */
-    public Boolean isVoiceLoggedIn() {
-        Boolean data = this.voiceLoggedIn.getData()
+     public fun isVoiceLoggedIn(): Boolean {
+        val data: Boolean = this.voiceLoggedIn.getData()
         if (data != null) {
             return data.booleanValue()
         }
@@ -1621,7 +1621,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         dialogInterface.dismiss()
         VoicePluginServiceConnection.setInstallOfferDisplayed(true)
         GlobalOptions.getInstance().enableVoice()
-        Intent intent = Intent("android.intent.action.VIEW")
+        val intent: Intent = Intent("android.intent.action.VIEW")
         intent.setData(Uri.parse(LicenseChecker.VOICE_PLUGIN_URL))
         getContext().startActivity(intent)
     }
@@ -1632,7 +1632,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         if (atomicInteger.get() == 0) {
             handleUserCloseChat(chatterID, true)
         } else if (atomicInteger.get() == 1) {
-            SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+            val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
             if (activeAgentCircuit != null) {
                 if (chatterID instanceof ChatterID.ChatterIDUser) {
                     activeAgentCircuit.getModules().muteList.Block(MuteListEntry(MuteType.AGENT, ((ChatterID.ChatterIDUser) chatterID).getChatterUUID(), str, 15))
@@ -1651,12 +1651,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         performTeleportTo(sLAgentCircuit, chatterIDUser)
     }
 
-    fun onCreate(Bundle bundle) {
+    fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.user_list_context_menu, menu)
     }
@@ -1664,8 +1664,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
     /* access modifiers changed from: protected */
     @CallSuper
     /* renamed from: onCurrentLocationChanged */
-    fun m574com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragmentmthref1(CurrentLocationInfo currentLocationInfo2) {
-        FragmentActivity activity = getActivity()
+    fun m574com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragmentmthref1(currentLocationInfo2: CurrentLocationInfo) {
+        val activity: FragmentActivity = getActivity()
         if (activity != null) {
             activity.supportInvalidateOptionsMenu()
         }
@@ -1673,16 +1673,16 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
 
     @EventHandler
     fun onGlobalOptionsChanged(GlobalOptions.GlobalOptionsChangedEvent globalOptionsChangedEvent) {
-        FragmentActivity activity = getActivity()
+        val activity: FragmentActivity = getActivity()
         if (activity != null) {
             activity.supportInvalidateOptionsMenu()
         }
     }
 
-    public Boolean onOptionsItemSelected(MenuItem menuItem) {
-        UserManager userManager = this.chatterID != null ? this.chatterID.getUserManager() : null
+     public fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+        val userManager: UserManager = this.chatterID != null ? this.chatterID.getUserManager() : null
         if (!(this.chatterID == null || userManager == null)) {
-            SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+            val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
             switch (menuItem.getItemId()) {
                 case R.id.item_close:
                     if ((this.chatterID instanceof ChatterID.ChatterIDUser) || (this.chatterID instanceof ChatterID.ChatterIDGroup)) {
@@ -1765,15 +1765,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         return super.onOptionsItemSelected(menuItem)
     }
 
-    fun onPrepareOptionsMenu(Menu menu) {
+    fun onPrepareOptionsMenu(menu: Menu) {
         AvatarGroupList avatarGroupList
         AvatarGroupList.AvatarGroupEntry avatarGroupEntry
         super.onPrepareOptionsMenu(menu)
-        Int[] iArr = {R.id.item_open_chat, R.id.item_view_profile, R.id.item_location_details, R.id.item_play_parcel_media, R.id.item_send_group_notice, R.id.item_offer_teleport, R.id.item_request_teleport, R.id.item_teleport_to, R.id.item_pay_user, R.id.item_share_object, R.id.item_add_friend, R.id.item_remove_friend, R.id.item_close, R.id.item_close_and_mute, R.id.item_unmute, R.id.item_unblock, R.id.item_start_voice, R.id.item_enable_voice}
-        UserManager userManager = this.chatterID != null ? this.chatterID.getUserManager() : null
+        val iArr: IntArray = {R.id.item_open_chat, R.id.item_view_profile, R.id.item_location_details, R.id.item_play_parcel_media, R.id.item_send_group_notice, R.id.item_offer_teleport, R.id.item_request_teleport, R.id.item_teleport_to, R.id.item_pay_user, R.id.item_share_object, R.id.item_add_friend, R.id.item_remove_friend, R.id.item_close, R.id.item_close_and_mute, R.id.item_unmute, R.id.item_unblock, R.id.item_start_voice, R.id.item_enable_voice}
+        val userManager: UserManager = this.chatterID != null ? this.chatterID.getUserManager() : null
         if (this.chatterID == null || userManager == null) {
             for (Int findItem : iArr) {
-                MenuItem findItem2 = menu.findItem(findItem)
+                val findItem2: MenuItem = menu.findItem(findItem)
                 if (findItem2 != null) {
                     findItem2.setVisible(false)
                 }
@@ -1781,24 +1781,24 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
             return
         }
         Debug.Printf("UserMenu: item type %s", this.chatterID.getChatterType())
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
-        CurrentLocationInfo data = this.currentLocationInfo.getData()
-        Boolean z5 = activeAgentCircuit != null
-        Boolean z6 = this.chatterID instanceof ChatterID.ChatterIDLocal
-        Boolean z7 = this.chatterID instanceof ChatterID.ChatterIDUser
-        Boolean z8 = this.chatterID instanceof ChatterID.ChatterIDGroup
-        Boolean z9 = false
-        Boolean z10 = false
-        Boolean z11 = false
-        Boolean voiceEnabled = GlobalOptions.getInstance().getVoiceEnabled()
-        Boolean isVoiceLoggedIn = isVoiceLoggedIn()
-        Boolean z12 = false
-        Boolean isPluginSupported = !voiceEnabled ? VoicePluginServiceConnection.isPluginSupported() : false
+        val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
+        val data: CurrentLocationInfo = this.currentLocationInfo.getData()
+        val z5: Boolean = activeAgentCircuit != null
+        val z6: Boolean = this.chatterID instanceof ChatterID.ChatterIDLocal
+        val z7: Boolean = this.chatterID instanceof ChatterID.ChatterIDUser
+        val z8: Boolean = this.chatterID instanceof ChatterID.ChatterIDGroup
+        val z9: Boolean = false
+        val z10: Boolean = false
+        val z11: Boolean = false
+        val voiceEnabled: Boolean = GlobalOptions.getInstance().getVoiceEnabled()
+        val isVoiceLoggedIn: Boolean = isVoiceLoggedIn()
+        val z12: Boolean = false
+        val isPluginSupported: Boolean = !voiceEnabled ? VoicePluginServiceConnection.isPluginSupported() : false
         if (!z6 || data == null) {
             z = isPluginSupported
             z2 = false
         } else {
-            ParcelData parcelData = data.parcelData()
+            val parcelData: ParcelData = data.parcelData()
             if (parcelData != null) {
                 z10 = true
                 z11 = !Strings.isNullOrEmpty(parcelData.getMediaURL())
@@ -1815,12 +1815,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         if (z8 || z7) {
             z12 = voiceEnabled ? isVoiceLoggedIn : false
         }
-        Friend friend = z7 ? userManager.getChatterList().getFriendManager().getFriend(this.chatterID.getOptionalChatterUUID()) : null
-        Boolean z13 = false
+        val friend: Friend = z7 ? userManager.getChatterList().getFriendManager().getFriend(this.chatterID.getOptionalChatterUUID()) : null
+        val z13: Boolean = false
         if (z7 || z8) {
-            Chatter chatter = userManager.getChatterList().getActiveChattersManager().getChatter(this.chatterID)
+            val chatter: Chatter = userManager.getChatterList().getActiveChattersManager().getChatter(this.chatterID)
             z13 = chatter != null ? chatter.getActive() : false
-            Boolean muted = chatter != null ? chatter.getMuted() : false
+            val muted: Boolean = chatter != null ? chatter.getMuted() : false
             if (activeAgentCircuit != null) {
                 z9 = activeAgentCircuit.getModules().muteList.isMuted(this.chatterID.getOptionalChatterUUID(), z8 ? MuteType.GROUP : MuteType.AGENT)
                 z3 = muted
@@ -1831,25 +1831,25 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         } else {
             z3 = false
         }
-        Boolean z14 = z7 && friend != null
-        Boolean isInstance = ChatFragment.class.isInstance(this)
-        Boolean isInstance2 = z7 ? UserProfileFragment.class.isInstance(this) : z8 ? GroupProfileFragment.class.isInstance(this) : false
-        Boolean canTeleportToLocation = (!z7 || !z5) ? false : activeAgentCircuit.getModules().rlvController.canTeleportToLocation()
-        Boolean z15 = false
+        val z14: Boolean = z7 && friend != null
+        val isInstance: Boolean = ChatFragment.class.isInstance(this)
+        val isInstance2: Boolean = z7 ? UserProfileFragment.class.isInstance(this) : z8 ? GroupProfileFragment.class.isInstance(this) : false
+        val canTeleportToLocation: Boolean = (!z7 || !z5) ? false : activeAgentCircuit.getModules().rlvController.canTeleportToLocation()
+        val z15: Boolean = false
         if (z7 && z5 && canTeleportToLocation) {
             z15 = activeAgentCircuit.getModules().minimap.getNearbyAgentLocation(this.chatterID.getOptionalChatterUUID()) != null
             if (friend != null) {
                 z15 |= (friend.getRightsHas() & 2) != 0
             }
         }
-        Boolean z16 = z8 ? (!z5 || (avatarGroupList = userManager.getChatterList().getGroupManager().getAvatarGroupList()) == null || (avatarGroupEntry = avatarGroupList.Groups.get(this.chatterID.getOptionalChatterUUID())) == null || (avatarGroupEntry.GroupPowers & SLGroupInfo.GP_NOTICES_SEND) == 0) ? false : true : false
-        Int i = 0
-        Int length = iArr.length
+        val z16: Boolean = z8 ? (!z5 || (avatarGroupList = userManager.getChatterList().getGroupManager().getAvatarGroupList()) == null || (avatarGroupEntry = avatarGroupList.Groups.get(this.chatterID.getOptionalChatterUUID())) == null || (avatarGroupEntry.GroupPowers & SLGroupInfo.GP_NOTICES_SEND) == 0) ? false : true : false
+        val i: Int = 0
+        val length: Int = iArr.length
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (i2 < length) {
-                Int i3 = iArr[i2]
-                MenuItem findItem3 = menu.findItem(i3)
+                val i3: Int = iArr[i2]
+                val findItem3: MenuItem = menu.findItem(i3)
                 if (findItem3 != null) {
                     switch (i3) {
                         case R.id.item_close:
@@ -1921,7 +1921,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
     }
 
     fun onStart() {
-        UserManager userManager = null
+        val userManager: UserManager = null
         super.onStart()
         if (this.chatterID != null) {
             userManager = this.chatterID.getUserManager()
@@ -1946,8 +1946,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
     /* access modifiers changed from: protected */
     @CallSuper
     /* renamed from: onVoiceLoginStatusChanged */
-    fun m573com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragmentmthref0(Boolean bool) {
-        FragmentActivity activity = getActivity()
+    fun m573com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragmentmthref0(bool: Boolean) {
+        val activity: FragmentActivity = getActivity()
         if (activity != null) {
             activity.supportInvalidateOptionsMenu()
         }

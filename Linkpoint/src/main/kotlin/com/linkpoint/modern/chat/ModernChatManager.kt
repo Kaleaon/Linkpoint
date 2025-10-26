@@ -32,11 +32,11 @@ class ModernChatManager {
     
     // Chat listeners
     interface ChatEventListener {
-        Unit onLocalChatReceived(ChatMessage message)
-        Unit onGroupChatReceived(ChatMessage message)
-        Unit onGroupChatInvitation(GroupChatInvitation invitation)
-        Unit onChatError(String error)
-        Unit onTypingIndicator(String userId, String sessionId, Boolean isTyping)
+         fun onLocalChatReceived(message: ChatMessage)
+         fun onGroupChatReceived(message: ChatMessage)
+         fun onGroupChatInvitation(invitation: GroupChatInvitation)
+         fun onChatError(error: String)
+         fun onTypingIndicator(userId: String, sessionId: String, isTyping: Boolean)
     }
     
     private ChatEventListener chatListener
@@ -75,7 +75,7 @@ class ModernChatManager {
             try {
                 Log.i(TAG, "Sending local chat message: " + message)
                 
-                ChatMessage chatMsg = ChatMessage(
+                val chatMsg: ChatMessage = ChatMessage(
                     UUID.randomUUID().toString(),
                     ChatMessage.Type.LOCAL,
                     message,
@@ -90,7 +90,7 @@ class ModernChatManager {
                 
                 // Send via WebSocket for real-time delivery
                 if (eventClient != null) {
-                    String payload = createChatPayload(chatMsg)
+                    val payload: String = createChatPayload(chatMsg)
                     return eventClient.sendMessage("chat.local", payload).join()
                 }
                 
@@ -115,7 +115,7 @@ class ModernChatManager {
             try {
                 Log.i(TAG, "Sending group chat message to group: " + groupId)
                 
-                ChatMessage chatMsg = ChatMessage(
+                val chatMsg: ChatMessage = ChatMessage(
                     UUID.randomUUID().toString(),
                     ChatMessage.Type.GROUP,
                     message,
@@ -126,7 +126,7 @@ class ModernChatManager {
                 )
                 
                 // Check if we have an active group session
-                ChatSession session = activeSessions.get(groupId)
+                val session: ChatSession = activeSessions.get(groupId)
                 if (session == null) {
                     // Create group session
                     session = ChatSession(groupId, ChatSession.Type.GROUP)
@@ -138,7 +138,7 @@ class ModernChatManager {
                 
                 // Send via modern protocol
                 if (eventClient != null) {
-                    String payload = createGroupChatPayload(chatMsg, groupId)
+                    val payload: String = createGroupChatPayload(chatMsg, groupId)
                     return eventClient.sendMessage("chat.group", payload).join()
                 }
                 
@@ -162,13 +162,13 @@ class ModernChatManager {
             try {
                 Log.i(TAG, "Joining group chat: " + groupName + " (" + groupId + ")")
                 
-                ChatSession session = ChatSession(groupId, ChatSession.Type.GROUP)
+                val session: ChatSession = ChatSession(groupId, ChatSession.Type.GROUP)
                 session.setGroupName(groupName)
                 activeSessions.put(groupId, session)
                 
                 // Request to join group via modern protocol
                 if (eventClient != null) {
-                    String joinPayload = "{\"action\":\"join\",\"groupId\":\"" + groupId + "\"}"
+                    val joinPayload: String = "{\"action\":\"join\",\"groupId\":\"" + groupId + "\"}"
                     return eventClient.sendMessage("chat.group.join", joinPayload).join()
                 }
                 
@@ -190,13 +190,13 @@ class ModernChatManager {
     public CompletableFuture<Boolean> leaveGroupChat(String groupId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                ChatSession session = activeSessions.remove(groupId)
+                val session: ChatSession = activeSessions.remove(groupId)
                 if (session != null) {
                     Log.i(TAG, "Left group chat: " + session.getGroupName())
                     
                     // Notify server via modern protocol
                     if (eventClient != null) {
-                        String leavePayload = "{\"action\":\"leave\",\"groupId\":\"" + groupId + "\"}"
+                        val leavePayload: String = "{\"action\":\"leave\",\"groupId\":\"" + groupId + "\"}"
                         return eventClient.sendMessage("chat.group.leave", leavePayload).join()
                     }
                 }
@@ -212,11 +212,11 @@ class ModernChatManager {
     /**
      * Send typing indicator
      */
-    fun sendTypingIndicator(String sessionId, Boolean isTyping) {
+    fun sendTypingIndicator(sessionId: String, isTyping: Boolean) {
         executor.execute(() -> {
             try {
                 if (eventClient != null) {
-                    String payload = "{\"sessionId\":\"" + sessionId + "\",\"typing\":" + isTyping + "}"
+                    val payload: String = "{\"sessionId\":\"" + sessionId + "\",\"typing\":" + isTyping + "}"
                     eventClient.sendMessage("chat.typing", payload)
                 }
             } catch (Exception e) {
@@ -227,7 +227,7 @@ class ModernChatManager {
     /**
      * Handle incoming chat message from protocol layer
      */
-    fun handleIncomingMessage(String messageType, String payload) {
+    fun handleIncomingMessage(messageType: String, payload: String) {
         executor.execute(() -> {
             try {
                 switch (messageType) {
@@ -268,19 +268,19 @@ class ModernChatManager {
     /**
      * Set chat event listener
      */
-    fun setChatEventListener(ChatEventListener listener) {
+    fun setChatEventListener(listener: ChatEventListener) {
         this.chatListener = listener
     }
     
     // Private helper methods
     
-    private Unit handleLocalChatMessage(String payload) {
+     private fun handleLocalChatMessage(payload: String) {
         try {
             // Parse incoming local chat message
-            ChatMessage message = parseChatMessage(payload, ChatMessage.Type.LOCAL)
+            val message: ChatMessage = parseChatMessage(payload, ChatMessage.Type.LOCAL)
             
             // Store in history
-            List<ChatMessage> history = messageHistory.computeIfAbsent("local", k -> ArrayList<>())
+            val history: List<ChatMessage> = messageHistory.computeIfAbsent("local", k -> ArrayList<>())
             history.add(message)
             
             // Limit history size
@@ -298,20 +298,20 @@ class ModernChatManager {
         }
     }
     
-    private Unit handleGroupChatMessage(String payload) {
+     private fun handleGroupChatMessage(payload: String) {
         try {
             // Parse incoming group chat message
-            ChatMessage message = parseChatMessage(payload, ChatMessage.Type.GROUP)
+            val message: ChatMessage = parseChatMessage(payload, ChatMessage.Type.GROUP)
             
             // Store in session and history
-            String groupId = message.getSessionId()
+            val groupId: String = message.getSessionId()
             if (groupId != null) {
-                ChatSession session = activeSessions.get(groupId)
+                val session: ChatSession = activeSessions.get(groupId)
                 if (session != null) {
                     session.addMessage(message)
                 }
                 
-                List<ChatMessage> history = messageHistory.computeIfAbsent(groupId, k -> ArrayList<>())
+                val history: List<ChatMessage> = messageHistory.computeIfAbsent(groupId, k -> ArrayList<>())
                 history.add(message)
                 
                 // Limit history size
@@ -330,10 +330,10 @@ class ModernChatManager {
         }
     }
     
-    private Unit handleGroupInvitation(String payload) {
+     private fun handleGroupInvitation(payload: String) {
         try {
             // Parse group invitation
-            GroupChatInvitation invitation = parseGroupInvitation(payload)
+            val invitation: GroupChatInvitation = parseGroupInvitation(payload)
             
             if (chatListener != null) {
                 chatListener.onGroupChatInvitation(invitation)
@@ -344,12 +344,12 @@ class ModernChatManager {
         }
     }
     
-    private Unit handleTypingIndicator(String payload) {
+     private fun handleTypingIndicator(payload: String) {
         try {
             // Parse typing indicator - simplified JSON parsing
-            String userId = extractJsonValue(payload, "userId")
-            String sessionId = extractJsonValue(payload, "sessionId")
-            Boolean isTyping = Boolean.parseBoolean(extractJsonValue(payload, "typing"))
+            val userId: String = extractJsonValue(payload, "userId")
+            val sessionId: String = extractJsonValue(payload, "sessionId")
+            val isTyping: Boolean = Boolean.parseBoolean(extractJsonValue(payload, "typing"))
             
             if (chatListener != null) {
                 chatListener.onTypingIndicator(userId, sessionId, isTyping)
@@ -360,45 +360,45 @@ class ModernChatManager {
         }
     }
     
-    private String createChatPayload(ChatMessage message) {
+     private fun createChatPayload(message: ChatMessage): String {
         return "{\"id\":\"" + message.getId() + "\"," +
                "\"message\":\"" + escapeJson(message.getMessage()) + "\"," +
                "\"timestamp\":" + message.getTimestamp() + "," +
                "\"channel\":" + message.getChannel() + "}"
     }
     
-    private String createGroupChatPayload(ChatMessage message, String groupId) {
+     private fun createGroupChatPayload(message: ChatMessage, groupId: String): String {
         return "{\"id\":\"" + message.getId() + "\"," +
                "\"message\":\"" + escapeJson(message.getMessage()) + "\"," +
                "\"timestamp\":" + message.getTimestamp() + "," +
                "\"groupId\":\"" + groupId + "\"}"
     }
     
-    private ChatMessage parseChatMessage(String payload, ChatMessage.Type type) {
+     private fun parseChatMessage(payload: String, ChatMessage.Type type): ChatMessage {
         // Simplified JSON parsing for chat messages
-        String id = extractJsonValue(payload, "id")
-        String message = extractJsonValue(payload, "message")
-        String timestampStr = extractJsonValue(payload, "timestamp")
-        String senderId = extractJsonValue(payload, "senderId")
-        String sessionId = extractJsonValue(payload, "sessionId")
-        String channelStr = extractJsonValue(payload, "channel")
+        val id: String = extractJsonValue(payload, "id")
+        val message: String = extractJsonValue(payload, "message")
+        val timestampStr: String = extractJsonValue(payload, "timestamp")
+        val senderId: String = extractJsonValue(payload, "senderId")
+        val sessionId: String = extractJsonValue(payload, "sessionId")
+        val channelStr: String = extractJsonValue(payload, "channel")
         
-        Long timestamp = timestampStr != null ? Long.parseLong(timestampStr) : System.currentTimeMillis()
-        Int channel = channelStr != null ? Integer.parseInt(channelStr) : 0
+        val timestamp: Long = timestampStr != null ? Long.parseLong(timestampStr) : System.currentTimeMillis()
+        val channel: Int = channelStr != null ? Integer.parseInt(channelStr) : 0
         
         return ChatMessage(id, type, message, timestamp, senderId, sessionId, channel)
     }
     
-    private GroupChatInvitation parseGroupInvitation(String payload) {
-        String groupId = extractJsonValue(payload, "groupId")
-        String groupName = extractJsonValue(payload, "groupName")
-        String inviterId = extractJsonValue(payload, "inviterId")
-        String inviterName = extractJsonValue(payload, "inviterName")
+     private fun parseGroupInvitation(payload: String): GroupChatInvitation {
+        val groupId: String = extractJsonValue(payload, "groupId")
+        val groupName: String = extractJsonValue(payload, "groupName")
+        val inviterId: String = extractJsonValue(payload, "inviterId")
+        val inviterName: String = extractJsonValue(payload, "inviterName")
         
         return GroupChatInvitation(groupId, groupName, inviterId, inviterName)
     }
     
-    private Boolean sendViaTraditionalProtocol(ChatMessage message) {
+     private fun sendViaTraditionalProtocol(message: ChatMessage): Boolean {
         // Fallback to existing SL protocol implementation
         // This would integrate with existing SLChatTextEvent system
         Log.i(TAG, "Sending via traditional SL protocol")
@@ -406,9 +406,9 @@ class ModernChatManager {
     }
     
     // Simple JSON value extraction (avoiding full JSON parser for minimal dependencies)
-    private String extractJsonValue(String json, String key) {
-        String searchKey = "\"" + key + "\":"
-        Int startIndex = json.indexOf(searchKey)
+     private fun extractJsonValue(json: String, key: String): String {
+        val searchKey: String = "\"" + key + "\":"
+        val startIndex: Int = json.indexOf(searchKey)
         if (startIndex == -1) return null
         
         startIndex += searchKey.length()
@@ -418,18 +418,18 @@ class ModernChatManager {
         
         if (startIndex >= json.length()) return null
         
-        Char firstChar = json.charAt(startIndex)
+        val firstChar: Char = json.charAt(startIndex)
         if (firstChar == '"') {
             // String value
             startIndex++
-            Int endIndex = json.indexOf('"', startIndex)
+            val endIndex: Int = json.indexOf('"', startIndex)
             while (endIndex != -1 && json.charAt(endIndex - 1) == '\\') {
                 endIndex = json.indexOf('"', endIndex + 1)
             }
             return endIndex != -1 ? json.substring(startIndex, endIndex) : null
         } else {
             // Number or Boolean value
-            Int endIndex = startIndex
+            val endIndex: Int = startIndex
             while (endIndex < json.length() && 
                    json.charAt(endIndex) != ',' && 
                    json.charAt(endIndex) != '}' && 
@@ -440,7 +440,7 @@ class ModernChatManager {
         }
     }
     
-    private String escapeJson(String text) {
+     private fun escapeJson(text: String): String {
         if (text == null) return ""
         return text.replace("\\", "\\\\")
                   .replace("\"", "\\\"")
@@ -494,13 +494,13 @@ class ModernChatManager {
         }
         
         // Getters
-        public String getId() { return id; }
-        public Type getType() { return type; }
-        public String getMessage() { return message; }
-        public Long getTimestamp() { return timestamp; }
-        public String getSenderId() { return senderId; }
-        public String getSessionId() { return sessionId; }
-        public Int getChannel() { return channel; }
+         public fun getId(): String { return id; }
+         public fun getType(): Type { return type; }
+         public fun getMessage(): String { return message; }
+         public fun getTimestamp(): Long { return timestamp; }
+         public fun getSenderId(): String { return senderId; }
+         public fun getSessionId(): String { return sessionId; }
+         public fun getChannel(): Int { return channel; }
     }
     
     @JvmStatic
@@ -523,7 +523,7 @@ class ModernChatManager {
             this.createdTime = System.currentTimeMillis()
         }
         
-        fun addMessage(ChatMessage message) {
+        fun addMessage(message: ChatMessage) {
             messages.add(message)
             // Limit message history per session
             if (messages.size() > 500) {
@@ -532,12 +532,12 @@ class ModernChatManager {
         }
         
         // Getters and setters
-        public String getSessionId() { return sessionId; }
-        public Type getType() { return type; }
-        public String getGroupName() { return groupName; }
-        fun setGroupName(String groupName) { this.groupName = groupName; }
+         public fun getSessionId(): String { return sessionId; }
+         public fun getType(): Type { return type; }
+         public fun getGroupName(): String { return groupName; }
+        fun setGroupName(groupName: String) { this.groupName = groupName; }
         public List<ChatMessage> getMessages() { return ArrayList<>(messages); }
-        public Long getCreatedTime() { return createdTime; }
+         public fun getCreatedTime(): Long { return createdTime; }
     }
     
     @JvmStatic
@@ -555,9 +555,9 @@ class ModernChatManager {
         }
         
         // Getters
-        public String getGroupId() { return groupId; }
-        public String getGroupName() { return groupName; }
-        public String getInviterId() { return inviterId; }
-        public String getInviterName() { return inviterName; }
+         public fun getGroupId(): String { return groupId; }
+         public fun getGroupName(): String { return groupName; }
+         public fun getInviterId(): String { return inviterId; }
+         public fun getInviterName(): String { return inviterName; }
     }
 }

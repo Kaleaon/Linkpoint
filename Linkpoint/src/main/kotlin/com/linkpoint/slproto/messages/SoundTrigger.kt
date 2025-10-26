@@ -24,15 +24,15 @@ class SoundTrigger : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return 89
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleSoundTrigger(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.put(Ascii.GS)
         packUUID(byteBuffer, this.SoundData_Field.SoundID)
         packUUID(byteBuffer, this.SoundData_Field.OwnerID)
@@ -43,7 +43,7 @@ class SoundTrigger : SLMessage() {
         packFloat(byteBuffer, this.SoundData_Field.Gain)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.SoundData_Field.SoundID = unpackUUID(byteBuffer)
         this.SoundData_Field.OwnerID = unpackUUID(byteBuffer)
         this.SoundData_Field.ObjectID = unpackUUID(byteBuffer)

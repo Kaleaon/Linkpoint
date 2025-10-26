@@ -29,7 +29,7 @@ import javax.annotation.Nullable
 abstract class AvatarPickerFragment : FragmentWithTitle() : AdapterView.OnItemClickListener {
 
     /* renamed from: -com-lumiyaviewer-lumiya-ui-avapicker-AvatarPickerFragment$ContactListTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f234comlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f234comlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues = null
 
     class AvatarPickerPagerAdapter : PagerAdapter() {
         private val Context context
@@ -38,7 +38,7 @@ abstract class AvatarPickerFragment : FragmentWithTitle() : AdapterView.OnItemCl
             this.context = context2
         }
 
-        fun destroyItem(ViewGroup viewGroup, Int i, Object obj) {
+        fun destroyItem(viewGroup: ViewGroup, i: Int, obj: Object) {
             if (obj instanceof View) {
                 if (obj instanceof ListView) {
                     ((ListView) obj).setAdapter((ListAdapter) null)
@@ -47,30 +47,30 @@ abstract class AvatarPickerFragment : FragmentWithTitle() : AdapterView.OnItemCl
             }
         }
 
-        public Int getCount() {
+         public fun getCount(): Int {
             return ContactListType.values().length
         }
 
-        public CharSequence getPageTitle(Int i) {
+         public fun getPageTitle(i: Int): CharSequence {
             if (i < 0 || i >= ContactListType.values().length) {
                 return null
             }
             return ContactListType.values()[i].toString()
         }
 
-        public Object instantiateItem(ViewGroup viewGroup, Int i) {
+         public fun instantiateItem(viewGroup: ViewGroup, i: Int): Object {
             if (i < 0 || i >= ContactListType.values().length) {
                 return null
             }
-            ContactListType contactListType = ContactListType.values()[i]
-            ListView listView = ListView(this.context)
+            val contactListType: ContactListType = ContactListType.values()[i]
+            val listView: ListView = ListView(this.context)
             listView.setOnItemClickListener(AvatarPickerFragment.this)
             listView.setAdapter(AvatarPickerFragment.this.createListAdapter(AvatarPickerFragment.this.getContext(), ActivityUtils.getUserManager(AvatarPickerFragment.this.getArguments()), contactListType))
             viewGroup.addView(listView)
             return listView
         }
 
-        public Boolean isViewFromObject(View view, Object obj) {
+         public fun isViewFromObject(view: View, obj: Object): Boolean {
             return view == obj
         }
     }
@@ -96,18 +96,18 @@ private class UsersOnlyPredicate : Predicate<ChatterDisplayData> {
             this()
         }
 
-        public Boolean apply(ChatterDisplayData chatterDisplayData) {
+         public fun apply(chatterDisplayData: ChatterDisplayData): Boolean {
             return chatterDisplayData != null && (chatterDisplayData.chatterID instanceof ChatterID.ChatterIDUser) && chatterDisplayData.chatterID.isValidUUID()
         }
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-ui-avapicker-AvatarPickerFragment$ContactListTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m388getcomlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues() {
+private /* synthetic */ IntArray m388getcomlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues() {
         if (f234comlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues != null) {
             return f234comlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues
         }
-        Int[] iArr = Int[ContactListType.values().length]
+        val iArr: IntArray = Int[ContactListType.values().length]
         try {
             iArr[ContactListType.Friends.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -125,7 +125,7 @@ private /* synthetic */ Int[] m388getcomlumiyaviewerlumiyauiavapickerAvatarPicke
     }
 
     /* access modifiers changed from: private */
-    public ListAdapter createListAdapter(Context context, UserManager userManager, ContactListType contactListType) {
+     public fun createListAdapter(context: Context, userManager: UserManager, contactListType: ContactListType): ListAdapter {
         switch (m388getcomlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues()[contactListType.ordinal()]) {
             case 1:
                 return ChatterListSubscriptionAdapter(context, userManager, ChatterListType.Friends)
@@ -139,7 +139,7 @@ private /* synthetic */ Int[] m388getcomlumiyaviewerlumiyauiavapickerAvatarPicke
     }
 
     /* access modifiers changed from: protected */
-    fun createExtraView(LayoutInflater layoutInflater, FrameLayout frameLayout) {
+    fun createExtraView(layoutInflater: LayoutInflater, frameLayout: FrameLayout) {
     }
 
     public abstract String getTitle()
@@ -147,18 +147,18 @@ private /* synthetic */ Int[] m388getcomlumiyaviewerlumiyauiavapickerAvatarPicke
     /* access modifiers changed from: protected */
     public abstract Unit onAvatarSelected(ChatterID chatterID, String str)
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View inflate = layoutInflater.inflate(R.layout.avatar_picker, viewGroup, false)
-        ViewPager viewPager = (ViewPager) inflate.findViewById(R.id.avatar_picker_pager)
+     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+        val inflate: View = layoutInflater.inflate(R.layout.avatar_picker, viewGroup, false)
+        val viewPager: ViewPager = (ViewPager) inflate.findViewById(R.id.avatar_picker_pager)
         viewPager.setAdapter(AvatarPickerPagerAdapter(layoutInflater.getContext()))
         ((PagerSlidingTabStrip) inflate.findViewById(R.id.avatar_picker_tabs)).setViewPager(viewPager)
         createExtraView(layoutInflater, (FrameLayout) inflate.findViewById(R.id.avatar_picker_extra_content))
         return inflate
     }
 
-    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
+    fun onItemClick(adapterView: AdapterView<?>, view: View, i: Int, j: Long) {
         ChatterID chatterID
-        Object itemAtPosition = adapterView.getItemAtPosition(i)
+        val itemAtPosition: Object = adapterView.getItemAtPosition(i)
         if ((itemAtPosition instanceof ChatterDisplayInfo) && (chatterID = ((ChatterDisplayInfo) itemAtPosition).getChatterID(ActivityUtils.getUserManager(getArguments()))) != null) {
             onAvatarSelected(chatterID, ((ChatterDisplayInfo) itemAtPosition).getDisplayName())
         }

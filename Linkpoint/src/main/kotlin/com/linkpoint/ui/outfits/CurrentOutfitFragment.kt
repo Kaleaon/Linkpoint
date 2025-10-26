@@ -29,31 +29,31 @@ class CurrentOutfitFragment : Fragment(), LoadableMonitor.OnLoadableDataChangedL
     private val SubscriptionData<SubscriptionSingleKey, ImmutableList<SLAvatarAppearance.WornItem>> wornItems = SubscriptionData<>(UIThreadExecutor.getInstance())
 
     @JvmStatic
-    Bundle makeSelection(UUID uuid) {
-        Bundle bundle = Bundle()
+     fun makeSelection(uuid: UUID): Bundle {
+        val bundle: Bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         return bundle
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
-        View inflate = layoutInflater.inflate(R.layout.current_outfit_fragment, viewGroup, false)
+        val inflate: View = layoutInflater.inflate(R.layout.current_outfit_fragment, viewGroup, false)
         this.listAdapter = CurrentOutfitAdapter(layoutInflater.getContext())
-        ListView listView = (ListView) inflate.findViewById(R.id.currentOutfitListView)
+        val listView: ListView = (ListView) inflate.findViewById(R.id.currentOutfitListView)
         listView.setAdapter(this.listAdapter)
         listView.setOnItemClickListener(this)
         listView.setEmptyView(inflate.findViewById(16908292))
-        SwipeDismissListViewTouchListener swipeDismissListViewTouchListener = SwipeDismissListViewTouchListener(listView, SwipeDismissListViewTouchListener.DismissCallbacks() {
-            public Boolean canDismiss(ListView listView, Int i) {
-                ListAdapter adapter = listView.getAdapter()
+        val swipeDismissListViewTouchListener: SwipeDismissListViewTouchListener = SwipeDismissListViewTouchListener(listView, SwipeDismissListViewTouchListener.DismissCallbacks() {
+             public fun canDismiss(listView: ListView, i: Int): Boolean {
+                val adapter: ListAdapter = listView.getAdapter()
                 if (adapter instanceof DismissableAdapter) {
                     return ((DismissableAdapter) adapter).canDismiss(i)
                 }
                 return false
             }
 
-            fun onDismiss(ListView listView, Int i) {
-                ListAdapter adapter = listView.getAdapter()
+            fun onDismiss(listView: ListView, i: Int) {
+                val adapter: ListAdapter = listView.getAdapter()
                 if (adapter instanceof DismissableAdapter) {
                     ((DismissableAdapter) adapter).onDismiss(i)
                 }
@@ -63,9 +63,9 @@ class CurrentOutfitFragment : Fragment(), LoadableMonitor.OnLoadableDataChangedL
         return inflate
     }
 
-    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
+    fun onItemClick(adapterView: AdapterView<?>, view: View, i: Int, j: Long) {
         SLAvatarAppearance.WornItem item
-        SLAgentCircuit data = this.agentCircuit.getData()
+        val data: SLAgentCircuit = this.agentCircuit.getData()
         if (this.listAdapter != null && data != null && (item = this.listAdapter.getItem(i)) != null && item.getIsTouchable() && item.getWornOn() == null) {
             data.TouchObject(item.getObjectLocalID())
         }
@@ -73,7 +73,7 @@ class CurrentOutfitFragment : Fragment(), LoadableMonitor.OnLoadableDataChangedL
 
     fun onLoadableDataChanged() {
         if (this.listAdapter != null) {
-            SLAgentCircuit data = this.agentCircuit.getData()
+            val data: SLAgentCircuit = this.agentCircuit.getData()
             this.listAdapter.setAvatarAppearance(data != null ? data.getModules().avatarAppearance : null)
             this.listAdapter.setData(this.wornItems.getData())
         }
@@ -81,7 +81,7 @@ class CurrentOutfitFragment : Fragment(), LoadableMonitor.OnLoadableDataChangedL
 
     fun onStart() {
         super.onStart()
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
             this.agentCircuit.subscribe(UserManager.agentCircuits(), userManager.getUserID())
             this.wornItems.subscribe(userManager.wornItems(), SubscriptionSingleKey.Value)

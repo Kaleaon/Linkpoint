@@ -18,17 +18,17 @@ import javax.annotation.Nullable
 class ObjectPopupsFragment : Fragment() {
     private const val AGENT_UUID_KEY: String = "agentUUID"
     private val ItemTouchHelper.Callback itemTouchCallback = ItemTouchHelper.SimpleCallback(0, 12) {
-        public Boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder viewHolder2) {
+         public fun onMove(recyclerView: RecyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder viewHolder2): Boolean {
             return false
         }
 
-        fun onSwiped(RecyclerView.ViewHolder viewHolder, Int i) {
+        fun onSwiped(RecyclerView.ViewHolder viewHolder, i: Int) {
             RecyclerView recyclerView
             RecyclerView.Adapter adapter
-            UserManager r1 = ObjectPopupsFragment.this.getUserManager()
-            View view = ObjectPopupsFragment.this.getView()
+            val r1: UserManager = ObjectPopupsFragment.this.getUserManager()
+            val view: View = ObjectPopupsFragment.this.getView()
             if (view != null && r1 != null && (recyclerView = (RecyclerView) view.findViewById(R.id.objectPopupsList)) != null && (adapter = recyclerView.getAdapter()) != null) {
-                Int adapterPosition = viewHolder.getAdapterPosition()
+                val adapterPosition: Int = viewHolder.getAdapterPosition()
                 if (adapter instanceof ObjectPopupsAdapter) {
                     r1.getObjectPopupsManager().cancelObjectPopup((SLChatEvent) ((ObjectPopupsAdapter) adapter).getObject(adapterPosition))
                 }
@@ -37,26 +37,26 @@ class ObjectPopupsFragment : Fragment() {
     }
 
     @JvmStatic
-    ObjectPopupsFragment create(UUID uuid) {
-        ObjectPopupsFragment objectPopupsFragment = ObjectPopupsFragment()
-        Bundle bundle = Bundle()
+     fun create(uuid: UUID): ObjectPopupsFragment {
+        val objectPopupsFragment: ObjectPopupsFragment = ObjectPopupsFragment()
+        val bundle: Bundle = Bundle()
         bundle.putString(AGENT_UUID_KEY, uuid.toString())
         objectPopupsFragment.setArguments(bundle)
         return objectPopupsFragment
     }
 
     /* access modifiers changed from: private */
-    public UserManager getUserManager() {
-        Bundle arguments = getArguments()
+     public fun getUserManager(): UserManager {
+        val arguments: Bundle = getArguments()
         if (arguments == null || !arguments.containsKey(AGENT_UUID_KEY)) {
             return null
         }
         return UserManager.getUserManager(UUID.fromString(arguments.getString(AGENT_UUID_KEY)))
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View inflate = layoutInflater.inflate(R.layout.object_popups_fragment_layout, viewGroup, false)
-        RecyclerView recyclerView = (RecyclerView) inflate.findViewById(R.id.objectPopupsList)
+     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+        val inflate: View = layoutInflater.inflate(R.layout.object_popups_fragment_layout, viewGroup, false)
+        val recyclerView: RecyclerView = (RecyclerView) inflate.findViewById(R.id.objectPopupsList)
         recyclerView.setHasFixedSize(true)
         recyclerView.setLayoutManager(ChatLayoutManager(layoutInflater.getContext(), 1, false))
         ItemTouchHelper(this.itemTouchCallback).attachToRecyclerView(recyclerView)
@@ -66,8 +66,8 @@ class ObjectPopupsFragment : Fragment() {
     fun onStart() {
         RecyclerView recyclerView
         super.onStart()
-        UserManager userManager = getUserManager()
-        View view = getView()
+        val userManager: UserManager = getUserManager()
+        val view: View = getView()
         if (userManager != null && view != null && (recyclerView = (RecyclerView) view.findViewById(R.id.objectPopupsList)) != null) {
             recyclerView.setAdapter(ObjectPopupsAdapter(getContext(), userManager.getObjectPopupsManager().getObjectPopups(), userManager))
         }
@@ -75,7 +75,7 @@ class ObjectPopupsFragment : Fragment() {
 
     fun onStop() {
         RecyclerView recyclerView
-        View view = getView()
+        val view: View = getView()
         if (!(view == null || (recyclerView = (RecyclerView) view.findViewById(R.id.objectPopupsList)) == null)) {
             recyclerView.setAdapter((RecyclerView.Adapter) null)
         }

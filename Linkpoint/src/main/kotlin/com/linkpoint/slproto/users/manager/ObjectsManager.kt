@@ -42,7 +42,7 @@ class ObjectsManager {
         /* access modifiers changed from: package-private */
         /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_ObjectsManager$2_3438  reason: not valid java name */
         public /* synthetic */ Unit m348lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ObjectsManager$2_3438(SLAgentCircuit sLAgentCircuit, Integer num) {
-            SLObjectProfileData objectProfile = sLAgentCircuit.getObjectProfile(num.intValue())
+            val objectProfile: SLObjectProfileData = sLAgentCircuit.getObjectProfile(num.intValue())
             if (objectProfile != null) {
                 ObjectsManager.this.objectProfilePool.onResultData(num, objectProfile)
             } else {
@@ -50,8 +50,8 @@ class ObjectsManager {
             }
         }
 
-        fun onRequest(Integer num) {
-            SLAgentCircuit activeAgentCircuit = ObjectsManager.this.userManager.getActiveAgentCircuit()
+        fun onRequest(num: Integer) {
+            val activeAgentCircuit: SLAgentCircuit = ObjectsManager.this.userManager.getActiveAgentCircuit()
             if (activeAgentCircuit != null) {
                 activeAgentCircuit.execute(Runnable(this, activeAgentCircuit, num) {
 
@@ -161,7 +161,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         /* access modifiers changed from: package-private */
         /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_ObjectsManager$3_4319  reason: not valid java name */
         public /* synthetic */ Unit m349lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ObjectsManager$3_4319(SLAgentCircuit sLAgentCircuit, UUID uuid) {
-            ImmutableList<SLObjectInfo> userTouchableObjects = sLAgentCircuit.getGridConnection().parcelInfo.getUserTouchableObjects(sLAgentCircuit, uuid)
+            val userTouchableObjects: ImmutableList<SLObjectInfo> = sLAgentCircuit.getGridConnection().parcelInfo.getUserTouchableObjects(sLAgentCircuit, uuid)
             if (userTouchableObjects != null) {
                 ObjectsManager.this.touchableObjectsPool.onResultData(uuid, userTouchableObjects)
             } else {
@@ -169,8 +169,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             }
         }
 
-        fun onRequest(UUID uuid) {
-            SLAgentCircuit activeAgentCircuit = ObjectsManager.this.userManager.getActiveAgentCircuit()
+        fun onRequest(uuid: UUID) {
+            val activeAgentCircuit: SLAgentCircuit = ObjectsManager.this.userManager.getActiveAgentCircuit()
             if (activeAgentCircuit != null) {
                 activeAgentCircuit.execute(Runnable(this, activeAgentCircuit, uuid) {
 
@@ -276,17 +276,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             synchronized (ObjectsManager.this.filterLock) {
                 r2 = ObjectsManager.this.filterInfo
             }
-            SLAgentCircuit activeAgentCircuit = ObjectsManager.this.userManager.getActiveAgentCircuit()
-            AgentPosition agentPosition = activeAgentCircuit != null ? activeAgentCircuit.getModules().avatarControl.getAgentPosition() : null
-            ImmutableVector immutablePosition = agentPosition != null ? agentPosition.getImmutablePosition() : null
-            SLParcelInfo sLParcelInfo = (SLParcelInfo) ObjectsManager.this.parcelInfo.get()
+            val activeAgentCircuit: SLAgentCircuit = ObjectsManager.this.userManager.getActiveAgentCircuit()
+            val agentPosition: AgentPosition = activeAgentCircuit != null ? activeAgentCircuit.getModules().avatarControl.getAgentPosition() : null
+            val immutablePosition: ImmutableVector = agentPosition != null ? agentPosition.getImmutablePosition() : null
+            val sLParcelInfo: SLParcelInfo = (SLParcelInfo) ObjectsManager.this.parcelInfo.get()
             Debug.Printf("ObjectList: updating object list, parcelInfo %s, agentPosVector %s", sLParcelInfo, immutablePosition)
             ObjectsManager.this.objectDisplayListPool.onResultData(SubscriptionSingleKey.Value, (sLParcelInfo == null || immutablePosition == null) ? ObjectDisplayList(ImmutableList.of(), false) : sLParcelInfo.getDisplayObjects(immutablePosition, r2, ObjectsManager.this.nameRetriever))
         }
     }
     private val SimpleRequestHandler<SubscriptionSingleKey> updateRequestHandler = SimpleRequestHandler<SubscriptionSingleKey>() {
-        fun onRequest(SubscriptionSingleKey subscriptionSingleKey) {
-            SLAgentCircuit activeAgentCircuit = ObjectsManager.this.userManager.getActiveAgentCircuit()
+        fun onRequest(subscriptionSingleKey: SubscriptionSingleKey) {
+            val activeAgentCircuit: SLAgentCircuit = ObjectsManager.this.userManager.getActiveAgentCircuit()
             if (activeAgentCircuit != null) {
                 activeAgentCircuit.execute(ObjectsManager.this.updateObjectListRunnable)
             } else {
@@ -294,7 +294,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             }
         }
 
-        fun onRequestCancelled(SubscriptionSingleKey subscriptionSingleKey) {
+        fun onRequestCancelled(subscriptionSingleKey: SubscriptionSingleKey) {
             ObjectsManager.this.nameRetriever.clearChatters()
         }
     }
@@ -335,7 +335,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             this(uuid2)
         }
 
-        public Int getLocalID() {
+         public fun getLocalID(): Int {
             return this.localID
         }
     }
@@ -348,7 +348,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         this.touchableObjectsPool.attachRequestHandler(this.touchableObjectsRequestHandler)
     }
 
-    fun clearParcelInfo(SLParcelInfo sLParcelInfo) {
+    fun clearParcelInfo(sLParcelInfo: SLParcelInfo) {
         this.parcelInfo.compareAndSet(sLParcelInfo, (Object) null)
     }
 
@@ -382,15 +382,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         this.objectDisplayListPool.requestUpdate(SubscriptionSingleKey.Value)
     }
 
-    fun requestObjectProfileUpdate(Int i) {
+    fun requestObjectProfileUpdate(i: Int) {
         this.objectProfilePool.requestUpdate(Integer.valueOf(i))
     }
 
-    fun requestTaskInventoryUpdate(Int i) {
+    fun requestTaskInventoryUpdate(i: Int) {
         this.taskInventoryPool.requestUpdate(Integer.valueOf(i))
     }
 
-    fun requestTouchableChildrenUpdate(UUID uuid) {
+    fun requestTouchableChildrenUpdate(uuid: UUID) {
         this.touchableObjectsPool.requestUpdate(uuid)
     }
 
@@ -398,8 +398,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return this.runningAnimationsPool
     }
 
-    fun setFilter(SLObjectFilterInfo sLObjectFilterInfo) {
-        Boolean z = false
+    fun setFilter(sLObjectFilterInfo: SLObjectFilterInfo) {
+        val z: Boolean = false
         synchronized (this.filterLock) {
             if (!this.filterInfo.equals(sLObjectFilterInfo)) {
                 this.filterInfo = sLObjectFilterInfo
@@ -411,7 +411,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         }
     }
 
-    fun setParcelInfo(SLParcelInfo sLParcelInfo) {
+    fun setParcelInfo(sLParcelInfo: SLParcelInfo) {
         this.parcelInfo.set(sLParcelInfo)
         requestObjectListUpdate()
     }

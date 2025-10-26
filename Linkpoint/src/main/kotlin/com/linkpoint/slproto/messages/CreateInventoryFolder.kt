@@ -17,7 +17,7 @@ class CreateInventoryFolder : SLMessage() {
     @JvmStatic
     class FolderData {
         public UUID FolderID
-        public Byte[] Name
+        public ByteArray Name
         public UUID ParentID
         public Int Type
     }
@@ -26,15 +26,15 @@ class CreateInventoryFolder : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.FolderData_Field.Name.length + 34 + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleCreateInventoryFolder(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 17)
@@ -46,7 +46,7 @@ class CreateInventoryFolder : SLMessage() {
         packVariable(byteBuffer, this.FolderData_Field.Name, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.FolderData_Field.FolderID = unpackUUID(byteBuffer)

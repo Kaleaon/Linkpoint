@@ -16,12 +16,12 @@ class UpdateParcel : SLMessage() {
         public UUID AuthorizedBuyerID
         public Int BillableArea
         public Int Category
-        public Byte[] Description
+        public ByteArray Description
         public Boolean GroupOwned
         public Boolean IsForSale
         public Boolean MaturePublish
-        public Byte[] MusicURL
-        public Byte[] Name
+        public ByteArray MusicURL
+        public ByteArray Name
         public UUID OwnerID
         public UUID ParcelID
         public Long RegionHandle
@@ -38,15 +38,15 @@ class UpdateParcel : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.ParcelData_Field.Name.length + 43 + 1 + this.ParcelData_Field.Description.length + 1 + this.ParcelData_Field.MusicURL.length + 4 + 4 + 4 + 4 + 1 + 1 + 1 + 16 + 12 + 4 + 16 + 1 + 1 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleUpdateParcel(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -35)
@@ -73,7 +73,7 @@ class UpdateParcel : SLMessage() {
         packBoolean(byteBuffer, this.ParcelData_Field.MaturePublish)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.ParcelData_Field.ParcelID = unpackUUID(byteBuffer)
         this.ParcelData_Field.RegionHandle = unpackLong(byteBuffer)
         this.ParcelData_Field.OwnerID = unpackUUID(byteBuffer)

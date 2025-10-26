@@ -10,12 +10,12 @@ abstract class AssetKey {
     private const val Joiner toStringJoiner = Joiner.on(':').useForNull("null")
 
     @JvmStatic
-    AssetKey createAssetKey(UUID uuid, UUID uuid2, UUID uuid3, Int i) {
+     fun createAssetKey(uuid: UUID, uuid2: UUID, uuid3: UUID, i: Int): AssetKey {
         return AutoValue_AssetKey(2, 2, uuid3, i, uuid2, uuid, (UUID) null)
     }
 
     @JvmStatic
-    AssetKey createInventoryKey(SLInventoryEntry sLInventoryEntry, UUID uuid) {
+     fun createInventoryKey(sLInventoryEntry: SLInventoryEntry, uuid: UUID): AssetKey {
         return AutoValue_AssetKey(2, 3, sLInventoryEntry.assetUUID, sLInventoryEntry.assetType, sLInventoryEntry.ownerUUID, sLInventoryEntry.uuid, uuid)
     }
 
@@ -33,7 +33,7 @@ abstract class AssetKey {
 
     public abstract UUID taskUUID()
 
-    public String toString() {
+     public fun toString(): String {
         return toStringJoiner.join(Integer.valueOf(channelType()), Integer.valueOf(sourceType()), assetUUID(), Integer.valueOf(assetType()), ownerUUID(), itemUUID(), taskUUID())
     }
 }

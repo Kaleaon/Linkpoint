@@ -14,15 +14,15 @@ class ChatMessageSourceUnknown : ChatMessageSource() {
     }
 
     @JvmStatic
-    ChatMessageSourceUnknown getInstance() {
+     fun getInstance(): ChatMessageSourceUnknown {
         return Instance
     }
 
-    public ChatterID getDefaultChatter(UUID uuid) {
+     public fun getDefaultChatter(uuid: UUID): ChatterID {
         return ChatterID.getLocalChatterID(uuid)
     }
 
-    public String getSourceName(UserManager userManager) {
+     public fun getSourceName(userManager: UserManager): String {
         return null
     }
 
@@ -30,7 +30,7 @@ class ChatMessageSourceUnknown : ChatMessageSource() {
         return ChatMessageSource.ChatMessageSourceType.Unknown
     }
 
-    public UUID getSourceUUID() {
+     public fun getSourceUUID(): UUID {
         return null
     }
 }

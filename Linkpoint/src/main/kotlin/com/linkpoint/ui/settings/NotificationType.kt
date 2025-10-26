@@ -35,31 +35,31 @@ enum class NotificationType {
         this.blinkColorKey = str6
     }
 
-    public String getBlinkColorKey() {
+     public fun getBlinkColorKey(): String {
         return this.blinkColorKey
     }
 
-    public String getBlinkKey() {
+     public fun getBlinkKey(): String {
         return this.blinkKey
     }
 
-    public String getEnableKey() {
+     public fun getEnableKey(): String {
         return this.enableKey
     }
 
-    public String getPlaySoundKey() {
+     public fun getPlaySoundKey(): String {
         return this.playSoundKey
     }
 
-    public String getPrefScreenKey() {
+     public fun getPrefScreenKey(): String {
         return this.prefScreenKey
     }
 
-    public Int getPriority() {
+     public fun getPriority(): Int {
         return this.priority
     }
 
-    public String getRingtoneKey() {
+     public fun getRingtoneKey(): String {
         return this.ringtoneKey
     }
 }

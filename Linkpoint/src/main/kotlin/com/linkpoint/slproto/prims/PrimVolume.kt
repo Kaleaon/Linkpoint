@@ -30,14 +30,14 @@ class PrimVolume {
     PrimVolumeParams volumeParams
 
     @JvmStatic
-    PrimVolume create(PrimVolumeParams primVolumeParams, Float f, Boolean z, Boolean z2, GLTexture gLTexture) {
+     fun create(primVolumeParams: PrimVolumeParams, f: Float, z: Boolean, z2: Boolean, gLTexture: GLTexture): PrimVolume {
         if (primVolumeParams.isSculpt()) {
             if (gLTexture == null) {
                 return null
             }
             Debug.Log("Sculpt: using sculpt texture " + primVolumeParams.SculptID)
         }
-        PrimVolume primVolume = PrimVolume()
+        val primVolume: PrimVolume = PrimVolume()
         primVolume.volumeParams = primVolumeParams
         primVolume.Detail = f
         primVolume.GenerateSingleFace = z
@@ -57,12 +57,12 @@ class PrimVolume {
         }
     }
 
-    private Unit createVolumeFaces() {
+     private fun createVolumeFaces() {
         if (!this.GenerateSingleFace) {
-            Int numFaces = getNumFaces()
+            val numFaces: Int = getNumFaces()
             this.VolumeFaces.ensureCapacity(numFaces)
             for (Int i = 0; i < numFaces; i++) {
-                PrimVolumeFace primVolumeFace = PrimVolumeFace()
+                val primVolumeFace: PrimVolumeFace = PrimVolumeFace()
                 PrimProfile.Face face = this.Profile.Faces.get(i)
                 primVolumeFace.BeginS = face.Index
                 primVolumeFace.NumS = face.Count
@@ -106,34 +106,34 @@ class PrimVolume {
         }
     }
 
-    private Boolean generate() {
-        Int i = (Int) (this.Detail * 0.66f)
+     private fun generate(): Boolean {
+        val i: Int = (Int) (this.Detail * 0.66f)
         if (this.volumeParams.PathParams.CurveType == 16 && (!(this.volumeParams.PathParams.ScaleX == 1.0f && this.volumeParams.PathParams.ScaleY == 1.0f) && (this.volumeParams.ProfileParams.CurveType == 1 || this.volumeParams.ProfileParams.CurveType == 2 || this.volumeParams.ProfileParams.CurveType == 3 || this.volumeParams.ProfileParams.CurveType == 4))) {
             i = 0
         }
         this.LODScaleBias.set(0.5f, 0.5f, 0.5f)
-        Float f = this.Detail
-        Float f2 = this.Detail
-        Byte b = this.volumeParams.PathParams.CurveType
-        Byte b2 = this.volumeParams.ProfileParams.CurveType
+        val f: Float = this.Detail
+        val f2: Float = this.Detail
+        val b: Byte = this.volumeParams.PathParams.CurveType
+        val b2: Byte = this.volumeParams.ProfileParams.CurveType
         if (b == 16 && b2 == 0) {
             this.LODScaleBias.set(0.6f, 0.6f, 0.0f)
         } else if (b == 32) {
             this.LODScaleBias.set(0.6f, 0.6f, 0.6f)
         }
-        Boolean generate = this.Path.generate(this.volumeParams.PathParams, f2, this.volumeParams.isFlexible() ? this.volumeParams.FlexiParams.NumFlexiSections - 2 : i, false, 0)
-        Boolean generate2 = this.Profile.generate(this.volumeParams.ProfileParams, this.Path.Open, f, i, false, 0)
+        val generate: Boolean = this.Path.generate(this.volumeParams.PathParams, f2, this.volumeParams.isFlexible() ? this.volumeParams.FlexiParams.NumFlexiSections - 2 : i, false, 0)
+        val generate2: Boolean = this.Profile.generate(this.volumeParams.ProfileParams, this.Path.Open, f, i, false, 0)
         if (!generate && !generate2) {
             return false
         }
-        Int size = this.Path.Path.size()
-        Int size2 = this.Profile.Profile.size()
+        val size: Int = this.Path.Path.size()
+        val size2: Int = this.Profile.Profile.size()
         this.Mesh = Vector3Array(size2 * size)
         for (Int i2 = 0; i2 < size; i2++) {
-            LLVector2 lLVector2 = this.Path.Path.get(i2).scale
-            LLQuaternion lLQuaternion = this.Path.Path.get(i2).rot
+            val lLVector2: LLVector2 = this.Path.Path.get(i2).scale
+            val lLQuaternion: LLQuaternion = this.Path.Path.get(i2).rot
             for (Int i3 = 0; i3 < size2; i3++) {
-                Int i4 = (i2 * size2) + i3
+                val i4: Int = (i2 * size2) + i3
                 this.Mesh.set(i4, lLVector2.x * this.Profile.Profile.get(i3).x, this.Profile.Profile.get(i3).y * lLVector2.y, 0.0f)
                 this.Mesh.mul(i4, lLQuaternion)
                 this.Mesh.add(i4, this.Path.Path.get(i2).pos)
@@ -145,12 +145,12 @@ class PrimVolume {
         return true
     }
 
-    private Int getNumFaces() {
+     private fun getNumFaces(): Int {
         return this.Profile.Faces.size()
     }
 
-    private Boolean sculpt(Int i, Int i2, Int i3, GLTexture gLTexture, Int i4) {
-        Byte b = this.volumeParams.SculptType
+     private fun sculpt(i: Int, i2: Int, i3: Int, gLTexture: GLTexture, i4: Int): Boolean {
+        val b: Byte = this.volumeParams.SculptType
         if (i == 0 || i2 == 0 || i3 < 3 || gLTexture == null) {
             i4 = -1
             z = true
@@ -160,8 +160,8 @@ class PrimVolume {
         sculpt_calc_mesh_resolution(i, i2, this.Detail)
         this.Path.generate(this.volumeParams.PathParams, this.Detail, 0, true, this.sculptRequestedS)
         this.Profile.generate(this.volumeParams.ProfileParams, this.Path.Open, this.Detail, 0, true, this.sculptRequestedT)
-        Int size = this.Path.Path.size()
-        Int size2 = this.Profile.Profile.size()
+        val size: Int = this.Path.Path.size()
+        val size2: Int = this.Profile.Profile.size()
         if (size == 0 || size2 == 0) {
             return false
         }
@@ -171,9 +171,9 @@ class PrimVolume {
         }
         try {
             sculptGenerateMapVertices(i, i2, i3, gLTexture, b)
-            Int i5 = 0
+            val i5: Int = 0
             while (true) {
-                Int i6 = i5
+                val i6: Int = i5
                 if (i6 < this.Profile.Faces.size()) {
                     this.FaceMask = this.Profile.Faces.get(i6).FaceID | this.FaceMask
                     i5 = i6 + 1
@@ -189,20 +189,20 @@ class PrimVolume {
         }
     }
 
-    private Unit sculptGenerateMapVertices(Int i, Int i2, Int i3, GLTexture gLTexture, Byte b) {
-        Byte b2 = (Byte) (b & 7)
-        Boolean z = (b & 64) != 0
-        Boolean z2 = (b & Byte.MIN_VALUE) != 0
-        Boolean z3 = z ? !z2 : z2
-        Int size = this.Path.Path.size()
-        Int size2 = this.Profile.Profile.size()
-        Int i4 = 0
-        Int i5 = 0
+     private fun sculptGenerateMapVertices(i: Int, i2: Int, i3: Int, gLTexture: GLTexture, b: Byte) {
+        val b2: Byte = (Byte) (b & 7)
+        val z: Boolean = (b & 64) != 0
+        val z2: Boolean = (b & Byte.MIN_VALUE) != 0
+        val z3: Boolean = z ? !z2 : z2
+        val size: Int = this.Path.Path.size()
+        val size2: Int = this.Profile.Profile.size()
+        val i4: Int = 0
+        val i5: Int = 0
         while (i4 < size) {
             for (Int i6 = 0; i6 < size2; i6++) {
-                Int i7 = i6 + i5
-                Int i8 = (Int) ((((Float) (z3 ? (size2 - i6) - 1 : i6)) / ((Float) (size2 - 1))) * ((Float) i))
-                Int i9 = (Int) ((((Float) i4) / ((Float) (size - 1))) * ((Float) i2))
+                val i7: Int = i6 + i5
+                val i8: Int = (Int) ((((Float) (z3 ? (size2 - i6) - 1 : i6)) / ((Float) (size2 - 1))) * ((Float) i))
+                val i9: Int = (Int) ((((Float) i4) / ((Float) (size - 1))) * ((Float) i2))
                 if (i9 == 0 && b2 == 1) {
                     i8 = i / 2
                 }
@@ -227,10 +227,10 @@ class PrimVolume {
                 if (i9 >= i2) {
                     i9 = i2 - 1
                 }
-                Int rgb = gLTexture.getRGB(((i9 * i) + i8) * i3)
-                Float f = (((Float) ((rgb >> 16) & 255)) / 255.0f) - 0.5f
-                Float f2 = (((Float) ((rgb >> 8) & 255)) / 255.0f) - 0.5f
-                Float f3 = (((Float) (rgb & 255)) / 255.0f) - 0.5f
+                val rgb: Int = gLTexture.getRGB(((i9 * i) + i8) * i3)
+                val f: Float = (((Float) ((rgb >> 16) & 255)) / 255.0f) - 0.5f
+                val f2: Float = (((Float) ((rgb >> 8) & 255)) / 255.0f) - 0.5f
+                val f3: Float = (((Float) (rgb & 255)) / 255.0f) - 0.5f
                 if (z2) {
                     f *= -1.0f
                 }
@@ -241,16 +241,16 @@ class PrimVolume {
         }
     }
 
-    private Unit sculpt_calc_mesh_resolution(Int i, Int i2, Float f) {
-        Int pow = (Int) Math.pow((Double) sculpt_sides(f), 2.0d)
-        Int i3 = (i * i2) / 4
-        Int min = i3 > 0 ? Math.min(pow, i3) : pow
-        Int max = Math.max(min / Math.max((Int) Math.sqrt((Double) (((Float) min) / ((i == 0 || i2 == 0) ? 1.0f : ((Float) i) / ((Float) i2)))), 4), 4)
+     private fun sculpt_calc_mesh_resolution(i: Int, i2: Int, f: Float) {
+        val pow: Int = (Int) Math.pow((Double) sculpt_sides(f), 2.0d)
+        val i3: Int = (i * i2) / 4
+        val min: Int = i3 > 0 ? Math.min(pow, i3) : pow
+        val max: Int = Math.max(min / Math.max((Int) Math.sqrt((Double) (((Float) min) / ((i == 0 || i2 == 0) ? 1.0f : ((Float) i) / ((Float) i2)))), 4), 4)
         this.sculptRequestedS = min / max
         this.sculptRequestedT = max
     }
 
-    private Int sculpt_sides(Float f) {
+     private fun sculpt_sides(f: Float): Int {
         if (((Double) f) <= 1.0d) {
             return 6
         }
@@ -261,12 +261,12 @@ class PrimVolume {
     }
 
     /* access modifiers changed from: package-private */
-    public Byte getPathType() {
+     public fun getPathType(): Byte {
         return this.volumeParams.PathParams.CurveType
     }
 
     /* access modifiers changed from: package-private */
-    public Byte getProfileType() {
+     public fun getProfileType(): Byte {
         return this.volumeParams.ProfileParams.CurveType
     }
 }

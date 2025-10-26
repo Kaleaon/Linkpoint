@@ -15,11 +15,11 @@ class Subscription<K, T> : RefreshableOne {
     private val Unsubscribable<K, T> subscriptionPool
 
     interface OnData<T> {
-        Unit onData(T t)
+         fun onData(T t)
     }
 
     interface OnError {
-        Unit onError(Throwable th)
+         fun onError(th: Throwable)
     }
 
     static class SubscriptionReference<K, T> : WeakReference<Subscription<K, T>> {
@@ -65,7 +65,7 @@ class Subscription<K, T> : RefreshableOne {
     }
 
     /* access modifiers changed from: package-private */
-    Unit onData(T t) {
+     fun onData(T t) {
         if (this.executor != null) {
             this.executor.execute(() -> this.onData.onData(t))
         } else {
@@ -74,7 +74,7 @@ class Subscription<K, T> : RefreshableOne {
     }
 
     /* access modifiers changed from: package-private */
-    Unit onError(Throwable th) {
+     fun onError(th: Throwable) {
         if (this.onError == null) {
             return
         }

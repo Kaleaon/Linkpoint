@@ -137,9 +137,9 @@ import javax.annotation.Nullable
 
 class SLAgentCircuit : SLThreadingCircuit(), ICapsEventHandler {
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues */
-    private const val /* synthetic */ Int[] syntheticField = null
+    private const val /* synthetic */ IntArray syntheticField = null
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues */
-    private const val /* synthetic */ Int[] syntheticField = null
+    private const val /* synthetic */ IntArray syntheticField = null
     private Subscription agentNameSubscription
     private Boolean agentPaused = false
     private val UUID agentUUID
@@ -157,11 +157,11 @@ class SLAgentCircuit : SLThreadingCircuit(), ICapsEventHandler {
     private val SLModules modules
     private val Map<UUID, SLObjectInfo> objectNamesRequested = ConcurrentHashMap()
     private val EventRateLimiter objectPropertiesRateLimiter = EventRateLimiter(this.eventBus, 500) {
-        protected Object getEventToFire() {
+         protected fun getEventToFire(): Object {
             return null
         }
 
-        protected Unit onActualFire() {
+         protected fun onActualFire() {
             SLAgentCircuit.this.notifyObjectPropertiesChange()
         }
     }
@@ -176,11 +176,11 @@ class SLAgentCircuit : SLThreadingCircuit(), ICapsEventHandler {
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues */
     @JvmStatic
-private /* synthetic */ Int[] m38-getcom-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues() {
+private /* synthetic */ IntArray m38-getcom-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues() {
         if (syntheticField != null) {
             return syntheticField
         }
-        Int[] iArr = Int[CapsEventType.values().length]
+        val iArr: IntArray = Int[CapsEventType.values().length]
         try {
             iArr[CapsEventType.AgentGroupDataUpdate.ordinal()] = 9
         } catch (NoSuchFieldError e) {
@@ -227,11 +227,11 @@ private /* synthetic */ Int[] m38-getcom-lumiyaviewer-lumiya-slproto-caps-SLCapE
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues */
     @JvmStatic
-private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues() {
+private /* synthetic */ IntArray m39-getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues() {
         if (syntheticField != null) {
             return syntheticField
         }
-        Int[] iArr = Int[ChatterType.values().length]
+        val iArr: IntArray = Int[ChatterType.values().length]
         try {
             iArr[ChatterType.Group.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -270,10 +270,10 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    private Unit DoAgentPause() {
+    private fun DoAgentPause() {
         this.agentPaused = true
         Debug.Log("AgentPause: Sending agentPause with ID = " + this.lastPauseId)
-        SLMessage agentPause = AgentPause()
+        val agentPause: SLMessage = AgentPause()
         agentPause.AgentData_Field.AgentID = this.circuitInfo.agentID
         agentPause.AgentData_Field.SessionID = this.circuitInfo.sessionID
         agentPause.AgentData_Field.SerialNum = this.lastPauseId
@@ -282,10 +282,10 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         this.lastPauseId++
     }
 
-    private Unit DoAgentResume() {
+    private fun DoAgentResume() {
         this.agentPaused = false
         Debug.Log("AgentPause: Sending agentResume with ID = " + this.lastPauseId)
-        SLMessage agentResume = AgentResume()
+        val agentResume: SLMessage = AgentResume()
         agentResume.AgentData_Field.AgentID = this.circuitInfo.agentID
         agentResume.AgentData_Field.SessionID = this.circuitInfo.sessionID
         agentResume.AgentData_Field.SerialNum = this.lastPauseId
@@ -294,7 +294,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         this.lastPauseId++
     }
 
-    private Unit HandleCapsEvent(CapsEvent capsEvent) {
+    private fun HandleCapsEvent(capsEvent: CapsEvent) {
         switch (m38-getcom-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues()[capsEvent.eventType.ordinal()]) {
             case 1:
                 HandleChatterBoxInvitation(capsEvent.eventBody)
@@ -317,20 +317,20 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    private Unit HandleChatterBoxInvitation(LLSDNode lLSDNode) {
+    private fun HandleChatterBoxInvitation(lLSDNode: LLSDNode) {
         try {
             Debug.Log("ChatterBoxInvitation: event = " + lLSDNode.serializeToXML())
         } catch (IOException e) {
             e.printStackTrace()
         }
         try {
-            UUID fromString = UUID.fromString(lLSDNode.byKey("session_id").asString())
-            AvatarGroupList avatarGroupList = this.userManager.getChatterList().getGroupManager().getAvatarGroupList()
-            AvatarGroupEntry avatarGroupEntry = avatarGroupList != null ? (AvatarGroupEntry) avatarGroupList.Groups.get(fromString) : null
-            LLSDNode byKey = lLSDNode.byKey("instantmessage").byKey("message_params")
-            UUID asUUID = byKey.keyExists("from_id") ? byKey.byKey("from_id").asUUID() : null
-            UUID asUUID2 = byKey.byKey("to_id").asUUID()
-            String asString = byKey.byKey("message").asString()
+            val fromString: UUID = UUID.fromString(lLSDNode.byKey("session_id").asString())
+            val avatarGroupList: AvatarGroupList = this.userManager.getChatterList().getGroupManager().getAvatarGroupList()
+            val avatarGroupEntry: AvatarGroupEntry = avatarGroupList != null ? (AvatarGroupEntry) avatarGroupList.Groups.get(fromString) : null
+            val byKey: LLSDNode = lLSDNode.byKey("instantmessage").byKey("message_params")
+            val asUUID: UUID = byKey.keyExists("from_id") ? byKey.byKey("from_id").asUUID() : null
+            val asUUID2: UUID = byKey.byKey("to_id").asUUID()
+            val asString: String = byKey.byKey("message").asString()
             if (avatarGroupEntry == null) {
                 avatarGroupEntry = avatarGroupList != null ? (AvatarGroupEntry) avatarGroupList.Groups.get(asUUID2) : null
             }
@@ -345,20 +345,20 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    private Unit HandleChatterBoxSessionStartReply(LLSDNode lLSDNode) {
+    private fun HandleChatterBoxSessionStartReply(lLSDNode: LLSDNode) {
         try {
             Debug.Log("ChatterBoxSessionStartReply: event = " + lLSDNode.serializeToXML())
         } catch (IOException e) {
             e.printStackTrace()
         }
         try {
-            UUID asUUID = lLSDNode.byKey("session_id").asUUID()
+            val asUUID: UUID = lLSDNode.byKey("session_id").asUUID()
             this.modules.voice.onGroupSessionReady(asUUID)
             synchronized (this.startedGroupSessions) {
                 this.startedGroupSessions.add(asUUID)
-                Iterator it = this.pendingGroupMessages.iterator()
+                val it: Iterator = this.pendingGroupMessages.iterator()
                 while (it.hasNext()) {
-                    ImprovedInstantMessage improvedInstantMessage = (ImprovedInstantMessage) it.next()
+                    val improvedInstantMessage: ImprovedInstantMessage = (ImprovedInstantMessage) it.next()
                     if (improvedInstantMessage.MessageBlock_Field.ID.equals(asUUID)) {
                         it.remove()
                         SendMessage(improvedInstantMessage)
@@ -371,13 +371,13 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    private Unit HandleChatterOnlineStatus(ChatterID chatterID, Boolean z) {
+    private fun HandleChatterOnlineStatus(chatterID: ChatterID, z: Boolean) {
         if (this.userManager.isChatterActive(chatterID) && (chatterID instanceof ChatterIDUser)) {
             HandleChatEvent(chatterID, SLChatOnlineOfflineEvent(ChatMessageSourceUser(((ChatterIDUser) chatterID).getChatterUUID()), this.agentUUID, z), false)
         }
     }
 
-    private Unit HandleEstablishAgentCommunication(LLSDNode lLSDNode) {
+    private fun HandleEstablishAgentCommunication(lLSDNode: LLSDNode) {
         if (this.teleportRequestSent) {
             try {
                 Debug.Log("EstablishAgentCommunication: event = " + lLSDNode.serializeToXML())
@@ -385,10 +385,10 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
                 e.printStackTrace()
             }
             try {
-                String asString = lLSDNode.byKey("sim-ip-and-port").asString()
-                String asString2 = lLSDNode.byKey("seed-capability").asString()
-                UUID asUUID = lLSDNode.byKey("agent-id").asUUID()
-                String[] split = asString.split(":")
+                val asString: String = lLSDNode.byKey("sim-ip-and-port").asString()
+                val asString2: String = lLSDNode.byKey("seed-capability").asString()
+                val asUUID: UUID = lLSDNode.byKey("agent-id").asUUID()
+                val split: Array<String> = asString.split(":")
                 this.gridConn.addTempCircuit(SLAuthReply(this.authReply, true, true, asUUID, split[0], Integer.parseInt(split[1]), asString2))
             } catch (Exception e2) {
                 e2.printStackTrace()
@@ -396,26 +396,26 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    private Unit HandleGroupNotice(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
-        ByteBuffer wrap = ByteBuffer.wrap(improvedInstantMessage.MessageBlock_Field.BinaryBucket)
+    private fun HandleGroupNotice(improvedInstantMessage: ImprovedInstantMessage, chatMessageSource: ChatMessageSource) {
+        val wrap: ByteBuffer = ByteBuffer.wrap(improvedInstantMessage.MessageBlock_Field.BinaryBucket)
         if (wrap.limit() >= 18) {
             wrap.order(ByteOrder.BIG_ENDIAN)
-            Byte b = wrap.get()
-            Byte b2 = wrap.get()
-            UUID uuid = UUID(wrap.getLong(), wrap.getLong())
-            String str = ""
+            val b: Byte = wrap.get()
+            val b2: Byte = wrap.get()
+            val uuid: UUID = UUID(wrap.getLong(), wrap.getLong())
+            val str: String = ""
             if (b != (Byte) 0) {
-                Byte[] bArr = Byte[wrap.remaining()]
+                val bArr: ByteArray = Byte[wrap.remaining()]
                 wrap.get(bArr)
                 str = SLMessage.stringFromVariableOEM(bArr)
             }
             Debug.Log("HandleGroupNotice: group UUID = " + uuid.toString())
-            ChatterID groupChatterID = ChatterID.getGroupChatterID(this.agentUUID, uuid)
-            Boolean equal = Objects.equal(chatMessageSource.getSourceUUID(), this.circuitInfo.agentID)
-            String stringFromVariableUTF = SLMessage.stringFromVariableUTF(improvedInstantMessage.MessageBlock_Field.Message)
-            Int indexOf = stringFromVariableUTF.indexOf(ErrorCode.CONTROLLER_GATT_NOTIFY_FAILED)
+            val groupChatterID: ChatterID = ChatterID.getGroupChatterID(this.agentUUID, uuid)
+            val equal: Boolean = Objects.equal(chatMessageSource.getSourceUUID(), this.circuitInfo.agentID)
+            val stringFromVariableUTF: String = SLMessage.stringFromVariableUTF(improvedInstantMessage.MessageBlock_Field.Message)
+            val indexOf: Int = stringFromVariableUTF.indexOf(ErrorCode.CONTROLLER_GATT_NOTIFY_FAILED)
             if (indexOf >= 0) {
-                String substring = stringFromVariableUTF.substring(0, indexOf)
+                val substring: String = stringFromVariableUTF.substring(0, indexOf)
                 stringFromVariableUTF = substring + "\n" + stringFromVariableUTF.substring(indexOf + 1)
             }
             if (equal && b != (Byte) 0) {
@@ -431,15 +431,15 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
     /* DevToolsApp WARNING: Missing block: B:24:0x0113, code:
             if (r0.rlvController.canTeleportToLure(r1) != false) goto L_0x0115
      */
-    private Unit HandleIM(com.lumiyaviewer.lumiya.slproto.messages.ImprovedInstantMessage r8, com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource r9) {
-    private Unit HandleIM(com.lumiyaviewer.lumiya.slproto.messages.ImprovedInstantMessage improvedInstantMessage, com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource chatMessageSource) {
+    private fun HandleIM(com.lumiyaviewer.lumiya.slproto.messages.ImprovedInstantMessage r8, com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource r9) {
+    private fun HandleIM(com.lumiyaviewer.lumiya.slproto.messages.ImprovedInstantMessage improvedInstantMessage, com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource chatMessageSource) {
         // Check if RLV controller should handle this IM
-        SLModules modules = getModules()
+        val modules: SLModules = getModules()
         if (modules != null && modules.rlvController.onIncomingIM(improvedInstantMessage)) {
             return; // RLV handled it
         }
         
-        Byte dialogType = improvedInstantMessage.MessageBlock_Field.Dialog
+        val dialogType: Byte = improvedInstantMessage.MessageBlock_Field.Dialog
         
         switch (dialogType) {
             case 0: // MessageFromAgent 
@@ -513,10 +513,10 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
     
-    private Unit handlePersonalMessage(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
-        SLChatTextEvent chatEvent = SLChatTextEvent(chatMessageSource, this.agentUUID, improvedInstantMessage, null)
-        ChatterID defaultChatter = chatMessageSource.getDefaultChatter(this.agentUUID)
-        Boolean isChatterActive = this.userManager.isChatterActive(defaultChatter)
+     private fun handlePersonalMessage(improvedInstantMessage: ImprovedInstantMessage, chatMessageSource: ChatMessageSource) {
+        val chatEvent: SLChatTextEvent = SLChatTextEvent(chatMessageSource, this.agentUUID, improvedInstantMessage, null)
+        val defaultChatter: ChatterID = chatMessageSource.getDefaultChatter(this.agentUUID)
+        val isChatterActive: Boolean = this.userManager.isChatterActive(defaultChatter)
         
         HandleChatEvent(defaultChatter, chatEvent, true)
         
@@ -528,7 +528,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
             !isChatterActive &&
             defaultChatter instanceof com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser) {
             
-            String autoResponse = SLGridConnection.getAutoresponse()
+            val autoResponse: String = SLGridConnection.getAutoresponse()
             if (!com.google.common.base.Strings.isNullOrEmpty(autoResponse)) {
                 com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser userChatter = 
                     (com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser) defaultChatter
@@ -537,8 +537,8 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
     
-    private Unit handleSystemMessage(ImprovedInstantMessage improvedInstantMessage) {
-        SLChatSystemMessageEvent systemEvent = SLChatSystemMessageEvent(
+     private fun handleSystemMessage(improvedInstantMessage: ImprovedInstantMessage) {
+        val systemEvent: SLChatSystemMessageEvent = SLChatSystemMessageEvent(
             com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUnknown.getInstance(),
             this.agentUUID,
             SLMessage.stringFromVariableUTF(improvedInstantMessage.MessageBlock_Field.Message)
@@ -546,43 +546,43 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         HandleChatEvent(this.localChatterID, systemEvent, true)
     }
     
-    private Unit handleGroupInvitation(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
-        SLChatGroupInvitationEvent invitationEvent = SLChatGroupInvitationEvent(
+     private fun handleGroupInvitation(improvedInstantMessage: ImprovedInstantMessage, chatMessageSource: ChatMessageSource) {
+        val invitationEvent: SLChatGroupInvitationEvent = SLChatGroupInvitationEvent(
             chatMessageSource, this.agentUUID, improvedInstantMessage
         )
         HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), invitationEvent, true)
     }
     
-    private Unit handleInventoryOffered(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
-        SLChatInventoryItemOfferedEvent inventoryEvent = SLChatInventoryItemOfferedEvent(
+     private fun handleInventoryOffered(improvedInstantMessage: ImprovedInstantMessage, chatMessageSource: ChatMessageSource) {
+        val inventoryEvent: SLChatInventoryItemOfferedEvent = SLChatInventoryItemOfferedEvent(
             chatMessageSource, this.agentUUID, improvedInstantMessage
         )
         HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), inventoryEvent, true)
     }
     
-    private Unit handleInventoryOfferedFromObject(ImprovedInstantMessage improvedInstantMessage) {
-        ChatMessageSource objectSource = com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceObject(
+     private fun handleInventoryOfferedFromObject(improvedInstantMessage: ImprovedInstantMessage) {
+        val objectSource: ChatMessageSource = com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceObject(
             improvedInstantMessage.AgentData_Field.AgentID,
             SLMessage.stringFromVariableOEM(improvedInstantMessage.MessageBlock_Field.FromAgentName)
         )
         
-        SLChatInventoryItemOfferedEvent inventoryEvent = SLChatInventoryItemOfferedEvent(
+        val inventoryEvent: SLChatInventoryItemOfferedEvent = SLChatInventoryItemOfferedEvent(
             objectSource, this.agentUUID, improvedInstantMessage
         )
         HandleChatEvent(this.localChatterID, inventoryEvent, true)
     }
     
-    private Unit handleObjectMessage(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
-        SLChatTextEvent chatEvent = SLChatTextEvent(
+     private fun handleObjectMessage(improvedInstantMessage: ImprovedInstantMessage, chatMessageSource: ChatMessageSource) {
+        val chatEvent: SLChatTextEvent = SLChatTextEvent(
             chatMessageSource, this.agentUUID, improvedInstantMessage, null
         )
         HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), chatEvent, true)
     }
     
-    private Unit handleTeleportLure(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
-        SLModules modules = getModules()
+     private fun handleTeleportLure(improvedInstantMessage: ImprovedInstantMessage, chatMessageSource: ChatMessageSource) {
+        val modules: SLModules = getModules()
         if (chatMessageSource.getSourceType() == ChatMessageSource.ChatMessageSourceType.User) {
-            UUID sourceUUID = chatMessageSource.getSourceUUID()
+            val sourceUUID: UUID = chatMessageSource.getSourceUUID()
             if (modules != null) {
                 if (modules.rlvController.autoAcceptTeleport(sourceUUID)) {
                     TeleportToLure(improvedInstantMessage.MessageBlock_Field.ID)
@@ -593,35 +593,35 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
             }
         }
         
-        SLChatLureEvent lureEvent = SLChatLureEvent(
+        val lureEvent: SLChatLureEvent = SLChatLureEvent(
             chatMessageSource, this.agentUUID, improvedInstantMessage
         )
         HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), lureEvent, true)
     }
     
-    private Unit handleLureRequest(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
-        SLModules modules = getModules()
+     private fun handleLureRequest(improvedInstantMessage: ImprovedInstantMessage, chatMessageSource: ChatMessageSource) {
+        val modules: SLModules = getModules()
         if (chatMessageSource.getSourceType() == ChatMessageSource.ChatMessageSourceType.User && modules != null) {
             if (!modules.rlvController.canTeleportToLure(chatMessageSource.getSourceUUID())) {
                 return
             }
         }
         
-        SLChatLureRequestEvent lureRequestEvent = SLChatLureRequestEvent(
+        val lureRequestEvent: SLChatLureRequestEvent = SLChatLureRequestEvent(
             chatMessageSource, this.agentUUID, improvedInstantMessage
         )
         HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), lureRequestEvent, true)
     }
     
-    private Unit handleFriendshipOffered(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
-        SLChatFriendshipOfferedEvent friendshipEvent = SLChatFriendshipOfferedEvent(
+     private fun handleFriendshipOffered(improvedInstantMessage: ImprovedInstantMessage, chatMessageSource: ChatMessageSource) {
+        val friendshipEvent: SLChatFriendshipOfferedEvent = SLChatFriendshipOfferedEvent(
             chatMessageSource, this.agentUUID, improvedInstantMessage
         )
         HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), friendshipEvent, true)
     }
     
-    private Unit handleFriendshipResult(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
-        SLChatFriendshipResultEvent friendshipResultEvent = SLChatFriendshipResultEvent(
+     private fun handleFriendshipResult(improvedInstantMessage: ImprovedInstantMessage, chatMessageSource: ChatMessageSource) {
+        val friendshipResultEvent: SLChatFriendshipResultEvent = SLChatFriendshipResultEvent(
             chatMessageSource, this.agentUUID, improvedInstantMessage
         )
         HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), friendshipResultEvent, true)
@@ -629,21 +629,21 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         // If friendship accepted, add to friend list and request online notification
         if (improvedInstantMessage.MessageBlock_Field.Dialog == 39) { // FriendshipAccepted
             if (chatMessageSource.getSourceType() == ChatMessageSource.ChatMessageSourceType.User) {
-                UUID sourceUUID = chatMessageSource.getSourceUUID()
+                val sourceUUID: UUID = chatMessageSource.getSourceUUID()
                 if (sourceUUID != null) {
                     this.userManager.getChatterList().getFriendManager().addFriend(sourceUUID)
-                    SendGenericMessage("requestonlinenotification", String[]{sourceUUID.toString()})
+                    SendGenericMessage("requestonlinenotification", Array<String>{sourceUUID.toString()})
                 }
             }
         }
     }
     }
 
-    private Unit HandleSessionIM(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
+    private fun HandleSessionIM(improvedInstantMessage: ImprovedInstantMessage, chatMessageSource: ChatMessageSource) {
         HandleChatEvent(ChatterID.getGroupChatterID(this.agentUUID, improvedInstantMessage.MessageBlock_Field.ID), SLChatTextEvent(chatMessageSource, this.agentUUID, improvedInstantMessage, null), true)
     }
 
-    private Unit HandleTeleportFailed(LLSDNode lLSDNode) {
+    private fun HandleTeleportFailed(lLSDNode: LLSDNode) {
         try {
             Debug.Log("TeleportFailed: event = " + lLSDNode.serializeToXML())
         } catch (IOException e) {
@@ -655,7 +655,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    private Unit HandleTeleportFinish(LLSDNode lLSDNode) {
+    private fun HandleTeleportFinish(lLSDNode: LLSDNode) {
         try {
             Debug.Log("TeleportFinish: event = " + lLSDNode.serializeToXML())
         } catch (IOException e) {
@@ -664,10 +664,10 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         if (this.teleportRequestSent) {
             this.teleportRequestSent = false
             try {
-                LLSDNode byIndex = lLSDNode.byKey("Info").byIndex(0)
-                String asString = byIndex.byKey("SeedCapability").asString()
-                Byte[] asBinary = byIndex.byKey("SimIP").asBinary()
-                Debug.Printf("sim address: %s", SLAuthReply(this.authReply, true, false, this.authReply.agentID, String.format("%d.%d.%d.%d", Object[]{Integer.valueOf(asBinary[0] & 255), Integer.valueOf(asBinary[1] & 255), Integer.valueOf(asBinary[2] & 255), Integer.valueOf(asBinary[3] & 255)}), byIndex.byKey("SimPort").asInt(), asString).simAddress)
+                val byIndex: LLSDNode = lLSDNode.byKey("Info").byIndex(0)
+                val asString: String = byIndex.byKey("SeedCapability").asString()
+                val asBinary: ByteArray = byIndex.byKey("SimIP").asBinary()
+                Debug.Printf("sim address: %s", SLAuthReply(this.authReply, true, false, this.authReply.agentID, String.format("%d.%d.%d.%d", Array<Any>{Integer.valueOf(asBinary[0] & 255), Integer.valueOf(asBinary[1] & 255), Integer.valueOf(asBinary[2] & 255), Integer.valueOf(asBinary[3] & 255)}), byIndex.byKey("SimPort").asInt(), asString).simAddress)
                 this.modules.avatarControl.setEnableAgentUpdates(false)
                 this.gridConn.HandleTeleportFinish(r0)
                 return
@@ -680,9 +680,9 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         Debug.Log("TeleportFinish: stale teleport finish?")
     }
 
-    private Unit HandleTypingNotification(ChatMessageSource chatMessageSource, Boolean z) {
+    private fun HandleTypingNotification(chatMessageSource: ChatMessageSource, z: Boolean) {
         if (chatMessageSource instanceof ChatMessageSourceUser) {
-            UUID sourceUUID = chatMessageSource.getSourceUUID()
+            val sourceUUID: UUID = chatMessageSource.getSourceUUID()
             if (sourceUUID == null) {
                 return
             }
@@ -696,10 +696,10 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    private Unit ProcessObjectSelection() {
+    private fun ProcessObjectSelection() {
         if (getNeedObjectNames() && (this.doingObjectSelection ^ 1) != 0) {
             SLMessage sLMessage
-            SLMessage sLMessage2 = null
+            val sLMessage2: SLMessage = null
             for (SLObjectInfo sLObjectInfo : this.forceNeedObjectNames.values()) {
                 if (sLMessage2 == null) {
                     sLMessage2 = ObjectSelect()
@@ -709,7 +709,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
                 if (sLMessage2.ObjectData_Fields.size() > 16) {
                     break
                 }
-                ObjectData objectData = ObjectData()
+                val objectData: ObjectData = ObjectData()
                 objectData.ObjectLocalID = sLObjectInfo.localID
                 sLMessage2.ObjectData_Fields.add(objectData)
                 sLObjectInfo.nameRequested = true
@@ -727,7 +727,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
                         sLMessage = sLMessage2
                         break
                     }
-                    ObjectData objectData2 = ObjectData()
+                    val objectData2: ObjectData = ObjectData()
                     objectData2.ObjectLocalID = sLObjectInfo2.localID
                     sLMessage2.ObjectData_Fields.add(objectData2)
                     sLObjectInfo2.nameRequested = true
@@ -746,9 +746,9 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    private Unit ProcessObjectSelectionTimeout() {
+    private fun ProcessObjectSelectionTimeout() {
         for (SLObjectInfo sLObjectInfo : this.objectNamesRequested.values()) {
-            SLObjectInfo sLObjectInfo2 = (SLObjectInfo) this.gridConn.parcelInfo.objectNamesQueue.remove(sLObjectInfo.getId())
+            val sLObjectInfo2: SLObjectInfo = (SLObjectInfo) this.gridConn.parcelInfo.objectNamesQueue.remove(sLObjectInfo.getId())
             if (sLObjectInfo2 != null) {
                 this.gridConn.parcelInfo.objectNamesQueue.put(sLObjectInfo2.getId(), sLObjectInfo2)
             }
@@ -757,8 +757,8 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         this.objectNamesRequested.clear()
     }
 
-    private Unit SendAgentFOV() {
-        SLMessage agentFOV = AgentFOV()
+    private fun SendAgentFOV() {
+        val agentFOV: SLMessage = AgentFOV()
         agentFOV.AgentData_Field.AgentID = this.circuitInfo.agentID
         agentFOV.AgentData_Field.SessionID = this.circuitInfo.sessionID
         agentFOV.AgentData_Field.CircuitCode = this.circuitInfo.circuitCode
@@ -768,8 +768,8 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(agentFOV)
     }
 
-    private Unit SendCompleteAgentMovement() {
-        SLMessage completeAgentMovement = CompleteAgentMovement()
+    private fun SendCompleteAgentMovement() {
+        val completeAgentMovement: SLMessage = CompleteAgentMovement()
         completeAgentMovement.AgentData_Field.CircuitCode = this.circuitInfo.circuitCode
         completeAgentMovement.AgentData_Field.AgentID = this.circuitInfo.agentID
         completeAgentMovement.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -777,15 +777,15 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(completeAgentMovement)
     }
 
-    private Unit SendEstateOwnerMessage(String str, String[] strArr) {
-        SLMessage estateOwnerMessage = EstateOwnerMessage()
+    private fun SendEstateOwnerMessage(str: String, strArr: Array<String>) {
+        val estateOwnerMessage: SLMessage = EstateOwnerMessage()
         estateOwnerMessage.AgentData_Field.AgentID = this.circuitInfo.agentID
         estateOwnerMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID
         estateOwnerMessage.AgentData_Field.TransactionID = UUID(0, 0)
         estateOwnerMessage.MethodData_Field.Method = SLMessage.stringToVariableOEM(str)
         estateOwnerMessage.MethodData_Field.Invoice = UUID(0, 0)
         for (String str2 : strArr) {
-            ParamList paramList = ParamList()
+            val paramList: ParamList = ParamList()
             paramList.Parameter = SLMessage.stringToVariableOEM(str2)
             estateOwnerMessage.ParamList_Fields.add(paramList)
         }
@@ -793,8 +793,8 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(estateOwnerMessage)
     }
 
-    private Unit SendGroupSessionStart(UUID uuid) {
-        SLMessage improvedInstantMessage = ImprovedInstantMessage()
+    private fun SendGroupSessionStart(uuid: UUID) {
+        val improvedInstantMessage: SLMessage = ImprovedInstantMessage()
         improvedInstantMessage.AgentData_Field.AgentID = this.circuitInfo.agentID
         improvedInstantMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID
         improvedInstantMessage.MessageBlock_Field.FromGroup = false
@@ -813,11 +813,11 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(improvedInstantMessage)
     }
 
-    private Boolean SendInstantMessage(UUID uuid, String str, Int i) {
+    private fun SendInstantMessage(uuid: UUID, str: String, i: Int): Boolean {
         if (!getModules().rlvController.canSendIM(uuid)) {
             return false
         }
-        SLMessage improvedInstantMessage = ImprovedInstantMessage()
+        val improvedInstantMessage: SLMessage = ImprovedInstantMessage()
         improvedInstantMessage.AgentData_Field.AgentID = this.circuitInfo.agentID
         improvedInstantMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID
         improvedInstantMessage.MessageBlock_Field.FromGroup = false
@@ -844,45 +844,45 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         return true
     }
 
-    private Unit SendRetrieveInstantMessages() {
-        SLMessage retrieveInstantMessages = RetrieveInstantMessages()
+    private fun SendRetrieveInstantMessages() {
+        val retrieveInstantMessages: SLMessage = RetrieveInstantMessages()
         retrieveInstantMessages.AgentData_Field.AgentID = this.circuitInfo.agentID
         retrieveInstantMessages.AgentData_Field.SessionID = this.circuitInfo.sessionID
         retrieveInstantMessages.isReliable = true
         SendMessage(retrieveInstantMessages)
     }
 
-    private UUID getActiveGroupID() {
+     private fun getActiveGroupID(): UUID {
         return this.modules != null ? this.modules.groupManager.getActiveGroupID() : null
     }
 
-    private Boolean getNeedObjectNames() {
+     private fun getNeedObjectNames(): Boolean {
         if (this.forceNeedObjectNames != null && !this.forceNeedObjectNames.isEmpty()) {
             return true
         }
         return this.modules != null ? this.modules.drawDistance.isObjectSelectEnabled() : false
     }
 
-    private Boolean isEventMuted(ChatterID chatterID, SLChatEvent sLChatEvent) {
+     private fun isEventMuted(chatterID: ChatterID, sLChatEvent: SLChatEvent): Boolean {
         if (this.modules != null) {
-            SLMuteList sLMuteList = this.modules.muteList
-            ChatMessageSource source = sLChatEvent.getSource()
+            val sLMuteList: SLMuteList = this.modules.muteList
+            val source: ChatMessageSource = sLChatEvent.getSource()
             if (source.getSourceType() == ChatMessageSourceType.User) {
                 if (sLMuteList.isMuted(source.getSourceUUID(), MuteType.AGENT)) {
                     return true
                 }
             } else if (source.getSourceType() == ChatMessageSourceType.Object) {
-                UUID sourceUUID = source.getSourceUUID()
+                val sourceUUID: UUID = source.getSourceUUID()
                 if (sourceUUID != null && !sourceUUID.equals(UUIDPool.ZeroUUID) && sLMuteList.isMuted(sourceUUID, MuteType.OBJECT)) {
                     return true
                 }
-                String sourceName = source.getSourceName(this.userManager)
+                val sourceName: String = source.getSourceName(this.userManager)
                 if (sourceName != null && sLMuteList.isMutedByName(sourceName)) {
                     return true
                 }
             }
             if (chatterID instanceof ChatterIDGroup) {
-                UUID chatterUUID = ((ChatterIDGroup) chatterID).getChatterUUID()
+                val chatterUUID: UUID = ((ChatterIDGroup) chatterID).getChatterUUID()
                 if (!chatterUUID.equals(UUIDPool.ZeroUUID) && sLMuteList.isMuted(chatterUUID, MuteType.GROUP)) {
                     return true
                 }
@@ -891,28 +891,28 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         return false
     }
 
-    private Unit notifyObjectPropertiesChange() {
+     private fun notifyObjectPropertiesChange() {
         if (this.userManager != null) {
             this.userManager.getObjectsManager().requestObjectListUpdate()
         }
     }
 
-    private Unit processMyAvatarUpdate(SLObjectAvatarInfo sLObjectAvatarInfo) {
+     private fun processMyAvatarUpdate(sLObjectAvatarInfo: SLObjectAvatarInfo) {
         if (this.modules != null) {
             this.modules.avatarControl.setAgentPosition(sLObjectAvatarInfo.getAbsolutePosition(), sLObjectAvatarInfo.getObjectCoords().get(2))
         }
     }
 
-    fun AcceptFriendship(UUID uuid, UUID uuid2) {
-        UUID uuid3 = null
+    fun AcceptFriendship(uuid: UUID, uuid2: UUID) {
+        val uuid3: UUID = null
         this.userManager.getChatterList().getFriendManager().addFriend(uuid)
-        SLMessage acceptFriendship = AcceptFriendship()
+        val acceptFriendship: SLMessage = AcceptFriendship()
         acceptFriendship.AgentData_Field.AgentID = this.circuitInfo.agentID
         acceptFriendship.AgentData_Field.SessionID = this.circuitInfo.sessionID
         if (this.modules != null) {
             uuid3 = this.modules.inventory.getCallingCardsFolderUUID()
         }
-        FolderData folderData = FolderData()
+        val folderData: FolderData = FolderData()
         if (uuid3 == null) {
             uuid3 = UUIDPool.ZeroUUID
         }
@@ -923,8 +923,8 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(acceptFriendship)
     }
 
-    fun AcceptInventoryOffer(Int i, Boolean z, UUID uuid, UUID uuid2, UUID uuid3) {
-        SLMessage improvedInstantMessage = ImprovedInstantMessage()
+    fun AcceptInventoryOffer(i: Int, z: Boolean, uuid: UUID, uuid2: UUID, uuid3: UUID) {
+        val improvedInstantMessage: SLMessage = ImprovedInstantMessage()
         improvedInstantMessage.AgentData_Field.AgentID = this.circuitInfo.agentID
         improvedInstantMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID
         improvedInstantMessage.MessageBlock_Field.FromGroup = false
@@ -943,7 +943,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo")
         improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF("")
         if (uuid3 != null) {
-            ByteBuffer wrap = ByteBuffer.wrap(Byte[16])
+            val wrap: ByteBuffer = ByteBuffer.wrap(Byte[16])
             wrap.order(ByteOrder.BIG_ENDIAN)
             wrap.putLong(uuid3.getMostSignificantBits())
             wrap.putLong(uuid3.getLeastSignificantBits())
@@ -956,8 +956,8 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(improvedInstantMessage)
     }
 
-    fun AddFriend(UUID uuid, String str) {
-        SLMessage improvedInstantMessage = ImprovedInstantMessage()
+    fun AddFriend(uuid: UUID, str: String) {
+        val improvedInstantMessage: SLMessage = ImprovedInstantMessage()
         improvedInstantMessage.AgentData_Field.AgentID = this.circuitInfo.agentID
         improvedInstantMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID
         improvedInstantMessage.MessageBlock_Field.FromGroup = false
@@ -976,12 +976,12 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(improvedInstantMessage)
     }
 
-    fun BuyObject(Int i, Byte b, Int i2) {
-        UUID activeGroupID = getActiveGroupID()
-        SLMessage objectBuy = ObjectBuy()
+    fun BuyObject(i: Int, b: Byte, i2: Int) {
+        val activeGroupID: UUID = getActiveGroupID()
+        val objectBuy: SLMessage = ObjectBuy()
         objectBuy.AgentData_Field.AgentID = this.circuitInfo.agentID
         objectBuy.AgentData_Field.SessionID = this.circuitInfo.sessionID
-        AgentData agentData = objectBuy.AgentData_Field
+        val agentData: AgentData = objectBuy.AgentData_Field
         if (activeGroupID == null) {
             activeGroupID = UUIDPool.ZeroUUID
         }
@@ -1011,12 +1011,12 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         super.CloseCircuit()
     }
 
-    fun DerezObject(Int i, EDeRezDestination eDeRezDestination) {
-        UUID activeGroupID = getActiveGroupID()
-        SLMessage deRezObject = DeRezObject()
+    fun DerezObject(i: Int, eDeRezDestination: EDeRezDestination) {
+        val activeGroupID: UUID = getActiveGroupID()
+        val deRezObject: SLMessage = DeRezObject()
         deRezObject.AgentData_Field.AgentID = this.circuitInfo.agentID
         deRezObject.AgentData_Field.SessionID = this.circuitInfo.sessionID
-        AgentBlock agentBlock = deRezObject.AgentBlock_Field
+        val agentBlock: AgentBlock = deRezObject.AgentBlock_Field
         if (activeGroupID == null) {
             activeGroupID = UUID(0, 0)
         }
@@ -1033,8 +1033,8 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(deRezObject)
     }
 
-    fun DoRequestPayPrice(UUID uuid) {
-        SLObjectInfo sLObjectInfo = (SLObjectInfo) this.gridConn.parcelInfo.allObjectsNearby.get(uuid)
+    fun DoRequestPayPrice(uuid: UUID) {
+        val sLObjectInfo: SLObjectInfo = (SLObjectInfo) this.gridConn.parcelInfo.allObjectsNearby.get(uuid)
         if (sLObjectInfo == null) {
             return
         }
@@ -1042,20 +1042,20 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
             this.eventBus.publish(SLObjectPayInfoEvent(sLObjectInfo))
             return
         }
-        SLMessage requestPayPrice = RequestPayPrice()
+        val requestPayPrice: SLMessage = RequestPayPrice()
         requestPayPrice.ObjectData_Field.ObjectID = uuid
         requestPayPrice.isReliable = true
         SendMessage(requestPayPrice)
     }
 
-    fun GenerateChatMoneyEvent(UUID uuid, Int i, Int i2) {
+    fun GenerateChatMoneyEvent(uuid: UUID, i: Int, i2: Int) {
         HandleChatEvent(uuid != null ? ChatterID.getUserChatterID(this.agentUUID, uuid) : this.localChatterID, SLChatBalanceChangedEvent(uuid != null ? ChatMessageSourceUser(uuid) : ChatMessageSourceUnknown.getInstance(), this.agentUUID, true, i, i2), true)
         if (this.modules != null) {
             this.modules.financialInfo.RecordChatEvent(uuid, i, i2)
         }
     }
 
-    fun HandleAgentMovementComplete(AgentMovementComplete agentMovementComplete) {
+    fun HandleAgentMovementComplete(agentMovementComplete: AgentMovementComplete) {
         this.regionHandle = agentMovementComplete.Data_Field.RegionHandle
         this.modules.avatarControl.setAgentPosition(agentMovementComplete.Data_Field.Position, null)
         Debug.Printf("Got agentPosition: %s", this.modules.avatarControl.getAgentPosition().getImmutablePosition())
@@ -1065,48 +1065,48 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         this.modules.avatarControl.setEnableAgentUpdates(true)
     }
 
-    fun HandleAlertMessage(AlertMessage alertMessage) {
+    fun HandleAlertMessage(alertMessage: AlertMessage) {
         HandleChatEvent(this.localChatterID, SLChatSystemMessageEvent(ChatMessageSourceUnknown.getInstance(), this.agentUUID, SLMessage.stringFromVariableOEM(alertMessage.AlertData_Field.Message)), true)
     }
 
-    fun HandleAvatarAnimation(AvatarAnimation avatarAnimation) {
-        SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo
+    fun HandleAvatarAnimation(avatarAnimation: AvatarAnimation) {
+        val sLParcelInfo: SLParcelInfo = this.gridConn.parcelInfo
         if (sLParcelInfo != null && this.modules != null) {
             sLParcelInfo.ApplyAvatarAnimation(avatarAnimation, this.modules.avatarControl)
         }
     }
 
-    fun HandleAvatarAppearance(AvatarAppearance avatarAppearance) {
+    fun HandleAvatarAppearance(avatarAppearance: AvatarAppearance) {
         Debug.Log("Got AvatarAppearance, ID = " + avatarAppearance.Sender_Field.ID.toString() + " isTrial = " + avatarAppearance.Sender_Field.IsTrial + ", our ID = " + this.circuitInfo.agentID.toString())
         if (avatarAppearance.Sender_Field.ID.equals(this.circuitInfo.agentID) && this.modules != null) {
             this.modules.avatarAppearance.HandleAvatarAppearance(avatarAppearance)
         }
-        SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo
+        val sLParcelInfo: SLParcelInfo = this.gridConn.parcelInfo
         if (sLParcelInfo != null) {
             sLParcelInfo.ApplyAvatarAppearance(avatarAppearance)
         }
     }
 
-    fun HandleAvatarInterestsReply(AvatarInterestsReply avatarInterestsReply) {
+    fun HandleAvatarInterestsReply(avatarInterestsReply: AvatarInterestsReply) {
         Debug.Log("got AvatarInterestsReply: wantToText = " + SLMessage.stringFromVariableOEM(avatarInterestsReply.PropertiesData_Field.WantToText))
         Debug.Log("got AvatarInterestsReply: skillText = " + SLMessage.stringFromVariableOEM(avatarInterestsReply.PropertiesData_Field.SkillsText))
     }
 
-    fun HandleChatEvent(ChatterID chatterID, SLChatEvent sLChatEvent, Boolean z) {
+    fun HandleChatEvent(chatterID: ChatterID, sLChatEvent: SLChatEvent, z: Boolean) {
         if (!isEventMuted(chatterID, sLChatEvent)) {
             this.userManager.getChatterList().getActiveChattersManager().HandleChatEvent(chatterID, sLChatEvent, z)
         }
     }
 
-    fun HandleChatFromSimulator(ChatFromSimulator chatFromSimulator) {
-        SLModules modules = getModules()
+    fun HandleChatFromSimulator(chatFromSimulator: ChatFromSimulator) {
+        val modules: SLModules = getModules()
         if (modules == null || !modules.rlvController.onIncomingChat(chatFromSimulator)) {
-            UUID uuid = chatFromSimulator.ChatData_Field.SourceID
-            String stringFromVariableOEM = SLMessage.stringFromVariableOEM(chatFromSimulator.ChatData_Field.FromName)
-            String stringFromVariableUTF = SLMessage.stringFromVariableUTF(chatFromSimulator.ChatData_Field.Message)
+            val uuid: UUID = chatFromSimulator.ChatData_Field.SourceID
+            val stringFromVariableOEM: String = SLMessage.stringFromVariableOEM(chatFromSimulator.ChatData_Field.FromName)
+            val stringFromVariableUTF: String = SLMessage.stringFromVariableUTF(chatFromSimulator.ChatData_Field.Message)
             if (chatFromSimulator.ChatData_Field.ChatType != 8 || chatFromSimulator.ChatData_Field.SourceType != 2 || !stringFromVariableOEM.startsWith("#Firestorm LSL Bridge") || !stringFromVariableUTF.startsWith("<bridgeURL>")) {
                 if ((chatFromSimulator.ChatData_Field.SourceType != 1 || modules == null || modules.rlvController.canRecvChat(stringFromVariableUTF, uuid)) && chatFromSimulator.ChatData_Field.Audible == 1) {
-                    Int i = chatFromSimulator.ChatData_Field.ChatType
+                    val i: Int = chatFromSimulator.ChatData_Field.ChatType
                     if (i != 6 && i != 4 && i != 5) {
                         switch (chatFromSimulator.ChatData_Field.SourceType) {
                             case 1:
@@ -1125,9 +1125,9 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    fun HandleImprovedInstantMessage(ImprovedInstantMessage improvedInstantMessage) {
+    fun HandleImprovedInstantMessage(improvedInstantMessage: ImprovedInstantMessage) {
         ChatMessageSource chatMessageSourceObject
-        Int i = improvedInstantMessage.MessageBlock_Field.Dialog
+        val i: Int = improvedInstantMessage.MessageBlock_Field.Dialog
         if (i == 19 || i == 31) {
             chatMessageSourceObject = ChatMessageSourceObject(improvedInstantMessage.AgentData_Field.AgentID, SLMessage.stringFromVariableOEM(improvedInstantMessage.MessageBlock_Field.FromAgentName))
         } else if (i == 3) {
@@ -1143,13 +1143,13 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         HandleIM(improvedInstantMessage, chatMessageSourceObject)
     }
 
-    fun HandleImprovedTerseObjectUpdate(ImprovedTerseObjectUpdate improvedTerseObjectUpdate) {
-        SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo
-        RequestMultipleObjects requestMultipleObjects = null
+    fun HandleImprovedTerseObjectUpdate(improvedTerseObjectUpdate: ImprovedTerseObjectUpdate) {
+        val sLParcelInfo: SLParcelInfo = this.gridConn.parcelInfo
+        val requestMultipleObjects: RequestMultipleObjects = null
         for (ImprovedTerseObjectUpdate.ObjectData objectData : improvedTerseObjectUpdate.ObjectData_Fields) {
             SLObjectInfo sLObjectInfo
-            Int localID = SLObjectInfo.getLocalID(objectData)
-            UUID uuid = (UUID) sLParcelInfo.uuidsNearby.get(Integer.valueOf(localID))
+            val localID: Int = SLObjectInfo.getLocalID(objectData)
+            val uuid: UUID = (UUID) sLParcelInfo.uuidsNearby.get(Integer.valueOf(localID))
             if (uuid != null) {
                 sLObjectInfo = (SLObjectInfo) sLParcelInfo.allObjectsNearby.get(uuid)
                 if (sLObjectInfo != null) {
@@ -1183,10 +1183,10 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    fun HandleKillObject(KillObject killObject) {
-        SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo
-        Object obj2 = null
-        Iterator it = killObject.ObjectData_Fields.iterator()
+    fun HandleKillObject(killObject: KillObject) {
+        val sLParcelInfo: SLParcelInfo = this.gridConn.parcelInfo
+        val obj2: Object = null
+        val it: Iterator = killObject.ObjectData_Fields.iterator()
         while (true) {
             obj = obj2
             if (!it.hasNext()) {
@@ -1199,23 +1199,23 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    fun HandleLayerData(LayerData layerData) {
+    fun HandleLayerData(layerData: LayerData) {
         if (layerData.LayerID_Field.Type == 76) {
-            SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo
+            val sLParcelInfo: SLParcelInfo = this.gridConn.parcelInfo
             if (sLParcelInfo != null) {
                 sLParcelInfo.terrainData.ProcessLayerData(layerData.LayerDataData_Field.Data)
             }
         }
     }
 
-    fun HandleLoadURL(LoadURL loadURL) {
+    fun HandleLoadURL(loadURL: LoadURL) {
         HandleChatEvent(this.localChatterID, SLChatTextEvent(ChatMessageSourceObject(loadURL.Data_Field.ObjectID, SLMessage.stringFromVariableOEM(loadURL.Data_Field.ObjectName)), this.agentUUID, loadURL), true)
     }
 
-    fun HandleObjectProperties(ObjectProperties objectProperties) {
+    fun HandleObjectProperties(objectProperties: ObjectProperties) {
         Debug.Log("ObjectProperties: " + objectProperties.ObjectData_Fields.size() + " ObjectSelect replies. Reqd " + this.objectNamesRequested.size() + " obj, remains " + this.gridConn.parcelInfo.objectNamesQueue.size() + " objects.")
         for (ObjectProperties.ObjectData objectData : objectProperties.ObjectData_Fields) {
-            SLObjectInfo sLObjectInfo = (SLObjectInfo) this.gridConn.parcelInfo.objectNamesQueue.remove(objectData.ObjectID)
+            val sLObjectInfo: SLObjectInfo = (SLObjectInfo) this.gridConn.parcelInfo.objectNamesQueue.remove(objectData.ObjectID)
             if (sLObjectInfo != null) {
                 sLObjectInfo.ApplyObjectProperties(objectData)
                 this.userManager.getObjectsManager().requestObjectProfileUpdate(sLObjectInfo.localID)
@@ -1226,7 +1226,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
                 this.userManager.getObjectsManager().requestObjectProfileUpdate(sLObjectInfo.localID)
                 sLObjectInfo = sLObjectInfo.getParentObject()
                 if (sLObjectInfo != null) {
-                    UUID id = sLObjectInfo.getId()
+                    val id: UUID = sLObjectInfo.getId()
                     if (id != null) {
                         this.userManager.getObjectsManager().requestTouchableChildrenUpdate(id)
                     }
@@ -1241,15 +1241,15 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         this.objectPropertiesRateLimiter.fire()
     }
 
-    fun HandleObjectUpdate(ObjectUpdate objectUpdate) {
-        SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo
-        Object obj = null
-        Object obj2 = null
+    fun HandleObjectUpdate(objectUpdate: ObjectUpdate) {
+        val sLParcelInfo: SLParcelInfo = this.gridConn.parcelInfo
+        val obj: Object = null
+        val obj2: Object = null
         for (ObjectUpdate.ObjectData objectData : objectUpdate.ObjectData_Fields) {
             if (objectData.PCode == 47 || objectData.PCode == 9) {
-                SLObjectInfo sLObjectInfo = (SLObjectInfo) sLParcelInfo.allObjectsNearby.get(objectData.FullID)
+                val sLObjectInfo: SLObjectInfo = (SLObjectInfo) sLParcelInfo.allObjectsNearby.get(objectData.FullID)
                 if (sLObjectInfo != null) {
-                    Int i = sLObjectInfo.parentID
+                    val i: Int = sLObjectInfo.parentID
                     sLObjectInfo.ApplyObjectUpdate(objectData)
                     sLParcelInfo.updateObjectParent(i, sLObjectInfo)
                     if (sLObjectInfo.parentID != i && (sLObjectInfo instanceof SLObjectAvatarInfo) && ((SLObjectAvatarInfo) sLObjectInfo).isMyAvatar()) {
@@ -1265,7 +1265,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
                         Debug.Log("ObjectUpdate: got my avatar (normal)")
                         sLParcelInfo.setAgentAvatar((SLObjectAvatarInfo) sLObjectInfo)
                         this.modules.avatarAppearance.OnMyAvatarCreated((SLObjectAvatarInfo) sLObjectInfo)
-                        Int i2 = 1
+                        val i2: Int = 1
                     }
                 }
                 if (sLObjectInfo instanceof SLObjectAvatarInfo ? ((SLObjectAvatarInfo) sLObjectInfo).isMyAvatar() : false) {
@@ -1286,8 +1286,8 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    fun HandleObjectUpdateCached(ObjectUpdateCached objectUpdateCached) {
-        SLMessage requestMultipleObjects = RequestMultipleObjects()
+    fun HandleObjectUpdateCached(objectUpdateCached: ObjectUpdateCached) {
+        val requestMultipleObjects: SLMessage = RequestMultipleObjects()
         requestMultipleObjects.AgentData_Field.AgentID = this.circuitInfo.agentID
         requestMultipleObjects.AgentData_Field.SessionID = this.circuitInfo.sessionID
         for (ObjectUpdateCached.ObjectData objectData : objectUpdateCached.ObjectData_Fields) {
@@ -1300,16 +1300,16 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(requestMultipleObjects)
     }
 
-    fun HandleObjectUpdateCompressed(ObjectUpdateCompressed objectUpdateCompressed) {
-        SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo
-        Object obj = null
-        Object obj2 = null
+    fun HandleObjectUpdateCompressed(objectUpdateCompressed: ObjectUpdateCompressed) {
+        val sLParcelInfo: SLParcelInfo = this.gridConn.parcelInfo
+        val obj: Object = null
+        val obj2: Object = null
         for (ObjectUpdateCompressed.ObjectData objectData : objectUpdateCompressed.ObjectData_Fields) {
             try {
-                UUID uuid = (UUID) sLParcelInfo.uuidsNearby.get(Integer.valueOf(SLObjectInfo.getLocalID(objectData)))
-                SLObjectInfo sLObjectInfo = uuid != null ? (SLObjectInfo) sLParcelInfo.allObjectsNearby.get(uuid) : null
+                val uuid: UUID = (UUID) sLParcelInfo.uuidsNearby.get(Integer.valueOf(SLObjectInfo.getLocalID(objectData)))
+                val sLObjectInfo: SLObjectInfo = uuid != null ? (SLObjectInfo) sLParcelInfo.allObjectsNearby.get(uuid) : null
                 if (sLObjectInfo != null) {
-                    Int i = sLObjectInfo.parentID
+                    val i: Int = sLObjectInfo.parentID
                     sLObjectInfo.ApplyObjectUpdate(objectData)
                     sLParcelInfo.updateObjectParent(i, sLObjectInfo)
                     obj3 = sLObjectInfo.parentID != i ? 1 : null
@@ -1345,30 +1345,30 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    fun HandleOfflineNotification(OfflineNotification offlineNotification) {
-        List arrayList = ArrayList(offlineNotification.AgentBlock_Fields.size())
+    fun HandleOfflineNotification(offlineNotification: OfflineNotification) {
+        val arrayList: List = ArrayList(offlineNotification.AgentBlock_Fields.size())
         for (OfflineNotification.AgentBlock agentBlock : offlineNotification.AgentBlock_Fields) {
             arrayList.add(agentBlock.AgentID)
         }
         this.userManager.getChatterList().getFriendManager().setUsersOnline(arrayList, false)
     }
 
-    fun HandleOnlineNotification(OnlineNotification onlineNotification) {
-        List arrayList = ArrayList(onlineNotification.AgentBlock_Fields.size())
+    fun HandleOnlineNotification(onlineNotification: OnlineNotification) {
+        val arrayList: List = ArrayList(onlineNotification.AgentBlock_Fields.size())
         for (OnlineNotification.AgentBlock agentBlock : onlineNotification.AgentBlock_Fields) {
             arrayList.add(agentBlock.AgentID)
         }
         this.userManager.getChatterList().getFriendManager().setUsersOnline(arrayList, true)
     }
 
-    fun HandlePayPriceReply(PayPriceReply payPriceReply) {
-        SLObjectInfo sLObjectInfo = (SLObjectInfo) this.gridConn.parcelInfo.allObjectsNearby.get(payPriceReply.ObjectData_Field.ObjectID)
+    fun HandlePayPriceReply(payPriceReply: PayPriceReply) {
+        val sLObjectInfo: SLObjectInfo = (SLObjectInfo) this.gridConn.parcelInfo.allObjectsNearby.get(payPriceReply.ObjectData_Field.ObjectID)
         if (sLObjectInfo != null) {
-            Int i = payPriceReply.ObjectData_Field.DefaultPayPrice
-            Int[] iArr = Int[payPriceReply.ButtonData_Fields.size()]
-            Int i2 = 0
+            val i: Int = payPriceReply.ObjectData_Field.DefaultPayPrice
+            val iArr: IntArray = Int[payPriceReply.ButtonData_Fields.size()]
+            val i2: Int = 0
             while (true) {
-                Int i3 = i2
+                val i3: Int = i2
                 if (i3 >= payPriceReply.ButtonData_Fields.size()) {
                     break
                 }
@@ -1383,9 +1383,9 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    fun HandleRegionHandshake(RegionHandshake regionHandshake) {
+    fun HandleRegionHandshake(regionHandshake: RegionHandshake) {
         if (!this.authReply.isTemporary) {
-            SLMessage regionHandshakeReply = RegionHandshakeReply()
+            val regionHandshakeReply: SLMessage = RegionHandshakeReply()
             regionHandshakeReply.AgentData_Field.AgentID = this.circuitInfo.agentID
             regionHandshakeReply.AgentData_Field.SessionID = this.circuitInfo.sessionID
             regionHandshakeReply.RegionInfo_Field.Flags = 0
@@ -1405,12 +1405,12 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    fun HandleScriptDialog(ScriptDialog scriptDialog) {
-        String[] strArr
-        Int i = 0
+    fun HandleScriptDialog(scriptDialog: ScriptDialog) {
+        Array<String> strArr
+        val i: Int = 0
         if (scriptDialog.Buttons_Fields.size() > 0) {
-            String[] strArr2 = String[scriptDialog.Buttons_Fields.size()]
-            Int i2 = 0
+            val strArr2: Array<String> = String[scriptDialog.Buttons_Fields.size()]
+            val i2: Int = 0
             for (Buttons buttons : scriptDialog.Buttons_Fields) {
                 strArr2[i2] = SLMessage.stringFromVariableUTF(buttons.ButtonLabel)
                 if (strArr2[i2].equals("!!llTextBox!!")) {
@@ -1434,49 +1434,49 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    fun HandleSimulatorViewerTimeMessage(SimulatorViewerTimeMessage simulatorViewerTimeMessage) {
+    fun HandleSimulatorViewerTimeMessage(simulatorViewerTimeMessage: SimulatorViewerTimeMessage) {
         if (!this.authReply.isTemporary && this.gridConn != null && this.gridConn.parcelInfo != null) {
-            Float f = (simulatorViewerTimeMessage.TimeInfo_Field.SunPhase / 6.2831855f) + 0.25f
+            val f: Float = (simulatorViewerTimeMessage.TimeInfo_Field.SunPhase / 6.2831855f) + 0.25f
             this.gridConn.parcelInfo.setSunHour((Float) (((Double) f) - Math.floor((Double) f)))
         }
     }
 
-    fun HandleTeleportFailed(TeleportFailed teleportFailed) {
+    fun HandleTeleportFailed(teleportFailed: TeleportFailed) {
         Debug.Log("TeleportFailed: reason = " + SLMessage.stringFromVariableOEM(teleportFailed.Info_Field.Reason))
         this.teleportRequestSent = false
         this.eventBus.publish(SLTeleportResultEvent(false, SLMessage.stringFromVariableOEM(teleportFailed.Info_Field.Reason)))
     }
 
-    fun HandleTeleportLocal(TeleportLocal teleportLocal) {
+    fun HandleTeleportLocal(teleportLocal: TeleportLocal) {
         this.teleportRequestSent = false
         this.eventBus.publish(SLTeleportResultEvent(true, null))
     }
 
-    fun HandleTeleportProgress(TeleportProgress teleportProgress) {
+    fun HandleTeleportProgress(teleportProgress: TeleportProgress) {
         Debug.Log("Teleport progress: flags = " + teleportProgress.Info_Field.TeleportFlags + ", progress = " + SLMessage.stringFromVariableOEM(teleportProgress.Info_Field.Message))
     }
 
-    fun HandleTeleportStart(TeleportStart teleportStart) {
+    fun HandleTeleportStart(teleportStart: TeleportStart) {
         Debug.Log("TeleportStart: flags = " + teleportStart.Info_Field.TeleportFlags)
     }
 
-    fun OfferInventoryItem(UUID uuid, SLInventoryEntry sLInventoryEntry) {
+    fun OfferInventoryItem(uuid: UUID, sLInventoryEntry: SLInventoryEntry) {
         this.userManager.getInventoryManager().getExecutor().execute(com.lumiyaviewer.lumiya.slproto.-$Lambda$K1xWCpEh0d4XNuVVYxGUJwEFRxU.AnonymousClass1(this, sLInventoryEntry, uuid))
     }
 
-    fun OfferTeleport(UUID uuid, String str) {
-        SLMessage startLure = StartLure()
+    fun OfferTeleport(uuid: UUID, str: String) {
+        val startLure: SLMessage = StartLure()
         startLure.AgentData_Field.AgentID = this.circuitInfo.agentID
         startLure.AgentData_Field.SessionID = this.circuitInfo.sessionID
         startLure.Info_Field.Message = SLMessage.stringToVariableUTF(str)
-        TargetData targetData = TargetData()
+        val targetData: TargetData = TargetData()
         targetData.TargetID = uuid
         startLure.TargetData_Fields.add(targetData)
         startLure.isReliable = true
         SendMessage(startLure)
     }
 
-    fun OnCapsEvent(CapsEvent capsEvent) {
+    fun OnCapsEvent(capsEvent: CapsEvent) {
         try {
             this.capsEventQueue.add(capsEvent)
             this.selector.wakeup()
@@ -1493,7 +1493,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
             ProcessObjectSelection()
         }
         if (!this.agentPaused) {
-            Long currentTimeMillis = System.currentTimeMillis()
+            val currentTimeMillis: Long = System.currentTimeMillis()
             if (GridConnectionService.hasVisibleActivities()) {
                 this.lastVisibleActivities = currentTimeMillis
             } else if (currentTimeMillis >= this.lastVisibleActivities + 10000) {
@@ -1530,7 +1530,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         super.ProcessWakeup()
         while (true) {
             try {
-                CapsEvent capsEvent = (CapsEvent) this.capsEventQueue.poll()
+                val capsEvent: CapsEvent = (CapsEvent) this.capsEventQueue.poll()
                 if (capsEvent == null) {
                     break
                 }
@@ -1541,8 +1541,8 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         ProcessIdle()
     }
 
-    fun RemoveFriend(UUID uuid) {
-        SLMessage terminateFriendship = TerminateFriendship()
+    fun RemoveFriend(uuid: UUID) {
+        val terminateFriendship: SLMessage = TerminateFriendship()
         terminateFriendship.AgentData_Field.AgentID = this.circuitInfo.agentID
         terminateFriendship.AgentData_Field.SessionID = this.circuitInfo.sessionID
         terminateFriendship.ExBlock_Field.OtherID = uuid
@@ -1551,22 +1551,22 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         this.userManager.getChatterList().getFriendManager().removeFriend(uuid)
     }
 
-    Unit RequestObjectName(SLObjectInfo sLObjectInfo) {
+    fun RequestObjectName(sLObjectInfo: SLObjectInfo) {
         if (!(sLObjectInfo.getId() == null || this.objectNamesRequested.containsKey(sLObjectInfo.getId()) || (this.forceNeedObjectNames.containsKey(sLObjectInfo.getId()) ^ 1) == 0)) {
             this.forceNeedObjectNames.put(sLObjectInfo.getId(), sLObjectInfo)
         }
         TryWakeUp()
     }
 
-    fun RequestTeleport(UUID uuid, String str) {
+    fun RequestTeleport(uuid: UUID, str: String) {
         SendInstantMessage(uuid, str, 26)
     }
 
-    public Boolean RestartRegion(Int i) {
+    public fun RestartRegion(i: Int): Boolean {
         if (!this.isEstateManager) {
             return false
         }
-        SendEstateOwnerMessage("restart", String[]{Integer.toString(i)})
+        SendEstateOwnerMessage("restart", Array<String>{Integer.toString(i)})
         return true
     }
 
@@ -1578,8 +1578,8 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
     /* DevToolsApp WARNING: Removed duplicated region for block: B:21:0x014c  */
     fun RezObject(com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry r8) {
     fun RezObject(com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry inventoryEntry) {
-        UUID groupID = com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID
-        UUID parcelOwnerID = null
+        val groupID: UUID = com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID
+        val parcelOwnerID: UUID = null
         
         // Get parcel information to determine group ownership
         if (this.userManager != null) {
@@ -1671,7 +1671,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         
         // Set up event listener if the item is not copy-ok (will be removed from inventory)
         if ((inventoryEntry.ownerMask & 0x8000) == 0) { // PERM_COPY bit
-            UUID folderID = inventoryEntry.parentUUID
+            val folderID: UUID = inventoryEntry.parentUUID
             rezMessage.setEventListener(com.lumiyaviewer.lumiya.slproto.SLAgentCircuit.RezObjectEventListener(folderID))
         }
         
@@ -1700,7 +1700,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
     }
     }
 
-    fun SendChatMessage(ChatterID chatterID, String str) {
+    fun SendChatMessage(chatterID: ChatterID, str: String) {
         switch (m39-getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues()[chatterID.getChatterType().ordinal()]) {
             case 1:
                 SendGroupInstantMessage(chatterID.getOptionalChatterUUID(), str)
@@ -1716,8 +1716,8 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    fun SendGenericMessage(String str, String[] strArr) {
-        SLMessage genericMessage = GenericMessage()
+    fun SendGenericMessage(str: String, strArr: Array<String>) {
+        val genericMessage: SLMessage = GenericMessage()
         genericMessage.AgentData_Field.AgentID = this.circuitInfo.agentID
         genericMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID
         genericMessage.AgentData_Field.TransactionID = UUID(0, 0)
@@ -1732,8 +1732,8 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(genericMessage)
     }
 
-    fun SendGroupInstantMessage(UUID uuid, String str) {
-        SLMessage improvedInstantMessage = ImprovedInstantMessage()
+    fun SendGroupInstantMessage(uuid: UUID, str: String) {
+        val improvedInstantMessage: SLMessage = ImprovedInstantMessage()
         improvedInstantMessage.AgentData_Field.AgentID = this.circuitInfo.agentID
         improvedInstantMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID
         improvedInstantMessage.MessageBlock_Field.FromGroup = false
@@ -1759,15 +1759,15 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    public Boolean SendInstantMessage(UUID uuid, String str) {
+    public fun SendInstantMessage(uuid: UUID, str: String): Boolean {
         return SendInstantMessage(uuid, str, 0)
     }
 
-    fun SendLocalChatMessage(String str) {
-        Int i = 0
+    fun SendLocalChatMessage(str: String) {
+        val i: Int = 0
         if (str.startsWith("/")) {
-            Int i2 = 1
-            Int i3 = 0
+            val i2: Int = 1
+            val i3: Int = 0
             while (i2 < str.length() && Character.isDigit(str.charAt(i2))) {
                 i3++
                 i2++
@@ -1782,7 +1782,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
             }
         }
         if (getModules().rlvController.onSendLocalChat(i, str)) {
-            SLMessage chatFromViewer = ChatFromViewer()
+            val chatFromViewer: SLMessage = ChatFromViewer()
             chatFromViewer.AgentData_Field.AgentID = this.circuitInfo.agentID
             chatFromViewer.AgentData_Field.SessionID = this.circuitInfo.sessionID
             chatFromViewer.ChatData_Field.Channel = i
@@ -1793,28 +1793,28 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    Unit SendLogoutRequest() {
+    fun SendLogoutRequest() {
         Debug.Log("Logout: Sending logout request.")
         this.modules.avatarControl.setEnableAgentUpdates(false)
-        SLMessage logoutRequest = LogoutRequest()
+        val logoutRequest: SLMessage = LogoutRequest()
         logoutRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         logoutRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
         logoutRequest.isReliable = true
         logoutRequest.setEventListener(SLMessageEventListener() {
-            fun onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(sLMessage: SLMessage) {
                 Debug.Log("Logout: Logout request acknowledged.")
                 SLAgentCircuit.this.gridConn.processDisconnect(true, "Logged out.")
             }
 
-            fun onMessageTimeout(SLMessage sLMessage) {
+            fun onMessageTimeout(sLMessage: SLMessage) {
                 Debug.Log("Logout: LogoutRequest timed out!")
                 SLAgentCircuit.this.gridConn.processDisconnect(false, "Logout request has timed out.")
             }
         SendMessage(logoutRequest)
     }
 
-    fun SendScriptDialogReply(UUID uuid, Int i, Int i2, String str) {
-        SLMessage scriptDialogReply = ScriptDialogReply()
+    fun SendScriptDialogReply(uuid: UUID, i: Int, i2: Int, str: String) {
+        val scriptDialogReply: SLMessage = ScriptDialogReply()
         scriptDialogReply.AgentData_Field.AgentID = this.circuitInfo.agentID
         scriptDialogReply.AgentData_Field.SessionID = this.circuitInfo.sessionID
         scriptDialogReply.isReliable = true
@@ -1825,15 +1825,15 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(scriptDialogReply)
     }
 
-    Unit SendUseCode() {
+    fun SendUseCode() {
         Debug.Printf("Using circuitCode: %d", Integer.valueOf(this.circuitInfo.circuitCode))
-        SLMessage useCircuitCode = UseCircuitCode()
+        val useCircuitCode: SLMessage = UseCircuitCode()
         useCircuitCode.CircuitCode_Field.Code = this.circuitInfo.circuitCode
         useCircuitCode.CircuitCode_Field.SessionID = this.circuitInfo.sessionID
         useCircuitCode.CircuitCode_Field.ID = this.circuitInfo.agentID
         useCircuitCode.isReliable = true
         useCircuitCode.setEventListener(SLMessageEventListener() {
-            fun onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(sLMessage: SLMessage) {
                 Debug.Log("SLAgentCircuit: UseCircuitCode acknowledged.")
                 if (!SLAgentCircuit.this.authReply.isTemporary) {
                     if (SLAgentCircuit.this.authReply.fromTeleport) {
@@ -1849,7 +1849,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
                 }
             }
 
-            fun onMessageTimeout(SLMessage sLMessage) {
+            fun onMessageTimeout(sLMessage: SLMessage) {
                 if (SLAgentCircuit.this.authReply.fromTeleport) {
                     SLAgentCircuit.this.eventBus.publish(SLTeleportResultEvent(false, "Timed out while connecting to the simulator."))
                 } else {
@@ -1859,8 +1859,8 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(useCircuitCode)
     }
 
-    fun StartGroupSessionForVoice(UUID uuid) {
-        Object obj = null
+    fun StartGroupSessionForVoice(uuid: UUID) {
+        val obj: Object = null
         synchronized (this.startedGroupSessions) {
             if (!this.startedGroupSessions.contains(uuid)) {
                 SendGroupSessionStart(uuid)
@@ -1872,17 +1872,17 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    fun TeleportToGlobalPosition(LLVector3 lLVector3) {
-        Int floor = (Int) Math.floor((Double) lLVector3.x)
-        Int floor2 = (Int) Math.floor((Double) lLVector3.y)
+    fun TeleportToGlobalPosition(lLVector3: LLVector3) {
+        val floor: Int = (Int) Math.floor((Double) lLVector3.x)
+        val floor2: Int = (Int) Math.floor((Double) lLVector3.y)
         floor -= floor % 256
-        Long j = ((Long) (floor2 - (floor2 % 256))) | (((Long) floor) << 32)
-        LLVector3 lLVector32 = LLVector3(lLVector3.x % 256.0f, lLVector3.y % 256.0f, lLVector3.z)
-        LLVector3 lLVector33 = LLVector3(lLVector32)
+        val j: Long = ((Long) (floor2 - (floor2 % 256))) | (((Long) floor) << 32)
+        val lLVector32: LLVector3 = LLVector3(lLVector3.x % 256.0f, lLVector3.y % 256.0f, lLVector3.z)
+        val lLVector33: LLVector3 = LLVector3(lLVector32)
         lLVector33.x += 1.0f
         Debug.Printf("regionHandle = %s, globalPos = %s", Long.toHexString(j), lLVector3)
         this.teleportRequestSent = true
-        SLMessage teleportLocationRequest = TeleportLocationRequest()
+        val teleportLocationRequest: SLMessage = TeleportLocationRequest()
         teleportLocationRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         teleportLocationRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
         teleportLocationRequest.Info_Field.RegionHandle = j
@@ -1890,82 +1890,82 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         teleportLocationRequest.Info_Field.LookAt = lLVector33
         teleportLocationRequest.isReliable = true
         teleportLocationRequest.setEventListener(SLMessageEventListener() {
-            fun onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(sLMessage: SLMessage) {
             }
 
-            fun onMessageTimeout(SLMessage sLMessage) {
+            fun onMessageTimeout(sLMessage: SLMessage) {
                 SLAgentCircuit.this.eventBus.publish(SLTeleportResultEvent(false, "Teleport request has timed out."))
             }
         SendMessage(teleportLocationRequest)
     }
 
-    fun TeleportToLandmarkAsset(UUID uuid) {
+    fun TeleportToLandmarkAsset(uuid: UUID) {
         if (getModules().rlvController.canTeleportToLandmark()) {
             this.teleportRequestSent = true
-            SLMessage teleportLandmarkRequest = TeleportLandmarkRequest()
+            val teleportLandmarkRequest: SLMessage = TeleportLandmarkRequest()
             teleportLandmarkRequest.Info_Field.AgentID = this.circuitInfo.agentID
             teleportLandmarkRequest.Info_Field.SessionID = this.circuitInfo.sessionID
             teleportLandmarkRequest.Info_Field.LandmarkID = uuid
             teleportLandmarkRequest.isReliable = true
             teleportLandmarkRequest.setEventListener(SLMessageEventListener() {
-                fun onMessageAcknowledged(SLMessage sLMessage) {
+                fun onMessageAcknowledged(sLMessage: SLMessage) {
                 }
 
-                fun onMessageTimeout(SLMessage sLMessage) {
+                fun onMessageTimeout(sLMessage: SLMessage) {
                     SLAgentCircuit.this.eventBus.publish(SLTeleportResultEvent(false, "Teleport request has timed out."))
                 }
             SendMessage(teleportLandmarkRequest)
         }
     }
 
-    public Boolean TeleportToLocalPosition(LLVector3 lLVector3) {
+    public fun TeleportToLocalPosition(lLVector3: LLVector3): Boolean {
         if (this.regionID == null) {
             return false
         }
         Debug.Printf("Teleport: localPos = %s, regionHandle = %d", lLVector3.toString(), Long.valueOf(this.regionHandle))
         this.teleportRequestSent = true
-        SLMessage teleportLocationRequest = TeleportLocationRequest()
+        val teleportLocationRequest: SLMessage = TeleportLocationRequest()
         teleportLocationRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         teleportLocationRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
         teleportLocationRequest.Info_Field.RegionHandle = this.regionHandle
         teleportLocationRequest.Info_Field.Position = lLVector3
         teleportLocationRequest.Info_Field.LookAt = LLVector3(lLVector3)
-        LLVector3 lLVector32 = teleportLocationRequest.Info_Field.LookAt
+        val lLVector32: LLVector3 = teleportLocationRequest.Info_Field.LookAt
         lLVector32.x += 10.0f
         teleportLocationRequest.isReliable = true
         teleportLocationRequest.setEventListener(SLMessageEventListener() {
-            fun onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(sLMessage: SLMessage) {
             }
 
-            fun onMessageTimeout(SLMessage sLMessage) {
+            fun onMessageTimeout(sLMessage: SLMessage) {
                 SLAgentCircuit.this.eventBus.publish(SLTeleportResultEvent(false, "Teleport request has timed out."))
             }
         SendMessage(teleportLocationRequest)
         return true
     }
 
-    fun TeleportToLure(UUID uuid) {
+    fun TeleportToLure(uuid: UUID) {
         this.teleportRequestSent = true
-        SLMessage teleportLureRequest = TeleportLureRequest()
+        val teleportLureRequest: SLMessage = TeleportLureRequest()
         teleportLureRequest.Info_Field.AgentID = this.circuitInfo.agentID
         teleportLureRequest.Info_Field.SessionID = this.circuitInfo.sessionID
         teleportLureRequest.Info_Field.LureID = uuid
         teleportLureRequest.isReliable = true
         teleportLureRequest.setEventListener(SLMessageEventListener() {
-            fun onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(sLMessage: SLMessage) {
             }
 
-            fun onMessageTimeout(SLMessage sLMessage) {
+            fun onMessageTimeout(sLMessage: SLMessage) {
                 SLAgentCircuit.this.eventBus.publish(SLTeleportResultEvent(false, "Teleport request has timed out."))
             }
         SendMessage(teleportLureRequest)
     }
 
-    fun TeleportToRegion(Long j, Int i, Int i2, Int i3) {
+    fun TeleportToRegion(j: Long, i: Int, i2: Int, i3: Int) {
         if (getModules().rlvController.canTeleportToLocation()) {
             Debug.Log("TeleportToRegion: regionHandle = " + Long.toHexString(j) + ", pos = (" + i + ", " + i2 + ", " + i3 + ")")
             this.teleportRequestSent = true
-            SLMessage teleportLocationRequest = TeleportLocationRequest()
+            val teleportLocationRequest: SLMessage = TeleportLocationRequest()
             teleportLocationRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
             teleportLocationRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
             teleportLocationRequest.Info_Field.RegionHandle = j
@@ -1973,18 +1973,18 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
             teleportLocationRequest.Info_Field.LookAt = LLVector3(0.0f, 1.0f, 0.0f)
             teleportLocationRequest.isReliable = true
             teleportLocationRequest.setEventListener(SLMessageEventListener() {
-                fun onMessageAcknowledged(SLMessage sLMessage) {
+                fun onMessageAcknowledged(sLMessage: SLMessage) {
                 }
 
-                fun onMessageTimeout(SLMessage sLMessage) {
+                fun onMessageTimeout(sLMessage: SLMessage) {
                     SLAgentCircuit.this.eventBus.publish(SLTeleportResultEvent(false, "Teleport request has timed out."))
                 }
             SendMessage(teleportLocationRequest)
         }
     }
 
-    fun TouchObject(Int i) {
-        SLMessage objectGrab = ObjectGrab()
+    fun TouchObject(i: Int) {
+        val objectGrab: SLMessage = ObjectGrab()
         objectGrab.AgentData_Field.AgentID = this.circuitInfo.agentID
         objectGrab.AgentData_Field.SessionID = this.circuitInfo.sessionID
         objectGrab.ObjectData_Field.LocalID = i
@@ -1999,14 +1999,14 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(objectGrab)
     }
 
-    fun TouchObjectFace(SLObjectInfo sLObjectInfo, Int i, Float f, Float f2, Float f3, Float f4, Float f5, Float f6, Float f7) {
+    fun TouchObjectFace(sLObjectInfo: SLObjectInfo, i: Int, f: Float, f2: Float, f3: Float, f4: Float, f5: Float, f6: Float, f7: Float) {
         Debug.Printf("Touch: Object %d, face %d, pos (%f, %f, %f), uv (%f, %f)", Integer.valueOf(sLObjectInfo.localID), Integer.valueOf(i), Float.valueOf(f), Float.valueOf(f2), Float.valueOf(f3), Float.valueOf(f4), Float.valueOf(f5))
-        SLMessage objectGrab = ObjectGrab()
+        val objectGrab: SLMessage = ObjectGrab()
         objectGrab.AgentData_Field.AgentID = this.circuitInfo.agentID
         objectGrab.AgentData_Field.SessionID = this.circuitInfo.sessionID
         objectGrab.ObjectData_Field.LocalID = sLObjectInfo.localID
         objectGrab.ObjectData_Field.GrabOffset = LLVector3()
-        SurfaceInfo surfaceInfo = SurfaceInfo()
+        val surfaceInfo: SurfaceInfo = SurfaceInfo()
         surfaceInfo.FaceIndex = i
         surfaceInfo.Position = LLVector3(f, f2, f3)
         surfaceInfo.UVCoord = LLVector3(f4, f5, 0.0f)
@@ -2038,14 +2038,14 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    public LLVector3d getAgentGlobalPosition() {
+     public fun getAgentGlobalPosition(): LLVector3d {
         if (this.modules == null) {
             return null
         }
-        LLVector3 position = this.modules.avatarControl.getAgentPosition().getPosition()
-        Int i = (Int) ((this.regionHandle >> 32) & 4294967295L)
-        Int i2 = (Int) (this.regionHandle & 4294967295L)
-        LLVector3d lLVector3d = LLVector3d()
+        val position: LLVector3 = this.modules.avatarControl.getAgentPosition().getPosition()
+        val i: Int = (Int) ((this.regionHandle >> 32) & 4294967295L)
+        val i2: Int = (Int) (this.regionHandle & 4294967295L)
+        val lLVector3d: LLVector3d = LLVector3d()
         lLVector3d.x = ((Double) i) + ((Double) position.x)
         lLVector3d.y = ((Double) i2) + ((Double) position.y)
         lLVector3d.z = (Double) position.z
@@ -2053,59 +2053,59 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
     }
 
     @SuppressLint({"DefaultLocale"})
-    public String getAgentSLURL() {
+     public fun getAgentSLURL(): String {
         if (this.modules == null || !Objects.equal(this.authReply.loginURL, "https://login.agni.lindenlab.com/cgi-bin/login.cgi") || this.regionName == null) {
             return null
         }
-        LLVector3 position = this.modules.avatarControl.getAgentPosition().getPosition()
+        val position: LLVector3 = this.modules.avatarControl.getAgentPosition().getPosition()
         try {
-            return String.format("http://maps.secondlife.com/secondlife/%s/%d/%d/%d", Object[]{URLEncoder.encode(this.regionName, "UTF-8"), Integer.valueOf((Int) position.x), Integer.valueOf((Int) position.y), Integer.valueOf((Int) position.z)})
+            return String.format("http://maps.secondlife.com/secondlife/%s/%d/%d/%d", Array<Any>{URLEncoder.encode(this.regionName, "UTF-8"), Integer.valueOf((Int) position.x), Integer.valueOf((Int) position.y), Integer.valueOf((Int) position.z)})
         } catch (UnsupportedEncodingException e) {
             return null
         }
     }
 
-    public UUID getAgentUUID() {
+     public fun getAgentUUID(): UUID {
         return this.agentUUID
     }
 
-    public SLCaps getCaps() {
+     public fun getCaps(): SLCaps {
         return this.caps
     }
 
-    public Boolean getIsEstateManager() {
+     public fun getIsEstateManager(): Boolean {
         return this.isEstateManager
     }
 
-    public ChatterID getLocalChatterID() {
+     public fun getLocalChatterID(): ChatterID {
         return this.localChatterID
     }
 
-    public SLModules getModules() {
+     public fun getModules(): SLModules {
         return this.modules
     }
 
-    public SLObjectProfileData getObjectProfile(Int i) {
-        SLObjectInfo objectInfo = this.gridConn.parcelInfo.getObjectInfo(i)
+     public fun getObjectProfile(i: Int): SLObjectProfileData {
+        val objectInfo: SLObjectInfo = this.gridConn.parcelInfo.getObjectInfo(i)
         if (objectInfo == null) {
             return null
         }
-        SLObjectProfileData create = SLObjectProfileData.create(objectInfo)
+        val create: SLObjectProfileData = SLObjectProfileData.create(objectInfo)
         if (!(create.name().isPresent() || (objectInfo.isDead ^ 1) == 0)) {
             RequestObjectName(objectInfo)
         }
         return create
     }
 
-    public String getRegionName() {
+     public fun getRegionName(): String {
         return this.regionName
     }
 
-    public UUID getSessionID() {
+     public fun getSessionID(): UUID {
         return this.circuitInfo.sessionID
     }
 
-    public Boolean isUserTyping(UUID uuid) {
+     public fun isUserTyping(uuid: UUID): Boolean {
         return Boolean.valueOf(this.typingUsers.contains(uuid))
     }
 
@@ -2116,12 +2116,12 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
 
     /* renamed from: handleInventoryItemOffer */
     /* synthetic */ Unit handleInventoryItemOffer(SLInventoryEntry sLInventoryEntry, UUID uuid) {
-        Iterable<SLInventoryEntry> arrayList = ArrayList()
+        val arrayList: Iterable<SLInventoryEntry> = ArrayList()
         arrayList.add(sLInventoryEntry)
         if (sLInventoryEntry.isFolder) {
             arrayList.addAll(this.modules.inventory.CollectGiveableItems(sLInventoryEntry))
         }
-        SLMessage improvedInstantMessage = ImprovedInstantMessage()
+        val improvedInstantMessage: SLMessage = ImprovedInstantMessage()
         improvedInstantMessage.AgentData_Field.AgentID = this.circuitInfo.agentID
         improvedInstantMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID
         improvedInstantMessage.MessageBlock_Field.FromGroup = false
@@ -2135,7 +2135,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         improvedInstantMessage.MessageBlock_Field.Timestamp = 0
         improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo")
         improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF(sLInventoryEntry.name)
-        ByteBuffer wrap = ByteBuffer.wrap(Byte[(arrayList.size() * 17)])
+        val wrap: ByteBuffer = ByteBuffer.wrap(Byte[(arrayList.size() * 17)])
         wrap.order(ByteOrder.BIG_ENDIAN)
         for (SLInventoryEntry sLInventoryEntry2 : arrayList) {
             wrap.put((Byte) (sLInventoryEntry2.isFolder ? SLAssetType.AT_CATEGORY.getTypeCode() : sLInventoryEntry2.assetType))
@@ -2149,14 +2149,14 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         HandleChatEvent(ChatterID.getUserChatterID(this.agentUUID, uuid), SLChatInventoryItemOfferedByYouEvent(this.agentUUID, sLInventoryEntry.name), false)
     }
 
-    Unit processMyAttachmentUpdate(SLObjectInfo sLObjectInfo) {
+     fun processMyAttachmentUpdate(sLObjectInfo: SLObjectInfo) {
         if (!(sLObjectInfo == null || sLObjectInfo.nameKnown || (sLObjectInfo.isDead ^ 1) == 0)) {
             RequestObjectName(sLObjectInfo)
         }
         getModules().avatarAppearance.UpdateMyAttachments()
     }
 
-    fun sendTypingNotify(UUID uuid, Boolean z) {
+    fun sendTypingNotify(uuid: UUID, z: Boolean) {
         SendInstantMessage(uuid, "", z ? 41 : 42)
     }
 }

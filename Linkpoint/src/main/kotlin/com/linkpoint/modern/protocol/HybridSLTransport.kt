@@ -30,7 +30,7 @@ class HybridSLTransport {
     /**
      * Set authentication token for all transport layers
      */
-    fun setAuthToken(String token) {
+    fun setAuthToken(token: String) {
         capsClient.setAuthToken(token)
         eventClient.setAuthToken(token)
         Log.d(TAG, "Auth token configured for all transports")
@@ -39,12 +39,12 @@ class HybridSLTransport {
     /**
      * Initialize connections based on authentication data
      */
-    fun initialize(String eventQueueUrl, String seedCapability) {
+    fun initialize(eventQueueUrl: String, seedCapability: String) {
         try {
             // Configure HTTP/2 CAPS client
             if (seedCapability != null) {
                 Log.i(TAG, "Configuring CAPS client with seed capability")
-                Map<String, String> capsUrls = parseSeedCapability(seedCapability)
+                val capsUrls: Map<String, String> = parseSeedCapability(seedCapability)
                 capsClient.configureCapabilities(capsUrls)
             }
             
@@ -65,7 +65,7 @@ class HybridSLTransport {
      * Send message using optimal transport route
      */
     public CompletableFuture<SLResponse> sendMessage(ModernMessage message) {
-        TransportRoute route = router.selectOptimalRoute(message)
+        val route: TransportRoute = router.selectOptimalRoute(message)
         
         Log.d(TAG, "Routing message via " + route.getTransport() + ": " + message.getClass().getSimpleName())
         
@@ -94,7 +94,7 @@ class HybridSLTransport {
      * Send message via WebSocket (async simulation)
      */
     private CompletableFuture<SLResponse> sendViaWebSocket(ModernMessage message) {
-        CompletableFuture<SLResponse> future = CompletableFuture<>()
+        val future: CompletableFuture<SLResponse> = CompletableFuture<>()
         
         try {
             if (!eventClient.isConnected()) {
@@ -103,11 +103,11 @@ class HybridSLTransport {
             }
             
             // Convert message to WebSocket format
-            String jsonMessage = message.toJSON()
+            val jsonMessage: String = message.toJSON()
             Log.d(TAG, "Sending WebSocket message: " + jsonMessage.substring(0, Math.min(100, jsonMessage.length())))
             
             // Send via WebSocket (OkHttp WebSocket send returns Boolean)
-            Boolean sent = eventClient.sendRawMessage(jsonMessage)
+            val sent: Boolean = eventClient.sendRawMessage(jsonMessage)
             
             if (sent) {
                 // Simulate immediate acknowledgment for real-time messages
@@ -129,14 +129,14 @@ class HybridSLTransport {
      * Extracts capability URLs from LLSD response
      */
     private Map<String, String> parseSeedCapability(String seedCapability) {
-        Map<String, String> capabilities = HashMap<>()
+        val capabilities: Map<String, String> = HashMap<>()
         
         try {
             // Parse LLSD-XML format seed capability
             // Example format: <map><key>EventQueueGet</key><string>http://...</string></map>
             
             // Common Second Life capabilities to extract
-            String[] capabilityNames = {
+            val capabilityNames: Array<String> = {
                 "EventQueueGet", "ChatSessionRequest", "SendChatMessage",
                 "UploadBakedTexture", "FetchInventory", "GetMesh", 
                 "GetTexture", "AgentPreferences", "UpdateAgentInformation"
@@ -145,14 +145,14 @@ class HybridSLTransport {
             for (String capName : capabilityNames) {
                 // Pattern to match LLSD capability entries
                 // <key>CapabilityName</key><string>URL</string>
-                Pattern capPattern = Pattern.compile(
+                val capPattern: Pattern = Pattern.compile(
                     "<key>" + Pattern.quote(capName) + "</key>\\s*<string>([^<]+)</string>",
                     Pattern.CASE_INSENSITIVE
                 )
                 
-                Matcher matcher = capPattern.matcher(seedCapability)
+                val matcher: Matcher = capPattern.matcher(seedCapability)
                 if (matcher.find()) {
-                    String capUrl = matcher.group(1).trim()
+                    val capUrl: String = matcher.group(1).trim()
                     capabilities.put(capName, capUrl)
                     Log.d(TAG, "Parsed capability: " + capName + " -> " + capUrl)
                 }
@@ -160,12 +160,12 @@ class HybridSLTransport {
             
             // Also try simplified key:value parsing for JSON-like formats
             if (capabilities.isEmpty() && seedCapability.contains(":")) {
-                Pattern jsonPattern = Pattern.compile("\"([^\"]+)\"\\s*:\\s*\"([^\"]+)\"")
-                Matcher jsonMatcher = jsonPattern.matcher(seedCapability)
+                val jsonPattern: Pattern = Pattern.compile("\"([^\"]+)\"\\s*:\\s*\"([^\"]+)\"")
+                val jsonMatcher: Matcher = jsonPattern.matcher(seedCapability)
                 
                 while (jsonMatcher.find()) {
-                    String key = jsonMatcher.group(1)
-                    String value = jsonMatcher.group(2)
+                    val key: String = jsonMatcher.group(1)
+                    val value: String = jsonMatcher.group(2)
                     
                     // Only store known capability names
                     for (String capName : capabilityNames) {
@@ -191,11 +191,11 @@ class HybridSLTransport {
      * Parse HTTP/2 CAPS response
      * Handles LLSD-XML format responses common in Second Life
      */
-    private SLResponse parseHTTP2Response(String responseData) {
+     private fun parseHTTP2Response(responseData: String): SLResponse {
         try {
             // Basic LLSD-XML parsing for Second Life responses
-            String responseType = "caps_response"
-            String parsedData = responseData
+            val responseType: String = "caps_response"
+            val parsedData: String = responseData
             
             if (responseData != null) {
                 // Extract common LLSD response patterns
@@ -203,14 +203,14 @@ class HybridSLTransport {
                     responseType = "llsd_map"
                     
                     // Extract key-value pairs from LLSD map
-                    Pattern mapPattern = Pattern.compile("<key>([^<]+)</key>\\s*<(string|integer|real|Boolean)>([^<]*)</\\2>")
-                    Matcher matcher = mapPattern.matcher(responseData)
+                    val mapPattern: Pattern = Pattern.compile("<key>([^<]+)</key>\\s*<(string|integer|real|Boolean)>([^<]*)</\\2>")
+                    val matcher: Matcher = mapPattern.matcher(responseData)
                     
-                    StringBuilder parsed = StringBuilder("LLSD Map: ")
+                    val parsed: StringBuilder = StringBuilder("LLSD Map: ")
                     while (matcher.find()) {
-                        String key = matcher.group(1)
-                        String type = matcher.group(2)
-                        String value = matcher.group(3)
+                        val key: String = matcher.group(1)
+                        val type: String = matcher.group(2)
+                        val value: String = matcher.group(3)
                         parsed.append(key).append("=").append(value).append(" ")
                     }
                     
@@ -224,8 +224,8 @@ class HybridSLTransport {
                     
                 } else if (responseData.contains("<string>")) {
                     // Simple string response
-                    Pattern stringPattern = Pattern.compile("<string>([^<]*)</string>")
-                    Matcher stringMatcher = stringPattern.matcher(responseData)
+                    val stringPattern: Pattern = Pattern.compile("<string>([^<]*)</string>")
+                    val stringMatcher: Matcher = stringPattern.matcher(responseData)
                     if (stringMatcher.find()) {
                         parsedData = stringMatcher.group(1)
                         responseType = "llsd_string"
@@ -261,11 +261,11 @@ class HybridSLTransport {
             this.timestamp = System.currentTimeMillis()
         }
         
-        public String getType() {
+         public fun getType(): String {
             return type
         }
         
-        public Long getTimestamp() {
+         public fun getTimestamp(): Long {
             return timestamp
         }
         
@@ -277,7 +277,7 @@ class HybridSLTransport {
         /**
          * Convert message to JSON format for WebSocket transport
          */
-        public String toJSON() {
+         public fun toJSON(): String {
             return String.format("{\"type\":\"%s\",\"timestamp\":%d,\"data\":%s}", 
                                type, timestamp, getMessageDataJSON())
         }
@@ -286,7 +286,7 @@ class HybridSLTransport {
          * Get message-specific data in JSON format
          * Override in subclasses to provide specific data
          */
-        protected String getMessageDataJSON() {
+         protected fun getMessageDataJSON(): String {
             return "{}"
         }
     }
@@ -294,7 +294,7 @@ class HybridSLTransport {
     /**
      * Subscribe to real-time events
      */
-    fun subscribeToEvents(String eventType, WebSocketEventClient.EventListener listener) {
+    fun subscribeToEvents(eventType: String, WebSocketEventClient.EventListener listener) {
         eventClient.subscribe(eventType, listener)
         Log.d(TAG, "Subscribed to event type: " + eventType)
     }
@@ -302,17 +302,17 @@ class HybridSLTransport {
     /**
      * Upload asset with progress tracking
      */
-    public CompletableFuture<String> uploadAsset(Byte[] assetData, String contentType, 
+    public CompletableFuture<String> uploadAsset(ByteArray assetData, String contentType, 
                                                 HTTP2CapsClient.ProgressListener progressListener) {
         // TODO: Get actual upload URL from CAPS
-        String uploadUrl = "https://example.com/upload"; // Placeholder
+        val uploadUrl: String = "https://example.com/upload"; // Placeholder
         return capsClient.uploadAssetAsync(uploadUrl, assetData, contentType, progressListener)
     }
     
     /**
      * Check connection status
      */
-    public Boolean isConnected() {
+     public fun isConnected(): Boolean {
         return eventClient.isConnected(); // Basic connectivity check
     }
     
@@ -331,9 +331,9 @@ class HybridSLTransport {
     @JvmStatic
 private class MessageRouter {
         
-        public TransportRoute selectOptimalRoute(ModernMessage message) {
+         public fun selectOptimalRoute(message: ModernMessage): TransportRoute {
             // Basic routing logic - can be enhanced based on message type
-            String messageType = message.getClass().getSimpleName()
+            val messageType: String = message.getClass().getSimpleName()
             
             // Route asset-related messages via HTTP/2 CAPS
             if (messageType.contains("Asset") || messageType.contains("Upload") || 
@@ -365,11 +365,11 @@ private class TransportRoute {
             this.url = url
         }
         
-        public TransportType getTransport() {
+         public fun getTransport(): TransportType {
             return transport
         }
         
-        public String getUrl() {
+         public fun getUrl(): String {
             return url
         }
     }
@@ -396,11 +396,11 @@ private class TransportRoute {
             this.data = data
         }
         
-        public String getType() {
+         public fun getType(): String {
             return type
         }
         
-        public String getData() {
+         public fun getData(): String {
             return data
         }
     }

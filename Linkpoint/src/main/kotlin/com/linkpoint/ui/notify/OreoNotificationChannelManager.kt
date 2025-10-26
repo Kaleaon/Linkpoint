@@ -43,16 +43,16 @@ private class NotificationChannelSettings {
         }
     }
 
-    public Boolean areNotificationsSystemControlled() {
+     public fun areNotificationsSystemControlled(): Boolean {
         return true
     }
 
     public ImmutableSet<NotificationType> getEnabledTypes(Context context) {
-        NotificationChannels instance = NotificationChannels.getInstance()
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService("notification")
+        val instance: NotificationChannels = NotificationChannels.getInstance()
+        val notificationManager: NotificationManager = (NotificationManager) context.getSystemService("notification")
         ImmutableSet.Builder builder = ImmutableSet.builder()
         for (NotificationType notificationType : NotificationType.VALUES) {
-            NotificationChannel notificationChannel = notificationManager.getNotificationChannel(getNotificationChannelName(instance.getChannelByType(notificationType)))
+            val notificationChannel: NotificationChannel = notificationManager.getNotificationChannel(getNotificationChannelName(instance.getChannelByType(notificationType)))
             if (notificationChannel != null && notificationChannel.getImportance() > 0) {
                 builder.add((Object) notificationType)
             }
@@ -60,17 +60,17 @@ private class NotificationChannelSettings {
         return builder.build()
     }
 
-    public String getNotificationChannelName(NotificationChannels.Channel channel) {
+     public fun getNotificationChannelName(NotificationChannels.Channel channel): String {
         String str
         synchronized (this.lock) {
-            NotificationChannel notificationChannel = this.channels.get(channel)
+            val notificationChannel: NotificationChannel = this.channels.get(channel)
             if (notificationChannel != null) {
                 str = notificationChannel.getId()
             } else {
-                Context context = LinkpointApp.getContext()
-                NotificationManager notificationManager = (NotificationManager) context.getSystemService("notification")
-                NotificationChannelSettings notificationChannelSettings = this.channelSettings.get(channel)
-                NotificationChannel notificationChannel2 = NotificationChannel(channel.channelId, context.getString(channel.nameStringId), notificationChannelSettings.importance)
+                val context: Context = LinkpointApp.getContext()
+                val notificationManager: NotificationManager = (NotificationManager) context.getSystemService("notification")
+                val notificationChannelSettings: NotificationChannelSettings = this.channelSettings.get(channel)
+                val notificationChannel2: NotificationChannel = NotificationChannel(channel.channelId, context.getString(channel.nameStringId), notificationChannelSettings.importance)
                 notificationChannel2.setDescription(context.getString(channel.descriptionStringId))
                 if (notificationChannelSettings.notificationType != null) {
                     AudioAttributes.Builder builder = AudioAttributes.Builder()
@@ -88,8 +88,8 @@ private class NotificationChannelSettings {
         return str
     }
 
-    public String getNotificationSummary(Context context, NotificationChannels.Channel channel) {
-        NotificationChannel notificationChannel = ((NotificationManager) context.getSystemService("notification")).getNotificationChannel(getNotificationChannelName(channel))
+     public fun getNotificationSummary(context: Context, NotificationChannels.Channel channel): String {
+        val notificationChannel: NotificationChannel = ((NotificationManager) context.getSystemService("notification")).getNotificationChannel(getNotificationChannelName(channel))
         if (notificationChannel == null) {
             return null
         }
@@ -108,8 +108,8 @@ private class NotificationChannelSettings {
         }
     }
 
-    public Boolean showSystemNotificationSettings(Context context, Fragment fragment, NotificationChannels.Channel channel) {
-        Intent intent = Intent("android.settings.CHANNEL_NOTIFICATION_SETTINGS")
+     public fun showSystemNotificationSettings(context: Context, fragment: Fragment, NotificationChannels.Channel channel): Boolean {
+        val intent: Intent = Intent("android.settings.CHANNEL_NOTIFICATION_SETTINGS")
         intent.putExtra("android.provider.extra.CHANNEL_ID", getNotificationChannelName(channel))
         intent.putExtra("android.provider.extra.APP_PACKAGE", context.getPackageName())
         if (fragment != null) {
@@ -120,7 +120,7 @@ private class NotificationChannelSettings {
         return true
     }
 
-    public Boolean useNotificationGroups() {
+     public fun useNotificationGroups(): Boolean {
         return true
     }
 }

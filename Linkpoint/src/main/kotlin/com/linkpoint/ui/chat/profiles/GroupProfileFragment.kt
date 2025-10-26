@@ -49,7 +49,7 @@ class GroupProfileFragment : ChatterReloadableFragment(), LoadableMonitor.OnLoad
             super(fragmentManager)
         }
 
-        fun destroyItem(ViewGroup viewGroup, Int i, Object obj) {
+        fun destroyItem(viewGroup: ViewGroup, i: Int, obj: Object) {
             ProfileTab profileTab
             if (!(this.tabs == null || (profileTab = (ProfileTab) this.tabs.get(i)) == null)) {
                 GroupProfileFragment.this.activeFragments.remove(profileTab)
@@ -57,20 +57,20 @@ class GroupProfileFragment : ChatterReloadableFragment(), LoadableMonitor.OnLoad
             super.destroyItem(viewGroup, i, obj)
         }
 
-        public Int getCount() {
+         public fun getCount(): Int {
             if (this.tabs != null) {
                 return this.tabs.size()
             }
             return 0
         }
 
-        public Fragment getItem(Int i) {
+         public fun getItem(i: Int): Fragment {
             if (this.tabs == null) {
                 return null
             }
-            ProfileTab profileTab = (ProfileTab) this.tabs.get(i)
+            val profileTab: ProfileTab = (ProfileTab) this.tabs.get(i)
             try {
-                Fragment fragment = (Fragment) profileTab.tabClass.newInstance()
+                val fragment: Fragment = (Fragment) profileTab.tabClass.newInstance()
                 fragment.setArguments(GroupProfileFragment.makeSelection(GroupProfileFragment.this.chatterID))
                 GroupProfileFragment.this.activeFragments.put(profileTab, WeakReference(fragment))
                 return fragment
@@ -81,7 +81,7 @@ class GroupProfileFragment : ChatterReloadableFragment(), LoadableMonitor.OnLoad
             }
         }
 
-        public CharSequence getPageTitle(Int i) {
+         public fun getPageTitle(i: Int): CharSequence {
             if (this.tabs != null) {
                 return GroupProfileFragment.this.getString(((ProfileTab) this.tabs.get(i)).tabCaption)
             }
@@ -93,12 +93,12 @@ class GroupProfileFragment : ChatterReloadableFragment(), LoadableMonitor.OnLoad
             return this.tabs
         }
 
-        public Parcelable saveState() {
+         public fun saveState(): Parcelable {
             return null
         }
 
         /* access modifiers changed from: package-private */
-        fun setTabs(ImmutableList<ProfileTab> immutableList) {
+        fun setTabs(immutableList: ImmutableList<ProfileTab>) {
             if (this.tabs != immutableList) {
                 this.tabs = immutableList
                 notifyDataSetChanged()
@@ -122,11 +122,11 @@ class GroupProfileFragment : ChatterReloadableFragment(), LoadableMonitor.OnLoad
         }
     }
 
-    fun onCreate(Bundle bundle) {
+    fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         if (bundle != null) {
             if (bundle.containsKey("lastSelectedTab")) {
@@ -136,22 +136,22 @@ class GroupProfileFragment : ChatterReloadableFragment(), LoadableMonitor.OnLoad
                 this.lastSelectedChatterID = (ChatterID) bundle.getParcelable("lastSelectedChatterID")
             }
         }
-        View inflate = layoutInflater.inflate(R.layout.group_profile_new, viewGroup, false)
-        ViewPager viewPager = (ViewPager) inflate.findViewById(R.id.user_profile_pager)
+        val inflate: View = layoutInflater.inflate(R.layout.group_profile_new, viewGroup, false)
+        val viewPager: ViewPager = (ViewPager) inflate.findViewById(R.id.user_profile_pager)
         this.adapter = ProfilePagerAdapter(getChildFragmentManager())
         viewPager.setAdapter(this.adapter)
         viewPager.addOnPageChangeListener(ViewPager.OnPageChangeListener() {
-            fun onPageScrollStateChanged(Int i) {
+            fun onPageScrollStateChanged(i: Int) {
             }
 
-            fun onPageScrolled(Int i, Float f, Int i2) {
+            fun onPageScrolled(i: Int, f: Float, i2: Int) {
             }
 
-            fun onPageSelected(Int i) {
+            fun onPageSelected(i: Int) {
                 ImmutableList<ProfileTab> tabs
                 if (GroupProfileFragment.this.adapter != null && (tabs = GroupProfileFragment.this.adapter.getTabs()) != null && i >= 0 && i < tabs.size()) {
-                    ProfileTab unused = GroupProfileFragment.this.lastSelectedTab = (ProfileTab) tabs.get(i)
-                    ChatterID unused2 = GroupProfileFragment.this.lastSelectedChatterID = GroupProfileFragment.this.chatterID
+                    val unused: ProfileTab = GroupProfileFragment.this.lastSelectedTab = (ProfileTab) tabs.get(i)
+                    val unused2: ChatterID = GroupProfileFragment.this.lastSelectedChatterID = GroupProfileFragment.this.chatterID
                 }
             }
         ((PagerSlidingTabStrip) inflate.findViewById(R.id.user_profile_tabs)).setViewPager(viewPager)
@@ -160,17 +160,17 @@ class GroupProfileFragment : ChatterReloadableFragment(), LoadableMonitor.OnLoad
     }
 
     fun onLoadableDataChanged() {
-        Int i = 0
+        val i: Int = 0
         AvatarGroupList.AvatarGroupEntry avatarGroupEntry = null
         try {
             if (this.chatterID instanceof ChatterID.ChatterIDGroup) {
                 avatarGroupEntry = this.myGroupList.get().Groups.get(((ChatterID.ChatterIDGroup) this.chatterID).getChatterUUID())
             }
-            ImmutableList<ProfileTab> immutableList = avatarGroupEntry != null ? this.myGroupTabs : this.generalGroupTabs
+            val immutableList: ImmutableList<ProfileTab> = avatarGroupEntry != null ? this.myGroupTabs : this.generalGroupTabs
             if (this.adapter != null) {
                 this.adapter.setTabs(immutableList)
             }
-            View view = getView()
+            val view: View = getView()
             if (Objects.equal(this.lastSelectedChatterID, this.chatterID) && this.lastSelectedTab != null && view != null) {
                 while (true) {
                     if (i >= immutableList.size()) {
@@ -192,7 +192,7 @@ class GroupProfileFragment : ChatterReloadableFragment(), LoadableMonitor.OnLoad
         }
     }
 
-    fun onSaveInstanceState(Bundle bundle) {
+    fun onSaveInstanceState(bundle: Bundle) {
         super.onSaveInstanceState(bundle)
         Debug.Printf("GroupProfile tabs: saving lastSelectedTab %s, lastSelectedChatterID %s", this.lastSelectedTab, this.lastSelectedChatterID)
         if (this.lastSelectedTab != null) {
@@ -204,7 +204,7 @@ class GroupProfileFragment : ChatterReloadableFragment(), LoadableMonitor.OnLoad
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(ChatterID chatterID) {
+    fun onShowUser(chatterID: ChatterID) {
         this.myGroupList.unsubscribe()
         if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDGroup)) {
             this.myGroupList.subscribe(this.userManager.getAvatarGroupLists().getPool(), chatterID.agentUUID)
@@ -212,7 +212,7 @@ class GroupProfileFragment : ChatterReloadableFragment(), LoadableMonitor.OnLoad
             this.adapter.setTabs((ImmutableList<ProfileTab>) null)
         }
         for (WeakReference weakReference : this.activeFragments.values()) {
-            Fragment fragment = (Fragment) weakReference.get()
+            val fragment: Fragment = (Fragment) weakReference.get()
             if (fragment instanceof ReloadableFragment) {
                 ((ReloadableFragment) fragment).setFragmentArgs(getActivity() != null ? getActivity().getIntent() : null, ChatterReloadableFragment.makeSelection(chatterID))
             }

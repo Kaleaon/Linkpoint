@@ -22,54 +22,54 @@ final class AutoValue_AssetKey : AssetKey() {
         this.taskUUID = uuid4
     }
 
-    public Int assetType() {
+     public fun assetType(): Int {
         return this.assetType
     }
 
-    public UUID assetUUID() {
+     public fun assetUUID(): UUID {
         return this.assetUUID
     }
 
-    public Int channelType() {
+     public fun channelType(): Int {
         return this.channelType
     }
 
-    public Boolean equals(Object obj) {
+     public fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
         if (!(obj instanceof AssetKey)) {
             return false
         }
-        AssetKey assetKey = (AssetKey) obj
+        val assetKey: AssetKey = (AssetKey) obj
         if (this.channelType != assetKey.channelType() || this.sourceType != assetKey.sourceType() || (this.assetUUID != null ? !this.assetUUID.equals(assetKey.assetUUID()) : assetKey.assetUUID() != null) || this.assetType != assetKey.assetType() || (this.ownerUUID != null ? !this.ownerUUID.equals(assetKey.ownerUUID()) : assetKey.ownerUUID() != null) || (this.itemUUID != null ? !this.itemUUID.equals(assetKey.itemUUID()) : assetKey.itemUUID() != null)) {
             return false
         }
         return this.taskUUID == null ? assetKey.taskUUID() == null : this.taskUUID.equals(assetKey.taskUUID())
     }
 
-    public Int hashCode() {
-        Int i = 0
-        Int hashCode = ((this.itemUUID == null ? 0 : this.itemUUID.hashCode()) ^ (((this.ownerUUID == null ? 0 : this.ownerUUID.hashCode()) ^ (((((this.assetUUID == null ? 0 : this.assetUUID.hashCode()) ^ ((((this.channelType ^ 1000003) * 1000003) ^ this.sourceType) * 1000003)) * 1000003) ^ this.assetType) * 1000003)) * 1000003)) * 1000003
+     public fun hashCode(): Int {
+        val i: Int = 0
+        val hashCode: Int = ((this.itemUUID == null ? 0 : this.itemUUID.hashCode()) ^ (((this.ownerUUID == null ? 0 : this.ownerUUID.hashCode()) ^ (((((this.assetUUID == null ? 0 : this.assetUUID.hashCode()) ^ ((((this.channelType ^ 1000003) * 1000003) ^ this.sourceType) * 1000003)) * 1000003) ^ this.assetType) * 1000003)) * 1000003)) * 1000003
         if (this.taskUUID != null) {
             i = this.taskUUID.hashCode()
         }
         return hashCode ^ i
     }
 
-    public UUID itemUUID() {
+     public fun itemUUID(): UUID {
         return this.itemUUID
     }
 
-    public UUID ownerUUID() {
+     public fun ownerUUID(): UUID {
         return this.ownerUUID
     }
 
-    public Int sourceType() {
+     public fun sourceType(): Int {
         return this.sourceType
     }
 
-    public UUID taskUUID() {
+     public fun taskUUID(): UUID {
         return this.taskUUID
     }
 }

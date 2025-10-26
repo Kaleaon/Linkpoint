@@ -34,15 +34,15 @@ class CreateNewOutfitAttachments : SLMessage() {
         this.HeaderData_Field = HeaderData()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.ObjectData_Fields.size() * 32) + 53
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleCreateNewOutfitAttachments(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -114)
@@ -56,13 +56,13 @@ class CreateNewOutfitAttachments : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.HeaderData_Field.NewFolderID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ObjectData objectData = ObjectData()
+            val objectData: ObjectData = ObjectData()
             objectData.OldItemID = unpackUUID(byteBuffer)
             objectData.OldFolderID = unpackUUID(byteBuffer)
             this.ObjectData_Fields.add(objectData)

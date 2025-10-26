@@ -16,25 +16,25 @@ class ObjectPopupsActionProvider : ActionProvider(), View.OnClickListener {
     private TextView popupCountTextView = null
 
     interface ObjectPopupsClickListener {
-        Unit onObjectPopupsClicked()
+         fun onObjectPopupsClicked()
     }
 
     public ObjectPopupsActionProvider(Context context) {
         super(context)
     }
 
-    public Boolean isVisible() {
+     public fun isVisible(): Boolean {
         return this.objectPopupCount != 0
     }
 
-    fun onClick(View view) {
+    fun onClick(view: View) {
         if (this.objectPopupsClickListener != null) {
             this.objectPopupsClickListener.onObjectPopupsClicked()
         }
     }
 
-    public View onCreateActionView() {
-        View inflate = LayoutInflater.from(getContext()).inflate(R.layout.object_popups_action_provider, (ViewGroup) null)
+     public fun onCreateActionView(): View {
+        val inflate: View = LayoutInflater.from(getContext()).inflate(R.layout.object_popups_action_provider, (ViewGroup) null)
         this.popupCountTextView = (TextView) inflate.findViewById(R.id.popupCountTextView)
         if (this.popupCountTextView != null) {
             this.popupCountTextView.setText(Integer.toString(this.objectPopupCount))
@@ -43,11 +43,11 @@ class ObjectPopupsActionProvider : ActionProvider(), View.OnClickListener {
         return inflate
     }
 
-    public Boolean overridesItemVisibility() {
+     public fun overridesItemVisibility(): Boolean {
         return true
     }
 
-    fun setObjectPopupCount(Int i) {
+    fun setObjectPopupCount(i: Int) {
         if (this.objectPopupCount != i) {
             this.objectPopupCount = i
             if (this.popupCountTextView != null) {
@@ -57,7 +57,7 @@ class ObjectPopupsActionProvider : ActionProvider(), View.OnClickListener {
         }
     }
 
-    fun setObjectPopupsClickListener(ObjectPopupsClickListener objectPopupsClickListener2) {
+    fun setObjectPopupsClickListener(objectPopupsClickListener2: ObjectPopupsClickListener) {
         this.objectPopupsClickListener = objectPopupsClickListener2
     }
 }

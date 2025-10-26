@@ -36,14 +36,14 @@ val class SLChatGroupInvitationEvent : SLChatYesNoEvent() {
             this.joinFee = 0
             return
         }
-        ByteBuffer wrap = ByteBuffer.wrap(improvedInstantMessage.MessageBlock_Field.BinaryBucket)
+        val wrap: ByteBuffer = ByteBuffer.wrap(improvedInstantMessage.MessageBlock_Field.BinaryBucket)
         wrap.order(ByteOrder.BIG_ENDIAN)
         this.joinFee = wrap.getInt()
     }
 
-    private Unit DoAcceptGroupInvite(UUID uuid, UUID uuid2, Boolean z) {
+    private fun DoAcceptGroupInvite(uuid: UUID, uuid2: UUID, z: Boolean) {
         SLAgentCircuit activeAgentCircuit
-        UserManager userManager = UserManager.getUserManager(this.agentUUID)
+        val userManager: UserManager = UserManager.getUserManager(this.agentUUID)
         if (userManager != null && (activeAgentCircuit = userManager.getActiveAgentCircuit()) != null) {
             activeAgentCircuit.getModules().groupManager.AcceptGroupInvite(uuid, uuid2, z)
         }
@@ -54,26 +54,26 @@ val class SLChatGroupInvitationEvent : SLChatYesNoEvent() {
         return SLChatEvent.ChatMessageType.GroupInvitation
     }
 
-    public String getNoButton(Context context) {
+     public fun getNoButton(context: Context): String {
         return context.getString(R.string.join_group_no)
     }
 
-    public String getNoMessage(Context context) {
+     public fun getNoMessage(context: Context): String {
         return context.getString(R.string.join_group_declined)
     }
 
-    public String getQuestion(Context context) {
+     public fun getQuestion(context: Context): String {
         if (this.joinFee == 0) {
             return context.getString(R.string.join_group_question_free)
         }
-        return context.getString(R.string.join_group_question_not_free, Object[]{Integer.valueOf(this.joinFee)})
+        return context.getString(R.string.join_group_question_not_free, Array<Any>{Integer.valueOf(this.joinFee)})
     }
 
-    public String getYesButton(Context context) {
+     public fun getYesButton(context: Context): String {
         return context.getString(R.string.join_group_yes)
     }
 
-    public String getYesMessage(Context context) {
+     public fun getYesMessage(context: Context): String {
         return context.getString(R.string.join_group_accepted)
     }
 
@@ -85,19 +85,19 @@ val class SLChatGroupInvitationEvent : SLChatYesNoEvent() {
     }
 
     /* access modifiers changed from: protected */
-    fun onNoAction(Context context, UserManager userManager) {
+    fun onNoAction(context: Context, userManager: UserManager) {
         super.onNoAction(context, userManager)
         DoAcceptGroupInvite(this.groupID, this.sessionID, false)
     }
 
-    fun onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(context: Context, userManager: UserManager) {
         super.onYesAction(context, userManager)
         if (this.joinFee == 0) {
             DoAcceptGroupInvite(this.groupID, this.sessionID, true)
             return
         }
         AlertDialog.Builder builder = AlertDialog.Builder(context)
-        builder.setMessage(context.getString(R.string.join_group_confirm, Object[]{Integer.valueOf(this.joinFee)})).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this) {
+        builder.setMessage(context.getString(R.string.join_group_confirm, Array<Any>{Integer.valueOf(this.joinFee)})).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this) {
 
             /* renamed from: -$f0 */
             private val /* synthetic */ Object f69$f0
@@ -179,7 +179,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.chat.-$Lambda
         builder.create().show()
     }
 
-    fun serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setTransactionAmount(Integer.valueOf(this.joinFee))
         chatMessage.setSessionID(this.sessionID)

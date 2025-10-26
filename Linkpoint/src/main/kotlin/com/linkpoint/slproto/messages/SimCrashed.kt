@@ -26,15 +26,15 @@ class SimCrashed : SLMessage() {
         this.Data_Field = Data()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.Users_Fields.size() * 16) + 13
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleSimCrashed(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 72)
@@ -46,12 +46,12 @@ class SimCrashed : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.Data_Field.RegionX = unpackInt(byteBuffer)
         this.Data_Field.RegionY = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            Users users = Users()
+            val users: Users = Users()
             users.AgentID = unpackUUID(byteBuffer)
             this.Users_Fields.add(users)
         }

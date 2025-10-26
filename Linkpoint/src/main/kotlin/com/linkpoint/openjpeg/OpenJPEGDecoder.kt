@@ -25,13 +25,13 @@ class OpenJPEGDecoder {
      * @return true if initialization was successful
      */
     @JvmStatic
-    Boolean initialize() {
+     fun initialize(): Boolean {
         if (initialized.get()) {
             return true
         }
         
         try {
-            Boolean result = initializeNative()
+            val result: Boolean = initializeNative()
             initialized.set(result)
             Log.i(TAG, "OpenJPEG decoder initialized: " + result)
             return result
@@ -47,7 +47,7 @@ class OpenJPEGDecoder {
      * @return RGB image data, or null if decoding failed
      */
     @JvmStatic
-    Byte[] decodeJ2K(Byte[] j2kData) {
+     fun decodeJ2K(j2kData: ByteArray): ByteArray {
         if (!initialized.get() && !initialize()) {
             Log.e(TAG, "OpenJPEG decoder not initialized")
             return null
@@ -59,7 +59,7 @@ class OpenJPEGDecoder {
         }
         
         try {
-            Byte[] result = decodeJ2KNative(j2kData)
+            val result: ByteArray = decodeJ2KNative(j2kData)
             if (result != null) {
                 Log.d(TAG, "Successfully decoded J2K image: " + result.length + " bytes")
             } else {
@@ -78,7 +78,7 @@ class OpenJPEGDecoder {
      * @return Array with [width, height], or null if failed
      */
     @JvmStatic
-    Int[] getImageDimensions(Byte[] j2kData) {
+     fun getImageDimensions(j2kData: ByteArray): IntArray {
         if (!initialized.get() && !initialize()) {
             Log.e(TAG, "OpenJPEG decoder not initialized")
             return null
@@ -102,7 +102,7 @@ class OpenJPEGDecoder {
      * @return true if the test passed
      */
     @JvmStatic
-    Boolean testDecoder() {
+     fun testDecoder(): Boolean {
         Log.i(TAG, "Testing OpenJPEG decoder...")
         
         if (!initialize()) {
@@ -111,10 +111,10 @@ class OpenJPEGDecoder {
         }
         
         // Create minimal test data (not valid J2K, but tests native call)
-        Byte[] testData = Byte[] {0x00, 0x00, 0x00, 0x0C, 0x6A, 0x50, 0x20, 0x20}
+        val testData: ByteArray = ByteArray {0x00, 0x00, 0x00, 0x0C, 0x6A, 0x50, 0x20, 0x20}
         
         try {
-            Int[] dimensions = getImageDimensions(testData)
+            val dimensions: IntArray = getImageDimensions(testData)
             if (dimensions != null && dimensions.length == 2) {
                 Log.i(TAG, "Decoder test passed: dimensions " + dimensions[0] + "x" + dimensions[1])
                 return true
@@ -132,7 +132,7 @@ class OpenJPEGDecoder {
      * Cleanup the decoder resources
      */
     @JvmStatic
-    Unit cleanup() {
+     fun cleanup() {
         try {
             cleanupNative()
             initialized.set(false)
@@ -146,15 +146,15 @@ class OpenJPEGDecoder {
     @JvmStatic
 private native Boolean initializeNative()
     @JvmStatic
-private native Byte[] decodeJ2KNative(Byte[] j2kData)
+private native ByteArray decodeJ2KNative(ByteArray j2kData)
     @JvmStatic
-private native Int[] getJ2KDimensionsNative(Byte[] j2kData)
+private native IntArray getJ2KDimensionsNative(ByteArray j2kData)
     @JvmStatic
 private native Unit cleanupNative()
     
     // Legacy compatibility methods for existing OpenJPEG class
-    public native Byte[] decodeJ2K(Byte[] j2kData)
-    public native Int[] getJ2KDimensions(Byte[] j2kData)
+    public native ByteArray decodeJ2K(ByteArray j2kData)
+    public native IntArray getJ2KDimensions(ByteArray j2kData)
     public native Boolean initialize()
     public native Unit cleanup()
 }

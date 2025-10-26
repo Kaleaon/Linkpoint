@@ -32,7 +32,7 @@ private class AnimationPair {
             this.stoppingAnimation = null
         }
 
-        Unit getRunningAnimations(Builder<AvatarRunningSequence> builder, Collection<AvatarRunningAnimation> collection) {
+         fun getRunningAnimations(builder: Builder<AvatarRunningSequence>, collection: Collection<AvatarRunningAnimation>) {
             if (this.runningAnimation != null) {
                 builder.add(this.runningAnimation)
                 this.runningAnimation.getRunningAnimations(collection)
@@ -43,7 +43,7 @@ private class AnimationPair {
             }
         }
 
-        Boolean hasStopped() {
+         fun hasStopped(): Boolean {
             return this.runningAnimation != null ? false : this.stoppingAnimation != null ? this.stoppingAnimation.hasStopped() : true
         }
     }
@@ -54,10 +54,10 @@ private class AnimationPair {
         AnimationCache.getInstance().RequestResource(animationSequenceInfo.animationID, this)
     }
 
-    fun OnResourceReady(Object obj, Boolean z) {
+    fun OnResourceReady(obj: Object, z: Boolean) {
         if (obj instanceof AnimationData) {
             this.animationData = (AnimationData) obj
-            DrawableAvatar drawableAvatar = (DrawableAvatar) this.drawableAvatar.get()
+            val drawableAvatar: DrawableAvatar = (DrawableAvatar) this.drawableAvatar.get()
             if (drawableAvatar != null) {
                 drawableAvatar.updateRunningAnimations()
             }
@@ -66,8 +66,8 @@ private class AnimationPair {
         }
     }
 
-    Unit getRunningAnimations(Builder<AvatarRunningSequence> builder, Collection<AvatarRunningAnimation> collection) {
-        AnimationPair animationPair = this.animationPair
+     fun getRunningAnimations(builder: Builder<AvatarRunningSequence>, collection: Collection<AvatarRunningAnimation>) {
+        val animationPair: AnimationPair = this.animationPair
         if (animationPair == null && this.animationData != null) {
             animationPair = AnimationPair(this.sequenceInfo, this.animationData)
             this.animationPair = animationPair
@@ -77,12 +77,12 @@ private class AnimationPair {
         }
     }
 
-    Boolean hasStopped() {
-        AnimationPair animationPair = this.animationPair
+     fun hasStopped(): Boolean {
+        val animationPair: AnimationPair = this.animationPair
         return animationPair != null ? animationPair.hasStopped() : false
     }
 
-    Unit updateSequenceInfo(AnimationSequenceInfo animationSequenceInfo) {
+     fun updateSequenceInfo(animationSequenceInfo: AnimationSequenceInfo) {
         this.sequenceInfo = animationSequenceInfo
         this.animationPair = null
     }

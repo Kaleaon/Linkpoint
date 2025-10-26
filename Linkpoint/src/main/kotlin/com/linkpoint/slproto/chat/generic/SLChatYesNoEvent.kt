@@ -18,7 +18,7 @@ import javax.annotation.Nullable
 abstract class SLChatYesNoEvent : SLChatTextEvent() {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-chat-generic-SLChatYesNoEvent$EventStateSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f74comlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues = null
+    private const val /* synthetic */ IntArray f74comlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues = null
     private EventState eventState = EventState.EventNew
 
     enum class EventState {
@@ -26,7 +26,7 @@ abstract class SLChatYesNoEvent : SLChatTextEvent() {
         EventAccepted,
         EventCancelled
         
-        const val EventState[] VALUES = null
+        const val Array<EventState> VALUES = null
 
         static {
             VALUES = values()
@@ -35,11 +35,11 @@ abstract class SLChatYesNoEvent : SLChatTextEvent() {
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-chat-generic-SLChatYesNoEvent$EventStateSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m157getcomlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues() {
+private /* synthetic */ IntArray m157getcomlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues() {
         if (f74comlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues != null) {
             return f74comlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues
         }
-        Int[] iArr = Int[EventState.values().length]
+        val iArr: IntArray = Int[EventState.values().length]
         try {
             iArr[EventState.EventAccepted.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -69,15 +69,15 @@ private /* synthetic */ Int[] m157getcomlumiyaviewerlumiyaslprotochatgenericSLCh
         super(chatMessageSource, uuid, str)
     }
 
-    fun bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, ChatEventTimestampUpdater chatEventTimestampUpdater) {
+    fun bindViewHolder(chatEventViewHolder: ChatEventViewHolder, userManager: UserManager, chatEventTimestampUpdater: ChatEventTimestampUpdater) {
         super.bindViewHolder(chatEventViewHolder, userManager, chatEventTimestampUpdater)
         if (chatEventViewHolder instanceof ChatYesNoEventViewHolder) {
-            ChatYesNoEventViewHolder chatYesNoEventViewHolder = (ChatYesNoEventViewHolder) chatEventViewHolder
+            val chatYesNoEventViewHolder: ChatYesNoEventViewHolder = (ChatYesNoEventViewHolder) chatEventViewHolder
             chatYesNoEventViewHolder.setEvent(this)
-            TextView textView = chatYesNoEventViewHolder.questionMsg
-            Button button = chatYesNoEventViewHolder.yesButton
-            Button button2 = chatYesNoEventViewHolder.noButton
-            CardView cardView = chatYesNoEventViewHolder.cardView
+            val textView: TextView = chatYesNoEventViewHolder.questionMsg
+            val button: Button = chatYesNoEventViewHolder.yesButton
+            val button2: Button = chatYesNoEventViewHolder.noButton
+            val cardView: CardView = chatYesNoEventViewHolder.cardView
             switch (m157getcomlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues()[this.eventState.ordinal()]) {
                 case 1:
                     textView.setText(getYesMessage(textView.getContext()))
@@ -116,7 +116,7 @@ private /* synthetic */ Int[] m157getcomlumiyaviewerlumiyaslprotochatgenericSLCh
         }
     }
 
-    public EventState getEventState() {
+     public fun getEventState(): EventState {
         return this.eventState
     }
 
@@ -140,17 +140,17 @@ private /* synthetic */ Int[] m157getcomlumiyaviewerlumiyaslprotochatgenericSLCh
     public abstract String getYesMessage(Context context)
 
     /* access modifiers changed from: protected */
-    fun onNoAction(Context context, UserManager userManager) {
+    fun onNoAction(context: Context, userManager: UserManager) {
         this.eventState = EventState.EventCancelled
         notifyEventUpdated(userManager)
     }
 
-    fun onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(context: Context, userManager: UserManager) {
         this.eventState = EventState.EventAccepted
         notifyEventUpdated(userManager)
     }
 
-    fun serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setEventState(Integer.valueOf(this.eventState.ordinal()))
     }

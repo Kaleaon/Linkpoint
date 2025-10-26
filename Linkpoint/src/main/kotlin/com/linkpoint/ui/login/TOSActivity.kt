@@ -14,7 +14,7 @@ import java.io.InputStream
 import java.io.InputStreamReader
 
 class TOSActivity : ThemedActivity(), View.OnClickListener {
-    fun onClick(View view) {
+    fun onClick(view: View) {
         switch (view.getId()) {
             case R.id.tos_accept_button:
                 setResult(-1)
@@ -29,17 +29,17 @@ class TOSActivity : ThemedActivity(), View.OnClickListener {
         }
     }
 
-    fun onCreate(Bundle bundle) {
+    fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setContentView((Int) R.layout.tos)
         findViewById(R.id.tos_accept_button).setOnClickListener(this)
         findViewById(R.id.tos_decline_button).setOnClickListener(this)
-        WebView webView = (WebView) findViewById(R.id.tos_view)
+        val webView: WebView = (WebView) findViewById(R.id.tos_view)
         webView.setBackgroundColor(isLightTheme() ? Color.parseColor("#FFFFFF") : Color.parseColor("#000000"))
-        String str = isLightTheme() ? "\tbackground-color: #FFFFFF;\n\tcolor: #000000;\n" : "\tbackground-color: #000000;\n\tcolor: #FFFFFF;\n"
+        val str: String = isLightTheme() ? "\tbackground-color: #FFFFFF;\n\tcolor: #000000;\n" : "\tbackground-color: #000000;\n\tcolor: #FFFFFF;\n"
         try {
-            InputStream open = getAssets().open("tos/index.html")
-            String charStreams = CharStreams.toString(InputStreamReader(open))
+            val open: InputStream = getAssets().open("tos/index.html")
+            val charStreams: String = CharStreams.toString(InputStreamReader(open))
             open.close()
             webView.loadData(charStreams.replace("<!-- STYLES -->", str), "text/html", "UTF-8")
         } catch (IOException e) {

@@ -14,7 +14,7 @@ class FXAAProgram : ShaderProgram() {
         super(Shader.FXAAVertexShader, Shader.FXAAFragmentShader)
     }
 
-    protected Unit bindVariables() {
+     protected fun bindVariables() {
         this.vPosition = GLES20.glGetAttribLocation(this.handle, "vPosition")
         this.vTexCoord = GLES20.glGetAttribLocation(this.handle, "vTexCoord")
         this.textureSampler = GLES20.glGetUniformLocation(this.handle, "textureSampler")

@@ -23,67 +23,67 @@ class GroupMember {
         this.isOwner = z
     }
 
-    public Long getAgentPowers() {
+     public fun getAgentPowers(): Long {
         return this.agentPowers
     }
 
-    public Int getContribution() {
+     public fun getContribution(): Int {
         return this.contribution
     }
 
-    public UUID getGroupID() {
+     public fun getGroupID(): UUID {
         return this.groupID
     }
 
-    public Boolean getIsOwner() {
+     public fun getIsOwner(): Boolean {
         return this.isOwner
     }
 
-    public String getOnlineStatus() {
+     public fun getOnlineStatus(): String {
         return this.onlineStatus
     }
 
-    public UUID getRequestID() {
+     public fun getRequestID(): UUID {
         return this.requestID
     }
 
-    public String getTitle() {
+     public fun getTitle(): String {
         return this.title
     }
 
-    public UUID getUserID() {
+     public fun getUserID(): UUID {
         return this.userID
     }
 
-    fun setAgentPowers(Long j) {
+    fun setAgentPowers(j: Long) {
         this.agentPowers = j
     }
 
-    fun setContribution(Int i) {
+    fun setContribution(i: Int) {
         this.contribution = i
     }
 
-    fun setGroupID(UUID uuid) {
+    fun setGroupID(uuid: UUID) {
         this.groupID = uuid
     }
 
-    fun setIsOwner(Boolean z) {
+    fun setIsOwner(z: Boolean) {
         this.isOwner = z
     }
 
-    fun setOnlineStatus(String str) {
+    fun setOnlineStatus(str: String) {
         this.onlineStatus = str
     }
 
-    fun setRequestID(UUID uuid) {
+    fun setRequestID(uuid: UUID) {
         this.requestID = uuid
     }
 
-    fun setTitle(String str) {
+    fun setTitle(str: String) {
         this.title = str
     }
 
-    fun setUserID(UUID uuid) {
+    fun setUserID(uuid: UUID) {
         this.userID = uuid
     }
 }

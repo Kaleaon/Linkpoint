@@ -20,25 +20,25 @@ final class AutoValue_UnreadNotifications : UnreadNotifications() {
         this.notificationGroups = immutableMap
     }
 
-    public UUID agentUUID() {
+     public fun agentUUID(): UUID {
         return this.agentUUID
     }
 
-    public Boolean equals(Object obj) {
+     public fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
         if (!(obj instanceof UnreadNotifications)) {
             return false
         }
-        UnreadNotifications unreadNotifications = (UnreadNotifications) obj
+        val unreadNotifications: UnreadNotifications = (UnreadNotifications) obj
         if (this.agentUUID.equals(unreadNotifications.agentUUID())) {
             return this.notificationGroups.equals(unreadNotifications.notificationGroups())
         }
         return false
     }
 
-    public Int hashCode() {
+     public fun hashCode(): Int {
         return ((this.agentUUID.hashCode() ^ 1000003) * 1000003) ^ this.notificationGroups.hashCode()
     }
 
@@ -46,7 +46,7 @@ final class AutoValue_UnreadNotifications : UnreadNotifications() {
         return this.notificationGroups
     }
 
-    public String toString() {
+     public fun toString(): String {
         return "UnreadNotifications{agentUUID=" + this.agentUUID + ", " + "notificationGroups=" + this.notificationGroups + "}"
     }
 }

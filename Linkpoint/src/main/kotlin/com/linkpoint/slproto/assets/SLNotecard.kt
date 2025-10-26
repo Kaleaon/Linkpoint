@@ -35,11 +35,11 @@ private class AttachmentClickableSpan : ClickableSpan() : InventoryEntrySpan {
             this.clickListener = onAttachmentClickListener
         }
 
-        public SLInventoryEntry getEntry() {
+         public fun getEntry(): SLInventoryEntry {
             return this.entry
         }
 
-        fun onClick(View view) {
+        fun onClick(view: View) {
             if (this.clickListener != null) {
                 this.clickListener.onAttachmentClick(this.entry)
             }
@@ -56,20 +56,20 @@ private class AttachmentSpan : ReplacementSpan() : InventoryEntrySpan {
             this.linkText = sLInventoryEntry.getReadableTextForLink()
         }
 
-        fun draw(Canvas canvas, CharSequence charSequence, Int i, Int i2, Float f, Int i3, Int i4, Int i5, Paint paint) {
+        fun draw(canvas: Canvas, charSequence: CharSequence, i: Int, i2: Int, f: Float, i3: Int, i4: Int, i5: Int, paint: Paint) {
             if (i != i2) {
-                Paint paint2 = Paint(paint)
+                val paint2: Paint = Paint(paint)
                 paint2.setUnderlineText(true)
                 paint2.setColor(Color.rgb(0, 50, 100))
                 canvas.drawText(this.linkText, 0, this.linkText.length(), f, (Float) i4, paint2)
             }
         }
 
-        public SLInventoryEntry getEntry() {
+         public fun getEntry(): SLInventoryEntry {
             return this.entry
         }
 
-        public Int getSize(Paint paint, CharSequence charSequence, Int i, Int i2, Paint.FontMetricsInt fontMetricsInt) {
+         public fun getSize(paint: Paint, charSequence: CharSequence, i: Int, i2: Int, Paint.FontMetricsInt fontMetricsInt): Int {
             if (fontMetricsInt != null) {
                 Paint.FontMetricsInt fontMetricsInt2 = paint.getFontMetricsInt()
                 fontMetricsInt.ascent = fontMetricsInt2.ascent
@@ -86,7 +86,7 @@ private class AttachmentSpan : ReplacementSpan() : InventoryEntrySpan {
     }
 
     private interface InventoryEntrySpan {
-        SLInventoryEntry getEntry()
+         fun getEntry(): SLInventoryEntry)
     }
 
     @JvmStatic
@@ -101,24 +101,24 @@ private class NotecardAttachment {
     }
 
     interface OnAttachmentClickListener {
-        Unit onAttachmentClick(SLInventoryEntry sLInventoryEntry)
+         fun onAttachmentClick(sLInventoryEntry: SLInventoryEntry)
     }
 
     public SLNotecard(Spanned spanned, Boolean z) {
         this.isScript = z
-        StringBuilder sb = StringBuilder()
+        val sb: StringBuilder = StringBuilder()
         this.attachments = ArrayList(0)
-        InventoryEntrySpan[] inventoryEntrySpanArr = (InventoryEntrySpan[]) spanned.getSpans(0, spanned.length(), InventoryEntrySpan.class)
-        Int[] iArr = Int[inventoryEntrySpanArr.length]
-        Int[] iArr2 = Int[inventoryEntrySpanArr.length]
+        val inventoryEntrySpanArr: Array<InventoryEntrySpan> = (Array<InventoryEntrySpan>) spanned.getSpans(0, spanned.length(), InventoryEntrySpan.class)
+        val iArr: IntArray = Int[inventoryEntrySpanArr.length]
+        val iArr2: IntArray = Int[inventoryEntrySpanArr.length]
         for (Int i = 0; i < inventoryEntrySpanArr.length; i++) {
             iArr[i] = spanned.getSpanStart(inventoryEntrySpanArr[i])
             iArr2[i] = spanned.getSpanEnd(inventoryEntrySpanArr[i])
         }
-        Int i2 = 0
-        Int i3 = 0
+        val i2: Int = 0
+        val i3: Int = 0
         while (i3 < spanned.length()) {
-            Int i4 = 0
+            val i4: Int = 0
             while (true) {
                 if (i4 >= inventoryEntrySpanArr.length) {
                     i4 = -1
@@ -129,7 +129,7 @@ private class NotecardAttachment {
                     i4++
                 }
             }
-            Int length = i4 != -1 ? iArr[i4] : spanned.length()
+            val length: Int = i4 != -1 ? iArr[i4] : spanned.length()
             sb.append(spanned.subSequence(i3, length))
             if (i4 != -1) {
                 this.attachments.add(NotecardAttachment(i2, inventoryEntrySpanArr[i4].getEntry()))
@@ -150,15 +150,15 @@ private class NotecardAttachment {
         this.notecardText = ""
     }
 
-    public SLNotecard(Byte[] bArr, Boolean z) throws SimpleStringParser.StringParsingException {
-        String stringFromVariableUTF = SLMessage.stringFromVariableUTF(bArr)
+    public SLNotecard(ByteArray bArr, Boolean z) throws SimpleStringParser.StringParsingException {
+        val stringFromVariableUTF: String = SLMessage.stringFromVariableUTF(bArr)
         this.isScript = z
         if (!z) {
-            SimpleStringParser simpleStringParser = SimpleStringParser(stringFromVariableUTF, DELIM_ANY)
+            val simpleStringParser: SimpleStringParser = SimpleStringParser(stringFromVariableUTF, DELIM_ANY)
             simpleStringParser.expectToken("Linden text version 2", DELIM_EOL)
             simpleStringParser.expectToken("{", DELIM_EOL)
             while (true) {
-                String nextToken = simpleStringParser.nextToken(DELIM_ANY)
+                val nextToken: String = simpleStringParser.nextToken(DELIM_ANY)
                 if (nextToken.equals("}")) {
                     break
                 } else if (nextToken.equals("LLEmbeddedItems")) {
@@ -166,7 +166,7 @@ private class NotecardAttachment {
                     this.attachments = parseEmbeddedItems(simpleStringParser)
                 } else if (nextToken.equals("Text")) {
                     simpleStringParser.expectToken("length", DELIM_ANY)
-                    Int intToken = simpleStringParser.getIntToken(DELIM_EOL)
+                    val intToken: Int = simpleStringParser.getIntToken(DELIM_EOL)
                     simpleStringParser.skipOneDelimiter(DELIM_EOL)
                     this.notecardText = simpleStringParser.getSubstring(intToken)
                 } else {
@@ -182,14 +182,14 @@ private class NotecardAttachment {
     }
 
     @JvmStatic
-    Spanned createSingleEditableAttachment(SLInventoryEntry sLInventoryEntry) {
-        SpannableStringBuilder spannableStringBuilder = SpannableStringBuilder()
+     fun createSingleEditableAttachment(sLInventoryEntry: SLInventoryEntry): Spanned {
+        val spannableStringBuilder: SpannableStringBuilder = SpannableStringBuilder()
         spannableStringBuilder.append("⟹")
         spannableStringBuilder.setSpan(AttachmentSpan(sLInventoryEntry), 0, spannableStringBuilder.length(), 33)
         return spannableStringBuilder
     }
 
-    private SLInventoryEntry findAttachmentByCode(Int i) {
+     private fun findAttachmentByCode(i: Int): SLInventoryEntry {
         if (this.attachments != null) {
             for (NotecardAttachment notecardAttachment : this.attachments) {
                 if (notecardAttachment.extCharIndex == i) {
@@ -203,12 +203,12 @@ private class NotecardAttachment {
     private List<NotecardAttachment> parseEmbeddedItems(SimpleStringParser simpleStringParser) throws SimpleStringParser.StringParsingException {
         simpleStringParser.expectToken("{", DELIM_EOL)
         simpleStringParser.expectToken("count", DELIM_ANY)
-        Int intToken = simpleStringParser.getIntToken(DELIM_EOL)
-        ArrayList arrayList = ArrayList(intToken)
+        val intToken: Int = simpleStringParser.getIntToken(DELIM_EOL)
+        val arrayList: ArrayList = ArrayList(intToken)
         for (Int i = 0; i < intToken; i++) {
             simpleStringParser.expectToken("{", DELIM_EOL)
             simpleStringParser.expectToken("ext", DELIM_ANY).expectToken("Char", DELIM_ANY).expectToken("index", DELIM_ANY)
-            Int intToken2 = simpleStringParser.getIntToken(DELIM_EOL)
+            val intToken2: Int = simpleStringParser.getIntToken(DELIM_EOL)
             simpleStringParser.expectToken("inv_item", DELIM_ANY)
             simpleStringParser.getIntToken(DELIM_EOL)
             arrayList.add(NotecardAttachment(intToken2, SLInventoryEntry.parseString(simpleStringParser)))
@@ -218,8 +218,8 @@ private class NotecardAttachment {
         return arrayList
     }
 
-    public Byte[] toLindenText() {
-        StringBuilder sb = StringBuilder()
+     public fun toLindenText(): ByteArray {
+        val sb: StringBuilder = StringBuilder()
         if (this.isScript) {
             sb.append(this.notecardText)
         } else {
@@ -235,11 +235,11 @@ private class NotecardAttachment {
                 }
                 sb.append("\t").append("permissions").append(" 0\n")
                 sb.append("\t").append("{\n")
-                sb.append("\t\t").append("base_mask").append("\t").append(String.format("%08x", Object[]{Integer.valueOf(notecardAttachment.entry.baseMask)})).append(DELIM_EOL)
-                sb.append("\t\t").append("owner_mask").append("\t").append(String.format("%08x", Object[]{Integer.valueOf(notecardAttachment.entry.ownerMask)})).append(DELIM_EOL)
-                sb.append("\t\t").append("group_mask").append("\t").append(String.format("%08x", Object[]{Integer.valueOf(notecardAttachment.entry.groupMask)})).append(DELIM_EOL)
-                sb.append("\t\t").append("everyone_mask").append("\t").append(String.format("%08x", Object[]{Integer.valueOf(notecardAttachment.entry.everyoneMask)})).append(DELIM_EOL)
-                sb.append("\t\t").append("next_owner_mask").append("\t").append(String.format("%08x", Object[]{Integer.valueOf(notecardAttachment.entry.nextOwnerMask)})).append(DELIM_EOL)
+                sb.append("\t\t").append("base_mask").append("\t").append(String.format("%08x", Array<Any>{Integer.valueOf(notecardAttachment.entry.baseMask)})).append(DELIM_EOL)
+                sb.append("\t\t").append("owner_mask").append("\t").append(String.format("%08x", Array<Any>{Integer.valueOf(notecardAttachment.entry.ownerMask)})).append(DELIM_EOL)
+                sb.append("\t\t").append("group_mask").append("\t").append(String.format("%08x", Array<Any>{Integer.valueOf(notecardAttachment.entry.groupMask)})).append(DELIM_EOL)
+                sb.append("\t\t").append("everyone_mask").append("\t").append(String.format("%08x", Array<Any>{Integer.valueOf(notecardAttachment.entry.everyoneMask)})).append(DELIM_EOL)
+                sb.append("\t\t").append("next_owner_mask").append("\t").append(String.format("%08x", Array<Any>{Integer.valueOf(notecardAttachment.entry.nextOwnerMask)})).append(DELIM_EOL)
                 if (notecardAttachment.entry.creatorUUID != null) {
                     sb.append("\t\t").append("creator_id").append("\t").append(notecardAttachment.entry.creatorUUID.toString()).append(DELIM_EOL)
                 }
@@ -258,7 +258,7 @@ private class NotecardAttachment {
                 }
                 sb.append("\t\t").append("type").append("\t").append(SLAssetType.getByType(notecardAttachment.entry.assetType).getStringCode()).append(DELIM_EOL)
                 sb.append("\t\t").append("inv_type").append("\t").append(SLInventoryType.getByType(notecardAttachment.entry.invType).getStringCode()).append(DELIM_EOL)
-                sb.append("\t\t").append("flags").append("\t").append(String.format("%08x", Object[]{Integer.valueOf(notecardAttachment.entry.flags)})).append(DELIM_EOL)
+                sb.append("\t\t").append("flags").append("\t").append(String.format("%08x", Array<Any>{Integer.valueOf(notecardAttachment.entry.flags)})).append(DELIM_EOL)
                 sb.append("\t").append("sale_info").append("\t0\n")
                 sb.append("\t").append("{\n")
                 sb.append("\t\t").append("sale_type").append("\t").append(SLSaleType.getByType(notecardAttachment.entry.saleType).getStringCode()).append(DELIM_EOL)
@@ -290,16 +290,16 @@ private class NotecardAttachment {
             r0 = 0
             android.text.SpannableStringBuilder r2 = android.text.SpannableStringBuilder
             r2.<init>()
-            Boolean r1 = r6.isScript
+            val r1: Boolean = r6.isScript
             if (r1 == 0) goto L_0x003c
             java.lang.String r0 = r6.notecardText
             r2.append(r0)
             return r2
         L_0x0010:
             java.lang.String r0 = r6.notecardText
-            Char r0 = r0.charAt(r3)
+            val r0: Char = r0.charAt(r3)
             r1 = 56320(0xdc00, Float:7.8921E-41)
-            Int r0 = r0 - r1
+            val r0: Int = r0 - r1
             com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry r0 = r6.findAttachmentByCode(r0)
             if (r0 == 0) goto L_0x003a
             if (r7 == 0) goto L_0x0071
@@ -307,33 +307,33 @@ private class NotecardAttachment {
             r1.<init>(r0)
             java.lang.String r0 = "⟹"
         L_0x002a:
-            Int r4 = r2.length()
+            val r4: Int = r2.length()
             r2.append(r0)
-            Int r0 = r2.length()
+            val r0: Int = r2.length()
             r5 = 33
             r2.setSpan(r1, r4, r0, r5)
         L_0x003a:
-            Int r0 = r3 + 1
+            val r0: Int = r3 + 1
         L_0x003c:
             java.lang.String r1 = r6.notecardText
-            Int r1 = r1.length()
+            val r1: Int = r1.length()
             if (r0 >= r1) goto L_0x0070
             java.lang.String r1 = r6.notecardText
             r3 = 56256(0xdbc0, Float:7.8831E-41)
-            Int r1 = r1.indexOf(r3, r0)
+            val r1: Int = r1.indexOf(r3, r0)
             if (r1 >= 0) goto L_0x0055
             java.lang.String r1 = r6.notecardText
-            Int r1 = r1.length()
+            val r1: Int = r1.length()
         L_0x0055:
             java.lang.String r3 = r6.notecardText
             java.lang.String r0 = r3.substring(r0, r1)
             r2.append(r0)
             java.lang.String r0 = r6.notecardText
-            Int r0 = r0.length()
+            val r0: Int = r0.length()
             if (r1 >= r0) goto L_0x007b
-            Int r3 = r1 + 1
+            val r3: Int = r1 + 1
             java.lang.String r0 = r6.notecardText
-            Int r0 = r0.length()
+            val r0: Int = r0.length()
             if (r3 < r0) goto L_0x0010
         L_0x0070:
             return r2

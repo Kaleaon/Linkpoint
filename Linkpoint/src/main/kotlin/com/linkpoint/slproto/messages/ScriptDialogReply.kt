@@ -17,7 +17,7 @@ class ScriptDialogReply : SLMessage() {
     @JvmStatic
     class Data {
         public Int ButtonIndex
-        public Byte[] ButtonLabel
+        public ByteArray ButtonLabel
         public Int ChatChannel
         public UUID ObjectID
     }
@@ -26,15 +26,15 @@ class ScriptDialogReply : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.Data_Field.ButtonLabel.length + 25 + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleScriptDialogReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -65)
@@ -46,7 +46,7 @@ class ScriptDialogReply : SLMessage() {
         packVariable(byteBuffer, this.Data_Field.ButtonLabel, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.Data_Field.ObjectID = unpackUUID(byteBuffer)

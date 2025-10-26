@@ -22,13 +22,13 @@ class InventoryListAdapter : CursorAdapter() {
         this.avatarAppearance = sLAvatarAppearance
     }
 
-    fun bindView(View view, Context context, Cursor cursor) {
-        SLInventoryEntry sLInventoryEntry = SLInventoryEntry(cursor)
+    fun bindView(view: View, context: Context, cursor: Cursor) {
+        val sLInventoryEntry: SLInventoryEntry = SLInventoryEntry(cursor)
         ((TextView) view.findViewById(R.id.itemNameTextView)).setText(sLInventoryEntry.name)
-        Int drawableResource = sLInventoryEntry.getDrawableResource()
+        val drawableResource: Int = sLInventoryEntry.getDrawableResource()
         if (drawableResource >= 0) {
             ((ImageView) view.findViewById(R.id.itemTypeIconView)).setImageResource(drawableResource)
-            Int subtypeDrawableResource = sLInventoryEntry.getSubtypeDrawableResource()
+            val subtypeDrawableResource: Int = sLInventoryEntry.getSubtypeDrawableResource()
             if (subtypeDrawableResource >= 0) {
                 ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageResource(subtypeDrawableResource)
             } else {
@@ -45,7 +45,7 @@ class InventoryListAdapter : CursorAdapter() {
         }
     }
 
-    public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
+     public fun newView(context: Context, cursor: Cursor, viewGroup: ViewGroup): View {
         return ((LayoutInflater) context.getSystemService("layout_inflater")).inflate(R.layout.inventory_item, viewGroup, false)
     }
 }

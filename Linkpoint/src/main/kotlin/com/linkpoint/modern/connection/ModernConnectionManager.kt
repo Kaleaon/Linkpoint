@@ -48,7 +48,7 @@ class ModernConnectionManager {
         this.context = context.getApplicationContext()
         this.diagnostics = ConnectionDiagnostics(context)
         this.executor = Executors.newCachedThreadPool(r -> {
-            Thread t = Thread(r, "SL-Connection-" + r.hashCode())
+            val t: Thread = Thread(r, "SL-Connection-" + r.hashCode())
             t.setDaemon(true)
             return t
         })
@@ -118,7 +118,7 @@ class ModernConnectionManager {
                     
                     if (attemptNumber < MAX_RETRY_ATTEMPTS - 1) {
                         // Calculate exponential backoff delay
-                        Long delay = (Long)(INITIAL_RETRY_DELAY_MS * Math.pow(RETRY_BACKOFF_MULTIPLIER, attemptNumber))
+                        val delay: Long = (Long)(INITIAL_RETRY_DELAY_MS * Math.pow(RETRY_BACKOFF_MULTIPLIER, attemptNumber))
                         Log.i(TAG, "Retrying connection in " + delay + "ms")
                         
                         try {
@@ -139,16 +139,16 @@ class ModernConnectionManager {
             })
     }
 
-    private SLAuthReply performActualConnection(SLAuthParams authParams) {
+     private fun performActualConnection(authParams: SLAuthParams): SLAuthReply {
         setState(ConnectionState.AUTHENTICATING)
         
         // Use the corrected login URL if needed
-        SLAuthParams correctedParams = ensureCorrectLoginURL(authParams)
+        val correctedParams: SLAuthParams = ensureCorrectLoginURL(authParams)
         
         try {
             // Use the existing authentication system but with modern error handling
             com.lumiyaviewer.lumiya.slproto.auth.SLAuth auth = com.lumiyaviewer.lumiya.slproto.auth.SLAuth()
-            SLAuthReply result = auth.Login(correctedParams)
+            val result: SLAuthReply = auth.Login(correctedParams)
             
             if (result == null) {
                 throw ConnectionException("Authentication returned null response")
@@ -165,8 +165,8 @@ class ModernConnectionManager {
         }
     }
 
-    private SLAuthParams ensureCorrectLoginURL(SLAuthParams original) {
-        String loginURL = original.loginURL
+     private fun ensureCorrectLoginURL(original: SLAuthParams): SLAuthParams {
+        val loginURL: String = original.loginURL
         
         // Fix common login URL issues
         if (loginURL == null || loginURL.isEmpty()) {
@@ -202,24 +202,24 @@ class ModernConnectionManager {
         return original
     }
 
-    private Unit setState(ConnectionState newState) {
+     private fun setState(newState: ConnectionState) {
         if (this.state != newState) {
-            ConnectionState oldState = this.state
+            val oldState: ConnectionState = this.state
             this.state = newState
             Log.d(TAG, "Connection state changed: " + oldState + " -> " + newState)
             // TODO: Emit state change event for UI updates
         }
     }
 
-    public ConnectionState getState() {
+     public fun getState(): ConnectionState {
         return state
     }
     
-    public String getLastError() {
+     public fun getLastError(): String {
         return lastError
     }
     
-    public Int getActiveConnectionCount() {
+     public fun getActiveConnectionCount(): Int {
         return activeConnections.get()
     }
 

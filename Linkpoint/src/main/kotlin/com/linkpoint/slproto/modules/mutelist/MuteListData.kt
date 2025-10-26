@@ -18,8 +18,8 @@ import javax.annotation.concurrent.Immutable
 @Immutable
 class MuteListData {
     private const val Ordering<MuteListEntry> ordering = Ordering<MuteListEntry>() {
-        public Int compare(MuteListEntry muteListEntry, MuteListEntry muteListEntry2) {
-            Int viewOrder = muteListEntry.type.getViewOrder() - muteListEntry2.type.getViewOrder()
+         public fun compare(muteListEntry: MuteListEntry, muteListEntry2: MuteListEntry): Int {
+            val viewOrder: Int = muteListEntry.type.getViewOrder() - muteListEntry2.type.getViewOrder()
             return viewOrder != 0 ? viewOrder : muteListEntry.name.compareToIgnoreCase(muteListEntry2.name)
         }
     }
@@ -36,23 +36,23 @@ class MuteListData {
         this.muteListNames = ImmutableMap.copyOf(map2)
     }
 
-    public MuteListData(Byte[] bArr) {
+    public MuteListData(ByteArray bArr) {
         ImmutableMap.Builder builder = ImmutableMap.builder()
         ImmutableMap.Builder builder2 = ImmutableMap.builder()
         if (bArr != null) {
             try {
-                BufferedReader bufferedReader = BufferedReader(InputStreamReader(ByteArrayInputStream(bArr)))
+                val bufferedReader: BufferedReader = BufferedReader(InputStreamReader(ByteArrayInputStream(bArr)))
                 while (true) {
-                    String readLine = bufferedReader.readLine()
+                    val readLine: String = bufferedReader.readLine()
                     if (readLine == null) {
                         break
                     }
-                    SimpleStringParser simpleStringParser = SimpleStringParser(readLine.trim(), " ")
+                    val simpleStringParser: SimpleStringParser = SimpleStringParser(readLine.trim(), " ")
                     try {
-                        Int intToken = simpleStringParser.getIntToken(" ")
-                        String nextToken = simpleStringParser.nextToken(" ")
+                        val intToken: Int = simpleStringParser.getIntToken(" ")
+                        val nextToken: String = simpleStringParser.nextToken(" ")
                         simpleStringParser.skipAllDelimiters(" ")
-                        String nextToken2 = simpleStringParser.nextToken("|")
+                        val nextToken2: String = simpleStringParser.nextToken("|")
                         simpleStringParser.skipAllDelimiters("|")
                         try {
                             i = simpleStringParser.getIntToken(" ")
@@ -61,8 +61,8 @@ class MuteListData {
                         }
                         Debug.Printf("MuteList: line '%s' type %d idstring '%s' name '%s' flags %d", readLine.trim(), Integer.valueOf(intToken), nextToken, nextToken2, Integer.valueOf(i))
                         if (intToken >= 0 && intToken < MuteType.values().length) {
-                            MuteType muteType = MuteType.values()[intToken]
-                            MuteListEntry muteListEntry = MuteListEntry(muteType, UUID.fromString(nextToken), nextToken2, i)
+                            val muteType: MuteType = MuteType.values()[intToken]
+                            val muteListEntry: MuteListEntry = MuteListEntry(muteType, UUID.fromString(nextToken), nextToken2, i)
                             if (muteType == MuteType.BY_NAME) {
                                 builder2.put(nextToken2, muteListEntry)
                             } else {
@@ -113,8 +113,8 @@ class MuteListData {
         return false
     }
 
-    public MuteListData Block(MuteListEntry muteListEntry) {
-        MuteListKey muteListKey = MuteListKey(muteListEntry)
+    public fun Block(muteListEntry: MuteListEntry): MuteListData {
+        val muteListKey: MuteListKey = MuteListKey(muteListEntry)
         if (muteListKey.muteType == MuteType.BY_NAME) {
             ImmutableMap.Builder builder = ImmutableMap.builder()
             builder.putAll(FluentIterable.from(this.muteListNames.entrySet()).filter($Lambda$pgqqKd1WN3Cb6t0a10SOVDLtoOA(muteListEntry)))
@@ -143,8 +143,8 @@ class MuteListData {
         return MuteListData(builder2.build(), this.muteListNames)
     }
 
-    public MuteListData Unblock(MuteListEntry muteListEntry) {
-        MuteListKey muteListKey = MuteListKey(muteListEntry)
+    public fun Unblock(muteListEntry: MuteListEntry): MuteListData {
+        val muteListKey: MuteListKey = MuteListKey(muteListEntry)
         if (muteListKey.muteType == MuteType.BY_NAME) {
             ImmutableMap.Builder builder = ImmutableMap.builder()
             builder.putAll(FluentIterable.from(this.muteListNames.entrySet()).filter(Predicate(muteListEntry) {
@@ -194,11 +194,11 @@ class MuteListData {
         return ordering.immutableSortedCopy(builder.build())
     }
 
-    public Boolean isMuted(UUID uuid, MuteType muteType) {
+     public fun isMuted(uuid: UUID, muteType: MuteType): Boolean {
         return this.muteList.containsKey(MuteListKey(muteType, uuid))
     }
 
-    public Boolean isMutedByName(String str) {
+     public fun isMutedByName(str: String): Boolean {
         return this.muteListNames.containsKey(str)
     }
 }

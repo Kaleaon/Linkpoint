@@ -13,7 +13,7 @@ class GraphicsModernizationValidation {
     private const val TAG: String = "GraphicsModernization"
     
     @JvmStatic
-    Unit validateModernization(Context context) {
+     fun validateModernization(context: Context) {
         Log.i(TAG, "==========================================")
         Log.i(TAG, "GRAPHICS ENGINE MODERNIZATION VALIDATION")
         Log.i(TAG, "==========================================")
@@ -33,15 +33,15 @@ class GraphicsModernizationValidation {
     }
     
     @JvmStatic
-private Unit testModernPipelineFeatures(Context context) {
+ private fun testModernPipelineFeatures(context: Context) {
         Log.i(TAG, "\n--- Testing Modern Pipeline Features ---")
         
         try {
-            ModernLinkpointDemo demo = ModernLinkpointDemo(context)
+            val demo: ModernLinkpointDemo = ModernLinkpointDemo(context)
             demo.initializeGraphics()
             demo.demonstrateModernGraphics()
             
-            String graphicsInfo = demo.getGraphicsInfo()
+            val graphicsInfo: String = demo.getGraphicsInfo()
             Log.i(TAG, "✅ Modern pipeline initialization: " + graphicsInfo)
             Log.i(TAG, "✅ PBR shader system available")
             Log.i(TAG, "✅ Modern texture formats detected")
@@ -54,7 +54,7 @@ private Unit testModernPipelineFeatures(Context context) {
     }
     
     @JvmStatic
-private Unit validatePerformanceImprovements() {
+ private fun validatePerformanceImprovements() {
         Log.i(TAG, "\n--- Performance Improvements Achieved ---")
         
         Log.i(TAG, "✅ Code Complexity Reduction:")
@@ -76,7 +76,7 @@ private Unit validatePerformanceImprovements() {
     }
     
     @JvmStatic
-private Unit validateLegacyRemoval() {
+ private fun validateLegacyRemoval() {
         Log.i(TAG, "\n--- Legacy Code Removal Validation ---")
         
         Log.i(TAG, "❌ Removed Legacy APIs (now compilation errors):")
@@ -104,7 +104,7 @@ private Unit validateLegacyRemoval() {
      * Demonstrate the modernization impact with metrics
      */
     @JvmStatic
-    Unit generateModernizationReport(Context context) {
+     fun generateModernizationReport(context: Context) {
         Log.i(TAG, "\n=== LINKPOINT GRAPHICS MODERNIZATION REPORT ===")
         Log.i(TAG, "Modernization Date: " + java.text.DateFormat.getDateInstance().format(java.util.Date()))
         Log.i(TAG, "")

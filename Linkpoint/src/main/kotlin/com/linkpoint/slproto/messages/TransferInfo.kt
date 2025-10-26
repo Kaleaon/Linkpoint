@@ -10,7 +10,7 @@ class TransferInfo : SLMessage() {
     @JvmStatic
     class TransferInfoData {
         public Int ChannelType
-        public Byte[] Params
+        public ByteArray Params
         public Int Size
         public Int Status
         public Int TargetType
@@ -21,15 +21,15 @@ class TransferInfo : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.TransferInfoData_Field.Params.length + 34 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleTransferInfo(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -102)
@@ -41,7 +41,7 @@ class TransferInfo : SLMessage() {
         packVariable(byteBuffer, this.TransferInfoData_Field.Params, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.TransferInfoData_Field.TransferID = unpackUUID(byteBuffer)
         this.TransferInfoData_Field.ChannelType = unpackInt(byteBuffer)
         this.TransferInfoData_Field.TargetType = unpackInt(byteBuffer)

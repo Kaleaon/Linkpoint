@@ -18,15 +18,15 @@ class TeleportLandmarkRequest : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return 52
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleTeleportLandmarkRequest(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 65)
@@ -35,7 +35,7 @@ class TeleportLandmarkRequest : SLMessage() {
         packUUID(byteBuffer, this.Info_Field.LandmarkID)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.Info_Field.AgentID = unpackUUID(byteBuffer)
         this.Info_Field.SessionID = unpackUUID(byteBuffer)
         this.Info_Field.LandmarkID = unpackUUID(byteBuffer)

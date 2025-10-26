@@ -56,7 +56,7 @@ class ModernWorldActivity : AppCompatActivity() {
         initializeWorldView()
     }
     
-    private Unit createModernLayout() {
+     private fun createModernLayout() {
         // Create root coordinator layout
         coordinatorLayout = CoordinatorLayout(this)
         CoordinatorLayout.LayoutParams rootParams = CoordinatorLayout.LayoutParams(
@@ -151,7 +151,7 @@ class ModernWorldActivity : AppCompatActivity() {
         setContentView(coordinatorLayout)
     }
     
-    private Unit initializeModernComponents() {
+     private fun initializeModernComponents() {
         // Get modern demo from application
         modernDemo = LinkpointApp.getModernDemo()
         
@@ -164,7 +164,7 @@ class ModernWorldActivity : AppCompatActivity() {
         }
     }
     
-    private Unit setupEventHandlers() {
+     private fun setupEventHandlers() {
         // Connect button click handler
         connectButton.setOnClickListener(v -> {
             connectToSecondLife()
@@ -179,7 +179,7 @@ class ModernWorldActivity : AppCompatActivity() {
         }
     }
     
-    private Unit initializeWorldView() {
+     private fun initializeWorldView() {
         statusText.setText("Initializing 3D world view...")
         loadingProgress.setProgress(50)
         
@@ -199,7 +199,7 @@ class ModernWorldActivity : AppCompatActivity() {
         }, 2000)
     }
     
-    private Unit connectToSecondLife() {
+     private fun connectToSecondLife() {
         statusText.setText("Connecting to Second Life with modern protocols...")
         loadingProgress.setProgress(75)
         
@@ -228,7 +228,7 @@ class ModernWorldActivity : AppCompatActivity() {
         }
     }
     
-    private Unit openChat() {
+     private fun openChat() {
         // TODO: Open modern chat interface
         Snackbar.make(coordinatorLayout, 
             "Opening modern chat interface...", 

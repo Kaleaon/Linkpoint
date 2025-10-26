@@ -32,7 +32,7 @@ class SLMuteList : SLModule(), SLXfer.SLXferCompletionListener {
     private val MuteListCachedDataDao muteListCachedDataDao
     private volatile MuteListData muteListData = MuteListData()
     private val RequestHandler<SubscriptionSingleKey> muteListRequestHandler = AsyncRequestHandler(this.agentCircuit, SimpleRequestHandler<SubscriptionSingleKey>() {
-        fun onRequest(SubscriptionSingleKey subscriptionSingleKey) {
+        fun onRequest(subscriptionSingleKey: SubscriptionSingleKey) {
             if (SLMuteList.this.muteListResultHandler != null) {
                 SLMuteList.this.muteListResultHandler.onResultData(SubscriptionSingleKey.Value, SLMuteList.this.getMuteList())
             }
@@ -53,8 +53,8 @@ class SLMuteList : SLModule(), SLXfer.SLXferCompletionListener {
         this.muteListResultHandler = null
     }
 
-    private Unit RequestMuteList() {
-        MuteListRequest muteListRequest = MuteListRequest()
+    private fun RequestMuteList() {
+        val muteListRequest: MuteListRequest = MuteListRequest()
         muteListRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         muteListRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
         muteListRequest.MuteData_Field.MuteCRC = this.cachedCRC != null ? this.cachedCRC.intValue() : 0
@@ -63,10 +63,10 @@ class SLMuteList : SLModule(), SLXfer.SLXferCompletionListener {
         Debug.Printf("MuteList: Requested mute list (CRC %08x)", Integer.valueOf(muteListRequest.MuteData_Field.MuteCRC))
     }
 
-    fun Block(MuteListEntry muteListEntry) {
+    fun Block(muteListEntry: MuteListEntry) {
         this.muteListData = this.muteListData.Block(muteListEntry)
         Debug.Printf("MuteList: adding entry %s '%s'", muteListEntry.uuid.toString(), muteListEntry.name)
-        UpdateMuteListEntry updateMuteListEntry = UpdateMuteListEntry()
+        val updateMuteListEntry: UpdateMuteListEntry = UpdateMuteListEntry()
         updateMuteListEntry.AgentData_Field.AgentID = this.circuitInfo.agentID
         updateMuteListEntry.AgentData_Field.SessionID = this.circuitInfo.sessionID
         updateMuteListEntry.MuteData_Field.MuteID = muteListEntry.uuid
@@ -81,10 +81,10 @@ class SLMuteList : SLModule(), SLXfer.SLXferCompletionListener {
     fun HandleCircuitReady() {
         super.HandleCircuitReady()
         if (this.muteListCachedDataDao != null) {
-            LazyList listLazy = this.muteListCachedDataDao.queryBuilder().listLazy()
-            Iterator it = listLazy.iterator()
+            val listLazy: LazyList = this.muteListCachedDataDao.queryBuilder().listLazy()
+            val it: Iterator = listLazy.iterator()
             if (it.hasNext()) {
-                MuteListCachedData muteListCachedData = (MuteListCachedData) it.next()
+                val muteListCachedData: MuteListCachedData = (MuteListCachedData) it.next()
                 this.muteListData = MuteListData(muteListCachedData.getData())
                 this.cachedCRC = Integer.valueOf(muteListCachedData.getCRC())
                 this.userManager.muteListPool().requestUpdate(SubscriptionSingleKey.Value)
@@ -102,8 +102,8 @@ class SLMuteList : SLModule(), SLXfer.SLXferCompletionListener {
     }
 
     @SLMessageHandler
-    fun HandleMuteListUpdate(MuteListUpdate muteListUpdate) {
-        String stringFromVariableOEM = SLMessage.stringFromVariableOEM(muteListUpdate.MuteData_Field.Filename)
+    fun HandleMuteListUpdate(muteListUpdate: MuteListUpdate) {
+        val stringFromVariableOEM: String = SLMessage.stringFromVariableOEM(muteListUpdate.MuteData_Field.Filename)
         Debug.Printf("MuteList: fileName = '%s'", stringFromVariableOEM)
         if (!stringFromVariableOEM.equals("")) {
             this.agentCircuit.getModules().xferManager.RequestXfer(stringFromVariableOEM, ELLPath.LL_PATH_CACHE, true, this, (Object) null)
@@ -111,14 +111,14 @@ class SLMuteList : SLModule(), SLXfer.SLXferCompletionListener {
     }
 
     @SLMessageHandler
-    fun HandleUseCachedMuteList(UseCachedMuteList useCachedMuteList) {
+    fun HandleUseCachedMuteList(useCachedMuteList: UseCachedMuteList) {
         Debug.Printf("MuteList: Using cached mute list.", Object[0])
     }
 
-    fun Unblock(MuteListEntry muteListEntry) {
+    fun Unblock(muteListEntry: MuteListEntry) {
         this.muteListData = this.muteListData.Unblock(muteListEntry)
         Debug.Printf("MuteList: removing entry %s '%s'", muteListEntry.uuid.toString(), muteListEntry.name)
-        RemoveMuteListEntry removeMuteListEntry = RemoveMuteListEntry()
+        val removeMuteListEntry: RemoveMuteListEntry = RemoveMuteListEntry()
         removeMuteListEntry.AgentData_Field.AgentID = this.circuitInfo.agentID
         removeMuteListEntry.AgentData_Field.SessionID = this.circuitInfo.sessionID
         removeMuteListEntry.MuteData_Field.MuteID = muteListEntry.uuid
@@ -132,24 +132,24 @@ class SLMuteList : SLModule(), SLXfer.SLXferCompletionListener {
         return this.muteListData.getMuteList()
     }
 
-    public Boolean isMuted(UUID uuid, MuteType muteType) {
+     public fun isMuted(uuid: UUID, muteType: MuteType): Boolean {
         if (uuid != null) {
             return this.muteListData.isMuted(uuid, muteType)
         }
         return false
     }
 
-    public Boolean isMutedByName(String str) {
+     public fun isMutedByName(str: String): Boolean {
         return this.muteListData.isMutedByName(str)
     }
 
-    fun onXferComplete(Object obj, String str, Byte[] bArr) {
+    fun onXferComplete(obj: Object, str: String, bArr: ByteArray) {
         if (bArr != null) {
             this.muteListData = MuteListData(bArr)
             if (this.muteListCachedDataDao != null) {
-                CRC32 crc32 = CRC32()
+                val crc32: CRC32 = CRC32()
                 crc32.update(bArr)
-                Long value = crc32.getValue()
+                val value: Long = crc32.getValue()
                 this.muteListCachedDataDao.deleteAll()
                 this.muteListCachedDataDao.insert(MuteListCachedData((Long) null, (Int) value, bArr))
             }

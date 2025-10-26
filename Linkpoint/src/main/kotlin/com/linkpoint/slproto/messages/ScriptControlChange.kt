@@ -19,15 +19,15 @@ class ScriptControlChange : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.Data_Fields.size() * 6) + 5
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleScriptControlChange(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -67)
@@ -39,10 +39,10 @@ class ScriptControlChange : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            Data data = Data()
+            val data: Data = Data()
             data.TakeControls = unpackBoolean(byteBuffer)
             data.Controls = unpackInt(byteBuffer)
             data.PassToAgent = unpackBoolean(byteBuffer)

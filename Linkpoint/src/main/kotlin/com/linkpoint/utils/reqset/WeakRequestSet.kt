@@ -19,19 +19,19 @@ class WeakRequestSet<T> {
     }
 
     /* access modifiers changed from: package-private */
-    public Boolean addRequest(T t, Object obj) {
-        Boolean z2 = true
+     public fun addRequest(T t, obj: Object): Boolean {
+        val z2: Boolean = true
         synchronized (this.lock) {
-            Set set = this.requests.get(t)
+            val set: Set = this.requests.get(t)
             if (set == null) {
-                HashSet hashSet = HashSet()
+                val hashSet: HashSet = HashSet()
                 hashSet.add(WeakReference(obj))
                 this.requests.put(t, hashSet)
             } else {
-                Iterator it = set.iterator()
-                Boolean z3 = false
+                val it: Iterator = set.iterator()
+                val z3: Boolean = false
                 while (it.hasNext()) {
-                    WeakReference weakReference = (WeakReference) it.next()
+                    val weakReference: WeakReference = (WeakReference) it.next()
                     if (weakReference.get() == null) {
                         it.remove()
                         z = z3
@@ -57,7 +57,7 @@ class WeakRequestSet<T> {
             remove = this.requests.remove(t)
         }
         for (WeakReference weakReference : remove) {
-            Object obj = weakReference.get()
+            val obj: Object = weakReference.get()
             if (obj != null && (obj instanceof RequestCompleteListener)) {
                 ((RequestCompleteListener) obj).onRequestComplete(t)
             }
@@ -75,7 +75,7 @@ class WeakRequestSet<T> {
                     break
                 }
                 Map.Entry next = it.next()
-                Iterator it2 = ((Set) next.getValue()).iterator()
+                val it2: Iterator = ((Set) next.getValue()).iterator()
                 while (it2.hasNext()) {
                     if (((WeakReference) it2.next()).get() == null) {
                         it2.remove()

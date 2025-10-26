@@ -16,11 +16,11 @@ class AccountList {
     @JvmStatic
     class AccountInfo : Parcelable {
         const val Parcelable.Creator<AccountInfo> CREATOR = Parcelable.Creator<AccountInfo>() {
-            public AccountInfo createFromParcel(Parcel parcel) {
+             public fun createFromParcel(parcel: Parcel): AccountInfo {
                 return AccountInfo(parcel, (AccountInfo) null)
             }
 
-            public AccountInfo[] newArray(Int i) {
+            public Array<AccountInfo> newArray(Int i) {
                 return AccountInfo[i]
             }
         }
@@ -37,7 +37,7 @@ class AccountList {
         private AccountInfo(Parcel parcel) {
             this.LoginName = parcel.readString()
             this.PasswordHash = parcel.readString()
-            String readString = parcel.readString()
+            val readString: String = parcel.readString()
             if (!readString.equals("")) {
                 this.GridUUID = UUID.fromString(readString)
             } else {
@@ -55,41 +55,41 @@ class AccountList {
             this.GridUUID = uuid
         }
 
-        public Int describeContents() {
+         public fun describeContents(): Int {
             return 0
         }
 
-        public UUID getGridUUID() {
+         public fun getGridUUID(): UUID {
             return this.GridUUID
         }
 
-        public String getLoginName() {
+         public fun getLoginName(): String {
             return this.LoginName
         }
 
-        public String getPasswordHash() {
+         public fun getPasswordHash(): String {
             return this.PasswordHash
         }
 
-        fun saveToPreferences(SharedPreferences.Editor editor, String str) {
+        fun saveToPreferences(SharedPreferences.Editor editor, str: String) {
             editor.putString(str + "_login_name", this.LoginName)
             editor.putString(str + "_pwd_hash", this.PasswordHash)
             editor.putString(str + "_grid", this.GridUUID.toString())
         }
 
-        fun setGridUUID(UUID uuid) {
+        fun setGridUUID(uuid: UUID) {
             this.GridUUID = uuid
         }
 
-        fun setLoginName(String str) {
+        fun setLoginName(str: String) {
             this.LoginName = str
         }
 
-        fun setPasswordHash(String str) {
+        fun setPasswordHash(str: String) {
             this.PasswordHash = str
         }
 
-        fun writeToParcel(Parcel parcel, Int i) {
+        fun writeToParcel(parcel: Parcel, i: Int) {
             parcel.writeString(this.LoginName)
             parcel.writeString(this.PasswordHash)
             if (this.GridUUID != null) {
@@ -105,15 +105,15 @@ class AccountList {
         loadAccounts()
     }
 
-    fun addNewAccount(AccountInfo accountInfo) {
+    fun addNewAccount(accountInfo: AccountInfo) {
         this.accounts.add(accountInfo)
     }
 
-    fun deleteAccount(AccountInfo accountInfo) {
+    fun deleteAccount(accountInfo: AccountInfo) {
         this.accounts.remove(accountInfo)
     }
 
-    public AccountInfo findAccount(String str, UUID uuid) {
+     public fun findAccount(str: String, uuid: UUID): AccountInfo {
         for (AccountInfo accountInfo : this.accounts) {
             if (accountInfo.getLoginName().equals(str) && accountInfo.getGridUUID().equals(uuid)) {
                 return accountInfo
@@ -122,7 +122,7 @@ class AccountList {
         return null
     }
 
-    public AccountInfo findOrAddAccount(String str, String str2, UUID uuid) {
+     public fun findOrAddAccount(str: String, str2: String, uuid: UUID): AccountInfo {
         for (AccountInfo accountInfo : this.accounts) {
             if (accountInfo.getLoginName().equals(str) && accountInfo.getGridUUID().equals(uuid)) {
                 accountInfo.setPasswordHash(str2)
@@ -130,7 +130,7 @@ class AccountList {
                 return accountInfo
             }
         }
-        AccountInfo accountInfo2 = AccountInfo(str, str2, uuid)
+        val accountInfo2: AccountInfo = AccountInfo(str, str2, uuid)
         this.accounts.add(accountInfo2)
         savePreferences()
         return accountInfo2
@@ -148,8 +148,8 @@ class AccountList {
 
     fun loadAccounts() {
         this.accounts.clear()
-        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.context.getApplicationContext())
-        Int i = defaultSharedPreferences.getInt("accounts_count", 0)
+        val defaultSharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.context.getApplicationContext())
+        val i: Int = defaultSharedPreferences.getInt("accounts_count", 0)
         for (Int i2 = 0; i2 < i; i2++) {
             this.accounts.add(AccountInfo(defaultSharedPreferences, "account_" + i2))
         }
@@ -158,9 +158,9 @@ class AccountList {
     fun savePreferences() {
         SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(this.context.getApplicationContext()).edit()
         edit.putInt("accounts_count", this.accounts.size())
-        Int i = 0
+        val i: Int = 0
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (i2 < this.accounts.size()) {
                 this.accounts.get(i2).saveToPreferences(edit, "account_" + i2)
                 i = i2 + 1

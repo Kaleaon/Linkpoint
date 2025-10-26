@@ -45,11 +45,11 @@ class SLChatTextEvent : SLChatEvent() {
         return SLChatEvent.ChatMessageType.Text
     }
 
-    public String getRawText() {
+     public fun getRawText(): String {
         return (this.text == null || !this.text.startsWith("/me ")) ? this.text : this.text.substring(4)
     }
 
-    public String getText(Context context, UserManager userManager) {
+     public fun getText(context: Context, userManager: UserManager): String {
         return (this.text == null || !this.text.startsWith("/me ")) ? this.text : this.text.substring(4)
     }
 
@@ -58,11 +58,11 @@ class SLChatTextEvent : SLChatEvent() {
     }
 
     /* access modifiers changed from: protected */
-    public Boolean isActionMessage(UserManager userManager) {
+     public fun isActionMessage(userManager: UserManager): Boolean {
         return this.text != null && this.text.startsWith("/me ")
     }
 
-    fun serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setMessageText(this.text)
     }

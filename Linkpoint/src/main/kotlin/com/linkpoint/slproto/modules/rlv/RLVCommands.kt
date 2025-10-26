@@ -64,7 +64,7 @@ enum class RLVCommands {
     }
 
     @JvmStatic
-    RLVCommands getCommand(String str) {
+     fun getCommand(str: String): RLVCommands {
         try {
             return valueOf(str)
         } catch (IllegalArgumentException e) {
@@ -72,7 +72,7 @@ enum class RLVCommands {
         }
     }
 
-    public RLVCommand getHandler() {
+     public fun getHandler(): RLVCommand {
         try {
             return (RLVCommand) this.handler.newInstance()
         } catch (IllegalArgumentException e) {

@@ -14,7 +14,7 @@ class AvatarProgram : BasicPrimProgram() {
         super(Shader.AvatarVertexShader, Shader.PrimFragmentShader)
     }
 
-    protected Unit bindVariables() {
+     protected fun bindVariables() {
         super.bindVariables()
         this.vWeight = GLES20.glGetAttribLocation(this.handle, "vWeight")
         this.uJointMatrix = GLES20.glGetUniformLocation(this.handle, "uJointMatrix")

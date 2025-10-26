@@ -26,7 +26,7 @@ class GodUpdateRegionInfo : SLMessage() {
         public Int RedirectGridX
         public Int RedirectGridY
         public Int RegionFlags
-        public Byte[] SimName
+        public ByteArray SimName
     }
 
     @JvmStatic
@@ -40,15 +40,15 @@ class GodUpdateRegionInfo : SLMessage() {
         this.RegionInfo_Field = RegionInfo()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.RegionInfo_Field.SimName.length + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 36 + 1 + (this.RegionInfo2_Fields.size() * 8)
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleGodUpdateRegionInfo(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -113)
@@ -68,7 +68,7 @@ class GodUpdateRegionInfo : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.RegionInfo_Field.SimName = unpackVariable(byteBuffer, 1)
@@ -79,9 +79,9 @@ class GodUpdateRegionInfo : SLMessage() {
         this.RegionInfo_Field.PricePerMeter = unpackInt(byteBuffer)
         this.RegionInfo_Field.RedirectGridX = unpackInt(byteBuffer)
         this.RegionInfo_Field.RedirectGridY = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            RegionInfo2 regionInfo2 = RegionInfo2()
+            val regionInfo2: RegionInfo2 = RegionInfo2()
             regionInfo2.RegionFlagsExtended = unpackLong(byteBuffer)
             this.RegionInfo2_Fields.add(regionInfo2)
         }

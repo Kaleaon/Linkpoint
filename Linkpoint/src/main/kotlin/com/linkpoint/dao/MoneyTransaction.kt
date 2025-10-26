@@ -22,43 +22,43 @@ class MoneyTransaction {
         this.newBalance = i2
     }
 
-    public UUID getAgentUUID() {
+     public fun getAgentUUID(): UUID {
         return this.agentUUID
     }
 
-    public Long getId() {
+     public fun getId(): Long {
         return this.id
     }
 
-    public Int getNewBalance() {
+     public fun getNewBalance(): Int {
         return this.newBalance
     }
 
-    public Date getTimestamp() {
+     public fun getTimestamp(): Date {
         return this.timestamp
     }
 
-    public Int getTransactionAmount() {
+     public fun getTransactionAmount(): Int {
         return this.transactionAmount
     }
 
-    fun setAgentUUID(UUID uuid) {
+    fun setAgentUUID(uuid: UUID) {
         this.agentUUID = uuid
     }
 
-    fun setId(Long l) {
+    fun setId(l: Long) {
         this.id = l
     }
 
-    fun setNewBalance(Int i) {
+    fun setNewBalance(i: Int) {
         this.newBalance = i
     }
 
-    fun setTimestamp(Date date) {
+    fun setTimestamp(date: Date) {
         this.timestamp = date
     }
 
-    fun setTransactionAmount(Int i) {
+    fun setTransactionAmount(i: Int) {
         this.transactionAmount = i
     }
 }

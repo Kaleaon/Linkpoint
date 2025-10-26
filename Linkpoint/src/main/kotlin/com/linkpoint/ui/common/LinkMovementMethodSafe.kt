@@ -11,10 +11,10 @@ class LinkMovementMethodSafe : LinkMovementMethod() {
     private OnLinkOpenErrorListener onLinkOpenErrorListener = null
 
     interface OnLinkOpenErrorListener {
-        Unit OnLinkOpenError(String str)
+        fun OnLinkOpenError(str: String)
     }
 
-    public Boolean onKeyDown(TextView textView, Spannable spannable, Int i, KeyEvent keyEvent) {
+     public fun onKeyDown(textView: TextView, spannable: Spannable, i: Int, keyEvent: KeyEvent): Boolean {
         try {
             return super.onKeyDown(textView, spannable, i, keyEvent)
         } catch (Exception e) {
@@ -26,7 +26,7 @@ class LinkMovementMethodSafe : LinkMovementMethod() {
         }
     }
 
-    public Boolean onKeyUp(TextView textView, Spannable spannable, Int i, KeyEvent keyEvent) {
+     public fun onKeyUp(textView: TextView, spannable: Spannable, i: Int, keyEvent: KeyEvent): Boolean {
         try {
             return super.onKeyUp(textView, spannable, i, keyEvent)
         } catch (Exception e) {
@@ -38,7 +38,7 @@ class LinkMovementMethodSafe : LinkMovementMethod() {
         }
     }
 
-    public Boolean onTouchEvent(TextView textView, Spannable spannable, MotionEvent motionEvent) {
+     public fun onTouchEvent(textView: TextView, spannable: Spannable, motionEvent: MotionEvent): Boolean {
         try {
             return super.onTouchEvent(textView, spannable, motionEvent)
         } catch (Exception e) {
@@ -50,7 +50,7 @@ class LinkMovementMethodSafe : LinkMovementMethod() {
         }
     }
 
-    public Boolean onTrackballEvent(TextView textView, Spannable spannable, MotionEvent motionEvent) {
+     public fun onTrackballEvent(textView: TextView, spannable: Spannable, motionEvent: MotionEvent): Boolean {
         try {
             return super.onTrackballEvent(textView, spannable, motionEvent)
         } catch (Exception e) {
@@ -62,7 +62,7 @@ class LinkMovementMethodSafe : LinkMovementMethod() {
         }
     }
 
-    fun setOnLinkOpenErrorListener(OnLinkOpenErrorListener onLinkOpenErrorListener2) {
+    fun setOnLinkOpenErrorListener(onLinkOpenErrorListener2: OnLinkOpenErrorListener) {
         this.onLinkOpenErrorListener = onLinkOpenErrorListener2
     }
 }

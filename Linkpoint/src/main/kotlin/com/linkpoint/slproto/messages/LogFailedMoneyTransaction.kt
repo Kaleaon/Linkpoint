@@ -29,15 +29,15 @@ class LogFailedMoneyTransaction : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return 78
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleLogFailedMoneyTransaction(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.DC4)
@@ -54,7 +54,7 @@ class LogFailedMoneyTransaction : SLMessage() {
         packByte(byteBuffer, (Byte) this.TransactionData_Field.FailureType)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.TransactionData_Field.TransactionID = unpackUUID(byteBuffer)
         this.TransactionData_Field.TransactionTime = unpackInt(byteBuffer)
         this.TransactionData_Field.TransactionType = unpackInt(byteBuffer)

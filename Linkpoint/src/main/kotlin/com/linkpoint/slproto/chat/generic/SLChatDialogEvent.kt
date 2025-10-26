@@ -27,7 +27,7 @@ abstract class SLChatDialogEvent : SLChatTextEvent() {
     }
 
     @JvmStatic
-private String sanitizeDialogText(String str) {
+ private fun sanitizeDialogText(str: String): String {
         while (str.contains("\n\n")) {
             str = str.replace("\n\n", "\n")
         }
@@ -35,11 +35,11 @@ private String sanitizeDialogText(String str) {
     }
 
     /* access modifiers changed from: protected */
-    fun onDialogIgnored(UserManager userManager) {
+    fun onDialogIgnored(userManager: UserManager) {
         this.ignored = true
     }
 
-    fun serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setChatChannel(Integer.valueOf(this.chatChannel))
         chatMessage.setDialogIgnored(Boolean.valueOf(this.ignored))

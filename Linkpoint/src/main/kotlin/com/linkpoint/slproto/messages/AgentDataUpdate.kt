@@ -11,26 +11,26 @@ class AgentDataUpdate : SLMessage() {
     class AgentData {
         public UUID ActiveGroupID
         public UUID AgentID
-        public Byte[] FirstName
-        public Byte[] GroupName
+        public ByteArray FirstName
+        public ByteArray GroupName
         public Long GroupPowers
-        public Byte[] GroupTitle
-        public Byte[] LastName
+        public ByteArray GroupTitle
+        public ByteArray LastName
     }
 
     public AgentDataUpdate() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.AgentData_Field.FirstName.length + 17 + 1 + this.AgentData_Field.LastName.length + 1 + this.AgentData_Field.GroupTitle.length + 16 + 8 + 1 + this.AgentData_Field.GroupName.length + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAgentDataUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -125)
@@ -43,7 +43,7 @@ class AgentDataUpdate : SLMessage() {
         packVariable(byteBuffer, this.AgentData_Field.GroupName, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.FirstName = unpackVariable(byteBuffer, 1)
         this.AgentData_Field.LastName = unpackVariable(byteBuffer, 1)

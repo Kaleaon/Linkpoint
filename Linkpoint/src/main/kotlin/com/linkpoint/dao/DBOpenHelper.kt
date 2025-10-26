@@ -12,7 +12,7 @@ class DBOpenHelper : DevOpenHelper() {
         super(context, str, cursorFactory)
     }
 
-    private Boolean tryUpgradeTo71(SQLiteDatabase sQLiteDatabase, Int fromVersion) {
+     private fun tryUpgradeTo71(sQLiteDatabase: SQLiteDatabase, fromVersion: Int): Boolean {
         if (fromVersion != 70) {
             return false
         }
@@ -37,16 +37,16 @@ class DBOpenHelper : DevOpenHelper() {
         }
     }
 
-    fun onDowngrade(SQLiteDatabase sQLiteDatabase, Int oldVersion, Int newVersion) {
+    fun onDowngrade(sQLiteDatabase: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         Debug.Printf("Database downgrade requested from %d to %d", oldVersion, newVersion)
         // Call onUpgrade which will recreate the database if needed
         super.onUpgrade(sQLiteDatabase, oldVersion, newVersion)
     }
 
-    fun onUpgrade(SQLiteDatabase sQLiteDatabase, Int oldVersion, Int newVersion) {
+    fun onUpgrade(sQLiteDatabase: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         Debug.Printf("Database upgrade requested from %d to %d", oldVersion, newVersion)
         
-        Boolean upgradeSuccessful = false
+        val upgradeSuccessful: Boolean = false
         if (newVersion == 71) {
             upgradeSuccessful = tryUpgradeTo71(sQLiteDatabase, oldVersion)
         }

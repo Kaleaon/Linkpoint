@@ -59,7 +59,7 @@ class ModernObjectManager {
     /**
      * Setup object tracking systems
      */
-    private Unit setupObjectTracking() {
+     private fun setupObjectTracking() {
         Log.d(TAG, "Setting up object tracking systems")
         // Initialize tracking data structures
     }
@@ -67,7 +67,7 @@ class ModernObjectManager {
     /**
      * Setup protocol listeners for object updates
      */
-    private Unit setupProtocolListeners() {
+     private fun setupProtocolListeners() {
         Log.d(TAG, "Setting up protocol listeners for object updates")
         // Would register callbacks with HybridProtocolManager
     }
@@ -85,7 +85,7 @@ class ModernObjectManager {
             // Fetch from grid if connected
             if (protocolManager != null && protocolManager.isConnected()) {
                 try {
-                    WorldObject obj = requestObjectFromGrid(objectId)
+                    val obj: WorldObject = requestObjectFromGrid(objectId)
                     if (obj != null) {
                         objectCache.put(objectId, obj)
                         return obj
@@ -102,7 +102,7 @@ class ModernObjectManager {
     /**
      * Request object from grid (stub)
      */
-    private WorldObject requestObjectFromGrid(UUID objectId) {
+     private fun requestObjectFromGrid(objectId: UUID): WorldObject {
         Log.d(TAG, "Requesting object from grid: " + objectId)
         return null
     }
@@ -111,11 +111,11 @@ class ModernObjectManager {
      * Update object position/rotation
      */
     public CompletableFuture<Boolean> updateObjectTransformAsync(UUID objectId, 
-                                                                 Float[] position, 
-                                                                 Float[] rotation) {
+                                                                 FloatArray position, 
+                                                                 FloatArray rotation) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                WorldObject obj = objectCache.get(objectId)
+                val obj: WorldObject = objectCache.get(objectId)
                 if (obj == null) {
                     Log.w(TAG, "Object not found: " + objectId)
                     return false
@@ -141,7 +141,7 @@ class ModernObjectManager {
     /**
      * Send object update to grid (stub)
      */
-    private Unit sendObjectUpdateToGrid(UUID objectId, WorldObject obj) {
+     private fun sendObjectUpdateToGrid(objectId: UUID, obj: WorldObject) {
         Log.d(TAG, "Sending object update to grid: " + objectId)
         // Would use HybridProtocolManager to send update
     }
@@ -158,7 +158,7 @@ class ModernObjectManager {
             // Request from grid
             if (protocolManager != null && protocolManager.isConnected()) {
                 try {
-                    ObjectProperties props = requestPropertiesFromGrid(objectId)
+                    val props: ObjectProperties = requestPropertiesFromGrid(objectId)
                     if (props != null) {
                         propertiesCache.put(objectId, props)
                         return props
@@ -175,7 +175,7 @@ class ModernObjectManager {
     /**
      * Request properties from grid (stub)
      */
-    private ObjectProperties requestPropertiesFromGrid(UUID objectId) {
+     private fun requestPropertiesFromGrid(objectId: UUID): ObjectProperties {
         Log.d(TAG, "Requesting object properties from grid: " + objectId)
         return null
     }
@@ -207,7 +207,7 @@ class ModernObjectManager {
     /**
      * Send touch event to grid (stub)
      */
-    private Unit sendTouchEventToGrid(UUID objectId) {
+     private fun sendTouchEventToGrid(objectId: UUID) {
         Log.d(TAG, "Sending touch event to grid: " + objectId)
         // Would use HybridProtocolManager to send touch event
     }
@@ -216,17 +216,17 @@ class ModernObjectManager {
      * Rez object from inventory
      */
     public CompletableFuture<UUID> rezObjectAsync(UUID inventoryItemId, 
-                                                  Float[] position, 
-                                                  Float[] rotation) {
+                                                  FloatArray position, 
+                                                  FloatArray rotation) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 Log.i(TAG, "Rezzing object from inventory: " + inventoryItemId)
                 
                 // Create object UUID
-                UUID newObjectId = UUID.randomUUID()
+                val newObjectId: UUID = UUID.randomUUID()
                 
                 // Create world object
-                WorldObject obj = WorldObject(newObjectId, "New Object", position, rotation)
+                val obj: WorldObject = WorldObject(newObjectId, "New Object", position, rotation)
                 objectCache.put(newObjectId, obj)
                 
                 // Send rez command to grid
@@ -246,8 +246,8 @@ class ModernObjectManager {
     /**
      * Send rez command to grid (stub)
      */
-    private Unit sendRezCommandToGrid(UUID inventoryItemId, UUID objectId, 
-                                     Float[] position, Float[] rotation) {
+     private fun sendRezCommandToGrid(UUID inventoryItemId, UUID objectId, 
+                                     FloatArray position, FloatArray rotation) {
         Log.d(TAG, "Sending rez command to grid: " + inventoryItemId)
         // Would use HybridProtocolManager to rez object
     }
@@ -258,7 +258,7 @@ class ModernObjectManager {
     public CompletableFuture<Boolean> deleteObjectAsync(UUID objectId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                WorldObject obj = objectCache.remove(objectId)
+                val obj: WorldObject = objectCache.remove(objectId)
                 if (obj == null) {
                     Log.w(TAG, "Object not found: " + objectId)
                     return false
@@ -281,12 +281,12 @@ class ModernObjectManager {
     /**
      * Send delete command to grid (stub)
      */
-    private Unit sendDeleteCommandToGrid(UUID objectId) {
+     private fun sendDeleteCommandToGrid(objectId: UUID) {
         Log.d(TAG, "Sending delete command to grid: " + objectId)
         // Would use HybridProtocolManager to delete object
     }
     
-    public Boolean isInitialized() {
+     public fun isInitialized(): Boolean {
         return managerInitialized
     }
     
@@ -297,21 +297,21 @@ class ModernObjectManager {
     class WorldObject {
         val UUID objectId
         public String name
-        public Float[] position
-        public Float[] rotation
-        public Float[] scale
+        public FloatArray position
+        public FloatArray rotation
+        public FloatArray scale
         public ObjectType type
         
         enum class ObjectType {
             PRIMITIVE, SCULPT, MESH, AVATAR, ATTACHMENT
         }
         
-        public WorldObject(UUID objectId, String name, Float[] position, Float[] rotation) {
+        public WorldObject(UUID objectId, String name, FloatArray position, FloatArray rotation) {
             this.objectId = objectId
             this.name = name
             this.position = position
             this.rotation = rotation
-            this.scale = Float[]{1.0f, 1.0f, 1.0f}
+            this.scale = FloatArray{1.0f, 1.0f, 1.0f}
             this.type = ObjectType.PRIMITIVE
         }
     }

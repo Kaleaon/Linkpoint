@@ -13,25 +13,25 @@ final class AutoValue_PayInfo : PayInfo() {
         this.payPrices = immutableList
     }
 
-    public Int defaultPayPrice() {
+     public fun defaultPayPrice(): Int {
         return this.defaultPayPrice
     }
 
-    public Boolean equals(Object obj) {
+     public fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
         if (!(obj instanceof PayInfo)) {
             return false
         }
-        PayInfo payInfo = (PayInfo) obj
+        val payInfo: PayInfo = (PayInfo) obj
         if (this.defaultPayPrice == payInfo.defaultPayPrice()) {
             return this.payPrices == null ? payInfo.payPrices() == null : this.payPrices.equals(payInfo.payPrices())
         }
         return false
     }
 
-    public Int hashCode() {
+     public fun hashCode(): Int {
         return (this.payPrices == null ? 0 : this.payPrices.hashCode()) ^ (1000003 * (this.defaultPayPrice ^ 1000003))
     }
 
@@ -39,7 +39,7 @@ final class AutoValue_PayInfo : PayInfo() {
         return this.payPrices
     }
 
-    public String toString() {
+     public fun toString(): String {
         return "PayInfo{defaultPayPrice=" + this.defaultPayPrice + ", " + "payPrices=" + this.payPrices + "}"
     }
 }

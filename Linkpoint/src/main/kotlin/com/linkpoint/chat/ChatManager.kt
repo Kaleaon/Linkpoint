@@ -20,7 +20,7 @@ enum class ChatType(val typeId: Int) {
     REGION(3),  // Say to entire region
     OWNER(4),   // Object owner
     DEBUG(5),
-    BROADCAST(0xFF);
+    BROADCAST(0xFF)
     
     companion object {
         fun fromId(id: Int) = values().find { it.typeId == id }
@@ -33,7 +33,7 @@ enum class ChatType(val typeId: Int) {
 enum class ChatSourceType(val typeId: Int) {
     SYSTEM(0),
     AGENT(1),
-    OBJECT(2);
+    OBJECT(2)
     
     companion object {
         fun fromId(id: Int) = values().find { it.typeId == id }
@@ -108,7 +108,7 @@ enum class IMType(val typeId: Int) {
     FRIENDSHIP_ACCEPTED(28),
     FRIENDSHIP_DECLINED(29),
     TYPING(41),
-    BUSY_AUTO_RESPONSE(42);
+    BUSY_AUTO_RESPONSE(42)
     
     companion object {
         fun fromId(id: Int) = values().find { it.typeId == id }

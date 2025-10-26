@@ -50,14 +50,14 @@ final class AutoValue_SLObjectProfileData : SLObjectProfileData() {
         return this.description
     }
 
-    public Boolean equals(Object obj) {
+     public fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
         if (!(obj instanceof SLObjectProfileData)) {
             return false
         }
-        SLObjectProfileData sLObjectProfileData = (SLObjectProfileData) obj
+        val sLObjectProfileData: SLObjectProfileData = (SLObjectProfileData) obj
         if (this.objectUUID != null ? this.objectUUID.equals(sLObjectProfileData.objectUUID()) : sLObjectProfileData.objectUUID() == null) {
             if (this.name.equals(sLObjectProfileData.name()) && this.description.equals(sLObjectProfileData.description()) && (this.ownerUUID != null ? this.ownerUUID.equals(sLObjectProfileData.ownerUUID()) : sLObjectProfileData.ownerUUID() == null) && this.isTouchable == sLObjectProfileData.isTouchable() && (this.touchName != null ? this.touchName.equals(sLObjectProfileData.touchName()) : sLObjectProfileData.touchName() == null) && this.isPayable == sLObjectProfileData.isPayable() && this.saleType == sLObjectProfileData.saleType() && this.salePrice == sLObjectProfileData.salePrice() && this.isCopyable == sLObjectProfileData.isCopyable() && this.isDead == sLObjectProfileData.isDead() && this.floatingText.equals(sLObjectProfileData.floatingText()) && (this.payInfo != null ? this.payInfo.equals(sLObjectProfileData.payInfo()) : sLObjectProfileData.payInfo() == null)) {
                 return this.isModifiable == sLObjectProfileData.isModifiable()
@@ -70,37 +70,37 @@ final class AutoValue_SLObjectProfileData : SLObjectProfileData() {
         return this.floatingText
     }
 
-    public Int hashCode() {
-        Int i = 0
-        Int i2 = 1231
-        Int hashCode = ((((this.isDead ? 1231 : 1237) ^ (((this.isCopyable ? 1231 : 1237) ^ (((((((this.isPayable ? 1231 : 1237) ^ (((this.touchName == null ? 0 : this.touchName.hashCode()) ^ (((this.isTouchable ? 1231 : 1237) ^ (((this.ownerUUID == null ? 0 : this.ownerUUID.hashCode()) ^ (((((((this.objectUUID == null ? 0 : this.objectUUID.hashCode()) ^ 1000003) * 1000003) ^ this.name.hashCode()) * 1000003) ^ this.description.hashCode()) * 1000003)) * 1000003)) * 1000003)) * 1000003)) * 1000003) ^ this.saleType) * 1000003) ^ this.salePrice) * 1000003)) * 1000003)) * 1000003) ^ this.floatingText.hashCode()) * 1000003
+     public fun hashCode(): Int {
+        val i: Int = 0
+        val i2: Int = 1231
+        val hashCode: Int = ((((this.isDead ? 1231 : 1237) ^ (((this.isCopyable ? 1231 : 1237) ^ (((((((this.isPayable ? 1231 : 1237) ^ (((this.touchName == null ? 0 : this.touchName.hashCode()) ^ (((this.isTouchable ? 1231 : 1237) ^ (((this.ownerUUID == null ? 0 : this.ownerUUID.hashCode()) ^ (((((((this.objectUUID == null ? 0 : this.objectUUID.hashCode()) ^ 1000003) * 1000003) ^ this.name.hashCode()) * 1000003) ^ this.description.hashCode()) * 1000003)) * 1000003)) * 1000003)) * 1000003)) * 1000003) ^ this.saleType) * 1000003) ^ this.salePrice) * 1000003)) * 1000003)) * 1000003) ^ this.floatingText.hashCode()) * 1000003
         if (this.payInfo != null) {
             i = this.payInfo.hashCode()
         }
-        Int i3 = (hashCode ^ i) * 1000003
+        val i3: Int = (hashCode ^ i) * 1000003
         if (!this.isModifiable) {
             i2 = 1237
         }
         return i3 ^ i2
     }
 
-    public Boolean isCopyable() {
+     public fun isCopyable(): Boolean {
         return this.isCopyable
     }
 
-    public Boolean isDead() {
+     public fun isDead(): Boolean {
         return this.isDead
     }
 
-    public Boolean isModifiable() {
+     public fun isModifiable(): Boolean {
         return this.isModifiable
     }
 
-    public Boolean isPayable() {
+     public fun isPayable(): Boolean {
         return this.isPayable
     }
 
-    public Boolean isTouchable() {
+     public fun isTouchable(): Boolean {
         return this.isTouchable
     }
 
@@ -108,31 +108,31 @@ final class AutoValue_SLObjectProfileData : SLObjectProfileData() {
         return this.name
     }
 
-    public UUID objectUUID() {
+     public fun objectUUID(): UUID {
         return this.objectUUID
     }
 
-    public UUID ownerUUID() {
+     public fun ownerUUID(): UUID {
         return this.ownerUUID
     }
 
-    public PayInfo payInfo() {
+     public fun payInfo(): PayInfo {
         return this.payInfo
     }
 
-    public Int salePrice() {
+     public fun salePrice(): Int {
         return this.salePrice
     }
 
-    public Byte saleType() {
+     public fun saleType(): Byte {
         return this.saleType
     }
 
-    public String toString() {
+     public fun toString(): String {
         return "SLObjectProfileData{objectUUID=" + this.objectUUID + ", " + "name=" + this.name + ", " + "description=" + this.description + ", " + "ownerUUID=" + this.ownerUUID + ", " + "isTouchable=" + this.isTouchable + ", " + "touchName=" + this.touchName + ", " + "isPayable=" + this.isPayable + ", " + "saleType=" + this.saleType + ", " + "salePrice=" + this.salePrice + ", " + "isCopyable=" + this.isCopyable + ", " + "isDead=" + this.isDead + ", " + "floatingText=" + this.floatingText + ", " + "payInfo=" + this.payInfo + ", " + "isModifiable=" + this.isModifiable + "}"
     }
 
-    public String touchName() {
+     public fun touchName(): String {
         return this.touchName
     }
 }

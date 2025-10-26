@@ -46,7 +46,7 @@ class VoiceSession {
             voiceChannelInfo = VoiceChannelInfo(vx_evt_session_added_t2.getUri(), false, false)
         }
         this.voiceChannelInfo = voiceChannelInfo
-        Boolean bl = vx_evt_session_added_t2.getIncoming() != 0
+        val bl: Boolean = vx_evt_session_added_t2.getIncoming() != 0
         this.isIncoming = bl
         Debug.Printf("Voice: created session: %s (uri %s)", this.handle, this.voiceChannelInfo.voiceChannelURI)
     }
@@ -60,7 +60,7 @@ class VoiceSession {
         }
     }
 
-    public String getHandle() {
+     public fun getHandle(): String {
         return this.handle
     }
 
@@ -70,13 +70,13 @@ class VoiceSession {
      * Enabled aggressive exception aggregation
      */
     public VoiceChatInfo.VoiceChatState getState() {
-        Object object = this.stateLock
+        val object: Object = this.stateLock
         synchronized (object) {
             return this.state
         }
     }
 
-    public VoiceChannelInfo getVoiceChannelInfo() {
+     public fun getVoiceChannelInfo(): VoiceChannelInfo {
         return this.voiceChannelInfo
     }
 
@@ -85,19 +85,19 @@ class VoiceSession {
      * Enabled unnecessary exception pruning
      * Enabled aggressive exception aggregation
      */
-    public VoiceChatInfo getVoiceChatInfo() {
+     public fun getVoiceChatInfo(): VoiceChatInfo {
         Object object
-        Object object2 = this.stateLock
+        val object2: Object = this.stateLock
         synchronized (object2) {
-            Debug.Printf("Voice: got session state: %s (%s)", Object[]{this.state, this})
+            Debug.Printf("Voice: got session state: %s (%s)", Array<Any>{this.state, this})
             if (this.state == VoiceChatInfo.VoiceChatState.None && this.previousState == VoiceChatInfo.VoiceChatState.None) {
                 object = VoiceChatInfo.empty()
                 Debug.Printf("Voice: returning empty session state", Object[0])
             } else {
-                VoiceChatInfo voiceChatInfo = null
+                val voiceChatInfo: VoiceChatInfo = null
                 object = voiceChatInfo
                 if (!this.speakers.isEmpty()) {
-                    Iterator<UUID> iterator = this.speakers.iterator()
+                    val iterator: Iterator<UUID> = this.speakers.iterator()
                     object = voiceChatInfo
                     if (iterator.hasNext()) {
                         object = iterator.next()
@@ -107,11 +107,11 @@ class VoiceSession {
             }
             this.previousState = this.state
         }
-        Debug.Printf("Voice: returning session state: %s", Object[]{((VoiceChatInfo)object).state})
+        Debug.Printf("Voice: returning session state: %s", Array<Any>{((VoiceChatInfo)object).state})
         return object
     }
 
-    public Boolean isIncoming() {
+     public fun isIncoming(): Boolean {
         return this.isIncoming
     }
 
@@ -131,7 +131,7 @@ class VoiceSession {
         this.messageController.sendRequest(vx_req_session_media_disconnect_t2.getBase())
     }
 
-    fun set3DPosition(Voice3DPosition voice3DPosition, Voice3DPosition voice3DPosition2) {
+    fun set3DPosition(voice3DPosition: Voice3DPosition, voice3DPosition2: Voice3DPosition) {
         Debug.Printf("Voice: set3D: speaker %s", voice3DPosition.toString())
         Debug.Printf("Voice: set3D: listener %s", voice3DPosition2.toString())
         vx_req_session_set_3d_position_t vx_req_session_set_3d_position_t2 = vx_req_session_set_3d_position_t()
@@ -174,10 +174,10 @@ class VoiceSession {
      * Enabled unnecessary exception pruning
      * Enabled aggressive exception aggregation
      */
-    public Boolean setLocalMicActive(Boolean bl) {
-        Object object = this.stateLock
+     public fun setLocalMicActive(bl: Boolean): Boolean {
+        val object: Object = this.stateLock
         synchronized (object) {
-            Boolean bl2 = bl != this.localMicActive
+            val bl2: Boolean = bl != this.localMicActive
             this.localMicActive = bl
             return bl2
         }
@@ -188,8 +188,8 @@ class VoiceSession {
      * Enabled unnecessary exception pruning
      * Enabled aggressive exception aggregation
      */
-    public Boolean setSpeakerSpeaking(UUID uUID, Boolean bl) {
-        Object object = this.stateLock
+     public fun setSpeakerSpeaking(uUID: UUID, bl: Boolean): Boolean {
+        val object: Object = this.stateLock
         synchronized (object) {
             if (!bl) return this.speakers.remove(uUID)
             return this.speakers.add(uUID)
@@ -201,15 +201,15 @@ class VoiceSession {
      * Enabled unnecessary exception pruning
      * Enabled aggressive exception aggregation
      */
-    public Boolean setState(VoiceChatInfo.VoiceChatState voiceChatState) {
-        Boolean bl = false
-        Object object = this.stateLock
+     public fun setState(VoiceChatInfo.VoiceChatState voiceChatState): Boolean {
+        val bl: Boolean = false
+        val object: Object = this.stateLock
         synchronized (object) {
             if (this.state != voiceChatState) {
                 this.previousState = this.state
                 this.state = voiceChatState
                 bl = true
-                Debug.Printf("Voice: session state: %s (%s)", Object[]{this.state, this})
+                Debug.Printf("Voice: session state: %s (%s)", Array<Any>{this.state, this})
             }
             return bl
         }

@@ -60,7 +60,7 @@ class GroupManager {
     @JvmStatic
     abstract class GroupMemberRolesQuery {
         @JvmStatic
-    GroupMemberRolesQuery create(UUID uuid, UUID uuid2, UUID uuid3) {
+     fun create(uuid: UUID, uuid2: UUID, uuid3: UUID): GroupMemberRolesQuery {
             return AutoValue_GroupManager_GroupMemberRolesQuery(uuid, uuid2, uuid3)
         }
 
@@ -74,7 +74,7 @@ class GroupManager {
     @JvmStatic
     abstract class GroupMembersQuery {
         @JvmStatic
-    GroupMembersQuery create(UUID uuid, UUID uuid2) {
+     fun create(uuid: UUID, uuid2: UUID): GroupMembersQuery {
             return AutoValue_GroupManager_GroupMembersQuery(uuid, uuid2)
         }
 
@@ -86,7 +86,7 @@ class GroupManager {
     @JvmStatic
     abstract class GroupRoleMembersQuery {
         @JvmStatic
-    GroupRoleMembersQuery create(UUID uuid, UUID uuid2, UUID uuid3) {
+     fun create(uuid: UUID, uuid2: UUID, uuid3: UUID): GroupRoleMembersQuery {
             return AutoValue_GroupManager_GroupRoleMembersQuery(uuid, uuid2, uuid3)
         }
 
@@ -178,8 +178,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
         this.groupMemberDataSetHandler = RateLimitRequestHandler<>(RequestProcessor<UUID, UUID, UUID>(this.groupMemberDataSetPool, userManager2.getDatabaseExecutor()) {
             /* access modifiers changed from: protected */
-            public UUID processRequest(UUID uuid) {
-                GroupMemberList groupMemberList = (GroupMemberList) GroupManager.this.groupMemberListDao.load(uuid)
+             public fun processRequest(uuid: UUID): UUID {
+                val groupMemberList: GroupMemberList = (GroupMemberList) GroupManager.this.groupMemberListDao.load(uuid)
                 if (groupMemberList != null) {
                     return groupMemberList.getRequestID()
                 }
@@ -187,14 +187,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             }
 
             /* access modifiers changed from: protected */
-            public UUID processResult(UUID uuid, UUID uuid2) {
+             public fun processResult(uuid: UUID, uuid2: UUID): UUID {
                 GroupManager.this.groupMemberListDao.insertOrReplace(GroupMemberList(uuid, uuid2))
                 return uuid2
             }
         this.groupRoleMemberDataSetHandler = RateLimitRequestHandler<>(RequestProcessor<UUID, UUID, UUID>(this.groupRoleMemberDataSetPool, userManager2.getDatabaseExecutor()) {
             /* access modifiers changed from: protected */
-            public Boolean isRequestComplete(UUID uuid, UUID uuid2) {
-                GroupRoleMemberList groupRoleMemberList = (GroupRoleMemberList) GroupManager.this.groupRoleMemberListDao.load(uuid)
+             public fun isRequestComplete(uuid: UUID, uuid2: UUID): Boolean {
+                val groupRoleMemberList: GroupRoleMemberList = (GroupRoleMemberList) GroupManager.this.groupRoleMemberListDao.load(uuid)
                 if (groupRoleMemberList != null) {
                     return !groupRoleMemberList.getMustRevalidate()
                 }
@@ -202,8 +202,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             }
 
             /* access modifiers changed from: protected */
-            public UUID processRequest(UUID uuid) {
-                GroupRoleMemberList groupRoleMemberList = (GroupRoleMemberList) GroupManager.this.groupRoleMemberListDao.load(uuid)
+             public fun processRequest(uuid: UUID): UUID {
+                val groupRoleMemberList: GroupRoleMemberList = (GroupRoleMemberList) GroupManager.this.groupRoleMemberListDao.load(uuid)
                 if (groupRoleMemberList != null) {
                     return groupRoleMemberList.getRequestID()
                 }
@@ -211,18 +211,18 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             }
 
             /* access modifiers changed from: protected */
-            public UUID processResult(UUID uuid, UUID uuid2) {
+             public fun processResult(uuid: UUID, uuid2: UUID): UUID {
                 GroupManager.this.groupRoleMemberListDao.insertOrReplace(GroupRoleMemberList(uuid, uuid2, false))
                 return uuid2
             }
         this.groupRoleMemberSubscriptionPool.attachRequestHandler(AsyncRequestHandler(userManager2.getDatabaseExecutor(), SimpleRequestHandler<GroupRoleMembersQuery>() {
-            fun onRequest(GroupRoleMembersQuery groupRoleMembersQuery) {
+            fun onRequest(groupRoleMembersQuery: GroupRoleMembersQuery) {
                 GroupManager.this.groupRoleMemberSubscriptionPool.onResultData(groupRoleMembersQuery, GroupManager.this.groupRoleMemberDao.queryBuilder().where(GroupRoleMemberDao.Properties.GroupID.eq(groupRoleMembersQuery.groupID()), GroupRoleMemberDao.Properties.RoleID.eq(groupRoleMembersQuery.roleID()), GroupRoleMemberDao.Properties.RequestID.eq(groupRoleMembersQuery.requestID())).listLazyUncached())
             }
         }))
         this.groupRoleMemberSubscriptionPool.setDisposeHandler($Lambda$u_XXTkSOKCgaVXhhUplrxzPP28(), userManager2.getDatabaseExecutor())
         this.groupMembersSubscriptionPool.attachRequestHandler(AsyncRequestHandler(userManager2.getDatabaseExecutor(), SimpleRequestHandler<GroupMembersQuery>() {
-            fun onRequest(GroupMembersQuery groupMembersQuery) {
+            fun onRequest(groupMembersQuery: GroupMembersQuery) {
                 GroupManager.this.groupMembersSubscriptionPool.onResultData(groupMembersQuery, GroupManager.this.groupMemberDao.queryBuilder().where(GroupMemberDao.Properties.GroupID.eq(groupMembersQuery.groupID()), GroupMemberDao.Properties.RequestID.eq(groupMembersQuery.requestID())).listLazyUncached())
             }
         }))
@@ -292,8 +292,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
         }, userManager2.getDatabaseExecutor())
         this.groupMemberRolesSubscriptionPool.attachRequestHandler(AsyncRequestHandler(userManager2.getDatabaseExecutor(), SimpleRequestHandler<GroupMemberRolesQuery>() {
-            fun onRequest(GroupMemberRolesQuery groupMemberRolesQuery) {
-                LazyList<GroupRoleMember> listLazyUncached = GroupManager.this.groupRoleMemberDao.queryBuilder().where(GroupRoleMemberDao.Properties.GroupID.eq(groupMemberRolesQuery.groupID()), GroupRoleMemberDao.Properties.UserID.eq(groupMemberRolesQuery.memberID()), GroupRoleMemberDao.Properties.RequestID.eq(groupMemberRolesQuery.requestID())).listLazyUncached()
+            fun onRequest(groupMemberRolesQuery: GroupMemberRolesQuery) {
+                val listLazyUncached: LazyList<GroupRoleMember> = GroupManager.this.groupRoleMemberDao.queryBuilder().where(GroupRoleMemberDao.Properties.GroupID.eq(groupMemberRolesQuery.groupID()), GroupRoleMemberDao.Properties.UserID.eq(groupMemberRolesQuery.memberID()), GroupRoleMemberDao.Properties.RequestID.eq(groupMemberRolesQuery.requestID())).listLazyUncached()
                 ImmutableSet.Builder builder = ImmutableSet.builder()
                 for (GroupRoleMember roleID : listLazyUncached) {
                     builder.add((Object) roleID.getRoleID())
@@ -306,17 +306,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     /* access modifiers changed from: private */
     /* renamed from: onAvatarGroupListsReply */
-    fun m314com_lumiyaviewer_lumiya_slproto_users_manager_GroupManagermthref0(AvatarGroupList avatarGroupList) {
+    fun m314com_lumiyaviewer_lumiya_slproto_users_manager_GroupManagermthref0(avatarGroupList: AvatarGroupList) {
         this.avatarGroupListRef.set(avatarGroupList)
         this.chatterList.notifyListUpdated(ChatterListType.Groups)
     }
 
-    public AvatarGroupList getAvatarGroupList() {
+     public fun getAvatarGroupList(): AvatarGroupList {
         return this.avatarGroupListRef.get()
     }
 
     /* access modifiers changed from: package-private */
-    public ChatterDisplayDataList getGroupList() {
+     public fun getGroupList(): ChatterDisplayDataList {
         return GroupDisplayDataList(this.userManager, this.onGroupListUpdated)
     }
 
@@ -351,7 +351,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_GroupManager_10304  reason: not valid java name */
     public /* synthetic */ Unit m315lambda$com_lumiyaviewer_lumiya_slproto_users_manager_GroupManager_10304(UUID uuid) {
-        GroupRoleMemberList groupRoleMemberList = (GroupRoleMemberList) this.groupRoleMemberListDao.load(uuid)
+        val groupRoleMemberList: GroupRoleMemberList = (GroupRoleMemberList) this.groupRoleMemberListDao.load(uuid)
         if (groupRoleMemberList != null) {
             groupRoleMemberList.setMustRevalidate(true)
             this.groupRoleMemberListDao.update(groupRoleMemberList)
@@ -359,7 +359,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         this.groupRoleMemberDataSetPool.requestUpdate(uuid)
     }
 
-    fun requestGroupRoleMembersRefresh(UUID uuid) {
+    fun requestGroupRoleMembersRefresh(uuid: UUID) {
         this.userManager.getDatabaseExecutor().execute(Runnable(this, uuid) {
 
             /* renamed from: -$f0 */
@@ -433,7 +433,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     }
 
-    fun requestRefreshMemberList(UUID uuid) {
+    fun requestRefreshMemberList(uuid: UUID) {
         this.groupMemberDataSetPool.requestUpdate(uuid)
     }
 }

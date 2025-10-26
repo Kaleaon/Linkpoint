@@ -36,16 +36,16 @@ class DrawableHUD {
         addObject(drawEntryList, sLObjectInfo, MatrixStack(), true)
     }
 
-    private Unit addObject(DrawEntryList drawEntryList, SLObjectInfo sLObjectInfo, MatrixStack matrixStack, Boolean z) {
+     private fun addObject(drawEntryList: DrawEntryList, sLObjectInfo: SLObjectInfo, matrixStack: MatrixStack, z: Boolean) {
         matrixStack.glPushMatrix()
         processObjectExtents(sLObjectInfo, matrixStack, z)
-        InlineListEntry drawListEntry = sLObjectInfo.getDrawListEntry()
+        val drawListEntry: InlineListEntry = sLObjectInfo.getDrawListEntry()
         drawEntryList.addEntry(drawListEntry)
         if (drawListEntry instanceof DrawListPrimEntry) {
             this.hudObjects.add(((DrawListPrimEntry) drawListEntry).getDrawableAttachment(this.drawableStore, this.attachedTo))
         }
         for (LinkedTreeNode firstChild = sLObjectInfo.treeNode.getFirstChild(); firstChild != null; firstChild = firstChild.getNextChild()) {
-            SLObjectInfo sLObjectInfo2 = (SLObjectInfo) firstChild.getDataObject()
+            val sLObjectInfo2: SLObjectInfo = (SLObjectInfo) firstChild.getDataObject()
             if (sLObjectInfo2 != null) {
                 addObject(drawEntryList, sLObjectInfo2, matrixStack, false)
             }
@@ -53,12 +53,12 @@ class DrawableHUD {
         matrixStack.glPopMatrix()
     }
 
-    private Unit processObjectExtents(SLObjectInfo sLObjectInfo, MatrixStack matrixStack, Boolean z) {
+     private fun processObjectExtents(sLObjectInfo: SLObjectInfo, matrixStack: MatrixStack, z: Boolean) {
         r0 = Float[8]
-        Vector3Array objectCoords = sLObjectInfo.getObjectCoords()
-        Int elementOffset = objectCoords.getElementOffset(0)
-        Int elementOffset2 = objectCoords.getElementOffset(1)
-        Float[] data = objectCoords.getData()
+        val objectCoords: Vector3Array = sLObjectInfo.getObjectCoords()
+        val elementOffset: Int = objectCoords.getElementOffset(0)
+        val elementOffset2: Int = objectCoords.getElementOffset(1)
+        val data: FloatArray = objectCoords.getData()
         matrixStack.glTranslatef(data[elementOffset + 0], data[elementOffset + 1], data[elementOffset + 2])
         matrixStack.glMultMatrixf(sLObjectInfo.getRotation().getInverseMatrix(), 0)
         r0[0] = (-data[elementOffset2 + 0]) / 2.0f
@@ -94,25 +94,25 @@ class DrawableHUD {
         this.maxPos.z = Math.max(this.maxPos.z, r0[6])
     }
 
-    public ObjectIntersectInfo Draw(RenderContext renderContext, Float f, Float f2, Float f3, TouchHUDEvent touchHUDEvent, Boolean z) {
+    public fun Draw(renderContext: RenderContext, f: Float, f2: Float, f3: Float, touchHUDEvent: TouchHUDEvent, z: Boolean): ObjectIntersectInfo {
         ObjectIntersectInfo objectIntersectInfo
-        ObjectIntersectInfo objectIntersectInfo2 = null
+        val objectIntersectInfo2: ObjectIntersectInfo = null
         renderContext.glModelPushMatrix()
-        Float f4 = (this.minPos.y + this.maxPos.y) / 2.0f
-        Float f5 = (this.minPos.z + this.maxPos.z) / 2.0f
-        Float max = Math.max(this.maxPos.y - this.minPos.y, this.maxPos.z - this.minPos.z)
+        val f4: Float = (this.minPos.y + this.maxPos.y) / 2.0f
+        val f5: Float = (this.minPos.z + this.maxPos.z) / 2.0f
+        val max: Float = Math.max(this.maxPos.y - this.minPos.y, this.maxPos.z - this.minPos.z)
         if (max > 0.001f) {
             max = (1.0f / max) * f
             renderContext.glModelScalef(1.0f, max, max)
         }
         renderContext.glModelTranslatef(-this.minPos.x, (-f4) + f2, (-f5) + f3)
-        Iterator it = this.hudObjects.iterator()
+        val it: Iterator = this.hudObjects.iterator()
         while (true) {
             objectIntersectInfo = objectIntersectInfo2
             if (!it.hasNext()) {
                 break
             }
-            DrawableObject drawableObject = (DrawableObject) it.next()
+            val drawableObject: DrawableObject = (DrawableObject) it.next()
             if (z) {
                 drawableObject.DrawHoverText(renderContext, true)
                 objectIntersectInfo2 = objectIntersectInfo
@@ -140,7 +140,7 @@ class DrawableHUD {
         return objectIntersectInfo
     }
 
-    public SLAttachmentPoint getAttachmentPoint() {
+     public fun getAttachmentPoint(): SLAttachmentPoint {
         return this.attachmentPoint
     }
 }

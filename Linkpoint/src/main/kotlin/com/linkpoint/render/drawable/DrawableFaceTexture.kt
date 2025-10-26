@@ -28,7 +28,7 @@ class DrawableFaceTexture : ResourceConsumer, GLCleanable {
     }
 
     val Boolean GLDraw(RenderContext renderContext) {
-        GLLoadedTexture gLLoadedTexture = this.loadedTexture
+        val gLLoadedTexture: GLLoadedTexture = this.loadedTexture
         if (gLLoadedTexture != null) {
             gLLoadedTexture.GLDraw()
             return true
@@ -43,9 +43,9 @@ class DrawableFaceTexture : ResourceConsumer, GLCleanable {
         }
     }
 
-    fun OnResourceReady(Object obj, Boolean z) {
+    fun OnResourceReady(obj: Object, z: Boolean) {
         if (obj instanceof GLLoadedTexture) {
-            GLLoadedTexture gLLoadedTexture = (GLLoadedTexture) obj
+            val gLLoadedTexture: GLLoadedTexture = (GLLoadedTexture) obj
             this.loadedTexture = gLLoadedTexture
             this.hasAlphaLayer = gLLoadedTexture.hasAlphaLayer()
         } else if (obj == null) {
@@ -55,7 +55,7 @@ class DrawableFaceTexture : ResourceConsumer, GLCleanable {
     }
 
     /* access modifiers changed from: package-private */
-    public Boolean hasAlphaLayer() {
+     public fun hasAlphaLayer(): Boolean {
         return this.hasAlphaLayer
     }
 }

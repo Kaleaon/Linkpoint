@@ -33,8 +33,8 @@ class VoiceEnablePreference : CheckBoxPreference() {
         initVoicePrefCapability()
     }
 
-    private Unit initVoicePrefCapability() {
-        Boolean isPluginSupported = VoicePluginServiceConnection.isPluginSupported()
+     private fun initVoicePrefCapability() {
+        val isPluginSupported: Boolean = VoicePluginServiceConnection.isPluginSupported()
         setEnabled(isPluginSupported)
         if (!isPluginSupported) {
             setChecked(false)
@@ -46,7 +46,7 @@ class VoiceEnablePreference : CheckBoxPreference() {
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_settings_VoiceEnablePreference_2130  reason: not valid java name */
     public /* synthetic */ Unit m862lambda$com_lumiyaviewer_lumiya_ui_settings_VoiceEnablePreference_2130(DialogInterface dialogInterface, Int i) {
         dialogInterface.dismiss()
-        Intent intent = Intent("android.intent.action.VIEW")
+        val intent: Intent = Intent("android.intent.action.VIEW")
         intent.setData(Uri.parse(LicenseChecker.VOICE_PLUGIN_URL))
         getContext().startActivity(intent)
     }
@@ -56,7 +56,7 @@ class VoiceEnablePreference : CheckBoxPreference() {
         VoicePluginServiceConnection.setInstallOfferDisplayed(true)
         super.onClick()
         if (isChecked() && !VoicePluginServiceConnection.checkPluginInstalled(getContext())) {
-            AlertDialog.Builder(getContext()).setTitle((Int) R.string.enable_voice).setMessage((CharSequence) getContext().getString(R.string.enable_voice_plugin_message, Object[]{LicenseChecker.APP_STORE_NAME})).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
+            AlertDialog.Builder(getContext()).setTitle((Int) R.string.enable_voice).setMessage((CharSequence) getContext().getString(R.string.enable_voice_plugin_message, Array<Any>{LicenseChecker.APP_STORE_NAME})).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
 
                 /* renamed from: -$f0 */
                 private val /* synthetic */ Object f585$f0

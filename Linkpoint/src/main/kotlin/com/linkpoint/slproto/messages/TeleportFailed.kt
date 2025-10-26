@@ -13,14 +13,14 @@ class TeleportFailed : SLMessage() {
 
     @JvmStatic
     class AlertInfo {
-        public Byte[] ExtraParams
-        public Byte[] Message
+        public ByteArray ExtraParams
+        public ByteArray Message
     }
 
     @JvmStatic
     class Info {
         public UUID AgentID
-        public Byte[] Reason
+        public ByteArray Reason
     }
 
     public TeleportFailed() {
@@ -28,24 +28,24 @@ class TeleportFailed : SLMessage() {
         this.Info_Field = Info()
     }
 
-    public Int CalcPayloadSize() {
-        Int length = this.Info_Field.Reason.length + 17 + 4 + 1
-        Iterator<T> it = this.AlertInfo_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val length: Int = this.Info_Field.Reason.length + 17 + 4 + 1
+        val it: Iterator<T> = this.AlertInfo_Fields.iterator()
         while (true) {
-            Int i = length
+            val i: Int = length
             if (!it.hasNext()) {
                 return i
             }
-            AlertInfo alertInfo = (AlertInfo) it.next()
+            val alertInfo: AlertInfo = (AlertInfo) it.next()
             length = alertInfo.ExtraParams.length + alertInfo.Message.length + 1 + 1 + i
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleTeleportFailed(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 74)
@@ -58,12 +58,12 @@ class TeleportFailed : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.Info_Field.AgentID = unpackUUID(byteBuffer)
         this.Info_Field.Reason = unpackVariable(byteBuffer, 1)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            AlertInfo alertInfo = AlertInfo()
+            val alertInfo: AlertInfo = AlertInfo()
             alertInfo.Message = unpackVariable(byteBuffer, 1)
             alertInfo.ExtraParams = unpackVariable(byteBuffer, 1)
             this.AlertInfo_Fields.add(alertInfo)

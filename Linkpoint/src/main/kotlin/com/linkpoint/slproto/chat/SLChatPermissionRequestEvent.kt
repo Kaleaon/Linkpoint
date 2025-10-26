@@ -29,7 +29,7 @@ val class SLChatPermissionRequestEvent : SLChatYesNoEvent() {
     /* JADX INFO: super call moved to the top of the method (can break code semantics) */
     public SLChatPermissionRequestEvent(ScriptQuestion scriptQuestion, UUID uuid) {
         super(ChatMessageSourceObject(scriptQuestion.Data_Field.TaskID, SLMessage.stringFromVariableOEM(scriptQuestion.Data_Field.ObjectName)), uuid, (String) null)
-        Int i = 0
+        val i: Int = 0
         this.ObjectOwner = SLMessage.stringFromVariableOEM(scriptQuestion.Data_Field.ObjectOwner)
         this.ItemID = scriptQuestion.Data_Field.ItemID
         for (SLScriptPermissions sLScriptPermissions : SLScriptPermissions.values()) {
@@ -45,24 +45,24 @@ val class SLChatPermissionRequestEvent : SLChatYesNoEvent() {
         return SLChatEvent.ChatMessageType.PermissionRequest
     }
 
-    public String getNoButton(Context context) {
+     public fun getNoButton(context: Context): String {
         return context.getString(R.string.permission_request_no)
     }
 
-    public String getNoMessage(Context context) {
+     public fun getNoMessage(context: Context): String {
         return context.getString(R.string.permission_request_declined)
     }
 
-    public String getQuestion(Context context) {
+     public fun getQuestion(context: Context): String {
         return context.getString(R.string.permission_request_question)
     }
 
-    public Int getQuestions() {
+     public fun getQuestions(): Int {
         return this.Questions
     }
 
-    public String getText(Context context, UserManager userManager) {
-        String str = ""
+     public fun getText(context: Context, userManager: UserManager): String {
+        val str: String = ""
         for (SLScriptPermissions sLScriptPermissions : SLScriptPermissions.values()) {
             if ((this.Questions & sLScriptPermissions.getPermMask()) != 0) {
                 if (!str.equals("")) {
@@ -71,37 +71,37 @@ val class SLChatPermissionRequestEvent : SLChatYesNoEvent() {
                 str = str + sLScriptPermissions.getMessage()
             }
         }
-        return context.getString(R.string.permission_request_format, Object[]{this.ObjectOwner, str})
+        return context.getString(R.string.permission_request_format, Array<Any>{this.ObjectOwner, str})
     }
 
-    public String getYesButton(Context context) {
+     public fun getYesButton(context: Context): String {
         return context.getString(R.string.permission_request_yes)
     }
 
-    public String getYesMessage(Context context) {
+     public fun getYesMessage(context: Context): String {
         return context.getString(R.string.permission_request_accepted)
     }
 
-    public Boolean isObjectPopup() {
+     public fun isObjectPopup(): Boolean {
         return true
     }
 
     /* access modifiers changed from: protected */
-    fun onNoAction(Context context, UserManager userManager) {
+    fun onNoAction(context: Context, userManager: UserManager) {
         super.onNoAction(context, userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    fun onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(context: Context, userManager: UserManager) {
         super.onYesAction(context, userManager)
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+        val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
             activeAgentCircuit.getModules().avatarControl.ScriptAnswerYes(this.ItemID, this.source.getSourceUUID(), this.Questions)
         }
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    fun serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setItemID(this.ItemID)
         chatMessage.setItemName(this.ObjectOwner)

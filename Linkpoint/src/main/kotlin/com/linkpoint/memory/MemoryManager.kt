@@ -23,35 +23,35 @@ class MemoryManager {
         this.activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE)
     }
     
-    fun addMemoryPressureListener(MemoryPressureListener listener) {
+    fun addMemoryPressureListener(listener: MemoryPressureListener) {
         listeners.add(listener)
     }
     
-    fun removeMemoryPressureListener(MemoryPressureListener listener) {
+    fun removeMemoryPressureListener(listener: MemoryPressureListener) {
         listeners.remove(listener)
     }
     
-    fun trackAllocation(String key, Object resource, Long size) {
+    fun trackAllocation(key: String, resource: Object, size: Long) {
         resourceCache.put(key, WeakReference<>(resource))
         totalAllocated.addAndGet(size)
         
         checkMemoryPressure()
     }
     
-    fun trackDeallocation(String key, Long size) {
+    fun trackDeallocation(key: String, size: Long) {
         resourceCache.remove(key)
         totalAllocated.addAndGet(-size)
     }
     
-    private Unit checkMemoryPressure() {
+     private fun checkMemoryPressure() {
         ActivityManager.MemoryInfo memInfo = ActivityManager.MemoryInfo()
         activityManager.getMemoryInfo(memInfo)
         
-        Long availableMemory = memInfo.availMem
-        Long totalMemory = memInfo.totalMem
-        Long usedMemory = totalMemory - availableMemory
+        val availableMemory: Long = memInfo.availMem
+        val totalMemory: Long = memInfo.totalMem
+        val usedMemory: Long = totalMemory - availableMemory
         
-        Float memoryUsagePercent = (Float) usedMemory / totalMemory
+        val memoryUsagePercent: Float = (Float) usedMemory / totalMemory
         
         if (memoryUsagePercent > 0.8f) {
             Log.w(TAG, "High memory usage detected: " + (memoryUsagePercent * 100) + "%")
@@ -72,7 +72,7 @@ class MemoryManager {
         notifyMemoryPressureListeners()
     }
     
-    private Unit notifyMemoryPressureListeners() {
+     private fun notifyMemoryPressureListeners() {
         for (MemoryPressureListener listener : listeners) {
             try {
                 listener.onMemoryPressure()
@@ -82,21 +82,21 @@ class MemoryManager {
         }
     }
     
-    public Long getTotalAllocatedMemory() {
+     public fun getTotalAllocatedMemory(): Long {
         return totalAllocated.get()
     }
     
-    public Int getCachedResourceCount() {
+     public fun getCachedResourceCount(): Int {
         return resourceCache.size()
     }
     
-    public Float getMemoryUsagePercent() {
+     public fun getMemoryUsagePercent(): Float {
         ActivityManager.MemoryInfo memInfo = ActivityManager.MemoryInfo()
         activityManager.getMemoryInfo(memInfo)
         
-        Long availableMemory = memInfo.availMem
-        Long totalMemory = memInfo.totalMem
-        Long usedMemory = totalMemory - availableMemory
+        val availableMemory: Long = memInfo.availMem
+        val totalMemory: Long = memInfo.totalMem
+        val usedMemory: Long = totalMemory - availableMemory
         
         return (Float) usedMemory / totalMemory
     }

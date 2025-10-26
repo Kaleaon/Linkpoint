@@ -42,7 +42,7 @@ private SharedPreferences prefs
 private ModernLinkpointDemo modernDemo
 
     @JvmStatic
-    String getAppVersion() {
+     fun getAppVersion(): String {
         try {
             return mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0).versionName
         } catch (NameNotFoundException e) {
@@ -55,12 +55,12 @@ private ModernLinkpointDemo modernDemo
      * Get application startup status and any initialization errors
      */
     @JvmStatic
-    String getStartupStatus() {
+     fun getStartupStatus(): String {
         if (mContext == null) {
             return "Application context not initialized"
         }
         
-        StringBuilder status = StringBuilder()
+        val status: StringBuilder = StringBuilder()
         status.append("Linkpoint Application Status:\n")
         status.append("- Context: ").append(mContext != null ? "OK" : "NULL").append("\n")
         status.append("- Modern Components: ").append(modernDemo != null ? "Active" : "Safe Mode").append("\n")
@@ -83,7 +83,7 @@ private ModernLinkpointDemo modernDemo
      * Upload debug logs immediately (for debug builds only)
      */
     @JvmStatic
-    Unit uploadDebugLogsNow(String reason) {
+     fun uploadDebugLogsNow(reason: String) {
         if (mContext != null) {
             try {
                 AutoLogUploader.getInstance(mContext).uploadLogsNow(reason)
@@ -97,7 +97,7 @@ private ModernLinkpointDemo modernDemo
      * Report a crash for automatic upload (debug builds only)
      */
     @JvmStatic
-    Unit reportCrash(Throwable crash, String additionalInfo) {
+     fun reportCrash(crash: Throwable, additionalInfo: String) {
         if (mContext != null) {
             try {
                 AutoLogUploader.getInstance(mContext).uploadCrashReport(crash, additionalInfo)
@@ -108,17 +108,17 @@ private ModernLinkpointDemo modernDemo
     }
 
     @JvmStatic
-    AssetManager getAssetManager() {
+     fun getAssetManager(): AssetManager {
         return mContext != null ? mContext.getAssets() : null
     }
 
     @JvmStatic
-    Context getContext() {
+     fun getContext(): Context {
         return mContext
     }
 
     @JvmStatic
-    SharedPreferences getDefaultSharedPreferences() {
+     fun getDefaultSharedPreferences(): SharedPreferences {
         if (prefs == null) {
             prefs = PreferenceManager.getDefaultSharedPreferences(getContext())
         }
@@ -126,22 +126,22 @@ private ModernLinkpointDemo modernDemo
     }
 
     @JvmStatic
-    Boolean isSplitScreenNeeded(Context context) {
-        String string = getDefaultSharedPreferences().getString("split_screens", "auto")
+     fun isSplitScreenNeeded(context: Context): Boolean {
+        val string: String = getDefaultSharedPreferences().getString("split_screens", "auto")
         if (string.equals("never")) {
             return false
         }
         if (string.equals("always")) {
             return true
         }
-        Display defaultDisplay = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay()
+        val defaultDisplay: Display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay()
         if (string.equals("landscape")) {
             return defaultDisplay.getWidth() > defaultDisplay.getHeight()
         } else {
             defaultDisplay.getMetrics(displayMetrics)
-            Float f = ((Float) displayMetrics.heightPixels) / displayMetrics.ydpi
-            Float f2 = ((Float) displayMetrics.widthPixels) / displayMetrics.xdpi
-            Double diagonalInches = Math.sqrt((Double) ((f * f) + (f2 * f2)))
+            val f: Float = ((Float) displayMetrics.heightPixels) / displayMetrics.ydpi
+            val f2: Float = ((Float) displayMetrics.widthPixels) / displayMetrics.xdpi
+            val diagonalInches: Double = Math.sqrt((Double) ((f * f) + (f2 * f2)))
             if (diagonalInches <= 6.5d || f2 < 5.0f) {
                 return false
             }
@@ -152,10 +152,10 @@ private ModernLinkpointDemo modernDemo
     }
 
     @JvmStatic
-    Unit restartApp() {
+     fun restartApp() {
         try {
-            AlarmManager alarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE)
-            PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, 
+            val alarmManager: AlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE)
+            val pendingIntent: PendingIntent = PendingIntent.getActivity(getContext(), 0, 
                 Intent(getContext(), LauncherActivity.class), 
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE)
             alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, pendingIntent)
@@ -226,7 +226,7 @@ private ModernLinkpointDemo modernDemo
      * Initialize modern Second Life protocol and rendering systems
      * Uses defensive programming to prevent crashes if modern components fail
      */
-    private Unit initializeModernSystems() {
+     private fun initializeModernSystems() {
         Log.i(TAG, "Initializing modern Linkpoint components...")
         
         try {
@@ -286,7 +286,7 @@ private ModernLinkpointDemo modernDemo
     /**
      * Perform system compatibility checks before initializing modern components
      */
-    private Boolean performSystemChecks() {
+     private fun performSystemChecks(): Boolean {
         try {
             // Check if we have a valid context
             if (mContext == null) {
@@ -295,17 +295,17 @@ private ModernLinkpointDemo modernDemo
             }
             
             // Check if we have basic Android API requirements
-            Int apiLevel = android.os.Build.VERSION.SDK_INT
+            val apiLevel: Int = android.os.Build.VERSION.SDK_INT
             if (apiLevel < 21) { // API 21 = Android 5.0 minimum
                 Log.w(TAG, "Android API level " + apiLevel + " below minimum for modern components (21)")
                 return false
             }
             
             // Check available memory
-            Runtime runtime = Runtime.getRuntime()
-            Long freeMemory = runtime.freeMemory()
-            Long totalMemory = runtime.totalMemory()
-            Double memoryUsage = (Double)(totalMemory - freeMemory) / totalMemory
+            val runtime: Runtime = Runtime.getRuntime()
+            val freeMemory: Long = runtime.freeMemory()
+            val totalMemory: Long = runtime.totalMemory()
+            val memoryUsage: Double = (Double)(totalMemory - freeMemory) / totalMemory
             
             if (memoryUsage > 0.8) { // If using more than 80% of heap
                 Log.w(TAG, "Memory usage too high (" + (memoryUsage * 100) + "%) - skipping modern components")
@@ -324,9 +324,9 @@ private ModernLinkpointDemo modernDemo
     /**
      * Initialize debug log upload system for debug builds only
      */
-    private Unit initializeDebugLogUpload() {
+     private fun initializeDebugLogUpload() {
         try {
-            AutoLogUploader logUploader = AutoLogUploader.getInstance(this)
+            val logUploader: AutoLogUploader = AutoLogUploader.getInstance(this)
             logUploader.initializeAutoUpload()
             Log.i(TAG, "Debug log upload system initialized")
         } catch (Exception e) {
@@ -339,7 +339,7 @@ private ModernLinkpointDemo modernDemo
      * Get modern components demo instance
      */
     @JvmStatic
-    ModernLinkpointDemo getModernDemo() {
+     fun getModernDemo(): ModernLinkpointDemo {
         return modernDemo
     }
 

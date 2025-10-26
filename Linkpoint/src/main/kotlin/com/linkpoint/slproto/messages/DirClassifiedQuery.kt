@@ -20,22 +20,22 @@ class DirClassifiedQuery : SLMessage() {
         public Int QueryFlags
         public UUID QueryID
         public Int QueryStart
-        public Byte[] QueryText
+        public ByteArray QueryText
     }
 
     public DirClassifiedQuery() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.QueryData_Field.QueryText.length + 17 + 4 + 4 + 4 + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleDirClassifiedQuery(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 39)
@@ -48,7 +48,7 @@ class DirClassifiedQuery : SLMessage() {
         packInt(byteBuffer, this.QueryData_Field.QueryStart)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)

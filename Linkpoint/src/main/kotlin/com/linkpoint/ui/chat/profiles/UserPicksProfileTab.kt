@@ -53,7 +53,7 @@ private class PicksAdapter : BaseAdapter() {
             this(context)
         }
 
-        public Int getCount() {
+         public fun getCount(): Int {
             if (this.picksReply != null) {
                 return this.picksReply.Data_Fields.size()
             }
@@ -67,11 +67,11 @@ private class PicksAdapter : BaseAdapter() {
             return this.picksReply.Data_Fields.get(i)
         }
 
-        public Long getItemId(Int i) {
+         public fun getItemId(i: Int): Long {
             return (Long) i
         }
 
-        public View getView(Int i, View view, ViewGroup viewGroup) {
+         public fun getView(i: Int, view: View, viewGroup: ViewGroup): View {
             if (view == null) {
                 view = this.inflater.inflate(17367043, viewGroup, false)
             }
@@ -82,12 +82,12 @@ private class PicksAdapter : BaseAdapter() {
             return view
         }
 
-        public Boolean hasStableIds() {
+         public fun hasStableIds(): Boolean {
             return false
         }
 
         /* access modifiers changed from: package-private */
-        fun setData(AvatarPicksReply avatarPicksReply) {
+        fun setData(avatarPicksReply: AvatarPicksReply) {
             this.picksReply = avatarPicksReply
             notifyDataSetChanged()
         }
@@ -95,18 +95,18 @@ private class PicksAdapter : BaseAdapter() {
 
     /* access modifiers changed from: private */
     /* renamed from: onAddNewPick */
-    fun m520com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTabmthref0(View view) {
-        ParcelData parcelData = null
+    fun m520com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTabmthref0(view: View) {
+        val parcelData: ParcelData = null
         if (this.userManager != null && (this.chatterID instanceof ChatterID.ChatterIDUser)) {
-            CurrentLocationInfo currentLocationInfoSnapshot = this.userManager.getCurrentLocationInfoSnapshot()
+            val currentLocationInfoSnapshot: CurrentLocationInfo = this.userManager.getCurrentLocationInfoSnapshot()
             if (currentLocationInfoSnapshot != null) {
                 parcelData = currentLocationInfoSnapshot.parcelData()
             }
-            SLAgentCircuit activeAgentCircuit = this.userManager.getActiveAgentCircuit()
+            val activeAgentCircuit: SLAgentCircuit = this.userManager.getActiveAgentCircuit()
             if (parcelData != null && activeAgentCircuit != null) {
-                Int count = this.picksAdapter != null ? this.picksAdapter.getCount() : 0
+                val count: Int = this.picksAdapter != null ? this.picksAdapter.getCount() : 0
                 AlertDialog.Builder builder = AlertDialog.Builder(getContext())
-                String str = (String) Optional.fromNullable(Strings.emptyToNull(parcelData.getName())).or(getString(R.string.name_loading_title))
+                val str: String = (String) Optional.fromNullable(Strings.emptyToNull(parcelData.getName())).or(getString(R.string.name_loading_title))
                 builder.setMessage(getString(R.string.create_pick_question, str)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(count, this, activeAgentCircuit, str, parcelData) {
 
                     /* renamed from: -$f0 */
@@ -216,7 +216,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTab_2539  reason: not valid java name */
     public /* synthetic */ Unit m521lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTab_2539(AdapterView adapterView, View view, Int i, Long j) {
-        Object item = adapterView.getAdapter().getItem(i)
+        val item: Object = adapterView.getAdapter().getItem(i)
         if ((item instanceof AvatarPicksReply.Data) && (this.chatterID instanceof ChatterID.ChatterIDUser)) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserPickFragment.class, UserPickFragment.makeSelection(this.chatterID.agentUUID, AvatarPickKey(((ChatterID.ChatterIDUser) this.chatterID).getChatterUUID(), ((AvatarPicksReply.Data) item).PickID)))
         }
@@ -225,14 +225,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTab_4543  reason: not valid java name */
     public /* synthetic */ Unit m522lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTab_4543(SLAgentCircuit sLAgentCircuit, String str, ParcelData parcelData, Int i, DialogInterface dialogInterface, Int i2) {
-        UUID randomUUID = UUID.randomUUID()
+        val randomUUID: UUID = UUID.randomUUID()
         sLAgentCircuit.getModules().userProfiles.UpdatePickInfo(randomUUID, this.userManager.getUserID(), UUIDPool.ZeroUUID, str, Strings.nullToEmpty(parcelData.getDescription()), (UUID) Optional.fromNullable(parcelData.getSnapshotUUID()).or(UUIDPool.ZeroUUID), sLAgentCircuit.getAgentGlobalPosition(), i, true)
         DetailsActivity.showEmbeddedDetails(getActivity(), UserPickFragment.class, UserPickFragment.makeSelection(this.chatterID.agentUUID, AvatarPickKey(((ChatterID.ChatterIDUser) this.chatterID).getChatterUUID(), randomUUID)))
         dialogInterface.dismiss()
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View inflate = layoutInflater.inflate(R.layout.user_profile_tab_picks, viewGroup, false)
+     public fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+        val inflate: View = layoutInflater.inflate(R.layout.user_profile_tab_picks, viewGroup, false)
         this.picksAdapter = PicksAdapter(layoutInflater.getContext(), (PicksAdapter) null)
         inflate.findViewById(R.id.add_new_pick_button).setOnClickListener(View.OnClickListener(this) {
 
@@ -389,9 +389,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(ChatterID chatterID) {
+    fun onShowUser(chatterID: ChatterID) {
         UserManager userManager
-        Int i = 0
+        val i: Int = 0
         this.loadableMonitor.unsubscribeAll()
         if (!(chatterID instanceof ChatterID.ChatterIDUser) || (userManager = chatterID.getUserManager()) == null) {
             z = false
@@ -399,9 +399,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             z = userManager.getUserID().equals(((ChatterID.ChatterIDUser) chatterID).getChatterUUID())
             this.avatarPicks.subscribe(userManager.getAvatarPicks().getPool(), ((ChatterID.ChatterIDUser) chatterID).getChatterUUID())
         }
-        View view = getView()
+        val view: View = getView()
         if (view != null) {
-            View findViewById = view.findViewById(R.id.add_new_pick_button)
+            val findViewById: View = view.findViewById(R.id.add_new_pick_button)
             if (!z) {
                 i = 8
             }

@@ -102,8 +102,8 @@ class SLCircuit : SLMessageHandler() {
         this.selectionKey.attach(this)
     }
 
-    private Unit DumpDebugBuffer(String str, ByteBuffer byteBuffer) {
-        StringBuilder stringBuilder = StringBuilder()
+    private fun DumpDebugBuffer(str: String, byteBuffer: ByteBuffer) {
+        val stringBuilder: StringBuilder = StringBuilder()
         stringBuilder.append(str).append(": ")
         for (Int i = 0; i < byteBuffer.limit(); i++) {
             stringBuilder.append(Integer.toHexString(byteBuffer.get(i) & 255))
@@ -111,15 +111,15 @@ class SLCircuit : SLMessageHandler() {
         Debug.Log(stringBuilder.toString())
     }
 
-    private Unit ProcessResends() {
-        Boolean z2 = false
-        Iterator it = this.unackedQueue.iterator()
+    private fun ProcessResends() {
+        val z2: Boolean = false
+        val it: Iterator = this.unackedQueue.iterator()
         while (true) {
             z = z2
             if (!it.hasNext()) {
                 break
             }
-            SLMessage sLMessage = (SLMessage) it.next()
+            val sLMessage: SLMessage = (SLMessage) it.next()
             if (System.currentTimeMillis() >= sLMessage.sentTimeMillis + PING_INTERVAL) {
                 it.remove()
                 sLMessage.retries++
@@ -154,33 +154,33 @@ class SLCircuit : SLMessageHandler() {
         ProcessCloseCircuit()
     }
 
-    fun DefaultEventQueueHandler(CapsEventType capsEventType, LLSDNode lLSDNode) {
+    fun DefaultEventQueueHandler(capsEventType: CapsEventType, lLSDNode: LLSDNode) {
         if (!this.messageRouter.handleEventQueueMessage(capsEventType, lLSDNode)) {
             Debug.Log("Unhandled event queue msg: type = " + capsEventType)
         }
     }
 
-    fun DefaultMessageHandler(SLMessage sLMessage) {
-        Boolean handleMessage = this.messageRouter.handleMessage(sLMessage)
+    fun DefaultMessageHandler(sLMessage: SLMessage) {
+        val handleMessage: Boolean = this.messageRouter.handleMessage(sLMessage)
     }
 
-    fun HandleMessage(SLMessage sLMessage) {
+    fun HandleMessage(sLMessage: SLMessage) {
         sLMessage.handleMessage(this)
     }
 
-    fun HandlePacketAck(PacketAck packetAck) {
+    fun HandlePacketAck(packetAck: PacketAck) {
         for (Packets packets : packetAck.Packets_Fields) {
             ProcessReceivedAck(packets.ID)
         }
     }
 
-    fun HandleStartPingCheck(StartPingCheck startPingCheck) {
-        SLMessage completePingCheck = CompletePingCheck()
+    fun HandleStartPingCheck(startPingCheck: StartPingCheck) {
+        val completePingCheck: SLMessage = CompletePingCheck()
         completePingCheck.PingID_Field.PingID = startPingCheck.PingID_Field.PingID
         SendMessage(completePingCheck)
     }
 
-    protected Unit InvokeProcessIdle() {
+    protected fun InvokeProcessIdle() {
         ProcessIdle()
         for (SLIdleHandler ProcessIdle : this.idleHandlers) {
             ProcessIdle.ProcessIdle()
@@ -196,13 +196,13 @@ class SLCircuit : SLMessageHandler() {
     fun ProcessNetworkError() {
     }
 
-    public Boolean ProcessReceive() throws java.io.IOException {
+    public fun ProcessReceive(): Boolean throws java.io.IOException {
         // Clear and prepare buffer for reading
         this.rxBuffer.clear()
         this.rxBuffer.order(ByteOrder.BIG_ENDIAN)
         
         // Try to read from the datagram channel
-        Int bytesRead = this.datagramChannel.read(this.rxBuffer)
+        val bytesRead: Int = this.datagramChannel.read(this.rxBuffer)
         if (bytesRead == 0) {
             return false
         }
@@ -212,7 +212,7 @@ class SLCircuit : SLMessageHandler() {
         this.receivedAcks.clear()
         
         // Unpack the message
-        SLMessage message = SLMessage.Unpack(this.rxBuffer, this.tempBuffer, this.receivedAcks)
+        val message: SLMessage = SLMessage.Unpack(this.rxBuffer, this.tempBuffer, this.receivedAcks)
         if (message == null) {
             Debug.Log("message discarded!")
             return true
@@ -223,8 +223,8 @@ class SLCircuit : SLMessageHandler() {
         this.pingSentCount = 0
         
         // Check for out-of-order packets
-        Boolean isDuplicate = false
-        Int seqDiff = message.seqNum - this.lastReceivedSeqnum
+        val isDuplicate: Boolean = false
+        val seqDiff: Int = message.seqNum - this.lastReceivedSeqnum
         if (seqDiff <= 0) {
             Debug.Printf("Detected incoming out of order: seqNum = %d", message.seqNum)
             
@@ -241,7 +241,7 @@ class SLCircuit : SLMessageHandler() {
             }
         }
         
-        SLMessage messageToHandle = null
+        val messageToHandle: SLMessage = null
         if (!isDuplicate) {
             // Maintain the handled packets queue (LRU with max size)
             while (this.handledPackets.size() >= TRACK_HANDLED_PACKETS) {
@@ -267,7 +267,7 @@ class SLCircuit : SLMessageHandler() {
         // Add reliable messages to pending acks (unless duplicate)
         if (message != null && message.isReliable && !isDuplicate) {
             // Check if we already have this sequence number in pending acks
-            Boolean alreadyPending = false
+            val alreadyPending: Boolean = false
             for (Integer pendingSeq : this.pendingAcks) {
                 if (pendingSeq == message.seqNum) {
                     alreadyPending = true
@@ -287,9 +287,9 @@ class SLCircuit : SLMessageHandler() {
         return true
     }
 
-    fun ProcessReceivedAck(Int i) {
+    fun ProcessReceivedAck(i: Int) {
         SLMessage sLMessage
-        Iterator it = this.unackedQueue.iterator()
+        val it: Iterator = this.unackedQueue.iterator()
         while (it.hasNext()) {
             sLMessage = (SLMessage) it.next()
             if (sLMessage.seqNum == i) {
@@ -310,11 +310,11 @@ class SLCircuit : SLMessageHandler() {
     fun ProcessTimeout() {
     }
 
-    public Boolean ProcessTransmit() throws IOException {
-        SLMessage sLMessage = (SLMessage) this.outgoingQueue.peek()
+    public fun ProcessTransmit(): Boolean throws IOException {
+        val sLMessage: SLMessage = (SLMessage) this.outgoingQueue.peek()
         if (sLMessage != null) {
             sLMessage.Pack(this.txBuffer, this.tempBuffer)
-            Int AppendPendingAcks = sLMessage.AppendPendingAcks(this.txBuffer, this.pendingAcks)
+            val AppendPendingAcks: Int = sLMessage.AppendPendingAcks(this.txBuffer, this.pendingAcks)
             this.txBuffer.flip()
             if (this.datagramChannel.write(this.txBuffer) != 0) {
                 this.outgoingQueue.remove(sLMessage)
@@ -331,12 +331,12 @@ class SLCircuit : SLMessageHandler() {
                 return true
             }
         } else if (!this.pendingAcks.isEmpty()) {
-            PacketAck packetAck = PacketAck()
+            val packetAck: PacketAck = PacketAck()
             packetAck.seqNum = this.lastSeqNum.incrementAndGet()
-            Iterator it = this.pendingAcks.iterator()
+            val it: Iterator = this.pendingAcks.iterator()
             i = 0
             while (it.hasNext() && packetAck.CalcPayloadSize() < 1018) {
-                Packets packets = Packets()
+                val packets: Packets = Packets()
                 packets.ID = ((Integer) it.next()).intValue()
                 packetAck.Packets_Fields.add(packets)
                 i++
@@ -369,7 +369,7 @@ class SLCircuit : SLMessageHandler() {
         }
     }
 
-    fun SendMessage(SLMessage sLMessage) {
+    fun SendMessage(sLMessage: SLMessage) {
         sLMessage.seqNum = this.lastSeqNum.incrementAndGet()
         sLMessage.sentTimeMillis = System.currentTimeMillis()
         sLMessage.retries = 0
@@ -379,15 +379,15 @@ class SLCircuit : SLMessageHandler() {
     }
 
     fun TryProcessIdle() {
-        Long elapsedRealtime = SystemClock.elapsedRealtime()
+        val elapsedRealtime: Long = SystemClock.elapsedRealtime()
         if (elapsedRealtime >= this.lastReceivedPacketMillis + NEED_PING_TIMEOUT && elapsedRealtime >= this.lastPingSent + PING_INTERVAL) {
             if (this.pingSentCount < 3) {
                 Debug.Log("SLCircuit: Sending ping ID " + this.lastPingID)
-                SLMessage startPingCheck = StartPingCheck()
-                SLMessage sLMessage = (SLMessage) this.unackedQueue.peek()
-                Int i = sLMessage != null ? sLMessage.seqNum : this.lastSeqNum.get()
-                PingID pingID = startPingCheck.PingID_Field
-                Byte b = this.lastPingID
+                val startPingCheck: SLMessage = StartPingCheck()
+                val sLMessage: SLMessage = (SLMessage) this.unackedQueue.peek()
+                val i: Int = sLMessage != null ? sLMessage.seqNum : this.lastSeqNum.get()
+                val pingID: PingID = startPingCheck.PingID_Field
+                val b: Byte = this.lastPingID
                 this.lastPingID = (Byte) (b + 1)
                 pingID.PingID = b
                 startPingCheck.PingID_Field.OldestUnacked = i
@@ -423,15 +423,15 @@ class SLCircuit : SLMessageHandler() {
         }
     }
 
-    public SLAuthReply getAuthReply() {
+     public fun getAuthReply(): SLAuthReply {
         return this.authReply
     }
 
-    public EventBus getEventBus() {
+     public fun getEventBus(): EventBus {
         return this.eventBus
     }
 
-    public SLGridConnection getGridConnection() {
+     public fun getGridConnection(): SLGridConnection {
         return this.gridConn
     }
 

@@ -27,7 +27,7 @@ private class MeshGeometryRequest : ResourceRequest()<PrimVolumeParams, Drawable
             this.meshCache = meshCache2
         }
 
-        fun OnResourceReady(Object obj, Boolean z) {
+        fun OnResourceReady(obj: Object, z: Boolean) {
             if (obj instanceof MeshData) {
                 this.meshData = (MeshData) obj
                 PrimComputeExecutor.getInstance().execute(this)
@@ -63,7 +63,7 @@ private class SculptGeometryRequest : ResourceRequest()<PrimVolumeParams, Drawab
             super(primVolumeParams, resourceManager)
         }
 
-        fun OnResourceReady(Object obj, Boolean z) {
+        fun OnResourceReady(obj: Object, z: Boolean) {
             if (obj instanceof OpenJPEG) {
                 this.sculptData = (OpenJPEG) obj
                 PrimComputeExecutor.getInstance().execute(this)

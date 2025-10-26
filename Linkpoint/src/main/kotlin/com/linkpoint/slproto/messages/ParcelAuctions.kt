@@ -19,15 +19,15 @@ class ParcelAuctions : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.ParcelData_Fields.size() * 32) + 5
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleParcelAuctions(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -22)
@@ -38,10 +38,10 @@ class ParcelAuctions : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ParcelData parcelData = ParcelData()
+            val parcelData: ParcelData = ParcelData()
             parcelData.ParcelID = unpackUUID(byteBuffer)
             parcelData.WinnerID = unpackUUID(byteBuffer)
             this.ParcelData_Fields.add(parcelData)

@@ -20,7 +20,7 @@ class TelehubInfo : SLMessage() {
     @JvmStatic
     class TelehubBlock {
         public UUID ObjectID
-        public Byte[] ObjectName
+        public ByteArray ObjectName
         public LLVector3 TelehubPos
         public LLQuaternion TelehubRot
     }
@@ -30,15 +30,15 @@ class TelehubInfo : SLMessage() {
         this.TelehubBlock_Field = TelehubBlock()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.TelehubBlock_Field.ObjectName.length + 17 + 12 + 12 + 4 + 1 + (this.SpawnPointBlock_Fields.size() * 12)
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleTelehubInfo(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 10)
@@ -52,14 +52,14 @@ class TelehubInfo : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.TelehubBlock_Field.ObjectID = unpackUUID(byteBuffer)
         this.TelehubBlock_Field.ObjectName = unpackVariable(byteBuffer, 1)
         this.TelehubBlock_Field.TelehubPos = unpackLLVector3(byteBuffer)
         this.TelehubBlock_Field.TelehubRot = unpackLLQuaternion(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            SpawnPointBlock spawnPointBlock = SpawnPointBlock()
+            val spawnPointBlock: SpawnPointBlock = SpawnPointBlock()
             spawnPointBlock.SpawnPointPos = unpackLLVector3(byteBuffer)
             this.SpawnPointBlock_Fields.add(spawnPointBlock)
         }

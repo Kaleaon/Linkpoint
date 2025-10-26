@@ -146,8 +146,8 @@ private VivoxController instance
         return voiceConnector
     }
 
-    private Unit closeAllSessions() {
-        Iterator iterator = ImmutableList.copyOf(this.voiceSessions.values()).iterator()
+     private fun closeAllSessions() {
+        val iterator: Iterator = ImmutableList.copyOf(this.voiceSessions.values()).iterator()
         while (iterator.hasNext()) {
             ((VoiceSession)iterator.next()).dispose()
         }
@@ -159,8 +159,8 @@ private VivoxController instance
      * Enabled aggressive exception aggregation
      */
     @JvmStatic
-    VivoxController getInstance(Context context, Handler handler, Messenger messenger) throws VivoxInitException {
-        Object object = instanceLock
+     fun getInstance(context: Context, handler: Handler, messenger: Messenger) throws VivoxInitException {
+        val object: Object = instanceLock
         synchronized (object) {
             if (instance == null) {
                 VivoxController vivoxController
@@ -171,11 +171,11 @@ private VivoxController instance
         return instance
     }
 
-    private Boolean hasActiveSession() {
+     private fun hasActiveSession(): Boolean {
         Boolean bl
         block1: {
-            Boolean bl2 = false
-            Iterator<VoiceSession> iterator = this.voiceSessions.values().iterator()
+            val bl2: Boolean = false
+            val iterator: Iterator<VoiceSession> = this.voiceSessions.values().iterator()
             do {
                 bl = bl2
                 if (!iterator.hasNext()) break block1
@@ -189,7 +189,7 @@ private VivoxController instance
      * Enabled force condition propagation
      * Lifted jumps to return sites
      */
-    private Unit setAudioVoiceMode(Boolean bl) {
+     private fun setAudioVoiceMode(bl: Boolean) {
         if (bl) {
             this.mainThreadHandler.post(Runnable(this){
                 final VivoxController this$0
@@ -258,7 +258,7 @@ private VivoxController instance
             }
     }
 
-    private Unit setBluetoothEnable(Boolean bl) {
+     private fun setBluetoothEnable(bl: Boolean) {
         this.mainThreadHandler.post(Runnable(this, bl){
             final VivoxController this$0
             final Boolean val$enable
@@ -289,10 +289,10 @@ private VivoxController instance
     /*
      * Enabled aggressive block sorting
      */
-    private Unit setLocalMicEnabled(Boolean bl) {
+     private fun setLocalMicEnabled(bl: Boolean) {
         if (this.voiceConnector != null) {
-            VoiceConnector voiceConnector = this.voiceConnector
-            Boolean bl2 = !bl
+            val voiceConnector: VoiceConnector = this.voiceConnector
+            val bl2: Boolean = !bl
             voiceConnector.setMuteLocalMic(bl2)
             this.localMicEnabled = bl
             for (VoiceSession voiceSession : this.voiceSessions.values()) {
@@ -302,7 +302,7 @@ private VivoxController instance
         }
     }
 
-    private Unit tryStartingBluetooth() {
+     private fun tryStartingBluetooth() {
         this.mainThreadHandler.post(Runnable(this){
             final VivoxController this$0
             {
@@ -328,15 +328,15 @@ private VivoxController instance
             }
     }
 
-    private Unit updateSessionState(VoiceSession voiceSession) {
+     private fun updateSessionState(voiceSession: VoiceSession) {
         if (this.connectedMessenger != null) {
-            VoiceChatInfo voiceChatInfo = voiceSession.getVoiceChatInfo()
+            val voiceChatInfo: VoiceChatInfo = voiceSession.getVoiceChatInfo()
             Debug.Printf("Voice: Updating session state: %s", voiceChatInfo)
             VoicePluginMessenger.sendMessage(this.connectedMessenger, VoicePluginMessageType.VoiceChannelStatus, VoiceChannelStatus(voiceSession.getVoiceChannelInfo(), voiceChatInfo, null), this.incomingMessengerRef.get())
         }
     }
 
-    fun AcceptCall(VoiceAcceptCall voiceAcceptCall) {
+    fun AcceptCall(voiceAcceptCall: VoiceAcceptCall) {
         this.controllerHandler.post(Runnable(this, voiceAcceptCall){
             final VivoxController this$0
             final VoiceAcceptCall val$message
@@ -350,13 +350,13 @@ private VivoxController instance
              */
             override Unit run() {
                 VoiceSession voiceSession
-                Object var2_1 = null
+                val var2_1: Object = null
                 if (this.val$message.sessionHandle != null) {
                     Debug.Printf("Voice: trying to accept session with handle %s", this.val$message.sessionHandle)
                     voiceSession = (VoiceSession)this.this$0.voiceSessions.get(this.val$message.sessionHandle)
                 } else {
                     Debug.Printf("Voice: trying to accept session with uri %s", this.val$message.voiceChannelInfo.voiceChannelURI)
-                    Iterator iterator = this.this$0.voiceSessions.values().iterator()
+                    val iterator: Iterator = this.this$0.voiceSessions.values().iterator()
                     do {
                         voiceSession = var2_1
                         if (!iterator.hasNext()) break
@@ -373,7 +373,7 @@ private VivoxController instance
             }
     }
 
-    fun ConnectChannel(VoiceChannelInfo voiceChannelInfo, String string2, Messenger messenger) {
+    fun ConnectChannel(voiceChannelInfo: VoiceChannelInfo, string2: String, messenger: Messenger) {
         this.controllerHandler.post(Runnable(this, voiceChannelInfo, string2, messenger){
             final VivoxController this$0
             final String val$channelCredentials
@@ -395,7 +395,7 @@ private VivoxController instance
             override Unit run() {
                 try {
                     if (this.this$0.voiceAccountConnection == null) {
-                        VoiceException voiceException = VoiceException("Not logged in")
+                        val voiceException: VoiceException = VoiceException("Not logged in")
                         throw voiceException
                     }
                 }
@@ -405,8 +405,8 @@ private VivoxController instance
                 }
                 {
                     Object object3
-                    ArrayList<Object> arrayList = ArrayList<Object>()
-                    Object object2 = null
+                    val arrayList: ArrayList<Object> = ArrayList<Object>()
+                    val object2: Object = null
                     for (Object object3 : this.this$0.voiceSessions.values()) {
                         if (((VoiceSession)object3).getVoiceChannelInfo().equals(this.val$voiceChannelInfo)) {
                             object2 = object3
@@ -422,7 +422,7 @@ private VivoxController instance
                             this.this$0.voiceAccountConnection.createVoiceSession(this.val$voiceChannelInfo, this.val$channelCredentials)
                             return
                         }
-                        VoiceSession voiceSession = (VoiceSession)object3.next()
+                        val voiceSession: VoiceSession = (VoiceSession)object3.next()
                         voiceSession.mediaDisconnect(vx_termination_status.termination_status_none)
                         voiceSession.dispose()
                     }
@@ -430,7 +430,7 @@ private VivoxController instance
             }
     }
 
-    fun EnableVoiceMic(VoiceEnableMic voiceEnableMic) {
+    fun EnableVoiceMic(voiceEnableMic: VoiceEnableMic) {
         this.controllerHandler.post(Runnable(this, voiceEnableMic){
             final VivoxController this$0
             final VoiceEnableMic val$message
@@ -459,7 +459,7 @@ private VivoxController instance
             }
     }
 
-    fun Login(VoiceLoginInfo voiceLoginInfo, Messenger messenger) {
+    fun Login(voiceLoginInfo: VoiceLoginInfo, messenger: Messenger) {
         this.controllerHandler.post(Runnable(this, voiceLoginInfo, messenger){
             final VivoxController this$0
             final Messenger val$replyTo
@@ -494,7 +494,7 @@ private VivoxController instance
                     }
                     if (this.this$0.voiceConnector == null) {
                         Debug.Printf("Voice: Creating voice connector.", Object[0])
-                        VivoxController vivoxController = this.this$0
+                        val vivoxController: VivoxController = this.this$0
                         voiceConnector = VoiceConnector(this.this$0.messageController, this.val$voiceLoginInfo.voiceAccountServerName)
                         VivoxController.access$802(vivoxController, voiceConnector)
                         Debug.Printf("Voice: Voice connector created.", Object[0])
@@ -508,8 +508,8 @@ private VivoxController instance
                     }
                     VivoxController.access$1102(this.this$0, this.val$replyTo)
                     voiceConnector = this.val$replyTo
-                    VoicePluginMessageType voicePluginMessageType = VoicePluginMessageType.VoiceLoginStatus
-                    VoiceLoginStatus voiceLoginStatus = VoiceLoginStatus(this.val$voiceLoginInfo, true, null)
+                    val voicePluginMessageType: VoicePluginMessageType = VoicePluginMessageType.VoiceLoginStatus
+                    val voiceLoginStatus: VoiceLoginStatus = VoiceLoginStatus(this.val$voiceLoginInfo, true, null)
                     VoicePluginMessenger.sendMessage((Messenger)voiceConnector, voicePluginMessageType, voiceLoginStatus, null)
                     return
                 }
@@ -522,7 +522,7 @@ private VivoxController instance
             }
     }
 
-    fun Logout(Messenger messenger) {
+    fun Logout(messenger: Messenger) {
         this.controllerHandler.post(Runnable(this, messenger){
             final VivoxController this$0
             final Messenger val$replyTo
@@ -548,7 +548,7 @@ private VivoxController instance
             }
     }
 
-    fun RejectCall(VoiceRejectCall voiceRejectCall) {
+    fun RejectCall(voiceRejectCall: VoiceRejectCall) {
         this.controllerHandler.post(Runnable(this, voiceRejectCall){
             final VivoxController this$0
             final VoiceRejectCall val$message
@@ -563,7 +563,7 @@ private VivoxController instance
              */
             override Unit run() {
                 Debug.Printf("Voice: requested to reject session with handle %s", this.val$message.sessionHandle)
-                VoiceSession voiceSession = (VoiceSession)this.this$0.voiceSessions.get(this.val$message.sessionHandle)
+                val voiceSession: VoiceSession = (VoiceSession)this.this$0.voiceSessions.get(this.val$message.sessionHandle)
                 if (voiceSession != null) {
                     Debug.Printf("Voice: terminating session", Object[0])
                     voiceSession.mediaDisconnect(vx_termination_status.termination_status_busy)
@@ -573,7 +573,7 @@ private VivoxController instance
             }
     }
 
-    fun Set3DPosition(VoiceSet3DPosition voiceSet3DPosition) {
+    fun Set3DPosition(voiceSet3DPosition: VoiceSet3DPosition) {
         this.controllerHandler.post(Runnable(this, voiceSet3DPosition){
             final VivoxController this$0
             final VoiceSet3DPosition val$message
@@ -584,14 +584,14 @@ private VivoxController instance
 
             override Unit run() {
                 for (VoiceSession voiceSession : this.this$0.voiceSessions.values()) {
-                    VoiceChannelInfo voiceChannelInfo = voiceSession.getVoiceChannelInfo()
+                    val voiceChannelInfo: VoiceChannelInfo = voiceSession.getVoiceChannelInfo()
                     if (!voiceChannelInfo.isSpatial || !Objects.equal(voiceChannelInfo, this.val$message.voiceChannelInfo)) continue
                     voiceSession.set3DPosition(this.val$message.speakerPosition, this.val$message.listenerPosition)
                 }
             }
     }
 
-    fun SetAudioProperties(VoiceSetAudioProperties voiceSetAudioProperties) {
+    fun SetAudioProperties(voiceSetAudioProperties: VoiceSetAudioProperties) {
         this.controllerHandler.post(Runnable(this, voiceSetAudioProperties){
             final VivoxController this$0
             final VoiceSetAudioProperties val$message
@@ -648,7 +648,7 @@ private VivoxController instance
             }
     }
 
-    fun TerminateCall(VoiceTerminateCall voiceTerminateCall) {
+    fun TerminateCall(voiceTerminateCall: VoiceTerminateCall) {
         this.controllerHandler.post(Runnable(this, voiceTerminateCall){
             final VivoxController this$0
             final VoiceTerminateCall val$message
@@ -658,7 +658,7 @@ private VivoxController instance
             }
 
             override Unit run() {
-                ArrayList<VoiceSession> arrayList = ArrayList<VoiceSession>()
+                val arrayList: ArrayList<VoiceSession> = ArrayList<VoiceSession>()
                 for (VoiceSession voiceSession : this.this$0.voiceSessions.values()) {
                     if (!Objects.equal(voiceSession.getVoiceChannelInfo().voiceChannelURI, this.val$message.channelInfo.voiceChannelURI)) continue
                     arrayList.add(voiceSession)
@@ -671,11 +671,11 @@ private VivoxController instance
             }
     }
 
-    Messenger getIncomingMessenger() {
+     fun getIncomingMessenger(): Messenger {
         return this.incomingMessengerRef.get()
     }
 
-    Unit onBluetoothScoStateChanged(Int n) {
+     fun onBluetoothScoStateChanged(n: Int) {
         this.controllerHandler.post(Runnable(this, n){
             final VivoxController this$0
             final Int val$state
@@ -698,7 +698,7 @@ private VivoxController instance
     override Unit onVivoxEvent(vx_evt_base_t object) {
         Debug.Printf("Voice: got vivox event: %s", object)
         if (object == null) return
-        Object object2 = ((vx_evt_base_t)object).getType()
+        val object2: Object = ((vx_evt_base_t)object).getType()
         Debug.Printf("Voice: vx_event_type %s", object2)
         if (object2 == vx_event_type.evt_session_added) {
             if ((object = VxClientProxy.vx_message_base_t2vx_evt_session_added_t(((vx_evt_base_t)object).getMessage())) == null) return
@@ -720,15 +720,15 @@ private VivoxController instance
             return
         }
         if (object2 == vx_event_type.evt_participant_updated) {
-            Object object3 = VxClientProxy.vx_message_base_t2vx_evt_participant_updated_t(((vx_evt_base_t)object).getMessage())
+            val object3: Object = VxClientProxy.vx_message_base_t2vx_evt_participant_updated_t(((vx_evt_base_t)object).getMessage())
             if (object3 == null) return
             object = this.voiceAccountConnection
             object2 = this.voiceSessions.get(((vx_evt_participant_updated_t)object3).getSession_handle())
             if (object2 == null) return
             if (object == null) return
-            Boolean bl = ((vx_evt_participant_updated_t)object3).getIs_speaking() != 0
+            val bl: Boolean = ((vx_evt_participant_updated_t)object3).getIs_speaking() != 0
             object3 = VoiceChannelInfo.agentUUIDFromURI(((vx_evt_participant_updated_t)object3).getParticipant_uri())
-            Boolean bl2 = Objects.equal(object3, ((VoiceAccountConnection)object).getVoiceLoginInfo().agentUUID)
+            val bl2: Boolean = Objects.equal(object3, ((VoiceAccountConnection)object).getVoiceLoginInfo().agentUUID)
             Debug.Printf("Voice: speaking %b, speakerID %s (mine: %b)", bl, object3, bl2)
             if (object3 == null) return
             if (bl2) return
@@ -774,7 +774,7 @@ private VivoxController instance
         Debug.Printf("Voice: got vivox message: %s", vx_message_base_t2)
     }
 
-    Unit setIncomingMessenger(Messenger messenger) {
+     fun setIncomingMessenger(messenger: Messenger) {
         this.incomingMessengerRef.set(messenger)
     }
 
@@ -796,7 +796,7 @@ private VivoxController instance
             Looper.prepare()
             this.handler = Handler()
             this.messageController = VivoxMessageController(this.this$0)
-            Object object = this.this$0.controllerReadyLock
+            val object: Object = this.this$0.controllerReadyLock
             synchronized (object) {
                 VivoxController.access$402(this.this$0, true)
                 this.this$0.controllerReadyLock.notifyAll()

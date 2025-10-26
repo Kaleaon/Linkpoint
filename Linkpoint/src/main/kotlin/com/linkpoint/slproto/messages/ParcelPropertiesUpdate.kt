@@ -20,16 +20,16 @@ class ParcelPropertiesUpdate : SLMessage() {
     class ParcelData {
         public UUID AuthBuyerID
         public Int Category
-        public Byte[] Desc
+        public ByteArray Desc
         public Int Flags
         public UUID GroupID
         public Int LandingType
         public Int LocalID
         public Int MediaAutoScale
         public UUID MediaID
-        public Byte[] MediaURL
-        public Byte[] MusicURL
-        public Byte[] Name
+        public ByteArray MediaURL
+        public ByteArray MusicURL
+        public ByteArray Name
         public Int ParcelFlags
         public Float PassHours
         public Int PassPrice
@@ -43,15 +43,15 @@ class ParcelPropertiesUpdate : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.ParcelData_Field.Name.length + 17 + 1 + this.ParcelData_Field.Desc.length + 1 + this.ParcelData_Field.MusicURL.length + 1 + this.ParcelData_Field.MediaURL.length + 16 + 1 + 16 + 4 + 4 + 1 + 16 + 16 + 12 + 12 + 1 + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleParcelPropertiesUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -58)
@@ -78,7 +78,7 @@ class ParcelPropertiesUpdate : SLMessage() {
         packByte(byteBuffer, (Byte) this.ParcelData_Field.LandingType)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ParcelData_Field.LocalID = unpackInt(byteBuffer)

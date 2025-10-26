@@ -10,7 +10,7 @@ import javax.annotation.Nullable
 abstract class ChatMessageSource {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-chatsrc-ChatMessageSource$ChatMessageSourceTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f151comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f151comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues = null
 
     enum class ChatMessageSourceType {
         Unknown,
@@ -19,7 +19,7 @@ abstract class ChatMessageSource {
         Group,
         Object
         
-        const val ChatMessageSourceType[] VALUES = null
+        const val Array<ChatMessageSourceType> VALUES = null
 
         static {
             VALUES = values()
@@ -28,11 +28,11 @@ abstract class ChatMessageSource {
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-chatsrc-ChatMessageSource$ChatMessageSourceTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m268getcomlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues() {
+private /* synthetic */ IntArray m268getcomlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues() {
         if (f151comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues != null) {
             return f151comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues
         }
-        Int[] iArr = Int[ChatMessageSourceType.values().length]
+        val iArr: IntArray = Int[ChatMessageSourceType.values().length]
         try {
             iArr[ChatMessageSourceType.Group.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -58,7 +58,7 @@ private /* synthetic */ Int[] m268getcomlumiyaviewerlumiyaslprotouserschatsrcCha
     }
 
     @JvmStatic
-    ChatMessageSource loadFrom(ChatMessage chatMessage) {
+     fun loadFrom(chatMessage: ChatMessage): ChatMessageSource {
         switch (m268getcomlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues()[ChatMessageSourceType.VALUES[chatMessage.getSenderType().intValue()].ordinal()]) {
             case 1:
                 return ChatMessageSourceGroup(chatMessage)
@@ -83,7 +83,7 @@ private /* synthetic */ Int[] m268getcomlumiyaviewerlumiyaslprotouserschatsrcCha
 
     public abstract UUID getSourceUUID()
 
-    fun serializeTo(ChatMessage chatMessage) {
+    fun serializeTo(chatMessage: ChatMessage) {
         chatMessage.setSenderType(Integer.valueOf(getSourceType().ordinal()))
     }
 }

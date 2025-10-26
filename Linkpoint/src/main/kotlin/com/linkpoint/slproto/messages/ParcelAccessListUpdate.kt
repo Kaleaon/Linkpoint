@@ -39,15 +39,15 @@ class ParcelAccessListUpdate : SLMessage() {
         this.Data_Field = Data()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.List_Fields.size() * 24) + 69
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleParcelAccessListUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -39)
@@ -66,7 +66,7 @@ class ParcelAccessListUpdate : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.Data_Field.Flags = unpackInt(byteBuffer)
@@ -74,9 +74,9 @@ class ParcelAccessListUpdate : SLMessage() {
         this.Data_Field.TransactionID = unpackUUID(byteBuffer)
         this.Data_Field.SequenceID = unpackInt(byteBuffer)
         this.Data_Field.Sections = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            List list = List()
+            val list: List = List()
             list.ID = unpackUUID(byteBuffer)
             list.Time = unpackInt(byteBuffer)
             list.Flags = unpackInt(byteBuffer)

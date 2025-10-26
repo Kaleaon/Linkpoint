@@ -18,12 +18,12 @@ class RezSingleAttachmentFromInv : SLMessage() {
     @JvmStatic
     class ObjectData {
         public Int AttachmentPt
-        public Byte[] Description
+        public ByteArray Description
         public Int EveryoneMask
         public Int GroupMask
         public Int ItemFlags
         public UUID ItemID
-        public Byte[] Name
+        public ByteArray Name
         public Int NextOwnerMask
         public UUID OwnerID
     }
@@ -32,15 +32,15 @@ class RezSingleAttachmentFromInv : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.ObjectData_Field.Name.length + 50 + 1 + this.ObjectData_Field.Description.length + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleRezSingleAttachmentFromInv(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -117)
@@ -57,7 +57,7 @@ class RezSingleAttachmentFromInv : SLMessage() {
         packVariable(byteBuffer, this.ObjectData_Field.Description, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ObjectData_Field.ItemID = unpackUUID(byteBuffer)
