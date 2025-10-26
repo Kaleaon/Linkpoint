@@ -2,37 +2,41 @@ package com.lumiyaviewer.lumiya.slproto.llsd.types
 
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode
 import java.io.DataOutputStream
-import java.io.IOException
 import java.util.Date
 import org.xmlpull.v1.XmlSerializer
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 
 class LLSDDate : LLSDNode {
-    private Date value
+    private val value: Date
 
-    LLSDDate(String str) {
-        try {
-            this.value = Date(str)
-        } catch (Exception e) {
-            this.value = Date()
+    constructor(str: String) {
+        this.value = try {
+            Date(str)
+        } catch (e: Exception) {
+            Date()
         }
     }
 
-    LLSDDate(Date date) {
+    constructor(date: Date) {
         this.value = date
     }
 
-    Date asDate() {
+    override fun asDate(): Date {
         return this.value
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    override fun toBinary(dataOutputStream: DataOutputStream) {
         dataOutputStream.writeByte(100)
-        dataOutputStream.writeDouble((double) (this.value.getTime() / 1000))
+        dataOutputStream.writeDouble(this.value.time.toDouble() / 1000.0)
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    override fun toXML(xmlSerializer: XmlSerializer) {
         xmlSerializer.startTag("", "date")
-        xmlSerializer.text(this.value.toGMTString())
+        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
+        sdf.timeZone = TimeZone.getTimeZone("UTC")
+        xmlSerializer.text(sdf.format(this.value))
         xmlSerializer.endTag("", "date")
     }
 }
