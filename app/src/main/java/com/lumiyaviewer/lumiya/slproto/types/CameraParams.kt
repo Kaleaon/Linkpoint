@@ -2,9 +2,9 @@ package com.lumiyaviewer.lumiya.slproto.types
 
 import com.lumiyaviewer.lumiya.render.HeadTransformCompat
 import com.lumiyaviewer.lumiya.slproto.types.LLQuaternion
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
-import javax.annotation.concurrent.ThreadSafe
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
+import androidx.annotation.ThreadSafe
 
 @ThreadSafe
 class CameraParams {
@@ -26,7 +26,7 @@ class CameraParams {
     private Float manualTurnSpeed = 0.0f
     private LLVector3 offset = LLVector3(-2.0f, 0.0f, 1.0f)
     private LLVector3 offsetVR = LLVector3(0.0f, 0.0f, 1.0f)
-    @Nonnull
+    @NonNull
     private LLVector3 position = LLVector3()
     private Float tilt = 0.0f
     private Float tiltFlingSpeed = 0.0f
@@ -159,7 +159,7 @@ class CameraParams {
         return f
     }
 
-    @Nonnull
+    @NonNull
     LLVector3 getPosition() {
         LLVector3 lLVector3
         synchronized (this.lock) {

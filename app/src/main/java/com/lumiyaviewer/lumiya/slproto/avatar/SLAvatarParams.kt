@@ -5,14 +5,14 @@ import com.google.common.collect.ImmutableMap
 import com.lumiyaviewer.lumiya.slproto.types.ImmutableVector
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 import java.util.HashMap
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class SLAvatarParams {
     Int NUM_PARAMS = 218
-    @Nonnull
+    @NonNull
     ImmutableMap<Integer, ParamSet> paramByIDs
-    @Nonnull
+    @NonNull
     ParamSet[] paramDefs = ParamSet[218]
 
     class AvatarParam {
@@ -63,12 +63,12 @@ class SLAvatarParams {
     class ParamSet {
         Int appearanceIndex
         Int id
-        @Nonnull
+        @NonNull
         SLVisualParamID name
-        @Nonnull
+        @NonNull
         ImmutableList<AvatarParam> params
 
-        ParamSet(Int i, Int i2, @Nonnull SLVisualParamID sLVisualParamID, @Nonnull ImmutableList<AvatarParam> immutableList) {
+        ParamSet(Int i, Int i2, @NonNull SLVisualParamID sLVisualParamID, @NonNull ImmutableList<AvatarParam> immutableList) {
             this.id = i
             this.appearanceIndex = i2
             this.name = sLVisualParamID
@@ -89,12 +89,12 @@ class SLAvatarParams {
     }
 
     class SkeletonParamValue {
-        @Nonnull
+        @NonNull
         LLVector3 offset
-        @Nonnull
+        @NonNull
         LLVector3 scale
 
-        SkeletonParamValue(@Nonnull LLVector3 lLVector3, @Nonnull LLVector3 lLVector32) {
+        SkeletonParamValue(@NonNull LLVector3 lLVector3, @NonNull LLVector3 lLVector32) {
             this.scale = lLVector3
             this.offset = lLVector32
         }

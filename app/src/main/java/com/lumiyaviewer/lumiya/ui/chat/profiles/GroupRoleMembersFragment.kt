@@ -35,7 +35,7 @@ import com.lumiyaviewer.lumiya.utils.UUIDPool
 import de.greenrobot.dao.query.LazyList
 import java.util.Iterator
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class GroupRoleMembersFragment : ChatterFragment : LoadableMonitor.OnLoadableDataChangedListener {
     private String ROLE_ID_KEY = "role_id"

@@ -6,8 +6,8 @@ import android.os.Build
 import com.lumiyaviewer.lumiya.orm.DBObject
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class InventoryDB {
     Int MAX_UPDATES_PER_TRANSACTION = 16
@@ -28,7 +28,7 @@ class InventoryDB {
         }
     }
 
-    Unit deleteEntry(@Nonnull SLInventoryEntry sLInventoryEntry) throws DBObject.DatabaseBindingException {
+    Unit deleteEntry(@NonNull SLInventoryEntry sLInventoryEntry) throws DBObject.DatabaseBindingException {
         if (sLInventoryEntry == null) {
             throw IllegalArgumentException("SLInventoryEntry cannot be null")
         }
@@ -44,7 +44,7 @@ class InventoryDB {
         return SLInventoryEntry.find(this.db, uuid)
     }
 
-    @Nonnull
+    @NonNull
     fun findEntryOrCreate(uuid: UUID): SLInventoryEntry {
         if (uuid == null) {
             throw IllegalArgumentException("UUID cannot be null")
@@ -114,7 +114,7 @@ class InventoryDB {
         return null
     }
 
-    @Nonnull
+    @NonNull
     SLInventoryEntry loadEntry(Long j) throws DBObject.DatabaseBindingException {
         return SLInventoryEntry(this.db, j)
     }
@@ -260,7 +260,7 @@ class InventoryDB {
         throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.orm.InventoryDB.retainChildren(Long, java.util.Set):Unit")
     }
 
-    Unit saveEntry(@Nonnull SLInventoryEntry sLInventoryEntry) throws DBObject.DatabaseBindingException {
+    Unit saveEntry(@NonNull SLInventoryEntry sLInventoryEntry) throws DBObject.DatabaseBindingException {
         if (sLInventoryEntry == null) {
             throw IllegalArgumentException("SLInventoryEntry cannot be null")
         }

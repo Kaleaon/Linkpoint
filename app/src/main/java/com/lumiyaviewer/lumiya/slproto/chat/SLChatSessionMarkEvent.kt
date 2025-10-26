@@ -8,13 +8,13 @@ import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.text.DateFormat
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class SLChatSessionMarkEvent : SLChatEvent {
     @Nullable
     private String description
-    @Nonnull
+    @NonNull
     private SessionMarkType sessionMarkType
 
     enum SessionMarkType {
@@ -22,26 +22,26 @@ class SLChatSessionMarkEvent : SLChatEvent {
         Teleport
     }
 
-    SLChatSessionMarkEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
+    SLChatSessionMarkEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
         super(chatMessage, uuid)
         this.sessionMarkType = SessionMarkType.values()[chatMessage.getChatChannel().intValue()]
         this.description = chatMessage.getMessageText()
     }
 
-    SLChatSessionMarkEvent(ChatMessageSource chatMessageSource, @Nonnull UUID uuid, @Nonnull SessionMarkType sessionMarkType2, @Nullable String str) {
+    SLChatSessionMarkEvent(ChatMessageSource chatMessageSource, @NonNull UUID uuid, @NonNull SessionMarkType sessionMarkType2, @Nullable String str) {
         super(chatMessageSource, uuid)
         this.sessionMarkType = sessionMarkType2
         this.description = str
     }
 
     /* access modifiers changed from: protected */
-    @Nonnull
+    @NonNull
     SLChatEvent.ChatMessageType getMessageType() {
         return SLChatEvent.ChatMessageType.SessionMark
     }
 
     /* access modifiers changed from: protected */
-    String getText(Context context, @Nonnull UserManager userManager) {
+    String getText(Context context, @NonNull UserManager userManager) {
         if (this.sessionMarkType == SessionMarkType.Teleport) {
             return context.getString(R.string.teleport_complete_format, Object[]{this.description})
         }
@@ -53,11 +53,11 @@ class SLChatSessionMarkEvent : SLChatEvent {
     }
 
     /* access modifiers changed from: protected */
-    Boolean isActionMessage(@Nonnull UserManager userManager) {
+    Boolean isActionMessage(@NonNull UserManager userManager) {
         return true
     }
 
-    Unit serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
+    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setMessageText(this.description)
         chatMessage.setChatChannel(Integer.valueOf(this.sessionMarkType.ordinal()))

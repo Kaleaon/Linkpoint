@@ -7,7 +7,7 @@ import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLChatBalanceChangedEvent : SLChatEvent {
     private Int newBalance
@@ -15,7 +15,7 @@ class SLChatBalanceChangedEvent : SLChatEvent {
     private Boolean transactionAmountValid
 
     /* JADX INFO: super call moved to the top of the method (can break code semantics) */
-    SLChatBalanceChangedEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
+    SLChatBalanceChangedEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
         super(chatMessage, uuid)
         Int i = 0
         this.transactionAmountValid = chatMessage.getTransactionAmount() != null
@@ -23,7 +23,7 @@ class SLChatBalanceChangedEvent : SLChatEvent {
         this.newBalance = chatMessage.getNewBalance().intValue()
     }
 
-    SLChatBalanceChangedEvent(@Nonnull ChatMessageSource chatMessageSource, @Nonnull UUID uuid, Boolean z, Int i, Int i2) {
+    SLChatBalanceChangedEvent(@NonNull ChatMessageSource chatMessageSource, @NonNull UUID uuid, Boolean z, Int i, Int i2) {
         super(chatMessageSource, uuid)
         this.transactionAmountValid = z
         this.transactionAmount = i
@@ -31,7 +31,7 @@ class SLChatBalanceChangedEvent : SLChatEvent {
     }
 
     /* access modifiers changed from: protected */
-    @Nonnull
+    @NonNull
     SLChatEvent.ChatMessageType getMessageType() {
         return SLChatEvent.ChatMessageType.BalanceChanged
     }
@@ -41,7 +41,7 @@ class SLChatBalanceChangedEvent : SLChatEvent {
     }
 
     /* access modifiers changed from: protected */
-    String getText(Context context, @Nonnull UserManager userManager) {
+    String getText(Context context, @NonNull UserManager userManager) {
         if (this.transactionAmountValid) {
             String sourceName = this.source.getSourceName(userManager)
             if (sourceName != null) {
@@ -72,7 +72,7 @@ class SLChatBalanceChangedEvent : SLChatEvent {
     }
 
     /* access modifiers changed from: protected */
-    Boolean isActionMessage(@Nonnull UserManager userManager) {
+    Boolean isActionMessage(@NonNull UserManager userManager) {
         return this.transactionAmountValid && this.source.getSourceName(userManager) != null && getTransactionAmount() >= 0
     }
 
@@ -80,7 +80,7 @@ class SLChatBalanceChangedEvent : SLChatEvent {
         return false
     }
 
-    Unit serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
+    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setTransactionAmount(this.transactionAmountValid ? Integer.valueOf(this.transactionAmount) : null)
         chatMessage.setNewBalance(Integer.valueOf(this.newBalance))

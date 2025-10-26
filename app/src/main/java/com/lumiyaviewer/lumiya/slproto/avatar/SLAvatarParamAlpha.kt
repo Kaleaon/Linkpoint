@@ -1,6 +1,6 @@
 package com.lumiyaviewer.lumiya.slproto.avatar
 
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class SLAvatarParamAlpha {
     float domain

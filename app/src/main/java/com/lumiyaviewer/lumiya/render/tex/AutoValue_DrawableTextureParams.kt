@@ -2,7 +2,7 @@ package com.lumiyaviewer.lumiya.render.tex
 
 import com.lumiyaviewer.lumiya.slproto.avatar.AvatarTextureFaceIndex
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class AutoValue_DrawableTextureParams : DrawableTextureParams {
     private AvatarTextureFaceIndex avatarFaceIndex

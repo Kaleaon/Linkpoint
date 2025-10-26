@@ -23,7 +23,7 @@ import com.lumiyaviewer.lumiya.ui.common.DetailsActivity
 import com.lumiyaviewer.lumiya.ui.common.LoadingLayout
 import com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class UserGroupsProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadableDataChangedListener {
     private SubscriptionData<UUID, AvatarGroupList> avatarGroups = SubscriptionData<>(UIThreadExecutor.getInstance())

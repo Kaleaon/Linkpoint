@@ -10,8 +10,8 @@ import java.util.Set
 import java.util.WeakHashMap
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class ObjectPopupsManager {
     private Int MAX_POPUPS = 99
@@ -29,7 +29,7 @@ class ObjectPopupsManager {
     private Boolean popupAnimated = false
     private Set<Any> popupWatchers = Collections.newSetFromMap(WeakHashMap())
     private AtomicInteger unreadPopupCount = AtomicInteger(0)
-    @Nonnull
+    @NonNull
     private UserManager userManager
 
     interface ObjectPopupListener {
@@ -38,7 +38,7 @@ class ObjectPopupsManager {
         Unit onObjectPopupCountChanged(Int i)
     }
 
-    ObjectPopupsManager(@Nonnull UserManager userManager2) {
+    ObjectPopupsManager(@NonNull UserManager userManager2) {
         this.userManager = userManager2
     }
 
@@ -562,7 +562,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     }
 
     /* access modifiers changed from: package-private */
-    @Nonnull
+    @NonNull
     UnreadNotificationInfo.ObjectPopupNotification getNotification(Boolean z) {
         UnreadNotificationInfo.ObjectPopupNotification create
         synchronized (this.listenerLock) {

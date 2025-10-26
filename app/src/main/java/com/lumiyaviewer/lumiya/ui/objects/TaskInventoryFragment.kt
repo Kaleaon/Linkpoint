@@ -35,7 +35,7 @@ import com.lumiyaviewer.lumiya.ui.inventory.NotecardEditActivity
 import java.util.HashSet
 import java.util.Iterator
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class TaskInventoryFragment : FragmentWithTitle {
 

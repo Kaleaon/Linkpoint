@@ -29,7 +29,7 @@ import com.lumiyaviewer.lumiya.ui.media.NotificationSounds
 import com.lumiyaviewer.lumiya.ui.notify.NotificationChannels
 import com.lumiyaviewer.lumiya.utils.FileUtils
 import java.io.File
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class SettingsFragment : PreferenceFragmentCompat : FragmentHasTitle {
     private String PREF_RESOURCE_KEY = "prefResourceId"

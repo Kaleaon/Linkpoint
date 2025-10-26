@@ -16,7 +16,7 @@ import com.lumiyaviewer.lumiya.slproto.assets.SLWearable
 import com.lumiyaviewer.lumiya.slproto.assets.SLWearableType
 import com.lumiyaviewer.lumiya.utils.SimpleStringParser
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
     Parcelable.Creator<SLInventoryEntry> CREATOR = Parcelable.Creator<SLInventoryEntry>() {

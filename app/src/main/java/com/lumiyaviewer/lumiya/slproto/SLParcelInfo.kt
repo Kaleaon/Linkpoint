@@ -34,7 +34,7 @@ import java.util.Map
 import java.util.Set
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class SLParcelInfo {
     private var agentAvatar: SLObjectAvatarInfo = null

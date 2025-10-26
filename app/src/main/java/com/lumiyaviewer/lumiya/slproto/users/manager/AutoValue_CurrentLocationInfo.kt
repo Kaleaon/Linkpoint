@@ -2,7 +2,7 @@ package com.lumiyaviewer.lumiya.slproto.users.manager
 
 import com.lumiyaviewer.lumiya.slproto.users.ParcelData
 import com.lumiyaviewer.lumiya.voice.common.model.VoiceChannelInfo
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class AutoValue_CurrentLocationInfo : CurrentLocationInfo {
     private Int inChatRangeUsers

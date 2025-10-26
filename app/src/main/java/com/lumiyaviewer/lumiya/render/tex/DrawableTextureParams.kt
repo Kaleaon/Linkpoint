@@ -3,7 +3,7 @@ package com.lumiyaviewer.lumiya.render.tex
 import com.lumiyaviewer.lumiya.slproto.avatar.AvatarTextureFaceIndex
 import java.io.File
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 abstract class DrawableTextureParams {
     fun create(uuid: UUID, textureClass: TextureClass): DrawableTextureParams {

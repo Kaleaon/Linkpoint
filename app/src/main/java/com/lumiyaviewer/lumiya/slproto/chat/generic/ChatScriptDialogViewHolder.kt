@@ -9,7 +9,7 @@ import android.widget.TextView
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.chat.SLChatScriptDialog
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class ChatScriptDialogViewHolder : ChatEventViewHolder : View.OnClickListener {
     private Int[] dialogButtonIds = {R.id.buttonDialog1, R.id.buttonDialog2, R.id.buttonDialog3, R.id.buttonDialog4, R.id.buttonDialog5, R.id.buttonDialog6, R.id.buttonDialog7, R.id.buttonDialog8, R.id.buttonDialog9, R.id.buttonDialog10, R.id.buttonDialog11, R.id.buttonDialog12}

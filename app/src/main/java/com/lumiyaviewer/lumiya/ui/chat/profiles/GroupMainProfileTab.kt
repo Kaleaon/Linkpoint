@@ -11,7 +11,7 @@ import butterknife.ButterKnife
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.groups.SLGroupInfo
 import com.lumiyaviewer.lumiya.slproto.groups.SLGroupProfileData
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 /**
  * Converted from Java to Kotlin

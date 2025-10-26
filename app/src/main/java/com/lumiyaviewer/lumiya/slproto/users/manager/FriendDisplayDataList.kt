@@ -7,12 +7,12 @@ import de.greenrobot.dao.query.WhereCondition
 import java.util.ArrayList
 import java.util.Comparator
 import java.util.List
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class FriendDisplayDataList : ChatterDisplayDataList {
     private Boolean onlineFriends
 
-    FriendDisplayDataList(@Nonnull UserManager userManager, OnListUpdated onListUpdated, Boolean z) {
+    FriendDisplayDataList(@NonNull UserManager userManager, OnListUpdated onListUpdated, Boolean z) {
         super(userManager, onListUpdated, (Comparator<? super ChatterDisplayData>) null)
         this.onlineFriends = z
     }

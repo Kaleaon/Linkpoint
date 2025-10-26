@@ -11,7 +11,7 @@ import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.lumiyaviewer.lumiya.R
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class LoadingLayout : FrameLayout {
     private Boolean butteryBarVisible = false

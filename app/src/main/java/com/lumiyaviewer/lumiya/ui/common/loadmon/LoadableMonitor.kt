@@ -9,8 +9,8 @@ import com.lumiyaviewer.lumiya.ui.common.loadmon.Loadable
 import java.util.ArrayList
 import java.util.Collections
 import java.util.List
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class LoadableMonitor : Loadable.LoadableStatusListener, SwipeRefreshLayout.OnRefreshListener {
 
@@ -29,7 +29,7 @@ class LoadableMonitor : Loadable.LoadableStatusListener, SwipeRefreshLayout.OnRe
     @Nullable
     private OnLoadableDataChangedListener onLoadableDataChangedListener = null
     private List<Loadable> optionalLoadables = ArrayList()
-    @Nonnull
+    @NonNull
     private Loadable.Status status = Loadable.Status.Idle
     @Nullable
     private SwipeRefreshLayout swipeRefreshLayout = null

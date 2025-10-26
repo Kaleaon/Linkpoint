@@ -13,7 +13,7 @@ import com.lumiyaviewer.lumiya.slproto.users.manager.CurrentLocationInfo
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.lang.ref.WeakReference
 import java.util.concurrent.Executor
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class ChatterNameRetriever {
     ChatterID chatterID

@@ -9,7 +9,7 @@ import java.util.Map
 import java.util.Set
 import java.util.UUID
 import java.util.concurrent.Executor
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class MultipleChatterNameRetriever : ChatterNameRetriever.OnChatterNameUpdated {
     private UUID agentUUID

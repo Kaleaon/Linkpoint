@@ -25,16 +25,16 @@ import java.util.Iterator
 import java.util.Map
 import java.util.Set
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class DriveSynchronizer {
     private long FLUSH_INTERVAL = 300000L
     private Map<String, DriveChatLogFolder> chatLogFolders = new HashMap<String, DriveChatLogFolder>()
     private DriveConnectibleFolder chatLogsFolder
-    @Nonnull
+    @NonNull
     private Context context
-    @Nonnull
+    @NonNull
     private GoogleApiClient googleApiClient
     private boolean isSyncing = false
     private LogWriteTracker logWriteTracker
@@ -43,7 +43,7 @@ class DriveSynchronizer {
     private boolean syncCompleted = false
     private Set<OnSyncCompletedListener> waitingForSyncComplete = new HashSet<OnSyncCompletedListener>()
 
-    DriveSynchronizer(@Nonnull Context context, @Nonnull GoogleApiClient googleApiClient, LogWriteTracker.OnLoggingDoneListener onLoggingDoneListener) {
+    DriveSynchronizer(@NonNull Context context, @NonNull GoogleApiClient googleApiClient, LogWriteTracker.OnLoggingDoneListener onLoggingDoneListener) {
         this.onRequestSyncResult = new ResultCallback<Status>(this){
             DriveSynchronizer this$0
             {
@@ -51,7 +51,7 @@ class DriveSynchronizer {
             }
 
             @Override
-            void onResult(@Nonnull Status object) {
+            void onResult(@NonNull Status object) {
                 Debug.Printf("LumiyaCloud: drive sync done, success: %b.", ((Status)object).isSuccess())
                 DriveSynchronizer.access$002(this.this$0, false)
                 DriveSynchronizer.access$102(this.this$0, true)
@@ -85,13 +85,13 @@ class DriveSynchronizer {
      * Lifted jumps to return sites
      */
     @Nullable
-    private DriveTextFile getChatLogFile(AgentSyncConnections object, UUID uUID, @Nonnull String object2, @Nonnull String string2, boolean bl) {
+    private DriveTextFile getChatLogFile(AgentSyncConnections object, UUID uUID, @NonNull String object2, @NonNull String string2, boolean bl) {
         if ((object2 = this.getChatLogFolder((String)object2, bl)) == null) return null
         return ((DriveChatLogFolder)object2).getChatLogFile((AgentSyncConnections)object, uUID, string2, this.logWriteTracker, bl)
     }
 
     @Nullable
-    private DriveChatLogFolder getChatLogFolder(@Nonnull String string2, boolean bl) {
+    private DriveChatLogFolder getChatLogFolder(@NonNull String string2, boolean bl) {
         DriveChatLogFolder driveChatLogFolder
         DriveChatLogFolder driveChatLogFolder2 = driveChatLogFolder = this.chatLogFolders.get(string2)
         if (driveChatLogFolder == null) {
@@ -104,7 +104,7 @@ class DriveSynchronizer {
         return driveChatLogFolder2
     }
 
-    void flushFile(AgentSyncConnections object, UUID uUID, @Nonnull String string2, @Nonnull String string3) {
+    void flushFile(AgentSyncConnections object, UUID uUID, @NonNull String string2, @NonNull String string3) {
         if ((object = this.getChatLogFile((AgentSyncConnections)object, uUID, string2, string3, false)) != null) {
             ((DriveTextFile)object).flush()
         }
@@ -132,7 +132,7 @@ class DriveSynchronizer {
         return true
     }
 
-    void logString(AgentSyncConnections object, UUID uUID, @Nonnull String string2, @Nonnull String string3, @Nonnull DriveLogEntry driveLogEntry) {
+    void logString(AgentSyncConnections object, UUID uUID, @NonNull String string2, @NonNull String string3, @NonNull DriveLogEntry driveLogEntry) {
         if ((object = this.getChatLogFile((AgentSyncConnections)object, uUID, string2, string3, true)) != null) {
             ((DriveTextFile)object).appendString(driveLogEntry)
         }

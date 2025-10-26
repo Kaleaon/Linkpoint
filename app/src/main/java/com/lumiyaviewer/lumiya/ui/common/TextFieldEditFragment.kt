@@ -19,7 +19,7 @@ import com.google.common.base.Objects
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 abstract class TextFieldEditFragment : ChatterFragment : BackButtonHandler {
     /* access modifiers changed from: private */

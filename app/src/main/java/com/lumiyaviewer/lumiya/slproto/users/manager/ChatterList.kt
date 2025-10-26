@@ -11,31 +11,31 @@ import java.util.Collections
 import java.util.EnumMap
 import java.util.Map
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class ChatterList {
     /* access modifiers changed from: private */
-    @Nonnull
+    @NonNull
     ActiveChattersManager activeChattersManager
     private SubscriptionPool<ChatterListType, ImmutableList<ChatterDisplayData>> chatterListPool = SubscriptionPool<>()
     /* access modifiers changed from: private */
     Map<ChatterListType, ChatterDisplayDataList> chatterLists = Collections.synchronizedMap(EnumMap(ChatterListType.class))
-    @Nonnull
+    @NonNull
     private DaoSession daoSession
     /* access modifiers changed from: private */
-    @Nonnull
+    @NonNull
     FriendManager friendManager
     /* access modifiers changed from: private */
-    @Nonnull
+    @NonNull
     GroupManager groupManager
     private SubscriptionPool<UUID, Float> nearbyDistancePool = SubscriptionPool<>()
     /* access modifiers changed from: private */
     OnListUpdated onNearbyListUpdated = $Lambda$vvo1Hidt87pwA0OrMywwrJjt1rU(this)
     private SubscriptionPool<UUID, Boolean> typingUsersPool = SubscriptionPool<>()
-    @Nonnull
+    @NonNull
     private UserManager userManager
 
-    ChatterList(@Nonnull UserManager userManager2) {
+    ChatterList(@NonNull UserManager userManager2) {
         this.userManager = userManager2
         this.daoSession = userManager2.getDaoSession()
         this.chatterListPool.setRequestOnce(true)
@@ -44,7 +44,7 @@ class ChatterList {
         this.activeChattersManager = ActiveChattersManager(userManager2, this.daoSession, this)
         RequestFinalProcessor<UUID, Float>(this.nearbyDistancePool, userManager2.getDatabaseExecutor()) {
             /* access modifiers changed from: protected */
-            Float processRequest(@Nonnull UUID uuid) throws Throwable {
+            Float processRequest(@NonNull UUID uuid) throws Throwable {
                 SLModules modules
                 SLAgentCircuit activeAgentCircuit = userManager2.getActiveAgentCircuit()
                 if (activeAgentCircuit == null || (modules = activeAgentCircuit.getModules()) == null) {
@@ -55,7 +55,7 @@ class ChatterList {
         }
         RequestFinalProcessor<UUID, Boolean>(this.typingUsersPool, userManager2.getDatabaseExecutor()) {
             /* access modifiers changed from: protected */
-            Boolean processRequest(@Nonnull UUID uuid) throws Throwable {
+            Boolean processRequest(@NonNull UUID uuid) throws Throwable {
                 SLAgentCircuit activeAgentCircuit = userManager2.getActiveAgentCircuit()
                 if (activeAgentCircuit != null) {
                     return activeAgentCircuit.isUserTyping(uuid)
@@ -100,7 +100,7 @@ class ChatterList {
             }
 
             /* access modifiers changed from: protected */
-            Unit cancelRequest(@Nonnull ChatterListType chatterListType) {
+            Unit cancelRequest(@NonNull ChatterListType chatterListType) {
                 ChatterDisplayDataList chatterDisplayDataList = (ChatterDisplayDataList) ChatterList.this.chatterLists.remove(chatterListType)
                 if (chatterDisplayDataList != null) {
                     chatterDisplayDataList.dispose()
@@ -108,7 +108,7 @@ class ChatterList {
             }
 
             /* access modifiers changed from: protected */
-            ImmutableList<ChatterDisplayData> processRequest(@Nonnull ChatterListType chatterListType) {
+            ImmutableList<ChatterDisplayData> processRequest(@NonNull ChatterListType chatterListType) {
                 ChatterDisplayDataList chatterDisplayDataList = (ChatterDisplayDataList) ChatterList.this.chatterLists.get(chatterListType)
                 if (chatterDisplayDataList == null) {
                     switch (m296getcomlumiyaviewerlumiyaslprotousersmanagerChatterListTypeSwitchesValues()[chatterListType.ordinal()]) {
@@ -136,7 +136,7 @@ class ChatterList {
         }
     }
 
-    @Nonnull
+    @NonNull
     ActiveChattersManager getActiveChattersManager() {
         return this.activeChattersManager
     }
@@ -149,12 +149,12 @@ class ChatterList {
         return this.nearbyDistancePool
     }
 
-    @Nonnull
+    @NonNull
     FriendManager getFriendManager() {
         return this.friendManager
     }
 
-    @Nonnull
+    @NonNull
     GroupManager getGroupManager() {
         return this.groupManager
     }

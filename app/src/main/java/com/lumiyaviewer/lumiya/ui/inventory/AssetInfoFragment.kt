@@ -48,8 +48,8 @@ import com.lumiyaviewer.lumiya.ui.common.ReloadableFragment
 import com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor
 import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class AssetInfoFragment : FragmentWithTitle : ReloadableFragment, View.OnClickListener, LoadableMonitor.OnLoadableDataChangedListener {
     private String ITEM_UUID_KEY = "itemUUID"
@@ -308,7 +308,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         this.runningAnimations.subscribe(userManager.getObjectsManager().runningAnimations(), SubscriptionSingleKey.Value)
     }
 
-    private Unit showEntryInfo(@Nonnull SLInventoryEntry sLInventoryEntry) {
+    private Unit showEntryInfo(@NonNull SLInventoryEntry sLInventoryEntry) {
         Int i = 0
         Int i2 = 8
         View view = getView()

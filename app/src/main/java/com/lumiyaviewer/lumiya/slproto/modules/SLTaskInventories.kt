@@ -18,7 +18,7 @@ import com.lumiyaviewer.lumiya.slproto.modules.xfer.SLXfer
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import com.lumiyaviewer.lumiya.utils.SimpleStringParser
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLTaskInventories : SLModule : SLXfer.SLXferCompletionListener {
     private String DELIM_ANY = " \t\n"
@@ -30,7 +30,7 @@ class SLTaskInventories : SLModule : SLXfer.SLXferCompletionListener {
     SLTaskInventories(SLAgentCircuit sLAgentCircuit) {
         super(sLAgentCircuit)
         this.requestHandler = AsyncRequestHandler(sLAgentCircuit, SimpleRequestHandler<Int>() {
-            Unit onRequest(@Nonnull Int num) {
+            Unit onRequest(@NonNull Int num) {
                 SLTaskInventories.this.RequestTaskInventory(num.intValue())
             }
         this.userManager = UserManager.getUserManager(sLAgentCircuit.getAgentUUID())

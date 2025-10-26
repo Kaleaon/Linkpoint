@@ -9,21 +9,21 @@ import com.lumiyaviewer.lumiya.render.shaders.RiggedMeshProgram30
 import com.lumiyaviewer.lumiya.utils.InternPool
 import com.lumiyaviewer.rawbuffers.DirectByteBuffer
 import java.util.Arrays
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class MeshRiggingData {
     private InternPool<MeshRiggingData> riggingDataPool = InternPool<>()
     private GLLoadableBuffer glRiggingDataBuffer = null
     private Boolean hasExtendedBones
     private Int hashCode
-    @Nonnull
+    @NonNull
     private float[] jointMatrices
-    @Nonnull
+    @NonNull
     private Int[] joints
     private float[] mappedJointMatrices
     private float[] mappedJointVectors
 
-    private MeshRiggingData(@Nonnull Int[] iArr, @Nonnull float[] fArr, Boolean z) {
+    private MeshRiggingData(@NonNull Int[] iArr, @NonNull float[] fArr, Boolean z) {
         this.joints = iArr
         this.jointMatrices = fArr
         this.hasExtendedBones = z
@@ -49,7 +49,7 @@ class MeshRiggingData {
         return (Arrays.hashCode(this.joints) * 31) + Arrays.hashCode(this.jointMatrices)
     }
 
-    MeshRiggingData create(@Nonnull Int[] iArr, @Nonnull float[] fArr, Boolean z) {
+    MeshRiggingData create(@NonNull Int[] iArr, @NonNull float[] fArr, Boolean z) {
         return riggingDataPool.intern(MeshRiggingData(iArr, fArr, z))
     }
 

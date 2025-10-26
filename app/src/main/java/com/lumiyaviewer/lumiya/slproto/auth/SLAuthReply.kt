@@ -9,7 +9,7 @@ import java.util.Collection
 import java.util.LinkedList
 import java.util.List
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 
@@ -37,10 +37,10 @@ class SLAuthReply {
     class Friend {
         Int rightsGiven
         Int rightsHas
-        @Nonnull
+        @NonNull
         UUID uuid
 
-        Friend(@Nonnull UUID uuid2, Int i, Int i2) {
+        Friend(@NonNull UUID uuid2, Int i, Int i2) {
             this.uuid = uuid2
             this.rightsGiven = i
             this.rightsHas = i2
@@ -69,7 +69,7 @@ class SLAuthReply {
         this.isTemporary = z2
     }
 
-    SLAuthReply(String str, String str2, @Nonnull XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+    SLAuthReply(String str, String str2, @NonNull XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
         this.gridName = str
         this.loginURL = str2
         Boolean z = false

@@ -5,7 +5,7 @@ import android.content.Context
 import com.google.common.collect.ImmutableList
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import com.lumiyaviewer.lumiya.ui.chat.ChatterDisplayInfo
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class ChatterListSimpleAdapter : ChatterListAdapter {
     @Nullable

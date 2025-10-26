@@ -42,7 +42,7 @@ import java.util.HashSet
 import java.util.Iterator
 import java.util.Set
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class GroupMemberRolesFragment : ChatterReloadableFragment : LoadableMonitor.OnLoadableDataChangedListener, BackButtonHandler {
     private String MEMBER_ID_KEY = "memberID"

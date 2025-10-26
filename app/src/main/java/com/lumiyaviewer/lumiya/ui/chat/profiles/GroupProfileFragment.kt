@@ -26,7 +26,7 @@ import java.lang.ref.WeakReference
 import java.util.EnumMap
 import java.util.Map
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class GroupProfileFragment : ChatterReloadableFragment : LoadableMonitor.OnLoadableDataChangedListener {
     /* access modifiers changed from: private */

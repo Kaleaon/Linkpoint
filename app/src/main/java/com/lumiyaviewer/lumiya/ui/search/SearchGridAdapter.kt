@@ -22,7 +22,7 @@ import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever
 import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView
 import de.greenrobot.dao.query.LazyList
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class SearchGridAdapter : RecyclerView.Adapter<SearchViewHolder> {
     /* access modifiers changed from: private */

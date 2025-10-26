@@ -12,13 +12,13 @@ import com.lumiyaviewer.lumiya.slproto.SLGridConnection
 import com.lumiyaviewer.lumiya.slproto.modules.finance.SLFinancialInfo
 import de.greenrobot.dao.query.LazyList
 import java.util.concurrent.atomic.AtomicReference
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class BalanceManager {
     /* access modifiers changed from: private */
     SubscriptionPool<SubscriptionSingleKey, Int> balancePool = SubscriptionPool<>()
     private SimpleRequestHandler<SubscriptionSingleKey> balanceRequestHandler = SimpleRequestHandler<SubscriptionSingleKey>() {
-        Unit onRequest(@Nonnull SubscriptionSingleKey subscriptionSingleKey) {
+        Unit onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey) {
             SLFinancialInfo sLFinancialInfo = (SLFinancialInfo) BalanceManager.this.financialInfo.get()
             if (sLFinancialInfo == null) {
                 BalanceManager.this.balancePool.onResultError(SubscriptionSingleKey.Value, SLGridConnection.NotConnectedException())
@@ -59,7 +59,7 @@ class BalanceManager {
         this.moneyTransactionDao = userManager2.getDaoSession().getMoneyTransactionDao()
         this.balancePool.attachRequestHandler(this.balanceRequestHandler)
         this.moneyTransactionPool.attachRequestHandler(AsyncRequestHandler(userManager2.getDatabaseExecutor(), SimpleRequestHandler<SubscriptionSingleKey>() {
-            Unit onRequest(@Nonnull SubscriptionSingleKey subscriptionSingleKey) {
+            Unit onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey) {
                 BalanceManager.this.moneyTransactionPool.onResultData(subscriptionSingleKey, BalanceManager.this.moneyTransactionDao.queryBuilder().orderAsc(MoneyTransactionDao.Properties.Timestamp).listLazy())
             }
         }))

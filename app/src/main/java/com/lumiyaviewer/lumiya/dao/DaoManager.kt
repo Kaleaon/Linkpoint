@@ -6,7 +6,7 @@ import java.io.File
 import java.util.HashMap
 import java.util.Map
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 object DaoManager {
     private Object lock = Object()

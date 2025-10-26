@@ -24,8 +24,8 @@ import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class SLChatScriptDialog : SLChatDialogEvent {
     /* access modifiers changed from: private */
@@ -77,7 +77,7 @@ class SLChatScriptDialog : SLChatDialogEvent {
         }
     }
 
-    SLChatScriptDialog(ChatMessage chatMessage, @Nonnull UUID uuid) {
+    SLChatScriptDialog(ChatMessage chatMessage, @NonNull UUID uuid) {
         super(chatMessage, uuid)
         String[] strArr
         this.selectedOption = chatMessage.getDialogSelectedOption()
@@ -90,7 +90,7 @@ class SLChatScriptDialog : SLChatDialogEvent {
         this.buttons = strArr
     }
 
-    SLChatScriptDialog(ScriptDialog scriptDialog, @Nonnull UUID uuid, String[] strArr) {
+    SLChatScriptDialog(ScriptDialog scriptDialog, @NonNull UUID uuid, String[] strArr) {
         super(scriptDialog, uuid)
         this.buttons = strArr
     }
@@ -130,7 +130,7 @@ class SLChatScriptDialog : SLChatDialogEvent {
     }
 
     /* access modifiers changed from: protected */
-    @Nonnull
+    @NonNull
     SLChatEvent.ChatMessageType getMessageType() {
         return SLChatEvent.ChatMessageType.ScriptDialog
     }
@@ -160,7 +160,7 @@ class SLChatScriptDialog : SLChatDialogEvent {
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    Unit serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
+    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         try {
             ByteArrayOutputStream byteArrayOutputStream = ByteArrayOutputStream()

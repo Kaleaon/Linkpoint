@@ -18,7 +18,7 @@ import com.lumiyaviewer.lumiya.ui.common.LoadingLayout
 import com.lumiyaviewer.lumiya.ui.common.StateAwareFragment
 import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 import uk.co.senab.photoview.PhotoViewAttacher
 
 class TextureViewFragment : StateAwareFragment {

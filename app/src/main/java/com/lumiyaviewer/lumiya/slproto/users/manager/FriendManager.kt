@@ -12,15 +12,15 @@ import com.lumiyaviewer.lumiya.slproto.auth.SLAuthReply
 import java.util.HashSet
 import java.util.List
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class FriendManager {
     /* access modifiers changed from: private */
-    @Nonnull
+    @NonNull
     ChatterList chatterList
     /* access modifiers changed from: private */
-    @Nonnull
+    @NonNull
     FriendDao friendDao
     private OnListUpdated onFriendListUpdated = OnListUpdated() {
         Unit onListUpdated() {
@@ -33,16 +33,16 @@ class FriendManager {
         }
     }
     private SubscriptionPool<UUID, Boolean> onlineStatus = SubscriptionPool<>()
-    @Nonnull
+    @NonNull
     private UserManager userManager
 
-    FriendManager(@Nonnull UserManager userManager2, @Nonnull DaoSession daoSession, @Nonnull ChatterList chatterList2) {
+    FriendManager(@NonNull UserManager userManager2, @NonNull DaoSession daoSession, @NonNull ChatterList chatterList2) {
         this.userManager = userManager2
         this.friendDao = daoSession.getFriendDao()
         this.chatterList = chatterList2
         RequestFinalProcessor<UUID, Boolean>(this.onlineStatus, userManager2.getDatabaseExecutor()) {
             /* access modifiers changed from: protected */
-            Boolean processRequest(@Nonnull UUID uuid) {
+            Boolean processRequest(@NonNull UUID uuid) {
                 Friend friend = (Friend) FriendManager.this.friendDao.load(uuid)
                 if (friend != null) {
                     return Boolean.valueOf(friend.getIsOnline())

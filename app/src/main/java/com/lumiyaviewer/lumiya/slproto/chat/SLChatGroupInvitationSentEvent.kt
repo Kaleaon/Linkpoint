@@ -7,25 +7,25 @@ import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLChatGroupInvitationSentEvent : SLChatEvent {
-    SLChatGroupInvitationSentEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
+    SLChatGroupInvitationSentEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
         super(chatMessage, uuid)
     }
 
-    SLChatGroupInvitationSentEvent(@Nonnull ChatMessageSource chatMessageSource, @Nonnull UUID uuid) {
+    SLChatGroupInvitationSentEvent(@NonNull ChatMessageSource chatMessageSource, @NonNull UUID uuid) {
         super(chatMessageSource, uuid)
     }
 
     /* access modifiers changed from: protected */
-    @Nonnull
+    @NonNull
     SLChatEvent.ChatMessageType getMessageType() {
         return SLChatEvent.ChatMessageType.GroupInvitationSent
     }
 
     /* access modifiers changed from: protected */
-    String getText(Context context, @Nonnull UserManager userManager) {
+    String getText(Context context, @NonNull UserManager userManager) {
         String sourceName = this.source.getSourceName(userManager)
         Object[] objArr = Object[1]
         if (sourceName == null) {
@@ -40,11 +40,11 @@ class SLChatGroupInvitationSentEvent : SLChatEvent {
     }
 
     /* access modifiers changed from: protected */
-    Boolean isActionMessage(@Nonnull UserManager userManager) {
+    Boolean isActionMessage(@NonNull UserManager userManager) {
         return false
     }
 
-    Unit serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
+    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

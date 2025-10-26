@@ -21,7 +21,7 @@ import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import com.lumiyaviewer.lumiya.ui.common.ActivityUtils
 import com.lumiyaviewer.lumiya.ui.common.ConnectedActivity
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class MinimapActivity : ConnectedActivity {
     private SubscriptionData<SubscriptionSingleKey, CurrentLocationInfo> currentLocationInfo = SubscriptionData<>(UIThreadExecutor.getInstance(), $Lambda$HQUtmVzLYkemE78mCklVmVxMXms(this))

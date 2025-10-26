@@ -6,7 +6,7 @@ import com.lumiyaviewer.lumiya.slproto.messages.AvatarPropertiesReply
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import com.lumiyaviewer.lumiya.ui.common.TextFieldEditFragment
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 abstract class ProfileTextFieldEditFragment : TextFieldEditFragment {
     private Subscription<UUID, AvatarPropertiesReply> avatarProperties = null

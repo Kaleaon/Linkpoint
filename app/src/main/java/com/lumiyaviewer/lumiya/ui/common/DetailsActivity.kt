@@ -16,8 +16,8 @@ import com.lumiyaviewer.lumiya.R
 import java.lang.ref.SoftReference
 import java.util.ArrayList
 import java.util.List
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class DetailsActivity : ConnectedActivity {
     String DEFAULT_DETAILS_FRAGMENT_TAG = "defaultDetails"
@@ -60,7 +60,7 @@ class DetailsActivity : ConnectedActivity {
             }
         }
 
-        private DetailsStackEntry(@Nonnull Fragment fragment2) {
+        private DetailsStackEntry(@NonNull Fragment fragment2) {
             this.fragment = SoftReference<>(fragment2)
             this.className = fragment2.getClass().getName()
             this.arguments = fragment2.getArguments()

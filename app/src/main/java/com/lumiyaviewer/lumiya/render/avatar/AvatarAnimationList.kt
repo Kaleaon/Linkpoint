@@ -8,12 +8,12 @@ import java.util.ArrayList
 import java.util.Collection
 import java.util.Collections
 import java.util.Iterator
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class AvatarAnimationList {
-    @Nonnull
+    @NonNull
     private ImmutableList<AvatarRunningAnimation> animations
-    @Nonnull
+    @NonNull
     private ImmutableList<AvatarRunningSequence> sequences
 
     AvatarAnimationList(Collection<AvatarAnimationState> collection) {

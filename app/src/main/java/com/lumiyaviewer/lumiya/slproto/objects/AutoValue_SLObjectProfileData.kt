@@ -2,7 +2,7 @@ package com.lumiyaviewer.lumiya.slproto.objects
 
 import com.google.common.base.Optional
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class AutoValue_SLObjectProfileData : SLObjectProfileData {
     private Optional<String> description

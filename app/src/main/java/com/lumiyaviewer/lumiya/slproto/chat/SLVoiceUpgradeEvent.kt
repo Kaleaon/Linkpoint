@@ -10,28 +10,28 @@ import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatYesNoEvent
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUnknown
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLVoiceUpgradeEvent : SLChatYesNoEvent {
     private Boolean isInstall
     private String upgradeURL
 
     /* JADX INFO: super call moved to the top of the method (can break code semantics) */
-    SLVoiceUpgradeEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
+    SLVoiceUpgradeEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
         super(chatMessage, uuid)
         Boolean z = false
         this.upgradeURL = chatMessage.getItemName()
         this.isInstall = chatMessage.getAssetType().intValue() != 0 ? true : z
     }
 
-    SLVoiceUpgradeEvent(@Nonnull UUID uuid, String str, Boolean z, String str2) {
+    SLVoiceUpgradeEvent(@NonNull UUID uuid, String str, Boolean z, String str2) {
         super(ChatMessageSourceUnknown.getInstance(), uuid, str)
         this.upgradeURL = str2
         this.isInstall = z
     }
 
     /* access modifiers changed from: protected */
-    @Nonnull
+    @NonNull
     SLChatEvent.ChatMessageType getMessageType() {
         return SLChatEvent.ChatMessageType.VoiceUpgrade
     }
@@ -48,7 +48,7 @@ class SLVoiceUpgradeEvent : SLChatYesNoEvent {
         return this.isInstall ? context.getString(R.string.install_now_question) : context.getString(R.string.upgrade_now_question)
     }
 
-    String getText(Context context, @Nonnull UserManager userManager) {
+    String getText(Context context, @NonNull UserManager userManager) {
         return this.text
     }
 
@@ -78,7 +78,7 @@ class SLVoiceUpgradeEvent : SLChatYesNoEvent {
         context.startActivity(intent)
     }
 
-    Unit serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
+    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setItemName(this.upgradeURL)
         chatMessage.setAssetType(Integer.valueOf(this.isInstall ? 1 : 0))

@@ -31,8 +31,8 @@ import java.util.HashMap
 import java.util.HashSet
 import java.util.Map
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class NearbyPeopleMinimapFragment : Fragment {
     private NearbyUserRecyclerAdapter adapter = null
@@ -45,7 +45,7 @@ class NearbyPeopleMinimapFragment : Fragment {
     RecyclerView userListView
 
     private class NearbyUserRecyclerAdapter : RecyclerView.Adapter<NearbyUserViewHolder> {
-        @Nonnull
+        @NonNull
         private ImmutableList<ChatterDisplayData> chatters = ImmutableList.of()
         private Context context
         private LayoutInflater layoutInflater

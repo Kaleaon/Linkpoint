@@ -12,7 +12,7 @@ import com.lumiyaviewer.lumiya.ui.avapicker.AvatarPickerFragment
 import com.lumiyaviewer.lumiya.ui.common.ActivityUtils
 import com.lumiyaviewer.lumiya.ui.common.DetailsActivity
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class AvatarPickerForMute : AvatarPickerFragment {
     Bundle makeArguments(UUID uuid) {

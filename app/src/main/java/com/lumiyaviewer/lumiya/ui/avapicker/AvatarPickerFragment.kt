@@ -23,8 +23,8 @@ import com.lumiyaviewer.lumiya.ui.chat.ChatterDisplayInfo
 import com.lumiyaviewer.lumiya.ui.chat.contacts.ChatterListSubscriptionAdapter
 import com.lumiyaviewer.lumiya.ui.common.ActivityUtils
 import com.lumiyaviewer.lumiya.ui.common.FragmentWithTitle
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 abstract class AvatarPickerFragment : FragmentWithTitle : AdapterView.OnItemClickListener {
 
@@ -123,8 +123,8 @@ abstract class AvatarPickerFragment : FragmentWithTitle : AdapterView.OnItemClic
     }
 
     /* access modifiers changed from: private */
-    @Nonnull
-    ListAdapter createListAdapter(Context context, UserManager userManager, @Nonnull ContactListType contactListType) {
+    @NonNull
+    ListAdapter createListAdapter(Context context, UserManager userManager, @NonNull ContactListType contactListType) {
         switch (m388getcomlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues()[contactListType.ordinal()]) {
             case 1:
                 return ChatterListSubscriptionAdapter(context, userManager, ChatterListType.Friends)

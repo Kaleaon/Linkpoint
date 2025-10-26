@@ -24,13 +24,13 @@ import de.greenrobot.dao.query.LazyList
 import java.util.Set
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class GroupManager {
     private AtomicReference<AvatarGroupList> avatarGroupListRef = AtomicReference<>()
     /* access modifiers changed from: private */
-    @Nonnull
+    @NonNull
     ChatterList chatterList
     /* access modifiers changed from: private */
     GroupMemberDao groupMemberDao
@@ -56,7 +56,7 @@ class GroupManager {
         }
     }
     private Subscription<UUID, AvatarGroupList> subscription
-    @Nonnull
+    @NonNull
     private UserManager userManager
 
     abstract class GroupMemberRolesQuery {
@@ -93,7 +93,7 @@ class GroupManager {
         abstract UUID roleID()
     }
 
-    GroupManager(@Nonnull UserManager userManager2, @Nonnull DaoSession daoSession, @Nonnull ChatterList chatterList2) {
+    GroupManager(@NonNull UserManager userManager2, @NonNull DaoSession daoSession, @NonNull ChatterList chatterList2) {
         this.userManager = userManager2
         this.chatterList = chatterList2
         this.groupMemberDao = daoSession.getGroupMemberDao()
@@ -175,7 +175,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         this.groupMemberDataSetHandler = RateLimitRequestHandler<>(RequestProcessor<UUID, UUID, UUID>(this.groupMemberDataSetPool, userManager2.getDatabaseExecutor()) {
             /* access modifiers changed from: protected */
             @Nullable
-            UUID processRequest(@Nonnull UUID uuid) {
+            UUID processRequest(@NonNull UUID uuid) {
                 GroupMemberList groupMemberList = (GroupMemberList) GroupManager.this.groupMemberListDao.load(uuid)
                 if (groupMemberList != null) {
                     return groupMemberList.getRequestID()
@@ -184,13 +184,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             }
 
             /* access modifiers changed from: protected */
-            UUID processResult(@Nonnull UUID uuid, UUID uuid2) {
+            UUID processResult(@NonNull UUID uuid, UUID uuid2) {
                 GroupManager.this.groupMemberListDao.insertOrReplace(GroupMemberList(uuid, uuid2))
                 return uuid2
             }
         this.groupRoleMemberDataSetHandler = RateLimitRequestHandler<>(RequestProcessor<UUID, UUID, UUID>(this.groupRoleMemberDataSetPool, userManager2.getDatabaseExecutor()) {
             /* access modifiers changed from: protected */
-            Boolean isRequestComplete(@Nonnull UUID uuid, UUID uuid2) {
+            Boolean isRequestComplete(@NonNull UUID uuid, UUID uuid2) {
                 GroupRoleMemberList groupRoleMemberList = (GroupRoleMemberList) GroupManager.this.groupRoleMemberListDao.load(uuid)
                 if (groupRoleMemberList != null) {
                     return !groupRoleMemberList.getMustRevalidate()
@@ -200,7 +200,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
             /* access modifiers changed from: protected */
             @Nullable
-            UUID processRequest(@Nonnull UUID uuid) {
+            UUID processRequest(@NonNull UUID uuid) {
                 GroupRoleMemberList groupRoleMemberList = (GroupRoleMemberList) GroupManager.this.groupRoleMemberListDao.load(uuid)
                 if (groupRoleMemberList != null) {
                     return groupRoleMemberList.getRequestID()
@@ -209,18 +209,18 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             }
 
             /* access modifiers changed from: protected */
-            UUID processResult(@Nonnull UUID uuid, UUID uuid2) {
+            UUID processResult(@NonNull UUID uuid, UUID uuid2) {
                 GroupManager.this.groupRoleMemberListDao.insertOrReplace(GroupRoleMemberList(uuid, uuid2, false))
                 return uuid2
             }
         this.groupRoleMemberSubscriptionPool.attachRequestHandler(AsyncRequestHandler(userManager2.getDatabaseExecutor(), SimpleRequestHandler<GroupRoleMembersQuery>() {
-            Unit onRequest(@Nonnull GroupRoleMembersQuery groupRoleMembersQuery) {
+            Unit onRequest(@NonNull GroupRoleMembersQuery groupRoleMembersQuery) {
                 GroupManager.this.groupRoleMemberSubscriptionPool.onResultData(groupRoleMembersQuery, GroupManager.this.groupRoleMemberDao.queryBuilder().where(GroupRoleMemberDao.Properties.GroupID.eq(groupRoleMembersQuery.groupID()), GroupRoleMemberDao.Properties.RoleID.eq(groupRoleMembersQuery.roleID()), GroupRoleMemberDao.Properties.RequestID.eq(groupRoleMembersQuery.requestID())).listLazyUncached())
             }
         }))
         this.groupRoleMemberSubscriptionPool.setDisposeHandler($Lambda$u_XXTkSOKCgaVXhhUplrxzPP28(), userManager2.getDatabaseExecutor())
         this.groupMembersSubscriptionPool.attachRequestHandler(AsyncRequestHandler(userManager2.getDatabaseExecutor(), SimpleRequestHandler<GroupMembersQuery>() {
-            Unit onRequest(@Nonnull GroupMembersQuery groupMembersQuery) {
+            Unit onRequest(@NonNull GroupMembersQuery groupMembersQuery) {
                 GroupManager.this.groupMembersSubscriptionPool.onResultData(groupMembersQuery, GroupManager.this.groupMemberDao.queryBuilder().where(GroupMemberDao.Properties.GroupID.eq(groupMembersQuery.groupID()), GroupMemberDao.Properties.RequestID.eq(groupMembersQuery.requestID())).listLazyUncached())
             }
         }))
@@ -290,7 +290,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
         }, userManager2.getDatabaseExecutor())
         this.groupMemberRolesSubscriptionPool.attachRequestHandler(AsyncRequestHandler(userManager2.getDatabaseExecutor(), SimpleRequestHandler<GroupMemberRolesQuery>() {
-            Unit onRequest(@Nonnull GroupMemberRolesQuery groupMemberRolesQuery) {
+            Unit onRequest(@NonNull GroupMemberRolesQuery groupMemberRolesQuery) {
                 LazyList<GroupRoleMember> listLazyUncached = GroupManager.this.groupRoleMemberDao.queryBuilder().where(GroupRoleMemberDao.Properties.GroupID.eq(groupMemberRolesQuery.groupID()), GroupRoleMemberDao.Properties.UserID.eq(groupMemberRolesQuery.memberID()), GroupRoleMemberDao.Properties.RequestID.eq(groupMemberRolesQuery.requestID())).listLazyUncached()
                 ImmutableSet.Builder builder = ImmutableSet.builder()
                 for (GroupRoleMember roleID : listLazyUncached) {

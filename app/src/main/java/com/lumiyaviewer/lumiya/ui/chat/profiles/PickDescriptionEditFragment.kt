@@ -12,7 +12,7 @@ import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import com.lumiyaviewer.lumiya.slproto.users.manager.AvatarPickKey
 import com.lumiyaviewer.lumiya.ui.common.ChatterFragment
 import com.lumiyaviewer.lumiya.ui.common.TextFieldEditFragment
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class PickDescriptionEditFragment : TextFieldEditFragment {
     private String AVATAR_PICK_KEY = "avatarPickKey"

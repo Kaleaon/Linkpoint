@@ -22,13 +22,13 @@ import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryType
 import com.lumiyaviewer.lumiya.slproto.modules.SLAvatarAppearance
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class InventoryFolderAdapter : BaseAdapter : View.OnClickListener {
     @Nullable
     private SLAvatarAppearance avatarAppearance = null
-    @Nonnull
+    @NonNull
     private InventoryEntryList data = InventoryEntryList()
     private InventoryDB database
     private LayoutInflater inflater

@@ -62,8 +62,8 @@ import java.io.IOException
 import java.util.Collection
 import java.util.Map
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class SLGroupManager : SLModule {
     private Int RoleMemberChange_Add = 0
@@ -77,7 +77,7 @@ class SLGroupManager : SLModule {
     /* access modifiers changed from: private */
     String groupMemberDataURL
     private RequestHandler<UUID> groupMemberListHTTPRequestHandler = AsyncCancellableRequestHandler(GenericHTTPExecutor.getInstance(), SimpleRequestHandler<UUID>() {
-        Unit onRequest(@Nonnull UUID uuid) {
+        Unit onRequest(@NonNull UUID uuid) {
             Debug.Printf("GroupMemberList: [%s] network requesting for group %s", Thread.currentThread().getName(), uuid.toString())
             try {
                 UUID randomUUID = UUID.randomUUID()
@@ -135,7 +135,7 @@ class SLGroupManager : SLModule {
             }
         }
     private RequestHandler<UUID> groupMemberListRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        Unit onRequest(@Nonnull UUID uuid) {
+        Unit onRequest(@NonNull UUID uuid) {
             Debug.Printf("GroupMemberList: [%s] network requesting for group %s", Thread.currentThread().getName(), uuid.toString())
             GroupMembersRequest groupMembersRequest = GroupMembersRequest()
             groupMembersRequest.AgentData_Field.AgentID = SLGroupManager.this.circuitInfo.agentID
@@ -149,7 +149,7 @@ class SLGroupManager : SLModule {
     /* access modifiers changed from: private */
     ResultHandler<UUID, UUID> groupMemberListResultHandler
     private RequestHandler<UUID> groupProfileRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        Unit onRequest(@Nonnull UUID uuid) {
+        Unit onRequest(@NonNull UUID uuid) {
             Debug.Printf("GroupManager: [%s] network requesting for group %s", Thread.currentThread().getName(), uuid.toString())
             SLGroupManager.this.RequestGroupProfileData(uuid)
         }
@@ -157,7 +157,7 @@ class SLGroupManager : SLModule {
     private ResultHandler<UUID, GroupProfileReply> groupProfileResultHandler
     private GroupRoleMemberDao groupRoleMemberDao
     private RequestHandler<UUID> groupRoleMemberListRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        Unit onRequest(@Nonnull UUID uuid) {
+        Unit onRequest(@NonNull UUID uuid) {
             Debug.Printf("GroupRoleMemberList: [%s] network requesting for %s", Thread.currentThread().getName(), uuid.toString())
             GroupRoleMembersRequest groupRoleMembersRequest = GroupRoleMembersRequest()
             groupRoleMembersRequest.AgentData_Field.AgentID = SLGroupManager.this.circuitInfo.agentID
@@ -170,7 +170,7 @@ class SLGroupManager : SLModule {
     }, false, 3, 15000)
     private ResultHandler<UUID, UUID> groupRoleMemberListResultHandler
     private RequestHandler<UUID> groupRolesRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        Unit onRequest(@Nonnull UUID uuid) {
+        Unit onRequest(@NonNull UUID uuid) {
             Debug.Printf("GroupRoles: [%s] network requesting for group %s", Thread.currentThread().getName(), uuid.toString())
             GroupRoleDataRequest groupRoleDataRequest = GroupRoleDataRequest()
             groupRoleDataRequest.AgentData_Field.AgentID = SLGroupManager.this.circuitInfo.agentID
@@ -183,7 +183,7 @@ class SLGroupManager : SLModule {
     }, false, 3, 15000)
     private ResultHandler<UUID, GroupRoleDataReply> groupRolesResultHandler
     private RequestHandler<UUID> groupTitlesRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        Unit onRequest(@Nonnull UUID uuid) {
+        Unit onRequest(@NonNull UUID uuid) {
             Debug.Printf("GroupTitles: [%s] network requesting for group %s", Thread.currentThread().getName(), uuid.toString())
             SLGroupManager.this.requestGroupTitles(uuid)
         }

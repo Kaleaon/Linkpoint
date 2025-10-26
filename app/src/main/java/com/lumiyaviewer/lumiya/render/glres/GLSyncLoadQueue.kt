@@ -4,7 +4,7 @@ import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.render.RenderContext
 import com.lumiyaviewer.lumiya.render.TextureMemoryTracker
 import com.lumiyaviewer.lumiya.render.glres.GLLoadQueue
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class GLSyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
     private Int MAX_LOADS_PER_FRAME = 16

@@ -39,9 +39,9 @@ import com.lumiyaviewer.lumiya.slproto.users.manager.AvatarPickKey
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.io.IOException
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
-import javax.annotation.concurrent.ThreadSafe
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
+import androidx.annotation.ThreadSafe
 
 @ThreadSafe
 class SLUserProfiles : SLModule {
@@ -52,32 +52,32 @@ class SLUserProfiles : SLModule {
     Int AVATAR_ONLINE = 16
     Int AVATAR_TRANSACTED = 8
     private RequestHandler<UUID> agentDataUpdateRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        Unit onRequest(@Nonnull UUID uuid) {
+        Unit onRequest(@NonNull UUID uuid) {
             SLUserProfiles.this.requestAgentDataUpdate()
         }
     }, false, 3, 15000)
     private ResultHandler<UUID, AgentDataUpdate> agentDataUpdateResultHandler
     private ResultHandler<UUID, AvatarGroupList> avatarGroupListsResultHandler
     private RequestHandler<UUID> avatarNotesRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        Unit onRequest(@Nonnull UUID uuid) {
+        Unit onRequest(@NonNull UUID uuid) {
             SLUserProfiles.this.agentCircuit.SendGenericMessage("avatarnotesrequest", String[]{uuid.toString()})
         }
     }, false, 3, 15000)
     private ResultHandler<UUID, AvatarNotesReply> avatarNotesResultHandler
     private RequestHandler<AvatarPickKey> avatarPickInfosRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<AvatarPickKey>() {
-        Unit onRequest(@Nonnull AvatarPickKey avatarPickKey) {
+        Unit onRequest(@NonNull AvatarPickKey avatarPickKey) {
             SLUserProfiles.this.agentCircuit.SendGenericMessage("pickinforequest", String[]{avatarPickKey.avatarID.toString(), avatarPickKey.pickID.toString()})
         }
     }, false, 3, 15000)
     private ResultHandler<AvatarPickKey, PickInfoReply> avatarPickInfosResultHandler
     private RequestHandler<UUID> avatarPicksRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        Unit onRequest(@Nonnull UUID uuid) {
+        Unit onRequest(@NonNull UUID uuid) {
             SLUserProfiles.this.agentCircuit.SendGenericMessage("avatarpicksrequest", String[]{uuid.toString()})
         }
     }, false, 3, 15000)
     private ResultHandler<UUID, AvatarPicksReply> avatarPicksResultHandler
     private RequestHandler<UUID> avatarPropertiesRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        Unit onRequest(@Nonnull UUID uuid) {
+        Unit onRequest(@NonNull UUID uuid) {
             Debug.Printf("AvatarGroupList: Requesting avatar properties for %s", uuid.toString())
             AvatarPropertiesRequest avatarPropertiesRequest = AvatarPropertiesRequest()
             avatarPropertiesRequest.AgentData_Field.AgentID = SLUserProfiles.this.circuitInfo.agentID

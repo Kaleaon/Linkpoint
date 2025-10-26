@@ -1,7 +1,7 @@
 package com.lumiyaviewer.lumiya.slproto.users.manager.assets
 
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class AutoValue_AssetKey : AssetKey {
     private Int assetType

@@ -22,7 +22,7 @@ import java.util.Collections
 import java.util.HashMap
 import java.util.Map
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLTransferManager : SLModule {
     private Float DEFAULT_PRIORITY = 10000.0f
@@ -31,14 +31,14 @@ class SLTransferManager : SLModule {
     /* access modifiers changed from: private */
     Map<UUID, SLTransfer> activeTransfers = Collections.synchronizedMap(HashMap())
     private RequestHandler<AssetKey> assetRequestHandler = AsyncRequestHandler(this.agentCircuit, RequestHandler<AssetKey>() {
-        Unit onRequest(@Nonnull AssetKey assetKey) {
+        Unit onRequest(@NonNull AssetKey assetKey) {
             Debug.Printf("Transfer: Requested asset download for %s", assetKey)
             SLTransfer sLTransfer = SLTransfer(SLTransferManager.this.circuitInfo.agentID, SLTransferManager.this.circuitInfo.sessionID, assetKey, SLTransferManager.DEFAULT_PRIORITY)
             SLTransferManager.this.activeTransferIds.forcePut(assetKey, sLTransfer.getTransferUUID())
             SLTransferManager.this.BeginTransfer(sLTransfer)
         }
 
-        Unit onRequestCancelled(@Nonnull AssetKey assetKey) {
+        Unit onRequestCancelled(@NonNull AssetKey assetKey) {
             SLTransfer sLTransfer
             UUID uuid = (UUID) SLTransferManager.this.activeTransferIds.remove(assetKey)
             if (uuid != null && (sLTransfer = (SLTransfer) SLTransferManager.this.activeTransfers.get(uuid)) != null) {

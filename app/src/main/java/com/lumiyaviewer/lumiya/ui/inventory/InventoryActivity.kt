@@ -25,7 +25,7 @@ import com.lumiyaviewer.lumiya.ui.common.FragmentActivityFactory
 import com.lumiyaviewer.lumiya.ui.common.MasterDetailsActivity
 import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class InventoryActivity : MasterDetailsActivity {
     private String INITIAL_FOLDER_ID_TAG = "folderID"

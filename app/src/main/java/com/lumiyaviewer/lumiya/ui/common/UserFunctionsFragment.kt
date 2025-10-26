@@ -15,7 +15,7 @@ import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.users.UserProfile
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 /**
  * Converted from Java to Kotlin

@@ -3,8 +3,8 @@ package com.lumiyaviewer.lumiya.slproto
 import java.util.Map
 import java.util.UUID
 import java.util.WeakHashMap
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 object GridConnectionManager {
     private Map<UUID, SLGridConnection> connections = WeakHashMap()

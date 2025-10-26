@@ -22,7 +22,7 @@ import com.lumiyaviewer.lumiya.ui.common.ChatterNameDisplayer
 import de.greenrobot.dao.query.LazyList
 import java.util.Calendar
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class TransactionLogAdapter : RecyclerView.Adapter<TransactionViewHolder> {
     /* access modifiers changed from: private */

@@ -10,7 +10,7 @@ import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView
 import com.lumiyaviewer.lumiya.ui.chat.TypingIndicatorView
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class ChatterItemViewBuilder {
     private Float distance

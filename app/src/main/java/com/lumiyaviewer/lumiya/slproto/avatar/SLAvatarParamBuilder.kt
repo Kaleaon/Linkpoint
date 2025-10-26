@@ -15,7 +15,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.util.EnumMap
 import java.util.Map
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class SLAvatarParamBuilder {
     SLAvatarParamBuilder() {

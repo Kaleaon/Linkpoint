@@ -12,8 +12,8 @@ import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import com.lumiyaviewer.lumiya.ui.chat.ChatLayoutManager
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class ObjectPopupsFragment : Fragment {
     private String AGENT_UUID_KEY = "agentUUID"
@@ -36,7 +36,7 @@ class ObjectPopupsFragment : Fragment {
         }
     }
 
-    ObjectPopupsFragment create(@Nonnull UUID uuid) {
+    ObjectPopupsFragment create(@NonNull UUID uuid) {
         ObjectPopupsFragment objectPopupsFragment = ObjectPopupsFragment()
         Bundle bundle = Bundle()
         bundle.putString(AGENT_UUID_KEY, uuid.toString())

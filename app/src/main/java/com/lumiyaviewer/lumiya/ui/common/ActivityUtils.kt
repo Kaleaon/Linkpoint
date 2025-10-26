@@ -5,8 +5,8 @@ import android.os.Bundle
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class ActivityUtils {
     String EXTRA_ACTIVE_AGENT_UUID = "activeAgentUUID"
@@ -56,7 +56,7 @@ class ActivityUtils {
         return null
     }
 
-    @Nonnull
+    @NonNull
     Bundle makeFragmentArguments(@Nullable UUID uuid, @Nullable Bundle bundle) {
         Bundle bundle2 = Bundle()
         if (uuid != null) {

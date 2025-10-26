@@ -23,8 +23,8 @@ import com.lumiyaviewer.lumiya.slproto.users.MultipleChatterNameRetriever
 import java.util.UUID
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicReference
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class ObjectsManager {
     /* access modifiers changed from: private */
@@ -50,7 +50,7 @@ class ObjectsManager {
             }
         }
 
-        Unit onRequest(@Nonnull Int num) {
+        Unit onRequest(@NonNull Int num) {
             SLAgentCircuit activeAgentCircuit = ObjectsManager.this.userManager.getActiveAgentCircuit()
             if (activeAgentCircuit != null) {
                 activeAgentCircuit.execute(Runnable(this, activeAgentCircuit, num) {
@@ -169,7 +169,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             }
         }
 
-        Unit onRequest(@Nonnull UUID uuid) {
+        Unit onRequest(@NonNull UUID uuid) {
             SLAgentCircuit activeAgentCircuit = ObjectsManager.this.userManager.getActiveAgentCircuit()
             if (activeAgentCircuit != null) {
                 activeAgentCircuit.execute(Runnable(this, activeAgentCircuit, uuid) {
@@ -285,7 +285,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         }
     }
     private SimpleRequestHandler<SubscriptionSingleKey> updateRequestHandler = SimpleRequestHandler<SubscriptionSingleKey>() {
-        Unit onRequest(@Nonnull SubscriptionSingleKey subscriptionSingleKey) {
+        Unit onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey) {
             SLAgentCircuit activeAgentCircuit = ObjectsManager.this.userManager.getActiveAgentCircuit()
             if (activeAgentCircuit != null) {
                 activeAgentCircuit.execute(ObjectsManager.this.updateObjectListRunnable)
@@ -294,7 +294,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             }
         }
 
-        Unit onRequestCancelled(@Nonnull SubscriptionSingleKey subscriptionSingleKey) {
+        Unit onRequestCancelled(@NonNull SubscriptionSingleKey subscriptionSingleKey) {
             ObjectsManager.this.nameRetriever.clearChatters()
         }
     }

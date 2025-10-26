@@ -8,8 +8,8 @@ import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry
 import java.util.AbstractList
 import java.util.concurrent.ExecutionException
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class InventoryEntryList : AbstractList<SLInventoryEntry> {
     /* access modifiers changed from: private */

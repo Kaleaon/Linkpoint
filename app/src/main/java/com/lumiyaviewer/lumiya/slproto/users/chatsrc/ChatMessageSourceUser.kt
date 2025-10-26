@@ -6,15 +6,15 @@ import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class ChatMessageSourceUser : ChatMessageSource {
     @Nullable
     private String displayName
     @Nullable
     private String legacyName
-    @Nonnull
+    @NonNull
     UUID uuid
 
     ChatMessageSourceUser(ChatMessage chatMessage) {
@@ -23,23 +23,23 @@ class ChatMessageSourceUser : ChatMessageSource {
         this.legacyName = chatMessage.getSenderLegacyName()
     }
 
-    ChatMessageSourceUser(@Nonnull UUID uuid2) {
+    ChatMessageSourceUser(@NonNull UUID uuid2) {
         this.uuid = uuid2
         this.displayName = null
         this.legacyName = null
     }
 
-    @Nonnull
+    @NonNull
     ChatterID getDefaultChatter(UUID uuid2) {
         return ChatterID.getUserChatterID(uuid2, this.uuid)
     }
 
     @Nullable
-    String getSourceName(@Nonnull UserManager userManager) {
+    String getSourceName(@NonNull UserManager userManager) {
         return GlobalOptions.getInstance().isLegacyUserNames() ? this.legacyName : this.displayName
     }
 
-    @Nonnull
+    @NonNull
     ChatMessageSource.ChatMessageSourceType getSourceType() {
         return ChatMessageSource.ChatMessageSourceType.User
     }
@@ -49,7 +49,7 @@ class ChatMessageSourceUser : ChatMessageSource {
         return this.uuid
     }
 
-    Unit serializeTo(@Nonnull ChatMessage chatMessage) {
+    Unit serializeTo(@NonNull ChatMessage chatMessage) {
         super.serializeTo(chatMessage)
         chatMessage.setSenderUUID(this.uuid)
         chatMessage.setSenderName(this.displayName)

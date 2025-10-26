@@ -3,7 +3,7 @@ package com.lumiyaviewer.lumiya.slproto.users.manager
 import android.os.Parcel
 import android.os.Parcelable
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class AvatarPickKey : Parcelable {
     Parcelable.Creator<AvatarPickKey> CREATOR = Parcelable.Creator<AvatarPickKey>() {
@@ -15,9 +15,9 @@ class AvatarPickKey : Parcelable {
             return AvatarPickKey[i]
         }
     }
-    @Nonnull
+    @NonNull
     UUID avatarID
-    @Nonnull
+    @NonNull
     UUID pickID
 
     protected AvatarPickKey(Parcel parcel) {
@@ -25,7 +25,7 @@ class AvatarPickKey : Parcelable {
         this.pickID = UUID.fromString(parcel.readString())
     }
 
-    AvatarPickKey(@Nonnull UUID uuid, @Nonnull UUID uuid2) {
+    AvatarPickKey(@NonNull UUID uuid, @NonNull UUID uuid2) {
         this.avatarID = uuid
         this.pickID = uuid2
     }

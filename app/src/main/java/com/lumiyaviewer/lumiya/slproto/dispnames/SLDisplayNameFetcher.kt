@@ -23,7 +23,7 @@ import java.util.HashSet
 import java.util.Set
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLDisplayNameFetcher : SLModule {
     private Int MAX_BATCH_SIZE = 4
@@ -55,7 +55,7 @@ class SLDisplayNameFetcher : SLModule {
         }
     }
     private RequestHandler<UUID> requestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        Unit onRequest(@Nonnull UUID uuid) {
+        Unit onRequest(@NonNull UUID uuid) {
             UUIDNameRequest uUIDNameRequest = UUIDNameRequest()
             UUIDNameRequest.UUIDNameBlock uUIDNameBlock = UUIDNameRequest.UUIDNameBlock()
             uUIDNameBlock.ID = uuid

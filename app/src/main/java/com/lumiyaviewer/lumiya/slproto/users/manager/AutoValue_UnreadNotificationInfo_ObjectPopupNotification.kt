@@ -2,7 +2,7 @@ package com.lumiyaviewer.lumiya.slproto.users.manager
 
 import com.google.common.base.Optional
 import com.lumiyaviewer.lumiya.slproto.users.manager.UnreadNotificationInfo
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class AutoValue_UnreadNotificationInfo_ObjectPopupNotification : UnreadNotificationInfo.ObjectPopupNotification {
     private Int freshObjectPopupsCount
@@ -40,7 +40,7 @@ class AutoValue_UnreadNotificationInfo_ObjectPopupNotification : UnreadNotificat
         return ((((this.freshObjectPopupsCount ^ 1000003) * 1000003) ^ this.objectPopupsCount) * 1000003) ^ this.lastObjectPopup.hashCode()
     }
 
-    @Nonnull
+    @NonNull
     Optional<UnreadNotificationInfo.ObjectPopupMessage> lastObjectPopup() {
         return this.lastObjectPopup
     }

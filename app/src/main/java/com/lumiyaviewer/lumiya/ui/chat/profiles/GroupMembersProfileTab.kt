@@ -39,7 +39,7 @@ import com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor
 import com.lumiyaviewer.lumiya.utils.UUIDPool
 import de.greenrobot.dao.query.LazyList
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class GroupMembersProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadableDataChangedListener {
     private String ROLE_TO_ADD_KEY = "roleToAdd"

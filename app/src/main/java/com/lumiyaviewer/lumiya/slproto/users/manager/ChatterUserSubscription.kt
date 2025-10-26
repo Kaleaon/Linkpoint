@@ -6,19 +6,19 @@ import com.lumiyaviewer.lumiya.dao.UserName
 import com.lumiyaviewer.lumiya.react.Subscription
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.concurrent.NotThreadSafe
+import androidx.annotation.NonNull
+import androidx.annotation.NotThreadSafe
 
 @NotThreadSafe
 class ChatterUserSubscription : ChatterSubscription {
-    @Nonnull
+    @NonNull
     private Subscription<UUID, Float> distanceSubscription
-    @Nonnull
+    @NonNull
     private Subscription<UUID, UserName> nameSubscription
-    @Nonnull
+    @NonNull
     private Subscription<UUID, Boolean> onlineStatusSubscription
 
-    ChatterUserSubscription(@Nonnull SortedChatterList sortedChatterList, @Nonnull ChatterID.ChatterIDUser chatterIDUser, @Nonnull UserManager userManager) {
+    ChatterUserSubscription(@NonNull SortedChatterList sortedChatterList, @NonNull ChatterID.ChatterIDUser chatterIDUser, @NonNull UserManager userManager) {
         super(sortedChatterList, chatterIDUser, userManager)
         this.nameSubscription = userManager.getUserNames().subscribe(chatterIDUser.getChatterUUID(), $Lambda$o86h7H3WuAxnvPtFprunJr0Jq8o(this))
         this.onlineStatusSubscription = userManager.getChatterList().getFriendManager().getOnlineStatus().subscribe(chatterIDUser.getChatterUUID(), Subscription.OnData(this) {

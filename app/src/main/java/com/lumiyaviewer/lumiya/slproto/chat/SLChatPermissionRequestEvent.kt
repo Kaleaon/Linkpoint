@@ -12,14 +12,14 @@ import com.lumiyaviewer.lumiya.slproto.messages.ScriptQuestion
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceObject
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLChatPermissionRequestEvent : SLChatYesNoEvent {
     private UUID ItemID
     private String ObjectOwner
     private Int Questions
 
-    SLChatPermissionRequestEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
+    SLChatPermissionRequestEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
         super(chatMessage, uuid)
         this.ItemID = chatMessage.getItemID()
         this.ObjectOwner = chatMessage.getItemName()
@@ -27,7 +27,7 @@ class SLChatPermissionRequestEvent : SLChatYesNoEvent {
     }
 
     /* JADX INFO: super call moved to the top of the method (can break code semantics) */
-    SLChatPermissionRequestEvent(ScriptQuestion scriptQuestion, @Nonnull UUID uuid) {
+    SLChatPermissionRequestEvent(ScriptQuestion scriptQuestion, @NonNull UUID uuid) {
         super(ChatMessageSourceObject(scriptQuestion.Data_Field.TaskID, SLMessage.stringFromVariableOEM(scriptQuestion.Data_Field.ObjectName)), uuid, (String) null)
         Int i = 0
         this.ObjectOwner = SLMessage.stringFromVariableOEM(scriptQuestion.Data_Field.ObjectOwner)
@@ -41,7 +41,7 @@ class SLChatPermissionRequestEvent : SLChatYesNoEvent {
     }
 
     /* access modifiers changed from: protected */
-    @Nonnull
+    @NonNull
     SLChatEvent.ChatMessageType getMessageType() {
         return SLChatEvent.ChatMessageType.PermissionRequest
     }
@@ -62,7 +62,7 @@ class SLChatPermissionRequestEvent : SLChatYesNoEvent {
         return this.Questions
     }
 
-    String getText(Context context, @Nonnull UserManager userManager) {
+    String getText(Context context, @NonNull UserManager userManager) {
         String str = ""
         for (SLScriptPermissions sLScriptPermissions : SLScriptPermissions.values()) {
             if ((this.Questions & sLScriptPermissions.getPermMask()) != 0) {
@@ -102,7 +102,7 @@ class SLChatPermissionRequestEvent : SLChatYesNoEvent {
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    Unit serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
+    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setItemID(this.ItemID)
         chatMessage.setItemName(this.ObjectOwner)

@@ -8,8 +8,8 @@ import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import com.lumiyaviewer.lumiya.ui.settings.NotificationType
 import java.util.List
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 abstract class UnreadNotificationInfo {
 
@@ -36,23 +36,23 @@ abstract class UnreadNotificationInfo {
             return equals(empty)
         }
 
-        @Nonnull
+        @NonNull
         abstract Optional<ObjectPopupMessage> lastObjectPopup()
 
         abstract Int objectPopupsCount()
     }
 
     abstract class UnreadMessageSource {
-        UnreadMessageSource create(@Nonnull ChatterID chatterID, @Nullable String str, @Nullable List<SLChatEvent> list, Int i) {
+        UnreadMessageSource create(@NonNull ChatterID chatterID, @Nullable String str, @Nullable List<SLChatEvent> list, Int i) {
             return AutoValue_UnreadNotificationInfo_UnreadMessageSource(chatterID, Optional.fromNullable(str), list != null ? ImmutableList.copyOf(list) : ImmutableList.of(), i)
         }
 
-        @Nonnull
+        @NonNull
         abstract ChatterID chatterID()
 
         abstract Optional<String> chatterName()
 
-        @Nonnull
+        @NonNull
         abstract ImmutableList<SLChatEvent> unreadMessages()
 
         abstract Int unreadMessagesCount()
@@ -62,7 +62,7 @@ abstract class UnreadNotificationInfo {
         }
     }
 
-    UnreadNotificationInfo create(@Nonnull UUID uuid, Int i, @Nullable List<UnreadMessageSource> list, @Nullable NotificationType notificationType, Int i2, @Nullable NotificationType notificationType2, @Nullable UnreadMessageSource unreadMessageSource, @Nonnull ObjectPopupNotification objectPopupNotification) {
+    UnreadNotificationInfo create(@NonNull UUID uuid, Int i, @Nullable List<UnreadMessageSource> list, @Nullable NotificationType notificationType, Int i2, @Nullable NotificationType notificationType2, @Nullable UnreadMessageSource unreadMessageSource, @NonNull ObjectPopupNotification objectPopupNotification) {
         return AutoValue_UnreadNotificationInfo(uuid, i, list != null ? ImmutableList.copyOf(list) : ImmutableList.of(), Optional.fromNullable(notificationType), i2, Optional.fromNullable(notificationType2), Optional.fromNullable(unreadMessageSource), objectPopupNotification)
     }
 
@@ -70,20 +70,20 @@ abstract class UnreadNotificationInfo {
 
     abstract Int freshMessagesCount()
 
-    @Nonnull
+    @NonNull
     abstract Optional<NotificationType> mostImportantFreshType()
 
-    @Nonnull
+    @NonNull
     abstract Optional<NotificationType> mostImportantType()
 
-    @Nonnull
+    @NonNull
     abstract ObjectPopupNotification objectPopupInfo()
 
-    @Nonnull
+    @NonNull
     abstract Optional<UnreadMessageSource> singleFreshSource()
 
     abstract Int totalUnreadCount()
 
-    @Nonnull
+    @NonNull
     abstract ImmutableList<UnreadMessageSource> unreadSources()
 }

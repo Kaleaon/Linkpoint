@@ -45,7 +45,7 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 data class DrawableAvatar(
     var headPosition: LLVector3,

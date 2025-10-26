@@ -10,7 +10,7 @@ import com.lumiyaviewer.lumiya.react.UIThreadExecutor
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 abstract class ChatterFragment : FragmentWithTitle : ChatterNameRetriever.OnChatterNameUpdated {
     String CHATTER_ID_KEY = "chatterID"

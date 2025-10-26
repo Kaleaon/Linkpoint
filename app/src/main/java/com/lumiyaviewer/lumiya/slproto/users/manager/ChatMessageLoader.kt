@@ -10,20 +10,20 @@ import de.greenrobot.dao.query.WhereCondition
 import java.util.ArrayList
 import java.util.List
 import java.util.concurrent.Executor
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class ChatMessageLoader : ChunkedListLoader<ChatMessage> {
-    @Nonnull
+    @NonNull
     private ChatMessageDao chatMessageDao
     @Nullable
     private Chatter chatter = null
-    @Nonnull
+    @NonNull
     private ChatterID chatterID
-    @Nonnull
+    @NonNull
     private UserManager userManager
 
-    ChatMessageLoader(@Nonnull UserManager userManager2, @Nonnull ChatterID chatterID2, Int i, @Nonnull Executor executor, Boolean z, @Nonnull ChunkedListLoader.EventListener eventListener) {
+    ChatMessageLoader(@NonNull UserManager userManager2, @NonNull ChatterID chatterID2, Int i, @NonNull Executor executor, Boolean z, @NonNull ChunkedListLoader.EventListener eventListener) {
         super(i, executor, z, eventListener)
         this.chatterID = chatterID2
         this.userManager = userManager2

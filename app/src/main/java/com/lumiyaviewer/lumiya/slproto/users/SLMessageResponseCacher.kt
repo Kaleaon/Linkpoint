@@ -9,7 +9,7 @@ import com.lumiyaviewer.lumiya.slproto.messages.SLMessageFactory
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.concurrent.Executor
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLMessageResponseCacher<Key, MessageType : SLMessage> : ResponseCacher<Key, MessageType> {
     SLMessageResponseCacher(DaoSession daoSession, Executor executor, String str) {
@@ -42,7 +42,7 @@ class SLMessageResponseCacher<Key, MessageType : SLMessage> : ResponseCacher<Key
     }
 
     /* access modifiers changed from: protected */
-    Byte[] storeCached(@Nonnull MessageType messagetype) {
+    Byte[] storeCached(@NonNull MessageType messagetype) {
         Byte[] bArr = Byte[messagetype.CalcPayloadSize()]
         messagetype.PackPayload(ByteBuffer.wrap(bArr).order(ByteOrder.nativeOrder()))
         return bArr

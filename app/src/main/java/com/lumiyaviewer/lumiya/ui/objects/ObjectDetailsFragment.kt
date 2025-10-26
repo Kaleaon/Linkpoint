@@ -13,7 +13,7 @@ import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectProfileData
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 import java.util.UUID
 
 /**

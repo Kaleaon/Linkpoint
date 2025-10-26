@@ -15,7 +15,7 @@ import android.widget.TextView
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatYesNoEvent
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class ChatYesNoEventViewHolder : ChatEventViewHolder : View.OnClickListener {
     CardView cardView

@@ -3,7 +3,7 @@ package com.lumiyaviewer.lumiya.ui.common
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import com.lumiyaviewer.lumiya.Debug
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class FragmentWithTitle : StateAwareFragment : FragmentHasTitle {
     private String FRAGMENT_SUBTITLE_TAG = "FragmentWithTitle:fragmentSubTitle"

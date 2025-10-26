@@ -33,16 +33,16 @@ import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView
 import java.text.DateFormat
 import java.util.Date
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 /**
  * Converted from Java to Kotlin
  * SLChatEvent - Represents various chat events in Second Life protocol
  */
 abstract class SLChatEvent(
-    @Nonnull protected val agentUUID: UUID,
-    @Nonnull protected val source: ChatMessageSource,
+    @NonNull protected val agentUUID: UUID,
+    @NonNull protected val source: ChatMessageSource,
     @Nullable protected val dbMessage: ChatMessage?,
     private val timestamp: Date,
     private val originalTimestamp: Date,

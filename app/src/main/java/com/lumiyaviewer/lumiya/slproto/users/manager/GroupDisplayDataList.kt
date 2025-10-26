@@ -5,10 +5,10 @@ import com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import java.util.Comparator
 import java.util.List
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class GroupDisplayDataList : ChatterDisplayDataList {
-    GroupDisplayDataList(@Nonnull UserManager userManager, OnListUpdated onListUpdated) {
+    GroupDisplayDataList(@NonNull UserManager userManager, OnListUpdated onListUpdated) {
         super(userManager, onListUpdated, (Comparator<? super ChatterDisplayData>) null)
     }
 

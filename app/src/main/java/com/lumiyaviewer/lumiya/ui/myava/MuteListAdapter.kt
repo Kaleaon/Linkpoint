@@ -13,15 +13,15 @@ import com.lumiyaviewer.lumiya.slproto.modules.mutelist.MuteListEntry
 import com.lumiyaviewer.lumiya.slproto.modules.mutelist.MuteType
 import com.lumiyaviewer.lumiya.ui.common.SwipeDismissListViewTouchListener
 import java.util.List
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class MuteListAdapter : BaseAdapter {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-modules-mutelist-MuteTypeSwitchesValues  reason: not valid java name */
     private /* synthetic */ Int[] f461comlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues = null
     private LayoutInflater layoutInflater
-    @Nonnull
+    @NonNull
     private ImmutableList<MuteListEntry> muteList = ImmutableList.of()
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-modules-mutelist-MuteTypeSwitchesValues  reason: not valid java name */

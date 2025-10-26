@@ -4,8 +4,8 @@ import com.lumiyaviewer.lumiya.dao.ChatMessage
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 abstract class ChatMessageSource {
 
@@ -56,8 +56,8 @@ abstract class ChatMessageSource {
         return iArr
     }
 
-    @Nonnull
-    ChatMessageSource loadFrom(@Nonnull ChatMessage chatMessage) {
+    @NonNull
+    ChatMessageSource loadFrom(@NonNull ChatMessage chatMessage) {
         switch (m268getcomlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues()[ChatMessageSourceType.VALUES[chatMessage.getSenderType().intValue()].ordinal()]) {
             case 1:
                 return ChatMessageSourceGroup(chatMessage)
@@ -74,19 +74,19 @@ abstract class ChatMessageSource {
         }
     }
 
-    @Nonnull
+    @NonNull
     abstract ChatterID getDefaultChatter(UUID uuid)
 
     @Nullable
-    abstract String getSourceName(@Nonnull UserManager userManager)
+    abstract String getSourceName(@NonNull UserManager userManager)
 
-    @Nonnull
+    @NonNull
     abstract ChatMessageSourceType getSourceType()
 
     @Nullable
     abstract UUID getSourceUUID()
 
-    Unit serializeTo(@Nonnull ChatMessage chatMessage) {
+    Unit serializeTo(@NonNull ChatMessage chatMessage) {
         chatMessage.setSenderType(Int.valueOf(getSourceType().ordinal()))
     }
 }

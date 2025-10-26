@@ -10,18 +10,18 @@ import java.util.List
 import java.util.Map
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 abstract class ChatterDisplayDataList {
     private Map<ChatterID, ChatterSubscription> chatterSubscriptions = HashMap()
     private SortedChatterList chatters
     private AtomicBoolean needsRefresh = AtomicBoolean(false)
     private Runnable refreshRunnable = $Lambda$n0kmAon3UDOV6Jcsw0ejXq6u0xA(this)
-    @Nonnull
+    @NonNull
     protected UserManager userManager
 
-    ChatterDisplayDataList(@Nonnull UserManager userManager2, OnListUpdated onListUpdated, @Nullable Comparator<? super ChatterDisplayData> comparator) {
+    ChatterDisplayDataList(@NonNull UserManager userManager2, OnListUpdated onListUpdated, @Nullable Comparator<? super ChatterDisplayData> comparator) {
         this.userManager = userManager2
         this.chatters = SortedChatterList(onListUpdated, comparator)
     }

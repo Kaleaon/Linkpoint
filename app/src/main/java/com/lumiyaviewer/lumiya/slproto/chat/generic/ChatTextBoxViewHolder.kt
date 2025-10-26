@@ -10,7 +10,7 @@ import android.widget.TextView
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.chat.SLChatTextBoxDialog
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class ChatTextBoxViewHolder : ChatEventViewHolder : View.OnClickListener, View.OnKeyListener, View.OnFocusChangeListener {
     private Button dialogButtonIgnore

@@ -1,7 +1,7 @@
 package com.lumiyaviewer.lumiya.utils.reqset
 
 import java.lang.ref.WeakReference
-import javax.annotation.concurrent.ThreadSafe
+import androidx.annotation.ThreadSafe
 
 @ThreadSafe
 internal class WeakRequestSet<T> {

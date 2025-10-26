@@ -10,19 +10,19 @@ import com.lumiyaviewer.lumiya.slproto.modules.SLModules
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLMissedVoiceCallEvent : SLChatYesNoEvent {
-    SLMissedVoiceCallEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
+    SLMissedVoiceCallEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
         super(chatMessage, uuid)
     }
 
-    SLMissedVoiceCallEvent(@Nonnull ChatMessageSource chatMessageSource, @Nonnull UUID uuid, String str) {
+    SLMissedVoiceCallEvent(@NonNull ChatMessageSource chatMessageSource, @NonNull UUID uuid, String str) {
         super(chatMessageSource, uuid, str)
     }
 
     /* access modifiers changed from: protected */
-    @Nonnull
+    @NonNull
     SLChatEvent.ChatMessageType getMessageType() {
         return SLChatEvent.ChatMessageType.MissedVoiceCall
     }
@@ -56,7 +56,7 @@ class SLMissedVoiceCallEvent : SLChatYesNoEvent {
         }
     }
 
-    Unit serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
+    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

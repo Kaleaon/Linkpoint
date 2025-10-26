@@ -8,29 +8,29 @@ import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUnknown
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLChatInventoryItemOfferedByYouEvent : SLChatEvent {
     private String itemName
 
-    SLChatInventoryItemOfferedByYouEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
+    SLChatInventoryItemOfferedByYouEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
         super(chatMessage, uuid)
         this.itemName = chatMessage.getItemName()
     }
 
-    SLChatInventoryItemOfferedByYouEvent(@Nonnull UUID uuid, String str) {
+    SLChatInventoryItemOfferedByYouEvent(@NonNull UUID uuid, String str) {
         super((ChatMessageSource) ChatMessageSourceUnknown.getInstance(), uuid)
         this.itemName = str
     }
 
     /* access modifiers changed from: protected */
-    @Nonnull
+    @NonNull
     SLChatEvent.ChatMessageType getMessageType() {
         return SLChatEvent.ChatMessageType.InventoryItemOfferedByYou
     }
 
     /* access modifiers changed from: protected */
-    String getText(Context context, @Nonnull UserManager userManager) {
+    String getText(Context context, @NonNull UserManager userManager) {
         return context.getString(R.string.chat_inventory_own_offer_format, Object[]{this.itemName})
     }
 
@@ -39,11 +39,11 @@ class SLChatInventoryItemOfferedByYouEvent : SLChatEvent {
     }
 
     /* access modifiers changed from: protected */
-    Boolean isActionMessage(@Nonnull UserManager userManager) {
+    Boolean isActionMessage(@NonNull UserManager userManager) {
         return false
     }
 
-    Unit serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
+    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setItemName(this.itemName)
     }

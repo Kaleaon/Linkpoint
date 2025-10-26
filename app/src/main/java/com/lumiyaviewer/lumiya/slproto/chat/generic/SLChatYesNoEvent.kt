@@ -12,14 +12,14 @@ import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import com.lumiyaviewer.lumiya.ui.chat.ChatEventTimestampUpdater
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 abstract class SLChatYesNoEvent : SLChatTextEvent {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-chat-generic-SLChatYesNoEvent$EventStateSwitchesValues  reason: not valid java name */
     private /* synthetic */ Int[] f74comlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues = null
-    @Nonnull
+    @NonNull
     private EventState eventState = EventState.EventNew
 
     enum EventState {
@@ -56,16 +56,16 @@ abstract class SLChatYesNoEvent : SLChatTextEvent {
         return iArr
     }
 
-    SLChatYesNoEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
+    SLChatYesNoEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
         super(chatMessage, uuid)
         this.eventState = EventState.VALUES[chatMessage.getEventState().intValue()]
     }
 
-    SLChatYesNoEvent(@Nonnull ChatMessageSource chatMessageSource, @Nonnull UUID uuid, ImprovedInstantMessage improvedInstantMessage, String str) {
+    SLChatYesNoEvent(@NonNull ChatMessageSource chatMessageSource, @NonNull UUID uuid, ImprovedInstantMessage improvedInstantMessage, String str) {
         super(chatMessageSource, uuid, improvedInstantMessage, str)
     }
 
-    SLChatYesNoEvent(@Nonnull ChatMessageSource chatMessageSource, @Nonnull UUID uuid, String str) {
+    SLChatYesNoEvent(@NonNull ChatMessageSource chatMessageSource, @NonNull UUID uuid, String str) {
         super(chatMessageSource, uuid, str)
     }
 
@@ -116,7 +116,7 @@ abstract class SLChatYesNoEvent : SLChatTextEvent {
         }
     }
 
-    @Nonnull
+    @NonNull
     EventState getEventState() {
         return this.eventState
     }
@@ -151,7 +151,7 @@ abstract class SLChatYesNoEvent : SLChatTextEvent {
         notifyEventUpdated(userManager)
     }
 
-    Unit serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
+    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setEventState(Integer.valueOf(this.eventState.ordinal()))
     }

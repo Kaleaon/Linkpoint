@@ -2,8 +2,8 @@ package com.lumiyaviewer.lumiya.slproto.avatar
 
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 /**
  * Converted from Java to Kotlin

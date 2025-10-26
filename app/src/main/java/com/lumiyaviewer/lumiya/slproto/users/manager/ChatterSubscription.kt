@@ -5,12 +5,12 @@ import com.lumiyaviewer.lumiya.react.Subscription
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import com.lumiyaviewer.lumiya.voice.common.model.VoiceChatInfo
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class ChatterSubscription {
-    @Nonnull
+    @NonNull
     private SortedChatterList chatterList
-    @Nonnull
+    @NonNull
     ChatterDisplayData displayData
     Boolean isValid
     private Subscription.OnData<UnreadMessageInfo> onUnreadCount = Subscription.OnData(this) {
@@ -64,12 +64,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     }
     private Subscription.OnData<VoiceChatInfo> onVoiceStatusChanged = $Lambda$x6PlkRNg0xExeA_EUn8oEJWcOq8(this)
-    @Nonnull
+    @NonNull
     private Subscription<ChatterID, UnreadMessageInfo> unreadCountSubscription
-    @Nonnull
+    @NonNull
     private Subscription<ChatterID, VoiceChatInfo> voiceChatInfoSubscription
 
-    ChatterSubscription(@Nonnull SortedChatterList sortedChatterList, @Nonnull ChatterID chatterID, @Nonnull UserManager userManager) {
+    ChatterSubscription(@NonNull SortedChatterList sortedChatterList, @NonNull ChatterID chatterID, @NonNull UserManager userManager) {
         this.chatterList = sortedChatterList
         this.displayData = ChatterDisplayData(chatterID, (String) null, false, 0, (SLChatEvent) null, Float.NaN, false)
         this.unreadCountSubscription = userManager.getChatterList().getActiveChattersManager().getUnreadCounts().subscribe(chatterID, this.onUnreadCount)
@@ -103,7 +103,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     }
 
     /* access modifiers changed from: package-private */
-    Unit setChatterDisplayData(@Nonnull ChatterDisplayData chatterDisplayData) {
+    Unit setChatterDisplayData(@NonNull ChatterDisplayData chatterDisplayData) {
         ChatterDisplayData chatterDisplayData2 = this.displayData
         this.displayData = chatterDisplayData
         this.chatterList.replaceChatter(chatterDisplayData2, this.displayData)

@@ -7,8 +7,8 @@ import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import com.lumiyaviewer.lumiya.ui.chat.ChatterDisplayInfo
 import com.lumiyaviewer.lumiya.ui.chat.contacts.ChatterItemViewBuilder
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class ChatterDisplayData : ChatterDisplayInfo, Comparable<ChatterDisplayData> {
     ChatterID chatterID
@@ -44,7 +44,7 @@ class ChatterDisplayData : ChatterDisplayInfo, Comparable<ChatterDisplayData> {
         chatterItemViewBuilder.setDistance(this.distanceToUser)
     }
 
-    Int compareTo(@Nonnull ChatterDisplayData chatterDisplayData) {
+    Int compareTo(@NonNull ChatterDisplayData chatterDisplayData) {
         Int compare = Booleans.compare(Strings.isNullOrEmpty(this.displayName), Strings.isNullOrEmpty(chatterDisplayData.displayName))
         if (compare != 0) {
             return compare
@@ -63,31 +63,31 @@ class ChatterDisplayData : ChatterDisplayInfo, Comparable<ChatterDisplayData> {
     }
 
     /* access modifiers changed from: package-private */
-    @Nonnull
+    @NonNull
     ChatterDisplayData withDisplayName(String str) {
         return ChatterDisplayData(this.chatterID, str, this.isOnline, this.unreadCount, this.lastMessage, this.distanceToUser, this.voiceActive)
     }
 
     /* access modifiers changed from: package-private */
-    @Nonnull
+    @NonNull
     ChatterDisplayData withDistanceToUser(Float f) {
         return ChatterDisplayData(this.chatterID, this.displayName, this.isOnline, this.unreadCount, this.lastMessage, f, this.voiceActive)
     }
 
     /* access modifiers changed from: package-private */
-    @Nonnull
+    @NonNull
     ChatterDisplayData withOnlineStatus(Boolean z) {
         return ChatterDisplayData(this.chatterID, this.displayName, z, this.unreadCount, this.lastMessage, this.distanceToUser, this.voiceActive)
     }
 
     /* access modifiers changed from: package-private */
-    @Nonnull
-    ChatterDisplayData withUnreadInfo(@Nonnull UnreadMessageInfo unreadMessageInfo) {
+    @NonNull
+    ChatterDisplayData withUnreadInfo(@NonNull UnreadMessageInfo unreadMessageInfo) {
         return ChatterDisplayData(this.chatterID, this.displayName, this.isOnline, unreadMessageInfo.unreadCount(), unreadMessageInfo.lastMessage(), this.distanceToUser, this.voiceActive)
     }
 
     /* access modifiers changed from: package-private */
-    @Nonnull
+    @NonNull
     ChatterDisplayData withVoiceActive(Boolean z) {
         return ChatterDisplayData(this.chatterID, this.displayName, this.isOnline, this.unreadCount, this.lastMessage, this.distanceToUser, z)
     }

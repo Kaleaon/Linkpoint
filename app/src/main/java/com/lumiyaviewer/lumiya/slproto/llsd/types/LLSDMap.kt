@@ -25,13 +25,13 @@ import java.util.List
 import java.util.Map
 import java.util.Set
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlSerializer
 
 class LLSDMap : LLSDNode {
-    @Nonnull
+    @NonNull
     private ImmutableMap<String, LLSDNode> items
 
     class LLSDMapEntry {

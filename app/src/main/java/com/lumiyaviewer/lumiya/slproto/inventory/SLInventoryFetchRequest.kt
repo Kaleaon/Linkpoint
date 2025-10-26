@@ -3,11 +3,11 @@ package com.lumiyaviewer.lumiya.slproto.inventory
 import com.lumiyaviewer.lumiya.orm.InventoryDB
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventory
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 abstract class SLInventoryFetchRequest {
     protected InventoryDB db
-    @Nonnull
+    @NonNull
     protected SLInventoryEntry folderEntry
     protected Long folderId
     protected UUID folderUUID

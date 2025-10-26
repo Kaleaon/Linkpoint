@@ -32,7 +32,7 @@ import com.lumiyaviewer.lumiya.ui.common.LoadingLayout
 import com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor
 import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class UserPicksProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadableDataChangedListener {
     private SubscriptionData<UUID, AvatarPicksReply> avatarPicks = SubscriptionData<>(UIThreadExecutor.getInstance())

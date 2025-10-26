@@ -20,7 +20,7 @@ import com.lumiyaviewer.lumiya.slproto.types.ImmutableVector
 import java.util.Iterator
 import java.util.Map
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class MinimapView : View {
     private Float USER_MARK_TOUCH_SLACK = 50.0f

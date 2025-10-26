@@ -70,7 +70,7 @@ import java.util.List
 import java.util.Set
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class VoicePluginServiceConnection : ServiceConnection {
     String ACTION_VOICE_ACCEPT = "accept"

@@ -18,7 +18,7 @@ import com.lumiyaviewer.lumiya.ui.common.UserFunctionsFragment
 import java.lang.ref.WeakReference
 import java.util.EnumMap
 import java.util.Map
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class UserProfileFragment : UserFunctionsFragment {
     /* access modifiers changed from: private */

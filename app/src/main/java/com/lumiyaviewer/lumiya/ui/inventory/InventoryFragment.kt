@@ -16,7 +16,7 @@ import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryFolder
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryItem
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 import java.util.UUID
 
 /**

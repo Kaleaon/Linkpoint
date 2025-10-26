@@ -5,16 +5,16 @@ import com.lumiyaviewer.lumiya.res.ResourceConsumer
 import com.lumiyaviewer.lumiya.res.anim.AnimationCache
 import java.lang.ref.WeakReference
 import java.util.Collection
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class AvatarAnimationState : ResourceConsumer {
     private volatile AnimationData animationData
     @Nullable
     private volatile AnimationPair animationPair = null
-    @Nonnull
+    @NonNull
     private WeakReference<DrawableAvatar> drawableAvatar
-    @Nonnull
+    @NonNull
     private volatile AnimationSequenceInfo sequenceInfo
 
     private class AnimationPair {
@@ -23,7 +23,7 @@ class AvatarAnimationState : ResourceConsumer {
         @Nullable
         AvatarRunningSequence stoppingAnimation
 
-        AnimationPair(@Nonnull AnimationSequenceInfo animationSequenceInfo, @Nonnull AnimationData animationData) {
+        AnimationPair(@NonNull AnimationSequenceInfo animationSequenceInfo, @NonNull AnimationData animationData) {
             if (animationSequenceInfo.sequenceID != 0) {
                 this.runningAnimation = AvatarRunningSequence(animationData, animationSequenceInfo.sequenceID, animationSequenceInfo.runningSince, -1, animationSequenceInfo.dontEaseIn)
             } else {
@@ -52,7 +52,7 @@ class AvatarAnimationState : ResourceConsumer {
         }
     }
 
-    AvatarAnimationState(@Nonnull AnimationSequenceInfo animationSequenceInfo, @Nonnull DrawableAvatar drawableAvatar) {
+    AvatarAnimationState(@NonNull AnimationSequenceInfo animationSequenceInfo, @NonNull DrawableAvatar drawableAvatar) {
         this.sequenceInfo = animationSequenceInfo
         this.drawableAvatar = WeakReference(drawableAvatar)
         AnimationCache.getInstance().RequestResource(animationSequenceInfo.animationID, this)
@@ -84,7 +84,7 @@ class AvatarAnimationState : ResourceConsumer {
         return animationPair != null ? animationPair.hasStopped() : false
     }
 
-    Unit updateSequenceInfo(@Nonnull AnimationSequenceInfo animationSequenceInfo) {
+    Unit updateSequenceInfo(@NonNull AnimationSequenceInfo animationSequenceInfo) {
         this.sequenceInfo = animationSequenceInfo
         this.animationPair = null
     }

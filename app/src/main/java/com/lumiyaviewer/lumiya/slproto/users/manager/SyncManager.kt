@@ -6,7 +6,7 @@ import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 /**
  * Converted from Java to Kotlin

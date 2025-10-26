@@ -6,7 +6,7 @@ import java.io.BufferedReader
 import java.io.IOException
 import java.util.Map
 import java.util.Map.Entry
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class ShaderPreprocessor {
     private ImmutableMap<String, String> definedMacros

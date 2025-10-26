@@ -6,7 +6,7 @@ import com.lumiyaviewer.lumiya.render.DrawableStore
 import com.lumiyaviewer.lumiya.render.avatar.DrawableAvatar
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo
 import java.lang.ref.WeakReference
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class DrawListPrimEntry : DrawListObjectEntry {
     private volatile WeakReference<DrawableObject> drawableObject = null
@@ -25,7 +25,7 @@ class DrawListPrimEntry : DrawListObjectEntry {
         drawList.objects.add(obj)
     }
 
-    @Nonnull
+    @NonNull
     fun getDrawableAttachment(drawableStore: DrawableStore, drawableAvatar: DrawableAvatar): DrawableObject {
         DrawableObject drawableObject = null
         WeakReference weakReference = this.drawableObject

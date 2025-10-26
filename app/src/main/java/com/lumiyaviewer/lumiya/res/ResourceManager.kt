@@ -13,7 +13,7 @@ import java.util.Set
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 abstract class ResourceManager<ResourceParams, ResourceType> {
     /* access modifiers changed from: private */
@@ -46,7 +46,7 @@ abstract class ResourceManager<ResourceParams, ResourceType> {
     }
     /* access modifiers changed from: private */
     LoadingCache<ResourceParams, ResourceRequest<ResourceParams, ResourceType>> requestMap = CacheBuilder.newBuilder().weakValues().build(new CacheLoader<ResourceParams, ResourceRequest<ResourceParams, ResourceType>>() {
-        ResourceRequest<ResourceParams, ResourceType> load(@Nonnull ResourceParams resourceparams) throws Exception {
+        ResourceRequest<ResourceParams, ResourceType> load(@NonNull ResourceParams resourceparams) throws Exception {
             return ResourceManager.this.CreateNewRequest(resourceparams, ResourceManager.this)
         }
 

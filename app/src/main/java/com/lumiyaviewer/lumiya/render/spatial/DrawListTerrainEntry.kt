@@ -4,16 +4,16 @@ import java.util.*
 import com.lumiyaviewer.lumiya.render.terrain.DrawableTerrainPatch
 import com.lumiyaviewer.lumiya.slproto.terrain.TerrainPatchInfo
 import java.lang.ref.WeakReference
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class DrawListTerrainEntry : DrawListEntry {
     private volatile WeakReference<DrawableTerrainPatch> drawablePatch
-    @Nonnull
+    @NonNull
     private var patchInfo: TerrainPatchInfo? = null
     private Int patchX
     private Int patchY
 
-    DrawListTerrainEntry(@Nonnull TerrainPatchInfo terrainPatchInfo, Int i, Int i2) {
+    DrawListTerrainEntry(@NonNull TerrainPatchInfo terrainPatchInfo, Int i, Int i2) {
         this.patchX = i
         this.patchY = i2
         updatePatchInfo(terrainPatchInfo)

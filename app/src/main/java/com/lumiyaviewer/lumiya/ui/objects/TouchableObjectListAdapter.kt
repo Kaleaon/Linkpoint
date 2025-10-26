@@ -10,12 +10,12 @@ import android.widget.TextView
 import com.google.common.collect.ImmutableList
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class TouchableObjectListAdapter : BaseAdapter {
     private Context context
-    @Nonnull
+    @NonNull
     private ImmutableList<SLObjectInfo> objects = ImmutableList.of()
 
     TouchableObjectListAdapter(Context context2) {

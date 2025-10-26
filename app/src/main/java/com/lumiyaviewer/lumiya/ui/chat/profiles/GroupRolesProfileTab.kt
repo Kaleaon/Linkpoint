@@ -27,7 +27,7 @@ import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.HashMap
 import java.util.Map
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class GroupRolesProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadableDataChangedListener {
     private GroupRoleAdapter adapter = null

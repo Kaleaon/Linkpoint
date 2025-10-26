@@ -45,7 +45,7 @@ import com.lumiyaviewer.lumiya.ui.objects.ObjectListNewActivity
 import java.util.ArrayList
 import java.util.HashSet
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, CompoundButton.OnCheckedChangeListener, ExpandableListView.OnGroupClickListener, ExpandableListView.OnChildClickListener {
     private Int MAX_FILTER_DISTANCE = 256
