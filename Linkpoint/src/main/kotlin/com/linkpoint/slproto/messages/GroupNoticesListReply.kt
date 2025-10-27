@@ -20,10 +20,10 @@ class GroupNoticesListReply : SLMessage() {
     @JvmStatic
     class Data {
         public Int AssetType
-        public Byte[] FromName
+        public ByteArray FromName
         public Boolean HasAttachment
         public UUID NoticeID
-        public Byte[] Subject
+        public ByteArray Subject
         public Int Timestamp
     }
 
@@ -32,24 +32,24 @@ class GroupNoticesListReply : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 37
-        Iterator<T> it = this.Data_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 37
+        val it: Iterator<T> = this.Data_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
-            Data data = (Data) it.next()
+            val data: Data = (Data) it.next()
             i = data.Subject.length + data.FromName.length + 22 + 2 + 1 + 1 + i2
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleGroupNoticesListReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 59)
@@ -66,12 +66,12 @@ class GroupNoticesListReply : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            Data data = Data()
+            val data: Data = Data()
             data.NoticeID = unpackUUID(byteBuffer)
             data.Timestamp = unpackInt(byteBuffer)
             data.FromName = unpackVariable(byteBuffer, 2)

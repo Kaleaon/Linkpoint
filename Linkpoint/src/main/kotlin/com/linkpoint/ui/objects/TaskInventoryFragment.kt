@@ -40,7 +40,7 @@ import javax.annotation.Nullable
 class TaskInventoryFragment : FragmentWithTitle() {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-inventory-SLAssetTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f501comlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f501comlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues = null
     private const val OBJECT_LOCAL_ID_KEY: String = "objectLocalId"
     private const val OBJECT_UUID_KEY: String = "objectUUID"
     private SLObjectProfileData objectProfileData = null
@@ -106,11 +106,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
 
     }
     private val Subscription.OnData<SLTaskInventory> onTaskInventoryReceived = Subscription.OnData<SLTaskInventory>() {
-        fun onData(SLTaskInventory sLTaskInventory) {
-            SLTaskInventory unused = TaskInventoryFragment.this.taskInventory = sLTaskInventory
-            View view = TaskInventoryFragment.this.getView()
+        fun onData(sLTaskInventory: SLTaskInventory) {
+            val unused: SLTaskInventory = TaskInventoryFragment.this.taskInventory = sLTaskInventory
+            val view: View = TaskInventoryFragment.this.getView()
             if (view != null) {
-                ListAdapter adapter = ((ListView) view.findViewById(R.id.taskInventoryListView)).getAdapter()
+                val adapter: ListAdapter = ((ListView) view.findViewById(R.id.taskInventoryListView)).getAdapter()
                 if (adapter instanceof TaskInventoryListAdapter) {
                     ((TaskInventoryListAdapter) adapter).setData(sLTaskInventory)
                 }
@@ -125,11 +125,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-inventory-SLAssetTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m684getcomlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues() {
+private /* synthetic */ IntArray m684getcomlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues() {
         if (f501comlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues != null) {
             return f501comlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues
         }
-        Int[] iArr = Int[SLAssetType.values().length]
+        val iArr: IntArray = Int[SLAssetType.values().length]
         try {
             iArr[SLAssetType.AT_ANIMATION.ordinal()] = 3
         } catch (NoSuchFieldError e) {
@@ -230,37 +230,37 @@ private /* synthetic */ Int[] m684getcomlumiyaviewerlumiyaslprotoinventorySLAsse
         return iArr
     }
 
-    private Boolean canModifyObject() {
-        UserManager userManager = getUserManager()
+     private fun canModifyObject(): Boolean {
+        val userManager: UserManager = getUserManager()
         if (this.objectProfileData == null || userManager == null || !userManager.getUserID().equals(this.objectProfileData.ownerUUID())) {
             return false
         }
         return this.objectProfileData.isModifiable()
     }
 
-    private Boolean canModifyObjectContents(SLInventoryEntry sLInventoryEntry) {
-        UserManager userManager = getUserManager()
+     private fun canModifyObjectContents(sLInventoryEntry: SLInventoryEntry): Boolean {
+        val userManager: UserManager = getUserManager()
         if (userManager != null) {
             return userManager.getUserID().equals(sLInventoryEntry.ownerUUID) ? (sLInventoryEntry.ownerMask & 16384) != 0 : (sLInventoryEntry.everyoneMask & 16384) != 0
         }
         return false
     }
 
-    private Unit copyAllToInventory(Boolean z) {
+     private fun copyAllToInventory(z: Boolean) {
         SLAgentCircuit activeAgentCircuit
         SLModules modules
-        Boolean z3 = false
+        val z3: Boolean = false
         final Int objectLocalID = getObjectLocalID()
         final UserManager userManager = getUserManager()
         if (this.taskInventory != null && this.objectProfileData != null && userManager != null && (activeAgentCircuit = userManager.getActiveAgentCircuit()) != null && (modules = activeAgentCircuit.getModules()) != null) {
-            SLInventory sLInventory = modules.inventory
+            val sLInventory: SLInventory = modules.inventory
             if (this.taskInventory.entries.size() != 0) {
                 if (!userManager.getUserID().equals(this.objectProfileData.ownerUUID())) {
                     Toast.makeText(getActivity(), R.string.object_contents_not_owned, 1).show()
                     return
                 }
                 if (!z) {
-                    Iterator<T> it = this.taskInventory.entries.iterator()
+                    val it: Iterator<T> = this.taskInventory.entries.iterator()
                     while (true) {
                         z2 = z3
                         if (!it.hasNext()) {
@@ -377,14 +377,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
                         return
                     }
                 }
-                String or = this.objectProfileData.name().or(getString(R.string.default_object_contents_folder))
-                HashSet hashSet = HashSet()
+                val or: String = this.objectProfileData.name().or(getString(R.string.default_object_contents_folder))
+                val hashSet: HashSet = HashSet()
                 for (SLInventoryEntry sLInventoryEntry : this.taskInventory.entries) {
                     hashSet.add(sLInventoryEntry.uuid)
                 }
                 final ProgressDialog show = ProgressDialog.show(getContext(), (CharSequence) null, getString(R.string.copying_object_contents), true, true)
                 sLInventory.CopyObjectContents(or, objectLocalID, hashSet, Function<UUID, Void>() {
-                    public Void apply(UUID uuid) {
+                     public fun apply(uuid: UUID): Void {
                         UIThreadExecutor.getInstance().execute(Runnable(objectLocalID, this, userManager, show, uuid) {
 
                             /* renamed from: -$f0 */
@@ -534,23 +534,23 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
         }
     }
 
-    private Int getObjectLocalID() {
+     private fun getObjectLocalID(): Int {
         return getArguments().getInt(OBJECT_LOCAL_ID_KEY)
     }
 
-    private UUID getObjectUUID() {
+     private fun getObjectUUID(): UUID {
         return UUID.fromString(getArguments().getString(OBJECT_UUID_KEY))
     }
 
-    private UserManager getUserManager() {
+     private fun getUserManager(): UserManager {
         return ActivityUtils.getUserManager(getArguments())
     }
 
-    private Unit handleObjectClick(Int i) {
+     private fun handleObjectClick(i: Int) {
         SLInventoryEntry item
-        UserManager userManager = getUserManager()
+        val userManager: UserManager = getUserManager()
         if (getView() != null && userManager != null) {
-            ListAdapter adapter = ((ListView) getView().findViewById(R.id.taskInventoryListView)).getAdapter()
+            val adapter: ListAdapter = ((ListView) getView().findViewById(R.id.taskInventoryListView)).getAdapter()
             if ((adapter instanceof TaskInventoryListAdapter) && (item = ((TaskInventoryListAdapter) adapter).getItem(i)) != null) {
                 switch (m684getcomlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues()[SLAssetType.getByType(item.assetType).ordinal()]) {
                     case 1:
@@ -573,8 +573,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
     }
 
     @JvmStatic
-    Bundle makeSelection(UUID uuid, UUID uuid2, Int i) {
-        Bundle bundle = Bundle()
+     fun makeSelection(uuid: UUID, uuid2: UUID, i: Int): Bundle {
+        val bundle: Bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         if (uuid2 != null) {
             bundle.putString(OBJECT_UUID_KEY, uuid2.toString())
@@ -604,19 +604,19 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
         }
     }
 
-    fun onCreate(@android.support.annotation.Nullable Bundle bundle) {
+    override fun onCreate(@android.support.annotation.Nullable Bundle bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.task_inventory_menu, menu)
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
-        View inflate = layoutInflater.inflate(R.layout.task_inventory, viewGroup, false)
+        val inflate: View = layoutInflater.inflate(R.layout.task_inventory, viewGroup, false)
         ((ListView) inflate.findViewById(R.id.taskInventoryListView)).setAdapter(TaskInventoryListAdapter(layoutInflater.getContext()))
         ((ListView) inflate.findViewById(R.id.taskInventoryListView)).setEmptyView(inflate.findViewById(16908292))
         ((ListView) inflate.findViewById(R.id.taskInventoryListView)).setOnItemClickListener(AdapterView.OnItemClickListener(this) {
@@ -690,7 +690,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
         return inflate
     }
 
-    public Boolean onOptionsItemSelected(MenuItem menuItem) {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_copy_all:
                 copyAllToInventory(false)
@@ -700,18 +700,18 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         setTitle(getString(R.string.object_contents_title), (String) null)
-        UserManager userManager = getUserManager()
+        val userManager: UserManager = getUserManager()
         if (userManager != null) {
-            Int objectLocalID = getObjectLocalID()
+            val objectLocalID: Int = getObjectLocalID()
             this.taskInventorySubscription = userManager.getObjectsManager().getObjectTaskInventory().subscribe(Integer.valueOf(objectLocalID), UIThreadExecutor.getInstance(), this.onTaskInventoryReceived)
             this.objectProfileSubscription = userManager.getObjectsManager().getObjectProfile().subscribe(Integer.valueOf(objectLocalID), UIThreadExecutor.getInstance(), this.onObjectProfileData)
         }
     }
 
-    fun onStop() {
+    override fun onStop() {
         if (this.taskInventorySubscription != null) {
             this.taskInventorySubscription.unsubscribe()
             this.taskInventorySubscription = null

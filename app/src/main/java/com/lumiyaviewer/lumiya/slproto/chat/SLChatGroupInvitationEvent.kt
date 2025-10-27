@@ -67,7 +67,7 @@ class SLChatGroupInvitationEvent : SLChatYesNoEvent {
         if (this.joinFee == 0) {
             return context.getString(R.string.join_group_question_free)
         }
-        return context.getString(R.string.join_group_question_not_free, Object[]{Integer.valueOf(this.joinFee)})
+        return context.getString(R.string.join_group_question_not_free, Array<Any>{Integer.valueOf(this.joinFee)})
     }
 
     String getYesButton(Context context) {
@@ -98,7 +98,7 @@ class SLChatGroupInvitationEvent : SLChatYesNoEvent {
             return
         }
         AlertDialog.Builder builder = AlertDialog.Builder(context)
-        builder.setMessage(context.getString(R.string.join_group_confirm, Object[]{Integer.valueOf(this.joinFee)})).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this) {
+        builder.setMessage(context.getString(R.string.join_group_confirm, Array<Any>{Integer.valueOf(this.joinFee)})).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this) {
 
             /* renamed from: -$f0 */
             private /* synthetic */ Object f69$f0

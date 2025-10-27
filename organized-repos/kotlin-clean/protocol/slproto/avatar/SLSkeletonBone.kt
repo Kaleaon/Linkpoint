@@ -14,11 +14,11 @@ class SLSkeletonBone {
     private Float globalBaseX
     private Float globalBaseY
     private Float globalBaseZ
-    private val Float[] globalMatrix = Float[16]
+    private val FloatArray globalMatrix = FloatArray(16)
     private val LLVector3 offset
     private SLSkeletonBone parent
     private val LLVector3 scale
-    private val Float[] tempMatrix = Float[16]
+    private val FloatArray tempMatrix = FloatArray(16)
     private val LLVector3 usePosition
 
     SLSkeletonBone(SLSkeletonBoneID sLSkeletonBoneID, LLVector3 lLVector3, LLVector3 lLVector32, SLSkeletonBone[] sLSkeletonBoneArr, SLSkeletonBone[] sLSkeletonBoneArr2) {
@@ -68,7 +68,7 @@ class SLSkeletonBone {
         return this.basePosition
     }
 
-    public Float[] getGlobalMatrix() {
+    public FloatArray getGlobalMatrix() {
         return this.globalMatrix
     }
 
@@ -138,7 +138,7 @@ class SLSkeletonBone {
     }
 
     /* access modifiers changed from: package-private */
-    val Unit updateGlobalPos(AnimationSkeletonData animationSkeletonData, Float[] fArr, Float[] fArr2) {
+    val Unit updateGlobalPos(AnimationSkeletonData animationSkeletonData, FloatArray fArr, FloatArray fArr2) {
         Float f
         Float f2
         Float f3
@@ -146,7 +146,7 @@ class SLSkeletonBone {
         Int i2 = i * 4
         Int i3 = i * 16
         if (i >= 0) {
-            Float[] animOffsets = animationSkeletonData.getAnimOffsets()
+            FloatArray animOffsets = animationSkeletonData.getAnimOffsets()
             Float f4 = animOffsets[i2 + 3]
             if (f4 > 0.0f) {
                 Float f5 = f4 * animOffsets[i2]

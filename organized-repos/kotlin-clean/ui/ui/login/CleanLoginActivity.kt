@@ -182,7 +182,7 @@ class CleanLoginActivity : AppCompatActivity() {
     // Authentication methods from comprehensive_operational_test.java
     private String hashPassword(String password) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("MD5")
-        Byte[] digest = md.digest(password.getBytes())
+        ByteArray digest = md.digest(password.getBytes())
         StringBuilder sb = StringBuilder()
         for (Byte b : digest) {
             sb.append(String.format("%02x", b))

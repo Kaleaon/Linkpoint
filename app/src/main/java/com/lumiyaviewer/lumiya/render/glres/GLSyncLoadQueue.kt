@@ -7,9 +7,9 @@ import com.lumiyaviewer.lumiya.render.glres.GLLoadQueue
 import androidx.annotation.NonNull
 
 class GLSyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
-    private Int MAX_LOADS_PER_FRAME = 16
-    private Int MAX_SIZE_PER_FRAME = 4194304
-    private Int WAIT_FRAMES_AFTER_LOAD = 3
+    private val MAX_LOADS_PER_FRAME: Int = 16
+    private val MAX_SIZE_PER_FRAME: Int = 4194304
+    private val WAIT_FRAMES_AFTER_LOAD: Int = 3
     private var framesWait: Int = 0
 
     fun GLResourceLoaded(gLLoadable: GLLoadQueue.GLLoadable): Unit {

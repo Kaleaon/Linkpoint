@@ -11,7 +11,7 @@ class EdgeDataPacket : SLMessage() {
     @JvmStatic
     class EdgeData {
         public Int Direction
-        public Byte[] LayerData
+        public ByteArray LayerData
         public Int LayerType
     }
 

@@ -18,7 +18,7 @@ class UpdateMuteListEntry : SLMessage() {
     class MuteData {
         public Int MuteFlags
         public UUID MuteID
-        public Byte[] MuteName
+        public ByteArray MuteName
         public Int MuteType
     }
 
@@ -26,15 +26,15 @@ class UpdateMuteListEntry : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.MuteData_Field.MuteName.length + 17 + 4 + 4 + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleUpdateMuteListEntry(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 7)
@@ -46,7 +46,7 @@ class UpdateMuteListEntry : SLMessage() {
         packInt(byteBuffer, this.MuteData_Field.MuteFlags)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.MuteData_Field.MuteID = unpackUUID(byteBuffer)

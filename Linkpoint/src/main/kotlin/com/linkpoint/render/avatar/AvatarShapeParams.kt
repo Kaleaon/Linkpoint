@@ -9,19 +9,19 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class AvatarShapeParams {
-    private val Int[] visualParamValues
+    private val IntArray visualParamValues
 
-    private AvatarShapeParams(Int[] iArr) {
+    private AvatarShapeParams(IntArray iArr) {
         this.visualParamValues = iArr
     }
 
     @JvmStatic
-    AvatarShapeParams create(AvatarShapeParams avatarShapeParams, AvatarAppearance avatarAppearance) {
+     fun create(avatarShapeParams: AvatarShapeParams, avatarAppearance: AvatarAppearance): AvatarShapeParams {
         Debug.Log("DrawableAvatar: appearance for avatar " + avatarAppearance.Sender_Field.ID + ", numParams = " + avatarAppearance.VisualParam_Fields.size() + ", appData = " + avatarAppearance.AppearanceData_Fields.size())
         for (i = 0; i < avatarAppearance.AppearanceData_Fields.size(); i++) {
             Debug.Printf("appData[%d]: appVer %d, cofVer %d, flags 0x%x", Integer.valueOf(i), Integer.valueOf(((AppearanceData) avatarAppearance.AppearanceData_Fields.get(i)).AppearanceVersion), Integer.valueOf(((AppearanceData) avatarAppearance.AppearanceData_Fields.get(i)).CofVersion), Integer.valueOf(((AppearanceData) avatarAppearance.AppearanceData_Fields.get(i)).Flags))
         }
-        Int[] iArr = Int[218]
+        val iArr: IntArray = Int[218]
         i = 0
         while (i < 218) {
             if (i < avatarAppearance.VisualParam_Fields.size()) {
@@ -35,9 +35,9 @@ class AvatarShapeParams {
     }
 
     @JvmStatic
-    AvatarShapeParams create(AvatarShapeParams avatarShapeParams, Int[] iArr) {
+     fun create(avatarShapeParams: AvatarShapeParams, iArr: IntArray): AvatarShapeParams {
         if (iArr.length != 218) {
-            Object obj = Int[218]
+            val obj: Object = Int[218]
             System.arraycopy(iArr, 0, obj, 0, Math.min(iArr.length, 218))
             Object iArr2
             if (iArr2.length >= 218 || avatarShapeParams == null) {
@@ -50,19 +50,19 @@ class AvatarShapeParams {
         return AvatarShapeParams(iArr2)
     }
 
-    public Boolean equals(Object obj) {
+     public override fun equals(obj: Object): Boolean {
         return obj instanceof AvatarShapeParams ? Arrays.equals(this.visualParamValues, ((AvatarShapeParams) obj).visualParamValues) : false
     }
 
-    public Int getParamCount() {
+     public fun getParamCount(): Int {
         return 218
     }
 
-    public Int getParamValue(Int i) {
+     public fun getParamValue(i: Int): Int {
         return (i < 0 || i >= 218) ? 0 : this.visualParamValues[i]
     }
 
-    public Int hashCode() {
+     public override fun hashCode(): Int {
         return Arrays.hashCode(this.visualParamValues)
     }
 }

@@ -8,7 +8,7 @@ interface RequestQueue<K, T> : RequestSource<K, T> {
 
     ResultHandler<K, T> getResultHandler()
 
-    Unit returnRequest(K k)
+     fun returnRequest(K k)
 
     K waitForRequest() throws InterruptedException
 }

@@ -30,7 +30,7 @@ class SLTaskInventories : SLModule(), SLXfer.SLXferCompletionListener {
     public SLTaskInventories(SLAgentCircuit sLAgentCircuit) {
         super(sLAgentCircuit)
         this.requestHandler = AsyncRequestHandler(sLAgentCircuit, SimpleRequestHandler<Integer>() {
-            fun onRequest(Integer num) {
+            fun onRequest(num: Integer) {
                 SLTaskInventories.this.RequestTaskInventory(num.intValue())
             }
         this.userManager = UserManager.getUserManager(sLAgentCircuit.getAgentUUID())
@@ -42,9 +42,9 @@ class SLTaskInventories : SLModule(), SLXfer.SLXferCompletionListener {
     }
 
     /* access modifiers changed from: private */
-    fun RequestTaskInventory(Int i) {
+    fun RequestTaskInventory(i: Int) {
         Debug.Printf("taskID = %d", Integer.valueOf(i))
-        RequestTaskInventory requestTaskInventory = RequestTaskInventory()
+        val requestTaskInventory: RequestTaskInventory = RequestTaskInventory()
         requestTaskInventory.AgentData_Field.AgentID = this.circuitInfo.agentID
         requestTaskInventory.AgentData_Field.SessionID = this.circuitInfo.sessionID
         requestTaskInventory.InventoryData_Field.LocalID = i
@@ -52,15 +52,15 @@ class SLTaskInventories : SLModule(), SLXfer.SLXferCompletionListener {
         SendMessage(requestTaskInventory)
     }
 
-    private SLTaskInventory parseTaskInventory(Byte[] bArr) {
+     private fun parseTaskInventory(bArr: ByteArray): SLTaskInventory {
         if (bArr == null) {
             return SLTaskInventory()
         }
         try {
             ImmutableList.Builder builder = ImmutableList.builder()
-            SimpleStringParser simpleStringParser = SimpleStringParser(SLMessage.stringFromVariableUTF(bArr), DELIM_ANY)
+            val simpleStringParser: SimpleStringParser = SimpleStringParser(SLMessage.stringFromVariableUTF(bArr), DELIM_ANY)
             while (!simpleStringParser.endOfString()) {
-                String nextToken = simpleStringParser.nextToken(DELIM_ANY)
+                val nextToken: String = simpleStringParser.nextToken(DELIM_ANY)
                 Debug.Printf("TaskInventory: got token: '%s'", nextToken)
                 if (nextToken.equalsIgnoreCase("inv_object")) {
                     simpleStringParser.nextToken(DELIM_EOL)
@@ -87,8 +87,8 @@ class SLTaskInventories : SLModule(), SLXfer.SLXferCompletionListener {
     }
 
     @SLMessageHandler
-    fun HandleReplyTaskInventory(ReplyTaskInventory replyTaskInventory) {
-        String stringFromVariableOEM = SLMessage.stringFromVariableOEM(replyTaskInventory.InventoryData_Field.Filename)
+    fun HandleReplyTaskInventory(replyTaskInventory: ReplyTaskInventory) {
+        val stringFromVariableOEM: String = SLMessage.stringFromVariableOEM(replyTaskInventory.InventoryData_Field.Filename)
         Debug.Printf("taskID = %s, serial = %d, filename = '%s'", replyTaskInventory.InventoryData_Field.TaskID.toString(), Integer.valueOf(replyTaskInventory.InventoryData_Field.Serial), stringFromVariableOEM)
         if (!stringFromVariableOEM.equals("")) {
             this.agentCircuit.getModules().xferManager.RequestXfer(stringFromVariableOEM, ELLPath.LL_PATH_CACHE, true, this, replyTaskInventory.InventoryData_Field.TaskID)
@@ -97,11 +97,11 @@ class SLTaskInventories : SLModule(), SLXfer.SLXferCompletionListener {
         }
     }
 
-    fun onXferComplete(Object obj, String str, Byte[] bArr) {
+    fun onXferComplete(obj: Object, str: String, bArr: ByteArray) {
         if (obj instanceof UUID) {
-            UUID uuid = (UUID) obj
+            val uuid: UUID = (UUID) obj
             Debug.Printf("onXferComplete with file = '%s', data length = %d", str, Integer.valueOf(bArr.length))
-            SLTaskInventory parseTaskInventory = parseTaskInventory(bArr)
+            val parseTaskInventory: SLTaskInventory = parseTaskInventory(bArr)
             Debug.Printf("task inventory count = %d", Integer.valueOf(parseTaskInventory.entries.size()))
             if (this.resultHandler != null) {
                 this.resultHandler.onResultData(Integer.valueOf(this.agentCircuit.getGridConnection().parcelInfo.getObjectLocalID(uuid)), parseTaskInventory)

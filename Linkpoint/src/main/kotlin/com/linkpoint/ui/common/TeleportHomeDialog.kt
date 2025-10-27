@@ -11,16 +11,16 @@ import com.linkpoint.utils.UUIDPool
 
 class TeleportHomeDialog {
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_TeleportHomeDialog_956  reason: not valid java name */
-    static /* synthetic */ Unit m545lambda$com_lumiyaviewer_lumiya_ui_common_TeleportHomeDialog_956(Activity activity, UserManager userManager, SLAgentCircuit sLAgentCircuit, DialogInterface dialogInterface, Int i) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m545lambda$com_lumiyaviewer_lumiya_ui_common_TeleportHomeDialog_956(Activity activity, UserManager userManager, SLAgentCircuit sLAgentCircuit, DialogInterface dialogInterface, Int i) {
         TeleportProgressDialog(activity, userManager, R.string.teleporting_progress_message).show()
         sLAgentCircuit.TeleportToLandmarkAsset(UUIDPool.ZeroUUID)
         dialogInterface.dismiss()
     }
 
     @JvmStatic
-    Unit show(Activity activity) {
+     fun show(activity: Activity) {
         SLAgentCircuit activeAgentCircuit
-        UserManager userManager = ActivityUtils.getUserManager(activity.getIntent())
+        val userManager: UserManager = ActivityUtils.getUserManager(activity.getIntent())
         if (userManager != null && (activeAgentCircuit = userManager.getActiveAgentCircuit()) != null && activeAgentCircuit.getModules().rlvController.canTeleportToLocation()) {
             AlertDialog.Builder(activity).setMessage((Int) R.string.teleport_home_confirm_title).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(activity, userManager, activeAgentCircuit) {
 

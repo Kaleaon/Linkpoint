@@ -12,33 +12,33 @@ class UUIDNameReply : SLMessage() {
 
     @JvmStatic
     class UUIDNameBlock {
-        public Byte[] FirstName
+        public ByteArray FirstName
         public UUID ID
-        public Byte[] LastName
+        public ByteArray LastName
     }
 
     public UUIDNameReply() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 5
-        Iterator<T> it = this.UUIDNameBlock_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 5
+        val it: Iterator<T> = this.UUIDNameBlock_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
-            UUIDNameBlock uUIDNameBlock = (UUIDNameBlock) it.next()
+            val uUIDNameBlock: UUIDNameBlock = (UUIDNameBlock) it.next()
             i = uUIDNameBlock.LastName.length + uUIDNameBlock.FirstName.length + 17 + 1 + i2
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleUUIDNameReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -20)
@@ -50,10 +50,10 @@ class UUIDNameReply : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            UUIDNameBlock uUIDNameBlock = UUIDNameBlock()
+            val uUIDNameBlock: UUIDNameBlock = UUIDNameBlock()
             uUIDNameBlock.ID = unpackUUID(byteBuffer)
             uUIDNameBlock.FirstName = unpackVariable(byteBuffer, 1)
             uUIDNameBlock.LastName = unpackVariable(byteBuffer, 1)

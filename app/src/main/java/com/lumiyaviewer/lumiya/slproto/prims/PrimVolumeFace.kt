@@ -9,24 +9,24 @@ import com.lumiyaviewer.lumiya.slproto.types.VertexArray
 import java.util.ArrayList
 
 class PrimVolumeFace {
-    Int BOTTOM_MASK = 1024
-    Int CAP_MASK = 2
-    Int END_MASK = 4
-    Int FLAT_MASK = 256
-    Int HOLLOW_MASK = 64
-    Int INNER_MASK = 16
-    Int OPEN_MASK = 128
-    Int OUTER_MASK = 32
-    Int SIDE_MASK = 8
-    Int SINGLE_MASK = 1
-    Int TOP_MASK = 512
+    val BOTTOM_MASK: Int = 1024
+    val CAP_MASK: Int = 2
+    val END_MASK: Int = 4
+    val FLAT_MASK: Int = 256
+    val HOLLOW_MASK: Int = 64
+    val INNER_MASK: Int = 16
+    val OPEN_MASK: Int = 128
+    val OUTER_MASK: Int = 32
+    val SIDE_MASK: Int = 8
+    val SINGLE_MASK: Int = 1
+    val TOP_MASK: Int = 512
     Int BeginS
     Int BeginT
     LLVector3 Center
-    Int[] Edge
+    IntArray Edge
     LLVector3[] Extents = {LLVector3(), LLVector3()}
     Int ID
-    Short[] Indices
+    ShortArray Indices
     Vector3Array Normals
     Int NumIndices
     Int NumS
@@ -251,7 +251,7 @@ class PrimVolumeFace {
         Vector3Array vector3Array2 = this.Positions
         Vector3Array vector3Array3 = this.Normals
         Vector2Array vector2Array = this.TexCoords
-        Int floor = (Int) Math.floor((Double) arrayList.get(this.BeginS).z)
+        Int floor = Math.toInt().floor(arrayList.toDouble().get(this.BeginS).z)
         Int i8 = ((this.TypeMask & 16) == 0 || (this.TypeMask & 256) == 0 || this.NumS <= 2) ? this.NumS : this.NumS / 2
         Int i9 = this.BeginT
         Int i10 = 0
@@ -264,7 +264,7 @@ class PrimVolumeFace {
             Int i12 = 0
             Int i13 = i10
             while (i12 < i8) {
-                Float f2 = ((this.TypeMask & 4) != 0 || this.BeginS + i12 >= arrayList.size()) ? i12 != 0 ? 1.0f : 0.0f : !z ? arrayList.get(this.BeginS + i12).z : arrayList.get(this.BeginS + i12).z - ((Float) floor)
+                Float f2 = ((this.TypeMask & 4) != 0 || this.BeginS + i12 >= arrayList.size()) ? i12 != 0 ? 1.0f : 0.0f : !z ? arrayList.get(this.BeginS + i12).z : arrayList.get(this.BeginS + i12).z - (floor.toFloat())
                 if (z4) {
                     f2 = 1.0f - f2
                 }
@@ -287,7 +287,7 @@ class PrimVolumeFace {
             } else {
                 Int i16 = (this.TypeMask & 128) != 0 ? i8 - 1 : 0
                 Int i17 = this.BeginS + i16 + (i6 * i11)
-                Float f3 = this.BeginS + i16 < arrayList.size() ? arrayList.get(i16 + this.BeginS).z - ((Float) floor) : i16 != 0 ? 1.0f : 0.0f
+                Float f3 = this.BeginS + i16 < arrayList.size() ? arrayList.get(i16 + this.BeginS).z - (floor.toFloat()) : i16 != 0 ? 1.0f : 0.0f
                 vector3Array2.set(i13, vector3Array, i17)
                 vector2Array.set(i13, f3, f)
                 i10 = i13 + 1
@@ -367,7 +367,7 @@ class PrimVolumeFace {
         }
         this.Normals.clear()
         LLVector3[] lLVector3Arr = LLVector3[3]
-        Short[] sArr = Short[3]
+        ShortArray sArr = ShortArray(3)
         for (Int i28 = 0; i28 < 3; i28++) {
             lLVector3Arr[i28] = LLVector3()
         }
@@ -510,7 +510,7 @@ class PrimVolumeFace {
                 if (i10 >= size2 + 1) {
                     break
                 }
-                this.vertexArray.LerpPlanarVertex(i6, vertexArray2, 0, vertexArray2, 1, vertexArray2, 3, ((Float) i8) / ((Float) size2), ((Float) i10) / ((Float) size2), lLVector35, lLVector36, lLVector2, lLVector22)
+                this.vertexArray.LerpPlanarVertex(i6, vertexArray2, 0, vertexArray2, 1, vertexArray2, 3, (i8.toFloat()) / (size2.toFloat()), (i10.toFloat()) / (size2.toFloat()), lLVector35, lLVector36, lLVector2, lLVector22)
                 this.vertexArray.getNormals().set(i6, lLVector33)
                 if (i8 == 0 && i10 == 0) {
                     vector3Array2.get(i6, lLVector3)
@@ -527,8 +527,8 @@ class PrimVolumeFace {
         this.Center.add(lLVector32)
         this.Center.mul(0.5f)
         resizeIndices(size2 * size2 * 6)
-        Short[] sArr = this.Indices
-        Short[] sArr2 = {0, 1, (Short) (size2 + 1 + 1), (Short) (size2 + 1 + 1), (Short) (size2 + 1), 0}
+        ShortArray sArr = this.Indices
+        ShortArray sArr2 = {0, 1, (Short) (size2 + 1 + 1), (Short) (size2 + 1 + 1), (Short) (size2 + 1), 0}
         Int i11 = 0
         Int i12 = 0
         while (true) {

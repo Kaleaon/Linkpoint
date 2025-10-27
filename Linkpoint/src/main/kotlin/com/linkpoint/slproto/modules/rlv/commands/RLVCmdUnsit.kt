@@ -10,7 +10,7 @@ class RLVCmdUnsit : RLVCmdGenericRestriction() {
     }
 
     /* access modifiers changed from: protected */
-    fun HandleForce(RLVController rLVController, UUID uuid, String str) {
+    fun HandleForce(rLVController: RLVController, uuid: UUID, str: String) {
         rLVController.getModules().avatarControl.ForceStand()
     }
 }

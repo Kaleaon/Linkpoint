@@ -20,7 +20,7 @@ class MoneyTransferRequest : SLMessage() {
         public Int AggregatePermInventory
         public Int AggregatePermNextOwner
         public Int Amount
-        public Byte[] Description
+        public ByteArray Description
         public UUID DestID
         public Int Flags
         public UUID SourceID

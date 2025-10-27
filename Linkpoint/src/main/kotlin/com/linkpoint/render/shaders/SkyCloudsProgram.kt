@@ -14,16 +14,16 @@ class SkyCloudsProgram : SkyProgram() {
         super(Shader.SkyFragmentShader)
     }
 
-    fun ApplyWindlight(RenderContext renderContext) {
+    fun ApplyWindlight(renderContext: RenderContext) {
         super.ApplyWindlight(renderContext)
-        WindlightPreset windlightPreset = renderContext.windlightPreset
+        val windlightPreset: WindlightPreset = renderContext.windlightPreset
         GLES20.glUniform3f(this.cloudColor, windlightPreset.cloud_color[0], windlightPreset.cloud_color[1], windlightPreset.cloud_color[2])
         GLES20.glUniform1f(this.cloudGamma, windlightPreset.cloud_pos_density1[2])
         GLES20.glUniform1f(this.cloudAdd, windlightPreset.cloud_shadow[0] - 0.5f)
         GLES20.glUniform1i(this.textureSampler, 0)
     }
 
-    protected Unit bindVariables() {
+     protected fun bindVariables() {
         super.bindVariables()
         this.textureSampler = GLES20.glGetUniformLocation(this.handle, "textureSampler")
         this.cloudColor = GLES20.glGetUniformLocation(this.handle, "cloudColor")
@@ -31,7 +31,7 @@ class SkyCloudsProgram : SkyProgram() {
         this.cloudAdd = GLES20.glGetUniformLocation(this.handle, "cloudAdd")
     }
 
-    public Boolean hasCloudsTexture() {
+     public fun hasCloudsTexture(): Boolean {
         return true
     }
 }

@@ -23,9 +23,9 @@ class AvatarGroupsReply : SLMessage() {
         public Boolean AcceptNotices
         public UUID GroupID
         public UUID GroupInsigniaID
-        public Byte[] GroupName
+        public ByteArray GroupName
         public Long GroupPowers
-        public Byte[] GroupTitle
+        public ByteArray GroupTitle
     }
 
     @JvmStatic

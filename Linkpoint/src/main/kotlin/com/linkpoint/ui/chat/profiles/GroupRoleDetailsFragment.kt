@@ -42,7 +42,7 @@ import javax.annotation.Nullable
 
 class GroupRoleDetailsFragment : ChatterFragment(), LoadableMonitor.OnLoadableDataChangedListener, BackButtonHandler {
     private const val ROLE_ID_KEY: String = "role_id"
-    private const val ImmutableList<RolePermission> rolePermissions = ImmutableList.copyOf((E[]) RolePermission[]{RolePermission(2, R.string.role_gp_member_invite, (RolePermission) null), RolePermission(4, R.string.role_gp_member_eject, (RolePermission) null), RolePermission(8, R.string.role_gp_member_options, (RolePermission) null), RolePermission(16, R.string.role_gp_role_create, (RolePermission) null), RolePermission(32, R.string.role_gp_role_delete, (RolePermission) null), RolePermission(64, R.string.role_gp_role_properties, (RolePermission) null), RolePermission(128, R.string.role_gp_role_assign_member_limited, (RolePermission) null), RolePermission(256, R.string.role_gp_role_assign_member, (RolePermission) null), RolePermission(512, R.string.role_gp_role_remove_member, (RolePermission) null), RolePermission(1024, R.string.role_gp_role_change_actions, (RolePermission) null), RolePermission(2048, R.string.role_gp_group_change_identity, (RolePermission) null), RolePermission(4096, R.string.role_gp_land_deed, (RolePermission) null), RolePermission(8192, R.string.role_gp_land_release, (RolePermission) null), RolePermission(16384, R.string.role_gp_land_set_sale_info, (RolePermission) null), RolePermission(32768, R.string.role_gp_land_divide_join, (RolePermission) null), RolePermission(131072, R.string.role_gp_land_find_places, (RolePermission) null), RolePermission(262144, R.string.role_gp_land_change_identity, (RolePermission) null), RolePermission(524288, R.string.role_gp_land_set_landing_point, (RolePermission) null), RolePermission(1048576, R.string.role_gp_land_change_media, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_EDIT, R.string.role_gp_land_edit, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_OPTIONS, R.string.role_gp_land_options, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_ALLOW_EDIT_LAND, R.string.role_gp_land_allow_edit_land, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_ALLOW_FLY, R.string.role_gp_land_allow_fly, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_ALLOW_CREATE, R.string.role_gp_land_allow_create, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_ALLOW_LANDMARK, R.string.role_gp_land_allow_landmark, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_ALLOW_SET_HOME, R.string.role_gp_land_allow_set_home, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_ALLOW_HOLD_EVENT, R.string.role_gp_land_allow_hold_event, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_MANAGE_ALLOWED, R.string.role_gp_land_manage_allowed, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_MANAGE_BANNED, R.string.role_gp_land_manage_banned, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_MANAGE_PASSES, R.string.role_gp_land_manage_passes, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_ADMIN, R.string.role_gp_land_admin, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_RETURN_GROUP_SET, R.string.role_gp_land_return_group_set, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_RETURN_NON_GROUP, R.string.role_gp_land_return_non_group, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_RETURN_GROUP_OWNED, R.string.role_gp_land_return_group_owned, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_GARDENING, R.string.role_gp_land_gardening, (RolePermission) null), RolePermission(SLGroupInfo.GP_OBJECT_DEED, R.string.role_gp_object_deed, (RolePermission) null), RolePermission(SLGroupInfo.GP_OBJECT_MANIPULATE, R.string.role_gp_object_manipulate, (RolePermission) null), RolePermission(SLGroupInfo.GP_OBJECT_SET_SALE, R.string.role_gp_object_set_sale, (RolePermission) null), RolePermission(SLGroupInfo.GP_ACCOUNTING_ACCOUNTABLE, R.string.role_gp_accounting_accountable, (RolePermission) null), RolePermission(SLGroupInfo.GP_NOTICES_SEND, R.string.role_gp_notices_send, (RolePermission) null), RolePermission(SLGroupInfo.GP_NOTICES_RECEIVE, R.string.role_gp_notices_receive, (RolePermission) null), RolePermission(SLGroupInfo.GP_PROPOSAL_START, R.string.role_gp_proposal_start, (RolePermission) null), RolePermission(SLGroupInfo.GP_PROPOSAL_VOTE, R.string.role_gp_proposal_vote, (RolePermission) null), RolePermission(65536, R.string.role_gp_session_join, (RolePermission) null), RolePermission(SLGroupInfo.GP_SESSION_VOICE, R.string.role_gp_session_voice, (RolePermission) null), RolePermission(SLGroupInfo.GP_SESSION_MODERATOR, R.string.role_gp_session_moderator, (RolePermission) null)})
+    private const val ImmutableList<RolePermission> rolePermissions = ImmutableList.copyOf((Array<E>) Array<RolePermission>{RolePermission(2, R.string.role_gp_member_invite, (RolePermission) null), RolePermission(4, R.string.role_gp_member_eject, (RolePermission) null), RolePermission(8, R.string.role_gp_member_options, (RolePermission) null), RolePermission(16, R.string.role_gp_role_create, (RolePermission) null), RolePermission(32, R.string.role_gp_role_delete, (RolePermission) null), RolePermission(64, R.string.role_gp_role_properties, (RolePermission) null), RolePermission(128, R.string.role_gp_role_assign_member_limited, (RolePermission) null), RolePermission(256, R.string.role_gp_role_assign_member, (RolePermission) null), RolePermission(512, R.string.role_gp_role_remove_member, (RolePermission) null), RolePermission(1024, R.string.role_gp_role_change_actions, (RolePermission) null), RolePermission(2048, R.string.role_gp_group_change_identity, (RolePermission) null), RolePermission(4096, R.string.role_gp_land_deed, (RolePermission) null), RolePermission(8192, R.string.role_gp_land_release, (RolePermission) null), RolePermission(16384, R.string.role_gp_land_set_sale_info, (RolePermission) null), RolePermission(32768, R.string.role_gp_land_divide_join, (RolePermission) null), RolePermission(131072, R.string.role_gp_land_find_places, (RolePermission) null), RolePermission(262144, R.string.role_gp_land_change_identity, (RolePermission) null), RolePermission(524288, R.string.role_gp_land_set_landing_point, (RolePermission) null), RolePermission(1048576, R.string.role_gp_land_change_media, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_EDIT, R.string.role_gp_land_edit, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_OPTIONS, R.string.role_gp_land_options, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_ALLOW_EDIT_LAND, R.string.role_gp_land_allow_edit_land, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_ALLOW_FLY, R.string.role_gp_land_allow_fly, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_ALLOW_CREATE, R.string.role_gp_land_allow_create, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_ALLOW_LANDMARK, R.string.role_gp_land_allow_landmark, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_ALLOW_SET_HOME, R.string.role_gp_land_allow_set_home, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_ALLOW_HOLD_EVENT, R.string.role_gp_land_allow_hold_event, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_MANAGE_ALLOWED, R.string.role_gp_land_manage_allowed, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_MANAGE_BANNED, R.string.role_gp_land_manage_banned, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_MANAGE_PASSES, R.string.role_gp_land_manage_passes, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_ADMIN, R.string.role_gp_land_admin, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_RETURN_GROUP_SET, R.string.role_gp_land_return_group_set, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_RETURN_NON_GROUP, R.string.role_gp_land_return_non_group, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_RETURN_GROUP_OWNED, R.string.role_gp_land_return_group_owned, (RolePermission) null), RolePermission(SLGroupInfo.GP_LAND_GARDENING, R.string.role_gp_land_gardening, (RolePermission) null), RolePermission(SLGroupInfo.GP_OBJECT_DEED, R.string.role_gp_object_deed, (RolePermission) null), RolePermission(SLGroupInfo.GP_OBJECT_MANIPULATE, R.string.role_gp_object_manipulate, (RolePermission) null), RolePermission(SLGroupInfo.GP_OBJECT_SET_SALE, R.string.role_gp_object_set_sale, (RolePermission) null), RolePermission(SLGroupInfo.GP_ACCOUNTING_ACCOUNTABLE, R.string.role_gp_accounting_accountable, (RolePermission) null), RolePermission(SLGroupInfo.GP_NOTICES_SEND, R.string.role_gp_notices_send, (RolePermission) null), RolePermission(SLGroupInfo.GP_NOTICES_RECEIVE, R.string.role_gp_notices_receive, (RolePermission) null), RolePermission(SLGroupInfo.GP_PROPOSAL_START, R.string.role_gp_proposal_start, (RolePermission) null), RolePermission(SLGroupInfo.GP_PROPOSAL_VOTE, R.string.role_gp_proposal_vote, (RolePermission) null), RolePermission(65536, R.string.role_gp_session_join, (RolePermission) null), RolePermission(SLGroupInfo.GP_SESSION_VOICE, R.string.role_gp_session_voice, (RolePermission) null), RolePermission(SLGroupInfo.GP_SESSION_MODERATOR, R.string.role_gp_session_moderator, (RolePermission) null)})
     private UUID RoleID
     private val SubscriptionData<UUID, SLAgentCircuit> agentCircuit = SubscriptionData<>(UIThreadExecutor.getInstance())
     private MenuItem deleteMenuItem
@@ -102,14 +102,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     }
     private val TextWatcher textChangedListener = TextWatcher() {
-        fun afterTextChanged(Editable editable) {
+        fun afterTextChanged(editable: Editable) {
             GroupRoleDetailsFragment.this.updateUnsavedChanges()
         }
 
-        fun beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+        fun beforeTextChanged(charSequence: CharSequence, i: Int, i2: Int, i3: Int) {
         }
 
-        fun onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+        fun onTextChanged(charSequence: CharSequence, i: Int, i2: Int, i3: Int) {
         }
     }
     private MenuItem undoMenuItem
@@ -129,12 +129,12 @@ private class RolePermission {
         }
     }
 
-    private Boolean anyChanges() {
+     private fun anyChanges(): Boolean {
         String str
         String stringFromVariableOEM
         Long j
         String str2
-        View view = getView()
+        val view: View = getView()
         if (view == null) {
             return false
         }
@@ -148,25 +148,25 @@ private class RolePermission {
             if (selectedRoleData == null) {
                 return false
             }
-            String stringFromVariableOEM2 = SLMessage.stringFromVariableOEM(selectedRoleData.Name)
+            val stringFromVariableOEM2: String = SLMessage.stringFromVariableOEM(selectedRoleData.Name)
             str = stringFromVariableOEM2
             stringFromVariableOEM = SLMessage.stringFromVariableOEM(selectedRoleData.Title)
-            String stringFromVariableOEM3 = SLMessage.stringFromVariableOEM(selectedRoleData.Description)
+            val stringFromVariableOEM3: String = SLMessage.stringFromVariableOEM(selectedRoleData.Description)
             j = selectedRoleData.Powers
             str2 = stringFromVariableOEM3
         }
         return !Objects.equal(str, ((TextView) view.findViewById(R.id.role_name_edit)).getText().toString()) || !Objects.equal(stringFromVariableOEM, ((TextView) view.findViewById(R.id.role_title_edit)).getText().toString()) || !Objects.equal(str2, ((TextView) view.findViewById(R.id.role_description_edit)).getText().toString()) || j != getSelectedPowers(j, (ViewGroup) view.findViewById(R.id.role_permission_list_layout))
     }
 
-    private Unit askForSavingChanges(Runnable runnable) {
-        View view = getView()
+     private fun askForSavingChanges(runnable: Runnable) {
+        val view: View = getView()
         if (view != null) {
             GroupRoleDataReply.RoleData selectedRoleData = getSelectedRoleData()
-            Long defaultPowers = selectedRoleData == null ? getDefaultPowers() : selectedRoleData.Powers
-            String charSequence = ((TextView) view.findViewById(R.id.role_name_edit)).getText().toString()
-            String charSequence2 = ((TextView) view.findViewById(R.id.role_title_edit)).getText().toString()
-            String charSequence3 = ((TextView) view.findViewById(R.id.role_description_edit)).getText().toString()
-            Long selectedPowers = getSelectedPowers(defaultPowers, (ViewGroup) view.findViewById(R.id.role_permission_list_layout))
+            val defaultPowers: Long = selectedRoleData == null ? getDefaultPowers() : selectedRoleData.Powers
+            val charSequence: String = ((TextView) view.findViewById(R.id.role_name_edit)).getText().toString()
+            val charSequence2: String = ((TextView) view.findViewById(R.id.role_title_edit)).getText().toString()
+            val charSequence3: String = ((TextView) view.findViewById(R.id.role_description_edit)).getText().toString()
+            val selectedPowers: Long = getSelectedPowers(defaultPowers, (ViewGroup) view.findViewById(R.id.role_permission_list_layout))
             AlertDialog.Builder builder = AlertDialog.Builder(getContext())
             builder.setMessage(getString(R.string.save_changes_question)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(selectedPowers, this, charSequence, charSequence2, charSequence3, runnable) {
 
@@ -345,7 +345,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         runnable.run()
     }
 
-    private Unit confirmDeleteRole() {
+     private fun confirmDeleteRole() {
         if ((getMyGroupPowers() & 32) != 0) {
             AlertDialog.Builder builder = AlertDialog.Builder(getContext())
             builder.setMessage(getString(R.string.delete_role_question)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this) {
@@ -434,9 +434,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    private Unit createPermEntries(LayoutInflater layoutInflater, ViewGroup viewGroup) {
+     private fun createPermEntries(layoutInflater: LayoutInflater, viewGroup: ViewGroup) {
         for (RolePermission rolePermission : rolePermissions) {
-            View inflate = layoutInflater.inflate(R.layout.group_role_perm_item, viewGroup, false)
+            val inflate: View = layoutInflater.inflate(R.layout.group_role_perm_item, viewGroup, false)
             ((CheckedTextView) inflate).setText(rolePermission.permName)
             inflate.setTag(R.id.perm_checkbox_mask, Long.valueOf(rolePermission.permMask))
             inflate.setEnabled(true)
@@ -446,11 +446,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    private Long getDefaultPowers() {
+     private fun getDefaultPowers(): Long {
         return 134283266
     }
 
-    private Int getMemberCount() {
+     private fun getMemberCount(): Int {
         GroupRoleDataReply.RoleData selectedRoleData = getSelectedRoleData()
         if (selectedRoleData == null) {
             return 0
@@ -458,7 +458,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         if (!selectedRoleData.RoleID.equals(UUIDPool.ZeroUUID)) {
             return selectedRoleData.Members
         }
-        GroupProfileReply data = this.groupProfile.getData()
+        val data: GroupProfileReply = this.groupProfile.getData()
         if (data != null) {
             return data.GroupData_Field.GroupMembershipCount
         }
@@ -473,7 +473,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    private Long getMyGroupPowers() {
+     private fun getMyGroupPowers(): Long {
         AvatarGroupList.AvatarGroupEntry myGroupEntry = getMyGroupEntry()
         if (myGroupEntry != null) {
             return myGroupEntry.GroupPowers
@@ -481,17 +481,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         return 0
     }
 
-    private Long getSelectedPowers(Long j, ViewGroup viewGroup) {
+     private fun getSelectedPowers(j: Long, viewGroup: ViewGroup): Long {
         Long j2
-        Int childCount = viewGroup.getChildCount()
-        Int i = 0
-        Long j3 = j
+        val childCount: Int = viewGroup.getChildCount()
+        val i: Int = 0
+        val j3: Long = j
         while (i < childCount) {
-            View childAt = viewGroup.getChildAt(i)
+            val childAt: View = viewGroup.getChildAt(i)
             if (childAt instanceof CheckedTextView) {
-                Object tag = childAt.getTag(R.id.perm_checkbox_mask)
+                val tag: Object = childAt.getTag(R.id.perm_checkbox_mask)
                 if (tag instanceof Long) {
-                    Long longValue = ((Long) tag).longValue()
+                    val longValue: Long = ((Long) tag).longValue()
                     j2 = ((CheckedTextView) childAt).isChecked() ? j3 | longValue : (~longValue) & j3
                     i++
                     j3 = j2
@@ -521,42 +521,42 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRoleDetailsFragment_26404  reason: not valid java name */
-    static /* synthetic */ Unit m485lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRoleDetailsFragment_26404(Runnable runnable, DialogInterface dialogInterface, Int i) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m485lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRoleDetailsFragment_26404(Runnable runnable, DialogInterface dialogInterface, Int i) {
         dialogInterface.cancel()
         runnable.run()
     }
 
     @JvmStatic
-    Bundle makeSelection(ChatterID chatterID, UUID uuid) {
-        Bundle makeSelection = ChatterFragment.makeSelection(chatterID)
+     fun makeSelection(chatterID: ChatterID, uuid: UUID): Bundle {
+        val makeSelection: Bundle = ChatterFragment.makeSelection(chatterID)
         if (uuid != null) {
             makeSelection.putString(ROLE_ID_KEY, uuid.toString())
         }
         return makeSelection
     }
 
-    private Unit setLoadedValues() {
-        Int i = 0
+     private fun setLoadedValues() {
+        val i: Int = 0
         GroupRoleDataReply.RoleData selectedRoleData = getSelectedRoleData()
-        Long myGroupPowers = getMyGroupPowers()
-        Boolean z = (64 & myGroupPowers) != 0
-        Boolean equal = Objects.equal(this.RoleID, UUIDPool.ZeroUUID)
-        GroupProfileReply data = this.groupProfile.getData()
-        Boolean equal2 = data != null ? Objects.equal(data.GroupData_Field.OwnerRole, this.RoleID) : false
+        val myGroupPowers: Long = getMyGroupPowers()
+        val z: Boolean = (64 & myGroupPowers) != 0
+        val equal: Boolean = Objects.equal(this.RoleID, UUIDPool.ZeroUUID)
+        val data: GroupProfileReply = this.groupProfile.getData()
+        val equal2: Boolean = data != null ? Objects.equal(data.GroupData_Field.OwnerRole, this.RoleID) : false
         if (this.deleteMenuItem != null) {
             this.deleteMenuItem.setVisible((this.RoleID == null || (myGroupPowers & 32) == 0 || !(equal2 ^ true)) ? false : !equal)
         }
-        View view = getView()
+        val view: View = getView()
         if (view != null) {
             if (selectedRoleData != null) {
-                Int memberCount = getMemberCount()
+                val memberCount: Int = getMemberCount()
                 ((EditText) view.findViewById(R.id.role_name_edit)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Name))
                 ((TextView) view.findViewById(R.id.role_name_view)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Name))
                 ((EditText) view.findViewById(R.id.role_title_edit)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Title))
                 ((TextView) view.findViewById(R.id.role_title_view)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Title))
                 ((EditText) view.findViewById(R.id.role_description_edit)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Description))
                 ((TextView) view.findViewById(R.id.role_description_view)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Description))
-                ((TextView) view.findViewById(R.id.role_member_count)).setText(getResources().getQuantityString(R.plurals.members, memberCount, Object[]{Integer.valueOf(memberCount)}))
+                ((TextView) view.findViewById(R.id.role_member_count)).setText(getResources().getQuantityString(R.plurals.members, memberCount, Array<Any>{Integer.valueOf(memberCount)}))
                 setPermissionCheckboxes(selectedRoleData.Powers, (ViewGroup) view.findViewById(R.id.role_permission_list_layout))
                 view.findViewById(R.id.group_role_members_card_view).setVisibility(0)
             } else {
@@ -575,7 +575,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             view.findViewById(R.id.role_title_edit).setVisibility(z ? 0 : 8)
             view.findViewById(R.id.role_title_view).setVisibility(!z ? 0 : 8)
             view.findViewById(R.id.role_description_edit).setVisibility(z ? 0 : 8)
-            View findViewById = view.findViewById(R.id.role_description_view)
+            val findViewById: View = view.findViewById(R.id.role_description_view)
             if (z) {
                 i = 8
             }
@@ -584,12 +584,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         updateUnsavedChanges()
     }
 
-    private Unit setPermissionCheckboxes(Long j, ViewGroup viewGroup) {
-        Int childCount = viewGroup.getChildCount()
+     private fun setPermissionCheckboxes(j: Long, viewGroup: ViewGroup) {
+        val childCount: Int = viewGroup.getChildCount()
         for (Int i = 0; i < childCount; i++) {
-            View childAt = viewGroup.getChildAt(i)
+            val childAt: View = viewGroup.getChildAt(i)
             if (childAt instanceof CheckedTextView) {
-                Object tag = childAt.getTag(R.id.perm_checkbox_mask)
+                val tag: Object = childAt.getTag(R.id.perm_checkbox_mask)
                 if (tag instanceof Long) {
                     ((CheckedTextView) childAt).setChecked((((Long) tag).longValue() & j) != 0)
                 }
@@ -599,7 +599,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     fun updateUnsavedChanges() {
-        Boolean anyChanges = anyChanges()
+        val anyChanges: Boolean = anyChanges()
         if (anyChanges != this.hasChanged) {
             this.hasChanged = anyChanges
             if (this.undoMenuItem != null) {
@@ -611,8 +611,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRoleDetailsFragment_11905  reason: not valid java name */
     public /* synthetic */ Unit m486lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRoleDetailsFragment_11905(View view) {
-        Long myGroupPowers = getMyGroupPowers()
-        GroupProfileReply data = this.groupProfile.getData()
+        val myGroupPowers: Long = getMyGroupPowers()
+        val data: GroupProfileReply = this.groupProfile.getData()
         if ((myGroupPowers & 1024) != 0 ? !(data != null ? Objects.equal(data.GroupData_Field.OwnerRole, this.RoleID) : false) : false) {
             if (view instanceof Checkable) {
                 ((Checkable) view).toggle()
@@ -631,7 +631,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             }
         } catch (SubscriptionData.DataNotReadyException e) {
         }
-        FragmentActivity activity = getActivity()
+        val activity: FragmentActivity = getActivity()
         if (activity instanceof DetailsActivity) {
             ((DetailsActivity) activity).closeDetailsFragment(this)
         }
@@ -640,7 +640,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRoleDetailsFragment_24146  reason: not valid java name */
     public /* synthetic */ Unit m488lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRoleDetailsFragment_24146() {
-        FragmentActivity activity = getActivity()
+        val activity: FragmentActivity = getActivity()
         if (activity instanceof DetailsActivity) {
             ((DetailsActivity) activity).closeDetailsFragment(this)
         }
@@ -672,7 +672,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    public Boolean onBackButtonPressed() {
+     public fun onBackButtonPressed(): Boolean {
         if (!anyChanges()) {
             return false
         }
@@ -751,12 +751,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         return true
     }
 
-    fun onCreate(@android.support.annotation.Nullable Bundle bundle) {
+    override fun onCreate(@android.support.annotation.Nullable Bundle bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.group_role_edit_menu, menu)
         this.undoMenuItem = menu.findItem(R.id.item_undo)
@@ -765,8 +765,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         this.deleteMenuItem.setVisible(false)
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View inflate = layoutInflater.inflate(R.layout.group_role_details_layout, viewGroup, false)
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+        val inflate: View = layoutInflater.inflate(R.layout.group_role_details_layout, viewGroup, false)
         ((LoadingLayout) inflate.findViewById(R.id.loading_layout)).setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout))
         this.loadableMonitor.setLoadingLayout((LoadingLayout) inflate.findViewById(R.id.loading_layout), getString(R.string.no_group_selected), getString(R.string.group_profile_fail))
         this.loadableMonitor.setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout))
@@ -849,7 +849,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         setLoadedValues()
     }
 
-    public Boolean onOptionsItemSelected(MenuItem menuItem) {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_undo:
                 setLoadedValues()
@@ -863,7 +863,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(ChatterID chatterID) {
+    fun onShowUser(chatterID: ChatterID) {
         this.loadableMonitor.unsubscribeAll()
         if (getArguments().containsKey(ROLE_ID_KEY)) {
             this.RoleID = UUIDPool.getUUID(getArguments().getString(ROLE_ID_KEY))
@@ -872,7 +872,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
         Debug.Printf("Group role details: role = %s", this.RoleID)
         if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDGroup)) {
-            UUID chatterUUID = ((ChatterID.ChatterIDGroup) chatterID).getChatterUUID()
+            val chatterUUID: UUID = ((ChatterID.ChatterIDGroup) chatterID).getChatterUUID()
             this.groupRoles.subscribe(this.userManager.getGroupRoles().getPool(), chatterUUID)
             this.myGroupList.subscribe(this.userManager.getAvatarGroupLists().getPool(), chatterID.agentUUID)
             this.groupProfile.subscribe(this.userManager.getCachedGroupProfiles().getPool(), chatterUUID)

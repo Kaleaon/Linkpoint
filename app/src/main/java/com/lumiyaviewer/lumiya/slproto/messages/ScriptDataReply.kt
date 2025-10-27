@@ -11,7 +11,7 @@ class ScriptDataReply : SLMessage {
 
     class DataBlock {
         Long Hash
-        Byte[] Reply
+        ByteArray Reply
     }
 
     ScriptDataReply() {

@@ -21,7 +21,7 @@ class GroupAccountDetailsReply : SLMessage() {
     @JvmStatic
     class HistoryData {
         public Int Amount
-        public Byte[] Description
+        public ByteArray Description
     }
 
     @JvmStatic
@@ -29,7 +29,7 @@ class GroupAccountDetailsReply : SLMessage() {
         public Int CurrentInterval
         public Int IntervalDays
         public UUID RequestID
-        public Byte[] StartDate
+        public ByteArray StartDate
     }
 
     public GroupAccountDetailsReply() {
@@ -38,11 +38,11 @@ class GroupAccountDetailsReply : SLMessage() {
         this.MoneyData_Field = MoneyData()
     }
 
-    public Int CalcPayloadSize() {
-        Int length = this.MoneyData_Field.StartDate.length + 25 + 36 + 1
-        Iterator<T> it = this.HistoryData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val length: Int = this.MoneyData_Field.StartDate.length + 25 + 36 + 1
+        val it: Iterator<T> = this.HistoryData_Fields.iterator()
         while (true) {
-            Int i = length
+            val i: Int = length
             if (!it.hasNext()) {
                 return i
             }
@@ -50,11 +50,11 @@ class GroupAccountDetailsReply : SLMessage() {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleGroupAccountDetailsReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 100)
@@ -71,16 +71,16 @@ class GroupAccountDetailsReply : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
         this.MoneyData_Field.RequestID = unpackUUID(byteBuffer)
         this.MoneyData_Field.IntervalDays = unpackInt(byteBuffer)
         this.MoneyData_Field.CurrentInterval = unpackInt(byteBuffer)
         this.MoneyData_Field.StartDate = unpackVariable(byteBuffer, 1)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            HistoryData historyData = HistoryData()
+            val historyData: HistoryData = HistoryData()
             historyData.Description = unpackVariable(byteBuffer, 1)
             historyData.Amount = unpackInt(byteBuffer)
             this.HistoryData_Fields.add(historyData)

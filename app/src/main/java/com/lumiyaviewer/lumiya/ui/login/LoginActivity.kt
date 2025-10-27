@@ -46,12 +46,12 @@ import java.util.List
 import java.util.UUID
 
 class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEditDialog.OnGridEditResultListener {
-    private String KEY_CLIENT_ID = "client_id"
-    private String KEY_LOGIN = "login"
-    private String KEY_PASSWORD = "password"
-    private String KEY_SAVE_PASSWORD = "save_password"
-    private String KEY_SELECTED_GRID = "selected_grid"
-    private String KEY_TOS_ACCEPTED = "tos_accepted"
+    private val KEY_CLIENT_ID: String = "client_id"
+    private val KEY_LOGIN: String = "login"
+    private val KEY_PASSWORD: String = "password"
+    private val KEY_SAVE_PASSWORD: String = "save_password"
+    private val KEY_SELECTED_GRID: String = "selected_grid"
+    private val KEY_TOS_ACCEPTED: String = "tos_accepted"
     private AccountList accountList = null
     private Boolean enableAutoClear = false
     private GridList.GridArrayAdapter gridDisplayAdapter = null
@@ -420,7 +420,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
                 return
             }
         }
-        setContentView((Int) R.layout.login)
+        setContentView(R.toInt().layout.login)
         Debug.Log("LoginActivity: created.")
         this.gridList = GridList(this)
         this.accountList = AccountList(this)

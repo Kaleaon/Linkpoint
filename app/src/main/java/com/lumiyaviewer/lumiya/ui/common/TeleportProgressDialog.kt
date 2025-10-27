@@ -18,7 +18,7 @@ import com.lumiyaviewer.lumiya.ui.common.$Lambda$8gWLFwrhoxKapEC8iWggaUhFR1c
 import java.util.UUID
 
 class TeleportProgressDialog : ProgressDialog : DialogInterface.OnCancelListener {
-    private Handler mHandler = Handler()
+    private val mHandler: Handler = Handler()
     private UserManager userManager
 
     TeleportProgressDialog(Context context, UserManager userManager2, Int i) {

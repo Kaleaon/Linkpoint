@@ -33,7 +33,7 @@ enum class SLWearableType {
     }
 
     @JvmStatic
-    SLWearableType getByCode(Int i) {
+     fun getByCode(i: Int): SLWearableType {
         for (SLWearableType sLWearableType : values()) {
             if (sLWearableType.typeCode == i) {
                 return sLWearableType
@@ -42,23 +42,23 @@ enum class SLWearableType {
         return null
     }
 
-    public SLAssetType getAssetType() {
+     public fun getAssetType(): SLAssetType {
         return this.assetType
     }
 
-    public Boolean getIsCritical() {
+     public fun getIsCritical(): Boolean {
         return this.isCritical
     }
 
-    public String getName() {
+     public fun getName(): String {
         return this.name
     }
 
-    public Int getTypeCode() {
+     public fun getTypeCode(): Int {
         return this.typeCode
     }
 
-    public Boolean isBodyPart() {
+     public fun isBodyPart(): Boolean {
         return this.assetType == SLAssetType.AT_BODYPART
     }
 }

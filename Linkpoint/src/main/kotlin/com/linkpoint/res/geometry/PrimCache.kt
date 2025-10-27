@@ -26,7 +26,7 @@ private class PrimRequest : ResourceRequest()<PrimDrawParams, DrawablePrim> : Ru
             this.geometryCache = geometryCache2
         }
 
-        fun OnResourceReady(Object obj, Boolean z) {
+        fun OnResourceReady(obj: Object, z: Boolean) {
             if (obj instanceof DrawableGeometry) {
                 this.geometry = (DrawableGeometry) obj
                 PrimComputeExecutor.getInstance().execute(this)
@@ -45,7 +45,7 @@ private class PrimRequest : ResourceRequest()<PrimDrawParams, DrawablePrim> : Ru
             this.geometryCache.RequestResource(((PrimDrawParams) getParams()).getVolumeParams(), this)
         }
 
-        fun run() {
+        override fun run() {
             try {
                 completeRequest(DrawablePrim((PrimDrawParams) getParams(), this.geometry))
             } catch (Exception e) {

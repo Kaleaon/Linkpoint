@@ -12,12 +12,12 @@ class RLVCmdDetach : RLVCmdGenericRestriction() {
     }
 
     /* access modifiers changed from: protected */
-    fun HandleForce(RLVController rLVController, UUID uuid, String str) {
+    fun HandleForce(rLVController: RLVController, uuid: UUID, str: String) {
         UUID attachmentUUID
-        SLAvatarAppearance sLAvatarAppearance = rLVController.getModules().avatarAppearance
+        val sLAvatarAppearance: SLAvatarAppearance = rLVController.getModules().avatarAppearance
         for (Int i = 0; i < 56; i++) {
             if (SLAttachmentPoint.attachmentPoints[i] != null) {
-                String lowerCase = SLAttachmentPoint.attachmentPoints[i].name.toLowerCase()
+                val lowerCase: String = SLAttachmentPoint.attachmentPoints[i].name.toLowerCase()
                 if ((str.equals("") || lowerCase.equalsIgnoreCase(str)) && (attachmentUUID = sLAvatarAppearance.getAttachmentUUID(i)) != null && rLVController.getRestrictions().isAllowed(RLVRestrictionType.detach, lowerCase, attachmentUUID)) {
                     sLAvatarAppearance.DetachItemFromPoint(i)
                 }

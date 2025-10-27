@@ -29,8 +29,8 @@ val class SLChatInventoryItemOfferedByYouEvent : SLChatEvent() {
     }
 
     /* access modifiers changed from: protected */
-    public String getText(Context context, UserManager userManager) {
-        return context.getString(R.string.chat_inventory_own_offer_format, Object[]{this.itemName})
+     public fun getText(context: Context, userManager: UserManager): String {
+        return context.getString(R.string.chat_inventory_own_offer_format, Array<Any>{this.itemName})
     }
 
     public SLChatEvent.ChatMessageViewType getViewType() {
@@ -38,11 +38,11 @@ val class SLChatInventoryItemOfferedByYouEvent : SLChatEvent() {
     }
 
     /* access modifiers changed from: protected */
-    public Boolean isActionMessage(UserManager userManager) {
+     public fun isActionMessage(userManager: UserManager): Boolean {
         return false
     }
 
-    fun serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setItemName(this.itemName)
     }

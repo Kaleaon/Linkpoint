@@ -6,7 +6,7 @@ import javax.annotation.Nonnull
 interface Loadable {
 
     interface LoadableStatusListener {
-        Unit onLoadableStatusChange(Loadable loadable, Status status)
+         fun onLoadableStatusChange(loadable: Loadable, status: Status)
     }
 
     enum class Status {
@@ -16,7 +16,7 @@ interface Loadable {
         Error
     }
 
-    Unit addLoadableStatusListener(LoadableStatusListener loadableStatusListener)
+     fun addLoadableStatusListener(loadableStatusListener: LoadableStatusListener)
 
-    Status getLoadableStatus()
+     fun getLoadableStatus(): Status)
 }

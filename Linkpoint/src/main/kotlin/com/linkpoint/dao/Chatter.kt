@@ -27,67 +27,67 @@ class Chatter {
         this.lastSessionID = uuid2
     }
 
-    public Boolean getActive() {
+     public fun getActive(): Boolean {
         return this.active
     }
 
-    public Long getId() {
+     public fun getId(): Long {
         return this.id
     }
 
-    public Long getLastMessageID() {
+     public fun getLastMessageID(): Long {
         return this.lastMessageID
     }
 
-    public UUID getLastSessionID() {
+     public fun getLastSessionID(): UUID {
         return this.lastSessionID
     }
 
-    public Boolean getMuted() {
+     public fun getMuted(): Boolean {
         return this.muted
     }
 
-    public Int getType() {
+     public fun getType(): Int {
         return this.type
     }
 
-    public Int getUnreadCount() {
+     public fun getUnreadCount(): Int {
         return this.unreadCount
     }
 
-    public UUID getUuid() {
+     public fun getUuid(): UUID {
         return this.uuid
     }
 
-    fun setActive(Boolean z) {
+    fun setActive(z: Boolean) {
         this.active = z
     }
 
-    fun setId(Long l) {
+    fun setId(l: Long) {
         this.id = l
     }
 
-    fun setLastMessageID(Long l) {
+    fun setLastMessageID(l: Long) {
         this.lastMessageID = l
     }
 
-    fun setLastSessionID(UUID uuid) {
+    fun setLastSessionID(uuid: UUID) {
         this.lastSessionID = uuid
     }
 
-    fun setMuted(Boolean z) {
+    fun setMuted(z: Boolean) {
         this.muted = z
     }
 
-    fun setType(Int i) {
+    fun setType(i: Int) {
         this.type = i
     }
 
-    fun setUnreadCount(Int i) {
+    fun setUnreadCount(i: Int) {
         this.unreadCount = i
     }
 
-    fun setUuid(UUID uuid) {
+    fun setUuid(uuid: UUID) {
         this.uuid = uuid
     }
 }

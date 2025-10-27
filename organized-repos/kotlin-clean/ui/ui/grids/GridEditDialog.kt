@@ -36,13 +36,13 @@ class GridEditDialog : AppCompatDialog(), View.OnClickListener {
             ((TextView) findViewById(R.id.gridLoginURIText)).setText(this.editGrid.getLoginURL())
             ((Button) findViewById(R.id.okButton)).setText(R.string.save_changes)
             findViewById(R.id.deleteButton).setVisibility(0)
-            setTitle((Int) R.string.edit_grid_dialog_title)
+            setTitle(R.toInt().string.edit_grid_dialog_title)
         } else {
             ((TextView) findViewById(R.id.gridNameText)).setText("")
             ((TextView) findViewById(R.id.gridLoginURIText)).setText("")
             ((Button) findViewById(R.id.okButton)).setText(R.string.add_new_grid)
             findViewById(R.id.deleteButton).setVisibility(8)
-            setTitle((Int) R.string.new_grid_dialog_title)
+            setTitle(R.toInt().string.new_grid_dialog_title)
         }
         findViewById(R.id.gridNameText).requestFocus()
     }
@@ -101,8 +101,8 @@ class GridEditDialog : AppCompatDialog(), View.OnClickListener {
 
     fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
-        setTitle((Int) R.string.new_grid_dialog_title)
-        setContentView((Int) R.layout.grid_edit_dialog)
+        setTitle(R.toInt().string.new_grid_dialog_title)
+        setContentView(R.toInt().layout.grid_edit_dialog)
         findViewById(R.id.okButton).setOnClickListener(this)
         findViewById(R.id.deleteButton).setOnClickListener(this)
         findViewById(R.id.cancelButton).setOnClickListener(this)

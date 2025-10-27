@@ -8,15 +8,15 @@ abstract class GLLoadQueue {
     final WeakQueue<GLLoadable> loadQueue = WeakQueue<>()
 
     interface GLLoadHandler {
-        Unit GLResourceLoaded(GLLoadable gLLoadable)
+        fun GLResourceLoaded(gLLoadable: GLLoadable)
     }
 
     interface GLLoadable {
-        Unit GLCompleteLoad()
+        fun GLCompleteLoad()
 
-        Int GLGetLoadSize()
+        fun GLGetLoadSize(): Int
 
-        Int GLLoad(RenderContext renderContext, GLLoadHandler gLLoadHandler)
+        fun GLLoad(renderContext: RenderContext, gLLoadHandler: GLLoadHandler): Int
     }
 
     public abstract Unit RunLoadQueue(RenderContext renderContext)
@@ -25,11 +25,11 @@ abstract class GLLoadQueue {
         this.loadQueue.clear()
     }
 
-    fun add(GLLoadable gLLoadable) {
+    fun add(gLLoadable: GLLoadable) {
         this.loadQueue.offer(gLLoadable)
     }
 
-    fun remove(GLLoadable gLLoadable) {
+    fun remove(gLLoadable: GLLoadable) {
         this.loadQueue.remove(gLLoadable)
     }
 }

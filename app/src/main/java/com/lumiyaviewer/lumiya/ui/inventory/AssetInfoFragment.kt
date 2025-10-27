@@ -52,7 +52,7 @@ import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 
 class AssetInfoFragment : FragmentWithTitle : ReloadableFragment, View.OnClickListener, LoadableMonitor.OnLoadableDataChangedListener {
-    private String ITEM_UUID_KEY = "itemUUID"
+    private val ITEM_UUID_KEY: String = "itemUUID"
     private SubscriptionData<UUID, SLAgentCircuit> agentCircuit = SubscriptionData<>(UIThreadExecutor.getInstance())
     private ChatterNameRetriever creatorNameRetriever = null
     private SubscriptionData<UUID, SLInventoryEntry> entrySubscription = SubscriptionData<>(UIThreadExecutor.getInstance())

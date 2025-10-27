@@ -27,10 +27,10 @@ class ModernRenderContext {
     private val ModernRenderPipeline renderPipeline
     
     // Matrix management (modern shader-based approach)
-    private val Float[] modelMatrix = Float[16]
-    private val Float[] viewMatrix = Float[16]
-    private val Float[] projectionMatrix = Float[16]
-    private val Float[] mvpMatrix = Float[16]
+    private val FloatArray modelMatrix = Float[16]
+    private val FloatArray viewMatrix = Float[16]
+    private val FloatArray projectionMatrix = Float[16]
+    private val FloatArray mvpMatrix = Float[16]
     
     // Rendering state
     public Float FOVAngle = 60.0f
@@ -42,7 +42,7 @@ class ModernRenderContext {
     public Float scaleX = 1.0f
     public Float scaleY = 1.0f 
     public Float scaleZ = 1.0f
-    private val Int[] viewport = Int[4]
+    private val IntArray viewport = Int[4]
     
     public ModernRenderContext() {
         Log.i(TAG, "Initializing Modern Render Context for OpenGL ES 3.0+")
@@ -61,7 +61,7 @@ class ModernRenderContext {
      * Initialize the modern graphics system
      * Replaces legacy OpenGL initialization with ES 3.0+ features
      */
-    public Boolean initialize() {
+     public fun initialize(): Boolean {
         // Verify OpenGL ES 3.0+ support - this is now mandatory
         if (!checkOpenGLVersion()) {
             Log.e(TAG, "OpenGL ES 3.0+ required but not available - device not supported")
@@ -72,7 +72,7 @@ class ModernRenderContext {
         detectAdvancedCapabilities()
         
         // Initialize modern rendering pipeline
-        Boolean success = renderPipeline.initialize()
+        val success: Boolean = renderPipeline.initialize()
         if (!success) {
             Log.e(TAG, "Failed to initialize modern rendering pipeline")
             return false
@@ -89,8 +89,8 @@ class ModernRenderContext {
     /**
      * Check for OpenGL ES 3.0+ support (mandatory requirement)
      */
-    private Boolean checkOpenGLVersion() {
-        String version = GLES30.glGetString(GLES30.GL_VERSION)
+     private fun checkOpenGLVersion(): Boolean {
+        val version: String = GLES30.glGetString(GLES30.GL_VERSION)
         Log.i(TAG, "OpenGL ES version: " + version)
         
         if (version == null) {
@@ -104,9 +104,9 @@ class ModernRenderContext {
     /**
      * Detect advanced OpenGL ES capabilities beyond 3.0
      */
-    private Unit detectAdvancedCapabilities() {
-        String version = GLES30.glGetString(GLES30.GL_VERSION)
-        String extensions = GLES30.glGetString(GLES30.GL_EXTENSIONS)
+     private fun detectAdvancedCapabilities() {
+        val version: String = GLES30.glGetString(GLES30.GL_VERSION)
+        val extensions: String = GLES30.glGetString(GLES30.GL_EXTENSIONS)
         
         // Check for compute shader support (ES 3.1+)
         if (version.contains("OpenGL ES 3.1") || version.contains("OpenGL ES 3.2")) {
@@ -125,7 +125,7 @@ class ModernRenderContext {
     /**
      * Enable modern OpenGL features that improve performance
      */
-    private Unit enableModernFeatures() {
+     private fun enableModernFeatures() {
         // Enable depth testing (standard for 3D rendering)
         GLES30.glEnable(GLES30.GL_DEPTH_TEST)
         GLES30.glDepthFunc(GLES30.GL_LEQUAL)
@@ -146,7 +146,7 @@ class ModernRenderContext {
     /**
      * Set up projection matrix for perspective rendering
      */
-    fun setupProjection(Int width, Int height, Float fov, Float near, Float far) {
+    fun setupProjection(width: Int, height: Int, fov: Float, near: Float, far: Float) {
         this.aspectRatio = (Float) width / (Float) height
         this.FOVAngle = fov
         
@@ -165,7 +165,7 @@ class ModernRenderContext {
     /**
      * Set up view matrix for camera positioning
      */
-    fun setupCamera(Float[] eyePos, Float[] lookAt, Float[] up) {
+    fun setupCamera(eyePos: FloatArray, lookAt: FloatArray, up: FloatArray) {
         Matrix.setLookAtM(viewMatrix, 0, 
             eyePos[0], eyePos[1], eyePos[2],
             lookAt[0], lookAt[1], lookAt[2], 
@@ -210,25 +210,25 @@ class ModernRenderContext {
         Log.d(TAG, "Matrix pop - managed in application code")
     }
     
-    fun setModelMatrix(Float[] matrix) {
+    fun setModelMatrix(matrix: FloatArray) {
         System.arraycopy(matrix, 0, modelMatrix, 0, 16)
     }
     
-    fun multiplyMatrix(Float[] matrix) {
-        Float[] temp = Float[16]
+    fun multiplyMatrix(matrix: FloatArray) {
+        val temp: FloatArray = Float[16]
         Matrix.multiplyMM(temp, 0, modelMatrix, 0, matrix, 0)
         System.arraycopy(temp, 0, modelMatrix, 0, 16)
     }
     
-    fun translate(Float x, Float y, Float z) {
+    fun translate(x: Float, y: Float, z: Float) {
         Matrix.translateM(modelMatrix, 0, x, y, z)
     }
     
-    fun rotate(Float angle, Float x, Float y, Float z) {
+    fun rotate(angle: Float, x: Float, y: Float, z: Float) {
         Matrix.rotateM(modelMatrix, 0, angle, x, y, z)
     }
     
-    fun scale(Float x, Float y, Float z) {
+    fun scale(x: Float, y: Float, z: Float) {
         Matrix.scaleM(modelMatrix, 0, x, y, z)
         this.scaleX = x
         this.scaleY = y 
@@ -238,23 +238,23 @@ class ModernRenderContext {
     /**
      * Calculate and get the Model-View-Projection matrix
      */
-    public Float[] getMVPMatrix() {
+     public fun getMVPMatrix(): FloatArray {
         // Calculate MVP = Projection * View * Model
-        Float[] temp = Float[16]
+        val temp: FloatArray = Float[16]
         Matrix.multiplyMM(temp, 0, viewMatrix, 0, modelMatrix, 0)
         Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, temp, 0)
         return mvpMatrix
     }
     
-    public Float[] getModelMatrix() {
+     public fun getModelMatrix(): FloatArray {
         return modelMatrix
     }
     
-    public Float[] getViewMatrix() {
+     public fun getViewMatrix(): FloatArray {
         return viewMatrix
     }
     
-    public Float[] getProjectionMatrix() {
+     public fun getProjectionMatrix(): FloatArray {
         return projectionMatrix
     }
     
@@ -274,8 +274,8 @@ class ModernRenderContext {
     /**
      * Check OpenGL error and log if found
      */
-    fun checkGLError(String operation) {
-        Int error = GLES30.glGetError()
+    fun checkGLError(operation: String) {
+        val error: Int = GLES30.glGetError()
         if (error != GLES30.GL_NO_ERROR) {
             Log.e(TAG, "OpenGL error in " + operation + ": " + error)
         }
@@ -284,7 +284,7 @@ class ModernRenderContext {
     /**
      * Log detected capabilities
      */
-    private Unit logCapabilities() {
+     private fun logCapabilities() {
         Log.i(TAG, "=== Modern Render Context Capabilities ===")
         Log.i(TAG, "OpenGL ES 3.0 baseline: YES (mandatory)")
         Log.i(TAG, "Compute shaders (ES 3.1+): " + hasComputeShaders)
@@ -297,11 +297,11 @@ class ModernRenderContext {
     /**
      * Getters for capabilities
      */
-    public Boolean hasComputeShaders() { return hasComputeShaders; }
-    public Boolean hasTessellation() { return hasTessellation; }
-    public Boolean hasGeometryShaders() { return hasGeometryShaders; }
-    public ModernRenderPipeline getRenderPipeline() { return renderPipeline; }
-    public Int[] getViewport() { return viewport; }
+     public fun hasComputeShaders(): Boolean { return hasComputeShaders; }
+     public fun hasTessellation(): Boolean { return hasTessellation; }
+     public fun hasGeometryShaders(): Boolean { return hasGeometryShaders; }
+     public fun getRenderPipeline(): ModernRenderPipeline { return renderPipeline; }
+     public fun getViewport(): IntArray { return viewport; }
     
     /**
      * Cleanup resources

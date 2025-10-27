@@ -17,8 +17,8 @@ class ObjectUpdate : SLMessage() {
     class ObjectData {
         public Int CRC
         public Int ClickAction
-        public Byte[] Data
-        public Byte[] ExtraParams
+        public ByteArray Data
+        public ByteArray ExtraParams
         public Int Flags
         public UUID FullID
         public Float Gain
@@ -27,12 +27,12 @@ class ObjectUpdate : SLMessage() {
         public LLVector3 JointPivot
         public Int JointType
         public Int Material
-        public Byte[] MediaURL
-        public Byte[] NameValue
-        public Byte[] ObjectData
+        public ByteArray MediaURL
+        public ByteArray NameValue
+        public ByteArray ObjectData
         public UUID OwnerID
         public Int PCode
-        public Byte[] PSBlock
+        public ByteArray PSBlock
         public Int ParentID
         public Int PathBegin
         public Int PathCurve
@@ -56,10 +56,10 @@ class ObjectUpdate : SLMessage() {
         public LLVector3 Scale
         public UUID Sound
         public Int State
-        public Byte[] Text
-        public Byte[] TextColor
-        public Byte[] TextureAnim
-        public Byte[] TextureEntry
+        public ByteArray Text
+        public ByteArray TextColor
+        public ByteArray TextureAnim
+        public ByteArray TextureEntry
         public Int UpdateFlags
     }
 
@@ -74,24 +74,24 @@ class ObjectUpdate : SLMessage() {
         this.RegionData_Field = RegionData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 12
-        Iterator<T> it = this.ObjectData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 12
+        val it: Iterator<T> = this.ObjectData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
-            ObjectData objectData = (ObjectData) it.next()
+            val objectData: ObjectData = (ObjectData) it.next()
             i = objectData.ExtraParams.length + objectData.ObjectData.length + 41 + 4 + 4 + 1 + 1 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 2 + 2 + 2 + 2 + objectData.TextureEntry.length + 1 + objectData.TextureAnim.length + 2 + objectData.NameValue.length + 2 + objectData.Data.length + 1 + objectData.Text.length + 4 + 1 + objectData.MediaURL.length + 1 + objectData.PSBlock.length + 1 + 16 + 16 + 4 + 1 + 4 + 1 + 12 + 12 + i2
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleObjectUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.put(Ascii.FF)
         packLong(byteBuffer, this.RegionData_Field.RegionHandle)
         packShort(byteBuffer, (Short) this.RegionData_Field.TimeDilation)
@@ -146,12 +146,12 @@ class ObjectUpdate : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.RegionData_Field.RegionHandle = unpackLong(byteBuffer)
         this.RegionData_Field.TimeDilation = unpackShort(byteBuffer) & 65535
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ObjectData objectData = ObjectData()
+            val objectData: ObjectData = ObjectData()
             objectData.ID = unpackInt(byteBuffer)
             objectData.State = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             objectData.FullID = unpackUUID(byteBuffer)

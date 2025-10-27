@@ -92,10 +92,10 @@ class UserMainProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadab
         if (trim.equals("")) {
             return trim
         }
-        String format = String.format(getString(R.string.born_since), Object[]{trim})
+        String format = String.format(getString(R.string.born_since), Array<Any>{trim})
         try {
             Date parse = SimpleDateFormat("MM/dd/yyyy").parse(trim)
-            return String.format(getString(R.string.age_days), Object[]{Long.valueOf((Date().getTime() - parse.getTime()) / 86400000)})
+            return String.format(getString(R.string.age_days), Array<Any>{Long.valueOf((Date().getTime() - parse.getTime()) / 86400000)})
         } catch (ParseException e) {
             return format
         }

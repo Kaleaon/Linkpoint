@@ -15,7 +15,7 @@ class LogTextMessage : SLMessage() {
         public UUID FromAgentId
         public Double GlobalX
         public Double GlobalY
-        public Byte[] Message
+        public ByteArray Message
         public Int Time
         public UUID ToAgentId
     }
@@ -24,11 +24,11 @@ class LogTextMessage : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 5
-        Iterator<T> it = this.DataBlock_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 5
+        val it: Iterator<T> = this.DataBlock_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -36,11 +36,11 @@ class LogTextMessage : SLMessage() {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleLogTextMessage(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -121)
@@ -55,10 +55,10 @@ class LogTextMessage : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            DataBlock dataBlock = DataBlock()
+            val dataBlock: DataBlock = DataBlock()
             dataBlock.FromAgentId = unpackUUID(byteBuffer)
             dataBlock.ToAgentId = unpackUUID(byteBuffer)
             dataBlock.GlobalX = unpackDouble(byteBuffer)

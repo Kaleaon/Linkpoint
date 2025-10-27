@@ -21,7 +21,7 @@ class SLWearable : Subscription.OnData<AssetData>, Subscription.OnError {
     private volatile SLWearableData wearableData
 
     interface OnWearableStatusChangeListener {
-        Unit onWearableStatusChanged(SLWearable sLWearable)
+         fun onWearableStatusChanged(sLWearable: SLWearable)
     }
 
     public SLWearable(UserManager userManager, Executor executor, UUID uuid, UUID uuid2, SLWearableType sLWearableType, OnWearableStatusChangeListener onWearableStatusChangeListener) {
@@ -37,27 +37,27 @@ class SLWearable : Subscription.OnData<AssetData>, Subscription.OnError {
         this.assetSubscription.unsubscribe()
     }
 
-    public Boolean getIsFailed() {
+     public fun getIsFailed(): Boolean {
         return this.isFailed
     }
 
-    public Boolean getIsValid() {
+     public fun getIsValid(): Boolean {
         return this.wearableData != null
     }
 
-    public String getName() {
+     public fun getName(): String {
         if (this.inventoryName != null) {
             return this.inventoryName
         }
-        SLWearableData sLWearableData = this.wearableData
+        val sLWearableData: SLWearableData = this.wearableData
         return sLWearableData != null ? sLWearableData.name : this.isFailed ? "(Failed to load)" : "(loading)"
     }
 
-    public SLWearableData getWearableData() {
+     public fun getWearableData(): SLWearableData {
         return this.wearableData
     }
 
-    fun onData(AssetData assetData) {
+    fun onData(assetData: AssetData) {
         if (assetData != null) {
             if (assetData.getStatus() != 1 || assetData.getData() == null) {
                 Debug.Printf("Wearable: asset transfer failed for asset %s", this.assetID)
@@ -78,7 +78,7 @@ class SLWearable : Subscription.OnData<AssetData>, Subscription.OnError {
         }
     }
 
-    fun onError(Throwable th) {
+    fun onError(th: Throwable) {
         Debug.Printf("Wearable: got error for asset %s", this.assetID)
         this.isFailed = true
         if (this.statusChangeListener != null) {
@@ -86,7 +86,7 @@ class SLWearable : Subscription.OnData<AssetData>, Subscription.OnError {
         }
     }
 
-    fun setInventoryName(String str) {
+    fun setInventoryName(str: String) {
         this.inventoryName = str
     }
 }

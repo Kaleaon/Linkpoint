@@ -12,11 +12,11 @@ class StarsProgram : ShaderProgram() {
         super(Shader.StarsVertexShader, Shader.StarsFragmentShader)
     }
 
-    fun ApplyWindlight(RenderContext renderContext) {
+    fun ApplyWindlight(renderContext: RenderContext) {
         GLES20.glUniform4f(this.uStarColor, 1.0f, 1.0f, 1.0f, renderContext.windlightPreset.star_brightness)
     }
 
-    protected Unit bindVariables() {
+     protected fun bindVariables() {
         this.vPosition = GLES20.glGetAttribLocation(this.handle, "vPosition")
         this.uMVPMatrix = GLES20.glGetUniformLocation(this.handle, "uMVPMatrix")
         this.uStarColor = GLES20.glGetUniformLocation(this.handle, "uStarColor")

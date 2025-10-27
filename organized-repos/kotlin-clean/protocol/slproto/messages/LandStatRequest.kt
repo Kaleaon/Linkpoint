@@ -16,7 +16,7 @@ class LandStatRequest : SLMessage() {
 
     @JvmStatic
     class RequestData {
-        public Byte[] Filter
+        public ByteArray Filter
         public Int ParcelLocalID
         public Int ReportType
         public Int RequestFlags

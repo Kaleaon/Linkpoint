@@ -3,11 +3,11 @@ package com.lumiyaviewer.lumiya.slproto.textures
 import java.util.UUID
 
 class MutableSLTextureEntryFace {
-    Byte BUMP_MASK = 31
-    Byte FULLBRIGHT_MASK = 32
-    Byte MEDIA_MASK = 1
-    Byte SHINY_MASK = -64
-    Byte TEX_MAP_MASK = 6
+    val BUMP_MASK: Byte = 31
+    val FULLBRIGHT_MASK: Byte = 32
+    val MEDIA_MASK: Byte = 1
+    val SHINY_MASK: Byte = -64
+    val TEX_MAP_MASK: Byte = 6
     Float glow = 0.0f
     Int hasAttribute
     Byte materialb = 0

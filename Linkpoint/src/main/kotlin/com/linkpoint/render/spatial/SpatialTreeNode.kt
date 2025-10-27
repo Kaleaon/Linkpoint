@@ -5,21 +5,21 @@ import com.linkpoint.utils.InlineList
 
 class SpatialTreeNode : InlineList()<DrawListEntry> {
     private const val MIN_SIZE: Float = 2.0f
-    private SpatialTreeNode[] children = null
-    Int depthBin = -1
+    private Array<SpatialTreeNode> children = null
+    val depthBin: Int = -1
     private val Int indexInParent
     private val Boolean leaf
-    SpatialTreeNode nextDepth = null
+    val nextDepth: SpatialTreeNode = null
     private val SpatialTreeNode parent
-    final Float[] position
-    SpatialTreeNode prevDepth = null
+    final FloatArray position
+    val prevDepth: SpatialTreeNode = null
     private SpatialTreeNode singleChild = null
     private val SpatialTree spatialTree
     private val Int splitAxis
 
     public SpatialTreeNode(SpatialTree spatialTree, Float f, Float f2, Float f3) {
         this.spatialTree = spatialTree
-        this.position = Float[]{0.0f, 0.0f, 0.0f, f, f2, f3, 0.0f, 0.0f, 0.0f, f, f2, f3}
+        this.position = FloatArray{0.0f, 0.0f, 0.0f, f, f2, f3, 0.0f, 0.0f, 0.0f, f, f2, f3}
         this.leaf = false
         this.parent = null
         this.indexInParent = 0
@@ -31,11 +31,11 @@ class SpatialTreeNode : InlineList()<DrawListEntry> {
         this.position = Float[12]
         this.parent = spatialTreeNode
         this.indexInParent = i
-        Boolean z = true
-        Int i2 = 0
+        val z: Boolean = true
+        val i2: Int = 0
         while (i2 < 3) {
-            Float f = spatialTreeNode.position[i2 + 6]
-            Float f2 = spatialTreeNode.position[i2 + 9] - f
+            val f: Float = spatialTreeNode.position[i2 + 6]
+            val f2: Float = spatialTreeNode.position[i2 + 9] - f
             if (i2 == spatialTreeNode.splitAxis) {
                 f2 /= MIN_SIZE
                 f += (f2 / MIN_SIZE) * ((Float) i)
@@ -51,10 +51,10 @@ class SpatialTreeNode : InlineList()<DrawListEntry> {
         this.splitAxis = longestAxis()
     }
 
-    private Unit enlargeForBoundingBox(Boolean z, Float[] fArr) {
+     private fun enlargeForBoundingBox(z: Boolean, fArr: FloatArray) {
         if (this.parent != null) {
-            Int i = 0
-            Boolean z2 = false
+            val i: Int = 0
+            val z2: Boolean = false
             while (i < 3) {
                 if (z || fArr[i] < this.position[i]) {
                     this.position[i] = fArr[i]
@@ -73,16 +73,16 @@ class SpatialTreeNode : InlineList()<DrawListEntry> {
         }
     }
 
-    private Boolean isEmpty() {
+     private fun isEmpty(): Boolean {
         return getFirst() == null && this.children == null
     }
 
-    private Int longestAxis() {
-        Int i = 0
-        Float f = 0.0f
-        Int i2 = 0
+     private fun longestAxis(): Int {
+        val i: Int = 0
+        val f: Float = 0.0f
+        val i2: Int = 0
         while (i < 3) {
-            Float f2 = this.position[i + 9] - this.position[i + 6]
+            val f2: Float = this.position[i + 9] - this.position[i + 6]
             if (f2 > f) {
                 i2 = i
             } else {
@@ -94,7 +94,7 @@ class SpatialTreeNode : InlineList()<DrawListEntry> {
         return i2
     }
 
-    private Unit removeFromParent() {
+     private fun removeFromParent() {
         this.spatialTree.removeEntry(this)
         if (this.parent != null && this.parent.children != null) {
             this.parent.children[this.indexInParent] = null
@@ -109,7 +109,7 @@ class SpatialTreeNode : InlineList()<DrawListEntry> {
                     return
                 }
             }
-            SpatialTreeNode spatialTreeNode = null
+            val spatialTreeNode: SpatialTreeNode = null
             for (Int i = 0; i < 3; i++) {
                 if (this.parent.children[i] != null) {
                     if (spatialTreeNode != null) {
@@ -127,12 +127,12 @@ class SpatialTreeNode : InlineList()<DrawListEntry> {
         }
     }
 
-    private Unit shrinkBoundingBox() {
-        Int i = 1
+     private fun shrinkBoundingBox() {
+        val i: Int = 1
         if (this.parent != null) {
-            Object obj = Float[6]
-            DrawListEntry drawListEntry = (DrawListEntry) getFirst()
-            Int i4 = 0
+            val obj: Object = Float[6]
+            val drawListEntry: DrawListEntry = (DrawListEntry) getFirst()
+            val i4: Int = 0
             while (drawListEntry != null) {
                 i2 = 0
                 while (i2 < 3) {
@@ -144,11 +144,11 @@ class SpatialTreeNode : InlineList()<DrawListEntry> {
                 i4 = 1
             }
             if (this.children != null) {
-                SpatialTreeNode[] spatialTreeNodeArr = this.children
-                Int length = spatialTreeNodeArr.length
-                Int i5 = 0
+                val spatialTreeNodeArr: Array<SpatialTreeNode> = this.children
+                val length: Int = spatialTreeNodeArr.length
+                val i5: Int = 0
                 while (i5 < length) {
-                    SpatialTreeNode spatialTreeNode = spatialTreeNodeArr[i5]
+                    val spatialTreeNode: SpatialTreeNode = spatialTreeNodeArr[i5]
                     if (spatialTreeNode != null) {
                         i2 = 0
                         while (i2 < 3) {
@@ -180,15 +180,15 @@ class SpatialTreeNode : InlineList()<DrawListEntry> {
         }
     }
 
-    fun addDrawables(DrawList drawList) {
+    fun addDrawables(drawList: DrawList) {
         for (DrawListEntry drawListEntry = (DrawListEntry) getFirst(); drawListEntry != null; drawListEntry = drawListEntry.getNext()) {
             drawListEntry.addToDrawList(drawList)
         }
     }
 
-    fun addEntry(DrawListEntry drawListEntry) {
-        Object obj = 1
-        Boolean z = getFirst() == null && this.children == null
+    fun addEntry(drawListEntry: DrawListEntry) {
+        val obj: Object = 1
+        val z: Boolean = getFirst() == null && this.children == null
         if (this.singleChild == null) {
             obj = null
         }
@@ -207,16 +207,16 @@ class SpatialTreeNode : InlineList()<DrawListEntry> {
         shrinkBoundingBox()
     }
 
-    protected SpatialTreeNode findNode(Float[] fArr) {
+     protected fun findNode(fArr: FloatArray): SpatialTreeNode {
         if (this.leaf) {
             return this
         }
-        Float f = Float.POSITIVE_INFINITY
-        Int i = 0
-        Int i2 = -1
+        val f: Float = Float.POSITIVE_INFINITY
+        val i: Int = 0
+        val i2: Int = -1
         while (i < 3) {
-            Float f2 = (this.position[(this.splitAxis + 6) + 3] - this.position[this.splitAxis + 6]) / MIN_SIZE
-            Float f3 = this.position[this.splitAxis + 6] + ((f2 / MIN_SIZE) * ((Float) i))
+            val f2: Float = (this.position[(this.splitAxis + 6) + 3] - this.position[this.splitAxis + 6]) / MIN_SIZE
+            val f3: Float = this.position[this.splitAxis + 6] + ((f2 / MIN_SIZE) * ((Float) i))
             if (fArr[this.splitAxis] < f3 || fArr[this.splitAxis + 3] > f3 + f2) {
                 f2 = f
                 i3 = i2
@@ -253,7 +253,7 @@ class SpatialTreeNode : InlineList()<DrawListEntry> {
         return this.children[i2].findNode(fArr)
     }
 
-    fun removeEntry(DrawListEntry drawListEntry) {
+    fun removeEntry(drawListEntry: DrawListEntry) {
         super.removeEntry(drawListEntry)
         if (this.depthBin != -1) {
             this.spatialTree.setDrawListChanged()
@@ -268,12 +268,12 @@ class SpatialTreeNode : InlineList()<DrawListEntry> {
         shrinkBoundingBox()
     }
 
-    fun requestEntryRemoval(DrawListEntry drawListEntry) {
+    fun requestEntryRemoval(drawListEntry: DrawListEntry) {
         this.spatialTree.spatialObjectIndex.requestEntryRemoval(drawListEntry)
     }
 
-    public Int walkTree(FrustrumPlanes frustrumPlanes, Int i, Float[] fArr) {
-        Int i2 = 0
+     public fun walkTree(frustrumPlanes: FrustrumPlanes, i: Int, fArr: FloatArray): Int {
+        val i2: Int = 0
         if (this.singleChild != null && getFirst() == null) {
             return this.singleChild.walkTree(frustrumPlanes, i, fArr)
         }
@@ -292,10 +292,10 @@ class SpatialTreeNode : InlineList()<DrawListEntry> {
             }
         }
         if (this.children != null) {
-            SpatialTreeNode[] spatialTreeNodeArr = this.children
-            Int length = spatialTreeNodeArr.length
+            val spatialTreeNodeArr: Array<SpatialTreeNode> = this.children
+            val length: Int = spatialTreeNodeArr.length
             while (i2 < length) {
-                SpatialTreeNode spatialTreeNode = spatialTreeNodeArr[i2]
+                val spatialTreeNode: SpatialTreeNode = spatialTreeNodeArr[i2]
                 if (spatialTreeNode != null) {
                     i3 += spatialTreeNode.walkTree(frustrumPlanes, i, fArr)
                 }

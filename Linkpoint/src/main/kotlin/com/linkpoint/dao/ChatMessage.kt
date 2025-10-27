@@ -9,7 +9,7 @@ class ChatMessage : Identifiable<Long> {
     private Integer assetType
     private Integer chatChannel
     private Long chatterID
-    private Byte[] dialogButtons
+    private ByteArray dialogButtons
     private Boolean dialogIgnored
     private String dialogSelectedOption
     private Integer eventState
@@ -40,7 +40,7 @@ class ChatMessage : Identifiable<Long> {
         this.id = l
     }
 
-    public ChatMessage(Long l, Long j, Date date, Int i, Date date2, Boolean bool, UUID uuid, Integer num, String str, String str2, String str3, Int i2, Integer num2, Integer num3, UUID uuid2, UUID uuid3, String str4, Integer num4, Integer num5, Integer num6, Integer num7, Boolean bool2, Boolean bool3, UUID uuid4, String str5, Integer num8, Byte[] bArr, String str6, Integer num9, Boolean z) {
+    public ChatMessage(Long l, Long j, Date date, Int i, Date date2, Boolean bool, UUID uuid, Integer num, String str, String str2, String str3, Int i2, Integer num2, Integer num3, UUID uuid2, UUID uuid3, String str4, Integer num4, Integer num5, Integer num6, Integer num7, Boolean bool2, Boolean bool3, UUID uuid4, String str5, Integer num8, ByteArray bArr, String str6, Integer num9, Boolean z) {
         this.id = l
         this.chatterID = j
         this.timestamp = date
@@ -73,243 +73,243 @@ class ChatMessage : Identifiable<Long> {
         this.syncedToGoogleDrive = z
     }
 
-    public Boolean getAccepted() {
+     public fun getAccepted(): Boolean {
         return this.accepted
     }
 
-    public Integer getAssetType() {
+     public fun getAssetType(): Integer {
         return this.assetType
     }
 
-    public Integer getChatChannel() {
+     public fun getChatChannel(): Integer {
         return this.chatChannel
     }
 
-    public Long getChatterID() {
+     public fun getChatterID(): Long {
         return this.chatterID
     }
 
-    public Byte[] getDialogButtons() {
+     public fun getDialogButtons(): ByteArray {
         return this.dialogButtons
     }
 
-    public Boolean getDialogIgnored() {
+     public fun getDialogIgnored(): Boolean {
         return this.dialogIgnored
     }
 
-    public String getDialogSelectedOption() {
+     public fun getDialogSelectedOption(): String {
         return this.dialogSelectedOption
     }
 
-    public Integer getEventState() {
+     public fun getEventState(): Integer {
         return this.eventState
     }
 
-    public Long getId() {
+     public fun getId(): Long {
         return this.id
     }
 
-    public Boolean getIsOffline() {
+     public fun getIsOffline(): Boolean {
         return this.isOffline
     }
 
-    public UUID getItemID() {
+     public fun getItemID(): UUID {
         return this.itemID
     }
 
-    public String getItemName() {
+     public fun getItemName(): String {
         return this.itemName
     }
 
-    public String getMessageText() {
+     public fun getMessageText(): String {
         return this.messageText
     }
 
-    public Int getMessageType() {
+     public fun getMessageType(): Int {
         return this.messageType
     }
 
-    public Integer getNewBalance() {
+     public fun getNewBalance(): Integer {
         return this.newBalance
     }
 
-    public String getObjectName() {
+     public fun getObjectName(): String {
         return this.objectName
     }
 
-    public Integer getOrigIMType() {
+     public fun getOrigIMType(): Integer {
         return this.origIMType
     }
 
-    public Date getOrigTimestamp() {
+     public fun getOrigTimestamp(): Date {
         return this.origTimestamp
     }
 
-    public Integer getQuestionMask() {
+     public fun getQuestionMask(): Integer {
         return this.questionMask
     }
 
-    public String getSenderLegacyName() {
+     public fun getSenderLegacyName(): String {
         return this.senderLegacyName
     }
 
-    public String getSenderName() {
+     public fun getSenderName(): String {
         return this.senderName
     }
 
-    public Integer getSenderType() {
+     public fun getSenderType(): Integer {
         return this.senderType
     }
 
-    public UUID getSenderUUID() {
+     public fun getSenderUUID(): UUID {
         return this.senderUUID
     }
 
-    public UUID getSessionID() {
+     public fun getSessionID(): UUID {
         return this.sessionID
     }
 
-    public Boolean getSyncedToGoogleDrive() {
+     public fun getSyncedToGoogleDrive(): Boolean {
         return this.syncedToGoogleDrive
     }
 
-    public Integer getTextBoxButtonIndex() {
+     public fun getTextBoxButtonIndex(): Integer {
         return this.textBoxButtonIndex
     }
 
-    public Date getTimestamp() {
+     public fun getTimestamp(): Date {
         return this.timestamp
     }
 
-    public Integer getTransactionAmount() {
+     public fun getTransactionAmount(): Integer {
         return this.transactionAmount
     }
 
-    public UUID getUserID() {
+     public fun getUserID(): UUID {
         return this.userID
     }
 
-    public Int getViewType() {
+     public fun getViewType(): Int {
         return this.viewType
     }
 
-    fun setAccepted(Boolean bool) {
+    fun setAccepted(bool: Boolean) {
         this.accepted = bool
     }
 
-    fun setAssetType(Integer num) {
+    fun setAssetType(num: Integer) {
         this.assetType = num
     }
 
-    fun setChatChannel(Integer num) {
+    fun setChatChannel(num: Integer) {
         this.chatChannel = num
     }
 
-    fun setChatterID(Long j) {
+    fun setChatterID(j: Long) {
         this.chatterID = j
     }
 
-    fun setDialogButtons(Byte[] bArr) {
+    fun setDialogButtons(bArr: ByteArray) {
         this.dialogButtons = bArr
     }
 
-    fun setDialogIgnored(Boolean bool) {
+    fun setDialogIgnored(bool: Boolean) {
         this.dialogIgnored = bool
     }
 
-    fun setDialogSelectedOption(String str) {
+    fun setDialogSelectedOption(str: String) {
         this.dialogSelectedOption = str
     }
 
-    fun setEventState(Integer num) {
+    fun setEventState(num: Integer) {
         this.eventState = num
     }
 
-    fun setId(Long l) {
+    fun setId(l: Long) {
         this.id = l
     }
 
-    fun setIsOffline(Boolean bool) {
+    fun setIsOffline(bool: Boolean) {
         this.isOffline = bool
     }
 
-    fun setItemID(UUID uuid) {
+    fun setItemID(uuid: UUID) {
         this.itemID = uuid
     }
 
-    fun setItemName(String str) {
+    fun setItemName(str: String) {
         this.itemName = str
     }
 
-    fun setMessageText(String str) {
+    fun setMessageText(str: String) {
         this.messageText = str
     }
 
-    fun setMessageType(Int i) {
+    fun setMessageType(i: Int) {
         this.messageType = i
     }
 
-    fun setNewBalance(Integer num) {
+    fun setNewBalance(num: Integer) {
         this.newBalance = num
     }
 
-    fun setObjectName(String str) {
+    fun setObjectName(str: String) {
         this.objectName = str
     }
 
-    fun setOrigIMType(Integer num) {
+    fun setOrigIMType(num: Integer) {
         this.origIMType = num
     }
 
-    fun setOrigTimestamp(Date date) {
+    fun setOrigTimestamp(date: Date) {
         this.origTimestamp = date
     }
 
-    fun setQuestionMask(Integer num) {
+    fun setQuestionMask(num: Integer) {
         this.questionMask = num
     }
 
-    fun setSenderLegacyName(String str) {
+    fun setSenderLegacyName(str: String) {
         this.senderLegacyName = str
     }
 
-    fun setSenderName(String str) {
+    fun setSenderName(str: String) {
         this.senderName = str
     }
 
-    fun setSenderType(Integer num) {
+    fun setSenderType(num: Integer) {
         this.senderType = num
     }
 
-    fun setSenderUUID(UUID uuid) {
+    fun setSenderUUID(uuid: UUID) {
         this.senderUUID = uuid
     }
 
-    fun setSessionID(UUID uuid) {
+    fun setSessionID(uuid: UUID) {
         this.sessionID = uuid
     }
 
-    fun setSyncedToGoogleDrive(Boolean z) {
+    fun setSyncedToGoogleDrive(z: Boolean) {
         this.syncedToGoogleDrive = z
     }
 
-    fun setTextBoxButtonIndex(Integer num) {
+    fun setTextBoxButtonIndex(num: Integer) {
         this.textBoxButtonIndex = num
     }
 
-    fun setTimestamp(Date date) {
+    fun setTimestamp(date: Date) {
         this.timestamp = date
     }
 
-    fun setTransactionAmount(Integer num) {
+    fun setTransactionAmount(num: Integer) {
         this.transactionAmount = num
     }
 
-    fun setUserID(UUID uuid) {
+    fun setUserID(uuid: UUID) {
         this.userID = uuid
     }
 
-    fun setViewType(Int i) {
+    fun setViewType(i: Int) {
         this.viewType = i
     }
 }

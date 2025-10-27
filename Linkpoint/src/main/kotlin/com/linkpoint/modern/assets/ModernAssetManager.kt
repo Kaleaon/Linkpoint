@@ -55,7 +55,7 @@ class ModernAssetManager {
     /**
      * Create priority-based executor for asset loading
      */
-    private ExecutorService createPriorityExecutor() {
+     private fun createPriorityExecutor(): ExecutorService {
         return ThreadPoolExecutor(
             2, // Core threads
             4, // Max threads
@@ -76,7 +76,7 @@ class ModernAssetManager {
      * Load asset with automatic priority detection
      */
     public CompletableFuture<AssetData> loadAsset(String assetId, AssetType type) {
-        AssetPriority priority = determinePriority(assetId, type)
+        val priority: AssetPriority = determinePriority(assetId, type)
         return loadAssetWithLOD(assetId, type, priority, currentQuality)
     }
     
@@ -86,10 +86,10 @@ class ModernAssetManager {
     public CompletableFuture<AssetData> loadAssetWithLOD(String assetId, AssetType type, 
                                                          AssetPriority priority, QualityLevel quality) {
         
-        String cacheKey = generateCacheKey(assetId, quality)
+        val cacheKey: String = generateCacheKey(assetId, quality)
         
         // Check cache first
-        CachedAsset cached = assetCache.get(cacheKey)
+        val cached: CachedAsset = assetCache.get(cacheKey)
         if (cached != null && !cached.isExpired()) {
             cached.updateAccessTime(); // LRU update
             Log.d(TAG, "Cache hit for " + assetId + " at quality " + quality)
@@ -97,7 +97,7 @@ class ModernAssetManager {
         }
         
         // Create prioritized loading task
-        PrioritizedAssetTask task = PrioritizedAssetTask(assetId, type, priority, quality, cacheKey)
+        val task: PrioritizedAssetTask = PrioritizedAssetTask(assetId, type, priority, quality, cacheKey)
         
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -112,12 +112,12 @@ class ModernAssetManager {
     /**
      * Set quality level and enable/disable adaptive quality
      */
-    fun setQualityLevel(QualityLevel quality) {
+    fun setQualityLevel(quality: QualityLevel) {
         this.currentQuality = quality
         Log.i(TAG, "Quality level set to: " + quality)
     }
     
-    fun setAdaptiveQuality(Boolean adaptive) {
+    fun setAdaptiveQuality(adaptive: Boolean) {
         this.adaptiveQuality = adaptive
         if (adaptive) {
             networkMonitor.startMonitoring()
@@ -130,7 +130,7 @@ class ModernAssetManager {
     /**
      * Get current cache statistics
      */
-    public CacheStats getCacheStats() {
+     public fun getCacheStats(): CacheStats {
         return CacheStats(
             assetCache.size(),
             totalCacheSize.get(),
@@ -183,15 +183,15 @@ class ModernAssetManager {
     class AssetData {
         private val String id
         private val AssetType type
-        private val Byte[] data
+        private val ByteArray data
         private val QualityLevel quality
         private val Long loadTime
         
-        public AssetData(String id, AssetType type, Byte[] data) {
+        public AssetData(String id, AssetType type, ByteArray data) {
             this(id, type, data, QualityLevel.MEDIUM)
         }
         
-        public AssetData(String id, AssetType type, Byte[] data, QualityLevel quality) {
+        public AssetData(String id, AssetType type, ByteArray data, QualityLevel quality) {
             this.id = id
             this.type = type
             this.data = data
@@ -199,12 +199,12 @@ class ModernAssetManager {
             this.loadTime = SystemClock.elapsedRealtime()
         }
         
-        public String getId() { return id; }
-        public AssetType getType() { return type; }
-        public Byte[] getData() { return data; }
-        public QualityLevel getQuality() { return quality; }
-        public Long getLoadTime() { return loadTime; }
-        public Int getSize() { return data != null ? data.length : 0; }
+         public fun getId(): String { return id; }
+         public fun getType(): AssetType { return type; }
+         public fun getData(): ByteArray { return data; }
+         public fun getQuality(): QualityLevel { return quality; }
+         public fun getLoadTime(): Long { return loadTime; }
+         public fun getSize(): Int { return data != null ? data.length : 0; }
     }
     
     /**
@@ -225,15 +225,15 @@ private class CachedAsset {
             this.cacheTime = lastAccess
         }
         
-        Unit updateAccessTime() {
+         fun updateAccessTime() {
             lastAccess = SystemClock.elapsedRealtime()
         }
         
-        Boolean isExpired() {
+         fun isExpired(): Boolean {
             return SystemClock.elapsedRealtime() - cacheTime > EXPIRE_TIME
         }
         
-        Long getLastAccess() { return lastAccess; }
+         fun getLastAccess(): Long { return lastAccess; }
     }
     
     // Priority-based asset loading task
@@ -257,7 +257,7 @@ private class CachedAsset {
         
         override Int compareTo(PrioritizedAssetTask other) {
             // Higher priority first (lower value = higher priority)
-            Int priorityComp = Integer.compare(this.priority.value, other.priority.value)
+            val priorityComp: Int = Integer.compare(this.priority.value, other.priority.value)
             if (priorityComp != 0) return priorityComp
             
             // Then by submit time (FIFO within same priority)
@@ -269,9 +269,9 @@ private class CachedAsset {
             // We need to override the supply method instead
         }
         
-        public AssetData get() throws Exception {
+         public fun get() throws Exception {
             try {
-                AssetData data = loadAssetData(assetId, type, quality)
+                val data: AssetData = loadAssetData(assetId, type, quality)
                 if (data != null) {
                     cacheAsset(cacheKey, data)
                 }
@@ -288,19 +288,19 @@ private class CachedAsset {
         private Long currentBandwidth = 1024 * 1024; // 1MB/s default
         private Boolean monitoring = false
         
-        Unit startMonitoring() {
+         fun startMonitoring() {
             monitoring = true
             Log.d(TAG, "Network quality monitoring started")
         }
         
-        Unit stopMonitoring() {
+         fun stopMonitoring() {
             monitoring = false
             Log.d(TAG, "Network quality monitoring stopped")
         }
         
-        Long getCurrentBandwidth() { return currentBandwidth; }
+         fun getCurrentBandwidth(): Long { return currentBandwidth; }
         
-        QualityLevel recommendQuality() {
+         fun recommendQuality(): QualityLevel {
             if (!monitoring) return currentQuality
             
             if (currentBandwidth > 2 * 1024 * 1024) return QualityLevel.ULTRA
@@ -313,7 +313,7 @@ private class CachedAsset {
     // Asset priority queue for advanced scheduling
     @JvmStatic
 private class AssetPriorityQueue {
-        Unit addRequest(String assetId, AssetPriority priority) {
+         fun addRequest(assetId: String, priority: AssetPriority) {
             // Implementation would handle queue ordering
         }
     }
@@ -336,17 +336,17 @@ private class AssetPriorityQueue {
             this.currentQuality = currentQuality
         }
         
-        public Float getCacheUtilization() {
+         public fun getCacheUtilization(): Float {
             return maxSize > 0 ? (Float)totalSize / maxSize : 0f
         }
     }
     
     // Private helper methods
-    private String generateCacheKey(String assetId, QualityLevel quality) {
+     private fun generateCacheKey(assetId: String, quality: QualityLevel): String {
         return assetId + "_" + quality.name()
     }
     
-    private AssetPriority determinePriority(String assetId, AssetType type) {
+     private fun determinePriority(assetId: String, type: AssetType): AssetPriority {
         // Auto-detect priority based on asset characteristics
         if (assetId.contains("avatar") || assetId.contains("ui")) {
             return AssetPriority.CRITICAL
@@ -357,18 +357,18 @@ private class AssetPriorityQueue {
         return AssetPriority.NORMAL
     }
     
-    private AssetData loadAssetData(String assetId, AssetType type, QualityLevel quality) {
+     private fun loadAssetData(assetId: String, type: AssetType, quality: QualityLevel): AssetData {
         try {
             Log.d(TAG, "Loading " + assetId + " at quality " + quality + " (" + quality.scaleFactor + "x)")
             
             // Simulate network delay based on quality
-            Int delay = (Int)(500 * quality.scaleFactor); // Higher quality = longer load
+            val delay: Int = (Int)(500 * quality.scaleFactor); // Higher quality = longer load
             Thread.sleep(delay)
             
             // Generate asset data with quality-based size
-            Int baseSize = getBaseSizeForType(type)
-            Int scaledSize = (Int)(baseSize * quality.scaleFactor)
-            Byte[] data = Byte[scaledSize]
+            val baseSize: Int = getBaseSizeForType(type)
+            val scaledSize: Int = (Int)(baseSize * quality.scaleFactor)
+            val data: ByteArray = Byte[scaledSize]
             
             // Fill with simulated data
             for (Int i = 0; i < data.length; i++) {
@@ -388,7 +388,7 @@ private class AssetPriorityQueue {
         }
     }
     
-    private Int getBaseSizeForType(AssetType type) {
+     private fun getBaseSizeForType(type: AssetType): Int {
         switch (type) {
             case TEXTURE: return 256 * 256 * 4; // 256KB base texture
             case MESH: return 64 * 1024; // 64KB base mesh
@@ -398,13 +398,13 @@ private class AssetPriorityQueue {
         }
     }
     
-    private Unit cacheAsset(String cacheKey, AssetData assetData) {
+     private fun cacheAsset(cacheKey: String, assetData: AssetData) {
         if (assetData == null) return
         
-        CachedAsset cached = CachedAsset(assetData)
+        val cached: CachedAsset = CachedAsset(assetData)
         
         // Check cache size limits
-        Long newSize = totalCacheSize.addAndGet(assetData.getSize())
+        val newSize: Long = totalCacheSize.addAndGet(assetData.getSize())
         
         if (newSize > MAX_CACHE_SIZE || assetCache.size() >= MAX_CACHE_ENTRIES) {
             evictLRUAssets()
@@ -414,7 +414,7 @@ private class AssetPriorityQueue {
         Log.d(TAG, "Cached " + assetData.getId() + " (" + assetData.getSize() + " bytes)")
     }
     
-    private Unit evictLRUAssets() {
+     private fun evictLRUAssets() {
         Log.d(TAG, "Cache eviction triggered - size: " + totalCacheSize.get() / 1024 + "KB, entries: " + assetCache.size())
         
         // Find LRU assets to evict
@@ -422,7 +422,7 @@ private class AssetPriorityQueue {
         entries.sort((a, b) -> Long.compare(a.getValue().getLastAccess(), b.getValue().getLastAccess()))
         
         // Evict oldest 25% of cache
-        Int evictCount = Math.max(1, entries.size() / 4)
+        val evictCount: Int = Math.max(1, entries.size() / 4)
         for (Int i = 0; i < evictCount && i < entries.size(); i++) {
             Map.Entry<String, CachedAsset> entry = entries.get(i)
             assetCache.remove(entry.getKey())
@@ -432,15 +432,15 @@ private class AssetPriorityQueue {
         Log.d(TAG, "Evicted " + evictCount + " assets. New size: " + totalCacheSize.get() / 1024 + "KB")
     }
     
-    private Unit startCacheManagement() {
+     private fun startCacheManagement() {
         // Background thread for cache maintenance
-        Thread cacheManager = Thread(() -> {
+        val cacheManager: Thread = Thread(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     Thread.sleep(60000); // Check every minute
                     
                     // Remove expired assets
-                    List<String> expired = ArrayList<>()
+                    val expired: List<String> = ArrayList<>()
                     for (Map.Entry<String, CachedAsset> entry : assetCache.entrySet()) {
                         if (entry.getValue().isExpired()) {
                             expired.add(entry.getKey())
@@ -448,7 +448,7 @@ private class AssetPriorityQueue {
                     }
                     
                     for (String key : expired) {
-                        CachedAsset removed = assetCache.remove(key)
+                        val removed: CachedAsset = assetCache.remove(key)
                         if (removed != null) {
                             totalCacheSize.addAndGet(-removed.assetData.getSize())
                         }
@@ -460,7 +460,7 @@ private class AssetPriorityQueue {
                     
                     // Adaptive quality adjustment
                     if (adaptiveQuality) {
-                        QualityLevel recommended = networkMonitor.recommendQuality()
+                        val recommended: QualityLevel = networkMonitor.recommendQuality()
                         if (recommended != currentQuality) {
                             Log.i(TAG, "Adaptive quality change: " + currentQuality + " -> " + recommended)
                             currentQuality = recommended

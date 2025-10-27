@@ -13,7 +13,7 @@ class MoneyTransferBackend : SLMessage() {
         public Int AggregatePermInventory
         public Int AggregatePermNextOwner
         public Int Amount
-        public Byte[] Description
+        public ByteArray Description
         public UUID DestID
         public Int Flags
         public Int GridX
@@ -29,15 +29,15 @@ class MoneyTransferBackend : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.MoneyData_Field.Description.length + 88 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleMoneyTransferBackend(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 56)
@@ -56,7 +56,7 @@ class MoneyTransferBackend : SLMessage() {
         packVariable(byteBuffer, this.MoneyData_Field.Description, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.MoneyData_Field.TransactionID = unpackUUID(byteBuffer)
         this.MoneyData_Field.TransactionTime = unpackInt(byteBuffer)
         this.MoneyData_Field.SourceID = unpackUUID(byteBuffer)

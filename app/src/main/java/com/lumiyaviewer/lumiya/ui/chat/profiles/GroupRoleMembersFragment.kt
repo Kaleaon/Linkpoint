@@ -38,7 +38,7 @@ import java.util.UUID
 import androidx.annotation.Nullable
 
 class GroupRoleMembersFragment : ChatterFragment : LoadableMonitor.OnLoadableDataChangedListener {
-    private String ROLE_ID_KEY = "role_id"
+    private val ROLE_ID_KEY: String = "role_id"
     @Nullable
     private UUID RoleID
     private MemberListAdapter adapter = null

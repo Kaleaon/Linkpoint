@@ -25,59 +25,59 @@ class SearchGridResult {
         this.memberCount = num
     }
 
-    public Long getId() {
+     public fun getId(): Long {
         return this.id
     }
 
-    public String getItemName() {
+     public fun getItemName(): String {
         return this.itemName
     }
 
-    public Int getItemType() {
+     public fun getItemType(): Int {
         return this.itemType
     }
 
-    public UUID getItemUUID() {
+     public fun getItemUUID(): UUID {
         return this.itemUUID
     }
 
-    public Int getLevensteinDistance() {
+     public fun getLevensteinDistance(): Int {
         return this.levensteinDistance
     }
 
-    public Integer getMemberCount() {
+     public fun getMemberCount(): Integer {
         return this.memberCount
     }
 
-    public UUID getSearchUUID() {
+     public fun getSearchUUID(): UUID {
         return this.searchUUID
     }
 
-    fun setId(Long l) {
+    fun setId(l: Long) {
         this.id = l
     }
 
-    fun setItemName(String str) {
+    fun setItemName(str: String) {
         this.itemName = str
     }
 
-    fun setItemType(Int i) {
+    fun setItemType(i: Int) {
         this.itemType = i
     }
 
-    fun setItemUUID(UUID uuid) {
+    fun setItemUUID(uuid: UUID) {
         this.itemUUID = uuid
     }
 
-    fun setLevensteinDistance(Int i) {
+    fun setLevensteinDistance(i: Int) {
         this.levensteinDistance = i
     }
 
-    fun setMemberCount(Integer num) {
+    fun setMemberCount(num: Integer) {
         this.memberCount = num
     }
 
-    fun setSearchUUID(UUID uuid) {
+    fun setSearchUUID(uuid: UUID) {
         this.searchUUID = uuid
     }
 }

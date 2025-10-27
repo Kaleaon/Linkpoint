@@ -28,18 +28,18 @@ class FriendDao : AbstractDao()<Friend, UUID> {
     }
 
     @JvmStatic
-    Unit createTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'Friends' (" + "'UUID' TEXT PRIMARY KEY ," + "'RIGHTS_GIVEN' INTEGER NOT NULL ," + "'RIGHTS_HAS' INTEGER NOT NULL ," + "'IS_ONLINE' INTEGER NOT NULL );")
     }
 
     @JvmStatic
-    Unit dropTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'Friends'")
     }
 
-    protected Unit bindValues(SQLiteStatement sQLiteStatement, Friend friend) {
+     protected fun bindValues(sQLiteStatement: SQLiteStatement, friend: Friend) {
         sQLiteStatement.clearBindings()
-        UUID uuid = friend.getUuid()
+        val uuid: UUID = friend.getUuid()
         if (uuid != null) {
             sQLiteStatement.bindString(1, uuid.toString())
         }
@@ -48,37 +48,37 @@ class FriendDao : AbstractDao()<Friend, UUID> {
         sQLiteStatement.bindLong(4, friend.getIsOnline() ? 1 : 0)
     }
 
-    public UUID getKey(Friend friend) {
+     public fun getKey(friend: Friend): UUID {
         return friend != null ? friend.getUuid() : null
     }
 
-    protected Boolean isEntityUpdateable() {
+     protected fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    public Friend readEntity(Cursor cursor, Int i) {
-        Boolean z = false
-        UUID fromString = cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0))
-        Int i2 = cursor.getInt(i + 1)
-        Int i3 = cursor.getInt(i + 2)
+     public fun readEntity(cursor: Cursor, i: Int): Friend {
+        val z: Boolean = false
+        val fromString: UUID = cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0))
+        val i2: Int = cursor.getInt(i + 1)
+        val i3: Int = cursor.getInt(i + 2)
         if (cursor.getShort(i + 3) != (Short) 0) {
             z = true
         }
         return Friend(fromString, i2, i3, z)
     }
 
-    fun readEntity(Cursor cursor, Friend friend, Int i) {
+    fun readEntity(cursor: Cursor, friend: Friend, i: Int) {
         friend.setUuid(cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0)))
         friend.setRightsGiven(cursor.getInt(i + 1))
         friend.setRightsHas(cursor.getInt(i + 2))
         friend.setIsOnline(cursor.getShort(i + 3) != (Short) 0)
     }
 
-    public UUID readKey(Cursor cursor, Int i) {
+     public fun readKey(cursor: Cursor, i: Int): UUID {
         return cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0))
     }
 
-    protected UUID updateKeyAfterInsert(Friend friend, Long j) {
+     protected fun updateKeyAfterInsert(friend: Friend, j: Long): UUID {
         return friend.getUuid()
     }
 }

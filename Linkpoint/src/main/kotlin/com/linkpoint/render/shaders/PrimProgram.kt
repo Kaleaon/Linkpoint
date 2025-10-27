@@ -13,7 +13,7 @@ class PrimProgram : BasicPrimProgram() {
         super(Shader.PrimVertexShader, z ? Shader.PrimOpaqueFragmentShader : Shader.PrimFragmentShader)
     }
 
-    protected Unit bindVariables() {
+     protected fun bindVariables() {
         super.bindVariables()
         this.uTexMatrix = GLES20.glGetUniformLocation(this.handle, "uTexMatrix")
     }

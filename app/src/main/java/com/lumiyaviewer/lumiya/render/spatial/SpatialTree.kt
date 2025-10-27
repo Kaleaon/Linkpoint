@@ -5,9 +5,9 @@ import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.utils.InlineList
 
 class SpatialTree {
-    Int INVALID_BIN = -1
+    val INVALID_BIN: Int = -1
     private SpatialTreeNode[] bins
-    private Float[] depthBuf = Float[1]
+    private val depthBuf: FloatArray = FloatArray(1)
     private var drawDistance: Float = 1.0f
     private var drawListChanged: Boolean = false
     private MyAvatarTreeNode myAvatarTreeNode
@@ -92,7 +92,7 @@ class SpatialTree {
 
     Unit setEntryDepth(SpatialTreeNode spatialTreeNode, Float f) {
         Int i = 0
-        Int round = Math.round((((Float) this.numBins) * f) / this.drawDistance)
+        Int round = Math.round(((this.toFloat().numBins) * f) / this.drawDistance)
         if (round >= 0) {
             i = round >= this.numBins ? this.numBins - 1 : round
         }

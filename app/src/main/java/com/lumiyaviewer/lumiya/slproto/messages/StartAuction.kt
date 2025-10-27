@@ -13,7 +13,7 @@ class StartAuction : SLMessage {
     }
 
     class ParcelData {
-        Byte[] Name
+        ByteArray Name
         UUID ParcelID
         UUID SnapshotID
     }

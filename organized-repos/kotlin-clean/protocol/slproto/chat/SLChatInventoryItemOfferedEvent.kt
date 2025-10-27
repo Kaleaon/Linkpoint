@@ -98,7 +98,7 @@ protected UUID extractItemID(ImprovedInstantMessage improvedInstantMessage) {
     }
 
     public String getText(Context context, UserManager userManager) {
-        return context.getString(R.string.chat_inventory_other_offer_format, Object[]{this.itemName})
+        return context.getString(R.string.chat_inventory_other_offer_format, Array<Any>{this.itemName})
     }
 
     public String getYesButton(Context context) {

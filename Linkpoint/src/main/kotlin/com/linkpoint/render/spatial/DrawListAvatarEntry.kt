@@ -17,8 +17,8 @@ class DrawListAvatarEntry : DrawListObjectEntry() {
         this.objectAvatarInfo = sLObjectAvatarInfo
     }
 
-    fun addToDrawList(DrawList drawList) {
-        Object obj = null
+    fun addToDrawList(drawList: DrawList) {
+        val obj: Object = null
         WeakReference weakReference
         if (drawList.avatars.size() < drawList.avatarCountLimit || this.objectAvatarInfo.isMyAvatar()) {
             DrawableAvatar drawableAvatar
@@ -48,7 +48,7 @@ class DrawListAvatarEntry : DrawListObjectEntry() {
         drawList.avatarStubs.add(obj)
     }
 
-    public SLObjectAvatarInfo getObjectAvatarInfo() {
+     public fun getObjectAvatarInfo(): SLObjectAvatarInfo {
         return this.objectAvatarInfo
     }
 }

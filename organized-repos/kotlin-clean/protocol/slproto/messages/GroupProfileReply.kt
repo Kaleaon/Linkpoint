@@ -16,17 +16,17 @@ class GroupProfileReply : SLMessage() {
     @JvmStatic
     class GroupData {
         public Boolean AllowPublish
-        public Byte[] Charter
+        public ByteArray Charter
         public UUID FounderID
         public UUID GroupID
         public Int GroupMembershipCount
         public Int GroupRolesCount
         public UUID InsigniaID
         public Boolean MaturePublish
-        public Byte[] MemberTitle
+        public ByteArray MemberTitle
         public Int MembershipFee
         public Int Money
-        public Byte[] Name
+        public ByteArray Name
         public Boolean OpenEnrollment
         public UUID OwnerRole
         public Long PowersMask

@@ -43,7 +43,7 @@ class IntegratedFeatureDemo {
     /**
      * Initialize all modern components
      */
-    private Unit initializeComponents() {
+     private fun initializeComponents() {
         try {
             // Initialize authentication manager
             authManager = OAuth2AuthManager(context)
@@ -94,21 +94,21 @@ class IntegratedFeatureDemo {
                 
                 // Step 2: Avatar System
                 Log.i(TAG, "Step 2: Setting up avatar rendering...")
-                Boolean avatarValid = setupAvatarDemo().join()
+                val avatarValid: Boolean = setupAvatarDemo().join()
                 if (!avatarValid) {
                     Log.w(TAG, "Avatar setup failed, continuing with other features")
                 }
                 
                 // Step 3: Voice System
                 Log.i(TAG, "Step 3: Initializing WebRTC voice...")
-                Boolean voiceReady = setupVoiceDemo().join()
+                val voiceReady: Boolean = setupVoiceDemo().join()
                 if (!voiceReady) {
                     Log.w(TAG, "Voice setup failed, continuing with chat")
                 }
                 
                 // Step 4: Chat System
                 Log.i(TAG, "Step 4: Setting up chat system...")
-                Boolean chatReady = setupChatDemo().join()
+                val chatReady: Boolean = setupChatDemo().join()
                 if (!chatReady) {
                     Log.w(TAG, "Chat setup failed")
                 }
@@ -133,7 +133,7 @@ class IntegratedFeatureDemo {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 // Validate avatar rendering system
-                Boolean valid = avatarManager.validateAvatarRendering().join()
+                val valid: Boolean = avatarManager.validateAvatarRendering().join()
                 if (!valid) {
                     return false
                 }
@@ -142,7 +142,7 @@ class IntegratedFeatureDemo {
                 currentAvatarId = UUID.randomUUID()
                 ModernAvatarManager.MockSLObject mockAvatarObject = createMockSLObject(currentAvatarId)
                 
-                Boolean created = avatarManager.createAvatar(currentAvatarId, mockAvatarObject).join()
+                val created: Boolean = avatarManager.createAvatar(currentAvatarId, mockAvatarObject).join()
                 if (created) {
                     // Update avatar appearance
                     ModernAvatarManager.AvatarAppearance appearance = 
@@ -175,7 +175,7 @@ class IntegratedFeatureDemo {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 // Enable voice
-                Boolean enabled = voiceManager.enableVoice().join()
+                val enabled: Boolean = voiceManager.enableVoice().join()
                 if (!enabled) {
                     return false
                 }
@@ -183,7 +183,7 @@ class IntegratedFeatureDemo {
                 voiceEnabled = true
                 
                 // Connect to spatial voice channel (mock)
-                Boolean connected = voiceManager.connectToVoiceChannel("spatial_main", "mock-signaling-server").join()
+                val connected: Boolean = voiceManager.connectToVoiceChannel("spatial_main", "mock-signaling-server").join()
                 if (connected) {
                     Log.i(TAG, "✅ WebRTC voice system ready")
                     return true
@@ -204,12 +204,12 @@ class IntegratedFeatureDemo {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 // Test local chat
-                Boolean localSent = chatManager.sendLocalChatMessage("Hello, world! Testing modern chat system.", 0).join()
+                val localSent: Boolean = chatManager.sendLocalChatMessage("Hello, world! Testing modern chat system.", 0).join()
                 
                 // Test group chat
-                String testGroupId = "test-group-" + System.currentTimeMillis()
-                Boolean groupJoined = chatManager.joinGroupChat(testGroupId, "Demo Group").join()
-                Boolean groupSent = chatManager.sendGroupChatMessage("Testing group chat functionality.", testGroupId).join()
+                val testGroupId: String = "test-group-" + System.currentTimeMillis()
+                val groupJoined: Boolean = chatManager.joinGroupChat(testGroupId, "Demo Group").join()
+                val groupSent: Boolean = chatManager.sendGroupChatMessage("Testing group chat functionality.", testGroupId).join()
                 
                 if (localSent && groupJoined && groupSent) {
                     chatActive = true
@@ -228,7 +228,7 @@ class IntegratedFeatureDemo {
     /**
      * Run integration tests between all systems
      */
-    private Unit runIntegrationTests() {
+     private fun runIntegrationTests() {
         Log.i(TAG, "Running integration tests...")
         
         // Test 1: Voice + Chat integration
@@ -293,7 +293,7 @@ class IntegratedFeatureDemo {
     /**
      * Get comprehensive status of all systems
      */
-    public SystemStatus getSystemStatus() {
+     public fun getSystemStatus(): SystemStatus {
         return SystemStatus(
             isAuthenticated && authManager.isTokenValid(),
             voiceEnabled && voiceManager.isConnected(),
@@ -354,7 +354,7 @@ class IntegratedFeatureDemo {
             Log.w(TAG, "🎙️ Voice error: " + error)
         }
         
-        override Unit onAudioReceived(String speakerId, Byte[] audioData) {
+        override Unit onAudioReceived(String speakerId, ByteArray audioData) {
             Log.d(TAG, "🎙️ Audio received from: " + speakerId + " (" + audioData.length + " bytes)")
         }
     }
@@ -420,13 +420,13 @@ class IntegratedFeatureDemo {
         }
         
         // Getters
-        public Boolean isAuthenticationActive() { return authenticationActive; }
-        public Boolean isVoiceActive() { return voiceActive; }
-        public Boolean isChatActive() { return chatActive; }
-        public Boolean isAvatarActive() { return avatarActive; }
+         public fun isAuthenticationActive(): Boolean { return authenticationActive; }
+         public fun isVoiceActive(): Boolean { return voiceActive; }
+         public fun isChatActive(): Boolean { return chatActive; }
+         public fun isAvatarActive(): Boolean { return avatarActive; }
         public OAuth2AuthManager.SessionInfo getSessionInfo() { return sessionInfo; }
         
-        public Boolean allSystemsActive() {
+         public fun allSystemsActive(): Boolean {
             return authenticationActive && voiceActive && chatActive && avatarActive
         }
     }

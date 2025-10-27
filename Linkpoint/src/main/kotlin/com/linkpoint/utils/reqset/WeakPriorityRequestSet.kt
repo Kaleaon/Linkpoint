@@ -20,13 +20,13 @@ class WeakPriorityRequestSet<T> {
     private val Map<Integer, WeakRequestSet<T>> priorityBins = TreeMap()
 
     /* JADX INFO: finally extract failed */
-    private Unit invokeListeners() {
-        LinkedList<RequestListener> linkedList = LinkedList<>()
+     private fun invokeListeners() {
+        val linkedList: LinkedList<RequestListener> = LinkedList<>()
         this.lock.lock()
         try {
             Iterator<WeakReference<RequestListener>> it = this.listeners.iterator()
             while (it.hasNext()) {
-                RequestListener requestListener = (RequestListener) it.next().get()
+                val requestListener: RequestListener = (RequestListener) it.next().get()
                 if (requestListener == null) {
                     it.remove()
                 } else {
@@ -43,13 +43,13 @@ class WeakPriorityRequestSet<T> {
         }
     }
 
-    fun addListener(RequestListener requestListener) {
+    fun addListener(requestListener: RequestListener) {
         this.lock.lock()
         try {
             Iterator<WeakReference<RequestListener>> it = this.listeners.iterator()
-            Boolean z2 = false
+            val z2: Boolean = false
             while (it.hasNext()) {
-                RequestListener requestListener2 = (RequestListener) it.next().get()
+                val requestListener2: RequestListener = (RequestListener) it.next().get()
                 if (requestListener2 == null) {
                     it.remove()
                     z = z2
@@ -66,15 +66,15 @@ class WeakPriorityRequestSet<T> {
         }
     }
 
-    fun addRequest(Int i, T t, Object obj) {
+    fun addRequest(i: Int, T t, obj: Object) {
         this.lock.lock()
         try {
-            WeakRequestSet weakRequestSet = this.priorityBins.get(Integer.valueOf(i))
+            val weakRequestSet: WeakRequestSet = this.priorityBins.get(Integer.valueOf(i))
             if (weakRequestSet == null) {
                 weakRequestSet = WeakRequestSet()
                 this.priorityBins.put(Integer.valueOf(i), weakRequestSet)
             }
-            Boolean addRequest = weakRequestSet.addRequest(t, obj)
+            val addRequest: Boolean = weakRequestSet.addRequest(t, obj)
             if (addRequest) {
                 this.notEmpty.signalAll()
             }
@@ -111,7 +111,7 @@ class WeakPriorityRequestSet<T> {
             java.util.Set r1 = r1.entrySet()     // Catch:{ all -> 0x002e }
             java.util.Iterator r1 = r1.iterator()     // Catch:{ all -> 0x002e }
         L_0x0010:
-            Boolean r2 = r1.hasNext()     // Catch:{ all -> 0x002e }
+            val r2: Boolean = r1.hasNext()     // Catch:{ all -> 0x002e }
             if (r2 == 0) goto L_0x0028
             java.lang.Object r0 = r1.next()     // Catch:{ all -> 0x002e }
             java.util.Map$Entry r0 = (java.util.Map.Entry) r0     // Catch:{ all -> 0x002e }
@@ -132,12 +132,12 @@ class WeakPriorityRequestSet<T> {
         throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.utils.reqset.WeakPriorityRequestSet.getRequest():java.lang.Object")
     }
 
-    fun removeListener(RequestListener requestListener) {
+    fun removeListener(requestListener: RequestListener) {
         this.lock.lock()
         try {
             Iterator<WeakReference<RequestListener>> it = this.listeners.iterator()
             while (it.hasNext()) {
-                RequestListener requestListener2 = (RequestListener) it.next().get()
+                val requestListener2: RequestListener = (RequestListener) it.next().get()
                 if (requestListener2 == null || requestListener2 == requestListener) {
                     it.remove()
                 }

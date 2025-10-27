@@ -17,7 +17,7 @@ class BakedImage {
         this.resultImage.setComponent(4, (Byte) -1)
     }
 
-    fun Bake(BakeProcess bakeProcess) {
+    fun Bake(bakeProcess: BakeProcess) {
         for (BakeLayer Bake : this.layerSet.layers) {
             Bake.Bake(this.resultImage, bakeProcess)
         }
@@ -29,23 +29,23 @@ class BakedImage {
         }
     }
 
-    fun SaveToJPEG2K(File file) throws IOException {
+    fun SaveToJPEG2K(file: File) throws IOException {
         this.resultImage.SaveJPEG2K(file)
     }
 
-    public Bitmap getAsBitmap() {
+     public fun getAsBitmap(): Bitmap {
         return this.resultImage.getAsBitmap()
     }
 
-    public OpenJPEG getBakedImage() {
+     public fun getBakedImage(): OpenJPEG {
         return this.resultImage
     }
 
-    public UUID getUploadedID() {
+     public fun getUploadedID(): UUID {
         return this.uploadedID
     }
 
-    fun setUploadedID(UUID uuid) {
+    fun setUploadedID(uuid: UUID) {
         this.uploadedID = uuid
     }
 }

@@ -15,35 +15,35 @@ class GroupRoleMember {
         this.userID = uuid4
     }
 
-    public UUID getGroupID() {
+     public fun getGroupID(): UUID {
         return this.groupID
     }
 
-    public UUID getRequestID() {
+     public fun getRequestID(): UUID {
         return this.requestID
     }
 
-    public UUID getRoleID() {
+     public fun getRoleID(): UUID {
         return this.roleID
     }
 
-    public UUID getUserID() {
+     public fun getUserID(): UUID {
         return this.userID
     }
 
-    fun setGroupID(UUID uuid) {
+    fun setGroupID(uuid: UUID) {
         this.groupID = uuid
     }
 
-    fun setRequestID(UUID uuid) {
+    fun setRequestID(uuid: UUID) {
         this.requestID = uuid
     }
 
-    fun setRoleID(UUID uuid) {
+    fun setRoleID(uuid: UUID) {
         this.roleID = uuid
     }
 
-    fun setUserID(UUID uuid) {
+    fun setUserID(uuid: UUID) {
         this.userID = uuid
     }
 }

@@ -26,11 +26,11 @@ class ChatMessageSourceUser : ChatMessageSource() {
         this.legacyName = null
     }
 
-    public ChatterID getDefaultChatter(UUID uuid2) {
+     public fun getDefaultChatter(uuid2: UUID): ChatterID {
         return ChatterID.getUserChatterID(uuid2, this.uuid)
     }
 
-    public String getSourceName(UserManager userManager) {
+     public fun getSourceName(userManager: UserManager): String {
         return GlobalOptions.getInstance().isLegacyUserNames() ? this.legacyName : this.displayName
     }
 
@@ -38,22 +38,22 @@ class ChatMessageSourceUser : ChatMessageSource() {
         return ChatMessageSource.ChatMessageSourceType.User
     }
 
-    public UUID getSourceUUID() {
+     public fun getSourceUUID(): UUID {
         return this.uuid
     }
 
-    fun serializeTo(ChatMessage chatMessage) {
+    fun serializeTo(chatMessage: ChatMessage) {
         super.serializeTo(chatMessage)
         chatMessage.setSenderUUID(this.uuid)
         chatMessage.setSenderName(this.displayName)
         chatMessage.setSenderLegacyName(this.legacyName)
     }
 
-    fun setDisplayName(String str) {
+    fun setDisplayName(str: String) {
         this.displayName = str
     }
 
-    fun setLegacyName(String str) {
+    fun setLegacyName(str: String) {
         this.legacyName = str
     }
 }

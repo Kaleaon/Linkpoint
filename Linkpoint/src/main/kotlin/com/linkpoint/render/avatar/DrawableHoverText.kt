@@ -26,10 +26,10 @@ class DrawableHoverText : ResourceConsumer, GLCleanable {
 
     val Unit DrawAtWorld(RenderContext renderContext, Float f, Float f2, Float f3, Float f4, MatrixStack matrixStack, Boolean z, Int i) {
         r0 = Float[8]
-        Float[] matrixData = renderContext.modelViewMatrix.getMatrixData()
-        Int matrixDataOffset = renderContext.modelViewMatrix.getMatrixDataOffset()
-        Float[] matrixData2 = matrixStack.getMatrixData()
-        Int matrixDataOffset2 = matrixStack.getMatrixDataOffset()
+        val matrixData: FloatArray = renderContext.modelViewMatrix.getMatrixData()
+        val matrixDataOffset: Int = renderContext.modelViewMatrix.getMatrixDataOffset()
+        val matrixData2: FloatArray = matrixStack.getMatrixData()
+        val matrixDataOffset2: Int = matrixStack.getMatrixDataOffset()
         r0[0] = f
         r0[1] = f2
         r0[2] = f3
@@ -42,8 +42,8 @@ class DrawableHoverText : ResourceConsumer, GLCleanable {
             Matrix.multiplyMV(r0, 0, matrixData2, matrixDataOffset2, r0, 4)
         }
         if (r0[3] != 0.0f) {
-            Float f5 = r0[0] / r0[3]
-            Float f6 = r0[1] / r0[3]
+            val f5: Float = r0[0] / r0[3]
+            val f6: Float = r0[1] / r0[3]
             if (r0[3] != 0.0f) {
                 GLDraw(renderContext, f5, f6, r0[2] / r0[3], z, i)
             }
@@ -63,10 +63,10 @@ class DrawableHoverText : ResourceConsumer, GLCleanable {
             this.textureRequested = true
             this.textTextureCache.RequestResource(DrawableTextParams.create(this.hoverText, this.backgroundColor), this)
         }
-        GLLoadedTextTexture gLLoadedTextTexture = this.hoverTextTexture
+        val gLLoadedTextTexture: GLLoadedTextTexture = this.hoverTextTexture
         if (gLLoadedTextTexture != null) {
-            Float width = (((Float) gLLoadedTextTexture.getWidth()) * 2.0f) / ((Float) renderContext.viewportRect[2])
-            Float height = (((Float) gLLoadedTextTexture.getHeight()) * 2.0f) / ((Float) renderContext.viewportRect[3])
+            val width: Float = (((Float) gLLoadedTextTexture.getWidth()) * 2.0f) / ((Float) renderContext.viewportRect[2])
+            val height: Float = (((Float) gLLoadedTextTexture.getHeight()) * 2.0f) / ((Float) renderContext.viewportRect[3])
             if (renderContext.hasGL20) {
                 GLES20.glUniform3f(renderContext.quadProgram.uPreTranslate, f, f2, f3)
                 GLES20.glUniform3f(renderContext.quadProgram.uScale, width, height, 1.0f)
@@ -95,7 +95,7 @@ class DrawableHoverText : ResourceConsumer, GLCleanable {
         }
     }
 
-    fun OnResourceReady(Object obj, Boolean z) {
+    fun OnResourceReady(obj: Object, z: Boolean) {
         if (obj instanceof GLLoadedTextTexture) {
             this.hoverTextTexture = (GLLoadedTextTexture) obj
         } else if (obj == null) {

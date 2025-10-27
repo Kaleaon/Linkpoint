@@ -31,16 +31,16 @@ class SLTransferManager : SLModule() {
     /* access modifiers changed from: private */
     val Map<UUID, SLTransfer> activeTransfers = Collections.synchronizedMap(HashMap())
     private val RequestHandler<AssetKey> assetRequestHandler = AsyncRequestHandler(this.agentCircuit, RequestHandler<AssetKey>() {
-        fun onRequest(AssetKey assetKey) {
+        fun onRequest(assetKey: AssetKey) {
             Debug.Printf("Transfer: Requested asset download for %s", assetKey)
-            SLTransfer sLTransfer = SLTransfer(SLTransferManager.this.circuitInfo.agentID, SLTransferManager.this.circuitInfo.sessionID, assetKey, SLTransferManager.DEFAULT_PRIORITY)
+            val sLTransfer: SLTransfer = SLTransfer(SLTransferManager.this.circuitInfo.agentID, SLTransferManager.this.circuitInfo.sessionID, assetKey, SLTransferManager.DEFAULT_PRIORITY)
             SLTransferManager.this.activeTransferIds.forcePut(assetKey, sLTransfer.getTransferUUID())
             SLTransferManager.this.BeginTransfer(sLTransfer)
         }
 
-        fun onRequestCancelled(AssetKey assetKey) {
+        fun onRequestCancelled(assetKey: AssetKey) {
             SLTransfer sLTransfer
-            UUID uuid = (UUID) SLTransferManager.this.activeTransferIds.remove(assetKey)
+            val uuid: UUID = (UUID) SLTransferManager.this.activeTransferIds.remove(assetKey)
             if (uuid != null && (sLTransfer = (SLTransfer) SLTransferManager.this.activeTransfers.get(uuid)) != null) {
                 SLTransferManager.this.CancelTransfer(sLTransfer)
             }
@@ -51,7 +51,7 @@ class SLTransferManager : SLModule() {
     /* JADX INFO: super call moved to the top of the method (can break code semantics) */
     public SLTransferManager(SLAgentCircuit sLAgentCircuit) {
         super(sLAgentCircuit)
-        ResultHandler<AssetKey, AssetData> resultHandler = null
+        val resultHandler: ResultHandler<AssetKey, AssetData> = null
         if (this.userManager != null) {
             AnimationCache.getInstance().setAssetResponseCacher(this.userManager.getAssetResponseCacher())
         }
@@ -59,16 +59,16 @@ class SLTransferManager : SLModule() {
     }
 
     /* access modifiers changed from: private */
-    fun BeginTransfer(SLTransfer sLTransfer) {
+    fun BeginTransfer(sLTransfer: SLTransfer) {
         Debug.Printf("Transfer: Starting transfer: assetUUID %s, assetType %d", sLTransfer.getAssetUUID().toString(), Integer.valueOf(sLTransfer.getAssetType()))
         this.activeTransfers.put(sLTransfer.getTransferUUID(), sLTransfer)
         this.agentCircuit.SendMessage(sLTransfer.makeTransferRequest())
     }
 
     /* access modifiers changed from: private */
-    fun CancelTransfer(SLTransfer sLTransfer) {
+    fun CancelTransfer(sLTransfer: SLTransfer) {
         this.activeTransfers.remove(sLTransfer.getTransferUUID())
-        TransferAbort transferAbort = TransferAbort()
+        val transferAbort: TransferAbort = TransferAbort()
         transferAbort.TransferInfo_Field.TransferID = sLTransfer.getTransferUUID()
         transferAbort.TransferInfo_Field.ChannelType = sLTransfer.getChannelType()
         transferAbort.isReliable = true
@@ -76,10 +76,10 @@ class SLTransferManager : SLModule() {
     }
 
     /* access modifiers changed from: package-private */
-    fun EndTransfer(SLTransfer sLTransfer) {
+    fun EndTransfer(sLTransfer: SLTransfer) {
         Int status
         this.activeTransfers.remove(sLTransfer.getTransferUUID())
-        AssetKey assetKey = (AssetKey) this.activeTransferIds.inverse().remove(sLTransfer.getTransferUUID())
+        val assetKey: AssetKey = (AssetKey) this.activeTransferIds.inverse().remove(sLTransfer.getTransferUUID())
         if (assetKey != null && this.assetResultHandler != null && (status = sLTransfer.getStatus()) != 3 && status != 0) {
             this.assetResultHandler.onResultData(assetKey, AssetData(status, sLTransfer.getData()))
         }
@@ -94,19 +94,19 @@ class SLTransferManager : SLModule() {
     }
 
     @SLMessageHandler
-    fun HandleTransferInfo(TransferInfo transferInfo) {
-        SLTransfer sLTransfer = this.activeTransfers.get(transferInfo.TransferInfoData_Field.TransferID)
+    fun HandleTransferInfo(transferInfo: TransferInfo) {
+        val sLTransfer: SLTransfer = this.activeTransfers.get(transferInfo.TransferInfoData_Field.TransferID)
         if (sLTransfer != null) {
-            Debug.Log(String.format("Transfer: Info recd, status %d, size %d", Object[]{Integer.valueOf(transferInfo.TransferInfoData_Field.Status), Integer.valueOf(transferInfo.TransferInfoData_Field.Size)}))
+            Debug.Log(String.format("Transfer: Info recd, status %d, size %d", Array<Any>{Integer.valueOf(transferInfo.TransferInfoData_Field.Status), Integer.valueOf(transferInfo.TransferInfoData_Field.Size)}))
             sLTransfer.HandleTransferInfo(this, transferInfo)
         }
     }
 
     @SLMessageHandler
-    fun HandleTransferPacket(TransferPacket transferPacket) {
-        SLTransfer sLTransfer = this.activeTransfers.get(transferPacket.TransferData_Field.TransferID)
+    fun HandleTransferPacket(transferPacket: TransferPacket) {
+        val sLTransfer: SLTransfer = this.activeTransfers.get(transferPacket.TransferData_Field.TransferID)
         if (sLTransfer != null) {
-            Debug.Log(String.format("Transfer: data recd, packet %d, status %d, size %d.", Object[]{Integer.valueOf(transferPacket.TransferData_Field.Packet), Integer.valueOf(transferPacket.TransferData_Field.Status), Integer.valueOf(transferPacket.TransferData_Field.Data.length)}))
+            Debug.Log(String.format("Transfer: data recd, packet %d, status %d, size %d.", Array<Any>{Integer.valueOf(transferPacket.TransferData_Field.Packet), Integer.valueOf(transferPacket.TransferData_Field.Status), Integer.valueOf(transferPacket.TransferData_Field.Data.length)}))
             sLTransfer.HandleTransferPacket(this, transferPacket)
         }
     }

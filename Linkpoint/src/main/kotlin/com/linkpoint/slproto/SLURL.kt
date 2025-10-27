@@ -10,11 +10,11 @@ import java.util.List
 
 class SLURL : Parcelable {
     const val Creator<SLURL> CREATOR = Creator<SLURL>() {
-        public SLURL createFromParcel(Parcel parcel) {
+         public fun createFromParcel(parcel: Parcel): SLURL {
             return SLURL(parcel, null)
         }
 
-        public SLURL[] newArray(Int i) {
+        public Array<SLURL> newArray(Int i) {
             return SLURL[i]
         }
     }
@@ -27,7 +27,7 @@ class SLURL : Parcelable {
         this.locationX = 128
         this.locationY = 128
         this.locationZ = 0
-        Uri data = intent.getData()
+        val data: Uri = intent.getData()
         if (!(data == null || data.getScheme() == null || data.getHost() == null)) {
             List pathSegments
             if (data.getScheme().equalsIgnoreCase("http")) {
@@ -85,31 +85,31 @@ class SLURL : Parcelable {
         this(parcel)
     }
 
-    public Int describeContents() {
+     public fun describeContents(): Int {
         return 0
     }
 
-    public String getLocationName() {
+     public fun getLocationName(): String {
         return this.locationName
     }
 
-    public Int getLocationX() {
+     public fun getLocationX(): Int {
         return this.locationX
     }
 
-    public Int getLocationY() {
+     public fun getLocationY(): Int {
         return this.locationY
     }
 
-    public Int getLocationZ() {
+     public fun getLocationZ(): Int {
         return this.locationZ
     }
 
-    public String getLoginStartLocation() {
+     public fun getLoginStartLocation(): String {
         return "uri:" + TextUtils.htmlEncode(this.locationName) + "&amp;" + Integer.toString(this.locationX) + "&amp;" + Integer.toString(this.locationY) + "&amp;" + Integer.toString(this.locationZ)
     }
 
-    fun writeToParcel(Parcel parcel, Int i) {
+    fun writeToParcel(parcel: Parcel, i: Int) {
         parcel.writeString(this.locationName)
         parcel.writeInt(this.locationX)
         parcel.writeInt(this.locationY)

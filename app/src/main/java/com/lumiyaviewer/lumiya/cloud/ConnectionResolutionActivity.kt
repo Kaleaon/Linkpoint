@@ -39,8 +39,8 @@ import androidx.annotation.Nullable
 
 class ConnectionResolutionActivity
 : Activity {
-    private String CONNECTION_RESULT_TAG = "connectionResult"
-    private String RESOLVABLE_ERROR_TAG = "resolvableError"
+    private val CONNECTION_RESULT_TAG: String = "connectionResult"
+    private val RESOLVABLE_ERROR_TAG: String = "resolvableError"
     private int RESOLVE_CONNECTION_REQUEST_CODE = 1
     private int RESOLVE_RESOLVABLE_REQUEST_CODE = 2
     private val serviceConnection: ServiceConnection = ServiceConnection(this){

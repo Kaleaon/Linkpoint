@@ -12,8 +12,8 @@ class ImprovedTerseObjectUpdate : SLMessage() {
 
     @JvmStatic
     class ObjectData {
-        public Byte[] Data
-        public Byte[] TextureEntry
+        public ByteArray Data
+        public ByteArray TextureEntry
     }
 
     @JvmStatic
@@ -27,24 +27,24 @@ class ImprovedTerseObjectUpdate : SLMessage() {
         this.RegionData_Field = RegionData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 12
-        Iterator<T> it = this.ObjectData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 12
+        val it: Iterator<T> = this.ObjectData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
-            ObjectData objectData = (ObjectData) it.next()
+            val objectData: ObjectData = (ObjectData) it.next()
             i = objectData.TextureEntry.length + objectData.Data.length + 1 + 2 + i2
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleImprovedTerseObjectUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.put((Byte) 15)
         packLong(byteBuffer, this.RegionData_Field.RegionHandle)
         packShort(byteBuffer, (Short) this.RegionData_Field.TimeDilation)
@@ -55,12 +55,12 @@ class ImprovedTerseObjectUpdate : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.RegionData_Field.RegionHandle = unpackLong(byteBuffer)
         this.RegionData_Field.TimeDilation = unpackShort(byteBuffer) & 65535
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ObjectData objectData = ObjectData()
+            val objectData: ObjectData = ObjectData()
             objectData.Data = unpackVariable(byteBuffer, 1)
             objectData.TextureEntry = unpackVariable(byteBuffer, 2)
             this.ObjectData_Fields.add(objectData)

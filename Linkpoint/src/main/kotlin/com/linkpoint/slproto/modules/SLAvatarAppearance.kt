@@ -84,7 +84,7 @@ class SLAvatarAppearance : SLModule(), SLWearable.OnWearableStatusChangeListener
     private Float agentSizeVPLegLength
     private Float agentSizeVPNeckLength
     private Float agentSizeVPPlatformHeight
-    private Int[] agentVisualParams
+    private IntArray agentVisualParams
     private volatile BakeProcess bakeProcess = null
     private Thread bakingThread = null
     private val SLCaps caps
@@ -109,7 +109,7 @@ class SLAvatarAppearance : SLModule(), SLWearable.OnWearableStatusChangeListener
     private SLInventoryEntry wantedOutfitFolder = null
     private volatile ImmutableMap<UUID, String> wornAttachments = ImmutableMap.of()
     private val RequestHandler<SubscriptionSingleKey> wornItemsRequestHandler = AsyncRequestHandler(this.agentCircuit, SimpleRequestHandler<SubscriptionSingleKey>() {
-        fun onRequest(SubscriptionSingleKey subscriptionSingleKey) {
+        fun onRequest(subscriptionSingleKey: SubscriptionSingleKey) {
             if (SLAvatarAppearance.this.wornItemsResultHandler != null) {
                 SLAvatarAppearance.this.wornItemsResultHandler.onResultData(subscriptionSingleKey, SLAvatarAppearance.this.getWornItems())
             }
@@ -138,27 +138,27 @@ class SLAvatarAppearance : SLModule(), SLWearable.OnWearableStatusChangeListener
         }
 
         /* access modifiers changed from: package-private */
-        public Int getAttachedTo() {
+         public fun getAttachedTo(): Int {
             return this.attachedTo
         }
 
-        public Boolean getIsTouchable() {
+         public fun getIsTouchable(): Boolean {
             return this.isTouchable
         }
 
-        public String getName() {
+         public fun getName(): String {
             return this.name
         }
 
-        public Int getObjectLocalID() {
+         public fun getObjectLocalID(): Int {
             return this.objectLocalID
         }
 
-        public SLWearableType getWornOn() {
+         public fun getWornOn(): SLWearableType {
             return this.wornOn
         }
 
-        public UUID itemID() {
+         public fun itemID(): UUID {
             return this.itemID
         }
     }
@@ -250,22 +250,22 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         }
     }
 
-    private Unit DetachItem(Int i) {
+    private fun DetachItem(i: Int) {
         SLObjectAvatarInfo agentAvatar
         Debug.Log("Outfits: detaching item " + i)
-        Boolean z2 = false
-        Map map = this.wantedAttachments.get()
+        val z2: Boolean = false
+        val map: Map = this.wantedAttachments.get()
         if (map != null) {
-            HashMap hashMap = HashMap(map)
+            val hashMap: HashMap = HashMap(map)
             if (!(this.parcelInfo == null || (agentAvatar = this.parcelInfo.getAgentAvatar()) == null)) {
                 try {
-                    Iterator<SLObjectInfo> it = agentAvatar.treeNode.iterator()
+                    val it: Iterator<SLObjectInfo> = agentAvatar.treeNode.iterator()
                     while (true) {
                         if (!it.hasNext()) {
                             z = false
                             break
                         }
-                        SLObjectInfo next = it.next()
+                        val next: SLObjectInfo = it.next()
                         if (next.attachedToUUID != null && (!next.isDead) && next.localID == i) {
                             if (hashMap.remove(next.getId()) != null) {
                                 z = true
@@ -285,7 +285,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
                 this.wantedAttachments.set(ImmutableMap.copyOf(hashMap))
             }
         }
-        ObjectDetach objectDetach = ObjectDetach()
+        val objectDetach: ObjectDetach = ObjectDetach()
         objectDetach.AgentData_Field.AgentID = this.circuitInfo.agentID
         objectDetach.AgentData_Field.SessionID = this.circuitInfo.sessionID
         ObjectDetach.ObjectData objectData = ObjectDetach.ObjectData()
@@ -299,7 +299,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         }
     }
 
-    private Unit ForceUpdateAppearance(Boolean z) {
+    private fun ForceUpdateAppearance(z: Boolean) {
         this.needUpdateAppearance = true
         if (this.caps.getCapability(SLCaps.SLCapability.UpdateAvatarAppearance) == null) {
             this.eventBus.publish(SLBakingProgressEvent(true, false, 0))
@@ -311,16 +311,16 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         StartUpdatingAppearance()
     }
 
-    private Unit ProcessMultiLayer() {
+    private fun ProcessMultiLayer() {
         if (!this.multiLayerDone && this.cofReady && this.legacyAppearanceReady) {
             UpdateMultiLayer()
         }
     }
 
-    private Unit RequestServerRebake() {
+    private fun RequestServerRebake() {
         SLInventoryEntry folder
-        String capability = this.caps.getCapability(SLCaps.SLCapability.UpdateAvatarAppearance)
-        InventoryEntryList data = this.currentOutfitFolder.getData()
+        val capability: String = this.caps.getCapability(SLCaps.SLCapability.UpdateAvatarAppearance)
+        val data: InventoryEntryList = this.currentOutfitFolder.getData()
         if (capability != null && data != null && (folder = data.getFolder()) != null) {
             this.currentCofInventoryVersion = folder.version
             if ((this.currentCofInventoryVersion != this.lastCofUpdatedVersion && this.currentCofInventoryVersion != this.currentCofAppearanceVersion) || this.lastCofUpdateError) {
@@ -331,12 +331,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         }
     }
 
-    private Unit SendAgentIsNowWearing() {
-        AgentIsNowWearing agentIsNowWearing = AgentIsNowWearing()
+    private fun SendAgentIsNowWearing() {
+        val agentIsNowWearing: AgentIsNowWearing = AgentIsNowWearing()
         agentIsNowWearing.AgentData_Field.AgentID = this.circuitInfo.agentID
         agentIsNowWearing.AgentData_Field.SessionID = this.circuitInfo.sessionID
         for (SLWearableType sLWearableType : SLWearableType.values()) {
-            Map<UUID, SLWearable> row = this.wornWearables.row(sLWearableType)
+            val row: Map<UUID, SLWearable> = this.wornWearables.row(sLWearableType)
             if (row != null) {
                 z = true
                 for (SLWearable sLWearable : row.values()) {
@@ -363,8 +363,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         UpdateCOFContents()
     }
 
-    private Unit SendAvatarSetAppearance() {
-        SLObjectAvatarInfo sLObjectAvatarInfo = null
+    private fun SendAvatarSetAppearance() {
+        val sLObjectAvatarInfo: SLObjectAvatarInfo = null
         UpdateCOFContents()
         if (this.caps.getCapability(SLCaps.SLCapability.UpdateAvatarAppearance) == null) {
             if (this.parcelInfo != null) {
@@ -373,7 +373,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
             if (!(this.agentBakedTextures == null || sLObjectAvatarInfo == null)) {
                 sLObjectAvatarInfo.ApplyAvatarTextures(this.agentBakedTextures, true)
             }
-            AgentSetAppearance agentSetAppearance = AgentSetAppearance()
+            val agentSetAppearance: AgentSetAppearance = AgentSetAppearance()
             agentSetAppearance.AgentData_Field.AgentID = this.circuitInfo.agentID
             agentSetAppearance.AgentData_Field.SessionID = this.circuitInfo.sessionID
             agentSetAppearance.AgentData_Field.SerialNum = this.setAppearanceSerialNum
@@ -408,32 +408,32 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         }
     }
 
-    private Unit StartUpdatingAppearance() {
+    private fun StartUpdatingAppearance() {
         updateIfWearablesReady()
     }
 
-    private Unit UpdateCOFContents() {
+    private fun UpdateCOFContents() {
         InventoryEntryList<SLInventoryEntry> data
         SLInventoryEntry folder
-        Boolean areWearablesReady = areWearablesReady()
+        val areWearablesReady: Boolean = areWearablesReady()
         Debug.Printf("Wearables ready %b, cofReady %b", Boolean.valueOf(areWearablesReady), Boolean.valueOf(this.cofReady))
         if ((areWearablesReady ? this.cofReady : false) && (data = this.currentOutfitFolder.getData()) != null && (folder = data.getFolder()) != null && this.needUpdateCOF.getAndSet(false)) {
             this.currentCofInventoryVersion = folder.version
-            LinkedList linkedList = LinkedList()
-            HashMap hashMap = HashMap()
-            HashMap hashMap2 = HashMap()
-            HashSet hashSet = HashSet()
+            val linkedList: LinkedList = LinkedList()
+            val hashMap: HashMap = HashMap()
+            val hashMap2: HashMap = HashMap()
+            val hashSet: HashSet = HashSet()
             for (SLWearable sLWearable : this.wornWearables.values()) {
                 if (!sLWearable.getIsFailed()) {
                     hashSet.add(sLWearable.itemID)
                     hashMap.put(sLWearable.itemID, sLWearable)
                 }
             }
-            Map map = this.wantedAttachments.get()
+            val map: Map = this.wantedAttachments.get()
             if (map != null) {
                 hashMap2.putAll(map)
             }
-            Boolean z3 = true
+            val z3: Boolean = true
             for (SLInventoryEntry sLInventoryEntry : data) {
                 if (sLInventoryEntry.assetType == SLAssetType.AT_LINK.getTypeCode()) {
                     if (sLInventoryEntry.invType == SLInventoryType.IT_WEARABLE.getTypeCode()) {
@@ -487,10 +487,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         }
     }
 
-    private Unit UpdateCurrentOutfitLink(InventoryEntryList inventoryEntryList) {
-        Iterator it = inventoryEntryList.iterator()
+    private fun UpdateCurrentOutfitLink(inventoryEntryList: InventoryEntryList) {
+        val it: Iterator = inventoryEntryList.iterator()
         while (it.hasNext()) {
-            SLInventoryEntry sLInventoryEntry = (SLInventoryEntry) it.next()
+            val sLInventoryEntry: SLInventoryEntry = (SLInventoryEntry) it.next()
             if (sLInventoryEntry.assetType == SLAssetType.AT_LINK_FOLDER.getTypeCode()) {
                 this.userManager.wornOutfitLink().setData(SubscriptionSingleKey.Value, sLInventoryEntry.assetUUID)
                 return
@@ -501,11 +501,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
     private synchronized Unit UpdateMultiLayer() {
         RezMultipleAttachmentsFromInv rezMultipleAttachmentsFromInv
         Debug.Printf("AvatarAppearance: MultiLayer: Updating multi layer appearance.", Object[0])
-        InventoryEntryList<SLInventoryEntry> data = this.currentOutfitFolder.getData()
-        InventoryDB database = this.userManager != null ? this.userManager.getInventoryManager().getDatabase() : null
+        val data: InventoryEntryList<SLInventoryEntry> = this.currentOutfitFolder.getData()
+        val database: InventoryDB = this.userManager != null ? this.userManager.getInventoryManager().getDatabase() : null
         if (!(data == null || database == null)) {
-            LinkedList linkedList = LinkedList()
-            LinkedList<SLInventoryEntry> linkedList2 = LinkedList<>()
+            val linkedList: LinkedList = LinkedList()
+            val linkedList2: LinkedList<SLInventoryEntry> = LinkedList<>()
             for (SLInventoryEntry sLInventoryEntry : data) {
                 if (sLInventoryEntry.invType == SLInventoryType.IT_WEARABLE.getTypeCode()) {
                     linkedList.add(sLInventoryEntry)
@@ -522,11 +522,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
             }
             if (linkedList2.size() != 0) {
                 Debug.Printf("AvatarAppearance: Re-attaching %d attachments from COF.", Integer.valueOf(linkedList2.size()))
-                HashMap hashMap = HashMap()
-                UUID randomUUID = UUID.randomUUID()
-                RezMultipleAttachmentsFromInv rezMultipleAttachmentsFromInv2 = null
+                val hashMap: HashMap = HashMap()
+                val randomUUID: UUID = UUID.randomUUID()
+                val rezMultipleAttachmentsFromInv2: RezMultipleAttachmentsFromInv = null
                 for (SLInventoryEntry sLInventoryEntry2 : linkedList2) {
-                    SLInventoryEntry resolveLink = database.resolveLink(sLInventoryEntry2)
+                    val resolveLink: SLInventoryEntry = database.resolveLink(sLInventoryEntry2)
                     if (resolveLink != null) {
                         if (rezMultipleAttachmentsFromInv2 == null) {
                             rezMultipleAttachmentsFromInv2 = RezMultipleAttachmentsFromInv()
@@ -660,12 +660,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
 
     }
 
-    private Unit UpdateWearableNames() {
+    private fun UpdateWearableNames() {
         SLInventoryEntry resolveLink
         SLWearableType byCode
         SLWearable sLWearable
-        InventoryDB inventoryDB = null
-        InventoryEntryList<SLInventoryEntry> data = this.currentOutfitFolder.getData()
+        val inventoryDB: InventoryDB = null
+        val data: InventoryEntryList<SLInventoryEntry> = this.currentOutfitFolder.getData()
         if (this.userManager != null) {
             inventoryDB = this.userManager.getInventoryManager().getDatabase()
         }
@@ -678,26 +678,26 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         }
     }
 
-    private Boolean WearItemList(InventoryDB inventoryDB, List<SLInventoryEntry> list, Boolean z) {
+    private fun WearItemList(inventoryDB: InventoryDB, list: List<SLInventoryEntry>, z: Boolean): Boolean {
         SLWearableType byCode
-        Boolean z5 = false
-        RLVController rLVController = this.agentCircuit.getModules().rlvController
-        HashBasedTable<SLWearableType, UUID, SLWearable> create = HashBasedTable.create(this.wornWearables)
-        Iterator<T> it = list.iterator()
+        val z5: Boolean = false
+        val rLVController: RLVController = this.agentCircuit.getModules().rlvController
+        val create: HashBasedTable<SLWearableType, UUID, SLWearable> = HashBasedTable.create(this.wornWearables)
+        val it: Iterator<T> = list.iterator()
         while (true) {
             z2 = z5
             if (!it.hasNext()) {
                 break
             }
-            SLInventoryEntry resolveLink = inventoryDB.resolveLink((SLInventoryEntry) it.next())
+            val resolveLink: SLInventoryEntry = inventoryDB.resolveLink((SLInventoryEntry) it.next())
             if (!(resolveLink == null || (byCode = SLWearableType.getByCode(resolveLink.flags & 255)) == null)) {
-                Boolean isBodyPart = !z ? byCode.isBodyPart() : true
+                val isBodyPart: Boolean = !z ? byCode.isBodyPart() : true
                 if (!rLVController.canWearItem(byCode)) {
                     z3 = false
                 } else if (isBodyPart) {
                     if (!rLVController.canTakeItemOff(byCode)) {
-                        Boolean z6 = false
-                        Iterator<T> it2 = create.row(byCode).keySet().iterator()
+                        val z6: Boolean = false
+                        val it2: Iterator<T> = create.row(byCode).keySet().iterator()
                         while (true) {
                             z4 = z6
                             if (!it2.hasNext()) {
@@ -715,10 +715,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
                 }
                 if (z3 && !create.contains(byCode, resolveLink.assetUUID)) {
                     if (isBodyPart) {
-                        HashSet<UUID> hashSet = HashSet<>(create.row(byCode).keySet())
+                        val hashSet: HashSet<UUID> = HashSet<>(create.row(byCode).keySet())
                         hashSet.remove(resolveLink.assetUUID)
                         for (UUID remove : hashSet) {
-                            SLWearable remove2 = create.remove(byCode, remove)
+                            val remove2: SLWearable = create.remove(byCode, remove)
                             if (remove2 != null) {
                                 remove2.dispose()
                             }
@@ -738,8 +738,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         return z2
     }
 
-    private SLWearable addWearable(Table<SLWearableType, UUID, SLWearable> table, SLWearableType sLWearableType, UUID uuid, UUID uuid2, String str) {
-        SLWearable sLWearable = SLWearable(this.userManager, this.agentCircuit, uuid, uuid2, sLWearableType, this)
+     private fun addWearable(table: Table<SLWearableType, UUID, SLWearable>, sLWearableType: SLWearableType, uuid: UUID, uuid2: UUID, str: String): SLWearable {
+        val sLWearable: SLWearable = SLWearable(this.userManager, this.agentCircuit, uuid, uuid2, sLWearableType, this)
         if (str != null) {
             sLWearable.setInventoryName(str)
         }
@@ -747,16 +747,16 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         return sLWearable
     }
 
-    private Boolean areWearablesReady() {
-        SLWearableType[] values = SLWearableType.values()
-        Int length = values.length
-        Int i = 0
-        Boolean z6 = false
-        Boolean z7 = false
+     private fun areWearablesReady(): Boolean {
+        val values: Array<SLWearableType> = SLWearableType.values()
+        val length: Int = values.length
+        val i: Int = 0
+        val z6: Boolean = false
+        val z7: Boolean = false
         while (i < length) {
-            SLWearableType sLWearableType = values[i]
-            Boolean isCritical = sLWearableType.getIsCritical()
-            Map<UUID, SLWearable> row = this.wornWearables.row(sLWearableType)
+            val sLWearableType: SLWearableType = values[i]
+            val isCritical: Boolean = sLWearableType.getIsCritical()
+            val row: Map<UUID, SLWearable> = this.wornWearables.row(sLWearableType)
             if (row != null) {
                 z2 = false
                 z = z7
@@ -781,7 +781,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
             if (!isCritical) {
                 z3 = z6
             } else if (!z2) {
-                Object[] objArr = Object[2]
+                val objArr: Array<Any> = Object[2]
                 objArr[0] = sLWearableType
                 objArr[1] = Integer.valueOf(row != null ? row.size() : 0)
                 Debug.Printf("missing wearables on critical layer %s (worn: %d entries)", objArr)
@@ -800,7 +800,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         return false
     }
 
-    private Boolean canDetachItem(UUID uuid) {
+     private fun canDetachItem(uuid: UUID): Boolean {
         SLObjectAvatarInfo agentAvatar
         if (this.parcelInfo == null || (agentAvatar = this.parcelInfo.getAgentAvatar()) == null) {
             return true
@@ -820,22 +820,22 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         }
     }
 
-    private Boolean canWearItem(SLWearableType sLWearableType) {
+     private fun canWearItem(sLWearableType: SLWearableType): Boolean {
         return this.agentCircuit.getModules().rlvController.canWearItem(sLWearableType)
     }
 
-    private Float getAgentHeight() {
+     private fun getAgentHeight(): Float {
         return (this.agentSizeVPLegLength * 0.1918f) + 1.706f + (this.agentSizeVPHipLength * 0.0375f) + (this.agentSizeVPHeight * 0.12022f) + (this.agentSizeVPHeadSize * 0.01117f) + (this.agentSizeVPNeckLength * 0.038f) + (this.agentSizeVPHeelHeight * 0.08f) + (this.agentSizeVPPlatformHeight * 0.07f)
     }
 
-    private Int[] getAppearanceParams() {
+     private fun getAppearanceParams(): IntArray {
         SLAvatarParams.AvatarParam avatarParam
-        Int[] iArr = Int[218]
+        val iArr: IntArray = Int[218]
         for (Int i = 0; i < 218; i++) {
             iArr[i] = 0
             SLAvatarParams.ParamSet paramSet = SLAvatarParams.paramDefs[i]
             if (!(paramSet == null || paramSet.params.size() <= 0 || (avatarParam = (SLAvatarParams.AvatarParam) paramSet.params.get(0)) == null)) {
-                Int round = Math.round(((avatarParam.defValue - avatarParam.minValue) * 255.0f) / (avatarParam.maxValue - avatarParam.minValue))
+                val round: Int = Math.round(((avatarParam.defValue - avatarParam.minValue) * 255.0f) / (avatarParam.maxValue - avatarParam.minValue))
                 if (round < 0) {
                     round = 0
                 } else if (round > 255) {
@@ -845,13 +845,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
             }
         }
         for (SLWearable wearableData : this.wornWearables.values()) {
-            SLWearableData wearableData2 = wearableData.getWearableData()
+            val wearableData2: SLWearableData = wearableData.getWearableData()
             if (wearableData2 != null) {
                 for (SLWearableData.WearableParam wearableParam : wearableData2.params) {
                     SLAvatarParams.ParamSet paramSet2 = SLAvatarParams.paramByIDs.get(Integer.valueOf(wearableParam.paramIndex))
                     if (paramSet2 != null && paramSet2.params.size() > 0 && paramSet2.appearanceIndex >= 0) {
                         SLAvatarParams.AvatarParam avatarParam2 = (SLAvatarParams.AvatarParam) paramSet2.params.get(0)
-                        Int round2 = Math.round(((wearableParam.paramValue - avatarParam2.minValue) * 255.0f) / (avatarParam2.maxValue - avatarParam2.minValue))
+                        val round2: Int = Math.round(((wearableParam.paramValue - avatarParam2.minValue) * 255.0f) / (avatarParam2.maxValue - avatarParam2.minValue))
                         if (round2 < 0) {
                             round2 = 0
                         } else if (round2 > 255) {
@@ -894,7 +894,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         SLObjectAvatarInfo agentAvatar
         ImmutableList.Builder builder = ImmutableList.builder()
         for (Table.Cell cell : this.wornWearables.cellSet()) {
-            SLWearable sLWearable = (SLWearable) cell.getValue()
+            val sLWearable: SLWearable = (SLWearable) cell.getValue()
             if (sLWearable != null) {
                 builder.add((Object) WornItem((SLWearableType) cell.getRowKey(), 0, (UUID) cell.getColumnKey(), sLWearable.getName(), 0, false))
             }
@@ -911,17 +911,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         return builder.build()
     }
 
-    private Boolean isItemWorn(SLInventoryEntry sLInventoryEntry, Boolean z) {
+     private fun isItemWorn(sLInventoryEntry: SLInventoryEntry, z: Boolean): Boolean {
         return sLInventoryEntry.whatIsItemWornOn(this.wornAttachments, this.wornWearables, z) != null
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onCofFolderEntry */
-    fun m201com_lumiyaviewer_lumiya_slproto_modules_SLAvatarAppearancemthref1(InventoryEntryList inventoryEntryList) {
+    fun m201com_lumiyaviewer_lumiya_slproto_modules_SLAvatarAppearancemthref1(inventoryEntryList: InventoryEntryList) {
         if (inventoryEntryList != null) {
-            Iterator it = inventoryEntryList.iterator()
+            val it: Iterator = inventoryEntryList.iterator()
             while (it.hasNext()) {
-                SLInventoryEntry sLInventoryEntry = (SLInventoryEntry) it.next()
+                val sLInventoryEntry: SLInventoryEntry = (SLInventoryEntry) it.next()
                 if (sLInventoryEntry != null && sLInventoryEntry.isFolder && sLInventoryEntry.typeDefault == 46) {
                     this.cofFolderUUID.set(sLInventoryEntry.uuid)
                     this.findCofFolder.unsubscribe()
@@ -934,7 +934,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
 
     /* access modifiers changed from: private */
     /* renamed from: onCurrentOutfitFolder */
-    fun m200com_lumiyaviewer_lumiya_slproto_modules_SLAvatarAppearancemthref0(InventoryEntryList inventoryEntryList) {
+    fun m200com_lumiyaviewer_lumiya_slproto_modules_SLAvatarAppearancemthref0(inventoryEntryList: InventoryEntryList) {
         SLInventoryEntry folder
         if (inventoryEntryList != null && (folder = inventoryEntryList.getFolder()) != null && Objects.equal(folder.sessionID, this.agentCircuit.circuitInfo.sessionID)) {
             Debug.Log("AvatarAppearance: COF has been fetched from inventory.")
@@ -947,15 +947,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         }
     }
 
-    private Unit startBaking() {
-        BakeProcess bakeProcess2 = this.bakeProcess
+     private fun startBaking() {
+        val bakeProcess2: BakeProcess = this.bakeProcess
         if (bakeProcess2 != null) {
             bakeProcess2.cancel()
         }
         this.bakeProcess = BakeProcess(this.wornWearables, this, this.agentCircuit.getModules().textureUploader, this.eventBus)
     }
 
-    private Unit updateIfWearablesReady() {
+     private fun updateIfWearablesReady() {
         if (areWearablesReady()) {
             SendAvatarSetAppearance()
             if (!this.needUpdateAppearance) {
@@ -966,8 +966,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         }
     }
 
-    fun AttachInventoryItem(SLInventoryEntry sLInventoryEntry, Int i, Boolean z) {
-        InventoryDB inventoryDB = null
+    fun AttachInventoryItem(sLInventoryEntry: SLInventoryEntry, i: Int, z: Boolean) {
+        val inventoryDB: InventoryDB = null
         if (this.userManager != null) {
             inventoryDB = this.userManager.getInventoryManager().getDatabase()
         }
@@ -980,9 +980,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
                 return
             }
             Debug.Printf("Outfits: Attaching inventory item %s", sLInventoryEntry.uuid.toString())
-            Map map = this.wantedAttachments.get()
+            val map: Map = this.wantedAttachments.get()
             if (map == null || (!map.containsKey(sLInventoryEntry.uuid))) {
-                HashMap hashMap = HashMap()
+                val hashMap: HashMap = HashMap()
                 if (map != null) {
                     hashMap.putAll(map)
                 }
@@ -992,7 +992,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
             } else {
                 z2 = false
             }
-            RezSingleAttachmentFromInv rezSingleAttachmentFromInv = RezSingleAttachmentFromInv()
+            val rezSingleAttachmentFromInv: RezSingleAttachmentFromInv = RezSingleAttachmentFromInv()
             rezSingleAttachmentFromInv.AgentData_Field.AgentID = this.circuitInfo.agentID
             rezSingleAttachmentFromInv.AgentData_Field.SessionID = this.circuitInfo.sessionID
             if (!z) {
@@ -1016,14 +1016,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         }
     }
 
-    fun ChangeOutfit(List<SLInventoryEntry> list, Boolean z, SLInventoryEntry sLInventoryEntry) {
+    fun ChangeOutfit(list: List<SLInventoryEntry>, z: Boolean, sLInventoryEntry: SLInventoryEntry) {
         RezMultipleAttachmentsFromInv rezMultipleAttachmentsFromInv
         SLWearableType byCode
         SLWearable remove
         RezMultipleAttachmentsFromInv rezMultipleAttachmentsFromInv2
-        InventoryDB database = this.userManager != null ? this.userManager.getInventoryManager().getDatabase() : null
-        Map map = this.wantedAttachments.get()
-        HashMap hashMap = map != null ? HashMap(map) : HashMap()
+        val database: InventoryDB = this.userManager != null ? this.userManager.getInventoryManager().getDatabase() : null
+        val map: Map = this.wantedAttachments.get()
+        val hashMap: HashMap = map != null ? HashMap(map) : HashMap()
         if (z) {
             z2 = true
             hashMap.clear()
@@ -1044,10 +1044,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         } else {
             z3 = z2
         }
-        UUID randomUUID = UUID.randomUUID()
-        ArrayList arrayList = ArrayList()
+        val randomUUID: UUID = UUID.randomUUID()
+        val arrayList: ArrayList = ArrayList()
         for (SLInventoryEntry sLInventoryEntry2 : list) {
-            SLInventoryEntry resolveLink = database != null ? database.resolveLink(sLInventoryEntry2) : sLInventoryEntry2
+            val resolveLink: SLInventoryEntry = database != null ? database.resolveLink(sLInventoryEntry2) : sLInventoryEntry2
             if (resolveLink != null) {
                 sLInventoryEntry2 = resolveLink
             }
@@ -1055,23 +1055,23 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
                 arrayList.add(sLInventoryEntry2)
             }
         }
-        RezMultipleAttachmentsFromInv rezMultipleAttachmentsFromInv3 = RezMultipleAttachmentsFromInv()
+        val rezMultipleAttachmentsFromInv3: RezMultipleAttachmentsFromInv = RezMultipleAttachmentsFromInv()
         rezMultipleAttachmentsFromInv3.AgentData_Field.AgentID = this.circuitInfo.agentID
         rezMultipleAttachmentsFromInv3.AgentData_Field.SessionID = this.circuitInfo.sessionID
         rezMultipleAttachmentsFromInv3.HeaderData_Field.CompoundMsgID = randomUUID
         rezMultipleAttachmentsFromInv3.HeaderData_Field.TotalObjects = arrayList.size()
         rezMultipleAttachmentsFromInv3.HeaderData_Field.FirstDetachAll = z
         Debug.Printf("Wearing: totalAttachments %d", Integer.valueOf(arrayList.size()))
-        Iterator it = arrayList.iterator()
+        val it: Iterator = arrayList.iterator()
         while (true) {
             z4 = z3
             rezMultipleAttachmentsFromInv = rezMultipleAttachmentsFromInv3
             if (!it.hasNext()) {
                 break
             }
-            SLInventoryEntry sLInventoryEntry3 = (SLInventoryEntry) it.next()
+            val sLInventoryEntry3: SLInventoryEntry = (SLInventoryEntry) it.next()
             if (rezMultipleAttachmentsFromInv == null) {
-                RezMultipleAttachmentsFromInv rezMultipleAttachmentsFromInv4 = RezMultipleAttachmentsFromInv()
+                val rezMultipleAttachmentsFromInv4: RezMultipleAttachmentsFromInv = RezMultipleAttachmentsFromInv()
                 rezMultipleAttachmentsFromInv4.AgentData_Field.AgentID = this.circuitInfo.agentID
                 rezMultipleAttachmentsFromInv4.AgentData_Field.SessionID = this.circuitInfo.sessionID
                 rezMultipleAttachmentsFromInv4.HeaderData_Field.CompoundMsgID = randomUUID
@@ -1082,7 +1082,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
                 rezMultipleAttachmentsFromInv2 = rezMultipleAttachmentsFromInv
             }
             RezMultipleAttachmentsFromInv.ObjectData objectData = RezMultipleAttachmentsFromInv.ObjectData()
-            UUID uuid = sLInventoryEntry3.uuid
+            val uuid: UUID = sLInventoryEntry3.uuid
             Debug.Printf("Wearing: entry '%s' actualUUID %s", sLInventoryEntry3.name, uuid)
             hashMap.put(uuid, sLInventoryEntry3.name)
             z3 = true
@@ -1108,25 +1108,25 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
             rezMultipleAttachmentsFromInv.isReliable = true
             SendMessage(rezMultipleAttachmentsFromInv)
         }
-        Boolean z9 = false
-        RLVController rLVController = this.agentCircuit.getModules().rlvController
-        HashSet hashSet = HashSet()
-        HashBasedTable<SLWearableType, UUID, SLWearable> create = HashBasedTable.create(this.wornWearables)
-        Iterator<T> it2 = list.iterator()
+        val z9: Boolean = false
+        val rLVController: RLVController = this.agentCircuit.getModules().rlvController
+        val hashSet: HashSet = HashSet()
+        val create: HashBasedTable<SLWearableType, UUID, SLWearable> = HashBasedTable.create(this.wornWearables)
+        val it2: Iterator<T> = list.iterator()
         while (true) {
             z5 = z9
             if (!it2.hasNext()) {
                 break
             }
-            SLInventoryEntry sLInventoryEntry4 = (SLInventoryEntry) it2.next()
-            SLInventoryEntry resolveLink2 = database != null ? database.resolveLink(sLInventoryEntry4) : sLInventoryEntry4
+            val sLInventoryEntry4: SLInventoryEntry = (SLInventoryEntry) it2.next()
+            val resolveLink2: SLInventoryEntry = database != null ? database.resolveLink(sLInventoryEntry4) : sLInventoryEntry4
             if (resolveLink2 != null && ((resolveLink2.assetType == SLAssetType.AT_BODYPART.getTypeCode() || resolveLink2.assetType == SLAssetType.AT_CLOTHING.getTypeCode()) && (byCode = SLWearableType.getByCode(resolveLink2.flags & 255)) != null)) {
                 if (!rLVController.canWearItem(byCode)) {
                     z7 = false
                 } else if (byCode.isBodyPart()) {
                     if (!rLVController.canTakeItemOff(byCode)) {
-                        Boolean z10 = false
-                        Iterator<T> it3 = create.row(byCode).keySet().iterator()
+                        val z10: Boolean = false
+                        val it3: Iterator<T> = create.row(byCode).keySet().iterator()
                         while (true) {
                             z8 = z10
                             if (!it3.hasNext()) {
@@ -1148,7 +1148,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
                         addWearable(create, byCode, resolveLink2.uuid, resolveLink2.assetUUID, resolveLink2.name)
                         z5 = true
                         if (byCode.isBodyPart()) {
-                            HashSet<UUID> hashSet2 = HashSet<>()
+                            val hashSet2: HashSet<UUID> = HashSet<>()
                             for (UUID uuid2 : create.row(byCode).keySet()) {
                                 if (!uuid2.equals(resolveLink2.assetUUID)) {
                                     hashSet2.add(uuid2)
@@ -1169,16 +1169,16 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
             z6 = z5
             for (SLWearableType sLWearableType : SLWearableType.values()) {
                 if (!sLWearableType.isBodyPart() && rLVController.canTakeItemOff(sLWearableType)) {
-                    Map<UUID, SLWearable> row = create.row(sLWearableType)
-                    HashSet<UUID> hashSet3 = HashSet<>()
+                    val row: Map<UUID, SLWearable> = create.row(sLWearableType)
+                    val hashSet3: HashSet<UUID> = HashSet<>()
                     for (UUID uuid4 : row.keySet()) {
                         if (!hashSet.contains(uuid4)) {
                             hashSet3.add(uuid4)
                         }
                     }
-                    Boolean z11 = z6
+                    val z11: Boolean = z6
                     for (UUID remove2 : hashSet3) {
-                        SLWearable remove3 = row.remove(remove2)
+                        val remove3: SLWearable = row.remove(remove2)
                         if (remove3 != null) {
                             remove3.dispose()
                         }
@@ -1209,22 +1209,22 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         }
     }
 
-    fun DetachInventoryItem(SLInventoryEntry sLInventoryEntry) {
+    fun DetachInventoryItem(sLInventoryEntry: SLInventoryEntry) {
         if (canDetachItem(sLInventoryEntry)) {
-            UUID uuid = sLInventoryEntry.isLink() ? sLInventoryEntry.assetUUID : sLInventoryEntry.uuid
+            val uuid: UUID = sLInventoryEntry.isLink() ? sLInventoryEntry.assetUUID : sLInventoryEntry.uuid
             Debug.Log("Outfits: Detaching inventory item " + uuid)
-            Map map = this.wantedAttachments.get()
+            val map: Map = this.wantedAttachments.get()
             if (map == null) {
                 z = false
             } else if (map.containsKey(uuid)) {
-                HashMap hashMap = HashMap(map)
+                val hashMap: HashMap = HashMap(map)
                 hashMap.remove(uuid)
                 this.wantedAttachments.set(ImmutableMap.copyOf(hashMap))
                 z = true
             } else {
                 z = false
             }
-            DetachAttachmentIntoInv detachAttachmentIntoInv = DetachAttachmentIntoInv()
+            val detachAttachmentIntoInv: DetachAttachmentIntoInv = DetachAttachmentIntoInv()
             detachAttachmentIntoInv.ObjectData_Field.AgentID = this.circuitInfo.agentID
             detachAttachmentIntoInv.ObjectData_Field.ItemID = uuid
             detachAttachmentIntoInv.isReliable = true
@@ -1236,15 +1236,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         }
     }
 
-    fun DetachItem(WornItem wornItem) {
+    fun DetachItem(wornItem: WornItem) {
         if (canDetachItem(wornItem)) {
             DetachItem(wornItem.objectLocalID)
         }
     }
 
-    fun DetachItemFromPoint(Int i) {
+    fun DetachItemFromPoint(i: Int) {
         SLObjectAvatarInfo agentAvatar
-        HashSet<Integer> hashSet = null
+        val hashSet: HashSet<Integer> = null
         if (!(this.parcelInfo == null || (agentAvatar = this.parcelInfo.getAgentAvatar()) == null)) {
             try {
                 for (SLObjectInfo next : agentAvatar.treeNode) {
@@ -1267,10 +1267,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         }
     }
 
-    fun ForceTakeItemOff(SLWearableType sLWearableType) {
+    fun ForceTakeItemOff(sLWearableType: SLWearableType) {
         if (!this.wornWearables.row(sLWearableType).isEmpty()) {
             z = true
-            HashBasedTable<SLWearableType, UUID, SLWearable> create = HashBasedTable.create(this.wornWearables)
+            val create: HashBasedTable<SLWearableType, UUID, SLWearable> = HashBasedTable.create(this.wornWearables)
             create.rowKeySet().remove(sLWearableType)
             this.wornWearables = ImmutableTable.copyOf(create)
             this.userManager.getWornWearablesPool().setData(SubscriptionSingleKey.Value, this.wornWearables)
@@ -1285,29 +1285,29 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
     }
 
     @SLMessageHandler
-    fun HandleAgentWearablesUpdate(AgentWearablesUpdate agentWearablesUpdate) {
+    fun HandleAgentWearablesUpdate(agentWearablesUpdate: AgentWearablesUpdate) {
         Debug.Log("AvatarAppearance: Got AgentWearablesUpdate, " + agentWearablesUpdate.WearableData_Fields.size() + " wearables.")
-        HashSet hashSet = HashSet()
-        HashBasedTable<SLWearableType, UUID, SLWearable> create = HashBasedTable.create(this.wornWearables)
+        val hashSet: HashSet = HashSet()
+        val create: HashBasedTable<SLWearableType, UUID, SLWearable> = HashBasedTable.create(this.wornWearables)
         for (AgentWearablesUpdate.WearableData wearableData : agentWearablesUpdate.WearableData_Fields) {
             Debug.Log("Wearable: type = " + wearableData.WearableType + ", itemID = " + wearableData.ItemID + ", assetID = " + wearableData.AssetID)
             if (wearableData.AssetID.getLeastSignificantBits() != 0 || wearableData.AssetID.getMostSignificantBits() != 0) {
                 hashSet.add(wearableData.AssetID)
-                SLWearableType byCode = SLWearableType.getByCode(wearableData.WearableType)
+                val byCode: SLWearableType = SLWearableType.getByCode(wearableData.WearableType)
                 if (byCode != null && create.get(byCode, wearableData.AssetID) == null) {
                     addWearable(create, byCode, wearableData.ItemID, wearableData.AssetID, (String) null)
                 }
             }
         }
         Debug.Log("AvatarAppearance: AgentWearablesUpdate: wearing now: " + hashSet.size() + " ids")
-        HashSet<UUID> hashSet2 = HashSet<>()
+        val hashSet2: HashSet<UUID> = HashSet<>()
         for (UUID uuid : create.columnKeySet()) {
             if (!hashSet.contains(uuid)) {
                 hashSet2.add(uuid)
             }
         }
         for (UUID column : hashSet2) {
-            Map<SLWearableType, SLWearable> column2 = create.column(column)
+            val column2: Map<SLWearableType, SLWearable> = create.column(column)
             for (SLWearable dispose : column2.values()) {
                 dispose.dispose()
             }
@@ -1323,7 +1323,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         StartUpdatingAppearance()
     }
 
-    fun HandleAvatarAppearance(AvatarAppearance avatarAppearance) {
+    fun HandleAvatarAppearance(avatarAppearance: AvatarAppearance) {
         if (avatarAppearance.AppearanceData_Fields.size() > 0) {
             this.currentCofAppearanceVersion = avatarAppearance.AppearanceData_Fields.get(0).CofVersion
             Debug.Printf("AvatarAppearance: inventory COF %d, last updated COF %d, appearance COF %d", Integer.valueOf(this.currentCofInventoryVersion), Integer.valueOf(this.lastCofUpdatedVersion), Integer.valueOf(this.currentCofAppearanceVersion))
@@ -1332,10 +1332,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
 
     fun HandleCircuitReady() {
         SLInventoryEntry findSpecialFolder
-        Boolean z = true
+        val z: Boolean = true
         super.HandleCircuitReady()
         if (this.userManager != null) {
-            UUID rootFolder = this.userManager.getInventoryManager().getRootFolder()
+            val rootFolder: UUID = this.userManager.getInventoryManager().getRootFolder()
             if (rootFolder == null || (findSpecialFolder = this.userManager.getInventoryManager().getDatabase().findSpecialFolder(rootFolder, 46)) == null) {
                 z = false
             } else {
@@ -1368,22 +1368,22 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         super.HandleCloseCircuit()
     }
 
-    fun OnMyAvatarCreated(SLObjectAvatarInfo sLObjectAvatarInfo) {
+    fun OnMyAvatarCreated(sLObjectAvatarInfo: SLObjectAvatarInfo) {
         if (this.agentVisualParams != null) {
             sLObjectAvatarInfo.ApplyAvatarVisualParams(this.agentVisualParams)
         }
     }
 
     fun SendAgentWearablesRequest() {
-        AgentWearablesRequest agentWearablesRequest = AgentWearablesRequest()
+        val agentWearablesRequest: AgentWearablesRequest = AgentWearablesRequest()
         agentWearablesRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         agentWearablesRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
         agentWearablesRequest.isReliable = true
         SendMessage(agentWearablesRequest)
     }
 
-    fun TakeItemOff(SLInventoryEntry sLInventoryEntry) {
-        InventoryDB inventoryDB = null
+    fun TakeItemOff(sLInventoryEntry: SLInventoryEntry) {
+        val inventoryDB: InventoryDB = null
         if (this.userManager != null) {
             inventoryDB = this.userManager.getInventoryManager().getDatabase()
         }
@@ -1395,19 +1395,19 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         }
     }
 
-    fun TakeItemOff(UUID uuid) {
-        RLVController rLVController = this.agentCircuit.getModules().rlvController
-        HashBasedTable<SLWearableType, UUID, SLWearable> create = HashBasedTable.create(this.wornWearables)
-        SLWearableType[] values = SLWearableType.values()
-        Int length = values.length
-        Int i = 0
-        Boolean z2 = false
+    fun TakeItemOff(uuid: UUID) {
+        val rLVController: RLVController = this.agentCircuit.getModules().rlvController
+        val create: HashBasedTable<SLWearableType, UUID, SLWearable> = HashBasedTable.create(this.wornWearables)
+        val values: Array<SLWearableType> = SLWearableType.values()
+        val length: Int = values.length
+        val i: Int = 0
+        val z2: Boolean = false
         while (i < length) {
-            SLWearableType sLWearableType = values[i]
+            val sLWearableType: SLWearableType = values[i]
             if (!rLVController.canTakeItemOff(sLWearableType)) {
                 z = z2
             } else {
-                SLWearable remove = create.remove(sLWearableType, uuid)
+                val remove: SLWearable = create.remove(sLWearableType, uuid)
                 if (remove != null) {
                     remove.dispose()
                     create.columnKeySet().remove(uuid)
@@ -1430,7 +1430,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
 
     fun UpdateMyAttachments() {
         SLObjectAvatarInfo agentAvatar
-        HashMap hashMap = HashMap()
+        val hashMap: HashMap = HashMap()
         if (!(this.parcelInfo == null || (agentAvatar = this.parcelInfo.getAgentAvatar()) == null)) {
             try {
                 for (SLObjectInfo next : agentAvatar.treeNode) {
@@ -1442,7 +1442,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
                 e.printStackTrace()
             }
         }
-        ImmutableMap<UUID, String> copyOf = ImmutableMap.copyOf(hashMap)
+        val copyOf: ImmutableMap<UUID, String> = ImmutableMap.copyOf(hashMap)
         if (!this.wornAttachments.equals(copyOf)) {
             Debug.Log("AvatarAppearance: attachments changed.")
             this.wornAttachments = copyOf
@@ -1452,8 +1452,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         }
     }
 
-    fun WearItem(SLInventoryEntry sLInventoryEntry, Boolean z) {
-        InventoryDB inventoryDB = null
+    fun WearItem(sLInventoryEntry: SLInventoryEntry, z: Boolean) {
+        val inventoryDB: InventoryDB = null
         if (this.userManager != null) {
             inventoryDB = this.userManager.getInventoryManager().getDatabase()
         }
@@ -1464,7 +1464,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         }
     }
 
-    public Boolean canDetachItem(SLInventoryEntry sLInventoryEntry) {
+     public fun canDetachItem(sLInventoryEntry: SLInventoryEntry): Boolean {
         if (sLInventoryEntry.assetType == SLAssetType.AT_LINK.getTypeCode()) {
             if (sLInventoryEntry.invType == SLInventoryType.IT_WEARABLE.getTypeCode()) {
                 return true
@@ -1485,28 +1485,28 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         return false
     }
 
-    public Boolean canDetachItem(WornItem wornItem) {
+     public fun canDetachItem(wornItem: WornItem): Boolean {
         return this.agentCircuit.getModules().rlvController.canDetachItem(wornItem.getAttachedTo(), wornItem.itemID())
     }
 
-    public Boolean canTakeItemOff(SLWearableType sLWearableType) {
+     public fun canTakeItemOff(sLWearableType: SLWearableType): Boolean {
         return this.agentCircuit.getModules().rlvController.canTakeItemOff(sLWearableType)
     }
 
-    public Boolean canTakeItemOff(SLInventoryEntry sLInventoryEntry) {
-        Object whatIsItemWornOn = sLInventoryEntry.whatIsItemWornOn(this.wornAttachments, this.wornWearables, false)
+     public fun canTakeItemOff(sLInventoryEntry: SLInventoryEntry): Boolean {
+        val whatIsItemWornOn: Object = sLInventoryEntry.whatIsItemWornOn(this.wornAttachments, this.wornWearables, false)
         if (whatIsItemWornOn == null) {
             return true
         }
-        RLVController rLVController = this.agentCircuit.getModules().rlvController
+        val rLVController: RLVController = this.agentCircuit.getModules().rlvController
         if (whatIsItemWornOn instanceof SLWearableType) {
             return rLVController.canTakeItemOff((SLWearableType) whatIsItemWornOn)
         }
         return true
     }
 
-    public Boolean canWearItem(SLInventoryEntry sLInventoryEntry) {
-        InventoryDB inventoryDB = null
+     public fun canWearItem(sLInventoryEntry: SLInventoryEntry): Boolean {
+        val inventoryDB: InventoryDB = null
         if (this.userManager != null) {
             inventoryDB = this.userManager.getInventoryManager().getDatabase()
         }
@@ -1516,11 +1516,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         if (sLInventoryEntry == null) {
             return false
         }
-        SLWearableType byCode = SLWearableType.getByCode(sLInventoryEntry.flags & 255)
+        val byCode: SLWearableType = SLWearableType.getByCode(sLInventoryEntry.flags & 255)
         return byCode == null || canWearItem(byCode)
     }
 
-    fun finishBaking(BakeProcess bakeProcess2, SLTextureEntry sLTextureEntry) {
+    fun finishBaking(bakeProcess2: BakeProcess, sLTextureEntry: SLTextureEntry) {
         if (sLTextureEntry != null) {
             this.agentBakedTextures = sLTextureEntry
             SendAvatarSetAppearance()
@@ -1530,7 +1530,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         }
     }
 
-    public UUID getAttachmentUUID(Int i) {
+     public fun getAttachmentUUID(i: Int): UUID {
         SLObjectAvatarInfo agentAvatar
         if (!(this.parcelInfo == null || (agentAvatar = this.parcelInfo.getAgentAvatar()) == null)) {
             try {
@@ -1546,25 +1546,25 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         return null
     }
 
-    public Boolean hasWornWearable(SLWearableType sLWearableType) {
+     public fun hasWornWearable(sLWearableType: SLWearableType): Boolean {
         return this.wornWearables.containsRow(sLWearableType)
     }
 
-    public Boolean isItemWorn(SLInventoryEntry sLInventoryEntry) {
+     public fun isItemWorn(sLInventoryEntry: SLInventoryEntry): Boolean {
         return isItemWorn(sLInventoryEntry, false)
     }
 
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_modules_SLAvatarAppearance_17963  reason: not valid java name */
     public /* synthetic */ Unit m202lambda$com_lumiyaviewer_lumiya_slproto_modules_SLAvatarAppearance_17963(Int i, String str) {
-        LLSDXMLRequest lLSDXMLRequest = LLSDXMLRequest()
-        LLSDMap lLSDMap = LLSDMap(LLSDMap.LLSDMapEntry("cof_version", LLSDInt(i)))
-        Int i2 = 3
+        val lLSDXMLRequest: LLSDXMLRequest = LLSDXMLRequest()
+        val lLSDMap: LLSDMap = LLSDMap(LLSDMap.LLSDMapEntry("cof_version", LLSDInt(i)))
+        val i2: Int = 3
         while (i2 > 0) {
             try {
-                LLSDNode PerformRequest = lLSDXMLRequest.PerformRequest(str, lLSDMap)
+                val PerformRequest: LLSDNode = lLSDXMLRequest.PerformRequest(str, lLSDMap)
                 if (PerformRequest != null && PerformRequest.keyExists("error")) {
-                    LLSDNode byKey = PerformRequest.byKey("error")
+                    val byKey: LLSDNode = PerformRequest.byKey("error")
                     if (byKey.isString()) {
                         Debug.Printf("AvatarAppearance: server-side error: %s", byKey.asString())
                     } else {
@@ -1576,7 +1576,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
             } catch (Exception e) {
                 Debug.Printf("AvatarAppearance: server-side update error: [exception %s]", e.toString())
                 this.lastCofUpdateError = true
-                Int i3 = i2 - 1
+                val i3: Int = i2 - 1
                 try {
                     Thread.sleep(1000)
                     i2 = i3
@@ -1587,7 +1587,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         }
     }
 
-    fun onWearableStatusChanged(SLWearable sLWearable) {
+    fun onWearableStatusChanged(sLWearable: SLWearable) {
         updateIfWearablesReady()
     }
 }

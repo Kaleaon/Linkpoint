@@ -5,13 +5,13 @@ import java.util.Arrays
 
 class TerrainPatchHeightMap {
     private Int hashCode = getHashCode()
-    private Float[] heightMap
+    private FloatArray heightMap
     private Int mapHeight
     private Int mapWidth
-    private Float[] normalMap
+    private FloatArray normalMap
     private Float waterHeight
 
-    TerrainPatchHeightMap(Float f, Float[] fArr, Float[] fArr2, Int i, Int i2) {
+    TerrainPatchHeightMap(Float f, FloatArray fArr, FloatArray fArr2, Int i, Int i2) {
         this.waterHeight = f
         this.mapWidth = i
         this.mapHeight = i2
@@ -36,7 +36,7 @@ class TerrainPatchHeightMap {
         return false
     }
 
-    Float[] getHeightArray() {
+    FloatArray getHeightArray() {
         return this.heightMap
     }
 
@@ -56,7 +56,7 @@ class TerrainPatchHeightMap {
         return Floats.min(this.heightMap)
     }
 
-    Float[] getNormalArray() {
+    FloatArray getNormalArray() {
         return this.normalMap
     }
 

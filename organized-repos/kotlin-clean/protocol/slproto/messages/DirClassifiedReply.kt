@@ -29,7 +29,7 @@ class DirClassifiedReply : SLMessage() {
         public UUID ClassifiedID
         public Int CreationDate
         public Int ExpirationDate
-        public Byte[] Name
+        public ByteArray Name
         public Int PriceForListing
     }
 

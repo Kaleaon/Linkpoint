@@ -75,7 +75,7 @@ class SLPolyMorphData {
         }
         for (Int i4 = 0; i4 < this.numVertices; i4++) {
             Int i5 = asIntBuffer.get(i4)
-            float f2 = z ? (((float) (byteBuffer.get(((Int) Math.floor((double) (asFloatBuffer4.get((i5 * 2) + 0) * ((float) i)))) + ((((Int) Math.floor((double) (asFloatBuffer4.get((i5 * 2) + 1) * ((float) i2)))) * i) + i3)) & UnsignedBytes.MAX_VALUE)) / 255.0f) * f : f
+            float f2 = z ? (((float) (byteBuffer.get((Math.toInt().floor((double) (asFloatBuffer4.get((i5 * 2) + 0) * ((float) i)))) + (((Math.toInt().floor((double) (asFloatBuffer4.get((i5 * 2) + 1) * ((float) i2)))) * i) + i3)) & UnsignedBytes.MAX_VALUE)) / 255.0f) * f : f
             for (Int i6 = 0; i6 < 6; i6++) {
                 asFloatBuffer3.put((i5 * 6) + i6, asFloatBuffer3.get((i5 * 6) + i6) + (asFloatBuffer.get((i4 * 6) + i6) * f2))
             }

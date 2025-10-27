@@ -15,10 +15,10 @@ class ShaderPreprocessor {
         this.definedMacros = ImmutableMap.copyOf((Map) map)
     }
 
-    private String processCode(BufferedReader bufferedReader, StringBuilder stringBuilder) throws IOException {
-        String str = null
+     private fun processCode(bufferedReader: BufferedReader, stringBuilder: StringBuilder) throws IOException {
+        val str: String = null
         while (true) {
-            String readLine = bufferedReader.readLine()
+            val readLine: String = bufferedReader.readLine()
             if (readLine == null) {
                 return str
             }
@@ -27,9 +27,9 @@ class ShaderPreprocessor {
                 return readLine
             }
             if (readLine.startsWith("#ifdef") || readLine.startsWith("#ifndef")) {
-                Boolean startsWith = readLine.startsWith("#ifdef")
-                Boolean containsKey = this.definedMacros.containsKey(readLine.substring(readLine.indexOf(32)).trim())
-                Object processCode = processCode(bufferedReader, startsWith == containsKey ? stringBuilder : null)
+                val startsWith: Boolean = readLine.startsWith("#ifdef")
+                val containsKey: Boolean = this.definedMacros.containsKey(readLine.substring(readLine.indexOf(32)).trim())
+                val processCode: Object = processCode(bufferedReader, startsWith == containsKey ? stringBuilder : null)
                 if (Objects.equal(processCode, "#else")) {
                     processCode = processCode(bufferedReader, startsWith != containsKey ? stringBuilder : null)
                 }
@@ -37,7 +37,7 @@ class ShaderPreprocessor {
                     throw IOException("#endif expected")
                 }
             } else if (stringBuilder != null) {
-                String str2 = readLine
+                val str2: String = readLine
                 for (Entry entry : this.definedMacros.entrySet()) {
                     str2 = str2.replace((CharSequence) entry.getKey(), (CharSequence) entry.getValue())
                 }
@@ -48,8 +48,8 @@ class ShaderPreprocessor {
         }
     }
 
-    public String processCode(BufferedReader bufferedReader) throws IOException {
-        StringBuilder stringBuilder = StringBuilder()
+     public fun processCode(bufferedReader: BufferedReader) throws IOException {
+        val stringBuilder: StringBuilder = StringBuilder()
         processCode(bufferedReader, stringBuilder)
         return stringBuilder.toString()
     }

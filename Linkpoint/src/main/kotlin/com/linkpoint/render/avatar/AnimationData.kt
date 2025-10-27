@@ -31,12 +31,12 @@ class AnimationData {
     @JvmStatic
 private class AnimationJointData {
         private val Int Priority
-        private val AnimationPosKeyframe[] posKeyframes
-        private val AnimationRotKeyframe[] rotKeyframes
+        private val Array<AnimationPosKeyframe> posKeyframes
+        private val Array<AnimationRotKeyframe> rotKeyframes
 
         AnimationJointData(LittleEndianDataInputStream littleEndianDataInputStream, Float f) throws IOException {
             this.Priority = littleEndianDataInputStream.readInt()
-            Int readInt = littleEndianDataInputStream.readInt()
+            val readInt: Int = littleEndianDataInputStream.readInt()
             if (readInt < 0 || readInt > EventType.STREET_VIEW_COLLECTION) {
                 readInt = 0
             }
@@ -65,15 +65,15 @@ private <T> Boolean animateArray(Float f, Float f2, T t, AnimationKeyframe<T>[] 
                     if (f2 == animationKeyframeArr[i].time) {
                         animationKeyframeArr[i].setTransform(t)
                     } else {
-                        Int i2 = i - 1
+                        val i2: Int = i - 1
                         if (i2 < 0) {
                             i2 = 0
                         }
                         if (i2 == i) {
                             animationKeyframeArr[i].setTransform(t)
                         } else {
-                            Float f3 = animationKeyframeArr[i].time
-                            Float f4 = animationKeyframeArr[i2].time
+                            val f3: Float = animationKeyframeArr[i].time
+                            val f4: Float = animationKeyframeArr[i2].time
                             if (f4 > f3) {
                                 f4 -= f
                             }
@@ -91,13 +91,13 @@ private <T> Boolean animateArray(Float f, Float f2, T t, AnimationKeyframe<T>[] 
         }
 
         @JvmStatic
-private Float uint16ToFloat(Int i, Float f, Float f2) {
-            Float f3 = f2 - f
-            Float f4 = ((((Float) i) * 1.5259022E-5f) * f3) + f
+ private fun uint16ToFloat(i: Int, f: Float, f2: Float): Float {
+            val f3: Float = f2 - f
+            val f4: Float = ((((Float) i) * 1.5259022E-5f) * f3) + f
             return Math.abs(f4) < f3 * 1.5259022E-5f ? 0.0f : f4
         }
 
-        Unit animate(SLSkeletonBone sLSkeletonBone, Float f, Float f2, LLQuaternion[] lLQuaternionArr, LLVector3[] lLVector3Arr, Int i, Float f3, Float[] fArr, Float[] fArr2, LLQuaternion lLQuaternion, LLVector3 lLVector3) {
+         fun animate(sLSkeletonBone: SLSkeletonBone, f: Float, f2: Float, lLQuaternionArr: Array<LLQuaternion>, lLVector3Arr: Array<LLVector3>, i: Int, f3: Float, fArr: FloatArray, fArr2: FloatArray, lLQuaternion: LLQuaternion, lLVector3: LLVector3) {
             Float f4
             if (this.posKeyframes.length != 0) {
                 f4 = fArr2[i] * f3
@@ -116,17 +116,17 @@ private Float uint16ToFloat(Int i, Float f, Float f2) {
             }
         }
 
-        public String toString() {
-            Int i = 0
-            StringBuilder stringBuilder = StringBuilder()
+         public override fun toString(): String {
+            val i: Int = 0
+            val stringBuilder: StringBuilder = StringBuilder()
             stringBuilder.append("Priority ").append(this.Priority)
             stringBuilder.append(", pos frames ").append(this.posKeyframes.length).append("[")
             for (AnimationPosKeyframe animationPosKeyframe : this.posKeyframes) {
                 stringBuilder.append(animationPosKeyframe.toString())
             }
             stringBuilder.append("], rot frames ").append(this.rotKeyframes.length).append("[")
-            AnimationRotKeyframe[] animationRotKeyframeArr = this.rotKeyframes
-            Int length = animationRotKeyframeArr.length
+            val animationRotKeyframeArr: Array<AnimationRotKeyframe> = this.rotKeyframes
+            val length: Int = animationRotKeyframeArr.length
             while (i < length) {
                 stringBuilder.append(animationRotKeyframeArr[i].toString())
                 i++
@@ -136,7 +136,7 @@ private Float uint16ToFloat(Int i, Float f, Float f2) {
         }
     }
 
-    static class AnimationJointSet {
+    class AnimationJointSet {
         private val Float animLength
         private val UUID animationUUID
         private val SparseArray<AnimationJointData> jointAnims
@@ -153,33 +153,33 @@ private Float uint16ToFloat(Int i, Float f, Float f2) {
             this(uuid, f, i)
         }
 
-        Unit addJointData(Int i, AnimationJointData animationJointData) {
+         fun addJointData(i: Int, animationJointData: AnimationJointData) {
             this.jointAnims.put(i, animationJointData)
         }
 
-        Unit animate(AvatarSkeleton avatarSkeleton, AnimationTiming animationTiming, Float[] fArr, Float[] fArr2, LLQuaternion[] lLQuaternionArr, LLVector3[] lLVector3Arr) {
-            Float f = animationTiming.inAnimationTime
-            Float f2 = animationTiming.inFactor * animationTiming.outFactor
+         fun animate(avatarSkeleton: AvatarSkeleton, animationTiming: AnimationTiming, fArr: FloatArray, fArr2: FloatArray, lLQuaternionArr: Array<LLQuaternion>, lLVector3Arr: Array<LLVector3>) {
+            val f: Float = animationTiming.inAnimationTime
+            val f2: Float = animationTiming.inFactor * animationTiming.outFactor
             if (f2 > 0.0f) {
-                LLQuaternion lLQuaternion = LLQuaternion()
-                LLVector3 lLVector3 = LLVector3()
-                Int size = this.jointAnims.size()
+                val lLQuaternion: LLQuaternion = LLQuaternion()
+                val lLVector3: LLVector3 = LLVector3()
+                val size: Int = this.jointAnims.size()
                 for (Int i = 0; i < size; i++) {
-                    Int keyAt = this.jointAnims.keyAt(i)
+                    val keyAt: Int = this.jointAnims.keyAt(i)
                     ((AnimationJointData) this.jointAnims.valueAt(i)).animate(avatarSkeleton.getAnimatedBone(keyAt), this.animLength, f, lLQuaternionArr, lLVector3Arr, keyAt, f2, fArr, fArr2, lLQuaternion, lLVector3)
                 }
             }
         }
 
-        Unit dumpJoints() {
+         fun dumpJoints() {
             Debug.Printf("Anim -- joint set -- length %f prio %d joints %d", Float.valueOf(this.animLength), Integer.valueOf(this.priority), Integer.valueOf(this.jointAnims.size()))
-            Int size = this.jointAnims.size()
+            val size: Int = this.jointAnims.size()
             for (Int i = 0; i < size; i++) {
                 Debug.Printf("Anim -- joint[%d] - jointIndex %d, %s", Integer.valueOf(i), Integer.valueOf(this.jointAnims.keyAt(i)), ((AnimationJointData) this.jointAnims.valueAt(i)).toString())
             }
         }
 
-        public Int getPriority() {
+         public fun getPriority(): Int {
             return this.priority
         }
     }
@@ -212,19 +212,19 @@ private class AnimationPosKeyframe : AnimationKeyframe()<LLVector3> {
             this.position = lLVector3
         }
 
-        protected LLVector3 getTransform() {
+         protected fun getTransform(): LLVector3 {
             return this.position
         }
 
-        fun setInterpolated(LLVector3 lLVector3, Float f, AnimationKeyframe<LLVector3> animationKeyframe, Float f2) {
+        fun setInterpolated(lLVector3: LLVector3, f: Float, animationKeyframe: AnimationKeyframe<LLVector3>, f2: Float) {
             lLVector3.setLerp(this.position, f, (LLVector3) animationKeyframe.getTransform(), f2)
         }
 
-        fun setTransform(LLVector3 lLVector3) {
+        fun setTransform(lLVector3: LLVector3) {
             lLVector3.set(this.position)
         }
 
-        public String toString() {
+         public override fun toString(): String {
             return this.position.toString()
         }
     }
@@ -238,27 +238,27 @@ private class AnimationRotKeyframe : AnimationKeyframe()<LLQuaternion> {
             this.quaternion = lLQuaternion
         }
 
-        protected LLQuaternion getTransform() {
+         protected fun getTransform(): LLQuaternion {
             return this.quaternion
         }
 
-        fun setInterpolated(LLQuaternion lLQuaternion, Float f, AnimationKeyframe<LLQuaternion> animationKeyframe, Float f2) {
+        fun setInterpolated(lLQuaternion: LLQuaternion, f: Float, animationKeyframe: AnimationKeyframe<LLQuaternion>, f2: Float) {
             lLQuaternion.setLerp(this.quaternion, f, (LLQuaternion) animationKeyframe.getTransform(), f2)
         }
 
-        fun setTransform(LLQuaternion lLQuaternion) {
+        fun setTransform(lLQuaternion: LLQuaternion) {
             lLQuaternion.set(this.quaternion)
         }
 
-        public String toString() {
+         public override fun toString(): String {
             return this.quaternion.toString()
         }
     }
 
     public AnimationData(UUID uuid, InputStream inputStream) throws IOException {
-        Int i = 0
+        val i: Int = 0
         this.animationUUID = uuid
-        LittleEndianDataInputStream littleEndianDataInputStream = LittleEndianDataInputStream(inputStream)
+        val littleEndianDataInputStream: LittleEndianDataInputStream = LittleEndianDataInputStream(inputStream)
         littleEndianDataInputStream.skipBytes(4)
         this.animPriority = littleEndianDataInputStream.readInt()
         this.animLength = littleEndianDataInputStream.readFloat()
@@ -269,14 +269,14 @@ private class AnimationRotKeyframe : AnimationKeyframe()<LLQuaternion> {
         this.easeInTime = littleEndianDataInputStream.readFloat()
         this.easeOutTime = littleEndianDataInputStream.readFloat()
         this.handPose = littleEndianDataInputStream.readInt()
-        Int readInt = littleEndianDataInputStream.readInt()
+        val readInt: Int = littleEndianDataInputStream.readInt()
         while (i < readInt) {
-            SLSkeletonBoneID sLSkeletonBoneID = (SLSkeletonBoneID) SLSkeletonBoneID.bones.get(littleEndianDataInputStream.readZeroTerminatedString())
-            AnimationJointData animationJointData = AnimationJointData(littleEndianDataInputStream, this.animLength)
+            val sLSkeletonBoneID: SLSkeletonBoneID = (SLSkeletonBoneID) SLSkeletonBoneID.bones.get(littleEndianDataInputStream.readZeroTerminatedString())
+            val animationJointData: AnimationJointData = AnimationJointData(littleEndianDataInputStream, this.animLength)
             if (sLSkeletonBoneID != null) {
-                Int i2 = sLSkeletonBoneID.animatedIndex
+                val i2: Int = sLSkeletonBoneID.animatedIndex
                 if (i2 >= 0) {
-                    AnimationJointSet animationJointSet = (AnimationJointSet) this.jointSets.get(animationJointData.Priority)
+                    val animationJointSet: AnimationJointSet = (AnimationJointSet) this.jointSets.get(animationJointData.Priority)
                     if (animationJointSet == null) {
                         animationJointSet = AnimationJointSet(uuid, this.animLength, animationJointData.Priority, null)
                         this.jointSets.put(animationJointData.Priority, animationJointSet)
@@ -289,12 +289,12 @@ private class AnimationRotKeyframe : AnimationKeyframe()<LLQuaternion> {
     }
 
     @JvmStatic
-private Float cubicStep(Float f) {
-        Float max = Math.max(0.0f, Math.min(1.0f, f))
+ private fun cubicStep(f: Float): Float {
+        val max: Float = Math.max(0.0f, Math.min(1.0f, f))
         return (3.0f - (max * 2.0f)) * (max * max)
     }
 
-    private Float getInAnimationTime(Float f, Float f2) {
+     private fun getInAnimationTime(f: Float, f2: Float): Float {
         if (!this.loop) {
             return Math.min(f, this.animLength)
         }
@@ -315,16 +315,16 @@ private Float cubicStep(Float f) {
         }
     }
 
-    private Float getInFactor(Float f) {
+     private fun getInFactor(f: Float): Float {
         if (f >= this.easeInTime || this.easeInTime < 0.001f) {
             return 1.0f
         }
-        Float cubicStep = cubicStep(f / this.easeInTime)
+        val cubicStep: Float = cubicStep(f / this.easeInTime)
         return cubicStep > 1.0f ? 1.0f : cubicStep
     }
 
-    private Float getOutFactor(Float f) {
-        Float f2 = 1.0f
+     private fun getOutFactor(f: Float): Float {
+        val f2: Float = 1.0f
         if (f >= 0.0f) {
             if (this.easeOutTime < 0.001f) {
                 return 0.0f
@@ -337,11 +337,11 @@ private Float cubicStep(Float f) {
         return f2
     }
 
-    private Float getOutFactor(Float f, Float f2) {
+     private fun getOutFactor(f: Float, f2: Float): Float {
         Float f3
         if (f2 >= 0.0f) {
             if (!this.loop) {
-                Float f4 = f - (this.animLength - this.easeOutTime)
+                val f4: Float = f - (this.animLength - this.easeOutTime)
                 if (f4 > 0.0f) {
                     f2 = Math.max(f2, f4)
                 }
@@ -362,7 +362,7 @@ private Float cubicStep(Float f) {
 
     ImmutableList<AvatarRunningAnimation> createRunningAnimations(AvatarRunningSequence avatarRunningSequence) {
         Debug.Printf("Animation: creating anims: %d anims", Integer.valueOf(this.jointSets.size()))
-        Builder builder = ImmutableList.builder()
+        val builder: Builder = ImmutableList.builder()
         for (Int i = 0; i < r2; i++) {
             builder.add(AvatarRunningAnimation(avatarRunningSequence, (AnimationJointSet) this.jointSets.valueAt(i)))
         }
@@ -372,25 +372,25 @@ private Float cubicStep(Float f) {
     fun dumpAnimationData() {
         Debug.Printf("Animation -- dump -- priority %d length %f joint sets %d (inPoint %f outPoint %f loop %b easeIn %f easeOut %f)", Integer.valueOf(this.animPriority), Float.valueOf(this.animLength), Integer.valueOf(this.jointSets.size()), Float.valueOf(this.inPoint), Float.valueOf(this.outPoint), Boolean.valueOf(this.loop), Float.valueOf(this.easeInTime), Float.valueOf(this.easeOutTime))
         for (Int i = 0; i < this.jointSets.size(); i++) {
-            Int keyAt = this.jointSets.keyAt(i)
+            val keyAt: Int = this.jointSets.keyAt(i)
             Debug.Printf("Anim -- joint set %d: prio %d", Integer.valueOf(i), Integer.valueOf(keyAt))
             ((AnimationJointSet) this.jointSets.valueAt(i)).dumpJoints()
         }
         Debug.Printf("Animation -- dump end", Object[0])
     }
 
-    public Int getPriority() {
+     public fun getPriority(): Int {
         return this.animPriority
     }
 
-    Boolean updateAnimationTiming(Long j, Long j2, Long j3, Boolean z, AnimationTiming animationTiming) {
-        Float f = ((Float) (j - j2)) / 1000.0f
-        Float f2 = (j3 == -1 || j < j3) ? -1.0f : ((Float) (j - j3)) / 1000.0f
-        Float inAnimationTime = getInAnimationTime(f, f2)
-        Float inFactor = getInFactor(f)
-        Float outFactor = getOutFactor(f, f2)
+     fun updateAnimationTiming(j: Long, j2: Long, j3: Long, z: Boolean, animationTiming: AnimationTiming): Boolean {
+        val f: Float = ((Float) (j - j2)) / 1000.0f
+        val f2: Float = (j3 == -1 || j < j3) ? -1.0f : ((Float) (j - j3)) / 1000.0f
+        val inAnimationTime: Float = getInAnimationTime(f, f2)
+        val inFactor: Float = getInFactor(f)
+        val outFactor: Float = getOutFactor(f, f2)
         f2 = z ? 1.0f : inFactor
-        Boolean z2 = false
+        val z2: Boolean = false
         animationTiming.runningTime = f
         if (animationTiming.inAnimationTime != inAnimationTime) {
             animationTiming.inAnimationTime = inAnimationTime

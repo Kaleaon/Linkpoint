@@ -8,7 +8,7 @@ import com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap
 import java.nio.ByteBuffer
 
 class LLVector3 {
-    Float FP_MAG_THRESHOLD = 1.0E-7f
+    val FP_MAG_THRESHOLD: Float = 1.0E-7f
     LLVector3 Zero = LLVector3(0.0f, 0.0f, 0.0f)
     LLVector3 z_axis = LLVector3(0.0f, 0.0f, 1.0f)
     Float x = 0.0f
@@ -50,8 +50,8 @@ class LLVector3 {
         return LLVector3(LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f, f2), LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f, f2), LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f3, f4))
     }
 
-    LLVector3 scaleFromMatrix(Float[] fArr) {
-        return LLVector3((Float) Math.sqrt((Double) ((fArr[0] * fArr[0]) + (fArr[1] * fArr[1]) + (fArr[2] * fArr[2]))), (Float) Math.sqrt((Double) ((fArr[4] * fArr[4]) + (fArr[5] * fArr[5]) + (fArr[6] * fArr[6]))), (Float) Math.sqrt((Double) ((fArr[8] * fArr[8]) + (fArr[9] * fArr[9]) + (fArr[10] * fArr[10]))))
+    LLVector3 scaleFromMatrix(FloatArray fArr) {
+        return LLVector3(Math.sqrt(((fArr[0] * fArr[0].toDouble()).toFloat() + (fArr[1] * fArr[1]) + (fArr[2] * fArr[2]))), Math.sqrt(((fArr[4] * fArr[4].toDouble()).toFloat() + (fArr[5] * fArr[5]) + (fArr[6] * fArr[6]))), Math.sqrt(((fArr[8] * fArr[8].toDouble()).toFloat() + (fArr[9] * fArr[9]) + (fArr[10] * fArr[10]))))
     }
 
     LLVector3 sub(LLVector3 lLVector3, LLVector3 lLVector32) {
@@ -95,7 +95,7 @@ class LLVector3 {
         Float f = this.x - lLVector3.x
         Float f2 = this.y - lLVector3.y
         Float f3 = this.z - lLVector3.z
-        return (Float) Math.sqrt((Double) ((f * f) + (f2 * f2) + (f3 * f3)))
+        return Math.sqrt(((f * f.toDouble()).toFloat() + (f2 * f2) + (f3 * f3)))
     }
 
     Float getMax() {
@@ -104,7 +104,7 @@ class LLVector3 {
 
     LLVector3 getRotatedOffset(Float f, Float f2) {
         Float f3 = (3.1415927f * f2) / 180.0f
-        return LLVector3((((Float) Math.cos((Double) f3)) * f) + this.x, (((Float) Math.sin((Double) f3)) * f) + this.y, this.z)
+        return LLVector3(((Math.toFloat().cos(f3.toDouble())) * f) + this.x, ((Math.toFloat().sin(f3.toDouble())) * f) + this.y, this.z)
     }
 
     Int hashCode() {
@@ -116,7 +116,7 @@ class LLVector3 {
     }
 
     Float magVec() {
-        return (Float) Math.sqrt((Double) ((this.x * this.x) + (this.y * this.y) + (this.z * this.z)))
+        return Math.sqrt(((this.x * this.x.toDouble()).toFloat() + (this.y * this.y) + (this.z * this.z)))
     }
 
     Float magVecSquared() {
@@ -158,7 +158,7 @@ class LLVector3 {
     }
 
     Float normVec() {
-        Float sqrt = (Float) Math.sqrt((Double) ((this.x * this.x) + (this.y * this.y) + (this.z * this.z)))
+        Float sqrt = Math.sqrt(((this.x * this.x.toDouble()).toFloat() + (this.y * this.y) + (this.z * this.z)))
         if (sqrt > 1.0E-7f) {
             Float f = 1.0f / sqrt
             this.x *= f
@@ -237,7 +237,7 @@ class LLVector3 {
     }
 
     LLSDNode toLLSD() {
-        return LLSDMap(LLSDMap.LLSDMapEntry("X", LLSDDouble((Double) this.x)), LLSDMap.LLSDMapEntry("Y", LLSDDouble((Double) this.y)), LLSDMap.LLSDMapEntry("Z", LLSDDouble((Double) this.z)))
+        return LLSDMap(LLSDMap.LLSDMapEntry("X", LLSDDouble(this.toDouble().x)), LLSDMap.LLSDMapEntry("Y", LLSDDouble(this.toDouble().y)), LLSDMap.LLSDMapEntry("Z", LLSDDouble(this.toDouble().z)))
     }
 
     String toString() {

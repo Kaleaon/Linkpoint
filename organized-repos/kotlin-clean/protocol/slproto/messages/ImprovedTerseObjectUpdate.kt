@@ -12,8 +12,8 @@ class ImprovedTerseObjectUpdate : SLMessage() {
 
     @JvmStatic
     class ObjectData {
-        public Byte[] Data
-        public Byte[] TextureEntry
+        public ByteArray Data
+        public ByteArray TextureEntry
     }
 
     @JvmStatic

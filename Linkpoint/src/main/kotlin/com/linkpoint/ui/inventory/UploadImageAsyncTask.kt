@@ -54,20 +54,20 @@ protected class UploadImageResult {
     }
 
     /* access modifiers changed from: protected */
-    public UploadImageResult doInBackground(UploadImageParams... uploadImageParamsArr) {
+     public override fun doInBackground(vararg uploadImageParamsArr: UploadImageParams): UploadImageResult {
         Bitmap bitmap
         String str
-        Boolean z2 = true
-        String str2 = null
-        Int length = uploadImageParamsArr.length
-        Int i = 0
+        val z2: Boolean = true
+        val str2: String = null
+        val length: Int = uploadImageParamsArr.length
+        val i: Int = 0
         while (i < length) {
-            UploadImageParams uploadImageParams = uploadImageParamsArr[i]
-            Bitmap bitmap2 = uploadImageParams.bitmap
-            Int width = bitmap2.getWidth()
-            Int height = bitmap2.getHeight()
-            Int highestOneBit = Integer.highestOneBit(width)
-            Int highestOneBit2 = Integer.highestOneBit(height)
+            val uploadImageParams: UploadImageParams = uploadImageParamsArr[i]
+            val bitmap2: Bitmap = uploadImageParams.bitmap
+            val width: Int = bitmap2.getWidth()
+            val height: Int = bitmap2.getHeight()
+            val highestOneBit: Int = Integer.highestOneBit(width)
+            val highestOneBit2: Int = Integer.highestOneBit(height)
             if (highestOneBit != width) {
                 highestOneBit *= 2
             }
@@ -87,28 +87,28 @@ protected class UploadImageResult {
                 Debug.Printf("UploadImage: scaled bitmap from %d x %d to %d x %d", Integer.valueOf(bitmap2.getWidth()), Integer.valueOf(bitmap2.getHeight()), Integer.valueOf(highestOneBit), Integer.valueOf(highestOneBit2))
                 bitmap = Bitmap.createScaledBitmap(bitmap2, highestOneBit, highestOneBit2, true)
             }
-            Int width2 = bitmap.getWidth()
-            Int height2 = bitmap.getHeight()
-            Int i2 = bitmap.hasAlpha() ? 4 : 3
-            OpenJPEG openJPEG = OpenJPEG(width2, height2, i2, i2, 0, 0)
-            Int[] iArr = Int[width2]
+            val width2: Int = bitmap.getWidth()
+            val height2: Int = bitmap.getHeight()
+            val i2: Int = bitmap.hasAlpha() ? 4 : 3
+            val openJPEG: OpenJPEG = OpenJPEG(width2, height2, i2, i2, 0, 0)
+            val iArr: IntArray = Int[width2]
             for (Int i3 = 0; i3 < height2; i3++) {
                 bitmap.getPixels(iArr, 0, width2, 0, i3, width2, 1)
                 openJPEG.putPixelRow((height2 - 1) - i3, iArr, width2)
             }
             try {
-                File createTempFile = File.createTempFile("uploadtex", "j2k", this.context.getCacheDir())
+                val createTempFile: File = File.createTempFile("uploadtex", "j2k", this.context.getCacheDir())
                 openJPEG.SaveJPEG2K(createTempFile)
-                UserManager userManager = UserManager.getUserManager(uploadImageParams.agentUUID)
-                SLAgentCircuit activeAgentCircuit = userManager != null ? userManager.getActiveAgentCircuit() : null
+                val userManager: UserManager = UserManager.getUserManager(uploadImageParams.agentUUID)
+                val activeAgentCircuit: SLAgentCircuit = userManager != null ? userManager.getActiveAgentCircuit() : null
                 if (activeAgentCircuit != null) {
-                    String capability = activeAgentCircuit.getCaps().getCapability(SLCaps.SLCapability.NewFileAgentInventory)
+                    val capability: String = activeAgentCircuit.getCaps().getCapability(SLCaps.SLCapability.NewFileAgentInventory)
                     if (capability != null) {
-                        LLSDNode PerformRequest = LLSDXMLRequest().PerformRequest(capability, LLSDMap(LLSDMap.LLSDMapEntry("asset_type", LLSDString("texture")), LLSDMap.LLSDMapEntry("description", LLSDString("(No description)")), LLSDMap.LLSDMapEntry("folder_id", LLSDUUID(uploadImageParams.folderID)), LLSDMap.LLSDMapEntry("inventory_type", LLSDString("texture")), LLSDMap.LLSDMapEntry("name", LLSDString(uploadImageParams.name))))
+                        val PerformRequest: LLSDNode = LLSDXMLRequest().PerformRequest(capability, LLSDMap(LLSDMap.LLSDMapEntry("asset_type", LLSDString("texture")), LLSDMap.LLSDMapEntry("description", LLSDString("(No description)")), LLSDMap.LLSDMapEntry("folder_id", LLSDUUID(uploadImageParams.folderID)), LLSDMap.LLSDMapEntry("inventory_type", LLSDString("texture")), LLSDMap.LLSDMapEntry("name", LLSDString(uploadImageParams.name))))
                         if (PerformRequest == null) {
                             throw IOException("Upload request refused")
                         }
-                        Response execute = SLHTTPSConnection.getOkHttpClient().newCall(Request.Builder().url(PerformRequest.byKey("uploader").asString()).header(HttpHeaders.ACCEPT, "application/llsd+xml").post(RequestBody.create(MEDIA_TYPE_JP2, createTempFile)).build()).execute()
+                        val execute: Response = SLHTTPSConnection.getOkHttpClient().newCall(Request.Builder().url(PerformRequest.byKey("uploader").asString()).header(HttpHeaders.ACCEPT, "application/llsd+xml").post(RequestBody.create(MEDIA_TYPE_JP2, createTempFile)).build()).execute()
                         if (execute == null) {
                             throw IOException("Null response")
                         }
@@ -116,15 +116,15 @@ protected class UploadImageResult {
                             if (!execute.isSuccessful()) {
                                 throw IOException("Invalid HTTP response")
                             }
-                            LLSDNode parseXML = LLSDNode.parseXML(execute.body().byteStream(), (String) null)
+                            val parseXML: LLSDNode = LLSDNode.parseXML(execute.body().byteStream(), (String) null)
                             Debug.Log("upload reply: " + parseXML.serializeToXML())
                             if (parseXML.keyExists("error")) {
-                                LLSDNode byKey = parseXML.byKey("error")
+                                val byKey: LLSDNode = parseXML.byKey("error")
                                 if (!byKey.keyExists("message")) {
                                     str = str2
                                     z = z2
                                 } else if (byKey.keyExists("success") && !byKey.byKey("success").asBoolean()) {
-                                    String asString = byKey.byKey("message").asString()
+                                    val asString: String = byKey.byKey("message").asString()
                                     z = false
                                     str = asString
                                 }
@@ -194,7 +194,7 @@ protected class UploadImageResult {
     /* access modifiers changed from: protected */
     /* JADX WARNING: Multi-variable type inference failed */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    fun onPostExecute(com.lumiyaviewer.lumiya.ui.inventory.UploadImageAsyncTask.UploadImageResult r4) {
+    override fun onPostExecute(com.lumiyaviewer.lumiya.ui.inventory.UploadImageAsyncTask.UploadImageResult r4) {
         /*
             r3 = this
             r2 = 0
@@ -207,7 +207,7 @@ protected class UploadImageResult {
             r3.progressDialog = r0
         L_0x0010:
             if (r4 == 0) goto L_0x0038
-            Boolean r1 = r4.success
+            val r1: Boolean = r4.success
         L_0x0014:
             if (r1 == 0) goto L_0x003a
             java.util.UUID r1 = r3.agentUUID
@@ -256,7 +256,7 @@ protected class UploadImageResult {
     }
 
     /* access modifiers changed from: protected */
-    fun onPreExecute() {
+    override fun onPreExecute() {
         super.onPreExecute()
         this.progressDialog = ProgressDialog(this.context)
         this.progressDialog.setMessage(this.context.getString(R.string.uploading_picture))

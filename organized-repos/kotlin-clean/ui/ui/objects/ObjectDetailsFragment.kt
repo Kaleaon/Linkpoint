@@ -52,7 +52,7 @@ import javax.annotation.Nullable
 
 class ObjectDetailsFragment : FragmentWithTitle(), ReloadableFragment, View.OnClickListener, LoadableMonitor.OnLoadableDataChangedListener {
     private const val LOCAL_ID_KEY: String = "localID"
-    private const val Int[] objectPayButtons = {R.id.object_pay_button1, R.id.object_pay_button2, R.id.object_pay_button3, R.id.object_pay_button4}
+    private const val IntArray objectPayButtons = {R.id.object_pay_button1, R.id.object_pay_button2, R.id.object_pay_button3, R.id.object_pay_button4}
     private val SubscriptionData<SubscriptionSingleKey, Integer> balanceSubscription = SubscriptionData<>(UIThreadExecutor.getInstance())
     private val OnChatEventListener chatEventListener = OnChatEventListener(this) {
 
@@ -121,7 +121,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         Int i = this.objectLocalID
         if (sLObjectProfileData != null && userManager != null) {
             AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
-            builder.setMessage((CharSequence) String.format(getString(R.string.object_buy_confirm), Object[]{sLObjectProfileData.name().or(getString(R.string.object_name_loading)), Integer.valueOf(sLObjectProfileData.salePrice())})).setCancelable(false).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(i, userManager, sLObjectProfileData) {
+            builder.setMessage((CharSequence) String.format(getString(R.string.object_buy_confirm), Array<Any>{sLObjectProfileData.name().or(getString(R.string.object_name_loading)), Integer.valueOf(sLObjectProfileData.salePrice())})).setCancelable(false).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(i, userManager, sLObjectProfileData) {
 
                 /* renamed from: -$f0 */
                 private val /* synthetic */ Int f478$f0
@@ -262,7 +262,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         UserManager userManager = getUserManager()
         if (sLObjectProfileData != null && userManager != null) {
             AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
-            builder.setMessage((CharSequence) String.format(getString(R.string.object_pay_confirm), Object[]{sLObjectProfileData.name().or(getString(R.string.object_name_loading)), Integer.valueOf(i)})).setCancelable(false).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(i, userManager, sLObjectProfileData) {
+            builder.setMessage((CharSequence) String.format(getString(R.string.object_pay_confirm), Array<Any>{sLObjectProfileData.name().or(getString(R.string.object_name_loading)), Integer.valueOf(i)})).setCancelable(false).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(i, userManager, sLObjectProfileData) {
 
                 /* renamed from: -$f0 */
                 private val /* synthetic */ Int f481$f0
@@ -526,7 +526,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
                                 view.findViewById(objectPayButtons[i]).setVisibility(8)
                                 view.findViewById(objectPayButtons[i]).setTag(R.id.object_pay_price_tag, 0)
                             } else {
-                                ((Button) view.findViewById(objectPayButtons[i])).setText(String.format(getString(R.string.pay_button_format), Object[]{Integer.valueOf(defaultPayPrice)}))
+                                ((Button) view.findViewById(objectPayButtons[i])).setText(String.format(getString(R.string.pay_button_format), Array<Any>{Integer.valueOf(defaultPayPrice)}))
                                 view.findViewById(objectPayButtons[i]).setVisibility(0)
                                 view.findViewById(objectPayButtons[i]).setTag(R.id.object_pay_price_tag, Integer.valueOf(defaultPayPrice))
                                 i2++
@@ -779,7 +779,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
                     }
                     if (!(activeAgentCircuit == null || data == null || str == null)) {
                         AlertDialog.Builder builder = AlertDialog.Builder(getContext())
-                        builder.setMessage((Int) R.string.object_block_question)
+                        builder.setMessage(R.toInt().string.object_block_question)
                         builder.setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(activeAgentCircuit, data, str) {
 
                             /* renamed from: -$f0 */

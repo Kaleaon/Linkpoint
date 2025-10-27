@@ -13,15 +13,15 @@ class ParcelMediaUpdate : SLMessage() {
     class DataBlock {
         public Int MediaAutoScale
         public UUID MediaID
-        public Byte[] MediaURL
+        public ByteArray MediaURL
     }
 
     @JvmStatic
     class DataBlockExtended {
-        public Byte[] MediaDesc
+        public ByteArray MediaDesc
         public Int MediaHeight
         public Int MediaLoop
-        public Byte[] MediaType
+        public ByteArray MediaType
         public Int MediaWidth
     }
 

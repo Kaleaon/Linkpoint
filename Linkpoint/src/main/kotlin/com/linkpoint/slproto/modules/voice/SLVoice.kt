@@ -91,7 +91,7 @@ class SLVoice : SLModule() {
 
     /* access modifiers changed from: private */
     /* renamed from: onParcelVoiceInfoResult */
-    fun m253com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref3(LLSDNode lLSDNode) {
+    fun m253com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref3(lLSDNode: LLSDNode) {
         if (lLSDNode != null) {
             try {
                 Debug.Printf("SLVoice: parcel voice info '%s'", lLSDNode.serializeToXML())
@@ -103,7 +103,7 @@ class SLVoice : SLModule() {
 
     /* access modifiers changed from: private */
     /* renamed from: onProvisionVoiceAccountResult */
-    fun m252com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref2(LLSDNode lLSDNode) {
+    fun m252com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref2(lLSDNode: LLSDNode) {
         if (lLSDNode != null) {
             try {
                 Debug.Printf("SLVoice: result '%s'", lLSDNode.serializeToXML())
@@ -220,7 +220,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceLoginStatusChanged */
-    fun m250com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref0(Boolean bool) {
+    fun m250com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref0(bool: Boolean) {
         this.voiceLoggedIn = bool != null ? bool.booleanValue() : false
     }
 
@@ -230,7 +230,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
         super.HandleCloseCircuit()
     }
 
-    public VoiceChannelInfo getCurrentParcelVoiceChannel() {
+     public fun getCurrentParcelVoiceChannel(): VoiceChannelInfo {
         VoiceChannelInfo voiceChannelInfo
         synchronized (this.parcelVoiceChannelLock) {
             voiceChannelInfo = this.currentParcelVoiceChannel
@@ -238,11 +238,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
         return voiceChannelInfo
     }
 
-    public VoiceLoginInfo getVoiceLoginInfo() {
+     public fun getVoiceLoginInfo(): VoiceLoginInfo {
         return this.voiceLoginInfo
     }
 
-    public Boolean groupVoiceChatRequest(UUID uuid) {
+     public fun groupVoiceChatRequest(uuid: UUID): Boolean {
         if (!this.voiceEnabled || !this.voiceLoggedIn || this.chatSessionRequestURL == null) {
             return false
         }
@@ -316,7 +316,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
         GridConnectionService serviceInstance
         this.voiceEnabled = GlobalOptions.getInstance().getVoiceEnabled()
         if (!this.voiceEnabled) {
-            GridConnectionService serviceInstance2 = GridConnectionService.getServiceInstance()
+            val serviceInstance2: GridConnectionService = GridConnectionService.getServiceInstance()
             if (serviceInstance2 != null) {
                 serviceInstance2.stopVoice()
             }
@@ -411,8 +411,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
         }
     }
 
-    fun nearbyVoiceChatRequest(VoiceChannelInfo voiceChannelInfo) {
-        VoicePluginServiceConnection voicePluginServiceConnection2 = this.voicePluginServiceConnection
+    fun nearbyVoiceChatRequest(voiceChannelInfo: VoiceChannelInfo) {
+        val voicePluginServiceConnection2: VoicePluginServiceConnection = this.voicePluginServiceConnection
         if (this.voiceEnabled && this.voiceLoggedIn && voicePluginServiceConnection2 != null) {
             voicePluginServiceConnection2.addChannel(ChatterID.getLocalChatterID(this.userManager.getUserID()), voiceChannelInfo)
             voicePluginServiceConnection2.sendMessage(VoicePluginMessageType.VoiceConnectChannel, VoiceConnectChannel(voiceChannelInfo, (String) null))
@@ -427,8 +427,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
     fun onGroupSessionReady(final UUID uuid) {
         if (this.requestedGroupChats.remove(uuid) && this.chatSessionRequestURL != null) {
             LLSDXMLAsyncRequest(this.chatSessionRequestURL, LLSDMap(LLSDMap.LLSDMapEntry("method", LLSDString(NotificationCompat.CATEGORY_CALL)), LLSDMap.LLSDMapEntry("session-id", LLSDUUID(uuid))), LLSDXMLAsyncRequest.LLSDXMLResultListener() {
-                fun onLLSDXMLResult(LLSDNode lLSDNode) {
-                    ChatterID groupChatterID = ChatterID.getGroupChatterID(SLVoice.this.userManager.getUserID(), uuid)
+                fun onLLSDXMLResult(lLSDNode: LLSDNode) {
+                    val groupChatterID: ChatterID = ChatterID.getGroupChatterID(SLVoice.this.userManager.getUserID(), uuid)
                     if (lLSDNode == null) {
                         try {
                             throw LLSDException("Null result")
@@ -437,11 +437,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
                             Debug.Warning(e)
                         }
                     } else {
-                        String asString = lLSDNode.byKey("voice_credentials").byKey("channel_uri").asString()
-                        String asString2 = lLSDNode.byKey("voice_credentials").byKey("channel_credentials").asString()
-                        VoicePluginServiceConnection r3 = SLVoice.this.voicePluginServiceConnection
+                        val asString: String = lLSDNode.byKey("voice_credentials").byKey("channel_uri").asString()
+                        val asString2: String = lLSDNode.byKey("voice_credentials").byKey("channel_credentials").asString()
+                        val r3: VoicePluginServiceConnection = SLVoice.this.voicePluginServiceConnection
                         if (SLVoice.this.voiceEnabled && SLVoice.this.voiceLoggedIn && r3 != null) {
-                            VoiceChannelInfo voiceChannelInfo = VoiceChannelInfo(asString, false, true)
+                            val voiceChannelInfo: VoiceChannelInfo = VoiceChannelInfo(asString, false, true)
                             r3.addChannel(groupChatterID, voiceChannelInfo)
                             r3.sendMessage(VoicePluginMessageType.VoiceConnectChannel, VoiceConnectChannel(voiceChannelInfo, asString2))
                         }
@@ -450,7 +450,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
         }
     }
 
-    fun onVoiceChannelStatus(VoiceChannelStatus voiceChannelStatus) {
+    fun onVoiceChannelStatus(voiceChannelStatus: VoiceChannelStatus) {
         this.agentCircuit.execute(Runnable(this, voiceChannelStatus) {
 
             /* renamed from: -$f0 */
@@ -524,7 +524,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
 
     }
 
-    fun onVoiceLoginStatus(VoicePluginServiceConnection voicePluginServiceConnection2, VoiceLoginStatus voiceLoginStatus) {
+    fun onVoiceLoginStatus(voicePluginServiceConnection2: VoicePluginServiceConnection, voiceLoginStatus: VoiceLoginStatus) {
         this.agentCircuit.execute(Runnable(this, voiceLoginStatus, voicePluginServiceConnection2) {
 
             /* renamed from: -$f0 */
@@ -601,7 +601,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
 
     }
 
-    public Boolean requestParcelVoiceInfo() {
+     public fun requestParcelVoiceInfo(): Boolean {
         if (this.parcelVoiceCapURL == null) {
             return false
         }
@@ -680,8 +680,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
         return true
     }
 
-    fun setCurrentParcel(Int i) {
-        Boolean z = false
+    fun setCurrentParcel(i: Int) {
+        val z: Boolean = false
         synchronized (this.parcelVoiceChannelLock) {
             if (!(this.parcelVoiceCapURL == null || this.capURL == null || this.requestedParcelID == i)) {
                 this.requestedParcelID = i
@@ -771,18 +771,18 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
     }
 
     fun updateSpatialVoicePosition() {
-        VoicePluginServiceConnection voicePluginServiceConnection2 = this.voicePluginServiceConnection
-        VoiceChannelInfo voiceChannelInfo = this.connectedVoiceChannel
+        val voicePluginServiceConnection2: VoicePluginServiceConnection = this.voicePluginServiceConnection
+        val voiceChannelInfo: VoiceChannelInfo = this.connectedVoiceChannel
         if (voicePluginServiceConnection2 != null && voiceChannelInfo != null && voiceChannelInfo.isSpatial) {
-            LLVector3d agentGlobalPosition = this.agentCircuit.getAgentGlobalPosition()
-            SLModules modules = this.agentCircuit.getModules()
+            val agentGlobalPosition: LLVector3d = this.agentCircuit.getAgentGlobalPosition()
+            val modules: SLModules = this.agentCircuit.getModules()
             if (agentGlobalPosition != null && modules != null) {
-                Float agentHeading = modules.avatarControl.getAgentHeading() * 0.017453292f
-                Float cos = (Float) Math.cos((Double) agentHeading)
-                Float sin = (Float) Math.sin((Double) agentHeading)
-                Voice3DVector fromLLCoords = Voice3DVector.fromLLCoords(cos, sin, 0.0f)
-                Voice3DVector fromLLCoords2 = Voice3DVector.fromLLCoords(-sin, cos, 0.0f)
-                Voice3DPosition voice3DPosition = Voice3DPosition(Voice3DVector.fromLLCoords((Float) agentGlobalPosition.x, (Float) agentGlobalPosition.y, (Float) agentGlobalPosition.z), Voice3DVector(0.0f, 0.0f, 0.0f), fromLLCoords, Voice3DVector.fromLLCoords(0.0f, 0.0f, 1.0f), fromLLCoords2)
+                val agentHeading: Float = modules.avatarControl.getAgentHeading() * 0.017453292f
+                val cos: Float = (Float) Math.cos((Double) agentHeading)
+                val sin: Float = (Float) Math.sin((Double) agentHeading)
+                val fromLLCoords: Voice3DVector = Voice3DVector.fromLLCoords(cos, sin, 0.0f)
+                val fromLLCoords2: Voice3DVector = Voice3DVector.fromLLCoords(-sin, cos, 0.0f)
+                val voice3DPosition: Voice3DPosition = Voice3DPosition(Voice3DVector.fromLLCoords((Float) agentGlobalPosition.x, (Float) agentGlobalPosition.y, (Float) agentGlobalPosition.z), Voice3DVector(0.0f, 0.0f, 0.0f), fromLLCoords, Voice3DVector.fromLLCoords(0.0f, 0.0f, 1.0f), fromLLCoords2)
                 voicePluginServiceConnection2.sendMessage(VoicePluginMessageType.VoiceSet3DPosition, VoiceSet3DPosition(voiceChannelInfo, voice3DPosition, voice3DPosition))
             }
         }
@@ -859,13 +859,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
 
     }
 
-    public Boolean userVoiceChatRequest(UUID uuid) {
-        VoicePluginServiceConnection voicePluginServiceConnection2 = this.voicePluginServiceConnection
-        VoiceLoginInfo voiceLoginInfo2 = this.voiceLoginInfo
+     public fun userVoiceChatRequest(uuid: UUID): Boolean {
+        val voicePluginServiceConnection2: VoicePluginServiceConnection = this.voicePluginServiceConnection
+        val voiceLoginInfo2: VoiceLoginInfo = this.voiceLoginInfo
         if (!this.voiceEnabled || !this.voiceLoggedIn || uuid == null || voicePluginServiceConnection2 == null || voiceLoginInfo2 == null || this.userManager == null) {
             return false
         }
-        VoiceChannelInfo voiceChannelInfo = VoiceChannelInfo(uuid, voiceLoginInfo2.voiceSipUriHostname)
+        val voiceChannelInfo: VoiceChannelInfo = VoiceChannelInfo(uuid, voiceLoginInfo2.voiceSipUriHostname)
         voicePluginServiceConnection2.addChannel(ChatterID.getUserChatterID(this.userManager.getUserID(), uuid), voiceChannelInfo)
         voicePluginServiceConnection2.sendMessage(VoicePluginMessageType.VoiceConnectChannel, VoiceConnectChannel(voiceChannelInfo, (String) null))
         return true

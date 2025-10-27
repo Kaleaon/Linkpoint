@@ -12,7 +12,7 @@ class ScriptDataReply : SLMessage() {
     @JvmStatic
     class DataBlock {
         public Long Hash
-        public Byte[] Reply
+        public ByteArray Reply
     }
 
     public ScriptDataReply() {

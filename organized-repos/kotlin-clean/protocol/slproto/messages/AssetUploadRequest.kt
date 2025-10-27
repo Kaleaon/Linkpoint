@@ -9,7 +9,7 @@ class AssetUploadRequest : SLMessage() {
 
     @JvmStatic
     class AssetBlock {
-        public Byte[] AssetData
+        public ByteArray AssetData
         public Boolean StoreLocal
         public Boolean Tempfile
         public UUID TransactionID

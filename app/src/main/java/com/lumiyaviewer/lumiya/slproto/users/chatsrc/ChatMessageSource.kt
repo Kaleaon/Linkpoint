@@ -10,7 +10,7 @@ import androidx.annotation.Nullable
 abstract class ChatMessageSource {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-chatsrc-ChatMessageSource$ChatMessageSourceTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] f151comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues = null
+    private /* synthetic */ IntArray f151comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues = null
 
     enum ChatMessageSourceType {
         Unknown,
@@ -27,11 +27,11 @@ abstract class ChatMessageSource {
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-chatsrc-ChatMessageSource$ChatMessageSourceTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] m268getcomlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues() {
+    private /* synthetic */ IntArray m268getcomlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues() {
         if (f151comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues != null) {
             return f151comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues
         }
-        Int[] iArr = Int[ChatMessageSourceType.values().length]
+        IntArray iArr = Int[ChatMessageSourceType.values().length]
         try {
             iArr[ChatMessageSourceType.Group.ordinal()] = 1
         } catch (NoSuchFieldError e) {

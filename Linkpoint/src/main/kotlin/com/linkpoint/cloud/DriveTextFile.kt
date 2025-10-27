@@ -90,7 +90,7 @@ class DriveTextFile {
                 }
                 if (((Status)object).hasResolution()) {
                     Debug.Printf("LinkpointCloud: File flush error, has resolution (%s)", ((Status)object).getStatusMessage())
-                    ErrorResolutionTracker errorResolutionTracker = ErrorResolutionTracker.getInstance()
+                    val errorResolutionTracker: ErrorResolutionTracker = ErrorResolutionTracker.getInstance()
                     if (errorResolutionTracker == null) return
                     errorResolutionTracker.addResolvableError(ErrorResolutionTracker.ResolvableError(this.this$0.fileName, (Status)object, ErrorResolutionTracker.RestartableOperation(this, (Status)object){
                         final 1 this$1
@@ -142,7 +142,7 @@ class DriveTextFile {
              * Enabled aggressive exception aggregation
              */
             override Unit onResult(DriveApi.DriveContentsResult object) {
-                Object object2 = object.getStatus()
+                val object2: Object = object.getStatus()
                 Debug.Printf("Opened file '%s', success %b", this.this$0.fileName, ((Status)object2).isSuccess())
                 if (((Status)object2).isSuccess()) {
                     this.this$0.logWriteTracker.markFileOpened(this.this$0)
@@ -192,27 +192,27 @@ class DriveTextFile {
         this.connectibleFile = DriveConnectibleFile(context, driveSynchronizer, driveConnectibleResource, googleApiClient, string2, "text/plain")
     }
 
-    static /* synthetic */ DriveFile access$1002(DriveTextFile driveTextFile, DriveFile driveFile) {
+    // TODO: Review synthetic accessor - static /* synthetic */ DriveFile access$1002(DriveTextFile driveTextFile, DriveFile driveFile) {
         driveTextFile.driveFile = driveFile
         return driveFile
     }
 
-    static /* synthetic */ Long access$1302(DriveTextFile driveTextFile, Long l) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Long access$1302(DriveTextFile driveTextFile, Long l) {
         driveTextFile.openSinceMillis = l
         return l
     }
 
-    static /* synthetic */ DriveContents access$1402(DriveTextFile driveTextFile, DriveContents driveContents) {
+    // TODO: Review synthetic accessor - static /* synthetic */ DriveContents access$1402(DriveTextFile driveTextFile, DriveContents driveContents) {
         driveTextFile.driveContents = driveContents
         return driveContents
     }
 
-    static /* synthetic */ FileOutputStream access$1502(DriveTextFile driveTextFile, FileOutputStream fileOutputStream) {
+    // TODO: Review synthetic accessor - static /* synthetic */ FileOutputStream access$1502(DriveTextFile driveTextFile, FileOutputStream fileOutputStream) {
         driveTextFile.fileOutputStream = fileOutputStream
         return fileOutputStream
     }
 
-    static /* synthetic */ State access$202(DriveTextFile driveTextFile, State state) {
+    // TODO: Review synthetic accessor - static /* synthetic */ State access$202(DriveTextFile driveTextFile, State state) {
         driveTextFile.state = state
         return state
     }
@@ -220,7 +220,7 @@ class DriveTextFile {
     /*
      * Enabled aggressive block sorting
      */
-    private Unit attemptReopen(Status status) {
+     private fun attemptReopen(status: Status) {
         if (!this.attemptedReopen) {
             this.state = State.Working
             this.attemptedReopen = true
@@ -247,7 +247,7 @@ class DriveTextFile {
         }
         Debug.Printf("Re-creation failed", Object[0])
         this.state = State.Error
-        ErrorResolutionTracker errorResolutionTracker = ErrorResolutionTracker.getInstance()
+        val errorResolutionTracker: ErrorResolutionTracker = ErrorResolutionTracker.getInstance()
         if (errorResolutionTracker == null) return
         errorResolutionTracker.addResolvableError(ErrorResolutionTracker.ResolvableError(this.fileName, status, null))
     }
@@ -257,12 +257,12 @@ class DriveTextFile {
      * Enabled unnecessary exception pruning
      * Enabled aggressive exception aggregation
      */
-    private Unit flushAppendStrings() {
+     private fun flushAppendStrings() {
         if (this.fileOutputStream == null) return
         try {
             DriveLogEntry driveLogEntry
             while ((driveLogEntry = this.appendStrings.poll()) != null) {
-                CharSequence charSequence = StringBuilder()
+                val charSequence: CharSequence = StringBuilder()
                 charSequence = ((StringBuilder)charSequence).append(driveLogEntry.text).append("\n").toString()
                 Debug.Printf("File '%s': written '%s'", this.fileName, driveLogEntry.text)
                 this.fileOutputStream.write(((String)charSequence).getBytes(this.charset))
@@ -286,11 +286,11 @@ class DriveTextFile {
         }
     }
 
-    private Unit flushWrittenStrings() {
+     private fun flushWrittenStrings() {
         if (this.fileOutputStream != null) {
             try {
                 for (DriveLogEntry driveLogEntry : this.writtenStrings) {
-                    CharSequence charSequence = StringBuilder()
+                    val charSequence: CharSequence = StringBuilder()
                     charSequence = ((StringBuilder)charSequence).append(driveLogEntry.text).append("\n").toString()
                     Debug.Printf("File '%s': (old) written '%s'", this.fileName, driveLogEntry.text)
                     this.fileOutputStream.write(((String)charSequence).getBytes(this.charset))
@@ -306,7 +306,7 @@ class DriveTextFile {
     /*
      * Enabled aggressive block sorting
      */
-    private Unit handlePendingStrings() {
+     private fun handlePendingStrings() {
         if (this.fileOutputStream != null) {
             this.flushAppendStrings()
             return
@@ -325,25 +325,25 @@ class DriveTextFile {
         this.connectibleFile.getResource(this.onFileReadyListener)
     }
 
-    private Unit onSuccessfulFlush() {
+     private fun onSuccessfulFlush() {
         this.attemptedReopen = false
         this.attemptedRecreate = false
         this.attemptedInvalidateParents = false
     }
 
-    private Unit startClosingFile() {
+     private fun startClosingFile() {
         if (this.driveContents != null && this.state != State.Working) {
             Debug.Printf("Flushing file: '%s'", this.fileName)
             this.needsFlushing = false
             this.state = State.Working
             this.fileOutputStream = null
-            ExecutionOptions executionOptions = ExecutionOptions.Builder().setConflictStrategy(0).build()
+            val executionOptions: ExecutionOptions = ExecutionOptions.Builder().setConflictStrategy(0).build()
             this.driveContents.commit(this.googleApiClient, null, executionOptions).setResultCallback(this.onFileFlushed)
             this.driveContents = null
         }
     }
 
-    Unit appendString(DriveLogEntry driveLogEntry) {
+     fun appendString(driveLogEntry: DriveLogEntry) {
         if (driveLogEntry != null) {
             this.logWriteTracker.addPendingLogEntry(driveLogEntry)
             this.appendStrings.add(driveLogEntry)
@@ -354,18 +354,18 @@ class DriveTextFile {
         }
     }
 
-    Unit flush() {
+     fun flush() {
         this.needsFlushing = true
         if (this.driveContents != null && this.state != State.Working && !this.logWriteTracker.isLoggingSuspended()) {
             this.flushAppendStrings()
         }
     }
 
-    Long getOpenedTimeMillis(Long l) {
+     fun getOpenedTimeMillis(l: Long): Long {
         return l - this.openSinceMillis
     }
 
-    Unit resume() {
+     fun resume() {
         this.handlePendingStrings()
     }
 
@@ -374,7 +374,7 @@ class DriveTextFile {
      * Enabled unnecessary exception pruning
      * Enabled aggressive exception aggregation
      */
-    Unit suspend() {
+     fun suspend() {
         if (this.fileOutputStream != null) {
             try {
                 this.fileOutputStream.close()

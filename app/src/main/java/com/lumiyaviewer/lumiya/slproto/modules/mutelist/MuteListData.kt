@@ -36,7 +36,7 @@ class MuteListData {
         this.muteListNames = ImmutableMap.copyOf(map2)
     }
 
-    MuteListData(Byte[] bArr) {
+    MuteListData(ByteArray bArr) {
         ImmutableMap.Builder builder = ImmutableMap.builder()
         ImmutableMap.Builder builder2 = ImmutableMap.builder()
         if (bArr != null) {

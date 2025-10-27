@@ -165,10 +165,10 @@ enum SLSkeletonBoneID {
     mHindLimb3Right(true, true, 131),
     mHindLimb4Right(true, true, 132)
     
-    Int NUM_ANIMATED = 133
-    Int NUM_BASE_BONES = 52
-    Int NUM_BASE_JOINTS = 26
-    Int NUM_JOINTS = 133
+    val NUM_ANIMATED: Int = 133
+    val NUM_BASE_BONES: Int = 52
+    val NUM_BASE_JOINTS: Int = 26
+    val NUM_JOINTS: Int = 133
     SLSkeletonBoneID[] VALUES = null
     ImmutableMap<String, SLSkeletonBoneID> bones
     Int animatedIndex

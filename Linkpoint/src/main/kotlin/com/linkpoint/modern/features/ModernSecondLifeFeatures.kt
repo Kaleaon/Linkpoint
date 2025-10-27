@@ -43,22 +43,22 @@ class ModernSecondLifeFeatures {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 // Initialize all feature managers in parallel
-                CompletableFuture<Boolean> avatarInit = avatarManager.initializeAsync()
-                CompletableFuture<Boolean> inventoryInit = inventoryManager.initializeAsync()
-                CompletableFuture<Boolean> chatInit = chatManager.initializeAsync()
-                CompletableFuture<Boolean> objectInit = objectManager.initializeAsync()
+                val avatarInit: CompletableFuture<Boolean> = avatarManager.initializeAsync()
+                val inventoryInit: CompletableFuture<Boolean> = inventoryManager.initializeAsync()
+                val chatInit: CompletableFuture<Boolean> = chatManager.initializeAsync()
+                val objectInit: CompletableFuture<Boolean> = objectManager.initializeAsync()
                 
                 // Wait for all to complete
-                CompletableFuture<Void> allFeatures = CompletableFuture.allOf(
+                val allFeatures: CompletableFuture<Void> = CompletableFuture.allOf(
                     avatarInit, inventoryInit, chatInit, objectInit)
                 
                 allFeatures.get()
                 
                 // Check results
-                Boolean avatarReady = avatarInit.get()
-                Boolean inventoryReady = inventoryInit.get()
-                Boolean chatReady = chatInit.get()
-                Boolean objectReady = objectInit.get()
+                val avatarReady: Boolean = avatarInit.get()
+                val inventoryReady: Boolean = inventoryInit.get()
+                val chatReady: Boolean = chatInit.get()
+                val objectReady: Boolean = objectInit.get()
                 
                 featuresInitialized = avatarReady && inventoryReady && chatReady && objectReady
                 
@@ -79,23 +79,23 @@ class ModernSecondLifeFeatures {
     }
     
     // Getters for feature managers
-    public ModernAvatarManager getAvatarManager() {
+     public fun getAvatarManager(): ModernAvatarManager {
         return avatarManager
     }
     
-    public ModernInventoryManager getInventoryManager() {
+     public fun getInventoryManager(): ModernInventoryManager {
         return inventoryManager
     }
     
-    public ModernChatManager getChatManager() {
+     public fun getChatManager(): ModernChatManager {
         return chatManager
     }
     
-    public ModernObjectManager getObjectManager() {
+     public fun getObjectManager(): ModernObjectManager {
         return objectManager
     }
     
-    public Boolean areFeaturesInitialized() {
+     public fun areFeaturesInitialized(): Boolean {
         return featuresInitialized
     }
     
@@ -122,7 +122,7 @@ class ModernSecondLifeFeatures {
         public CompletableFuture<AvatarData> getAvatarDataAsync(UUID avatarId) {
             return CompletableFuture.supplyAsync(() -> {
                 // Fetch avatar data with modern features
-                AvatarData data = AvatarData()
+                val data: AvatarData = AvatarData()
                 data.id = avatarId
                 data.name = "Avatar " + avatarId.toString().substring(0, 8)
                 data.supportsPBR = true; // Modern PBR material support
@@ -180,17 +180,17 @@ class ModernSecondLifeFeatures {
         public CompletableFuture<List<InventoryItem>> getInventoryItemsAsync(UUID folderID) {
             return CompletableFuture.supplyAsync(() -> {
                 Log.d(TAG, "Fetching inventory items for folder: " + folderID)
-                List<InventoryItem> items = ArrayList<>()
+                val items: List<InventoryItem> = ArrayList<>()
                 
                 // Create sample items with modern features
-                InventoryItem item1 = InventoryItem()
+                val item1: InventoryItem = InventoryItem()
                 item1.id = UUID.randomUUID()
                 item1.name = "Modern PBR Shirt"
                 item1.type = InventoryItemType.CLOTHING
                 item1.supportsPBR = true
                 items.add(item1)
                 
-                InventoryItem item2 = InventoryItem()
+                val item2: InventoryItem = InventoryItem()
                 item2.id = UUID.randomUUID()
                 item2.name = "Smart Object"
                 item2.type = InventoryItemType.OBJECT
@@ -247,7 +247,7 @@ class ModernSecondLifeFeatures {
             return CompletableFuture.supplyAsync(() -> {
                 Log.d(TAG, "Sending chat message via modern system: " + message)
                 
-                ChatMessage chatMsg = ChatMessage()
+                val chatMsg: ChatMessage = ChatMessage()
                 chatMsg.id = UUID.randomUUID()
                 chatMsg.content = message
                 chatMsg.channel = channel
@@ -301,13 +301,13 @@ class ModernSecondLifeFeatures {
         
         public CompletableFuture<WorldObject> getObjectAsync(UUID objectID) {
             return CompletableFuture.supplyAsync(() -> {
-                WorldObject cached = objectCache.get(objectID)
+                val cached: WorldObject = objectCache.get(objectID)
                 if (cached != null) {
                     return cached
                 }
                 
                 // Create modern object with advanced features
-                WorldObject obj = WorldObject()
+                val obj: WorldObject = WorldObject()
                 obj.id = objectID
                 obj.name = "Modern Object " + objectID.toString().substring(0, 8)
                 obj.supportsPBR = true
@@ -323,7 +323,7 @@ class ModernSecondLifeFeatures {
             return CompletableFuture.supplyAsync(() -> {
                 Log.d(TAG, "Updating object with modern features: " + objectID)
                 
-                WorldObject obj = objectCache.get(objectID)
+                val obj: WorldObject = objectCache.get(objectID)
                 if (obj != null) {
                     // Apply updates with modern rendering pipeline
                     obj.lastUpdate = System.currentTimeMillis()

@@ -64,14 +64,14 @@ class ActiveChatsListAdapter : BaseAdapter(), Closeable, DismissableAdapter {
             this(chatterID2)
         }
 
-        fun buildView(Context context, ChatterItemViewBuilder chatterItemViewBuilder, UserManager userManager) {
-            Boolean z = false
-            StringBuilder sb = StringBuilder(context.getString(R.string.local_chat_item_title))
+        fun buildView(context: Context, chatterItemViewBuilder: ChatterItemViewBuilder, userManager: UserManager) {
+            val z: Boolean = false
+            val sb: StringBuilder = StringBuilder(context.getString(R.string.local_chat_item_title))
             if (ActiveChatsListAdapter.this.currentLocationInfo != null) {
                 sb.append(": ")
-                Int inChatRangeUsers = ActiveChatsListAdapter.this.currentLocationInfo.inChatRangeUsers()
+                val inChatRangeUsers: Int = ActiveChatsListAdapter.this.currentLocationInfo.inChatRangeUsers()
                 if (inChatRangeUsers != 0) {
-                    sb.append(context.getString(R.string.someone_in_chat_range, Object[]{Integer.valueOf(inChatRangeUsers)}))
+                    sb.append(context.getString(R.string.someone_in_chat_range, Array<Any>{Integer.valueOf(inChatRangeUsers)}))
                 } else {
                     sb.append(context.getString(R.string.no_one_in_chat_range))
                 }
@@ -80,7 +80,7 @@ class ActiveChatsListAdapter : BaseAdapter(), Closeable, DismissableAdapter {
             chatterItemViewBuilder.setLabel(sb.toString())
             chatterItemViewBuilder.setThumbnailDefaultIcon(R.attr.IconLocalChat)
             chatterItemViewBuilder.setThumbnailChatterID(this.chatterID, (String) null)
-            SLChatEvent lastMessage = this.unreadMessageInfo != null ? this.unreadMessageInfo.lastMessage() : null
+            val lastMessage: SLChatEvent = this.unreadMessageInfo != null ? this.unreadMessageInfo.lastMessage() : null
             chatterItemViewBuilder.setLastMessage(lastMessage != null ? lastMessage.getPlainTextMessage(context, userManager, false).toString() : null)
             if (!(this.voiceChatInfo == null || this.voiceChatInfo.state == VoiceChatInfo.VoiceChatState.None)) {
                 z = true
@@ -88,19 +88,19 @@ class ActiveChatsListAdapter : BaseAdapter(), Closeable, DismissableAdapter {
             chatterItemViewBuilder.setVoiceActive(z)
         }
 
-        public ChatterID getChatterID(UserManager userManager) {
+         public fun getChatterID(userManager: UserManager): ChatterID {
             return this.chatterID
         }
 
-        public String getDisplayName() {
+         public fun getDisplayName(): String {
             return ActiveChatsListAdapter.this.context.getString(R.string.local_chat_item_title)
         }
 
-        fun setUnreadInfo(UnreadMessageInfo unreadMessageInfo2) {
+        fun setUnreadInfo(unreadMessageInfo2: UnreadMessageInfo) {
             this.unreadMessageInfo = unreadMessageInfo2
         }
 
-        fun setVoiceChatInfo(VoiceChatInfo voiceChatInfo2) {
+        fun setVoiceChatInfo(voiceChatInfo2: VoiceChatInfo) {
             this.voiceChatInfo = voiceChatInfo2
         }
     }
@@ -109,10 +109,10 @@ class ActiveChatsListAdapter : BaseAdapter(), Closeable, DismissableAdapter {
 private class OnlineFriendsHeaderRow {
         private Boolean isAnyoneOnline = false
 
-        public View getView(LayoutInflater layoutInflater, View view, ViewGroup viewGroup) {
-            View view2 = null
-            Int i = this.isAnyoneOnline ? R.id.list_header_title : R.id.list_header_small_title
-            Int i2 = this.isAnyoneOnline ? R.layout.list_header : R.layout.list_header_small
+         public fun getView(layoutInflater: LayoutInflater, view: View, viewGroup: ViewGroup): View {
+            val view2: View = null
+            val i: Int = this.isAnyoneOnline ? R.id.list_header_title : R.id.list_header_small_title
+            val i2: Int = this.isAnyoneOnline ? R.layout.list_header : R.layout.list_header_small
             if (view != null && view.getId() == i) {
                 view2 = view
             }
@@ -123,7 +123,7 @@ private class OnlineFriendsHeaderRow {
             return view2
         }
 
-        fun setAnyoneOnline(Boolean z) {
+        fun setAnyoneOnline(z: Boolean) {
             this.isAnyoneOnline = z
         }
     }
@@ -426,11 +426,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.contacts.-$La
 
     }
 
-    public Boolean areAllItemsEnabled() {
+     public fun areAllItemsEnabled(): Boolean {
         return false
     }
 
-    public Boolean canDismiss(Int i) {
+     public fun canDismiss(i: Int): Boolean {
         return i > 0 && i <= this.activeChatters.size()
     }
 
@@ -442,12 +442,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.contacts.-$La
         this.localVoiceChatSubscription.unsubscribe()
     }
 
-    public Int getCount() {
+     public fun getCount(): Int {
         return this.activeChatters.size() + 1 + 1 + this.onlineFriends.size()
     }
 
-    public Object getItem(Int i) {
-        Int size = this.activeChatters.size()
+     public fun getItem(i: Int): Object {
+        val size: Int = this.activeChatters.size()
         if (i == 0) {
             return this.localChatItem
         }
@@ -463,16 +463,16 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.contacts.-$La
         return null
     }
 
-    public Long getItemId(Int i) {
+     public fun getItemId(i: Int): Long {
         return 0
     }
 
-    public Int getItemViewType(Int i) {
+     public fun getItemViewType(i: Int): Int {
         return i == this.activeChatters.size() + 1 ? 1 : 0
     }
 
-    public View getView(Int i, View view, ViewGroup viewGroup) {
-        Object item = getItem(i)
+     public fun getView(i: Int, view: View, viewGroup: ViewGroup): View {
+        val item: Object = getItem(i)
         if (item == this.onlineFriendsHeader) {
             return this.onlineFriendsHeader.getView(this.inflater, view, viewGroup)
         }
@@ -481,26 +481,26 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.contacts.-$La
         }
         this.viewBuilder.reset()
         ((ChatterDisplayInfo) item).buildView(this.context, this.viewBuilder, this.userManager)
-        View view2 = this.viewBuilder.getView(this.inflater, view, viewGroup, true)
+        val view2: View = this.viewBuilder.getView(this.inflater, view, viewGroup, true)
         if (view2 != null) {
             SwipeDismissListViewTouchListener.restoreViewState(view2)
         }
         return view2
     }
 
-    public Int getViewTypeCount() {
+     public fun getViewTypeCount(): Int {
         return 2
     }
 
-    public Boolean hasStableIds() {
+     public fun hasStableIds(): Boolean {
         return false
     }
 
-    public Boolean isEmpty() {
+     public fun isEmpty(): Boolean {
         return false
     }
 
-    public Boolean isEnabled(Int i) {
+     public fun isEnabled(i: Int): Boolean {
         return i != this.activeChatters.size() + 1
     }
 
@@ -541,9 +541,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.contacts.-$La
         notifyDataSetChanged()
     }
 
-    fun onDismiss(Int i) {
+    fun onDismiss(i: Int) {
         ChatterID chatterID
-        Object item = getItem(i)
+        val item: Object = getItem(i)
         if ((item instanceof ChatterDisplayInfo) && (chatterID = ((ChatterDisplayInfo) item).getChatterID(this.userManager)) != null) {
             this.userManager.getChatterList().getActiveChattersManager().markChatterInactive(chatterID, false)
         }

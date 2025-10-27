@@ -24,7 +24,7 @@ class ChatterNameRetriever {
     private Subscription subscription = null
 
     interface OnChatterNameUpdated {
-        Unit onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever)
+         fun onChatterNameUpdated(chatterNameRetriever: ChatterNameRetriever)
     }
 
     public ChatterNameRetriever(ChatterID chatterID2, OnChatterNameUpdated onChatterNameUpdated, Executor executor2) {
@@ -45,15 +45,15 @@ class ChatterNameRetriever {
 
     /* access modifiers changed from: private */
     /* renamed from: onCurrentLocation */
-    fun m262com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref0(CurrentLocationInfo currentLocationInfo) {
-        String str = null
-        ParcelData parcelData = currentLocationInfo.parcelData()
+    fun m262com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref0(currentLocationInfo: CurrentLocationInfo) {
+        val str: String = null
+        val parcelData: ParcelData = currentLocationInfo.parcelData()
         if (parcelData != null) {
             str = parcelData.getName()
         }
         if (!Objects.equal(this.resolvedName, str)) {
             this.resolvedName = str
-            OnChatterNameUpdated onChatterNameUpdated = (OnChatterNameUpdated) this.listener.get()
+            val onChatterNameUpdated: OnChatterNameUpdated = (OnChatterNameUpdated) this.listener.get()
             if (onChatterNameUpdated != null) {
                 onChatterNameUpdated.onChatterNameUpdated(this)
             }
@@ -62,10 +62,10 @@ class ChatterNameRetriever {
 
     /* access modifiers changed from: private */
     /* renamed from: onGroupProfile */
-    fun m264com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref2(GroupProfileReply groupProfileReply) {
+    fun m264com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref2(groupProfileReply: GroupProfileReply) {
         this.resolvedName = SLMessage.stringFromVariableOEM(groupProfileReply.GroupData_Field.Name)
         this.resolvedSecondaryName = SLMessage.stringFromVariableOEM(groupProfileReply.GroupData_Field.Name)
-        OnChatterNameUpdated onChatterNameUpdated = (OnChatterNameUpdated) this.listener.get()
+        val onChatterNameUpdated: OnChatterNameUpdated = (OnChatterNameUpdated) this.listener.get()
         if (onChatterNameUpdated != null) {
             onChatterNameUpdated.onChatterNameUpdated(this)
         }
@@ -73,7 +73,7 @@ class ChatterNameRetriever {
 
     /* access modifiers changed from: private */
     /* renamed from: onUserName */
-    fun m263com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref1(UserName userName) {
+    fun m263com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref1(userName: UserName) {
         Debug.Printf("Resolved name for %s", userName.getUuid())
         if (GlobalOptions.getInstance().isLegacyUserNames()) {
             this.resolvedName = userName.getUserName()
@@ -82,7 +82,7 @@ class ChatterNameRetriever {
             this.resolvedName = userName.getDisplayName()
             this.resolvedSecondaryName = userName.getUserName()
         }
-        OnChatterNameUpdated onChatterNameUpdated = (OnChatterNameUpdated) this.listener.get()
+        val onChatterNameUpdated: OnChatterNameUpdated = (OnChatterNameUpdated) this.listener.get()
         if (onChatterNameUpdated != null) {
             onChatterNameUpdated.onChatterNameUpdated(this)
         }
@@ -94,16 +94,16 @@ class ChatterNameRetriever {
         }
     }
 
-    public String getResolvedName() {
+     public fun getResolvedName(): String {
         return this.resolvedName
     }
 
-    public String getResolvedSecondaryName() {
+     public fun getResolvedSecondaryName(): String {
         return this.resolvedSecondaryName
     }
 
     fun subscribe() {
-        UserManager userManager = this.chatterID.getUserManager()
+        val userManager: UserManager = this.chatterID.getUserManager()
         if (userManager == null) {
             this.subscription = null
         } else if (this.chatterID.getChatterType() == ChatterID.ChatterType.Local) {

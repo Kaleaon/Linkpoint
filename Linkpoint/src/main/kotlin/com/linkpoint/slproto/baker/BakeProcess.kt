@@ -58,7 +58,7 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
         }
     }
 
-    static class DefaultTextureException : Exception() {
+    class DefaultTextureException : Exception() {
         DefaultTextureException() {
         }
     }
@@ -73,7 +73,7 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
             this.texture = wearableTexture
         }
 
-        fun OnResourceReady(Object obj, Boolean z) {
+        fun OnResourceReady(obj: Object, z: Boolean) {
             if (obj instanceof OpenJPEG) {
                 this.textureData = (OpenJPEG) obj
             }
@@ -87,12 +87,12 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
         }
 
         /* access modifiers changed from: package-private */
-        public OpenJPEG getTextureData() {
+         public fun getTextureData(): OpenJPEG {
             return this.textureData
         }
 
         /* access modifiers changed from: package-private */
-        public Boolean getTextureReady() {
+         public fun getTextureReady(): Boolean {
             return this.textureReady
         }
 
@@ -109,9 +109,9 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
         this.uploader = sLTextureUploader
         this.eventBus = eventBus2
         for (SLWearable sLWearable : table.values()) {
-            SLWearableData wearableData = sLWearable.getWearableData()
+            val wearableData: SLWearableData = sLWearable.getWearableData()
             if (wearableData != null) {
-                ArrayList arrayList = ArrayList(wearableData.textures.size())
+                val arrayList: ArrayList = ArrayList(wearableData.textures.size())
                 for (SLWearableData.WearableTexture wearableTextureData : wearableData.textures) {
                     arrayList.add(WearableTextureData(wearableTextureData))
                 }
@@ -122,15 +122,15 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
         this.bakingThread.start()
     }
 
-    private SLTextureEntry PrepareAvatarTextureEntry() {
+    private fun PrepareAvatarTextureEntry(): SLTextureEntry {
         UUID uploadedID
-        SLTextureEntryFace create = SLTextureEntryFace.create(MutableSLTextureEntryFace(-1))
-        SLTextureEntryFace[] sLTextureEntryFaceArr = SLTextureEntryFace[32]
+        val create: SLTextureEntryFace = SLTextureEntryFace.create(MutableSLTextureEntryFace(-1))
+        val sLTextureEntryFaceArr: Array<SLTextureEntryFace> = SLTextureEntryFace[32]
         for (BakedTextureIndex bakedTextureIndex : BakedTextureIndex.values()) {
-            Int ordinal = bakedTextureIndex.getFaceIndex().ordinal()
-            BakedImage bakedImage = this.bakedImages.get(bakedTextureIndex)
+            val ordinal: Int = bakedTextureIndex.getFaceIndex().ordinal()
+            val bakedImage: BakedImage = this.bakedImages.get(bakedTextureIndex)
             if (!(bakedImage == null || (uploadedID = bakedImage.getUploadedID()) == null)) {
-                MutableSLTextureEntryFace mutableSLTextureEntryFace = MutableSLTextureEntryFace(0)
+                val mutableSLTextureEntryFace: MutableSLTextureEntryFace = MutableSLTextureEntryFace(0)
                 mutableSLTextureEntryFace.setTextureID(uploadedID)
                 sLTextureEntryFaceArr[ordinal] = SLTextureEntryFace.create(mutableSLTextureEntryFace)
             }
@@ -161,8 +161,8 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
         Debug.Log("Baking: calculating param values...")
         this.paramValues = calcAllParamValues(this.wornWearables)
         Debug.Log("Baking: baking...")
-        Boolean isWearingSkirt = isWearingSkirt()
-        File cacheDir = GlobalOptions.getInstance().getCacheDir("baker")
+        val isWearingSkirt: Boolean = isWearingSkirt()
+        val cacheDir: File = GlobalOptions.getInstance().getCacheDir("baker")
         cacheDir.mkdirs()
         for (BakedTextureIndex bakedTextureIndex : BakedTextureIndex.values()) {
             if (Thread.interrupted()) {
@@ -173,7 +173,7 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
             }
             if (bakedTextureIndex != BakedTextureIndex.BAKED_SKIRT || !(!isWearingSkirt)) {
                 Debug.Log("Baking: Baking layer " + bakedTextureIndex)
-                BakedImage bakedImage = BakedImage(BakeLayers.layerSets.get(bakedTextureIndex))
+                val bakedImage: BakedImage = BakedImage(BakeLayers.layerSets.get(bakedTextureIndex))
                 this.bakedImages.put(bakedTextureIndex, bakedImage)
                 bakedImage.Bake(this)
                 if (Thread.interrupted()) {
@@ -183,9 +183,9 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
                     return
                 }
                 try {
-                    File file = File(cacheDir, bakedTextureIndex.toString() + ".j2k")
+                    val file: File = File(cacheDir, bakedTextureIndex.toString() + ".j2k")
                     bakedImage.SaveToJPEG2K(file)
-                    BakedImageUploadRequest bakedImageUploadRequest = BakedImageUploadRequest(bakedImage, bakedTextureIndex, file)
+                    val bakedImageUploadRequest: BakedImageUploadRequest = BakedImageUploadRequest(bakedImage, bakedTextureIndex, file)
                     bakedImageUploadRequest.setOnUploadComplete(this)
                     this.uploader.BeginUpload(bakedImageUploadRequest)
                 } catch (IOException e2) {
@@ -198,12 +198,12 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
     }
 
     private Map<Integer, Float> calcAllParamValues(Table<SLWearableType, UUID, SLWearable> table) {
-        HashMap hashMap = HashMap()
+        val hashMap: HashMap = HashMap()
         for (Map.Entry entry : SLAvatarParams.paramByIDs.entrySet()) {
             hashMap.put((Integer) entry.getKey(), Float.valueOf(((SLAvatarParams.AvatarParam) ((SLAvatarParams.ParamSet) entry.getValue()).params.get(0)).defValue))
         }
         for (SLWearable wearableData : table.values()) {
-            SLWearableData wearableData2 = wearableData.getWearableData()
+            val wearableData2: SLWearableData = wearableData.getWearableData()
             if (wearableData2 != null) {
                 for (SLWearableData.WearableParam wearableParam : wearableData2.params) {
                     hashMap.put(Integer.valueOf(wearableParam.paramIndex), Float.valueOf(wearableParam.paramValue))
@@ -227,12 +227,12 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
         return hashMap
     }
 
-    private Unit finishBaking(SLTextureEntry sLTextureEntry) {
+     private fun finishBaking(sLTextureEntry: SLTextureEntry) {
         this.avatarAppearance.finishBaking(this, sLTextureEntry)
     }
 
-    private Boolean isTexturesReady() {
-        Boolean z = true
+     private fun isTexturesReady(): Boolean {
+        val z: Boolean = true
         for (List<WearableTextureData> it : this.wearables.values()) {
             for (WearableTextureData textureReady : it) {
                 if (!textureReady.getTextureReady()) {
@@ -243,7 +243,7 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
         return z
     }
 
-    private Boolean isWearingSkirt() {
+     private fun isWearingSkirt(): Boolean {
         return !this.wornWearables.row(SLWearableType.WT_SKIRT).isEmpty()
     }
 
@@ -254,23 +254,23 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
         }
     }
 
-    fun OnTextureUploadComplete(SLTextureUploadRequest sLTextureUploadRequest) {
+    fun OnTextureUploadComplete(sLTextureUploadRequest: SLTextureUploadRequest) {
         if (sLTextureUploadRequest instanceof BakedImageUploadRequest) {
-            BakedImageUploadRequest bakedImageUploadRequest = (BakedImageUploadRequest) sLTextureUploadRequest
+            val bakedImageUploadRequest: BakedImageUploadRequest = (BakedImageUploadRequest) sLTextureUploadRequest
             Debug.Log("Baking: texture " + bakedImageUploadRequest.bakedIndex + " uploaded, UUID = " + bakedImageUploadRequest.getTextureID())
             bakedImageUploadRequest.bakedImage.setUploadedID(bakedImageUploadRequest.getTextureID())
             this.bakedImages.put(bakedImageUploadRequest.bakedIndex, bakedImageUploadRequest.bakedImage)
-            Boolean isWearingSkirt = isWearingSkirt()
-            BakedTextureIndex[] values = BakedTextureIndex.values()
-            Int length = values.length
-            Int i3 = 0
-            Boolean z2 = true
-            Int i4 = 0
-            Int i5 = 0
+            val isWearingSkirt: Boolean = isWearingSkirt()
+            val values: Array<BakedTextureIndex> = BakedTextureIndex.values()
+            val length: Int = values.length
+            val i3: Int = 0
+            val z2: Boolean = true
+            val i4: Int = 0
+            val i5: Int = 0
             while (i3 < length) {
-                BakedTextureIndex bakedTextureIndex = values[i3]
+                val bakedTextureIndex: BakedTextureIndex = values[i3]
                 if (bakedTextureIndex != BakedTextureIndex.BAKED_SKIRT || !(!isWearingSkirt)) {
-                    Int i6 = i5 + 1
+                    val i6: Int = i5 + 1
                     if (!this.bakedImages.containsKey(bakedTextureIndex)) {
                         i = i4 + 1
                         i2 = i6
@@ -285,13 +285,13 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
                         i2 = i6
                     }
                 } else {
-                    Boolean z3 = z2
+                    val z3: Boolean = z2
                     i = i4
                     i2 = i5
                     z = z3
                 }
                 i3++
-                Boolean z4 = z
+                val z4: Boolean = z
                 i5 = i2
                 i4 = i
                 z2 = z4
@@ -313,8 +313,8 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
     /* access modifiers changed from: package-private */
     public List<OpenJPEG> getLocalTexture(AvatarTextureFaceIndex avatarTextureFaceIndex) throws DefaultTextureException {
         OpenJPEG textureData
-        Boolean z = false
-        LinkedList linkedList = null
+        val z: Boolean = false
+        val linkedList: LinkedList = null
         for (List<WearableTextureData> it : this.wearables.values()) {
             for (WearableTextureData wearableTextureData : it) {
                 if (wearableTextureData.getTexture().layer == avatarTextureFaceIndex.ordinal()) {
@@ -336,8 +336,8 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
     }
 
     /* access modifiers changed from: package-private */
-    public Float getParamWeight(Int i, SLAvatarParams.AvatarParam avatarParam) {
-        Float f = this.paramValues.get(Integer.valueOf(i))
+     public fun getParamWeight(i: Int, SLAvatarParams.AvatarParam avatarParam): Float {
+        val f: Float = this.paramValues.get(Integer.valueOf(i))
         return f != null ? f.floatValue() : avatarParam.defValue
     }
 }

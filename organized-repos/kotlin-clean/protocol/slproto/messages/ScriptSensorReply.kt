@@ -21,7 +21,7 @@ class ScriptSensorReply : SLMessage() {
     @JvmStatic
     class SensedData {
         public UUID GroupID
-        public Byte[] Name
+        public ByteArray Name
         public UUID ObjectID
         public UUID OwnerID
         public LLVector3 Position

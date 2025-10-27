@@ -29,8 +29,8 @@ class Voice3DPosition {
         this.leftOrientation = voice3DVector5
     }
 
-    public Bundle toBundle() {
-        Bundle bundle = Bundle()
+     public fun toBundle(): Bundle {
+        val bundle: Bundle = Bundle()
         bundle.putBundle("position", this.position.toBundle())
         bundle.putBundle("velocity", this.velocity.toBundle())
         bundle.putBundle("atOrientation", this.atOrientation.toBundle())
@@ -39,7 +39,7 @@ class Voice3DPosition {
         return bundle
     }
 
-    public String toString() {
+     public override fun toString(): String {
         return String.format("(pos %s vel %s at %s up %s left %s)", this.position.toString(), this.velocity.toString(), this.atOrientation.toString(), this.upOrientation.toString(), this.leftOrientation.toString())
     }
 }

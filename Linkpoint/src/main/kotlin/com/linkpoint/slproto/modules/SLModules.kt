@@ -43,84 +43,84 @@ class SLModules {
     val SLXferManager xferManager
 
     public SLModules(SLAgentCircuit sLAgentCircuit, SLCaps sLCaps, SLGridConnection sLGridConnection) {
-        List<SLModule> list = this.modules
-        SLUserNameFetcher sLUserNameFetcher = SLUserNameFetcher(sLAgentCircuit, sLCaps)
+        val list: List<SLModule> = this.modules
+        val sLUserNameFetcher: SLUserNameFetcher = SLUserNameFetcher(sLAgentCircuit, sLCaps)
         this.userNameFetcher = sLUserNameFetcher
         list.add(sLUserNameFetcher)
-        List<SLModule> list2 = this.modules
-        SLSearch sLSearch = SLSearch(sLAgentCircuit)
+        val list2: List<SLModule> = this.modules
+        val sLSearch: SLSearch = SLSearch(sLAgentCircuit)
         this.gridSearch = sLSearch
         list2.add(sLSearch)
-        List<SLModule> list3 = this.modules
-        SLMinimap sLMinimap = SLMinimap(sLAgentCircuit)
+        val list3: List<SLModule> = this.modules
+        val sLMinimap: SLMinimap = SLMinimap(sLAgentCircuit)
         this.minimap = sLMinimap
         list3.add(sLMinimap)
-        List<SLModule> list4 = this.modules
-        SLAvatarControl sLAvatarControl = SLAvatarControl(sLAgentCircuit)
+        val list4: List<SLModule> = this.modules
+        val sLAvatarControl: SLAvatarControl = SLAvatarControl(sLAgentCircuit)
         this.avatarControl = sLAvatarControl
         list4.add(sLAvatarControl)
-        List<SLModule> list5 = this.modules
-        SLDrawDistance sLDrawDistance = SLDrawDistance(sLAgentCircuit)
+        val list5: List<SLModule> = this.modules
+        val sLDrawDistance: SLDrawDistance = SLDrawDistance(sLAgentCircuit)
         this.drawDistance = sLDrawDistance
         list5.add(sLDrawDistance)
-        List<SLModule> list6 = this.modules
-        SLInventory sLInventory = SLInventory(sLAgentCircuit, sLCaps)
+        val list6: List<SLModule> = this.modules
+        val sLInventory: SLInventory = SLInventory(sLAgentCircuit, sLCaps)
         this.inventory = sLInventory
         list6.add(sLInventory)
-        List<SLModule> list7 = this.modules
-        SLWorldMap sLWorldMap = SLWorldMap(sLAgentCircuit)
+        val list7: List<SLModule> = this.modules
+        val sLWorldMap: SLWorldMap = SLWorldMap(sLAgentCircuit)
         this.worldMap = sLWorldMap
         list7.add(sLWorldMap)
-        List<SLModule> list8 = this.modules
-        SLTransferManager sLTransferManager = SLTransferManager(sLAgentCircuit)
+        val list8: List<SLModule> = this.modules
+        val sLTransferManager: SLTransferManager = SLTransferManager(sLAgentCircuit)
         this.transferManager = sLTransferManager
         list8.add(sLTransferManager)
-        List<SLModule> list9 = this.modules
-        SLTextureFetcher sLTextureFetcher = SLTextureFetcher(sLAgentCircuit, sLCaps, sLGridConnection.authReply.agentAppearanceService)
+        val list9: List<SLModule> = this.modules
+        val sLTextureFetcher: SLTextureFetcher = SLTextureFetcher(sLAgentCircuit, sLCaps, sLGridConnection.authReply.agentAppearanceService)
         this.textureFetcher = sLTextureFetcher
         list9.add(sLTextureFetcher)
-        List<SLModule> list10 = this.modules
-        SLTextureUploader sLTextureUploader = SLTextureUploader(sLAgentCircuit, sLCaps)
+        val list10: List<SLModule> = this.modules
+        val sLTextureUploader: SLTextureUploader = SLTextureUploader(sLAgentCircuit, sLCaps)
         this.textureUploader = sLTextureUploader
         list10.add(sLTextureUploader)
-        List<SLModule> list11 = this.modules
-        SLAvatarAppearance sLAvatarAppearance = SLAvatarAppearance(sLAgentCircuit, this.inventory, sLCaps)
+        val list11: List<SLModule> = this.modules
+        val sLAvatarAppearance: SLAvatarAppearance = SLAvatarAppearance(sLAgentCircuit, this.inventory, sLCaps)
         this.avatarAppearance = sLAvatarAppearance
         list11.add(sLAvatarAppearance)
-        List<SLModule> list12 = this.modules
-        RLVController rLVController = RLVController(sLAgentCircuit)
+        val list12: List<SLModule> = this.modules
+        val rLVController: RLVController = RLVController(sLAgentCircuit)
         this.rlvController = rLVController
         list12.add(rLVController)
-        List<SLModule> list13 = this.modules
-        SLXferManager sLXferManager = SLXferManager(sLAgentCircuit)
+        val list13: List<SLModule> = this.modules
+        val sLXferManager: SLXferManager = SLXferManager(sLAgentCircuit)
         this.xferManager = sLXferManager
         list13.add(sLXferManager)
-        List<SLModule> list14 = this.modules
-        SLTaskInventories sLTaskInventories = SLTaskInventories(sLAgentCircuit)
+        val list14: List<SLModule> = this.modules
+        val sLTaskInventories: SLTaskInventories = SLTaskInventories(sLAgentCircuit)
         this.taskInventories = sLTaskInventories
         list14.add(sLTaskInventories)
-        List<SLModule> list15 = this.modules
-        SLMuteList sLMuteList = SLMuteList(sLAgentCircuit)
+        val list15: List<SLModule> = this.modules
+        val sLMuteList: SLMuteList = SLMuteList(sLAgentCircuit)
         this.muteList = sLMuteList
         list15.add(sLMuteList)
-        List<SLModule> list16 = this.modules
-        SLFinancialInfo sLFinancialInfo = SLFinancialInfo(sLAgentCircuit)
+        val list16: List<SLModule> = this.modules
+        val sLFinancialInfo: SLFinancialInfo = SLFinancialInfo(sLAgentCircuit)
         this.financialInfo = sLFinancialInfo
         list16.add(sLFinancialInfo)
-        List<SLModule> list17 = this.modules
-        SLGroupManager sLGroupManager = SLGroupManager(sLAgentCircuit)
+        val list17: List<SLModule> = this.modules
+        val sLGroupManager: SLGroupManager = SLGroupManager(sLAgentCircuit)
         this.groupManager = sLGroupManager
         list17.add(sLGroupManager)
-        List<SLModule> list18 = this.modules
-        SLUserProfiles sLUserProfiles = SLUserProfiles(sLAgentCircuit, sLCaps)
+        val list18: List<SLModule> = this.modules
+        val sLUserProfiles: SLUserProfiles = SLUserProfiles(sLAgentCircuit, sLCaps)
         this.userProfiles = sLUserProfiles
         list18.add(sLUserProfiles)
-        List<SLModule> list19 = this.modules
-        SLDisplayNameFetcher sLDisplayNameFetcher = SLDisplayNameFetcher(sLAgentCircuit, sLCaps)
+        val list19: List<SLModule> = this.modules
+        val sLDisplayNameFetcher: SLDisplayNameFetcher = SLDisplayNameFetcher(sLAgentCircuit, sLCaps)
         this.displayNameFetcher = sLDisplayNameFetcher
         list19.add(sLDisplayNameFetcher)
-        List<SLModule> list20 = this.modules
-        SLVoice sLVoice = SLVoice(sLAgentCircuit, sLCaps)
+        val list20: List<SLModule> = this.modules
+        val sLVoice: SLVoice = SLVoice(sLAgentCircuit, sLCaps)
         this.voice = sLVoice
         list20.add(sLVoice)
     }

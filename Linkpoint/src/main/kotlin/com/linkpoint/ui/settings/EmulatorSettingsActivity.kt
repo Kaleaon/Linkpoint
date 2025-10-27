@@ -48,7 +48,7 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         refreshAVDList()
     }
     
-    private Unit createLayout() {
+     private fun createLayout() {
         // Create root scroll view
         scrollView = ScrollView(this)
         scrollView.setFillViewport(true)
@@ -69,8 +69,8 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         setContentView(scrollView)
     }
     
-    private Unit setupToolbar() {
-        Toolbar toolbar = Toolbar(this)
+     private fun setupToolbar() {
+        val toolbar: Toolbar = Toolbar(this)
         toolbar.setTitle("Emulator Management")
         toolbar.setTitleTextColor(0xFFFFFFFF)
         toolbar.setBackgroundColor(0xFF2196F3)
@@ -88,7 +88,7 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         }
     }
     
-    private Unit populateSettings() {
+     private fun populateSettings() {
         // Check if emulator management is available
         if (!emulatorManager.isAvailable()) {
             addErrorSection()
@@ -100,8 +100,8 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         createInfoSection()
     }
     
-    private Unit addErrorSection() {
-        LinearLayout errorSection = createSection("❌ Emulator Management Unavailable")
+     private fun addErrorSection() {
+        val errorSection: LinearLayout = createSection("❌ Emulator Management Unavailable")
         
         addInfoText(errorSection, 
                    "Emulator management is not available", 
@@ -112,7 +112,7 @@ class EmulatorSettingsActivity : AppCompatActivity() {
                    "Please ensure Android SDK is properly installed and ANDROID_HOME is set.")
     }
     
-    private Unit createAVDSection() {
+     private fun createAVDSection() {
         avdSection = createSection("📱 Android Virtual Devices")
         
         // Refresh button for AVD list
@@ -124,7 +124,7 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         // AVD list will be populated dynamically
     }
     
-    private Unit createActionSection() {
+     private fun createActionSection() {
         actionSection = createSection("⚡ Emulator Actions")
         
         // Create AVD
@@ -158,7 +158,7 @@ class EmulatorSettingsActivity : AppCompatActivity() {
                        this::showEmulatorStatus)
     }
     
-    private Unit createInfoSection() {
+     private fun createInfoSection() {
         infoSection = createSection("ℹ️ System Information")
         
         // Show device profiles
@@ -180,9 +180,9 @@ class EmulatorSettingsActivity : AppCompatActivity() {
                        this::showInstallImageDialog)
     }
     
-    private LinearLayout createSection(String title) {
+     private fun createSection(title: String): LinearLayout {
         // Section title
-        TextView titleText = TextView(this)
+        val titleText: TextView = TextView(this)
         titleText.setText(title)
         titleText.setTextSize(18)
         titleText.setTypeface(null, android.graphics.Typeface.BOLD)
@@ -191,7 +191,7 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         mainLayout.addView(titleText)
         
         // Section container
-        LinearLayout section = LinearLayout(this)
+        val section: LinearLayout = LinearLayout(this)
         section.setOrientation(LinearLayout.VERTICAL)
         section.setBackgroundColor(0xFFF5F5F5)
         section.setPadding(8, 8, 8, 16)
@@ -200,9 +200,9 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         return section
     }
     
-    private Unit addActionButton(LinearLayout parent, String title, String description, Runnable action) {
+     private fun addActionButton(parent: LinearLayout, title: String, description: String, action: Runnable) {
         // Container for this setting
-        LinearLayout container = LinearLayout(this)
+        val container: LinearLayout = LinearLayout(this)
         container.setOrientation(LinearLayout.VERTICAL)
         container.setPadding(16, 12, 16, 12)
         container.setClickable(true)
@@ -220,7 +220,7 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         container.setLayoutParams(params)
         
         // Title
-        TextView titleText = TextView(this)
+        val titleText: TextView = TextView(this)
         titleText.setText(title)
         titleText.setTextSize(16)
         titleText.setTypeface(null, android.graphics.Typeface.BOLD)
@@ -228,7 +228,7 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         container.addView(titleText)
         
         // Description
-        TextView descText = TextView(this)
+        val descText: TextView = TextView(this)
         descText.setText(description)
         descText.setTextSize(12)
         descText.setTextColor(0xFF666666)
@@ -237,14 +237,14 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         parent.addView(container)
     }
     
-    private Unit addInfoText(LinearLayout parent, String title, String content) {
-        LinearLayout container = LinearLayout(this)
+     private fun addInfoText(parent: LinearLayout, title: String, content: String) {
+        val container: LinearLayout = LinearLayout(this)
         container.setOrientation(LinearLayout.VERTICAL)
         container.setPadding(16, 12, 16, 12)
         container.setBackgroundColor(0xFFFFF3E0)
         
         // Title
-        TextView titleText = TextView(this)
+        val titleText: TextView = TextView(this)
         titleText.setText(title)
         titleText.setTextSize(16)
         titleText.setTypeface(null, android.graphics.Typeface.BOLD)
@@ -252,7 +252,7 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         container.addView(titleText)
         
         // Content
-        TextView contentText = TextView(this)
+        val contentText: TextView = TextView(this)
         contentText.setText(content)
         contentText.setTextSize(14)
         contentText.setTextColor(0xFF5D4037)
@@ -261,7 +261,7 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         parent.addView(container)
     }
     
-    private Unit updateStatus(String status) {
+     private fun updateStatus(status: String) {
         runOnUiThread(() -> {
             statusText.setText("Status: " + status)
     }
@@ -286,7 +286,7 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         }
     }
     
-    private Unit refreshAVDList() {
+     private fun refreshAVDList() {
         updateStatus("Loading AVD list...")
         
         emulatorManager.listAVDs(EmulatorManager.EmulatorCallback() {
@@ -297,14 +297,14 @@ class EmulatorSettingsActivity : AppCompatActivity() {
                     // Clear existing AVD items
                     // Find and remove old AVD items
                     for (Int i = avdSection.getChildCount() - 1; i >= 0; i--) {
-                        View child = avdSection.getChildAt(i)
+                        val child: View = avdSection.getChildAt(i)
                         if (child.getTag() != null && "avd_item".equals(child.getTag())) {
                             avdSection.removeView(child)
                         }
                     }
                     
                     // Parse and display AVDs
-                    List<EmulatorManager.AVDInfo> avds = EmulatorManager.parseAVDList(output)
+                    val avds: List<EmulatorManager.AVDInfo> = EmulatorManager.parseAVDList(output)
                     if (avds.isEmpty()) {
                         addInfoText(avdSection, "No AVDs Found", "Create a AVD to get started with emulator testing.")
                         avdSection.getChildAt(avdSection.getChildCount() - 1).setTag("avd_item")
@@ -326,8 +326,8 @@ class EmulatorSettingsActivity : AppCompatActivity() {
             }
     }
     
-    private Unit addAVDItem(EmulatorManager.AVDInfo avd) {
-        LinearLayout container = LinearLayout(this)
+     private fun addAVDItem(EmulatorManager.AVDInfo avd) {
+        val container: LinearLayout = LinearLayout(this)
         container.setOrientation(LinearLayout.VERTICAL)
         container.setPadding(16, 8, 16, 8)
         container.setBackgroundColor(0xFFE8F5E8)
@@ -341,7 +341,7 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         container.setLayoutParams(params)
         
         // AVD name
-        TextView nameText = TextView(this)
+        val nameText: TextView = TextView(this)
         nameText.setText("📱 " + avd.name)
         nameText.setTextSize(16)
         nameText.setTypeface(null, android.graphics.Typeface.BOLD)
@@ -349,13 +349,13 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         container.addView(nameText)
         
         // AVD details
-        StringBuilder details = StringBuilder()
+        val details: StringBuilder = StringBuilder()
         if (!avd.device.isEmpty()) details.append("Device: ").append(avd.device).append("  ")
         if (!avd.apiLevel.isEmpty()) details.append("API: ").append(avd.apiLevel).append("  ")
         if (!avd.abi.isEmpty()) details.append("ABI: ").append(avd.abi)
         
         if (details.length() > 0) {
-            TextView detailsText = TextView(this)
+            val detailsText: TextView = TextView(this)
             detailsText.setText(details.toString())
             detailsText.setTextSize(12)
             detailsText.setTextColor(0xFF4CAF50)
@@ -365,49 +365,49 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         avdSection.addView(container)
     }
     
-    private Unit showCreateAVDDialog() {
+     private fun showCreateAVDDialog() {
         AlertDialog.Builder builder = AlertDialog.Builder(this)
         builder.setTitle("Create New AVD")
         
-        LinearLayout layout = LinearLayout(this)
+        val layout: LinearLayout = LinearLayout(this)
         layout.setOrientation(LinearLayout.VERTICAL)
         layout.setPadding(20, 20, 20, 20)
         
         // AVD Name
-        TextView nameLabel = TextView(this)
+        val nameLabel: TextView = TextView(this)
         nameLabel.setText("AVD Name:")
         nameLabel.setTextSize(14)
         nameLabel.setTypeface(null, android.graphics.Typeface.BOLD)
         layout.addView(nameLabel)
         
-        EditText nameInput = EditText(this)
+        val nameInput: EditText = EditText(this)
         nameInput.setHint("e.g., linkpoint-test")
         nameInput.setInputType(InputType.TYPE_CLASS_TEXT)
         layout.addView(nameInput)
         
         // Device Profile
-        TextView deviceLabel = TextView(this)
+        val deviceLabel: TextView = TextView(this)
         deviceLabel.setText("Device Profile:")
         deviceLabel.setTextSize(14)
         deviceLabel.setTypeface(null, android.graphics.Typeface.BOLD)
         layout.addView(deviceLabel)
         
-        Spinner deviceSpinner = Spinner(this)
-        ArrayAdapter<String> deviceAdapter = ArrayAdapter<>(this, 
+        val deviceSpinner: Spinner = Spinner(this)
+        val deviceAdapter: ArrayAdapter<String> = ArrayAdapter<>(this, 
             android.R.layout.simple_spinner_item, EmulatorManager.EmulatorDefaults.POPULAR_DEVICES)
         deviceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         deviceSpinner.setAdapter(deviceAdapter)
         layout.addView(deviceSpinner)
         
         // API Level
-        TextView apiLabel = TextView(this)
+        val apiLabel: TextView = TextView(this)
         apiLabel.setText("API Level:")
         apiLabel.setTextSize(14)
         apiLabel.setTypeface(null, android.graphics.Typeface.BOLD)
         layout.addView(apiLabel)
         
-        Spinner apiSpinner = Spinner(this)
-        ArrayAdapter<String> apiAdapter = ArrayAdapter<>(this, 
+        val apiSpinner: Spinner = Spinner(this)
+        val apiAdapter: ArrayAdapter<String> = ArrayAdapter<>(this, 
             android.R.layout.simple_spinner_item, EmulatorManager.EmulatorDefaults.SUPPORTED_APIS)
         apiAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         apiSpinner.setAdapter(apiAdapter)
@@ -415,14 +415,14 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         layout.addView(apiSpinner)
         
         // ABI
-        TextView abiLabel = TextView(this)
+        val abiLabel: TextView = TextView(this)
         abiLabel.setText("ABI:")
         abiLabel.setTextSize(14)
         abiLabel.setTypeface(null, android.graphics.Typeface.BOLD)
         layout.addView(abiLabel)
         
-        Spinner abiSpinner = Spinner(this)
-        ArrayAdapter<String> abiAdapter = ArrayAdapter<>(this, 
+        val abiSpinner: Spinner = Spinner(this)
+        val abiAdapter: ArrayAdapter<String> = ArrayAdapter<>(this, 
             android.R.layout.simple_spinner_item, EmulatorManager.EmulatorDefaults.SUPPORTED_ABIS)
         abiAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         abiSpinner.setAdapter(abiAdapter)
@@ -432,10 +432,10 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         builder.setView(layout)
         
         builder.setPositiveButton("Create", (dialog, which) -> {
-            String name = nameInput.getText().toString().trim()
-            String device = (String) deviceSpinner.getSelectedItem()
-            String api = (String) apiSpinner.getSelectedItem()
-            String abi = (String) abiSpinner.getSelectedItem()
+            val name: String = nameInput.getText().toString().trim()
+            val device: String = (String) deviceSpinner.getSelectedItem()
+            val api: String = (String) apiSpinner.getSelectedItem()
+            val abi: String = (String) abiSpinner.getSelectedItem()
             
             if (name.isEmpty()) {
                 Toast.makeText(this, "Please enter an AVD name", Toast.LENGTH_SHORT).show()
@@ -449,7 +449,7 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         builder.show()
     }
     
-    private Unit showStartAVDDialog() {
+     private fun showStartAVDDialog() {
         // For simplicity, we'll ask for AVD name
         // In a full implementation, we'd show a list of available AVDs
         showSimpleInputDialog("Start Emulator", "Enter AVD name to start:", 
@@ -458,31 +458,31 @@ class EmulatorSettingsActivity : AppCompatActivity() {
                                 emulatorManager.startAVD(name, createCallback("Start AVD"))
     }
     
-    private Unit showStopAVDDialog() {
+     private fun showStopAVDDialog() {
         showSimpleInputDialog("Stop Emulator", "Enter AVD name to stop:", 
                             (name) -> {
                                 updateStatus("Stopping AVD: " + name)
                                 emulatorManager.stopAVD(name, createCallback("Stop AVD"))
     }
     
-    private Unit showDeleteAVDDialog() {
+     private fun showDeleteAVDDialog() {
         showSimpleInputDialog("Delete AVD", "Enter AVD name to delete:", 
                             (name) -> {
                                 updateStatus("Deleting AVD: " + name)
                                 emulatorManager.deleteAVD(name, createCallback("Delete AVD"))
     }
     
-    private Unit showSimpleInputDialog(String title, String message, SimpleInputCallback callback) {
+     private fun showSimpleInputDialog(title: String, message: String, callback: SimpleInputCallback) {
         AlertDialog.Builder builder = AlertDialog.Builder(this)
         builder.setTitle(title)
         builder.setMessage(message)
         
-        EditText input = EditText(this)
+        val input: EditText = EditText(this)
         input.setInputType(InputType.TYPE_CLASS_TEXT)
         builder.setView(input)
         
         builder.setPositiveButton("OK", (dialog, which) -> {
-            String value = input.getText().toString().trim()
+            val value: String = input.getText().toString().trim()
             if (!value.isEmpty()) {
                 callback.onInput(value)
             } else {
@@ -493,22 +493,22 @@ class EmulatorSettingsActivity : AppCompatActivity() {
         builder.show()
     }
     
-    private Unit showEmulatorStatus() {
+     private fun showEmulatorStatus() {
         updateStatus("Checking emulator status...")
         emulatorManager.getStatus(createCallback("Emulator Status"))
     }
     
-    private Unit showDeviceProfiles() {
+     private fun showDeviceProfiles() {
         updateStatus("Loading device profiles...")
         emulatorManager.listDevices(createCallback("Device Profiles"))
     }
     
-    private Unit showSystemImages() {
+     private fun showSystemImages() {
         updateStatus("Loading system images...")
         emulatorManager.listSystemImages(createCallback("System Images"))
     }
     
-    private Unit showInstallImageDialog() {
+     private fun showInstallImageDialog() {
         // Simple implementation - in practice, you'd want a more sophisticated UI
         showSimpleInputDialog("Install System Image", 
                             "Enter API level (default: 34):", 
@@ -520,7 +520,7 @@ class EmulatorSettingsActivity : AppCompatActivity() {
                                     createCallback("Install System Image"))
     }
     
-    private Unit showResultDialog(String title, String message) {
+     private fun showResultDialog(title: String, message: String) {
         AlertDialog.Builder builder = AlertDialog.Builder(this)
         builder.setTitle(title)
         builder.setMessage(message)
@@ -529,6 +529,6 @@ class EmulatorSettingsActivity : AppCompatActivity() {
     }
     
     private interface SimpleInputCallback {
-        Unit onInput(String input)
+         fun onInput(input: String)
     }
 }

@@ -35,7 +35,7 @@ class SLChatLureRequestedEvent : SLChatEvent {
         if (Strings.isNullOrEmpty(this.message)) {
             return context.getString(R.string.chat_teleport_requested_no_message)
         }
-        return context.getString(R.string.chat_teleport_requested_message, Object[]{this.message})
+        return context.getString(R.string.chat_teleport_requested_message, Array<Any>{this.message})
     }
 
     SLChatEvent.ChatMessageViewType getViewType() {

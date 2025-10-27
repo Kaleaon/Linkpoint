@@ -15,29 +15,29 @@ class AvatarPickerForShare : AvatarPickerFragment() {
     private val InventoryFragmentHelper inventoryFragmentHelper = InventoryFragmentHelper(this)
 
     @JvmStatic
-    Bundle makeArguments(UUID uuid, SLInventoryEntry sLInventoryEntry) {
-        Bundle bundle = Bundle()
+     fun makeArguments(uuid: UUID, sLInventoryEntry: SLInventoryEntry): Bundle {
+        val bundle: Bundle = Bundle()
         bundle.putString("activeAgentUUID", uuid.toString())
         bundle.putParcelable(INVENTORY_ENTRY_KEY, sLInventoryEntry)
         return bundle
     }
 
-    public String getTitle() {
+     public fun getTitle(): String {
         return getString(R.string.share_with_title)
     }
 
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_avapicker_AvatarPickerForShare_1468  reason: not valid java name */
     public /* synthetic */ Unit m387lambda$com_lumiyaviewer_lumiya_ui_avapicker_AvatarPickerForShare_1468() {
-        FragmentActivity activity = getActivity()
+        val activity: FragmentActivity = getActivity()
         if (activity instanceof DetailsActivity) {
             ((DetailsActivity) activity).closeDetailsFragment(this)
         }
     }
 
     /* access modifiers changed from: protected */
-    fun onAvatarSelected(ChatterID chatterID, String str) {
-        Bundle arguments = getArguments()
+    fun onAvatarSelected(chatterID: ChatterID, str: String) {
+        val arguments: Bundle = getArguments()
         if (arguments != null && arguments.containsKey(INVENTORY_ENTRY_KEY)) {
             this.inventoryFragmentHelper.ConfirmShareInventoryEntry((SLInventoryEntry) arguments.getParcelable(INVENTORY_ENTRY_KEY), chatterID, str, $Lambda$GxFBFkg7vdmipTAXKE3eB6HqSs(this))
         }

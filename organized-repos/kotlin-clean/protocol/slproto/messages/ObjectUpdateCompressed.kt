@@ -13,7 +13,7 @@ class ObjectUpdateCompressed : SLMessage() {
 
     @JvmStatic
     class ObjectData {
-        public Byte[] Data
+        public ByteArray Data
         public Int UpdateFlags
     }
 

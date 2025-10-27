@@ -11,7 +11,7 @@ class RequestXfer : SLMessage {
     class XferID {
         Boolean DeleteOnCompletion
         Int FilePath
-        Byte[] Filename
+        ByteArray Filename
         Long ID
         Boolean UseBigPackets
         UUID VFileID

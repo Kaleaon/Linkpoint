@@ -68,13 +68,13 @@ class WorldSurfaceView : GLSurfaceView() {
     WorldSurfaceView(WorldViewActivity worldViewActivity, UserManager userManager) {
         super(worldViewActivity)
         this.activity = worldViewActivity
-        Int applyDimension = (Int) TypedValue.applyDimension(2, 16.0f, getResources().getDisplayMetrics())
+        Int applyDimension = TypedValue.toInt().applyDimension(2, 16.0f, getResources().getDisplayMetrics())
         this.supportsGL20 = ((ActivityManager) getContext().getSystemService("activity")).getDeviceConfigurationInfo().reqGlEsVersion >= 131072
         if (Debug.isDebugBuild()) {
             setDebugFlags(3)
         }
         this.wantGL20 = getWantGL20()
-        Object[] objArr = Object[2]
+        Array<Any> objArr = Object[2]
         objArr[0] = Integer.valueOf(Build.VERSION.SDK_INT)
         objArr[1] = this.wantGL20 ? "yes" : "no"
         Debug.Printf("WorldSurfaceView: API level %d, wantGL20 %s", objArr)

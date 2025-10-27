@@ -31,14 +31,14 @@ import org.xmlpull.v1.XmlSerializer
 abstract class LLSDNode {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-https-LLSDContentTypeDetector$LLSDContentTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] f114comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues = null
+    private /* synthetic */ IntArray f114comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues = null
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-https-LLSDContentTypeDetector$LLSDContentTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] m195getcomlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues() {
+    private /* synthetic */ IntArray m195getcomlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues() {
         if (f114comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues != null) {
             return f114comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues
         }
-        Int[] iArr = Int[LLSDContentTypeDetector.LLSDContentType.values().length]
+        IntArray iArr = Int[LLSDContentTypeDetector.LLSDContentType.values().length]
         try {
             iArr[LLSDContentTypeDetector.LLSDContentType.llsdBinary.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -131,7 +131,7 @@ abstract class LLSDNode {
         L_0x0048:
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDInt r0 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDInt     // Catch:{ IOException -> 0x0026 }
             Int r1 = r6.readInt()     // Catch:{ IOException -> 0x0026 }
-            r0.<init>((Int) r1)     // Catch:{ IOException -> 0x0026 }
+            r0.<init>(r1.toInt())     // Catch:{ IOException -> 0x0026 }
             return r0
         L_0x0052:
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDDouble r0 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDDouble     // Catch:{ IOException -> 0x0026 }

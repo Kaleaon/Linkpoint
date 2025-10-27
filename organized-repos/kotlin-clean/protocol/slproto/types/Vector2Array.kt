@@ -11,10 +11,10 @@ class Vector2Array : VectorArray() {
 
     val Unit add(Int i, LLVector2 lLVector2) {
         Int i2 = this.offset + (this.numComponents * i)
-        Float[] fArr = this.data
+        FloatArray fArr = this.data
         Int i3 = i2 + 0
         fArr[i3] = fArr[i3] + lLVector2.x
-        Float[] fArr2 = this.data
+        FloatArray fArr2 = this.data
         Int i4 = i2 + 1
         fArr2[i4] = fArr2[i4] + lLVector2.y
     }

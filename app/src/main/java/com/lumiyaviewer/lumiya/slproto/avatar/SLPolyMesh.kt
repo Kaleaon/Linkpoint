@@ -15,7 +15,7 @@ import java.util.Map
 
 class SLPolyMesh : SLMeshData {
     protected Boolean hasWeights
-    Int[] jointMap
+    IntArray jointMap
     private Map<SLVisualParamID, Integer> morphIndices = EnumMap(SLVisualParamID.class)
     private SLPolyMorphData[] morphs
     protected DirectByteBuffer weightsBuffer
@@ -90,7 +90,7 @@ class SLPolyMesh : SLMeshData {
                 if (((double) f) != d2) {
                     float floor = (float) Math.floor((double) f)
                     float f2 = f - floor
-                    Int i2 = ((Int) floor) - 1
+                    Int i2 = (floor.toInt()) - 1
                     Int i3 = 0
                     if (i2 >= 0 && i2 < this.jointMap.length) {
                         i3 = this.jointMap[i2]

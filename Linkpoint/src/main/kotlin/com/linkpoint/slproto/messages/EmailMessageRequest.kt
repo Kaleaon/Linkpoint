@@ -9,24 +9,24 @@ class EmailMessageRequest : SLMessage() {
 
     @JvmStatic
     class DataBlock {
-        public Byte[] FromAddress
+        public ByteArray FromAddress
         public UUID ObjectID
-        public Byte[] Subject
+        public ByteArray Subject
     }
 
     public EmailMessageRequest() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.DataBlock_Field.FromAddress.length + 17 + 1 + this.DataBlock_Field.Subject.length + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleEmailMessageRequest(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 79)
@@ -35,7 +35,7 @@ class EmailMessageRequest : SLMessage() {
         packVariable(byteBuffer, this.DataBlock_Field.Subject, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.DataBlock_Field.ObjectID = unpackUUID(byteBuffer)
         this.DataBlock_Field.FromAddress = unpackVariable(byteBuffer, 1)
         this.DataBlock_Field.Subject = unpackVariable(byteBuffer, 1)

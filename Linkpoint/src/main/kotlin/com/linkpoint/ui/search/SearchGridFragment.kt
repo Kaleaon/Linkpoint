@@ -34,7 +34,7 @@ import java.util.UUID
 class SearchGridFragment : FragmentWithTitle(), LoadableMonitor.OnLoadableDataChangedListener, SearchGridAdapter.OnSearchResultClickListener {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-modules-search-SearchGridQuery$SearchTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f584comlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f584comlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues = null
     private SearchGridAdapter adapter
     private val LoadableMonitor loadableMonitor = LoadableMonitor(this.searchResults).withDataChangedListener(this)
     @BindView(2131755641)
@@ -48,11 +48,11 @@ class SearchGridFragment : FragmentWithTitle(), LoadableMonitor.OnLoadableDataCh
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-modules-search-SearchGridQuery$SearchTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m851getcomlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues() {
+private /* synthetic */ IntArray m851getcomlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues() {
         if (f584comlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues != null) {
             return f584comlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues
         }
-        Int[] iArr = Int[SearchGridQuery.SearchType.values().length]
+        val iArr: IntArray = Int[SearchGridQuery.SearchType.values().length]
         try {
             iArr[SearchGridQuery.SearchType.Groups.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -69,10 +69,10 @@ private /* synthetic */ Int[] m851getcomlumiyaviewerlumiyaslprotomodulessearchSe
         return iArr
     }
 
-    private Unit beginSearch() {
+     private fun beginSearch() {
         SearchGridQuery.SearchType searchType
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
-        String trim = this.searchString.getText().toString().trim()
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
+        val trim: String = this.searchString.getText().toString().trim()
         if (!trim.isEmpty() && userManager != null) {
             switch (this.radioGroupSearchType.getCheckedRadioButtonId()) {
                 case R.id.radio_people:
@@ -93,17 +93,17 @@ private /* synthetic */ Int[] m851getcomlumiyaviewerlumiyaslprotomodulessearchSe
     }
 
     @JvmStatic
-    SearchGridFragment newInstance(UUID uuid) {
-        SearchGridFragment searchGridFragment = SearchGridFragment()
-        Bundle bundle = Bundle()
+     fun newInstance(uuid: UUID): SearchGridFragment {
+        val searchGridFragment: SearchGridFragment = SearchGridFragment()
+        val bundle: Bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         searchGridFragment.setArguments(bundle)
         return searchGridFragment
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
-        View inflate = layoutInflater.inflate(R.layout.search_fragment, viewGroup, false)
+        val inflate: View = layoutInflater.inflate(R.layout.search_fragment, viewGroup, false)
         this.unbinder = ButterKnife.bind((Object) this, inflate)
         this.adapter = SearchGridAdapter(layoutInflater.getContext(), ActivityUtils.getActiveAgentID(getArguments()), this)
         this.searchResultsList.setAdapter(this.adapter)
@@ -112,14 +112,14 @@ private /* synthetic */ Int[] m851getcomlumiyaviewerlumiyaslprotomodulessearchSe
         return inflate
     }
 
-    fun onDestroyView() {
+    override fun onDestroyView() {
         this.unbinder.unbind()
         super.onDestroyView()
     }
 
     fun onLoadableDataChanged() {
         if (this.adapter != null) {
-            LazyList data = this.searchResults.getData()
+            val data: LazyList = this.searchResults.getData()
             this.adapter.setData(data)
             this.loadableMonitor.setEmptyMessage(data != null ? data.isEmpty() : false, getString(R.string.nothing_found))
         }
@@ -130,8 +130,8 @@ private /* synthetic */ Int[] m851getcomlumiyaviewerlumiyaslprotomodulessearchSe
         beginSearch()
     }
 
-    fun onSearchResultClicked(SearchGridResult searchGridResult) {
-        UUID activeAgentID = ActivityUtils.getActiveAgentID(getArguments())
+    fun onSearchResultClicked(searchGridResult: SearchGridResult) {
+        val activeAgentID: UUID = ActivityUtils.getActiveAgentID(getArguments())
         if (searchGridResult != null && activeAgentID != null) {
             switch (m851getcomlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues()[SearchGridQuery.SearchType.values()[searchGridResult.getItemType()].ordinal()]) {
                 case 1:
@@ -150,7 +150,7 @@ private /* synthetic */ Int[] m851getcomlumiyaviewerlumiyaslprotomodulessearchSe
     }
 
     @OnEditorAction({2131755639})
-    public Boolean onSearchTextAction(Int i, KeyEvent keyEvent) {
+     public fun onSearchTextAction(i: Int, keyEvent: KeyEvent): Boolean {
         if (i != 3 && (keyEvent == null || keyEvent.getAction() != 0 || keyEvent.getKeyCode() != 66)) {
             return false
         }

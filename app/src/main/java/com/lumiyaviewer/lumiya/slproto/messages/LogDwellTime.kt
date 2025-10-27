@@ -17,7 +17,7 @@ class LogDwellTime : SLMessage {
         Int RegionX
         Int RegionY
         UUID SessionID
-        Byte[] SimName
+        ByteArray SimName
     }
 
     constructor() {

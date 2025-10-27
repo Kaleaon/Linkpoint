@@ -11,11 +11,11 @@ class ChatMessageSourceSystem : ChatMessageSource() {
     ChatMessageSourceSystem() {
     }
 
-    public ChatterID getDefaultChatter(UUID uuid) {
+     public fun getDefaultChatter(uuid: UUID): ChatterID {
         return ChatterID.getLocalChatterID(uuid)
     }
 
-    public String getSourceName(UserManager userManager) {
+     public fun getSourceName(userManager: UserManager): String {
         return null
     }
 
@@ -23,7 +23,7 @@ class ChatMessageSourceSystem : ChatMessageSource() {
         return ChatMessageSource.ChatMessageSourceType.System
     }
 
-    public UUID getSourceUUID() {
+     public fun getSourceUUID(): UUID {
         return null
     }
 }

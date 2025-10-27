@@ -9,7 +9,7 @@ import com.lumiyaviewer.lumiya.modern.samples.ModernLinkpointDemo
  * Complete workflow demonstration of modern Linkpoint capabilities
  */
 class FullWorkflowDemo {
-    private String TAG = "FullWorkflowDemo"
+    private val TAG: String = "FullWorkflowDemo"
     
     private Context context
     private ModernLinkpointDemo modernDemo

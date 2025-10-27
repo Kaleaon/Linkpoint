@@ -24,158 +24,158 @@ class LinkpointRenderPipeline(private val context: Context) : GLSurfaceView.Rend
         // Modern PBR Vertex Shader
         private const val VERTEX_SHADER = """
             #version 320 es
-            precision highp float;
+            precision highp float
             
-            layout(location = 0) in vec3 aPosition;
-            layout(location = 1) in vec3 aNormal;
-            layout(location = 2) in vec2 aTexCoord;
-            layout(location = 3) in vec3 aTangent;
+            layout(location = 0) in vec3 aPosition
+            layout(location = 1) in vec3 aNormal
+            layout(location = 2) in vec2 aTexCoord
+            layout(location = 3) in vec3 aTangent
             
-            uniform mat4 uMVPMatrix;
-            uniform mat4 uModelMatrix;
-            uniform mat4 uNormalMatrix;
+            uniform mat4 uMVPMatrix
+            uniform mat4 uModelMatrix
+            uniform mat4 uNormalMatrix
             
-            out vec3 vWorldPos;
-            out vec3 vNormal;
-            out vec2 vTexCoord;
-            out vec3 vTangent;
-            out vec3 vBitangent;
+            out vec3 vWorldPos
+            out vec3 vNormal
+            out vec2 vTexCoord
+            out vec3 vTangent
+            out vec3 vBitangent
             
             void main() {
-                vec4 worldPos = uModelMatrix * vec4(aPosition, 1.0);
-                vWorldPos = worldPos.xyz;
-                vNormal = mat3(uNormalMatrix) * aNormal;
-                vTexCoord = aTexCoord;
-                vTangent = mat3(uNormalMatrix) * aTangent;
-                vBitangent = cross(vNormal, vTangent);
-                gl_Position = uMVPMatrix * vec4(aPosition, 1.0);
+                vec4 worldPos = uModelMatrix * vec4(aPosition, 1.0)
+                vWorldPos = worldPos.xyz
+                vNormal = mat3(uNormalMatrix) * aNormal
+                vTexCoord = aTexCoord
+                vTangent = mat3(uNormalMatrix) * aTangent
+                vBitangent = cross(vNormal, vTangent)
+                gl_Position = uMVPMatrix * vec4(aPosition, 1.0)
             }
         """
         
         // Modern PBR Fragment Shader
         private const val FRAGMENT_SHADER = """
             #version 320 es
-            precision highp float;
+            precision highp float
             
-            in vec3 vWorldPos;
-            in vec3 vNormal;
-            in vec2 vTexCoord;
-            in vec3 vTangent;
-            in vec3 vBitangent;
+            in vec3 vWorldPos
+            in vec3 vNormal
+            in vec2 vTexCoord
+            in vec3 vTangent
+            in vec3 vBitangent
             
-            uniform sampler2D uAlbedoMap;
-            uniform sampler2D uNormalMap;
-            uniform sampler2D uMetallicRoughnessMap;
-            uniform sampler2D uEmissiveMap;
-            uniform sampler2D uAOMap;
+            uniform sampler2D uAlbedoMap
+            uniform sampler2D uNormalMap
+            uniform sampler2D uMetallicRoughnessMap
+            uniform sampler2D uEmissiveMap
+            uniform sampler2D uAOMap
             
-            uniform vec3 uCameraPos;
-            uniform vec3 uLightPos;
-            uniform vec3 uLightColor;
-            uniform float uLightIntensity;
+            uniform vec3 uCameraPos
+            uniform vec3 uLightPos
+            uniform vec3 uLightColor
+            uniform float uLightIntensity
             
-            uniform vec3 uAlbedo;
-            uniform float uMetallic;
-            uniform float uRoughness;
-            uniform vec3 uEmissive;
+            uniform vec3 uAlbedo
+            uniform float uMetallic
+            uniform float uRoughness
+            uniform vec3 uEmissive
             
-            out vec4 FragColor;
+            out vec4 FragColor
             
-            const float PI = 3.14159265359;
+            const float PI = 3.14159265359
             
             // PBR Distribution function (GGX/Trowbridge-Reitz)
             float DistributionGGX(vec3 N, vec3 H, float roughness) {
-                float a = roughness * roughness;
-                float a2 = a * a;
-                float NdotH = max(dot(N, H), 0.0);
-                float NdotH2 = NdotH * NdotH;
+                float a = roughness * roughness
+                float a2 = a * a
+                float NdotH = max(dot(N, H), 0.0)
+                float NdotH2 = NdotH * NdotH
                 
-                float num = a2;
-                float denom = (NdotH2 * (a2 - 1.0) + 1.0);
-                denom = PI * denom * denom;
+                float num = a2
+                float denom = (NdotH2 * (a2 - 1.0) + 1.0)
+                denom = PI * denom * denom
                 
-                return num / denom;
+                return num / denom
             }
             
             // Geometry function (Schlick-GGX)
             float GeometrySchlickGGX(float NdotV, float roughness) {
-                float r = (roughness + 1.0);
-                float k = (r * r) / 8.0;
+                float r = (roughness + 1.0)
+                float k = (r * r) / 8.0
                 
-                float num = NdotV;
-                float denom = NdotV * (1.0 - k) + k;
+                float num = NdotV
+                float denom = NdotV * (1.0 - k) + k
                 
-                return num / denom;
+                return num / denom
             }
             
             // Smith geometry function
             float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
-                float NdotV = max(dot(N, V), 0.0);
-                float NdotL = max(dot(N, L), 0.0);
-                float ggx2 = GeometrySchlickGGX(NdotV, roughness);
-                float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+                float NdotV = max(dot(N, V), 0.0)
+                float NdotL = max(dot(N, L), 0.0)
+                float ggx2 = GeometrySchlickGGX(NdotV, roughness)
+                float ggx1 = GeometrySchlickGGX(NdotL, roughness)
                 
-                return ggx1 * ggx2;
+                return ggx1 * ggx2
             }
             
             // Fresnel function (Schlick approximation)
             vec3 FresnelSchlick(float cosTheta, vec3 F0) {
-                return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+                return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0)
             }
             
             void main() {
                 // Sample textures
-                vec3 albedo = pow(texture(uAlbedoMap, vTexCoord).rgb, vec3(2.2)) * uAlbedo;
-                vec3 normal = texture(uNormalMap, vTexCoord).rgb * 2.0 - 1.0;
-                float metallic = texture(uMetallicRoughnessMap, vTexCoord).b * uMetallic;
-                float roughness = texture(uMetallicRoughnessMap, vTexCoord).g * uRoughness;
-                float ao = texture(uAOMap, vTexCoord).r;
-                vec3 emissive = texture(uEmissiveMap, vTexCoord).rgb * uEmissive;
+                vec3 albedo = pow(texture(uAlbedoMap, vTexCoord).rgb, vec3(2.2)) * uAlbedo
+                vec3 normal = texture(uNormalMap, vTexCoord).rgb * 2.0 - 1.0
+                float metallic = texture(uMetallicRoughnessMap, vTexCoord).b * uMetallic
+                float roughness = texture(uMetallicRoughnessMap, vTexCoord).g * uRoughness
+                float ao = texture(uAOMap, vTexCoord).r
+                vec3 emissive = texture(uEmissiveMap, vTexCoord).rgb * uEmissive
                 
                 // Transform normal from tangent space to world space
-                mat3 TBN = mat3(normalize(vTangent), normalize(vBitangent), normalize(vNormal));
-                vec3 N = normalize(TBN * normal);
-                vec3 V = normalize(uCameraPos - vWorldPos);
+                mat3 TBN = mat3(normalize(vTangent), normalize(vBitangent), normalize(vNormal))
+                vec3 N = normalize(TBN * normal)
+                vec3 V = normalize(uCameraPos - vWorldPos)
                 
                 // Calculate reflectance at normal incidence
-                vec3 F0 = vec3(0.04);
-                F0 = mix(F0, albedo, metallic);
+                vec3 F0 = vec3(0.04)
+                F0 = mix(F0, albedo, metallic)
                 
                 // Lighting calculation
-                vec3 L = normalize(uLightPos - vWorldPos);
-                vec3 H = normalize(V + L);
-                float distance = length(uLightPos - vWorldPos);
-                float attenuation = 1.0 / (distance * distance);
-                vec3 radiance = uLightColor * uLightIntensity * attenuation;
+                vec3 L = normalize(uLightPos - vWorldPos)
+                vec3 H = normalize(V + L)
+                float distance = length(uLightPos - vWorldPos)
+                float attenuation = 1.0 / (distance * distance)
+                vec3 radiance = uLightColor * uLightIntensity * attenuation
                 
                 // Cook-Torrance BRDF
-                float NDF = DistributionGGX(N, H, roughness);
-                float G = GeometrySmith(N, V, L, roughness);
-                vec3 F = FresnelSchlick(max(dot(H, V), 0.0), F0);
+                float NDF = DistributionGGX(N, H, roughness)
+                float G = GeometrySmith(N, V, L, roughness)
+                vec3 F = FresnelSchlick(max(dot(H, V), 0.0), F0)
                 
-                vec3 kS = F;
-                vec3 kD = vec3(1.0) - kS;
-                kD *= 1.0 - metallic;
+                vec3 kS = F
+                vec3 kD = vec3(1.0) - kS
+                kD *= 1.0 - metallic
                 
-                vec3 numerator = NDF * G * F;
-                float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
-                vec3 specular = numerator / denominator;
+                vec3 numerator = NDF * G * F
+                float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001
+                vec3 specular = numerator / denominator
                 
                 // Add to outgoing radiance
-                float NdotL = max(dot(N, L), 0.0);
-                vec3 Lo = (kD * albedo / PI + specular) * radiance * NdotL;
+                float NdotL = max(dot(N, L), 0.0)
+                vec3 Lo = (kD * albedo / PI + specular) * radiance * NdotL
                 
                 // Ambient lighting (simplified)
-                vec3 ambient = vec3(0.03) * albedo * ao;
-                vec3 color = ambient + Lo + emissive;
+                vec3 ambient = vec3(0.03) * albedo * ao
+                vec3 color = ambient + Lo + emissive
                 
                 // HDR tonemapping (Reinhard)
-                color = color / (color + vec3(1.0));
+                color = color / (color + vec3(1.0))
                 
                 // Gamma correction
-                color = pow(color, vec3(1.0/2.2));
+                color = pow(color, vec3(1.0/2.2))
                 
-                FragColor = vec4(color, 1.0);
+                FragColor = vec4(color, 1.0)
             }
         """
     }

@@ -17,7 +17,7 @@ class RLVCmdGenericRestriction : RLVCommand {
         this.canHaveExceptions = z
     }
 
-    fun Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2) {
+    fun Handle(rLVController: RLVController, uuid: UUID, rLVCommands: RLVCommands, str: String, str2: String) {
         String str3
         String str4
         if (str2 == null) {
@@ -31,15 +31,15 @@ class RLVCmdGenericRestriction : RLVCommand {
             str4 = "y"
         }
         if (str.equals(str3) || str.equals("add")) {
-            RLVRestrictions restrictions = rLVController.getRestrictions()
-            RLVRestrictionType rLVRestrictionType = this.restrictionType
+            val restrictions: RLVRestrictions = rLVController.getRestrictions()
+            val rLVRestrictionType: RLVRestrictionType = this.restrictionType
             if (!this.canHaveExceptions) {
                 str2 = ""
             }
             restrictions.addRestriction(rLVRestrictionType, uuid, str2)
         } else if (str.equals(str4) || str.equals("rem")) {
-            RLVRestrictions restrictions2 = rLVController.getRestrictions()
-            RLVRestrictionType rLVRestrictionType2 = this.restrictionType
+            val restrictions2: RLVRestrictions = rLVController.getRestrictions()
+            val rLVRestrictionType2: RLVRestrictionType = this.restrictionType
             if (!this.canHaveExceptions) {
                 str2 = ""
             }
@@ -50,7 +50,7 @@ class RLVCmdGenericRestriction : RLVCommand {
     }
 
     /* access modifiers changed from: protected */
-    fun HandleForce(RLVController rLVController, UUID uuid, String str) {
+    fun HandleForce(rLVController: RLVController, uuid: UUID, str: String) {
         Debug.Printf("RLV: force option not supported for restriction '%s'", this.restrictionType.toString())
     }
 }

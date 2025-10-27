@@ -7,11 +7,11 @@ import javax.annotation.Nonnull
 
 class SLObjectPrimInfo : SLObjectInfo() {
     /* access modifiers changed from: protected */
-    public DrawListObjectEntry createDrawListEntry() {
+     public fun createDrawListEntry(): DrawListObjectEntry {
         return DrawListPrimEntry(this)
     }
 
-    public Boolean isAvatar() {
+     public fun isAvatar(): Boolean {
         return false
     }
 }

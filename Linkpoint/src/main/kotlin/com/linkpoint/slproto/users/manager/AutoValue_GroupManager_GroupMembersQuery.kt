@@ -18,7 +18,7 @@ final class AutoValue_GroupManager_GroupMembersQuery : GroupManager().GroupMembe
         this.requestID = uuid2
     }
 
-    public Boolean equals(Object obj) {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
@@ -32,19 +32,19 @@ final class AutoValue_GroupManager_GroupMembersQuery : GroupManager().GroupMembe
         return false
     }
 
-    public UUID groupID() {
+     public fun groupID(): UUID {
         return this.groupID
     }
 
-    public Int hashCode() {
+     public override fun hashCode(): Int {
         return ((this.groupID.hashCode() ^ 1000003) * 1000003) ^ this.requestID.hashCode()
     }
 
-    public UUID requestID() {
+     public fun requestID(): UUID {
         return this.requestID
     }
 
-    public String toString() {
+     public override fun toString(): String {
         return "GroupMembersQuery{groupID=" + this.groupID + ", " + "requestID=" + this.requestID + "}"
     }
 }

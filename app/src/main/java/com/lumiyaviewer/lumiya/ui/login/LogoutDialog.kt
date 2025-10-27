@@ -18,7 +18,7 @@ import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.UUID
 
 class LogoutDialog : ProgressDialog {
-    private Long DISCONNECT_TIMEOUT = 5000
+    private val DISCONNECT_TIMEOUT: Long = 5000
     private UUID agentUUID
     private EventBus eventBus
     private Handler handler

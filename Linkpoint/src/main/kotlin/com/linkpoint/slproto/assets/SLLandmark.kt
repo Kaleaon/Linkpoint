@@ -17,16 +17,16 @@ class SLLandmark {
         }
     }
 
-    public SLLandmark(Byte[] bArr) throws LandmarkFormatException {
+    public SLLandmark(ByteArray bArr) throws LandmarkFormatException {
         try {
-            String[] split = String(bArr, "ISO-8859-1").trim().split("\n+")
+            val split: Array<String> = String(bArr, "ISO-8859-1").trim().split("\n+")
             if (split.length < 1) {
                 throw LandmarkFormatException()
             } else if (!split[0].trim().equalsIgnoreCase("Landmark version 2")) {
                 throw LandmarkFormatException()
             } else {
                 for (Int i = 1; i < split.length; i++) {
-                    String[] split2 = split[i].trim().split("\\s+")
+                    val split2: Array<String> = split[i].trim().split("\\s+")
                     if (split2.length >= 1) {
                         if (split2[0].equalsIgnoreCase("region_id")) {
                             this.regionUUID = UUID.fromString(split2[1])

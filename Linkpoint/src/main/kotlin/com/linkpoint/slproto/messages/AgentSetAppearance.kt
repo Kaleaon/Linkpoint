@@ -23,7 +23,7 @@ class AgentSetAppearance : SLMessage() {
 
     @JvmStatic
     class ObjectData {
-        public Byte[] TextureEntry
+        public ByteArray TextureEntry
     }
 
     @JvmStatic
@@ -43,15 +43,15 @@ class AgentSetAppearance : SLMessage() {
         this.ObjectData_Field = ObjectData()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.WearableData_Fields.size() * 17) + 53 + this.ObjectData_Field.TextureEntry.length + 2 + 1 + (this.VisualParam_Fields.size() * 1)
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAgentSetAppearance(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 84)
@@ -71,22 +71,22 @@ class AgentSetAppearance : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.SerialNum = unpackInt(byteBuffer)
         this.AgentData_Field.Size = unpackLLVector3(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            WearableData wearableData = WearableData()
+            val wearableData: WearableData = WearableData()
             wearableData.CacheID = unpackUUID(byteBuffer)
             wearableData.TextureIndex = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             this.WearableData_Fields.add(wearableData)
         }
         this.ObjectData_Field.TextureEntry = unpackVariable(byteBuffer, 2)
-        Byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b2: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i2 = 0; i2 < b2; i2++) {
-            VisualParam visualParam = VisualParam()
+            val visualParam: VisualParam = VisualParam()
             visualParam.ParamValue = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             this.VisualParam_Fields.add(visualParam)
         }

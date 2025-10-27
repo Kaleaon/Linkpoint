@@ -22,7 +22,7 @@ class CopyInventoryItem : SLMessage() {
     class InventoryData {
         public Int CallbackID
         public UUID NewFolderID
-        public Byte[] NewName
+        public ByteArray NewName
         public UUID OldAgentID
         public UUID OldItemID
     }

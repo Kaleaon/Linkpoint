@@ -19,11 +19,11 @@ import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 
 @SuppressLint({"ViewConstructor"})
 class WorldSurfaceView : GLSurfaceView {
-    private Int DEFAULT_FONT_SIZE_SP = 16
+    private val DEFAULT_FONT_SIZE_SP: Int = 16
     /* access modifiers changed from: private */
     WorldViewActivity activity
     @SuppressLint({"HandlerLeak"})
-    private Handler mHandler = Handler() {
+    private val mHandler: Handler = Handler() {
         Unit handleMessage(Message message) {
             switch (message.what) {
                 case 1:
@@ -68,7 +68,7 @@ class WorldSurfaceView : GLSurfaceView {
     WorldSurfaceView(WorldViewActivity worldViewActivity, UserManager userManager) {
         super(worldViewActivity)
         this.activity = worldViewActivity
-        Int applyDimension = (Int) TypedValue.applyDimension(2, 16.0f, getResources().getDisplayMetrics())
+        Int applyDimension = TypedValue.toInt().applyDimension(2, 16.0f, getResources().getDisplayMetrics())
         this.supportsGL20 = ((ActivityManager) getContext().getSystemService("activity")).getDeviceConfigurationInfo().reqGlEsVersion >= 131072
         if (Debug.isDebugBuild()) {
             setDebugFlags(3)

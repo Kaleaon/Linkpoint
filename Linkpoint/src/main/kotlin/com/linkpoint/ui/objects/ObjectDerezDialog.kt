@@ -27,20 +27,20 @@ class ObjectDerezDialog {
     }
 
     @JvmStatic
-    Unit askForObjectDerez(Context context, final DerezAction derezAction, final UUID uuid, final Int i) {
-        Int i2 = derezAction.derezQuestionId
+     fun askForObjectDerez(context: Context, final DerezAction derezAction, final UUID uuid, final Int i) {
+        val i2: Int = derezAction.derezQuestionId
         AlertDialog.Builder builder = AlertDialog.Builder(context)
         builder.setMessage(context.getString(i2)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener() {
-            fun onClick(DialogInterface dialogInterface, Int i) {
+            override fun onClick(dialogInterface: DialogInterface, i: Int) {
                 SLAgentCircuit activeAgentCircuit
                 dialogInterface.dismiss()
-                UserManager userManager = UserManager.getUserManager(uuid)
+                val userManager: UserManager = UserManager.getUserManager(uuid)
                 if (userManager != null && (activeAgentCircuit = userManager.getActiveAgentCircuit()) != null) {
                     activeAgentCircuit.DerezObject(i, derezAction.deRezDestination)
                 }
             }
         }).setNegativeButton("No", DialogInterface.OnClickListener() {
-            fun onClick(DialogInterface dialogInterface, Int i) {
+            override fun onClick(dialogInterface: DialogInterface, i: Int) {
                 dialogInterface.cancel()
             }
         builder.create().show()

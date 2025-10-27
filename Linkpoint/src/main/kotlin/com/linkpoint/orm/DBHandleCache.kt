@@ -16,7 +16,7 @@ class DBHandleCache {
     private val ReferenceQueue<DBHandle> refQueue
 
     interface DBOpenHelper {
-        SQLiteDatabase openOrCreateDatabase(String str) throws SQLiteException
+         fun openOrCreateDatabase(String str): SQLiteDatabase) throws SQLiteException
     }
 
     @JvmStatic
@@ -69,22 +69,22 @@ private class InstanceHolder {
     }
 
     @JvmStatic
-    DBHandleCache getInstance() {
+     fun getInstance(): DBHandleCache {
         return InstanceHolder.Instance
     }
 
     public synchronized Unit Cleanup() {
         while (true) {
-            Reference<? : DBHandle> poll = this.refQueue.poll()
+            val poll: Reference<? : DBHandle> = this.refQueue.poll()
             if (poll == null) {
                 break; // Exit when no more references to process
             }
-            DBOpenRef remove = this.refMap.remove(poll)
+            val remove: DBOpenRef = this.refMap.remove(poll)
             if (remove != null && remove.releaseReference() <= 0) {
-                String fileName = remove.getFileName()
+                val fileName: String = remove.getFileName()
                 Debug.Printf("DBHandle: Closing db '%s'", fileName)
                 try {
-                    SQLiteDatabase db = remove.getDB()
+                    val db: SQLiteDatabase = remove.getDB()
                     if (db != null && db.isOpen()) {
                         db.close()
                     }
@@ -105,11 +105,11 @@ private class InstanceHolder {
         }
         
         DBHandle dBHandle
-        DBOpenRef dBOpenRef = this.fileMap.get(str)
+        val dBOpenRef: DBOpenRef = this.fileMap.get(str)
         if (dBOpenRef == null) {
             Debug.Printf("DBHandle: Opening db '%s'", str)
             try {
-                SQLiteDatabase database = dBOpenHelper.openOrCreateDatabase(str)
+                val database: SQLiteDatabase = dBOpenHelper.openOrCreateDatabase(str)
                 if (database == null) {
                     throw SQLiteException("Failed to open or create database: " + str)
                 }

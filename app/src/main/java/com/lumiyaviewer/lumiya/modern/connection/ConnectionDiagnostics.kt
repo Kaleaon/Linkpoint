@@ -19,15 +19,15 @@ import okhttp3.Response
  * Provides comprehensive testing and troubleshooting capabilities.
  */
 class ConnectionDiagnostics {
-    private String TAG = "ConnectionDiagnostics"
+    private val TAG: String = "ConnectionDiagnostics"
     
     // Second Life endpoints for testing
-    private String[] SL_LOGIN_ENDPOINTS = {
+    private Array<String> SL_LOGIN_ENDPOINTS = {
         "https://login.agni.lindenlab.com/cgi-bin/login.cgi",  // Main grid
         "https://login.aditi.lindenlab.com/cgi-bin/login.cgi"   // Beta grid
     }
     
-    private String[] SL_TEST_DOMAINS = {
+    private Array<String> SL_TEST_DOMAINS = {
         "login.agni.lindenlab.com",
         "login.aditi.lindenlab.com",
         "secondlife.com",

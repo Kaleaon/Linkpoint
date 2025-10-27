@@ -15,7 +15,7 @@ class RemoveMuteListEntry : SLMessage {
 
     class MuteData {
         UUID MuteID
-        Byte[] MuteName
+        ByteArray MuteName
     }
 
     RemoveMuteListEntry() {

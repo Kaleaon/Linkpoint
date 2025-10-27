@@ -25,12 +25,12 @@ class ModernWorldViewRenderer : GLSurfaceView.Renderer {
     private Int surfaceHeight = 0
     
     // Camera parameters
-    private val Float[] cameraPosition = {0.0f, 0.0f, 5.0f}
-    private val Float[] lookAtPoint = {0.0f, 0.0f, 0.0f}
-    private val Float[] upVector = {0.0f, 1.0f, 0.0f}
+    private val FloatArray cameraPosition = {0.0f, 0.0f, 5.0f}
+    private val FloatArray lookAtPoint = {0.0f, 0.0f, 0.0f}
+    private val FloatArray upVector = {0.0f, 1.0f, 0.0f}
     
     // Lighting parameters (for PBR)
-    private val Float[] directionalLight = {
+    private val FloatArray directionalLight = {
         0.0f, -1.0f, -1.0f, 1.0f,  // direction + intensity
         0.0f, 0.0f, 0.0f, 0.0f,    // unused
         0.0f, 0.0f, 0.0f, 0.0f,    // unused  
@@ -93,8 +93,8 @@ class ModernWorldViewRenderer : GLSurfaceView.Renderer {
     /**
      * Render scene using modern PBR pipeline
      */
-    private Unit renderModernScene() {
-        ModernRenderPipeline renderPipeline = renderContext.getRenderPipeline()
+     private fun renderModernScene() {
+        val renderPipeline: ModernRenderPipeline = renderContext.getRenderPipeline()
         
         if (!renderPipeline.isModernPipelineAvailable()) {
             Log.w(TAG, "Modern pipeline not available - using fallback")
@@ -126,7 +126,7 @@ class ModernWorldViewRenderer : GLSurfaceView.Renderer {
     /**
      * Fallback rendering for devices without full ES 3.0 support
      */
-    private Unit renderLegacyFallback() {
+     private fun renderLegacyFallback() {
         Log.d(TAG, "Using legacy fallback rendering")
         
         // Clear with blue color to indicate fallback mode
@@ -137,9 +137,9 @@ class ModernWorldViewRenderer : GLSurfaceView.Renderer {
     /**
      * Render demo geometry to demonstrate modern pipeline
      */
-    private Unit renderDemoGeometry() {
+     private fun renderDemoGeometry() {
         // Animate rotation for demo
-        Float time = System.currentTimeMillis() * 0.001f
+        val time: Float = System.currentTimeMillis() * 0.001f
         
         // Transform for demo object
         renderContext.pushMatrix()
@@ -157,17 +157,17 @@ class ModernWorldViewRenderer : GLSurfaceView.Renderer {
      * Get default textures (placeholder implementation)
      * In real implementation, these would be loaded from assets
      */
-    private Int getDefaultAlbedoTexture() {
+     private fun getDefaultAlbedoTexture(): Int {
         // Return white texture handle (would create actual texture)
         return createSolidColorTexture(255, 255, 255, 255)
     }
     
-    private Int getDefaultNormalTexture() {
+     private fun getDefaultNormalTexture(): Int {
         // Return default normal map (128, 128, 255) for flat surface
         return createSolidColorTexture(128, 128, 255, 255)
     }
     
-    private Int getDefaultMetallicRoughnessTexture() {
+     private fun getDefaultMetallicRoughnessTexture(): Int {
         // Return default metallic/roughness (0, 128) = not metallic, medium roughness
         return createSolidColorTexture(0, 128, 0, 255)
     }
@@ -175,8 +175,8 @@ class ModernWorldViewRenderer : GLSurfaceView.Renderer {
     /**
      * Create a simple solid color texture for testing
      */
-    private Int createSolidColorTexture(Int r, Int g, Int b, Int a) {
-        Int[] textureHandle = Int[1]
+     private fun createSolidColorTexture(r: Int, g: Int, b: Int, a: Int): Int {
+        val textureHandle: IntArray = Int[1]
         GLES30.glGenTextures(1, textureHandle, 0)
         
         if (textureHandle[0] == 0) {
@@ -187,7 +187,7 @@ class ModernWorldViewRenderer : GLSurfaceView.Renderer {
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureHandle[0])
         
         // Create 1x1 pixel texture
-        Byte[] pixelData = Byte[] { (Byte)r, (Byte)g, (Byte)b, (Byte)a }
+        val pixelData: ByteArray = ByteArray { (Byte)r, (Byte)g, (Byte)b, (Byte)a }
         
         GLES30.glTexImage2D(GLES30.GL_TEXTURE_2D, 0, GLES30.GL_RGBA, 1, 1, 0, 
                            GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, 
@@ -204,7 +204,7 @@ class ModernWorldViewRenderer : GLSurfaceView.Renderer {
     /**
      * Update camera position
      */
-    fun setCameraPosition(Float x, Float y, Float z) {
+    fun setCameraPosition(x: Float, y: Float, z: Float) {
         cameraPosition[0] = x
         cameraPosition[1] = y
         cameraPosition[2] = z
@@ -213,7 +213,7 @@ class ModernWorldViewRenderer : GLSurfaceView.Renderer {
     /**
      * Update look at point  
      */
-    fun setLookAt(Float x, Float y, Float z) {
+    fun setLookAt(x: Float, y: Float, z: Float) {
         lookAtPoint[0] = x
         lookAtPoint[1] = y
         lookAtPoint[2] = z
@@ -222,7 +222,7 @@ class ModernWorldViewRenderer : GLSurfaceView.Renderer {
     /**
      * Update lighting direction
      */
-    fun setDirectionalLight(Float x, Float y, Float z, Float intensity) {
+    fun setDirectionalLight(x: Float, y: Float, z: Float, intensity: Float) {
         directionalLight[0] = x
         directionalLight[1] = y
         directionalLight[2] = z
@@ -232,25 +232,25 @@ class ModernWorldViewRenderer : GLSurfaceView.Renderer {
     /**
      * Get current surface dimensions
      */
-    public Int getSurfaceWidth() { return surfaceWidth; }
-    public Int getSurfaceHeight() { return surfaceHeight; }
+     public fun getSurfaceWidth(): Int { return surfaceWidth; }
+     public fun getSurfaceHeight(): Int { return surfaceHeight; }
     
     /**
      * Check if modern graphics are available
      */
-    public Boolean isModernGraphicsAvailable() {
+     public fun isModernGraphicsAvailable(): Boolean {
         return initialized && renderContext.getRenderPipeline().isModernPipelineAvailable()
     }
     
     /**
      * Get graphics capabilities string for debugging
      */
-    public String getGraphicsInfo() {
+     public fun getGraphicsInfo(): String {
         if (!initialized) {
             return "Graphics not initialized"
         }
         
-        StringBuilder info = StringBuilder()
+        val info: StringBuilder = StringBuilder()
         info.append("Modern Graphics: ").append(isModernGraphicsAvailable()).append("\n")
         info.append("Compute Shaders: ").append(renderContext.hasComputeShaders()).append("\n")
         info.append("Tessellation: ").append(renderContext.hasTessellation()).append("\n")

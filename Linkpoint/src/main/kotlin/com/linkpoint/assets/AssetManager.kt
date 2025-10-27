@@ -36,7 +36,7 @@ enum class AssetType(val typeId: Int) {
     LINK(24),
     LINK_FOLDER(25),
     MESH(49),
-    WIDGET(67);
+    WIDGET(67)
     
     companion object {
         fun fromId(id: Int) = values().find { it.typeId == id }

@@ -8,24 +8,24 @@ class SLSkeletonBone {
     private val LLVector3 basePosition
     val SLSkeletonBoneID boneID
     private val Int boneIndex
-    private val SLSkeletonBone[] childBones
-    private val SLSkeletonBone[] collisionVolumes
+    private val Array<SLSkeletonBone> childBones
+    private val Array<SLSkeletonBone> collisionVolumes
     private val LLVector3 defaultBasePosition
     private Float globalBaseX
     private Float globalBaseY
     private Float globalBaseZ
-    private val Float[] globalMatrix = Float[16]
+    private val FloatArray globalMatrix = Float[16]
     private val LLVector3 offset
     private SLSkeletonBone parent
     private val LLVector3 scale
-    private val Float[] tempMatrix = Float[16]
+    private val FloatArray tempMatrix = Float[16]
     private val LLVector3 usePosition
 
-    SLSkeletonBone(SLSkeletonBoneID sLSkeletonBoneID, LLVector3 lLVector3, LLVector3 lLVector32, SLSkeletonBone[] sLSkeletonBoneArr, SLSkeletonBone[] sLSkeletonBoneArr2) {
+    SLSkeletonBone(SLSkeletonBoneID sLSkeletonBoneID, LLVector3 lLVector3, LLVector3 lLVector32, Array<SLSkeletonBone> sLSkeletonBoneArr, Array<SLSkeletonBone> sLSkeletonBoneArr2) {
         this.boneID = sLSkeletonBoneID
         this.boneIndex = sLSkeletonBoneID.ordinal()
         this.basePosition = LLVector3(lLVector32)
-        LLVector3 lLVector33 = LLVector3(lLVector3)
+        val lLVector33: LLVector3 = LLVector3(lLVector3)
         this.defaultBasePosition = LLVector3(this.basePosition)
         this.offset = LLVector3()
         this.scale = LLVector3(1.0f, 1.0f, 1.0f)
@@ -49,12 +49,12 @@ class SLSkeletonBone {
     }
 
     /* access modifiers changed from: package-private */
-    fun deform(LLVector3 lLVector3, LLVector3 lLVector32) {
+    fun deform(lLVector3: LLVector3, lLVector32: LLVector3) {
         this.offset.add(lLVector3)
         this.scale.mul(lLVector32)
     }
 
-    fun deformHierarchy(LLVector3 lLVector3, LLVector3 lLVector32) {
+    fun deformHierarchy(lLVector3: LLVector3, lLVector32: LLVector3) {
         this.offset.add(lLVector3)
         this.scale.mul(lLVector32)
         if (this.collisionVolumes != null) {
@@ -64,42 +64,42 @@ class SLSkeletonBone {
         }
     }
 
-    public LLVector3 getBasePosition() {
+     public fun getBasePosition(): LLVector3 {
         return this.basePosition
     }
 
-    public Float[] getGlobalMatrix() {
+     public fun getGlobalMatrix(): FloatArray {
         return this.globalMatrix
     }
 
-    public Float getPositionX() {
+     public fun getPositionX(): Float {
         return this.basePosition.x + this.offset.x
     }
 
-    public Float getPositionY() {
+     public fun getPositionY(): Float {
         return this.basePosition.y + this.offset.y
     }
 
-    public Float getPositionZ() {
+     public fun getPositionZ(): Float {
         return this.basePosition.z + this.offset.z
     }
 
-    public Float getScaleX() {
+     public fun getScaleX(): Float {
         return this.scale.x
     }
 
-    public Float getScaleY() {
+     public fun getScaleY(): Float {
         return this.scale.y
     }
 
-    public Float getScaleZ() {
+     public fun getScaleZ(): Float {
         return this.scale.z
     }
 
     /* access modifiers changed from: package-private */
-    public Int prepareSkeleton(SLSkeletonBone[] sLSkeletonBoneArr, Int i) {
-        Int i2 = 0
-        Int i3 = i + 1
+     public fun prepareSkeleton(sLSkeletonBoneArr: Array<SLSkeletonBone>, i: Int): Int {
+        val i2: Int = 0
+        val i3: Int = i + 1
         sLSkeletonBoneArr[i] = this
         if (this.parent == null) {
             this.globalBaseX = this.defaultBasePosition.x
@@ -111,20 +111,20 @@ class SLSkeletonBone {
             this.globalBaseZ = this.parent.globalBaseZ + this.defaultBasePosition.z
         }
         if (this.childBones != null) {
-            SLSkeletonBone[] sLSkeletonBoneArr2 = this.childBones
-            Int length = sLSkeletonBoneArr2.length
-            Int i4 = 0
+            val sLSkeletonBoneArr2: Array<SLSkeletonBone> = this.childBones
+            val length: Int = sLSkeletonBoneArr2.length
+            val i4: Int = 0
             while (i4 < length) {
-                Int prepareSkeleton = sLSkeletonBoneArr2[i4].prepareSkeleton(sLSkeletonBoneArr, i3)
+                val prepareSkeleton: Int = sLSkeletonBoneArr2[i4].prepareSkeleton(sLSkeletonBoneArr, i3)
                 i4++
                 i3 = prepareSkeleton
             }
         }
         if (this.collisionVolumes != null) {
-            SLSkeletonBone[] sLSkeletonBoneArr3 = this.collisionVolumes
-            Int length2 = sLSkeletonBoneArr3.length
+            val sLSkeletonBoneArr3: Array<SLSkeletonBone> = this.collisionVolumes
+            val length2: Int = sLSkeletonBoneArr3.length
             while (i2 < length2) {
-                Int prepareSkeleton2 = sLSkeletonBoneArr3[i2].prepareSkeleton(sLSkeletonBoneArr, i3)
+                val prepareSkeleton2: Int = sLSkeletonBoneArr3[i2].prepareSkeleton(sLSkeletonBoneArr, i3)
                 i2++
                 i3 = prepareSkeleton2
             }
@@ -133,23 +133,23 @@ class SLSkeletonBone {
     }
 
     /* access modifiers changed from: package-private */
-    fun setPositionOverride(LLVector3 lLVector3) {
+    fun setPositionOverride(lLVector3: LLVector3) {
         this.basePosition.set(lLVector3)
     }
 
     /* access modifiers changed from: package-private */
-    val Unit updateGlobalPos(AnimationSkeletonData animationSkeletonData, Float[] fArr, Float[] fArr2) {
+    val Unit updateGlobalPos(AnimationSkeletonData animationSkeletonData, FloatArray fArr, FloatArray fArr2) {
         Float f
         Float f2
         Float f3
-        Int i = this.boneID.animatedIndex
-        Int i2 = i * 4
-        Int i3 = i * 16
+        val i: Int = this.boneID.animatedIndex
+        val i2: Int = i * 4
+        val i3: Int = i * 16
         if (i >= 0) {
-            Float[] animOffsets = animationSkeletonData.getAnimOffsets()
-            Float f4 = animOffsets[i2 + 3]
+            val animOffsets: FloatArray = animationSkeletonData.getAnimOffsets()
+            val f4: Float = animOffsets[i2 + 3]
             if (f4 > 0.0f) {
-                Float f5 = f4 * animOffsets[i2]
+                val f5: Float = f4 * animOffsets[i2]
                 f2 = f4 * animOffsets[i2 + 1]
                 f3 = f5
                 f = animOffsets[i2 + 2] * f4

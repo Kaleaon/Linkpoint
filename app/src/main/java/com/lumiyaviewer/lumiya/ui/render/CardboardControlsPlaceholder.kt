@@ -35,7 +35,7 @@ class CardboardControlsPlaceholder : ViewGroup {
         super(context, attributeSet, i, i2)
     }
 
-    ViewParent invalidateChildInParent(Int[] iArr, Rect rect) {
+    ViewParent invalidateChildInParent(IntArray iArr, Rect rect) {
         ViewParent invalidateChildInParent = super.invalidateChildInParent(iArr, rect)
         if (this.onViewInvalidateListener != null) {
             this.onViewInvalidateListener.onViewInvalidated()

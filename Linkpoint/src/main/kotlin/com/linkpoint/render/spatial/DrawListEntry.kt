@@ -6,7 +6,7 @@ import com.linkpoint.utils.InlineListEntry
 import javax.annotation.Nonnull
 
 abstract class DrawListEntry : InlineListEntry<DrawListEntry> {
-    final Float[] boundingBox = Float[6]
+    final FloatArray boundingBox = Float[6]
     private volatile InlineList<DrawListEntry> list
     private DrawListEntry next
     private DrawListEntry prev
@@ -17,30 +17,30 @@ abstract class DrawListEntry : InlineListEntry<DrawListEntry> {
         return this.list
     }
 
-    public DrawListEntry getNext() {
+     public fun getNext(): DrawListEntry {
         return this.next
     }
 
-    public DrawListEntry getPrev() {
+     public fun getPrev(): DrawListEntry {
         return this.prev
     }
 
     fun requestEntryRemoval() {
-        InlineList inlineList = this.list
+        val inlineList: InlineList = this.list
         if (inlineList != null) {
             inlineList.requestEntryRemoval(this)
         }
     }
 
-    fun setList(InlineList<DrawListEntry> inlineList) {
+    fun setList(inlineList: InlineList<DrawListEntry>) {
         this.list = inlineList
     }
 
-    fun setNext(DrawListEntry drawListEntry) {
+    fun setNext(drawListEntry: DrawListEntry) {
         this.next = drawListEntry
     }
 
-    fun setPrev(DrawListEntry drawListEntry) {
+    fun setPrev(drawListEntry: DrawListEntry) {
         this.prev = drawListEntry
     }
 }

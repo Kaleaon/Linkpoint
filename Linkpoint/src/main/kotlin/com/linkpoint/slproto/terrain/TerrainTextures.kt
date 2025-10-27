@@ -8,10 +8,10 @@ import java.util.UUID
 
 class TerrainTextures {
     @JvmStatic
-private UUID[] defaultTerrainTextures = {UUID.fromString("0bc58228-74a0-7e83-89bc-5c23464bcec5"), UUID.fromString("63338ede-0037-c4fd-855b-015d77112fc8"), UUID.fromString("303cd381-8560-7579-23f1-f0a880799740"), UUID.fromString("53a2f406-4895-1d13-d541-d2e3b86bc19c")}
-    private val Float[] terrainHeightRange
-    private val Float[] terrainStartHeight
-    private val UUID[] textureIDs
+private Array<UUID> defaultTerrainTextures = {UUID.fromString("0bc58228-74a0-7e83-89bc-5c23464bcec5"), UUID.fromString("63338ede-0037-c4fd-855b-015d77112fc8"), UUID.fromString("303cd381-8560-7579-23f1-f0a880799740"), UUID.fromString("53a2f406-4895-1d13-d541-d2e3b86bc19c")}
+    private val FloatArray terrainHeightRange
+    private val FloatArray terrainStartHeight
+    private val Array<UUID> textureIDs
 
     public TerrainTextures() {
         this.terrainStartHeight = Float[4]
@@ -23,7 +23,7 @@ private UUID[] defaultTerrainTextures = {UUID.fromString("0bc58228-74a0-7e83-89b
     public TerrainTextures(RegionHandshake.RegionInfo regionInfo) {
         this.terrainStartHeight = Float[4]
         this.terrainHeightRange = Float[4]
-        UUID[] uuidArr = {regionInfo.TerrainDetail0, regionInfo.TerrainDetail1, regionInfo.TerrainDetail2, regionInfo.TerrainDetail3}
+        val uuidArr: Array<UUID> = {regionInfo.TerrainDetail0, regionInfo.TerrainDetail1, regionInfo.TerrainDetail2, regionInfo.TerrainDetail3}
         for (Int i = 0; i < 4; i++) {
             Debug.Printf("Terrain: texture[%d] = %s", Integer.valueOf(i), uuidArr[i].toString())
             if (uuidArr[i] == null || uuidArr[i].equals(UUIDPool.ZeroUUID)) {
@@ -42,25 +42,25 @@ private UUID[] defaultTerrainTextures = {UUID.fromString("0bc58228-74a0-7e83-89b
     }
 
     @JvmStatic
-private Float bilinearCorners(Float[] fArr, Float f, Float f2) {
+ private fun bilinearCorners(fArr: FloatArray, f: Float, f2: Float): Float {
         return (((fArr[0] * f) + (fArr[1] * (1.0f - f))) * f2) + (((fArr[2] * f) + (fArr[3] * (1.0f - f))) * (1.0f - f2))
     }
 
-    public Boolean equals(Object obj) {
+     public override fun equals(obj: Object): Boolean {
         if (!(obj instanceof TerrainTextures)) {
             return false
         }
-        TerrainTextures terrainTextures = (TerrainTextures) obj
+        val terrainTextures: TerrainTextures = (TerrainTextures) obj
         if (!Arrays.equals(this.textureIDs, terrainTextures.textureIDs) || !Arrays.equals(this.terrainStartHeight, terrainTextures.terrainStartHeight)) {
             return false
         }
         return Arrays.equals(this.terrainHeightRange, terrainTextures.terrainHeightRange)
     }
 
-    public Int getNeededLayerMask(Float[] fArr) {
-        Int i = 0
+     public fun getNeededLayerMask(fArr: FloatArray): Int {
+        val i: Int = 0
         for (Float f : fArr) {
-            Int floor = (Int) Math.floor((Double) f)
+            val floor: Int = (Int) Math.floor((Double) f)
             i |= 1 << floor
             if (f - ((Float) floor) != 0.0f) {
                 i |= 1 << (floor + 1)
@@ -69,24 +69,24 @@ private Float bilinearCorners(Float[] fArr, Float f, Float f2) {
         return i & 15
     }
 
-    public Float[] getTextureHeightMap(Float[] fArr, Int i, Int i2, Float f, Float f2, Float f3, Float f4) {
-        Float[] fArr2 = Float[(i * i2)]
+     public fun getTextureHeightMap(fArr: FloatArray, i: Int, i2: Int, f: Float, f2: Float, f3: Float, f4: Float): FloatArray {
+        val fArr2: FloatArray = Float[(i * i2)]
         for (Int i3 = 0; i3 < i2; i3++) {
-            Float f5 = ((Float) i3) / ((Float) (i2 - 1))
+            val f5: Float = ((Float) i3) / ((Float) (i2 - 1))
             for (Int i4 = 0; i4 < i; i4++) {
-                Float f6 = ((Float) i4) / ((Float) (i - 1))
-                Int i5 = (i3 * i) + i4
+                val f6: Float = ((Float) i4) / ((Float) (i - 1))
+                val i5: Int = (i3 * i) + i4
                 fArr2[i5] = Math.min(3.0f, Math.max(0.0f, ((fArr[(i3 * i) + i4] - bilinearCorners(this.terrainStartHeight, (f6 * f3) + f, (f5 * f4) + f2)) * 4.0f) / bilinearCorners(this.terrainHeightRange, (f6 * f3) + f, (f5 * f4) + f2)))
             }
         }
         return fArr2
     }
 
-    public UUID getTextureUUID(Int i) {
+     public fun getTextureUUID(i: Int): UUID {
         return this.textureIDs[i]
     }
 
-    public Int hashCode() {
+     public override fun hashCode(): Int {
         return Arrays.hashCode(this.textureIDs) + Arrays.hashCode(this.terrainStartHeight) + Arrays.hashCode(this.terrainHeightRange)
     }
 }

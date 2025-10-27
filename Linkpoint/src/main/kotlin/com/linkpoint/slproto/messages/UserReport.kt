@@ -19,32 +19,32 @@ class UserReport : SLMessage() {
     @JvmStatic
     class ReportData {
         public UUID AbuseRegionID
-        public Byte[] AbuseRegionName
+        public ByteArray AbuseRegionName
         public UUID AbuserID
         public Int Category
         public Int CheckFlags
-        public Byte[] Details
+        public ByteArray Details
         public UUID ObjectID
         public LLVector3 Position
         public Int ReportType
         public UUID ScreenshotID
-        public Byte[] Summary
-        public Byte[] VersionString
+        public ByteArray Summary
+        public ByteArray VersionString
     }
 
     public UserReport() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.ReportData_Field.AbuseRegionName.length + 64 + 16 + 1 + this.ReportData_Field.Summary.length + 2 + this.ReportData_Field.Details.length + 1 + this.ReportData_Field.VersionString.length + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleUserReport(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -123)
@@ -64,7 +64,7 @@ class UserReport : SLMessage() {
         packVariable(byteBuffer, this.ReportData_Field.VersionString, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ReportData_Field.ReportType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE

@@ -48,10 +48,10 @@ import javax.annotation.Nullable
 class VoiceStatusView : FrameLayout() {
 
     /* renamed from: -com-lumiyaviewer-lumiya-voice-common-model-VoiceBluetoothStateSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f606comlumiyaviewerlumiyavoicecommonmodelVoiceBluetoothStateSwitchesValues = null
+    private const val /* synthetic */ IntArray f606comlumiyaviewerlumiyavoicecommonmodelVoiceBluetoothStateSwitchesValues = null
 
     /* renamed from: -com-lumiyaviewer-lumiya-voice-common-model-VoiceChatInfo$VoiceChatStateSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f607comlumiyaviewerlumiyavoicecommonmodelVoiceChatInfo$VoiceChatStateSwitchesValues = null
+    private const val /* synthetic */ IntArray f607comlumiyaviewerlumiyavoicecommonmodelVoiceChatInfo$VoiceChatStateSwitchesValues = null
     private ChatterID activeChatterID
     private ChatterNameRetriever activeChatterNameRetriever
     private Boolean canConnect
@@ -96,11 +96,11 @@ class VoiceStatusView : FrameLayout() {
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-voice-common-model-VoiceBluetoothStateSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m864getcomlumiyaviewerlumiyavoicecommonmodelVoiceBluetoothStateSwitchesValues() {
+private /* synthetic */ IntArray m864getcomlumiyaviewerlumiyavoicecommonmodelVoiceBluetoothStateSwitchesValues() {
         if (f606comlumiyaviewerlumiyavoicecommonmodelVoiceBluetoothStateSwitchesValues != null) {
             return f606comlumiyaviewerlumiyavoicecommonmodelVoiceBluetoothStateSwitchesValues
         }
-        Int[] iArr = Int[VoiceBluetoothState.values().length]
+        IntArray iArr = Int[VoiceBluetoothState.values().length]
         try {
             iArr[VoiceBluetoothState.Active.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -127,11 +127,11 @@ private /* synthetic */ Int[] m864getcomlumiyaviewerlumiyavoicecommonmodelVoiceB
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-voice-common-model-VoiceChatInfo$VoiceChatStateSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m865getcomlumiyaviewerlumiyavoicecommonmodelVoiceChatInfo$VoiceChatStateSwitchesValues() {
+private /* synthetic */ IntArray m865getcomlumiyaviewerlumiyavoicecommonmodelVoiceChatInfo$VoiceChatStateSwitchesValues() {
         if (f607comlumiyaviewerlumiyavoicecommonmodelVoiceChatInfo$VoiceChatStateSwitchesValues != null) {
             return f607comlumiyaviewerlumiyavoicecommonmodelVoiceChatInfo$VoiceChatStateSwitchesValues
         }
-        Int[] iArr = Int[VoiceChatInfo.VoiceChatState.values().length]
+        IntArray iArr = Int[VoiceChatInfo.VoiceChatState.values().length]
         try {
             iArr[VoiceChatInfo.VoiceChatState.Active.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -311,7 +311,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
             fun onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
                 VoicePluginServiceConnection voicePluginServiceConnection
                 if (z && (!VoiceStatusView.this.updatingAudioVolume)) {
-                    Float max = ((Float) i) / ((Float) seekBar.getMax())
+                    Float max = (i.toFloat()) / (seekBar.toFloat().getMax())
                     GridConnectionService serviceInstance = GridConnectionService.getServiceInstance()
                     if (serviceInstance != null && (voicePluginServiceConnection = serviceInstance.getVoicePluginServiceConnection()) != null) {
                         voicePluginServiceConnection.setVoiceAudioProperties(VoiceSetAudioProperties(max, true, (VoiceAudioDevice) null))
@@ -555,7 +555,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
             fun onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
                 VoicePluginServiceConnection voicePluginServiceConnection
                 if (z && (!VoiceStatusView.this.updatingAudioVolume)) {
-                    Float max = ((Float) i) / ((Float) seekBar.getMax())
+                    Float max = (i.toFloat()) / (seekBar.toFloat().getMax())
                     GridConnectionService serviceInstance = GridConnectionService.getServiceInstance()
                     if (serviceInstance != null && (voicePluginServiceConnection = serviceInstance.getVoicePluginServiceConnection()) != null) {
                         voicePluginServiceConnection.setVoiceAudioProperties(VoiceSetAudioProperties(max, true, (VoiceAudioDevice) null))
@@ -799,7 +799,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
             fun onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
                 VoicePluginServiceConnection voicePluginServiceConnection
                 if (z && (!VoiceStatusView.this.updatingAudioVolume)) {
-                    Float max = ((Float) i) / ((Float) seekBar.getMax())
+                    Float max = (i.toFloat()) / (seekBar.toFloat().getMax())
                     GridConnectionService serviceInstance = GridConnectionService.getServiceInstance()
                     if (serviceInstance != null && (voicePluginServiceConnection = serviceInstance.getVoicePluginServiceConnection()) != null) {
                         voicePluginServiceConnection.setVoiceAudioProperties(VoiceSetAudioProperties(max, true, (VoiceAudioDevice) null))
@@ -1044,7 +1044,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
             fun onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
                 VoicePluginServiceConnection voicePluginServiceConnection
                 if (z && (!VoiceStatusView.this.updatingAudioVolume)) {
-                    Float max = ((Float) i) / ((Float) seekBar.getMax())
+                    Float max = (i.toFloat()) / (seekBar.toFloat().getMax())
                     GridConnectionService serviceInstance = GridConnectionService.getServiceInstance()
                     if (serviceInstance != null && (voicePluginServiceConnection = serviceInstance.getVoicePluginServiceConnection()) != null) {
                         voicePluginServiceConnection.setVoiceAudioProperties(VoiceSetAudioProperties(max, true, (VoiceAudioDevice) null))
@@ -1156,7 +1156,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
     /* renamed from: onVoiceAudioProperties */
     fun m867com_lumiyaviewer_lumiya_ui_voice_VoiceStatusViewmthref0(VoiceAudioProperties voiceAudioProperties2) {
         VoiceBluetoothState voiceBluetoothState = null
-        Object[] objArr = Object[1]
+        Array<Any> objArr = Object[1]
         if (voiceAudioProperties2 != null) {
             voiceBluetoothState = voiceAudioProperties2.bluetoothState
         }
@@ -1231,12 +1231,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
                     str = this.speakerNameRetriever != null ? Objects.equal(chatterIDUser2, this.speakerNameRetriever.chatterID) ? this.speakerNameRetriever.getResolvedName() : null : null
                 }
                 Debug.Printf("Voice: numActiveSpeakers %d, speakerName %s, activeChatterID %s (view chatterID %s)", Integer.valueOf(data.numActiveSpeakers), str, chatterIDUser2, this.chatterID)
-                Object[] objArr = Object[2]
+                Array<Any> objArr = Object[2]
                 objArr[0] = this.speakerNameRetriever
                 objArr[1] = this.speakerNameRetriever != null ? this.speakerNameRetriever.chatterID : null
                 Debug.Printf("Voice: speakerNameRetriever %s, snr.chatterID %s", objArr)
                 if (str == null) {
-                    str = data.numActiveSpeakers != 1 ? getContext().getString(R.string.speakers_speaking, Object[]{Integer.valueOf(data.numActiveSpeakers)}) : null
+                    str = data.numActiveSpeakers != 1 ? getContext().getString(R.string.speakers_speaking, Array<Any>{Integer.valueOf(data.numActiveSpeakers)}) : null
                 }
             } else if (data.state == VoiceChatInfo.VoiceChatState.Ringing) {
                 this.voiceSpeakIndicatorLeft.setVisibility(0)
@@ -1321,7 +1321,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
             this.voiceBluetoothButton.setCompoundDrawablesWithIntrinsicBounds(compoundDrawables[0], (Drawable) null, (Drawable) null, ContextCompat.getDrawable(getContext(), i))
             this.voiceLoudspeakerButton.setCompoundDrawablesWithIntrinsicBounds(this.voiceLoudspeakerButton.getCompoundDrawables()[0], (Drawable) null, (Drawable) null, ContextCompat.getDrawable(getContext(), data2.speakerphoneOn ? R.drawable.active_button_underline : R.drawable.inactive_button_underline))
             this.updatingAudioVolume = true
-            this.voiceSpeakerVolumeControl.setProgress(Math.round(data2.speakerVolume * ((Float) this.voiceSpeakerVolumeControl.getMax())))
+            this.voiceSpeakerVolumeControl.setProgress(Math.round(data2.speakerVolume * (this.toFloat().voiceSpeakerVolumeControl.getMax())))
             this.updatingAudioVolume = false
         }
     }
@@ -1338,8 +1338,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
         if (Build.VERSION.SDK_INT >= 21) {
             this.hoverEnabled = true
             $Lambda$LRu9qjGWbEJmZF4NfrRGigLGXl8 r2 = $Lambda$LRu9qjGWbEJmZF4NfrRGigLGXl8(onHoverListenerCompat)
-            Int applyDimension = (Int) TypedValue.applyDimension(1, 14.0f, getResources().getDisplayMetrics())
-            TypedArray obtainStyledAttributes = getContext().obtainStyledAttributes(Int[]{R.attr.buttonShapeMoveControl})
+            Int applyDimension = TypedValue.toInt().applyDimension(1, 14.0f, getResources().getDisplayMetrics())
+            TypedArray obtainStyledAttributes = getContext().obtainStyledAttributes(IntArray{R.attr.buttonShapeMoveControl})
             for (ImageButton imageButton : ImageButton[]{this.voiceAnswerButton, this.voiceTerminateButton, this.voiceMicOnButton, this.voiceMicOffButton}) {
                 imageButton.setOnHoverListener(r2)
                 if (imageButton == this.voiceMicOnButton) {

@@ -9,8 +9,8 @@ import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 
 class ActivityUtils {
-    String EXTRA_ACTIVE_AGENT_UUID = "activeAgentUUID"
-    String FRAGMENT_SELECTION_KEY = "fragmentSelection"
+    val EXTRA_ACTIVE_AGENT_UUID: String = "activeAgentUUID"
+    val FRAGMENT_SELECTION_KEY: String = "fragmentSelection"
 
     @Nullable
     UUID getActiveAgentID(@Nullable Intent intent) {

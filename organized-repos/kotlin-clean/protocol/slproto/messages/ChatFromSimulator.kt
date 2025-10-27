@@ -13,8 +13,8 @@ class ChatFromSimulator : SLMessage() {
     class ChatData {
         public Int Audible
         public Int ChatType
-        public Byte[] FromName
-        public Byte[] Message
+        public ByteArray FromName
+        public ByteArray Message
         public UUID OwnerID
         public LLVector3 Position
         public UUID SourceID

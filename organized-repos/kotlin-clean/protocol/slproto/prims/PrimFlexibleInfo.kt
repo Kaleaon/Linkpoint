@@ -14,8 +14,8 @@ class PrimFlexibleInfo {
     private Int NumSections = 0
     private Long lastUpdateMillis
     private volatile Boolean needVertexBufferUpdate = false
-    private Float[] sectionData
-    private Float[] sectionMatrices
+    private FloatArray sectionData
+    private FloatArray sectionMatrices
     private FlexibleSection[] sections
     private GLLoadableBuffer vertexBuffer = null
 
@@ -34,7 +34,7 @@ private class FlexibleSection {
         }
     }
 
-    public Boolean doFlexibleUpdate(PrimFlexibleParams primFlexibleParams, Float[] fArr, Int i, Float f, Float f2, Float f3) {
+    public Boolean doFlexibleUpdate(PrimFlexibleParams primFlexibleParams, FloatArray fArr, Int i, Float f, Float f2, Float f3) {
         Long currentTimeMillis = System.currentTimeMillis()
         if (currentTimeMillis < this.lastUpdateMillis + MIN_UPDATE_INTERVAL) {
             return false
@@ -61,14 +61,14 @@ private class FlexibleSection {
         return true
     }
 
-    public Boolean doFlexibleUpdateSlow(PrimFlexibleParams primFlexibleParams, Float[] fArr, Int i, Float f, Float f2, Float f3) {
+    public Boolean doFlexibleUpdateSlow(PrimFlexibleParams primFlexibleParams, FloatArray fArr, Int i, Float f, Float f2, Float f3) {
         Long currentTimeMillis = System.currentTimeMillis()
         if (currentTimeMillis < this.lastUpdateMillis + MIN_UPDATE_INTERVAL) {
             return false
         }
         LLVector3 lLVector3 = LLVector3(fArr[i + 12], fArr[i + 13], fArr[i + 14])
         LLVector3 lLVector32 = LLVector3(f, f2, f3)
-        Float[] fArr2 = Float[32]
+        FloatArray fArr2 = FloatArray(32)
         Matrix.invertM(fArr2, 0, fArr, i)
         LLQuaternion lLQuaternion = LLQuaternion(fArr2)
         if (primFlexibleParams.NumFlexiSections != this.NumSections) {
@@ -84,7 +84,7 @@ private class FlexibleSection {
         LLQuaternion lLQuaternion2 = LLQuaternion(lLQuaternion)
         LLVector3 lLVector33 = LLVector3(LLVector3.z_axis)
         lLVector33.mul(lLQuaternion2)
-        Float f5 = lLVector32.z / ((Float) this.NumSections)
+        Float f5 = lLVector32.z / (this.toFloat().NumSections)
         LLVector3 lLVector34 = LLVector3(lLVector33)
         lLVector34.mul(lLVector32.z / 2.0f)
         LLVector3 sub = LLVector3.sub(lLVector3, lLVector34)
@@ -93,7 +93,7 @@ private class FlexibleSection {
             for (Int i2 = 0; i2 < this.NumSections; i2++) {
                 this.sections[i2] = FlexibleSection((FlexibleSection) null)
                 this.sections[i2].Position = LLVector3(sub)
-                this.sections[i2].Position.addMul(lLVector33, ((Float) i2) * f5)
+                this.sections[i2].Position.addMul(lLVector33, (i2.toFloat()) * f5)
                 this.sections[i2].Direction = LLVector3(lLVector33)
                 this.sections[i2].Rotation = LLQuaternion(lLQuaternion)
                 this.sections[i2].Velocity = LLVector3()
@@ -102,16 +102,16 @@ private class FlexibleSection {
         this.sections[0].Position.set(sub)
         this.sections[0].Direction.set(lLVector33)
         this.sections[0].Rotation.set(lLQuaternion)
-        Float pow = primFlexibleParams.Tension * 0.1f * (1.0f - ((Float) Math.pow(0.85d, ((Double) f4) * 30.0d)))
+        Float pow = primFlexibleParams.Tension * 0.1f * (1.0f - (Math.toFloat().pow(0.85d, (f4.toDouble()) * 30.0d)))
         if (pow > FLEXIBLE_OBJECT_MAX_INTERNAL_TENSION_FORCE) {
             pow = FLEXIBLE_OBJECT_MAX_INTERNAL_TENSION_FORCE
         }
-        Float pow2 = (Float) Math.pow(10.0d, (Double) (((primFlexibleParams.AirFriction * 2.0f) + 1.0f) * f4))
+        Float pow2 = Math.toFloat().pow(10.0d, (Double) (((primFlexibleParams.AirFriction * 2.0f) + 1.0f) * f4))
         if (pow2 <= 1.0f) {
             pow2 = 1.0f
         }
         Float f6 = 1.0f / pow2
-        Float atan = (Float) Math.atan((Double) (2.0f * f5))
+        Float atan = Math.toFloat().atan((Double) (2.0f * f5))
         Float f7 = f5 * f4
         LLVector3 lLVector35 = LLVector3()
         LLVector3 lLVector36 = LLVector3()
@@ -165,7 +165,7 @@ private class FlexibleSection {
             }
             i3++
         }
-        Float[] fArr3 = Float[32]
+        FloatArray fArr3 = FloatArray(32)
         Matrix.setIdentityM(fArr3, 16)
         Matrix.scaleM(fArr3, 16, 1.0f / lLVector32.x, 1.0f / lLVector32.y, 1.0f / lLVector32.z)
         Matrix.multiplyMM(fArr3, 0, fArr3, 16, lLQuaternion.getMatrix(), 0)
@@ -173,7 +173,7 @@ private class FlexibleSection {
         if (this.sectionMatrices == null) {
             this.sectionMatrices = Float[(this.NumSections * 16)]
         }
-        Float[] fArr4 = Float[8]
+        FloatArray fArr4 = FloatArray(8)
         Int i4 = 0
         while (true) {
             Int i5 = i4
@@ -183,8 +183,8 @@ private class FlexibleSection {
                 fArr4[2] = this.sections[i5].Position.z
                 fArr4[3] = 1.0f
                 Matrix.multiplyMV(fArr4, 4, fArr3, 0, fArr4, 0)
-                Float f8 = (((Float) i5) / ((Float) this.NumSections)) - 0.5f
-                Float[] fArr5 = Float[32]
+                Float f8 = ((i5.toFloat()) / (this.toFloat().NumSections)) - 0.5f
+                FloatArray fArr5 = FloatArray(32)
                 Matrix.setIdentityM(fArr5, 16)
                 Matrix.translateM(fArr5, 16, fArr4[4], fArr4[5], fArr4[6] - f8)
                 Matrix.translateM(fArr5, 16, 0.0f, 0.0f, f8)
@@ -220,7 +220,7 @@ private class FlexibleSection {
         return gLLoadableBuffer
     }
 
-    public Float[] getMatrices() {
+    public FloatArray getMatrices() {
         return this.sectionMatrices
     }
 }

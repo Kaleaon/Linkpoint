@@ -18,12 +18,12 @@ class FriendlyEditTextPreference : EditTextPreference() {
         super(context, attributeSet, i)
     }
 
-    public CharSequence getSummary() {
+     public fun getSummary(): CharSequence {
         CharSequence summary
-        String text = getText()
+        val text: String = getText()
         if (TextUtils.isEmpty(text) || (summary = super.getSummary()) == null) {
             return null
         }
-        return String.format(summary.toString(), Object[]{text})
+        return String.format(summary.toString(), Array<Any>{text})
     }
 }

@@ -156,10 +156,10 @@ class SLAvatarControl : SLModule() {
             if (!this.isCamming) {
                 this.agentHeading = this.cameraParams.getHeading()
             }
-            Double d = (((Double) this.agentHeading) * 3.141592653589793d) / 180.0d
+            Double d = ((this.toDouble().agentHeading) * 3.141592653589793d) / 180.0d
             Debug.Printf("AgentUpdate: agent heading %.2f", Float.valueOf(this.agentHeading))
-            Float cos = (Float) Math.cos(d)
-            Float sin = (Float) Math.sin(d)
+            Float cos = Math.toFloat().cos(d)
+            Float sin = Math.toFloat().sin(d)
             LLQuaternion mayaQ = LLQuaternion.mayaQ(0.0f, 0.0f, this.agentHeading, LLQuaternion.Order.YZX)
             agentUpdate.AgentData_Field.BodyRotation = mayaQ
             agentUpdate.AgentData_Field.HeadRotation = mayaQ
@@ -431,7 +431,7 @@ class SLAvatarControl : SLModule() {
 
     @SLMessageHandler
     fun HandleScriptQuestion(ScriptQuestion scriptQuestion) {
-        Debug.Log("ScriptQuestion: ItemID = " + scriptQuestion.Data_Field.ItemID + ", questions = " + String.format("%08x", Object[]{Integer.valueOf(scriptQuestion.Data_Field.Questions)}))
+        Debug.Log("ScriptQuestion: ItemID = " + scriptQuestion.Data_Field.ItemID + ", questions = " + String.format("%08x", Array<Any>{Integer.valueOf(scriptQuestion.Data_Field.Questions)}))
         SLChatPermissionRequestEvent sLChatPermissionRequestEvent = SLChatPermissionRequestEvent(scriptQuestion, this.agentCircuit.getAgentUUID())
         if (sLChatPermissionRequestEvent.getQuestions() != 0) {
             this.agentCircuit.HandleChatEvent(this.agentCircuit.getLocalChatterID(), sLChatPermissionRequestEvent, true)

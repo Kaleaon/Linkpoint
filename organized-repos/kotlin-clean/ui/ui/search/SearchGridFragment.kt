@@ -34,7 +34,7 @@ import java.util.UUID
 class SearchGridFragment : FragmentWithTitle(), LoadableMonitor.OnLoadableDataChangedListener, SearchGridAdapter.OnSearchResultClickListener {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-modules-search-SearchGridQuery$SearchTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f584comlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f584comlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues = null
     private SearchGridAdapter adapter
     private val LoadableMonitor loadableMonitor = LoadableMonitor(this.searchResults).withDataChangedListener(this)
     @BindView(2131755641)
@@ -48,11 +48,11 @@ class SearchGridFragment : FragmentWithTitle(), LoadableMonitor.OnLoadableDataCh
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-modules-search-SearchGridQuery$SearchTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m851getcomlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues() {
+private /* synthetic */ IntArray m851getcomlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues() {
         if (f584comlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues != null) {
             return f584comlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues
         }
-        Int[] iArr = Int[SearchGridQuery.SearchType.values().length]
+        IntArray iArr = Int[SearchGridQuery.SearchType.values().length]
         try {
             iArr[SearchGridQuery.SearchType.Groups.ordinal()] = 1
         } catch (NoSuchFieldError e) {

@@ -47,10 +47,10 @@ class ChunkedListLoader<E : Identifiable<Long>>, AbstractList<E> : ChunkedList.C
     /* access modifiers changed from: private */
     public Boolean loadBelowWanted = false
     private val Runnable loadMoreData = Runnable() {
-        fun run() {
+        override fun run() {
             Long r4
             Long r6
-            Boolean z4 = true
+            val z4: Boolean = true
             Debug.Printf("ChatView: processing loadMoreData(), reloadRequested %b", Boolean.valueOf(ChunkedListLoader.this.reloadRequested.get()))
             ChunkedListLoader.this.loadRequested.set(false)
             synchronized (ChunkedListLoader.this.lock) {
@@ -58,9 +58,9 @@ class ChunkedListLoader<E : Identifiable<Long>>, AbstractList<E> : ChunkedList.C
                 r4 = ChunkedListLoader.this.loadAboveTopmostId
             }
             if (z) {
-                LoadResult loadInBackground = ChunkedListLoader.this.loadInBackground(ChunkedListLoader.this.windowSize, r4, false)
+                val loadInBackground: LoadResult = ChunkedListLoader.this.loadInBackground(ChunkedListLoader.this.windowSize, r4, false)
                 synchronized (ChunkedListLoader.this.lock) {
-                    LoadResult unused = ChunkedListLoader.this.loadAboveResult = loadInBackground
+                    val unused: LoadResult = ChunkedListLoader.this.loadAboveResult = loadInBackground
                 }
                 z2 = true
             } else {
@@ -71,9 +71,9 @@ class ChunkedListLoader<E : Identifiable<Long>>, AbstractList<E> : ChunkedList.C
                 r6 = ChunkedListLoader.this.loadBelowLastId
             }
             if (z3) {
-                LoadResult loadInBackground2 = ChunkedListLoader.this.loadInBackground(ChunkedListLoader.this.windowSize, r6, true)
+                val loadInBackground2: LoadResult = ChunkedListLoader.this.loadInBackground(ChunkedListLoader.this.windowSize, r6, true)
                 synchronized (ChunkedListLoader.this.lock) {
-                    LoadResult unused2 = ChunkedListLoader.this.loadBelowResult = loadInBackground2
+                    val unused2: LoadResult = ChunkedListLoader.this.loadBelowResult = loadInBackground2
                 }
                 z2 = true
             }
@@ -92,7 +92,7 @@ class ChunkedListLoader<E : Identifiable<Long>>, AbstractList<E> : ChunkedList.C
     /* access modifiers changed from: private */
     val Object lock = Object()
     private val Runnable processUpdate = Runnable() {
-        fun run() {
+        override fun run() {
             LoadResult r3
             LoadResult r32
             Identifiable identifiable
@@ -100,13 +100,13 @@ class ChunkedListLoader<E : Identifiable<Long>>, AbstractList<E> : ChunkedList.C
             Debug.Printf("ChatView: processUpdate, reloadAccepted: %b", Boolean.valueOf(ChunkedListLoader.this.reloadAccepted.get()))
             if (ChunkedListLoader.this.reloadAccepted.getAndSet(false)) {
                 synchronized (ChunkedListLoader.this.lock) {
-                    Boolean unused = ChunkedListLoader.this.loadAboveWanted = false
-                    LoadResult unused2 = ChunkedListLoader.this.loadAboveResult = null
-                    LoadResult unused3 = ChunkedListLoader.this.loadBelowResult = null
-                    Boolean unused4 = ChunkedListLoader.this.loadBelowWanted = false
+                    val unused: Boolean = ChunkedListLoader.this.loadAboveWanted = false
+                    val unused2: LoadResult = ChunkedListLoader.this.loadAboveResult = null
+                    val unused3: LoadResult = ChunkedListLoader.this.loadBelowResult = null
+                    val unused4: Boolean = ChunkedListLoader.this.loadBelowWanted = false
                 }
-                Boolean unused5 = ChunkedListLoader.this.hasAbove = true
-                Boolean unused6 = ChunkedListLoader.this.hasBelow = true
+                val unused5: Boolean = ChunkedListLoader.this.hasAbove = true
+                val unused6: Boolean = ChunkedListLoader.this.hasBelow = true
                 ChunkedListLoader.this.addedElements.clear()
                 ChunkedListLoader.this.items.clear()
                 ChunkedListLoader.this.listener.onListReloaded()
@@ -115,16 +115,16 @@ class ChunkedListLoader<E : Identifiable<Long>>, AbstractList<E> : ChunkedList.C
             synchronized (ChunkedListLoader.this.lock) {
                 r3 = ChunkedListLoader.this.loadAboveResult
                 if (r3 != null) {
-                    LoadResult unused7 = ChunkedListLoader.this.loadAboveResult = null
-                    Boolean unused8 = ChunkedListLoader.this.loadAboveWanted = false
+                    val unused7: LoadResult = ChunkedListLoader.this.loadAboveResult = null
+                    val unused8: Boolean = ChunkedListLoader.this.loadAboveWanted = false
                 }
             }
             if (r3 != null) {
                 i = r3.entries.size() + 0
                 ChunkedListLoader.this.items.addChunkAtStart(Lists.reverse(r3.entries))
-                Boolean unused9 = ChunkedListLoader.this.hasAbove = r3.hasMore
+                val unused9: Boolean = ChunkedListLoader.this.hasAbove = r3.hasMore
                 if (r3.fromId == Long.MAX_VALUE) {
-                    Boolean unused10 = ChunkedListLoader.this.hasBelow = false
+                    val unused10: Boolean = ChunkedListLoader.this.hasBelow = false
                 }
             } else {
                 i = 0
@@ -132,32 +132,32 @@ class ChunkedListLoader<E : Identifiable<Long>>, AbstractList<E> : ChunkedList.C
             if (i != 0) {
                 ChunkedListLoader.this.listener.onListItemsAdded(0, i)
             }
-            Int size = ChunkedListLoader.this.items.size()
+            val size: Int = ChunkedListLoader.this.items.size()
             synchronized (ChunkedListLoader.this.lock) {
                 r32 = ChunkedListLoader.this.loadBelowResult
                 if (r32 != null) {
-                    LoadResult unused11 = ChunkedListLoader.this.loadBelowResult = null
-                    Boolean unused12 = ChunkedListLoader.this.loadBelowWanted = false
+                    val unused11: LoadResult = ChunkedListLoader.this.loadBelowResult = null
+                    val unused12: Boolean = ChunkedListLoader.this.loadBelowWanted = false
                 }
             }
             if (r32 != null) {
                 i2 = r32.entries.size()
                 ChunkedListLoader.this.items.addChunkAtEnd(r32.entries)
-                Boolean unused13 = ChunkedListLoader.this.hasBelow = r32.hasMore
+                val unused13: Boolean = ChunkedListLoader.this.hasBelow = r32.hasMore
                 if (r32.fromId == 0) {
-                    Boolean unused14 = ChunkedListLoader.this.hasAbove = false
+                    val unused14: Boolean = ChunkedListLoader.this.hasAbove = false
                 }
             } else {
                 i2 = 0
             }
-            Boolean z2 = false
-            Int i3 = i2
+            val z2: Boolean = false
+            val i3: Int = i2
             while (true) {
-                Identifiable identifiable2 = (Identifiable) ChunkedListLoader.this.addedElements.poll()
+                val identifiable2: Identifiable = (Identifiable) ChunkedListLoader.this.addedElements.poll()
                 if (identifiable2 == null) {
                     break
                 }
-                Long longValue = ChunkedListLoader.this.items.size() > 0 ? ((Long) ((Identifiable) ChunkedListLoader.this.items.get(ChunkedListLoader.this.items.size() - 1)).getId()).longValue() : -1
+                val longValue: Long = ChunkedListLoader.this.items.size() > 0 ? ((Long) ((Identifiable) ChunkedListLoader.this.items.get(ChunkedListLoader.this.items.size() - 1)).getId()).longValue() : -1
                 Debug.Printf("ChatView: added element: id %d, lastId %d, hasBelow %b", identifiable2.getId(), Long.valueOf(longValue), Boolean.valueOf(ChunkedListLoader.this.hasBelow))
                 if (ChunkedListLoader.this.hasBelow || ((Long) identifiable2.getId()).longValue() <= longValue) {
                     z = z2
@@ -177,7 +177,7 @@ class ChunkedListLoader<E : Identifiable<Long>>, AbstractList<E> : ChunkedList.C
             }
             while (true) {
                 synchronized (ChunkedListLoader.this.lock) {
-                    Iterator it = ChunkedListLoader.this.updatedElements.entrySet().iterator()
+                    val it: Iterator = ChunkedListLoader.this.updatedElements.entrySet().iterator()
                     if (it.hasNext()) {
                         identifiable = (Identifiable) ((Map.Entry) it.next()).getValue()
                         it.remove()
@@ -186,7 +186,7 @@ class ChunkedListLoader<E : Identifiable<Long>>, AbstractList<E> : ChunkedList.C
                     }
                 }
                 if (identifiable != null) {
-                    Int replaceElement = ChunkedListLoader.this.items.replaceElement(identifiable, ChunkedListLoader.this.chatMessageComparator)
+                    val replaceElement: Int = ChunkedListLoader.this.items.replaceElement(identifiable, ChunkedListLoader.this.chatMessageComparator)
                     Debug.Printf("ChunkedListLoader: replace: replacedIndex is %d", Integer.valueOf(replaceElement))
                     if (replaceElement >= 0) {
                         ChunkedListLoader.this.listener.onListItemChanged(replaceElement)
@@ -210,17 +210,17 @@ class ChunkedListLoader<E : Identifiable<Long>>, AbstractList<E> : ChunkedList.C
     val Int windowSize
 
     interface EventListener {
-        Executor getListEventsExecutor()
+         fun getListEventsExecutor(): Executor)
 
-        Unit onListItemAddedAtEnd()
+         fun onListItemAddedAtEnd()
 
-        Unit onListItemChanged(Int i)
+         fun onListItemChanged(i: Int)
 
-        Unit onListItemsAdded(Int i, Int i2)
+         fun onListItemsAdded(i: Int, i2: Int)
 
-        Unit onListItemsRemoved(Int i, Int i2)
+         fun onListItemsRemoved(i: Int, i2: Int)
 
-        Unit onListReloaded()
+         fun onListReloaded()
     }
 
     @JvmStatic
@@ -271,7 +271,7 @@ protected class LoadResult<E> {
         return (Identifiable) this.items.get(i)
     }
 
-    public Boolean hasMoreItemsAtBottom() {
+     public fun hasMoreItemsAtBottom(): Boolean {
         return this.hasBelow
     }
 
@@ -290,7 +290,7 @@ protected class LoadResult<E> {
     /* JADX WARNING: Removed duplicated region for block: B:135:? A[RETURN, SYNTHETIC] */
     /* JADX WARNING: Removed duplicated region for block: B:46:0x00d9  */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    fun setVisibleRange(Int r9, Int r10) {
+    fun setVisibleRange(r9: Int, r10: Int) {
         /*
             r8 = this
             r1 = 1
@@ -299,7 +299,7 @@ protected class LoadResult<E> {
             monitor-enter(r3)
             java.lang.String r4 = "ChatView: visible range %d, %d size %d above possible %s below possible %s"
             r0 = 5
-            java.lang.Object[] r5 = java.lang.Object[r0]     // Catch:{ all -> 0x00fb }
+            java.lang.Array<Any> r5 = java.lang.Object[r0]     // Catch:{ all -> 0x00fb }
             java.lang.Integer r0 = java.lang.Integer.valueOf(r9)     // Catch:{ all -> 0x00fb }
             r6 = 0
             r5[r6] = r0     // Catch:{ all -> 0x00fb }
@@ -307,11 +307,11 @@ protected class LoadResult<E> {
             r6 = 1
             r5[r6] = r0     // Catch:{ all -> 0x00fb }
             com.lumiyaviewer.lumiya.utils.wlist.ChunkedList<E> r0 = r8.items     // Catch:{ all -> 0x00fb }
-            Int r0 = r0.size()     // Catch:{ all -> 0x00fb }
+            val r0: Int = r0.size()     // Catch:{ all -> 0x00fb }
             java.lang.Integer r0 = java.lang.Integer.valueOf(r0)     // Catch:{ all -> 0x00fb }
             r6 = 2
             r5[r6] = r0     // Catch:{ all -> 0x00fb }
-            Boolean r0 = r8.loadAboveWanted     // Catch:{ all -> 0x00fb }
+            val r0: Boolean = r8.loadAboveWanted     // Catch:{ all -> 0x00fb }
             if (r0 != 0) goto L_0x00f1
             com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$LoadResult<E> r0 = r8.loadAboveResult     // Catch:{ all -> 0x00fb }
             if (r0 != 0) goto L_0x00f1
@@ -319,7 +319,7 @@ protected class LoadResult<E> {
         L_0x0031:
             r6 = 3
             r5[r6] = r0     // Catch:{ all -> 0x00fb }
-            Boolean r0 = r8.loadBelowWanted     // Catch:{ all -> 0x00fb }
+            val r0: Boolean = r8.loadBelowWanted     // Catch:{ all -> 0x00fb }
             if (r0 != 0) goto L_0x00f6
             com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$LoadResult<E> r0 = r8.loadBelowResult     // Catch:{ all -> 0x00fb }
             if (r0 != 0) goto L_0x00f6
@@ -330,14 +330,14 @@ protected class LoadResult<E> {
             com.lumiyaviewer.lumiya.Debug.Printf(r4, r5)     // Catch:{ all -> 0x00fb }
             monitor-exit(r3)
             com.lumiyaviewer.lumiya.utils.wlist.ChunkedList<E> r0 = r8.items
-            Int r0 = r0.size()
+            val r0: Int = r0.size()
             if (r0 <= 0) goto L_0x0166
             if (r9 > 0) goto L_0x0103
-            Boolean r0 = r8.hasAbove
+            val r0: Boolean = r8.hasAbove
             if (r0 == 0) goto L_0x0103
             java.lang.Object r3 = r8.lock
             monitor-enter(r3)
-            Boolean r0 = r8.loadAboveWanted     // Catch:{ all -> 0x0100 }
+            val r0: Boolean = r8.loadAboveWanted     // Catch:{ all -> 0x0100 }
             if (r0 != 0) goto L_0x00fe
             com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$LoadResult<E> r0 = r8.loadAboveResult     // Catch:{ all -> 0x0100 }
             if (r0 != 0) goto L_0x00fe
@@ -347,14 +347,14 @@ protected class LoadResult<E> {
             com.lumiyaviewer.lumiya.utils.Identifiable r0 = (com.lumiyaviewer.lumiya.utils.Identifiable) r0     // Catch:{ all -> 0x0100 }
             java.lang.Object r0 = r0.getId()     // Catch:{ all -> 0x0100 }
             java.lang.Long r0 = (java.lang.Long) r0     // Catch:{ all -> 0x0100 }
-            Long r4 = r0.longValue()     // Catch:{ all -> 0x0100 }
+            val r4: Long = r0.longValue()     // Catch:{ all -> 0x0100 }
             r8.loadAboveTopmostId = r4     // Catch:{ all -> 0x0100 }
             r0 = 1
             r8.loadAboveWanted = r0     // Catch:{ all -> 0x0100 }
             java.lang.String r0 = "ChatView: requesting load above id %d"
             r4 = 1
-            java.lang.Object[] r4 = java.lang.Object[r4]     // Catch:{ all -> 0x0100 }
-            Long r6 = r8.loadAboveTopmostId     // Catch:{ all -> 0x0100 }
+            java.lang.Array<Any> r4 = java.lang.Object[r4]     // Catch:{ all -> 0x0100 }
+            val r6: Long = r8.loadAboveTopmostId     // Catch:{ all -> 0x0100 }
             java.lang.Long r5 = java.lang.Long.valueOf(r6)     // Catch:{ all -> 0x0100 }
             r6 = 0
             r4[r6] = r5     // Catch:{ all -> 0x0100 }
@@ -364,33 +364,33 @@ protected class LoadResult<E> {
             monitor-exit(r3)
         L_0x008b:
             com.lumiyaviewer.lumiya.utils.wlist.ChunkedList<E> r3 = r8.items
-            Int r3 = r3.size()
-            Int r3 = r3 + -1
+            val r3: Int = r3.size()
+            val r3: Int = r3 + -1
             if (r10 < r3) goto L_0x012e
-            Boolean r3 = r8.hasBelow
+            val r3: Boolean = r8.hasBelow
             if (r3 == 0) goto L_0x012e
             java.lang.Object r3 = r8.lock
             monitor-enter(r3)
-            Boolean r4 = r8.loadBelowWanted     // Catch:{ all -> 0x012b }
+            val r4: Boolean = r8.loadBelowWanted     // Catch:{ all -> 0x012b }
             if (r4 != 0) goto L_0x00d6
             com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$LoadResult<E> r4 = r8.loadBelowResult     // Catch:{ all -> 0x012b }
             if (r4 != 0) goto L_0x00d6
             com.lumiyaviewer.lumiya.utils.wlist.ChunkedList<E> r0 = r8.items     // Catch:{ all -> 0x012b }
             com.lumiyaviewer.lumiya.utils.wlist.ChunkedList<E> r4 = r8.items     // Catch:{ all -> 0x012b }
-            Int r4 = r4.size()     // Catch:{ all -> 0x012b }
-            Int r4 = r4 + -1
+            val r4: Int = r4.size()     // Catch:{ all -> 0x012b }
+            val r4: Int = r4 + -1
             java.lang.Object r0 = r0.get(r4)     // Catch:{ all -> 0x012b }
             com.lumiyaviewer.lumiya.utils.Identifiable r0 = (com.lumiyaviewer.lumiya.utils.Identifiable) r0     // Catch:{ all -> 0x012b }
             java.lang.Object r0 = r0.getId()     // Catch:{ all -> 0x012b }
             java.lang.Long r0 = (java.lang.Long) r0     // Catch:{ all -> 0x012b }
-            Long r4 = r0.longValue()     // Catch:{ all -> 0x012b }
+            val r4: Long = r0.longValue()     // Catch:{ all -> 0x012b }
             r8.loadBelowLastId = r4     // Catch:{ all -> 0x012b }
             r0 = 1
             r8.loadBelowWanted = r0     // Catch:{ all -> 0x012b }
             java.lang.String r0 = "ChatView: requesting load below id %d"
             r4 = 1
-            java.lang.Object[] r4 = java.lang.Object[r4]     // Catch:{ all -> 0x012b }
-            Long r6 = r8.loadBelowLastId     // Catch:{ all -> 0x012b }
+            java.lang.Array<Any> r4 = java.lang.Object[r4]     // Catch:{ all -> 0x012b }
+            val r6: Long = r8.loadBelowLastId     // Catch:{ all -> 0x012b }
             java.lang.Long r5 = java.lang.Long.valueOf(r6)     // Catch:{ all -> 0x012b }
             r6 = 0
             r4[r6] = r5     // Catch:{ all -> 0x012b }
@@ -401,10 +401,10 @@ protected class LoadResult<E> {
         L_0x00d7:
             if (r0 == 0) goto L_0x00f0
             java.util.concurrent.atomic.AtomicBoolean r0 = r8.loadRequested
-            Boolean r0 = r0.compareAndSet(r2, r1)
+            val r0: Boolean = r0.compareAndSet(r2, r1)
             if (r0 == 0) goto L_0x01cf
             java.lang.String r0 = "ChatView: requesting loadMoreData ()"
-            java.lang.Object[] r1 = java.lang.Object[r2]
+            java.lang.Array<Any> r1 = java.lang.Object[r2]
             com.lumiyaviewer.lumiya.Debug.Printf(r0, r1)
             java.util.concurrent.Executor r0 = r8.executor
             java.lang.Runnable r1 = r8.loadMoreData
@@ -432,7 +432,7 @@ protected class LoadResult<E> {
             if (r9 <= 0) goto L_0x01dc
             java.lang.Object r3 = r8.lock
             monitor-enter(r3)
-            Boolean r0 = r8.loadAboveWanted     // Catch:{ all -> 0x0128 }
+            val r0: Boolean = r8.loadAboveWanted     // Catch:{ all -> 0x0128 }
             if (r0 != 0) goto L_0x0126
             com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$LoadResult<E> r0 = r8.loadAboveResult     // Catch:{ all -> 0x0128 }
             if (r0 != 0) goto L_0x0126
@@ -441,7 +441,7 @@ protected class LoadResult<E> {
             monitor-exit(r3)
             if (r0 == 0) goto L_0x01dc
             com.lumiyaviewer.lumiya.utils.wlist.ChunkedList<E> r0 = r8.items
-            Int r0 = r0.removeElementsBefore(r9)
+            val r0: Int = r0.removeElementsBefore(r9)
             if (r0 == 0) goto L_0x01dc
             r8.hasAbove = r1
             com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$EventListener r3 = r8.listener
@@ -462,12 +462,12 @@ protected class LoadResult<E> {
         L_0x012e:
             if (r10 < 0) goto L_0x00d7
             com.lumiyaviewer.lumiya.utils.wlist.ChunkedList<E> r3 = r8.items
-            Int r3 = r3.size()
-            Int r3 = r3 + -1
+            val r3: Int = r3.size()
+            val r3: Int = r3 + -1
             if (r10 >= r3) goto L_0x00d7
             java.lang.Object r4 = r8.lock
             monitor-enter(r4)
-            Boolean r3 = r8.loadBelowWanted     // Catch:{ all -> 0x0163 }
+            val r3: Boolean = r8.loadBelowWanted     // Catch:{ all -> 0x0163 }
             if (r3 != 0) goto L_0x0161
             com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$LoadResult<E> r3 = r8.loadBelowResult     // Catch:{ all -> 0x0163 }
             if (r3 != 0) goto L_0x0161
@@ -476,13 +476,13 @@ protected class LoadResult<E> {
             monitor-exit(r4)
             if (r3 == 0) goto L_0x00d7
             com.lumiyaviewer.lumiya.utils.wlist.ChunkedList<E> r3 = r8.items
-            Int r3 = r3.size()
+            val r3: Int = r3.size()
             com.lumiyaviewer.lumiya.utils.wlist.ChunkedList<E> r4 = r8.items
-            Int r4 = r4.removeElementsAfter(r10)
+            val r4: Int = r4.removeElementsAfter(r10)
             if (r4 == 0) goto L_0x00d7
             r8.hasBelow = r1
             com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$EventListener r5 = r8.listener
-            Int r3 = r3 - r4
+            val r3: Int = r3 - r4
             r5.onListItemsRemoved(r3, r4)
             goto L_0x00d7
         L_0x0161:
@@ -493,13 +493,13 @@ protected class LoadResult<E> {
             monitor-exit(r4)
             throw r0
         L_0x0166:
-            Boolean r0 = r8.startFromStart
+            val r0: Boolean = r8.startFromStart
             if (r0 == 0) goto L_0x019b
-            Boolean r0 = r8.hasBelow
+            val r0: Boolean = r8.hasBelow
             if (r0 == 0) goto L_0x01d9
             java.lang.Object r3 = r8.lock
             monitor-enter(r3)
-            Boolean r0 = r8.loadBelowWanted     // Catch:{ all -> 0x0198 }
+            val r0: Boolean = r8.loadBelowWanted     // Catch:{ all -> 0x0198 }
             if (r0 != 0) goto L_0x0195
             com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$LoadResult<E> r0 = r8.loadBelowResult     // Catch:{ all -> 0x0198 }
             if (r0 != 0) goto L_0x0195
@@ -509,8 +509,8 @@ protected class LoadResult<E> {
             r8.loadBelowWanted = r0     // Catch:{ all -> 0x0198 }
             java.lang.String r0 = "ChatView: requesting load below id %d"
             r4 = 1
-            java.lang.Object[] r4 = java.lang.Object[r4]     // Catch:{ all -> 0x0198 }
-            Long r6 = r8.loadBelowLastId     // Catch:{ all -> 0x0198 }
+            java.lang.Array<Any> r4 = java.lang.Object[r4]     // Catch:{ all -> 0x0198 }
+            val r6: Long = r8.loadBelowLastId     // Catch:{ all -> 0x0198 }
             java.lang.Long r5 = java.lang.Long.valueOf(r6)     // Catch:{ all -> 0x0198 }
             r6 = 0
             r4[r6] = r5     // Catch:{ all -> 0x0198 }
@@ -525,11 +525,11 @@ protected class LoadResult<E> {
             monitor-exit(r3)
             throw r0
         L_0x019b:
-            Boolean r0 = r8.hasAbove
+            val r0: Boolean = r8.hasAbove
             if (r0 == 0) goto L_0x01d9
             java.lang.Object r3 = r8.lock
             monitor-enter(r3)
-            Boolean r0 = r8.loadAboveWanted     // Catch:{ all -> 0x01cc }
+            val r0: Boolean = r8.loadAboveWanted     // Catch:{ all -> 0x01cc }
             if (r0 != 0) goto L_0x01c9
             com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$LoadResult<E> r0 = r8.loadAboveResult     // Catch:{ all -> 0x01cc }
             if (r0 != 0) goto L_0x01c9
@@ -539,8 +539,8 @@ protected class LoadResult<E> {
             r8.loadAboveWanted = r0     // Catch:{ all -> 0x01cc }
             java.lang.String r0 = "ChatView: requesting load above id %d"
             r4 = 1
-            java.lang.Object[] r4 = java.lang.Object[r4]     // Catch:{ all -> 0x01cc }
-            Long r6 = r8.loadAboveTopmostId     // Catch:{ all -> 0x01cc }
+            java.lang.Array<Any> r4 = java.lang.Object[r4]     // Catch:{ all -> 0x01cc }
+            val r6: Long = r8.loadAboveTopmostId     // Catch:{ all -> 0x01cc }
             java.lang.Long r5 = java.lang.Long.valueOf(r6)     // Catch:{ all -> 0x01cc }
             r6 = 0
             r4[r6] = r5     // Catch:{ all -> 0x01cc }
@@ -556,7 +556,7 @@ protected class LoadResult<E> {
             throw r0
         L_0x01cf:
             java.lang.String r0 = "ChatView: loadMoreData() already requested"
-            java.lang.Object[] r1 = java.lang.Object[r2]
+            java.lang.Array<Any> r1 = java.lang.Object[r2]
             com.lumiyaviewer.lumiya.Debug.Printf(r0, r1)
             goto L_0x00f0
         L_0x01d9:
@@ -569,7 +569,7 @@ protected class LoadResult<E> {
         throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader.setVisibleRange(Int, Int):Unit")
     }
 
-    public Int size() {
+     public fun size(): Int {
         return this.items.size()
     }
 

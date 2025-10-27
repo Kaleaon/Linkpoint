@@ -9,7 +9,7 @@ import java.util.UUID
 class RLVCmdVersion : RLVCommand {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-modules-rlv-RLVCommandsSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f128comlumiyaviewerlumiyaslprotomodulesrlvRLVCommandsSwitchesValues = null
+    private const val /* synthetic */ IntArray f128comlumiyaviewerlumiyaslprotomodulesrlvRLVCommandsSwitchesValues = null
     private const val RLV_VERSION_BUILD: Int = 0
     private const val RLV_VERSION_MAJOR: Int = 1
     private const val RLV_VERSION_MINOR: Int = 10
@@ -20,11 +20,11 @@ class RLVCmdVersion : RLVCommand {
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-modules-rlv-RLVCommandsSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m232getcomlumiyaviewerlumiyaslprotomodulesrlvRLVCommandsSwitchesValues() {
+private /* synthetic */ IntArray m232getcomlumiyaviewerlumiyaslprotomodulesrlvRLVCommandsSwitchesValues() {
         if (f128comlumiyaviewerlumiyaslprotomodulesrlvRLVCommandsSwitchesValues != null) {
             return f128comlumiyaviewerlumiyaslprotomodulesrlvRLVCommandsSwitchesValues
         }
-        Int[] iArr = Int[RLVCommands.values().length]
+        val iArr: IntArray = Int[RLVCommands.values().length]
         try {
             iArr[RLVCommands.accepttp.ordinal()] = 4
         } catch (NoSuchFieldError e) {
@@ -142,17 +142,17 @@ private /* synthetic */ Int[] m232getcomlumiyaviewerlumiyaslprotomodulesrlvRLVCo
     }
 
     @JvmStatic
-    String getManualVersionReply() {
-        return String.format("RestrainedLove viewer v%d.%d.%d", Object[]{1, 10, 1})
+     fun getManualVersionReply(): String {
+        return String.format("RestrainedLove viewer v%d.%d.%d", Array<Any>{1, 10, 1})
     }
 
-    fun Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2) {
+    fun Handle(rLVController: RLVController, uuid: UUID, rLVCommands: RLVCommands, str: String, str2: String) {
         try {
-            Int parseInt = Integer.parseInt(str)
+            val parseInt: Int = Integer.parseInt(str)
             switch (m232getcomlumiyaviewerlumiyaslprotomodulesrlvRLVCommandsSwitchesValues()[rLVCommands.ordinal()]) {
                 case 1:
                 case 2:
-                    Object[] objArr = Object[7]
+                    val objArr: Array<Any> = Object[7]
                     objArr[0] = rLVCommands == RLVCommands.versionnew ? "RestrainedLove" : "RestrainedLife"
                     objArr[1] = 1
                     objArr[2] = 10
@@ -163,7 +163,7 @@ private /* synthetic */ Int[] m232getcomlumiyaviewerlumiyaslprotomodulesrlvRLVCo
                     rLVController.sayOnChannel(parseInt, String.format("%s viewer v%d.%d.%d (RLVa %d.%d.%d)", objArr))
                     return
                 case 3:
-                    rLVController.sayOnChannel(parseInt, String.format("%d%02d%02d%02d", Object[]{1, 10, 1, 0}))
+                    rLVController.sayOnChannel(parseInt, String.format("%d%02d%02d%02d", Array<Any>{1, 10, 1, 0}))
                     return
                 default:
                     return

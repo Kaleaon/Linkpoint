@@ -161,8 +161,8 @@ class FilamentWorldRenderer(
                 .require(MaterialBuilder.VertexAttribute.COLOR)
                 .material("""
                     void material(inout MaterialInputs material) {
-                        prepareMaterial(material);
-                        material.baseColor = getColor();
+                        prepareMaterial(material)
+                        material.baseColor = getColor()
                     }
                 """.trimIndent())
                 .optimization(MaterialBuilder.Optimization.NONE)

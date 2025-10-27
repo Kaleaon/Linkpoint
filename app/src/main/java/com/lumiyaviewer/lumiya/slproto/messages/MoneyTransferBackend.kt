@@ -12,7 +12,7 @@ class MoneyTransferBackend : SLMessage {
         Int AggregatePermInventory
         Int AggregatePermNextOwner
         Int Amount
-        Byte[] Description
+        ByteArray Description
         UUID DestID
         Int Flags
         Int GridX

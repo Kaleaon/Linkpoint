@@ -57,7 +57,7 @@ class SLTransfer {
     private val UUID assetUUID
     private val Int channelType
     private Int currentSize
-    private Byte[] data
+    private ByteArray data
     private val UUID itemUUID
     private Int nextPacket
     private val UUID ownerUUID
@@ -90,13 +90,13 @@ class SLTransfer {
         this.currentSize = 0
     }
 
-    private Unit RunQueuedPackets(SLTransferManager sLTransferManager) {
+    private fun RunQueuedPackets(sLTransferManager: SLTransferManager) {
         TransferPacket transferPacket
         if (this.statusKnown && this.status == 0) {
             while (!this.queuedPackets.isEmpty() && (transferPacket = this.queuedPackets.get(Integer.valueOf(this.nextPacket))) != null) {
                 this.queuedPackets.remove(Integer.valueOf(this.nextPacket))
                 this.nextPacket++
-                Int length = transferPacket.TransferData_Field.Data.length
+                val length: Int = transferPacket.TransferData_Field.Data.length
                 System.arraycopy(transferPacket.TransferData_Field.Data, 0, this.data, this.currentSize, length)
                 this.currentSize = length + this.currentSize
                 if (transferPacket.TransferData_Field.Status != 0) {
@@ -110,7 +110,7 @@ class SLTransfer {
     }
 
     /* access modifiers changed from: package-private */
-    fun HandleTransferInfo(SLTransferManager sLTransferManager, TransferInfo transferInfo) {
+    fun HandleTransferInfo(sLTransferManager: SLTransferManager, transferInfo: TransferInfo) {
         this.statusKnown = true
         this.status = transferInfo.TransferInfoData_Field.Status
         this.size = transferInfo.TransferInfoData_Field.Size
@@ -121,54 +121,54 @@ class SLTransfer {
     }
 
     /* access modifiers changed from: package-private */
-    fun HandleTransferPacket(SLTransferManager sLTransferManager, TransferPacket transferPacket) {
+    fun HandleTransferPacket(sLTransferManager: SLTransferManager, transferPacket: TransferPacket) {
         this.queuedPackets.put(Integer.valueOf(transferPacket.TransferData_Field.Packet), transferPacket)
         RunQueuedPackets(sLTransferManager)
     }
 
     /* access modifiers changed from: package-private */
-    public Int getAssetType() {
+     public fun getAssetType(): Int {
         return this.assetType
     }
 
     /* access modifiers changed from: package-private */
-    public UUID getAssetUUID() {
+     public fun getAssetUUID(): UUID {
         return this.assetUUID
     }
 
     /* access modifiers changed from: package-private */
-    public Int getChannelType() {
+     public fun getChannelType(): Int {
         return this.channelType
     }
 
     /* access modifiers changed from: package-private */
-    public Byte[] getData() {
+     public fun getData(): ByteArray {
         return this.data
     }
 
     /* access modifiers changed from: package-private */
-    public Float getPriority() {
+     public fun getPriority(): Float {
         return this.priority
     }
 
     /* access modifiers changed from: package-private */
-    public Int getStatus() {
+     public fun getStatus(): Int {
         return this.status
     }
 
     /* access modifiers changed from: package-private */
-    public UUID getTransferUUID() {
+     public fun getTransferUUID(): UUID {
         return this.transferUUID
     }
 
     /* access modifiers changed from: package-private */
-    public TransferRequest makeTransferRequest() {
-        TransferRequest transferRequest = TransferRequest()
+     public fun makeTransferRequest(): TransferRequest {
+        val transferRequest: TransferRequest = TransferRequest()
         transferRequest.TransferInfo_Field.TransferID = this.transferUUID
         transferRequest.TransferInfo_Field.ChannelType = this.channelType
         transferRequest.TransferInfo_Field.SourceType = this.sourceType
         transferRequest.TransferInfo_Field.Priority = this.priority
-        ByteBuffer allocate = ByteBuffer.allocate(1024)
+        val allocate: ByteBuffer = ByteBuffer.allocate(1024)
         allocate.order(ByteOrder.BIG_ENDIAN)
         if (this.sourceType == 3) {
             allocate.putLong(this.agentID.getMostSignificantBits())

@@ -28,12 +28,12 @@ class UserPicBitmapCache : ResourceMemoryCache()<UUID, Bitmap> {
         /* access modifiers changed from: private */
         public volatile File compressedFile = null
         private val Runnable decompressRunnable = Runnable() {
-            fun run() {
+            override fun run() {
                 try {
-                    Bitmap asBitmap = OpenJPEG(UserPicBitmapRequest.this.compressedFile, 128, 128, false).getAsBitmap()
-                    ByteArrayOutputStream byteArrayOutputStream = ByteArrayOutputStream()
+                    val asBitmap: Bitmap = OpenJPEG(UserPicBitmapRequest.this.compressedFile, 128, 128, false).getAsBitmap()
+                    val byteArrayOutputStream: ByteArrayOutputStream = ByteArrayOutputStream()
                     asBitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
-                    Byte[] byteArray = byteArrayOutputStream.toByteArray()
+                    val byteArray: ByteArray = byteArrayOutputStream.toByteArray()
                     Debug.Printf("UserPic: bitmap ID %s: storing bitmap data %d bytes", UserPicBitmapRequest.this.getParams(), Integer.valueOf(byteArray.length))
                     UserPicBitmapCache.this.userManager.setUserPic((UUID) UserPicBitmapRequest.this.getParams(), byteArray)
                     UserPicBitmapRequest.this.completeRequest(asBitmap)
@@ -44,9 +44,9 @@ class UserPicBitmapCache : ResourceMemoryCache()<UUID, Bitmap> {
         }
         private volatile Future<?> decompressorFuture
         private val Runnable loadRunnable = Runnable() {
-            fun run() {
-                Byte[] userPic = UserPicBitmapCache.this.userManager.getUserPic((UUID) UserPicBitmapRequest.this.getParams())
-                Object[] objArr = Object[2]
+            override fun run() {
+                val userPic: ByteArray = UserPicBitmapCache.this.userManager.getUserPic((UUID) UserPicBitmapRequest.this.getParams())
+                val objArr: Array<Any> = Object[2]
                 objArr[0] = UserPicBitmapRequest.this.getParams()
                 objArr[1] = userPic != null ? Integer.toString(userPic.length) : "null"
                 Debug.Printf("UserPic: bitmap ID %s: got bitmap data %s", objArr)
@@ -63,8 +63,8 @@ class UserPicBitmapCache : ResourceMemoryCache()<UUID, Bitmap> {
             super(uuid, resourceManager)
         }
 
-        fun OnResourceReady(Object obj, Boolean z) {
-            Object[] objArr = Object[2]
+        fun OnResourceReady(obj: Object, z: Boolean) {
+            val objArr: Array<Any> = Object[2]
             objArr[0] = getParams()
             objArr[1] = obj != null ? obj.toString() : "null"
             Debug.Printf("UserPic: bitmap ID %s: got resource %s", objArr)
@@ -78,11 +78,11 @@ class UserPicBitmapCache : ResourceMemoryCache()<UUID, Bitmap> {
 
         fun cancelRequest() {
             Debug.Printf("DecompressRequest: cancelled (%s)", ((UUID) getParams()).toString())
-            Future<?> future = this.decompressorFuture
+            val future: Future<?> = this.decompressorFuture
             if (future != null) {
                 future.cancel(false)
             }
-            Future<?> future2 = this.loaderFuture
+            val future2: Future<?> = this.loaderFuture
             if (future2 != null) {
                 future2.cancel(false)
             }

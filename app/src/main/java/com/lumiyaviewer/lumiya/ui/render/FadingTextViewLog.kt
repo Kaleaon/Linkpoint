@@ -19,7 +19,7 @@ import java.util.LinkedHashMap
 import java.util.Map
 
 class FadingTextViewLog {
-    private Long STALE_CHAT_TIMEOUT = 5000
+    private val STALE_CHAT_TIMEOUT: Long = 5000
     private Runnable RemoveStaleChatsTask = Runnable() {
         Unit run() {
             Boolean unused = FadingTextViewLog.this.removeStaleChatsPosted = false
@@ -56,7 +56,7 @@ class FadingTextViewLog {
     private Context context
     private Int logBackgroundColor
     private Int logTextColor
-    private Handler mHandler = Handler()
+    private val mHandler: Handler = Handler()
     /* access modifiers changed from: private */
     Boolean removeStaleChatsPosted = false
     private UserManager userManager
@@ -88,10 +88,10 @@ class FadingTextViewLog {
                 String str = chatMessageEvent.isPrivate ? "[IM] " + charSequence : charSequence
                 if (chatMessageEvent.isNewMessage) {
                     DisplayMetrics displayMetrics = this.context.getResources().getDisplayMetrics()
-                    Int applyDimension = (Int) TypedValue.applyDimension(1, 10.0f, displayMetrics)
-                    Int applyDimension2 = (Int) TypedValue.applyDimension(1, 5.0f, displayMetrics)
-                    Int applyDimension3 = (Int) TypedValue.applyDimension(1, 10.0f, displayMetrics)
-                    Int applyDimension4 = (Int) TypedValue.applyDimension(1, 5.0f, displayMetrics)
+                    Int applyDimension = TypedValue.toInt().applyDimension(1, 10.0f, displayMetrics)
+                    Int applyDimension2 = TypedValue.toInt().applyDimension(1, 5.0f, displayMetrics)
+                    Int applyDimension3 = TypedValue.toInt().applyDimension(1, 10.0f, displayMetrics)
+                    Int applyDimension4 = TypedValue.toInt().applyDimension(1, 5.0f, displayMetrics)
                     LinearLayout.LayoutParams layoutParams = LinearLayout.LayoutParams(-2, -2)
                     layoutParams.setMargins(applyDimension, applyDimension2, applyDimension, applyDimension2)
                     textView = TextView(this.context)

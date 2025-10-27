@@ -10,7 +10,7 @@ import java.util.Date
 import java.util.UUID
 
 class MoneyTransactionDao : AbstractDao<MoneyTransaction, Long> {
-    String TABLENAME = "MONEY_TRANSACTION"
+    val TABLENAME: String = "MONEY_TRANSACTION"
 
     class Properties {
         Property AgentUUID = Property(2, UUID.class, "agentUUID", false, "AGENT_UUID")

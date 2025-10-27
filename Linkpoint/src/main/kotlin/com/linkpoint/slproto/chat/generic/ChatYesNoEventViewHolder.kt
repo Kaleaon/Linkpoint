@@ -32,7 +32,7 @@ class ChatYesNoEventViewHolder : ChatEventViewHolder(), View.OnClickListener {
 
     ChatYesNoEventViewHolder(View view, RecyclerView.Adapter adapter) {
         super(view, adapter)
-        TypedValue typedValue = TypedValue()
+        val typedValue: TypedValue = TypedValue()
         view.getContext().getTheme().resolveAttribute(R.attr.CardViewDefaultBackground, typedValue, true)
         this.cardViewDefaultBackground = typedValue.data
         view.getContext().getTheme().resolveAttribute(R.attr.CardViewDefaultText, typedValue, true)
@@ -53,17 +53,17 @@ class ChatYesNoEventViewHolder : ChatEventViewHolder(), View.OnClickListener {
         }
     }
 
-    private Unit fadeCardView() {
+     private fun fadeCardView() {
         if (!this.cardViewFaded && Build.VERSION.SDK_INT >= 11) {
             if (this.fadeAnimatorSet == null) {
-                ObjectAnimator objectAnimator = (ObjectAnimator) AnimatorInflater.loadAnimator(this.cardView.getContext(), R.animator.cardview_background_fade)
-                ObjectAnimator objectAnimator2 = (ObjectAnimator) AnimatorInflater.loadAnimator(this.cardView.getContext(), R.animator.cardview_text_unfade)
-                ObjectAnimator clone = objectAnimator2.clone()
+                val objectAnimator: ObjectAnimator = (ObjectAnimator) AnimatorInflater.loadAnimator(this.cardView.getContext(), R.animator.cardview_background_fade)
+                val objectAnimator2: ObjectAnimator = (ObjectAnimator) AnimatorInflater.loadAnimator(this.cardView.getContext(), R.animator.cardview_text_unfade)
+                val clone: ObjectAnimator = objectAnimator2.clone()
                 objectAnimator.setTarget(this.cardView)
                 objectAnimator2.setTarget(this.textView)
                 clone.setTarget(this.questionMsg)
                 this.fadeAnimatorSet = AnimatorSet()
-                this.fadeAnimatorSet.playTogether(Animator[]{objectAnimator, objectAnimator2, clone})
+                this.fadeAnimatorSet.playTogether(Array<Animator>{objectAnimator, objectAnimator2, clone})
             }
             this.fadeAnimatorSet.start()
             this.cardViewFaded = true
@@ -90,7 +90,7 @@ class ChatYesNoEventViewHolder : ChatEventViewHolder(), View.OnClickListener {
         this.textView.setTextColor(this.cardViewDefaultText)
     }
 
-    fun onClick(View view) {
+    override fun onClick(view: View) {
         switch (view.getId()) {
             case R.id.buttonYesNoAccept:
                 if (this.yesNoEvent != null && this.yesNoEvent.getEventState() == SLChatYesNoEvent.EventState.EventNew) {
@@ -111,7 +111,7 @@ class ChatYesNoEventViewHolder : ChatEventViewHolder(), View.OnClickListener {
         }
     }
 
-    fun setEvent(SLChatYesNoEvent sLChatYesNoEvent) {
+    fun setEvent(sLChatYesNoEvent: SLChatYesNoEvent) {
         this.yesNoEvent = sLChatYesNoEvent
     }
 }

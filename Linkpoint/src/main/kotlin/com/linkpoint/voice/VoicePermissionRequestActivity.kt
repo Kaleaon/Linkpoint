@@ -28,18 +28,18 @@ class VoicePermissionRequestActivity : AppCompatActivity() {
             this.this$0 = voicePermissionRequestActivity
         }
 
-        fun onServiceConnected(ComponentName componentName, IBinder iBinder) {
+        fun onServiceConnected(componentName: ComponentName, iBinder: IBinder) {
             VoicePermissionRequestActivity.access$002(this.this$0, Messenger(iBinder))
-            ActivityCompat.requestPermissions(this.this$0, String[]{"android.permission.RECORD_AUDIO"}, 100)
+            ActivityCompat.requestPermissions(this.this$0, Array<String>{"android.permission.RECORD_AUDIO"}, 100)
         }
 
-        fun onServiceDisconnected(ComponentName componentName) {
+        fun onServiceDisconnected(componentName: ComponentName) {
             VoicePermissionRequestActivity.access$002(this.this$0, null)
         }
     }
     private Messenger serviceMessenger = null
 
-    static /* synthetic */ Messenger access$002(VoicePermissionRequestActivity voicePermissionRequestActivity, Messenger messenger) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Messenger access$002(VoicePermissionRequestActivity voicePermissionRequestActivity, Messenger messenger) {
         voicePermissionRequestActivity.serviceMessenger = messenger
         return messenger
     }
@@ -49,12 +49,12 @@ class VoicePermissionRequestActivity : AppCompatActivity() {
      * Enabled unnecessary exception pruning
      * Enabled aggressive exception aggregation
      */
-    private Unit handlePermissionGranted(Boolean bl) {
+     private fun handlePermissionGranted(bl: Boolean) {
         Intent intent
         if (this.serviceMessenger != null && (intent = this.getIntent()).hasExtra(VOICE_INIT_REPLY_TO)) {
-            Message message = Message.obtain()
+            val message: Message = Message.obtain()
             message.what = 300
-            Int n = bl ? 1 : 0
+            val n: Int = bl ? 1 : 0
             message.arg1 = n
             message.obj = intent.getParcelableExtra(VOICE_INIT_REPLY_TO)
             try {
@@ -92,7 +92,7 @@ class VoicePermissionRequestActivity : AppCompatActivity() {
      * Enabled force condition propagation
      * Lifted jumps to return sites
      */
-    override Unit onRequestPermissionsResult(Int n, String[] stringArray, Int[] nArray) {
+    override Unit onRequestPermissionsResult(Int n, Array<String> stringArray, IntArray nArray) {
         block4: {
             block3: {
                 Debug.Printf("Cardboard: onRequestPermissionResult, code %d", n)

@@ -13,7 +13,7 @@ class RoutedMoneyBalanceReply : SLMessage() {
     @JvmStatic
     class MoneyData {
         public UUID AgentID
-        public Byte[] Description
+        public ByteArray Description
         public Int MoneyBalance
         public Int SquareMetersCommitted
         public Int SquareMetersCredit
@@ -33,7 +33,7 @@ class RoutedMoneyBalanceReply : SLMessage() {
         public UUID DestID
         public Boolean IsDestGroup
         public Boolean IsSourceGroup
-        public Byte[] ItemDescription
+        public ByteArray ItemDescription
         public UUID SourceID
         public Int TransactionType
     }

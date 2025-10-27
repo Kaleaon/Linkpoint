@@ -29,7 +29,7 @@ class StreamingMediaActivity : AppCompatActivity(), View.OnClickListener {
     fun onCreate(Bundle bundle) {
         ParcelData parcelData
         super.onCreate(bundle)
-        setContentView((Int) R.layout.streaming_media)
+        setContentView(R.toInt().layout.streaming_media)
         Intent intent = getIntent()
         if (intent.hasExtra(ParcelPropertiesFragment.PARCEL_DATA_KEY) && (parcelData = (ParcelData) intent.getSerializableExtra(ParcelPropertiesFragment.PARCEL_DATA_KEY)) != null) {
             ((TextView) findViewById(R.id.locationNameView)).setText(parcelData.getName())

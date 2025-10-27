@@ -23,7 +23,7 @@ class GroupAccountSummaryReply : SLMessage() {
         public Int IntervalDays
         public Int LandTaxCurrent
         public Int LandTaxEstimate
-        public Byte[] LastTaxDate
+        public ByteArray LastTaxDate
         public Int LightTaxCurrent
         public Int LightTaxEstimate
         public Int NonExemptMembers
@@ -32,8 +32,8 @@ class GroupAccountSummaryReply : SLMessage() {
         public Int ParcelDirFeeCurrent
         public Int ParcelDirFeeEstimate
         public UUID RequestID
-        public Byte[] StartDate
-        public Byte[] TaxDate
+        public ByteArray StartDate
+        public ByteArray TaxDate
         public Int TotalCredits
         public Int TotalDebits
     }
@@ -42,15 +42,15 @@ class GroupAccountSummaryReply : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.MoneyData_Field.StartDate.length + 25 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + this.MoneyData_Field.LastTaxDate.length + 1 + this.MoneyData_Field.TaxDate.length + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleGroupAccountSummaryReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 98)
@@ -78,7 +78,7 @@ class GroupAccountSummaryReply : SLMessage() {
         packVariable(byteBuffer, this.MoneyData_Field.TaxDate, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
         this.MoneyData_Field.RequestID = unpackUUID(byteBuffer)

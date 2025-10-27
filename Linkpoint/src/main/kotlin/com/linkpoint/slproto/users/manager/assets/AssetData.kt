@@ -1,19 +1,19 @@
 package com.linkpoint.slproto.users.manager.assets
 
 class AssetData {
-    private val Byte[] data
+    private val ByteArray data
     private val Int status
 
-    public AssetData(Int i, Byte[] bArr) {
+    public AssetData(Int i, ByteArray bArr) {
         this.status = i
         this.data = bArr
     }
 
-    public Byte[] getData() {
+     public fun getData(): ByteArray {
         return this.data
     }
 
-    public Int getStatus() {
+     public fun getStatus(): Int {
         return this.status
     }
 }

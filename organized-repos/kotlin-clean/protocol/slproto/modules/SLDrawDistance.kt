@@ -73,12 +73,12 @@ class SLDrawDistance : SLModule() {
 
     public synchronized Unit Enable3DView(Int i) {
         Debug.Log("Enable3DView: Setting drawDistance to " + i)
-        this.worldDrawDistance = (Float) i
+        this.worldDrawDistance = i.toFloat()
         if (!this.worldViewActive) {
             this.worldViewActive = true
             this.agentCircuit.getModules().avatarControl.EnableFastUpdates()
         }
-        this.gridConn.parcelInfo.setDrawDistance((Float) i)
+        this.gridConn.parcelInfo.setDrawDistance(i.toFloat())
         this.agentCircuit.TryWakeUp()
     }
 

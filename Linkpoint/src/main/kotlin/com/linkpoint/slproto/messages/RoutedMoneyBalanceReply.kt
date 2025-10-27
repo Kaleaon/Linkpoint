@@ -13,7 +13,7 @@ class RoutedMoneyBalanceReply : SLMessage() {
     @JvmStatic
     class MoneyData {
         public UUID AgentID
-        public Byte[] Description
+        public ByteArray Description
         public Int MoneyBalance
         public Int SquareMetersCommitted
         public Int SquareMetersCredit
@@ -33,7 +33,7 @@ class RoutedMoneyBalanceReply : SLMessage() {
         public UUID DestID
         public Boolean IsDestGroup
         public Boolean IsSourceGroup
-        public Byte[] ItemDescription
+        public ByteArray ItemDescription
         public UUID SourceID
         public Int TransactionType
     }
@@ -42,15 +42,15 @@ class RoutedMoneyBalanceReply : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.MoneyData_Field.Description.length + 46 + 10 + this.TransactionInfo_Field.ItemDescription.length + 43
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleRoutedMoneyBalanceReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 59)
@@ -72,7 +72,7 @@ class RoutedMoneyBalanceReply : SLMessage() {
         packVariable(byteBuffer, this.TransactionInfo_Field.ItemDescription, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.TargetBlock_Field.TargetIP = unpackIPAddress(byteBuffer)
         this.TargetBlock_Field.TargetPort = unpackShort(byteBuffer) & 65535
         this.MoneyData_Field.AgentID = unpackUUID(byteBuffer)

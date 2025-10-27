@@ -39,7 +39,7 @@ private class ExponentialInterpolator : Interpolator {
             this()
         }
 
-        public Float getInterpolation(Float f) {
+         public fun getInterpolation(f: Float): Float {
             return ((Float) Math.pow(2.0d, (Double) f)) - 1.0f
         }
     }
@@ -53,50 +53,50 @@ private class ExponentialInterpolator : Interpolator {
         super(context, attributeSet)
         this.mPaint = Paint()
         this.mDensity = context.getResources().getDisplayMetrics().density
-        TypedArray obtainStyledAttributes = context.obtainStyledAttributes(attributeSet, R.styleable.ButteryProgressBar)
+        val obtainStyledAttributes: TypedArray = context.obtainStyledAttributes(attributeSet, R.styleable.ButteryProgressBar)
         try {
             this.mBarColor = obtainStyledAttributes.getColor(0, context.getResources().getColor(17170450))
             this.mSolidBarHeight = obtainStyledAttributes.getDimensionPixelSize(1, Math.round(this.mDensity * 4.0f))
             this.mSolidBarDetentWidth = obtainStyledAttributes.getDimensionPixelSize(2, Math.round(this.mDensity * 3.0f))
             obtainStyledAttributes.recycle()
             this.mAnimator = ValueAnimator()
-            this.mAnimator.setFloatValues(Float[]{1.0f, 2.0f})
+            this.mAnimator.setFloatValues(FloatArray{1.0f, 2.0f})
             this.mAnimator.setRepeatCount(-1)
             this.mAnimator.setInterpolator(ExponentialInterpolator((ExponentialInterpolator) null))
             this.mAnimator.addUpdateListener(ValueAnimator.AnimatorUpdateListener() {
-                fun onAnimationUpdate(ValueAnimator valueAnimator) {
+                fun onAnimationUpdate(valueAnimator: ValueAnimator) {
                     ButteryProgressBar.this.invalidate()
                 }
             this.mPaint.setColor(this.mBarColor)
-            this.mShadow = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, Int[]{(this.mBarColor & ViewCompat.MEASURED_SIZE_MASK) | 570425344, 0})
+            this.mShadow = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, IntArray{(this.mBarColor & ViewCompat.MEASURED_SIZE_MASK) | 570425344, 0})
         } catch (Throwable th) {
             obtainStyledAttributes.recycle()
             throw th
         }
     }
 
-    private Unit start() {
+     private fun start() {
         if (this.mAnimator != null) {
             this.mAnimator.start()
         }
     }
 
-    private Unit stop() {
+     private fun stop() {
         if (this.mAnimator != null) {
             this.mAnimator.cancel()
         }
     }
 
     /* access modifiers changed from: protected */
-    fun onDraw(Canvas canvas) {
+    override fun onDraw(canvas: Canvas) {
         if (this.mAnimator.isStarted()) {
             this.mShadow.draw(canvas)
-            Float floatValue = ((Float) this.mAnimator.getAnimatedValue()).floatValue()
-            Int width = getWidth()
-            Int i = width >> (this.mSegmentCount - 1)
-            Int i2 = 0
+            val floatValue: Float = ((Float) this.mAnimator.getAnimatedValue()).floatValue()
+            val width: Int = getWidth()
+            val i: Int = width >> (this.mSegmentCount - 1)
+            val i2: Int = 0
             while (i2 < this.mSegmentCount) {
-                Float f = floatValue * ((Float) (width >> (i2 + 1)))
+                val f: Float = floatValue * ((Float) (width >> (i2 + 1)))
                 canvas.drawRect((f + ((Float) this.mSolidBarDetentWidth)) - ((Float) i), 0.0f, (i2 == 0 ? (Float) (width + i) : 2.0f * f) - ((Float) i), (Float) this.mSolidBarHeight, this.mPaint)
                 i2++
             }
@@ -104,18 +104,18 @@ private class ExponentialInterpolator : Interpolator {
     }
 
     /* access modifiers changed from: protected */
-    fun onLayout(Boolean z, Int i, Int i2, Int i3, Int i4) {
+    override fun onLayout(z: Boolean, i: Int, i2: Int, i3: Int, i4: Int) {
         if (z) {
-            Int width = getWidth()
+            val width: Int = getWidth()
             this.mShadow.setBounds(0, this.mSolidBarHeight, width, getHeight() - this.mSolidBarHeight)
-            Float f = (((Float) width) / this.mDensity) / 300.0f
+            val f: Float = (((Float) width) / this.mDensity) / 300.0f
             this.mAnimator.setDuration((Long) ((Int) ((((f - 1.0f) * 0.3f) + 1.0f) * 500.0f)))
             this.mSegmentCount = (Int) ((((f - 1.0f) * 0.1f) + 1.0f) * 5.0f)
         }
     }
 
     /* access modifiers changed from: protected */
-    fun onVisibilityChanged(View view, Int i) {
+    fun onVisibilityChanged(view: View, i: Int) {
         super.onVisibilityChanged(view, i)
         if (i == 0) {
             start()

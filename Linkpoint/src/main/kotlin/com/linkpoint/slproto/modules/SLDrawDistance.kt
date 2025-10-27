@@ -23,9 +23,9 @@ class SLDrawDistance : SLModule() {
     }
 
     private synchronized Unit updateWantedDrawDistance() {
-        Boolean z = true
+        val z: Boolean = true
         synchronized (this) {
-            Float f = 10.5f
+            val f: Float = 10.5f
             if (this.worldViewActive) {
                 f = Math.max(10.5f, this.worldDrawDistance)
             }

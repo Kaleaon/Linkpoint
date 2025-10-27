@@ -24,7 +24,7 @@ class VoiceSet3DPosition : VoicePluginMessage {
     }
 
     override Bundle toBundle() {
-        Bundle bundle = Bundle()
+        val bundle: Bundle = Bundle()
         bundle.putBundle("voiceChannelInfo", this.voiceChannelInfo.toBundle())
         bundle.putBundle("speakerPosition", this.speakerPosition.toBundle())
         bundle.putBundle("listenerPosition", this.listenerPosition.toBundle())

@@ -26,7 +26,7 @@ class SerializableResponseCacher<Key, MessageType : Serializable>, ResponseCache
     }
 
     /* access modifiers changed from: protected */
-    public MessageType loadCached(Byte[] bArr) {
+    public MessageType loadCached(ByteArray bArr) {
         try {
             return (Serializable) ObjectInputStream(ByteArrayInputStream(bArr)).readObject()
         } catch (IOException e) {
@@ -43,7 +43,7 @@ class SerializableResponseCacher<Key, MessageType : Serializable>, ResponseCache
     }
 
     /* access modifiers changed from: protected */
-    public Byte[] storeCached(MessageType messagetype) {
+    public ByteArray storeCached(MessageType messagetype) {
         try {
             ByteArrayOutputStream byteArrayOutputStream = ByteArrayOutputStream()
             ObjectOutputStream objectOutputStream = ObjectOutputStream(byteArrayOutputStream)

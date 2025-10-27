@@ -10,7 +10,7 @@ class TransferInfo : SLMessage() {
     @JvmStatic
     class TransferInfoData {
         public Int ChannelType
-        public Byte[] Params
+        public ByteArray Params
         public Int Size
         public Int Status
         public Int TargetType

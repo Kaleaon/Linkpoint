@@ -12,7 +12,7 @@ class ModernTextureManagerTest {
     private const val TAG: String = "ModernTextureManagerTest"
     
     @JvmStatic
-    Unit runBasicTests(Context context) {
+     fun runBasicTests(context: Context) {
         Log.i(TAG, "Starting ModernTextureManager tests...")
         
         try {
@@ -36,11 +36,11 @@ class ModernTextureManagerTest {
     }
     
     @JvmStatic
-private Unit testInitialization(Context context) {
+ private fun testInitialization(context: Context) {
         Log.i(TAG, "Testing initialization...")
         
         try {
-            ModernTextureManager manager = ModernTextureManager(context)
+            val manager: ModernTextureManager = ModernTextureManager(context)
             if (manager != null && manager.isInitialized()) {
                 Log.i(TAG, "✓ ModernTextureManager created and initialized successfully")
             } else {
@@ -52,14 +52,14 @@ private Unit testInitialization(Context context) {
     }
     
     @JvmStatic
-private Unit testGPUCapabilities(Context context) {
+ private fun testGPUCapabilities(context: Context) {
         Log.i(TAG, "Testing GPU capability detection...")
         
         try {
-            ModernTextureManager manager = ModernTextureManager(context)
+            val manager: ModernTextureManager = ModernTextureManager(context)
             if (manager.isInitialized()) {
-                Int optimalFormat = manager.getOptimalTextureFormat()
-                String formatName = ModernTextureManager.getFormatName(optimalFormat)
+                val optimalFormat: Int = manager.getOptimalTextureFormat()
+                val formatName: String = ModernTextureManager.getFormatName(optimalFormat)
                 
                 Log.i(TAG, "✓ Optimal texture format detected: " + formatName + " (" + optimalFormat + ")")
             } else {
@@ -71,23 +71,23 @@ private Unit testGPUCapabilities(Context context) {
     }
     
     @JvmStatic
-private Unit testFormatUtilities() {
+ private fun testFormatUtilities() {
         Log.i(TAG, "Testing format utilities...")
         
         // Test format name mapping
-        String astcName = ModernTextureManager.getFormatName(ModernTextureManager.FORMAT_ASTC_4x4_RGBA)
-        String etc2Name = ModernTextureManager.getFormatName(ModernTextureManager.FORMAT_ETC2_RGBA)
-        String bc7Name = ModernTextureManager.getFormatName(ModernTextureManager.FORMAT_BC7_RGBA)
-        String rgbaName = ModernTextureManager.getFormatName(ModernTextureManager.FORMAT_RGBA32)
+        val astcName: String = ModernTextureManager.getFormatName(ModernTextureManager.FORMAT_ASTC_4x4_RGBA)
+        val etc2Name: String = ModernTextureManager.getFormatName(ModernTextureManager.FORMAT_ETC2_RGBA)
+        val bc7Name: String = ModernTextureManager.getFormatName(ModernTextureManager.FORMAT_BC7_RGBA)
+        val rgbaName: String = ModernTextureManager.getFormatName(ModernTextureManager.FORMAT_RGBA32)
         
         Log.i(TAG, "✓ Format names: ASTC=" + astcName + ", ETC2=" + etc2Name + 
                    ", BC7=" + bc7Name + ", RGBA=" + rgbaName)
         
         // Test OpenGL format mapping
-        Int astcGL = ModernTextureManager.getOpenGLFormat(ModernTextureManager.FORMAT_ASTC_4x4_RGBA)
-        Int etc2GL = ModernTextureManager.getOpenGLFormat(ModernTextureManager.FORMAT_ETC2_RGBA)
-        Int bc7GL = ModernTextureManager.getOpenGLFormat(ModernTextureManager.FORMAT_BC7_RGBA)
-        Int rgbaGL = ModernTextureManager.getOpenGLFormat(ModernTextureManager.FORMAT_RGBA32)
+        val astcGL: Int = ModernTextureManager.getOpenGLFormat(ModernTextureManager.FORMAT_ASTC_4x4_RGBA)
+        val etc2GL: Int = ModernTextureManager.getOpenGLFormat(ModernTextureManager.FORMAT_ETC2_RGBA)
+        val bc7GL: Int = ModernTextureManager.getOpenGLFormat(ModernTextureManager.FORMAT_BC7_RGBA)
+        val rgbaGL: Int = ModernTextureManager.getOpenGLFormat(ModernTextureManager.FORMAT_RGBA32)
         
         Log.i(TAG, "✓ OpenGL formats: ASTC=0x" + Integer.toHexString(astcGL) + 
                    ", ETC2=0x" + Integer.toHexString(etc2GL) + 
@@ -96,10 +96,10 @@ private Unit testFormatUtilities() {
     }
     
     @JvmStatic
-private Unit testTextureDataClass() {
+ private fun testTextureDataClass() {
         Log.i(TAG, "Testing TextureData class...")
         
-        Byte[] testData = Byte[1024]
+        val testData: ByteArray = Byte[1024]
         ModernTextureManager.TextureData textureData = ModernTextureManager.TextureData(
                 256, 256, 1, ModernTextureManager.FORMAT_ASTC_4x4_RGBA, testData
         )

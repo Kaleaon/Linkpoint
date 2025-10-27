@@ -26,46 +26,46 @@ class GroupMemberListDao : AbstractDao()<GroupMemberList, UUID> {
     }
 
     @JvmStatic
-    Unit createTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'GroupMemberLists' (" + "'GROUP_ID' TEXT PRIMARY KEY ," + "'REQUEST_ID' TEXT NOT NULL );")
     }
 
     @JvmStatic
-    Unit dropTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'GroupMemberLists'")
     }
 
-    protected Unit bindValues(SQLiteStatement sQLiteStatement, GroupMemberList groupMemberList) {
+     protected fun bindValues(sQLiteStatement: SQLiteStatement, groupMemberList: GroupMemberList) {
         sQLiteStatement.clearBindings()
-        UUID groupID = groupMemberList.getGroupID()
+        val groupID: UUID = groupMemberList.getGroupID()
         if (groupID != null) {
             sQLiteStatement.bindString(1, groupID.toString())
         }
         sQLiteStatement.bindString(2, groupMemberList.getRequestID().toString())
     }
 
-    public UUID getKey(GroupMemberList groupMemberList) {
+     public fun getKey(groupMemberList: GroupMemberList): UUID {
         return groupMemberList != null ? groupMemberList.getGroupID() : null
     }
 
-    protected Boolean isEntityUpdateable() {
+     protected fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    public GroupMemberList readEntity(Cursor cursor, Int i) {
+     public fun readEntity(cursor: Cursor, i: Int): GroupMemberList {
         return GroupMemberList(cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0)), UUID.fromString(cursor.getString(i + 1)))
     }
 
-    fun readEntity(Cursor cursor, GroupMemberList groupMemberList, Int i) {
+    fun readEntity(cursor: Cursor, groupMemberList: GroupMemberList, i: Int) {
         groupMemberList.setGroupID(cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0)))
         groupMemberList.setRequestID(UUID.fromString(cursor.getString(i + 1)))
     }
 
-    public UUID readKey(Cursor cursor, Int i) {
+     public fun readKey(cursor: Cursor, i: Int): UUID {
         return cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0))
     }
 
-    protected UUID updateKeyAfterInsert(GroupMemberList groupMemberList, Long j) {
+     protected fun updateKeyAfterInsert(groupMemberList: GroupMemberList, j: Long): UUID {
         return groupMemberList.getGroupID()
     }
 }

@@ -20,7 +20,7 @@ const val A: IntttributeTextureID = 1
     private const val InternPool<SLTextureEntryFace> pool = InternPool<>()
 
     @JvmStatic
-    SLTextureEntryFace create(MutableSLTextureEntryFace mutableSLTextureEntryFace) {
+     fun create(mutableSLTextureEntryFace: MutableSLTextureEntryFace): SLTextureEntryFace {
         if (mutableSLTextureEntryFace == null) {
             return null
         }

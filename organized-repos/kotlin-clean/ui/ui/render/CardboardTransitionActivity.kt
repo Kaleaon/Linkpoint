@@ -14,7 +14,7 @@ import java.util.UUID
 class CardboardTransitionActivity : AppCompatActivity() {
     private const val MAX_WAIT_ATTEMPTS: Int = 15
     private const val WAIT_INTERVAL: Long = 250
-    private Handler handler = Handler()
+    private val handler: Handler = Handler()
     private Int waitAttempts = 0
 
     /* access modifiers changed from: private */
@@ -117,7 +117,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$4M
         super.onCreate(bundle)
         requestWindowFeature(1)
         getWindow().setFlags(1024, 1024)
-        setContentView((Int) R.layout.cardboard_transition_layout)
+        setContentView(R.toInt().layout.cardboard_transition_layout)
     }
 
     /* access modifiers changed from: protected */

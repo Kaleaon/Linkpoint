@@ -1,7 +1,7 @@
 package com.linkpoint.slproto.types
 
 class VectorArray {
-    protected Float[] data
+    protected FloatArray data
     protected Int length
     protected Int numComponents
     protected Int offset
@@ -20,7 +20,7 @@ class VectorArray {
         this.offset = i
     }
 
-    val Float[] getData() {
+    val FloatArray getData() {
         return this.data
     }
 

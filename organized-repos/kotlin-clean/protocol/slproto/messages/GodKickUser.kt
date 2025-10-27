@@ -13,7 +13,7 @@ class GodKickUser : SLMessage() {
         public UUID GodID
         public UUID GodSessionID
         public Int KickFlags
-        public Byte[] Reason
+        public ByteArray Reason
     }
 
     public GodKickUser() {

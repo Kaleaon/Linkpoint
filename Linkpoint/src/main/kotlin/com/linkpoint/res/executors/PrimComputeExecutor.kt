@@ -28,12 +28,12 @@ private class InstanceHolder {
     }
 
     @JvmStatic
-    PrimComputeExecutor getInstance() {
+     fun getInstance(): PrimComputeExecutor {
         return InstanceHolder.Instance
     }
 
     /* access modifiers changed from: protected */
-    fun beforeExecute(Thread thread, Runnable runnable) {
+    fun beforeExecute(thread: Thread, runnable: Runnable) {
         super.beforeExecute(thread, runnable)
         this.pauseLock.lock()
         while (this.isPaused) {

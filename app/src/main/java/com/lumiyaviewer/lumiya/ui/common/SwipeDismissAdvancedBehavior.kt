@@ -14,19 +14,19 @@ import java.lang.annotation.Retention
 import java.lang.annotation.RetentionPolicy
 
 class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
-    private Float DEFAULT_ALPHA_END_DISTANCE = 1.0f
-    private Float DEFAULT_ALPHA_START_DISTANCE = 0.0f
-    private Float DEFAULT_DRAG_DISMISS_THRESHOLD = 1.0f
-    Int STATE_DRAGGING = 1
-    Int STATE_IDLE = 0
-    Int STATE_SETTLING = 2
-    Int SWIPE_DIRECTION_ANY = 15
-    Int SWIPE_DIRECTION_DOWN = 8
-    Int SWIPE_DIRECTION_LEFT = 1
-    Int SWIPE_DIRECTION_RIGHT = 2
-    Int SWIPE_DIRECTION_UP = 4
-    Int SWIPE_DIRECTION_X = 3
-    Int SWIPE_DIRECTION_Y = 12
+    private val DEFAULT_ALPHA_END_DISTANCE: Float = 1.0f
+    private val DEFAULT_ALPHA_START_DISTANCE: Float = 0.0f
+    private val DEFAULT_DRAG_DISMISS_THRESHOLD: Float = 1.0f
+    val STATE_DRAGGING: Int = 1
+    val STATE_IDLE: Int = 0
+    val STATE_SETTLING: Int = 2
+    val SWIPE_DIRECTION_ANY: Int = 15
+    val SWIPE_DIRECTION_DOWN: Int = 8
+    val SWIPE_DIRECTION_LEFT: Int = 1
+    val SWIPE_DIRECTION_RIGHT: Int = 2
+    val SWIPE_DIRECTION_UP: Int = 4
+    val SWIPE_DIRECTION_X: Int = 3
+    val SWIPE_DIRECTION_Y: Int = 12
     /* access modifiers changed from: private */
     Float mAlphaEndSwipeDistance = 1.0f
     /* access modifiers changed from: private */
@@ -36,7 +36,7 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
         private Int mOriginalCapturedViewTop
 
         private Boolean shouldDismiss(View view, Float f, Float f2) {
-            Float scaledMinimumFlingVelocity = (Float) ViewConfiguration.get(view.getContext()).getScaledMinimumFlingVelocity()
+            Float scaledMinimumFlingVelocity = ViewConfiguration.toFloat().get(view.getContext()).getScaledMinimumFlingVelocity()
             if (f < (-scaledMinimumFlingVelocity) && (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 1) != 0) {
                 return true
             }
@@ -50,7 +50,7 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
                 return true
             }
             Int left = view.getLeft() - this.mOriginalCapturedViewLeft
-            Int round = Math.round(((Float) view.getWidth()) * SwipeDismissAdvancedBehavior.this.mDragDismissThreshold)
+            Int round = Math.round((view.toFloat().getWidth()) * SwipeDismissAdvancedBehavior.this.mDragDismissThreshold)
             if (left < (-round) && (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 1) != 0) {
                 return true
             }
@@ -58,7 +58,7 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
                 return true
             }
             Int top = view.getTop() - this.mOriginalCapturedViewTop
-            Int round2 = Math.round(((Float) view.getHeight()) * SwipeDismissAdvancedBehavior.this.mDragDismissThreshold)
+            Int round2 = Math.round((view.toFloat().getHeight()) * SwipeDismissAdvancedBehavior.this.mDragDismissThreshold)
             if (top >= (-round2) || (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 4) == 0) {
                 return top > round2 && (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 8) != 0
             }
@@ -125,7 +125,7 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
             if (abs == 0 && i5 == 0) {
                 ViewCompat.setAlpha(view, 1.0f)
             } else {
-                ViewCompat.setAlpha(view, 1.0f - Math.max(SwipeDismissAdvancedBehavior.clamp(0.0f, SwipeDismissAdvancedBehavior.fraction(((Float) view.getWidth()) * SwipeDismissAdvancedBehavior.this.mAlphaStartSwipeDistance, ((Float) view.getWidth()) * SwipeDismissAdvancedBehavior.this.mAlphaEndSwipeDistance, (Float) abs), 1.0f), SwipeDismissAdvancedBehavior.clamp(0.0f, SwipeDismissAdvancedBehavior.fraction(((Float) view.getHeight()) * SwipeDismissAdvancedBehavior.this.mAlphaStartSwipeDistance, ((Float) view.getHeight()) * SwipeDismissAdvancedBehavior.this.mAlphaEndSwipeDistance, (Float) i5), 1.0f)))
+                ViewCompat.setAlpha(view, 1.0f - Math.max(SwipeDismissAdvancedBehavior.clamp(0.0f, SwipeDismissAdvancedBehavior.fraction((view.toFloat().getWidth()) * SwipeDismissAdvancedBehavior.this.mAlphaStartSwipeDistance, (view.toFloat().getWidth()) * SwipeDismissAdvancedBehavior.this.mAlphaEndSwipeDistance, abs.toFloat()), 1.0f), SwipeDismissAdvancedBehavior.clamp(0.0f, SwipeDismissAdvancedBehavior.fraction((view.toFloat().getHeight()) * SwipeDismissAdvancedBehavior.this.mAlphaStartSwipeDistance, (view.toFloat().getHeight()) * SwipeDismissAdvancedBehavior.this.mAlphaEndSwipeDistance, i5.toFloat()), 1.0f)))
             }
         }
 
@@ -135,7 +135,7 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
             Int left = view.getLeft()
             Int top = view.getTop()
             if (shouldDismiss(view, f, f2)) {
-                Float scaledMinimumFlingVelocity = (Float) ViewConfiguration.get(view.getContext()).getScaledMinimumFlingVelocity()
+                Float scaledMinimumFlingVelocity = ViewConfiguration.toFloat().get(view.getContext()).getScaledMinimumFlingVelocity()
                 if (f < (-scaledMinimumFlingVelocity) && (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 1) != 0) {
                     left = this.mOriginalCapturedViewLeft - width
                 } else if (f > scaledMinimumFlingVelocity && (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 2) != 0) {
@@ -245,7 +245,7 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
                 }
                 break
             default:
-                this.mIgnoreEvents = !coordinatorLayout.isPointInChildBounds(v, (Int) motionEvent.getX(), (Int) motionEvent.getY())
+                this.mIgnoreEvents = !coordinatorLayout.isPointInChildBounds(v, motionEvent.toInt().getX(), motionEvent.toInt().getY())
                 break
         }
         if (this.mIgnoreEvents) {

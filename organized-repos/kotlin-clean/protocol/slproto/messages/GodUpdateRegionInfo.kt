@@ -26,7 +26,7 @@ class GodUpdateRegionInfo : SLMessage() {
         public Int RedirectGridX
         public Int RedirectGridY
         public Int RegionFlags
-        public Byte[] SimName
+        public ByteArray SimName
     }
 
     @JvmStatic

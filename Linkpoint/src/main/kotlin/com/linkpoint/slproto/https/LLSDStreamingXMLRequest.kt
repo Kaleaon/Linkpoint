@@ -19,7 +19,7 @@ class LLSDStreamingXMLRequest {
     private val AtomicReference<Call> callRef = AtomicReference<>((Object) null)
 
     fun InterruptRequest() {
-        Call call = this.callRef.get()
+        val call: Call = this.callRef.get()
         if (call != null) {
             try {
                 call.cancel()
@@ -29,13 +29,13 @@ class LLSDStreamingXMLRequest {
         }
     }
 
-    fun PerformRequest(String str, LLSDNode lLSDNode, LLSDStreamingParser.LLSDContentHandler lLSDContentHandler) throws IOException, LLSDXMLException {
+    fun PerformRequest(str: String, lLSDNode: LLSDNode, LLSDStreamingParser.LLSDContentHandler lLSDContentHandler) throws IOException, LLSDXMLException {
         Response execute
         Request.Builder header = Request.Builder().url(str).header(HttpHeaders.ACCEPT, "application/llsd+binary;q=0.5,application/llsd+xml;q=0.1")
         if (lLSDNode != null) {
             header.post(RequestBody.create(MEDIA_TYPE_LLSD_XML, lLSDNode.serializeToXML()))
         }
-        Call newCall = SLHTTPSConnection.getOkHttpClient().newCall(header.build())
+        val newCall: Call = SLHTTPSConnection.getOkHttpClient().newCall(header.build())
         this.callRef.set(newCall)
         try {
             execute = newCall.execute()

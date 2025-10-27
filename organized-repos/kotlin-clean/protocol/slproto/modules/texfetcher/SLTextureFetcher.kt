@@ -20,8 +20,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 class SLTextureFetcher : SLModule(), SLIdleHandler {
     private const val MAX_UDP_TRANSFERS: Int = 2
-    private String agentAppearanceService = null
-    private String capURL = null
+    private val agentAppearanceService: String = null
+    private val capURL: String = null
     private Long lastCheckForStalls = 0
     private PriorityBinQueue<SLTextureFetchRequest> udpQueue = PriorityBinQueue<>(TexturePriority.values().length)
     private Map<UUID, TextureUDPTransfer> udpTransfers = ConcurrentHashMap()

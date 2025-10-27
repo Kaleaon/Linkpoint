@@ -11,9 +11,9 @@ class UUIDNameReply : SLMessage {
     ArrayList<UUIDNameBlock> UUIDNameBlock_Fields = ArrayList<>()
 
     class UUIDNameBlock {
-        Byte[] FirstName
+        ByteArray FirstName
         UUID ID
-        Byte[] LastName
+        ByteArray LastName
     }
 
     UUIDNameReply() {

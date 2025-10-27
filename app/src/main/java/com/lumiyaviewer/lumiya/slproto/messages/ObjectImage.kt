@@ -17,9 +17,9 @@ class ObjectImage : SLMessage {
     }
 
     class ObjectData {
-        Byte[] MediaURL
+        ByteArray MediaURL
         Int ObjectLocalID
-        Byte[] TextureEntry
+        ByteArray TextureEntry
     }
 
     ObjectImage() {

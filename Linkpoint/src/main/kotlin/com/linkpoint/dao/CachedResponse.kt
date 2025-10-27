@@ -1,7 +1,7 @@
 package com.linkpoint.dao
 
 class CachedResponse {
-    private Byte[] data
+    private ByteArray data
     private String key
     private Boolean mustRevalidate
 
@@ -9,33 +9,33 @@ class CachedResponse {
         this.key = str
     }
 
-    public CachedResponse(String str, Byte[] bArr, Boolean z) {
+    public CachedResponse(String str, ByteArray bArr, Boolean z) {
         this.key = str
         this.data = bArr
         this.mustRevalidate = z
     }
 
-    public Byte[] getData() {
+     public fun getData(): ByteArray {
         return this.data
     }
 
-    public String getKey() {
+     public fun getKey(): String {
         return this.key
     }
 
-    public Boolean getMustRevalidate() {
+     public fun getMustRevalidate(): Boolean {
         return this.mustRevalidate
     }
 
-    fun setData(Byte[] bArr) {
+    fun setData(bArr: ByteArray) {
         this.data = bArr
     }
 
-    fun setKey(String str) {
+    fun setKey(str: String) {
         this.key = str
     }
 
-    fun setMustRevalidate(Boolean z) {
+    fun setMustRevalidate(z: Boolean) {
         this.mustRevalidate = z
     }
 }

@@ -21,7 +21,7 @@ class ModernSystemTests {
     CompletableFuture<Boolean> testConnectionDiagnostics(android.content.Context context) {
         Log.i(TAG, "Testing connection diagnostics...")
         
-        ConnectionDiagnostics diagnostics = ConnectionDiagnostics(context)
+        val diagnostics: ConnectionDiagnostics = ConnectionDiagnostics(context)
         
         return diagnostics.diagnoseAsync()
             .thenApply(result -> {
@@ -38,7 +38,7 @@ class ModernSystemTests {
                 }
                 
                 // Test passes if we get any level of connectivity
-                Boolean testPassed = result.networkAvailable
+                val testPassed: Boolean = result.networkAvailable
                 Log.i(TAG, "Connection diagnostics test " + (testPassed ? "PASSED" : "FAILED"))
                 
                 return testPassed
@@ -56,7 +56,7 @@ class ModernSystemTests {
     CompletableFuture<Boolean> testAuthenticationManager(android.content.Context context) {
         Log.i(TAG, "Testing authentication manager...")
         
-        ModernAuthManager authManager = ModernAuthManager(context)
+        val authManager: ModernAuthManager = ModernAuthManager(context)
         
         return authManager.authenticateAsync("testuser", "testpass")
             .thenApply(result -> {
@@ -72,7 +72,7 @@ class ModernSystemTests {
                     Log.w(TAG, "  Error: " + result.getErrorMessage())
                 }
                 
-                Boolean testPassed = result.isSuccessful() && result.isValid()
+                val testPassed: Boolean = result.isSuccessful() && result.isValid()
                 Log.i(TAG, "Authentication manager test " + (testPassed ? "PASSED" : "FAILED"))
                 
                 return testPassed
@@ -88,11 +88,11 @@ class ModernSystemTests {
      */
     @JvmStatic
     CompletableFuture<String> generateDiagnosticReport(android.content.Context context) {
-        ConnectionDiagnostics diagnostics = ConnectionDiagnostics(context)
+        val diagnostics: ConnectionDiagnostics = ConnectionDiagnostics(context)
         
         return diagnostics.diagnoseAsync()
             .thenApply(result -> {
-                StringBuilder report = StringBuilder()
+                val report: StringBuilder = StringBuilder()
                 report.append("=== LINKPOINT SECOND LIFE CONNECTION DIAGNOSTIC REPORT ===\n")
                 report.append("Generated: ").append(java.util.Date()).append("\n\n")
                 

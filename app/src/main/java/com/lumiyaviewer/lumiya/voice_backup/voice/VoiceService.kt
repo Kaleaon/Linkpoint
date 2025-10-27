@@ -54,7 +54,7 @@ private VoiceService serviceInstance = null
     private Boolean isServiceBound = false
     private val Messenger mMessenger
     private val Handler mainThreadHandler = Handler()
-    private Messenger toAppMessenger = null
+    private val toAppMessenger: Messenger = null
     private VivoxController vivoxController = null
 
     public VoiceService() {
@@ -302,7 +302,7 @@ private VoiceService serviceInstance = null
                 if (!bl) break block4
                 AudioStreamVolumeObserver audioStreamVolumeObserver = this.audioStreamVolumeObserver
                 AudioStreamVolumeObserver.OnAudioStreamVolumeChangedListener onAudioStreamVolumeChangedListener = this.audioVolumeChangeListener
-                audioStreamVolumeObserver.start(Int[]{0, 6}, onAudioStreamVolumeChangedListener)
+                audioStreamVolumeObserver.start(IntArray{0, 6}, onAudioStreamVolumeChangedListener)
                 this.updateAudioProperties()
             }
             return

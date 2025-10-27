@@ -439,7 +439,7 @@ private File getInventoryDatabasePath(String str) {
         return this.userNamesPool
     }
 
-    public Byte[] getUserPic(UUID uuid) {
+    public ByteArray getUserPic(UUID uuid) {
         if (uuid == null) {
             return null
         }
@@ -562,7 +562,7 @@ private File getInventoryDatabasePath(String str) {
         updateUserNames(uuid, (String) null, (String) null, true)
     }
 
-    fun setUserPic(UUID uuid, Byte[] bArr) {
+    fun setUserPic(UUID uuid, ByteArray bArr) {
         if (uuid != null) {
             Query<UserPic> forCurrentThread = this.findUserPicQuery.forCurrentThread()
             forCurrentThread.setParameter(0, uuid.toString())

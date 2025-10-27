@@ -67,7 +67,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
     val SubscriptionPool<Boolean, UnreadNotifications> unreadNotificationInfoPool = SubscriptionPool<>()
     /* access modifiers changed from: private */
     val Runnable updateChatterDataRunnable = Runnable() {
-        fun run() {
+        override fun run() {
             UnreadNotificationManager.this.updateUnreadChatterData()
             UnreadNotificationManager.this.updateExecutor.execute(UnreadNotificationManager.this.updateNotificationDataRunnable)
         }
@@ -76,14 +76,14 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
     val Executor updateExecutor
     /* access modifiers changed from: private */
     val Runnable updateNotificationDataRunnable = Runnable() {
-        fun run() {
+        override fun run() {
             UnreadNotificationManager.this.unreadNotificationInfoPool.onResultData(UnreadNotificationManager.unreadNotificationKey, UnreadNotificationManager.this.getUnreadNotification())
         }
     }
     private val UserManager userManager
 
     interface NotifyCapture {
-        Intent onGetNotifyCaptureIntent(UnreadNotificationInfo unreadNotificationInfo, Intent intent)
+         fun onGetNotifyCaptureIntent(unreadNotificationInfo: UnreadNotificationInfo, Intent intent): Intent)
     }
 
     public UnreadNotificationManager(UserManager userManager2, DaoSession daoSession) {
@@ -93,7 +93,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         this.updateExecutor = userManager2.getDatabaseRunOnceExecutor()
         this.emptyNotification = UnreadNotificationInfo.create(userManager2.getUserID(), 0, (List<UnreadNotificationInfo.UnreadMessageSource>) null, (NotificationType) null, 0, (NotificationType) null, (UnreadNotificationInfo.UnreadMessageSource) null, UnreadNotificationInfo.ObjectPopupNotification.create(0, 0, (UnreadNotificationInfo.ObjectPopupMessage) null))
         this.unreadNotificationInfoPool.attachRequestHandler(SimpleRequestHandler<Boolean>() {
-            fun onRequest(Boolean bool) {
+            fun onRequest(bool: Boolean) {
                 UnreadNotificationManager.this.updateExecutor.execute(UnreadNotificationManager.this.updateChatterDataRunnable)
             }
         updateTypesFromPreferences(LinkpointApp.getDefaultSharedPreferences())
@@ -101,46 +101,46 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
     }
 
     /* access modifiers changed from: private */
-    public UnreadNotifications getUnreadNotification() {
+     public fun getUnreadNotification(): UnreadNotifications {
         NotificationType notificationType
         ArrayList arrayList
         UnreadNotificationInfo.UnreadMessageSource unreadMessageSource
         Int intValue
-        Boolean z = System.currentTimeMillis() >= this.lastFreshMessageNotification.get() + FRESH_MESSAGES_NOTIFICATION_INTERVAL
+        val z: Boolean = System.currentTimeMillis() >= this.lastFreshMessageNotification.get() + FRESH_MESSAGES_NOTIFICATION_INTERVAL
         ImmutableMap.Builder builder = ImmutableMap.builder()
         for (NotificationType notificationType2 : NotificationType.VALUES) {
-            Int i2 = 0
-            Int i3 = 0
-            NotificationType notificationType3 = null
-            NotificationType notificationType4 = null
-            Long l = null
-            Boolean z2 = false
+            val i2: Int = 0
+            val i3: Int = 0
+            val notificationType3: NotificationType = null
+            val notificationType4: NotificationType = null
+            val l: Long = null
+            val z2: Boolean = false
             if (!this.chatterSources.isEmpty()) {
-                HashMap hashMap = HashMap()
-                Iterator<T> it = this.chatterSources.entrySet().iterator()
+                val hashMap: HashMap = HashMap()
+                val it: Iterator<T> = this.chatterSources.entrySet().iterator()
                 while (true) {
-                    Int i4 = i3
-                    Int i5 = i2
-                    NotificationType notificationType5 = notificationType4
-                    NotificationType notificationType6 = notificationType3
-                    Boolean z3 = z2
-                    Long l2 = l
+                    val i4: Int = i3
+                    val i5: Int = i2
+                    val notificationType5: NotificationType = notificationType4
+                    val notificationType6: NotificationType = notificationType3
+                    val z3: Boolean = z2
+                    val l2: Long = l
                     if (it.hasNext()) {
                         Map.Entry entry = (Map.Entry) it.next()
-                        ChatterNameRetriever chatterNameRetriever = (ChatterNameRetriever) entry.getValue()
-                        ChatterID chatterID = chatterNameRetriever.chatterID
-                        NotificationType notificationType7 = chatterID.getChatterType().getNotificationType()
+                        val chatterNameRetriever: ChatterNameRetriever = (ChatterNameRetriever) entry.getValue()
+                        val chatterID: ChatterID = chatterNameRetriever.chatterID
+                        val notificationType7: NotificationType = chatterID.getChatterType().getNotificationType()
                         if (notificationType7 == notificationType2) {
                             if (chatterID.getChatterType() == ChatterID.ChatterType.Local || chatterNameRetriever.getResolvedName() != null) {
-                                Chatter chatter = (Chatter) this.chatterDao.load((Long) entry.getKey())
+                                val chatter: Chatter = (Chatter) this.chatterDao.load((Long) entry.getKey())
                                 if (chatter != null) {
-                                    Int unreadCount = chatter.getUnreadCount()
-                                    Int i6 = i5 + unreadCount
+                                    val unreadCount: Int = chatter.getUnreadCount()
+                                    val i6: Int = i5 + unreadCount
                                     hashMap.put(chatter.getId(), UnreadNotificationInfo.UnreadMessageSource.create(chatterID, chatterNameRetriever.getResolvedName(), (List<SLChatEvent>) null, unreadCount))
-                                    NotificationType notificationType8 = (notificationType6 == null || notificationType7.compareTo(notificationType6) > 0) ? notificationType7 : notificationType6
+                                    val notificationType8: NotificationType = (notificationType6 == null || notificationType7.compareTo(notificationType6) > 0) ? notificationType7 : notificationType6
                                     if (z) {
                                         synchronized (this.freshMessageCountsLock) {
-                                            Integer remove = this.freshMessageCounts.remove(chatter.getId())
+                                            val remove: Integer = this.freshMessageCounts.remove(chatter.getId())
                                             intValue = remove != null ? remove.intValue() : 0
                                         }
                                         i4 += intValue
@@ -191,17 +191,17 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
                         i3 = i4
                         i2 = i5
                     } else {
-                        Int i7 = hashMap.size() <= 1 ? 3 : 1
-                        ArrayList arrayList2 = ArrayList(hashMap.size())
+                        val i7: Int = hashMap.size() <= 1 ? 3 : 1
+                        val arrayList2: ArrayList = ArrayList(hashMap.size())
                         UnreadNotificationInfo.UnreadMessageSource unreadMessageSource2 = null
                         for (Map.Entry entry2 : hashMap.entrySet()) {
-                            LinkedList linkedList = LinkedList()
-                            Int unreadMessagesCount = ((UnreadNotificationInfo.UnreadMessageSource) entry2.getValue()).unreadMessagesCount()
+                            val linkedList: LinkedList = LinkedList()
+                            val unreadMessagesCount: Int = ((UnreadNotificationInfo.UnreadMessageSource) entry2.getValue()).unreadMessagesCount()
                             if (unreadMessagesCount > i7) {
                                 unreadMessagesCount = i7
                             }
                             for (ChatMessage loadFromDatabaseObject : this.chatMessageDao.queryBuilder().where(ChatMessageDao.Properties.ChatterID.eq(entry2.getKey()), WhereCondition[0]).orderDesc(ChatMessageDao.Properties.Id).limit(unreadMessagesCount).list()) {
-                                SLChatEvent loadFromDatabaseObject2 = SLChatEvent.loadFromDatabaseObject(loadFromDatabaseObject, this.userManager.getUserID())
+                                val loadFromDatabaseObject2: SLChatEvent = SLChatEvent.loadFromDatabaseObject(loadFromDatabaseObject, this.userManager.getUserID())
                                 if (loadFromDatabaseObject2 != null) {
                                     linkedList.add(0, loadFromDatabaseObject2)
                                 }
@@ -229,7 +229,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
             if (z && !(i3 == 0 && notification.freshObjectPopupsCount() == 0)) {
                 this.lastFreshMessageNotification.set(System.currentTimeMillis())
             }
-            Boolean z4 = false
+            val z4: Boolean = false
             if (arrayList != null && !arrayList.isEmpty()) {
                 z4 = true
             }
@@ -240,14 +240,14 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         return UnreadNotifications.create(this.userManager.getUserID(), builder.build())
     }
 
-    private Unit setEnabledMask(Int i) {
+     private fun setEnabledMask(i: Int) {
         if (this.maskEnabled.getAndSet(i) != i) {
             updateUnreadNotifications()
         }
     }
 
-    private Unit updateTypesFromPreferences(SharedPreferences sharedPreferences) {
-        Int i = 0
+     private fun updateTypesFromPreferences(sharedPreferences: SharedPreferences) {
+        val i: Int = 0
         if (NotificationChannels.getInstance().areNotificationsSystemControlled()) {
             i = 7
         } else {
@@ -266,7 +266,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
 
     /* access modifiers changed from: private */
     fun updateUnreadChatterData() {
-        Int i = this.maskEnabled.get()
+        val i: Int = this.maskEnabled.get()
         if (i == 0) {
             this.totalUnreadCount.set(0)
             this.totalSourcesCount.set(0)
@@ -278,9 +278,9 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
             this.mostImportantNotificationType.set((Object) null)
             return
         }
-        QueryBuilder where = this.chatterDao.queryBuilder().where(ChatterDao.Properties.UnreadCount.gt(0), ChatterDao.Properties.Muted.notEq(true))
+        val where: QueryBuilder = this.chatterDao.queryBuilder().where(ChatterDao.Properties.UnreadCount.gt(0), ChatterDao.Properties.Muted.notEq(true))
         if (i != 7) {
-            ArrayList arrayList = ArrayList(3)
+            val arrayList: ArrayList = ArrayList(3)
             if ((i & 1) != 0) {
                 arrayList.add(Integer.valueOf(ChatterID.ChatterType.Local.ordinal()))
             }
@@ -292,12 +292,12 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
             }
             where = where.where(ChatterDao.Properties.Type.in((Collection<?>) arrayList), WhereCondition[0])
         }
-        HashSet hashSet = null
-        Int i2 = 0
-        Int i3 = 0
-        NotificationType notificationType = null
+        val hashSet: HashSet = null
+        val i2: Int = 0
+        val i3: Int = 0
+        val notificationType: NotificationType = null
         for (Chatter chatter : where.orderDesc(ChatterDao.Properties.LastMessageID).listLazy()) {
-            ChatterID fromDatabaseObject = ChatterID.fromDatabaseObject(this.userManager.getUserID(), chatter)
+            val fromDatabaseObject: ChatterID = ChatterID.fromDatabaseObject(this.userManager.getUserID(), chatter)
             if (fromDatabaseObject != null) {
                 if (hashSet == null) {
                     hashSet = HashSet()
@@ -308,14 +308,14 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
                         this.chatterSources.put(chatter.getId(), ChatterNameRetriever(fromDatabaseObject, this, (Executor) null))
                     }
                 }
-                NotificationType notificationType2 = fromDatabaseObject.getChatterType().getNotificationType()
+                val notificationType2: NotificationType = fromDatabaseObject.getChatterType().getNotificationType()
                 if (notificationType == null || notificationType2.compareTo(notificationType) > 0) {
                     notificationType = notificationType2
                 }
                 i3 += chatter.getUnreadCount()
                 i2++
             }
-            NotificationType notificationType3 = notificationType
+            val notificationType3: NotificationType = notificationType
             i3 = i3
             i2 = i2
             hashSet = hashSet
@@ -334,12 +334,12 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         }
     }
 
-    fun addFreshMessage(Chatter chatter) {
+    fun addFreshMessage(chatter: Chatter) {
         ChatterID.ChatterType chatterType
-        Boolean z = true
-        Long id = chatter.getId()
+        val z: Boolean = true
+        val id: Long = chatter.getId()
         if (id != null) {
-            Int i = this.maskEnabled.get()
+            val i: Int = this.maskEnabled.get()
             if (i == 0) {
                 z = false
             } else if (i != 7 && (((chatterType = ChatterID.ChatterType.VALUES[chatter.getType()]) != ChatterID.ChatterType.User || (i & 4) == 0) && ((chatterType != ChatterID.ChatterType.Group || (i & 2) == 0) && (chatterType != ChatterID.ChatterType.Local || (i & 1) == 0)))) {
@@ -347,7 +347,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
             }
             if (z) {
                 synchronized (this.freshMessageCountsLock) {
-                    Integer num = this.freshMessageCounts.get(id)
+                    val num: Integer = this.freshMessageCounts.get(id)
                     this.freshMessageCounts.put(id, Integer.valueOf((num != null ? num.intValue() : 0) + 1))
                 }
                 return
@@ -358,7 +358,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         }
     }
 
-    public Intent captureNotify(UnreadNotificationInfo unreadNotificationInfo, Intent intent) {
+     public fun captureNotify(unreadNotificationInfo: UnreadNotificationInfo, intent: Intent): Intent {
         NotifyCapture notifyCapture2
         synchronized (this.notifyCaptureLock) {
             notifyCapture2 = this.notifyCapture != null ? (NotifyCapture) this.notifyCapture.get() : null
@@ -370,8 +370,8 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         return null
     }
 
-    fun clearFreshMessages(Chatter chatter) {
-        Long id = chatter.getId()
+    fun clearFreshMessages(chatter: Chatter) {
+        val id: Long = chatter.getId()
         if (id != null) {
             synchronized (this.freshMessageCountsLock) {
                 this.freshMessageCounts.remove(id)
@@ -379,7 +379,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         }
     }
 
-    fun clearNotifyCapture(NotifyCapture notifyCapture2) {
+    fun clearNotifyCapture(notifyCapture2: NotifyCapture) {
         synchronized (this.notifyCaptureLock) {
             if (this.notifyCapture != null && this.notifyCapture.get() == notifyCapture2) {
                 this.notifyCapture = null
@@ -392,7 +392,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         return this.unreadNotificationInfoPool
     }
 
-    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
+    fun onChatterNameUpdated(chatterNameRetriever: ChatterNameRetriever) {
         this.updateExecutor.execute(this.updateNotificationDataRunnable)
     }
 
@@ -403,7 +403,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         }
     }
 
-    fun setNotifyCapture(NotifyCapture notifyCapture2) {
+    fun setNotifyCapture(notifyCapture2: NotifyCapture) {
         synchronized (this.notifyCaptureLock) {
             this.notifyCapture = WeakReference<>(notifyCapture2)
             updateUnreadNotifications()

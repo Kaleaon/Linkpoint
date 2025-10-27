@@ -45,16 +45,16 @@ class SLChatBalanceChangedEvent : SLChatEvent() {
             String sourceName = this.source.getSourceName(userManager)
             if (sourceName != null) {
                 if (this.transactionAmount >= 0) {
-                    return context.getString(R.string.you_were_paid_by_agent, Object[]{Integer.valueOf(this.transactionAmount), Integer.valueOf(getNewBalance())})
+                    return context.getString(R.string.you_were_paid_by_agent, Array<Any>{Integer.valueOf(this.transactionAmount), Integer.valueOf(getNewBalance())})
                 }
-                return context.getString(R.string.you_have_paid_to_agent, Object[]{Integer.valueOf(-this.transactionAmount), sourceName, Integer.valueOf(getNewBalance())})
+                return context.getString(R.string.you_have_paid_to_agent, Array<Any>{Integer.valueOf(-this.transactionAmount), sourceName, Integer.valueOf(getNewBalance())})
             } else if (this.transactionAmount >= 0) {
-                return context.getString(R.string.you_were_paid, Object[]{Integer.valueOf(this.transactionAmount), Integer.valueOf(this.newBalance)})
+                return context.getString(R.string.you_were_paid, Array<Any>{Integer.valueOf(this.transactionAmount), Integer.valueOf(this.newBalance)})
             } else {
-                return context.getString(R.string.you_have_paid, Object[]{Integer.valueOf(-this.transactionAmount), Integer.valueOf(this.newBalance)})
+                return context.getString(R.string.you_have_paid, Array<Any>{Integer.valueOf(-this.transactionAmount), Integer.valueOf(this.newBalance)})
             }
         } else {
-            return context.getString(R.string.your_account_balance_is_now, Object[]{Integer.valueOf(this.newBalance)})
+            return context.getString(R.string.your_account_balance_is_now, Array<Any>{Integer.valueOf(this.newBalance)})
         }
     }
 

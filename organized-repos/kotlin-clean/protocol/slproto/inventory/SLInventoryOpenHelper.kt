@@ -57,7 +57,7 @@ private class InstanceHolder {
         Boolean needsUpgrade = false
         
         try {
-            query = sQLiteDatabase.query("DBVersion", String[]{"Version"}, null, null, null, null, null)
+            query = sQLiteDatabase.query("DBVersion", Array<String>{"Version"}, null, null, null, null, null)
             if (!query.moveToFirst()) {
                 isNewDb = true
                 needsUpgrade = true

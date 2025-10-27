@@ -33,16 +33,16 @@ class GoogleDriveSyncPreference : CheckBoxPreference() {
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_settings_GoogleDriveSyncPreference_1541  reason: not valid java name */
     public /* synthetic */ Unit m853lambda$com_lumiyaviewer_lumiya_ui_settings_GoogleDriveSyncPreference_1541(DialogInterface dialogInterface, Int i) {
         dialogInterface.dismiss()
-        Intent intent = Intent("android.intent.action.VIEW")
+        val intent: Intent = Intent("android.intent.action.VIEW")
         intent.setData(Uri.parse(LicenseChecker.CLOUD_PLUGIN_URL))
         getContext().startActivity(intent)
     }
 
     /* access modifiers changed from: protected */
-    fun onClick() {
+    override fun onClick() {
         super.onClick()
         if (isChecked() && !CloudSyncServiceConnection.checkPluginInstalled(getContext())) {
-            AlertDialog.Builder(getContext()).setTitle((Int) R.string.enable_google_drive).setMessage((CharSequence) getContext().getString(R.string.enable_google_drive_message, Object[]{LicenseChecker.APP_STORE_NAME})).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
+            AlertDialog.Builder(getContext()).setTitle((Int) R.string.enable_google_drive).setMessage((CharSequence) getContext().getString(R.string.enable_google_drive_message, Array<Any>{LicenseChecker.APP_STORE_NAME})).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
 
                 /* renamed from: -$f0 */
                 private val /* synthetic */ Object f586$f0

@@ -17,7 +17,7 @@ class UpdateGroupInfo : SLMessage() {
     @JvmStatic
     class GroupData {
         public Boolean AllowPublish
-        public Byte[] Charter
+        public ByteArray Charter
         public UUID GroupID
         public UUID InsigniaID
         public Boolean MaturePublish
@@ -30,15 +30,15 @@ class UpdateGroupInfo : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.GroupData_Field.Charter.length + 18 + 1 + 16 + 4 + 1 + 1 + 1 + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleUpdateGroupInfo(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 85)
@@ -54,7 +54,7 @@ class UpdateGroupInfo : SLMessage() {
         packBoolean(byteBuffer, this.GroupData_Field.MaturePublish)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.GroupData_Field.GroupID = unpackUUID(byteBuffer)

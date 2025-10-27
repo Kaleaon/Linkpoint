@@ -32,12 +32,12 @@ private ErrorResolutionTracker instance = null
         return instance
     }
 
-    private Unit showMoreErrors() {
+     private fun showMoreErrors() {
         Object object
         if (!this.notificationDisplayed && (object = this.resolvableErrors.keySet().iterator()).hasNext()) {
             Object object2
-            UUID uUID = object.next()
-            ResolvableError resolvableError = this.resolvableErrors.get(uUID)
+            val uUID: UUID = object.next()
+            val resolvableError: ResolvableError = this.resolvableErrors.get(uUID)
             object = object2 = resolvableError.status.getStatusMessage()
             if (Strings.isNullOrEmpty((String)object2)) {
                 object = this.context.getString(2131099704)
@@ -51,8 +51,8 @@ private ErrorResolutionTracker instance = null
         }
     }
 
-    private Unit showSyncingError(UUID object, String string2, String string3, Intent intent) {
-        Intent intent2 = Intent(this.context, DriveSyncService.class)
+     private fun showSyncingError(object: UUID, string2: String, string3: String, intent: Intent) {
+        val intent2: Intent = Intent(this.context, DriveSyncService.class)
         intent2.putExtra(DELETE_RESOLVABLE_ERROR_TAG, ((UUID)object).toString())
         this.notificationDisplayed = true
         object = NotificationCompat.Builder(this.context)
@@ -60,7 +60,7 @@ private ErrorResolutionTracker instance = null
         ((NotificationManager)this.context.getSystemService("notification")).notify(2131427332, ((NotificationCompat.Builder)object).build())
     }
 
-    Unit addResolvableError(ResolvableError resolvableError) {
+     fun addResolvableError(resolvableError: ResolvableError) {
         Debug.Printf("LinkpointCloud: error: %s", resolvableError.status.getStatusMessage())
         this.resolvableErrors.put(UUID.randomUUID(), resolvableError)
         this.showMoreErrors()
@@ -69,8 +69,8 @@ private ErrorResolutionTracker instance = null
     /*
      * Enabled aggressive block sorting
      */
-    Unit clearError(UUID object, Boolean bl) {
-        ResolvableError resolvableError = this.resolvableErrors.remove(object)
+     fun clearError(object: UUID, bl: Boolean) {
+        val resolvableError: ResolvableError = this.resolvableErrors.remove(object)
         object = resolvableError != null ? resolvableError.status.getStatusMessage() : null
         Debug.Printf("LinkpointCloud: clearing error (resolved: %b): %s", bl, object)
         if (resolvableError != null && bl && resolvableError.operation != null) {
@@ -79,17 +79,17 @@ private ErrorResolutionTracker instance = null
         this.showMoreErrors()
     }
 
-    Unit clearNotification() {
+     fun clearNotification() {
         Debug.Printf("LinkpointCloud: error notification cleared", Object[0])
         this.notificationDisplayed = false
         this.showMoreErrors()
     }
 
-    ResolvableError getError(UUID uUID) {
+     fun getError(uUID: UUID): ResolvableError {
         return this.resolvableErrors.get(uUID)
     }
 
-    static class ResolvableError {
+    class ResolvableError {
         final RestartableOperation operation
         final String resourceName
         final Status status
@@ -101,7 +101,7 @@ private ErrorResolutionTracker instance = null
         }
     }
 
-    static interface RestartableOperation {
+    interface RestartableOperation {
         fun tryRestartingOperation()
     }
 }

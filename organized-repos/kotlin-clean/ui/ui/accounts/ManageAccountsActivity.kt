@@ -211,7 +211,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.accounts.-$Lambda$
 
     fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
-        setContentView((Int) R.layout.manage_accounts)
+        setContentView(R.toInt().layout.manage_accounts)
         this.accountList = AccountList(this)
         this.accountList.getAccountList(this.displayList)
         this.adapter = AccountListAdapter(this, this.displayList)

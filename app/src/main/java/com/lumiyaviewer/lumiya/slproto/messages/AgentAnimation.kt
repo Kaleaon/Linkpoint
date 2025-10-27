@@ -23,7 +23,7 @@ class AgentAnimation : SLMessage {
     }
 
     class PhysicalAvatarEventList {
-        Byte[] TypeData
+        ByteArray TypeData
     }
 
     constructor() {

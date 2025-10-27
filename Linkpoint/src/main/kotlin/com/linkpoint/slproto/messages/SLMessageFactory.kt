@@ -5,7 +5,7 @@ import com.linkpoint.slproto.SLMessage
 
 class SLMessageFactory {
     @JvmStatic
-    SLMessage CreateByID(Int i) {
+    fun CreateByID(i: Int): SLMessage {
         switch (i) {
             case -65535:
                 return TestMessage()

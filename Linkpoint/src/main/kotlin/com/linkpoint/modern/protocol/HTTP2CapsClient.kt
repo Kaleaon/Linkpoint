@@ -35,14 +35,14 @@ class HTTP2CapsClient {
             .build()
     }
     
-    fun setAuthToken(String token) {
+    fun setAuthToken(token: String) {
         this.authToken = token
     }
     
     /**
      * Configure capability URLs from seed capability response
      */
-    fun configureCapabilities(Map<String, String> capabilitiesMap) {
+    fun configureCapabilities(capabilitiesMap: Map<String, String>) {
         capabilities.clear()
         capabilities.putAll(capabilitiesMap)
         Log.i(TAG, "Configured " + capabilities.size() + " capabilities")
@@ -56,7 +56,7 @@ class HTTP2CapsClient {
     /**
      * Get capability URL by name
      */
-    public String getCapabilityUrl(String capabilityName) {
+     public fun getCapabilityUrl(capabilityName: String): String {
         return capabilities.get(capabilityName)
     }
     
@@ -64,10 +64,10 @@ class HTTP2CapsClient {
      * Send async CAPS request with modern error handling
      */
     public CompletableFuture<String> sendAsync(String capUrl, String llsdData) {
-        CompletableFuture<String> future = CompletableFuture<>()
+        val future: CompletableFuture<String> = CompletableFuture<>()
         
-        RequestBody body = RequestBody.create(llsdData, LLSD_XML)
-        Request request = Request.Builder()
+        val body: RequestBody = RequestBody.create(llsdData, LLSD_XML)
+        val request: Request = Request.Builder()
             .url(capUrl)
             .post(body)
             .addHeader("User-Agent", "Linkpoint/3.4.3 (Android)")
@@ -83,7 +83,7 @@ class HTTP2CapsClient {
             override Unit onResponse(Call call, Response response) throws IOException {
                 try (ResponseBody responseBody = response.body()) {
                     if (response.isSuccessful() && responseBody != null) {
-                        String result = responseBody.string()
+                        val result: String = responseBody.string()
                         Log.d(TAG, "CAPS response received: " + result.length() + " bytes")
                         future.complete(result)
                     } else {
@@ -99,16 +99,16 @@ class HTTP2CapsClient {
     /**
      * Asset upload with progress monitoring
      */
-    public CompletableFuture<String> uploadAssetAsync(String uploadUrl, Byte[] assetData, 
+    public CompletableFuture<String> uploadAssetAsync(String uploadUrl, ByteArray assetData, 
                                                      String contentType, ProgressListener progressListener) {
-        CompletableFuture<String> future = CompletableFuture<>()
+        val future: CompletableFuture<String> = CompletableFuture<>()
         
-        RequestBody body = ProgressRequestBody(
+        val body: RequestBody = ProgressRequestBody(
             RequestBody.create(assetData, MediaType.get(contentType)),
             progressListener
         )
         
-        Request request = Request.Builder()
+        val request: Request = Request.Builder()
             .url(uploadUrl)
             .post(body)
             .addHeader("User-Agent", "Linkpoint/3.4.3 (Android)")
@@ -139,10 +139,10 @@ class HTTP2CapsClient {
      */
     private class AuthenticationInterceptor : Interceptor {
         override Response intercept(Chain chain) throws IOException {
-            Request original = chain.request()
+            val original: Request = chain.request()
             
             if (authToken != null) {
-                Request authenticated = original.newBuilder()
+                val authenticated: Request = original.newBuilder()
                     .addHeader("Authorization", "Bearer " + authToken)
                     .build()
                 return chain.proceed(authenticated)
@@ -175,8 +175,8 @@ private class ProgressRequestBody : RequestBody() {
         
         override Unit writeTo(okio.BufferedSink sink) throws IOException {
             okio.ForwardingSink forwardingSink = okio.ForwardingSink(sink) {
-                Long bytesWritten = 0L
-                Long contentLength = 0L
+                val bytesWritten: Long = 0L
+                val contentLength: Long = 0L
                 
                 override Unit write(okio.Buffer source, Long byteCount) throws IOException {
                     super.write(source, byteCount)
@@ -200,7 +200,7 @@ private class ProgressRequestBody : RequestBody() {
      * Progress callback interface
      */
     interface ProgressListener {
-        Unit onProgress(Long bytesWritten, Long contentLength)
+         fun onProgress(bytesWritten: Long, contentLength: Long)
     }
     
     fun shutdown() {

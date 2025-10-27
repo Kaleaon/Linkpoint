@@ -18,23 +18,23 @@ class ThemedActivity : AppCompatActivity() {
     private Int selectedThemeId = -1
 
     /* access modifiers changed from: protected */
-    public Boolean isLightTheme() {
+     public fun isLightTheme(): Boolean {
         return this.selectedThemeId != 2131427371
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(Bundle bundle) {
+    override fun onCreate(bundle: Bundle) {
         this.selectedThemeId = GlobalOptions.getInstance().getThemeResourceId()
         Debug.Printf("Theme: activity theme 0x%x", Integer.valueOf(this.selectedThemeId))
-        Int i = this.selectedThemeId
+        val i: Int = this.selectedThemeId
         setTheme(this instanceof ThemeMapper ? ((ThemeMapper) this).mapThemeResourceId(i) : i)
         super.onCreate(bundle)
     }
 
     /* access modifiers changed from: protected */
-    fun onResume() {
+    override fun onResume() {
         super.onResume()
-        Int themeResourceId = GlobalOptions.getInstance().getThemeResourceId()
+        val themeResourceId: Int = GlobalOptions.getInstance().getThemeResourceId()
         Debug.Printf("Theme: resume, activity theme 0x%x", Integer.valueOf(themeResourceId))
         if (this.selectedThemeId != themeResourceId && this.selectedThemeId != -1) {
             onThemeChangedEvent(ThemeChangedEvent(themeResourceId))
@@ -42,25 +42,25 @@ class ThemedActivity : AppCompatActivity() {
     }
 
     /* access modifiers changed from: protected */
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         EventBus.getInstance().subscribe((Activity) this)
     }
 
     /* access modifiers changed from: protected */
-    fun onStop() {
+    override fun onStop() {
         EventBus.getInstance().unsubscribeActivity(this)
         super.onStop()
     }
 
     @EventHandler
-    fun onThemeChangedEvent(ThemeChangedEvent themeChangedEvent) {
+    fun onThemeChangedEvent(themeChangedEvent: ThemeChangedEvent) {
         Debug.Printf("Theme: old theme id 0x%x, theme id 0x%x", Integer.valueOf(this.selectedThemeId), Integer.valueOf(themeChangedEvent.themeResourceId))
         if (Build.VERSION.SDK_INT >= 11) {
             recreate()
             return
         }
-        Intent intent = Intent(getIntent())
+        val intent: Intent = Intent(getIntent())
         finish()
         startActivity(intent)
     }

@@ -18,7 +18,7 @@ class AgentThrottle : SLMessage() {
     @JvmStatic
     class Throttle {
         public Int GenCounter
-        public Byte[] Throttles
+        public ByteArray Throttles
     }
 
     public AgentThrottle() {

@@ -13,7 +13,7 @@ class SLObjectDisplayInfo {
     interface HasChildrenObjects {
         ImmutableList<SLObjectDisplayInfo> getChildren()
 
-        Boolean isImplicitlyAdded()
+         fun isImplicitlyAdded(): Boolean)
     }
 
     public SLObjectDisplayInfo(Int i, String str, Float f, Int i2) {

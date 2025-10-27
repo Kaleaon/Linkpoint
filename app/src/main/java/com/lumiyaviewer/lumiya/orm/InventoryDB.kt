@@ -10,7 +10,7 @@ import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 
 class InventoryDB {
-    Int MAX_UPDATES_PER_TRANSACTION = 16
+    val MAX_UPDATES_PER_TRANSACTION: Int = 16
     private SQLiteDatabase db
 
     constructor(sQLiteDatabase: SQLiteDatabase) {

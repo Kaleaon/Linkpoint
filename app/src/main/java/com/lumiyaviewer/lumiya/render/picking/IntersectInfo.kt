@@ -19,7 +19,7 @@ class IntersectInfo {
         this.t = intersectInfo.t
         this.faceKnown = intersectInfo.faceKnown
         if (this.faceKnown) {
-            Float[] fArr2 = Float[8]
+            FloatArray fArr2 = FloatArray(8)
             fArr2[0] = this.s
             fArr2[1] = this.t
             fArr2[3] = 1.0f

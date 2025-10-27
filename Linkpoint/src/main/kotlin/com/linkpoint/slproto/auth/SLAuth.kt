@@ -47,7 +47,7 @@ private class LoginRequestField {
             if (r1 == 0) goto L_0x0376
             java.lang.String r1 = r12.startLocation
             java.lang.String r3 = "first"
-            Boolean r1 = r1.equals(r3)
+            val r1: Boolean = r1.equals(r3)
             if (r1 == 0) goto L_0x005e
             java.lang.String r0 = "home"
             r1 = r0
@@ -56,27 +56,27 @@ private class LoginRequestField {
             r7.<init>()
             java.lang.String r0 = r12.loginName
             java.lang.String r8 = r0.trim()
-            Int r0 = r8.length()
+            val r0: Int = r8.length()
             java.lang.String r9 = " ._"
             r3 = r0
             r0 = r2
         L_0x0045:
-            Int r4 = r9.length()
+            val r4: Int = r9.length()
             if (r0 >= r4) goto L_0x006d
-            Int r4 = r0 + 1
+            val r4: Int = r0 + 1
             java.lang.String r4 = r9.substring(r0, r4)
-            Int r4 = r8.indexOf(r4)
+            val r4: Int = r8.indexOf(r4)
             r10 = -1
             if (r4 == r10) goto L_0x005b
             if (r4 >= r3) goto L_0x005b
             r3 = r4
         L_0x005b:
-            Int r0 = r0 + 1
+            val r0: Int = r0 + 1
             goto L_0x0045
         L_0x005e:
             java.lang.String r1 = r12.startLocation
             java.lang.String r3 = "uri:"
-            Boolean r1 = r1.startsWith(r3)
+            val r1: Boolean = r1.startsWith(r3)
             if (r1 == 0) goto L_0x0376
             java.lang.String r0 = r12.startLocation
             r1 = r0
@@ -84,15 +84,15 @@ private class LoginRequestField {
         L_0x006d:
             java.lang.String r4 = r8.substring(r2, r3)
             java.lang.String r0 = ""
-            Int r9 = r8.length()
+            val r9: Int = r8.length()
             if (r3 >= r9) goto L_0x0080
-            Int r0 = r3 + 1
+            val r0: Int = r3 + 1
             java.lang.String r0 = r8.substring(r0)
         L_0x0080:
             java.lang.String r3 = r4.trim()
             java.lang.String r0 = r0.trim()
             java.lang.String r4 = ""
-            Boolean r4 = r0.equalsIgnoreCase(r4)
+            val r4: Boolean = r0.equalsIgnoreCase(r4)
             if (r4 == 0) goto L_0x0094
             java.lang.String r0 = "Resident"
         L_0x0094:
@@ -116,7 +116,7 @@ private class LoginRequestField {
             r0.<init>()
             java.lang.String r3 = "Linkpoint "
             java.lang.StringBuilder r3 = r0.append(r3)
-            Boolean r0 = com.lumiyaviewer.lumiya.Debug.isDebugBuild()
+            val r0: Boolean = com.lumiyaviewer.lumiya.Debug.isDebugBuild()
             if (r0 == 0) goto L_0x0101
             java.lang.String r0 = "Test"
         L_0x00d5:
@@ -124,7 +124,7 @@ private class LoginRequestField {
             java.lang.String r4 = r0.toString()
             java.lang.String r3 = com.lumiyaviewer.lumiya.LinkpointApp.getAppVersion()
             r0 = 46
-            Int r0 = com.lumiyaviewer.lumiya.utils.StringUtils.countOccurrences(r3, r0)
+            val r0: Int = com.lumiyaviewer.lumiya.utils.StringUtils.countOccurrences(r3, r0)
         L_0x00e7:
             r6 = 3
             if (r0 >= r6) goto L_0x0105
@@ -134,7 +134,7 @@ private class LoginRequestField {
             java.lang.String r6 = ".0"
             java.lang.StringBuilder r3 = r3.append(r6)
             java.lang.String r3 = r3.toString()
-            Int r0 = r0 + 1
+            val r0: Int = r0 + 1
             goto L_0x00e7
         L_0x0101:
             java.lang.String r0 = "Release"
@@ -142,7 +142,7 @@ private class LoginRequestField {
         L_0x0105:
             java.lang.String r0 = "Auth: viewer channel '%s', version '%s'"
             r6 = 2
-            java.lang.Object[] r6 = java.lang.Object[r6]
+            java.lang.Array<Any> r6 = java.lang.Object[r6]
             r6[r2] = r4
             r8 = 1
             r6[r8] = r3
@@ -221,7 +221,7 @@ private class LoginRequestField {
             r5.append(r0)
             java.util.Iterator r3 = r7.iterator()
         L_0x01da:
-            Boolean r0 = r3.hasNext()
+            val r0: Boolean = r3.hasNext()
             if (r0 == 0) goto L_0x0221
             java.lang.Object r0 = r3.next()
             com.lumiyaviewer.lumiya.slproto.auth.SLAuth$LoginRequestField r0 = (com.lumiyaviewer.lumiya.slproto.auth.SLAuth.LoginRequestField) r0
@@ -319,14 +319,14 @@ private class LoginRequestField {
             r0.<init>(r1)
             throw r0
         L_0x0300:
-            Boolean r0 = r5.isSuccessful()     // Catch:{ all -> 0x0324 }
+            val r0: Boolean = r5.isSuccessful()     // Catch:{ all -> 0x0324 }
             if (r0 != 0) goto L_0x0329
             java.io.IOException r0 = java.io.IOException     // Catch:{ all -> 0x0324 }
             java.lang.StringBuilder r1 = java.lang.StringBuilder     // Catch:{ all -> 0x0324 }
             r1.<init>()     // Catch:{ all -> 0x0324 }
             java.lang.String r2 = "Login error code "
             java.lang.StringBuilder r1 = r1.append(r2)     // Catch:{ all -> 0x0324 }
-            Int r2 = r5.code()     // Catch:{ all -> 0x0324 }
+            val r2: Int = r5.code()     // Catch:{ all -> 0x0324 }
             java.lang.StringBuilder r1 = r1.append(r2)     // Catch:{ all -> 0x0324 }
             java.lang.String r1 = r1.toString()     // Catch:{ all -> 0x0324 }
             r0.<init>(r1)     // Catch:{ all -> 0x0324 }
@@ -349,7 +349,7 @@ private class LoginRequestField {
             java.lang.String r4 = r12.gridName     // Catch:{ XmlPullParserException -> 0x0368 }
             java.lang.String r6 = r12.loginURL     // Catch:{ XmlPullParserException -> 0x0368 }
             r0.<init>(r4, r6, r3)     // Catch:{ XmlPullParserException -> 0x0368 }
-            Boolean r3 = r0.isIndeterminate     // Catch:{ XmlPullParserException -> 0x0368 }
+            val r3: Boolean = r0.isIndeterminate     // Catch:{ XmlPullParserException -> 0x0368 }
             if (r3 == 0) goto L_0x0364
             java.lang.String r3 = r0.nextMethod     // Catch:{ XmlPullParserException -> 0x0368 }
             if (r3 == 0) goto L_0x0364
@@ -358,7 +358,7 @@ private class LoginRequestField {
             java.lang.String r3 = r0.nextMethod     // Catch:{ XmlPullParserException -> 0x0368 }
             java.lang.String r4 = r0.nextURL     // Catch:{ XmlPullParserException -> 0x0368 }
             r5.close()
-            Int r2 = r2 + 1
+            val r2: Int = r2 + 1
             goto L_0x0199
         L_0x0364:
             r5.close()
@@ -380,15 +380,15 @@ private class LoginRequestField {
     }
 
     @JvmStatic
-    String getPasswordHash(String str) {
-        String trim = str.trim()
+     fun getPasswordHash(str: String): String {
+        val trim: String = str.trim()
         if (trim.length() > 16) {
             trim = trim.substring(0, 16)
         }
         return "$1$" + HashUtils.MD5_Hash(trim)
     }
 
-    public SLAuthReply Login(SLAuthParams sLAuthParams) throws IOException {
+    public fun Login(sLAuthParams: SLAuthParams): SLAuthReply throws IOException {
         try {
             return SendLoginRequest(sLAuthParams)
         } catch (Exception e) {

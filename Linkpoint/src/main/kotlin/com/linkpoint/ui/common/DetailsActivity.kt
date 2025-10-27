@@ -31,11 +31,11 @@ class DetailsActivity : ConnectedActivity() {
     @JvmStatic
 private class DetailsStackEntry : Parcelable {
         const val Parcelable.Creator<DetailsStackEntry> CREATOR = Parcelable.Creator<DetailsStackEntry>() {
-            public DetailsStackEntry createFromParcel(Parcel parcel) {
+             public fun createFromParcel(parcel: Parcel): DetailsStackEntry {
                 return DetailsStackEntry(parcel)
             }
 
-            public DetailsStackEntry[] newArray(Int i) {
+            public Array<DetailsStackEntry> newArray(Int i) {
                 return DetailsStackEntry[i]
             }
         }
@@ -63,7 +63,7 @@ private class DetailsStackEntry : Parcelable {
             this.fragment = SoftReference<>(fragment2)
             this.className = fragment2.getClass().getName()
             this.arguments = fragment2.getArguments()
-            FragmentManager fragmentManager = fragment2.getFragmentManager()
+            val fragmentManager: FragmentManager = fragment2.getFragmentManager()
             if (fragmentManager != null) {
                 this.savedState = fragmentManager.saveFragmentInstanceState(fragment2)
             } else {
@@ -75,12 +75,12 @@ private class DetailsStackEntry : Parcelable {
             this(fragment2)
         }
 
-        public Int describeContents() {
+         public fun describeContents(): Int {
             return 0
         }
 
-        public Fragment getFragment(Context context) {
-            Fragment fragment2 = this.fragment.get()
+         public fun getFragment(context: Context): Fragment {
+            val fragment2: Fragment = this.fragment.get()
             if (fragment2 == null) {
                 fragment2 = Fragment.instantiate(context, this.className, this.arguments)
                 if (this.savedState != null) {
@@ -90,7 +90,7 @@ private class DetailsStackEntry : Parcelable {
             return fragment2
         }
 
-        fun writeToParcel(Parcel parcel, Int i) {
+        fun writeToParcel(parcel: Parcel, i: Int) {
             parcel.writeString(this.className)
             if (this.arguments != null) {
                 parcel.writeByte((Byte) 1)
@@ -100,7 +100,7 @@ private class DetailsStackEntry : Parcelable {
             }
             if (this.savedState != null) {
                 parcel.writeByte((Byte) 1)
-                Bundle bundle = Bundle()
+                val bundle: Bundle = Bundle()
                 bundle.putParcelable("savedState", this.savedState)
                 parcel.writeBundle(bundle)
                 return
@@ -109,29 +109,29 @@ private class DetailsStackEntry : Parcelable {
         }
     }
 
-    private Boolean goBack(FragmentManager fragmentManager) {
+     private fun goBack(fragmentManager: FragmentManager): Boolean {
         Debug.Printf("DetailsActivity: goBack, detailsStack size %d", Integer.valueOf(this.detailsStack.size()))
         if (this.detailsStack.size() != 0) {
-            FragmentTransaction beginTransaction = fragmentManager.beginTransaction()
+            val beginTransaction: FragmentTransaction = fragmentManager.beginTransaction()
             beginTransaction.replace(R.id.details, this.detailsStack.remove(this.detailsStack.size() - 1).getFragment(this))
             beginTransaction.commit()
             updateTitle()
             return true
         }
-        Boolean onDetailsStackEmpty = onDetailsStackEmpty()
+        val onDetailsStackEmpty: Boolean = onDetailsStackEmpty()
         Debug.Printf("DetailsActivity: goBack, onDetailsStackEmpty: really empty: %b", Boolean.valueOf(onDetailsStackEmpty))
         return !onDetailsStackEmpty
     }
 
     @JvmStatic
-    Unit showDetails(Activity activity, FragmentActivityFactory fragmentActivityFactory, Bundle bundle) {
+     fun showDetails(activity: Activity, fragmentActivityFactory: FragmentActivityFactory, bundle: Bundle) {
         if (!showEmbeddedDetails(activity, fragmentActivityFactory.getFragmentClass(), bundle)) {
             activity.startActivity(fragmentActivityFactory.createIntent(activity, bundle))
         }
     }
 
     @JvmStatic
-    Boolean showEmbeddedDetails(Activity activity, Class<? : Fragment> cls, Bundle bundle) {
+     fun showEmbeddedDetails(activity: Activity, cls: Class<? : Fragment>, bundle: Bundle): Boolean {
         if (!(activity instanceof DetailsActivity) || !((DetailsActivity) activity).acceptsDetailFragment(cls)) {
             return false
         }
@@ -140,13 +140,13 @@ private class DetailsStackEntry : Parcelable {
     }
 
     /* access modifiers changed from: protected */
-    public Boolean acceptsDetailFragment(Class<? : Fragment> cls) {
+     public fun acceptsDetailFragment(cls: Class<? : Fragment>): Boolean {
         return true
     }
 
     /* access modifiers changed from: protected */
-    fun addDetailsToStack(FragmentManager fragmentManager) {
-        Fragment findFragmentById = fragmentManager.findFragmentById(R.id.details)
+    fun addDetailsToStack(fragmentManager: FragmentManager) {
+        val findFragmentById: Fragment = fragmentManager.findFragmentById(R.id.details)
         if (findFragmentById != null) {
             this.detailsStack.add(DetailsStackEntry(findFragmentById, (DetailsStackEntry) null))
         }
@@ -157,26 +157,26 @@ private class DetailsStackEntry : Parcelable {
         this.detailsStack.clear()
     }
 
-    public Boolean closeDetailsFragment(Fragment fragment) {
-        FragmentManager supportFragmentManager = getSupportFragmentManager()
+     public fun closeDetailsFragment(fragment: Fragment): Boolean {
+        val supportFragmentManager: FragmentManager = getSupportFragmentManager()
         if (supportFragmentManager.findFragmentById(R.id.details) == fragment) {
             return goBack(supportFragmentManager)
         }
         return false
     }
 
-    public Fragment getCurrentDetailsFragment() {
+     public fun getCurrentDetailsFragment(): Fragment {
         Fragment findFragmentById
-        FragmentManager supportFragmentManager = getSupportFragmentManager()
+        val supportFragmentManager: FragmentManager = getSupportFragmentManager()
         if (supportFragmentManager == null || (findFragmentById = supportFragmentManager.findFragmentById(R.id.details)) == null || !findFragmentById.isAdded() || !(!findFragmentById.isDetached()) || !(!findFragmentById.isHidden())) {
             return null
         }
         return findFragmentById
     }
 
-    public Boolean handleBackPressed() {
-        FragmentManager supportFragmentManager = getSupportFragmentManager()
-        Fragment findFragmentById = supportFragmentManager.findFragmentById(R.id.details)
+     public fun handleBackPressed(): Boolean {
+        val supportFragmentManager: FragmentManager = getSupportFragmentManager()
+        val findFragmentById: Fragment = supportFragmentManager.findFragmentById(R.id.details)
         if ((findFragmentById instanceof BackButtonHandler) && findFragmentById.isAdded() && (!findFragmentById.isDetached()) && ((BackButtonHandler) findFragmentById).onBackButtonPressed()) {
             return true
         }
@@ -187,15 +187,15 @@ private class DetailsStackEntry : Parcelable {
     }
 
     /* access modifiers changed from: protected */
-    public Boolean isRootDetailsFragment(Class<? : Fragment> cls) {
+     public fun isRootDetailsFragment(cls: Class<? : Fragment>): Boolean {
         return true
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(Bundle bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         if (bundle != null) {
-            ArrayList parcelableArrayList = bundle.getParcelableArrayList(DETAILS_STACK_TAG)
+            val parcelableArrayList: ArrayList = bundle.getParcelableArrayList(DETAILS_STACK_TAG)
             if (parcelableArrayList != null) {
                 this.detailsStack.addAll(parcelableArrayList)
             }
@@ -205,13 +205,13 @@ private class DetailsStackEntry : Parcelable {
     }
 
     /* access modifiers changed from: protected */
-    public Boolean onDetailsStackEmpty() {
-        FragmentManager supportFragmentManager = getSupportFragmentManager()
-        Fragment findFragmentById = supportFragmentManager.findFragmentById(R.id.details)
+     public fun onDetailsStackEmpty(): Boolean {
+        val supportFragmentManager: FragmentManager = getSupportFragmentManager()
+        val findFragmentById: Fragment = supportFragmentManager.findFragmentById(R.id.details)
         if (findFragmentById == null) {
             return true
         }
-        FragmentTransaction beginTransaction = supportFragmentManager.beginTransaction()
+        val beginTransaction: FragmentTransaction = supportFragmentManager.beginTransaction()
         beginTransaction.remove(findFragmentById)
         beginTransaction.commit()
         updateTitle()
@@ -228,9 +228,9 @@ private class DetailsStackEntry : Parcelable {
         updateTitle()
     }
 
-    fun onRequestPermissionsResult(Int i, String[] strArr, Int[] iArr) {
+    override fun onRequestPermissionsResult(i: Int, strArr: Array<String>, iArr: IntArray) {
         super.onRequestPermissionsResult(i, strArr, iArr)
-        List<Fragment> fragments = getSupportFragmentManager().getFragments()
+        val fragments: List<Fragment> = getSupportFragmentManager().getFragments()
         if (fragments != null) {
             for (Fragment onRequestPermissionsResult : fragments) {
                 onRequestPermissionsResult.onRequestPermissionsResult(i, strArr, iArr)
@@ -239,7 +239,7 @@ private class DetailsStackEntry : Parcelable {
     }
 
     /* access modifiers changed from: protected */
-    fun onSaveInstanceState(Bundle bundle) {
+    override fun onSaveInstanceState(bundle: Bundle) {
         bundle.putParcelableArrayList(DETAILS_STACK_TAG, this.detailsStack)
         bundle.putString(DEFAULT_TITLE_TAG, this.defaultTitle)
         bundle.putString(DEFAULT_SUBTITLE_TAG, this.defaultSubTitle)
@@ -248,7 +248,7 @@ private class DetailsStackEntry : Parcelable {
 
     /* access modifiers changed from: protected */
     fun removeAllDetails() {
-        FragmentManager supportFragmentManager = getSupportFragmentManager()
+        val supportFragmentManager: FragmentManager = getSupportFragmentManager()
         if (supportFragmentManager.findFragmentById(R.id.details) != null) {
             clearDetailsStack()
             goBack(supportFragmentManager)
@@ -256,8 +256,8 @@ private class DetailsStackEntry : Parcelable {
     }
 
     /* access modifiers changed from: protected */
-    fun replaceDetailsFragment(FragmentManager fragmentManager, Fragment fragment) {
-        FragmentTransaction beginTransaction = fragmentManager.beginTransaction()
+    fun replaceDetailsFragment(fragmentManager: FragmentManager, fragment: Fragment) {
+        val beginTransaction: FragmentTransaction = fragmentManager.beginTransaction()
         beginTransaction.setCustomAnimations(R.anim.slide_from_right, 0, 0, R.anim.slide_to_right)
         beginTransaction.replace(R.id.details, fragment)
         beginTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
@@ -266,8 +266,8 @@ private class DetailsStackEntry : Parcelable {
     }
 
     /* access modifiers changed from: protected */
-    fun setActivityTitle(String str, String str2) {
-        ActionBar supportActionBar = getSupportActionBar()
+    fun setActivityTitle(str: String, str2: String) {
+        val supportActionBar: ActionBar = getSupportActionBar()
         Debug.Printf("updateTitle: title '%s' actionBar %s", str, supportActionBar)
         if (supportActionBar != null) {
             supportActionBar.setTitle((CharSequence) str)
@@ -276,9 +276,9 @@ private class DetailsStackEntry : Parcelable {
         setTitle(str)
     }
 
-    public Boolean setCurrentDetailsArguments(Class<? : Fragment> cls, Bundle bundle) {
+     public fun setCurrentDetailsArguments(cls: Class<? : Fragment>, bundle: Bundle): Boolean {
         Fragment findFragmentById
-        FragmentManager supportFragmentManager = getSupportFragmentManager()
+        val supportFragmentManager: FragmentManager = getSupportFragmentManager()
         if (supportFragmentManager == null || (findFragmentById = supportFragmentManager.findFragmentById(R.id.details)) == null || !cls.isInstance(findFragmentById) || !(findFragmentById instanceof ReloadableFragment) || findFragmentById.getArguments() == null) {
             return false
         }
@@ -286,20 +286,20 @@ private class DetailsStackEntry : Parcelable {
         return true
     }
 
-    fun setDefaultTitle(String str, String str2) {
+    fun setDefaultTitle(str: String, str2: String) {
         this.defaultTitle = str
         this.defaultSubTitle = str2
         updateTitle()
     }
 
-    public Fragment showDetailsFragment(Class<? : Fragment> cls, Intent intent, Bundle bundle) {
+     public fun showDetailsFragment(cls: Class<? : Fragment>, intent: Intent, bundle: Bundle): Fragment {
         Debug.Printf("DetailsActivity: fragmentClass %s, intent %s, arguments %s", cls.toString(), intent, bundle)
-        FragmentManager supportFragmentManager = getSupportFragmentManager()
+        val supportFragmentManager: FragmentManager = getSupportFragmentManager()
         if (supportFragmentManager == null) {
             return null
         }
-        Boolean isRootDetailsFragment = isRootDetailsFragment(cls)
-        Fragment findFragmentById = supportFragmentManager.findFragmentById(R.id.details)
+        val isRootDetailsFragment: Boolean = isRootDetailsFragment(cls)
+        val findFragmentById: Fragment = supportFragmentManager.findFragmentById(R.id.details)
         Debug.Printf("DetailsActivity: isRootFragment %b existing fragment: %s", Boolean.valueOf(isRootDetailsFragment), findFragmentById)
         if (findFragmentById != null) {
             Debug.Printf("DetailsActivity: is good instance: %b", Boolean.valueOf(cls.isInstance(findFragmentById)))
@@ -313,7 +313,7 @@ private class DetailsStackEntry : Parcelable {
                 addDetailsToStack(supportFragmentManager)
             }
             try {
-                Fragment fragment = (Fragment) cls.newInstance()
+                val fragment: Fragment = (Fragment) cls.newInstance()
                 try {
                     if (fragment instanceof ReloadableFragment) {
                         fragment.setArguments(Bundle())
@@ -324,7 +324,7 @@ private class DetailsStackEntry : Parcelable {
                     replaceDetailsFragment(supportFragmentManager, fragment)
                     return fragment
                 } catch (Exception e) {
-                    Exception exc = e
+                    val exc: Exception = e
                     findFragmentById = fragment
                     e = exc
                 }
@@ -355,30 +355,30 @@ private class DetailsStackEntry : Parcelable {
             r1 = 2131755284(0x7f100114, Float:1.9141443E38)
             android.support.v4.app.Fragment r1 = r0.findFragmentById(r1)
             java.lang.String r0 = "updateTitle: detailsFragment %s"
-            java.lang.Object[] r4 = java.lang.Object[r2]
+            java.lang.Array<Any> r4 = java.lang.Object[r2]
             r4[r3] = r1
             com.lumiyaviewer.lumiya.Debug.Printf(r0, r4)
-            Boolean r0 = r1 instanceof com.lumiyaviewer.lumiya.ui.common.FragmentHasTitle
+            val r0: Boolean = r1 instanceof com.lumiyaviewer.lumiya.ui.common.FragmentHasTitle
             if (r0 == 0) goto L_0x0082
             java.lang.String r0 = "updateTitle: detailsFragment added %b hidden %b detached %b"
             r4 = 3
-            java.lang.Object[] r4 = java.lang.Object[r4]
-            Boolean r5 = r1.isAdded()
+            java.lang.Array<Any> r4 = java.lang.Object[r4]
+            val r5: Boolean = r1.isAdded()
             java.lang.Boolean r5 = java.lang.Boolean.valueOf(r5)
             r4[r3] = r5
-            Boolean r5 = r1.isHidden()
+            val r5: Boolean = r1.isHidden()
             java.lang.Boolean r5 = java.lang.Boolean.valueOf(r5)
             r4[r2] = r5
-            Boolean r5 = r1.isDetached()
+            val r5: Boolean = r1.isDetached()
             java.lang.Boolean r5 = java.lang.Boolean.valueOf(r5)
             r4[r6] = r5
             com.lumiyaviewer.lumiya.Debug.Printf(r0, r4)
-            Boolean r0 = r1.isAdded()
+            val r0: Boolean = r1.isAdded()
             if (r0 == 0) goto L_0x0080
-            Boolean r0 = r1.isHidden()
+            val r0: Boolean = r1.isHidden()
             r0 = r0 ^ 1
             if (r0 == 0) goto L_0x0080
-            Boolean r0 = r1.isDetached()
+            val r0: Boolean = r1.isDetached()
             r0 = r0 ^ 1
             if (r0 == 0) goto L_0x0082
             r0 = r1
@@ -387,7 +387,7 @@ private class DetailsStackEntry : Parcelable {
             com.lumiyaviewer.lumiya.ui.common.FragmentHasTitle r1 = (com.lumiyaviewer.lumiya.ui.common.FragmentHasTitle) r1
             java.lang.String r1 = r1.getSubTitle()
             java.lang.String r4 = "updateTitle: got title '%s', subtitle '%s'"
-            java.lang.Object[] r5 = java.lang.Object[r6]
+            java.lang.Array<Any> r5 = java.lang.Object[r6]
             r5[r3] = r0
             r5[r2] = r1
             com.lumiyaviewer.lumiya.Debug.Printf(r4, r5)

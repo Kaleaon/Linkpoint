@@ -21,8 +21,8 @@ class ClassifiedInfoUpdate : SLMessage() {
         public Int Category
         public Int ClassifiedFlags
         public UUID ClassifiedID
-        public Byte[] Desc
-        public Byte[] Name
+        public ByteArray Desc
+        public ByteArray Name
         public UUID ParcelID
         public Int ParentEstate
         public LLVector3d PosGlobal

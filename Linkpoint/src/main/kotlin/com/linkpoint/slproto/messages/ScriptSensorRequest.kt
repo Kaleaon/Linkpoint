@@ -18,7 +18,7 @@ class ScriptSensorRequest : SLMessage() {
         public UUID RequestID
         public LLQuaternion SearchDir
         public UUID SearchID
-        public Byte[] SearchName
+        public ByteArray SearchName
         public LLVector3 SearchPos
         public Int SearchRegions
         public UUID SourceID
@@ -29,15 +29,15 @@ class ScriptSensorRequest : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.Requester_Field.SearchName.length + 73 + 4 + 4 + 4 + 8 + 1 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleScriptSensorRequest(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -9)
@@ -54,7 +54,7 @@ class ScriptSensorRequest : SLMessage() {
         packByte(byteBuffer, (Byte) this.Requester_Field.SearchRegions)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.Requester_Field.SourceID = unpackUUID(byteBuffer)
         this.Requester_Field.RequestID = unpackUUID(byteBuffer)
         this.Requester_Field.SearchID = unpackUUID(byteBuffer)

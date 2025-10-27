@@ -26,7 +26,7 @@ class CrossedRegion : SLMessage() {
     @JvmStatic
     class RegionData {
         public Long RegionHandle
-        public Byte[] SeedCapability
+        public ByteArray SeedCapability
         public Inet4Address SimIP
         public Int SimPort
     }

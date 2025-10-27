@@ -8,16 +8,16 @@ import com.lumiyaviewer.lumiya.slproto.types.LLVector2
 import java.nio.ByteBuffer
 
 class PrimPathParams {
-    Float CUT_QUANTA = 2.0E-5f
-    Byte LL_PCODE_PATH_CIRCLE = 32
-    Byte LL_PCODE_PATH_CIRCLE2 = 48
-    Byte LL_PCODE_PATH_FLEXIBLE = Byte.MIN_VALUE
-    Byte LL_PCODE_PATH_LINE = 16
-    Byte LL_PCODE_PATH_TEST = 64
-    Float REV_QUANTA = 0.015f
-    Float SCALE_QUANTA = 0.01f
-    Float SHEAR_QUANTA = 0.01f
-    Float TAPER_QUANTA = 0.01f
+    val CUT_QUANTA: Float = 2.0E-5f
+    val LL_PCODE_PATH_CIRCLE: Byte = 32
+    val LL_PCODE_PATH_CIRCLE2: Byte = 48
+    val LL_PCODE_PATH_FLEXIBLE: Byte = Byte.MIN_VALUE
+    val LL_PCODE_PATH_LINE: Byte = 16
+    val LL_PCODE_PATH_TEST: Byte = 64
+    val REV_QUANTA: Float = 0.015f
+    val SCALE_QUANTA: Float = 0.01f
+    val SHEAR_QUANTA: Float = 0.01f
+    val TAPER_QUANTA: Float = 0.01f
     Float Begin
     Byte CurveType
     Float End
@@ -57,15 +57,15 @@ class PrimPathParams {
         this.End = ((Float) (50000 - (objectData.PathEnd & SupportMenu.USER_MASK))) * 2.0E-5f
         this.ScaleX = ((Float) (200 - (objectData.PathScaleX & 255))) * 0.01f
         this.ScaleY = ((Float) (200 - (objectData.PathScaleY & 255))) * 0.01f
-        this.ShearX = ((Float) LLTersePacking.getSignedByte(objectData.PathShearX)) * 0.01f
-        this.ShearY = ((Float) LLTersePacking.getSignedByte(objectData.PathShearY)) * 0.01f
-        this.TwistEnd = ((Float) LLTersePacking.getSignedByte(objectData.PathTwist)) * 0.01f
-        this.TwistBegin = ((Float) LLTersePacking.getSignedByte(objectData.PathTwistBegin)) * 0.01f
-        this.RadiusOffset = ((Float) LLTersePacking.getSignedByte(objectData.PathRadiusOffset)) * 0.01f
-        this.TaperX = ((Float) LLTersePacking.getSignedByte(objectData.PathTaperX)) * 0.01f
-        this.TaperY = ((Float) LLTersePacking.getSignedByte(objectData.PathTaperY)) * 0.01f
+        this.ShearX = (LLTersePacking.toFloat().getSignedByte(objectData.PathShearX)) * 0.01f
+        this.ShearY = (LLTersePacking.toFloat().getSignedByte(objectData.PathShearY)) * 0.01f
+        this.TwistEnd = (LLTersePacking.toFloat().getSignedByte(objectData.PathTwist)) * 0.01f
+        this.TwistBegin = (LLTersePacking.toFloat().getSignedByte(objectData.PathTwistBegin)) * 0.01f
+        this.RadiusOffset = (LLTersePacking.toFloat().getSignedByte(objectData.PathRadiusOffset)) * 0.01f
+        this.TaperX = (LLTersePacking.toFloat().getSignedByte(objectData.PathTaperX)) * 0.01f
+        this.TaperY = (LLTersePacking.toFloat().getSignedByte(objectData.PathTaperY)) * 0.01f
         this.Revolutions = (((Float) (objectData.PathRevolutions & 255)) * 0.015f) + 1.0f
-        this.Skew = ((Float) LLTersePacking.getSignedByte(objectData.PathSkew)) * 0.01f
+        this.Skew = (LLTersePacking.toFloat().getSignedByte(objectData.PathSkew)) * 0.01f
     }
 
     PrimPathParams(ByteBuffer byteBuffer) {
@@ -74,15 +74,15 @@ class PrimPathParams {
         this.End = ((Float) (50000 - (byteBuffer.getShort() & 65535))) * 2.0E-5f
         this.ScaleX = ((Float) (200 - (byteBuffer.get() & UnsignedBytes.MAX_VALUE))) * 0.01f
         this.ScaleY = ((Float) (200 - (byteBuffer.get() & UnsignedBytes.MAX_VALUE))) * 0.01f
-        this.ShearX = ((Float) LLTersePacking.getSignedByte(byteBuffer.get())) * 0.01f
-        this.ShearY = ((Float) LLTersePacking.getSignedByte(byteBuffer.get())) * 0.01f
-        this.TwistEnd = ((Float) LLTersePacking.getSignedByte(byteBuffer.get())) * 0.01f
-        this.TwistBegin = ((Float) LLTersePacking.getSignedByte(byteBuffer.get())) * 0.01f
-        this.RadiusOffset = ((Float) LLTersePacking.getSignedByte(byteBuffer.get())) * 0.01f
-        this.TaperX = ((Float) LLTersePacking.getSignedByte(byteBuffer.get())) * 0.01f
-        this.TaperY = ((Float) LLTersePacking.getSignedByte(byteBuffer.get())) * 0.01f
+        this.ShearX = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
+        this.ShearY = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
+        this.TwistEnd = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
+        this.TwistBegin = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
+        this.RadiusOffset = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
+        this.TaperX = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
+        this.TaperY = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
         this.Revolutions = (((Float) (byteBuffer.get() & UnsignedBytes.MAX_VALUE)) * 0.015f) + 1.0f
-        this.Skew = ((Float) LLTersePacking.getSignedByte(byteBuffer.get())) * 0.01f
+        this.Skew = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
     }
 
     private Int getHashValue() {

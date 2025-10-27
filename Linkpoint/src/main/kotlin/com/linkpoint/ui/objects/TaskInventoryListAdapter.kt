@@ -22,34 +22,34 @@ class TaskInventoryListAdapter : BaseAdapter() {
         this.context = context2
     }
 
-    public Int getCount() {
+     public fun getCount(): Int {
         if (this.taskInventory != null) {
             return this.taskInventory.entries.size()
         }
         return 0
     }
 
-    public SLInventoryEntry getItem(Int i) {
+     public fun getItem(i: Int): SLInventoryEntry {
         if (this.taskInventory != null) {
             return (SLInventoryEntry) this.taskInventory.entries.get(i)
         }
         return null
     }
 
-    public Long getItemId(Int i) {
+     public fun getItemId(i: Int): Long {
         return (Long) i
     }
 
-    public View getView(Int i, View view, ViewGroup viewGroup) {
+     public fun getView(i: Int, view: View, viewGroup: ViewGroup): View {
         if (view == null) {
             view = ((LayoutInflater) this.context.getSystemService("layout_inflater")).inflate(R.layout.inventory_item, viewGroup, false)
         }
-        SLInventoryEntry item = getItem(i)
+        val item: SLInventoryEntry = getItem(i)
         ((TextView) view.findViewById(R.id.itemNameTextView)).setText(item.name)
-        Int drawableResource = item.getDrawableResource()
+        val drawableResource: Int = item.getDrawableResource()
         if (drawableResource >= 0) {
             ((ImageView) view.findViewById(R.id.itemTypeIconView)).setImageResource(drawableResource)
-            Int subtypeDrawableResource = item.getSubtypeDrawableResource()
+            val subtypeDrawableResource: Int = item.getSubtypeDrawableResource()
             if (subtypeDrawableResource >= 0) {
                 ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageResource(subtypeDrawableResource)
             } else {
@@ -63,11 +63,11 @@ class TaskInventoryListAdapter : BaseAdapter() {
         return view
     }
 
-    public Boolean hasStableIds() {
+     public fun hasStableIds(): Boolean {
         return false
     }
 
-    fun setData(SLTaskInventory sLTaskInventory) {
+    fun setData(sLTaskInventory: SLTaskInventory) {
         this.taskInventory = sLTaskInventory
         notifyDataSetChanged()
     }

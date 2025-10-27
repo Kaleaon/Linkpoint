@@ -17,22 +17,22 @@ class GLTextTextureCache : GLResourceCache()<DrawableTextParams, DrawableTextBit
     }
 
     /* access modifiers changed from: protected */
-    fun CancelRawResource(ResourceConsumer resourceConsumer) {
+    fun CancelRawResource(resourceConsumer: ResourceConsumer) {
         this.drawableTextCache.CancelRequest(resourceConsumer)
     }
 
     /* access modifiers changed from: protected */
-    public Int GetResourceSize(DrawableTextBitmap drawableTextBitmap) {
+    public fun GetResourceSize(drawableTextBitmap: DrawableTextBitmap): Int {
         return 0
     }
 
     /* access modifiers changed from: protected */
-    public GLLoadedTextTexture LoadResource(DrawableTextParams drawableTextParams, DrawableTextBitmap drawableTextBitmap, RenderContext renderContext) {
+    public fun LoadResource(drawableTextParams: DrawableTextParams, drawableTextBitmap: DrawableTextBitmap, renderContext: RenderContext): GLLoadedTextTexture {
         return GLLoadedTextTexture(renderContext, drawableTextBitmap.getBitmap(), drawableTextBitmap.getBaselineOffset())
     }
 
     /* access modifiers changed from: protected */
-    fun RequestRawResource(DrawableTextParams drawableTextParams, ResourceConsumer resourceConsumer) {
+    fun RequestRawResource(drawableTextParams: DrawableTextParams, resourceConsumer: ResourceConsumer) {
         this.drawableTextCache.RequestResource(drawableTextParams, resourceConsumer)
     }
 }

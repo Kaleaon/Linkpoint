@@ -42,8 +42,8 @@ class SLTextureEntry {
             return
         }
         MutableSLTextureEntryFace[] mutableSLTextureEntryFaceArr = MutableSLTextureEntryFace[32]
-        Int[] iArr = Int[1]
-        Int[] iArr2 = Int[1]
+        IntArray iArr = IntArray(1)
+        IntArray iArr2 = IntArray(1)
         mutableSLTextureEntryFace.setTextureID(UUIDPool.getUUID(getUUID(byteBuffer)))
         while (true) {
             Int ReadFaceBitfield = ReadFaceBitfield(byteBuffer, iArr2)
@@ -241,7 +241,7 @@ class SLTextureEntry {
     }
 
     @JvmStatic
-private MutableSLTextureEntryFace CreateFace(MutableSLTextureEntryFace[] mutableSLTextureEntryFaceArr, Int i, Int[] iArr) {
+private MutableSLTextureEntryFace CreateFace(MutableSLTextureEntryFace[] mutableSLTextureEntryFaceArr, Int i, IntArray iArr) {
         if (i >= 32) {
             return null
         }
@@ -253,7 +253,7 @@ private MutableSLTextureEntryFace CreateFace(MutableSLTextureEntryFace[] mutable
         return mutableSLTextureEntryFaceArr[i]
     }
 
-    private Int ReadFaceBitfield(ByteBuffer byteBuffer, Int[] iArr) {
+    private Int ReadFaceBitfield(ByteBuffer byteBuffer, IntArray iArr) {
         Byte b
         iArr[0] = 0
         if (byteBuffer.position() >= byteBuffer.limit()) {
@@ -283,14 +283,14 @@ private MutableSLTextureEntryFace CreateFace(MutableSLTextureEntryFace[] mutable
                 i3++
             }
         }
-        Debug.Log(String.format("WriteFaceBitfield: faceBits = 0x%08x, count %d", Object[]{Integer.valueOf(i), Integer.valueOf(i2)}))
+        Debug.Log(String.format("WriteFaceBitfield: faceBits = 0x%08x, count %d", Array<Any>{Integer.valueOf(i), Integer.valueOf(i2)}))
         Int i5 = (i2 - 1) * 7
         for (Int i6 = 0; i6 < i2; i6++) {
             Byte b = (Byte) ((i >> i5) & Vr.VREvent.VrCore.ErrorCode.CONTROLLER_UNSTUCK)
             if (i6 != i2 - 1) {
                 b = (Byte) (b | 128)
             }
-            Debug.Log(String.format("WriteFaceBitfield: i = %d, shift = %d, Byte 0x%02x", Object[]{Integer.valueOf(i6), Integer.valueOf(i5), Byte.valueOf(b)}))
+            Debug.Log(String.format("WriteFaceBitfield: i = %d, shift = %d, Byte 0x%02x", Array<Any>{Integer.valueOf(i6), Integer.valueOf(i5), Byte.valueOf(b)}))
             byteBuffer.put(b)
             i5 -= 7
         }
@@ -308,7 +308,7 @@ private MutableSLTextureEntryFace CreateFace(MutableSLTextureEntryFace[] mutable
 
     @JvmStatic
 private Float getGlow(ByteBuffer byteBuffer) {
-        return ((Float) byteBuffer.get()) / 255.0f
+        return (byteBuffer.toFloat().get()) / 255.0f
     }
 
     private Int getHashValue() {
@@ -325,12 +325,12 @@ private Float getGlow(ByteBuffer byteBuffer) {
 
     @JvmStatic
 private Float getOffset(ByteBuffer byteBuffer) {
-        return ((Float) byteBuffer.getShort()) / 32767.0f
+        return (byteBuffer.toFloat().getShort()) / 32767.0f
     }
 
     @JvmStatic
 private Float getRotation(ByteBuffer byteBuffer) {
-        return (((Float) byteBuffer.getShort()) / 32767.0f) * 3.1415927f * 2.0f
+        return ((byteBuffer.toFloat().getShort()) / 32767.0f) * 3.1415927f * 2.0f
     }
 
     @JvmStatic
@@ -416,7 +416,7 @@ private Unit putUUID(ByteBuffer byteBuffer, UUID uuid) {
         return this.faceMask == 0
     }
 
-    public Byte[] packByteArray() {
+    public ByteArray packByteArray() {
         ByteBuffer allocate = ByteBuffer.allocate(SupportMenu.USER_MASK)
         putUUID(allocate, this.DefaultTexture.textureID())
         for (Int i = 0; i < this.FaceTextures.length; i++) {
@@ -500,7 +500,7 @@ private Unit putUUID(ByteBuffer byteBuffer, UUID uuid) {
             }
         }
         WriteFaceBitfield(allocate, 0)
-        Byte[] bArr = Byte[allocate.position()]
+        ByteArray bArr = Byte[allocate.position()]
         allocate.position(0)
         allocate.get(bArr)
         Debug.DumpBuffer("Baking: TEpacked: ", bArr)

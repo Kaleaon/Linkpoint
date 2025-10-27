@@ -16,7 +16,7 @@ class UpdateMuteListEntry : SLMessage {
     class MuteData {
         Int MuteFlags
         UUID MuteID
-        Byte[] MuteName
+        ByteArray MuteName
         Int MuteType
     }
 

@@ -14,15 +14,15 @@ class LLSDUUID : LLSDNode() {
     }
 
     public LLSDUUID(String str) {
-        Int length = str.length()
-        Long j = 0
-        Int i = 0
-        Int i2 = 0
-        Long j2 = 0
-        Long j3 = 0
-        Int i3 = 0
+        val length: Int = str.length()
+        val j: Long = 0
+        val i: Int = 0
+        val i2: Int = 0
+        val j2: Long = 0
+        val j3: Long = 0
+        val i3: Int = 0
         while (i3 < length) {
-            Char charAt = str.charAt(i3)
+            val charAt: Char = str.charAt(i3)
             if (charAt != '-') {
                 j = (j << 4) | ((Long) ((charAt < '0' || charAt > '9') ? (charAt < 'a' || charAt > 'f') ? (charAt < 'A' || charAt > 'F') ? 0 : (charAt - 'A') + 10 : (charAt - 'a') + 10 : charAt - '0'))
                 i++
@@ -48,21 +48,21 @@ class LLSDUUID : LLSDNode() {
         this.value = uuid
     }
 
-    public String asString() {
+     public fun asString(): String {
         return this.value.toString()
     }
 
-    public UUID asUUID() {
+     public fun asUUID(): UUID {
         return this.value
     }
 
-    fun toBinary(DataOutputStream dataOutputStream) throws IOException {
+    fun toBinary(dataOutputStream: DataOutputStream) throws IOException {
         dataOutputStream.writeByte(117)
         dataOutputStream.writeLong(this.value.getMostSignificantBits())
         dataOutputStream.writeLong(this.value.getLeastSignificantBits())
     }
 
-    fun toXML(XmlSerializer xmlSerializer) throws IOException {
+    fun toXML(xmlSerializer: XmlSerializer) throws IOException {
         xmlSerializer.startTag("", "uuid")
         if (this.value != null) {
             xmlSerializer.text(this.value.toString())

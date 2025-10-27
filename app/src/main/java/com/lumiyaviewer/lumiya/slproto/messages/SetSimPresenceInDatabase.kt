@@ -12,10 +12,10 @@ class SetSimPresenceInDatabase : SLMessage {
         Int AgentCount
         Int GridX
         Int GridY
-        Byte[] HostName
+        ByteArray HostName
         Int PID
         UUID RegionID
-        Byte[] Status
+        ByteArray Status
         Int TimeToLive
     }
 

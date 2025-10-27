@@ -28,7 +28,7 @@ enum class BomBakeType(val index: Int, val layerName: String) {
     LEFT_LEG(7, "leftleg"),
     AUX1(8, "aux1"),
     AUX2(9, "aux2"),
-    AUX3(10, "aux3");
+    AUX3(10, "aux3")
     
     companion object {
         fun fromIndex(index: Int): BomBakeType? {

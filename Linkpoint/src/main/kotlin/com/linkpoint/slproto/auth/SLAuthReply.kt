@@ -72,21 +72,21 @@ val class SLAuthReply {
     public SLAuthReply(String str, String str2, XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
         this.gridName = str
         this.loginURL = str2
-        Boolean z = false
-        String str3 = null
-        String str4 = null
-        UUID uuid = null
-        UUID uuid2 = null
-        UUID uuid3 = null
-        Int i = 0
-        String str5 = null
-        Int i2 = 0
-        String str6 = null
-        Boolean z2 = false
-        String str7 = ""
-        String str8 = null
-        UUID uuid4 = null
-        Collection of = ImmutableList.of()
+        val z: Boolean = false
+        val str3: String = null
+        val str4: String = null
+        val uuid: UUID = null
+        val uuid2: UUID = null
+        val uuid3: UUID = null
+        val i: Int = 0
+        val str5: String = null
+        val i2: Int = 0
+        val str6: String = null
+        val z2: Boolean = false
+        val str7: String = ""
+        val str8: String = null
+        val uuid4: UUID = null
+        val of: Collection = ImmutableList.of()
         xmlPullParser.nextTag()
         xmlPullParser.require(2, (String) null, "methodResponse")
         xmlPullParser.nextTag()
@@ -96,7 +96,7 @@ val class SLAuthReply {
                     if (skipUntilTag(xmlPullParser, "struct")) {
                         while (skipUntilTag(xmlPullParser, "member")) {
                             if (skipUntilTag(xmlPullParser, "name")) {
-                                String innerText = getInnerText(xmlPullParser)
+                                val innerText: String = getInnerText(xmlPullParser)
                                 finishTag(xmlPullParser)
                                 if (skipUntilTag(xmlPullParser, VrSettingsProviderContract.SETTING_VALUE_KEY)) {
                                     if (innerText.equalsIgnoreCase("session_id")) {
@@ -114,7 +114,7 @@ val class SLAuthReply {
                                     } else if (innerText.equalsIgnoreCase("seed_capability")) {
                                         str6 = getSimpleValue(xmlPullParser)
                                     } else if (innerText.equalsIgnoreCase("login")) {
-                                        String simpleValue = getSimpleValue(xmlPullParser)
+                                        val simpleValue: String = getSimpleValue(xmlPullParser)
                                         z2 = simpleValue.equalsIgnoreCase("true")
                                         z = simpleValue.equalsIgnoreCase("indeterminate")
                                     } else if (innerText.equalsIgnoreCase("next_url")) {
@@ -164,7 +164,7 @@ val class SLAuthReply {
         this.nextMethod = str4
     }
 
-    private Unit finishTag(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+     private fun finishTag(xmlPullParser: XmlPullParser) throws XmlPullParserException, IOException {
         while (xmlPullParser.getEventType() != 1) {
             if (xmlPullParser.getEventType() == 3) {
                 xmlPullParser.next()
@@ -177,24 +177,24 @@ val class SLAuthReply {
         }
     }
 
-    private String getInnerText(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+     private fun getInnerText(xmlPullParser: XmlPullParser) throws XmlPullParserException, IOException {
         if (xmlPullParser.getEventType() != 4) {
             return ""
         }
-        String text = xmlPullParser.getText()
+        val text: String = xmlPullParser.getText()
         xmlPullParser.next()
         return text
     }
 
-    private UUID getInventoryRootValue(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
-        UUID uuid = null
+     private fun getInventoryRootValue(xmlPullParser: XmlPullParser) throws XmlPullParserException, IOException {
+        val uuid: UUID = null
         if (skipUntilTag(xmlPullParser, "array")) {
             if (skipUntilTag(xmlPullParser, "data")) {
                 while (skipUntilTag(xmlPullParser, VrSettingsProviderContract.SETTING_VALUE_KEY)) {
                     if (skipUntilTag(xmlPullParser, "struct")) {
                         while (skipUntilTag(xmlPullParser, "member")) {
                             if (skipUntilTag(xmlPullParser, "name")) {
-                                String innerText = getInnerText(xmlPullParser)
+                                val innerText: String = getInnerText(xmlPullParser)
                                 finishTag(xmlPullParser)
                                 if (skipUntilTag(xmlPullParser, VrSettingsProviderContract.SETTING_VALUE_KEY)) {
                                     if (innerText.equalsIgnoreCase("folder_id")) {
@@ -216,28 +216,28 @@ val class SLAuthReply {
         return uuid
     }
 
-    private String getSimpleValue(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+     private fun getSimpleValue(xmlPullParser: XmlPullParser) throws XmlPullParserException, IOException {
         while (xmlPullParser.getEventType() == 4) {
             xmlPullParser.next()
         }
-        String nextText = xmlPullParser.nextText()
+        val nextText: String = xmlPullParser.nextText()
         xmlPullParser.nextTag()
         Debug.Printf("got value '%s'", nextText)
         return nextText
     }
 
     private List<Friend> parseBuddyList(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
-        LinkedList linkedList = LinkedList()
+        val linkedList: LinkedList = LinkedList()
         if (skipUntilTag(xmlPullParser, "array")) {
             if (skipUntilTag(xmlPullParser, "data")) {
                 while (skipUntilTag(xmlPullParser, VrSettingsProviderContract.SETTING_VALUE_KEY)) {
                     if (skipUntilTag(xmlPullParser, "struct")) {
-                        Int i = 0
-                        Int i2 = 0
-                        UUID uuid = null
+                        val i: Int = 0
+                        val i2: Int = 0
+                        val uuid: UUID = null
                         while (skipUntilTag(xmlPullParser, "member")) {
                             if (skipUntilTag(xmlPullParser, "name")) {
-                                String innerText = getInnerText(xmlPullParser)
+                                val innerText: String = getInnerText(xmlPullParser)
                                 finishTag(xmlPullParser)
                                 if (skipUntilTag(xmlPullParser, VrSettingsProviderContract.SETTING_VALUE_KEY)) {
                                     if (innerText.equalsIgnoreCase("buddy_id")) {
@@ -266,8 +266,8 @@ val class SLAuthReply {
         return linkedList
     }
 
-    private Unit skipTag(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
-        Int i = 0
+     private fun skipTag(xmlPullParser: XmlPullParser) throws XmlPullParserException, IOException {
+        val i: Int = 0
         while (true) {
             switch (xmlPullParser.next()) {
                 case 1:
@@ -287,7 +287,7 @@ val class SLAuthReply {
         }
     }
 
-    private Boolean skipUntilTag(XmlPullParser xmlPullParser, String str) throws XmlPullParserException, IOException {
+     private fun skipUntilTag(xmlPullParser: XmlPullParser, str: String) throws XmlPullParserException, IOException {
         while (xmlPullParser.getEventType() != 3 && xmlPullParser.getEventType() != 1) {
             if (xmlPullParser.getEventType() == 4) {
                 xmlPullParser.next()
@@ -301,18 +301,18 @@ val class SLAuthReply {
         return false
     }
 
-    public Boolean equals(Object obj) {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
         if (!(obj instanceof SLAuthReply)) {
             return false
         }
-        SLAuthReply sLAuthReply = (SLAuthReply) obj
+        val sLAuthReply: SLAuthReply = (SLAuthReply) obj
         return this.simAddress.equals(sLAuthReply.simAddress) && this.simPort == sLAuthReply.simPort && this.agentID.equals(sLAuthReply.agentID) && this.sessionID.equals(sLAuthReply.sessionID) && this.circuitCode == sLAuthReply.circuitCode
     }
 
-    public Int hashCode() {
+     public override fun hashCode(): Int {
         return this.simAddress.hashCode() + 0 + this.simPort + this.agentID.hashCode() + this.sessionID.hashCode() + this.circuitCode
     }
 }

@@ -57,9 +57,9 @@ class ModernInventoryManager {
     /**
      * Create default inventory folders (compatible with SL/Firestorm structure)
      */
-    private Unit createDefaultFolders() {
+     private fun createDefaultFolders() {
         // Standard Second Life inventory folders
-        String[] defaultFolders = {
+        val defaultFolders: Array<String> = {
             "Textures", "Sounds", "Calling Cards", "Landmarks", "Clothing",
             "Objects", "Notecards", "Scripts", "Body Parts", "Trash",
             "Photo Album", "Lost And Found", "Animations", "Gestures",
@@ -67,8 +67,8 @@ class ModernInventoryManager {
         }
         
         for (String folderName : defaultFolders) {
-            UUID folderId = UUID.randomUUID()
-            InventoryFolder folder = InventoryFolder(folderId, folderName, rootFolderId)
+            val folderId: UUID = UUID.randomUUID()
+            val folder: InventoryFolder = InventoryFolder(folderId, folderName, rootFolderId)
             folderCache.put(folderId, folder)
         }
     }
@@ -87,7 +87,7 @@ class ModernInventoryManager {
             if (protocolManager != null && protocolManager.isConnected()) {
                 try {
                     // Request item from grid
-                    InventoryItem item = requestItemFromGrid(itemId)
+                    val item: InventoryItem = requestItemFromGrid(itemId)
                     if (item != null) {
                         inventoryCache.put(itemId, item)
                         return item
@@ -104,7 +104,7 @@ class ModernInventoryManager {
     /**
      * Request item from grid (stub - would use actual protocol)
      */
-    private InventoryItem requestItemFromGrid(UUID itemId) {
+     private fun requestItemFromGrid(itemId: UUID): InventoryItem {
         // Stub implementation - would use HybridProtocolManager to fetch
         Log.d(TAG, "Requesting item from grid: " + itemId)
         return null
@@ -115,7 +115,7 @@ class ModernInventoryManager {
      */
     public CompletableFuture<List<InventoryItem>> getFolderContentsAsync(UUID folderId) {
         return CompletableFuture.supplyAsync(() -> {
-            List<InventoryItem> items = ArrayList<>()
+            val items: List<InventoryItem> = ArrayList<>()
             
             for (InventoryItem item : inventoryCache.values()) {
                 if (item.parentFolderId.equals(folderId)) {
@@ -133,7 +133,7 @@ class ModernInventoryManager {
     public CompletableFuture<Boolean> moveItemAsync(UUID itemId, UUID targetFolderId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                InventoryItem item = inventoryCache.get(itemId)
+                val item: InventoryItem = inventoryCache.get(itemId)
                 if (item == null) {
                     Log.w(TAG, "Item not found: " + itemId)
                     return false
@@ -162,7 +162,7 @@ class ModernInventoryManager {
     public CompletableFuture<Boolean> deleteItemAsync(UUID itemId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                InventoryItem item = inventoryCache.remove(itemId)
+                val item: InventoryItem = inventoryCache.remove(itemId)
                 if (item == null) {
                     Log.w(TAG, "Item not found: " + itemId)
                     return false
@@ -182,11 +182,11 @@ class ModernInventoryManager {
         })
     }
     
-    public Boolean isInventoryLoaded() {
+     public fun isInventoryLoaded(): Boolean {
         return inventoryLoaded
     }
     
-    public UUID getRootFolderId() {
+     public fun getRootFolderId(): UUID {
         return rootFolderId
     }
     

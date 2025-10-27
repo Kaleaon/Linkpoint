@@ -18,16 +18,16 @@ class RLVRestrictions {
 private class RLVRestrictionList {
 
         /* renamed from: -com-lumiyaviewer-lumiya-slproto-modules-rlv-RLVRestrictionType$RLVRuleMatchTypeSwitchesValues  reason: not valid java name */
-        private const val /* synthetic */ Int[] f127comlumiyaviewerlumiyaslprotomodulesrlvRLVRestrictionType$RLVRuleMatchTypeSwitchesValues = null
+        private const val /* synthetic */ IntArray f127comlumiyaviewerlumiyaslprotomodulesrlvRLVRestrictionType$RLVRuleMatchTypeSwitchesValues = null
         private Map<String, HashSet<UUID>> restMap
 
         /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-modules-rlv-RLVRestrictionType$RLVRuleMatchTypeSwitchesValues  reason: not valid java name */
         @JvmStatic
-private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRestrictionType$RLVRuleMatchTypeSwitchesValues() {
+private /* synthetic */ IntArray m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRestrictionType$RLVRuleMatchTypeSwitchesValues() {
             if (f127comlumiyaviewerlumiyaslprotomodulesrlvRLVRestrictionType$RLVRuleMatchTypeSwitchesValues != null) {
                 return f127comlumiyaviewerlumiyaslprotomodulesrlvRLVRestrictionType$RLVRuleMatchTypeSwitchesValues
             }
-            Int[] iArr = Int[RLVRestrictionType.RLVRuleMatchType.values().length]
+            IntArray iArr = Int[RLVRestrictionType.RLVRuleMatchType.values().length]
             try {
                 iArr[RLVRestrictionType.RLVRuleMatchType.TargetNoExceptions.ordinal()] = 1
             } catch (NoSuchFieldError e) {
@@ -111,7 +111,7 @@ private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRe
                 if (r0 == 0) goto L_0x002e
                 return r4
             L_0x002e:
-                Int[] r0 = m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRestrictionType$RLVRuleMatchTypeSwitchesValues()
+                IntArray r0 = m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRestrictionType$RLVRuleMatchTypeSwitchesValues()
                 Int r1 = r6.ordinal()
                 r0 = r0[r1]
                 switch(r0) {

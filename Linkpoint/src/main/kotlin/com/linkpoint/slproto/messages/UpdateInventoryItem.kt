@@ -25,7 +25,7 @@ class UpdateInventoryItem : SLMessage() {
         public Int CallbackID
         public Int CreationDate
         public UUID CreatorID
-        public Byte[] Description
+        public ByteArray Description
         public Int EveryoneMask
         public Int Flags
         public UUID FolderID
@@ -34,7 +34,7 @@ class UpdateInventoryItem : SLMessage() {
         public Boolean GroupOwned
         public Int InvType
         public UUID ItemID
-        public Byte[] Name
+        public ByteArray Name
         public Int NextOwnerMask
         public UUID OwnerID
         public Int OwnerMask
@@ -49,24 +49,24 @@ class UpdateInventoryItem : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 53
-        Iterator<T> it = this.InventoryData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 53
+        val it: Iterator<T> = this.InventoryData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
-            InventoryData inventoryData = (InventoryData) it.next()
+            val inventoryData: InventoryData = (InventoryData) it.next()
             i = inventoryData.Description.length + inventoryData.Name.length + 133 + 1 + 4 + 4 + i2
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleUpdateInventoryItem(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 10)
@@ -100,13 +100,13 @@ class UpdateInventoryItem : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.TransactionID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            InventoryData inventoryData = InventoryData()
+            val inventoryData: InventoryData = InventoryData()
             inventoryData.ItemID = unpackUUID(byteBuffer)
             inventoryData.FolderID = unpackUUID(byteBuffer)
             inventoryData.CallbackID = unpackInt(byteBuffer)

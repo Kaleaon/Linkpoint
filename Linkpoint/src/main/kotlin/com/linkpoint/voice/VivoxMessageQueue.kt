@@ -13,7 +13,7 @@ class VivoxMessageQueue {
     }
 
     @JvmStatic
-    VivoxMessageQueue getInstance() {
+     fun getInstance(): VivoxMessageQueue {
         return InstanceHolder.instance
     }
 
@@ -22,8 +22,8 @@ class VivoxMessageQueue {
      * Enabled unnecessary exception pruning
      * Enabled aggressive exception aggregation
      */
-    private Unit handleNotification() {
-        Object object = this.messageLock
+     private fun handleNotification() {
+        val object: Object = this.messageLock
         synchronized (object) {
             this.messageLock.notifyAll()
             return
@@ -31,7 +31,7 @@ class VivoxMessageQueue {
     }
 
     @JvmStatic
-    Unit handle_notification() {
+     fun handle_notification() {
         VivoxMessageQueue.getInstance().handleNotification()
     }
 
@@ -41,7 +41,7 @@ class VivoxMessageQueue {
      * Enabled aggressive exception aggregation
      */
     public vx_message_base_t getMessage() {
-        Object object = this.messageLock
+        val object: Object = this.messageLock
         synchronized (object) {
             while (true) {
                 vx_message_base_t vx_message_base_t2

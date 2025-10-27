@@ -34,9 +34,9 @@ class AvatarVisualState {
         this.avatarUUID = uuid2
     }
 
-    private Unit startAnimation(UUID uuid, Int i, Long j, DrawableAvatar drawableAvatar) {
+     private fun startAnimation(uuid: UUID, i: Int, j: Long, drawableAvatar: DrawableAvatar) {
         AnimationSequenceInfo animationSequenceInfo
-        AnimationSequenceInfo animationSequenceInfo2 = (AnimationSequenceInfo) this.animations.get(uuid)
+        val animationSequenceInfo2: AnimationSequenceInfo = (AnimationSequenceInfo) this.animations.get(uuid)
         if (animationSequenceInfo2 == null) {
             Debug.Printf("Anim: Starting animation %s seqID %d", uuid.toString(), Integer.valueOf(i))
             animationSequenceInfo2 = AnimationSequenceInfo.newSequence(uuid, j, i)
@@ -58,27 +58,27 @@ class AvatarVisualState {
     }
 
     private synchronized Unit updateAvatarShape() {
-        DrawableAvatar drawableAvatar = SpatialIndex.getInstance().getDrawableAvatar(this.avatarObject)
+        val drawableAvatar: DrawableAvatar = SpatialIndex.getInstance().getDrawableAvatar(this.avatarObject)
         if (drawableAvatar != null) {
             drawableAvatar.UpdateShapeParams(this.avatarShapeParams)
         }
     }
 
     private synchronized Unit updateTextures() {
-        DrawableAvatar drawableAvatar = SpatialIndex.getInstance().getDrawableAvatar(this.avatarObject)
+        val drawableAvatar: DrawableAvatar = SpatialIndex.getInstance().getDrawableAvatar(this.avatarObject)
         if (drawableAvatar != null) {
             drawableAvatar.UpdateTextures(this.textures)
         }
     }
 
     public synchronized Unit ApplyAvatarAnimation(AvatarAnimation avatarAnimation) {
-        Long currentTimeMillis = System.currentTimeMillis()
-        Collection hashSet = HashSet()
-        Iterable<UUID> hashSet2 = HashSet()
+        val currentTimeMillis: Long = System.currentTimeMillis()
+        val hashSet: Collection = HashSet()
+        val hashSet2: Iterable<UUID> = HashSet()
         hashSet2.addAll(this.animations.keySet())
-        DrawableAvatar drawableAvatar = SpatialIndex.getInstance().getDrawableAvatar(this.avatarObject)
+        val drawableAvatar: DrawableAvatar = SpatialIndex.getInstance().getDrawableAvatar(this.avatarObject)
         for (AnimationList animationList : avatarAnimation.AnimationList_Fields) {
-            UUID uuid = animationList.AnimID
+            val uuid: UUID = animationList.AnimID
             hashSet.add(uuid)
             hashSet2.remove(uuid)
             startAnimation(uuid, animationList.AnimSequenceID, currentTimeMillis, drawableAvatar)
@@ -88,7 +88,7 @@ class AvatarVisualState {
             startAnimation(defaultStandingAnimation, 1, currentTimeMillis, drawableAvatar)
         }
         for (UUID uuid2 : hashSet2) {
-            AnimationSequenceInfo animationSequenceInfo = (AnimationSequenceInfo) this.animations.get(uuid2)
+            val animationSequenceInfo: AnimationSequenceInfo = (AnimationSequenceInfo) this.animations.get(uuid2)
             if (animationSequenceInfo != null) {
                 AnimationSequenceInfo animationSequenceInfo2
                 if (animationSequenceInfo.sequenceID != 0) {
@@ -99,7 +99,7 @@ class AvatarVisualState {
                         animationSequenceInfo2 = animationSequenceInfo
                         i = 0
                     } else {
-                        Int obj2 = 1
+                        val obj2: Int = 1
                         animationSequenceInfo2 = animationSequenceInfo
                         i = 1
                     }
@@ -129,7 +129,7 @@ class AvatarVisualState {
     }
 
     public synchronized Unit ApplyAvatarAppearance(AvatarAppearance avatarAppearance) {
-        AvatarShapeParams avatarShapeParams = this.avatarShapeParams
+        val avatarShapeParams: AvatarShapeParams = this.avatarShapeParams
         this.avatarShapeParams = AvatarShapeParams.create(avatarShapeParams, avatarAppearance)
         if (!this.avatarShapeParams.equals(avatarShapeParams)) {
             updateAvatarShape()
@@ -145,8 +145,8 @@ class AvatarVisualState {
         }
     }
 
-    public synchronized Unit ApplyVisualParams(Int[] iArr) {
-        AvatarShapeParams avatarShapeParams = this.avatarShapeParams
+    public synchronized Unit ApplyVisualParams(IntArray iArr) {
+        val avatarShapeParams: AvatarShapeParams = this.avatarShapeParams
         this.avatarShapeParams = AvatarShapeParams.create(avatarShapeParams, iArr)
         if (!this.avatarShapeParams.equals(avatarShapeParams)) {
             updateAvatarShape()

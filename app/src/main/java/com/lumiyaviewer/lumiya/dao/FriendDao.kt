@@ -9,7 +9,7 @@ import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
 class FriendDao : AbstractDao<Friend, UUID> {
-    String TABLENAME = "Friends"
+    val TABLENAME: String = "Friends"
 
     class Properties {
         Property IsOnline = Property(3, Boolean.TYPE, "isOnline", false, "IS_ONLINE")

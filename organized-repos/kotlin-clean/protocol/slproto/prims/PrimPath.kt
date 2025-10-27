@@ -8,7 +8,7 @@ import java.util.ArrayList
 class PrimPath {
     private const val MIN_DETAIL_FACES: Int = 6
     @JvmStatic
-private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 0.5f}
+private val tableScale: FloatArray = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 0.5f}
     Boolean Dirty = true
     Boolean Open = false
     ArrayList<PathPoint> Path = ArrayList<>()
@@ -69,12 +69,12 @@ private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 
         LLVector3 lLVector3 = LLVector3(1.0f, 0.0f, 0.0f)
         Float f19 = primPathParams.TwistBegin * f3
         Float f20 = primPathParams.TwistEnd * f3
-        Float f21 = 1.0f / ((Float) i)
+        Float f21 = 1.0f / (i.toFloat())
         Float f22 = primPathParams.Begin
         PathPoint pathPoint = PathPoint()
         Float f23 = 6.2831855f * f9 * f22
-        Float sin = (Float) (Math.sin((Double) f23) * ((Double) PrimMath.lerp(f8, f16, f22)))
-        pathPoint.pos.set(PrimMath.lerp(0.0f, primPathParams.ShearX, sin) + 0.0f + (PrimMath.lerp(-f10, f10, f22) * 0.5f), ((Float) (Math.cos((Double) f23) * ((Double) PrimMath.lerp(f8, f16, f22)))) + PrimMath.lerp(0.0f, primPathParams.ShearY, sin), sin)
+        Float sin = (Float) (Math.sin(f23.toDouble()) * (PrimMath.toDouble().lerp(f8, f16, f22)))
+        pathPoint.pos.set(PrimMath.lerp(0.0f, primPathParams.ShearX, sin) + 0.0f + (PrimMath.lerp(-f10, f10, f22) * 0.5f), ((Float) (Math.cos(f23.toDouble()) * (PrimMath.toDouble().lerp(f8, f16, f22)))) + PrimMath.lerp(0.0f, primPathParams.ShearY, sin), sin)
         pathPoint.scale.x = PrimMath.lerp(f5, f4, f22) * f11
         pathPoint.scale.y = PrimMath.lerp(f7, f6, f22) * f12
         pathPoint.TexT = f22
@@ -82,11 +82,11 @@ private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 
         lLQuaternion2.setQuat(f23, lLVector3)
         pathPoint.rot.setMul(lLQuaternion, lLQuaternion2)
         this.Path.add(pathPoint)
-        for (Float f24 = ((Float) ((Int) ((f22 + f21) * ((Float) i)))) / ((Float) i); f24 < primPathParams.End; f24 += f21) {
+        for (Float f24 = ((Float) ((Int) ((f22 + f21) * (i.toFloat())))) / (i.toFloat()); f24 < primPathParams.End; f24 += f21) {
             PathPoint pathPoint2 = PathPoint()
             Float f25 = 6.2831855f * f9 * f24
-            Float cos = (Float) (Math.cos((Double) f25) * ((Double) PrimMath.lerp(f8, f16, f24)))
-            Float sin2 = (Float) (Math.sin((Double) f25) * ((Double) PrimMath.lerp(f8, f16, f24)))
+            Float cos = (Float) (Math.cos(f25.toDouble()) * (PrimMath.toDouble().lerp(f8, f16, f24)))
+            Float sin2 = (Float) (Math.sin(f25.toDouble()) * (PrimMath.toDouble().lerp(f8, f16, f24)))
             pathPoint2.pos.set(PrimMath.lerp(0.0f, primPathParams.ShearX, sin2) + 0.0f + (PrimMath.lerp(-f10, f10, f24) * 0.5f), cos + PrimMath.lerp(0.0f, primPathParams.ShearY, sin2), sin2)
             pathPoint2.scale.x = PrimMath.lerp(f5, f4, f24) * f11
             pathPoint2.scale.y = PrimMath.lerp(f7, f6, f24) * f12
@@ -99,8 +99,8 @@ private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 
         Float f26 = primPathParams.End
         PathPoint pathPoint3 = PathPoint()
         Float f27 = f9 * 6.2831855f * f26
-        Float cos2 = (Float) (Math.cos((Double) f27) * ((Double) PrimMath.lerp(f8, f16, f26)))
-        Float lerp = (Float) (((Double) PrimMath.lerp(f8, f16, f26)) * Math.sin((Double) f27))
+        Float cos2 = (Float) (Math.cos(f27.toDouble()) * (PrimMath.toDouble().lerp(f8, f16, f26)))
+        Float lerp = (Float) ((PrimMath.toDouble().lerp(f8, f16, f26)) * Math.sin(f27.toDouble()))
         pathPoint3.pos.set((PrimMath.lerp(-f10, f10, f26) * 0.5f) + PrimMath.lerp(0.0f, primPathParams.ShearX, lerp) + 0.0f, cos2 + PrimMath.lerp(0.0f, primPathParams.ShearY, lerp), lerp)
         pathPoint3.scale.x = PrimMath.lerp(f5, f4, f26) * f11
         pathPoint3.scale.y = PrimMath.lerp(f7, f6, f26) * f12
@@ -124,7 +124,7 @@ private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 
         this.Open = true
         switch (primPathParams.CurveType & PrimProfileParams.LL_PCODE_HOLE_MASK) {
             case 32:
-                Int floor = (Int) Math.floor(Math.floor((Double) ((Math.abs(primPathParams.TwistBegin - primPathParams.TwistEnd) * 3.5f * (f - 0.5f)) + (6.0f * f))) * ((Double) primPathParams.Revolutions))
+                Int floor = Math.toInt().floor(Math.floor((Double) ((Math.abs(primPathParams.TwistBegin - primPathParams.TwistEnd) * 3.5f * (f - 0.5f)) + (6.0f * f))) * (primPathParams.toDouble().Revolutions))
                 if (z) {
                     floor = i2
                 }
@@ -134,8 +134,8 @@ private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 
                 if (primPathParams.End - primPathParams.Begin >= 0.99f && primPathParams.ScaleX >= 0.99f) {
                     this.Open = false
                 }
-                genNGon(primPathParams, (Int) Math.floor((Double) (6.0f * f)), 0.0f, 1.0f, 1.0f)
-                Float size = 1.0f / ((Float) this.Path.size())
+                genNGon(primPathParams, Math.toInt().floor((Double) (6.0f * f)), 0.0f, 1.0f, 1.0f)
+                Float size = 1.0f / (this.toFloat().Path.size())
                 Int i3 = 0
                 Float f2 = 0.5f
                 while (true) {
@@ -152,7 +152,7 @@ private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 
                 this.Step = 1.0f / ((Float) 4)
                 this.Path.ensureCapacity(5)
                 for (Int i5 = 0; i5 < 5; i5++) {
-                    Float f3 = ((Float) i5) * this.Step
+                    Float f3 = (i5.toFloat()) * this.Step
                     PathPoint pathPoint = PathPoint()
                     pathPoint.pos.set(0.0f, PrimMath.lerp(0.0f, (Float) ((-Math.sin((Double) (primPathParams.TwistEnd * 3.1415927f * f3))) * 0.5d), f3), PrimMath.lerp(-0.5f, (Float) (Math.cos((Double) (primPathParams.TwistEnd * 3.1415927f * f3)) * 0.5d), f3))
                     pathPoint.scale.x = PrimMath.lerp(1.0f, primPathParams.ScaleX, f3)
@@ -163,7 +163,7 @@ private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 
                 }
                 break
             default:
-                Int floor2 = ((Int) Math.floor((Double) (Math.abs(primPathParams.TwistBegin - primPathParams.TwistEnd) * 3.5f * (f - 0.5f)))) + 2
+                Int floor2 = (Math.toInt().floor((Double) (Math.abs(primPathParams.TwistBegin - primPathParams.TwistEnd) * 3.5f * (f - 0.5f)))) + 2
                 if (floor2 < i + 2) {
                     floor2 = i + 2
                 }
@@ -172,7 +172,7 @@ private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 
                 LLVector2 beginScale = primPathParams.getBeginScale()
                 LLVector2 endScale = primPathParams.getEndScale()
                 for (Int i6 = 0; i6 < floor2; i6++) {
-                    Float lerp = PrimMath.lerp(primPathParams.Begin, primPathParams.End, ((Float) i6) * this.Step)
+                    Float lerp = PrimMath.lerp(primPathParams.Begin, primPathParams.End, (i6.toFloat()) * this.Step)
                     PathPoint pathPoint2 = PathPoint()
                     pathPoint2.pos.set(PrimMath.lerp(0.0f, primPathParams.ShearX, lerp), PrimMath.lerp(0.0f, primPathParams.ShearY, lerp), lerp - 0.5f)
                     pathPoint2.rot.setQuat(PrimMath.lerp(primPathParams.TwistBegin * 3.1415927f, primPathParams.TwistEnd * 3.1415927f, lerp), 0.0f, 0.0f, 1.0f)

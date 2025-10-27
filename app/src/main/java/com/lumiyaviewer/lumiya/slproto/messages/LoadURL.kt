@@ -8,12 +8,12 @@ class LoadURL : SLMessage {
     Data Data_Field = Data()
 
     class Data {
-        Byte[] Message
+        ByteArray Message
         UUID ObjectID
-        Byte[] ObjectName
+        ByteArray ObjectName
         UUID OwnerID
         Boolean OwnerIsGroup
-        Byte[] URL
+        ByteArray URL
     }
 
     constructor() {

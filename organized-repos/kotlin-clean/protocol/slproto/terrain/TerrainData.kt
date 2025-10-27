@@ -11,15 +11,15 @@ class TerrainData {
 const val P: IntatchesPerEdge = 16
 const val P: IntatchesSize = 16
 const val T: InterrainPerEdge = 256
-    private val Float[] heightMap = Float[65536]
-    private val Boolean[] patchDirtyMap = Boolean[256]
+    private val FloatArray heightMap = FloatArray(65536)
+    private val BooleanArray patchDirtyMap = BooleanArray(256)
     private volatile TerrainTextures terrainTextures = TerrainTextures()
     private Int validCount = 0
-    private val Boolean[] validMap = Boolean[65536]
-    private val Float[] vertexHeights = Float[66049]
+    private val BooleanArray validMap = BooleanArray(65536)
+    private val FloatArray vertexHeights = FloatArray(66049)
     private val Object vertexLock = Object()
-    private val Float[] vertexNormals = Float[132098]
-    private val Boolean[] vertexValids = Boolean[66049]
+    private val FloatArray vertexNormals = FloatArray(132098)
+    private val BooleanArray vertexValids = BooleanArray(66049)
     private Float waterHeight = 0.0f
     private Boolean waterHeightValid = false
 
@@ -80,7 +80,7 @@ const val T: InterrainPerEdge = 256
                     i6++
                 }
                 if (i6 == 4) {
-                    this.vertexHeights[(i2 * InputDeviceCompat.SOURCE_KEYBOARD) + i5] = f / ((Float) i6)
+                    this.vertexHeights[(i2 * InputDeviceCompat.SOURCE_KEYBOARD) + i5] = f / (i6.toFloat())
                     Float f2 = this.heightMap[(min4 * 256) + min3] - this.heightMap[min + (min4 * 256)]
                     Float f3 = this.heightMap[(min4 * 256) + min3] - this.heightMap[(min2 * 256) + min3]
                     this.vertexNormals[((i2 * InputDeviceCompat.SOURCE_KEYBOARD) + i5) * 2] = f2
@@ -103,12 +103,12 @@ const val T: InterrainPerEdge = 256
         }
     }
 
-    fun ProcessLayerData(Byte[] bArr) {
+    fun ProcessLayerData(ByteArray bArr) {
         TerrainPatch DecompressPatch
         BitBuffer bitBuffer = BitBuffer(bArr)
         Int bits = bitBuffer.getBits(16)
         Int bits2 = bitBuffer.getBits(8)
-        Debug.Log(String.format("Terrain: ProcessLayerData: stride 0x%x patchSize 0x%x type 0x%x", Object[]{Integer.valueOf(bits), Integer.valueOf(bits2), Integer.valueOf(bitBuffer.getBits(8))}))
+        Debug.Log(String.format("Terrain: ProcessLayerData: stride 0x%x patchSize 0x%x type 0x%x", Array<Any>{Integer.valueOf(bits), Integer.valueOf(bits2), Integer.valueOf(bitBuffer.getBits(8))}))
         synchronized (this.vertexLock) {
             while (!bitBuffer.isEOF() && (DecompressPatch = TerrainPatch.DecompressPatch(bitBuffer, bits2)) != null) {
                 Int x = DecompressPatch.getX()
@@ -161,8 +161,8 @@ const val T: InterrainPerEdge = 256
         if (!z) {
             return null
         }
-        Float[] fArr = Float[289]
-        Float[] fArr2 = Float[578]
+        FloatArray fArr = FloatArray(289)
+        FloatArray fArr2 = FloatArray(578)
         Int i6 = 0
         while (true) {
             Int i7 = i6
@@ -178,7 +178,7 @@ const val T: InterrainPerEdge = 256
                 }
                 i6 = i7 + 1
             } else {
-                return TerrainPatchInfo(TerrainPatchHeightMap(this.waterHeight, fArr, fArr2, 17, 17), this.terrainTextures, ((Float) i) / 16.0f, ((Float) i) / 16.0f, 0.0625f, 0.0625f)
+                return TerrainPatchInfo(TerrainPatchHeightMap(this.waterHeight, fArr, fArr2, 17, 17), this.terrainTextures, (i.toFloat()) / 16.0f, (i.toFloat()) / 16.0f, 0.0625f, 0.0625f)
             }
         }
     }

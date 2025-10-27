@@ -26,7 +26,7 @@ class AgentMovementComplete : SLMessage() {
 
     @JvmStatic
     class SimData {
-        public Byte[] ChannelVersion
+        public ByteArray ChannelVersion
     }
 
     public AgentMovementComplete() {

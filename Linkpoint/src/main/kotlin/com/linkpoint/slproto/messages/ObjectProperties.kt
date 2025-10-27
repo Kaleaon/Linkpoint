@@ -19,7 +19,7 @@ class ObjectProperties : SLMessage() {
         public Int Category
         public Long CreationDate
         public UUID CreatorID
-        public Byte[] Description
+        public ByteArray Description
         public Int EveryoneMask
         public UUID FolderID
         public UUID FromTaskID
@@ -28,7 +28,7 @@ class ObjectProperties : SLMessage() {
         public Int InventorySerial
         public UUID ItemID
         public UUID LastOwnerID
-        public Byte[] Name
+        public ByteArray Name
         public Int NextOwnerMask
         public UUID ObjectID
         public UUID OwnerID
@@ -36,33 +36,33 @@ class ObjectProperties : SLMessage() {
         public Int OwnershipCost
         public Int SalePrice
         public Int SaleType
-        public Byte[] SitName
-        public Byte[] TextureID
-        public Byte[] TouchName
+        public ByteArray SitName
+        public ByteArray TextureID
+        public ByteArray TouchName
     }
 
     public ObjectProperties() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 3
-        Iterator<T> it = this.ObjectData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 3
+        val it: Iterator<T> = this.ObjectData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
-            ObjectData objectData = (ObjectData) it.next()
+            val objectData: ObjectData = (ObjectData) it.next()
             i = objectData.TextureID.length + objectData.Name.length + 175 + 1 + objectData.Description.length + 1 + objectData.TouchName.length + 1 + objectData.SitName.length + 1 + i2
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleObjectProperties(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) 9)
         byteBuffer.put((Byte) this.ObjectData_Fields.size())
@@ -97,10 +97,10 @@ class ObjectProperties : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ObjectData objectData = ObjectData()
+            val objectData: ObjectData = ObjectData()
             objectData.ObjectID = unpackUUID(byteBuffer)
             objectData.CreatorID = unpackUUID(byteBuffer)
             objectData.OwnerID = unpackUUID(byteBuffer)

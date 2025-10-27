@@ -32,7 +32,7 @@ abstract class ResultOperator<K, Tin, Tout> : ResultHandler<K, Tin> {
 
     protected abstract Tout onData(Tin tin)
 
-    fun onResultData(K k, Tin tin) {
+    fun onResultData(K k, tin: Tin) {
         if (this.executor != null) {
             this.executor.execute(() -> this.toHandler.onResultData(k, onData(tin)))
         } else {
@@ -40,7 +40,7 @@ abstract class ResultOperator<K, Tin, Tout> : ResultHandler<K, Tin> {
         }
     }
 
-    fun onResultError(K k, Throwable th) {
+    fun onResultError(K k, th: Throwable) {
         if (this.executor != null) {
             this.executor.execute(() -> this.toHandler.onResultError(k, th))
         } else {

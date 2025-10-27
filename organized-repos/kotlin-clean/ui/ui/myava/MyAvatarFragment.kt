@@ -30,7 +30,7 @@ import java.util.UUID
 class MyAvatarFragment : FragmentWithTitle(), AdapterView.OnItemClickListener, ChatterNameRetriever.OnChatterNameUpdated {
 
     /* renamed from: -com-lumiyaviewer-lumiya-ui-myava-MyAvatarDetailsPagesSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f462comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues = null
+    private const val /* synthetic */ IntArray f462comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues = null
     @BindView(2131755497)
     TextView myAvatarName
     private ChatterNameRetriever myAvatarNameRetriever = null
@@ -45,16 +45,16 @@ class MyAvatarFragment : FragmentWithTitle(), AdapterView.OnItemClickListener, C
     private class MyAvatarPagesAdapter : ArrayAdapter()<MyAvatarDetailsPages> {
 
         /* renamed from: -com-lumiyaviewer-lumiya-ui-myava-MyAvatarDetailsPagesSwitchesValues  reason: not valid java name */
-        private const val /* synthetic */ Int[] f463comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues = null
-        final /* synthetic */ Int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$ui$myava$MyAvatarDetailsPages
+        private const val /* synthetic */ IntArray f463comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues = null
+        final /* synthetic */ IntArray $SWITCH_TABLE$com$lumiyaviewer$lumiya$ui$myava$MyAvatarDetailsPages
 
         /* renamed from: -getcom-lumiyaviewer-lumiya-ui-myava-MyAvatarDetailsPagesSwitchesValues  reason: not valid java name */
         @JvmStatic
-private /* synthetic */ Int[] m655getcomlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues() {
+private /* synthetic */ IntArray m655getcomlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues() {
             if (f463comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues != null) {
                 return f463comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues
             }
-            Int[] iArr = Int[MyAvatarDetailsPages.values().length]
+            IntArray iArr = Int[MyAvatarDetailsPages.values().length]
             try {
                 iArr[MyAvatarDetailsPages.pageBalance.ordinal()] = 1
             } catch (NoSuchFieldError e) {
@@ -105,11 +105,11 @@ private /* synthetic */ Int[] m655getcomlumiyaviewerlumiyauimyavaMyAvatarDetails
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-ui-myava-MyAvatarDetailsPagesSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m653getcomlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues() {
+private /* synthetic */ IntArray m653getcomlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues() {
         if (f462comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues != null) {
             return f462comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues
         }
-        Int[] iArr = Int[MyAvatarDetailsPages.values().length]
+        IntArray iArr = Int[MyAvatarDetailsPages.values().length]
         try {
             iArr[MyAvatarDetailsPages.pageBalance.ordinal()] = 1
         } catch (NoSuchFieldError e) {

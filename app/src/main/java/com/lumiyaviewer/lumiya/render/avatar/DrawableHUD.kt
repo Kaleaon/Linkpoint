@@ -54,11 +54,11 @@ class DrawableHUD {
     }
 
     private fun processObjectExtents(sLObjectInfo: SLObjectInfo, matrixStack: MatrixStack, z: Boolean): Unit {
-        r0 = Float[8]
+        r0 = FloatArray(8)
         Vector3Array objectCoords = sLObjectInfo.getObjectCoords()
         Int elementOffset = objectCoords.getElementOffset(0)
         Int elementOffset2 = objectCoords.getElementOffset(1)
-        Float[] data = objectCoords.getData()
+        FloatArray data = objectCoords.getData()
         matrixStack.glTranslatef(data[elementOffset + 0], data[elementOffset + 1], data[elementOffset + 2])
         matrixStack.glMultMatrixf(sLObjectInfo.getRotation().getInverseMatrix(), 0)
         r0[0] = (-data[elementOffset2 + 0]) / 2.0f

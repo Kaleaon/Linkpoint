@@ -16,12 +16,12 @@ class RezSingleAttachmentFromInv : SLMessage {
 
     class ObjectData {
         Int AttachmentPt
-        Byte[] Description
+        ByteArray Description
         Int EveryoneMask
         Int GroupMask
         Int ItemFlags
         UUID ItemID
-        Byte[] Name
+        ByteArray Name
         Int NextOwnerMask
         UUID OwnerID
     }

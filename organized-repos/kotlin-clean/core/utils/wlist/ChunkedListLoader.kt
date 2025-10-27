@@ -299,7 +299,7 @@ protected class LoadResult<E> {
             monitor-enter(r3)
             java.lang.String r4 = "ChatView: visible range %d, %d size %d above possible %s below possible %s"
             r0 = 5
-            java.lang.Object[] r5 = java.lang.Object[r0]     // Catch:{ all -> 0x00fb }
+            java.lang.Array<Any> r5 = java.lang.Object[r0]     // Catch:{ all -> 0x00fb }
             java.lang.Integer r0 = java.lang.Integer.valueOf(r9)     // Catch:{ all -> 0x00fb }
             r6 = 0
             r5[r6] = r0     // Catch:{ all -> 0x00fb }
@@ -353,7 +353,7 @@ protected class LoadResult<E> {
             r8.loadAboveWanted = r0     // Catch:{ all -> 0x0100 }
             java.lang.String r0 = "ChatView: requesting load above id %d"
             r4 = 1
-            java.lang.Object[] r4 = java.lang.Object[r4]     // Catch:{ all -> 0x0100 }
+            java.lang.Array<Any> r4 = java.lang.Object[r4]     // Catch:{ all -> 0x0100 }
             Long r6 = r8.loadAboveTopmostId     // Catch:{ all -> 0x0100 }
             java.lang.Long r5 = java.lang.Long.valueOf(r6)     // Catch:{ all -> 0x0100 }
             r6 = 0
@@ -389,7 +389,7 @@ protected class LoadResult<E> {
             r8.loadBelowWanted = r0     // Catch:{ all -> 0x012b }
             java.lang.String r0 = "ChatView: requesting load below id %d"
             r4 = 1
-            java.lang.Object[] r4 = java.lang.Object[r4]     // Catch:{ all -> 0x012b }
+            java.lang.Array<Any> r4 = java.lang.Object[r4]     // Catch:{ all -> 0x012b }
             Long r6 = r8.loadBelowLastId     // Catch:{ all -> 0x012b }
             java.lang.Long r5 = java.lang.Long.valueOf(r6)     // Catch:{ all -> 0x012b }
             r6 = 0
@@ -404,7 +404,7 @@ protected class LoadResult<E> {
             Boolean r0 = r0.compareAndSet(r2, r1)
             if (r0 == 0) goto L_0x01cf
             java.lang.String r0 = "ChatView: requesting loadMoreData ()"
-            java.lang.Object[] r1 = java.lang.Object[r2]
+            java.lang.Array<Any> r1 = java.lang.Object[r2]
             com.lumiyaviewer.lumiya.Debug.Printf(r0, r1)
             java.util.concurrent.Executor r0 = r8.executor
             java.lang.Runnable r1 = r8.loadMoreData
@@ -509,7 +509,7 @@ protected class LoadResult<E> {
             r8.loadBelowWanted = r0     // Catch:{ all -> 0x0198 }
             java.lang.String r0 = "ChatView: requesting load below id %d"
             r4 = 1
-            java.lang.Object[] r4 = java.lang.Object[r4]     // Catch:{ all -> 0x0198 }
+            java.lang.Array<Any> r4 = java.lang.Object[r4]     // Catch:{ all -> 0x0198 }
             Long r6 = r8.loadBelowLastId     // Catch:{ all -> 0x0198 }
             java.lang.Long r5 = java.lang.Long.valueOf(r6)     // Catch:{ all -> 0x0198 }
             r6 = 0
@@ -539,7 +539,7 @@ protected class LoadResult<E> {
             r8.loadAboveWanted = r0     // Catch:{ all -> 0x01cc }
             java.lang.String r0 = "ChatView: requesting load above id %d"
             r4 = 1
-            java.lang.Object[] r4 = java.lang.Object[r4]     // Catch:{ all -> 0x01cc }
+            java.lang.Array<Any> r4 = java.lang.Object[r4]     // Catch:{ all -> 0x01cc }
             Long r6 = r8.loadAboveTopmostId     // Catch:{ all -> 0x01cc }
             java.lang.Long r5 = java.lang.Long.valueOf(r6)     // Catch:{ all -> 0x01cc }
             r6 = 0
@@ -556,7 +556,7 @@ protected class LoadResult<E> {
             throw r0
         L_0x01cf:
             java.lang.String r0 = "ChatView: loadMoreData() already requested"
-            java.lang.Object[] r1 = java.lang.Object[r2]
+            java.lang.Array<Any> r1 = java.lang.Object[r2]
             com.lumiyaviewer.lumiya.Debug.Printf(r0, r1)
             goto L_0x00f0
         L_0x01d9:

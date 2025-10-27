@@ -15,10 +15,10 @@ class LinkInventoryItem : SLMessage {
 
     class InventoryBlock {
         Int CallbackID
-        Byte[] Description
+        ByteArray Description
         UUID FolderID
         Int InvType
-        Byte[] Name
+        ByteArray Name
         UUID OldItemID
         UUID TransactionID
         Int Type

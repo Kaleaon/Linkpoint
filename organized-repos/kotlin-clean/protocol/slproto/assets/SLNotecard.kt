@@ -61,7 +61,7 @@ private class AttachmentSpan : ReplacementSpan() : InventoryEntrySpan {
                 Paint paint2 = Paint(paint)
                 paint2.setUnderlineText(true)
                 paint2.setColor(Color.rgb(0, 50, 100))
-                canvas.drawText(this.linkText, 0, this.linkText.length(), f, (Float) i4, paint2)
+                canvas.drawText(this.linkText, 0, this.linkText.length(), f, i4.toFloat(), paint2)
             }
         }
 
@@ -79,7 +79,7 @@ private class AttachmentSpan : ReplacementSpan() : InventoryEntrySpan {
                 fontMetricsInt.top = fontMetricsInt2.top
             }
             if (i != i2) {
-                return (Int) paint.measureText(this.linkText, 0, this.linkText.length())
+                return paint.toInt().measureText(this.linkText, 0, this.linkText.length())
             }
             return 0
         }
@@ -109,8 +109,8 @@ private class NotecardAttachment {
         StringBuilder sb = StringBuilder()
         this.attachments = ArrayList(0)
         InventoryEntrySpan[] inventoryEntrySpanArr = (InventoryEntrySpan[]) spanned.getSpans(0, spanned.length(), InventoryEntrySpan.class)
-        Int[] iArr = Int[inventoryEntrySpanArr.length]
-        Int[] iArr2 = Int[inventoryEntrySpanArr.length]
+        IntArray iArr = Int[inventoryEntrySpanArr.length]
+        IntArray iArr2 = Int[inventoryEntrySpanArr.length]
         for (Int i = 0; i < inventoryEntrySpanArr.length; i++) {
             iArr[i] = spanned.getSpanStart(inventoryEntrySpanArr[i])
             iArr2[i] = spanned.getSpanEnd(inventoryEntrySpanArr[i])
@@ -150,7 +150,7 @@ private class NotecardAttachment {
         this.notecardText = ""
     }
 
-    public SLNotecard(Byte[] bArr, Boolean z) throws SimpleStringParser.StringParsingException {
+    public SLNotecard(ByteArray bArr, Boolean z) throws SimpleStringParser.StringParsingException {
         String stringFromVariableUTF = SLMessage.stringFromVariableUTF(bArr)
         this.isScript = z
         if (!z) {
@@ -218,7 +218,7 @@ private class NotecardAttachment {
         return arrayList
     }
 
-    public Byte[] toLindenText() {
+    public ByteArray toLindenText() {
         StringBuilder sb = StringBuilder()
         if (this.isScript) {
             sb.append(this.notecardText)
@@ -235,11 +235,11 @@ private class NotecardAttachment {
                 }
                 sb.append("\t").append("permissions").append(" 0\n")
                 sb.append("\t").append("{\n")
-                sb.append("\t\t").append("base_mask").append("\t").append(String.format("%08x", Object[]{Integer.valueOf(notecardAttachment.entry.baseMask)})).append(DELIM_EOL)
-                sb.append("\t\t").append("owner_mask").append("\t").append(String.format("%08x", Object[]{Integer.valueOf(notecardAttachment.entry.ownerMask)})).append(DELIM_EOL)
-                sb.append("\t\t").append("group_mask").append("\t").append(String.format("%08x", Object[]{Integer.valueOf(notecardAttachment.entry.groupMask)})).append(DELIM_EOL)
-                sb.append("\t\t").append("everyone_mask").append("\t").append(String.format("%08x", Object[]{Integer.valueOf(notecardAttachment.entry.everyoneMask)})).append(DELIM_EOL)
-                sb.append("\t\t").append("next_owner_mask").append("\t").append(String.format("%08x", Object[]{Integer.valueOf(notecardAttachment.entry.nextOwnerMask)})).append(DELIM_EOL)
+                sb.append("\t\t").append("base_mask").append("\t").append(String.format("%08x", Array<Any>{Integer.valueOf(notecardAttachment.entry.baseMask)})).append(DELIM_EOL)
+                sb.append("\t\t").append("owner_mask").append("\t").append(String.format("%08x", Array<Any>{Integer.valueOf(notecardAttachment.entry.ownerMask)})).append(DELIM_EOL)
+                sb.append("\t\t").append("group_mask").append("\t").append(String.format("%08x", Array<Any>{Integer.valueOf(notecardAttachment.entry.groupMask)})).append(DELIM_EOL)
+                sb.append("\t\t").append("everyone_mask").append("\t").append(String.format("%08x", Array<Any>{Integer.valueOf(notecardAttachment.entry.everyoneMask)})).append(DELIM_EOL)
+                sb.append("\t\t").append("next_owner_mask").append("\t").append(String.format("%08x", Array<Any>{Integer.valueOf(notecardAttachment.entry.nextOwnerMask)})).append(DELIM_EOL)
                 if (notecardAttachment.entry.creatorUUID != null) {
                     sb.append("\t\t").append("creator_id").append("\t").append(notecardAttachment.entry.creatorUUID.toString()).append(DELIM_EOL)
                 }
@@ -258,7 +258,7 @@ private class NotecardAttachment {
                 }
                 sb.append("\t\t").append("type").append("\t").append(SLAssetType.getByType(notecardAttachment.entry.assetType).getStringCode()).append(DELIM_EOL)
                 sb.append("\t\t").append("inv_type").append("\t").append(SLInventoryType.getByType(notecardAttachment.entry.invType).getStringCode()).append(DELIM_EOL)
-                sb.append("\t\t").append("flags").append("\t").append(String.format("%08x", Object[]{Integer.valueOf(notecardAttachment.entry.flags)})).append(DELIM_EOL)
+                sb.append("\t\t").append("flags").append("\t").append(String.format("%08x", Array<Any>{Integer.valueOf(notecardAttachment.entry.flags)})).append(DELIM_EOL)
                 sb.append("\t").append("sale_info").append("\t0\n")
                 sb.append("\t").append("{\n")
                 sb.append("\t\t").append("sale_type").append("\t").append(SLSaleType.getByType(notecardAttachment.entry.saleType).getStringCode()).append(DELIM_EOL)

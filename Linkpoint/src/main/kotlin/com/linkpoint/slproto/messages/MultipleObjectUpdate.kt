@@ -19,7 +19,7 @@ class MultipleObjectUpdate : SLMessage() {
 
     @JvmStatic
     class ObjectData {
-        public Byte[] Data
+        public ByteArray Data
         public Int ObjectLocalID
         public Int Type
     }
@@ -29,11 +29,11 @@ class MultipleObjectUpdate : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 35
-        Iterator<T> it = this.ObjectData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 35
+        val it: Iterator<T> = this.ObjectData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -41,11 +41,11 @@ class MultipleObjectUpdate : SLMessage() {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleMultipleObjectUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) 2)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
@@ -58,12 +58,12 @@ class MultipleObjectUpdate : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ObjectData objectData = ObjectData()
+            val objectData: ObjectData = ObjectData()
             objectData.ObjectLocalID = unpackInt(byteBuffer)
             objectData.Type = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             objectData.Data = unpackVariable(byteBuffer, 1)

@@ -15,9 +15,9 @@ class DrawListPrimEntry : DrawListObjectEntry() {
         super(sLObjectInfo)
     }
 
-    fun addToDrawList(DrawList drawList) {
-        WeakReference weakReference = this.drawableObject
-        Object obj = weakReference != null ? (DrawableObject) weakReference.get() : null
+    fun addToDrawList(drawList: DrawList) {
+        val weakReference: WeakReference = this.drawableObject
+        val obj: Object = weakReference != null ? (DrawableObject) weakReference.get() : null
         if (obj == null) {
             obj = DrawableObject(drawList.drawableStore, this.objectInfo, null)
             this.drawableObject = WeakReference(obj)
@@ -25,9 +25,9 @@ class DrawListPrimEntry : DrawListObjectEntry() {
         drawList.objects.add(obj)
     }
 
-    public DrawableObject getDrawableAttachment(DrawableStore drawableStore, DrawableAvatar drawableAvatar) {
-        DrawableObject drawableObject = null
-        WeakReference weakReference = this.drawableObject
+     public fun getDrawableAttachment(drawableStore: DrawableStore, drawableAvatar: DrawableAvatar): DrawableObject {
+        val drawableObject: DrawableObject = null
+        val weakReference: WeakReference = this.drawableObject
         if (weakReference != null) {
             drawableObject = (DrawableObject) weakReference.get()
         }
@@ -39,8 +39,8 @@ class DrawListPrimEntry : DrawListObjectEntry() {
         return drawableObject
     }
 
-    public DrawableObject getDrawableObject() {
-        WeakReference weakReference = this.drawableObject
+     public fun getDrawableObject(): DrawableObject {
+        val weakReference: WeakReference = this.drawableObject
         return weakReference != null ? (DrawableObject) weakReference.get() : null
     }
 }

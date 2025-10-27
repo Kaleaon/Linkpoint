@@ -26,9 +26,9 @@ class AccountEditDialog : AppCompatDialog(), View.OnClickListener, TextWatcher {
     private OnAccountEditResultListener onAccountEditResultListener = null
 
     interface OnAccountEditResultListener {
-        Unit onAccountEditCancelled()
+         fun onAccountEditCancelled()
 
-        Unit onAccountEdited(AccountList.AccountInfo accountInfo, Boolean z)
+         fun onAccountEdited(AccountList.AccountInfo accountInfo, z: Boolean)
     }
 
     AccountEditDialog(Context context, AccountList.AccountInfo accountInfo) {
@@ -37,7 +37,7 @@ class AccountEditDialog : AppCompatDialog(), View.OnClickListener, TextWatcher {
         this.editAccount = accountInfo
     }
 
-    private Unit prepare() {
+     private fun prepare() {
         this.gridList.loadGrids()
         if (this.editAccount != null) {
             ((TextView) findViewById(R.id.loginNameText)).setText(this.editAccount.getLoginName())
@@ -69,11 +69,11 @@ class AccountEditDialog : AppCompatDialog(), View.OnClickListener, TextWatcher {
         ((TextView) findViewById(R.id.loginNameText)).requestFocus()
     }
 
-    fun afterTextChanged(Editable editable) {
+    fun afterTextChanged(editable: Editable) {
     }
 
-    fun beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
-        TextView textView = (TextView) findViewById(R.id.loginPasswordText)
+    fun beforeTextChanged(charSequence: CharSequence, i: Int, i2: Int, i3: Int) {
+        val textView: TextView = (TextView) findViewById(R.id.loginPasswordText)
         if (textView.getTag() != null) {
             textView.setTag((Object) null)
             textView.setInputType(129)
@@ -82,16 +82,16 @@ class AccountEditDialog : AppCompatDialog(), View.OnClickListener, TextWatcher {
         }
     }
 
-    fun onClick(View view) {
+    override fun onClick(view: View) {
         AccountList.AccountInfo accountInfo
-        Boolean z2 = false
+        val z2: Boolean = false
         switch (view.getId()) {
             case R.id.okButton:
-                String charSequence = ((TextView) findViewById(R.id.loginNameText)).getText().toString()
-                String charSequence2 = ((TextView) findViewById(R.id.loginPasswordText)).getText().toString()
-                String str = ""
-                Object selectedItem = ((Spinner) findViewById(R.id.spinnerGrid)).getSelectedItem()
-                UUID gridUUID = selectedItem instanceof GridList.GridInfo ? ((GridList.GridInfo) selectedItem).getGridUUID() : null
+                val charSequence: String = ((TextView) findViewById(R.id.loginNameText)).getText().toString()
+                val charSequence2: String = ((TextView) findViewById(R.id.loginPasswordText)).getText().toString()
+                val str: String = ""
+                val selectedItem: Object = ((Spinner) findViewById(R.id.spinnerGrid)).getSelectedItem()
+                val gridUUID: UUID = selectedItem instanceof GridList.GridInfo ? ((GridList.GridInfo) selectedItem).getGridUUID() : null
                 if (charSequence.equals("")) {
                     Toast.makeText(getContext(), getContext().getString(R.string.login_name_empty_error), 0).show()
                     return
@@ -137,7 +137,7 @@ class AccountEditDialog : AppCompatDialog(), View.OnClickListener, TextWatcher {
         }
     }
 
-    fun onCreate(Bundle bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setTitle((Int) R.string.new_account_dialog_title)
         setContentView((Int) R.layout.account_edit_dialog)
@@ -148,11 +148,11 @@ class AccountEditDialog : AppCompatDialog(), View.OnClickListener, TextWatcher {
         prepare()
     }
 
-    fun onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+    fun onTextChanged(charSequence: CharSequence, i: Int, i2: Int, i3: Int) {
     }
 
     /* access modifiers changed from: package-private */
-    fun setOnAccountEditResultListener(OnAccountEditResultListener onAccountEditResultListener2) {
+    fun setOnAccountEditResultListener(onAccountEditResultListener2: OnAccountEditResultListener) {
         this.onAccountEditResultListener = onAccountEditResultListener2
     }
 }

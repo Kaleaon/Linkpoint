@@ -10,7 +10,7 @@ import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 
 class DummyNotificationChannelManager : NotificationChannelManager {
-    String DEFAULT_NOTIFICATION_CHANNEL = "miscellaneous"
+    val DEFAULT_NOTIFICATION_CHANNEL: String = "miscellaneous"
     private ImmutableSet<NotificationType> allChannels = ImmutableSet.of(NotificationType.LocalChat, NotificationType.Group, NotificationType.Private)
 
     Boolean areNotificationsSystemControlled() {

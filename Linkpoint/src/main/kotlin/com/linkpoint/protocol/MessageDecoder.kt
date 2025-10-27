@@ -56,7 +56,7 @@ enum class MessageType(val id: Int, val name: String, val frequency: MessageFreq
     
     // Inventory messages
     FETCH_INVENTORY_DESCENDENTS(0x72, "FetchInventoryDescendents", MessageFrequency.LOW),
-    INVENTORY_DESCENDENTS(0x73, "InventoryDescendents", MessageFrequency.LOW);
+    INVENTORY_DESCENDENTS(0x73, "InventoryDescendents", MessageFrequency.LOW)
     
     companion object {
         private val BY_ID = values().associateBy { it.id }

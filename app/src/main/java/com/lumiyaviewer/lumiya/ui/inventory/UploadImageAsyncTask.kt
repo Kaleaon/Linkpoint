@@ -91,7 +91,7 @@ class UploadImageAsyncTask : AsyncTask<UploadImageParams, Void, UploadImageResul
             Int height2 = bitmap.getHeight()
             Int i2 = bitmap.hasAlpha() ? 4 : 3
             OpenJPEG openJPEG = OpenJPEG(width2, height2, i2, i2, 0, 0)
-            Int[] iArr = Int[width2]
+            IntArray iArr = Int[width2]
             for (Int i3 = 0; i3 < height2; i3++) {
                 bitmap.getPixels(iArr, 0, width2, 0, i3, width2, 1)
                 openJPEG.putPixelRow((height2 - 1) - i3, iArr, width2)

@@ -30,8 +30,8 @@ class GroupMembersReply : SLMessage() {
         public Long AgentPowers
         public Int Contribution
         public Boolean IsOwner
-        public Byte[] OnlineStatus
-        public Byte[] Title
+        public ByteArray OnlineStatus
+        public ByteArray Title
     }
 
     public GroupMembersReply() {

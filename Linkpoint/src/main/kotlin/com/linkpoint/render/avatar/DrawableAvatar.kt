@@ -60,7 +60,7 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
     private volatile DrawableHUD drawableHUD
     private LLVector3 headPosition
     private Boolean jointMatrixUpdated = false
-    private val Float[] localAviWorldMatrix = Float[16]
+    private val FloatArray localAviWorldMatrix = Float[16]
     private val Map<MeshIndex, DrawableAvatarPart> parts = EnumMap(MeshIndex.class)
     private Float pelvisTranslateX = 0.0f
     private Float pelvisTranslateY = 0.0f
@@ -74,13 +74,13 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
     private val AtomicReference<AvatarSkeleton> updatedSkeleton = AtomicReference(null)
 
     public DrawableAvatar(DrawableStore drawableStore, UUID uuid, SLObjectAvatarInfo sLObjectAvatarInfo, UUID uuid2, Map<UUID, AnimationSequenceInfo> map) {
-        Int i = 0
+        val i: Int = 0
         super(drawableStore, uuid, sLObjectAvatarInfo)
-        SLBaseAvatar instance = SLBaseAvatar.getInstance()
-        MeshIndex[] meshIndexArr = MeshIndex.VALUES
-        Int length = meshIndexArr.length
+        val instance: SLBaseAvatar = SLBaseAvatar.getInstance()
+        val meshIndexArr: Array<MeshIndex> = MeshIndex.VALUES
+        val length: Int = meshIndexArr.length
         while (i < length) {
-            MeshIndex meshIndex = meshIndexArr[i]
+            val meshIndex: MeshIndex = meshIndexArr[i]
             this.parts.put(meshIndex, DrawableAvatarPart(uuid2, instance.getMeshEntry(meshIndex).textureFaceIndex, instance.getMeshEntry(meshIndex).polyMesh, drawableStore.hasGL20))
             i++
         }
@@ -96,10 +96,10 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
         updateAttachments()
     }
 
-    private Unit DrawParts(RenderContext renderContext) {
-        AvatarSkeleton avatarSkeleton = this.skeleton
+    private fun DrawParts(renderContext: RenderContext) {
+        val avatarSkeleton: AvatarSkeleton = this.skeleton
         if (avatarSkeleton != null) {
-            Float pelvisToFoot = this.avatarObject.parentID == 0 ? (((-avatarSkeleton.getBodySize()) / 2.0f) + avatarSkeleton.getPelvisToFoot()) + avatarSkeleton.getPelvisOffset() : 0.0f
+            val pelvisToFoot: Float = this.avatarObject.parentID == 0 ? (((-avatarSkeleton.getBodySize()) / 2.0f) + avatarSkeleton.getPelvisToFoot()) + avatarSkeleton.getPelvisOffset() : 0.0f
             this.pelvisTranslateX = -avatarSkeleton.rootBone.getPositionX()
             this.pelvisTranslateY = -avatarSkeleton.rootBone.getPositionY()
             this.pelvisTranslateZ = pelvisToFoot + (-avatarSkeleton.rootBone.getPositionZ())
@@ -107,8 +107,8 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
             renderContext.objWorldMatrix.getMatrix(this.localAviWorldMatrix, 0)
             GLPrepare(renderContext, avatarSkeleton.jointMatrix)
             for (MeshIndex meshIndex : MeshIndex.VALUES) {
-                DrawableAvatarPart drawableAvatarPart = (DrawableAvatarPart) this.parts.get(meshIndex)
-                SLSkeletonBone sLSkeletonBone = meshIndex == MeshIndex.MESH_ID_EYEBALL_LEFT ? (SLSkeletonBone) avatarSkeleton.bones.get(SLSkeletonBoneID.mEyeLeft) : meshIndex == MeshIndex.MESH_ID_EYEBALL_RIGHT ? (SLSkeletonBone) avatarSkeleton.bones.get(SLSkeletonBoneID.mEyeRight) : null
+                val drawableAvatarPart: DrawableAvatarPart = (DrawableAvatarPart) this.parts.get(meshIndex)
+                val sLSkeletonBone: SLSkeletonBone = meshIndex == MeshIndex.MESH_ID_EYEBALL_LEFT ? (SLSkeletonBone) avatarSkeleton.bones.get(SLSkeletonBoneID.mEyeLeft) : meshIndex == MeshIndex.MESH_ID_EYEBALL_RIGHT ? (SLSkeletonBone) avatarSkeleton.bones.get(SLSkeletonBoneID.mEyeRight) : null
                 if (sLSkeletonBone != null) {
                     renderContext.glObjWorldPushAndMultMatrixf(sLSkeletonBone.getGlobalMatrix(), 0)
                 }
@@ -117,13 +117,13 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
                     renderContext.glObjWorldPopMatrix()
                 }
             }
-            SLSkeletonBone sLSkeletonBone2 = (SLSkeletonBone) avatarSkeleton.bones.get(SLSkeletonBoneID.mHead)
+            val sLSkeletonBone2: SLSkeletonBone = (SLSkeletonBone) avatarSkeleton.bones.get(SLSkeletonBoneID.mHead)
             if (sLSkeletonBone2 != null) {
                 renderContext.glObjWorldPushAndMultMatrixf(sLSkeletonBone2.getGlobalMatrix(), 0)
-                Float[] matrixData = renderContext.objWorldMatrix.getMatrixData()
-                Int matrixDataOffset = renderContext.objWorldMatrix.getMatrixDataOffset()
-                Float f = matrixData[matrixDataOffset + 12]
-                Float f2 = matrixData[matrixDataOffset + 13]
+                val matrixData: FloatArray = renderContext.objWorldMatrix.getMatrixData()
+                val matrixDataOffset: Int = renderContext.objWorldMatrix.getMatrixDataOffset()
+                val f: Float = matrixData[matrixDataOffset + 12]
+                val f2: Float = matrixData[matrixDataOffset + 13]
                 pelvisToFoot = matrixData[matrixDataOffset + 14]
                 if (this.headPosition == null) {
                     this.headPosition = LLVector3()
@@ -139,7 +139,7 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
         }
     }
 
-    private Unit GLPrepare(RenderContext renderContext, Float[] fArr) {
+    private fun GLPrepare(renderContext: RenderContext, fArr: FloatArray) {
         if (renderContext.hasGL20) {
             GLES20.glUseProgram(renderContext.avatarProgram.getHandle())
             GLES20.glUniform1i(renderContext.avatarProgram.sTexture, 0)
@@ -154,9 +154,9 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
         GLES11.glMatrixMode(5888)
     }
 
-    private Boolean animate(AvatarSkeleton avatarSkeleton) {
-        Boolean needForceAnimate = avatarSkeleton.needForceAnimate()
-        AvatarAnimationList avatarAnimationList = this.runningAnimations
+     private fun animate(avatarSkeleton: AvatarSkeleton): Boolean {
+        val needForceAnimate: Boolean = avatarSkeleton.needForceAnimate()
+        val avatarAnimationList: AvatarAnimationList = this.runningAnimations
         if (!avatarAnimationList.needAnimate(System.currentTimeMillis()) && !needForceAnimate) {
             return false
         }
@@ -164,7 +164,7 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
         return true
     }
 
-    private AvatarAnimationList getRunningAnimations() {
+     private fun getRunningAnimations(): AvatarAnimationList {
         AvatarAnimationList avatarAnimationList
         synchronized (this.animationLock) {
             avatarAnimationList = AvatarAnimationList(this.animations.values())
@@ -172,18 +172,18 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
         return avatarAnimationList
     }
 
-    private Unit processUpdateAttachments() {
-        DrawListEntry[] drawListEntryArr
+     private fun processUpdateAttachments() {
+        Array<DrawListEntry> drawListEntryArr
         DrawableObject drawableObject
-        Int i2 = 0
-        Multimap create = ArrayListMultimap.create()
-        Set newSetFromMap = Collections.newSetFromMap(IdentityHashMap())
-        Int i3 = this.displayedHUDid.get()
-        LinkedTreeNode firstChild = this.avatarObject.treeNode.getFirstChild()
-        DrawableHUD drawableHUD = null
+        val i2: Int = 0
+        val create: Multimap = ArrayListMultimap.create()
+        val newSetFromMap: Set = Collections.newSetFromMap(IdentityHashMap())
+        val i3: Int = this.displayedHUDid.get()
+        val firstChild: LinkedTreeNode = this.avatarObject.treeNode.getFirstChild()
+        val drawableHUD: DrawableHUD = null
         while (firstChild != null) {
             DrawableHUD drawableHUD2
-            SLObjectInfo sLObjectInfo = (SLObjectInfo) firstChild.getDataObject()
+            val sLObjectInfo: SLObjectInfo = (SLObjectInfo) firstChild.getDataObject()
             if (!sLObjectInfo.isDead) {
                 i = sLObjectInfo.attachmentID
                 if (i < 0 || i >= 56) {
@@ -191,7 +191,7 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
                     firstChild = firstChild.getNextChild()
                     drawableHUD = drawableHUD2
                 } else {
-                    SLAttachmentPoint sLAttachmentPoint = SLAttachmentPoint.attachmentPoints[i]
+                    val sLAttachmentPoint: SLAttachmentPoint = SLAttachmentPoint.attachmentPoints[i]
                     if (sLAttachmentPoint != null) {
                         if (!sLAttachmentPoint.isHUD) {
                             updateAttachmentParts(sLObjectInfo, create, i)
@@ -212,12 +212,12 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
             if (this.deadAttachmentsList.isEmpty()) {
                 drawListEntryArr = null
             } else {
-                DrawListEntry[] drawListEntryArr2 = (DrawListEntry[]) this.deadAttachmentsList.toArray(DrawListEntry[this.deadAttachmentsList.size()])
+                val drawListEntryArr2: Array<DrawListEntry> = (Array<DrawListEntry>) this.deadAttachmentsList.toArray(DrawListEntry[this.deadAttachmentsList.size()])
                 this.deadAttachmentsList.clear()
                 drawListEntryArr = drawListEntryArr2
             }
         }
-        Int i4 = 0
+        val i4: Int = 0
         for (DrawableObject drawableObject2 : create.values()) {
             if (drawableObject2.isRiggedMesh()) {
                 if (this.riggedMeshes.add(drawableObject2)) {
@@ -228,9 +228,9 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
             i4 = i4
         }
         if (drawListEntryArr != null) {
-            Int length = drawListEntryArr.length
+            val length: Int = drawListEntryArr.length
             while (i2 < length) {
-                InlineListEntry inlineListEntry = drawListEntryArr[i2]
+                val inlineListEntry: InlineListEntry = drawListEntryArr[i2]
                 this.drawableAttachments.removeEntry(inlineListEntry)
                 if (inlineListEntry instanceof DrawListPrimEntry) {
                     drawableObject2 = ((DrawListPrimEntry) inlineListEntry).getDrawableObject()
@@ -261,21 +261,21 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
         }
     }
 
-    private Unit updateAttachmentParts(SLObjectInfo sLObjectInfo, Multimap<Integer, DrawableObject> multimap, Int i) {
-        InlineListEntry drawListEntry = sLObjectInfo.getDrawListEntry()
+     private fun updateAttachmentParts(sLObjectInfo: SLObjectInfo, multimap: Multimap<Integer, DrawableObject>, i: Int) {
+        val drawListEntry: InlineListEntry = sLObjectInfo.getDrawListEntry()
         this.drawableAttachments.addEntry(drawListEntry)
         if (drawListEntry instanceof DrawListPrimEntry) {
             multimap.put(Integer.valueOf(i), ((DrawListPrimEntry) drawListEntry).getDrawableAttachment(this.drawableStore, this))
         }
         for (LinkedTreeNode firstChild = sLObjectInfo.treeNode.getFirstChild(); firstChild != null; firstChild = firstChild.getNextChild()) {
-            SLObjectInfo sLObjectInfo2 = (SLObjectInfo) firstChild.getDataObject()
+            val sLObjectInfo2: SLObjectInfo = (SLObjectInfo) firstChild.getDataObject()
             if (sLObjectInfo2 != null) {
                 updateAttachmentParts(sLObjectInfo2, multimap, i)
             }
         }
     }
 
-    private Unit updateRiggedMeshes() {
+     private fun updateRiggedMeshes() {
         PrimComputeExecutor.getInstance().execute(this.shapeParamsUpdate)
     }
 
@@ -284,7 +284,7 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
         processUpdateAttachments()
     }
 
-    Unit AnimationRemove(UUID uuid) {
+    fun AnimationRemove(uuid: UUID) {
         synchronized (this.animationLock) {
             obj = this.animations.remove(uuid) != null ? 1 : null
         }
@@ -293,10 +293,10 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
         }
     }
 
-    Unit AnimationUpdate(AnimationSequenceInfo animationSequenceInfo) {
-        UUID uuid = animationSequenceInfo.animationID
+    fun AnimationUpdate(animationSequenceInfo: AnimationSequenceInfo) {
+        val uuid: UUID = animationSequenceInfo.animationID
         synchronized (this.animationLock) {
-            AvatarAnimationState avatarAnimationState = (AvatarAnimationState) this.animations.get(uuid)
+            val avatarAnimationState: AvatarAnimationState = (AvatarAnimationState) this.animations.get(uuid)
             if (avatarAnimationState == null) {
                 this.animations.put(uuid, AvatarAnimationState(animationSequenceInfo, this))
             } else {
@@ -306,8 +306,8 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
         updateRunningAnimations()
     }
 
-    fun Draw(RenderContext renderContext) {
-        Float[] worldMatrix = getWorldMatrix(renderContext)
+    fun Draw(renderContext: RenderContext) {
+        val worldMatrix: FloatArray = getWorldMatrix(renderContext)
         if (worldMatrix != null) {
             try {
                 renderContext.glObjWorldPushAndMultMatrixf(worldMatrix, 0)
@@ -319,10 +319,10 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
         }
     }
 
-    fun DrawNameTag(RenderContext renderContext) {
-        DrawableHoverText drawableHoverText = this.drawableNameTag
+    fun DrawNameTag(renderContext: RenderContext) {
+        val drawableHoverText: DrawableHoverText = this.drawableNameTag
         if (drawableHoverText != null) {
-            LLVector3 lLVector3 = this.headPosition
+            val lLVector3: LLVector3 = this.headPosition
             if (lLVector3 != null) {
                 drawableHoverText.DrawAtWorld(renderContext, lLVector3.x, lLVector3.y, lLVector3.z, 0.5f, renderContext.projectionMatrix, false, 0)
                 return
@@ -331,26 +331,26 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
         }
     }
 
-    Boolean IsAnimationStopped(UUID uuid) {
+    fun IsAnimationStopped(uuid: UUID): Boolean {
         Boolean hasStopped
         synchronized (this.animationLock) {
-            AvatarAnimationState avatarAnimationState = (AvatarAnimationState) this.animations.get(uuid)
+            val avatarAnimationState: AvatarAnimationState = (AvatarAnimationState) this.animations.get(uuid)
             hasStopped = avatarAnimationState != null ? avatarAnimationState.hasStopped() : false
         }
         return hasStopped
     }
 
-    public ObjectIntersectInfo PickObject(RenderContext renderContext, Float f, Float f2, Float f3) {
-        Float[] worldMatrix = getWorldMatrix(renderContext)
-        AvatarSkeleton avatarSkeleton = this.skeleton
+    public fun PickObject(renderContext: RenderContext, f: Float, f2: Float, f3: Float): ObjectIntersectInfo {
+        val worldMatrix: FloatArray = getWorldMatrix(renderContext)
+        val avatarSkeleton: AvatarSkeleton = this.skeleton
         if (worldMatrix == null || avatarSkeleton == null) {
             return null
         }
         ObjectIntersectInfo objectIntersectInfo
-        Int[] iArr = renderContext.viewportRect
-        Float[] fArr = Float[32]
-        Float[] fArr2 = Float[6]
-        Float f4 = ((Float) iArr[3]) - f2
+        val iArr: IntArray = renderContext.viewportRect
+        val fArr: FloatArray = Float[32]
+        val fArr2: FloatArray = Float[6]
+        val f4: Float = ((Float) iArr[3]) - f2
         renderContext.glObjWorldPushAndMultMatrixf(worldMatrix, 0)
         renderContext.glObjWorldTranslatef(this.pelvisTranslateX, this.pelvisTranslateY, this.pelvisTranslateZ)
         for (SLSkeletonBone sLSkeletonBone : avatarSkeleton.bones.values()) {
@@ -367,10 +367,10 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
                     RenderContext.gluUnProject(f, f4, 1.0f, fArr, 0, renderContext.projectionMatrix.getMatrixData(), renderContext.projectionMatrix.getMatrixDataOffset(), iArr, 0, fArr2, 3)
                 }
                 renderContext.glObjWorldPopMatrix()
-                LLVector3 lLVector3 = LLVector3(fArr2[0], fArr2[1], fArr2[2])
-                LLVector3 lLVector32 = LLVector3(fArr2[3], fArr2[4], fArr2[5])
-                LLVector3[] lLVector3Arr = CollisionBox.getInstance().vertices
-                RayIntersectInfo rayIntersectInfo = null
+                val lLVector3: LLVector3 = LLVector3(fArr2[0], fArr2[1], fArr2[2])
+                val lLVector32: LLVector3 = LLVector3(fArr2[3], fArr2[4], fArr2[5])
+                val lLVector3Arr: Array<LLVector3> = CollisionBox.getInstance().vertices
+                val rayIntersectInfo: RayIntersectInfo = null
                 for (Int i = 0; i < 12; i++) {
                     rayIntersectInfo = GLRayTrace.intersect_RayTriangle(lLVector3, lLVector32, lLVector3Arr, i * 3)
                     if (rayIntersectInfo != null) {
@@ -378,7 +378,7 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
                     }
                 }
                 if (rayIntersectInfo != null) {
-                    Float intersectionDepth = GLRayTrace.getIntersectionDepth(renderContext, rayIntersectInfo.intersectPoint, fArr)
+                    val intersectionDepth: Float = GLRayTrace.getIntersectionDepth(renderContext, rayIntersectInfo.intersectPoint, fArr)
                     if (intersectionDepth >= f3) {
                         objectIntersectInfo = ObjectIntersectInfo(IntersectInfo(rayIntersectInfo.intersectPoint), this.avatarObject, intersectionDepth)
                         break
@@ -394,7 +394,7 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
     }
 
     fun RunAnimations() {
-        AvatarSkeleton avatarSkeleton = (AvatarSkeleton) this.updatedSkeleton.getAndSet(null)
+        val avatarSkeleton: AvatarSkeleton = (AvatarSkeleton) this.updatedSkeleton.getAndSet(null)
         if (avatarSkeleton != null) {
             this.skeleton = avatarSkeleton
         }
@@ -405,39 +405,39 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
         }
     }
 
-    Unit UpdateShapeParams(AvatarShapeParams avatarShapeParams) {
+    fun UpdateShapeParams(avatarShapeParams: AvatarShapeParams) {
         this.shapeParams = avatarShapeParams
         PrimComputeExecutor.getInstance().execute(this.shapeParamsUpdate)
     }
 
-    Unit UpdateTextures(AvatarTextures avatarTextures) {
+    fun UpdateTextures(avatarTextures: AvatarTextures) {
         for (Entry entry : this.parts.entrySet()) {
             ((DrawableAvatarPart) entry.getValue()).setTexture(this.drawableStore.glTextureCache, avatarTextures.getTexture(((DrawableAvatarPart) entry.getValue()).getFaceIndex()))
         }
     }
 
-    public DrawableHUD getDrawableHUD() {
+     public fun getDrawableHUD(): DrawableHUD {
         return this.drawableHUD
     }
 
     /* renamed from: updateAvatarShape */
     /* synthetic */ Unit updateAvatarShape() {
-        Boolean z = false
-        AvatarShapeParams avatarShapeParams = this.shapeParams
+        val z: Boolean = false
+        val avatarShapeParams: AvatarShapeParams = this.shapeParams
         if (avatarShapeParams != null) {
             Debug.Printf("Avatar: shapeParamsUpdate: %d rigged meshes", Integer.valueOf(this.riggedMeshes.size()))
-            MeshJointTranslations meshJointTranslations = MeshJointTranslations()
-            Iterator it = this.riggedMeshes.iterator()
+            val meshJointTranslations: MeshJointTranslations = MeshJointTranslations()
+            val it: Iterator = this.riggedMeshes.iterator()
             while (true) {
                 z2 = z
                 if (!it.hasNext()) {
                     break
                 }
-                DrawableObject drawableObject = (DrawableObject) it.next()
+                val drawableObject: DrawableObject = (DrawableObject) it.next()
                 drawableObject.ApplyJointTranslations(meshJointTranslations)
                 z = drawableObject.hasExtendedBones() | z2
             }
-            AvatarSkeleton avatarSkeleton = AvatarSkeleton(avatarShapeParams, meshJointTranslations, z2)
+            val avatarSkeleton: AvatarSkeleton = AvatarSkeleton(avatarShapeParams, meshJointTranslations, z2)
             this.updatedSkeleton.set(avatarSkeleton)
             for (Entry entry : this.parts.entrySet()) {
                 ((DrawableAvatarPart) entry.getValue()).setPartMorphParams(avatarSkeleton.getMorphParams((MeshIndex) entry.getKey()))
@@ -445,20 +445,20 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
         }
     }
 
-    fun onEntryRemovalRequested(DrawListEntry drawListEntry) {
+    fun onEntryRemovalRequested(drawListEntry: DrawListEntry) {
         synchronized (this.deadAttachmentsLock) {
             this.deadAttachmentsList.add(drawListEntry)
         }
         updateAttachments()
     }
 
-    fun onRiggedMeshReady(DrawableObject drawableObject) {
+    fun onRiggedMeshReady(drawableObject: DrawableObject) {
         if (this.riggedMeshes.add(drawableObject)) {
             updateRiggedMeshes()
         }
     }
 
-    fun setDisplayedHUDid(Int i) {
+    fun setDisplayedHUDid(i: Int) {
         if (this.displayedHUDid.getAndSet(i) != i) {
             updateAttachments()
         }
@@ -468,10 +468,10 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
         PrimComputeExecutor.getInstance().execute(this.updateAttachmentsRunnable)
     }
 
-    Unit updateRunningAnimations() {
+     fun updateRunningAnimations() {
         if (this.animationsInitialized) {
             this.runningAnimations = getRunningAnimations()
-            AvatarSkeleton avatarSkeleton = this.skeleton
+            val avatarSkeleton: AvatarSkeleton = this.skeleton
             if (avatarSkeleton != null) {
                 avatarSkeleton.setForceAnimate()
             }

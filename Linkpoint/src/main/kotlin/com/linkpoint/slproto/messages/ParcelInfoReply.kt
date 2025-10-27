@@ -19,17 +19,17 @@ class ParcelInfoReply : SLMessage() {
         public Int ActualArea
         public Int AuctionID
         public Int BillableArea
-        public Byte[] Desc
+        public ByteArray Desc
         public Float Dwell
         public Int Flags
         public Float GlobalX
         public Float GlobalY
         public Float GlobalZ
-        public Byte[] Name
+        public ByteArray Name
         public UUID OwnerID
         public UUID ParcelID
         public Int SalePrice
-        public Byte[] SimName
+        public ByteArray SimName
         public UUID SnapshotID
     }
 
@@ -37,15 +37,15 @@ class ParcelInfoReply : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.Data_Field.Name.length + 33 + 1 + this.Data_Field.Desc.length + 4 + 4 + 1 + 4 + 4 + 4 + 1 + this.Data_Field.SimName.length + 16 + 4 + 4 + 4 + 20
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleParcelInfoReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 55)
@@ -67,7 +67,7 @@ class ParcelInfoReply : SLMessage() {
         packInt(byteBuffer, this.Data_Field.AuctionID)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.Data_Field.ParcelID = unpackUUID(byteBuffer)
         this.Data_Field.OwnerID = unpackUUID(byteBuffer)

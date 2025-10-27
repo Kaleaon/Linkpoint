@@ -18,80 +18,80 @@ class AnimeshRenderer {
         // Vertex shader with skinning support
         private const val VERTEX_SHADER = """
             #version 320 es
-            precision highp float;
+            precision highp float
             
-            layout(location = 0) in vec3 aPosition;
-            layout(location = 1) in vec3 aNormal;
-            layout(location = 2) in vec2 aTexCoord;
-            layout(location = 3) in vec4 aBoneIndices;
-            layout(location = 4) in vec4 aBoneWeights;
+            layout(location = 0) in vec3 aPosition
+            layout(location = 1) in vec3 aNormal
+            layout(location = 2) in vec2 aTexCoord
+            layout(location = 3) in vec4 aBoneIndices
+            layout(location = 4) in vec4 aBoneWeights
             
-            uniform mat4 uMVPMatrix;
-            uniform mat4 uModelMatrix;
-            uniform mat4 uNormalMatrix;
-            uniform mat4 uBoneMatrices[256];
+            uniform mat4 uMVPMatrix
+            uniform mat4 uModelMatrix
+            uniform mat4 uNormalMatrix
+            uniform mat4 uBoneMatrices[256]
             
-            out vec3 vWorldPos;
-            out vec3 vNormal;
-            out vec2 vTexCoord;
+            out vec3 vWorldPos
+            out vec3 vNormal
+            out vec2 vTexCoord
             
             void main() {
                 // GPU skinning calculation
-                mat4 boneTransform = mat4(0.0);
+                mat4 boneTransform = mat4(0.0)
                 
-                boneTransform += uBoneMatrices[int(aBoneIndices.x)] * aBoneWeights.x;
-                boneTransform += uBoneMatrices[int(aBoneIndices.y)] * aBoneWeights.y;
-                boneTransform += uBoneMatrices[int(aBoneIndices.z)] * aBoneWeights.z;
-                boneTransform += uBoneMatrices[int(aBoneIndices.w)] * aBoneWeights.w;
+                boneTransform += uBoneMatrices[int(aBoneIndices.x)] * aBoneWeights.x
+                boneTransform += uBoneMatrices[int(aBoneIndices.y)] * aBoneWeights.y
+                boneTransform += uBoneMatrices[int(aBoneIndices.z)] * aBoneWeights.z
+                boneTransform += uBoneMatrices[int(aBoneIndices.w)] * aBoneWeights.w
                 
-                vec4 skinnedPosition = boneTransform * vec4(aPosition, 1.0);
-                vec4 skinnedNormal = boneTransform * vec4(aNormal, 0.0);
+                vec4 skinnedPosition = boneTransform * vec4(aPosition, 1.0)
+                vec4 skinnedNormal = boneTransform * vec4(aNormal, 0.0)
                 
-                vec4 worldPos = uModelMatrix * skinnedPosition;
-                vWorldPos = worldPos.xyz;
-                vNormal = mat3(uNormalMatrix) * skinnedNormal.xyz;
-                vTexCoord = aTexCoord;
+                vec4 worldPos = uModelMatrix * skinnedPosition
+                vWorldPos = worldPos.xyz
+                vNormal = mat3(uNormalMatrix) * skinnedNormal.xyz
+                vTexCoord = aTexCoord
                 
-                gl_Position = uMVPMatrix * skinnedPosition;
+                gl_Position = uMVPMatrix * skinnedPosition
             }
         """
         
         // Fragment shader (same as regular mesh)
         private const val FRAGMENT_SHADER = """
             #version 320 es
-            precision highp float;
+            precision highp float
             
-            in vec3 vWorldPos;
-            in vec3 vNormal;
-            in vec2 vTexCoord;
+            in vec3 vWorldPos
+            in vec3 vNormal
+            in vec2 vTexCoord
             
-            uniform sampler2D uTexture;
-            uniform vec3 uLightPos;
-            uniform vec3 uLightColor;
-            uniform vec3 uCameraPos;
+            uniform sampler2D uTexture
+            uniform vec3 uLightPos
+            uniform vec3 uLightColor
+            uniform vec3 uCameraPos
             
-            out vec4 FragColor;
+            out vec4 FragColor
             
             void main() {
-                vec3 N = normalize(vNormal);
-                vec3 L = normalize(uLightPos - vWorldPos);
-                vec3 V = normalize(uCameraPos - vWorldPos);
-                vec3 H = normalize(L + V);
+                vec3 N = normalize(vNormal)
+                vec3 L = normalize(uLightPos - vWorldPos)
+                vec3 V = normalize(uCameraPos - vWorldPos)
+                vec3 H = normalize(L + V)
                 
                 // Sample texture
-                vec4 texColor = texture(uTexture, vTexCoord);
+                vec4 texColor = texture(uTexture, vTexCoord)
                 
                 // Simple lighting
-                float diff = max(dot(N, L), 0.0);
-                float spec = pow(max(dot(N, H), 0.0), 32.0);
+                float diff = max(dot(N, L), 0.0)
+                float spec = pow(max(dot(N, H), 0.0), 32.0)
                 
-                vec3 ambient = vec3(0.2);
-                vec3 diffuse = diff * uLightColor;
-                vec3 specular = spec * vec3(0.3);
+                vec3 ambient = vec3(0.2)
+                vec3 diffuse = diff * uLightColor
+                vec3 specular = spec * vec3(0.3)
                 
-                vec3 color = texColor.rgb * (ambient + diffuse) + specular;
+                vec3 color = texColor.rgb * (ambient + diffuse) + specular
                 
-                FragColor = vec4(color, texColor.a);
+                FragColor = vec4(color, texColor.a)
             }
         """
         

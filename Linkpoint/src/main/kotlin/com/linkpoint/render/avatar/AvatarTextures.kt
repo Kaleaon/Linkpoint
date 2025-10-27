@@ -21,18 +21,18 @@ class AvatarTextures {
         if (sLTextureEntry.getFaceMask() == 0) {
             return false
         }
-        SLTextureEntryFace GetDefaultTexture = sLTextureEntry.GetDefaultTexture()
-        AvatarTextureFaceIndex[] values = AvatarTextureFaceIndex.values()
-        Int length = values.length
-        Int i = 0
-        Boolean z2 = false
+        val GetDefaultTexture: SLTextureEntryFace = sLTextureEntry.GetDefaultTexture()
+        val values: Array<AvatarTextureFaceIndex> = AvatarTextureFaceIndex.values()
+        val length: Int = values.length
+        val i: Int = 0
+        val z2: Boolean = false
         while (i < length) {
-            AvatarTextureFaceIndex avatarTextureFaceIndex = values[i]
-            SLTextureEntryFace GetFace = sLTextureEntry.GetFace(avatarTextureFaceIndex.ordinal())
+            val avatarTextureFaceIndex: AvatarTextureFaceIndex = values[i]
+            val GetFace: SLTextureEntryFace = sLTextureEntry.GetFace(avatarTextureFaceIndex.ordinal())
             if (GetFace != null) {
-                UUID textureID = GetFace.getTextureID(GetDefaultTexture)
+                val textureID: UUID = GetFace.getTextureID(GetDefaultTexture)
                 if (textureID != null) {
-                    UUID uuid = (UUID) this.avatarTextures.get(avatarTextureFaceIndex)
+                    val uuid: UUID = (UUID) this.avatarTextures.get(avatarTextureFaceIndex)
                     if (z && uuid != null) {
                         z3 = z2
                         i++

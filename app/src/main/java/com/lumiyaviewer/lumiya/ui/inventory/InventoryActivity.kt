@@ -28,16 +28,16 @@ import java.util.UUID
 import androidx.annotation.Nullable
 
 class InventoryActivity : MasterDetailsActivity {
-    private String INITIAL_FOLDER_ID_TAG = "folderID"
-    private String NAME_FILTER_TAG = "nameFilter"
-    String SAVE_INFO_INTENT_TAG = "forSaveInfo"
-    private String SEARCH_ACTIVE_TAG = "searchActive"
-    String SELECT_ACTION_ASSET_TYPE = "selectActionAssetType"
-    String SELECT_ACTION_INTENT_TAG = "selectAction"
-    String SELECT_ACTION_PARAMS_TAG = "selectActionParams"
-    String SELECT_ITEM_INTENT_TAG = "forSelectItem"
-    String TRANSFER_TO_INTENT_TAG = "transferToID"
-    String TRANSFER_TO_NAME_TAG = "transferToName"
+    private val INITIAL_FOLDER_ID_TAG: String = "folderID"
+    private val NAME_FILTER_TAG: String = "nameFilter"
+    val SAVE_INFO_INTENT_TAG: String = "forSaveInfo"
+    private val SEARCH_ACTIVE_TAG: String = "searchActive"
+    val SELECT_ACTION_ASSET_TYPE: String = "selectActionAssetType"
+    val SELECT_ACTION_INTENT_TAG: String = "selectAction"
+    val SELECT_ACTION_PARAMS_TAG: String = "selectActionParams"
+    val SELECT_ITEM_INTENT_TAG: String = "forSelectItem"
+    val TRANSFER_TO_INTENT_TAG: String = "transferToID"
+    val TRANSFER_TO_NAME_TAG: String = "transferToName"
     private FragmentActivityFactory InventoryDetailsFragmentFactory = FragmentActivityFactory() {
         Intent createIntent(Context context, Bundle bundle) {
             Intent intent = Intent(context, InventoryActivity.class)
@@ -50,7 +50,7 @@ class InventoryActivity : MasterDetailsActivity {
         }
     }
     private Boolean activityStarted = false
-    private String fragmentSearchString = null
+    private val fragmentSearchString: String = null
     /* access modifiers changed from: private */
     String nameFilter = null
     /* access modifiers changed from: private */

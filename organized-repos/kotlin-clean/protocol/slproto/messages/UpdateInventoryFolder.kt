@@ -21,7 +21,7 @@ class UpdateInventoryFolder : SLMessage() {
     @JvmStatic
     class FolderData {
         public UUID FolderID
-        public Byte[] Name
+        public ByteArray Name
         public UUID ParentID
         public Int Type
     }

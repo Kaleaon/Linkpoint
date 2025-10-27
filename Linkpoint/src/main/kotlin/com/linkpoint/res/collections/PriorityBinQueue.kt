@@ -30,24 +30,24 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
         this.queueFactory = queueFactory2
     }
 
-    private Int getPriority(Object obj) {
+     private fun getPriority(obj: Object): Int {
         if (obj instanceof HasPriority) {
             return ((HasPriority) obj).getPriority()
         }
         return 0
     }
 
-    public Boolean add(T t) {
+     public fun add(T t): Boolean {
         this.lock.lock()
         try {
-            Int priority = getPriority(t)
+            val priority: Int = getPriority(t)
             Debug.Printf("PriorityBinQueue: added %s with prio %d", t.toString(), Integer.valueOf(priority))
-            Queue<T> queue = (Queue) this.queues.get(Integer.valueOf(priority))
+            val queue: Queue<T> = (Queue) this.queues.get(Integer.valueOf(priority))
             if (queue == null) {
                 queue = this.queueFactory.getQueue()
                 this.queues.put(Integer.valueOf(priority), queue)
             }
-            Boolean add = queue.add(t)
+            val add: Boolean = queue.add(t)
             this.notEmpty.signalAll()
             return add
         } finally {
@@ -55,19 +55,19 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public Boolean addAll(Collection<? : T> collection) {
+     public fun addAll(collection: Collection<? : T>): Boolean {
         this.lock.lock()
-        Boolean z = false
+        val z: Boolean = false
         try {
-            Iterator<T> it = collection.iterator()
+            val it: Iterator<T> = collection.iterator()
             while (true) {
-                Boolean z2 = z
+                val z2: Boolean = z
                 if (!it.hasNext()) {
                     return z2
                 }
                 T next = it.next()
-                Int priority = getPriority(next)
-                Queue<T> queue = (Queue) this.queues.get(Integer.valueOf(priority))
+                val priority: Int = getPriority(next)
+                val queue: Queue<T> = (Queue) this.queues.get(Integer.valueOf(priority))
                 if (queue == null) {
                     queue = this.queueFactory.getQueue()
                     this.queues.put(Integer.valueOf(priority), queue)
@@ -89,10 +89,10 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public Boolean contains(Object obj) {
+     public fun contains(obj: Object): Boolean {
         this.lock.lock()
         try {
-            Queue queue = (Queue) this.queues.get(Integer.valueOf(getPriority(obj)))
+            val queue: Queue = (Queue) this.queues.get(Integer.valueOf(getPriority(obj)))
             if (queue != null) {
                 return queue.contains(obj)
             }
@@ -103,17 +103,17 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public Boolean containsAll(Collection<?> collection) {
+     public fun containsAll(collection: Collection<?>): Boolean {
         this.lock.lock()
         try {
-            Iterator<T> it = collection.iterator()
+            val it: Iterator<T> = collection.iterator()
             while (true) {
                 if (!it.hasNext()) {
                     z = true
                     break
                 }
                 T next = it.next()
-                Queue queue = (Queue) this.queues.get(Integer.valueOf(getPriority(next)))
+                val queue: Queue = (Queue) this.queues.get(Integer.valueOf(getPriority(next)))
                 if (queue != null && !queue.contains(next)) {
                     z = false
                     break
@@ -125,13 +125,13 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public Int drainTo(Collection<? super T> collection) {
+     public fun drainTo(collection: Collection<? super T>): Int {
         this.lock.lock()
-        Int i = 0
+        val i: Int = 0
         try {
             for (Queue queue : this.queues.values()) {
                 while (true) {
-                    Object poll = queue.poll()
+                    val poll: Object = queue.poll()
                     if (poll != null) {
                         collection.add(poll)
                         i++
@@ -147,7 +147,7 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
 
     /* JADX WARNING: Removed duplicated region for block: B:20:0x002c A[SYNTHETIC] */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    public Int drainTo(java.util.Collection<? super T> r5, Int r6) {
+     public fun drainTo(java.util.Collection<? super T> r5, r6: Int): Int {
         /*
             r4 = this
             java.util.concurrent.locks.Lock r0 = r4.lock
@@ -157,7 +157,7 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
             java.util.Collection r0 = r0.values()     // Catch:{ all -> 0x0033 }
             java.util.Iterator r2 = r0.iterator()     // Catch:{ all -> 0x0033 }
         L_0x0010:
-            Boolean r0 = r2.hasNext()     // Catch:{ all -> 0x0033 }
+            val r0: Boolean = r2.hasNext()     // Catch:{ all -> 0x0033 }
             if (r0 == 0) goto L_0x003a
             java.lang.Object r0 = r2.next()     // Catch:{ all -> 0x0033 }
             java.util.Queue r0 = (java.util.Queue) r0     // Catch:{ all -> 0x0033 }
@@ -166,7 +166,7 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
             if (r3 == 0) goto L_0x002a
             if (r1 >= r6) goto L_0x002a
             r5.add(r3)     // Catch:{ all -> 0x0033 }
-            Int r1 = r1 + 1
+            val r1: Int = r1 + 1
             goto L_0x001c
         L_0x002a:
             if (r1 < r6) goto L_0x0010
@@ -195,10 +195,10 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
         throw NoSuchElementException()
     }
 
-    public Boolean isEmpty() {
+     public fun isEmpty(): Boolean {
         this.lock.lock()
         try {
-            Iterator<T> it = this.queues.values().iterator()
+            val it: Iterator<T> = this.queues.values().iterator()
             while (true) {
                 if (it.hasNext()) {
                     if (!((Queue) it.next()).isEmpty()) {
@@ -220,11 +220,11 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
         throw UnsupportedOperationException("Iterator not supported")
     }
 
-    public Boolean offer(T t) {
+     public fun offer(T t): Boolean {
         return add(t)
     }
 
-    public Boolean offer(T t, Long j, TimeUnit timeUnit) throws InterruptedException {
+     public fun offer(T t, j: Long, timeUnit: TimeUnit) throws InterruptedException {
         return add(t)
     }
 
@@ -252,7 +252,7 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
         this.lock.lock()
         try {
             for (Queue it : this.queues.values()) {
-                Iterator it2 = it.iterator()
+                val it2: Iterator = it.iterator()
                 while (true) {
                     if (it2.hasNext()) {
                         T next = it2.next()
@@ -290,7 +290,7 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
         add(t)
     }
 
-    public Int remainingCapacity() {
+     public fun remainingCapacity(): Int {
         return Integer.MAX_VALUE
     }
 
@@ -302,10 +302,10 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
         throw NoSuchElementException()
     }
 
-    public Boolean remove(Object obj) {
+     public fun remove(obj: Object): Boolean {
         this.lock.lock()
         try {
-            Queue queue = (Queue) this.queues.get(Integer.valueOf(getPriority(obj)))
+            val queue: Queue = (Queue) this.queues.get(Integer.valueOf(getPriority(obj)))
             if (queue != null) {
                 return queue.remove(obj)
             }
@@ -316,12 +316,12 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public Boolean removeAll(Collection<?> collection) {
+     public fun removeAll(collection: Collection<?>): Boolean {
         this.lock.lock()
-        Boolean z = false
+        val z: Boolean = false
         try {
             for (T next : collection) {
-                Queue queue = (Queue) this.queues.get(Integer.valueOf(getPriority(next)))
+                val queue: Queue = (Queue) this.queues.get(Integer.valueOf(getPriority(next)))
                 z = queue != null ? queue.remove(next) | z : z
             }
             return z
@@ -330,13 +330,13 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public Boolean retainAll(Collection<?> collection) {
+     public fun retainAll(collection: Collection<?>): Boolean {
         this.lock.lock()
-        Boolean z = false
+        val z: Boolean = false
         try {
-            Iterator<T> it = this.queues.values().iterator()
+            val it: Iterator<T> = this.queues.values().iterator()
             while (true) {
-                Boolean z2 = z
+                val z2: Boolean = z
                 if (!it.hasNext()) {
                     return z2
                 }
@@ -347,13 +347,13 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public Int size() {
+     public fun size(): Int {
         this.lock.lock()
-        Int i = 0
+        val i: Int = 0
         try {
-            Iterator<T> it = this.queues.values().iterator()
+            val it: Iterator<T> = this.queues.values().iterator()
             while (true) {
-                Int i2 = i
+                val i2: Int = i
                 if (!it.hasNext()) {
                     return i2
                 }
@@ -379,19 +379,19 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public Object[] toArray() {
-        Int i = 0
+    public Array<Any> toArray() {
+        val i: Int = 0
         this.lock.lock()
         try {
-            ArrayList<Object[]> arrayList = ArrayList<>()
-            Int i2 = 0
+            ArrayList<Array<Any>> arrayList = ArrayList<>()
+            val i2: Int = 0
             for (Queue array : this.queues.values()) {
-                Object[] array2 = array.toArray()
+                val array2: Array<Any> = array.toArray()
                 arrayList.add(array2)
                 i2 = array2.length + i2
             }
-            Object[] objArr = Object[i2]
-            for (Object[] objArr2 : arrayList) {
+            val objArr: Array<Any> = Object[i2]
+            for (Array<Any> objArr2 : arrayList) {
                 System.arraycopy(objArr2, 0, objArr, i, objArr2.length)
                 i = objArr2.length + i
             }
@@ -402,14 +402,14 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public <T1> T1[] toArray(T1[] t1Arr) {
-        Int i = 0
+    public <T1> Array<T1> toArray(Array<T1> t1Arr) {
+        val i: Int = 0
         this.lock.lock()
         try {
-            ArrayList<Object[]> arrayList = ArrayList<>()
-            Int i2 = 0
+            ArrayList<Array<Any>> arrayList = ArrayList<>()
+            val i2: Int = 0
             for (Queue array : this.queues.values()) {
-                Object[] array2 = array.toArray()
+                val array2: Array<Any> = array.toArray()
                 arrayList.add(array2)
                 i2 = array2.length + i2
             }
@@ -418,7 +418,7 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
             } else {
                 t1Arr = Object[i2]
             }
-            for (Object[] objArr : arrayList) {
+            for (Array<Any> objArr : arrayList) {
                 System.arraycopy(objArr, 0, t1Arr, i, objArr.length)
                 i = objArr.length + i
             }

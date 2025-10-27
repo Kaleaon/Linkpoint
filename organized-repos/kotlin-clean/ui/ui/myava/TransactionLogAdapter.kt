@@ -66,8 +66,8 @@ class TransactionLogAdapter : RecyclerView().Adapter<TransactionViewHolder> {
         fun bindToData(MoneyTransaction moneyTransaction2) {
             this.moneyTransaction = moneyTransaction2
             this.chatterNameDisplayer.setChatterID(ChatterID.getUserChatterID(TransactionLogAdapter.this.agentUUID, moneyTransaction2.getAgentUUID()))
-            this.amountTextView.setText(TransactionLogAdapter.this.context.getString(R.string.transaction_amount_format, Object[]{Integer.valueOf(moneyTransaction2.getTransactionAmount())}))
-            this.finalBalanceTextView.setText(TransactionLogAdapter.this.context.getString(R.string.transaction_balance_amount, Object[]{Integer.valueOf(moneyTransaction2.getNewBalance())}))
+            this.amountTextView.setText(TransactionLogAdapter.this.context.getString(R.string.transaction_amount_format, Array<Any>{Integer.valueOf(moneyTransaction2.getTransactionAmount())}))
+            this.finalBalanceTextView.setText(TransactionLogAdapter.this.context.getString(R.string.transaction_balance_amount, Array<Any>{Integer.valueOf(moneyTransaction2.getNewBalance())}))
             this.calendar.setTime(moneyTransaction2.getTimestamp())
             this.timestampTextView.setText(DateUtils.getRelativeTimeSpanString(TransactionLogAdapter.this.context, this.calendar.getTimeInMillis(), false))
         }

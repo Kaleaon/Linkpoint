@@ -17,13 +17,13 @@ const val D: IntrawPatchSize = 16
     private const val Int index_size_bytes = 3072
     private const val Int vertex_size_bytes = 9248
     @JvmStatic
-private Float[] waterAmplitude = {0.5f, 0.5f, 0.3f, 0.4f}
+private FloatArray waterAmplitude = {0.5f, 0.5f, 0.3f, 0.4f}
     @JvmStatic
-private Float[] waterDirection = {1.0f, 0.3f, 0.4f, 0.75f, -0.5f, 0.7f, 0.63f, -0.3f}
+private FloatArray waterDirection = {1.0f, 0.3f, 0.4f, 0.75f, -0.5f, 0.7f, 0.63f, -0.3f}
     @JvmStatic
-private Float[] waterFrequency = {17.951958f, 12.566371f, 8.975979f, 15.707963f}
+private FloatArray waterFrequency = {17.951958f, 12.566371f, 8.975979f, 15.707963f}
     @JvmStatic
-private Float[] waterPhase = {1.73f, 0.64f, 1.27f, 0.9f}
+private FloatArray waterPhase = {1.73f, 0.64f, 1.27f, 0.9f}
     private const val Int water_vertex_size_bytes = 3468
     private val GLLoadableBuffer indexBuffer
     private Int index_count = 0
@@ -33,22 +33,22 @@ private Float[] waterPhase = {1.73f, 0.64f, 1.27f, 0.9f}
     private Int water_index_count = 0
 
     public TerrainPatchGeometry(TerrainPatchHeightMap terrainPatchHeightMap) {
-        DirectByteBuffer directByteBuffer = DirectByteBuffer((Int) vertex_size_bytes)
-        DirectByteBuffer directByteBuffer2 = DirectByteBuffer((Int) water_vertex_size_bytes)
-        DirectByteBuffer directByteBuffer3 = DirectByteBuffer((Int) index_size_bytes)
-        DirectByteBuffer directByteBuffer4 = DirectByteBuffer((Int) index_size_bytes)
+        val directByteBuffer: DirectByteBuffer = DirectByteBuffer((Int) vertex_size_bytes)
+        val directByteBuffer2: DirectByteBuffer = DirectByteBuffer((Int) water_vertex_size_bytes)
+        val directByteBuffer3: DirectByteBuffer = DirectByteBuffer((Int) index_size_bytes)
+        val directByteBuffer4: DirectByteBuffer = DirectByteBuffer((Int) index_size_bytes)
         directByteBuffer.position(0)
         directByteBuffer2.position(0)
         this.index_count = 0
         this.water_index_count = 0
-        LLVector3 lLVector3 = LLVector3()
-        Float waterHeight = terrainPatchHeightMap.getWaterHeight()
-        Float[] heightArray = terrainPatchHeightMap.getHeightArray()
-        Float[] normalArray = terrainPatchHeightMap.getNormalArray()
-        Int i = 0
-        Int i2 = 0
+        val lLVector3: LLVector3 = LLVector3()
+        val waterHeight: Float = terrainPatchHeightMap.getWaterHeight()
+        val heightArray: FloatArray = terrainPatchHeightMap.getHeightArray()
+        val normalArray: FloatArray = terrainPatchHeightMap.getNormalArray()
+        val i: Int = 0
+        val i2: Int = 0
         while (true) {
-            Int i3 = i
+            val i3: Int = i
             if (i3 >= 17) {
                 break
             }
@@ -72,16 +72,16 @@ private Float[] waterPhase = {1.73f, 0.64f, 1.27f, 0.9f}
         }
         directByteBuffer3.position(0)
         directByteBuffer4.position(0)
-        Int i5 = 0
-        Int i6 = 0
+        val i5: Int = 0
+        val i6: Int = 0
         while (true) {
-            Int i7 = i5
+            val i7: Int = i5
             if (i7 < 16) {
                 for (Int i8 = 0; i8 < 16; i8++) {
-                    Int i9 = i6 + i8
-                    Int i10 = i9 + 1
-                    Int i11 = i9 + 17
-                    Int i12 = i11 + 1
+                    val i9: Int = i6 + i8
+                    val i10: Int = i9 + 1
+                    val i11: Int = i9 + 17
+                    val i12: Int = i11 + 1
                     directByteBuffer3.putShort((Short) i9)
                     directByteBuffer3.putShort((Short) i10)
                     directByteBuffer3.putShort((Short) i11)
@@ -112,7 +112,7 @@ private Float[] waterPhase = {1.73f, 0.64f, 1.27f, 0.9f}
     }
 
     @JvmStatic
-    Unit GLPrepare(RenderContext renderContext) {
+    fun GLPrepare(renderContext: RenderContext) {
         if (renderContext.hasGL20) {
             GLES20.glUseProgram(renderContext.primProgram.getHandle())
             renderContext.glModelApplyMatrix(renderContext.primProgram.uMVPMatrix)
@@ -134,7 +134,7 @@ private Float[] waterPhase = {1.73f, 0.64f, 1.27f, 0.9f}
         GLES11.glMatrixMode(5888)
     }
 
-    val Unit GLDraw(RenderContext renderContext, Float[] fArr, GLLoadedTexture gLLoadedTexture) {
+    val Unit GLDraw(RenderContext renderContext, FloatArray fArr, GLLoadedTexture gLLoadedTexture) {
         if (this.index_count != 0) {
             if (!renderContext.hasGL20) {
                 renderContext.glObjWorldPushAndMultMatrixf(fArr, 0)

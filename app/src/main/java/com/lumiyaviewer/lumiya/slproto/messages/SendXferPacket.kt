@@ -9,7 +9,7 @@ class SendXferPacket : SLMessage {
     XferID XferID_Field = XferID()
 
     class DataPacket {
-        Byte[] Data
+        ByteArray Data
     }
 
     class XferID {

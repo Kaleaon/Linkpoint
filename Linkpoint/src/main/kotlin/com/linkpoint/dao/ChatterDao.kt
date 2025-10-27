@@ -32,26 +32,26 @@ class ChatterDao : AbstractDao()<Chatter, Long> {
     }
 
     @JvmStatic
-    Unit createTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
-        String str = z ? "IF NOT EXISTS " : ""
+     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
+        val str: String = z ? "IF NOT EXISTS " : ""
         sQLiteDatabase.execSQL("CREATE TABLE " + str + "'CHATTER' (" + "'_id' INTEGER PRIMARY KEY ," + "'TYPE' INTEGER NOT NULL ," + "'UUID' TEXT," + "'ACTIVE' INTEGER NOT NULL ," + "'MUTED' INTEGER NOT NULL ," + "'UNREAD_COUNT' INTEGER NOT NULL ," + "'LAST_MESSAGE_ID' INTEGER," + "'LAST_SESSION_ID' TEXT);")
         sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_CHATTER_TYPE_UUID ON CHATTER" + " (TYPE,UUID);")
     }
 
     @JvmStatic
-    Unit dropTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'CHATTER'")
     }
 
-    protected Unit bindValues(SQLiteStatement sQLiteStatement, Chatter chatter) {
-        Long j = 1
+     protected fun bindValues(sQLiteStatement: SQLiteStatement, chatter: Chatter) {
+        val j: Long = 1
         sQLiteStatement.clearBindings()
-        Long id = chatter.getId()
+        val id: Long = chatter.getId()
         if (id != null) {
             sQLiteStatement.bindLong(1, id.longValue())
         }
         sQLiteStatement.bindLong(2, (Long) chatter.getType())
-        UUID uuid = chatter.getUuid()
+        val uuid: UUID = chatter.getUuid()
         if (uuid != null) {
             sQLiteStatement.bindString(3, uuid.toString())
         }
@@ -71,35 +71,35 @@ class ChatterDao : AbstractDao()<Chatter, Long> {
         }
     }
 
-    public Long getKey(Chatter chatter) {
+     public fun getKey(chatter: Chatter): Long {
         return chatter != null ? chatter.getId() : null
     }
 
-    protected Boolean isEntityUpdateable() {
+     protected fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    public Chatter readEntity(Cursor cursor, Int i) {
-        Boolean z = true
-        UUID uuid = null
-        Long valueOf = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
-        Int i2 = cursor.getInt(i + 1)
-        UUID fromString = cursor.isNull(i + 2) ? null : UUID.fromString(cursor.getString(i + 2))
-        Boolean z2 = cursor.getShort(i + 3) != (Short) 0
+     public fun readEntity(cursor: Cursor, i: Int): Chatter {
+        val z: Boolean = true
+        val uuid: UUID = null
+        val valueOf: Long = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
+        val i2: Int = cursor.getInt(i + 1)
+        val fromString: UUID = cursor.isNull(i + 2) ? null : UUID.fromString(cursor.getString(i + 2))
+        val z2: Boolean = cursor.getShort(i + 3) != (Short) 0
         if (cursor.getShort(i + 4) == (Short) 0) {
             z = false
         }
-        Int i3 = cursor.getInt(i + 5)
-        Long valueOf2 = cursor.isNull(i + 6) ? null : Long.valueOf(cursor.getLong(i + 6))
+        val i3: Int = cursor.getInt(i + 5)
+        val valueOf2: Long = cursor.isNull(i + 6) ? null : Long.valueOf(cursor.getLong(i + 6))
         if (!cursor.isNull(i + 7)) {
             uuid = UUID.fromString(cursor.getString(i + 7))
         }
         return Chatter(valueOf, i2, fromString, z2, z, i3, valueOf2, uuid)
     }
 
-    fun readEntity(Cursor cursor, Chatter chatter, Int i) {
-        Boolean z = true
-        UUID uuid = null
+    fun readEntity(cursor: Cursor, chatter: Chatter, i: Int) {
+        val z: Boolean = true
+        val uuid: UUID = null
         chatter.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
         chatter.setType(cursor.getInt(i + 1))
         chatter.setUuid(cursor.isNull(i + 2) ? null : UUID.fromString(cursor.getString(i + 2)))
@@ -116,11 +116,11 @@ class ChatterDao : AbstractDao()<Chatter, Long> {
         chatter.setLastSessionID(uuid)
     }
 
-    public Long readKey(Cursor cursor, Int i) {
+     public fun readKey(cursor: Cursor, i: Int): Long {
         return cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
     }
 
-    protected Long updateKeyAfterInsert(Chatter chatter, Long j) {
+     protected fun updateKeyAfterInsert(chatter: Chatter, j: Long): Long {
         chatter.setId(Long.valueOf(j))
         return Long.valueOf(j)
     }

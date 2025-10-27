@@ -21,15 +21,15 @@ class AvatarRunningSequence : AnimationTiming() {
         this.runningAnimations = animationData.createRunningAnimations(this)
     }
 
-    public Int getAnimationPriority() {
+     public fun getAnimationPriority(): Int {
         return this.animationData.getPriority()
     }
 
-    Unit getRunningAnimations(Collection<AvatarRunningAnimation> collection) {
+     fun getRunningAnimations(collection: Collection<AvatarRunningAnimation>) {
         collection.addAll(this.runningAnimations)
     }
 
-    Boolean needAnimate(Long j) {
+     fun needAnimate(j: Long): Boolean {
         return this.animationData.updateAnimationTiming(j, this.runningSince, this.stoppingSince, this.dontEaseIn, this)
     }
 }

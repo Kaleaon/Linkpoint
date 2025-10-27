@@ -8,10 +8,10 @@ import com.lumiyaviewer.lumiya.render.glres.GLSizedResource
 
 class GLResourceTexture : GLSizedResource {
     /* access modifiers changed from: private */
-    ThreadLocal<Int[]> idBuffer = ThreadLocal<Int[]>() {
+    ThreadLocal<IntArray> idBuffer = ThreadLocal<IntArray>() {
         /* access modifiers changed from: protected */
-        Int[] initialValue() {
-            return Int[1]
+        IntArray initialValue() {
+            return IntArray(1)
         }
     }
 
@@ -26,7 +26,7 @@ class GLResourceTexture : GLSizedResource {
 
         fun GLFree(): Unit {
             TextureMemoryTracker.releaseTextureMemory(this.loadedSize)
-            Int[] iArr = (Int[]) GLResourceTexture.idBuffer.get()
+            IntArray iArr = (IntArray) GLResourceTexture.idBuffer.get()
             iArr[0] = this.handle
             GLES11.glDeleteTextures(1, iArr, 0)
         }
@@ -39,7 +39,7 @@ class GLResourceTexture : GLSizedResource {
 
     /* access modifiers changed from: protected */
     fun Allocate(gLResourceManager: GLResourceManager): Int {
-        Int[] iArr = idBuffer.get()
+        IntArray iArr = idBuffer.get()
         GLES11.glGenTextures(1, iArr, 0)
         return iArr[0]
     }

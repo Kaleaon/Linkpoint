@@ -35,15 +35,15 @@ class ObjectFlagUpdate : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.ExtraPhysics_Fields.size() * 17) + 45
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleObjectFlagUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 94)
@@ -64,7 +64,7 @@ class ObjectFlagUpdate : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.ObjectLocalID = unpackInt(byteBuffer)
@@ -72,9 +72,9 @@ class ObjectFlagUpdate : SLMessage() {
         this.AgentData_Field.IsTemporary = unpackBoolean(byteBuffer)
         this.AgentData_Field.IsPhantom = unpackBoolean(byteBuffer)
         this.AgentData_Field.CastsShadows = unpackBoolean(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ExtraPhysics extraPhysics = ExtraPhysics()
+            val extraPhysics: ExtraPhysics = ExtraPhysics()
             extraPhysics.PhysicsShapeType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             extraPhysics.Density = unpackFloat(byteBuffer)
             extraPhysics.Friction = unpackFloat(byteBuffer)

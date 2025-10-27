@@ -32,29 +32,29 @@ class UserDao : AbstractDao()<User, Long> {
     }
 
     @JvmStatic
-    Unit createTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
-        String str = z ? "IF NOT EXISTS " : ""
+     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
+        val str: String = z ? "IF NOT EXISTS " : ""
         sQLiteDatabase.execSQL("CREATE TABLE " + str + "'Users' (" + "'_id' INTEGER PRIMARY KEY ," + "'UUID' TEXT," + "'USER_NAME' TEXT," + "'DISPLAY_NAME' TEXT," + "'BAD_UUID' INTEGER NOT NULL ," + "'IS_FRIEND' INTEGER NOT NULL ," + "'RIGHTS_GIVEN' INTEGER NOT NULL ," + "'RIGHTS_HAS' INTEGER NOT NULL );")
         sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_Users_UUID ON Users" + " (UUID);")
     }
 
     @JvmStatic
-    Unit dropTable(SQLiteDatabase sQLiteDatabase, Boolean z) {
+     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean) {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'Users'")
     }
 
-    protected Unit bindValues(SQLiteStatement sQLiteStatement, User user) {
-        Long j = 1
+     protected fun bindValues(sQLiteStatement: SQLiteStatement, user: User) {
+        val j: Long = 1
         sQLiteStatement.clearBindings()
-        Long id = user.getId()
+        val id: Long = user.getId()
         if (id != null) {
             sQLiteStatement.bindLong(1, id.longValue())
         }
-        UUID uuid = user.getUuid()
+        val uuid: UUID = user.getUuid()
         if (uuid != null) {
             sQLiteStatement.bindString(2, uuid.toString())
         }
-        String userName = user.getUserName()
+        val userName: String = user.getUserName()
         if (userName != null) {
             sQLiteStatement.bindString(3, userName)
         }
@@ -71,33 +71,33 @@ class UserDao : AbstractDao()<User, Long> {
         sQLiteStatement.bindLong(8, (Long) user.getRightsHas())
     }
 
-    public Long getKey(User user) {
+     public fun getKey(user: User): Long {
         return user != null ? user.getId() : null
     }
 
-    protected Boolean isEntityUpdateable() {
+     protected fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    public User readEntity(Cursor cursor, Int i) {
-        Boolean z = true
-        String str = null
-        Long valueOf = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
-        UUID fromString = cursor.isNull(i + 1) ? null : UUID.fromString(cursor.getString(i + 1))
-        String string = cursor.isNull(i + 2) ? null : cursor.getString(i + 2)
+     public fun readEntity(cursor: Cursor, i: Int): User {
+        val z: Boolean = true
+        val str: String = null
+        val valueOf: Long = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
+        val fromString: UUID = cursor.isNull(i + 1) ? null : UUID.fromString(cursor.getString(i + 1))
+        val string: String = cursor.isNull(i + 2) ? null : cursor.getString(i + 2)
         if (!cursor.isNull(i + 3)) {
             str = cursor.getString(i + 3)
         }
-        Boolean z2 = cursor.getShort(i + 4) != (Short) 0
+        val z2: Boolean = cursor.getShort(i + 4) != (Short) 0
         if (cursor.getShort(i + 5) == (Short) 0) {
             z = false
         }
         return User(valueOf, fromString, string, str, z2, z, cursor.getInt(i + 6), cursor.getInt(i + 7))
     }
 
-    fun readEntity(Cursor cursor, User user, Int i) {
-        Boolean z = true
-        String str = null
+    fun readEntity(cursor: Cursor, user: User, i: Int) {
+        val z: Boolean = true
+        val str: String = null
         user.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
         user.setUuid(cursor.isNull(i + 1) ? null : UUID.fromString(cursor.getString(i + 1)))
         user.setUserName(cursor.isNull(i + 2) ? null : cursor.getString(i + 2))
@@ -114,11 +114,11 @@ class UserDao : AbstractDao()<User, Long> {
         user.setRightsHas(cursor.getInt(i + 7))
     }
 
-    public Long readKey(Cursor cursor, Int i) {
+     public fun readKey(cursor: Cursor, i: Int): Long {
         return cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
     }
 
-    protected Long updateKeyAfterInsert(User user, Long j) {
+     protected fun updateKeyAfterInsert(user: User, j: Long): Long {
         user.setId(Long.valueOf(j))
         return Long.valueOf(j)
     }

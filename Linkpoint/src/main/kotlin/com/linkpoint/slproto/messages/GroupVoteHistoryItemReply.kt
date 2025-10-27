@@ -21,16 +21,16 @@ class GroupVoteHistoryItemReply : SLMessage() {
 
     @JvmStatic
     class HistoryItemData {
-        public Byte[] EndDateTime
+        public ByteArray EndDateTime
         public Float Majority
-        public Byte[] ProposalText
+        public ByteArray ProposalText
         public Int Quorum
-        public Byte[] StartDateTime
-        public Byte[] TerseDateID
+        public ByteArray StartDateTime
+        public ByteArray TerseDateID
         public UUID VoteID
         public UUID VoteInitiator
-        public Byte[] VoteResult
-        public Byte[] VoteType
+        public ByteArray VoteResult
+        public ByteArray VoteType
     }
 
     @JvmStatic
@@ -43,7 +43,7 @@ class GroupVoteHistoryItemReply : SLMessage() {
     class VoteItem {
         public UUID CandidateID
         public Int NumVotes
-        public Byte[] VoteCast
+        public ByteArray VoteCast
     }
 
     public GroupVoteHistoryItemReply() {
@@ -53,11 +53,11 @@ class GroupVoteHistoryItemReply : SLMessage() {
         this.HistoryItemData_Field = HistoryItemData()
     }
 
-    public Int CalcPayloadSize() {
-        Int length = this.HistoryItemData_Field.TerseDateID.length + 17 + 1 + this.HistoryItemData_Field.StartDateTime.length + 1 + this.HistoryItemData_Field.EndDateTime.length + 16 + 1 + this.HistoryItemData_Field.VoteType.length + 1 + this.HistoryItemData_Field.VoteResult.length + 4 + 4 + 2 + this.HistoryItemData_Field.ProposalText.length + 56 + 1
-        Iterator<T> it = this.VoteItem_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val length: Int = this.HistoryItemData_Field.TerseDateID.length + 17 + 1 + this.HistoryItemData_Field.StartDateTime.length + 1 + this.HistoryItemData_Field.EndDateTime.length + 16 + 1 + this.HistoryItemData_Field.VoteType.length + 1 + this.HistoryItemData_Field.VoteResult.length + 4 + 4 + 2 + this.HistoryItemData_Field.ProposalText.length + 56 + 1
+        val it: Iterator<T> = this.VoteItem_Fields.iterator()
         while (true) {
-            Int i = length
+            val i: Int = length
             if (!it.hasNext()) {
                 return i
             }
@@ -65,11 +65,11 @@ class GroupVoteHistoryItemReply : SLMessage() {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleGroupVoteHistoryItemReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 106)
@@ -95,7 +95,7 @@ class GroupVoteHistoryItemReply : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
         this.TransactionData_Field.TransactionID = unpackUUID(byteBuffer)
@@ -110,9 +110,9 @@ class GroupVoteHistoryItemReply : SLMessage() {
         this.HistoryItemData_Field.Majority = unpackFloat(byteBuffer)
         this.HistoryItemData_Field.Quorum = unpackInt(byteBuffer)
         this.HistoryItemData_Field.ProposalText = unpackVariable(byteBuffer, 2)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            VoteItem voteItem = VoteItem()
+            val voteItem: VoteItem = VoteItem()
             voteItem.CandidateID = unpackUUID(byteBuffer)
             voteItem.VoteCast = unpackVariable(byteBuffer, 1)
             voteItem.NumVotes = unpackInt(byteBuffer)

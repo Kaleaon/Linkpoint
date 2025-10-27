@@ -18,10 +18,10 @@ class CreateInventoryItem : SLMessage() {
     @JvmStatic
     class InventoryBlock {
         public Int CallbackID
-        public Byte[] Description
+        public ByteArray Description
         public UUID FolderID
         public Int InvType
-        public Byte[] Name
+        public ByteArray Name
         public Int NextOwnerMask
         public UUID TransactionID
         public Int Type

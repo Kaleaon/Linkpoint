@@ -12,7 +12,7 @@ import javax.annotation.Nullable
 class NotificationChannels {
 
     /* renamed from: -com-lumiyaviewer-lumiya-ui-settings-NotificationTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f464comlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f464comlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues = null
     const val MESSAGE_NOTIFICATION_GROUP: String = "messageNotifications"
     private val NotificationChannelManager channelManager
 
@@ -48,11 +48,11 @@ private class InstanceHolder {
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-ui-settings-NotificationTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m666getcomlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues() {
+private /* synthetic */ IntArray m666getcomlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues() {
         if (f464comlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues != null) {
             return f464comlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues
         }
-        Int[] iArr = Int[NotificationType.values().length]
+        val iArr: IntArray = Int[NotificationType.values().length]
         try {
             iArr[NotificationType.Group.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -82,15 +82,15 @@ private /* synthetic */ Int[] m666getcomlumiyaviewerlumiyauisettingsNotification
     }
 
     @JvmStatic
-    NotificationChannels getInstance() {
+     fun getInstance(): NotificationChannels {
         return InstanceHolder.Instance
     }
 
-    public Boolean areNotificationsSystemControlled() {
+     public fun areNotificationsSystemControlled(): Boolean {
         return this.channelManager.areNotificationsSystemControlled()
     }
 
-    public Channel getChannelByType(NotificationType notificationType) {
+     public fun getChannelByType(notificationType: NotificationType): Channel {
         switch (m666getcomlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues()[notificationType.ordinal()]) {
             case 1:
                 return Channel.Group
@@ -103,7 +103,7 @@ private /* synthetic */ Int[] m666getcomlumiyaviewerlumiyauisettingsNotification
         }
     }
 
-    public String getChannelName(Channel channel) {
+     public fun getChannelName(channel: Channel): String {
         return this.channelManager.getNotificationChannelName(channel)
     }
 
@@ -111,15 +111,15 @@ private /* synthetic */ Int[] m666getcomlumiyaviewerlumiyauisettingsNotification
         return this.channelManager.getEnabledTypes(context)
     }
 
-    public String getNotificationSummary(Context context, Channel channel) {
+     public fun getNotificationSummary(context: Context, channel: Channel): String {
         return this.channelManager.getNotificationSummary(context, channel)
     }
 
-    public Boolean showSystemNotificationSettings(Context context, Fragment fragment, Channel channel) {
+     public fun showSystemNotificationSettings(context: Context, fragment: Fragment, channel: Channel): Boolean {
         return this.channelManager.showSystemNotificationSettings(context, fragment, channel)
     }
 
-    public Boolean useNotificationGroups() {
+     public fun useNotificationGroups(): Boolean {
         return this.channelManager.useNotificationGroups()
     }
 }

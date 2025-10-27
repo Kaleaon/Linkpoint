@@ -14,9 +14,9 @@ class PrimFlexibleParams {
     public Float WindSensitivity
 
     public PrimFlexibleParams(ByteBuffer byteBuffer, Int i) {
-        Int i2 = 0
-        Byte b = byteBuffer.get()
-        Byte b2 = byteBuffer.get()
+        val i2: Int = 0
+        val b: Byte = byteBuffer.get()
+        val b2: Byte = byteBuffer.get()
         this.Tension = ((Float) (b & Ascii.DEL)) / 10.0f
         this.AirFriction = ((Float) (b2 & Ascii.DEL)) / 10.0f
         i2 = (b & 128) != 0 ? 2 : i2
@@ -30,18 +30,18 @@ class PrimFlexibleParams {
         }
     }
 
-    public Boolean equals(Object obj) {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
         if (!(obj instanceof PrimFlexibleParams)) {
             return false
         }
-        PrimFlexibleParams primFlexibleParams = (PrimFlexibleParams) obj
+        val primFlexibleParams: PrimFlexibleParams = (PrimFlexibleParams) obj
         return this.Tension == primFlexibleParams.Tension && this.AirFriction == primFlexibleParams.AirFriction && this.Gravity == primFlexibleParams.Gravity && this.WindSensitivity == primFlexibleParams.WindSensitivity && this.NumFlexiSections == primFlexibleParams.NumFlexiSections && !(this.UserForce.equals(primFlexibleParams.UserForce) ^ true)
     }
 
-    public Int hashCode() {
+     public override fun hashCode(): Int {
         return Float.floatToRawIntBits(this.Tension) + 0 + Float.floatToRawIntBits(this.AirFriction) + Float.floatToRawIntBits(this.Gravity) + Float.floatToRawIntBits(this.WindSensitivity) + this.NumFlexiSections + this.UserForce.hashCode()
     }
 }

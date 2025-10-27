@@ -31,8 +31,8 @@ import okhttp3.Request
 import okhttp3.Response
 
 class SLHTTPSConnection {
-    private Long CONNECT_TIMEOUT = 60
-    private Long READ_TIMEOUT = 60
+    private val CONNECT_TIMEOUT: Long = 60
+    private val READ_TIMEOUT: Long = 60
     private OkHttpClient okHttpClient = OkHttpClient.Builder().proxy(Proxy.NO_PROXY).dns(SLDNS()).connectionPool(ConnectionPool(8, 5, TimeUnit.MINUTES)).connectTimeout(60, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).hostnameVerifier(HostnameVerifier() {
         Boolean verify(String str, SSLSession sSLSession) {
             return true

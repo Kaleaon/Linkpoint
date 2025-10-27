@@ -17,17 +17,17 @@ class ParcelInfoReply : SLMessage {
         Int ActualArea
         Int AuctionID
         Int BillableArea
-        Byte[] Desc
+        ByteArray Desc
         Float Dwell
         Int Flags
         Float GlobalX
         Float GlobalY
         Float GlobalZ
-        Byte[] Name
+        ByteArray Name
         UUID OwnerID
         UUID ParcelID
         Int SalePrice
-        Byte[] SimName
+        ByteArray SimName
         UUID SnapshotID
     }
 

@@ -3,7 +3,7 @@ package com.linkpoint.render.picking
 import com.linkpoint.slproto.types.LLVector3
 
 class CollisionBox {
-    val LLVector3[] vertices
+    val Array<LLVector3> vertices
 
     @JvmStatic
 private class InstanceHolder {
@@ -27,9 +27,9 @@ private class InstanceHolder {
         this()
     }
 
-    private Unit addCollisionFace(Int i, Float f, Float f2, Float f3, Float f4, Float f5, Int i2) {
-        Int i3 = (i * 2) * 3
-        LLVector3[] lLVector3Arr = LLVector3[]{getCollisionVertex(f, f2, f5, i2), getCollisionVertex(f3, f2, f5, i2), getCollisionVertex(f3, f4, f5, i2), getCollisionVertex(f, f4, f5, i2)}
+     private fun addCollisionFace(i: Int, f: Float, f2: Float, f3: Float, f4: Float, f5: Float, i2: Int) {
+        val i3: Int = (i * 2) * 3
+        val lLVector3Arr: Array<LLVector3> = Array<LLVector3>{getCollisionVertex(f, f2, f5, i2), getCollisionVertex(f3, f2, f5, i2), getCollisionVertex(f3, f4, f5, i2), getCollisionVertex(f, f4, f5, i2)}
         this.vertices[i3 + 0] = lLVector3Arr[0]
         this.vertices[i3 + 1] = lLVector3Arr[1]
         this.vertices[i3 + 2] = lLVector3Arr[3]
@@ -38,7 +38,7 @@ private class InstanceHolder {
         this.vertices[i3 + 5] = lLVector3Arr[3]
     }
 
-    private LLVector3 getCollisionVertex(Float f, Float f2, Float f3, Int i) {
+     private fun getCollisionVertex(f: Float, f2: Float, f3: Float, i: Int): LLVector3 {
         switch (i) {
             case 0:
                 return LLVector3(f3, f, f2)
@@ -52,7 +52,7 @@ private class InstanceHolder {
     }
 
     @JvmStatic
-    CollisionBox getInstance() {
+     fun getInstance(): CollisionBox {
         return InstanceHolder.Instance
     }
 }

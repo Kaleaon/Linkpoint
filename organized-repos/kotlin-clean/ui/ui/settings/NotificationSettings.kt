@@ -14,9 +14,9 @@ import com.linkpoint.utils.LEDAction
 
 class NotificationSettings {
     private LEDAction blinkAction = LEDAction.None
-    private String blinkColor = "red"
+    private val blinkColor: String = "red"
     private Boolean notificationEnabled = false
-    private String ringtone = ""
+    private val ringtone: String = ""
     private Boolean soundEnabled = false
     private NotificationType type
 
@@ -37,8 +37,8 @@ class NotificationSettings {
     }
 
     private String getPreferenceValueName(Context context, String str, Int i, Int i2) {
-        String[] stringArray = context.getResources().getStringArray(i)
-        String[] stringArray2 = context.getResources().getStringArray(i2)
+        Array<String> stringArray = context.getResources().getStringArray(i)
+        Array<String> stringArray2 = context.getResources().getStringArray(i2)
         for (Int i3 = 0; i3 < stringArray.length; i3++) {
             if (stringArray[i3].equals(str)) {
                 return stringArray2[i3]

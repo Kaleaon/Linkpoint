@@ -40,7 +40,7 @@ import javax.annotation.Nullable
 class TaskInventoryFragment : FragmentWithTitle() {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-inventory-SLAssetTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f501comlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f501comlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues = null
     private const val OBJECT_LOCAL_ID_KEY: String = "objectLocalId"
     private const val OBJECT_UUID_KEY: String = "objectUUID"
     private SLObjectProfileData objectProfileData = null
@@ -125,11 +125,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-inventory-SLAssetTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m684getcomlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues() {
+private /* synthetic */ IntArray m684getcomlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues() {
         if (f501comlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues != null) {
             return f501comlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues
         }
-        Int[] iArr = Int[SLAssetType.values().length]
+        IntArray iArr = Int[SLAssetType.values().length]
         try {
             iArr[SLAssetType.AT_ANIMATION.ordinal()] = 3
         } catch (NoSuchFieldError e) {
@@ -270,7 +270,7 @@ private /* synthetic */ Int[] m684getcomlumiyaviewerlumiyaslprotoinventorySLAsse
                     }
                     if (z2) {
                         AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
-                        builder.setMessage((Int) R.string.object_contents_has_no_copy).setPositiveButton((Int) R.string.object_contents_yes_move, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
+                        builder.setMessage(R.toInt().string.object_contents_has_no_copy).setPositiveButton(R.toInt().string.object_contents_yes_move, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
 
                             /* renamed from: -$f0 */
                             private val /* synthetic */ Object f466$f0
@@ -372,7 +372,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
                             
 */
 
-                        }).setNegativeButton((Int) R.string.cancel, (DialogInterface.OnClickListener) $Lambda$2R1p9WuPUwPagPVBm9YiYK9KyJ0())
+                        }).setNegativeButton(R.toInt().string.cancel, (DialogInterface.OnClickListener) $Lambda$2R1p9WuPUwPagPVBm9YiYK9KyJ0())
                         builder.create().show()
                         return
                     }

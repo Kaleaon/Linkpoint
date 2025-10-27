@@ -67,16 +67,16 @@ abstract class DriveConnectibleResource {
                     this.this$0.startCreatingResource()
                     return
                 }
-                Boolean bl = false
+                val bl: Boolean = false
                 Debug.Printf("LinkpointCloud: '%s': key %s, needInvalidate %b", this.this$0.resourceName, this.this$0.preferencesKey, this.this$0.needInvalidate)
-                Boolean bl2 = bl
+                val bl2: Boolean = bl
                 if (this.this$0.preferencesKey != null) {
                     bl2 = bl
                     if (!this.this$0.needInvalidate) {
-                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences((Context)this.this$0.context)
+                        val sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences((Context)this.this$0.context)
                         bl2 = bl
                         if (sharedPreferences.contains(this.this$0.preferencesKey)) {
-                            String string2 = sharedPreferences.getString(this.this$0.preferencesKey, null)
+                            val string2: String = sharedPreferences.getString(this.this$0.preferencesKey, null)
                             bl2 = bl
                             if (string2 != null) {
                                 Debug.Printf("Resource '%s': has stored DriveId: %s", this.this$0.resourceName, string2)
@@ -100,7 +100,7 @@ abstract class DriveConnectibleResource {
                     return
                 }
                 Debug.Printf("LinkpointCloud: '%s': searching root folder", this.this$0.resourceName)
-                DriveFolder driveFolder = Drive.DriveApi.getRootFolder(this.this$0.googleApiClient)
+                val driveFolder: DriveFolder = Drive.DriveApi.getRootFolder(this.this$0.googleApiClient)
                 this.this$0.startSearching(driveFolder)
             }
         }
@@ -135,8 +135,8 @@ abstract class DriveConnectibleResource {
                 block2: {
                     metadataBuffer = object.getMetadataBuffer()
                     Debug.Printf("Resource '%s': got %d results.", this.this$0.resourceName, metadataBuffer.getCount())
-                    Boolean bl2 = false
-                    Iterator iterator = metadataBuffer.iterator()
+                    val bl2: Boolean = false
+                    val iterator: Iterator = metadataBuffer.iterator()
                     do {
                         bl = bl2
                         if (!iterator.hasNext()) break block2
@@ -163,7 +163,7 @@ abstract class DriveConnectibleResource {
              * Lifted jumps to return sites
              */
             override Unit onResult(DriveResource.MetadataResult object) {
-                Status status = object.getStatus()
+                val status: Status = object.getStatus()
                 Debug.Printf("Resource '%s': metadata received, success %b", this.this$0.resourceName, status.isSuccess())
                 if (status.isSuccess()) {
                     if (!this.this$0.isMetadataOk(object.getMetadata())) {
@@ -222,12 +222,12 @@ abstract class DriveConnectibleResource {
         this.resourceName = string3
     }
 
-    static /* synthetic */ Boolean access$002(DriveConnectibleResource driveConnectibleResource, Boolean bl) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Boolean access$002(DriveConnectibleResource driveConnectibleResource, Boolean bl) {
         driveConnectibleResource.needInvalidate = bl
         return bl
     }
 
-    static /* synthetic */ Boolean access$102(DriveConnectibleResource driveConnectibleResource, Boolean bl) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Boolean access$102(DriveConnectibleResource driveConnectibleResource, Boolean bl) {
         driveConnectibleResource.needRecreate = bl
         return bl
     }
@@ -235,7 +235,7 @@ abstract class DriveConnectibleResource {
     /*
      * Enabled aggressive block sorting
      */
-    private Unit invokeListeners(DriveResource driveResource, String string2) {
+     private fun invokeListeners(driveResource: DriveResource, string2: String) {
         Debug.Printf("Resource '%s': calling listeners, resource %s, message %s.", this.resourceName, driveResource, string2)
         if (driveResource != null) {
             this.requestedParentInvalidate = false
@@ -243,7 +243,7 @@ abstract class DriveConnectibleResource {
         this.driveResource = driveResource
         this.errorMessage = string2
         this.state = this.driveResource != null ? State.Idle : State.Error
-        Object object = ImmutableList.copyOf(this.listeners)
+        val object: Object = ImmutableList.copyOf(this.listeners)
         this.listeners.clear()
         object = ((ImmutableList)object).iterator()
         while (object.hasNext()) {
@@ -252,7 +252,7 @@ abstract class DriveConnectibleResource {
         return
     }
 
-    private Unit startRequestingResource() {
+     private fun startRequestingResource() {
         Debug.Printf("Resource '%s': starting work.", this.resourceName)
         this.state = State.Working
         if (this.needInvalidate) {
@@ -261,9 +261,9 @@ abstract class DriveConnectibleResource {
         this.synchronizer.requestSync(this.onSyncCompleted)
     }
 
-    private Unit startSearching(DriveFolder driveFolder) {
+     private fun startSearching(driveFolder: DriveFolder) {
         Debug.Printf("Resource '%s': starting to search", this.resourceName)
-        Query query = Query.Builder().addFilter(Filters.and(Filters.eq(SearchableField.TITLE, this.resourceName), Filters.eq(SearchableField.TRASHED, false), Filters.eq(SearchableField.MIME_TYPE, this.getMimeType()))).build()
+        val query: Query = Query.Builder().addFilter(Filters.and(Filters.eq(SearchableField.TITLE, this.resourceName), Filters.eq(SearchableField.TRASHED, false), Filters.eq(SearchableField.MIME_TYPE, this.getMimeType()))).build()
         driveFolder.queryChildren(this.googleApiClient, query).setResultCallback(this.onQueryResults)
     }
 
@@ -274,8 +274,8 @@ abstract class DriveConnectibleResource {
     /*
      * Enabled aggressive block sorting
      */
-    Unit getResource(OnResourceReadyListener onResourceReadyListener) {
-        Debug.Printf("Asked for resource '%s', state %s", Object[]{this.resourceName, this.state})
+     fun getResource(onResourceReadyListener: OnResourceReadyListener) {
+        Debug.Printf("Asked for resource '%s', state %s", Array<Any>{this.resourceName, this.state})
         if (this.driveResource != null) {
             if (onResourceReadyListener == null) return
             onResourceReadyListener.onResourceReady(this.driveResource, null)
@@ -295,7 +295,7 @@ abstract class DriveConnectibleResource {
 
     protected abstract Boolean isMetadataOk(Metadata var1)
 
-    Unit onResourceCreated(DriveResource driveResource) {
+     fun onResourceCreated(driveResource: DriveResource) {
         Debug.Printf("Resource '%s': created.", this.resourceName)
         if (this.preferencesKey != null) {
             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences((Context)this.context).edit()
@@ -309,7 +309,7 @@ abstract class DriveConnectibleResource {
      * Enabled force condition propagation
      * Lifted jumps to return sites
      */
-    Unit onResourceCreationFailed(String string2) {
+     fun onResourceCreationFailed(string2: String) {
         Debug.Printf("Resource '%s': creation failed, requestedParentInvalidate %b.", this.resourceName, this.requestedParentInvalidate)
         if (!this.requestedParentInvalidate) {
             this.requestedParentInvalidate = true
@@ -324,7 +324,7 @@ abstract class DriveConnectibleResource {
         this.errorMessage = string2
     }
 
-    Unit requestInvalidate(Boolean bl, Boolean bl2) {
+     fun requestInvalidate(bl: Boolean, bl2: Boolean) {
         Debug.Printf("LinkpointCloud: invalidate requested for '%s', recreate %b, parents %b", this.resourceName, bl, bl2)
         this.needInvalidate = true
         this.needRecreate |= bl
@@ -343,7 +343,7 @@ abstract class DriveConnectibleResource {
      * Enabled force condition propagation
      * Lifted jumps to return sites
      */
-    Unit startCreatingResource() {
+     fun startCreatingResource() {
         if (this.parentFolder != null) {
             Debug.Printf("Resource '%s': asking for parent folder", this.resourceName)
             this.parentFolder.getResource(this.onParentFolderReady)
@@ -353,8 +353,8 @@ abstract class DriveConnectibleResource {
         this.createResource(Drive.DriveApi.getRootFolder(this.googleApiClient))
     }
 
-    static interface OnResourceReadyListener {
-        fun onResourceReady(DriveResource var1, String var2)
+    interface OnResourceReadyListener {
+        fun onResourceReady(var1: DriveResource, var2: String)
     }
 
     @JvmStatic

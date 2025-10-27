@@ -30,7 +30,7 @@ import java.util.UUID
 class MyAvatarFragment : FragmentWithTitle(), AdapterView.OnItemClickListener, ChatterNameRetriever.OnChatterNameUpdated {
 
     /* renamed from: -com-lumiyaviewer-lumiya-ui-myava-MyAvatarDetailsPagesSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f462comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues = null
+    private const val /* synthetic */ IntArray f462comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues = null
     @BindView(2131755497)
     TextView myAvatarName
     private ChatterNameRetriever myAvatarNameRetriever = null
@@ -45,16 +45,16 @@ class MyAvatarFragment : FragmentWithTitle(), AdapterView.OnItemClickListener, C
     private class MyAvatarPagesAdapter : ArrayAdapter()<MyAvatarDetailsPages> {
 
         /* renamed from: -com-lumiyaviewer-lumiya-ui-myava-MyAvatarDetailsPagesSwitchesValues  reason: not valid java name */
-        private const val /* synthetic */ Int[] f463comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues = null
-        final /* synthetic */ Int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$ui$myava$MyAvatarDetailsPages
+        private const val /* synthetic */ IntArray f463comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues = null
+        final /* synthetic */ IntArray $SWITCH_TABLE$com$lumiyaviewer$lumiya$ui$myava$MyAvatarDetailsPages
 
         /* renamed from: -getcom-lumiyaviewer-lumiya-ui-myava-MyAvatarDetailsPagesSwitchesValues  reason: not valid java name */
         @JvmStatic
-private /* synthetic */ Int[] m655getcomlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues() {
+private /* synthetic */ IntArray m655getcomlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues() {
             if (f463comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues != null) {
                 return f463comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues
             }
-            Int[] iArr = Int[MyAvatarDetailsPages.values().length]
+            val iArr: IntArray = Int[MyAvatarDetailsPages.values().length]
             try {
                 iArr[MyAvatarDetailsPages.pageBalance.ordinal()] = 1
             } catch (NoSuchFieldError e) {
@@ -79,14 +79,14 @@ private /* synthetic */ Int[] m655getcomlumiyaviewerlumiyauimyavaMyAvatarDetails
             super(context, 17367043, MyAvatarDetailsPages.values())
         }
 
-        public View getView(Int i, View view, ViewGroup viewGroup) {
+         public fun getView(i: Int, view: View, viewGroup: ViewGroup): View {
             String string
-            View view2 = super.getView(i, view, viewGroup)
-            MyAvatarDetailsPages myAvatarDetailsPages = (MyAvatarDetailsPages) getItem(i)
+            val view2: View = super.getView(i, view, viewGroup)
+            val myAvatarDetailsPages: MyAvatarDetailsPages = (MyAvatarDetailsPages) getItem(i)
             if ((view2 instanceof TextView) && myAvatarDetailsPages != null) {
                 switch (m655getcomlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues()[myAvatarDetailsPages.ordinal()]) {
                     case 1:
-                        Integer num = (Integer) MyAvatarFragment.this.myBalance.getData()
+                        val num: Integer = (Integer) MyAvatarFragment.this.myBalance.getData()
                         if (num != null) {
                             string = MyAvatarFragment.this.getString(R.string.my_ava_balance_title, num)
                         } else {
@@ -105,11 +105,11 @@ private /* synthetic */ Int[] m655getcomlumiyaviewerlumiyauimyavaMyAvatarDetails
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-ui-myava-MyAvatarDetailsPagesSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m653getcomlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues() {
+private /* synthetic */ IntArray m653getcomlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues() {
         if (f462comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues != null) {
             return f462comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues
         }
-        Int[] iArr = Int[MyAvatarDetailsPages.values().length]
+        val iArr: IntArray = Int[MyAvatarDetailsPages.values().length]
         try {
             iArr[MyAvatarDetailsPages.pageBalance.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -130,37 +130,37 @@ private /* synthetic */ Int[] m653getcomlumiyaviewerlumiyauimyavaMyAvatarDetails
         return iArr
     }
 
-    private UUID getAgentUUID() {
+     private fun getAgentUUID(): UUID {
         return ActivityUtils.getActiveAgentID(getArguments())
     }
 
     @JvmStatic
-    Bundle makeSelection(UUID uuid) {
-        Bundle bundle = Bundle()
+     fun makeSelection(uuid: UUID): Bundle {
+        val bundle: Bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         return bundle
     }
 
     @JvmStatic
-    MyAvatarFragment newInstance(UUID uuid) {
-        MyAvatarFragment myAvatarFragment = MyAvatarFragment()
+     fun newInstance(uuid: UUID): MyAvatarFragment {
+        val myAvatarFragment: MyAvatarFragment = MyAvatarFragment()
         myAvatarFragment.setArguments(makeSelection(uuid))
         return myAvatarFragment
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onMyBalance */
-    fun m654com_lumiyaviewer_lumiya_ui_myava_MyAvatarFragmentmthref0(Integer num) {
+    fun m654com_lumiyaviewer_lumiya_ui_myava_MyAvatarFragmentmthref0(num: Integer) {
         if (this.unbinder != null) {
-            ListAdapter adapter = this.myAvatarOptionsList.getAdapter()
+            val adapter: ListAdapter = this.myAvatarOptionsList.getAdapter()
             if (adapter instanceof MyAvatarPagesAdapter) {
                 ((MyAvatarPagesAdapter) adapter).notifyDataSetChanged()
             }
         }
     }
 
-    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
-        String resolvedName = chatterNameRetriever.getResolvedName()
+    fun onChatterNameUpdated(chatterNameRetriever: ChatterNameRetriever) {
+        val resolvedName: String = chatterNameRetriever.getResolvedName()
         if (this.unbinder != null) {
             this.myAvatarName.setText(resolvedName != null ? resolvedName : getString(R.string.name_loading_title))
             this.myAvatarPic.setChatterID(chatterNameRetriever.chatterID, resolvedName)
@@ -168,16 +168,16 @@ private /* synthetic */ Int[] m653getcomlumiyaviewerlumiyauimyavaMyAvatarDetails
         setTitle(resolvedName, (String) null)
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
-        View inflate = layoutInflater.inflate(R.layout.my_avatar, viewGroup, false)
+        val inflate: View = layoutInflater.inflate(R.layout.my_avatar, viewGroup, false)
         this.unbinder = ButterKnife.bind((Object) this, inflate)
         this.myAvatarOptionsList.setAdapter(MyAvatarPagesAdapter(viewGroup.getContext()))
         this.myAvatarOptionsList.setOnItemClickListener(this)
         return inflate
     }
 
-    fun onDestroyView() {
+    override fun onDestroyView() {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -185,9 +185,9 @@ private /* synthetic */ Int[] m653getcomlumiyaviewerlumiyauimyavaMyAvatarDetails
         super.onDestroyView()
     }
 
-    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
-        UUID agentUUID = getAgentUUID()
-        Object itemAtPosition = adapterView.getItemAtPosition(i)
+    fun onItemClick(adapterView: AdapterView<?>, view: View, i: Int, j: Long) {
+        val agentUUID: UUID = getAgentUUID()
+        val itemAtPosition: Object = adapterView.getItemAtPosition(i)
         if ((itemAtPosition instanceof MyAvatarDetailsPages) && agentUUID != null) {
             switch (m653getcomlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues()[((MyAvatarDetailsPages) itemAtPosition).ordinal()]) {
                 case 1:
@@ -208,10 +208,10 @@ private /* synthetic */ Int[] m653getcomlumiyaviewerlumiyauimyavaMyAvatarDetails
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
-        UUID agentUUID = getAgentUUID()
-        UserManager userManager = UserManager.getUserManager(agentUUID)
+        val agentUUID: UUID = getAgentUUID()
+        val userManager: UserManager = UserManager.getUserManager(agentUUID)
         if (userManager != null) {
             this.myBalance.subscribe(userManager.getBalanceManager().getBalance(), SubscriptionSingleKey.Value)
         }
@@ -220,7 +220,7 @@ private /* synthetic */ Int[] m653getcomlumiyaviewerlumiyauimyavaMyAvatarDetails
         }
     }
 
-    fun onStop() {
+    override fun onStop() {
         if (this.myAvatarNameRetriever != null) {
             this.myAvatarNameRetriever.dispose()
             this.myAvatarNameRetriever = null

@@ -1,9 +1,9 @@
 package com.linkpoint.react
 
 interface RequestHandlerLimits {
-    Int getMaxRequestsInFlight()
+     fun getMaxRequestsInFlight(): Int)
 
-    Long getRequestTimeout()
+     fun getRequestTimeout(): Long)
 
-    Boolean isRequestCancellable()
+     fun isRequestCancellable(): Boolean)
 }

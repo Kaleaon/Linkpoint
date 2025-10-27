@@ -23,7 +23,7 @@ class MapItemReply : SLMessage() {
         public Int Extra
         public Int Extra2
         public UUID ID
-        public Byte[] Name
+        public ByteArray Name
         public Int X
         public Int Y
     }
@@ -39,11 +39,11 @@ class MapItemReply : SLMessage() {
         this.RequestData_Field = RequestData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 29
-        Iterator<T> it = this.Data_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 29
+        val it: Iterator<T> = this.Data_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -51,11 +51,11 @@ class MapItemReply : SLMessage() {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleMapItemReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -101)
@@ -73,13 +73,13 @@ class MapItemReply : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.Flags = unpackInt(byteBuffer)
         this.RequestData_Field.ItemType = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            Data data = Data()
+            val data: Data = Data()
             data.X = unpackInt(byteBuffer)
             data.Y = unpackInt(byteBuffer)
             data.ID = unpackUUID(byteBuffer)

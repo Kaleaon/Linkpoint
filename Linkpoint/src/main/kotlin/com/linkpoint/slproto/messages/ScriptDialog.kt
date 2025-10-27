@@ -14,18 +14,18 @@ class ScriptDialog : SLMessage() {
 
     @JvmStatic
     class Buttons {
-        public Byte[] ButtonLabel
+        public ByteArray ButtonLabel
     }
 
     @JvmStatic
     class Data {
         public Int ChatChannel
-        public Byte[] FirstName
+        public ByteArray FirstName
         public UUID ImageID
-        public Byte[] LastName
-        public Byte[] Message
+        public ByteArray LastName
+        public ByteArray Message
         public UUID ObjectID
-        public Byte[] ObjectName
+        public ByteArray ObjectName
     }
 
     @JvmStatic
@@ -38,11 +38,11 @@ class ScriptDialog : SLMessage() {
         this.Data_Field = Data()
     }
 
-    public Int CalcPayloadSize() {
-        Int length = this.Data_Field.FirstName.length + 17 + 1 + this.Data_Field.LastName.length + 1 + this.Data_Field.ObjectName.length + 2 + this.Data_Field.Message.length + 4 + 16 + 4 + 1
-        Iterator<T> it = this.Buttons_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val length: Int = this.Data_Field.FirstName.length + 17 + 1 + this.Data_Field.LastName.length + 1 + this.Data_Field.ObjectName.length + 2 + this.Data_Field.Message.length + 4 + 16 + 4 + 1
+        val it: Iterator<T> = this.Buttons_Fields.iterator()
         while (true) {
-            Int i = length
+            val i: Int = length
             if (!it.hasNext()) {
                 return i + 1 + (this.OwnerData_Fields.size() * 16)
             }
@@ -50,11 +50,11 @@ class ScriptDialog : SLMessage() {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleScriptDialog(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -66)
@@ -75,7 +75,7 @@ class ScriptDialog : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.Data_Field.ObjectID = unpackUUID(byteBuffer)
         this.Data_Field.FirstName = unpackVariable(byteBuffer, 1)
         this.Data_Field.LastName = unpackVariable(byteBuffer, 1)
@@ -83,15 +83,15 @@ class ScriptDialog : SLMessage() {
         this.Data_Field.Message = unpackVariable(byteBuffer, 2)
         this.Data_Field.ChatChannel = unpackInt(byteBuffer)
         this.Data_Field.ImageID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            Buttons buttons = Buttons()
+            val buttons: Buttons = Buttons()
             buttons.ButtonLabel = unpackVariable(byteBuffer, 1)
             this.Buttons_Fields.add(buttons)
         }
-        Byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b2: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i2 = 0; i2 < b2; i2++) {
-            OwnerData ownerData = OwnerData()
+            val ownerData: OwnerData = OwnerData()
             ownerData.OwnerID = unpackUUID(byteBuffer)
             this.OwnerData_Fields.add(ownerData)
         }

@@ -40,7 +40,7 @@ import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.UUID
 
 class ParcelInfoFragment : FragmentWithTitle : ReloadableFragment, LoadableMonitor.OnLoadableDataChangedListener, ChatterNameRetriever.OnChatterNameUpdated {
-    private String PARCEL_UUID_KEY = "parcelUUID"
+    private val PARCEL_UUID_KEY: String = "parcelUUID"
     private LoadableMonitor loadableMonitor = LoadableMonitor(this.parcelInfoReply).withDataChangedListener(this)
     private ChatterNameRetriever ownerGroupNameRetriever = null
     private ChatterNameRetriever ownerNameRetriever = null

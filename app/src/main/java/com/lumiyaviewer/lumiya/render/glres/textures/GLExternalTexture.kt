@@ -25,7 +25,7 @@ class GLExternalTexture {
     constructor(i: Int, i2: Int) {
         this.width = i
         this.height = i2
-        Int[] iArr = Int[1]
+        IntArray iArr = IntArray(1)
         GLES11.glGenTextures(1, iArr, 0)
         this.handle = iArr[0]
         bind()
@@ -63,7 +63,7 @@ class GLExternalTexture {
     fun release(): Unit {
         this.surface.release()
         this.surfaceTexture.release()
-        GLES11.glDeleteTextures(1, Int[]{this.handle}, 0)
+        GLES11.glDeleteTextures(1, IntArray{this.handle}, 0)
     }
 
     @TargetApi(11)

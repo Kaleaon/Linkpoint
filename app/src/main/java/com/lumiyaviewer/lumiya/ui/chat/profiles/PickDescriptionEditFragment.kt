@@ -15,7 +15,7 @@ import com.lumiyaviewer.lumiya.ui.common.TextFieldEditFragment
 import androidx.annotation.Nullable
 
 class PickDescriptionEditFragment : TextFieldEditFragment {
-    private String AVATAR_PICK_KEY = "avatarPickKey"
+    private val AVATAR_PICK_KEY: String = "avatarPickKey"
     private SubscriptionData<AvatarPickKey, PickInfoReply> pickInfo = SubscriptionData<>(UIThreadExecutor.getInstance(), $Lambda$Y7Ne2VWglUcvjFUgJydWWKVgIXM(this))
 
     private AvatarPickKey getPickKey() {

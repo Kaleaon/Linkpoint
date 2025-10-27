@@ -67,7 +67,7 @@ class SLChatLureRequestEvent : SLChatYesNoEvent {
             if (Strings.isNullOrEmpty(regionName)) {
                 regionName = context.getString(R.string.unknown_region_name)
             }
-            activeAgentCircuit.OfferTeleport(sourceUUID, context.getString(R.string.join_me_in_region, Object[]{regionName}))
+            activeAgentCircuit.OfferTeleport(sourceUUID, context.getString(R.string.join_me_in_region, Array<Any>{regionName}))
         }
     }
 

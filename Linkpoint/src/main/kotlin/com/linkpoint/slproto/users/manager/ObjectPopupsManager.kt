@@ -28,16 +28,16 @@ class ObjectPopupsManager {
     private val UserManager userManager
 
     interface ObjectPopupListener {
-        Unit onNewObjectPopup(SLChatEvent sLChatEvent)
+         fun onNewObjectPopup(sLChatEvent: SLChatEvent)
 
-        Unit onObjectPopupCountChanged(Int i)
+         fun onObjectPopupCountChanged(i: Int)
     }
 
     ObjectPopupsManager(UserManager userManager2) {
         this.userManager = userManager2
     }
 
-    private Unit addObjectPopupInternal(SLChatEvent sLChatEvent) {
+     private fun addObjectPopupInternal(sLChatEvent: SLChatEvent) {
         this.objectPopups.add(0, sLChatEvent)
         while (this.objectPopups.size() > 99) {
             try {
@@ -49,14 +49,14 @@ class ObjectPopupsManager {
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_ObjectPopupsManager_8558  reason: not valid java name */
-    static /* synthetic */ Unit m337lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ObjectPopupsManager_8558(ObjectPopupListener objectPopupListener2) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m337lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ObjectPopupsManager_8558(ObjectPopupListener objectPopupListener2) {
         objectPopupListener2.onObjectPopupCountChanged(0)
         objectPopupListener2.onNewObjectPopup((SLChatEvent) null)
     }
 
-    private Unit notifyCountUpdated() {
+     private fun notifyCountUpdated() {
         Executor executor
-        ObjectPopupListener objectPopupListener2 = null
+        val objectPopupListener2: ObjectPopupListener = null
         synchronized (this.listenerLock) {
             if (this.objectPopupListener != null) {
                 objectPopupListener2 = (ObjectPopupListener) this.objectPopupListener.get()
@@ -66,7 +66,7 @@ class ObjectPopupsManager {
             }
         }
         if (objectPopupListener2 != null) {
-            Int size = this.objectPopups.size()
+            val size: Int = this.objectPopups.size()
             if (executor != null) {
                 executor.execute(Runnable(size, objectPopupListener2) {
 
@@ -156,10 +156,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     }
 
     /* access modifiers changed from: package-private */
-    fun addObjectPopup(SLChatEvent sLChatEvent) {
+    fun addObjectPopup(sLChatEvent: SLChatEvent) {
         Executor executor
-        Boolean z = false
-        ObjectPopupListener objectPopupListener2 = null
+        val z: Boolean = false
+        val objectPopupListener2: ObjectPopupListener = null
         synchronized (this.listenerLock) {
             if (this.objectPopupListener != null) {
                 objectPopupListener2 = (ObjectPopupListener) this.objectPopupListener.get()
@@ -180,7 +180,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         }
         if (!z) {
             addObjectPopupInternal(sLChatEvent)
-            Int size = this.objectPopups.size()
+            val size: Int = this.objectPopups.size()
             if (objectPopupListener2 != null) {
                 if (executor != null) {
                     executor.execute(Runnable(size, objectPopupListener2) {
@@ -358,7 +358,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         this.userManager.getUnreadNotificationManager().updateUnreadNotifications()
     }
 
-    fun addPopupWatcher(Object obj) {
+    fun addPopupWatcher(obj: Object) {
         synchronized (this.listenerLock) {
             this.popupWatchers.add(obj)
             this.freshPopupsCount.set(0)
@@ -401,7 +401,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             r2.execute(r1)
         L_0x002f:
             com.lumiyaviewer.lumiya.slproto.users.manager.SubscribableList<com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent> r0 = r5.objectPopups
-            Boolean r0 = r0.remove(r6)
+            val r0: Boolean = r0.remove(r6)
             if (r0 == 0) goto L_0x003a
             r5.notifyCountUpdated()
         L_0x003a:
@@ -528,7 +528,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         this.userManager.getUnreadNotificationManager().updateUnreadNotifications()
     }
 
-    fun dismissDisplayedObjectPopup(SLChatEvent sLChatEvent) {
+    fun dismissDisplayedObjectPopup(sLChatEvent: SLChatEvent) {
         synchronized (this.listenerLock) {
             if (sLChatEvent == this.displayedPopupEvent) {
                 this.displayedPopupEvent = null
@@ -548,7 +548,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         this.userManager.getUnreadNotificationManager().updateUnreadNotifications()
     }
 
-    public SLChatEvent getDisplayedObjectPopup() {
+     public fun getDisplayedObjectPopup(): SLChatEvent {
         SLChatEvent sLChatEvent
         synchronized (this.listenerLock) {
             sLChatEvent = this.displayedPopupEvent
@@ -560,8 +560,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     public UnreadNotificationInfo.ObjectPopupNotification getNotification(Boolean z) {
         UnreadNotificationInfo.ObjectPopupNotification create
         synchronized (this.listenerLock) {
-            Int i = this.unreadPopupCount.get()
-            Int andSet = z ? this.freshPopupsCount.getAndSet(0) : 0
+            val i: Int = this.unreadPopupCount.get()
+            val andSet: Int = z ? this.freshPopupsCount.getAndSet(0) : 0
             UnreadNotificationInfo.ObjectPopupMessage objectPopupMessage = null
             if (this.lastEvent instanceof SLChatTextEvent) {
                 objectPopupMessage = UnreadNotificationInfo.ObjectPopupMessage.create(this.lastEvent.getSource().getSourceName(this.userManager), ((SLChatTextEvent) this.lastEvent).getRawText())
@@ -571,7 +571,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return create
     }
 
-    public Int getObjectPopupCount() {
+     public fun getObjectPopupCount(): Int {
         return this.objectPopups.size()
     }
 
@@ -579,8 +579,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return this.objectPopups
     }
 
-    public Boolean mustAnimatePopup(SLChatEvent sLChatEvent) {
-        Boolean z = false
+     public fun mustAnimatePopup(sLChatEvent: SLChatEvent): Boolean {
+        val z: Boolean = false
         synchronized (this.listenerLock) {
             if (sLChatEvent == this.displayedPopupEvent) {
                 z = !this.popupAnimated
@@ -590,7 +590,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return z
     }
 
-    fun removeObjectPopupListener(ObjectPopupListener objectPopupListener2) {
+    fun removeObjectPopupListener(objectPopupListener2: ObjectPopupListener) {
         synchronized (this.listenerLock) {
             if (this.objectPopupListener != null && this.objectPopupListener.get() == objectPopupListener2) {
                 this.objectPopupListener = null
@@ -599,13 +599,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         }
     }
 
-    fun removePopupWatcher(Object obj) {
+    fun removePopupWatcher(obj: Object) {
         synchronized (this.listenerLock) {
             this.popupWatchers.remove(obj)
         }
     }
 
-    fun setObjectPopupListener(ObjectPopupListener objectPopupListener2, Executor executor) {
+    fun setObjectPopupListener(objectPopupListener2: ObjectPopupListener, executor: Executor) {
         synchronized (this.listenerLock) {
             this.objectPopupListener = WeakReference<>(objectPopupListener2)
             this.objectPopupListenerExecutor = executor

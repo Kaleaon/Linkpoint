@@ -44,8 +44,8 @@ private ModernPerformanceMonitor instance
             this.description = description
         }
         
-        public String getDisplayName() { return displayName; }
-        public String getDescription() { return description; }
+         public fun getDisplayName(): String { return displayName; }
+         public fun getDescription(): String { return description; }
     }
     
     // Performance metrics
@@ -104,12 +104,12 @@ private ModernPerformanceMonitor instance
     /**
      * Start timing an operation
      */
-    fun startOperation(String operationName) {
-        Long startTime = SystemClock.elapsedRealtime()
+    fun startOperation(operationName: String) {
+        val startTime: Long = SystemClock.elapsedRealtime()
         operationStartTimes.put(operationName, startTime)
         
         // Take memory snapshot
-        Long memoryUsage = Debug.getNativeHeapAllocatedSize()
+        val memoryUsage: Long = Debug.getNativeHeapAllocatedSize()
         memoryUsageSnapshots.put(operationName, memoryUsage)
         
         Log.d(TAG, "Started timing operation: " + operationName)
@@ -118,16 +118,16 @@ private ModernPerformanceMonitor instance
     /**
      * End timing an operation and record the duration
      */
-    fun endOperation(String operationName) {
-        Long endTime = SystemClock.elapsedRealtime()
-        Long startTime = operationStartTimes.remove(operationName)
+    fun endOperation(operationName: String) {
+        val endTime: Long = SystemClock.elapsedRealtime()
+        val startTime: Long = operationStartTimes.remove(operationName)
         
         if (startTime == null) {
             Log.w(TAG, "No start time found for operation: " + operationName)
             return
         }
         
-        Long duration = endTime - startTime
+        val duration: Long = endTime - startTime
         
         // Record duration
         operationDurations.computeIfAbsent(operationName, k -> ArrayList<>()).add(duration)
@@ -139,7 +139,7 @@ private ModernPerformanceMonitor instance
     /**
      * Record a single-point performance measurement
      */
-    fun recordMetric(String metricName, Long value) {
+    fun recordMetric(metricName: String, value: Long) {
         operationDurations.computeIfAbsent(metricName, k -> ArrayList<>()).add(value)
         operationCounts.put(metricName, operationCounts.getOrDefault(metricName, 0) + 1)
         
@@ -149,20 +149,20 @@ private ModernPerformanceMonitor instance
     /**
      * Get performance metrics for a specific operation
      */
-    public PerformanceMetrics getMetrics(String operationName) {
-        List<Long> durations = operationDurations.get(operationName)
+     public fun getMetrics(operationName: String): PerformanceMetrics {
+        val durations: List<Long> = operationDurations.get(operationName)
         if (durations == null || durations.isEmpty()) {
             return null
         }
         
-        Long totalOperations = durations.size()
-        Long sum = durations.stream().mapToLong(Long::longValue).sum()
-        Double averageDuration = (Double) sum / totalOperations
-        Long minDuration = durations.stream().mapToLong(Long::longValue).min().orElse(0)
-        Long maxDuration = durations.stream().mapToLong(Long::longValue).max().orElse(0)
+        val totalOperations: Long = durations.size()
+        val sum: Long = durations.stream().mapToLong(Long::longValue).sum()
+        val averageDuration: Double = (Double) sum / totalOperations
+        val minDuration: Long = durations.stream().mapToLong(Long::longValue).min().orElse(0)
+        val maxDuration: Long = durations.stream().mapToLong(Long::longValue).max().orElse(0)
         
-        Double operationsPerSecond = totalOperations > 0 ? (1000.0 / averageDuration) : 0
-        Long memoryUsage = memoryUsageSnapshots.getOrDefault(operationName, 0L)
+        val operationsPerSecond: Double = totalOperations > 0 ? (1000.0 / averageDuration) : 0
+        val memoryUsage: Long = memoryUsageSnapshots.getOrDefault(operationName, 0L)
         
         return PerformanceMetrics(operationName, totalOperations, averageDuration,
                                      minDuration, maxDuration, operationsPerSecond, memoryUsage)
@@ -171,11 +171,11 @@ private ModernPerformanceMonitor instance
     /**
      * Run comprehensive benchmark for a specific category
      */
-    public BenchmarkResult runBenchmark(BenchmarkCategory category, Context context) {
+     public fun runBenchmark(category: BenchmarkCategory, context: Context): BenchmarkResult {
         Log.i(TAG, "Starting benchmark for category: " + category.getDisplayName())
-        Long benchmarkStartTime = SystemClock.elapsedRealtime()
+        val benchmarkStartTime: Long = SystemClock.elapsedRealtime()
         
-        List<PerformanceMetrics> categoryMetrics = ArrayList<>()
+        val categoryMetrics: List<PerformanceMetrics> = ArrayList<>()
         
         switch (category) {
             case AUTHENTICATION:
@@ -195,15 +195,15 @@ private ModernPerformanceMonitor instance
                 break
         }
         
-        Long benchmarkDuration = SystemClock.elapsedRealtime() - benchmarkStartTime
-        String summary = generateBenchmarkSummary(category, categoryMetrics, benchmarkDuration)
+        val benchmarkDuration: Long = SystemClock.elapsedRealtime() - benchmarkStartTime
+        val summary: String = generateBenchmarkSummary(category, categoryMetrics, benchmarkDuration)
         
         Log.i(TAG, "Completed benchmark for " + category.getDisplayName() + " in " + benchmarkDuration + "ms")
         return BenchmarkResult(category, categoryMetrics, benchmarkDuration, summary)
     }
     
     private List<PerformanceMetrics> benchmarkAuthentication() {
-        List<PerformanceMetrics> metrics = ArrayList<>()
+        val metrics: List<PerformanceMetrics> = ArrayList<>()
         
         // Simulate OAuth2 token generation benchmark
         for (Int i = 0; i < 10; i++) {
@@ -234,7 +234,7 @@ private ModernPerformanceMonitor instance
     }
     
     private List<PerformanceMetrics> benchmarkNetwork() {
-        List<PerformanceMetrics> metrics = ArrayList<>()
+        val metrics: List<PerformanceMetrics> = ArrayList<>()
         
         // Simulate HTTP/2 request benchmark
         for (Int i = 0; i < 50; i++) {
@@ -265,7 +265,7 @@ private ModernPerformanceMonitor instance
     }
     
     private List<PerformanceMetrics> benchmarkGraphics() {
-        List<PerformanceMetrics> metrics = ArrayList<>()
+        val metrics: List<PerformanceMetrics> = ArrayList<>()
         
         // Simulate shader compilation benchmark
         for (Int i = 0; i < 5; i++) {
@@ -296,7 +296,7 @@ private ModernPerformanceMonitor instance
     }
     
     private List<PerformanceMetrics> benchmarkAssets() {
-        List<PerformanceMetrics> metrics = ArrayList<>()
+        val metrics: List<PerformanceMetrics> = ArrayList<>()
         
         // Simulate asset download benchmark
         for (Int i = 0; i < 20; i++) {
@@ -327,7 +327,7 @@ private ModernPerformanceMonitor instance
     }
     
     private List<PerformanceMetrics> benchmarkUI() {
-        List<PerformanceMetrics> metrics = ArrayList<>()
+        val metrics: List<PerformanceMetrics> = ArrayList<>()
         
         // Simulate UI layout benchmark
         for (Int i = 0; i < 50; i++) {
@@ -357,7 +357,7 @@ private ModernPerformanceMonitor instance
         return metrics
     }
     
-    private Unit simulateWork(Long duration) {
+     private fun simulateWork(duration: Long) {
         try {
             Thread.sleep(duration)
         } catch (InterruptedException e) {
@@ -365,10 +365,10 @@ private ModernPerformanceMonitor instance
         }
     }
     
-    private String generateBenchmarkSummary(BenchmarkCategory category, 
+     private fun generateBenchmarkSummary(BenchmarkCategory category, 
                                           List<PerformanceMetrics> metrics, 
                                           Long benchmarkDuration) {
-        StringBuilder summary = StringBuilder()
+        val summary: StringBuilder = StringBuilder()
         summary.append("=== ").append(category.getDisplayName()).append(" Benchmark Results ===\n\n")
         summary.append("Category: ").append(category.getDescription()).append("\n")
         summary.append("Total Benchmark Duration: ").append(benchmarkDuration).append("ms\n\n")
@@ -385,7 +385,7 @@ private ModernPerformanceMonitor instance
         }
         
         // Generate performance assessment
-        Double avgOperationsPerSecond = metrics.stream()
+        val avgOperationsPerSecond: Double = metrics.stream()
             .filter(m -> m != null)
             .mapToDouble(m -> m.operationsPerSecond)
             .average()
@@ -407,7 +407,7 @@ private ModernPerformanceMonitor instance
         return summary.toString()
     }
     
-    private String formatMemoryUsage(Long bytes) {
+     private fun formatMemoryUsage(bytes: Long): String {
         if (bytes < 1024) return bytes + " B"
         if (bytes < 1024 * 1024) return String.format("%.2f KB", bytes / 1024.0)
         return String.format("%.2f MB", bytes / (1024.0 * 1024.0))
@@ -416,14 +416,14 @@ private ModernPerformanceMonitor instance
     /**
      * Get current memory usage statistics
      */
-    public String getMemoryUsageReport() {
-        Runtime runtime = Runtime.getRuntime()
-        Long totalMemory = runtime.totalMemory()
-        Long freeMemory = runtime.freeMemory()
-        Long usedMemory = totalMemory - freeMemory
-        Long maxMemory = runtime.maxMemory()
+     public fun getMemoryUsageReport(): String {
+        val runtime: Runtime = Runtime.getRuntime()
+        val totalMemory: Long = runtime.totalMemory()
+        val freeMemory: Long = runtime.freeMemory()
+        val usedMemory: Long = totalMemory - freeMemory
+        val maxMemory: Long = runtime.maxMemory()
         
-        StringBuilder report = StringBuilder()
+        val report: StringBuilder = StringBuilder()
         report.append("=== Memory Usage Report ===\n")
         report.append("Used Memory: ").append(formatMemoryUsage(usedMemory)).append("\n")
         report.append("Free Memory: ").append(formatMemoryUsage(freeMemory)).append("\n")
@@ -432,9 +432,9 @@ private ModernPerformanceMonitor instance
         report.append("Memory Usage: ").append(String.format("%.1f%%", (Double) usedMemory / maxMemory * 100)).append("\n")
         
         // Native heap info
-        Long nativeHeapSize = Debug.getNativeHeapSize()
-        Long nativeHeapUsed = Debug.getNativeHeapAllocatedSize()
-        Long nativeHeapFree = Debug.getNativeHeapFreeSize()
+        val nativeHeapSize: Long = Debug.getNativeHeapSize()
+        val nativeHeapUsed: Long = Debug.getNativeHeapAllocatedSize()
+        val nativeHeapFree: Long = Debug.getNativeHeapFreeSize()
         
         report.append("\n=== Native Heap ===\n")
         report.append("Native Heap Size: ").append(formatMemoryUsage(nativeHeapSize)).append("\n")
@@ -458,8 +458,8 @@ private ModernPerformanceMonitor instance
     /**
      * Export performance data as formatted report
      */
-    public String exportPerformanceReport() {
-        StringBuilder report = StringBuilder()
+     public fun exportPerformanceReport(): String {
+        val report: StringBuilder = StringBuilder()
         report.append("=== Linkpoint Modern Performance Report ===\n")
         report.append("Generated: ").append(java.util.Date()).append("\n\n")
         
@@ -467,7 +467,7 @@ private ModernPerformanceMonitor instance
         
         report.append("=== All Recorded Operations ===\n")
         for (String operationName : operationDurations.keySet()) {
-            PerformanceMetrics metrics = getMetrics(operationName)
+            val metrics: PerformanceMetrics = getMetrics(operationName)
             if (metrics != null) {
                 report.append("Operation: ").append(operationName).append("\n")
                 report.append("  Count: ").append(metrics.totalOperations).append("\n")

@@ -11,7 +11,7 @@ class ParcelRename : SLMessage {
     ArrayList<ParcelData> ParcelData_Fields = ArrayList<>()
 
     class ParcelData {
-        Byte[] NewName
+        ByteArray NewName
         UUID ParcelID
     }
 

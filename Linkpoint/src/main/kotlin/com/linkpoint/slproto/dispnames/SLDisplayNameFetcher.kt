@@ -29,10 +29,10 @@ class SLDisplayNameFetcher : SLModule() {
     private const val MAX_BATCH_SIZE: Int = 4
     private val String capsURL
     private val Runnable httpThreadRunnable = Runnable() {
-        fun run() {
+        override fun run() {
             UUID nextRequest
-            RequestQueue<UUID, UserName> userNameRequestQueue = SLDisplayNameFetcher.this.userManager.getUserNameRequestQueue()
-            HashSet<UUID> hashSet = HashSet<>()
+            val userNameRequestQueue: RequestQueue<UUID, UserName> = SLDisplayNameFetcher.this.userManager.getUserNameRequestQueue()
+            val hashSet: HashSet<UUID> = HashSet<>()
             while (!SLDisplayNameFetcher.this.threadMustExit.get()) {
                 hashSet.clear()
                 try {
@@ -55,8 +55,8 @@ class SLDisplayNameFetcher : SLModule() {
         }
     }
     private val RequestHandler<UUID> requestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        fun onRequest(UUID uuid) {
-            UUIDNameRequest uUIDNameRequest = UUIDNameRequest()
+        fun onRequest(uuid: UUID) {
+            val uUIDNameRequest: UUIDNameRequest = UUIDNameRequest()
             UUIDNameRequest.UUIDNameBlock uUIDNameBlock = UUIDNameRequest.UUIDNameBlock()
             uUIDNameBlock.ID = uuid
             uUIDNameRequest.UUIDNameBlock_Fields.add(uUIDNameBlock)
@@ -83,7 +83,7 @@ class SLDisplayNameFetcher : SLModule() {
     /* JADX INFO: super call moved to the top of the method (can break code semantics) */
     public SLDisplayNameFetcher(SLAgentCircuit sLAgentCircuit, SLCaps sLCaps) {
         super(sLAgentCircuit)
-        ResultHandler<UUID, UserName> resultHandler2 = null
+        val resultHandler2: ResultHandler<UUID, UserName> = null
         this.userManager = UserManager.getUserManager(sLAgentCircuit.circuitInfo.agentID)
         this.requestQueue = this.userManager != null ? this.userManager.getUserNameRequestQueue() : null
         if (sLCaps.getCapability(SLCaps.SLCapability.GetDisplayNames) != null) {
@@ -103,9 +103,9 @@ class SLDisplayNameFetcher : SLModule() {
     }
 
     /* access modifiers changed from: private */
-    fun requestNamesHttp(Set<UUID> set, RequestQueue<UUID, UserName> requestQueue2) {
-        StringBuilder append = StringBuilder(this.capsURL).append('/')
-        Boolean z = true
+    fun requestNamesHttp(set: Set<UUID>, requestQueue2: RequestQueue<UUID, UserName>) {
+        val append: StringBuilder = StringBuilder(this.capsURL).append('/')
+        val z: Boolean = true
         for (UUID uuid : set) {
             Debug.Printf("UserName: Requesting name for %s over HTTP", uuid)
             if (z) {
@@ -117,14 +117,14 @@ class SLDisplayNameFetcher : SLModule() {
             z = false
         }
         try {
-            LLSDNode PerformRequest = this.xmlReq.PerformRequest(append.toString(), (LLSDNode) null)
+            val PerformRequest: LLSDNode = this.xmlReq.PerformRequest(append.toString(), (LLSDNode) null)
             if (PerformRequest != null) {
                 if (PerformRequest.keyExists("agents")) {
-                    LLSDNode byKey = PerformRequest.byKey("agents")
+                    val byKey: LLSDNode = PerformRequest.byKey("agents")
                     for (Int i = 0; i < byKey.getCount(); i++) {
-                        LLSDNode byIndex = byKey.byIndex(i)
-                        UUID asUUID = byIndex.byKey("id").asUUID()
-                        UserName userName = UserName(asUUID, byIndex.byKey("username").asString(), byIndex.byKey("display_name").asString(), false)
+                        val byIndex: LLSDNode = byKey.byIndex(i)
+                        val asUUID: UUID = byIndex.byKey("id").asUUID()
+                        val userName: UserName = UserName(asUUID, byIndex.byKey("username").asString(), byIndex.byKey("display_name").asString(), false)
                         if (this.resultHandler != null) {
                             this.resultHandler.onResultData(asUUID, userName)
                         }
@@ -132,10 +132,10 @@ class SLDisplayNameFetcher : SLModule() {
                     }
                 }
                 if (PerformRequest.keyExists("bad_ids")) {
-                    LLSDNode byKey2 = PerformRequest.byKey("bad_ids")
+                    val byKey2: LLSDNode = PerformRequest.byKey("bad_ids")
                     for (Int i2 = 0; i2 < byKey2.getCount(); i2++) {
-                        UUID fromString = UUID.fromString(byKey2.byIndex(i2).asString())
-                        UserName userName2 = UserName(fromString, (String) null, (String) null, true)
+                        val fromString: UUID = UUID.fromString(byKey2.byIndex(i2).asString())
+                        val userName2: UserName = UserName(fromString, (String) null, (String) null, true)
                         if (this.resultHandler != null) {
                             this.resultHandler.onResultData(fromString, userName2)
                         }
@@ -162,11 +162,11 @@ class SLDisplayNameFetcher : SLModule() {
     }
 
     @SLMessageHandler
-    fun HandleUUIDNameReply(UUIDNameReply uUIDNameReply) {
+    fun HandleUUIDNameReply(uUIDNameReply: UUIDNameReply) {
         for (UUIDNameReply.UUIDNameBlock uUIDNameBlock : uUIDNameReply.UUIDNameBlock_Fields) {
-            UUID uuid = uUIDNameBlock.ID
-            String str = SLMessage.stringFromVariableOEM(uUIDNameBlock.FirstName) + " " + SLMessage.stringFromVariableOEM(uUIDNameBlock.LastName)
-            UserName userName = UserName(uuid, str, str, false)
+            val uuid: UUID = uUIDNameBlock.ID
+            val str: String = SLMessage.stringFromVariableOEM(uUIDNameBlock.FirstName) + " " + SLMessage.stringFromVariableOEM(uUIDNameBlock.LastName)
+            val userName: UserName = UserName(uuid, str, str, false)
             if (this.resultHandler != null) {
                 this.resultHandler.onResultData(uuid, userName)
             }

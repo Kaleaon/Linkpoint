@@ -21,11 +21,11 @@ import java.util.Map
 class FadingTextViewLog {
     private const val STALE_CHAT_TIMEOUT: Long = 5000
     private val Runnable RemoveStaleChatsTask = Runnable() {
-        fun run() {
-            Boolean unused = FadingTextViewLog.this.removeStaleChatsPosted = false
+        override fun run() {
+            val unused: Boolean = FadingTextViewLog.this.removeStaleChatsPosted = false
             if (FadingTextViewLog.this.chatsOverlayLayout != null) {
-                Long uptimeMillis = SystemClock.uptimeMillis()
-                Iterator it = FadingTextViewLog.this.chatEventOverlays.entrySet().iterator()
+                val uptimeMillis: Long = SystemClock.uptimeMillis()
+                val it: Iterator = FadingTextViewLog.this.chatEventOverlays.entrySet().iterator()
                 while (it.hasNext()) {
                     Map.Entry entry = (Map.Entry) it.next()
                     if (entry != null) {
@@ -35,7 +35,7 @@ class FadingTextViewLog {
                         final TextView textView = ((ChatEventOverlay) entry.getValue()).textView
                         if (Build.VERSION.SDK_INT >= 14) {
                             textView.animate().alpha(0.0f).setDuration(1000).setListener(AnimatorListenerAdapter() {
-                                fun onAnimationEnd(Animator animator) {
+                                fun onAnimationEnd(animator: Animator) {
                                     FadingTextViewLog.this.chatsOverlayLayout.removeView(textView)
                                 }
                             }).start()
@@ -79,19 +79,19 @@ class FadingTextViewLog {
 
     /* access modifiers changed from: package-private */
     fun handleChatEvent(ActiveChattersManager.ChatMessageEvent chatMessageEvent) {
-        TextView textView = null
-        SLChatEvent loadFromDatabaseObject = SLChatEvent.loadFromDatabaseObject(chatMessageEvent.chatMessage, this.userManager.getUserID())
+        val textView: TextView = null
+        val loadFromDatabaseObject: SLChatEvent = SLChatEvent.loadFromDatabaseObject(chatMessageEvent.chatMessage, this.userManager.getUserID())
         if (loadFromDatabaseObject != null) {
-            CharSequence plainTextMessage = loadFromDatabaseObject.getPlainTextMessage(this.context, this.userManager, false)
-            String charSequence = plainTextMessage != null ? plainTextMessage.toString() : null
+            val plainTextMessage: CharSequence = loadFromDatabaseObject.getPlainTextMessage(this.context, this.userManager, false)
+            val charSequence: String = plainTextMessage != null ? plainTextMessage.toString() : null
             if (!Strings.isNullOrEmpty(charSequence)) {
-                String str = chatMessageEvent.isPrivate ? "[IM] " + charSequence : charSequence
+                val str: String = chatMessageEvent.isPrivate ? "[IM] " + charSequence : charSequence
                 if (chatMessageEvent.isNewMessage) {
-                    DisplayMetrics displayMetrics = this.context.getResources().getDisplayMetrics()
-                    Int applyDimension = (Int) TypedValue.applyDimension(1, 10.0f, displayMetrics)
-                    Int applyDimension2 = (Int) TypedValue.applyDimension(1, 5.0f, displayMetrics)
-                    Int applyDimension3 = (Int) TypedValue.applyDimension(1, 10.0f, displayMetrics)
-                    Int applyDimension4 = (Int) TypedValue.applyDimension(1, 5.0f, displayMetrics)
+                    val displayMetrics: DisplayMetrics = this.context.getResources().getDisplayMetrics()
+                    val applyDimension: Int = (Int) TypedValue.applyDimension(1, 10.0f, displayMetrics)
+                    val applyDimension2: Int = (Int) TypedValue.applyDimension(1, 5.0f, displayMetrics)
+                    val applyDimension3: Int = (Int) TypedValue.applyDimension(1, 10.0f, displayMetrics)
+                    val applyDimension4: Int = (Int) TypedValue.applyDimension(1, 5.0f, displayMetrics)
                     LinearLayout.LayoutParams layoutParams = LinearLayout.LayoutParams(-2, -2)
                     layoutParams.setMargins(applyDimension, applyDimension2, applyDimension, applyDimension2)
                     textView = TextView(this.context)
@@ -103,7 +103,7 @@ class FadingTextViewLog {
                     this.chatEventOverlays.put(chatMessageEvent.chatMessage.getId(), ChatEventOverlay(SystemClock.uptimeMillis(), textView))
                     postRemovingStaleChats()
                 } else {
-                    ChatEventOverlay chatEventOverlay = this.chatEventOverlays.get(chatMessageEvent.chatMessage.getId())
+                    val chatEventOverlay: ChatEventOverlay = this.chatEventOverlays.get(chatMessageEvent.chatMessage.getId())
                     if (chatEventOverlay != null) {
                         textView = chatEventOverlay.textView
                     }

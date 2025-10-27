@@ -20,9 +20,9 @@ class TextureCache : MemoryPressureListener {
         this.memoryManager = memoryManager
         
         // Calculate cache size based on available memory
-        Runtime runtime = Runtime.getRuntime()
-        Long maxMemory = runtime.maxMemory()
-        Int cacheSize = (Int) (maxMemory / 8); // Use 1/8 of available memory
+        val runtime: Runtime = Runtime.getRuntime()
+        val maxMemory: Long = runtime.maxMemory()
+        val cacheSize: Int = (Int) (maxMemory / 8); // Use 1/8 of available memory
         
         this.cache = LruCache<String, CachedTexture>(cacheSize) {
             override protected Int sizeOf(String key, CachedTexture texture) {
@@ -41,26 +41,26 @@ class TextureCache : MemoryPressureListener {
         memoryManager.addMemoryPressureListener(this)
     }
     
-    fun put(String key, CachedTexture texture) {
+    fun put(key: String, texture: CachedTexture) {
         if (texture != null) {
             memoryManager.trackAllocation("texture_" + key, texture, texture.getEstimatedSize())
             cache.put(key, texture)
         }
     }
     
-    public CachedTexture get(String key) {
+     public fun get(key: String): CachedTexture {
         return cache.get(key)
     }
     
-    fun remove(String key) {
-        CachedTexture texture = cache.remove(key)
+    fun remove(key: String) {
+        val texture: CachedTexture = cache.remove(key)
         if (texture != null) {
             memoryManager.trackDeallocation("texture_" + key, texture.getEstimatedSize())
             texture.release()
         }
     }
     
-    public Int getCacheSize() {
+     public fun getCacheSize(): Int {
         return cache.size()
     }
     

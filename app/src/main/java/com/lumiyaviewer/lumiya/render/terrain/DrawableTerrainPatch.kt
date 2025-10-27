@@ -12,7 +12,7 @@ import com.lumiyaviewer.lumiya.slproto.terrain.TerrainPatchInfo
 
 class DrawableTerrainPatch : ResourceConsumer {
     private volatile TerrainPatchGeometry geometry
-    private Float[] objWorldMatrix = Float[16]
+    private val objWorldMatrix: FloatArray = FloatArray(16)
     private volatile GLLoadedTexture texture
 
     constructor(terrainGeometryCache: TerrainGeometryCache, gLTerrainTextureCache: GLTerrainTextureCache, terrainPatchInfo: TerrainPatchInfo, i: Int, i2: Int) {

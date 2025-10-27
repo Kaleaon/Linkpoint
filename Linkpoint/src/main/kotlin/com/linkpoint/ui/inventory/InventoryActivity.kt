@@ -39,8 +39,8 @@ class InventoryActivity : MasterDetailsActivity() {
     const val TRANSFER_TO_INTENT_TAG: String = "transferToID"
     const val TRANSFER_TO_NAME_TAG: String = "transferToName"
     private val FragmentActivityFactory InventoryDetailsFragmentFactory = FragmentActivityFactory() {
-        public Intent createIntent(Context context, Bundle bundle) {
-            Intent intent = Intent(context, InventoryActivity.class)
+         public fun createIntent(context: Context, bundle: Bundle): Intent {
+            val intent: Intent = Intent(context, InventoryActivity.class)
             intent.putExtra(MasterDetailsActivity.INTENT_SELECTION_KEY, bundle)
             return intent
         }
@@ -71,24 +71,24 @@ class InventoryActivity : MasterDetailsActivity() {
     }
 
     @JvmStatic
-    Intent makeFolderIntent(Context context, UUID uuid, UUID uuid2) {
-        Intent intent = Intent(context, InventoryActivity.class)
+     fun makeFolderIntent(context: Context, uuid: UUID, uuid2: UUID): Intent {
+        val intent: Intent = Intent(context, InventoryActivity.class)
         intent.putExtra("activeAgentUUID", uuid.toString())
         intent.putExtra(INITIAL_FOLDER_ID_TAG, uuid2.toString())
         return intent
     }
 
     @JvmStatic
-    Intent makeSaveItemIntent(Context context, UUID uuid, InventorySaveInfo inventorySaveInfo) {
-        Intent intent = Intent(context, InventoryActivity.class)
+     fun makeSaveItemIntent(context: Context, uuid: UUID, inventorySaveInfo: InventorySaveInfo): Intent {
+        val intent: Intent = Intent(context, InventoryActivity.class)
         intent.putExtra("activeAgentUUID", uuid.toString())
         intent.putExtra(SAVE_INFO_INTENT_TAG, inventorySaveInfo)
         return intent
     }
 
     @JvmStatic
-    Intent makeSelectActionIntent(Context context, UUID uuid, SelectAction selectAction, Bundle bundle, SLAssetType sLAssetType) {
-        Intent intent = Intent(context, InventoryActivity.class)
+     fun makeSelectActionIntent(context: Context, uuid: UUID, selectAction: SelectAction, bundle: Bundle, sLAssetType: SLAssetType): Intent {
+        val intent: Intent = Intent(context, InventoryActivity.class)
         intent.putExtra("activeAgentUUID", uuid.toString())
         intent.putExtra(SELECT_ITEM_INTENT_TAG, true)
         intent.putExtra(SELECT_ACTION_INTENT_TAG, selectAction.toString())
@@ -100,16 +100,16 @@ class InventoryActivity : MasterDetailsActivity() {
     }
 
     @JvmStatic
-    Intent makeSelectIntent(Context context, UUID uuid) {
-        Intent intent = Intent(context, InventoryActivity.class)
+     fun makeSelectIntent(context: Context, uuid: UUID): Intent {
+        val intent: Intent = Intent(context, InventoryActivity.class)
         intent.putExtra("activeAgentUUID", uuid.toString())
         intent.putExtra(SELECT_ITEM_INTENT_TAG, true)
         return intent
     }
 
     @JvmStatic
-    Intent makeTransferIntent(Context context, UUID uuid, UUID uuid2, String str) {
-        Intent intent = Intent(context, InventoryActivity.class)
+     fun makeTransferIntent(context: Context, uuid: UUID, uuid2: UUID, str: String): Intent {
+        val intent: Intent = Intent(context, InventoryActivity.class)
         intent.putExtra("activeAgentUUID", uuid.toString())
         intent.putExtra(SELECT_ITEM_INTENT_TAG, true)
         intent.putExtra(TRANSFER_TO_INTENT_TAG, uuid2.toString())
@@ -119,11 +119,11 @@ class InventoryActivity : MasterDetailsActivity() {
         return intent
     }
 
-    private Unit selectSortOrder() {
-        Int sortOrder = InventoryFragmentHelper.getSortOrder(this)
+     private fun selectSortOrder() {
+        val sortOrder: Int = InventoryFragmentHelper.getSortOrder(this)
         AlertDialog.Builder builder = AlertDialog.Builder(this)
         builder.setTitle(R.string.sort_order_caption)
-        builder.setSingleChoiceItems(CharSequence[]{"Newest first", "Alphabetical"}, sortOrder, $Lambda$Tc22ivDU79Y83KauKGybv49CW7A(sortOrder, this))
+        builder.setSingleChoiceItems(Array<CharSequence>{"Newest first", "Alphabetical"}, sortOrder, $Lambda$Tc22ivDU79Y83KauKGybv49CW7A(sortOrder, this))
         builder.create().show()
     }
 
@@ -134,7 +134,7 @@ class InventoryActivity : MasterDetailsActivity() {
             this.searchProcess.unsubscribe()
             str = ""
         } else {
-            UserManager userManager = ActivityUtils.getUserManager(getIntent())
+            val userManager: UserManager = ActivityUtils.getUserManager(getIntent())
             if (userManager != null) {
                 this.searchProcess.subscribe(userManager.getInventoryManager().getSearchProcess(), SubscriptionSingleKey.Value)
             }
@@ -142,7 +142,7 @@ class InventoryActivity : MasterDetailsActivity() {
         }
         if (!Objects.equal(this.fragmentSearchString, str)) {
             this.fragmentSearchString = str
-            Fragment findFragmentById = getSupportFragmentManager().findFragmentById(R.id.selector)
+            val findFragmentById: Fragment = getSupportFragmentManager().findFragmentById(R.id.selector)
             if (findFragmentById instanceof InventoryFragment) {
                 ((InventoryFragment) findFragmentById).setSearchString(Strings.emptyToNull(str))
             }
@@ -158,17 +158,17 @@ class InventoryActivity : MasterDetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-    public FragmentActivityFactory getDetailsFragmentFactory() {
+     public fun getDetailsFragmentFactory(): FragmentActivityFactory {
         return this.InventoryDetailsFragmentFactory
     }
 
     /* access modifiers changed from: protected */
-    public Bundle getNewDetailsFragmentArguments(Bundle bundle, Bundle bundle2) {
+     public fun getNewDetailsFragmentArguments(bundle: Bundle, bundle2: Bundle): Bundle {
         return bundle != null ? InventoryFragment.makeDetailsArguments(bundle) : super.getNewDetailsFragmentArguments((Bundle) null, bundle2)
     }
 
     /* access modifiers changed from: protected */
-    public Boolean isAlwaysImplicitFragment(Class<? : Fragment> cls) {
+     public fun isAlwaysImplicitFragment(cls: Class<? : Fragment>): Boolean {
         return cls.equals(InventoryFragment.class)
     }
 
@@ -183,7 +183,7 @@ class InventoryActivity : MasterDetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(Bundle bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         if (bundle != null) {
             this.searchActive = bundle.getBoolean(SEARCH_ACTIVE_TAG)
@@ -192,15 +192,15 @@ class InventoryActivity : MasterDetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-    public Fragment onCreateMasterFragment(Intent intent, Bundle bundle) {
+     public override fun onCreateMasterFragment(intent: Intent, bundle: Bundle): Fragment {
         InventorySaveInfo inventorySaveInfo
         SLInventoryEntry findSpecialFolder
         if (bundle == null || bundle.isEmpty()) {
             if (getIntent().hasExtra(INITIAL_FOLDER_ID_TAG)) {
                 bundle = InventoryFragment.makeSelection(UUIDPool.getUUID(getIntent().getStringExtra(INITIAL_FOLDER_ID_TAG)), (String) null)
             } else if (!(!getIntent().hasExtra(SAVE_INFO_INTENT_TAG) || (inventorySaveInfo = (InventorySaveInfo) getIntent().getParcelableExtra(SAVE_INFO_INTENT_TAG)) == null || inventorySaveInfo.assetType == null || inventorySaveInfo.assetType == SLAssetType.AT_UNKNOWN)) {
-                Int specialFolderType = inventorySaveInfo.assetType.getSpecialFolderType()
-                UserManager userManager = ActivityUtils.getUserManager(getIntent())
+                val specialFolderType: Int = inventorySaveInfo.assetType.getSpecialFolderType()
+                val userManager: UserManager = ActivityUtils.getUserManager(getIntent())
                 if (!(userManager == null || (findSpecialFolder = userManager.getInventoryManager().getDatabase().findSpecialFolder(userManager.getInventoryManager().getRootFolder(), specialFolderType)) == null)) {
                     bundle = InventoryFragment.makeSelection(findSpecialFolder.uuid, (String) null)
                 }
@@ -209,40 +209,40 @@ class InventoryActivity : MasterDetailsActivity() {
         return InventoryFragment.newInstance(bundle, true)
     }
 
-    public Boolean onCreateOptionsMenu(Menu menu) {
+     public override fun onCreateOptionsMenu(menu: Menu): Boolean {
         getMenuInflater().inflate(R.menu.inventory_menu, menu)
         this.searchMenuItem = menu.findItem(R.id.inventory_search_item)
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(this.searchMenuItem)
+        val searchView: SearchView = (SearchView) MenuItemCompat.getActionView(this.searchMenuItem)
         if (this.searchActive) {
             MenuItemCompat.expandActionView(this.searchMenuItem)
             searchView.setQuery(this.nameFilter, false)
         }
         searchView.setOnQueryTextListener(SearchView.OnQueryTextListener() {
-            public Boolean onQueryTextChange(String str) {
-                String unused = InventoryActivity.this.nameFilter = str
+             public fun onQueryTextChange(str: String): Boolean {
+                val unused: String = InventoryActivity.this.nameFilter = str
                 InventoryActivity.this.updateSearchAction()
                 return true
             }
 
-            public Boolean onQueryTextSubmit(String str) {
+             public fun onQueryTextSubmit(str: String): Boolean {
                 return true
             }
         MenuItemCompat.setOnActionExpandListener(this.searchMenuItem, MenuItemCompat.OnActionExpandListener() {
-            public Boolean onMenuItemActionCollapse(MenuItem menuItem) {
-                Boolean unused = InventoryActivity.this.searchActive = false
+             public fun onMenuItemActionCollapse(menuItem: MenuItem): Boolean {
+                val unused: Boolean = InventoryActivity.this.searchActive = false
                 InventoryActivity.this.updateSearchAction()
                 return true
             }
 
-            public Boolean onMenuItemActionExpand(MenuItem menuItem) {
-                Boolean unused = InventoryActivity.this.searchActive = true
+             public fun onMenuItemActionExpand(menuItem: MenuItem): Boolean {
+                val unused: Boolean = InventoryActivity.this.searchActive = true
                 InventoryActivity.this.updateSearchAction()
                 return true
             }
         return true
     }
 
-    public Boolean onOptionsItemSelected(MenuItem menuItem) {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_sort_order:
                 selectSortOrder()
@@ -253,7 +253,7 @@ class InventoryActivity : MasterDetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-    fun onSaveInstanceState(Bundle bundle) {
+    override fun onSaveInstanceState(bundle: Bundle) {
         super.onSaveInstanceState(bundle)
         if (bundle != null) {
             bundle.putBoolean(SEARCH_ACTIVE_TAG, this.searchActive)
@@ -262,14 +262,14 @@ class InventoryActivity : MasterDetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         this.activityStarted = true
         updateSearchAction()
     }
 
     /* access modifiers changed from: protected */
-    fun onStop() {
+    override fun onStop() {
         this.activityStarted = false
         updateSearchAction()
         super.onStop()

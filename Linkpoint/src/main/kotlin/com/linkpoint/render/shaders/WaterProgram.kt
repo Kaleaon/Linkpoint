@@ -17,7 +17,7 @@ class WaterProgram : ShaderProgram() {
         super(Shader.WaterVertexShader, Shader.WaterFragmentShader)
     }
 
-    protected Unit bindVariables() {
+     protected fun bindVariables() {
         this.vPosition = GLES20.glGetAttribLocation(this.handle, "vPosition")
         this.vColor = GLES20.glGetUniformLocation(this.handle, "vColor")
         this.uMVPMatrix = GLES20.glGetUniformLocation(this.handle, "uMVPMatrix")

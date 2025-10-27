@@ -29,15 +29,15 @@ class FindAgent : SLMessage() {
         this.AgentBlock_Field = AgentBlock()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return (this.LocationBlock_Fields.size() * 16) + 41
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleFindAgent(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 0)
@@ -51,13 +51,13 @@ class FindAgent : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentBlock_Field.Hunter = unpackUUID(byteBuffer)
         this.AgentBlock_Field.Prey = unpackUUID(byteBuffer)
         this.AgentBlock_Field.SpaceIP = unpackIPAddress(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            LocationBlock locationBlock = LocationBlock()
+            val locationBlock: LocationBlock = LocationBlock()
             locationBlock.GlobalX = unpackDouble(byteBuffer)
             locationBlock.GlobalY = unpackDouble(byteBuffer)
             this.LocationBlock_Fields.add(locationBlock)

@@ -53,8 +53,8 @@ class LoadingLayout : FrameLayout() {
         prepareViews(context)
     }
 
-    private Unit applyAttributes(Context context, AttributeSet attributeSet) {
-        TypedArray obtainStyledAttributes = context.getTheme().obtainStyledAttributes(attributeSet, R.styleable.LoadingLayout, 0, 0)
+     private fun applyAttributes(context: Context, attributeSet: AttributeSet) {
+        val obtainStyledAttributes: TypedArray = context.getTheme().obtainStyledAttributes(attributeSet, R.styleable.LoadingLayout, 0, 0)
         try {
             this.withButteryProgressBar = obtainStyledAttributes.getBoolean(0, this.withButteryProgressBar)
         } finally {
@@ -62,7 +62,7 @@ class LoadingLayout : FrameLayout() {
         }
     }
 
-    private Unit prepareViews(Context context) {
+     private fun prepareViews(context: Context) {
         if (this.withButteryProgressBar && Build.VERSION.SDK_INT >= 14) {
             this.butteryProgressBar = ButteryProgressBar(context)
             this.butteryProgressBar.setId(R.id.loading_layout_buttery_progress_bar_id)
@@ -78,10 +78,10 @@ class LoadingLayout : FrameLayout() {
         addView(this.textView, FrameLayout.LayoutParams(-2, -2, 17))
     }
 
-    private Unit setMode(Boolean z, Boolean z2, Boolean z3) {
-        Int childCount = getChildCount()
+     private fun setMode(z: Boolean, z2: Boolean, z3: Boolean) {
+        val childCount: Int = getChildCount()
         for (Int i = 0; i < childCount; i++) {
-            View childAt = getChildAt(i)
+            val childAt: View = getChildAt(i)
             if (childAt == this.progressBar) {
                 childAt.setVisibility(z ? 0 : 8)
             } else if (childAt == this.textView) {
@@ -100,18 +100,18 @@ class LoadingLayout : FrameLayout() {
         }
     }
 
-    fun setButteryProgressBar(Boolean z) {
+    fun setButteryProgressBar(z: Boolean) {
         this.butteryBarVisible = z
         if (this.butteryProgressBar != null) {
             this.butteryProgressBar.setVisibility(z ? 0 : 8)
         }
     }
 
-    fun setSwipeRefreshLayout(SwipeRefreshLayout swipeRefreshLayout2) {
+    fun setSwipeRefreshLayout(swipeRefreshLayout2: SwipeRefreshLayout) {
         this.swipeRefreshLayout = swipeRefreshLayout2
     }
 
-    fun showContent(String str) {
+    fun showContent(str: String) {
         setMode(false, str != null, true)
         this.textView.setText(str)
         if (this.swipeRefreshLayout != null) {
@@ -123,7 +123,7 @@ class LoadingLayout : FrameLayout() {
         setMode(true, false, false)
     }
 
-    fun showMessage(String str) {
+    fun showMessage(str: String) {
         setMode(false, true, false)
         this.textView.setText(str)
     }

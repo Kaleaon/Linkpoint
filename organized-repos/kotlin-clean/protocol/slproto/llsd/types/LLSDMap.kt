@@ -89,7 +89,7 @@ class LLSDMap : LLSDNode() {
         dataOutputStream.writeInt(entrySet.size())
         for (Map.Entry entry : entrySet) {
             dataOutputStream.writeByte(107)
-            Byte[] stringToVariableUTF = SLMessage.stringToVariableUTF((String) entry.getKey())
+            ByteArray stringToVariableUTF = SLMessage.stringToVariableUTF((String) entry.getKey())
             dataOutputStream.writeInt(stringToVariableUTF.length)
             dataOutputStream.write(stringToVariableUTF)
             ((LLSDNode) entry.getValue()).toBinary(dataOutputStream)
@@ -126,7 +126,7 @@ class LLSDMap : LLSDNode() {
                             field.set(newInstance, byKey.asURI())
                         } else if (type.equals(Date.class)) {
                             field.set(newInstance, byKey.asDate())
-                        } else if (type.equals(Byte[].class)) {
+                        } else if (type.equals(ByteArray.class)) {
                             field.set(newInstance, byKey.asBinary())
                         } else if (type.isAssignableFrom(List.class)) {
                             Type genericType = field.getGenericType()

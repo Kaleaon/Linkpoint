@@ -28,12 +28,12 @@ class RezMultipleAttachmentsFromInv : SLMessage() {
     @JvmStatic
     class ObjectData {
         public Int AttachmentPt
-        public Byte[] Description
+        public ByteArray Description
         public Int EveryoneMask
         public Int GroupMask
         public Int ItemFlags
         public UUID ItemID
-        public Byte[] Name
+        public ByteArray Name
         public Int NextOwnerMask
         public UUID OwnerID
     }
@@ -44,24 +44,24 @@ class RezMultipleAttachmentsFromInv : SLMessage() {
         this.HeaderData_Field = HeaderData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 55
-        Iterator<T> it = this.ObjectData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 55
+        val it: Iterator<T> = this.ObjectData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
-            ObjectData objectData = (ObjectData) it.next()
+            val objectData: ObjectData = (ObjectData) it.next()
             i = objectData.Description.length + objectData.Name.length + 50 + 1 + i2
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleRezMultipleAttachmentsFromInv(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -116)
@@ -84,15 +84,15 @@ class RezMultipleAttachmentsFromInv : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.HeaderData_Field.CompoundMsgID = unpackUUID(byteBuffer)
         this.HeaderData_Field.TotalObjects = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.HeaderData_Field.FirstDetachAll = unpackBoolean(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            ObjectData objectData = ObjectData()
+            val objectData: ObjectData = ObjectData()
             objectData.ItemID = unpackUUID(byteBuffer)
             objectData.OwnerID = unpackUUID(byteBuffer)
             objectData.AttachmentPt = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE

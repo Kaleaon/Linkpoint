@@ -14,7 +14,7 @@ class TeleportFinish : SLMessage() {
         public UUID AgentID
         public Int LocationID
         public Long RegionHandle
-        public Byte[] SeedCapability
+        public ByteArray SeedCapability
         public Int SimAccess
         public Inet4Address SimIP
         public Int SimPort

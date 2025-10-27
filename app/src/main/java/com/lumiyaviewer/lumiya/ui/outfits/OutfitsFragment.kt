@@ -48,7 +48,7 @@ import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 
 class OutfitsFragment : FragmentWithTitle : ReloadableFragment, View.OnClickListener, InventoryFolderAdapter.OnItemCheckboxClickListener {
-    private String FOLDER_ID_KEY = "folderID"
+    private val FOLDER_ID_KEY: String = "folderID"
     private InventoryFolderAdapter adapter = null
     private SubscriptionData<UUID, SLAgentCircuit> agentCircuit = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
 
@@ -219,7 +219,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
     private ViewGroup listHeader
     private Any listHeaderData = Any()
     private LoadableMonitor loadableMonitor = LoadableMonitor(this.entryList)
-    private UUID myOutfitsFolderUUID = null
+    private val myOutfitsFolderUUID: UUID = null
     private SubscriptionData<InventoryQuery, InventoryEntryList> rootFolderEntryList = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
 
         /* renamed from: -$f0 */

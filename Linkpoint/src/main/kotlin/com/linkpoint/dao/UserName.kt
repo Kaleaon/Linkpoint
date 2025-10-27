@@ -21,28 +21,28 @@ class UserName {
         this.isBadUUID = z
     }
 
-    public String getDisplayName() {
+     public fun getDisplayName(): String {
         return this.displayName
     }
 
-    public Boolean getIsBadUUID() {
+     public fun getIsBadUUID(): Boolean {
         return this.isBadUUID
     }
 
-    public String getUserName() {
+     public fun getUserName(): String {
         return this.userName
     }
 
-    public UUID getUuid() {
+     public fun getUuid(): UUID {
         return this.uuid
     }
 
-    public Boolean isComplete() {
+     public fun isComplete(): Boolean {
         return !this.isBadUUID ? !Strings.isNullOrEmpty(this.userName) ? Strings.isNullOrEmpty(this.displayName) ^ 1 : false : true
     }
 
-    public Boolean mergeWith(UserName userName) {
-        Boolean z = false
+     public fun mergeWith(userName: UserName): Boolean {
+        val z: Boolean = false
         if (userName.isBadUUID && (this.isBadUUID ^ 1) != 0) {
             this.isBadUUID = true
             return true
@@ -61,19 +61,19 @@ class UserName {
         }
     }
 
-    fun setDisplayName(String str) {
+    fun setDisplayName(str: String) {
         this.displayName = str
     }
 
-    fun setIsBadUUID(Boolean z) {
+    fun setIsBadUUID(z: Boolean) {
         this.isBadUUID = z
     }
 
-    fun setUserName(String str) {
+    fun setUserName(str: String) {
         this.userName = str
     }
 
-    fun setUuid(UUID uuid) {
+    fun setUuid(uuid: UUID) {
         this.uuid = uuid
     }
 }

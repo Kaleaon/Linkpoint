@@ -22,7 +22,7 @@ import androidx.annotation.Nullable
 import uk.co.senab.photoview.PhotoViewAttacher
 
 class TextureViewFragment : StateAwareFragment {
-    private String ASSET_UUID_KEY = "assetUUID"
+    private val ASSET_UUID_KEY: String = "assetUUID"
     /* access modifiers changed from: private */
     @Nullable
     LoadAssetImageTask loadAssetImageTask = null

@@ -22,9 +22,9 @@ class SettingsSelectionFragment : Fragment(), AdapterView.OnItemClickListener {
             super(context, 17367043, SettingsPage.values())
         }
 
-        public View getView(Int i, View view, ViewGroup viewGroup) {
-            View view2 = super.getView(i, view, viewGroup)
-            SettingsPage settingsPage = (SettingsPage) getItem(i)
+         public fun getView(i: Int, view: View, viewGroup: ViewGroup): View {
+            val view2: View = super.getView(i, view, viewGroup)
+            val settingsPage: SettingsPage = (SettingsPage) getItem(i)
             if ((view2 instanceof TextView) && settingsPage != null) {
                 ((TextView) view2).setText(settingsPage.getPageTitle())
             }
@@ -32,16 +32,16 @@ class SettingsSelectionFragment : Fragment(), AdapterView.OnItemClickListener {
         }
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View inflate = layoutInflater.inflate(R.layout.settings_page_selector, viewGroup, false)
-        ListView listView = (ListView) inflate.findViewById(R.id.settings_page_list)
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
+        val inflate: View = layoutInflater.inflate(R.layout.settings_page_selector, viewGroup, false)
+        val listView: ListView = (ListView) inflate.findViewById(R.id.settings_page_list)
         listView.setAdapter(SettingPagesAdapter(getContext()))
         listView.setOnItemClickListener(this)
         return inflate
     }
 
-    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
-        SettingsPage[] values = SettingsPage.values()
+    fun onItemClick(adapterView: AdapterView<?>, view: View, i: Int, j: Long) {
+        val values: Array<SettingsPage> = SettingsPage.values()
         if (i >= 0 && i < values.length) {
             DetailsActivity.showEmbeddedDetails(getActivity(), SettingsFragment.class, SettingsFragment.makeSelection(values[i].getPageResourceId()))
         }

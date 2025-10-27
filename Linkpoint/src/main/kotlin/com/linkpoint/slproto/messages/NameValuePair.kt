@@ -13,7 +13,7 @@ class NameValuePair : SLMessage() {
 
     @JvmStatic
     class NameValueData {
-        public Byte[] NVPair
+        public ByteArray NVPair
     }
 
     @JvmStatic
@@ -26,11 +26,11 @@ class NameValuePair : SLMessage() {
         this.TaskData_Field = TaskData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 21
-        Iterator<T> it = this.NameValueData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 21
+        val it: Iterator<T> = this.NameValueData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -38,11 +38,11 @@ class NameValuePair : SLMessage() {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleNameValuePair(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 73)
@@ -53,11 +53,11 @@ class NameValuePair : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.TaskData_Field.ID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            NameValueData nameValueData = NameValueData()
+            val nameValueData: NameValueData = NameValueData()
             nameValueData.NVPair = unpackVariable(byteBuffer, 2)
             this.NameValueData_Fields.add(nameValueData)
         }

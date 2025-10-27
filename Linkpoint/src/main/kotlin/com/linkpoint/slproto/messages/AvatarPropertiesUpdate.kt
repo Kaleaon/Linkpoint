@@ -16,28 +16,28 @@ class AvatarPropertiesUpdate : SLMessage() {
 
     @JvmStatic
     class PropertiesData {
-        public Byte[] AboutText
+        public ByteArray AboutText
         public Boolean AllowPublish
-        public Byte[] FLAboutText
+        public ByteArray FLAboutText
         public UUID FLImageID
         public UUID ImageID
         public Boolean MaturePublish
-        public Byte[] ProfileURL
+        public ByteArray ProfileURL
     }
 
     public AvatarPropertiesUpdate() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.PropertiesData_Field.AboutText.length + 34 + 1 + this.PropertiesData_Field.FLAboutText.length + 1 + 1 + 1 + this.PropertiesData_Field.ProfileURL.length + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAvatarPropertiesUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -82)
@@ -52,7 +52,7 @@ class AvatarPropertiesUpdate : SLMessage() {
         packVariable(byteBuffer, this.PropertiesData_Field.ProfileURL, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.PropertiesData_Field.ImageID = unpackUUID(byteBuffer)

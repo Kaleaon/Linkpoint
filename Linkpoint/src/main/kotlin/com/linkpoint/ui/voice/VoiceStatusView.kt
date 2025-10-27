@@ -48,10 +48,10 @@ import javax.annotation.Nullable
 class VoiceStatusView : FrameLayout() {
 
     /* renamed from: -com-lumiyaviewer-lumiya-voice-common-model-VoiceBluetoothStateSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f606comlumiyaviewerlumiyavoicecommonmodelVoiceBluetoothStateSwitchesValues = null
+    private const val /* synthetic */ IntArray f606comlumiyaviewerlumiyavoicecommonmodelVoiceBluetoothStateSwitchesValues = null
 
     /* renamed from: -com-lumiyaviewer-lumiya-voice-common-model-VoiceChatInfo$VoiceChatStateSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f607comlumiyaviewerlumiyavoicecommonmodelVoiceChatInfo$VoiceChatStateSwitchesValues = null
+    private const val /* synthetic */ IntArray f607comlumiyaviewerlumiyavoicecommonmodelVoiceChatInfo$VoiceChatStateSwitchesValues = null
     private ChatterID activeChatterID
     private ChatterNameRetriever activeChatterNameRetriever
     private Boolean canConnect
@@ -96,11 +96,11 @@ class VoiceStatusView : FrameLayout() {
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-voice-common-model-VoiceBluetoothStateSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m864getcomlumiyaviewerlumiyavoicecommonmodelVoiceBluetoothStateSwitchesValues() {
+private /* synthetic */ IntArray m864getcomlumiyaviewerlumiyavoicecommonmodelVoiceBluetoothStateSwitchesValues() {
         if (f606comlumiyaviewerlumiyavoicecommonmodelVoiceBluetoothStateSwitchesValues != null) {
             return f606comlumiyaviewerlumiyavoicecommonmodelVoiceBluetoothStateSwitchesValues
         }
-        Int[] iArr = Int[VoiceBluetoothState.values().length]
+        val iArr: IntArray = Int[VoiceBluetoothState.values().length]
         try {
             iArr[VoiceBluetoothState.Active.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -127,11 +127,11 @@ private /* synthetic */ Int[] m864getcomlumiyaviewerlumiyavoicecommonmodelVoiceB
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-voice-common-model-VoiceChatInfo$VoiceChatStateSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m865getcomlumiyaviewerlumiyavoicecommonmodelVoiceChatInfo$VoiceChatStateSwitchesValues() {
+private /* synthetic */ IntArray m865getcomlumiyaviewerlumiyavoicecommonmodelVoiceChatInfo$VoiceChatStateSwitchesValues() {
         if (f607comlumiyaviewerlumiyavoicecommonmodelVoiceChatInfo$VoiceChatStateSwitchesValues != null) {
             return f607comlumiyaviewerlumiyavoicecommonmodelVoiceChatInfo$VoiceChatStateSwitchesValues
         }
-        Int[] iArr = Int[VoiceChatInfo.VoiceChatState.values().length]
+        val iArr: IntArray = Int[VoiceChatInfo.VoiceChatState.values().length]
         try {
             iArr[VoiceChatInfo.VoiceChatState.Active.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -308,21 +308,21 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
         this.onCallButtonListener = null
         this.updatingAudioVolume = false
         this.volumeChangeListener = SeekBar.OnSeekBarChangeListener() {
-            fun onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
+            fun onProgressChanged(seekBar: SeekBar, i: Int, z: Boolean) {
                 VoicePluginServiceConnection voicePluginServiceConnection
                 if (z && (!VoiceStatusView.this.updatingAudioVolume)) {
-                    Float max = ((Float) i) / ((Float) seekBar.getMax())
-                    GridConnectionService serviceInstance = GridConnectionService.getServiceInstance()
+                    val max: Float = ((Float) i) / ((Float) seekBar.getMax())
+                    val serviceInstance: GridConnectionService = GridConnectionService.getServiceInstance()
                     if (serviceInstance != null && (voicePluginServiceConnection = serviceInstance.getVoicePluginServiceConnection()) != null) {
                         voicePluginServiceConnection.setVoiceAudioProperties(VoiceSetAudioProperties(max, true, (VoiceAudioDevice) null))
                     }
                 }
             }
 
-            fun onStartTrackingTouch(SeekBar seekBar) {
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
             }
 
-            fun onStopTrackingTouch(SeekBar seekBar) {
+            fun onStopTrackingTouch(seekBar: SeekBar) {
             }
         }
         this.onActiveSpeakerNameUpdated = ChatterNameRetriever.OnChatterNameUpdated(this) {
@@ -552,21 +552,21 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
         this.onCallButtonListener = null
         this.updatingAudioVolume = false
         this.volumeChangeListener = SeekBar.OnSeekBarChangeListener() {
-            fun onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
+            fun onProgressChanged(seekBar: SeekBar, i: Int, z: Boolean) {
                 VoicePluginServiceConnection voicePluginServiceConnection
                 if (z && (!VoiceStatusView.this.updatingAudioVolume)) {
-                    Float max = ((Float) i) / ((Float) seekBar.getMax())
-                    GridConnectionService serviceInstance = GridConnectionService.getServiceInstance()
+                    val max: Float = ((Float) i) / ((Float) seekBar.getMax())
+                    val serviceInstance: GridConnectionService = GridConnectionService.getServiceInstance()
                     if (serviceInstance != null && (voicePluginServiceConnection = serviceInstance.getVoicePluginServiceConnection()) != null) {
                         voicePluginServiceConnection.setVoiceAudioProperties(VoiceSetAudioProperties(max, true, (VoiceAudioDevice) null))
                     }
                 }
             }
 
-            fun onStartTrackingTouch(SeekBar seekBar) {
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
             }
 
-            fun onStopTrackingTouch(SeekBar seekBar) {
+            fun onStopTrackingTouch(seekBar: SeekBar) {
             }
         }
         this.onActiveSpeakerNameUpdated = ChatterNameRetriever.OnChatterNameUpdated(this) {
@@ -796,21 +796,21 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
         this.onCallButtonListener = null
         this.updatingAudioVolume = false
         this.volumeChangeListener = SeekBar.OnSeekBarChangeListener() {
-            fun onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
+            fun onProgressChanged(seekBar: SeekBar, i: Int, z: Boolean) {
                 VoicePluginServiceConnection voicePluginServiceConnection
                 if (z && (!VoiceStatusView.this.updatingAudioVolume)) {
-                    Float max = ((Float) i) / ((Float) seekBar.getMax())
-                    GridConnectionService serviceInstance = GridConnectionService.getServiceInstance()
+                    val max: Float = ((Float) i) / ((Float) seekBar.getMax())
+                    val serviceInstance: GridConnectionService = GridConnectionService.getServiceInstance()
                     if (serviceInstance != null && (voicePluginServiceConnection = serviceInstance.getVoicePluginServiceConnection()) != null) {
                         voicePluginServiceConnection.setVoiceAudioProperties(VoiceSetAudioProperties(max, true, (VoiceAudioDevice) null))
                     }
                 }
             }
 
-            fun onStartTrackingTouch(SeekBar seekBar) {
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
             }
 
-            fun onStopTrackingTouch(SeekBar seekBar) {
+            fun onStopTrackingTouch(seekBar: SeekBar) {
             }
         }
         this.onActiveSpeakerNameUpdated = ChatterNameRetriever.OnChatterNameUpdated(this) {
@@ -1041,21 +1041,21 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
         this.onCallButtonListener = null
         this.updatingAudioVolume = false
         this.volumeChangeListener = SeekBar.OnSeekBarChangeListener() {
-            fun onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
+            fun onProgressChanged(seekBar: SeekBar, i: Int, z: Boolean) {
                 VoicePluginServiceConnection voicePluginServiceConnection
                 if (z && (!VoiceStatusView.this.updatingAudioVolume)) {
-                    Float max = ((Float) i) / ((Float) seekBar.getMax())
-                    GridConnectionService serviceInstance = GridConnectionService.getServiceInstance()
+                    val max: Float = ((Float) i) / ((Float) seekBar.getMax())
+                    val serviceInstance: GridConnectionService = GridConnectionService.getServiceInstance()
                     if (serviceInstance != null && (voicePluginServiceConnection = serviceInstance.getVoicePluginServiceConnection()) != null) {
                         voicePluginServiceConnection.setVoiceAudioProperties(VoiceSetAudioProperties(max, true, (VoiceAudioDevice) null))
                     }
                 }
             }
 
-            fun onStartTrackingTouch(SeekBar seekBar) {
+            fun onStartTrackingTouch(seekBar: SeekBar) {
             }
 
-            fun onStopTrackingTouch(SeekBar seekBar) {
+            fun onStopTrackingTouch(seekBar: SeekBar) {
             }
         }
         this.onActiveSpeakerNameUpdated = ChatterNameRetriever.OnChatterNameUpdated(this) {
@@ -1129,14 +1129,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
         initializeControls()
     }
 
-    private Unit initializeControls() {
+     private fun initializeControls() {
         ButterKnife.bind((View) this)
         updateVoiceState()
         this.voiceSpeakerVolumeControl.setOnSeekBarChangeListener(this.volumeChangeListener)
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_voice_VoiceStatusView_6407  reason: not valid java name */
-    static /* synthetic */ Boolean m866lambda$com_lumiyaviewer_lumiya_ui_voice_VoiceStatusView_6407(OnHoverListenerCompat onHoverListenerCompat, View view, MotionEvent motionEvent) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Boolean m866lambda$com_lumiyaviewer_lumiya_ui_voice_VoiceStatusView_6407(OnHoverListenerCompat onHoverListenerCompat, View view, MotionEvent motionEvent) {
         if (!(view instanceof ImageButton)) {
             return false
         }
@@ -1154,9 +1154,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceAudioProperties */
-    fun m867com_lumiyaviewer_lumiya_ui_voice_VoiceStatusViewmthref0(VoiceAudioProperties voiceAudioProperties2) {
-        VoiceBluetoothState voiceBluetoothState = null
-        Object[] objArr = Object[1]
+    fun m867com_lumiyaviewer_lumiya_ui_voice_VoiceStatusViewmthref0(voiceAudioProperties2: VoiceAudioProperties) {
+        val voiceBluetoothState: VoiceBluetoothState = null
+        val objArr: Array<Any> = Object[1]
         if (voiceAudioProperties2 != null) {
             voiceBluetoothState = voiceAudioProperties2.bluetoothState
         }
@@ -1167,16 +1167,16 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceChatInfo */
-    fun m868com_lumiyaviewer_lumiya_ui_voice_VoiceStatusViewmthref1(VoiceChatInfo voiceChatInfo2) {
+    fun m868com_lumiyaviewer_lumiya_ui_voice_VoiceStatusViewmthref1(voiceChatInfo2: VoiceChatInfo) {
         updateVoiceState()
     }
 
-    private Unit updateVoiceState() {
+     private fun updateVoiceState() {
         ChatterID.ChatterIDUser chatterIDUser
         String str
         ChatterID.ChatterIDUser chatterIDUser2
-        Int i2 = 4
-        VoiceChatInfo data = this.voiceChatInfo.getData()
+        val i2: Int = 4
+        val data: VoiceChatInfo = this.voiceChatInfo.getData()
         Debug.Printf("VoiceStatusView: voice state %s", data)
         if (data == null || !(!data.state.equals(VoiceChatInfo.VoiceChatState.None))) {
             this.voiceStatusControls.setVisibility(8)
@@ -1196,7 +1196,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
                 this.voiceTerminateButton.setVisibility(4)
                 this.voiceMicOnButton.setVisibility(4)
                 this.voiceMicOffButton.setVisibility(4)
-                ImageButton imageButton = this.voiceAnswerButton
+                val imageButton: ImageButton = this.voiceAnswerButton
                 if (this.canConnect) {
                     i2 = 0
                 }
@@ -1206,7 +1206,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
         } else {
             setVisibility(0)
             this.voiceTerminateButton.setVisibility(0)
-            Boolean z = data.state == VoiceChatInfo.VoiceChatState.Active
+            val z: Boolean = data.state == VoiceChatInfo.VoiceChatState.Active
             this.voiceMicOnButton.setVisibility((!z || !data.localMicActive) ? 4 : 0)
             this.voiceMicOffButton.setVisibility((!z || !(data.localMicActive ^ true)) ? 4 : 0)
             this.voiceAnswerButton.setVisibility(data.state == VoiceChatInfo.VoiceChatState.Ringing ? 0 : 4)
@@ -1214,11 +1214,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
                 if (!(this.voiceSpeakIndicatorLeft.getVisibility() == 0 && this.voiceSpeakIndicatorRight.getVisibility() == 0)) {
                     this.voiceSpeakIndicatorLeft.setVisibility(0)
                     this.voiceSpeakIndicatorRight.setVisibility(0)
-                    Drawable drawable = this.voiceSpeakIndicatorLeft.getDrawable()
+                    val drawable: Drawable = this.voiceSpeakIndicatorLeft.getDrawable()
                     if (drawable instanceof AnimationDrawable) {
                         ((AnimationDrawable) drawable).start()
                     }
-                    Drawable drawable2 = this.voiceSpeakIndicatorRight.getDrawable()
+                    val drawable2: Drawable = this.voiceSpeakIndicatorRight.getDrawable()
                     if (drawable2 instanceof AnimationDrawable) {
                         ((AnimationDrawable) drawable2).start()
                     }
@@ -1231,12 +1231,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
                     str = this.speakerNameRetriever != null ? Objects.equal(chatterIDUser2, this.speakerNameRetriever.chatterID) ? this.speakerNameRetriever.getResolvedName() : null : null
                 }
                 Debug.Printf("Voice: numActiveSpeakers %d, speakerName %s, activeChatterID %s (view chatterID %s)", Integer.valueOf(data.numActiveSpeakers), str, chatterIDUser2, this.chatterID)
-                Object[] objArr = Object[2]
+                val objArr: Array<Any> = Object[2]
                 objArr[0] = this.speakerNameRetriever
                 objArr[1] = this.speakerNameRetriever != null ? this.speakerNameRetriever.chatterID : null
                 Debug.Printf("Voice: speakerNameRetriever %s, snr.chatterID %s", objArr)
                 if (str == null) {
-                    str = data.numActiveSpeakers != 1 ? getContext().getString(R.string.speakers_speaking, Object[]{Integer.valueOf(data.numActiveSpeakers)}) : null
+                    str = data.numActiveSpeakers != 1 ? getContext().getString(R.string.speakers_speaking, Array<Any>{Integer.valueOf(data.numActiveSpeakers)}) : null
                 }
             } else if (data.state == VoiceChatInfo.VoiceChatState.Ringing) {
                 this.voiceSpeakIndicatorLeft.setVisibility(0)
@@ -1267,7 +1267,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
                         break
                 }
             }
-            String resolvedName = this.showActiveChatterName ? this.activeChatterNameRetriever != null ? this.activeChatterNameRetriever.getResolvedName() : null : null
+            val resolvedName: String = this.showActiveChatterName ? this.activeChatterNameRetriever != null ? this.activeChatterNameRetriever.getResolvedName() : null : null
             if (resolvedName != null) {
                 this.voiceStatusSmallText.setVisibility(0)
                 this.voiceStatusText.setText(resolvedName)
@@ -1304,9 +1304,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
                 this.speakerNameRetriever = null
             }
         }
-        VoiceAudioProperties data2 = this.voiceAudioProperties.getData()
+        val data2: VoiceAudioProperties = this.voiceAudioProperties.getData()
         if (data2 != null) {
-            Drawable[] compoundDrawables = this.voiceBluetoothButton.getCompoundDrawables()
+            val compoundDrawables: Array<Drawable> = this.voiceBluetoothButton.getCompoundDrawables()
             switch (m864getcomlumiyaviewerlumiyavoicecommonmodelVoiceBluetoothStateSwitchesValues()[data2.bluetoothState.ordinal()]) {
                 case 1:
                     i = R.drawable.active_button_underline
@@ -1334,13 +1334,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
         }
     }
 
-    fun enableHover(OnHoverListenerCompat onHoverListenerCompat) {
+    fun enableHover(onHoverListenerCompat: OnHoverListenerCompat) {
         if (Build.VERSION.SDK_INT >= 21) {
             this.hoverEnabled = true
             $Lambda$LRu9qjGWbEJmZF4NfrRGigLGXl8 r2 = $Lambda$LRu9qjGWbEJmZF4NfrRGigLGXl8(onHoverListenerCompat)
-            Int applyDimension = (Int) TypedValue.applyDimension(1, 14.0f, getResources().getDisplayMetrics())
-            TypedArray obtainStyledAttributes = getContext().obtainStyledAttributes(Int[]{R.attr.buttonShapeMoveControl})
-            for (ImageButton imageButton : ImageButton[]{this.voiceAnswerButton, this.voiceTerminateButton, this.voiceMicOnButton, this.voiceMicOffButton}) {
+            val applyDimension: Int = (Int) TypedValue.applyDimension(1, 14.0f, getResources().getDisplayMetrics())
+            val obtainStyledAttributes: TypedArray = getContext().obtainStyledAttributes(IntArray{R.attr.buttonShapeMoveControl})
+            for (ImageButton imageButton : Array<ImageButton>{this.voiceAnswerButton, this.voiceTerminateButton, this.voiceMicOnButton, this.voiceMicOffButton}) {
                 imageButton.setOnHoverListener(r2)
                 if (imageButton == this.voiceMicOnButton) {
                     imageButton.setBackground(getContext().getDrawable(R.drawable.fab_shape_move_control_green))
@@ -1369,8 +1369,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
     @OnClick({2131755739})
     fun onLoudspeakerButton() {
         VoicePluginServiceConnection voicePluginServiceConnection
-        VoiceAudioProperties data = this.voiceAudioProperties.getData()
-        GridConnectionService serviceInstance = GridConnectionService.getServiceInstance()
+        val data: VoiceAudioProperties = this.voiceAudioProperties.getData()
+        val serviceInstance: GridConnectionService = GridConnectionService.getServiceInstance()
         if (serviceInstance != null && (voicePluginServiceConnection = serviceInstance.getVoicePluginServiceConnection()) != null && data != null) {
             voicePluginServiceConnection.setVoiceAudioProperties(VoiceSetAudioProperties(0.0f, false, data.speakerphoneOn ? VoiceAudioDevice.Default : VoiceAudioDevice.Loudspeaker))
         }
@@ -1379,7 +1379,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
     @OnClick({2131755731})
     fun onVoiceAnswerButton() {
         GridConnectionService serviceInstance
-        VoiceChatInfo data = this.voiceChatInfo.getData()
+        val data: VoiceChatInfo = this.voiceChatInfo.getData()
         if (this.onCallButtonListener != null && (this.chatterID == null || data == null || data.state == VoiceChatInfo.VoiceChatState.None)) {
             this.onCallButtonListener.onClick(this.voiceAnswerButton)
         }
@@ -1391,8 +1391,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
     @OnClick({2131755740})
     fun onVoiceBluetoothButton() {
         VoicePluginServiceConnection voicePluginServiceConnection
-        VoiceAudioProperties data = this.voiceAudioProperties.getData()
-        GridConnectionService serviceInstance = GridConnectionService.getServiceInstance()
+        val data: VoiceAudioProperties = this.voiceAudioProperties.getData()
+        val serviceInstance: GridConnectionService = GridConnectionService.getServiceInstance()
         if (serviceInstance != null && (voicePluginServiceConnection = serviceInstance.getVoicePluginServiceConnection()) != null && data != null) {
             voicePluginServiceConnection.setVoiceAudioProperties(VoiceSetAudioProperties(0.0f, false, data.bluetoothState == VoiceBluetoothState.Active ? VoiceAudioDevice.Default : VoiceAudioDevice.Bluetooth))
         }
@@ -1400,7 +1400,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
 
     @OnClick({2131755730})
     fun onVoiceMicOffButton() {
-        GridConnectionService serviceInstance = GridConnectionService.getServiceInstance()
+        val serviceInstance: GridConnectionService = GridConnectionService.getServiceInstance()
         if (serviceInstance != null) {
             serviceInstance.enableVoiceMic(true)
         }
@@ -1408,7 +1408,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
 
     @OnClick({2131755729})
     fun onVoiceMicOnButton() {
-        GridConnectionService serviceInstance = GridConnectionService.getServiceInstance()
+        val serviceInstance: GridConnectionService = GridConnectionService.getServiceInstance()
         if (serviceInstance != null) {
             serviceInstance.enableVoiceMic(false)
         }
@@ -1435,15 +1435,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
         }
     }
 
-    fun setCanConnect(Boolean z) {
+    fun setCanConnect(z: Boolean) {
         this.canConnect = z
         updateVoiceState()
     }
 
-    fun setChatterID(ChatterID chatterID2) {
+    fun setChatterID(chatterID2: ChatterID) {
         this.chatterID = chatterID2
         if (chatterID2 != null) {
-            UserManager userManager = chatterID2.getUserManager()
+            val userManager: UserManager = chatterID2.getUserManager()
             if (userManager != null) {
                 this.voiceAudioProperties.subscribe(userManager.getVoiceAudioProperties(), SubscriptionSingleKey.Value)
                 this.voiceChatInfo.subscribe(userManager.getVoiceChatInfo(), chatterID2)
@@ -1467,7 +1467,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
                 this.activeChatterNameRetriever.dispose()
                 this.activeChatterNameRetriever = null
             }
-            GridConnectionService serviceInstance = GridConnectionService.getServiceInstance()
+            val serviceInstance: GridConnectionService = GridConnectionService.getServiceInstance()
             if (serviceInstance != null) {
                 serviceInstance.enableVoiceMic(false)
             }
@@ -1488,12 +1488,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
         this.onCallButtonListener = onClickListener
     }
 
-    fun setShowActiveChatterName(Boolean z) {
+    fun setShowActiveChatterName(z: Boolean) {
         this.showActiveChatterName = z
         updateVoiceState()
     }
 
-    fun setShowWhenInactive(Boolean z) {
+    fun setShowWhenInactive(z: Boolean) {
         this.showWhenInactive = z
         updateVoiceState()
     }

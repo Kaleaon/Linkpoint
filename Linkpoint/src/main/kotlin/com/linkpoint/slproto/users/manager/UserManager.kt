@@ -112,7 +112,7 @@ class UserManager {
     private val WeakPriorityRequestSet<UUID> userNameRequests = WeakPriorityRequestSet<>()
     private val RateLimitRequestHandler<UUID, UserName> userNamesHandler = RateLimitRequestHandler<>(RequestProcessor<UUID, UserName, UserName>(this.userNamesPool, this.dbExecutor) {
         /* access modifiers changed from: protected */
-        public Boolean isRequestComplete(UUID uuid, UserName userName) {
+         public fun isRequestComplete(uuid: UUID, userName: UserName): Boolean {
             if (userName != null) {
                 if (userName.getIsBadUUID()) {
                     return true
@@ -125,13 +125,13 @@ class UserManager {
         }
 
         /* access modifiers changed from: protected */
-        public UserName processRequest(UUID uuid) {
+         public fun processRequest(uuid: UUID): UserName {
             return (UserName) UserManager.this.daoSession.getUserNameDao().load(uuid)
         }
 
         /* access modifiers changed from: protected */
-        public UserName processResult(UUID uuid, UserName userName) {
-            UserName userName2 = (UserName) UserManager.this.daoSession.getUserNameDao().load(uuid)
+         public fun processResult(uuid: UUID, userName: UserName): UserName {
+            val userName2: UserName = (UserName) UserManager.this.daoSession.getUserNameDao().load(uuid)
             if (userName2 != null) {
                 if (userName2.mergeWith(userName)) {
                     UserManager.this.daoSession.getUserNameDao().update(userName2)
@@ -157,7 +157,7 @@ class UserManager {
 
     private UserManager(UUID uuid) throws IllegalArgumentException {
         this.userID = uuid
-        DaoSession userDaoSession = DaoManager.getUserDaoSession(uuid)
+        val userDaoSession: DaoSession = DaoManager.getUserDaoSession(uuid)
         if (userDaoSession == null) {
             throw IllegalArgumentException("Null DAO session")
         }
@@ -200,7 +200,7 @@ class UserManager {
     }
 
     @JvmStatic
-    SLAgentCircuit getActiveAgentCircuit(UUID uuid) {
+     fun getActiveAgentCircuit(uuid: UUID): SLAgentCircuit {
         UserManager userManager
         if (uuid == null || (userManager = getUserManager(uuid)) == null) {
             return null
@@ -209,8 +209,8 @@ class UserManager {
     }
 
     @JvmStatic
-    SLAgentCircuit getConnectedAgentCircuit(UUID uuid) throws SLGridConnection.NotConnectedException {
-        SLAgentCircuit activeAgentCircuit2 = getActiveAgentCircuit(uuid)
+     fun getConnectedAgentCircuit(uuid: UUID) throws SLGridConnection.NotConnectedException {
+        val activeAgentCircuit2: SLAgentCircuit = getActiveAgentCircuit(uuid)
         if (activeAgentCircuit2 != null) {
             return activeAgentCircuit2
         }
@@ -218,14 +218,14 @@ class UserManager {
     }
 
     @JvmStatic
-private File getInventoryDatabasePath(String str) {
+ private fun getInventoryDatabasePath(str: String): File {
         if (PreferenceManager.getDefaultSharedPreferences(LinkpointApp.getContext()).getString("db_location", "internal").equals("sd")) {
-            File file = File(Environment.getExternalStorageDirectory(), "/Android/data/com.lumiyaviewer.lumiya/cache/database")
+            val file: File = File(Environment.getExternalStorageDirectory(), "/Android/data/com.lumiyaviewer.lumiya/cache/database")
             file.mkdirs()
             return File(file, str)
         }
-        File databasePath = LinkpointApp.getContext().getDatabasePath(str)
-        File parentFile = databasePath.getParentFile()
+        val databasePath: File = LinkpointApp.getContext().getDatabasePath(str)
+        val parentFile: File = databasePath.getParentFile()
         if (parentFile != null) {
             parentFile.mkdirs()
         }
@@ -233,7 +233,7 @@ private File getInventoryDatabasePath(String str) {
     }
 
     @JvmStatic
-    UserManager getUserManager(UUID uuid) {
+     fun getUserManager(uuid: UUID): UserManager {
         UserManager userManager
         if (uuid == null) {
             return null
@@ -253,11 +253,11 @@ private File getInventoryDatabasePath(String str) {
         return userManager
     }
 
-    fun addChatMessage(ChatMessage chatMessage) {
+    fun addChatMessage(chatMessage: ChatMessage) {
         this.chatMessageDao.insert(chatMessage)
     }
 
-    fun clearActiveAgentCircuit(SLAgentCircuit sLAgentCircuit) {
+    fun clearActiveAgentCircuit(sLAgentCircuit: SLAgentCircuit) {
         if (this.activeAgentCircuit.compareAndSet(sLAgentCircuit, (Object) null)) {
             Debug.Printf("Active agent circuit cleared.", Object[0])
             this.objectPopupsManager.clearObjectPopups()
@@ -266,7 +266,7 @@ private File getInventoryDatabasePath(String str) {
         }
     }
 
-    public SLAgentCircuit getActiveAgentCircuit() {
+     public fun getActiveAgentCircuit(): SLAgentCircuit {
         return this.activeAgentCircuit.get()
     }
 
@@ -274,7 +274,7 @@ private File getInventoryDatabasePath(String str) {
         return this.agentDataUpdates
     }
 
-    public AssetResponseCacher getAssetResponseCacher() {
+     public fun getAssetResponseCacher(): AssetResponseCacher {
         return this.assetResponseCacher
     }
 
@@ -298,7 +298,7 @@ private File getInventoryDatabasePath(String str) {
         return this.avatarProperties
     }
 
-    public BalanceManager getBalanceManager() {
+     public fun getBalanceManager(): BalanceManager {
         return this.balanceManager
     }
 
@@ -306,25 +306,25 @@ private File getInventoryDatabasePath(String str) {
         return this.groupProfiles
     }
 
-    public ChatMessage getChatMessage(Long j) {
-        Query<ChatMessage> forCurrentThread = this.loadMessageQuery.forCurrentThread()
+     public fun getChatMessage(j: Long): ChatMessage {
+        val forCurrentThread: Query<ChatMessage> = this.loadMessageQuery.forCurrentThread()
         forCurrentThread.setParameter(0, Long.valueOf(j))
         return forCurrentThread.unique()
     }
 
-    public ChatMessageDao getChatMessageDao() {
+     public fun getChatMessageDao(): ChatMessageDao {
         return this.chatMessageDao
     }
 
-    public Chatter getChatter(Cursor cursor) {
+     public fun getChatter(cursor: Cursor): Chatter {
         return this.chatterDao.readEntity(cursor, 0)
     }
 
-    public ChatterDao getChatterDao() {
+     public fun getChatterDao(): ChatterDao {
         return this.chatterDao
     }
 
-    public ChatterList getChatterList() {
+     public fun getChatterList(): ChatterList {
         return this.chatterList
     }
 
@@ -332,23 +332,23 @@ private File getInventoryDatabasePath(String str) {
         return this.currentLocationInfoPool
     }
 
-    public CurrentLocationInfo getCurrentLocationInfoSnapshot() {
+     public fun getCurrentLocationInfoSnapshot(): CurrentLocationInfo {
         return this.currentLocationInfoPool.getData()
     }
 
-    public DaoSession getDaoSession() {
+     public fun getDaoSession(): DaoSession {
         return this.daoSession
     }
 
-    public Executor getDatabaseExecutor() {
+     public fun getDatabaseExecutor(): Executor {
         return this.dbExecutor
     }
 
-    public Executor getDatabaseRunOnceExecutor() {
+     public fun getDatabaseRunOnceExecutor(): Executor {
         return this.dbExecutor.getRunOnceExecutor()
     }
 
-    public EventBus getEventBus() {
+     public fun getEventBus(): EventBus {
         return this.eventBus
     }
 
@@ -360,7 +360,7 @@ private File getInventoryDatabasePath(String str) {
         return this.groupTitles
     }
 
-    public InventoryManager getInventoryManager() {
+     public fun getInventoryManager(): InventoryManager {
         return this.inventoryManager
     }
 
@@ -368,34 +368,34 @@ private File getInventoryDatabasePath(String str) {
         return this.minimapBitmapPool
     }
 
-    public ObjectPopupsManager getObjectPopupsManager() {
+     public fun getObjectPopupsManager(): ObjectPopupsManager {
         return this.objectPopupsManager
     }
 
-    public ObjectsManager getObjectsManager() {
+     public fun getObjectsManager(): ObjectsManager {
         return this.objectsManager
     }
 
-    public SearchManager getSearchManager() {
+     public fun getSearchManager(): SearchManager {
         return this.searchManager
     }
 
-    public SyncManager getSyncManager() {
+     public fun getSyncManager(): SyncManager {
         return this.syncManager
     }
 
-    public UnreadNotificationManager getUnreadNotificationManager() {
+     public fun getUnreadNotificationManager(): UnreadNotificationManager {
         return this.notificationManager
     }
 
-    public User getUser(Cursor cursor) {
+     public fun getUser(cursor: Cursor): User {
         return this.userDao.readEntity(cursor, 0)
     }
 
-    public User getUser(UUID uuid, String str, String str2) {
-        Query<User> forCurrentThread = this.findUserQuery.forCurrentThread()
+     public fun getUser(uuid: UUID, str: String, str2: String): User {
+        val forCurrentThread: Query<User> = this.findUserQuery.forCurrentThread()
         forCurrentThread.setParameter(0, uuid.toString())
-        User unique = forCurrentThread.unique()
+        val unique: User = forCurrentThread.unique()
         if (unique == null) {
             synchronized (this.userUpdateLock) {
                 unique = forCurrentThread.unique()
@@ -415,11 +415,11 @@ private File getInventoryDatabasePath(String str) {
         return unique
     }
 
-    public UserDao getUserDao() {
+     public fun getUserDao(): UserDao {
         return this.userDao
     }
 
-    public UUID getUserID() {
+     public fun getUserID(): UUID {
         return this.userID
     }
 
@@ -439,20 +439,20 @@ private File getInventoryDatabasePath(String str) {
         return this.userNamesPool
     }
 
-    public Byte[] getUserPic(UUID uuid) {
+     public fun getUserPic(uuid: UUID): ByteArray {
         if (uuid == null) {
             return null
         }
-        Query<UserPic> forCurrentThread = this.findUserPicQuery.forCurrentThread()
+        val forCurrentThread: Query<UserPic> = this.findUserPicQuery.forCurrentThread()
         forCurrentThread.setParameter(0, uuid.toString())
-        UserPic unique = forCurrentThread.unique()
+        val unique: UserPic = forCurrentThread.unique()
         if (unique == null) {
             return null
         }
         return unique.getBitmap()
     }
 
-    public UserPicBitmapCache getUserPicBitmapCache() {
+     public fun getUserPicBitmapCache(): UserPicBitmapCache {
         return this.userPicBitmapCache
     }
 
@@ -480,36 +480,36 @@ private File getInventoryDatabasePath(String str) {
         return this.wornWearablesPool
     }
 
-    public Boolean isChatterActive(ChatterID chatterID) {
+     public fun isChatterActive(chatterID: ChatterID): Boolean {
         if (chatterID.getChatterType() == ChatterID.ChatterType.Local) {
             return true
         }
         synchronized (this.chatterUpdateLock) {
-            Query<Chatter> forCurrentThread = this.findChatterQuery.forCurrentThread()
+            val forCurrentThread: Query<Chatter> = this.findChatterQuery.forCurrentThread()
             forCurrentThread.setParameter(0, Integer.valueOf(chatterID.getChatterType().ordinal()))
             forCurrentThread.setParameter(1, StringUtils.toString(chatterID.getOptionalChatterUUID()))
-            Chatter unique = forCurrentThread.unique()
+            val unique: Chatter = forCurrentThread.unique()
             if (unique == null) {
                 return false
             }
-            Boolean active = unique.getActive()
+            val active: Boolean = unique.getActive()
             return active
         }
     }
 
-    public Boolean isChatterMuted(ChatterID chatterID) {
+     public fun isChatterMuted(chatterID: ChatterID): Boolean {
         if (chatterID.getChatterType() == ChatterID.ChatterType.Local) {
             return false
         }
         synchronized (this.chatterUpdateLock) {
-            Query<Chatter> forCurrentThread = this.findChatterQuery.forCurrentThread()
+            val forCurrentThread: Query<Chatter> = this.findChatterQuery.forCurrentThread()
             forCurrentThread.setParameter(0, Integer.valueOf(chatterID.getChatterType().ordinal()))
             forCurrentThread.setParameter(1, StringUtils.toString(chatterID.getOptionalChatterUUID()))
-            Chatter unique = forCurrentThread.unique()
+            val unique: Chatter = forCurrentThread.unique()
             if (unique == null) {
                 return false
             }
-            Boolean muted = unique.getMuted()
+            val muted: Boolean = unique.getMuted()
             return muted
         }
     }
@@ -522,7 +522,7 @@ private File getInventoryDatabasePath(String str) {
         return this.parcelInfoData
     }
 
-    fun setActiveAgentCircuit(SLAgentCircuit sLAgentCircuit) {
+    fun setActiveAgentCircuit(sLAgentCircuit: SLAgentCircuit) {
         this.activeAgentCircuit.set(sLAgentCircuit)
         if (sLAgentCircuit == null) {
             this.objectPopupsManager.clearObjectPopups()
@@ -531,13 +531,13 @@ private File getInventoryDatabasePath(String str) {
         activeAgentCircuitsPool.setData(this.userID, sLAgentCircuit)
     }
 
-    fun setChatterMuted(ChatterID chatterID, Boolean z) {
+    fun setChatterMuted(chatterID: ChatterID, z: Boolean) {
         if (chatterID.getChatterType() != ChatterID.ChatterType.Local) {
             synchronized (this.chatterUpdateLock) {
-                Query<Chatter> forCurrentThread = this.findChatterQuery.forCurrentThread()
+                val forCurrentThread: Query<Chatter> = this.findChatterQuery.forCurrentThread()
                 forCurrentThread.setParameter(0, Integer.valueOf(chatterID.getChatterType().ordinal()))
                 forCurrentThread.setParameter(1, StringUtils.toString(chatterID.getOptionalChatterUUID()))
-                Chatter unique = forCurrentThread.unique()
+                val unique: Chatter = forCurrentThread.unique()
                 if (unique != null) {
                     if (unique.getMuted() != z) {
                         unique.setMuted(z)
@@ -554,20 +554,20 @@ private File getInventoryDatabasePath(String str) {
         }
     }
 
-    fun setCurrentLocationInfo(CurrentLocationInfo currentLocationInfo) {
+    fun setCurrentLocationInfo(currentLocationInfo: CurrentLocationInfo) {
         this.currentLocationInfoPool.setData(this.currentLocationInfoPool.getKey(), currentLocationInfo)
     }
 
-    fun setUserBadUUID(UUID uuid) {
+    fun setUserBadUUID(uuid: UUID) {
         updateUserNames(uuid, (String) null, (String) null, true)
     }
 
-    fun setUserPic(UUID uuid, Byte[] bArr) {
+    fun setUserPic(uuid: UUID, bArr: ByteArray) {
         if (uuid != null) {
-            Query<UserPic> forCurrentThread = this.findUserPicQuery.forCurrentThread()
+            val forCurrentThread: Query<UserPic> = this.findUserPicQuery.forCurrentThread()
             forCurrentThread.setParameter(0, uuid.toString())
             synchronized (this.userPicUpdateLock) {
-                UserPic unique = forCurrentThread.unique()
+                val unique: UserPic = forCurrentThread.unique()
                 if (unique == null) {
                     unique = UserPic((Long) null)
                     unique.setUuid(uuid.toString())
@@ -578,31 +578,31 @@ private File getInventoryDatabasePath(String str) {
         }
     }
 
-    fun setVoiceActiveChatter(ChatterID chatterID) {
+    fun setVoiceActiveChatter(chatterID: ChatterID) {
         this.voiceActiveChatterPool.setData(SubscriptionSingleKey.Value, chatterID)
     }
 
-    fun setVoiceAudioProperties(VoiceAudioProperties voiceAudioProperties) {
+    fun setVoiceAudioProperties(voiceAudioProperties: VoiceAudioProperties) {
         this.voiceAudioPropertiesPool.setData(SubscriptionSingleKey.Value, voiceAudioProperties)
     }
 
-    fun setVoiceChatInfo(ChatterID chatterID, VoiceChatInfo voiceChatInfo) {
+    fun setVoiceChatInfo(chatterID: ChatterID, voiceChatInfo: VoiceChatInfo) {
         this.voiceChatInfoPool.setData(chatterID, voiceChatInfo)
     }
 
-    fun setVoiceLoggedIn(Boolean z) {
+    fun setVoiceLoggedIn(z: Boolean) {
         this.voiceLoggedInPool.setData(SubscriptionSingleKey.Value, Boolean.valueOf(z))
     }
 
-    fun updateUserNames(UUID uuid, String str, String str2) {
+    fun updateUserNames(uuid: UUID, str: String, str2: String) {
         updateUserNames(uuid, str, str2, false)
     }
 
-    fun updateUserNames(UUID uuid, String str, String str2, Boolean z) {
-        Query<User> forCurrentThread = this.findUserQuery.forCurrentThread()
+    fun updateUserNames(uuid: UUID, str: String, str2: String, z: Boolean) {
+        val forCurrentThread: Query<User> = this.findUserQuery.forCurrentThread()
         forCurrentThread.setParameter(0, uuid.toString())
         synchronized (this.userUpdateLock) {
-            User unique = forCurrentThread.unique()
+            val unique: User = forCurrentThread.unique()
             if (unique != null) {
                 if (unique.getUserName() == null && str != null) {
                     unique.setUserName(str)
@@ -613,7 +613,7 @@ private File getInventoryDatabasePath(String str) {
                 unique.setBadUUID(z)
                 this.userDao.update(unique)
             } else {
-                User user = User((Long) null)
+                val user: User = User((Long) null)
                 user.setUuid(uuid)
                 if (str != null) {
                     user.setUserName(str)

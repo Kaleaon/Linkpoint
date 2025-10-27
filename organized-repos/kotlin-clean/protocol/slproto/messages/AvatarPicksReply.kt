@@ -20,7 +20,7 @@ class AvatarPicksReply : SLMessage() {
     @JvmStatic
     class Data {
         public UUID PickID
-        public Byte[] PickName
+        public ByteArray PickName
     }
 
     public AvatarPicksReply() {

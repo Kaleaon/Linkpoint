@@ -17,7 +17,7 @@ class ScriptDialogReply : SLMessage() {
     @JvmStatic
     class Data {
         public Int ButtonIndex
-        public Byte[] ButtonLabel
+        public ByteArray ButtonLabel
         public Int ChatChannel
         public UUID ObjectID
     }

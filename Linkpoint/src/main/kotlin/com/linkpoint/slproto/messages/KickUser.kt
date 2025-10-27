@@ -18,7 +18,7 @@ class KickUser : SLMessage() {
     @JvmStatic
     class UserInfo {
         public UUID AgentID
-        public Byte[] Reason
+        public ByteArray Reason
         public UUID SessionID
     }
 
@@ -26,15 +26,15 @@ class KickUser : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.UserInfo_Field.Reason.length + 34 + 10
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleKickUser(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -93)
@@ -45,7 +45,7 @@ class KickUser : SLMessage() {
         packVariable(byteBuffer, this.UserInfo_Field.Reason, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.TargetBlock_Field.TargetIP = unpackIPAddress(byteBuffer)
         this.TargetBlock_Field.TargetPort = unpackShort(byteBuffer) & 65535
         this.UserInfo_Field.AgentID = unpackUUID(byteBuffer)

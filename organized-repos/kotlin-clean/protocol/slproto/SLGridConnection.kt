@@ -25,12 +25,12 @@ import java.util.UUID
 
 class SLGridConnection : SLConnection() {
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues */
-    private const val /* synthetic */ Int[] syntheticField = null
+    private const val /* synthetic */ IntArray syntheticField = null
     private const val DEFAULT_SYSTEM_ACCOUNT: String = "Second Life"
     @JvmStatic
 private Boolean autoresponseEnabled = false
     @JvmStatic
-private String autoresponseText = ""
+private val autoresponseText: String = ""
     private UUID activeAgentUUID
     private SLAgentCircuit agentCircuit
     private SLAuthParams authParams
@@ -66,11 +66,11 @@ private String autoresponseText = ""
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues */
     @JvmStatic
-private /* synthetic */ Int[] m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues() {
+private /* synthetic */ IntArray m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues() {
         if (syntheticField != null) {
             return syntheticField
         }
-        Int[] iArr = Int[ConnectionState.values().length]
+        IntArray iArr = Int[ConnectionState.values().length]
         try {
             iArr[ConnectionState.Connected.ordinal()] = 1
         } catch (NoSuchFieldError e) {

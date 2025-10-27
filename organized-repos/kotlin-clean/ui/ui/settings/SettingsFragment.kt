@@ -244,12 +244,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
         Int i = -1
         ImmutableList<File> availableCacheDirs = GlobalOptions.getInstance().getAvailableCacheDirs()
         File baseCacheDir = GlobalOptions.getInstance().getBaseCacheDir()
-        String[] strArr = String[availableCacheDirs.size()]
+        Array<String> strArr = String[availableCacheDirs.size()]
         Int i2 = 0
         while (i2 < availableCacheDirs.size()) {
             Int i3 = Objects.equal(availableCacheDirs.get(i2), baseCacheDir) ? i2 : i
             StatFs statFs = StatFs(((File) availableCacheDirs.get(i2)).getAbsolutePath())
-            strArr[i2] = String.format("%s (%.1f Gb free)", Object[]{CacheLocationPreference.makeDisplayableCacheLocation(((File) availableCacheDirs.get(i2)).getAbsolutePath()), Float.valueOf(((Float) (Build.VERSION.SDK_INT >= 18 ? statFs.getBlockSizeLong() * statFs.getAvailableBlocksLong() : (Long) (statFs.getAvailableBlocks() * statFs.getBlockSize()))) / 1.07374182E9f)})
+            strArr[i2] = String.format("%s (%.1f Gb free)", Array<Any>{CacheLocationPreference.makeDisplayableCacheLocation(((File) availableCacheDirs.get(i2)).getAbsolutePath()), Float.valueOf(((Float) (Build.VERSION.SDK_INT >= 18 ? statFs.getBlockSizeLong() * statFs.getAvailableBlocksLong() : (Long) (statFs.getAvailableBlocks() * statFs.getBlockSize()))) / 1.07374182E9f)})
             i2++
             i = i3
         }

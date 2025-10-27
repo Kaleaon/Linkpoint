@@ -19,7 +19,7 @@ import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.UUID
 
 class TouchableObjectsFragment : Fragment : AdapterView.OnItemClickListener {
-    private String OBJECT_UUID_KEY = "objectUUID"
+    private val OBJECT_UUID_KEY: String = "objectUUID"
     private TouchableObjectListAdapter listAdapter
     private SubscriptionData<UUID, ImmutableList<SLObjectInfo>> touchableObjects = SubscriptionData<>(UIThreadExecutor.getInstance(), $Lambda$LilZ3G1QEr_14fK4lPNJzUyzlBg(this))
 

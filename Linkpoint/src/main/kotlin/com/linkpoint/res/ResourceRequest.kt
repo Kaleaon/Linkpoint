@@ -17,14 +17,14 @@ abstract class ResourceRequest<ResourceParams, ResourceType> {
         this.manager = resourceManager
     }
 
-    fun addConsumer(ResourceConsumer resourceConsumer) {
+    fun addConsumer(resourceConsumer: ResourceConsumer) {
         this.consumers.add(resourceConsumer)
     }
 
     fun cancelRequest() {
     }
 
-    fun completeRequest(ResourceType resourcetype) {
+    fun completeRequest(resourcetype: ResourceType) {
         this.isCompleted = true
         this.manager.CompleteRequest(this.params, resourcetype, this.consumers)
     }
@@ -36,11 +36,11 @@ abstract class ResourceRequest<ResourceParams, ResourceType> {
         return this.params
     }
 
-    fun intermediateResult(ResourceType resourcetype) {
+    fun intermediateResult(resourcetype: ResourceType) {
         this.manager.IntermediateResult(this.params, resourcetype, this.consumers)
     }
 
-    public Boolean isCancelled() {
+     public fun isCancelled(): Boolean {
         return this.isCancelled
     }
 
@@ -48,16 +48,16 @@ abstract class ResourceRequest<ResourceParams, ResourceType> {
         return this.isCompleted
     }
 
-    public Boolean isStale() {
+     public fun isStale(): Boolean {
         return this.consumers.size() == 0
     }
 
-    public Boolean removeConsumer(ResourceConsumer resourceConsumer) {
+     public fun removeConsumer(resourceConsumer: ResourceConsumer): Boolean {
         this.consumers.remove(resourceConsumer)
         return this.consumers.size() == 0
     }
 
-    fun setCancelled(Boolean z) {
+    fun setCancelled(z: Boolean) {
         this.isCancelled = z
     }
 

@@ -9,9 +9,9 @@ import com.linkpoint.render.glres.GLSizedResource
 class GLResourceTexture : GLSizedResource() {
     /* access modifiers changed from: private */
     @JvmStatic
-    ThreadLocal<Int[]> idBuffer = ThreadLocal<Int[]>() {
+    val idBuffer: ThreadLocal<IntArray> = ThreadLocal<IntArray>() {
         /* access modifiers changed from: protected */
-        public Int[] initialValue() {
+         public fun initialValue(): IntArray {
             return Int[1]
         }
     }
@@ -28,7 +28,7 @@ private class GLResourceTexturesReference : GLResourceManager().GLResourceRefere
 
         fun GLFree() {
             TextureMemoryTracker.releaseTextureMemory(this.loadedSize)
-            Int[] iArr = (Int[]) GLResourceTexture.idBuffer.get()
+            val iArr: IntArray = (IntArray) GLResourceTexture.idBuffer.get()
             iArr[0] = this.handle
             GLES11.glDeleteTextures(1, iArr, 0)
         }
@@ -40,8 +40,8 @@ private class GLResourceTexturesReference : GLResourceManager().GLResourceRefere
     }
 
     /* access modifiers changed from: protected */
-    public Int Allocate(GLResourceManager gLResourceManager) {
-        Int[] iArr = idBuffer.get()
+    public fun Allocate(gLResourceManager: GLResourceManager): Int {
+        val iArr: IntArray = idBuffer.get()
         GLES11.glGenTextures(1, iArr, 0)
         return iArr[0]
     }

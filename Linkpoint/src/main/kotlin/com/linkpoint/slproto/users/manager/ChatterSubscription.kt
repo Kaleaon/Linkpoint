@@ -76,7 +76,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     /* access modifiers changed from: private */
     /* renamed from: onUnreadCountChanged */
-    fun m298com_lumiyaviewer_lumiya_slproto_users_manager_ChatterSubscriptionmthref1(UnreadMessageInfo unreadMessageInfo) {
+    fun m298com_lumiyaviewer_lumiya_slproto_users_manager_ChatterSubscriptionmthref1(unreadMessageInfo: UnreadMessageInfo) {
         if (unreadMessageInfo != null) {
             setChatterDisplayData(this.displayData.withUnreadInfo(unreadMessageInfo))
         }
@@ -84,9 +84,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceChatInfoChanged */
-    fun m297com_lumiyaviewer_lumiya_slproto_users_manager_ChatterSubscriptionmthref0(VoiceChatInfo voiceChatInfo) {
-        Boolean z = false
-        ChatterDisplayData chatterDisplayData = this.displayData
+    fun m297com_lumiyaviewer_lumiya_slproto_users_manager_ChatterSubscriptionmthref0(voiceChatInfo: VoiceChatInfo) {
+        val z: Boolean = false
+        val chatterDisplayData: ChatterDisplayData = this.displayData
         if (!(voiceChatInfo == null || voiceChatInfo.state == VoiceChatInfo.VoiceChatState.None)) {
             z = true
         }
@@ -99,8 +99,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     }
 
     /* access modifiers changed from: package-private */
-    fun setChatterDisplayData(ChatterDisplayData chatterDisplayData) {
-        ChatterDisplayData chatterDisplayData2 = this.displayData
+    fun setChatterDisplayData(chatterDisplayData: ChatterDisplayData) {
+        val chatterDisplayData2: ChatterDisplayData = this.displayData
         this.displayData = chatterDisplayData
         this.chatterList.replaceChatter(chatterDisplayData2, this.displayData)
     }

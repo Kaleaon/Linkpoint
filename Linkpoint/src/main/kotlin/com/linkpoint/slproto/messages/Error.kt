@@ -16,26 +16,26 @@ class Error : SLMessage() {
     @JvmStatic
     class Data {
         public Int Code
-        public Byte[] Data
+        public ByteArray Data
         public UUID ID
-        public Byte[] Message
-        public Byte[] System
-        public Byte[] Token
+        public ByteArray Message
+        public ByteArray System
+        public ByteArray Token
     }
 
     public Error() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.Data_Field.Token.length + 5 + 16 + 1 + this.Data_Field.System.length + 2 + this.Data_Field.Message.length + 2 + this.Data_Field.Data.length + 20
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleError(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -89)
@@ -48,7 +48,7 @@ class Error : SLMessage() {
         packVariable(byteBuffer, this.Data_Field.Data, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.Data_Field.Code = unpackInt(byteBuffer)
         this.Data_Field.Token = unpackVariable(byteBuffer, 1)

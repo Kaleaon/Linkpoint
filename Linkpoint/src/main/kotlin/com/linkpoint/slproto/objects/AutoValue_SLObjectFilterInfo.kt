@@ -18,50 +18,50 @@ final class AutoValue_SLObjectFilterInfo : SLObjectFilterInfo() {
         this.range = f
     }
 
-    public Boolean equals(Object obj) {
+     public override fun equals(obj: Object): Boolean {
         if (obj == this) {
             return true
         }
         if (!(obj instanceof SLObjectFilterInfo)) {
             return false
         }
-        SLObjectFilterInfo sLObjectFilterInfo = (SLObjectFilterInfo) obj
+        val sLObjectFilterInfo: SLObjectFilterInfo = (SLObjectFilterInfo) obj
         if (this.filterText.equals(sLObjectFilterInfo.filterText()) && this.showAttachments == sLObjectFilterInfo.showAttachments() && this.showNonDescriptive == sLObjectFilterInfo.showNonDescriptive() && this.showNonTouchable == sLObjectFilterInfo.showNonTouchable()) {
             return Float.floatToIntBits(this.range) == Float.floatToIntBits(sLObjectFilterInfo.range())
         }
         return false
     }
 
-    public String filterText() {
+     public fun filterText(): String {
         return this.filterText
     }
 
-    public Int hashCode() {
-        Int i = 1231
-        Int hashCode = ((this.showNonDescriptive ? 1231 : 1237) ^ (((this.showAttachments ? 1231 : 1237) ^ ((this.filterText.hashCode() ^ 1000003) * 1000003)) * 1000003)) * 1000003
+     public override fun hashCode(): Int {
+        val i: Int = 1231
+        val hashCode: Int = ((this.showNonDescriptive ? 1231 : 1237) ^ (((this.showAttachments ? 1231 : 1237) ^ ((this.filterText.hashCode() ^ 1000003) * 1000003)) * 1000003)) * 1000003
         if (!this.showNonTouchable) {
             i = 1237
         }
         return ((hashCode ^ i) * 1000003) ^ Float.floatToIntBits(this.range)
     }
 
-    public Float range() {
+     public fun range(): Float {
         return this.range
     }
 
-    public Boolean showAttachments() {
+     public fun showAttachments(): Boolean {
         return this.showAttachments
     }
 
-    public Boolean showNonDescriptive() {
+     public fun showNonDescriptive(): Boolean {
         return this.showNonDescriptive
     }
 
-    public Boolean showNonTouchable() {
+     public fun showNonTouchable(): Boolean {
         return this.showNonTouchable
     }
 
-    public String toString() {
+     public override fun toString(): String {
         return "SLObjectFilterInfo{filterText=" + this.filterText + ", " + "showAttachments=" + this.showAttachments + ", " + "showNonDescriptive=" + this.showNonDescriptive + ", " + "showNonTouchable=" + this.showNonTouchable + ", " + "range=" + this.range + "}"
     }
 }

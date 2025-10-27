@@ -18,14 +18,14 @@ class BalanceManager {
     /* access modifiers changed from: private */
     val SubscriptionPool<SubscriptionSingleKey, Integer> balancePool = SubscriptionPool<>()
     private val SimpleRequestHandler<SubscriptionSingleKey> balanceRequestHandler = SimpleRequestHandler<SubscriptionSingleKey>() {
-        fun onRequest(SubscriptionSingleKey subscriptionSingleKey) {
-            SLFinancialInfo sLFinancialInfo = (SLFinancialInfo) BalanceManager.this.financialInfo.get()
+        fun onRequest(subscriptionSingleKey: SubscriptionSingleKey) {
+            val sLFinancialInfo: SLFinancialInfo = (SLFinancialInfo) BalanceManager.this.financialInfo.get()
             if (sLFinancialInfo == null) {
                 BalanceManager.this.balancePool.onResultError(SubscriptionSingleKey.Value, SLGridConnection.NotConnectedException())
             } else if (sLFinancialInfo.getBalanceKnown()) {
                 BalanceManager.this.balancePool.onResultData(SubscriptionSingleKey.Value, Integer.valueOf(sLFinancialInfo.getBalance()))
             } else {
-                SLAgentCircuit activeAgentCircuit = BalanceManager.this.userManager.getActiveAgentCircuit()
+                val activeAgentCircuit: SLAgentCircuit = BalanceManager.this.userManager.getActiveAgentCircuit()
                 if (activeAgentCircuit != null) {
                     activeAgentCircuit.execute(BalanceManager.this.requestBalanceRunnable)
                 } else {
@@ -42,8 +42,8 @@ class BalanceManager {
     val SubscriptionPool<SubscriptionSingleKey, LazyList<MoneyTransaction>> moneyTransactionPool = SubscriptionPool<>()
     /* access modifiers changed from: private */
     val Runnable requestBalanceRunnable = Runnable() {
-        fun run() {
-            SLFinancialInfo sLFinancialInfo = (SLFinancialInfo) BalanceManager.this.financialInfo.get()
+        override fun run() {
+            val sLFinancialInfo: SLFinancialInfo = (SLFinancialInfo) BalanceManager.this.financialInfo.get()
             if (sLFinancialInfo != null) {
                 sLFinancialInfo.AskForMoneyBalance()
             } else {
@@ -59,7 +59,7 @@ class BalanceManager {
         this.moneyTransactionDao = userManager2.getDaoSession().getMoneyTransactionDao()
         this.balancePool.attachRequestHandler(this.balanceRequestHandler)
         this.moneyTransactionPool.attachRequestHandler(AsyncRequestHandler(userManager2.getDatabaseExecutor(), SimpleRequestHandler<SubscriptionSingleKey>() {
-            fun onRequest(SubscriptionSingleKey subscriptionSingleKey) {
+            fun onRequest(subscriptionSingleKey: SubscriptionSingleKey) {
                 BalanceManager.this.moneyTransactionPool.onResultData(subscriptionSingleKey, BalanceManager.this.moneyTransactionDao.queryBuilder().orderAsc(MoneyTransactionDao.Properties.Timestamp).listLazy())
             }
         }))
@@ -67,13 +67,13 @@ class BalanceManager {
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_BalanceManager_1705  reason: not valid java name */
-    static /* synthetic */ Unit m286lambda$com_lumiyaviewer_lumiya_slproto_users_manager_BalanceManager_1705(LazyList lazyList) {
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m286lambda$com_lumiyaviewer_lumiya_slproto_users_manager_BalanceManager_1705(LazyList lazyList) {
         if (!lazyList.isClosed()) {
             lazyList.close()
         }
     }
 
-    fun clearFinancialInfo(SLFinancialInfo sLFinancialInfo) {
+    fun clearFinancialInfo(sLFinancialInfo: SLFinancialInfo) {
         this.financialInfo.compareAndSet(sLFinancialInfo, (Object) null)
     }
 
@@ -163,11 +163,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return this.moneyTransactionPool
     }
 
-    fun setFinancialInfo(SLFinancialInfo sLFinancialInfo) {
+    fun setFinancialInfo(sLFinancialInfo: SLFinancialInfo) {
         this.financialInfo.set(sLFinancialInfo)
     }
 
-    fun updateBalance(Int i) {
+    fun updateBalance(i: Int) {
         this.balancePool.onResultData(SubscriptionSingleKey.Value, Integer.valueOf(i))
     }
 

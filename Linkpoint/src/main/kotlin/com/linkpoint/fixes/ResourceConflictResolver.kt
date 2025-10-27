@@ -22,7 +22,7 @@ class ResourceConflictResolver {
      * @param context Application context
      */
     @JvmStatic
-    Unit initialize(Context context) {
+     fun initialize(context: Context) {
         try {
             Log.i(TAG, "Starting resource conflict resolution")
             
@@ -47,25 +47,25 @@ class ResourceConflictResolver {
      * Addresses the "Duplicate value for resource 'attr/fontStyle'" error.
      */
     @JvmStatic
-private Unit resolveAttributeConflicts(Context context) {
+ private fun resolveAttributeConflicts(context: Context) {
         try {
-            Resources res = context.getResources()
+            val res: Resources = context.getResources()
             
             // Check for app-specific fontStyle attribute
-            Int fontStyleAttr = res.getIdentifier("fontStyle", "attr", context.getPackageName())
+            val fontStyleAttr: Int = res.getIdentifier("fontStyle", "attr", context.getPackageName())
             if (fontStyleAttr != 0) {
                 Log.d(TAG, "App fontStyle attribute resolved: " + fontStyleAttr)
             }
             
             // Check for other conflicting attributes
-            String[] conflictingAttrNames = {
+            val conflictingAttrNames: Array<String> = {
                 "passwordToggleEnabled",
                 "buttonGravity",
                 "fontStyle"
             }
             
             for (String attrName : conflictingAttrNames) {
-                Int attr = res.getIdentifier(attrName, "attr", context.getPackageName())
+                val attr: Int = res.getIdentifier(attrName, "attr", context.getPackageName())
                 if (attr != 0) {
                     Log.d(TAG, "Conflicting attribute resolved: " + attrName + " = " + attr)
                 }
@@ -80,19 +80,19 @@ private Unit resolveAttributeConflicts(Context context) {
      * Handle drawable conflicts, particularly eye icons from password fields.
      */
     @JvmStatic
-private Unit resolveDrawableConflicts(Context context) {
+ private fun resolveDrawableConflicts(context: Context) {
         try {
-            Resources res = context.getResources()
+            val res: Resources = context.getResources()
             
             // Check for visibility/eye icon drawables that commonly conflict
-            String[] drawableNames = {
+            val drawableNames: Array<String> = {
                 "design_ic_visibility",
                 "design_ic_visibility_off", 
                 "abc_ic_clear_material"
             }
             
             for (String drawableName : drawableNames) {
-                Int drawableId = res.getIdentifier(drawableName, "drawable", context.getPackageName())
+                val drawableId: Int = res.getIdentifier(drawableName, "drawable", context.getPackageName())
                 if (drawableId != 0) {
                     Log.d(TAG, "Drawable resolved: " + drawableName + " = " + drawableId)
                 }
@@ -107,19 +107,19 @@ private Unit resolveDrawableConflicts(Context context) {
      * Resolve string conflicts from AndroidX migration.
      */
     @JvmStatic
-private Unit resolveStringConflicts(Context context) {
-        Resources res = context.getResources()
+ private fun resolveStringConflicts(context: Context) {
+        val res: Resources = context.getResources()
         
         try {
             // Check for AppCompat strings that may conflict
-            String[] stringNames = {
+            val stringNames: Array<String> = {
                 "abc_action_bar_home_description",
                 "abc_action_bar_up_description",
                 "abc_searchview_description_clear"
             }
             
             for (String stringName : stringNames) {
-                Int stringId = res.getIdentifier(stringName, "string", context.getPackageName())
+                val stringId: Int = res.getIdentifier(stringName, "string", context.getPackageName())
                 if (stringId != 0) {
                     Log.d(TAG, "String resolved: " + stringName + " = " + stringId)
                 }
@@ -139,9 +139,9 @@ private Unit resolveStringConflicts(Context context) {
      * @return true if resource exists, false otherwise
      */
     @JvmStatic
-    Boolean resourceExists(Context context, String name, String type) {
+     fun resourceExists(context: Context, name: String, type: String): Boolean {
         try {
-            Int resourceId = context.getResources().getIdentifier(name, type, context.getPackageName())
+            val resourceId: Int = context.getResources().getIdentifier(name, type, context.getPackageName())
             return resourceId != 0
         } catch (Exception e) {
             Log.w(TAG, "Error checking resource existence: " + name, e)

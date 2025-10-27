@@ -9,12 +9,12 @@ class EmailMessageReply : SLMessage() {
 
     @JvmStatic
     class DataBlock {
-        public Byte[] Data
-        public Byte[] FromAddress
-        public Byte[] MailFilter
+        public ByteArray Data
+        public ByteArray FromAddress
+        public ByteArray MailFilter
         public Int More
         public UUID ObjectID
-        public Byte[] Subject
+        public ByteArray Subject
         public Int Time
     }
 
@@ -22,15 +22,15 @@ class EmailMessageReply : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.DataBlock_Field.FromAddress.length + 25 + 1 + this.DataBlock_Field.Subject.length + 2 + this.DataBlock_Field.Data.length + 1 + this.DataBlock_Field.MailFilter.length + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleEmailMessageReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 80)
@@ -43,7 +43,7 @@ class EmailMessageReply : SLMessage() {
         packVariable(byteBuffer, this.DataBlock_Field.MailFilter, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.DataBlock_Field.ObjectID = unpackUUID(byteBuffer)
         this.DataBlock_Field.More = unpackInt(byteBuffer)
         this.DataBlock_Field.Time = unpackInt(byteBuffer)

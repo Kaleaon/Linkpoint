@@ -10,7 +10,7 @@ class FlexiPrimProgram : PrimProgram() {
         super(Shader.FlexiVertexShader, z ? Shader.PrimOpaqueFragmentShader : Shader.PrimFragmentShader)
     }
 
-    protected Unit bindVariables() {
+     protected fun bindVariables() {
         super.bindVariables()
         this.uSectionMatrices = GLES20.glGetUniformLocation(this.handle, "uSectionMatrices")
         this.uNumSectionMatrices = GLES20.glGetUniformLocation(this.handle, "uNumSectionMatrices")

@@ -108,16 +108,16 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     private Boolean editMode = false
     private Boolean isEditingScript = false
     private Boolean isSaving = false
-    private String lastErrorMessage = null
+    private val lastErrorMessage: String = null
     private MenuItem menuItemNewAttachment
     private SLInventoryEntry noteEntry = null
     private SLNotecard notecard = null
     private val SubscriptionData<AssetKey, AssetData> notecardAssetSubscription = SubscriptionData<>(UIThreadExecutor.getInstance(), $Lambda$srzsajEQjSwYc3yok0XsNFeAjNk(this))
     private String notecardDescription
     private String notecardTitle
-    private UUID parentFolderUUID = null
+    private val parentFolderUUID: UUID = null
     private Int taskLocalID = 0
-    private UUID taskUUID = null
+    private val taskUUID: UUID = null
     private UserManager userManager
 
     private Unit copyAttachmentToInventory(SLInventoryEntry sLInventoryEntry) {
@@ -192,7 +192,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
 
     private Unit saveChanges() {
         Boolean z = true
-        Byte[] bArr = null
+        ByteArray bArr = null
         if (this.editMode && this.notecard != null) {
             String editable = ((EditText) findViewById(R.id.notecardEditTitle)).getText().toString()
             String editable2 = ((EditText) findViewById(R.id.notecardEditDescription)).getText().toString()
@@ -200,7 +200,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
                 z = !(Objects.equal(editable, this.noteEntry.name) ? Objects.equal(editable2, this.noteEntry.description) : false)
             }
             SLNotecard sLNotecard = SLNotecard((Spanned) ((EditText) findViewById(R.id.notecardEditContents)).getText(), this.isEditingScript)
-            Byte[] lindenText = sLNotecard.toLindenText()
+            ByteArray lindenText = sLNotecard.toLindenText()
             if (!Arrays.equals(lindenText, this.notecard.toLindenText()) || this.noteEntry == null || this.noteEntry.getId() == 0) {
                 this.notecard = sLNotecard
                 bArr = lindenText
@@ -707,14 +707,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
             return
         }
         setTitle(getString(this.isEditingScript ? R.string.script_edit_title : R.string.notecard_edit_window_title))
-        setContentView((Int) R.layout.notecard_edit)
+        setContentView(R.toInt().layout.notecard_edit)
         findViewById(R.id.notecardSaveButton).setOnClickListener(this)
         findViewById(R.id.notecardDiscardButton).setOnClickListener(this)
         findViewById(R.id.notecardEditButton).setOnClickListener(this)
         findViewById(R.id.notecardErrorDiscard).setOnClickListener(this)
         this.editMode = false
         this.notecardTitle = this.noteEntry != null ? this.noteEntry.name : getString(R.string.new_notecard_title)
-        this.notecardDescription = this.noteEntry != null ? this.noteEntry.description : getString(R.string.new_notecard_description_format, Object[]{DateFormat.getDateTimeInstance(3, 3).format(Date())})
+        this.notecardDescription = this.noteEntry != null ? this.noteEntry.description : getString(R.string.new_notecard_description_format, Array<Any>{DateFormat.getDateTimeInstance(3, 3).format(Date())})
         ((EditText) findViewById(R.id.notecardEditTitle)).setText(this.notecardTitle)
         ((EditText) findViewById(R.id.notecardEditDescription)).setText(this.notecardDescription)
         this.agentCircuit.subscribe(UserManager.agentCircuits(), this.userManager.getUserID())

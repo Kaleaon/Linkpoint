@@ -7,30 +7,30 @@ class Debug {
     private const val LOG_TAG: String = "Linkpoint"
 
     @JvmStatic
-    Unit AlwaysPrintf(String str, Object... objArr) {
-        StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[3]
-        String className = stackTraceElement.getClassName()
+    fun AlwaysPrintf(str: String, vararg objArr: Any) {
+        val stackTraceElement: StackTraceElement = Thread.currentThread().getStackTrace()[3]
+        val className: String = stackTraceElement.getClassName()
         Log.d(LOG_TAG, "[" + className.substring(className.lastIndexOf(46) + 1) + "::" + stackTraceElement.getMethodName() + "] " + String.format(str, objArr))
     }
 
     @JvmStatic
-    Unit DumpBuffer(String str, ByteBuffer byteBuffer) {
+    fun DumpBuffer(str: String, byteBuffer: ByteBuffer) {
     }
 
     @JvmStatic
-    Unit DumpBuffer(String str, Byte[] bArr) {
+    fun DumpBuffer(str: String, bArr: ByteArray) {
     }
 
     @JvmStatic
-    Unit DumpBuffer(String str, Byte[] bArr, Int i) {
+    fun DumpBuffer(str: String, bArr: ByteArray, i: Int) {
     }
 
     @JvmStatic
-    Unit Log(String str) {
+    fun Log(str: String) {
     }
 
     @JvmStatic
-    Unit Printf(String str, Object... objArr) {
+    fun Printf(str: String, vararg objArr: Any) {
         try {
             if (objArr == null || objArr.length == 0) {
                 Log.d(LOG_TAG, str)
@@ -43,11 +43,11 @@ class Debug {
     }
 
     @JvmStatic
-    Unit Warning(Throwable th) {
+    fun Warning(th: Throwable) {
     }
 
     @JvmStatic
-    Boolean isDebugBuild() {
+     fun isDebugBuild(): Boolean {
         return false
     }
 }

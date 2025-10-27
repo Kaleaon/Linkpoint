@@ -192,7 +192,7 @@ enum class SLSkeletonBoneID(
     mHindLimb1Right(true, true, 129),
     mHindLimb2Right(true, true, 130),
     mHindLimb3Right(true, true, 131),
-    mHindLimb4Right(true, true, 132);
+    mHindLimb4Right(true, true, 132)
     
     companion object {
         // Counts

@@ -55,7 +55,7 @@ class AccountEditDialog : AppCompatDialog(), View.OnClickListener, TextWatcher {
                 ((EditText) findViewById(R.id.loginPasswordText)).setTransformationMethod(PasswordTransformationMethod.getInstance())
             }
             ((Button) findViewById(R.id.okButton)).setText(R.string.save_changes)
-            setTitle((Int) R.string.edit_account_dialog_title)
+            setTitle(R.toInt().string.edit_account_dialog_title)
         } else {
             findViewById(R.id.loginPasswordText).setTag((Object) null)
             ((TextView) findViewById(R.id.loginNameText)).setText("")
@@ -64,7 +64,7 @@ class AccountEditDialog : AppCompatDialog(), View.OnClickListener, TextWatcher {
             ((EditText) findViewById(R.id.loginPasswordText)).setTransformationMethod(PasswordTransformationMethod.getInstance())
             ((Spinner) findViewById(R.id.spinnerGrid)).setSelection(0)
             ((Button) findViewById(R.id.okButton)).setText(R.string.add_new_account)
-            setTitle((Int) R.string.new_account_dialog_title)
+            setTitle(R.toInt().string.new_account_dialog_title)
         }
         ((TextView) findViewById(R.id.loginNameText)).requestFocus()
     }
@@ -139,8 +139,8 @@ class AccountEditDialog : AppCompatDialog(), View.OnClickListener, TextWatcher {
 
     fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
-        setTitle((Int) R.string.new_account_dialog_title)
-        setContentView((Int) R.layout.account_edit_dialog)
+        setTitle(R.toInt().string.new_account_dialog_title)
+        setContentView(R.toInt().layout.account_edit_dialog)
         findViewById(R.id.okButton).setOnClickListener(this)
         findViewById(R.id.cancelButton).setOnClickListener(this)
         ((EditText) findViewById(R.id.loginPasswordText)).addTextChangedListener(this)

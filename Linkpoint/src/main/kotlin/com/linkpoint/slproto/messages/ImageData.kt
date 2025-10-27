@@ -11,7 +11,7 @@ class ImageData : SLMessage() {
 
     @JvmStatic
     class ImageDataData {
-        public Byte[] Data
+        public ByteArray Data
     }
 
     @JvmStatic
@@ -26,15 +26,15 @@ class ImageData : SLMessage() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.ImageDataData_Field.Data.length + 2 + 24
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleImageData(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.put((Byte) 9)
         packUUID(byteBuffer, this.ImageID_Field.ID)
         packByte(byteBuffer, (Byte) this.ImageID_Field.Codec)
@@ -43,7 +43,7 @@ class ImageData : SLMessage() {
         packVariable(byteBuffer, this.ImageDataData_Field.Data, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.ImageID_Field.ID = unpackUUID(byteBuffer)
         this.ImageID_Field.Codec = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.ImageID_Field.Size = unpackInt(byteBuffer)

@@ -6,7 +6,7 @@ class TerrainPatchInfo {
     private Int hashCode = getHashCode()
     private TerrainPatchHeightMap heightMap
     private Int layerMask
-    private Float[] textureHeightMap
+    private FloatArray textureHeightMap
     private TerrainTextures textures
 
     TerrainPatchInfo(TerrainPatchHeightMap terrainPatchHeightMap, TerrainTextures terrainTextures, Float f, Float f2, Float f3, Float f4) {
@@ -47,7 +47,7 @@ class TerrainPatchInfo {
         return this.heightMap.getMinHeight()
     }
 
-    Float[] getTextureHeightMap() {
+    FloatArray getTextureHeightMap() {
         return this.textureHeightMap
     }
 

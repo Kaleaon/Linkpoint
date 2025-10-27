@@ -21,8 +21,8 @@ class AvatarPickerReply : SLMessage() {
     @JvmStatic
     class Data {
         public UUID AvatarID
-        public Byte[] FirstName
-        public Byte[] LastName
+        public ByteArray FirstName
+        public ByteArray LastName
     }
 
     public AvatarPickerReply() {

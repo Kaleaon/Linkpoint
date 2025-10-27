@@ -18,7 +18,7 @@ class ChatterNameDisplayer : ChatterNameRetriever.OnChatterNameUpdated {
     private TextView nameTextView = null
     private ChatterPicView picView = null
 
-    private Unit clearViews() {
+     private fun clearViews() {
         if (this.nameTextView != null) {
             this.nameTextView.setText("")
         }
@@ -27,12 +27,12 @@ class ChatterNameDisplayer : ChatterNameRetriever.OnChatterNameUpdated {
         }
     }
 
-    private Unit updateViews() {
+     private fun updateViews() {
         if (this.chatterID == null || this.nameRetriever == null) {
             clearViews()
             return
         }
-        String resolvedName = this.nameRetriever.getResolvedName()
+        val resolvedName: String = this.nameRetriever.getResolvedName()
         if (this.nameTextView != null) {
             this.nameTextView.setText(resolvedName != null ? resolvedName : this.nameTextView.getContext().getString(R.string.name_loading_title))
         }
@@ -41,32 +41,32 @@ class ChatterNameDisplayer : ChatterNameRetriever.OnChatterNameUpdated {
         }
     }
 
-    fun bindViews(TextView textView, ChatterPicView chatterPicView) {
+    fun bindViews(textView: TextView, chatterPicView: ChatterPicView) {
         this.nameTextView = textView
         this.picView = chatterPicView
         updateViews()
     }
 
-    public ChatterID getChatterID() {
+     public fun getChatterID(): ChatterID {
         return this.chatterID
     }
 
-    public String getResolvedName(Context context) {
-        String str = null
+     public fun getResolvedName(context: Context): String {
+        val str: String = null
         if (this.nameRetriever != null) {
             str = this.nameRetriever.getResolvedName()
         }
         return str != null ? str : context.getString(R.string.name_loading_title)
     }
 
-    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
+    fun onChatterNameUpdated(chatterNameRetriever: ChatterNameRetriever) {
         if (chatterNameRetriever == this.nameRetriever) {
             this.alreadyUpdated = true
             updateViews()
         }
     }
 
-    fun setChatterID(ChatterID chatterID2) {
+    fun setChatterID(chatterID2: ChatterID) {
         if (!Objects.equal(chatterID2, this.chatterID)) {
             if (this.nameRetriever != null) {
                 this.nameRetriever.dispose()

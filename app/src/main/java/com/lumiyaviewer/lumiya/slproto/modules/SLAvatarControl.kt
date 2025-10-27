@@ -45,20 +45,20 @@ import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 
 class SLAvatarControl : SLModule {
-    private Int IDLE_AGENT_UPDATE_INTERVAL = 2000
-    Float MANUAL_FLY_SPEED = 1.0f
-    Float MANUAL_MOVE_SPEED = 1.0f
-    Float MANUAL_STRAFE_SPEED = 1.0f
-    Float MANUAL_TURN_SPEED = 45.0f
-    private Int MIN_AGENT_UPDATE_INTERVAL = 200
-    private UUID animUUID_Falldown = UUID.fromString("666307d9-a860-572d-6fd4-c3ab8865c094")
-    private UUID animUUID_Land = UUID.fromString("7a17b059-12b2-41b1-570a-186368b6aa6f")
-    private UUID animUUID_PreJump = UUID.fromString("7a4e87fe-de39-6fcb-6223-024b00893244")
-    private UUID animUUID_Run = UUID.fromString("05ddbff8-aaa9-92a1-2b74-8fe77a29b445")
-    private UUID animUUID_Softland = UUID.fromString("f4f00d6e-b9fe-9292-f4cb-0ae06ea58d57")
-    private UUID animUUID_Stand = UUID.fromString("2408fe9e-df1d-1d7d-f4ff-1384fa7b350f")
-    private UUID animUUID_Standup = UUID.fromString("3da1d753-028a-5446-24f3-9c9b856d9422")
-    private UUID animUUID_Walk = UUID.fromString("6ed24bd8-91aa-4b12-ccc7-c97c857ab4e0")
+    private val IDLE_AGENT_UPDATE_INTERVAL: Int = 2000
+    val MANUAL_FLY_SPEED: Float = 1.0f
+    val MANUAL_MOVE_SPEED: Float = 1.0f
+    val MANUAL_STRAFE_SPEED: Float = 1.0f
+    val MANUAL_TURN_SPEED: Float = 45.0f
+    private val MIN_AGENT_UPDATE_INTERVAL: Int = 200
+    private val animUUID_Falldown: UUID = UUID.fromString("666307d9-a860-572d-6fd4-c3ab8865c094")
+    private val animUUID_Land: UUID = UUID.fromString("7a17b059-12b2-41b1-570a-186368b6aa6f")
+    private val animUUID_PreJump: UUID = UUID.fromString("7a4e87fe-de39-6fcb-6223-024b00893244")
+    private val animUUID_Run: UUID = UUID.fromString("05ddbff8-aaa9-92a1-2b74-8fe77a29b445")
+    private val animUUID_Softland: UUID = UUID.fromString("f4f00d6e-b9fe-9292-f4cb-0ae06ea58d57")
+    private val animUUID_Stand: UUID = UUID.fromString("2408fe9e-df1d-1d7d-f4ff-1384fa7b350f")
+    private val animUUID_Standup: UUID = UUID.fromString("3da1d753-028a-5446-24f3-9c9b856d9422")
+    private val animUUID_Walk: UUID = UUID.fromString("6ed24bd8-91aa-4b12-ccc7-c97c857ab4e0")
     private volatile Int ActiveMotionMask = 0
     private volatile Int AgentMotionMask = 0
     private volatile Boolean AgentWantStand = true
@@ -156,10 +156,10 @@ class SLAvatarControl : SLModule {
             if (!this.isCamming) {
                 this.agentHeading = this.cameraParams.getHeading()
             }
-            Double d = (((Double) this.agentHeading) * 3.141592653589793d) / 180.0d
+            Double d = ((this.toDouble().agentHeading) * 3.141592653589793d) / 180.0d
             Debug.Printf("AgentUpdate: agent heading %.2f", Float.valueOf(this.agentHeading))
-            Float cos = (Float) Math.cos(d)
-            Float sin = (Float) Math.sin(d)
+            Float cos = Math.toFloat().cos(d)
+            Float sin = Math.toFloat().sin(d)
             LLQuaternion mayaQ = LLQuaternion.mayaQ(0.0f, 0.0f, this.agentHeading, LLQuaternion.Order.YZX)
             agentUpdate.AgentData_Field.BodyRotation = mayaQ
             agentUpdate.AgentData_Field.HeadRotation = mayaQ

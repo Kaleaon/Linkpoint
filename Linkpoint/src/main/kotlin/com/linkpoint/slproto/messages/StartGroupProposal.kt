@@ -19,7 +19,7 @@ class StartGroupProposal : SLMessage() {
         public Int Duration
         public UUID GroupID
         public Float Majority
-        public Byte[] ProposalText
+        public ByteArray ProposalText
         public Int Quorum
     }
 
@@ -27,15 +27,15 @@ class StartGroupProposal : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.ProposalData_Field.ProposalText.length + 29 + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleStartGroupProposal(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 107)
@@ -48,7 +48,7 @@ class StartGroupProposal : SLMessage() {
         packVariable(byteBuffer, this.ProposalData_Field.ProposalText, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ProposalData_Field.GroupID = unpackUUID(byteBuffer)

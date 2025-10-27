@@ -22,8 +22,8 @@ private class TerrainTextureRequest : ResourceRequest()<TerrainPatchInfo, OpenJP
         private volatile Future<?> bakingFuture = null
         private Int layerNeededMask
         private Int layerReadyMask
-        private val TerrainRawTextureRequest[] rawRequests = TerrainRawTextureRequest[4]
-        private val OpenJPEG[] rawTextures = OpenJPEG[4]
+        private val Array<TerrainRawTextureRequest> rawRequests = TerrainRawTextureRequest[4]
+        private val Array<OpenJPEG> rawTextures = OpenJPEG[4]
 
         private class TerrainRawTextureRequest : ResourceConsumer {
             private val Int layer
@@ -33,7 +33,7 @@ private class TerrainTextureRequest : ResourceRequest()<TerrainPatchInfo, OpenJP
                 TextureCache.getInstance().RequestResource(DrawableTextureParams.create(uuid, TextureClass.Terrain), this)
             }
 
-            fun OnResourceReady(Object obj, Boolean z) {
+            fun OnResourceReady(obj: Object, z: Boolean) {
                 if (obj instanceof OpenJPEG) {
                     TerrainTextureRequest.this.onLayerReady(this.layer, (OpenJPEG) obj)
                 } else if (obj == null) {
@@ -51,7 +51,7 @@ private class TerrainTextureRequest : ResourceRequest()<TerrainPatchInfo, OpenJP
                 for (Int i = 0; i < 4; i++) {
                     this.rawRequests[i] = null
                 }
-                Future<?> future = this.bakingFuture
+                val future: Future<?> = this.bakingFuture
                 if (future != null) {
                     future.cancel(false)
                 }
@@ -75,24 +75,24 @@ private class TerrainTextureRequest : ResourceRequest()<TerrainPatchInfo, OpenJP
             this.bakingFuture = TextureCache.getInstance().getDecompressorExecutor().submit(this)
         }
 
-        public Int getPriority() {
+         public fun getPriority(): Int {
             return 0
         }
 
         /* access modifiers changed from: protected */
         public synchronized Unit onLayerReady(Int i, OpenJPEG openJPEG) {
-            Boolean z = false
+            val z: Boolean = false
             synchronized (this) {
                 this.rawTextures[i] = openJPEG
                 this.layerReadyMask |= 1 << i
-                Object[] objArr = Object[4]
+                val objArr: Array<Any> = Object[4]
                 objArr[0] = Integer.valueOf(i)
                 objArr[1] = openJPEG != null ? openJPEG.toString() : "null"
                 objArr[2] = Integer.valueOf(this.layerNeededMask)
                 objArr[3] = Integer.valueOf(this.layerReadyMask)
                 Debug.Printf("Terrain: onLayerReady (%d), rawTexture %s, layerNeededMask %d, layerReadyMask %d", objArr)
                 if ((this.layerNeededMask & this.layerReadyMask) == this.layerNeededMask) {
-                    Int i2 = 0
+                    val i2: Int = 0
                     while (true) {
                         if (i2 < 4) {
                             if ((this.layerNeededMask & (1 << i2)) != 0 && this.rawTextures[i2] == null) {
@@ -114,10 +114,10 @@ private class TerrainTextureRequest : ResourceRequest()<TerrainPatchInfo, OpenJP
             }
         }
 
-        fun run() {
+        override fun run() {
             try {
-                TerrainPatchInfo terrainPatchInfo = (TerrainPatchInfo) getParams()
-                OpenJPEG bakeTerrain = OpenJPEG.bakeTerrain(256, 256, this.rawTextures, terrainPatchInfo.getTextureHeightMap(), terrainPatchInfo.getHeightMap().getMapWidth(), terrainPatchInfo.getHeightMap().getMapHeight())
+                val terrainPatchInfo: TerrainPatchInfo = (TerrainPatchInfo) getParams()
+                val bakeTerrain: OpenJPEG = OpenJPEG.bakeTerrain(256, 256, this.rawTextures, terrainPatchInfo.getTextureHeightMap(), terrainPatchInfo.getHeightMap().getMapWidth(), terrainPatchInfo.getHeightMap().getMapHeight())
                 Debug.Printf("Terrain: Baked texture producer: produced baked texture", Object[0])
                 completeRequest(bakeTerrain)
             } catch (Exception e) {

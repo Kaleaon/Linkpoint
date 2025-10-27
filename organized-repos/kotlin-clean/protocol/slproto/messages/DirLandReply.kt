@@ -27,7 +27,7 @@ class DirLandReply : SLMessage() {
         public Int ActualArea
         public Boolean Auction
         public Boolean ForSale
-        public Byte[] Name
+        public ByteArray Name
         public UUID ParcelID
         public Int SalePrice
     }

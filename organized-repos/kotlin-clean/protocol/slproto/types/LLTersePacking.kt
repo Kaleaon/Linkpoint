@@ -18,7 +18,7 @@ const val U8_: Floatto_float(Int i, Float f, Float f2) {
 
     private const val Float int_dequantize(Float f, Int i, Float f2, Float f3) {
         Float f4 = f3 - f2
-        Float f5 = (((Float) i) * f * f4) + f2
+        Float f5 = ((i.toFloat()) * f * f4) + f2
         if (Math.abs(f5) < f4 * f) {
             return 0.0f
         }

@@ -9,7 +9,7 @@ package com.lumiyaviewer.lumiya.voice
 import android.util.Log
 
 class Debug {
-    private String LOG_TAG = "LumiyaVoice"
+    private val LOG_TAG: String = "LumiyaVoice"
 
     Unit AlwaysPrintf(String string2, Any ... objectArray) {
         StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[3]

@@ -11,22 +11,22 @@ class LiveHelpGroupReply : SLMessage() {
     class ReplyData {
         public UUID GroupID
         public UUID RequestID
-        public Byte[] Selection
+        public ByteArray Selection
     }
 
     public LiveHelpGroupReply() {
         this.zeroCoded = false
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.ReplyData_Field.Selection.length + 33 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleLiveHelpGroupReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 124)
@@ -35,7 +35,7 @@ class LiveHelpGroupReply : SLMessage() {
         packVariable(byteBuffer, this.ReplyData_Field.Selection, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.ReplyData_Field.RequestID = unpackUUID(byteBuffer)
         this.ReplyData_Field.GroupID = unpackUUID(byteBuffer)
         this.ReplyData_Field.Selection = unpackVariable(byteBuffer, 1)

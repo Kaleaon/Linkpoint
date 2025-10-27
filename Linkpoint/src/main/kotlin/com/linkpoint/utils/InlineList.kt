@@ -5,7 +5,7 @@ class InlineList<T : InlineListEntry<T>> {
     private T first = null
 
     fun addEntry(T t) {
-        InlineList list = t.getList()
+        val list: InlineList = t.getList()
         if (list != this) {
             if (list != null) {
                 list.removeEntry(t)
@@ -26,8 +26,8 @@ class InlineList<T : InlineListEntry<T>> {
 
     fun removeEntry(T t) {
         if (t.getList() == this) {
-            InlineListEntry next = t.getNext()
-            InlineListEntry prev = t.getPrev()
+            val next: InlineListEntry = t.getNext()
+            val prev: InlineListEntry = t.getPrev()
             if (prev != null) {
                 prev.setNext(next)
             } else {

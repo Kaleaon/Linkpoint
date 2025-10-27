@@ -36,16 +36,16 @@ class SLTextureFetcher : SLModule(), SLIdleHandler {
     private synchronized Unit RunUDPQueue() {
         SLTextureFetchRequest poll
         if (this.udpTransfers.size() < 2 && (poll = this.udpQueue.poll()) != null) {
-            TextureUDPTransfer textureUDPTransfer = TextureUDPTransfer(poll.destFile, poll)
+            val textureUDPTransfer: TextureUDPTransfer = TextureUDPTransfer(poll.destFile, poll)
             this.udpTransfers.put(poll.textureID, textureUDPTransfer)
             textureUDPTransfer.StartTransfer(this.agentCircuit, this.circuitInfo)
         }
     }
 
-    fun BeginFetch(SLTextureFetchRequest sLTextureFetchRequest) {
-        SLTextureFetchRequest sLTextureFetchRequest2 = null
+    fun BeginFetch(sLTextureFetchRequest: SLTextureFetchRequest) {
+        val sLTextureFetchRequest2: SLTextureFetchRequest = null
         synchronized (this) {
-            File file = sLTextureFetchRequest.destFile
+            val file: File = sLTextureFetchRequest.destFile
             if (file.exists()) {
                 sLTextureFetchRequest.outputFile = file
                 sLTextureFetchRequest2 = sLTextureFetchRequest
@@ -71,10 +71,10 @@ class SLTextureFetcher : SLModule(), SLIdleHandler {
     }
 
     @SLMessageHandler
-    fun HandleImageData(ImageData imageData) {
+    fun HandleImageData(imageData: ImageData) {
         SLTextureFetchRequest sLTextureFetchRequest
         synchronized (this) {
-            TextureUDPTransfer textureUDPTransfer = this.udpTransfers.get(imageData.ImageID_Field.ID)
+            val textureUDPTransfer: TextureUDPTransfer = this.udpTransfers.get(imageData.ImageID_Field.ID)
             if (textureUDPTransfer != null) {
                 textureUDPTransfer.HandleImageData(imageData)
                 if (textureUDPTransfer.isCompleted()) {
@@ -91,11 +91,11 @@ class SLTextureFetcher : SLModule(), SLIdleHandler {
     }
 
     @SLMessageHandler
-    fun HandleImageNotInDatabase(ImageNotInDatabase imageNotInDatabase) {
+    fun HandleImageNotInDatabase(imageNotInDatabase: ImageNotInDatabase) {
         SLTextureFetchRequest sLTextureFetchRequest
         synchronized (this) {
             Debug.Log("TextureUDP: Image not in database: " + imageNotInDatabase.ImageID_Field.ID)
-            TextureUDPTransfer remove = this.udpTransfers.remove(imageNotInDatabase.ImageID_Field.ID)
+            val remove: TextureUDPTransfer = this.udpTransfers.remove(imageNotInDatabase.ImageID_Field.ID)
             sLTextureFetchRequest = remove != null ? remove.fetchReq : null
         }
         if (!(sLTextureFetchRequest == null || sLTextureFetchRequest.onFetchComplete == null)) {
@@ -105,15 +105,15 @@ class SLTextureFetcher : SLModule(), SLIdleHandler {
     }
 
     @SLMessageHandler
-    fun HandleImagePacket(ImagePacket imagePacket) {
+    fun HandleImagePacket(imagePacket: ImagePacket) {
         SLTextureFetchRequest sLTextureFetchRequest
         synchronized (this) {
-            TextureUDPTransfer textureUDPTransfer = this.udpTransfers.get(imagePacket.ImageID_Field.ID)
+            val textureUDPTransfer: TextureUDPTransfer = this.udpTransfers.get(imagePacket.ImageID_Field.ID)
             if (textureUDPTransfer != null) {
                 textureUDPTransfer.HandleImagePacket(imagePacket)
                 if (textureUDPTransfer.isCompleted()) {
                     this.udpTransfers.remove(imagePacket.ImageID_Field.ID)
-                    SLTextureFetchRequest sLTextureFetchRequest2 = textureUDPTransfer.fetchReq
+                    val sLTextureFetchRequest2: SLTextureFetchRequest = textureUDPTransfer.fetchReq
                     sLTextureFetchRequest2.outputFile = textureUDPTransfer.getOutputFile()
                     RunUDPQueue()
                     sLTextureFetchRequest = sLTextureFetchRequest2
@@ -128,8 +128,8 @@ class SLTextureFetcher : SLModule(), SLIdleHandler {
 
     fun ProcessIdle() {
         HashSet hashSet
-        HashSet<UUID> hashSet2 = null
-        Long currentTimeMillis = System.currentTimeMillis()
+        val hashSet2: HashSet<UUID> = null
+        val currentTimeMillis: Long = System.currentTimeMillis()
         if (currentTimeMillis >= this.lastCheckForStalls + 1000) {
             this.lastCheckForStalls = currentTimeMillis
             try {
@@ -138,7 +138,7 @@ class SLTextureFetcher : SLModule(), SLIdleHandler {
                         hashSet = hashSet2
                     } else {
                         Debug.Printf("Cannot retry texture %s", ((UUID) entry.getKey()).toString())
-                        HashSet hashSet3 = hashSet2 == null ? HashSet() : hashSet2
+                        val hashSet3: HashSet = hashSet2 == null ? HashSet() : hashSet2
                         hashSet3.add((UUID) entry.getKey())
                         hashSet = hashSet3
                     }
@@ -146,9 +146,9 @@ class SLTextureFetcher : SLModule(), SLIdleHandler {
                 }
                 if (hashSet2 != null) {
                     for (UUID remove : hashSet2) {
-                        TextureUDPTransfer remove2 = this.udpTransfers.remove(remove)
+                        val remove2: TextureUDPTransfer = this.udpTransfers.remove(remove)
                         if (remove2 != null) {
-                            SLTextureFetchRequest sLTextureFetchRequest = remove2.fetchReq
+                            val sLTextureFetchRequest: SLTextureFetchRequest = remove2.fetchReq
                             sLTextureFetchRequest.outputFile = null
                             if (sLTextureFetchRequest.onFetchComplete != null) {
                                 sLTextureFetchRequest.onFetchComplete.OnTextureFetchComplete(sLTextureFetchRequest)
@@ -167,15 +167,15 @@ class SLTextureFetcher : SLModule(), SLIdleHandler {
         this.udpQueue.clear()
     }
 
-    fun UpdatePriority(SLTextureFetchRequest sLTextureFetchRequest) {
+    fun UpdatePriority(sLTextureFetchRequest: SLTextureFetchRequest) {
         this.udpQueue.updatePriority(sLTextureFetchRequest)
     }
 
-    public String getAgentAppearanceService() {
+     public fun getAgentAppearanceService(): String {
         return this.agentAppearanceService
     }
 
-    public String getCapURL() {
+     public fun getCapURL(): String {
         return this.capURL
     }
 }

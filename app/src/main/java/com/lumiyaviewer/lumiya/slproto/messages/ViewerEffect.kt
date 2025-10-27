@@ -18,11 +18,11 @@ class ViewerEffect : SLMessage {
 
     class Effect {
         UUID AgentID
-        Byte[] Color
+        ByteArray Color
         Float Duration
         UUID ID
         Int Type
-        Byte[] TypeData
+        ByteArray TypeData
     }
 
     ViewerEffect() {

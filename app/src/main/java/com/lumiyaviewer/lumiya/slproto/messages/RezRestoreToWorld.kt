@@ -19,7 +19,7 @@ class RezRestoreToWorld : SLMessage {
         Int CRC
         Int CreationDate
         UUID CreatorID
-        Byte[] Description
+        ByteArray Description
         Int EveryoneMask
         Int Flags
         UUID FolderID
@@ -28,7 +28,7 @@ class RezRestoreToWorld : SLMessage {
         Boolean GroupOwned
         Int InvType
         UUID ItemID
-        Byte[] Name
+        ByteArray Name
         Int NextOwnerMask
         UUID OwnerID
         Int OwnerMask

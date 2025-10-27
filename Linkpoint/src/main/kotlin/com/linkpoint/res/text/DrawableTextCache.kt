@@ -21,7 +21,7 @@ private class TextGenRequest : ResourceRequest()<DrawableTextParams, DrawableTex
             PrimComputeExecutor.getInstance().execute(this)
         }
 
-        fun run() {
+        override fun run() {
             completeRequest(DrawableTextBitmap((DrawableTextParams) getParams(), this.fontSize))
         }
     }

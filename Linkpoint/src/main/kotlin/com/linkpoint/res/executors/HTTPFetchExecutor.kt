@@ -23,7 +23,7 @@ private class InstanceHolder {
     }
 
     @JvmStatic
-    HTTPFetchExecutor getInstance() {
+     fun getInstance(): HTTPFetchExecutor {
         return InstanceHolder.Instance
     }
 }

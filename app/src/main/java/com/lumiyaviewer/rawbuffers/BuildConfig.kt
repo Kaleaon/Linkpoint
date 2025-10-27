@@ -1,10 +1,10 @@
 package com.lumiyaviewer.rawbuffers
 
 class BuildConfig {
-    String APPLICATION_ID = "com.lumiyaviewer.rawbuffers"
-    String BUILD_TYPE = "release"
-    Boolean DEBUG = false
-    String FLAVOR = ""
-    Int VERSION_CODE = 1
-    String VERSION_NAME = "1.0"
+    val APPLICATION_ID: String = "com.lumiyaviewer.rawbuffers"
+    val BUILD_TYPE: String = "release"
+    val DEBUG: Boolean = false
+    val FLAVOR: String = ""
+    val VERSION_CODE: Int = 1
+    val VERSION_NAME: String = "1.0"
 }

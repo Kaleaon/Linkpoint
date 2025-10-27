@@ -45,7 +45,7 @@ class TeleportSLURLActivity : AppCompatActivity(), View.OnClickListener {
                     }
                 }
                 if (!z) {
-                    AlertDialog.Builder(this).setMessage((Int) R.string.teleport_unable).setCancelable(true).setPositiveButton((CharSequence) "OK", (DialogInterface.OnClickListener) $Lambda$txy91ryZVkviKYu9VXLZHkYSvg0(this)).create().show()
+                    AlertDialog.Builder(this).setMessage(R.toInt().string.teleport_unable).setCancelable(true).setPositiveButton((CharSequence) "OK", (DialogInterface.OnClickListener) $Lambda$txy91ryZVkviKYu9VXLZHkYSvg0(this)).create().show()
                     return
                 }
                 return
@@ -61,7 +61,7 @@ class TeleportSLURLActivity : AppCompatActivity(), View.OnClickListener {
     fun onCreate(Bundle bundle) {
         SLAgentCircuit agentCircuit
         super.onCreate(bundle)
-        setContentView((Int) R.layout.teleport_slurl)
+        setContentView(R.toInt().layout.teleport_slurl)
         try {
             this.slurl = SLURL(getIntent())
         } catch (Exception e) {
@@ -86,7 +86,7 @@ class TeleportSLURLActivity : AppCompatActivity(), View.OnClickListener {
             findViewById(R.id.buttonTeleport).setOnClickListener(this)
             findViewById(R.id.buttonTeleportCancel).setOnClickListener(this)
             ((TextView) findViewById(R.id.teleportTargetName)).setText(this.slurl.getLocationName())
-            ((TextView) findViewById(R.id.teleportTargetCoords)).setText(String.format("(%d, %d, %d)", Object[]{Integer.valueOf(this.slurl.getLocationX()), Integer.valueOf(this.slurl.getLocationY()), Integer.valueOf(this.slurl.getLocationZ())}))
+            ((TextView) findViewById(R.id.teleportTargetCoords)).setText(String.format("(%d, %d, %d)", Array<Any>{Integer.valueOf(this.slurl.getLocationX()), Integer.valueOf(this.slurl.getLocationY()), Integer.valueOf(this.slurl.getLocationZ())}))
         } catch (Exception e2) {
             finish()
         }

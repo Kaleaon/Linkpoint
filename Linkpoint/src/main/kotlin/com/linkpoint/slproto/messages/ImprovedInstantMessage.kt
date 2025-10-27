@@ -18,12 +18,12 @@ class ImprovedInstantMessage : SLMessage() {
 
     @JvmStatic
     class MessageBlock {
-        public Byte[] BinaryBucket
+        public ByteArray BinaryBucket
         public Int Dialog
-        public Byte[] FromAgentName
+        public ByteArray FromAgentName
         public Boolean FromGroup
         public UUID ID
-        public Byte[] Message
+        public ByteArray Message
         public Int Offline
         public Int ParentEstateID
         public LLVector3 Position
@@ -36,15 +36,15 @@ class ImprovedInstantMessage : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.MessageBlock_Field.FromAgentName.length + 72 + 2 + this.MessageBlock_Field.Message.length + 2 + this.MessageBlock_Field.BinaryBucket.length + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleImprovedInstantMessage(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -2)
@@ -64,7 +64,7 @@ class ImprovedInstantMessage : SLMessage() {
         packVariable(byteBuffer, this.MessageBlock_Field.BinaryBucket, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.MessageBlock_Field.FromGroup = unpackBoolean(byteBuffer)

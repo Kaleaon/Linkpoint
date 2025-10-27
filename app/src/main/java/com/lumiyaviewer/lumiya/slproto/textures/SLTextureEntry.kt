@@ -11,7 +11,7 @@ import java.nio.ByteOrder
 import java.util.UUID
 
 class SLTextureEntry {
-    Int MAX_FACES = 32
+    val MAX_FACES: Int = 32
     private SLTextureEntryFace[] emptyFaces = SLTextureEntryFace[0]
     private InternPool<SLTextureEntry> pool = InternPool<>()
     private SLTextureEntryFace DefaultTexture
@@ -42,8 +42,8 @@ class SLTextureEntry {
             return
         }
         MutableSLTextureEntryFace[] mutableSLTextureEntryFaceArr = MutableSLTextureEntryFace[32]
-        Int[] iArr = Int[1]
-        Int[] iArr2 = Int[1]
+        IntArray iArr = IntArray(1)
+        IntArray iArr2 = IntArray(1)
         mutableSLTextureEntryFace.setTextureID(UUIDPool.getUUID(getUUID(byteBuffer)))
         while (true) {
             Int ReadFaceBitfield = ReadFaceBitfield(byteBuffer, iArr2)
@@ -240,7 +240,7 @@ class SLTextureEntry {
         this.hashValue = getHashValue()
     }
 
-    private MutableSLTextureEntryFace CreateFace(MutableSLTextureEntryFace[] mutableSLTextureEntryFaceArr, Int i, Int[] iArr) {
+    private MutableSLTextureEntryFace CreateFace(MutableSLTextureEntryFace[] mutableSLTextureEntryFaceArr, Int i, IntArray iArr) {
         if (i >= 32) {
             return null
         }
@@ -252,7 +252,7 @@ class SLTextureEntry {
         return mutableSLTextureEntryFaceArr[i]
     }
 
-    private Int ReadFaceBitfield(ByteBuffer byteBuffer, Int[] iArr) {
+    private Int ReadFaceBitfield(ByteBuffer byteBuffer, IntArray iArr) {
         Byte b
         iArr[0] = 0
         if (byteBuffer.position() >= byteBuffer.limit()) {
@@ -304,7 +304,7 @@ class SLTextureEntry {
     }
 
     private Float getGlow(ByteBuffer byteBuffer) {
-        return ((Float) byteBuffer.get()) / 255.0f
+        return (byteBuffer.toFloat().get()) / 255.0f
     }
 
     private Int getHashValue() {
@@ -320,11 +320,11 @@ class SLTextureEntry {
     }
 
     private Float getOffset(ByteBuffer byteBuffer) {
-        return ((Float) byteBuffer.getShort()) / 32767.0f
+        return (byteBuffer.toFloat().getShort()) / 32767.0f
     }
 
     private Float getRotation(ByteBuffer byteBuffer) {
-        return (((Float) byteBuffer.getShort()) / 32767.0f) * 3.1415927f * 2.0f
+        return ((byteBuffer.toFloat().getShort()) / 32767.0f) * 3.1415927f * 2.0f
     }
 
     private UUID getUUID(ByteBuffer byteBuffer) {
@@ -405,7 +405,7 @@ class SLTextureEntry {
         return this.faceMask == 0
     }
 
-    Byte[] packByteArray() {
+    ByteArray packByteArray() {
         ByteBuffer allocate = ByteBuffer.allocate(SupportMenu.USER_MASK)
         putUUID(allocate, this.DefaultTexture.textureID())
         for (Int i = 0; i < this.FaceTextures.length; i++) {
@@ -489,7 +489,7 @@ class SLTextureEntry {
             }
         }
         WriteFaceBitfield(allocate, 0)
-        Byte[] bArr = Byte[allocate.position()]
+        ByteArray bArr = Byte[allocate.position()]
         allocate.position(0)
         allocate.get(bArr)
         Debug.DumpBuffer("Baking: TEpacked: ", bArr)

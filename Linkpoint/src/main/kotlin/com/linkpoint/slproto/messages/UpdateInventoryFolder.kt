@@ -21,7 +21,7 @@ class UpdateInventoryFolder : SLMessage() {
     @JvmStatic
     class FolderData {
         public UUID FolderID
-        public Byte[] Name
+        public ByteArray Name
         public UUID ParentID
         public Int Type
     }
@@ -31,11 +31,11 @@ class UpdateInventoryFolder : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
-        Int i = 37
-        Iterator<T> it = this.FolderData_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val i: Int = 37
+        val it: Iterator<T> = this.FolderData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            val i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -43,11 +43,11 @@ class UpdateInventoryFolder : SLMessage() {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleUpdateInventoryFolder(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put(Ascii.DC2)
@@ -62,12 +62,12 @@ class UpdateInventoryFolder : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            FolderData folderData = FolderData()
+            val folderData: FolderData = FolderData()
             folderData.FolderID = unpackUUID(byteBuffer)
             folderData.ParentID = unpackUUID(byteBuffer)
             folderData.Type = unpackByte(byteBuffer)

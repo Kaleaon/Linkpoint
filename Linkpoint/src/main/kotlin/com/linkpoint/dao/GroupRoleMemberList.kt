@@ -17,27 +17,27 @@ class GroupRoleMemberList {
         this.mustRevalidate = z
     }
 
-    public UUID getGroupID() {
+     public fun getGroupID(): UUID {
         return this.groupID
     }
 
-    public Boolean getMustRevalidate() {
+     public fun getMustRevalidate(): Boolean {
         return this.mustRevalidate
     }
 
-    public UUID getRequestID() {
+     public fun getRequestID(): UUID {
         return this.requestID
     }
 
-    fun setGroupID(UUID uuid) {
+    fun setGroupID(uuid: UUID) {
         this.groupID = uuid
     }
 
-    fun setMustRevalidate(Boolean z) {
+    fun setMustRevalidate(z: Boolean) {
         this.mustRevalidate = z
     }
 
-    fun setRequestID(UUID uuid) {
+    fun setRequestID(uuid: UUID) {
         this.requestID = uuid
     }
 }

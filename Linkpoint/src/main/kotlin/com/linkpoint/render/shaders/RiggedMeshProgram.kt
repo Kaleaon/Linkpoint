@@ -12,7 +12,7 @@ class RiggedMeshProgram : PrimProgram() {
         super(Shader.RiggedMeshVertexShader, z ? Shader.PrimOpaqueFragmentShader : Shader.PrimFragmentShader)
     }
 
-    protected Unit bindVariables() {
+     protected fun bindVariables() {
         super.bindVariables()
         this.uBindShapeMatrix = GLES20.glGetUniformLocation(this.handle, "uBindShapeMatrix")
         this.uJointVectors = GLES20.glGetUniformLocation(this.handle, "uJointVectors")

@@ -16,24 +16,24 @@ import javax.annotation.Nullable
 
 class AvatarPickerForMute : AvatarPickerFragment() {
     static Bundle makeArguments(UUID uuid) {
-        Bundle bundle = Bundle()
+        val bundle: Bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         return bundle
     }
 
-    public String getTitle() {
+     public fun getTitle(): String {
         return getString(R.string.select_avatar_to_mute)
     }
 
     /* access modifiers changed from: protected */
-    fun onAvatarSelected(ChatterID chatterID, String str) {
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
+    fun onAvatarSelected(chatterID: ChatterID, str: String) {
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
-            SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+            val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
             if (activeAgentCircuit != null) {
                 activeAgentCircuit.getModules().muteList.Block(MuteListEntry(MuteType.AGENT, chatterID.getOptionalChatterUUID(), str, 15))
             }
-            FragmentActivity activity = getActivity()
+            val activity: FragmentActivity = getActivity()
             if (activity instanceof DetailsActivity) {
                 ((DetailsActivity) activity).closeDetailsFragment(this)
             }

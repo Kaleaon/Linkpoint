@@ -21,7 +21,7 @@ class AvatarAppearance : SLMessage() {
 
     @JvmStatic
     class ObjectData {
-        public Byte[] TextureEntry
+        public ByteArray TextureEntry
     }
 
     @JvmStatic
@@ -41,15 +41,15 @@ class AvatarAppearance : SLMessage() {
         this.ObjectData_Field = ObjectData()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.ObjectData_Field.TextureEntry.length + 2 + 21 + 1 + (this.VisualParam_Fields.size() * 1) + 1 + (this.AppearanceData_Fields.size() * 9)
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAvatarAppearance(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -98)
@@ -68,19 +68,19 @@ class AvatarAppearance : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.Sender_Field.ID = unpackUUID(byteBuffer)
         this.Sender_Field.IsTrial = unpackBoolean(byteBuffer)
         this.ObjectData_Field.TextureEntry = unpackVariable(byteBuffer, 2)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            VisualParam visualParam = VisualParam()
+            val visualParam: VisualParam = VisualParam()
             visualParam.ParamValue = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             this.VisualParam_Fields.add(visualParam)
         }
-        Byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b2: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i2 = 0; i2 < b2; i2++) {
-            AppearanceData appearanceData = AppearanceData()
+            val appearanceData: AppearanceData = AppearanceData()
             appearanceData.AppearanceVersion = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             appearanceData.CofVersion = unpackInt(byteBuffer)
             appearanceData.Flags = unpackInt(byteBuffer)

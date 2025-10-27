@@ -25,10 +25,10 @@ class DrawableHoverText : ResourceConsumer, GLCleanable {
     }
 
     Unit DrawAtWorld(RenderContext renderContext, Float f, Float f2, Float f3, Float f4, MatrixStack matrixStack, Boolean z, Int i) {
-        r0 = Float[8]
-        Float[] matrixData = renderContext.modelViewMatrix.getMatrixData()
+        r0 = FloatArray(8)
+        FloatArray matrixData = renderContext.modelViewMatrix.getMatrixData()
         Int matrixDataOffset = renderContext.modelViewMatrix.getMatrixDataOffset()
-        Float[] matrixData2 = matrixStack.getMatrixData()
+        FloatArray matrixData2 = matrixStack.getMatrixData()
         Int matrixDataOffset2 = matrixStack.getMatrixDataOffset()
         r0[0] = f
         r0[1] = f2
@@ -65,8 +65,8 @@ class DrawableHoverText : ResourceConsumer, GLCleanable {
         }
         GLLoadedTextTexture gLLoadedTextTexture = this.hoverTextTexture
         if (gLLoadedTextTexture != null) {
-            Float width = (((Float) gLLoadedTextTexture.getWidth()) * 2.0f) / ((Float) renderContext.viewportRect[2])
-            Float height = (((Float) gLLoadedTextTexture.getHeight()) * 2.0f) / ((Float) renderContext.viewportRect[3])
+            Float width = ((gLLoadedTextTexture.toFloat().getWidth()) * 2.0f) / (renderContext.toFloat().viewportRect[2])
+            Float height = ((gLLoadedTextTexture.toFloat().getHeight()) * 2.0f) / (renderContext.toFloat().viewportRect[3])
             if (renderContext.hasGL20) {
                 GLES20.glUniform3f(renderContext.quadProgram.uPreTranslate, f, f2, f3)
                 GLES20.glUniform3f(renderContext.quadProgram.uScale, width, height, 1.0f)

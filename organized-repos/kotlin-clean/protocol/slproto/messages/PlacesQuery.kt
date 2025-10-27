@@ -21,8 +21,8 @@ class PlacesQuery : SLMessage() {
     class QueryData {
         public Int Category
         public Int QueryFlags
-        public Byte[] QueryText
-        public Byte[] SimName
+        public ByteArray QueryText
+        public ByteArray SimName
     }
 
     @JvmStatic

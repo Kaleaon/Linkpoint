@@ -10,8 +10,8 @@ class ScriptTeleportRequest : SLMessage() {
     @JvmStatic
     class Data {
         public LLVector3 LookAt
-        public Byte[] ObjectName
-        public Byte[] SimName
+        public ByteArray ObjectName
+        public ByteArray SimName
         public LLVector3 SimPosition
     }
 

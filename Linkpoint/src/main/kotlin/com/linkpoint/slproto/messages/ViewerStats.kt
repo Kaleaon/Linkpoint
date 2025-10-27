@@ -12,7 +12,7 @@ class ViewerStats : SLMessage() {
     public DownloadTotals DownloadTotals_Field
     public FailStats FailStats_Field
     public ArrayList<MiscStats> MiscStats_Fields = ArrayList<>()
-    public NetStats[] NetStats_Fields = NetStats[2]
+    public Array<NetStats> NetStats_Fields = NetStats[2]
 
     @JvmStatic
     class AgentData {
@@ -27,9 +27,9 @@ class ViewerStats : SLMessage() {
         public UUID SessionID
         public Float SimFPS
         public Int StartTime
-        public Byte[] SysCPU
-        public Byte[] SysGPU
-        public Byte[] SysOS
+        public ByteArray SysCPU
+        public ByteArray SysGPU
+        public ByteArray SysOS
         public Int SysRAM
     }
 
@@ -74,15 +74,15 @@ class ViewerStats : SLMessage() {
         this.FailStats_Field = FailStats()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.AgentData_Field.SysOS.length + 74 + 1 + this.AgentData_Field.SysCPU.length + 1 + this.AgentData_Field.SysGPU.length + 4 + 12 + 32 + 24 + 1 + (this.MiscStats_Fields.size() * 12)
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleViewerStats(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -125)
@@ -123,7 +123,7 @@ class ViewerStats : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.IP = unpackIPAddress(byteBuffer)
@@ -154,9 +154,9 @@ class ViewerStats : SLMessage() {
         this.FailStats_Field.FailedResends = unpackInt(byteBuffer)
         this.FailStats_Field.OffCircuit = unpackInt(byteBuffer)
         this.FailStats_Field.Invalid = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i2 = 0; i2 < b; i2++) {
-            MiscStats miscStats = MiscStats()
+            val miscStats: MiscStats = MiscStats()
             miscStats.Type = unpackInt(byteBuffer)
             miscStats.Value = unpackDouble(byteBuffer)
             this.MiscStats_Fields.add(miscStats)

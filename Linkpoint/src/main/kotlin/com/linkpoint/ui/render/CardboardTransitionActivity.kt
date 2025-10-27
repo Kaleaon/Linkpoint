@@ -104,8 +104,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$4M
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_render_CardboardTransitionActivity_1411  reason: not valid java name */
     public /* synthetic */ Unit m786lambda$com_lumiyaviewer_lumiya_ui_render_CardboardTransitionActivity_1411() {
-        UUID activeAgentID = ActivityUtils.getActiveAgentID(getIntent())
-        Intent intent = Intent(this, CardboardActivity.class)
+        val activeAgentID: UUID = ActivityUtils.getActiveAgentID(getIntent())
+        val intent: Intent = Intent(this, CardboardActivity.class)
         ActivityUtils.setActiveAgentID(intent, activeAgentID)
         intent.addFlags(16777216)
         startActivity(intent)
@@ -113,7 +113,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$4M
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(Bundle bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         requestWindowFeature(1)
         getWindow().setFlags(1024, 1024)
@@ -121,7 +121,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$4M
     }
 
     /* access modifiers changed from: protected */
-    fun onResume() {
+    override fun onResume() {
         super.onResume()
         m785com_lumiyaviewer_lumiya_ui_render_CardboardTransitionActivitymthref0()
     }

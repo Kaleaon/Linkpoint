@@ -21,16 +21,16 @@ class GroupVoteHistoryItemReply : SLMessage() {
 
     @JvmStatic
     class HistoryItemData {
-        public Byte[] EndDateTime
+        public ByteArray EndDateTime
         public Float Majority
-        public Byte[] ProposalText
+        public ByteArray ProposalText
         public Int Quorum
-        public Byte[] StartDateTime
-        public Byte[] TerseDateID
+        public ByteArray StartDateTime
+        public ByteArray TerseDateID
         public UUID VoteID
         public UUID VoteInitiator
-        public Byte[] VoteResult
-        public Byte[] VoteType
+        public ByteArray VoteResult
+        public ByteArray VoteType
     }
 
     @JvmStatic
@@ -43,7 +43,7 @@ class GroupVoteHistoryItemReply : SLMessage() {
     class VoteItem {
         public UUID CandidateID
         public Int NumVotes
-        public Byte[] VoteCast
+        public ByteArray VoteCast
     }
 
     public GroupVoteHistoryItemReply() {

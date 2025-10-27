@@ -26,9 +26,9 @@ class ViewerStats : SLMessage {
         UUID SessionID
         Float SimFPS
         Int StartTime
-        Byte[] SysCPU
-        Byte[] SysGPU
-        Byte[] SysOS
+        ByteArray SysCPU
+        ByteArray SysGPU
+        ByteArray SysOS
         Int SysRAM
     }
 

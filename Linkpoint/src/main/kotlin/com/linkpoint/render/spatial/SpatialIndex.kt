@@ -27,14 +27,14 @@ private class InstanceHolder {
     }
 
     @JvmStatic
-    SpatialIndex getInstance() {
+     fun getInstance(): SpatialIndex {
         return InstanceHolder.instance
     }
 
     public synchronized Unit DisableObjectIndex(Object obj) {
-        Object obj2 = null
+        val obj2: Object = null
         synchronized (this) {
-            SpatialObjectIndex spatialObjectIndex = this.objectIndex
+            val spatialObjectIndex: SpatialObjectIndex = this.objectIndex
             if (this.indexHolder != null) {
                 obj2 = this.indexHolder.get()
             }
@@ -52,8 +52,8 @@ private class InstanceHolder {
         return this.objectIndex
     }
 
-    public DrawableAvatar getDrawableAvatar(SLObjectInfo sLObjectInfo) {
-        SpatialObjectIndex spatialObjectIndex = this.objectIndex
+     public fun getDrawableAvatar(sLObjectInfo: SLObjectInfo): DrawableAvatar {
+        val spatialObjectIndex: SpatialObjectIndex = this.objectIndex
         return spatialObjectIndex != null ? spatialObjectIndex.getDrawableAvatar(sLObjectInfo) : null
     }
 
@@ -61,15 +61,15 @@ private class InstanceHolder {
         return this.objectIndex
     }
 
-    fun setAvatarCountLimit(Int i) {
-        SpatialObjectIndex spatialObjectIndex = this.objectIndex
+    fun setAvatarCountLimit(i: Int) {
+        val spatialObjectIndex: SpatialObjectIndex = this.objectIndex
         if (spatialObjectIndex != null) {
             spatialObjectIndex.setAvatarCountLimit(i)
         }
     }
 
-    fun updateTerrainPatch(Int i, Int i2, TerrainData terrainData) {
-        SpatialObjectIndex spatialObjectIndex = this.objectIndex
+    fun updateTerrainPatch(i: Int, i2: Int, terrainData: TerrainData) {
+        val spatialObjectIndex: SpatialObjectIndex = this.objectIndex
         if (spatialObjectIndex != null) {
             spatialObjectIndex.updateTerrainPatch(i, i2, terrainData)
         }

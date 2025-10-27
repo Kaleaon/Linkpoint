@@ -9,12 +9,12 @@ class EmailMessageReply : SLMessage() {
 
     @JvmStatic
     class DataBlock {
-        public Byte[] Data
-        public Byte[] FromAddress
-        public Byte[] MailFilter
+        public ByteArray Data
+        public ByteArray FromAddress
+        public ByteArray MailFilter
         public Int More
         public UUID ObjectID
-        public Byte[] Subject
+        public ByteArray Subject
         public Int Time
     }
 

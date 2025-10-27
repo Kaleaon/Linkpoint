@@ -10,11 +10,11 @@ import java.util.UUID
 class SLTextureFetchRequest : HasPriority {
 
     /* renamed from: -com-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f130comlumiyaviewerlumiyarendertexTextureClassSwitchesValues = null
+    private const val /* synthetic */ IntArray f130comlumiyaviewerlumiyarendertexTextureClassSwitchesValues = null
     public AvatarTextureFaceIndex avatarFaceIndex
     public UUID avatarUUID
     val File destFile
-    TextureFetchCompleteListener onFetchComplete = null
+    val onFetchComplete: TextureFetchCompleteListener = null
     public File outputFile
     public TextureClass textureClass
     public UUID textureID
@@ -22,16 +22,16 @@ class SLTextureFetchRequest : HasPriority {
     private Int visibleRangeCategory
 
     interface TextureFetchCompleteListener {
-        Unit OnTextureFetchComplete(SLTextureFetchRequest sLTextureFetchRequest)
+        fun OnTextureFetchComplete(sLTextureFetchRequest: SLTextureFetchRequest)
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m239getcomlumiyaviewerlumiyarendertexTextureClassSwitchesValues() {
+private /* synthetic */ IntArray m239getcomlumiyaviewerlumiyarendertexTextureClassSwitchesValues() {
         if (f130comlumiyaviewerlumiyarendertexTextureClassSwitchesValues != null) {
             return f130comlumiyaviewerlumiyarendertexTextureClassSwitchesValues
         }
-        Int[] iArr = Int[TextureClass.values().length]
+        val iArr: IntArray = Int[TextureClass.values().length]
         try {
             iArr[TextureClass.Asset.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -68,7 +68,7 @@ private /* synthetic */ Int[] m239getcomlumiyaviewerlumiyarendertexTextureClassS
     }
 
     @JvmStatic
-    Int getPriorityForClass(TextureClass textureClass2, Int i) {
+     fun getPriorityForClass(textureClass2: TextureClass, i: Int): Int {
         switch (m239getcomlumiyaviewerlumiyarendertexTextureClassSwitchesValues()[textureClass2.ordinal()]) {
             case 1:
                 return TexturePriority.Asset.ordinal()
@@ -94,11 +94,11 @@ private /* synthetic */ Int[] m239getcomlumiyaviewerlumiyarendertexTextureClassS
         }
     }
 
-    public Int getPriority() {
+     public fun getPriority(): Int {
         return getPriorityForClass(this.textureClass, this.visibleRangeCategory)
     }
 
-    fun setOnFetchComplete(TextureFetchCompleteListener textureFetchCompleteListener) {
+    fun setOnFetchComplete(textureFetchCompleteListener: TextureFetchCompleteListener) {
         this.onFetchComplete = textureFetchCompleteListener
     }
 }

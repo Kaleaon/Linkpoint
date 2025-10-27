@@ -62,15 +62,15 @@ class ParcelInfoFragment : FragmentWithTitle(), ReloadableFragment, LoadableMoni
     private Unbinder unbinder
 
     @JvmStatic
-    Bundle makeSelection(UUID uuid, UUID uuid2) {
-        Bundle bundle = Bundle()
+     fun makeSelection(uuid: UUID, uuid2: UUID): Bundle {
+        val bundle: Bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         bundle.putString(PARCEL_UUID_KEY, uuid2.toString())
         return bundle
     }
 
-    private Unit showParcelInfo(UUID uuid) {
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
+     private fun showParcelInfo(uuid: UUID) {
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null && uuid != null) {
             Debug.Printf("ParcelInfo: subscribing for UUID %s", uuid)
             this.parcelInfoReply.subscribe(userManager.parcelInfoData().getPool(), uuid)
@@ -81,26 +81,26 @@ class ParcelInfoFragment : FragmentWithTitle(), ReloadableFragment, LoadableMoni
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_search_ParcelInfoFragment_9137  reason: not valid java name */
     public /* synthetic */ Unit m848lambda$com_lumiyaviewer_lumiya_ui_search_ParcelInfoFragment_9137(UserManager userManager, LLVector3 lLVector3, DialogInterface dialogInterface, Int i) {
         dialogInterface.dismiss()
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+        val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
             TeleportProgressDialog(getContext(), userManager, R.string.teleporting_progress_message).show()
             activeAgentCircuit.TeleportToGlobalPosition(lLVector3)
         }
     }
 
-    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
+    fun onChatterNameUpdated(chatterNameRetriever: ChatterNameRetriever) {
         if ((chatterNameRetriever == this.ownerNameRetriever || chatterNameRetriever == this.ownerGroupNameRetriever) && this.unbinder != null && this.ownerGroupNameRetriever != null && this.ownerNameRetriever != null) {
-            ChatterNameRetriever chatterNameRetriever2 = this.ownerGroupNameRetriever.getResolvedName() != null ? this.ownerGroupNameRetriever : this.ownerNameRetriever
-            String resolvedName = chatterNameRetriever2.getResolvedName()
+            val chatterNameRetriever2: ChatterNameRetriever = this.ownerGroupNameRetriever.getResolvedName() != null ? this.ownerGroupNameRetriever : this.ownerNameRetriever
+            val resolvedName: String = chatterNameRetriever2.getResolvedName()
             this.parcelOwnerName.setText(resolvedName != null ? resolvedName : getString(R.string.name_loading_title))
             this.parcelOwnerPic.setVisibility(0)
             this.parcelOwnerPic.setChatterID(chatterNameRetriever2.chatterID, resolvedName)
         }
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
-        View inflate = layoutInflater.inflate(R.layout.parcel_info, viewGroup, false)
+        val inflate: View = layoutInflater.inflate(R.layout.parcel_info, viewGroup, false)
         this.unbinder = ButterKnife.bind((Object) this, inflate)
         this.loadableMonitor.setLoadingLayout((LoadingLayout) inflate.findViewById(R.id.loading_layout), getString(R.string.no_parcel_selected), getString(R.string.failed_to_load_parcel_data))
         this.loadableMonitor.setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout))
@@ -109,7 +109,7 @@ class ParcelInfoFragment : FragmentWithTitle(), ReloadableFragment, LoadableMoni
         return inflate
     }
 
-    fun onDestroyView() {
+    override fun onDestroyView() {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -118,9 +118,9 @@ class ParcelInfoFragment : FragmentWithTitle(), ReloadableFragment, LoadableMoni
     }
 
     fun onLoadableDataChanged() {
-        ParcelInfoReply data = this.parcelInfoReply.getData()
+        val data: ParcelInfoReply = this.parcelInfoReply.getData()
         Debug.Printf("ParcelInfo: loadable data %s", data)
-        UUID activeAgentID = ActivityUtils.getActiveAgentID(getArguments())
+        val activeAgentID: UUID = ActivityUtils.getActiveAgentID(getArguments())
         if (this.unbinder != null && data != null && activeAgentID != null) {
             if (this.ownerNameRetriever != null) {
                 this.ownerNameRetriever.dispose()
@@ -130,11 +130,11 @@ class ParcelInfoFragment : FragmentWithTitle(), ReloadableFragment, LoadableMoni
                 this.ownerGroupNameRetriever.dispose()
                 this.ownerGroupNameRetriever = null
             }
-            String stringFromVariableOEM = SLMessage.stringFromVariableOEM(data.Data_Field.Name)
+            val stringFromVariableOEM: String = SLMessage.stringFromVariableOEM(data.Data_Field.Name)
             setTitle(stringFromVariableOEM, (String) null)
             this.parcelDetailsName.setText(stringFromVariableOEM)
-            String trim = SLMessage.stringFromVariableOEM(data.Data_Field.Desc).trim()
-            TextView textView = this.parcelDetailsDescription
+            val trim: String = SLMessage.stringFromVariableOEM(data.Data_Field.Desc).trim()
+            val textView: TextView = this.parcelDetailsDescription
             if (Strings.isNullOrEmpty(trim)) {
                 trim = getString(R.string.asset_no_description)
             }
@@ -155,8 +155,8 @@ class ParcelInfoFragment : FragmentWithTitle(), ReloadableFragment, LoadableMoni
 
     @OnClick({2131755608})
     fun onParcelOwnerProfileClick() {
-        UUID activeAgentID = ActivityUtils.getActiveAgentID(getArguments())
-        ParcelInfoReply data = this.parcelInfoReply.getData()
+        val activeAgentID: UUID = ActivityUtils.getActiveAgentID(getArguments())
+        val data: ParcelInfoReply = this.parcelInfoReply.getData()
         if (activeAgentID != null && data != null) {
             if (this.ownerGroupNameRetriever != null && this.ownerGroupNameRetriever.getResolvedName() != null) {
                 DetailsActivity.showEmbeddedDetails(getActivity(), GroupProfileFragment.class, GroupProfileFragment.makeSelection(this.ownerGroupNameRetriever.chatterID))
@@ -170,10 +170,10 @@ class ParcelInfoFragment : FragmentWithTitle(), ReloadableFragment, LoadableMoni
 
     @OnClick({2131755600})
     fun onParcelTeleportButton() {
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
-        ParcelInfoReply data = this.parcelInfoReply.getData()
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
+        val data: ParcelInfoReply = this.parcelInfoReply.getData()
         if (data != null && userManager != null) {
-            LLVector3 lLVector3 = LLVector3(data.Data_Field.GlobalX, data.Data_Field.GlobalY, data.Data_Field.GlobalZ)
+            val lLVector3: LLVector3 = LLVector3(data.Data_Field.GlobalX, data.Data_Field.GlobalY, data.Data_Field.GlobalZ)
             AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
             builder.setMessage(getActivity().getString(R.string.teleport_parcel_confirm_title)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this, userManager, lLVector3) {
 
@@ -267,12 +267,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.search.-$Lambda$5J
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
         showParcelInfo(UUIDPool.getUUID(getArguments().getString(PARCEL_UUID_KEY)))
     }
 
-    fun onStop() {
+    override fun onStop() {
         this.loadableMonitor.unsubscribeAll()
         if (this.ownerNameRetriever != null) {
             this.ownerNameRetriever.dispose()
@@ -289,7 +289,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.search.-$Lambda$5J
         super.onStop()
     }
 
-    fun setFragmentArgs(Intent intent, Bundle bundle) {
+    fun setFragmentArgs(intent: Intent, bundle: Bundle) {
         getArguments().putAll(bundle)
         if (isFragmentStarted()) {
             showParcelInfo(UUIDPool.getUUID(bundle.getString(PARCEL_UUID_KEY)))

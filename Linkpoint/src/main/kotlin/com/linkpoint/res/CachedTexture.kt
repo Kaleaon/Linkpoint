@@ -17,26 +17,26 @@ class CachedTexture {
         this.format = format
     }
     
-    public Int getTextureId() {
+     public fun getTextureId(): Int {
         return textureId
     }
     
-    public Int getWidth() {
+     public fun getWidth(): Int {
         return width
     }
     
-    public Int getHeight() {
+     public fun getHeight(): Int {
         return height
     }
     
-    public Int getFormat() {
+     public fun getFormat(): Int {
         return format
     }
     
     /**
      * Estimate memory usage based on texture dimensions and format
      */
-    public Int getEstimatedSize() {
+     public fun getEstimatedSize(): Int {
         Int bytesPerPixel
         switch (format) {
             case 0x1907: // GL_RGB
@@ -54,7 +54,7 @@ class CachedTexture {
         return width * height * bytesPerPixel
     }
     
-    public Boolean isReleased() {
+     public fun isReleased(): Boolean {
         return released
     }
     

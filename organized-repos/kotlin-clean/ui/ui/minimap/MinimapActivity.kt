@@ -46,7 +46,7 @@ class MinimapActivity : ConnectedActivity() {
             if (str == null) {
                 str = getString(R.string.name_loading_title)
             }
-            setActivityTitle(str, getString(R.string.nearby_users_format, Object[]{Integer.valueOf(currentLocationInfo2.nearbyUsers())}))
+            setActivityTitle(str, getString(R.string.nearby_users_format, Array<Any>{Integer.valueOf(currentLocationInfo2.nearbyUsers())}))
         }
     }
 
@@ -62,7 +62,7 @@ class MinimapActivity : ConnectedActivity() {
     /* access modifiers changed from: protected */
     fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
-        setContentView((Int) R.layout.split_two_panels)
+        setContentView(R.toInt().layout.split_two_panels)
         ButterKnife.bind((Activity) this)
         if (getResources().getConfiguration().orientation == 2) {
             this.splitMainLayout.setOrientation(0)
@@ -98,10 +98,10 @@ class MinimapActivity : ConnectedActivity() {
         }
         FragmentTransaction beginTransaction = supportFragmentManager.beginTransaction()
         if (supportFragmentManager.findFragmentById(R.id.selector) == null) {
-            beginTransaction.add((Int) R.id.selector, MinimapFragment.newInstance(activeAgentID))
+            beginTransaction.add(R.toInt().id.selector, MinimapFragment.newInstance(activeAgentID))
         }
         if (supportFragmentManager.findFragmentById(R.id.details) == null) {
-            beginTransaction.add((Int) R.id.details, NearbyPeopleMinimapFragment.newInstance(activeAgentID))
+            beginTransaction.add(R.toInt().id.details, NearbyPeopleMinimapFragment.newInstance(activeAgentID))
         }
         beginTransaction.commit()
     }

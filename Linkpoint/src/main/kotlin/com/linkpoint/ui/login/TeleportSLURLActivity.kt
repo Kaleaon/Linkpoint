@@ -27,15 +27,15 @@ class TeleportSLURLActivity : AppCompatActivity(), View.OnClickListener {
         finish()
     }
 
-    fun onClick(View view) {
+    override fun onClick(view: View) {
         SLGridConnection gridConnection
         SLAgentCircuit activeAgentCircuit
-        UserManager userManager = null
+        val userManager: UserManager = null
         switch (view.getId()) {
             case R.id.buttonTeleport:
-                Boolean z = false
+                val z: Boolean = false
                 if (!(this.slurl == null || (gridConnection = GridConnectionService.getGridConnection()) == null)) {
-                    UUID activeAgentUUID = gridConnection.getActiveAgentUUID()
+                    val activeAgentUUID: UUID = gridConnection.getActiveAgentUUID()
                     if (activeAgentUUID != null) {
                         userManager = UserManager.getUserManager(activeAgentUUID)
                     }
@@ -58,7 +58,7 @@ class TeleportSLURLActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     @SuppressLint({"DefaultLocale"})
-    fun onCreate(Bundle bundle) {
+    override fun onCreate(bundle: Bundle) {
         SLAgentCircuit agentCircuit
         super.onCreate(bundle)
         setContentView((Int) R.layout.teleport_slurl)
@@ -67,7 +67,7 @@ class TeleportSLURLActivity : AppCompatActivity(), View.OnClickListener {
         } catch (Exception e) {
         }
         try {
-            SLGridConnection gridConnection = GridConnectionService.getGridConnection()
+            val gridConnection: SLGridConnection = GridConnectionService.getGridConnection()
             if (gridConnection == null || gridConnection.getConnectionState() != SLGridConnection.ConnectionState.Connected || (agentCircuit = gridConnection.getAgentCircuit()) == null) {
                 z = false
             } else if (!agentCircuit.getModules().rlvController.canTeleportToLocation()) {
@@ -77,7 +77,7 @@ class TeleportSLURLActivity : AppCompatActivity(), View.OnClickListener {
                 z = true
             }
             if (!z || this.slurl == null) {
-                Intent intent = Intent(getIntent())
+                val intent: Intent = Intent(getIntent())
                 intent.setClass(this, LoginActivity.class)
                 startActivity(intent)
                 finish()
@@ -86,7 +86,7 @@ class TeleportSLURLActivity : AppCompatActivity(), View.OnClickListener {
             findViewById(R.id.buttonTeleport).setOnClickListener(this)
             findViewById(R.id.buttonTeleportCancel).setOnClickListener(this)
             ((TextView) findViewById(R.id.teleportTargetName)).setText(this.slurl.getLocationName())
-            ((TextView) findViewById(R.id.teleportTargetCoords)).setText(String.format("(%d, %d, %d)", Object[]{Integer.valueOf(this.slurl.getLocationX()), Integer.valueOf(this.slurl.getLocationY()), Integer.valueOf(this.slurl.getLocationZ())}))
+            ((TextView) findViewById(R.id.teleportTargetCoords)).setText(String.format("(%d, %d, %d)", Array<Any>{Integer.valueOf(this.slurl.getLocationX()), Integer.valueOf(this.slurl.getLocationY()), Integer.valueOf(this.slurl.getLocationZ())}))
         } catch (Exception e2) {
             finish()
         }

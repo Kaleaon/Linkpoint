@@ -27,23 +27,23 @@ class ParcelInfoFragment_ViewBinding : Unbinder {
         parcelInfoFragment.parcelSimName = (TextView) Utils.findRequiredViewAsType(view, R.id.parcel_sim_name, "field 'parcelSimName'", TextView.class)
         parcelInfoFragment.parcelDetailsName = (TextView) Utils.findRequiredViewAsType(view, R.id.parcel_details_name, "field 'parcelDetailsName'", TextView.class)
         parcelInfoFragment.parcelLocation = (TextView) Utils.findRequiredViewAsType(view, R.id.parcel_location, "field 'parcelLocation'", TextView.class)
-        View findRequiredView = Utils.findRequiredView(view, R.id.parcel_teleport_button, "method 'onParcelTeleportButton'")
+        val findRequiredView: View = Utils.findRequiredView(view, R.id.parcel_teleport_button, "method 'onParcelTeleportButton'")
         this.view2131755600 = findRequiredView
         findRequiredView.setOnClickListener(DebouncingOnClickListener() {
-            fun doClick(View view) {
+            fun doClick(view: View) {
                 parcelInfoFragment.onParcelTeleportButton()
             }
-        View findRequiredView2 = Utils.findRequiredView(view, R.id.parcel_owner_profile_button, "method 'onParcelOwnerProfileClick'")
+        val findRequiredView2: View = Utils.findRequiredView(view, R.id.parcel_owner_profile_button, "method 'onParcelOwnerProfileClick'")
         this.view2131755608 = findRequiredView2
         findRequiredView2.setOnClickListener(DebouncingOnClickListener() {
-            fun doClick(View view) {
+            fun doClick(view: View) {
                 parcelInfoFragment.onParcelOwnerProfileClick()
             }
     }
 
     @CallSuper
     fun unbind() {
-        ParcelInfoFragment parcelInfoFragment = this.target
+        val parcelInfoFragment: ParcelInfoFragment = this.target
         if (parcelInfoFragment == null) {
             throw IllegalStateException("Bindings already cleared.")
         }

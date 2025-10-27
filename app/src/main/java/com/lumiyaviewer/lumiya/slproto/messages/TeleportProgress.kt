@@ -13,7 +13,7 @@ class TeleportProgress : SLMessage {
     }
 
     class Info {
-        Byte[] Message
+        ByteArray Message
         Int TeleportFlags
     }
 

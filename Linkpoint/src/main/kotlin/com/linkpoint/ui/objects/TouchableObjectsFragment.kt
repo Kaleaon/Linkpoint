@@ -23,8 +23,8 @@ class TouchableObjectsFragment : Fragment(), AdapterView.OnItemClickListener {
     private TouchableObjectListAdapter listAdapter
     private val SubscriptionData<UUID, ImmutableList<SLObjectInfo>> touchableObjects = SubscriptionData<>(UIThreadExecutor.getInstance(), $Lambda$LilZ3G1QEr_14fK4lPNJzUyzlBg(this))
 
-    private UUID getObjectUUID() {
-        Bundle arguments = getArguments()
+     private fun getObjectUUID(): UUID {
+        val arguments: Bundle = getArguments()
         if (arguments == null || !arguments.containsKey(OBJECT_UUID_KEY)) {
             return null
         }
@@ -32,8 +32,8 @@ class TouchableObjectsFragment : Fragment(), AdapterView.OnItemClickListener {
     }
 
     @JvmStatic
-    Bundle makeSelection(UUID uuid, UUID uuid2) {
-        Bundle bundle = Bundle()
+     fun makeSelection(uuid: UUID, uuid2: UUID): Bundle {
+        val bundle: Bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         bundle.putString(OBJECT_UUID_KEY, uuid2.toString())
         return bundle
@@ -41,15 +41,15 @@ class TouchableObjectsFragment : Fragment(), AdapterView.OnItemClickListener {
 
     /* access modifiers changed from: private */
     /* renamed from: onTouchableObjects */
-    fun m691com_lumiyaviewer_lumiya_ui_objects_TouchableObjectsFragmentmthref0(ImmutableList<SLObjectInfo> immutableList) {
+    fun m691com_lumiyaviewer_lumiya_ui_objects_TouchableObjectsFragmentmthref0(immutableList: ImmutableList<SLObjectInfo>) {
         if (this.listAdapter != null) {
             this.listAdapter.setData(immutableList)
         }
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
-        View inflate = layoutInflater.inflate(R.layout.touchable_object_list, viewGroup, false)
+        val inflate: View = layoutInflater.inflate(R.layout.touchable_object_list, viewGroup, false)
         this.listAdapter = TouchableObjectListAdapter(layoutInflater.getContext())
         ((ListView) inflate.findViewById(R.id.touchableObjectListView)).setAdapter(this.listAdapter)
         ((ListView) inflate.findViewById(R.id.touchableObjectListView)).setOnItemClickListener(this)
@@ -57,11 +57,11 @@ class TouchableObjectsFragment : Fragment(), AdapterView.OnItemClickListener {
         return inflate
     }
 
-    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
-        SLAgentCircuit sLAgentCircuit = null
+    fun onItemClick(adapterView: AdapterView<?>, view: View, i: Int, j: Long) {
+        val sLAgentCircuit: SLAgentCircuit = null
         if (this.listAdapter != null) {
-            SLObjectInfo item = this.listAdapter.getItem(i)
-            UserManager userManager = ActivityUtils.getUserManager(getArguments())
+            val item: SLObjectInfo = this.listAdapter.getItem(i)
+            val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
             if (userManager != null) {
                 sLAgentCircuit = userManager.getActiveAgentCircuit()
             }
@@ -71,10 +71,10 @@ class TouchableObjectsFragment : Fragment(), AdapterView.OnItemClickListener {
         }
     }
 
-    fun onStart() {
+    override fun onStart() {
         super.onStart()
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
-        UUID objectUUID = getObjectUUID()
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
+        val objectUUID: UUID = getObjectUUID()
         if (userManager == null || objectUUID == null) {
             this.touchableObjects.unsubscribe()
         } else {
@@ -82,7 +82,7 @@ class TouchableObjectsFragment : Fragment(), AdapterView.OnItemClickListener {
         }
     }
 
-    fun onStop() {
+    override fun onStop() {
         this.touchableObjects.unsubscribe()
         super.onStop()
     }

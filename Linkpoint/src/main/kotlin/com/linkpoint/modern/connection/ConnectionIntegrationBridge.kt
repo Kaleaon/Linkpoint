@@ -56,7 +56,7 @@ class ConnectionIntegrationBridge {
                     
                     return true
                 } else {
-                    String errorMessage = authReply != null ? authReply.message : 
+                    val errorMessage: String = authReply != null ? authReply.message : 
                         "Unknown authentication error"
                     Log.e(TAG, "Modern connection failed: " + errorMessage)
                     
@@ -91,10 +91,10 @@ class ConnectionIntegrationBridge {
      * Run diagnostics and return detailed connection health information
      */
     public CompletableFuture<String> getDiagnosticReport() {
-        ConnectionDiagnostics diagnostics = ConnectionDiagnostics(context)
+        val diagnostics: ConnectionDiagnostics = ConnectionDiagnostics(context)
         
         return diagnostics.diagnoseAsync().thenApply(result -> {
-            StringBuilder report = StringBuilder()
+            val report: StringBuilder = StringBuilder()
             report.append("=== Second Life Connection Diagnostic Report ===\n")
             report.append("Network Available: ").append(result.networkAvailable ? "✅" : "❌").append("\n")
             report.append("DNS Resolution: ").append(result.dnsWorking ? "✅" : "❌").append("\n")
@@ -140,14 +140,14 @@ class ConnectionIntegrationBridge {
     /**
      * Get the last error message if any
      */
-    public String getLastError() {
+     public fun getLastError(): String {
         return modernManager.getLastError()
     }
     
     /**
      * Get number of active connections
      */
-    public Int getActiveConnectionCount() {
+     public fun getActiveConnectionCount(): Int {
         return modernManager.getActiveConnectionCount()
     }
     

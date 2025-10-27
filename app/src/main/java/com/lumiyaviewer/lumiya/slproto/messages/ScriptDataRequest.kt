@@ -11,7 +11,7 @@ class ScriptDataRequest : SLMessage {
 
     class DataBlock {
         Long Hash
-        Byte[] Request
+        ByteArray Request
         Int RequestType
     }
 

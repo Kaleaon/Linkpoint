@@ -12,11 +12,11 @@ import com.lumiyaviewer.lumiya.modern.graphics.ModernRenderPipeline
  * Implements the modernization plan from Graphics_Engine_Modernization_Plan.md
  */
 class ModernRenderContext {
-    private String TAG = "ModernRenderContext"
+    private val TAG: String = "ModernRenderContext"
     
     // OpenGL ES version requirements
-    private Int MIN_GL_VERSION = 30; // ES 3.0 minimum
-    Float NEAR_PLANE = 0.5f
+    private val MIN_GL_VERSION: Int = 30; // ES 3.0 minimum
+    val NEAR_PLANE: Float = 0.5f
     
     // Modern capabilities
     private var hasComputeShaders: Boolean = false  // ES 3.1+
@@ -27,10 +27,10 @@ class ModernRenderContext {
     private ModernRenderPipeline renderPipeline
     
     // Matrix management (modern shader-based approach)
-    private Float[] modelMatrix = Float[16]
-    private Float[] viewMatrix = Float[16]
-    private Float[] projectionMatrix = Float[16]
-    private Float[] mvpMatrix = Float[16]
+    private val modelMatrix: FloatArray = FloatArray(16)
+    private val viewMatrix: FloatArray = FloatArray(16)
+    private val projectionMatrix: FloatArray = FloatArray(16)
+    private val mvpMatrix: FloatArray = FloatArray(16)
     
     // Rendering state
     Float FOVAngle = 60.0f
@@ -42,7 +42,7 @@ class ModernRenderContext {
     Float scaleX = 1.0f
     Float scaleY = 1.0f 
     Float scaleZ = 1.0f
-    private Int[] viewport = Int[4]
+    private val viewport: IntArray = IntArray(4)
     
     constructor() {
         Log.i(TAG, "Initializing Modern Render Context for OpenGL ES 3.0+")
@@ -147,7 +147,7 @@ class ModernRenderContext {
      * Set up projection matrix for perspective rendering
      */
     fun setupProjection(width: Int, height: Int, fov: Float, near: Float, far: Float): Unit {
-        this.aspectRatio = (Float) width / (Float) height
+        this.aspectRatio = width.toFloat() / height.toFloat()
         this.FOVAngle = fov
         
         // Store viewport dimensions  
@@ -215,7 +215,7 @@ class ModernRenderContext {
     }
     
     fun multiplyMatrix(matrix: FloatArray): Unit {
-        Float[] temp = Float[16]
+        FloatArray temp = FloatArray(16)
         Matrix.multiplyMM(temp, 0, modelMatrix, 0, matrix, 0)
         System.arraycopy(temp, 0, modelMatrix, 0, 16)
     }
@@ -238,23 +238,23 @@ class ModernRenderContext {
     /**
      * Calculate and get the Model-View-Projection matrix
      */
-    Float[] getMVPMatrix() {
+    FloatArray getMVPMatrix() {
         // Calculate MVP = Projection * View * Model
-        Float[] temp = Float[16]
+        FloatArray temp = FloatArray(16)
         Matrix.multiplyMM(temp, 0, viewMatrix, 0, modelMatrix, 0)
         Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, temp, 0)
         return mvpMatrix
     }
     
-    Float[] getModelMatrix() {
+    FloatArray getModelMatrix() {
         return modelMatrix
     }
     
-    Float[] getViewMatrix() {
+    FloatArray getViewMatrix() {
         return viewMatrix
     }
     
-    Float[] getProjectionMatrix() {
+    FloatArray getProjectionMatrix() {
         return projectionMatrix
     }
     
@@ -301,7 +301,7 @@ class ModernRenderContext {
     fun hasTessellation(): Boolean { return hasTessellation; }
     fun hasGeometryShaders(): Boolean { return hasGeometryShaders; }
     fun getRenderPipeline(): ModernRenderPipeline { return renderPipeline; }
-    Int[] getViewport() { return viewport; }
+    IntArray getViewport() { return viewport; }
     
     /**
      * Cleanup resources

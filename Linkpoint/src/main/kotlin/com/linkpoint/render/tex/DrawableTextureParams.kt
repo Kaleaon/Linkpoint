@@ -7,12 +7,12 @@ import javax.annotation.Nullable
 
 abstract class DrawableTextureParams {
     @JvmStatic
-    DrawableTextureParams create(UUID uuid, TextureClass textureClass) {
+     fun create(uuid: UUID, textureClass: TextureClass): DrawableTextureParams {
         return AutoValue_DrawableTextureParams(uuid, textureClass, null, null)
     }
 
     @JvmStatic
-    DrawableTextureParams create(UUID uuid, AvatarTextureFaceIndex avatarTextureFaceIndex, UUID uuid2) {
+     fun create(uuid: UUID, avatarTextureFaceIndex: AvatarTextureFaceIndex, uuid2: UUID): DrawableTextureParams {
         return AutoValue_DrawableTextureParams(uuid, TextureClass.Baked, avatarTextureFaceIndex, uuid2)
     }
 
@@ -21,13 +21,13 @@ abstract class DrawableTextureParams {
     public abstract UUID avatarUUID()
 
     val File getTextureRawPath(File file, Boolean z) {
-        Int hashCode = uuid().hashCode()
-        Int i = ((hashCode >> 24) ^ (((hashCode >> 8) ^ hashCode) ^ (hashCode >> 16))) & 255
-        String storePath = textureClass().getStorePath()
+        val hashCode: Int = uuid().hashCode()
+        val i: Int = ((hashCode >> 24) ^ (((hashCode >> 8) ^ hashCode) ^ (hashCode >> 16))) & 255
+        val storePath: String = textureClass().getStorePath()
         if (textureClass() == TextureClass.Prim && z) {
             storePath = storePath + "-hq"
         }
-        return File(file, String.format("%s-raw/%02x/%s.raw", Object[]{storePath, Integer.valueOf(i), uuid().toString()}))
+        return File(file, String.format("%s-raw/%02x/%s.raw", Array<Any>{storePath, Integer.valueOf(i), uuid().toString()}))
     }
 
     public abstract TextureClass textureClass()

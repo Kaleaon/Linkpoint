@@ -16,7 +16,7 @@ import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 
 class ObjectPopupsFragment : Fragment {
-    private String AGENT_UUID_KEY = "agentUUID"
+    private val AGENT_UUID_KEY: String = "agentUUID"
     private ItemTouchHelper.Callback itemTouchCallback = ItemTouchHelper.SimpleCallback(0, 12) {
         Boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder viewHolder2) {
             return false

@@ -28,7 +28,7 @@ class DirPlacesReply : SLMessage() {
         public Boolean Auction
         public Float Dwell
         public Boolean ForSale
-        public Byte[] Name
+        public ByteArray Name
         public UUID ParcelID
     }
 
@@ -42,11 +42,11 @@ class DirPlacesReply : SLMessage() {
         this.AgentData_Field = AgentData()
     }
 
-    public Int CalcPayloadSize() {
-        Int size = (this.QueryData_Fields.size() * 16) + 21 + 1
-        Iterator<T> it = this.QueryReplies_Fields.iterator()
+    public fun CalcPayloadSize(): Int {
+        val size: Int = (this.QueryData_Fields.size() * 16) + 21 + 1
+        val it: Iterator<T> = this.QueryReplies_Fields.iterator()
         while (true) {
-            Int i = size
+            val i: Int = size
             if (!it.hasNext()) {
                 return i + 1 + (this.StatusData_Fields.size() * 4)
             }
@@ -54,11 +54,11 @@ class DirPlacesReply : SLMessage() {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleDirPlacesReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 35)
@@ -81,17 +81,17 @@ class DirPlacesReply : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            QueryData queryData = QueryData()
+            val queryData: QueryData = QueryData()
             queryData.QueryID = unpackUUID(byteBuffer)
             this.QueryData_Fields.add(queryData)
         }
-        Byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b2: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i2 = 0; i2 < b2; i2++) {
-            QueryReplies queryReplies = QueryReplies()
+            val queryReplies: QueryReplies = QueryReplies()
             queryReplies.ParcelID = unpackUUID(byteBuffer)
             queryReplies.Name = unpackVariable(byteBuffer, 1)
             queryReplies.ForSale = unpackBoolean(byteBuffer)
@@ -99,9 +99,9 @@ class DirPlacesReply : SLMessage() {
             queryReplies.Dwell = unpackFloat(byteBuffer)
             this.QueryReplies_Fields.add(queryReplies)
         }
-        Byte b3 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b3: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i3 = 0; i3 < b3; i3++) {
-            StatusData statusData = StatusData()
+            val statusData: StatusData = StatusData()
             statusData.Status = unpackInt(byteBuffer)
             this.StatusData_Fields.add(statusData)
         }

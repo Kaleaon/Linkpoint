@@ -13,7 +13,7 @@ class OpenJPEGIntegrationTest {
     private const val TAG: String = "OpenJPEGIntegrationTest"
     
     @JvmStatic
-    Unit runIntegrationTests(Context context) {
+     fun runIntegrationTests(context: Context) {
         Log.i(TAG, "Starting OpenJPEG integration tests...")
         
         try {
@@ -34,12 +34,12 @@ class OpenJPEGIntegrationTest {
     }
     
     @JvmStatic
-private Unit testFormatDetection() {
+ private fun testFormatDetection() {
         Log.i(TAG, "Testing format detection...")
         
         // Test KTX2 magic bytes
-        Byte[] ktx2Magic = {(Byte)0xAB, 0x4B, 0x54, 0x58, 0x20, 0x32, 0x30, (Byte)0xBB, 0x0D, 0x0A, 0x1A, 0x0A}
-        ImageFormat detectedFormat = OpenJPEG.detectTextureFormat(ktx2Magic)
+        val ktx2Magic: ByteArray = {(Byte)0xAB, 0x4B, 0x54, 0x58, 0x20, 0x32, 0x30, (Byte)0xBB, 0x0D, 0x0A, 0x1A, 0x0A}
+        val detectedFormat: ImageFormat = OpenJPEG.detectTextureFormat(ktx2Magic)
         if (detectedFormat == ImageFormat.KTX2) {
             Log.i(TAG, "✓ KTX2 format detection works correctly")
         } else {
@@ -47,7 +47,7 @@ private Unit testFormatDetection() {
         }
         
         // Test JPEG2000 magic bytes
-        Byte[] jp2Magic = {0x00, 0x00, 0x00, 0x0C, 0x6A, 0x50, 0x20, 0x20}
+        val jp2Magic: ByteArray = {0x00, 0x00, 0x00, 0x0C, 0x6A, 0x50, 0x20, 0x20}
         detectedFormat = OpenJPEG.detectTextureFormat(jp2Magic)
         if (detectedFormat == ImageFormat.JPEG2000) {
             Log.i(TAG, "✓ JPEG2000 format detection works correctly")
@@ -56,7 +56,7 @@ private Unit testFormatDetection() {
         }
         
         // Test fallback for unknown format
-        Byte[] unknownData = {0x01, 0x02, 0x03, 0x04}
+        val unknownData: ByteArray = {0x01, 0x02, 0x03, 0x04}
         detectedFormat = OpenJPEG.detectTextureFormat(unknownData)
         if (detectedFormat == ImageFormat.JPEG2000) {
             Log.i(TAG, "✓ Unknown format fallback works correctly")
@@ -66,7 +66,7 @@ private Unit testFormatDetection() {
     }
     
     @JvmStatic
-private Unit testKTX2Initialization() {
+ private fun testKTX2Initialization() {
         Log.i(TAG, "Testing KTX2 initialization...")
         
         try {
@@ -79,7 +79,7 @@ private Unit testKTX2Initialization() {
     }
     
     @JvmStatic
-private Unit testTextureCreation() {
+ private fun testTextureCreation() {
         Log.i(TAG, "Testing texture creation compatibility...")
         
         try {
@@ -102,7 +102,7 @@ private Unit testTextureCreation() {
      * Test texture loading pipeline integration
      */
     @JvmStatic
-    Unit testTextureLoadingPipeline() {
+     fun testTextureLoadingPipeline() {
         Log.i(TAG, "Testing texture loading pipeline integration...")
         
         try {

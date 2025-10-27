@@ -19,7 +19,7 @@ class RegionHandshake : SLMessage() {
         public Boolean IsEstateManager
         public Int RegionFlags
         public Int SimAccess
-        public Byte[] SimName
+        public ByteArray SimName
         public UUID SimOwner
         public UUID TerrainBase0
         public UUID TerrainBase1
@@ -49,9 +49,9 @@ class RegionHandshake : SLMessage() {
     class RegionInfo3 {
         public Int CPUClassID
         public Int CPURatio
-        public Byte[] ColoName
-        public Byte[] ProductName
-        public Byte[] ProductSKU
+        public ByteArray ColoName
+        public ByteArray ProductName
+        public ByteArray ProductSKU
     }
 
     @JvmStatic
@@ -67,15 +67,15 @@ class RegionHandshake : SLMessage() {
         this.RegionInfo3_Field = RegionInfo3()
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.RegionInfo_Field.SimName.length + 6 + 16 + 1 + 4 + 4 + 16 + 16 + 16 + 16 + 16 + 16 + 16 + 16 + 16 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 16 + this.RegionInfo3_Field.ColoName.length + 9 + 1 + this.RegionInfo3_Field.ProductSKU.length + 1 + this.RegionInfo3_Field.ProductName.length + 1 + (this.RegionInfo4_Fields.size() * 16)
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleRegionHandshake(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -108)
@@ -116,7 +116,7 @@ class RegionHandshake : SLMessage() {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.RegionInfo_Field.RegionFlags = unpackInt(byteBuffer)
         this.RegionInfo_Field.SimAccess = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.RegionInfo_Field.SimName = unpackVariable(byteBuffer, 1)
@@ -147,9 +147,9 @@ class RegionHandshake : SLMessage() {
         this.RegionInfo3_Field.ColoName = unpackVariable(byteBuffer, 1)
         this.RegionInfo3_Field.ProductSKU = unpackVariable(byteBuffer, 1)
         this.RegionInfo3_Field.ProductName = unpackVariable(byteBuffer, 1)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        val b: Byte = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
-            RegionInfo4 regionInfo4 = RegionInfo4()
+            val regionInfo4: RegionInfo4 = RegionInfo4()
             regionInfo4.RegionFlagsExtended = unpackLong(byteBuffer)
             regionInfo4.RegionProtocols = unpackLong(byteBuffer)
             this.RegionInfo4_Fields.add(regionInfo4)

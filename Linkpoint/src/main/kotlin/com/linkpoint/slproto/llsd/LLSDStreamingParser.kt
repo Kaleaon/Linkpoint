@@ -22,50 +22,50 @@ import org.xmlpull.v1.XmlPullParserFactory
 class LLSDStreamingParser {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-https-LLSDContentTypeDetector$LLSDContentTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f115comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f115comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues = null
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-llsd-LLSDNodeTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f116comlumiyaviewerlumiyaslprotollsdLLSDNodeTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f116comlumiyaviewerlumiyaslprotollsdLLSDNodeTypeSwitchesValues = null
 
     interface LLSDContentHandler {
-        LLSDContentHandler onArrayBegin(String str) throws LLSDXMLException
+         fun onArrayBegin(String str): LLSDContentHandler) throws LLSDXMLException
 
-        Unit onArrayEnd(String str) throws LLSDXMLException
+         fun onArrayEnd(str: String) throws LLSDXMLException
 
-        LLSDContentHandler onMapBegin(String str) throws LLSDXMLException
+         fun onMapBegin(String str): LLSDContentHandler) throws LLSDXMLException
 
-        Unit onMapEnd(String str) throws LLSDXMLException, InterruptedException
+         fun onMapEnd(str: String) throws LLSDXMLException, InterruptedException
 
-        Unit onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException
+         fun onPrimitiveValue(str: String, lLSDNode: LLSDNode) throws LLSDXMLException, LLSDValueTypeException
     }
 
     @JvmStatic
     class LLSDDefaultContentHandler : LLSDContentHandler {
-        public LLSDContentHandler onArrayBegin(String str) throws LLSDXMLException {
+         public fun onArrayBegin(str: String) throws LLSDXMLException {
             return LLSDDefaultContentHandler()
         }
 
-        fun onArrayEnd(String str) throws LLSDXMLException {
+        fun onArrayEnd(str: String) throws LLSDXMLException {
         }
 
-        public LLSDContentHandler onMapBegin(String str) throws LLSDXMLException {
+         public fun onMapBegin(str: String) throws LLSDXMLException {
             return LLSDDefaultContentHandler()
         }
 
-        fun onMapEnd(String str) throws LLSDXMLException, InterruptedException {
+        fun onMapEnd(str: String) throws LLSDXMLException, InterruptedException {
         }
 
-        fun onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
+        fun onPrimitiveValue(str: String, lLSDNode: LLSDNode) throws LLSDXMLException, LLSDValueTypeException {
         }
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-https-LLSDContentTypeDetector$LLSDContentTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m196getcomlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues() {
+private /* synthetic */ IntArray m196getcomlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues() {
         if (f115comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues != null) {
             return f115comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues
         }
-        Int[] iArr = Int[LLSDContentTypeDetector.LLSDContentType.values().length]
+        val iArr: IntArray = Int[LLSDContentTypeDetector.LLSDContentType.values().length]
         try {
             iArr[LLSDContentTypeDetector.LLSDContentType.llsdBinary.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -80,11 +80,11 @@ private /* synthetic */ Int[] m196getcomlumiyaviewerlumiyaslprotohttpsLLSDConten
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-llsd-LLSDNodeTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m197getcomlumiyaviewerlumiyaslprotollsdLLSDNodeTypeSwitchesValues() {
+private /* synthetic */ IntArray m197getcomlumiyaviewerlumiyaslprotollsdLLSDNodeTypeSwitchesValues() {
         if (f116comlumiyaviewerlumiyaslprotollsdLLSDNodeTypeSwitchesValues != null) {
             return f116comlumiyaviewerlumiyaslprotollsdLLSDNodeTypeSwitchesValues
         }
-        Int[] iArr = Int[LLSDNodeType.values().length]
+        val iArr: IntArray = Int[LLSDNodeType.values().length]
         try {
             iArr[LLSDNodeType.llsdArray.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -142,9 +142,9 @@ private /* synthetic */ Int[] m197getcomlumiyaviewerlumiyaslprotollsdLLSDNodeTyp
     }
 
     @JvmStatic
-    Unit parseAny(InputStream inputStream, String str, LLSDContentHandler lLSDContentHandler) throws LLSDXMLException {
+     fun parseAny(inputStream: InputStream, str: String, lLSDContentHandler: LLSDContentHandler) throws LLSDXMLException {
         try {
-            BufferedInputStream bufferedInputStream = BufferedInputStream(inputStream, 65536)
+            val bufferedInputStream: BufferedInputStream = BufferedInputStream(inputStream, 65536)
             switch (m196getcomlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues()[LLSDContentTypeDetector.DetectContentType(bufferedInputStream, str).ordinal()]) {
                 case 1:
                     parseBinary(DataInputStream(bufferedInputStream), lLSDContentHandler)
@@ -156,29 +156,29 @@ private /* synthetic */ Int[] m197getcomlumiyaviewerlumiyaslprotollsdLLSDNodeTyp
                     return
             }
         } catch (IOException e) {
-            LLSDXMLException lLSDXMLException = LLSDXMLException("I/O error")
+            val lLSDXMLException: LLSDXMLException = LLSDXMLException("I/O error")
             lLSDXMLException.initCause(e)
             throw lLSDXMLException
         }
-        LLSDXMLException lLSDXMLException2 = LLSDXMLException("I/O error")
+        val lLSDXMLException2: LLSDXMLException = LLSDXMLException("I/O error")
         lLSDXMLException2.initCause(e)
         throw lLSDXMLException2
     }
 
     @JvmStatic
-    Unit parseBinary(DataInputStream dataInputStream, LLSDContentHandler lLSDContentHandler) throws LLSDXMLException {
+     fun parseBinary(dataInputStream: DataInputStream, lLSDContentHandler: LLSDContentHandler) throws LLSDXMLException {
         try {
             parseBinaryNode(1, (String) null, dataInputStream, lLSDContentHandler)
         } catch (LLSDValueTypeException e) {
-            LLSDXMLException lLSDXMLException = LLSDXMLException("Invalid value type")
+            val lLSDXMLException: LLSDXMLException = LLSDXMLException("Invalid value type")
             lLSDXMLException.initCause(e)
             throw lLSDXMLException
         } catch (InterruptedException e2) {
-            LLSDXMLException lLSDXMLException2 = LLSDXMLException("Interrupted")
+            val lLSDXMLException2: LLSDXMLException = LLSDXMLException("Interrupted")
             lLSDXMLException2.initCause(e2)
             throw lLSDXMLException2
         } catch (IOException e3) {
-            LLSDXMLException lLSDXMLException3 = LLSDXMLException("I/O error")
+            val lLSDXMLException3: LLSDXMLException = LLSDXMLException("I/O error")
             lLSDXMLException3.initCause(e3)
             throw lLSDXMLException3
         }
@@ -190,7 +190,7 @@ private /* synthetic */ Int[] m197getcomlumiyaviewerlumiyaslprotollsdLLSDNodeTyp
      */
     /* Code decompiled incorrectly, please refer to instructions dump. */
     @JvmStatic
-private Unit parseBinaryNode(Int r10, java.lang.String r11, java.io.DataInputStream r12, com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDContentHandler r13) throws com.lumiyaviewer.lumiya.slproto.llsd.LLSDXMLException, com.lumiyaviewer.lumiya.slproto.llsd.LLSDValueTypeException, java.lang.InterruptedException, java.io.IOException {
+ private fun parseBinaryNode(r10: Int, java.lang.String r11, java.io.DataInputStream r12, com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDContentHandler r13) throws com.lumiyaviewer.lumiya.slproto.llsd.LLSDXMLException, com.lumiyaviewer.lumiya.slproto.llsd.LLSDValueTypeException, java.lang.InterruptedException, java.io.IOException {
         /*
             r9 = 1
             r8 = 0
@@ -198,7 +198,7 @@ private Unit parseBinaryNode(Int r10, java.lang.String r11, java.io.DataInputStr
             r1 = r10
         L_0x0004:
             if (r1 <= 0) goto L_0x0181
-            Byte r0 = r12.readByte()
+            val r0: Byte = r12.readByte()
             switch(r0) {
                 case 10: goto L_0x017e
                 case 33: goto L_0x002b
@@ -231,7 +231,7 @@ private Unit parseBinaryNode(Int r10, java.lang.String r11, java.io.DataInputStr
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDUndefined r0 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDUndefined
             r0.<init>()
             r13.onPrimitiveValue(r11, r0)
-            Int r0 = r1 + -1
+            val r0: Int = r1 + -1
         L_0x0035:
             r1 = r0
             goto L_0x0004
@@ -239,59 +239,59 @@ private Unit parseBinaryNode(Int r10, java.lang.String r11, java.io.DataInputStr
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDBoolean r0 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDBoolean
             r0.<init>((Boolean) r9)
             r13.onPrimitiveValue(r11, r0)
-            Int r0 = r1 + -1
+            val r0: Int = r1 + -1
             goto L_0x0035
         L_0x0042:
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDBoolean r0 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDBoolean
             r0.<init>((Boolean) r3)
             r13.onPrimitiveValue(r11, r0)
-            Int r0 = r1 + -1
+            val r0: Int = r1 + -1
             goto L_0x0035
         L_0x004d:
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDInt r0 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDInt
-            Int r2 = r12.readInt()
+            val r2: Int = r12.readInt()
             r0.<init>((Int) r2)
             r13.onPrimitiveValue(r11, r0)
-            Int r0 = r1 + -1
+            val r0: Int = r1 + -1
             goto L_0x0035
         L_0x005c:
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDDouble r0 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDDouble
-            Double r4 = r12.readDouble()
+            val r4: Double = r12.readDouble()
             r0.<init>((Double) r4)
             r13.onPrimitiveValue(r11, r0)
-            Int r0 = r1 + -1
+            val r0: Int = r1 + -1
             goto L_0x0035
         L_0x006b:
-            Long r4 = r12.readLong()
-            Long r6 = r12.readLong()
+            val r4: Long = r12.readLong()
+            val r6: Long = r12.readLong()
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDUUID r0 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDUUID
             java.util.UUID r2 = java.util.UUID
             r2.<init>(r4, r6)
             r0.<init>((java.util.UUID) r2)
             r13.onPrimitiveValue(r11, r0)
-            Int r0 = r1 + -1
+            val r0: Int = r1 + -1
             goto L_0x0035
         L_0x0083:
-            Int r0 = r12.readInt()
-            Byte[] r0 = Byte[r0]
+            val r0: Int = r12.readInt()
+            val r0: ByteArray = Byte[r0]
             r12.readFully(r0)
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDBinary r2 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDBinary
-            r2.<init>((Byte[]) r0)
+            r2.<init>((ByteArray) r0)
             r13.onPrimitiveValue(r11, r2)
-            Int r0 = r1 + -1
+            val r0: Int = r1 + -1
             goto L_0x0035
         L_0x0097:
-            Int r0 = r12.readInt()
+            val r0: Int = r12.readInt()
             if (r0 != 0) goto L_0x00ab
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDString r0 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDString
             java.lang.String r2 = ""
             r0.<init>(r2)
             r13.onPrimitiveValue(r11, r0)
         L_0x00a8:
-            Int r0 = r1 + -1
+            val r0: Int = r1 + -1
             goto L_0x0035
         L_0x00ab:
-            Byte[] r0 = Byte[r0]
+            val r0: ByteArray = Byte[r0]
             r12.readFully(r0)
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDString r2 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDString
             java.lang.String r0 = com.lumiyaviewer.lumiya.slproto.SLMessage.stringFromVariableUTF(r0)
@@ -299,17 +299,17 @@ private Unit parseBinaryNode(Int r10, java.lang.String r11, java.io.DataInputStr
             r13.onPrimitiveValue(r11, r2)
             goto L_0x00a8
         L_0x00bd:
-            Int r0 = r12.readInt()
+            val r0: Int = r12.readInt()
             if (r0 != 0) goto L_0x00d2
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDURI r0 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDURI
             java.lang.String r2 = ""
             r0.<init>((java.lang.String) r2)
             r13.onPrimitiveValue(r11, r0)
         L_0x00ce:
-            Int r0 = r1 + -1
+            val r0: Int = r1 + -1
             goto L_0x0035
         L_0x00d2:
-            Byte[] r0 = Byte[r0]
+            val r0: ByteArray = Byte[r0]
             r12.readFully(r0)
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDURI r2 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDURI
             java.lang.String r0 = com.lumiyaviewer.lumiya.slproto.SLMessage.stringFromVariableUTF(r0)
@@ -317,25 +317,25 @@ private Unit parseBinaryNode(Int r10, java.lang.String r11, java.io.DataInputStr
             r13.onPrimitiveValue(r11, r2)
             goto L_0x00ce
         L_0x00e4:
-            Double r4 = r12.readDouble()
+            val r4: Double = r12.readDouble()
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDDate r0 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDDate
             java.util.Date r2 = java.util.Date
             r6 = 4652007308841189376(0x408f400000000000, Double:1000.0)
-            Double r4 = r4 * r6
-            Long r4 = java.lang.Math.round(r4)
+            val r4: Double = r4 * r6
+            val r4: Long = java.lang.Math.round(r4)
             r2.<init>(r4)
             r0.<init>((java.util.Date) r2)
             r13.onPrimitiveValue(r11, r0)
-            Int r0 = r1 + -1
+            val r0: Int = r1 + -1
             goto L_0x0035
         L_0x0103:
-            Int r2 = r12.readInt()
+            val r2: Int = r12.readInt()
             com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser$LLSDContentHandler r0 = r13.onArrayBegin(r11)
             if (r0 != 0) goto L_0x010e
             r0 = r13
         L_0x010e:
             parseBinaryNode(r2, r8, r12, r0)
-            Byte r2 = r12.readByte()
+            val r2: Byte = r12.readByte()
             r4 = 93
             if (r2 == r4) goto L_0x0122
             com.lumiyaviewer.lumiya.slproto.llsd.LLSDXMLException r0 = com.lumiyaviewer.lumiya.slproto.llsd.LLSDXMLException
@@ -344,10 +344,10 @@ private Unit parseBinaryNode(Int r10, java.lang.String r11, java.io.DataInputStr
             throw r0
         L_0x0122:
             r0.onMapEnd(r11)
-            Int r0 = r1 + -1
+            val r0: Int = r1 + -1
             goto L_0x0035
         L_0x0129:
-            Int r4 = r12.readInt()
+            val r4: Int = r12.readInt()
             com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser$LLSDContentHandler r0 = r13.onMapBegin(r11)
             if (r0 != 0) goto L_0x0134
             r0 = r13
@@ -355,7 +355,7 @@ private Unit parseBinaryNode(Int r10, java.lang.String r11, java.io.DataInputStr
             r2 = r3
         L_0x0135:
             if (r2 >= r4) goto L_0x015b
-            Byte r5 = r12.readByte()
+            val r5: Byte = r12.readByte()
             r6 = 107(0x6b, Float:1.5E-43)
             if (r5 == r6) goto L_0x0148
             com.lumiyaviewer.lumiya.slproto.llsd.LLSDXMLException r0 = com.lumiyaviewer.lumiya.slproto.llsd.LLSDXMLException
@@ -363,15 +363,15 @@ private Unit parseBinaryNode(Int r10, java.lang.String r11, java.io.DataInputStr
             r0.<init>(r1)
             throw r0
         L_0x0148:
-            Int r5 = r12.readInt()
-            Byte[] r5 = Byte[r5]
+            val r5: Int = r12.readInt()
+            val r5: ByteArray = Byte[r5]
             r12.readFully(r5)
             java.lang.String r5 = com.lumiyaviewer.lumiya.slproto.SLMessage.stringFromVariableUTF(r5)
             parseBinaryNode(r9, r5, r12, r0)
-            Int r2 = r2 + 1
+            val r2: Int = r2 + 1
             goto L_0x0135
         L_0x015b:
-            Byte r2 = r12.readByte()
+            val r2: Byte = r12.readByte()
             r4 = 125(0x7d, Float:1.75E-43)
             if (r2 == r4) goto L_0x016c
             com.lumiyaviewer.lumiya.slproto.llsd.LLSDXMLException r0 = com.lumiyaviewer.lumiya.slproto.llsd.LLSDXMLException
@@ -380,10 +380,10 @@ private Unit parseBinaryNode(Int r10, java.lang.String r11, java.io.DataInputStr
             throw r0
         L_0x016c:
             r0.onMapEnd(r11)
-            Int r0 = r1 + -1
+            val r0: Int = r1 + -1
             goto L_0x0035
         L_0x0173:
-            Byte r0 = r12.readByte()
+            val r0: Byte = r12.readByte()
             r2 = 62
             if (r0 != r2) goto L_0x0173
             r0 = r1
@@ -398,9 +398,9 @@ private Unit parseBinaryNode(Int r10, java.lang.String r11, java.io.DataInputStr
     }
 
     @JvmStatic
-    Unit parseXML(InputStream inputStream, String str, LLSDContentHandler lLSDContentHandler) throws LLSDXMLException {
+     fun parseXML(inputStream: InputStream, str: String, lLSDContentHandler: LLSDContentHandler) throws LLSDXMLException {
         try {
-            XmlPullParser newPullParser = XmlPullParserFactory.newInstance().newPullParser()
+            val newPullParser: XmlPullParser = XmlPullParserFactory.newInstance().newPullParser()
             newPullParser.setInput(inputStream, str)
             newPullParser.nextTag()
             newPullParser.require(2, (String) null, "llsd")
@@ -410,34 +410,34 @@ private Unit parseBinaryNode(Int r10, java.lang.String r11, java.io.DataInputStr
         } catch (XmlPullParserException e) {
             Debug.Log("XmlPullParserException: " + e.getMessage())
             e.printStackTrace()
-            LLSDXMLException lLSDXMLException = LLSDXMLException("Malformed XML")
+            val lLSDXMLException: LLSDXMLException = LLSDXMLException("Malformed XML")
             lLSDXMLException.initCause(e)
             throw lLSDXMLException
         } catch (IOException e2) {
             throw LLSDXMLException("Input stream error")
         } catch (LLSDValueTypeException e3) {
             e3.printStackTrace()
-            LLSDXMLException lLSDXMLException2 = LLSDXMLException("Malformed XML")
+            val lLSDXMLException2: LLSDXMLException = LLSDXMLException("Malformed XML")
             lLSDXMLException2.initCause(e3)
             throw lLSDXMLException2
         } catch (InterruptedException e4) {
             e4.printStackTrace()
-            LLSDXMLException lLSDXMLException3 = LLSDXMLException("Interrupted")
+            val lLSDXMLException3: LLSDXMLException = LLSDXMLException("Interrupted")
             lLSDXMLException3.initCause(e4)
             throw lLSDXMLException3
         }
     }
 
     @JvmStatic
-private Unit parseXMLNode(String str, XmlPullParser xmlPullParser, LLSDContentHandler lLSDContentHandler) throws LLSDXMLException, XmlPullParserException, IOException, LLSDValueTypeException, InterruptedException {
-        String name = xmlPullParser.getName()
-        LLSDNodeType byTag = LLSDNodeType.byTag(name)
+ private fun parseXMLNode(str: String, xmlPullParser: XmlPullParser, lLSDContentHandler: LLSDContentHandler) throws LLSDXMLException, XmlPullParserException, IOException, LLSDValueTypeException, InterruptedException {
+        val name: String = xmlPullParser.getName()
+        val byTag: LLSDNodeType = LLSDNodeType.byTag(name)
         if (byTag == null) {
             throw LLSDXMLException("Unknown tag: " + name)
         }
         switch (m197getcomlumiyaviewerlumiyaslprotollsdLLSDNodeTypeSwitchesValues()[byTag.ordinal()]) {
             case 1:
-                LLSDContentHandler onArrayBegin = lLSDContentHandler.onArrayBegin(str)
+                val onArrayBegin: LLSDContentHandler = lLSDContentHandler.onArrayBegin(str)
                 xmlPullParser.nextTag()
                 if (onArrayBegin != null) {
                     lLSDContentHandler = onArrayBegin
@@ -471,17 +471,17 @@ private Unit parseXMLNode(String str, XmlPullParser xmlPullParser, LLSDContentHa
             case 7:
                 throw LLSDXMLException("Unexpected tag: " + name)
             case 8:
-                LLSDContentHandler onMapBegin = lLSDContentHandler.onMapBegin(str)
+                val onMapBegin: LLSDContentHandler = lLSDContentHandler.onMapBegin(str)
                 xmlPullParser.nextTag()
                 if (onMapBegin != null) {
                     lLSDContentHandler = onMapBegin
                 }
                 while (xmlPullParser.getEventType() != 3) {
-                    String name2 = xmlPullParser.getName()
+                    val name2: String = xmlPullParser.getName()
                     if (!name2.equalsIgnoreCase("key")) {
                         throw LLSDXMLException("Unexpected tag: " + name2)
                     }
-                    String nextText = xmlPullParser.nextText()
+                    val nextText: String = xmlPullParser.nextText()
                     xmlPullParser.nextTag()
                     parseXMLNode(nextText, xmlPullParser, lLSDContentHandler)
                 }

@@ -11,11 +11,11 @@ class AgentDataUpdate : SLMessage() {
     class AgentData {
         public UUID ActiveGroupID
         public UUID AgentID
-        public Byte[] FirstName
-        public Byte[] GroupName
+        public ByteArray FirstName
+        public ByteArray GroupName
         public Long GroupPowers
-        public Byte[] GroupTitle
-        public Byte[] LastName
+        public ByteArray GroupTitle
+        public ByteArray LastName
     }
 
     public AgentDataUpdate() {

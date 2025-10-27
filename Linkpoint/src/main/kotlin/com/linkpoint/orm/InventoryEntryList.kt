@@ -24,7 +24,7 @@ class InventoryEntryList : AbstractList()<SLInventoryEntry> {
     public InventoryEntryList() {
         this.lock = Object()
         this.entryCache = CacheBuilder.newBuilder().maximumSize(1000).weakValues().build(CacheLoader<Integer, SLInventoryEntry>() {
-            public SLInventoryEntry load(Integer num) {
+             public fun load(num: Integer): SLInventoryEntry {
                 SLInventoryEntry sLInventoryEntry
                 if (InventoryEntryList.this.cursor == null) {
                     sLInventoryEntry = null
@@ -52,7 +52,7 @@ class InventoryEntryList : AbstractList()<SLInventoryEntry> {
     InventoryEntryList(String str, SLInventoryEntry sLInventoryEntry, Cursor cursor2) {
         this.lock = Object()
         this.entryCache = CacheBuilder.newBuilder().maximumSize(1000).weakValues().build(CacheLoader<Integer, SLInventoryEntry>() {
-            public SLInventoryEntry load(Integer num) {
+             public fun load(num: Integer): SLInventoryEntry {
                 SLInventoryEntry sLInventoryEntry
                 if (InventoryEntryList.this.cursor == null) {
                     sLInventoryEntry = null
@@ -85,9 +85,9 @@ class InventoryEntryList : AbstractList()<SLInventoryEntry> {
         }
     }
 
-    public SLInventoryEntry get(Int i) {
+     public fun get(i: Int): SLInventoryEntry {
         if (this.cursor == null || !(!this.cursor.isClosed())) {
-            Object[] objArr = Object[2]
+            val objArr: Array<Any> = Object[2]
             objArr[0] = Integer.valueOf(i)
             objArr[1] = this.cursor == null ? "null" : "closed"
             Debug.Printf("InventoryEntryList: returning null for %d because cursor is %s", objArr)
@@ -101,15 +101,15 @@ class InventoryEntryList : AbstractList()<SLInventoryEntry> {
         }
     }
 
-    public SLInventoryEntry getFolder() {
+     public fun getFolder(): SLInventoryEntry {
         return this.folder
     }
 
-    public String getTitle() {
+     public fun getTitle(): String {
         return this.title
     }
 
-    public Int size() {
+     public fun size(): Int {
         return this.size
     }
 }

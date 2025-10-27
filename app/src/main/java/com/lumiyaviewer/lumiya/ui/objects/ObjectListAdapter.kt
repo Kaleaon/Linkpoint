@@ -19,7 +19,7 @@ import com.lumiyaviewer.lumiya.slproto.objects.SLPrimObjectDisplayInfo
 import androidx.annotation.NonNull
 
 class ObjectListAdapter : BaseExpandableListAdapter {
-    private Int HIERARCHY_PADDING_DP = 10
+    private val HIERARCHY_PADDING_DP: Int = 10
     private Context context
     @NonNull
     private ImmutableList<SLObjectDisplayInfo> objects = ImmutableList.of()
@@ -124,7 +124,7 @@ class ObjectListAdapter : BaseExpandableListAdapter {
         if (view == null) {
             view = LayoutInflater.from(this.context).inflate(R.layout.object_list_item, viewGroup, false)
         }
-        view.findViewById(R.id.object_hierarchy_padding).setLayoutParams(LinearLayout.LayoutParams((Int) (TypedValue.applyDimension(1, 10.0f, this.context.getResources().getDisplayMetrics()) * ((Float) sLObjectDisplayInfo.hierarchyLevel)), -1))
+        view.findViewById(R.id.object_hierarchy_padding).setLayoutParams(LinearLayout.LayoutParams((Int) (TypedValue.applyDimension(1, 10.0f, this.context.getResources().getDisplayMetrics()) * (sLObjectDisplayInfo.toFloat().hierarchyLevel)), -1))
         view.findViewById(R.id.avatarIconView).setVisibility(sLObjectDisplayInfo instanceof SLAvatarObjectDisplayInfo ? 0 : 8)
         if (sLObjectDisplayInfo.name != null) {
             ((TextView) view.findViewById(R.id.objectNameTextView)).setText(sLObjectDisplayInfo.name)

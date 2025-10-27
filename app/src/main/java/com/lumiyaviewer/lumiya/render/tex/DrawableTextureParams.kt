@@ -27,7 +27,7 @@ abstract class DrawableTextureParams {
         if (textureClass() == TextureClass.Prim && z) {
             storePath = storePath + "-hq"
         }
-        return File(file, String.format("%s-raw/%02x/%s.raw", new Object[]{storePath, Integer.valueOf(i), uuid().toString()}))
+        return File(file, String.format("%s-raw/%02x/%s.raw", new Array<Any>{storePath, Integer.valueOf(i), uuid().toString()}))
     }
 
     abstract fun textureClass(): TextureClass

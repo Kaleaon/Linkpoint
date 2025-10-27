@@ -92,7 +92,7 @@ class ModernMainActivity : AppCompatActivity() {
         }
     }
     
-    private Unit initializeModernComponents() {
+     private fun initializeModernComponents() {
         updateStatus("Initializing modern components...", 10)
         
         // Get modern demo from application
@@ -104,12 +104,12 @@ class ModernMainActivity : AppCompatActivity() {
             // Test graphics capabilities
             uiHandler.postDelayed(() -> {
                 try {
-                    String graphicsInfo = modernDemo.getGraphicsInfo()
+                    val graphicsInfo: String = modernDemo.getGraphicsInfo()
                     updateStatus("✅ Graphics: " + graphicsInfo, 50)
                     
                     // Test connection capabilities
                     uiHandler.postDelayed(() -> {
-                        Boolean connected = modernDemo.isConnected()
+                        val connected: Boolean = modernDemo.isConnected()
                         updateStatus("✅ Ready for testing - All modern components available", 100)
                     }, 1000)
                 } catch (Exception e) {
@@ -128,13 +128,13 @@ class ModernMainActivity : AppCompatActivity() {
         }
     }
     
-    private Unit updateStatus(String message, Int progress) {
+     private fun updateStatus(message: String, progress: Int) {
         statusText.setText(message)
         progressBar.setProgress(progress)
         Log.i(TAG, "Status: " + message)
     }
     
-    private Unit createEnhancedLayout() {
+     private fun createEnhancedLayout() {
         // Create root scroll view for better UX on small screens
         scrollView = ScrollView(this)
         scrollView.setFillViewport(true)
@@ -169,7 +169,7 @@ class ModernMainActivity : AppCompatActivity() {
         setContentView(scrollView)
     }
     
-    private Unit createWelcomeSection() {
+     private fun createWelcomeSection() {
         // Welcome header
         welcomeText = TextView(this)
         welcomeText.setText("🚀 Linkpoint Modern Sample Application")
@@ -181,7 +181,7 @@ class ModernMainActivity : AppCompatActivity() {
         mainLayout.addView(welcomeText)
         
         // Description text
-        TextView descText = TextView(this)
+        val descText: TextView = TextView(this)
         descText.setText("Comprehensive demonstration of modernized Second Life client technology:\n\n" +
                         "• OAuth2 authentication with secure token management\n" +
                         "• HTTP/2 CAPS + WebSocket hybrid transport layer\n" +
@@ -195,9 +195,9 @@ class ModernMainActivity : AppCompatActivity() {
         mainLayout.addView(descText)
     }
     
-    private Unit createStatusSection() {
+     private fun createStatusSection() {
         // Status header
-        TextView statusHeader = TextView(this)
+        val statusHeader: TextView = TextView(this)
         statusHeader.setText("📊 System Status")
         statusHeader.setTextSize(18)
         statusHeader.setTypeface(null, android.graphics.Typeface.BOLD)
@@ -224,9 +224,9 @@ class ModernMainActivity : AppCompatActivity() {
         mainLayout.addView(progressBar)
     }
     
-    private Unit createFeatureDemonstrationButtons() {
+     private fun createFeatureDemonstrationButtons() {
         // Feature section header
-        TextView featureHeader = TextView(this)
+        val featureHeader: TextView = TextView(this)
         featureHeader.setText("🧪 Feature Demonstrations")
         featureHeader.setTextSize(18)
         featureHeader.setTypeface(null, android.graphics.Typeface.BOLD)
@@ -274,9 +274,9 @@ class ModernMainActivity : AppCompatActivity() {
                                    v -> openApplicationSettings())
     }
     
-    private Unit createButtonWithDescription(String buttonText, String description, View.OnClickListener clickListener) {
+     private fun createButtonWithDescription(buttonText: String, description: String, View.OnClickListener clickListener) {
         // Description text
-        TextView desc = TextView(this)
+        val desc: TextView = TextView(this)
         desc.setText(description)
         desc.setTextSize(12)
         desc.setTextColor(0xFF666666)
@@ -284,7 +284,7 @@ class ModernMainActivity : AppCompatActivity() {
         mainLayout.addView(desc)
         
         // Button
-        Button button = Button(this)
+        val button: Button = Button(this)
         button.setText(buttonText)
         button.setTextSize(14)
         button.setPadding(16, 12, 16, 12)
@@ -299,7 +299,7 @@ class ModernMainActivity : AppCompatActivity() {
         mainLayout.addView(button)
     }
     
-    private Unit testModernConnection() {
+     private fun testModernConnection() {
         if (modernDemo != null) {
             updateStatus("🔄 Testing modern Second Life connection...", 30)
             Log.i(TAG, "Testing modern Second Life connection with HTTP/2 + WebSocket...")
@@ -332,7 +332,7 @@ class ModernMainActivity : AppCompatActivity() {
         }
     }
     
-    private Unit testModernAuthentication() {
+     private fun testModernAuthentication() {
         if (modernDemo != null) {
             updateStatus("🔄 Testing OAuth2 authentication...", 25)
             Log.i(TAG, "Testing OAuth2 authentication with Second Life...")
@@ -360,7 +360,7 @@ class ModernMainActivity : AppCompatActivity() {
         }
     }
     
-    private Unit testAssetStreaming() {
+     private fun testAssetStreaming() {
         if (modernDemo != null) {
             updateStatus("🔄 Testing intelligent asset streaming...", 20)
             Log.i(TAG, "Testing asset streaming with adaptive quality...")
@@ -391,7 +391,7 @@ class ModernMainActivity : AppCompatActivity() {
         }
     }
     
-    private Unit testModernRender() {
+     private fun testModernRender() {
         updateStatus("🔄 Testing modern graphics pipeline...", 15)
         Log.i(TAG, "Testing graphics pipeline with fallback rendering...")
         
@@ -426,11 +426,11 @@ class ModernMainActivity : AppCompatActivity() {
         }, 1500)
     }
     
-    private Unit openModernWorldView() {
+     private fun openModernWorldView() {
         updateStatus("🌍 Opening modern world view...", 50)
         Log.i(TAG, "Launching modern world view with Material Design...")
         
-        Intent intent = Intent(this, com.lumiyaviewer.lumiya.ui.modern.ModernWorldActivity.class)
+        val intent: Intent = Intent(this, com.lumiyaviewer.lumiya.ui.modern.ModernWorldActivity.class)
         startActivity(intent)
         
         uiHandler.postDelayed(() -> {
@@ -438,11 +438,11 @@ class ModernMainActivity : AppCompatActivity() {
         }, 1000)
     }
     
-    private Unit openGraphicsDemo() {
+     private fun openGraphicsDemo() {
         updateStatus("🎮 Opening advanced graphics demo...", 50)
         Log.i(TAG, "Launching graphics demonstration activity...")
         
-        Intent intent = Intent(this, ModernGraphicsDemoActivity.class)
+        val intent: Intent = Intent(this, ModernGraphicsDemoActivity.class)
         startActivity(intent)
         
         uiHandler.postDelayed(() -> {
@@ -450,13 +450,13 @@ class ModernMainActivity : AppCompatActivity() {
         }, 1000)
     }
     
-    private Unit runPerformanceBenchmark() {
+     private fun runPerformanceBenchmark() {
         updateStatus("⚡ Starting comprehensive performance benchmark...", 10)
         Log.i(TAG, "Running comprehensive performance benchmark of all modern components...")
         
         try {
             // Get performance monitor instance
-            ModernPerformanceMonitor monitor = ModernPerformanceMonitor.getInstance()
+            val monitor: ModernPerformanceMonitor = ModernPerformanceMonitor.getInstance()
             
             // Run benchmark in background thread
             Thread(() -> {
@@ -500,12 +500,12 @@ class ModernMainActivity : AppCompatActivity() {
                     Log.i(TAG, uiResult.summary)
                     
                     // Generate comprehensive report
-                    String performanceReport = monitor.exportPerformanceReport()
+                    val performanceReport: String = monitor.exportPerformanceReport()
                     Log.i(TAG, "=== COMPREHENSIVE PERFORMANCE REPORT ===")
                     Log.i(TAG, performanceReport)
                     
                     // Calculate overall performance rating
-                    Long totalBenchmarkTime = authResult.totalDuration + networkResult.totalDuration + 
+                    val totalBenchmarkTime: Long = authResult.totalDuration + networkResult.totalDuration + 
                                             graphicsResult.totalDuration + assetResult.totalDuration + 
                                             uiResult.totalDuration
                     
@@ -540,11 +540,11 @@ class ModernMainActivity : AppCompatActivity() {
         }
     }
     
-    private Unit openApplicationSettings() {
+     private fun openApplicationSettings() {
         updateStatus("⚙️ Opening application settings...", 50)
         Log.i(TAG, "Opening comprehensive settings and configuration...")
         
-        Intent intent = Intent(this, ModernSettingsActivity.class)
+        val intent: Intent = Intent(this, ModernSettingsActivity.class)
         startActivity(intent)
         
         uiHandler.postDelayed(() -> {
@@ -580,14 +580,14 @@ class ModernMainActivity : AppCompatActivity() {
         }
     }
     
-    private Unit showSystemInfo() {
+     private fun showSystemInfo() {
         try {
             if (modernDemo != null) {
                 // Get performance monitor for additional system info
-                ModernPerformanceMonitor monitor = ModernPerformanceMonitor.getInstance()
-                String memoryReport = monitor.getMemoryUsageReport()
+                val monitor: ModernPerformanceMonitor = ModernPerformanceMonitor.getInstance()
+                val memoryReport: String = monitor.getMemoryUsageReport()
                 
-                String info = "📱 System Information\n\n"
+                val info: String = "📱 System Information\n\n"
                 info += "Graphics: " + modernDemo.getGraphicsInfo() + "\n"
                 info += "Connected: " + (modernDemo.isConnected() ? "Yes" : "No") + "\n"
                 info += "Components: All modern systems initialized\n"
@@ -606,7 +606,7 @@ class ModernMainActivity : AppCompatActivity() {
                 updateStatus("ℹ️ System info available - Check logs for complete details", 100)
                 Log.i(TAG, info)
             } else {
-                String info = "📱 System Information\n\n"
+                val info: String = "📱 System Information\n\n"
                 info += "Status: Running in compatibility mode\n"
                 info += "Modern Components: Not available (likely missing native libraries)\n"
                 info += "Build: Debug APK v3.4.3\n\n"
@@ -634,15 +634,15 @@ class ModernMainActivity : AppCompatActivity() {
     /**
      * Create a simple error layout when normal initialization fails
      */
-    private Unit createErrorLayout(Exception e) {
+     private fun createErrorLayout(e: Exception) {
         try {
             // Create a simple linear layout
-            LinearLayout errorLayout = LinearLayout(this)
+            val errorLayout: LinearLayout = LinearLayout(this)
             errorLayout.setOrientation(LinearLayout.VERTICAL)
             errorLayout.setPadding(32, 32, 32, 32)
             
             // Error title
-            TextView errorTitle = TextView(this)
+            val errorTitle: TextView = TextView(this)
             errorTitle.setText("⚠️ Startup Issue Detected")
             errorTitle.setTextSize(20)
             errorTitle.setTypeface(null, android.graphics.Typeface.BOLD)
@@ -652,7 +652,7 @@ class ModernMainActivity : AppCompatActivity() {
             errorLayout.addView(errorTitle)
             
             // Error message
-            TextView errorMessage = TextView(this)
+            val errorMessage: TextView = TextView(this)
             errorMessage.setText("The app encountered an issue during startup but has recovered to a basic mode.\n\n" +
                                "Possible causes:\n" +
                                "• Missing native libraries\n" +
@@ -665,7 +665,7 @@ class ModernMainActivity : AppCompatActivity() {
             
             // Error details (if available)
             if (e != null) {
-                TextView errorDetails = TextView(this)
+                val errorDetails: TextView = TextView(this)
                 errorDetails.setText("Technical details:\n" + e.getMessage())
                 errorDetails.setTextSize(12)
                 errorDetails.setTextColor(0xFF666666)
@@ -674,7 +674,7 @@ class ModernMainActivity : AppCompatActivity() {
             }
             
             // Basic restart button
-            Button restartButton = Button(this)
+            val restartButton: Button = Button(this)
             restartButton.setText("Restart App")
             restartButton.setOnClickListener(v -> {
                 Log.i(TAG, "User requested app restart")
@@ -690,12 +690,12 @@ class ModernMainActivity : AppCompatActivity() {
         }
     }
     
-    private Unit clearLogs() {
+     private fun clearLogs() {
         updateStatus("🗑️ Application logs cleared", 100)
         Log.i(TAG, "Application logs cleared by user request")
     }
     
-    private Unit exportLogs() {
+     private fun exportLogs() {
         updateStatus("📤 Uploading logs to GitHub for copilot review...", 50)
         
         // Export in background thread
@@ -725,8 +725,8 @@ class ModernMainActivity : AppCompatActivity() {
         }).start()
     }
     
-    private Unit showAboutDialog() {
-        String aboutText = "🚀 Linkpoint Modern Sample Application\n\n" +
+     private fun showAboutDialog() {
+        val aboutText: String = "🚀 Linkpoint Modern Sample Application\n\n" +
                           "This comprehensive demo showcases the most advanced Second Life client technology:\n\n" +
                           "🔐 OAuth2 Authentication - Secure modern login\n" +
                           "🌐 HTTP/2 + WebSocket Transport - Faster, more reliable\n" +

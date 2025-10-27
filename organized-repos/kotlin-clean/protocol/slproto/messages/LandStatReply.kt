@@ -16,11 +16,11 @@ class LandStatReply : SLMessage() {
         public Float LocationX
         public Float LocationY
         public Float LocationZ
-        public Byte[] OwnerName
+        public ByteArray OwnerName
         public Float Score
         public UUID TaskID
         public Int TaskLocalID
-        public Byte[] TaskName
+        public ByteArray TaskName
     }
 
     @JvmStatic

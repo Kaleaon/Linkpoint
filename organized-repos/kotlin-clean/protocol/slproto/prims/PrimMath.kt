@@ -12,8 +12,8 @@ class PrimMath {
     }
 
     @JvmStatic
-    Float[] lookAt(LLVector3 lLVector3, LLVector3 lLVector32, LLVector3 lLVector33) {
-        Float[] fArr = Float[16]
+    FloatArray lookAt(LLVector3 lLVector3, LLVector3 lLVector32, LLVector3 lLVector33) {
+        FloatArray fArr = FloatArray(16)
         LLVector3 sub = LLVector3.sub(lLVector32, lLVector3)
         sub.normVec()
         LLVector3 lLVector34 = LLVector3(sub)

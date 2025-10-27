@@ -21,8 +21,8 @@ class PlacesQuery : SLMessage() {
     class QueryData {
         public Int Category
         public Int QueryFlags
-        public Byte[] QueryText
-        public Byte[] SimName
+        public ByteArray QueryText
+        public ByteArray SimName
     }
 
     @JvmStatic
@@ -34,15 +34,15 @@ class PlacesQuery : SLMessage() {
         this.zeroCoded = true
     }
 
-    public Int CalcPayloadSize() {
+    public fun CalcPayloadSize(): Int {
         return this.QueryData_Field.QueryText.length + 1 + 4 + 1 + 1 + this.QueryData_Field.SimName.length + 68
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandlePlacesQuery(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.GS)
@@ -56,7 +56,7 @@ class PlacesQuery : SLMessage() {
         packVariable(byteBuffer, this.QueryData_Field.SimName, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.QueryID = unpackUUID(byteBuffer)

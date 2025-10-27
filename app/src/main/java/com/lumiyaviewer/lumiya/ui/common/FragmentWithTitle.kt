@@ -6,12 +6,12 @@ import com.lumiyaviewer.lumiya.Debug
 import androidx.annotation.Nullable
 
 class FragmentWithTitle : StateAwareFragment : FragmentHasTitle {
-    private String FRAGMENT_SUBTITLE_TAG = "FragmentWithTitle:fragmentSubTitle"
-    private String FRAGMENT_TITLE_TAG = "FragmentWithTitle:fragmentTitle"
+    private val FRAGMENT_SUBTITLE_TAG: String = "FragmentWithTitle:fragmentSubTitle"
+    private val FRAGMENT_TITLE_TAG: String = "FragmentWithTitle:fragmentTitle"
     @Nullable
-    private String fragmentSubTitle = null
+    private val fragmentSubTitle: String = null
     @Nullable
-    private String fragmentTitle = null
+    private val fragmentTitle: String = null
 
     @Nullable
     String getSubTitle() {

@@ -8,10 +8,10 @@ import androidx.annotation.ThreadSafe
 
 @ThreadSafe
 class CameraParams {
-    private Float FLING_DECEL_PITCH = 100.0f
-    private Float FLING_DECEL_YAW = 50.0f
-    private Float MAX_PITCH = 85.0f
-    private Float MIN_PITCH = -85.0f
+    private val FLING_DECEL_PITCH: Float = 100.0f
+    private val FLING_DECEL_YAW: Float = 50.0f
+    private val MAX_PITCH: Float = 85.0f
+    private val MIN_PITCH: Float = -85.0f
     private Long flingStartTime = 0
     private Float heading = 0.0f
     private Float headingFlingSpeed = 0.0f

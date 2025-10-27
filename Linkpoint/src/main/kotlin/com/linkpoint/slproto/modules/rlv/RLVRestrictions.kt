@@ -18,16 +18,16 @@ class RLVRestrictions {
 private class RLVRestrictionList {
 
         /* renamed from: -com-lumiyaviewer-lumiya-slproto-modules-rlv-RLVRestrictionType$RLVRuleMatchTypeSwitchesValues  reason: not valid java name */
-        private const val /* synthetic */ Int[] f127comlumiyaviewerlumiyaslprotomodulesrlvRLVRestrictionType$RLVRuleMatchTypeSwitchesValues = null
+        private const val /* synthetic */ IntArray f127comlumiyaviewerlumiyaslprotomodulesrlvRLVRestrictionType$RLVRuleMatchTypeSwitchesValues = null
         private Map<String, HashSet<UUID>> restMap
 
         /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-modules-rlv-RLVRestrictionType$RLVRuleMatchTypeSwitchesValues  reason: not valid java name */
         @JvmStatic
-private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRestrictionType$RLVRuleMatchTypeSwitchesValues() {
+private /* synthetic */ IntArray m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRestrictionType$RLVRuleMatchTypeSwitchesValues() {
             if (f127comlumiyaviewerlumiyaslprotomodulesrlvRLVRestrictionType$RLVRuleMatchTypeSwitchesValues != null) {
                 return f127comlumiyaviewerlumiyaslprotomodulesrlvRLVRestrictionType$RLVRuleMatchTypeSwitchesValues
             }
-            Int[] iArr = Int[RLVRestrictionType.RLVRuleMatchType.values().length]
+            val iArr: IntArray = Int[RLVRestrictionType.RLVRuleMatchType.values().length]
             try {
                 iArr[RLVRestrictionType.RLVRuleMatchType.TargetNoExceptions.ordinal()] = 1
             } catch (NoSuchFieldError e) {
@@ -56,8 +56,8 @@ private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRe
             this()
         }
 
-        fun addRestriction(UUID uuid, String str) {
-            HashSet hashSet = this.restMap.get(str)
+        fun addRestriction(uuid: UUID, str: String) {
+            val hashSet: HashSet = this.restMap.get(str)
             if (hashSet == null) {
                 hashSet = HashSet()
                 this.restMap.put(str, hashSet)
@@ -69,7 +69,7 @@ private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRe
             return this.restMap.keySet()
         }
 
-        public Boolean hasRestrictionsByObject(UUID uuid) {
+         public fun hasRestrictionsByObject(uuid: UUID): Boolean {
             if (uuid == null) {
                 return !this.restMap.isEmpty()
             }
@@ -83,7 +83,7 @@ private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRe
 
         /* JADX WARNING: Removed duplicated region for block: B:42:0x009e  */
         /* Code decompiled incorrectly, please refer to instructions dump. */
-        public Boolean isAllowed(com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVRestrictionType.RLVRuleMatchType r6, java.lang.String r7, java.util.UUID r8, java.util.UUID r9) {
+         public fun isAllowed(com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVRestrictionType.RLVRuleMatchType r6, java.lang.String r7, java.util.UUID r8, java.util.UUID r9): Boolean {
             /*
                 r5 = this
                 r4 = 1
@@ -92,27 +92,27 @@ private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRe
                 if (r6 != r0) goto L_0x0025
                 java.util.Map<java.lang.String, java.util.HashSet<java.util.UUID>> r0 = r5.restMap
                 java.lang.String r1 = ""
-                Boolean r0 = r0.containsKey(r1)
+                val r0: Boolean = r0.containsKey(r1)
                 if (r0 == 0) goto L_0x0012
                 return r4
             L_0x0012:
                 java.lang.String r0 = ""
-                Boolean r0 = r7.equals(r0)
+                val r0: Boolean = r7.equals(r0)
                 if (r0 != 0) goto L_0x0024
                 java.util.Map<java.lang.String, java.util.HashSet<java.util.UUID>> r0 = r5.restMap
-                Boolean r0 = r0.containsKey(r7)
+                val r0: Boolean = r0.containsKey(r7)
                 if (r0 == 0) goto L_0x0024
                 return r4
             L_0x0024:
                 return r3
             L_0x0025:
                 java.util.Map<java.lang.String, java.util.HashSet<java.util.UUID>> r0 = r5.restMap
-                Boolean r0 = r0.isEmpty()
+                val r0: Boolean = r0.isEmpty()
                 if (r0 == 0) goto L_0x002e
                 return r4
             L_0x002e:
-                Int[] r0 = m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRestrictionType$RLVRuleMatchTypeSwitchesValues()
-                Int r1 = r6.ordinal()
+                val r0: IntArray = m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRestrictionType$RLVRuleMatchTypeSwitchesValues()
+                val r1: Int = r6.ordinal()
                 r0 = r0[r1]
                 switch(r0) {
                     case 1: goto L_0x0083
@@ -125,26 +125,26 @@ private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRe
             L_0x003c:
                 java.util.Map<java.lang.String, java.util.HashSet<java.util.UUID>> r0 = r5.restMap
                 java.lang.String r1 = ""
-                Boolean r0 = r0.containsKey(r1)
+                val r0: Boolean = r0.containsKey(r1)
                 if (r0 == 0) goto L_0x003b
                 java.lang.String r0 = ""
-                Boolean r0 = r7.equals(r0)
+                val r0: Boolean = r7.equals(r0)
                 if (r0 != 0) goto L_0x0059
                 java.util.Map<java.lang.String, java.util.HashSet<java.util.UUID>> r0 = r5.restMap
-                Boolean r0 = r0.containsKey(r7)
+                val r0: Boolean = r0.containsKey(r7)
                 if (r0 == 0) goto L_0x0059
                 return r4
             L_0x0059:
                 return r3
             L_0x005a:
                 java.util.Map<java.lang.String, java.util.HashSet<java.util.UUID>> r0 = r5.restMap
-                Boolean r0 = r0.containsKey(r7)
+                val r0: Boolean = r0.containsKey(r7)
                 if (r0 == 0) goto L_0x0063
                 return r3
             L_0x0063:
                 java.util.Map<java.lang.String, java.util.HashSet<java.util.UUID>> r0 = r5.restMap
                 java.lang.String r1 = ""
-                Boolean r0 = r0.containsKey(r1)
+                val r0: Boolean = r0.containsKey(r1)
                 if (r0 == 0) goto L_0x003b
                 if (r8 != 0) goto L_0x0071
                 return r3
@@ -153,12 +153,12 @@ private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRe
                 java.lang.String r1 = ""
                 java.lang.Object r0 = r0.get(r1)
                 java.util.HashSet r0 = (java.util.HashSet) r0
-                Boolean r0 = r0.contains(r8)
+                val r0: Boolean = r0.contains(r8)
                 if (r0 == 0) goto L_0x003b
                 return r3
             L_0x0083:
                 java.util.Map<java.lang.String, java.util.HashSet<java.util.UUID>> r0 = r5.restMap
-                Boolean r0 = r0.isEmpty()
+                val r0: Boolean = r0.isEmpty()
                 if (r0 != 0) goto L_0x003b
                 if (r9 != 0) goto L_0x008e
                 return r3
@@ -167,13 +167,13 @@ private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRe
                 java.util.Collection r0 = r0.values()
                 java.util.Iterator r1 = r0.iterator()
             L_0x0098:
-                Boolean r0 = r1.hasNext()
+                val r0: Boolean = r1.hasNext()
                 if (r0 == 0) goto L_0x003b
                 java.lang.Object r0 = r1.next()
                 java.util.HashSet r0 = (java.util.HashSet) r0
-                Int r2 = r0.size()
+                val r2: Int = r0.size()
                 if (r2 != r4) goto L_0x00b0
-                Boolean r0 = r0.contains(r9)
+                val r0: Boolean = r0.contains(r9)
                 if (r0 != 0) goto L_0x0098
             L_0x00b0:
                 return r3
@@ -181,12 +181,12 @@ private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRe
             throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVRestrictions.RLVRestrictionList.isAllowed(com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVRestrictionType$RLVRuleMatchType, java.lang.String, java.util.UUID, java.util.UUID):Boolean")
         }
 
-        public Boolean isEmpty() {
+         public fun isEmpty(): Boolean {
             return this.restMap.isEmpty()
         }
 
-        fun removeAllForObject(UUID uuid) {
-            HashSet<String> hashSet = HashSet<>()
+        fun removeAllForObject(uuid: UUID) {
+            val hashSet: HashSet<String> = HashSet<>()
             for (Map.Entry entry : this.restMap.entrySet()) {
                 ((HashSet) entry.getValue()).remove(uuid)
                 if (((HashSet) entry.getValue()).isEmpty()) {
@@ -198,8 +198,8 @@ private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRe
             }
         }
 
-        fun removeRestriction(UUID uuid, String str) {
-            HashSet hashSet = this.restMap.get(str)
+        fun removeRestriction(uuid: UUID, str: String) {
+            val hashSet: HashSet = this.restMap.get(str)
             if (hashSet != null) {
                 hashSet.remove(uuid)
                 if (hashSet.isEmpty()) {
@@ -214,7 +214,7 @@ private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRe
             str = ""
         }
         Debug.Printf("RLV: adding restriction '%s' for object %s, target '%s'", rLVRestrictionType.toString(), uuid, str)
-        RLVRestrictionList rLVRestrictionList = this.restrictions.get(rLVRestrictionType)
+        val rLVRestrictionList: RLVRestrictionList = this.restrictions.get(rLVRestrictionType)
         if (rLVRestrictionList == null) {
             rLVRestrictionList = RLVRestrictionList((RLVRestrictionList) null)
             this.restrictions.put(rLVRestrictionType, rLVRestrictionList)
@@ -234,7 +234,7 @@ private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRe
     }
 
     public synchronized Set<String> getTargetsForRestriction(RLVRestrictionType rLVRestrictionType) {
-        RLVRestrictionList rLVRestrictionList = this.restrictions.get(rLVRestrictionType)
+        val rLVRestrictionList: RLVRestrictionList = this.restrictions.get(rLVRestrictionType)
         if (rLVRestrictionList == null) {
             return null
         }
@@ -249,7 +249,7 @@ private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRe
         if (str == null) {
             str = ""
         }
-        RLVRestrictionList rLVRestrictionList = this.restrictions.get(rLVRestrictionType)
+        val rLVRestrictionList: RLVRestrictionList = this.restrictions.get(rLVRestrictionType)
         if (rLVRestrictionList == null) {
             return rLVRestrictionType.getRuleMatchType() != RLVRestrictionType.RLVRuleMatchType.TargetSpecifiesAllowance
         }
@@ -261,7 +261,7 @@ private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRe
             str = ""
         }
         Debug.Printf("RLV: removing restriction '%s' for object %s, target '%s'", rLVRestrictionType.toString(), uuid, str)
-        RLVRestrictionList rLVRestrictionList = this.restrictions.get(rLVRestrictionType)
+        val rLVRestrictionList: RLVRestrictionList = this.restrictions.get(rLVRestrictionType)
         if (rLVRestrictionList != null) {
             rLVRestrictionList.removeRestriction(uuid, str.toLowerCase())
             if (rLVRestrictionList.isEmpty()) {
@@ -273,7 +273,7 @@ private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRe
     public synchronized Unit removeRestrictions(UUID uuid, Set<RLVRestrictionType> set) {
         Debug.Printf("RLV: removing %d restrictions for object %s", Integer.valueOf(set.size()), uuid)
         for (RLVRestrictionType rLVRestrictionType : set) {
-            RLVRestrictionList rLVRestrictionList = this.restrictions.get(rLVRestrictionType)
+            val rLVRestrictionList: RLVRestrictionList = this.restrictions.get(rLVRestrictionType)
             if (rLVRestrictionList != null) {
                 rLVRestrictionList.removeAllForObject(uuid)
                 if (rLVRestrictionList.isEmpty()) {

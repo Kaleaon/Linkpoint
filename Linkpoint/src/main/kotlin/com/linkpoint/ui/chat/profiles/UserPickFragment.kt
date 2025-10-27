@@ -116,9 +116,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         setArguments(Bundle())
     }
 
-    private Unit deletePick() {
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
-        AvatarPickKey pickKey = getPickKey()
+     private fun deletePick() {
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
+        val pickKey: AvatarPickKey = getPickKey()
         if (userManager != null && pickKey != null) {
             AlertDialog.Builder builder = AlertDialog.Builder(getContext())
             builder.setMessage(getString(R.string.delete_pick_question)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this, userManager, pickKey) {
@@ -213,21 +213,21 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    private AvatarPickKey getPickKey() {
+     private fun getPickKey(): AvatarPickKey {
         return (AvatarPickKey) getArguments().getParcelable(PICK_ID_KEY)
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_UserPickFragment_13525  reason: not valid java name */
-    static /* synthetic */ Unit m513lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserPickFragment_13525(UserManager userManager, AvatarPickKey avatarPickKey, PickInfoReply pickInfoReply, String str) {
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+    // TODO: Review synthetic accessor - static /* synthetic */ Unit m513lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserPickFragment_13525(UserManager userManager, AvatarPickKey avatarPickKey, PickInfoReply pickInfoReply, String str) {
+        val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
             activeAgentCircuit.getModules().userProfiles.UpdatePickInfo(avatarPickKey.pickID, pickInfoReply.Data_Field.CreatorID, pickInfoReply.Data_Field.ParcelID, str, SLMessage.stringFromVariableUTF(pickInfoReply.Data_Field.Desc), pickInfoReply.Data_Field.SnapshotID, pickInfoReply.Data_Field.PosGlobal, pickInfoReply.Data_Field.SortOrder, pickInfoReply.Data_Field.Enabled)
         }
     }
 
     @JvmStatic
-    Bundle makeSelection(UUID uuid, AvatarPickKey avatarPickKey) {
-        Bundle bundle = Bundle()
+     fun makeSelection(uuid: UUID, avatarPickKey: AvatarPickKey): Bundle {
+        val bundle: Bundle = Bundle()
         bundle.putString("activeAgentUUID", uuid.toString())
         bundle.putParcelable(PICK_ID_KEY, avatarPickKey)
         return bundle
@@ -235,9 +235,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onPickInfo */
-    fun m515com_lumiyaviewer_lumiya_ui_chat_profiles_UserPickFragmentmthref0(PickInfoReply pickInfoReply) {
+    fun m515com_lumiyaviewer_lumiya_ui_chat_profiles_UserPickFragmentmthref0(pickInfoReply: PickInfoReply) {
         if (pickInfoReply != null) {
-            LLVector3d lLVector3d = pickInfoReply.Data_Field.PosGlobal
+            val lLVector3d: LLVector3d = pickInfoReply.Data_Field.PosGlobal
             Debug.Printf("GlobalPos: got pick global pos %f, %f, %f", Double.valueOf(lLVector3d.x), Double.valueOf(lLVector3d.y), Double.valueOf(lLVector3d.z))
             setTitle(SLMessage.stringFromVariableOEM(pickInfoReply.Data_Field.Name), (String) null)
         }
@@ -248,12 +248,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    private Unit renamePick() {
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
-        AvatarPickKey pickKey = getPickKey()
-        PickInfoReply data = this.pickInfo.getData()
+     private fun renamePick() {
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
+        val pickKey: AvatarPickKey = getPickKey()
+        val data: PickInfoReply = this.pickInfo.getData()
         if (userManager != null && pickKey != null && data != null) {
-            TextFieldDialogBuilder textFieldDialogBuilder = TextFieldDialogBuilder(getContext())
+            val textFieldDialogBuilder: TextFieldDialogBuilder = TextFieldDialogBuilder(getContext())
             textFieldDialogBuilder.setTitle(getString(R.string.pick_rename_title))
             textFieldDialogBuilder.setDefaultText(SLMessage.stringFromVariableOEM(data.Data_Field.Name))
             textFieldDialogBuilder.setOnTextEnteredListener(TextFieldDialogBuilder.OnTextEnteredListener(userManager, pickKey, data) {
@@ -341,10 +341,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    private Unit updateMenuItems() {
-        Boolean z = false
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
-        AvatarPickKey pickKey = getPickKey()
+     private fun updateMenuItems() {
+        val z: Boolean = false
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
+        val pickKey: AvatarPickKey = getPickKey()
         if (!(userManager == null || pickKey == null)) {
             z = userManager.getUserID().equals(pickKey.avatarID)
         }
@@ -359,10 +359,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_UserPickFragment_12153  reason: not valid java name */
     public /* synthetic */ Unit m516lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserPickFragment_12153(UserManager userManager, AvatarPickKey avatarPickKey, DialogInterface dialogInterface, Int i) {
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+        val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
             activeAgentCircuit.getModules().userProfiles.DeletePick(avatarPickKey.pickID)
-            FragmentActivity activity = getActivity()
+            val activity: FragmentActivity = getActivity()
             if (activity instanceof DetailsActivity) {
                 ((DetailsActivity) activity).closeDetailsFragment(this)
             }
@@ -374,7 +374,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_UserPickFragment_7285  reason: not valid java name */
     public /* synthetic */ Unit m517lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserPickFragment_7285(UserManager userManager, LLVector3 lLVector3, DialogInterface dialogInterface, Int i) {
         dialogInterface.dismiss()
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+        val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
             TeleportProgressDialog(getContext(), userManager, R.string.teleporting_progress_message).show()
             activeAgentCircuit.TeleportToGlobalPosition(lLVector3)
@@ -385,7 +385,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_UserPickFragment_9741  reason: not valid java name */
     public /* synthetic */ Unit m518lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserPickFragment_9741(UserManager userManager, AvatarPickKey avatarPickKey, PickInfoReply pickInfoReply, DialogInterface dialogInterface, Int i) {
         LLVector3d agentGlobalPosition
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+        val activeAgentCircuit: SLAgentCircuit = userManager.getActiveAgentCircuit()
         if (!(activeAgentCircuit == null || (agentGlobalPosition = activeAgentCircuit.getAgentGlobalPosition()) == null)) {
             Debug.Printf("GlobalPos: setting pick to global pos %f %f %f", Double.valueOf(agentGlobalPosition.x), Double.valueOf(agentGlobalPosition.y), Double.valueOf(agentGlobalPosition.z))
             activeAgentCircuit.getModules().userProfiles.UpdatePickInfo(avatarPickKey.pickID, pickInfoReply.Data_Field.CreatorID, pickInfoReply.Data_Field.ParcelID, SLMessage.stringFromVariableOEM(pickInfoReply.Data_Field.Name), SLMessage.stringFromVariableUTF(pickInfoReply.Data_Field.Desc), pickInfoReply.Data_Field.SnapshotID, agentGlobalPosition, pickInfoReply.Data_Field.SortOrder, pickInfoReply.Data_Field.Enabled)
@@ -396,23 +396,23 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: protected */
     @OnClick({2131755698})
-    fun onChangePic(View view) {
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
-        AvatarPickKey pickKey = getPickKey()
-        PickInfoReply data = this.pickInfo.getData()
+    fun onChangePic(view: View) {
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
+        val pickKey: AvatarPickKey = getPickKey()
+        val data: PickInfoReply = this.pickInfo.getData()
         if (userManager != null && pickKey != null && data != null) {
-            Bundle bundle = Bundle()
+            val bundle: Bundle = Bundle()
             bundle.putParcelable("oldPickData", data)
             getContext().startActivity(InventoryActivity.makeSelectActionIntent(getContext(), userManager.getUserID(), InventoryActivity.SelectAction.applyPickImage, bundle, SLAssetType.AT_TEXTURE))
         }
     }
 
-    fun onCreate(Bundle bundle) {
+    override fun onCreate(bundle: Bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.pick_menu, menu)
         this.menuItemRename = menu.findItem(R.id.item_pick_rename)
@@ -420,9 +420,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         updateMenuItems()
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+     public override fun onCreateView(layoutInflater: LayoutInflater, viewGroup: ViewGroup, bundle: Bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
-        View inflate = layoutInflater.inflate(R.layout.user_pick, viewGroup, false)
+        val inflate: View = layoutInflater.inflate(R.layout.user_pick, viewGroup, false)
         this.unbinder = ButterKnife.bind((Object) this, inflate)
         this.userPickImageView.setAlignTop(true)
         this.userPickImageView.setVerticalFit(true)
@@ -431,15 +431,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: protected */
     @OnClick({2131755700})
-    fun onDescEdit(View view) {
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
-        AvatarPickKey pickKey = getPickKey()
+    fun onDescEdit(view: View) {
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
+        val pickKey: AvatarPickKey = getPickKey()
         if (userManager != null && pickKey != null) {
             DetailsActivity.showEmbeddedDetails(getActivity(), PickDescriptionEditFragment.class, PickDescriptionEditFragment.makeSelection(ChatterID.getUserChatterID(userManager.getUserID(), pickKey.avatarID), pickKey))
         }
     }
 
-    fun onDestroyView() {
+    override fun onDestroyView() {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -447,7 +447,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         super.onDestroyView()
     }
 
-    public Boolean onOptionsItemSelected(MenuItem menuItem) {
+     public override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_pick_rename:
                 renamePick()
@@ -461,10 +461,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: protected */
     @OnClick({2131755696})
-    fun onSetLocation(View view) {
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
-        AvatarPickKey pickKey = getPickKey()
-        PickInfoReply data = this.pickInfo.getData()
+    fun onSetLocation(view: View) {
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
+        val pickKey: AvatarPickKey = getPickKey()
+        val data: PickInfoReply = this.pickInfo.getData()
         if (userManager != null && pickKey != null && data != null) {
             AlertDialog.Builder builder = AlertDialog.Builder(getContext())
             builder.setMessage(getString(R.string.set_pick_location_question)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this, userManager, pickKey, data) {
@@ -632,17 +632,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    fun onStart() {
-        Int i = 0
+    override fun onStart() {
+        val i: Int = 0
         super.onStart()
         setTitle(getString(R.string.name_loading_title), (String) null)
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
-            AvatarPickKey pickKey = getPickKey()
-            Boolean equals = userManager.getUserID().equals(pickKey.avatarID)
+            val pickKey: AvatarPickKey = getPickKey()
+            val equals: Boolean = userManager.getUserID().equals(pickKey.avatarID)
             this.userPickDescEditButton.setVisibility(equals ? 0 : 8)
             this.changePicButton.setVisibility(equals ? 0 : 8)
-            Button button = this.setLocationButton
+            val button: Button = this.setLocationButton
             if (!equals) {
                 i = 8
             }
@@ -653,18 +653,18 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         this.pickInfo.unsubscribe()
     }
 
-    fun onStop() {
+    override fun onStop() {
         this.pickInfo.unsubscribe()
         super.onStop()
     }
 
     /* access modifiers changed from: protected */
     @OnClick({2131755697})
-    fun onTeleportToPickClick(View view) {
-        UserManager userManager = ActivityUtils.getUserManager(getArguments())
-        PickInfoReply data = this.pickInfo.getData()
+    fun onTeleportToPickClick(view: View) {
+        val userManager: UserManager = ActivityUtils.getUserManager(getArguments())
+        val data: PickInfoReply = this.pickInfo.getData()
         if (data != null && userManager != null) {
-            LLVector3 lLVector3 = LLVector3((Float) data.Data_Field.PosGlobal.x, (Float) data.Data_Field.PosGlobal.y, (Float) data.Data_Field.PosGlobal.z)
+            val lLVector3: LLVector3 = LLVector3((Float) data.Data_Field.PosGlobal.x, (Float) data.Data_Field.PosGlobal.y, (Float) data.Data_Field.PosGlobal.z)
             AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
             builder.setMessage(getActivity().getString(R.string.teleport_pick_confirm_title)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this, userManager, lLVector3) {
 

@@ -43,9 +43,9 @@ class SLChatSessionMarkEvent : SLChatEvent {
     /* access modifiers changed from: protected */
     String getText(Context context, @NonNull UserManager userManager) {
         if (this.sessionMarkType == SessionMarkType.Teleport) {
-            return context.getString(R.string.teleport_complete_format, Object[]{this.description})
+            return context.getString(R.string.teleport_complete_format, Array<Any>{this.description})
         }
-        return context.getString(R.string.new_session_mark_format, Object[]{DateFormat.getDateTimeInstance(3, 3).format(getTimestamp())})
+        return context.getString(R.string.new_session_mark_format, Array<Any>{DateFormat.getDateTimeInstance(3, 3).format(getTimestamp())})
     }
 
     SLChatEvent.ChatMessageViewType getViewType() {

@@ -10,7 +10,7 @@ class MoneyBalanceReply : SLMessage {
 
     class MoneyData {
         UUID AgentID
-        Byte[] Description
+        ByteArray Description
         Int MoneyBalance
         Int SquareMetersCommitted
         Int SquareMetersCredit
@@ -23,7 +23,7 @@ class MoneyBalanceReply : SLMessage {
         UUID DestID
         Boolean IsDestGroup
         Boolean IsSourceGroup
-        Byte[] ItemDescription
+        ByteArray ItemDescription
         UUID SourceID
         Int TransactionType
     }

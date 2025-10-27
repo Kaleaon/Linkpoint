@@ -84,29 +84,29 @@ private class InstanceHolder {
             this.lodName = str
         }
 
-        public String getLODName() {
+         public fun getLODName(): String {
             return this.lodName
         }
     }
 
     @JvmStatic
-    GlobalOptions getInstance() {
+     fun getInstance(): GlobalOptions {
         return InstanceHolder.Instance
     }
 
     @JvmStatic
-private Long getTotalMemory() {
-        Long j = 0
+ private fun getTotalMemory(): Long {
+        val j: Long = 0
         try {
             String readLine
-            BufferedReader bufferedReader = BufferedReader(FileReader("/proc/meminfo"), 8192)
+            val bufferedReader: BufferedReader = BufferedReader(FileReader("/proc/meminfo"), 8192)
             do {
                 readLine = bufferedReader.readLine()
                 if (readLine == null) {
                     break
                 }
             } while (!readLine.startsWith("MemTotal:"))
-            String[] split = readLine.split("\\s+")
+            val split: Array<String> = readLine.split("\\s+")
             if (split.length >= 2) {
                 j = Long.parseLong(split[1])
             }
@@ -119,7 +119,7 @@ private Long getTotalMemory() {
         return j
     }
 
-    private Boolean isCacheDirectoryWriteable(File file) {
+     private fun isCacheDirectoryWriteable(file: File): Boolean {
         if (file == null) {
             return false
         }
@@ -128,7 +128,7 @@ private Long getTotalMemory() {
             if (!file.exists()) {
                 return false
             }
-            File file2 = File(file, ".tmp")
+            val file2: File = File(file, ".tmp")
             if (file2.exists()) {
                 file2.delete()
                 if (file2.exists()) {
@@ -146,15 +146,15 @@ private Long getTotalMemory() {
         }
     }
 
-    private Unit updateCacheDir(Context context, SharedPreferences sharedPreferences) {
-        File file = null
-        File file2 = (File) this.baseCacheDir.get()
-        String string = sharedPreferences.getString("cache_location", "")
+     private fun updateCacheDir(context: Context, sharedPreferences: SharedPreferences) {
+        val file: File = null
+        val file2: File = (File) this.baseCacheDir.get()
+        val string: String = sharedPreferences.getString("cache_location", "")
         if (file2 != null && isCacheDirectoryWriteable(file2) && string.isEmpty()) {
             file = file2
         }
-        Iterable arrayList = ArrayList()
-        File[] externalCacheDirs = ContextCompat.getExternalCacheDirs(context)
+        val arrayList: Iterable = ArrayList()
+        val externalCacheDirs: Array<File> = ContextCompat.getExternalCacheDirs(context)
         if (externalCacheDirs != null) {
             for (Object obj : externalCacheDirs) {
                 if (obj != null) {
@@ -162,12 +162,12 @@ private Long getTotalMemory() {
                 }
             }
         }
-        File cacheDir = context.getCacheDir()
+        val cacheDir: File = context.getCacheDir()
         if (cacheDir != null) {
             arrayList.add(cacheDir)
         }
-        Builder builder = ImmutableList.builder()
-        Iterator it = arrayList.iterator()
+        val builder: Builder = ImmutableList.builder()
+        val it: Iterator = arrayList.iterator()
         while (true) {
             cacheDir = file
             if (!it.hasNext()) {
@@ -206,12 +206,12 @@ private Long getTotalMemory() {
         }
     }
 
-    private Unit updateNotificationSoundDefault(SharedPreferences sharedPreferences, NotificationType notificationType) {
+     private fun updateNotificationSoundDefault(sharedPreferences: SharedPreferences, notificationType: NotificationType) {
         if (!sharedPreferences.contains(notificationType.getRingtoneKey())) {
-            NotificationSounds notificationSounds = (NotificationSounds) NotificationSounds.defaultSounds.get(notificationType)
+            val notificationSounds: NotificationSounds = (NotificationSounds) NotificationSounds.defaultSounds.get(notificationType)
             if (notificationSounds != null) {
-                Uri uri = notificationSounds.getUri()
-                Editor edit = sharedPreferences.edit()
+                val uri: Uri = notificationSounds.getUri()
+                val edit: Editor = sharedPreferences.edit()
                 edit.putString(notificationType.getRingtoneKey(), uri.toString())
                 edit.apply()
                 Debug.Printf("NotificationSounds: Updated %s preference to %s", notificationType.getRingtoneKey(), uri)
@@ -220,12 +220,12 @@ private Long getTotalMemory() {
     }
 
     fun enableVoice() {
-        Editor edit = LinkpointApp.getDefaultSharedPreferences().edit()
+        val edit: Editor = LinkpointApp.getDefaultSharedPreferences().edit()
         edit.putBoolean("enableVoice", true)
         edit.apply()
     }
 
-    public Boolean getAdvancedRendering() {
+     public fun getAdvancedRendering(): Boolean {
         return this.advancedRendering
     }
 
@@ -237,17 +237,17 @@ private Long getTotalMemory() {
         return (ImmutableList) this.availableCacheDirs.get()
     }
 
-    public File getBaseCacheDir() {
+     public fun getBaseCacheDir(): File {
         return (File) this.baseCacheDir.get()
     }
 
     val File getCacheDir(String str) {
         this.cacheDirUsed.set(true)
-        File file = (File) this.baseCacheDir.get()
+        val file: File = (File) this.baseCacheDir.get()
         if (file == null) {
             file = LinkpointApp.getContext().getCacheDir()
         }
-        File file2 = File(file, str)
+        val file2: File = File(file, str)
         try {
             file2.mkdirs()
         } catch (Exception e) {
@@ -259,11 +259,11 @@ private Long getTotalMemory() {
         return this.compressedTextures
     }
 
-    public Float getForceDaylightHour() {
+     public fun getForceDaylightHour(): Float {
         return this.forceDaylightHour
     }
 
-    public Boolean getForceDaylightTime() {
+     public fun getForceDaylightTime(): Boolean {
         return this.forceDaylightTime
     }
 
@@ -279,7 +279,7 @@ private Long getTotalMemory() {
         return this.hoverTextEnableObjects
     }
 
-    public Boolean getKeepWifiOn() {
+     public fun getKeepWifiOn(): Boolean {
         return this.keepWifiOn
     }
 
@@ -299,11 +299,11 @@ private Long getTotalMemory() {
         return this.RLVEnabled
     }
 
-    public Boolean getRenderClouds() {
+     public fun getRenderClouds(): Boolean {
         return this.renderClouds
     }
 
-    public Boolean getShowTimestamps() {
+     public fun getShowTimestamps(): Boolean {
         return this.showTimestamps
     }
 
@@ -311,46 +311,46 @@ private Long getTotalMemory() {
         return this.terrainTextures
     }
 
-    public Int getThemeResourceId() {
+     public fun getThemeResourceId(): Int {
         return this.themeResourceId
     }
 
-    public Boolean getUseFXAA() {
+     public fun getUseFXAA(): Boolean {
         return this.useFXAA
     }
 
-    public Boolean getVoiceEnabled() {
+     public fun getVoiceEnabled(): Boolean {
         return this.voiceEnabled
     }
 
     fun initialize() {
-        SharedPreferences defaultSharedPreferences = LinkpointApp.getDefaultSharedPreferences()
+        val defaultSharedPreferences: SharedPreferences = LinkpointApp.getDefaultSharedPreferences()
         updateFromPreferences(LinkpointApp.getContext(), defaultSharedPreferences)
         defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this)
     }
 
-    public Boolean isCacheDirUsed() {
+     public fun isCacheDirUsed(): Boolean {
         return this.cacheDirUsed.get()
     }
 
-    public Boolean isLegacyUserNames() {
+     public fun isLegacyUserNames(): Boolean {
         return this.legacyUserNames
     }
 
-    fun onSharedPreferenceChanged(SharedPreferences sharedPreferences, String str) {
+    fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, str: String) {
         updateFromPreferences(LinkpointApp.getContext(), sharedPreferences)
         EventBus.getInstance().publish(GlobalOptionsChangedEvent(sharedPreferences))
     }
 
-    fun updateFromPreferences(Context context, SharedPreferences sharedPreferences) {
+    fun updateFromPreferences(context: Context, sharedPreferences: SharedPreferences) {
         Debug.Printf("Updating options from preferences.", Object[0])
         updateNotificationSoundDefault(sharedPreferences, NotificationType.Private)
         updateNotificationSoundDefault(sharedPreferences, NotificationType.Group)
         updateNotificationSoundDefault(sharedPreferences, NotificationType.LocalChat)
         if (!sharedPreferences.getBoolean("system_defaults_set", false)) {
-            Editor edit = sharedPreferences.edit()
-            Long totalMemory = getTotalMemory()
-            Int availableProcessors = Runtime.getRuntime().availableProcessors()
+            val edit: Editor = sharedPreferences.edit()
+            val totalMemory: Long = getTotalMemory()
+            val availableProcessors: Int = Runtime.getRuntime().availableProcessors()
             if (availableProcessors < 2 || totalMemory <= 524288) {
                 edit.putBoolean("high_quality_textures", false)
             } else {
@@ -371,8 +371,8 @@ private Long getTotalMemory() {
             edit.putBoolean("system_defaults_set", true)
             edit.commit()
         }
-        Int i2 = this.themeResourceId
-        String nullToEmpty = Strings.nullToEmpty(sharedPreferences.getString("theme", "light"))
+        val i2: Int = this.themeResourceId
+        val nullToEmpty: String = Strings.nullToEmpty(sharedPreferences.getString("theme", "light"))
         if (nullToEmpty.equals("dark")) {
             this.themeResourceId = R.style.f46Theme.Linkpoint
         } else if (nullToEmpty.equals("pink")) {

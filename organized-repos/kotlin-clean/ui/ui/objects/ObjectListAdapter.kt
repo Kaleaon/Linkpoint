@@ -122,7 +122,7 @@ class ObjectListAdapter : BaseExpandableListAdapter() {
         if (view == null) {
             view = LayoutInflater.from(this.context).inflate(R.layout.object_list_item, viewGroup, false)
         }
-        view.findViewById(R.id.object_hierarchy_padding).setLayoutParams(LinearLayout.LayoutParams((Int) (TypedValue.applyDimension(1, 10.0f, this.context.getResources().getDisplayMetrics()) * ((Float) sLObjectDisplayInfo.hierarchyLevel)), -1))
+        view.findViewById(R.id.object_hierarchy_padding).setLayoutParams(LinearLayout.LayoutParams((Int) (TypedValue.applyDimension(1, 10.0f, this.context.getResources().getDisplayMetrics()) * (sLObjectDisplayInfo.toFloat().hierarchyLevel)), -1))
         view.findViewById(R.id.avatarIconView).setVisibility(sLObjectDisplayInfo instanceof SLAvatarObjectDisplayInfo ? 0 : 8)
         if (sLObjectDisplayInfo.name != null) {
             ((TextView) view.findViewById(R.id.objectNameTextView)).setText(sLObjectDisplayInfo.name)
@@ -131,7 +131,7 @@ class ObjectListAdapter : BaseExpandableListAdapter() {
         }
         TextView textView = (TextView) view.findViewById(R.id.objectDistanceTextView)
         if (!Float.isNaN(sLObjectDisplayInfo.distance)) {
-            str = String.format("%d m", Object[]{Integer.valueOf(Math.round(sLObjectDisplayInfo.distance))})
+            str = String.format("%d m", Array<Any>{Integer.valueOf(Math.round(sLObjectDisplayInfo.distance))})
         }
         textView.setText(str)
         if (sLObjectDisplayInfo instanceof SLPrimObjectDisplayInfo) {
