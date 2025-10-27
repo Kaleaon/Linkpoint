@@ -8,7 +8,7 @@ import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit
 import com.lumiyaviewer.lumiya.slproto.types.EDeRezDestination
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class ObjectDerezDialog {
 
@@ -26,7 +26,7 @@ class ObjectDerezDialog {
         }
     }
 
-    Unit askForObjectDerez(Context context, @Nonnull DerezAction derezAction, UUID uuid, Int i) {
+    Unit askForObjectDerez(Context context, @NonNull DerezAction derezAction, UUID uuid, Int i) {
         Int i2 = derezAction.derezQuestionId
         AlertDialog.Builder builder = AlertDialog.Builder(context)
         builder.setMessage(context.getString(i2)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener() {

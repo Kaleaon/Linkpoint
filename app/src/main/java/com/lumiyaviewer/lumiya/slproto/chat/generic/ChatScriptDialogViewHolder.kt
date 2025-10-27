@@ -1,15 +1,15 @@
 package com.lumiyaviewer.lumiya.slproto.chat.generic
 import java.util.*
 
-import android.support.v7.widget.CardView
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.CardView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.chat.SLChatScriptDialog
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class ChatScriptDialogViewHolder : ChatEventViewHolder : View.OnClickListener {
     private val dialogButtonIds: IntArray = {R.id.buttonDialog1, R.id.buttonDialog2, R.id.buttonDialog3, R.id.buttonDialog4, R.id.buttonDialog5, R.id.buttonDialog6, R.id.buttonDialog7, R.id.buttonDialog8, R.id.buttonDialog9, R.id.buttonDialog10, R.id.buttonDialog11, R.id.buttonDialog12}

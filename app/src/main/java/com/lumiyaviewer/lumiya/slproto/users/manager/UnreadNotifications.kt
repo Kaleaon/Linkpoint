@@ -9,17 +9,17 @@ import java.util.Iterator
 import java.util.List
 import java.util.Map
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 abstract class UnreadNotifications {
-    UnreadNotifications create(@Nonnull UUID uuid, @Nonnull ImmutableMap<NotificationType, UnreadNotificationInfo> immutableMap) {
+    UnreadNotifications create(@NonNull UUID uuid, @NonNull ImmutableMap<NotificationType, UnreadNotificationInfo> immutableMap) {
         return AutoValue_UnreadNotifications(uuid, immutableMap)
     }
 
-    @Nonnull
+    @NonNull
     abstract UUID agentUUID()
 
-    UnreadNotifications filter(@Nonnull ImmutableSet<NotificationType> immutableSet) {
+    UnreadNotifications filter(@NonNull ImmutableSet<NotificationType> immutableSet) {
         if (immutableSet.containsAll(notificationGroups().keySet())) {
             return this
         }
@@ -110,6 +110,6 @@ abstract class UnreadNotifications {
         return UnreadNotificationInfo.create(agentUUID(), i, builder != null ? builder.build() : null, notificationType, i3, notificationType2, unreadMessageSource, objectPopupNotification != null ? objectPopupNotification : UnreadNotificationInfo.ObjectPopupNotification.create(0, 0, (UnreadNotificationInfo.ObjectPopupMessage) null))
     }
 
-    @Nonnull
+    @NonNull
     abstract ImmutableMap<NotificationType, UnreadNotificationInfo> notificationGroups()
 }

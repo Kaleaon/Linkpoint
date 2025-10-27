@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableList
 import com.lumiyaviewer.lumiya.slproto.users.manager.UnreadNotificationInfo
 import com.lumiyaviewer.lumiya.ui.settings.NotificationType
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class AutoValue_UnreadNotificationInfo : UnreadNotificationInfo {
     private UUID agentUUID
@@ -72,22 +72,22 @@ class AutoValue_UnreadNotificationInfo : UnreadNotificationInfo {
         return ((((((((((((((this.agentUUID.hashCode() ^ 1000003) * 1000003) ^ this.totalUnreadCount) * 1000003) ^ this.unreadSources.hashCode()) * 1000003) ^ this.mostImportantType.hashCode()) * 1000003) ^ this.freshMessagesCount) * 1000003) ^ this.mostImportantFreshType.hashCode()) * 1000003) ^ this.singleFreshSource.hashCode()) * 1000003) ^ this.objectPopupInfo.hashCode()
     }
 
-    @Nonnull
+    @NonNull
     Optional<NotificationType> mostImportantFreshType() {
         return this.mostImportantFreshType
     }
 
-    @Nonnull
+    @NonNull
     Optional<NotificationType> mostImportantType() {
         return this.mostImportantType
     }
 
-    @Nonnull
+    @NonNull
     UnreadNotificationInfo.ObjectPopupNotification objectPopupInfo() {
         return this.objectPopupInfo
     }
 
-    @Nonnull
+    @NonNull
     Optional<UnreadNotificationInfo.UnreadMessageSource> singleFreshSource() {
         return this.singleFreshSource
     }
@@ -100,7 +100,7 @@ class AutoValue_UnreadNotificationInfo : UnreadNotificationInfo {
         return this.totalUnreadCount
     }
 
-    @Nonnull
+    @NonNull
     ImmutableList<UnreadNotificationInfo.UnreadMessageSource> unreadSources() {
         return this.unreadSources
     }

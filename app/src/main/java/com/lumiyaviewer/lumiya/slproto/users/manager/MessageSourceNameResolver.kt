@@ -8,11 +8,11 @@ import java.util.Set
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class MessageSourceNameResolver {
     /* access modifiers changed from: private */
-    @Nonnull
+    @NonNull
     Executor dbExecutor
     /* access modifiers changed from: private */
     OnMessageSourcesResolvedListener listener
@@ -49,7 +49,7 @@ class MessageSourceNameResolver {
     /* access modifiers changed from: private */
     Map<UUID, NameRequestEntry> requestEntryMap = ConcurrentHashMap()
     /* access modifiers changed from: private */
-    @Nonnull
+    @NonNull
     UserManager userManager
 
     private class NameRequestEntry {
@@ -84,7 +84,7 @@ class MessageSourceNameResolver {
         Unit onMessageSourcesResolved(Set<Long> set, UserName userName)
     }
 
-    MessageSourceNameResolver(@Nonnull UserManager userManager2, OnMessageSourcesResolvedListener onMessageSourcesResolvedListener) {
+    MessageSourceNameResolver(@NonNull UserManager userManager2, OnMessageSourcesResolvedListener onMessageSourcesResolvedListener) {
         this.userManager = userManager2
         this.listener = onMessageSourcesResolvedListener
         this.dbExecutor = userManager2.getDatabaseExecutor()

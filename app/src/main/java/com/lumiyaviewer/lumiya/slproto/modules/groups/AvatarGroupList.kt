@@ -9,7 +9,7 @@ import com.lumiyaviewer.lumiya.slproto.modules.groups.AgentGroupDataInfo
 import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.io.Serializable
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class AvatarGroupList : Serializable {
     ImmutableMap<UUID, AvatarGroupEntry> Groups

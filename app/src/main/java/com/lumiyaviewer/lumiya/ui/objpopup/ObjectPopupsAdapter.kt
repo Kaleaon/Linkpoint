@@ -2,7 +2,7 @@ package com.lumiyaviewer.lumiya.ui.objpopup
 import java.util.*
 
 import android.content.Context
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.lumiyaviewer.lumiya.slproto.chat.generic.ChatEventViewHolder

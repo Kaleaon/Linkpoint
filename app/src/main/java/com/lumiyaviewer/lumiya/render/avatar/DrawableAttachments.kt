@@ -12,16 +12,16 @@ import com.lumiyaviewer.lumiya.render.RenderContext
 import com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer
 import com.lumiyaviewer.lumiya.slproto.avatar.SLSkeletonBoneID
 import com.lumiyaviewer.rawbuffers.DirectByteBuffer
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
-import javax.annotation.concurrent.Immutable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
+import androidx.annotation.Immutable
 
 @Immutable
 class DrawableAttachments {
     private var glAnimationDataBuffer: GLLoadableBuffer? = null
-    @Nonnull
+    @NonNull
     private ImmutableMultimap<Int, DrawableObject> nonRigged
-    @Nonnull
+    @NonNull
     private ImmutableList<DrawableObject> rigged
 
     DrawableAttachments() {
@@ -50,7 +50,7 @@ class DrawableAttachments {
         Debug.Printf("Created drawableAttachments: %d rigged, %d non-rigged", Int.valueOf(this.rigged.size()), Int.valueOf(this.nonRigged.size()))
     }
 
-    DrawableAttachments(@Nonnull DrawableAttachments drawableAttachments) {
+    DrawableAttachments(@NonNull DrawableAttachments drawableAttachments) {
         this.glAnimationDataBuffer = null
         Builder builder = ImmutableMultimap.builder()
         ImmutableList.Builder builder2 = ImmutableList.builder()

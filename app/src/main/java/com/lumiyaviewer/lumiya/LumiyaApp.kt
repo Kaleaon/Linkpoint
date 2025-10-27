@@ -9,7 +9,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.AssetManager
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import androidx.core.app.NotificationCompat
 import androidx.multidex.MultiDex
 import androidx.multidex.MultiDexApplication
@@ -22,135 +22,142 @@ import com.lumiyaviewer.lumiya.modern.samples.ModernLinkpointDemo
 import com.lumiyaviewer.lumiya.debug.AutoLogUploader
 
 /**
- * Main Application object for Lumiya Viewer.
+ * Main Application class for Lumiya Viewer.
  * 
  * Handles global application state, resource conflict resolution, and system-wide initialization.
  * Updated to use AndroidX libraries and modern Android development practices.
  * Extends MultiDexApplication to support large applications with 64K+ methods.
  */
-object LumiyaApp : MultiDexApplication() {
-    private const val TAG = "LumiyaApp"
-    private val displayMetrics = DisplayMetrics()
-    private var mContext: Context? = null
-    private var prefs: SharedPreferences? = null
+class LumiyaApp : MultiDexApplication() {
     
-    // Modern components
-    private var modernDemo: ModernLinkpointDemo? = null
-
-    fun getAppVersion(): String {
-        return try {
-            mContext?.packageManager?.getPackageInfo(mContext!!.packageName, 0)?.versionName ?: ""
-        } catch (e: NameNotFoundException) {
-            Log.w(TAG, "Could not get app version", e)
-            ""
-        }
-    }
-    
-    /**
-     * Get application startup status and any initialization errors
-     */
-    fun getStartupStatus(): String {
-        if (mContext == null) {
-            return "Application context not initialized"
+    companion object {
+        private const val TAG = "LumiyaApp"
+        private val displayMetrics = DisplayMetrics()
+        private lateinit var mContext: Context
+        private val prefs: SharedPreferences by lazy { 
+            PreferenceManager.getDefaultSharedPreferences(mContext) 
         }
         
-        val status = StringBuilder()
-        status.append("Lumiya Application Status:\n")
-        status.append("- Context: ").append(if (mContext != null) "OK" else "NULL").append("\n")
-        status.append("- Modern Components: ").append(if (modernDemo != null) "Active" else "Safe Mode").append("\n")
+        // Modern components
+        private var modernDemo: ModernLinkpointDemo? = null
         
-        modernDemo?.let { demo ->
-            try {
-                status.append("- Graphics: ").append(demo.getGraphicsInfo()).append("\n")
-                status.append("- Connection: ").append(if (demo.isConnected()) "Connected" else "Disconnected").append("\n")
-            } catch (e: Exception) {
-                status.append("- Component Status: Error checking - ").append(e.message).append("\n")
+        fun getContext(): Context = mContext
+        
+        fun getDefaultSharedPreferences(): SharedPreferences = prefs
+        
+        fun getAssetManager(): AssetManager = mContext.assets
+
+        fun getAppVersion(): String {
+            return try {
+                mContext.packageManager.getPackageInfo(mContext.packageName, 0)?.versionName ?: ""
+            } catch (e: NameNotFoundException) {
+                Log.w(TAG, "Could not get app version", e)
+                ""
             }
-        } ?: run {
-            status.append("- Running in Safe Mode - basic functionality only\n")
+        }
+    
+        /**
+         * Get application startup status and any initialization errors
+         */
+        fun getStartupStatus(): String {
+            if (!::mContext.isInitialized) {
+                return "Application context not initialized"
+            }
+            
+            return buildString {
+                append("Lumiya Application Status:\n")
+                append("- Context: OK\n")
+                append("- Modern Components: ${if (modernDemo != null) "Active" else "Safe Mode"}\n")
+                
+                modernDemo?.let { demo ->
+                    try {
+                        append("- Graphics: ${demo.getGraphicsInfo()}\n")
+                        append("- Connection: ${if (demo.isConnected()) "Connected" else "Disconnected"}\n")
+                    } catch (e: Exception) {
+                        append("- Component Status: Error checking - ${e.message}\n")
+                    }
+                } ?: run {
+                    append("- Running in Safe Mode - basic functionality only\n")
+                }
+            }
+        }
+    
+        /**
+         * Upload debug logs immediately (for debug builds only)
+         */
+        fun uploadDebugLogsNow(reason: String) {
+            if (::mContext.isInitialized) {
+                try {
+                    AutoLogUploader.getInstance(mContext).uploadLogsNow(reason)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to trigger log upload", e)
+                }
+            }
         }
         
-        return status.toString()
-    }
-    
-    /**
-     * Upload debug logs immediately (for debug builds only)
-     */
-    fun uploadDebugLogsNow(reason: String) {
-        mContext?.let { context ->
+        /**
+         * Report a crash for automatic upload (debug builds only)
+         */
+        fun reportCrash(crash: Throwable, additionalInfo: String) {
+            if (::mContext.isInitialized) {
+                try {
+                    AutoLogUploader.getInstance(mContext).uploadCrashReport(crash, additionalInfo)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to upload crash report", e)
+                }
+            }
+        }
+
+        @Suppress("DEPRECATION")
+        fun isSplitScreenNeeded(context: Context): Boolean {
+            val preference = getDefaultSharedPreferences().getString("split_screens", "auto") ?: "auto"
+            return when (preference) {
+                "never" -> false
+                "always" -> true
+                else -> {
+                    val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+                    val defaultDisplay = windowManager.defaultDisplay
+                    
+                    if (preference == "landscape") {
+                        defaultDisplay.width > defaultDisplay.height
+                    } else {
+                        defaultDisplay.getMetrics(displayMetrics)
+                        val heightInches = displayMetrics.heightPixels.toFloat() / displayMetrics.ydpi
+                        val widthInches = displayMetrics.widthPixels.toFloat() / displayMetrics.xdpi
+                        val diagonalInches = kotlin.math.sqrt((heightInches * heightInches + widthInches * widthInches).toDouble())
+                        
+                        if (diagonalInches <= 6.5 || widthInches < 5.0f) {
+                            return false
+                        }
+                        
+                        val widthDp = defaultDisplay.width.toFloat() / displayMetrics.density
+                        Log.i(TAG, "Display: width ${widthDp}dp, ${widthInches}in, diagonal ${diagonalInches}in")
+                        widthDp >= 1000.0f
+                    }
+                }
+            }
+        }
+
+        fun restartApp() {
             try {
-                AutoLogUploader.getInstance(context).uploadLogsNow(reason)
+                val alarmManager = mContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val pendingIntent = PendingIntent.getActivity(
+                    mContext, 
+                    0, 
+                    Intent(mContext, LauncherActivity::class.java), 
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, pendingIntent)
+                System.exit(0)
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to trigger log upload", e)
+                Log.e(TAG, "Failed to restart app", e)
             }
         }
-    }
-    
-    /**
-     * Report a crash for automatic upload (debug builds only)
-     */
-    fun reportCrash(crash: Throwable, additionalInfo: String) {
-        mContext?.let { context ->
-            try {
-                AutoLogUploader.getInstance(context).uploadCrashReport(crash, additionalInfo)
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to upload crash report", e)
-            }
-        }
-    }
-
-    fun getAssetManager(): AssetManager? {
-        return mContext?.assets
-    }
-
-    fun getContext(): Context {
-        return mContext!!
-    }
-
-    fun getDefaultSharedPreferences(): SharedPreferences {
-        if (prefs == null) {
-            prefs = PreferenceManager.getDefaultSharedPreferences(getContext())
-        }
-        return prefs!!
-    }
-
-    @Suppress("DEPRECATION")
-    fun isSplitScreenNeeded(context: Context): Boolean {
-        val string = getDefaultSharedPreferences().getString("split_screens", "auto") ?: "auto"
-        if (string == "never") {
-            return false
-        }
-        if (string == "always") {
-            return true
-        }
-        val defaultDisplay = (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
-        if (string == "landscape") {
-            return defaultDisplay.width > defaultDisplay.height
-        } else {
-            defaultDisplay.getMetrics(displayMetrics)
-            val f = displayMetrics.heightPixels.toFloat() / displayMetrics.ydpi
-            val f2 = displayMetrics.widthPixels.toFloat() / displayMetrics.xdpi
-            val diagonalInches = Math.sqrt(((f * f) + (f2 * f2)).toDouble())
-            if (diagonalInches <= 6.5 || f2 < 5.0f) {
-                return false
-            }
-            Log.i(TAG, String.format("LumiyaApp: Display width in dp: %.2f, xInches %.1f, diag %.1f", 
-                defaultDisplay.width.toFloat() / displayMetrics.density, f2, diagonalInches))
-            return defaultDisplay.width.toFloat() / displayMetrics.density >= 1000.0f
-        }
-    }
-
-    fun restartApp() {
-        try {
-            val alarmManager = getContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val pendingIntent = PendingIntent.getActivity(getContext(), 0, 
-                Intent(getContext(), LauncherActivity::class.java), 
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-            alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, pendingIntent)
-            System.exit(0)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to restart app", e)
-        }
+        
+        /**
+         * Get modern components demo instance
+         */
+        fun getModernDemo(): ModernLinkpointDemo? = modernDemo
     }
 
     override fun onCreate() {
@@ -275,8 +282,8 @@ object LumiyaApp : MultiDexApplication() {
     private fun performSystemChecks(): Boolean {
         try {
             // Check if we have a valid context
-            if (mContext == null) {
-                Log.e(TAG, "Context is null - cannot initialize modern components")
+            if (!::mContext.isInitialized) {
+                Log.e(TAG, "Context not initialized - cannot initialize modern components")
                 return false
             }
             
@@ -321,13 +328,6 @@ object LumiyaApp : MultiDexApplication() {
         }
     }
     
-    /**
-     * Get modern components demo instance
-     */
-    fun getModernDemo(): ModernLinkpointDemo? {
-        return modernDemo
-    }
-
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
         MultiDex.install(this)

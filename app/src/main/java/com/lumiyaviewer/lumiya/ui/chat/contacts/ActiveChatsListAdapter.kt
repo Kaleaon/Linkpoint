@@ -27,14 +27,14 @@ import com.lumiyaviewer.lumiya.ui.common.SwipeDismissListViewTouchListener
 import com.lumiyaviewer.lumiya.voice.common.model.VoiceChatInfo
 import java.io.Closeable
 import java.io.IOException
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class ActiveChatsListAdapter : BaseAdapter : Closeable, DismissableAdapter {
-    private val VIEW_TYPE_COUNT: Int = 2
-    private val VIEW_TYPE_HEADER: Int = 1
-    private val VIEW_TYPE_ROW: Int = 0
-    @Nonnull
+    private Int VIEW_TYPE_COUNT = 2
+    private Int VIEW_TYPE_HEADER = 1
+    private Int VIEW_TYPE_ROW = 0
+    @NonNull
     private ImmutableList<? : ChatterDisplayInfo> activeChatters = ImmutableList.of()
     private Subscription<ChatterListType, ImmutableList<ChatterDisplayData>> activeChattersSubscription
     /* access modifiers changed from: private */
@@ -47,7 +47,7 @@ class ActiveChatsListAdapter : BaseAdapter : Closeable, DismissableAdapter {
     private LocalChatItem localChatItem
     private Subscription<ChatterID, UnreadMessageInfo> localChatUnreadCountSubscription
     private Subscription<ChatterID, VoiceChatInfo> localVoiceChatSubscription
-    @Nonnull
+    @NonNull
     private ImmutableList<? : ChatterDisplayInfo> onlineFriends = ImmutableList.of()
     private OnlineFriendsHeaderRow onlineFriendsHeader
     private Subscription<ChatterListType, ImmutableList<ChatterDisplayData>> onlineFriendsSubscription

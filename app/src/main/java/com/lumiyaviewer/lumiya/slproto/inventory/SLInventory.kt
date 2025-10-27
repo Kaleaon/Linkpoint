@@ -1,8 +1,8 @@
 package com.lumiyaviewer.lumiya.slproto.inventory
 
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 /**
  * Converted from Java to Kotlin

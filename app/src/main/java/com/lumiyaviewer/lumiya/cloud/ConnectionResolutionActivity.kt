@@ -34,8 +34,8 @@ import com.lumiyaviewer.lumiya.cloud.Debug
 import com.lumiyaviewer.lumiya.cloud.DriveSyncService
 import com.lumiyaviewer.lumiya.cloud.ErrorResolutionTracker
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class ConnectionResolutionActivity
 : Activity {
@@ -66,14 +66,14 @@ class ConnectionResolutionActivity
         return messenger
     }
 
-    Intent getResolvableErrorIntent(Context context, @Nonnull UUID uUID) {
+    Intent getResolvableErrorIntent(Context context, @NonNull UUID uUID) {
         context = Intent(context, ConnectionResolutionActivity.class)
         context.putExtra(RESOLVABLE_ERROR_TAG, uUID.toString())
         context.setFlags(0x10000000)
         return context
     }
 
-    void startForConnectionResolution(Context context, @Nonnull ConnectionResult connectionResult) {
+    void startForConnectionResolution(Context context, @NonNull ConnectionResult connectionResult) {
         Intent intent = Intent(context, ConnectionResolutionActivity.class)
         intent.putExtra(CONNECTION_RESULT_TAG, (Parcelable)connectionResult)
         intent.setFlags(0x10000000)

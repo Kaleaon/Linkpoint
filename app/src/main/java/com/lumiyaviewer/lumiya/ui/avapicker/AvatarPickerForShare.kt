@@ -1,14 +1,14 @@
 package com.lumiyaviewer.lumiya.ui.avapicker
 
 import android.os.Bundle
-import android.support.v4.app.FragmentActivity
+import androidx.fragment.app.FragmentActivity
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import com.lumiyaviewer.lumiya.ui.common.DetailsActivity
 import com.lumiyaviewer.lumiya.ui.inventory.InventoryFragmentHelper
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class AvatarPickerForShare : AvatarPickerFragment {
     private val INVENTORY_ENTRY_KEY: String = "inventoryEntry"

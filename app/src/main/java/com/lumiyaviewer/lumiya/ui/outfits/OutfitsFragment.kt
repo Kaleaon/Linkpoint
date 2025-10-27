@@ -44,8 +44,8 @@ import com.lumiyaviewer.lumiya.ui.inventory.InventorySortOrderChangedEvent
 import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.Iterator
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class OutfitsFragment : FragmentWithTitle : ReloadableFragment, View.OnClickListener, InventoryFolderAdapter.OnItemCheckboxClickListener {
     private val FOLDER_ID_KEY: String = "folderID"
@@ -478,7 +478,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
         return ActivityUtils.getUserManager(getArguments())
     }
 
-    Bundle makeSelection(@Nonnull UUID uuid, @Nullable UUID uuid2) {
+    Bundle makeSelection(@NonNull UUID uuid, @Nullable UUID uuid2) {
         Bundle bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         if (uuid2 != null) {

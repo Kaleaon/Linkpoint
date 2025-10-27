@@ -14,14 +14,14 @@ import com.lumiyaviewer.lumiya.ui.settings.NotificationType
 import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.UUID
 import java.util.concurrent.Executor
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 abstract class ChatterID : Parcelable, Comparable<ChatterID> {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ IntArray f150comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues = null
-    @Nonnull
+    private /* synthetic */ Int[] f150comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues = null
+    @NonNull
     UUID agentUUID
 
     class ChatterIDGroup : ChatterIDWithUUID {
@@ -43,7 +43,7 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
             this(parcel)
         }
 
-        private ChatterIDGroup(@Nonnull UUID uuid, @Nonnull UUID uuid2) {
+        private ChatterIDGroup(@NonNull UUID uuid, @NonNull UUID uuid2) {
             super(uuid, uuid2, (ChatterIDWithUUID) null)
         }
 
@@ -51,7 +51,7 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
             this(uuid, uuid2)
         }
 
-        /* bridge */ /* synthetic */ Int compareTo(@Nonnull ChatterID chatterID) {
+        /* bridge */ /* synthetic */ Int compareTo(@NonNull ChatterID chatterID) {
             return super.compareTo(chatterID)
         }
 
@@ -62,12 +62,12 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
             return false
         }
 
-        @Nonnull
+        @NonNull
         ChatterType getChatterType() {
             return ChatterType.Group
         }
 
-        @Nonnull
+        @NonNull
         /* bridge */ /* synthetic */ UUID getChatterUUID() {
             return super.getChatterUUID()
         }
@@ -77,7 +77,7 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
             return super.getOptionalChatterUUID()
         }
 
-        Subscription getPictureID(@Nonnull UserManager userManager, @Nullable Executor executor, @Nonnull OnChatterPictureIDListener onChatterPictureIDListener) {
+        Subscription getPictureID(@NonNull UserManager userManager, @Nullable Executor executor, @NonNull OnChatterPictureIDListener onChatterPictureIDListener) {
             return userManager.getCachedGroupProfiles().getPool().subscribe(this.uuid, UIThreadExecutor.getInstance(), $Lambda$0dEDWURupJXcv_HDGgfxSQl02DE(onChatterPictureIDListener))
         }
 
@@ -121,7 +121,7 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
             this(parcel)
         }
 
-        private ChatterIDLocal(@Nonnull UUID uuid) {
+        private ChatterIDLocal(@NonNull UUID uuid) {
             super(uuid, (ChatterID) null)
         }
 
@@ -136,7 +136,7 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
             return false
         }
 
-        @Nonnull
+        @NonNull
         ChatterType getChatterType() {
             return ChatterType.Local
         }
@@ -161,7 +161,7 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
             this(parcel)
         }
 
-        private ChatterIDUser(@Nonnull UUID uuid, @Nonnull UUID uuid2) {
+        private ChatterIDUser(@NonNull UUID uuid, @NonNull UUID uuid2) {
             super(uuid, uuid2, (ChatterIDWithUUID) null)
         }
 
@@ -169,7 +169,7 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
             this(uuid, uuid2)
         }
 
-        /* bridge */ /* synthetic */ Int compareTo(@Nonnull ChatterID chatterID) {
+        /* bridge */ /* synthetic */ Int compareTo(@NonNull ChatterID chatterID) {
             return super.compareTo(chatterID)
         }
 
@@ -180,12 +180,12 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
             return false
         }
 
-        @Nonnull
+        @NonNull
         ChatterType getChatterType() {
             return ChatterType.User
         }
 
-        @Nonnull
+        @NonNull
         /* bridge */ /* synthetic */ UUID getChatterUUID() {
             return super.getChatterUUID()
         }
@@ -195,7 +195,7 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
             return super.getOptionalChatterUUID()
         }
 
-        Subscription getPictureID(@Nonnull UserManager userManager, @Nullable Executor executor, @Nonnull OnChatterPictureIDListener onChatterPictureIDListener) {
+        Subscription getPictureID(@NonNull UserManager userManager, @Nullable Executor executor, @NonNull OnChatterPictureIDListener onChatterPictureIDListener) {
             return userManager.getAvatarProperties().getPool().subscribe(this.uuid, executor, Subscription.OnData(onChatterPictureIDListener) {
 
                 /* renamed from: -$f0 */
@@ -307,7 +307,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.-$Lambd
     }
 
     private abstract class ChatterIDWithUUID : ChatterID {
-        @Nonnull
+        @NonNull
         protected UUID uuid
 
         private ChatterIDWithUUID(Parcel parcel) {
@@ -319,7 +319,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.-$Lambd
             this(parcel)
         }
 
-        private ChatterIDWithUUID(@Nonnull UUID uuid2, @Nonnull UUID uuid3) {
+        private ChatterIDWithUUID(@NonNull UUID uuid2, @NonNull UUID uuid3) {
             super(uuid2, (ChatterID) null)
             this.uuid = uuid3 == null ? UUIDPool.ZeroUUID : uuid3
         }
@@ -328,7 +328,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.-$Lambd
             this(uuid2, uuid3)
         }
 
-        Int compareTo(@Nonnull ChatterID chatterID) {
+        Int compareTo(@NonNull ChatterID chatterID) {
             Int compareTo = ChatterID.super.compareTo(chatterID)
             if (compareTo != 0) {
                 return compareTo
@@ -346,7 +346,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.-$Lambd
             return Objects.equal(this.uuid, ((ChatterIDWithUUID) obj).uuid)
         }
 
-        @Nonnull
+        @NonNull
         UUID getChatterUUID() {
             return this.uuid
         }
@@ -395,7 +395,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.-$Lambd
         Group(NotificationType.Group)
         
         ChatterType[] VALUES = null
-        @Nonnull
+        @NonNull
         private NotificationType notificationType
 
         {
@@ -406,7 +406,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.-$Lambd
             this.notificationType = notificationType2
         }
 
-        @Nonnull
+        @NonNull
         NotificationType getNotificationType() {
             return this.notificationType
         }
@@ -417,11 +417,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.-$Lambd
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ IntArray m259getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues() {
+    private /* synthetic */ Int[] m259getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues() {
         if (f150comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues != null) {
             return f150comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues
         }
-        IntArray iArr = Int[ChatterType.values().length]
+        Int[] iArr = Int[ChatterType.values().length]
         try {
             iArr[ChatterType.Group.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -446,7 +446,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.-$Lambd
         this(parcel)
     }
 
-    private ChatterID(@Nonnull UUID uuid) {
+    private ChatterID(@NonNull UUID uuid) {
         this.agentUUID = uuid
     }
 
@@ -481,22 +481,22 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.-$Lambd
         }
     }
 
-    @Nonnull
-    ChatterID getGroupChatterID(@Nonnull UUID uuid, @Nonnull UUID uuid2) {
+    @NonNull
+    ChatterID getGroupChatterID(@NonNull UUID uuid, @NonNull UUID uuid2) {
         return ChatterIDGroup(uuid, uuid2, (ChatterIDGroup) null)
     }
 
-    @Nonnull
-    ChatterID getLocalChatterID(@Nonnull UUID uuid) {
+    @NonNull
+    ChatterID getLocalChatterID(@NonNull UUID uuid) {
         return ChatterIDLocal(uuid, (ChatterIDLocal) null)
     }
 
-    @Nonnull
-    ChatterIDUser getUserChatterID(@Nonnull UUID uuid, @Nonnull UUID uuid2) {
+    @NonNull
+    ChatterIDUser getUserChatterID(@NonNull UUID uuid, @NonNull UUID uuid2) {
         return ChatterIDUser(uuid, uuid2, (ChatterIDUser) null)
     }
 
-    Int compareTo(@Nonnull ChatterID chatterID) {
+    Int compareTo(@NonNull ChatterID chatterID) {
         Int compareTo = this.agentUUID.compareTo(chatterID.agentUUID)
         return compareTo != 0 ? compareTo : getChatterType().compareTo(chatterID.getChatterType())
     }
@@ -512,7 +512,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.-$Lambd
         return false
     }
 
-    @Nonnull
+    @NonNull
     abstract ChatterType getChatterType()
 
     @Nullable
@@ -525,7 +525,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.-$Lambd
         return null
     }
 
-    Subscription getPictureID(@Nonnull UserManager userManager, @Nullable Executor executor, @Nonnull OnChatterPictureIDListener onChatterPictureIDListener) {
+    Subscription getPictureID(@NonNull UserManager userManager, @Nullable Executor executor, @NonNull OnChatterPictureIDListener onChatterPictureIDListener) {
         return null
     }
 

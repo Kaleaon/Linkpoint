@@ -40,8 +40,8 @@ import java.text.DateFormat
 import java.util.Arrays
 import java.util.Date
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class NotecardEditActivity : ThemedActivity : SLNotecard.OnAttachmentClickListener, View.OnClickListener {
     private val INVENTORY_ENTRY_KEY: String = "inventoryEntry"
@@ -126,7 +126,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         }
     }
 
-    Intent createIntent(Context context, @Nonnull UUID uuid, @Nullable UUID uuid2, @Nullable SLInventoryEntry sLInventoryEntry, Boolean z, @Nullable UUID uuid3, Int i) {
+    Intent createIntent(Context context, @NonNull UUID uuid, @Nullable UUID uuid2, @Nullable SLInventoryEntry sLInventoryEntry, Boolean z, @Nullable UUID uuid3, Int i) {
         Intent intent = Intent(context, NotecardEditActivity.class)
         intent.putExtra("activeAgentUUID", uuid.toString())
         if (uuid2 != null) {

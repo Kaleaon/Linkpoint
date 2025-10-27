@@ -11,7 +11,7 @@ package com.lumiyaviewer.lumiya.cloud
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.common.api.ResultCallback
 import com.google.android.gms.common.api.Status
@@ -32,17 +32,17 @@ import com.lumiyaviewer.lumiya.cloud.ErrorResolutionTracker
 import java.util.HashSet
 import java.util.Iterator
 import java.util.Set
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 abstract class DriveConnectibleResource {
-    @Nonnull
+    @NonNull
     private Context context
     @Nullable
     private DriveResource driveResource
     @Nullable
     private String errorMessage
-    @Nonnull
+    @NonNull
     GoogleApiClient googleApiClient
     private Set<OnResourceReadyListener> listeners = new HashSet<OnResourceReadyListener>()
     private boolean needInvalidate = false
@@ -57,14 +57,14 @@ abstract class DriveConnectibleResource {
     @Nullable
     private String preferencesKey
     private boolean requestedParentInvalidate = false
-    @Nonnull
+    @NonNull
     String resourceName
-    @Nonnull
+    @NonNull
     private State state = State.Idle
-    @Nonnull
+    @NonNull
     private DriveSynchronizer synchronizer
 
-    DriveConnectibleResource(@Nonnull Context context, @Nonnull DriveSynchronizer driveSynchronizer, @Nullable String string2, @Nullable DriveConnectibleResource driveConnectibleResource, @Nonnull GoogleApiClient googleApiClient, @Nonnull String string3) {
+    DriveConnectibleResource(@NonNull Context context, @NonNull DriveSynchronizer driveSynchronizer, @Nullable String string2, @Nullable DriveConnectibleResource driveConnectibleResource, @NonNull GoogleApiClient googleApiClient, @NonNull String string3) {
         this.onSyncCompleted = new DriveSynchronizer.OnSyncCompletedListener(this){
             DriveConnectibleResource this$0
             {
@@ -150,7 +150,7 @@ abstract class DriveConnectibleResource {
             }
 
             @Override
-            void onResult(@Nonnull DriveApi.MetadataBufferResult object) {
+            void onResult(@NonNull DriveApi.MetadataBufferResult object) {
                 boolean bl
                 MetadataBuffer metadataBuffer
                 block2: {
@@ -184,7 +184,7 @@ abstract class DriveConnectibleResource {
              * Lifted jumps to return sites
              */
             @Override
-            void onResult(@Nonnull DriveResource.MetadataResult object) {
+            void onResult(@NonNull DriveResource.MetadataResult object) {
                 Status status = object.getStatus()
                 Debug.Printf("Resource '%s': metadata received, success %b", this.this$0.resourceName, status.isSuccess())
                 if (status.isSuccess()) {
@@ -293,7 +293,7 @@ abstract class DriveConnectibleResource {
 
     protected abstract fun createResource(var1: DriveFolder): Unit
 
-    @Nonnull
+    @NonNull
     protected abstract fun getMimeType(): String
 
     /*

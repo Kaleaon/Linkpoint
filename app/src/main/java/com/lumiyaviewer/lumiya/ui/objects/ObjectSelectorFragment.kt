@@ -2,9 +2,9 @@ package com.lumiyaviewer.lumiya.ui.objects
 
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.view.MenuItemCompat
-import android.support.v7.widget.SearchView
+import androidx.fragment.app.Fragment
+import androidx.core.view.MenuItemCompat
+import androidx.recyclerview.widget.SearchView
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.Menu
@@ -45,7 +45,7 @@ import com.lumiyaviewer.lumiya.ui.objects.ObjectListNewActivity
 import java.util.ArrayList
 import java.util.HashSet
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, CompoundButton.OnCheckedChangeListener, ExpandableListView.OnGroupClickListener, ExpandableListView.OnChildClickListener {
     private val MAX_FILTER_DISTANCE: Int = 256

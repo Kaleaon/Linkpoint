@@ -2,7 +2,7 @@ package com.lumiyaviewer.lumiya.slproto.users.manager
 
 import android.database.Cursor
 import android.os.Environment
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.Table
@@ -63,15 +63,15 @@ import java.util.UUID
 import java.util.WeakHashMap
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicReference
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class UserManager {
     private SubscriptionDataPool<UUID, SLAgentCircuit> activeAgentCircuitsPool = SubscriptionDataPool().setCanContainNulls(true)
     private Any lock = Any()
     private Map<UUID, UserManager> userManagers = WeakHashMap()
     private AtomicReference<SLAgentCircuit> activeAgentCircuit = AtomicReference<>()
-    @Nonnull
+    @NonNull
     private Query<Chatter> activeChattersQuery
     private SLMessageResponseCacher<UUID, AgentDataUpdate> agentDataUpdates
     private AssetResponseCacher assetResponseCacher
@@ -80,58 +80,58 @@ class UserManager {
     private SLMessageResponseCacher<AvatarPickKey, PickInfoReply> avatarPickInfos
     private SLMessageResponseCacher<UUID, AvatarPicksReply> avatarPicks
     private SLMessageResponseCacher<UUID, AvatarPropertiesReply> avatarProperties
-    @Nonnull
+    @NonNull
     private BalanceManager balanceManager
-    @Nonnull
+    @NonNull
     private ChatMessageDao chatMessageDao
-    @Nonnull
+    @NonNull
     private ChatterDao chatterDao
-    @Nonnull
+    @NonNull
     private ChatterList chatterList
     private Any chatterUpdateLock = Any()
     private SubscriptionSingleDataPool<CurrentLocationInfo> currentLocationInfoPool = SubscriptionSingleDataPool<>()
     /* access modifiers changed from: private */
-    @Nonnull
+    @NonNull
     DaoSession daoSession
     private OpportunisticExecutor dbExecutor = OpportunisticExecutor("Database")
     private EventBus eventBus = EventBus.getInstance()
-    @Nonnull
+    @NonNull
     private Query<Chatter> findChatterQuery
-    @Nonnull
+    @NonNull
     private Query<UserPic> findUserPicQuery
-    @Nonnull
+    @NonNull
     private Query<User> findUserQuery
-    @Nonnull
+    @NonNull
     private Query<User> friendsQuery
     private SLMessageResponseCacher<UUID, GroupProfileReply> groupProfiles
     private SLMessageResponseCacher<UUID, GroupRoleDataReply> groupRoles
     private SLMessageResponseCacher<UUID, GroupTitlesReply> groupTitles
-    @Nonnull
+    @NonNull
     private InventoryManager inventoryManager
-    @Nonnull
+    @NonNull
     private Query<ChatMessage> loadMessageQuery
     private SubscriptionSingleDataPool<SLMinimap.MinimapBitmap> minimapBitmapPool = SubscriptionSingleDataPool<>()
     private SubscriptionPool<SubscriptionSingleKey, ImmutableList<MuteListEntry>> muteListPool = SubscriptionPool<>()
-    @Nonnull
+    @NonNull
     private UnreadNotificationManager notificationManager
-    @Nonnull
+    @NonNull
     private ObjectPopupsManager objectPopupsManager
-    @Nonnull
+    @NonNull
     private ObjectsManager objectsManager
     private SLMessageResponseCacher<UUID, ParcelInfoReply> parcelInfoData
-    @Nonnull
+    @NonNull
     private SearchManager searchManager
-    @Nonnull
+    @NonNull
     private SyncManager syncManager
-    @Nonnull
+    @NonNull
     private UserDao userDao
-    @Nonnull
+    @NonNull
     private UUID userID
     private SubscriptionPool<SubscriptionSingleKey, SLMinimap.UserLocations> userLocationsPool = SubscriptionPool<>()
     private WeakPriorityRequestSet<UUID> userNameRequests = WeakPriorityRequestSet<>()
     private RateLimitRequestHandler<UUID, UserName> userNamesHandler = RateLimitRequestHandler<>(RequestProcessor<UUID, UserName, UserName>(this.userNamesPool, this.dbExecutor) {
         /* access modifiers changed from: protected */
-        Boolean isRequestComplete(@Nonnull UUID uuid, UserName userName) {
+        Boolean isRequestComplete(@NonNull UUID uuid, UserName userName) {
             if (userName != null) {
                 if (userName.getIsBadUUID()) {
                     return true
@@ -145,12 +145,12 @@ class UserManager {
 
         /* access modifiers changed from: protected */
         @Nullable
-        UserName processRequest(@Nonnull UUID uuid) {
+        UserName processRequest(@NonNull UUID uuid) {
             return (UserName) UserManager.this.daoSession.getUserNameDao().load(uuid)
         }
 
         /* access modifiers changed from: protected */
-        UserName processResult(@Nonnull UUID uuid, UserName userName) {
+        UserName processResult(@NonNull UUID uuid, UserName userName) {
             UserName userName2 = (UserName) UserManager.this.daoSession.getUserNameDao().load(uuid)
             if (userName2 != null) {
                 if (userName2.mergeWith(userName)) {
@@ -163,7 +163,7 @@ class UserManager {
         }
     private SubscriptionPool<UUID, UserName> userNamesPool = SubscriptionPool<>()
     private UserPicBitmapCache userPicBitmapCache
-    @Nonnull
+    @NonNull
     private UserPicDao userPicDao
     private Any userPicUpdateLock = Any()
     private Any userUpdateLock = Any()
@@ -176,7 +176,7 @@ class UserManager {
     private SubscriptionSingleDataPool<UUID> wornOutfitLinkPool = SubscriptionSingleDataPool<>()
     private SubscriptionSingleDataPool<Table<SLWearableType, UUID, SLWearable>> wornWearablesPool = SubscriptionSingleDataPool<>()
 
-    private UserManager(@Nonnull UUID uuid) throws IllegalArgumentException {
+    private UserManager(@NonNull UUID uuid) throws IllegalArgumentException {
         this.userID = uuid
         DaoSession userDaoSession = DaoManager.getUserDaoSession(uuid)
         if (userDaoSession == null) {
@@ -215,7 +215,7 @@ class UserManager {
         this.syncManager = SyncManager(this)
     }
 
-    @Nonnull
+    @NonNull
     Subscribable<UUID, SLAgentCircuit> agentCircuits() {
         return activeAgentCircuitsPool
     }
@@ -229,7 +229,7 @@ class UserManager {
         return userManager.getActiveAgentCircuit()
     }
 
-    @Nonnull
+    @NonNull
     SLAgentCircuit getConnectedAgentCircuit(@Nullable UUID uuid) throws SLGridConnection.NotConnectedException {
         SLAgentCircuit activeAgentCircuit2 = getActiveAgentCircuit(uuid)
         if (activeAgentCircuit2 != null) {
@@ -273,7 +273,7 @@ class UserManager {
         return userManager
     }
 
-    Unit addChatMessage(@Nonnull ChatMessage chatMessage) {
+    Unit addChatMessage(@NonNull ChatMessage chatMessage) {
         this.chatMessageDao.insert(chatMessage)
     }
 
@@ -319,7 +319,7 @@ class UserManager {
         return this.avatarProperties
     }
 
-    @Nonnull
+    @NonNull
     BalanceManager getBalanceManager() {
         return this.balanceManager
     }
@@ -335,7 +335,7 @@ class UserManager {
         return forCurrentThread.unique()
     }
 
-    @Nonnull
+    @NonNull
     ChatMessageDao getChatMessageDao() {
         return this.chatMessageDao
     }
@@ -344,12 +344,12 @@ class UserManager {
         return this.chatterDao.readEntity(cursor, 0)
     }
 
-    @Nonnull
+    @NonNull
     ChatterDao getChatterDao() {
         return this.chatterDao
     }
 
-    @Nonnull
+    @NonNull
     ChatterList getChatterList() {
         return this.chatterList
     }
@@ -363,17 +363,17 @@ class UserManager {
         return this.currentLocationInfoPool.getData()
     }
 
-    @Nonnull
+    @NonNull
     DaoSession getDaoSession() {
         return this.daoSession
     }
 
-    @Nonnull
+    @NonNull
     Executor getDatabaseExecutor() {
         return this.dbExecutor
     }
 
-    @Nonnull
+    @NonNull
     Executor getDatabaseRunOnceExecutor() {
         return this.dbExecutor.getRunOnceExecutor()
     }
@@ -390,7 +390,7 @@ class UserManager {
         return this.groupTitles
     }
 
-    @Nonnull
+    @NonNull
     InventoryManager getInventoryManager() {
         return this.inventoryManager
     }
@@ -399,27 +399,27 @@ class UserManager {
         return this.minimapBitmapPool
     }
 
-    @Nonnull
+    @NonNull
     ObjectPopupsManager getObjectPopupsManager() {
         return this.objectPopupsManager
     }
 
-    @Nonnull
+    @NonNull
     ObjectsManager getObjectsManager() {
         return this.objectsManager
     }
 
-    @Nonnull
+    @NonNull
     SearchManager getSearchManager() {
         return this.searchManager
     }
 
-    @Nonnull
+    @NonNull
     SyncManager getSyncManager() {
         return this.syncManager
     }
 
-    @Nonnull
+    @NonNull
     UnreadNotificationManager getUnreadNotificationManager() {
         return this.notificationManager
     }
@@ -428,8 +428,8 @@ class UserManager {
         return this.userDao.readEntity(cursor, 0)
     }
 
-    @Nonnull
-    User getUser(@Nonnull UUID uuid, @Nullable String str, @Nullable String str2) {
+    @NonNull
+    User getUser(@NonNull UUID uuid, @Nullable String str, @Nullable String str2) {
         Query<User> forCurrentThread = this.findUserQuery.forCurrentThread()
         forCurrentThread.setParameter(0, uuid.toString())
         User unique = forCurrentThread.unique()
@@ -452,12 +452,12 @@ class UserManager {
         return unique
     }
 
-    @Nonnull
+    @NonNull
     UserDao getUserDao() {
         return this.userDao
     }
 
-    @Nonnull
+    @NonNull
     UUID getUserID() {
         return this.userID
     }
@@ -625,7 +625,7 @@ class UserManager {
         this.voiceAudioPropertiesPool.setData(SubscriptionSingleKey.Value, voiceAudioProperties)
     }
 
-    Unit setVoiceChatInfo(@Nonnull ChatterID chatterID, @Nullable VoiceChatInfo voiceChatInfo) {
+    Unit setVoiceChatInfo(@NonNull ChatterID chatterID, @Nullable VoiceChatInfo voiceChatInfo) {
         this.voiceChatInfoPool.setData(chatterID, voiceChatInfo)
     }
 
@@ -633,11 +633,11 @@ class UserManager {
         this.voiceLoggedInPool.setData(SubscriptionSingleKey.Value, Boolean.valueOf(z))
     }
 
-    Unit updateUserNames(@Nonnull UUID uuid, @Nullable String str, @Nullable String str2) {
+    Unit updateUserNames(@NonNull UUID uuid, @Nullable String str, @Nullable String str2) {
         updateUserNames(uuid, str, str2, false)
     }
 
-    Unit updateUserNames(@Nonnull UUID uuid, @Nullable String str, @Nullable String str2, Boolean z) {
+    Unit updateUserNames(@NonNull UUID uuid, @Nullable String str, @Nullable String str2, Boolean z) {
         Query<User> forCurrentThread = this.findUserQuery.forCurrentThread()
         forCurrentThread.setParameter(0, uuid.toString())
         synchronized (this.userUpdateLock) {

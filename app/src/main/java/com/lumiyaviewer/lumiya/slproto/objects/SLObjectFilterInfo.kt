@@ -1,6 +1,6 @@
 package com.lumiyaviewer.lumiya.slproto.objects
 
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 abstract class SLObjectFilterInfo {
     SLObjectFilterInfo create() {

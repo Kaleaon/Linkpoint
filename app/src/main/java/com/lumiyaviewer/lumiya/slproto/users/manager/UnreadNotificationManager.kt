@@ -38,8 +38,8 @@ import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
     private val FRESH_MESSAGES_NOTIFICATION_INTERVAL: Long = 3000
@@ -50,9 +50,9 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
     private val MAX_CHATTERS_PER_NOTIFICATION: Int = 3
     private val MAX_MESSAGES_PER_NOTIFICATION: Int = 3
     Boolean unreadNotificationKey = Boolean.FALSE
-    @Nonnull
+    @NonNull
     private ChatMessageDao chatMessageDao
-    @Nonnull
+    @NonNull
     private ChatterDao chatterDao
     private Map<Long, ChatterNameRetriever> chatterSources = ConcurrentHashMap(4, 0.75f, 2)
     private UnreadNotificationInfo emptyNotification
@@ -83,22 +83,22 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
             UnreadNotificationManager.this.unreadNotificationInfoPool.onResultData(UnreadNotificationManager.unreadNotificationKey, UnreadNotificationManager.this.getUnreadNotification())
         }
     }
-    @Nonnull
+    @NonNull
     private UserManager userManager
 
     interface NotifyCapture {
         @Nullable
-        Intent onGetNotifyCaptureIntent(@Nonnull UnreadNotificationInfo unreadNotificationInfo, Intent intent)
+        Intent onGetNotifyCaptureIntent(@NonNull UnreadNotificationInfo unreadNotificationInfo, Intent intent)
     }
 
-    UnreadNotificationManager(@Nonnull UserManager userManager2, @Nonnull DaoSession daoSession) {
+    UnreadNotificationManager(@NonNull UserManager userManager2, @NonNull DaoSession daoSession) {
         this.userManager = userManager2
         this.chatterDao = daoSession.getChatterDao()
         this.chatMessageDao = daoSession.getChatMessageDao()
         this.updateExecutor = userManager2.getDatabaseRunOnceExecutor()
         this.emptyNotification = UnreadNotificationInfo.create(userManager2.getUserID(), 0, (List<UnreadNotificationInfo.UnreadMessageSource>) null, (NotificationType) null, 0, (NotificationType) null, (UnreadNotificationInfo.UnreadMessageSource) null, UnreadNotificationInfo.ObjectPopupNotification.create(0, 0, (UnreadNotificationInfo.ObjectPopupMessage) null))
         this.unreadNotificationInfoPool.attachRequestHandler(SimpleRequestHandler<Boolean>() {
-            Unit onRequest(@Nonnull Boolean bool) {
+            Unit onRequest(@NonNull Boolean bool) {
                 UnreadNotificationManager.this.updateExecutor.execute(UnreadNotificationManager.this.updateChatterDataRunnable)
             }
         updateTypesFromPreferences(LumiyaApp.getDefaultSharedPreferences())
@@ -106,7 +106,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
     }
 
     /* access modifiers changed from: private */
-    @Nonnull
+    @NonNull
     UnreadNotifications getUnreadNotification() {
         NotificationType notificationType
         ArrayList arrayList
@@ -340,7 +340,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         }
     }
 
-    Unit addFreshMessage(@Nonnull Chatter chatter) {
+    Unit addFreshMessage(@NonNull Chatter chatter) {
         ChatterID.ChatterType chatterType
         Boolean z = true
         Long id = chatter.getId()
@@ -377,7 +377,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         return null
     }
 
-    Unit clearFreshMessages(@Nonnull Chatter chatter) {
+    Unit clearFreshMessages(@NonNull Chatter chatter) {
         Long id = chatter.getId()
         if (id != null) {
             synchronized (this.freshMessageCountsLock) {

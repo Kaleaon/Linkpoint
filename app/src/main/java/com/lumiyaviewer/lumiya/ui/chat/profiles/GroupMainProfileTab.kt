@@ -1,7 +1,7 @@
 package com.lumiyaviewer.lumiya.ui.groups
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +11,7 @@ import butterknife.ButterKnife
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.groups.SLGroupInfo
 import com.lumiyaviewer.lumiya.slproto.groups.SLGroupProfileData
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 /**
  * Converted from Java to Kotlin

@@ -10,7 +10,7 @@ import com.lumiyaviewer.rawbuffers.DirectByteBuffer
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.ShortBuffer
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class MeshFace {
     private DirectByteBuffer indexBuffer
@@ -110,7 +110,7 @@ class MeshFace {
     }
 
     /* access modifiers changed from: package-private */
-    Unit PrepareInfluenceBuffer(@Nonnull MeshWeightsBuffer meshWeightsBuffer, Int i) {
+    Unit PrepareInfluenceBuffer(@NonNull MeshWeightsBuffer meshWeightsBuffer, Int i) {
         OpenJPEG.meshPrepareSeparateInfluenceBuffer(this.weightBuffer.asByteBuffer(), this.numVertices, meshWeightsBuffer.jointIndexBuffer.asByteBuffer(), meshWeightsBuffer.weightsBuffer.asByteBuffer(), i)
     }
 

@@ -1,8 +1,8 @@
 package com.lumiyaviewer.lumiya.ui.search
 import java.util.*
 
-import android.support.annotation.CallSuper
-import android.support.annotation.UiThread
+import androidx.annotation.CallSuper
+import androidx.annotation.UiThread
 import android.view.View
 import android.widget.TextView
 import butterknife.Unbinder

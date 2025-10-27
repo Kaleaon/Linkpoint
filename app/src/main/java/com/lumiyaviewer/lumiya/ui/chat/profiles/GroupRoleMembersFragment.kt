@@ -4,8 +4,8 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.widget.RecyclerView
+import androidx.core.widget.SwipeRefreshLayout
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,7 +35,7 @@ import com.lumiyaviewer.lumiya.utils.UUIDPool
 import de.greenrobot.dao.query.LazyList
 import java.util.Iterator
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class GroupRoleMembersFragment : ChatterFragment : LoadableMonitor.OnLoadableDataChangedListener {
     private val ROLE_ID_KEY: String = "role_id"

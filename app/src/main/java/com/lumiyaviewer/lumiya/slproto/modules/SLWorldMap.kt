@@ -1,6 +1,6 @@
 package com.lumiyaviewer.lumiya.slproto.modules
 
-import android.support.v4.view.InputDeviceCompat
+import androidx.core.view.InputDeviceCompat
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit
 import com.lumiyaviewer.lumiya.slproto.SLMessage

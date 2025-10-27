@@ -11,19 +11,19 @@ import com.lumiyaviewer.lumiya.slproto.messages.ImprovedInstantMessage
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLChatLureRequestEvent : SLChatYesNoEvent {
-    SLChatLureRequestEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
+    SLChatLureRequestEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
         super(chatMessage, uuid)
     }
 
-    SLChatLureRequestEvent(ChatMessageSource chatMessageSource, @Nonnull UUID uuid, ImprovedInstantMessage improvedInstantMessage) {
+    SLChatLureRequestEvent(ChatMessageSource chatMessageSource, @NonNull UUID uuid, ImprovedInstantMessage improvedInstantMessage) {
         super(chatMessageSource, uuid, improvedInstantMessage, (String) null)
     }
 
     /* access modifiers changed from: protected */
-    @Nonnull
+    @NonNull
     SLChatEvent.ChatMessageType getMessageType() {
         return SLChatEvent.ChatMessageType.LureRequest
     }
@@ -40,7 +40,7 @@ class SLChatLureRequestEvent : SLChatYesNoEvent {
         return context.getString(R.string.teleport_lure_request_question)
     }
 
-    String getText(Context context, @Nonnull UserManager userManager) {
+    String getText(Context context, @NonNull UserManager userManager) {
         String string = context.getString(R.string.teleport_lure_request_message)
         return !Strings.isNullOrEmpty(this.text) ? string + ": " + this.text : string + "."
     }
@@ -54,7 +54,7 @@ class SLChatLureRequestEvent : SLChatYesNoEvent {
     }
 
     /* access modifiers changed from: protected */
-    Boolean isActionMessage(@Nonnull UserManager userManager) {
+    Boolean isActionMessage(@NonNull UserManager userManager) {
         return true
     }
 
@@ -71,7 +71,7 @@ class SLChatLureRequestEvent : SLChatYesNoEvent {
         }
     }
 
-    Unit serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
+    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

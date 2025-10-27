@@ -21,7 +21,7 @@ import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.io.File
 import java.io.IOException
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 import okhttp3.MediaType
 import okhttp3.Request
 import okhttp3.RequestBody

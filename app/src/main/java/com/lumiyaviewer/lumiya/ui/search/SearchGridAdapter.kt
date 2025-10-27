@@ -2,9 +2,9 @@ package com.lumiyaviewer.lumiya.ui.search
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.support.annotation.CallSuper
-import android.support.annotation.UiThread
-import android.support.v7.widget.RecyclerView
+import androidx.annotation.CallSuper
+import androidx.annotation.UiThread
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,7 +22,7 @@ import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever
 import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView
 import de.greenrobot.dao.query.LazyList
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class SearchGridAdapter : RecyclerView.Adapter<SearchViewHolder> {
     /* access modifiers changed from: private */

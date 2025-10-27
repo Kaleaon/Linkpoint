@@ -9,19 +9,19 @@ import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceObject
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 abstract class SLChatDialogEvent : SLChatTextEvent {
     protected Int chatChannel
     protected Boolean ignored = false
 
-    SLChatDialogEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
+    SLChatDialogEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
         super(chatMessage, uuid)
         this.chatChannel = chatMessage.getChatChannel().intValue()
         this.ignored = chatMessage.getDialogIgnored().booleanValue()
     }
 
-    SLChatDialogEvent(ScriptDialog scriptDialog, @Nonnull UUID uuid) {
+    SLChatDialogEvent(ScriptDialog scriptDialog, @NonNull UUID uuid) {
         super((ChatMessageSource) ChatMessageSourceObject(scriptDialog.Data_Field.ObjectID, SLMessage.stringFromVariableOEM(scriptDialog.Data_Field.ObjectName)), uuid, sanitizeDialogText(SLMessage.stringFromVariableUTF(scriptDialog.Data_Field.Message)))
         this.chatChannel = scriptDialog.Data_Field.ChatChannel
     }
@@ -38,7 +38,7 @@ abstract class SLChatDialogEvent : SLChatTextEvent {
         this.ignored = true
     }
 
-    Unit serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
+    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setChatChannel(Integer.valueOf(this.chatChannel))
         chatMessage.setDialogIgnored(Boolean.valueOf(this.ignored))

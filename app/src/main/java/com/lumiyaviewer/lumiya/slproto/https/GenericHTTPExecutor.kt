@@ -5,7 +5,7 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class GenericHTTPExecutor : ThreadPoolExecutor {
 
@@ -19,7 +19,7 @@ class GenericHTTPExecutor : ThreadPoolExecutor {
 
     private GenericHTTPExecutor() {
         super(1, 3, 60, TimeUnit.SECONDS, LinkedBlockingQueue<>(), ThreadFactory() {
-            Thread newThread(@Nonnull Runnable runnable) {
+            Thread newThread(@NonNull Runnable runnable) {
                 return Thread(runnable, "HTTPAccess")
             }
         })

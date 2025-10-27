@@ -5,10 +5,10 @@ import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit
 import com.lumiyaviewer.lumiya.slproto.modules.SLModules
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import java.util.List
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class NearbyChattersDisplayDataList : ChatterDisplayDataList {
-    NearbyChattersDisplayDataList(@Nonnull UserManager userManager, OnListUpdated onListUpdated) {
+    NearbyChattersDisplayDataList(@NonNull UserManager userManager, OnListUpdated onListUpdated) {
         super(userManager, onListUpdated, $Lambda$D8uG4BZ932XmwoX97ZE2tEBU1gE())
     }
 

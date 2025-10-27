@@ -27,8 +27,8 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicReference
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class InventoryManager {
     private SubscriptionSingleDataPool<InventoryClipboardEntry> clipboardPool = SubscriptionSingleDataPool<>()
@@ -41,14 +41,14 @@ class InventoryManager {
     private SubscriptionPool<UUID, Boolean> folderLoadingPool = SubscriptionPool<>()
     private RequestProcessor<UUID, SLInventoryEntry, SLInventoryEntry> folderRequestProcessor
     /* access modifiers changed from: private */
-    @Nonnull
+    @NonNull
     InventoryDB inventoryDB
     /* access modifiers changed from: private */
     OpportunisticExecutor inventoryDbExecutor = OpportunisticExecutor("InventoryDB")
     private RequestHandler<InventoryQuery> queryRequestHandler = RequestHandler<InventoryQuery>() {
         private Map<InventoryQuery, FolderSubscription> folderQueries = ConcurrentHashMap()
 
-        Unit onRequest(@Nonnull InventoryQuery inventoryQuery) {
+        Unit onRequest(@NonNull InventoryQuery inventoryQuery) {
             FolderSubscription put
             if (inventoryQuery.containsString() != null) {
                 InventoryManager.this.entryListPool.onResultData(inventoryQuery, inventoryQuery.query((SLInventoryEntry) null, InventoryManager.this.inventoryDB))
@@ -64,7 +64,7 @@ class InventoryManager {
             }
         }
 
-        Unit onRequestCancelled(@Nonnull InventoryQuery inventoryQuery) {
+        Unit onRequestCancelled(@NonNull InventoryQuery inventoryQuery) {
             FolderSubscription folderSubscription = this.folderQueries.get(inventoryQuery)
             if (folderSubscription != null) {
                 folderSubscription.unsubscribe()
@@ -109,17 +109,17 @@ class InventoryManager {
     }
 
     class InventoryClipboardEntry {
-        @Nonnull
+        @NonNull
         SLInventoryEntry inventoryEntry
         Boolean isCut
 
-        InventoryClipboardEntry(Boolean z, @Nonnull SLInventoryEntry sLInventoryEntry) {
+        InventoryClipboardEntry(Boolean z, @NonNull SLInventoryEntry sLInventoryEntry) {
             this.isCut = z
             this.inventoryEntry = sLInventoryEntry
         }
     }
 
-    InventoryManager(@Nonnull UUID uuid) {
+    InventoryManager(@NonNull UUID uuid) {
         InventoryDB userInventoryDB = InventoryDBManager.getUserInventoryDB(uuid)
         if (userInventoryDB == null) {
             throw IllegalArgumentException("Null inventory database")
@@ -127,18 +127,18 @@ class InventoryManager {
         this.inventoryDB = userInventoryDB
         this.folderRequestProcessor = RequestProcessor<UUID, SLInventoryEntry, SLInventoryEntry>(this.folderEntryPool, this.inventoryDbExecutor) {
             /* access modifiers changed from: protected */
-            Boolean isRequestComplete(@Nonnull UUID uuid, SLInventoryEntry sLInventoryEntry) {
+            Boolean isRequestComplete(@NonNull UUID uuid, SLInventoryEntry sLInventoryEntry) {
                 return sLInventoryEntry != null && Objects.equal(sLInventoryEntry.sessionID, InventoryManager.this.currentSessionID.get())
             }
 
             /* access modifiers changed from: protected */
             @Nullable
-            SLInventoryEntry processRequest(@Nonnull UUID uuid) {
+            SLInventoryEntry processRequest(@NonNull UUID uuid) {
                 return userInventoryDB.findEntry(uuid)
             }
 
             /* access modifiers changed from: protected */
-            SLInventoryEntry processResult(@Nonnull UUID uuid, SLInventoryEntry sLInventoryEntry) {
+            SLInventoryEntry processResult(@NonNull UUID uuid, SLInventoryEntry sLInventoryEntry) {
                 if (sLInventoryEntry != null) {
                     Debug.Printf("Inventory: entry subscription got name: %s with folderId = '%s'", sLInventoryEntry.name, sLInventoryEntry.uuid)
                 }
@@ -370,7 +370,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return this.searchRunningPool
     }
 
-    Unit requestFolderUpdate(@Nonnull UUID uuid) {
+    Unit requestFolderUpdate(@NonNull UUID uuid) {
         this.folderEntryPool.requestUpdate(uuid)
     }
 

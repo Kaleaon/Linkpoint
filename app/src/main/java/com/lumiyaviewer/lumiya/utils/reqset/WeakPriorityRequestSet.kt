@@ -3,7 +3,7 @@ package com.lumiyaviewer.lumiya.utils.reqset
 import java.lang.ref.WeakReference
 import java.util.TreeMap
 import java.util.concurrent.locks.ReentrantLock
-import javax.annotation.concurrent.ThreadSafe
+import androidx.annotation.ThreadSafe
 import kotlin.concurrent.withLock
 
 @ThreadSafe

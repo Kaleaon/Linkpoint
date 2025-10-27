@@ -3,7 +3,7 @@ package com.lumiyaviewer.lumiya.ui.objects
 import android.app.ProgressDialog
 import android.content.DialogInterface
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -35,7 +35,7 @@ import com.lumiyaviewer.lumiya.ui.inventory.NotecardEditActivity
 import java.util.HashSet
 import java.util.Iterator
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class TaskInventoryFragment : FragmentWithTitle {
 

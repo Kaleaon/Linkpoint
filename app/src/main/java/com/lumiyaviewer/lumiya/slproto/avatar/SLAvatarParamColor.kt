@@ -1,13 +1,13 @@
 package com.lumiyaviewer.lumiya.slproto.avatar
 
 import java.util.Arrays
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLAvatarParamColor {
-    @Nonnull
+    @NonNull
     ColorOperation colorOperation
-    @Nonnull
-    private IntArray colorValues
+    @NonNull
+    private Int[] colorValues
 
     enum ColorOperation {
         Default,
@@ -15,7 +15,7 @@ class SLAvatarParamColor {
         Multiply
     }
 
-    SLAvatarParamColor(@Nonnull ColorOperation colorOperation2, @Nonnull IntArray iArr) {
+    SLAvatarParamColor(@NonNull ColorOperation colorOperation2, @NonNull Int[] iArr) {
         this.colorOperation = colorOperation2
         this.colorValues = iArr
     }
@@ -113,7 +113,7 @@ class SLAvatarParamColor {
         }
         Int length = this.colorValues.length - 1
         float f2 = ((float) length) * f
-        Int i = f2.toInt()
+        Int i = (Int) f2
         Int i2 = i + 1
         if (i >= length) {
             return this.colorValues[length]

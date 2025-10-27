@@ -1,6 +1,6 @@
 package com.lumiyaviewer.lumiya.slproto.inventory
 
-import android.support.v4.os.EnvironmentCompat
+import androidx.v4.os.EnvironmentCompat
 
 enum SLSaleType {
     FS_NOT(0, "not"),

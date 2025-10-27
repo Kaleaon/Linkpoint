@@ -1,7 +1,7 @@
 package com.lumiyaviewer.lumiya.orm
 
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class AutoValue_InventoryQuery : InventoryQuery {
     private Int assetType

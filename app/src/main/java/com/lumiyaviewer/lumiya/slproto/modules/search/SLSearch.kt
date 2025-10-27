@@ -28,7 +28,7 @@ import de.greenrobot.dao.query.LazyList
 import de.greenrobot.dao.query.WhereCondition
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLSearch : SLModule {
     private val DFQ_ADULT_SIMS_ONLY: Int = 134217728
@@ -63,7 +63,7 @@ class SLSearch : SLModule {
     /* access modifiers changed from: private */
     AtomicReference<SearchGridQuery> currentSearchQuery = AtomicReference<>((Any) null)
     private RequestHandler<UUID> parcelInfoRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        Unit onRequest(@Nonnull UUID uuid) {
+        Unit onRequest(@NonNull UUID uuid) {
             Debug.Printf("ParcelInfo: Requesting for %s", uuid)
             ParcelInfoRequest parcelInfoRequest = ParcelInfoRequest()
             parcelInfoRequest.AgentData_Field.AgentID = SLSearch.this.circuitInfo.agentID
@@ -102,7 +102,7 @@ class SLSearch : SLModule {
             return iArr
         }
 
-        Unit onRequest(@Nonnull SearchGridQuery searchGridQuery) {
+        Unit onRequest(@NonNull SearchGridQuery searchGridQuery) {
             SLSearch.this.currentSearchQuery.set(searchGridQuery)
             switch (m238getcomlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues()[searchGridQuery.searchType().ordinal()]) {
                 case 1:

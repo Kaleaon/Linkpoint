@@ -20,8 +20,8 @@ buildscript {
     dependencies {
         // AGP 8.1.4 - Compatible with Gradle 8.5 and Java 21
         classpath 'com.android.tools.build:gradle:8.1.4'
-        // Kotlin Gradle plugin for advanced Kotlin features
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.22'
+        // Kotlin Gradle plugin - Updated to 1.9.22 for latest features
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22'
     }
 }
 

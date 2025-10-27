@@ -1,9 +1,9 @@
 package com.lumiyaviewer.lumiya.ui.objpopup
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.helper.ItemTouchHelper
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.helper.ItemTouchHelper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,8 +12,8 @@ import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import com.lumiyaviewer.lumiya.ui.chat.ChatLayoutManager
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class ObjectPopupsFragment : Fragment {
     private val AGENT_UUID_KEY: String = "agentUUID"
@@ -36,7 +36,7 @@ class ObjectPopupsFragment : Fragment {
         }
     }
 
-    ObjectPopupsFragment create(@Nonnull UUID uuid) {
+    ObjectPopupsFragment create(@NonNull UUID uuid) {
         ObjectPopupsFragment objectPopupsFragment = ObjectPopupsFragment()
         Bundle bundle = Bundle()
         bundle.putString(AGENT_UUID_KEY, uuid.toString())

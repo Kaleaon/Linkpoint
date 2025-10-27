@@ -5,18 +5,18 @@ import com.lumiyaviewer.lumiya.slproto.messages.AvatarAppearance
 import com.lumiyaviewer.lumiya.slproto.messages.AvatarAppearance.AppearanceData
 import com.lumiyaviewer.lumiya.slproto.messages.AvatarAppearance.VisualParam
 import java.util.Arrays
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 object AvatarShapeParams {
-    @Nonnull
+    @NonNull
     private int[] visualParamValues
 
-    private AvatarShapeParams(@Nonnull int[] iArr) {
+    private AvatarShapeParams(@NonNull int[] iArr) {
         this.visualParamValues = iArr
     }
 
-    @Nonnull
+    @NonNull
     fun create(avatarShapeParams: AvatarShapeParams, avatarAppearance: AvatarAppearance): AvatarShapeParams {
         Debug.Log("DrawableAvatar: new appearance for avatar " + avatarAppearance.Sender_Field.ID + ", numParams = " + avatarAppearance.VisualParam_Fields.size() + ", appData = " + avatarAppearance.AppearanceData_Fields.size())
         for (i = 0; i < avatarAppearance.AppearanceData_Fields.size(); i++) {
@@ -35,7 +35,7 @@ object AvatarShapeParams {
         return AvatarShapeParams(iArr)
     }
 
-    @Nonnull
+    @NonNull
     fun create(avatarShapeParams: AvatarShapeParams, iArr: IntArray): AvatarShapeParams {
         if (iArr.length != 218) {
             Object obj = IntArray(218)

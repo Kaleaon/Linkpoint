@@ -7,14 +7,14 @@ import com.lumiyaviewer.lumiya.react.SubscriptionPool
 import com.lumiyaviewer.lumiya.slproto.modules.search.SearchGridQuery
 import de.greenrobot.dao.query.LazyList
 import java.util.concurrent.Executor
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SearchManager {
     private Executor dbExecutor
     private SearchGridResultDao searchGridResultDao
     private SubscriptionPool<SearchGridQuery, LazyList<SearchGridResult>> searchResults = SubscriptionPool<>()
 
-    SearchManager(@Nonnull UserManager userManager, @Nonnull DaoSession daoSession) {
+    SearchManager(@NonNull UserManager userManager, @NonNull DaoSession daoSession) {
         this.dbExecutor = userManager.getDatabaseExecutor()
         this.searchGridResultDao = daoSession.getSearchGridResultDao()
         this.searchResults.setDisposeHandler($Lambda$bhNrB7VMDi5fNhRKl1Wi5s6H9k(), this.dbExecutor)

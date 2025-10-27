@@ -2,13 +2,13 @@ package com.lumiyaviewer.lumiya.ui.objpopup
 import java.util.*
 
 import android.content.Context
-import android.support.v4.view.ActionProvider
+import androidx.core.view.ActionProvider
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.lumiyaviewer.lumiya.R
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class ObjectPopupsActionProvider : ActionProvider : View.OnClickListener {
     private Int objectPopupCount = 0

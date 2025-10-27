@@ -34,8 +34,8 @@ import java.nio.ByteOrder
 import java.util.Arrays
 import java.util.NoSuchElementException
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 abstract class SLObjectInfo : Identifiable<UUID> {
     private val AGENT_ATTACH_MASK: Int = 240
@@ -638,7 +638,7 @@ abstract class SLObjectInfo : Identifiable<UUID> {
     }
 
     /* access modifiers changed from: protected */
-    @Nonnull
+    @NonNull
     abstract DrawListObjectEntry createDrawListEntry()
 
     LLVector3 getAbsolutePosition() {
@@ -666,7 +666,7 @@ abstract class SLObjectInfo : Identifiable<UUID> {
         return this.description
     }
 
-    @Nonnull
+    @NonNull
     DrawListObjectEntry getDrawListEntry() {
         WeakReference<DrawListObjectEntry> weakReference = this.drawListEntry
         DrawListObjectEntry drawListObjectEntry = weakReference != null ? (DrawListObjectEntry) weakReference.get() : null

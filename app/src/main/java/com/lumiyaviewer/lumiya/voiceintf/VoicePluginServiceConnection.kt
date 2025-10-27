@@ -16,7 +16,7 @@ import android.os.IBinder
 import android.os.Message
 import android.os.Messenger
 import android.os.Parcelable
-import android.support.v7.app.NotificationCompat
+import androidx.appcompat.app.NotificationCompat
 import com.google.common.base.Objects
 import com.google.common.base.Strings
 import com.google.common.collect.BiMap
@@ -70,7 +70,7 @@ import java.util.List
 import java.util.Set
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class VoicePluginServiceConnection : ServiceConnection {
     val ACTION_VOICE_ACCEPT: String = "accept"

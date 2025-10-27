@@ -5,7 +5,7 @@ import android.opengl.GLES10
 import android.opengl.GLES11
 import android.opengl.GLES20
 import android.opengl.Matrix
-import android.support.v4.view.ViewCompat
+import androidx.core.view.ViewCompat
 import com.lumiyaviewer.lumiya.render.RenderContext
 import com.lumiyaviewer.lumiya.render.avatar.AvatarSkeleton
 import com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer

@@ -3,8 +3,8 @@ package com.lumiyaviewer.lumiya.ui.chat.profiles
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.os.Bundle
-import android.support.v4.app.FragmentActivity
-import android.support.v4.widget.SwipeRefreshLayout
+import androidx.fragment.app.FragmentActivity
+import androidx.core.widget.SwipeRefreshLayout
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -38,7 +38,7 @@ import com.lumiyaviewer.lumiya.ui.common.LoadingLayout
 import com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor
 import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class GroupRoleDetailsFragment : ChatterFragment : LoadableMonitor.OnLoadableDataChangedListener, BackButtonHandler {
     private val ROLE_ID_KEY: String = "role_id"

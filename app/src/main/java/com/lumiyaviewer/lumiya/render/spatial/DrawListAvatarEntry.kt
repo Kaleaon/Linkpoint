@@ -5,12 +5,12 @@ import com.lumiyaviewer.lumiya.render.avatar.DrawableAvatar
 import com.lumiyaviewer.lumiya.render.avatar.DrawableAvatarStub
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectAvatarInfo
 import java.lang.ref.WeakReference
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class DrawListAvatarEntry : DrawListObjectEntry {
     private var drawableAvatar: WeakReference<DrawableAvatar> = null
     private var drawableAvatarStub: WeakReference<DrawableAvatarStub> = null
-    @Nonnull
+    @NonNull
     private SLObjectAvatarInfo objectAvatarInfo
 
     constructor(sLObjectAvatarInfo: SLObjectAvatarInfo) {
@@ -49,7 +49,7 @@ class DrawListAvatarEntry : DrawListObjectEntry {
         drawList.avatarStubs.add(obj)
     }
 
-    @Nonnull
+    @NonNull
     fun getObjectAvatarInfo(): SLObjectAvatarInfo {
         return this.objectAvatarInfo
     }

@@ -1,7 +1,7 @@
 package com.lumiyaviewer.lumiya.slproto.baker
 
-import android.support.v4.view.InputDeviceCompat
-import android.support.v4.view.PointerIconCompat
+import androidx.core.view.InputDeviceCompat
+import androidx.core.view.PointerIconCompat
 import com.lumiyaviewer.lumiya.slproto.avatar.AvatarTextureFaceIndex
 import com.lumiyaviewer.lumiya.slproto.avatar.BakedTextureIndex
 import java.util.EnumMap

@@ -12,19 +12,19 @@ import com.lumiyaviewer.lumiya.slproto.messages.ChatFromSimulator
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceObject
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLEnableRLVOfferEvent : SLChatYesNoEvent {
-    SLEnableRLVOfferEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
+    SLEnableRLVOfferEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
         super(chatMessage, uuid)
     }
 
-    SLEnableRLVOfferEvent(ChatFromSimulator chatFromSimulator, @Nonnull UUID uuid) {
+    SLEnableRLVOfferEvent(ChatFromSimulator chatFromSimulator, @NonNull UUID uuid) {
         super(ChatMessageSourceObject(chatFromSimulator.ChatData_Field.SourceID, SLMessage.stringFromVariableOEM(chatFromSimulator.ChatData_Field.FromName)), uuid, SLMessage.stringFromVariableUTF(chatFromSimulator.ChatData_Field.Message))
     }
 
     /* access modifiers changed from: protected */
-    @Nonnull
+    @NonNull
     SLChatEvent.ChatMessageType getMessageType() {
         return SLChatEvent.ChatMessageType.EnableRLVOffer
     }
@@ -41,7 +41,7 @@ class SLEnableRLVOfferEvent : SLChatYesNoEvent {
         return context.getString(R.string.enable_rlv_question)
     }
 
-    String getText(Context context, @Nonnull UserManager userManager) {
+    String getText(Context context, @NonNull UserManager userManager) {
         return context.getString(R.string.rlv_enable_chat_message)
     }
 
@@ -71,7 +71,7 @@ class SLEnableRLVOfferEvent : SLChatYesNoEvent {
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    Unit serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
+    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

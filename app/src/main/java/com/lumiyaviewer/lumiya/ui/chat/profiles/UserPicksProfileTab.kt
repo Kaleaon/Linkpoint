@@ -4,7 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
-import android.support.v4.widget.SwipeRefreshLayout
+import androidx.core.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,7 +32,7 @@ import com.lumiyaviewer.lumiya.ui.common.LoadingLayout
 import com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor
 import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class UserPicksProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadableDataChangedListener {
     private SubscriptionData<UUID, AvatarPicksReply> avatarPicks = SubscriptionData<>(UIThreadExecutor.getInstance())

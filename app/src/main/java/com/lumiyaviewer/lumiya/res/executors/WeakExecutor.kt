@@ -11,7 +11,7 @@ import java.util.concurrent.RunnableFuture
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class WeakExecutor : ThreadPoolExecutor {
     private val usePriorities: Boolean = false

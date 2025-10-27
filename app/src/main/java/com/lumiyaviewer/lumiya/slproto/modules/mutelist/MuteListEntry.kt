@@ -2,7 +2,7 @@ package com.lumiyaviewer.lumiya.slproto.modules.mutelist
 
 import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.UUID
-import javax.annotation.concurrent.Immutable
+import androidx.annotation.Immutable
 
 @Immutable
 data class MuteListEntry(

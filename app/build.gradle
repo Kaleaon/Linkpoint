@@ -211,18 +211,18 @@ android {
 }
 
 dependencies {
-    // AndroidX Core - Updated to latest stable
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.11.0'
+    // AndroidX Core - Latest stable versions (Q4 2024)
+    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.fragment:fragment-ktx:1.6.2'
-    implementation 'androidx.activity:activity-ktx:1.8.2'
+    implementation 'androidx.fragment:fragment-ktx:1.8.4'
+    implementation 'androidx.activity:activity-ktx:1.9.3'
     
-    // Lifecycle components - Modern versions
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.7.0'
+    // Lifecycle components - Latest stable versions
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.6'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.8.6'
     
     // Google libraries
     implementation 'com.google.guava:guava:32.1.3-android'
@@ -231,10 +231,10 @@ dependencies {
     // Multidex support for large method counts  
     implementation 'androidx.multidex:multidex:2.0.1'
 
-    // Google Play Services (Cloud Plugin stubs)
+    // Google Play Services - Latest versions
     implementation 'com.google.android.gms:play-services-drive:17.0.0'
-    implementation 'com.google.android.gms:play-services-auth:21.0.0'
-    implementation 'com.google.android.gms:play-services-base:18.3.0'
+    implementation 'com.google.android.gms:play-services-auth:21.2.0'
+    implementation 'com.google.android.gms:play-services-base:18.5.0'
 
     // Networking - Updated OkHttp
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
@@ -263,7 +263,7 @@ dependencies {
     // UI components
     implementation 'com.astuetz:pagerslidingtabstrip:1.0.1'
 
-    // Preferences
+    // Preferences - Latest AndroidX version
     implementation 'androidx.preference:preference-ktx:1.2.1'
     
     // Filament Rendering Engine - Modern PBR renderer
@@ -293,10 +293,10 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-compat'
 
         resolutionStrategy {
-            force 'androidx.appcompat:appcompat:1.6.1'
-            force 'com.google.android.material:material:1.11.0'
-            force 'androidx.activity:activity:1.8.2'
-            force 'androidx.activity:activity-ktx:1.8.2'
+            force 'androidx.appcompat:appcompat:1.7.0'
+            force 'com.google.android.material:material:1.12.0'
+            force 'androidx.activity:activity:1.9.3'
+            force 'androidx.activity:activity-ktx:1.9.3'
             force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'
         }
     }

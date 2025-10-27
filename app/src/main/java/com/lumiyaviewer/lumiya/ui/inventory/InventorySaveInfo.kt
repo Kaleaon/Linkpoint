@@ -4,8 +4,8 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.lumiyaviewer.lumiya.slproto.inventory.SLAssetType
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class InventorySaveInfo : Parcelable {
     Parcelable.Creator<InventorySaveInfo> CREATOR = Parcelable.Creator<InventorySaveInfo>() {
@@ -22,11 +22,11 @@ class InventorySaveInfo : Parcelable {
     Long inventoryOfferMessageId
     @Nullable
     UUID notecardUUID
-    @Nonnull
+    @NonNull
     String saveItemName
     @Nullable
     UUID saveItemUUID
-    @Nonnull
+    @NonNull
     InventorySaveType saveType
 
     enum InventorySaveType {
@@ -55,7 +55,7 @@ class InventorySaveInfo : Parcelable {
         this.inventoryOfferMessageId = parcel.readLong()
     }
 
-    InventorySaveInfo(@Nonnull InventorySaveType inventorySaveType, @Nullable UUID uuid, @Nonnull String str, @Nullable UUID uuid2, @Nullable SLAssetType sLAssetType, Long j) {
+    InventorySaveInfo(@NonNull InventorySaveType inventorySaveType, @Nullable UUID uuid, @NonNull String str, @Nullable UUID uuid2, @Nullable SLAssetType sLAssetType, Long j) {
         this.saveType = inventorySaveType
         this.saveItemUUID = uuid
         this.saveItemName = str

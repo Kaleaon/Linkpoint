@@ -4,24 +4,24 @@ import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class ChatMessageSourceSystem : ChatMessageSource {
     ChatMessageSourceSystem() {
     }
 
-    @Nonnull
+    @NonNull
     ChatterID getDefaultChatter(UUID uuid) {
         return ChatterID.getLocalChatterID(uuid)
     }
 
     @Nullable
-    String getSourceName(@Nonnull UserManager userManager) {
+    String getSourceName(@NonNull UserManager userManager) {
         return null
     }
 
-    @Nonnull
+    @NonNull
     ChatMessageSource.ChatMessageSourceType getSourceType() {
         return ChatMessageSource.ChatMessageSourceType.System
     }

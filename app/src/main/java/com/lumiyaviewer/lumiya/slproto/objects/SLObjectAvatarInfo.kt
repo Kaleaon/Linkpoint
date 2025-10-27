@@ -7,10 +7,10 @@ import com.lumiyaviewer.lumiya.slproto.messages.AvatarAnimation
 import com.lumiyaviewer.lumiya.slproto.messages.AvatarAppearance
 import com.lumiyaviewer.lumiya.slproto.textures.SLTextureEntry
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLObjectAvatarInfo : SLObjectInfo {
-    @Nonnull
+    @NonNull
     private AvatarVisualState avatarVisualState
     private Boolean isMyAvatar
 
@@ -36,12 +36,12 @@ class SLObjectAvatarInfo : SLObjectInfo {
     }
 
     /* access modifiers changed from: protected */
-    @Nonnull
+    @NonNull
     DrawListObjectEntry createDrawListEntry() {
         return DrawListAvatarEntry(this)
     }
 
-    @Nonnull
+    @NonNull
     AvatarVisualState getAvatarVisualState() {
         return this.avatarVisualState
     }

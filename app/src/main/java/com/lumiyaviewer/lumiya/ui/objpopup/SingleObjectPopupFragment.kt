@@ -1,10 +1,10 @@
 package com.lumiyaviewer.lumiya.ui.objpopup
 
 import android.os.Bundle
-import android.support.design.widget.CoordinatorLayout
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentActivity
-import android.support.v7.widget.RecyclerView
+import com.google.android.material.widget.CoordinatorLayout
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,8 +18,8 @@ import com.lumiyaviewer.lumiya.ui.common.ActivityUtils
 import com.lumiyaviewer.lumiya.ui.common.ConnectedActivity
 import com.lumiyaviewer.lumiya.ui.common.SwipeDismissAdvancedBehavior
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class SingleObjectPopupFragment : Fragment {
     private SwipeDismissAdvancedBehavior.OnDismissListener dismissListener = SwipeDismissAdvancedBehavior.OnDismissListener() {
@@ -32,7 +32,7 @@ class SingleObjectPopupFragment : Fragment {
     }
     private View.OnClickListener frameClickListener = $Lambda$gmgx9kG_frukRCwYiu6KI4GSv6k(this)
 
-    SingleObjectPopupFragment create(@Nonnull UUID uuid) {
+    SingleObjectPopupFragment create(@NonNull UUID uuid) {
         SingleObjectPopupFragment singleObjectPopupFragment = SingleObjectPopupFragment()
         singleObjectPopupFragment.setArguments(ActivityUtils.makeFragmentArguments(uuid, (Bundle) null))
         return singleObjectPopupFragment

@@ -1,7 +1,7 @@
 package com.lumiyaviewer.lumiya.ui.objects
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +13,7 @@ import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectProfileData
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 import java.util.UUID
 
 /**

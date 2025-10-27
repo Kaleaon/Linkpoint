@@ -3,8 +3,8 @@ import java.util.*
 
 import android.content.Context
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.app.LoaderManager
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.LoaderManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,7 +24,7 @@ import com.lumiyaviewer.lumiya.ui.common.SwipeDismissListViewTouchListener
 import com.lumiyaviewer.lumiya.ui.render.CardboardActivity
 import java.io.Closeable
 import java.io.IOException
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 abstract class UserListFragment : Fragment {
     @Nullable

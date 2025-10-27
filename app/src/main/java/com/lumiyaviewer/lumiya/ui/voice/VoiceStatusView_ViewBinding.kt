@@ -1,9 +1,9 @@
 package com.lumiyaviewer.lumiya.ui.voice
 import java.util.*
 
-import android.support.annotation.CallSuper
-import android.support.annotation.UiThread
-import android.support.v7.widget.CardView
+import androidx.annotation.CallSuper
+import androidx.annotation.UiThread
+import androidx.recyclerview.widget.CardView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button

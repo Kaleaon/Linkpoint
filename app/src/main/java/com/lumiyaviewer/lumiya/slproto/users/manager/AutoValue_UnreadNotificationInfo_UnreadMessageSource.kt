@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableList
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import com.lumiyaviewer.lumiya.slproto.users.manager.UnreadNotificationInfo
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class AutoValue_UnreadNotificationInfo_UnreadMessageSource : UnreadNotificationInfo.UnreadMessageSource {
     private ChatterID chatterID
@@ -30,7 +30,7 @@ class AutoValue_UnreadNotificationInfo_UnreadMessageSource : UnreadNotificationI
         this.unreadMessagesCount = i
     }
 
-    @Nonnull
+    @NonNull
     ChatterID chatterID() {
         return this.chatterID
     }
@@ -61,7 +61,7 @@ class AutoValue_UnreadNotificationInfo_UnreadMessageSource : UnreadNotificationI
         return "UnreadMessageSource{chatterID=" + this.chatterID + ", " + "chatterName=" + this.chatterName + ", " + "unreadMessages=" + this.unreadMessages + ", " + "unreadMessagesCount=" + this.unreadMessagesCount + "}"
     }
 
-    @Nonnull
+    @NonNull
     ImmutableList<SLChatEvent> unreadMessages() {
         return this.unreadMessages
     }

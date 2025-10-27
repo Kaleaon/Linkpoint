@@ -11,7 +11,7 @@ import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import com.lumiyaviewer.lumiya.ui.common.BackButtonHandler
 import com.lumiyaviewer.lumiya.ui.common.TextFieldEditFragment
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class UserNotesEditFragment : TextFieldEditFragment : BackButtonHandler {
     private Subscription<UUID, AvatarNotesReply> avatarNotesSubscription = null

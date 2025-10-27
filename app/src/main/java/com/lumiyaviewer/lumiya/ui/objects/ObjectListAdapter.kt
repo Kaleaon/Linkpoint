@@ -16,12 +16,12 @@ import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.objects.SLAvatarObjectDisplayInfo
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectDisplayInfo
 import com.lumiyaviewer.lumiya.slproto.objects.SLPrimObjectDisplayInfo
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class ObjectListAdapter : BaseExpandableListAdapter {
     private val HIERARCHY_PADDING_DP: Int = 10
     private Context context
-    @Nonnull
+    @NonNull
     private ImmutableList<SLObjectDisplayInfo> objects = ImmutableList.of()
 
     ObjectListAdapter(Context context2) {
@@ -57,7 +57,7 @@ class ObjectListAdapter : BaseExpandableListAdapter {
         return 0
     }
 
-    @Nonnull
+    @NonNull
     ImmutableList<SLObjectDisplayInfo> getData() {
         return this.objects
     }
@@ -159,7 +159,7 @@ class ObjectListAdapter : BaseExpandableListAdapter {
         return true
     }
 
-    Unit setData(@Nonnull ImmutableList<SLObjectDisplayInfo> immutableList) {
+    Unit setData(@NonNull ImmutableList<SLObjectDisplayInfo> immutableList) {
         this.objects = immutableList
         notifyDataSetChanged()
     }

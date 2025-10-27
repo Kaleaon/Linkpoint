@@ -8,8 +8,8 @@ import com.lumiyaviewer.lumiya.react.UIThreadExecutor
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever
 import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class ChatterNameDisplayer : ChatterNameRetriever.OnChatterNameUpdated {
     private Boolean alreadyUpdated = false
@@ -56,7 +56,7 @@ class ChatterNameDisplayer : ChatterNameRetriever.OnChatterNameUpdated {
         return this.chatterID
     }
 
-    @Nonnull
+    @NonNull
     String getResolvedName(Context context) {
         String str = null
         if (this.nameRetriever != null) {

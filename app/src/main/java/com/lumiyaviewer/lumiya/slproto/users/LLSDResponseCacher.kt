@@ -12,7 +12,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 import java.util.concurrent.Executor
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class LLSDResponseCacher<Key> : ResponseCacher<Key, LLSDNode> {
     LLSDResponseCacher(DaoSession daoSession, Executor executor, String str) {
@@ -28,7 +28,7 @@ class LLSDResponseCacher<Key> : ResponseCacher<Key, LLSDNode> {
     }
 
     /* access modifiers changed from: protected */
-    LLSDNode loadCached(ByteArray bArr) {
+    LLSDNode loadCached(Byte[] bArr) {
         try {
             return LLSDNode.fromBinary(DataInputStream(ByteArrayInputStream(bArr)))
         } catch (LLSDException e) {
@@ -42,7 +42,7 @@ class LLSDResponseCacher<Key> : ResponseCacher<Key, LLSDNode> {
     }
 
     /* access modifiers changed from: protected */
-    ByteArray storeCached(@Nonnull LLSDNode lLSDNode) {
+    Byte[] storeCached(@NonNull LLSDNode lLSDNode) {
         ByteArrayOutputStream byteArrayOutputStream = ByteArrayOutputStream()
         DataOutputStream dataOutputStream = DataOutputStream(byteArrayOutputStream)
         try {

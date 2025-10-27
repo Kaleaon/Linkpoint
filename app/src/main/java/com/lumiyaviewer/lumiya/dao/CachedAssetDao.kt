@@ -3,7 +3,7 @@ package com.lumiyaviewer.lumiya.dao
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteStatement
-import android.support.v4.app.NotificationCompat
+import androidx.fragment.app.NotificationCompat
 import de.greenrobot.dao.AbstractDao
 import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig

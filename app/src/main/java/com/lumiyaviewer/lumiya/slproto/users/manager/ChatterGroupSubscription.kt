@@ -6,15 +6,15 @@ import com.lumiyaviewer.lumiya.slproto.SLMessage
 import com.lumiyaviewer.lumiya.slproto.messages.GroupProfileReply
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.concurrent.NotThreadSafe
+import androidx.annotation.NonNull
+import androidx.annotation.NotThreadSafe
 
 @NotThreadSafe
 class ChatterGroupSubscription : ChatterSubscription {
-    @Nonnull
+    @NonNull
     private Subscription<UUID, GroupProfileReply> groupProfileSubscription
 
-    ChatterGroupSubscription(@Nonnull SortedChatterList sortedChatterList, ChatterID.ChatterIDGroup chatterIDGroup, @Nonnull UserManager userManager) {
+    ChatterGroupSubscription(@NonNull SortedChatterList sortedChatterList, ChatterID.ChatterIDGroup chatterIDGroup, @NonNull UserManager userManager) {
         super(sortedChatterList, chatterIDGroup, userManager)
         this.groupProfileSubscription = userManager.getCachedGroupProfiles().getPool().subscribe(chatterIDGroup.getChatterUUID(), $Lambda$eTv5Cj2a9ssR4ZBNRV1Lgb181AY(this))
     }

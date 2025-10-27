@@ -2,7 +2,7 @@ package com.lumiyaviewer.lumiya.render.glres
 
 import com.lumiyaviewer.lumiya.render.RenderContext
 import com.lumiyaviewer.lumiya.res.collections.WeakQueue
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 abstract class GLLoadQueue {
     WeakQueue<GLLoadable> loadQueue = new WeakQueue<>()
@@ -25,11 +25,11 @@ abstract class GLLoadQueue {
         this.loadQueue.clear()
     }
 
-    void add(@Nonnull GLLoadable gLLoadable) {
+    void add(@NonNull GLLoadable gLLoadable) {
         this.loadQueue.offer(gLLoadable)
     }
 
-    void remove(@Nonnull GLLoadable gLLoadable) {
+    void remove(@NonNull GLLoadable gLLoadable) {
         this.loadQueue.remove(gLLoadable)
     }
 }

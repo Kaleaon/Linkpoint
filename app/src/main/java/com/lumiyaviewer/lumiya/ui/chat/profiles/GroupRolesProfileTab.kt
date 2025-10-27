@@ -2,7 +2,7 @@ package com.lumiyaviewer.lumiya.ui.chat.profiles
 
 import android.graphics.Typeface
 import android.os.Bundle
-import android.support.v4.widget.SwipeRefreshLayout
+import androidx.core.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,7 +27,7 @@ import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.HashMap
 import java.util.Map
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class GroupRolesProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadableDataChangedListener {
     private GroupRoleAdapter adapter = null

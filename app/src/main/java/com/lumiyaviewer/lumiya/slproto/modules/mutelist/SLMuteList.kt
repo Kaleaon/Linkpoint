@@ -25,14 +25,14 @@ import de.greenrobot.dao.query.LazyList
 import java.util.Iterator
 import java.util.UUID
 import java.util.zip.CRC32
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLMuteList : SLModule : SLXfer.SLXferCompletionListener {
     private Int cachedCRC = null
     private MuteListCachedDataDao muteListCachedDataDao
     private volatile MuteListData muteListData = MuteListData()
     private RequestHandler<SubscriptionSingleKey> muteListRequestHandler = AsyncRequestHandler(this.agentCircuit, SimpleRequestHandler<SubscriptionSingleKey>() {
-        Unit onRequest(@Nonnull SubscriptionSingleKey subscriptionSingleKey) {
+        Unit onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey) {
             if (SLMuteList.this.muteListResultHandler != null) {
                 SLMuteList.this.muteListResultHandler.onResultData(SubscriptionSingleKey.Value, SLMuteList.this.getMuteList())
             }

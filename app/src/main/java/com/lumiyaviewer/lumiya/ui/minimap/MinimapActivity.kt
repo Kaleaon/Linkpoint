@@ -2,9 +2,9 @@ package com.lumiyaviewer.lumiya.ui.minimap
 
 import android.app.Activity
 import android.os.Bundle
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentTransaction
-import android.support.v7.app.ActionBar
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
+import androidx.appcompat.app.ActionBar
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -21,7 +21,7 @@ import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import com.lumiyaviewer.lumiya.ui.common.ActivityUtils
 import com.lumiyaviewer.lumiya.ui.common.ConnectedActivity
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class MinimapActivity : ConnectedActivity {
     private SubscriptionData<SubscriptionSingleKey, CurrentLocationInfo> currentLocationInfo = SubscriptionData<>(UIThreadExecutor.getInstance(), $Lambda$HQUtmVzLYkemE78mCklVmVxMXms(this))

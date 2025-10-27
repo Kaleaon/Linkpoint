@@ -3,8 +3,8 @@ package com.lumiyaviewer.lumiya.ui.chat.profiles
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.os.Bundle
-import android.support.v4.app.FragmentActivity
-import android.support.v4.widget.SwipeRefreshLayout
+import androidx.fragment.app.FragmentActivity
+import androidx.core.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -42,7 +42,7 @@ import java.util.HashSet
 import java.util.Iterator
 import java.util.Set
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class GroupMemberRolesFragment : ChatterReloadableFragment : LoadableMonitor.OnLoadableDataChangedListener, BackButtonHandler {
     private val MEMBER_ID_KEY: String = "memberID"

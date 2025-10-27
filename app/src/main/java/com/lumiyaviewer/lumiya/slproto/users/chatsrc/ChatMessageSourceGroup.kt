@@ -5,13 +5,13 @@ import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class ChatMessageSourceGroup : ChatMessageSource {
-    @Nonnull
+    @NonNull
     String name
-    @Nonnull
+    @NonNull
     UUID uuid
 
     ChatMessageSourceGroup(ChatMessage chatMessage) {
@@ -19,17 +19,17 @@ class ChatMessageSourceGroup : ChatMessageSource {
         this.name = chatMessage.getSenderName()
     }
 
-    @Nonnull
+    @NonNull
     ChatterID getDefaultChatter(UUID uuid2) {
         return ChatterID.getGroupChatterID(uuid2, this.uuid)
     }
 
     @Nullable
-    String getSourceName(@Nonnull UserManager userManager) {
+    String getSourceName(@NonNull UserManager userManager) {
         return this.name
     }
 
-    @Nonnull
+    @NonNull
     ChatMessageSource.ChatMessageSourceType getSourceType() {
         return ChatMessageSource.ChatMessageSourceType.Group
     }
@@ -39,7 +39,7 @@ class ChatMessageSourceGroup : ChatMessageSource {
         return this.uuid
     }
 
-    Unit serializeTo(@Nonnull ChatMessage chatMessage) {
+    Unit serializeTo(@NonNull ChatMessage chatMessage) {
         super.serializeTo(chatMessage)
         chatMessage.setSenderUUID(this.uuid)
         chatMessage.setSenderName(this.name)

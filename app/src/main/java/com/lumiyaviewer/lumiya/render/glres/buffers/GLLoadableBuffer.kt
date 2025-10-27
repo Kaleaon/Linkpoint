@@ -8,11 +8,11 @@ import android.opengl.GLES30
 import com.lumiyaviewer.lumiya.render.RenderContext
 import com.lumiyaviewer.lumiya.render.glres.GLCleanable
 import com.lumiyaviewer.rawbuffers.DirectByteBuffer
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class GLLoadableBuffer : GLCleanable {
     private var glBuffer: GLBuffer = null
-    @Nonnull
+    @NonNull
     private DirectByteBuffer rawBuffer
 
     constructor(directByteBuffer: DirectByteBuffer) {
@@ -179,7 +179,7 @@ class GLLoadableBuffer : GLCleanable {
         return this.rawBuffer.getFloat(i)
     }
 
-    @Nonnull
+    @NonNull
     fun getRawBuffer(): DirectByteBuffer {
         return this.rawBuffer
     }

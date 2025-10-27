@@ -2,12 +2,12 @@ package com.lumiyaviewer.lumiya.ui.notify
 
 import android.content.Context
 import android.os.Build
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import com.google.common.collect.ImmutableSet
 import com.lumiyaviewer.lumiya.ui.notify.NotificationChannels
 import com.lumiyaviewer.lumiya.ui.settings.NotificationType
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class DummyNotificationChannelManager : NotificationChannelManager {
     val DEFAULT_NOTIFICATION_CHANNEL: String = "miscellaneous"
@@ -17,22 +17,22 @@ class DummyNotificationChannelManager : NotificationChannelManager {
         return false
     }
 
-    @Nonnull
+    @NonNull
     ImmutableSet<NotificationType> getEnabledTypes(Context context) {
         return allChannels
     }
 
-    @Nonnull
-    String getNotificationChannelName(@Nonnull NotificationChannels.Channel channel) {
+    @NonNull
+    String getNotificationChannelName(@NonNull NotificationChannels.Channel channel) {
         return DEFAULT_NOTIFICATION_CHANNEL
     }
 
     @Nullable
-    String getNotificationSummary(Context context, @Nonnull NotificationChannels.Channel channel) {
+    String getNotificationSummary(Context context, @NonNull NotificationChannels.Channel channel) {
         return null
     }
 
-    Boolean showSystemNotificationSettings(Context context, @Nullable Fragment fragment, @Nonnull NotificationChannels.Channel channel) {
+    Boolean showSystemNotificationSettings(Context context, @Nullable Fragment fragment, @NonNull NotificationChannels.Channel channel) {
         return false
     }
 

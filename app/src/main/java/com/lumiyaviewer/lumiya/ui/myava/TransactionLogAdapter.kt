@@ -2,9 +2,9 @@ package com.lumiyaviewer.lumiya.ui.myava
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.support.annotation.CallSuper
-import android.support.annotation.UiThread
-import android.support.v7.widget.RecyclerView
+import androidx.annotation.CallSuper
+import androidx.annotation.UiThread
+import androidx.recyclerview.widget.RecyclerView
 import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
@@ -22,7 +22,7 @@ import com.lumiyaviewer.lumiya.ui.common.ChatterNameDisplayer
 import de.greenrobot.dao.query.LazyList
 import java.util.Calendar
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class TransactionLogAdapter : RecyclerView.Adapter<TransactionViewHolder> {
     /* access modifiers changed from: private */

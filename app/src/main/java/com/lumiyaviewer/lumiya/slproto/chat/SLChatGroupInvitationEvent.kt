@@ -14,21 +14,21 @@ import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLChatGroupInvitationEvent : SLChatYesNoEvent {
     private UUID groupID
     private Int joinFee
     private UUID sessionID
 
-    SLChatGroupInvitationEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
+    SLChatGroupInvitationEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
         super(chatMessage, uuid)
         this.joinFee = chatMessage.getTransactionAmount().intValue()
         this.sessionID = chatMessage.getSessionID()
         this.groupID = chatMessage.getItemID()
     }
 
-    SLChatGroupInvitationEvent(ChatMessageSource chatMessageSource, @Nonnull UUID uuid, ImprovedInstantMessage improvedInstantMessage) {
+    SLChatGroupInvitationEvent(ChatMessageSource chatMessageSource, @NonNull UUID uuid, ImprovedInstantMessage improvedInstantMessage) {
         super(chatMessageSource, uuid, improvedInstantMessage, (String) null)
         this.groupID = improvedInstantMessage.AgentData_Field.AgentID
         this.sessionID = improvedInstantMessage.MessageBlock_Field.ID
@@ -50,7 +50,7 @@ class SLChatGroupInvitationEvent : SLChatYesNoEvent {
     }
 
     /* access modifiers changed from: protected */
-    @Nonnull
+    @NonNull
     SLChatEvent.ChatMessageType getMessageType() {
         return SLChatEvent.ChatMessageType.GroupInvitation
     }
@@ -180,7 +180,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.chat.-$Lambda
         builder.create().show()
     }
 
-    Unit serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
+    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setTransactionAmount(Integer.valueOf(this.joinFee))
         chatMessage.setSessionID(this.sessionID)

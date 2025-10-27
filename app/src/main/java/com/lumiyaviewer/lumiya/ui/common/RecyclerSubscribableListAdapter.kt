@@ -1,6 +1,6 @@
 package com.lumiyaviewer.lumiya.ui.common
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.ViewGroup
 import com.google.common.base.Optional
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor
@@ -8,7 +8,7 @@ import com.lumiyaviewer.lumiya.slproto.users.manager.SubscribableList
 import java.util.AbstractList
 import java.util.ArrayList
 import java.util.List
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 abstract class RecyclerSubscribableListAdapter<T> : RecyclerView.Adapter {
     private RecyclerSubscribableListAdapter<T>.LocalItemList<T> localItemList

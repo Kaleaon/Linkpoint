@@ -1,11 +1,11 @@
 package com.lumiyaviewer.lumiya.ui.common
 import java.util.*
 
-import android.support.annotation.NonNull
-import android.support.design.widget.CoordinatorLayout
-import android.support.v4.view.MotionEventCompat
-import android.support.v4.view.ViewCompat
-import android.support.v4.widget.ViewDragHelper
+import androidx.annotation.NonNull
+import com.google.android.material.widget.CoordinatorLayout
+import androidx.core.view.MotionEventCompat
+import androidx.core.view.ViewCompat
+import androidx.core.widget.ViewDragHelper
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration

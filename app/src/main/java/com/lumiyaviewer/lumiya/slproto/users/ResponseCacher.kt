@@ -11,8 +11,8 @@ import com.lumiyaviewer.lumiya.react.RequestSource
 import com.lumiyaviewer.lumiya.react.Subscribable
 import com.lumiyaviewer.lumiya.react.SubscriptionPool
 import java.util.concurrent.Executor
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 abstract class ResponseCacher<KeyType, MessageType> : Refreshable<KeyType> {
     private Executor cacheExecutor
@@ -29,7 +29,7 @@ abstract class ResponseCacher<KeyType, MessageType> : Refreshable<KeyType> {
         this.pool.setCacheInvalidateHandler($Lambda$Tb8OaRVtYXRJ6N6ca7skHX1PNws(this), executor)
         this.requestHandler = RateLimitRequestHandler<>(RequestProcessor<KeyType, MessageType, MessageType>(this.pool, executor) {
             /* access modifiers changed from: protected */
-            Boolean isRequestComplete(@Nonnull KeyType keytype, MessageType messagetype) {
+            Boolean isRequestComplete(@NonNull KeyType keytype, MessageType messagetype) {
                 CachedResponse cachedResponse = (CachedResponse) ResponseCacher.this.cachedresponseDao.load(ResponseCacher.this.getKeyString(keytype))
                 if (cachedResponse != null) {
                     return !cachedResponse.getMustRevalidate()
@@ -39,7 +39,7 @@ abstract class ResponseCacher<KeyType, MessageType> : Refreshable<KeyType> {
 
             /* access modifiers changed from: protected */
             @Nullable
-            MessageType processRequest(@Nonnull KeyType keytype) {
+            MessageType processRequest(@NonNull KeyType keytype) {
                 CachedResponse cachedResponse = (CachedResponse) ResponseCacher.this.cachedresponseDao.load(ResponseCacher.this.getKeyString(keytype))
                 if (cachedResponse == null || cachedResponse.getData() == null) {
                     return null
@@ -50,7 +50,7 @@ abstract class ResponseCacher<KeyType, MessageType> : Refreshable<KeyType> {
             }
 
             /* access modifiers changed from: protected */
-            MessageType processResult(@Nonnull KeyType keytype, MessageType messagetype) {
+            MessageType processResult(@NonNull KeyType keytype, MessageType messagetype) {
                 Debug.Printf("%s: saving cached data for key %s", str, keytype.toString())
                 if (messagetype != null) {
                     ResponseCacher.this.cachedresponseDao.insertOrReplace(CachedResponse(ResponseCacher.this.getKeyString(keytype), ResponseCacher.this.storeCached(messagetype), false))
@@ -60,7 +60,7 @@ abstract class ResponseCacher<KeyType, MessageType> : Refreshable<KeyType> {
     }
 
     /* access modifiers changed from: private */
-    String getKeyString(@Nonnull KeyType keytype) {
+    String getKeyString(@NonNull KeyType keytype) {
         return this.keyPrefix + ":" + keytype.toString()
     }
 
@@ -83,12 +83,12 @@ abstract class ResponseCacher<KeyType, MessageType> : Refreshable<KeyType> {
     }
 
     /* access modifiers changed from: protected */
-    abstract MessageType loadCached(ByteArray bArr)
+    abstract MessageType loadCached(Byte[] bArr)
 
     Unit requestUpdate(KeyType keytype) {
         this.pool.requestUpdate(keytype)
     }
 
     /* access modifiers changed from: protected */
-    abstract ByteArray storeCached(@Nonnull MessageType messagetype)
+    abstract Byte[] storeCached(@NonNull MessageType messagetype)
 }

@@ -5,7 +5,7 @@ import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit
 import java.nio.ByteBuffer
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 /**
  * Converted from Java to Kotlin

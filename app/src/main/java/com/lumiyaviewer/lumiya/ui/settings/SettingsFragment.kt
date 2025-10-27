@@ -12,11 +12,11 @@ import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
 import android.os.StatFs
-import android.support.v4.app.FragmentActivity
-import android.support.v7.preference.Preference
-import android.support.v7.preference.PreferenceFragmentCompat
-import android.support.v7.preference.PreferenceScreen
-import android.support.v7.widget.RecyclerView
+import androidx.fragment.app.FragmentActivity
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceScreen
+import androidx.recyclerview.widget.RecyclerView
 import android.widget.ArrayAdapter
 import com.google.common.base.Objects
 import com.google.common.collect.ImmutableList
@@ -29,7 +29,7 @@ import com.lumiyaviewer.lumiya.ui.media.NotificationSounds
 import com.lumiyaviewer.lumiya.ui.notify.NotificationChannels
 import com.lumiyaviewer.lumiya.utils.FileUtils
 import java.io.File
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class SettingsFragment : PreferenceFragmentCompat : FragmentHasTitle {
     private val PREF_RESOURCE_KEY: String = "prefResourceId"

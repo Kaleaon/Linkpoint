@@ -6,26 +6,26 @@ import com.lumiyaviewer.lumiya.render.avatar.DrawableAvatar
 import com.lumiyaviewer.lumiya.render.avatar.DrawableAvatarStub
 import com.lumiyaviewer.lumiya.render.terrain.DrawableTerrainPatch
 import java.util.ArrayList
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 object DrawList {
     int avatarCountLimit
-    @Nonnull
+    @NonNull
     ArrayList<DrawableAvatarStub> avatarStubs
-    @Nonnull
+    @NonNull
     ArrayList<DrawableAvatar> avatars
-    @Nonnull
+    @NonNull
     DrawableStore drawableStore
     @Nullable
     DrawableAvatar myAvatar
-    @Nonnull
+    @NonNull
     ArrayList<DrawableObject> objects
     int[] renderPasses
-    @Nonnull
+    @NonNull
     ArrayList<DrawableTerrainPatch> terrain
 
-    private DrawList(@Nonnull DrawableStore drawableStore, int i) {
+    private DrawList(@NonNull DrawableStore drawableStore, int i) {
         this.drawableStore = drawableStore
         this.myAvatar = null
         this.objects = ArrayList()
@@ -35,7 +35,7 @@ object DrawList {
         this.avatarCountLimit = i
     }
 
-    private DrawList(@Nonnull DrawableStore drawableStore, int i, int i2, int i3, int i4, int i5) {
+    private DrawList(@NonNull DrawableStore drawableStore, int i, int i2, int i3, int i4, int i5) {
         this.drawableStore = drawableStore
         this.myAvatar = null
         this.objects = ArrayList(i)

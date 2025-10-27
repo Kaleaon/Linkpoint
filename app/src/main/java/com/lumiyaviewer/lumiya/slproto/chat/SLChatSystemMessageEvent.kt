@@ -6,30 +6,30 @@ import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLChatSystemMessageEvent : SLChatEvent {
-    @Nonnull
+    @NonNull
     private String text
 
-    SLChatSystemMessageEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
+    SLChatSystemMessageEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
         super(chatMessage, uuid)
         this.text = chatMessage.getMessageText()
     }
 
-    SLChatSystemMessageEvent(@Nonnull ChatMessageSource chatMessageSource, @Nonnull UUID uuid, @Nonnull String str) {
+    SLChatSystemMessageEvent(@NonNull ChatMessageSource chatMessageSource, @NonNull UUID uuid, @NonNull String str) {
         super(chatMessageSource, uuid)
         this.text = str
     }
 
     /* access modifiers changed from: protected */
-    @Nonnull
+    @NonNull
     SLChatEvent.ChatMessageType getMessageType() {
         return SLChatEvent.ChatMessageType.SystemMessage
     }
 
     /* access modifiers changed from: protected */
-    String getText(Context context, @Nonnull UserManager userManager) {
+    String getText(Context context, @NonNull UserManager userManager) {
         return this.text
     }
 
@@ -38,11 +38,11 @@ class SLChatSystemMessageEvent : SLChatEvent {
     }
 
     /* access modifiers changed from: protected */
-    Boolean isActionMessage(@Nonnull UserManager userManager) {
+    Boolean isActionMessage(@NonNull UserManager userManager) {
         return true
     }
 
-    Unit serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
+    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setMessageText(this.text)
     }

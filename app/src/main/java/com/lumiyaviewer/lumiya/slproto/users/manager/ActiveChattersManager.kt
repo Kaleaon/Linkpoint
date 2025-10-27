@@ -18,8 +18,8 @@ import de.greenrobot.dao.query.WhereCondition
 import java.lang.ref.WeakReference
 import java.util.*
 import java.util.concurrent.Executor
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 /**
  * Converted from Java to Kotlin

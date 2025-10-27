@@ -25,8 +25,8 @@ import java.util.List
 import java.util.Map
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class SLMinimap : SLModule {
     val CHAT_RANGE: Float = 20.0f
@@ -45,7 +45,7 @@ class SLMinimap : SLModule {
     private Int parcelUpsampleFactor = 4
     private Boolean afterTeleport = false
     private Int chatRangeUsersCount = 0
-    @Nonnull
+    @NonNull
     private volatile MinimapBitmap minimapBitmap = MinimapBitmap(256, 256)
     private Int myAvatarParcelDataIndex = -1
     /* access modifiers changed from: private */
@@ -55,7 +55,7 @@ class SLMinimap : SLModule {
     private val parcelIDs: IntArray = IntArray(4096)
     private Map<Int, ParcelData> parcels = ConcurrentHashMap()
     private RequestHandler<SubscriptionSingleKey> userLocationRequestHandler = SimpleRequestHandler<SubscriptionSingleKey>() {
-        Unit onRequest(@Nonnull SubscriptionSingleKey subscriptionSingleKey) {
+        Unit onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey) {
             if (SLMinimap.this.userLocationsResultHandler != null) {
                 SLMinimap.this.userLocationsResultHandler.onResultData(subscriptionSingleKey, UserLocations(SLMinimap.this.myAvatarPosition, SLMinimap.this.getMyAvatarHeading(), SLMinimap.this.userPositions))
             }
@@ -95,13 +95,13 @@ class SLMinimap : SLModule {
     }
 
     class UserLocation {
-        @Nonnull
+        @NonNull
         ChatterID chatterID
         volatile Float distance = Float.NaN
-        @Nonnull
+        @NonNull
         volatile ImmutableVector location
 
-        UserLocation(@Nonnull ChatterID chatterID2, @Nonnull ImmutableVector immutableVector) {
+        UserLocation(@NonNull ChatterID chatterID2, @NonNull ImmutableVector immutableVector) {
             this.chatterID = chatterID2
             this.location = immutableVector
         }

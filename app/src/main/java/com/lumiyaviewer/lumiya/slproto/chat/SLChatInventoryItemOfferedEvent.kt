@@ -16,7 +16,7 @@ import com.lumiyaviewer.lumiya.ui.inventory.InventorySaveInfo
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLChatInventoryItemOfferedEvent : SLChatYesNoEvent {
     private SLAssetType assetType
@@ -25,7 +25,7 @@ class SLChatInventoryItemOfferedEvent : SLChatYesNoEvent {
     private Int origIMType
     private UUID sessionID
 
-    SLChatInventoryItemOfferedEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
+    SLChatInventoryItemOfferedEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
         super(chatMessage, uuid)
         this.origIMType = chatMessage.getOrigIMType().intValue()
         this.sessionID = chatMessage.getSessionID()
@@ -34,7 +34,7 @@ class SLChatInventoryItemOfferedEvent : SLChatYesNoEvent {
         this.assetType = SLAssetType.getByType(chatMessage.getAssetType().intValue())
     }
 
-    SLChatInventoryItemOfferedEvent(@Nonnull ChatMessageSource chatMessageSource, @Nonnull UUID uuid, ImprovedInstantMessage improvedInstantMessage) {
+    SLChatInventoryItemOfferedEvent(@NonNull ChatMessageSource chatMessageSource, @NonNull UUID uuid, ImprovedInstantMessage improvedInstantMessage) {
         super(chatMessageSource, uuid, improvedInstantMessage, SLMessage.stringFromVariableUTF(improvedInstantMessage.MessageBlock_Field.Message))
         this.itemName = SLMessage.stringFromVariableUTF(improvedInstantMessage.MessageBlock_Field.Message)
         this.origIMType = improvedInstantMessage.MessageBlock_Field.Dialog
@@ -43,7 +43,7 @@ class SLChatInventoryItemOfferedEvent : SLChatYesNoEvent {
         this.assetType = extractAssetType(improvedInstantMessage)
     }
 
-    SLChatInventoryItemOfferedEvent(@Nonnull ChatMessageSource chatMessageSource, @Nonnull UUID uuid, ImprovedInstantMessage improvedInstantMessage, String str, UUID uuid2, SLAssetType sLAssetType) {
+    SLChatInventoryItemOfferedEvent(@NonNull ChatMessageSource chatMessageSource, @NonNull UUID uuid, ImprovedInstantMessage improvedInstantMessage, String str, UUID uuid2, SLAssetType sLAssetType) {
         super(chatMessageSource, uuid, improvedInstantMessage, str)
         this.itemName = str
         this.origIMType = improvedInstantMessage.MessageBlock_Field.Dialog
@@ -79,7 +79,7 @@ class SLChatInventoryItemOfferedEvent : SLChatYesNoEvent {
     }
 
     /* access modifiers changed from: protected */
-    @Nonnull
+    @NonNull
     SLChatEvent.ChatMessageType getMessageType() {
         return SLChatEvent.ChatMessageType.InventoryItemOffered
     }
@@ -96,8 +96,8 @@ class SLChatInventoryItemOfferedEvent : SLChatYesNoEvent {
         return context.getString(R.string.inv_offer_question)
     }
 
-    String getText(Context context, @Nonnull UserManager userManager) {
-        return context.getString(R.string.chat_inventory_other_offer_format, Array<Any>{this.itemName})
+    String getText(Context context, @NonNull UserManager userManager) {
+        return context.getString(R.string.chat_inventory_other_offer_format, Object[]{this.itemName})
     }
 
     String getYesButton(Context context) {
@@ -109,7 +109,7 @@ class SLChatInventoryItemOfferedEvent : SLChatYesNoEvent {
     }
 
     /* access modifiers changed from: protected */
-    Boolean isActionMessage(@Nonnull UserManager userManager) {
+    Boolean isActionMessage(@NonNull UserManager userManager) {
         return true
     }
 
@@ -143,7 +143,7 @@ class SLChatInventoryItemOfferedEvent : SLChatYesNoEvent {
         }
     }
 
-    Unit serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
+    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
         Integer num = null
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setOrigIMType(Integer.valueOf(this.origIMType))

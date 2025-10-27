@@ -1,8 +1,8 @@
 package com.lumiyaviewer.lumiya.slproto.types
 
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
-import javax.annotation.concurrent.ThreadSafe
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
+import androidx.annotation.ThreadSafe
 
 @ThreadSafe
 class AgentPosition {
@@ -23,7 +23,7 @@ class AgentPosition {
         return immutableVector
     }
 
-    Boolean getInterpolatedPosition(@Nonnull LLVector3 lLVector3) {
+    Boolean getInterpolatedPosition(@NonNull LLVector3 lLVector3) {
         synchronized (this.lock) {
             if (this.isValid) {
                 if (this.velocity.x == 0.0f && this.velocity.y == 0.0f && this.velocity.z == 0.0f) {
@@ -40,7 +40,7 @@ class AgentPosition {
         return z
     }
 
-    @Nonnull
+    @NonNull
     LLVector3 getPosition() {
         LLVector3 lLVector3 = LLVector3()
         synchronized (this.lock) {
@@ -51,7 +51,7 @@ class AgentPosition {
         return lLVector3
     }
 
-    Boolean getPosition(@Nonnull LLVector3 lLVector3) {
+    Boolean getPosition(@NonNull LLVector3 lLVector3) {
         synchronized (this.lock) {
             if (this.isValid) {
                 lLVector3.set(this.position)
@@ -70,7 +70,7 @@ class AgentPosition {
         return z
     }
 
-    Unit set(@Nonnull LLVector3 lLVector3, @Nullable LLVector3 lLVector32) {
+    Unit set(@NonNull LLVector3 lLVector3, @Nullable LLVector3 lLVector32) {
         synchronized (this.lock) {
             this.position.set(lLVector3)
             LLVector3 lLVector33 = this.velocity

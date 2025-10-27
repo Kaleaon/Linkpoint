@@ -1,6 +1,6 @@
 package com.lumiyaviewer.lumiya.slproto.modules
 
-import android.support.v4.view.InputDeviceCompat
+import androidx.core.view.InputDeviceCompat
 import com.google.common.base.Strings
 import com.google.common.collect.ImmutableSet
 import com.lumiyaviewer.lumiya.Debug
@@ -41,8 +41,8 @@ import java.util.Set
 import java.util.Timer
 import java.util.TimerTask
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class SLAvatarControl : SLModule {
     private val IDLE_AGENT_UPDATE_INTERVAL: Int = 2000
@@ -68,7 +68,7 @@ class SLAvatarControl : SLModule {
     private Any agentUpdateScheduleLock = Any()
     private volatile AgentUpdateTimerTask agentUpdateTask
     private RequestHandler<SubscriptionSingleKey> avatarStateRequestHandler = AsyncRequestHandler(this.agentCircuit, SimpleRequestHandler<SubscriptionSingleKey>() {
-        Unit onRequest(@Nonnull SubscriptionSingleKey subscriptionSingleKey) {
+        Unit onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey) {
             if (SLAvatarControl.this.myAvatarStateResultHandler != null) {
                 SLAvatarControl.this.myAvatarStateResultHandler.onResultData(subscriptionSingleKey, SLAvatarControl.this.getMyAvatarState())
             }
@@ -227,7 +227,7 @@ class SLAvatarControl : SLModule {
     }
 
     /* access modifiers changed from: private */
-    @Nonnull
+    @NonNull
     MyAvatarState getMyAvatarState() {
         SLAttachmentPoint sLAttachmentPoint
         Boolean z4 = false
@@ -510,7 +510,7 @@ class SLAvatarControl : SLModule {
         rescheduleAgentUpdate()
     }
 
-    Boolean getAgentAndCameraPosition(@Nonnull LLVector3 lLVector3, @Nonnull CameraParams cameraParams2) {
+    Boolean getAgentAndCameraPosition(@NonNull LLVector3 lLVector3, @NonNull CameraParams cameraParams2) {
         Float f
         this.agentPosition.getInterpolatedPosition(lLVector3)
         synchronized (this.turningLock) {
@@ -540,7 +540,7 @@ class SLAvatarControl : SLModule {
         return this.agentHeading
     }
 
-    @Nonnull
+    @NonNull
     AgentPosition getAgentPosition() {
         return this.agentPosition
     }
@@ -552,7 +552,7 @@ class SLAvatarControl : SLModule {
         return z
     }
 
-    Unit getVRCamera(HeadTransformCompat headTransformCompat, @Nonnull LLVector3 lLVector3, @Nonnull CameraParams cameraParams2) {
+    Unit getVRCamera(HeadTransformCompat headTransformCompat, @NonNull LLVector3 lLVector3, @NonNull CameraParams cameraParams2) {
         this.agentPosition.getInterpolatedPosition(lLVector3)
         synchronized (this.cammingLock) {
             if (!this.isManualCamming) {
@@ -603,7 +603,7 @@ class SLAvatarControl : SLModule {
         }
     }
 
-    Unit setAgentPosition(@Nonnull LLVector3 lLVector3, @Nullable LLVector3 lLVector32) {
+    Unit setAgentPosition(@NonNull LLVector3 lLVector3, @Nullable LLVector3 lLVector32) {
         synchronized (this.cammingLock) {
             this.agentPosition.set(lLVector3, lLVector32)
             if (!this.cameraParams.isValid() || (!this.isCamming && (!this.isManualCamming))) {

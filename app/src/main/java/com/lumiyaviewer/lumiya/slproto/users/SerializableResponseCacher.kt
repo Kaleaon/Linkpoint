@@ -10,7 +10,7 @@ import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.io.Serializable
 import java.util.concurrent.Executor
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SerializableResponseCacher<Key, MessageType : Serializable> : ResponseCacher<Key, MessageType> {
     SerializableResponseCacher(DaoSession daoSession, Executor executor, String str) {
@@ -26,7 +26,7 @@ class SerializableResponseCacher<Key, MessageType : Serializable> : ResponseCach
     }
 
     /* access modifiers changed from: protected */
-    MessageType loadCached(ByteArray bArr) {
+    MessageType loadCached(Byte[] bArr) {
         try {
             return (Serializable) ObjectInputStream(ByteArrayInputStream(bArr)).readObject()
         } catch (IOException e) {
@@ -43,7 +43,7 @@ class SerializableResponseCacher<Key, MessageType : Serializable> : ResponseCach
     }
 
     /* access modifiers changed from: protected */
-    ByteArray storeCached(@Nonnull MessageType messagetype) {
+    Byte[] storeCached(@NonNull MessageType messagetype) {
         try {
             ByteArrayOutputStream byteArrayOutputStream = ByteArrayOutputStream()
             ObjectOutputStream objectOutputStream = ObjectOutputStream(byteArrayOutputStream)

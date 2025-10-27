@@ -6,8 +6,8 @@ import android.animation.AnimatorInflater
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.os.Build
-import android.support.v7.widget.CardView
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.CardView
+import androidx.recyclerview.widget.RecyclerView
 import android.util.TypedValue
 import android.view.View
 import android.widget.Button
@@ -15,7 +15,7 @@ import android.widget.TextView
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatYesNoEvent
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class ChatYesNoEventViewHolder : ChatEventViewHolder : View.OnClickListener {
     CardView cardView

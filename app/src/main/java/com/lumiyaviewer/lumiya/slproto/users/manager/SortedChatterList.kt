@@ -5,8 +5,8 @@ import com.lumiyaviewer.lumiya.Debug
 import java.util.Comparator
 import java.util.SortedSet
 import java.util.TreeSet
-import javax.annotation.Nullable
-import javax.annotation.concurrent.ThreadSafe
+import androidx.annotation.Nullable
+import androidx.annotation.ThreadSafe
 
 @ThreadSafe
 class SortedChatterList {

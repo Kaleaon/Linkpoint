@@ -4,7 +4,7 @@ import android.content.ClipData
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.widget.SwipeRefreshLayout
+import androidx.core.widget.SwipeRefreshLayout
 import android.text.ClipboardManager
 import android.text.util.Linkify
 import android.view.LayoutInflater
@@ -40,7 +40,7 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadableDataChangedListener {
     @BindView(2131755706)

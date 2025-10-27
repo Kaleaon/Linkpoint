@@ -7,29 +7,29 @@ import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLChatOnlineOfflineEvent : SLChatEvent {
     private Boolean wentOnline
 
-    SLChatOnlineOfflineEvent(ChatMessage chatMessage, @Nonnull UUID uuid, Boolean z) {
+    SLChatOnlineOfflineEvent(ChatMessage chatMessage, @NonNull UUID uuid, Boolean z) {
         super(chatMessage, uuid)
         this.wentOnline = z
     }
 
-    SLChatOnlineOfflineEvent(ChatMessageSource chatMessageSource, @Nonnull UUID uuid, Boolean z) {
+    SLChatOnlineOfflineEvent(ChatMessageSource chatMessageSource, @NonNull UUID uuid, Boolean z) {
         super(chatMessageSource, uuid)
         this.wentOnline = z
     }
 
     /* access modifiers changed from: protected */
-    @Nonnull
+    @NonNull
     SLChatEvent.ChatMessageType getMessageType() {
         return this.wentOnline ? SLChatEvent.ChatMessageType.WentOnline : SLChatEvent.ChatMessageType.WentOffline
     }
 
     /* access modifiers changed from: protected */
-    String getText(Context context, @Nonnull UserManager userManager) {
+    String getText(Context context, @NonNull UserManager userManager) {
         return context.getString(this.wentOnline ? R.string.went_online : R.string.went_offline)
     }
 
@@ -38,11 +38,11 @@ class SLChatOnlineOfflineEvent : SLChatEvent {
     }
 
     /* access modifiers changed from: protected */
-    Boolean isActionMessage(@Nonnull UserManager userManager) {
+    Boolean isActionMessage(@NonNull UserManager userManager) {
         return true
     }
 
-    Unit serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
+    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

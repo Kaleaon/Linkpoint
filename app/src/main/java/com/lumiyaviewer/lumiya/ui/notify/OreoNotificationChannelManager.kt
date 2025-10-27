@@ -5,8 +5,8 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
-import android.support.annotation.RequiresApi
-import android.support.v4.app.Fragment
+import androidx.annotation.RequiresApi
+import androidx.fragment.app.Fragment
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
 import com.lumiyaviewer.lumiya.Debug
@@ -17,8 +17,8 @@ import com.lumiyaviewer.lumiya.ui.notify.NotificationChannels
 import com.lumiyaviewer.lumiya.ui.settings.NotificationType
 import java.util.EnumMap
 import java.util.Map
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 @RequiresApi(api = 26)
 class OreoNotificationChannelManager : NotificationChannelManager {
@@ -46,7 +46,7 @@ class OreoNotificationChannelManager : NotificationChannelManager {
         return true
     }
 
-    @Nonnull
+    @NonNull
     ImmutableSet<NotificationType> getEnabledTypes(Context context) {
         NotificationChannels instance = NotificationChannels.getInstance()
         NotificationManager notificationManager = (NotificationManager) context.getSystemService("notification")
@@ -60,8 +60,8 @@ class OreoNotificationChannelManager : NotificationChannelManager {
         return builder.build()
     }
 
-    @Nonnull
-    String getNotificationChannelName(@Nonnull NotificationChannels.Channel channel) {
+    @NonNull
+    String getNotificationChannelName(@NonNull NotificationChannels.Channel channel) {
         String str
         synchronized (this.lock) {
             NotificationChannel notificationChannel = this.channels.get(channel)
@@ -90,7 +90,7 @@ class OreoNotificationChannelManager : NotificationChannelManager {
     }
 
     @Nullable
-    String getNotificationSummary(Context context, @Nonnull NotificationChannels.Channel channel) {
+    String getNotificationSummary(Context context, @NonNull NotificationChannels.Channel channel) {
         NotificationChannel notificationChannel = ((NotificationManager) context.getSystemService("notification")).getNotificationChannel(getNotificationChannelName(channel))
         if (notificationChannel == null) {
             return null
@@ -110,7 +110,7 @@ class OreoNotificationChannelManager : NotificationChannelManager {
         }
     }
 
-    Boolean showSystemNotificationSettings(Context context, @Nullable Fragment fragment, @Nonnull NotificationChannels.Channel channel) {
+    Boolean showSystemNotificationSettings(Context context, @Nullable Fragment fragment, @NonNull NotificationChannels.Channel channel) {
         Intent intent = Intent("android.settings.CHANNEL_NOTIFICATION_SETTINGS")
         intent.putExtra("android.provider.extra.CHANNEL_ID", getNotificationChannelName(channel))
         intent.putExtra("android.provider.extra.APP_PACKAGE", context.getPackageName())

@@ -13,20 +13,20 @@ import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import com.lumiyaviewer.lumiya.ui.chat.ChatEventTimestampUpdater
 import com.lumiyaviewer.lumiya.ui.common.TextFieldDialogBuilder
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class SLChatTextBoxDialog : SLChatDialogEvent {
     private val enteredValue: String = null
     private Int textBoxButtonIndex
 
-    SLChatTextBoxDialog(ChatMessage chatMessage, @Nonnull UUID uuid) {
+    SLChatTextBoxDialog(ChatMessage chatMessage, @NonNull UUID uuid) {
         super(chatMessage, uuid)
         this.textBoxButtonIndex = chatMessage.getTextBoxButtonIndex().intValue()
         this.enteredValue = chatMessage.getDialogSelectedOption()
     }
 
-    SLChatTextBoxDialog(ScriptDialog scriptDialog, @Nonnull UUID uuid, Int i) {
+    SLChatTextBoxDialog(ScriptDialog scriptDialog, @NonNull UUID uuid, Int i) {
         super(scriptDialog, uuid)
         this.textBoxButtonIndex = i
     }
@@ -52,7 +52,7 @@ class SLChatTextBoxDialog : SLChatDialogEvent {
     }
 
     /* access modifiers changed from: protected */
-    @Nonnull
+    @NonNull
     SLChatEvent.ChatMessageType getMessageType() {
         return SLChatEvent.ChatMessageType.TextBoxDialog
     }
@@ -82,7 +82,7 @@ class SLChatTextBoxDialog : SLChatDialogEvent {
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    Unit serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
+    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setTextBoxButtonIndex(Integer.valueOf(this.textBoxButtonIndex))
         chatMessage.setDialogSelectedOption(this.enteredValue)

@@ -9,7 +9,7 @@ import com.lumiyaviewer.lumiya.slproto.messages.SLMessageFactory
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.concurrent.Executor
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class SLMessageResponseCacher<Key, MessageType : SLMessage> : ResponseCacher<Key, MessageType> {
     SLMessageResponseCacher(DaoSession daoSession, Executor executor, String str) {
@@ -25,7 +25,7 @@ class SLMessageResponseCacher<Key, MessageType : SLMessage> : ResponseCacher<Key
     }
 
     /* access modifiers changed from: protected */
-    MessageType loadCached(ByteArray bArr) {
+    MessageType loadCached(Byte[] bArr) {
         ByteBuffer order = ByteBuffer.wrap(bArr).order(ByteOrder.nativeOrder())
         Int DecodeMessageIDGeneric = SLMessage.DecodeMessageIDGeneric(order)
         MessageType CreateByID = SLMessageFactory.CreateByID(DecodeMessageIDGeneric)
@@ -42,8 +42,8 @@ class SLMessageResponseCacher<Key, MessageType : SLMessage> : ResponseCacher<Key
     }
 
     /* access modifiers changed from: protected */
-    ByteArray storeCached(@Nonnull MessageType messagetype) {
-        ByteArray bArr = Byte[messagetype.CalcPayloadSize()]
+    Byte[] storeCached(@NonNull MessageType messagetype) {
+        Byte[] bArr = Byte[messagetype.CalcPayloadSize()]
         messagetype.PackPayload(ByteBuffer.wrap(bArr).order(ByteOrder.nativeOrder()))
         return bArr
     }

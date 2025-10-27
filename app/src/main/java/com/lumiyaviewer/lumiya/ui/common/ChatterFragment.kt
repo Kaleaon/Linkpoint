@@ -1,8 +1,8 @@
 package com.lumiyaviewer.lumiya.ui.common
 
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v4.app.FragmentActivity
+import androidx.fragment.app.ActivityCompat
+import androidx.fragment.app.FragmentActivity
 import com.google.common.base.Objects
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.R
@@ -10,7 +10,7 @@ import com.lumiyaviewer.lumiya.react.UIThreadExecutor
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 abstract class ChatterFragment : FragmentWithTitle : ChatterNameRetriever.OnChatterNameUpdated {
     val CHATTER_ID_KEY: String = "chatterID"

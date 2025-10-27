@@ -1,7 +1,7 @@
 package com.lumiyaviewer.lumiya.slproto.chat.generic
 import java.util.*
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Button
@@ -10,7 +10,7 @@ import android.widget.TextView
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.chat.SLChatTextBoxDialog
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class ChatTextBoxViewHolder : ChatEventViewHolder : View.OnClickListener, View.OnKeyListener, View.OnFocusChangeListener {
     private Button dialogButtonIgnore

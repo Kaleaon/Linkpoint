@@ -5,9 +5,9 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.view.MenuItemCompat
-import android.support.v7.widget.SearchView
+import androidx.fragment.app.Fragment
+import androidx.core.view.MenuItemCompat
+import androidx.recyclerview.widget.SearchView
 import android.view.Menu
 import android.view.MenuItem
 import com.google.common.base.Objects
@@ -25,7 +25,7 @@ import com.lumiyaviewer.lumiya.ui.common.FragmentActivityFactory
 import com.lumiyaviewer.lumiya.ui.common.MasterDetailsActivity
 import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class InventoryActivity : MasterDetailsActivity {
     private val INITIAL_FOLDER_ID_TAG: String = "folderID"

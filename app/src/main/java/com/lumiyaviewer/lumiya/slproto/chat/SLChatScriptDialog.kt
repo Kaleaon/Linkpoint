@@ -24,15 +24,15 @@ import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class SLChatScriptDialog : SLChatDialogEvent {
     /* access modifiers changed from: private */
-    IntArray dialogButtonIds = {R.id.buttonDialog1, R.id.buttonDialog2, R.id.buttonDialog3, R.id.buttonDialog4, R.id.buttonDialog5, R.id.buttonDialog6, R.id.buttonDialog7, R.id.buttonDialog8, R.id.buttonDialog9, R.id.buttonDialog10, R.id.buttonDialog11, R.id.buttonDialog12}
+    Int[] dialogButtonIds = {R.id.buttonDialog1, R.id.buttonDialog2, R.id.buttonDialog3, R.id.buttonDialog4, R.id.buttonDialog5, R.id.buttonDialog6, R.id.buttonDialog7, R.id.buttonDialog8, R.id.buttonDialog9, R.id.buttonDialog10, R.id.buttonDialog11, R.id.buttonDialog12}
     /* access modifiers changed from: private */
-    Array<String> buttons
-    private val selectedOption: String = null
+    String[] buttons
+    private String selectedOption = null
 
     class ScriptDialogDialog : Dialog : View.OnClickListener, DialogInterface.OnCancelListener {
         private UserManager userManager
@@ -77,12 +77,12 @@ class SLChatScriptDialog : SLChatDialogEvent {
         }
     }
 
-    SLChatScriptDialog(ChatMessage chatMessage, @Nonnull UUID uuid) {
+    SLChatScriptDialog(ChatMessage chatMessage, @NonNull UUID uuid) {
         super(chatMessage, uuid)
-        Array<String> strArr
+        String[] strArr
         this.selectedOption = chatMessage.getDialogSelectedOption()
         try {
-            strArr = (Array<String>) ObjectInputStream(ByteArrayInputStream(chatMessage.getDialogButtons())).readObject()
+            strArr = (String[]) ObjectInputStream(ByteArrayInputStream(chatMessage.getDialogButtons())).readObject()
         } catch (IOException | ClassNotFoundException e) {
             Debug.Warning(e)
             strArr = null
@@ -90,7 +90,7 @@ class SLChatScriptDialog : SLChatDialogEvent {
         this.buttons = strArr
     }
 
-    SLChatScriptDialog(ScriptDialog scriptDialog, @Nonnull UUID uuid, Array<String> strArr) {
+    SLChatScriptDialog(ScriptDialog scriptDialog, @NonNull UUID uuid, String[] strArr) {
         super(scriptDialog, uuid)
         this.buttons = strArr
     }
@@ -104,7 +104,7 @@ class SLChatScriptDialog : SLChatDialogEvent {
                 if (this.ignored) {
                     chatScriptDialogViewHolder.dialogResultTextView.setText(R.string.dialog_ignored)
                 } else {
-                    chatScriptDialogViewHolder.dialogResultTextView.setText(chatScriptDialogViewHolder.dialogResultTextView.getContext().getString(R.string.dialog_selected_format, Array<Any>{this.selectedOption}))
+                    chatScriptDialogViewHolder.dialogResultTextView.setText(chatScriptDialogViewHolder.dialogResultTextView.getContext().getString(R.string.dialog_selected_format, Object[]{this.selectedOption}))
                 }
                 chatScriptDialogViewHolder.dialogResultTextView.findViewById(R.id.dialogResultTextView).setVisibility(0)
                 chatScriptDialogViewHolder.dialogButtonsLayout.findViewById(R.id.dialogButtonsLayout).setVisibility(8)
@@ -125,12 +125,12 @@ class SLChatScriptDialog : SLChatDialogEvent {
         }
     }
 
-    Array<String> getButtons() {
+    String[] getButtons() {
         return this.buttons
     }
 
     /* access modifiers changed from: protected */
-    @Nonnull
+    @NonNull
     SLChatEvent.ChatMessageType getMessageType() {
         return SLChatEvent.ChatMessageType.ScriptDialog
     }
@@ -160,7 +160,7 @@ class SLChatScriptDialog : SLChatDialogEvent {
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    Unit serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
+    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         try {
             ByteArrayOutputStream byteArrayOutputStream = ByteArrayOutputStream()

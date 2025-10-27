@@ -11,8 +11,8 @@ import com.lumiyaviewer.lumiya.react.RequestSource
 import com.lumiyaviewer.lumiya.react.Subscribable
 import com.lumiyaviewer.lumiya.react.SubscriptionPool
 import java.util.concurrent.Executor
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class AssetResponseCacher : Refreshable<AssetKey> {
     /* access modifiers changed from: private */
@@ -25,7 +25,7 @@ class AssetResponseCacher : Refreshable<AssetKey> {
         this.pool.setCacheInvalidateHandler($Lambda$9LOU8pkPwNYFJNwesblYMTVNE0(this), executor)
         this.requestHandler = RateLimitRequestHandler<>(RequestProcessor<AssetKey, AssetData, AssetData>(this.pool, executor) {
             /* access modifiers changed from: protected */
-            Boolean isRequestComplete(@Nonnull AssetKey assetKey, AssetData assetData) {
+            Boolean isRequestComplete(@NonNull AssetKey assetKey, AssetData assetData) {
                 CachedAsset cachedAsset = (CachedAsset) AssetResponseCacher.this.cachedAssetDao.load(assetKey.toString())
                 if (cachedAsset != null) {
                     return !cachedAsset.getMustRevalidate()
@@ -35,7 +35,7 @@ class AssetResponseCacher : Refreshable<AssetKey> {
 
             /* access modifiers changed from: protected */
             @Nullable
-            AssetData processRequest(@Nonnull AssetKey assetKey) {
+            AssetData processRequest(@NonNull AssetKey assetKey) {
                 CachedAsset cachedAsset = (CachedAsset) AssetResponseCacher.this.cachedAssetDao.load(assetKey.toString())
                 if (cachedAsset != null) {
                     AssetData assetData = AssetData(cachedAsset.getStatus(), cachedAsset.getData())
@@ -47,7 +47,7 @@ class AssetResponseCacher : Refreshable<AssetKey> {
             }
 
             /* access modifiers changed from: protected */
-            AssetData processResult(@Nonnull AssetKey assetKey, AssetData assetData) {
+            AssetData processResult(@NonNull AssetKey assetKey, AssetData assetData) {
                 Debug.Printf("AssetCache: saving cached data for key %s", assetKey.toString())
                 if (assetData != null) {
                     AssetResponseCacher.this.cachedAssetDao.insertOrReplace(CachedAsset(assetKey.toString(), assetData.getStatus(), assetData.getData(), false))

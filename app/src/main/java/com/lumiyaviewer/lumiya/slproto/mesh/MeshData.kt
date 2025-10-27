@@ -20,7 +20,7 @@ import java.io.IOException
 import java.util.EnumMap
 import java.util.Map
 import java.util.zip.InflaterInputStream
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class MeshData {
     val MAX_RIGGED_MESH_JOINTS: Int = 163

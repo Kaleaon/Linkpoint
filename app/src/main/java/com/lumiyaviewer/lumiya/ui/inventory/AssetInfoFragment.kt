@@ -4,8 +4,8 @@ import android.app.Dialog
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.support.v4.app.FragmentActivity
-import android.support.v4.widget.SwipeRefreshLayout
+import androidx.fragment.app.FragmentActivity
+import androidx.core.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -48,8 +48,8 @@ import com.lumiyaviewer.lumiya.ui.common.ReloadableFragment
 import com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor
 import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 class AssetInfoFragment : FragmentWithTitle : ReloadableFragment, View.OnClickListener, LoadableMonitor.OnLoadableDataChangedListener {
     private val ITEM_UUID_KEY: String = "itemUUID"
@@ -308,7 +308,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         this.runningAnimations.subscribe(userManager.getObjectsManager().runningAnimations(), SubscriptionSingleKey.Value)
     }
 
-    private Unit showEntryInfo(@Nonnull SLInventoryEntry sLInventoryEntry) {
+    private Unit showEntryInfo(@NonNull SLInventoryEntry sLInventoryEntry) {
         Int i = 0
         Int i2 = 8
         View view = getView()

@@ -3,8 +3,8 @@ package com.lumiyaviewer.lumiya.slproto.users.manager.assets
 import com.google.common.base.Joiner
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 
 abstract class AssetKey {
     private Joiner toStringJoiner = Joiner.on(':').useForNull("null")
@@ -35,7 +35,7 @@ abstract class AssetKey {
     @Nullable
     abstract UUID taskUUID()
 
-    @Nonnull
+    @NonNull
     String toString() {
         return toStringJoiner.join(Int.valueOf(channelType()), Int.valueOf(sourceType()), assetUUID(), Int.valueOf(assetType()), ownerUUID(), itemUUID(), taskUUID())
     }

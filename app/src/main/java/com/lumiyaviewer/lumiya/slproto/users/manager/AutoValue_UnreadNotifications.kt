@@ -3,7 +3,7 @@ package com.lumiyaviewer.lumiya.slproto.users.manager
 import com.google.common.collect.ImmutableMap
 import com.lumiyaviewer.lumiya.ui.settings.NotificationType
 import java.util.UUID
-import javax.annotation.Nonnull
+import androidx.annotation.NonNull
 
 class AutoValue_UnreadNotifications : UnreadNotifications {
     private UUID agentUUID
@@ -20,7 +20,7 @@ class AutoValue_UnreadNotifications : UnreadNotifications {
         this.notificationGroups = immutableMap
     }
 
-    @Nonnull
+    @NonNull
     UUID agentUUID() {
         return this.agentUUID
     }
@@ -43,7 +43,7 @@ class AutoValue_UnreadNotifications : UnreadNotifications {
         return ((this.agentUUID.hashCode() ^ 1000003) * 1000003) ^ this.notificationGroups.hashCode()
     }
 
-    @Nonnull
+    @NonNull
     ImmutableMap<NotificationType, UnreadNotificationInfo> notificationGroups() {
         return this.notificationGroups
     }

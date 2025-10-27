@@ -1,6 +1,6 @@
 package com.lumiyaviewer.lumiya.slproto.modules.voice
 
-import android.support.v4.app.NotificationCompat
+import androidx.fragment.app.NotificationCompat
 import com.google.common.base.Objects
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.GlobalOptions
@@ -43,7 +43,7 @@ import java.util.Collections
 import java.util.HashSet
 import java.util.Set
 import java.util.UUID
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class SLVoice : SLModule {
     private val INVALID_PARCEL_ID: Int = -1

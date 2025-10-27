@@ -1,7 +1,7 @@
 package com.lumiyaviewer.lumiya.slproto.users.manager
 
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent
-import javax.annotation.Nullable
+import androidx.annotation.Nullable
 
 class AutoValue_UnreadMessageInfo : UnreadMessageInfo {
     private SLChatEvent lastMessage
