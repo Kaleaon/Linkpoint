@@ -7,77 +7,94 @@ import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 
+/**
+ * OpenGL ES shader enumeration.
+ * Each enum value represents a shader file that can be compiled.
+ */
 enum class Shader(
     private val type: Int,
     private val fileName: String
 ) {
-    PrimFragmentShader(35632, "prim.fsh"),
-    PrimFragmentShader30(35632, "prim_30.fsh"),
-    PrimOpaqueFragmentShader(35632, "prim_opaque.fsh"),
-    PrimOpaqueFragmentShader30(35632, "prim_opaque_30.fsh"),
-    PrimVertexShader(35633, "prim.vsh"),
-    AvatarVertexShader(35633, "avatar.vsh"),
-    FlexiVertexShader(35633, "prim_flexible.vsh"),
-    RiggedMeshVertexShader(35633, "rigged_mesh.vsh"),
-    RiggedMeshVertexShader30(35633, "rigged_mesh_30.vsh"),
-    QuadVertexShader(35633, "quad.vsh"),
-    QuadFragmentShader(35632, "quad.fsh"),
-    BoundingBoxVertexShader(35633, "bounding_box_30.vsh"),
-    BoundingBoxFragmentShader(35632, "bounding_box_30.fsh"),
-    WaterVertexShader(35633, "water.vsh"),
-    WaterFragmentShader(35632, "water.fsh"),
-    SkyVertexShader(35633, "sky.vsh"),
-    SkyFragmentShader(35632, "sky.fsh"),
-    SkyNoCloudsFragmentShader(35632, "sky_no_clouds.fsh"),
-    StarsVertexShader(35633, "stars.vsh"),
-    StarsFragmentShader(35632, "stars.fsh"),
-    ExtTextureVertexShader(35633, "external_texture.vsh"),
-    ExtTextureFragmentShader(35632, "external_texture.fsh"),
-    RawVertexShader(35633, "raw.vsh"),
-    RawFragmentShader(35632, "raw.fsh"),
-    FXAAVertexShader(35633, "fxaa.vsh"),
-    FXAAFragmentShader(35632, "fxaa.fsh")
-    
-    private String fileName
-    private int handle
-    private int type
+    PrimFragmentShader(GLES20.GL_FRAGMENT_SHADER, "prim.fsh"),
+    PrimFragmentShader30(GLES20.GL_FRAGMENT_SHADER, "prim_30.fsh"),
+    PrimOpaqueFragmentShader(GLES20.GL_FRAGMENT_SHADER, "prim_opaque.fsh"),
+    PrimOpaqueFragmentShader30(GLES20.GL_FRAGMENT_SHADER, "prim_opaque_30.fsh"),
+    PrimVertexShader(GLES20.GL_VERTEX_SHADER, "prim.vsh"),
+    AvatarVertexShader(GLES20.GL_VERTEX_SHADER, "avatar.vsh"),
+    FlexiVertexShader(GLES20.GL_VERTEX_SHADER, "prim_flexible.vsh"),
+    RiggedMeshVertexShader(GLES20.GL_VERTEX_SHADER, "rigged_mesh.vsh"),
+    RiggedMeshVertexShader30(GLES20.GL_VERTEX_SHADER, "rigged_mesh_30.vsh"),
+    QuadVertexShader(GLES20.GL_VERTEX_SHADER, "quad.vsh"),
+    QuadFragmentShader(GLES20.GL_FRAGMENT_SHADER, "quad.fsh"),
+    BoundingBoxVertexShader(GLES20.GL_VERTEX_SHADER, "bounding_box_30.vsh"),
+    BoundingBoxFragmentShader(GLES20.GL_FRAGMENT_SHADER, "bounding_box_30.fsh"),
+    WaterVertexShader(GLES20.GL_VERTEX_SHADER, "water.vsh"),
+    WaterFragmentShader(GLES20.GL_FRAGMENT_SHADER, "water.fsh"),
+    SkyVertexShader(GLES20.GL_VERTEX_SHADER, "sky.vsh"),
+    SkyFragmentShader(GLES20.GL_FRAGMENT_SHADER, "sky.fsh"),
+    SkyNoCloudsFragmentShader(GLES20.GL_FRAGMENT_SHADER, "sky_no_clouds.fsh"),
+    StarsVertexShader(GLES20.GL_VERTEX_SHADER, "stars.vsh"),
+    StarsFragmentShader(GLES20.GL_FRAGMENT_SHADER, "stars.fsh"),
+    ExtTextureVertexShader(GLES20.GL_VERTEX_SHADER, "external_texture.vsh"),
+    ExtTextureFragmentShader(GLES20.GL_FRAGMENT_SHADER, "external_texture.fsh"),
+    RawVertexShader(GLES20.GL_VERTEX_SHADER, "raw.vsh"),
+    RawFragmentShader(GLES20.GL_FRAGMENT_SHADER, "raw.fsh"),
+    FXAAVertexShader(GLES20.GL_VERTEX_SHADER, "fxaa.vsh"),
+    FXAAFragmentShader(GLES20.GL_FRAGMENT_SHADER, "fxaa.fsh");
 
-    private Shader(int i, String str) {
-        this.type = i
-        this.fileName = str
-    }
+    private var handle: Int = 0
 
-    private String getShaderCode(ShaderPreprocessor shaderPreprocessor) {
-        try {
-            BufferedReader bufferedReader = BufferedReader(InputStreamReader(LumiyaApp.getAssetManager().open("shaders/" + this.fileName)))
-            String processCode = shaderPreprocessor.processCode(bufferedReader)
+    /**
+     * Load and preprocess shader source code from assets.
+     */
+    private fun getShaderCode(shaderPreprocessor: ShaderPreprocessor): String? {
+        return try {
+            val inputStream = LumiyaApp.getAssetManager()?.open("shaders/$fileName")
+                ?: return null
+            val bufferedReader = BufferedReader(InputStreamReader(inputStream))
+            val processedCode = shaderPreprocessor.processCode(bufferedReader)
             bufferedReader.close()
-            return processCode
-        } catch (IOException e) {
-            return null
+            processedCode
+        } catch (e: IOException) {
+            null
         }
     }
 
-    int Compile(ShaderPreprocessor shaderPreprocessor) throws ShaderCompileException {
-        Debug.Printf("Shaders: Compiling shader '%s'...", this.fileName)
-        String shaderCode = getShaderCode(shaderPreprocessor)
-        if (shaderCode == null) {
-            this.handle = 0
-            throw ShaderCompileException("No shader code for " + this.fileName)
+    /**
+     * Compile this shader.
+     * @param shaderPreprocessor Preprocessor for shader source
+     * @return The OpenGL shader handle
+     * @throws ShaderCompileException if compilation fails
+     */
+    @Throws(ShaderCompileException::class)
+    fun compile(shaderPreprocessor: ShaderPreprocessor): Int {
+        Debug.printf("Shaders: Compiling shader '%s'...", fileName)
+        
+        val shaderCode = getShaderCode(shaderPreprocessor)
+            ?: throw ShaderCompileException("No shader code for $fileName")
+        
+        // Create and compile shader
+        handle = GLES20.glCreateShader(type)
+        GLES20.glShaderSource(handle, shaderCode)
+        GLES20.glCompileShader(handle)
+        
+        // Check compilation status
+        val compileStatus = IntArray(1)
+        GLES20.glGetShaderiv(handle, GLES20.GL_COMPILE_STATUS, compileStatus, 0)
+        
+        if (compileStatus[0] != GLES20.GL_TRUE) {
+            val errorLog = GLES20.glGetShaderInfoLog(handle)
+            throw ShaderCompileException("Shader ($fileName) compile error: '$errorLog'")
         }
-        this.handle = GLES20.glCreateShader(this.type)
-        GLES20.glShaderSource(this.handle, shaderCode)
-        GLES20.glCompileShader(this.handle)
-        int[] iArr = IntArray(1)
-        GLES20.glGetShaderiv(this.handle, 35713, iArr, 0)
-        if (iArr[0] == 1) {
-            return this.handle
-        }
-        shaderCode = GLES20.glGetShaderInfoLog(this.handle)
-        throw ShaderCompileException(String.format("Shader (%s) compile error: '%s'", new Object[]{this.fileName, shaderCode}))
+        
+        return handle
     }
 
-    int getHandle() {
-        return this.handle
+    /**
+     * Get the OpenGL shader handle.
+     */
+    fun getHandle(): Int {
+        return handle
     }
 }
+

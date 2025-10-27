@@ -4,54 +4,80 @@ import com.google.common.base.Objects
 import com.google.common.collect.ImmutableMap
 import java.io.BufferedReader
 import java.io.IOException
-import java.util.Map
-import java.util.Map.Entry
 import javax.annotation.Nullable
 
-class ShaderPreprocessor {
-    private ImmutableMap<String, String> definedMacros
+/**
+ * Preprocessor for shader source code.
+ * Handles #ifdef, #ifndef, #else, #endif directives and macro substitution.
+ */
+class ShaderPreprocessor(map: Map<String, String>) {
+    private val definedMacros: ImmutableMap<String, String> = ImmutableMap.copyOf(map)
 
-    constructor(map: String>) {
-        this.definedMacros = ImmutableMap.copyOf((Map) map)
+    /**
+     * Process shader code with preprocessor directives.
+     * @param bufferedReader Source code reader
+     * @return Processed code as string
+     * @throws IOException if reading fails or syntax errors occur
+     */
+    @Throws(IOException::class)
+    fun processCode(bufferedReader: BufferedReader): String {
+        val stringBuilder = StringBuilder()
+        processCode(bufferedReader, stringBuilder)
+        return stringBuilder.toString()
     }
 
     @Nullable
-    private String processCode(BufferedReader bufferedReader, @Nullable StringBuilder stringBuilder) throws IOException {
-        String str = null
+    @Throws(IOException::class)
+    private fun processCode(
+        bufferedReader: BufferedReader,
+        @Nullable stringBuilder: StringBuilder?
+    ): String? {
+        var lastLine: String? = null
+        
         while (true) {
-            String readLine = bufferedReader.readLine()
-            if (readLine == null) {
-                return str
+            val readLine = bufferedReader.readLine() ?: return lastLine
+            val trimmedLine = readLine.trim()
+            
+            // Check for directive end markers
+            if (trimmedLine.startsWith("#endif") || trimmedLine.startsWith("#else")) {
+                return trimmedLine
             }
-            readLine = readLine.trim()
-            if (readLine.startsWith("#endif") || readLine.startsWith("#else")) {
-                return readLine
-            }
-            if (readLine.startsWith("#ifdef") || readLine.startsWith("#ifndef")) {
-                Boolean startsWith = readLine.startsWith("#ifdef")
-                Boolean containsKey = this.definedMacros.containsKey(readLine.substring(readLine.indexOf(32)).trim())
-                Any processCode = processCode(bufferedReader, startsWith == containsKey ? stringBuilder : null)
-                if (Objects.equal(processCode, "#else")) {
-                    processCode = processCode(bufferedReader, startsWith != containsKey ? stringBuilder : null)
+            
+            // Handle conditional compilation
+            if (trimmedLine.startsWith("#ifdef") || trimmedLine.startsWith("#ifndef")) {
+                val isIfdef = trimmedLine.startsWith("#ifdef")
+                val macroName = trimmedLine.substring(trimmedLine.indexOf(' ')).trim()
+                val isDefined = definedMacros.containsKey(macroName)
+                
+                // Process the conditional block
+                var nextDirective = processCode(
+                    bufferedReader,
+                    if (isIfdef == isDefined) stringBuilder else null
+                )
+                
+                // Handle #else block
+                if (Objects.equal(nextDirective, "#else")) {
+                    nextDirective = processCode(
+                        bufferedReader,
+                        if (isIfdef != isDefined) stringBuilder else null
+                    )
                 }
-                if (!Objects.equal(processCode, "#endif")) {
+                
+                // Verify proper closing
+                if (!Objects.equal(nextDirective, "#endif")) {
                     throw IOException("#endif expected")
                 }
             } else if (stringBuilder != null) {
-                String str2 = readLine
-                for (Entry entry : this.definedMacros.entrySet()) {
-                    str2 = str2.replace((CharSequence) entry.getKey(), (CharSequence) entry.getValue())
+                // Process active code - perform macro substitution
+                var processedLine = trimmedLine
+                for (entry in definedMacros.entries) {
+                    processedLine = processedLine.replace(entry.key, entry.value)
                 }
-                stringBuilder.append(str2).append("\r\n")
-                str = str2
+                stringBuilder.append(processedLine).append("\r\n")
+                lastLine = processedLine
             }
-            str = readLine
+            
+            lastLine = trimmedLine
         }
-    }
-
-    String processCode(BufferedReader bufferedReader) throws IOException {
-        StringBuilder stringBuilder = StringBuilder()
-        processCode(bufferedReader, stringBuilder)
-        return stringBuilder.toString()
     }
 }
