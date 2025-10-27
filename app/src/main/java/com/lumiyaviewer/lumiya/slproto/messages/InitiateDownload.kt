@@ -5,40 +5,40 @@ import java.nio.ByteBuffer
 import java.util.UUID
 
 class InitiateDownload : SLMessage {
-    AgentData AgentData_Field = AgentData()
-    FileData FileData_Field = FileData()
+    var AgentData_Field = AgentData()
+    var FileData_Field = FileData()
 
     class AgentData {
-        UUID AgentID
+        lateinit var AgentID: UUID
     }
 
     class FileData {
-        byte[] SimFilename
-        byte[] ViewerFilename
+        lateinit var SimFilename: ByteArray
+        lateinit var ViewerFilename: ByteArray
     }
 
-    InitiateDownload() {
+    init {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.FileData_Field.SimFilename.length + 1 + 1 + this.FileData_Field.ViewerFilename.length + 20
+    fun CalcPayloadSize(): Int {
+        return this.FileData_Field.SimFilename.size + 1 + 1 + this.FileData_Field.ViewerFilename.size + 20
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleInitiateDownload(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 1)
-        byteBuffer.put((byte) -109)
+        byteBuffer.put(1.toByte())
+        byteBuffer.put((-109).toByte())
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packVariable(byteBuffer, this.FileData_Field.SimFilename, 1)
         packVariable(byteBuffer, this.FileData_Field.ViewerFilename, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.FileData_Field.SimFilename = unpackVariable(byteBuffer, 1)
         this.FileData_Field.ViewerFilename = unpackVariable(byteBuffer, 1)
