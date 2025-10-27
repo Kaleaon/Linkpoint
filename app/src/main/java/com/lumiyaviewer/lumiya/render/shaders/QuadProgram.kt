@@ -2,28 +2,37 @@ package com.lumiyaviewer.lumiya.render.shaders
 
 import android.opengl.GLES20
 
-class QuadProgram : ShaderProgram {
-    Int sTexture
-    Int uColor
-    Int uColorize
-    Int uPostTranslate
-    Int uPreTranslate
-    Int uScale
-    Int vPosition
-    Int vTexCoord
+/**
+ * Shader program for rendering textured quads.
+ * Used for UI elements, HUDs, and 2D overlays.
+ */
+class QuadProgram : ShaderProgram(
+    Shader.QuadVertexShader,
+    Shader.QuadFragmentShader
+) {
+    // Attribute locations
+    var vPosition: Int = 0
+    var vTexCoord: Int = 0
+    
+    // Uniform locations
+    var sTexture: Int = 0
+    var uColor: Int = 0
+    var uColorize: Int = 0
+    var uPreTranslate: Int = 0
+    var uScale: Int = 0
+    var uPostTranslate: Int = 0
 
-    constructor() {
-        super(Shader.QuadVertexShader, Shader.QuadFragmentShader)
-    }
-
-    protected fun bindVariables(): Unit {
-        this.vPosition = GLES20.glGetAttribLocation(this.handle, "vPosition")
-        this.vTexCoord = GLES20.glGetAttribLocation(this.handle, "vTexCoord")
-        this.sTexture = GLES20.glGetUniformLocation(this.handle, "sTexture")
-        this.uColor = GLES20.glGetUniformLocation(this.handle, "uColor")
-        this.uColorize = GLES20.glGetUniformLocation(this.handle, "uColorize")
-        this.uPreTranslate = GLES20.glGetUniformLocation(this.handle, "uPreTranslate")
-        this.uScale = GLES20.glGetUniformLocation(this.handle, "uScale")
-        this.uPostTranslate = GLES20.glGetUniformLocation(this.handle, "uPostTranslate")
+    override fun bindVariables() {
+        // Bind vertex attributes
+        vPosition = GLES20.glGetAttribLocation(handle, "vPosition")
+        vTexCoord = GLES20.glGetAttribLocation(handle, "vTexCoord")
+        
+        // Bind uniforms
+        sTexture = GLES20.glGetUniformLocation(handle, "sTexture")
+        uColor = GLES20.glGetUniformLocation(handle, "uColor")
+        uColorize = GLES20.glGetUniformLocation(handle, "uColorize")
+        uPreTranslate = GLES20.glGetUniformLocation(handle, "uPreTranslate")
+        uScale = GLES20.glGetUniformLocation(handle, "uScale")
+        uPostTranslate = GLES20.glGetUniformLocation(handle, "uPostTranslate")
     }
 }

@@ -2,16 +2,20 @@ package com.lumiyaviewer.lumiya.render.shaders
 
 import android.opengl.GLES20
 
+/**
+ * FXAA (Fast Approximate Anti-Aliasing) shader program.
+ * Applies post-processing anti-aliasing to rendered scenes.
+ */
 class FXAAProgram : ShaderProgram(
     Shader.FXAAVertexShader,
-    Shader.FXAAFragmentShader,
+    Shader.FXAAFragmentShader
 ) {
-    var noAAtextureSampler: Int = 0
-    var texcoordOffset: Int = 0
-    var textureSampler: Int = 0
-    var uMVPMatrix: Int = 0
     var vPosition: Int = 0
     var vTexCoord: Int = 0
+    var uMVPMatrix: Int = 0
+    var textureSampler: Int = 0
+    var noAAtextureSampler: Int = 0
+    var texcoordOffset: Int = 0
 
     override fun bindVariables() {
         vPosition = GLES20.glGetAttribLocation(handle, "vPosition")
