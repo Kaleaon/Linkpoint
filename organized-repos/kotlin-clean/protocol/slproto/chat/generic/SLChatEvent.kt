@@ -60,10 +60,10 @@ import javax.annotation.Nullable
 abstract class SLChatEvent : View.OnLongClickListener {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-chat-generic-SLChatEvent$ChatMessageTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f72comlumiyaviewerlumiyaslprotochatgenericSLChatEvent$ChatMessageTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f72comlumiyaviewerlumiyaslprotochatgenericSLChatEvent$ChatMessageTypeSwitchesValues = null
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-chatsrc-ChatMessageSource$ChatMessageSourceTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f73comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f73comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues = null
     const val CHAT_AUDIBLE_BARELY: Int = 0
     const val CHAT_AUDIBLE_FULLY: Int = 1
     const val CHAT_AUDIBLE_NOT: Int = -1
@@ -755,11 +755,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.chat.generic.
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-chat-generic-SLChatEvent$ChatMessageTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m148getcomlumiyaviewerlumiyaslprotochatgenericSLChatEvent$ChatMessageTypeSwitchesValues() {
+private /* synthetic */ IntArray m148getcomlumiyaviewerlumiyaslprotochatgenericSLChatEvent$ChatMessageTypeSwitchesValues() {
         if (f72comlumiyaviewerlumiyaslprotochatgenericSLChatEvent$ChatMessageTypeSwitchesValues != null) {
             return f72comlumiyaviewerlumiyaslprotochatgenericSLChatEvent$ChatMessageTypeSwitchesValues
         }
-        Int[] iArr = Int[ChatMessageType.values().length]
+        IntArray iArr = Int[ChatMessageType.values().length]
         try {
             iArr[ChatMessageType.BalanceChanged.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -854,11 +854,11 @@ private /* synthetic */ Int[] m148getcomlumiyaviewerlumiyaslprotochatgenericSLCh
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-chatsrc-ChatMessageSource$ChatMessageSourceTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m149getcomlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues() {
+private /* synthetic */ IntArray m149getcomlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues() {
         if (f73comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues != null) {
             return f73comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues
         }
-        Int[] iArr = Int[ChatMessageSource.ChatMessageSourceType.values().length]
+        IntArray iArr = Int[ChatMessageSource.ChatMessageSourceType.values().length]
         try {
             iArr[ChatMessageSource.ChatMessageSourceType.Group.ordinal()] = 25
         } catch (NoSuchFieldError e) {

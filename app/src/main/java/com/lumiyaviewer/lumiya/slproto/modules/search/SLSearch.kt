@@ -31,35 +31,35 @@ import java.util.concurrent.atomic.AtomicReference
 import javax.annotation.Nonnull
 
 class SLSearch : SLModule {
-    private Int DFQ_ADULT_SIMS_ONLY = 134217728
-    private Int DFQ_AGENT_OWNED = 64
-    private Int DFQ_AREA_SORT = 262144
-    private Int DFQ_AUCTION = 512
-    private Int DFQ_DATE_EVENTS = 32
-    private Int DFQ_DWELL_SORT = 1024
-    private Int DFQ_EVENTS = 8
-    private Int DFQ_FILTER_MATURE = 4194304
-    private Int DFQ_FOR_SALE = 128
-    private Int DFQ_GROUPS = 16
-    private Int DFQ_GROUP_OWNED = 256
-    private Int DFQ_INC_ADULT = 67108864
-    private Int DFQ_INC_MATURE = 33554432
-    private Int DFQ_INC_NEW_VIEWER = 117440512
-    private Int DFQ_INC_PG = 16777216
-    private Int DFQ_LIMIT_BY_AREA = 2097152
-    private Int DFQ_LIMIT_BY_PRICE = 1048576
-    private Int DFQ_MATURE_SIMS_ONLY = 16384
-    private Int DFQ_NAME_SORT = 524288
-    private Int DFQ_ONLINE = 2
-    private Int DFQ_PEOPLE = 1
-    private Int DFQ_PER_METER_SORT = 131072
-    private Int DFQ_PG_EVENTS_ONLY = 8192
-    private Int DFQ_PG_PARCELS_ONLY = 8388608
-    private Int DFQ_PG_SIMS_ONLY = 2048
-    private Int DFQ_PICTURES_ONLY = 4096
-    private Int DFQ_PLACES = 4
-    private Int DFQ_PRICE_SORT = 65536
-    private Int DFQ_SORT_ASC = 32768
+    private val DFQ_ADULT_SIMS_ONLY: Int = 134217728
+    private val DFQ_AGENT_OWNED: Int = 64
+    private val DFQ_AREA_SORT: Int = 262144
+    private val DFQ_AUCTION: Int = 512
+    private val DFQ_DATE_EVENTS: Int = 32
+    private val DFQ_DWELL_SORT: Int = 1024
+    private val DFQ_EVENTS: Int = 8
+    private val DFQ_FILTER_MATURE: Int = 4194304
+    private val DFQ_FOR_SALE: Int = 128
+    private val DFQ_GROUPS: Int = 16
+    private val DFQ_GROUP_OWNED: Int = 256
+    private val DFQ_INC_ADULT: Int = 67108864
+    private val DFQ_INC_MATURE: Int = 33554432
+    private val DFQ_INC_NEW_VIEWER: Int = 117440512
+    private val DFQ_INC_PG: Int = 16777216
+    private val DFQ_LIMIT_BY_AREA: Int = 2097152
+    private val DFQ_LIMIT_BY_PRICE: Int = 1048576
+    private val DFQ_MATURE_SIMS_ONLY: Int = 16384
+    private val DFQ_NAME_SORT: Int = 524288
+    private val DFQ_ONLINE: Int = 2
+    private val DFQ_PEOPLE: Int = 1
+    private val DFQ_PER_METER_SORT: Int = 131072
+    private val DFQ_PG_EVENTS_ONLY: Int = 8192
+    private val DFQ_PG_PARCELS_ONLY: Int = 8388608
+    private val DFQ_PG_SIMS_ONLY: Int = 2048
+    private val DFQ_PICTURES_ONLY: Int = 4096
+    private val DFQ_PLACES: Int = 4
+    private val DFQ_PRICE_SORT: Int = 65536
+    private val DFQ_SORT_ASC: Int = 32768
     /* access modifiers changed from: private */
     AtomicReference<SearchGridQuery> currentSearchQuery = AtomicReference<>((Any) null)
     private RequestHandler<UUID> parcelInfoRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
@@ -77,15 +77,15 @@ class SLSearch : SLModule {
     private RequestHandler<SearchGridQuery> searchRequestHandler = AsyncRequestHandler(this.agentCircuit, SimpleRequestHandler<SearchGridQuery>() {
 
         /* renamed from: -com-lumiyaviewer-lumiya-slproto-modules-search-SearchGridQuery$SearchTypeSwitchesValues  reason: not valid java name */
-        private /* synthetic */ Int[] f129comlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues = null
-        /* synthetic */ Int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$modules$search$SearchGridQuery$SearchType
+        private /* synthetic */ IntArray f129comlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues = null
+        /* synthetic */ IntArray $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$modules$search$SearchGridQuery$SearchType
 
         /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-modules-search-SearchGridQuery$SearchTypeSwitchesValues  reason: not valid java name */
-        private /* synthetic */ Int[] m238getcomlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues() {
+        private /* synthetic */ IntArray m238getcomlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues() {
             if (f129comlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues != null) {
                 return f129comlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues
             }
-            Int[] iArr = Int[SearchGridQuery.SearchType.values().length]
+            IntArray iArr = Int[SearchGridQuery.SearchType.values().length]
             try {
                 iArr[SearchGridQuery.SearchType.Groups.ordinal()] = 1
             } catch (NoSuchFieldError e) {

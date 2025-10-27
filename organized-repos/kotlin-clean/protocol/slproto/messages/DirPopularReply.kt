@@ -25,7 +25,7 @@ class DirPopularReply : SLMessage() {
     @JvmStatic
     class QueryReplies {
         public Float Dwell
-        public Byte[] Name
+        public ByteArray Name
         public UUID ParcelID
     }
 

@@ -10,7 +10,7 @@ class ImagePacket : SLMessage() {
 
     @JvmStatic
     class ImageData {
-        public Byte[] Data
+        public ByteArray Data
     }
 
     @JvmStatic

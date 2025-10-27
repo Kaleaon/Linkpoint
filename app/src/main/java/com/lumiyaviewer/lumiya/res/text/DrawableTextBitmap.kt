@@ -12,7 +12,7 @@ class DrawableTextBitmap {
     DrawableTextBitmap(DrawableTextParams drawableTextParams, Int i) {
         Paint paint = Paint()
         Rect rect = Rect()
-        paint.setTextSize((Float) i)
+        paint.setTextSize(i.toFloat())
         paint.setAntiAlias(true)
         paint.setTextAlign(Paint.Align.CENTER)
         Array<String> split = drawableTextParams.text().split("\n")
@@ -26,7 +26,7 @@ class DrawableTextBitmap {
             i3 = rect.width() > i3 ? rect.width() : i3
         }
         Float descent = paint.descent() - paint.ascent()
-        Int round = Math.round((((Float) split.length) * descent) + 1.0f)
+        Int round = Math.round(((split.toFloat().length) * descent) + 1.0f)
         Int i4 = drawableTextParams.backgroundColor() != 0 ? i : 0
         Int i5 = drawableTextParams.backgroundColor() != 0 ? i / 2 : 0
         Int i6 = 1
@@ -49,10 +49,10 @@ class DrawableTextBitmap {
         paint.setARGB(255, 255, 255, 255)
         Int i10 = (max - round) / 2
         for (String drawText : split) {
-            canvas.drawText(drawText, (Float) (max / 2), ((Float) i10) - paint.ascent(), paint)
-            i10 = (Int) (((Float) i10) + (paint.descent() - paint.ascent()))
+            canvas.drawText(drawText, (Float) (max / 2), (i10.toFloat()) - paint.ascent(), paint)
+            i10 = (Int) ((i10.toFloat()) + (paint.descent() - paint.ascent()))
         }
-        this.baselineOffset = (((Float) round) + descent) / ((Float) max)
+        this.baselineOffset = ((round.toFloat()) + descent) / (max.toFloat())
     }
 
     fun getBaselineOffset(): Float {

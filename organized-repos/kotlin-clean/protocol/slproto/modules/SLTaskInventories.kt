@@ -52,7 +52,7 @@ class SLTaskInventories : SLModule(), SLXfer.SLXferCompletionListener {
         SendMessage(requestTaskInventory)
     }
 
-    private SLTaskInventory parseTaskInventory(Byte[] bArr) {
+    private SLTaskInventory parseTaskInventory(ByteArray bArr) {
         if (bArr == null) {
             return SLTaskInventory()
         }
@@ -97,7 +97,7 @@ class SLTaskInventories : SLModule(), SLXfer.SLXferCompletionListener {
         }
     }
 
-    fun onXferComplete(Object obj, String str, Byte[] bArr) {
+    fun onXferComplete(Object obj, String str, ByteArray bArr) {
         if (obj instanceof UUID) {
             UUID uuid = (UUID) obj
             Debug.Printf("onXferComplete with file = '%s', data length = %d", str, Integer.valueOf(bArr.length))

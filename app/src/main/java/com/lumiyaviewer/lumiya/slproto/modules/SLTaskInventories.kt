@@ -21,8 +21,8 @@ import java.util.UUID
 import javax.annotation.Nonnull
 
 class SLTaskInventories : SLModule : SLXfer.SLXferCompletionListener {
-    private String DELIM_ANY = " \t\n"
-    private String DELIM_EOL = "\n"
+    private val DELIM_ANY: String = " \t\n"
+    private val DELIM_EOL: String = "\n"
     private RequestHandler<Int> requestHandler
     private ResultHandler<Int, SLTaskInventory> resultHandler
     private UserManager userManager
@@ -52,7 +52,7 @@ class SLTaskInventories : SLModule : SLXfer.SLXferCompletionListener {
         SendMessage(requestTaskInventory)
     }
 
-    private SLTaskInventory parseTaskInventory(Byte[] bArr) {
+    private SLTaskInventory parseTaskInventory(ByteArray bArr) {
         if (bArr == null) {
             return SLTaskInventory()
         }
@@ -97,7 +97,7 @@ class SLTaskInventories : SLModule : SLXfer.SLXferCompletionListener {
         }
     }
 
-    Unit onXferComplete(Any obj, String str, Byte[] bArr) {
+    Unit onXferComplete(Any obj, String str, ByteArray bArr) {
         if (obj instanceof UUID) {
             UUID uuid = (UUID) obj
             Debug.Printf("onXferComplete with file = '%s', data length = %d", str, Int.valueOf(bArr.length))

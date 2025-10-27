@@ -73,27 +73,27 @@ import java.util.concurrent.atomic.AtomicReference
 import javax.annotation.Nullable
 
 class VoicePluginServiceConnection : ServiceConnection {
-    String ACTION_VOICE_ACCEPT = "accept"
-    String ACTION_VOICE_REJECT = "reject"
-    private Int INCOMING_CALL_NOTIFICATION_ID = 1001
-    private String INTENT_EXTRA_CHATTER_ID = "chatterID"
-    private String INTENT_EXTRA_OPEN_CHATTER = "openChatterIntent"
-    private String INTENT_EXTRA_RINGING_MESSSAGE = "ringingMessage"
-    private Int REQUIRED_PLUGIN_VERSION = 3
+    val ACTION_VOICE_ACCEPT: String = "accept"
+    val ACTION_VOICE_REJECT: String = "reject"
+    private val INCOMING_CALL_NOTIFICATION_ID: Int = 1001
+    private val INTENT_EXTRA_CHATTER_ID: String = "chatterID"
+    private val INTENT_EXTRA_OPEN_CHATTER: String = "openChatterIntent"
+    private val INTENT_EXTRA_RINGING_MESSSAGE: String = "ringingMessage"
+    private val REQUIRED_PLUGIN_VERSION: Int = 3
     private AtomicBoolean installOfferDisplayed = AtomicBoolean(false)
     private Context context
-    private Handler fromPluginHandler = Handler() {
+    private val fromPluginHandler: Handler = Handler() {
 
         /* renamed from: -com-lumiyaviewer-lumiya-voice-common-VoicePluginMessageTypeSwitchesValues  reason: not valid java name */
-        private /* synthetic */ Int[] f611comlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues = null
-        /* synthetic */ Int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$voice$common$VoicePluginMessageType
+        private /* synthetic */ IntArray f611comlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues = null
+        /* synthetic */ IntArray $SWITCH_TABLE$com$lumiyaviewer$lumiya$voice$common$VoicePluginMessageType
 
         /* renamed from: -getcom-lumiyaviewer-lumiya-voice-common-VoicePluginMessageTypeSwitchesValues  reason: not valid java name */
-        private /* synthetic */ Int[] m906getcomlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues() {
+        private /* synthetic */ IntArray m906getcomlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues() {
             if (f611comlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues != null) {
                 return f611comlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues
             }
-            Int[] iArr = Int[VoicePluginMessageType.values().length]
+            IntArray iArr = Int[VoicePluginMessageType.values().length]
             try {
                 iArr[VoicePluginMessageType.VoiceAcceptCall.ordinal()] = 6
             } catch (NoSuchFieldError e) {
@@ -196,7 +196,7 @@ class VoicePluginServiceConnection : ServiceConnection {
     }
     private Messenger fromPluginMessenger
     private Set<String> incomingCallNotificationTags = Collections.synchronizedSet(HashSet())
-    private Handler mainThreadHandler = Handler()
+    private val mainThreadHandler: Handler = Handler()
     @Nullable
     private ChatterNameRetriever ringingChatterNameRetriever = null
     @Nullable
@@ -232,11 +232,11 @@ class VoicePluginServiceConnection : ServiceConnection {
     }
 
     Boolean isPluginSupported() {
-        String[] strArr
+        Array<String> strArr
         if (Build.VERSION.SDK_INT >= 21) {
             strArr = Build.SUPPORTED_ABIS
         } else {
-            strArr = String[]{Build.CPU_ABI, Build.CPU_ABI2}
+            strArr = Array<String>{Build.CPU_ABI, Build.CPU_ABI2}
         }
         if (strArr == null) {
             return false

@@ -61,16 +61,16 @@ class ChatterList {
         RequestFinalProcessor<ChatterListType, ImmutableList<ChatterDisplayData>>(this.chatterListPool, userManager2.getDatabaseExecutor()) {
 
             /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-manager-ChatterListTypeSwitchesValues  reason: not valid java name */
-            private const val /* synthetic */ Int[] f225comlumiyaviewerlumiyaslprotousersmanagerChatterListTypeSwitchesValues = null
-            final /* synthetic */ Int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$users$manager$ChatterListType
+            private const val /* synthetic */ IntArray f225comlumiyaviewerlumiyaslprotousersmanagerChatterListTypeSwitchesValues = null
+            final /* synthetic */ IntArray $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$users$manager$ChatterListType
 
             /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-manager-ChatterListTypeSwitchesValues  reason: not valid java name */
             @JvmStatic
-private /* synthetic */ Int[] m296getcomlumiyaviewerlumiyaslprotousersmanagerChatterListTypeSwitchesValues() {
+private /* synthetic */ IntArray m296getcomlumiyaviewerlumiyaslprotousersmanagerChatterListTypeSwitchesValues() {
                 if (f225comlumiyaviewerlumiyaslprotousersmanagerChatterListTypeSwitchesValues != null) {
                     return f225comlumiyaviewerlumiyaslprotousersmanagerChatterListTypeSwitchesValues
                 }
-                Int[] iArr = Int[ChatterListType.values().length]
+                IntArray iArr = Int[ChatterListType.values().length]
                 try {
                     iArr[ChatterListType.Active.ordinal()] = 1
                 } catch (NoSuchFieldError e) {

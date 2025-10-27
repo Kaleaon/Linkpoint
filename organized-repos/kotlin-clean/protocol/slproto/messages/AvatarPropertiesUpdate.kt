@@ -16,13 +16,13 @@ class AvatarPropertiesUpdate : SLMessage() {
 
     @JvmStatic
     class PropertiesData {
-        public Byte[] AboutText
+        public ByteArray AboutText
         public Boolean AllowPublish
-        public Byte[] FLAboutText
+        public ByteArray FLAboutText
         public UUID FLImageID
         public UUID ImageID
         public Boolean MaturePublish
-        public Byte[] ProfileURL
+        public ByteArray ProfileURL
     }
 
     public AvatarPropertiesUpdate() {

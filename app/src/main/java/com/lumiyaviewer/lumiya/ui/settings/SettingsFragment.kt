@@ -32,7 +32,7 @@ import java.io.File
 import javax.annotation.Nullable
 
 class SettingsFragment : PreferenceFragmentCompat : FragmentHasTitle {
-    private String PREF_RESOURCE_KEY = "prefResourceId"
+    private val PREF_RESOURCE_KEY: String = "prefResourceId"
     private RingtonePreference requestedRingtonePreference = null
 
     private class ClearCacheTask : AsyncTask<Void, Void, Void> {
@@ -244,7 +244,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
         Int i = -1
         ImmutableList<File> availableCacheDirs = GlobalOptions.getInstance().getAvailableCacheDirs()
         File baseCacheDir = GlobalOptions.getInstance().getBaseCacheDir()
-        String[] strArr = String[availableCacheDirs.size()]
+        Array<String> strArr = String[availableCacheDirs.size()]
         Int i2 = 0
         while (i2 < availableCacheDirs.size()) {
             Int i3 = Objects.equal(availableCacheDirs.get(i2), baseCacheDir) ? i2 : i

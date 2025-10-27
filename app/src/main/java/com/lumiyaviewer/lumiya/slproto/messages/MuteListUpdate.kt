@@ -9,7 +9,7 @@ class MuteListUpdate : SLMessage {
 
     class MuteData {
         UUID AgentID
-        Byte[] Filename
+        ByteArray Filename
     }
 
     MuteListUpdate() {

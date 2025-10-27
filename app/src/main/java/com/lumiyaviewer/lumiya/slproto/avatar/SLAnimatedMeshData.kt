@@ -6,10 +6,10 @@ import com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer
 import com.lumiyaviewer.rawbuffers.DirectByteBuffer
 
 class SLAnimatedMeshData : SLMeshData {
-    private Int BUF_INDEX = 1
-    private Int BUF_TEXCOORD = 2
-    private Int BUF_VERTEX = 0
-    private Int BUF_WEIGHTS = 3
+    private val BUF_INDEX: Int = 1
+    private val BUF_TEXCOORD: Int = 2
+    private val BUF_VERTEX: Int = 0
+    private val BUF_WEIGHTS: Int = 3
     private Boolean VBOLoaded = false
     private Boolean animated
     private DirectByteBuffer animatedVertexData
@@ -166,16 +166,16 @@ class SLAnimatedMeshData : SLMeshData {
             com.lumiyaviewer.lumiya.render.shaders.AvatarProgram r0 = r9.avatarProgram
             Int r0 = r0.uJointMap
             com.lumiyaviewer.lumiya.slproto.avatar.SLPolyMesh r1 = r8.referenceData
-            Int[] r1 = r1.jointMap
+            IntArray r1 = r1.jointMap
             Int r1 = r1.length
             com.lumiyaviewer.lumiya.slproto.avatar.SLPolyMesh r2 = r8.referenceData
-            Int[] r2 = r2.jointMap
+            IntArray r2 = r2.jointMap
             r3 = 0
             android.opengl.GLES20.glUniform1iv(r0, r1, r2, r3)
             com.lumiyaviewer.lumiya.render.shaders.AvatarProgram r0 = r9.avatarProgram
             Int r0 = r0.uJointMapLength
             com.lumiyaviewer.lumiya.slproto.avatar.SLPolyMesh r1 = r8.referenceData
-            Int[] r1 = r1.jointMap
+            IntArray r1 = r1.jointMap
             Int r1 = r1.length
             android.opengl.GLES20.glUniform1i(r0, r1)
             com.lumiyaviewer.lumiya.render.shaders.AvatarProgram r0 = r9.avatarProgram

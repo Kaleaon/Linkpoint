@@ -19,7 +19,7 @@ class MapNameRequest : SLMessage() {
 
     @JvmStatic
     class NameData {
-        public Byte[] Name
+        public ByteArray Name
     }
 
     public MapNameRequest() {

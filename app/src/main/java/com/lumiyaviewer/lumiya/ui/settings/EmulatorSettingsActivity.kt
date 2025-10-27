@@ -25,7 +25,7 @@ import java.util.List
  * Users can create, start, stop, and manage AVDs directly from the app settings.
  */
 class EmulatorSettingsActivity : AppCompatActivity {
-    private String TAG = "EmulatorSettings"
+    private val TAG: String = "EmulatorSettings"
     
     private EmulatorManager emulatorManager
     private ScrollView scrollView

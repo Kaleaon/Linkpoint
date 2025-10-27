@@ -17,7 +17,7 @@ class MultipleObjectUpdate : SLMessage {
     }
 
     class ObjectData {
-        Byte[] Data
+        ByteArray Data
         Int ObjectLocalID
         Int Type
     }

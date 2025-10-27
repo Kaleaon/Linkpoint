@@ -12,13 +12,13 @@ class AlertMessage : SLMessage() {
 
     @JvmStatic
     class AlertData {
-        public Byte[] Message
+        public ByteArray Message
     }
 
     @JvmStatic
     class AlertInfo {
-        public Byte[] ExtraParams
-        public Byte[] Message
+        public ByteArray ExtraParams
+        public ByteArray Message
     }
 
     public AlertMessage() {

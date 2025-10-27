@@ -45,7 +45,7 @@ import java.util.UUID
 import javax.annotation.Nullable
 
 class GroupMemberRolesFragment : ChatterReloadableFragment : LoadableMonitor.OnLoadableDataChangedListener, BackButtonHandler {
-    private String MEMBER_ID_KEY = "memberID"
+    private val MEMBER_ID_KEY: String = "memberID"
     /* access modifiers changed from: private */
     @Nullable
     UUID MemberID = null

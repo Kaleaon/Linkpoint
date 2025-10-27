@@ -20,19 +20,19 @@ import javax.crypto.spec.GCMParameterSpec
  * and biometric authentication for Second Life grid access.
  */
 class ModernAuthManager {
-    private String TAG = "ModernAuthManager"
+    private val TAG: String = "ModernAuthManager"
     
     // Secure storage keys
-    private String PREFS_NAME = "sl_auth_secure"
-    private String KEY_ALIAS = "SLAuthKey"
-    private String KEY_ACCESS_TOKEN = "access_token"
-    private String KEY_REFRESH_TOKEN = "refresh_token"
-    private String KEY_USERNAME = "username"
-    private String KEY_TOKEN_EXPIRY = "token_expiry"
+    private val PREFS_NAME: String = "sl_auth_secure"
+    private val KEY_ALIAS: String = "SLAuthKey"
+    private val KEY_ACCESS_TOKEN: String = "access_token"
+    private val KEY_REFRESH_TOKEN: String = "refresh_token"
+    private val KEY_USERNAME: String = "username"
+    private val KEY_TOKEN_EXPIRY: String = "token_expiry"
     
     // OAuth2 endpoints (when Second Life supports OAuth2)
-    private String SL_OAUTH_AUTHORIZE = "https://id.secondlife.com/oauth2/authorize"
-    private String SL_OAUTH_TOKEN = "https://id.secondlife.com/oauth2/token"
+    private val SL_OAUTH_AUTHORIZE: String = "https://id.secondlife.com/oauth2/authorize"
+    private val SL_OAUTH_TOKEN: String = "https://id.secondlife.com/oauth2/token"
     
     private Context context
     private SharedPreferences securePrefs
@@ -171,7 +171,7 @@ class ModernAuthManager {
             SecretKey secretKey = generateSecretKey()
             
             // Create a simple token (in real implementation, this would be more sophisticated)
-            Byte[] tokenBytes = Byte[32]
+            ByteArray tokenBytes = ByteArray(32)
             java.security.SecureRandom().nextBytes(tokenBytes)
             
             return Base64.encodeToString(tokenBytes, Base64.NO_WRAP)

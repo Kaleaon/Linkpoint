@@ -8,10 +8,10 @@ import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig
 
 class UserPicDao : AbstractDao<UserPic, Long> {
-    String TABLENAME = "USER_PIC"
+    val TABLENAME: String = "USER_PIC"
 
     class Properties {
-        Property Bitmap = Property(2, Byte[].class, "bitmap", false, "BITMAP")
+        Property Bitmap = Property(2, ByteArray.class, "bitmap", false, "BITMAP")
         Property Id = Property(0, Long.class, "id", true, "_id")
         Property Uuid = Property(1, String.class, "uuid", false, "UUID")
     }
@@ -44,7 +44,7 @@ class UserPicDao : AbstractDao<UserPic, Long> {
         if (uuid != null) {
             sQLiteStatement.bindString(2, uuid)
         }
-        Byte[] bitmap = userPic.getBitmap()
+        ByteArray bitmap = userPic.getBitmap()
         if (bitmap != null) {
             sQLiteStatement.bindBlob(3, bitmap)
         }
@@ -59,7 +59,7 @@ class UserPicDao : AbstractDao<UserPic, Long> {
     }
 
     fun readEntity(cursor: Cursor, i: Int): UserPic {
-        Byte[] bArr = null
+        ByteArray bArr = null
         Long valueOf = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
         String string = cursor.isNull(i + 1) ? null : cursor.getString(i + 1)
         if (!cursor.isNull(i + 2)) {
@@ -69,7 +69,7 @@ class UserPicDao : AbstractDao<UserPic, Long> {
     }
 
     fun readEntity(cursor: Cursor, userPic: UserPic, i: Int): Unit {
-        Byte[] bArr = null
+        ByteArray bArr = null
         userPic.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
         userPic.setUuid(cursor.isNull(i + 1) ? null : cursor.getString(i + 1))
         if (!cursor.isNull(i + 2)) {

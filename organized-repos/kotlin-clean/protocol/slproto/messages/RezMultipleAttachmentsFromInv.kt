@@ -28,12 +28,12 @@ class RezMultipleAttachmentsFromInv : SLMessage() {
     @JvmStatic
     class ObjectData {
         public Int AttachmentPt
-        public Byte[] Description
+        public ByteArray Description
         public Int EveryoneMask
         public Int GroupMask
         public Int ItemFlags
         public UUID ItemID
-        public Byte[] Name
+        public ByteArray Name
         public Int NextOwnerMask
         public UUID OwnerID
     }

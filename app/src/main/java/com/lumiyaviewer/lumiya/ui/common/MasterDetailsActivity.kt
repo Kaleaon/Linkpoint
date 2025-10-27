@@ -11,9 +11,9 @@ import com.lumiyaviewer.lumiya.R
 
 abstract class MasterDetailsActivity : DetailsActivity {
     protected String FROM_SAME_ACTIVITY = "fromSameActivity"
-    private String IMPLICIT_DETAILS_TAG = "MasterDetailsActivityIsImplicitDetails"
-    String INTENT_SELECTION_KEY = "selection"
-    String WEAK_SELECTION_KEY = "weakSelection"
+    private val IMPLICIT_DETAILS_TAG: String = "MasterDetailsActivityIsImplicitDetails"
+    val INTENT_SELECTION_KEY: String = "selection"
+    val WEAK_SELECTION_KEY: String = "weakSelection"
     private Boolean isSplitScreen = false
 
     /* access modifiers changed from: protected */
@@ -64,7 +64,7 @@ abstract class MasterDetailsActivity : DetailsActivity {
             Boolean r1 = r14.isSplitScreen
             if (r1 == 0) goto L_0x01a8
             r1 = 2130968740(0x7f0400a4, Float:1.7546142E38)
-            r14.setContentView((Int) r1)
+            r14.setContentView(r1.toInt())
         L_0x001c:
             java.lang.String r4 = "MasterDetailsActivity: hasSelectorView = %b, sel fragment %b, hasDetailsView = %b, details fragment %b"
             r1 = 4
@@ -237,7 +237,7 @@ abstract class MasterDetailsActivity : DetailsActivity {
             return
         L_0x01a8:
             r1 = 2130968737(0x7f0400a1, Float:1.7546136E38)
-            r14.setContentView((Int) r1)
+            r14.setContentView(r1.toInt())
             goto L_0x001c
         L_0x01b0:
             r1 = r3
@@ -272,7 +272,7 @@ abstract class MasterDetailsActivity : DetailsActivity {
         L_0x01d8:
             android.content.Intent r5 = r14.getIntent()
             android.support.v4.app.Fragment r5 = r14.onCreateMasterFragment(r5, r1)
-            r8.add((Int) r13, (android.support.v4.app.Fragment) r5)
+            r8.add(r13.toInt(), (android.support.v4.app.Fragment) r5)
             goto L_0x011e
         L_0x01e5:
             if (r9 == 0) goto L_0x011e
@@ -347,7 +347,7 @@ abstract class MasterDetailsActivity : DetailsActivity {
         objArr[2] = Boolean.valueOf(findFragmentById2 != null ? findFragmentById2.isHidden() : false)
         Debug.Printf("MasterDetailsFragment: existing selector %b, detached %b, hidden %b", objArr)
         if (findFragmentById2 == null) {
-            beginTransaction.add((Int) R.id.selector, onCreateMasterFragment(getIntent(), (Bundle) null))
+            beginTransaction.add(R.toInt().id.selector, onCreateMasterFragment(getIntent(), (Bundle) null))
         } else {
             if (findFragmentById2.isDetached()) {
                 beginTransaction.attach(findFragmentById2)

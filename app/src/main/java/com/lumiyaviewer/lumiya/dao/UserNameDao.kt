@@ -9,7 +9,7 @@ import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
 class UserNameDao : AbstractDao<UserName, UUID> {
-    String TABLENAME = "UserNames"
+    val TABLENAME: String = "UserNames"
 
     class Properties {
         Property DisplayName = Property(2, String.class, "displayName", false, "DISPLAY_NAME")

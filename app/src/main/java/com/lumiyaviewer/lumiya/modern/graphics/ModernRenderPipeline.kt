@@ -10,7 +10,7 @@ import android.util.Log
  * Implements PBR-style rendering for capable mobile devices
  */
 class ModernRenderPipeline {
-    private String TAG = "ModernRenderPipeline"
+    private val TAG: String = "ModernRenderPipeline"
     
     private var isES3Available: Boolean = false
     private var pbrShaderProgram: Int = -1
@@ -30,10 +30,10 @@ class ModernRenderPipeline {
     private var uPointLights: Int? = null
     private var uNumPointLights: Int? = null
     
-    private Float[] mvpMatrix = Float[16]
-    private Float[] modelMatrix = Float[16]
-    private Float[] viewMatrix = Float[16]
-    private Float[] projectionMatrix = Float[16]
+    private val mvpMatrix: FloatArray = FloatArray(16)
+    private val modelMatrix: FloatArray = FloatArray(16)
+    private val viewMatrix: FloatArray = FloatArray(16)
+    private val projectionMatrix: FloatArray = FloatArray(16)
     
     fun initialize(): Boolean {
         // Check OpenGL ES version
@@ -177,7 +177,7 @@ class ModernRenderPipeline {
         GLES30.glAttachShader(program, fragmentShader)
         GLES30.glLinkProgram(program)
         
-        Int[] linkStatus = Int[1]
+        IntArray linkStatus = IntArray(1)
         GLES30.glGetProgramiv(program, GLES30.GL_LINK_STATUS, linkStatus, 0)
         if (linkStatus[0] != GLES30.GL_TRUE) {
             Log.e(TAG, "Error linking program: " + GLES30.glGetProgramInfoLog(program))
@@ -202,7 +202,7 @@ class ModernRenderPipeline {
         GLES30.glShaderSource(shader, shaderCode)
         GLES30.glCompileShader(shader)
         
-        Int[] compiled = Int[1]
+        IntArray compiled = IntArray(1)
         GLES30.glGetShaderiv(shader, GLES30.GL_COMPILE_STATUS, compiled, 0)
         if (compiled[0] == 0) {
             Log.e(TAG, "Error compiling shader: " + GLES30.glGetShaderInfoLog(shader))
@@ -338,10 +338,10 @@ class ModernRenderPipeline {
      * Rendering parameters container
      */
     class RenderParams {
-        Float[] modelMatrix = Float[16]
-        Float[] viewMatrix = Float[16]
-        Float[] projectionMatrix = Float[16]
-        Float[] cameraPosition = Float[3]
+        FloatArray modelMatrix = FloatArray(16)
+        FloatArray viewMatrix = FloatArray(16)
+        FloatArray projectionMatrix = FloatArray(16)
+        FloatArray cameraPosition = FloatArray(3)
         
         // Texture handles
         Int albedoTexture = 0
@@ -349,7 +349,7 @@ class ModernRenderPipeline {
         Int metallicRoughnessTexture = 0
         
         // Lighting
-        Float[] directionalLight = Float[16]; // 4 lights * 4 components
+        FloatArray directionalLight = FloatArray(16); // 4 lights * 4 components
         Int numPointLights = 0
         
         // Geometry

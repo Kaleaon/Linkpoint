@@ -11,7 +11,7 @@ class EstateCovenantReply : SLMessage() {
     class Data {
         public UUID CovenantID
         public Int CovenantTimestamp
-        public Byte[] EstateName
+        public ByteArray EstateName
         public UUID EstateOwnerID
     }
 

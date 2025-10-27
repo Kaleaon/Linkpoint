@@ -13,12 +13,12 @@ class UserReportInternal : SLMessage() {
     @JvmStatic
     class ReportData {
         public UUID AbuseRegionID
-        public Byte[] AbuseRegionName
+        public ByteArray AbuseRegionName
         public UUID AbuserID
         public LLVector3 AgentPosition
         public Int Category
         public UUID CreatorID
-        public Byte[] Details
+        public ByteArray Details
         public UUID LastOwnerID
         public UUID ObjectID
         public UUID OwnerID
@@ -26,8 +26,8 @@ class UserReportInternal : SLMessage() {
         public Int ReportType
         public UUID ReporterID
         public UUID ScreenshotID
-        public Byte[] Summary
-        public Byte[] VersionString
+        public ByteArray Summary
+        public ByteArray VersionString
         public LLVector3 ViewerPosition
     }
 

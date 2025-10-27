@@ -17,18 +17,18 @@ class EventInfoReply : SLMessage() {
     @JvmStatic
     class EventData {
         public Int Amount
-        public Byte[] Category
+        public ByteArray Category
         public Int Cover
-        public Byte[] Creator
-        public Byte[] Date
+        public ByteArray Creator
+        public ByteArray Date
         public Int DateUTC
-        public Byte[] Desc
+        public ByteArray Desc
         public Int Duration
         public Int EventFlags
         public Int EventID
         public LLVector3d GlobalPos
-        public Byte[] Name
-        public Byte[] SimName
+        public ByteArray Name
+        public ByteArray SimName
     }
 
     public EventInfoReply() {

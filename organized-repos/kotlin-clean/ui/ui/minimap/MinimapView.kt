@@ -46,7 +46,7 @@ class MinimapView : View() {
             return true
         }
     }
-    private UUID selectedUser = null
+    private val selectedUser: UUID = null
     private SLMinimap.UserLocations userLocations
     private val Paint userMarkPaint = Paint()
 
@@ -72,8 +72,8 @@ class MinimapView : View() {
     private Unit drawUserMark(ImmutableVector immutableVector, Canvas canvas, Paint paint, Rect rect, Boolean z, Float f, Boolean z2) {
         Float x = immutableVector.getX()
         Float y = immutableVector.getY()
-        Float width = ((Float) rect.left) + ((x / 256.0f) * ((Float) rect.width()))
-        Float width2 = ((Float) rect.top) + (((256.0f - y) / 256.0f) * ((Float) rect.width()))
+        Float width = (rect.toFloat().left) + ((x / 256.0f) * (rect.toFloat().width()))
+        Float width2 = (rect.toFloat().top) + (((256.0f - y) / 256.0f) * (rect.toFloat().width()))
         if (!z) {
             paint.setARGB(255, 0, 255, 0)
         } else {
@@ -86,12 +86,12 @@ class MinimapView : View() {
         paint.setStyle(Paint.Style.STROKE)
         canvas.drawCircle(width, width2, 5.0f, paint)
         if (z && (!Float.isNaN(f))) {
-            Float cos = (Float) (Math.cos((Double) f) * 20.0d)
-            Float sin = (Float) (Math.sin((Double) f) * 20.0d)
-            Float cos2 = (Float) ((Math.cos((Double) f) * 15.0d) - (Math.sin((Double) f) * -5.0d))
-            Float cos3 = (Float) ((Math.cos((Double) f) * -5.0d) + (Math.sin((Double) f) * 15.0d))
-            Float cos4 = (Float) ((Math.cos((Double) f) * 15.0d) - (Math.sin((Double) f) * 5.0d))
-            Float cos5 = (Float) ((Math.cos((Double) f) * 5.0d) + (Math.sin((Double) f) * 15.0d))
+            Float cos = (Float) (Math.cos(f.toDouble()) * 20.0d)
+            Float sin = (Float) (Math.sin(f.toDouble()) * 20.0d)
+            Float cos2 = (Float) ((Math.cos(f.toDouble()) * 15.0d) - (Math.sin(f.toDouble()) * -5.0d))
+            Float cos3 = (Float) ((Math.cos(f.toDouble()) * -5.0d) + (Math.sin(f.toDouble()) * 15.0d))
+            Float cos4 = (Float) ((Math.cos(f.toDouble()) * 15.0d) - (Math.sin(f.toDouble()) * 5.0d))
+            Float cos5 = (Float) ((Math.cos(f.toDouble()) * 5.0d) + (Math.sin(f.toDouble()) * 15.0d))
             paint.setStrokeWidth(3.0f)
             canvas.drawLine(width, width2, width + cos, width2 - sin, paint)
             canvas.drawLine(width + cos, width2 - sin, cos2 + width, width2 - cos3, paint)
@@ -119,9 +119,9 @@ class MinimapView : View() {
                 }
                 Map.Entry entry = (Map.Entry) it.next()
                 ImmutableVector immutableVector = ((SLMinimap.UserLocation) entry.getValue()).location
-                Float abs = Math.abs((((immutableVector.getX() / 256.0f) * ((Float) this.lastDrawRect.width())) + ((Float) this.lastDrawRect.left)) - f)
-                Float abs2 = Math.abs(((((256.0f - immutableVector.getY()) / 256.0f) * ((Float) this.lastDrawRect.width())) + ((Float) this.lastDrawRect.top)) - f2)
-                f3 = (Float) Math.sqrt((Double) ((abs2 * abs2) + (abs * abs)))
+                Float abs = Math.abs((((immutableVector.getX() / 256.0f) * (this.toFloat().lastDrawRect.width())) + (this.toFloat().lastDrawRect.left)) - f)
+                Float abs2 = Math.abs(((((256.0f - immutableVector.getY()) / 256.0f) * (this.toFloat().lastDrawRect.width())) + (this.toFloat().lastDrawRect.top)) - f2)
+                f3 = Math.sqrt(((abs2 * abs2.toDouble()).toFloat() + (abs * abs)))
                 if (f3 < applyDimension) {
                     if (uuid == null) {
                         uuid2 = (UUID) entry.getKey()
@@ -144,7 +144,7 @@ class MinimapView : View() {
         if (this.minimapBitmap != null) {
             Int width = getWidth()
             Int height = getHeight()
-            Int round = Math.round(((Float) Math.min(width, height)) * this.actualZoomFactor)
+            Int round = Math.round((Math.toFloat().min(width, height)) * this.actualZoomFactor)
             Int i = width / 2
             Int i2 = height / 2
             if (round <= width) {
@@ -153,23 +153,23 @@ class MinimapView : View() {
             if (round <= height) {
                 this.mapOffsetY = 0.0f
             }
-            Int i3 = (i - (round / 2)) + ((Int) this.mapOffsetX)
+            Int i3 = (i - (round / 2)) + (this.toInt().mapOffsetX)
             if (i3 > 0 && round > width) {
                 this.mapOffsetX = (Float) ((round / 2) - i)
-                i3 = (i - (round / 2)) + ((Int) this.mapOffsetX)
+                i3 = (i - (round / 2)) + (this.toInt().mapOffsetX)
             }
             if (i3 + round <= width && round > width) {
                 this.mapOffsetX = (Float) (((width - round) - i) + (round / 2))
-                i3 = (i - (round / 2)) + ((Int) this.mapOffsetX)
+                i3 = (i - (round / 2)) + (this.toInt().mapOffsetX)
             }
-            Int i4 = (i2 - (round / 2)) + ((Int) this.mapOffsetY)
+            Int i4 = (i2 - (round / 2)) + (this.toInt().mapOffsetY)
             if (i4 > 0 && round > height) {
                 this.mapOffsetY = (Float) ((round / 2) - i2)
-                i4 = (i2 - (round / 2)) + ((Int) this.mapOffsetY)
+                i4 = (i2 - (round / 2)) + (this.toInt().mapOffsetY)
             }
             if (i4 + round <= height && round > height) {
                 this.mapOffsetY = (Float) (((height - round) - i2) + (round / 2))
-                i4 = (i2 - (round / 2)) + ((Int) this.mapOffsetY)
+                i4 = (i2 - (round / 2)) + (this.toInt().mapOffsetY)
             }
             this.bitmapDstRect.set(i3, i4, i3 + round, round + i4)
             this.bitmapSrcRect.set(0, 0, this.minimapBitmap.getWidth(), this.minimapBitmap.getHeight())

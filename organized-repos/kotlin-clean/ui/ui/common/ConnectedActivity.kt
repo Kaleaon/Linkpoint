@@ -109,7 +109,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
                 } else if (connectionState == SLGridConnection.ConnectionState.Connecting) {
                     findViewById.setVisibility(0)
                     if (gridConnection.getIsReconnecting()) {
-                        ((TextView) findViewById.findViewById(R.id.offline_notify_message)).setText(getString(R.string.reconnecting_offline_message, Object[]{Integer.valueOf(gridConnection.getReconnectAttempt())}))
+                        ((TextView) findViewById.findViewById(R.id.offline_notify_message)).setText(getString(R.string.reconnecting_offline_message, Array<Any>{Integer.valueOf(gridConnection.getReconnectAttempt())}))
                     } else {
                         ((TextView) findViewById.findViewById(R.id.offline_notify_message)).setText(R.string.connecting_message)
                     }

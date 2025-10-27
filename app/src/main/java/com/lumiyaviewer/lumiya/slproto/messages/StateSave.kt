@@ -15,7 +15,7 @@ class StateSave : SLMessage {
     }
 
     class DataBlock {
-        Byte[] Filename
+        ByteArray Filename
     }
 
     StateSave() {

@@ -21,7 +21,7 @@ class AvatarAppearance : SLMessage() {
 
     @JvmStatic
     class ObjectData {
-        public Byte[] TextureEntry
+        public ByteArray TextureEntry
     }
 
     @JvmStatic

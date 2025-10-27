@@ -11,7 +11,7 @@ class LiveHelpGroupReply : SLMessage() {
     class ReplyData {
         public UUID GroupID
         public UUID RequestID
-        public Byte[] Selection
+        public ByteArray Selection
     }
 
     public LiveHelpGroupReply() {

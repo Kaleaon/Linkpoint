@@ -11,53 +11,53 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 class SLTransfer {
-    Int AT_ANIMATION = 20
-    Int AT_BODYPART = 13
-    Int AT_CALLINGCARD = 2
-    Int AT_CATEGORY = 8
-    Int AT_CLOTHING = 5
-    Int AT_GESTURE = 21
-    Int AT_IMAGE_JPEG = 19
-    Int AT_IMAGE_TGA = 18
-    Int AT_LANDMARK = 3
-    Int AT_LOST_AND_FOUND = 16
-    Int AT_LSL_BYTECODE = 11
-    Int AT_LSL_TEXT = 10
-    Int AT_NOTECARD = 7
-    Int AT_OBJECT = 6
-    Int AT_ROOT_CATEGORY = 9
-    Int AT_SCRIPT = 4
-    Int AT_SIMSTATE = 22
-    Int AT_SNAPSHOT_CATEGORY = 15
-    Int AT_SOUND = 1
-    Int AT_SOUND_WAV = 17
-    Int AT_TEXTURE = 0
-    Int AT_TEXTURE_TGA = 12
-    Int AT_TRASH = 14
-    Int LLTCT_ASSET = 2
-    Int LLTCT_MISC = 1
-    Int LLTCT_UNKNOWN = 0
-    Int LLTST_ASSET = 2
-    Int LLTST_FILE = 1
-    Int LLTST_SIM_ESTATE = 4
-    Int LLTST_SIM_INV_ITEM = 3
-    Int LLTST_UNKNOWN = 0
-    Int LLTS_ABORT = 3
-    Int LLTS_DONE = 1
-    Int LLTS_ERROR = -1
-    Int LLTS_INSUFFICIENT_PERMISSIONS = -3
-    Int LLTS_OK = 0
-    Int LLTS_SKIP = 2
-    Int LLTS_UNKNOWN_SOURCE = -2
-    Int LLTTT_FILE = 1
-    Int LLTTT_UNKNOWN = 0
-    Int LLTTT_VFILE = 2
+    val AT_ANIMATION: Int = 20
+    val AT_BODYPART: Int = 13
+    val AT_CALLINGCARD: Int = 2
+    val AT_CATEGORY: Int = 8
+    val AT_CLOTHING: Int = 5
+    val AT_GESTURE: Int = 21
+    val AT_IMAGE_JPEG: Int = 19
+    val AT_IMAGE_TGA: Int = 18
+    val AT_LANDMARK: Int = 3
+    val AT_LOST_AND_FOUND: Int = 16
+    val AT_LSL_BYTECODE: Int = 11
+    val AT_LSL_TEXT: Int = 10
+    val AT_NOTECARD: Int = 7
+    val AT_OBJECT: Int = 6
+    val AT_ROOT_CATEGORY: Int = 9
+    val AT_SCRIPT: Int = 4
+    val AT_SIMSTATE: Int = 22
+    val AT_SNAPSHOT_CATEGORY: Int = 15
+    val AT_SOUND: Int = 1
+    val AT_SOUND_WAV: Int = 17
+    val AT_TEXTURE: Int = 0
+    val AT_TEXTURE_TGA: Int = 12
+    val AT_TRASH: Int = 14
+    val LLTCT_ASSET: Int = 2
+    val LLTCT_MISC: Int = 1
+    val LLTCT_UNKNOWN: Int = 0
+    val LLTST_ASSET: Int = 2
+    val LLTST_FILE: Int = 1
+    val LLTST_SIM_ESTATE: Int = 4
+    val LLTST_SIM_INV_ITEM: Int = 3
+    val LLTST_UNKNOWN: Int = 0
+    val LLTS_ABORT: Int = 3
+    val LLTS_DONE: Int = 1
+    val LLTS_ERROR: Int = -1
+    val LLTS_INSUFFICIENT_PERMISSIONS: Int = -3
+    val LLTS_OK: Int = 0
+    val LLTS_SKIP: Int = 2
+    val LLTS_UNKNOWN_SOURCE: Int = -2
+    val LLTTT_FILE: Int = 1
+    val LLTTT_UNKNOWN: Int = 0
+    val LLTTT_VFILE: Int = 2
     private UUID agentID
     private Int assetType
     private UUID assetUUID
     private Int channelType
     private Int currentSize
-    private Byte[] data
+    private ByteArray data
     private UUID itemUUID
     private Int nextPacket
     private UUID ownerUUID
@@ -142,7 +142,7 @@ class SLTransfer {
     }
 
     /* access modifiers changed from: package-private */
-    Byte[] getData() {
+    ByteArray getData() {
         return this.data
     }
 

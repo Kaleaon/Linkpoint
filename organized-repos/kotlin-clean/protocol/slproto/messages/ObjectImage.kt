@@ -19,9 +19,9 @@ class ObjectImage : SLMessage() {
 
     @JvmStatic
     class ObjectData {
-        public Byte[] MediaURL
+        public ByteArray MediaURL
         public Int ObjectLocalID
-        public Byte[] TextureEntry
+        public ByteArray TextureEntry
     }
 
     public ObjectImage() {

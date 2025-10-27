@@ -16,7 +16,7 @@ class AvatarNotesUpdate : SLMessage() {
 
     @JvmStatic
     class Data {
-        public Byte[] Notes
+        public ByteArray Notes
         public UUID TargetID
     }
 

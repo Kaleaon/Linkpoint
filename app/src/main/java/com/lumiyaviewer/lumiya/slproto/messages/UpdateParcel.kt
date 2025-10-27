@@ -15,12 +15,12 @@ class UpdateParcel : SLMessage {
         UUID AuthorizedBuyerID
         Int BillableArea
         Int Category
-        Byte[] Description
+        ByteArray Description
         Boolean GroupOwned
         Boolean IsForSale
         Boolean MaturePublish
-        Byte[] MusicURL
-        Byte[] Name
+        ByteArray MusicURL
+        ByteArray Name
         UUID OwnerID
         UUID ParcelID
         Long RegionHandle

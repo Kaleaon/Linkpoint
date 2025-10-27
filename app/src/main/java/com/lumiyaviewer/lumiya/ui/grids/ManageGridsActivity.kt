@@ -188,7 +188,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.grids.-$Lambda$mB5
 
     Unit onCreate(Bundle bundle) {
         super.onCreate(bundle)
-        setContentView((Int) R.layout.manage_grids)
+        setContentView(R.toInt().layout.manage_grids)
         ButterKnife.bind((Activity) this)
         this.gridList = GridList(this)
         this.gridList.getGridList(this.displayList)

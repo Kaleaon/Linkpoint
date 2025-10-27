@@ -15,7 +15,7 @@ class LogTextMessage : SLMessage() {
         public UUID FromAgentId
         public Double GlobalX
         public Double GlobalY
-        public Byte[] Message
+        public ByteArray Message
         public Int Time
         public UUID ToAgentId
     }

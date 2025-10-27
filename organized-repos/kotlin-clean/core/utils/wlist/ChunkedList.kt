@@ -27,7 +27,7 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
             i = size.size() + i
         }
         if (i != this.count) {
-            throw IllegalStateException(String.format("newCount %d, count %d", Object[]{Integer.valueOf(i), Integer.valueOf(this.count)}))
+            throw IllegalStateException(String.format("newCount %d, count %d", Array<Any>{Integer.valueOf(i), Integer.valueOf(this.count)}))
         }
     }
 
@@ -63,7 +63,7 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
 
     private Unit setLastChunk(Int i) {
         if (i < 0 || i >= this.count) {
-            throw IndexOutOfBoundsException(String.format("index %d, count %d", Object[]{Integer.valueOf(i), Integer.valueOf(this.count)}))
+            throw IndexOutOfBoundsException(String.format("index %d, count %d", Array<Any>{Integer.valueOf(i), Integer.valueOf(this.count)}))
         }
         checkConsistency()
         if (this.lastChunk == null) {
@@ -82,7 +82,7 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
             this.lastChunkIndex++
             this.lastChunkStart += this.lastChunkSize
             if (this.lastChunkIndex >= this.chunks.size()) {
-                throw IllegalStateException(String.format("lastChunkIndex runaway, position %d, count %d, lastChunkStart %d", Object[]{Integer.valueOf(i), Integer.valueOf(this.count), Integer.valueOf(this.lastChunkStart)}))
+                throw IllegalStateException(String.format("lastChunkIndex runaway, position %d, count %d, lastChunkStart %d", Array<Any>{Integer.valueOf(i), Integer.valueOf(this.count), Integer.valueOf(this.lastChunkStart)}))
             } else {
                 this.lastChunk = this.chunks.get(this.lastChunkIndex)
                 this.lastChunkSize = this.lastChunk.size()
@@ -133,7 +133,7 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
         if (i >= this.lastChunkStart && i < this.lastChunkStart + this.lastChunkSize) {
             return this.lastChunk.get(i - this.lastChunkStart)
         }
-        throw IndexOutOfBoundsException(String.format("index %d, count %d", Object[]{Integer.valueOf(i), Integer.valueOf(this.count)}))
+        throw IndexOutOfBoundsException(String.format("index %d, count %d", Array<Any>{Integer.valueOf(i), Integer.valueOf(this.count)}))
     }
 
     public Int removeChunkAtEnd() {

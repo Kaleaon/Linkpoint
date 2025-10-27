@@ -23,7 +23,7 @@ import java.util.zip.InflaterInputStream
 import javax.annotation.Nullable
 
 class MeshData {
-    Int MAX_RIGGED_MESH_JOINTS = 163
+    val MAX_RIGGED_MESH_JOINTS: Int = 163
     @Nullable
     private float[] bindShapeMatrix
     private MeshFace[] faces
@@ -40,7 +40,7 @@ class MeshData {
         FileInputStream fileInputStream
         DataInputStream dataInputStream
         float[] fArr
-        Int[] iArr
+        IntArray iArr
         float[] fArr2
         GlobalOptions.MeshRendering meshRendering = GlobalOptions.getInstance().getMeshRendering()
         if (meshRendering == GlobalOptions.MeshRendering.disabled) {
@@ -119,7 +119,7 @@ class MeshData {
                 if (fromBinary3.keyExists("joint_names")) {
                     LLSDNode byKey = fromBinary3.byKey("joint_names")
                     Int min = Math.min(byKey.getCount(), MAX_RIGGED_MESH_JOINTS)
-                    Int[] iArr2 = Int[min]
+                    IntArray iArr2 = Int[min]
                     for (Int i4 = 0; i4 < min; i4++) {
                         String asString = byKey.byIndex(i4).asString()
                         Int i5 = -1

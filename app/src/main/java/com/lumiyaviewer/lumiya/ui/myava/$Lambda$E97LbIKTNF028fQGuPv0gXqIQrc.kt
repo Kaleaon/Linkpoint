@@ -9,7 +9,7 @@ import com.lumiyaviewer.lumiya.react.Subscription
     private /* synthetic */ Any f455$f0
 
     private /* synthetic */ Unit $m$0(Any obj) {
-        ((MyAvatarFragment) this.f455$f0).m654com_lumiyaviewer_lumiya_ui_myava_MyAvatarFragmentmthref0((Int) obj)
+        ((MyAvatarFragment) this.f455$f0).m654com_lumiyaviewer_lumiya_ui_myava_MyAvatarFragmentmthref0(obj.toInt())
     }
 
     /* synthetic */ $Lambda$E97LbIKTNF028fQGuPv0gXqIQrc(Any obj) {

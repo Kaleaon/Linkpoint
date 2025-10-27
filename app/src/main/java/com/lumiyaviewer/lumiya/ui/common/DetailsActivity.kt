@@ -20,14 +20,14 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class DetailsActivity : ConnectedActivity {
-    String DEFAULT_DETAILS_FRAGMENT_TAG = "defaultDetails"
-    private String DEFAULT_SUBTITLE_TAG = "DetailsActivity:defaultSubTitle"
-    private String DEFAULT_TITLE_TAG = "DetailsActivity:defaultTitle"
-    private String DETAILS_STACK_TAG = "DetailsActivity:DetailsStack"
+    val DEFAULT_DETAILS_FRAGMENT_TAG: String = "defaultDetails"
+    private val DEFAULT_SUBTITLE_TAG: String = "DetailsActivity:defaultSubTitle"
+    private val DEFAULT_TITLE_TAG: String = "DetailsActivity:defaultTitle"
+    private val DETAILS_STACK_TAG: String = "DetailsActivity:DetailsStack"
     @Nullable
-    private String defaultSubTitle = null
+    private val defaultSubTitle: String = null
     @Nullable
-    private String defaultTitle = null
+    private val defaultTitle: String = null
     private ArrayList<DetailsStackEntry> detailsStack = ArrayList<>()
 
     private class DetailsStackEntry : Parcelable {
@@ -228,7 +228,7 @@ class DetailsActivity : ConnectedActivity {
         updateTitle()
     }
 
-    Unit onRequestPermissionsResult(Int i, @NonNull String[] strArr, @NonNull Int[] iArr) {
+    Unit onRequestPermissionsResult(Int i, @NonNull Array<String> strArr, @NonNull IntArray iArr) {
         super.onRequestPermissionsResult(i, strArr, iArr)
         List<Fragment> fragments = getSupportFragmentManager().getFragments()
         if (fragments != null) {

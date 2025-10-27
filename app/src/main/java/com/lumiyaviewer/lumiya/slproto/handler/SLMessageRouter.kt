@@ -29,7 +29,7 @@ class SLMessageRouter {
             try {
                 Object obj2 = this.subscriber.get()
                 if (obj2 != null) {
-                    this.method.invoke(obj2, Object[]{obj})
+                    this.method.invoke(obj2, Array<Any>{obj})
                 }
             } catch (IllegalArgumentException e) {
                 e.printStackTrace()

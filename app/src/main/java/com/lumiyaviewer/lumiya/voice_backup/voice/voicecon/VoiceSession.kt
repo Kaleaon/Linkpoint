@@ -89,7 +89,7 @@ class VoiceSession {
         Object object
         Object object2 = this.stateLock
         synchronized (object2) {
-            Debug.Printf("Voice: got session state: %s (%s)", Object[]{this.state, this})
+            Debug.Printf("Voice: got session state: %s (%s)", Array<Any>{this.state, this})
             if (this.state == VoiceChatInfo.VoiceChatState.None && this.previousState == VoiceChatInfo.VoiceChatState.None) {
                 object = VoiceChatInfo.empty()
                 Debug.Printf("Voice: returning empty session state", Object[0])
@@ -107,7 +107,7 @@ class VoiceSession {
             }
             this.previousState = this.state
         }
-        Debug.Printf("Voice: returning session state: %s", Object[]{((VoiceChatInfo)object).state})
+        Debug.Printf("Voice: returning session state: %s", Array<Any>{((VoiceChatInfo)object).state})
         return object
     }
 
@@ -209,7 +209,7 @@ class VoiceSession {
                 this.previousState = this.state
                 this.state = voiceChatState
                 bl = true
-                Debug.Printf("Voice: session state: %s (%s)", Object[]{this.state, this})
+                Debug.Printf("Voice: session state: %s (%s)", Array<Any>{this.state, this})
             }
             return bl
         }

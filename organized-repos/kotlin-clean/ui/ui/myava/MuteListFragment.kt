@@ -97,7 +97,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
 
     private Unit askForUnblock(MuteListEntry muteListEntry) {
         AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
-        builder.setMessage(String.format(getString(R.string.unblock_confirm_message), Object[]{muteListEntry.name})).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this, muteListEntry) {
+        builder.setMessage(String.format(getString(R.string.unblock_confirm_message), Array<Any>{muteListEntry.name})).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this, muteListEntry) {
 
             /* renamed from: -$f0 */
             private val /* synthetic */ Object f459$f0

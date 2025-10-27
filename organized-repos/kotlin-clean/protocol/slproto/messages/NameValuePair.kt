@@ -13,7 +13,7 @@ class NameValuePair : SLMessage() {
 
     @JvmStatic
     class NameValueData {
-        public Byte[] NVPair
+        public ByteArray NVPair
     }
 
     @JvmStatic

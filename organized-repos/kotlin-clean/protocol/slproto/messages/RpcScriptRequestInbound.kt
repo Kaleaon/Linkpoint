@@ -13,7 +13,7 @@ class RpcScriptRequestInbound : SLMessage() {
         public UUID ChannelID
         public Int IntValue
         public UUID ItemID
-        public Byte[] StringValue
+        public ByteArray StringValue
         public UUID TaskID
     }
 

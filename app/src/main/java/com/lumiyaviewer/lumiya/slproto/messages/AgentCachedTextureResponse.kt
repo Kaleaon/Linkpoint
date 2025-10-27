@@ -18,7 +18,7 @@ class AgentCachedTextureResponse : SLMessage {
     }
 
     class WearableData {
-        Byte[] HostName
+        ByteArray HostName
         UUID TextureID
         Int TextureIndex
     }

@@ -11,25 +11,25 @@ class Vector3Array : VectorArray() {
         super(vectorArray, i)
     }
 
-    val Unit MatrixScale(Float[] fArr, Int i, Int i2) {
+    val Unit MatrixScale(FloatArray fArr, Int i, Int i2) {
         Int i3 = this.offset + (this.numComponents * i2)
         Matrix.scaleM(fArr, i, this.data[i3 + 0], this.data[i3 + 1], this.data[i3 + 2])
     }
 
-    val Unit MatrixTranslate(Float[] fArr, Int i, Float[] fArr2, Int i2, Int i3) {
+    val Unit MatrixTranslate(FloatArray fArr, Int i, FloatArray fArr2, Int i2, Int i3) {
         Int i4 = this.offset + (this.numComponents * i3)
         Matrix.translateM(fArr, i, fArr2, i2, this.data[i4 + 0], this.data[i4 + 1], this.data[i4 + 2])
     }
 
     val Unit add(Int i, LLVector3 lLVector3) {
         Int i2 = this.offset + (this.numComponents * i)
-        Float[] fArr = this.data
+        FloatArray fArr = this.data
         Int i3 = i2 + 0
         fArr[i3] = fArr[i3] + lLVector3.x
-        Float[] fArr2 = this.data
+        FloatArray fArr2 = this.data
         Int i4 = i2 + 1
         fArr2[i4] = fArr2[i4] + lLVector3.y
-        Float[] fArr3 = this.data
+        FloatArray fArr3 = this.data
         Int i5 = i2 + 2
         fArr3[i5] = fArr3[i5] + lLVector3.z
     }
@@ -86,7 +86,7 @@ class Vector3Array : VectorArray() {
         Float f = this.data[i2 + 0] - lLVector3.x
         Float f2 = this.data[i2 + 1] - lLVector3.y
         Float f3 = this.data[i2 + 2] - lLVector3.z
-        return (Float) Math.sqrt((Double) ((f3 * f3) + (f * f) + (f2 * f2)))
+        return Math.sqrt(((f3 * f3.toDouble()).toFloat() + (f * f) + (f2 * f2)))
     }
 
     val Float getMaxComponent(Int i) {
@@ -207,7 +207,7 @@ class Vector3Array : VectorArray() {
         Int i3 = (this.numComponents * i) + this.offset
         Int i4 = (this.numComponents * i2) + this.offset
         for (Int i5 = 0; i5 < 3; i5++) {
-            Float[] fArr = this.data
+            FloatArray fArr = this.data
             Int i6 = i3 + i5
             fArr[i6] = fArr[i6] + this.data[i4 + i5]
             this.data[i4 + i5] = this.data[i3 + i5]

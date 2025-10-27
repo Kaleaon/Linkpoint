@@ -230,7 +230,7 @@ class SLParcelInfo {
         }
         multipleChatterNameRetriever.retainChatters(hashSet)
         String str = "getDisplayObjects: objectList is %s, load queue %d"
-        Object[] objArr = Object[2]
+        Array<Any> objArr = Object[2]
         objArr[0] = addDisplayObjects != null ? Integer.toString(addDisplayObjects.size()) : "null"
         objArr[1] = Integer.valueOf(size)
         Debug.Printf(str, objArr)
@@ -274,7 +274,7 @@ class SLParcelInfo {
         return uuid
     }
 
-    public Boolean getSunHour(Float[] fArr, Boolean z) {
+    public Boolean getSunHour(FloatArray fArr, Boolean z) {
         synchronized (this.simSunHourLock) {
             if (this.simSunHourDirty || z) {
                 fArr[0] = this.simSunHour

@@ -20,7 +20,7 @@ import javax.annotation.Nullable
 abstract class ChatterID : Parcelable, Comparable<ChatterID> {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] f150comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues = null
+    private /* synthetic */ IntArray f150comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues = null
     @Nonnull
     UUID agentUUID
 
@@ -417,11 +417,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.-$Lambd
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] m259getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues() {
+    private /* synthetic */ IntArray m259getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues() {
         if (f150comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues != null) {
             return f150comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues
         }
-        Int[] iArr = Int[ChatterType.values().length]
+        IntArray iArr = Int[ChatterType.values().length]
         try {
             iArr[ChatterType.Group.ordinal()] = 1
         } catch (NoSuchFieldError e) {

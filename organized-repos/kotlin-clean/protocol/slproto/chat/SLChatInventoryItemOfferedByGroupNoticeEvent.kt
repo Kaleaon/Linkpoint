@@ -26,6 +26,6 @@ val class SLChatInventoryItemOfferedByGroupNoticeEvent : SLChatInventoryItemOffe
     }
 
     public String getText(Context context, UserManager userManager) {
-        return context.getString(R.string.group_notice_attachment_format, Object[]{getItemName()})
+        return context.getString(R.string.group_notice_attachment_format, Array<Any>{getItemName()})
     }
 }

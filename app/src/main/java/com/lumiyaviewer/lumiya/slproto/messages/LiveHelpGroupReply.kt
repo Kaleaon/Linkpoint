@@ -10,7 +10,7 @@ class LiveHelpGroupReply : SLMessage {
     class ReplyData {
         UUID GroupID
         UUID RequestID
-        Byte[] Selection
+        ByteArray Selection
     }
 
     LiveHelpGroupReply() {

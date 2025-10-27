@@ -26,7 +26,7 @@ class SimulatorPresentAtLocation : SLMessage {
         Int RegionFlags
         UUID RegionID
         Int SimAccess
-        Byte[] SimName
+        ByteArray SimName
     }
 
     class SimulatorPublicHostBlock {

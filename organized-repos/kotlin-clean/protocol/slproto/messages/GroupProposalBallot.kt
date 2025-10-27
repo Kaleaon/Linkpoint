@@ -18,7 +18,7 @@ class GroupProposalBallot : SLMessage() {
     class ProposalData {
         public UUID GroupID
         public UUID ProposalID
-        public Byte[] VoteCast
+        public ByteArray VoteCast
     }
 
     public GroupProposalBallot() {

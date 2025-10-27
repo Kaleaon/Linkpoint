@@ -22,7 +22,7 @@ class TeleportHomeDialog {
         SLAgentCircuit activeAgentCircuit
         UserManager userManager = ActivityUtils.getUserManager(activity.getIntent())
         if (userManager != null && (activeAgentCircuit = userManager.getActiveAgentCircuit()) != null && activeAgentCircuit.getModules().rlvController.canTeleportToLocation()) {
-            AlertDialog.Builder(activity).setMessage((Int) R.string.teleport_home_confirm_title).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(activity, userManager, activeAgentCircuit) {
+            AlertDialog.Builder(activity).setMessage(R.toInt().string.teleport_home_confirm_title).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(activity, userManager, activeAgentCircuit) {
 
                 /* renamed from: -$f0 */
                 private val /* synthetic */ Object f375$f0

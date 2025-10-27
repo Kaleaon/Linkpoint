@@ -16,11 +16,11 @@ class Error : SLMessage() {
     @JvmStatic
     class Data {
         public Int Code
-        public Byte[] Data
+        public ByteArray Data
         public UUID ID
-        public Byte[] Message
-        public Byte[] System
-        public Byte[] Token
+        public ByteArray Message
+        public ByteArray System
+        public ByteArray Token
     }
 
     public Error() {

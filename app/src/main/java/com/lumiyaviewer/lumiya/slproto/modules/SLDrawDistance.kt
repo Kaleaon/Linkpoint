@@ -4,9 +4,9 @@ import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit
 
 class SLDrawDistance : SLModule {
-    Float CHAT_RANGE = 20.0f
-    private Long DRAW_RANGE_TIMEOUT = 10000
-    Float MIN_DRAW_RANGE = 10.5f
+    val CHAT_RANGE: Float = 20.0f
+    private val DRAW_RANGE_TIMEOUT: Long = 10000
+    val MIN_DRAW_RANGE: Float = 10.5f
     private Float activeDrawDistance = 0.0f
     private Long defaultDrawDistanceSince = 0
     private Boolean defaultTimerSet = false
@@ -73,12 +73,12 @@ class SLDrawDistance : SLModule {
 
     synchronized Unit Enable3DView(Int i) {
         Debug.Log("Enable3DView: Setting drawDistance to " + i)
-        this.worldDrawDistance = (Float) i
+        this.worldDrawDistance = i.toFloat()
         if (!this.worldViewActive) {
             this.worldViewActive = true
             this.agentCircuit.getModules().avatarControl.EnableFastUpdates()
         }
-        this.gridConn.parcelInfo.setDrawDistance((Float) i)
+        this.gridConn.parcelInfo.setDrawDistance(i.toFloat())
         this.agentCircuit.TryWakeUp()
     }
 

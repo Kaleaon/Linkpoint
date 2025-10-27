@@ -9,8 +9,8 @@ class ScriptQuestion : SLMessage {
 
     class Data {
         UUID ItemID
-        Byte[] ObjectName
-        Byte[] ObjectOwner
+        ByteArray ObjectName
+        ByteArray ObjectOwner
         Int Questions
         UUID TaskID
     }

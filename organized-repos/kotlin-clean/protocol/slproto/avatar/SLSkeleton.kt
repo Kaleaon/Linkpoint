@@ -8,8 +8,8 @@ import java.util.Map
 
 class SLSkeleton {
     val Map<SLSkeletonBoneID, SLSkeletonBone> bones = EnumMap(SLSkeletonBoneID.class)
-    val Float[] jointMatrix = Float[(SLSkeletonBoneID.VALUES.length * 16)]
-    val Float[] jointWorldMatrix = Float[((SLSkeletonBoneID.VALUES.length + 47) * 16)]
+    val FloatArray jointMatrix = Float[(SLSkeletonBoneID.VALUES.length * 16)]
+    val FloatArray jointWorldMatrix = Float[((SLSkeletonBoneID.VALUES.length + 47) * 16)]
     public SLSkeletonBone rootBone
     private val SLSkeletonBone[] updateBones = SLSkeletonBone[SLSkeletonBoneID.VALUES.length]
 
@@ -22,7 +22,7 @@ class SLSkeleton {
     /* access modifiers changed from: protected */
     fun applyJointTranslations(MeshJointTranslations meshJointTranslations) {
         for (Map.Entry entry : this.bones.entrySet()) {
-            Float[] fArr = meshJointTranslations.jointTranslations.get(entry.getKey())
+            FloatArray fArr = meshJointTranslations.jointTranslations.get(entry.getKey())
             if (fArr != null) {
                 ((SLSkeletonBone) entry.getValue()).setPositionOverride(LLVector3(fArr[0], fArr[1], fArr[2]))
             }
@@ -40,7 +40,7 @@ class SLSkeleton {
             return 0.0f
         }
         Double positionZ = (Double) (sLSkeletonBone4.getPositionZ() * sLSkeletonBone5.getScaleZ())
-        return (Float) (((Double) (sLSkeletonBone.getScaleZ() * sLSkeletonBone6.getPositionZ())) + positionZ + ((Double) getPelvisToFoot()) + (Math.sqrt(2.0d) * ((Double) (sLSkeletonBone2.getPositionZ() * sLSkeletonBone3.getScaleZ()))) + ((Double) (sLSkeletonBone3.getPositionZ() * sLSkeletonBone4.getScaleZ())) + ((Double) (sLSkeletonBone5.getPositionZ() * sLSkeletonBone6.getScaleZ())))
+        return (Float) (((Double) (sLSkeletonBone.getScaleZ() * sLSkeletonBone6.getPositionZ())) + positionZ + (getPelvisToFoot.toDouble()()) + (Math.sqrt(2.0d) * ((Double) (sLSkeletonBone2.getPositionZ() * sLSkeletonBone3.getScaleZ()))) + ((Double) (sLSkeletonBone3.getPositionZ() * sLSkeletonBone4.getScaleZ())) + ((Double) (sLSkeletonBone5.getPositionZ() * sLSkeletonBone6.getScaleZ())))
     }
 
     public Float getPelvisToFoot() {

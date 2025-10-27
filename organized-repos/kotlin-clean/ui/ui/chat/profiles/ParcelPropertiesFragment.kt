@@ -199,9 +199,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         fun onPostExecute(Boolean bool) {
             this.progressDialog.dismiss()
             if (bool == null || (!bool.booleanValue())) {
-                AlertDialog.Builder(ParcelPropertiesFragment.this.getContext()).setMessage((Int) R.string.set_home_failed).setCancelable(true).create().show()
+                AlertDialog.Builder(ParcelPropertiesFragment.this.getContext()).setMessage(R.toInt().string.set_home_failed).setCancelable(true).create().show()
             } else {
-                AlertDialog.Builder(ParcelPropertiesFragment.this.getContext()).setMessage((Int) R.string.set_home_success).setCancelable(true).create().show()
+                AlertDialog.Builder(ParcelPropertiesFragment.this.getContext()).setMessage(R.toInt().string.set_home_success).setCancelable(true).create().show()
             }
         }
 
@@ -326,7 +326,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     @OnClick({2131755611})
     fun onSetHomeButton() {
         if (this.agentCircuit.getData() != null) {
-            AlertDialog.Builder(getContext()).setMessage((Int) R.string.set_home_confirm_title).setCancelable(true).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
+            AlertDialog.Builder(getContext()).setMessage(R.toInt().string.set_home_confirm_title).setCancelable(true).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
 
                 /* renamed from: -$f0 */
                 private val /* synthetic */ Object f264$f0
@@ -427,7 +427,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     fun onSimRestartButton() {
         SLAgentCircuit data = this.agentCircuit.getData()
         if (data != null) {
-            AlertDialog.Builder(getContext()).setMessage((Int) R.string.restart_region_confirm_title).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, data) {
+            AlertDialog.Builder(getContext()).setMessage(R.toInt().string.restart_region_confirm_title).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, data) {
 
                 /* renamed from: -$f0 */
                 private val /* synthetic */ Object f267$f0

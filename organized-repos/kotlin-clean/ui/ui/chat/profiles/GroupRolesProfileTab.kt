@@ -80,7 +80,7 @@ class GroupRolesProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoad
             if (item != null) {
                 Int i3 = (!item.RoleID.equals(UUIDPool.ZeroUUID) || this.groupProfile == null) ? item.Members : this.groupProfile.GroupData_Field.GroupMembershipCount
                 ((TextView) view.findViewById(R.id.role_name)).setText(SLMessage.stringFromVariableOEM(item.Name))
-                ((TextView) view.findViewById(R.id.role_member_count)).setText(GroupRolesProfileTab.this.getResources().getQuantityString(R.plurals.members, i3, Object[]{Integer.valueOf(i3)}))
+                ((TextView) view.findViewById(R.id.role_member_count)).setText(GroupRolesProfileTab.this.getResources().getQuantityString(R.plurals.members, i3, Array<Any>{Integer.valueOf(i3)}))
                 if (this.titlesByRole == null || (groupData = this.titlesByRole.get(item.RoleID)) == null) {
                     z = false
                     z2 = false

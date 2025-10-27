@@ -23,7 +23,7 @@ class UpdateTaskInventory : SLMessage() {
         public Int CRC
         public Int CreationDate
         public UUID CreatorID
-        public Byte[] Description
+        public ByteArray Description
         public Int EveryoneMask
         public Int Flags
         public UUID FolderID
@@ -32,7 +32,7 @@ class UpdateTaskInventory : SLMessage() {
         public Boolean GroupOwned
         public Int InvType
         public UUID ItemID
-        public Byte[] Name
+        public ByteArray Name
         public Int NextOwnerMask
         public UUID OwnerID
         public Int OwnerMask

@@ -3,15 +3,15 @@ package com.lumiyaviewer.lumiya.slproto.prims
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 
 class PrimMath {
-    Float F_DEG_TO_RAD = 0.017453292f
-    Float F_PI = 3.1415927f
+    val F_DEG_TO_RAD: Float = 0.017453292f
+    val F_PI: Float = 3.1415927f
 
     Float lerp(Float f, Float f2, Float f3) {
         return ((f2 - f) * f3) + f
     }
 
-    Float[] lookAt(LLVector3 lLVector3, LLVector3 lLVector32, LLVector3 lLVector33) {
-        Float[] fArr = Float[16]
+    FloatArray lookAt(LLVector3 lLVector3, LLVector3 lLVector32, LLVector3 lLVector33) {
+        FloatArray fArr = FloatArray(16)
         LLVector3 sub = LLVector3.sub(lLVector32, lLVector3)
         sub.normVec()
         LLVector3 lLVector34 = LLVector3(sub)

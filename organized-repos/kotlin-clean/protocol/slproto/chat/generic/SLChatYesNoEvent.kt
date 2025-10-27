@@ -18,7 +18,7 @@ import javax.annotation.Nullable
 abstract class SLChatYesNoEvent : SLChatTextEvent() {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-chat-generic-SLChatYesNoEvent$EventStateSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f74comlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues = null
+    private const val /* synthetic */ IntArray f74comlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues = null
     private EventState eventState = EventState.EventNew
 
     enum class EventState {
@@ -35,11 +35,11 @@ abstract class SLChatYesNoEvent : SLChatTextEvent() {
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-chat-generic-SLChatYesNoEvent$EventStateSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m157getcomlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues() {
+private /* synthetic */ IntArray m157getcomlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues() {
         if (f74comlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues != null) {
             return f74comlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues
         }
-        Int[] iArr = Int[EventState.values().length]
+        IntArray iArr = Int[EventState.values().length]
         try {
             iArr[EventState.EventAccepted.ordinal()] = 1
         } catch (NoSuchFieldError e) {

@@ -21,10 +21,10 @@ class GroupAccountTransactionsReply : SLMessage() {
     @JvmStatic
     class HistoryData {
         public Int Amount
-        public Byte[] Item
-        public Byte[] Time
+        public ByteArray Item
+        public ByteArray Time
         public Int Type
-        public Byte[] User
+        public ByteArray User
     }
 
     @JvmStatic
@@ -32,7 +32,7 @@ class GroupAccountTransactionsReply : SLMessage() {
         public Int CurrentInterval
         public Int IntervalDays
         public UUID RequestID
-        public Byte[] StartDate
+        public ByteArray StartDate
     }
 
     public GroupAccountTransactionsReply() {

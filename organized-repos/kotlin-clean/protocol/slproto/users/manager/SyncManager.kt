@@ -31,7 +31,7 @@ import javax.annotation.Nullable
 class SyncManager {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f226comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f226comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues = null
     private const val MAX_MESSAGES_PER_BATCH: Int = 100
     private val ChatMessageDao chatMessageDao
     private val ChatterDao chatterDao
@@ -53,11 +53,11 @@ class SyncManager {
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m355getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues() {
+private /* synthetic */ IntArray m355getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues() {
         if (f226comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues != null) {
             return f226comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues
         }
-        Int[] iArr = Int[ChatterID.ChatterType.values().length]
+        IntArray iArr = Int[ChatterID.ChatterType.values().length]
         try {
             iArr[ChatterID.ChatterType.Group.ordinal()] = 1
         } catch (NoSuchFieldError e) {

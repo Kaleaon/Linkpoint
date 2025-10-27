@@ -84,7 +84,7 @@ class SLAvatarAppearance : SLModule(), SLWearable.OnWearableStatusChangeListener
     private Float agentSizeVPLegLength
     private Float agentSizeVPNeckLength
     private Float agentSizeVPPlatformHeight
-    private Int[] agentVisualParams
+    private IntArray agentVisualParams
     private volatile BakeProcess bakeProcess = null
     private Thread bakingThread = null
     private val SLCaps caps
@@ -384,7 +384,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
             if (this.agentBakedTextures != null) {
                 agentSetAppearance.ObjectData_Field.TextureEntry = this.agentBakedTextures.packByteArray()
             } else {
-                agentSetAppearance.ObjectData_Field.TextureEntry = Byte[0]
+                agentSetAppearance.ObjectData_Field.TextureEntry = ByteArray(0)
             }
             this.agentVisualParams = getAppearanceParams()
             if (sLObjectAvatarInfo != null) {
@@ -781,7 +781,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
             if (!isCritical) {
                 z3 = z6
             } else if (!z2) {
-                Object[] objArr = Object[2]
+                Array<Any> objArr = Object[2]
                 objArr[0] = sLWearableType
                 objArr[1] = Integer.valueOf(row != null ? row.size() : 0)
                 Debug.Printf("missing wearables on critical layer %s (worn: %d entries)", objArr)
@@ -828,9 +828,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         return (this.agentSizeVPLegLength * 0.1918f) + 1.706f + (this.agentSizeVPHipLength * 0.0375f) + (this.agentSizeVPHeight * 0.12022f) + (this.agentSizeVPHeadSize * 0.01117f) + (this.agentSizeVPNeckLength * 0.038f) + (this.agentSizeVPHeelHeight * 0.08f) + (this.agentSizeVPPlatformHeight * 0.07f)
     }
 
-    private Int[] getAppearanceParams() {
+    private IntArray getAppearanceParams() {
         SLAvatarParams.AvatarParam avatarParam
-        Int[] iArr = Int[218]
+        IntArray iArr = IntArray(218)
         for (Int i = 0; i < 218; i++) {
             iArr[i] = 0
             SLAvatarParams.ParamSet paramSet = SLAvatarParams.paramDefs[i]

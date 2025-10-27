@@ -26,7 +26,7 @@ class AgentAnimation : SLMessage() {
 
     @JvmStatic
     class PhysicalAvatarEventList {
-        public Byte[] TypeData
+        public ByteArray TypeData
     }
 
     public AgentAnimation() {

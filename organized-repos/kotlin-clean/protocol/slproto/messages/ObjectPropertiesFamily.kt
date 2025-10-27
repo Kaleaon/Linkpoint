@@ -12,12 +12,12 @@ class ObjectPropertiesFamily : SLMessage() {
     class ObjectData {
         public Int BaseMask
         public Int Category
-        public Byte[] Description
+        public ByteArray Description
         public Int EveryoneMask
         public UUID GroupID
         public Int GroupMask
         public UUID LastOwnerID
-        public Byte[] Name
+        public ByteArray Name
         public Int NextOwnerMask
         public UUID ObjectID
         public UUID OwnerID

@@ -1,7 +1,7 @@
 package com.lumiyaviewer.lumiya.slproto.types
 
 class LLVector2 {
-    Float FP_MAG_THRESHOLD = 1.0E-7f
+    val FP_MAG_THRESHOLD: Float = 1.0E-7f
     Float x
     Float y
 
@@ -53,7 +53,7 @@ class LLVector2 {
     }
 
     Float magVec() {
-        return (Float) Math.sqrt((Double) ((this.x * this.x) + (this.y * this.y)))
+        return Math.sqrt(((this.x * this.x.toDouble()).toFloat() + (this.y * this.y)))
     }
 
     Unit mul(Float f) {
@@ -62,7 +62,7 @@ class LLVector2 {
     }
 
     Float normVec() {
-        Float sqrt = (Float) Math.sqrt((Double) ((this.x * this.x) + (this.y * this.y)))
+        Float sqrt = Math.sqrt(((this.x * this.x.toDouble()).toFloat() + (this.y * this.y)))
         if (sqrt > 1.0E-7f) {
             Float f = 1.0f / sqrt
             this.x *= f

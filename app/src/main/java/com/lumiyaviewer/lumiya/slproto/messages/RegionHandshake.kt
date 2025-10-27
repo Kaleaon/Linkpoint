@@ -18,7 +18,7 @@ class RegionHandshake : SLMessage {
         Boolean IsEstateManager
         Int RegionFlags
         Int SimAccess
-        Byte[] SimName
+        ByteArray SimName
         UUID SimOwner
         UUID TerrainBase0
         UUID TerrainBase1
@@ -46,9 +46,9 @@ class RegionHandshake : SLMessage {
     class RegionInfo3 {
         Int CPUClassID
         Int CPURatio
-        Byte[] ColoName
-        Byte[] ProductName
-        Byte[] ProductSKU
+        ByteArray ColoName
+        ByteArray ProductName
+        ByteArray ProductSKU
     }
 
     class RegionInfo4 {

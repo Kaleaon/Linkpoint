@@ -12,13 +12,13 @@ class SystemMessage : SLMessage {
     ArrayList<ParamList> ParamList_Fields = ArrayList<>()
 
     class MethodData {
-        Byte[] Digest
+        ByteArray Digest
         UUID Invoice
-        Byte[] Method
+        ByteArray Method
     }
 
     class ParamList {
-        Byte[] Parameter
+        ByteArray Parameter
     }
 
     SystemMessage() {

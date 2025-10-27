@@ -55,7 +55,7 @@ private VivoxController instance
     private const val Object instanceLock
     private val AudioManager audioManager
     private Int bluetoothScoState = -1
-    private Messenger connectedMessenger = null
+    private val connectedMessenger: Messenger = null
     private val Handler controllerHandler
     private Boolean controllerReady = false
     private val Object controllerReadyLock

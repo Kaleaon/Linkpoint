@@ -13,8 +13,8 @@ class UserInfoReply : SLMessage {
     }
 
     class UserData {
-        Byte[] DirectoryVisibility
-        Byte[] EMail
+        ByteArray DirectoryVisibility
+        ByteArray EMail
         Boolean IMViaEMail
     }
 

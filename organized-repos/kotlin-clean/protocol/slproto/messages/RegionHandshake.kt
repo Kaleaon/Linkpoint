@@ -19,7 +19,7 @@ class RegionHandshake : SLMessage() {
         public Boolean IsEstateManager
         public Int RegionFlags
         public Int SimAccess
-        public Byte[] SimName
+        public ByteArray SimName
         public UUID SimOwner
         public UUID TerrainBase0
         public UUID TerrainBase1
@@ -49,9 +49,9 @@ class RegionHandshake : SLMessage() {
     class RegionInfo3 {
         public Int CPUClassID
         public Int CPURatio
-        public Byte[] ColoName
-        public Byte[] ProductName
-        public Byte[] ProductSKU
+        public ByteArray ColoName
+        public ByteArray ProductName
+        public ByteArray ProductSKU
     }
 
     @JvmStatic

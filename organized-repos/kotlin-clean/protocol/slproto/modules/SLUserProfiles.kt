@@ -60,19 +60,19 @@ class SLUserProfiles : SLModule() {
     private ResultHandler<UUID, AvatarGroupList> avatarGroupListsResultHandler
     private val RequestHandler<UUID> avatarNotesRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
         fun onRequest(UUID uuid) {
-            SLUserProfiles.this.agentCircuit.SendGenericMessage("avatarnotesrequest", String[]{uuid.toString()})
+            SLUserProfiles.this.agentCircuit.SendGenericMessage("avatarnotesrequest", Array<String>{uuid.toString()})
         }
     }, false, 3, 15000)
     private ResultHandler<UUID, AvatarNotesReply> avatarNotesResultHandler
     private val RequestHandler<AvatarPickKey> avatarPickInfosRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<AvatarPickKey>() {
         fun onRequest(AvatarPickKey avatarPickKey) {
-            SLUserProfiles.this.agentCircuit.SendGenericMessage("pickinforequest", String[]{avatarPickKey.avatarID.toString(), avatarPickKey.pickID.toString()})
+            SLUserProfiles.this.agentCircuit.SendGenericMessage("pickinforequest", Array<String>{avatarPickKey.avatarID.toString(), avatarPickKey.pickID.toString()})
         }
     }, false, 3, 15000)
     private ResultHandler<AvatarPickKey, PickInfoReply> avatarPickInfosResultHandler
     private val RequestHandler<UUID> avatarPicksRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
         fun onRequest(UUID uuid) {
-            SLUserProfiles.this.agentCircuit.SendGenericMessage("avatarpicksrequest", String[]{uuid.toString()})
+            SLUserProfiles.this.agentCircuit.SendGenericMessage("avatarpicksrequest", Array<String>{uuid.toString()})
         }
     }, false, 3, 15000)
     private ResultHandler<UUID, AvatarPicksReply> avatarPicksResultHandler
@@ -243,8 +243,8 @@ class SLUserProfiles : SLModule() {
             return false
         }
         LLVector3 position = this.agentCircuit.getModules().avatarControl.getAgentPosition().getPosition()
-        Double agentHeading = (((Double) this.agentCircuit.getModules().avatarControl.getAgentHeading()) * 3.141592653589793d) / 180.0d
-        LLSDMap lLSDMap = LLSDMap(LLSDMap.LLSDMapEntry("HomeLocation", LLSDMap(LLSDMap.LLSDMapEntry("LocationId", LLSDInt(1)), LLSDMap.LLSDMapEntry("LocationPos", position.toLLSD()), LLSDMap.LLSDMapEntry("LocationLookAt", LLVector3((Float) Math.cos(agentHeading), (Float) Math.sin(agentHeading), 0.0f).toLLSD()))))
+        Double agentHeading = ((this.toDouble().agentCircuit.getModules().avatarControl.getAgentHeading()) * 3.141592653589793d) / 180.0d
+        LLSDMap lLSDMap = LLSDMap(LLSDMap.LLSDMapEntry("HomeLocation", LLSDMap(LLSDMap.LLSDMapEntry("LocationId", LLSDInt(1)), LLSDMap.LLSDMapEntry("LocationPos", position.toLLSD()), LLSDMap.LLSDMapEntry("LocationLookAt", LLVector3(Math.toFloat().cos(agentHeading), Math.toFloat().sin(agentHeading), 0.0f).toLLSD()))))
         try {
             LLSDNode PerformRequest = LLSDXMLRequest().PerformRequest(this.setHomeLocationCap, lLSDMap)
             if (PerformRequest == null) {

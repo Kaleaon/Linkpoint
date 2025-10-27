@@ -13,14 +13,14 @@ class TeleportFailed : SLMessage() {
 
     @JvmStatic
     class AlertInfo {
-        public Byte[] ExtraParams
-        public Byte[] Message
+        public ByteArray ExtraParams
+        public ByteArray Message
     }
 
     @JvmStatic
     class Info {
         public UUID AgentID
-        public Byte[] Reason
+        public ByteArray Reason
     }
 
     public TeleportFailed() {

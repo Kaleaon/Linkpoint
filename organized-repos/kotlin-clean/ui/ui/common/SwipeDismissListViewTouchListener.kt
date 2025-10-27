@@ -109,10 +109,10 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
                 }
                 Rect rect = Rect()
                 Int childCount = this.mListView.getChildCount()
-                Int[] iArr = Int[2]
+                IntArray iArr = IntArray(2)
                 this.mListView.getLocationOnScreen(iArr)
-                Int rawX = ((Int) motionEvent.getRawX()) - iArr[0]
-                Int rawY = ((Int) motionEvent.getRawY()) - iArr[1]
+                Int rawX = (motionEvent.toInt().getRawX()) - iArr[0]
+                Int rawY = (motionEvent.toInt().getRawY()) - iArr[1]
                 Int i = 0
                 while (true) {
                     if (i < childCount) {
@@ -146,7 +146,7 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
                     Float abs = Math.abs(xVelocity)
                     Float abs2 = Math.abs(this.mVelocityTracker.getYVelocity())
                     if (Math.abs(rawX2) <= ((Float) (this.mViewWidth / 2)) || !this.mSwiping) {
-                        if (((Float) this.mMinFlingVelocity) > abs || abs > ((Float) this.mMaxFlingVelocity) || abs2 >= abs) {
+                        if ((this.toFloat().mMinFlingVelocity) > abs || abs > (this.toFloat().mMaxFlingVelocity) || abs2 >= abs) {
                             z2 = false
                             z = false
                         } else if (this.mSwiping) {
@@ -199,7 +199,7 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
                     this.mVelocityTracker.addMovement(motionEvent)
                     Float rawX3 = motionEvent.getRawX() - this.mDownX
                     Float rawY2 = motionEvent.getRawY() - this.mDownY
-                    if (Math.abs(rawX3) > ((Float) this.mSlop) && Math.abs(rawY2) < Math.abs(rawX3) / 2.0f) {
+                    if (Math.abs(rawX3) > (this.toFloat().mSlop) && Math.abs(rawY2) < Math.abs(rawX3) / 2.0f) {
                         this.mSwiping = true
                         this.mSwipingSlop = rawX3 > 0.0f ? this.mSlop : -this.mSlop
                         this.mListView.requestDisallowInterceptTouchEvent(true)
@@ -210,11 +210,11 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
                     }
                     if (this.mSwiping) {
                         if (Build.VERSION.SDK_INT >= 11) {
-                            this.mDownView.setTranslationX(rawX3 - ((Float) this.mSwipingSlop))
-                            this.mDownView.setAlpha(Math.max(0.0f, Math.min(1.0f, 1.0f - ((Math.abs(rawX3) * 2.0f) / ((Float) this.mViewWidth)))))
+                            this.mDownView.setTranslationX(rawX3 - (this.toFloat().mSwipingSlop))
+                            this.mDownView.setAlpha(Math.max(0.0f, Math.min(1.0f, 1.0f - ((Math.abs(rawX3) * 2.0f) / (this.toFloat().mViewWidth)))))
                         } else {
-                            ViewHelper.setTranslationX(this.mDownView, rawX3 - ((Float) this.mSwipingSlop))
-                            ViewHelper.setAlpha(this.mDownView, Math.min(1.0f, 1.0f - ((Math.abs(rawX3) * 2.0f) / ((Float) this.mViewWidth))))
+                            ViewHelper.setTranslationX(this.mDownView, rawX3 - (this.toFloat().mSwipingSlop))
+                            ViewHelper.setAlpha(this.mDownView, Math.min(1.0f, 1.0f - ((Math.abs(rawX3) * 2.0f) / (this.toFloat().mViewWidth))))
                         }
                         return true
                     }

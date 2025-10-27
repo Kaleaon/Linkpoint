@@ -783,7 +783,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             }
             unique = forCurrentThread.unique()
             if (z) {
-                Object[] objArr = Object[3]
+                Array<Any> objArr = Object[3]
                 objArr[0] = Boolean.valueOf(unique != null)
                 objArr[1] = sessionID
                 if (unique != null) {

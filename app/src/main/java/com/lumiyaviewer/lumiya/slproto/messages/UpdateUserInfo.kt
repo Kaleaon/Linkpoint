@@ -14,7 +14,7 @@ class UpdateUserInfo : SLMessage {
     }
 
     class UserData {
-        Byte[] DirectoryVisibility
+        ByteArray DirectoryVisibility
         Boolean IMViaEMail
     }
 

@@ -18,7 +18,7 @@ class ChatFromViewer : SLMessage() {
     @JvmStatic
     class ChatData {
         public Int Channel
-        public Byte[] Message
+        public ByteArray Message
         public Int Type
     }
 

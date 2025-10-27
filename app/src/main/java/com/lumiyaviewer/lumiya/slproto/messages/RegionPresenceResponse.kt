@@ -14,7 +14,7 @@ class RegionPresenceResponse : SLMessage {
     class RegionData {
         Inet4Address ExternalRegionIP
         Inet4Address InternalRegionIP
-        Byte[] Message
+        ByteArray Message
         Long RegionHandle
         UUID RegionID
         Int RegionPort

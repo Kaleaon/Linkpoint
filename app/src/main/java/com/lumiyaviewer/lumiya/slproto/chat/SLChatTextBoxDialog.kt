@@ -17,7 +17,7 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class SLChatTextBoxDialog : SLChatDialogEvent {
-    private String enteredValue = null
+    private val enteredValue: String = null
     private Int textBoxButtonIndex
 
     SLChatTextBoxDialog(ChatMessage chatMessage, @Nonnull UUID uuid) {
@@ -39,7 +39,7 @@ class SLChatTextBoxDialog : SLChatDialogEvent {
                 if (this.ignored) {
                     chatTextBoxViewHolder.dialogResultTextView.setText(R.string.dialog_ignored)
                 } else {
-                    chatTextBoxViewHolder.dialogResultTextView.setText(chatTextBoxViewHolder.dialogResultTextView.getContext().getString(R.string.text_box_entered, Object[]{this.enteredValue}))
+                    chatTextBoxViewHolder.dialogResultTextView.setText(chatTextBoxViewHolder.dialogResultTextView.getContext().getString(R.string.text_box_entered, Array<Any>{this.enteredValue}))
                 }
                 chatTextBoxViewHolder.dialogResultTextView.setVisibility(0)
                 chatTextBoxViewHolder.dialogButtonsLayout.setVisibility(8)

@@ -11,12 +11,12 @@ class ObjectPropertiesFamily : SLMessage {
     class ObjectData {
         Int BaseMask
         Int Category
-        Byte[] Description
+        ByteArray Description
         Int EveryoneMask
         UUID GroupID
         Int GroupMask
         UUID LastOwnerID
-        Byte[] Name
+        ByteArray Name
         Int NextOwnerMask
         UUID ObjectID
         UUID OwnerID

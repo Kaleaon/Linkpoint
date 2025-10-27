@@ -57,15 +57,15 @@ class PrimPathParams {
         this.End = ((Float) (50000 - (objectData.PathEnd & SupportMenu.USER_MASK))) * 2.0E-5f
         this.ScaleX = ((Float) (200 - (objectData.PathScaleX & 255))) * 0.01f
         this.ScaleY = ((Float) (200 - (objectData.PathScaleY & 255))) * 0.01f
-        this.ShearX = ((Float) LLTersePacking.getSignedByte(objectData.PathShearX)) * 0.01f
-        this.ShearY = ((Float) LLTersePacking.getSignedByte(objectData.PathShearY)) * 0.01f
-        this.TwistEnd = ((Float) LLTersePacking.getSignedByte(objectData.PathTwist)) * 0.01f
-        this.TwistBegin = ((Float) LLTersePacking.getSignedByte(objectData.PathTwistBegin)) * 0.01f
-        this.RadiusOffset = ((Float) LLTersePacking.getSignedByte(objectData.PathRadiusOffset)) * 0.01f
-        this.TaperX = ((Float) LLTersePacking.getSignedByte(objectData.PathTaperX)) * 0.01f
-        this.TaperY = ((Float) LLTersePacking.getSignedByte(objectData.PathTaperY)) * 0.01f
+        this.ShearX = (LLTersePacking.toFloat().getSignedByte(objectData.PathShearX)) * 0.01f
+        this.ShearY = (LLTersePacking.toFloat().getSignedByte(objectData.PathShearY)) * 0.01f
+        this.TwistEnd = (LLTersePacking.toFloat().getSignedByte(objectData.PathTwist)) * 0.01f
+        this.TwistBegin = (LLTersePacking.toFloat().getSignedByte(objectData.PathTwistBegin)) * 0.01f
+        this.RadiusOffset = (LLTersePacking.toFloat().getSignedByte(objectData.PathRadiusOffset)) * 0.01f
+        this.TaperX = (LLTersePacking.toFloat().getSignedByte(objectData.PathTaperX)) * 0.01f
+        this.TaperY = (LLTersePacking.toFloat().getSignedByte(objectData.PathTaperY)) * 0.01f
         this.Revolutions = (((Float) (objectData.PathRevolutions & 255)) * 0.015f) + 1.0f
-        this.Skew = ((Float) LLTersePacking.getSignedByte(objectData.PathSkew)) * 0.01f
+        this.Skew = (LLTersePacking.toFloat().getSignedByte(objectData.PathSkew)) * 0.01f
     }
 
     public PrimPathParams(ByteBuffer byteBuffer) {
@@ -74,15 +74,15 @@ class PrimPathParams {
         this.End = ((Float) (50000 - (byteBuffer.getShort() & 65535))) * 2.0E-5f
         this.ScaleX = ((Float) (200 - (byteBuffer.get() & UnsignedBytes.MAX_VALUE))) * 0.01f
         this.ScaleY = ((Float) (200 - (byteBuffer.get() & UnsignedBytes.MAX_VALUE))) * 0.01f
-        this.ShearX = ((Float) LLTersePacking.getSignedByte(byteBuffer.get())) * 0.01f
-        this.ShearY = ((Float) LLTersePacking.getSignedByte(byteBuffer.get())) * 0.01f
-        this.TwistEnd = ((Float) LLTersePacking.getSignedByte(byteBuffer.get())) * 0.01f
-        this.TwistBegin = ((Float) LLTersePacking.getSignedByte(byteBuffer.get())) * 0.01f
-        this.RadiusOffset = ((Float) LLTersePacking.getSignedByte(byteBuffer.get())) * 0.01f
-        this.TaperX = ((Float) LLTersePacking.getSignedByte(byteBuffer.get())) * 0.01f
-        this.TaperY = ((Float) LLTersePacking.getSignedByte(byteBuffer.get())) * 0.01f
+        this.ShearX = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
+        this.ShearY = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
+        this.TwistEnd = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
+        this.TwistBegin = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
+        this.RadiusOffset = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
+        this.TaperX = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
+        this.TaperY = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
         this.Revolutions = (((Float) (byteBuffer.get() & UnsignedBytes.MAX_VALUE)) * 0.015f) + 1.0f
-        this.Skew = ((Float) LLTersePacking.getSignedByte(byteBuffer.get())) * 0.01f
+        this.Skew = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
     }
 
     private Int getHashValue() {
@@ -130,6 +130,6 @@ class PrimPathParams {
     }
 
     public String toString() {
-        return String.format("CurveType: 0x%02x, Begin: %f, End: %f, Scale: (%f, %f), Shear: (%f, %f), TwistBegin: %f, TwistEnd: %f, RadiusOffset: %f, Taper: (%f, %f), Revolutions: %f, Skew: %f", Object[]{Byte.valueOf(this.CurveType), Float.valueOf(this.Begin), Float.valueOf(this.End), Float.valueOf(this.ScaleX), Float.valueOf(this.ScaleY), Float.valueOf(this.ShearX), Float.valueOf(this.ShearY), Float.valueOf(this.TwistBegin), Float.valueOf(this.TwistEnd), Float.valueOf(this.RadiusOffset), Float.valueOf(this.TaperX), Float.valueOf(this.TaperY), Float.valueOf(this.Revolutions), Float.valueOf(this.Skew)})
+        return String.format("CurveType: 0x%02x, Begin: %f, End: %f, Scale: (%f, %f), Shear: (%f, %f), TwistBegin: %f, TwistEnd: %f, RadiusOffset: %f, Taper: (%f, %f), Revolutions: %f, Skew: %f", Array<Any>{Byte.valueOf(this.CurveType), Float.valueOf(this.Begin), Float.valueOf(this.End), Float.valueOf(this.ScaleX), Float.valueOf(this.ScaleY), Float.valueOf(this.ShearX), Float.valueOf(this.ShearY), Float.valueOf(this.TwistBegin), Float.valueOf(this.TwistEnd), Float.valueOf(this.RadiusOffset), Float.valueOf(this.TaperX), Float.valueOf(this.TaperY), Float.valueOf(this.Revolutions), Float.valueOf(this.Skew)})
     }
 }

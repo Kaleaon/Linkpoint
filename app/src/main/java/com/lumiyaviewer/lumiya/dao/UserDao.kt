@@ -9,7 +9,7 @@ import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
 class UserDao : AbstractDao<User, Long> {
-    String TABLENAME = "Users"
+    val TABLENAME: String = "Users"
 
     class Properties {
         Property BadUUID = Property(4, Boolean.TYPE, "badUUID", false, "BAD_UUID")

@@ -22,12 +22,12 @@ class GenericMessage : SLMessage() {
     @JvmStatic
     class MethodData {
         public UUID Invoice
-        public Byte[] Method
+        public ByteArray Method
     }
 
     @JvmStatic
     class ParamList {
-        public Byte[] Parameter
+        public ByteArray Parameter
     }
 
     public GenericMessage() {

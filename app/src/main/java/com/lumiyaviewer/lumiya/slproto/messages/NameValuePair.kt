@@ -12,7 +12,7 @@ class NameValuePair : SLMessage {
     TaskData TaskData_Field
 
     class NameValueData {
-        Byte[] NVPair
+        ByteArray NVPair
     }
 
     class TaskData {

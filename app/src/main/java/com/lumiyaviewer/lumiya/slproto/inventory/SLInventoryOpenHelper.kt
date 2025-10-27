@@ -11,7 +11,7 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 
 class SLInventoryOpenHelper : DBHandleCache.DBOpenHelper {
-    private Int DB_VERSION = 21
+    private val DB_VERSION: Int = 21
 
     private class InstanceHolder {
         /* access modifiers changed from: private */
@@ -55,7 +55,7 @@ class SLInventoryOpenHelper : DBHandleCache.DBOpenHelper {
         Boolean needsUpgrade = false
         
         try {
-            query = sQLiteDatabase.query("DBVersion", String[]{"Version"}, null, null, null, null, null)
+            query = sQLiteDatabase.query("DBVersion", Array<String>{"Version"}, null, null, null, null, null)
             if (!query.moveToFirst()) {
                 isNewDb = true
                 needsUpgrade = true

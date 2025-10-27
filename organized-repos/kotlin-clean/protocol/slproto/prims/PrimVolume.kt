@@ -201,8 +201,8 @@ class PrimVolume {
         while (i4 < size) {
             for (Int i6 = 0; i6 < size2; i6++) {
                 Int i7 = i6 + i5
-                Int i8 = (Int) ((((Float) (z3 ? (size2 - i6) - 1 : i6)) / ((Float) (size2 - 1))) * ((Float) i))
-                Int i9 = (Int) ((((Float) i4) / ((Float) (size - 1))) * ((Float) i2))
+                Int i8 = (Int) ((((Float) (z3 ? (size2 - i6) - 1 : i6)) / ((Float) (size2 - 1))) * (i.toFloat()))
+                Int i9 = (Int) (((i4.toFloat()) / ((Float) (size - 1))) * (i2.toFloat()))
                 if (i9 == 0 && b2 == 1) {
                     i8 = i / 2
                 }
@@ -242,22 +242,22 @@ class PrimVolume {
     }
 
     private Unit sculpt_calc_mesh_resolution(Int i, Int i2, Float f) {
-        Int pow = (Int) Math.pow((Double) sculpt_sides(f), 2.0d)
+        Int pow = Math.toInt().pow(sculpt_sides.toDouble()(f), 2.0d)
         Int i3 = (i * i2) / 4
         Int min = i3 > 0 ? Math.min(pow, i3) : pow
-        Int max = Math.max(min / Math.max((Int) Math.sqrt((Double) (((Float) min) / ((i == 0 || i2 == 0) ? 1.0f : ((Float) i) / ((Float) i2)))), 4), 4)
+        Int max = Math.max(min / Math.max(Math.toInt().sqrt((Double) ((min.toFloat()) / ((i == 0 || i2 == 0) ? 1.0f : (i.toFloat()) / (i2.toFloat())))), 4), 4)
         this.sculptRequestedS = min / max
         this.sculptRequestedT = max
     }
 
     private Int sculpt_sides(Float f) {
-        if (((Double) f) <= 1.0d) {
+        if ((f.toDouble()) <= 1.0d) {
             return 6
         }
-        if (((Double) f) <= 2.0d) {
+        if ((f.toDouble()) <= 2.0d) {
             return 8
         }
-        return ((Double) f) <= 3.0d ? 16 : 32
+        return (f.toDouble()) <= 3.0d ? 16 : 32
     }
 
     /* access modifiers changed from: package-private */

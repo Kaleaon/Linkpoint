@@ -16,13 +16,13 @@ import java.io.InputStream
  * GPU-native approach using KTX2 container format and runtime transcoding.
  */
 class ModernTextureManager {
-    private String TAG = "ModernTextureManager"
+    private val TAG: String = "ModernTextureManager"
     
     // Texture format constants matching JNI implementation
     Int FORMAT_ASTC_4x4_RGBA = 0
-    Int FORMAT_ETC2_RGBA = 1
-    Int FORMAT_BC7_RGBA = 2
-    Int FORMAT_RGBA32 = 3
+    val FORMAT_ETC2_RGBA: Int = 1
+    val FORMAT_BC7_RGBA: Int = 2
+    val FORMAT_RGBA32: Int = 3
     
     // GPU capability flags
     private var supportsASTC: Boolean = false
@@ -46,9 +46,9 @@ class ModernTextureManager {
     // Native method declarations
     private native Boolean nativeInit()
     private native Long nativeCreateTranscoder()
-    private native Boolean nativeInitTranscoder(Long handle, Byte[] ktx2Data)
-    private native Int[] nativeGetTextureDimensions(Long handle)
-    private native Byte[] nativeTranscodeTexture(Long handle, Int targetFormat, Int level)
+    private native Boolean nativeInitTranscoder(Long handle, ByteArray ktx2Data)
+    private native IntArray nativeGetTextureDimensions(Long handle)
+    private native ByteArray nativeTranscodeTexture(Long handle, Int targetFormat, Int level)
     private native Unit nativeDestroyTranscoder(Long handle)
     
     constructor(context: Context) {
@@ -159,7 +159,7 @@ class ModernTextureManager {
             throw IllegalStateException("ModernTextureManager not properly initialized")
         }
         // Read KTX2 data from input stream
-        Byte[] ktx2Data = readInputStreamToByteArray(inputStream)
+        ByteArray ktx2Data = readInputStreamToByteArray(inputStream)
         
         // Create transcoder instance
         Long transcoderHandle = nativeCreateTranscoder()
@@ -174,7 +174,7 @@ class ModernTextureManager {
             }
             
             // Get texture dimensions
-            Int[] dimensions = nativeGetTextureDimensions(transcoderHandle)
+            IntArray dimensions = nativeGetTextureDimensions(transcoderHandle)
             if (dimensions == null || dimensions.length != 3) {
                 throw IOException("Failed to get texture dimensions")
             }
@@ -186,7 +186,7 @@ class ModernTextureManager {
             Log.i(TAG, "Loading KTX2 texture: " + width + "x" + height + " with " + levels + " mip levels")
             
             // Transcode base level (level 0)
-            Byte[] transcodedData = nativeTranscodeTexture(transcoderHandle, targetFormat, 0)
+            ByteArray transcodedData = nativeTranscodeTexture(transcoderHandle, targetFormat, 0)
             if (transcodedData == null) {
                 throw IOException("Failed to transcode texture data")
             }
@@ -204,9 +204,9 @@ class ModernTextureManager {
     /**
      * Read input stream into Byte array
      */
-    private Byte[] readInputStreamToByteArray(InputStream inputStream) throws IOException {
+    private ByteArray readInputStreamToByteArray(InputStream inputStream) throws IOException {
         ByteArrayOutputStream outputStream = ByteArrayOutputStream()
-        Byte[] buffer = Byte[8192]
+        ByteArray buffer = ByteArray(8192)
         Int bytesRead
         
         while ((bytesRead = inputStream.read(buffer)) != -1) {
@@ -255,9 +255,9 @@ class ModernTextureManager {
         Int height
         Int levels
         Int format
-        Byte[] data
+        ByteArray data
         
-        TextureData(Int width, Int height, Int levels, Int format, Byte[] data) {
+        TextureData(Int width, Int height, Int levels, Int format, ByteArray data) {
             this.width = width
             this.height = height
             this.levels = levels

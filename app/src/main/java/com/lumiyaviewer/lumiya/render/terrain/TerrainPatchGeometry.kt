@@ -16,10 +16,10 @@ class TerrainPatchGeometry {
     Int DrawPatchSize = 16
     private Int index_size_bytes = 3072
     private Int vertex_size_bytes = 9248
-    private Float[] waterAmplitude = {0.5f, 0.5f, 0.3f, 0.4f}
-    private Float[] waterDirection = {1.0f, 0.3f, 0.4f, 0.75f, -0.5f, 0.7f, 0.63f, -0.3f}
-    private Float[] waterFrequency = {17.951958f, 12.566371f, 8.975979f, 15.707963f}
-    private Float[] waterPhase = {1.73f, 0.64f, 1.27f, 0.9f}
+    private val waterAmplitude: FloatArray = {0.5f, 0.5f, 0.3f, 0.4f}
+    private val waterDirection: FloatArray = {1.0f, 0.3f, 0.4f, 0.75f, -0.5f, 0.7f, 0.63f, -0.3f}
+    private val waterFrequency: FloatArray = {17.951958f, 12.566371f, 8.975979f, 15.707963f}
+    private val waterPhase: FloatArray = {1.73f, 0.64f, 1.27f, 0.9f}
     private Int water_vertex_size_bytes = 3468
     private GLLoadableBuffer indexBuffer
     private var index_count: Int = 0
@@ -29,18 +29,18 @@ class TerrainPatchGeometry {
     private var water_index_count: Int = 0
 
     constructor(terrainPatchHeightMap: TerrainPatchHeightMap) {
-        DirectByteBuffer directByteBuffer = DirectByteBuffer((Int) vertex_size_bytes)
-        DirectByteBuffer directByteBuffer2 = DirectByteBuffer((Int) water_vertex_size_bytes)
-        DirectByteBuffer directByteBuffer3 = DirectByteBuffer((Int) index_size_bytes)
-        DirectByteBuffer directByteBuffer4 = DirectByteBuffer((Int) index_size_bytes)
+        DirectByteBuffer directByteBuffer = DirectByteBuffer(vertex_size_bytes.toInt())
+        DirectByteBuffer directByteBuffer2 = DirectByteBuffer(water_vertex_size_bytes.toInt())
+        DirectByteBuffer directByteBuffer3 = DirectByteBuffer(index_size_bytes.toInt())
+        DirectByteBuffer directByteBuffer4 = DirectByteBuffer(index_size_bytes.toInt())
         directByteBuffer.position(0)
         directByteBuffer2.position(0)
         this.index_count = 0
         this.water_index_count = 0
         LLVector3 lLVector3 = LLVector3()
         Float waterHeight = terrainPatchHeightMap.getWaterHeight()
-        Float[] heightArray = terrainPatchHeightMap.getHeightArray()
-        Float[] normalArray = terrainPatchHeightMap.getNormalArray()
+        FloatArray heightArray = terrainPatchHeightMap.getHeightArray()
+        FloatArray normalArray = terrainPatchHeightMap.getNormalArray()
         Int i = 0
         Int i2 = 0
         while (true) {
@@ -49,18 +49,18 @@ class TerrainPatchGeometry {
                 break
             }
             for (Int i4 = 0; i4 < 17; i4++) {
-                directByteBuffer.putFloat((Float) i4)
-                directByteBuffer.putFloat((Float) i3)
+                directByteBuffer.putFloat(i4.toFloat())
+                directByteBuffer.putFloat(i3.toFloat())
                 directByteBuffer.putFloat(heightArray[i2 + i4])
                 lLVector3.set(-normalArray[(i2 + i4) * 2], normalArray[((i2 + i4) * 2) + 1], 2.0f)
                 lLVector3.normVec()
                 directByteBuffer.putFloat(lLVector3.x)
                 directByteBuffer.putFloat(lLVector3.y)
                 directByteBuffer.putFloat(lLVector3.z)
-                directByteBuffer.putFloat(((Float) i4) / 16.0f)
-                directByteBuffer.putFloat(((Float) i3) / 16.0f)
-                directByteBuffer2.putFloat((Float) i4)
-                directByteBuffer2.putFloat((Float) i3)
+                directByteBuffer.putFloat((i4.toFloat()) / 16.0f)
+                directByteBuffer.putFloat((i3.toFloat()) / 16.0f)
+                directByteBuffer2.putFloat(i4.toFloat())
+                directByteBuffer2.putFloat(i3.toFloat())
                 directByteBuffer2.putFloat(waterHeight)
             }
             i2 += 17
@@ -129,7 +129,7 @@ class TerrainPatchGeometry {
         GLES11.glMatrixMode(5888)
     }
 
-    Unit GLDraw(RenderContext renderContext, Float[] fArr, GLLoadedTexture gLLoadedTexture) {
+    Unit GLDraw(RenderContext renderContext, FloatArray fArr, GLLoadedTexture gLLoadedTexture) {
         if (this.index_count != 0) {
             if (!renderContext.hasGL20) {
                 renderContext.glObjWorldPushAndMultMatrixf(fArr, 0)

@@ -61,7 +61,7 @@ class GLAsyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
             EGLDisplay r3 = GLAsyncLoadQueue.this.eglDisplay
             EGLConfig r4 = GLAsyncLoadQueue.this.eglConfig
             EGLContext r5 = GLAsyncLoadQueue.this.eglBaseContext
-            Int[] iArr = Int[3]
+            IntArray iArr = IntArray(3)
             iArr[0] = 12440
             if (!GLAsyncLoadQueue.this.requestGL30) {
                 i = 2
@@ -70,7 +70,7 @@ class GLAsyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
             iArr[2] = 12344
             EGLContext eglCreateContext = r2.eglCreateContext(r3, r4, r5, iArr)
             Debug.Printf("TexLoad: create[2]: eglGetError = %d", Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
-            EGLSurface eglCreatePbufferSurface = GLAsyncLoadQueue.this.egl10.eglCreatePbufferSurface(GLAsyncLoadQueue.this.eglDisplay, GLAsyncLoadQueue.this.eglConfig, Int[]{12374, 128, 12375, 128, 12344})
+            EGLSurface eglCreatePbufferSurface = GLAsyncLoadQueue.this.egl10.eglCreatePbufferSurface(GLAsyncLoadQueue.this.eglDisplay, GLAsyncLoadQueue.this.eglConfig, IntArray{12374, 128, 12375, 128, 12344})
             Debug.Printf("TexLoad: create[3]: eglGetError = %d", Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
             if (eglCreateContext == null || eglCreateContext == EGL10.EGL_NO_CONTEXT) {
                 Debug.Printf("TexLoad: Failed to create loader context", Any[0])

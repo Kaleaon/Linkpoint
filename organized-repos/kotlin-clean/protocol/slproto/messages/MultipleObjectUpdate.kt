@@ -19,7 +19,7 @@ class MultipleObjectUpdate : SLMessage() {
 
     @JvmStatic
     class ObjectData {
-        public Byte[] Data
+        public ByteArray Data
         public Int ObjectLocalID
         public Int Type
     }

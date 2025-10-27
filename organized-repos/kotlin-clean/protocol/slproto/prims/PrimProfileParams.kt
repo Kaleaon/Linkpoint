@@ -62,6 +62,6 @@ class PrimProfileParams {
     }
 
     public String toString() {
-        return String.format("CurveType: 0x%02x, Begin: %f, End: %f, Hollow: %f", Object[]{Byte.valueOf(this.CurveType), Float.valueOf(this.Begin), Float.valueOf(this.End), Float.valueOf(this.Hollow)})
+        return String.format("CurveType: 0x%02x, Begin: %f, End: %f, Hollow: %f", Array<Any>{Byte.valueOf(this.CurveType), Float.valueOf(this.Begin), Float.valueOf(this.End), Float.valueOf(this.Hollow)})
     }
 }

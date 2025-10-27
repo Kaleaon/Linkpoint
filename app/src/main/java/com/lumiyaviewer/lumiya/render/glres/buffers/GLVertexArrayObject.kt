@@ -8,12 +8,12 @@ import com.lumiyaviewer.lumiya.render.glres.GLResourceManager
 @TargetApi(18)
 class GLVertexArrayObject : GLGenericResource {
     Int size
-    private Int[] vaoIndices
+    private IntArray vaoIndices
 
     private class GLVertexArrayObjectReference : GLResourceManager.GLGenericResourceReference {
-        private Int[] vaoIndices
+        private IntArray vaoIndices
 
-        GLVertexArrayObjectReference(GLGenericResource gLGenericResource, GLResourceManager gLResourceManager, Int[] iArr) {
+        GLVertexArrayObjectReference(GLGenericResource gLGenericResource, GLResourceManager gLResourceManager, IntArray iArr) {
             super(gLGenericResource, gLResourceManager)
             this.vaoIndices = iArr
         }

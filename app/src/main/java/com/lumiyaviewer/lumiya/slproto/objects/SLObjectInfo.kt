@@ -38,41 +38,41 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 abstract class SLObjectInfo : Identifiable<UUID> {
-    private Int AGENT_ATTACH_MASK = 240
-    private Int AGENT_ATTACH_OFFSET = 4
-    Int FLAGS_ALLOW_INVENTORY_DROP = 65536
-    Int FLAGS_ANIM_SOURCE = 2097152
-    Int FLAGS_CAMERA_DECOUPLED = 1048576
-    Int FLAGS_CAMERA_SOURCE = 4194304
-    Int FLAGS_CAST_SHADOWS = 8388608
-    Int FLAGS_CREATE_SELECTED = 2
-    Int FLAGS_HANDLE_TOUCH = 128
-    Int FLAGS_INCLUDE_IN_SEARCH = 32768
-    Int FLAGS_INVENTORY_EMPTY = 2048
-    Int FLAGS_JOINT_HINGE = 4096
-    Int FLAGS_JOINT_LP2P = 16384
-    Int FLAGS_JOINT_P2P = 8192
-    Int FLAGS_OBJECT_ANY_OWNER = 16
-    Int FLAGS_OBJECT_COPY = 8
-    Int FLAGS_OBJECT_GROUP_OWNED = 262144
-    Int FLAGS_OBJECT_MODIFY = 4
-    Int FLAGS_OBJECT_MOVE = 256
-    Int FLAGS_OBJECT_OWNER_MODIFY = 268435456
-    Int FLAGS_OBJECT_TRANSFER = 131072
-    Int FLAGS_OBJECT_YOU_OWNER = 32
-    Int FLAGS_PHANTOM = 1024
-    Int FLAGS_SCRIPTED = 64
-    Int FLAGS_TAKES_MONEY = 512
-    Int FLAGS_TEMPORARY = 1073741824
-    Int FLAGS_TEMPORARY_ON_REZ = 536870912
-    Int FLAGS_USE_PHYSICS = 1
-    Int FLAGS_ZLIB_COMPRESSED = Int.MIN_VALUE
-    Int OBJ_COORD_POSITION = 0
-    Int OBJ_COORD_SCALE = 1
-    Int OBJ_COORD_VELOCITY = 2
-    Int OBJ_COORD_WORLD_CENTER = 3
-    Int PAY_DEFAULT = -2
-    Int PAY_HIDE = -1
+    private val AGENT_ATTACH_MASK: Int = 240
+    private val AGENT_ATTACH_OFFSET: Int = 4
+    val FLAGS_ALLOW_INVENTORY_DROP: Int = 65536
+    val FLAGS_ANIM_SOURCE: Int = 2097152
+    val FLAGS_CAMERA_DECOUPLED: Int = 1048576
+    val FLAGS_CAMERA_SOURCE: Int = 4194304
+    val FLAGS_CAST_SHADOWS: Int = 8388608
+    val FLAGS_CREATE_SELECTED: Int = 2
+    val FLAGS_HANDLE_TOUCH: Int = 128
+    val FLAGS_INCLUDE_IN_SEARCH: Int = 32768
+    val FLAGS_INVENTORY_EMPTY: Int = 2048
+    val FLAGS_JOINT_HINGE: Int = 4096
+    val FLAGS_JOINT_LP2P: Int = 16384
+    val FLAGS_JOINT_P2P: Int = 8192
+    val FLAGS_OBJECT_ANY_OWNER: Int = 16
+    val FLAGS_OBJECT_COPY: Int = 8
+    val FLAGS_OBJECT_GROUP_OWNED: Int = 262144
+    val FLAGS_OBJECT_MODIFY: Int = 4
+    val FLAGS_OBJECT_MOVE: Int = 256
+    val FLAGS_OBJECT_OWNER_MODIFY: Int = 268435456
+    val FLAGS_OBJECT_TRANSFER: Int = 131072
+    val FLAGS_OBJECT_YOU_OWNER: Int = 32
+    val FLAGS_PHANTOM: Int = 1024
+    val FLAGS_SCRIPTED: Int = 64
+    val FLAGS_TAKES_MONEY: Int = 512
+    val FLAGS_TEMPORARY: Int = 1073741824
+    val FLAGS_TEMPORARY_ON_REZ: Int = 536870912
+    val FLAGS_USE_PHYSICS: Int = 1
+    val FLAGS_ZLIB_COMPRESSED: Int = Int.MIN_VALUE
+    val OBJ_COORD_POSITION: Int = 0
+    val OBJ_COORD_SCALE: Int = 1
+    val OBJ_COORD_VELOCITY: Int = 2
+    val OBJ_COORD_WORLD_CENTER: Int = 3
+    val PAY_DEFAULT: Int = -2
+    val PAY_HIDE: Int = -1
     Int UpdateFlags
     UUID attachedToUUID = null
     Int attachmentID = 0
@@ -102,7 +102,7 @@ abstract class SLObjectInfo : Identifiable<UUID> {
     String touchName = ""
     LinkedTreeNode<SLObjectInfo> treeNode = LinkedTreeNode<>(this)
     protected UUID uuid
-    Float[] worldMatrix
+    FloatArray worldMatrix
 
     /* JADX WARNING: Code restructure failed: missing block: B:3:0x001f, code lost:
         r7.objectCoords.set(0, com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseFloatVec(r8))
@@ -217,13 +217,13 @@ abstract class SLObjectInfo : Identifiable<UUID> {
         return (((i & 255) & AGENT_ATTACH_MASK) >> 4) | (((i & 255) & -241) << 4)
     }
 
-    private Float[] calculateWorldMatrix(Float[] fArr) {
+    private FloatArray calculateWorldMatrix(FloatArray fArr) {
         LLQuaternion lLQuaternion = this.rotation
         if (lLQuaternion == null) {
             return null
         }
-        Float[] fArr2 = Float[16]
-        Float[] fArr3 = Float[16]
+        FloatArray fArr2 = FloatArray(16)
+        FloatArray fArr3 = FloatArray(16)
         this.objectCoords.MatrixTranslate(fArr3, 0, fArr, 0, 0)
         Matrix.multiplyMM(fArr2, 0, fArr3, 0, lLQuaternion.getInverseMatrix(), 0)
         return fArr2
@@ -383,7 +383,7 @@ abstract class SLObjectInfo : Identifiable<UUID> {
             r1 = 0
             Int r0 = r13.UpdateFlags
             r12.UpdateFlags = r0
-            Byte[] r0 = r13.Data
+            ByteArray r0 = r13.Data
             java.nio.ByteBuffer r4 = java.nio.ByteBuffer.wrap(r0)
             java.nio.ByteOrder r0 = java.nio.ByteOrder.BIG_ENDIAN
             r4.order(r0)
@@ -468,7 +468,7 @@ abstract class SLObjectInfo : Identifiable<UUID> {
             if (r2 != 0) goto L_0x013e
         L_0x00d3:
             if (r0 == 0) goto L_0x01b7
-            Byte[] r7 = Byte[r0]
+            ByteArray r7 = Byte[r0]
             r4.get(r7, r1, r0)
             java.lang.String r2 = java.lang.String     // Catch:{ UnsupportedEncodingException -> 0x0141 }
             java.lang.String r8 = "ISO-8859-1"
@@ -547,7 +547,7 @@ abstract class SLObjectInfo : Identifiable<UUID> {
         L_0x016d:
             com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeParams r5 = com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeParams.createFromPackedData(r4)
             Int r0 = r4.getInt()     // Catch:{ Exception -> 0x01ac }
-            com.lumiyaviewer.lumiya.slproto.textures.SLTextureEntry r0 = com.lumiyaviewer.lumiya.slproto.textures.SLTextureEntry.create((java.nio.ByteBuffer) r4, (Int) r0)     // Catch:{ Exception -> 0x01ac }
+            com.lumiyaviewer.lumiya.slproto.textures.SLTextureEntry r0 = com.lumiyaviewer.lumiya.slproto.textures.SLTextureEntry.create((java.nio.ByteBuffer) r4, r0.toInt())     // Catch:{ Exception -> 0x01ac }
             r12.onTexturesUpdate(r0)     // Catch:{ Exception -> 0x01b5 }
         L_0x017c:
             if (r5 == 0) goto L_0x0184
@@ -710,10 +710,10 @@ abstract class SLObjectInfo : Identifiable<UUID> {
     }
 
     Unit getObjectExtents(MatrixStack matrixStack, Boolean z, LLVector3 lLVector3, LLVector3 lLVector32) {
-        Float[] fArr = Float[8]
+        FloatArray fArr = FloatArray(8)
         Int elementOffset = this.objectCoords.getElementOffset(0)
         Int elementOffset2 = this.objectCoords.getElementOffset(1)
-        Float[] data = this.objectCoords.getData()
+        FloatArray data = this.objectCoords.getData()
         matrixStack.glPushMatrix()
         matrixStack.glTranslatef(data[elementOffset + 0], data[elementOffset + 1], data[elementOffset + 2])
         matrixStack.glMultMatrixf(this.rotation.getInverseMatrix(), 0)
@@ -881,11 +881,11 @@ abstract class SLObjectInfo : Identifiable<UUID> {
 
     Unit updateWorldMatrix(Boolean z) {
         SLObjectInfo parentObject = getParentObject()
-        Float[] matrix = parentObject == null ? IdentityMatrix.getMatrix() : parentObject.isAvatar() ? IdentityMatrix.getMatrix() : parentObject.worldMatrix
+        FloatArray matrix = parentObject == null ? IdentityMatrix.getMatrix() : parentObject.isAvatar() ? IdentityMatrix.getMatrix() : parentObject.worldMatrix
         if (matrix != null) {
             this.objRadius = this.objectCoords.getMaxComponent(1) / 2.0f
-            Float[] calculateWorldMatrix = calculateWorldMatrix(matrix)
-            Float[] fArr = this.worldMatrix
+            FloatArray calculateWorldMatrix = calculateWorldMatrix(matrix)
+            FloatArray fArr = this.worldMatrix
             if (fArr == null || !Arrays.equals(calculateWorldMatrix, fArr)) {
                 this.worldMatrix = calculateWorldMatrix
                 this.objectCoords.set(3, this.worldMatrix[12], this.worldMatrix[13], this.worldMatrix[14])

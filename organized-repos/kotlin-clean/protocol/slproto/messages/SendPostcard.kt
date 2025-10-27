@@ -13,14 +13,14 @@ class SendPostcard : SLMessage() {
         public UUID AgentID
         public Boolean AllowPublish
         public UUID AssetID
-        public Byte[] From
+        public ByteArray From
         public Boolean MaturePublish
-        public Byte[] Msg
-        public Byte[] Name
+        public ByteArray Msg
+        public ByteArray Name
         public LLVector3d PosGlobal
         public UUID SessionID
-        public Byte[] Subject
-        public Byte[] To
+        public ByteArray Subject
+        public ByteArray To
     }
 
     public SendPostcard() {

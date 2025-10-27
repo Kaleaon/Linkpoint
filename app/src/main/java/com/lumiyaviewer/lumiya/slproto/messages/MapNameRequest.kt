@@ -17,7 +17,7 @@ class MapNameRequest : SLMessage {
     }
 
     class NameData {
-        Byte[] Name
+        ByteArray Name
     }
 
     MapNameRequest() {

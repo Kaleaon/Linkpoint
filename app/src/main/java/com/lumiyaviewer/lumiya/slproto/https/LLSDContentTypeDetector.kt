@@ -64,7 +64,7 @@ class LLSDContentTypeDetector {
         L_0x004e:
             java.lang.String r7 = "LLSD: contentType '%s', detected binary %s, xml %s, skipBytes %d, firstString '%s'"
             r5 = 5
-            java.lang.Object[] r8 = java.lang.Object[r5]
+            java.lang.Array<Any> r8 = java.lang.Object[r5]
             r8[r1] = r12
             if (r4 == 0) goto L_0x00af
             java.lang.String r5 = "true"
@@ -90,7 +90,7 @@ class LLSDContentTypeDetector {
         L_0x007f:
             if (r4 == 0) goto L_0x00b9
             java.lang.String r0 = "LLSD: using binary parser"
-            java.lang.Object[] r1 = java.lang.Object[r1]
+            java.lang.Array<Any> r1 = java.lang.Object[r1]
             com.lumiyaviewer.lumiya.Debug.Printf(r0, r1)
             com.lumiyaviewer.lumiya.slproto.https.LLSDContentTypeDetector$LLSDContentType r0 = com.lumiyaviewer.lumiya.slproto.https.LLSDContentTypeDetector.LLSDContentType.llsdBinary
             return r0
@@ -125,7 +125,7 @@ class LLSDContentTypeDetector {
             goto L_0x0073
         L_0x00b9:
             java.lang.String r0 = "LLSD: using XML parser"
-            java.lang.Object[] r1 = java.lang.Object[r1]
+            java.lang.Array<Any> r1 = java.lang.Object[r1]
             com.lumiyaviewer.lumiya.Debug.Printf(r0, r1)
             com.lumiyaviewer.lumiya.slproto.https.LLSDContentTypeDetector$LLSDContentType r0 = com.lumiyaviewer.lumiya.slproto.https.LLSDContentTypeDetector.LLSDContentType.llsdXML
             return r0

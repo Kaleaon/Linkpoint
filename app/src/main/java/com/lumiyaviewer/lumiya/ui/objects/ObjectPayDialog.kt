@@ -19,7 +19,7 @@ class ObjectPayDialog {
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_1356  reason: not valid java name */
     /* synthetic */ Unit m677lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_1356(AlertDialog alertDialog, PayInfo payInfo, Context context, UserManager userManager, SLObjectProfileData sLObjectProfileData, DialogInterface dialogInterface) {
         alertDialog.findViewById(R.id.object_pay_cancel).setOnClickListener($Lambda$X9q_n5C700PWS1S1Fm8NWTXuec(dialogInterface))
-        Int[] iArr = {R.id.object_pay_button1, R.id.object_pay_button2, R.id.object_pay_button3, R.id.object_pay_button4}
+        IntArray iArr = {R.id.object_pay_button1, R.id.object_pay_button2, R.id.object_pay_button3, R.id.object_pay_button4}
         ImmutableList<Int> payPrices = payInfo.payPrices()
         Int i = 0
         while (true) {
@@ -27,7 +27,7 @@ class ObjectPayDialog {
             if (i2 >= iArr.length) {
                 break
             }
-            Int intValue = (payPrices == null || i2 > payPrices.size()) ? -1 : ((Int) payPrices.get(i2)).intValue()
+            Int intValue = (payPrices == null || i2 > payPrices.size()) ? -1 : (payPrices.toInt().get(i2)).intValue()
             Int defaultPayPrice = intValue == -2 ? payInfo.defaultPayPrice() : intValue
             if (defaultPayPrice <= 0) {
                 alertDialog.findViewById(iArr[i2]).setVisibility(8)
@@ -250,7 +250,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$X
             AlertDialog.Builder builder = AlertDialog.Builder(context)
             builder.setTitle((CharSequence) context.getString(R.string.object_pay_dialog_caption, Any[]{sLObjectProfileData.name().or(context.getString(R.string.name_loading_title))}))
             builder.setCancelable(true)
-            builder.setView((Int) R.layout.object_pay_dialog)
+            builder.setView(R.toInt().layout.object_pay_dialog)
             AlertDialog create = builder.create()
             create.setOnShowListener(DialogInterface.OnShowListener(create, payInfo, context, userManager, sLObjectProfileData) {
 

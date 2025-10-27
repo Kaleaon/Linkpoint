@@ -13,7 +13,7 @@ class TeleportFinish : SLMessage {
         UUID AgentID
         Int LocationID
         Long RegionHandle
-        Byte[] SeedCapability
+        ByteArray SeedCapability
         Int SimAccess
         Inet4Address SimIP
         Int SimPort

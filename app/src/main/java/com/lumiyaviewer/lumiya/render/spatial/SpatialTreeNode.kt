@@ -4,14 +4,14 @@ import java.util.*
 import com.lumiyaviewer.lumiya.utils.InlineList
 
 class SpatialTreeNode : InlineList<DrawListEntry> {
-    private Float MIN_SIZE = 2.0f
+    private val MIN_SIZE: Float = 2.0f
     private SpatialTreeNode[] children = null
     Int depthBin = -1
     private Int indexInParent
     private Boolean leaf
     SpatialTreeNode nextDepth = null
     private SpatialTreeNode parent
-    Float[] position
+    FloatArray position
     SpatialTreeNode prevDepth = null
     private var singleChild: SpatialTreeNode = null
     private SpatialTree spatialTree
@@ -19,7 +19,7 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
 
     constructor(spatialTree: SpatialTree, f: Float, f2: Float, f3: Float) {
         this.spatialTree = spatialTree
-        this.position = Float[]{0.0f, 0.0f, 0.0f, f, f2, f3, 0.0f, 0.0f, 0.0f, f, f2, f3}
+        this.position = FloatArray{0.0f, 0.0f, 0.0f, f, f2, f3, 0.0f, 0.0f, 0.0f, f, f2, f3}
         this.leaf = false
         this.parent = null
         this.indexInParent = 0
@@ -28,7 +28,7 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
 
     constructor(spatialTreeNode: SpatialTreeNode, i: Int) {
         this.spatialTree = spatialTreeNode.spatialTree
-        this.position = Float[12]
+        this.position = FloatArray(12)
         this.parent = spatialTreeNode
         this.indexInParent = i
         Boolean z = true
@@ -38,7 +38,7 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
             Float f2 = spatialTreeNode.position[i2 + 9] - f
             if (i2 == spatialTreeNode.splitAxis) {
                 f2 /= MIN_SIZE
-                f += (f2 / MIN_SIZE) * ((Float) i)
+                f += (f2 / MIN_SIZE) * (i.toFloat())
             }
             this.position[i2 + 6] = f
             this.position[i2 + 9] = f + f2
@@ -130,7 +130,7 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
     private fun shrinkBoundingBox(): Unit {
         Int i = 1
         if (this.parent != null) {
-            Any obj = Float[6]
+            Any obj = FloatArray(6)
             DrawListEntry drawListEntry = (DrawListEntry) getFirst()
             Int i4 = 0
             while (drawListEntry != null) {
@@ -216,7 +216,7 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
         Int i2 = -1
         while (i < 3) {
             Float f2 = (this.position[(this.splitAxis + 6) + 3] - this.position[this.splitAxis + 6]) / MIN_SIZE
-            Float f3 = this.position[this.splitAxis + 6] + ((f2 / MIN_SIZE) * ((Float) i))
+            Float f3 = this.position[this.splitAxis + 6] + ((f2 / MIN_SIZE) * (i.toFloat()))
             if (fArr[this.splitAxis] < f3 || fArr[this.splitAxis + 3] > f3 + f2) {
                 f2 = f
                 i3 = i2

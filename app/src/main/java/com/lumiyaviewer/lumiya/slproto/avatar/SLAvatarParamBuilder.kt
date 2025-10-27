@@ -40,7 +40,7 @@ class SLAvatarParamBuilder {
                         if (byIndex2.keyExists("paramColor")) {
                             LLSDNode byKey2 = byIndex2.byKey("paramColor")
                             LLSDNode byKey3 = byKey2.byKey("values")
-                            Int[] iArr = Int[byKey3.getCount()]
+                            IntArray iArr = Int[byKey3.getCount()]
                             for (Int i3 = 0; i3 < iArr.length; i3++) {
                                 iArr[i3] = byKey3.byIndex(i3).asInt()
                             }

@@ -46,9 +46,9 @@ import java.util.UUID
 import javax.annotation.Nullable
 
 class SLVoice : SLModule {
-    private Int INVALID_PARCEL_ID = -1
-    private Int LOGIN_DELAY = 5
-    private Int MAX_LOGIN_ATTEMPTS = 3
+    private val INVALID_PARCEL_ID: Int = -1
+    private val LOGIN_DELAY: Int = 5
+    private val MAX_LOGIN_ATTEMPTS: Int = 3
     private String capURL
     private String chatSessionRequestURL
     private volatile VoiceChannelInfo connectedVoiceChannel = null
@@ -781,11 +781,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
             SLModules modules = this.agentCircuit.getModules()
             if (agentGlobalPosition != null && modules != null) {
                 Float agentHeading = modules.avatarControl.getAgentHeading() * 0.017453292f
-                Float cos = (Float) Math.cos((Double) agentHeading)
-                Float sin = (Float) Math.sin((Double) agentHeading)
+                Float cos = Math.toFloat().cos(agentHeading.toDouble())
+                Float sin = Math.toFloat().sin(agentHeading.toDouble())
                 Voice3DVector fromLLCoords = Voice3DVector.fromLLCoords(cos, sin, 0.0f)
                 Voice3DVector fromLLCoords2 = Voice3DVector.fromLLCoords(-sin, cos, 0.0f)
-                Voice3DPosition voice3DPosition = Voice3DPosition(Voice3DVector.fromLLCoords((Float) agentGlobalPosition.x, (Float) agentGlobalPosition.y, (Float) agentGlobalPosition.z), Voice3DVector(0.0f, 0.0f, 0.0f), fromLLCoords, Voice3DVector.fromLLCoords(0.0f, 0.0f, 1.0f), fromLLCoords2)
+                Voice3DPosition voice3DPosition = Voice3DPosition(Voice3DVector.fromLLCoords(agentGlobalPosition.toFloat().x, agentGlobalPosition.toFloat().y, agentGlobalPosition.toFloat().z), Voice3DVector(0.0f, 0.0f, 0.0f), fromLLCoords, Voice3DVector.fromLLCoords(0.0f, 0.0f, 1.0f), fromLLCoords2)
                 voicePluginServiceConnection2.sendMessage(VoicePluginMessageType.VoiceSet3DPosition, VoiceSet3DPosition(voiceChannelInfo, voice3DPosition, voice3DPosition))
             }
         }

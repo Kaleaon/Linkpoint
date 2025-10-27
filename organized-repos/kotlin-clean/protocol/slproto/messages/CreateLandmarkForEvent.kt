@@ -23,7 +23,7 @@ class CreateLandmarkForEvent : SLMessage() {
     @JvmStatic
     class InventoryBlock {
         public UUID FolderID
-        public Byte[] Name
+        public ByteArray Name
     }
 
     public CreateLandmarkForEvent() {

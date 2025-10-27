@@ -29,10 +29,10 @@ import javax.annotation.Nullable
 
 class SLChatScriptDialog : SLChatDialogEvent {
     /* access modifiers changed from: private */
-    Int[] dialogButtonIds = {R.id.buttonDialog1, R.id.buttonDialog2, R.id.buttonDialog3, R.id.buttonDialog4, R.id.buttonDialog5, R.id.buttonDialog6, R.id.buttonDialog7, R.id.buttonDialog8, R.id.buttonDialog9, R.id.buttonDialog10, R.id.buttonDialog11, R.id.buttonDialog12}
+    IntArray dialogButtonIds = {R.id.buttonDialog1, R.id.buttonDialog2, R.id.buttonDialog3, R.id.buttonDialog4, R.id.buttonDialog5, R.id.buttonDialog6, R.id.buttonDialog7, R.id.buttonDialog8, R.id.buttonDialog9, R.id.buttonDialog10, R.id.buttonDialog11, R.id.buttonDialog12}
     /* access modifiers changed from: private */
-    String[] buttons
-    private String selectedOption = null
+    Array<String> buttons
+    private val selectedOption: String = null
 
     class ScriptDialogDialog : Dialog : View.OnClickListener, DialogInterface.OnCancelListener {
         private UserManager userManager
@@ -79,10 +79,10 @@ class SLChatScriptDialog : SLChatDialogEvent {
 
     SLChatScriptDialog(ChatMessage chatMessage, @Nonnull UUID uuid) {
         super(chatMessage, uuid)
-        String[] strArr
+        Array<String> strArr
         this.selectedOption = chatMessage.getDialogSelectedOption()
         try {
-            strArr = (String[]) ObjectInputStream(ByteArrayInputStream(chatMessage.getDialogButtons())).readObject()
+            strArr = (Array<String>) ObjectInputStream(ByteArrayInputStream(chatMessage.getDialogButtons())).readObject()
         } catch (IOException | ClassNotFoundException e) {
             Debug.Warning(e)
             strArr = null
@@ -90,7 +90,7 @@ class SLChatScriptDialog : SLChatDialogEvent {
         this.buttons = strArr
     }
 
-    SLChatScriptDialog(ScriptDialog scriptDialog, @Nonnull UUID uuid, String[] strArr) {
+    SLChatScriptDialog(ScriptDialog scriptDialog, @Nonnull UUID uuid, Array<String> strArr) {
         super(scriptDialog, uuid)
         this.buttons = strArr
     }
@@ -104,7 +104,7 @@ class SLChatScriptDialog : SLChatDialogEvent {
                 if (this.ignored) {
                     chatScriptDialogViewHolder.dialogResultTextView.setText(R.string.dialog_ignored)
                 } else {
-                    chatScriptDialogViewHolder.dialogResultTextView.setText(chatScriptDialogViewHolder.dialogResultTextView.getContext().getString(R.string.dialog_selected_format, Object[]{this.selectedOption}))
+                    chatScriptDialogViewHolder.dialogResultTextView.setText(chatScriptDialogViewHolder.dialogResultTextView.getContext().getString(R.string.dialog_selected_format, Array<Any>{this.selectedOption}))
                 }
                 chatScriptDialogViewHolder.dialogResultTextView.findViewById(R.id.dialogResultTextView).setVisibility(0)
                 chatScriptDialogViewHolder.dialogButtonsLayout.findViewById(R.id.dialogButtonsLayout).setVisibility(8)
@@ -125,7 +125,7 @@ class SLChatScriptDialog : SLChatDialogEvent {
         }
     }
 
-    String[] getButtons() {
+    Array<String> getButtons() {
         return this.buttons
     }
 

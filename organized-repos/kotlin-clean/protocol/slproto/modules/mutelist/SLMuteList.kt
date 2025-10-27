@@ -143,7 +143,7 @@ class SLMuteList : SLModule(), SLXfer.SLXferCompletionListener {
         return this.muteListData.isMutedByName(str)
     }
 
-    fun onXferComplete(Object obj, String str, Byte[] bArr) {
+    fun onXferComplete(Object obj, String str, ByteArray bArr) {
         if (bArr != null) {
             this.muteListData = MuteListData(bArr)
             if (this.muteListCachedDataDao != null) {
@@ -151,7 +151,7 @@ class SLMuteList : SLModule(), SLXfer.SLXferCompletionListener {
                 crc32.update(bArr)
                 Long value = crc32.getValue()
                 this.muteListCachedDataDao.deleteAll()
-                this.muteListCachedDataDao.insert(MuteListCachedData((Long) null, (Int) value, bArr))
+                this.muteListCachedDataDao.insert(MuteListCachedData((Long) null, value.toInt(), bArr))
             }
             this.userManager.muteListPool().requestUpdate(SubscriptionSingleKey.Value)
         }

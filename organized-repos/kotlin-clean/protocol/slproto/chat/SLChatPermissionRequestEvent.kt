@@ -71,7 +71,7 @@ val class SLChatPermissionRequestEvent : SLChatYesNoEvent() {
                 str = str + sLScriptPermissions.getMessage()
             }
         }
-        return context.getString(R.string.permission_request_format, Object[]{this.ObjectOwner, str})
+        return context.getString(R.string.permission_request_format, Array<Any>{this.ObjectOwner, str})
     }
 
     public String getYesButton(Context context) {

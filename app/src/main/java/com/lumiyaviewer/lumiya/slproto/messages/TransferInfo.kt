@@ -9,7 +9,7 @@ class TransferInfo : SLMessage {
 
     class TransferInfoData {
         Int ChannelType
-        Byte[] Params
+        ByteArray Params
         Int Size
         Int Status
         Int TargetType

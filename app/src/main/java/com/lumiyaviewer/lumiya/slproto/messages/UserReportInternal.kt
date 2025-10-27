@@ -12,12 +12,12 @@ class UserReportInternal : SLMessage {
 
     class ReportData {
         UUID AbuseRegionID
-        Byte[] AbuseRegionName
+        ByteArray AbuseRegionName
         UUID AbuserID
         LLVector3 AgentPosition
         Int Category
         UUID CreatorID
-        Byte[] Details
+        ByteArray Details
         UUID LastOwnerID
         UUID ObjectID
         UUID OwnerID
@@ -25,8 +25,8 @@ class UserReportInternal : SLMessage {
         Int ReportType
         UUID ReporterID
         UUID ScreenshotID
-        Byte[] Summary
-        Byte[] VersionString
+        ByteArray Summary
+        ByteArray VersionString
         LLVector3 ViewerPosition
     }
 

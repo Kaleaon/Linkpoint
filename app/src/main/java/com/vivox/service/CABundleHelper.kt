@@ -15,7 +15,7 @@ import java.io.InputStream
 import java.io.OutputStream
 
 class CABundleHelper {
-    String TAG = "vivoxsdk"
+    val TAG: String = "vivoxsdk"
 
     /*
      * Enabled force condition propagation
@@ -31,9 +31,9 @@ class CABundleHelper {
             inputStream = object.getAssets().open("ca-bundle.crt")
             object2 = StringBuilder()
             object = FileOutputStream(((StringBuilder)object2).append(string2).append("/ca-bundle.crt").toString())
-            object2 = Byte[1024]
+            object2 = ByteArray(1024)
             while (true) {
-                if ((n = inputStream.read((Byte[])object2)) > 0) break block6
+                if ((n = inputStream.read((ByteArray)object2)) > 0) break block6
                 break
             }
         }
@@ -51,7 +51,7 @@ class CABundleHelper {
                 }
                 return bl
             }
-            ((OutputStream)object).write((Byte[])object2, 0, n)
+            ((OutputStream)object).write((ByteArray)object2, 0, n)
             continue
         }
     }

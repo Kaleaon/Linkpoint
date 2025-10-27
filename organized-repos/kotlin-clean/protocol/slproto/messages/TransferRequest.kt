@@ -10,7 +10,7 @@ class TransferRequest : SLMessage() {
     @JvmStatic
     class TransferInfo {
         public Int ChannelType
-        public Byte[] Params
+        public ByteArray Params
         public Float Priority
         public Int SourceType
         public UUID TransferID

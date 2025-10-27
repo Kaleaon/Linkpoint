@@ -20,11 +20,11 @@ class SLXfer {
     private Boolean hasCompleted = false
     private Long id
     private List<XferListenerInvocation> listeners = LinkedList()
-    private Byte[] receivedData
+    private ByteArray receivedData
     private Int receivedDataLen
 
     interface SLXferCompletionListener {
-        Unit onXferComplete(Any obj, String str, Byte[] bArr)
+        Unit onXferComplete(Any obj, String str, ByteArray bArr)
     }
 
     private class XferListenerInvocation {
@@ -36,7 +36,7 @@ class SLXfer {
             this.listener = sLXferCompletionListener
         }
 
-        Unit invokeListener(String str, Byte[] bArr) {
+        Unit invokeListener(String str, ByteArray bArr) {
             this.listener.onXferComplete(this.tag, str, bArr)
         }
     }
@@ -107,7 +107,7 @@ class SLXfer {
         this.listeners.add(XferListenerInvocation(obj, sLXferCompletionListener))
     }
 
-    Byte[] getData() {
+    ByteArray getData() {
         return this.receivedData
     }
 

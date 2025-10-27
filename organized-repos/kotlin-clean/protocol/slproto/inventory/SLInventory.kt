@@ -489,7 +489,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
     }
 
     /* access modifiers changed from: private */
-    fun StartUploadingNotecardContents(SLInventoryEntry sLInventoryEntry, UUID uuid, Boolean z, Byte[] bArr, OnNotecardUpdatedListener onNotecardUpdatedListener) {
+    fun StartUploadingNotecardContents(SLInventoryEntry sLInventoryEntry, UUID uuid, Boolean z, ByteArray bArr, OnNotecardUpdatedListener onNotecardUpdatedListener) {
         GenericHTTPExecutor.getInstance().execute(Runnable(z, this, sLInventoryEntry, bArr, uuid, onNotecardUpdatedListener) {
 
             /* renamed from: -$f0 */
@@ -575,7 +575,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
 
     }
 
-    private String UploadNotecardContents(SLInventoryEntry sLInventoryEntry, UUID uuid, Boolean z, Byte[] bArr) {
+    private String UploadNotecardContents(SLInventoryEntry sLInventoryEntry, UUID uuid, Boolean z, ByteArray bArr) {
         String capabilityOrThrow
         Response execute
         Int i = 0
@@ -666,7 +666,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
         if (this.fetchEntireInventoryRequested.get()) {
             UUID uuid = this.circuitInfo.sessionID
             try {
-                Cursor query = this.db.getDatabase().query(InventoryEntryDBObject.tableName, String[]{"uuid_high", "uuid_low"}, "isFolder AND (sessionID_high != ? OR sessionID_low != ?)", String[]{Long.toString(uuid.getMostSignificantBits()), Long.toString(uuid.getLeastSignificantBits())}, (String) null, (String) null, (String) null, "1")
+                Cursor query = this.db.getDatabase().query(InventoryEntryDBObject.tableName, Array<String>{"uuid_high", "uuid_low"}, "isFolder AND (sessionID_high != ? OR sessionID_low != ?)", Array<String>{Long.toString(uuid.getMostSignificantBits()), Long.toString(uuid.getLeastSignificantBits())}, (String) null, (String) null, (String) null, "1")
                 if (query.moveToFirst()) {
                     UUID uuid2 = UUIDPool.getUUID(query.getLong(0), query.getLong(1))
                     Debug.Printf("InventorySearch: fetching next folder: %s", uuid2)
@@ -736,7 +736,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
 
     public Collection<SLInventoryEntry> CollectGiveableItems(SLInventoryEntry sLInventoryEntry) {
         ArrayList arrayList = ArrayList()
-        Cursor query = SLInventoryEntry.query(this.db.getDatabase(), "parent_id = ?", String[]{Long.toString(sLInventoryEntry.getId())}, (String) null)
+        Cursor query = SLInventoryEntry.query(this.db.getDatabase(), "parent_id = ?", Array<String>{Long.toString(sLInventoryEntry.getId())}, (String) null)
         if (query != null) {
             while (query.moveToNext()) {
                 SLInventoryEntry sLInventoryEntry2 = SLInventoryEntry(query)
@@ -1450,7 +1450,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
         }
     }
 
-    fun UpdateNotecard(SLInventoryEntry sLInventoryEntry, UUID uuid, Boolean z, String str, String str2, Byte[] bArr, UUID uuid2, Int i, OnNotecardUpdatedListener onNotecardUpdatedListener) {
+    fun UpdateNotecard(SLInventoryEntry sLInventoryEntry, UUID uuid, Boolean z, String str, String str2, ByteArray bArr, UUID uuid2, Int i, OnNotecardUpdatedListener onNotecardUpdatedListener) {
         if (sLInventoryEntry != null) {
             z2 = !(Objects.equal(sLInventoryEntry.name, str) ? Objects.equal(sLInventoryEntry.description, str2) : false)
         } else {
@@ -1656,7 +1656,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
             final SLInventoryEntry sLInventoryEntry2 = sLInventoryEntry
             final UUID uuid3 = uuid2
             final Boolean z3 = z
-            final Byte[] bArr2 = bArr
+            final ByteArray bArr2 = bArr
             final OnNotecardUpdatedListener onNotecardUpdatedListener2 = onNotecardUpdatedListener
             DoUpdateTaskInventoryItem(sLInventoryEntry, i, SLMessageEventListener.SLMessageBaseEventListener() {
                 fun onMessageAcknowledged(SLMessage sLMessage) {
@@ -1824,13 +1824,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
 
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_48053  reason: not valid java name */
-    public /* synthetic */ Unit m180lambda$com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_48053(SLInventoryEntry sLInventoryEntry, Byte[] bArr, UUID uuid, Boolean z, OnNotecardUpdatedListener onNotecardUpdatedListener) {
+    public /* synthetic */ Unit m180lambda$com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_48053(SLInventoryEntry sLInventoryEntry, ByteArray bArr, UUID uuid, Boolean z, OnNotecardUpdatedListener onNotecardUpdatedListener) {
         UUID uuid2 = null
-        Object[] objArr = Object[1]
+        Array<Any> objArr = Object[1]
         objArr[0] = sLInventoryEntry != null ? sLInventoryEntry.uuid : null
         Debug.Printf("Notecard: Starting to upload contents for entry %s", objArr)
         String UploadNotecardContents = bArr != null ? UploadNotecardContents(sLInventoryEntry, uuid, z, bArr) : null
-        Object[] objArr2 = Object[1]
+        Array<Any> objArr2 = Object[1]
         if (sLInventoryEntry != null) {
             uuid2 = sLInventoryEntry.uuid
         }
@@ -1843,13 +1843,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
 
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_49599  reason: not valid java name */
-    public /* synthetic */ Unit m181lambda$com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_49599(Boolean z, Byte[] bArr, OnNotecardUpdatedListener onNotecardUpdatedListener, SLInventoryEntry sLInventoryEntry) {
+    public /* synthetic */ Unit m181lambda$com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_49599(Boolean z, ByteArray bArr, OnNotecardUpdatedListener onNotecardUpdatedListener, SLInventoryEntry sLInventoryEntry) {
         StartUploadingNotecardContents(sLInventoryEntry, (UUID) null, z, bArr, onNotecardUpdatedListener)
     }
 
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_50229  reason: not valid java name */
-    public /* synthetic */ Unit m182lambda$com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_50229(Boolean z, Byte[] bArr, OnNotecardUpdatedListener onNotecardUpdatedListener, SLInventoryEntry sLInventoryEntry) {
+    public /* synthetic */ Unit m182lambda$com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_50229(Boolean z, ByteArray bArr, OnNotecardUpdatedListener onNotecardUpdatedListener, SLInventoryEntry sLInventoryEntry) {
         StartUploadingNotecardContents(sLInventoryEntry, (UUID) null, z, bArr, onNotecardUpdatedListener)
     }
 

@@ -12,7 +12,7 @@ import com.linkpoint.slproto.users.manager.UserManager
 import javax.annotation.Nullable
 
 class ChatScriptDialogViewHolder : ChatEventViewHolder(), View.OnClickListener {
-    private const val Int[] dialogButtonIds = {R.id.buttonDialog1, R.id.buttonDialog2, R.id.buttonDialog3, R.id.buttonDialog4, R.id.buttonDialog5, R.id.buttonDialog6, R.id.buttonDialog7, R.id.buttonDialog8, R.id.buttonDialog9, R.id.buttonDialog10, R.id.buttonDialog11, R.id.buttonDialog12}
+    private const val IntArray dialogButtonIds = {R.id.buttonDialog1, R.id.buttonDialog2, R.id.buttonDialog3, R.id.buttonDialog4, R.id.buttonDialog5, R.id.buttonDialog6, R.id.buttonDialog7, R.id.buttonDialog8, R.id.buttonDialog9, R.id.buttonDialog10, R.id.buttonDialog11, R.id.buttonDialog12}
     val CardView cardView
     val Button dialogButtonIgnore
     val Button[] dialogButtons = Button[dialogButtonIds.length]

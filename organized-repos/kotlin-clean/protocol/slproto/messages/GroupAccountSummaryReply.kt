@@ -23,7 +23,7 @@ class GroupAccountSummaryReply : SLMessage() {
         public Int IntervalDays
         public Int LandTaxCurrent
         public Int LandTaxEstimate
-        public Byte[] LastTaxDate
+        public ByteArray LastTaxDate
         public Int LightTaxCurrent
         public Int LightTaxEstimate
         public Int NonExemptMembers
@@ -32,8 +32,8 @@ class GroupAccountSummaryReply : SLMessage() {
         public Int ParcelDirFeeCurrent
         public Int ParcelDirFeeEstimate
         public UUID RequestID
-        public Byte[] StartDate
-        public Byte[] TaxDate
+        public ByteArray StartDate
+        public ByteArray TaxDate
         public Int TotalCredits
         public Int TotalDebits
     }

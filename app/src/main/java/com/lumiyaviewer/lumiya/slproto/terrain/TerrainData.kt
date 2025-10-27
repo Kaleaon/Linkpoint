@@ -11,15 +11,15 @@ class TerrainData {
     Int PatchesPerEdge = 16
     Int PatchesSize = 16
     Int TerrainPerEdge = 256
-    private Float[] heightMap = Float[65536]
-    private Boolean[] patchDirtyMap = Boolean[256]
+    private val heightMap: FloatArray = FloatArray(65536)
+    private val patchDirtyMap: BooleanArray = BooleanArray(256)
     private volatile TerrainTextures terrainTextures = TerrainTextures()
     private Int validCount = 0
-    private Boolean[] validMap = Boolean[65536]
-    private Float[] vertexHeights = Float[66049]
+    private val validMap: BooleanArray = BooleanArray(65536)
+    private val vertexHeights: FloatArray = FloatArray(66049)
     private Any vertexLock = Any()
-    private Float[] vertexNormals = Float[132098]
-    private Boolean[] vertexValids = Boolean[66049]
+    private val vertexNormals: FloatArray = FloatArray(132098)
+    private val vertexValids: BooleanArray = BooleanArray(66049)
     private Float waterHeight = 0.0f
     private Boolean waterHeightValid = false
 
@@ -80,7 +80,7 @@ class TerrainData {
                     i6++
                 }
                 if (i6 == 4) {
-                    this.vertexHeights[(i2 * InputDeviceCompat.SOURCE_KEYBOARD) + i5] = f / ((Float) i6)
+                    this.vertexHeights[(i2 * InputDeviceCompat.SOURCE_KEYBOARD) + i5] = f / (i6.toFloat())
                     Float f2 = this.heightMap[(min4 * 256) + min3] - this.heightMap[min + (min4 * 256)]
                     Float f3 = this.heightMap[(min4 * 256) + min3] - this.heightMap[(min2 * 256) + min3]
                     this.vertexNormals[((i2 * InputDeviceCompat.SOURCE_KEYBOARD) + i5) * 2] = f2
@@ -103,7 +103,7 @@ class TerrainData {
         }
     }
 
-    Unit ProcessLayerData(Byte[] bArr) {
+    Unit ProcessLayerData(ByteArray bArr) {
         TerrainPatch DecompressPatch
         BitBuffer bitBuffer = BitBuffer(bArr)
         Int bits = bitBuffer.getBits(16)
@@ -161,8 +161,8 @@ class TerrainData {
         if (!z) {
             return null
         }
-        Float[] fArr = Float[289]
-        Float[] fArr2 = Float[578]
+        FloatArray fArr = FloatArray(289)
+        FloatArray fArr2 = FloatArray(578)
         Int i6 = 0
         while (true) {
             Int i7 = i6
@@ -178,7 +178,7 @@ class TerrainData {
                 }
                 i6 = i7 + 1
             } else {
-                return TerrainPatchInfo(TerrainPatchHeightMap(this.waterHeight, fArr, fArr2, 17, 17), this.terrainTextures, ((Float) i) / 16.0f, ((Float) i) / 16.0f, 0.0625f, 0.0625f)
+                return TerrainPatchInfo(TerrainPatchHeightMap(this.waterHeight, fArr, fArr2, 17, 17), this.terrainTextures, (i.toFloat()) / 16.0f, (i.toFloat()) / 16.0f, 0.0625f, 0.0625f)
             }
         }
     }

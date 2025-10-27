@@ -40,7 +40,7 @@ class SLWearableData {
         }
     }
 
-    SLWearableData(Byte[] bArr) throws WearableFormatException {
+    SLWearableData(ByteArray bArr) throws WearableFormatException {
         try {
             Array<String> split = String(bArr, "ISO-8859-1").trim().split("\n+")
             if (split.length < 2) {

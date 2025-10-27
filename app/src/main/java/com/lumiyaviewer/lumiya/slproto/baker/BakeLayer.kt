@@ -13,7 +13,7 @@ import java.util.List
 class BakeLayer {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-avatar-SLAvatarParamColor$ColorOperationSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] f64comlumiyaviewerlumiyaslprotoavatarSLAvatarParamColor$ColorOperationSwitchesValues = null
+    private /* synthetic */ IntArray f64comlumiyaviewerlumiyaslprotoavatarSLAvatarParamColor$ColorOperationSwitchesValues = null
     Int fixedColor
     SLAvatarGlobalColor globalColor
     Boolean hasFixedColor
@@ -21,18 +21,18 @@ class BakeLayer {
     String layerName
     AvatarTextureFaceIndex localTexture
     Boolean localTextureAlphaOnly
-    Int[] paramIDs
+    IntArray paramIDs
     Boolean tgaFileIsMask
     String tgaTexture
     Boolean visibilityMask
     Boolean writeAllChannels
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-avatar-SLAvatarParamColor$ColorOperationSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] m138getcomlumiyaviewerlumiyaslprotoavatarSLAvatarParamColor$ColorOperationSwitchesValues() {
+    private /* synthetic */ IntArray m138getcomlumiyaviewerlumiyaslprotoavatarSLAvatarParamColor$ColorOperationSwitchesValues() {
         if (f64comlumiyaviewerlumiyaslprotoavatarSLAvatarParamColor$ColorOperationSwitchesValues != null) {
             return f64comlumiyaviewerlumiyaslprotoavatarSLAvatarParamColor$ColorOperationSwitchesValues
         }
-        Int[] iArr = Int[SLAvatarParamColor.ColorOperation.values().length]
+        IntArray iArr = Int[SLAvatarParamColor.ColorOperation.values().length]
         try {
             iArr[SLAvatarParamColor.ColorOperation.Blend.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -49,7 +49,7 @@ class BakeLayer {
         return iArr
     }
 
-    BakeLayer(String str, SLAvatarGlobalColor sLAvatarGlobalColor, Boolean z, Int i, Boolean z2, Boolean z3, Boolean z4, AvatarTextureFaceIndex avatarTextureFaceIndex, Boolean z5, String str2, Boolean z6, Int[] iArr) {
+    BakeLayer(String str, SLAvatarGlobalColor sLAvatarGlobalColor, Boolean z, Int i, Boolean z2, Boolean z3, Boolean z4, AvatarTextureFaceIndex avatarTextureFaceIndex, Boolean z5, String str2, Boolean z6, IntArray iArr) {
         this.layerName = str
         this.globalColor = sLAvatarGlobalColor
         this.hasFixedColor = z
@@ -64,13 +64,13 @@ class BakeLayer {
         this.paramIDs = iArr
     }
 
-    private Int getColorByParamList(BakeProcess bakeProcess, Int[] iArr, Int i, Int i2) {
+    private Int getColorByParamList(BakeProcess bakeProcess, IntArray iArr, Int i, Int i2) {
         SLAvatarParams.AvatarParam avatarParam
         SLAvatarParamColor sLAvatarParamColor
         Int colorAdd
         Boolean z = false
         if (this.layerName.equals("lipstick")) {
-            Debug.Log(String.format("Baking: lipstick start color %08x default %08x", Object[]{Integer.valueOf(i), Integer.valueOf(i2)}))
+            Debug.Log(String.format("Baking: lipstick start color %08x default %08x", Array<Any>{Integer.valueOf(i), Integer.valueOf(i2)}))
         }
         Int length = iArr.length
         Int i3 = 0
@@ -83,7 +83,7 @@ class BakeLayer {
                 float paramWeight = bakeProcess.getParamWeight(i5, (avatarParam = (SLAvatarParams.AvatarParam) paramSet.params.get(0)))
                 Int color = sLAvatarParamColor.getColor(paramWeight)
                 if (this.layerName.equals("lipstick")) {
-                    Debug.Log(String.format("Baking: lipstick color param weight %ff color %08x", Object[]{Float.valueOf(paramWeight), Integer.valueOf(color)}))
+                    Debug.Log(String.format("Baking: lipstick color param weight %ff color %08x", Array<Any>{Float.valueOf(paramWeight), Integer.valueOf(color)}))
                 }
                 switch (m138getcomlumiyaviewerlumiyaslprotoavatarSLAvatarParamColor$ColorOperationSwitchesValues()[sLAvatarParamColor.colorOperation.ordinal()]) {
                     case 1:
@@ -100,7 +100,7 @@ class BakeLayer {
                         break
                 }
                 if (this.layerName.equals("lipstick")) {
-                    Debug.Log(String.format("Baking: after op, lipstick color result %08x", Object[]{Integer.valueOf(colorAdd)}))
+                    Debug.Log(String.format("Baking: after op, lipstick color result %08x", Array<Any>{Integer.valueOf(colorAdd)}))
                     i4 = colorAdd
                 } else {
                     i4 = colorAdd
@@ -113,7 +113,7 @@ class BakeLayer {
     }
 
     private Int getNetColor(BakeProcess bakeProcess) {
-        Int[] iArr = this.paramIDs
+        IntArray iArr = this.paramIDs
         Int length = iArr.length
         Int i = 0
         while (true) {
@@ -175,7 +175,7 @@ class BakeLayer {
             r3.<init>(r4, r5, r6, r7, r8, r9)
             java.lang.String r4 = "Baking: layer %s net_color 0x%08x."
             r5 = 2
-            java.lang.Object[] r5 = java.lang.Object[r5]
+            java.lang.Array<Any> r5 = java.lang.Object[r5]
             r0 = r20
             java.lang.String r6 = r0.layerName
             r7 = 0
@@ -188,7 +188,7 @@ class BakeLayer {
             r5 = 1
             r13 = 0
             r0 = r20
-            Int[] r0 = r0.paramIDs
+            IntArray r0 = r0.paramIDs
             r18 = r0
             r4 = 0
             r0 = r18
@@ -263,7 +263,7 @@ class BakeLayer {
             r4.<init>(r5, r6, r7, r8, r9, r10, r11)     // Catch:{ Exception -> 0x0139 }
             java.lang.String r6 = "Baking: layer %s: applying alpha (weight %f domain %f) mask texture %s, width %d, height %d, num_comps %d"
             r7 = 7
-            java.lang.Object[] r7 = java.lang.Object[r7]     // Catch:{ Exception -> 0x0139 }
+            java.lang.Array<Any> r7 = java.lang.Object[r7]     // Catch:{ Exception -> 0x0139 }
             r0 = r20
             java.lang.String r8 = r0.layerName     // Catch:{ Exception -> 0x0139 }
             r9 = 0
@@ -327,7 +327,7 @@ class BakeLayer {
             com.lumiyaviewer.lumiya.openjpeg.OpenJPEG r4 = (com.lumiyaviewer.lumiya.openjpeg.OpenJPEG) r4     // Catch:{ DefaultTextureException -> 0x0280 }
             java.lang.String r7 = "Baking: layer %s: applying local texture, writeAllChannels %s"
             r8 = 2
-            java.lang.Object[] r8 = java.lang.Object[r8]     // Catch:{ DefaultTextureException -> 0x0280 }
+            java.lang.Array<Any> r8 = java.lang.Object[r8]     // Catch:{ DefaultTextureException -> 0x0280 }
             r0 = r20
             java.lang.String r9 = r0.layerName     // Catch:{ DefaultTextureException -> 0x0280 }
             r10 = 0
@@ -347,7 +347,7 @@ class BakeLayer {
         L_0x018b:
             java.lang.String r5 = "Baking: layer %s: missing local texture"
             r6 = 1
-            java.lang.Object[] r6 = java.lang.Object[r6]     // Catch:{ DefaultTextureException -> 0x0255 }
+            java.lang.Array<Any> r6 = java.lang.Object[r6]     // Catch:{ DefaultTextureException -> 0x0255 }
             r0 = r20
             java.lang.String r7 = r0.layerName     // Catch:{ DefaultTextureException -> 0x0255 }
             r8 = 0
@@ -383,7 +383,7 @@ class BakeLayer {
             r4.<init>(r5, r6, r7, r8, r9, r10, r11)     // Catch:{ Exception -> 0x026f }
             java.lang.String r6 = "Baking: layer %s: applying tga texture %s, writeAllChannels %s, width %d, height %d, num_comps %d"
             r7 = 6
-            java.lang.Object[] r7 = java.lang.Object[r7]     // Catch:{ Exception -> 0x026f }
+            java.lang.Array<Any> r7 = java.lang.Object[r7]     // Catch:{ Exception -> 0x026f }
             r0 = r20
             java.lang.String r8 = r0.layerName     // Catch:{ Exception -> 0x026f }
             r9 = 0
@@ -450,7 +450,7 @@ class BakeLayer {
         L_0x0257:
             java.lang.String r4 = "Baking: layer %s: default local texture"
             r6 = 1
-            java.lang.Object[] r6 = java.lang.Object[r6]
+            java.lang.Array<Any> r6 = java.lang.Object[r6]
             r0 = r20
             java.lang.String r7 = r0.layerName
             r8 = 0
@@ -497,7 +497,7 @@ class BakeLayer {
                 try {
                     InputStream open = LumiyaApp.getAssetManager().open("tga/" + this.tgaTexture)
                     OpenJPEG openJPEG2 = OpenJPEG(open, OpenJPEG.ImageFormat.TGA, this.tgaFileIsMask, false, 0.0f, 0.0f, false)
-                    Debug.Log(String.format("Baking: layer %s: applying tga alpha mask %swidth %d, height %d, num_comps %d", Object[]{this.layerName, this.tgaTexture, Integer.valueOf(openJPEG2.getWidth()), Integer.valueOf(openJPEG2.getHeight()), Integer.valueOf(openJPEG2.getNumComponents())}))
+                    Debug.Log(String.format("Baking: layer %s: applying tga alpha mask %swidth %d, height %d, num_comps %d", Array<Any>{this.layerName, this.tgaTexture, Integer.valueOf(openJPEG2.getWidth()), Integer.valueOf(openJPEG2.getHeight()), Integer.valueOf(openJPEG2.getNumComponents())}))
                     openJPEG.blendAlpha(openJPEG2, false)
                     open.close()
                 } catch (Exception e) {
@@ -509,12 +509,12 @@ class BakeLayer {
                     List<OpenJPEG> localTexture2 = bakeProcess.getLocalTexture(this.localTexture)
                     if (localTexture2 != null) {
                         for (OpenJPEG blendAlpha : localTexture2) {
-                            Debug.Log(String.format("Baking: layer %s: applying local texture alpha", Object[]{this.layerName}))
+                            Debug.Log(String.format("Baking: layer %s: applying local texture alpha", Array<Any>{this.layerName}))
                             openJPEG.blendAlpha(blendAlpha, false)
                         }
                     }
                 } catch (BakeProcess.DefaultTextureException e2) {
-                    Debug.Log(String.format("Baking: layer %s: default local texture for alpha", Object[]{this.layerName}))
+                    Debug.Log(String.format("Baking: layer %s: default local texture for alpha", Array<Any>{this.layerName}))
                 }
             }
         }

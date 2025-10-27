@@ -219,7 +219,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
     private ViewGroup listHeader
     private val Object listHeaderData = Object()
     private val LoadableMonitor loadableMonitor = LoadableMonitor(this.entryList)
-    private UUID myOutfitsFolderUUID = null
+    private val myOutfitsFolderUUID: UUID = null
     private val SubscriptionData<InventoryQuery, InventoryEntryList> rootFolderEntryList = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
 
         /* renamed from: -$f0 */

@@ -17,7 +17,7 @@ class StartGroupProposal : SLMessage {
         Int Duration
         UUID GroupID
         Float Majority
-        Byte[] ProposalText
+        ByteArray ProposalText
         Int Quorum
     }
 

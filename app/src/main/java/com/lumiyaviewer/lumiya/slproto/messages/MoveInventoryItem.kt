@@ -21,7 +21,7 @@ class MoveInventoryItem : SLMessage {
     class InventoryData {
         UUID FolderID
         UUID ItemID
-        Byte[] NewName
+        ByteArray NewName
     }
 
     MoveInventoryItem() {

@@ -12,7 +12,7 @@ class ObjectUpdateCompressed : SLMessage {
     RegionData RegionData_Field
 
     class ObjectData {
-        Byte[] Data
+        ByteArray Data
         Int UpdateFlags
     }
 

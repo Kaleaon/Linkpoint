@@ -24,7 +24,7 @@ import com.lumiyaviewer.lumiya.modern.samples.ModernLinkpointDemo
  * This demonstrates modernized UI patterns while maintaining Lumiya functionality
  */
 class ModernWorldActivity : AppCompatActivity {
-    private String TAG = "ModernWorldActivity"
+    private val TAG: String = "ModernWorldActivity"
     
     // UI Components using modern patterns (no ButterKnife)
     private CoordinatorLayout coordinatorLayout

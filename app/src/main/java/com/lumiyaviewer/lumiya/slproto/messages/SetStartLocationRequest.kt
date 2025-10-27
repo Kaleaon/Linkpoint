@@ -18,7 +18,7 @@ class SetStartLocationRequest : SLMessage {
         Int LocationID
         LLVector3 LocationLookAt
         LLVector3 LocationPos
-        Byte[] SimName
+        ByteArray SimName
     }
 
     SetStartLocationRequest() {

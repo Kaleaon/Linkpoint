@@ -50,7 +50,7 @@ class InventoryActivity : MasterDetailsActivity() {
         }
     }
     private Boolean activityStarted = false
-    private String fragmentSearchString = null
+    private val fragmentSearchString: String = null
     /* access modifiers changed from: private */
     public String nameFilter = null
     /* access modifiers changed from: private */

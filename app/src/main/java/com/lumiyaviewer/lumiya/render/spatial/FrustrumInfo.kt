@@ -4,7 +4,7 @@ import android.opengl.Matrix
 import java.util.Arrays
 
 class FrustrumInfo {
-    Float[] mvpMatrix
+    FloatArray mvpMatrix
     Float viewDistance
     Float viewX
     Float viewY
@@ -15,7 +15,7 @@ class FrustrumInfo {
         this.viewY = f2
         this.viewZ = f3
         this.viewDistance = f4
-        this.mvpMatrix = Float[16]
+        this.mvpMatrix = FloatArray(16)
         System.arraycopy(fArr, i, this.mvpMatrix, 0, 16)
     }
 
@@ -24,7 +24,7 @@ class FrustrumInfo {
         this.viewY = f2
         this.viewZ = f3
         this.viewDistance = f4
-        this.mvpMatrix = Float[16]
+        this.mvpMatrix = FloatArray(16)
         Matrix.multiplyMM(this.mvpMatrix, 0, fArr2, i2, fArr, i)
     }
 

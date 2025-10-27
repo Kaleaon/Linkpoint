@@ -137,9 +137,9 @@ import javax.annotation.Nullable
 
 class SLAgentCircuit : SLThreadingCircuit(), ICapsEventHandler {
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues */
-    private const val /* synthetic */ Int[] syntheticField = null
+    private const val /* synthetic */ IntArray syntheticField = null
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues */
-    private const val /* synthetic */ Int[] syntheticField = null
+    private const val /* synthetic */ IntArray syntheticField = null
     private Subscription agentNameSubscription
     private Boolean agentPaused = false
     private val UUID agentUUID
@@ -167,8 +167,8 @@ class SLAgentCircuit : SLThreadingCircuit(), ICapsEventHandler {
     }
     private List<ImprovedInstantMessage> pendingGroupMessages = LinkedList()
     private Long regionHandle = 0
-    private UUID regionID = null
-    private String regionName = null
+    private val regionID: UUID = null
+    private val regionName: String = null
     private val Set<UUID> startedGroupSessions = HashSet()
     private Boolean teleportRequestSent = false
     private val Set<UUID> typingUsers = Collections.synchronizedSet(HashSet())
@@ -176,11 +176,11 @@ class SLAgentCircuit : SLThreadingCircuit(), ICapsEventHandler {
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues */
     @JvmStatic
-private /* synthetic */ Int[] m38-getcom-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues() {
+private /* synthetic */ IntArray m38-getcom-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues() {
         if (syntheticField != null) {
             return syntheticField
         }
-        Int[] iArr = Int[CapsEventType.values().length]
+        IntArray iArr = Int[CapsEventType.values().length]
         try {
             iArr[CapsEventType.AgentGroupDataUpdate.ordinal()] = 9
         } catch (NoSuchFieldError e) {
@@ -227,11 +227,11 @@ private /* synthetic */ Int[] m38-getcom-lumiyaviewer-lumiya-slproto-caps-SLCapE
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues */
     @JvmStatic
-private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues() {
+private /* synthetic */ IntArray m39-getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues() {
         if (syntheticField != null) {
             return syntheticField
         }
-        Int[] iArr = Int[ChatterType.values().length]
+        IntArray iArr = Int[ChatterType.values().length]
         try {
             iArr[ChatterType.Group.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -388,7 +388,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
                 String asString = lLSDNode.byKey("sim-ip-and-port").asString()
                 String asString2 = lLSDNode.byKey("seed-capability").asString()
                 UUID asUUID = lLSDNode.byKey("agent-id").asUUID()
-                String[] split = asString.split(":")
+                Array<String> split = asString.split(":")
                 this.gridConn.addTempCircuit(SLAuthReply(this.authReply, true, true, asUUID, split[0], Integer.parseInt(split[1]), asString2))
             } catch (Exception e2) {
                 e2.printStackTrace()
@@ -405,7 +405,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
             UUID uuid = UUID(wrap.getLong(), wrap.getLong())
             String str = ""
             if (b != (Byte) 0) {
-                Byte[] bArr = Byte[wrap.remaining()]
+                ByteArray bArr = Byte[wrap.remaining()]
                 wrap.get(bArr)
                 str = SLMessage.stringFromVariableOEM(bArr)
             }
@@ -632,7 +632,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
                 UUID sourceUUID = chatMessageSource.getSourceUUID()
                 if (sourceUUID != null) {
                     this.userManager.getChatterList().getFriendManager().addFriend(sourceUUID)
-                    SendGenericMessage("requestonlinenotification", String[]{sourceUUID.toString()})
+                    SendGenericMessage("requestonlinenotification", Array<String>{sourceUUID.toString()})
                 }
             }
         }
@@ -666,8 +666,8 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
             try {
                 LLSDNode byIndex = lLSDNode.byKey("Info").byIndex(0)
                 String asString = byIndex.byKey("SeedCapability").asString()
-                Byte[] asBinary = byIndex.byKey("SimIP").asBinary()
-                Debug.Printf("sim address: %s", SLAuthReply(this.authReply, true, false, this.authReply.agentID, String.format("%d.%d.%d.%d", Object[]{Integer.valueOf(asBinary[0] & 255), Integer.valueOf(asBinary[1] & 255), Integer.valueOf(asBinary[2] & 255), Integer.valueOf(asBinary[3] & 255)}), byIndex.byKey("SimPort").asInt(), asString).simAddress)
+                ByteArray asBinary = byIndex.byKey("SimIP").asBinary()
+                Debug.Printf("sim address: %s", SLAuthReply(this.authReply, true, false, this.authReply.agentID, String.format("%d.%d.%d.%d", Array<Any>{Integer.valueOf(asBinary[0] & 255), Integer.valueOf(asBinary[1] & 255), Integer.valueOf(asBinary[2] & 255), Integer.valueOf(asBinary[3] & 255)}), byIndex.byKey("SimPort").asInt(), asString).simAddress)
                 this.modules.avatarControl.setEnableAgentUpdates(false)
                 this.gridConn.HandleTeleportFinish(r0)
                 return
@@ -777,7 +777,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(completeAgentMovement)
     }
 
-    private Unit SendEstateOwnerMessage(String str, String[] strArr) {
+    private Unit SendEstateOwnerMessage(String str, Array<String> strArr) {
         SLMessage estateOwnerMessage = EstateOwnerMessage()
         estateOwnerMessage.AgentData_Field.AgentID = this.circuitInfo.agentID
         estateOwnerMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -808,7 +808,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         improvedInstantMessage.MessageBlock_Field.Timestamp = 0
         improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo")
         improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF("")
-        improvedInstantMessage.MessageBlock_Field.BinaryBucket = Byte[1]
+        improvedInstantMessage.MessageBlock_Field.BinaryBucket = ByteArray(1)
         improvedInstantMessage.isReliable = true
         SendMessage(improvedInstantMessage)
     }
@@ -831,7 +831,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         improvedInstantMessage.MessageBlock_Field.Timestamp = 0
         improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo")
         improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF(str)
-        improvedInstantMessage.MessageBlock_Field.BinaryBucket = Byte[0]
+        improvedInstantMessage.MessageBlock_Field.BinaryBucket = ByteArray(0)
         improvedInstantMessage.isReliable = true
         SendMessage(improvedInstantMessage)
         if (!(i == 20 || i == 41 || i == 42)) {
@@ -943,14 +943,14 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo")
         improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF("")
         if (uuid3 != null) {
-            ByteBuffer wrap = ByteBuffer.wrap(Byte[16])
+            ByteBuffer wrap = ByteBuffer.wrap(ByteArray(16))
             wrap.order(ByteOrder.BIG_ENDIAN)
             wrap.putLong(uuid3.getMostSignificantBits())
             wrap.putLong(uuid3.getLeastSignificantBits())
             wrap.position(0)
             improvedInstantMessage.MessageBlock_Field.BinaryBucket = wrap.array()
         } else {
-            improvedInstantMessage.MessageBlock_Field.BinaryBucket = Byte[0]
+            improvedInstantMessage.MessageBlock_Field.BinaryBucket = ByteArray(0)
         }
         improvedInstantMessage.isReliable = true
         SendMessage(improvedInstantMessage)
@@ -971,7 +971,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         improvedInstantMessage.MessageBlock_Field.Timestamp = 0
         improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo")
         improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF(str)
-        improvedInstantMessage.MessageBlock_Field.BinaryBucket = Byte[0]
+        improvedInstantMessage.MessageBlock_Field.BinaryBucket = ByteArray(0)
         improvedInstantMessage.isReliable = true
         SendMessage(improvedInstantMessage)
     }
@@ -1365,7 +1365,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SLObjectInfo sLObjectInfo = (SLObjectInfo) this.gridConn.parcelInfo.allObjectsNearby.get(payPriceReply.ObjectData_Field.ObjectID)
         if (sLObjectInfo != null) {
             Int i = payPriceReply.ObjectData_Field.DefaultPayPrice
-            Int[] iArr = Int[payPriceReply.ButtonData_Fields.size()]
+            IntArray iArr = Int[payPriceReply.ButtonData_Fields.size()]
             Int i2 = 0
             while (true) {
                 Int i3 = i2
@@ -1406,10 +1406,10 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
     }
 
     fun HandleScriptDialog(ScriptDialog scriptDialog) {
-        String[] strArr
+        Array<String> strArr
         Int i = 0
         if (scriptDialog.Buttons_Fields.size() > 0) {
-            String[] strArr2 = String[scriptDialog.Buttons_Fields.size()]
+            Array<String> strArr2 = String[scriptDialog.Buttons_Fields.size()]
             Int i2 = 0
             for (Buttons buttons : scriptDialog.Buttons_Fields) {
                 strArr2[i2] = SLMessage.stringFromVariableUTF(buttons.ButtonLabel)
@@ -1437,7 +1437,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
     fun HandleSimulatorViewerTimeMessage(SimulatorViewerTimeMessage simulatorViewerTimeMessage) {
         if (!this.authReply.isTemporary && this.gridConn != null && this.gridConn.parcelInfo != null) {
             Float f = (simulatorViewerTimeMessage.TimeInfo_Field.SunPhase / 6.2831855f) + 0.25f
-            this.gridConn.parcelInfo.setSunHour((Float) (((Double) f) - Math.floor((Double) f)))
+            this.gridConn.parcelInfo.setSunHour((Float) ((f.toDouble()) - Math.floor(f.toDouble())))
         }
     }
 
@@ -1566,7 +1566,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         if (!this.isEstateManager) {
             return false
         }
-        SendEstateOwnerMessage("restart", String[]{Integer.toString(i)})
+        SendEstateOwnerMessage("restart", Array<String>{Integer.toString(i)})
         return true
     }
 
@@ -1716,7 +1716,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    fun SendGenericMessage(String str, String[] strArr) {
+    fun SendGenericMessage(String str, Array<String> strArr) {
         SLMessage genericMessage = GenericMessage()
         genericMessage.AgentData_Field.AgentID = this.circuitInfo.agentID
         genericMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -1747,7 +1747,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         improvedInstantMessage.MessageBlock_Field.Timestamp = 0
         improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo")
         improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF(str)
-        improvedInstantMessage.MessageBlock_Field.BinaryBucket = Byte[1]
+        improvedInstantMessage.MessageBlock_Field.BinaryBucket = ByteArray(1)
         improvedInstantMessage.isReliable = true
         synchronized (this.startedGroupSessions) {
             if (this.startedGroupSessions.contains(uuid)) {
@@ -1873,8 +1873,8 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
     }
 
     fun TeleportToGlobalPosition(LLVector3 lLVector3) {
-        Int floor = (Int) Math.floor((Double) lLVector3.x)
-        Int floor2 = (Int) Math.floor((Double) lLVector3.y)
+        Int floor = Math.toInt().floor(lLVector3.toDouble().x)
+        Int floor2 = Math.toInt().floor(lLVector3.toDouble().y)
         floor -= floor % 256
         Long j = ((Long) (floor2 - (floor2 % 256))) | (((Long) floor) << 32)
         LLVector3 lLVector32 = LLVector3(lLVector3.x % 256.0f, lLVector3.y % 256.0f, lLVector3.z)
@@ -1969,7 +1969,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
             teleportLocationRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
             teleportLocationRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
             teleportLocationRequest.Info_Field.RegionHandle = j
-            teleportLocationRequest.Info_Field.Position = LLVector3((Float) i, (Float) i2, (Float) i3)
+            teleportLocationRequest.Info_Field.Position = LLVector3(i.toFloat(), i2.toFloat(), i3.toFloat())
             teleportLocationRequest.Info_Field.LookAt = LLVector3(0.0f, 1.0f, 0.0f)
             teleportLocationRequest.isReliable = true
             teleportLocationRequest.setEventListener(SLMessageEventListener() {
@@ -2046,9 +2046,9 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         Int i = (Int) ((this.regionHandle >> 32) & 4294967295L)
         Int i2 = (Int) (this.regionHandle & 4294967295L)
         LLVector3d lLVector3d = LLVector3d()
-        lLVector3d.x = ((Double) i) + ((Double) position.x)
-        lLVector3d.y = ((Double) i2) + ((Double) position.y)
-        lLVector3d.z = (Double) position.z
+        lLVector3d.x = (i.toDouble()) + (position.toDouble().x)
+        lLVector3d.y = (i2.toDouble()) + (position.toDouble().y)
+        lLVector3d.z = position.toDouble().z
         return lLVector3d
     }
 
@@ -2059,7 +2059,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
         LLVector3 position = this.modules.avatarControl.getAgentPosition().getPosition()
         try {
-            return String.format("http://maps.secondlife.com/secondlife/%s/%d/%d/%d", Object[]{URLEncoder.encode(this.regionName, "UTF-8"), Integer.valueOf((Int) position.x), Integer.valueOf((Int) position.y), Integer.valueOf((Int) position.z)})
+            return String.format("http://maps.secondlife.com/secondlife/%s/%d/%d/%d", Array<Any>{URLEncoder.encode(this.regionName, "UTF-8"), Integer.valueOf(position.toInt().x), Integer.valueOf(position.toInt().y), Integer.valueOf(position.toInt().z)})
         } catch (UnsupportedEncodingException e) {
             return null
         }

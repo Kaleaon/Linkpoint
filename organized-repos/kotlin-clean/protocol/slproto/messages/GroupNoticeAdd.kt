@@ -16,11 +16,11 @@ class GroupNoticeAdd : SLMessage() {
 
     @JvmStatic
     class MessageBlock {
-        public Byte[] BinaryBucket
+        public ByteArray BinaryBucket
         public Int Dialog
-        public Byte[] FromAgentName
+        public ByteArray FromAgentName
         public UUID ID
-        public Byte[] Message
+        public ByteArray Message
         public UUID ToGroupID
     }
 

@@ -17,7 +17,7 @@ import java.util.List
  * for CLI-based Android emulator management functionality.
  */
 class EmulatorManager {
-    private String TAG = "EmulatorManager"
+    private val TAG: String = "EmulatorManager"
     
     private Context context
     private File scriptPath
@@ -93,7 +93,7 @@ class EmulatorManager {
      * Create a AVD
      */
     Unit createAVD(String name, String device, String apiLevel, String abi, EmulatorCallback callback) {
-        String[] args = {"create", name, "--device", device, "--api", apiLevel, "--abi", abi}
+        Array<String> args = {"create", name, "--device", device, "--api", apiLevel, "--abi", abi}
         EmulatorTask(args, callback).execute()
     }
     
@@ -129,7 +129,7 @@ class EmulatorManager {
      * Install system image
      */
     Unit installSystemImage(String apiLevel, String abi, String tag, EmulatorCallback callback) {
-        String[] args = {"install-image", apiLevel, abi, tag}
+        Array<String> args = {"install-image", apiLevel, abi, tag}
         EmulatorTask(args, callback).execute()
     }
     
@@ -151,36 +151,36 @@ class EmulatorManager {
      * Get default configuration for AVDs
      */
     class EmulatorDefaults {
-        String DEFAULT_DEVICE = "pixel_2"
-        String DEFAULT_API = "34"
-        String DEFAULT_ABI = "x86_64"
-        String DEFAULT_TAG = "google_apis"
+        val DEFAULT_DEVICE: String = "pixel_2"
+        val DEFAULT_API: String = "34"
+        val DEFAULT_ABI: String = "x86_64"
+        val DEFAULT_TAG: String = "google_apis"
         
-        String[] SUPPORTED_APIS = {"30", "31", "32", "33", "34"}
-        String[] SUPPORTED_ABIS = {"x86_64", "arm64-v8a", "x86"}
-        String[] SUPPORTED_TAGS = {"google_apis", "google_apis_playstore", "default"}
-        String[] POPULAR_DEVICES = {"pixel_2", "pixel_3", "pixel_4", "pixel_5", "Nexus_5X"}
+        Array<String> SUPPORTED_APIS = {"30", "31", "32", "33", "34"}
+        Array<String> SUPPORTED_ABIS = {"x86_64", "arm64-v8a", "x86"}
+        Array<String> SUPPORTED_TAGS = {"google_apis", "google_apis_playstore", "default"}
+        Array<String> POPULAR_DEVICES = {"pixel_2", "pixel_3", "pixel_4", "pixel_5", "Nexus_5X"}
     }
     
     /**
      * AsyncTask to execute emulator commands
      */
     private class EmulatorTask : AsyncTask<Void, String, String> {
-        private String[] command
+        private Array<String> command
         private EmulatorCallback callback
         private Boolean hasError = false
         
         EmulatorTask(String action, EmulatorCallback callback) {
-            this.command = String[]{scriptPath.getAbsolutePath(), action}
+            this.command = Array<String>{scriptPath.getAbsolutePath(), action}
             this.callback = callback
         }
         
         EmulatorTask(String action, String arg, EmulatorCallback callback) {
-            this.command = String[]{scriptPath.getAbsolutePath(), action, arg}
+            this.command = Array<String>{scriptPath.getAbsolutePath(), action, arg}
             this.callback = callback
         }
         
-        EmulatorTask(String[] args, EmulatorCallback callback) {
+        EmulatorTask(Array<String> args, EmulatorCallback callback) {
             this.command = String[args.length + 1]
             this.command[0] = scriptPath.getAbsolutePath()
             System.arraycopy(args, 0, this.command, 1, args.length)
@@ -253,7 +253,7 @@ class EmulatorManager {
     List<AVDInfo> parseAVDList(String output) {
         List<AVDInfo> avds = ArrayList<>()
         
-        String[] lines = output.split("\n")
+        Array<String> lines = output.split("\n")
         AVDInfo currentAVD = null
         
         for (String line : lines) {
@@ -272,7 +272,7 @@ class EmulatorManager {
                     String apiInfo = line.substring(line.indexOf(":") + 1).trim()
                     // Extract API number if present
                     if (apiInfo.contains("API level")) {
-                        String[] parts = apiInfo.split("API level")
+                        Array<String> parts = apiInfo.split("API level")
                         if (parts.length > 1) {
                             currentAVD.apiLevel = parts[1].trim().split("\\s+")[0]
                         }

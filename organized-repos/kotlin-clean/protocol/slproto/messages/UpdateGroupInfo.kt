@@ -17,7 +17,7 @@ class UpdateGroupInfo : SLMessage() {
     @JvmStatic
     class GroupData {
         public Boolean AllowPublish
-        public Byte[] Charter
+        public ByteArray Charter
         public UUID GroupID
         public UUID InsigniaID
         public Boolean MaturePublish

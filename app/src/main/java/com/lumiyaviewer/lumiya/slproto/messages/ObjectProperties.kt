@@ -18,7 +18,7 @@ class ObjectProperties : SLMessage {
         Int Category
         Long CreationDate
         UUID CreatorID
-        Byte[] Description
+        ByteArray Description
         Int EveryoneMask
         UUID FolderID
         UUID FromTaskID
@@ -27,7 +27,7 @@ class ObjectProperties : SLMessage {
         Int InventorySerial
         UUID ItemID
         UUID LastOwnerID
-        Byte[] Name
+        ByteArray Name
         Int NextOwnerMask
         UUID ObjectID
         UUID OwnerID
@@ -35,9 +35,9 @@ class ObjectProperties : SLMessage {
         Int OwnershipCost
         Int SalePrice
         Int SaleType
-        Byte[] SitName
-        Byte[] TextureID
-        Byte[] TouchName
+        ByteArray SitName
+        ByteArray TextureID
+        ByteArray TouchName
     }
 
     ObjectProperties() {

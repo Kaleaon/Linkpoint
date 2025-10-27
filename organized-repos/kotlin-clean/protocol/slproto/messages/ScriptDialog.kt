@@ -14,18 +14,18 @@ class ScriptDialog : SLMessage() {
 
     @JvmStatic
     class Buttons {
-        public Byte[] ButtonLabel
+        public ByteArray ButtonLabel
     }
 
     @JvmStatic
     class Data {
         public Int ChatChannel
-        public Byte[] FirstName
+        public ByteArray FirstName
         public UUID ImageID
-        public Byte[] LastName
-        public Byte[] Message
+        public ByteArray LastName
+        public ByteArray Message
         public UUID ObjectID
-        public Byte[] ObjectName
+        public ByteArray ObjectName
     }
 
     @JvmStatic

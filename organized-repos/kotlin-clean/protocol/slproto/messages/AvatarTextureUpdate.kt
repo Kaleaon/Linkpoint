@@ -26,7 +26,7 @@ class AvatarTextureUpdate : SLMessage() {
     @JvmStatic
     class WearableData {
         public UUID CacheID
-        public Byte[] HostName
+        public ByteArray HostName
         public Int TextureIndex
     }
 

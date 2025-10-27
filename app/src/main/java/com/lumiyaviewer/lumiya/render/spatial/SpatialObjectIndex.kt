@@ -18,9 +18,9 @@ import java.util.Set
 import java.util.concurrent.atomic.AtomicBoolean
 
 class SpatialObjectIndex {
-    private Int NUM_DEPTH_BINS = 16
-    private Float REGION_SIZE_XY = 256.0f
-    private Float REGION_SIZE_Z = 4096.0f
+    private val NUM_DEPTH_BINS: Int = 16
+    private val REGION_SIZE_XY: Float = 256.0f
+    private val REGION_SIZE_Z: Float = 4096.0f
     private volatile Int avatarCountLimit = 5
     private val drawListUpdateRequested: AtomicBoolean = AtomicBoolean(false)
     private val drawListUpdateTask: DrawListUpdateTask = DrawListUpdateTask(this, null)
@@ -37,7 +37,7 @@ class SpatialObjectIndex {
     private val objectsToUpdate: Set<DrawListObjectEntry> = Collections.newSetFromMap(IdentityHashMap())
     private val objectsUpdateTask: ObjectsUpdateTask = ObjectsUpdateTask(this, null)
     private SpatialTree spatialTree
-    private DrawListTerrainEntry[][] terrain = ((DrawListTerrainEntry[][]) Array.newInstance(DrawListTerrainEntry.class, Int[]{16, 16}))
+    private DrawListTerrainEntry[][] terrain = ((DrawListTerrainEntry[][]) Array.newInstance(DrawListTerrainEntry.class, IntArray{16, 16}))
     private val terrainDirty: Map<Int, TerrainData> = HashMap()
     private val terrainLock: Any = Any()
     private val terrainUpdate: Runnable = Runnable() {
@@ -49,7 +49,7 @@ class SpatialObjectIndex {
                     Iterator it = SpatialObjectIndex.this.terrainDirty.entrySet().iterator()
                     if (it.hasNext()) {
                         Entry entry = (Entry) it.next()
-                        Int intValue = ((Int) entry.getKey()).intValue()
+                        Int intValue = (entry.toInt().getKey()).intValue()
                         TerrainData terrainData2 = (TerrainData) entry.getValue()
                         it.remove()
                         i = intValue

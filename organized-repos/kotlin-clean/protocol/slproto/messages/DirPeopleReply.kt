@@ -25,9 +25,9 @@ class DirPeopleReply : SLMessage() {
     @JvmStatic
     class QueryReplies {
         public UUID AgentID
-        public Byte[] FirstName
-        public Byte[] Group
-        public Byte[] LastName
+        public ByteArray FirstName
+        public ByteArray Group
+        public ByteArray LastName
         public Boolean Online
         public Int Reputation
     }

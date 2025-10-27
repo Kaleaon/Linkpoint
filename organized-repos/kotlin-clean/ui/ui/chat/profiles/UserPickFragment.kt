@@ -664,7 +664,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         PickInfoReply data = this.pickInfo.getData()
         if (data != null && userManager != null) {
-            LLVector3 lLVector3 = LLVector3((Float) data.Data_Field.PosGlobal.x, (Float) data.Data_Field.PosGlobal.y, (Float) data.Data_Field.PosGlobal.z)
+            LLVector3 lLVector3 = LLVector3(data.toFloat().Data_Field.PosGlobal.x, data.toFloat().Data_Field.PosGlobal.y, data.toFloat().Data_Field.PosGlobal.z)
             AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
             builder.setMessage(getActivity().getString(R.string.teleport_pick_confirm_title)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this, userManager, lLVector3) {
 

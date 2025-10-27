@@ -18,7 +18,7 @@ class TelehubInfo : SLMessage {
 
     class TelehubBlock {
         UUID ObjectID
-        Byte[] ObjectName
+        ByteArray ObjectName
         LLVector3 TelehubPos
         LLQuaternion TelehubRot
     }

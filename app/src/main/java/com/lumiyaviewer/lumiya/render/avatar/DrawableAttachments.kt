@@ -108,7 +108,7 @@ class DrawableAttachments {
         }
         Boolean z3 = false
         for (Any obj : this.nonRigged.keySet()) {
-            Float[] attachmentMatrix = avatarSkeleton.getAttachmentMatrix(obj.intValue())
+            FloatArray attachmentMatrix = avatarSkeleton.getAttachmentMatrix(obj.intValue())
             if (attachmentMatrix != null) {
                 renderContext.glObjWorldPushAndMultMatrixf(attachmentMatrix, 0)
                 for (DrawableObject DrawRigged30222 : this.nonRigged.get(obj)) {

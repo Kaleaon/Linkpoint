@@ -9,22 +9,22 @@ import java.io.InputStream
 
 class WindlightPreset {
     private const val WINDLIGHT_GAMMA: Float = 2.2f
-    public Float[] ambient = Float[4]
-    public Float[] ambientBelowWater = Float[4]
-    public Float[] blue_density = Float[4]
-    public Float[] blue_horizon = Float[4]
-    public Float[] cloud_color = Float[4]
-    public Float[] cloud_pos_density1 = Float[4]
-    public Float[] cloud_pos_density2 = Float[4]
-    public Float[] cloud_shadow = Float[4]
-    private String[] defaultPresets = {"A%2D12AM", "A%2D3AM", "A%2D6AM", "A%2D9AM", "A%2D12PM", "A%2D3PM", "A%2D6PM", "A%2D9PM"}
-    public Float[] haze_density = Float[4]
-    public Float[] haze_horizon = Float[4]
-    private Float[] hourTable = {0.0f, 0.125f, 0.25f, 0.375f, 0.5f, 0.625f, 0.75f, 0.875f}
-    public Float[] lightnorm = Float[4]
+    public FloatArray ambient = FloatArray(4)
+    public FloatArray ambientBelowWater = FloatArray(4)
+    public FloatArray blue_density = FloatArray(4)
+    public FloatArray blue_horizon = FloatArray(4)
+    public FloatArray cloud_color = FloatArray(4)
+    public FloatArray cloud_pos_density1 = FloatArray(4)
+    public FloatArray cloud_pos_density2 = FloatArray(4)
+    public FloatArray cloud_shadow = FloatArray(4)
+    private val defaultPresets: Array<String> = {"A%2D12AM", "A%2D3AM", "A%2D6AM", "A%2D9AM", "A%2D12PM", "A%2D3PM", "A%2D6PM", "A%2D9PM"}
+    public FloatArray haze_density = FloatArray(4)
+    public FloatArray haze_horizon = FloatArray(4)
+    private val hourTable: FloatArray = {0.0f, 0.125f, 0.25f, 0.375f, 0.5f, 0.625f, 0.75f, 0.875f}
+    public FloatArray lightnorm = FloatArray(4)
     public Float star_brightness
-    public Float[] sunlightBelowWater = Float[4]
-    public Float[] sunlight_color = Float[4]
+    public FloatArray sunlightBelowWater = FloatArray(4)
+    public FloatArray sunlight_color = FloatArray(4)
 
     public WindlightPreset() {
         reset()
@@ -34,7 +34,7 @@ class WindlightPreset {
         loadFromAssetFile(str)
     }
 
-    private Unit darkenUnderWater(Float[] fArr, Float[] fArr2) {
+    private Unit darkenUnderWater(FloatArray fArr, FloatArray fArr2) {
         for (Int i = 0; i < fArr2.length; i++) {
             if (i == 2 || i == 3) {
                 fArr[i] = fArr2[i]
@@ -44,19 +44,19 @@ class WindlightPreset {
         }
     }
 
-    private Unit gammaFloatArray(Float[] fArr, Float f, Float f2) {
+    private Unit gammaFloatArray(FloatArray fArr, Float f, Float f2) {
         for (Int i = 0; i < fArr.length; i++) {
-            fArr[i] = ((Float) Math.pow((Double) fArr[i], (Double) (1.0f / f))) * f2
+            fArr[i] = (Math.toFloat().pow(fArr.toDouble()[i], (Double) (1.0f / f))) * f2
         }
     }
 
-    private Unit getFloatArray(LLSDNode lLSDNode, Float[] fArr, Float f) throws LLSDException {
+    private Unit getFloatArray(LLSDNode lLSDNode, FloatArray fArr, Float f) throws LLSDException {
         for (Int i = 0; i < fArr.length; i++) {
-            fArr[i] = ((Float) lLSDNode.byIndex(i).asDouble()) / f
+            fArr[i] = (lLSDNode.toFloat().byIndex(i).asDouble()) / f
         }
     }
 
-    private const val Unit lerpFloatArray(Float[] fArr, Float[] fArr2, Float[] fArr3, Float f) {
+    private const val Unit lerpFloatArray(FloatArray fArr, FloatArray fArr2, FloatArray fArr3, Float f) {
         Int i = 0
         while (i < fArr.length && i < fArr2.length && i < fArr3.length) {
             fArr[i] = (fArr2[i] * (1.0f - f)) + (fArr3[i] * f)
@@ -81,7 +81,7 @@ class WindlightPreset {
             getFloatArray(parseXML.byKey("cloud_pos_density1"), this.cloud_pos_density1, 3.0f)
             getFloatArray(parseXML.byKey("cloud_pos_density2"), this.cloud_pos_density2, 3.0f)
             getFloatArray(parseXML.byKey("cloud_shadow"), this.cloud_shadow, 1.0f)
-            this.star_brightness = (Float) parseXML.byKey("star_brightness").asDouble()
+            this.star_brightness = parseXML.toFloat().byKey("star_brightness").asDouble()
             gammaFloatArray(this.ambient, WINDLIGHT_GAMMA, 1.25f)
             gammaFloatArray(this.sunlight_color, WINDLIGHT_GAMMA, 1.25f)
             darkenUnderWater(this.ambientBelowWater, this.ambient)

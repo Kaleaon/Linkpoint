@@ -20,7 +20,7 @@ class ObjectExtraParams : SLMessage() {
     @JvmStatic
     class ObjectData {
         public Int ObjectLocalID
-        public Byte[] ParamData
+        public ByteArray ParamData
         public Boolean ParamInUse
         public Int ParamSize
         public Int ParamType

@@ -14,7 +14,7 @@ import java.util.UUID
  * Integrates existing avatar system with new rendering components
  */
 class ModernAvatarManager {
-    private String TAG = "ModernAvatarManager"
+    private val TAG: String = "ModernAvatarManager"
     
     private Context context
     private ExecutorService executor

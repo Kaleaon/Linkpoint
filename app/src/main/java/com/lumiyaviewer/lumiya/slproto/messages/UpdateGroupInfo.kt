@@ -15,7 +15,7 @@ class UpdateGroupInfo : SLMessage {
 
     class GroupData {
         Boolean AllowPublish
-        Byte[] Charter
+        ByteArray Charter
         UUID GroupID
         UUID InsigniaID
         Boolean MaturePublish

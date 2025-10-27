@@ -10,7 +10,7 @@ import java.util.UUID
 class SLTextureFetchRequest : HasPriority {
 
     /* renamed from: -com-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] f130comlumiyaviewerlumiyarendertexTextureClassSwitchesValues = null
+    private /* synthetic */ IntArray f130comlumiyaviewerlumiyarendertexTextureClassSwitchesValues = null
     AvatarTextureFaceIndex avatarFaceIndex
     UUID avatarUUID
     File destFile
@@ -26,11 +26,11 @@ class SLTextureFetchRequest : HasPriority {
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] m239getcomlumiyaviewerlumiyarendertexTextureClassSwitchesValues() {
+    private /* synthetic */ IntArray m239getcomlumiyaviewerlumiyarendertexTextureClassSwitchesValues() {
         if (f130comlumiyaviewerlumiyarendertexTextureClassSwitchesValues != null) {
             return f130comlumiyaviewerlumiyarendertexTextureClassSwitchesValues
         }
-        Int[] iArr = Int[TextureClass.values().length]
+        IntArray iArr = Int[TextureClass.values().length]
         try {
             iArr[TextureClass.Asset.ordinal()] = 1
         } catch (NoSuchFieldError e) {

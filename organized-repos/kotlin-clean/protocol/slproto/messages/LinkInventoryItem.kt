@@ -17,10 +17,10 @@ class LinkInventoryItem : SLMessage() {
     @JvmStatic
     class InventoryBlock {
         public Int CallbackID
-        public Byte[] Description
+        public ByteArray Description
         public UUID FolderID
         public Int InvType
-        public Byte[] Name
+        public ByteArray Name
         public UUID OldItemID
         public UUID TransactionID
         public Int Type

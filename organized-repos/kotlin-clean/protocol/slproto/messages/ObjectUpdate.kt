@@ -17,8 +17,8 @@ class ObjectUpdate : SLMessage() {
     class ObjectData {
         public Int CRC
         public Int ClickAction
-        public Byte[] Data
-        public Byte[] ExtraParams
+        public ByteArray Data
+        public ByteArray ExtraParams
         public Int Flags
         public UUID FullID
         public Float Gain
@@ -27,12 +27,12 @@ class ObjectUpdate : SLMessage() {
         public LLVector3 JointPivot
         public Int JointType
         public Int Material
-        public Byte[] MediaURL
-        public Byte[] NameValue
-        public Byte[] ObjectData
+        public ByteArray MediaURL
+        public ByteArray NameValue
+        public ByteArray ObjectData
         public UUID OwnerID
         public Int PCode
-        public Byte[] PSBlock
+        public ByteArray PSBlock
         public Int ParentID
         public Int PathBegin
         public Int PathCurve
@@ -56,10 +56,10 @@ class ObjectUpdate : SLMessage() {
         public LLVector3 Scale
         public UUID Sound
         public Int State
-        public Byte[] Text
-        public Byte[] TextColor
-        public Byte[] TextureAnim
-        public Byte[] TextureEntry
+        public ByteArray Text
+        public ByteArray TextColor
+        public ByteArray TextureAnim
+        public ByteArray TextureEntry
         public Int UpdateFlags
     }
 

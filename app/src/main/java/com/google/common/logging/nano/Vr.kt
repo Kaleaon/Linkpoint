@@ -7,8 +7,8 @@ class Vr {
     class VREvent {
         class VrCore {
             class ErrorCode {
-                Int CONTROLLER_GATT_CHARACTERISTIC_NOT_FOUND = 0
-                Int CONTROLLER_BATTERY_READ_FAILED = 1
+                val CONTROLLER_GATT_CHARACTERISTIC_NOT_FOUND: Int = 0
+                val CONTROLLER_BATTERY_READ_FAILED: Int = 1
             }
         }
     }

@@ -21,8 +21,8 @@ class DirPlacesQueryBackend : SLMessage() {
         public Int QueryFlags
         public UUID QueryID
         public Int QueryStart
-        public Byte[] QueryText
-        public Byte[] SimName
+        public ByteArray QueryText
+        public ByteArray SimName
     }
 
     public DirPlacesQueryBackend() {

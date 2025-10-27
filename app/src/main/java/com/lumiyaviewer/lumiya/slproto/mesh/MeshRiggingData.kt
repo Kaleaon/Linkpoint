@@ -19,11 +19,11 @@ class MeshRiggingData {
     @Nonnull
     private float[] jointMatrices
     @Nonnull
-    private Int[] joints
+    private IntArray joints
     private float[] mappedJointMatrices
     private float[] mappedJointVectors
 
-    private MeshRiggingData(@Nonnull Int[] iArr, @Nonnull float[] fArr, Boolean z) {
+    private MeshRiggingData(@Nonnull IntArray iArr, @Nonnull float[] fArr, Boolean z) {
         this.joints = iArr
         this.jointMatrices = fArr
         this.hasExtendedBones = z
@@ -49,7 +49,7 @@ class MeshRiggingData {
         return (Arrays.hashCode(this.joints) * 31) + Arrays.hashCode(this.jointMatrices)
     }
 
-    MeshRiggingData create(@Nonnull Int[] iArr, @Nonnull float[] fArr, Boolean z) {
+    MeshRiggingData create(@Nonnull IntArray iArr, @Nonnull float[] fArr, Boolean z) {
         return riggingDataPool.intern(MeshRiggingData(iArr, fArr, z))
     }
 

@@ -13,7 +13,7 @@ import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import javax.annotation.Nullable
 
 abstract class ChatterFragment : FragmentWithTitle : ChatterNameRetriever.OnChatterNameUpdated {
-    String CHATTER_ID_KEY = "chatterID"
+    val CHATTER_ID_KEY: String = "chatterID"
     /* access modifiers changed from: protected */
     @Nullable
     ChatterID chatterID

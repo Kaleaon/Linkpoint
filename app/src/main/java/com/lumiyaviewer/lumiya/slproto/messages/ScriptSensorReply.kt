@@ -19,7 +19,7 @@ class ScriptSensorReply : SLMessage {
 
     class SensedData {
         UUID GroupID
-        Byte[] Name
+        ByteArray Name
         UUID ObjectID
         UUID OwnerID
         LLVector3 Position

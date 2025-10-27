@@ -19,17 +19,17 @@ import javax.annotation.Nullable
 class MuteListAdapter : BaseAdapter {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-modules-mutelist-MuteTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] f461comlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues = null
+    private /* synthetic */ IntArray f461comlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues = null
     private LayoutInflater layoutInflater
     @Nonnull
     private ImmutableList<MuteListEntry> muteList = ImmutableList.of()
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-modules-mutelist-MuteTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] m646getcomlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues() {
+    private /* synthetic */ IntArray m646getcomlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues() {
         if (f461comlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues != null) {
             return f461comlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues
         }
-        Int[] iArr = Int[MuteType.values().length]
+        IntArray iArr = Int[MuteType.values().length]
         try {
             iArr[MuteType.AGENT.ordinal()] = 1
         } catch (NoSuchFieldError e) {

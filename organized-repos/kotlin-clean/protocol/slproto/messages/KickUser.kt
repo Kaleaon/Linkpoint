@@ -18,7 +18,7 @@ class KickUser : SLMessage() {
     @JvmStatic
     class UserInfo {
         public UUID AgentID
-        public Byte[] Reason
+        public ByteArray Reason
         public UUID SessionID
     }
 

@@ -22,7 +22,7 @@ class AgentGroupDataUpdate : SLMessage() {
         public Int Contribution
         public UUID GroupID
         public UUID GroupInsigniaID
-        public Byte[] GroupName
+        public ByteArray GroupName
         public Long GroupPowers
     }
 

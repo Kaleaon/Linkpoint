@@ -15,7 +15,7 @@ class AgentAlertMessage : SLMessage() {
 
     @JvmStatic
     class AlertData {
-        public Byte[] Message
+        public ByteArray Message
         public Boolean Modal
     }
 

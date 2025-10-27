@@ -20,11 +20,11 @@ class ViewerEffect : SLMessage() {
     @JvmStatic
     class Effect {
         public UUID AgentID
-        public Byte[] Color
+        public ByteArray Color
         public Float Duration
         public UUID ID
         public Int Type
-        public Byte[] TypeData
+        public ByteArray TypeData
     }
 
     public ViewerEffect() {

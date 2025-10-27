@@ -44,7 +44,7 @@ import java.util.UUID
  * 5. Provide foundation for future enhanced features migration
  */
 class LLSDIntegrationBridge {
-    private String TAG = "LLSDIntegrationBridge"
+    private val TAG: String = "LLSDIntegrationBridge"
     
     /**
      * Parse LLSD from XML string using the external library
@@ -103,9 +103,9 @@ class LLSDIntegrationBridge {
             } else if (externalObject instanceof Integer) {
                 return LLSDInt((Integer) externalObject)
             } else if (externalObject instanceof Double) {
-                return LLSDDouble((Double) externalObject)
+                return LLSDDouble(externalObject.toDouble())
             } else if (externalObject instanceof Float) {
-                return LLSDDouble(((Float) externalObject).doubleValue())
+                return LLSDDouble((externalObject.toFloat()).doubleValue())
             } else if (externalObject instanceof Boolean) {
                 return LLSDBoolean((Boolean) externalObject)
             } else if (externalObject instanceof UUID) {

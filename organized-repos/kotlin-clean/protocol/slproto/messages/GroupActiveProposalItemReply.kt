@@ -21,13 +21,13 @@ class GroupActiveProposalItemReply : SLMessage() {
     @JvmStatic
     class ProposalData {
         public Boolean AlreadyVoted
-        public Byte[] EndDateTime
+        public ByteArray EndDateTime
         public Float Majority
-        public Byte[] ProposalText
+        public ByteArray ProposalText
         public Int Quorum
-        public Byte[] StartDateTime
-        public Byte[] TerseDateID
-        public Byte[] VoteCast
+        public ByteArray StartDateTime
+        public ByteArray TerseDateID
+        public ByteArray VoteCast
         public UUID VoteID
         public UUID VoteInitiator
     }

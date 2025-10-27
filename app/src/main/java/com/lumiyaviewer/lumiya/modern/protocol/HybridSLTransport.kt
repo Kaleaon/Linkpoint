@@ -13,7 +13,7 @@ import java.util.HashMap
  * Based on Second Life Integration Guide modernization plans
  */
 class HybridSLTransport {
-    private String TAG = "HybridSLTransport"
+    private val TAG: String = "HybridSLTransport"
     
     private HTTP2CapsClient capsClient;        // Modern CAPS using HTTP/2
     private WebSocketEventClient eventClient;  // Real-time events
@@ -136,7 +136,7 @@ class HybridSLTransport {
             // Example format: <map><key>EventQueueGet</key><string>http://...</string></map>
             
             // Common Second Life capabilities to extract
-            String[] capabilityNames = {
+            Array<String> capabilityNames = {
                 "EventQueueGet", "ChatSessionRequest", "SendChatMessage",
                 "UploadBakedTexture", "FetchInventory", "GetMesh", 
                 "GetTexture", "AgentPreferences", "UpdateAgentInformation"

@@ -37,19 +37,19 @@ class DirectByteBuffer {
 
     private native ByteBuffer allocate(Int i)
 
-    private native Unit copyByteArray(ByteBuffer byteBuffer, Int i, Byte[] bArr, Int i2, Int i3)
+    private native Unit copyByteArray(ByteBuffer byteBuffer, Int i, ByteArray bArr, Int i2, Int i3)
 
-    private native Unit copyFloatArray(ByteBuffer byteBuffer, Int i, Float[] fArr, Int i2, Int i3)
+    private native Unit copyFloatArray(ByteBuffer byteBuffer, Int i, FloatArray fArr, Int i2, Int i3)
 
     private native Unit copyPart(ByteBuffer byteBuffer, ByteBuffer byteBuffer2, Int i, Int i2, Int i3)
 
-    private native Unit copyShortArray(ByteBuffer byteBuffer, Int i, Short[] sArr, Int i2, Int i3)
+    private native Unit copyShortArray(ByteBuffer byteBuffer, Int i, ShortArray sArr, Int i2, Int i3)
 
-    private native Unit copyShortArrayOffset(ByteBuffer byteBuffer, Int i, Short[] sArr, Int i2, Int i3, Short s)
+    private native Unit copyShortArrayOffset(ByteBuffer byteBuffer, Int i, ShortArray sArr, Int i2, Int i3, Short s)
 
     private native Unit release(ByteBuffer byteBuffer)
 
-    Int zeroDecode(Byte[] bArr, Int i, Int i2, Byte[] bArr2, Int i3, Int i4) throws IndexOutOfBoundsException {
+    Int zeroDecode(ByteArray bArr, Int i, Int i2, ByteArray bArr2, Int i3, Int i4) throws IndexOutOfBoundsException {
         Int zeroDecodeArray = zeroDecodeArray(bArr, i, i2, bArr2, i3, i4)
         if (zeroDecodeArray >= 0) {
             return zeroDecodeArray
@@ -57,7 +57,7 @@ class DirectByteBuffer {
         throw IndexOutOfBoundsException("zeroDecode: out of dest buffer, destStart " + Int.toString(i) + " destMaxLen " + Int.toString(i2))
     }
 
-    private native Int zeroDecodeArray(Byte[] bArr, Int i, Int i2, Byte[] bArr2, Int i3, Int i4)
+    private native Int zeroDecodeArray(ByteArray bArr, Int i, Int i2, ByteArray bArr2, Int i3, Int i4)
 
     ByteBuffer asByteBuffer() {
         return this.buf
@@ -108,7 +108,7 @@ class DirectByteBuffer {
         return this.buf.getShort(i * 2)
     }
 
-    Unit loadFromByteArray(Int i, Byte[] bArr, Int i2, Int i3) {
+    Unit loadFromByteArray(Int i, ByteArray bArr, Int i2, Int i3) {
         Int i4 = i + i3
         if (i >= 0 && i <= this.buf.capacity() && i4 >= 0 && i4 <= this.buf.capacity()) {
             copyByteArray(this.buf, i, bArr, i2, i3)
@@ -117,7 +117,7 @@ class DirectByteBuffer {
         throw IndexOutOfBoundsException(String.format("capacity %d, posStart %d, posEnd %d", Any[]{Int.valueOf(this.buf.capacity()), Int.valueOf(i), Int.valueOf(i4)}))
     }
 
-    Unit loadFromFloatArray(Int i, Float[] fArr, Int i2, Int i3) {
+    Unit loadFromFloatArray(Int i, FloatArray fArr, Int i2, Int i3) {
         Int i4 = i * 4
         Int i5 = (i + i3) * 4
         if (i4 >= 0 && i4 <= this.buf.capacity() && i5 >= 0 && i5 <= this.buf.capacity()) {
@@ -127,7 +127,7 @@ class DirectByteBuffer {
         throw IndexOutOfBoundsException(String.format("capacity %d, posStart %d, posEnd %d", Any[]{Int.valueOf(this.buf.capacity()), Int.valueOf(i4), Int.valueOf(i5)}))
     }
 
-    Unit loadFromShortArray(Int i, Short[] sArr, Int i2, Int i3) {
+    Unit loadFromShortArray(Int i, ShortArray sArr, Int i2, Int i3) {
         Int i4 = i * 2
         Int i5 = (i + i3) * 2
         if (i4 >= 0 && i4 <= this.buf.capacity() && i5 >= 0 && i5 <= this.buf.capacity()) {
@@ -137,7 +137,7 @@ class DirectByteBuffer {
         throw IndexOutOfBoundsException(String.format("capacity %d, posStart %d, posEnd %d", Any[]{Int.valueOf(this.buf.capacity()), Int.valueOf(i4), Int.valueOf(i5)}))
     }
 
-    Unit loadFromShortArrayOffset(Int i, Short[] sArr, Int i2, Int i3, Short s) {
+    Unit loadFromShortArrayOffset(Int i, ShortArray sArr, Int i2, Int i3, Short s) {
         Int i4 = i * 2
         Int i5 = (i + i3) * 2
         if (i4 >= 0 && i4 <= this.buf.capacity() && i5 >= 0 && i5 <= this.buf.capacity()) {
@@ -189,7 +189,7 @@ class DirectByteBuffer {
 
     Unit read(InputStream inputStream) throws IOException {
         ByteBuffer asByteBuffer = asByteBuffer()
-        Byte[] bArr = Byte[asByteBuffer.capacity()]
+        ByteArray bArr = Byte[asByteBuffer.capacity()]
         inputStream.read(bArr)
         Int position = asByteBuffer.position()
         asByteBuffer.position(0)

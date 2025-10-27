@@ -28,7 +28,7 @@ class SimulatorPresentAtLocation : SLMessage() {
         public Int RegionFlags
         public UUID RegionID
         public Int SimAccess
-        public Byte[] SimName
+        public ByteArray SimName
     }
 
     @JvmStatic

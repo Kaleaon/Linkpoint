@@ -12,12 +12,12 @@ import javax.annotation.Nullable
 class NotificationChannels {
 
     /* renamed from: -com-lumiyaviewer-lumiya-ui-settings-NotificationTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] f464comlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues = null
-    String MESSAGE_NOTIFICATION_GROUP = "messageNotifications"
+    private /* synthetic */ IntArray f464comlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues = null
+    val MESSAGE_NOTIFICATION_GROUP: String = "messageNotifications"
     private NotificationChannelManager channelManager
 
     enum Channel {
-        OnlineStatus("onlineStatus", R.string.notify_online_status_name, R.string.notify_online_status_desc, (Int) null, R.id.online_notify_id),
+        OnlineStatus("onlineStatus", R.string.notify_online_status_name, R.string.notify_online_status_desc, null.toInt(), R.id.online_notify_id),
         Local("localChat", R.string.notify_local_chat_name, R.string.notify_local_chat_desc, NotificationType.LocalChat, R.id.unread_notify_local_id),
         Group("groupChat", R.string.notify_group_chat_name, R.string.notify_group_chat_desc, NotificationType.Group, R.id.unread_notify_group_id),
         IM("privateIM", R.string.notify_im_name, R.string.notify_im_desc, NotificationType.Private, R.id.unread_notify_im_id)
@@ -48,11 +48,11 @@ class NotificationChannels {
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-ui-settings-NotificationTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] m666getcomlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues() {
+    private /* synthetic */ IntArray m666getcomlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues() {
         if (f464comlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues != null) {
             return f464comlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues
         }
-        Int[] iArr = Int[NotificationType.values().length]
+        IntArray iArr = Int[NotificationType.values().length]
         try {
             iArr[NotificationType.Group.ordinal()] = 1
         } catch (NoSuchFieldError e) {

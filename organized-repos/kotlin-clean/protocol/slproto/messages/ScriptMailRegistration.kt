@@ -10,7 +10,7 @@ class ScriptMailRegistration : SLMessage() {
     @JvmStatic
     class DataBlock {
         public Int Flags
-        public Byte[] TargetIP
+        public ByteArray TargetIP
         public Int TargetPort
         public UUID TaskID
     }

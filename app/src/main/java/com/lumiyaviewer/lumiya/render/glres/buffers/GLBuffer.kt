@@ -9,10 +9,10 @@ import com.lumiyaviewer.rawbuffers.DirectByteBuffer
 
 class GLBuffer : GLResource {
     /* access modifiers changed from: private */
-    ThreadLocal<Int[]> idBuffer = ThreadLocal<Int[]>() {
+    ThreadLocal<IntArray> idBuffer = ThreadLocal<IntArray>() {
         /* access modifiers changed from: protected */
-        Int[] initialValue() {
-            return Int[1]
+        IntArray initialValue() {
+            return IntArray(1)
         }
     }
     private DirectByteBuffer rawBuffer
@@ -26,7 +26,7 @@ class GLBuffer : GLResource {
         }
 
         fun GLFree(): Unit {
-            Int[] iArr = (Int[]) GLBuffer.idBuffer.get()
+            IntArray iArr = (IntArray) GLBuffer.idBuffer.get()
             iArr[0] = this.handle
             Debug.Printf("GLBuffer: deleted buffer %d", Int.valueOf(iArr[0]))
             GLES11.glDeleteBuffers(1, iArr, 0)
@@ -47,7 +47,7 @@ class GLBuffer : GLResource {
 
     /* access modifiers changed from: protected */
     fun Allocate(gLResourceManager: GLResourceManager): Int {
-        Int[] iArr = idBuffer.get()
+        IntArray iArr = idBuffer.get()
         GLES11.glGenBuffers(1, iArr, 0)
         Debug.Printf("GLBuffer: allocated buffer %d", Int.valueOf(iArr[0]))
         return iArr[0]

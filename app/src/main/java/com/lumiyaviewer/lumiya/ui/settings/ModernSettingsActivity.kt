@@ -19,7 +19,7 @@ import com.lumiyaviewer.lumiya.LumiyaApp
  * Provides comprehensive configuration options for all modern components
  */
 class ModernSettingsActivity : AppCompatActivity {
-    private String TAG = "ModernSettingsActivity"
+    private val TAG: String = "ModernSettingsActivity"
     
     // UI Components
     private Toolbar toolbar

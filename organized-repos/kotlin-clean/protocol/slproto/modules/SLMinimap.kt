@@ -50,7 +50,7 @@ class SLMinimap : SLModule() {
     /* access modifiers changed from: private */
     public ImmutableVector myAvatarPosition = null
     private Int nearbyUsersCount = 0
-    private val Int[] parcelIDs = Int[4096]
+    private val IntArray parcelIDs = IntArray(4096)
     private val Map<Integer, ParcelData> parcels = ConcurrentHashMap()
     private val RequestHandler<SubscriptionSingleKey> userLocationRequestHandler = SimpleRequestHandler<SubscriptionSingleKey>() {
         fun onRequest(SubscriptionSingleKey subscriptionSingleKey) {
@@ -69,7 +69,7 @@ class SLMinimap : SLModule() {
     class MinimapBitmap {
         private val Int bitmapHeight
         private val Int bitmapWidth
-        final Int[] colors
+        final IntArray colors
 
         MinimapBitmap(Int i, Int i2) {
             this.bitmapWidth = i
@@ -77,7 +77,7 @@ class SLMinimap : SLModule() {
             this.colors = Int[(i * i2)]
         }
 
-        MinimapBitmap(MinimapBitmap minimapBitmap, Int i, Int i2, Int[] iArr) {
+        MinimapBitmap(MinimapBitmap minimapBitmap, Int i, Int i2, IntArray iArr) {
             this.bitmapWidth = minimapBitmap.bitmapWidth
             this.bitmapHeight = minimapBitmap.bitmapHeight
             this.colors = Arrays.copyOf(minimapBitmap.colors, minimapBitmap.colors.length)
@@ -137,8 +137,8 @@ class SLMinimap : SLModule() {
 
     private Int getParcelDataIndex(ImmutableVector immutableVector) {
         Int i = 0
-        Int floor = (Int) Math.floor((Double) ((immutableVector.getX() * 64.0f) / 256.0f))
-        Int floor2 = (Int) Math.floor((Double) ((immutableVector.getY() * 64.0f) / 256.0f))
+        Int floor = Math.toInt().floor((Double) ((immutableVector.getX() * 64.0f) / 256.0f))
+        Int floor2 = Math.toInt().floor((Double) ((immutableVector.getY() * 64.0f) / 256.0f))
         if (floor < 0) {
             floor = 0
         } else if (floor >= 64) {
@@ -192,7 +192,7 @@ class SLMinimap : SLModule() {
             Int r0 = r13.myAvatarParcelDataIndex
             if (r0 < 0) goto L_0x01e8
             java.util.Map<java.lang.Integer, com.lumiyaviewer.lumiya.slproto.users.ParcelData> r0 = r13.parcels
-            Int[] r1 = r13.parcelIDs
+            IntArray r1 = r13.parcelIDs
             Int r4 = r13.myAvatarParcelDataIndex
             r1 = r1[r4]
             java.lang.Integer r1 = java.lang.Integer.valueOf(r1)
@@ -221,12 +221,12 @@ class SLMinimap : SLModule() {
             com.lumiyaviewer.lumiya.slproto.messages.CoarseLocationUpdate$Location r0 = (com.lumiyaviewer.lumiya.slproto.messages.CoarseLocationUpdate.Location) r0
             com.lumiyaviewer.lumiya.slproto.types.ImmutableVector r10 = com.lumiyaviewer.lumiya.slproto.types.ImmutableVector
             Int r11 = r0.X
-            Float r11 = (Float) r11
+            Float r11 = r11.toFloat()
             Int r12 = r0.Y
-            Float r12 = (Float) r12
+            Float r12 = r12.toFloat()
             Int r0 = r0.Z
             Int r0 = r0 * 4
-            Float r0 = (Float) r0
+            Float r0 = r0.toFloat()
             r10.<init>(r11, r12, r0)
             com.lumiyaviewer.lumiya.slproto.messages.CoarseLocationUpdate$Index r0 = r14.Index_Field
             Int r0 = r0.You
@@ -241,7 +241,7 @@ class SLMinimap : SLModule() {
             if (r0 == r6) goto L_0x01e5
             r13.myAvatarParcelDataIndex = r0
             java.util.Map<java.lang.Integer, com.lumiyaviewer.lumiya.slproto.users.ParcelData> r0 = r13.parcels
-            Int[] r4 = r13.parcelIDs
+            IntArray r4 = r13.parcelIDs
             Int r6 = r13.myAvatarParcelDataIndex
             r4 = r4[r6]
             java.lang.Integer r4 = java.lang.Integer.valueOf(r4)
@@ -444,9 +444,9 @@ class SLMinimap : SLModule() {
     @SLMessageHandler
     fun HandleParcelOverlay(ParcelOverlay parcelOverlay) {
         Debug.Log("ParcelOverlay: SequenceID = " + parcelOverlay.ParcelData_Field.SequenceID)
-        Byte[] bArr = parcelOverlay.ParcelData_Field.Data
+        ByteArray bArr = parcelOverlay.ParcelData_Field.Data
         Int length = bArr.length / 64
-        Int[] iArr = Int[(length * 4 * 64 * 4)]
+        IntArray iArr = Int[(length * 4 * 64 * 4)]
         Int i = 0
         Int i2 = 0
         while (i2 < length) {
@@ -550,7 +550,7 @@ class SLMinimap : SLModule() {
             java.util.Map<java.lang.Integer, com.lumiyaviewer.lumiya.slproto.users.ParcelData> r0 = r9.parcels     // Catch:{ LLSDException -> 0x0040 }
             java.lang.Integer r7 = java.lang.Integer.valueOf(r6)     // Catch:{ LLSDException -> 0x0040 }
             r0.put(r7, r5)     // Catch:{ LLSDException -> 0x0040 }
-            Boolean[] r5 = r5.getParcelBitmap()     // Catch:{ LLSDException -> 0x0040 }
+            BooleanArray r5 = r5.getParcelBitmap()     // Catch:{ LLSDException -> 0x0040 }
             r0 = r1
             r1 = r2
         L_0x002c:
@@ -558,7 +558,7 @@ class SLMinimap : SLModule() {
             if (r1 >= r7) goto L_0x0045
             Boolean r7 = r5[r1]     // Catch:{ LLSDException -> 0x0057 }
             if (r7 == 0) goto L_0x003d
-            Int[] r7 = r9.parcelIDs     // Catch:{ LLSDException -> 0x0057 }
+            IntArray r7 = r9.parcelIDs     // Catch:{ LLSDException -> 0x0057 }
             r7[r1] = r6     // Catch:{ LLSDException -> 0x0057 }
             Int r7 = r9.myAvatarParcelDataIndex     // Catch:{ LLSDException -> 0x0057 }
             if (r1 != r7) goto L_0x003d

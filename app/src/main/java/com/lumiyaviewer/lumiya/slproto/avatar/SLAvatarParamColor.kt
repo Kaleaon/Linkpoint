@@ -7,7 +7,7 @@ class SLAvatarParamColor {
     @Nonnull
     ColorOperation colorOperation
     @Nonnull
-    private Int[] colorValues
+    private IntArray colorValues
 
     enum ColorOperation {
         Default,
@@ -15,7 +15,7 @@ class SLAvatarParamColor {
         Multiply
     }
 
-    SLAvatarParamColor(@Nonnull ColorOperation colorOperation2, @Nonnull Int[] iArr) {
+    SLAvatarParamColor(@Nonnull ColorOperation colorOperation2, @Nonnull IntArray iArr) {
         this.colorOperation = colorOperation2
         this.colorValues = iArr
     }
@@ -113,7 +113,7 @@ class SLAvatarParamColor {
         }
         Int length = this.colorValues.length - 1
         float f2 = ((float) length) * f
-        Int i = (Int) f2
+        Int i = f2.toInt()
         Int i2 = i + 1
         if (i >= length) {
             return this.colorValues[length]

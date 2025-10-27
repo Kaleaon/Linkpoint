@@ -23,7 +23,7 @@ class MoveInventoryItem : SLMessage() {
     class InventoryData {
         public UUID FolderID
         public UUID ItemID
-        public Byte[] NewName
+        public ByteArray NewName
     }
 
     public MoveInventoryItem() {
