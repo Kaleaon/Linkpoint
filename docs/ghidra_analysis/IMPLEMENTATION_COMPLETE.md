@@ -135,7 +135,7 @@ The guide at https://remyhax.xyz/posts/android-with-ghidra/ identifies a **criti
 
 > "This is the singular core mistake I see so many people do with Android RE in Ghidra. It's a quirk that is easily worked around if you follow directions."
 
-The mistake is clicking "Yes" on the analysis prompt immediately after import, which causes:
+The mistake is clicking "Yes" on the analysis prompt immediately after import, which is easily avoided by following the proper workflow. This mistake causes:
 - Missing entire DEX files (classes2.dex, classes3.dex, etc.)
 - Broken cross-DEX references
 - Incomplete decompilation
@@ -291,12 +291,12 @@ cat Lumiya/README.md
 
 ### What Requires Full System
 
-⏳ **Full Ghidra Analysis** (would require ~30+ minutes)
-- Complete headless analysis run
-- GUI workflow validation
-- Native library decompilation
+⏳ **Full Ghidra Analysis** (estimated 20-60 minutes per APK, depending on system resources)
+- Complete headless analysis run (15-30 min per APK)
+- GUI workflow validation (5-15 min per APK)
+- Native library decompilation (varies by .so file size)
 
-Note: Full Ghidra analysis is intentionally not run in this implementation phase to avoid long execution times. The scripts are ready to run when needed.
+Note: Full Ghidra analysis is intentionally not run in this implementation phase to avoid long execution times. The scripts are ready to run when needed. Analysis time depends on CPU speed, available memory, and APK complexity.
 
 ## Conclusion
 

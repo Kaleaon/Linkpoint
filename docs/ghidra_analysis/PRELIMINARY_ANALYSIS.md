@@ -22,7 +22,7 @@ This preliminary report documents the initial analysis of the Lumiya APK files p
 **DEX Content**:
 ```
 classes.dex - 7.6 MB
-  └─ Lumiya-specific classes: 6 identified
+  └─ Lumiya-specific classes: 6 (listed below under "Lumiya Classes Found")
 ```
 
 **Native Libraries**:
@@ -44,7 +44,7 @@ MIPS/MIPS64:
   - libopenjpeg.so, librawbuf.so
 ```
 
-**Lumiya Classes Found** (sample):
+**Lumiya Classes Found** (the 6 identified classes):
 ```
 Lcom/lumiyaviewer/lumiya/Debug;
 Lcom/lumiyaviewer/lumiya/R$id;
@@ -94,7 +94,7 @@ The presence of multiple native libraries indicates JNI (Java Native Interface) 
 - Critical for texture decoding in Second Life
 - Will require separate Ghidra analysis alongside DEX
 
-**libgvr.so** - Google VR/Cardboard support
+**libgvr.so** - Google Cardboard/VR support
 - Only in ARM and x86 architectures
 - Virtual reality functionality
 - Complex C++ codebase
