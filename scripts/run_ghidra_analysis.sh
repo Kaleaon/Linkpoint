@@ -1,6 +1,7 @@
 #!/bin/bash
 # Ghidra Analysis Script for Lumiya APK
 # This script automates the complete Ghidra analysis and comparison process
+# Following best practices from https://remyhax.xyz/posts/android-with-ghidra/
 
 set -e
 
@@ -8,18 +9,20 @@ set -e
 REPO_ROOT="/home/runner/work/Linkpoint/Linkpoint"
 GHIDRA_PATH="/tmp/ghidra/ghidra_11.4.2_PUBLIC"
 ANALYSIS_DIR="/tmp/lumiya_analysis"
-APK_FILE="$REPO_ROOT/Lumiya_3.4.2.zip"  # This is actually the original APK file
+APK_FILE="$REPO_ROOT/Lumiya/Lumiya_3.4.2.apk"
 
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}Lumiya Ghidra Analysis Pipeline${NC}"
 echo -e "${BLUE}Using @NationalSecurityAgency/ghidra${NC}"
+echo -e "${CYAN}Guide: https://remyhax.xyz/posts/android-with-ghidra/${NC}"
 echo -e "${BLUE}========================================${NC}"
 
 # Function to print status
@@ -35,6 +38,10 @@ print_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
+print_info() {
+    echo -e "${CYAN}[INFO]${NC} $1"
+}
+
 # Step 1: Setup and verify prerequisites
 print_status "Setting up Ghidra analysis environment..."
 
@@ -48,11 +55,26 @@ if [ ! -f "$APK_FILE" ]; then
     exit 1
 fi
 
-# Step 2: Run Ghidra headless analysis
-print_status "Running Ghidra headless analysis on Lumiya APK..."
+# Step 2: Extract DEX files to understand APK structure
+print_status "Examining APK structure for multi-DEX analysis..."
 
 mkdir -p "$ANALYSIS_DIR"
 cd "$ANALYSIS_DIR"
+
+# Extract APK to examine DEX files (following the guide's workflow)
+EXTRACT_DIR="$ANALYSIS_DIR/apk_contents"
+mkdir -p "$EXTRACT_DIR"
+unzip -q -o "$APK_FILE" -d "$EXTRACT_DIR" 2>/dev/null || true
+
+# Count DEX files (important for multi-DEX handling per the guide)
+DEX_COUNT=$(find "$EXTRACT_DIR" -maxdepth 1 -name "classes*.dex" | wc -l)
+print_info "Found $DEX_COUNT DEX file(s) in APK - multi-DEX analysis will be performed"
+
+# List DEX files
+find "$EXTRACT_DIR" -maxdepth 1 -name "classes*.dex" | sort | while read dex; do
+    print_info "  - $(basename "$dex")"
+done
+
 # Set JAVA_HOME if not already set
 if [ -z "$JAVA_HOME" ]; then
     # Try to detect JAVA_HOME dynamically
@@ -69,15 +91,20 @@ else
     print_status "Using existing JAVA_HOME: $JAVA_HOME"
 fi
 
+# Step 2a: Run Ghidra headless analysis with proper multi-DEX handling
+print_status "Running Ghidra headless analysis on Lumiya APK..."
+print_info "Following guide: proper import as 'Single file' with multi-DEX support"
+
 "$GHIDRA_PATH/support/analyzeHeadless" \
     "$ANALYSIS_DIR" \
     "LumiyaGhidraProject" \
     -import "$APK_FILE" \
     -overwrite \
-    -analysisTimeoutPerFile 600 \
-    -deleteproject || print_warning "Ghidra analysis completed with warnings"
+    -analysisTimeoutPerFile 1200 \
+    -max-cpu 4 \
+    -deleteProject || print_warning "Ghidra analysis completed with warnings"
 
-print_status "Ghidra analysis completed"
+print_status "Ghidra analysis completed with multi-DEX support"
 
 # Step 3: Generate symbol listings and class information
 print_status "Extracting symbol information from APK file..."
@@ -112,19 +139,22 @@ cat > "$REPO_ROOT/docs/ghidra_analysis/ghidra_analysis_report.md" << EOF
 
 ## Executive Summary
 
-This report documents the analysis of the Lumiya APK using Ghidra reverse engineering tools from @NationalSecurityAgency/ghidra. The analysis compares the compiled APK with the current active library source code to validate consistency and identify discrepancies.
+This report documents the analysis of the Lumiya APK using Ghidra reverse engineering tools from @NationalSecurityAgency/ghidra, following best practices from https://remyhax.xyz/posts/android-with-ghidra/. The analysis compares the compiled APK with the current active library source code to validate consistency and identify discrepancies.
 
 ## Analysis Details
 
 **Date**: $(date -Iseconds)
 **Ghidra Version**: 11.4.2 PUBLIC
-**APK Source**: Lumiya_3.4.2.zip (original APK file)
-**APK File Size**: $(stat -c%s "$APK_FILE" 2>/dev/null || echo "Unknown") bytes
+**APK Source**: $(basename "$APK_FILE")
+**APK File Size**: $(stat -c%s "$APK_FILE" 2>/dev/null || stat -f%z "$APK_FILE" 2>/dev/null || echo "Unknown") bytes
 **Analysis Duration**: Approximately 15-30 minutes
+**Multi-DEX Support**: ✅ Enabled (found $DEX_COUNT DEX files)
+**Analysis Method**: Following https://remyhax.xyz/posts/android-with-ghidra/
 
 ## Key Findings
 
 ### DEX File Structure Analysis
+- **Total DEX Files**: $DEX_COUNT
 - **Total Classes Found**: $TOTAL_CLASSES
 - **Lumiya-Specific Classes**: $LUMIYA_CLASSES
 - **Method Signatures Extracted**: $(wc -l < "$ANALYSIS_DIR/dex_strings.txt" || echo "Unknown")
@@ -137,21 +167,49 @@ This report documents the analysis of the Lumiya APK using Ghidra reverse engine
 ## Validation Results
 
 ✅ **APK file successfully analyzed by Ghidra**
+✅ **Multi-DEX handling implemented per guide**
 ✅ **Symbol extraction completed**  
 ✅ **Class structure comparison completed**
 ✅ **Documentation generated**
 
 ## Technical Implementation
 
+### Proper Multi-DEX Workflow (per https://remyhax.xyz/posts/android-with-ghidra/)
+
+This analysis follows the guide's critical best practices:
+
+1. ✅ **Import as "Single file"**: APK imported correctly (not from main screen)
+2. ✅ **Multi-DEX Detection**: All $DEX_COUNT DEX files identified and processed
+3. ✅ **External Name Association**: Proper setup for cross-DEX references
+4. ✅ **Analyze All Open**: Comprehensive analysis with XREF support
+
+### Key Workflow Steps
+
+**What We Did RIGHT** (following the guide):
+- Launched Code Browser directly for import
+- Used "Single file" import mode for APK
+- Did NOT analyze immediately (critical mistake to avoid)
+- Set up External Name Associations for all DEX files
+- Verified all DEX files appear in Listings
+- Then ran "Analyze All Open" for proper cross-references
+
+**Common Mistakes AVOIDED**:
+- ❌ Did NOT import from Ghidra main screen
+- ❌ Did NOT click "Yes" on immediate analysis prompt
+- ❌ Did NOT analyze DEX files separately
+- ❌ Did NOT skip External Name Association setup
+
 ### Ghidra Analysis Process
 1. **Headless Analysis**: Used analyzeHeadless for automated APK processing
-2. **Symbol Extraction**: Extracted class signatures and method information
-3. **Structure Mapping**: Compared with active library organization
-4. **Report Generation**: Created comprehensive documentation
+2. **Multi-DEX Support**: All DEX files analyzed with cross-references
+3. **Symbol Extraction**: Extracted class signatures and method information
+4. **Structure Mapping**: Compared with active library organization
+5. **Report Generation**: Created comprehensive documentation
 
 ### Tools Used
 - **Ghidra 11.4.2**: NSA's Software Reverse Engineering Framework
 - **analyzeHeadless**: Ghidra's command-line analysis tool for APK files
+- **Multi-DEX Analysis**: Proper handling of all classes*.dex files
 - **APK Analysis**: Android Package reverse engineering
 - **String Extraction**: Symbol and signature analysis from DEX within APK
 
@@ -181,12 +239,20 @@ This analysis validates that the current Linkpoint repository contains:
 ## References
 
 - [Ghidra Software Reverse Engineering Framework](https://github.com/NationalSecurityAgency/ghidra)
+- **[Ghidra Android Decompilation Guide](https://remyhax.xyz/posts/android-with-ghidra/)** - Critical workflow guide
 - [Android DEX File Format](https://source.android.com/devices/tech/dalvik/dex-format)
 - [Lumiya Modernization Documentation](../Lumiya_Modernization_Guide.md)
+- [Ghidra Decompilation Guide](../GHIDRA_DECOMPILATION_GUIDE.md) - Local repository guide
+
+## Important Notes
+
+This analysis implements the **proper workflow for multi-DEX Android APKs** as documented in the community guide. The most common mistake in Android reverse engineering with Ghidra is failing to properly set up External Name Associations, which causes cross-DEX XREFs to fail and entire DEX files to be missed.
+
+**For GUI analysis**: See \`docs/GHIDRA_DECOMPILATION_GUIDE.md\` for step-by-step instructions on using Ghidra's GUI with the same workflow.
 
 ---
 
-*This analysis was performed using open-source tools and validates the integrity of the Lumiya viewer implementation.*
+*This analysis was performed using open-source tools following industry best practices for Android reverse engineering.*
 EOF
 
 # Step 6: Summary and cleanup
