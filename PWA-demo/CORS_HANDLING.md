@@ -183,16 +183,51 @@ const response = await window.corsHandler.makeRequest(url, {
 
 ## 🚀 Public CORS Proxies
 
-Primary: `https://corsproxy.io/`
+The application uses multiple CORS proxies with automatic fallback for maximum reliability:
+
+### Primary: AllOrigins
+**URL:** `https://api.allorigins.win/raw?url=`
 - Fast and reliable
-- Good uptime
+- Good uptime  
 - Free tier available
+- URL encoding required
 
-Fallbacks:
-1. `https://api.allorigins.win/raw?url=`
-2. `https://cors-anywhere.herokuapp.com/`
+### Secondary: CodeTabs
+**URL:** `https://api.codetabs.com/v1/proxy?quest=`
+- Automatic fallback
+- Good reliability
+- Alternative when primary fails
+- URL encoding required
 
-**Note:** Public proxies are shared resources and may have rate limits or occasional downtime.
+### Tertiary: ThingProxy
+**URL:** `https://thingproxy.freeboard.io/fetch/`
+- Final fallback option
+- Additional redundancy
+- No URL encoding needed
+- Direct URL appending
+
+### How Fallback Works
+
+The application tries each proxy in sequence until one succeeds:
+
+```javascript
+// Try proxy 1 (AllOrigins)
+try {
+  const response = await fetch(allOriginsUrl, options);
+  if (response.ok) return response;
+} catch (error) {
+  // Try proxy 2 (CodeTabs)
+  try {
+    const response = await fetch(codeTabsUrl, options);
+    if (response.ok) return response;
+  } catch (error) {
+    // Try proxy 3 (ThingProxy)
+    // ... final attempt
+  }
+}
+```
+
+**Note:** Public proxies are shared resources and may have rate limits or occasional downtime. The fallback system ensures high availability.
 
 ## 💡 Recommendations by Use Case
 

@@ -1,0 +1,36 @@
+# Capacitor
+node_modules/
+.DS_Store
+
+# Synced PWA files (generated from parent directory)
+www/index.html
+www/js/
+www/css/
+www/assets/
+www/manifest.json
+www/service-worker.js
+www/*.html
+
+# Keep only the integration summary
+!www/PWA_JAVA_INTEGRATION_SUMMARY.md
+
+# iOS build artifacts
+ios/App/App/public/
+ios/App/App/capacitor.config.json
+ios/App/App/config.xml
+ios/App/Pods/
+ios/App/Podfile.lock
+ios/App/.DS_Store
+ios/capacitor-cordova-ios-plugins/
+
+# Android build outputs
+android/.idea/
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/*.iml
+android/.DS_Store
+
+# Capacitor generated files
+.capacitor/

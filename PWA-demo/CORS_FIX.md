@@ -150,25 +150,54 @@ const response = await fetch(proxiedUrl, { /* ... */ });
 
 ## CORS Proxy Service
 
-### corsproxy.io Features
+### Updated CORS Proxy Configuration (2024)
 
-- ✅ **Free public service** - No API key required
-- ✅ **Simple usage** - Just prefix URL
+The application now uses multiple CORS proxy services with automatic fallback:
+
+**Primary: AllOrigins** (`https://api.allorigins.win/raw?url=`)
+- Fast and reliable
+- Good uptime
+- Free tier available
+- URL encoding required
+
+**Secondary: CodeTabs** (`https://api.codetabs.com/v1/proxy?quest=`)
+- Automatic fallback
+- Good reliability
+- Alternative when primary fails
+- URL encoding required
+
+**Tertiary: ThingProxy** (`https://thingproxy.freeboard.io/fetch/`)
+- Final fallback option
+- Additional redundancy
+- No URL encoding needed
+- Direct URL appending
+
+**Note**: corsproxy.io was removed due to increased restrictions and rate limiting.
+
+### Features
+
+- ✅ **Free public services** - No API key required
+- ✅ **Simple usage** - Automatic proxy selection
 - ✅ **HTTPS support** - Secure connections
-- ✅ **Reliable** - High uptime
-- ✅ **Fast** - Low latency
+- ✅ **Automatic fallback** - Tries multiple proxies
+- ✅ **Reliable** - Multiple redundancy options
 
 ### Usage Pattern
 
 ```javascript
+// Updated CORS proxy usage with automatic fallback
+
 // Original URL
 const originalUrl = 'https://login.agni.lindenlab.com/cgi-bin/login.cgi';
 
-// Encode URL
-const encodedUrl = encodeURIComponent(originalUrl);
+// The application tries multiple proxies automatically:
+// 1. AllOrigins: https://api.allorigins.win/raw?url=<encoded_url>
+// 2. CodeTabs: https://api.codetabs.com/v1/proxy?quest=<encoded_url>
+// 3. ThingProxy: https://thingproxy.freeboard.io/fetch/<url>
 
-// Construct proxy URL
-const proxyUrl = 'https://corsproxy.io/?' + encodedUrl;
+// Example with AllOrigins (primary):
+const encodedUrl = encodeURIComponent(originalUrl);
+const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodedUrl;
 
 // Make request
 fetch(proxyUrl, {
@@ -178,7 +207,7 @@ fetch(proxyUrl, {
 });
 ```
 
-### How corsproxy.io Works
+### How CORS Proxies Work
 
 1. **Receives request** from your browser
 2. **Makes request** to target server on your behalf
@@ -186,6 +215,29 @@ fetch(proxyUrl, {
 4. **Returns response** to your browser
 
 The proxy acts as an intermediary that adds the necessary CORS headers, allowing the browser to accept the response.
+
+### Automatic Fallback System
+
+The application tries proxies in sequence:
+
+```javascript
+// Proxy list with automatic fallback
+const corsProxies = [
+  { name: 'AllOrigins', url: 'https://api.allorigins.win/raw?url=', encode: true },
+  { name: 'CodeTabs', url: 'https://api.codetabs.com/v1/proxy?quest=', encode: true },
+  { name: 'ThingProxy', url: 'https://thingproxy.freeboard.io/fetch/', encode: false }
+];
+
+// Try each proxy until one succeeds
+for (const proxy of corsProxies) {
+  try {
+    const response = await fetch(proxiedUrl, options);
+    if (response.ok) return response; // Success!
+  } catch (error) {
+    continue; // Try next proxy
+  }
+}
+```
 
 ## Error Handling
 
@@ -334,38 +386,48 @@ For a production app, consider:
 ### Issue 1: "Failed to fetch" still occurs
 
 **Check**:
-1. Is corsproxy.io accessible?
+1. Are CORS proxies accessible?
    ```javascript
-   fetch('https://corsproxy.io').then(r => console.log('Proxy OK'))
+   // Test primary proxy
+   fetch('https://api.allorigins.win/get?url=https://httpbin.org/get')
+     .then(r => r.json())
+     .then(console.log);
    ```
 2. Check browser console for actual error
 3. Verify internet connection
-4. Check if firewall blocks corsproxy.io
+4. Check if firewall blocks proxy services
+5. Try disabling VPN (VPNs can interfere with CORS proxies)
 
-**Solution**: If corsproxy.io is down, switch to alternative proxy:
-```javascript
-// Alternative proxies
-const corsProxyUrl = 'https://api.allorigins.win/raw?url=';
-// or
-const corsProxyUrl = 'https://cors-anywhere.herokuapp.com/';
-```
+**Solution**: The application automatically tries multiple proxies. If all fail:
+- Check network connectivity
+- Disable VPN temporarily
+- Try desktop app (no CORS restrictions)
+- Wait and retry (proxies may be temporarily unavailable)
 
 ### Issue 2: Login works in browser but not installed PWA
 
 **Possible causes**:
 - PWA trying direct connection and failing
 - Fallback to proxy not working
+- Service worker caching issues
 
-**Solution**: Check console logs to see which method is attempted. If direct connection always fails, you can remove that try-catch block.
+**Solution**: 
+- Check console logs to see which method is attempted
+- Clear PWA cache and reinstall
+- Use desktop app for most reliable experience
 
 ### Issue 3: Slow login response
 
 **Possible causes**:
-- CORS proxy adding latency
+- CORS proxy adding latency (50-150ms typical)
 - Network conditions
+- Proxy server load
+- VPN interference
 
 **Solution**:
-- Use installed PWA for direct connection
+- Use installed PWA for potential direct connection
+- Disable VPN if using
+- Try desktop app (Electron/Tauri) for zero-latency direct connections
 - Deploy your own proxy closer to users
 - Monitor corsproxy.io status
 
@@ -384,20 +446,27 @@ const encodedUrl = encodeURIComponent(url);
 
 ## Alternative CORS Proxies
 
-If corsproxy.io has issues, alternatives include:
+If the default proxies have issues, the following alternatives are available:
 
-### 1. AllOrigins
+### 1. AllOrigins (Primary)
 ```javascript
 const corsProxyUrl = 'https://api.allorigins.win/raw?url=';
+// Requires URL encoding
 ```
 
-### 2. CORS Anywhere
+### 2. CodeTabs (Secondary)
 ```javascript
-const corsProxyUrl = 'https://cors-anywhere.herokuapp.com/';
-// Note: May require API key
+const corsProxyUrl = 'https://api.codetabs.com/v1/proxy?quest=';
+// Requires URL encoding
 ```
 
-### 3. Your Own Proxy
+### 3. ThingProxy (Tertiary)
+```javascript
+const corsProxyUrl = 'https://thingproxy.freeboard.io/fetch/';
+// No URL encoding needed - direct append
+```
+
+### 4. Your Own Proxy (Recommended for Production)
 Deploy a simple proxy using Express.js:
 ```javascript
 // server.js

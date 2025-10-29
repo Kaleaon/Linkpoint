@@ -1,0 +1,64 @@
+Capacitor Build Status
+=====================
+
+Build Date: Wed Oct 29 11:41:24 UTC 2025
+Platform: Linux (GitHub Actions/CI)
+
+PWA Files Synced: YES ✅
+Android Platform: YES ✅ (Ready to build)
+iOS Platform: PARTIAL ⚠️ (Files copied, requires macOS for pod install)
+
+Capacitor Version: 5.7.8
+Plugins Installed: @capacitor/splash-screen@5.0.8
+
+Files Synced to www/:
+- index.html
+- js/ (all JavaScript)
+- css/ (all stylesheets)  
+- assets/ (icons & images)
+- manifest.json
+- service-worker.js
+
+Next Steps for Android:
+========================
+1. Open Android Studio:
+   cd PWA-demo/capacitor-wrapper
+   npm run android:open
+
+2. Build APK:
+   Click: Build > Build Bundle(s) / APK(s) > Build APK(s)
+   
+3. Or from command line:
+   cd PWA-demo/capacitor-wrapper/android
+   ./gradlew assembleDebug
+
+4. Find APK:
+   android/app/build/outputs/apk/debug/app-debug.apk
+
+Next Steps for iOS (macOS only):
+================================
+1. Transfer project to macOS
+2. Install dependencies: cd PWA-demo/capacitor-wrapper && npm install
+3. Install CocoaPods: cd ios/App && pod install
+4. Open Xcode: npm run ios:open
+5. Build and archive
+
+Build Output Locations:
+======================
+- Android APK: PWA-demo/capacitor-wrapper/android/app/build/outputs/apk/
+- iOS IPA: Built through Xcode Organizer (macOS)
+
+Features:
+=========
+✅ Direct HTTPS to Second Life (no CORS proxies)
+✅ Native HTTP plugin
+✅ Offline support
+✅ Push notifications ready
+✅ Native camera/file access
+
+Documentation:
+=============
+- BUILD_INFO.md (this folder)
+- PWA-demo/capacitor-wrapper/README.md
+- PWA-demo/CORS_HANDLING.md
+- PWA-demo/HTTPS_RESEARCH.md

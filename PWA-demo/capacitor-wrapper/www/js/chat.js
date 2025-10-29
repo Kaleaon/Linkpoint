@@ -12,6 +12,8 @@ class ChatManager extends Utils.EventEmitter {
     this.chatInput = null;
     this.chatMessages = null;
     this.sendBtn = null;
+    this.currentChatType = 'local'; // local, group, im
+    this.currentGroupId = null;
   }
 
   /**
@@ -20,15 +22,21 @@ class ChatManager extends Utils.EventEmitter {
   init() {
     this.chatInput = document.getElementById('chat-input');
     this.chatMessages = document.getElementById('chat-messages');
-    this.sendBtn = document.getElementById('send-btn');
+    const chatForm = document.getElementById('chat-form');
 
-    if (!this.chatInput || !this.chatMessages || !this.sendBtn) {
+    if (!this.chatInput || !this.chatMessages) {
       console.error('Chat elements not found');
       return;
     }
 
     // Setup event listeners
-    this.sendBtn.addEventListener('click', () => this.sendMessage());
+    if (chatForm) {
+      chatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.sendMessage();
+      });
+    }
+    
     this.chatInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -36,11 +44,79 @@ class ChatManager extends Utils.EventEmitter {
       }
     });
 
+    // Setup chat type tabs
+    const chatTabs = document.querySelectorAll('.chat-tab');
+    chatTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const chatType = tab.dataset.chatType;
+        this.switchChatType(chatType);
+      });
+    });
+
     // Setup protocol listeners
     this.protocol.on('chat_message', (data) => this.handleIncomingMessage(data));
+    this.protocol.on('group_chat', (data) => this.handleGroupMessage(data));
+    this.protocol.on('instant_message', (data) => this.handleInstantMessage(data));
 
     // Load chat history from storage
     this.loadChatHistory();
+  }
+  
+  /**
+   * Switch chat type (local, group, im)
+   */
+  switchChatType(chatType) {
+    this.currentChatType = chatType;
+    
+    // Update tab UI
+    document.querySelectorAll('.chat-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.chatType === chatType);
+    });
+    
+    // Update input placeholder
+    if (this.chatInput) {
+      switch (chatType) {
+        case 'local':
+          this.chatInput.placeholder = 'Type a message...';
+          break;
+        case 'group':
+          this.chatInput.placeholder = 'Send to group...';
+          break;
+        case 'im':
+          this.chatInput.placeholder = 'Send instant message...';
+          break;
+      }
+    }
+    
+    // Load messages for this type
+    this.displayMessagesForType(chatType);
+  }
+  
+  /**
+   * Display messages for specific chat type
+   */
+  displayMessagesForType(chatType) {
+    if (!this.chatMessages) return;
+    
+    // Clear current messages
+    this.chatMessages.innerHTML = '';
+    
+    // Filter and display messages for this type
+    const filteredMessages = this.messages.filter(msg => {
+      if (chatType === 'local') return msg.type === 'local' || !msg.type;
+      if (chatType === 'group') return msg.type === 'group';
+      if (chatType === 'im') return msg.type === 'im';
+      return false;
+    });
+    
+    if (filteredMessages.length === 0) {
+      this.addSystemMessage(`No ${chatType} messages`);
+    } else {
+      filteredMessages.forEach(msg => {
+        const isSelf = msg.senderId === this.auth.getUser()?.id;
+        this.displayMessage(msg, isSelf);
+      });
+    }
   }
 
   /**
@@ -392,6 +468,65 @@ Available commands:
     if (this.chatMessages) {
       this.chatMessages.innerHTML = '<div class="system-message">Chat history cleared</div>';
     }
+  }
+  
+  /**
+   * Handle group chat message
+   */
+  handleGroupMessage(data) {
+    const messageData = {
+      id: data.id || Utils.generateUUID(),
+      sender: data.fromName || 'Unknown',
+      senderId: data.fromId,
+      text: data.message || data.text,
+      timestamp: data.timestamp || Date.now(),
+      type: 'group',
+      groupId: data.groupId,
+      groupName: data.groupName,
+      channel: 'group'
+    };
+    
+    this.addMessage(messageData, false);
+    
+    // If viewing group chat, display immediately
+    if (this.currentChatType === 'group') {
+      this.displayMessage(messageData, false);
+    }
+    
+    this.emit('group_message_received', messageData);
+  }
+  
+  /**
+   * Handle instant message
+   */
+  handleInstantMessage(data) {
+    const messageData = {
+      id: data.id || Utils.generateUUID(),
+      sender: data.fromName || 'Unknown',
+      senderId: data.fromId,
+      text: data.message || data.text,
+      timestamp: data.timestamp || Date.now(),
+      type: 'im',
+      channel: 'im'
+    };
+    
+    this.addMessage(messageData, false);
+    
+    // If viewing IM, display immediately
+    if (this.currentChatType === 'im') {
+      this.displayMessage(messageData, false);
+    }
+    
+    this.emit('im_received', messageData);
+  }
+  
+  /**
+   * Set current group for group chat
+   */
+  setCurrentGroup(groupId, groupName) {
+    this.currentGroupId = groupId;
+    this.currentGroupName = groupName;
+    this.switchChatType('group');
   }
 }
 
