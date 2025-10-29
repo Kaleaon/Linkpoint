@@ -146,11 +146,31 @@ class AuthManager extends Utils.EventEmitter {
       // Emit login success event
       this.emit('login_success', this.user);
 
+      console.log('[Auth] Login successful, user:', this.user);
+      console.log('[Auth] Connection state:', this.protocol.state || 'unknown');
+      
+      // If using SLConnectionFull, it should already be connected
+      // Otherwise activate the protocol features
+      if (!this.protocol.connected && this.protocol.isConnected) {
+        // Activate protocol features
+        this.protocol.emit('connected', this.user);
+      }
+      
       Utils.showToast(`Welcome, ${this.user.fullName}!`, 'success');
 
-      // Switch to world view
+      // Switch to world view and activate features
+      console.log('[Auth] Switching to world view and activating features...');
       setTimeout(() => {
-        window.app?.switchView('world');
+        if (window.app && typeof window.app.switchView === 'function') {
+          window.app.switchView('world');
+          
+          // Activate post-login features
+          if (window.app.activatePostLoginFeatures) {
+            window.app.activatePostLoginFeatures();
+          }
+        } else {
+          console.error('[Auth] window.app or switchView not available');
+        }
       }, 1000);
 
     } catch (error) {

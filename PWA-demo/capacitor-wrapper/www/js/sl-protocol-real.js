@@ -43,6 +43,16 @@ class SLProtocol extends Utils.EventEmitter {
 
   /**
    * Grid configurations (real Second Life URLs)
+   * 
+   * Note on HTTPS vs HTTP:
+   * - Second Life (Agni/Aditi): Uses HTTPS with SSL/TLS 1.2+ for secure authentication
+   *   SSL certificates are regularly updated (latest renewal April 2025)
+   * - OSGrid: Currently uses HTTP only - HTTPS not supported for login endpoint
+   *   (OSGrid website uses HTTPS, but login.osgrid.org viewer endpoint is HTTP only)
+   * 
+   * Research findings (2024-2025):
+   * - Second Life maintains HTTPS support with modern TLS protocols
+   * - OSGrid login remains HTTP-only; no HTTPS endpoint available
    */
   static GRIDS = {
     agni: {
@@ -57,7 +67,7 @@ class SLProtocol extends Utils.EventEmitter {
     },
     osgrid: {
       name: 'OSGrid',
-      loginUrl: 'http://login.osgrid.org/',
+      loginUrl: 'http://login.osgrid.org/', // HTTP only - HTTPS not available for viewer login
       isOpenSim: true
     }
   };

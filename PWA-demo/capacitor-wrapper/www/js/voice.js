@@ -16,6 +16,7 @@ class VoiceManager extends Utils.EventEmitter {
     this.spatialAudioEnabled = true;
     this.audioContext = null;
     this.voiceChannel = null;
+    this.slVoiceBridge = null; // SL-specific voice bridge
   }
 
   /**
@@ -34,6 +35,31 @@ class VoiceManager extends Utils.EventEmitter {
       console.log('Audio context created');
     } catch (error) {
       console.error('Failed to create audio context:', error);
+    }
+
+    // Initialize SL WebRTC bridge
+    if (window.SLWebRTCBridge) {
+      this.slVoiceBridge = new SLWebRTCBridge(this.protocol);
+      await this.slVoiceBridge.init(this);
+      
+      // Forward bridge events
+      this.slVoiceBridge.on('voice_connected', () => {
+        this.emit('voice_connected');
+      });
+      
+      this.slVoiceBridge.on('voice_disconnected', () => {
+        this.emit('voice_disconnected');
+      });
+      
+      this.slVoiceBridge.on('user_joined', (data) => {
+        this.emit('voice_participant_joined', data);
+      });
+      
+      this.slVoiceBridge.on('user_left', (data) => {
+        this.emit('voice_participant_left', data);
+      });
+      
+      console.log('[Voice] SL WebRTC bridge initialized');
     }
 
     // Setup protocol listeners

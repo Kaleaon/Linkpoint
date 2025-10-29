@@ -11,6 +11,7 @@ class LinkpointApp {
     this.voice = null;
     this.inventory = null;
     this.friends = null;
+    this.groups = null;
     this.teleport = null;
     this.search = null;
     this.preferences = null;
@@ -18,6 +19,7 @@ class LinkpointApp {
     this.currentView = 'login';
     this.deferredPrompt = null;
     this.serviceWorkerRegistration = null;
+    this.eventHandlers = {}; // Event handlers storage
   }
 
   /**
@@ -39,6 +41,7 @@ class LinkpointApp {
     this.voice = new VoiceManager(this.protocol, this.auth);
     this.inventory = new InventoryManager(this.protocol, this.auth);
     this.friends = new FriendsManager(this.protocol, this.auth);
+    this.groups = new GroupsUIManager(this.protocol, this.auth);
     this.teleport = new TeleportManager(this.protocol, this.auth, this.world);
     this.search = new SearchManager(this.protocol);
     this.notifications = new NotificationsManager(this.protocol, this.auth, this.preferences);
@@ -68,6 +71,7 @@ class LinkpointApp {
     await this.voice.init();
     await this.inventory.init();
     await this.friends.init();
+    this.groups.init();
     await this.teleport.init();
     await this.search.init();
     await this.notifications.init();
@@ -78,6 +82,9 @@ class LinkpointApp {
 
     // Setup PWA install prompt
     this.setupInstallPrompt();
+    
+    // Update CORS status display
+    this.updateCORSStatus();
 
     // Check for updates
     this.checkForUpdates();
@@ -122,8 +129,8 @@ class LinkpointApp {
    * Setup UI components
    */
   setupUI() {
-    // Setup navigation
-    const navLinks = document.querySelectorAll('.nav-link');
+    // Setup navigation (support both .nav-link and .nav-item)
+    const navLinks = document.querySelectorAll('.nav-link, .nav-item');
     navLinks.forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -134,10 +141,10 @@ class LinkpointApp {
       });
     });
 
-    // Setup menu button
-    const menuBtn = document.getElementById('menu-btn');
+    // Setup menu button (support multiple ID patterns)
+    const menuBtn = document.getElementById('menu-btn') || document.getElementById('menu-toggle');
     const sidebar = document.getElementById('sidebar');
-    const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
+    const sidebarCloseBtn = document.getElementById('sidebar-close-btn') || document.getElementById('sidebar-close');
 
     menuBtn?.addEventListener('click', () => {
       sidebar?.classList.add('active');
@@ -167,6 +174,82 @@ class LinkpointApp {
     notificationsBtn?.addEventListener('click', () => {
       this.showNotifications();
     });
+    
+    // Setup voice controls
+    this.setupVoiceControls();
+    
+    // Setup groups loading when view is switched
+    this.on('view_changed', (view) => {
+      if (view === 'groups' && this.groups) {
+        this.groups.loadGroups();
+      }
+    });
+  }
+  
+  /**
+   * Setup voice controls UI
+   */
+  setupVoiceControls() {
+    const voiceToggleBtn = document.getElementById('voice-toggle-btn');
+    const voiceMuteBtn = document.getElementById('voice-mute-btn');
+    const voiceStatus = document.getElementById('voice-status');
+    const voiceIcon = document.getElementById('voice-icon');
+    const voiceText = document.getElementById('voice-text');
+    const muteIcon = document.getElementById('mute-icon');
+    
+    // Voice toggle button
+    if (voiceToggleBtn) {
+      voiceToggleBtn.addEventListener('click', async () => {
+        if (this.voice.isEnabled()) {
+          this.voice.disable();
+          voiceToggleBtn.innerHTML = '<span>🎤</span>';
+          voiceToggleBtn.title = 'Enable Voice';
+          if (voiceMuteBtn) voiceMuteBtn.style.display = 'none';
+          if (voiceIcon) voiceIcon.textContent = '🔇';
+          if (voiceText) voiceText.textContent = 'Voice: Off';
+        } else {
+          const enabled = await this.voice.enable();
+          if (enabled) {
+            voiceToggleBtn.innerHTML = '<span>🎤</span>';
+            voiceToggleBtn.title = 'Disable Voice';
+            if (voiceMuteBtn) voiceMuteBtn.style.display = 'inline-block';
+            if (voiceIcon) voiceIcon.textContent = '🔊';
+            if (voiceText) voiceText.textContent = 'Voice: On';
+          }
+        }
+      });
+    }
+    
+    // Voice mute button
+    if (voiceMuteBtn) {
+      voiceMuteBtn.addEventListener('click', () => {
+        const muted = this.voice.toggleMute();
+        if (muteIcon) {
+          muteIcon.textContent = muted ? '🔇' : '🔊';
+        }
+        if (voiceIcon) {
+          voiceIcon.textContent = muted ? '🔇' : '🔊';
+        }
+        voiceMuteBtn.title = muted ? 'Unmute' : 'Mute';
+      });
+    }
+    
+    // Voice events
+    if (this.voice) {
+      this.voice.on('voice_enabled', () => {
+        if (voiceStatus) voiceStatus.classList.add('active');
+        Utils.showToast('Voice chat enabled', 'success');
+      });
+      
+      this.voice.on('voice_disabled', () => {
+        if (voiceStatus) voiceStatus.classList.remove('active');
+        Utils.showToast('Voice chat disabled', 'info');
+      });
+      
+      this.voice.on('voice_error', (error) => {
+        Utils.showToast(`Voice error: ${error.message || error}`, 'error');
+      });
+    }
   }
 
   /**
@@ -217,17 +300,100 @@ class LinkpointApp {
   }
 
   /**
+   * Activate post-login features
+   * This connects the real SL protocol features after successful authentication
+   */
+  activatePostLoginFeatures() {
+    console.log('[App] Activating post-login features...');
+    
+    try {
+      // 1. Setup protocol event handlers for chat
+      if (this.protocol.on) {
+        // Handle incoming chat messages
+        this.protocol.on('chat_from_simulator', (data) => {
+          console.log('[App] Chat message from simulator:', data);
+          if (this.chat && this.chat.handleIncomingMessage) {
+            this.chat.handleIncomingMessage(data);
+          }
+          
+          // Show notification
+          if (this.currentView !== 'chat') {
+            this.incrementNotificationCount();
+            Utils.showToast(`${data.fromName || 'Unknown'}: ${data.message}`, 'info');
+          }
+        });
+        
+        // Handle object updates for 3D rendering
+        this.protocol.on('object_update', (data) => {
+          console.log('[App] Object update received');
+          if (this.objectManager) {
+            this.objectManager.handleObjectUpdate(data);
+          }
+        });
+        
+        // Handle region handshake
+        this.protocol.on('region_handshake', (data) => {
+          console.log('[App] Region handshake:', data);
+          if (this.world && this.world.updateRegionInfo) {
+            this.world.updateRegionInfo(data);
+          }
+        });
+        
+        console.log('[App] Protocol event handlers registered');
+      }
+      
+      // 2. Start event queue if using SLConnectionFull
+      if (this.protocol.eventQueueRunning === false && this.protocol.startEventQueue) {
+        console.log('[App] Starting event queue...');
+        this.protocol.startEventQueue();
+      }
+      
+      // 3. Activate 3D rendering if available
+      if (this.world && this.world.startRendering) {
+        console.log('[App] Starting 3D rendering...');
+        this.world.startRendering();
+      }
+      
+      // 4. Subscribe to capabilities-based services
+      if (this.protocol.capabilities) {
+        console.log('[App] Available capabilities:', Object.keys(this.protocol.capabilities));
+        
+        // Start fetching display names if available
+        if (this.protocol.capabilities.GetDisplayNames && window.DisplayNameManager) {
+          const displayNameManager = new DisplayNameManager(this.protocol);
+          console.log('[App] Display name manager initialized');
+        }
+      }
+      
+      // 5. Show status
+      Utils.showToast('Connected to Second Life', 'success');
+      console.log('[App] ✅ Post-login features activated');
+      
+    } catch (error) {
+      console.error('[App] Error activating post-login features:', error);
+      Utils.showToast('Warning: Some features may not be fully active', 'warning');
+    }
+  }
+
+  /**
    * Switch view
    */
   switchView(viewName) {
-    // Update nav links
-    document.querySelectorAll('.nav-link').forEach(link => {
+    console.log(`[App] Switching to view: ${viewName}`);
+    
+    // Update nav links (support both .nav-link and .nav-item)
+    document.querySelectorAll('.nav-link, .nav-item').forEach(link => {
       link.classList.toggle('active', link.dataset.view === viewName);
     });
 
-    // Update views
-    document.querySelectorAll('.view').forEach(view => {
-      view.classList.toggle('active', view.id === `view-${viewName}`);
+    // Update views (support both #view-{name} and #{name}-view patterns)
+    document.querySelectorAll('.view, .view-container').forEach(view => {
+      const isActive = view.id === `view-${viewName}` || view.id === `${viewName}-view`;
+      view.classList.toggle('active', isActive);
+      
+      if (isActive) {
+        console.log(`[App] Activated view: ${view.id}`);
+      }
     });
 
     // Close sidebar on mobile
@@ -241,6 +407,7 @@ class LinkpointApp {
 
     this.currentView = viewName;
     this.emit('view_changed', viewName);
+    console.log(`[App] Current view is now: ${this.currentView}`);
   }
 
   /**
@@ -385,6 +552,69 @@ class LinkpointApp {
       }
     }
   }
+  
+  /**
+   * Update CORS status display
+   */
+  updateCORSStatus() {
+    if (!window.corsHandler) {
+      console.warn('[App] CORS handler not available');
+      return;
+    }
+    
+    const status = window.corsHandler.displayStatus();
+    
+    // Update UI elements
+    const envName = document.getElementById('cors-env-name');
+    const envType = document.getElementById('cors-env-type');
+    const supportType = document.getElementById('cors-support-type');
+    const statusMessage = document.getElementById('cors-status-message');
+    const recommendations = document.getElementById('cors-recommendations');
+    
+    if (envName) {
+      envName.textContent = `${status.environment.name}`;
+    }
+    
+    if (envType) {
+      envType.textContent = status.environment.name;
+    }
+    
+    if (supportType) {
+      let supportText = status.environment.corsSupport;
+      let emoji = '✅';
+      
+      if (status.environment.needsProxy) {
+        emoji = '⚠️';
+        supportText += ' (using public proxy)';
+      }
+      
+      supportType.innerHTML = `${emoji} ${supportText}`;
+    }
+    
+    if (statusMessage) {
+      if (status.environment.needsProxy) {
+        statusMessage.innerHTML = '⚠️ Using public CORS proxy (may be slower)';
+      } else {
+        statusMessage.innerHTML = '✅ Optimal connection (no proxy needed)';
+      }
+    }
+    
+    if (recommendations && status.solution) {
+      let html = `<p><strong>💡 ${status.solution.primary}</strong></p>`;
+      html += `<p style="font-size: 0.8rem; color: var(--text-secondary);">${status.solution.instructions}</p>`;
+      
+      if (status.solution.alternatives.length > 0) {
+        html += `<p style="font-size: 0.8rem; margin-top: 0.5rem;"><strong>Alternatives:</strong></p>`;
+        html += '<ul style="font-size: 0.8rem; margin: 0; padding-left: 1.5rem;">';
+        status.solution.alternatives.forEach(alt => {
+          html += `<li>${alt}</li>`;
+        });
+        html += '</ul>';
+      }
+      
+      recommendations.innerHTML = html;
+    }
+  }
 
   /**
    * Handle query parameters
@@ -404,6 +634,21 @@ class LinkpointApp {
    */
   emit(event, data) {
     window.dispatchEvent(new CustomEvent(`linkpoint:${event}`, { detail: data }));
+    
+    // Also call registered event handlers
+    if (this.eventHandlers[event]) {
+      this.eventHandlers[event].forEach(handler => handler(data));
+    }
+  }
+  
+  /**
+   * Register event handler
+   */
+  on(event, handler) {
+    if (!this.eventHandlers[event]) {
+      this.eventHandlers[event] = [];
+    }
+    this.eventHandlers[event].push(handler);
   }
 }
 
