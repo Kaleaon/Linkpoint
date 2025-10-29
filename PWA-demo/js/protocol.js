@@ -18,6 +18,11 @@ class ProtocolManager extends Utils.EventEmitter {
 
   /**
    * Grid configurations
+   * 
+   * Note on HTTPS vs HTTP:
+   * - Second Life (Agni/Aditi): Uses HTTPS for secure login authentication
+   * - OSGrid: Currently uses HTTP only - HTTPS not supported for login endpoint
+   *   (OSGrid website uses HTTPS, but login.osgrid.org viewer endpoint is HTTP only)
    */
   static GRIDS = {
     agni: {
@@ -30,7 +35,7 @@ class ProtocolManager extends Utils.EventEmitter {
     },
     osgrid: {
       name: 'OSGrid',
-      loginUrl: 'http://login.osgrid.org/'
+      loginUrl: 'http://login.osgrid.org/' // HTTP only - HTTPS not available for viewer login
     }
   };
 

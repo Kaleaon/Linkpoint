@@ -236,10 +236,11 @@ class XMLRPCClient {
       console.log('[SL] Using CORS proxy for web browser');
       
       // List of CORS proxies to try (in order of preference)
+      // Updated to match cors-handler.js - corsproxy.io has restrictions now
       const corsProxies = [
-        { name: 'corsproxy.io', url: 'https://corsproxy.io/?' },
-        { name: 'cors.sh', url: 'https://cors.sh/' },
-        { name: 'allorigins', url: 'https://api.allorigins.win/raw?url=' }
+        { name: 'AllOrigins', url: 'https://api.allorigins.win/raw?url=', encode: true },
+        { name: 'CodeTabs', url: 'https://api.codetabs.com/v1/proxy?quest=', encode: true },
+        { name: 'ThingProxy', url: 'https://thingproxy.freeboard.io/fetch/', encode: false }
       ];
       
       let lastError = null;
@@ -248,7 +249,9 @@ class XMLRPCClient {
       for (const proxy of corsProxies) {
         try {
           console.log(`[XMLRPCClient] Trying ${proxy.name}...`);
-          const proxiedUrl = proxy.url + encodeURIComponent(url);
+          const proxiedUrl = proxy.encode ? 
+            proxy.url + encodeURIComponent(url) : 
+            proxy.url + url;
           
           const response = await fetch(proxiedUrl, {
             method: 'POST',
