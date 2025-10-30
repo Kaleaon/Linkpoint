@@ -60,9 +60,9 @@ public class AgentDataUpdate extends SLMessage {
         }
     }
     
-    // Convenient getters using LLSD utilities
+    // Convenient getters using enhanced LLSD utilities with proper navigation
     public UUID getAgentID() {
-        return LLSDUtils.getUUID(agentDataLLSD.getContent(), "AgentID", null);
+        return EnhancedLLSDUtils.safeGetUUID(agentDataLLSD, "AgentID", null);
     }
     
     public void setAgentID(UUID agentID) {
@@ -70,7 +70,7 @@ public class AgentDataUpdate extends SLMessage {
     }
     
     public UUID getActiveGroupID() {
-        return LLSDUtils.getUUID(agentDataLLSD.getContent(), "ActiveGroupID", null);
+        return EnhancedLLSDUtils.safeGetUUID(agentDataLLSD, "ActiveGroupID", null);
     }
     
     public void setActiveGroupID(UUID activeGroupID) {
@@ -78,7 +78,7 @@ public class AgentDataUpdate extends SLMessage {
     }
     
     public String getFirstName() {
-        return LLSDUtils.getString(agentDataLLSD.getContent(), "FirstName", "");
+        return EnhancedLLSDUtils.safeGetString(agentDataLLSD, "FirstName", "");
     }
     
     public void setFirstName(String firstName) {
@@ -86,7 +86,7 @@ public class AgentDataUpdate extends SLMessage {
     }
     
     public String getLastName() {
-        return LLSDUtils.getString(agentDataLLSD.getContent(), "LastName", "");
+        return EnhancedLLSDUtils.safeGetString(agentDataLLSD, "LastName", "");
     }
     
     public void setLastName(String lastName) {
@@ -94,7 +94,7 @@ public class AgentDataUpdate extends SLMessage {
     }
     
     public String getGroupTitle() {
-        return LLSDUtils.getString(agentDataLLSD.getContent(), "GroupTitle", "");
+        return EnhancedLLSDUtils.safeGetString(agentDataLLSD, "GroupTitle", "");
     }
     
     public void setGroupTitle(String groupTitle) {
@@ -102,7 +102,7 @@ public class AgentDataUpdate extends SLMessage {
     }
     
     public long getGroupPowers() {
-        return LLSDUtils.getLong(agentDataLLSD.getContent(), "GroupPowers", 0L);
+        return EnhancedLLSDUtils.safeGetLong(agentDataLLSD, "GroupPowers", 0L);
     }
     
     public void setGroupPowers(long groupPowers) {
@@ -110,7 +110,7 @@ public class AgentDataUpdate extends SLMessage {
     }
     
     public String getGroupName() {
-        return LLSDUtils.getString(agentDataLLSD.getContent(), "GroupName", "");
+        return EnhancedLLSDUtils.safeGetString(agentDataLLSD, "GroupName", "");
     }
     
     public void setGroupName(String groupName) {

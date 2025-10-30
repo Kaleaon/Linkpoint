@@ -49,31 +49,13 @@ class ObjectLinkKt : SLMessage() {
         return LLSD(messageData)
     }
 
-    // Kotlin properties for LLSD access with delegation-like behavior
+    // Kotlin properties for LLSD access using enhanced utilities with proper nested navigation
     var agentID: UUID?
-        get() {
-            val content = messageLLSD.content as? Map<*, *> ?: return null
-            val agentData = content["AgentData"] as? Map<*, *> ?: return null
-            val agentIdValue = agentData["AgentID"]
-            return when (agentIdValue) {
-                is UUID -> agentIdValue
-                is String -> try { UUID.fromString(agentIdValue) } catch (_: Exception) { null }
-                else -> null
-            }
-        }
+        get() = EnhancedLLSDUtils.safeGetUUID(messageLLSD, "AgentData.AgentID", null)
         set(value) = updateNestedLLSDField("AgentData", "AgentID", value)
 
     var sessionID: UUID?
-        get() {
-            val content = messageLLSD.content as? Map<*, *> ?: return null
-            val agentData = content["AgentData"] as? Map<*, *> ?: return null
-            val sessionIdValue = agentData["SessionID"]
-            return when (sessionIdValue) {
-                is UUID -> sessionIdValue
-                is String -> try { UUID.fromString(sessionIdValue) } catch (_: Exception) { null }
-                else -> null
-            }
-        }
+        get() = EnhancedLLSDUtils.safeGetUUID(messageLLSD, "AgentData.SessionID", null)
         set(value) = updateNestedLLSDField("AgentData", "SessionID", value)
 
     val objectLocalIDs: List<Int>
@@ -157,7 +139,10 @@ class ObjectLinkKt : SLMessage() {
     override fun CalcPayloadSize(): Int = (objectLocalIDs.size * 4) + 37
 
     override fun Handle(handler: SLMessageHandler?) {
-        handler?.HandleObjectLink(this)  // Pass this directly, avoid unsafe cast
+        // Note: ObjectLinkKt is not an ObjectLink subclass, so handler may not accept it
+        // This is a Kotlin alternative implementation with enhanced features
+        // For full compatibility, use the Java ObjectLink class instead
+        // handler?.HandleObjectLink(this)  // Would cause ClassCastException
     }
 
     override fun PackPayload(buffer: ByteBuffer?) {

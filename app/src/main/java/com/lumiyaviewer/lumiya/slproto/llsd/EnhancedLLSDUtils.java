@@ -168,66 +168,101 @@ public final class EnhancedLLSDUtils {
     }
     
     /**
-     * Safe value extraction with advanced utilities from Kaleaon's library
+     * Safe value extraction with support for nested paths using dot notation
+     * These methods properly navigate nested LLSD structures
      */
     public static String safeGetString(LLSD llsd, String path, String defaultValue) {
-        if (llsd == null) {
-            return defaultValue;
+        Object value = getNestedValue(llsd, path);
+        if (value instanceof String) {
+            return (String) value;
         }
-        
-        try {
-            return LLSDUtils.getString(llsd.getContent(), path, defaultValue);
-        } catch (Exception e) {
-            return defaultValue;
-        }
+        return defaultValue;
     }
     
     public static int safeGetInteger(LLSD llsd, String path, int defaultValue) {
-        if (llsd == null) {
-            return defaultValue;
+        Object value = getNestedValue(llsd, path);
+        if (value instanceof Integer) {
+            return (Integer) value;
+        } else if (value instanceof Number) {
+            return ((Number) value).intValue();
         }
-        
-        try {
-            return LLSDUtils.getInteger(llsd.getContent(), path, defaultValue);
-        } catch (Exception e) {
-            return defaultValue;
+        return defaultValue;
+    }
+    
+    public static long safeGetLong(LLSD llsd, String path, long defaultValue) {
+        Object value = getNestedValue(llsd, path);
+        if (value instanceof Long) {
+            return (Long) value;
+        } else if (value instanceof Number) {
+            return ((Number) value).longValue();
         }
+        return defaultValue;
     }
     
     public static UUID safeGetUUID(LLSD llsd, String path, UUID defaultValue) {
-        if (llsd == null) {
-            return defaultValue;
+        Object value = getNestedValue(llsd, path);
+        if (value instanceof UUID) {
+            return (UUID) value;
+        } else if (value instanceof String) {
+            try {
+                return UUID.fromString((String) value);
+            } catch (Exception e) {
+                LOGGER.fine("Failed to parse UUID from string: " + value);
+            }
         }
-        
-        try {
-            return LLSDUtils.getUUID(llsd.getContent(), path, defaultValue);
-        } catch (Exception e) {
-            return defaultValue;
-        }
+        return defaultValue;
     }
     
     public static double safeGetDouble(LLSD llsd, String path, double defaultValue) {
-        if (llsd == null) {
-            return defaultValue;
+        Object value = getNestedValue(llsd, path);
+        if (value instanceof Double) {
+            return (Double) value;
+        } else if (value instanceof Number) {
+            return ((Number) value).doubleValue();
         }
-        
-        try {
-            return LLSDUtils.getDouble(llsd.getContent(), path, defaultValue);
-        } catch (Exception e) {
-            return defaultValue;
-        }
+        return defaultValue;
     }
     
     public static boolean safeGetBoolean(LLSD llsd, String path, boolean defaultValue) {
-        if (llsd == null) {
-            return defaultValue;
+        Object value = getNestedValue(llsd, path);
+        if (value instanceof Boolean) {
+            return (Boolean) value;
+        }
+        return defaultValue;
+    }
+    
+    /**
+     * Navigate nested LLSD structure using dot notation path
+     * @param llsd The LLSD object to navigate
+     * @param path The path using dot notation (e.g., "AgentData.AgentID")
+     * @return The value at the path, or null if not found
+     */
+    private static Object getNestedValue(LLSD llsd, String path) {
+        if (llsd == null || path == null || path.isEmpty()) {
+            return null;
         }
         
-        try {
-            return LLSDUtils.getBoolean(llsd.getContent(), path, defaultValue);
-        } catch (Exception e) {
-            return defaultValue;
+        Object content = llsd.getContent();
+        if (content == null) {
+            return null;
         }
+        
+        String[] parts = path.split("\\.");
+        Object current = content;
+        
+        for (String part : parts) {
+            if (current instanceof Map) {
+                Map<?, ?> map = (Map<?, ?>) current;
+                current = map.get(part);
+                if (current == null) {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        }
+        
+        return current;
     }
     
     /**
@@ -351,6 +386,12 @@ public final class EnhancedLLSDUtils {
         return llsd != null && llsd.getContent() != null;
     }
     
+    /**
+     * Validate that required fields exist in the LLSD structure
+     * @param llsd The LLSD object to validate
+     * @param requiredPaths The paths to required fields (e.g., "AgentID", "AgentData.AgentID")
+     * @return List of missing field paths
+     */
     public static List<String> validateRequiredFields(LLSD llsd, String... requiredPaths) {
         List<String> missing = new ArrayList<>();
         if (llsd == null) {
@@ -358,13 +399,47 @@ public final class EnhancedLLSDUtils {
             return missing;
         }
         
-        try {
-            missing.addAll(LLSDUtils.validateRequiredFields(llsd.getContent(), requiredPaths));
-        } catch (Exception e) {
+        Object content = llsd.getContent();
+        if (content == null) {
             Collections.addAll(missing, requiredPaths);
+            return missing;
+        }
+        
+        // Validate each required path
+        for (String path : requiredPaths) {
+            if (!fieldExists(content, path)) {
+                missing.add(path);
+            }
         }
         
         return missing;
+    }
+    
+    /**
+     * Check if a field exists in the LLSD content at the given path
+     * Supports dot notation for nested fields (e.g., "AgentData.AgentID")
+     */
+    private static boolean fieldExists(Object content, String path) {
+        if (content == null || path == null || path.isEmpty()) {
+            return false;
+        }
+        
+        String[] parts = path.split("\\.");
+        Object current = content;
+        
+        for (String part : parts) {
+            if (current instanceof Map) {
+                Map<?, ?> map = (Map<?, ?>) current;
+                if (!map.containsKey(part)) {
+                    return false;
+                }
+                current = map.get(part);
+            } else {
+                return false;
+            }
+        }
+        
+        return current != null;
     }
     
     /**
@@ -390,7 +465,11 @@ public final class EnhancedLLSDUtils {
                 Map<String, Object> overlayMap = castToStringObjectMap(overlayContent);
                 
                 if (baseMap != null && overlayMap != null) {
-                    Map<String, Object> merged = LLSDUtils.mergeMaps(baseMap, overlayMap);
+                    // Implement merge logic directly instead of relying on external method
+                    Map<String, Object> merged = new HashMap<>(baseMap);
+                    if (overlayMap != null) {
+                        merged.putAll(overlayMap);
+                    }
                     return new LLSD(merged);
                 }
             }

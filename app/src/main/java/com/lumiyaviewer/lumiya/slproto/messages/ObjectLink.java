@@ -66,21 +66,13 @@ public class ObjectLink extends SLMessage {
         }
     }
     
-    // Agent data accessors using LLSD utilities
+    // Agent data accessors using enhanced LLSD utilities with proper nested navigation
     public UUID getAgentID() {
-        Map<String, Object> agentData = (Map<String, Object>) messageLLSD.getContent().get("AgentData");
-        if (agentData != null) {
-            return LLSDUtils.getUUID(agentData, "AgentID", null);
-        }
-        return null;
+        return EnhancedLLSDUtils.safeGetUUID(messageLLSD, "AgentData.AgentID", null);
     }
     
     public UUID getSessionID() {
-        Map<String, Object> agentData = (Map<String, Object>) messageLLSD.getContent().get("AgentData");
-        if (agentData != null) {
-            return LLSDUtils.getUUID(agentData, "SessionID", null);
-        }
-        return null;
+        return EnhancedLLSDUtils.safeGetUUID(messageLLSD, "AgentData.SessionID", null);
     }
     
     // Object data accessors
