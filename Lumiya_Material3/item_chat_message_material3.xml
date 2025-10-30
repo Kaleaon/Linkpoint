@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Chat Message Item - Material Design 3
+    Modern chat bubble with:
+    - Rounded corners
+    - Elevated cards
+    - Avatar with badge
+    - Timestamp
+-->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="4dp"
+    android:paddingHorizontal="8dp">
+    
+    <!-- Avatar with Badge -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/avatarCard"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        
+        <ImageView
+            android:id="@+id/avatarImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            tools:src="@tools:sample/avatars" />
+    </com.google.android.material.card.MaterialCardView>
+    
+    <!-- Online Status Badge -->
+    <View
+        android:id="@+id/onlineStatusBadge"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:background="@drawable/bg_status_badge"
+        app:layout_constraintBottom_toBottomOf="@id/avatarCard"
+        app:layout_constraintEnd_toEndOf="@id/avatarCard"
+        tools:backgroundTint="@color/status_online" />
+    
+    <!-- Message Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/messageCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="48dp"
+        app:cardElevation="1dp"
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="@color/chat_bubble_other"
+        app:layout_constraintStart_toEndOf="@id/avatarCard"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        style="@style/Widget.Lumiya.Card">
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp">
+            
+            <!-- Username -->
+            <TextView
+                android:id="@+id/usernameText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                android:textColor="?attr/colorPrimary"
+                android:textStyle="bold"
+                tools:text="JohnDoe Resident" />
+            
+            <!-- Message Text -->
+            <TextView
+                android:id="@+id/messageText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                android:textColor="?attr/colorOnSurface"
+                android:autoLink="web"
+                tools:text="Hello! This is a sample message that could be quite long and wrap to multiple lines." />
+            
+            <!-- Metadata Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal"
+                android:gravity="end|center_vertical">
+                
+                <!-- Timestamp -->
+                <TextView
+                    android:id="@+id/timestampText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    tools:text="10:30 AM" />
+                
+                <!-- Read Receipt (for sent messages) -->
+                <ImageView
+                    android:id="@+id/readReceiptIcon"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginStart="4dp"
+                    android:visibility="gone"
+                    app:srcCompat="@drawable/ic_check_circle_24"
+                    app:tint="?attr/colorSecondary"
+                    tools:visibility="visible" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+    
+    <!-- Context Menu Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/contextMenuButton"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        app:icon="@drawable/ic_more_vert_24"
+        app:iconPadding="0dp"
+        app:iconGravity="textStart"
+        app:iconTint="?attr/colorOnSurfaceVariant"
+        android:alpha="0.6"
+        android:contentDescription="More options"
+        app:layout_constraintTop_toTopOf="@id/messageCard"
+        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/Widget.Material3.Button.IconButton" />
+    
+</androidx.constraintlayout.widget.ConstraintLayout>
