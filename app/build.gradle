@@ -58,17 +58,19 @@ android {
         checkReleaseBuilds false
     }
 
-
-    // Java 8 for Android compatibility (AGP 7.0.4 requires Java 8 targets)
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    
     // Kotlin configuration for @Kaleaon's enhanced LLSD support (now enabled)
     kotlinOptions {
         jvmTarget = '1.8'
         freeCompilerArgs += ['-opt-in=kotlin.RequiresOptIn']
+    }
+    
+    // Jetpack Compose integration
+    buildFeatures {
+        compose true
+    }
+    
+    composeOptions {
+        kotlinCompilerExtensionVersion = '1.5.10'
     }
 
     // Packaging conflict resolution. Keep simple and explicit.
@@ -266,6 +268,30 @@ dependencies {
 
     // Preferences - Latest AndroidX version
     implementation 'androidx.preference:preference-ktx:1.2.1'
+    
+    // Jetpack Navigation - Latest stable versions
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.7.7'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.7.7'
+    implementation 'androidx.navigation:navigation-compose:2.7.7'
+    
+    // Jetpack Compose - BOM for version alignment
+    def composeBom = platform('androidx.compose:compose-bom:2024.02.00')
+    implementation composeBom
+    androidTestImplementation composeBom
+    
+    // Compose UI
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.ui:ui-graphics'
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.compose.material:material-icons-extended'
+    implementation 'androidx.activity:activity-compose:1.9.3'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6'
+    implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.8.6'
+    
+    // Compose debugging
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'
     
     // Filament Rendering Engine - Modern PBR renderer
     implementation 'com.google.android.filament:filament-android:1.66.0'

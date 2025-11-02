@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_main"
+    app:startDestination="@id/homeFragment">
+
+    <!-- Home Fragment - Dashboard and overview -->
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.lumiyaviewer.lumiya.ui.fragments.HomeFragment"
+        android:label="@string/app_name"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_home_to_world"
+            app:destination="@id/worldFragment" />
+        <action
+            android:id="@+id/action_home_to_chat"
+            app:destination="@id/chatFragment" />
+        <action
+            android:id="@+id/action_home_to_inventory"
+            app:destination="@id/inventoryFragment" />
+        <action
+            android:id="@+id/action_home_to_settings"
+            app:destination="@id/settingsFragment" />
+    </fragment>
+
+    <!-- World View Fragment - 3D rendering and world interaction -->
+    <fragment
+        android:id="@+id/worldFragment"
+        android:name="com.lumiyaviewer.lumiya.ui.fragments.WorldFragment"
+        android:label="World View"
+        tools:layout="@layout/fragment_world">
+        <action
+            android:id="@+id/action_world_to_chat"
+            app:destination="@id/chatFragment"
+            app:popUpTo="@id/homeFragment" />
+        <action
+            android:id="@+id/action_world_to_inventory"
+            app:destination="@id/inventoryFragment"
+            app:popUpTo="@id/homeFragment" />
+        <argument
+            android:name="region_handle"
+            android:defaultValue="0L"
+            app:argType="long" />
+    </fragment>
+
+    <!-- Chat Fragment - Messaging and communication -->
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.lumiyaviewer.lumiya.ui.fragments.ChatFragment"
+        android:label="Chat"
+        tools:layout="@layout/fragment_chat">
+        <action
+            android:id="@+id/action_chat_to_world"
+            app:destination="@id/worldFragment"
+            app:popUpTo="@id/homeFragment" />
+        <argument
+            android:name="chat_target_id"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="chat_type"
+            android:defaultValue="local"
+            app:argType="string" />
+    </fragment>
+
+    <!-- Inventory Fragment - Asset and item management -->
+    <fragment
+        android:id="@+id/inventoryFragment"
+        android:name="com.lumiyaviewer.lumiya.ui.fragments.InventoryFragment"
+        android:label="Inventory"
+        tools:layout="@layout/fragment_inventory">
+        <action
+            android:id="@+id/action_inventory_to_world"
+            app:destination="@id/worldFragment"
+            app:popUpTo="@id/homeFragment" />
+        <argument
+            android:name="folder_id"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+
+    <!-- Settings Fragment - App configuration and preferences -->
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.lumiyaviewer.lumiya.ui.fragments.SettingsFragment"
+        android:label="Settings"
+        tools:layout="@layout/fragment_settings">
+        <action
+            android:id="@+id/action_settings_to_home"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- Avatar Fragment - Avatar customization -->
+    <fragment
+        android:id="@+id/avatarFragment"
+        android:name="com.lumiyaviewer.lumiya.ui.fragments.AvatarFragment"
+        android:label="Avatar"
+        tools:layout="@layout/fragment_avatar">
+        <action
+            android:id="@+id/action_avatar_to_world"
+            app:destination="@id/worldFragment"
+            app:popUpTo="@id/homeFragment" />
+    </fragment>
+
+    <!-- Friends Fragment - Social connections -->
+    <fragment
+        android:id="@+id/friendsFragment"
+        android:name="com.lumiyaviewer.lumiya.ui.fragments.FriendsFragment"
+        android:label="Friends"
+        tools:layout="@layout/fragment_friends">
+        <action
+            android:id="@+id/action_friends_to_chat"
+            app:destination="@id/chatFragment" />
+    </fragment>
+
+    <!-- Groups Fragment - Group management -->
+    <fragment
+        android:id="@+id/groupsFragment"
+        android:name="com.lumiyaviewer.lumiya.ui.fragments.GroupsFragment"
+        android:label="Groups"
+        tools:layout="@layout/fragment_groups">
+        <action
+            android:id="@+id/action_groups_to_chat"
+            app:destination="@id/chatFragment" />
+    </fragment>
+
+    <!-- Deep link for teleport -->
+    <deepLink
+        android:id="@+id/deeplink_teleport"
+        app:uri="linkpoint://teleport/{region_handle}" />
+
+    <!-- Deep link for chat -->
+    <deepLink
+        android:id="@+id/deeplink_chat"
+        app:uri="linkpoint://chat/{chat_target_id}" />
+
+</navigation>
