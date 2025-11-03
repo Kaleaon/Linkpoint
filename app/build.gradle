@@ -9,7 +9,7 @@ android {
 
     // SDK configuration: MinSDK 24, Target/Compile SDK 34 for AGP 8.1.4
     compileSdk 34
-    // buildToolsVersion will use default from AGP
+    buildToolsVersion "34.0.0"
 
     // Resource processing tweaks (keep minimal). noCompress keeps ktx2 files uncompressed.
     aaptOptions {
@@ -104,7 +104,7 @@ android {
             assets.srcDirs = ['src/main/assets']
 
             // Exclude problematic decompiled files and complex dependencies
-            java.excludes = [
+            def javaExcludePatterns = [
                 '**/$Lambda$*.java',                 // Lambda artifacts from decompilation
                 '**/*$Lambda$*.java',                // More lambda artifacts
 
@@ -175,6 +175,12 @@ android {
                 '**/slproto/types/CameraParams.java', // Camera params with render dependencies
                 '**/dao/**/*.java'                   // DAO classes with GreenDao dependencies
             ]
+            java.excludes = javaExcludePatterns
+
+            // Mirror the Java exclusion patterns for Kotlin sources to avoid compiling problematic decompiled code
+            kotlin.excludes = javaExcludePatterns.collect { pattern ->
+                pattern.contains('.java') ? pattern.replace('.java', '.kt') : pattern
+            }.unique()
             
             // Include only essential modern auth components and core classes for tests
             java.includes = [
