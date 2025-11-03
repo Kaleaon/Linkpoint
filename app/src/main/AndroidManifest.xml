@@ -135,6 +135,38 @@
             android:label="Modern World View"
             android:name="com.lumiyaviewer.lumiya.ui.modern.ModernWorldActivity"
             android:exported="false"/>
+        
+        <!-- Modern Compose Activities with Material Design 3 -->
+        <activity
+            android:label="Inventory"
+            android:name="com.lumiyaviewer.lumiya.ui.compose.ComposeInventoryActivity"
+            android:exported="false"/>
+        
+        <activity
+            android:label="Avatar Customization"
+            android:name="com.lumiyaviewer.lumiya.ui.compose.ComposeAvatarActivity"
+            android:exported="false"/>
+        
+        <activity
+            android:label="Object Management"
+            android:name="com.lumiyaviewer.lumiya.ui.compose.ComposeObjectsActivity"
+            android:exported="false"/>
+        
+        <activity
+            android:label="Settings"
+            android:name="com.lumiyaviewer.lumiya.ui.compose.ComposeSettingsActivity"
+            android:exported="false"/>
+        
+        <activity
+            android:label="Chat"
+            android:name="com.lumiyaviewer.lumiya.ui.compose.ComposeChatActivity"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="linkpoint" android:host="chat"/>
+            </intent-filter>
+        </activity>
             
         <!-- Filament Rendering Activities -->
         <activity
