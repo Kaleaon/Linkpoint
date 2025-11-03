@@ -58,6 +58,12 @@ android {
         checkReleaseBuilds false
     }
 
+    // Java configuration for compatibility
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    
     // Kotlin configuration for @Kaleaon's enhanced LLSD support (now enabled)
     kotlinOptions {
         jvmTarget = '1.8'

@@ -34,7 +34,7 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     val themeManager = remember { ThemeManager.getInstance(context) }
-    var currentTheme by remember { mutableStateOf(themeManager.getCurrentThemeMode()) }
+    var currentTheme by remember { mutableStateOf(themeManager.getThemeMode()) }
     var showThemeDialog by remember { mutableStateOf(false) }
 
     LinkpointTheme {

@@ -147,8 +147,30 @@ class ShadowMapper {
             }
         """.trimIndent()
         
-        // Compile shaders (simplified for example)
-        return 1 // Return program ID
+        return compileShaderProgram(vertexShader, fragmentShader)
+    }
+    
+    /**
+     * Helper to compile and link shader program
+     */
+    private fun compileShaderProgram(vertexSource: String, fragmentSource: String): Int {
+        val vertexShader = GLES30.glCreateShader(GLES30.GL_VERTEX_SHADER)
+        GLES30.glShaderSource(vertexShader, vertexSource)
+        GLES30.glCompileShader(vertexShader)
+        
+        val fragmentShader = GLES30.glCreateShader(GLES30.GL_FRAGMENT_SHADER)
+        GLES30.glShaderSource(fragmentShader, fragmentSource)
+        GLES30.glCompileShader(fragmentShader)
+        
+        val program = GLES30.glCreateProgram()
+        GLES30.glAttachShader(program, vertexShader)
+        GLES30.glAttachShader(program, fragmentShader)
+        GLES30.glLinkProgram(program)
+        
+        GLES30.glDeleteShader(vertexShader)
+        GLES30.glDeleteShader(fragmentShader)
+        
+        return program
     }
     
     /**

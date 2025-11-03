@@ -20,10 +20,10 @@ class ModernRenderPipeline {
     private var pbrShaderProgram: Int = -1
     private var legacyShaderProgram: Int = -1
     
-    // Integrated AAA graphics components
-    private val renderingOptimizer: RenderingOptimizer = RenderingOptimizer()
-    private val shadowMapper: ShadowMapper = ShadowMapper()
-    private val waterRenderer: WaterRenderer = WaterRenderer()
+    // Integrated AAA graphics components (lazily initialized)
+    private lateinit var renderingOptimizer: RenderingOptimizer
+    private lateinit var shadowMapper: ShadowMapper
+    private lateinit var waterRenderer: WaterRenderer
     
     // Uniform locations for PBR shader
     private var uMVPMatrix: Int? = null
@@ -88,7 +88,8 @@ class ModernRenderPipeline {
         // Initialize AAA graphics components
         Log.i(TAG, "Initializing AAA graphics components...")
         
-        // Initialize rendering optimizer (frustum culling, LOD, batching)
+        // Create and initialize rendering optimizer (frustum culling, LOD, batching)
+        renderingOptimizer = RenderingOptimizer()
         val renderConfig = RenderConfig(
             maxDrawCalls = 500,
             maxTriangles = 100000,
@@ -97,7 +98,8 @@ class ModernRenderPipeline {
         renderingOptimizer.initialize(renderConfig)
         Log.i(TAG, "Rendering optimizer initialized: 70% draw call reduction enabled")
         
-        // Initialize shadow mapper (cascaded shadows)
+        // Create and initialize shadow mapper (cascaded shadows)
+        shadowMapper = ShadowMapper()
         val shadowConfig = ShadowConfig(
             shadowMapSize = 2048,
             cascadeCount = 3,
@@ -107,7 +109,8 @@ class ModernRenderPipeline {
         shadowMapper.initialize(shadowConfig)
         Log.i(TAG, "Shadow mapper initialized: 3 cascades at 2048x2048 resolution")
         
-        // Initialize water renderer (reflections, waves, Fresnel)
+        // Create and initialize water renderer (reflections, waves, Fresnel)
+        waterRenderer = WaterRenderer()
         val waterConfig = WaterConfig(
             waterLevel = 20f,
             waterColor = floatArrayOf(0.0f, 0.3f, 0.5f, 0.7f),
