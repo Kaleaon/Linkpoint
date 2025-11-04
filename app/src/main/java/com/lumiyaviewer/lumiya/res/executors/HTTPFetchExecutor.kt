@@ -1,6 +1,5 @@
 package com.lumiyaviewer.lumiya.res.executors
 
-import com.lumiyaviewer.lumiya.GlobalOptions
 import java.util.concurrent.PriorityBlockingQueue
 
 /**
@@ -8,7 +7,7 @@ import java.util.concurrent.PriorityBlockingQueue
  */
 object HTTPFetchExecutor : WeakExecutor(
     "ResourceHTTPFetch",
-    GlobalOptions.getMaxTextureDownloads(),
+    com.lumiyaviewer.lumiya.GlobalOptions.getMaxTextureDownloads(),
     PriorityBlockingQueue()
 ) {
     

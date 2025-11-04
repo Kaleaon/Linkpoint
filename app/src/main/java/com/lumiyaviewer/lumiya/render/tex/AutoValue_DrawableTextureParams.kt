@@ -2,74 +2,54 @@ package com.lumiyaviewer.lumiya.render.tex
 
 import com.lumiyaviewer.lumiya.slproto.avatar.AvatarTextureFaceIndex
 import java.util.UUID
-import androidx.annotation.Nullable
 
-class AutoValue_DrawableTextureParams : DrawableTextureParams {
-    private AvatarTextureFaceIndex avatarFaceIndex
-    private UUID avatarUUID
-    private TextureClass textureClass
-    private UUID uuid
+internal class AutoValue_DrawableTextureParams(
+    private val uuidValue: UUID,
+    private val textureClassValue: TextureClass,
+    private val avatarFaceIndexValue: AvatarTextureFaceIndex?,
+    private val avatarUuidValue: UUID?,
+) : DrawableTextureParams() {
 
-    AutoValue_DrawableTextureParams(UUID uuid, TextureClass textureClass, @Nullable AvatarTextureFaceIndex avatarTextureFaceIndex, @Nullable UUID uuid2) {
-        if (uuid == null) {
-            throw NullPointerException("Null uuid")
-        }
-        this.uuid = uuid
-        if (textureClass == null) {
-            throw NullPointerException("Null textureClass")
-        }
-        this.textureClass = textureClass
-        this.avatarFaceIndex = avatarTextureFaceIndex
-        this.avatarUUID = uuid2
+    init {
+        requireNotNull(uuidValue) { "Null uuid" }
+        requireNotNull(textureClassValue) { "Null textureClass" }
     }
 
-    @Nullable
-    fun avatarFaceIndex(): AvatarTextureFaceIndex {
-        return this.avatarFaceIndex
+    override fun uuid(): UUID = uuidValue
+
+    override fun textureClass(): TextureClass = textureClassValue
+
+    override fun avatarFaceIndex(): AvatarTextureFaceIndex? = avatarFaceIndexValue
+
+    override fun avatarUUID(): UUID? = avatarUuidValue
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is DrawableTextureParams) return false
+
+        return uuidValue == other.uuid() &&
+            textureClassValue == other.textureClass() &&
+            avatarFaceIndexValue == other.avatarFaceIndex() &&
+            avatarUuidValue == other.avatarUUID()
     }
 
-    @Nullable
-    fun avatarUUID(): UUID {
-        return this.avatarUUID
+    override fun hashCode(): Int {
+        var result = uuidValue.hashCode()
+        result = 31 * result + textureClassValue.hashCode()
+        result = 31 * result + (avatarFaceIndexValue?.hashCode() ?: 0)
+        result = 31 * result + (avatarUuidValue?.hashCode() ?: 0)
+        return result
     }
 
-    fun equals(obj: Any): Boolean {
-        Boolean z = true
-        if (obj == this) {
-            return true
-        }
-        if (!(obj instanceof DrawableTextureParams)) {
-            return false
-        }
-        DrawableTextureParams drawableTextureParams = (DrawableTextureParams) obj
-        if (!this.uuid == drawableTextureParams.uuid() || !this.textureClass == drawableTextureParams.textureClass() || (this.avatarFaceIndex != null ? this.avatarFaceIndex == drawableTextureParams.avatarFaceIndex() : drawableTextureParams.avatarFaceIndex() == null)) {
-            z = false
-        } else if (this.avatarUUID != null) {
-            z = this.avatarUUID == drawableTextureParams.avatarUUID()
-        } else if (drawableTextureParams.avatarUUID() != null) {
-            z = false
-        }
-        return z
-    }
-
-    fun hashCode(): Int {
-        Int i = 0
-        Int hashCode = ((this.avatarFaceIndex == null ? 0 : this.avatarFaceIndex.hashCode()) ^ ((((this.uuid.hashCode() ^ 1000003) * 1000003) ^ this.textureClass.hashCode()) * 1000003)) * 1000003
-        if (this.avatarUUID != null) {
-            i = this.avatarUUID.hashCode()
-        }
-        return hashCode ^ i
-    }
-
-    fun textureClass(): TextureClass {
-        return this.textureClass
-    }
-
-    fun toString(): String {
-        return "DrawableTextureParams{uuid=" + this.uuid + ", " + "textureClass=" + this.textureClass + ", " + "avatarFaceIndex=" + this.avatarFaceIndex + ", " + "avatarUUID=" + this.avatarUUID + "}"
-    }
-
-    fun uuid(): UUID {
-        return this.uuid
+    override fun toString(): String = buildString {
+        append("DrawableTextureParams{uuid=")
+        append(uuidValue)
+        append(", textureClass=")
+        append(textureClassValue)
+        append(", avatarFaceIndex=")
+        append(avatarFaceIndexValue)
+        append(", avatarUUID=")
+        append(avatarUuidValue)
+        append('}')
     }
 }

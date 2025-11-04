@@ -28,6 +28,8 @@ import java.util.concurrent.atomic.AtomicReference
  */
 object GlobalOptions : SharedPreferences.OnSharedPreferenceChangeListener {
 
+    fun getInstance(): GlobalOptions = this
+
     enum class MeshRendering(val lodName: String?) {
         HIGH("high_lod"),
         MEDIUM("medium_lod"),
