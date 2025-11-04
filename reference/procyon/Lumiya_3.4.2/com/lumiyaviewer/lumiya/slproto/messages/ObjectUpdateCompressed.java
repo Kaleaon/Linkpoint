@@ -1,0 +1,74 @@
+// 
+// Decompiled by Procyon v0.6.0
+// 
+
+package com.lumiyaviewer.lumiya.slproto.messages;
+
+import java.nio.ByteBuffer;
+import java.util.Iterator;
+import java.util.ArrayList;
+import com.lumiyaviewer.lumiya.slproto.SLMessage;
+
+public class ObjectUpdateCompressed extends SLMessage
+{
+    public ArrayList<ObjectData> ObjectData_Fields;
+    public RegionData RegionData_Field;
+    
+    public ObjectUpdateCompressed() {
+        this.ObjectData_Fields = new ArrayList<ObjectData>();
+        this.zeroCoded = false;
+        this.RegionData_Field = new RegionData();
+    }
+    
+    @Override
+    public int CalcPayloadSize() {
+        final Iterator<Object> iterator = this.ObjectData_Fields.iterator();
+        int n = 12;
+        while (iterator.hasNext()) {
+            n += iterator.next().Data.length + 6;
+        }
+        return n;
+    }
+    
+    @Override
+    public void Handle(final SLMessageHandler slMessageHandler) {
+        slMessageHandler.HandleObjectUpdateCompressed(this);
+    }
+    
+    @Override
+    public void PackPayload(final ByteBuffer byteBuffer) {
+        byteBuffer.put((byte)13);
+        this.packLong(byteBuffer, this.RegionData_Field.RegionHandle);
+        this.packShort(byteBuffer, (short)this.RegionData_Field.TimeDilation);
+        byteBuffer.put((byte)this.ObjectData_Fields.size());
+        for (final ObjectData objectData : this.ObjectData_Fields) {
+            this.packInt(byteBuffer, objectData.UpdateFlags);
+            this.packVariable(byteBuffer, objectData.Data, 2);
+        }
+    }
+    
+    @Override
+    public void UnpackPayload(final ByteBuffer byteBuffer) {
+        this.RegionData_Field.RegionHandle = this.unpackLong(byteBuffer);
+        this.RegionData_Field.TimeDilation = (this.unpackShort(byteBuffer) & 0xFFFF);
+        final byte value = byteBuffer.get();
+        for (int i = 0; i < (value & 0xFF); ++i) {
+            final ObjectData e = new ObjectData();
+            e.UpdateFlags = this.unpackInt(byteBuffer);
+            e.Data = this.unpackVariable(byteBuffer, 2);
+            this.ObjectData_Fields.add(e);
+        }
+    }
+    
+    public static class ObjectData
+    {
+        public byte[] Data;
+        public int UpdateFlags;
+    }
+    
+    public static class RegionData
+    {
+        public long RegionHandle;
+        public int TimeDilation;
+    }
+}
