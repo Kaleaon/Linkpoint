@@ -5,26 +5,26 @@ import java.io.DataOutputStream
 import java.io.IOException
 import org.xmlpull.v1.XmlSerializer
 
-class LLSDInt(private val value: Int) : LLSDNode() {
+class LLSDDouble(private val value: Double) : LLSDNode() {
 
-    constructor(text: String) : this(text.toInt())
+    constructor(text: String) : this(text.toDouble())
 
-    override fun asInt(): Int = value
+    override fun asDouble(): Double = value
 
-    override fun asBoolean(): Boolean = value != 0
+    override fun asInt(): Int = value.toInt()
 
     override fun asString(): String = value.toString()
 
     @Throws(IOException::class)
     override fun toBinary(stream: DataOutputStream) {
-        stream.writeByte('i'.code)
-        stream.writeInt(value)
+        stream.writeByte('r'.code)
+        stream.writeDouble(value)
     }
 
     @Throws(IOException::class)
     override fun toXML(serializer: XmlSerializer) {
-        serializer.startTag("", "integer")
+        serializer.startTag("", "real")
         serializer.text(value.toString())
-        serializer.endTag("", "integer")
+        serializer.endTag("", "real")
     }
 }
