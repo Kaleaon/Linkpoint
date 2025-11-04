@@ -2,7 +2,6 @@ package com.lumiyaviewer.lumiya
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.net.Uri
 import androidx.core.content.ContextCompat
 import com.google.common.base.Strings
 import com.google.common.collect.ImmutableList
@@ -13,7 +12,6 @@ import com.lumiyaviewer.lumiya.res.textures.TextureCache
 import com.lumiyaviewer.lumiya.ui.media.NotificationSounds
 import com.lumiyaviewer.lumiya.ui.settings.NotificationType
 import com.lumiyaviewer.lumiya.ui.settings.ThemeChangedEvent
-import com.lumiyaviewer.lumiya.voiceintf.VoicePluginServiceConnection
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
@@ -182,8 +180,7 @@ object GlobalOptions : SharedPreferences.OnSharedPreferenceChangeListener {
         keepWifiOn = prefs.getBoolean("keep_wifi_on", true)
         cloudSyncEnabled = prefs.getBoolean("sync_to_gdrive", false)
 
-        voiceEnabled = prefs.getBoolean("enableVoice", false) &&
-            VoicePluginServiceConnection.isPluginSupported()
+        voiceEnabled = prefs.getBoolean("enableVoice", false)
 
         maxTextureDownloads = prefs.getString("max_texture_downloads", "2")
             ?.toIntOrNull()?.coerceAtLeast(1) ?: 2
@@ -247,17 +244,18 @@ object GlobalOptions : SharedPreferences.OnSharedPreferenceChangeListener {
     }
 
     private fun updateNotificationSoundDefault(prefs: SharedPreferences, type: NotificationType) {
-        if (prefs.contains(type.ringtoneKey)) return
+        val key = type.getRingtoneKey()
+        if (prefs.contains(key)) return
 
         val defaultSound = NotificationSounds.defaultSounds[type] ?: return
-        val uri: Uri = defaultSound.uri
+        val tone = defaultSound.getUri()
         prefs.edit()
-            .putString(type.ringtoneKey, uri.toString())
+            .putString(key, tone.toString())
             .apply()
         Debug.Printf(
             "NotificationSounds: Updated %s preference to %s",
-            type.ringtoneKey,
-            uri
+            key,
+            tone
         )
     }
 
