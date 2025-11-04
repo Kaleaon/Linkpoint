@@ -5,9 +5,9 @@ import com.linkpoint.Debug
 import com.linkpoint.eventbus.EventBus
 import com.linkpoint.slproto.auth.SLAuthReply
 import com.linkpoint.slproto.handler.SLMessageRouter
+import com.linkpoint.slproto.messages.CompletePingCheck
 import com.linkpoint.slproto.messages.PacketAck
 import com.linkpoint.slproto.messages.StartPingCheck
-import com.linkpoint.slproto.messages.CompletePingCheck
 import com.linkpoint.slproto.modules.SLIdleHandler
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -17,7 +17,7 @@ import java.nio.channels.Selector
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.collections.ArrayList
+import kotlin.math.min
 
 /**
  * SLCircuit - UDP circuit for Second Life protocol
@@ -47,6 +47,7 @@ open class SLCircuitNew(
         const val PING_INTERVAL = 5000L
         const val TRACK_HANDLED_PACKETS = 1024
         const val UNANSWERED_PINGS = 3
+        const val MAX_ACKS_PER_PACKET = 255
     }
     
     // Network components
@@ -57,7 +58,6 @@ open class SLCircuitNew(
     
     // Buffers
     private val txBuffer = ByteBuffer.allocate(65536)
-    private val tempBuffer = ByteBuffer.allocate(65536)
     private val rxBuffer = ByteBuffer.allocate(65536)
     
     // Message queues
@@ -68,7 +68,6 @@ open class SLCircuitNew(
     private val lastSeqNum = AtomicInteger(0)
     private var lastReceivedSeqnum = 0
     private val pendingAcks = Collections.synchronizedList(LinkedList<Int>())
-    private val receivedAcks = ArrayList<Int>()
     private val handledPackets: Queue<Int> = LinkedList()
     
     // Ping tracking
@@ -127,64 +126,56 @@ open class SLCircuitNew(
         try {
             rxBuffer.clear()
             val address = datagramChannel.receive(rxBuffer)
-            
+
             if (address == null) {
                 return false
             }
-            
+
             rxBuffer.flip()
             lastReceivedPacketMillis = SystemClock.elapsedRealtime()
-            
-            // Parse packet header
-            if (rxBuffer.remaining() < 6) {
-                Debug.Log("Packet too short: ${rxBuffer.remaining()} bytes")
+
+            val decodedPacket = SLPacket.decode(rxBuffer)
+            if (decodedPacket == null) {
+                Debug.Log("Failed to decode incoming packet")
                 return false
             }
-            
-            val flags = rxBuffer.get()
-            val sequenceNum = rxBuffer.getInt()
-            val offset = rxBuffer.get()
-            
-            // Check if this is a duplicate packet
+
+            // Process ACKs bundled with this packet before handling the message
+            if (decodedPacket.ackIds.isNotEmpty()) {
+                for (ack in decodedPacket.ackIds) {
+                    processReceivedAck(ack)
+                }
+            }
+
+            val sequenceNum = decodedPacket.header.sequenceNumber
+
+            // Duplicate detection
             if (handledPackets.contains(sequenceNum)) {
                 Debug.Log("Duplicate packet: $sequenceNum")
                 return true
             }
-            
-            // Track handled packets
+
             handledPackets.add(sequenceNum)
             if (handledPackets.size > TRACK_HANDLED_PACKETS) {
                 handledPackets.poll()
             }
-            
-            // Check if packet needs acknowledgment
-            val isReliable = (flags.toInt() and SLMessage.LL_RELIABLE_FLAG.toInt()) != 0
-            if (isReliable) {
+
+            if (decodedPacket.header.isReliable) {
                 pendingAcks.add(sequenceNum)
             }
-            
-            // Check for ACK flag
-            val hasAck = (flags.toInt() and SLMessage.LL_ACK_FLAG.toInt()) != 0
-            if (hasAck) {
-                // Extra acknowledgments are appended to the packet
-                val ackCount = rxBuffer.get().toInt() and 0xFF
-                for (i in 0 until ackCount) {
-                    val ackedSeq = rxBuffer.getInt()
-                    processReceivedAck(ackedSeq)
-                }
-            }
-            
-            // Decode message
-            val message = decodeMessage(rxBuffer)
+
+            val message = decodedPacket.message
             if (message != null) {
                 handleMessage(message)
+            } else {
+                Debug.Log("Unhandled or unknown message in packet $sequenceNum")
             }
-            
+
             lastReceivedSeqnum = sequenceNum
             resetPingTimer()
-            
+
             return true
-            
+
         } catch (e: IOException) {
             Debug.Log("Error receiving packet: ${e.message}")
             return false
@@ -196,50 +187,39 @@ open class SLCircuitNew(
      */
     fun processSend(): Boolean {
         try {
-            val message = outgoingQueue.poll() ?: return false
-            
+            val message = outgoingQueue.poll()
+            val pendingAckSnapshot = snapshotPendingAcks(MAX_ACKS_PER_PACKET)
+
+            if (message == null) {
+                return sendAckPacket(pendingAckSnapshot)
+            }
+
             txBuffer.clear()
-            
-            // Write packet header
-            var flags: Byte = 0
-            if (message.isReliable) {
-                flags = (flags.toInt() or SLMessage.LL_RELIABLE_FLAG.toInt()).toByte()
-            }
-            if (message.isResent) {
-                flags = (flags.toInt() or SLMessage.LL_RESENT_FLAG.toInt()).toByte()
-            }
-            
-            // Add pending ACKs to packet if available
-            val acksToSend = synchronized(pendingAcks) {
-                val acks = ArrayList(pendingAcks.take(255))
-                pendingAcks.clear()
-                acks
-            }
-            
-            if (acksToSend.isNotEmpty()) {
-                flags = (flags.toInt() or SLMessage.LL_ACK_FLAG.toInt()).toByte()
-            }
-            
-            txBuffer.put(flags)
-            txBuffer.putInt(message.sequenceNumber)
-            txBuffer.put(0) // offset (0 for single messages)
-            
-            // Write ACKs if any
-            if (acksToSend.isNotEmpty()) {
-                txBuffer.put(acksToSend.size.toByte())
-                for (ack in acksToSend) {
-                    txBuffer.putInt(ack)
-                }
-            }
-            
-            // Encode message body
-            message.encode(txBuffer)
-            
+
+            message.sentTimeMillis = System.currentTimeMillis()
+
+            val packet = SLPacket.outgoing(
+                message = message,
+                sequenceNumber = message.sequenceNumber,
+                isResent = message.isResent,
+                ackIds = pendingAckSnapshot
+            )
+
+            packet.writeTo(txBuffer)
+
             txBuffer.flip()
-            datagramChannel.write(txBuffer)
-            
-            return true
-            
+            val bytesWritten = datagramChannel.write(txBuffer)
+            if (bytesWritten > 0) {
+                if (pendingAckSnapshot.isNotEmpty()) {
+                    removePendingAcks(pendingAckSnapshot.size)
+                }
+                return true
+            }
+
+            // Write failed; requeue message for later attempt
+            outgoingQueue.add(message)
+            return false
+
         } catch (e: IOException) {
             Debug.Log("Error sending packet: ${e.message}")
             return false
@@ -296,12 +276,67 @@ open class SLCircuitNew(
             }
         }
     }
-    
-    /**
-     * Decode message from buffer
-     */
-    private fun decodeMessage(buffer: ByteBuffer): SLMessage? {
-        return com.linkpoint.protocol.MessageDecoder.decode(buffer)
+
+    private fun snapshotPendingAcks(maxCount: Int): List<Int> {
+        if (maxCount <= 0) {
+            return emptyList()
+        }
+
+        return synchronized(pendingAcks) {
+            if (pendingAcks.isEmpty()) {
+                emptyList()
+            } else {
+                pendingAcks.take(maxCount).toList()
+            }
+        }
+    }
+
+    private fun removePendingAcks(count: Int) {
+        if (count <= 0) {
+            return
+        }
+
+        synchronized(pendingAcks) {
+            val removeCount = min(count, pendingAcks.size)
+            repeat(removeCount) {
+                pendingAcks.removeAt(0)
+            }
+        }
+    }
+
+    private fun sendAckPacket(ackIds: List<Int>): Boolean {
+        if (ackIds.isEmpty()) {
+            return false
+        }
+
+        val ackMessage = PacketAck(ackIds.map { PacketAck.Packet(it) })
+        ackMessage.isReliable = false
+        ackMessage.sequenceNumber = lastSeqNum.incrementAndGet()
+        ackMessage.sentTimeMillis = System.currentTimeMillis()
+        ackMessage.retries = 0
+
+        txBuffer.clear()
+        val packet = SLPacket.outgoing(
+            message = ackMessage,
+            sequenceNumber = ackMessage.sequenceNumber,
+            isResent = false,
+            ackIds = emptyList()
+        )
+        packet.writeTo(txBuffer)
+        txBuffer.flip()
+
+        return try {
+            val bytesWritten = datagramChannel.write(txBuffer)
+            if (bytesWritten > 0) {
+                removePendingAcks(ackIds.size)
+                true
+            } else {
+                false
+            }
+        } catch (e: IOException) {
+            Debug.Log("Error sending ACK packet: ${e.message}")
+            false
+        }
     }
     
     /**
@@ -384,7 +419,8 @@ open class SLCircuitNew(
      */
     private fun updateSelectorOps() {
         var ops = SelectionKey.OP_READ
-        if (outgoingQueue.isNotEmpty()) {
+        val hasPendingAcks = synchronized(pendingAcks) { pendingAcks.isNotEmpty() }
+        if (outgoingQueue.isNotEmpty() || hasPendingAcks) {
             ops = ops or SelectionKey.OP_WRITE
         }
         selectionKey.interestOps(ops)

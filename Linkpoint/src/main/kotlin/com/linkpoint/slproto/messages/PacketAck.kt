@@ -12,6 +12,10 @@ class PacketAck(
     
     data class Packet(val id: Int)
     
+    init {
+        isReliable = false
+    }
+
     override fun getMessageName() = "PacketAck"
     
     override fun encode(buffer: ByteBuffer) {
