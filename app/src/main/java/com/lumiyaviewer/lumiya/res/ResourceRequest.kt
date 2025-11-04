@@ -1,71 +1,67 @@
 package com.lumiyaviewer.lumiya.res
 
 import java.util.Collections
-import java.util.Set
 import java.util.WeakHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 
-abstract class ResourceRequest<ResourceParams, ResourceType> {
-    private val consumers: Set<ResourceConsumer> = Collections.newSetFromMap(WeakHashMap(4, 0.5f))
-    private var isCancelled: Boolean = false
-    private var isCompleted: Boolean = false
-    private ResourceManager<ResourceParams, ResourceType> manager
-    private ResourceParams params
-    private var started: Boolean = false
+/**
+ * Base class for asynchronous resource population requests.
+ * Consumers are tracked via a weak set so that UI components can simply
+ * drop their strong reference when they are destroyed.
+ */
+abstract class ResourceRequest<ResourceParams, ResourceType>(
+    private val params: ResourceParams,
+    private val manager: ResourceManager<ResourceParams, ResourceType>,
+) {
 
-    constructor(resourceparams: ResourceParams, resourceManager: ResourceType>) {
-        this.params = resourceparams
-        this.manager = resourceManager
+    private val consumers: MutableSet<ResourceConsumer> =
+        Collections.newSetFromMap(WeakHashMap<ResourceConsumer, Boolean>(4, 0.5f))
+
+    private val cancelled = AtomicBoolean(false)
+    private val completed = AtomicBoolean(false)
+    private val started = AtomicBoolean(false)
+
+    fun addConsumer(consumer: ResourceConsumer) {
+        consumers.add(consumer)
     }
 
-    fun addConsumer(resourceConsumer: ResourceConsumer): Unit {
-        this.consumers.add(resourceConsumer)
+    open fun cancelRequest() {
+        // override in subclasses when additional cleanup is needed
     }
 
-    fun cancelRequest(): Unit {
+    protected fun completeRequest(resource: ResourceType?) {
+        completed.set(true)
+        manager.completeRequest(params, resource, consumers)
     }
 
-    fun completeRequest(resourcetype: ResourceType): Unit {
-        this.isCompleted = true
-        this.manager.CompleteRequest(this.params, resourcetype, this.consumers)
+    protected fun intermediateResult(resource: ResourceType?) {
+        manager.intermediateResult(params, resource, consumers)
     }
 
-    abstract fun execute(): Unit
-
-    /* access modifiers changed from: protected */
-    ResourceParams getParams() {
-        return this.params
+    fun removeConsumer(consumer: ResourceConsumer): Boolean {
+        consumers.remove(consumer)
+        return consumers.isEmpty()
     }
 
-    fun intermediateResult(resourcetype: ResourceType): Unit {
-        this.manager.IntermediateResult(this.params, resourcetype, this.consumers)
+    fun isStale(): Boolean = consumers.isEmpty()
+
+    fun isCancelled(): Boolean = cancelled.get()
+
+    fun setCancelled(value: Boolean) {
+        cancelled.set(value)
     }
 
-    fun isCancelled(): Boolean {
-        return this.isCancelled
-    }
+    fun isCompleted(): Boolean = completed.get()
 
-    boolean isCompleted() {
-        return this.isCompleted
-    }
+    internal fun params(): ResourceParams = params
 
-    fun isStale(): Boolean {
-        return this.consumers.size() == 0
-    }
+    /**
+     * Ensures the request is only executed once even if multiple consumers
+     * subscribe before the first result is produced.
+     *
+     * @return true when the caller should trigger [execute].
+     */
+    fun willStart(): Boolean = started.compareAndSet(false, true)
 
-    fun removeConsumer(resourceConsumer: ResourceConsumer): Boolean {
-        this.consumers.remove(resourceConsumer)
-        return this.consumers.size() == 0
-    }
-
-    fun setCancelled(z: Boolean): Unit {
-        this.isCancelled = z
-    }
-
-    boolean willStart() {
-        if (this.started) {
-            return false
-        }
-        this.started = true
-        return true
-    }
+    abstract fun execute()
 }

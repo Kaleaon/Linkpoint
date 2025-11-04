@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ImageButton
+        android:id="@+id/ui_back_button"
+        android:src="@drawable/quantum_ic_close_white_24"
+        android:layout_alignParentTop="true"
+        android:contentDescription="@string/back_button_content_description"
+        android:layout_alignParentStart="true"
+        style="@style/UiButton"/>
+    <RelativeLayout
+        android:id="@+id/ui_alignment_marker"
+        android:background="@color/alignment_marker_color"
+        android:layout_width="@dimen/alignment_marker_thickness"
+        android:layout_height="@dimen/alignment_marker_height"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"/>
+    <ImageButton
+        android:id="@+id/ui_settings_button"
+        android:src="@drawable/quantum_ic_settings_white_24"
+        android:layout_alignParentTop="true"
+        android:contentDescription="@string/settings_button_content_description"
+        android:layout_alignParentEnd="true"
+        style="@style/UiButton"/>
+</RelativeLayout>

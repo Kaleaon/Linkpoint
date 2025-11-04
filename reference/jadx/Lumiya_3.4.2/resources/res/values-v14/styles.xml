@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Platform.AppCompat" parent="@style/Platform.V14.AppCompat">
+    </style>
+    <style name="Platform.AppCompat.Light" parent="@style/Platform.V14.AppCompat.Light">
+    </style>
+    <style name="Base.TextAppearance.AppCompat.Button" parent="@style/Base.TextAppearance.AppCompat">
+        <item name="android:textSize">@dimen/abc_text_size_button_material</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+    <style name="Platform.V14.AppCompat" parent="@style/Platform.V11.AppCompat">
+        <item name="android:actionModeSelectAllDrawable">?attr/actionModeSelectAllDrawable</item>
+        <item name="android:listPreferredItemPaddingLeft">@dimen/abc_list_item_padding_horizontal_material</item>
+        <item name="android:listPreferredItemPaddingRight">@dimen/abc_list_item_padding_horizontal_material</item>
+    </style>
+    <style name="Platform.V14.AppCompat.Light" parent="@style/Platform.V11.AppCompat.Light">
+        <item name="android:actionModeSelectAllDrawable">?attr/actionModeSelectAllDrawable</item>
+        <item name="android:listPreferredItemPaddingLeft">@dimen/abc_list_item_padding_horizontal_material</item>
+        <item name="android:listPreferredItemPaddingRight">@dimen/abc_list_item_padding_horizontal_material</item>
+    </style>
+    <style name="Theme.Lumiya" parent="@style/Theme.Lumiya.Base">
+        <item name="android:buttonStyle">@style/PrimaryButton</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    </style>
+    <style name="Theme.Lumiya.Light" parent="@style/Theme.Lumiya.Base.Light">
+        <item name="android:buttonStyle">@style/PrimaryButton</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    </style>
+    <style name="Theme.Lumiya.Light.NoActionBar" parent="@style/Theme.Lumiya.Light">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    <style name="Theme.Lumiya.NoActionBar" parent="@style/Theme.Lumiya">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    <style name="Theme.Lumiya.Pink" parent="@style/Theme.Lumiya.Base.Pink">
+        <item name="android:buttonStyle">@style/PrimaryButton</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    </style>
+    <style name="Theme.Lumiya.Pink.NoActionBar" parent="@style/Theme.Lumiya.Pink">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+</resources>

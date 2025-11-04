@@ -1,0 +1,28 @@
+package com.lumiyaviewer.lumiya.voice.common.messages;
+
+import android.os.Bundle;
+import com.lumiyaviewer.lumiya.voice.common.VoicePluginMessage;
+import com.lumiyaviewer.lumiya.voice.common.model.VoiceChannelInfo;
+import javax.annotation.Nonnull;
+
+/* loaded from: classes.dex */
+public class VoiceTerminateCall implements VoicePluginMessage {
+
+    @Nonnull
+    public final VoiceChannelInfo channelInfo;
+
+    public VoiceTerminateCall(Bundle bundle) {
+        this.channelInfo = new VoiceChannelInfo(bundle.getBundle("channelInfo"));
+    }
+
+    public VoiceTerminateCall(@Nonnull VoiceChannelInfo voiceChannelInfo) {
+        this.channelInfo = voiceChannelInfo;
+    }
+
+    @Override // com.lumiyaviewer.lumiya.voice.common.VoicePluginMessage
+    public Bundle toBundle() {
+        Bundle bundle = new Bundle();
+        bundle.putBundle("channelInfo", this.channelInfo.toBundle());
+        return bundle;
+    }
+}

@@ -1,17 +1,13 @@
 package com.lumiyaviewer.lumiya.res
 
 /**
- * Modern Kotlin ResourceConsumer interface
- * Callback interface for resource loading completion
+ * Callback invoked when a resource request has produced either an
+ * intermediate or final result.
  */
-interface ResourceConsumer {
+fun interface ResourceConsumer {
     /**
-     * Called when a resource is ready
-     * @param resource The loaded resource
-     * @param success Whether the resource loaded successfully
+     * @param resource       the resource instance (or null on failure)
+     * @param isIntermediate true when delivery represents a streaming/intermediate result
      */
-    fun OnResourceReady(
-        resource: Any?,
-        success: Boolean,
-    )
+    fun OnResourceReady(resource: Any?, isIntermediate: Boolean)
 }

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:lumiya="http://schemas.android.com/apk/res-auto">
+    <item
+        android:icon="?attr/MenuIconObjects"
+        android:id="@+id/item_object_popups"
+        android:title="@string/object_messages_menu_title"
+        lumiya:showAsAction="always"
+        lumiya:actionProviderClass="com.lumiyaviewer.lumiya.ui.objpopup.ObjectPopupsActionProvider"/>
+</menu>

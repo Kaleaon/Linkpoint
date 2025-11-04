@@ -1,0 +1,55 @@
+package com.lumiyaviewer.lumiya.slproto.messages;
+
+import com.lumiyaviewer.lumiya.slproto.SLMessage;
+import java.nio.ByteBuffer;
+import java.util.UUID;
+
+/* loaded from: classes.dex */
+public class RegionHandshakeReply extends SLMessage {
+    public AgentData AgentData_Field;
+    public RegionInfo RegionInfo_Field;
+
+    /* loaded from: classes.dex */
+    public static class AgentData {
+        public UUID AgentID;
+        public UUID SessionID;
+    }
+
+    /* loaded from: classes.dex */
+    public static class RegionInfo {
+        public int Flags;
+    }
+
+    public RegionHandshakeReply() {
+        this.zeroCoded = true;
+        this.AgentData_Field = new AgentData();
+        this.RegionInfo_Field = new RegionInfo();
+    }
+
+    @Override // com.lumiyaviewer.lumiya.slproto.SLMessage
+    public int CalcPayloadSize() {
+        return 40;
+    }
+
+    @Override // com.lumiyaviewer.lumiya.slproto.SLMessage
+    public void Handle(SLMessageHandler sLMessageHandler) {
+        sLMessageHandler.HandleRegionHandshakeReply(this);
+    }
+
+    @Override // com.lumiyaviewer.lumiya.slproto.SLMessage
+    public void PackPayload(ByteBuffer byteBuffer) {
+        byteBuffer.putShort((short) -1);
+        byteBuffer.put((byte) 0);
+        byteBuffer.put((byte) -107);
+        packUUID(byteBuffer, this.AgentData_Field.AgentID);
+        packUUID(byteBuffer, this.AgentData_Field.SessionID);
+        packInt(byteBuffer, this.RegionInfo_Field.Flags);
+    }
+
+    @Override // com.lumiyaviewer.lumiya.slproto.SLMessage
+    public void UnpackPayload(ByteBuffer byteBuffer) {
+        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
+        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
+        this.RegionInfo_Field.Flags = unpackInt(byteBuffer);
+    }
+}
