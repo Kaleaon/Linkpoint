@@ -30,7 +30,9 @@ class SLAuth(
             }
 
             val body = response.body?.string() ?: throw IOException("Empty login response")
-            return SLAuthReply.fromXml(params.gridName, params.loginUrl, body)
+            val reply = SLAuthReply.fromXml(params.gridName, params.loginUrl, body)
+            SessionManager.store(params, reply)
+            return reply
         }
     }
 

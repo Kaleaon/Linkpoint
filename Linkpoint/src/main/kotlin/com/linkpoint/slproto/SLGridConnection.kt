@@ -308,6 +308,7 @@ private /* synthetic */ IntArray m71-getcom-lumiyaviewer-lumiya-slproto-SLGridCo
             CloseCircuit.CloseCircuit()
         }
         this.tempCircuits.clear()
+        com.linkpoint.slproto.auth.SessionManager.clear()
         setConnectionState(ConnectionState.Idle)
     }
 

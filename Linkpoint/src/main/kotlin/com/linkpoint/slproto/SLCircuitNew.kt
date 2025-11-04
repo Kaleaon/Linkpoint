@@ -309,7 +309,7 @@ open class SLCircuitNew(
             return false
         }
 
-        val ackMessage = PacketAck(ackIds.map { PacketAck.Packet(it) })
+        val ackMessage = PacketAck(ackIds.map { PacketAck.Packet(it) }.toMutableList())
         ackMessage.isReliable = false
         ackMessage.sequenceNumber = lastSeqNum.incrementAndGet()
         ackMessage.sentTimeMillis = System.currentTimeMillis()
