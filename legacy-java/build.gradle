@@ -16,6 +16,15 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+            include 'com/lumiyaviewer/lumiya/Debug.java'
+        }
+    }
+}
+
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
