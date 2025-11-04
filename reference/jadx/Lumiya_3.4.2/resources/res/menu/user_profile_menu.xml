@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:icon="?attr/MenuIconLocalChat"
+        android:id="@+id/item_chat"
+        android:title="Chat"
+        android:showAsAction="withText|ifRoom"/>
+    <item
+        android:icon="?attr/MenuIconItemShare"
+        android:id="@+id/item_share_object"
+        android:title="Share item"
+        android:showAsAction="withText|ifRoom"/>
+    <item
+        android:icon="?attr/MenuIconDollar"
+        android:id="@+id/item_pay_user"
+        android:title="Pay"
+        android:showAsAction="withText|ifRoom"/>
+    <item
+        android:icon="?attr/MenuIconFlag"
+        android:id="@+id/item_offer_teleport"
+        android:title="Offer teleport"
+        android:titleCondensed="Lure"
+        android:showAsAction="withText|ifRoom"/>
+    <item
+        android:icon="?attr/MenuIconRequestTeleport"
+        android:id="@+id/item_request_teleport"
+        android:title="Request teleport"
+        android:showAsAction="withText|ifRoom"/>
+    <item
+        android:icon="?attr/MenuIconPlus"
+        android:id="@+id/item_add_friend"
+        android:title="Add friend"
+        android:showAsAction="withText|ifRoom"/>
+    <item
+        android:icon="?attr/MenuIconMinus"
+        android:id="@+id/item_remove_friend"
+        android:title="Remove friend"
+        android:showAsAction="withText|ifRoom"/>
+</menu>
