@@ -4,43 +4,46 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * UUID pooling utility for Second Life protocol
+ * UUID pooling utility for Second Life protocol.
+ *
+ * Certain protocol responses send the same UUID strings repeatedly. Caching the
+ * parsed instances dramatically reduces allocations when parsing large
+ * responses (login buddy lists, inventory trees, etc.).
  */
-class UUIDPool {
-    private const val ConcurrentHashMap<String, UUID> uuidCache = ConcurrentHashMap<>()
-    
+object UUIDPool {
+
+    private val uuidCache = ConcurrentHashMap<String, UUID>()
+
     /**
-     * Get UUID from string, with caching
+     * Obtain a stable [UUID] for the provided [uuidString]. Invalid inputs fall
+     * back to a randomly generated UUID so callers never receive null.
      */
     @JvmStatic
-     fun getUUID(uuidString: String): UUID {
-        if (uuidString == null || uuidString.isEmpty()) {
+    fun getUUID(uuidString: String?): UUID {
+        if (uuidString.isNullOrBlank()) {
             return UUID.randomUUID()
         }
-        
-        return uuidCache.computeIfAbsent(uuidString, key -> {
+
+        return uuidCache.computeIfAbsent(uuidString) { key ->
             try {
-                return UUID.fromString(key)
-            } catch (IllegalArgumentException e) {
-                // If string is not a valid UUID, generate one
-                return UUID.randomUUID()
+                UUID.fromString(key)
+            } catch (_: IllegalArgumentException) {
+                UUID.randomUUID()
             }
-        })
+        }
     }
-    
+
     /**
-     * Generate random UUID
+     * Generate a brand new random [UUID].
      */
     @JvmStatic
-     fun generateUUID(): UUID {
-        return UUID.randomUUID()
-    }
-    
+    fun generateUUID(): UUID = UUID.randomUUID()
+
     /**
-     * Clear UUID cache
+     * Clear the internal cache. Primarily useful for tests.
      */
     @JvmStatic
-     fun clearCache() {
+    fun clearCache() {
         uuidCache.clear()
     }
 }

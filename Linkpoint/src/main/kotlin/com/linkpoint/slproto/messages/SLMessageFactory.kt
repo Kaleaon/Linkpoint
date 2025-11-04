@@ -1,964 +1,491 @@
 package com.linkpoint.slproto.messages
-import java.util.*
 
 import com.linkpoint.slproto.SLMessage
 
-class SLMessageFactory {
+/**
+ * Factory for instantiating protocol message classes based on their numeric identifier.
+ */
+object SLMessageFactory {
+    private val factoryById: Map<Int, () -> SLMessage> = mapOf(
+        -65535 to { TestMessage() },
+        -65534 to { AddCircuitCode() },
+        -65533 to { UseCircuitCode() },
+        -65532 to { AvatarTextureUpdate() },
+        -65531 to { SimulatorMapUpdate() },
+        -65530 to { SimulatorSetMap() },
+        -65529 to { SubscribeLoad() },
+        -65528 to { UnsubscribeLoad() },
+        -65527 to { SimulatorReady() },
+        -65526 to { TelehubInfo() },
+        -65525 to { SimulatorPresentAtLocation() },
+        -65524 to { SimulatorLoad() },
+        -65523 to { SimulatorShutdownRequest() },
+        -65522 to { RegionPresenceRequestByRegionID() },
+        -65521 to { RegionPresenceRequestByHandle() },
+        -65520 to { RegionPresenceResponse() },
+        -65519 to { UpdateSimulator() },
+        -65518 to { LogDwellTime() },
+        -65517 to { FeatureDisabled() },
+        -65516 to { LogFailedMoneyTransaction() },
+        -65515 to { UserReportInternal() },
+        -65514 to { SetSimStatusInDatabase() },
+        -65513 to { SetSimPresenceInDatabase() },
+        -65512 to { EconomyDataRequest() },
+        -65511 to { EconomyData() },
+        -65510 to { AvatarPickerRequest() },
+        -65509 to { AvatarPickerRequestBackend() },
+        -65508 to { AvatarPickerReply() },
+        -65507 to { PlacesQuery() },
+        -65506 to { PlacesReply() },
+        -65505 to { DirFindQuery() },
+        -65504 to { DirFindQueryBackend() },
+        -65503 to { DirPlacesQuery() },
+        -65502 to { DirPlacesQueryBackend() },
+        -65501 to { DirPlacesReply() },
+        -65500 to { DirPeopleReply() },
+        -65499 to { DirEventsReply() },
+        -65498 to { DirGroupsReply() },
+        -65497 to { DirClassifiedQuery() },
+        -65496 to { DirClassifiedQueryBackend() },
+        -65495 to { DirClassifiedReply() },
+        -65494 to { AvatarClassifiedReply() },
+        -65493 to { ClassifiedInfoRequest() },
+        -65492 to { ClassifiedInfoReply() },
+        -65491 to { ClassifiedInfoUpdate() },
+        -65490 to { ClassifiedDelete() },
+        -65489 to { ClassifiedGodDelete() },
+        -65488 to { DirLandQuery() },
+        -65487 to { DirLandQueryBackend() },
+        -65486 to { DirLandReply() },
+        -65485 to { DirPopularQuery() },
+        -65484 to { DirPopularQueryBackend() },
+        -65483 to { DirPopularReply() },
+        -65482 to { ParcelInfoRequest() },
+        -65481 to { ParcelInfoReply() },
+        -65480 to { ParcelObjectOwnersRequest() },
+        -65479 to { ParcelObjectOwnersReply() },
+        -65478 to { GroupNoticesListRequest() },
+        -65477 to { GroupNoticesListReply() },
+        -65476 to { GroupNoticeRequest() },
+        -65475 to { GroupNoticeAdd() },
+        -65474 to { TeleportRequest() },
+        -65473 to { TeleportLocationRequest() },
+        -65472 to { TeleportLocal() },
+        -65471 to { TeleportLandmarkRequest() },
+        -65470 to { TeleportProgress() },
+        -65469 to { DataHomeLocationRequest() },
+        -65468 to { DataHomeLocationReply() },
+        -65467 to { TeleportFinish() },
+        -65466 to { StartLure() },
+        -65465 to { TeleportLureRequest() },
+        -65464 to { TeleportCancel() },
+        -65463 to { TeleportStart() },
+        -65462 to { TeleportFailed() },
+        -65461 to { Undo() },
+        -65460 to { Redo() },
+        -65459 to { UndoLand() },
+        -65458 to { AgentPause() },
+        -65457 to { AgentResume() },
+        -65456 to { ChatFromViewer() },
+        -65455 to { AgentThrottle() },
+        -65454 to { AgentFOV() },
+        -65453 to { AgentHeightWidth() },
+        -65452 to { AgentSetAppearance() },
+        -65451 to { AgentQuitCopy() },
+        -65450 to { ImageNotInDatabase() },
+        -65449 to { RebakeAvatarTextures() },
+        -65448 to { SetAlwaysRun() },
+        -65447 to { ObjectDelete() },
+        -65446 to { ObjectDuplicate() },
+        -65445 to { ObjectDuplicateOnRay() },
+        -65444 to { ObjectScale() },
+        -65443 to { ObjectRotation() },
+        -65442 to { ObjectFlagUpdate() },
+        -65441 to { ObjectClickAction() },
+        -65440 to { ObjectImage() },
+        -65439 to { ObjectMaterial() },
+        -65438 to { ObjectShape() },
+        -65437 to { ObjectExtraParams() },
+        -65436 to { ObjectOwner() },
+        -65435 to { ObjectGroup() },
+        -65434 to { ObjectBuy() },
+        -65433 to { BuyObjectInventory() },
+        -65432 to { DerezContainer() },
+        -65431 to { ObjectPermissions() },
+        -65430 to { ObjectSaleInfo() },
+        -65429 to { ObjectName() },
+        -65428 to { ObjectDescription() },
+        -65427 to { ObjectCategory() },
+        -65426 to { ObjectSelect() },
+        -65425 to { ObjectDeselect() },
+        -65424 to { ObjectAttach() },
+        -65423 to { ObjectDetach() },
+        -65422 to { ObjectDrop() },
+        -65421 to { ObjectLink() },
+        -65420 to { ObjectDelink() },
+        -65419 to { ObjectGrab() },
+        -65418 to { ObjectGrabUpdate() },
+        -65417 to { ObjectDeGrab() },
+        -65416 to { ObjectSpinStart() },
+        -65415 to { ObjectSpinUpdate() },
+        -65414 to { ObjectSpinStop() },
+        -65413 to { ObjectExportSelected() },
+        -65412 to { ModifyLand() },
+        -65411 to { VelocityInterpolateOn() },
+        -65410 to { VelocityInterpolateOff() },
+        -65409 to { StateSave() },
+        -65408 to { ReportAutosaveCrash() },
+        -65407 to { SimWideDeletes() },
+        -65406 to { TrackAgent() },
+        -65405 to { ViewerStats() },
+        -65404 to { ScriptAnswerYes() },
+        -65403 to { UserReport() },
+        -65402 to { AlertMessage() },
+        -65401 to { AgentAlertMessage() },
+        -65400 to { MeanCollisionAlert() },
+        -65399 to { ViewerFrozenMessage() },
+        -65398 to { HealthMessage() },
+        -65397 to { ChatFromSimulator() },
+        -65396 to { SimStats() },
+        -65395 to { RequestRegionInfo() },
+        -65394 to { RegionInfo() },
+        -65393 to { GodUpdateRegionInfo() },
+        -65392 to { NearestLandingRegionRequest() },
+        -65391 to { NearestLandingRegionReply() },
+        -65390 to { NearestLandingRegionUpdated() },
+        -65389 to { TeleportLandingStatusChanged() },
+        -65388 to { RegionHandshake() },
+        -65387 to { RegionHandshakeReply() },
+        -65386 to { SimulatorViewerTimeMessage() },
+        -65385 to { EnableSimulator() },
+        -65384 to { DisableSimulator() },
+        -65383 to { TransferRequest() },
+        -65382 to { TransferInfo() },
+        -65381 to { TransferAbort() },
+        -65380 to { RequestXfer() },
+        -65379 to { AbortXfer() },
+        -65378 to { AvatarAppearance() },
+        -65377 to { SetFollowCamProperties() },
+        -65376 to { ClearFollowCamProperties() },
+        -65375 to { RequestPayPrice() },
+        -65374 to { PayPriceReply() },
+        -65373 to { KickUser() },
+        -65372 to { KickUserAck() },
+        -65371 to { GodKickUser() },
+        -65370 to { SystemKickUser() },
+        -65369 to { EjectUser() },
+        -65368 to { FreezeUser() },
+        -65367 to { AvatarPropertiesRequest() },
+        -65366 to { AvatarPropertiesRequestBackend() },
+        -65365 to { AvatarPropertiesReply() },
+        -65364 to { AvatarInterestsReply() },
+        -65363 to { AvatarGroupsReply() },
+        -65362 to { AvatarPropertiesUpdate() },
+        -65361 to { AvatarInterestsUpdate() },
+        -65360 to { AvatarNotesReply() },
+        -65359 to { AvatarNotesUpdate() },
+        -65358 to { AvatarPicksReply() },
+        -65357 to { EventInfoRequest() },
+        -65356 to { EventInfoReply() },
+        -65355 to { EventNotificationAddRequest() },
+        -65354 to { EventNotificationRemoveRequest() },
+        -65353 to { EventGodDelete() },
+        -65352 to { PickInfoReply() },
+        -65351 to { PickInfoUpdate() },
+        -65350 to { PickDelete() },
+        -65349 to { PickGodDelete() },
+        -65348 to { ScriptQuestion() },
+        -65347 to { ScriptControlChange() },
+        -65346 to { ScriptDialog() },
+        -65345 to { ScriptDialogReply() },
+        -65344 to { ForceScriptControlRelease() },
+        -65343 to { RevokePermissions() },
+        -65342 to { LoadURL() },
+        -65341 to { ScriptTeleportRequest() },
+        -65340 to { ParcelOverlay() },
+        -65339 to { ParcelPropertiesRequestByID() },
+        -65338 to { ParcelPropertiesUpdate() },
+        -65337 to { ParcelReturnObjects() },
+        -65336 to { ParcelSetOtherCleanTime() },
+        -65335 to { ParcelDisableObjects() },
+        -65334 to { ParcelSelectObjects() },
+        -65333 to { EstateCovenantRequest() },
+        -65332 to { EstateCovenantReply() },
+        -65331 to { ForceObjectSelect() },
+        -65330 to { ParcelBuyPass() },
+        -65329 to { ParcelDeedToGroup() },
+        -65328 to { ParcelReclaim() },
+        -65327 to { ParcelClaim() },
+        -65326 to { ParcelJoin() },
+        -65325 to { ParcelDivide() },
+        -65324 to { ParcelRelease() },
+        -65323 to { ParcelBuy() },
+        -65322 to { ParcelGodForceOwner() },
+        -65321 to { ParcelAccessListRequest() },
+        -65320 to { ParcelAccessListReply() },
+        -65319 to { ParcelAccessListUpdate() },
+        -65318 to { ParcelDwellRequest() },
+        -65317 to { ParcelDwellReply() },
+        -65316 to { RequestParcelTransfer() },
+        -65315 to { UpdateParcel() },
+        -65314 to { RemoveParcel() },
+        -65313 to { MergeParcel() },
+        -65312 to { LogParcelChanges() },
+        -65311 to { CheckParcelSales() },
+        -65310 to { ParcelSales() },
+        -65309 to { ParcelGodMarkAsContent() },
+        -65308 to { ViewerStartAuction() },
+        -65307 to { StartAuction() },
+        -65306 to { ConfirmAuctionStart() },
+        -65305 to { CompleteAuction() },
+        -65304 to { CancelAuction() },
+        -65303 to { CheckParcelAuctions() },
+        -65302 to { ParcelAuctions() },
+        -65301 to { UUIDNameRequest() },
+        -65300 to { UUIDNameReply() },
+        -65299 to { UUIDGroupNameRequest() },
+        -65298 to { UUIDGroupNameReply() },
+        -65297 to { ChatPass() },
+        -65296 to { ChildAgentDying() },
+        -65295 to { ChildAgentUnknown() },
+        -65294 to { KillChildAgents() },
+        -65293 to { GetScriptRunning() },
+        -65292 to { ScriptRunningReply() },
+        -65291 to { SetScriptRunning() },
+        -65290 to { ScriptReset() },
+        -65289 to { ScriptSensorRequest() },
+        -65288 to { ScriptSensorReply() },
+        -65287 to { CompleteAgentMovement() },
+        -65286 to { AgentMovementComplete() },
+        -65285 to { DataServerLogout() },
+        -65284 to { LogoutRequest() },
+        -65283 to { LogoutReply() },
+        -65282 to { ImprovedInstantMessage() },
+        -65281 to { RetrieveInstantMessages() },
+        -65280 to { FindAgent() },
+        -65279 to { RequestGodlikePowers() },
+        -65278 to { GrantGodlikePowers() },
+        -65277 to { GodlikeMessage() },
+        -65276 to { EstateOwnerMessage() },
+        -65275 to { GenericMessage() },
+        -65274 to { MuteListRequest() },
+        -65273 to { UpdateMuteListEntry() },
+        -65272 to { RemoveMuteListEntry() },
+        -65271 to { CopyInventoryFromNotecard() },
+        -65270 to { UpdateInventoryItem() },
+        -65269 to { UpdateCreateInventoryItem() },
+        -65268 to { MoveInventoryItem() },
+        -65267 to { CopyInventoryItem() },
+        -65266 to { RemoveInventoryItem() },
+        -65265 to { ChangeInventoryItemFlags() },
+        -65264 to { SaveAssetIntoInventory() },
+        -65263 to { CreateInventoryFolder() },
+        -65262 to { UpdateInventoryFolder() },
+        -65261 to { MoveInventoryFolder() },
+        -65260 to { RemoveInventoryFolder() },
+        -65259 to { FetchInventoryDescendents() },
+        -65258 to { InventoryDescendents() },
+        -65257 to { FetchInventory() },
+        -65256 to { FetchInventoryReply() },
+        -65255 to { BulkUpdateInventory() },
+        -65254 to { RequestInventoryAsset() },
+        -65253 to { InventoryAssetResponse() },
+        -65252 to { RemoveInventoryObjects() },
+        -65251 to { PurgeInventoryDescendents() },
+        -65250 to { UpdateTaskInventory() },
+        -65249 to { RemoveTaskInventory() },
+        -65248 to { MoveTaskInventory() },
+        -65247 to { RequestTaskInventory() },
+        -65246 to { ReplyTaskInventory() },
+        -65245 to { DeRezObject() },
+        -65244 to { DeRezAck() },
+        -65243 to { RezObject() },
+        -65242 to { RezObjectFromNotecard() },
+        -65241 to { TransferInventory() },
+        -65240 to { TransferInventoryAck() },
+        -65239 to { AcceptFriendship() },
+        -65238 to { DeclineFriendship() },
+        -65237 to { FormFriendship() },
+        -65236 to { TerminateFriendship() },
+        -65235 to { OfferCallingCard() },
+        -65234 to { AcceptCallingCard() },
+        -65233 to { DeclineCallingCard() },
+        -65232 to { RezScript() },
+        -65231 to { CreateInventoryItem() },
+        -65230 to { CreateLandmarkForEvent() },
+        -65229 to { EventLocationRequest() },
+        -65228 to { EventLocationReply() },
+        -65227 to { RegionHandleRequest() },
+        -65226 to { RegionIDAndHandleReply() },
+        -65225 to { MoneyTransferRequest() },
+        -65224 to { MoneyTransferBackend() },
+        -65223 to { MoneyBalanceRequest() },
+        -65222 to { MoneyBalanceReply() },
+        -65221 to { RoutedMoneyBalanceReply() },
+        -65220 to { ActivateGestures() },
+        -65219 to { DeactivateGestures() },
+        -65218 to { MuteListUpdate() },
+        -65217 to { UseCachedMuteList() },
+        -65216 to { GrantUserRights() },
+        -65215 to { ChangeUserRights() },
+        -65214 to { OnlineNotification() },
+        -65213 to { OfflineNotification() },
+        -65212 to { SetStartLocationRequest() },
+        -65211 to { SetStartLocation() },
+        -65210 to { NetTest() },
+        -65209 to { SetCPURatio() },
+        -65208 to { SimCrashed() },
+        -65207 to { NameValuePair() },
+        -65206 to { RemoveNameValuePair() },
+        -65205 to { UpdateAttachment() },
+        -65204 to { RemoveAttachment() },
+        -65203 to { AssetUploadRequest() },
+        -65202 to { AssetUploadComplete() },
+        -65201 to { EmailMessageRequest() },
+        -65200 to { EmailMessageReply() },
+        -65199 to { ScriptDataRequest() },
+        -65198 to { ScriptDataReply() },
+        -65197 to { CreateGroupRequest() },
+        -65196 to { CreateGroupReply() },
+        -65195 to { UpdateGroupInfo() },
+        -65194 to { GroupRoleChanges() },
+        -65193 to { JoinGroupRequest() },
+        -65192 to { JoinGroupReply() },
+        -65191 to { EjectGroupMemberRequest() },
+        -65190 to { EjectGroupMemberReply() },
+        -65189 to { LeaveGroupRequest() },
+        -65188 to { LeaveGroupReply() },
+        -65187 to { InviteGroupRequest() },
+        -65186 to { InviteGroupResponse() },
+        -65185 to { GroupProfileRequest() },
+        -65184 to { GroupProfileReply() },
+        -65183 to { GroupAccountSummaryRequest() },
+        -65182 to { GroupAccountSummaryReply() },
+        -65181 to { GroupAccountDetailsRequest() },
+        -65180 to { GroupAccountDetailsReply() },
+        -65179 to { GroupAccountTransactionsRequest() },
+        -65178 to { GroupAccountTransactionsReply() },
+        -65177 to { GroupActiveProposalsRequest() },
+        -65176 to { GroupActiveProposalItemReply() },
+        -65175 to { GroupVoteHistoryRequest() },
+        -65174 to { GroupVoteHistoryItemReply() },
+        -65173 to { StartGroupProposal() },
+        -65172 to { GroupProposalBallot() },
+        -65171 to { TallyVotes() },
+        -65170 to { GroupMembersRequest() },
+        -65169 to { GroupMembersReply() },
+        -65168 to { ActivateGroup() },
+        -65167 to { SetGroupContribution() },
+        -65166 to { SetGroupAcceptNotices() },
+        -65165 to { GroupRoleDataRequest() },
+        -65164 to { GroupRoleDataReply() },
+        -65163 to { GroupRoleMembersRequest() },
+        -65162 to { GroupRoleMembersReply() },
+        -65161 to { GroupTitlesRequest() },
+        -65160 to { GroupTitlesReply() },
+        -65159 to { GroupTitleUpdate() },
+        -65158 to { GroupRoleUpdate() },
+        -65157 to { LiveHelpGroupRequest() },
+        -65156 to { LiveHelpGroupReply() },
+        -65155 to { AgentWearablesRequest() },
+        -65154 to { AgentWearablesUpdate() },
+        -65153 to { AgentIsNowWearing() },
+        -65152 to { AgentCachedTexture() },
+        -65151 to { AgentCachedTextureResponse() },
+        -65150 to { AgentDataUpdateRequest() },
+        -65149 to { AgentDataUpdate() },
+        -65148 to { GroupDataUpdate() },
+        -65147 to { AgentGroupDataUpdate() },
+        -65146 to { AgentDropGroup() },
+        -65145 to { LogTextMessage() },
+        -65144 to { CreateTrustedCircuit() },
+        -65143 to { DenyTrustedCircuit() },
+        -65142 to { RequestTrustedCircuit() },
+        -65141 to { RezSingleAttachmentFromInv() },
+        -65140 to { RezMultipleAttachmentsFromInv() },
+        -65139 to { DetachAttachmentIntoInv() },
+        -65138 to { CreateNewOutfitAttachments() },
+        -65137 to { UserInfoRequest() },
+        -65136 to { UserInfoReply() },
+        -65135 to { UpdateUserInfo() },
+        -65134 to { ParcelRename() },
+        -65133 to { InitiateDownload() },
+        -65132 to { SystemMessage() },
+        -65131 to { MapLayerRequest() },
+        -65130 to { MapLayerReply() },
+        -65129 to { MapBlockRequest() },
+        -65128 to { MapNameRequest() },
+        -65127 to { MapBlockReply() },
+        -65126 to { MapItemRequest() },
+        -65125 to { MapItemReply() },
+        -65124 to { SendPostcard() },
+        -65123 to { RpcChannelRequest() },
+        -65122 to { RpcChannelReply() },
+        -65121 to { RpcScriptRequestInbound() },
+        -65120 to { RpcScriptRequestInboundForward() },
+        -65119 to { RpcScriptReplyInbound() },
+        -65118 to { ScriptMailRegistration() },
+        -65117 to { ParcelMediaCommandMessage() },
+        -65116 to { ParcelMediaUpdate() },
+        -65115 to { LandStatRequest() },
+        -65114 to { LandStatReply() },
+        -65113 to { Error() },
+        -65112 to { ObjectIncludeInSearch() },
+        -65111 to { RezRestoreToWorld() },
+        -65110 to { LinkInventoryItem() },
+        -5 to { PacketAck() },
+        -4 to { OpenCircuit() },
+        -3 to { CloseCircuit() },
+        1 to { StartPingCheck() },
+        2 to { CompletePingCheck() },
+        3 to { NeighborList() },
+        4 to { AgentUpdate() },
+        5 to { AgentAnimation() },
+        6 to { AgentRequestSit() },
+        7 to { AgentSit() },
+        8 to { RequestImage() },
+        9 to { ImageData() },
+        10 to { ImagePacket() },
+        11 to { LayerData() },
+        12 to { ObjectUpdate() },
+        13 to { ObjectUpdateCompressed() },
+        14 to { ObjectUpdateCached() },
+        15 to { ImprovedTerseObjectUpdate() },
+        16 to { KillObject() },
+        17 to { TransferPacket() },
+        18 to { SendXferPacket() },
+        19 to { ConfirmXferPacket() },
+        20 to { AvatarAnimation() },
+        21 to { AvatarSitResponse() },
+        22 to { CameraConstraint() },
+        23 to { ParcelProperties() },
+        24 to { EdgeDataPacket() },
+        25 to { ChildAgentUpdate() },
+        26 to { ChildAgentAlive() },
+        27 to { ChildAgentPositionUpdate() },
+        28 to { AtomicPassObject() },
+        29 to { SoundTrigger() },
+        65281 to { ObjectAdd() },
+        65282 to { MultipleObjectUpdate() },
+        65283 to { RequestMultipleObjects() },
+        65284 to { ObjectPosition() },
+        65285 to { RequestObjectPropertiesFamily() },
+        65286 to { CoarseLocationUpdate() },
+        65287 to { CrossedRegion() },
+        65288 to { ConfirmEnableSimulator() },
+        65289 to { ObjectProperties() },
+        65290 to { ObjectPropertiesFamily() },
+        65291 to { ParcelPropertiesRequest() },
+        65292 to { SimStatus() },
+        65293 to { AttachedSound() },
+        65294 to { AttachedSoundGainChange() },
+        65295 to { PreloadSound() },
+        65296 to { InternalScriptMail() },
+        65297 to { ViewerEffect() }
+    )
+
     @JvmStatic
-    fun CreateByID(i: Int): SLMessage {
-        switch (i) {
-            case -65535:
-                return TestMessage()
-            case -65534:
-                return AddCircuitCode()
-            case -65533:
-                return UseCircuitCode()
-            case -65532:
-                return AvatarTextureUpdate()
-            case -65531:
-                return SimulatorMapUpdate()
-            case -65530:
-                return SimulatorSetMap()
-            case -65529:
-                return SubscribeLoad()
-            case -65528:
-                return UnsubscribeLoad()
-            case -65527:
-                return SimulatorReady()
-            case -65526:
-                return TelehubInfo()
-            case -65525:
-                return SimulatorPresentAtLocation()
-            case -65524:
-                return SimulatorLoad()
-            case -65523:
-                return SimulatorShutdownRequest()
-            case -65522:
-                return RegionPresenceRequestByRegionID()
-            case -65521:
-                return RegionPresenceRequestByHandle()
-            case -65520:
-                return RegionPresenceResponse()
-            case -65519:
-                return UpdateSimulator()
-            case -65518:
-                return LogDwellTime()
-            case -65517:
-                return FeatureDisabled()
-            case -65516:
-                return LogFailedMoneyTransaction()
-            case -65515:
-                return UserReportInternal()
-            case -65514:
-                return SetSimStatusInDatabase()
-            case -65513:
-                return SetSimPresenceInDatabase()
-            case -65512:
-                return EconomyDataRequest()
-            case -65511:
-                return EconomyData()
-            case -65510:
-                return AvatarPickerRequest()
-            case -65509:
-                return AvatarPickerRequestBackend()
-            case -65508:
-                return AvatarPickerReply()
-            case -65507:
-                return PlacesQuery()
-            case -65506:
-                return PlacesReply()
-            case -65505:
-                return DirFindQuery()
-            case -65504:
-                return DirFindQueryBackend()
-            case -65503:
-                return DirPlacesQuery()
-            case -65502:
-                return DirPlacesQueryBackend()
-            case -65501:
-                return DirPlacesReply()
-            case -65500:
-                return DirPeopleReply()
-            case -65499:
-                return DirEventsReply()
-            case -65498:
-                return DirGroupsReply()
-            case -65497:
-                return DirClassifiedQuery()
-            case -65496:
-                return DirClassifiedQueryBackend()
-            case -65495:
-                return DirClassifiedReply()
-            case -65494:
-                return AvatarClassifiedReply()
-            case -65493:
-                return ClassifiedInfoRequest()
-            case -65492:
-                return ClassifiedInfoReply()
-            case -65491:
-                return ClassifiedInfoUpdate()
-            case -65490:
-                return ClassifiedDelete()
-            case -65489:
-                return ClassifiedGodDelete()
-            case -65488:
-                return DirLandQuery()
-            case -65487:
-                return DirLandQueryBackend()
-            case -65486:
-                return DirLandReply()
-            case -65485:
-                return DirPopularQuery()
-            case -65484:
-                return DirPopularQueryBackend()
-            case -65483:
-                return DirPopularReply()
-            case -65482:
-                return ParcelInfoRequest()
-            case -65481:
-                return ParcelInfoReply()
-            case -65480:
-                return ParcelObjectOwnersRequest()
-            case -65479:
-                return ParcelObjectOwnersReply()
-            case -65478:
-                return GroupNoticesListRequest()
-            case -65477:
-                return GroupNoticesListReply()
-            case -65476:
-                return GroupNoticeRequest()
-            case -65475:
-                return GroupNoticeAdd()
-            case -65474:
-                return TeleportRequest()
-            case -65473:
-                return TeleportLocationRequest()
-            case -65472:
-                return TeleportLocal()
-            case -65471:
-                return TeleportLandmarkRequest()
-            case -65470:
-                return TeleportProgress()
-            case -65469:
-                return DataHomeLocationRequest()
-            case -65468:
-                return DataHomeLocationReply()
-            case -65467:
-                return TeleportFinish()
-            case -65466:
-                return StartLure()
-            case -65465:
-                return TeleportLureRequest()
-            case -65464:
-                return TeleportCancel()
-            case -65463:
-                return TeleportStart()
-            case -65462:
-                return TeleportFailed()
-            case -65461:
-                return Undo()
-            case -65460:
-                return Redo()
-            case -65459:
-                return UndoLand()
-            case -65458:
-                return AgentPause()
-            case -65457:
-                return AgentResume()
-            case -65456:
-                return ChatFromViewer()
-            case -65455:
-                return AgentThrottle()
-            case -65454:
-                return AgentFOV()
-            case -65453:
-                return AgentHeightWidth()
-            case -65452:
-                return AgentSetAppearance()
-            case -65451:
-                return AgentQuitCopy()
-            case -65450:
-                return ImageNotInDatabase()
-            case -65449:
-                return RebakeAvatarTextures()
-            case -65448:
-                return SetAlwaysRun()
-            case -65447:
-                return ObjectDelete()
-            case -65446:
-                return ObjectDuplicate()
-            case -65445:
-                return ObjectDuplicateOnRay()
-            case -65444:
-                return ObjectScale()
-            case -65443:
-                return ObjectRotation()
-            case -65442:
-                return ObjectFlagUpdate()
-            case -65441:
-                return ObjectClickAction()
-            case -65440:
-                return ObjectImage()
-            case -65439:
-                return ObjectMaterial()
-            case -65438:
-                return ObjectShape()
-            case -65437:
-                return ObjectExtraParams()
-            case -65436:
-                return ObjectOwner()
-            case -65435:
-                return ObjectGroup()
-            case -65434:
-                return ObjectBuy()
-            case -65433:
-                return BuyObjectInventory()
-            case -65432:
-                return DerezContainer()
-            case -65431:
-                return ObjectPermissions()
-            case -65430:
-                return ObjectSaleInfo()
-            case -65429:
-                return ObjectName()
-            case -65428:
-                return ObjectDescription()
-            case -65427:
-                return ObjectCategory()
-            case -65426:
-                return ObjectSelect()
-            case -65425:
-                return ObjectDeselect()
-            case -65424:
-                return ObjectAttach()
-            case -65423:
-                return ObjectDetach()
-            case -65422:
-                return ObjectDrop()
-            case -65421:
-                return ObjectLink()
-            case -65420:
-                return ObjectDelink()
-            case -65419:
-                return ObjectGrab()
-            case -65418:
-                return ObjectGrabUpdate()
-            case -65417:
-                return ObjectDeGrab()
-            case -65416:
-                return ObjectSpinStart()
-            case -65415:
-                return ObjectSpinUpdate()
-            case -65414:
-                return ObjectSpinStop()
-            case -65413:
-                return ObjectExportSelected()
-            case -65412:
-                return ModifyLand()
-            case -65411:
-                return VelocityInterpolateOn()
-            case -65410:
-                return VelocityInterpolateOff()
-            case -65409:
-                return StateSave()
-            case -65408:
-                return ReportAutosaveCrash()
-            case -65407:
-                return SimWideDeletes()
-            case -65406:
-                return TrackAgent()
-            case -65405:
-                return ViewerStats()
-            case -65404:
-                return ScriptAnswerYes()
-            case -65403:
-                return UserReport()
-            case -65402:
-                return AlertMessage()
-            case -65401:
-                return AgentAlertMessage()
-            case -65400:
-                return MeanCollisionAlert()
-            case -65399:
-                return ViewerFrozenMessage()
-            case -65398:
-                return HealthMessage()
-            case -65397:
-                return ChatFromSimulator()
-            case -65396:
-                return SimStats()
-            case -65395:
-                return RequestRegionInfo()
-            case -65394:
-                return RegionInfo()
-            case -65393:
-                return GodUpdateRegionInfo()
-            case -65392:
-                return NearestLandingRegionRequest()
-            case -65391:
-                return NearestLandingRegionReply()
-            case -65390:
-                return NearestLandingRegionUpdated()
-            case -65389:
-                return TeleportLandingStatusChanged()
-            case -65388:
-                return RegionHandshake()
-            case -65387:
-                return RegionHandshakeReply()
-            case -65386:
-                return SimulatorViewerTimeMessage()
-            case -65385:
-                return EnableSimulator()
-            case -65384:
-                return DisableSimulator()
-            case -65383:
-                return TransferRequest()
-            case -65382:
-                return TransferInfo()
-            case -65381:
-                return TransferAbort()
-            case -65380:
-                return RequestXfer()
-            case -65379:
-                return AbortXfer()
-            case -65378:
-                return AvatarAppearance()
-            case -65377:
-                return SetFollowCamProperties()
-            case -65376:
-                return ClearFollowCamProperties()
-            case -65375:
-                return RequestPayPrice()
-            case -65374:
-                return PayPriceReply()
-            case -65373:
-                return KickUser()
-            case -65372:
-                return KickUserAck()
-            case -65371:
-                return GodKickUser()
-            case -65370:
-                return SystemKickUser()
-            case -65369:
-                return EjectUser()
-            case -65368:
-                return FreezeUser()
-            case -65367:
-                return AvatarPropertiesRequest()
-            case -65366:
-                return AvatarPropertiesRequestBackend()
-            case -65365:
-                return AvatarPropertiesReply()
-            case -65364:
-                return AvatarInterestsReply()
-            case -65363:
-                return AvatarGroupsReply()
-            case -65362:
-                return AvatarPropertiesUpdate()
-            case -65361:
-                return AvatarInterestsUpdate()
-            case -65360:
-                return AvatarNotesReply()
-            case -65359:
-                return AvatarNotesUpdate()
-            case -65358:
-                return AvatarPicksReply()
-            case -65357:
-                return EventInfoRequest()
-            case -65356:
-                return EventInfoReply()
-            case -65355:
-                return EventNotificationAddRequest()
-            case -65354:
-                return EventNotificationRemoveRequest()
-            case -65353:
-                return EventGodDelete()
-            case -65352:
-                return PickInfoReply()
-            case -65351:
-                return PickInfoUpdate()
-            case -65350:
-                return PickDelete()
-            case -65349:
-                return PickGodDelete()
-            case -65348:
-                return ScriptQuestion()
-            case -65347:
-                return ScriptControlChange()
-            case -65346:
-                return ScriptDialog()
-            case -65345:
-                return ScriptDialogReply()
-            case -65344:
-                return ForceScriptControlRelease()
-            case -65343:
-                return RevokePermissions()
-            case -65342:
-                return LoadURL()
-            case -65341:
-                return ScriptTeleportRequest()
-            case -65340:
-                return ParcelOverlay()
-            case -65339:
-                return ParcelPropertiesRequestByID()
-            case -65338:
-                return ParcelPropertiesUpdate()
-            case -65337:
-                return ParcelReturnObjects()
-            case -65336:
-                return ParcelSetOtherCleanTime()
-            case -65335:
-                return ParcelDisableObjects()
-            case -65334:
-                return ParcelSelectObjects()
-            case -65333:
-                return EstateCovenantRequest()
-            case -65332:
-                return EstateCovenantReply()
-            case -65331:
-                return ForceObjectSelect()
-            case -65330:
-                return ParcelBuyPass()
-            case -65329:
-                return ParcelDeedToGroup()
-            case -65328:
-                return ParcelReclaim()
-            case -65327:
-                return ParcelClaim()
-            case -65326:
-                return ParcelJoin()
-            case -65325:
-                return ParcelDivide()
-            case -65324:
-                return ParcelRelease()
-            case -65323:
-                return ParcelBuy()
-            case -65322:
-                return ParcelGodForceOwner()
-            case -65321:
-                return ParcelAccessListRequest()
-            case -65320:
-                return ParcelAccessListReply()
-            case -65319:
-                return ParcelAccessListUpdate()
-            case -65318:
-                return ParcelDwellRequest()
-            case -65317:
-                return ParcelDwellReply()
-            case -65316:
-                return RequestParcelTransfer()
-            case -65315:
-                return UpdateParcel()
-            case -65314:
-                return RemoveParcel()
-            case -65313:
-                return MergeParcel()
-            case -65312:
-                return LogParcelChanges()
-            case -65311:
-                return CheckParcelSales()
-            case -65310:
-                return ParcelSales()
-            case -65309:
-                return ParcelGodMarkAsContent()
-            case -65308:
-                return ViewerStartAuction()
-            case -65307:
-                return StartAuction()
-            case -65306:
-                return ConfirmAuctionStart()
-            case -65305:
-                return CompleteAuction()
-            case -65304:
-                return CancelAuction()
-            case -65303:
-                return CheckParcelAuctions()
-            case -65302:
-                return ParcelAuctions()
-            case -65301:
-                return UUIDNameRequest()
-            case -65300:
-                return UUIDNameReply()
-            case -65299:
-                return UUIDGroupNameRequest()
-            case -65298:
-                return UUIDGroupNameReply()
-            case -65297:
-                return ChatPass()
-            case -65296:
-                return ChildAgentDying()
-            case -65295:
-                return ChildAgentUnknown()
-            case -65294:
-                return KillChildAgents()
-            case -65293:
-                return GetScriptRunning()
-            case -65292:
-                return ScriptRunningReply()
-            case -65291:
-                return SetScriptRunning()
-            case -65290:
-                return ScriptReset()
-            case -65289:
-                return ScriptSensorRequest()
-            case -65288:
-                return ScriptSensorReply()
-            case -65287:
-                return CompleteAgentMovement()
-            case -65286:
-                return AgentMovementComplete()
-            case -65285:
-                return DataServerLogout()
-            case -65284:
-                return LogoutRequest()
-            case -65283:
-                return LogoutReply()
-            case -65282:
-                return ImprovedInstantMessage()
-            case -65281:
-                return RetrieveInstantMessages()
-            case -65280:
-                return FindAgent()
-            case -65279:
-                return RequestGodlikePowers()
-            case -65278:
-                return GrantGodlikePowers()
-            case -65277:
-                return GodlikeMessage()
-            case -65276:
-                return EstateOwnerMessage()
-            case -65275:
-                return GenericMessage()
-            case -65274:
-                return MuteListRequest()
-            case -65273:
-                return UpdateMuteListEntry()
-            case -65272:
-                return RemoveMuteListEntry()
-            case -65271:
-                return CopyInventoryFromNotecard()
-            case -65270:
-                return UpdateInventoryItem()
-            case -65269:
-                return UpdateCreateInventoryItem()
-            case -65268:
-                return MoveInventoryItem()
-            case -65267:
-                return CopyInventoryItem()
-            case -65266:
-                return RemoveInventoryItem()
-            case -65265:
-                return ChangeInventoryItemFlags()
-            case -65264:
-                return SaveAssetIntoInventory()
-            case -65263:
-                return CreateInventoryFolder()
-            case -65262:
-                return UpdateInventoryFolder()
-            case -65261:
-                return MoveInventoryFolder()
-            case -65260:
-                return RemoveInventoryFolder()
-            case -65259:
-                return FetchInventoryDescendents()
-            case -65258:
-                return InventoryDescendents()
-            case -65257:
-                return FetchInventory()
-            case -65256:
-                return FetchInventoryReply()
-            case -65255:
-                return BulkUpdateInventory()
-            case -65254:
-                return RequestInventoryAsset()
-            case -65253:
-                return InventoryAssetResponse()
-            case -65252:
-                return RemoveInventoryObjects()
-            case -65251:
-                return PurgeInventoryDescendents()
-            case -65250:
-                return UpdateTaskInventory()
-            case -65249:
-                return RemoveTaskInventory()
-            case -65248:
-                return MoveTaskInventory()
-            case -65247:
-                return RequestTaskInventory()
-            case -65246:
-                return ReplyTaskInventory()
-            case -65245:
-                return DeRezObject()
-            case -65244:
-                return DeRezAck()
-            case -65243:
-                return RezObject()
-            case -65242:
-                return RezObjectFromNotecard()
-            case -65241:
-                return TransferInventory()
-            case -65240:
-                return TransferInventoryAck()
-            case -65239:
-                return AcceptFriendship()
-            case -65238:
-                return DeclineFriendship()
-            case -65237:
-                return FormFriendship()
-            case -65236:
-                return TerminateFriendship()
-            case -65235:
-                return OfferCallingCard()
-            case -65234:
-                return AcceptCallingCard()
-            case -65233:
-                return DeclineCallingCard()
-            case -65232:
-                return RezScript()
-            case -65231:
-                return CreateInventoryItem()
-            case -65230:
-                return CreateLandmarkForEvent()
-            case -65229:
-                return EventLocationRequest()
-            case -65228:
-                return EventLocationReply()
-            case -65227:
-                return RegionHandleRequest()
-            case -65226:
-                return RegionIDAndHandleReply()
-            case -65225:
-                return MoneyTransferRequest()
-            case -65224:
-                return MoneyTransferBackend()
-            case -65223:
-                return MoneyBalanceRequest()
-            case -65222:
-                return MoneyBalanceReply()
-            case -65221:
-                return RoutedMoneyBalanceReply()
-            case -65220:
-                return ActivateGestures()
-            case -65219:
-                return DeactivateGestures()
-            case -65218:
-                return MuteListUpdate()
-            case -65217:
-                return UseCachedMuteList()
-            case -65216:
-                return GrantUserRights()
-            case -65215:
-                return ChangeUserRights()
-            case -65214:
-                return OnlineNotification()
-            case -65213:
-                return OfflineNotification()
-            case -65212:
-                return SetStartLocationRequest()
-            case -65211:
-                return SetStartLocation()
-            case -65210:
-                return NetTest()
-            case -65209:
-                return SetCPURatio()
-            case -65208:
-                return SimCrashed()
-            case -65207:
-                return NameValuePair()
-            case -65206:
-                return RemoveNameValuePair()
-            case -65205:
-                return UpdateAttachment()
-            case -65204:
-                return RemoveAttachment()
-            case -65203:
-                return AssetUploadRequest()
-            case -65202:
-                return AssetUploadComplete()
-            case -65201:
-                return EmailMessageRequest()
-            case -65200:
-                return EmailMessageReply()
-            case -65199:
-                return ScriptDataRequest()
-            case -65198:
-                return ScriptDataReply()
-            case -65197:
-                return CreateGroupRequest()
-            case -65196:
-                return CreateGroupReply()
-            case -65195:
-                return UpdateGroupInfo()
-            case -65194:
-                return GroupRoleChanges()
-            case -65193:
-                return JoinGroupRequest()
-            case -65192:
-                return JoinGroupReply()
-            case -65191:
-                return EjectGroupMemberRequest()
-            case -65190:
-                return EjectGroupMemberReply()
-            case -65189:
-                return LeaveGroupRequest()
-            case -65188:
-                return LeaveGroupReply()
-            case -65187:
-                return InviteGroupRequest()
-            case -65186:
-                return InviteGroupResponse()
-            case -65185:
-                return GroupProfileRequest()
-            case -65184:
-                return GroupProfileReply()
-            case -65183:
-                return GroupAccountSummaryRequest()
-            case -65182:
-                return GroupAccountSummaryReply()
-            case -65181:
-                return GroupAccountDetailsRequest()
-            case -65180:
-                return GroupAccountDetailsReply()
-            case -65179:
-                return GroupAccountTransactionsRequest()
-            case -65178:
-                return GroupAccountTransactionsReply()
-            case -65177:
-                return GroupActiveProposalsRequest()
-            case -65176:
-                return GroupActiveProposalItemReply()
-            case -65175:
-                return GroupVoteHistoryRequest()
-            case -65174:
-                return GroupVoteHistoryItemReply()
-            case -65173:
-                return StartGroupProposal()
-            case -65172:
-                return GroupProposalBallot()
-            case -65171:
-                return TallyVotes()
-            case -65170:
-                return GroupMembersRequest()
-            case -65169:
-                return GroupMembersReply()
-            case -65168:
-                return ActivateGroup()
-            case -65167:
-                return SetGroupContribution()
-            case -65166:
-                return SetGroupAcceptNotices()
-            case -65165:
-                return GroupRoleDataRequest()
-            case -65164:
-                return GroupRoleDataReply()
-            case -65163:
-                return GroupRoleMembersRequest()
-            case -65162:
-                return GroupRoleMembersReply()
-            case -65161:
-                return GroupTitlesRequest()
-            case -65160:
-                return GroupTitlesReply()
-            case -65159:
-                return GroupTitleUpdate()
-            case -65158:
-                return GroupRoleUpdate()
-            case -65157:
-                return LiveHelpGroupRequest()
-            case -65156:
-                return LiveHelpGroupReply()
-            case -65155:
-                return AgentWearablesRequest()
-            case -65154:
-                return AgentWearablesUpdate()
-            case -65153:
-                return AgentIsNowWearing()
-            case -65152:
-                return AgentCachedTexture()
-            case -65151:
-                return AgentCachedTextureResponse()
-            case -65150:
-                return AgentDataUpdateRequest()
-            case -65149:
-                return AgentDataUpdate()
-            case -65148:
-                return GroupDataUpdate()
-            case -65147:
-                return AgentGroupDataUpdate()
-            case -65146:
-                return AgentDropGroup()
-            case -65145:
-                return LogTextMessage()
-            case -65144:
-                return CreateTrustedCircuit()
-            case -65143:
-                return DenyTrustedCircuit()
-            case -65142:
-                return RequestTrustedCircuit()
-            case -65141:
-                return RezSingleAttachmentFromInv()
-            case -65140:
-                return RezMultipleAttachmentsFromInv()
-            case -65139:
-                return DetachAttachmentIntoInv()
-            case -65138:
-                return CreateNewOutfitAttachments()
-            case -65137:
-                return UserInfoRequest()
-            case -65136:
-                return UserInfoReply()
-            case -65135:
-                return UpdateUserInfo()
-            case -65134:
-                return ParcelRename()
-            case -65133:
-                return InitiateDownload()
-            case -65132:
-                return SystemMessage()
-            case -65131:
-                return MapLayerRequest()
-            case -65130:
-                return MapLayerReply()
-            case -65129:
-                return MapBlockRequest()
-            case -65128:
-                return MapNameRequest()
-            case -65127:
-                return MapBlockReply()
-            case -65126:
-                return MapItemRequest()
-            case -65125:
-                return MapItemReply()
-            case -65124:
-                return SendPostcard()
-            case -65123:
-                return RpcChannelRequest()
-            case -65122:
-                return RpcChannelReply()
-            case -65121:
-                return RpcScriptRequestInbound()
-            case -65120:
-                return RpcScriptRequestInboundForward()
-            case -65119:
-                return RpcScriptReplyInbound()
-            case -65118:
-                return ScriptMailRegistration()
-            case -65117:
-                return ParcelMediaCommandMessage()
-            case -65116:
-                return ParcelMediaUpdate()
-            case -65115:
-                return LandStatRequest()
-            case -65114:
-                return LandStatReply()
-            case -65113:
-                return Error()
-            case -65112:
-                return ObjectIncludeInSearch()
-            case -65111:
-                return RezRestoreToWorld()
-            case -65110:
-                return LinkInventoryItem()
-            case -5:
-                return PacketAck()
-            case -4:
-                return OpenCircuit()
-            case -3:
-                return CloseCircuit()
-            case 1:
-                return StartPingCheck()
-            case 2:
-                return CompletePingCheck()
-            case 3:
-                return NeighborList()
-            case 4:
-                return AgentUpdate()
-            case 5:
-                return AgentAnimation()
-            case 6:
-                return AgentRequestSit()
-            case 7:
-                return AgentSit()
-            case 8:
-                return RequestImage()
-            case 9:
-                return ImageData()
-            case 10:
-                return ImagePacket()
-            case 11:
-                return LayerData()
-            case 12:
-                return ObjectUpdate()
-            case 13:
-                return ObjectUpdateCompressed()
-            case 14:
-                return ObjectUpdateCached()
-            case 15:
-                return ImprovedTerseObjectUpdate()
-            case 16:
-                return KillObject()
-            case 17:
-                return TransferPacket()
-            case 18:
-                return SendXferPacket()
-            case 19:
-                return ConfirmXferPacket()
-            case 20:
-                return AvatarAnimation()
-            case 21:
-                return AvatarSitResponse()
-            case 22:
-                return CameraConstraint()
-            case 23:
-                return ParcelProperties()
-            case 24:
-                return EdgeDataPacket()
-            case 25:
-                return ChildAgentUpdate()
-            case 26:
-                return ChildAgentAlive()
-            case 27:
-                return ChildAgentPositionUpdate()
-            case 28:
-                return AtomicPassObject()
-            case 29:
-                return SoundTrigger()
-            case 65281:
-                return ObjectAdd()
-            case 65282:
-                return MultipleObjectUpdate()
-            case 65283:
-                return RequestMultipleObjects()
-            case 65284:
-                return ObjectPosition()
-            case 65285:
-                return RequestObjectPropertiesFamily()
-            case 65286:
-                return CoarseLocationUpdate()
-            case 65287:
-                return CrossedRegion()
-            case 65288:
-                return ConfirmEnableSimulator()
-            case 65289:
-                return ObjectProperties()
-            case 65290:
-                return ObjectPropertiesFamily()
-            case 65291:
-                return ParcelPropertiesRequest()
-            case 65292:
-                return SimStatus()
-            case 65293:
-                return AttachedSound()
-            case 65294:
-                return AttachedSoundGainChange()
-            case 65295:
-                return PreloadSound()
-            case 65296:
-                return InternalScriptMail()
-            case 65297:
-                return ViewerEffect()
-            default:
-                return null
-        }
-    }
+    fun CreateByID(id: Int): SLMessage? = factoryById[id]?.invoke()
+
+    fun createById(id: Int): SLMessage? = CreateByID(id)
 }
