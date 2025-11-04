@@ -3,9 +3,11 @@ package com.linkpoint.protocol
 import com.linkpoint.Debug
 import com.linkpoint.slproto.SLMessage
 import com.linkpoint.slproto.messages.SLMessageFactory
+import com.linkpoint.slproto.template.MessageTemplateRegistry
+import com.linkpoint.slproto.template.TemplateMessageDecoder
+import java.lang.reflect.Method
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.lang.reflect.Method
 
 enum class MessageFrequency {
     HIGH,
@@ -23,13 +25,21 @@ object MessageDecoder {
 
             val (messageId, _) = readMessageId(buffer)
             val message = SLMessageFactory.CreateByID(messageId)
-            if (message == null) {
-                Debug.Log("Unknown message id: $messageId")
-                return null
+            if (message != null) {
+                decodePayload(message, buffer)
+                return message
             }
 
-            decodePayload(message, buffer)
-            message
+            val template = MessageTemplateRegistry.getTemplateById(messageId)
+            if (template != null) {
+                val templated = TemplateMessageDecoder.decode(template, buffer)
+                if (templated != null) {
+                    return templated
+                }
+            }
+
+            Debug.Log("Unknown message id: $messageId")
+            null
         } catch (e: Exception) {
             Debug.Log("Message decode error: ${e.message}")
             null
@@ -70,20 +80,20 @@ object MessageDecoder {
     }
 
     private fun readMessageId(buffer: ByteBuffer): Pair<Int, MessageFrequency> {
-        val first = buffer.get()
-        if (first.toInt() != 0xFF) {
-            return first.toInt() to MessageFrequency.HIGH
+        val first = buffer.get().toInt()
+        if (first != -1) {
+            return (first and 0xFF) to MessageFrequency.HIGH
         }
 
-        val second = buffer.get()
-        if (second.toInt() != 0xFF) {
-            val id = second.toInt() or 0xFF00
+        val second = buffer.get().toInt()
+        if (second != -1) {
+            val id = (second and 0xFF) or 0xFF00
             return id to MessageFrequency.MEDIUM
         }
 
-        val high = buffer.get().toInt()
+        val high = buffer.get().toInt() and 0xFF
         val low = buffer.get().toInt() and 0xFF
-        val id = ((high shl 8) and 0xFF00) or 0xFFFF0000.toInt() or low
+        val id = (0xFFFF0000.toInt()) or (high shl 8) or low
         return id to MessageFrequency.LOW
     }
 }
