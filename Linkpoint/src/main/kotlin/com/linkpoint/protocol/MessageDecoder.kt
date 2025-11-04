@@ -44,19 +44,19 @@ object MessageDecoder {
 
     private fun readMessageId(buffer: ByteBuffer): Pair<Int, MessageFrequency> {
         val first = buffer.get()
-        if (first != 0xFF.toByte()) {
-            return (first.toInt() and 0xFF) to MessageFrequency.HIGH
+        if (first.toInt() != 0xFF) {
+            return first.toInt() to MessageFrequency.HIGH
         }
 
         val second = buffer.get()
-        if (second != 0xFF.toByte()) {
-            val id = (second.toInt() and 0xFF) or 0xFF00
+        if (second.toInt() != 0xFF) {
+            val id = second.toInt() or 0xFF00
             return id to MessageFrequency.MEDIUM
         }
 
-        val high = buffer.get()
-        val low = buffer.get()
-        val id = (-0x10000) or ((high.toInt() and 0xFF) shl 8) or (low.toInt() and 0xFF)
+        val high = buffer.get().toInt()
+        val low = buffer.get().toInt() and 0xFF
+        val id = ((high shl 8) and 0xFF00) or 0xFF0000.toInt() or low
         return id to MessageFrequency.LOW
     }
 }
