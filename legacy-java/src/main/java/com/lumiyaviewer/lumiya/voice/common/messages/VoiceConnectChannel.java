@@ -1,0 +1,35 @@
+package com.lumiyaviewer.lumiya.voice.common.messages;
+
+import android.os.Bundle;
+import com.lumiyaviewer.lumiya.voice.common.VoicePluginMessage;
+import com.lumiyaviewer.lumiya.voice.common.model.VoiceChannelInfo;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+/* loaded from: classes.dex */
+public class VoiceConnectChannel implements VoicePluginMessage {
+
+    @Nullable
+    public final String channelCredentials;
+
+    @Nonnull
+    public final VoiceChannelInfo voiceChannelInfo;
+
+    public VoiceConnectChannel(Bundle bundle) {
+        this.voiceChannelInfo = new VoiceChannelInfo(bundle.getBundle("voiceChannelInfo"));
+        this.channelCredentials = bundle.getString("channelCredentials");
+    }
+
+    public VoiceConnectChannel(@Nonnull VoiceChannelInfo voiceChannelInfo, @Nullable String str) {
+        this.voiceChannelInfo = voiceChannelInfo;
+        this.channelCredentials = str;
+    }
+
+    @Override // com.lumiyaviewer.lumiya.voice.common.VoicePluginMessage
+    public Bundle toBundle() {
+        Bundle bundle = new Bundle();
+        bundle.putBundle("voiceChannelInfo", this.voiceChannelInfo.toBundle());
+        bundle.putString("channelCredentials", this.channelCredentials);
+        return bundle;
+    }
+}
