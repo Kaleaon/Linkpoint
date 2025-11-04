@@ -14,7 +14,8 @@
 
 ### Phase 0 – Workspace Stabilization
 - [ ] Create `reference/java-legacy` module from the decompiled APK Java sources (compile to ensure fidelity).
-- [ ] Lock down current Kotlin modules by excluding broken packages; build should fail only on missing implementations, not syntax.
+- [x] Lock down current Kotlin modules by excluding broken packages; build should fail only on missing implementations, not syntax.
+    - Introduced a dedicated `app/src/rebuild/kotlin` source root and removed the legacy `src/main/kotlin` tree so only rebuilt Kotlin stubs compile.
 - [ ] Catalogue critical subsystems (auth, inventory, rendering, chat, voice) and map them to C++/C#/Java source locations.
 
 ### Phase 1 – Architecture Blueprint
@@ -54,5 +55,5 @@
 
 ### Immediate Next Actions
 1. Stand up the Java reference module and ensure it compiles.
-2. Freeze broken Kotlin by adjusting source-set excludes so the Gradle build reflects actual TODOs.
-3. Begin Kotlin translation of `GlobalOptions` and configuration services using the reference Java + upstream improvements.
+2. Populate the new `rebuild` Kotlin source tree with foundation services (`GlobalOptions`, logging, cache dirs) using verified Java baselines.
+3. Catalogue subsystem ownership and start drafting migration notes for cloud sync and voice (WebRTC).
