@@ -35,7 +35,6 @@ const FOLDERS = [
 
 export default function InventoryView() {
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
 
   const filteredItems = INVENTORY_ITEMS.filter(item =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())

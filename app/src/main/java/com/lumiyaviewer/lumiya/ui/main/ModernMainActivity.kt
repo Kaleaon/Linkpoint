@@ -43,5 +43,3 @@ class ModernMainActivity : ComponentActivity() {
         finish()
     }
 }
-```suggestion
-// EOF

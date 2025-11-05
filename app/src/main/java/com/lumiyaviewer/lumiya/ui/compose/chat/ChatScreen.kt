@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ChatScreen(
     messages: List<ChatMessageEntity>,
+    currentUserId: Long,
     onSendMessage: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -50,7 +51,7 @@ fun ChatScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(messages) { message ->
-                ChatMessageItem(message = message)
+                ChatMessageItem(message = message, currentUserId = currentUserId)
             }
         }
 
@@ -95,8 +96,8 @@ fun ChatScreen(
 }
 
 @Composable
-private fun ChatMessageItem(message: ChatMessageEntity) {
-    val isCurrentUser = message.chatterID == 1L // TODO: Replace with actual user ID
+private fun ChatMessageItem(message: ChatMessageEntity, currentUserId: Long) {
+    val isCurrentUser = message.chatterID == currentUserId
     
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -116,8 +117,10 @@ private fun ChatMessageItem(message: ChatMessageEntity) {
                 modifier = Modifier.padding(12.dp)
             ) {
                 // Sender name
+                // TODO: Look up actual user name from ChatterEntity/UserRepository
+                // The chatterID should be resolved to a display name through a ViewModel
                 Text(
-                    text = "User ${message.chatterID}", // TODO: Replace with actual name
+                    text = if (isCurrentUser) "You" else "User ${message.chatterID}",
                     style = MaterialTheme.typography.labelSmall,
                     color = if (isCurrentUser) {
                         MaterialTheme.colorScheme.onPrimaryContainer

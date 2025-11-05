@@ -50,6 +50,20 @@
     </array>
     <key>NSAppTransportSecurity</key>
     <dict>
+        <!-- WARNING: NSAllowsArbitraryLoads disables App Transport Security (ATS)
+             This is a SECURITY RISK and may be rejected by App Store review.
+             TODO: Configure specific domain exceptions instead:
+             <key>NSExceptionDomains</key>
+             <dict>
+                 <key>example.com</key>
+                 <dict>
+                     <key>NSIncludesSubdomains</key>
+                     <true/>
+                     <key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
+                     <true/>
+                 </dict>
+             </dict>
+        -->
         <key>NSAllowsArbitraryLoads</key>
         <true/>
     </dict>
