@@ -47,3 +47,47 @@ Linden Lab Structured Data (LLSD) remains central to Second Life protocol messag
 3. Set up shared fixture repo and initial CI harness.
 4. Schedule extraction/refactor of Firestorm C++ LLSD module and C# modernization.
 5. Kick off Rust/Swift/TypeScript library prototypes following the plan above.
+
+## Actionable Rollout Plan
+
+| Workstream | Tasks | Owners (Proposed) | Deliverables | Target Timeline |
+| --- | --- | --- | --- | --- |
+| Governance | Draft LLSD standardization ADR; define versioning & API guidelines | Architecture WG | ADR-LLSD-001, contribution checklist | Week 1 |
+| Kotlin (LLSD-Kotlin) | Fork repo, migrate to KMP, add coroutine streaming parser, publish Maven artifact | Android Platform team | `llsd-kotlin` 1.0.0, docs, CI pipeline | Weeks 1-3 |
+| C++ (`llsd-cpp`) | Extract Firestorm LLSD code, modernize API, add unit tests, package with CMake | Desktop Viewer team | Standalone library, pkg scripts, docs | Weeks 2-5 |
+| C# (`LLSD.DotNet`) | Port OpenMetaverse LLSD to netstandard2.1+, optimize spans, publish NuGet | Services team | NuGet package, integration tests | Weeks 2-4 |
+| Rust (`llsd-rs`) | Implement Serde-based parser, fuzz tests, publish crates.io | Services/Infra team | `llsd-rs` crate, docs, CI | Weeks 3-6 |
+| Swift (`LLSDKit`) | Create Codable-based library, integrate with SwiftPM, add tests | Apple client team | Swift package, DocC docs, CI | Weeks 4-6 |
+| TypeScript (`llsd-ts`) | Build parser or wrap WebAssembly, provide npm package | Web Tooling team | npm package, typings, tests | Weeks 4-6 |
+| Tooling & Scripts | Generate Python/Lua/Node helpers from canonical fixtures | Tooling guild | Utility modules, automation scripts | Weeks 5-7 |
+| Fixtures & CI | Build shared fixture repo, create CLI runner invoking each library, integrate into CI nightly | QA Automation | `llsd-fixtures` repo, CI dashboards | Weeks 2-6 |
+
+## Audit Checklist
+
+1. **LLSD-Kotlin**
+   - Review supported encodings (XML, Binary, Notation) and ensure parity with Linden Lab spec.
+   - Verify Kotlin Multiplatform targets (JVM, Android, native) and update Gradle config accordingly.
+   - Assess performance benchmarks vs. legacy Java implementation and document findings.
+2. **Firestorm C++ LLSD**
+   - Locate LLSD classes (`llsd.cpp`, `llsdserialize.cpp`, etc.) and map dependencies.
+   - Identify divergent behavior (e.g., date parsing) and create issues for alignment.
+   - Plan extraction path into new library with minimal viewer build disruption.
+3. **OpenMetaverse LLSD (C#)**
+   - Audit API surface, determine compatibility with .NET 8.
+   - Measure serialization/deserialization speed; identify optimization targets (Span<T>, pooling).
+   - Confirm licensing and contribution process for modernization.
+
+## Shared Fixture & CI Plan
+
+- **Fixture Repository Structure**
+  - `fixtures/xml/*.llsd` – curated XML messages (agent update, inventory, teleport).
+  - `fixtures/binary/*.llsd` – binary encoded equivalents.
+  - `fixtures/notation/*.llsd` – LLSD notation inputs.
+  - `expected/json/*.json` – canonical normalized JSON output for comparison.
+- **Test Harness**
+  - Provide CLI (`llsd-verify`) implemented in Python or Rust that executes each language library via subprocess or bindings, comparing outputs to expected JSON.
+  - Integrate diff reporting and optional property-based fuzz inputs.
+- **CI Integration**
+  - Add nightly workflow that pulls latest versions of each LLSD library, runs fixture tests, reports to dashboard.
+  - Gate releases of LLSD libraries on passing shared fixture tests.
+  - Track coverage metrics to ensure new fixtures are added for emerging protocol fields.
