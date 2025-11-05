@@ -140,6 +140,7 @@ tooling/
   - `render-filament`: NDK-backed renderer bridging to shared scene graph.
   - `integration-tests`: Instrumented UI + protocol contract tests.
 - **Build & Tooling**: Gradle (KTS), Detekt, Ktlint, kotlinx.serialization, Dagger/Hilt DI.
+- **UI Translation Reference**: See `docs/mobile_ui_translation_guide.md` for Java→Kotlin→Compose migration patterns.
 
 ### C++ (Firestorm / RestrainedLove)
 
@@ -180,6 +181,7 @@ tooling/
   - `MetalRenderer`: Metal renderer mapping canonical scene graph to GPU resources.
   - `AppCatalyst`: Catalyst target sharing UI code with macOS.
 - **Build & Tooling**: Xcode + Swift Package Manager, SwiftLint, XCTest.
+- **UI Translation Reference**: `docs/mobile_ui_translation_guide.md` section 3 details Android XML → SwiftUI mappings.
 
 ### TypeScript / WebAssembly (Web Client)
 
