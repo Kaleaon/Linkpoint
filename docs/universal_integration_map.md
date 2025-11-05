@@ -139,8 +139,10 @@ tooling/
   - `android-ui`: Compose UI layered on command bus interfaces.
   - `render-filament`: NDK-backed renderer bridging to shared scene graph.
   - `integration-tests`: Instrumented UI + protocol contract tests.
+
 - **Build & Tooling**: Gradle (KTS), Detekt, Ktlint, kotlinx.serialization, Dagger/Hilt DI.
 - **UI Translation Reference**: See `docs/mobile_ui_translation_guide.md` for Java→Kotlin→Compose migration patterns.
+- **LLSD Support**: Integrate `LLSD-Kotlin` per `docs/llsd_library_strategy.md` for canonical LLSD parsing/serialization across JVM and KMP targets.
 
 ### C++ (Firestorm / RestrainedLove)
 
@@ -151,6 +153,7 @@ tooling/
   - `plugin-host`: RLV and scripting extensions isolated with capability descriptors.
   - `tests`: Catch2 or GoogleTest harness validating new modular contracts.
 - **Build & Tooling**: CMake presets per platform, clang-format, static analysis (clang-tidy).
+- **LLSD Support**: Extract and modernize viewer LLSD code into standalone `llsd-cpp` library with shared fixtures.
 
 ### C# (.NET / LibreMetaverse)
 
@@ -161,6 +164,7 @@ tooling/
   - `LibMetaverse.Client`: Desktop tooling/bots aligning with shared command bus.
   - `Tests`: xUnit + integration tests targeting grid simulators.
 - **Build & Tooling**: dotnet CLI, analyzers (Sonar, StyleCop), GitHub actions pipelines.
+- **LLSD Support**: Modernize OpenMetaverse LLSD implementation into `LLSD.DotNet` and align with shared fixtures.
 
 ### Rust (Services & Experimental Viewer)
 
@@ -171,6 +175,7 @@ tooling/
   - `viewer-wgpu`: Prototype client consuming shared scene graph via ECS.
   - `ffi-bridge`: `cxx` wrappers exposing Rust modules to C++/Kotlin.
 - **Build & Tooling**: Cargo workspaces, Clippy, rustfmt, criterion benchmarks.
+- **LLSD Support**: Implement `llsd-rs` crate with Serde support and shared fixture tests.
 
 ### Swift / Objective-C (Apple Platforms)
 
@@ -183,6 +188,7 @@ tooling/
 - **Build & Tooling**: Xcode + Swift Package Manager, SwiftLint, XCTest.
 - **UI Translation Reference**: `docs/mobile_ui_translation_guide.md` section 3 details Android XML → SwiftUI mappings.
 - **Swift UI Playbook**: `docs/swift_ui_playbook.md` defines module layout and profile-specific interfaces (iPhone, iPad, Catalyst, visionOS, accessibility).
+- **LLSD Support**: Build `LLSDKit` Codable-based library aligned with shared fixtures and schema tests.
 
 ### TypeScript / WebAssembly (Web Client)
 
@@ -193,12 +199,14 @@ tooling/
   - `wasm-modules`: Compiled Rust (wasm-bindgen) providing protocol/scene utilities.
   - `integration-tests`: Playwright or Cypress suites.
 - **Build & Tooling**: pnpm, ESLint, Prettier, Vitest/Jest.
+- **LLSD Support**: Supply TypeScript LLSD parser (native or via WebAssembly) for tooling and automated tests.
 
 ### Python / Lua / JavaScript (Tooling & Scripting)
 
 - **Python**: Use FastAPI/Celery for automation services, `pytest` + `behave` for BDD tests, integrate with shared protocol via gRPC stubs.
 - **Lua**: Provide sandboxed runtime for viewer plugins, share capability descriptors with RestrainedLove policies.
 - **Node.js**: Companion bots/services using NestJS or Express, bridging to shared telemetry/logging.
+- **LLSD Support**: Provide lightweight LLSD utilities in Python/Lua/Node (generated from canonical fixtures) for tooling and automated regression tests.
 
 ### XR/VR (Unity / Unreal)
 
@@ -221,6 +229,7 @@ tooling/
 - **OpenAPI / gRPC IDL**: Provide HTTP/gRPC contract that generates clients in Swift, TypeScript, C#, Kotlin, Rust, and C++ automatically.
 - **SPIR-V**: Intermediate shader representation converted between GLSL, HLSL, Metal Shading Language, and WGSL to keep renderers consistent.
 - **OpenXR Action Maps**: Serve as intermediate descriptors for XR input across Unity, Unreal, and custom engines.
+- **LLSD Canonical Fixtures**: Maintain cross-language LLSD encoding fixtures and libraries (see `docs/llsd_library_strategy.md`) to ensure consistent legacy protocol handling.
 
 Reference skeleton repositories in `docs/skeleton_repo_templates.md` for per-language starter layouts aligned with these runtime bridges.
 
