@@ -41,4 +41,5 @@ class ModernMainActivity : ComponentActivity() {
         finish()
     }
 }
-</create-file>
+```suggestion
+// EOF
