@@ -8,39 +8,24 @@ import com.lumiyaviewer.lumiya.slproto.llsd.LLSDXMLException
 import com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDBoolean
 import com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDInt
 import com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap
+import com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry
 import com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDUndefined
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.util.LinkedList
-import java.util.List
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
 
-class SLCapEventQueue : Runnable {
-    private String capURL
-    private Boolean done = false
-    private ICapsEventHandler eventHandler = null
-    private Int lastEventID = 0
-    private List<CapsEvent> nextQueue = LinkedList()
-    private Boolean threadMustExit = false
-    private AtomicBoolean willExitGracefully = AtomicBoolean(false)
-    private Thread workingThread
-    private LLSDXMLRequest xmlReq = LLSDXMLRequest()
+/**
+ * Background poller for capability-based event queues.
+ */
+class SLCapEventQueue(
+    private val capURL: String,
+    private val eventHandler: ICapsEventHandler,
+) : Runnable {
 
-    class CapsEvent {
-        LLSDNode eventBody
-        CapsEventType eventType
+    data class CapsEvent(val eventType: CapsEventType, val eventBody: LLSDNode)
 
-        CapsEvent(String str, LLSDNode lLSDNode) {
-            try {
-                this.eventType = CapsEventType.valueOf(str)
-            } catch (IllegalArgumentException e) {
-                this.eventType = CapsEventType.UnknownCapsEvent
-            }
-            this.eventBody = lLSDNode
-        }
-    }
-
-    enum CapsEventType {
+    enum class CapsEventType {
         AgentGroupDataUpdate,
         AvatarGroupsReply,
         ChatterBoxInvitation,
@@ -50,104 +35,126 @@ class SLCapEventQueue : Runnable {
         TeleportFinish,
         BulkUpdateInventory,
         EstablishAgentCommunication,
-        UnknownCapsEvent
+        UnknownCapsEvent,
     }
 
     interface ICapsEventHandler {
-        Unit OnCapsEvent(CapsEvent capsEvent)
+        fun onCapsEvent(event: CapsEvent)
     }
 
-    SLCapEventQueue(String str, ICapsEventHandler iCapsEventHandler) {
-        this.capURL = str
-        this.eventHandler = iCapsEventHandler
-        this.workingThread = Thread(this)
-        this.workingThread.start()
+    private val xmlRequest = LLSDXMLRequest()
+    private val nextQueue = CopyOnWriteArrayList<CapsEvent>()
+    private val workerThread = Thread(this, "CapEventQueue-$capURL")
+
+    @Volatile private var lastEventId: Int = 0
+    @Volatile private var done = false
+    @Volatile private var threadMustExit = false
+    private val willExitGracefully = AtomicBoolean(false)
+
+    init {
+        workerThread.start()
     }
 
-    Unit run() {
-        Debug.Log("CapEventQueue: working thread starting with capURL = " + this.capURL)
-        Boolean z2 = false
-        while (true) {
-            if (this.threadMustExit) {
-                break
-            }
-            LLSDMap.LLSDMapEntry[] lLSDMapEntryArr = LLSDMap.LLSDMapEntry[2]
-            lLSDMapEntryArr[0] = LLSDMap.LLSDMapEntry("ack", this.lastEventID != 0 ? LLSDInt(this.lastEventID) : LLSDUndefined())
-            lLSDMapEntryArr[1] = LLSDMap.LLSDMapEntry("done", LLSDBoolean(this.done))
-            try {
-                LLSDNode PerformRequest = this.xmlReq.PerformRequest(this.capURL, LLSDMap(lLSDMapEntryArr))
-                if (this.done) {
-                    Debug.Log("CapEventQueue: Done sent and confirmed, exiting gracefully.")
+    override fun run() {
+        Debug.Log("CapEventQueue: worker thread starting with capURL = $capURL")
+
+        try {
+            while (!threadMustExit) {
+                try {
+                    val payload = buildPollPayload()
+                    val response = xmlRequest.PerformRequest(capURL, payload)
+
+                    if (done) {
+                        Debug.Log("CapEventQueue: done acknowledged, exiting thread")
+                        break
+                    }
+
+                    processResponse(response)
+                    dispatchPendingEvents()
+
+                    if (!willExitGracefully.get() && !threadMustExit) {
+                        Thread.sleep(POLL_DELAY_MS)
+                    }
+                } catch (ex: FileNotFoundException) {
+                    Debug.Log("CapEventQueue: capability endpoint closed")
+                    break
+                } catch (ex: LLSDXMLException) {
+                    Debug.Warning(ex)
+                } catch (ex: IOException) {
+                    Debug.Warning(ex)
+                } catch (ex: InterruptedException) {
+                    Thread.currentThread().interrupt()
                     break
                 }
-                try {
-                    this.lastEventID = PerformRequest.byKey("id").asInt()
-                    Debug.Log("CapEventQueue: lastEventID = " + this.lastEventID)
-                    Int count = PerformRequest.byKey("events").getCount()
-                    for (Int i = 0; i < count; i++) {
-                        LLSDNode byIndex = PerformRequest.byKey("events").byIndex(i)
-                        String asString = byIndex.byKey("message").asString()
-                        LLSDNode byKey = byIndex.byKey("body")
-                        Debug.Log("CapEventQueue: event name = " + asString)
-                        if (asString.equalsIgnoreCase("TeleportFinish")) {
-                            this.done = true
-                            this.willExitGracefully.set(true)
-                        }
-                        this.nextQueue.add(CapsEvent(asString, byKey))
-                    }
-                } catch (LLSDException e) {
-                    Debug.Printf("CapEventQueue: failed to extract id. event was: %s" + PerformRequest.serializeToXML(), Object[0])
-                    Debug.Warning(e)
-                }
-                if (!this.threadMustExit) {
-                    while (true) {
-                        z = z2
-                        if (this.nextQueue.size() <= 0) {
-                            break
-                        }
-                        CapsEvent remove = this.nextQueue.remove(0)
-                        if (z || this.eventHandler == null) {
-                            z2 = z
-                        } else {
-                            if (remove.eventType == CapsEventType.TeleportFinish) {
-                                z = true
-                            }
-                            this.eventHandler.OnCapsEvent(remove)
-                            z2 = z
-                        }
-                    }
-                    if (!z) {
-                        try {
-                            Thread.sleep(2500)
-                        } catch (InterruptedException e2) {
-                            Debug.Log("Interrupted")
-                            e2.printStackTrace()
-                            z2 = z
-                        }
-                    }
-                    z2 = z
-                }
-            } catch (FileNotFoundException e3) {
-                Debug.Printf("CapEventQueue: Got file not found expection, cap queue closed?", Object[0])
-            } catch (LLSDXMLException e4) {
-                Debug.Warning(e4)
-            } catch (IOException e5) {
-                Debug.Warning(e5)
-            } catch (NullPointerException e6) {
-                Debug.Warning(e6)
             }
+        } finally {
+            Debug.Log("CapEventQueue: worker thread exiting")
         }
-        Debug.Log("CapEventQueue: event queue thread exiting")
     }
 
-    synchronized Unit stopQueue() {
-        if (!this.willExitGracefully.get()) {
-            this.threadMustExit = true
-            if (this.workingThread != null) {
-                this.xmlReq.InterruptRequest()
-                this.workingThread.interrupt()
-                this.workingThread = null
+    private fun buildPollPayload(): LLSDMap {
+        val ackNode = if (lastEventId != 0) LLSDInt(lastEventId) else LLSDUndefined()
+        val doneNode = LLSDBoolean(done)
+        return LLSDMap(
+            arrayOf(
+                LLSDMapEntry("ack", ackNode),
+                LLSDMapEntry("done", doneNode),
+            ),
+        )
+    }
+
+    private fun processResponse(response: LLSDNode) {
+        try {
+            lastEventId = response.byKey("id").asInt()
+        } catch (ex: LLSDException) {
+            Debug.Warning(ex)
+        }
+
+        val eventsNode = try {
+            response.byKey("events")
+        } catch (ex: LLSDException) {
+            return
+        }
+
+        for (index in 0 until eventsNode.getCount()) {
+            val eventNode = eventsNode.byIndex(index)
+            val name = eventNode.byKey("message").asString()
+            val body = eventNode.byKey("body")
+            val type = CapsEventType.values().find { it.name.equals(name, ignoreCase = true) }
+                ?: CapsEventType.UnknownCapsEvent
+
+            if (type == CapsEventType.TeleportFinish) {
+                done = true
+                willExitGracefully.set(true)
+            }
+
+            nextQueue.add(CapsEvent(type, body))
+        }
+    }
+
+    private fun dispatchPendingEvents() {
+        if (nextQueue.isEmpty()) return
+
+        val iterator = nextQueue.iterator()
+        while (iterator.hasNext() && !threadMustExit) {
+            val event = iterator.next()
+            iterator.remove()
+            try {
+                eventHandler.onCapsEvent(event)
+            } catch (ex: Exception) {
+                Debug.Warning(ex)
             }
         }
+    }
+
+    fun stopQueue() {
+        if (threadMustExit) return
+        threadMustExit = true
+        xmlRequest.InterruptRequest()
+        workerThread.interrupt()
+    }
+
+    companion object {
+        private const val POLL_DELAY_MS = 2_500L
     }
 }
