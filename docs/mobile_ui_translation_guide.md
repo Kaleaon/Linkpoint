@@ -186,3 +186,7 @@ struct MetalView: UIViewRepresentable {
 - **Testing**: Incorporate VR snapshot tests by capturing off-screen UI textures and verifying layout metrics. Manual QA should validate comfort metrics (FOV, legibility) using guidelines from Firestorm VR Mod.
 
 For deeper research and recommendations, see `docs/vr_ui_research.md`.
+
+## 8. Swift UI Profiles
+
+For detailed Swift module structure and profile-specific interfaces (iPhone, iPad, Mac Catalyst, visionOS, accessibility), refer to `docs/swift_ui_playbook.md`. Use those profiles to ensure each user context receives an optimized layout while sharing common state and command infrastructure.

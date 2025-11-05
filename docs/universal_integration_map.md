@@ -182,6 +182,7 @@ tooling/
   - `AppCatalyst`: Catalyst target sharing UI code with macOS.
 - **Build & Tooling**: Xcode + Swift Package Manager, SwiftLint, XCTest.
 - **UI Translation Reference**: `docs/mobile_ui_translation_guide.md` section 3 details Android XML → SwiftUI mappings.
+- **Swift UI Playbook**: `docs/swift_ui_playbook.md` defines module layout and profile-specific interfaces (iPhone, iPad, Catalyst, visionOS, accessibility).
 
 ### TypeScript / WebAssembly (Web Client)
 
