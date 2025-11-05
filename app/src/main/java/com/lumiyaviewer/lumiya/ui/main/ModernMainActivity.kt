@@ -1,5 +1,7 @@
 package com.lumiyaviewer.lumiya.ui.main
-
+```suggestion
+import android.content.Intent
+import android.os.Bundle
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
