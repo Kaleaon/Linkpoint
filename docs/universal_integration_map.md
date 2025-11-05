@@ -53,6 +53,74 @@ This document maps the major code assets, technology stacks, and integration tou
 - **C++/Kotlin → Godot**: Translate core scene entities into Godot resources, leveraging `godot-rust` bindings. Ideal for lightweight companion viewer or VR front-ends.
 - **Rendering Shader Conversions**: Maintain shader translation pipeline (GLSL ↔ SPIR-V ↔ WGSL) using SPIRV-Cross or Naga to keep render paths synchronized across engines.
 
+## Code Module Catalog & Translation Layout
+
+| Functional Module | Responsibilities | Legacy Implementations | Kotlin/Android Translation | C#/LibreMetaverse Alignment | Rust Target | Godot/Other Targets |
+| --- | --- | --- | --- | --- | --- | --- |
+| Protocol Gateway | Login, capabilities, region handshake | Firestorm `llmessage` stack, LibreMetaverse `AgentManager` | Coroutine-based client using Retrofit/ktor + protobuf | Reuse `CapsClient`, expose gRPC façade | Async gateway with `tonic` + `serde` | GDNative service, integrate via WebSocket |
+| Network Transport | UDP messaging, interest management | C++ `LLMessageSystem`, Java `LLUDPClient` | Kotlin Multiplatform networking module + okio buffers | .NET `UDPPacketBuffer` | Rust `quinn`/`tokio` with ECS event queue | Godot high-level multiplayer bridge |
+| Scene Graph | Region primitives, attachments, terrain | Firestorm `LLVOVolume`, Lumiya `SceneNode` | Shared `SceneGraph` Kotlin module (Flow-based updates) | `SimObject` wrappers | ECS (bevy specs) with FlatBuffer schema | Godot `Node3D` graph importer |
+| Rendering Core | Materials, shaders, avatar rendering | Firestorm OpenGL pipeline, Lumiya Filament layer | Jetpack Compose + Filament renderer adapters | Hook via interop to provide test harness | WGPU-based renderer with `wgpu-rs` | Godot renderer scripts and shader porting |
+| Asset & Inventory | Inventory, textures, animations | Firestorm `LLInventoryModel`, LibreMetaverse `InventoryManager` | Kotlin repository pattern + Room cache | Direct reuse; expose REST caching | Rust asset microservice with `reqwest`, `sled` | Godot resource loader via REST/gRPC |
+| UI & Interaction | UI markup, command handling, input | Firestorm XML/UI widgets, Lumiya Activities | Compose screens bound to shared command bus | Avalonia/MAUI front-ends backed by shared commands | Tauri/Wry UI or egui front | Godot scenes with signal mapping |
+| Scripting & Mods | LSL script execution, RLV constraints | Firestorm script engine, RLV module | Kotlin plugin sandbox using wasmtime | .NET scripting host, capability flags | Rust WASM host with capability checks | Godot GDScript sandbox connectors |
+| Voice & Chat | Vivox/voice, text chat, IM logs | Firestorm `LLVoiceClient`, Lumiya chat stack | Kotlin service connecting to Vivox SDK | LibreMetaverse `VoiceGateway` integration | Rust voice relay using `janus` or `mediasoup` | Godot WebRTC or Vivox plugin |
+| Telemetry & QA | Logging, metrics, replay harness | Firestorm `LLPerfStats`, Lumiya logs | Kotlin OTel exporter, logcat bridge | .NET OTel pipeline | Rust tracing + OpenTelemetry exporter | Godot analytics plugin |
+
+### Translation Recipes
+
+- **Schema First**: Maintain protobuf/FlatBuffer definitions per module. Generate Kotlin, C++, C#, and Rust bindings to eliminate hand-written translations.
+- **Interface Contracts**: Promote language-neutral service interfaces (gRPC IDL or OpenAPI) so each client consumes or exposes the same capabilities.
+- **Shared Configuration**: Centralize settings in TOML/YAML manifests; clients load and validate against schema to maintain parity.
+- **Automated Diffing**: Use semantic diff tools (e.g., `kotlinx.serialization` schema diff, `clang` AST diff) to ensure translated modules remain behaviorally equivalent.
+- **Documentation Synchronization**: Store module docs in Markdown with embedded code snippets per language, generated via literate tooling (MkDocs + `mdbook` for Rust).
+
+## Lego-Brick Modularization Strategy
+
+### Design Principles
+
+- **Clear Boundaries**: Each module exposes a minimal public surface (`NetworkModule`, `SceneModule`, `RenderModule`) through language-agnostic interfaces.
+- **Dependency Direction**: Enforce flow from outer UI shells inward to core services; core modules avoid platform-specific dependencies.
+- **Hot-Swappable Components**: Build adapter registries so alternate implementations (e.g., Rust renderer vs. C++ OpenGL) can be swapped via configuration.
+- **Versioned Contracts**: Tag every interface and schema with semantic versions; provide compatibility shims when incrementing.
+- **Extensibility Hooks**: Offer plugin APIs (Lua/WASM) gated by capability flags to keep RestrainedLove constraints intact without forking.
+
+### Modular Layout Blueprint
+
+```
+clients/
+  android-kotlin/          # Compose UI + Filament renderer adapters
+  desktop-firestorm/       # wxWidgets UI shell consuming shared modules
+  desktop-rust/            # WGPU demo client (future)
+shared/
+  protocol/                # Protobuf/gRPC definitions, shared models
+  services/                # Auth, inventory, messaging microservices (Rust/C#)
+  scene/                   # Canonical scene graph builders and sync logic
+  rendering/               # Shader packages, material definitions, tools
+  scripting/               # Sandbox runtimes, capability descriptors
+  telemetry/               # Logging schemas, dashboard configs
+tooling/
+  converters/              # Shader translation, asset pipeline scripts
+  testing/                 # Grid compliance harness, replay tools
+```
+
+### Implementation Roadmap for Modularity
+
+1. **Inventory the Codebase**: Tag existing files with module IDs. For Firestorm, map `ll*` files to proposed shared modules; for Kotlin, align packages.
+2. **Define Interfaces**: Write interface contracts in the shared repository, generate stubs for each language, and integrate gradually (facade pattern).
+3. **Extract Shared Libraries**: Carve out protocol and scene graph logic into language-appropriate libraries (KMP for Kotlin, static libs for C++, crates for Rust).
+4. **Adapter Wrappers**: Build thin adapters that translate legacy calls into modular interfaces, allowing incremental migration without large rewrites.
+5. **Automated Testing**: Create contract tests per module to validate any implementation (Kotlin, C++, Rust) adheres to expected behaviors.
+6. **Continuous Packaging**: Use package managers (Gradle Maven artifacts, NuGet, Cargo crates, vcpkg) to distribute module builds; version lock in manifest.
+7. **Governance**: Establish module maintainers, review checklists, and compatibility matrices to ensure bricks snap together without regressions.
+
+### Independent Upgrade Pathways
+
+- **Protocol Upgrades**: Deploy new capability endpoints in the shared service mesh; clients update generated stubs without touching core logic.
+- **Rendering Experimentation**: Introduce new renderer modules behind feature flags, enabling A/B testing (e.g., Vulkan vs. OpenGL).
+- **Feature Plugins**: Allow optional modules (VR support, accessibility overlays) to register via discovery endpoints; clients that opt in simply load the plugin brick.
+- **Rollback Strategy**: Maintain compatibility bins (stable, beta, experimental) so modules can be promoted or rolled back independently.
+
 ## Roadmap & Milestones
 
 | Phase | Focus | Key Deliverables | Dependencies |
