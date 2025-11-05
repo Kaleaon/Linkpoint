@@ -37,7 +37,11 @@ abstract class SLMessage : Parcelable {
 
     abstract fun CalcPayloadSize(): Int
 
-    abstract fun handleMessage(handler: SLMessageHandler)
+    open fun handleMessage(handler: SLMessageHandler) {
+        handler.dispatch(this)
+    }
+
+    fun Handle(handler: SLMessageHandler) = handleMessage(handler)
 
     @Throws(Exception::class)
     abstract fun PackPayload(buffer: ByteBuffer)
@@ -110,12 +114,13 @@ abstract class SLMessage : Parcelable {
             return 0
         }
 
-        val iterator = pendingAcks.iterator()
         var appended = 0
-
-        while (iterator.hasNext() && packetBuffer.position() <= MAX_PAYLOAD_SIZE) {
-            packetBuffer.putInt(iterator.next())
-            appended++
+        synchronized(pendingAcks) {
+            val iterator = pendingAcks.iterator()
+            while (iterator.hasNext() && packetBuffer.position() <= MAX_PAYLOAD_SIZE) {
+                packetBuffer.putInt(iterator.next())
+                appended++
+            }
         }
 
         if (appended > 0) {

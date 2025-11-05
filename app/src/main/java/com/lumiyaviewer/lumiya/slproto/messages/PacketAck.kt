@@ -1,6 +1,7 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.messages.SLMessageHandler
 import java.nio.ByteBuffer
 
 /**
