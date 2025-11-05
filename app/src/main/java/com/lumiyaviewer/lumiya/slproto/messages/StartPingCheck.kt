@@ -1,37 +1,38 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
 import java.nio.ByteBuffer
 
-class StartPingCheck : SLMessage {
-    PingID PingID_Field = PingID()
+class StartPingCheck : SLMessage() {
 
-    class PingID {
-        Int OldestUnacked
-        Int PingID
+    val PingID_Field: PingID = PingID()
+
+    data class PingID(
+        var PingID: Int = 0,
+        var OldestUnacked: Int = 0,
+    )
+
+    init {
+        zeroCoded = false
     }
 
-    StartPingCheck() {
-        this.zeroCoded = false
+    override fun CalcPayloadSize(): Int = 6
+
+    override fun handleMessage(handler: SLMessageHandler) {
+        handler.HandleStartPingCheck(this)
     }
 
-    Int CalcPayloadSize() {
-        return 6
+    override fun PackPayload(buffer: ByteBuffer) {
+        buffer.put(1) // Number of PingID blocks
+        packByte(buffer, PingID_Field.PingID.toByte())
+        packInt(buffer, PingID_Field.OldestUnacked)
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleStartPingCheck(this)
-    }
-
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put((Byte) 1)
-        packByte(byteBuffer, (Byte) this.PingID_Field.PingID)
-        packInt(byteBuffer, this.PingID_Field.OldestUnacked)
-    }
-
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.PingID_Field.PingID = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
-        this.PingID_Field.OldestUnacked = unpackInt(byteBuffer)
+    override fun UnpackPayload(buffer: ByteBuffer) {
+        val blockCount = buffer.get().toInt() and 0xFF
+        if (blockCount > 0) {
+            PingID_Field.PingID = unpackByte(buffer).toInt() and 0xFF
+            PingID_Field.OldestUnacked = unpackInt(buffer)
+        }
     }
 }
