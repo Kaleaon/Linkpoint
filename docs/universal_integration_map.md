@@ -220,6 +220,49 @@ tooling/
 
 Reference skeleton repositories in `docs/skeleton_repo_templates.md` for per-language starter layouts aligned with these runtime bridges.
 
+## Cross-Language Build Automation Strategy
+
+1. **Central Orchestration**
+   - Use a CI platform (GitHub Actions, GitLab CI, Jenkins) with a polyglot pipeline runner (Docker agents or Kubernetes) capable of executing Android, .NET, Rust, Swift, and JavaScript jobs.
+   - Adopt a monorepo with language-specific workspaces or maintain polyrepo builds triggered via workflow dispatch; share common workflows via reusable workflow templates.
+
+2. **Build Matrix & Dependency Graph**
+   - Define a top-level manifest (`build-manifest.yml`) listing each module, language toolchain, Docker image, and dependency edges.
+   - Generate CI jobs dynamically from the manifest using a small Python/Go utility to keep pipelines in sync as modules grow.
+
+3. **Reusable Workflow Templates**
+   - Kotlin/Java: `gradle-build.yml` running `./gradlew lint test assemble` with caching.
+   - C++: `cmake-build.yml` invoking configure/build/test matrix across platforms.
+   - .NET: `dotnet-build.yml` executing restore/build/test, containerizing services with Docker.
+   - Rust: `cargo-build.yml` running fmt, clippy, tests, benches.
+   - Swift: `swift-build.yml` on macOS runners performing `swift build` and `xcodebuild`.
+   - Web/TypeScript: `web-build.yml` running `pnpm install`, lint, test, build.
+   - Unity/Unreal: Dedicated workflows triggering headless builds/testing using official CI actions.
+
+4. **Toolchain Containers**
+   - Maintain Docker images per language stack (Android SDK + NDK, clang/LLVM, dotnet SDK, Rust toolchain, Node.js, etc.).
+   - Publish images to an internal registry and pin versions in the manifest to ensure reproducibility.
+
+5. **Artifacts & Module Promotions**
+   - Standardize artifact outputs (AARs, NuGet packages, Cargo crates, Swift packages, npm bundles) and publish to language-specific registries via CI jobs.
+   - Use semantic versioning and Git tags; automate changelog generation with conventional commits.
+
+6. **Cross-Language Contract Checks**
+   - Add CI stages that regenerate protobuf/gRPC/IDL code and fail if diffs are detected (enforces schema updates).
+   - Run contract tests using shared fixtures (e.g., Kotlin client ↔ Rust service) in nightly workflows.
+
+7. **Infrastructure as Code**
+   - Store Jenkins/GitHub Actions pipeline definitions alongside code; manage secrets via HashiCorp Vault or GitHub OIDC.
+   - Use Terraform/Helm for deploying shared services (inventory, telemetry) to staging environments after successful builds.
+
+8. **Automated Scaffolding**
+   - Provide a CLI (`metaverse-tool`) that clones the appropriate skeleton template, installs tooling, and registers new modules in the manifest.
+   - Integrate the CLI with CI to bootstrap new repositories with default workflows automatically.
+
+9. **Observability & Alerts**
+   - Centralize build metrics in Grafana/Prometheus; alert on failing pipelines, increased test flakiness, or coverage drops.
+   - Enable dependency update bots (Renovate, Dependabot, cargo-bump) per language with guarded auto-merge rules.
+
 ## Roadmap & Milestones
 
 | Phase | Focus | Key Deliverables | Dependencies |
