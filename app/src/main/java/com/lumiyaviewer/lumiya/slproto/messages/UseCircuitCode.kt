@@ -4,39 +4,38 @@ import com.lumiyaviewer.lumiya.slproto.SLMessage
 import java.nio.ByteBuffer
 import java.util.UUID
 
-class UseCircuitCode : SLMessage {
-    CircuitCode CircuitCode_Field = CircuitCode()
+class UseCircuitCode : SLMessage() {
 
-    class CircuitCode {
-        Int Code
-        UUID ID
-        UUID SessionID
+    data class CircuitCode(
+        var Code: Int = 0,
+        var ID: UUID = UUID(0, 0),
+        var SessionID: UUID = UUID(0, 0),
+    )
+
+    val CircuitCode_Field: CircuitCode = CircuitCode()
+
+    init {
+        zeroCoded = false
     }
 
-    UseCircuitCode() {
-        this.zeroCoded = false
+    override fun CalcPayloadSize(): Int = 40
+
+    override fun handleMessage(handler: SLMessageHandler) {
+        handler.HandleUseCircuitCode(this)
     }
 
-    Int CalcPayloadSize() {
-        return 40
+    override fun PackPayload(buffer: ByteBuffer) {
+        buffer.putShort((-1).toShort())
+        buffer.put(0x00.toByte())
+        buffer.put(0x03.toByte())
+        packInt(buffer, CircuitCode_Field.Code)
+        packUUID(buffer, CircuitCode_Field.SessionID)
+        packUUID(buffer, CircuitCode_Field.ID)
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleUseCircuitCode(this)
-    }
-
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1)
-        byteBuffer.put((Byte) 0)
-        byteBuffer.put((Byte) 3)
-        packInt(byteBuffer, this.CircuitCode_Field.Code)
-        packUUID(byteBuffer, this.CircuitCode_Field.SessionID)
-        packUUID(byteBuffer, this.CircuitCode_Field.ID)
-    }
-
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.CircuitCode_Field.Code = unpackInt(byteBuffer)
-        this.CircuitCode_Field.SessionID = unpackUUID(byteBuffer)
-        this.CircuitCode_Field.ID = unpackUUID(byteBuffer)
+    override fun UnpackPayload(buffer: ByteBuffer) {
+        CircuitCode_Field.Code = unpackInt(buffer)
+        CircuitCode_Field.SessionID = unpackUUID(buffer)
+        CircuitCode_Field.ID = unpackUUID(buffer)
     }
 }
