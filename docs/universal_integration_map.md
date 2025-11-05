@@ -121,6 +121,14 @@ tooling/
 - **Feature Plugins**: Allow optional modules (VR support, accessibility overlays) to register via discovery endpoints; clients that opt in simply load the plugin brick.
 - **Rollback Strategy**: Maintain compatibility bins (stable, beta, experimental) so modules can be promoted or rolled back independently.
 
+## Additional Language & Platform Targets
+
+- **Apple Ecosystem (iOS/iPadOS/macOS)**: Primary languages are Swift and Objective-C, with SwiftUI/AppKit for UI and Metal for rendering. Consider a Swift consumer of shared protocols, Metal-backed renderer brick, and Catalyst for iPad→macOS reuse.
+- **Web Front-Ends**: TypeScript + WebAssembly for a browser-based viewer or dashboard (use Rust/WASM or AssemblyScript bindings for heavy logic).
+- **Scripting & Automation**: Python for build/test tooling, Lua for in-world scripting experiments, JavaScript (Node.js) for companion services.
+- **XR/VR Targets**: C#/Unity and C++/Unreal integration layers if VR viewers are planned; align with OpenXR bindings and reuse canonical scene graph.
+- **Data/Analytics Pipelines**: SQL for telemetry warehousing, plus Scala/Kotlin (JVM) or Rust for real-time analytics microservices.
+
 ## Roadmap & Milestones
 
 | Phase | Focus | Key Deliverables | Dependencies |
