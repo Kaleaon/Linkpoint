@@ -207,6 +207,19 @@ tooling/
 - **SQL Warehousing**: PostgreSQL for persistent telemetry; maintain DB schema generated from shared contract definitions.
 - **Real-Time Pipelines**: Rust (`tokio`, `kafka`), Scala (Akka), or Kotlin (Spring WebFlux) microservices streaming viewer metrics to dashboards (Grafana, Superset).
 
+## Intermediate Language & Runtime Bridges
+
+- **WebAssembly (WASM)**: Run shared logic (protocol validation, scene transforms) inside browsers, Node.js, or embedded runtimes. Compile from Rust, C/C++, or AssemblyScript; expose host bindings for Kotlin/Java via Wasmtime.
+- **LLVM IR**: Common target for C/C++, Rust, Swift, enabling cross-language optimization passes or static analysis. Tooling like llvmlite can generate diagnostics for viewer modules.
+- **.NET Intermediate Language (CIL)**: LibreMetaverse services compile to IL, which can be consumed in Unity or converted for use via Xamarin/MAUI; consider IKVM or dotnet-wasm for additional targets.
+- **JVM Bytecode**: Kotlin and Java modules emit bytecode, allowing reuse via GraalVM or Kotlin Native. Shared protocol logic compiled to JVM can be embedded in server-side Kotlin or Scala services.
+- **Protocol Buffers / FlatBuffers Schemas**: Act as interface definition languages (IDLs) generating code in all target languages; maintain canonical schema repo.
+- **OpenAPI / gRPC IDL**: Provide HTTP/gRPC contract that generates clients in Swift, TypeScript, C#, Kotlin, Rust, and C++ automatically.
+- **SPIR-V**: Intermediate shader representation converted between GLSL, HLSL, Metal Shading Language, and WGSL to keep renderers consistent.
+- **OpenXR Action Maps**: Serve as intermediate descriptors for XR input across Unity, Unreal, and custom engines.
+
+Reference skeleton repositories in `docs/skeleton_repo_templates.md` for per-language starter layouts aligned with these runtime bridges.
+
 ## Roadmap & Milestones
 
 | Phase | Focus | Key Deliverables | Dependencies |
