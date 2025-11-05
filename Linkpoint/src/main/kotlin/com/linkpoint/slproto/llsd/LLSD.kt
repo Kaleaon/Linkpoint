@@ -1,7 +1,26 @@
 package com.linkpoint.slproto.llsd
 
-import java.util.UUID
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Base64
 import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
+import java.util.UUID
+import com.linkpoint.slproto.llsd.types.LLSDArray
+import com.linkpoint.slproto.llsd.types.LLSDBinary
+import com.linkpoint.slproto.llsd.types.LLSDBoolean
+import com.linkpoint.slproto.llsd.types.LLSDDate
+import com.linkpoint.slproto.llsd.types.LLSDDouble
+import com.linkpoint.slproto.llsd.types.LLSDInt
+import com.linkpoint.slproto.llsd.types.LLSDMap
+import com.linkpoint.slproto.llsd.types.LLSDNode
+import com.linkpoint.slproto.llsd.types.LLSDString
+import com.linkpoint.slproto.llsd.types.LLSDURI
+import com.linkpoint.slproto.llsd.types.LLSDUUID
+import com.linkpoint.slproto.llsd.types.LLSDUndefined
 
 /**
  * LLSD - Linden Lab Structured Data
@@ -295,64 +314,87 @@ class LLSD {
             llsd.value = HashMap<String, LLSD>()
             return llsd
         }
+
+          fun fromUri(uri: String): LLSD {
+              val llsd = LLSD()
+              llsd.type = LLSDType.URI
+              llsd.value = uri
+              return llsd
+          }
         
         /**
          * Parse LLSD from binary format
          */
         fun parseBinary(data: ByteArray): LLSD {
-            // TODO: Implement binary LLSD parser
-            return LLSD()
+              return try {
+                  ByteArrayInputStream(data).use { input ->
+                      LLSDBinaryParser.parse(input)
+                  }
+              } catch (e: IOException) {
+                  throw LLSDException("Binary parse failed: ${e.message}", e)
+              }
         }
         
         /**
          * Parse LLSD from XML
          */
         fun parseXML(xml: String): LLSD {
-            // TODO: Implement XML LLSD parser
-            return LLSD()
+              return LLSDXMLParser.parse(xml)
         }
         
         /**
          * Parse LLSD from JSON-like notation
          */
         fun parseNotation(notation: String): LLSD {
-            // TODO: Implement notation parser
-            return LLSD()
+              return LLSDNotationParser.parse(notation)
         }
     }
     
     // Serialization
     fun toBinary(): ByteArray {
-        // TODO: Implement binary serialization
-        return ByteArray(0)
+          val output = ByteArrayOutputStream()
+          return try {
+              LLSDBinaryParser.serialize(this, output)
+              output.toByteArray()
+          } catch (e: IOException) {
+              throw LLSDException("Binary serialization failed: ${e.message}", e)
+          }
     }
     
     fun toXML(): String {
-        // TODO: Implement XML serialization
-        return "<llsd></llsd>"
+          return try {
+              toNode().serializeToXML()
+          } catch (e: IOException) {
+              throw LLSDException("XML serialization failed: ${e.message}", e)
+          }
     }
     
     fun toNotation(): String {
-        // TODO: Implement notation serialization
         return when (type) {
             LLSDType.Undefined -> "!"
-            LLSDType.Boolean -> if (value as Boolean) "true" else "false"
-            LLSDType.Integer -> "i${value}"
-            LLSDType.Real -> "r${value}"
-            LLSDType.String -> "\"${value}\""
-            LLSDType.UUID -> "u${value}"
+            LLSDType.Boolean -> if (asBoolean()) "true" else "false"
+            LLSDType.Integer -> "i${asInteger()}"
+            LLSDType.Real -> "r${asReal()}"
+            LLSDType.String -> "s\"${escapeNotationString(asString())}\""
+            LLSDType.UUID -> "u${asUUID()}"
+            LLSDType.Date -> "d${notationDateFormat().format(asDate())}"
+            LLSDType.URI -> "l${asString()}"
+            LLSDType.Binary -> {
+                val base64 = Base64.getEncoder().encodeToString(asBinary())
+                "b64\"$base64\""
+            }
             LLSDType.Array -> {
-                val items = (value as ArrayList<*>).joinToString(",") { (it as LLSD).toNotation() }
-                "[$items]"
+                val list = value as? ArrayList<LLSD> ?: ArrayList()
+                list.joinToString(prefix = "[", postfix = "]") { it.toNotation() }
             }
             LLSDType.Map -> {
                 @Suppress("UNCHECKED_CAST")
-                val items = (value as HashMap<String, LLSD>).entries.joinToString(",") {
-                    "'${it.key}':${it.value.toNotation()}"
+                val map = value as? HashMap<String, LLSD> ?: HashMap()
+                map.entries.joinToString(prefix = "{", postfix = "}") { (k, v) ->
+                    val keyNotation = if (k.all { it.isLetterOrDigit() || it == '_' }) k else "s\"${escapeNotationString(k)}\""
+                    "$keyNotation:${v.toNotation()}"
                 }
-                "{$items}"
             }
-            else -> "!"
         }
     }
     
@@ -389,5 +431,55 @@ class LLSD {
         var result = type.hashCode()
         result = 31 * result + (value?.hashCode() ?: 0)
         return result
+    }
+
+    private fun toNode(): LLSDNode {
+        return when (type) {
+            LLSDType.Undefined -> LLSDUndefined()
+            LLSDType.Boolean -> LLSDBoolean(asBoolean())
+            LLSDType.Integer -> LLSDInt(asInteger())
+            LLSDType.Real -> LLSDDouble(asReal())
+            LLSDType.String -> LLSDString(asString())
+            LLSDType.UUID -> LLSDUUID(asUUID())
+            LLSDType.Date -> LLSDDate(asDate())
+            LLSDType.URI -> LLSDURI(asString())
+            LLSDType.Binary -> LLSDBinary(asBinary())
+            LLSDType.Array -> {
+                val arrayNode = LLSDArray()
+                @Suppress("UNCHECKED_CAST")
+                val list = value as? ArrayList<LLSD> ?: ArrayList()
+                for (child in list) {
+                    arrayNode.add(child.toNode())
+                }
+                arrayNode
+            }
+            LLSDType.Map -> {
+                @Suppress("UNCHECKED_CAST")
+                val map = value as? HashMap<String, LLSD> ?: HashMap()
+                val nodeMap = map.mapValues { (_, v) -> v.toNode() }
+                LLSDMap(nodeMap)
+            }
+        }
+    }
+
+    private fun escapeNotationString(input: String): String {
+        val builder = StringBuilder(input.length)
+        for (ch in input) {
+            when (ch) {
+                '\\' -> builder.append("\\\\")
+                '"' -> builder.append("\\\"")
+                '\n' -> builder.append("\\n")
+                '\r' -> builder.append("\\r")
+                '\t' -> builder.append("\\t")
+                else -> builder.append(ch)
+            }
+        }
+        return builder.toString()
+    }
+
+    private fun notationDateFormat(): SimpleDateFormat {
+        return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
     }
 }

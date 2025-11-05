@@ -4,68 +4,46 @@ import android.content.Intent
 import com.linkpoint.utils.UUIDPool
 import java.util.UUID
 
-class SLAuthParams {
-    val UUID clientID
-    val String gridName
-    val String loginName
-    val String loginURL
-    val String passwordHash
-    val String startLocation
+/**
+ * Immutable parameters required to authenticate against the Second Life grid.
+ */
+data class SLAuthParams(
+    val loginName: String,
+    val passwordHash: String,
+    val clientId: UUID,
+    val startLocation: String,
+    val loginUrl: String,
+    val gridName: String
+) {
 
-    public SLAuthParams(Intent intent) {
-        this.loginName = intent.getStringExtra("login")
-        this.passwordHash = intent.getStringExtra("password")
-        this.clientID = UUIDPool.getUUID(intent.getStringExtra("client_id"))
-        this.startLocation = intent.getStringExtra("start_location")
-        this.loginURL = intent.getStringExtra("login_url")
-        this.gridName = intent.getStringExtra("grid_name")
-    }
+    constructor(intent: Intent) : this(
+        loginName = intent.getStringExtra(EXTRA_LOGIN)?.takeIf { it.isNotBlank() }
+            ?: DEFAULT_LOGIN,
+        passwordHash = intent.getStringExtra(EXTRA_PASSWORD)?.takeIf { it.isNotBlank() }
+            ?: DEFAULT_PASSWORD,
+        clientId = UUIDPool.getUUID(intent.getStringExtra(EXTRA_CLIENT_ID)),
+        startLocation = intent.getStringExtra(EXTRA_START_LOCATION)?.takeIf { it.isNotBlank() }
+            ?: DEFAULT_START_LOCATION,
+        loginUrl = intent.getStringExtra(EXTRA_LOGIN_URL)?.takeIf { it.isNotBlank() }
+            ?: DEFAULT_LOGIN_URL,
+        gridName = intent.getStringExtra(EXTRA_GRID_NAME)?.takeIf { it.isNotBlank() }
+            ?: DEFAULT_GRID_NAME
+    )
 
-    public SLAuthParams(String str, String str2, UUID uuid, String str3, String str4, String str5) {
-        this.loginName = str
-        this.passwordHash = str2
-        this.clientID = uuid
-        this.startLocation = str3
-        this.loginURL = str4
-        this.gridName = str5
-    }
+    fun withLocation(location: String): SLAuthParams = copy(startLocation = location)
 
-     public override fun equals(obj: Object): Boolean {
-        if (this == obj) {
-            return true
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false
-        }
-        val sLAuthParams: SLAuthParams = (SLAuthParams) obj
-        if (this.loginName == null ? sLAuthParams.loginName != null : (!this.loginName.equals(sLAuthParams.loginName))) {
-            return false
-        }
-        if (this.passwordHash == null ? sLAuthParams.passwordHash != null : (!this.passwordHash.equals(sLAuthParams.passwordHash))) {
-            return false
-        }
-        if (this.clientID == null ? sLAuthParams.clientID != null : (!this.clientID.equals(sLAuthParams.clientID))) {
-            return false
-        }
-        if (this.startLocation == null ? sLAuthParams.startLocation != null : (!this.startLocation.equals(sLAuthParams.startLocation))) {
-            return false
-        }
-        if (this.loginURL == null ? sLAuthParams.loginURL != null : (!this.loginURL.equals(sLAuthParams.loginURL))) {
-            return false
-        }
-        return this.gridName != null ? this.gridName.equals(sLAuthParams.gridName) : sLAuthParams.gridName == null
-    }
+    companion object {
+        private const val EXTRA_LOGIN = "login"
+        private const val EXTRA_PASSWORD = "password"
+        private const val EXTRA_CLIENT_ID = "client_id"
+        private const val EXTRA_START_LOCATION = "start_location"
+        private const val EXTRA_LOGIN_URL = "login_url"
+        private const val EXTRA_GRID_NAME = "grid_name"
 
-     public override fun hashCode(): Int {
-        val i: Int = 0
-        val hashCode: Int = ((this.loginURL != null ? this.loginURL.hashCode() : 0) + (((this.startLocation != null ? this.startLocation.hashCode() : 0) + (((this.clientID != null ? this.clientID.hashCode() : 0) + (((this.passwordHash != null ? this.passwordHash.hashCode() : 0) + ((this.loginName != null ? this.loginName.hashCode() : 0) * 31)) * 31)) * 31)) * 31)) * 31
-        if (this.gridName != null) {
-            i = this.gridName.hashCode()
-        }
-        return hashCode + i
-    }
-
-     public fun withLocation(str: String): SLAuthParams {
-        return SLAuthParams(this.loginName, this.passwordHash, this.clientID, str, this.loginURL, this.gridName)
+        private const val DEFAULT_LOGIN = ""
+        private const val DEFAULT_PASSWORD = ""
+        private const val DEFAULT_START_LOCATION = "last"
+        private const val DEFAULT_LOGIN_URL = "https://login.agni.lindenlab.com/cgi-bin/login.cgi"
+        private const val DEFAULT_GRID_NAME = "Second Life"
     }
 }
