@@ -129,6 +129,84 @@ tooling/
 - **XR/VR Targets**: C#/Unity and C++/Unreal integration layers if VR viewers are planned; align with OpenXR bindings and reuse canonical scene graph.
 - **Data/Analytics Pipelines**: SQL for telemetry warehousing, plus Scala/Kotlin (JVM) or Rust for real-time analytics microservices.
 
+## Language-Specific Framework Guides
+
+### Kotlin / Java (Android & Multiplatform)
+
+- **Frameworks**: Jetpack Compose, Android View system, Kotlin Multiplatform (KMP), Filament renderer, ktor/Retrofit networking, Room/SQLDelight persistence.
+- **Module Layout**:
+  - `core-protocol`: KMP module exposing shared protobuf bindings and coroutines.
+  - `android-ui`: Compose UI layered on command bus interfaces.
+  - `render-filament`: NDK-backed renderer bridging to shared scene graph.
+  - `integration-tests`: Instrumented UI + protocol contract tests.
+- **Build & Tooling**: Gradle (KTS), Detekt, Ktlint, kotlinx.serialization, Dagger/Hilt DI.
+
+### C++ (Firestorm / RestrainedLove)
+
+- **Frameworks**: wxWidgets (UI), OpenGL/OpenAL, Boost, LL common libraries, CMake build system.
+- **Module Layout**:
+  - `viewercore`: Core scene, rendering, and avatar logic reorganized under new modular headers.
+  - `protocol-adapter`: C++ facade implementing shared protocol interfaces (generated headers from protobuf/gRPC).
+  - `plugin-host`: RLV and scripting extensions isolated with capability descriptors.
+  - `tests`: Catch2 or GoogleTest harness validating new modular contracts.
+- **Build & Tooling**: CMake presets per platform, clang-format, static analysis (clang-tidy).
+
+### C# (.NET / LibreMetaverse)
+
+- **Frameworks**: .NET 8, ASP.NET Core gRPC/REST services, Avalonia or MAUI UI shells, Entity Framework Core for persistence.
+- **Module Layout**:
+  - `LibMetaverse.Protocol`: Shared model + gRPC client/server stubs.
+  - `LibMetaverse.Services`: Auth, inventory, messaging microservices.
+  - `LibMetaverse.Client`: Desktop tooling/bots aligning with shared command bus.
+  - `Tests`: xUnit + integration tests targeting grid simulators.
+- **Build & Tooling**: dotnet CLI, analyzers (Sonar, StyleCop), GitHub actions pipelines.
+
+### Rust (Services & Experimental Viewer)
+
+- **Frameworks**: Tokio async runtime, tonic gRPC, serde, Bevy/WGPU or egui for rendering UI, `cxx` for C++ interop.
+- **Module Layout**:
+  - `metaverse-protocol`: Generated Rust bindings from protobuf/FlatBuffer schemas.
+  - `service-auth`, `service-inventory`, `service-telemetry`: Microservices packaged as Cargo workspaces.
+  - `viewer-wgpu`: Prototype client consuming shared scene graph via ECS.
+  - `ffi-bridge`: `cxx` wrappers exposing Rust modules to C++/Kotlin.
+- **Build & Tooling**: Cargo workspaces, Clippy, rustfmt, criterion benchmarks.
+
+### Swift / Objective-C (Apple Platforms)
+
+- **Frameworks**: SwiftUI, Combine, Metal, URLSession/GRPC-Swift, CoreData/Realm.
+- **Module Layout**:
+  - `MetaverseProtocolKit`: Swift package wrapping shared schemas.
+  - `ViewerUI`: SwiftUI views binding to cross-platform command bus.
+  - `MetalRenderer`: Metal renderer mapping canonical scene graph to GPU resources.
+  - `AppCatalyst`: Catalyst target sharing UI code with macOS.
+- **Build & Tooling**: Xcode + Swift Package Manager, SwiftLint, XCTest.
+
+### TypeScript / WebAssembly (Web Client)
+
+- **Frameworks**: React/Next.js or SvelteKit for UI, WebAssembly modules from Rust/C++ for heavy lifting, three.js/Babylon.js for rendering.
+- **Module Layout**:
+  - `metaverse-sdk`: TypeScript SDK generated from OpenAPI/gRPC-Web.
+  - `viewer-web`: SPA shell communicating with command bus endpoints.
+  - `wasm-modules`: Compiled Rust (wasm-bindgen) providing protocol/scene utilities.
+  - `integration-tests`: Playwright or Cypress suites.
+- **Build & Tooling**: pnpm, ESLint, Prettier, Vitest/Jest.
+
+### Python / Lua / JavaScript (Tooling & Scripting)
+
+- **Python**: Use FastAPI/Celery for automation services, `pytest` + `behave` for BDD tests, integrate with shared protocol via gRPC stubs.
+- **Lua**: Provide sandboxed runtime for viewer plugins, share capability descriptors with RestrainedLove policies.
+- **Node.js**: Companion bots/services using NestJS or Express, bridging to shared telemetry/logging.
+
+### XR/VR (Unity / Unreal)
+
+- **Unity (C#)**: URP/HDRP rendering, Mirror or Photon networking wrappers, integrate shared command bus via gRPC C# client.
+- **Unreal (C++)**: Unreal Motion Graphics UI, OpenXR, `Grpc` plugin for protocol integration, reuse scene graph translation pipeline.
+
+### Data & Analytics
+
+- **SQL Warehousing**: PostgreSQL for persistent telemetry; maintain DB schema generated from shared contract definitions.
+- **Real-Time Pipelines**: Rust (`tokio`, `kafka`), Scala (Akka), or Kotlin (Spring WebFlux) microservices streaming viewer metrics to dashboards (Grafana, Superset).
+
 ## Roadmap & Milestones
 
 | Phase | Focus | Key Deliverables | Dependencies |
