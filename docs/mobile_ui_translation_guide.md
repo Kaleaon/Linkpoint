@@ -175,3 +175,14 @@ struct MetalView: UIViewRepresentable {
 3. Extract shared UI state and commands into multiplatform module.
 4. Scaffold SwiftUI project using skeleton repo, generating bindings from shared schema.
 5. Establish automated snapshot/regression tests to guarantee UI parity across platforms.
+
+## 7. VR-Specific UI Considerations
+
+- **Firestorm VR Mod Learnings**: Legacy wxWidgets UI is projected as curved panels in VR. Compose/SwiftUI layers must emit metadata (panel type, ideal distance) so VR renderers can reconstruct similar overlays.
+- **Layout Metadata Schema**: Extend shared command/state models to include hints like `displayMode = FLAT_PANEL | CURVED_PANEL`, `preferredDistanceMeters`, `interactionMode = POINTER | DIRECT`.
+- **Renderer Adaptation**: Android/Java `GLSurfaceView` and Swift `MetalView` should support rendering UI surfaces off-screen (e.g., via `RenderNode` or `CALayer`) for use in OpenXR compositors.
+- **Input Mapping**: Introduce VR input events (raycast pointer, trigger, grip) in the command bus. Compose and SwiftUI components expose semantics to handle focus/activation for VR controllers.
+- **Performance**: Maintain 90 Hz target by throttling heavy UI recompositions. Use selective updates and memoization in Compose/SwiftUI to reduce GPU load.
+- **Testing**: Incorporate VR snapshot tests by capturing off-screen UI textures and verifying layout metrics. Manual QA should validate comfort metrics (FOV, legibility) using guidelines from Firestorm VR Mod.
+
+For deeper research and recommendations, see `docs/vr_ui_research.md`.

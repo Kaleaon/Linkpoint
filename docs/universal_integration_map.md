@@ -203,6 +203,7 @@ tooling/
 
 - **Unity (C#)**: URP/HDRP rendering, Mirror or Photon networking wrappers, integrate shared command bus via gRPC C# client.
 - **Unreal (C++)**: Unreal Motion Graphics UI, OpenXR, `Grpc` plugin for protocol integration, reuse scene graph translation pipeline.
+- **Reference**: VR UI research and recommendations captured in `docs/vr_ui_research.md`.
 
 ### Data & Analytics
 
