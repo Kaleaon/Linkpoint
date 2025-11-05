@@ -13,17 +13,17 @@ import com.lumiyaviewer.lumiya.database.dao.*
 import com.lumiyaviewer.lumiya.database.entities.*
 
 /**
- * Main Room database for Lumiya.
+ * Main Room database for Lumiya/Linkpoint.
  * 
  * This database replaces the legacy GreenDAO implementation with modern Room.
- * Includes all entities and DAOs for the Lumiya Second Life viewer.
+ * Includes all entities and DAOs for the Second Life viewer.
  * 
  * Features:
- * - Type-safe queries
+ * - Type-safe queries at compile time
  * - Kotlin Coroutines support
  * - Flow for reactive data
  * - Automatic migrations
- * - Better performance
+ * - Better performance than GreenDAO
  * 
  * @version 1
  */
@@ -81,7 +81,7 @@ abstract class LumiyaDatabase : RoomDatabase() {
                     DATABASE_NAME
                 )
                     .addMigrations(MIGRATION_GREENDAO_TO_ROOM)
-                    .fallbackToDestructiveMigration() // TODO: Remove in production
+                    .fallbackToDestructiveMigration() // TODO: Remove in production after migration tested
                     .build()
                 
                 INSTANCE = instance
@@ -97,22 +97,22 @@ abstract class LumiyaDatabase : RoomDatabase() {
          */
         private val MIGRATION_GREENDAO_TO_ROOM = object : Migration(0, 1) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                // Note: This is a placeholder migration
-                // In production, you would:
-                // 1. Analyze the GreenDAO schema
-                // 2. Create new Room tables
-                // 3. Copy data from old tables to new tables
-                // 4. Drop old tables
+                // Migration strategy:
+                // 1. Check if old GreenDAO tables exist
+                // 2. If they exist, copy data to new Room tables
+                // 3. Drop old tables
                 
-                // For now, we'll create the new schema
-                // The actual data migration would be implemented based on
-                // the specific GreenDAO schema in use
+                // For now, Room will create new tables
+                // In production, implement full data migration
                 
-                // Example migration steps:
-                // database.execSQL("CREATE TABLE IF NOT EXISTS chat_messages_new (...)")
-                // database.execSQL("INSERT INTO chat_messages_new SELECT * FROM CHAT_MESSAGE")
-                // database.execSQL("DROP TABLE CHAT_MESSAGE")
-                // database.execSQL("ALTER TABLE chat_messages_new RENAME TO chat_messages")
+                // Example migration for ChatMessage:
+                // val cursor = database.query("SELECT name FROM sqlite_master WHERE type='table' AND name='CHAT_MESSAGE'")
+                // if (cursor.moveToFirst()) {
+                //     // Old table exists, migrate data
+                //     database.execSQL("INSERT INTO chat_messages SELECT * FROM CHAT_MESSAGE")
+                //     database.execSQL("DROP TABLE CHAT_MESSAGE")
+                // }
+                // cursor.close()
             }
         }
         

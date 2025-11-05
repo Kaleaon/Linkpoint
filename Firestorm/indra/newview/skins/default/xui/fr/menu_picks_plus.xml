@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<toggleable_menu name="picks_plus_menu">
-	<menu_item_call name="create_pick" label="Nouveau favori"/>
-	<menu_item_call name="create_classified" label="Nouvelle annonce"/>
-</toggleable_menu>

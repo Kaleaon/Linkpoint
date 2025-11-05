@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater label="Событие" name="Event" title="Детали события">
-	<floater.string name="loading_text">
-		Загрузка...
-	</floater.string>
-	<floater.string name="done_text">
-		Готовые
-	</floater.string>
-</floater>

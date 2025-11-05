@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater name="floater_voice_volume" title="Volume de la voix">
-	<slider name="volume_slider" tool_tip="Volume de la voix"/>
-</floater>

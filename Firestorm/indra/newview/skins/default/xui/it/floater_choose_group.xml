@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater name="groups" title="Gruppi">
-	<text name="groupdesc">
-		Scegli un gruppo:
-	</text>
-	<button label="Annulla" label_selected="Annulla" name="Cancel"/>
-</floater>

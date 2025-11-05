@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater name="whitelist_entry" title="Белый список">
-	<text name="media_label">
-		Введите URL или шаблон URL, чтобы добавить в список разрешенных доменов
-	</text>
-	<line_editor name="whitelist_entry" tool_tip="Введите URL или шаблон URL, чтобы добавить в список разрешенных доменов"/>
-	<button label="Отмена" name="cancel_btn"/>
-</floater>

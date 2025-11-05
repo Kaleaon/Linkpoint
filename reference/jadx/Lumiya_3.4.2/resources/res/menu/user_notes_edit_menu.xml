@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:lumiya="http://schemas.android.com/apk/res-auto">
-    <item
-        android:icon="?attr/MenuIconUndo"
-        android:id="@+id/item_undo"
-        android:title="@string/menu_item_undo_title"
-        lumiya:showAsAction="always"/>
-</menu>

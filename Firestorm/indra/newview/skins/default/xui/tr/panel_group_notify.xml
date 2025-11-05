@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<panel label="instant_message" name="panel_group_notify">
-	<panel label="başlık" name="header">
-		<text name="title" value="Gönderici Adı / Grup Adı"/>
-	</panel>
-	<text_editor name="message" value="ileti"/>
-	<text name="attachment" value="Aksesuar"/>
-	<button label="Tamam" name="btn_ok"/>
-</panel>

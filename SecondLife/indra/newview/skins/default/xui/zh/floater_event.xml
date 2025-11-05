@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater label="活動" name="Event" title="活動細節">
-	<floater.string name="loading_text">
-		載入中...
-	</floater.string>
-	<floater.string name="done_text">
-		完成
-	</floater.string>
-</floater>

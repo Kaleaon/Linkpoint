@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<floater name="media_settings" title="USTAWIENIA MEDIÓW">
-	<button label="Anuluj" label_selected="Anuluj" name="Cancel" />
-	<button label="Zastosuj" label_selected="Zastosuj" name="Apply" />
-</floater>

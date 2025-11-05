@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater label="Évènement" name="Event" title="Détails de l'évènement">
-	<floater.string name="loading_text">Chargement...</floater.string>
-	<floater.string name="done_text">Terminé</floater.string>
-</floater>
