@@ -1,34 +1,34 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.messages.SLMessageHandler
 import java.nio.ByteBuffer
 
-class CompletePingCheck : SLMessage {
-    PingID PingID_Field = PingID()
+class CompletePingCheck : SLMessage() {
 
-    class PingID {
-        Int PingID
+    val PingID_Field: PingID = PingID()
+
+    data class PingID(var PingID: Int = 0)
+
+    init {
+        zeroCoded = false
     }
 
-    CompletePingCheck() {
-        this.zeroCoded = false
+    override fun CalcPayloadSize(): Int = 2
+
+    override fun handleMessage(handler: SLMessageHandler) {
+        handler.HandleCompletePingCheck(this)
     }
 
-    Int CalcPayloadSize() {
-        return 2
+    override fun PackPayload(buffer: ByteBuffer) {
+        buffer.put(1) // Number of PingID blocks
+        packByte(buffer, PingID_Field.PingID.toByte())
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleCompletePingCheck(this)
-    }
-
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put((byte) 2)
-        packByte(byteBuffer, (byte) this.PingID_Field.PingID)
-    }
-
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.PingID_Field.PingID = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
+    override fun UnpackPayload(buffer: ByteBuffer) {
+        val blockCount = buffer.get().toInt() and 0xFF
+        if (blockCount > 0) {
+            PingID_Field.PingID = unpackByte(buffer).toInt() and 0xFF
+        }
     }
 }

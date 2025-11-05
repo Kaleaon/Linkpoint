@@ -2,64 +2,82 @@ package com.lumiyaviewer.lumiya.slproto
 
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.slproto.auth.SLAuthReply
-import java.io.IOException
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.Executor
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
-class SLThreadingCircuit : SLCircuit : Executor {
-    private val DEFAULT_IDLE_INTERVAL: Int = 1000
+/**
+ * Circuit implementation that processes inbound messages on a dedicated worker thread.
+ */
+class SLThreadingCircuit @JvmOverloads constructor(
+    gridConnection: SLGridConnection,
+    circuitInfo: SLCircuitInfo,
+    authReply: SLAuthReply,
+    previousCircuit: SLCircuit? = null,
+) : SLCircuit(gridConnection, circuitInfo, authReply, previousCircuit), Executor {
+
+    companion object {
+        private const val POLL_TIMEOUT_MS = 1_000L
+    }
+
+    private val workEnabled = AtomicBoolean(true)
     private val queue: BlockingQueue<Runnable> = LinkedBlockingQueue()
-    private volatile Boolean workEnabled = true
-    private val workingRunnable: Runnable = Runnable() {
-        fun run(): Unit {
-            Debug.Printf("SLThreadingCircuit: working thread started.", Any[0])
-            while (SLThreadingCircuit.this.workEnabled) {
-                try {
-                    Runnable runnable = (Runnable) SLThreadingCircuit.this.queue.poll(1000, TimeUnit.MILLISECONDS)
-                    runnable?.run()
-                    } else {
-                        SLThreadingCircuit.this.InvokeProcessIdle()
+    private val workerThread = Thread({ runWorker() }, "SLCircuit-${circuitInfo.circuitCode}").apply { start() }
+
+    private fun runWorker() {
+        Debug.Log("SLThreadingCircuit: worker thread started")
+        try {
+            while (workEnabled.get() && !Thread.currentThread().isInterrupted) {
+                val task = queue.poll(POLL_TIMEOUT_MS, TimeUnit.MILLISECONDS)
+                if (task != null) {
+                    task.run()
+                } else {
+                    try {
+                        invokeProcessIdle()
+                    } catch (ex: Exception) {
+                        Debug.Warning(ex)
                     }
-                } catch (InterruptedException e) {
-                    // Thread was interrupted, restore interrupt status and exit
-                    Thread.currentThread().interrupt()
-                    break
                 }
             }
-            Debug.Printf("SLThreadingCircuit: working thread exiting.", Any[0])
+        } catch (_: InterruptedException) {
+            Thread.currentThread().interrupt()
+        } finally {
+            Debug.Log("SLThreadingCircuit: worker thread exiting")
         }
     }
-    private val workingThread: Thread = Thread(this.workingRunnable, "SLCircuit")
 
-    SLThreadingCircuit(SLGridConnection sLGridConnection, SLCircuitInfo sLCircuitInfo, SLAuthReply sLAuthReply, SLCircuit sLCircuit) throws IOException {
-        super(sLGridConnection, sLCircuitInfo, sLAuthReply, sLCircuit)
-        this.workingThread.start()
+    private fun stopWorker() {
+        if (workEnabled.compareAndSet(true, false)) {
+            workerThread.interrupt()
+        }
     }
 
-    private fun stopThread(): Unit {
-        this.workEnabled = false
-        this.workingThread.interrupt()
+    override fun handleMessage(message: SLMessage) {
+        if (!queue.offer(Runnable { super.handleMessage(message) })) {
+            super.handleMessage(message)
+        }
     }
 
-    fun HandleMessage(sLMessage: SLMessage): Unit {
-        this.queue.offer(() -> super.HandleMessage(sLMessage))
+    override fun processCloseCircuit() {
+        stopWorker()
+        super.processCloseCircuit()
     }
 
-    fun ProcessCloseCircuit(): Unit {
-        stopThread()
+    override fun processNetworkError() {
+        stopWorker()
+        super.processNetworkError()
     }
 
-    fun ProcessNetworkError(): Unit {
-        stopThread()
+    override fun processTimeout() {
+        stopWorker()
+        super.processTimeout()
     }
 
-    fun ProcessTimeout(): Unit {
-        stopThread()
-    }
-
-    fun execute(runnable: Runnable): Unit {
-        this.queue.offer(runnable)
+    override fun execute(command: Runnable) {
+        if (!queue.offer(command)) {
+            command.run()
+        }
     }
 }

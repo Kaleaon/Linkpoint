@@ -1,45 +1,43 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.messages.SLMessageHandler
 import java.nio.ByteBuffer
-import java.util.ArrayList
 
-class PacketAck : SLMessage {
-    ArrayList<Packets> Packets_Fields = ArrayList<>()
+/**
+ * PacketAck message - acknowledges receipt of reliable packets.
+ */
+class PacketAck(
+    val packets: MutableList<Packet> = mutableListOf(),
+) : SLMessage() {
 
-    class Packets {
-        Int ID
+    data class Packet(var id: Int)
+
+    init {
+        zeroCoded = false
+        isReliable = false
     }
 
-    PacketAck() {
-        this.zeroCoded = false
+    override fun CalcPayloadSize(): Int = packets.size * 4 + 5
+
+    override fun handleMessage(handler: SLMessageHandler) {
+        handler.HandlePacketAck(this)
     }
 
-    Int CalcPayloadSize() {
-        return (this.Packets_Fields.size() * 4) + 5
-    }
-
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandlePacketAck(this)
-    }
-
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1)
-        byteBuffer.put((Byte) -1)
-        byteBuffer.put((Byte) -5)
-        byteBuffer.put((Byte) this.Packets_Fields.size())
-        for (Packets packets : this.Packets_Fields) {
-            packInt(byteBuffer, packets.ID)
+    override fun PackPayload(buffer: ByteBuffer) {
+        buffer.putShort((-1).toShort())
+        buffer.put((-1).toByte())
+        buffer.put((-5).toByte())
+        buffer.put(packets.size.toByte())
+        for (packet in packets) {
+            packInt(buffer, packet.id)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            Packets packets = Packets()
-            packets.ID = unpackInt(byteBuffer)
-            this.Packets_Fields.add(packets)
+    override fun UnpackPayload(buffer: ByteBuffer) {
+        val count = buffer.get().toInt() and 0xFF
+        repeat(count) {
+            packets.add(Packet(unpackInt(buffer)))
         }
     }
 }

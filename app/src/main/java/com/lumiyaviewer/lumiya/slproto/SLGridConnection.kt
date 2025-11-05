@@ -4,6 +4,7 @@ import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.GlobalOptions
 import com.lumiyaviewer.lumiya.eventbus.EventBus
 import com.lumiyaviewer.lumiya.res.textures.TextureCache
+import com.lumiyaviewer.linkpoint.GridConnectionManager
 import com.lumiyaviewer.lumiya.slproto.auth.SLAuth
 import com.lumiyaviewer.lumiya.slproto.auth.SLAuthParams
 import com.lumiyaviewer.lumiya.slproto.auth.SLAuthReply
@@ -17,322 +18,102 @@ import com.lumiyaviewer.lumiya.slproto.events.SLLoginResultEvent
 import com.lumiyaviewer.lumiya.slproto.events.SLReconnectingEvent
 import com.lumiyaviewer.lumiya.slproto.modules.SLModules
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
+import com.linkpoint.slproto.auth.SessionManager
 import java.io.IOException
-import java.util.*
+import java.util.Collections
+import java.util.UUID
 
 /**
- * Grid connection manager for Second Life protocol
- * Handles authentication, circuit management, and reconnection logic
+ * Manages the lifecycle of a Second Life grid connection.
  */
 class SLGridConnection : SLConnection() {
-    
-    private val DEFAULT_SYSTEM_ACCOUNT = "Second Life"
+
+    enum class ConnectionState { Idle, Connecting, Connected }
+
+    class NotConnectedException : Exception("Grid not connected")
+
     private var autoresponseEnabled = false
     private var autoresponseText = ""
-    
+
     private var activeAgentUUID: UUID? = null
     private var agentCircuit: SLAgentCircuit? = null
     private var authParams: SLAuthParams? = null
     internal var authReply: SLAuthReply? = null
     internal var capEventQueue: SLCapEventQueue? = null
     private var connectionState = ConnectionState.Idle
+
     private val eventBus = EventBus.getInstance()
-    
+
     @Volatile private var firstConnect = true
     @Volatile private var hadConnected = false
     @Volatile private var isReconnecting = false
     @Volatile private var loginThread: Thread? = null
-    
+
     private var modules: SLModules? = null
     internal val parcelInfo = SLParcelInfo()
-    
+
     @Volatile private var reconnectAttempts = 0
-    private val tempCircuits = Collections.synchronizedMap(HashMap<SLAuthReply, SLTempCircuit>())
+    private val tempCircuits = Collections.synchronizedMap(mutableMapOf<SLAuthReply, SLTempCircuit>())
     private var userManager: UserManager? = null
-    
     @Volatile private var userWantsConnected = false
 
-    /**
-     * Connection states
-     */
-    enum class ConnectionState {
-        Idle,
-        Connecting,
-        Connected
-    }
+    // ---------------------------------------------------------------------
+    // Public API
 
-    /**
-     * Exception thrown when operations require an active connection
-     */
-    class NotConnectedException : Exception("Grid not connected") {
-        companion object {
-            private const val serialVersionUID = 2164121452714562470L
-        }
-    }
+    fun getAutoresponse(): String? = if (autoresponseEnabled) autoresponseText else null
 
-    /**
-     * Perform connection to grid with authentication
-     */
-    private fun doConnect(authParams: SLAuthParams, location: String) {
-        try {
-            val loginReply = SLAuth().Login(authParams.withLocation(location))
-            if (loginReply.success) {
-                synchronized(this) {
-                    if (connectionState == ConnectionState.Idle) {
-                        return
-                    }
-                    authReply = loginReply
-                    activeAgentUUID = loginReply.agentID
-                    userManager = UserManager.getUserManager(activeAgentUUID)
-                    userManager?.getChatterList()?.getFriendManager()?.updateFriendList(loginReply.friends)
-                    parcelInfo.reset(userManager)
-                    startCircuit(loginReply, null)
-                    return
-                }
-            }
-            setConnectionState(ConnectionState.Idle)
-            reconnectOrDrop(isLogin = true, fromLogout = false, message = loginReply.message ?: "Login failed")
-        } catch (e: Exception) {
-            setConnectionState(ConnectionState.Idle)
-            reconnectOrDrop(isLogin = true, fromLogout = false, message = "Failed to connect to login server.")
-        }
-    }
-
-    /**
-     * Attempt to reconnect to the grid
-     */
-    @Synchronized
-    private fun reconnect(): Boolean {
-        // Check if we should attempt reconnection
-        if (!userWantsConnected || !hadConnected) {
-            isReconnecting = false
-            return false
-        }
-        
-        if (!GlobalOptions.getAutoReconnect()) {
-            isReconnecting = false
-            return false
-        }
-        
-        if (reconnectAttempts >= GlobalOptions.getMaxReconnectAttempts()) {
-            isReconnecting = false
-            return false
-        }
-        
-        // Only reconnect if we're in idle state and have auth params
-        if (connectionState != ConnectionState.Idle || authParams == null) {
-            isReconnecting = false
-            return true // Return true to indicate we're still trying to reconnect
-        }
-        
-        // Attempt reconnection
-        reconnectAttempts++
-        isReconnecting = true
-        
-        // Publish reconnecting event
-        eventBus.publish(SLReconnectingEvent(reconnectAttempts))
-        
-        // Start connecting with "last" location
-        startConnecting(delay = true, location = "last")
-        
-        return true
-    }
-
-    /**
-     * Get autoresponse text if enabled
-     */
-    fun getAutoresponse(): String? {
-        return if (autoresponseEnabled) autoresponseText else null
-    }
-
-    /**
-     * Reconnect or drop connection based on state
-     */
-    private fun reconnectOrDrop(isLogin: Boolean, fromLogout: Boolean, message: String) {
-        if (!reconnect()) {
-            activeAgentUUID?.let {
-                GridConnectionManager.removeConnection(it, this)
-            }
-            if (isLogin) {
-                eventBus.publish(SLLoginResultEvent(false, message, activeAgentUUID))
-            } else {
-                eventBus.publish(SLDisconnectEvent(fromLogout, message))
-            }
-        }
-    }
-
-    /**
-     * Set autoresponse information
-     */
     fun setAutoresponseInfo(enabled: Boolean, text: String) {
         autoresponseEnabled = enabled
         autoresponseText = text
     }
 
-    /**
-     * Update connection state and notify listeners
-     */
-    private fun setConnectionState(newState: ConnectionState) {
-        if (connectionState != newState) {
-            connectionState = newState
-            eventBus.publish(SLConnectionStateChangedEvent(newState))
-        }
-    }
+    fun getConnectionState(): ConnectionState = connectionState
 
-    /**
-     * Start circuit connection to simulator
-     */
-    private fun startCircuit(authReply: SLAuthReply, tempCircuit: SLTempCircuit?) {
-        Debug.Log("login reply: ip = ${authReply.simAddress}, port = ${authReply.simPort}, ccode = ${authReply.circuitCode}")
-        authReply.inventoryRoot?.let {
-            Debug.Log("inventory root: $it")
-        } ?: Debug.Log("inventory root is null")
-        
-        val caps = SLCaps()
-        caps.GetCapabilites(this.authReply!!.loginURL, this.authReply!!.seedCapability)
-        
-        try {
-            agentCircuit = SLAgentCircuit(this, SLCircuitInfo(authReply), authReply, caps, tempCircuit)
-            modules = agentCircuit?.getModules()
-            
-            try {
-                capEventQueue = SLCapEventQueue(caps.getCapabilityOrThrow(SLCapability.EventQueueGet), agentCircuit!!)
-            } catch (e: NoSuchCapabilityException) {
-                e.printStackTrace()
-            }
-            
-            parcelInfo.reset(userManager)
-            TextureCache.getInstance().setFetcher(modules?.textureFetcher)
-            AddCircuit(agentCircuit!!)
-            agentCircuit?.SendUseCode()
-            firstConnect = false
-        } catch (e: IOException) {
-            setConnectionState(ConnectionState.Idle)
-            reconnectOrDrop(isLogin = true, fromLogout = false, message = "Failed to connect to the simulator.")
-        }
-    }
+    fun isReconnecting(): Boolean = isReconnecting
 
-    /**
-     * Start connecting with optional delay
-     */
-    private fun startConnecting(delay: Boolean, location: String) {
-        loginThread = Thread {
-            if (delay) {
-                try {
-                    Thread.sleep(3000)
-                } catch (e: InterruptedException) {
-                    e.printStackTrace()
-                }
-            }
-            authParams?.let { doConnect(it, location) }
-            loginThread = null
-        }
-        setConnectionState(ConnectionState.Connecting)
-        loginThread?.start()
-    }
+    fun getActiveAgentUUID(): UUID? = activeAgentUUID
 
-    /**
-     * Cancel connection attempt
-     */
+    fun getReconnectAttempt(): Int = reconnectAttempts
+
+    fun isFirstConnect(): Boolean = firstConnect
+
     @Synchronized
-    fun CancelConnect() {
+    @Throws(NotConnectedException::class)
+    fun getAgentCircuit(): SLAgentCircuit = agentCircuit ?: throw NotConnectedException()
+
+    @Synchronized
+    @Throws(NotConnectedException::class)
+    fun getModules(): SLModules = modules ?: throw NotConnectedException()
+
+    @Synchronized
+    fun connect(params: SLAuthParams) {
+        if (connectionState != ConnectionState.Idle) return
+
+        authParams = params
+        userWantsConnected = true
+        reconnectAttempts = 0
+        isReconnecting = false
+        hadConnected = false
+        firstConnect = true
+        startConnecting(delay = false, location = params.startLocation)
+    }
+
+    @Synchronized
+    fun cancelConnect() {
         userWantsConnected = false
         isReconnecting = false
         hadConnected = false
         closeConnectionObjects()
     }
 
-    /**
-     * Connect to grid with authentication parameters
-     */
     @Synchronized
-    fun Connect(authParams: SLAuthParams) {
-        if (connectionState == ConnectionState.Idle) {
-            this.authParams = authParams
-            userWantsConnected = true
-            reconnectAttempts = 0
-            isReconnecting = false
-            hadConnected = false
-            firstConnect = true
-            startConnecting(delay = false, location = authParams.startLocation)
-        }
-    }
-
-    /**
-     * Disconnect from grid
-     */
-    @Synchronized
-    fun Disconnect() {
+    fun disconnect() {
         userWantsConnected = false
         isReconnecting = false
         hadConnected = false
-        agentCircuit?.SendLogoutRequest() ?: processDisconnect(fromLogout = true, message = "Logged out")
+        agentCircuit?.SendLogoutRequest() ?: processDisconnect(true, "Logged out")
     }
 
-    /**
-     * Handle teleport completion
-     */
-    @Synchronized
-    fun HandleTeleportFinish(authReply: SLAuthReply) {
-        agentCircuit?.let {
-            it.CloseCircuit()
-            agentCircuit = null
-        }
-        capEventQueue?.let {
-            it.stopQueue()
-            capEventQueue = null
-        }
-        this.authReply = authReply
-        startCircuit(authReply, tempCircuits.remove(authReply))
-    }
-
-    /**
-     * Add temporary circuit for region crossing
-     */
-    @Synchronized
-    fun addTempCircuit(authReply: SLAuthReply) {
-        if (!tempCircuits.containsKey(authReply)) {
-            try {
-                val tempCircuit = SLTempCircuit(this, SLCircuitInfo(authReply), authReply)
-                tempCircuits[authReply] = tempCircuit
-                AddCircuit(tempCircuit)
-                tempCircuit.SendUseCode()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    /**
-     * Close all connection objects
-     */
-    @Synchronized
-    fun closeConnectionObjects() {
-        loginThread?.interrupt()
-        loginThread = null
-        modules = null
-        
-        agentCircuit?.let {
-            it.CloseCircuit()
-            agentCircuit = null
-        }
-        
-        capEventQueue?.let {
-            it.stopQueue()
-            capEventQueue = null
-        }
-        
-        TextureCache.getInstance().setFetcher(null)
-        
-        tempCircuits.values.forEach { it.CloseCircuit() }
-        tempCircuits.clear()
-        
-        setConnectionState(ConnectionState.Idle)
-    }
-
-    /**
-     * Force disconnect from grid
-     */
     @Synchronized
     fun forceDisconnect(fromLogoutRequest: Boolean) {
         if (fromLogoutRequest) {
@@ -340,8 +121,8 @@ class SLGridConnection : SLConnection() {
             isReconnecting = false
             hadConnected = false
         }
+
         Debug.Log("GridConnection: forceDisconnect() called, fromLogoutRequest = $fromLogoutRequest")
-        
         when (connectionState) {
             ConnectionState.Connected -> {
                 closeConnectionObjects()
@@ -351,76 +132,36 @@ class SLGridConnection : SLConnection() {
                 closeConnectionObjects()
                 reconnectOrDrop(isLogin = true, fromLogout = fromLogoutRequest, message = "Network connection lost.")
             }
-            ConnectionState.Idle -> {
-                // Already idle, nothing to do
-            }
+            else -> Unit
         }
     }
 
-    // Public accessors
+    @Synchronized
+    fun handleTeleportFinish(reply: SLAuthReply) {
+        agentCircuit?.CloseCircuit()
+        agentCircuit = null
+        capEventQueue?.stopQueue()
+        capEventQueue = null
 
-    fun getActiveAgentUUID(): UUID? = activeAgentUUID
-
-    @Throws(NotConnectedException::class)
-    fun getAgentCircuit(): SLAgentCircuit {
-        return agentCircuit ?: throw NotConnectedException()
+        authReply = reply
+        val tempCircuit = tempCircuits.remove(reply)
+        startCircuit(reply, tempCircuit)
     }
 
     @Synchronized
-    fun getConnectionState(): ConnectionState = connectionState
+    fun addTempCircuit(reply: SLAuthReply) {
+        if (tempCircuits.containsKey(reply)) return
 
-    fun getIsReconnecting(): Boolean = isReconnecting
-
-    @Synchronized
-    @Throws(NotConnectedException::class)
-    fun getModules(): SLModules {
-        return modules ?: throw NotConnectedException()
-    }
-
-    fun getReconnectAttempt(): Int = reconnectAttempts
-
-    fun isFirstConnect(): Boolean = firstConnect
-
-    /**
-     * Notify that login failed
-     */
-    @Synchronized
-    fun notifyLoginError(message: String) {
-        closeConnectionObjects()
-        reconnectOrDrop(isLogin = true, fromLogout = false, message = message)
-    }
-
-    /**
-     * Notify that login succeeded
-     */
-    @Synchronized
-    fun notifyLoginSuccess() {
-        hadConnected = true
-        reconnectAttempts = 0
-        isReconnecting = false
-        setConnectionState(ConnectionState.Connected)
-        
-        activeAgentUUID?.let {
-            GridConnectionManager.setConnection(it, this)
-        }
-        
-        eventBus.publish(SLLoginResultEvent(true, null, activeAgentUUID))
-    }
-
-    /**
-     * Process disconnect event
-     */
-    @Synchronized
-    fun processDisconnect(fromLogout: Boolean, message: String) {
-        if (connectionState != ConnectionState.Idle) {
-            closeConnectionObjects()
-            reconnectOrDrop(isLogin = false, fromLogout = fromLogout, message = message)
+        try {
+            val tempCircuit = SLTempCircuit(this, SLCircuitInfo(reply), reply)
+            tempCircuits[reply] = tempCircuit
+            AddCircuit(tempCircuit)
+            tempCircuit.SendUseCode()
+        } catch (ioe: IOException) {
+            Debug.Warning(ioe)
         }
     }
 
-    /**
-     * Remove temporary circuit
-     */
     @Synchronized
     fun removeTempCircuit(tempCircuit: SLTempCircuit) {
         val iterator = tempCircuits.entries.iterator()
@@ -431,4 +172,185 @@ class SLGridConnection : SLConnection() {
         }
         tempCircuit.CloseCircuit()
     }
+
+    @Synchronized
+    fun closeConnectionObjects() {
+        loginThread?.interrupt()
+        loginThread = null
+
+        modules = null
+        agentCircuit?.CloseCircuit()
+        agentCircuit = null
+
+        capEventQueue?.stopQueue()
+        capEventQueue = null
+
+        TextureCache.getInstance().setFetcher(null)
+        tempCircuits.values.toList().forEach { it.CloseCircuit() }
+        tempCircuits.clear()
+
+        SessionManager.clear()
+        setConnectionState(ConnectionState.Idle)
+    }
+
+    @Synchronized
+    fun notifyLoginError(message: String) {
+        closeConnectionObjects()
+        reconnectOrDrop(isLogin = true, fromLogout = false, message = message)
+    }
+
+    @Synchronized
+    fun notifyLoginSuccess() {
+        hadConnected = true
+        reconnectAttempts = 0
+        isReconnecting = false
+        setConnectionState(ConnectionState.Connected)
+
+        activeAgentUUID?.let { GridConnectionManager.setConnection(it, this) }
+        eventBus.publish(SLLoginResultEvent(true, null, activeAgentUUID))
+    }
+
+    @Synchronized
+    fun processDisconnect(fromLogout: Boolean, message: String) {
+        if (connectionState == ConnectionState.Idle) return
+        closeConnectionObjects()
+        reconnectOrDrop(isLogin = false, fromLogout = fromLogout, message = message)
+    }
+
+    // ---------------------------------------------------------------------
+    // Internal helpers
+
+    private fun doConnect(params: SLAuthParams, location: String) {
+        try {
+            val reply = SLAuth().Login(params.withLocation(location))
+            if (reply.success) {
+                synchronized(this) {
+                    if (connectionState == ConnectionState.Idle) return
+
+                    authReply = reply
+                    activeAgentUUID = reply.agentID
+                    userManager = UserManager.getUserManager(activeAgentUUID)
+                    userManager?.getChatterList()?.getFriendManager()?.updateFriendList(reply.friends)
+                    parcelInfo.reset(userManager)
+                    startCircuit(reply, null)
+                }
+            } else {
+                setConnectionState(ConnectionState.Idle)
+                reconnectOrDrop(isLogin = true, fromLogout = false, message = reply.message ?: "Login failed")
+            }
+        } catch (ex: Exception) {
+            Debug.Warning(ex)
+            setConnectionState(ConnectionState.Idle)
+            reconnectOrDrop(isLogin = true, fromLogout = false, message = "Failed to connect to login server.")
+        }
+    }
+
+    private fun startCircuit(reply: SLAuthReply, tempCircuit: SLTempCircuit?) {
+        Debug.Log("login reply: ip = ${reply.simAddress}, port = ${reply.simPort}, ccode = ${reply.circuitCode}")
+        reply.inventoryRoot?.let { Debug.Log("inventory root: $it") } ?: Debug.Log("inventory root is null")
+
+        val caps = SLCaps()
+        caps.GetCapabilites(reply.loginURL, reply.seedCapability)
+
+        try {
+            val circuit = SLAgentCircuit(this, SLCircuitInfo(reply), reply, caps, tempCircuit)
+            agentCircuit = circuit
+            modules = circuit.getModules()
+
+            try {
+                capEventQueue = SLCapEventQueue(caps.getCapabilityOrThrow(SLCapability.EventQueueGet), circuit)
+            } catch (ex: NoSuchCapabilityException) {
+                Debug.Warning(ex)
+            }
+
+            parcelInfo.reset(userManager)
+            TextureCache.getInstance().setFetcher(modules?.textureFetcher)
+            AddCircuit(circuit)
+            circuit.SendUseCode()
+            firstConnect = false
+        } catch (ioe: IOException) {
+            Debug.Warning(ioe)
+            setConnectionState(ConnectionState.Idle)
+            reconnectOrDrop(isLogin = true, fromLogout = false, message = "Failed to connect to the simulator.")
+        }
+    }
+
+    private fun startConnecting(delay: Boolean, location: String) {
+        loginThread = Thread {
+            if (delay) {
+                try {
+                    Thread.sleep(3_000)
+                } catch (_: InterruptedException) {
+                    Thread.currentThread().interrupt()
+                    return@Thread
+                }
+            }
+            authParams?.let { doConnect(it, location) }
+            loginThread = null
+        }.also {
+            setConnectionState(ConnectionState.Connecting)
+            it.start()
+        }
+    }
+
+    @Synchronized
+    private fun reconnect(): Boolean {
+        if (!userWantsConnected || !hadConnected) {
+            isReconnecting = false
+            return false
+        }
+
+        if (!GlobalOptions.getAutoReconnect()) {
+            isReconnecting = false
+            return false
+        }
+
+        if (reconnectAttempts >= GlobalOptions.getMaxReconnectAttempts()) {
+            isReconnecting = false
+            return false
+        }
+
+        if (connectionState != ConnectionState.Idle || authParams == null) {
+            isReconnecting = false
+            return true
+        }
+
+        reconnectAttempts++
+        isReconnecting = true
+        eventBus.publish(SLReconnectingEvent(reconnectAttempts))
+        startConnecting(delay = true, location = "last")
+        return true
+    }
+
+    private fun reconnectOrDrop(isLogin: Boolean, fromLogout: Boolean, message: String) {
+        if (reconnect()) return
+
+        activeAgentUUID?.let { GridConnectionManager.removeConnection(it, this) }
+        if (isLogin) {
+            eventBus.publish(SLLoginResultEvent(false, message, activeAgentUUID))
+        } else {
+            eventBus.publish(SLDisconnectEvent(fromLogout, message))
+        }
+    }
+
+    private fun setConnectionState(state: ConnectionState) {
+        if (connectionState == state) return
+        connectionState = state
+        eventBus.publish(SLConnectionStateChangedEvent(state))
+    }
+
+    // ---------------------------------------------------------------------
+    // Legacy aliases retained for decompiled call sites.
+
+    fun Connect(params: SLAuthParams) = connect(params)
+    fun CancelConnect() = cancelConnect()
+    fun Disconnect() = disconnect()
+    fun ForceDisconnect(fromLogoutRequest: Boolean) = forceDisconnect(fromLogoutRequest)
+    fun HandleTeleportFinish(reply: SLAuthReply) = handleTeleportFinish(reply)
+    fun AddTempCircuit(reply: SLAuthReply) = addTempCircuit(reply)
+    fun CloseConnectionObjects() = closeConnectionObjects()
+    fun NotifyLoginError(message: String) = notifyLoginError(message)
+    fun NotifyLoginSuccess() = notifyLoginSuccess()
+    fun ProcessDisconnect(fromLogout: Boolean, message: String) = processDisconnect(fromLogout, message)
+    fun Reconnect(): Boolean = reconnect()
 }

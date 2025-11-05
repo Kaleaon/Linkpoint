@@ -1,38 +1,39 @@
 package com.lumiyaviewer.lumiya.slproto
 
-import java.util.Map
 import java.util.UUID
 import java.util.WeakHashMap
-import androidx.annotation.NonNull
-import androidx.annotation.Nullable
 
+/**
+ * Tracks active grid connections by agent UUID using weak references.
+ */
 object GridConnectionManager {
-    private Map<UUID, SLGridConnection> connections = WeakHashMap()
-    private Object lock = Object()
 
-    @Nullable
-    fun getConnection(uuid: UUID): SLGridConnection {
-        if (uuid == null) {
-            return null
+    private val connections = WeakHashMap<UUID, SLGridConnection>()
+    private val lock = Any()
+
+    @JvmStatic
+    fun getConnection(uuid: UUID?): SLGridConnection? {
+        if (uuid == null) return null
+        synchronized(lock) {
+            return connections[uuid]
         }
-        SLGridConnection sLGridConnection
-        synchronized (lock) {
-            sLGridConnection = (SLGridConnection) connections.get(uuid)
-        }
-        return sLGridConnection
     }
 
-    fun removeConnection(uuid: UUID, sLGridConnection: SLGridConnection): Unit {
-        synchronized (lock) {
-            if (((SLGridConnection) connections.get(uuid)) == sLGridConnection) {
+    @JvmStatic
+    fun setConnection(uuid: UUID, connection: SLGridConnection) {
+        synchronized(lock) {
+            connections[uuid] = connection
+        }
+    }
+
+    @JvmStatic
+    fun removeConnection(uuid: UUID?, connection: SLGridConnection?) {
+        if (uuid == null || connection == null) return
+        synchronized(lock) {
+            val current = connections[uuid]
+            if (current == connection) {
                 connections.remove(uuid)
             }
-        }
-    }
-
-    fun setConnection(uuid: UUID, sLGridConnection: SLGridConnection): Unit {
-        synchronized (lock) {
-            connections.put(uuid, sLGridConnection)
         }
     }
 }
