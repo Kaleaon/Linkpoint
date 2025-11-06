@@ -625,16 +625,16 @@ class OpenGLWorldRenderer(
     private fun createModelMatrix(position: LLVector3, rotation: LLVector3, scale: LLVector3, matrix: FloatArray) {
         Matrix.setIdentityM(matrix, 0)
         
-        // Apply scale
-        Matrix.scaleM(matrix, 0, scale.x, scale.y, scale.z)
+        // Apply translation
+        Matrix.translateM(matrix, 0, position.x, position.y, position.z)
         
         // Apply rotation (X, Y, Z order)
         Matrix.rotateM(matrix, 0, rotation.x, 1f, 0f, 0f)
         Matrix.rotateM(matrix, 0, rotation.y, 0f, 1f, 0f)
         Matrix.rotateM(matrix, 0, rotation.z, 0f, 0f, 1f)
         
-        // Apply translation
-        Matrix.translateM(matrix, 0, position.x, position.y, position.z)
+        // Apply scale
+        Matrix.scaleM(matrix, 0, scale.x, scale.y, scale.z)
     }
 
     private fun calculateNormalMatrix(modelMatrix: FloatArray, normalMatrix: FloatArray) {

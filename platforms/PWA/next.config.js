@@ -24,7 +24,6 @@ const nextConfig = {
   // Optimize images
   images: {
     domains: ['localhost'],
-    unoptimized: true,
   },
   
   // Webpack configuration for Three.js

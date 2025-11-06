@@ -1,4 +1,24 @@
+package com.lumiyaviewer.lumiya.repository
 
+import com.lumiyaviewer.lumiya.database.dao.FriendDao
+import com.lumiyaviewer.lumiya.database.entities.FriendEntity
+import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/**
+ * Repository for user and friend-related data operations.
+ * 
+ * Provides a clean API for accessing friend data with a focus
+ * on friend management operations.
+ * 
+ * This follows the Repository pattern from Android Architecture Components.
+ */
+@Singleton
+class UserRepository @Inject constructor(
+    private val friendDao: FriendDao
+) {
+    
     // ========== FRIENDS ==========
     
     /**
@@ -43,3 +63,4 @@
         return friendDao.getByUUID(uuid)
     }
 
+}

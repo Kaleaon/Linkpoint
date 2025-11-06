@@ -44,8 +44,8 @@ class OpenGLWorldView(context: Context) : GLSurfaceView(context) {
         
         // Configure OpenGL settings
         setPreserveEGLContextOnPause(true)
-        setRenderer(renderer = OpenGLWorldRenderer(context).also { 
-            renderer = it 
+        setRenderer(OpenGLWorldRenderer(context).also { 
+            this.renderer = it 
         })
         
         // Set render mode
