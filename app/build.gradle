@@ -37,7 +37,9 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            // Temporarily disable minification to fix CI build issue with base.jar
+            // Re-enable after fixing Java resources merging issue
+            minifyEnabled false
             // Disable resource shrinking to reduce AAPT2 dependency
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
