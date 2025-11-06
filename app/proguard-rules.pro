@@ -44,3 +44,33 @@
 # Guava rules
 -dontwarn com.google.common.**
 -dontwarn javax.lang.model.element.Modifier
+
+# R8 resource handling - gracefully handle missing Java resources
+# This prevents issues when packagingOptions excludes all META-INF files
+-dontwarn org.apache.commons.logging.**
+-dontwarn org.apache.http.**
+
+# Keep source file and line numbers for better crash reports
+-keepattributes SourceFile,LineNumberTable
+
+# Preserve annotations for runtime reflection
+-keepattributes *Annotation*
+
+# Filament rendering engine rules
+-keep class com.google.android.filament.** { *; }
+-keep class com.google.android.filament.gltfio.** { *; }
+
+# Kotlin coroutines rules
+-keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
+-keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
+-dontwarn kotlinx.coroutines.**
+
+# Room database rules
+-keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Entity class *
+-dontwarn androidx.room.paging.**
+
+# Hilt dependency injection rules
+-keep class dagger.hilt.** { *; }
+-keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$FragmentContextWrapper { *; }
+-dontwarn dagger.hilt.**

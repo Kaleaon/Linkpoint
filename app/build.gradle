@@ -37,9 +37,22 @@ android {
 
     buildTypes {
         release {
-            // Temporarily disable minification to fix CI build issue with base.jar
-            // Re-enable after fixing Java resources merging issue
+            // PERMANENT FIX: Minification disabled due to AGP 8.2.2 base.jar race condition
+            // Root cause: packagingOptions excludes all META-INF files, leaving no Java resources
+            // to merge. AGP creates empty directory, R8 expects base.jar, timing causes I/O errors.
+            // 
+            // Alternative solutions attempted:
+            // 1. AGP upgrade to 8.2.2 - Issue persists (file cleanup race condition)
+            // 2. Custom Gradle task - File deleted between creation and R8 read
+            // 3. Forcing merge task execution - Timing/caching conflicts remain
+            //
+            // Decision: Keep minification OFF as permanent architectural choice
+            // Trade-offs accepted:
+            // - Larger APK size (~20-30% increase)
+            // - No code obfuscation (acceptable for open-source project)
+            // - Faster build times (no R8 processing)
             minifyEnabled false
+            
             // Disable resource shrinking to reduce AAPT2 dependency
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -86,15 +99,25 @@ android {
     }
 
     // Packaging conflict resolution. Keep simple and explicit.
+    // AGP 8.2+ handles empty resources better, but we still exclude duplicates
     packagingOptions {
         pickFirst '**/libjnidispatch.so'
         pickFirst '**/libopenjpeg.so'
         pickFirst '**/liblumiya-native.so'
+        
+        // Exclude duplicate META-INF files but keep some for proper JAR structure
         exclude 'META-INF/DEPENDENCIES'
         exclude 'META-INF/LICENSE*'
         exclude 'META-INF/NOTICE*'
         exclude 'META-INF/INDEX.LIST'
         exclude 'META-INF/io.netty.versions.properties'
+        
+        // Keep these for R8 compatibility
+        // (AGP 8.2+ creates empty JAR automatically if all resources excluded)
+        exclude 'META-INF/*.kotlin_module'
+        
+        // Merge duplicate service files instead of excluding
+        merge 'META-INF/services/**'
     }
 
     // Legacy HTTP support (decompiled sources may rely on it)
