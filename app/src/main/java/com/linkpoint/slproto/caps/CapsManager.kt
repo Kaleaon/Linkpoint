@@ -58,6 +58,11 @@ class CapsManager(private val seedCapability: String) {
         const val CAP_UPDATE_SCRIPT_AGENT = "UpdateScriptAgent"
         const val CAP_UPDATE_SCRIPT_TASK = "UpdateScriptTask"
         const val CAP_UPLOAD_ASSET = "NewFileAgentInventory"
+           const val CAP_CREATE_INVENTORY_FOLDER = "CreateInventoryFolder"
+           const val CAP_UPDATE_INVENTORY_FOLDER = "UpdateInventoryFolder"
+           const val CAP_MOVE_INVENTORY_ITEM = "MoveInventoryItem"
+           const val CAP_COPY_INVENTORY_ITEM = "CopyInventoryItem"
+           const val CAP_DELETE_INVENTORY_ITEM = "DeleteInventoryItem"
         const val CAP_VIEW_ADMIN_OPTIONS = "ViewerStartAuction"
         const val CAP_VIEW_STATS = "ViewerStats"
     }
@@ -71,19 +76,23 @@ class CapsManager(private val seedCapability: String) {
                 // Request capabilities from seed
                 val capsToRequest =
                     listOf(
-                        CAP_EVENT_QUEUE,
-                        CAP_UPLOAD_BAKED_TEXTURE,
-                        CAP_FETCH_INVENTORY,
-                        CAP_FETCH_LIB,
-                        CAP_FETCH_INVENTORY_DESCENDENTS,
-                        CAP_GET_TEXTURE,
-                        CAP_GET_MESH,
-                        CAP_GET_MESH2,
-                        CAP_OBJECT_MEDIA,
-                        CAP_PARCEL_PROPERTIES,
-                        CAP_PROVISION_VOICE,
-                        CAP_UPDATE_AGENT_INFO,
-                        CAP_UPLOAD_ASSET,
+                        CAP_EVENT_QUEUE
+                        CAP_UPLOAD_BAKED_TEXTURE
+                        CAP_FETCH_INVENTORY
+                        CAP_FETCH_LIB
+                        CAP_FETCH_INVENTORY_DESCENDENTS
+                        CAP_GET_TEXTURE
+                        CAP_GET_MESH
+                        CAP_GET_MESH2
+                        CAP_OBJECT_MEDIA
+                        CAP_PARCEL_PROPERTIES
+                        CAP_PROVISION_VOICE
+                        CAP_UPDATE_AGENT_INFO
+                        CAP_UPLOAD_ASSET
+                           CAP_CREATE_INVENTORY_FOLDER
+                           CAP_UPDATE_INVENTORY_FOLDER
+                           CAP_MOVE_INVENTORY_ITEM
+                           CAP_DELETE_INVENTORY_ITEM
                     )
 
                 val requestMap = LLSDMap()
@@ -129,8 +138,8 @@ class CapsManager(private val seedCapability: String) {
      * POST LLSD data to a capability
      */
     suspend fun postLLSD(
-        url: String,
-        data: LLSD,
+        url: String
+        data: LLSD
     ): LLSD =
         withContext(Dispatchers.IO) {
             val jsonString = JSONObject(data.toJson() as Map<*, *>).toString()
@@ -217,10 +226,10 @@ class CapsManager(private val seedCapability: String) {
      * Upload asset via CAPS
      */
     suspend fun uploadAsset(
-        assetType: String,
-        data: ByteArray,
-        name: String,
-        description: String,
+        assetType: String
+        data: ByteArray
+        name: String
+        description: String
     ): LLSD =
         withContext(Dispatchers.IO) {
             val uploadUrl =
@@ -249,8 +258,8 @@ class CapsManager(private val seedCapability: String) {
         }
 
     private suspend fun uploadAssetData(
-        url: String,
-        data: ByteArray,
+        url: String
+        data: ByteArray
     ): LLSD =
         withContext(Dispatchers.IO) {
             val requestBody = data.toRequestBody("application/octet-stream".toMediaType())

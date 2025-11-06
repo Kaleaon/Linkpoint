@@ -79,22 +79,22 @@ class InventoryManager(private val capsManager: CapsManager) {
      */
     private fun parseInventoryItem(data: LLSDMap): InventoryItem {
         return InventoryItem(
-            itemId = UUID.fromString((data["item_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString()),
-            parentId = UUID.fromString((data["parent_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString()),
-            name = (data["name"] as? LLSDString)?.value ?: "Unknown",
-            description = (data["desc"] as? LLSDString)?.value ?: "",
-            assetId = UUID.fromString((data["asset_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString()),
-            type = (data["type"] as? LLSDInteger)?.value ?: 0,
-            invType = (data["inv_type"] as? LLSDInteger)?.value ?: 0,
-            flags = (data["flags"] as? LLSDInteger)?.value ?: 0,
-            creatorId = UUID.fromString((data["creator_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString()),
-            ownerId = UUID.fromString((data["owner_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString()),
-            groupId = UUID.fromString((data["group_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString()),
-            groupOwned = (data["group_owned"] as? LLSDBoolean)?.value ?: false,
-            salePrice = (data["sale_price"] as? LLSDInteger)?.value ?: 0,
-            saleType = (data["sale_type"] as? LLSDInteger)?.value ?: 0,
-            permissions = parsePermissions(data["permissions"] as? LLSDMap),
-            creationDate = (data["creation_date"] as? LLSDInteger)?.value ?: 0,
+            itemId = UUID.fromString((data["item_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString())
+            parentId = UUID.fromString((data["parent_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString())
+            name = (data["name"] as? LLSDString)?.value ?: "Unknown"
+            description = (data["desc"] as? LLSDString)?.value ?: ""
+            assetId = UUID.fromString((data["asset_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString())
+            type = (data["type"] as? LLSDInteger)?.value ?: 0
+            invType = (data["inv_type"] as? LLSDInteger)?.value ?: 0
+            flags = (data["flags"] as? LLSDInteger)?.value ?: 0
+            creatorId = UUID.fromString((data["creator_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString())
+            ownerId = UUID.fromString((data["owner_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString())
+            groupId = UUID.fromString((data["group_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString())
+            groupOwned = (data["group_owned"] as? LLSDBoolean)?.value ?: false
+            salePrice = (data["sale_price"] as? LLSDInteger)?.value ?: 0
+            saleType = (data["sale_type"] as? LLSDInteger)?.value ?: 0
+            permissions = parsePermissions(data["permissions"] as? LLSDMap)
+            creationDate = (data["creation_date"] as? LLSDInteger)?.value ?: 0
         )
     }
 
@@ -103,11 +103,11 @@ class InventoryManager(private val capsManager: CapsManager) {
      */
     private fun parseInventoryFolder(data: LLSDMap): InventoryFolder {
         return InventoryFolder(
-            folderId = UUID.fromString((data["folder_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString()),
-            parentId = UUID.fromString((data["parent_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString()),
-            name = (data["name"] as? LLSDString)?.value ?: "Unknown",
-            type = (data["type"] as? LLSDInteger)?.value ?: -1,
-            preferredType = (data["preferred_type"] as? LLSDInteger)?.value ?: -1,
+            folderId = UUID.fromString((data["folder_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString())
+            parentId = UUID.fromString((data["parent_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString())
+            name = (data["name"] as? LLSDString)?.value ?: "Unknown"
+            type = (data["type"] as? LLSDInteger)?.value ?: -1
+            preferredType = (data["preferred_type"] as? LLSDInteger)?.value ?: -1
         )
     }
 
@@ -118,12 +118,12 @@ class InventoryManager(private val capsManager: CapsManager) {
         if (data == null) return InventoryPermissions()
 
         return InventoryPermissions(
-            baseMask = (data["base_mask"] as? LLSDInteger)?.value ?: 0,
-            ownerMask = (data["owner_mask"] as? LLSDInteger)?.value ?: 0,
-            groupMask = (data["group_mask"] as? LLSDInteger)?.value ?: 0,
-            everyoneMask = (data["everyone_mask"] as? LLSDInteger)?.value ?: 0,
-            nextOwnerMask = (data["next_owner_mask"] as? LLSDInteger)?.value ?: 0,
-            isOwnerGroup = (data["is_owner_group"] as? LLSDBoolean)?.value ?: false,
+            baseMask = (data["base_mask"] as? LLSDInteger)?.value ?: 0
+            ownerMask = (data["owner_mask"] as? LLSDInteger)?.value ?: 0
+            groupMask = (data["group_mask"] as? LLSDInteger)?.value ?: 0
+            everyoneMask = (data["everyone_mask"] as? LLSDInteger)?.value ?: 0
+            nextOwnerMask = (data["next_owner_mask"] as? LLSDInteger)?.value ?: 0
+            isOwnerGroup = (data["is_owner_group"] as? LLSDBoolean)?.value ?: false
         )
     }
 
@@ -133,11 +133,42 @@ class InventoryManager(private val capsManager: CapsManager) {
     suspend fun createFolder(
         parentId: UUID,
         name: String,
-        type: Int,
+        type: Int
     ): InventoryFolder? =
         withContext(Dispatchers.IO) {
-            // TODO: Implement folder creation via CAPS
-            null
+            try {
+                val createUrl = 
+                    capsManager.getCapability(CapsManager.CAP_CREATE_INVENTORY_FOLDER)
+                        ?: throw Exception("CreateInventoryFolder capability not available")
+
+                val request = LLSDMap()
+                request["parent_id"] = LLSDUUID(parentId)
+                request["name"] = LLSDString(name)
+                request["type"] = LLSDInteger(type)
+
+                val response = capsManager.postLLSD(createUrl, request)
+
+                if (response is LLSDMap) {
+                    val folderId = response["folder_id"]
+                    if (folderId is LLSDUUID) {
+                        val folder = InventoryFolder(
+                            folderId = folderId.value
+                            parentId = parentId
+                            name = name
+                            type = type
+                        )
+                        folderCache[folderId.value] = folder
+                        folder
+                    } else {
+                        throw Exception("Invalid folder_id in response")
+                    }
+                } else {
+                    throw Exception("Invalid response from CreateInventoryFolder")
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
         }
 
     /**
@@ -145,11 +176,44 @@ class InventoryManager(private val capsManager: CapsManager) {
      */
     suspend fun moveItem(
         itemId: UUID,
-        newParentId: UUID,
+        newParentId: UUID
     ): Boolean =
         withContext(Dispatchers.IO) {
-            // TODO: Implement item move via CAPS
-            false
+            try {
+                val moveUrl = 
+                    capsManager.getCapability(CapsManager.CAP_MOVE_INVENTORY_ITEM)
+                        ?: throw Exception("MoveInventoryItem capability not available")
+
+                val request = LLSDMap()
+                request["item_id"] = LLSDUUID(itemId)
+                request["new_parent_id"] = LLSDUUID(newParentId)
+
+                val response = capsManager.postLLSD(moveUrl, request)
+
+                if (response is LLSDMap) {
+                    val success = response["success"]
+                    if (success is LLSDBoolean && success.value) {
+                        // Update cached item
+                        inventoryCache[itemId]?.let { item ->
+                            val updatedItem = item.copy(parentId = newParentId)
+                            inventoryCache[itemId] = updatedItem
+                        }
+                        true
+                    } else {
+                        val error = response["error"]
+                        if (error is LLSDString) {
+                            throw Exception("Move failed: ${error.value}")
+                        } else {
+                            throw Exception("Move operation failed")
+                        }
+                    }
+                } else {
+                    throw Exception("Invalid response from MoveInventoryItem")
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                false
+            }
         }
 
     /**
@@ -157,9 +221,37 @@ class InventoryManager(private val capsManager: CapsManager) {
      */
     suspend fun deleteItem(itemId: UUID): Boolean =
         withContext(Dispatchers.IO) {
-            // TODO: Implement item deletion via CAPS
-            inventoryCache.remove(itemId)
-            true
+            try {
+                val deleteUrl = 
+                    capsManager.getCapability(CapsManager.CAP_DELETE_INVENTORY_ITEM)
+                        ?: throw Exception("DeleteInventoryItem capability not available")
+
+                val request = LLSDMap()
+                request["item_id"] = LLSDUUID(itemId)
+
+                val response = capsManager.postLLSD(deleteUrl, request)
+
+                if (response is LLSDMap) {
+                    val success = response["success"]
+                    if (success is LLSDBoolean && success.value) {
+                        // Remove from cache only after successful server deletion
+                        inventoryCache.remove(itemId)
+                        true
+                    } else {
+                        val error = response["error"]
+                        if (error is LLSDString) {
+                            throw Exception("Delete failed: ${error.value}")
+                        } else {
+                            throw Exception("Delete operation failed")
+                        }
+                    }
+                } else {
+                    throw Exception("Invalid response from DeleteInventoryItem")
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                false
+            }
         }
 
     /**
@@ -174,45 +266,45 @@ class InventoryManager(private val capsManager: CapsManager) {
  * Inventory item data class
  */
 data class InventoryItem(
-    val itemId: UUID,
-    val parentId: UUID,
-    val name: String,
-    val description: String,
-    val assetId: UUID,
-    val type: Int,
-    val invType: Int,
-    val flags: Int,
-    val creatorId: UUID,
-    val ownerId: UUID,
-    val groupId: UUID,
-    val groupOwned: Boolean,
-    val salePrice: Int,
-    val saleType: Int,
-    val permissions: InventoryPermissions,
-    val creationDate: Int,
+    val itemId: UUID
+    val parentId: UUID
+    val name: String
+    val description: String
+    val assetId: UUID
+    val type: Int
+    val invType: Int
+    val flags: Int
+    val creatorId: UUID
+    val ownerId: UUID
+    val groupId: UUID
+    val groupOwned: Boolean
+    val salePrice: Int
+    val saleType: Int
+    val permissions: InventoryPermissions
+    val creationDate: Int
 )
 
 /**
  * Inventory folder data class
  */
 data class InventoryFolder(
-    val folderId: UUID,
-    val parentId: UUID,
-    val name: String,
-    val type: Int,
-    val preferredType: Int,
+    val folderId: UUID
+    val parentId: UUID
+    val name: String
+    val type: Int
+    val preferredType: Int
 )
 
 /**
  * Inventory permissions
  */
 data class InventoryPermissions(
-    val baseMask: Int = 0,
-    val ownerMask: Int = 0,
-    val groupMask: Int = 0,
-    val everyoneMask: Int = 0,
-    val nextOwnerMask: Int = 0,
-    val isOwnerGroup: Boolean = false,
+    val baseMask: Int = 0
+    val ownerMask: Int = 0
+    val groupMask: Int = 0
+    val everyoneMask: Int = 0
+    val nextOwnerMask: Int = 0
+    val isOwnerGroup: Boolean = false
 ) {
     companion object {
         const val PERM_TRANSFER = 0x00002000

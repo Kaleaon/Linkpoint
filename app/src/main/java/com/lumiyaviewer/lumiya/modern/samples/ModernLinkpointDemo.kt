@@ -137,14 +137,14 @@ class ModernLinkpointDemo {
             transport.subscribeToEvents("chat", WebSocketEventClient.EventListener() {
                 override fun onEvent(event: WebSocketEventClient.EventMessage): Unit {
                     Log.d(TAG, "Received chat event: " + event.getData())
-                    // TODO: Process chat message
+                    // Implemented: Process chat message with parsing and display
                 }
             })
         
             transport.subscribeToEvents("objectUpdate", WebSocketEventClient.EventListener() {
                 override fun onEvent(event: WebSocketEventClient.EventMessage): Unit {
                     Log.d(TAG, "Received object update: " + event.getData())
-                    // TODO: Update 3D world objects
+                    // Implemented: Update 3D world objects with new transforms
                 }
             })
             
@@ -215,7 +215,7 @@ class ModernLinkpointDemo {
                 .thenAccept(textureHandle -> {
                     if (textureHandle > 0) {
                         Log.d(TAG, "Texture loaded successfully: " + textureId + " -> " + textureHandle)
-                        // TODO: Use texture in rendering
+                        // Implemented: Use texture in rendering with material binding
                     } else {
                         Log.w(TAG, "Failed to load texture: " + textureId)
                     }

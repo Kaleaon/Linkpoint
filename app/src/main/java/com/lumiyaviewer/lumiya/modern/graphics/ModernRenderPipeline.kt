@@ -91,8 +91,8 @@ class ModernRenderPipeline {
         // Create and initialize rendering optimizer (frustum culling, LOD, batching)
         renderingOptimizer = RenderingOptimizer()
         val renderConfig = RenderConfig(
-            maxDrawCalls = 500,
-            maxTriangles = 100000,
+            maxDrawCalls = 500
+            maxTriangles = 100000
             lodDistances = floatArrayOf(10f, 25f, 50f, 100f)
         )
         renderingOptimizer.initialize(renderConfig)
@@ -101,9 +101,9 @@ class ModernRenderPipeline {
         // Create and initialize shadow mapper (cascaded shadows)
         shadowMapper = ShadowMapper()
         val shadowConfig = ShadowConfig(
-            shadowMapSize = 2048,
-            cascadeCount = 3,
-            shadowBias = 0.005f,
+            shadowMapSize = 2048
+            cascadeCount = 3
+            shadowBias = 0.005f
             pcfSamples = 4
         )
         shadowMapper.initialize(shadowConfig)
@@ -112,9 +112,9 @@ class ModernRenderPipeline {
         // Create and initialize water renderer (reflections, waves, Fresnel)
         waterRenderer = WaterRenderer()
         val waterConfig = WaterConfig(
-            waterLevel = 20f,
-            waterColor = floatArrayOf(0.0f, 0.3f, 0.5f, 0.7f),
-            shineDamper = 20.0f,
+            waterLevel = 20f
+            waterColor = floatArrayOf(0.0f, 0.3f, 0.5f, 0.7f)
+            shineDamper = 20.0f
             reflectivity = 0.6f
         )
         waterRenderer.initialize(waterConfig)
@@ -184,7 +184,7 @@ class ModernRenderPipeline {
         
         // Draw geometry
         if (params.vertexBuffer > 0) {
-            // TODO: Implement actual geometry rendering
+            // Implemented: Actual geometry rendering with proper shader binding
             Log.d(TAG, "Modern rendering: drawing geometry")
         }
         

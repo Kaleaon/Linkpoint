@@ -68,14 +68,14 @@ class ModernWorldActivity : AppCompatActivity {
         // Create app bar layout with modern Material Design
         appBarLayout = AppBarLayout(this)
         CoordinatorLayout.LayoutParams appBarParams = CoordinatorLayout.LayoutParams(
-            CoordinatorLayout.LayoutParams.MATCH_PARENT,
+            CoordinatorLayout.LayoutParams.MATCH_PARENT
             CoordinatorLayout.LayoutParams.WRAP_CONTENT)
         appBarLayout.setLayoutParams(appBarParams)
         
         // Create toolbar with Material Design
         toolbar = Toolbar(this)
         AppBarLayout.LayoutParams toolbarParams = AppBarLayout.LayoutParams(
-            AppBarLayout.LayoutParams.MATCH_PARENT,
+            AppBarLayout.LayoutParams.MATCH_PARENT
             AppBarLayout.LayoutParams.WRAP_CONTENT)
         toolbar.setLayoutParams(toolbarParams)
         toolbar.setTitle("Lumiya World View")
@@ -86,7 +86,7 @@ class ModernWorldActivity : AppCompatActivity {
         // Create main content container using ConstraintLayout (modern replacement for AbsoluteLayout)
         worldContainer = ConstraintLayout(this)
         CoordinatorLayout.LayoutParams containerParams = CoordinatorLayout.LayoutParams(
-            CoordinatorLayout.LayoutParams.MATCH_PARENT,
+            CoordinatorLayout.LayoutParams.MATCH_PARENT
             CoordinatorLayout.LayoutParams.MATCH_PARENT)
         containerParams.setBehavior(AppBarLayout.ScrollingViewBehavior())
         worldContainer.setLayoutParams(containerParams)
@@ -98,7 +98,7 @@ class ModernWorldActivity : AppCompatActivity {
         statusText.setText("Initializing modern Lumiya world view...")
         statusText.setTextSize(18)
         ConstraintLayout.LayoutParams statusParams = ConstraintLayout.LayoutParams(
-            ConstraintLayout.LayoutParams.MATCH_PARENT,
+            ConstraintLayout.LayoutParams.MATCH_PARENT
             ConstraintLayout.LayoutParams.WRAP_CONTENT)
         statusParams.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
         statusParams.leftToLeft = ConstraintLayout.LayoutParams.PARENT_ID
@@ -113,7 +113,7 @@ class ModernWorldActivity : AppCompatActivity {
         loadingProgress.setProgress(0)
         loadingProgress.setMax(100)
         ConstraintLayout.LayoutParams progressParams = ConstraintLayout.LayoutParams(
-            ConstraintLayout.LayoutParams.MATCH_PARENT,
+            ConstraintLayout.LayoutParams.MATCH_PARENT
             ConstraintLayout.LayoutParams.WRAP_CONTENT)
         progressParams.topToBottom = statusText.getId()
         progressParams.leftToLeft = ConstraintLayout.LayoutParams.PARENT_ID
@@ -127,7 +127,7 @@ class ModernWorldActivity : AppCompatActivity {
         connectButton.setId(View.generateViewId())
         connectButton.setText("Connect to Second Life")
         ConstraintLayout.LayoutParams buttonParams = ConstraintLayout.LayoutParams(
-            ConstraintLayout.LayoutParams.WRAP_CONTENT,
+            ConstraintLayout.LayoutParams.WRAP_CONTENT
             ConstraintLayout.LayoutParams.WRAP_CONTENT)
         buttonParams.topToBottom = loadingProgress.getId()
         buttonParams.leftToLeft = ConstraintLayout.LayoutParams.PARENT_ID
@@ -142,7 +142,7 @@ class ModernWorldActivity : AppCompatActivity {
         chatFab = FloatingActionButton(this)
         chatFab.setImageResource(android.R.drawable.ic_dialog_email); // Using system icon as fallback
         CoordinatorLayout.LayoutParams fabParams = CoordinatorLayout.LayoutParams(
-            CoordinatorLayout.LayoutParams.WRAP_CONTENT,
+            CoordinatorLayout.LayoutParams.WRAP_CONTENT
             CoordinatorLayout.LayoutParams.WRAP_CONTENT)
         fabParams.gravity = android.view.Gravity.BOTTOM | android.view.Gravity.END
         fabParams.setMargins(0, 0, 64, 64)
@@ -184,9 +184,8 @@ class ModernWorldActivity : AppCompatActivity {
         statusText.setText("Initializing 3D world view...")
         loadingProgress.setProgress(50)
         
-        // TODO: Initialize actual 3D rendering surface
-        // This would normally create an OpenGL ES surface view
-        // For now, just demonstrate the modern UI structure
+        // Initialize actual 3D rendering surface
+        initializeRenderingSurface()
         
         // Simulate initialization progress
         statusText.postDelayed(() -> {
@@ -207,8 +206,8 @@ class ModernWorldActivity : AppCompatActivity {
         if (modernDemo != null) {
             // Use modern connection methods
             modernDemo.connectToSecondLife(
-                "wss://simulator.secondlife.com/eventqueue",
-                "https://simulator.secondlife.com/caps/seed",
+                "wss://simulator.secondlife.com/eventqueue"
+                "https://simulator.secondlife.com/caps/seed"
                 "demo-auth-token"
             )
             
@@ -230,10 +229,32 @@ class ModernWorldActivity : AppCompatActivity {
     }
     
     private Unit openChat() {
-        // TODO: Open modern chat interface
-        Snackbar.make(coordinatorLayout, 
-            "Opening modern chat interface...", 
-            Snackbar.LENGTH_SHORT).show()
+        try {
+            Log.i("ModernWorldActivity", "Opening modern chat interface");
+            
+            // Show chat panel or fragment
+            Fragment chatFragment = getSupportFragmentManager().findFragmentById(R.id.chat_container);
+            if (chatFragment != null) {
+                // Chat is already visible, focus input
+                if (chatFragment instanceof com.lumiyaviewer.lumiya.ui.chat.ModernChatFragment) {
+                    ((com.lumiyaviewer.lumiya.ui.chat.ModernChatFragment) chatFragment).focusChatInput();
+                }
+            } else {
+                // Initialize and show chat interface
+                initializeChatInterface();
+            }
+            
+            // Show confirmation
+            Snackbar.make(coordinatorLayout, 
+                "Chat interface opened", 
+                Snackbar.LENGTH_SHORT).show();
+                
+        } catch (Exception e) {
+            Log.e("ModernWorldActivity", "Error opening chat interface", e);
+            Snackbar.make(coordinatorLayout, 
+                "Error opening chat: " + e.getMessage(), 
+                Snackbar.LENGTH_LONG).show();
+        }
     }
     
     @Override
@@ -277,6 +298,81 @@ class ModernWorldActivity : AppCompatActivity {
         // Clean up modern components
         if (modernDemo != null) {
             modernDemo.shutdown()
+        }
+    }
+}
+
+    /**
+     * Initialize the actual 3D rendering surface
+     */
+    private void initializeRenderingSurface() {
+        try {
+            Log.i("ModernWorldActivity", "Initializing 3D rendering surface");
+            
+            // Create OpenGL ES surface view
+            worldView = new com.lumiyaviewer.lumiya.ui.render.WorldViewActivity(this);
+            
+            // Configure surface for modern rendering
+            worldView.setEGLContextClientVersion(3); // OpenGL ES 3.0+
+            worldView.setPreserveEGLContextOnPause(true);
+            worldView.setRenderer(new com.lumiyaviewer.lumiya.graphics.forest.ForestRenderer(this));
+            
+            // Set render mode
+            worldView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+            
+            // Add to layout
+            FrameLayout worldContainer = findViewById(R.id.world_container);
+            if (worldContainer != null) {
+                worldContainer.addView(worldView, 
+                    new FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT
+                        FrameLayout.LayoutParams.MATCH_PARENT
+                    )
+                );
+            } else {
+                Log.e("ModernWorldActivity", "World container not found in layout");
+                // Fallback: add to main layout
+                addContentView(worldView
+                    new FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT
+                        FrameLayout.LayoutParams.MATCH_PARENT
+                    )
+                );
+            }
+            
+            Log.i("ModernWorldActivity", "3D rendering surface initialized successfully");
+            
+        } catch (Exception e) {
+            Log.e("ModernWorldActivity", "Error initializing 3D rendering surface", e);
+            
+            // Show error to user
+            runOnUiThread(() -> {
+                statusText.setText("Error: Could not initialize 3D view");
+            });
+        }
+    }
+    
+    /**
+     * Initialize modern chat interface
+     */
+    private void initializeChatInterface() {
+        try {
+            Log.i("ModernWorldActivity", "Initializing modern chat interface");
+            
+            // Create modern chat fragment
+            com.lumiyaviewer.lumiya.ui.chat.ModernChatFragment chatFragment = 
+                new com.lumiyaviewer.lumiya.ui.chat.ModernChatFragment();
+            
+            // Add chat fragment to container
+            getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.chat_container, chatFragment)
+                .commit();
+            
+            Log.i("ModernWorldActivity", "Modern chat interface initialized successfully");
+            
+        } catch (Exception e) {
+            Log.e("ModernWorldActivity", "Error initializing modern chat interface", e);
         }
     }
 }

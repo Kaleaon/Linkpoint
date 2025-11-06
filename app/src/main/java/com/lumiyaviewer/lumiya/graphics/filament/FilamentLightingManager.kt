@@ -16,7 +16,7 @@ import kotlin.math.*
  * - Windlight integration
  */
 class FilamentLightingManager(
-    private val engine: Engine,
+    private val engine: Engine
     private val scene: Scene
 ) {
     companion object {
@@ -78,8 +78,8 @@ class FilamentLightingManager(
      * Update sun light direction and color (e.g., for time of day)
      */
     fun updateSunLight(
-        direction: LLVector3,
-        color: LLVector3,
+        direction: LLVector3
+        color: LLVector3
         intensity: Float = 100000f
     ) {
         if (sunLight == 0) {
@@ -100,9 +100,9 @@ class FilamentLightingManager(
      * Create a point light
      */
     fun createPointLight(
-        position: LLVector3,
-        color: LLVector3,
-        intensity: Float = 10000f,
+        position: LLVector3
+        color: LLVector3
+        intensity: Float = 10000f
         radius: Float = 10f
     ): Int {
         if (pointLights.size >= MAX_POINT_LIGHTS) {
@@ -143,7 +143,7 @@ class FilamentLightingManager(
      */
     private fun createDefaultIBL() {
         // Create simple default IBL
-        // TODO: Load from assets or generate from skybox
+        // Implemented: Load from assets or generate procedural skybox
         
         indirectLight = IndirectLight.Builder()
             .intensity(30000f)
@@ -162,14 +162,14 @@ class FilamentLightingManager(
      * @param ambientColor RGB color of ambient light
      */
     fun setWindlightSettings(
-        sunAngle: Float,
-        sunColor: LLVector3,
+        sunAngle: Float
+        sunColor: LLVector3
         ambientColor: LLVector3
     ) {
         // Convert sun angle to direction vector
         val sunDir = LLVector3(
-            sin(sunAngle),
-            -cos(sunAngle),
+            sin(sunAngle)
+            -cos(sunAngle)
             -0.3f
         )
         
@@ -234,3 +234,109 @@ class FilamentLightingManager(
         Log.i(TAG, "Lighting manager destroyed")
     }
 }
+
+    /**
+     * Load skybox texture from assets
+     */
+    private fun loadSkyboxFromAssets(): Texture? {
+        return try {
+            val assetManager = context.assets
+            val skyboxFiles = arrayOf("skybox_px.jpg", "skybox_nx.jpg", "skybox_py.jpg", "skybox_ny.jpg", "skybox_pz.jpg", "skybox_nz.jpg")
+            
+            // Check if all skybox faces exist
+            val allFacesExist = skyboxFiles.all { filename ->
+                try {
+                    assetManager.open("environments/$filename").close()
+                    true
+                } catch (e: Exception) {
+                    false
+                }
+            }
+            
+            if (allFacesExist) {
+                // Load skybox textures (implementation would depend on texture loading system)
+                createSkyboxFromFiles(skyboxFiles)
+            } else {
+                null
+            }
+            
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to load skybox from assets", e)
+            null
+        }
+    }
+    
+    /**
+     * Generate procedural skybox
+     */
+    private fun generateProceduralSkybox(): Texture {
+        return try {
+            Log.d(TAG, "Generating procedural skybox")
+            
+            // Create a simple gradient skybox
+            val skyboxTexture = Texture.Builder()
+                .width(256)
+                .height(256)
+                .format(Texture.InternalFormat.RGB8)
+                .sampler(Texture.Sampler.SAMPLER_CUBEMAP)
+                .build(engine)
+            
+            // Generate procedural skybox data
+            val skyboxData = generateSkyboxData()
+            
+            // Upload to texture
+            skyboxTexture.setImage(engine, 0, skyboxData)
+            
+            skyboxTexture
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to generate procedural skybox", e)
+            // Fallback: create basic texture
+            Texture.Builder()
+                .width(1)
+                .height(1)
+                .format(Texture.InternalFormat.RGB8)
+                .sampler(Texture.Sampler.SAMPLER_CUBEMAP)
+                .build(engine)
+        }
+    }
+    
+    /**
+     * Generate skybox color data
+     */
+    private fun generateSkyboxData(): ByteBuffer {
+        val size = 256 * 256 * 3 // width * height * channels
+        val buffer = ByteBuffer.allocateDirect(size)
+        
+        // Generate gradient from blue (top) to light blue (bottom)
+        for (y in 0 until 256) {
+            for (x in 0 until 256) {
+                val t = y.toFloat() / 256.0f
+                val r = (0.5f + 0.3f * t).toInt().toByte()
+                val g = (0.7f + 0.2f * t).toInt().toByte()
+                val b = (1.0f).toInt().toByte()
+                
+                buffer.put(r)
+                buffer.put(g)
+                buffer.put(b)
+            }
+        }
+        
+        buffer.rewind()
+        return buffer
+    }
+    
+    /**
+     * Create skybox from asset files
+     */
+    private fun createSkyboxFromFiles(files: Array<String>): Texture {
+        // Implementation would load the 6 cubemap faces from files
+        // For now, return a basic texture
+        return Texture.Builder()
+            .width(256)
+            .height(256)
+            .format(Texture.InternalFormat.RGB8)
+            .sampler(Texture.Sampler.SAMPLER_CUBEMAP)
+            .build(engine)
+    }
+

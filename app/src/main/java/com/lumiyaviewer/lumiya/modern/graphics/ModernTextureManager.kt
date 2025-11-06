@@ -20,6 +20,7 @@ class ModernTextureManager {
     private int optimalFormat
     private boolean nativeLibraryLoaded = false
     
+       // Texture cache for loaded textures\n       private val textureCache = mutableMapOf<String, Int>()
     // Texture format constants
     
     
@@ -116,9 +117,39 @@ class ModernTextureManager {
      * Load texture data from asset or network
      */
     private byte[] loadTextureData(String textureId) {
-        // TODO: Implement actual texture loading from SL asset system
-        Log.d(TAG, "TODO: Load texture data for " + textureId)
-        return null
+        try {
+            Log.d(TAG, "Loading texture data for " + textureId)
+            
+            // Try to load from cache first
+            val cachedData = loadFromCache(textureId)
+            if (cachedData != null) {
+                Log.d(TAG, "Texture " + textureId + " loaded from cache")
+                return cachedData
+            }
+            
+            // Load from SL asset system
+            val assetData = loadFromSLAssetSystem(textureId)
+            if (assetData != null) {
+                // Cache the loaded data
+                saveToCache(textureId, assetData)
+                Log.d(TAG, "Texture " + textureId + " loaded from SL asset system")
+                return assetData
+            }
+            
+            // Try to load from local assets (fallback)
+            val localData = loadFromLocalAssets(textureId)
+            if (localData != null) {
+                Log.d(TAG, "Texture " + textureId + " loaded from local assets")
+                return localData
+            }
+            
+            Log.w(TAG, "Failed to load texture data for " + textureId)
+            return null
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading texture " + textureId, e)
+            return null
+        }
     }
     
     /**
@@ -337,19 +368,19 @@ class ModernTextureManager {
         // Upload texture data based on format
         switch (format) {
             case FORMAT_ASTC_4x4_RGBA:
-                // TODO: Upload ASTC compressed data
-                Log.d(TAG, "Uploading ASTC texture")
+                // Upload ASTC compressed data
+                uploadASTCTexture(textureId, data, width, height)
                 break
                 
             case FORMAT_ETC2_RGBA:
-                // TODO: Upload ETC2 compressed data
-                Log.d(TAG, "Uploading ETC2 texture")
+                // Upload ETC2 compressed data
+                uploadETC2Texture(textureId, data, width, height)
                 break
                 
             case FORMAT_RGBA32:
             default:
-                // TODO: Upload uncompressed RGBA data
-                Log.d(TAG, "Uploading RGBA32 texture")
+                // Upload uncompressed RGBA data
+                uploadRGBATexture(textureId, data, width, height)
                 break
         }
         
@@ -367,16 +398,15 @@ class ModernTextureManager {
      * Get cached texture handle
      */
     private Integer getCachedTexture(String textureId) {
-        // TODO: Implement texture cache
-        return null
+        return textureCache[textureId]
     }
     
     /**
      * Cache texture handle
      */
     private void cacheTexture(String textureId, int textureHandle) {
-        // TODO: Implement texture caching
-        Log.d(TAG, "TODO: Cache texture " + textureId + " -> " + textureHandle)
+        textureCache[textureId] = textureHandle
+        Log.d(TAG, "Cached texture: $textureId -> $textureHandle")
     }
     
     /**
@@ -446,3 +476,215 @@ class ModernTextureManager {
     }
 
 }
+
+    /**
+     * Load texture from cache
+     */
+    private fun loadFromCache(textureId: String): ByteArray? {
+        return try {
+            val cacheDir = context.cacheDir
+            val textureFile = java.io.File(cacheDir, "textures/$textureId.j2c")
+            if (textureFile.exists()) {
+                textureFile.readBytes()
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading from cache", e)
+            null
+        }
+    }
+    
+    /**
+     * Save texture to cache
+     */
+    private fun saveToCache(textureId: String, data: ByteArray) {
+        try {
+            val cacheDir = context.cacheDir
+            val textureDir = java.io.File(cacheDir, "textures")
+            textureDir.mkdirs()
+            val textureFile = java.io.File(textureDir, "$textureId.j2c")
+            textureFile.writeBytes(data)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saving to cache", e)
+        }
+    }
+    
+    /**
+     * Load texture from SL asset system
+     */
+    private fun loadFromSLAssetSystem(textureId: String): ByteArray? {
+        return try {
+            // Use SL texture fetcher to get the texture
+            val fetcher = com.lumiyaviewer.lumiya.slproto.modules.texfetcher.SLTextureFetcher.getInstance()
+            fetcher.fetchTexture(textureId)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading from SL asset system", e)
+            null
+        }
+    }
+    
+    /**
+     * Load texture from local assets (fallback)
+     */
+    private fun loadFromLocalAssets(textureId: String): ByteArray? {
+        return try {
+            // Try to load from app assets
+            val assetManager = context.assets
+            val inputStream = assetManager.open("textures/$textureId.j2c")
+            inputStream.readBytes()
+        } catch (e: Exception) {
+            // Try alternative formats
+            try {
+                val assetManager = context.assets
+                val inputStream = assetManager.open("textures/$textureId.jpg")
+                inputStream.readBytes()
+            } catch (e2: Exception) {
+                Log.d(TAG, "Local asset not found for texture: $textureId")
+                null
+            }
+        }
+    }
+}
+
+    /**
+     * Upload ASTC compressed texture data
+     */
+    private fun uploadASTCTexture(textureId: Int, data: ByteArray, width: Int, height: Int): Boolean {
+        return try {
+            Log.d(TAG, "Uploading ASTC compressed texture: $textureId")
+            
+            // Bind texture
+            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureId)
+            
+            // Set texture parameters for ASTC
+            GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR_MIPMAP_LINEAR)
+            GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
+            GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_REPEAT)
+            GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_REPEAT)
+            
+            // Upload ASTC compressed data
+            GLES30.glCompressedTexImage2D(
+                GLES30.GL_TEXTURE_2D
+                0, // Level
+                FORMAT_ASTC_4x4_RGBA, // Internal format
+                width
+                height
+                0, // Border
+                data.size
+                java.nio.ByteBuffer.wrap(data)
+            )
+            
+            // Generate mipmaps
+            GLES30.glGenerateMipmap(GLES30.GL_TEXTURE_2D)
+            
+            // Check for errors
+            val error = GLES30.glGetError()
+            if (error != GLES30.GL_NO_ERROR) {
+                Log.e(TAG, "ASTC texture upload error: $error")
+                return false
+            }
+            
+            Log.d(TAG, "ASTC texture uploaded successfully: $textureId")
+            true
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error uploading ASTC texture", e)
+            false
+        }
+    }
+    
+    /**
+     * Upload ETC2 compressed texture data
+     */
+    private fun uploadETC2Texture(textureId: Int, data: ByteArray, width: Int, height: Int): Boolean {
+        return try {
+            Log.d(TAG, "Uploading ETC2 compressed texture: $textureId")
+            
+            // Bind texture
+            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureId)
+            
+            // Set texture parameters for ETC2
+            GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR_MIPMAP_LINEAR)
+            GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
+            GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_REPEAT)
+            GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_REPEAT)
+            
+            // Upload ETC2 compressed data
+            GLES30.glCompressedTexImage2D(
+                GLES30.GL_TEXTURE_2D
+                0, // Level
+                FORMAT_ETC2_RGBA, // Internal format
+                width
+                height
+                0, // Border
+                data.size
+                java.nio.ByteBuffer.wrap(data)
+            )
+            
+            // Generate mipmaps
+            GLES30.glGenerateMipmap(GLES30.GL_TEXTURE_2D)
+            
+            // Check for errors
+            val error = GLES30.glGetError()
+            if (error != GLES30.GL_NO_ERROR) {
+                Log.e(TAG, "ETC2 texture upload error: $error")
+                return false
+            }
+            
+            Log.d(TAG, "ETC2 texture uploaded successfully: $textureId")
+            true
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error uploading ETC2 texture", e)
+            false
+        }
+    }
+    
+    /**
+     * Upload uncompressed RGBA texture data
+     */
+    private fun uploadRGBATexture(textureId: Int, data: ByteArray, width: Int, height: Int): Boolean {
+        return try {
+            Log.d(TAG, "Uploading RGBA32 texture: $textureId")
+            
+            // Bind texture
+            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureId)
+            
+            // Set texture parameters for RGBA
+            GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR_MIPMAP_LINEAR)
+            GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
+            GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_REPEAT)
+            GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_REPEAT)
+            
+            // Upload uncompressed RGBA data
+            GLES30.glTexImage2D(
+                GLES30.GL_TEXTURE_2D
+                0, // Level
+                FORMAT_RGBA32, // Internal format
+                width
+                height
+                0, // Border
+                GLES30.GL_RGBA, // Format
+                GLES30.GL_UNSIGNED_BYTE, // Type
+                java.nio.ByteBuffer.wrap(data)
+            )
+            
+            // Generate mipmaps
+            GLES30.glGenerateMipmap(GLES30.GL_TEXTURE_2D)
+            
+            // Check for errors
+            val error = GLES30.glGetError()
+            if (error != GLES30.GL_NO_ERROR) {
+                Log.e(TAG, "RGBA texture upload error: $error")
+                return false
+            }
+            
+            Log.d(TAG, "RGBA texture uploaded successfully: $textureId")
+            true
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error uploading RGBA texture", e)
+            false
+        }
+    }

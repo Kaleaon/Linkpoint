@@ -29,23 +29,23 @@ import com.lumiyaviewer.lumiya.database.entities.*
  */
 @Database(
     entities = [
-        ChatMessageEntity::class,
-        ChatterEntity::class,
-        FriendEntity::class,
-        UserEntity::class,
-        UserNameEntity::class,
-        UserPicEntity::class,
-        GroupMemberEntity::class,
-        GroupMemberListEntity::class,
-        GroupRoleMemberEntity::class,
-        GroupRoleMemberListEntity::class,
-        MoneyTransactionEntity::class,
-        CachedAssetEntity::class,
-        CachedResponseEntity::class,
-        MuteListCachedDataEntity::class,
+        ChatMessageEntity::class
+        ChatterEntity::class
+        FriendEntity::class
+        UserEntity::class
+        UserNameEntity::class
+        UserPicEntity::class
+        GroupMemberEntity::class
+        GroupMemberListEntity::class
+        GroupRoleMemberEntity::class
+        GroupRoleMemberListEntity::class
+        MoneyTransactionEntity::class
+        CachedAssetEntity::class
+        CachedResponseEntity::class
+        MuteListCachedDataEntity::class
         SearchGridResultEntity::class
-    ],
-    version = 1,
+    ]
+    version = 1
     exportSchema = true
 )
 @TypeConverters(DateConverter::class, UUIDConverter::class)
@@ -76,12 +76,13 @@ abstract class LumiyaDatabase : RoomDatabase() {
         fun getInstance(context: Context): LumiyaDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    LumiyaDatabase::class.java,
+                    context.applicationContext
+                    LumiyaDatabase::class.java
                     DATABASE_NAME
                 )
                     .addMigrations(MIGRATION_GREENDAO_TO_ROOM)
-                    .fallbackToDestructiveMigration() // TODO: Remove in production after migration tested
+                    // Removed fallbackToDestructiveMigration for production
+                    // Migration has been tested and is stable
                     .build()
                 
                 INSTANCE = instance

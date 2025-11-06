@@ -16,8 +16,8 @@ import java.util.concurrent.atomic.AtomicInteger
  * Handles reliable message transmission and acknowledgment
  */
 class SLCircuit(
-    private val remoteAddress: InetAddress,
-    private val remotePort: Int,
+    private val remoteAddress: InetAddress
+    private val remotePort: Int
 ) {
     private val socket = DatagramSocket()
     private val sequenceNumber = AtomicInteger(1)
@@ -251,15 +251,81 @@ class SLCircuit(
         ackMessage.packets.add(seqNum)
         sendMessage(ackMessage)
     }
+
+    /**
+     * Send raw packet data directly through the circuit
+     * Used for low-level protocol operations
+     */
+    fun sendRawPacket(data: ByteArray): Boolean {
+        return try {
+            val packet = DatagramPacket(data, data.size, remoteAddress, remotePort)
+            socket.send(packet)
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    /**
+     * Send raw packet with sequence number and flags
+     * Used for custom message types
+     */
+    fun sendRawPacketWithHeader(
+        data: ByteArray, 
+        sequenceNum: Int = sequenceNumber.getAndIncrement(),
+        flags: Byte = 0,
+        includeAcks: Boolean = true
+    ): Boolean {
+        return try {
+            val buffer = ByteBuffer.allocate(data.size + 32) // Extra space for header
+            buffer.order(ByteOrder.BIG_ENDIAN)
+
+            // Build header
+            buffer.put(flags)
+            buffer.putInt(sequenceNum)
+            buffer.put(0) // Extra header bytes
+
+            // Add payload
+            buffer.put(data)
+
+            // Add ACKs if requested and available
+            if (includeAcks) {
+                val acksToSend = synchronized(ackQueue) {
+                    val acks = ackQueue.take(255.coerceAtMost(ackQueue.size))
+                    ackQueue.removeAll(acks)
+                    acks
+                }
+
+                if (acksToSend.isNotEmpty()) {
+                    for (ack in acksToSend) {
+                        buffer.putInt(ack)
+                    }
+                    buffer.put(acksToSend.size.toByte())
+                }
+            }
+
+            buffer.flip()
+            val packetData = ByteArray(buffer.remaining())
+            buffer.get(packetData)
+
+            val packet = DatagramPacket(packetData, packetData.size, remoteAddress, remotePort)
+            socket.send(packet)
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
 }
 
 /**
  * Circuit information
  */
 data class SLCircuitInfo(
-    val address: InetAddress,
-    val port: Int,
-    val circuitCode: Int,
-    val agentId: UUID,
-    val sessionId: UUID,
+    val address: InetAddress
+    val port: Int
+    val circuitCode: Int
+    val agentId: UUID
+    val sessionId: UUID
 )

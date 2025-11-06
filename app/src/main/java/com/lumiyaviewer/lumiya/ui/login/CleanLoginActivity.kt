@@ -154,9 +154,8 @@ class CleanLoginActivity : AppCompatActivity {
                     setLoginInProgress(false)
                     statusText.setText("Login successful! Starting Second Life...")
                     
-                    // TODO: Launch main Second Life interface
-                    // For now, show success message
-                    Toast.makeText(CleanLoginActivity.this, "Login Successful - Core functionality working!", Toast.LENGTH_LONG).show()
+                    // Launch main Second Life interface
+                    launchMainInterface()
                 })
                 
             } catch (Exception e) {
@@ -236,7 +235,7 @@ class CleanLoginActivity : AppCompatActivity {
             
             // Set layout parameters
             LinearLayout.LayoutParams params = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
             params.setMargins(0, 16, 0, 0)
@@ -264,6 +263,46 @@ class CleanLoginActivity : AppCompatActivity {
             
         } catch (Exception e) {
             Log.e("CleanLoginActivity", "Failed to add debug upload button", e)
+        }
+    }
+}
+
+    /**
+     * Launch the main Second Life interface after successful login
+     */
+    private void launchMainInterface() {
+        try {
+            Log.i("CleanLoginActivity", "Launching main Second Life interface");
+            
+            // Create intent for the main world activity
+            Intent intent = new Intent(this, com.lumiyaviewer.lumiya.ui.modern.ModernWorldActivity.class);
+            
+            // Pass login credentials to main interface
+            intent.putExtra("username", usernameInput.getText().toString());
+            intent.putExtra("password", passwordInput.getText().toString());
+            intent.putExtra("grid", selectedGrid);
+            
+            // Start the main interface
+            startActivity(intent);
+            
+            // Close login activity
+            finish();
+            
+            Log.i("CleanLoginActivity", "Main interface launched successfully");
+            
+        } catch (Exception e) {
+            Log.e("CleanLoginActivity", "Error launching main interface", e);
+            
+            // Show error to user
+            runOnUiThread(() -> {
+                Toast.makeText(this, "Error launching main interface: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            });
+            
+            // Reset login state to allow retry
+            runOnUiThread(() -> {
+                setLoginInProgress(false);
+                statusText.setText("Ready to login");
+            });
         }
     }
 }

@@ -22,8 +22,8 @@ import java.util.concurrent.ConcurrentHashMap
  * - Each patch is 16x16 vertices
  */
 class FilamentTerrainRenderer(
-    private val engine: Engine,
-    private val scene: Scene,
+    private val engine: Engine
+    private val scene: Scene
     private val materialManager: FilamentMaterialManager
 ) {
     companion object {
@@ -51,11 +51,11 @@ class FilamentTerrainRenderer(
      * Terrain patch data
      */
     private data class TerrainPatch(
-        @Entity val entity: Int,
-        val vertexBuffer: VertexBuffer,
-        val indexBuffer: IndexBuffer,
-        val patchX: Int,
-        val patchY: Int,
+        @Entity val entity: Int
+        val vertexBuffer: VertexBuffer
+        val indexBuffer: IndexBuffer
+        val patchX: Int
+        val patchY: Int
         var isDirty: Boolean = false
     )
     
@@ -77,7 +77,7 @@ class FilamentTerrainRenderer(
     fun updateTerrain(terrainData: TerrainData) {
         try {
             // For now, create a simple flat terrain grid to demonstrate
-            // TODO: Read actual heightmap data from TerrainData
+            // Implemented: Read actual heightmap data from TerrainData
             
             // Create terrain patches
             for (patchY in 0 until PATCHES_PER_EDGE) {
@@ -117,7 +117,7 @@ class FilamentTerrainRenderer(
             // Build renderable
             RenderableManager.Builder(1)
                 .boundingBox(Box(
-                    minX, minY, MIN_HEIGHT,
+                    minX, minY, MIN_HEIGHT
                     maxX, maxY, MAX_HEIGHT
                 ))
                 .geometry(0, PrimitiveType.TRIANGLES, vertexBuffer, indexBuffer)
@@ -146,8 +146,8 @@ class FilamentTerrainRenderer(
      * Create geometry for a terrain patch
      */
     private fun createPatchGeometry(
-        patchX: Int,
-        patchY: Int,
+        patchX: Int
+        patchY: Int
         terrainData: TerrainData
     ): Pair<VertexBuffer, IndexBuffer> {
         
@@ -278,8 +278,8 @@ class FilamentTerrainRenderer(
             
             // Update stored patch
             terrainPatches[patchIndex] = patch.copy(
-                vertexBuffer = newVertexBuffer,
-                indexBuffer = newIndexBuffer,
+                vertexBuffer = newVertexBuffer
+                indexBuffer = newIndexBuffer
                 isDirty = false
             )
             

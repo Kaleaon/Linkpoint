@@ -54,8 +54,13 @@ sealed class LLSD {
          * Parse LLSD from XML
          */
         fun fromXml(xml: String): LLSD {
-            // TODO: Implement XML parsing
-            return LLSDUndefined
+            return try {
+                val xmlParser = LLSDXmlParser()
+                xmlParser.parse(xml)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                LLSDUndefined
+            }
         }
     }
 }
@@ -173,8 +178,8 @@ data class LLSDArray(val value: MutableList<LLSD> = mutableListOf()) : LLSD() {
     operator fun get(index: Int): LLSD = value.getOrNull(index) ?: LLSDUndefined
 
     operator fun set(
-        index: Int,
-        element: LLSD,
+        index: Int
+        element: LLSD
     ) {
         if (index >= value.size) {
             // Expand array
@@ -215,8 +220,8 @@ data class LLSDMap(val value: MutableMap<String, LLSD> = mutableMapOf()) : LLSD(
     operator fun get(key: String): LLSD = value[key] ?: LLSDUndefined
 
     operator fun set(
-        key: String,
-        llsdValue: LLSD,
+        key: String
+        llsdValue: LLSD
     ) {
         value[key] = llsdValue
     }

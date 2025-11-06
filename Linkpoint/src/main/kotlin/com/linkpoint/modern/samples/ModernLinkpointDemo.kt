@@ -137,14 +137,14 @@ class ModernLinkpointDemo {
             transport.subscribeToEvents("chat", WebSocketEventClient.EventListener() {
                 override Unit onEvent(WebSocketEventClient.EventMessage event) {
                     Log.d(TAG, "Received chat event: " + event.getData())
-                    // TODO: Process chat message
+                    processChatMessage(event.getData())
                 }
             })
         
             transport.subscribeToEvents("objectUpdate", WebSocketEventClient.EventListener() {
                 override Unit onEvent(WebSocketEventClient.EventMessage event) {
                     Log.d(TAG, "Received object update: " + event.getData())
-                    // TODO: Update 3D world objects
+                    update3DWorldObjects(event.getData())
                 }
             })
             
@@ -215,7 +215,7 @@ class ModernLinkpointDemo {
                 .thenAccept(textureHandle -> {
                     if (textureHandle > 0) {
                         Log.d(TAG, "Texture loaded successfully: " + textureId + " -> " + textureHandle)
-                        // TODO: Use texture in rendering
+                        applyTextureToRendering(textureId, textureHandle)
                     } else {
                         Log.w(TAG, "Failed to load texture: " + textureId)
                     }
@@ -471,4 +471,169 @@ class ModernLinkpointDemo {
             default: return "Unknown Format"
         }
     }
+}
+    /**
+     * Process incoming chat message
+     */
+    private fun processChatMessage(eventData: String) {
+        try {
+            Log.d(TAG, "Processing chat message: " + eventData)
+            
+            // Parse chat message from event data
+            val chatMessage = parseChatMessage(eventData)
+            if (chatMessage != null) {
+                // Display chat message in UI
+                displayChatMessage(chatMessage)
+                
+                // Store in chat history
+                chatHistory.add(chatMessage)
+                
+                Log.d(TAG, "Chat message processed successfully")
+            } else {
+                Log.w(TAG, "Failed to parse chat message from: " + eventData)
+            }
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error processing chat message", e)
+        }
+    }
+    
+    /**
+     * Update 3D world objects based on event data
+     */
+    private fun update3DWorldObjects(eventData: String) {
+        try {
+            Log.d(TAG, "Updating 3D world objects: " + eventData)
+            
+            // Parse object update from event data
+            val objectUpdate = parseObjectUpdate(eventData)
+            if (objectUpdate != null) {
+                // Update object in 3D scene
+                worldRenderer.updateObject(objectUpdate)
+                
+                // Invalidate render to show changes
+                worldView.requestRender()
+                
+                Log.d(TAG, "3D world object updated successfully")
+            } else {
+                Log.w(TAG, "Failed to parse object update from: " + eventData)
+            }
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating 3D world objects", e)
+        }
+    }
+    
+    /**
+     * Apply loaded texture to rendering
+     */
+    private fun applyTextureToRendering(textureId: String, textureHandle: Int) {
+        try {
+            Log.d(TAG, "Applying texture to rendering: " + textureId + " -> " + textureHandle)
+            
+            // Find objects that use this texture
+            val objectsNeedingTexture = worldRenderer.getObjectsUsingTexture(textureId)
+            
+            // Apply texture to each object
+            for (object3D in objectsNeedingTexture) {
+                worldRenderer.setTextureForObject(object3D, textureHandle)
+            }
+            
+            // Update material system
+            materialSystem.setTextureMapping(textureId, textureHandle)
+            
+            // Request render update
+            worldView.requestRender()
+            
+            Log.d(TAG, "Texture applied to rendering successfully")
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error applying texture to rendering", e)
+        }
+    }
+    
+    /**
+     * Parse chat message from event data
+     */
+    private fun parseChatMessage(eventData: String): ChatMessage? {
+        try {
+            // Parse JSON event data
+            val jsonData = org.json.JSONObject(eventData)
+            
+            val message = jsonData.optString("message", "")
+            val sender = jsonData.optString("sender", "Unknown")
+            val timestamp = jsonData.optLong("timestamp", System.currentTimeMillis())
+            
+            if (message.isNotEmpty()) {
+                return ChatMessage(sender, message, timestamp)
+            }
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing chat message JSON", e)
+        }
+        
+        return null
+    }
+    
+    /**
+     * Parse object update from event data
+     */
+    private fun parseObjectUpdate(eventData: String): ObjectUpdate? {
+        try {
+            // Parse JSON event data
+            val jsonData = org.json.JSONObject(eventData)
+            
+            val objectId = jsonData.optString("id", "")
+            val position = parseVector3(jsonData.getJSONObject("position"))
+            val rotation = parseQuaternion(jsonData.getJSONObject("rotation"))
+            val scale = parseVector3(jsonData.getJSONObject("scale"))
+            
+            if (objectId.isNotEmpty()) {
+                return ObjectUpdate(objectId, position, rotation, scale)
+            }
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing object update JSON", e)
+        }
+        
+        return null
+    }
+    
+    /**
+     * Parse Vector3 from JSON
+     */
+    private fun parseVector3(jsonObj: org.json.JSONObject): Vector3 {
+        return Vector3(
+            jsonObj.optDouble("x", 0.0).toFloat()
+            jsonObj.optDouble("y", 0.0).toFloat()
+            jsonObj.optDouble("z", 0.0).toFloat()
+        )
+    }
+    
+    /**
+     * Parse Quaternion from JSON
+     */
+    private fun parseQuaternion(jsonObj: org.json.JSONObject): Quaternion {
+        return Quaternion(
+            jsonObj.optDouble("x", 0.0).toFloat()
+            jsonObj.optDouble("y", 0.0).toFloat()
+            jsonObj.optDouble("z", 0.0).toFloat()
+            jsonObj.optDouble("w", 1.0).toFloat()
+        )
+    }
+    
+    /**
+     * Display chat message in UI
+     */
+    private fun displayChatMessage(chatMessage: ChatMessage) {
+        // This would update the chat UI component
+        // For demo purposes, just log the message
+        Log.i(TAG, "Chat [${chatMessage.sender}]: ${chatMessage.message}")
+    }
+
+    // Data classes for parsed objects
+    data class ChatMessage(val sender: String, val message: String, val timestamp: Long)
+    data class ObjectUpdate(val id: String, val position: Vector3, val rotation: Quaternion, val scale: Vector3)
+    data class Vector3(val x: Float, val y: Float, val z: Float)
+    data class Quaternion(val x: Float, val y: Float, val z: Float, val w: Float)
 }

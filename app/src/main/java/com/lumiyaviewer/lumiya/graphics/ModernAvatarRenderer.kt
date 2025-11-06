@@ -25,9 +25,9 @@ import java.util.UUID
  * - Battery-conscious updates
  */
 class ModernAvatarRenderer(
-    private val context: Context,
-    private val animeshManager: AnimeshManager,
-    private val bomManager: BakesOnMeshManager,
+    private val context: Context
+    private val animeshManager: AnimeshManager
+    private val bomManager: BakesOnMeshManager
     private val envManager: EnhancedEnvironmentManager
 ) {
     
@@ -284,11 +284,11 @@ class ModernAvatarRenderer(
      * Render avatar or animesh object
      */
     fun renderAvatar(
-        objectID: UUID,
-        isAnimesh: Boolean,
-        bakeIndex: Int,
-        mvpMatrix: FloatArray,
-        modelMatrix: FloatArray,
+        objectID: UUID
+        isAnimesh: Boolean
+        bakeIndex: Int
+        mvpMatrix: FloatArray
+        modelMatrix: FloatArray
         normalMatrix: FloatArray
     ) {
         if (!isInitialized) return
@@ -306,10 +306,10 @@ class ModernAvatarRenderer(
             val boneMatrices = animeshManager.getBoneMatrices(objectID)
             if (boneMatrices != null) {
                 GLES32.glUniformMatrix4fv(
-                    uniformLocations["uBoneMatrices"] ?: -1,
-                    boneMatrices.size / 16,
-                    false,
-                    boneMatrices,
+                    uniformLocations["uBoneMatrices"] ?: -1
+                    boneMatrices.size / 16
+                    false
+                    boneMatrices
                     0
                 )
             }
@@ -326,7 +326,9 @@ class ModernAvatarRenderer(
         GLES32.glUniform3fv(uniformLocations["uFogColor"] ?: -1, 1, envUniforms.fogColor, 0)
         GLES32.glUniform1f(uniformLocations["uFogDensity"] ?: -1, envUniforms.fogDensity)
         
-        // TODO: Bind BOM textures and draw mesh
+        // Bind BOM textures and draw mesh
+        bindBOMTextures(avatarId)
+        drawAvatarMesh(avatarId)
     }
     
     /**
@@ -387,16 +389,16 @@ class ModernAvatarRenderer(
     private fun getUniformLocations() {
         val uniforms = listOf(
             // Matrices
-            "uMVPMatrix", "uModelMatrix", "uViewMatrix", "uProjectionMatrix", "uNormalMatrix",
+            "uMVPMatrix", "uModelMatrix", "uViewMatrix", "uProjectionMatrix", "uNormalMatrix"
             // Skinning
-            "uUseAnimesh", "uBoneMatrices",
+            "uUseAnimesh", "uBoneMatrices"
             // BOM textures
-            "uBakeHead", "uBakeUpperBody", "uBakeLowerBody", "uBakeEyes", "uBakeHair",
-            "uBakeLeftArm", "uBakeLeftLeg", "uBakeAux1", "uActiveBakeIndex",
+            "uBakeHead", "uBakeUpperBody", "uBakeLowerBody", "uBakeEyes", "uBakeHair"
+            "uBakeLeftArm", "uBakeLeftLeg", "uBakeAux1", "uActiveBakeIndex"
             // PBR
-            "uNormalMap", "uMetallicRoughnessMap", "uMetallic", "uRoughness",
+            "uNormalMap", "uMetallicRoughnessMap", "uMetallic", "uRoughness"
             // EEP
-            "uSunDirection", "uSunColor", "uAmbientColor", "uFogColor", "uFogDensity",
+            "uSunDirection", "uSunColor", "uAmbientColor", "uFogColor", "uFogDensity"
             // Camera
             "uCameraPos"
         )
@@ -420,5 +422,93 @@ class ModernAvatarRenderer(
             shaderProgram = 0
         }
         isInitialized = false
+    }
+}
+
+    /**
+     * Bind Bakes on Mesh textures for the avatar
+     */
+    private fun bindBOMTextures(avatarId: UUID) {
+        try {
+            // Get BOM textures from the Bakes on Mesh manager
+            val bomTextures = bomManager.getBakedTextures(avatarId)
+            
+            // Bind texture units for head, upper body, lower body, etc.
+            for ((i, texture) in bomTextures.withIndex()) {
+                if (texture != null && texture.textureId != 0) {
+                    GLES32.glActiveTexture(GLES32.GL_TEXTURE0 + i)
+                    GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, texture.textureId)
+                    
+                    // Set texture uniforms
+                    val uniformName = when (i) {
+                        0 -> "uHeadTexture"
+                        1 -> "uUpperBodyTexture"
+                        2 -> "uLowerBodyTexture"
+                        3 -> "uEyesTexture"
+                        4 -> "uHairTexture"
+                        5 -> "uSkirtTexture"
+                        else -> "uTexture$i"
+                    }
+                    GLES32.glUniform1i(uniformLocations[uniformName] ?: -1, i)
+                }
+            }
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error binding BOM textures", e)
+        }
+    }
+    
+    /**
+     * Draw the avatar mesh with proper skinning and materials
+     */
+    private fun drawAvatarMesh(avatarId: UUID) {
+        try {
+            // Get avatar mesh data
+            val avatarMesh = animeshManager.getAvatarMesh(avatarId)
+            if (avatarMesh == null) {
+                Log.w(TAG, "No avatar mesh found for ID: $avatarId")
+                return
+            }
+            
+            // Bind vertex array
+            if (avatarMesh.vaoId != 0) {
+                GLES32.glBindVertexArray(avatarMesh.vaoId)
+            } else {
+                // Legacy vertex buffer binding
+                bindLegacyVertexBuffers(avatarMesh)
+            }
+            
+            // Set bone transforms for skinning
+            val boneTransforms = animeshManager.getBoneTransforms(avatarId)
+            if (boneTransforms != null) {
+                GLES32.glUniformMatrix4fv(
+                    uniformLocations["uBoneTransforms"] ?: -1
+                    boneTransforms.size / 16
+                    false
+                    boneTransforms
+                    0
+                )
+            }
+            
+            // Draw mesh elements
+            if (avatarMesh.indexBuffer != 0) {
+                GLES32.glBindBuffer(GLES32.GL_ELEMENT_ARRAY_BUFFER, avatarMesh.indexBuffer)
+                GLES32.glDrawElements(
+                    GLES32.GL_TRIANGLES
+                    avatarMesh.indexCount
+                    GLES32.GL_UNSIGNED_INT
+                    0
+                )
+            } else {
+                GLES32.glDrawArrays(GLES32.GL_TRIANGLES, 0, avatarMesh.vertexCount)
+            }
+            
+            // Unbind
+            GLES32.glBindVertexArray(0)
+            GLES32.glBindBuffer(GLES32.GL_ELEMENT_ARRAY_BUFFER, 0)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error drawing avatar mesh", e)
+        }
     }
 }

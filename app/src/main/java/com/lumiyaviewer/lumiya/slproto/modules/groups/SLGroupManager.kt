@@ -260,8 +260,8 @@ class SLGroupManager : SLModule {
         improvedInstantMessage.MessageBlock_Field.Dialog = z ? 35 : 36
         improvedInstantMessage.MessageBlock_Field.ID = uuid2
         improvedInstantMessage.MessageBlock_Field.Timestamp = 0
-        improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo")
-        improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF("todo")
+        improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM(this.agentCircuit.getAgentName() ?: "Unknown")
+        improvedInstantMessage.MessageBlock_Field.Message = if (z) SLMessage.stringToVariableUTF("Group invitation accepted") else SLMessage.stringToVariableUTF("Group invitation declined")
         improvedInstantMessage.MessageBlock_Field.BinaryBucket = ByteArray(0)
         improvedInstantMessage.isReliable = true
         SendMessage(improvedInstantMessage)
@@ -492,7 +492,7 @@ class SLGroupManager : SLModule {
         improvedInstantMessage.MessageBlock_Field.Dialog = 32
         improvedInstantMessage.MessageBlock_Field.ID = UUIDPool.ZeroUUID
         improvedInstantMessage.MessageBlock_Field.Timestamp = 0
-        improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo")
+        improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM(this.agentCircuit.getAgentName() ?: "Unknown")
         improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF(str + "|" + str2)
         if (sLInventoryEntry != null) {
             try {

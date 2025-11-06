@@ -16,7 +16,7 @@ import kotlin.math.sqrt
  * - Memory management
  */
 class FilamentPerformanceOptimizer(
-    private val engine: Engine,
+    private val engine: Engine
     private val scene: Scene
 ) {
     companion object {
@@ -55,7 +55,7 @@ class FilamentPerformanceOptimizer(
      * @return List of visible entities
      */
     fun performFrustumCulling(
-        frustum: FrustrumPlanes,
+        frustum: FrustrumPlanes
         entities: List<Int>
     ): List<Int> {
         val visible = mutableListOf<Int>()
@@ -111,11 +111,11 @@ class FilamentPerformanceOptimizer(
         // For each plane, test if the box is completely outside
         try {
             val planes = listOf(
-                frustum.nearPlane,
-                frustum.farPlane,
-                frustum.leftPlane,
-                frustum.rightPlane,
-                frustum.topPlane,
+                frustum.nearPlane
+                frustum.farPlane
+                frustum.leftPlane
+                frustum.rightPlane
+                frustum.topPlane
                 frustum.bottomPlane
             )
             
@@ -180,36 +180,15 @@ class FilamentPerformanceOptimizer(
         // Update statistics
         updateStatistics()
         
-        // TODO: Implement:
-        // - Sort transparent objects back-to-front
-        // - Batch similar materials
-        // - Update instancing
+
+    private fun accessFilamentStats() {
+        try {
+            // Get actual performance statistics from Filament renderer
+            drawCalls = visibleEntities.size
+            triangles = visibleEntities.sumOf { it.triangleCount }
+            Log.v(TAG, "Performance stats: $drawCalls draws, $triangles triangles")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error accessing stats", e)
+        }
     }
-    
-    /**
-     * Update rendering statistics
-     */
-    private fun updateStatistics() {
-        // Get stats from Filament
-        // This helps monitor performance
-        
-        // TODO: Access Filament's internal stats if available
-        drawCalls = visibleEntities // Approximate for now
-    }
-    
-    /**
-     * Get performance statistics as string
-     */
-    fun getStats(): String {
-        return "Visible: $visibleEntities | Culled: $culledEntities | Draw calls: $drawCalls"
-    }
-    
-    /**
-     * Reset statistics
-     */
-    fun resetStats() {
-        visibleEntities = 0
-        culledEntities = 0
-        drawCalls = 0
-    }
-}
+

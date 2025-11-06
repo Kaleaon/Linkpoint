@@ -20,11 +20,11 @@ import java.util.concurrent.ConcurrentHashMap
  * - Nametags
  */
 class FilamentAvatarRenderer(
-    private val context: Context,
-    private val engine: Engine,
-    private val scene: Scene,
-    private val materialManager: FilamentMaterialManager,
-    private val textureManager: FilamentTextureManager,
+    private val context: Context
+    private val engine: Engine
+    private val scene: Scene
+    private val materialManager: FilamentMaterialManager
+    private val textureManager: FilamentTextureManager
     private val gltfLoader: FilamentGltfLoader
 ) {
     companion object {
@@ -36,11 +36,11 @@ class FilamentAvatarRenderer(
      * Avatar entity data
      */
     private data class AvatarEntity(
-        @Entity val rootEntity: Int,
-        val vertexBuffer: VertexBuffer?,
-        val indexBuffer: IndexBuffer?,
-        val asset: FilamentAsset?,
-        val avatarInfo: SLObjectAvatarInfo,
+        @Entity val rootEntity: Int
+        val vertexBuffer: VertexBuffer?
+        val indexBuffer: IndexBuffer?
+        val asset: FilamentAsset?
+        val avatarInfo: SLObjectAvatarInfo
         var lastUpdate: Long = 0
     )
     
@@ -116,10 +116,10 @@ class FilamentAvatarRenderer(
             // Build renderable with avatar mesh
             RenderableManager.Builder(1)
                 .boundingBox(Box(
-                    -0.5f, 0f, -0.5f,
+                    -0.5f, 0f, -0.5f
                     0.5f, 2.0f, 0.5f
                 ))
-                .geometry(0, RenderableManager.PrimitiveType.TRIANGLES,
+                .geometry(0, RenderableManager.PrimitiveType.TRIANGLES
                     avatarMesh.vertexBuffer, avatarMesh.indexBuffer)
                 .material(0, material.defaultInstance)
                 .castShadows(true)
@@ -138,7 +138,7 @@ class FilamentAvatarRenderer(
             scene.addEntity(entity)
             
             // Store avatar data (don't own the buffers, they're shared)
-            avatars[uuid] = AvatarEntity(entity, null, null, null, avatarInfo,
+            avatars[uuid] = AvatarEntity(entity, null, null, null, avatarInfo
                 System.currentTimeMillis())
             
             Log.d(TAG, "Created avatar $uuid with humanoid mesh at ($position)")
@@ -163,7 +163,9 @@ class FilamentAvatarRenderer(
             
             // Apply rotation if available
             if (rotation != null) {
-                // TODO: Convert quaternion to matrix rotation
+                val rotationMatrix = FloatArray(16)
+                convertQuaternionToMatrix(rotation, rotationMatrix)
+                android.opengl.Matrix.multiplyMM(transform, 0, transform, 0, rotationMatrix, 0)
             }
             
             val tcm = engine.transformManager
@@ -239,5 +241,61 @@ class FilamentAvatarRenderer(
         defaultAvatarMesh = null
         
         Log.i(TAG, "Avatar renderer destroyed")
+    }
+}
+
+    /**
+     * Convert quaternion to rotation matrix
+     */
+    private fun convertQuaternionToMatrix(quaternion: FloatArray, matrix: FloatArray) {
+        val q0 = quaternion[0] // w
+        val q1 = quaternion[1] // x
+        val q2 = quaternion[2] // y
+        val q3 = quaternion[3] // z
+        
+        // Calculate commonly used values
+        val q0q0 = q0 * q0
+        val q0q1 = q0 * q1
+        val q0q2 = q0 * q2
+        val q0q3 = q0 * q3
+        val q1q1 = q1 * q1
+        val q1q2 = q1 * q2
+        val q1q3 = q1 * q3
+        val q2q2 = q2 * q2
+        val q2q3 = q2 * q3
+        val q3q3 = q3 * q3
+        
+        // Build rotation matrix
+        matrix[0] = 1.0f - 2.0f * (q2q2 + q3q3)
+        matrix[1] = 2.0f * (q1q2 - q0q3)
+        matrix[2] = 2.0f * (q1q3 + q0q2)
+        matrix[3] = 0.0f
+        
+        matrix[4] = 2.0f * (q1q2 + q0q3)
+        matrix[5] = 1.0f - 2.0f * (q1q1 + q3q3)
+        matrix[6] = 2.0f * (q2q3 - q0q1)
+        matrix[7] = 0.0f
+        
+        matrix[8] = 2.0f * (q1q3 - q0q2)
+        matrix[9] = 2.0f * (q2q3 + q0q1)
+        matrix[10] = 1.0f - 2.0f * (q1q1 + q2q2)
+        matrix[11] = 0.0f
+        
+        matrix[12] = 0.0f
+        matrix[13] = 0.0f
+        matrix[14] = 0.0f
+        matrix[15] = 1.0f
+    }
+    
+    /**
+     * Convert LLQuaternion to FloatArray
+     */
+    private fun convertLLQuaternion(llQuaternion: com.lumiyaviewer.lumiya.slproto.types.LLQuaternion): FloatArray {
+        return floatArrayOf(
+            llQuaternion.w, // w (scalar component)
+            llQuaternion.x, // x
+            llQuaternion.y, // y
+            llQuaternion.z  // z
+        )
     }
 }

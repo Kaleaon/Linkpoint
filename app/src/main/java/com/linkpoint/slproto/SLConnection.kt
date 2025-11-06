@@ -25,11 +25,11 @@ class SLConnection {
 
     // Connection state
     enum class State {
-        DISCONNECTED,
-        AUTHENTICATING,
-        CONNECTING,
-        CONNECTED,
-        DISCONNECTING,
+        DISCONNECTED
+        AUTHENTICATING
+        CONNECTING
+        CONNECTED
+        DISCONNECTING
     }
 
     private var state = State.DISCONNECTED
@@ -53,7 +53,11 @@ class SLConnection {
 
                 if (!reply.success) {
                     throw Exception("Authentication failed: ${reply.reason ?: reply.message}")
-                }
+                        onError?.invoke(Exception("Failed to send packet"))
+            }
+        } ?: run {
+            onError?.invoke(Exception("Circuit not available"))
+        }
 
                 // Extract connection info
                 val simIp = reply.simIp ?: throw Exception("No sim IP in auth reply")
@@ -75,14 +79,26 @@ class SLConnection {
 
                         this.onMessageReceived = { message ->
                             handleMessage(message)
-                        }
+                                onError?.invoke(Exception("Failed to send packet"))
+            }
+        } ?: run {
+            onError?.invoke(Exception("Circuit not available"))
+        }
 
                         this.onCircuitClosed = {
                             setState(State.DISCONNECTED)
-                        }
+                                onError?.invoke(Exception("Failed to send packet"))
+            }
+        } ?: run {
+            onError?.invoke(Exception("Circuit not available"))
+        }
 
                         start()
-                    }
+                            onError?.invoke(Exception("Failed to send packet"))
+            }
+        } ?: run {
+            onError?.invoke(Exception("Circuit not available"))
+        }
 
                 // Send UseCircuitCode to establish connection
                 sendUseCircuitCode(circuitCode, sessionId, agentId)
@@ -95,11 +111,23 @@ class SLConnection {
 
                 setState(State.CONNECTED)
                 true
-            } catch (e: Exception) {
+                    onError?.invoke(Exception("Failed to send packet"))
+            }
+        } ?: run {
+            onError?.invoke(Exception("Circuit not available"))
+        } catch (e: Exception) {
                 onError?.invoke(e)
                 setState(State.DISCONNECTED)
                 false
+                    onError?.invoke(Exception("Failed to send packet"))
             }
+        } ?: run {
+            onError?.invoke(Exception("Circuit not available"))
+        }
+                onError?.invoke(Exception("Failed to send packet"))
+            }
+        } ?: run {
+            onError?.invoke(Exception("Circuit not available"))
         }
 
     /**
@@ -133,7 +161,15 @@ class SLConnection {
             else -> {
                 // Forward to application
                 onMessageReceived?.invoke(message)
+                    onError?.invoke(Exception("Failed to send packet"))
             }
+        } ?: run {
+            onError?.invoke(Exception("Circuit not available"))
+        }
+                onError?.invoke(Exception("Failed to send packet"))
+            }
+        } ?: run {
+            onError?.invoke(Exception("Circuit not available"))
         }
     }
 
@@ -172,9 +208,9 @@ class SLConnection {
      * Send UseCircuitCode message
      */
     private fun sendUseCircuitCode(
-        code: Int,
-        sessionId: UUID,
-        agentId: UUID,
+        code: Int
+        sessionId: UUID
+        agentId: UUID
     ) {
         // Create and send UseCircuitCode message
         // This is a system message to establish the circuit
@@ -203,10 +239,12 @@ class SLConnection {
         buffer.get(data)
 
         // Send raw packet through circuit
-        remoteAddress?.let { addr ->
-            val packet = java.net.DatagramPacket(data, data.size, addr, remotePort)
-            // TODO: Add sendRawPacket method to SLCircuit or use proper message
-            // For now, skip sending as this is a stub implementation
+        circuit?.let { circ ->
+            if (!circ.sendRawPacket(data)) {
+                onError?.invoke(Exception("Failed to send packet"))
+            }
+        } ?: run {
+            onError?.invoke(Exception("Circuit not available"))
         }
     }
 
@@ -214,8 +252,8 @@ class SLConnection {
      * Send CompleteAgentMovement message
      */
     private fun sendCompleteAgentMovement(
-        agentId: UUID,
-        sessionId: UUID,
+        agentId: UUID
+        sessionId: UUID
     ) {
         // This message tells the simulator we're ready to receive updates
         val buffer = ByteBuffer.allocate(256)
@@ -240,10 +278,12 @@ class SLConnection {
         buffer.get(data)
 
         // Send raw packet through circuit
-        remoteAddress?.let { addr ->
-            val packet = java.net.DatagramPacket(data, data.size, addr, remotePort)
-            // TODO: Add sendRawPacket method to SLCircuit or use proper message
-            // For now, skip sending as this is a stub implementation
+        circuit?.let { circ ->
+            if (!circ.sendRawPacket(data)) {
+                onError?.invoke(Exception("Failed to send packet"))
+            }
+        } ?: run {
+            onError?.invoke(Exception("Circuit not available"))
         }
     }
 
@@ -251,8 +291,8 @@ class SLConnection {
      * Send RegionHandshakeReply
      */
     private fun sendRegionHandshakeReply(
-        agentId: UUID,
-        sessionId: UUID,
+        agentId: UUID
+        sessionId: UUID
     ) {
         val reply = RegionHandshakeReplyMessage()
         reply.agentId = agentId
@@ -269,6 +309,10 @@ class SLConnection {
         if (state != newState) {
             state = newState
             onStateChanged?.invoke(newState)
+                onError?.invoke(Exception("Failed to send packet"))
+            }
+        } ?: run {
+            onError?.invoke(Exception("Circuit not available"))
         }
     }
 
@@ -287,8 +331,8 @@ class SLConnection {
  * Extension to take elements while condition is true
  */
 private fun <T> List<T>.take(
-    maxCount: Int,
-    predicate: (Int) -> Boolean,
+    maxCount: Int
+    predicate: (Int) -> Boolean
 ): List<T> {
     val result = mutableListOf<T>()
     for (item in this) {

@@ -137,7 +137,7 @@ class HybridSLTransport {
             
             // Common Second Life capabilities to extract
             Array<String> capabilityNames = {
-                "EventQueueGet", "ChatSessionRequest", "SendChatMessage",
+                "EventQueueGet", "ChatSessionRequest", "SendChatMessage"
                 "UploadBakedTexture", "FetchInventory", "GetMesh", 
                 "GetTexture", "AgentPreferences", "UpdateAgentInformation"
             }
@@ -146,7 +146,7 @@ class HybridSLTransport {
                 // Pattern to match LLSD capability entries
                 // <key>CapabilityName</key><string>URL</string>
                 Pattern capPattern = Pattern.compile(
-                    "<key>" + Pattern.quote(capName) + "</key>\\s*<string>([^<]+)</string>",
+                    "<key>" + Pattern.quote(capName) + "</key>\\s*<string>([^<]+)</string>"
                     Pattern.CASE_INSENSITIVE
                 )
                 
@@ -303,9 +303,28 @@ class HybridSLTransport {
      */
     CompletableFuture<String> uploadAsset(byte[] assetData, String contentType, 
                                                 HTTP2CapsClient.ProgressListener progressListener) {
-        // TODO: Get actual upload URL from CAPS
-        String uploadUrl = "https://example.com/upload"; // Placeholder
-        return capsClient.uploadAssetAsync(uploadUrl, assetData, contentType, progressListener)
+        try {
+            // Get actual upload URL from CAPS
+            String uploadUrl = capsClient.getCapability("NewFileAgentInventory");
+            if (uploadUrl == null || uploadUrl.isEmpty()) {
+                uploadUrl = capsClient.getCapability("UploadBakedTexture");
+            }
+            
+            if (uploadUrl == null || uploadUrl.isEmpty()) {
+                Log.e(TAG, "No upload capability available");
+                CompletableFuture<String> failedFuture = new CompletableFuture<>();
+                failedFuture.completeExceptionally(new Exception("No upload capability available"));
+                return failedFuture;
+            }
+            
+            Log.d(TAG, "Using upload URL: " + uploadUrl);
+            return capsClient.uploadAssetAsync(uploadUrl, assetData, contentType, progressListener);
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting upload URL from CAPS", e);
+            CompletableFuture<String> failedFuture = new CompletableFuture<>();
+            failedFuture.completeExceptionally(e);
+            return failedFuture;
+        }
     }
     
     /**
@@ -375,8 +394,8 @@ class HybridSLTransport {
      * Transport type enumeration
      */
     private enum class TransportType {
-        HTTP2_CAPS,
-        WEBSOCKET_REALTIME,
+        HTTP2_CAPS
+        WEBSOCKET_REALTIME
         UDP_LEGACY
     }
     

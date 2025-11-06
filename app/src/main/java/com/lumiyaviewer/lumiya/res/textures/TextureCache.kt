@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Simplified placeholder implementation of the original texture cache.
  *
  * The goal is to restore compilation while we rebuild the full feature set.
- * The current implementation provides directory management and request wiring,
+ * The current implementation provides directory management and request wiring
  * but defers actual decompression/fetch logic to follow-up iterations.
  */
 object TextureCache : ResourceMemoryCache<DrawableTextureParams, OpenJPEG>() {
@@ -40,16 +40,22 @@ object TextureCache : ResourceMemoryCache<DrawableTextureParams, OpenJPEG>() {
     fun getInstance(): TextureCache = this
 
     override fun CreateNewRequest(
-        params: DrawableTextureParams,
-        manager: ResourceManager<DrawableTextureParams, OpenJPEG>,
+        params: DrawableTextureParams
+        manager: ResourceManager<DrawableTextureParams, OpenJPEG>
     ): ResourceRequest<DrawableTextureParams, OpenJPEG> {
         return object : ResourceRequest<DrawableTextureParams, OpenJPEG>(params, manager) {
             private var pendingTask: Future<*>? = null
 
             override fun execute() {
                 pendingTask = decompressExecutor.submit {
-                    // TODO: hook real decompression; for now emit null to unblock requesters
-                    completeRequest(null)
+                    try {
+                        // Hook real decompression
+                        val textureData = decompressTexture(params)
+                        completeRequest(textureData)
+                    } catch (e: Exception) {
+                        com.lumiyaviewer.lumiya.Debug.Printf("TextureCache: Decompression error: %s", e.message)
+                        completeRequest(null)
+                    }
                 }
             }
 
@@ -140,5 +146,110 @@ object TextureCache : ResourceMemoryCache<DrawableTextureParams, OpenJPEG>() {
             }
             return textureTempDir
         }
+    }
+
+    /**
+     * Decompress texture data using OpenJPEG or fallback methods
+     */
+    private fun decompressTexture(params: DrawableTextureParams): OpenJPEG? {
+        return try {
+            // First try to fetch the texture from SL servers
+            val fetcher = SLTextureFetcher.getInstance()
+            val textureData = fetcher.fetchTexture(params.textureId)
+            
+            if (textureData != null) {
+                // Decompress using OpenJPEG
+                decompressOpenJPEG(textureData)
+            } else {
+                // Try to load from cache
+                val cacheFile = getResourceFile(params)
+                if (cacheFile.exists()) {
+                    val cachedData = cacheFile.readBytes()
+                    decompressOpenJPEG(cachedData)
+                } else {
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            com.lumiyaviewer.lumiya.Debug.Printf("TextureCache: Error in decompressTexture: %s", e.message)
+            null
+        }
+    }
+
+    /**
+     * Decompress JPEG2000 data using OpenJPEG
+     */
+    private fun decompressOpenJPEG(jpegData: ByteArray): OpenJPEG? {
+        return try {
+            val openJPEG = OpenJPEG()
+            
+            // Check if it's JPEG2000 format
+            if (jpegData.size >= 12) {
+                // JPEG2000 signature check
+                val signature = jpegData.sliceArray(0..11)
+                val isJPEG2000 = (signature[0] == 0x00.toByte() && 
+                                signature[1] == 0x00.toByte() && 
+                                signature[2] == 0x00.toByte() && 
+                                signature[3] == 0x0C.toByte() &&
+                                signature[4] == 0x6A.toByte() && 
+                                signature[5] == 0x50.toByte() && 
+                                signature[6] == 0x20.toByte() && 
+                                signature[7] == 0x20.toByte() &&
+                                signature[8] == 0x0D.toByte() && 
+                                signature[9] == 0x0A.toByte() && 
+                                signature[10] == 0x87.toByte() && 
+                                signature[11] == 0x0A.toByte())
+                
+                if (isJPEG2000) {
+                    // Use OpenJPEG for JPEG2000 decompression
+                    openJPEG.decode(jpegData)
+                    return openJPEG
+                }
+            }
+            
+            // Fallback: try standard JPEG decompression
+            if (isStandardJPEG(jpegData)) {
+                openJPEG.decodeStandardJPEG(jpegData)
+                return openJPEG
+            }
+            
+            // Fallback: try PNG decompression
+            if (isPNG(jpegData)) {
+                openJPEG.decodePNG(jpegData)
+                return openJPEG
+            }
+            
+            // Unsupported format
+            com.lumiyaviewer.lumiya.Debug.Printf("TextureCache: Unsupported texture format")
+            null
+            
+        } catch (e: Exception) {
+            com.lumiyaviewer.lumiya.Debug.Printf("TextureCache: OpenJPEG decompression failed: %s", e.message)
+            null
+        }
+    }
+
+    /**
+     * Check if data is standard JPEG format
+     */
+    private fun isStandardJPEG(data: ByteArray): Boolean {
+        return data.size >= 2 && 
+               data[0] == 0xFF.toByte() && 
+               data[1] == 0xD8.toByte()
+    }
+
+    /**
+     * Check if data is PNG format
+     */
+    private fun isPNG(data: ByteArray): Boolean {
+        return data.size >= 8 && 
+               data[0] == 0x89.toByte() && 
+               data[1] == 0x50.toByte() && 
+               data[2] == 0x4E.toByte() && 
+               data[3] == 0x47.toByte() &&
+               data[4] == 0x0D.toByte() && 
+               data[5] == 0x0A.toByte() && 
+               data[6] == 0x1A.toByte() && 
+               data[7] == 0x0A.toByte()
     }
 }
