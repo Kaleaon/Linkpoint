@@ -39,6 +39,28 @@ class CleanLoginActivity : AppCompatActivity() {
     private lateinit var loginProgress: ProgressBar
     private lateinit var statusText: TextView
     
+    private val slAuth = SLAuth() // Reusable auth instance
+    
+    companion object {
+        // Grid configuration constants
+        private const val DEFAULT_LOGIN_URL = "https://login.agni.lindenlab.com/cgi-bin/login.cgi"
+        private const val DEFAULT_GRID_NAME = "Second Life"
+        private const val DEFAULT_START_LOCATION = "last"
+        
+        // Intent extra keys for passing authentication data
+        const val EXTRA_LOGIN_NAME = "login_name"
+        const val EXTRA_CLIENT_ID = "client_id"
+        const val EXTRA_GRID_NAME = "grid_name"
+        const val EXTRA_LOGIN_URL = "login_url"
+        const val EXTRA_AGENT_ID = "agent_id"
+        const val EXTRA_SESSION_ID = "session_id"
+        const val EXTRA_SECURE_SESSION_ID = "secure_session_id"
+        const val EXTRA_CIRCUIT_CODE = "circuit_code"
+        const val EXTRA_SIM_ADDRESS = "sim_address"
+        const val EXTRA_SIM_PORT = "sim_port"
+        const val EXTRA_SEED_CAPABILITY = "seed_capability"
+    }
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -143,23 +165,19 @@ class CleanLoginActivity : AppCompatActivity() {
                 val loginName = "$firstName $lastName"
                 val passwordHash = SLAuth.getPasswordHash(password)
                 val clientId = UUID.randomUUID()
-                val startLocation = "last"
-                val loginUrl = "https://login.agni.lindenlab.com/cgi-bin/login.cgi"
-                val gridName = "Second Life"
                 
                 val authParams = SLAuthParams(
                     loginName = loginName,
                     passwordHash = passwordHash,
                     clientId = clientId,
-                    startLocation = startLocation,
-                    loginUrl = loginUrl,
-                    gridName = gridName
+                    startLocation = DEFAULT_START_LOCATION,
+                    loginUrl = DEFAULT_LOGIN_URL,
+                    gridName = DEFAULT_GRID_NAME
                 )
                 
                 Log.i("CleanLoginActivity", "Attempting login for: $loginName")
                 
                 // Perform actual authentication
-                val slAuth = SLAuth()
                 val authReply = slAuth.login(authParams)
                 
                 if (authReply.success) {
@@ -205,19 +223,19 @@ class CleanLoginActivity : AppCompatActivity() {
             val intent = Intent(this, WorldViewActivity::class.java)
             
             // Pass authentication parameters via intent extras
-            intent.putExtra("login_name", authParams.loginName)
-            intent.putExtra("client_id", authParams.clientId.toString())
-            intent.putExtra("grid_name", authParams.gridName)
-            intent.putExtra("login_url", authParams.loginUrl)
+            intent.putExtra(EXTRA_LOGIN_NAME, authParams.loginName)
+            intent.putExtra(EXTRA_CLIENT_ID, authParams.clientId.toString())
+            intent.putExtra(EXTRA_GRID_NAME, authParams.gridName)
+            intent.putExtra(EXTRA_LOGIN_URL, authParams.loginUrl)
             
             // Pass authentication reply data (only non-null values)
-            authReply.agentId?.let { intent.putExtra("agent_id", it.toString()) }
-            authReply.sessionId?.let { intent.putExtra("session_id", it.toString()) }
-            authReply.secureSessionId?.let { intent.putExtra("secure_session_id", it.toString()) }
-            intent.putExtra("circuit_code", authReply.circuitCode)
-            authReply.simAddress?.let { intent.putExtra("sim_address", it) }
-            intent.putExtra("sim_port", authReply.simPort)
-            authReply.seedCapability?.let { intent.putExtra("seed_capability", it) }
+            authReply.agentId?.let { intent.putExtra(EXTRA_AGENT_ID, it.toString()) }
+            authReply.sessionId?.let { intent.putExtra(EXTRA_SESSION_ID, it.toString()) }
+            authReply.secureSessionId?.let { intent.putExtra(EXTRA_SECURE_SESSION_ID, it.toString()) }
+            intent.putExtra(EXTRA_CIRCUIT_CODE, authReply.circuitCode)
+            authReply.simAddress?.let { intent.putExtra(EXTRA_SIM_ADDRESS, it) }
+            intent.putExtra(EXTRA_SIM_PORT, authReply.simPort)
+            authReply.seedCapability?.let { intent.putExtra(EXTRA_SEED_CAPABILITY, it) }
             
             Log.i("CleanLoginActivity", "Launching WorldViewActivity")
             
