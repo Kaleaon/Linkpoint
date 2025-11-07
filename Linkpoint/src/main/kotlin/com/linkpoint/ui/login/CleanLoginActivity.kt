@@ -59,6 +59,9 @@ class CleanLoginActivity : AppCompatActivity() {
         const val EXTRA_SIM_ADDRESS = "sim_address"
         const val EXTRA_SIM_PORT = "sim_port"
         const val EXTRA_SEED_CAPABILITY = "seed_capability"
+        
+        // UI timing constants
+        private const val BUTTON_RE_ENABLE_DELAY_MS = 2000L
     }
     
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -278,7 +281,11 @@ class CleanLoginActivity : AppCompatActivity() {
         
         try {
             // Find the parent layout
-            val parentLayout = statusText.parent as? ViewGroup ?: return
+            val parentLayout = statusText.parent as? ViewGroup
+            if (parentLayout == null) {
+                Log.w("CleanLoginActivity", "Cannot add debug upload button: parent is not a ViewGroup")
+                return
+            }
             
             // Create debug log upload button
             val debugUploadButton = Button(this).apply {
@@ -307,7 +314,7 @@ class CleanLoginActivity : AppCompatActivity() {
                     debugUploadButton.isEnabled = true
                     debugUploadButton.text = "📤 Upload Debug Logs"
                     Toast.makeText(this, "Debug logs upload initiated - check logcat for results", Toast.LENGTH_LONG).show()
-                }, 2000)
+                }, BUTTON_RE_ENABLE_DELAY_MS)
             }
             
             // Add to parent layout
