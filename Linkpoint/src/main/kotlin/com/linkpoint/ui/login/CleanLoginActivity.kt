@@ -1,6 +1,5 @@
 package com.linkpoint.ui.login
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -16,39 +15,43 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 import com.linkpoint.BuildConfig
+import com.linkpoint.LinkpointApp
 import com.linkpoint.R
+import com.linkpoint.slproto.auth.SLAuth
+import com.linkpoint.slproto.auth.SLAuthParams
+import com.linkpoint.slproto.auth.SLAuthReply
+import com.linkpoint.ui.render.WorldViewActivity
 
-import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
+import java.io.IOException
+import java.util.UUID
 import java.util.concurrent.CompletableFuture
 
 /**
  * Clean implementation of LoginActivity without decompilation artifacts
- * Based on working patterns from comprehensive_operational_test.java
+ * Implements real grid authentication using SLAuth
  */
 class CleanLoginActivity : AppCompatActivity() {
     
-    private EditText firstNameEdit
-    private EditText lastNameEdit
-    private EditText passwordEdit
-    private Button loginButton
-    private ProgressBar loginProgress
-    private TextView statusText
+    private lateinit var firstNameEdit: EditText
+    private lateinit var lastNameEdit: EditText
+    private lateinit var passwordEdit: EditText
+    private lateinit var loginButton: Button
+    private lateinit var loginProgress: ProgressBar
+    private lateinit var statusText: TextView
     
-    override protected Unit onCreate(Bundle savedInstanceState) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         Log.i("CleanLoginActivity", "Starting CleanLoginActivity")
         
         try {
-            // Use simple layout for now - we'll create the layout file next
             setContentView(R.layout.activity_clean_login)
             
             initializeViews()
             setupLoginButton()
             
             Log.i("CleanLoginActivity", "CleanLoginActivity initialized successfully")
-        } catch (Exception e) {
+        } catch (e: Exception) {
             Log.e("CleanLoginActivity", "Error during activity initialization", e)
             
             // Create a basic error layout if the normal layout fails
@@ -59,32 +62,33 @@ class CleanLoginActivity : AppCompatActivity() {
     /**
      * Create a basic fallback layout when normal initialization fails
      */
-     private fun createFallbackLayout(originalError: Exception) {
+    private fun createFallbackLayout(originalError: Exception) {
         try {
-            Log.w("CleanLoginActivity", "Creating fallback layout due to: " + originalError.getMessage())
+            Log.w("CleanLoginActivity", "Creating fallback layout due to: ${originalError.message}")
             
             // Create a simple error display
             setTitle("Linkpoint - Second Life Viewer")
             
             // Since we can't rely on the XML layout, create a simple text view
-            val errorText: TextView = TextView(this)
-            errorText.setText("Linkpoint Second Life Viewer\n\n" +
-                            "The app is starting in safe mode.\n" +
-                            "Some features may be limited.\n\n" +
-                            "Error: " + originalError.getMessage())
-            errorText.setPadding(32, 32, 32, 32)
-            errorText.setTextSize(16)
+            val errorText = TextView(this).apply {
+                text = "Linkpoint Second Life Viewer\n\n" +
+                        "The app is starting in safe mode.\n" +
+                        "Some features may be limited.\n\n" +
+                        "Error: ${originalError.message}"
+                setPadding(32, 32, 32, 32)
+                textSize = 16f
+            }
             setContentView(errorText)
             
             Log.i("CleanLoginActivity", "Fallback layout created successfully")
-        } catch (Exception e) {
+        } catch (e: Exception) {
             Log.e("CleanLoginActivity", "Failed to create fallback layout", e)
             // Last resort - just finish the activity
             finish()
         }
     }
     
-     private fun initializeViews() {
+    private fun initializeViews() {
         try {
             firstNameEdit = findViewById(R.id.edit_first_name)
             lastNameEdit = findViewById(R.id.edit_last_name)
@@ -93,43 +97,35 @@ class CleanLoginActivity : AppCompatActivity() {
             loginProgress = findViewById(R.id.progress_login)
             statusText = findViewById(R.id.text_status)
             
-            // Check if all views were found
-            if (firstNameEdit == null || lastNameEdit == null || passwordEdit == null || 
-                loginButton == null || loginProgress == null || statusText == null) {
-                throw RuntimeException("One or more required views not found in layout")
-            }
-            
             // Initialize with default values for testing
             firstNameEdit.setText("Test")
             lastNameEdit.setText("User")
             
             // Show app status in the status text for debugging
-            val appStatus: String = com.lumiyaviewer.lumiya.LinkpointApp.getStartupStatus()
-            statusText.setText("Ready to login to Second Life\n\n" + appStatus)
+            val appStatus = LinkpointApp.getStartupStatus()
+            statusText.text = "Ready to login to Second Life\n\n$appStatus"
             
             // Add debug log upload button for debug builds
             addDebugLogUploadButton()
             
             Log.i("CleanLoginActivity", "All views initialized successfully")
             Log.i("CleanLoginActivity", appStatus)
-        } catch (Exception e) {
+        } catch (e: Exception) {
             Log.e("CleanLoginActivity", "Error initializing views", e)
-            throw e; // Re-throw to trigger fallback layout
+            throw e // Re-throw to trigger fallback layout
         }
     }
     
-     private fun setupLoginButton() {
-        loginButton.setOnClickListener(View.OnClickListener() {
-            override Unit onClick(View v) {
-                performLogin()
-            }
-        })
+    private fun setupLoginButton() {
+        loginButton.setOnClickListener {
+            performLogin()
+        }
     }
     
-     private fun performLogin() {
-        val firstName: String = firstNameEdit.getText().toString().trim()
-        val lastName: String = lastNameEdit.getText().toString().trim()
-        val password: String = passwordEdit.getText().toString()
+    private fun performLogin() {
+        val firstName = firstNameEdit.text.toString().trim()
+        val lastName = lastNameEdit.text.toString().trim()
+        val password = passwordEdit.text.toString()
         
         if (firstName.isEmpty() || lastName.isEmpty() || password.isEmpty()) {
             showError("Please fill in all fields")
@@ -138,86 +134,125 @@ class CleanLoginActivity : AppCompatActivity() {
         
         // Show progress
         setLoginInProgress(true)
-        statusText.setText("Authenticating with Second Life...")
+        statusText.text = "Authenticating with Second Life..."
         
-        // Perform authentication in background (based on comprehensive test patterns)
-        CompletableFuture.runAsync(() -> {
+        // Perform real authentication using SLAuth
+        CompletableFuture.runAsync {
             try {
-                // Use the same authentication logic as comprehensive_operational_test.java
-                val hashedPassword: String = hashPassword(password)
-                val xmlRequest: String = buildLoginXMLRequest(firstName, lastName, hashedPassword, "last")
+                // Build login parameters
+                val loginName = "$firstName $lastName"
+                val passwordHash = SLAuth.getPasswordHash(password)
+                val clientId = UUID.randomUUID()
+                val startLocation = "last"
+                val loginUrl = "https://login.agni.lindenlab.com/cgi-bin/login.cgi"
+                val gridName = "Second Life"
                 
-                // Simulate successful authentication for now
-                runOnUiThread(() -> {
-                    setLoginInProgress(false)
-                    statusText.setText("Login successful! Starting Second Life...")
+                val authParams = SLAuthParams(
+                    loginName = loginName,
+                    passwordHash = passwordHash,
+                    clientId = clientId,
+                    startLocation = startLocation,
+                    loginUrl = loginUrl,
+                    gridName = gridName
+                )
+                
+                Log.i("CleanLoginActivity", "Attempting login for: $loginName")
+                
+                // Perform actual authentication
+                val slAuth = SLAuth()
+                val authReply = slAuth.login(authParams)
+                
+                if (authReply.success) {
+                    Log.i("CleanLoginActivity", "Login successful! Agent ID: ${authReply.agentId}")
                     
-                    // TODO: Launch main Second Life interface
-                    // For now, show success message
-                    Toast.makeText(CleanLoginActivity.this, "Login Successful - Core functionality working!", Toast.LENGTH_LONG).show()
-                })
+                    runOnUiThread {
+                        setLoginInProgress(false)
+                        statusText.text = "Login successful! Starting Second Life..."
+                        
+                        // Launch WorldViewActivity
+                        launchWorldView(authParams, authReply)
+                    }
+                } else {
+                    Log.e("CleanLoginActivity", "Login failed: ${authReply.message}")
+                    
+                    runOnUiThread {
+                        setLoginInProgress(false)
+                        showError("Login failed: ${authReply.message}")
+                    }
+                }
                 
-            } catch (Exception e) {
-                runOnUiThread(() -> {
+            } catch (e: IOException) {
+                Log.e("CleanLoginActivity", "Network error during login", e)
+                runOnUiThread {
                     setLoginInProgress(false)
-                    showError("Login failed: " + e.getMessage())
-                })
+                    showError("Network error: ${e.message}")
+                }
+            } catch (e: Exception) {
+                Log.e("CleanLoginActivity", "Login error", e)
+                runOnUiThread {
+                    setLoginInProgress(false)
+                    showError("Login failed: ${e.message}")
+                }
             }
-        })
-    }
-    
-     private fun setLoginInProgress(inProgress: Boolean) {
-        loginButton.setEnabled(!inProgress)
-        loginProgress.setVisibility(inProgress ? View.VISIBLE : View.GONE)
-        firstNameEdit.setEnabled(!inProgress)
-        lastNameEdit.setEnabled(!inProgress)
-        passwordEdit.setEnabled(!inProgress)
-    }
-    
-     private fun showError(message: String) {
-        statusText.setText("Error: " + message)
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-    }
-    
-    // Authentication methods from comprehensive_operational_test.java
-     private fun hashPassword(password: String) throws NoSuchAlgorithmException {
-        val md: MessageDigest = MessageDigest.getInstance("MD5")
-        val digest: ByteArray = md.digest(password.getBytes())
-        val sb: StringBuilder = StringBuilder()
-        for (Byte b : digest) {
-            sb.append(String.format("%02x", b))
         }
-        return "$1$" + sb.toString()
     }
     
-     private fun buildLoginXMLRequest(first: String, last: String, password: String, start: String): String {
-        return "<?xml version=\"1.0\"?>" +
-                "<methodCall>" +
-                "<methodName>login_to_simulator</methodName>" +
-                "<params>" +
-                "<param><value><struct>" +
-                "<member><name>first</name><value><string>" + first + "</string></value></member>" +
-                "<member><name>last</name><value><string>" + last + "</string></value></member>" +
-                "<member><name>passwd</name><value><string>" + password + "</string></value></member>" +
-                "<member><name>start</name><value><string>" + start + "</string></value></member>" +
-                "<member><name>channel</name><value><string>Linkpoint</string></value></member>" +
-                "<member><name>version</name><value><string>3.4.3</string></value></member>" +
-                "<member><name>platform</name><value><string>Android</string></value></member>" +
-                "<member><name>mac</name><value><string>00:00:00:00:00:00</string></value></member>" +
-                "<member><name>id0</name><value><string>" + generateClientID() + "</string></value></member>" +
-                "</struct></value></param>" +
-                "</params>" +
-                "</methodCall>"
+    /**
+     * Launch the WorldViewActivity after successful login
+     */
+    private fun launchWorldView(authParams: SLAuthParams, authReply: SLAuthReply) {
+        try {
+            val intent = Intent(this, WorldViewActivity::class.java)
+            
+            // Pass authentication parameters via intent extras
+            intent.putExtra("login_name", authParams.loginName)
+            intent.putExtra("client_id", authParams.clientId.toString())
+            intent.putExtra("grid_name", authParams.gridName)
+            intent.putExtra("login_url", authParams.loginUrl)
+            
+            // Pass authentication reply data
+            intent.putExtra("agent_id", authReply.agentId?.toString())
+            intent.putExtra("session_id", authReply.sessionId?.toString())
+            intent.putExtra("secure_session_id", authReply.secureSessionId?.toString())
+            intent.putExtra("circuit_code", authReply.circuitCode)
+            intent.putExtra("sim_address", authReply.simAddress)
+            intent.putExtra("sim_port", authReply.simPort)
+            intent.putExtra("seed_capability", authReply.seedCapability)
+            
+            Log.i("CleanLoginActivity", "Launching WorldViewActivity")
+            
+            // Start the world view
+            startActivity(intent)
+            
+            // Show success message
+            Toast.makeText(this, "Welcome to Second Life!", Toast.LENGTH_LONG).show()
+            
+            // Finish this activity so back button doesn't return to login
+            finish()
+            
+        } catch (e: Exception) {
+            Log.e("CleanLoginActivity", "Error launching WorldViewActivity", e)
+            showError("Error starting world view: ${e.message}")
+        }
     }
     
-     private fun generateClientID(): String {
-        return java.util.UUID.randomUUID().toString()
+    private fun setLoginInProgress(inProgress: Boolean) {
+        loginButton.isEnabled = !inProgress
+        loginProgress.visibility = if (inProgress) View.VISIBLE else View.GONE
+        firstNameEdit.isEnabled = !inProgress
+        lastNameEdit.isEnabled = !inProgress
+        passwordEdit.isEnabled = !inProgress
+    }
+    
+    private fun showError(message: String) {
+        statusText.text = "Error: $message"
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
     
     /**
      * Add debug log upload button for debug builds
      */
-     private fun addDebugLogUploadButton() {
+    private fun addDebugLogUploadButton() {
         // Only add for debug builds
         if (!BuildConfig.DEBUG) {
             return
@@ -225,42 +260,44 @@ class CleanLoginActivity : AppCompatActivity() {
         
         try {
             // Find the parent layout
-            val parentLayout: ViewGroup = (ViewGroup) statusText.getParent()
+            val parentLayout = statusText.parent as? ViewGroup ?: return
             
             // Create debug log upload button
-            val debugUploadButton: Button = Button(this)
-            debugUploadButton.setText("📤 Upload Debug Logs")
-            debugUploadButton.setTextSize(12)
+            val debugUploadButton = Button(this).apply {
+                text = "📤 Upload Debug Logs"
+                textSize = 12f
+            }
             
             // Set layout parameters
-            LinearLayout.LayoutParams params = LinearLayout.LayoutParams(
+            val params = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            params.setMargins(0, 16, 0, 0)
-            debugUploadButton.setLayoutParams(params)
+            ).apply {
+                setMargins(0, 16, 0, 0)
+            }
+            debugUploadButton.layoutParams = params
             
             // Set click listener
-            debugUploadButton.setOnClickListener(v -> {
-                debugUploadButton.setEnabled(false)
-                debugUploadButton.setText("📤 Uploading...")
+            debugUploadButton.setOnClickListener { view ->
+                view.isEnabled = false
+                (view as Button).text = "📤 Uploading..."
                 
-                com.lumiyaviewer.lumiya.LinkpointApp.uploadDebugLogsNow("Manual upload from login screen")
+                LinkpointApp.uploadDebugLogsNow("Manual upload from login screen")
                 
                 // Re-enable button after a delay
-                debugUploadButton.postDelayed(() -> {
-                    debugUploadButton.setEnabled(true)
-                    debugUploadButton.setText("📤 Upload Debug Logs")
+                view.postDelayed({
+                    view.isEnabled = true
+                    view.text = "📤 Upload Debug Logs"
                     Toast.makeText(this, "Debug logs upload initiated - check logcat for results", Toast.LENGTH_LONG).show()
                 }, 2000)
-            })
+            }
             
             // Add to parent layout
             parentLayout.addView(debugUploadButton)
             
             Log.i("CleanLoginActivity", "Debug log upload button added")
             
-        } catch (Exception e) {
+        } catch (e: Exception) {
             Log.e("CleanLoginActivity", "Failed to add debug upload button", e)
         }
     }
