@@ -83,7 +83,7 @@ class CleanLoginActivity : AppCompatActivity() {
             return
         }
 
-        Log.i(TAG, "Authenticating user $first $last (demo mode)")
+        Log.i(TAG, "Authenticating user (demo mode)")
         setInProgress(true, getString(R.string.clean_login_status_authenticating))
 
         loginJob?.cancel()
@@ -91,6 +91,7 @@ class CleanLoginActivity : AppCompatActivity() {
             delay(DEMO_LOGIN_DELAY_MS)
             Log.i(TAG, "Demo login complete; continuing to main experience placeholder")
             setInProgress(false, getString(R.string.clean_login_status_success, first, last))
+            passwordField.text?.clear()
             Toast.makeText(
                 this@CleanLoginActivity,
                 R.string.clean_login_toast_success,
