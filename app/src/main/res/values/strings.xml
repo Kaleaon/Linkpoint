@@ -38,6 +38,12 @@
     <string name="age_days">%d days old</string>
     <string name="app_descr">Second Life viewer</string>
     <string name="app_name">Lumiya</string>
+    <string name="clean_login_status_ready">%1$s v%2$s is ready to sign in.</string>
+    <string name="clean_login_status_authenticating">Authenticating with Second Life…</string>
+    <string name="clean_login_status_success">Welcome back, %1$s %2$s!</string>
+    <string name="clean_login_status_error">Login failed: %1$s</string>
+    <string name="clean_login_validation_error">Please fill in all fields to continue.</string>
+    <string name="clean_login_toast_success">Login successful — starting viewer prototype.</string>
     <string name="app_upgrade_for_voice_needed">Lumiya needs to be updated to work with Voice Plugin.</string>
     <string name="appbar_scrolling_view_behavior">android.support.design.widget.AppBarLayout$ScrollingViewBehavior</string>
     <string name="arrow_down">⇩</string>
