@@ -210,14 +210,14 @@ class CleanLoginActivity : AppCompatActivity() {
             intent.putExtra("grid_name", authParams.gridName)
             intent.putExtra("login_url", authParams.loginUrl)
             
-            // Pass authentication reply data
-            intent.putExtra("agent_id", authReply.agentId?.toString())
-            intent.putExtra("session_id", authReply.sessionId?.toString())
-            intent.putExtra("secure_session_id", authReply.secureSessionId?.toString())
+            // Pass authentication reply data (only non-null values)
+            authReply.agentId?.let { intent.putExtra("agent_id", it.toString()) }
+            authReply.sessionId?.let { intent.putExtra("session_id", it.toString()) }
+            authReply.secureSessionId?.let { intent.putExtra("secure_session_id", it.toString()) }
             intent.putExtra("circuit_code", authReply.circuitCode)
-            intent.putExtra("sim_address", authReply.simAddress)
+            authReply.simAddress?.let { intent.putExtra("sim_address", it) }
             intent.putExtra("sim_port", authReply.simPort)
-            intent.putExtra("seed_capability", authReply.seedCapability)
+            authReply.seedCapability?.let { intent.putExtra("seed_capability", it) }
             
             Log.i("CleanLoginActivity", "Launching WorldViewActivity")
             
@@ -278,16 +278,16 @@ class CleanLoginActivity : AppCompatActivity() {
             debugUploadButton.layoutParams = params
             
             // Set click listener
-            debugUploadButton.setOnClickListener { view ->
-                view.isEnabled = false
-                (view as Button).text = "📤 Uploading..."
+            debugUploadButton.setOnClickListener {
+                debugUploadButton.isEnabled = false
+                debugUploadButton.text = "📤 Uploading..."
                 
                 LinkpointApp.uploadDebugLogsNow("Manual upload from login screen")
                 
                 // Re-enable button after a delay
-                view.postDelayed({
-                    view.isEnabled = true
-                    view.text = "📤 Upload Debug Logs"
+                debugUploadButton.postDelayed({
+                    debugUploadButton.isEnabled = true
+                    debugUploadButton.text = "📤 Upload Debug Logs"
                     Toast.makeText(this, "Debug logs upload initiated - check logcat for results", Toast.LENGTH_LONG).show()
                 }, 2000)
             }
