@@ -328,5 +328,7 @@ object SLMessageFactory {
         registerMessage(MessageIDs.ASSET_UPLOAD_COMPLETE) { AssetUploadCompleteMessage() }
         registerMessage(MessageIDs.CREATE_TRUSTED_CIRCUIT) { CreateTrustedCircuitMessage() }
         registerMessage(MessageIDs.DENY_TRUSTED_CIRCUIT) { DenyTrustedCircuitMessage() }
-    }
+
+        GeneratedMessageRegistrar.registerAll()
+      }
 }

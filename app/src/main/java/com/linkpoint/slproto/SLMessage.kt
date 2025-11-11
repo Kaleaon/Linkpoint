@@ -287,41 +287,45 @@ abstract class SLMessage : Parcelable {
         }
     }
 
-    // Helper packing utilities
+      // Helper packing utilities
       protected fun packByte(buffer: ByteBuffer, value: Int) {
-        buffer.put(value.toByte())
+          buffer.put(value.toByte())
       }
 
       protected fun packInt(buffer: ByteBuffer, value: Int) {
-        buffer.putInt(value)
+          buffer.putInt(value)
       }
 
       protected fun packUInt16(buffer: ByteBuffer, value: Int) {
-        buffer.putShort(value.toShort())
+          buffer.putShort(value.toShort())
       }
 
       protected fun packShort(buffer: ByteBuffer, value: Int) {
-        buffer.putShort(value.toShort())
+          buffer.putShort(value.toShort())
       }
 
       protected fun packLong(buffer: ByteBuffer, value: Long) {
-        buffer.putLong(value)
+          buffer.putLong(value)
       }
 
       protected fun packFloat(buffer: ByteBuffer, value: Float) {
-        buffer.putFloat(value)
+          buffer.putFloat(value)
+      }
+
+      protected fun packDouble(buffer: ByteBuffer, value: Double) {
+          buffer.putDouble(value)
       }
 
       protected fun packBoolean(buffer: ByteBuffer, value: Boolean) {
-        buffer.put(if (value) 1 else 0)
+          buffer.put(if (value) 1 else 0)
       }
 
       protected fun packUUID(buffer: ByteBuffer, uuid: UUID) {
-        val originalOrder = buffer.order()
-        buffer.order(ByteOrder.BIG_ENDIAN)
-        buffer.putLong(uuid.mostSignificantBits)
-        buffer.putLong(uuid.leastSignificantBits)
-        buffer.order(originalOrder)
+          val originalOrder = buffer.order()
+          buffer.order(ByteOrder.BIG_ENDIAN)
+          buffer.putLong(uuid.mostSignificantBits)
+          buffer.putLong(uuid.leastSignificantBits)
+          buffer.order(originalOrder)
       }
 
       protected fun packVariable(
@@ -329,107 +333,115 @@ abstract class SLMessage : Parcelable {
           data: ByteArray,
           lengthBytes: Int,
       ) {
-        require(lengthBytes == 1 || lengthBytes == 2) { "lengthBytes must be 1 or 2" }
-        val length = data.size
-        when (lengthBytes) {
-          1 -> {
-            require(length <= 0xFF) { "Variable field too large for 1 byte length: $length" }
-            buffer.put(length.toByte())
-          }
-          2 -> {
-            require(length <= 0xFFFF) { "Variable field too large for 2 byte length: $length" }
-            buffer.putShort(length.toShort())
-          }
-        }
-        buffer.put(data)
-      }
-
-        protected fun packFixed(
-            buffer: ByteBuffer,
-            data: ByteArray,
-            expectedLength: Int,
-        ) {
-          require(expectedLength >= 0) { "expectedLength must be non-negative" }
-          require(data.size == expectedLength) {
-            "Fixed field expected $expectedLength bytes but was ${data.size}"
+          require(lengthBytes == 1 || lengthBytes == 2) { "lengthBytes must be 1 or 2" }
+          val length = data.size
+          when (lengthBytes) {
+              1 -> {
+                  require(length <= 0xFF) { "Variable field too large for 1 byte length: $length" }
+                  buffer.put(length.toByte())
+              }
+              2 -> {
+                  require(length <= 0xFFFF) { "Variable field too large for 2 byte length: $length" }
+                  buffer.putShort(length.toShort())
+              }
           }
           buffer.put(data)
-        }
+      }
+
+      protected fun packFixed(
+          buffer: ByteBuffer,
+          data: ByteArray,
+          expectedLength: Int,
+      ) {
+          require(expectedLength >= 0) { "expectedLength must be non-negative" }
+          require(data.size == expectedLength) {
+              "Fixed field expected $expectedLength bytes but was ${data.size}"
+          }
+          buffer.put(data)
+      }
 
       protected fun packIPAddress(
           buffer: ByteBuffer,
           address: Inet4Address?,
       ) {
-        val bytes = address?.address ?: ByteArray(4)
-        buffer.put(bytes)
+          val bytes = address?.address ?: ByteArray(4)
+          buffer.put(bytes)
       }
 
       protected fun unpackByte(buffer: ByteBuffer): Int {
-        return buffer.get().toInt() and 0xFF
+          return buffer.get().toInt() and 0xFF
       }
 
       protected fun unpackInt(buffer: ByteBuffer): Int {
-        return buffer.getInt()
+          return buffer.getInt()
       }
 
       protected fun unpackUInt16(buffer: ByteBuffer): Int {
-        return buffer.getShort().toInt() and 0xFFFF
+          return buffer.getShort().toInt() and 0xFFFF
+      }
+
+      protected fun unpackShort(buffer: ByteBuffer): Int {
+          return buffer.getShort().toInt()
       }
 
       protected fun unpackLong(buffer: ByteBuffer): Long {
-        return buffer.getLong()
+          return buffer.getLong()
       }
 
       protected fun unpackFloat(buffer: ByteBuffer): Float {
-        return buffer.getFloat()
+          return buffer.getFloat()
+      }
+
+      protected fun unpackDouble(buffer: ByteBuffer): Double {
+          return buffer.getDouble()
       }
 
       protected fun unpackBoolean(buffer: ByteBuffer): Boolean {
-        return buffer.get().toInt() != 0
+          return buffer.get().toInt() != 0
       }
 
       protected fun unpackUUID(buffer: ByteBuffer): UUID {
-        val originalOrder = buffer.order()
-        buffer.order(ByteOrder.BIG_ENDIAN)
-        val most = buffer.getLong()
-        val least = buffer.getLong()
-        buffer.order(originalOrder)
-        return UUID(most, least)
+          val originalOrder = buffer.order()
+          buffer.order(ByteOrder.BIG_ENDIAN)
+          val most = buffer.getLong()
+          val least = buffer.getLong()
+          buffer.order(originalOrder)
+          return UUID(most, least)
       }
 
       protected fun unpackVariable(
           buffer: ByteBuffer,
           lengthBytes: Int,
       ): ByteArray {
-        require(lengthBytes == 1 || lengthBytes == 2) { "lengthBytes must be 1 or 2" }
-        val length =
-            when (lengthBytes) {
-              1 -> buffer.get().toInt() and 0xFF
-              else -> buffer.getShort().toInt() and 0xFFFF
-            }
-        val data = ByteArray(length)
-        buffer.get(data)
-        return data
+          require(lengthBytes == 1 || lengthBytes == 2) { "lengthBytes must be 1 or 2" }
+          val length =
+              when (lengthBytes) {
+                  1 -> buffer.get().toInt() and 0xFF
+                  else -> buffer.getShort().toInt() and 0xFFFF
+              }
+          val data = ByteArray(length)
+          buffer.get(data)
+          return data
       }
 
-        protected fun unpackFixed(
-            buffer: ByteBuffer,
-            length: Int,
-        ): ByteArray {
+      protected fun unpackFixed(
+          buffer: ByteBuffer,
+          length: Int,
+      ): ByteArray {
           require(length >= 0) { "length must be non-negative" }
           val data = ByteArray(length)
           buffer.get(data)
           return data
-        }
+      }
 
       protected fun unpackIPAddress(buffer: ByteBuffer): Inet4Address? {
-        val bytes = ByteArray(4)
-        buffer.get(bytes)
-        return try {
-          InetAddress.getByAddress(bytes) as? Inet4Address
-        } catch (_: UnknownHostException) {
-          null
-        }
+          val bytes = ByteArray(4)
+          buffer.get(bytes)
+          return try {
+              InetAddress.getByAddress(bytes) as? Inet4Address
+          } catch (_: UnknownHostException) {
+              null
+          }
       }
 
     /**
