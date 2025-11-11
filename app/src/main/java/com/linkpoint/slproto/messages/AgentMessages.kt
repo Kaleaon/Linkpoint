@@ -962,6 +962,8 @@ class ChildAgentUpdateMessage : SLMessage() {
 
     init {
         zeroCoded = true
+        preyAgent = UUID(0L, 0L)
+        activeGroupId = UUID(0L, 0L)
     }
 
     override fun packPayload(buffer: ByteBuffer) {

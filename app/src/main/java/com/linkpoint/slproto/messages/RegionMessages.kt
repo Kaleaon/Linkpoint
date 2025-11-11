@@ -209,3 +209,56 @@ class CrossedRegionMessage : SLMessage() {
 
     override fun getMessageName(): String = "CrossedRegion"
 }
+
+/**
+ * Neighbor list (0x03 / 0xFF03)
+ */
+class NeighborListMessage : SLMessage() {
+    data class NeighborEntry(
+        var simulatorAddress: Inet4Address? = null,
+        var simulatorPort: Int = 0,
+        var publicAddress: Inet4Address? = null,
+        var publicPort: Int = 0,
+        var regionId: UUID = UUID.randomUUID(),
+        var name: String = "",
+        var simAccess: Int = 0,
+    )
+
+    private val charset: Charset = Charsets.UTF_8
+    val neighbors: MutableList<NeighborEntry> = MutableList(4) { NeighborEntry() }
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packByte(buffer, 3) // block frequency identifier
+        require(neighbors.size == 4) { "Neighbor list must contain exactly 4 entries" }
+        neighbors.forEach { entry ->
+            packIPAddress(buffer, entry.simulatorAddress)
+            require(entry.simulatorPort in 0..0xFFFF) { "simulatorPort out of range (${entry.simulatorPort})" }
+            packUInt16(buffer, entry.simulatorPort)
+            packIPAddress(buffer, entry.publicAddress)
+            require(entry.publicPort in 0..0xFFFF) { "publicPort out of range (${entry.publicPort})" }
+            packUInt16(buffer, entry.publicPort)
+            packUUID(buffer, entry.regionId)
+            packVariable(buffer, entry.name.toByteArray(charset), 1)
+            require(entry.simAccess in 0..0xFF) { "simAccess out of range (${entry.simAccess})" }
+            packByte(buffer, entry.simAccess)
+        }
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        /* frequency */ unpackByte(buffer)
+        neighbors.indices.forEach { idx ->
+            val entry = neighbors[idx]
+            entry.simulatorAddress = unpackIPAddress(buffer)
+            entry.simulatorPort = unpackUInt16(buffer)
+            entry.publicAddress = unpackIPAddress(buffer)
+            entry.publicPort = unpackUInt16(buffer)
+            entry.regionId = unpackUUID(buffer)
+            entry.name = String(unpackVariable(buffer, 1), charset)
+            entry.simAccess = unpackByte(buffer)
+        }
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.NEIGHBOR_LIST
+
+    override fun getMessageName(): String = "NeighborList"
+}

@@ -21,6 +21,7 @@ object SLMessageFactory {
         // Agent messages
         const val AGENT_UPDATE = 0x04
         const val AGENT_ANIMATION = 0x14
+        const val NEIGHBOR_LIST = 0x03
         const val AGENT_REQUEST_SIT = 0x1E
         const val AGENT_SIT = 0x1F
         const val CHILD_AGENT_UPDATE = 0x19
@@ -133,6 +134,7 @@ object SLMessageFactory {
         registerMessage(MessageIDs.START_PING_CHECK) { StartPingCheckMessage() }
         registerMessage(MessageIDs.COMPLETE_PING_CHECK) { CompletePingCheckMessage() }
         registerMessage(MessageIDs.CONFIRM_ENABLE_SIMULATOR) { ConfirmEnableSimulatorMessage() }
+        registerMessage(MessageIDs.NEIGHBOR_LIST) { NeighborListMessage() }
 
         // Agent messages
         registerMessage(MessageIDs.AGENT_UPDATE) { AgentUpdateMessage() }
