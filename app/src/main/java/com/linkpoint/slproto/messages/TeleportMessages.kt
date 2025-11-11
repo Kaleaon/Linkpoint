@@ -3,6 +3,7 @@ package com.linkpoint.slproto.messages
 import com.linkpoint.slproto.SLMessage
 import com.linkpoint.slproto.types.LLVector3
 import java.net.Inet4Address
+import java.net.InetAddress
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.util.*
@@ -69,6 +70,16 @@ class TeleportFinishMessage : SLMessage() {
     var seedCapability: String = ""
     var simAccess: Int = 0
     var teleportFlags: Int = 0
+    var simIp: String
+        get() = simAddress?.hostAddress ?: "0.0.0.0"
+        set(value) {
+            simAddress =
+                try {
+                    InetAddress.getByName(value) as? Inet4Address
+                } catch (_: Exception) {
+                    null
+                }
+        }
 
     override fun packPayload(buffer: ByteBuffer) {
         packUUID(buffer, agentId)

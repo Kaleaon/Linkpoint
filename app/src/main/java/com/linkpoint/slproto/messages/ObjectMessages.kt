@@ -77,20 +77,21 @@ class ObjectUpdateMessage : SLMessage() {
     val objectList = mutableListOf<ObjectData>()
 
     override fun packPayload(buffer: ByteBuffer) {
-        buffer.putLong(regionHandle)
-        buffer.putShort(timeDilation)
+        packLong(buffer, regionHandle)
+        packUInt16(buffer, timeDilation.toInt() and 0xFFFF)
 
-        buffer.put(objectList.size.toByte())
+        require(objectList.size <= 0xFF) { "Object list too large (${objectList.size})" }
+        packByte(buffer, objectList.size)
         for (obj in objectList) {
             packObjectData(buffer, obj)
         }
     }
 
     override fun unpackPayload(buffer: ByteBuffer) {
-        regionHandle = buffer.getLong()
-        timeDilation = buffer.getShort()
+        regionHandle = unpackLong(buffer)
+        timeDilation = unpackUInt16(buffer).toShort()
 
-        val count = buffer.get().toInt() and 0xFF
+        val count = unpackByte(buffer)
         objectList.clear()
         for (i in 0 until count) {
             objectList.add(unpackObjectData(buffer))
@@ -101,281 +102,206 @@ class ObjectUpdateMessage : SLMessage() {
         buffer: ByteBuffer,
         obj: ObjectData,
     ) {
-        buffer.putInt(obj.id)
-        buffer.put(obj.state)
-        buffer.putLong(obj.fullId.mostSignificantBits)
-        buffer.putLong(obj.fullId.leastSignificantBits)
-        buffer.putInt(obj.crc)
-        buffer.put(obj.pCode)
-        buffer.put(obj.material)
-        buffer.put(obj.clickAction)
+        packInt(buffer, obj.id)
+        packByte(buffer, obj.state.toInt())
+        packUUID(buffer, obj.fullId)
+        packInt(buffer, obj.crc)
+        packByte(buffer, obj.pCode.toInt())
+        packByte(buffer, obj.material.toInt())
+        packByte(buffer, obj.clickAction.toInt())
         obj.scale.pack(buffer)
 
         // Object data (variable)
-        buffer.put(obj.objectData.size.toByte())
-        buffer.put(obj.objectData)
+        packVariable(buffer, obj.objectData, 1)
 
-        buffer.putInt(obj.parentId)
-        buffer.putInt(obj.updateFlags)
+        packInt(buffer, obj.parentId)
+        packInt(buffer, obj.updateFlags)
 
         // Path and profile data
-        buffer.put(obj.pathCurve)
-        buffer.put(obj.profileCurve)
-        buffer.putShort(obj.pathBegin)
-        buffer.putShort(obj.pathEnd)
-        buffer.put(obj.pathScaleX)
-        buffer.put(obj.pathScaleY)
-        buffer.put(obj.pathShearX)
-        buffer.put(obj.pathShearY)
-        buffer.put(obj.pathTwist)
-        buffer.put(obj.pathTwistBegin)
-        buffer.put(obj.pathRadiusOffset)
-        buffer.put(obj.pathTaperX)
-        buffer.put(obj.pathTaperY)
-        buffer.put(obj.pathRevolutions)
-        buffer.put(obj.pathSkew)
-        buffer.putShort(obj.profileBegin)
-        buffer.putShort(obj.profileEnd)
-        buffer.putShort(obj.profileHollow)
+        packByte(buffer, obj.pathCurve.toInt())
+        packByte(buffer, obj.profileCurve.toInt())
+        packUInt16(buffer, obj.pathBegin.toInt() and 0xFFFF)
+        packUInt16(buffer, obj.pathEnd.toInt() and 0xFFFF)
+        packByte(buffer, obj.pathScaleX.toInt())
+        packByte(buffer, obj.pathScaleY.toInt())
+        packByte(buffer, obj.pathShearX.toInt())
+        packByte(buffer, obj.pathShearY.toInt())
+        packByte(buffer, obj.pathTwist.toInt())
+        packByte(buffer, obj.pathTwistBegin.toInt())
+        packByte(buffer, obj.pathRadiusOffset.toInt())
+        packByte(buffer, obj.pathTaperX.toInt())
+        packByte(buffer, obj.pathTaperY.toInt())
+        packByte(buffer, obj.pathRevolutions.toInt())
+        packByte(buffer, obj.pathSkew.toInt())
+        packUInt16(buffer, obj.profileBegin.toInt() and 0xFFFF)
+        packUInt16(buffer, obj.profileEnd.toInt() and 0xFFFF)
+        packUInt16(buffer, obj.profileHollow.toInt() and 0xFFFF)
 
         // Texture entry
-        buffer.putShort(obj.textureEntry.size.toShort())
-        buffer.put(obj.textureEntry)
+        packVariable(buffer, obj.textureEntry, 2)
 
         // Texture animation
-        buffer.put(obj.textureAnim.size.toByte())
-        buffer.put(obj.textureAnim)
+        packVariable(buffer, obj.textureAnim, 1)
 
         // Name value
-        buffer.putShort(obj.nameValue.size.toShort())
-        buffer.put(obj.nameValue)
+        packVariable(buffer, obj.nameValue, 2)
 
         // Data
-        buffer.putShort(obj.data.size.toShort())
-        buffer.put(obj.data)
+        packVariable(buffer, obj.data, 2)
 
         // Text
-        val textBytes = obj.text.toByteArray(StandardCharsets.UTF_8)
-        buffer.put(textBytes.size.toByte())
-        buffer.put(textBytes)
+        packVariable(buffer, obj.text.toByteArray(StandardCharsets.UTF_8), 1)
 
         // Text color
         buffer.put(obj.textColor)
 
         // Media URL
-        val mediaBytes = obj.mediaUrl.toByteArray(StandardCharsets.UTF_8)
-        buffer.put(mediaBytes.size.toByte())
-        buffer.put(mediaBytes)
+        packVariable(buffer, obj.mediaUrl.toByteArray(StandardCharsets.UTF_8), 1)
 
         // PS block
-        buffer.put(obj.psBlock.size.toByte())
-        buffer.put(obj.psBlock)
+        packVariable(buffer, obj.psBlock, 1)
 
         // Extra params
-        buffer.putShort(obj.extraParams.size.toShort())
-        buffer.put(obj.extraParams)
+        packVariable(buffer, obj.extraParams, 2)
 
         // Sound
-        buffer.putLong(obj.sound.mostSignificantBits)
-        buffer.putLong(obj.sound.leastSignificantBits)
+        packUUID(buffer, obj.sound)
 
         // Owner and permissions
-        buffer.putLong(obj.ownerId.mostSignificantBits)
-        buffer.putLong(obj.ownerId.leastSignificantBits)
-        buffer.putInt(obj.ownerMask)
-        buffer.putInt(obj.baseMask)
-        buffer.putInt(obj.everyoneMask)
-        buffer.putInt(obj.groupMask)
-        buffer.putInt(obj.nextOwnerMask)
+        packUUID(buffer, obj.ownerId)
+        packInt(buffer, obj.ownerMask)
+        packInt(buffer, obj.baseMask)
+        packInt(buffer, obj.everyoneMask)
+        packInt(buffer, obj.groupMask)
+        packInt(buffer, obj.nextOwnerMask)
 
         // Group and creator
-        buffer.putLong(obj.groupId.mostSignificantBits)
-        buffer.putLong(obj.groupId.leastSignificantBits)
-        buffer.putLong(obj.creatorId.mostSignificantBits)
-        buffer.putLong(obj.creatorId.leastSignificantBits)
-        buffer.putLong(obj.lastOwnerId.mostSignificantBits)
-        buffer.putLong(obj.lastOwnerId.leastSignificantBits)
-        buffer.putLong(obj.folderId.mostSignificantBits)
-        buffer.putLong(obj.folderId.leastSignificantBits)
-        buffer.putLong(obj.fromTaskId.mostSignificantBits)
-        buffer.putLong(obj.fromTaskId.leastSignificantBits)
+        packUUID(buffer, obj.groupId)
+        packUUID(buffer, obj.creatorId)
+        packUUID(buffer, obj.lastOwnerId)
+        packUUID(buffer, obj.folderId)
+        packUUID(buffer, obj.fromTaskId)
 
-        buffer.putInt(obj.inventorySerial)
-        buffer.put(obj.saleType)
-        buffer.putInt(obj.salePrice)
+        packInt(buffer, obj.inventorySerial)
+        packByte(buffer, obj.saleType.toInt())
+        packInt(buffer, obj.salePrice)
 
         // Name and description
-        val nameBytes = obj.name.toByteArray(StandardCharsets.UTF_8)
-        buffer.put(nameBytes.size.toByte())
-        buffer.put(nameBytes)
+        packVariable(buffer, obj.name.toByteArray(StandardCharsets.UTF_8), 1)
 
-        val descBytes = obj.description.toByteArray(StandardCharsets.UTF_8)
-        buffer.put(descBytes.size.toByte())
-        buffer.put(descBytes)
+        packVariable(buffer, obj.description.toByteArray(StandardCharsets.UTF_8), 1)
 
-        val touchBytes = obj.touchName.toByteArray(StandardCharsets.UTF_8)
-        buffer.put(touchBytes.size.toByte())
-        buffer.put(touchBytes)
+        packVariable(buffer, obj.touchName.toByteArray(StandardCharsets.UTF_8), 1)
 
-        val sitBytes = obj.sitName.toByteArray(StandardCharsets.UTF_8)
-        buffer.put(sitBytes.size.toByte())
-        buffer.put(sitBytes)
+        packVariable(buffer, obj.sitName.toByteArray(StandardCharsets.UTF_8), 1)
     }
 
     private fun unpackObjectData(buffer: ByteBuffer): ObjectData {
         val obj = ObjectData()
 
-        obj.id = buffer.getInt()
-        obj.state = buffer.get()
+        obj.id = unpackInt(buffer)
+        obj.state = unpackByte(buffer).toByte()
 
-        val fullIdMsb = buffer.getLong()
-        val fullIdLsb = buffer.getLong()
-        obj.fullId = UUID(fullIdMsb, fullIdLsb)
+        obj.fullId = unpackUUID(buffer)
 
-        obj.crc = buffer.getInt()
-        obj.pCode = buffer.get()
-        obj.material = buffer.get()
-        obj.clickAction = buffer.get()
+        obj.crc = unpackInt(buffer)
+        obj.pCode = unpackByte(buffer).toByte()
+        obj.material = unpackByte(buffer).toByte()
+        obj.clickAction = unpackByte(buffer).toByte()
         obj.scale = LLVector3.unpack(buffer)
 
         // Object data
-        val objectDataLength = buffer.get().toInt() and 0xFF
-        obj.objectData = ByteArray(objectDataLength)
-        buffer.get(obj.objectData)
+        obj.objectData = unpackVariable(buffer, 1)
 
-        obj.parentId = buffer.getInt()
-        obj.updateFlags = buffer.getInt()
+        obj.parentId = unpackInt(buffer)
+        obj.updateFlags = unpackInt(buffer)
 
         // Path and profile
-        obj.pathCurve = buffer.get()
-        obj.profileCurve = buffer.get()
-        obj.pathBegin = buffer.getShort()
-        obj.pathEnd = buffer.getShort()
-        obj.pathScaleX = buffer.get()
-        obj.pathScaleY = buffer.get()
-        obj.pathShearX = buffer.get()
-        obj.pathShearY = buffer.get()
-        obj.pathTwist = buffer.get()
-        obj.pathTwistBegin = buffer.get()
-        obj.pathRadiusOffset = buffer.get()
-        obj.pathTaperX = buffer.get()
-        obj.pathTaperY = buffer.get()
-        obj.pathRevolutions = buffer.get()
-        obj.pathSkew = buffer.get()
-        obj.profileBegin = buffer.getShort()
-        obj.profileEnd = buffer.getShort()
-        obj.profileHollow = buffer.getShort()
+        obj.pathCurve = unpackByte(buffer).toByte()
+        obj.profileCurve = unpackByte(buffer).toByte()
+        obj.pathBegin = unpackUInt16(buffer).toShort()
+        obj.pathEnd = unpackUInt16(buffer).toShort()
+        obj.pathScaleX = unpackByte(buffer).toByte()
+        obj.pathScaleY = unpackByte(buffer).toByte()
+        obj.pathShearX = unpackByte(buffer).toByte()
+        obj.pathShearY = unpackByte(buffer).toByte()
+        obj.pathTwist = unpackByte(buffer).toByte()
+        obj.pathTwistBegin = unpackByte(buffer).toByte()
+        obj.pathRadiusOffset = unpackByte(buffer).toByte()
+        obj.pathTaperX = unpackByte(buffer).toByte()
+        obj.pathTaperY = unpackByte(buffer).toByte()
+        obj.pathRevolutions = unpackByte(buffer).toByte()
+        obj.pathSkew = unpackByte(buffer).toByte()
+        obj.profileBegin = unpackUInt16(buffer).toShort()
+        obj.profileEnd = unpackUInt16(buffer).toShort()
+        obj.profileHollow = unpackUInt16(buffer).toShort()
 
         // Texture entry
-        val textureLength = buffer.getShort().toInt() and 0xFFFF
-        obj.textureEntry = ByteArray(textureLength)
-        buffer.get(obj.textureEntry)
+        obj.textureEntry = unpackVariable(buffer, 2)
 
         // Texture animation
-        val texAnimLength = buffer.get().toInt() and 0xFF
-        obj.textureAnim = ByteArray(texAnimLength)
-        buffer.get(obj.textureAnim)
+        obj.textureAnim = unpackVariable(buffer, 1)
 
         // Name value
-        val nvLength = buffer.getShort().toInt() and 0xFFFF
-        obj.nameValue = ByteArray(nvLength)
-        buffer.get(obj.nameValue)
+        obj.nameValue = unpackVariable(buffer, 2)
 
         // Data
-        val dataLength = buffer.getShort().toInt() and 0xFFFF
-        obj.data = ByteArray(dataLength)
-        buffer.get(obj.data)
+        obj.data = unpackVariable(buffer, 2)
 
         // Text
-        val textLength = buffer.get().toInt() and 0xFF
-        val textBytes = ByteArray(textLength)
-        buffer.get(textBytes)
-        obj.text = String(textBytes, StandardCharsets.UTF_8)
+        obj.text = String(unpackVariable(buffer, 1), StandardCharsets.UTF_8)
 
         // Text color
         obj.textColor = ByteArray(4)
         buffer.get(obj.textColor)
 
         // Media URL
-        val mediaLength = buffer.get().toInt() and 0xFF
-        val mediaBytes = ByteArray(mediaLength)
-        buffer.get(mediaBytes)
-        obj.mediaUrl = String(mediaBytes, StandardCharsets.UTF_8)
+        obj.mediaUrl = String(unpackVariable(buffer, 1), StandardCharsets.UTF_8)
 
         // PS block
-        val psLength = buffer.get().toInt() and 0xFF
-        obj.psBlock = ByteArray(psLength)
-        buffer.get(obj.psBlock)
+        obj.psBlock = unpackVariable(buffer, 1)
 
         // Extra params
-        val extraLength = buffer.getShort().toInt() and 0xFFFF
-        obj.extraParams = ByteArray(extraLength)
-        buffer.get(obj.extraParams)
+        obj.extraParams = unpackVariable(buffer, 2)
 
         // Sound
-        val soundMsb = buffer.getLong()
-        val soundLsb = buffer.getLong()
-        obj.sound = UUID(soundMsb, soundLsb)
+        obj.sound = unpackUUID(buffer)
 
         // Owner and permissions
-        val ownerMsb = buffer.getLong()
-        val ownerLsb = buffer.getLong()
-        obj.ownerId = UUID(ownerMsb, ownerLsb)
+        obj.ownerId = unpackUUID(buffer)
 
-        obj.ownerMask = buffer.getInt()
-        obj.baseMask = buffer.getInt()
-        obj.everyoneMask = buffer.getInt()
-        obj.groupMask = buffer.getInt()
-        obj.nextOwnerMask = buffer.getInt()
+        obj.ownerMask = unpackInt(buffer)
+        obj.baseMask = unpackInt(buffer)
+        obj.everyoneMask = unpackInt(buffer)
+        obj.groupMask = unpackInt(buffer)
+        obj.nextOwnerMask = unpackInt(buffer)
 
         // Group and creator
-        val groupMsb = buffer.getLong()
-        val groupLsb = buffer.getLong()
-        obj.groupId = UUID(groupMsb, groupLsb)
+        obj.groupId = unpackUUID(buffer)
 
-        val creatorMsb = buffer.getLong()
-        val creatorLsb = buffer.getLong()
-        obj.creatorId = UUID(creatorMsb, creatorLsb)
+        obj.creatorId = unpackUUID(buffer)
 
-        val lastOwnerMsb = buffer.getLong()
-        val lastOwnerLsb = buffer.getLong()
-        obj.lastOwnerId = UUID(lastOwnerMsb, lastOwnerLsb)
+        obj.lastOwnerId = unpackUUID(buffer)
 
-        val folderMsb = buffer.getLong()
-        val folderLsb = buffer.getLong()
-        obj.folderId = UUID(folderMsb, folderLsb)
+        obj.folderId = unpackUUID(buffer)
 
-        val taskMsb = buffer.getLong()
-        val taskLsb = buffer.getLong()
-        obj.fromTaskId = UUID(taskMsb, taskLsb)
+        obj.fromTaskId = unpackUUID(buffer)
 
-        obj.inventorySerial = buffer.getInt()
-        obj.saleType = buffer.get()
-        obj.salePrice = buffer.getInt()
+        obj.inventorySerial = unpackInt(buffer)
+        obj.saleType = unpackByte(buffer).toByte()
+        obj.salePrice = unpackInt(buffer)
 
         // Name
-        val nameLength = buffer.get().toInt() and 0xFF
-        val nameBytes = ByteArray(nameLength)
-        buffer.get(nameBytes)
-        obj.name = String(nameBytes, StandardCharsets.UTF_8)
+        obj.name = String(unpackVariable(buffer, 1), StandardCharsets.UTF_8)
 
         // Description
-        val descLength = buffer.get().toInt() and 0xFF
-        val descBytes = ByteArray(descLength)
-        buffer.get(descBytes)
-        obj.description = String(descBytes, StandardCharsets.UTF_8)
+        obj.description = String(unpackVariable(buffer, 1), StandardCharsets.UTF_8)
 
         // Touch name
-        val touchLength = buffer.get().toInt() and 0xFF
-        val touchBytes = ByteArray(touchLength)
-        buffer.get(touchBytes)
-        obj.touchName = String(touchBytes, StandardCharsets.UTF_8)
+        obj.touchName = String(unpackVariable(buffer, 1), StandardCharsets.UTF_8)
 
         // Sit name
-        val sitLength = buffer.get().toInt() and 0xFF
-        val sitBytes = ByteArray(sitLength)
-        buffer.get(sitBytes)
-        obj.sitName = String(sitBytes, StandardCharsets.UTF_8)
+        obj.sitName = String(unpackVariable(buffer, 1), StandardCharsets.UTF_8)
 
         return obj
     }
@@ -400,28 +326,26 @@ class ObjectUpdateCompressedMessage : SLMessage() {
     val objectList = mutableListOf<CompressedObjectData>()
 
     override fun packPayload(buffer: ByteBuffer) {
-        buffer.putLong(regionHandle)
-        buffer.putShort(timeDilation)
+        packLong(buffer, regionHandle)
+        packUInt16(buffer, timeDilation.toInt() and 0xFFFF)
 
-        buffer.put(objectList.size.toByte())
+        require(objectList.size <= 0xFF) { "Compressed object list too large (${objectList.size})" }
+        packByte(buffer, objectList.size)
         for (obj in objectList) {
-            buffer.putInt(obj.updateFlags)
-            buffer.putShort(obj.data.size.toShort())
-            buffer.put(obj.data)
+            packInt(buffer, obj.updateFlags)
+            packVariable(buffer, obj.data, 2)
         }
     }
 
     override fun unpackPayload(buffer: ByteBuffer) {
-        regionHandle = buffer.getLong()
-        timeDilation = buffer.getShort()
+        regionHandle = unpackLong(buffer)
+        timeDilation = unpackUInt16(buffer).toShort()
 
-        val count = buffer.get().toInt() and 0xFF
+        val count = unpackByte(buffer)
         objectList.clear()
         for (i in 0 until count) {
-            val updateFlags = buffer.getInt()
-            val dataLength = buffer.getShort().toInt() and 0xFFFF
-            val data = ByteArray(dataLength)
-            buffer.get(data)
+            val updateFlags = unpackInt(buffer)
+            val data = unpackVariable(buffer, 2)
             objectList.add(CompressedObjectData(updateFlags, data))
         }
     }
@@ -486,17 +410,16 @@ class KillObjectMessage : SLMessage() {
     val objectIds = mutableListOf<Int>()
 
     override fun packPayload(buffer: ByteBuffer) {
-        buffer.put(objectIds.size.toByte())
-        for (id in objectIds) {
-            buffer.putInt(id)
-        }
+        require(objectIds.size <= 0xFF) { "KillObject id list too large (${objectIds.size})" }
+        packByte(buffer, objectIds.size)
+        objectIds.forEach { id -> packInt(buffer, id) }
     }
 
     override fun unpackPayload(buffer: ByteBuffer) {
-        val count = buffer.get().toInt() and 0xFF
+        val count = unpackByte(buffer)
         objectIds.clear()
         for (i in 0 until count) {
-            objectIds.add(buffer.getInt())
+            objectIds.add(unpackInt(buffer))
         }
     }
 
