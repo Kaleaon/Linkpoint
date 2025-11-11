@@ -71,13 +71,7 @@ abstract class SLMessage : Parcelable {
             return ((highByte shl 8) or lowByte) or 0xFFFF0000.toInt()
         }
 
-        /**
-         * Encode a message ID to the payload buffer.
-         */
-        internal fun encodeMessageID(
-            buffer: ByteBuffer,
-            messageId: Int,
-        ) {
+        internal fun encodeMessageID(buffer: ByteBuffer, messageId: Int) {
             when {
                 messageId and 0xFFFF0000.toInt() == 0xFFFF0000.toInt() -> {
                     buffer.put(0xFF.toByte())
@@ -185,10 +179,7 @@ abstract class SLMessage : Parcelable {
         /**
          * Zero-encode a buffer.
          */
-        internal fun zeroEncode(
-            input: ByteBuffer,
-            output: ByteBuffer,
-        ) {
+        internal fun zeroEncode(input: ByteBuffer, output: ByteBuffer) {
             var zeroCount = 0
             while (input.hasRemaining()) {
                 val value = input.get()
@@ -279,10 +270,7 @@ abstract class SLMessage : Parcelable {
     /**
      * Write message ID and payload into the target buffer, applying zero coding if required.
      */
-    internal fun writePayloadForTransmit(
-        target: ByteBuffer,
-        scratch: ByteBuffer,
-    ) {
+    internal fun writePayloadForTransmit(target: ByteBuffer, scratch: ByteBuffer) {
         if (zeroCoded) {
             scratch.clear()
             scratch.order(ByteOrder.BIG_ENDIAN)
@@ -294,6 +282,52 @@ abstract class SLMessage : Parcelable {
             encodeMessageID(target, getMessageID())
             packPayloadLE(target)
         }
+    }
+
+    // Helper packing utilities
+    protected fun packByte(buffer: ByteBuffer, value: Int) {
+        buffer.put(value.toByte())
+    }
+
+    protected fun packInt(buffer: ByteBuffer, value: Int) {
+        buffer.putInt(value)
+    }
+
+    protected fun packUInt16(buffer: ByteBuffer, value: Int) {
+        buffer.putShort(value.toShort())
+    }
+
+    protected fun packFloat(buffer: ByteBuffer, value: Float) {
+        buffer.putFloat(value)
+    }
+
+    protected fun packUUID(buffer: ByteBuffer, uuid: UUID) {
+        val originalOrder = buffer.order()
+        buffer.order(ByteOrder.BIG_ENDIAN)
+        buffer.putLong(uuid.mostSignificantBits)
+        buffer.putLong(uuid.leastSignificantBits)
+        buffer.order(originalOrder)
+    }
+
+    protected fun unpackByte(buffer: ByteBuffer): Int {
+        return buffer.get().toInt() and 0xFF
+    }
+
+    protected fun unpackInt(buffer: ByteBuffer): Int {
+        return buffer.getInt()
+    }
+
+    protected fun unpackFloat(buffer: ByteBuffer): Float {
+        return buffer.getFloat()
+    }
+
+    protected fun unpackUUID(buffer: ByteBuffer): UUID {
+        val originalOrder = buffer.order()
+        buffer.order(ByteOrder.BIG_ENDIAN)
+        val most = buffer.getLong()
+        val least = buffer.getLong()
+        buffer.order(originalOrder)
+        return UUID(most, least)
     }
 
     /**

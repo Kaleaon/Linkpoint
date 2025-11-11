@@ -12,6 +12,10 @@ object SLMessageFactory {
         const val PACKET_ACK = 0xFFFFFFFB.toInt()
         const val OPEN_CIRCUIT = 0xFFFFFFFC.toInt()
         const val CLOSE_CIRCUIT = 0xFFFFFFFD.toInt()
+        const val USE_CIRCUIT_CODE = 0xFFFF0003.toInt()
+        const val COMPLETE_AGENT_MOVEMENT = 0xFFFF00F9.toInt()
+        const val START_PING_CHECK = 0x01
+        const val COMPLETE_PING_CHECK = 0x02
 
         // Agent messages
         const val AGENT_UPDATE = 0x04
@@ -91,6 +95,10 @@ object SLMessageFactory {
         registerMessage(MessageIDs.PACKET_ACK) { PacketAckMessage() }
         registerMessage(MessageIDs.OPEN_CIRCUIT) { OpenCircuitMessage() }
         registerMessage(MessageIDs.CLOSE_CIRCUIT) { CloseCircuitMessage() }
+        registerMessage(MessageIDs.USE_CIRCUIT_CODE) { UseCircuitCodeMessage() }
+        registerMessage(MessageIDs.COMPLETE_AGENT_MOVEMENT) { CompleteAgentMovementMessage() }
+        registerMessage(MessageIDs.START_PING_CHECK) { StartPingCheckMessage() }
+        registerMessage(MessageIDs.COMPLETE_PING_CHECK) { CompletePingCheckMessage() }
 
         // Agent messages
         registerMessage(MessageIDs.AGENT_UPDATE) { AgentUpdateMessage() }

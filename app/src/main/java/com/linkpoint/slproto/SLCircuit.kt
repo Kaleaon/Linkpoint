@@ -10,7 +10,6 @@ import java.nio.ByteOrder
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.TimeoutException
 import kotlin.math.min
 
 /**
@@ -29,6 +28,7 @@ class SLCircuit(
     private val pendingAcks = ConcurrentHashMap<Int, SLMessage>()
     private val receivedPackets = Collections.synchronizedSet(mutableSetOf<Int>())
     private val ackQueue = Collections.synchronizedList(mutableListOf<Int>())
+    private val zeroEncodeScratch = ByteBuffer.allocate(SLMessage.MAX_MESSAGE_SIZE)
 
     private var isRunning = false
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -89,44 +89,53 @@ class SLCircuit(
     /**
      * Send a message
      */
-    fun sendMessage(message: SLMessage) {
-        val seqNum = sequenceNumber.getAndIncrement()
-        message.seqNum = seqNum
+    fun sendMessage(message: SLMessage, reuseSequence: Boolean = false) {
+        val now = System.currentTimeMillis()
+        val seqNum =
+            if (reuseSequence && message.seqNum != 0) {
+                message.seqNum
+            } else {
+                val nextSeq = sequenceNumber.getAndIncrement()
+                message.seqNum = nextSeq
+                nextSeq
+            }
 
         val buffer = ByteBuffer.allocate(SLMessage.MAX_TRANSMIT_SIZE)
         buffer.order(ByteOrder.BIG_ENDIAN)
 
         // Build header
-        var flags: Byte = 0
+        var flags = 0
         if (message.isReliable) {
-            flags = (flags.toInt() or FLAG_RELIABLE.toInt()).toByte()
+            flags = flags or FLAG_RELIABLE.toInt()
             pendingAcks[seqNum] = message
-            message.sentTimeMillis = System.currentTimeMillis()
+            message.sentTimeMillis = now
+        }
+        if (message.isResent) {
+            flags = flags or FLAG_RESENT.toInt()
         }
         if (message.zeroCoded) {
-            flags = (flags.toInt() or FLAG_ZERO_CODE.toInt()).toByte()
+            flags = flags or FLAG_ZERO_CODE.toInt()
         }
 
         // Add pending ACKs to this packet if available
-        val acksToSend =
-            synchronized(ackQueue) {
-                val acks = ackQueue.take(255.coerceAtMost(ackQueue.size))
-                ackQueue.removeAll(acks)
-                acks
+        val acksToSend = mutableListOf<Int>()
+        synchronized(ackQueue) {
+            val toDrain = min(255, ackQueue.size)
+            repeat(toDrain) {
+                acksToSend.add(ackQueue.removeAt(0))
             }
-
-        if (acksToSend.isNotEmpty()) {
-            flags = (flags.toInt() or FLAG_ACK.toInt()).toByte()
         }
 
-        buffer.put(flags)
+        if (acksToSend.isNotEmpty()) {
+            flags = flags or FLAG_ACK.toInt()
+        }
+
+        buffer.put(flags.toByte())
         buffer.putInt(seqNum)
         buffer.put(0.toByte()) // Extra header bytes
 
-        // Pack message payload
-        val payloadStart = buffer.position()
-        message.packPayload(buffer)
-        val payloadEnd = buffer.position()
+        // Pack message payload with proper message ID handling
+        message.writePayloadForTransmit(buffer, zeroEncodeScratch)
 
         // Add ACKs at the end if present
         if (acksToSend.isNotEmpty()) {
@@ -229,6 +238,7 @@ class SLCircuit(
                     if (message.retries < MAX_RETRIES) {
                         message.retries++
                         message.isResent = true
+                        message.sentTimeMillis = now
                         toRetry.add(message)
                     } else {
                         // Max retries exceeded
@@ -244,7 +254,7 @@ class SLCircuit(
 
             // Resend messages
             for (message in toRetry) {
-                sendMessage(message)
+                sendMessage(message, reuseSequence = true)
             }
         }
     }
@@ -298,9 +308,12 @@ class SLCircuit(
             // Add ACKs if requested and available
             if (includeAcks) {
                 val acksToSend = synchronized(ackQueue) {
-                    val acks = ackQueue.take(255.coerceAtMost(ackQueue.size))
-                    ackQueue.removeAll(acks)
-                    acks
+                  val acks = mutableListOf<Int>()
+                  val toDrain = min(255, ackQueue.size)
+                  repeat(toDrain) {
+                      acks.add(ackQueue.removeAt(0))
+                  }
+                  acks
                 }
 
                 if (acksToSend.isNotEmpty()) {

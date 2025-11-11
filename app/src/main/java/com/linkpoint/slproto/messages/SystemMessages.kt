@@ -39,21 +39,15 @@ class OpenCircuitMessage : SLMessage() {
     var agentId: UUID = UUID.randomUUID()
 
     override fun packPayload(buffer: ByteBuffer) {
-        buffer.putInt(circuitCode)
-        buffer.putLong(sessionId.mostSignificantBits)
-        buffer.putLong(sessionId.leastSignificantBits)
-        buffer.putLong(agentId.mostSignificantBits)
-        buffer.putLong(agentId.leastSignificantBits)
+        packInt(buffer, circuitCode)
+        packUUID(buffer, sessionId)
+        packUUID(buffer, agentId)
     }
 
     override fun unpackPayload(buffer: ByteBuffer) {
-        circuitCode = buffer.getInt()
-        val sessionMsb = buffer.getLong()
-        val sessionLsb = buffer.getLong()
-        sessionId = UUID(sessionMsb, sessionLsb)
-        val agentMsb = buffer.getLong()
-        val agentLsb = buffer.getLong()
-        agentId = UUID(agentMsb, agentLsb)
+        circuitCode = unpackInt(buffer)
+        sessionId = unpackUUID(buffer)
+        agentId = unpackUUID(buffer)
     }
 
     override fun getMessageID(): Int = SLMessageFactory.MessageIDs.OPEN_CIRCUIT
@@ -76,4 +70,95 @@ class CloseCircuitMessage : SLMessage() {
     override fun getMessageID(): Int = SLMessageFactory.MessageIDs.CLOSE_CIRCUIT
 
     override fun getMessageName(): String = "CloseCircuit"
+}
+
+/**
+ * Use circuit code message
+ */
+class UseCircuitCodeMessage : SLMessage() {
+    var circuitCode: Int = 0
+    var sessionId: UUID = UUID.randomUUID()
+    var agentId: UUID = UUID.randomUUID()
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packInt(buffer, circuitCode)
+        packUUID(buffer, sessionId)
+        packUUID(buffer, agentId)
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        circuitCode = unpackInt(buffer)
+        sessionId = unpackUUID(buffer)
+        agentId = unpackUUID(buffer)
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.USE_CIRCUIT_CODE
+
+    override fun getMessageName(): String = "UseCircuitCode"
+}
+
+/**
+ * Complete agent movement message
+ */
+class CompleteAgentMovementMessage : SLMessage() {
+    var agentId: UUID = UUID.randomUUID()
+    var sessionId: UUID = UUID.randomUUID()
+    var circuitCode: Int = 0
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packUUID(buffer, agentId)
+        packUUID(buffer, sessionId)
+        packInt(buffer, circuitCode)
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        agentId = unpackUUID(buffer)
+        sessionId = unpackUUID(buffer)
+        circuitCode = unpackInt(buffer)
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.COMPLETE_AGENT_MOVEMENT
+
+    override fun getMessageName(): String = "CompleteAgentMovement"
+}
+
+/**
+ * Start ping check message
+ */
+class StartPingCheckMessage : SLMessage() {
+    var pingId: Int = 0
+    var oldestUnacked: Int = 0
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packByte(buffer, pingId)
+        packInt(buffer, oldestUnacked)
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        pingId = unpackByte(buffer)
+        oldestUnacked = unpackInt(buffer)
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.START_PING_CHECK
+
+    override fun getMessageName(): String = "StartPingCheck"
+}
+
+/**
+ * Complete ping check message
+ */
+class CompletePingCheckMessage : SLMessage() {
+    var pingId: Int = 0
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packByte(buffer, pingId)
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        pingId = unpackByte(buffer)
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.COMPLETE_PING_CHECK
+
+    override fun getMessageName(): String = "CompletePingCheck"
 }
