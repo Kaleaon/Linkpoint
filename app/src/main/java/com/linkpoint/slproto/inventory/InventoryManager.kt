@@ -79,22 +79,22 @@ class InventoryManager(private val capsManager: CapsManager) {
      */
     private fun parseInventoryItem(data: LLSDMap): InventoryItem {
         return InventoryItem(
-            itemId = UUID.fromString((data["item_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString())
-            parentId = UUID.fromString((data["parent_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString())
-            name = (data["name"] as? LLSDString)?.value ?: "Unknown"
-            description = (data["desc"] as? LLSDString)?.value ?: ""
-            assetId = UUID.fromString((data["asset_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString())
-            type = (data["type"] as? LLSDInteger)?.value ?: 0
-            invType = (data["inv_type"] as? LLSDInteger)?.value ?: 0
-            flags = (data["flags"] as? LLSDInteger)?.value ?: 0
-            creatorId = UUID.fromString((data["creator_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString())
-            ownerId = UUID.fromString((data["owner_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString())
-            groupId = UUID.fromString((data["group_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString())
-            groupOwned = (data["group_owned"] as? LLSDBoolean)?.value ?: false
-            salePrice = (data["sale_price"] as? LLSDInteger)?.value ?: 0
-            saleType = (data["sale_type"] as? LLSDInteger)?.value ?: 0
-            permissions = parsePermissions(data["permissions"] as? LLSDMap)
-            creationDate = (data["creation_date"] as? LLSDInteger)?.value ?: 0
+            itemId = UUID.fromString((data["item_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString()),
+            parentId = UUID.fromString((data["parent_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString()),
+            name = (data["name"] as? LLSDString)?.value ?: "Unknown",
+            description = (data["desc"] as? LLSDString)?.value ?: "",
+            assetId = UUID.fromString((data["asset_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString()),
+            type = (data["type"] as? LLSDInteger)?.value?.toInt() ?: 0,
+            invType = (data["inv_type"] as? LLSDInteger)?.value?.toInt() ?: 0,
+            flags = (data["flags"] as? LLSDInteger)?.value?.toInt() ?: 0,
+            creatorId = UUID.fromString((data["creator_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString()),
+            ownerId = UUID.fromString((data["owner_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString()),
+            groupId = UUID.fromString((data["group_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString()),
+            groupOwned = (data["group_owned"] as? LLSDBoolean)?.value ?: false,
+            salePrice = (data["sale_price"] as? LLSDInteger)?.value?.toInt() ?: 0,
+            saleType = (data["sale_type"] as? LLSDInteger)?.value?.toInt() ?: 0,
+            permissions = parsePermissions(data["permissions"] as? LLSDMap),
+            creationDate = (data["creation_date"] as? LLSDInteger)?.value?.toInt() ?: 0,
         )
     }
 
@@ -103,11 +103,11 @@ class InventoryManager(private val capsManager: CapsManager) {
      */
     private fun parseInventoryFolder(data: LLSDMap): InventoryFolder {
         return InventoryFolder(
-            folderId = UUID.fromString((data["folder_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString())
-            parentId = UUID.fromString((data["parent_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString())
-            name = (data["name"] as? LLSDString)?.value ?: "Unknown"
-            type = (data["type"] as? LLSDInteger)?.value ?: -1
-            preferredType = (data["preferred_type"] as? LLSDInteger)?.value ?: -1
+            folderId = UUID.fromString((data["folder_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString()),
+            parentId = UUID.fromString((data["parent_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString()),
+            name = (data["name"] as? LLSDString)?.value ?: "Unknown",
+            type = (data["type"] as? LLSDInteger)?.value?.toInt() ?: -1,
+            preferredType = (data["preferred_type"] as? LLSDInteger)?.value?.toInt() ?: -1,
         )
     }
 
@@ -118,12 +118,12 @@ class InventoryManager(private val capsManager: CapsManager) {
         if (data == null) return InventoryPermissions()
 
         return InventoryPermissions(
-            baseMask = (data["base_mask"] as? LLSDInteger)?.value ?: 0
-            ownerMask = (data["owner_mask"] as? LLSDInteger)?.value ?: 0
-            groupMask = (data["group_mask"] as? LLSDInteger)?.value ?: 0
-            everyoneMask = (data["everyone_mask"] as? LLSDInteger)?.value ?: 0
-            nextOwnerMask = (data["next_owner_mask"] as? LLSDInteger)?.value ?: 0
-            isOwnerGroup = (data["is_owner_group"] as? LLSDBoolean)?.value ?: false
+            baseMask = (data["base_mask"] as? LLSDInteger)?.value?.toInt() ?: 0,
+            ownerMask = (data["owner_mask"] as? LLSDInteger)?.value?.toInt() ?: 0,
+            groupMask = (data["group_mask"] as? LLSDInteger)?.value?.toInt() ?: 0,
+            everyoneMask = (data["everyone_mask"] as? LLSDInteger)?.value?.toInt() ?: 0,
+            nextOwnerMask = (data["next_owner_mask"] as? LLSDInteger)?.value?.toInt() ?: 0,
+            isOwnerGroup = (data["is_owner_group"] as? LLSDBoolean)?.value ?: false,
         )
     }
 
@@ -266,33 +266,33 @@ class InventoryManager(private val capsManager: CapsManager) {
  * Inventory item data class
  */
 data class InventoryItem(
-    val itemId: UUID
-    val parentId: UUID
-    val name: String
-    val description: String
-    val assetId: UUID
-    val type: Int
-    val invType: Int
-    val flags: Int
-    val creatorId: UUID
-    val ownerId: UUID
-    val groupId: UUID
-    val groupOwned: Boolean
-    val salePrice: Int
-    val saleType: Int
-    val permissions: InventoryPermissions
-    val creationDate: Int
+    val itemId: UUID,
+    val parentId: UUID,
+    val name: String,
+    val description: String,
+    val assetId: UUID,
+    val type: Int,
+    val invType: Int,
+    val flags: Int,
+    val creatorId: UUID,
+    val ownerId: UUID,
+    val groupId: UUID,
+    val groupOwned: Boolean,
+    val salePrice: Int,
+    val saleType: Int,
+    val permissions: InventoryPermissions,
+    val creationDate: Int,
 )
 
 /**
  * Inventory folder data class
  */
 data class InventoryFolder(
-    val folderId: UUID
-    val parentId: UUID
-    val name: String
-    val type: Int
-    val preferredType: Int
+    val folderId: UUID,
+    val parentId: UUID,
+    val name: String,
+    val type: Int,
+    val preferredType: Int,
 )
 
 /**
