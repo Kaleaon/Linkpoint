@@ -18,6 +18,11 @@ object SLMessageFactory {
         const val START_PING_CHECK = 0x00000001
         const val COMPLETE_PING_CHECK = 0x00000002
         const val CONFIRM_ENABLE_SIMULATOR = 0x0000FF08
+        const val FEATURE_DISABLED = 0x00000013
+        const val MEAN_COLLISION_ALERT = 0x00000088
+        const val VIEWER_FROZEN_MESSAGE = 0x00000089
+        const val HEALTH_MESSAGE = 0x0000008A
+        const val SIM_STATS = 0x0000008C
 
         // Agent messages
         const val AGENT_UPDATE = 0x00000004
