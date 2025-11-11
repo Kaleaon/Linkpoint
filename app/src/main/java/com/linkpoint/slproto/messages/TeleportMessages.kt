@@ -116,3 +116,29 @@ class TeleportFinishMessage : SLMessage() {
 
     override fun getMessageName(): String = "TeleportFinish"
 }
+
+/**
+ * Teleport progress message
+ */
+class TeleportProgressMessage : SLMessage() {
+    var agentId: UUID = UUID.randomUUID()
+    var teleportFlags: Int = 0
+    var statusMessage: String = ""
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packUUID(buffer, agentId)
+        packInt(buffer, teleportFlags)
+        val messageBytes = statusMessage.toByteArray(StandardCharsets.UTF_8)
+        packVariable(buffer, messageBytes, 1)
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        agentId = unpackUUID(buffer)
+        teleportFlags = unpackInt(buffer)
+        statusMessage = String(unpackVariable(buffer, 1), StandardCharsets.UTF_8)
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.TELEPORT_PROGRESS
+
+    override fun getMessageName(): String = "TeleportProgress"
+}
