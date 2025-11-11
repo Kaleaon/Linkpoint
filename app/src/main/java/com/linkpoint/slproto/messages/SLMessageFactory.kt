@@ -25,7 +25,11 @@ object SLMessageFactory {
         const val AGENT_REQUEST_SIT = 0x1E
         const val AGENT_SIT = 0x1F
         const val CHILD_AGENT_UPDATE = 0x19
+        const val CHILD_AGENT_ALIVE = 0x1A
         const val CHILD_AGENT_POSITION_UPDATE = 0x1B
+        const val CHILD_AGENT_DYING = 0xFFFF00F0.toInt()
+        const val CHILD_AGENT_UNKNOWN = 0xFFFF00F1.toInt()
+        const val KILL_CHILD_AGENTS = 0xFFFF00F2.toInt()
         const val AGENT_THROTTLE = 0x51
         const val AGENT_HEIGHT_WIDTH = 0x53
         const val AGENT_FOV = 0x52
@@ -143,7 +147,11 @@ object SLMessageFactory {
         registerMessage(MessageIDs.AGENT_REQUEST_SIT) { AgentRequestSitMessage() }
         registerMessage(MessageIDs.AGENT_SIT) { AgentSitMessage() }
         registerMessage(MessageIDs.CHILD_AGENT_UPDATE) { ChildAgentUpdateMessage() }
+        registerMessage(MessageIDs.CHILD_AGENT_ALIVE) { ChildAgentAliveMessage() }
         registerMessage(MessageIDs.CHILD_AGENT_POSITION_UPDATE) { ChildAgentPositionUpdateMessage() }
+        registerMessage(MessageIDs.CHILD_AGENT_DYING) { ChildAgentDyingMessage() }
+        registerMessage(MessageIDs.CHILD_AGENT_UNKNOWN) { ChildAgentUnknownMessage() }
+        registerMessage(MessageIDs.KILL_CHILD_AGENTS) { KillChildAgentsMessage() }
         registerMessage(MessageIDs.AGENT_THROTTLE) { AgentThrottleMessage() }
         registerMessage(MessageIDs.AGENT_FOV) { AgentFovMessage() }
         registerMessage(MessageIDs.AGENT_PAUSE) { AgentPauseMessage() }

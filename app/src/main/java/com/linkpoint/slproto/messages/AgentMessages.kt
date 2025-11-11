@@ -1127,3 +1127,98 @@ class ChildAgentUpdateMessage : SLMessage() {
 
     override fun getMessageName(): String = "ChildAgentUpdate"
 }
+
+/**
+ * Child agent alive (0x1A)
+ */
+class ChildAgentAliveMessage : SLMessage() {
+    var regionHandle: Long = 0L
+    var viewerCircuitCode: Int = 0
+    var agentId: UUID = UUID.randomUUID()
+    var sessionId: UUID = UUID.randomUUID()
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packLong(buffer, regionHandle)
+        packInt(buffer, viewerCircuitCode)
+        packUUID(buffer, agentId)
+        packUUID(buffer, sessionId)
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        regionHandle = unpackLong(buffer)
+        viewerCircuitCode = unpackInt(buffer)
+        agentId = unpackUUID(buffer)
+        sessionId = unpackUUID(buffer)
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.CHILD_AGENT_ALIVE
+
+    override fun getMessageName(): String = "ChildAgentAlive"
+}
+
+/**
+ * Child agent dying (0xFFFF00F0)
+ */
+class ChildAgentDyingMessage : SLMessage() {
+    var agentId: UUID = UUID.randomUUID()
+    var sessionId: UUID = UUID.randomUUID()
+
+    init {
+        zeroCoded = true
+    }
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packUUID(buffer, agentId)
+        packUUID(buffer, sessionId)
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        agentId = unpackUUID(buffer)
+        sessionId = unpackUUID(buffer)
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.CHILD_AGENT_DYING
+
+    override fun getMessageName(): String = "ChildAgentDying"
+}
+
+/**
+ * Child agent unknown (0xFFFF00F1)
+ */
+class ChildAgentUnknownMessage : SLMessage() {
+    var agentId: UUID = UUID.randomUUID()
+    var sessionId: UUID = UUID.randomUUID()
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packUUID(buffer, agentId)
+        packUUID(buffer, sessionId)
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        agentId = unpackUUID(buffer)
+        sessionId = unpackUUID(buffer)
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.CHILD_AGENT_UNKNOWN
+
+    override fun getMessageName(): String = "ChildAgentUnknown"
+}
+
+/**
+ * Kill child agents (0xFFFF00F2)
+ */
+class KillChildAgentsMessage : SLMessage() {
+    var agentId: UUID = UUID.randomUUID()
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packUUID(buffer, agentId)
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        agentId = unpackUUID(buffer)
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.KILL_CHILD_AGENTS
+
+    override fun getMessageName(): String = "KillChildAgents"
+}
