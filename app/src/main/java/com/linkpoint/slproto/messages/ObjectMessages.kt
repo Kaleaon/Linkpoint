@@ -432,6 +432,54 @@ class ObjectUpdateCompressedMessage : SLMessage() {
 }
 
 /**
+ * Object update cached message
+ */
+class ObjectUpdateCachedMessage : SLMessage() {
+    var regionHandle: Long = 0L
+    var timeDilation: Int = 0
+
+    data class CachedObjectData(
+        var id: Int = 0,
+        var crc: Int = 0,
+        var updateFlags: Int = 0,
+    )
+
+    val objectList: MutableList<CachedObjectData> = mutableListOf()
+
+    override fun packPayload(buffer: ByteBuffer) {
+        require(objectList.size <= 0xFF) { "Too many cached objects (${objectList.size})" }
+        packLong(buffer, regionHandle)
+        packUInt16(buffer, timeDilation)
+        packByte(buffer, objectList.size)
+        objectList.forEach { obj ->
+            packInt(buffer, obj.id)
+            packInt(buffer, obj.crc)
+            packInt(buffer, obj.updateFlags)
+        }
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        regionHandle = unpackLong(buffer)
+        timeDilation = unpackUInt16(buffer)
+        val count = unpackByte(buffer)
+        objectList.clear()
+        repeat(count) {
+            val obj =
+                CachedObjectData(
+                    id = unpackInt(buffer),
+                    crc = unpackInt(buffer),
+                    updateFlags = unpackInt(buffer),
+                )
+            objectList += obj
+        }
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.OBJECT_UPDATE_CACHED
+
+    override fun getMessageName(): String = "ObjectUpdateCached"
+}
+
+/**
  * Kill object message
  */
 class KillObjectMessage : SLMessage() {

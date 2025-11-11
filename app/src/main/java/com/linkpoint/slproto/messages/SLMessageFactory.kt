@@ -111,6 +111,7 @@ object SLMessageFactory {
         // Object messages
         registerMessage(MessageIDs.OBJECT_UPDATE) { ObjectUpdateMessage() }
         registerMessage(MessageIDs.OBJECT_UPDATE_COMPRESSED) { ObjectUpdateCompressedMessage() }
+        registerMessage(MessageIDs.OBJECT_UPDATE_CACHED) { ObjectUpdateCachedMessage() }
         registerMessage(MessageIDs.KILL_OBJECT) { KillObjectMessage() }
 
         // Region messages
@@ -120,7 +121,9 @@ object SLMessageFactory {
         // Teleport messages
         registerMessage(MessageIDs.TELEPORT_REQUEST) { TeleportRequestMessage() }
         registerMessage(MessageIDs.TELEPORT_START) { TeleportStartMessage() }
+        registerMessage(MessageIDs.TELEPORT_PROGRESS) { TeleportProgressMessage() }
         registerMessage(MessageIDs.TELEPORT_FINISH) { TeleportFinishMessage() }
+        registerMessage(MessageIDs.TELEPORT_FAILED) { TeleportFailedMessage() }
 
         // IM messages
         registerMessage(MessageIDs.IMPROVED_IM) { ImprovedIMMessage() }

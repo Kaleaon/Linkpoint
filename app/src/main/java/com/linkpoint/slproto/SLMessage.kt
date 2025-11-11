@@ -4,6 +4,9 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.linkpoint.slproto.messages.SLMessageFactory
 import com.linkpoint.slproto.types.*
+import java.net.Inet4Address
+import java.net.InetAddress
+import java.net.UnknownHostException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.*
@@ -285,50 +288,119 @@ abstract class SLMessage : Parcelable {
     }
 
     // Helper packing utilities
-    protected fun packByte(buffer: ByteBuffer, value: Int) {
+      protected fun packByte(buffer: ByteBuffer, value: Int) {
         buffer.put(value.toByte())
-    }
+      }
 
-    protected fun packInt(buffer: ByteBuffer, value: Int) {
+      protected fun packInt(buffer: ByteBuffer, value: Int) {
         buffer.putInt(value)
-    }
+      }
 
-    protected fun packUInt16(buffer: ByteBuffer, value: Int) {
+      protected fun packUInt16(buffer: ByteBuffer, value: Int) {
         buffer.putShort(value.toShort())
-    }
+      }
 
-    protected fun packFloat(buffer: ByteBuffer, value: Float) {
+      protected fun packShort(buffer: ByteBuffer, value: Int) {
+        buffer.putShort(value.toShort())
+      }
+
+      protected fun packLong(buffer: ByteBuffer, value: Long) {
+        buffer.putLong(value)
+      }
+
+      protected fun packFloat(buffer: ByteBuffer, value: Float) {
         buffer.putFloat(value)
-    }
+      }
 
-    protected fun packUUID(buffer: ByteBuffer, uuid: UUID) {
+      protected fun packUUID(buffer: ByteBuffer, uuid: UUID) {
         val originalOrder = buffer.order()
         buffer.order(ByteOrder.BIG_ENDIAN)
         buffer.putLong(uuid.mostSignificantBits)
         buffer.putLong(uuid.leastSignificantBits)
         buffer.order(originalOrder)
-    }
+      }
 
-    protected fun unpackByte(buffer: ByteBuffer): Int {
+      protected fun packVariable(
+          buffer: ByteBuffer,
+          data: ByteArray,
+          lengthBytes: Int,
+      ) {
+        require(lengthBytes == 1 || lengthBytes == 2) { "lengthBytes must be 1 or 2" }
+        val length = data.size
+        when (lengthBytes) {
+          1 -> {
+            require(length <= 0xFF) { "Variable field too large for 1 byte length: $length" }
+            buffer.put(length.toByte())
+          }
+          2 -> {
+            require(length <= 0xFFFF) { "Variable field too large for 2 byte length: $length" }
+            buffer.putShort(length.toShort())
+          }
+        }
+        buffer.put(data)
+      }
+
+      protected fun packIPAddress(
+          buffer: ByteBuffer,
+          address: Inet4Address?,
+      ) {
+        val bytes = address?.address ?: ByteArray(4)
+        buffer.put(bytes)
+      }
+
+      protected fun unpackByte(buffer: ByteBuffer): Int {
         return buffer.get().toInt() and 0xFF
-    }
+      }
 
-    protected fun unpackInt(buffer: ByteBuffer): Int {
+      protected fun unpackInt(buffer: ByteBuffer): Int {
         return buffer.getInt()
-    }
+      }
 
-    protected fun unpackFloat(buffer: ByteBuffer): Float {
+      protected fun unpackUInt16(buffer: ByteBuffer): Int {
+        return buffer.getShort().toInt() and 0xFFFF
+      }
+
+      protected fun unpackLong(buffer: ByteBuffer): Long {
+        return buffer.getLong()
+      }
+
+      protected fun unpackFloat(buffer: ByteBuffer): Float {
         return buffer.getFloat()
-    }
+      }
 
-    protected fun unpackUUID(buffer: ByteBuffer): UUID {
+      protected fun unpackUUID(buffer: ByteBuffer): UUID {
         val originalOrder = buffer.order()
         buffer.order(ByteOrder.BIG_ENDIAN)
         val most = buffer.getLong()
         val least = buffer.getLong()
         buffer.order(originalOrder)
         return UUID(most, least)
-    }
+      }
+
+      protected fun unpackVariable(
+          buffer: ByteBuffer,
+          lengthBytes: Int,
+      ): ByteArray {
+        require(lengthBytes == 1 || lengthBytes == 2) { "lengthBytes must be 1 or 2" }
+        val length =
+            when (lengthBytes) {
+              1 -> buffer.get().toInt() and 0xFF
+              else -> buffer.getShort().toInt() and 0xFFFF
+            }
+        val data = ByteArray(length)
+        buffer.get(data)
+        return data
+      }
+
+      protected fun unpackIPAddress(buffer: ByteBuffer): Inet4Address? {
+        val bytes = ByteArray(4)
+        buffer.get(bytes)
+        return try {
+          InetAddress.getByAddress(bytes) as? Inet4Address
+        } catch (_: UnknownHostException) {
+          null
+        }
+      }
 
     /**
      * Set message event listener
