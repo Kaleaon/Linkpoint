@@ -53,6 +53,7 @@ class FilamentWorldRenderer(
     private lateinit var gltfLoader: FilamentGltfLoader
     private lateinit var avatarRenderer: FilamentAvatarRenderer
     private lateinit var performanceOptimizer: FilamentPerformanceOptimizer
+    private var lastFrameTimeNs: Long = -1L
     
     // Test renderable (a simple triangle for now)
     @Entity private var testRenderable = 0
@@ -97,7 +98,7 @@ class FilamentWorldRenderer(
             performanceOptimizer = FilamentPerformanceOptimizer(engine, scene)
             
             // Initialize world data bridge
-            worldDataBridge = FilamentWorldDataBridge(context, renderContext, materialManager)
+            worldDataBridge = FilamentWorldDataBridge(context, renderContext, materialManager, avatarRenderer)
             
             // Create a simple test scene
             createTestTriangle()
@@ -296,7 +297,22 @@ class FilamentWorldRenderer(
         // Start syncing
         worldDataBridge.startSync()
         
+        lastFrameTimeNs = -1L
         Log.i(TAG, "Connected to world data sources")
+    }
+
+    fun onFrame(frameTimeNanos: Long) {
+        if (!::avatarRenderer.isInitialized) return
+        if (lastFrameTimeNs < 0L) {
+            lastFrameTimeNs = frameTimeNanos
+            return
+        }
+
+        val deltaSeconds = (frameTimeNanos - lastFrameTimeNs) / 1_000_000_000f
+        lastFrameTimeNs = frameTimeNanos
+        if (deltaSeconds.isFinite() && deltaSeconds > 0f) {
+            avatarRenderer.tick(deltaSeconds.coerceIn(0f, 0.25f))
+        }
     }
     
     /**
@@ -395,6 +411,7 @@ class FilamentWorldRenderer(
                 materialManager.destroy()
             }
             
+            lastFrameTimeNs = -1L
             Log.i(TAG, "FilamentWorldRenderer destroyed")
         } catch (e: Exception) {
             Log.e(TAG, "Error destroying world renderer", e)
