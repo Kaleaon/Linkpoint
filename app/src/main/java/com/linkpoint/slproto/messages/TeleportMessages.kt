@@ -3,7 +3,6 @@ package com.linkpoint.slproto.messages
 import com.linkpoint.slproto.SLMessage
 import com.linkpoint.slproto.types.LLVector3
 import java.net.Inet4Address
-import java.net.InetAddress
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.util.*
@@ -43,14 +42,14 @@ class TeleportRequestMessage : SLMessage() {
  * Teleport start message
  */
 class TeleportStartMessage : SLMessage() {
-    var flags: Int = 0
+    var teleportFlags: Int = 0
 
     override fun packPayload(buffer: ByteBuffer) {
-        packInt(buffer, flags)
+        packInt(buffer, teleportFlags)
     }
 
     override fun unpackPayload(buffer: ByteBuffer) {
-        flags = unpackInt(buffer)
+        teleportFlags = unpackInt(buffer)
     }
 
     override fun getMessageID(): Int = SLMessageFactory.MessageIDs.TELEPORT_START
@@ -64,7 +63,7 @@ class TeleportStartMessage : SLMessage() {
 class TeleportFinishMessage : SLMessage() {
     var agentId: UUID = UUID.randomUUID()
     var locationId: Int = 0
-    var simIp: String = "0.0.0.0"
+    var simAddress: Inet4Address? = null
     var simPort: Int = 0
     var regionHandle: Long = 0L
     var seedCapability: String = ""
@@ -74,7 +73,8 @@ class TeleportFinishMessage : SLMessage() {
     override fun packPayload(buffer: ByteBuffer) {
         packUUID(buffer, agentId)
         packInt(buffer, locationId)
-        packIPAddress(buffer, resolveIPv4(simIp))
+        require(simPort in 0..0xFFFF) { "Sim port out of range ($simPort)" }
+        packIPAddress(buffer, simAddress)
         packUInt16(buffer, simPort)
         packLong(buffer, regionHandle)
         packVariable(buffer, seedCapability.toByteArray(StandardCharsets.UTF_8), 2)
@@ -85,7 +85,7 @@ class TeleportFinishMessage : SLMessage() {
     override fun unpackPayload(buffer: ByteBuffer) {
         agentId = unpackUUID(buffer)
         locationId = unpackInt(buffer)
-        simIp = unpackIPAddress(buffer)?.hostAddress ?: "0.0.0.0"
+        simAddress = unpackIPAddress(buffer)
         simPort = unpackUInt16(buffer)
         regionHandle = unpackLong(buffer)
         seedCapability = String(unpackVariable(buffer, 2), StandardCharsets.UTF_8)
@@ -128,7 +128,7 @@ class TeleportProgressMessage : SLMessage() {
  */
 class TeleportFailedMessage : SLMessage() {
     var agentId: UUID = UUID.randomUUID()
-    var reason: String = ""
+    var reason: ByteArray = ByteArray(0)
 
     data class AlertInfo(
         var message: String = "",
@@ -139,7 +139,7 @@ class TeleportFailedMessage : SLMessage() {
 
     override fun packPayload(buffer: ByteBuffer) {
         packUUID(buffer, agentId)
-        packVariable(buffer, reason.toByteArray(StandardCharsets.UTF_8), 1)
+        packVariable(buffer, reason, 1)
         require(alerts.size <= 0xFF) { "Too many teleport alerts (${alerts.size})" }
         packByte(buffer, alerts.size)
         alerts.forEach { alert ->
@@ -150,7 +150,7 @@ class TeleportFailedMessage : SLMessage() {
 
     override fun unpackPayload(buffer: ByteBuffer) {
         agentId = unpackUUID(buffer)
-        reason = String(unpackVariable(buffer, 1), StandardCharsets.UTF_8)
+        reason = unpackVariable(buffer, 1)
         val count = unpackByte(buffer)
         alerts.clear()
         repeat(count) {
@@ -165,9 +165,3 @@ class TeleportFailedMessage : SLMessage() {
     override fun getMessageName(): String = "TeleportFailed"
 }
 
-private fun resolveIPv4(address: String): Inet4Address? =
-    try {
-        InetAddress.getByName(address) as? Inet4Address
-    } catch (_: Exception) {
-        null
-    }
