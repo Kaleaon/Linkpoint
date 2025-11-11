@@ -2,6 +2,7 @@ package com.lumiyaviewer.lumiya
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.preference.PreferenceManager
 import java.io.File
@@ -21,6 +22,8 @@ object GlobalOptions : SharedPreferences.OnSharedPreferenceChangeListener {
 
     data class GlobalOptionsChangedEvent(val preferences: SharedPreferences)
 
+    private const val TAG = "GlobalOptions"
+
     private val initialized = AtomicBoolean(false)
     private val cacheDirUsed = AtomicBoolean(false)
     private val cacheBaseDirRef = AtomicReference<File?>()
@@ -35,16 +38,35 @@ object GlobalOptions : SharedPreferences.OnSharedPreferenceChangeListener {
     @Volatile private var voiceEnabled: Boolean = false
     @Volatile private var meshRendering: MeshRendering = MeshRendering.MEDIUM
 
-    fun initialize(context: Context = LumiyaApp.getContext()) {
-        if (initialized.compareAndSet(false, true)) {
-            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-            updateState(context, prefs)
-            prefs.registerOnSharedPreferenceChangeListener(this)
+    fun initialize(context: Context? = null) {
+        if (!initialized.compareAndSet(false, true)) {
+            return
         }
+
+        val targetContext = context ?: runCatching { LumiyaApp.getContext() }
+            .getOrElse { error ->
+                Log.w(TAG, "Skipping GlobalOptions initialisation; application context unavailable", error)
+                initialized.set(false)
+                return
+            }
+
+        val prefs = runCatching { PreferenceManager.getDefaultSharedPreferences(targetContext) }
+            .getOrElse { error ->
+                Log.e(TAG, "Failed to access default shared preferences", error)
+                initialized.set(false)
+                return
+            }
+
+        updateState(targetContext, prefs)
+        prefs.registerOnSharedPreferenceChangeListener(this)
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
-        updateState(LumiyaApp.getContext(), sharedPreferences)
+        val context = runCatching { LumiyaApp.getContext() }.getOrElse { error ->
+            Log.w(TAG, "Preference change ignored; application context unavailable", error)
+            return
+        }
+        updateState(context, sharedPreferences)
     }
 
     fun getThemeResourceId(): Int = themeResId
@@ -61,7 +83,11 @@ object GlobalOptions : SharedPreferences.OnSharedPreferenceChangeListener {
     fun getAvailableCacheDirs(): List<File> = availableCacheDirsRef.get()
 
     fun getCacheDir(child: String): File {
-        val base = cacheBaseDirRef.get() ?: LumiyaApp.getContext().cacheDir
+        val base = cacheBaseDirRef.get() ?: runCatching { LumiyaApp.getContext().cacheDir }
+            .getOrElse { error ->
+                Log.e(TAG, "Failed to resolve cache directory; application context unavailable", error)
+                throw IllegalStateException("Unable to resolve cache directory", error)
+            }
         val target = File(base, child)
         cacheDirUsed.set(true)
         if (!target.exists()) {
