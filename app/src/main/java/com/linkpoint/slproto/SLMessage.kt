@@ -344,6 +344,18 @@ abstract class SLMessage : Parcelable {
         buffer.put(data)
       }
 
+        protected fun packFixed(
+            buffer: ByteBuffer,
+            data: ByteArray,
+            expectedLength: Int,
+        ) {
+          require(expectedLength >= 0) { "expectedLength must be non-negative" }
+          require(data.size == expectedLength) {
+            "Fixed field expected $expectedLength bytes but was ${data.size}"
+          }
+          buffer.put(data)
+        }
+
       protected fun packIPAddress(
           buffer: ByteBuffer,
           address: Inet4Address?,
@@ -399,6 +411,16 @@ abstract class SLMessage : Parcelable {
         buffer.get(data)
         return data
       }
+
+        protected fun unpackFixed(
+            buffer: ByteBuffer,
+            length: Int,
+        ): ByteArray {
+          require(length >= 0) { "length must be non-negative" }
+          val data = ByteArray(length)
+          buffer.get(data)
+          return data
+        }
 
       protected fun unpackIPAddress(buffer: ByteBuffer): Inet4Address? {
         val bytes = ByteArray(4)

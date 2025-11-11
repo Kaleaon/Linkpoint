@@ -12,6 +12,7 @@ object SLMessageFactory {
         const val PACKET_ACK = 0xFFFFFFFB.toInt()
         const val OPEN_CIRCUIT = 0xFFFFFFFC.toInt()
         const val CLOSE_CIRCUIT = 0xFFFFFFFD.toInt()
+        const val ADD_CIRCUIT_CODE = 0xFFFF0002.toInt()
         const val USE_CIRCUIT_CODE = 0xFFFF0003.toInt()
         const val COMPLETE_AGENT_MOVEMENT = 0xFFFF00F9.toInt()
         const val START_PING_CHECK = 0x00000001
@@ -67,6 +68,19 @@ object SLMessageFactory {
         const val AGENT_ALERT = 0xFFFF0087.toInt()
         const val AGENT_GROUP_DATA_UPDATE = 0xFFFF0185.toInt()
         const val AGENT_MOVEMENT_COMPLETE = 0xFFFF00FA.toInt()
+        const val ACCEPT_CALLING_CARD = 0xFFFF012E.toInt()
+        const val DECLINE_CALLING_CARD = 0xFFFF012F.toInt()
+        const val OFFER_CALLING_CARD = 0xFFFF012D.toInt()
+        const val ACCEPT_FRIENDSHIP = 0xFFFF0129.toInt()
+        const val DECLINE_FRIENDSHIP = 0xFFFF012A.toInt()
+        const val FORM_FRIENDSHIP = 0xFFFF012B.toInt()
+        const val TERMINATE_FRIENDSHIP = 0xFFFF012C.toInt()
+        const val CHANGE_USER_RIGHTS = 0xFFFF0141.toInt()
+        const val GRANT_USER_RIGHTS = 0xFFFF0140.toInt()
+        const val ACTIVATE_GESTURES = 0xFFFF013C.toInt()
+        const val DEACTIVATE_GESTURES = 0xFFFF013D.toInt()
+        const val ACTIVATE_GROUP = 0xFFFF0170.toInt()
+        const val GENERIC_MESSAGE = 0xFFFF0105.toInt()
 
         // Region and location updates
         const val COARSE_LOCATION_UPDATE = 0x0000FF06
@@ -103,8 +117,23 @@ object SLMessageFactory {
         const val TELEPORT_FAILED = 0xFFFF004A.toInt()
 
         // Inventory messages
+        const val FETCH_INVENTORY_DESCENDENTS = 0xFFFF0115.toInt()
         const val FETCH_INVENTORY = 0xFFFF0117.toInt()
         const val FETCH_INVENTORY_REPLY = 0xFFFF0118.toInt()
+        const val BULK_UPDATE_INVENTORY = 0xFFFF0119.toInt()
+        const val CHANGE_INVENTORY_ITEM_FLAGS = 0xFFFF010F.toInt()
+        const val COPY_INVENTORY_FROM_NOTECARD = 0xFFFF0109.toInt()
+        const val COPY_INVENTORY_ITEM = 0xFFFF010D.toInt()
+        const val MOVE_INVENTORY_ITEM = 0xFFFF010C.toInt()
+        const val MOVE_INVENTORY_FOLDER = 0xFFFF0113.toInt()
+        const val CREATE_INVENTORY_FOLDER = 0xFFFF0111.toInt()
+        const val CREATE_INVENTORY_ITEM = 0xFFFF0131.toInt()
+        const val CREATE_NEW_OUTFIT_ATTACHMENTS = 0xFFFF018E.toInt()
+        const val DETACH_ATTACHMENT_INTO_INV = 0xFFFF018D.toInt()
+        const val TRANSFER_INVENTORY = 0xFFFF0127.toInt()
+        const val TRANSFER_INVENTORY_ACK = 0xFFFF0128.toInt()
+        const val BUY_OBJECT_INVENTORY = 0xFFFF0067.toInt()
+        const val CREATE_LANDMARK_FOR_EVENT = 0xFFFF0132.toInt()
 
         // Avatar messages
         const val AVATAR_APPEARANCE = 0xFFFF009E.toInt()
@@ -119,6 +148,11 @@ object SLMessageFactory {
         const val TRANSFER_INFO = 0xFFFF009A.toInt()
         const val TRANSFER_PACKET = 0x00000011
         const val TRANSFER_ABORT = 0xFFFF009B.toInt()
+        const val ABORT_XFER = 0xFFFF009D.toInt()
+        const val ASSET_UPLOAD_REQUEST = 0xFFFF014D.toInt()
+        const val ASSET_UPLOAD_COMPLETE = 0xFFFF014E.toInt()
+        const val CREATE_TRUSTED_CIRCUIT = 0xFFFF0188.toInt()
+        const val DENY_TRUSTED_CIRCUIT = 0xFFFF0189.toInt()
     }
 
     private val messageRegistry = mutableMapOf<Int, () -> SLMessage>()
@@ -153,6 +187,7 @@ object SLMessageFactory {
         registerMessage(MessageIDs.PACKET_ACK) { PacketAckMessage() }
         registerMessage(MessageIDs.OPEN_CIRCUIT) { OpenCircuitMessage() }
         registerMessage(MessageIDs.CLOSE_CIRCUIT) { CloseCircuitMessage() }
+        registerMessage(MessageIDs.ADD_CIRCUIT_CODE) { AddCircuitCodeMessage() }
         registerMessage(MessageIDs.USE_CIRCUIT_CODE) { UseCircuitCodeMessage() }
         registerMessage(MessageIDs.COMPLETE_AGENT_MOVEMENT) { CompleteAgentMovementMessage() }
         registerMessage(MessageIDs.START_PING_CHECK) { StartPingCheckMessage() }
@@ -206,6 +241,33 @@ object SLMessageFactory {
         registerMessage(MessageIDs.AGENT_DROP_GROUP) { AgentDropGroupMessage() }
         registerMessage(MessageIDs.AGENT_ALERT) { AgentAlertMessage() }
         registerMessage(MessageIDs.AGENT_MOVEMENT_COMPLETE) { AgentMovementCompleteMessage() }
+        registerMessage(MessageIDs.ACCEPT_CALLING_CARD) { AcceptCallingCardMessage() }
+        registerMessage(MessageIDs.DECLINE_CALLING_CARD) { DeclineCallingCardMessage() }
+        registerMessage(MessageIDs.OFFER_CALLING_CARD) { OfferCallingCardMessage() }
+        registerMessage(MessageIDs.ACCEPT_FRIENDSHIP) { AcceptFriendshipMessage() }
+        registerMessage(MessageIDs.DECLINE_FRIENDSHIP) { DeclineFriendshipMessage() }
+        registerMessage(MessageIDs.FORM_FRIENDSHIP) { FormFriendshipMessage() }
+        registerMessage(MessageIDs.TERMINATE_FRIENDSHIP) { TerminateFriendshipMessage() }
+        registerMessage(MessageIDs.CHANGE_USER_RIGHTS) { ChangeUserRightsMessage() }
+        registerMessage(MessageIDs.GRANT_USER_RIGHTS) { GrantUserRightsMessage() }
+        registerMessage(MessageIDs.ACTIVATE_GESTURES) { ActivateGesturesMessage() }
+        registerMessage(MessageIDs.DEACTIVATE_GESTURES) { DeactivateGesturesMessage() }
+        registerMessage(MessageIDs.ACTIVATE_GROUP) { ActivateGroupMessage() }
+        registerMessage(MessageIDs.GENERIC_MESSAGE) { GenericMessageMessage() }
+        registerMessage(MessageIDs.BULK_UPDATE_INVENTORY) { BulkUpdateInventoryMessage() }
+        registerMessage(MessageIDs.CHANGE_INVENTORY_ITEM_FLAGS) { ChangeInventoryItemFlagsMessage() }
+        registerMessage(MessageIDs.COPY_INVENTORY_FROM_NOTECARD) { CopyInventoryFromNotecardMessage() }
+        registerMessage(MessageIDs.COPY_INVENTORY_ITEM) { CopyInventoryItemMessage() }
+        registerMessage(MessageIDs.MOVE_INVENTORY_ITEM) { MoveInventoryItemMessage() }
+        registerMessage(MessageIDs.MOVE_INVENTORY_FOLDER) { MoveInventoryFolderMessage() }
+        registerMessage(MessageIDs.CREATE_INVENTORY_FOLDER) { CreateInventoryFolderMessage() }
+        registerMessage(MessageIDs.CREATE_INVENTORY_ITEM) { CreateInventoryItemMessage() }
+        registerMessage(MessageIDs.CREATE_NEW_OUTFIT_ATTACHMENTS) { CreateNewOutfitAttachmentsMessage() }
+        registerMessage(MessageIDs.DETACH_ATTACHMENT_INTO_INV) { DetachAttachmentIntoInvMessage() }
+        registerMessage(MessageIDs.TRANSFER_INVENTORY) { TransferInventoryMessage() }
+        registerMessage(MessageIDs.TRANSFER_INVENTORY_ACK) { TransferInventoryAckMessage() }
+        registerMessage(MessageIDs.BUY_OBJECT_INVENTORY) { BuyObjectInventoryMessage() }
+        registerMessage(MessageIDs.CREATE_LANDMARK_FOR_EVENT) { CreateLandmarkForEventMessage() }
 
         // Location updates
         registerMessage(MessageIDs.COARSE_LOCATION_UPDATE) { CoarseLocationUpdateMessage() }
@@ -247,6 +309,7 @@ object SLMessageFactory {
         registerMessage(MessageIDs.IMPROVED_IM) { ImprovedIMMessage() }
 
         // Inventory messages
+        registerMessage(MessageIDs.FETCH_INVENTORY_DESCENDENTS) { FetchInventoryDescendentsMessage() }
         registerMessage(MessageIDs.FETCH_INVENTORY) { FetchInventoryMessage() }
         registerMessage(MessageIDs.FETCH_INVENTORY_REPLY) { FetchInventoryReplyMessage() }
 
@@ -260,5 +323,10 @@ object SLMessageFactory {
         registerMessage(MessageIDs.TRANSFER_INFO) { TransferInfoMessage() }
         registerMessage(MessageIDs.TRANSFER_PACKET) { TransferPacketMessage() }
         registerMessage(MessageIDs.TRANSFER_ABORT) { TransferAbortMessage() }
+        registerMessage(MessageIDs.ABORT_XFER) { AbortXferMessage() }
+        registerMessage(MessageIDs.ASSET_UPLOAD_REQUEST) { AssetUploadRequestMessage() }
+        registerMessage(MessageIDs.ASSET_UPLOAD_COMPLETE) { AssetUploadCompleteMessage() }
+        registerMessage(MessageIDs.CREATE_TRUSTED_CIRCUIT) { CreateTrustedCircuitMessage() }
+        registerMessage(MessageIDs.DENY_TRUSTED_CIRCUIT) { DenyTrustedCircuitMessage() }
     }
 }
