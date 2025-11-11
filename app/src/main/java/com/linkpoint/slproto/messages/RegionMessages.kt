@@ -228,7 +228,6 @@ class NeighborListMessage : SLMessage() {
     val neighbors: MutableList<NeighborEntry> = MutableList(4) { NeighborEntry() }
 
     override fun packPayload(buffer: ByteBuffer) {
-        packByte(buffer, 3) // block frequency identifier
         require(neighbors.size == 4) { "Neighbor list must contain exactly 4 entries" }
         neighbors.forEach { entry ->
             packIPAddress(buffer, entry.simulatorAddress)
@@ -245,7 +244,6 @@ class NeighborListMessage : SLMessage() {
     }
 
     override fun unpackPayload(buffer: ByteBuffer) {
-        /* frequency */ unpackByte(buffer)
         neighbors.indices.forEach { idx ->
             val entry = neighbors[idx]
             entry.simulatorAddress = unpackIPAddress(buffer)

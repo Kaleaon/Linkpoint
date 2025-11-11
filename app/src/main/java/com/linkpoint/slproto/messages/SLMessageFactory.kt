@@ -56,6 +56,7 @@ object SLMessageFactory {
         const val IMAGE_DATA = 0x09
         const val IMAGE_PACKET = 0x0A
         const val LAYER_DATA = 0x0B
+        const val REQUEST_IMAGE = 0x08
 
         // Chat messages
         const val CHAT_FROM_SIMULATOR = 0x8B
@@ -170,6 +171,7 @@ object SLMessageFactory {
         registerMessage(MessageIDs.DISABLE_SIMULATOR) { DisableSimulatorMessage() }
 
         // Asset streaming
+        registerMessage(MessageIDs.REQUEST_IMAGE) { RequestImageMessage() }
         registerMessage(MessageIDs.IMAGE_DATA) { ImageDataMessage() }
         registerMessage(MessageIDs.IMAGE_PACKET) { ImagePacketMessage() }
         registerMessage(MessageIDs.LAYER_DATA) { LayerDataMessage() }
