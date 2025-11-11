@@ -16,10 +16,13 @@ import java.util.concurrent.atomic.AtomicInteger
  * Handles reliable message transmission and acknowledgment
  */
 class SLCircuit(
-    private val remoteAddress: InetAddress
-    private val remotePort: Int
+    private val remoteAddress: InetAddress,
+    private val remotePort: Int,
 ) {
-    private val socket = DatagramSocket()
+    private val socket = DatagramSocket().apply {
+        connect(remoteAddress, remotePort)
+        soTimeout = 0
+    }
     private val sequenceNumber = AtomicInteger(1)
     private val pendingAcks = ConcurrentHashMap<Int, SLMessage>()
     private val receivedPackets = Collections.synchronizedSet(mutableSetOf<Int>())
@@ -116,7 +119,7 @@ class SLCircuit(
 
         buffer.put(flags)
         buffer.putInt(seqNum)
-        buffer.put(0) // Extra header bytes
+        buffer.put(0.toByte()) // Extra header bytes
 
         // Pack message payload
         val payloadStart = buffer.position()
@@ -149,6 +152,7 @@ class SLCircuit(
 
         while (isRunning) {
             try {
+                packet.length = buffer.size
                 socket.receive(packet)
 
                 val byteBuffer = ByteBuffer.wrap(buffer, 0, packet.length)
@@ -284,7 +288,7 @@ class SLCircuit(
             // Build header
             buffer.put(flags)
             buffer.putInt(sequenceNum)
-            buffer.put(0) // Extra header bytes
+            buffer.put(0.toByte()) // Extra header bytes
 
             // Add payload
             buffer.put(data)
@@ -323,9 +327,9 @@ class SLCircuit(
  * Circuit information
  */
 data class SLCircuitInfo(
-    val address: InetAddress
-    val port: Int
-    val circuitCode: Int
-    val agentId: UUID
-    val sessionId: UUID
+    val address: InetAddress,
+    val port: Int,
+    val circuitCode: Int,
+    val agentId: UUID,
+    val sessionId: UUID,
 )
