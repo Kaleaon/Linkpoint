@@ -10,6 +10,8 @@ import java.nio.ByteOrder
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.TimeoutException
+import kotlin.math.min
 
 /**
  * Second Life UDP circuit implementation

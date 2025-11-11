@@ -72,6 +72,28 @@ abstract class SLMessage : Parcelable {
         }
 
         /**
+         * Encode a message ID to the payload buffer.
+         */
+        internal fun encodeMessageID(
+            buffer: ByteBuffer,
+            messageId: Int,
+        ) {
+            when {
+                messageId and 0xFFFF0000.toInt() == 0xFFFF0000.toInt() -> {
+                    buffer.put(0xFF.toByte())
+                    buffer.put(0xFF.toByte())
+                    buffer.put(((messageId ushr 8) and 0xFF).toByte())
+                    buffer.put((messageId and 0xFF).toByte())
+                }
+                messageId and 0xFF00 == 0xFF00 -> {
+                    buffer.put(0xFF.toByte())
+                    buffer.put((messageId and 0xFF).toByte())
+                }
+                else -> buffer.put((messageId and 0xFF).toByte())
+            }
+        }
+
+        /**
          * Unpack a message from network buffer
          */
         fun unpack(
@@ -152,14 +174,44 @@ abstract class SLMessage : Parcelable {
                 if (byte == 0.toByte()) {
                     if (!input.hasRemaining()) break
                     val count = input.get().toInt() and 0xFF
-                    for (i in 0 until count) {
-                        output.put(0)
-                    }
+                    repeat(count) { output.put(0) }
                 } else {
                     output.put(byte)
                 }
             }
             return output
+        }
+
+        /**
+         * Zero-encode a buffer.
+         */
+        internal fun zeroEncode(
+            input: ByteBuffer,
+            output: ByteBuffer,
+        ) {
+            var zeroCount = 0
+            while (input.hasRemaining()) {
+                val value = input.get()
+                if (value == 0.toByte()) {
+                    zeroCount++
+                    if (zeroCount == 255) {
+                        output.put(0)
+                        output.put(255.toByte())
+                        zeroCount = 0
+                    }
+                } else {
+                    if (zeroCount > 0) {
+                        output.put(0)
+                        output.put(zeroCount.toByte())
+                        zeroCount = 0
+                    }
+                    output.put(value)
+                }
+            }
+            if (zeroCount > 0) {
+                output.put(0)
+                output.put(zeroCount.toByte())
+            }
         }
 
         @JvmField
@@ -207,7 +259,7 @@ abstract class SLMessage : Parcelable {
     /**
      * Pack payload with little-endian byte order
      */
-    private fun packPayloadLE(buffer: ByteBuffer) {
+    internal fun packPayloadLE(buffer: ByteBuffer) {
         val originalOrder = buffer.order()
         buffer.order(ByteOrder.LITTLE_ENDIAN)
         packPayload(buffer)
@@ -217,11 +269,31 @@ abstract class SLMessage : Parcelable {
     /**
      * Unpack payload with little-endian byte order
      */
-    private fun unpackPayloadLE(buffer: ByteBuffer) {
+    internal fun unpackPayloadLE(buffer: ByteBuffer) {
         val originalOrder = buffer.order()
         buffer.order(ByteOrder.LITTLE_ENDIAN)
         unpackPayload(buffer)
         buffer.order(originalOrder)
+    }
+
+    /**
+     * Write message ID and payload into the target buffer, applying zero coding if required.
+     */
+    internal fun writePayloadForTransmit(
+        target: ByteBuffer,
+        scratch: ByteBuffer,
+    ) {
+        if (zeroCoded) {
+            scratch.clear()
+            scratch.order(ByteOrder.BIG_ENDIAN)
+            encodeMessageID(scratch, getMessageID())
+            packPayloadLE(scratch)
+            scratch.flip()
+            zeroEncode(scratch, target)
+        } else {
+            encodeMessageID(target, getMessageID())
+            packPayloadLE(target)
+        }
     }
 
     /**
