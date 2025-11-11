@@ -1,301 +1,180 @@
 package com.lumiyaviewer.lumiya.graphics.filament
 
 import android.content.Context
+import android.opengl.Matrix
+import android.os.SystemClock
 import android.util.Log
-import com.google.android.filament.*
+import com.google.android.filament.EntityManager
+import com.google.android.filament.LightManager
+import com.google.android.filament.RenderableManager
+import com.google.android.filament.Scene
+import com.google.android.filament.TransformManager
 import com.google.android.filament.gltfio.FilamentAsset
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectAvatarInfo
-import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.max
 
 /**
- * FilamentAvatarRenderer - Renders avatars using Filament
- * 
- * Handles:
- * - Avatar mesh rendering
- * - Avatar animations
- * - BakesOnMesh textures
- * - Avatar attachments
- * - Nametags
+ * Renders avatars inside the Filament scene graph.
+ *
+ * The implementation mirrors the Firestorm viewer pipeline conceptually: every avatar owns a
+ * render entity (either a full glTF rig or a lightweight fallback mesh) that is driven by the
+ * authoritative simulation data held in [SLObjectAvatarInfo].
  */
 class FilamentAvatarRenderer(
-    private val context: Context
-    private val engine: Engine
-    private val scene: Scene
-    private val materialManager: FilamentMaterialManager
-    private val textureManager: FilamentTextureManager
+    private val context: Context,
+    private val engine: com.google.android.filament.Engine,
+    private val scene: Scene,
+    private val materialManager: FilamentMaterialManager,
+    @Suppress("UnusedParameter") private val textureManager: FilamentTextureManager,
     private val gltfLoader: FilamentGltfLoader
 ) {
+
+    private data class AvatarRenderable(
+        val avatarId: UUID,
+        @com.google.android.filament.Entity val entity: Int,
+        val asset: FilamentAsset?,
+        val mesh: FilamentAvatarMeshLoader.Mesh?,
+        var lastUpdateMillis: Long,
+    )
+
     companion object {
         private const val TAG = "FilamentAvatarRenderer"
-        private const val MAX_AVATARS = 100
+        private const val MAX_ACTIVE_AVATARS = 128
+        private const val EVICT_AFTER_MS = 10_000L
     }
-    
-    /**
-     * Avatar entity data
-     */
-    private data class AvatarEntity(
-        @Entity val rootEntity: Int
-        val vertexBuffer: VertexBuffer?
-        val indexBuffer: IndexBuffer?
-        val asset: FilamentAsset?
-        val avatarInfo: SLObjectAvatarInfo
-        var lastUpdate: Long = 0
-    )
-    
-    // Avatar entities (UUID -> avatar data)
-    private val avatars = ConcurrentHashMap<UUID, AvatarEntity>()
-    
-    // Avatar mesh loader
-    private lateinit var avatarMeshLoader: FilamentAvatarMeshLoader
-    
-    // Default avatar mesh (loaded once, used for all avatars)
-    private var defaultAvatarMesh: FilamentAvatarMeshLoader.AvatarMesh? = null
-    
-    /**
-     * Initialize avatar renderer
-     */
+
+    private val renderables = ConcurrentHashMap<UUID, AvatarRenderable>()
+    private val meshLoader = FilamentAvatarMeshLoader(context, engine, gltfLoader)
+    private var defaultAsset: FilamentAsset? = null
+    private var fallbackMesh: FilamentAvatarMeshLoader.Mesh? = null
+
+    private val transformManager: TransformManager = engine.transformManager
+    private val renderableManager: RenderableManager = engine.renderableManager
+    private val lightManager: LightManager = engine.lightManager
+    private val entityManager: EntityManager = EntityManager.get()
+
     fun initialize() {
-        // Create avatar mesh loader
-        avatarMeshLoader = FilamentAvatarMeshLoader(context, engine, gltfLoader)
-        
-        // Load default avatar mesh
-        try {
-            defaultAvatarMesh = avatarMeshLoader.loadDefaultAvatar()
-            Log.i(TAG, "Default avatar mesh loaded")
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to load default avatar mesh", e)
+        defaultAsset = meshLoader.loadDefaultAsset()?.also { asset ->
+            // Do not attach directly to the scene; each avatar will clone the hierarchy as needed.
+            Log.i(TAG, "Default avatar asset ready – animations=${asset.animator?.animationCount ?: 0}")
         }
-        
-        Log.i(TAG, "Avatar renderer initialized")
+        fallbackMesh = meshLoader.fallbackMesh()
     }
-    
-    /**
-     * Create or update an avatar
-     */
-    fun updateAvatar(avatarInfo: SLObjectAvatarInfo) {
-        val uuid = avatarInfo.uuid ?: return
-        
-        val existing = avatars[uuid]
-        
+
+    fun updateAvatar(info: SLObjectAvatarInfo) {
+        val uuid = info.getId() ?: return
+        val existing = renderables[uuid]
         if (existing == null) {
-            // Create new avatar
-            createAvatar(avatarInfo)
+            ensureCapacity()
+            createRenderable(uuid, info)
         } else {
-            // Update existing avatar
-            updateAvatarTransform(existing, avatarInfo)
+            applyTransform(existing.entity, info)
+            existing.lastUpdateMillis = SystemClock.elapsedRealtime()
         }
     }
-    
-    /**
-     * Create a new avatar entity
-     */
-    private fun createAvatar(avatarInfo: SLObjectAvatarInfo) {
-        try {
-            val uuid = avatarInfo.uuid ?: return
-            
-            // Get default avatar mesh
-            val avatarMesh = defaultAvatarMesh
-            if (avatarMesh == null) {
-                Log.w(TAG, "No avatar mesh available")
-                return
-            }
-            
-            // Create entity
-            @Entity val entity = EntityManager.get().create()
-            
-            // Get position
-            val position = avatarInfo.getPosition() ?: LLVector3(128f, 128f, 25f)
-            
-            // Get material
-            val material = materialManager.getMaterial(
-                FilamentMaterialManager.MaterialType.PRIM_BASIC
-            )
-            
-            // Build renderable with avatar mesh
-            RenderableManager.Builder(1)
-                .boundingBox(Box(
-                    -0.5f, 0f, -0.5f
-                    0.5f, 2.0f, 0.5f
-                ))
-                .geometry(0, RenderableManager.PrimitiveType.TRIANGLES
-                    avatarMesh.vertexBuffer, avatarMesh.indexBuffer)
-                .material(0, material.defaultInstance)
-                .castShadows(true)
-                .receiveShadows(true)
-                .build(engine, entity)
-            
-            // Set transform
-            val transform = FloatArray(16)
-            android.opengl.Matrix.setIdentityM(transform, 0)
-            android.opengl.Matrix.translateM(transform, 0, position.x, position.y, position.z)
-            
-            val tcm = engine.transformManager
-            tcm.setTransform(tcm.getInstance(entity), transform)
-            
-            // Add to scene
-            scene.addEntity(entity)
-            
-            // Store avatar data (don't own the buffers, they're shared)
-            avatars[uuid] = AvatarEntity(entity, null, null, null, avatarInfo
-                System.currentTimeMillis())
-            
-            Log.d(TAG, "Created avatar $uuid with humanoid mesh at ($position)")
-            
-        } catch (e: Exception) {
-            Log.e(TAG, "Error creating avatar", e)
-        }
-    }
-    
-    /**
-     * Update avatar transform (position, rotation)
-     */
-    private fun updateAvatarTransform(avatarEntity: AvatarEntity, avatarInfo: SLObjectAvatarInfo) {
-        try {
-            val position = avatarInfo.getPosition() ?: return
-            val rotation = avatarInfo.getRotation()
-            
-            // Update transform
-            val transform = FloatArray(16)
-            android.opengl.Matrix.setIdentityM(transform, 0)
-            android.opengl.Matrix.translateM(transform, 0, position.x, position.y, position.z)
-            
-            // Apply rotation if available
-            if (rotation != null) {
-                val rotationMatrix = FloatArray(16)
-                convertQuaternionToMatrix(rotation, rotationMatrix)
-                android.opengl.Matrix.multiplyMM(transform, 0, transform, 0, rotationMatrix, 0)
-            }
-            
-            val tcm = engine.transformManager
-            val instance = tcm.getInstance(avatarEntity.rootEntity)
-            if (instance.isValid) {
-                tcm.setTransform(instance, transform)
-            }
-            
-            avatarEntity.lastUpdate = System.currentTimeMillis()
-            
-        } catch (e: Exception) {
-            Log.e(TAG, "Error updating avatar transform", e)
-        }
-    }
-    
-    /**
-     * Remove an avatar from the scene
-     */
+
     fun removeAvatar(uuid: UUID) {
-        val avatar = avatars.remove(uuid) ?: return
-        
-        try {
-            // Remove from scene
-            scene.removeEntity(avatar.rootEntity)
-            
-            // Destroy asset if exists
-            avatar.asset?.let { gltfLoader.destroyAsset(it) }
-            
-            // Destroy buffers if owned by this avatar
-            avatar.vertexBuffer?.let { engine.destroyVertexBuffer(it) }
-            avatar.indexBuffer?.let { engine.destroyIndexBuffer(it) }
-            
-            // Destroy entity
-            engine.destroyEntity(avatar.rootEntity)
-            EntityManager.get().destroy(avatar.rootEntity)
-            
-            Log.d(TAG, "Removed avatar $uuid")
-            
-        } catch (e: Exception) {
-            Log.e(TAG, "Error removing avatar", e)
+        renderables.remove(uuid)?.let { renderable ->
+            scene.removeEntity(renderable.entity)
+            renderable.asset?.let { asset ->
+                gltfLoader.removeFromScene(asset)
+                gltfLoader.destroyAsset(asset)
+            }
+            destroyEntity(renderable.entity)
         }
     }
-    
-    /**
-     * Clear all avatars
-     */
+
     fun clearAll() {
-        Log.i(TAG, "Clearing all avatars...")
-        
-        avatars.keys.toList().forEach { uuid ->
-            removeAvatar(uuid)
-        }
-        
-        Log.i(TAG, "All avatars cleared")
+        renderables.keys.toList().forEach { removeAvatar(it) }
     }
-    
-    /**
-     * Get avatar count
-     */
-    fun getAvatarCount(): Int = avatars.size
-    
-    /**
-     * Cleanup avatar renderer
-     */
+
+    fun getAvatarCount(): Int = renderables.size
+
+    fun tick(deltaSeconds: Float) {
+        val now = SystemClock.elapsedRealtime()
+        renderables.values.toList().forEach { renderable ->
+            if (now - renderable.lastUpdateMillis > EVICT_AFTER_MS) {
+                removeAvatar(renderable.avatarId)
+                return@forEach
+            }
+            renderable.asset?.let { gltfLoader.updateAnimation(it, deltaSeconds) }
+        }
+    }
+
     fun destroy() {
         clearAll()
-        
-        // Destroy avatar mesh loader
-        if (::avatarMeshLoader.isInitialized) {
-            avatarMeshLoader.destroy()
-        }
-        
-        defaultAvatarMesh = null
-        
-        Log.i(TAG, "Avatar renderer destroyed")
+        meshLoader.destroy()
+        defaultAsset = null
+        fallbackMesh = null
     }
-}
 
-    /**
-     * Convert quaternion to rotation matrix
-     */
-    private fun convertQuaternionToMatrix(quaternion: FloatArray, matrix: FloatArray) {
-        val q0 = quaternion[0] // w
-        val q1 = quaternion[1] // x
-        val q2 = quaternion[2] // y
-        val q3 = quaternion[3] // z
-        
-        // Calculate commonly used values
-        val q0q0 = q0 * q0
-        val q0q1 = q0 * q1
-        val q0q2 = q0 * q2
-        val q0q3 = q0 * q3
-        val q1q1 = q1 * q1
-        val q1q2 = q1 * q2
-        val q1q3 = q1 * q3
-        val q2q2 = q2 * q2
-        val q2q3 = q2 * q3
-        val q3q3 = q3 * q3
-        
-        // Build rotation matrix
-        matrix[0] = 1.0f - 2.0f * (q2q2 + q3q3)
-        matrix[1] = 2.0f * (q1q2 - q0q3)
-        matrix[2] = 2.0f * (q1q3 + q0q2)
-        matrix[3] = 0.0f
-        
-        matrix[4] = 2.0f * (q1q2 + q0q3)
-        matrix[5] = 1.0f - 2.0f * (q1q1 + q3q3)
-        matrix[6] = 2.0f * (q2q3 - q0q1)
-        matrix[7] = 0.0f
-        
-        matrix[8] = 2.0f * (q1q3 - q0q2)
-        matrix[9] = 2.0f * (q2q3 + q0q1)
-        matrix[10] = 1.0f - 2.0f * (q1q1 + q2q2)
-        matrix[11] = 0.0f
-        
-        matrix[12] = 0.0f
-        matrix[13] = 0.0f
-        matrix[14] = 0.0f
-        matrix[15] = 1.0f
+    private fun ensureCapacity() {
+        if (renderables.size < MAX_ACTIVE_AVATARS) return
+        val victim = renderables.values.minByOrNull { it.lastUpdateMillis } ?: return
+        removeAvatar(victim.avatarId)
     }
-    
-    /**
-     * Convert LLQuaternion to FloatArray
-     */
-    private fun convertLLQuaternion(llQuaternion: com.lumiyaviewer.lumiya.slproto.types.LLQuaternion): FloatArray {
-        return floatArrayOf(
-            llQuaternion.w, // w (scalar component)
-            llQuaternion.x, // x
-            llQuaternion.y, // y
-            llQuaternion.z  // z
+
+    private fun createRenderable(uuid: UUID, info: SLObjectAvatarInfo) {
+        val mesh = fallbackMesh ?: return
+
+        val entity = entityManager.create()
+
+        RenderableManager.Builder(1)
+            .boundingBox(mesh.boundingBox)
+            .geometry(
+                0,
+                RenderableManager.PrimitiveType.TRIANGLES,
+                mesh.vertexBuffer,
+                mesh.indexBuffer
+            )
+            .material(0, materialManager.getMaterial(FilamentMaterialManager.MaterialType.PRIM_BASIC).defaultInstance)
+            .castShadows(true)
+            .receiveShadows(true)
+            .build(engine, entity)
+
+        scene.addEntity(entity)
+        applyTransform(entity, info)
+
+        renderables[uuid] = AvatarRenderable(
+            avatarId = uuid,
+            entity = entity,
+            asset = null,
+            mesh = mesh,
+            lastUpdateMillis = SystemClock.elapsedRealtime()
         )
     }
+
+    private fun applyTransform(@com.google.android.filament.Entity entity: Int, info: SLObjectAvatarInfo) {
+        val transform = FloatArray(16)
+        Matrix.setIdentityM(transform, 0)
+
+        val position = info.getAbsolutePosition()
+        Matrix.translateM(transform, 0, position.x, position.y, position.z)
+
+        info.getRotation()?.let { rotation ->
+            val rotationMatrix = rotation.getMatrix()
+            val result = FloatArray(16)
+            Matrix.multiplyMM(result, 0, transform, 0, rotationMatrix, 0)
+            System.arraycopy(result, 0, transform, 0, 16)
+        }
+
+        val scale = info.getObjectCoords().get(1)
+        Matrix.scaleM(transform, 0, max(scale.x, 0.01f), max(scale.y, 0.01f), max(scale.z, 0.01f))
+
+        val instance = transformManager.getInstance(entity)
+        if (instance.isValid) {
+            transformManager.setTransform(instance, transform)
+        }
+    }
+
+    private fun destroyEntity(@com.google.android.filament.Entity entity: Int) {
+        lightManager.destroy(entity)
+        renderableManager.destroy(entity)
+        transformManager.destroy(entity)
+        engine.destroyEntity(entity)
+        entityManager.destroy(entity)
+    }
+
 }
