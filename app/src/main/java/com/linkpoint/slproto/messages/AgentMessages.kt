@@ -904,3 +904,224 @@ class ChildAgentPositionUpdateMessage : SLMessage() {
 
     override fun getMessageName(): String = "ChildAgentPositionUpdate"
 }
+
+/**
+ * Child agent update (0x19)
+ */
+class ChildAgentUpdateMessage : SLMessage() {
+    data class GroupData(
+        var groupId: UUID = UUID.randomUUID(),
+        var groupPowers: Long = 0L,
+        var acceptNotices: Boolean = false,
+    )
+
+    data class AnimationEntry(
+        var animationId: UUID = UUID.randomUUID(),
+        var objectId: UUID = UUID.randomUUID(),
+    )
+
+    data class AccessLevel(
+        var legacyAccess: Int = 0,
+        var maxAccess: Int = 0,
+    )
+
+    var regionHandle: Long = 0L
+    var viewerCircuitCode: Int = 0
+    var agentId: UUID = UUID.randomUUID()
+    var sessionId: UUID = UUID.randomUUID()
+    var agentPosition: LLVector3 = LLVector3()
+    var agentVelocity: LLVector3 = LLVector3()
+    var cameraCenter: LLVector3 = LLVector3()
+    var agentSize: LLVector3 = LLVector3()
+    var atAxis: LLVector3 = LLVector3()
+    var leftAxis: LLVector3 = LLVector3()
+    var upAxis: LLVector3 = LLVector3()
+    var changedGrid: Boolean = false
+    var far: Float = 0f
+    var aspect: Float = 0f
+    var throttles: ByteArray = ByteArray(0)
+    var locomotionState: Int = 0
+    var headRotation: LLQuaternion = LLQuaternion()
+    var bodyRotation: LLQuaternion = LLQuaternion()
+    var controlFlags: Int = 0
+    var energyLevel: Float = 0f
+    var godLevel: Int = 0
+    var alwaysRun: Boolean = false
+    var preyAgent: UUID = UUID.randomUUID()
+    var agentAccess: Int = 0
+    var agentTextures: ByteArray = ByteArray(0)
+    var activeGroupId: UUID = UUID.randomUUID()
+
+    val groups: MutableList<GroupData> = mutableListOf()
+    val animations: MutableList<AnimationEntry> = mutableListOf()
+    val granterBlocks: MutableList<UUID> = mutableListOf()
+    val nvPairs: MutableList<ByteArray> = mutableListOf()
+    val visualParams: MutableList<Int> = mutableListOf()
+    val agentAccessLevels: MutableList<AccessLevel> = mutableListOf()
+    val agentInfoFlags: MutableList<Int> = mutableListOf()
+
+    init {
+        zeroCoded = true
+    }
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packLong(buffer, regionHandle)
+        packInt(buffer, viewerCircuitCode)
+        packUUID(buffer, agentId)
+        packUUID(buffer, sessionId)
+        agentPosition.pack(buffer)
+        agentVelocity.pack(buffer)
+        cameraCenter.pack(buffer)
+        agentSize.pack(buffer)
+        atAxis.pack(buffer)
+        leftAxis.pack(buffer)
+        upAxis.pack(buffer)
+        packBoolean(buffer, changedGrid)
+        packFloat(buffer, far)
+        packFloat(buffer, aspect)
+        require(throttles.size <= 0xFF) { "Throttles too large (${throttles.size})" }
+        packVariable(buffer, throttles, 1)
+        packInt(buffer, locomotionState)
+        headRotation.pack(buffer)
+        bodyRotation.pack(buffer)
+        packInt(buffer, controlFlags)
+        packFloat(buffer, energyLevel)
+        require(godLevel in 0..0xFF) { "godLevel out of range ($godLevel)" }
+        packByte(buffer, godLevel)
+        packBoolean(buffer, alwaysRun)
+        packUUID(buffer, preyAgent)
+        require(agentAccess in 0..0xFF) { "agentAccess out of range ($agentAccess)" }
+        packByte(buffer, agentAccess)
+        packVariable(buffer, agentTextures, 2)
+        packUUID(buffer, activeGroupId)
+
+        require(groups.size <= 0xFF) { "Group list too large (${groups.size})" }
+        packByte(buffer, groups.size)
+        groups.forEach { group ->
+            packUUID(buffer, group.groupId)
+            packLong(buffer, group.groupPowers)
+            packBoolean(buffer, group.acceptNotices)
+        }
+
+        require(animations.size <= 0xFF) { "Animation list too large (${animations.size})" }
+        packByte(buffer, animations.size)
+        animations.forEach { anim ->
+            packUUID(buffer, anim.animationId)
+            packUUID(buffer, anim.objectId)
+        }
+
+        require(granterBlocks.size <= 0xFF) { "Granter block list too large (${granterBlocks.size})" }
+        packByte(buffer, granterBlocks.size)
+        granterBlocks.forEach { packUUID(buffer, it) }
+
+        require(nvPairs.size <= 0xFF) { "NV pair list too large (${nvPairs.size})" }
+        packByte(buffer, nvPairs.size)
+        nvPairs.forEach { pair ->
+            packVariable(buffer, pair, 2)
+        }
+
+        require(visualParams.size <= 0xFF) { "Visual param list too large (${visualParams.size})" }
+        packByte(buffer, visualParams.size)
+        visualParams.forEach { value ->
+            require(value in 0..0xFF) { "Visual param out of range ($value)" }
+            packByte(buffer, value)
+        }
+
+        require(agentAccessLevels.size <= 0xFF) { "Agent access list too large (${agentAccessLevels.size})" }
+        packByte(buffer, agentAccessLevels.size)
+        agentAccessLevels.forEach { access ->
+            require(access.legacyAccess in 0..0xFF) { "legacyAccess out of range (${access.legacyAccess})" }
+            require(access.maxAccess in 0..0xFF) { "maxAccess out of range (${access.maxAccess})" }
+            packByte(buffer, access.legacyAccess)
+            packByte(buffer, access.maxAccess)
+        }
+
+        require(agentInfoFlags.size <= 0xFF) { "Agent info list too large (${agentInfoFlags.size})" }
+        packByte(buffer, agentInfoFlags.size)
+        agentInfoFlags.forEach { packInt(buffer, it) }
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        regionHandle = unpackLong(buffer)
+        viewerCircuitCode = unpackInt(buffer)
+        agentId = unpackUUID(buffer)
+        sessionId = unpackUUID(buffer)
+        agentPosition = LLVector3.unpack(buffer)
+        agentVelocity = LLVector3.unpack(buffer)
+        cameraCenter = LLVector3.unpack(buffer)
+        agentSize = LLVector3.unpack(buffer)
+        atAxis = LLVector3.unpack(buffer)
+        leftAxis = LLVector3.unpack(buffer)
+        upAxis = LLVector3.unpack(buffer)
+        changedGrid = unpackBoolean(buffer)
+        far = unpackFloat(buffer)
+        aspect = unpackFloat(buffer)
+        throttles = unpackVariable(buffer, 1)
+        locomotionState = unpackInt(buffer)
+        headRotation = LLQuaternion.unpack(buffer)
+        bodyRotation = LLQuaternion.unpack(buffer)
+        controlFlags = unpackInt(buffer)
+        energyLevel = unpackFloat(buffer)
+        godLevel = unpackByte(buffer)
+        alwaysRun = unpackBoolean(buffer)
+        preyAgent = unpackUUID(buffer)
+        agentAccess = unpackByte(buffer)
+        agentTextures = unpackVariable(buffer, 2)
+        activeGroupId = unpackUUID(buffer)
+
+        val groupCount = unpackByte(buffer)
+        groups.clear()
+        repeat(groupCount) {
+            groups += GroupData(
+                groupId = unpackUUID(buffer),
+                groupPowers = unpackLong(buffer),
+                acceptNotices = unpackBoolean(buffer),
+            )
+        }
+
+        val animationCount = unpackByte(buffer)
+        animations.clear()
+        repeat(animationCount) {
+            animations += AnimationEntry(
+                animationId = unpackUUID(buffer),
+                objectId = unpackUUID(buffer),
+            )
+        }
+
+        val granterCount = unpackByte(buffer)
+        granterBlocks.clear()
+        repeat(granterCount) {
+            granterBlocks += unpackUUID(buffer)
+        }
+
+        val nvPairCount = unpackByte(buffer)
+        nvPairs.clear()
+        repeat(nvPairCount) {
+            nvPairs += unpackVariable(buffer, 2)
+        }
+
+        val visualParamCount = unpackByte(buffer)
+        visualParams.clear()
+        repeat(visualParamCount) {
+            visualParams += unpackByte(buffer)
+        }
+
+        val accessCount = unpackByte(buffer)
+        agentAccessLevels.clear()
+        repeat(accessCount) {
+            val legacy = unpackByte(buffer)
+            val max = unpackByte(buffer)
+            agentAccessLevels += AccessLevel(legacy, max)
+        }
+
+        val infoCount = unpackByte(buffer)
+        agentInfoFlags.clear()
+        repeat(infoCount) {
+            agentInfoFlags += unpackInt(buffer)
+        }
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.CHILD_AGENT_UPDATE
+
+    override fun getMessageName(): String = "ChildAgentUpdate"
+}

@@ -16,13 +16,14 @@ object SLMessageFactory {
         const val COMPLETE_AGENT_MOVEMENT = 0xFFFF00F9.toInt()
         const val START_PING_CHECK = 0x01
         const val COMPLETE_PING_CHECK = 0x02
-        const val CONFIRM_ENABLE_SIMULATOR = 0x08
+        const val CONFIRM_ENABLE_SIMULATOR = 0xFF08
 
         // Agent messages
         const val AGENT_UPDATE = 0x04
         const val AGENT_ANIMATION = 0x14
         const val AGENT_REQUEST_SIT = 0x1E
         const val AGENT_SIT = 0x1F
+        const val CHILD_AGENT_UPDATE = 0x19
         const val CHILD_AGENT_POSITION_UPDATE = 0x1B
         const val AGENT_THROTTLE = 0x51
         const val AGENT_HEIGHT_WIDTH = 0x53
@@ -44,11 +45,11 @@ object SLMessageFactory {
         const val AGENT_MOVEMENT_COMPLETE = 0xFA
 
         // Region and location updates
-        const val COARSE_LOCATION_UPDATE = 0x06
-        const val CROSSED_REGION = 0x07
-        const val SIMULATOR_VIEWER_TIME = 0x96
-        const val ENABLE_SIMULATOR = 0x97
-        const val DISABLE_SIMULATOR = 0x98
+        const val COARSE_LOCATION_UPDATE = 0xFF06
+        const val CROSSED_REGION = 0xFF07
+        const val SIMULATOR_VIEWER_TIME = -65386
+        const val ENABLE_SIMULATOR = -65385
+        const val DISABLE_SIMULATOR = -65384
 
         // Terrain and asset streaming
         const val IMAGE_DATA = 0x09
@@ -138,6 +139,7 @@ object SLMessageFactory {
         registerMessage(MessageIDs.AGENT_ANIMATION) { AgentAnimationMessage() }
         registerMessage(MessageIDs.AGENT_REQUEST_SIT) { AgentRequestSitMessage() }
         registerMessage(MessageIDs.AGENT_SIT) { AgentSitMessage() }
+        registerMessage(MessageIDs.CHILD_AGENT_UPDATE) { ChildAgentUpdateMessage() }
         registerMessage(MessageIDs.CHILD_AGENT_POSITION_UPDATE) { ChildAgentPositionUpdateMessage() }
         registerMessage(MessageIDs.AGENT_THROTTLE) { AgentThrottleMessage() }
         registerMessage(MessageIDs.AGENT_FOV) { AgentFovMessage() }
