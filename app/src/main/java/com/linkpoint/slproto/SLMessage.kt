@@ -312,6 +312,10 @@ abstract class SLMessage : Parcelable {
         buffer.putFloat(value)
       }
 
+      protected fun packBoolean(buffer: ByteBuffer, value: Boolean) {
+        buffer.put(if (value) 1 else 0)
+      }
+
       protected fun packUUID(buffer: ByteBuffer, uuid: UUID) {
         val originalOrder = buffer.order()
         buffer.order(ByteOrder.BIG_ENDIAN)
@@ -366,6 +370,10 @@ abstract class SLMessage : Parcelable {
 
       protected fun unpackFloat(buffer: ByteBuffer): Float {
         return buffer.getFloat()
+      }
+
+      protected fun unpackBoolean(buffer: ByteBuffer): Boolean {
+        return buffer.get().toInt() != 0
       }
 
       protected fun unpackUUID(buffer: ByteBuffer): UUID {

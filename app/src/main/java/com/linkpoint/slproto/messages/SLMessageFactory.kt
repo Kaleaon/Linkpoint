@@ -127,5 +127,20 @@ object SLMessageFactory {
 
         // IM messages
         registerMessage(MessageIDs.IMPROVED_IM) { ImprovedIMMessage() }
+
+        // Inventory messages
+        registerMessage(MessageIDs.FETCH_INVENTORY) { FetchInventoryMessage() }
+        registerMessage(MessageIDs.FETCH_INVENTORY_REPLY) { FetchInventoryReplyMessage() }
+
+        // Avatar messages
+        registerMessage(MessageIDs.AVATAR_APPEARANCE) { AvatarAppearanceMessage() }
+        registerMessage(MessageIDs.AVATAR_PROPERTIES_REQUEST) { AvatarPropertiesRequestMessage() }
+        registerMessage(MessageIDs.AVATAR_PROPERTIES_REPLY) { AvatarPropertiesReplyMessage() }
+
+        // Asset transfer messages
+        registerMessage(MessageIDs.TRANSFER_REQUEST) { TransferRequestMessage() }
+        registerMessage(MessageIDs.TRANSFER_INFO) { TransferInfoMessage() }
+        registerMessage(MessageIDs.TRANSFER_PACKET) { TransferPacketMessage() }
+        registerMessage(MessageIDs.TRANSFER_ABORT) { TransferAbortMessage() }
     }
 }
