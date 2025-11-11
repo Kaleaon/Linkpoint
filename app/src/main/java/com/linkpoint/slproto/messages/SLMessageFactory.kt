@@ -22,6 +22,24 @@ object SLMessageFactory {
         const val AGENT_ANIMATION = 0x14
         const val AGENT_REQUEST_SIT = 0x1E
         const val AGENT_SIT = 0x1F
+        const val AGENT_THROTTLE = 0x51
+        const val AGENT_HEIGHT_WIDTH = 0x53
+        const val AGENT_FOV = 0x52
+        const val AGENT_PAUSE = 0x4E
+        const val AGENT_RESUME = 0x4F
+        const val AGENT_SET_APPEARANCE = 0x54
+        const val AGENT_QUIT_COPY = 0x55
+        const val AGENT_WEARABLES_REQUEST = 0x7D
+        const val AGENT_WEARABLES_UPDATE = 0x7E
+        const val AGENT_IS_NOW_WEARING = 0x7F
+        const val AGENT_CACHED_TEXTURE = 0x80
+        const val AGENT_CACHED_TEXTURE_RESPONSE = 0x81
+        const val AGENT_DATA_UPDATE = 0x83
+        const val AGENT_DATA_UPDATE_REQUEST = 0x82
+        const val AGENT_DROP_GROUP = 0x86
+        const val AGENT_ALERT = 0x87
+        const val AGENT_GROUP_DATA_UPDATE = 0x85
+        const val AGENT_MOVEMENT_COMPLETE = 0xFA
 
         // Chat messages
         const val CHAT_FROM_SIMULATOR = 0x8B
@@ -103,6 +121,26 @@ object SLMessageFactory {
         // Agent messages
         registerMessage(MessageIDs.AGENT_UPDATE) { AgentUpdateMessage() }
         registerMessage(MessageIDs.AGENT_ANIMATION) { AgentAnimationMessage() }
+        registerMessage(MessageIDs.AGENT_REQUEST_SIT) { AgentRequestSitMessage() }
+        registerMessage(MessageIDs.AGENT_SIT) { AgentSitMessage() }
+        registerMessage(MessageIDs.AGENT_THROTTLE) { AgentThrottleMessage() }
+        registerMessage(MessageIDs.AGENT_FOV) { AgentFovMessage() }
+        registerMessage(MessageIDs.AGENT_PAUSE) { AgentPauseMessage() }
+        registerMessage(MessageIDs.AGENT_RESUME) { AgentResumeMessage() }
+        registerMessage(MessageIDs.AGENT_HEIGHT_WIDTH) { AgentHeightWidthMessage() }
+        registerMessage(MessageIDs.AGENT_SET_APPEARANCE) { AgentSetAppearanceMessage() }
+        registerMessage(MessageIDs.AGENT_QUIT_COPY) { AgentQuitCopyMessage() }
+        registerMessage(MessageIDs.AGENT_WEARABLES_REQUEST) { AgentWearablesRequestMessage() }
+        registerMessage(MessageIDs.AGENT_WEARABLES_UPDATE) { AgentWearablesUpdateMessage() }
+        registerMessage(MessageIDs.AGENT_IS_NOW_WEARING) { AgentIsNowWearingMessage() }
+        registerMessage(MessageIDs.AGENT_CACHED_TEXTURE) { AgentCachedTextureMessage() }
+        registerMessage(MessageIDs.AGENT_CACHED_TEXTURE_RESPONSE) { AgentCachedTextureResponseMessage() }
+        registerMessage(MessageIDs.AGENT_DATA_UPDATE) { AgentDataUpdateMessage() }
+        registerMessage(MessageIDs.AGENT_DATA_UPDATE_REQUEST) { AgentDataUpdateRequestMessage() }
+        registerMessage(MessageIDs.AGENT_GROUP_DATA_UPDATE) { AgentGroupDataUpdateMessage() }
+        registerMessage(MessageIDs.AGENT_DROP_GROUP) { AgentDropGroupMessage() }
+        registerMessage(MessageIDs.AGENT_ALERT) { AgentAlertMessage() }
+        registerMessage(MessageIDs.AGENT_MOVEMENT_COMPLETE) { AgentMovementCompleteMessage() }
 
         // Chat messages
         registerMessage(MessageIDs.CHAT_FROM_SIMULATOR) { ChatFromSimulatorMessage() }
