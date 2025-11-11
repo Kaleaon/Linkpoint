@@ -14,94 +14,102 @@ object SLMessageFactory {
         const val CLOSE_CIRCUIT = 0xFFFFFFFD.toInt()
         const val USE_CIRCUIT_CODE = 0xFFFF0003.toInt()
         const val COMPLETE_AGENT_MOVEMENT = 0xFFFF00F9.toInt()
-        const val START_PING_CHECK = 0x01
-        const val COMPLETE_PING_CHECK = 0x02
-        const val CONFIRM_ENABLE_SIMULATOR = 0xFF08
+        const val START_PING_CHECK = 0x00000001
+        const val COMPLETE_PING_CHECK = 0x00000002
+        const val CONFIRM_ENABLE_SIMULATOR = 0x0000FF08
 
         // Agent messages
-        const val AGENT_UPDATE = 0x04
-        const val AGENT_ANIMATION = 0x14
-        const val NEIGHBOR_LIST = 0x03
-        const val AGENT_REQUEST_SIT = 0x1E
-        const val AGENT_SIT = 0x1F
-        const val CHILD_AGENT_UPDATE = 0x19
-        const val CHILD_AGENT_ALIVE = 0x1A
-        const val CHILD_AGENT_POSITION_UPDATE = 0x1B
+        const val AGENT_UPDATE = 0x00000004
+        const val AGENT_ANIMATION = 0x00000005
+        const val NEIGHBOR_LIST = 0x00000003
+        const val AGENT_REQUEST_SIT = 0x00000006
+        const val AGENT_SIT = 0x00000007
+        const val CHILD_AGENT_UPDATE = 0x00000019
+        const val CHILD_AGENT_ALIVE = 0x0000001A
+        const val CHILD_AGENT_POSITION_UPDATE = 0x0000001B
         const val CHILD_AGENT_DYING = 0xFFFF00F0.toInt()
         const val CHILD_AGENT_UNKNOWN = 0xFFFF00F1.toInt()
         const val KILL_CHILD_AGENTS = 0xFFFF00F2.toInt()
-        const val CAMERA_CONSTRAINT = 0x16
-        const val PARCEL_PROPERTIES = 0x17
-        const val AGENT_THROTTLE = 0x51
-        const val AGENT_HEIGHT_WIDTH = 0x53
-        const val AGENT_FOV = 0x52
-        const val AGENT_PAUSE = 0x4E
-        const val AGENT_RESUME = 0x4F
-        const val AGENT_SET_APPEARANCE = 0x54
-        const val AGENT_QUIT_COPY = 0x55
-        const val AGENT_WEARABLES_REQUEST = 0x7D
-        const val AGENT_WEARABLES_UPDATE = 0x7E
-        const val AGENT_IS_NOW_WEARING = 0x7F
-        const val AGENT_CACHED_TEXTURE = 0x80
-        const val AGENT_CACHED_TEXTURE_RESPONSE = 0x81
-        const val AGENT_DATA_UPDATE = 0x83
-        const val AGENT_DATA_UPDATE_REQUEST = 0x82
-        const val AGENT_DROP_GROUP = 0x86
-        const val AGENT_ALERT = 0x87
-        const val AGENT_GROUP_DATA_UPDATE = 0x85
-        const val AGENT_MOVEMENT_COMPLETE = 0xFA
+        const val CAMERA_CONSTRAINT = 0x00000016
+        const val PARCEL_PROPERTIES = 0x00000017
+        const val DIR_FIND_QUERY = 0xFFFF001F.toInt()
+        const val DIR_FIND_QUERY_BACKEND = 0xFFFF0020.toInt()
+        const val DIR_PLACES_QUERY = 0xFFFF0021.toInt()
+        const val DIR_PLACES_QUERY_BACKEND = 0xFFFF0022.toInt()
+        const val DIR_PLACES_REPLY = 0xFFFF0023.toInt()
+        const val DIR_PEOPLE_REPLY = 0xFFFF0024.toInt()
+        const val DIR_EVENTS_REPLY = 0xFFFF0025.toInt()
+        const val DIR_GROUPS_REPLY = 0xFFFF0026.toInt()
+        const val AGENT_THROTTLE = 0xFFFF0051.toInt()
+        const val AGENT_HEIGHT_WIDTH = 0xFFFF0053.toInt()
+        const val AGENT_FOV = 0xFFFF0052.toInt()
+        const val AGENT_PAUSE = 0xFFFF004E.toInt()
+        const val AGENT_RESUME = 0xFFFF004F.toInt()
+        const val AGENT_SET_APPEARANCE = 0xFFFF0054.toInt()
+        const val AGENT_QUIT_COPY = 0xFFFF0055.toInt()
+        const val AGENT_WEARABLES_REQUEST = 0xFFFF017D.toInt()
+        const val AGENT_WEARABLES_UPDATE = 0xFFFF017E.toInt()
+        const val AGENT_IS_NOW_WEARING = 0xFFFF017F.toInt()
+        const val AGENT_CACHED_TEXTURE = 0xFFFF0180.toInt()
+        const val AGENT_CACHED_TEXTURE_RESPONSE = 0xFFFF0181.toInt()
+        const val AGENT_DATA_UPDATE = 0xFFFF0183.toInt()
+        const val AGENT_DATA_UPDATE_REQUEST = 0xFFFF0182.toInt()
+        const val AGENT_DROP_GROUP = 0xFFFF0186.toInt()
+        const val AGENT_ALERT = 0xFFFF0087.toInt()
+        const val AGENT_GROUP_DATA_UPDATE = 0xFFFF0185.toInt()
+        const val AGENT_MOVEMENT_COMPLETE = 0xFFFF00FA.toInt()
 
         // Region and location updates
-        const val COARSE_LOCATION_UPDATE = 0xFF06
-        const val CROSSED_REGION = 0xFF07
-        const val SIMULATOR_VIEWER_TIME = -65386
-        const val ENABLE_SIMULATOR = -65385
-        const val DISABLE_SIMULATOR = -65384
+        const val COARSE_LOCATION_UPDATE = 0x0000FF06
+        const val CROSSED_REGION = 0x0000FF07
+        const val SIMULATOR_VIEWER_TIME = 0xFFFF0096.toInt()
+        const val ENABLE_SIMULATOR = 0xFFFF0097.toInt()
+        const val DISABLE_SIMULATOR = 0xFFFF0098.toInt()
 
         // Terrain and asset streaming
-        const val IMAGE_DATA = 0x09
-        const val IMAGE_PACKET = 0x0A
-        const val LAYER_DATA = 0x0B
-        const val REQUEST_IMAGE = 0x08
+        const val REQUEST_IMAGE = 0x00000008
+        const val IMAGE_DATA = 0x00000009
+        const val IMAGE_PACKET = 0x0000000A
+        const val LAYER_DATA = 0x0000000B
 
         // Chat messages
-        const val CHAT_FROM_SIMULATOR = 0x8B
-        const val CHAT_FROM_VIEWER = 0x50
+        const val CHAT_FROM_SIMULATOR = 0xFFFF008B.toInt()
+        const val CHAT_FROM_VIEWER = 0xFFFF0050.toInt()
 
         // Object messages
-        const val OBJECT_UPDATE = 0x0C
-        const val OBJECT_UPDATE_COMPRESSED = 0x0D
-        const val OBJECT_UPDATE_CACHED = 0x0E
-        const val KILL_OBJECT = 0x0F
+        const val OBJECT_UPDATE = 0x0000000C
+        const val OBJECT_UPDATE_COMPRESSED = 0x0000000D
+        const val OBJECT_UPDATE_CACHED = 0x0000000E
+        const val KILL_OBJECT = 0x00000010
 
         // Region messages
-        const val REGION_HANDSHAKE = 0x94
-        const val REGION_HANDSHAKE_REPLY = 0x95
+        const val REGION_HANDSHAKE = 0xFFFF0094.toInt()
+        const val REGION_HANDSHAKE_REPLY = 0xFFFF0095.toInt()
 
         // Teleport messages
-        const val TELEPORT_REQUEST = 0x56
-        const val TELEPORT_START = 0x57
-        const val TELEPORT_PROGRESS = 0x58
-        const val TELEPORT_FINISH = 0x59
-        const val TELEPORT_FAILED = 0x5A
+        const val TELEPORT_REQUEST = 0xFFFF003E.toInt()
+        const val TELEPORT_START = 0xFFFF0049.toInt()
+        const val TELEPORT_PROGRESS = 0xFFFF0042.toInt()
+        const val TELEPORT_FINISH = 0xFFFF0045.toInt()
+        const val TELEPORT_FAILED = 0xFFFF004A.toInt()
 
         // Inventory messages
-        const val FETCH_INVENTORY = 0x66
-        const val FETCH_INVENTORY_REPLY = 0x67
+        const val FETCH_INVENTORY = 0xFFFF0117.toInt()
+        const val FETCH_INVENTORY_REPLY = 0xFFFF0118.toInt()
 
         // Avatar messages
-        const val AVATAR_APPEARANCE = 0x9E
-        const val AVATAR_PROPERTIES_REQUEST = 0xA0
-        const val AVATAR_PROPERTIES_REPLY = 0xA1
+        const val AVATAR_APPEARANCE = 0xFFFF009E.toInt()
+        const val AVATAR_PROPERTIES_REQUEST = 0xFFFF00A9.toInt()
+        const val AVATAR_PROPERTIES_REPLY = 0xFFFF00AB.toInt()
 
         // IM messages
-        const val IMPROVED_IM = 0xFE
+        const val IMPROVED_IM = 0xFFFF00FE.toInt()
 
         // Asset messages
-        const val TRANSFER_REQUEST = 0x68
-        const val TRANSFER_INFO = 0x69
-        const val TRANSFER_PACKET = 0x6A
-        const val TRANSFER_ABORT = 0x6B
+        const val TRANSFER_REQUEST = 0xFFFF0099.toInt()
+        const val TRANSFER_INFO = 0xFFFF009A.toInt()
+        const val TRANSFER_PACKET = 0x00000011
+        const val TRANSFER_ABORT = 0xFFFF009B.toInt()
     }
 
     private val messageRegistry = mutableMapOf<Int, () -> SLMessage>()
@@ -154,6 +162,14 @@ object SLMessageFactory {
         registerMessage(MessageIDs.CHILD_AGENT_DYING) { ChildAgentDyingMessage() }
         registerMessage(MessageIDs.CHILD_AGENT_UNKNOWN) { ChildAgentUnknownMessage() }
         registerMessage(MessageIDs.KILL_CHILD_AGENTS) { KillChildAgentsMessage() }
+        registerMessage(MessageIDs.DIR_FIND_QUERY) { DirFindQueryMessage() }
+        registerMessage(MessageIDs.DIR_FIND_QUERY_BACKEND) { DirFindQueryBackendMessage() }
+        registerMessage(MessageIDs.DIR_PLACES_QUERY) { DirPlacesQueryMessage() }
+        registerMessage(MessageIDs.DIR_PLACES_QUERY_BACKEND) { DirPlacesQueryBackendMessage() }
+        registerMessage(MessageIDs.DIR_PLACES_REPLY) { DirPlacesReplyMessage() }
+        registerMessage(MessageIDs.DIR_PEOPLE_REPLY) { DirPeopleReplyMessage() }
+        registerMessage(MessageIDs.DIR_EVENTS_REPLY) { DirEventsReplyMessage() }
+        registerMessage(MessageIDs.DIR_GROUPS_REPLY) { DirGroupsReplyMessage() }
         registerMessage(MessageIDs.AGENT_THROTTLE) { AgentThrottleMessage() }
         registerMessage(MessageIDs.AGENT_FOV) { AgentFovMessage() }
         registerMessage(MessageIDs.AGENT_PAUSE) { AgentPauseMessage() }
