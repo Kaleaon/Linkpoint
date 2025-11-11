@@ -1,8 +1,10 @@
 package com.linkpoint.slproto.messages
 
 import com.linkpoint.slproto.SLMessage
+import com.linkpoint.slproto.types.LLVector3
+import java.net.Inet4Address
 import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets
+import java.nio.charset.Charset
 import java.util.*
 
 /**
@@ -10,7 +12,7 @@ import java.util.*
  */
 class RegionHandshakeMessage : SLMessage() {
     var regionFlags: Int = 0
-    var simAccess: Byte = 0
+    var simAccess: Int = 0
     var simName: String = ""
     var simOwner: UUID = UUID.randomUUID()
     var isEstateManager: Boolean = false
@@ -39,138 +41,98 @@ class RegionHandshakeMessage : SLMessage() {
     var coloName: String = ""
     var productSku: String = ""
     var productName: String = ""
+    val extendedRegionInfo: MutableList<RegionInfoExtended> = mutableListOf()
+
+    data class RegionInfoExtended(
+        var regionFlagsExtended: Long = 0L,
+        var regionProtocols: Long = 0L,
+    )
+
+    private val charset: Charset = Charsets.UTF_8
+
+    init {
+        zeroCoded = true
+    }
 
     override fun packPayload(buffer: ByteBuffer) {
-        // Region info
-        buffer.putInt(regionFlags)
-        buffer.put(simAccess)
-
-        val simNameBytes = simName.toByteArray(StandardCharsets.UTF_8)
-        buffer.put(simNameBytes.size.toByte())
-        buffer.put(simNameBytes)
-
-        buffer.putLong(simOwner.mostSignificantBits)
-        buffer.putLong(simOwner.leastSignificantBits)
-        buffer.put(if (isEstateManager) 1 else 0)
-        buffer.putFloat(waterHeight)
-        buffer.putFloat(billableFactor)
-
-        buffer.putLong(cacheId.mostSignificantBits)
-        buffer.putLong(cacheId.leastSignificantBits)
-
-        // Terrain textures
-        buffer.putLong(terrainBase0.mostSignificantBits)
-        buffer.putLong(terrainBase0.leastSignificantBits)
-        buffer.putLong(terrainBase1.mostSignificantBits)
-        buffer.putLong(terrainBase1.leastSignificantBits)
-        buffer.putLong(terrainBase2.mostSignificantBits)
-        buffer.putLong(terrainBase2.leastSignificantBits)
-        buffer.putLong(terrainBase3.mostSignificantBits)
-        buffer.putLong(terrainBase3.leastSignificantBits)
-
-        buffer.putLong(terrainDetail0.mostSignificantBits)
-        buffer.putLong(terrainDetail0.leastSignificantBits)
-        buffer.putLong(terrainDetail1.mostSignificantBits)
-        buffer.putLong(terrainDetail1.leastSignificantBits)
-        buffer.putLong(terrainDetail2.mostSignificantBits)
-        buffer.putLong(terrainDetail2.leastSignificantBits)
-        buffer.putLong(terrainDetail3.mostSignificantBits)
-        buffer.putLong(terrainDetail3.leastSignificantBits)
-
-        // Terrain heights
-        buffer.putFloat(terrainStartHeight00)
-        buffer.putFloat(terrainStartHeight01)
-        buffer.putFloat(terrainStartHeight10)
-        buffer.putFloat(terrainStartHeight11)
-        buffer.putFloat(terrainHeightRange00)
-        buffer.putFloat(terrainHeightRange01)
-        buffer.putFloat(terrainHeightRange10)
-        buffer.putFloat(terrainHeightRange11)
-
-        // Region ID
-        buffer.putLong(regionId.mostSignificantBits)
-        buffer.putLong(regionId.leastSignificantBits)
-
-        // CPU info
-        buffer.putInt(cpuClassId)
-        buffer.putInt(cpuRatio)
-
-        val coloBytes = coloName.toByteArray(StandardCharsets.UTF_8)
-        buffer.put(coloBytes.size.toByte())
-        buffer.put(coloBytes)
-
-        val skuBytes = productSku.toByteArray(StandardCharsets.UTF_8)
-        buffer.put(skuBytes.size.toByte())
-        buffer.put(skuBytes)
-
-        val productBytes = productName.toByteArray(StandardCharsets.UTF_8)
-        buffer.put(productBytes.size.toByte())
-        buffer.put(productBytes)
+        packInt(buffer, regionFlags)
+        require(simAccess in 0..0xFF) { "simAccess out of range ($simAccess)" }
+        packByte(buffer, simAccess)
+        packVariable(buffer, simName.toByteArray(charset), 1)
+        packUUID(buffer, simOwner)
+        packBoolean(buffer, isEstateManager)
+        packFloat(buffer, waterHeight)
+        packFloat(buffer, billableFactor)
+        packUUID(buffer, cacheId)
+        packUUID(buffer, terrainBase0)
+        packUUID(buffer, terrainBase1)
+        packUUID(buffer, terrainBase2)
+        packUUID(buffer, terrainBase3)
+        packUUID(buffer, terrainDetail0)
+        packUUID(buffer, terrainDetail1)
+        packUUID(buffer, terrainDetail2)
+        packUUID(buffer, terrainDetail3)
+        packFloat(buffer, terrainStartHeight00)
+        packFloat(buffer, terrainStartHeight01)
+        packFloat(buffer, terrainStartHeight10)
+        packFloat(buffer, terrainStartHeight11)
+        packFloat(buffer, terrainHeightRange00)
+        packFloat(buffer, terrainHeightRange01)
+        packFloat(buffer, terrainHeightRange10)
+        packFloat(buffer, terrainHeightRange11)
+        packUUID(buffer, regionId)
+        packInt(buffer, cpuClassId)
+        packInt(buffer, cpuRatio)
+        packVariable(buffer, coloName.toByteArray(charset), 1)
+        packVariable(buffer, productSku.toByteArray(charset), 1)
+        packVariable(buffer, productName.toByteArray(charset), 1)
+        require(extendedRegionInfo.size <= 0xFF) { "Extended region info list too large (${extendedRegionInfo.size})" }
+        packByte(buffer, extendedRegionInfo.size)
+        extendedRegionInfo.forEach { entry ->
+            packLong(buffer, entry.regionFlagsExtended)
+            packLong(buffer, entry.regionProtocols)
+        }
     }
 
     override fun unpackPayload(buffer: ByteBuffer) {
-        // Region info
-        regionFlags = buffer.getInt()
-        simAccess = buffer.get()
-
-        val simNameLength = buffer.get().toInt() and 0xFF
-        val simNameBytes = ByteArray(simNameLength)
-        buffer.get(simNameBytes)
-        simName = String(simNameBytes, StandardCharsets.UTF_8)
-
-        val simOwnerMsb = buffer.getLong()
-        val simOwnerLsb = buffer.getLong()
-        simOwner = UUID(simOwnerMsb, simOwnerLsb)
-
-        isEstateManager = buffer.get() != 0.toByte()
-        waterHeight = buffer.getFloat()
-        billableFactor = buffer.getFloat()
-
-        val cacheMsb = buffer.getLong()
-        val cacheLsb = buffer.getLong()
-        cacheId = UUID(cacheMsb, cacheLsb)
-
-        // Terrain textures
-        terrainBase0 = UUID(buffer.getLong(), buffer.getLong())
-        terrainBase1 = UUID(buffer.getLong(), buffer.getLong())
-        terrainBase2 = UUID(buffer.getLong(), buffer.getLong())
-        terrainBase3 = UUID(buffer.getLong(), buffer.getLong())
-        terrainDetail0 = UUID(buffer.getLong(), buffer.getLong())
-        terrainDetail1 = UUID(buffer.getLong(), buffer.getLong())
-        terrainDetail2 = UUID(buffer.getLong(), buffer.getLong())
-        terrainDetail3 = UUID(buffer.getLong(), buffer.getLong())
-
-        // Terrain heights
-        terrainStartHeight00 = buffer.getFloat()
-        terrainStartHeight01 = buffer.getFloat()
-        terrainStartHeight10 = buffer.getFloat()
-        terrainStartHeight11 = buffer.getFloat()
-        terrainHeightRange00 = buffer.getFloat()
-        terrainHeightRange01 = buffer.getFloat()
-        terrainHeightRange10 = buffer.getFloat()
-        terrainHeightRange11 = buffer.getFloat()
-
-        // Region ID
-        regionId = UUID(buffer.getLong(), buffer.getLong())
-
-        // CPU info
-        cpuClassId = buffer.getInt()
-        cpuRatio = buffer.getInt()
-
-        val coloLength = buffer.get().toInt() and 0xFF
-        val coloBytes = ByteArray(coloLength)
-        buffer.get(coloBytes)
-        coloName = String(coloBytes, StandardCharsets.UTF_8)
-
-        val skuLength = buffer.get().toInt() and 0xFF
-        val skuBytes = ByteArray(skuLength)
-        buffer.get(skuBytes)
-        productSku = String(skuBytes, StandardCharsets.UTF_8)
-
-        val productLength = buffer.get().toInt() and 0xFF
-        val productBytes = ByteArray(productLength)
-        buffer.get(productBytes)
-        productName = String(productBytes, StandardCharsets.UTF_8)
+        regionFlags = unpackInt(buffer)
+        simAccess = unpackByte(buffer)
+        simName = String(unpackVariable(buffer, 1), charset)
+        simOwner = unpackUUID(buffer)
+        isEstateManager = unpackBoolean(buffer)
+        waterHeight = unpackFloat(buffer)
+        billableFactor = unpackFloat(buffer)
+        cacheId = unpackUUID(buffer)
+        terrainBase0 = unpackUUID(buffer)
+        terrainBase1 = unpackUUID(buffer)
+        terrainBase2 = unpackUUID(buffer)
+        terrainBase3 = unpackUUID(buffer)
+        terrainDetail0 = unpackUUID(buffer)
+        terrainDetail1 = unpackUUID(buffer)
+        terrainDetail2 = unpackUUID(buffer)
+        terrainDetail3 = unpackUUID(buffer)
+        terrainStartHeight00 = unpackFloat(buffer)
+        terrainStartHeight01 = unpackFloat(buffer)
+        terrainStartHeight10 = unpackFloat(buffer)
+        terrainStartHeight11 = unpackFloat(buffer)
+        terrainHeightRange00 = unpackFloat(buffer)
+        terrainHeightRange01 = unpackFloat(buffer)
+        terrainHeightRange10 = unpackFloat(buffer)
+        terrainHeightRange11 = unpackFloat(buffer)
+        regionId = unpackUUID(buffer)
+        cpuClassId = unpackInt(buffer)
+        cpuRatio = unpackInt(buffer)
+        coloName = String(unpackVariable(buffer, 1), charset)
+        productSku = String(unpackVariable(buffer, 1), charset)
+        productName = String(unpackVariable(buffer, 1), charset)
+        val extendedCount = unpackByte(buffer)
+        extendedRegionInfo.clear()
+        repeat(extendedCount) {
+            extendedRegionInfo += RegionInfoExtended(
+                regionFlagsExtended = unpackLong(buffer),
+                regionProtocols = unpackLong(buffer),
+            )
+        }
     }
 
     override fun getMessageID(): Int = SLMessageFactory.MessageIDs.REGION_HANDSHAKE
@@ -186,21 +148,64 @@ class RegionHandshakeReplyMessage : SLMessage() {
     var sessionId: UUID = UUID.randomUUID()
     var flags: Int = 0
 
+    init {
+        zeroCoded = true
+    }
+
     override fun packPayload(buffer: ByteBuffer) {
-        buffer.putLong(agentId.mostSignificantBits)
-        buffer.putLong(agentId.leastSignificantBits)
-        buffer.putLong(sessionId.mostSignificantBits)
-        buffer.putLong(sessionId.leastSignificantBits)
-        buffer.putInt(flags)
+        packUUID(buffer, agentId)
+        packUUID(buffer, sessionId)
+        packInt(buffer, flags)
     }
 
     override fun unpackPayload(buffer: ByteBuffer) {
-        agentId = UUID(buffer.getLong(), buffer.getLong())
-        sessionId = UUID(buffer.getLong(), buffer.getLong())
-        flags = buffer.getInt()
+        agentId = unpackUUID(buffer)
+        sessionId = unpackUUID(buffer)
+        flags = unpackInt(buffer)
     }
 
     override fun getMessageID(): Int = SLMessageFactory.MessageIDs.REGION_HANDSHAKE_REPLY
 
     override fun getMessageName(): String = "RegionHandshakeReply"
+}
+
+/**
+ * Crossed region message (0x07)
+ */
+class CrossedRegionMessage : SLMessage() {
+    var agentId: UUID = UUID.randomUUID()
+    var sessionId: UUID = UUID.randomUUID()
+    var simAddress: Inet4Address? = null
+    var simPort: Int = 0
+    var regionHandle: Long = 0L
+    var seedCapability: ByteArray = ByteArray(0)
+    var position: LLVector3 = LLVector3()
+    var lookAt: LLVector3 = LLVector3()
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packUUID(buffer, agentId)
+        packUUID(buffer, sessionId)
+        packIPAddress(buffer, simAddress)
+        require(simPort in 0..0xFFFF) { "simPort out of range ($simPort)" }
+        packUInt16(buffer, simPort)
+        packLong(buffer, regionHandle)
+        packVariable(buffer, seedCapability, 2)
+        position.pack(buffer)
+        lookAt.pack(buffer)
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        agentId = unpackUUID(buffer)
+        sessionId = unpackUUID(buffer)
+        simAddress = unpackIPAddress(buffer)
+        simPort = unpackUInt16(buffer)
+        regionHandle = unpackLong(buffer)
+        seedCapability = unpackVariable(buffer, 2)
+        position = LLVector3.unpack(buffer)
+        lookAt = LLVector3.unpack(buffer)
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.CROSSED_REGION
+
+    override fun getMessageName(): String = "CrossedRegion"
 }

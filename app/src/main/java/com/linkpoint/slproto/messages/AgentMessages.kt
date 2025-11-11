@@ -852,3 +852,55 @@ class AgentSitMessage : SLMessage() {
 
     override fun getMessageName(): String = "AgentSit"
 }
+
+/**
+ * Child agent position update (0x1B)
+ */
+class ChildAgentPositionUpdateMessage : SLMessage() {
+    var regionHandle: Long = 0L
+    var viewerCircuitCode: Int = 0
+    var agentId: UUID = UUID.randomUUID()
+    var sessionId: UUID = UUID.randomUUID()
+    var agentPosition: LLVector3 = LLVector3()
+    var agentVelocity: LLVector3 = LLVector3()
+    var cameraCenter: LLVector3 = LLVector3()
+    var agentSize: LLVector3 = LLVector3()
+    var atAxis: LLVector3 = LLVector3()
+    var leftAxis: LLVector3 = LLVector3()
+    var upAxis: LLVector3 = LLVector3()
+    var changedGrid: Boolean = false
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packLong(buffer, regionHandle)
+        packInt(buffer, viewerCircuitCode)
+        packUUID(buffer, agentId)
+        packUUID(buffer, sessionId)
+        agentPosition.pack(buffer)
+        agentVelocity.pack(buffer)
+        cameraCenter.pack(buffer)
+        agentSize.pack(buffer)
+        atAxis.pack(buffer)
+        leftAxis.pack(buffer)
+        upAxis.pack(buffer)
+        packBoolean(buffer, changedGrid)
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        regionHandle = unpackLong(buffer)
+        viewerCircuitCode = unpackInt(buffer)
+        agentId = unpackUUID(buffer)
+        sessionId = unpackUUID(buffer)
+        agentPosition = LLVector3.unpack(buffer)
+        agentVelocity = LLVector3.unpack(buffer)
+        cameraCenter = LLVector3.unpack(buffer)
+        agentSize = LLVector3.unpack(buffer)
+        atAxis = LLVector3.unpack(buffer)
+        leftAxis = LLVector3.unpack(buffer)
+        upAxis = LLVector3.unpack(buffer)
+        changedGrid = unpackBoolean(buffer)
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.CHILD_AGENT_POSITION_UPDATE
+
+    override fun getMessageName(): String = "ChildAgentPositionUpdate"
+}

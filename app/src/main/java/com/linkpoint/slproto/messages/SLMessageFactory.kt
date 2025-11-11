@@ -16,12 +16,14 @@ object SLMessageFactory {
         const val COMPLETE_AGENT_MOVEMENT = 0xFFFF00F9.toInt()
         const val START_PING_CHECK = 0x01
         const val COMPLETE_PING_CHECK = 0x02
+        const val CONFIRM_ENABLE_SIMULATOR = 0x08
 
         // Agent messages
         const val AGENT_UPDATE = 0x04
         const val AGENT_ANIMATION = 0x14
         const val AGENT_REQUEST_SIT = 0x1E
         const val AGENT_SIT = 0x1F
+        const val CHILD_AGENT_POSITION_UPDATE = 0x1B
         const val AGENT_THROTTLE = 0x51
         const val AGENT_HEIGHT_WIDTH = 0x53
         const val AGENT_FOV = 0x52
@@ -40,6 +42,18 @@ object SLMessageFactory {
         const val AGENT_ALERT = 0x87
         const val AGENT_GROUP_DATA_UPDATE = 0x85
         const val AGENT_MOVEMENT_COMPLETE = 0xFA
+
+        // Region and location updates
+        const val COARSE_LOCATION_UPDATE = 0x06
+        const val CROSSED_REGION = 0x07
+        const val SIMULATOR_VIEWER_TIME = 0x96
+        const val ENABLE_SIMULATOR = 0x97
+        const val DISABLE_SIMULATOR = 0x98
+
+        // Terrain and asset streaming
+        const val IMAGE_DATA = 0x09
+        const val IMAGE_PACKET = 0x0A
+        const val LAYER_DATA = 0x0B
 
         // Chat messages
         const val CHAT_FROM_SIMULATOR = 0x8B
@@ -117,12 +131,14 @@ object SLMessageFactory {
         registerMessage(MessageIDs.COMPLETE_AGENT_MOVEMENT) { CompleteAgentMovementMessage() }
         registerMessage(MessageIDs.START_PING_CHECK) { StartPingCheckMessage() }
         registerMessage(MessageIDs.COMPLETE_PING_CHECK) { CompletePingCheckMessage() }
+        registerMessage(MessageIDs.CONFIRM_ENABLE_SIMULATOR) { ConfirmEnableSimulatorMessage() }
 
         // Agent messages
         registerMessage(MessageIDs.AGENT_UPDATE) { AgentUpdateMessage() }
         registerMessage(MessageIDs.AGENT_ANIMATION) { AgentAnimationMessage() }
         registerMessage(MessageIDs.AGENT_REQUEST_SIT) { AgentRequestSitMessage() }
         registerMessage(MessageIDs.AGENT_SIT) { AgentSitMessage() }
+        registerMessage(MessageIDs.CHILD_AGENT_POSITION_UPDATE) { ChildAgentPositionUpdateMessage() }
         registerMessage(MessageIDs.AGENT_THROTTLE) { AgentThrottleMessage() }
         registerMessage(MessageIDs.AGENT_FOV) { AgentFovMessage() }
         registerMessage(MessageIDs.AGENT_PAUSE) { AgentPauseMessage() }
@@ -141,6 +157,18 @@ object SLMessageFactory {
         registerMessage(MessageIDs.AGENT_DROP_GROUP) { AgentDropGroupMessage() }
         registerMessage(MessageIDs.AGENT_ALERT) { AgentAlertMessage() }
         registerMessage(MessageIDs.AGENT_MOVEMENT_COMPLETE) { AgentMovementCompleteMessage() }
+
+        // Location updates
+        registerMessage(MessageIDs.COARSE_LOCATION_UPDATE) { CoarseLocationUpdateMessage() }
+        registerMessage(MessageIDs.CROSSED_REGION) { CrossedRegionMessage() }
+        registerMessage(MessageIDs.SIMULATOR_VIEWER_TIME) { SimulatorViewerTimeMessage() }
+        registerMessage(MessageIDs.ENABLE_SIMULATOR) { EnableSimulatorMessage() }
+        registerMessage(MessageIDs.DISABLE_SIMULATOR) { DisableSimulatorMessage() }
+
+        // Asset streaming
+        registerMessage(MessageIDs.IMAGE_DATA) { ImageDataMessage() }
+        registerMessage(MessageIDs.IMAGE_PACKET) { ImagePacketMessage() }
+        registerMessage(MessageIDs.LAYER_DATA) { LayerDataMessage() }
 
         // Chat messages
         registerMessage(MessageIDs.CHAT_FROM_SIMULATOR) { ChatFromSimulatorMessage() }

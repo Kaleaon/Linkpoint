@@ -130,11 +130,14 @@ class StartPingCheckMessage : SLMessage() {
     var oldestUnacked: Int = 0
 
     override fun packPayload(buffer: ByteBuffer) {
+        packByte(buffer, 1) // block frequency identifier
+        require(pingId in 0..0xFF) { "pingId out of range ($pingId)" }
         packByte(buffer, pingId)
         packInt(buffer, oldestUnacked)
     }
 
     override fun unpackPayload(buffer: ByteBuffer) {
+        /* frequency */ unpackByte(buffer)
         pingId = unpackByte(buffer)
         oldestUnacked = unpackInt(buffer)
     }
@@ -151,10 +154,13 @@ class CompletePingCheckMessage : SLMessage() {
     var pingId: Int = 0
 
     override fun packPayload(buffer: ByteBuffer) {
+        packByte(buffer, 2) // block frequency identifier
+        require(pingId in 0..0xFF) { "pingId out of range ($pingId)" }
         packByte(buffer, pingId)
     }
 
     override fun unpackPayload(buffer: ByteBuffer) {
+        /* frequency */ unpackByte(buffer)
         pingId = unpackByte(buffer)
     }
 
