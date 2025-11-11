@@ -429,3 +429,427 @@ class DirGroupsReplyMessage : SLMessage() {
 
     override fun getMessageName(): String = "DirGroupsReply"
 }
+
+/**
+ * Directory classified query (0xFFFF0027)
+ */
+class DirClassifiedQueryMessage : SLMessage() {
+    var agentId: UUID = UUID.randomUUID()
+    var sessionId: UUID = UUID.randomUUID()
+    var queryId: UUID = UUID.randomUUID()
+    var queryText: String = ""
+    var queryFlags: Int = 0
+    var category: Int = 0
+    var queryStart: Int = 0
+
+    private val charset: Charset = Charsets.UTF_8
+
+    init {
+        zeroCoded = true
+    }
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packUUID(buffer, agentId)
+        packUUID(buffer, sessionId)
+        packUUID(buffer, queryId)
+        packVariable(buffer, queryText.toByteArray(charset), 1)
+        packInt(buffer, queryFlags)
+        packInt(buffer, category)
+        packInt(buffer, queryStart)
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        agentId = unpackUUID(buffer)
+        sessionId = unpackUUID(buffer)
+        queryId = unpackUUID(buffer)
+        queryText = String(unpackVariable(buffer, 1), charset)
+        queryFlags = unpackInt(buffer)
+        category = unpackInt(buffer)
+        queryStart = unpackInt(buffer)
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.DIR_CLASSIFIED_QUERY
+
+    override fun getMessageName(): String = "DirClassifiedQuery"
+}
+
+/**
+ * Directory classified query backend (0xFFFF0028)
+ */
+class DirClassifiedQueryBackendMessage : SLMessage() {
+    var agentId: UUID = UUID.randomUUID()
+    var queryId: UUID = UUID.randomUUID()
+    var queryText: String = ""
+    var queryFlags: Int = 0
+    var category: Int = 0
+    var estateId: Int = 0
+    var godlike: Boolean = false
+    var queryStart: Int = 0
+
+    private val charset: Charset = Charsets.UTF_8
+
+    init {
+        zeroCoded = true
+    }
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packUUID(buffer, agentId)
+        packUUID(buffer, queryId)
+        packVariable(buffer, queryText.toByteArray(charset), 1)
+        packInt(buffer, queryFlags)
+        packInt(buffer, category)
+        packInt(buffer, estateId)
+        packBoolean(buffer, godlike)
+        packInt(buffer, queryStart)
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        agentId = unpackUUID(buffer)
+        queryId = unpackUUID(buffer)
+        queryText = String(unpackVariable(buffer, 1), charset)
+        queryFlags = unpackInt(buffer)
+        category = unpackInt(buffer)
+        estateId = unpackInt(buffer)
+        godlike = unpackBoolean(buffer)
+        queryStart = unpackInt(buffer)
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.DIR_CLASSIFIED_QUERY_BACKEND
+
+    override fun getMessageName(): String = "DirClassifiedQueryBackend"
+}
+
+/**
+ * Directory classified reply (0xFFFF0029)
+ */
+class DirClassifiedReplyMessage : SLMessage() {
+    data class ClassifiedEntry(
+        var classifiedId: UUID = UUID.randomUUID(),
+        var name: String = "",
+        var classifiedFlags: Int = 0,
+        var creationDateSec: Int = 0,
+        var expirationDateSec: Int = 0,
+        var priceForListing: Int = 0,
+    )
+
+    var agentId: UUID = UUID.randomUUID()
+    var queryId: UUID = UUID.randomUUID()
+    val classifieds: MutableList<ClassifiedEntry> = mutableListOf()
+    val statusCodes: MutableList<Int> = mutableListOf()
+
+    private val charset: Charset = Charsets.UTF_8
+
+    init {
+        zeroCoded = true
+    }
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packUUID(buffer, agentId)
+        packUUID(buffer, queryId)
+        require(classifieds.size <= 0xFF) { "Classified list too large (${classifieds.size})" }
+        packByte(buffer, classifieds.size)
+        classifieds.forEach { entry ->
+            packUUID(buffer, entry.classifiedId)
+            packVariable(buffer, entry.name.toByteArray(charset), 1)
+            packByte(buffer, entry.classifiedFlags and 0xFF)
+            packInt(buffer, entry.creationDateSec)
+            packInt(buffer, entry.expirationDateSec)
+            packInt(buffer, entry.priceForListing)
+        }
+        require(statusCodes.size <= 0xFF) { "Status list too large (${statusCodes.size})" }
+        packByte(buffer, statusCodes.size)
+        statusCodes.forEach { packInt(buffer, it) }
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        agentId = unpackUUID(buffer)
+        queryId = unpackUUID(buffer)
+        val classifiedCount = unpackByte(buffer)
+        classifieds.clear()
+        repeat(classifiedCount) {
+            val id = unpackUUID(buffer)
+            val name = String(unpackVariable(buffer, 1), charset)
+            val flags = unpackByte(buffer)
+            val creation = unpackInt(buffer)
+            val expiration = unpackInt(buffer)
+            val price = unpackInt(buffer)
+            classifieds += ClassifiedEntry(id, name, flags, creation, expiration, price)
+        }
+        val statusCount = unpackByte(buffer)
+        statusCodes.clear()
+        repeat(statusCount) {
+            statusCodes += unpackInt(buffer)
+        }
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.DIR_CLASSIFIED_REPLY
+
+    override fun getMessageName(): String = "DirClassifiedReply"
+}
+
+/**
+ * Directory land query (0xFFFF0030)
+ */
+class DirLandQueryMessage : SLMessage() {
+    var agentId: UUID = UUID.randomUUID()
+    var sessionId: UUID = UUID.randomUUID()
+    var queryId: UUID = UUID.randomUUID()
+    var queryFlags: Int = 0
+    var searchType: Int = 0
+    var price: Int = 0
+    var area: Int = 0
+    var queryStart: Int = 0
+
+    init {
+        zeroCoded = true
+    }
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packUUID(buffer, agentId)
+        packUUID(buffer, sessionId)
+        packUUID(buffer, queryId)
+        packInt(buffer, queryFlags)
+        packInt(buffer, searchType)
+        packInt(buffer, price)
+        packInt(buffer, area)
+        packInt(buffer, queryStart)
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        agentId = unpackUUID(buffer)
+        sessionId = unpackUUID(buffer)
+        queryId = unpackUUID(buffer)
+        queryFlags = unpackInt(buffer)
+        searchType = unpackInt(buffer)
+        price = unpackInt(buffer)
+        area = unpackInt(buffer)
+        queryStart = unpackInt(buffer)
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.DIR_LAND_QUERY
+
+    override fun getMessageName(): String = "DirLandQuery"
+}
+
+/**
+ * Directory land query backend (0xFFFF0031)
+ */
+class DirLandQueryBackendMessage : SLMessage() {
+    var agentId: UUID = UUID.randomUUID()
+    var queryId: UUID = UUID.randomUUID()
+    var queryFlags: Int = 0
+    var searchType: Int = 0
+    var price: Int = 0
+    var area: Int = 0
+    var queryStart: Int = 0
+    var estateId: Int = 0
+    var godlike: Boolean = false
+
+    init {
+        zeroCoded = true
+    }
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packUUID(buffer, agentId)
+        packUUID(buffer, queryId)
+        packInt(buffer, queryFlags)
+        packInt(buffer, searchType)
+        packInt(buffer, price)
+        packInt(buffer, area)
+        packInt(buffer, queryStart)
+        packInt(buffer, estateId)
+        packBoolean(buffer, godlike)
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        agentId = unpackUUID(buffer)
+        queryId = unpackUUID(buffer)
+        queryFlags = unpackInt(buffer)
+        searchType = unpackInt(buffer)
+        price = unpackInt(buffer)
+        area = unpackInt(buffer)
+        queryStart = unpackInt(buffer)
+        estateId = unpackInt(buffer)
+        godlike = unpackBoolean(buffer)
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.DIR_LAND_QUERY_BACKEND
+
+    override fun getMessageName(): String = "DirLandQueryBackend"
+}
+
+/**
+ * Directory land reply (0xFFFF0032)
+ */
+class DirLandReplyMessage : SLMessage() {
+    data class LandEntry(
+        var parcelId: UUID = UUID.randomUUID(),
+        var name: String = "",
+        var auction: Boolean = false,
+        var forSale: Boolean = false,
+        var salePrice: Int = 0,
+        var actualArea: Int = 0,
+    )
+
+    var agentId: UUID = UUID.randomUUID()
+    var queryId: UUID = UUID.randomUUID()
+    val parcels: MutableList<LandEntry> = mutableListOf()
+
+    private val charset: Charset = Charsets.UTF_8
+
+    init {
+        zeroCoded = true
+    }
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packUUID(buffer, agentId)
+        packUUID(buffer, queryId)
+        require(parcels.size <= 0xFF) { "Parcel list too large (${parcels.size})" }
+        packByte(buffer, parcels.size)
+        parcels.forEach { entry ->
+            packUUID(buffer, entry.parcelId)
+            packVariable(buffer, entry.name.toByteArray(charset), 1)
+            packBoolean(buffer, entry.auction)
+            packBoolean(buffer, entry.forSale)
+            packInt(buffer, entry.salePrice)
+            packInt(buffer, entry.actualArea)
+        }
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        agentId = unpackUUID(buffer)
+        queryId = unpackUUID(buffer)
+        val count = unpackByte(buffer)
+        parcels.clear()
+        repeat(count) {
+            val id = unpackUUID(buffer)
+            val name = String(unpackVariable(buffer, 1), charset)
+            val auction = unpackBoolean(buffer)
+            val forSale = unpackBoolean(buffer)
+            val price = unpackInt(buffer)
+            val area = unpackInt(buffer)
+            parcels += LandEntry(id, name, auction, forSale, price, area)
+        }
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.DIR_LAND_REPLY
+
+    override fun getMessageName(): String = "DirLandReply"
+}
+
+/**
+ * Directory popular query (0xFFFF0033)
+ */
+class DirPopularQueryMessage : SLMessage() {
+    var agentId: UUID = UUID.randomUUID()
+    var sessionId: UUID = UUID.randomUUID()
+    var queryId: UUID = UUID.randomUUID()
+    var queryFlags: Int = 0
+
+    init {
+        zeroCoded = true
+    }
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packUUID(buffer, agentId)
+        packUUID(buffer, sessionId)
+        packUUID(buffer, queryId)
+        packInt(buffer, queryFlags)
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        agentId = unpackUUID(buffer)
+        sessionId = unpackUUID(buffer)
+        queryId = unpackUUID(buffer)
+        queryFlags = unpackInt(buffer)
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.DIR_POPULAR_QUERY
+
+    override fun getMessageName(): String = "DirPopularQuery"
+}
+
+/**
+ * Directory popular query backend (0xFFFF0034)
+ */
+class DirPopularQueryBackendMessage : SLMessage() {
+    var agentId: UUID = UUID.randomUUID()
+    var queryId: UUID = UUID.randomUUID()
+    var queryFlags: Int = 0
+    var estateId: Int = 0
+    var godlike: Boolean = false
+
+    init {
+        zeroCoded = true
+    }
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packUUID(buffer, agentId)
+        packUUID(buffer, queryId)
+        packInt(buffer, queryFlags)
+        packInt(buffer, estateId)
+        packBoolean(buffer, godlike)
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        agentId = unpackUUID(buffer)
+        queryId = unpackUUID(buffer)
+        queryFlags = unpackInt(buffer)
+        estateId = unpackInt(buffer)
+        godlike = unpackBoolean(buffer)
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.DIR_POPULAR_QUERY_BACKEND
+
+    override fun getMessageName(): String = "DirPopularQueryBackend"
+}
+
+/**
+ * Directory popular reply (0xFFFF0035)
+ */
+class DirPopularReplyMessage : SLMessage() {
+    data class PopularEntry(
+        var parcelId: UUID = UUID.randomUUID(),
+        var name: String = "",
+        var dwell: Float = 0f,
+    )
+
+    var agentId: UUID = UUID.randomUUID()
+    var queryId: UUID = UUID.randomUUID()
+    val entries: MutableList<PopularEntry> = mutableListOf()
+
+    private val charset: Charset = Charsets.UTF_8
+
+    init {
+        zeroCoded = true
+    }
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packUUID(buffer, agentId)
+        packUUID(buffer, queryId)
+        require(entries.size <= 0xFF) { "Popular list too large (${entries.size})" }
+        packByte(buffer, entries.size)
+        entries.forEach { entry ->
+            packUUID(buffer, entry.parcelId)
+            packVariable(buffer, entry.name.toByteArray(charset), 1)
+            packFloat(buffer, entry.dwell)
+        }
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        agentId = unpackUUID(buffer)
+        queryId = unpackUUID(buffer)
+        val count = unpackByte(buffer)
+        entries.clear()
+        repeat(count) {
+            val id = unpackUUID(buffer)
+            val name = String(unpackVariable(buffer, 1), charset)
+            val dwell = unpackFloat(buffer)
+            entries += PopularEntry(id, name, dwell)
+        }
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.DIR_POPULAR_REPLY
+
+    override fun getMessageName(): String = "DirPopularReply"
+}

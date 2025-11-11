@@ -40,6 +40,15 @@ object SLMessageFactory {
         const val DIR_PEOPLE_REPLY = 0xFFFF0024.toInt()
         const val DIR_EVENTS_REPLY = 0xFFFF0025.toInt()
         const val DIR_GROUPS_REPLY = 0xFFFF0026.toInt()
+        const val DIR_CLASSIFIED_QUERY = 0xFFFF0027.toInt()
+        const val DIR_CLASSIFIED_QUERY_BACKEND = 0xFFFF0028.toInt()
+        const val DIR_CLASSIFIED_REPLY = 0xFFFF0029.toInt()
+        const val DIR_LAND_QUERY = 0xFFFF0030.toInt()
+        const val DIR_LAND_QUERY_BACKEND = 0xFFFF0031.toInt()
+        const val DIR_LAND_REPLY = 0xFFFF0032.toInt()
+        const val DIR_POPULAR_QUERY = 0xFFFF0033.toInt()
+        const val DIR_POPULAR_QUERY_BACKEND = 0xFFFF0034.toInt()
+        const val DIR_POPULAR_REPLY = 0xFFFF0035.toInt()
         const val AGENT_THROTTLE = 0xFFFF0051.toInt()
         const val AGENT_HEIGHT_WIDTH = 0xFFFF0053.toInt()
         const val AGENT_FOV = 0xFFFF0052.toInt()
@@ -170,6 +179,15 @@ object SLMessageFactory {
         registerMessage(MessageIDs.DIR_PEOPLE_REPLY) { DirPeopleReplyMessage() }
         registerMessage(MessageIDs.DIR_EVENTS_REPLY) { DirEventsReplyMessage() }
         registerMessage(MessageIDs.DIR_GROUPS_REPLY) { DirGroupsReplyMessage() }
+        registerMessage(MessageIDs.DIR_CLASSIFIED_QUERY) { DirClassifiedQueryMessage() }
+        registerMessage(MessageIDs.DIR_CLASSIFIED_QUERY_BACKEND) { DirClassifiedQueryBackendMessage() }
+        registerMessage(MessageIDs.DIR_CLASSIFIED_REPLY) { DirClassifiedReplyMessage() }
+        registerMessage(MessageIDs.DIR_LAND_QUERY) { DirLandQueryMessage() }
+        registerMessage(MessageIDs.DIR_LAND_QUERY_BACKEND) { DirLandQueryBackendMessage() }
+        registerMessage(MessageIDs.DIR_LAND_REPLY) { DirLandReplyMessage() }
+        registerMessage(MessageIDs.DIR_POPULAR_QUERY) { DirPopularQueryMessage() }
+        registerMessage(MessageIDs.DIR_POPULAR_QUERY_BACKEND) { DirPopularQueryBackendMessage() }
+        registerMessage(MessageIDs.DIR_POPULAR_REPLY) { DirPopularReplyMessage() }
         registerMessage(MessageIDs.AGENT_THROTTLE) { AgentThrottleMessage() }
         registerMessage(MessageIDs.AGENT_FOV) { AgentFovMessage() }
         registerMessage(MessageIDs.AGENT_PAUSE) { AgentPauseMessage() }
