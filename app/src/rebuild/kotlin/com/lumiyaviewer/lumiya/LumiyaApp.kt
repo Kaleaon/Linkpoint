@@ -7,6 +7,7 @@ import android.content.res.AssetManager
 import android.util.Log
 import androidx.multidex.MultiDex
 import androidx.preference.PreferenceManager
+import com.lumiyaviewer.lumiya.modern.graphics.ModernGraphicsSupport
 import java.util.concurrent.atomic.AtomicReference
 
 class LumiyaApp : Application() {
@@ -15,6 +16,9 @@ class LumiyaApp : Application() {
         super.onCreate()
         bootstrapContext(this)
         ensurePreferences(this)
+        val graphicsStatus = ModernGraphicsSupport.evaluate(this)
+        modernGraphicsStatus.compareAndSet(null, graphicsStatus)
+        Log.i(TAG, "Modern graphics status: ${graphicsStatus.describe()}")
         GlobalOptions.initialize(this)
         Log.i(TAG, "LumiyaApp initialised (rebuild stub)")
     }
@@ -29,6 +33,7 @@ class LumiyaApp : Application() {
         private const val TAG = "LumiyaApp"
         private val contextRef = AtomicReference<Context?>()
         private val prefsRef = AtomicReference<SharedPreferences?>()
+        private val modernGraphicsStatus = AtomicReference<ModernGraphicsSupport.Status?>()
 
         fun getContext(): Context =
             resolveContext() ?: throw IllegalStateException("LumiyaApp context not initialised yet")
@@ -46,6 +51,16 @@ class LumiyaApp : Application() {
 
         fun restartApp() {
             Log.w(TAG, "restartApp() is a no-op in rebuild mode")
+        }
+
+        fun isModernGraphicsAvailable(): Boolean =
+            modernGraphicsStatus.get()?.supported == true
+
+        fun getModernGraphicsStatus(): ModernGraphicsSupport.Status? =
+            modernGraphicsStatus.get()
+
+        fun setModernGraphicsStatus(status: ModernGraphicsSupport.Status) {
+            modernGraphicsStatus.set(status)
         }
 
         private fun bootstrapContext(context: Context) {
