@@ -2,6 +2,7 @@ package com.linkpoint.slproto.messages
 
 import com.linkpoint.slproto.SLMessage
 import com.linkpoint.slproto.types.LLVector3
+import com.linkpoint.slproto.types.LLVector4
 import java.net.Inet4Address
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
@@ -138,6 +139,29 @@ class RegionHandshakeMessage : SLMessage() {
     override fun getMessageID(): Int = SLMessageFactory.MessageIDs.REGION_HANDSHAKE
 
     override fun getMessageName(): String = "RegionHandshake"
+}
+
+/**
+ * Camera constraint (0x16)
+ */
+class CameraConstraintMessage : SLMessage() {
+    var plane: LLVector4 = LLVector4()
+
+    init {
+        zeroCoded = true
+    }
+
+    override fun packPayload(buffer: ByteBuffer) {
+        plane.pack(buffer)
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        plane = LLVector4.unpack(buffer)
+    }
+
+    override fun getMessageID(): Int = SLMessageFactory.MessageIDs.CAMERA_CONSTRAINT
+
+    override fun getMessageName(): String = "CameraConstraint"
 }
 
 /**

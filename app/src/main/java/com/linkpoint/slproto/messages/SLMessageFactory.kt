@@ -30,6 +30,8 @@ object SLMessageFactory {
         const val CHILD_AGENT_DYING = 0xFFFF00F0.toInt()
         const val CHILD_AGENT_UNKNOWN = 0xFFFF00F1.toInt()
         const val KILL_CHILD_AGENTS = 0xFFFF00F2.toInt()
+        const val CAMERA_CONSTRAINT = 0x16
+        const val PARCEL_PROPERTIES = 0x17
         const val AGENT_THROTTLE = 0x51
         const val AGENT_HEIGHT_WIDTH = 0x53
         const val AGENT_FOV = 0x52
@@ -177,6 +179,8 @@ object SLMessageFactory {
         registerMessage(MessageIDs.SIMULATOR_VIEWER_TIME) { SimulatorViewerTimeMessage() }
         registerMessage(MessageIDs.ENABLE_SIMULATOR) { EnableSimulatorMessage() }
         registerMessage(MessageIDs.DISABLE_SIMULATOR) { DisableSimulatorMessage() }
+        registerMessage(MessageIDs.CAMERA_CONSTRAINT) { CameraConstraintMessage() }
+        registerMessage(MessageIDs.PARCEL_PROPERTIES) { ParcelPropertiesMessage() }
 
         // Asset streaming
         registerMessage(MessageIDs.REQUEST_IMAGE) { RequestImageMessage() }
