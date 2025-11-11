@@ -218,6 +218,18 @@ class SLParcelInfo {
         return sLObjectAvatarInfo
     }
 
+    fun snapshotAvatarObjects(): List<SLObjectAvatarInfo> {
+        val result = ArrayList<SLObjectAvatarInfo>()
+        synchronized(this) {
+            for (entry in allObjectsNearby.values) {
+                if (entry is SLObjectAvatarInfo) {
+                    result.add(entry)
+                }
+            }
+        }
+        return result
+    }
+
     synchronized SLObjectInfo getAvatarObject(UUID uuid) {
         return (SLObjectInfo) this.allObjectsNearby.get(uuid)
     }

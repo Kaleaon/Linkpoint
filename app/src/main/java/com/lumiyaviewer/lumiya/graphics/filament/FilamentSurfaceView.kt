@@ -35,10 +35,15 @@ class FilamentSurfaceView @JvmOverloads constructor(
     private val frameCallback = object : Choreographer.FrameCallback {
         override fun doFrame(frameTimeNanos: Long) {
             if (isAttached && !isPaused) {
-                // Render frame
+                try {
+                    renderer?.onDrawFrame(frameTimeNanos)
+                } catch (t: Throwable) {
+                    Log.e(TAG, "Renderer draw callback failed", t)
+                }
+
+                worldRenderer?.onFrame(frameTimeNanos)
                 renderContext.renderFrame(frameTimeNanos)
-                
-                // Schedule next frame
+
                 choreographer.postFrameCallback(this)
             }
         }
