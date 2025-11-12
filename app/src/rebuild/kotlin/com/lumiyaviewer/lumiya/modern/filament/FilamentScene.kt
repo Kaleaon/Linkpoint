@@ -1,12 +1,10 @@
 package com.lumiyaviewer.lumiya.modern.filament
 
 import android.content.Context
-import android.opengl.Matrix
 import android.view.Surface
 import android.view.SurfaceView
 import com.google.android.filament.Camera
 import com.google.android.filament.Engine
-import com.google.android.filament.Entity
 import com.google.android.filament.EntityManager
 import com.google.android.filament.IndirectLight
 import com.google.android.filament.LightManager
@@ -33,7 +31,7 @@ internal class FilamentScene(context: Context) {
     val renderer: Renderer = engine.createRenderer()
     val scene: Scene = engine.createScene()
     val view: View = engine.createView()
-    private val cameraEntity: Entity = entityManager.create()
+    private val cameraEntity: Int = entityManager.create()
     val camera: Camera = engine.createCamera(cameraEntity)
 
     private val displayHelper = DisplayHelper(context)
@@ -65,7 +63,12 @@ internal class FilamentScene(context: Context) {
             override fun onNativeWindowChanged(surface: Surface) {
                 destroySwapChain()
                 swapChain = engine.createSwapChain(surface)
-                displayHelper.attach(renderer, surfaceView?.display)
+                val display = surfaceView?.display
+                if (display != null) {
+                    displayHelper.attach(renderer, display)
+                } else {
+                    displayHelper.detach()
+                }
             }
 
             override fun onDetachedFromSurface() {
@@ -77,14 +80,8 @@ internal class FilamentScene(context: Context) {
                 if (width <= 0 || height <= 0) return
                 lastViewport = Viewport(0, 0, width, height)
                 view.viewport = lastViewport
-                val aspect = max(width, 1) / max(height.toDouble(), 1.0)
-                camera.setProjection(
-                    Camera.Projection.PERSPECTIVE,
-                    45.0,
-                    aspect,
-                    0.1,
-                    1000.0
-                )
+                val aspect = max(width, 1).toDouble() / max(height, 1)
+                camera.setProjection(45.0, aspect, 0.1, 1000.0, Camera.Fov.VERTICAL)
             }
         }
 
@@ -123,15 +120,19 @@ internal class FilamentScene(context: Context) {
         }
 
         // Destroy all entities that might still be in the scene (lights, renderables)
+        val renderableManager = engine.renderableManager
+        val lightManager = engine.lightManager
         scene.entities.forEach { entity ->
             scene.removeEntity(entity)
-            engine.renderableManager.destroy(entity)
-            engine.lightManager.destroy(entity)
+            if (renderableManager.hasComponent(entity)) {
+                renderableManager.destroy(entity)
+            }
+            if (lightManager.hasComponent(entity)) {
+                lightManager.destroy(entity)
+            }
             engine.destroyEntity(entity)
             entityManager.destroy(entity)
         }
-
-        scene.destroyLights()
 
         engine.destroyView(view)
         engine.destroyScene(scene)

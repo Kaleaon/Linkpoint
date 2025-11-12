@@ -1,32 +1,37 @@
 package com.linkpoint.slproto.llsd
 
+import android.util.Base64
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.*
+import java.net.URI
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.LinkedHashMap
+import java.util.UUID
 
 /**
- * Linden Lab Structured Data (LLSD)
- * Base class for all LLSD types
+ * Modern LLSD model (Libremetaverse compatible).
+ *
+ * Provides strongly typed nodes that can convert between JSON, XML, and Kotlin primitives.
  */
-sealed class LLSD {
-    /**
-     * Convert to JSON representation
-     */
-    abstract fun toJson(): Any
-
-    /**
-     * Convert to XML representation
-     */
-    abstract fun toXml(): String
+sealed interface LLSD {
+    fun toJson(): Any?
+    fun toXml(): String
 
     companion object {
-        /**
-         * Parse LLSD from JSON
-         */
-        fun fromJson(json: Any): LLSD {
-            return when (json) {
+        private val ISO_FORMATTERS =
+            listOf(
+                DateTimeFormatter.ISO_INSTANT,
+                DateTimeFormatter.ISO_OFFSET_DATE_TIME,
+            )
+
+        fun fromJson(json: Any?): LLSD =
+            when (json) {
+                null, JSONObject.NULL -> LLSDUndefined
                 is JSONObject -> {
-                    val map = mutableMapOf<String, LLSD>()
+                    val map = LinkedHashMap<String, LLSD>()
                     for (key in json.keys()) {
                         map[key] = fromJson(json.get(key))
                     }
@@ -35,257 +40,212 @@ sealed class LLSD {
                 is JSONArray -> {
                     val list = mutableListOf<LLSD>()
                     for (i in 0 until json.length()) {
-                        list.add(fromJson(json.get(i)))
+                        list += fromJson(json.get(i))
                     }
                     LLSDArray(list)
                 }
-                is String -> LLSDString(json)
-                is Int -> LLSDInteger(json)
-                is Long -> LLSDInteger(json.toInt())
-                is Double -> LLSDReal(json)
-                is Float -> LLSDReal(json.toDouble())
                 is Boolean -> LLSDBoolean(json)
-                JSONObject.NULL -> LLSDUndefined
+                is Int -> LLSDInteger(json.toLong())
+                is Long -> LLSDInteger(json)
+                is Number -> LLSDReal(json.toDouble())
+                is UUID -> LLSDUUID(json)
+                is Date -> LLSDDate(json)
+                is String -> {
+                    val trimmed = json.trim()
+                    if (trimmed.equals("true", ignoreCase = true) || trimmed.equals("false", ignoreCase = true)) {
+                        LLSDBoolean(trimmed.equals("true", ignoreCase = true))
+                    } else {
+                        LLSDString(json)
+                    }
+                }
+                is ByteArray -> LLSDBinary(json)
                 else -> LLSDString(json.toString())
             }
-        }
 
-        /**
-         * Parse LLSD from XML
-         */
-        fun fromXml(xml: String): LLSD {
-            return try {
-                val xmlParser = LLSDXmlParser()
-                xmlParser.parse(xml)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                LLSDUndefined
+        fun fromXml(xml: String): LLSD = LLSDXmlParser().parse(xml)
+
+        internal fun parseDate(value: String): Date {
+            val trimmed = value.trim()
+            if (trimmed.isEmpty()) return Date(0)
+
+            ISO_FORMATTERS.forEach { formatter ->
+                try {
+                    val temporal = formatter.parse(trimmed)
+                    val instant =
+                        when (temporal) {
+                            is Instant -> temporal
+                            else -> OffsetDateTime.from(temporal).toInstant()
+                        }
+                    return Date.from(instant)
+                } catch (_: Exception) {
+                }
             }
+
+            trimmed.toDoubleOrNull()?.let { seconds ->
+                return Date((seconds * 1000).toLong())
+            }
+
+            return Date(0)
         }
     }
 }
 
-/**
- * LLSD Undefined type
- */
-object LLSDUndefined : LLSD() {
-    override fun toJson(): Any = JSONObject.NULL
-
-    override fun toXml(): String = "<undef />"
+object LLSDUndefined : LLSD {
+    override fun toJson(): Any? = JSONObject.NULL
+    override fun toXml(): String = "<undef/>"
 }
 
-/**
- * LLSD Boolean type
- */
-data class LLSDBoolean(val value: Boolean) : LLSD() {
+data class LLSDBoolean(val value: Boolean) : LLSD {
     override fun toJson(): Any = value
-
     override fun toXml(): String = "<boolean>${if (value) "true" else "false"}</boolean>"
 }
 
-/**
- * LLSD Integer type
- */
-data class LLSDInteger(val value: Int) : LLSD() {
-    override fun toJson(): Any = value
+data class LLSDInteger(val value: Long) : LLSD {
+    constructor(value: Int) : this(value.toLong())
 
+    override fun toJson(): Any = value
     override fun toXml(): String = "<integer>$value</integer>"
 }
 
-/**
- * LLSD Real (floating point) type
- */
-data class LLSDReal(val value: Double) : LLSD() {
-    override fun toJson(): Any = value
+data class LLSDReal(val value: Double) : LLSD {
+    constructor(value: Float) : this(value.toDouble())
 
+    override fun toJson(): Any = value
     override fun toXml(): String = "<real>$value</real>"
 }
 
-/**
- * LLSD String type
- */
-data class LLSDString(val value: String) : LLSD() {
+data class LLSDString(val value: String) : LLSD {
     override fun toJson(): Any = value
-
-    override fun toXml(): String = "<string>$value</string>"
+    override fun toXml(): String = "<string>${escapeXml(value)}</string>"
 }
 
-/**
- * LLSD UUID type
- */
-data class LLSDUUID(val value: UUID) : LLSD() {
+data class LLSDUUID(val value: UUID) : LLSD {
     override fun toJson(): Any = value.toString()
-
-    override fun toXml(): String = "<uuid>$value</uuid>"
+    override fun toXml(): String = "<uuid>${value}</uuid>"
 }
 
-/**
- * LLSD Date type
- */
-data class LLSDDate(val value: Date) : LLSD() {
-    override fun toJson(): Any = value.time
+data class LLSDURI(val value: URI) : LLSD {
+    constructor(value: String) : this(URI.create(value))
 
-    override fun toXml(): String = "<date>${value.time}</date>"
+    override fun toJson(): Any = value.toString()
+    override fun toXml(): String = "<uri>${escapeXml(value.toString())}</uri>"
 }
 
-/**
- * LLSD URI type
- */
-data class LLSDURI(val value: String) : LLSD() {
-    override fun toJson(): Any = value
-
-    override fun toXml(): String = "<uri>$value</uri>"
+data class LLSDDate(val value: Date) : LLSD {
+    override fun toJson(): Any = DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochMilli(value.time))
+    override fun toXml(): String = "<date>${DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochMilli(value.time))}</date>"
 }
 
-/**
- * LLSD Binary type
- */
-data class LLSDBinary(val value: ByteArray) : LLSD() {
-    override fun toJson(): Any = Base64.getEncoder().encodeToString(value)
+data class LLSDBinary(val value: ByteArray) : LLSD {
+    override fun toJson(): Any = Base64.encodeToString(value, Base64.NO_WRAP)
+    override fun toXml(): String = "<binary>${Base64.encodeToString(value, Base64.NO_WRAP)}</binary>"
 
-    override fun toXml(): String = "<binary>${Base64.getEncoder().encodeToString(value)}</binary>"
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is LLSDBinary) return false
-        return value.contentEquals(other.value)
-    }
+    override fun equals(other: Any?): Boolean =
+        other is LLSDBinary && value.contentEquals(other.value)
 
     override fun hashCode(): Int = value.contentHashCode()
 }
 
-/**
- * LLSD Array type
- */
-data class LLSDArray(val value: MutableList<LLSD> = mutableListOf()) : LLSD() {
+data class LLSDArray(val value: MutableList<LLSD> = mutableListOf()) : LLSD {
+    constructor(elements: Collection<LLSD>) : this(elements.toMutableList())
+
     override fun toJson(): Any {
         val array = JSONArray()
-        for (item in value) {
-            array.put(item.toJson())
-        }
+        value.forEach { array.put(it.toJson()) }
         return array
     }
 
-    override fun toXml(): String {
-        val sb = StringBuilder("<array>")
-        for (item in value) {
-            sb.append(item.toXml())
-        }
-        sb.append("</array>")
-        return sb.toString()
+    override fun toXml(): String = buildString {
+        append("<array>")
+        value.forEach { append(it.toXml()) }
+        append("</array>")
     }
 
     operator fun get(index: Int): LLSD = value.getOrNull(index) ?: LLSDUndefined
 
-    operator fun set(
-        index: Int
-        element: LLSD
-    ) {
-        if (index >= value.size) {
-            // Expand array
-            while (value.size <= index) {
-                value.add(LLSDUndefined)
-            }
-        }
-        value[index] = element
+    fun add(element: LLSD) {
+        value += element
     }
-
-    fun add(element: LLSD) = value.add(element)
-
-    fun size(): Int = value.size
 }
 
-/**
- * LLSD Map type
- */
-data class LLSDMap(val value: MutableMap<String, LLSD> = mutableMapOf()) : LLSD() {
+data class LLSDMap(val value: LinkedHashMap<String, LLSD> = LinkedHashMap()) : LLSD {
+    constructor(initial: Map<String, LLSD>) : this(LinkedHashMap(initial))
+
     override fun toJson(): Any {
         val obj = JSONObject()
-        for ((key, llsdValue) in value) {
-            obj.put(key, llsdValue.toJson())
-        }
+        value.forEach { (key, node) -> obj.put(key, node.toJson()) }
         return obj
     }
 
-    override fun toXml(): String {
-        val sb = StringBuilder("<map>")
-        for ((key, llsdValue) in value) {
-            sb.append("<key>$key</key>")
-            sb.append(llsdValue.toXml())
+    override fun toXml(): String = buildString {
+        append("<map>")
+        value.forEach { (key, node) ->
+            append("<key>${escapeXml(key)}</key>")
+            append(node.toXml())
         }
-        sb.append("</map>")
-        return sb.toString()
+        append("</map>")
     }
 
     operator fun get(key: String): LLSD = value[key] ?: LLSDUndefined
-
-    operator fun set(
-        key: String
-        llsdValue: LLSD
-    ) {
-        value[key] = llsdValue
+    operator fun set(key: String, node: LLSD) {
+        value[key] = node
     }
 
-    fun containsKey(key: String): Boolean = value.containsKey(key)
-
-    fun keys(): Set<String> = value.keys
+    fun put(key: String, node: LLSD) = set(key, node)
 }
 
-/**
- * LLSD helper functions
- */
 object LLSDHelper {
-    /**
-     * Create LLSD from Kotlin value
-     */
-    fun from(value: Any?): LLSD {
-        return when (value) {
+    fun from(value: Any?): LLSD =
+        when (value) {
             null -> LLSDUndefined
+            is LLSD -> value
             is Boolean -> LLSDBoolean(value)
-            is Int -> LLSDInteger(value)
-            is Long -> LLSDInteger(value.toInt())
+            is Int -> LLSDInteger(value.toLong())
+            is Long -> LLSDInteger(value)
             is Float -> LLSDReal(value.toDouble())
             is Double -> LLSDReal(value)
-            is String -> LLSDString(value)
             is UUID -> LLSDUUID(value)
+            is URI -> LLSDURI(value)
             is Date -> LLSDDate(value)
-            is ByteArray -> LLSDBinary(value)
+            is ByteArray -> LLSDBinary(value.copyOf())
+            is String -> LLSDString(value)
             is List<*> -> {
-                val array = LLSDArray()
-                for (item in value) {
-                    array.add(from(item))
-                }
-                array
+                val list = LLSDArray()
+                value.forEach { list.add(from(it)) }
+                list
             }
             is Map<*, *> -> {
                 val map = LLSDMap()
-                for ((k, v) in value) {
-                    if (k is String) {
-                        map[k] = from(v)
+                value.forEach { (key, entryValue) ->
+                    if (key is String) {
+                        map[key] = from(entryValue)
                     }
                 }
                 map
             }
             else -> LLSDString(value.toString())
         }
-    }
 
-    /**
-     * Convert LLSD to Kotlin value
-     */
-    fun toKotlin(llsd: LLSD): Any? {
-        return when (llsd) {
+    fun toKotlin(node: LLSD): Any? =
+        when (node) {
             is LLSDUndefined -> null
-            is LLSDBoolean -> llsd.value
-            is LLSDInteger -> llsd.value
-            is LLSDReal -> llsd.value
-            is LLSDString -> llsd.value
-            is LLSDUUID -> llsd.value
-            is LLSDDate -> llsd.value
-            is LLSDURI -> llsd.value
-            is LLSDBinary -> llsd.value
-            is LLSDArray -> llsd.value.map { toKotlin(it) }
-            is LLSDMap -> llsd.value.mapValues { toKotlin(it.value) }
+            is LLSDBoolean -> node.value
+            is LLSDInteger -> node.value
+            is LLSDReal -> node.value
+            is LLSDString -> node.value
+            is LLSDUUID -> node.value
+            is LLSDURI -> node.value
+            is LLSDDate -> node.value
+            is LLSDBinary -> node.value
+            is LLSDArray -> node.value.map { toKotlin(it) }
+            is LLSDMap -> node.value.mapValues { toKotlin(it.value) }
         }
-    }
 }
+
+private fun escapeXml(input: String): String =
+    input
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\"", "&quot;")
+        .replace("'", "&apos;")

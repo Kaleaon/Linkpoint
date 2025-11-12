@@ -5,7 +5,9 @@ import kotlinx.coroutines.*
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
 import org.json.JSONObject
+import org.json.JSONTokener
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 
@@ -142,7 +144,16 @@ class CapsManager(private val seedCapability: String) {
         data: LLSD
     ): LLSD =
         withContext(Dispatchers.IO) {
-            val jsonString = JSONObject(data.toJson() as Map<*, *>).toString()
+            val jsonValue = data.toJson()
+            val jsonString =
+                when (jsonValue) {
+                    is JSONObject -> jsonValue.toString()
+                    is JSONArray -> jsonValue.toString()
+                    is String -> JSONObject.quote(jsonValue)
+                    is Number, is Boolean -> jsonValue.toString()
+                    null -> "null"
+                    else -> JSONObject.wrap(jsonValue)?.toString() ?: jsonValue.toString()
+                }
             val requestBody = jsonString.toRequestBody(JSON_MEDIA_TYPE)
 
             val request =
@@ -158,7 +169,7 @@ class CapsManager(private val seedCapability: String) {
             }
 
             val responseBody = response.body?.string() ?: throw IOException("Empty response")
-            val jsonResponse = JSONObject(responseBody)
+            val jsonResponse = JSONTokener(responseBody).nextValue()
 
             LLSD.fromJson(jsonResponse)
         }
@@ -181,7 +192,7 @@ class CapsManager(private val seedCapability: String) {
             }
 
             val responseBody = response.body?.string() ?: throw IOException("Empty response")
-            val jsonResponse = JSONObject(responseBody)
+            val jsonResponse = JSONTokener(responseBody).nextValue()
 
             LLSD.fromJson(jsonResponse)
         }
@@ -277,7 +288,7 @@ class CapsManager(private val seedCapability: String) {
             }
 
             val responseBody = response.body?.string() ?: throw IOException("Empty response")
-            val jsonResponse = JSONObject(responseBody)
+            val jsonResponse = JSONTokener(responseBody).nextValue()
 
             LLSD.fromJson(jsonResponse)
         }
