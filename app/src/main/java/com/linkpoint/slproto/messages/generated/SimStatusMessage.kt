@@ -21,7 +21,7 @@ class SimStatusMessage : SLMessage() {
         flags = unpackLong(buffer)
     }
 
-    override fun getMessageID(): Int = 0x0000000C
+    override fun getMessageID(): Int = 0x0000FF0C
 
     override fun getMessageName(): String = "SimStatus"
 }

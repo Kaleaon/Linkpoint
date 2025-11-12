@@ -19,7 +19,7 @@ class HealthMessage : SLMessage() {
         health = unpackFloat(buffer)
     }
 
-    override fun getMessageID(): Int = 0x0000008A
+    override fun getMessageID(): Int = 0xFFFF008A
 
     override fun getMessageName(): String = "HealthMessage"
 }

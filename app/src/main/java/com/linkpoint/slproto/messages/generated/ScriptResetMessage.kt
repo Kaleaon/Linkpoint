@@ -25,7 +25,7 @@ class ScriptResetMessage : SLMessage() {
         itemId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0x000000F6
+    override fun getMessageID(): Int = 0xFFFF00F6
 
     override fun getMessageName(): String = "ScriptReset"
 }

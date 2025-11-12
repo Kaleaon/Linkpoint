@@ -22,7 +22,7 @@ class ScriptRunningReplyMessage : SLMessage() {
         running = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0x000000F4
+    override fun getMessageID(): Int = 0xFFFF00F4
 
     override fun getMessageName(): String = "ScriptRunningReply"
 }

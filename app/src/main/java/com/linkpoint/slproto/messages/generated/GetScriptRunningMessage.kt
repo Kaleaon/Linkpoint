@@ -19,7 +19,7 @@ class GetScriptRunningMessage : SLMessage() {
         itemId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0x000000F3
+    override fun getMessageID(): Int = 0xFFFF00F3
 
     override fun getMessageName(): String = "GetScriptRunning"
 }
