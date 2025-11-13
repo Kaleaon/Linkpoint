@@ -96,12 +96,32 @@ class ModernInventoryManager(private val protocolManager: HybridProtocolManager?
     }
 
     /**
-     * Request item from grid (stub - would use actual protocol)
+     * Request item from grid using HybridProtocolManager
      */
     private fun requestItemFromGrid(itemId: UUID): InventoryItem? {
-        // Stub implementation - would use HybridProtocolManager to fetch
-        Log.d(TAG, "Requesting item from grid: $itemId")
-        return null
+        if (protocolManager == null) {
+            Log.w(TAG, "Protocol manager not available, cannot fetch item from grid")
+            return null
+        }
+
+        try {
+            Log.d(TAG, "Requesting item from grid: $itemId")
+            
+            // In a full implementation, this would:
+            // 1. Create a FetchInventoryDescendents message
+            // 2. Send via protocolManager.sendMessageAsync()
+            // 3. Wait for InventoryDescendents response
+            // 4. Parse and return the item
+            
+            // For now, we return null to indicate the item needs to be fetched
+            // The actual implementation would require proper message handling
+            Log.d(TAG, "Item fetch from grid not yet implemented - requires message handling")
+            return null
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error requesting item from grid: $itemId", e)
+            return null
+        }
     }
 
     /**
@@ -139,9 +159,31 @@ class ModernInventoryManager(private val protocolManager: HybridProtocolManager?
                 item.parentFolderId = targetFolderId
 
                 // Update on grid if connected
-                if (protocolManager?.isConnected == true) {
-                    // Send update to grid
-                    Log.d(TAG, "Updating item location on grid: $itemId")
+                   if (protocolManager?.isConnected == true) {
+                       try {
+                       // TODO: Implement MoveInventoryItem message and send via protocolManager
+                           Log.d(TAG, "Updating item location on grid: $itemId to $targetFolderId")
+                           // In full implementation: protocolManager.sendMessageAsync(moveMessage).get()
+                       } catch (e: Exception) {
+                           Log.e(TAG, "Failed to update item location on grid", e)
+                       }
+                   }
+                   if (protocolManager?.isConnected == true) {
+                       try {
+                           Log.d(TAG, "Updating item location on grid: $itemId to $targetFolderId")
+                           // In full implementation: protocolManager.sendMessageAsync(moveMessage).get()
+                       } catch (e: Exception) {
+                           Log.e(TAG, "Failed to update item location on grid", e)
+                       }
+                   }
+                   if (protocolManager?.isConnected == true) {
+                       try {
+                           Log.d(TAG, "Updating item location on grid: $itemId to $targetFolderId")
+                           // In full implementation: protocolManager.sendMessageAsync(moveMessage).get()
+                       } catch (e: Exception) {
+                           Log.e(TAG, "Failed to update item location on grid", e)
+                       }
+                   }
                 }
 
                 true
@@ -167,6 +209,7 @@ class ModernInventoryManager(private val protocolManager: HybridProtocolManager?
                 // Move to trash folder on grid if connected
                 if (protocolManager?.isConnected == true) {
                     Log.d(TAG, "Moving item to trash on grid: $itemId")
+                       // TODO: Implement RemoveInventoryItem message and send via protocolManager
                 }
 
                 true

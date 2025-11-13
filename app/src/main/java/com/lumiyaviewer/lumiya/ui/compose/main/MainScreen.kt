@@ -29,6 +29,7 @@ import androidx.navigation.compose.rememberNavController
 @Composable
 fun MainScreen(
     onLogout: () -> Unit,
+    onSettingsClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
@@ -49,15 +50,15 @@ fun MainScreen(
                             else -> "Linkpoint"
                         }
                     )
-                },
-                actions = {
-                    IconButton(onClick = { /* TODO: Settings */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings"
-                        )
-                    }
-                },
+                   },
+                   actions = {
+                       IconButton(onClick = onSettingsClick) {
+                           Icon(
+                               imageVector = Icons.Default.Settings,
+                               contentDescription = "Settings"
+                           )
+                       }
+                   },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer

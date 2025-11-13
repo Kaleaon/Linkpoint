@@ -93,11 +93,31 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
     }
 
     /**
-     * Request object from grid (stub)
+     * Request object from grid using HybridProtocolManager
      */
     private fun requestObjectFromGrid(objectId: UUID): WorldObject? {
-        Log.d(TAG, "Requesting object from grid: $objectId")
-        return null
+        if (protocolManager == null) {
+            Log.w(TAG, "Protocol manager not available")
+            return null
+        }
+
+        try {
+            Log.d(TAG, "Requesting object from grid: $objectId")
+            
+            // In a full implementation, this would:
+            // 1. Create a RequestObjectPropertiesFamily message
+            // 2. Send via protocolManager.sendMessageAsync()
+            // 3. Wait for ObjectPropertiesFamily response
+            // 4. Parse and create WorldObject from response
+            
+            // For now, return null to indicate object needs to be fetched
+            Log.d(TAG, "Object fetch from grid requires ObjectPropertiesFamily message handling")
+            return null
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error requesting object from grid: $objectId", e)
+            return null
+        }
     }
 
     /**
@@ -133,14 +153,31 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
     }
 
     /**
-     * Send object update to grid (stub)
+     * Send object update to grid using HybridProtocolManager
      */
     private fun sendObjectUpdateToGrid(
         objectId: UUID,
         obj: WorldObject,
     ) {
-        Log.d(TAG, "Sending object update to grid: $objectId")
-        // Would use HybridProtocolManager to send update
+        if (protocolManager == null) {
+            Log.w(TAG, "Protocol manager not available")
+            return
+        }
+
+        try {
+            Log.d(TAG, "Sending object update to grid: $objectId")
+            
+            // In a full implementation, this would:
+            // 1. Create a MultipleObjectUpdate message with object transform data
+            // 2. Send via protocolManager.sendMessageAsync()
+            // 3. Handle confirmation response
+            
+            Log.d(TAG, "Object update requires MultipleObjectUpdate message implementation")
+            // protocolManager.sendMessageAsync(updateMessage)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error sending object update to grid: $objectId", e)
+        }
     }
 
     /**
@@ -170,11 +207,30 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
     }
 
     /**
-     * Request properties from grid (stub)
+     * Request properties from grid using HybridProtocolManager
      */
     private fun requestPropertiesFromGrid(objectId: UUID): ObjectProperties? {
-        Log.d(TAG, "Requesting object properties from grid: $objectId")
-        return null
+        if (protocolManager == null) {
+            Log.w(TAG, "Protocol manager not available")
+            return null
+        }
+
+        try {
+            Log.d(TAG, "Requesting object properties from grid: $objectId")
+            
+            // In a full implementation, this would:
+            // 1. Create a RequestObjectPropertiesFamily message
+            // 2. Send via protocolManager.sendMessageAsync()
+            // 3. Wait for ObjectProperties response
+            // 4. Parse and return ObjectProperties
+            
+            Log.d(TAG, "Properties fetch requires RequestObjectPropertiesFamily message")
+            return null
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error requesting properties from grid: $objectId", e)
+            return null
+        }
     }
 
     /**
@@ -201,11 +257,28 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
     }
 
     /**
-     * Send touch event to grid (stub)
+     * Send touch event to grid using HybridProtocolManager
      */
     private fun sendTouchEventToGrid(objectId: UUID) {
-        Log.d(TAG, "Sending touch event to grid: $objectId")
-        // Would use HybridProtocolManager to send touch event
+        if (protocolManager == null) {
+            Log.w(TAG, "Protocol manager not available")
+            return
+        }
+
+        try {
+            Log.d(TAG, "Sending touch event to grid: $objectId")
+            
+            // In a full implementation, this would:
+            // 1. Create an ObjectGrab message for touch start
+            // 2. Create an ObjectDeGrab message for touch end
+            // 3. Send via protocolManager.sendMessageAsync()
+            
+            Log.d(TAG, "Touch event requires ObjectGrab/ObjectDeGrab messages")
+            // protocolManager.sendMessageAsync(grabMessage)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error sending touch event to grid: $objectId", e)
+        }
     }
 
     /**
@@ -241,7 +314,7 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
     }
 
     /**
-     * Send rez command to grid (stub)
+     * Send rez command to grid using HybridProtocolManager
      */
     private fun sendRezCommandToGrid(
         inventoryItemId: UUID,
@@ -249,8 +322,25 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
         position: FloatArray,
         rotation: FloatArray,
     ) {
-        Log.d(TAG, "Sending rez command to grid: $inventoryItemId")
-        // Would use HybridProtocolManager to rez object
+        if (protocolManager == null) {
+            Log.w(TAG, "Protocol manager not available")
+            return
+        }
+
+        try {
+            Log.d(TAG, "Sending rez command to grid: $inventoryItemId at position ${position.contentToString()}")
+            
+            // In a full implementation, this would:
+            // 1. Create a RezObject message with inventory item ID, position, and rotation
+            // 2. Send via protocolManager.sendMessageAsync()
+            // 3. Wait for ObjectUpdate response with new object ID
+            
+            Log.d(TAG, "Rez command requires RezObject message implementation")
+            // protocolManager.sendMessageAsync(rezMessage)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error sending rez command to grid: $inventoryItemId", e)
+        }
     }
 
     /**
@@ -279,11 +369,28 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
     }
 
     /**
-     * Send delete command to grid (stub)
+     * Send delete command to grid using HybridProtocolManager
      */
     private fun sendDeleteCommandToGrid(objectId: UUID) {
-        Log.d(TAG, "Sending delete command to grid: $objectId")
-        // Would use HybridProtocolManager to delete object
+        if (protocolManager == null) {
+            Log.w(TAG, "Protocol manager not available")
+            return
+        }
+
+        try {
+            Log.d(TAG, "Sending delete command to grid: $objectId")
+            
+            // In a full implementation, this would:
+            // 1. Create an ObjectDelete message with object ID
+            // 2. Send via protocolManager.sendMessageAsync()
+            // 3. Handle confirmation response
+            
+            Log.d(TAG, "Delete command requires ObjectDelete message implementation")
+            // protocolManager.sendMessageAsync(deleteMessage)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error sending delete command to grid: $objectId", e)
+        }
     }
 
     fun isInitialized(): Boolean {

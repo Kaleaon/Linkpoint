@@ -109,6 +109,13 @@ class ChatRepository @Inject constructor(
     }
     
     /**
+     * Get chatter by ID
+     */
+    suspend fun getChatterById(chatterId: Long): ChatterEntity? {
+        return chatterDao.getById(chatterId)
+    }
+
+    /**
      * Get or create chatter by UUID
      */
     suspend fun getOrCreateChatter(
