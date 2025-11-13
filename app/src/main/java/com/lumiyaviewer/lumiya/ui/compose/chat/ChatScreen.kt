@@ -23,6 +23,7 @@ fun ChatScreen(
     messages: List<ChatMessageEntity>,
     currentUserId: Long,
     onSendMessage: (String) -> Unit,
+    getChatterName: (Long) -> String = { "User $it" },
     modifier: Modifier = Modifier
 ) {
     var messageText by remember { mutableStateOf("") }
@@ -51,7 +52,11 @@ fun ChatScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(messages) { message ->
-                ChatMessageItem(message = message, currentUserId = currentUserId)
+                ChatMessageItem(
+                    message = message,
+                    currentUserId = currentUserId,
+                    getChatterName = getChatterName
+                )
             }
         }
 
@@ -96,7 +101,11 @@ fun ChatScreen(
 }
 
 @Composable
-private fun ChatMessageItem(message: ChatMessageEntity, currentUserId: Long) {
+private fun ChatMessageItem(
+    message: ChatMessageEntity,
+    currentUserId: Long,
+    getChatterName: (Long) -> String
+) {
     val isCurrentUser = message.chatterID == currentUserId
     
     Row(
@@ -116,11 +125,9 @@ private fun ChatMessageItem(message: ChatMessageEntity, currentUserId: Long) {
             Column(
                 modifier = Modifier.padding(12.dp)
             ) {
-                // Sender name
-                // TODO: Look up actual user name from ChatterEntity/UserRepository
-                // The chatterID should be resolved to a display name through a ViewModel
+                // Sender name - resolved from ChatterEntity via ViewModel
                 Text(
-                    text = if (isCurrentUser) "You" else "User ${message.chatterID}",
+                    text = if (isCurrentUser) "You" else getChatterName(message.chatterID),
                     style = MaterialTheme.typography.labelSmall,
                     color = if (isCurrentUser) {
                         MaterialTheme.colorScheme.onPrimaryContainer

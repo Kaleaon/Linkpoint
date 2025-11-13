@@ -86,15 +86,26 @@ private fun LoginScreenContainer(
         }
     }
 
+    var showGridDialog by remember { mutableStateOf(false) }
+
     LoginScreen(
         uiState = uiState,
         onFirstNameChange = viewModel::updateFirstName,
         onLastNameChange = viewModel::updateLastName,
         onPasswordChange = viewModel::updatePassword,
         onLoginClick = viewModel::login,
-        onGridSelectionClick = { /* TODO: Implement grid selection */ },
+        onGridSelectionClick = { showGridDialog = true },
         onCreateAccountClick = onCreateAccount
     )
+
+    // Grid selection dialog
+    if (showGridDialog) {
+        GridSelectionDialog(
+            currentGrid = uiState.selectedGrid,
+            onGridSelected = viewModel::updateSelectedGrid,
+            onDismiss = { showGridDialog = false }
+        )
+    }
 }
 
 /**

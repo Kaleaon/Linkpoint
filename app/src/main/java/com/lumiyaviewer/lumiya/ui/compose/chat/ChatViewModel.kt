@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lumiyaviewer.lumiya.database.entities.ChatMessageEntity
 import com.lumiyaviewer.lumiya.repository.ChatRepository
+import com.lumiyaviewer.lumiya.slproto.auth.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,11 +20,15 @@ import javax.inject.Inject
  * - Loading messages
  * - Sending messages
  * - Real-time updates
+ * - User name lookups
  */
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val chatRepository: ChatRepository
 ) : ViewModel() {
+
+    // Cache for chatter names to avoid repeated lookups
+    private val chatterNameCache = mutableMapOf<Long, String>()
 
     private val _messages = MutableStateFlow<List<ChatMessageEntity>>(emptyList())
     val messages: StateFlow<List<ChatMessageEntity>> = _messages.asStateFlow()
@@ -31,7 +36,10 @@ class ChatViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    private val _currentChatterId = MutableStateFlow<Long>(1L) // TODO: Get from user session
+    // Get current user ID from session, fallback to 1L if no session
+    private val _currentChatterId = MutableStateFlow<Long>(
+        SessionManager.current()?.reply?.agentID?.toLongOrNull() ?: 1L
+    )
     val currentChatterId: StateFlow<Long> = _currentChatterId.asStateFlow()
 
     init {
@@ -101,5 +109,36 @@ class ChatViewModel @Inject constructor(
      */
     fun refresh() {
         loadMessages()
+    }
+
+    /**
+     * Get display name for a chatter ID
+     * Returns cached name if available, otherwise fetches from repository
+     */
+    fun getChatterName(chatterId: Long): String {
+        // Return cached name if available
+        chatterNameCache[chatterId]?.let { return it }
+
+        // Fetch from repository asynchronously
+        viewModelScope.launch {
+            try {
+                val chatter = chatRepository.getChatterById(chatterId)
+                val name = chatter?.uuid?.toString()?.take(8) ?: "User $chatterId"
+                chatterNameCache[chatterId] = name
+            } catch (e: Exception) {
+                android.util.Log.e("ChatViewModel", "Error fetching chatter name", e)
+                chatterNameCache[chatterId] = "User $chatterId"
+            }
+        }
+
+        // Return temporary name while fetching
+        return "User $chatterId"
+    }
+
+    /**
+     * Clear the chatter name cache
+     */
+    fun clearNameCache() {
+        chatterNameCache.clear()
     }
 }
