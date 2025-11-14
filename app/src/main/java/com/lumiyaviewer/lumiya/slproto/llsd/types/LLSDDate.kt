@@ -34,9 +34,17 @@ class LLSDDate : LLSDNode {
 
     override fun toXML(xmlSerializer: XmlSerializer) {
         xmlSerializer.startTag("", "date")
-        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
-        sdf.timeZone = TimeZone.getTimeZone("UTC")
-        xmlSerializer.text(sdf.format(this.value))
+        // Use thread-local formatter for thread-safety and efficiency
+        xmlSerializer.text(ISO8601_FORMATTER.get().format(this.value))
         xmlSerializer.endTag("", "date")
+    }
+
+    companion object {
+        // ThreadLocal SimpleDateFormat for thread-safe reuse
+        private val ISO8601_FORMATTER = ThreadLocal.withInitial {
+            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+            }
+        }
     }
 }

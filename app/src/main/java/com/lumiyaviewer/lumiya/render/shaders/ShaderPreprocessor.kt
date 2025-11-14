@@ -69,9 +69,11 @@ class ShaderPreprocessor(map: Map<String, String>) {
                 }
             } else if (stringBuilder != null) {
                 // Process active code - perform macro substitution
+                // Replace only whole tokens (macro names) using word boundaries
                 var processedLine = trimmedLine
                 for (entry in definedMacros.entries) {
-                    processedLine = processedLine.replace(entry.key, entry.value)
+                    val pattern = Regex("\\b" + Regex.escape(entry.key) + "\\b")
+                    processedLine = pattern.replace(processedLine, entry.value)
                 }
                 stringBuilder.append(processedLine).append("\r\n")
                 lastLine = processedLine

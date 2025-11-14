@@ -5,9 +5,21 @@ import java.io.DataOutputStream
 import java.util.UUID
 import org.xmlpull.v1.XmlSerializer
 
+/**
+ * LLSD UUID type.
+ * 
+ * Note on null semantics:
+ * - null value: Represents an undefined/uninitialized UUID (returns empty string, converts to zero UUID)
+ * - UUID(0,0): Represents an explicit zero/null UUID value in Second Life
+ * The distinction allows differentiating between "no UUID set" vs "UUID explicitly set to zero"
+ */
 class LLSDUUID : LLSDNode {
     private val value: UUID?
 
+    /**
+     * Create an undefined UUID (null value).
+     * This represents an uninitialized UUID, distinct from a zero UUID.
+     */
     constructor() {
         this.value = null
     }

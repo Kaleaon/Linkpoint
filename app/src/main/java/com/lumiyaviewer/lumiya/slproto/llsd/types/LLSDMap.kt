@@ -29,6 +29,13 @@ class LLSDMap : LLSDNode {
     @Nonnull
     private val items: ImmutableMap<String, LLSDNode>
 
+    companion object {
+        // LLSD binary format constants
+        private const val LLSD_MAP_BEGIN = 123 // '{'
+        private const val LLSD_MAP_END = 125   // '}'
+        private const val LLSD_KEY = 107       // 'k'
+    }
+
     class LLSDMapEntry(val key: String, val value: LLSDNode)
 
     constructor(map: Map<String, LLSDNode>) {
@@ -74,17 +81,17 @@ class LLSDMap : LLSDNode {
 
     @Throws(IOException::class)
     override fun toBinary(dataOutputStream: DataOutputStream) {
-        dataOutputStream.writeByte(123) // '{'
+        dataOutputStream.writeByte(LLSD_MAP_BEGIN)
         val entrySet = this.items.entries
         dataOutputStream.writeInt(entrySet.size)
         for (entry in entrySet) {
-            dataOutputStream.writeByte(107) // 'k'
+            dataOutputStream.writeByte(LLSD_KEY)
             val stringToVariableUTF = SLMessage.stringToVariableUTF(entry.key)
             dataOutputStream.writeInt(stringToVariableUTF.size)
             dataOutputStream.write(stringToVariableUTF)
             entry.value.toBinary(dataOutputStream)
         }
-        dataOutputStream.writeByte(125) // '}'
+        dataOutputStream.writeByte(LLSD_MAP_END)
     }
 
     @Throws(LLSDException::class)

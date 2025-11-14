@@ -47,16 +47,19 @@ enum class Shader(
     /**
      * Load and preprocess shader source code from assets.
      */
-    private fun getShaderCode(shaderPreprocessor: ShaderPreprocessor): String? {
+    @Throws(ShaderCompileException::class)
+    private fun getShaderCode(shaderPreprocessor: ShaderPreprocessor): String {
+        val assetManager = LumiyaApp.getAssetManager()
+            ?: throw ShaderCompileException("AssetManager is null when loading shader $fileName")
+        
         return try {
-            val inputStream = LumiyaApp.getAssetManager()?.open("shaders/$fileName")
-                ?: return null
+            val inputStream = assetManager.open("shaders/$fileName")
             val bufferedReader = BufferedReader(InputStreamReader(inputStream))
             val processedCode = shaderPreprocessor.processCode(bufferedReader)
             bufferedReader.close()
             processedCode
         } catch (e: IOException) {
-            null
+            throw ShaderCompileException("Failed to load shader file $fileName: ${e.message}")
         }
     }
 
@@ -71,7 +74,6 @@ enum class Shader(
         Debug.printf("Shaders: Compiling shader '%s'...", fileName)
         
         val shaderCode = getShaderCode(shaderPreprocessor)
-            ?: throw ShaderCompileException("No shader code for $fileName")
         
         // Create and compile shader
         handle = GLES20.glCreateShader(type)
