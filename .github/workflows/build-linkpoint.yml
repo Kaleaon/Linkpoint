@@ -28,234 +28,234 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-    
-    - name: Set up JDK ${{ env.JAVA_VERSION }}
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: ${{ env.JAVA_VERSION }}
-        cache: 'gradle'
-    
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
-      with:
-        api-level: ${{ env.ANDROID_SDK_VERSION }}
-        build-tools: 34.0.0
-        cmake: 3.22.1
-        ndk: ${{ env.NDK_VERSION }}
-    
-    - name: Cache Gradle packages
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-          ~/.android/build-cache
-          Linkpoint/.gradle
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-    
-    - name: Cache Kotlin compiler
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.konan
-          ~/.kotlin
-        key: ${{ runner.os }}-kotlin-${{ env.KOTLIN_VERSION }}
-        restore-keys: |
-          ${{ runner.os }}-kotlin-
-    
-    - name: Grant execute permission for gradlew
-      run: |
-        cd Linkpoint
-        chmod +x gradlew
-    
-    - name: Display Gradle version
-      run: |
-        cd Linkpoint
-        ./gradlew --version
-    
-    - name: Validate Gradle wrapper
-      uses: gradle/wrapper-validation-action@v2
-    
-    - name: Check Kotlin source structure
-      run: |
-        echo "Checking Kotlin migration status..."
-        cd Linkpoint
-        KOTLIN_FILES=$(find src/main/kotlin -name "*.kt" 2>/dev/null | wc -l)
-        JAVA_FILES=$(find src/main/java -name "*.java" 2>/dev/null | wc -l)
-        echo "✅ Kotlin files: $KOTLIN_FILES"
-        echo "📊 Java files: $JAVA_FILES"
-        echo "kotlin_files=$KOTLIN_FILES" >> $GITHUB_ENV
-        echo "java_files=$JAVA_FILES" >> $GITHUB_ENV
-        
-        if [ "$JAVA_FILES" -eq 0 ] && [ "$KOTLIN_FILES" -gt 0 ]; then
-          echo "✅ Migration complete: 100% Kotlin!"
-        fi
-    
-    - name: Clean build
-      run: |
-        cd Linkpoint
-        ./gradlew clean --stacktrace
-    
-    - name: Build Debug APK
-      run: |
-        cd Linkpoint
-        ./gradlew assembleDebug --stacktrace --info --no-daemon
-      env:
-        GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError"
-    
-    - name: Build Release APK
-      run: |
-        cd Linkpoint
-        ./gradlew assembleRelease --stacktrace --info --no-daemon
-      continue-on-error: true
-      env:
-        GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError"
-    
-    - name: Run Kotlin compilation checks
-      run: |
-        cd Linkpoint
-        ./gradlew compileDebugKotlin --stacktrace
-      continue-on-error: true
-    
-    - name: Run unit tests
-      run: |
-        cd Linkpoint
-        ./gradlew testDebugUnitTest --stacktrace --continue
-      continue-on-error: true
-    
-    - name: Run lint analysis
-      run: |
-        cd Linkpoint
-        ./gradlew lintDebug --stacktrace
-      continue-on-error: true
-    
-    - name: Generate code coverage
-      run: |
-        cd Linkpoint
-        ./gradlew jacocoTestReport
-      continue-on-error: true
-    
-    - name: Analyze APK size
-      if: success()
-      run: |
-        cd Linkpoint
-        if [ -f build/outputs/apk/debug/*.apk ]; then
-          APK_SIZE=$(du -h build/outputs/apk/debug/*.apk | cut -f1)
-          echo "apk_size=$APK_SIZE" >> $GITHUB_ENV
-          echo "📦 APK Size: $APK_SIZE"
-        fi
-    
-    - name: Upload Debug APK
-      uses: actions/upload-artifact@v4
-      if: success()
-      with:
-        name: linkpoint-debug-${{ github.sha }}
-        path: Linkpoint/build/outputs/apk/debug/*.apk
-        retention-days: 14
-        compression-level: 9
-    
-    - name: Upload Release APK
-      uses: actions/upload-artifact@v4
-      if: success()
-      with:
-        name: linkpoint-release-${{ github.sha }}
-        path: Linkpoint/build/outputs/apk/release/*.apk
-        retention-days: 30
-        compression-level: 9
-      continue-on-error: true
-    
-    - name: Upload build reports
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: build-reports-${{ github.sha }}
-        path: |
-          Linkpoint/build/reports/
-          Linkpoint/build/test-results/
-          Linkpoint/build/outputs/logs/
-        retention-days: 7
-        compression-level: 9
-    
-    - name: Upload lint results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: lint-results-${{ github.sha }}
-        path: Linkpoint/build/reports/lint-results-debug.html
-        retention-days: 7
-      continue-on-error: true
-    
-    - name: Build Summary
-      if: always()
-      run: |
-        echo "# 📱 Linkpoint Build Summary" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "## 🏗️ Build Status" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        
-        if [ -f Linkpoint/build/outputs/apk/debug/*.apk ]; then
-          echo "✅ **Debug APK built successfully**" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+      
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: ${{ env.ANDROID_SDK_VERSION }}
+          build-tools: 34.0.0
+          cmake: 3.22.1
+          ndk: ${{ env.NDK_VERSION }}
+      
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.android/build-cache
+            Linkpoint/.gradle
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      
+      - name: Cache Kotlin compiler
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.konan
+            ~/.kotlin
+          key: ${{ runner.os }}-kotlin-${{ env.KOTLIN_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-kotlin-
+      
+      - name: Grant execute permission for gradlew
+        run: |
+          cd Linkpoint
+          chmod +x gradlew
+      
+      - name: Display Gradle version
+        run: |
+          cd Linkpoint
+          ./gradlew --version
+      
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v2
+      
+      - name: Check Kotlin source structure
+        run: |
+          echo "Checking Kotlin migration status..."
+          cd Linkpoint
+          KOTLIN_FILES=$(find src/main/kotlin -name "*.kt" 2>/dev/null | wc -l)
+          JAVA_FILES=$(find src/main/java -name "*.java" 2>/dev/null | wc -l)
+          echo "✅ Kotlin files: $KOTLIN_FILES"
+          echo "📊 Java files: $JAVA_FILES"
+          echo "kotlin_files=$KOTLIN_FILES" >> $GITHUB_ENV
+          echo "java_files=$JAVA_FILES" >> $GITHUB_ENV
+          
+          if [ "$JAVA_FILES" -eq 0 ] && [ "$KOTLIN_FILES" -gt 0 ]; then
+            echo "✅ Migration complete: 100% Kotlin!"
+          fi
+      
+      - name: Clean build
+        run: |
+          cd Linkpoint
+          ./gradlew clean --stacktrace
+      
+      - name: Build Debug APK
+        run: |
+          cd Linkpoint
+          ./gradlew assembleDebug --stacktrace --info --no-daemon
+        env:
+          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError"
+      
+      - name: Build Release APK
+        run: |
+          cd Linkpoint
+          ./gradlew assembleRelease --stacktrace --info --no-daemon
+        continue-on-error: true
+        env:
+          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError"
+      
+      - name: Run Kotlin compilation checks
+        run: |
+          cd Linkpoint
+          ./gradlew compileDebugKotlin --stacktrace
+        continue-on-error: true
+      
+      - name: Run unit tests
+        run: |
+          cd Linkpoint
+          ./gradlew testDebugUnitTest --stacktrace --continue
+        continue-on-error: true
+      
+      - name: Run lint analysis
+        run: |
+          cd Linkpoint
+          ./gradlew lintDebug --stacktrace
+        continue-on-error: true
+      
+      - name: Generate code coverage
+        run: |
+          cd Linkpoint
+          ./gradlew jacocoTestReport
+        continue-on-error: true
+      
+      - name: Analyze APK size
+        if: success()
+        run: |
+          cd Linkpoint
+          if [ -f build/outputs/apk/debug/*.apk ]; then
+            APK_SIZE=$(du -h build/outputs/apk/debug/*.apk | cut -f1)
+            echo "apk_size=$APK_SIZE" >> $GITHUB_ENV
+            echo "📦 APK Size: $APK_SIZE"
+          fi
+      
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: linkpoint-debug-${{ github.sha }}
+          path: Linkpoint/build/outputs/apk/debug/*.apk
+          retention-days: 14
+          compression-level: 9
+      
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: linkpoint-release-${{ github.sha }}
+          path: Linkpoint/build/outputs/apk/release/*.apk
+          retention-days: 30
+          compression-level: 9
+        continue-on-error: true
+      
+      - name: Upload build reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build-reports-${{ github.sha }}
+          path: |
+            Linkpoint/build/reports/
+            Linkpoint/build/test-results/
+            Linkpoint/build/outputs/logs/
+          retention-days: 7
+          compression-level: 9
+      
+      - name: Upload lint results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lint-results-${{ github.sha }}
+          path: Linkpoint/build/reports/lint-results-debug.html
+          retention-days: 7
+        continue-on-error: true
+      
+      - name: Build Summary
+        if: always()
+        run: |
+          echo "# 📱 Linkpoint Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📦 APK Details" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          ls -lh Linkpoint/build/outputs/apk/debug/*.apk >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "## 🏗️ Build Status" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📊 **Size:** ${{ env.apk_size }}" >> $GITHUB_STEP_SUMMARY
-        else
-          echo "❌ **APK build failed**" >> $GITHUB_STEP_SUMMARY
-        fi
-        
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "## 🎯 Kotlin Migration Status" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "- **Kotlin files:** ${{ env.kotlin_files }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Java files:** ${{ env.java_files }}" >> $GITHUB_STEP_SUMMARY
-        
-        if [ "${{ env.java_files }}" -eq 0 ]; then
-          echo "- **Migration:** ✅ **100% COMPLETE**" >> $GITHUB_STEP_SUMMARY
-        fi
-        
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "## ✨ Features Included" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ **Animesh** - Animated mesh support" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ **Bakes on Mesh (BoM)** - Texture baking" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ **Enhanced Environment (EEP)** - Advanced lighting" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ **PBR Materials** - Physically-based rendering" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ **WebRTC Voice** - Modern voice chat" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ **Full Kotlin** - Modern language features" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ **Coroutines** - Async programming" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ **AndroidX** - Modern Android libraries" >> $GITHUB_STEP_SUMMARY
-        
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "## 🔧 Build Configuration" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "- **Java Version:** ${{ env.JAVA_VERSION }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Android SDK:** ${{ env.ANDROID_SDK_VERSION }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Kotlin Version:** ${{ env.KOTLIN_VERSION }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **NDK Version:** ${{ env.NDK_VERSION }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Min SDK:** 24 (Android 7.0)" >> $GITHUB_STEP_SUMMARY
-        echo "- **Target SDK:** 34 (Android 14)" >> $GITHUB_STEP_SUMMARY
-        
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "## 📊 Code Quality" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        
-        if [ -f Linkpoint/build/reports/lint-results-debug.html ]; then
-          echo "✅ Lint analysis completed" >> $GITHUB_STEP_SUMMARY
-        fi
-        
-        if [ -d Linkpoint/build/test-results ]; then
-          echo "✅ Unit tests executed" >> $GITHUB_STEP_SUMMARY
-        fi
-        
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "---" >> $GITHUB_STEP_SUMMARY
-        echo "*Built from commit: \`${{ github.sha }}\`*" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f Linkpoint/build/outputs/apk/debug/*.apk ]; then
+            echo "✅ **Debug APK built successfully**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 📦 APK Details" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            ls -lh Linkpoint/build/outputs/apk/debug/*.apk >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "📊 **Size:** ${{ env.apk_size }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **APK build failed**" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🎯 Kotlin Migration Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Kotlin files:** ${{ env.kotlin_files }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Java files:** ${{ env.java_files }}" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ env.java_files }}" -eq 0 ]; then
+            echo "- **Migration:** ✅ **100% COMPLETE**" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## ✨ Features Included" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Animesh** - Animated mesh support" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Bakes on Mesh (BoM)** - Texture baking" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Enhanced Environment (EEP)** - Advanced lighting" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **PBR Materials** - Physically-based rendering" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **WebRTC Voice** - Modern voice chat" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Full Kotlin** - Modern language features" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Coroutines** - Async programming" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **AndroidX** - Modern Android libraries" >> $GITHUB_STEP_SUMMARY
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔧 Build Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Java Version:** ${{ env.JAVA_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Android SDK:** ${{ env.ANDROID_SDK_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Kotlin Version:** ${{ env.KOTLIN_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **NDK Version:** ${{ env.NDK_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Min SDK:** 24 (Android 7.0)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target SDK:** 34 (Android 14)" >> $GITHUB_STEP_SUMMARY
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📊 Code Quality" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f Linkpoint/build/reports/lint-results-debug.html ]; then
+            echo "✅ Lint analysis completed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ -d Linkpoint/build/test-results ]; then
+            echo "✅ Unit tests executed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Built from commit: \`${{ github.sha }}\`*" >> $GITHUB_STEP_SUMMARY
 
   code-quality:
     runs-on: ubuntu-latest
@@ -263,34 +263,34 @@ jobs:
     if: success()
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Set up JDK ${{ env.JAVA_VERSION }}
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: 17
-        cache: 'gradle'
-    
-    - name: Download build reports
-      uses: actions/download-artifact@v4
-      with:
-        name: build-reports-${{ github.sha }}
-        path: reports/
-    
-    - name: Analyze Kotlin code metrics
-      run: |
-        cd Linkpoint
-        echo "Analyzing Kotlin codebase..."
-        TOTAL_KOTLIN=$(find src/main/kotlin -name "*.kt" | wc -l)
-        TOTAL_LINES=$(find src/main/kotlin -name "*.kt" -exec wc -l {} + | tail -1 | awk '{print $1}')
-        echo "Total Kotlin files: $TOTAL_KOTLIN"
-        echo "Total lines of code: $TOTAL_LINES"
-        
-        echo "## 📈 Code Metrics" >> $GITHUB_STEP_SUMMARY
-        echo "- **Total Kotlin files:** $TOTAL_KOTLIN" >> $GITHUB_STEP_SUMMARY
-        echo "- **Total lines of code:** $TOTAL_LINES" >> $GITHUB_STEP_SUMMARY
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+          cache: 'gradle'
+      
+      - name: Download build reports
+        uses: actions/download-artifact@v4
+        with:
+          name: build-reports-${{ github.sha }}
+          path: reports/
+      
+      - name: Analyze Kotlin code metrics
+        run: |
+          cd Linkpoint
+          echo "Analyzing Kotlin codebase..."
+          TOTAL_KOTLIN=$(find src/main/kotlin -name "*.kt" | wc -l)
+          TOTAL_LINES=$(find src/main/kotlin -name "*.kt" -exec wc -l {} + | tail -1 | awk '{print $1}')
+          echo "Total Kotlin files: $TOTAL_KOTLIN"
+          echo "Total lines of code: $TOTAL_LINES"
+          
+          echo "## 📈 Code Metrics" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total Kotlin files:** $TOTAL_KOTLIN" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total lines of code:** $TOTAL_LINES" >> $GITHUB_STEP_SUMMARY
 
   release:
     needs: [build, code-quality]
@@ -298,54 +298,54 @@ jobs:
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
     
     steps:
-    - name: Download Debug APK
-      uses: actions/download-artifact@v4
-      with:
-        name: linkpoint-debug-${{ github.sha }}
-        path: apks/debug/
-    
-    - name: Download Release APK
-      uses: actions/download-artifact@v4
-      with:
-        name: linkpoint-release-${{ github.sha }}
-        path: apks/release/
-      continue-on-error: true
-    
-    - name: Create Release
-      uses: softprops/action-gh-release@v2
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        files: |
-          apks/debug/*.apk
-          apks/release/*.apk
-        draft: false
-        prerelease: false
-        generate_release_notes: true
-        body: |
-          ## 📱 Linkpoint Release
-          
-          ### ✨ Features
-          - ✅ 100% Kotlin codebase
-          - ✅ Animesh support
-          - ✅ Bakes on Mesh (BoM)
-          - ✅ Enhanced Environment (EEP)
-          - ✅ PBR Materials
-          - ✅ WebRTC Voice
-          
-          ### 📦 Downloads
-          - **Debug APK**: Development build with debugging enabled
-          - **Release APK**: Production-ready optimized build
-          
-          ### 🔧 Requirements
-          - Android 7.0 (API 24) or higher
-          - ARM64 or ARMv7 device
-          - ~100MB storage space
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Upload to artifact storage
-      if: github.ref == 'refs/heads/main'
-      run: |
-        echo "APKs ready for distribution"
-        echo "- Debug: apks/debug/"
-        echo "- Release: apks/release/"
+      - name: Download Debug APK
+        uses: actions/download-artifact@v4
+        with:
+          name: linkpoint-debug-${{ github.sha }}
+          path: apks/debug/
+      
+      - name: Download Release APK
+        uses: actions/download-artifact@v4
+        with:
+          name: linkpoint-release-${{ github.sha }}
+          path: apks/release/
+        continue-on-error: true
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            apks/debug/*.apk
+            apks/release/*.apk
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          body: |
+            ## 📱 Linkpoint Release
+            
+            ### ✨ Features
+            - ✅ 100% Kotlin codebase
+            - ✅ Animesh support
+            - ✅ Bakes on Mesh (BoM)
+            - ✅ Enhanced Environment (EEP)
+            - ✅ PBR Materials
+            - ✅ WebRTC Voice
+            
+            ### 📦 Downloads
+            - **Debug APK**: Development build with debugging enabled
+            - **Release APK**: Production-ready optimized build
+            
+            ### 🔧 Requirements
+            - Android 7.0 (API 24) or higher
+            - ARM64 or ARMv7 device
+            - ~100MB storage space
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload to artifact storage
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "APKs ready for distribution"
+          echo "- Debug: apks/debug/"
+          echo "- Release: apks/release/"

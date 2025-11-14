@@ -31,8 +31,8 @@ jobs:
         run: |
           sdkmanager --install \
             "platform-tools" \
-            "platforms;android-35" \
-            "build-tools;35.0.0"
+            "platforms;android-34" \
+            "build-tools;34.0.0"
 
       - name: Build Debug
         run: ./gradlew :app:assembleDebug --stacktrace
