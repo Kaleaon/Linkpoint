@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Inventory Item - Material Design 3
+    Modern list item with:
+    - Icon with tinted background
+    - Two-line text
+    - Action buttons
+    - Checkbox for selection mode
+-->
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="4dp"
+    app:cardElevation="1dp"
+    app:cardCornerRadius="12dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    style="@style/Widget.Lumiya.Card.Outlined">
+    
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+        
+        <!-- Selection Checkbox (Hidden by default) -->
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/selectionCheckbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:visibility="visible" />
+        
+        <!-- Item Icon with Background -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/iconCard"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="?attr/colorPrimaryContainer"
+            app:layout_constraintStart_toEndOf="@id/selectionCheckbox"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+            
+            <ImageView
+                android:id="@+id/itemIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                app:tint="?attr/colorOnPrimaryContainer"
+                tools:src="@drawable/ic_folder_24" />
+        </com.google.android.material.card.MaterialCardView>
+        
+        <!-- Item Name and Details -->
+        <LinearLayout
+            android:id="@+id/textContainer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            android:orientation="vertical"
+            app:layout_constraintStart_toEndOf="@id/iconCard"
+            app:layout_constraintEnd_toStartOf="@id/actionButton"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+            
+            <!-- Item Name -->
+            <TextView
+                android:id="@+id/itemNameText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                android:textColor="?attr/colorOnSurface"
+                android:maxLines="1"
+                android:ellipsize="end"
+                tools:text="My Awesome Object" />
+            
+            <!-- Item Details -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                
+                <!-- Item Type Chip -->
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/itemTypeChip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                    app:chipMinHeight="20dp"
+                    app:chipStartPadding="6dp"
+                    app:chipEndPadding="6dp"
+                    style="@style/Widget.Material3.Chip.Assist.Elevated"
+                    tools:text="Object" />
+                
+                <!-- Item Count (for folders) -->
+                <TextView
+                    android:id="@+id/itemCountText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    tools:text="12 items" />
+                
+                <!-- Permissions Icon -->
+                <ImageView
+                    android:id="@+id/permissionsIcon"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginStart="8dp"
+                    android:visibility="gone"
+                    app:srcCompat="@drawable/ic_lock_24"
+                    app:tint="?attr/colorOnSurfaceVariant"
+                    tools:visibility="visible" />
+            </LinearLayout>
+        </LinearLayout>
+        
+        <!-- Action Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/actionButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            app:icon="@drawable/ic_arrow_forward_24"
+            app:iconPadding="0dp"
+            app:iconGravity="textStart"
+            app:iconTint="?attr/colorOnSurfaceVariant"
+            android:contentDescription="Open item"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            style="@style/Widget.Material3.Button.IconButton" />
+        
+        <!-- Item Badge (New, Modified, etc.) -->
+        <com.google.android.material.badge.BadgeDrawable
+            android:id="@+id/itemBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/iconCard"
+            app:layout_constraintEnd_toEndOf="@id/iconCard" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    
+</com.google.android.material.card.MaterialCardView>

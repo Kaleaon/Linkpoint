@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Material Design 3 Dynamic Color System for Lumiya
+    Using Blue/Cyan theme matching Second Life virtual world aesthetics
+-->
+<resources>
+    
+    <!-- Primary Colors (Blue - Main brand color) -->
+    <color name="md_theme_primary">#2196F3</color>
+    <color name="md_theme_onPrimary">#FFFFFF</color>
+    <color name="md_theme_primaryContainer">#BBDEFB</color>
+    <color name="md_theme_onPrimaryContainer">#0D47A1</color>
+    
+    <!-- Secondary Colors (Cyan/Teal - Accent) -->
+    <color name="md_theme_secondary">#00BCD4</color>
+    <color name="md_theme_onSecondary">#FFFFFF</color>
+    <color name="md_theme_secondaryContainer">#B2EBF2</color>
+    <color name="md_theme_onSecondaryContainer">#006064</color>
+    
+    <!-- Tertiary Colors (Purple - Additional accent) -->
+    <color name="md_theme_tertiary">#9C27B0</color>
+    <color name="md_theme_onTertiary">#FFFFFF</color>
+    <color name="md_theme_tertiaryContainer">#E1BEE7</color>
+    <color name="md_theme_onTertiaryContainer">#4A148C</color>
+    
+    <!-- Error Colors -->
+    <color name="md_theme_error">#B00020</color>
+    <color name="md_theme_onError">#FFFFFF</color>
+    <color name="md_theme_errorContainer">#FDECEA</color>
+    <color name="md_theme_onErrorContainer">#410001</color>
+    
+    <!-- Background Colors -->
+    <color name="md_theme_background">#FAFBFF</color>
+    <color name="md_theme_onBackground">#1A1C1E</color>
+    
+    <!-- Surface Colors -->
+    <color name="md_theme_surface">#FAFBFF</color>
+    <color name="md_theme_onSurface">#1A1C1E</color>
+    <color name="md_theme_surfaceVariant">#E1E2EC</color>
+    <color name="md_theme_onSurfaceVariant">#44464F</color>
+    <color name="md_theme_surfaceTint">@color/md_theme_primary</color>
+    
+    <!-- Outline Colors -->
+    <color name="md_theme_outline">#74777F</color>
+    <color name="md_theme_outlineVariant">#C4C6D0</color>
+    
+    <!-- Inverse Colors -->
+    <color name="md_theme_inverseSurface">#2F3033</color>
+    <color name="md_theme_inverseOnSurface">#F1F0F4</color>
+    <color name="md_theme_inversePrimary">#90CAF9</color>
+    
+    <!-- Shadow and Scrim -->
+    <color name="md_theme_shadow">#000000</color>
+    <color name="md_theme_scrim">#000000</color>
+    
+    <!-- Dark Theme Colors -->
+    <color name="md_theme_dark_primary">#90CAF9</color>
+    <color name="md_theme_dark_onPrimary">#0D3C61</color>
+    <color name="md_theme_dark_primaryContainer">#1565C0</color>
+    <color name="md_theme_dark_onPrimaryContainer">#E3F2FD</color>
+    
+    <color name="md_theme_dark_secondary">#80DEEA</color>
+    <color name="md_theme_dark_onSecondary">#00363A</color>
+    <color name="md_theme_dark_secondaryContainer">#00838F</color>
+    <color name="md_theme_dark_onSecondaryContainer">#E0F7FA</color>
+    
+    <color name="md_theme_dark_tertiary">#CE93D8</color>
+    <color name="md_theme_dark_onTertiary">#38124A</color>
+    <color name="md_theme_dark_tertiaryContainer">#7B1FA2</color>
+    <color name="md_theme_dark_onTertiaryContainer">#F3E5F5</color>
+    
+    <color name="md_theme_dark_error">#EF5350</color>
+    <color name="md_theme_dark_onError">#680003</color>
+    <color name="md_theme_dark_errorContainer">#C62828</color>
+    <color name="md_theme_dark_onErrorContainer">#FFEBEE</color>
+    
+    <color name="md_theme_dark_background">#121316</color>
+    <color name="md_theme_dark_onBackground">#E3E2E6</color>
+    
+    <color name="md_theme_dark_surface">#121316</color>
+    <color name="md_theme_dark_onSurface">#E3E2E6</color>
+    <color name="md_theme_dark_surfaceVariant">#44464F</color>
+    <color name="md_theme_dark_onSurfaceVariant">#C4C6D0</color>
+    
+    <color name="md_theme_dark_outline">#8E9099</color>
+    <color name="md_theme_dark_outlineVariant">#44464F</color>
+    
+    <color name="md_theme_dark_inverseSurface">#E3E2E6</color>
+    <color name="md_theme_dark_inverseOnSurface">#2F3033</color>
+    <color name="md_theme_dark_inversePrimary">#2196F3</color>
+    
+    <!-- Chat Bubble Colors - Material 3 Style -->
+    <color name="chat_bubble_user">#E3F2FD</color>
+    <color name="chat_bubble_other">#F5F5F5</color>
+    <color name="chat_bubble_system">#FFF9C4</color>
+    <color name="chat_bubble_user_dark">#1565C0</color>
+    <color name="chat_bubble_other_dark">#37474F</color>
+    <color name="chat_bubble_system_dark">#F57F17</color>
+    
+    <!-- Navigation Item Colors -->
+    <color name="navigation_item_selected">@color/md_theme_primary</color>
+    <color name="navigation_item_unselected">#757575</color>
+    
+    <!-- Status Colors -->
+    <color name="status_online">#4CAF50</color>
+    <color name="status_away">#FF9800</color>
+    <color name="status_busy">#F44336</color>
+    <color name="status_offline">#9E9E9E</color>
+    
+    <!-- Overlay and Scrim -->
+    <color name="overlay_light">#14000000</color>
+    <color name="overlay_dark">#1EFFFFFF</color>
+    <color name="scrim_transparent">#00000000</color>
+    <color name="scrim_translucent">#60000000</color>
+    
+</resources>

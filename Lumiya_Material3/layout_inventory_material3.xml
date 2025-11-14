@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Inventory Screen - Material Design 3
+    Modernized with:
+    - CoordinatorLayout for collapsing toolbar
+    - Material 3 search bar
+    - Floating action menu
+    - Modern list items with cards
+-->
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+    
+    <!-- App Bar Layout with Collapsing Toolbar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        app:elevation="0dp"
+        style="@style/Widget.Lumiya.TopAppBar">
+        
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/collapsingToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:contentScrim="?attr/colorSurface"
+            app:expandedTitleMarginStart="24dp"
+            app:expandedTitleMarginBottom="24dp"
+            app:expandedTitleTextAppearance="@style/TextAppearance.Material3.HeadlineMedium">
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                app:layout_collapseMode="parallax">
+                
+                <!-- Inventory Stats Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardElevation="1dp"
+                    app:cardCornerRadius="16dp"
+                    style="@style/Widget.Lumiya.Card.Filled">
+                    
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="16dp">
+                        
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+                            
+                            <TextView
+                                android:id="@+id/totalItemsCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+                                android:textColor="?attr/colorPrimary"
+                                tools:text="1,234" />
+                            
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Total Items"
+                                android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
+                        </LinearLayout>
+                        
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginHorizontal="16dp"
+                            android:background="?attr/colorOutlineVariant" />
+                        
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+                            
+                            <TextView
+                                android:id="@+id/foldersCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+                                android:textColor="?attr/colorSecondary"
+                                tools:text="56" />
+                            
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Folders"
+                                android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+            
+            <!-- Toolbar -->
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:title="Inventory"
+                app:navigationIcon="@drawable/ic_menu_24"
+                style="@style/Widget.Lumiya.Toolbar" />
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+        
+        <!-- Search Bar -->
+        <com.google.android.material.search.SearchBar
+            android:id="@+id/searchBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="8dp"
+            android:hint="Search inventory"
+            app:navigationIcon="@drawable/ic_search_24" />
+    </com.google.android.material.appbar.AppBarLayout>
+    
+    <!-- Breadcrumb Navigation (Current Folder Path) -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/breadcrumbCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginTop="8dp"
+        app:cardElevation="1dp"
+        app:cardCornerRadius="8dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        style="@style/Widget.Lumiya.Card.Outlined">
+        
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none">
+            
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/breadcrumbChipGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                app:singleLine="true"
+                app:chipSpacing="4dp">
+                
+                <com.google.android.material.chip.Chip
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Root"
+                    app:chipIcon="@drawable/ic_folder_24"
+                    style="@style/Widget.Lumiya.Chip.Assist" />
+                
+                <com.google.android.material.chip.Chip
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Objects"
+                    app:chipIcon="@drawable/ic_folder_24"
+                    style="@style/Widget.Lumiya.Chip.Assist" />
+            </com.google.android.material.chip.ChipGroup>
+        </HorizontalScrollView>
+    </com.google.android.material.card.MaterialCardView>
+    
+    <!-- Main Content -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp">
+            
+            <!-- Filter Chips -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+                
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/filterChipGroup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="8dp"
+                    app:singleSelection="true"
+                    app:chipSpacing="8dp">
+                    
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipAll"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="All Items"
+                        android:checked="true"
+                        style="@style/Widget.Lumiya.Chip.Filter" />
+                    
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipObjects"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Objects"
+                        app:chipIcon="@drawable/ic_cube_24"
+                        style="@style/Widget.Lumiya.Chip.Filter" />
+                    
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipTextures"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Textures"
+                        app:chipIcon="@drawable/ic_image_24"
+                        style="@style/Widget.Lumiya.Chip.Filter" />
+                    
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipScripts"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Scripts"
+                        app:chipIcon="@drawable/ic_code_24"
+                        style="@style/Widget.Lumiya.Chip.Filter" />
+                    
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipNotecards"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Notecards"
+                        app:chipIcon="@drawable/ic_note_24"
+                        style="@style/Widget.Lumiya.Chip.Filter" />
+                    
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipAnimations"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Animations"
+                        app:chipIcon="@drawable/ic_animation_24"
+                        style="@style/Widget.Lumiya.Chip.Filter" />
+                </com.google.android.material.chip.ChipGroup>
+            </HorizontalScrollView>
+            
+            <!-- Inventory RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/inventoryRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_inventory_material3" />
+            
+            <!-- Empty State -->
+            <LinearLayout
+                android:id="@+id/emptyState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="48dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="gone"
+                tools:visibility="visible">
+                
+                <ImageView
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:src="@drawable/ic_inventory_empty_state"
+                    android:alpha="0.6"
+                    app:tint="?attr/colorOnSurfaceVariant" />
+                
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Folder is empty"
+                    android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+                
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Try a different folder or create new items"
+                    android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+    
+    <!-- Extended FAB with Menu -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/createFab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:text="Create"
+        app:icon="@drawable/ic_add_24"
+        style="@style/Widget.Lumiya.ExtendedFloatingActionButton" />
+    
+    <!-- Search View (Full Screen Overlay) -->
+    <com.google.android.material.search.SearchView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:hint="Search inventory"
+        app:layout_anchor="@id/searchBar">
+        
+        <!-- Search Results -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/searchResultsRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:padding="8dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+    </com.google.android.material.search.SearchView>
+    
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
