@@ -30,9 +30,6 @@
     <!-- Cloud Plugin Permissions -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
 
-    <!-- Voice Plugin Permissions (duplicate intentionally kept for clarity) -->
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
-
     <uses-feature android:name="android.hardware.screen.landscape" android:required="false"/>
     <uses-feature android:name="android.software.vr.mode" android:required="false"/>
     <uses-feature android:name="android.hardware.vr.high_performance" android:required="false"/>

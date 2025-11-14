@@ -34,6 +34,21 @@ android {
         }
     }
 
+    // Signing configurations for release builds
+    // For production Play Store releases, create a keystore.properties file with:
+    //   storeFile=/path/to/your/keystore.jks
+    //   storePassword=your_store_password
+    //   keyAlias=your_key_alias
+    //   keyPassword=your_key_password
+    // 
+    // If keystore.properties is not present, release builds will use debug signing
+    // (suitable for testing but NOT for Play Store submission)
+    signingConfigs {
+        debug {
+            // Default debug signing configuration provided by Android SDK
+        }
+    }
+
     buildTypes {
         release {
             // PERMANENT FIX: Minification disabled due to AGP 8.2.2 base.jar race condition
@@ -56,13 +71,33 @@ android {
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
-            // Use debug signing for test releases (NOT for Play Store)
-            signingConfig signingConfigs.debug
+            // Signing configuration for release builds
+            // Check if keystore.properties exists for production signing
+            def keystorePropertiesFile = rootProject.file("keystore.properties")
+            if (keystorePropertiesFile.exists()) {
+                // Use production keystore for Play Store releases
+                def keystoreProperties = new Properties()
+                keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+                
+                signingConfig signingConfigs.create("release") {
+                    storeFile file(keystoreProperties['storeFile'])
+                    storePassword keystoreProperties['storePassword']
+                    keyAlias keystoreProperties['keyAlias']
+                    keyPassword keystoreProperties['keyPassword']
+                }
+                println "✅ Using production keystore for release build"
+            } else {
+                // Use debug signing for development/testing (NOT suitable for Play Store)
+                signingConfig signingConfigs.debug
+                println "⚠️  WARNING: Using debug signing for release build (NOT suitable for Play Store)"
+                println "   For production releases, create keystore.properties with signing credentials"
+            }
         }
         debug {
             minifyEnabled false
             // Disable resource shrinking to reduce AAPT2 dependency
             shrinkResources false
+            signingConfig signingConfigs.debug
         }
     }
 
@@ -74,6 +109,8 @@ android {
     lint {
         abortOnError false
         checkReleaseBuilds false
+        // Suppress AndroidX AppCompat string warnings for missing default values
+        disable 'MissingDefaultResource'
     }
 
     // Java configuration for compatibility
