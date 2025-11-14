@@ -7,6 +7,7 @@ import android.provider.Settings
 import android.util.Log
 import com.lumiyaviewer.lumiya.BuildConfig
 import com.lumiyaviewer.lumiya.LumiyaApp
+import kotlinx.coroutines.*
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -21,6 +22,8 @@ import java.util.concurrent.TimeUnit
  * Modern Kotlin AutoLogUploader
  * Automatic log uploader for debug builds
  * Uploads application logs and crash reports to GitHub for review
+ * 
+ * FIXED: Converted from Thread-based to Coroutine-based for proper lifecycle management
  */
 class AutoLogUploader private constructor(context: Context) {
     private val context: Context = context.applicationContext
@@ -31,6 +34,9 @@ class AutoLogUploader private constructor(context: Context) {
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .build()
+    
+    // Coroutine scope for upload operations
+    private val uploadScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     companion object {
         private const val TAG = "AutoLogUploader"
@@ -105,21 +111,34 @@ class AutoLogUploader private constructor(context: Context) {
     }
 
     /**
-     * Upload logs asynchronously
+     * Upload logs asynchronously using coroutines
+     * FIXED: Converted from Thread to Coroutine for proper lifecycle management
      */
     private fun uploadLogsAsync(reason: String) {
-        Thread {
+        uploadScope.launch {
             try {
                 Log.i(TAG, "📊 Collecting application logs for upload...")
                 val logContent = collectApplicationLogs()
                 uploadLogContent(logContent, reason, "application")
 
-                // Update last upload time
-                prefs.edit().putLong(PREF_LAST_UPLOAD, System.currentTimeMillis()).apply()
+                // Update last upload time on main thread
+                withContext(Dispatchers.Main) {
+                    prefs.edit().putLong(PREF_LAST_UPLOAD, System.currentTimeMillis()).apply()
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Failed to upload logs", e)
             }
-        }.start()
+        }
+    }
+    
+    /**
+     * Cleanup method to cancel all pending uploads
+     * Call this when the uploader is no longer needed
+     */
+    fun cleanup() {
+        Log.i(TAG, "🧹 Cleaning up AutoLogUploader...")
+        uploadScope.cancel()
+        Log.i(TAG, "✅ AutoLogUploader cleanup complete")
     }
 
     /**
