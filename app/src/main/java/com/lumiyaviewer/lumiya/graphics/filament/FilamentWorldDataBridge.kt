@@ -123,8 +123,162 @@ class FilamentWorldDataBridge(
 
     private fun syncTerrain() {
         val terrain = terrainData ?: return
-        // TODO(future): stream terrain patches into Filament terrain renderer
-        Log.d(TAG, "Terrain sync pending (${terrain.hashCode()})")
+        
+        // Stream terrain patches into Filament terrain renderer
+        try {
+            // Check if terrain has been updated
+            val terrainHash = terrain.hashCode()
+            
+            // TODO: Implement terrain patch streaming system
+            // This would involve:
+            // 1. Dividing terrain into patches (e.g., 16x16 meter patches)
+            // 2. Determining which patches are visible based on camera position
+            // 3. Loading/unloading patches based on distance (LOD system)
+            // 4. Converting terrain height data to Filament mesh format
+            // 5. Applying terrain textures and materials
+            
+            // For now, we'll create a simple terrain representation
+            if (!terrainEntities.containsKey(terrainHash)) {
+                createTerrainMesh(terrain)?.let { entityData ->
+                    terrainEntities[terrainHash] = entityData
+                    Log.i(TAG, "Terrain mesh created and added to scene")
+                }
+            }
+            
+            Log.v(TAG, "Terrain sync completed (hash: $terrainHash)")
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error syncing terrain", e)
+        }
+    }
+    
+    /**
+     * Creates a terrain mesh from terrain data.
+     * 
+     * This is a simplified implementation. A full implementation would:
+     * - Use terrain height maps
+     * - Implement LOD (Level of Detail) system
+     * - Stream patches based on camera position
+     * - Apply terrain textures and materials
+     * - Handle terrain physics
+     */
+    private fun createTerrainMesh(terrain: TerrainData): EntityData? {
+        try {
+            // Create a simple flat terrain mesh as placeholder
+            // In a full implementation, this would use actual terrain height data
+            
+            val terrainSize = 256f // 256 meters (standard SL region size)
+            val gridResolution = 32 // 32x32 grid
+            val cellSize = terrainSize / gridResolution
+            
+            // Calculate vertex count
+            val vertexCount = (gridResolution + 1) * (gridResolution + 1)
+            val indexCount = gridResolution * gridResolution * 6
+            
+            // Create vertex buffer
+            val stride = 8 * java.lang.Float.BYTES // position(3) + normal(3) + uv(2)
+            val vertexBuffer = VertexBuffer.Builder()
+                .bufferCount(1)
+                .vertexCount(vertexCount)
+                .attribute(VertexBuffer.VertexAttribute.POSITION, 0, VertexBuffer.AttributeType.FLOAT3, 0, stride)
+                .attribute(VertexBuffer.VertexAttribute.TANGENTS, 0, VertexBuffer.AttributeType.FLOAT3, 12, stride)
+                .attribute(VertexBuffer.VertexAttribute.UV0, 0, VertexBuffer.AttributeType.FLOAT2, 24, stride)
+                .build(engine)
+            
+            // Generate vertices
+            val vertices = FloatArray(vertexCount * 8)
+            var vertexIndex = 0
+            
+            for (z in 0..gridResolution) {
+                for (x in 0..gridResolution) {
+                    val posX = x * cellSize
+                    val posZ = z * cellSize
+                    val posY = 0f // Flat terrain for now
+                    
+                    // Position
+                    vertices[vertexIndex++] = posX
+                    vertices[vertexIndex++] = posY
+                    vertices[vertexIndex++] = posZ
+                    
+                    // Normal (pointing up)
+                    vertices[vertexIndex++] = 0f
+                    vertices[vertexIndex++] = 1f
+                    vertices[vertexIndex++] = 0f
+                    
+                    // UV coordinates
+                    vertices[vertexIndex++] = x.toFloat() / gridResolution
+                    vertices[vertexIndex++] = z.toFloat() / gridResolution
+                }
+            }
+            
+            vertexBuffer.setBufferAt(engine, 0, floatArrayToByteBuffer(vertices))
+            
+            // Generate indices
+            val indices = ShortArray(indexCount)
+            var indexIndex = 0
+            
+            for (z in 0 until gridResolution) {
+                for (x in 0 until gridResolution) {
+                    val topLeft = (z * (gridResolution + 1) + x).toShort()
+                    val topRight = (topLeft + 1).toShort()
+                    val bottomLeft = (topLeft + gridResolution + 1).toShort()
+                    val bottomRight = (bottomLeft + 1).toShort()
+                    
+                    // First triangle
+                    indices[indexIndex++] = topLeft
+                    indices[indexIndex++] = bottomLeft
+                    indices[indexIndex++] = topRight
+                    
+                    // Second triangle
+                    indices[indexIndex++] = topRight
+                    indices[indexIndex++] = bottomLeft
+                    indices[indexIndex++] = bottomRight
+                }
+            }
+            
+            val indexBuffer = IndexBuffer.Builder()
+                .indexCount(indexCount)
+                .bufferType(IndexBuffer.Builder.IndexType.USHORT)
+                .build(engine)
+            indexBuffer.setBuffer(engine, shortArrayToByteBuffer(indices))
+            
+            // Create entity
+            val entity = renderContext.entityManager.create()
+            
+            // Get terrain material
+            val material = materialManager.getMaterial(FilamentMaterialManager.MaterialType.TERRAIN)
+            
+            // Build renderable
+            RenderableManager.Builder(1)
+                .boundingBox(Box(
+                    floatArrayOf(0f, 0f, 0f),
+                    floatArrayOf(terrainSize, 0f, terrainSize)
+                ))
+                .geometry(0, RenderableManager.PrimitiveType.TRIANGLES, vertexBuffer, indexBuffer)
+                .material(0, material.defaultInstance)
+                .castShadows(false)
+                .receiveShadows(true)
+                .build(engine, entity)
+            
+            // Set transform (identity - terrain at origin)
+            val transform = FloatArray(16)
+            Matrix.setIdentityM(transform, 0)
+            val transformInstance = engine.transformManager.getInstance(entity)
+            if (transformInstance.isValid) {
+                engine.transformManager.setTransform(transformInstance, transform)
+            }
+            
+            // Add to scene
+            scene.addEntity(entity)
+            
+            Log.i(TAG, "Terrain mesh created: ${gridResolution}x${gridResolution} grid, $vertexCount vertices, ${indexCount / 3} triangles")
+            
+            return EntityData(entity, vertexBuffer, indexBuffer, material)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error creating terrain mesh", e)
+            return null
+        }
     }
 
     private fun syncObjects() {

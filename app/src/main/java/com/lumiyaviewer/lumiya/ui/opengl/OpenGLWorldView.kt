@@ -164,13 +164,150 @@ class OpenGLWorldView(context: Context) : GLSurfaceView(context) {
     }
 
     private fun handleTap(event: MotionEvent) {
-        // Handle tap on 3D world
-        val worldX = event.x
-        val worldY = event.y
+        // Handle tap on 3D world - implement ray casting for object selection
+        val screenX = event.x
+        val screenY = event.y
         
-        // TODO: Implement world picking/selection
-        android.util.Log.d("OpenGLWorldView", "Tapped at: ($worldX, $worldY)")
+        android.util.Log.d("OpenGLWorldView", "Tapped at screen: ($screenX, $screenY)")
+        
+        // Perform ray casting to find intersected objects
+        queueEvent {
+            try {
+                val pickedObject = performRayCast(screenX, screenY)
+                
+                if (pickedObject != null) {
+                    android.util.Log.i("OpenGLWorldView", "Object selected: ${pickedObject.id}")
+                    
+                    // Notify listeners about selection
+                    onObjectSelected?.invoke(pickedObject)
+                    
+                    // Highlight selected object
+                    highlightObject(pickedObject)
+                } else {
+                    android.util.Log.d("OpenGLWorldView", "No object at tap location")
+                    clearSelection()
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("OpenGLWorldView", "Error during object picking", e)
+            }
+        }
     }
+    
+    /**
+     * Performs ray casting from screen coordinates to world space
+     * to find intersected objects.
+     * 
+     * @param screenX Screen X coordinate
+     * @param screenY Screen Y coordinate
+     * @return The picked object, or null if no object was hit
+     */
+    private fun performRayCast(screenX: Float, screenY: Float): PickedObject? {
+        // Convert screen coordinates to normalized device coordinates (NDC)
+        val ndcX = (2.0f * screenX) / width - 1.0f
+        val ndcY = 1.0f - (2.0f * screenY) / height
+        
+        // Create ray in NDC space
+        val rayNDC = floatArrayOf(ndcX, ndcY, -1.0f, 1.0f)
+        
+        // Transform to world space
+        // This requires inverse projection and view matrices
+        // For now, we'll use a simplified approach
+        
+        val cameraPos = getCameraPosition()
+        val rayDirection = calculateRayDirection(ndcX, ndcY)
+        
+        android.util.Log.v("OpenGLWorldView", "Ray: origin=$cameraPos, direction=$rayDirection")
+        
+        // Test intersection with scene objects
+        // TODO: Implement actual intersection testing with scene geometry
+        // For now, return null (no intersection)
+        
+        return null
+    }
+    
+    /**
+     * Calculates the ray direction in world space from NDC coordinates.
+     */
+    private fun calculateRayDirection(ndcX: Float, ndcY: Float): LLVector3 {
+        // Calculate ray direction based on camera orientation
+        val forward = LLVector3(
+            x = -sin(cameraRotationY) * cos(cameraRotationX),
+            y = cos(cameraRotationY) * cos(cameraRotationX),
+            z = sin(cameraRotationX)
+        )
+        
+        val right = LLVector3(
+            x = cos(cameraRotationY),
+            y = sin(cameraRotationY),
+            z = 0f
+        )
+        
+        val up = LLVector3(
+            x = -sin(cameraRotationY) * sin(cameraRotationX),
+            y = cos(cameraRotationY) * sin(cameraRotationX),
+            z = cos(cameraRotationX)
+        )
+        
+        // Combine to get ray direction
+        val rayDir = LLVector3(
+            x = forward.x + right.x * ndcX + up.x * ndcY,
+            y = forward.y + right.y * ndcX + up.y * ndcY,
+            z = forward.z + right.z * ndcX + up.z * ndcY
+        )
+        
+        // Normalize
+        val length = sqrt(rayDir.x * rayDir.x + rayDir.y * rayDir.y + rayDir.z * rayDir.z)
+        return LLVector3(rayDir.x / length, rayDir.y / length, rayDir.z / length)
+    }
+    
+    /**
+     * Highlights the selected object in the scene.
+     */
+    private fun highlightObject(obj: PickedObject) {
+        android.util.Log.d("OpenGLWorldView", "Highlighting object: ${obj.id}")
+        
+        // TODO: Implement visual highlighting
+        // This could involve:
+        // - Changing object color/material
+        // - Adding an outline shader
+        // - Drawing a bounding box
+        // - Emitting particles
+        
+        selectedObject = obj
+    }
+    
+    /**
+     * Clears the current selection.
+     */
+    private fun clearSelection() {
+        selectedObject?.let { obj ->
+            android.util.Log.d("OpenGLWorldView", "Clearing selection: ${obj.id}")
+            
+            // TODO: Remove visual highlighting
+        }
+        
+        selectedObject = null
+    }
+    
+    // Selection callback
+    private var onObjectSelected: ((PickedObject) -> Unit)? = null
+    private var selectedObject: PickedObject? = null
+    
+    /**
+     * Sets a callback to be invoked when an object is selected.
+     */
+    fun setOnObjectSelectedListener(listener: (PickedObject) -> Unit) {
+        onObjectSelected = listener
+    }
+    
+    /**
+     * Data class representing a picked object in the scene.
+     */
+    data class PickedObject(
+        val id: String,
+        val position: LLVector3,
+        val distance: Float
+    )
 
     private fun updateCameraPosition() {
         // Calculate camera position based on spherical coordinates

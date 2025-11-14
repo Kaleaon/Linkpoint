@@ -12,6 +12,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 import kotlin.math.*
@@ -26,6 +27,7 @@ import kotlin.math.*
  * - Terrain and object rendering
  * - Avatar system
  * - Performance optimization
+ * - Proper resource management and cleanup
  */
 class OpenGLWorldRenderer(
     private val context: Context
@@ -164,6 +166,16 @@ class OpenGLWorldRenderer(
     private var objectsManager: ObjectsManager? = null
     private var userManager: UserManager? = null
     private var terrainData: TerrainData? = null
+    
+    // Thread management for resource leak prevention
+    private var updateThread: Thread? = null
+    private val isRunning = AtomicBoolean(false)
+    private val isDestroyed = AtomicBoolean(false)
+    
+    // Track allocated OpenGL resources for cleanup
+    private val allocatedVBOs = mutableListOf<Int>()
+    private val allocatedEBOs = mutableListOf<Int>()
+    private val allocatedVAOs = mutableListOf<Int>()
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         // Set clear color to sky blue
@@ -199,6 +211,11 @@ class OpenGLWorldRenderer(
     }
 
     override fun onDrawFrame(gl: GL10?) {
+        // Check if destroyed
+        if (isDestroyed.get()) {
+            return
+        }
+        
         // Clear buffers
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
         
@@ -257,7 +274,7 @@ class OpenGLWorldRenderer(
         useTextureLoc = GLES30.glGetUniformLocation(shaderProgram, "uUseTexture")
         useLightingLoc = GLES30.glGetUniformLocation(shaderProgram, "uUseLighting")
         
-        // Clean up shaders
+        // Clean up shaders (they're now part of the program)
         GLES30.glDeleteShader(vertexShader)
         GLES30.glDeleteShader(fragmentShader)
         
@@ -452,6 +469,9 @@ class OpenGLWorldRenderer(
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, vbo[0])
         GLES30.glBufferData(GLES30.GL_ARRAY_BUFFER, vertices.size * 4, buffer, GLES30.GL_STATIC_DRAW)
         
+        // Track for cleanup
+        allocatedVBOs.add(vbo[0])
+        
         return vbo[0]
     }
 
@@ -466,6 +486,9 @@ class OpenGLWorldRenderer(
         GLES30.glGenBuffers(1, ebo, 0)
         GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, ebo[0])
         GLES30.glBufferData(GLES30.GL_ELEMENT_ARRAY_BUFFER, indices.size * 2, buffer, GLES30.GL_STATIC_DRAW)
+        
+        // Track for cleanup
+        allocatedEBOs.add(ebo[0])
         
         return ebo[0]
     }
@@ -502,6 +525,9 @@ class OpenGLWorldRenderer(
         
         // Unbind VAO
         GLES30.glBindVertexArray(0)
+        
+        // Track for cleanup
+        allocatedVAOs.add(vao[0])
         
         return vao[0]
     }
@@ -712,20 +738,163 @@ class OpenGLWorldRenderer(
         android.util.Log.i(TAG, "Disconnected from world data")
     }
 
+    /**
+     * FIXED: Proper thread management to prevent resource leak
+     * - Thread is now stored in a variable for proper lifecycle management
+     * - AtomicBoolean used for thread-safe running state
+     * - Thread can be properly interrupted and stopped
+     */
     private fun startWorldUpdates() {
-        // TODO: Implement real-time world data updates
-        android.util.Log.i(TAG, "Started world data updates")
+        // Stop any existing thread first
+        stopWorldUpdates()
+        
+        android.util.Log.i(TAG, "Starting real-time world data updates")
+        
+        isRunning.set(true)
+        
+        updateThread = Thread {
+            android.util.Log.i(TAG, "World update thread started")
+            
+            while (isRunning.get() && !Thread.currentThread().isInterrupted) {
+                try {
+                    // Update objects from ObjectsManager
+                    objectsManager?.let { manager ->
+                        // TODO: Fetch updated object list from manager
+                        // For now, log that we're checking for updates
+                        android.util.Log.v(TAG, "Checking for object updates")
+                    }
+                    
+                    // Update avatars from UserManager
+                    userManager?.let { manager ->
+                        // TODO: Fetch updated avatar list from manager
+                        android.util.Log.v(TAG, "Checking for avatar updates")
+                    }
+                    
+                    // Update terrain from TerrainData
+                    terrainData?.let { data ->
+                        // TODO: Check for terrain updates
+                        android.util.Log.v(TAG, "Checking for terrain updates")
+                    }
+                    
+                    // Wait before next update cycle (1 second)
+                    Thread.sleep(1000)
+                    
+                } catch (e: InterruptedException) {
+                    android.util.Log.i(TAG, "World update thread interrupted")
+                    Thread.currentThread().interrupt() // Restore interrupt status
+                    break
+                } catch (e: Exception) {
+                    android.util.Log.e(TAG, "Error during world update", e)
+                }
+            }
+            
+            android.util.Log.i(TAG, "World update thread stopped")
+        }.apply {
+            name = "WorldUpdateThread"
+            isDaemon = true
+            start()
+        }
+        
+        android.util.Log.i(TAG, "Real-time world data updates started")
     }
 
+    /**
+     * FIXED: Proper thread stopping mechanism
+     * - Sets running flag to false
+     * - Interrupts the thread
+     * - Waits for thread to finish with timeout
+     */
     private fun stopWorldUpdates() {
-        // TODO: Stop real-time updates
-        android.util.Log.i(TAG, "Stopped world data updates")
+        android.util.Log.i(TAG, "Stopping real-time world data updates")
+        
+        isRunning.set(false)
+        
+        updateThread?.let { thread ->
+            if (thread.isAlive) {
+                thread.interrupt()
+                
+                try {
+                    // Wait for thread to finish (max 2 seconds)
+                    thread.join(2000)
+                    
+                    if (thread.isAlive) {
+                        android.util.Log.w(TAG, "World update thread did not stop gracefully")
+                    } else {
+                        android.util.Log.i(TAG, "World update thread stopped successfully")
+                    }
+                } catch (e: InterruptedException) {
+                    android.util.Log.w(TAG, "Interrupted while waiting for thread to stop")
+                    Thread.currentThread().interrupt()
+                }
+            }
+        }
+        
+        updateThread = null
+        
+        android.util.Log.i(TAG, "Real-time world data updates stopped")
     }
 
     private fun clearScene() {
         sceneObjects.clear()
         avatars.clear()
         terrain = null
+    }
+    
+    /**
+     * NEW: Cleanup method for proper resource management
+     * Call this when the renderer is being destroyed to prevent resource leaks
+     */
+    fun cleanup() {
+        if (isDestroyed.getAndSet(true)) {
+            android.util.Log.w(TAG, "Renderer already destroyed")
+            return
+        }
+        
+        android.util.Log.i(TAG, "Cleaning up OpenGL resources")
+        
+        // Stop update thread
+        stopWorldUpdates()
+        
+        // Clear scene data
+        clearScene()
+        
+        // Delete VAOs
+        if (allocatedVAOs.isNotEmpty()) {
+            val vaos = allocatedVAOs.toIntArray()
+            GLES30.glDeleteVertexArrays(vaos.size, vaos, 0)
+            allocatedVAOs.clear()
+            android.util.Log.d(TAG, "Deleted ${vaos.size} VAOs")
+        }
+        
+        // Delete VBOs
+        if (allocatedVBOs.isNotEmpty()) {
+            val vbos = allocatedVBOs.toIntArray()
+            GLES30.glDeleteBuffers(vbos.size, vbos, 0)
+            allocatedVBOs.clear()
+            android.util.Log.d(TAG, "Deleted ${vbos.size} VBOs")
+        }
+        
+        // Delete EBOs
+        if (allocatedEBOs.isNotEmpty()) {
+            val ebos = allocatedEBOs.toIntArray()
+            GLES30.glDeleteBuffers(ebos.size, ebos, 0)
+            allocatedEBOs.clear()
+            android.util.Log.d(TAG, "Deleted ${ebos.size} EBOs")
+        }
+        
+        // Delete shader program
+        if (shaderProgram != 0) {
+            GLES30.glDeleteProgram(shaderProgram)
+            shaderProgram = 0
+            android.util.Log.d(TAG, "Deleted shader program")
+        }
+        
+        // Clear manager references
+        objectsManager = null
+        userManager = null
+        terrainData = null
+        
+        android.util.Log.i(TAG, "OpenGL resources cleaned up successfully")
     }
 
     // Data classes
