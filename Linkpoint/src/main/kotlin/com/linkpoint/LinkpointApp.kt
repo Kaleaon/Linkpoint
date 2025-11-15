@@ -29,143 +29,155 @@ import com.linkpoint.debug.AutoLogUploader
  * Extends MultiDexApplication to support large applications with 64K+ methods.
  */
 class LinkpointApp : MultiDexApplication() {
-    private const val TAG: String = "LinkpointApp"
-    @JvmStatic
-private DisplayMetrics displayMetrics = DisplayMetrics()
-    @JvmStatic
-private Context mContext
-    @JvmStatic
-private SharedPreferences prefs
     
-    // Modern components
-    @JvmStatic
-private ModernLinkpointDemo modernDemo
-
-    @JvmStatic
-     fun getAppVersion(): String {
-        try {
-            return mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0).versionName
-        } catch (NameNotFoundException e) {
-            Log.w(TAG, "Could not get app version", e)
-            return ""
-        }
-    }
-    
-    /**
-     * Get application startup status and any initialization errors
-     */
-    @JvmStatic
-     fun getStartupStatus(): String {
-        if (mContext == null) {
-            return "Application context not initialized"
-        }
+    companion object {
+        private const val TAG: String = "LinkpointApp"
+        private var displayMetrics = DisplayMetrics()
+        private lateinit var mContext: Context
+        private var prefs: SharedPreferences? = null
         
-        val status: StringBuilder = StringBuilder()
-        status.append("Linkpoint Application Status:\n")
-        status.append("- Context: ").append(mContext != null ? "OK" : "NULL").append("\n")
-        status.append("- Modern Components: ").append(modernDemo != null ? "Active" : "Safe Mode").append("\n")
+        // Modern components
+        private var modernDemo: ModernLinkpointDemo? = null
         
-        if (modernDemo != null) {
-            try {
-                status.append("- Graphics: ").append(modernDemo.getGraphicsInfo()).append("\n")
-                status.append("- Connection: ").append(modernDemo.isConnected() ? "Connected" : "Disconnected").append("\n")
-            } catch (Exception e) {
-                status.append("- Component Status: Error checking - ").append(e.getMessage()).append("\n")
-            }
-        } else {
-            status.append("- Running in Safe Mode - basic functionality only\n")
-        }
-        
-        return status.toString()
-    }
-    
-    /**
-     * Upload debug logs immediately (for debug builds only)
-     */
-    @JvmStatic
-     fun uploadDebugLogsNow(reason: String) {
-        if (mContext != null) {
-            try {
-                AutoLogUploader.getInstance(mContext).uploadLogsNow(reason)
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to trigger log upload", e)
+        @JvmStatic
+        fun getAppVersion(): String {
+            return try {
+                mContext.packageManager.getPackageInfo(mContext.packageName, 0).versionName
+            } catch (e: NameNotFoundException) {
+                Log.w(TAG, "Could not get app version", e)
+                ""
             }
         }
-    }
-    
-    /**
-     * Report a crash for automatic upload (debug builds only)
-     */
-    @JvmStatic
-     fun reportCrash(crash: Throwable, additionalInfo: String) {
-        if (mContext != null) {
-            try {
-                AutoLogUploader.getInstance(mContext).uploadCrashReport(crash, additionalInfo)
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to upload crash report", e)
+        
+        /**
+         * Get application startup status and any initialization errors
+         */
+        @JvmStatic
+        fun getStartupStatus(): String {
+            if (!::mContext.isInitialized) {
+                return "Application context not initialized"
+            }
+            
+            val status = StringBuilder()
+            status.append("Linkpoint Application Status:\n")
+            status.append("- Context: ").append(if (::mContext.isInitialized) "OK" else "NULL").append("\n")
+            status.append("- Modern Components: ").append(if (modernDemo != null) "Active" else "Safe Mode").append("\n")
+            
+            modernDemo?.let { demo ->
+                try {
+                    status.append("- Graphics: ").append(demo.getGraphicsInfo()).append("\n")
+                    status.append("- Connection: ").append(if (demo.isConnected()) "Connected" else "Disconnected").append("\n")
+                } catch (e: Exception) {
+                    status.append("- Component Status: Error checking - ").append(e.message).append("\n")
+                }
+            } ?: run {
+                status.append("- Running in Safe Mode - basic functionality only\n")
+            }
+            
+            return status.toString()
+        }
+        
+        /**
+         * Upload debug logs immediately (for debug builds only)
+         */
+        @JvmStatic
+        fun uploadDebugLogsNow(reason: String) {
+            if (::mContext.isInitialized) {
+                try {
+                    AutoLogUploader.getInstance(mContext).uploadLogsNow(reason)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to trigger log upload", e)
+                }
             }
         }
-    }
-
-    @JvmStatic
-     fun getAssetManager(): AssetManager {
-        return mContext != null ? mContext.getAssets() : null
-    }
-
-    @JvmStatic
-     fun getContext(): Context {
-        return mContext
-    }
-
-    @JvmStatic
-     fun getDefaultSharedPreferences(): SharedPreferences {
-        if (prefs == null) {
-            prefs = PreferenceManager.getDefaultSharedPreferences(getContext())
+        
+        /**
+         * Report a crash for automatic upload (debug builds only)
+         */
+        @JvmStatic
+        fun reportCrash(crash: Throwable, additionalInfo: String) {
+            if (::mContext.isInitialized) {
+                try {
+                    AutoLogUploader.getInstance(mContext).uploadCrashReport(crash, additionalInfo)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to upload crash report", e)
+                }
+            }
         }
-        return prefs
-    }
-
-    @JvmStatic
-     fun isSplitScreenNeeded(context: Context): Boolean {
-        val string: String = getDefaultSharedPreferences().getString("split_screens", "auto")
-        if (string.equals("never")) {
-            return false
+    
+        @JvmStatic
+        fun getAssetManager(): AssetManager? {
+            return if (::mContext.isInitialized) mContext.assets else null
         }
-        if (string.equals("always")) {
-            return true
+    
+        @JvmStatic
+        fun getContext(): Context? {
+            return if (::mContext.isInitialized) mContext else null
         }
-        val defaultDisplay: Display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay()
-        if (string.equals("landscape")) {
-            return defaultDisplay.getWidth() > defaultDisplay.getHeight()
-        } else {
-            defaultDisplay.getMetrics(displayMetrics)
-            val f: Float = ((Float) displayMetrics.heightPixels) / displayMetrics.ydpi
-            val f2: Float = ((Float) displayMetrics.widthPixels) / displayMetrics.xdpi
-            val diagonalInches: Double = Math.sqrt((Double) ((f * f) + (f2 * f2)))
-            if (diagonalInches <= 6.5d || f2 < 5.0f) {
+    
+        @JvmStatic
+        fun getDefaultSharedPreferences(): SharedPreferences {
+            if (prefs == null && ::mContext.isInitialized) {
+                prefs = PreferenceManager.getDefaultSharedPreferences(mContext)
+            }
+            return prefs ?: throw IllegalStateException("Context not initialized")
+        }
+    
+        @JvmStatic
+        fun isSplitScreenNeeded(context: Context): Boolean {
+            val string = getDefaultSharedPreferences().getString("split_screens", "auto") ?: "auto"
+            if (string == "never") {
                 return false
             }
-            Log.i(TAG, String.format("LinkpointApp: Display width in dp: %.2f, xInches %.1f, diag %.1f", 
-                ((Float) defaultDisplay.getWidth()) / displayMetrics.density, f2, diagonalInches))
-            return ((Float) defaultDisplay.getWidth()) / displayMetrics.density >= 1000.0f
+            if (string == "always") {
+                return true
+            }
+            val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+            val defaultDisplay = windowManager.defaultDisplay
+            if (string == "landscape") {
+                return defaultDisplay.width > defaultDisplay.height
+            } else {
+                defaultDisplay.getMetrics(displayMetrics)
+                val f = displayMetrics.heightPixels.toFloat() / displayMetrics.ydpi
+                val f2 = displayMetrics.widthPixels.toFloat() / displayMetrics.xdpi
+                val diagonalInches = Math.sqrt(((f * f) + (f2 * f2)).toDouble())
+                if (diagonalInches <= 6.5 || f2 < 5.0f) {
+                    return false
+                }
+                Log.i(TAG, String.format("LinkpointApp: Display width in dp: %.2f, xInches %.1f, diag %.1f", 
+                    defaultDisplay.width.toFloat() / displayMetrics.density, f2, diagonalInches))
+                return defaultDisplay.width.toFloat() / displayMetrics.density >= 1000.0f
+            }
+        }
+    
+        @JvmStatic
+        fun restartApp() {
+            try {
+                if (!::mContext.isInitialized) return
+                
+                val alarmManager = mContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val pendingIntent = PendingIntent.getActivity(
+                    mContext, 0, 
+                    Intent(mContext, LauncherActivity::class.java), 
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, pendingIntent)
+                System.exit(0)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to restart app", e)
+            }
+        }
+        
+        /**
+         * Get modern components demo instance
+         */
+        @JvmStatic
+        fun getModernDemo(): ModernLinkpointDemo? {
+            return modernDemo
         }
     }
 
-    @JvmStatic
-     fun restartApp() {
-        try {
-            val alarmManager: AlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE)
-            val pendingIntent: PendingIntent = PendingIntent.getActivity(getContext(), 0, 
-                Intent(getContext(), LauncherActivity.class), 
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE)
-            alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, pendingIntent)
-            System.exit(0)
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to restart app", e)
-        }
-    }
-
-    override Unit onCreate() {
+    override fun onCreate() {
         super.onCreate()
         
         Log.i(TAG, "Linkpoint Application starting up")
@@ -180,7 +192,7 @@ private ModernLinkpointDemo modernDemo
             try {
                 ResourceConflictResolver.initialize(this)
                 Log.i(TAG, "Resource conflict resolver initialized successfully")
-            } catch (Exception e) {
+            } catch (e: Exception) {
                 Log.e(TAG, "Resource conflict resolver failed - continuing anyway", e)
             }
             
@@ -194,24 +206,22 @@ private ModernLinkpointDemo modernDemo
             initializeDebugLogUpload()
             
             Log.i(TAG, "Linkpoint Application initialization complete")
-        } catch (Throwable e) {
+        } catch (e: Throwable) {
             // Catch all throwables including OutOfMemoryError, LinkageError, etc.
             Log.e(TAG, "CRITICAL: Application initialization failed", e)
             
             // Upload crash report for debug builds
             try {
                 AutoLogUploader.getInstance(this).uploadCrashReport(e, "Application initialization failure")
-            } catch (Exception uploadError) {
+            } catch (uploadError: Exception) {
                 Log.e(TAG, "Failed to upload crash report", uploadError)
             }
             
             // Log specific error types for debugging
-            if (e instanceof OutOfMemoryError) {
-                Log.e(TAG, "Out of memory during initialization")
-            } else if (e instanceof NoClassDefFoundError) {
-                Log.e(TAG, "Missing class definition: " + e.getMessage())
-            } else if (e instanceof UnsatisfiedLinkError) {
-                Log.e(TAG, "Native library linking failed: " + e.getMessage())
+            when (e) {
+                is OutOfMemoryError -> Log.e(TAG, "Out of memory during initialization")
+                is NoClassDefFoundError -> Log.e(TAG, "Missing class definition: ${e.message}")
+                is UnsatisfiedLinkError -> Log.e(TAG, "Native library linking failed: ${e.message}")
             }
             
             // Set a safe fallback state
@@ -226,7 +236,7 @@ private ModernLinkpointDemo modernDemo
      * Initialize modern Second Life protocol and rendering systems
      * Uses defensive programming to prevent crashes if modern components fail
      */
-     private fun initializeModernSystems() {
+    private fun initializeModernSystems() {
         Log.i(TAG, "Initializing modern Linkpoint components...")
         
         try {
@@ -241,34 +251,34 @@ private ModernLinkpointDemo modernDemo
             modernDemo = ModernLinkpointDemo(this)
             Log.i(TAG, "Modern Linkpoint systems initialized successfully")
             
-        } catch (NoClassDefFoundError e) {
+        } catch (e: NoClassDefFoundError) {
             Log.e(TAG, "Modern system class not found - likely missing dependency", e)
-            Log.e(TAG, "Missing class: " + e.getMessage())
+            Log.e(TAG, "Missing class: ${e.message}")
             modernDemo = null
             
-        } catch (UnsatisfiedLinkError e) {
+        } catch (e: UnsatisfiedLinkError) {
             Log.e(TAG, "Native library loading failed - modern graphics features will be disabled", e)
-            Log.e(TAG, "Library loading error: " + e.getMessage())
+            Log.e(TAG, "Library loading error: ${e.message}")
             modernDemo = null
             
-        } catch (SecurityException e) {
+        } catch (e: SecurityException) {
             Log.e(TAG, "Security error during modern system initialization", e)
             modernDemo = null
             
-        } catch (OutOfMemoryError e) {
+        } catch (e: OutOfMemoryError) {
             Log.e(TAG, "Out of memory during modern system initialization", e)
             modernDemo = null
             // Force garbage collection
             System.gc()
             
-        } catch (Exception e) {
+        } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize modern systems - continuing with graceful degradation", e)
             modernDemo = null
             
             // Log specific error for debugging
-            Log.e(TAG, "Modern component initialization failed: " + e.getClass().getSimpleName() + " - " + e.getMessage())
+            Log.e(TAG, "Modern component initialization failed: ${e.javaClass.simpleName} - ${e.message}")
             
-        } catch (Throwable t) {
+        } catch (t: Throwable) {
             // Catch any other throwables that might occur
             Log.e(TAG, "Unexpected error during modern system initialization", t)
             modernDemo = null
@@ -286,36 +296,36 @@ private ModernLinkpointDemo modernDemo
     /**
      * Perform system compatibility checks before initializing modern components
      */
-     private fun performSystemChecks(): Boolean {
+    private fun performSystemChecks(): Boolean {
         try {
             // Check if we have a valid context
-            if (mContext == null) {
+            if (!::mContext.isInitialized) {
                 Log.e(TAG, "Context is null - cannot initialize modern components")
                 return false
             }
             
             // Check if we have basic Android API requirements
-            val apiLevel: Int = android.os.Build.VERSION.SDK_INT
+            val apiLevel = android.os.Build.VERSION.SDK_INT
             if (apiLevel < 21) { // API 21 = Android 5.0 minimum
-                Log.w(TAG, "Android API level " + apiLevel + " below minimum for modern components (21)")
+                Log.w(TAG, "Android API level $apiLevel below minimum for modern components (21)")
                 return false
             }
             
             // Check available memory
-            val runtime: Runtime = Runtime.getRuntime()
-            val freeMemory: Long = runtime.freeMemory()
-            val totalMemory: Long = runtime.totalMemory()
-            val memoryUsage: Double = (Double)(totalMemory - freeMemory) / totalMemory
+            val runtime = Runtime.getRuntime()
+            val freeMemory = runtime.freeMemory()
+            val totalMemory = runtime.totalMemory()
+            val memoryUsage = (totalMemory - freeMemory).toDouble() / totalMemory
             
             if (memoryUsage > 0.8) { // If using more than 80% of heap
-                Log.w(TAG, "Memory usage too high (" + (memoryUsage * 100) + "%) - skipping modern components")
+                Log.w(TAG, "Memory usage too high (${memoryUsage * 100}%) - skipping modern components")
                 return false
             }
             
             Log.i(TAG, "System checks passed - proceeding with modern component initialization")
             return true
             
-        } catch (Exception e) {
+        } catch (e: Exception) {
             Log.e(TAG, "Error during system checks", e)
             return false
         }
@@ -324,26 +334,18 @@ private ModernLinkpointDemo modernDemo
     /**
      * Initialize debug log upload system for debug builds only
      */
-     private fun initializeDebugLogUpload() {
+    private fun initializeDebugLogUpload() {
         try {
-            val logUploader: AutoLogUploader = AutoLogUploader.getInstance(this)
+            val logUploader = AutoLogUploader.getInstance(this)
             logUploader.initializeAutoUpload()
             Log.i(TAG, "Debug log upload system initialized")
-        } catch (Exception e) {
+        } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize debug log upload", e)
             // Don't crash the app if log upload fails
         }
     }
-    
-    /**
-     * Get modern components demo instance
-     */
-    @JvmStatic
-     fun getModernDemo(): ModernLinkpointDemo {
-        return modernDemo
-    }
 
-    override protected Unit attachBaseContext(Context base) {
+    override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
         MultiDex.install(this)
     }

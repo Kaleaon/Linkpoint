@@ -12,7 +12,7 @@ import android.util.Log
  * 
  * Based on fixes from Broken Code Analysis document and modern Android development practices.
  */
-class ResourceConflictResolver {
+object ResourceConflictResolver {
     private const val TAG: String = "ResourceResolver"
     
     /**
@@ -22,7 +22,7 @@ class ResourceConflictResolver {
      * @param context Application context
      */
     @JvmStatic
-     fun initialize(context: Context) {
+    fun initialize(context: Context) {
         try {
             Log.i(TAG, "Starting resource conflict resolution")
             
@@ -36,7 +36,7 @@ class ResourceConflictResolver {
             resolveStringConflicts(context)
             
             Log.i(TAG, "Resource conflicts resolved successfully")
-        } catch (Exception e) {
+        } catch (e: Exception) {
             Log.e(TAG, "Failed to resolve resource conflicts", e)
             // Non-fatal - app can continue but may have styling issues
         }
@@ -47,31 +47,31 @@ class ResourceConflictResolver {
      * Addresses the "Duplicate value for resource 'attr/fontStyle'" error.
      */
     @JvmStatic
- private fun resolveAttributeConflicts(context: Context) {
+    private fun resolveAttributeConflicts(context: Context) {
         try {
-            val res: Resources = context.getResources()
+            val res = context.resources
             
             // Check for app-specific fontStyle attribute
-            val fontStyleAttr: Int = res.getIdentifier("fontStyle", "attr", context.getPackageName())
+            val fontStyleAttr = res.getIdentifier("fontStyle", "attr", context.packageName)
             if (fontStyleAttr != 0) {
-                Log.d(TAG, "App fontStyle attribute resolved: " + fontStyleAttr)
+                Log.d(TAG, "App fontStyle attribute resolved: $fontStyleAttr")
             }
             
             // Check for other conflicting attributes
-            val conflictingAttrNames: Array<String> = {
+            val conflictingAttrNames = arrayOf(
                 "passwordToggleEnabled",
                 "buttonGravity",
                 "fontStyle"
-            }
+            )
             
-            for (String attrName : conflictingAttrNames) {
-                val attr: Int = res.getIdentifier(attrName, "attr", context.getPackageName())
+            for (attrName in conflictingAttrNames) {
+                val attr = res.getIdentifier(attrName, "attr", context.packageName)
                 if (attr != 0) {
-                    Log.d(TAG, "Conflicting attribute resolved: " + attrName + " = " + attr)
+                    Log.d(TAG, "Conflicting attribute resolved: $attrName = $attr")
                 }
             }
             
-        } catch (Resources.NotFoundException e) {
+        } catch (e: Resources.NotFoundException) {
             Log.w(TAG, "Some attribute conflicts could not be resolved", e)
         }
     }
@@ -80,25 +80,25 @@ class ResourceConflictResolver {
      * Handle drawable conflicts, particularly eye icons from password fields.
      */
     @JvmStatic
- private fun resolveDrawableConflicts(context: Context) {
+    private fun resolveDrawableConflicts(context: Context) {
         try {
-            val res: Resources = context.getResources()
+            val res = context.resources
             
             // Check for visibility/eye icon drawables that commonly conflict
-            val drawableNames: Array<String> = {
+            val drawableNames = arrayOf(
                 "design_ic_visibility",
                 "design_ic_visibility_off", 
                 "abc_ic_clear_material"
-            }
+            )
             
-            for (String drawableName : drawableNames) {
-                val drawableId: Int = res.getIdentifier(drawableName, "drawable", context.getPackageName())
+            for (drawableName in drawableNames) {
+                val drawableId = res.getIdentifier(drawableName, "drawable", context.packageName)
                 if (drawableId != 0) {
-                    Log.d(TAG, "Drawable resolved: " + drawableName + " = " + drawableId)
+                    Log.d(TAG, "Drawable resolved: $drawableName = $drawableId")
                 }
             }
             
-        } catch (Exception e) {
+        } catch (e: Exception) {
             Log.w(TAG, "Could not resolve drawable conflicts", e)
         }
     }
@@ -107,25 +107,25 @@ class ResourceConflictResolver {
      * Resolve string conflicts from AndroidX migration.
      */
     @JvmStatic
- private fun resolveStringConflicts(context: Context) {
-        val res: Resources = context.getResources()
+    private fun resolveStringConflicts(context: Context) {
+        val res = context.resources
         
         try {
             // Check for AppCompat strings that may conflict
-            val stringNames: Array<String> = {
+            val stringNames = arrayOf(
                 "abc_action_bar_home_description",
                 "abc_action_bar_up_description",
                 "abc_searchview_description_clear"
-            }
+            )
             
-            for (String stringName : stringNames) {
-                val stringId: Int = res.getIdentifier(stringName, "string", context.getPackageName())
+            for (stringName in stringNames) {
+                val stringId = res.getIdentifier(stringName, "string", context.packageName)
                 if (stringId != 0) {
-                    Log.d(TAG, "String resolved: " + stringName + " = " + stringId)
+                    Log.d(TAG, "String resolved: $stringName = $stringId")
                 }
             }
             
-        } catch (Resources.NotFoundException e) {
+        } catch (e: Resources.NotFoundException) {
             Log.w(TAG, "Some string conflicts could not be resolved", e)
         }
     }
@@ -139,13 +139,13 @@ class ResourceConflictResolver {
      * @return true if resource exists, false otherwise
      */
     @JvmStatic
-     fun resourceExists(context: Context, name: String, type: String): Boolean {
-        try {
-            val resourceId: Int = context.getResources().getIdentifier(name, type, context.getPackageName())
-            return resourceId != 0
-        } catch (Exception e) {
-            Log.w(TAG, "Error checking resource existence: " + name, e)
-            return false
+    fun resourceExists(context: Context, name: String, type: String): Boolean {
+        return try {
+            val resourceId = context.resources.getIdentifier(name, type, context.packageName)
+            resourceId != 0
+        } catch (e: Exception) {
+            Log.w(TAG, "Error checking resource existence: $name", e)
+            false
         }
     }
 }
