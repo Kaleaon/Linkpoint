@@ -4,6 +4,13 @@
 
 This documentation provides comprehensive guidance for using the Linkpoint mobile application with Second Life's open source ecosystem. Based on research from the Second Life Open Source Portal and integration with leading virtual world technologies, these guides enable developers and users to fully leverage the power of open source virtual world technologies on mobile platforms.
 
+## App Versions
+
+The repository hosts three standalone Android builds (Modern Lumiya, Legacy Lumiya, and Linkpoint). See [APP_VERSIONS.md](APP_VERSIONS.md) for the directory layout and build commands.
+
+> **Note:** Running any of the Android builds requires a full Android SDK. Make sure the `android-sdk/`
+> directory contains `platforms/android-34/android.jar` and the accompanying Build Tools packages.
+
 ## Quick Start Guide
 
 ### For Users

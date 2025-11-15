@@ -1,23 +1,12 @@
 plugins {
     id 'com.android.application'
-    // Kotlin support enabled for advanced LLSD features (@Kaleaon's implementation)
     id 'org.jetbrains.kotlin.android'
-    // Kotlin annotation processing for Room (when Room is properly configured)
-    // Note: kapt plugin disabled - not currently needed, can be re-enabled for Room/Hilt later
-    // id 'org.jetbrains.kotlin.kapt'
 }
 
 android {
     namespace 'com.lumiyaviewer.lumiya'
-
-    // SDK configuration: MinSDK 24, Target/Compile SDK 34 for AGP 8.1.4
     compileSdk 34
-    buildToolsVersion "34.0.0"
-
-    // Resource processing tweaks (keep minimal). noCompress keeps ktx2 files uncompressed.
-    aaptOptions {
-        noCompress 'ktx2'
-    }
+    buildToolsVersion "33.0.2"
 
     defaultConfig {
         applicationId "com.lumiyaviewer.lumiya"
@@ -25,399 +14,54 @@ android {
         targetSdk 34
         versionCode 67
         versionName "3.4.3"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        // NDK filters (we're not building native yet, but keep ABI consistent)
-        ndk {
-            abiFilters 'arm64-v8a'
-        }
-    }
-
-    // Signing configurations for release builds
-    // For production Play Store releases, create a keystore.properties file with:
-    //   storeFile=/path/to/your/keystore.jks
-    //   storePassword=your_store_password
-    //   keyAlias=your_key_alias
-    //   keyPassword=your_key_password
-    // 
-    // If keystore.properties is not present, release builds will use debug signing
-    // (suitable for testing but NOT for Play Store submission)
-    signingConfigs {
-        debug {
-            // Default debug signing configuration provided by Android SDK
-        }
     }
 
     buildTypes {
         release {
-            // PERMANENT FIX: Minification disabled due to AGP 8.2.2 base.jar race condition
-            // Root cause: packagingOptions excludes all META-INF files, leaving no Java resources
-            // to merge. AGP creates empty directory, R8 expects base.jar, timing causes I/O errors.
-            // 
-            // Alternative solutions attempted:
-            // 1. AGP upgrade to 8.2.2 - Issue persists (file cleanup race condition)
-            // 2. Custom Gradle task - File deleted between creation and R8 read
-            // 3. Forcing merge task execution - Timing/caching conflicts remain
-            //
-            // Decision: Keep minification OFF as permanent architectural choice
-            // Trade-offs accepted:
-            // - Larger APK size (~20-30% increase)
-            // - No code obfuscation (acceptable for open-source project)
-            // - Faster build times (no R8 processing)
             minifyEnabled false
-            
-            // Disable resource shrinking to reduce AAPT2 dependency
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-
-            // Signing configuration for release builds
-            // Check if keystore.properties exists for production signing
-            def keystorePropertiesFile = rootProject.file("keystore.properties")
-            if (keystorePropertiesFile.exists()) {
-                // Use production keystore for Play Store releases
-                def keystoreProperties = new Properties()
-                keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-                
-                signingConfig signingConfigs.create("release") {
-                    storeFile file(keystoreProperties['storeFile'])
-                    storePassword keystoreProperties['storePassword']
-                    keyAlias keystoreProperties['keyAlias']
-                    keyPassword keystoreProperties['keyPassword']
-                }
-                println "✅ Using production keystore for release build"
-            } else {
-                // Use debug signing for development/testing (NOT suitable for Play Store)
-                signingConfig signingConfigs.debug
-                println "⚠️  WARNING: Using debug signing for release build (NOT suitable for Play Store)"
-                println "   For production releases, create keystore.properties with signing credentials"
-            }
         }
         debug {
             minifyEnabled false
-            // Disable resource shrinking to reduce AAPT2 dependency
             shrinkResources false
-            signingConfig signingConfigs.debug
         }
     }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+        freeCompilerArgs += ['-opt-in=kotlin.RequiresOptIn']
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 
     lint {
         abortOnError false
         checkReleaseBuilds false
-        // Suppress AndroidX AppCompat string warnings for missing default values
-        disable 'MissingDefaultResource'
     }
-
-    // Java configuration for compatibility
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    
-    // Kotlin configuration for @Kaleaon's enhanced LLSD support (now enabled)
-    kotlinOptions {
-        jvmTarget = '1.8'
-        freeCompilerArgs += ['-opt-in=kotlin.RequiresOptIn']
-    }
-    
-    // Jetpack Compose integration
-    buildFeatures {
-        compose true
-    }
-    
-    composeOptions {
-        kotlinCompilerExtensionVersion = '1.5.10'
-    }
-
-    // Packaging conflict resolution. Keep simple and explicit.
-    // AGP 8.2+ handles empty resources better, but we still exclude duplicates
-    packagingOptions {
-        pickFirst '**/libjnidispatch.so'
-        pickFirst '**/libopenjpeg.so'
-        pickFirst '**/liblumiya-native.so'
-        
-        // Exclude duplicate META-INF files but keep some for proper JAR structure
-        exclude 'META-INF/DEPENDENCIES'
-        exclude 'META-INF/LICENSE*'
-        exclude 'META-INF/NOTICE*'
-        exclude 'META-INF/INDEX.LIST'
-        exclude 'META-INF/io.netty.versions.properties'
-        
-        // Keep these for R8 compatibility
-        // (AGP 8.2+ creates empty JAR automatically if all resources excluded)
-        exclude 'META-INF/*.kotlin_module'
-        
-        // Merge duplicate service files instead of excluding
-        merge 'META-INF/services/**'
-    }
-
-    // Legacy HTTP support (decompiled sources may rely on it)
-    // Temporarily disabled as the library is not available in API 23
-    // useLibrary 'org.apache.http.legacy'
-
-    sourceSets {
-        main {
-            manifest.srcFile 'src/main/AndroidManifest.xml'
-            java.srcDirs = []
-            kotlin.srcDirs = ['src/rebuild/kotlin']
-            res.srcDirs = ['src/main/res']
-            assets.srcDirs = ['src/main/assets']
-
-            // Exclude problematic decompiled files and complex dependencies
-            def javaExcludePatterns = [
-                '**/$Lambda$*.java',                 // Lambda artifacts from decompilation
-                '**/*$Lambda$*.java',                // More lambda artifacts
-
-                '**/Debug.java',                     // Debug classes might have issues
-                '**/base64/**/*.java',               // Base64 encoding - decompiled issues
-                '**/utils/**/*.java',                // Utils classes - decompiled issues
-                '**/cloud/**/*.java',                // Cloud features
-                '**/vivox/**/*.java',                // Vivox - has compilation issues (replaced by WebRTC)
-                '**/vivox/**/*.kt',                  // Vivox Kotlin files
-                '**/dao/**/*.java',                  // Database access objects
-                '**/eventbus/**/*.java',             // Event bus
-                '**/fixes/**/*.java',                // Fixes
-                '**/licensing/**/*.java',            // Licensing
-                '**/media/**/*.java',                // Media
-                '**/memory/**/*.java',               // Memory management
-                '**/modern/**/*.java',               // Modern components
-                '**/openjpeg/**/*.java',             // OpenJPEG
-                '**/orm/**/*.java',                  // Object-relational mapping
-                '**/react/**/*.java',                // React components
-                '**/render/**/*.java',               // Rendering
-                '**/res/**/*.java',                  // Resource management
-                '**/slproto/**/*.java',              // SL protocol - too complex for now
-                '!**/slproto/llsd/integration/**/*.java', // EXCEPT our LLSD integration
-                '!**/slproto/llsd/LLSDException.java', // EXCEPT basic LLSD exceptions
-                '!**/slproto/llsd/LLSDXMLException.java',
-                '!**/slproto/llsd/LLSDValueTypeException.java',
-                '!**/slproto/llsd/LLSDInvalidKeyException.java',
-                '!**/slproto/llsd/types/LLSDString.java', // EXCEPT basic LLSD types
-                '!**/slproto/llsd/types/LLSDInt.java',
-                '!**/slproto/llsd/types/LLSDDouble.java',
-                '!**/slproto/llsd/types/LLSDBoolean.java',
-                '!**/slproto/llsd/types/LLSDUUID.java',
-                '!**/slproto/llsd/types/LLSDURI.java',
-                '!**/slproto/llsd/types/LLSDDate.java',
-                '!**/slproto/llsd/types/LLSDArray.java',
-                '!**/slproto/llsd/types/LLSDMap.java',
-                '!**/slproto/llsd/types/LLSDUndefined.java',
-                '**/sync/**/*.java',                 // Sync
-
-                '**/ui/accounts/**/*.java',          // UI accounts
-                '**/ui/avapicker/**/*.java',         // Avatar picker
-                '**/ui/chat/**/*.java',              // Chat UI
-                '**/ui/common/**/*.java',            // Common UI
-                '**/ui/grids/**/*.java',             // Grids UI
-                '**/ui/inventory/**/*.java',         // Inventory UI
-                '**/ui/main/**/*.java',              // Main UI (except modern)
-                '**/ui/media/**/*.java',             // Media UI
-                '**/ui/minimap/**/*.java',           // Minimap
-                '**/ui/myava/**/*.java',             // My avatar UI
-                '**/ui/notify/**/*.java',            // Notifications UI
-                '**/ui/objects/**/*.java',           // Objects UI
-                '**/ui/objpopup/**/*.java',          // Object popup UI
-                '**/ui/outfits/**/*.java',           // Outfits UI
-                '**/ui/render/**/*.java',            // Render UI
-                '**/ui/search/**/*.java',            // Search UI
-                '**/ui/settings/**/*.java',          // Settings UI
-                '**/ui/voice/**/*.java',             // Voice UI
-                '**/voice/**/*.java',                // Voice
-                '**/voiceintf/**/*.java',            // Voice interface
-                '**/modern/protocol/**/*.java',      // Modern protocol with syntax errors
-                '**/modern/chat/**/*.java',          // Modern chat with syntax errors
-                '**/modern/demos/**/*.java',         // Modern demos with syntax errors
-                '**/modern/connection/**/*.java',    // Modern connection with issues
-                '**/modern/samples/ModernLinkpointDemo.java', // Demo with WebSocket dependencies
-                '**/modern/features/**/*.java',      // Modern features with protocol dependencies
-                '**/ui/modern/**/*.java',            // Modern UI with issues
-                '**/GlobalOptions.java',            // Global options with many dependencies
-                '**/slproto/types/CameraParams.java', // Camera params with render dependencies
-                '**/dao/**/*.java'                   // DAO classes with GreenDao dependencies
-            ]
-            java.excludes = javaExcludePatterns
-
-            // Mirror the Java exclusion patterns for Kotlin sources to avoid compiling problematic decompiled code
-            kotlin.excludes = javaExcludePatterns.collect { pattern ->
-                pattern.contains('.java') ? pattern.replace('.java', '.kt') : pattern
-            }.unique()
-            
-            // Include only essential modern auth components and core classes for tests
-            java.includes = [
-
-                '**/modern/auth/**/*.java',          // Working auth components (needed for tests)
-                '**/modern/avatar/**/*.java',        // Working avatar components (needed for tests)
-                '**/modern/graphics/**/*.java',      // Working graphics (needed for tests)
-                '**/modern/llsd/**/*.java',          // LLSD codec
-                '**/modern/samples/ProtocolCompatibilityDemo.java', // Working demo
-                '**/modern/utils/**/*.java',         // Modern utilities
-                '**/modern/voice/**/*.java',         // Voice components (needed for tests)
-                '**/llsd/**/*.java',                 // LLSD protocol
-                '**/base64/**/*.java',               // Base64 encoding
-                '**/Debug.java',                     // Debug utilities
-                '**/utils/UUIDPool.java',            // UUID utilities
-                '**/utils/StringUtils.java',         // String utilities
-                '**/utils/HashUtils.java',           // Hash utilities
-                '**/utils/HasPriority.java',         // Priority interface
-                '**/utils/Identifiable.java',       // Identifiable interface
-                '**/eventbus/**/*.java',             // Event bus
-                '**/slproto/types/LLVector*.java',   // Vector types only
-                '**/slproto/types/LLQuaternion.java', // Quaternion type
-                '**/slproto/types/ImmutableVector.java', // Vector stub
-                '**/slproto/llsd/**/*.java',         // LLSD types
-                '**/slproto/https/**/*.java',        // HTTPS requests
-                '**/slproto/SLMessage.java',         // SLMessage stub
-                '**/com/google/common/logging/nano/Vr.java' // Vr stub
-
-            ]
-        }
-    }
-
-    // IMPORTANT: Native build disabled for first APK bring-up.
-    // We will re-enable CMake/NDK after Java-only APK is proven.
-    // externalNativeBuild {
-    //     cmake {
-    //         path "src/main/cpp/CMakeLists.txt"
-    //         version "3.22.1"
-    //     }
-    // }
-
-    // ndkVersion not required while native build is disabled
 }
 
 dependencies {
-    // AndroidX Core - Latest stable versions (Q4 2024)
     implementation 'androidx.core:core-ktx:1.13.1'
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'com.google.android.material:material:1.12.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.fragment:fragment-ktx:1.8.4'
-    implementation 'androidx.activity:activity-ktx:1.9.3'
-    
-    // Lifecycle components - Latest stable versions
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.6'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.8.6'
-    
-    // Google libraries
-    implementation 'com.google.guava:guava:32.1.3-android'
-    implementation 'com.google.code.gson:gson:2.10.1'
-
-    // Multidex support for large method counts  
+    implementation 'androidx.activity:activity-ktx:1.9.3'
+    implementation 'androidx.preference:preference-ktx:1.2.1'
     implementation 'androidx.multidex:multidex:2.0.1'
 
-    // Google Play Services - Latest versions
-    implementation 'com.google.android.gms:play-services-drive:17.0.0'
-    implementation 'com.google.android.gms:play-services-auth:21.2.0'
-    implementation 'com.google.android.gms:play-services-base:18.5.0'
-
-    // Networking - Updated OkHttp
-    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
-
-    // WebRTC for voice chat - Stream WebRTC Android library (optional for voice)
-    // implementation 'io.getstream:stream-webrtc-android:1.1.1'
-    // implementation 'io.getstream:stream-webrtc-android-ui:1.1.1'
-    // implementation 'io.getstream:stream-webrtc-android-ktx:1.1.1'
-
-    // Audio processing - AAudio and OpenSL ES Android libraries
-    implementation 'androidx.media:media:1.7.0'
-
-    // LLSD Java library - @Kaleaon's enhanced version
-    implementation 'lindenlab:llsd:1.0'
-    
-    // Kotlin support - Latest stable Kotlin 1.9.x
     implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'
-    implementation 'org.jetbrains.kotlin:kotlin-reflect:1.9.22'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
-    
-    // Room Database - Disabled until properly configured with kapt
-    // When re-enabling Room, also uncomment kapt plugin in plugins section above
-    // def room_version = "2.6.1"
-    // implementation "androidx.room:room-runtime:$room_version"
-    // implementation "androidx.room:room-ktx:$room_version"
-    // kapt "androidx.room:room-compiler:$room_version"
-    
-    // Hilt Dependency Injection - Removed (not currently used, was causing crashes)
-    // When re-adding Hilt, must also:
-    // 1. Uncomment kapt plugin above
-    // 2. Add @HiltAndroidApp to LumiyaApp
-    // 3. Add @AndroidEntryPoint to activities that need injection
-    // def hilt_version = "2.48"
-    // implementation "com.google.dagger:hilt-android:$hilt_version"
-    // kapt "com.google.dagger:hilt-compiler:$hilt_version"
 
-    // Back-compat libs
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-
-    // UI components
-    implementation 'com.astuetz:pagerslidingtabstrip:1.0.1'
-
-    // Preferences - Latest AndroidX version
-    implementation 'androidx.preference:preference-ktx:1.2.1'
-    
-    // Jetpack Navigation - Latest stable versions
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.7.7'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.7.7'
-    implementation 'androidx.navigation:navigation-compose:2.7.7'
-    
-    // Jetpack Compose - BOM for version alignment
-    def composeBom = platform('androidx.compose:compose-bom:2024.02.00')
-    implementation composeBom
-    androidTestImplementation composeBom
-    
-    // Compose UI
-    implementation 'androidx.compose.ui:ui'
-    implementation 'androidx.compose.ui:ui-graphics'
-    implementation 'androidx.compose.ui:ui-tooling-preview'
-    implementation 'androidx.compose.material3:material3'
-    implementation 'androidx.compose.material:material-icons-extended'
-    implementation 'androidx.activity:activity-compose:1.9.3'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6'
-    implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.8.6'
-    
-    // Compose debugging
-    debugImplementation 'androidx.compose.ui:ui-tooling'
-    debugImplementation 'androidx.compose.ui:ui-test-manifest'
-    
-    // Filament Rendering Engine - Modern PBR renderer
-    implementation 'com.google.android.filament:filament-android:1.66.0'
-    implementation 'com.google.android.filament:filament-utils-android:1.66.0'
-    implementation 'com.google.android.filament:gltfio-android:1.66.0'
-    implementation 'com.google.android.filament:filamat-android:1.66.0'  // Runtime material compilation
-
-    // Testing
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.robolectric:robolectric:4.11.1'
-    testImplementation 'org.mockito:mockito-core:5.7.0'
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-
-    // Global exclusions/forces to avoid support-v7 vs AndroidX conflicts
-    configurations.all {
-        exclude group: 'org.apache.httpcomponents', module: 'httpclient'
-        exclude group: 'commons-logging', module: 'commons-logging'
-        exclude group: 'android.arch.lifecycle', module: 'common'
-        exclude group: 'com.android.support'
-        exclude group: 'com.android.support', module: 'support-annotations'
-        exclude group: 'com.android.support', module: 'support-v4'
-        exclude group: 'com.android.support', module: 'appcompat-v7'
-        exclude group: 'com.android.support', module: 'design'
-        exclude group: 'com.android.support', module: 'support-compat'
-
-        resolutionStrategy {
-            force 'androidx.appcompat:appcompat:1.7.0'
-            force 'com.google.android.material:material:1.12.0'
-            force 'androidx.activity:activity:1.9.3'
-            force 'androidx.activity:activity-ktx:1.9.3'
-            force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'
-        }
-    }
 }
