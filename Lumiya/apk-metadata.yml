@@ -1,0 +1,169 @@
+# Lumiya Reference APKs - Metadata Configuration
+# This file documents the reference APK files in this directory
+
+project:
+  name: Lumiya Reference APKs
+  type: reference_archive
+  status: archived
+  purpose: Historical reference and feature comparison
+  build_status: not_built
+  ci_cd: none
+  
+apks:
+  - name: Lumiya Main Application
+    filename: Lumiya_3.4.2.apk
+    version: 3.4.2
+    version_code: unknown
+    type: main_application
+    package_id: com.lumiyaviewer.lumiya
+    min_sdk: 21
+    target_sdk: unknown
+    size_mb: ~50
+    status: reference_only
+    description: Original Lumiya Second Life viewer for Android
+    features:
+      - Basic Second Life viewer functionality
+      - Chat and instant messaging
+      - Inventory management
+      - 3D rendering (OpenGL ES 2.0)
+      - Avatar customization
+      - Teleportation
+      - Friends and groups management
+      - Plugin support
+    limitations:
+      - No Animesh support
+      - No Bakes on Mesh (BoM)
+      - No Enhanced Environment (EEP)
+      - No PBR materials
+      - Legacy rendering engine
+    
+  - name: Lumiya Cloud Plugin
+    filename: Lumiya Cloud Plugin_1.0.apk
+    version: 1.0
+    version_code: unknown
+    type: plugin
+    package_id: com.lumiyaviewer.lumiya.cloud
+    min_sdk: 21
+    target_sdk: unknown
+    size_mb: ~5
+    status: reference_only
+    description: Cloud storage integration plugin for Lumiya
+    features:
+      - Cloud backup of settings
+      - Inventory cache synchronization
+      - Cross-device settings sync
+      - Automatic backup
+    requires:
+      - Lumiya main application
+    integration: plugin_api
+    
+  - name: Lumiya Voice Plugin
+    filename: Lumiya Voice Plugin_1.4.apk
+    version: 1.4
+    version_code: unknown
+    type: plugin
+    package_id: com.lumiyaviewer.lumiya.voice
+    min_sdk: 21
+    target_sdk: unknown
+    size_mb: ~10
+    status: reference_only
+    description: Voice communication plugin for Lumiya
+    features:
+      - Voice chat support
+      - Spatial audio
+      - Voice settings
+      - Microphone controls
+    requires:
+      - Lumiya main application
+    integration: plugin_api
+    permissions:
+      - RECORD_AUDIO
+      - MODIFY_AUDIO_SETTINGS
+
+architecture:
+  pattern: plugin_based
+  main_app: Lumiya_3.4.2.apk
+  plugins:
+    - Lumiya Cloud Plugin_1.0.apk
+    - Lumiya Voice Plugin_1.4.apk
+  benefits:
+    - Modular functionality
+    - Optional features
+    - Smaller main app size
+    - Independent updates
+  limitations:
+    - Complex installation (3 APKs)
+    - Plugin compatibility issues
+    - Multiple update cycles
+
+comparison:
+  successor: Linkpoint
+  successor_location: ../Linkpoint/
+  successor_status: active_development
+  
+  improvements_in_linkpoint:
+    - Single APK installation
+    - All features integrated
+    - Modern WebRTC voice (built-in)
+    - Cloud sync (built-in)
+    - Animesh support
+    - Bakes on Mesh (BoM)
+    - Enhanced Environment (EEP)
+    - PBR materials
+    - Filament rendering engine
+    - 100% Kotlin codebase
+    - AndroidX libraries
+    
+  migration_path:
+    - Backup Lumiya settings
+    - Install Linkpoint
+    - Import settings
+    - Uninstall Lumiya and plugins
+
+usage:
+  installation: not_recommended
+  recommended_action: Use Linkpoint instead
+  support: none
+  updates: none
+  
+  historical_installation:
+    steps:
+      - Install Lumiya_3.4.2.apk (main app)
+      - Install Lumiya Cloud Plugin_1.0.apk (optional)
+      - Install Lumiya Voice Plugin_1.4.apk (optional)
+      - Configure plugins in main app settings
+
+preservation:
+  reasons:
+    - Historical reference
+    - Feature comparison baseline
+    - Plugin architecture study
+    - Migration planning
+    - Documentation
+  
+  not_for:
+    - Active use
+    - Distribution
+    - Production deployment
+    - New installations
+
+decompilation:
+  supported: true
+  tool: Ghidra
+  script: ../../scripts/decompile_lumiya_with_ghidra.sh
+  purpose: Reverse engineering and analysis
+  output: ../../docs/ghidra_analysis/
+
+documentation:
+  readme: README.md
+  decompilation_guide: README.md
+  apk_organization: ../APK_ORGANIZATION_PLAN.md
+  linkpoint_readme: ../Linkpoint/README.md
+  legacy_app_readme: ../app/README.md
+
+metadata:
+  created: 2024-11-15
+  maintained_by: SuperNinja AI Agent
+  last_updated: 2024-11-15
+  status: complete
+  format_version: 1.0
