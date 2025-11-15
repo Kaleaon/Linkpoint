@@ -6,16 +6,18 @@
     android:padding="24dp"
     android:gravity="center_vertical">
 
+    <!-- App Title -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/app_name"
+        android:text="Lumiya - Second Life Viewer"
         android:textSize="24sp"
         android:textStyle="bold"
         android:gravity="center"
         android:layout_marginBottom="32dp"
         android:textColor="@android:color/black" />
 
+    <!-- First Name Input -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -31,6 +33,7 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- Last Name Input -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -46,6 +49,7 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- Password Input -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -61,6 +65,7 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- Login Button -->
     <Button
         android:id="@+id/button_login"
         android:layout_width="match_parent"
@@ -69,6 +74,7 @@
         android:textSize="16sp"
         android:layout_marginBottom="16dp" />
 
+    <!-- Progress Bar -->
     <ProgressBar
         android:id="@+id/progress_login"
         android:layout_width="wrap_content"
@@ -77,11 +83,12 @@
         android:visibility="gone"
         android:layout_marginBottom="16dp" />
 
+    <!-- Status Text -->
     <TextView
         android:id="@+id/text_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/clean_login_status_ready"
+        android:text="Ready to login"
         android:textSize="14sp"
         android:gravity="center"
         android:textColor="@android:color/darker_gray" />

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Lumiya" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/lumiya_primary</item>
+        <item name="colorPrimaryContainer">@color/lumiya_primary_dark</item>
+        <item name="colorSecondary">@color/lumiya_secondary</item>
+    </style>
+
+    <style name="Theme.Lumiya.Light" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/lumiya_primary</item>
+        <item name="colorSecondary">@color/lumiya_secondary</item>
+    </style>
+
+    <style name="Theme.Lumiya.Pink" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#FFE91E63</item>
+        <item name="colorPrimaryContainer">#FFD81B60</item>
+        <item name="colorSecondary">#FFF06292</item>
+    </style>
+
+    <style name="Theme.Lumiya.NoActionBar" parent="Theme.Lumiya" />
+
+</resources>
