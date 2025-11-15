@@ -20,3 +20,10 @@ each other.
 
 Use `./gradlew tasks` to verify that all modules are visible, or run the build commands above to
 generate APKs for each variant.
+
+### Android SDK requirements
+
+All modules expect a full Android SDK installed at `android-sdk/`, including the
+`platforms/android-34/android.jar` platform files and Build Tools 33.x/34.x. If the bundled SDK
+snapshot is missing those artifacts, install them via `sdkmanager` (or copy them from an existing
+SDK) before running any Gradle build.

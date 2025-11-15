@@ -8,6 +8,9 @@ This documentation provides comprehensive guidance for using the Linkpoint mobil
 
 The repository hosts three standalone Android builds (Modern Lumiya, Legacy Lumiya, and Linkpoint). See [APP_VERSIONS.md](APP_VERSIONS.md) for the directory layout and build commands.
 
+> **Note:** Running any of the Android builds requires a full Android SDK. Make sure the `android-sdk/`
+> directory contains `platforms/android-34/android.jar` and the accompanying Build Tools packages.
+
 ## Quick Start Guide
 
 ### For Users
