@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_world"
+        android:icon="@drawable/ic_linkpoint_world"
+        android:title="@string/linkpoint_world_title" />
+    <item
+        android:id="@+id/menu_chat"
+        android:icon="@drawable/ic_linkpoint_chat"
+        android:title="@string/linkpoint_chat_title" />
+</menu>
