@@ -34,7 +34,8 @@
 
         <service
             android:name="com.linkpoint.StreamingMediaService"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
 
     </application>
 

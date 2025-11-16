@@ -1,5 +1,6 @@
 package com.linkpoint.ui.login
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -12,8 +13,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import com.linkpoint.GridConnectionService
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
+import com.linkpoint.ui.modern.ModernWorldActivity
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -98,8 +101,13 @@ class CleanLoginActivity : AppCompatActivity() {
                 Toast.LENGTH_LONG
             ).show()
 
-            // TODO: Launch the real viewer experience once the modernised
-            // navigation stack is ready. For now we stay on this screen.
+            GridConnectionService.connect(
+                context = this@CleanLoginActivity,
+                firstName = first,
+                lastName = last,
+                password = password
+            )
+            startActivity(Intent(this@CleanLoginActivity, ModernWorldActivity::class.java))
         }
     }
 
