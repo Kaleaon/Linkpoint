@@ -37,7 +37,7 @@
     <string name="add_to_mute_list">Add to mute list</string>
     <string name="age_days">%d days old</string>
     <string name="app_descr">Second Life viewer</string>
-    <string name="app_name">Lumiya</string>
+    <string name="app_name">Linkpoint</string>
     <string name="app_upgrade_for_voice_needed">Lumiya needs to be updated to work with Voice Plugin.</string>
     <string name="appbar_scrolling_view_behavior">android.support.design.widget.AppBarLayout$ScrollingViewBehavior</string>
     <string name="arrow_down">⇩</string>
@@ -887,4 +887,21 @@
     <string name="you_were_paid">You were paid L$ %1$d. Your account balance is now L$ %2$d.</string>
     <string name="you_were_paid_by_agent">has paid you L$ %1$d. Your account balance is now L$ %2$d.</string>
     <string name="your_account_balance_is_now">Your account balance is now L$ %d.</string>
+
+    <!-- Modern Linkpoint additions -->
+    <string name="linkpoint_world_title">World</string>
+    <string name="linkpoint_chat_title">Chat</string>
+    <string name="linkpoint_world_initializing">Preparing renderer…</string>
+    <string name="linkpoint_world_ready">Renderer ready</string>
+    <string name="linkpoint_world_fps">FPS %1$s</string>
+    <string name="linkpoint_world_fps_placeholder">FPS --</string>
+    <string name="linkpoint_world_frame_time">%1$s</string>
+    <string name="linkpoint_world_frame_time_placeholder">Frame --</string>
+    <string name="linkpoint_world_reset_camera">Reset camera</string>
+    <string name="linkpoint_chat_connected">Connected</string>
+    <string name="linkpoint_chat_connecting">Connecting…</string>
+    <string name="linkpoint_chat_disconnected">Offline</string>
+    <string name="linkpoint_chat_empty_message">Message is empty</string>
+    <string name="linkpoint_chat_hint">Send a message to the Linkpoint relay</string>
+    <string name="linkpoint_chat_retry">Retry</string>
 </resources>

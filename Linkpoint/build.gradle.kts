@@ -84,13 +84,13 @@ android {
     buildFeatures {
         viewBinding = true
         buildConfig = true
+        dataBinding = false
     }
     
     sourceSets {
         getByName("main") {
             manifest.srcFile("src/main/AndroidManifest.xml")
-            java.srcDirs("src/main/java", "src/main/kotlin")
-            kotlin.srcDirs("src/main/java", "src/main/kotlin")
+            java.setSrcDirs(listOf("src/main/app"))
             res.srcDirs("src/main/res")
             assets.srcDirs("src/main/assets")
         }
@@ -122,6 +122,10 @@ android {
     }
 }
 
+kotlin {
+    sourceSets["main"].kotlin.setSrcDirs(listOf("src/main/app"))
+}
+
 dependencies {
     // AndroidX Core
     implementation("androidx.core:core-ktx:1.12.0")
@@ -132,6 +136,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.multidex:multidex:2.0.1")
     implementation("androidx.preference:preference-ktx:1.2.1")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
     
     // Lifecycle
