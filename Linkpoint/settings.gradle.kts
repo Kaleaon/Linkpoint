@@ -12,6 +12,10 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url = uri("https://jitpack.io") }
+        maven { 
+            name = "Clojars"
+            url = uri("https://repo.clojars.org/") 
+        }
     }
 }
 

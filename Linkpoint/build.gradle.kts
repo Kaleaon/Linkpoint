@@ -164,8 +164,8 @@ dependencies {
     // Audio processing
     implementation("androidx.media:media:1.7.0")
     
-    // LLSD Java library
-    implementation("lindenlab:llsd:1.0")
+    // LLSD Java library - Commented out, using local implementation
+    // implementation("lindenlab:llsd:1.0")
     
     // Kotlin support
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
