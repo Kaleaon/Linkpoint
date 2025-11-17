@@ -1,12 +1,14 @@
 package com.linkpoint.ui.login
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
-import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -18,6 +20,8 @@ import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.modern.protocol.HybridSLTransport
 import com.linkpoint.ui.modern.ModernWorldActivity
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -30,12 +34,14 @@ import kotlinx.coroutines.launch
  */
 class CleanLoginActivity : AppCompatActivity() {
 
-    private lateinit var firstNameField: EditText
-    private lateinit var lastNameField: EditText
-    private lateinit var passwordField: EditText
+    private lateinit var firstNameField: TextInputEditText
+    private lateinit var lastNameField: TextInputEditText
+    private lateinit var passwordField: TextInputEditText
     private lateinit var loginButton: Button
     private lateinit var progressBar: ProgressBar
     private lateinit var statusText: TextView
+    private lateinit var gridDropdown: AutoCompleteTextView
+    private var selectedGrid: HybridSLTransport.Grid = HybridSLTransport.Grid.SecondLifeMain
 
     private var loginJob: Job? = null
 
@@ -43,18 +49,37 @@ class CleanLoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_clean_login)
 
+        val toolbar: MaterialToolbar = findViewById(R.id.login_toolbar)
+        setSupportActionBar(toolbar)
+
         firstNameField = findViewById(R.id.edit_first_name)
         lastNameField = findViewById(R.id.edit_last_name)
         passwordField = findViewById(R.id.edit_password)
         loginButton = findViewById(R.id.button_login)
         progressBar = findViewById(R.id.progress_login)
         statusText = findViewById(R.id.text_status)
+        gridDropdown = findViewById(R.id.dropdown_grid)
+        findViewById<TextView>(R.id.text_create_account).setOnClickListener {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://join.secondlife.com")))
+        }
 
         statusText.text = getString(
             R.string.clean_login_status_ready,
             getString(R.string.app_name),
             LinkpointApp.getAppVersion()
         )
+
+        val grids = HybridSLTransport.Grid.values()
+        val gridAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_list_item_1,
+            grids.map { it.displayName }
+        )
+        gridDropdown.setAdapter(gridAdapter)
+        gridDropdown.setText(selectedGrid.displayName, false)
+        gridDropdown.setOnItemClickListener { _, _, position, _ ->
+            selectedGrid = grids[position]
+        }
 
         val watcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
@@ -107,7 +132,7 @@ class CleanLoginActivity : AppCompatActivity() {
                 firstName = first,
                 lastName = last,
                 password = password,
-                grid = HybridSLTransport.Grid.SecondLifeMain
+                grid = selectedGrid
             )
             startActivity(Intent(this@CleanLoginActivity, ModernWorldActivity::class.java))
         }
@@ -119,6 +144,7 @@ class CleanLoginActivity : AppCompatActivity() {
         firstNameField.isEnabled = !inProgress
         lastNameField.isEnabled = !inProgress
         passwordField.isEnabled = !inProgress
+        gridDropdown.isEnabled = !inProgress
         statusMessage?.let { statusText.text = it }
     }
 
