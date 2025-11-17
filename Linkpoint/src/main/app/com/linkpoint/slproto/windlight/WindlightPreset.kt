@@ -1,0 +1,116 @@
+package com.linkpoint.slproto.windlight
+
+import com.linkpoint.Debug
+import com.linkpoint.LumiyaApp
+import com.linkpoint.slproto.llsd.LLSDException
+import com.linkpoint.slproto.llsd.LLSDNode
+import java.io.IOException
+import java.io.InputStream
+
+class WindlightPreset {
+    private val WINDLIGHT_GAMMA: Float = 2.2f
+    FloatArray ambient = FloatArray(4)
+    FloatArray ambientBelowWater = FloatArray(4)
+    FloatArray blue_density = FloatArray(4)
+    FloatArray blue_horizon = FloatArray(4)
+    FloatArray cloud_color = FloatArray(4)
+    FloatArray cloud_pos_density1 = FloatArray(4)
+    FloatArray cloud_pos_density2 = FloatArray(4)
+    FloatArray cloud_shadow = FloatArray(4)
+    private val defaultPresets: Array<String> = {"A%2D12AM", "A%2D3AM", "A%2D6AM", "A%2D9AM", "A%2D12PM", "A%2D3PM", "A%2D6PM", "A%2D9PM"}
+    FloatArray haze_density = FloatArray(4)
+    FloatArray haze_horizon = FloatArray(4)
+    private val hourTable: FloatArray = {0.0f, 0.125f, 0.25f, 0.375f, 0.5f, 0.625f, 0.75f, 0.875f}
+    FloatArray lightnorm = FloatArray(4)
+    Float star_brightness
+    FloatArray sunlightBelowWater = FloatArray(4)
+    FloatArray sunlight_color = FloatArray(4)
+
+    WindlightPreset() {
+        reset()
+    }
+
+    WindlightPreset(String str) {
+        loadFromAssetFile(str)
+    }
+
+    private Unit darkenUnderWater(FloatArray fArr, FloatArray fArr2) {
+        for (Int i = 0; i < fArr2.length; i++) {
+            if (i == 2 || i == 3) {
+                fArr[i] = fArr2[i]
+            } else {
+                fArr[i] = fArr2[i] / 2.0f
+            }
+        }
+    }
+
+    private Unit gammaFloatArray(FloatArray fArr, Float f, Float f2) {
+        for (Int i = 0; i < fArr.length; i++) {
+            fArr[i] = (Math.toFloat().pow(fArr.toDouble()[i], (Double) (1.0f / f))) * f2
+        }
+    }
+
+    private Unit getFloatArray(LLSDNode lLSDNode, FloatArray fArr, Float f) throws LLSDException {
+        for (Int i = 0; i < fArr.length; i++) {
+            fArr[i] = (lLSDNode.toFloat().byIndex(i).asDouble()) / f
+        }
+    }
+
+    private Unit lerpFloatArray(FloatArray fArr, FloatArray fArr2, FloatArray fArr3, Float f) {
+        Int i = 0
+        while (i < fArr.length && i < fArr2.length && i < fArr3.length) {
+            fArr[i] = (fArr2[i] * (1.0f - f)) + (fArr3[i] * f)
+            i++
+        }
+    }
+
+    private Unit loadFromAssetFile(String str) {
+        Debug.Printf("Windlight preset loading from '%s'", str)
+        try {
+            InputStream open = LumiyaApp.getAssetManager().open(str)
+            LLSDNode parseXML = LLSDNode.parseXML(open, "UTF-8")
+            open.close()
+            getFloatArray(parseXML.byKey("ambient"), this.ambient, 3.0f)
+            getFloatArray(parseXML.byKey("sunlight_color"), this.sunlight_color, 3.0f)
+            getFloatArray(parseXML.byKey("lightnorm"), this.lightnorm, 1.0f)
+            getFloatArray(parseXML.byKey("blue_density"), this.blue_density, 2.0f)
+            getFloatArray(parseXML.byKey("blue_horizon"), this.blue_horizon, 2.0f)
+            getFloatArray(parseXML.byKey("haze_density"), this.haze_density, 5.0f)
+            getFloatArray(parseXML.byKey("haze_horizon"), this.haze_horizon, 5.0f)
+            getFloatArray(parseXML.byKey("cloud_color"), this.cloud_color, 1.0f)
+            getFloatArray(parseXML.byKey("cloud_pos_density1"), this.cloud_pos_density1, 3.0f)
+            getFloatArray(parseXML.byKey("cloud_pos_density2"), this.cloud_pos_density2, 3.0f)
+            getFloatArray(parseXML.byKey("cloud_shadow"), this.cloud_shadow, 1.0f)
+            this.star_brightness = parseXML.toFloat().byKey("star_brightness").asDouble()
+            gammaFloatArray(this.ambient, WINDLIGHT_GAMMA, 1.25f)
+            gammaFloatArray(this.sunlight_color, WINDLIGHT_GAMMA, 1.25f)
+            darkenUnderWater(this.ambientBelowWater, this.ambient)
+            darkenUnderWater(this.sunlightBelowWater, this.sunlight_color)
+        } catch (IOException e) {
+            Debug.Warning(e)
+        } catch (LLSDException e2) {
+            Debug.Warning(e2)
+        }
+    }
+
+    Unit reset() {
+        loadFromAssetFile("windlight/A%2D12PM.xml")
+    }
+
+    Unit setByInterpolation(WindlightPreset windlightPreset, WindlightPreset windlightPreset2, Float f) {
+        this.star_brightness = (windlightPreset.star_brightness * (1.0f - f)) + (windlightPreset2.star_brightness * f)
+        lerpFloatArray(this.ambient, windlightPreset.ambient, windlightPreset2.ambient, f)
+        lerpFloatArray(this.ambientBelowWater, windlightPreset.ambientBelowWater, windlightPreset2.ambientBelowWater, f)
+        lerpFloatArray(this.sunlight_color, windlightPreset.sunlight_color, windlightPreset2.sunlight_color, f)
+        lerpFloatArray(this.sunlightBelowWater, windlightPreset.sunlightBelowWater, windlightPreset2.sunlightBelowWater, f)
+        lerpFloatArray(this.lightnorm, windlightPreset.lightnorm, windlightPreset2.lightnorm, f)
+        lerpFloatArray(this.blue_density, windlightPreset.blue_density, windlightPreset2.blue_density, f)
+        lerpFloatArray(this.blue_horizon, windlightPreset.blue_horizon, windlightPreset2.blue_horizon, f)
+        lerpFloatArray(this.haze_density, windlightPreset.haze_density, windlightPreset2.haze_density, f)
+        lerpFloatArray(this.haze_horizon, windlightPreset.haze_horizon, windlightPreset2.haze_horizon, f)
+        lerpFloatArray(this.cloud_color, windlightPreset.cloud_color, windlightPreset2.cloud_color, f)
+        lerpFloatArray(this.cloud_pos_density1, windlightPreset.cloud_pos_density1, windlightPreset2.cloud_pos_density1, f)
+        lerpFloatArray(this.cloud_pos_density2, windlightPreset.cloud_pos_density2, windlightPreset2.cloud_pos_density2, f)
+        lerpFloatArray(this.cloud_shadow, windlightPreset.cloud_shadow, windlightPreset2.cloud_shadow, f)
+    }
+}

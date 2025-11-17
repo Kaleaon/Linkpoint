@@ -2,7 +2,7 @@ name: Build Linkpoint (Kotlin)
 
 on:
   push:
-    branches: [ main, develop, 'cursor/**' ]
+    branches: [ main, develop, 'cursor/**', 'copilot/**' ]
     paths:
       - 'Linkpoint/**'
       - '.github/workflows/build-linkpoint.yml'
@@ -51,7 +51,7 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
             ~/.android/build-cache
-            Linkpoint/.gradle
+            .gradle
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
@@ -67,24 +67,19 @@ jobs:
             ${{ runner.os }}-kotlin-
       
       - name: Grant execute permission for gradlew
-        run: |
-          cd Linkpoint
-          chmod +x gradlew
+        run: chmod +x gradlew
       
       - name: Display Gradle version
-        run: |
-          cd Linkpoint
-          ./gradlew --version
+        run: ./gradlew --version
       
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v2
       
       - name: Check Kotlin source structure
         run: |
-          echo "Checking Kotlin migration status..."
-          cd Linkpoint
-          KOTLIN_FILES=$(find src/main/kotlin -name "*.kt" 2>/dev/null | wc -l)
-          JAVA_FILES=$(find src/main/java -name "*.java" 2>/dev/null | wc -l)
+          echo "Checking Linkpoint project structure..."
+          KOTLIN_FILES=$(find Linkpoint/src -name "*.kt" 2>/dev/null | wc -l)
+          JAVA_FILES=$(find Linkpoint/src -name "*.java" 2>/dev/null | wc -l)
           echo "✅ Kotlin files: $KOTLIN_FILES"
           echo "📊 Java files: $JAVA_FILES"
           echo "kotlin_files=$KOTLIN_FILES" >> $GITHUB_ENV
@@ -95,55 +90,36 @@ jobs:
           fi
       
       - name: Clean build
-        run: |
-          cd Linkpoint
-          ./gradlew clean --stacktrace
+        run: ./gradlew clean --stacktrace
       
-      - name: Build Debug APK
-        run: |
-          cd Linkpoint
-          ./gradlew assembleDebug --stacktrace --info --no-daemon
+      - name: Build Linkpoint Debug APK
+        run: ./gradlew :Linkpoint:assembleDebug --stacktrace
         env:
           GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError"
       
-      - name: Build Release APK
-        run: |
-          cd Linkpoint
-          ./gradlew assembleRelease --stacktrace --info --no-daemon
+      - name: Build Linkpoint Release APK
+        run: ./gradlew :Linkpoint:assembleRelease --stacktrace
         continue-on-error: true
         env:
           GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError"
       
       - name: Run Kotlin compilation checks
-        run: |
-          cd Linkpoint
-          ./gradlew compileDebugKotlin --stacktrace
+        run: ./gradlew :Linkpoint:compileDebugKotlin --stacktrace
         continue-on-error: true
       
       - name: Run unit tests
-        run: |
-          cd Linkpoint
-          ./gradlew testDebugUnitTest --stacktrace --continue
+        run: ./gradlew :Linkpoint:testDebugUnitTest --stacktrace --continue
         continue-on-error: true
       
       - name: Run lint analysis
-        run: |
-          cd Linkpoint
-          ./gradlew lintDebug --stacktrace
-        continue-on-error: true
-      
-      - name: Generate code coverage
-        run: |
-          cd Linkpoint
-          ./gradlew jacocoTestReport
+        run: ./gradlew :Linkpoint:lintDebug --stacktrace
         continue-on-error: true
       
       - name: Analyze APK size
         if: success()
         run: |
-          cd Linkpoint
-          if [ -f build/outputs/apk/debug/*.apk ]; then
-            APK_SIZE=$(du -h build/outputs/apk/debug/*.apk | cut -f1)
+          if [ -f Linkpoint/build/outputs/apk/debug/*.apk ]; then
+            APK_SIZE=$(du -h Linkpoint/build/outputs/apk/debug/*.apk | cut -f1)
             echo "apk_size=$APK_SIZE" >> $GITHUB_ENV
             echo "📦 APK Size: $APK_SIZE"
           fi
@@ -210,23 +186,21 @@ jobs:
           fi
           
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## 🎯 Kotlin Migration Status" >> $GITHUB_STEP_SUMMARY
+          echo "## 🎯 Linkpoint Project Info" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Kotlin files:** ${{ env.kotlin_files }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Java files:** ${{ env.java_files }}" >> $GITHUB_STEP_SUMMARY
           
           if [ "${{ env.java_files }}" -eq 0 ]; then
-            echo "- **Migration:** ✅ **100% COMPLETE**" >> $GITHUB_STEP_SUMMARY
+            echo "- **Status:** ✅ **100% Kotlin**" >> $GITHUB_STEP_SUMMARY
           fi
           
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## ✨ Features Included" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **Animesh** - Animated mesh support" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **Bakes on Mesh (BoM)** - Texture baking" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **Enhanced Environment (EEP)** - Advanced lighting" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **PBR Materials** - Physically-based rendering" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **WebRTC Voice** - Modern voice chat" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Material 3** - Modern Material Design" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Filament Rendering** - Advanced 3D graphics" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **WebRTC Integration** - Modern voice chat" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ **Full Kotlin** - Modern language features" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ **Coroutines** - Async programming" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ **AndroidX** - Modern Android libraries" >> $GITHUB_STEP_SUMMARY
@@ -281,10 +255,9 @@ jobs:
       
       - name: Analyze Kotlin code metrics
         run: |
-          cd Linkpoint
-          echo "Analyzing Kotlin codebase..."
-          TOTAL_KOTLIN=$(find src/main/kotlin -name "*.kt" | wc -l)
-          TOTAL_LINES=$(find src/main/kotlin -name "*.kt" -exec wc -l {} + | tail -1 | awk '{print $1}')
+          echo "Analyzing Linkpoint Kotlin codebase..."
+          TOTAL_KOTLIN=$(find Linkpoint/src -name "*.kt" 2>/dev/null | wc -l)
+          TOTAL_LINES=$(find Linkpoint/src -name "*.kt" -exec wc -l {} + 2>/dev/null | tail -1 | awk '{print $1}')
           echo "Total Kotlin files: $TOTAL_KOTLIN"
           echo "Total lines of code: $TOTAL_LINES"
           
@@ -326,11 +299,10 @@ jobs:
             
             ### ✨ Features
             - ✅ 100% Kotlin codebase
-            - ✅ Animesh support
-            - ✅ Bakes on Mesh (BoM)
-            - ✅ Enhanced Environment (EEP)
-            - ✅ PBR Materials
-            - ✅ WebRTC Voice
+            - ✅ Material 3 design
+            - ✅ Filament rendering engine
+            - ✅ WebRTC voice integration
+            - ✅ Modern Android architecture
             
             ### 📦 Downloads
             - **Debug APK**: Development build with debugging enabled
@@ -338,8 +310,8 @@ jobs:
             
             ### 🔧 Requirements
             - Android 7.0 (API 24) or higher
-            - ARM64 or ARMv7 device
-            - ~100MB storage space
+            - ARM64 device
+            - ~10MB storage space
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       

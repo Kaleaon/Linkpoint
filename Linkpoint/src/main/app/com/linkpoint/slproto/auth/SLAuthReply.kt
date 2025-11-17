@@ -1,55 +1,318 @@
 package com.linkpoint.slproto.auth
 
-/**
- * Complete response from the Second Life XML-RPC login endpoint.
- */
-data class SLAuthReply(
-    val success: Boolean,
-    val reason: String? = null,
-    val message: String? = null,
+import com.google.common.collect.ImmutableList
+import com.google.vr.cardboard.VrSettingsProviderContract
+import com.linkpoint.Debug
+import com.linkpoint.utils.UUIDPool
+import java.io.IOException
+import java.util.Collection
+import java.util.LinkedList
+import java.util.List
+import java.util.UUID
+import androidx.annotation.NonNull
+import org.xmlpull.v1.XmlPullParser
+import org.xmlpull.v1.XmlPullParserException
 
-    // Session
-    val sessionId: String? = null,
-    val secureSessionId: String? = null,
-    val agentId: String? = null,
-    val agentAccess: String? = null,
+class SLAuthReply {
+    String agentAppearanceService
+    UUID agentID
+    Int circuitCode
+    ImmutableList<Friend> friends
+    Boolean fromTeleport
+    String gridName
+    UUID inventoryRoot
+    Boolean isIndeterminate
+    Boolean isTemporary
+    String loginURL
+    String message
+    String nextMethod
+    String nextURL
+    UUID secureSessionID
+    String seedCapability
+    UUID sessionID
+    String simAddress
+    Int simPort
+    Boolean success
 
-    // Region
-    val simIp: String? = null,
-    val simPort: Int? = null,
-    val regionX: Int? = null,
-    val regionY: Int? = null,
-    val seedCapability: String? = null,
+    class Friend {
+        Int rightsGiven
+        Int rightsHas
+        @NonNull
+        UUID uuid
 
-    // Avatar
-    val firstName: String? = null,
-    val lastName: String? = null,
-    val startLocation: String? = null,
-    val lookAt: String? = null,
-    val home: String? = null,
+        Friend(@NonNull UUID uuid2, Int i, Int i2) {
+            this.uuid = uuid2
+            this.rightsGiven = i
+            this.rightsHas = i2
+        }
+    }
 
-    // Circuit
-    val circuitCode: Int? = null,
+    SLAuthReply(SLAuthReply sLAuthReply, Boolean z, Boolean z2, UUID uuid, String str, Int i, String str2) {
+        this.gridName = sLAuthReply.gridName
+        this.loginURL = sLAuthReply.loginURL
+        this.sessionID = sLAuthReply.sessionID
+        this.secureSessionID = sLAuthReply.secureSessionID
+        this.agentID = uuid == null ? sLAuthReply.agentID : uuid
+        this.circuitCode = sLAuthReply.circuitCode
+        this.simAddress = str
+        this.simPort = i
+        this.seedCapability = str2
+        this.success = sLAuthReply.success
+        this.message = sLAuthReply.message
+        this.agentAppearanceService = sLAuthReply.agentAppearanceService
+        this.inventoryRoot = sLAuthReply.inventoryRoot
+        this.friends = sLAuthReply.friends
+        this.isIndeterminate = sLAuthReply.isIndeterminate
+        this.nextMethod = sLAuthReply.nextMethod
+        this.nextURL = sLAuthReply.nextURL
+        this.fromTeleport = z
+        this.isTemporary = z2
+    }
 
-    // Inventory
-    val inventoryRoot: List<Map<String, String>>? = null,
-    val inventorySkeleton: List<Map<String, String>>? = null,
-    val inventoryLibRoot: List<Map<String, String>>? = null,
-    val inventoryLibOwner: List<Map<String, String>>? = null,
-    val inventorySkel: List<Map<String, String>>? = null,
+    SLAuthReply(String str, String str2, @NonNull XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+        this.gridName = str
+        this.loginURL = str2
+        Boolean z = false
+        String str3 = null
+        String str4 = null
+        UUID uuid = null
+        UUID uuid2 = null
+        UUID uuid3 = null
+        Int i = 0
+        String str5 = null
+        Int i2 = 0
+        String str6 = null
+        Boolean z2 = false
+        String str7 = ""
+        String str8 = null
+        UUID uuid4 = null
+        Collection of = ImmutableList.of()
+        xmlPullParser.nextTag()
+        xmlPullParser.require(2, (String) null, "methodResponse")
+        xmlPullParser.nextTag()
+        if (skipUntilTag(xmlPullParser, "params")) {
+            if (skipUntilTag(xmlPullParser, "param")) {
+                if (skipUntilTag(xmlPullParser, VrSettingsProviderContract.SETTING_VALUE_KEY)) {
+                    if (skipUntilTag(xmlPullParser, "struct")) {
+                        while (skipUntilTag(xmlPullParser, "member")) {
+                            if (skipUntilTag(xmlPullParser, "name")) {
+                                String innerText = getInnerText(xmlPullParser)
+                                finishTag(xmlPullParser)
+                                if (skipUntilTag(xmlPullParser, VrSettingsProviderContract.SETTING_VALUE_KEY)) {
+                                    if (innerText.equalsIgnoreCase("session_id")) {
+                                        uuid = UUIDPool.getUUID(getSimpleValue(xmlPullParser))
+                                    } else if (innerText.equalsIgnoreCase("secure_session_id")) {
+                                        uuid2 = UUIDPool.getUUID(getSimpleValue(xmlPullParser))
+                                    } else if (innerText.equalsIgnoreCase("agent_id")) {
+                                        uuid3 = UUIDPool.getUUID(getSimpleValue(xmlPullParser))
+                                    } else if (innerText.equalsIgnoreCase("circuit_code")) {
+                                        i = Integer.decode(getSimpleValue(xmlPullParser)).intValue()
+                                    } else if (innerText.equalsIgnoreCase("sim_ip")) {
+                                        str5 = getSimpleValue(xmlPullParser)
+                                    } else if (innerText.equalsIgnoreCase("sim_port")) {
+                                        i2 = Integer.decode(getSimpleValue(xmlPullParser)).intValue()
+                                    } else if (innerText.equalsIgnoreCase("seed_capability")) {
+                                        str6 = getSimpleValue(xmlPullParser)
+                                    } else if (innerText.equalsIgnoreCase("login")) {
+                                        String simpleValue = getSimpleValue(xmlPullParser)
+                                        z2 = simpleValue.equalsIgnoreCase("true")
+                                        z = simpleValue.equalsIgnoreCase("indeterminate")
+                                    } else if (innerText.equalsIgnoreCase("next_url")) {
+                                        str3 = getSimpleValue(xmlPullParser)
+                                    } else if (innerText.equalsIgnoreCase("next_method")) {
+                                        str4 = getSimpleValue(xmlPullParser)
+                                    } else if (innerText.equalsIgnoreCase("message")) {
+                                        str7 = getSimpleValue(xmlPullParser)
+                                    } else if (innerText.equalsIgnoreCase("agent_appearance_service")) {
+                                        str8 = getSimpleValue(xmlPullParser)
+                                    } else if (innerText.equalsIgnoreCase("inventory-root")) {
+                                        uuid4 = getInventoryRootValue(xmlPullParser)
+                                    } else if (innerText.equalsIgnoreCase("buddy-list")) {
+                                        of = parseBuddyList(xmlPullParser)
+                                    }
+                                    finishTag(xmlPullParser)
+                                }
+                                finishTag(xmlPullParser)
+                            } else {
+                                throw XmlPullParserException("Not found name", xmlPullParser, (Throwable) null)
+                            }
+                        }
+                        finishTag(xmlPullParser)
+                    }
+                    finishTag(xmlPullParser)
+                }
+                finishTag(xmlPullParser)
+            }
+            finishTag(xmlPullParser)
+        }
+        this.sessionID = uuid
+        this.secureSessionID = uuid2
+        this.agentID = uuid3
+        this.circuitCode = i
+        this.simAddress = str5
+        this.simPort = i2
+        this.seedCapability = str6
+        this.success = z2
+        this.message = str7
+        this.agentAppearanceService = str8
+        this.inventoryRoot = uuid4
+        this.friends = ImmutableList.copyOf(of)
+        this.fromTeleport = false
+        this.isTemporary = false
+        this.isIndeterminate = z
+        this.nextURL = str3
+        this.nextMethod = str4
+    }
 
-    // Friends / Config
-    val buddyList: List<Map<String, String>>? = null,
-    val uiConfig: List<Map<String, String>>? = null,
-    val loginFlags: List<Map<String, String>>? = null,
-    val globalTextures: List<Map<String, String>>? = null,
+    private Unit finishTag(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+        while (xmlPullParser.getEventType() != 1) {
+            if (xmlPullParser.getEventType() == 3) {
+                xmlPullParser.next()
+                return
+            } else if (xmlPullParser.getEventType() == 2) {
+                skipTag(xmlPullParser)
+            } else {
+                xmlPullParser.next()
+            }
+        }
+    }
 
-    // Categories
-    val eventCategories: List<Map<String, String>>? = null,
-    val eventNotifications: List<Map<String, String>>? = null,
-    val classifiedCategories: List<Map<String, String>>? = null,
+    private String getInnerText(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+        if (xmlPullParser.getEventType() != 4) {
+            return ""
+        }
+        String text = xmlPullParser.getText()
+        xmlPullParser.next()
+        return text
+    }
 
-    // Limits
-    val maxAgentGroups: Int? = null,
-    val secondsSinceEpoch: Long? = null
-)
+    private UUID getInventoryRootValue(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+        UUID uuid = null
+        if (skipUntilTag(xmlPullParser, "array")) {
+            if (skipUntilTag(xmlPullParser, "data")) {
+                while (skipUntilTag(xmlPullParser, VrSettingsProviderContract.SETTING_VALUE_KEY)) {
+                    if (skipUntilTag(xmlPullParser, "struct")) {
+                        while (skipUntilTag(xmlPullParser, "member")) {
+                            if (skipUntilTag(xmlPullParser, "name")) {
+                                String innerText = getInnerText(xmlPullParser)
+                                finishTag(xmlPullParser)
+                                if (skipUntilTag(xmlPullParser, VrSettingsProviderContract.SETTING_VALUE_KEY)) {
+                                    if (innerText.equalsIgnoreCase("folder_id")) {
+                                        uuid = UUID.fromString(getSimpleValue(xmlPullParser))
+                                    }
+                                    finishTag(xmlPullParser)
+                                }
+                            }
+                            finishTag(xmlPullParser)
+                        }
+                        finishTag(xmlPullParser)
+                    }
+                    finishTag(xmlPullParser)
+                }
+                finishTag(xmlPullParser)
+            }
+            finishTag(xmlPullParser)
+        }
+        return uuid
+    }
+
+    private String getSimpleValue(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+        while (xmlPullParser.getEventType() == 4) {
+            xmlPullParser.next()
+        }
+        String nextText = xmlPullParser.nextText()
+        xmlPullParser.nextTag()
+        Debug.Printf("got value '%s'", nextText)
+        return nextText
+    }
+
+    private List<Friend> parseBuddyList(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+        LinkedList linkedList = LinkedList()
+        if (skipUntilTag(xmlPullParser, "array")) {
+            if (skipUntilTag(xmlPullParser, "data")) {
+                while (skipUntilTag(xmlPullParser, VrSettingsProviderContract.SETTING_VALUE_KEY)) {
+                    if (skipUntilTag(xmlPullParser, "struct")) {
+                        Int i = 0
+                        Int i2 = 0
+                        UUID uuid = null
+                        while (skipUntilTag(xmlPullParser, "member")) {
+                            if (skipUntilTag(xmlPullParser, "name")) {
+                                String innerText = getInnerText(xmlPullParser)
+                                finishTag(xmlPullParser)
+                                if (skipUntilTag(xmlPullParser, VrSettingsProviderContract.SETTING_VALUE_KEY)) {
+                                    if (innerText.equalsIgnoreCase("buddy_id")) {
+                                        uuid = UUIDPool.getUUID(getSimpleValue(xmlPullParser))
+                                    } else if (innerText.equalsIgnoreCase("buddy_rights_given")) {
+                                        i2 = Integer.parseInt(getSimpleValue(xmlPullParser))
+                                    } else if (innerText.equalsIgnoreCase("buddy_rights_has")) {
+                                        i = Integer.parseInt(getSimpleValue(xmlPullParser))
+                                    }
+                                    finishTag(xmlPullParser)
+                                }
+                            }
+                            finishTag(xmlPullParser)
+                        }
+                        if (uuid != null) {
+                            linkedList.add(Friend(uuid, i2, i))
+                        }
+                        finishTag(xmlPullParser)
+                    }
+                    finishTag(xmlPullParser)
+                }
+                finishTag(xmlPullParser)
+            }
+            finishTag(xmlPullParser)
+        }
+        return linkedList
+    }
+
+    private Unit skipTag(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
+        Int i = 0
+        while (true) {
+            switch (xmlPullParser.next()) {
+                case 1:
+                    return
+                case 2:
+                    i++
+                    break
+                case 3:
+                    if (i != 0) {
+                        i--
+                        break
+                    } else {
+                        xmlPullParser.nextTag()
+                        return
+                    }
+            }
+        }
+    }
+
+    private Boolean skipUntilTag(XmlPullParser xmlPullParser, String str) throws XmlPullParserException, IOException {
+        while (xmlPullParser.getEventType() != 3 && xmlPullParser.getEventType() != 1) {
+            if (xmlPullParser.getEventType() == 4) {
+                xmlPullParser.next()
+            } else if (xmlPullParser.getEventType() != 2 || !xmlPullParser.getName().equalsIgnoreCase(str)) {
+                skipTag(xmlPullParser)
+            } else {
+                xmlPullParser.next()
+                return true
+            }
+        }
+        return false
+    }
+
+    Boolean equals(Object obj) {
+        if (obj == this) {
+            return true
+        }
+        if (!(obj instanceof SLAuthReply)) {
+            return false
+        }
+        SLAuthReply sLAuthReply = (SLAuthReply) obj
+        return this.simAddress.equals(sLAuthReply.simAddress) && this.simPort == sLAuthReply.simPort && this.agentID.equals(sLAuthReply.agentID) && this.sessionID.equals(sLAuthReply.sessionID) && this.circuitCode == sLAuthReply.circuitCode
+    }
+
+    Int hashCode() {
+        return this.simAddress.hashCode() + 0 + this.simPort + this.agentID.hashCode() + this.sessionID.hashCode() + this.circuitCode
+    }
+}

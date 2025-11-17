@@ -1,167 +1,235 @@
 package com.linkpoint
 
+import android.app.Notification
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.media.AudioAttributes
-import android.media.AudioFocusRequest
-import android.media.AudioManager
-import android.media.MediaPlayer
-import android.net.Uri
-import android.os.Binder
+import android.content.IntentFilter
+import android.os.Handler
 import android.os.IBinder
-import android.util.Log
+import android.os.Looper
+import android.os.Message
+import androidx.core.app.NotificationCompat
+import com.google.common.base.Strings
+import com.linkpoint.media.AudioIntentReceiver
+import com.linkpoint.media.AudioManagerWrapper
+import com.linkpoint.media.MediaPlayerWrapper
+import com.linkpoint.react.SubscriptionSingleDataPool
+import com.linkpoint.react.SubscriptionSingleKey
+import com.linkpoint.slproto.avatar.SLMoveEvents
+import com.linkpoint.slproto.users.ParcelData
+import com.linkpoint.slproto.users.manager.UserManager
+import com.linkpoint.ui.chat.profiles.ParcelPropertiesFragment
+import com.linkpoint.ui.common.ActivityUtils
+import com.linkpoint.ui.media.StreamingMediaActivity
+import java.lang.ref.WeakReference
+import java.util.UUID
 
 /**
- * Handles parcelable audio stream playback for in-world media parcels or
- * voice streams. The implementation focuses on correctness and resource
- * hygiene so it can be used safely from the UI, tests, or background jobs.
+ * Service for streaming media playback
+ * Manages audio focus and notification
  */
-class StreamingMediaService : Service(), AudioManager.OnAudioFocusChangeListener {
+class StreamingMediaService : Service() {
+    
+    val LOCATION_DESC_KEY = "location_desc"
+    val LOCATION_NAME_KEY = "location_name"
+    val MEDIA_URL_KEY = "media_url"
+    private val MSG_ON_AUDIO_FOCUS_CHANGE = 100
+    
+    val isPlayingMedia = SubscriptionSingleDataPool<Boolean>()
+    
+    private var audioManagerWrapper: AudioManagerWrapper? = null
+    private var lastActiveAgentUUID: UUID? = null
+    private var lastLocationDesc = ""
+    private var lastLocationName = ""
+    private var lastParcelData: ParcelData? = null
+    private var lastURL = ""
+    private val mHandler = AudioFocusChangeHandler(this)
+    private val mediaWrapper = MediaPlayerWrapper()
+    private val noisyReceiver = AudioIntentReceiver()
+    private var notify: Notification? = null
 
-    private val binder = MediaBinder()
-    private lateinit var audioManager: AudioManager
-    private var focusRequest: AudioFocusRequest? = null
-    private var mediaPlayer: MediaPlayer? = null
-    private var currentUri: Uri? = null
+    /**
+     * Handler for audio focus changes
+     */
+    private class AudioFocusChangeHandler(
+        service: StreamingMediaService
+    ) : Handler(Looper.getMainLooper()) {
+        
+        private val streamingMediaService = WeakReference(service)
+
+        override fun handleMessage(msg: Message) {
+            if (msg.what == 100) {
+                streamingMediaService.get()?.handleAudioFocusChange(msg.arg1)
+            }
+        }
+    }
+
+    /**
+     * Handle audio focus changes
+     */
+    private fun handleAudioFocusChange(focusChange: Int) {
+        Debug.Log("StreamingMediaService: focusChange = $focusChange")
+        
+        if (focusChange == -1) { // AUDIOFOCUS_LOSS
+            isPlayingMedia.setData(SubscriptionSingleKey.Value, false)
+            mediaWrapper.stop()
+            audioManagerWrapper?.abandonAudioFocus()
+            safeUnregisterReceiver()
+            stopForeground(true)
+            notify = null
+            stopSelf()
+        }
+    }
+
+    /**
+     * Handle service start
+     */
+    private fun handleStartService(intent: Intent?) {
+        intent ?: return
+        
+        val action = intent.action ?: ""
+        
+        if (action == "com.linkpoint.ACTION_PLAY_MEDIA") {
+            val mediaUrl = intent.getStringExtra(MEDIA_URL_KEY)
+            Debug.Log("StreamingMediaService: service is started, playing $mediaUrl")
+            
+            lastURL = mediaUrl ?: ""
+            lastLocationName = intent.getStringExtra(LOCATION_NAME_KEY) ?: ""
+            lastLocationDesc = intent.getStringExtra(LOCATION_DESC_KEY) ?: ""
+            lastParcelData = if (intent.hasExtra(ParcelPropertiesFragment.PARCEL_DATA_KEY)) {
+                intent.getSerializableExtra(ParcelPropertiesFragment.PARCEL_DATA_KEY) as? ParcelData
+            } else {
+                null
+            }
+            lastActiveAgentUUID = ActivityUtils.getActiveAgentID(intent)
+            
+            val hasAudioFocus = audioManagerWrapper?.requestAudioFocus() ?: false
+            
+            if (hasAudioFocus) {
+                showNotification()
+                safeRegisterReceiver()
+                isPlayingMedia.setData(SubscriptionSingleKey.Value, true)
+                mediaWrapper.play(mediaUrl)
+            }
+        } else {
+            // Stop media
+            isPlayingMedia.setData(SubscriptionSingleKey.Value, false)
+            mediaWrapper.stop()
+            audioManagerWrapper?.abandonAudioFocus()
+            safeUnregisterReceiver()
+            stopForeground(true)
+            notify = null
+            stopSelf()
+        }
+    }
+
+    /**
+     * Register broadcast receiver for audio becoming noisy
+     */
+    private fun safeRegisterReceiver() {
+        try {
+            registerReceiver(noisyReceiver, IntentFilter("android.media.AUDIO_BECOMING_NOISY"))
+        } catch (e: Exception) {
+            Debug.Log("StreamingMediaService: Failed to register noisy receiver")
+        }
+    }
+
+    /**
+     * Unregister broadcast receiver
+     */
+    private fun safeUnregisterReceiver() {
+        try {
+            unregisterReceiver(noisyReceiver)
+        } catch (e: Exception) {
+            Debug.Log("StreamingMediaService: Failed to unregister noisy receiver")
+        }
+    }
+
+    /**
+     * Show media playback notification
+     */
+    private fun showNotification() {
+        val stopIntent = PendingIntent.getService(
+            this,
+            0,
+            Intent(this, StreamingMediaService::class.java),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+        
+        val activityIntent = Intent(this, StreamingMediaActivity::class.java).apply {
+            ActivityUtils.setActiveAgentID(this, lastActiveAgentUUID)
+            putExtra(ParcelPropertiesFragment.PARCEL_DATA_KEY, lastParcelData)
+        }
+        
+        val notification = NotificationCompat.Builder(this, "media_playback")
+            .setSmallIcon(R.drawable.ic_playing_media)
+            .setContentTitle("Playing media")
+            .setContentText(lastLocationName)
+            .setDefaults(0)
+            .setOngoing(true)
+            .setContentIntent(
+                PendingIntent.getActivity(
+                    this,
+                    0,
+                    activityIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            )
+            .addAction(R.drawable.icon_material_stop, "Stop", stopIntent)
+            .setDeleteIntent(stopIntent)
+            .setOnlyAlertOnce(true)
+            .build()
+        
+        startForeground(R.id.media_notify_id, notification)
+    }
+
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()
-        audioManager = getSystemService(AudioManager::class.java)
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.action) {
-            ACTION_PLAY -> intent.uriExtra()?.let { playStream(it) }
-            ACTION_STOP -> stopPlayback()
+        audioManagerWrapper = AudioManagerWrapper(this).apply {
+            setHandler(mHandler, MSG_ON_AUDIO_FOCUS_CHANGE)
         }
-        return START_NOT_STICKY
     }
-
-    override fun onBind(intent: Intent?): IBinder = binder
 
     override fun onDestroy() {
-        stopPlayback()
-        abandonFocus()
+        mediaWrapper.release()
+        audioManagerWrapper?.abandonAudioFocus()
+        safeUnregisterReceiver()
+        stopForeground(true)
+        notify = null
+        isPlayingMedia.setData(SubscriptionSingleKey.Value, false)
         super.onDestroy()
     }
 
-    private fun playStream(uri: Uri) {
-        if (uri == currentUri && mediaPlayer?.isPlaying == true) {
-            return
-        }
-        currentUri = uri
-
-        if (!requestFocus()) {
-            Log.w(TAG, "Unable to obtain audio focus")
-            return
-        }
-
-        mediaPlayer?.release()
-        mediaPlayer = MediaPlayer().apply {
-            setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_MEDIA)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .build()
-            )
-            setDataSource(applicationContext, uri)
-            setOnPreparedListener { start() }
-            setOnCompletionListener { stopPlayback() }
-            setOnErrorListener { _, what, extra ->
-                Log.e(TAG, "MediaPlayer error what=$what extra=$extra")
-                stopPlayback()
-                true
-            }
-            prepareAsync()
-        }
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        handleStartService(intent)
+        return START_NOT_STICKY
     }
-
-    private fun stopPlayback() {
-        mediaPlayer?.run {
-            setOnPreparedListener(null)
-            setOnCompletionListener(null)
-            stop()
-            release()
-        }
-        mediaPlayer = null
-        currentUri = null
-        abandonFocus()
-        stopSelf()
-    }
-
-    override fun onAudioFocusChange(focusChange: Int) {
-        when (focusChange) {
-            AudioManager.AUDIOFOCUS_LOSS,
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> stopPlayback()
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK ->
-                mediaPlayer?.setVolume(DUCK_VOLUME, DUCK_VOLUME)
-            AudioManager.AUDIOFOCUS_GAIN ->
-                mediaPlayer?.setVolume(NORMAL_VOLUME, NORMAL_VOLUME)
-        }
-    }
-
-    private fun requestFocus(): Boolean {
-        if (::audioManager.isInitialized.not()) {
-            audioManager = getSystemService(AudioManager::class.java)
-        }
-        val request = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-            .setOnAudioFocusChangeListener(this)
-            .setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_MEDIA)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .build()
-            )
-            .build()
-        val result = audioManager.requestAudioFocus(request) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
-        if (result) {
-            focusRequest = request
-        }
-        return result
-    }
-
-    private fun abandonFocus() {
-        focusRequest?.let { audioManager.abandonAudioFocusRequest(it) }
-        focusRequest = null
-    }
-
-    inner class MediaBinder : Binder() {
-        fun play(uri: Uri) = playStream(uri)
-        fun stop() = stopPlayback()
-        fun isPlaying(): Boolean = mediaPlayer?.isPlaying == true
-        fun currentStream(): Uri? = currentUri
-    }
-
-    private fun Intent.uriExtra(): Uri? =
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            getParcelableExtra(EXTRA_URI, Uri::class.java)
-        } else {
-            @Suppress("DEPRECATION")
-            getParcelableExtra(EXTRA_URI)
-        }
-
+    
     companion object {
-        private const val TAG = "StreamingMediaService"
-        private const val ACTION_PLAY = "com.linkpoint.action.PLAY_STREAM"
-        private const val ACTION_STOP = "com.linkpoint.action.STOP_STREAM"
-        private const val EXTRA_URI = "extra_stream_uri"
-        private const val DUCK_VOLUME = 0.2f
-        private const val NORMAL_VOLUME = 1f
-
-        fun play(context: Context, uri: Uri) {
-            val intent = Intent(context, StreamingMediaService::class.java).apply {
-                action = ACTION_PLAY
-                putExtra(EXTRA_URI, uri)
+        /**
+         * Start streaming media service for a parcel
+         */
+        fun startStreamingMediaService(context: Context, userManager: UserManager?) {
+            userManager ?: return
+            
+            val locationInfo = userManager.getCurrentLocationInfoSnapshot() ?: return
+            val parcelData = locationInfo.parcelData() ?: return
+            val mediaURL = parcelData.getMediaURL()
+            
+            if (!Strings.isNullOrEmpty(mediaURL)) {
+                val intent = Intent(context, StreamingMediaService::class.java).apply {
+                    action = "com.linkpoint.ACTION_PLAY_MEDIA"
+                    ActivityUtils.setActiveAgentID(this, userManager.getUserID())
+                    putExtra(ParcelPropertiesFragment.PARCEL_DATA_KEY, parcelData)
+                    putExtra("media_url", mediaURL)
+                    putExtra("location_name", parcelData.getName())
+                }
+                context.startService(intent)
             }
-            context.startService(intent)
-        }
-
-        fun stop(context: Context) {
-            val intent = Intent(context, StreamingMediaService::class.java).apply {
-                action = ACTION_STOP
-            }
-            context.startService(intent)
         }
     }
 }

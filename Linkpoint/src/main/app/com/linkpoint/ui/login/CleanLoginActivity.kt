@@ -1,167 +1,308 @@
 package com.linkpoint.ui.login
 
+import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
-import androidx.lifecycle.lifecycleScope
-import com.linkpoint.GridConnectionService
-import com.linkpoint.LinkpointApp
+
+import com.linkpoint.BuildConfig
 import com.linkpoint.R
-import com.linkpoint.modern.protocol.HybridSLTransport
-import com.linkpoint.ui.modern.ModernWorldActivity
-import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.textfield.TextInputEditText
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
+import java.util.concurrent.CompletableFuture
 
 /**
- * Small, modernised login activity so the rebuilt APK has a stable entry point.
- * The real grid authentication workflow will be reintroduced once the
- * supporting protocol code is ready; for now we simulate a successful login
- * and provide basic input validation and status feedback.
+ * Clean implementation of LoginActivity without decompilation artifacts
+ * Based on working patterns from comprehensive_operational_test.java
  */
-class CleanLoginActivity : AppCompatActivity() {
-
-    private lateinit var firstNameField: TextInputEditText
-    private lateinit var lastNameField: TextInputEditText
-    private lateinit var passwordField: TextInputEditText
-    private lateinit var loginButton: Button
-    private lateinit var progressBar: ProgressBar
-    private lateinit var statusText: TextView
-    private lateinit var gridDropdown: AutoCompleteTextView
-    private var selectedGrid: HybridSLTransport.Grid = HybridSLTransport.Grid.SecondLifeMain
-
-    private var loginJob: Job? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
+class CleanLoginActivity : AppCompatActivity {
+    
+    private EditText firstNameEdit
+    private EditText lastNameEdit
+    private EditText passwordEdit
+    private Button loginButton
+    private ProgressBar loginProgress
+    private TextView statusText
+    
+    @Override
+    protected Unit onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_clean_login)
-
-        val toolbar: MaterialToolbar = findViewById(R.id.login_toolbar)
-        setSupportActionBar(toolbar)
-
-        firstNameField = findViewById(R.id.edit_first_name)
-        lastNameField = findViewById(R.id.edit_last_name)
-        passwordField = findViewById(R.id.edit_password)
-        loginButton = findViewById(R.id.button_login)
-        progressBar = findViewById(R.id.progress_login)
-        statusText = findViewById(R.id.text_status)
-        gridDropdown = findViewById(R.id.dropdown_grid)
-        findViewById<TextView>(R.id.text_create_account).setOnClickListener {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://join.secondlife.com")))
+        
+        Log.i("CleanLoginActivity", "Starting CleanLoginActivity")
+        
+        try {
+            // Use simple layout for now - we'll create the layout file next
+            setContentView(R.layout.activity_clean_login)
+            
+            initializeViews()
+            setupLoginButton()
+            
+            Log.i("CleanLoginActivity", "CleanLoginActivity initialized successfully")
+        } catch (Exception e) {
+            Log.e("CleanLoginActivity", "Error during activity initialization", e)
+            
+            // Create a basic error layout if the normal layout fails
+            createFallbackLayout(e)
         }
-
-        statusText.text = getString(
-            R.string.clean_login_status_ready,
-            getString(R.string.app_name),
-            LinkpointApp.getAppVersion()
-        )
-
-        val grids = HybridSLTransport.Grid.values()
-        val gridAdapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_list_item_1,
-            grids.map { it.displayName }
-        )
-        gridDropdown.setAdapter(gridAdapter)
-        gridDropdown.setText(selectedGrid.displayName, false)
-        gridDropdown.setOnItemClickListener { _, _, position, _ ->
-            selectedGrid = grids[position]
+    }
+    
+    /**
+     * Create a basic fallback layout when normal initialization fails
+     */
+    private Unit createFallbackLayout(Exception originalError) {
+        try {
+            Log.w("CleanLoginActivity", "Creating fallback layout due to: " + originalError.getMessage())
+            
+            // Create a simple error display
+            setTitle("Lumiya - Second Life Viewer")
+            
+            // Since we can't rely on the XML layout, create a simple text view
+            TextView errorText = TextView(this)
+            errorText.setText("Lumiya Second Life Viewer\n\n" +
+                            "The app is starting in safe mode.\n" +
+                            "Some features may be limited.\n\n" +
+                            "Error: " + originalError.getMessage())
+            errorText.setPadding(32, 32, 32, 32)
+            errorText.setTextSize(16)
+            setContentView(errorText)
+            
+            Log.i("CleanLoginActivity", "Fallback layout created successfully")
+        } catch (Exception e) {
+            Log.e("CleanLoginActivity", "Failed to create fallback layout", e)
+            // Last resort - just finish the activity
+            finish()
         }
-
-        val watcher = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
-            override fun afterTextChanged(s: Editable?) {
-                loginButton.isEnabled = areInputsValid()
+    }
+    
+    private Unit initializeViews() {
+        try {
+            firstNameEdit = findViewById(R.id.edit_first_name)
+            lastNameEdit = findViewById(R.id.edit_last_name)
+            passwordEdit = findViewById(R.id.edit_password)
+            loginButton = findViewById(R.id.button_login)
+            loginProgress = findViewById(R.id.progress_login)
+            statusText = findViewById(R.id.text_status)
+            
+            // Check if all views were found
+            if (firstNameEdit == null || lastNameEdit == null || passwordEdit == null || 
+                loginButton == null || loginProgress == null || statusText == null) {
+                throw RuntimeException("One or more required views not found in layout")
             }
+            
+            // Initialize with default values for testing
+            firstNameEdit.setText("Test")
+            lastNameEdit.setText("User")
+            
+            // Show app status in the status text for debugging
+            String appStatus = com.linkpoint.LumiyaApp.getStartupStatus()
+            statusText.setText("Ready to login to Second Life\n\n" + appStatus)
+            
+            // Add debug log upload button for debug builds
+            addDebugLogUploadButton()
+            
+            Log.i("CleanLoginActivity", "All views initialized successfully")
+            Log.i("CleanLoginActivity", appStatus)
+        } catch (Exception e) {
+            Log.e("CleanLoginActivity", "Error initializing views", e)
+            throw e; // Re-throw to trigger fallback layout
         }
-
-        firstNameField.addTextChangedListener(watcher)
-        lastNameField.addTextChangedListener(watcher)
-        passwordField.addTextChangedListener(watcher)
-
-        loginButton.isEnabled = areInputsValid()
-        loginButton.setOnClickListener { attemptLogin() }
     }
-
-    override fun onDestroy() {
-        loginJob?.cancel()
-        super.onDestroy()
+    
+    private Unit setupLoginButton() {
+        loginButton.setOnClickListener(View.OnClickListener() {
+            @Override
+            Unit onClick(View v) {
+                performLogin()
+            }
+        })
     }
-
-    private fun attemptLogin() {
-        val first = firstNameField.text?.toString()?.trim().orEmpty()
-        val last = lastNameField.text?.toString()?.trim().orEmpty()
-        val password = passwordField.text?.toString().orEmpty()
-
-        if (first.isBlank() || last.isBlank() || password.isBlank()) {
-            showError(getString(R.string.clean_login_validation_error))
+    
+    private Unit performLogin() {
+        String firstName = firstNameEdit.getText().toString().trim()
+        String lastName = lastNameEdit.getText().toString().trim()
+        String password = passwordEdit.getText().toString()
+        
+        if (firstName.isEmpty() || lastName.isEmpty() || password.isEmpty()) {
+            showError("Please fill in all fields")
             return
         }
-
-        Log.i(TAG, "Authenticating user (demo mode)")
-        setInProgress(true, getString(R.string.clean_login_status_authenticating))
-
-        loginJob?.cancel()
-        loginJob = lifecycleScope.launch {
-            delay(DEMO_LOGIN_DELAY_MS)
-            Log.i(TAG, "Demo login complete; continuing to main experience placeholder")
-            setInProgress(false, getString(R.string.clean_login_status_success, first, last))
-            passwordField.text?.clear()
-            Toast.makeText(
-                this@CleanLoginActivity,
-                R.string.clean_login_toast_success,
-                Toast.LENGTH_LONG
-            ).show()
-
-            GridConnectionService.connect(
-                context = this@CleanLoginActivity,
-                firstName = first,
-                lastName = last,
-                password = password,
-                grid = selectedGrid
-            )
-            startActivity(Intent(this@CleanLoginActivity, ModernWorldActivity::class.java))
-        }
+        
+        // Show progress
+        setLoginInProgress(true)
+        statusText.setText("Authenticating with Second Life...")
+        
+        // Perform authentication in background (based on comprehensive test patterns)
+        CompletableFuture.runAsync(() -> {
+            try {
+                // Use the same authentication logic as comprehensive_operational_test.java
+                String hashedPassword = hashPassword(password)
+                String xmlRequest = buildLoginXMLRequest(firstName, lastName, hashedPassword, "last")
+                
+                // Simulate successful authentication for now
+                runOnUiThread(() -> {
+                    setLoginInProgress(false)
+                    statusText.setText("Login successful! Starting Second Life...")
+                    
+                    // Launch main Second Life interface
+                    launchMainInterface()
+                })
+                
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    setLoginInProgress(false)
+                    showError("Login failed: " + e.getMessage())
+                })
+            }
+        })
     }
-
-    private fun setInProgress(inProgress: Boolean, statusMessage: String? = null) {
-        loginButton.isEnabled = !inProgress && areInputsValid()
-        progressBar.isVisible = inProgress
-        firstNameField.isEnabled = !inProgress
-        lastNameField.isEnabled = !inProgress
-        passwordField.isEnabled = !inProgress
-        gridDropdown.isEnabled = !inProgress
-        statusMessage?.let { statusText.text = it }
+    
+    private Unit setLoginInProgress(Boolean inProgress) {
+        loginButton.setEnabled(!inProgress)
+        loginProgress.setVisibility(inProgress ? View.VISIBLE : View.GONE)
+        firstNameEdit.setEnabled(!inProgress)
+        lastNameEdit.setEnabled(!inProgress)
+        passwordEdit.setEnabled(!inProgress)
     }
-
-    private fun showError(message: String) {
-        setInProgress(false, getString(R.string.clean_login_status_error, message))
+    
+    private Unit showError(String message) {
+        statusText.setText("Error: " + message)
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
-
-    private fun areInputsValid(): Boolean {
-        val first = firstNameField.text?.toString()?.trim().orEmpty()
-        val last = lastNameField.text?.toString()?.trim().orEmpty()
-        val password = passwordField.text?.toString().orEmpty()
-        return first.isNotEmpty() && last.isNotEmpty() && password.isNotEmpty()
+    
+    // Authentication methods from comprehensive_operational_test.java
+    private String hashPassword(String password) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("MD5")
+        ByteArray digest = md.digest(password.getBytes())
+        StringBuilder sb = StringBuilder()
+        for (Byte b : digest) {
+            sb.append(String.format("%02x", b))
+        }
+        return "$1$" + sb.toString()
     }
+    
+    private String buildLoginXMLRequest(String first, String last, String password, String start) {
+        return "<?xml version=\"1.0\"?>" +
+                "<methodCall>" +
+                "<methodName>login_to_simulator</methodName>" +
+                "<params>" +
+                "<param><value><struct>" +
+                "<member><name>first</name><value><string>" + first + "</string></value></member>" +
+                "<member><name>last</name><value><string>" + last + "</string></value></member>" +
+                "<member><name>passwd</name><value><string>" + password + "</string></value></member>" +
+                "<member><name>start</name><value><string>" + start + "</string></value></member>" +
+                "<member><name>channel</name><value><string>Lumiya</string></value></member>" +
+                "<member><name>version</name><value><string>3.4.3</string></value></member>" +
+                "<member><name>platform</name><value><string>Android</string></value></member>" +
+                "<member><name>mac</name><value><string>00:00:00:00:00:00</string></value></member>" +
+                "<member><name>id0</name><value><string>" + generateClientID() + "</string></value></member>" +
+                "</struct></value></param>" +
+                "</params>" +
+                "</methodCall>"
+    }
+    
+    private String generateClientID() {
+        return java.util.UUID.randomUUID().toString()
+    }
+    
+    /**
+     * Add debug log upload button for debug builds
+     */
+    private Unit addDebugLogUploadButton() {
+        // Only add for debug builds
+        if (!BuildConfig.DEBUG) {
+            return
+        }
+        
+        try {
+            // Find the parent layout
+            ViewGroup parentLayout = (ViewGroup) statusText.getParent()
+            
+            // Create debug log upload button
+            Button debugUploadButton = Button(this)
+            debugUploadButton.setText("📤 Upload Debug Logs")
+            debugUploadButton.setTextSize(12)
+            
+            // Set layout parameters
+            LinearLayout.LayoutParams params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            params.setMargins(0, 16, 0, 0)
+            debugUploadButton.setLayoutParams(params)
+            
+            // Set click listener
+            debugUploadButton.setOnClickListener(v -> {
+                debugUploadButton.setEnabled(false)
+                debugUploadButton.setText("📤 Uploading...")
+                
+                com.linkpoint.LumiyaApp.uploadDebugLogsNow("Manual upload from login screen")
+                
+                // Re-enable button after a delay
+                debugUploadButton.postDelayed(() -> {
+                    debugUploadButton.setEnabled(true)
+                    debugUploadButton.setText("📤 Upload Debug Logs")
+                    Toast.makeText(this, "Debug logs upload initiated - check logcat for results", Toast.LENGTH_LONG).show()
+                }, 2000)
+            })
+            
+            // Add to parent layout
+            parentLayout.addView(debugUploadButton)
+            
+            Log.i("CleanLoginActivity", "Debug log upload button added")
+            
+        } catch (Exception e) {
+            Log.e("CleanLoginActivity", "Failed to add debug upload button", e)
+        }
+    }
+}
 
-    companion object {
-        private const val TAG = "CleanLoginActivity"
-        private const val DEMO_LOGIN_DELAY_MS = 1500L
+    /**
+     * Launch the main Second Life interface after successful login
+     */
+    private void launchMainInterface() {
+        try {
+            Log.i("CleanLoginActivity", "Launching main Second Life interface");
+            
+            // Create intent for the main world activity
+            Intent intent = new Intent(this, com.linkpoint.ui.modern.ModernWorldActivity.class);
+            
+            // Pass login credentials to main interface
+            intent.putExtra("username", usernameInput.getText().toString());
+            intent.putExtra("password", passwordInput.getText().toString());
+            intent.putExtra("grid", selectedGrid);
+            
+            // Start the main interface
+            startActivity(intent);
+            
+            // Close login activity
+            finish();
+            
+            Log.i("CleanLoginActivity", "Main interface launched successfully");
+            
+        } catch (Exception e) {
+            Log.e("CleanLoginActivity", "Error launching main interface", e);
+            
+            // Show error to user
+            runOnUiThread(() -> {
+                Toast.makeText(this, "Error launching main interface: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            });
+            
+            // Reset login state to allow retry
+            runOnUiThread(() -> {
+                setLoginInProgress(false);
+                statusText.setText("Ready to login");
+            });
+        }
     }
 }

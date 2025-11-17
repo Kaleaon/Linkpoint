@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:orientation="horizontal" android:paddingLeft="5dp" android:paddingTop="6dp" android:paddingRight="10dp" android:paddingBottom="6dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+    <ImageView android:layout_gravity="center" android:id="@+id/role_mine_check_mark" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginRight="5dp" android:src="?attr/IconMaterialCheckCircle" android:scaleType="fitCenter" android:maxHeight="16sp"/>
+    <TextView android:textSize="16sp" android:ellipsize="end" android:layout_gravity="center_vertical" android:id="@+id/role_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1"/>
+    <TextView android:layout_gravity="right|center_vertical|center_horizontal|center" android:id="@+id/role_member_count" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+</LinearLayout>

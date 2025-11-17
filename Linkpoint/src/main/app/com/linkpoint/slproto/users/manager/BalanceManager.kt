@@ -1,127 +1,177 @@
 package com.linkpoint.slproto.users.manager
 
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.UUID
-import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.CopyOnWriteArraySet
+import com.linkpoint.dao.MoneyTransaction
+import com.linkpoint.dao.MoneyTransactionDao
+import com.linkpoint.react.AsyncRequestHandler
+import com.linkpoint.react.SimpleRequestHandler
+import com.linkpoint.react.Subscribable
+import com.linkpoint.react.SubscriptionPool
+import com.linkpoint.react.SubscriptionSingleKey
+import com.linkpoint.slproto.SLAgentCircuit
+import com.linkpoint.slproto.SLGridConnection
+import com.linkpoint.slproto.modules.finance.SLFinancialInfo
+import de.greenrobot.dao.query.LazyList
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.random.Random
+import androidx.annotation.NonNull
 
-/**
- * Tracks Linden Dollar balances for the currently logged in avatar, offering a
- * reactive stream for UI layers and a simple transaction history cache for the
- * finance screens. The implementation intentionally avoids any network stack
- * dependencies so it can be used inside tests and hooked up to the modern
- * protocol layer later.
- */
-class BalanceManager(
-    private val dataSource: BalanceDataSource = SimulatedBalanceDataSource(),
-    dispatcher: CoroutineDispatcher = Dispatchers.IO
-) {
-
-    private val scope = CoroutineScope(SupervisorJob() + dispatcher)
-    private val cachedSnapshot = AtomicReference<BalanceSnapshot?>(null)
-    private val listeners = CopyOnWriteArraySet<(BalanceSnapshot) -> Unit>()
-    private val transactions = CopyOnWriteArrayList<TransactionRecord>()
-    private val balanceState = MutableStateFlow<BalanceState>(BalanceState.Stale)
-
-    fun observeState(): StateFlow<BalanceState> = balanceState
-
-    fun addListener(listener: (BalanceSnapshot) -> Unit) {
-        cachedSnapshot.get()?.let(listener)
-        listeners.add(listener)
-    }
-
-    fun removeListener(listener: (BalanceSnapshot) -> Unit) {
-        listeners.remove(listener)
-    }
-
-    fun getSnapshot(): BalanceSnapshot? = cachedSnapshot.get()
-
-    fun getTransactionHistory(limit: Int = DEFAULT_HISTORY_LIMIT): List<TransactionRecord> {
-        val items = transactions.toList()
-        return if (items.size <= limit) items else items.takeLast(limit)
-    }
-
-    fun recordTransaction(record: TransactionRecord) {
-        transactions += record
-        val current = cachedSnapshot.get()
-        if (current != null) {
-            val newAmount = current.amount + record.deltaLinden
-            val updated = current.copy(amount = newAmount, updatedAt = System.currentTimeMillis())
-            cachedSnapshot.set(updated)
-            balanceState.value = BalanceState.Fresh(updated)
-            notifyListeners(updated)
-        }
-    }
-
-    fun refreshBalance(avatarId: UUID) {
-        scope.launch {
-            balanceState.emit(BalanceState.Loading)
-            runCatching { dataSource.fetchBalance(avatarId) }
-                .onSuccess { snapshot ->
-                    cachedSnapshot.set(snapshot)
-                    balanceState.emit(BalanceState.Fresh(snapshot))
-                    notifyListeners(snapshot)
+class BalanceManager {
+    /* access modifiers changed from: private */
+    SubscriptionPool<SubscriptionSingleKey, Int> balancePool = SubscriptionPool<>()
+    private SimpleRequestHandler<SubscriptionSingleKey> balanceRequestHandler = SimpleRequestHandler<SubscriptionSingleKey>() {
+        Unit onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey) {
+            SLFinancialInfo sLFinancialInfo = (SLFinancialInfo) BalanceManager.this.financialInfo.get()
+            if (sLFinancialInfo == null) {
+                BalanceManager.this.balancePool.onResultError(SubscriptionSingleKey.Value, SLGridConnection.NotConnectedException())
+            } else if (sLFinancialInfo.getBalanceKnown()) {
+                BalanceManager.this.balancePool.onResultData(SubscriptionSingleKey.Value, Int.valueOf(sLFinancialInfo.getBalance()))
+            } else {
+                SLAgentCircuit activeAgentCircuit = BalanceManager.this.userManager.getActiveAgentCircuit()
+                if (activeAgentCircuit != null) {
+                    activeAgentCircuit.execute(BalanceManager.this.requestBalanceRunnable)
+                } else {
+                    BalanceManager.this.balancePool.onResultError(SubscriptionSingleKey.Value, SLGridConnection.NotConnectedException())
                 }
-                .onFailure { error ->
-                    balanceState.emit(BalanceState.Error(error))
-                }
+            }
+        }
+    }
+    /* access modifiers changed from: private */
+    AtomicReference<SLFinancialInfo> financialInfo = AtomicReference<>((Any) null)
+    /* access modifiers changed from: private */
+    MoneyTransactionDao moneyTransactionDao
+    /* access modifiers changed from: private */
+    SubscriptionPool<SubscriptionSingleKey, LazyList<MoneyTransaction>> moneyTransactionPool = SubscriptionPool<>()
+    /* access modifiers changed from: private */
+    Runnable requestBalanceRunnable = Runnable() {
+        Unit run() {
+            SLFinancialInfo sLFinancialInfo = (SLFinancialInfo) BalanceManager.this.financialInfo.get()
+            if (sLFinancialInfo != null) {
+                sLFinancialInfo.AskForMoneyBalance()
+            } else {
+                BalanceManager.this.balancePool.onResultError(SubscriptionSingleKey.Value, SLGridConnection.NotConnectedException())
+            }
+        }
+    }
+    /* access modifiers changed from: private */
+    UserManager userManager
+
+    BalanceManager(UserManager userManager2) {
+        this.userManager = userManager2
+        this.moneyTransactionDao = userManager2.getDaoSession().getMoneyTransactionDao()
+        this.balancePool.attachRequestHandler(this.balanceRequestHandler)
+        this.moneyTransactionPool.attachRequestHandler(AsyncRequestHandler(userManager2.getDatabaseExecutor(), SimpleRequestHandler<SubscriptionSingleKey>() {
+            Unit onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey) {
+                BalanceManager.this.moneyTransactionPool.onResultData(subscriptionSingleKey, BalanceManager.this.moneyTransactionDao.queryBuilder().orderAsc(MoneyTransactionDao.Properties.Timestamp).listLazy())
+            }
+        }))
+        this.moneyTransactionPool.setDisposeHandler($Lambda$xo_DO1h0hLJizWUYkWN5MuOYxk(), userManager2.getDatabaseExecutor())
+    }
+
+    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_BalanceManager_1705  reason: not valid java name */
+    /* synthetic */ Unit m286lambda$com_lumiyaviewer_lumiya_slproto_users_manager_BalanceManager_1705(LazyList lazyList) {
+        if (!lazyList.isClosed()) {
+            lazyList.close()
         }
     }
 
-    private fun notifyListeners(snapshot: BalanceSnapshot) {
-        listeners.forEach { listener ->
-            runCatching { listener(snapshot) }
-        }
+    Unit clearFinancialInfo(SLFinancialInfo sLFinancialInfo) {
+        this.financialInfo.compareAndSet(sLFinancialInfo, (Any) null)
     }
 
-    interface BalanceDataSource {
-        suspend fun fetchBalance(avatarId: UUID): BalanceSnapshot
+    Unit clearMoneyTransactions() {
+        this.userManager.getDatabaseExecutor().execute(Runnable(this) {
+
+            /* renamed from: -$f0 */
+            private /* synthetic */ Any f224$f0
+
+            private /* synthetic */ Unit $m$0(
+/*
+Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$xo_DO1h0hLJizWUYkWN5MuOY-xk.1.$m$0():Unit, dex: classes.dex
+            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.linkpoint.slproto.users.manager.-$Lambda$xo_DO1h0hLJizWUYkWN5MuOY-xk.1.$m$0():Unit, class status: UNLOADED
+            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
+            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
+            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
+            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
+            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
+            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
+            	at java.util.ArrayList.forEach(ArrayList.java:1259)
+            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
+            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
+            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
+            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
+            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
+            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
+            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
+            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
+            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
+            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
+            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
+            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
+            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
+            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
+            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
+            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
+            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
+            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
+            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
+            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
+            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
+            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
+            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
+            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
+            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
+            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
+            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
+            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
+            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
+            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
+            	at java.util.ArrayList.forEach(ArrayList.java:1259)
+            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
+            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
+            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
+            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
+            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
+            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
+            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
+            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
+            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
+            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
+            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
+            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
+            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
+            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
+            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
+            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
+            
+*/
+
     }
 
-    data class BalanceSnapshot(
-        val avatarId: UUID,
-        val amount: Long,
-        val updatedAt: Long
-    )
-
-    data class TransactionRecord(
-        val transactionId: UUID = UUID.randomUUID(),
-        val avatarId: UUID,
-        val description: String,
-        val deltaLinden: Long,
-        val counterparty: String?,
-        val timestamp: Long = System.currentTimeMillis()
-    )
-
-    sealed class BalanceState {
-        object Stale : BalanceState()
-        object Loading : BalanceState()
-        data class Fresh(val snapshot: BalanceSnapshot) : BalanceState()
-        data class Error(val throwable: Throwable) : BalanceState()
+    Subscribable<SubscriptionSingleKey, Int> getBalance() {
+        return this.balancePool
     }
 
-    private class SimulatedBalanceDataSource : BalanceDataSource {
-        override suspend fun fetchBalance(avatarId: UUID): BalanceSnapshot = withContext(Dispatchers.Default) {
-            // Simulate I/O delay
-            kotlinx.coroutines.delay(150)
-            BalanceSnapshot(
-                avatarId = avatarId,
-                amount = Random.nextLong(50_000, 250_000),
-                updatedAt = System.currentTimeMillis()
-            )
-        }
+    /* access modifiers changed from: package-private */
+    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_BalanceManager_4293  reason: not valid java name */
+    /* synthetic */ Unit m287lambda$com_lumiyaviewer_lumiya_slproto_users_manager_BalanceManager_4293() {
+        this.moneyTransactionDao.deleteAll()
+        updateMoneyTransactions()
     }
 
-    companion object {
-        private const val DEFAULT_HISTORY_LIMIT = 50
+    Subscribable<SubscriptionSingleKey, LazyList<MoneyTransaction>> moneyTransactions() {
+        return this.moneyTransactionPool
+    }
+
+    Unit setFinancialInfo(SLFinancialInfo sLFinancialInfo) {
+        this.financialInfo.set(sLFinancialInfo)
+    }
+
+    Unit updateBalance(Int i) {
+        this.balancePool.onResultData(SubscriptionSingleKey.Value, Int.valueOf(i))
+    }
+
+    Unit updateMoneyTransactions() {
+        this.moneyTransactionPool.requestUpdate(SubscriptionSingleKey.Value)
     }
 }
