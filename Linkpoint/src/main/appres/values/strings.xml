@@ -4,6 +4,11 @@
     <string name="modern_world_activity_label">Modern World View</string>
 
     <string name="clean_login_title">Linkpoint - Second Life Viewer</string>
+    <string name="clean_login_toolbar_title">Sign In</string>
+    <string name="clean_login_subtitle">Sign in to explore the grid</string>
+    <string name="clean_login_grid_hint">Grid</string>
+    <string name="clean_login_grid_default">Second Life (Agni)</string>
+    <string name="clean_login_create_account">Need an account? Visit secondlife.com</string>
     <string name="clean_login_first_name_hint">First name</string>
     <string name="clean_login_last_name_hint">Last name</string>
     <string name="clean_login_password_hint">Password</string>
