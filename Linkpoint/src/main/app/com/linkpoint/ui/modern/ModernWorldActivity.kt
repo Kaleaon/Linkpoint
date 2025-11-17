@@ -171,19 +171,24 @@ class ModernWorldActivity : AppCompatActivity() {
             GridConnectionService.ConnectionState.Idle -> "Connection status: Idle"
             is GridConnectionService.ConnectionState.Connecting -> buildString {
                 append("Connecting to ")
-                append(state.grid)
+                append(state.grid.displayName)
                 append(" as ")
                 append(state.avatarName)
                 append("…")
             }
             is GridConnectionService.ConnectionState.Connected -> buildString {
+                val reply = state.session.reply
                 append("Connected to ")
-                append(state.grid)
+                append(state.session.grid.displayName)
                 append(" as ")
-                append(state.avatarName)
+                append(state.session.avatarName.ifEmpty { "Unknown" })
+                append(" • Region ")
+                append(reply.simIp ?: "unknown")
             }
             is GridConnectionService.ConnectionState.Error -> buildString {
-                append("Connection error: ")
+                append("Connection error on ")
+                append(state.grid.displayName)
+                append(": ")
                 append(state.message)
             }
         }

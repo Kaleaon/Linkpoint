@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import com.linkpoint.GridConnectionService
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
+import com.linkpoint.modern.protocol.HybridSLTransport
 import com.linkpoint.ui.modern.ModernWorldActivity
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -105,7 +106,8 @@ class CleanLoginActivity : AppCompatActivity() {
                 context = this@CleanLoginActivity,
                 firstName = first,
                 lastName = last,
-                password = password
+                password = password,
+                grid = HybridSLTransport.Grid.SecondLifeMain
             )
             startActivity(Intent(this@CleanLoginActivity, ModernWorldActivity::class.java))
         }

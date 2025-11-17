@@ -1,10 +1,15 @@
 package com.linkpoint.modern.protocol
 
 import android.util.Log
+import com.linkpoint.slproto.auth.SLAuth
+import com.linkpoint.slproto.auth.SLAuthParams
+import com.linkpoint.slproto.auth.SLAuthReply
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,240 +18,277 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import lindenlab.llsd.LLSD
+import lindenlab.llsd.LLSDException
+import lindenlab.llsd.LLSDParser
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.ByteArrayInputStream
+import java.io.IOException
+import java.security.SecureRandom
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.coroutines.cancellation.CancellationException
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
+import javax.xml.parsers.ParserConfigurationException
 
 /**
- * Unified transport façade that sits above HTTP/2 CAPS, WebSocket event queues,
- * and (future) UDP legacy circuits. The implementation deliberately focuses on
- * correctness and observability rather than raw networking – each transport
- * layer is represented by a lightweight adapter that can later be swapped for
- * a real client.
+ * Real transport layer that wires Linkpoint into the Second Life protocol stack.
+ * Handles XML-RPC authentication, CAPS fetching and the EventQueue long poll.
  */
 class HybridSLTransport(
-    private val capsClient: CapsClient = CapsClient(),
-    private val eventClient: EventClient = EventClient(),
+    private val auth: SLAuth = SLAuth(),
+    private val httpClient: OkHttpClient = defaultHttpClient(),
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
     private val scope = CoroutineScope(SupervisorJob() + dispatcher)
-    private val router = MessageRouter()
-    private val connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
-    private val eventFlow = MutableSharedFlow<GridEvent>(extraBufferCapacity = 32)
-    private val initMutex = Mutex()
-    private var authToken: String? = null
+    private val sessionRef = AtomicReference<SessionInfo?>()
+    private val capabilities = ConcurrentHashMap<String, String>()
+    private val connectionState = MutableStateFlow<State>(State.Idle)
+    private val eventFlow = MutableSharedFlow<GridEvent>(
+        extraBufferCapacity = 64,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    private var eventJob = scope.launch { }
+    private var eventAck: Long? = null
+    private val parser: LLSDParser = try {
+        LLSDParser()
+    } catch (e: ParserConfigurationException) {
+        throw IllegalStateException("Unable to create LLSD parser", e)
+    }
 
-    fun state(): StateFlow<ConnectionState> = connectionState.asStateFlow()
+    fun state(): StateFlow<State> = connectionState.asStateFlow()
     fun events(): SharedFlow<GridEvent> = eventFlow.asSharedFlow()
+    fun currentSession(): SessionInfo? = sessionRef.get()
 
-    suspend fun initialize(eventQueueUrl: String?, seedCapability: String?) {
-        initMutex.withLock {
+    suspend fun login(
+        grid: Grid = Grid.SecondLifeMain,
+        loginName: String,
+        password: String,
+        startLocation: String = "last"
+    ): SessionInfo = withContext(scope.coroutineContext) {
+        connectionState.value = State.Connecting
+        val params = SLAuthParams(
+            loginUri = grid.loginUrl,
+            loginName = loginName,
+            passwordHash = SLAuth.md5Hash(password),
+            startLocation = startLocation,
+            channel = "Linkpoint Android",
+            version = "1.0.0",
+            macAddress = randomMacAddress(),
+            id0 = randomId0()
+        )
+        val reply = auth.sendLoginRequest(params)
+        if (!reply.success) {
+            val error = IllegalStateException(reply.message ?: "Login failed")
+            connectionState.value = State.Error(error)
+            throw error
+        }
+
+        val session = SessionInfo(grid, reply)
+        sessionRef.set(session)
+        connectionState.value = State.Connected(session)
+
+        reply.seedCapability?.let { seed ->
             try {
-                connectionState.value = ConnectionState.Initialising
-                seedCapability?.let { capsClient.configureCapabilities(parseSeedCapability(it)) }
-                eventQueueUrl?.let { eventClient.connect(it, authToken, ::dispatchEvent) }
-                connectionState.value = ConnectionState.Ready
-            } catch (error: Throwable) {
-                if (error is CancellationException) throw error
-                Log.e(TAG, "Failed to initialise hybrid transport", error)
-                connectionState.value = ConnectionState.Error(error)
+                fetchCapabilities(seed)
+                capabilities["EventQueueGet"]?.let { startEventQueue(it) }
+            } catch (capError: Exception) {
+                Log.w(TAG, "Capability bootstrap failed: ${capError.message}", capError)
+                eventFlow.emit(GridEvent.Error(capError))
             }
         }
+
+        session
     }
 
-    fun setAuthToken(token: String) {
-        authToken = token
-        capsClient.authToken = token
-        eventClient.authToken = token
-    }
-
-    suspend fun send(message: ModernMessage): TransportResult {
-        return when (val route = router.selectRoute(message)) {
-            is TransportRoute.Caps -> capsClient.send(route.capability, message)
-            TransportRoute.WebSocket -> eventClient.send(message)
-            TransportRoute.NotSupported ->
-                TransportResult.Failure(UnsupportedOperationException("UDP transport not available"))
+    suspend fun postCapability(
+        name: String,
+        body: LLSD,
+        contentType: String = LLSD_MIME
+    ): String {
+        val url = capabilities[name]
+            ?: throw IllegalStateException("Capability $name not available")
+        val writer = java.io.StringWriter()
+        body.serialise(writer)
+        val request = Request.Builder()
+            .url(url)
+            .post(writer.toString().toRequestBody(contentType.toMediaType()))
+            .addHeader("Accept", LLSD_MIME)
+            .build()
+        return withContext(scope.coroutineContext) {
+            httpClient.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    throw IOException("Capability request failed (${response.code})")
+                }
+                response.body?.string() ?: ""
+            }
         }
-    }
-
-    suspend fun uploadAsset(
-        bytes: ByteArray,
-        contentType: String,
-        progress: suspend (Float) -> Unit
-    ): TransportResult {
-        return capsClient.upload(bytes, contentType, progress)
     }
 
     suspend fun shutdown() {
-        initMutex.withLock {
-            capsClient.shutdown()
-            eventClient.shutdown()
-            connectionState.value = ConnectionState.Disconnected
-        }
+        eventJob.cancel()
+        eventJob.join()
+        sessionRef.set(null)
+        capabilities.clear()
+        connectionState.value = State.Idle
     }
 
-    fun subscribe(eventType: String, listener: suspend (GridEvent.Message) -> Unit) {
-        eventClient.subscribe(eventType) { payload ->
-            scope.launch { listener(payload) }
-        }
-    }
+    private suspend fun fetchCapabilities(seedUrl: String) {
+        val payload = buildCapabilityRequest(DEFAULT_CAPABILITIES)
+        val request = Request.Builder()
+            .url(seedUrl)
+            .post(payload.toRequestBody(LLSD_MIME.toMediaType()))
+            .addHeader("Accept", LLSD_MIME)
+            .build()
 
-    private fun dispatchEvent(event: GridEvent) {
-        scope.launch { eventFlow.emit(event) }
-    }
-
-    private fun parseSeedCapability(seed: String): Map<String, String> {
-        val regex = Regex("<key>([^<]+)</key>\\s*<string>([^<]+)</string>", RegexOption.IGNORE_CASE)
-        val map = mutableMapOf<String, String>()
-        regex.findAll(seed).forEach { match ->
-            val (key, value) = match.destructured
-            map[key] = value
-        }
-        return map
-    }
-
-    sealed class ConnectionState {
-        object Disconnected : ConnectionState()
-        object Initialising : ConnectionState()
-        object Ready : ConnectionState()
-        data class Error(val throwable: Throwable) : ConnectionState()
-    }
-
-    sealed class TransportResult {
-        data class Success(val response: TransportPayload) : TransportResult()
-        data class Failure(val throwable: Throwable) : TransportResult()
-    }
-
-    data class TransportPayload(val type: String, val data: String)
-
-    sealed class GridEvent {
-        data class Message(val eventType: String, val payload: String) : GridEvent()
-        data class Status(val description: String) : GridEvent()
-    }
-
-    abstract class ModernMessage(val type: String) {
-        val id: UUID = UUID.randomUUID()
-        val timestamp: Long = System.currentTimeMillis()
-
-        abstract fun toLlsdXml(): String
-        open fun toJson(): String = """{"type":"$type","id":"$id","timestamp":$timestamp}"""
-    }
-
-    private class MessageRouter {
-        fun selectRoute(message: ModernMessage): TransportRoute {
-            val name = message.type.lowercase()
-            return when {
-                "asset" in name || "upload" in name || "inventory" in name -> TransportRoute.Caps("UploadBakedTexture")
-                "chat" in name || "event" in name || "object" in name -> TransportRoute.WebSocket
-                else -> TransportRoute.Caps("GenericMessage")
+        httpClient.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw IOException("Seed capability fetch failed (${response.code})")
             }
+            response.body?.byteStream()?.use { stream ->
+                val parsed = parser.parse(stream).content as? Map<*, *>
+                    ?: throw LLSDException("Seed capability returned unexpected payload")
+                capabilities.clear()
+                parsed.entries.forEach { entry ->
+                    val key = entry.key as? String ?: return@forEach
+                    val value = entry.value as? String ?: return@forEach
+                    capabilities[key] = value
+                }
+                eventFlow.emit(GridEvent.Capabilities(capabilities.toMap()))
+            } ?: throw IOException("Seed capability empty response")
         }
     }
 
-    private sealed class TransportRoute {
-        data class Caps(val capability: String) : TransportRoute()
-        object WebSocket : TransportRoute()
-        object NotSupported : TransportRoute()
-    }
-
-    class CapsClient {
-        private val capabilities = ConcurrentHashMap<String, String>()
-        var authToken: String? = null
-
-        suspend fun configureCapabilities(map: Map<String, String>) {
-            capabilities.clear()
-            capabilities.putAll(map)
-        }
-
-        suspend fun send(capability: String, message: ModernMessage): TransportResult {
-            val url = capabilities[capability] ?: "https://caps.example.com/$capability"
-            delay(SIMULATED_LATENCY_MS)
-            val payload = TransportPayload(
-                type = "caps_response",
-                data = "Delivered ${message.type} via $url (token=${authToken?.take(6) ?: "none"})"
-            )
-            return TransportResult.Success(payload)
-        }
-
-        suspend fun upload(
-            bytes: ByteArray,
-            contentType: String,
-            progress: suspend (Float) -> Unit
-        ): TransportResult {
-            val total = bytes.size.coerceAtLeast(1)
-            val chunk = (total / 4).coerceAtLeast(1)
-            var uploaded = 0
-            repeat(4) {
-                delay(SIMULATED_LATENCY_MS / 2)
-                uploaded = (uploaded + chunk).coerceAtMost(total)
-                progress(uploaded / total.toFloat())
-            }
-            val payload = TransportPayload(
-                type = "upload_complete",
-                data = "Stored ${bytes.size} bytes ($contentType)"
-            )
-            return TransportResult.Success(payload)
-        }
-
-        fun getCapability(name: String): String? = capabilities[name]
-        fun shutdown() {
-            capabilities.clear()
-        }
-    }
-
-    class EventClient {
-        private val listeners = ConcurrentHashMap<String, MutableList<suspend (GridEvent.Message) -> Unit>>()
-        private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-        private var heartbeatJob: kotlinx.coroutines.Job? = null
-        var authToken: String? = null
-            internal set
-
-        suspend fun connect(url: String, token: String?, callback: (GridEvent) -> Unit) {
-            delay(SIMULATED_LATENCY_MS)
-            callback(GridEvent.Status("Connected to $url"))
-            heartbeatJob?.cancel()
-            heartbeatJob = scope.launch {
-                while (true) {
-                    delay(SIMULATED_EVENT_TICK_MS)
-                    emit("heartbeat", """{"token":"${token ?: "none"}"}""", callback)
+    private fun startEventQueue(eventQueueUrl: String) {
+        eventJob.cancel()
+        eventJob = scope.launch {
+            eventAck = null
+            while (true) {
+                try {
+                    val body = buildEventQueueRequest(eventAck)
+                    val request = Request.Builder()
+                        .url(eventQueueUrl)
+                        .post(body.toRequestBody(LLSD_MIME.toMediaType()))
+                        .addHeader("Accept", LLSD_MIME)
+                        .build()
+                    httpClient.newCall(request).execute().use { response ->
+                        if (!response.isSuccessful) {
+                            throw IOException("Event queue HTTP ${response.code}")
+                        }
+                        response.body?.byteStream()?.use { stream ->
+                            handleEventQueueResponse(stream)
+                        } ?: throw IOException("Event queue empty response")
+                    }
+                } catch (error: Exception) {
+                    eventFlow.emit(GridEvent.Error(error))
+                    delay(EVENT_QUEUE_RETRY_MS)
                 }
             }
         }
+    }
 
-        suspend fun send(message: ModernMessage): TransportResult {
-            delay(SIMULATED_LATENCY_MS / 2)
-            return TransportResult.Success(
-                TransportPayload(
-                    type = "websocket_ack",
-                    data = "Delivered ${message.type} via WebSocket"
-                )
-            )
+    private suspend fun handleEventQueueResponse(stream: java.io.InputStream) {
+        val parsed = parser.parse(stream).content as? Map<*, *> ?: return
+        val events = parsed["events"] as? List<*>
+        val ack = parsed["id"]
+        if (ack is Number) {
+            eventAck = ack.toLong()
         }
-
-        fun subscribe(eventType: String, listener: suspend (GridEvent.Message) -> Unit) {
-            listeners.computeIfAbsent(eventType) { mutableListOf() }.add(listener)
-        }
-
-        fun shutdown() {
-            heartbeatJob?.cancel()
-            heartbeatJob = null
-            listeners.clear()
-        }
-
-        private fun emit(eventType: String, payload: String, callback: (GridEvent) -> Unit) {
-            val event = GridEvent.Message(eventType, payload)
-            callback(event)
-            listeners[eventType]?.forEach { handler ->
-                scope.launch { handler(event) }
+        if (!events.isNullOrEmpty()) {
+            events.forEach { payload ->
+                eventFlow.emit(GridEvent.EventQueue(payload))
             }
+        } else {
+            eventFlow.emit(GridEvent.Status("Event queue heartbeat"))
+        }
+    }
+
+    private fun buildCapabilityRequest(names: List<String>): String = buildString {
+        append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+        append("<llsd><array>")
+        names.forEach { append("<string>${LLSD.encodeXML(it)}</string>") }
+        append("</array></llsd>")
+    }
+
+    private fun buildEventQueueRequest(ack: Long?): String = buildString {
+        append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+        append("<llsd><map>")
+        if (ack != null) {
+            append("<key>ack</key><integer>$ack</integer>")
+        }
+        append("<key>done</key><boolean>false</boolean>")
+        append("</map></llsd>")
+    }
+
+    sealed class State {
+        object Idle : State()
+        object Connecting : State()
+        data class Connected(val session: SessionInfo) : State()
+        data class Error(val throwable: Throwable) : State()
+    }
+
+    data class SessionInfo(
+        val grid: Grid,
+        val reply: SLAuthReply
+    ) {
+        val avatarName: String = listOfNotNull(reply.firstName, reply.lastName)
+            .joinToString(" ")
+        val sessionId: String? = reply.sessionId
+    }
+
+    sealed class GridEvent {
+        data class Capabilities(val urls: Map<String, String>) : GridEvent()
+        data class EventQueue(val payload: Any?) : GridEvent()
+        data class Status(val description: String) : GridEvent()
+        data class Error(val throwable: Throwable) : GridEvent()
+    }
+
+    enum class Grid(val id: String, val displayName: String, val loginUrl: String) {
+        SecondLifeMain("secondlife_agni", "Second Life (Agni)", "https://login.agni.lindenlab.com/cgi-bin/login.cgi"),
+        SecondLifeBeta("secondlife_aditi", "Second Life (Aditi)", "https://login.aditi.lindenlab.com/cgi-bin/login.cgi"),
+        OsGrid("osgrid", "OSGrid", "http://login.osgrid.org/");
+
+        companion object {
+            fun fromId(id: String?): Grid =
+                values().firstOrNull { it.id == id } ?: SecondLifeMain
         }
     }
 
     companion object {
         private const val TAG = "HybridSLTransport"
-        private const val SIMULATED_LATENCY_MS = 150L
-        private const val SIMULATED_EVENT_TICK_MS = 5_000L
+        private const val LLSD_MIME = "application/llsd+xml"
+        private const val EVENT_QUEUE_RETRY_MS = 5_000L
+        private val DEFAULT_CAPABILITIES = listOf(
+            "EventQueueGet",
+            "ChatSessionRequest",
+            "SendUserReport",
+            "ViewerStats",
+            "UploadBakedTexture",
+            "FetchInventoryDescendents2",
+            "FetchInventory2",
+            "GetDisplayNames",
+            "AgentState",
+            "AgentPreferences",
+            "UpdateAgentLanguage",
+            "EnvironmentSettings",
+            "ExtEnvironment"
+        )
+
+        private fun defaultHttpClient(): OkHttpClient = OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+
+        private fun randomMacAddress(): String {
+            val random = SecureRandom()
+            return (0 until 6).joinToString(":") { "%02x".format(random.nextInt(256)) }
+        }
+
+        private fun randomId0(): String = UUID.randomUUID().toString().replace("-", "")
     }
 }
