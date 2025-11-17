@@ -1,0 +1,84 @@
+package com.linkpoint.slproto.messages
+
+import com.google.common.base.Ascii
+import com.linkpoint.slproto.SLMessage
+import java.nio.ByteBuffer
+
+class EconomyData : SLMessage {
+    Info Info_Field = Info()
+
+    class Info {
+        float EnergyEfficiency
+        Int ObjectCapacity
+        Int ObjectCount
+        Int PriceEnergyUnit
+        Int PriceGroupCreate
+        Int PriceObjectClaim
+        float PriceObjectRent
+        float PriceObjectScaleFactor
+        Int PriceParcelClaim
+        float PriceParcelClaimFactor
+        Int PriceParcelRent
+        Int PricePublicObjectDecay
+        Int PricePublicObjectDelete
+        Int PriceRentLight
+        Int PriceUpload
+        Int TeleportMinPrice
+        float TeleportPriceExponent
+    }
+
+    EconomyData() {
+        this.zeroCoded = true
+    }
+
+    Int CalcPayloadSize() {
+        return 72
+    }
+
+    Unit Handle(SLMessageHandler sLMessageHandler) {
+        sLMessageHandler.HandleEconomyData(this)
+    }
+
+    Unit PackPayload(ByteBuffer byteBuffer) {
+        byteBuffer.putShort(-1)
+        byteBuffer.put((byte) 0)
+        byteBuffer.put(Ascii.EM)
+        packInt(byteBuffer, this.Info_Field.ObjectCapacity)
+        packInt(byteBuffer, this.Info_Field.ObjectCount)
+        packInt(byteBuffer, this.Info_Field.PriceEnergyUnit)
+        packInt(byteBuffer, this.Info_Field.PriceObjectClaim)
+        packInt(byteBuffer, this.Info_Field.PricePublicObjectDecay)
+        packInt(byteBuffer, this.Info_Field.PricePublicObjectDelete)
+        packInt(byteBuffer, this.Info_Field.PriceParcelClaim)
+        packFloat(byteBuffer, this.Info_Field.PriceParcelClaimFactor)
+        packInt(byteBuffer, this.Info_Field.PriceUpload)
+        packInt(byteBuffer, this.Info_Field.PriceRentLight)
+        packInt(byteBuffer, this.Info_Field.TeleportMinPrice)
+        packFloat(byteBuffer, this.Info_Field.TeleportPriceExponent)
+        packFloat(byteBuffer, this.Info_Field.EnergyEfficiency)
+        packFloat(byteBuffer, this.Info_Field.PriceObjectRent)
+        packFloat(byteBuffer, this.Info_Field.PriceObjectScaleFactor)
+        packInt(byteBuffer, this.Info_Field.PriceParcelRent)
+        packInt(byteBuffer, this.Info_Field.PriceGroupCreate)
+    }
+
+    Unit UnpackPayload(ByteBuffer byteBuffer) {
+        this.Info_Field.ObjectCapacity = unpackInt(byteBuffer)
+        this.Info_Field.ObjectCount = unpackInt(byteBuffer)
+        this.Info_Field.PriceEnergyUnit = unpackInt(byteBuffer)
+        this.Info_Field.PriceObjectClaim = unpackInt(byteBuffer)
+        this.Info_Field.PricePublicObjectDecay = unpackInt(byteBuffer)
+        this.Info_Field.PricePublicObjectDelete = unpackInt(byteBuffer)
+        this.Info_Field.PriceParcelClaim = unpackInt(byteBuffer)
+        this.Info_Field.PriceParcelClaimFactor = unpackFloat(byteBuffer)
+        this.Info_Field.PriceUpload = unpackInt(byteBuffer)
+        this.Info_Field.PriceRentLight = unpackInt(byteBuffer)
+        this.Info_Field.TeleportMinPrice = unpackInt(byteBuffer)
+        this.Info_Field.TeleportPriceExponent = unpackFloat(byteBuffer)
+        this.Info_Field.EnergyEfficiency = unpackFloat(byteBuffer)
+        this.Info_Field.PriceObjectRent = unpackFloat(byteBuffer)
+        this.Info_Field.PriceObjectScaleFactor = unpackFloat(byteBuffer)
+        this.Info_Field.PriceParcelRent = unpackInt(byteBuffer)
+        this.Info_Field.PriceGroupCreate = unpackInt(byteBuffer)
+    }
+}

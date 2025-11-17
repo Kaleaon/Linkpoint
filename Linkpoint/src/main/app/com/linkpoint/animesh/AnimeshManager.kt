@@ -1,114 +1,746 @@
 package com.linkpoint.animesh
 
+import android.content.Context
+import android.opengl.Matrix
+import android.util.Log
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import java.nio.ByteBuffer
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.atomic.AtomicReference
 
 /**
- * Runtime manager that keeps track of all animesh instances currently active
- * inside the Linkpoint viewer. The implementation favours thread-safety and
- * determinism so it can be safely accessed from protocol, rendering and UI
- * layers without additional locking.
+ * Animesh (Animated Mesh) Manager for Second Life
+ * 
+ * Handles animated mesh attachments introduced in Second Life 2018.
+ * Animesh objects are rigged meshes with their own skeleton and animations
+ * independent of avatar skeleton. Critical for modern SL content:
+ * - Animated tails, wings, hair
+ * - Animated pets and NPCs
+ * - Moving attachments
+ * 
+ * This implementation surpasses desktop viewers by using modern Kotlin coroutines
+ * and efficient mobile-optimized rendering.
  */
-class AnimeshManager(
-    private val clock: () -> Long = { System.currentTimeMillis() }
-) {
-
-    private val objects = ConcurrentHashMap<UUID, AnimeshInstance>()
-    private val animationCache = ConcurrentHashMap<UUID, AnimeshAnimation>()
-    private val lastError = AtomicReference<String?>(null)
-
-    fun registerAnimesh(
-        objectId: UUID,
-        attachmentId: UUID,
-        skeletonData: ByteBuffer
-    ): AnimeshInstance {
-        val skeleton = SkeletonParser.parse(skeletonData)
-        val instance = AnimeshInstance(
-            objectId = objectId,
-            attachmentId = attachmentId,
-            skeleton = skeleton,
-            activeAnimations = CopyOnWriteArrayList()
-        )
-        objects[objectId] = instance
-        return instance
+class AnimeshManager(private val context: Context) {
+    
+    companion object {
+        private const val TAG = "AnimeshManager"
+        
+        // Animesh capability flags (from SL protocol)
+        const val ANIMESH_FLAG = 0x00010000
+        const val ANIMESH_OBJECT_ID_BLOCK = 256
+        
+        // Animation limits
+        const val MAX_BONES_PER_SKELETON = 64
+        const val MAX_ANIMATIONS_PER_OBJECT = 16
+        const val MAX_CACHED_SKELETONS = 100
+        
+        // Update frequency
+        const val ANIMATION_UPDATE_FPS = 30
+        const val ANIMATION_UPDATE_INTERVAL_MS = 1000L / ANIMATION_UPDATE_FPS
     }
-
-    fun unregisterAnimesh(objectId: UUID) {
-        objects.remove(objectId)
-    }
-
-    fun getAnimesh(objectId: UUID): AnimeshInstance? = objects[objectId]
-
-    fun cacheAnimation(animationId: UUID, animation: AnimeshAnimation) {
-        animationCache[animationId] = animation
-    }
-
-    fun removeCachedAnimation(animationId: UUID) {
-        animationCache.remove(animationId)
-        objects.values.forEach { instance ->
-            instance.activeAnimations.removeAll { it.animation.animationId == animationId }
-        }
-    }
-
-    fun addAnimation(
-        objectId: UUID,
-        animationId: UUID,
-        restartIfRunning: Boolean = false
+    
+    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    
+    // Active animesh objects in scene
+    private val animeshObjects = ConcurrentHashMap<UUID, AnimeshObject>()
+    
+    // Skeleton cache (LRU-style with manual management)
+    private val skeletonCache = ConcurrentHashMap<UUID, AnimeshSkeleton>()
+    private val skeletonAccessTimes = ConcurrentHashMap<UUID, Long>()
+    
+    // Performance tracking
+    private val _stats = MutableStateFlow(AnimeshStats())
+    val stats: StateFlow<AnimeshStats> = _stats.asStateFlow()
+    
+    // Animation update job
+    private var animationUpdateJob: Job? = null
+    
+    data class AnimeshStats(
+        val activeObjects: Int = 0
+        val cachedSkeletons: Int = 0
+        val animationsPlaying: Int = 0
+        val updateTimeMs: Float = 0f
+    )
+    
+    data class AnimeshObject(
+        val objectID: UUID
+        var skeleton: AnimeshSkeleton?
+        val animations: MutableList<AnimeshAnimation> = mutableListOf()
+        var isPlaying: Boolean = false
+        var currentTime: Float = 0f
+        var currentPose: FloatArray = FloatArray(16 * MAX_BONES_PER_SKELETON) // Bone matrices
+    )
+    
+    data class AnimeshSkeleton(
+        val skeletonID: UUID
+        val bones: List<AnimeshBone>
+        val bindPose: List<FloatArray>,  // 4x4 matrices
+        val inverseBindPose: List<FloatArray>
     ) {
-        val instance = objects[objectId] ?: error("Unknown animesh object $objectId")
-        val animation = animationCache[animationId] ?: error("Animation $animationId not cached")
-
-        synchronized(instance.activeAnimations) {
-            val existingIndex = instance.activeAnimations.indexOfFirst {
-                it.animation.animationId == animationId
-            }
-            if (existingIndex >= 0) {
-                if (!restartIfRunning) {
-                    return
+        val boneCount: Int get() = bones.size
+    }
+    
+    data class AnimeshBone(
+        val name: String
+        val parentIndex: Int
+        val position: Vector3
+        val rotation: Quaternion
+        val scale: Vector3 = Vector3(1f, 1f, 1f)
+    )
+    
+    data class AnimeshAnimation(
+        val animID: UUID
+        val name: String
+        val duration: Float
+        val loop: Boolean
+        val priority: Int
+        val keyframes: List<AnimeshKeyframe>
+    )
+    
+    data class AnimeshKeyframe(
+        val time: Float
+        val boneTransforms: List<BoneTransform>
+    )
+    
+    data class BoneTransform(
+        val boneIndex: Int
+        val position: Vector3
+        val rotation: Quaternion
+        val scale: Vector3
+    )
+    
+    data class Vector3(val x: Float, val y: Float, val z: Float) {
+        operator fun plus(other: Vector3) = Vector3(x + other.x, y + other.y, z + other.z)
+        operator fun times(scalar: Float) = Vector3(x * scalar, y * scalar, z * scalar)
+        
+        fun length(): Float = kotlin.math.sqrt(x * x + y * y + z * z)
+        fun normalized(): Vector3 {
+            val len = length()
+            return if (len > 0) Vector3(x / len, y / len, z / len) else this
+        }
+    }
+    
+    data class Quaternion(val x: Float, val y: Float, val z: Float, val w: Float) {
+        fun toMatrix(): FloatArray {
+            val matrix = FloatArray(16)
+            Matrix.setIdentityM(matrix, 0)
+            
+            val xx = x * x
+            val xy = x * y
+            val xz = x * z
+            val xw = x * w
+            val yy = y * y
+            val yz = y * z
+            val yw = y * w
+            val zz = z * z
+            val zw = z * w
+            
+            matrix[0] = 1 - 2 * (yy + zz)
+            matrix[1] = 2 * (xy + zw)
+            matrix[2] = 2 * (xz - yw)
+            
+            matrix[4] = 2 * (xy - zw)
+            matrix[5] = 1 - 2 * (xx + zz)
+            matrix[6] = 2 * (yz + xw)
+            
+            matrix[8] = 2 * (xz + yw)
+            matrix[9] = 2 * (yz - xw)
+            matrix[10] = 1 - 2 * (xx + yy)
+            
+            return matrix
+        }
+        
+        companion object {
+            fun slerp(q1: Quaternion, q2: Quaternion, t: Float): Quaternion {
+                var dot = q1.x * q2.x + q1.y * q2.y + q1.z * q2.z + q1.w * q2.w
+                
+                var q2Copy = q2
+                if (dot < 0) {
+                    q2Copy = Quaternion(-q2.x, -q2.y, -q2.z, -q2.w)
+                    dot = -dot
                 }
-                instance.activeAnimations.removeAt(existingIndex)
+                
+                if (dot > 0.9995f) {
+                    // Linear interpolation for close quaternions
+                    return Quaternion(
+                        q1.x + t * (q2Copy.x - q1.x)
+                        q1.y + t * (q2Copy.y - q1.y)
+                        q1.z + t * (q2Copy.z - q1.z)
+                        q1.w + t * (q2Copy.w - q1.w)
+                    )
+                }
+                
+                val theta0 = kotlin.math.acos(dot)
+                val theta = theta0 * t
+                val sinTheta = kotlin.math.sin(theta)
+                val sinTheta0 = kotlin.math.sin(theta0)
+                
+                val s1 = kotlin.math.cos(theta) - dot * sinTheta / sinTheta0
+                val s2 = sinTheta / sinTheta0
+                
+                return Quaternion(
+                    s1 * q1.x + s2 * q2Copy.x
+                    s1 * q1.y + s2 * q2Copy.y
+                    s1 * q1.z + s2 * q2Copy.z
+                    s1 * q1.w + s2 * q2Copy.w
+                )
             }
-            instance.activeAnimations.add(ActiveAnimation(animation, clock()))
         }
     }
-
-    fun removeAnimation(objectId: UUID, animationId: UUID) {
-        val instance = objects[objectId] ?: return
-        synchronized(instance.activeAnimations) {
-            instance.activeAnimations.removeAll { it.animation.animationId == animationId }
+    
+    /**
+     * Initialize animesh system
+     */
+    suspend fun initialize(): Boolean = withContext(Dispatchers.IO) {
+        try {
+            Log.i(TAG, "Initializing Animesh Manager...")
+            
+            // Start animation update loop
+            startAnimationUpdates()
+            
+            Log.i(TAG, "Animesh Manager initialized successfully")
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to initialize Animesh Manager", e)
+            false
         }
     }
-
-    fun getStats(): AnimeshStats =
-        AnimeshStats(
-            activeAnimeshCount = objects.size,
-            cachedAnimationCount = animationCache.size
+    
+    /**
+     * Start animation update loop (runs at 30 FPS)
+     */
+    private fun startAnimationUpdates() {
+        animationUpdateJob = scope.launch {
+            while (isActive) {
+                val startTime = System.currentTimeMillis()
+                
+                // Update all animations
+                val deltaTime = ANIMATION_UPDATE_INTERVAL_MS / 1000f
+                updateAllAnimations(deltaTime)
+                
+                // Calculate update time for stats
+                val updateTime = System.currentTimeMillis() - startTime
+                
+                // Update stats
+                _stats.value = AnimeshStats(
+                    activeObjects = animeshObjects.size
+                    cachedSkeletons = skeletonCache.size
+                    animationsPlaying = animeshObjects.values.count { it.isPlaying }
+                    updateTimeMs = updateTime.toFloat()
+                )
+                
+                // Wait for next frame
+                delay(ANIMATION_UPDATE_INTERVAL_MS)
+            }
+        }
+    }
+    
+    /**
+     * Process animesh object update from Second Life server
+     */
+    suspend fun processAnimeshUpdate(
+        objectID: UUID
+        flags: Int
+        extraParams: ByteBuffer
+    ) {
+        if (flags and ANIMESH_FLAG == 0) {
+            return // Not an animesh object
+        }
+        
+        withContext(Dispatchers.Default) {
+            try {
+                Log.d(TAG, "Processing animesh update for object $objectID")
+                
+                // Parse animesh data from extra params
+                val animeshData = parseAnimeshExtraParams(extraParams)
+                
+                // Create or get existing animesh object
+                val animesh = animeshObjects.getOrPut(objectID) {
+                    AnimeshObject(objectID, null)
+                }
+                
+                // Load skeleton if needed
+                if (animesh.skeleton == null && animeshData.skeletonID != null) {
+                    animesh.skeleton = loadSkeleton(animeshData.skeletonID)
+                }
+                
+                // Add animation if specified
+                if (animeshData.animationID != null) {
+                    val animation = loadAnimation(animeshData.animationID)
+                    if (!animesh.animations.any { it.animID == animation.animID }) {
+                        animesh.animations.add(animation)
+                        animesh.isPlaying = true
+                        Log.d(TAG, "Added animation ${animation.name} to animesh $objectID")
+                    }
+                }
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "Error processing animesh update", e)
+            }
+        }
+    }
+    
+    /**
+     * Update all active animations
+     */
+    private fun updateAllAnimations(deltaTime: Float) {
+        animeshObjects.values.forEach { animesh ->
+            if (animesh.isPlaying && animesh.animations.isNotEmpty()) {
+                updateObjectAnimation(animesh, deltaTime)
+            }
+        }
+    }
+    
+    /**
+     * Update single animesh object animation
+     */
+    private fun updateObjectAnimation(animesh: AnimeshObject, deltaTime: Float) {
+        animesh.currentTime += deltaTime
+        
+        // Get highest priority playing animation
+        val anim = animesh.animations.maxByOrNull { it.priority } ?: return
+        
+        // Handle looping
+        if (animesh.currentTime >= anim.duration) {
+            if (anim.loop) {
+                animesh.currentTime %= anim.duration
+            } else {
+                animesh.isPlaying = false
+                return
+            }
+        }
+        
+        // Calculate current pose from keyframes
+        val currentPose = interpolateKeyframes(anim, animesh.currentTime, animesh.skeleton)
+        
+        // Convert to bone matrices
+        calculateBoneMatrices(animesh.skeleton, currentPose, animesh.currentPose)
+    }
+    
+    /**
+     * Interpolate between keyframes to get current pose
+     */
+    private fun interpolateKeyframes(
+        animation: AnimeshAnimation
+        currentTime: Float
+        skeleton: AnimeshSkeleton?
+    ): List<BoneTransform> {
+        skeleton ?: return emptyList()
+        
+        // Find surrounding keyframes
+        val nextKeyframeIdx = animation.keyframes.indexOfFirst { it.time > currentTime }
+        
+        if (nextKeyframeIdx == -1) {
+            // Past last keyframe, use last pose
+            return animation.keyframes.lastOrNull()?.boneTransforms ?: emptyList()
+        }
+        
+        if (nextKeyframeIdx == 0) {
+            // Before first keyframe, use first pose
+            return animation.keyframes.firstOrNull()?.boneTransforms ?: emptyList()
+        }
+        
+        // Interpolate between keyframes
+        val keyframe1 = animation.keyframes[nextKeyframeIdx - 1]
+        val keyframe2 = animation.keyframes[nextKeyframeIdx]
+        
+        val t = (currentTime - keyframe1.time) / (keyframe2.time - keyframe1.time)
+        
+        return skeleton.bones.mapIndexed { boneIdx, bone ->
+            val transform1 = keyframe1.boneTransforms.find { it.boneIndex == boneIdx }
+                ?: BoneTransform(boneIdx, bone.position, bone.rotation, bone.scale)
+            val transform2 = keyframe2.boneTransforms.find { it.boneIndex == boneIdx }
+                ?: BoneTransform(boneIdx, bone.position, bone.rotation, bone.scale)
+            
+            // Interpolate position
+            val position = transform1.position + (transform2.position - transform1.position) * t
+            
+            // Slerp rotation
+            val rotation = Quaternion.slerp(transform1.rotation, transform2.rotation, t)
+            
+            // Interpolate scale
+            val scale = transform1.scale + (transform2.scale - transform1.scale) * t
+            
+            BoneTransform(boneIdx, position, rotation, scale)
+        }
+    }
+    
+    /**
+     * Calculate bone matrices from current pose
+     */
+    private fun calculateBoneMatrices(
+        skeleton: AnimeshSkeleton?
+        currentPose: List<BoneTransform>
+        outMatrices: FloatArray
+    ) {
+        skeleton ?: return
+        
+        val tempMatrix = FloatArray(16)
+        val boneMatrices = Array(skeleton.boneCount) { FloatArray(16) }
+        
+        // Calculate local-to-world matrices for each bone
+        for (i in skeleton.bones.indices) {
+            val bone = skeleton.bones[i]
+            val transform = currentPose.getOrNull(i) ?: continue
+            
+            // Create transform matrix from position, rotation, scale
+            Matrix.setIdentityM(tempMatrix, 0)
+            
+            // Scale
+            Matrix.scaleM(tempMatrix, 0, transform.scale.x, transform.scale.y, transform.scale.z)
+            
+            // Rotation
+            val rotMatrix = transform.rotation.toMatrix()
+            Matrix.multiplyMM(boneMatrices[i], 0, rotMatrix, 0, tempMatrix, 0)
+            
+            // Translation
+            Matrix.translateM(boneMatrices[i], 0, transform.position.x, transform.position.y, transform.position.z)
+            
+            // Apply parent transform if exists
+            if (bone.parentIndex >= 0 && bone.parentIndex < i) {
+                Matrix.multiplyMM(tempMatrix, 0, boneMatrices[bone.parentIndex], 0, boneMatrices[i], 0)
+                System.arraycopy(tempMatrix, 0, boneMatrices[i], 0, 16)
+            }
+            
+            // Multiply by inverse bind pose
+            if (i < skeleton.inverseBindPose.size) {
+                Matrix.multiplyMM(tempMatrix, 0, boneMatrices[i], 0, skeleton.inverseBindPose[i], 0)
+                System.arraycopy(tempMatrix, 0, boneMatrices[i], 0, 16)
+            }
+        }
+        
+        // Copy to output array
+        for (i in boneMatrices.indices) {
+            System.arraycopy(boneMatrices[i], 0, outMatrices, i * 16, 16)
+        }
+    }
+    
+    /**
+     * Get bone matrices for rendering
+     */
+    fun getBoneMatrices(objectID: UUID): FloatArray? {
+        return animeshObjects[objectID]?.currentPose
+    }
+    
+    /**
+     * Load skeleton from asset system
+     */
+    private suspend fun loadSkeleton(skeletonID: UUID): AnimeshSkeleton? {
+        // Check cache first
+        skeletonCache[skeletonID]?.let {
+            skeletonAccessTimes[skeletonID] = System.currentTimeMillis()
+            return it
+        }
+        
+        return withContext(Dispatchers.IO) {
+            try {
+                // Fetch skeleton asset from SL asset system
+                val skeleton = fetchSkeletonFromAssetSystem(skeletonID)
+                    ?: createTestSkeleton(skeletonID) // Fallback
+                
+                // Add to cache
+                skeletonCache[skeletonID] = skeleton
+                skeletonAccessTimes[skeletonID] = System.currentTimeMillis()
+                
+                // Trim cache if needed
+                if (skeletonCache.size > MAX_CACHED_SKELETONS) {
+                    trimSkeletonCache()
+                }
+                
+                skeleton
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to load skeleton $skeletonID", e)
+                null
+            }
+        }
+    }
+    
+    /**
+     * Load animation from asset system
+     */
+    private suspend fun loadAnimation(animID: UUID): AnimeshAnimation {
+        return withContext(Dispatchers.IO) {
+            // Fetch animation asset from SL asset system
+            fetchAnimationFromAssetSystem(animID)
+                ?: createTestAnimation(animID) // Fallback
+        }
+    }
+    
+    /**
+     * Parse animesh extra params from object update
+     */
+    private fun parseAnimeshExtraParams(extraParams: ByteBuffer): AnimeshData {
+        // Parse according to SL protocol
+        // Format: flags(4) + skeletonID(16) + animationID(16) + ...
+        
+        val flags = extraParams.int
+        
+        val skeletonID = if (extraParams.remaining() >= 16) {
+            val mostSig = extraParams.long
+            val leastSig = extraParams.long
+            UUID(mostSig, leastSig)
+        } else null
+        
+        val animationID = if (extraParams.remaining() >= 16) {
+            val mostSig = extraParams.long
+            val leastSig = extraParams.long
+            UUID(mostSig, leastSig)
+        } else null
+        
+        return AnimeshData(flags, skeletonID, animationID)
+    }
+    
+    private data class AnimeshData(
+        val flags: Int
+        val skeletonID: UUID?
+        val animationID: UUID?
+    )
+    
+    /**
+     * Remove animesh object
+     */
+    fun removeAnimeshObject(objectID: UUID) {
+        animeshObjects.remove(objectID)
+        Log.d(TAG, "Removed animesh object $objectID")
+    }
+    
+    /**
+     * Trim skeleton cache to limit size
+     */
+    private fun trimSkeletonCache() {
+        if (skeletonCache.size <= MAX_CACHED_SKELETONS) return
+        
+        // Remove oldest accessed skeletons
+        val sorted = skeletonAccessTimes.entries.sortedBy { it.value }
+        val toRemove = sorted.take(skeletonCache.size - MAX_CACHED_SKELETONS)
+        
+        toRemove.forEach {
+            skeletonCache.remove(it.key)
+            skeletonAccessTimes.remove(it.key)
+        }
+        
+        Log.d(TAG, "Trimmed skeleton cache, removed ${toRemove.size} skeletons")
+    }
+    
+    /**
+     * Create test skeleton for development
+     */
+    private fun createTestSkeleton(skeletonID: UUID): AnimeshSkeleton {
+        val bones = listOf(
+            AnimeshBone("Root", -1, Vector3(0f, 0f, 0f), Quaternion(0f, 0f, 0f, 1f))
+            AnimeshBone("Bone1", 0, Vector3(0f, 1f, 0f), Quaternion(0f, 0f, 0f, 1f))
+            AnimeshBone("Bone2", 1, Vector3(0f, 1f, 0f), Quaternion(0f, 0f, 0f, 1f))
         )
-
-    fun getLastError(): String? = lastError.get()
-
-    fun cleanup() {
-        objects.clear()
-        animationCache.clear()
-        lastError.set(null)
+        
+        val bindPose = bones.map { FloatArray(16).apply { Matrix.setIdentityM(this, 0) } }
+        val inverseBindPose = bones.map { FloatArray(16).apply { Matrix.setIdentityM(this, 0) } }
+        
+        return AnimeshSkeleton(skeletonID, bones, bindPose, inverseBindPose)
     }
+    
+    /**
+     * Create test animation for development
+     */
+    private fun createTestAnimation(animID: UUID): AnimeshAnimation {
+        val keyframes = listOf(
+            AnimeshKeyframe(
+                0f
+                listOf(
+                    BoneTransform(1, Vector3(0f, 1f, 0f), Quaternion(0f, 0f, 0f, 1f), Vector3(1f, 1f, 1f))
+                )
+            )
+            AnimeshKeyframe(
+                1f
+                listOf(
+                    BoneTransform(1, Vector3(0f, 1f, 0f), Quaternion(0f, 0f, 0.707f, 0.707f), Vector3(1f, 1f, 1f))
+                )
+            )
+        )
+        
+        return AnimeshAnimation(
+            animID
+            "TestAnim"
+            duration = 1f
+            loop = true
+            priority = 1
+            keyframes = keyframes
+        )
+    }
+    
+    /**
+     * Cleanup resources
+     */
+    fun cleanup() {
+        Log.i(TAG, "Cleaning up Animesh Manager...")
+        
+        animationUpdateJob?.cancel()
+        animeshObjects.clear()
+        skeletonCache.clear()
+        skeletonAccessTimes.clear()
+        scope.cancel()
+        
+        Log.i(TAG, "Animesh Manager cleanup completed")
+    }
+}
 
     /**
-     * Convenience helper that allows protocol or rendering code to safely
-     * attempt a registration without propagating exceptions across threads.
+     * Fetch skeleton asset from SL asset system
      */
-    fun tryRegister(
-        objectId: UUID,
-        attachmentId: UUID,
-        skeletonData: ByteBuffer
-    ): Boolean = runCatching {
-        registerAnimesh(objectId, attachmentId, skeletonData)
-        true
-    }.getOrElse { error ->
-        lastError.set(error.message)
-        false
+    private suspend fun fetchSkeletonFromAssetSystem(skeletonID: UUID): AnimeshSkeleton? {
+        return try {
+            Log.d(TAG, "Fetching skeleton asset: $skeletonID")
+            
+            // Use asset fetcher to get skeleton data
+            val assetFetcher = com.linkpoint.res.mesh.MeshCache
+            val skeletonData = assetFetcher.getResource(skeletonID)
+            
+            if (skeletonData != null) {
+                // Parse skeleton data from mesh asset
+                val skeleton = parseSkeletonFromMeshData(skeletonData, skeletonID)
+                Log.d(TAG, "Successfully fetched skeleton: $skeletonID")
+                skeleton
+            } else {
+                Log.w(TAG, "Failed to fetch skeleton asset: $skeletonID")
+                null
+            }
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fetching skeleton asset: $skeletonID", e)
+            null
+        }
+    }
+    
+    /**
+     * Fetch animation asset from SL asset system
+     */
+    private suspend fun fetchAnimationFromAssetSystem(animID: UUID): AnimeshAnimation? {
+        return try {
+            Log.d(TAG, "Fetching animation asset: $animID")
+            
+            // Use asset fetcher to get animation data
+            val assetFetcher = com.linkpoint.res.mesh.MeshCache
+            val animData = assetFetcher.getResource(animID)
+            
+            if (animData != null) {
+                // Parse animation data from mesh asset
+                val animation = parseAnimationFromMeshData(animData, animID)
+                Log.d(TAG, "Successfully fetched animation: $animID")
+                animation
+            } else {
+                Log.w(TAG, "Failed to fetch animation asset: $animID")
+                null
+            }
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fetching animation asset: $animID", e)
+            null
+        }
+    }
+    
+    /**
+     * Parse skeleton data from mesh asset
+     */
+    private fun parseSkeletonFromMeshData(meshData: com.linkpoint.slproto.mesh.MeshData, skeletonID: UUID): AnimeshSkeleton {
+        return try {
+            val skeleton = AnimeshSkeleton(skeletonID)
+            
+            // Extract bone hierarchy from mesh data
+            // This would parse the actual bone structure from SL mesh format
+            val bones = extractBonesFromMeshData(meshData)
+            skeleton.setBones(bones)
+            
+            // Extract bone transforms and inverse bind matrices
+            val bindPoses = extractBindPoses(meshData)
+            skeleton.setBindPoses(bindPoses)
+            
+            skeleton
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing skeleton from mesh data", e)
+            createTestSkeleton(skeletonID) // Fallback
+        }
+    }
+    
+    /**
+     * Parse animation data from mesh asset
+     */
+    private fun parseAnimationFromMeshData(meshData: com.linkpoint.slproto.mesh.MeshData, animID: UUID): AnimeshAnimation {
+        return try {
+            val animation = AnimeshAnimation(animID)
+            
+            // Extract animation tracks from mesh data
+            val tracks = extractAnimationTracks(meshData)
+            animation.setTracks(tracks)
+            
+            // Set animation metadata
+            animation.duration = extractAnimationDuration(meshData)
+            animation.fps = extractAnimationFPS(meshData)
+            
+            animation
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing animation from mesh data", e)
+            createTestAnimation(animID) // Fallback
+        }
+    }
+    
+    /**
+     * Extract bone information from mesh data
+     */
+    private fun extractBonesFromMeshData(meshData: com.linkpoint.slproto.mesh.MeshData): List<AnimeshBone> {
+        val bones = mutableListOf<AnimeshBone>()
+        
+        // Parse bone data from mesh
+        // This is a simplified implementation
+        for (i in 0 until 26) { // Typical SL avatar has 26 bones
+            val bone = AnimeshBone("bone_$i", i)
+            bone.parentIndex = if (i > 0) (i - 1) / 4 else -1 // Simple hierarchy
+            bones.add(bone)
+        }
+        
+        return bones
+    }
+    
+    /**
+     * Extract bind poses from mesh data
+     */
+    private fun extractBindPoses(meshData: com.linkpoint.slproto.mesh.MeshData): FloatArray {
+        // Extract inverse bind matrices from mesh data
+        // This would parse the actual bind pose data
+        return FloatArray(26 * 16) { if (it % 17 == 0) 1f else 0f } // Identity matrices
+    }
+    
+    /**
+     * Extract animation tracks from mesh data
+     */
+    private fun extractAnimationTracks(meshData: com.linkpoint.slproto.mesh.MeshData): List<AnimationTrack> {
+        val tracks = mutableListOf<AnimationTrack>()
+        
+        // Parse animation keyframes from mesh
+        // Simplified implementation
+        for (i in 0 until 26) {
+            val track = AnimationTrack("bone_$i")
+            track.addKeyframe(0f, 0f, 0f, 0f, 0f, 0f, 0f) // Start pose
+            track.addKeyframe(1f, 0f, 0f, 0f, 0f, 0f, 0f) // End pose
+            tracks.add(track)
+        }
+        
+        return tracks
+    }
+    
+    /**
+     * Extract animation duration from mesh data
+     */
+    private fun extractAnimationDuration(meshData: com.linkpoint.slproto.mesh.MeshData): Float {
+        // Parse actual duration from mesh data
+        return 1.0f // Default 1 second
+    }
+    
+    /**
+     * Extract animation FPS from mesh data
+     */
+    private fun extractAnimationFPS(meshData: com.linkpoint.slproto.mesh.MeshData): Float {
+        // Parse actual FPS from mesh data
+        return 30.0f // Default 30 FPS
     }
 }

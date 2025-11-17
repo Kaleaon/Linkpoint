@@ -1,0 +1,88 @@
+package com.linkpoint.slproto.chat
+
+import android.content.Context
+import com.linkpoint.R
+import com.linkpoint.dao.ChatMessage
+import com.linkpoint.slproto.chat.generic.SLChatEvent
+import com.linkpoint.slproto.users.chatsrc.ChatMessageSource
+import com.linkpoint.slproto.users.manager.UserManager
+import java.util.UUID
+import androidx.annotation.NonNull
+
+class SLChatBalanceChangedEvent : SLChatEvent {
+    private Int newBalance
+    private Int transactionAmount
+    private Boolean transactionAmountValid
+
+    /* JADX INFO: super call moved to the top of the method (can break code semantics) */
+    SLChatBalanceChangedEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
+        super(chatMessage, uuid)
+        Int i = 0
+        this.transactionAmountValid = chatMessage.getTransactionAmount() != null
+        this.transactionAmount = chatMessage.getTransactionAmount() != null ? chatMessage.getTransactionAmount().intValue() : i
+        this.newBalance = chatMessage.getNewBalance().intValue()
+    }
+
+    SLChatBalanceChangedEvent(@NonNull ChatMessageSource chatMessageSource, @NonNull UUID uuid, Boolean z, Int i, Int i2) {
+        super(chatMessageSource, uuid)
+        this.transactionAmountValid = z
+        this.transactionAmount = i
+        this.newBalance = i2
+    }
+
+    /* access modifiers changed from: protected */
+    @NonNull
+    SLChatEvent.ChatMessageType getMessageType() {
+        return SLChatEvent.ChatMessageType.BalanceChanged
+    }
+
+    Int getNewBalance() {
+        return this.newBalance
+    }
+
+    /* access modifiers changed from: protected */
+    String getText(Context context, @NonNull UserManager userManager) {
+        if (this.transactionAmountValid) {
+            String sourceName = this.source.getSourceName(userManager)
+            if (sourceName != null) {
+                if (this.transactionAmount >= 0) {
+                    return context.getString(R.string.you_were_paid_by_agent, Array<Any>{Integer.valueOf(this.transactionAmount), Integer.valueOf(getNewBalance())})
+                }
+                return context.getString(R.string.you_have_paid_to_agent, Array<Any>{Integer.valueOf(-this.transactionAmount), sourceName, Integer.valueOf(getNewBalance())})
+            } else if (this.transactionAmount >= 0) {
+                return context.getString(R.string.you_were_paid, Array<Any>{Integer.valueOf(this.transactionAmount), Integer.valueOf(this.newBalance)})
+            } else {
+                return context.getString(R.string.you_have_paid, Array<Any>{Integer.valueOf(-this.transactionAmount), Integer.valueOf(this.newBalance)})
+            }
+        } else {
+            return context.getString(R.string.your_account_balance_is_now, Array<Any>{Integer.valueOf(this.newBalance)})
+        }
+    }
+
+    Int getTransactionAmount() {
+        return this.transactionAmount
+    }
+
+    Boolean getTransactionAmountValid() {
+        return this.transactionAmountValid
+    }
+
+    SLChatEvent.ChatMessageViewType getViewType() {
+        return SLChatEvent.ChatMessageViewType.VIEW_TYPE_NORMAL
+    }
+
+    /* access modifiers changed from: protected */
+    Boolean isActionMessage(@NonNull UserManager userManager) {
+        return this.transactionAmountValid && this.source.getSourceName(userManager) != null && getTransactionAmount() >= 0
+    }
+
+    Boolean opensNewChatter() {
+        return false
+    }
+
+    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+        super.serializeToDatabaseObject(chatMessage)
+        chatMessage.setTransactionAmount(this.transactionAmountValid ? Integer.valueOf(this.transactionAmount) : null)
+        chatMessage.setNewBalance(Integer.valueOf(this.newBalance))
+    }
+}

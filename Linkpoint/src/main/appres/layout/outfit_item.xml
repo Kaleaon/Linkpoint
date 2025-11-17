@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:orientation="horizontal" android:id="@+id/outfitItemLayout" android:layout_width="match_parent" android:layout_height="50sp">
+    <ImageView android:layout_gravity="center_vertical" android:id="@+id/itemTypeIconView" android:paddingLeft="5dp" android:paddingRight="5dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/inv_folder" android:scaleType="center"/>
+    <TextView android:textSize="16sp" android:ellipsize="end" android:layout_gravity="center_vertical" android:id="@+id/itemNameTextView" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1"/>
+    <ImageView android:layout_gravity="center_vertical" android:id="@+id/itemTouchableIcon" android:paddingLeft="5dp" android:paddingRight="5dp" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="?attr/SmallIconHand" android:scaleType="center"/>
+</LinearLayout>

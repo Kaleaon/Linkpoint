@@ -1,0 +1,58 @@
+package com.linkpoint.slproto.messages
+
+import com.google.common.base.Ascii
+import com.google.common.primitives.UnsignedBytes
+import com.linkpoint.slproto.SLMessage
+import java.nio.ByteBuffer
+import java.util.ArrayList
+import java.util.UUID
+
+class RemoveInventoryItem : SLMessage {
+    AgentData AgentData_Field
+    ArrayList<InventoryData> InventoryData_Fields = ArrayList<>()
+
+    class AgentData {
+        UUID AgentID
+        UUID SessionID
+    }
+
+    class InventoryData {
+        UUID ItemID
+    }
+
+    RemoveInventoryItem() {
+        this.zeroCoded = false
+        this.AgentData_Field = AgentData()
+    }
+
+    Int CalcPayloadSize() {
+        return (this.InventoryData_Fields.size() * 16) + 37
+    }
+
+    Unit Handle(SLMessageHandler sLMessageHandler) {
+        sLMessageHandler.HandleRemoveInventoryItem(this)
+    }
+
+    Unit PackPayload(ByteBuffer byteBuffer) {
+        byteBuffer.putShort(-1)
+        byteBuffer.put((Byte) 1)
+        byteBuffer.put(Ascii.SO)
+        packUUID(byteBuffer, this.AgentData_Field.AgentID)
+        packUUID(byteBuffer, this.AgentData_Field.SessionID)
+        byteBuffer.put((Byte) this.InventoryData_Fields.size())
+        for (InventoryData inventoryData : this.InventoryData_Fields) {
+            packUUID(byteBuffer, inventoryData.ItemID)
+        }
+    }
+
+    Unit UnpackPayload(ByteBuffer byteBuffer) {
+        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
+        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
+        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        for (Int i = 0; i < b; i++) {
+            InventoryData inventoryData = InventoryData()
+            inventoryData.ItemID = unpackUUID(byteBuffer)
+            this.InventoryData_Fields.add(inventoryData)
+        }
+    }
+}

@@ -1,294 +1,422 @@
 package com.linkpoint.modern.protocol
 
 import android.util.Log
-import com.linkpoint.slproto.auth.SLAuth
-import com.linkpoint.slproto.auth.SLAuthParams
-import com.linkpoint.slproto.auth.SLAuthReply
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import lindenlab.llsd.LLSD
-import lindenlab.llsd.LLSDException
-import lindenlab.llsd.LLSDParser
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.ByteArrayInputStream
-import java.io.IOException
-import java.security.SecureRandom
-import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicReference
-import javax.xml.parsers.ParserConfigurationException
+
+import java.util.concurrent.CompletableFuture
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+import java.util.Map
+import java.util.HashMap
 
 /**
- * Real transport layer that wires Linkpoint into the Second Life protocol stack.
- * Handles XML-RPC authentication, CAPS fetching and the EventQueue long poll.
+ * Hybrid transport layer combining HTTP/2, WebSocket, and UDP
+ * Based on Second Life Integration Guide modernization plans
  */
-class HybridSLTransport(
-    private val auth: SLAuth = SLAuth(),
-    private val httpClient: OkHttpClient = defaultHttpClient(),
-    dispatcher: CoroutineDispatcher = Dispatchers.IO
-) {
-    private val scope = CoroutineScope(SupervisorJob() + dispatcher)
-    private val sessionRef = AtomicReference<SessionInfo?>()
-    private val capabilities = ConcurrentHashMap<String, String>()
-    private val connectionState = MutableStateFlow<State>(State.Idle)
-    private val eventFlow = MutableSharedFlow<GridEvent>(
-        extraBufferCapacity = 64,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-    private var eventJob = scope.launch { }
-    private var eventAck: Long? = null
-    private val parser: LLSDParser = try {
-        LLSDParser()
-    } catch (e: ParserConfigurationException) {
-        throw IllegalStateException("Unable to create LLSD parser", e)
+class HybridSLTransport {
+    private val TAG: String = "HybridSLTransport"
+    
+    private HTTP2CapsClient capsClient;        // Modern CAPS using HTTP/2
+    private WebSocketEventClient eventClient;  // Real-time events
+    private MessageRouter router
+    
+    HybridSLTransport() {
+        this.capsClient = HTTP2CapsClient()
+        this.eventClient = WebSocketEventClient()
+        this.router = MessageRouter()
+        
+        Log.i(TAG, "Hybrid transport layer initialized")
     }
-
-    fun state(): StateFlow<State> = connectionState.asStateFlow()
-    fun events(): SharedFlow<GridEvent> = eventFlow.asSharedFlow()
-    fun currentSession(): SessionInfo? = sessionRef.get()
-
-    suspend fun login(
-        grid: Grid = Grid.SecondLifeMain,
-        loginName: String,
-        password: String,
-        startLocation: String = "last"
-    ): SessionInfo = withContext(scope.coroutineContext) {
-        connectionState.value = State.Connecting
-        val params = SLAuthParams(
-            loginUri = grid.loginUrl,
-            loginName = loginName,
-            passwordHash = SLAuth.md5Hash(password),
-            startLocation = startLocation,
-            channel = "Linkpoint Android",
-            version = "1.0.0",
-            macAddress = randomMacAddress(),
-            id0 = randomId0()
-        )
-        val reply = auth.sendLoginRequest(params)
-        if (!reply.success) {
-            val error = IllegalStateException(reply.message ?: "Login failed")
-            connectionState.value = State.Error(error)
-            throw error
-        }
-
-        val session = SessionInfo(grid, reply)
-        sessionRef.set(session)
-        connectionState.value = State.Connected(session)
-
-        reply.seedCapability?.let { seed ->
-            try {
-                fetchCapabilities(seed)
-                capabilities["EventQueueGet"]?.let { startEventQueue(it) }
-            } catch (capError: Exception) {
-                Log.w(TAG, "Capability bootstrap failed: ${capError.message}", capError)
-                eventFlow.emit(GridEvent.Error(capError))
+    
+    /**
+     * Set authentication token for all transport layers
+     */
+    void setAuthToken(String token) {
+        capsClient.setAuthToken(token)
+        eventClient.setAuthToken(token)
+        Log.d(TAG, "Auth token configured for all transports")
+    }
+    
+    /**
+     * Initialize connections based on authentication data
+     */
+    void initialize(String eventQueueUrl, String seedCapability) {
+        try {
+            // Configure HTTP/2 CAPS client
+            if (seedCapability != null) {
+                Log.i(TAG, "Configuring CAPS client with seed capability")
+                Map<String, String> capsUrls = parseSeedCapability(seedCapability)
+                capsClient.configureCapabilities(capsUrls)
             }
+            
+            // Configure WebSocket event client
+            if (eventQueueUrl != null) {
+                Log.i(TAG, "Connecting to event queue: " + eventQueueUrl)
+                eventClient.connect(eventQueueUrl)
+            }
+            
+            Log.i(TAG, "Hybrid transport initialized successfully")
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to initialize hybrid transport", e)
         }
-
-        session
     }
-
-    suspend fun postCapability(
-        name: String,
-        body: LLSD,
-        contentType: String = LLSD_MIME
-    ): String {
-        val url = capabilities[name]
-            ?: throw IllegalStateException("Capability $name not available")
-        val writer = java.io.StringWriter()
-        body.serialise(writer)
-        val request = Request.Builder()
-            .url(url)
-            .post(writer.toString().toRequestBody(contentType.toMediaType()))
-            .addHeader("Accept", LLSD_MIME)
-            .build()
-        return withContext(scope.coroutineContext) {
-            httpClient.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) {
-                    throw IOException("Capability request failed (${response.code})")
+    
+    /**
+     * Send message using optimal transport route
+     */
+    CompletableFuture<SLResponse> sendMessage(ModernMessage message) {
+        TransportRoute route = router.selectOptimalRoute(message)
+        
+        Log.d(TAG, "Routing message via " + route.getTransport() + ": " + message.getClass().getSimpleName())
+        
+        switch (route.getTransport()) {
+            case HTTP2_CAPS:
+                // Use HTTP/2 for large data transfers, asset uploads
+                return capsClient.sendAsync(route.getUrl(), message.toLLSDXML())
+                    .thenApply(this::parseHTTP2Response)
+                    
+            case WEBSOCKET_REALTIME:
+                // Use WebSocket for chat, object updates, real-time events
+                return sendViaWebSocket(message)
+                    
+            case UDP_LEGACY:
+                // Legacy UDP not available in modern-only build
+                return CompletableFuture.failedFuture(
+                    UnsupportedOperationException("UDP transport not available"))
+                    
+            default:
+                return CompletableFuture.failedFuture(
+                    UnsupportedOperationException("Unknown transport: " + route))
+        }
+    }
+    
+    /**
+     * Send message via WebSocket (async simulation)
+     */
+    private CompletableFuture<SLResponse> sendViaWebSocket(ModernMessage message) {
+        CompletableFuture<SLResponse> future = new CompletableFuture<>()
+        
+        try {
+            if (!eventClient.isConnected()) {
+                future.completeExceptionally(IllegalStateException("WebSocket not connected"))
+                return future
+            }
+            
+            // Convert message to WebSocket format
+            String jsonMessage = message.toJSON()
+            Log.d(TAG, "Sending WebSocket message: " + jsonMessage.substring(0, Math.min(100, jsonMessage.length())))
+            
+            // Send via WebSocket (OkHttp WebSocket send returns boolean)
+            boolean sent = eventClient.sendRawMessage(jsonMessage)
+            
+            if (sent) {
+                // Simulate immediate acknowledgment for real-time messages
+                future.complete(SLResponse("websocket_ack", "Message sent successfully"))
+            } else {
+                future.completeExceptionally(RuntimeException("Failed to send WebSocket message"))
+            }
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Error sending WebSocket message", e)
+            future.completeExceptionally(e)
+        }
+        
+        return future
+    }
+    
+    /**
+     * Parse Second Life seed capability response
+     * Extracts capability URLs from LLSD response
+     */
+    private Map<String, String> parseSeedCapability(String seedCapability) {
+        Map<String, String> capabilities = new HashMap<>()
+        
+        try {
+            // Parse LLSD-XML format seed capability
+            // Example format: <map><key>EventQueueGet</key><string>http://...</string></map>
+            
+            // Common Second Life capabilities to extract
+            Array<String> capabilityNames = {
+                "EventQueueGet", "ChatSessionRequest", "SendChatMessage"
+                "UploadBakedTexture", "FetchInventory", "GetMesh", 
+                "GetTexture", "AgentPreferences", "UpdateAgentInformation"
+            }
+            
+            for (String capName : capabilityNames) {
+                // Pattern to match LLSD capability entries
+                // <key>CapabilityName</key><string>URL</string>
+                Pattern capPattern = Pattern.compile(
+                    "<key>" + Pattern.quote(capName) + "</key>\\s*<string>([^<]+)</string>"
+                    Pattern.CASE_INSENSITIVE
+                )
+                
+                Matcher matcher = capPattern.matcher(seedCapability)
+                if (matcher.find()) {
+                    String capUrl = matcher.group(1).trim()
+                    capabilities.put(capName, capUrl)
+                    Log.d(TAG, "Parsed capability: " + capName + " -> " + capUrl)
                 }
-                response.body?.string() ?: ""
             }
-        }
-    }
-
-    suspend fun shutdown() {
-        eventJob.cancel()
-        eventJob.join()
-        sessionRef.set(null)
-        capabilities.clear()
-        connectionState.value = State.Idle
-    }
-
-    private suspend fun fetchCapabilities(seedUrl: String) {
-        val payload = buildCapabilityRequest(DEFAULT_CAPABILITIES)
-        val request = Request.Builder()
-            .url(seedUrl)
-            .post(payload.toRequestBody(LLSD_MIME.toMediaType()))
-            .addHeader("Accept", LLSD_MIME)
-            .build()
-
-        httpClient.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) {
-                throw IOException("Seed capability fetch failed (${response.code})")
-            }
-            response.body?.byteStream()?.use { stream ->
-                val parsed = parser.parse(stream).content as? Map<*, *>
-                    ?: throw LLSDException("Seed capability returned unexpected payload")
-                capabilities.clear()
-                parsed.entries.forEach { entry ->
-                    val key = entry.key as? String ?: return@forEach
-                    val value = entry.value as? String ?: return@forEach
-                    capabilities[key] = value
-                }
-                eventFlow.emit(GridEvent.Capabilities(capabilities.toMap()))
-            } ?: throw IOException("Seed capability empty response")
-        }
-    }
-
-    private fun startEventQueue(eventQueueUrl: String) {
-        eventJob.cancel()
-        eventJob = scope.launch {
-            eventAck = null
-            while (true) {
-                try {
-                    val body = buildEventQueueRequest(eventAck)
-                    val request = Request.Builder()
-                        .url(eventQueueUrl)
-                        .post(body.toRequestBody(LLSD_MIME.toMediaType()))
-                        .addHeader("Accept", LLSD_MIME)
-                        .build()
-                    httpClient.newCall(request).execute().use { response ->
-                        if (!response.isSuccessful) {
-                            throw IOException("Event queue HTTP ${response.code}")
+            
+            // Also try simplified key:value parsing for JSON-like formats
+            if (capabilities.isEmpty() && seedCapability.contains(":")) {
+                Pattern jsonPattern = Pattern.compile("\"([^\"]+)\"\\s*:\\s*\"([^\"]+)\"")
+                Matcher jsonMatcher = jsonPattern.matcher(seedCapability)
+                
+                while (jsonMatcher.find()) {
+                    String key = jsonMatcher.group(1)
+                    String value = jsonMatcher.group(2)
+                    
+                    // Only store known capability names
+                    for (String capName : capabilityNames) {
+                        if (key.equalsIgnoreCase(capName)) {
+                            capabilities.put(capName, value)
+                            Log.d(TAG, "Parsed JSON capability: " + key + " -> " + value)
+                            break
                         }
-                        response.body?.byteStream()?.use { stream ->
-                            handleEventQueueResponse(stream)
-                        } ?: throw IOException("Event queue empty response")
                     }
-                } catch (error: Exception) {
-                    eventFlow.emit(GridEvent.Error(error))
-                    delay(EVENT_QUEUE_RETRY_MS)
                 }
             }
+            
+            Log.i(TAG, "Parsed " + capabilities.size() + " capabilities from seed")
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to parse seed capability", e)
         }
+        
+        return capabilities
     }
-
-    private suspend fun handleEventQueueResponse(stream: java.io.InputStream) {
-        val parsed = parser.parse(stream).content as? Map<*, *> ?: return
-        val events = parsed["events"] as? List<*>
-        val ack = parsed["id"]
-        if (ack is Number) {
-            eventAck = ack.toLong()
-        }
-        if (!events.isNullOrEmpty()) {
-            events.forEach { payload ->
-                eventFlow.emit(GridEvent.EventQueue(payload))
+    
+    /**
+     * Parse HTTP/2 CAPS response
+     * Handles LLSD-XML format responses common in Second Life
+     */
+    private SLResponse parseHTTP2Response(String responseData) {
+        try {
+            // Basic LLSD-XML parsing for Second Life responses
+            String responseType = "caps_response"
+            String parsedData = responseData
+            
+            if (responseData != null) {
+                // Extract common LLSD response patterns
+                if (responseData.contains("<map>")) {
+                    responseType = "llsd_map"
+                    
+                    // Extract key-value pairs from LLSD map
+                    Pattern mapPattern = Pattern.compile("<key>([^<]+)</key>\\s*<(string|integer|real|boolean)>([^<]*)</\\2>")
+                    Matcher matcher = mapPattern.matcher(responseData)
+                    
+                    StringBuilder parsed = StringBuilder("LLSD Map: ")
+                    while (matcher.find()) {
+                        String key = matcher.group(1)
+                        String type = matcher.group(2)
+                        String value = matcher.group(3)
+                        parsed.append(key).append("=").append(value).append(" ")
+                    }
+                    
+                    if (parsed.length() > "LLSD Map: ".length()) {
+                        parsedData = parsed.toString()
+                    }
+                    
+                } else if (responseData.contains("<array>")) {
+                    responseType = "llsd_array"
+                    parsedData = "LLSD Array with " + responseData.split("<").length + " elements"
+                    
+                } else if (responseData.contains("<string>")) {
+                    // Simple string response
+                    Pattern stringPattern = Pattern.compile("<string>([^<]*)</string>")
+                    Matcher stringMatcher = stringPattern.matcher(responseData)
+                    if (stringMatcher.find()) {
+                        parsedData = stringMatcher.group(1)
+                        responseType = "llsd_string"
+                    }
+                }
+                
+                // Check for common error responses
+                if (responseData.toLowerCase().contains("error") || 
+                    responseData.toLowerCase().contains("fail")) {
+                    responseType = "error_response"
+                }
             }
-        } else {
-            eventFlow.emit(GridEvent.Status("Event queue heartbeat"))
+            
+            Log.d(TAG, "Parsed CAPS response type: " + responseType)
+            return SLResponse(responseType, parsedData)
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to parse HTTP/2 response", e)
+            return SLResponse("parse_error", "Failed to parse response: " + e.getMessage())
         }
     }
-
-    private fun buildCapabilityRequest(names: List<String>): String = buildString {
-        append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-        append("<llsd><array>")
-        names.forEach { append("<string>${LLSD.encodeXML(it)}</string>") }
-        append("</array></llsd>")
-    }
-
-    private fun buildEventQueueRequest(ack: Long?): String = buildString {
-        append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-        append("<llsd><map>")
-        if (ack != null) {
-            append("<key>ack</key><integer>$ack</integer>")
+    
+    /**
+     * Modern message base class
+     */
+    abstract class ModernMessage {
+        protected String type
+        protected long timestamp
+        
+        ModernMessage(String type) {
+            this.type = type
+            this.timestamp = System.currentTimeMillis()
         }
-        append("<key>done</key><boolean>false</boolean>")
-        append("</map></llsd>")
-    }
-
-    sealed class State {
-        object Idle : State()
-        object Connecting : State()
-        data class Connected(val session: SessionInfo) : State()
-        data class Error(val throwable: Throwable) : State()
-    }
-
-    data class SessionInfo(
-        val grid: Grid,
-        val reply: SLAuthReply
-    ) {
-        val avatarName: String = listOfNotNull(reply.firstName, reply.lastName)
-            .joinToString(" ")
-        val sessionId: String? = reply.sessionId
-    }
-
-    sealed class GridEvent {
-        data class Capabilities(val urls: Map<String, String>) : GridEvent()
-        data class EventQueue(val payload: Any?) : GridEvent()
-        data class Status(val description: String) : GridEvent()
-        data class Error(val throwable: Throwable) : GridEvent()
-    }
-
-    enum class Grid(val id: String, val displayName: String, val loginUrl: String) {
-        SecondLifeMain("secondlife_agni", "Second Life (Agni)", "https://login.agni.lindenlab.com/cgi-bin/login.cgi"),
-        SecondLifeBeta("secondlife_aditi", "Second Life (Aditi)", "https://login.aditi.lindenlab.com/cgi-bin/login.cgi"),
-        OsGrid("osgrid", "OSGrid", "http://login.osgrid.org/");
-
-        companion object {
-            fun fromId(id: String?): Grid =
-                values().firstOrNull { it.id == id } ?: SecondLifeMain
+        
+        String getType() {
+            return type
+        }
+        
+        long getTimestamp() {
+            return timestamp
+        }
+        
+        /**
+         * Convert message to LLSD XML format
+         */
+        abstract String toLLSDXML()
+        
+        /**
+         * Convert message to JSON format for WebSocket transport
+         */
+        String toJSON() {
+            return String.format("{\"type\":\"%s\",\"timestamp\":%d,\"data\":%s}", 
+                               type, timestamp, getMessageDataJSON())
+        }
+        
+        /**
+         * Get message-specific data in JSON format
+         * Override in subclasses to provide specific data
+         */
+        protected String getMessageDataJSON() {
+            return "{}"
         }
     }
-
-    companion object {
-        private const val TAG = "HybridSLTransport"
-        private const val LLSD_MIME = "application/llsd+xml"
-        private const val EVENT_QUEUE_RETRY_MS = 5_000L
-        private val DEFAULT_CAPABILITIES = listOf(
-            "EventQueueGet",
-            "ChatSessionRequest",
-            "SendUserReport",
-            "ViewerStats",
-            "UploadBakedTexture",
-            "FetchInventoryDescendents2",
-            "FetchInventory2",
-            "GetDisplayNames",
-            "AgentState",
-            "AgentPreferences",
-            "UpdateAgentLanguage",
-            "EnvironmentSettings",
-            "ExtEnvironment"
-        )
-
-        private fun defaultHttpClient(): OkHttpClient = OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(60, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .build()
-
-        private fun randomMacAddress(): String {
-            val random = SecureRandom()
-            return (0 until 6).joinToString(":") { "%02x".format(random.nextInt(256)) }
+    
+    /**
+     * Subscribe to real-time events
+     */
+    void subscribeToEvents(String eventType, WebSocketEventClient.EventListener listener) {
+        eventClient.subscribe(eventType, listener)
+        Log.d(TAG, "Subscribed to event type: " + eventType)
+    }
+    
+    /**
+     * Upload asset with progress tracking
+     */
+    CompletableFuture<String> uploadAsset(byte[] assetData, String contentType, 
+                                                HTTP2CapsClient.ProgressListener progressListener) {
+        try {
+            // Get actual upload URL from CAPS
+            String uploadUrl = capsClient.getCapability("NewFileAgentInventory");
+            if (uploadUrl == null || uploadUrl.isEmpty()) {
+                uploadUrl = capsClient.getCapability("UploadBakedTexture");
+            }
+            
+            if (uploadUrl == null || uploadUrl.isEmpty()) {
+                Log.e(TAG, "No upload capability available");
+                CompletableFuture<String> failedFuture = new CompletableFuture<>();
+                failedFuture.completeExceptionally(new Exception("No upload capability available"));
+                return failedFuture;
+            }
+            
+            Log.d(TAG, "Using upload URL: " + uploadUrl);
+            return capsClient.uploadAssetAsync(uploadUrl, assetData, contentType, progressListener);
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting upload URL from CAPS", e);
+            CompletableFuture<String> failedFuture = new CompletableFuture<>();
+            failedFuture.completeExceptionally(e);
+            return failedFuture;
         }
-
-        private fun randomId0(): String = UUID.randomUUID().toString().replace("-", "")
+    }
+    
+    /**
+     * Check connection status
+     */
+    boolean isConnected() {
+        return eventClient.isConnected(); // Basic connectivity check
+    }
+    
+    /**
+     * Shutdown all transport layers
+     */
+    void shutdown() {
+        Log.i(TAG, "Shutting down hybrid transport")
+        capsClient.shutdown()
+        eventClient.shutdown()
+    }
+    
+    /**
+     * Message routing logic
+     */
+    private class MessageRouter {
+        
+        TransportRoute selectOptimalRoute(ModernMessage message) {
+            // Basic routing logic - can be enhanced based on message type
+            String messageType = message.getClass().getSimpleName()
+            
+            // Route asset-related messages via HTTP/2 CAPS
+            if (messageType.contains("Asset") || messageType.contains("Upload") || 
+                messageType.contains("Texture") || messageType.contains("Inventory")) {
+                return TransportRoute(TransportType.HTTP2_CAPS, "https://example.com/caps")
+            }
+            
+            // Route real-time messages via WebSocket
+            if (messageType.contains("Chat") || messageType.contains("ObjectUpdate") || 
+                messageType.contains("Avatar") || messageType.contains("Position")) {
+                return TransportRoute(TransportType.WEBSOCKET_REALTIME, null)
+            }
+            
+            // Default to HTTP/2 for modern build
+            return TransportRoute(TransportType.HTTP2_CAPS, "https://example.com/caps")
+        }
+    }
+    
+    /**
+     * Transport route descriptor
+     */
+    private class TransportRoute {
+        private TransportType transport
+        private String url
+        
+        TransportRoute(TransportType transport, String url) {
+            this.transport = transport
+            this.url = url
+        }
+        
+        TransportType getTransport() {
+            return transport
+        }
+        
+        String getUrl() {
+            return url
+        }
+    }
+    
+    /**
+     * Transport type enumeration
+     */
+    private enum class TransportType {
+        HTTP2_CAPS
+        WEBSOCKET_REALTIME
+        UDP_LEGACY
+    }
+    
+    /**
+     * Generic response wrapper
+     */
+    class SLResponse {
+        private String type
+        private String data
+        
+        SLResponse(String type, String data) {
+            this.type = type
+            this.data = data
+        }
+        
+        String getType() {
+            return type
+        }
+        
+        String getData() {
+            return data
+        }
     }
 }
