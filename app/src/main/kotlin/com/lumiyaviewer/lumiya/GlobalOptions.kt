@@ -30,7 +30,7 @@ object GlobalOptions : SharedPreferences.OnSharedPreferenceChangeListener {
     private val availableCacheDirsRef = AtomicReference<List<File>>(emptyList())
     private val maxTextureDownloads = AtomicInteger(2)
 
-    @Volatile private var themeResId: Int = R.style.Theme_Lumiya_Light
+    @Volatile private var themeResId: Int = R.style.Theme_Lumiya_Light  // Uses dotted name Theme.Lumiya.Light
     @Volatile private var highQualityTextures: Boolean = false
     @Volatile private var compressedTextures: Boolean = true
     @Volatile private var keepWifiOn: Boolean = false

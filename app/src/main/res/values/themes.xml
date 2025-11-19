@@ -25,10 +25,4 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <!-- Legacy theme aliases referenced from Kotlin code -->
-    <style name="Theme_Lumiya" parent="Theme.Lumiya" />
-    <style name="Theme_Lumiya_Light" parent="Theme.Lumiya.Light" />
-    <style name="Theme_Lumiya_Pink" parent="Theme.Lumiya.Pink" />
-    <style name="Theme_Lumiya_NoActionBar" parent="Theme.Lumiya.NoActionBar" />
-
 </resources>
