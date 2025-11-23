@@ -126,26 +126,27 @@ class FilamentWorldDataBridge(
         
         // Stream terrain patches into Filament terrain renderer
         try {
-            // Check if terrain has been updated
-            val terrainHash = terrain.hashCode()
+            // Update patches based on terrain state
+            // Iterate through all possible patches (16x16)
+            val patchesPerEdge = terrain.PatchesPerEdge
             
-            // TODO: Implement terrain patch streaming system
-            // This would involve:
-            // 1. Dividing terrain into patches (e.g., 16x16 meter patches)
-            // 2. Determining which patches are visible based on camera position
-            // 3. Loading/unloading patches based on distance (LOD system)
-            // 4. Converting terrain height data to Filament mesh format
-            // 5. Applying terrain textures and materials
-            
-            // For now, we'll create a simple terrain representation
-            if (!terrainEntities.containsKey(terrainHash)) {
-                createTerrainMesh(terrain)?.let { entityData ->
-                    terrainEntities[terrainHash] = entityData
-                    Log.i(TAG, "Terrain mesh created and added to scene")
+            for (y in 0 until patchesPerEdge) {
+                for (x in 0 until patchesPerEdge) {
+                    val patchHash = (y * patchesPerEdge + x)
+                    
+                    // Check if we already have an entity for this patch
+                    if (!terrainEntities.containsKey(patchHash)) {
+                        // Get patch info
+                        val patchInfo = terrain.getPatchInfo(x, y)
+                        if (patchInfo != null) {
+                            createTerrainPatchMesh(patchInfo, x, y)?.let { entityData ->
+                                terrainEntities[patchHash] = entityData
+                                Log.v(TAG, "Terrain patch mesh created for $x,$y")
+                            }
+                        }
+                    }
                 }
             }
-            
-            Log.v(TAG, "Terrain sync completed (hash: $terrainHash)")
             
         } catch (e: Exception) {
             Log.e(TAG, "Error syncing terrain", e)
@@ -153,27 +154,19 @@ class FilamentWorldDataBridge(
     }
     
     /**
-     * Creates a terrain mesh from terrain data.
-     * 
-     * This is a simplified implementation. A full implementation would:
-     * - Use terrain height maps
-     * - Implement LOD (Level of Detail) system
-     * - Stream patches based on camera position
-     * - Apply terrain textures and materials
-     * - Handle terrain physics
+     * Creates a terrain mesh from terrain patch info.
      */
-    private fun createTerrainMesh(terrain: TerrainData): EntityData? {
+    private fun createTerrainPatchMesh(patchInfo: com.linkpoint.slproto.terrain.TerrainPatchInfo, patchX: Int, patchY: Int): EntityData? {
         try {
-            // Create a simple flat terrain mesh as placeholder
-            // In a full implementation, this would use actual terrain height data
+            // Each patch is 16x16 meters, usually represented by 17x17 height values (for edge sharing)
+            // PatchInfo contains heightMap: FloatArray(289) - 17x17
             
-            val terrainSize = 256f // 256 meters (standard SL region size)
-            val gridResolution = 32 // 32x32 grid
-            val cellSize = terrainSize / gridResolution
+            val patchSize = 16f
+            val resolution = 16 // 16 cells per patch (17 vertices)
             
-            // Calculate vertex count
-            val vertexCount = (gridResolution + 1) * (gridResolution + 1)
-            val indexCount = gridResolution * gridResolution * 6
+            // Calculate vertex count (17x17)
+            val vertexCount = (resolution + 1) * (resolution + 1)
+            val indexCount = resolution * resolution * 6
             
             // Create vertex buffer
             val stride = 8 * java.lang.Float.BYTES // position(3) + normal(3) + uv(2)
@@ -189,25 +182,36 @@ class FilamentWorldDataBridge(
             val vertices = FloatArray(vertexCount * 8)
             var vertexIndex = 0
             
-            for (z in 0..gridResolution) {
-                for (x in 0..gridResolution) {
-                    val posX = x * cellSize
-                    val posZ = z * cellSize
-                    val posY = 0f // Flat terrain for now
+            // Height map from patchInfo
+            val heights = patchInfo.heightMap
+            
+            for (z in 0..resolution) {
+                for (x in 0..resolution) {
+                    // Local patch coordinates
+                    val posX = x.toFloat() // 0..16
+                    val posZ = z.toFloat() // 0..16
                     
-                    // Position
+                    // Get height from map
+                    // Height map is 1D array of 17x17
+                    val hIndex = z * 17 + x
+                    val height = if (hIndex < heights.size) heights[hIndex] else 0f
+                    
+                    // Position (local to patch)
                     vertices[vertexIndex++] = posX
-                    vertices[vertexIndex++] = posY
+                    vertices[vertexIndex++] = height
                     vertices[vertexIndex++] = posZ
                     
-                    // Normal (pointing up)
+                    // Normal (placeholder - up)
+                    // In real impl, calculate from neighbors
                     vertices[vertexIndex++] = 0f
                     vertices[vertexIndex++] = 1f
                     vertices[vertexIndex++] = 0f
                     
-                    // UV coordinates
-                    vertices[vertexIndex++] = x.toFloat() / gridResolution
-                    vertices[vertexIndex++] = z.toFloat() / gridResolution
+                    // UV coordinates (global UV based on patch position)
+                    // Assuming region is 256x256, so 16 patches.
+                    // U = (patchX * 16 + x) / 256
+                    vertices[vertexIndex++] = (patchX * 16 + x).toFloat() / 256f
+                    vertices[vertexIndex++] = (patchY * 16 + z).toFloat() / 256f
                 }
             }
             
@@ -217,11 +221,11 @@ class FilamentWorldDataBridge(
             val indices = ShortArray(indexCount)
             var indexIndex = 0
             
-            for (z in 0 until gridResolution) {
-                for (x in 0 until gridResolution) {
-                    val topLeft = (z * (gridResolution + 1) + x).toShort()
+            for (z in 0 until resolution) {
+                for (x in 0 until resolution) {
+                    val topLeft = (z * (resolution + 1) + x).toShort()
                     val topRight = (topLeft + 1).toShort()
-                    val bottomLeft = (topLeft + gridResolution + 1).toShort()
+                    val bottomLeft = (topLeft + resolution + 1).toShort()
                     val bottomRight = (bottomLeft + 1).toShort()
                     
                     // First triangle
@@ -252,7 +256,7 @@ class FilamentWorldDataBridge(
             RenderableManager.Builder(1)
                 .boundingBox(Box(
                     floatArrayOf(0f, 0f, 0f),
-                    floatArrayOf(terrainSize, 0f, terrainSize)
+                    floatArrayOf(patchSize, 60f, patchSize) // Height arbitrary for bounds
                 ))
                 .geometry(0, RenderableManager.PrimitiveType.TRIANGLES, vertexBuffer, indexBuffer)
                 .material(0, material.defaultInstance)
@@ -260,9 +264,23 @@ class FilamentWorldDataBridge(
                 .receiveShadows(true)
                 .build(engine, entity)
             
-            // Set transform (identity - terrain at origin)
+            // Set transform to patch location
             val transform = FloatArray(16)
             Matrix.setIdentityM(transform, 0)
+            // Each patch is 16 units.
+            // World coordinates: X is East, Y is North in SL?
+            // In Filament/OpenGL usually X is Right, Y is Up, Z is Forward/Back.
+            // SL Coordinates: Z is Up.
+            // We need to map SL (X,Y,Z) to Filament (X, Y, Z) or rotate.
+            // Assuming standard mapping where Filament Y is Up (SL Z).
+            // So SL X -> Filament X, SL Y -> Filament Z (negated?), SL Z -> Filament Y.
+            // Let's assume simple mapping for now:
+            // Patch position in meters
+            val worldX = patchX * 16f
+            val worldZ = patchY * 16f
+            
+            Matrix.translateM(transform, 0, worldX, 0f, worldZ)
+            
             val transformInstance = engine.transformManager.getInstance(entity)
             if (transformInstance.isValid) {
                 engine.transformManager.setTransform(transformInstance, transform)
@@ -271,12 +289,10 @@ class FilamentWorldDataBridge(
             // Add to scene
             scene.addEntity(entity)
             
-            Log.i(TAG, "Terrain mesh created: ${gridResolution}x${gridResolution} grid, $vertexCount vertices, ${indexCount / 3} triangles")
-            
             return EntityData(entity, vertexBuffer, indexBuffer, material)
             
         } catch (e: Exception) {
-            Log.e(TAG, "Error creating terrain mesh", e)
+            Log.e(TAG, "Error creating terrain patch mesh", e)
             return null
         }
     }
