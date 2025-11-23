@@ -5,67 +5,57 @@ import com.linkpoint.utils.UUIDPool
 import java.util.UUID
 
 class SLAuthParams {
-    UUID clientID
-    String gridName
-    String loginName
-    String loginURL
-    String passwordHash
-    String startLocation
+    var clientID: UUID? = null
+    var gridName: String? = null
+    var loginName: String? = null
+    var loginURL: String? = null
+    var passwordHash: String? = null
+    var startLocation: String? = null
 
     constructor(intent: Intent) {
         this.loginName = intent.getStringExtra("login")
         this.passwordHash = intent.getStringExtra("password")
-        this.clientID = UUIDPool.getUUID(intent.getStringExtra("client_id"))
+        val clientIdStr = intent.getStringExtra("client_id")
+        this.clientID = if (clientIdStr != null) UUIDPool.getUUID(clientIdStr) else null
         this.startLocation = intent.getStringExtra("start_location")
         this.loginURL = intent.getStringExtra("login_url")
         this.gridName = intent.getStringExtra("grid_name")
     }
 
-    constructor(str: String, str2: String, uuid: UUID, str3: String, str4: String, str5: String) {
-        this.loginName = str
-        this.passwordHash = str2
-        this.clientID = uuid
-        this.startLocation = str3
-        this.loginURL = str4
-        this.gridName = str5
+    constructor(loginName: String?, passwordHash: String?, clientID: UUID?, startLocation: String?, loginURL: String?, gridName: String?) {
+        this.loginName = loginName
+        this.passwordHash = passwordHash
+        this.clientID = clientID
+        this.startLocation = startLocation
+        this.loginURL = loginURL
+        this.gridName = gridName
     }
 
-    fun equals(obj: Any): Boolean {
-        if (this == obj) {
-            return true
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false
-        }
-        SLAuthParams sLAuthParams = (SLAuthParams) obj
-        if (this.loginName == null ? sLAuthParams.loginName != null : (!this.loginName == sLAuthParams.loginName)) {
-            return false
-        }
-        if (this.passwordHash == null ? sLAuthParams.passwordHash != null : (!this.passwordHash == sLAuthParams.passwordHash)) {
-            return false
-        }
-        if (this.clientID == null ? sLAuthParams.clientID != null : (!this.clientID == sLAuthParams.clientID)) {
-            return false
-        }
-        if (this.startLocation == null ? sLAuthParams.startLocation != null : (!this.startLocation == sLAuthParams.startLocation)) {
-            return false
-        }
-        if (this.loginURL == null ? sLAuthParams.loginURL != null : (!this.loginURL == sLAuthParams.loginURL)) {
-            return false
-        }
-        return this.gridName != null ? this.gridName == sLAuthParams.gridName : sLAuthParams.gridName == null
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+        
+        val that = other as SLAuthParams
+        
+        if (loginName != that.loginName) return false
+        if (passwordHash != that.passwordHash) return false
+        if (clientID != that.clientID) return false
+        if (startLocation != that.startLocation) return false
+        if (loginURL != that.loginURL) return false
+        return gridName == that.gridName
     }
 
-    fun hashCode(): Int {
-        Int i = 0
-        Int hashCode = ((this.loginURL != null ? this.loginURL.hashCode() : 0) + (((this.startLocation != null ? this.startLocation.hashCode() : 0) + (((this.clientID != null ? this.clientID.hashCode() : 0) + (((this.passwordHash != null ? this.passwordHash.hashCode() : 0) + ((this.loginName != null ? this.loginName.hashCode() : 0) * 31)) * 31)) * 31)) * 31)) * 31
-        if (this.gridName != null) {
-            i = this.gridName.hashCode()
-        }
-        return hashCode + i
+    override fun hashCode(): Int {
+        var result = loginURL?.hashCode() ?: 0
+        result = 31 * result + (startLocation?.hashCode() ?: 0)
+        result = 31 * result + (clientID?.hashCode() ?: 0)
+        result = 31 * result + (passwordHash?.hashCode() ?: 0)
+        result = 31 * result + (loginName?.hashCode() ?: 0)
+        result = 31 * result + (gridName?.hashCode() ?: 0)
+        return result
     }
 
-    fun withLocation(str: String): SLAuthParams {
-        return SLAuthParams(this.loginName, this.passwordHash, this.clientID, str, this.loginURL, this.gridName)
+    fun withLocation(newLocation: String?): SLAuthParams {
+        return SLAuthParams(this.loginName, this.passwordHash, this.clientID, newLocation, this.loginURL, this.gridName)
     }
 }

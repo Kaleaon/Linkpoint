@@ -15,7 +15,13 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.linkpoint.eventbus.EventBus
+import com.linkpoint.eventbus.EventHandler
 import com.linkpoint.slproto.SLGridConnection
+import com.linkpoint.slproto.auth.SLAuthParams
+import com.linkpoint.slproto.events.SLConnectionStateChangedEvent
+import com.linkpoint.slproto.events.SLDisconnectEvent
+import com.linkpoint.slproto.events.SLLoginResultEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -121,7 +127,6 @@ class GridConnectionService : Service() {
     
     // Coroutine scope for background tasks
     private val serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    private var heartbeatJob: Job? = null
     private var reconnectJob: Job? = null
     
     // Network monitoring
@@ -147,6 +152,9 @@ class GridConnectionService : Service() {
         
         // Register network callback
         registerNetworkCallback()
+
+        // Subscribe to EventBus
+        EventBus.getInstance().subscribe(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -173,13 +181,15 @@ class GridConnectionService : Service() {
         isRunning.set(false)
         
         // Cancel all jobs
-        heartbeatJob?.cancel()
         reconnectJob?.cancel()
         serviceScope.cancel()
         
         // Unregister network callback
         unregisterNetworkCallback()
         
+        // Unsubscribe from EventBus
+        EventBus.getInstance().unsubscribe(this)
+
         // Clear connection
         setGridConnection(null)
         setServiceInstance(null)
@@ -188,6 +198,39 @@ class GridConnectionService : Service() {
         stopForeground(true)
     }
     
+    // Event Handlers
+    @EventHandler
+    fun onLoginResult(event: SLLoginResultEvent) {
+        if (event.success) {
+            Log.i(TAG, "Login successful via EventBus")
+            updateConnectionState(ConnectionState.CONNECTED)
+            reconnectAttempts = 0
+        } else {
+            Log.e(TAG, "Login failed via EventBus: ${event.message}")
+            updateConnectionState(ConnectionState.ERROR)
+            // If we were reconnecting, maybe retry? But SLLoginResultEvent usually means final result.
+            stopSelf()
+        }
+    }
+
+    @EventHandler
+    fun onDisconnect(event: SLDisconnectEvent) {
+        Log.i(TAG, "Disconnected: ${event.message}, requested=${event.requested}")
+        updateConnectionState(ConnectionState.DISCONNECTED)
+        if (!event.requested) {
+            // Unexpected disconnect
+            handleReconnect()
+        } else {
+            stopSelf()
+        }
+    }
+
+    @EventHandler
+    fun onConnectionStateChanged(event: SLConnectionStateChangedEvent) {
+        Log.d(TAG, "SL Grid Connection state changed: ${event.state}")
+        // We could sync service state here if needed, but LoginResult/Disconnect cover most cases.
+    }
+
     // Connection lifecycle methods
     
     private fun handleLogin(intent: Intent) {
@@ -210,24 +253,29 @@ class GridConnectionService : Service() {
         
         serviceScope.launch {
             try {
-                // TODO: Implement actual login logic with SLGridConnection
-                // For now, simulate connection
-                delay(2000)
+                Log.i(TAG, "Creating SLGridConnection...")
+                val connection = SLGridConnection()
                 
-                // Create connection (placeholder)
-                // val connection = SLGridConnection.create(username, password, gridUrl, startLocation)
-                // setGridConnection(connection)
+                // Use a persistent ID if available or generate new one. 
+                // Ideally this should come from AuthenticationManager or similar.
+                val clientID = java.util.UUID.randomUUID()
+
+                val params = SLAuthParams(
+                    username, 
+                    password, 
+                    clientID,
+                    startLocation ?: "last",
+                    gridUrl, // loginURL
+                    "Grid" // gridName
+                )
+
+                setGridConnection(connection)
+                connection.connect(params)
                 
-                updateConnectionState(ConnectionState.CONNECTED)
-                reconnectAttempts = 0
-                
-                // Start heartbeat
-                startHeartbeat()
-                
-                Log.i(TAG, "Login successful")
+                Log.i(TAG, "Connect request sent")
                 
             } catch (e: Exception) {
-                Log.e(TAG, "Login failed", e)
+                Log.e(TAG, "Login initiation failed", e)
                 updateConnectionState(ConnectionState.ERROR)
                 stopSelf()
             }
@@ -237,26 +285,18 @@ class GridConnectionService : Service() {
     private fun handleLogout() {
         Log.i(TAG, "Initiating logout")
         
-        updateConnectionState(ConnectionState.DISCONNECTED)
-        
-        // Stop heartbeat
-        heartbeatJob?.cancel()
-        heartbeatJob = null
-        
         // Disconnect
         serviceScope.launch {
             try {
-                getGridConnection()?.let { connection ->
-                    // TODO: Implement proper disconnect logic
-                    Log.d(TAG, "Disconnecting from grid")
-                }
-                
-                setGridConnection(null)
-                
+                getGridConnection()?.disconnect()
+                // connectionRef will be cleared in onDestroy or after disconnect event
             } catch (e: Exception) {
                 Log.e(TAG, "Error during logout", e)
             } finally {
-                stopSelf()
+                // We wait for disconnect event or force stop?
+                // Usually disconnect() is async.
+                // If we stopSelf immediately, we might kill the disconnect process.
+                // But disconnect event should come back and call stopSelf.
             }
         }
     }
@@ -285,14 +325,19 @@ class GridConnectionService : Service() {
                 reconnectAttempts++
                 
                 try {
-                    // TODO: Implement reconnection logic
-                    // For now, simulate reconnection
-                    delay(2000)
-                    
-                    updateConnectionState(ConnectionState.CONNECTED)
-                    reconnectAttempts = 0
-                    
-                    Log.i(TAG, "Reconnection successful")
+                    val connection = getGridConnection()
+                    if (connection != null) {
+                        if (!connection.Reconnect()) {
+                            Log.w(TAG, "SLGridConnection.Reconnect() returned false, possibly fatal error or not set up")
+                            // Try full relogin?
+                            // For now, just fail
+                            updateConnectionState(ConnectionState.ERROR)
+                            stopSelf()
+                        }
+                    } else {
+                        Log.e(TAG, "Cannot reconnect, no connection object")
+                        stopSelf()
+                    }
                     
                 } catch (e: Exception) {
                     Log.e(TAG, "Reconnection failed", e)
@@ -310,36 +355,12 @@ class GridConnectionService : Service() {
     
     private fun handleVoiceAccept() {
         Log.d(TAG, "Voice call accepted")
-        // TODO: Implement voice call acceptance logic
+        // TODO: Implement voice call acceptance logic via SLVoiceManager or similar
     }
     
     private fun handleVoiceReject() {
         Log.d(TAG, "Voice call rejected")
         // TODO: Implement voice call rejection logic
-    }
-    
-    // Heartbeat and monitoring
-    
-    private fun startHeartbeat() {
-        heartbeatJob?.cancel()
-        heartbeatJob = serviceScope.launch {
-            while (isActive && connectionState.get() == ConnectionState.CONNECTED) {
-                try {
-                    // Send heartbeat/keepalive
-                    getGridConnection()?.let { connection ->
-                        // TODO: Implement actual heartbeat logic
-                        Log.v(TAG, "Heartbeat sent")
-                    }
-                    
-                    delay(30000) // 30 seconds
-                    
-                } catch (e: Exception) {
-                    Log.e(TAG, "Heartbeat failed", e)
-                    handleReconnect()
-                    break
-                }
-            }
-        }
     }
     
     // Network monitoring
@@ -362,6 +383,9 @@ class GridConnectionService : Service() {
                 Log.w(TAG, "Network lost")
                 
                 if (connectionState.get() == ConnectionState.CONNECTED) {
+                    // Force disconnect logic in SLGridConnection might handle this,
+                    // but we should signal it.
+                    getGridConnection()?.ForceDisconnect(false)
                     updateConnectionState(ConnectionState.RECONNECTING)
                     handleReconnect()
                 }
