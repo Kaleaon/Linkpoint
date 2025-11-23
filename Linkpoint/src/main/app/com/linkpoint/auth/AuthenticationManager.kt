@@ -1,7 +1,15 @@
 package com.linkpoint.auth
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.util.Log
+import com.linkpoint.GridConnectionService
+import com.linkpoint.eventbus.EventBus
+import com.linkpoint.eventbus.EventHandler
+import com.linkpoint.slproto.events.SLDisconnectEvent
+import com.linkpoint.slproto.events.SLLoginResultEvent
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Authentication Manager for Linkpoint
  * 
  * Manages user authentication including:
- * - XMLRPC login
+ * - XMLRPC login via GridConnectionService
  * - Token management
  * - Session persistence
  * - Logout functionality
@@ -57,6 +65,9 @@ class AuthenticationManager(private val context: Context) {
     // Login in progress flag
     private val loginInProgress = AtomicBoolean(false)
     
+    // Deferred result for login
+    private var loginDeferred: CompletableDeferred<LoginResult>? = null
+    
     /**
      * Authentication State
      */
@@ -71,7 +82,7 @@ class AuthenticationManager(private val context: Context) {
      * User Session
      */
     data class UserSession(
-        val userId: Long,
+        val userId: String, // Changed to String for UUID
         val username: String,
         val sessionToken: String,
         val gridUrl: String,
@@ -97,10 +108,69 @@ class AuthenticationManager(private val context: Context) {
     }
     
     init {
+        // Subscribe to EventBus
+        EventBus.getInstance().subscribe(this)
+        
         // Try to restore session on initialization
         restoreSession()
     }
     
+    @EventHandler
+    fun onLoginResult(event: SLLoginResultEvent) {
+        if (event.success) {
+            val agentId = event.agentId?.toString() ?: "unknown"
+            Log.i(TAG, "Login success event received for agent: $agentId")
+            
+            // Ideally we should have the username and gridUrl from the login request context
+            // For now, we might have to rely on what we stored during login()
+            // or what is available in the event or GridConnectionService
+            
+            // If we have a pending login, complete it
+            val pendingCredentials = currentLoginCredentials
+            if (pendingCredentials != null) {
+                val session = UserSession(
+                    userId = agentId,
+                    username = pendingCredentials.username,
+                    sessionToken = generateSessionToken(), // Local session token
+                    gridUrl = pendingCredentials.gridUrl
+                )
+                
+                saveSession(session)
+                currentSession = session
+                _authState.value = AuthState.Authenticated(session)
+                
+                loginDeferred?.complete(LoginResult.Success(session))
+            } else {
+                // Login happened outside of this manager (e.g. auto-reconnect?)
+                // Or restored session?
+            }
+        } else {
+            Log.e(TAG, "Login failed event received: ${event.message}")
+            val error = LoginResult.Failure(event.message ?: "Unknown login error")
+            _authState.value = AuthState.Error(error.message)
+            loginDeferred?.complete(error)
+        }
+        
+        loginInProgress.set(false)
+        loginDeferred = null
+        currentLoginCredentials = null
+    }
+
+    @EventHandler
+    fun onDisconnect(event: SLDisconnectEvent) {
+        Log.i(TAG, "Disconnect event received: ${event.message}")
+        if (_authState.value is AuthState.Authenticated) {
+            _authState.value = AuthState.Unauthenticated
+            // Should we clear session?
+            // If it's a temporary disconnect (reconnecting), maybe not.
+            // But SLDisconnectEvent usually means fully disconnected.
+            currentSession = null
+            clearSession()
+        }
+    }
+    
+    private var currentLoginCredentials: LoginCredentials? = null
+
     /**
      * Login with credentials
      */
@@ -112,35 +182,40 @@ class AuthenticationManager(private val context: Context) {
         try {
             Log.i(TAG, "Attempting login for user: ${credentials.username}")
             _authState.value = AuthState.Authenticating
+            currentLoginCredentials = credentials
             
-            // TODO: Implement actual XMLRPC login
-            // For now, simulate login
-            delay(2000)
+            loginDeferred = CompletableDeferred()
             
-            // Create session (placeholder)
-            val session = UserSession(
-                userId = 1L, // TODO: Get from server
-                username = credentials.username,
-                sessionToken = generateSessionToken(),
-                gridUrl = credentials.gridUrl
-            )
+            // Start GridConnectionService
+            val intent = Intent(context, GridConnectionService::class.java).apply {
+                action = GridConnectionService.LOGIN_ACTION
+                putExtra(GridConnectionService.EXTRA_USERNAME, credentials.username)
+                putExtra(GridConnectionService.EXTRA_PASSWORD, credentials.password)
+                putExtra(GridConnectionService.EXTRA_GRID_URL, credentials.gridUrl)
+                putExtra(GridConnectionService.EXTRA_START_LOCATION, credentials.startLocation)
+            }
             
-            // Save session
-            saveSession(session)
-            currentSession = session
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
             
-            _authState.value = AuthState.Authenticated(session)
+            // Wait for result with timeout
+            withTimeout(60000) { // 60 seconds timeout
+                loginDeferred?.await() ?: LoginResult.Failure("Login cancelled or error")
+            }
             
-            Log.i(TAG, "Login successful for user: ${credentials.username}")
-            LoginResult.Success(session)
-            
+        } catch (e: TimeoutCancellationException) {
+            Log.e(TAG, "Login timed out", e)
+            loginInProgress.set(false)
+            _authState.value = AuthState.Error("Login timed out")
+            LoginResult.Failure("Login timed out")
         } catch (e: Exception) {
             Log.e(TAG, "Login failed", e)
+            loginInProgress.set(false)
             _authState.value = AuthState.Error("Login failed: ${e.message}", e)
             LoginResult.Failure("Login failed: ${e.message}", e)
-            
-        } finally {
-            loginInProgress.set(false)
         }
     }
     
@@ -151,7 +226,11 @@ class AuthenticationManager(private val context: Context) {
         try {
             Log.i(TAG, "Logging out user: ${currentSession?.username}")
             
-            // TODO: Notify server of logout
+            // Stop GridConnectionService
+            val intent = Intent(context, GridConnectionService::class.java).apply {
+                action = GridConnectionService.LOGOUT_ACTION
+            }
+            context.startService(intent)
             
             // Clear session
             clearSession()
@@ -183,7 +262,7 @@ class AuthenticationManager(private val context: Context) {
     /**
      * Get current user ID
      */
-    fun getCurrentUserId(): Long? {
+    fun getCurrentUserId(): String? {
         return currentSession?.userId
     }
     
@@ -198,32 +277,13 @@ class AuthenticationManager(private val context: Context) {
      * Refresh session token
      */
     suspend fun refreshToken(): Boolean = withContext(Dispatchers.IO) {
-        try {
-            val session = currentSession ?: return@withContext false
-            
-            Log.i(TAG, "Refreshing session token")
-            
-            // TODO: Implement actual token refresh
-            delay(1000)
-            
-            // Update session with new token
-            val newSession = session.copy(
-                sessionToken = generateSessionToken(),
-                loginTime = System.currentTimeMillis()
-            )
-            
-            saveSession(newSession)
-            currentSession = newSession
-            
-            _authState.value = AuthState.Authenticated(newSession)
-            
-            Log.i(TAG, "Token refreshed successfully")
-            true
-            
-        } catch (e: Exception) {
-            Log.e(TAG, "Error refreshing token", e)
-            false
-        }
+        // For SL, token refresh is effectively a re-login or handled by keepalives.
+        // We assume session is valid if connected.
+        // But if we are disconnected, we might need to login again.
+        
+        // Check GridConnectionService state?
+        // For now, simple check.
+        isAuthenticated()
     }
     
     /**
@@ -243,8 +303,6 @@ class AuthenticationManager(private val context: Context) {
                 return@withContext false
             }
             
-            // TODO: Validate with server
-            
             true
             
         } catch (e: Exception) {
@@ -258,7 +316,7 @@ class AuthenticationManager(private val context: Context) {
      */
     private fun saveSession(session: UserSession) {
         prefs.edit().apply {
-            putLong(KEY_USER_ID, session.userId)
+            putString(KEY_USER_ID, session.userId)
             putString(KEY_USERNAME, session.username)
             putString(KEY_SESSION_TOKEN, session.sessionToken)
             putString(KEY_GRID_URL, session.gridUrl)
@@ -274,13 +332,13 @@ class AuthenticationManager(private val context: Context) {
      */
     private fun restoreSession() {
         try {
-            val userId = prefs.getLong(KEY_USER_ID, -1L)
+            val userId = prefs.getString(KEY_USER_ID, null)
             val username = prefs.getString(KEY_USERNAME, null)
             val sessionToken = prefs.getString(KEY_SESSION_TOKEN, null)
             val gridUrl = prefs.getString(KEY_GRID_URL, null)
             val loginTime = prefs.getLong(KEY_LAST_LOGIN, 0L)
             
-            if (userId != -1L && username != null && sessionToken != null && gridUrl != null) {
+            if (userId != null && username != null && sessionToken != null && gridUrl != null) {
                 val session = UserSession(
                     userId = userId,
                     username = username,
@@ -328,6 +386,7 @@ class AuthenticationManager(private val context: Context) {
      * Cleanup resources
      */
     fun cleanup() {
+        EventBus.getInstance().unsubscribe(this)
         scope.cancel()
         Log.i(TAG, "AuthenticationManager cleaned up")
     }

@@ -25,9 +25,9 @@ class LogoutRequest : SLMessage {
     }
 
     fun PackPayload(byteBuffer: ByteBuffer): Unit {
-        byteBuffer.putShort(-1)
-        byteBuffer.put((Byte) 0)
-        byteBuffer.put((Byte) -4)
+        byteBuffer.putShort((-1).toShort())
+        byteBuffer.put(0x00.toByte())
+        byteBuffer.put(0x02.toByte()) // Correct ID for LogoutRequest
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
     }

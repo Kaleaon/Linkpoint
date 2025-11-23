@@ -42,444 +42,107 @@ import com.linkpoint.ui.inventory.InventoryFolderAdapter
 import com.linkpoint.ui.inventory.InventoryFragmentHelper
 import com.linkpoint.ui.inventory.InventorySortOrderChangedEvent
 import com.linkpoint.utils.UUIDPool
-import java.util.Iterator
 import java.util.UUID
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 
-class OutfitsFragment : FragmentWithTitle : ReloadableFragment, View.OnClickListener, InventoryFolderAdapter.OnItemCheckboxClickListener {
-    private val FOLDER_ID_KEY: String = "folderID"
-    private InventoryFolderAdapter adapter = null
-    private SubscriptionData<UUID, SLAgentCircuit> agentCircuit = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private /* synthetic */ Any f505$f0
-
-        private /* synthetic */ Unit $m$0(
-/*
-Method generation error in method: com.linkpoint.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.2.$m$0(java.lang.Any):Unit, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.linkpoint.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.2.$m$0(java.lang.Any):Unit, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-    private SubscriptionData<InventoryQuery, InventoryEntryList> entryList = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private /* synthetic */ Any f504$f0
-
-        private /* synthetic */ Unit $m$0(
-/*
-Method generation error in method: com.linkpoint.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.1.$m$0(java.lang.Any):Unit, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.linkpoint.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.1.$m$0(java.lang.Any):Unit, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-    private SubscriptionData<UUID, Boolean> folderLoading = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private /* synthetic */ Any f506$f0
-
-        private /* synthetic */ Unit $m$0(
-/*
-Method generation error in method: com.linkpoint.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.3.$m$0(java.lang.Any):Unit, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.linkpoint.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.3.$m$0(java.lang.Any):Unit, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-    private AdapterView.OnItemClickListener itemClickListener = $Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs(this)
-    private ViewGroup listHeader
-    private Any listHeaderData = Any()
-    private LoadableMonitor loadableMonitor = LoadableMonitor(this.entryList)
-    private val myOutfitsFolderUUID: UUID = null
-    private SubscriptionData<InventoryQuery, InventoryEntryList> rootFolderEntryList = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private /* synthetic */ Any f509$f0
-
-        private /* synthetic */ Unit $m$0(
-/*
-Method generation error in method: com.linkpoint.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.6.$m$0(java.lang.Any):Unit, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.linkpoint.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.6.$m$0(java.lang.Any):Unit, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-    private SubscriptionData<SubscriptionSingleKey, ImmutableMap<UUID, String>> wornAttachments = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private /* synthetic */ Any f507$f0
-
-        private /* synthetic */ Unit $m$0(
-/*
-Method generation error in method: com.linkpoint.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.4.$m$0(java.lang.Any):Unit, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.linkpoint.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.4.$m$0(java.lang.Any):Unit, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-    private SubscriptionData<SubscriptionSingleKey, UUID> wornOutfitFolder = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private /* synthetic */ Any f510$f0
-
-        private /* synthetic */ Unit $m$0(
-/*
-Method generation error in method: com.linkpoint.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.7.$m$0(java.lang.Any):Unit, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.linkpoint.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.7.$m$0(java.lang.Any):Unit, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-    private SubscriptionData<SubscriptionSingleKey, Table<SLWearableType, UUID, SLWearable>> wornWearables = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private /* synthetic */ Any f508$f0
-
-        private /* synthetic */ Unit $m$0(
-/*
-Method generation error in method: com.linkpoint.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.5.$m$0(java.lang.Any):Unit, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.linkpoint.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.5.$m$0(java.lang.Any):Unit, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-
-    private Unit changeOutfit(Boolean z) {
-        InventoryEntryList<SLInventoryEntry> data = this.entryList.getData()
-        SLAgentCircuit data2 = this.agentCircuit.getData()
-        if (data != null && data2 != null) {
-            ImmutableList.Builder builder = ImmutableList.builder()
-            for (SLInventoryEntry sLInventoryEntry : data) {
-                if (!sLInventoryEntry.isFolderOrFolderLink()) {
-                    builder.add((Any) sLInventoryEntry)
+class OutfitsFragment : FragmentWithTitle(), ReloadableFragment, View.OnClickListener, InventoryFolderAdapter.OnItemCheckboxClickListener {
+    private val FOLDER_ID_KEY = "folderID"
+    private var adapter: InventoryFolderAdapter? = null
+    
+    private val agentCircuit = SubscriptionData<UUID, SLAgentCircuit>(UIThreadExecutor.getInstance(), Subscription.OnData {
+        onAgentCircuit(it)
+    })
+    
+    private val entryList = SubscriptionData<InventoryQuery, InventoryEntryList>(UIThreadExecutor.getInstance(), Subscription.OnData {
+        onInventoryEntryList(it)
+    })
+    
+    private val folderLoading = SubscriptionData<UUID, Boolean>(UIThreadExecutor.getInstance(), Subscription.OnData {
+        onLoadingStatusChanged(it)
+    })
+    
+    private val itemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
+        val userManager = getUserManager()
+        if (userManager != null) {
+            val item = parent.adapter.getItem(position)
+            if (item === listHeaderData) {
+                val folderUUID = getFolderUUID()
+                if (folderUUID == null || Objects.equal(folderUUID, myOutfitsFolderUUID)) {
+                    DetailsActivity.showEmbeddedDetails(activity, CurrentOutfitFragment::class.java, CurrentOutfitFragment.makeSelection(userManager.getUserID()))
+                } else {
+                    val data = entryList.data
+                    val folder = data?.folder
+                    if (folder != null) {
+                        navigateToFolder(folder.parentUUID)
+                    }
+                }
+            } else if (item is SLInventoryEntry) {
+                Debug.Printf("Inventory: Item click: item isFolder %b invType %d typeDefault %d assetType %d", item.isFolder, item.invType, item.typeDefault, item.assetType)
+                val uuid = if (!item.isFolder || item.uuid == null) {
+                    if (!item.isLink || item.invType != 8) null else item.assetUUID
+                } else {
+                    item.uuid
+                }
+                if (uuid != null) {
+                    navigateToFolder(uuid)
                 }
             }
-            data2.getModules().avatarAppearance.ChangeOutfit(builder.build(), z, data.getFolder())
+        }
+    }
+    
+    private var listHeader: ViewGroup? = null
+    private val listHeaderData = Any()
+    private val loadableMonitor = LoadableMonitor(entryList)
+    private var myOutfitsFolderUUID: UUID? = null
+    
+    private val rootFolderEntryList = SubscriptionData<InventoryQuery, InventoryEntryList>(UIThreadExecutor.getInstance(), Subscription.OnData {
+        onRootFolderEntryList(it)
+    })
+    
+    private val wornAttachments = SubscriptionData<SubscriptionSingleKey, ImmutableMap<UUID, String>>(UIThreadExecutor.getInstance(), Subscription.OnData {
+        onWornAttachmentsChanged(it)
+    })
+    
+    private val wornOutfitFolder = SubscriptionData<SubscriptionSingleKey, UUID>(UIThreadExecutor.getInstance(), Subscription.OnData {
+        onWornOutfitFolder(it)
+    })
+    
+    private val wornWearables = SubscriptionData<SubscriptionSingleKey, Table<SLWearableType, UUID, SLWearable>>(UIThreadExecutor.getInstance(), Subscription.OnData {
+        onWornWearablesChanged(it)
+    })
+
+    private fun changeOutfit(replace: Boolean) {
+        val data = entryList.data
+        val circuit = agentCircuit.data
+        if (data != null && circuit != null) {
+            val builder = ImmutableList.builder<SLInventoryEntry>()
+            for (entry in data) {
+                if (!entry.isFolderOrFolderLink) {
+                    builder.add(entry)
+                }
+            }
+            circuit.getModules().avatarAppearance.ChangeOutfit(builder.build(), replace, data.folder)
         }
     }
 
-    @Nullable
-    private UUID getFolderUUID() {
-        String str = null
-        Bundle arguments = getArguments()
-        if (arguments != null) {
-            str = arguments.getString(FOLDER_ID_KEY)
-        }
+    private fun getFolderUUID(): UUID? {
+        val args = arguments
+        val str = args?.getString(FOLDER_ID_KEY)
         return UUIDPool.getUUID(str)
     }
 
-    private InventoryQuery getInventoryQuery(@Nullable UUID uuid) {
-        Boolean z = false
-        if (InventoryFragmentHelper.getSortOrder(getContext()) == 0) {
-            z = true
-        }
-        return InventoryQuery.create(uuid, (String) null, true, true, z, (SLAssetType) null)
+    private fun getInventoryQuery(uuid: UUID?): InventoryQuery {
+        val sortOrder = InventoryFragmentHelper.getSortOrder(context)
+        return InventoryQuery.create(uuid, null, true, true, sortOrder == 0, null)
     }
 
-    @Nullable
-    private UserManager getUserManager() {
-        return ActivityUtils.getUserManager(getArguments())
+    private fun getUserManager(): UserManager? {
+        return ActivityUtils.getUserManager(arguments)
     }
 
-    Bundle makeSelection(@NonNull UUID uuid, @Nullable UUID uuid2) {
-        Bundle bundle = Bundle()
+    fun makeSelection(@NonNull uuid: UUID, @Nullable uuid2: UUID?): Bundle {
+        val bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         if (uuid2 != null) {
             bundle.putString(FOLDER_ID_KEY, uuid2.toString())
@@ -487,51 +150,40 @@ Method generation error in method: com.linkpoint.ui.outfits.-$Lambda$oBJjjSxYBPv
         return bundle
     }
 
-    private Unit navigateToFolder(UUID uuid) {
-        getArguments().putString(FOLDER_ID_KEY, uuid.toString())
+    private fun navigateToFolder(uuid: UUID) {
+        arguments?.putString(FOLDER_ID_KEY, uuid.toString())
         showInventoryList(uuid)
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onAgentCircuit */
-    Unit m696com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref1(SLAgentCircuit sLAgentCircuit) {
-        SLAvatarAppearance sLAvatarAppearance = null
-        if (this.adapter != null) {
-            InventoryFolderAdapter inventoryFolderAdapter = this.adapter
-            if (sLAgentCircuit != null) {
-                sLAvatarAppearance = sLAgentCircuit.getModules().avatarAppearance
+    private fun onAgentCircuit(circuit: SLAgentCircuit?) {
+        var appearance: SLAvatarAppearance? = null
+        if (adapter != null) {
+            if (circuit != null) {
+                appearance = circuit.getModules().avatarAppearance
             }
-            inventoryFolderAdapter.setAvatarAppearance(sLAvatarAppearance)
+            adapter!!.setAvatarAppearance(appearance)
         }
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onInventoryEntryList */
-    Unit m695com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref0(InventoryEntryList inventoryEntryList) {
-        Debug.Printf("InventoryFragment (%s): onInventoryEntryList: %d entries", this, Int.valueOf(inventoryEntryList.size()))
-        setTitle(inventoryEntryList.getTitle(), (String) null)
-        if (this.adapter != null) {
-            this.adapter.setData(inventoryEntryList)
+    private fun onInventoryEntryList(list: InventoryEntryList?) {
+        if (list != null) {
+            Debug.Printf("InventoryFragment (%s): onInventoryEntryList: %d entries", this, list.size)
+            setTitle(list.title, null)
+            adapter?.setData(list)
         }
         updateLoadingStatus()
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onLoadingStatusChanged */
-    Unit m697com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref2(Boolean bool) {
+    private fun onLoadingStatusChanged(loading: Boolean?) {
         updateLoadingStatus()
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onRootFolderEntryList */
-    Unit m700com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref5(InventoryEntryList inventoryEntryList) {
-        if (inventoryEntryList != null) {
-            Iterator it = inventoryEntryList.iterator()
-            while (it.hasNext()) {
-                SLInventoryEntry sLInventoryEntry = (SLInventoryEntry) it.next()
-                if (sLInventoryEntry.isFolder && sLInventoryEntry.typeDefault == 48) {
-                    this.myOutfitsFolderUUID = sLInventoryEntry.uuid
-                    this.rootFolderEntryList.unsubscribe()
+    private fun onRootFolderEntryList(list: InventoryEntryList?) {
+        if (list != null) {
+            for (entry in list) {
+                if (entry.isFolder && entry.typeDefault == 48) { // 48 is Outfits folder type?
+                    myOutfitsFolderUUID = entry.uuid
+                    rootFolderEntryList.unsubscribe()
                     if (getFolderUUID() == null) {
                         showInventoryList(getFolderUUID())
                         return
@@ -542,226 +194,199 @@ Method generation error in method: com.linkpoint.ui.outfits.-$Lambda$oBJjjSxYBPv
         }
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onWornAttachmentsChanged */
-    Unit m698com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref3(ImmutableMap<UUID, String> immutableMap) {
-        if (this.adapter != null) {
-            this.adapter.setWornAttachments(immutableMap)
-        }
+    private fun onWornAttachmentsChanged(map: ImmutableMap<UUID, String>?) {
+        adapter?.setWornAttachments(map)
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onWornOutfitFolder */
-    Unit m701com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref6(UUID uuid) {
-        if (this.adapter != null) {
-            this.adapter.setWornOutfitFolder(uuid)
-        }
+    private fun onWornOutfitFolder(uuid: UUID?) {
+        adapter?.setWornOutfitFolder(uuid)
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onWornWearablesChanged */
-    Unit m699com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref4(Table<SLWearableType, UUID, SLWearable> table) {
-        if (this.adapter != null) {
-            this.adapter.setWornWearables(table)
-        }
+    private fun onWornWearablesChanged(table: Table<SLWearableType, UUID, SLWearable>?) {
+        adapter?.setWornWearables(table)
     }
 
-    private Unit showInventoryList(@Nullable UUID uuid) {
-        UUID rootFolder
-        Debug.Printf("OutfitsNewFragment (%s): showInventoryList '%s'", this, uuid)
-        View view = getView()
-        this.entryList.unsubscribe()
-        this.agentCircuit.unsubscribe()
-        this.folderLoading.unsubscribe()
-        this.rootFolderEntryList.unsubscribe()
-        UserManager userManager = getUserManager()
+    private fun showInventoryList(uuid: UUID?) {
+        var currentUUID = uuid
+        Debug.Printf("OutfitsNewFragment (%s): showInventoryList '%s'", this, currentUUID)
+        
+        val view = view
+        entryList.unsubscribe()
+        agentCircuit.unsubscribe()
+        folderLoading.unsubscribe()
+        rootFolderEntryList.unsubscribe()
+        
+        val userManager = getUserManager()
         if (userManager != null) {
-            InventoryDB database = userManager.getInventoryManager().getDatabase()
-            this.wornAttachments.subscribe(userManager.getWornAttachmentsPool(), SubscriptionSingleKey.Value)
-            this.wornWearables.subscribe(userManager.getWornWearablesPool(), SubscriptionSingleKey.Value)
-            this.wornOutfitFolder.subscribe(userManager.wornOutfitLink(), SubscriptionSingleKey.Value)
-            this.agentCircuit.subscribe(UserManager.agentCircuits(), userManager.getUserID())
-            if (uuid == null) {
-                uuid = this.myOutfitsFolderUUID
+            val database = userManager.getInventoryManager().getDatabase()
+            wornAttachments.subscribe(userManager.getWornAttachmentsPool(), SubscriptionSingleKey.Value)
+            wornWearables.subscribe(userManager.getWornWearablesPool(), SubscriptionSingleKey.Value)
+            wornOutfitFolder.subscribe(userManager.wornOutfitLink(), SubscriptionSingleKey.Value)
+            agentCircuit.subscribe(userManager.agentCircuits(), userManager.getUserID())
+            
+            if (currentUUID == null) {
+                currentUUID = myOutfitsFolderUUID
             }
-            Debug.Printf("After checking myoutfits: %s", uuid)
-            if (uuid == null && (rootFolder = userManager.getInventoryManager().getRootFolder()) != null) {
-                SLInventoryEntry findSpecialFolder = database.findSpecialFolder(rootFolder, 48)
-                if (findSpecialFolder != null) {
-                    this.myOutfitsFolderUUID = findSpecialFolder.uuid
-                    uuid = findSpecialFolder.uuid
-                    Debug.Printf("Found special folder: %s", uuid)
-                } else {
-                    Debug.Printf("Special folder not found", Any[0])
+            
+            Debug.Printf("After checking myoutfits: %s", currentUUID)
+            
+            if (currentUUID == null) {
+                val rootFolder = userManager.getInventoryManager().getRootFolder()
+                if (rootFolder != null) {
+                     // database might be null check?
+                     // Decompiled code assumed database valid if manager valid?
+                     // InventoryDB database = ...
+                     val specialFolder = database?.findSpecialFolder(rootFolder, 48)
+                     if (specialFolder != null) {
+                         myOutfitsFolderUUID = specialFolder.uuid
+                         currentUUID = specialFolder.uuid
+                         Debug.Printf("Found special folder: %s", currentUUID)
+                     } else {
+                         Debug.Printf("Special folder not found")
+                     }
                 }
             }
-            if (uuid != null) {
-                this.folderLoading.subscribe(userManager.getInventoryManager().getFolderLoading(), uuid)
-                this.entryList.subscribe(userManager.getInventoryManager().getInventoryEntries(), getInventoryQuery(uuid))
-                if (!(view == null || this.listHeader == null)) {
-                    if (Objects.equal(uuid, this.myOutfitsFolderUUID)) {
-                        ((TextView) this.listHeader.findViewById(R.id.itemNameTextView)).setText(R.string.current_outfit)
-                        ((ImageView) this.listHeader.findViewById(R.id.itemTypeIconView)).setImageResource(R.drawable.inv_folder)
-                        view.findViewById(R.id.wear_buttons_layout).setVisibility(8)
+            
+            if (currentUUID != null) {
+                folderLoading.subscribe(userManager.getInventoryManager().getFolderLoading(), currentUUID)
+                entryList.subscribe(userManager.getInventoryManager().getInventoryEntries(), getInventoryQuery(currentUUID))
+                
+                if (view != null && listHeader != null) {
+                    val nameView = listHeader!!.findViewById<TextView>(R.id.itemNameTextView)
+                    val iconView = listHeader!!.findViewById<ImageView>(R.id.itemTypeIconView)
+                    val buttonsLayout = view.findViewById<View>(R.id.wear_buttons_layout)
+                    
+                    if (Objects.equal(currentUUID, myOutfitsFolderUUID)) {
+                        nameView.setText(R.string.current_outfit)
+                        iconView.setImageResource(R.drawable.inv_folder)
+                        buttonsLayout.visibility = View.GONE
                     } else {
-                        ((TextView) this.listHeader.findViewById(R.id.itemNameTextView)).setText(R.string.inventory_go_up)
-                        ((ImageView) this.listHeader.findViewById(R.id.itemTypeIconView)).setImageResource(R.drawable.inv_up)
-                        view.findViewById(R.id.wear_buttons_layout).setVisibility(0)
+                        nameView.setText(R.string.inventory_go_up)
+                        iconView.setImageResource(R.drawable.inv_up)
+                        buttonsLayout.visibility = View.VISIBLE
                     }
-                    this.listHeader.findViewById(R.id.itemSubTypeIconView).setVisibility(8)
-                    this.listHeader.setVisibility(0)
+                    listHeader!!.findViewById<View>(R.id.itemSubTypeIconView).visibility = View.GONE
+                    listHeader!!.visibility = View.VISIBLE
                 }
             } else {
-                this.rootFolderEntryList.subscribe(userManager.getInventoryManager().getInventoryEntries(), InventoryQuery.create((UUID) null, (String) null, true, false, false, (SLAssetType) null))
-                if (this.listHeader != null) {
-                    this.listHeader.setVisibility(8)
-                }
-                if (view != null) {
-                    view.findViewById(R.id.wear_buttons_layout).setVisibility(8)
-                }
+                // Subscribe to root to find outfits folder
+                rootFolderEntryList.subscribe(userManager.getInventoryManager().getInventoryEntries(), InventoryQuery.create(null, null, true, false, false, null))
+                listHeader?.visibility = View.GONE
+                view?.findViewById<View>(R.id.wear_buttons_layout)?.visibility = View.GONE
             }
-            if (this.adapter != null) {
-                this.adapter.setDatabase(database)
-            }
+            
+            adapter?.setDatabase(database)
+            
         } else {
-            this.wornAttachments.unsubscribe()
-            this.wornWearables.unsubscribe()
-            this.rootFolderEntryList.unsubscribe()
-            this.adapter.setDatabase((InventoryDB) null)
-            this.wornOutfitFolder.unsubscribe()
+            wornAttachments.unsubscribe()
+            wornWearables.unsubscribe()
+            rootFolderEntryList.unsubscribe()
+            adapter?.setDatabase(null)
+            wornOutfitFolder.unsubscribe()
         }
         updateLoadingStatus()
     }
 
-    private Unit updateLoadingStatus() {
-        Context context = getContext()
+    private fun updateLoadingStatus() {
+        val context = context
         if (context != null) {
-            Boolean z2 = true
-            if (this.folderLoading.isSubscribed()) {
-                Boolean data = this.folderLoading.getData()
-                z = data != null ? data.booleanValue() : false
-            } else {
-                z = false
+            var isLoading = false
+            if (folderLoading.isSubscribed) {
+                val data = folderLoading.data
+                isLoading = data == true
             }
-            if (this.adapter != null) {
-                z2 = this.adapter.isEmpty()
-            }
-            this.loadableMonitor.setExtraLoading(z2 ? z : false)
-            LoadableMonitor loadableMonitor2 = this.loadableMonitor
-            if (z2) {
-                z = false
-            }
-            loadableMonitor2.setButteryProgressBar(z)
-            this.loadableMonitor.setEmptyMessage(z2, context.getString(R.string.no_inventory_subentries))
+            
+            val isEmpty = adapter?.isEmpty ?: true
+            loadableMonitor.setExtraLoading(if (isEmpty) isLoading else false)
+            loadableMonitor.setButteryProgressBar(if (isEmpty) false else isLoading)
+            loadableMonitor.setEmptyMessage(isEmpty, context.getString(R.string.no_inventory_subentries))
         }
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragment_13544  reason: not valid java name */
-    /* synthetic */ Unit m702lambda$com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragment_13544(AdapterView adapterView, View view, Int i, Long j) {
-        SLInventoryEntry folder
-        UserManager userManager = getUserManager()
-        if (userManager != null) {
-            Any item = adapterView.getAdapter().getItem(i)
-            if (item == this.listHeaderData) {
-                UUID folderUUID = getFolderUUID()
-                if (folderUUID == null || Objects.equal(folderUUID, this.myOutfitsFolderUUID)) {
-                    DetailsActivity.showEmbeddedDetails(getActivity(), CurrentOutfitFragment.class, CurrentOutfitFragment.makeSelection(userManager.getUserID()))
-                    return
-                }
-                InventoryEntryList data = this.entryList.getData()
-                if (data != null && (folder = data.getFolder()) != null) {
-                    navigateToFolder(folder.parentUUID)
-                }
-            } else if (item instanceof SLInventoryEntry) {
-                SLInventoryEntry sLInventoryEntry = (SLInventoryEntry) item
-                Debug.Printf("Inventory: Item click: item isFolder %b invType %d typeDefault %d assetType %d", Boolean.valueOf(sLInventoryEntry.isFolder), Int.valueOf(sLInventoryEntry.invType), Int.valueOf(sLInventoryEntry.typeDefault), Int.valueOf(sLInventoryEntry.assetType))
-                UUID uuid = (!sLInventoryEntry.isFolder || sLInventoryEntry.uuid == null) ? (!sLInventoryEntry.isLink() || sLInventoryEntry.invType != 8) ? null : sLInventoryEntry.assetUUID : sLInventoryEntry.uuid
-                if (uuid != null) {
-                    navigateToFolder(uuid)
-                }
-            }
+    override fun onClick(view: View) {
+        when (view.id) {
+            R.id.outfit_folder_wear_button -> changeOutfit(true)
+            R.id.outfit_folder_add_button -> changeOutfit(false)
         }
     }
 
-    Unit onClick(View view) {
-        switch (view.getId()) {
-            case R.id.outfit_folder_wear_button:
-                changeOutfit(true)
-                return
-            case R.id.outfit_folder_add_button:
-                changeOutfit(false)
-                return
-            default:
-                return
-        }
-    }
-
-    @Nullable
-    View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
-        Debug.Printf("InventoryFragment: onCreateView", Any[0])
-        View inflate = layoutInflater.inflate(R.layout.outfit_folder, viewGroup, false)
-        this.loadableMonitor.setLoadingLayout((LoadingLayout) inflate.findViewById(R.id.loading_layout), getString(R.string.no_folder_selected), getString(R.string.inventory_folder_fail))
-        this.listHeader = (ViewGroup) layoutInflater.inflate(R.layout.inventory_item, (ListView) inflate.findViewById(R.id.item_list), false)
-        this.adapter = InventoryFolderAdapter(layoutInflater, true)
-        this.adapter.setOnItemCheckboxClickListener(this)
-        ((ListView) inflate.findViewById(R.id.item_list)).addHeaderView(this.listHeader, this.listHeaderData, true)
-        ((ListView) inflate.findViewById(R.id.item_list)).setAdapter(this.adapter)
-        ((ListView) inflate.findViewById(R.id.item_list)).setOnItemClickListener(this.itemClickListener)
-        inflate.findViewById(R.id.outfit_folder_wear_button).setOnClickListener(this)
-        inflate.findViewById(R.id.outfit_folder_add_button).setOnClickListener(this)
-        return inflate
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        Debug.Printf("InventoryFragment: onCreateView")
+        val view = inflater.inflate(R.layout.outfit_folder, container, false)
+        
+        loadableMonitor.setLoadingLayout(view.findViewById(R.id.loading_layout), getString(R.string.no_folder_selected), getString(R.string.inventory_folder_fail))
+        
+        val listView = view.findViewById<ListView>(R.id.item_list)
+        listHeader = inflater.inflate(R.layout.inventory_item, listView, false) as ViewGroup
+        
+        adapter = InventoryFolderAdapter(inflater, true)
+        adapter!!.setOnItemCheckboxClickListener(this)
+        
+        listView.addHeaderView(listHeader, listHeaderData, true)
+        listView.adapter = adapter
+        listView.onItemClickListener = itemClickListener
+        
+        view.findViewById<View>(R.id.outfit_folder_wear_button).setOnClickListener(this)
+        view.findViewById<View>(R.id.outfit_folder_add_button).setOnClickListener(this)
+        
+        return view
     }
 
     @EventHandler
-    Unit onInventorySortOrderChanged(InventorySortOrderChangedEvent inventorySortOrderChangedEvent) {
-        if (isFragmentStarted()) {
+    fun onInventorySortOrderChanged(event: InventorySortOrderChangedEvent) {
+        if (isFragmentStarted) {
             showInventoryList(getFolderUUID())
         }
     }
 
-    Unit onItemCheckboxClicked(SLInventoryEntry sLInventoryEntry) {
-        SLInventoryEntry resolveLink
-        UserManager userManager = getUserManager()
-        SLAgentCircuit data = this.agentCircuit.getData()
-        if (data != null && userManager != null) {
-            SLAvatarAppearance sLAvatarAppearance = data.getModules().avatarAppearance
-            InventoryDB database = userManager.getInventoryManager().getDatabase()
-            if (!(database == null || (resolveLink = database.resolveLink(sLInventoryEntry)) == null)) {
-                sLInventoryEntry = resolveLink
-            }
-            if (sLAvatarAppearance.isItemWorn(sLInventoryEntry)) {
-                if (sLInventoryEntry.isWearable()) {
-                    sLAvatarAppearance.TakeItemOff(sLInventoryEntry)
-                } else {
-                    sLAvatarAppearance.DetachInventoryItem(sLInventoryEntry)
+    override fun onItemCheckboxClicked(entry: SLInventoryEntry) {
+        var item = entry
+        val userManager = getUserManager()
+        val circuit = agentCircuit.data
+        
+        if (circuit != null && userManager != null) {
+            val appearance = circuit.getModules().avatarAppearance
+            val database = userManager.getInventoryManager().getDatabase()
+            
+            if (database != null) {
+                val resolved = database.resolveLink(item)
+                if (resolved != null) {
+                    item = resolved
                 }
-            } else if (sLInventoryEntry.isWearable()) {
-                sLAvatarAppearance.WearItem(sLInventoryEntry, false)
+            }
+            
+            if (appearance.isItemWorn(item)) {
+                if (item.isWearable) {
+                    appearance.TakeItemOff(item)
+                } else {
+                    appearance.DetachInventoryItem(item)
+                }
+            } else if (item.isWearable) {
+                appearance.WearItem(item, false)
             } else {
-                sLAvatarAppearance.AttachInventoryItem(sLInventoryEntry, 0, false)
+                appearance.AttachInventoryItem(item, 0, false)
             }
         }
     }
 
-    Unit onStart() {
+    override fun onStart() {
         super.onStart()
-        EventBus.getInstance().subscribe((Any) this)
+        EventBus.getInstance().subscribe(this)
         showInventoryList(getFolderUUID())
     }
 
-    Unit onStop() {
-        showInventoryList((UUID) null)
+    override fun onStop() {
+        showInventoryList(null)
         EventBus.getInstance().unsubscribe(this)
         super.onStop()
     }
 
-    Unit setFragmentArgs(Intent intent, Bundle bundle) {
+    override fun setFragmentArgs(intent: Intent?, bundle: Bundle?) {
         Debug.Printf("InventoryFragment: setFragmentArgs '%s'", bundle)
         if (bundle != null) {
-            getArguments().putAll(bundle)
+            arguments?.putAll(bundle)
         }
-        if (isFragmentStarted()) {
+        if (isFragmentStarted) {
             showInventoryList(getFolderUUID())
         }
     }
