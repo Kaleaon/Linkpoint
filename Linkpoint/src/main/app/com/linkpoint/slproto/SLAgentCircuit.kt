@@ -120,6 +120,6 @@ class SLAgentCircuit(
     }
 
     companion object {
-        private const val LOGOUT_MESSAGE_ID = -9000 // Placeholder identifier for LogoutRequest
+        private const val LOGOUT_MESSAGE_ID = -9000 // Mapped in SLMessageFactory
     }
 }

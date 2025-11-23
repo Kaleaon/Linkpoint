@@ -835,6 +835,11 @@ abstract class SLObjectInfo : Identifiable<UUID> {
 
     /* access modifiers changed from: protected */
     Unit onTexturesUpdate(SLTextureEntry sLTextureEntry) {
+        // Hook into material/texture system
+        // For now, we just acknowledge the update.
+        // In a full implementation, this would notify the renderer to fetch/update the texture.
+        // e.g., TextureCache.getInstance().fetch(sLTextureEntry.defaultTexture.textureID)
+        // or eventBus.publish(ObjectTextureUpdatedEvent(this.uuid, sLTextureEntry))
     }
 
     synchronized Unit removeChild(SLObjectInfo sLObjectInfo) {

@@ -408,6 +408,7 @@ object SLMessageFactory {
         -65142 to { SimulatorFeatures() },
         -65141 to { SimulatorFeaturesReply() },
         -65140 to { ChatSessionRequest() },
+        -9000 to { LogoutRequest() }, // Added LogoutRequest
         -5 to { PacketAck() },
         -4 to { StartPingCheck() },
         -3 to { CompletePingCheck() },
