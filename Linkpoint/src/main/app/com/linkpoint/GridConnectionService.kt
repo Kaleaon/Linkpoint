@@ -21,18 +21,7 @@ import com.linkpoint.slproto.SLGridConnection
 import com.linkpoint.slproto.auth.SLAuthParams
 import com.linkpoint.slproto.events.SLConnectionStateChangedEvent
 import com.linkpoint.slproto.events.SLDisconnectEvent
-import com.linkpoint.slproto.events.SLLoginResultEvent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicReference
+import com.linkpoint.voice.LinkpointVoiceManager
 
 /**
  * Grid Connection Service - Manages persistent connection to Second Life grid
@@ -47,7 +36,7 @@ import java.util.concurrent.atomic.AtomicReference
  * The service runs as a foreground service when connected to ensure
  * the connection is maintained even when the app is in the background.
  */
-class GridConnectionService : Service() {
+class GridConnectionService : Service(), LinkpointVoiceManager.VoiceCallback {
 
     companion object {
         private const val TAG = "GridConnectionService"
@@ -64,6 +53,8 @@ class GridConnectionService : Service() {
         const val EXTRA_PASSWORD = "password"
         const val EXTRA_GRID_URL = "grid_url"
         const val EXTRA_START_LOCATION = "start_location"
+        const val EXTRA_CHANNEL_URI = "channel_uri"
+        const val EXTRA_AUTH_TOKEN = "auth_token"
         
         // Notification constants
         private const val NOTIFICATION_CHANNEL_ID = "grid_connection_channel"
@@ -135,6 +126,9 @@ class GridConnectionService : Service() {
     
     // Notification manager
     private var notificationManager: NotificationManager? = null
+    
+    // Voice Manager
+    private lateinit var voiceManager: LinkpointVoiceManager
 
     override fun onCreate() {
         super.onCreate()
@@ -146,6 +140,12 @@ class GridConnectionService : Service() {
         // Initialize managers
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        
+        // Initialize Voice Manager
+        voiceManager = LinkpointVoiceManager(this, this)
+        serviceScope.launch {
+            voiceManager.initialize()
+        }
         
         // Create notification channel
         createNotificationChannel()
@@ -164,8 +164,8 @@ class GridConnectionService : Service() {
             LOGIN_ACTION -> handleLogin(intent)
             LOGOUT_ACTION -> handleLogout()
             RECONNECT_ACTION -> handleReconnect()
-            ACTION_VOICE_ACCEPT -> handleVoiceAccept()
-            ACTION_VOICE_REJECT -> handleVoiceReject()
+            ACTION_VOICE_ACCEPT -> handleVoiceAccept(intent)
+            ACTION_VOICE_REJECT -> handleVoiceReject(intent)
             else -> Log.w(TAG, "Unknown action: ${intent?.action}")
         }
         
@@ -189,6 +189,9 @@ class GridConnectionService : Service() {
         
         // Unsubscribe from EventBus
         EventBus.getInstance().unsubscribe(this)
+        
+        // Cleanup voice
+        voiceManager.cleanup()
 
         // Clear connection
         setGridConnection(null)
@@ -353,14 +356,56 @@ class GridConnectionService : Service() {
         }
     }
     
-    private fun handleVoiceAccept() {
+    private fun handleVoiceAccept(intent: Intent) {
         Log.d(TAG, "Voice call accepted")
-        // TODO: Implement voice call acceptance logic via SLVoiceManager or similar
+        val channelUri = intent.getStringExtra(EXTRA_CHANNEL_URI)
+        val authToken = intent.getStringExtra(EXTRA_AUTH_TOKEN) ?: ""
+        
+        if (!channelUri.isNullOrEmpty()) {
+            serviceScope.launch {
+                voiceManager.connectToVoiceChannel(channelUri, authToken)
+            }
+        } else {
+            Log.e(TAG, "Accept voice call failed: missing channel URI")
+        }
     }
     
-    private fun handleVoiceReject() {
+    private fun handleVoiceReject(intent: Intent) {
         Log.d(TAG, "Voice call rejected")
-        // TODO: Implement voice call rejection logic
+        // For rejection, we might just need to ensure we aren't connected
+        // or maybe send a message if supported. For now, just log.
+        val channelUri = intent.getStringExtra(EXTRA_CHANNEL_URI)
+        if (!channelUri.isNullOrEmpty()) {
+            serviceScope.launch {
+                voiceManager.leaveVoiceChannel(channelUri)
+            }
+        }
+    }
+    
+    // VoiceCallback implementation
+    override fun onVoiceConnected(channelUri: String) {
+        Log.i(TAG, "Voice connected: $channelUri")
+        // Optionally notify UI or show notification
+    }
+
+    override fun onVoiceDisconnected(channelUri: String, reason: String) {
+        Log.i(TAG, "Voice disconnected: $channelUri, reason: $reason")
+    }
+
+    override fun onUserJoined(channelUri: String, userId: String, displayName: String) {
+        Log.d(TAG, "Voice user joined: $displayName")
+    }
+
+    override fun onUserLeft(channelUri: String, userId: String) {
+        Log.d(TAG, "Voice user left: $userId")
+    }
+
+    override fun onUserSpeaking(userId: String, speaking: Boolean) {
+        // Handle speaking indicators
+    }
+
+    override fun onVoiceError(error: String) {
+        Log.e(TAG, "Voice error: $error")
     }
     
     // Network monitoring
