@@ -136,7 +136,9 @@ class StreamingMediaService : Service() {
                 showNotification()
                 safeRegisterReceiver()
                 isPlayingMedia.setData(SubscriptionSingleKey.Value, true)
-                mediaWrapper.play(mediaUrl)
+                if (mediaUrl != null) {
+                    mediaWrapper.play(mediaUrl)
+                }
             }
         } else {
             // Stop media

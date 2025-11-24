@@ -3,89 +3,83 @@ package com.lumiyaviewer.lumiya.dao
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteStatement
-import androidx.fragment.app.NotificationCompat
+import androidx.core.app.NotificationCompat
 import de.greenrobot.dao.AbstractDao
 import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig
 
 class CachedAssetDao : AbstractDao<CachedAsset, String> {
-    val TABLENAME: String = "CachedAssets"
+    
+    companion object {
+        const val TABLENAME = "CachedAssets"
+        
+        object Properties {
+            @JvmField val Data = Property(2, ByteArray::class.java, "data", false, "DATA")
+            @JvmField val Key = Property(0, String::class.java, "key", true, "KEY")
+            @JvmField val MustRevalidate = Property(3, Boolean::class.java, "mustRevalidate", false, "MUST_REVALIDATE")
+            @JvmField val Status = Property(1, Int::class.java, "status", false, "STATUS") // Assuming 'status' is the column/property name
+        }
+        
+        @JvmStatic
+        fun createTable(db: SQLiteDatabase, ifNotExists: Boolean) {
+            val constraint = if (ifNotExists) "IF NOT EXISTS " else ""
+            db.execSQL("CREATE TABLE $constraint'CachedAssets' ('KEY' TEXT PRIMARY KEY NOT NULL ,'STATUS' INTEGER NOT NULL ,'DATA' BLOB,'MUST_REVALIDATE' INTEGER NOT NULL );")
+        }
 
-    class Properties {
-        Property Data = Property(2, ByteArray.class, "data", false, "DATA")
-        Property Key = Property(0, String.class, "key", true, "KEY")
-        Property MustRevalidate = Property(3, Boolean.TYPE, "mustRevalidate", false, "MUST_REVALIDATE")
-        Property Status = Property(1, Int.TYPE, NotificationCompat.CATEGORY_STATUS, false, "STATUS")
+        @JvmStatic
+        fun dropTable(db: SQLiteDatabase, ifExists: Boolean) {
+            val constraint = if (ifExists) "IF EXISTS " else ""
+            db.execSQL("DROP TABLE $constraint'CachedAssets'")
+        }
     }
 
-    constructor(daoConfig: DaoConfig) {
-        super(daoConfig)
-    }
+    constructor(config: DaoConfig) : super(config)
+    
+    constructor(config: DaoConfig, daoSession: DaoSession) : super(config, daoSession)
 
-    constructor(daoConfig: DaoConfig, daoSession: DaoSession) {
-        super(daoConfig, daoSession)
-    }
-
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'CachedAssets' (" + "'KEY' TEXT PRIMARY KEY NOT NULL ," + "'STATUS' INTEGER NOT NULL ," + "'DATA' BLOB," + "'MUST_REVALIDATE' INTEGER NOT NULL );")
-    }
-
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'CachedAssets'")
-    }
-
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, cachedAsset: CachedAsset): Unit {
-        sQLiteStatement.clearBindings()
-        String key = cachedAsset.getKey()
+    override fun bindValues(stmt: SQLiteStatement, entity: CachedAsset) {
+        stmt.clearBindings()
+        val key = entity.getKey()
         if (key != null) {
-            sQLiteStatement.bindString(1, key)
+            stmt.bindString(1, key)
         }
-        sQLiteStatement.bindLong(2, (Long) cachedAsset.getStatus())
-        ByteArray data = cachedAsset.getData()
+        stmt.bindLong(2, entity.getStatus().toLong())
+        val data = entity.getData()
         if (data != null) {
-            sQLiteStatement.bindBlob(3, data)
+            stmt.bindBlob(3, data)
         }
-        sQLiteStatement.bindLong(4, cachedAsset.getMustRevalidate() ? 1 : 0)
+        stmt.bindLong(4, if (entity.getMustRevalidate()) 1L else 0L)
     }
 
-    fun getKey(cachedAsset: CachedAsset): String {
-        return cachedAsset != null ? cachedAsset.getKey() : null
+    override fun getKey(entity: CachedAsset?): String? {
+        return entity?.getKey()
     }
 
-    protected fun isEntityUpdateable(): Boolean {
+    override fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    fun readEntity(cursor: Cursor, i: Int): CachedAsset {
-        ByteArray bArr = null
-        Boolean z = false
-        String string = cursor.isNull(i + 0) ? null : cursor.getString(i + 0)
-        Int i2 = cursor.getInt(i + 1)
-        if (!cursor.isNull(i + 2)) {
-            bArr = cursor.getBlob(i + 2)
-        }
-        if (cursor.getShort(i + 3) != (Short) 0) {
-            z = true
-        }
-        return CachedAsset(string, i2, bArr, z)
+    override fun readEntity(cursor: Cursor, offset: Int): CachedAsset {
+        val key = if (cursor.isNull(offset + 0)) null else cursor.getString(offset + 0)
+        val status = cursor.getInt(offset + 1)
+        val data = if (cursor.isNull(offset + 2)) null else cursor.getBlob(offset + 2)
+        val mustRevalidate = cursor.getShort(offset + 3) != 0.toShort()
+        
+        return CachedAsset(key, status, data, mustRevalidate)
     }
 
-    fun readEntity(cursor: Cursor, cachedAsset: CachedAsset, i: Int): Unit {
-        ByteArray bArr = null
-        cachedAsset.setKey(cursor.isNull(i + 0) ? null : cursor.getString(i + 0))
-        cachedAsset.setStatus(cursor.getInt(i + 1))
-        if (!cursor.isNull(i + 2)) {
-            bArr = cursor.getBlob(i + 2)
-        }
-        cachedAsset.setData(bArr)
-        cachedAsset.setMustRevalidate(cursor.getShort(i + 3) != (Short) 0)
+    override fun readEntity(cursor: Cursor, entity: CachedAsset, offset: Int) {
+        entity.setKey(if (cursor.isNull(offset + 0)) null else cursor.getString(offset + 0))
+        entity.setStatus(cursor.getInt(offset + 1))
+        entity.setData(if (cursor.isNull(offset + 2)) null else cursor.getBlob(offset + 2))
+        entity.setMustRevalidate(cursor.getShort(offset + 3) != 0.toShort())
     }
 
-    fun readKey(cursor: Cursor, i: Int): String {
-        return cursor.isNull(i + 0) ? null : cursor.getString(i + 0)
+    override fun readKey(cursor: Cursor, offset: Int): String? {
+        return if (cursor.isNull(offset + 0)) null else cursor.getString(offset + 0)
     }
 
-    protected fun updateKeyAfterInsert(cachedAsset: CachedAsset, j: Long): String {
-        return cachedAsset.getKey()
+    override fun updateKeyAfterInsert(entity: CachedAsset, rowId: Long): String? {
+        return entity.getKey()
     }
 }

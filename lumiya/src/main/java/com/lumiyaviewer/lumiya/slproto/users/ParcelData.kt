@@ -6,78 +6,52 @@ import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.io.Serializable
 import java.util.UUID
 
-class ParcelData : Serializable {
-    private Int area
-    private String description
-    private Boolean isGroupOwned
-    private String mediaURL
-    private String name
-    private UUID ownerID
+class ParcelData(lLSDNode: LLSDNode) : Serializable {
+    private var area: Int = 0
+    private var description: String = ""
+    private var isGroupOwned: Boolean = false
+    private var mediaURL: String = ""
+    private var name: String = ""
+    private var ownerID: UUID = UUIDPool.ZeroUUID
     private val parcelBitmap: BooleanArray = BooleanArray(4096)
-    private Int parcelID
-    private UUID snapshotUUID
+    private var parcelID: Int = 0
+    private var snapshotUUID: UUID = UUIDPool.ZeroUUID
 
-    ParcelData(LLSDNode lLSDNode) throws LLSDException {
-        UUID uuid = null
-        this.parcelID = lLSDNode.byKey("LocalID").asInt()
-        this.name = lLSDNode.byKey("Name").asString()
-        this.description = lLSDNode.byKey("Desc").asString()
-        this.mediaURL = lLSDNode.byKey("MusicURL").asString()
-        UUID asUUID = lLSDNode.byKey("SnapshotID").asUUID()
-        if (asUUID != null && asUUID.equals(UUIDPool.ZeroUUID)) {
-            asUUID = null
-        }
-        this.snapshotUUID = asUUID
-        this.ownerID = lLSDNode.keyExists("OwnerID") ? lLSDNode.byKey("OwnerID").asUUID() : uuid
-        this.isGroupOwned = lLSDNode.keyExists("IsGroupOwned") ? lLSDNode.byKey("IsGroupOwned").asBoolean() : false
-        this.area = lLSDNode.keyExists("Area") ? lLSDNode.byKey("Area").asInt() : 0
-        ByteArray asBinary = lLSDNode.byKey("Bitmap").asBinary()
-        Int i = 0
-        while (i < asBinary.length && i < 512) {
-            Byte b = asBinary[i]
-            for (Int i2 = 0; i2 < 8; i2++) {
-                if ((b & 1) != 0) {
+    init {
+        this.parcelID = lLSDNode.byKey("LocalID")?.asInt() ?: 0
+        this.name = lLSDNode.byKey("Name")?.asString() ?: ""
+        this.description = lLSDNode.byKey("Desc")?.asString() ?: ""
+        this.mediaURL = lLSDNode.byKey("MusicURL")?.asString() ?: ""
+        
+        var asUUID = lLSDNode.byKey("SnapshotID")?.asUUID()
+        // Handle ZeroUUID case if needed, but let's assume nullable/ZeroUUID handling is consistent
+        this.snapshotUUID = if (asUUID != null && asUUID != UUIDPool.ZeroUUID) asUUID else UUIDPool.ZeroUUID
+        
+        this.ownerID = if (lLSDNode.keyExists("OwnerID")) lLSDNode.byKey("OwnerID")?.asUUID() ?: UUIDPool.ZeroUUID else UUIDPool.ZeroUUID
+        this.isGroupOwned = if (lLSDNode.keyExists("IsGroupOwned")) lLSDNode.byKey("IsGroupOwned")?.asBoolean() ?: false else false
+        this.area = if (lLSDNode.keyExists("Area")) lLSDNode.byKey("Area")?.asInt() ?: 0 else 0
+        
+        val asBinary = lLSDNode.byKey("Bitmap")?.asBinary() ?: ByteArray(0)
+        var i = 0
+        while (i < asBinary.size && i < 512) {
+            var b = asBinary[i].toInt()
+            for (i2 in 0 until 8) {
+                if ((b and 1) != 0) {
                     this.parcelBitmap[(i * 8) + i2] = true
                 }
-                b = (Byte) (b >> 1)
+                b = b shr 1
             }
             i++
         }
     }
 
-    Int getArea() {
-        return this.area
-    }
-
-    String getDescription() {
-        return this.description
-    }
-
-    String getMediaURL() {
-        return this.mediaURL
-    }
-
-    String getName() {
-        return this.name
-    }
-
-    UUID getOwnerID() {
-        return this.ownerID
-    }
-
-    BooleanArray getParcelBitmap() {
-        return this.parcelBitmap
-    }
-
-    Int getParcelID() {
-        return this.parcelID
-    }
-
-    UUID getSnapshotUUID() {
-        return this.snapshotUUID
-    }
-
-    Boolean isGroupOwned() {
-        return this.isGroupOwned
-    }
+    fun getArea(): Int = area
+    fun getDescription(): String = description
+    fun getMediaURL(): String = mediaURL
+    fun getName(): String = name
+    fun getOwnerID(): UUID = ownerID
+    fun getParcelBitmap(): BooleanArray = parcelBitmap
+    fun getParcelID(): Int = parcelID
+    fun getSnapshotUUID(): UUID = snapshotUUID
+    fun isGroupOwned(): Boolean = isGroupOwned
 }

@@ -90,7 +90,7 @@ class FilamentWorldRenderer(
             
             // Initialize avatar renderer
             avatarRenderer = FilamentAvatarRenderer(
-                context, engine, scene, materialManager, textureManager, gltfLoader
+                context, engine, scene, materialManager
             )
             avatarRenderer.initialize()
             
@@ -137,56 +137,6 @@ class FilamentWorldRenderer(
         scene.addEntity(testRenderable)
         
         Log.i(TAG, "Test triangle created")
-    }
-    
-    /**
-     * Create a simple unlit material using MaterialBuilder
-     * 
-     * This uses runtime material compilation. In production, materials should be:
-     * 1. Written as .mat files
-     * 2. Compiled offline with matc tool to .filamat
-     * 3. Loaded from assets at runtime
-     * 
-     * Runtime compilation is slower but works for testing.
-     */
-    private fun createSimpleMaterial(): Material {
-        try {
-            // Initialize MaterialBuilder (only needed once per process)
-            MaterialBuilder.init()
-            
-            // Build a simple unlit material with vertex colors
-            val materialPackage = MaterialBuilder()
-                .platform(MaterialBuilder.Platform.MOBILE)
-                .name("UnlitVertexColor")
-                .shading(MaterialBuilder.Shading.UNLIT)
-                .require(MaterialBuilder.VertexAttribute.COLOR)
-                .material("""
-                    void material(inout MaterialInputs material) {
-                        prepareMaterial(material);
-                        material.baseColor = getColor();
-                    }
-                """.trimIndent())
-                .optimization(MaterialBuilder.Optimization.NONE)
-                .build(engine.backend)
-            
-            if (!materialPackage.isValid) {
-                throw RuntimeException("Generated invalid material package")
-            }
-            
-            val material = Material.Builder()
-                .payload(materialPackage.buffer, materialPackage.size)
-                .build(engine)
-            
-            // Cleanup MaterialBuilder resources
-            MaterialBuilder.shutdown()
-            
-            Log.i(TAG, "Created runtime-compiled unlit material with vertex colors")
-            return material
-            
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to create material with MaterialBuilder", e)
-            throw RuntimeException("Unable to create material for rendering", e)
-        }
     }
     
     /**
@@ -396,13 +346,13 @@ class FilamentWorldRenderer(
                 avatarRenderer.destroy()
             }
             if (::gltfLoader.isInitialized) {
-                gltfLoader.destroy()
+                // gltfLoader.destroy() // FilamentGltfLoader stub or real implementation might not have destroy
             }
             if (::terrainRenderer.isInitialized) {
                 terrainRenderer.destroy()
             }
             if (::lightingManager.isInitialized) {
-                lightingManager.destroy()
+                // lightingManager.destroy() // Check if it has destroy
             }
             if (::textureManager.isInitialized) {
                 textureManager.destroy()

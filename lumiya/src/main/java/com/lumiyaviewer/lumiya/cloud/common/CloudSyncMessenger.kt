@@ -35,7 +35,7 @@ object CloudSyncMessenger {
                 }
 
             val message =
-                Message.obtain(null, MessageType.CLOUD_PLUGIN_MESSAGE, bundle).apply {
+                Message.obtain(null, messageType.ordinal, bundle).apply {
                     this.replyTo = replyTo
                 }
 
@@ -43,6 +43,18 @@ object CloudSyncMessenger {
             true
         } catch (e: RemoteException) {
             false
+        }
+    }
+
+    inline fun <reified T : Bundleable> extractMessage(msg: Message): T? {
+        val bundle = msg.obj as? Bundle ?: return null
+        bundle.classLoader = T::class.java.classLoader
+        val messageBundle = bundle.getBundle("message") ?: return null
+        
+        return try {
+            T::class.java.getConstructor(Bundle::class.java).newInstance(messageBundle)
+        } catch (e: Exception) {
+            null
         }
     }
 }

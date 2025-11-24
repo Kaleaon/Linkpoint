@@ -7,83 +7,77 @@ import de.greenrobot.dao.AbstractDao
 import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig
 
-class UserPicDao : AbstractDao<UserPic, Long> {
-    val TABLENAME: String = "USER_PIC"
+class UserPicDao(config: DaoConfig, daoSession: DaoSession?) : AbstractDao<UserPic, Long>(config, daoSession) {
 
-    class Properties {
-        Property Bitmap = Property(2, ByteArray.class, "bitmap", false, "BITMAP")
-        Property Id = Property(0, Long.class, "id", true, "_id")
-        Property Uuid = Property(1, String.class, "uuid", false, "UUID")
+    companion object {
+        const val TABLENAME = "USER_PIC"
+
+        object Properties {
+            @JvmField val Bitmap = Property(2, ByteArray::class.java, "bitmap", false, "BITMAP")
+            @JvmField val Id = Property(0, Long::class.java, "id", true, "_id")
+            @JvmField val Uuid = Property(1, String::class.java, "uuid", false, "UUID")
+        }
+
+        @JvmStatic
+        fun createTable(db: SQLiteDatabase, ifNotExists: Boolean) {
+            val constraint = if (ifNotExists) "IF NOT EXISTS " else ""
+            db.execSQL("CREATE TABLE $constraint'USER_PIC' (" +
+                    "'_id' INTEGER PRIMARY KEY ," +
+                    "'UUID' TEXT," +
+                    "'BITMAP' BLOB);")
+            db.execSQL("CREATE INDEX ${constraint}IDX_USER_PIC_UUID ON USER_PIC (UUID);")
+        }
+
+        @JvmStatic
+        fun dropTable(db: SQLiteDatabase, ifExists: Boolean) {
+            val constraint = if (ifExists) "IF EXISTS " else ""
+            db.execSQL("DROP TABLE $constraint'USER_PIC'")
+        }
     }
 
-    constructor(daoConfig: DaoConfig) {
-        super(daoConfig)
-    }
-
-    constructor(daoConfig: DaoConfig, daoSession: DaoSession) {
-        super(daoConfig, daoSession)
-    }
-
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        String str = z ? "IF NOT EXISTS " : ""
-        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'USER_PIC' (" + "'_id' INTEGER PRIMARY KEY ," + "'UUID' TEXT," + "'BITMAP' BLOB);")
-        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_USER_PIC_UUID ON USER_PIC" + " (UUID);")
-    }
-
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'USER_PIC'")
-    }
-
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, userPic: UserPic): Unit {
-        sQLiteStatement.clearBindings()
-        Long id = userPic.getId()
+    override fun bindValues(stmt: SQLiteStatement, entity: UserPic) {
+        stmt.clearBindings()
+        val id = entity.id
         if (id != null) {
-            sQLiteStatement.bindLong(1, id.longValue())
+            stmt.bindLong(1, id)
         }
-        String uuid = userPic.getUuid()
+        val uuid = entity.uuid
         if (uuid != null) {
-            sQLiteStatement.bindString(2, uuid)
+            stmt.bindString(2, uuid)
         }
-        ByteArray bitmap = userPic.getBitmap()
+        val bitmap = entity.bitmap
         if (bitmap != null) {
-            sQLiteStatement.bindBlob(3, bitmap)
+            stmt.bindBlob(3, bitmap)
         }
     }
 
-    fun getKey(userPic: UserPic): Long {
-        return userPic != null ? userPic.getId() : null
+    override fun getKey(entity: UserPic?): Long? {
+        return entity?.id
     }
 
-    protected fun isEntityUpdateable(): Boolean {
+    override fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    fun readEntity(cursor: Cursor, i: Int): UserPic {
-        ByteArray bArr = null
-        Long valueOf = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
-        String string = cursor.isNull(i + 1) ? null : cursor.getString(i + 1)
-        if (!cursor.isNull(i + 2)) {
-            bArr = cursor.getBlob(i + 2)
-        }
-        return UserPic(valueOf, string, bArr)
+    override fun readEntity(cursor: Cursor, offset: Int): UserPic {
+        val id = if (cursor.isNull(offset + 0)) null else cursor.getLong(offset + 0)
+        val uuid = if (cursor.isNull(offset + 1)) null else cursor.getString(offset + 1)
+        val bitmap = if (cursor.isNull(offset + 2)) null else cursor.getBlob(offset + 2)
+        return UserPic(id, uuid, bitmap)
     }
 
-    fun readEntity(cursor: Cursor, userPic: UserPic, i: Int): Unit {
-        ByteArray bArr = null
-        userPic.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
-        userPic.setUuid(cursor.isNull(i + 1) ? null : cursor.getString(i + 1))
-        if (!cursor.isNull(i + 2)) {
-            bArr = cursor.getBlob(i + 2)
-        }
-        userPic.setBitmap(bArr)
+    override fun readEntity(cursor: Cursor, entity: UserPic, offset: Int) {
+        entity.id = if (cursor.isNull(offset + 0)) null else cursor.getLong(offset + 0)
+        entity.uuid = if (cursor.isNull(offset + 1)) null else cursor.getString(offset + 1)
+        entity.bitmap = if (cursor.isNull(offset + 2)) null else cursor.getBlob(offset + 2)
     }
 
-    fun readKey(cursor: Cursor, i: Int): Long {
-        return cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
+    override fun readKey(cursor: Cursor, offset: Int): Long? {
+        return if (cursor.isNull(offset + 0)) null else cursor.getLong(offset + 0)
     }
 
-    protected fun updateKeyAfterInsert(userPic: UserPic, j: Long): Long {
-        userPic.setId(Long.valueOf(j))
-        return Long.valueOf(j)
+    override fun updateKeyAfterInsert(entity: UserPic, rowId: Long): Long? {
+        entity.id = rowId
+        return rowId
     }
 }

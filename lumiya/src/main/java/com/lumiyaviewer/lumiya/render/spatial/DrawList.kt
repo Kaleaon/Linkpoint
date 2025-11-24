@@ -6,53 +6,44 @@ import com.lumiyaviewer.lumiya.render.avatar.DrawableAvatar
 import com.lumiyaviewer.lumiya.render.avatar.DrawableAvatarStub
 import com.lumiyaviewer.lumiya.render.terrain.DrawableTerrainPatch
 import java.util.ArrayList
-import androidx.annotation.NonNull
-import androidx.annotation.Nullable
 
-object DrawList {
-    int avatarCountLimit
-    @NonNull
-    ArrayList<DrawableAvatarStub> avatarStubs
-    @NonNull
-    ArrayList<DrawableAvatar> avatars
-    @NonNull
-    DrawableStore drawableStore
-    @Nullable
-    DrawableAvatar myAvatar
-    @NonNull
-    ArrayList<DrawableObject> objects
-    int[] renderPasses
-    @NonNull
-    ArrayList<DrawableTerrainPatch> terrain
+class DrawList private constructor(
+    val drawableStore: DrawableStore,
+    objectsCapacity: Int,
+    avatarsCapacity: Int,
+    avatarStubsCapacity: Int,
+    terrainCapacity: Int,
+    val avatarCountLimit: Int
+) {
+    val avatarStubs: ArrayList<DrawableAvatarStub> = ArrayList(avatarStubsCapacity)
+    val avatars: ArrayList<DrawableAvatar> = ArrayList(avatarsCapacity)
+    var myAvatar: DrawableAvatar? = null
+    val objects: ArrayList<DrawableObject> = ArrayList(objectsCapacity)
+    lateinit var renderPasses: IntArray
+    val terrain: ArrayList<DrawableTerrainPatch> = ArrayList(terrainCapacity)
 
-    private DrawList(@NonNull DrawableStore drawableStore, int i) {
-        this.drawableStore = drawableStore
-        this.myAvatar = null
-        this.objects = ArrayList()
-        this.avatars = ArrayList()
-        this.avatarStubs = ArrayList()
-        this.terrain = ArrayList()
-        this.avatarCountLimit = i
-    }
+    private constructor(drawableStore: DrawableStore, limit: Int) : this(
+        drawableStore,
+        10, 10, 10, 10, limit
+    )
 
-    private DrawList(@NonNull DrawableStore drawableStore, int i, int i2, int i3, int i4, int i5) {
-        this.drawableStore = drawableStore
-        this.myAvatar = null
-        this.objects = ArrayList(i)
-        this.avatars = ArrayList(i2)
-        this.avatarStubs = ArrayList(i3)
-        this.terrain = ArrayList(i4)
-        this.avatarCountLimit = i5
-    }
-
-    fun create(drawableStore: DrawableStore, drawList: DrawList, i: Int): DrawList {
-        if (drawList == null) {
-            return DrawList(drawableStore, i)
+    companion object {
+        fun create(drawableStore: DrawableStore, previousDrawList: DrawList?, limit: Int): DrawList {
+            if (previousDrawList == null) {
+                return DrawList(drawableStore, limit)
+            }
+            return DrawList(
+                drawableStore,
+                (previousDrawList.objects.size * 4) / 3,
+                (previousDrawList.avatars.size * 4) / 3,
+                (previousDrawList.avatarStubs.size * 4) / 3,
+                (previousDrawList.terrain.size * 4) / 3,
+                limit
+            )
         }
-        return DrawList(drawableStore, (drawList.objects.size() * 4) / 3, (drawList.avatars.size() * 4) / 3, (drawList.avatarStubs.size() * 4) / 3, (drawList.terrain.size() * 4) / 3, i)
     }
 
-    void initRenderPasses() {
-        this.renderPasses = new int[this.objects.size()]
+    fun initRenderPasses() {
+        this.renderPasses = IntArray(this.objects.size)
     }
 }

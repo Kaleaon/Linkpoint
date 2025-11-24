@@ -63,7 +63,7 @@ class DaoMaster(database: SQLiteDatabase) : AbstractDaoMaster(database, SCHEMA_V
      */
     abstract class OpenHelper(
         context: Context,
-        name: String,
+        name: String?,
         factory: SQLiteDatabase.CursorFactory?
     ) : SQLiteOpenHelper(context, name, factory, SCHEMA_VERSION) {
 
@@ -76,9 +76,9 @@ class DaoMaster(database: SQLiteDatabase) : AbstractDaoMaster(database, SCHEMA_V
     /**
      * Development open helper that drops tables on upgrade
      */
-    class DevOpenHelper(
+    open class DevOpenHelper(
         context: Context,
-        name: String,
+        name: String?,
         factory: SQLiteDatabase.CursorFactory? = null
     ) : OpenHelper(context, name, factory) {
 
@@ -110,14 +110,18 @@ class DaoMaster(database: SQLiteDatabase) : AbstractDaoMaster(database, SCHEMA_V
     /**
      * Create new DAO session
      */
-    fun newSession(): DaoSession {
-        return DaoSession(db, IdentityScopeType.Session, daoConfigMap)
+    override fun newSession(): DaoSession {
+        @Suppress("UNCHECKED_CAST")
+        val configMap = daoConfigMap as java.util.Map<Class<out de.greenrobot.dao.AbstractDao<*, *>>, de.greenrobot.dao.internal.DaoConfig>
+        return DaoSession(db, IdentityScopeType.Session, configMap)
     }
 
     /**
      * Create new DAO session with custom identity scope
      */
-    fun newSession(identityScopeType: IdentityScopeType): DaoSession {
-        return DaoSession(db, identityScopeType, daoConfigMap)
+    override fun newSession(identityScopeType: IdentityScopeType): DaoSession {
+        @Suppress("UNCHECKED_CAST")
+        val configMap = daoConfigMap as java.util.Map<Class<out de.greenrobot.dao.AbstractDao<*, *>>, de.greenrobot.dao.internal.DaoConfig>
+        return DaoSession(db, identityScopeType, configMap)
     }
 }

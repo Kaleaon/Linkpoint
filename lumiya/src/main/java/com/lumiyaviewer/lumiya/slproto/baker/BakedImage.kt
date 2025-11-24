@@ -6,46 +6,36 @@ import java.io.File
 import java.io.IOException
 import java.util.UUID
 
-class BakedImage {
-    private BakeLayerSet layerSet
-    private OpenJPEG resultImage
-    private UUID uploadedID
+class BakedImage(private val layerSet: BakeLayerSet) {
+    private val resultImage: OpenJPEG = OpenJPEG(layerSet.width, layerSet.height, 4, 4, 1, -1)
+    var uploadedID: UUID? = null
 
-    BakedImage(BakeLayerSet bakeLayerSet) {
-        this.layerSet = bakeLayerSet
-        this.resultImage = OpenJPEG(bakeLayerSet.width, bakeLayerSet.height, 4, 4, 1, -1)
-        this.resultImage.setComponent(4, (byte) -1)
+    init {
+        resultImage.setComponent(4, -1)
     }
 
-    Unit Bake(BakeProcess bakeProcess) {
-        for (BakeLayer Bake : this.layerSet.layers) {
-            Bake.Bake(this.resultImage, bakeProcess)
+    fun Bake(bakeProcess: BakeProcess) {
+        for (layer in layerSet.layers) {
+            layer.bake(resultImage, bakeProcess)
         }
-        if (this.layerSet.clear_alpha || this.layerSet.maskLayers.length > 0) {
-            this.resultImage.setComponent(3, (byte) -1)
+        if (layerSet.clear_alpha || layerSet.maskLayers.isNotEmpty()) {
+            resultImage.setComponent(3, -1)
         }
-        for (BakeLayer BakeAlpha : this.layerSet.maskLayers) {
-            BakeAlpha.BakeAlpha(this.resultImage, bakeProcess)
+        for (maskLayer in layerSet.maskLayers) {
+            maskLayer.bakeAlpha(resultImage, bakeProcess)
         }
     }
 
-    Unit SaveToJPEG2K(File file) throws IOException {
-        this.resultImage.SaveJPEG2K(file)
+    @Throws(IOException::class)
+    fun SaveToJPEG2K(file: File) {
+        resultImage.SaveJPEG2K(file)
     }
 
-    Bitmap getAsBitmap() {
-        return this.resultImage.getAsBitmap()
+    fun getAsBitmap(): Bitmap? {
+        return resultImage.getAsBitmap()
     }
 
-    OpenJPEG getBakedImage() {
-        return this.resultImage
-    }
-
-    UUID getUploadedID() {
-        return this.uploadedID
-    }
-
-    Unit setUploadedID(UUID uuid) {
-        this.uploadedID = uuid
+    fun getBakedImage(): OpenJPEG {
+        return resultImage
     }
 }

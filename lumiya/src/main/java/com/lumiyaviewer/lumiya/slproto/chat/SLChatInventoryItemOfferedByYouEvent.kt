@@ -1,50 +1,50 @@
 package com.lumiyaviewer.lumiya.slproto.chat
 
 import android.content.Context
-import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.dao.ChatMessage
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent
-import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUnknown
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import androidx.annotation.NonNull
 
 class SLChatInventoryItemOfferedByYouEvent : SLChatEvent {
-    private String itemName
+    private val itemName: String
 
-    SLChatInventoryItemOfferedByYouEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
-        super(chatMessage, uuid)
-        this.itemName = chatMessage.getItemName()
+    constructor(chatMessage: ChatMessage, uuid: UUID) : super(chatMessage, uuid) {
+        this.itemName = chatMessage.itemName ?: ""
     }
 
-    SLChatInventoryItemOfferedByYouEvent(@NonNull UUID uuid, String str) {
-        super((ChatMessageSource) ChatMessageSourceUnknown.getInstance(), uuid)
-        this.itemName = str
+    constructor(uuid: UUID, itemName: String) : super(ChatMessageSourceUnknown.getInstance(), uuid) {
+        this.itemName = itemName
     }
 
-    /* access modifiers changed from: protected */
-    @NonNull
-    SLChatEvent.ChatMessageType getMessageType() {
-        return SLChatEvent.ChatMessageType.InventoryItemOfferedByYou
+    override fun getMessageType(): ChatMessageType {
+        return ChatMessageType.InventoryItemOfferedByYou
     }
 
-    /* access modifiers changed from: protected */
-    String getText(Context context, @NonNull UserManager userManager) {
-        return context.getString(R.string.chat_inventory_own_offer_format, Object[]{this.itemName})
+    override fun getMessage(): CharSequence {
+        return "You offered inventory item: $itemName"
     }
 
-    SLChatEvent.ChatMessageViewType getViewType() {
-        return SLChatEvent.ChatMessageViewType.VIEW_TYPE_NORMAL
+    override fun getSenderDisplayName(): CharSequence? {
+        return "You"
     }
 
-    /* access modifiers changed from: protected */
-    Boolean isActionMessage(@NonNull UserManager userManager) {
+    override fun getChatterID(): com.lumiyaviewer.lumiya.slproto.users.ChatterID {
+        return com.lumiyaviewer.lumiya.slproto.users.ChatterID(agentUUID, "")
+    }
+
+    override fun getViewType(): ChatMessageViewType {
+        return ChatMessageViewType.VIEW_TYPE_NORMAL
+    }
+    
+    // Stub implementation as SLChatEvent might require it
+    fun isActionMessage(userManager: UserManager): Boolean {
         return false
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    override fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
-        chatMessage.setItemName(this.itemName)
+        chatMessage.itemName = itemName
     }
 }

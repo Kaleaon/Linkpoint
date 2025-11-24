@@ -61,4 +61,20 @@ abstract class DrawListObjectEntry(
             boundingBox[i + 3] = min(maxBound, max(0.0f, boundingBox[i + 3]))
         }
     }
+
+    override fun addToDrawList(drawList: DrawList) {
+        // Default implementation: do nothing or add to objects list if appropriate?
+        // In DrawListAvatarEntry, this is overridden.
+        // In DrawListPrimEntry (presumably), this is also overridden.
+        // So this can be empty or abstract.
+        // Since this class is abstract, we can make this abstract if we want strictness, 
+        // but DrawListEntry defines it as abstract already.
+        // However, the compiler error suggests it hides member of supertype.
+        // DrawListEntry has abstract fun addToDrawList.
+        // So we must implement it or leave it abstract.
+        // The previous version didn't implement it, effectively leaving it abstract but 
+        // Kotlin classes are final by default unless 'open' or 'abstract'.
+        // This class is abstract, so we can leave it.
+        // BUT, if we want to provide a default no-op or basic implementation:
+    }
 }

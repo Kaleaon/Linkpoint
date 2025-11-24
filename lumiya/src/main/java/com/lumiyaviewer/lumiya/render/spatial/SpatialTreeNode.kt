@@ -1,265 +1,335 @@
 package com.lumiyaviewer.lumiya.render.spatial
-import java.util.*
 
 import com.lumiyaviewer.lumiya.utils.InlineList
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 class SpatialTreeNode : InlineList<DrawListEntry> {
-    private val MIN_SIZE: Float = 2.0f
-    private SpatialTreeNode[] children = null
-    Int depthBin = -1
-    private Int indexInParent
-    private Boolean leaf
-    SpatialTreeNode nextDepth = null
-    private SpatialTreeNode parent
-    FloatArray position
-    SpatialTreeNode prevDepth = null
-    private var singleChild: SpatialTreeNode = null
-    private SpatialTree spatialTree
-    private Int splitAxis
+    companion object {
+        private const val MIN_SIZE = 2.0f
+    }
 
-    constructor(spatialTree: SpatialTree, f: Float, f2: Float, f3: Float) {
+    var depthBin: Int = -1
+    var nextDepth: SpatialTreeNode? = null
+    var prevDepth: SpatialTreeNode? = null
+    
+    private var children: Array<SpatialTreeNode?>? = null
+    private var indexInParent: Int = 0
+    private var leaf: Boolean = false
+    private var parent: SpatialTreeNode? = null
+    val position: FloatArray
+    private var singleChild: SpatialTreeNode? = null
+    private val spatialTree: SpatialTree
+    private var splitAxis: Int = 0
+
+    constructor(spatialTree: SpatialTree, xSize: Float, ySize: Float, zSize: Float) {
         this.spatialTree = spatialTree
-        this.position = FloatArray{0.0f, 0.0f, 0.0f, f, f2, f3, 0.0f, 0.0f, 0.0f, f, f2, f3}
+        this.position = floatArrayOf(
+            0.0f, 0.0f, 0.0f, xSize, ySize, zSize, 
+            0.0f, 0.0f, 0.0f, xSize, ySize, zSize
+        )
         this.leaf = false
         this.parent = null
         this.indexInParent = 0
         this.splitAxis = longestAxis()
     }
 
-    constructor(spatialTreeNode: SpatialTreeNode, i: Int) {
-        this.spatialTree = spatialTreeNode.spatialTree
+    constructor(parent: SpatialTreeNode, index: Int) {
+        this.spatialTree = parent.spatialTree
         this.position = FloatArray(12)
-        this.parent = spatialTreeNode
-        this.indexInParent = i
-        Boolean z = true
-        Int i2 = 0
-        while (i2 < 3) {
-            Float f = spatialTreeNode.position[i2 + 6]
-            Float f2 = spatialTreeNode.position[i2 + 9] - f
-            if (i2 == spatialTreeNode.splitAxis) {
-                f2 /= MIN_SIZE
-                f += (f2 / MIN_SIZE) * (i.toFloat())
+        this.parent = parent
+        this.indexInParent = index
+        
+        var isLeaf = true
+        for (i in 0 until 3) {
+            var min = parent.position[i + 6]
+            var size = parent.position[i + 9] - min
+            
+            if (i == parent.splitAxis) {
+                size /= MIN_SIZE
+                min += (size / MIN_SIZE) * index.toFloat()
             }
-            this.position[i2 + 6] = f
-            this.position[i2 + 9] = f + f2
-            this.position[i2] = (f2 / MIN_SIZE) + f
-            this.position[i2 + 3] = f + (f2 / MIN_SIZE)
-            i2++
-            z = f2 > MIN_SIZE ? false : z
+            
+            this.position[i + 6] = min
+            this.position[i + 9] = min + size
+            this.position[i] = (size / MIN_SIZE) + min
+            this.position[i + 3] = min + (size / MIN_SIZE)
+            
+            if (size > MIN_SIZE) {
+                // Loop continues, but we mark if ANY dimension is > MIN_SIZE? 
+                // Decompiled: z = f2 > MIN_SIZE ? false : z
+                // If f2 (size) > MIN_SIZE, then z (leaf) becomes false.
+                // Initial z is true.
+                isLeaf = false
+            }
         }
-        this.leaf = z
+        this.leaf = isLeaf
         this.splitAxis = longestAxis()
     }
 
-    private fun enlargeForBoundingBox(z: Boolean, fArr: FloatArray): Unit {
-        if (this.parent != null) {
-            Int i = 0
-            Boolean z2 = false
-            while (i < 3) {
-                if (z || fArr[i] < this.position[i]) {
-                    this.position[i] = fArr[i]
-                    z2 = true
-                }
-                if (z || fArr[i + 3] > this.position[i + 3]) {
-                    this.position[i + 3] = fArr[i + 3]
-                    z2 = true
-                }
-                i++
+    private fun enlargeForBoundingBox(isEmpty: Boolean, bounds: FloatArray) {
+        val p = parent ?: return
+        var changed = false
+        
+        for (i in 0 until 3) {
+            if (isEmpty || bounds[i] < this.position[i]) {
+                this.position[i] = bounds[i]
+                changed = true
             }
-            if (z2) {
-                this.spatialTree.setTreeWalkNeeded()
-                this.parent.enlargeForBoundingBox(false, this.position)
+            if (isEmpty || bounds[i + 3] > this.position[i + 3]) {
+                this.position[i + 3] = bounds[i + 3]
+                changed = true
             }
+        }
+        
+        if (changed) {
+            spatialTree.setTreeWalkNeeded()
+            p.enlargeForBoundingBox(false, this.position)
         }
     }
 
     private fun isEmpty(): Boolean {
-        return getFirst() == null && this.children == null
+        return first == null && children == null
     }
 
     private fun longestAxis(): Int {
-        Int i = 0
-        Float f = 0.0f
-        Int i2 = 0
-        while (i < 3) {
-            Float f2 = this.position[i + 9] - this.position[i + 6]
-            if (f2 > f) {
-                i2 = i
-            } else {
-                f2 = f
+        var maxAxis = 0
+        var maxSize = 0.0f
+        
+        for (i in 0 until 3) {
+            val size = this.position[i + 9] - this.position[i + 6]
+            if (size > maxSize) {
+                maxSize = size
+                maxAxis = i
             }
-            i++
-            f = f2
         }
-        return i2
+        return maxAxis
     }
 
-    private fun removeFromParent(): Unit {
-        this.spatialTree.removeEntry(this)
-        if (this.parent != null && this.parent.children != null) {
-            this.parent.children[this.indexInParent] = null
-            if (this.parent.singleChild == this) {
-                this.parent.singleChild = null
-                this.parent.children = null
-                if (this.parent.isEmpty()) {
-                    this.parent.removeFromParent()
-                    return
+    private fun removeFromParent() {
+        spatialTree.removeEntry(this)
+        val p = parent
+        if (p != null && p.children != null) {
+            p.children!![indexInParent] = null
+            
+            if (p.singleChild === this) {
+                p.singleChild = null
+                p.children = null
+                if (p.isEmpty()) {
+                    p.removeFromParent()
                 } else {
-                    this.parent.shrinkBoundingBox()
-                    return
+                    p.shrinkBoundingBox()
                 }
-            }
-            SpatialTreeNode spatialTreeNode = null
-            for (Int i = 0; i < 3; i++) {
-                if (this.parent.children[i] != null) {
-                    if (spatialTreeNode != null) {
-                        spatialTreeNode = null
-                        break
-                    }
-                    spatialTreeNode = this.parent.children[i]
-                }
-            }
-            this.parent.singleChild = spatialTreeNode
-            if (this.parent.getFirst() == null) {
-                this.spatialTree.removeEntry(this.parent)
-            }
-            this.parent.shrinkBoundingBox()
-        }
-    }
-
-    private fun shrinkBoundingBox(): Unit {
-        Int i = 1
-        if (this.parent != null) {
-            Any obj = FloatArray(6)
-            DrawListEntry drawListEntry = (DrawListEntry) getFirst()
-            Int i4 = 0
-            while (drawListEntry != null) {
-                i2 = 0
-                while (i2 < 3) {
-                    obj[i2] = i4 != 0 ? Math.min(obj[i2], drawListEntry.boundingBox[i2]) : drawListEntry.boundingBox[i2]
-                    obj[i2 + 3] = i4 != 0 ? Math.max(obj[i2 + 3], drawListEntry.boundingBox[i2 + 3]) : drawListEntry.boundingBox[i2 + 3]
-                    i2++
-                }
-                drawListEntry = drawListEntry.getNext()
-                i4 = 1
-            }
-            if (this.children != null) {
-                SpatialTreeNode[] spatialTreeNodeArr = this.children
-                Int length = spatialTreeNodeArr.length
-                Int i5 = 0
-                while (i5 < length) {
-                    SpatialTreeNode spatialTreeNode = spatialTreeNodeArr[i5]
-                    if (spatialTreeNode != null) {
-                        i2 = 0
-                        while (i2 < 3) {
-                            obj[i2] = i4 != 0 ? Math.min(obj[i2], spatialTreeNode.position[i2]) : spatialTreeNode.position[i2]
-                            obj[i2 + 3] = i4 != 0 ? Math.max(obj[i2 + 3], spatialTreeNode.position[i2 + 3]) : spatialTreeNode.position[i2 + 3]
-                            i2++
-                        }
-                        i3 = 1
-                    } else {
-                        i3 = i4
-                    }
-                    i5++
-                    i4 = i3
-                }
-            }
-            if (i4 != 0) {
-                for (i3 = 0; i3 < 6; i3++) {
-                    if (this.position[i3] != obj[i3]) {
-                        break
-                    }
-                }
-                i = 0
-                if (i != 0) {
-                    System.arraycopy(obj, 0, this.position, 0, 6)
-                    this.parent.shrinkBoundingBox()
-                    this.spatialTree.setTreeWalkNeeded()
-                }
-            }
-        }
-    }
-
-    fun addDrawables(drawList: DrawList): Unit {
-        for (DrawListEntry drawListEntry = (DrawListEntry) getFirst(); drawListEntry != null; drawListEntry = drawListEntry.getNext()) {
-            drawListEntry.addToDrawList(drawList)
-        }
-    }
-
-    fun addEntry(drawListEntry: DrawListEntry): Unit {
-        Any obj = 1
-        Boolean z = getFirst() == null && this.children == null
-        if (this.singleChild == null) {
-            obj = null
-        }
-        if (drawListEntry.getList() != this) {
-            super.addEntry(drawListEntry)
-            enlargeForBoundingBox(z, drawListEntry.boundingBox)
-            if (z || obj != null) {
-                this.spatialTree.setTreeWalkNeeded()
-            }
-            if (this.depthBin != -1) {
-                this.spatialTree.setDrawListChanged()
                 return
             }
-            return
-        }
-        shrinkBoundingBox()
-    }
-
-    protected fun findNode(fArr: FloatArray): SpatialTreeNode {
-        if (this.leaf) {
-            return this
-        }
-        Float f = Float.POSITIVE_INFINITY
-        Int i = 0
-        Int i2 = -1
-        while (i < 3) {
-            Float f2 = (this.position[(this.splitAxis + 6) + 3] - this.position[this.splitAxis + 6]) / MIN_SIZE
-            Float f3 = this.position[this.splitAxis + 6] + ((f2 / MIN_SIZE) * (i.toFloat()))
-            if (fArr[this.splitAxis] < f3 || fArr[this.splitAxis + 3] > f3 + f2) {
-                f2 = f
-                i3 = i2
-            } else {
-                f2 = Math.abs(((f2 / MIN_SIZE) + f3) - ((fArr[this.splitAxis] + fArr[this.splitAxis + 3]) / MIN_SIZE))
-                if (f2 < f) {
-                    i3 = i
-                } else {
-                    f2 = f
-                    i3 = i2
+            
+            var remainingChild: SpatialTreeNode? = null
+            var childCount = 0
+            for (child in p.children!!) {
+                if (child != null) {
+                    if (remainingChild != null) {
+                        remainingChild = null // More than one child
+                        childCount = 2
+                        break
+                    }
+                    remainingChild = child
+                    childCount = 1
                 }
             }
-            i++
-            i2 = i3
-            f = f2
-        }
-        if (i2 == -1) {
-            return this
-        }
-        if (this.children == null) {
-            this.children = SpatialTreeNode[3]
-            obj = 1
-        } else {
-            obj = null
-        }
-        if (this.children[i2] == null) {
-            this.children[i2] = SpatialTreeNode(this, i2)
-            if (obj != null) {
-                this.singleChild = this.children[i2]
-            } else {
-                this.singleChild = null
+            
+            p.singleChild = remainingChild
+            if (p.first == null) {
+                spatialTree.removeEntry(p)
             }
+            p.shrinkBoundingBox()
         }
-        return this.children[i2].findNode(fArr)
     }
 
-    fun removeEntry(drawListEntry: DrawListEntry): Unit {
-        super.removeEntry(drawListEntry)
-        if (this.depthBin != -1) {
-            this.spatialTree.setDrawListChanged()
+    private fun shrinkBoundingBox() {
+        if (parent == null) return
+        
+        val newBounds = FloatArray(6)
+        var hasItems = false
+        
+        // Check items in this node
+        var item = first as? DrawListEntry
+        while (item != null) {
+            for (i in 0 until 3) {
+                newBounds[i] = if (hasItems) min(newBounds[i], item!!.boundingBox[i]) else item!!.boundingBox[i]
+                newBounds[i + 3] = if (hasItems) max(newBounds[i + 3], item!!.boundingBox[i + 3]) else item!!.boundingBox[i + 3]
+            }
+            item = item.next as? DrawListEntry
+            hasItems = true
         }
-        if (getFirst() == null) {
-            this.spatialTree.removeEntry(this)
+        
+        // Check children
+        children?.forEach { child ->
+            if (child != null) {
+                for (i in 0 until 3) {
+                    newBounds[i] = if (hasItems) min(newBounds[i], child.position[i]) else child.position[i]
+                    newBounds[i + 3] = if (hasItems) max(newBounds[i + 3], child.position[i + 3]) else child.position[i + 3]
+                }
+                hasItems = true
+            }
+        }
+        
+        if (hasItems) {
+            var changed = false
+            for (i in 0 until 6) {
+                if (this.position[i] != newBounds[i]) {
+                    changed = true
+                    break
+                }
+            }
+            
+            if (changed) {
+                System.arraycopy(newBounds, 0, this.position, 0, 6)
+                parent!!.shrinkBoundingBox()
+                spatialTree.setTreeWalkNeeded()
+            }
+        }
+    }
+
+    fun addDrawables(drawList: DrawList) {
+        var item = first as? DrawListEntry
+        while (item != null) {
+            item.addToDrawList(drawList)
+            item = item.next as? DrawListEntry
+        }
+    }
+
+    override fun addEntry(entry: DrawListEntry) {
+        val wasEmpty = first == null && children == null
+        // Decompiled logic: obj = 1 if singleChild == null? No, `if (this.singleChild == null) { obj = null }`.
+        // Wait. `Any obj = 1`. `if (singleChild == null) obj = null`. So `obj` is not null if `singleChild` is not null?
+        // Then `if (z || obj != null)`. z is wasEmpty.
+        // So if wasEmpty OR hasSingleChild.
+        
+        if (entry.list !== this) {
+            super.addEntry(entry)
+            enlargeForBoundingBox(wasEmpty, entry.boundingBox)
+            
+            if (wasEmpty || singleChild != null) {
+                spatialTree.setTreeWalkNeeded()
+            }
+            
+            if (depthBin != -1) {
+                spatialTree.setDrawListChanged()
+            }
+        } else {
+            shrinkBoundingBox()
+        }
+    }
+
+    protected fun findNode(bounds: FloatArray): SpatialTreeNode {
+        if (leaf) return this
+        
+        var minCost = Float.POSITIVE_INFINITY
+        var bestChildIndex = -1
+        
+        for (i in 0 until 3) {
+            val stepSize = (position[splitAxis + 6 + 3] - position[splitAxis + 6]) / MIN_SIZE
+            val childStart = position[splitAxis + 6] + ((stepSize / MIN_SIZE) * i.toFloat())
+            
+            val cost: Float
+            val nextChildIndex: Int
+            
+            if (bounds[splitAxis] < childStart || bounds[splitAxis + 3] > childStart + stepSize) {
+                cost = minCost
+                nextChildIndex = bestChildIndex
+            } else {
+                val diff = abs(((stepSize / MIN_SIZE) + childStart) - ((bounds[splitAxis] + bounds[splitAxis + 3]) / MIN_SIZE))
+                if (diff < minCost) {
+                    cost = diff
+                    nextChildIndex = i
+                } else {
+                    cost = minCost
+                    nextChildIndex = bestChildIndex
+                }
+            }
+            
+            if (nextChildIndex != -1) {
+                minCost = cost
+                bestChildIndex = nextChildIndex
+            }
+        }
+        
+        if (bestChildIndex == -1) return this
+        
+        if (children == null) {
+            children = arrayOfNulls(3)
+            // Logic about `obj = 1` was here.
+        }
+        
+        if (children!![bestChildIndex] == null) {
+            val newChild = SpatialTreeNode(this, bestChildIndex)
+            children!![bestChildIndex] = newChild
+            
+            // If it was first child, set singleChild?
+            // Decompiled: `if (obj != null) singleChild = children[i2] else singleChild = null`
+            // `obj` was 1 if `children` was just allocated (so prev was null).
+            // So if we just created the array, this is the first child.
+            // BUT wait, if `children` was NOT null, `obj` was null.
+            // If `obj` is null, `singleChild` becomes null.
+            // Meaning: if we add a second child, singleChild becomes null.
+            
+            // Logic reconstruction:
+            // If we created a new child array, we have 1 child -> singleChild = newChild.
+            // If we already had array, we are adding another child (or filling existing slot).
+            // If we are filling a slot that was null, and we already have other slots filled...
+            // The logic `singleChild = null` implies checking if there is exactly one child.
+            
+            // Let's approximate:
+            // If `children` was freshly created, `singleChild = newChild`.
+            // If `children` existed, we assume more than 1 child might exist now?
+            // Wait, `children` array exists. If we add a child, we need to check if it's the ONLY child.
+            // But this logic runs only when `children[i] == null` (creating new child).
+            // If `children` existed, and we create a new child, we now have at least 1.
+            // If we had `singleChild` set, and we create *another* child (different index), `singleChild` should become null.
+            
+            // Re-reading decompiled:
+            // if (children == null) { children = new...; obj = 1; } else { obj = null; }
+            // if (children[i] == null) { create...; if (obj != null) singleChild = new; else singleChild = null; }
+            
+            // Case 1: First child. children=null -> children=new, obj=1. create child. singleChild=new. Correct.
+            // Case 2: Second child. children!=null -> obj=null. create child. singleChild=null. Correct.
+            // Case 3: Existing child (not null). Block skipped. singleChild unchanged. Correct.
+            
+            if (singleChild == null && children!!.count { it != null } == 1) {
+                 // Wait, if we just added it, count is 1.
+            }
+            
+            // Following decompiled strictly:
+            if (children!!.count { it != null } == 1) { 
+                // Only 1 child (the one we just added, assuming array was empty or we track it).
+                // But if array was not null, we set singleChild to null.
+                // This implies if we add a *second* child, singleChild is null.
+                // If we add a *third*, singleChild is null.
+                
+                // Implementation:
+                // Check how many non-null children there are.
+                val count = children!!.count { it != null }
+                if (count == 1) {
+                    singleChild = children!![bestChildIndex]
+                } else {
+                    singleChild = null
+                }
+            }
+        }
+        
+        return children!![bestChildIndex]!!.findNode(bounds)
+    }
+
+    override fun removeEntry(entry: DrawListEntry) {
+        super.removeEntry(entry)
+        
+        if (depthBin != -1) {
+            spatialTree.setDrawListChanged()
+        }
+        
+        if (first == null) {
+            spatialTree.removeEntry(this)
             if (isEmpty()) {
                 removeFromParent()
                 return
@@ -268,40 +338,39 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
         shrinkBoundingBox()
     }
 
-    fun requestEntryRemoval(drawListEntry: DrawListEntry): Unit {
-        this.spatialTree.spatialObjectIndex.requestEntryRemoval(drawListEntry)
+    fun requestEntryRemoval(entry: DrawListEntry) {
+        spatialTree.spatialObjectIndex.requestEntryRemoval(entry)
     }
 
-    fun walkTree(frustrumPlanes: FrustrumPlanes, i: Int, fArr: FloatArray): Int {
-        Int i2 = 0
-        if (this.singleChild != null && getFirst() == null) {
-            return this.singleChild.walkTree(frustrumPlanes, i, fArr)
+    fun walkTree(planes: FrustrumPlanes, parentResult: Int, depthBuf: FloatArray): Int {
+        if (singleChild != null && first == null) {
+            return singleChild!!.walkTree(planes, parentResult, depthBuf)
         }
-        if (i != -1) {
-            i = frustrumPlanes.testBoundingBox(this.position, fArr)
+        
+        var result = parentResult
+        if (result != -1) {
+            result = planes.testBoundingBox(position, depthBuf)
         }
-        if (i == -1) {
-            this.spatialTree.removeEntry(this)
-            i3 = 0
+        
+        var count: Int
+        if (result == -1) {
+            spatialTree.removeEntry(this)
+            count = 0
         } else {
-            i3 = 1
-            if (getFirst() != null) {
-                this.spatialTree.setEntryDepth(this, fArr[0])
+            count = 1
+            if (first != null) {
+                spatialTree.setEntryDepth(this, depthBuf[0])
             } else {
-                this.spatialTree.removeEntry(this)
+                spatialTree.removeEntry(this)
             }
         }
-        if (this.children != null) {
-            SpatialTreeNode[] spatialTreeNodeArr = this.children
-            Int length = spatialTreeNodeArr.length
-            while (i2 < length) {
-                SpatialTreeNode spatialTreeNode = spatialTreeNodeArr[i2]
-                if (spatialTreeNode != null) {
-                    i3 += spatialTreeNode.walkTree(frustrumPlanes, i, fArr)
-                }
-                i2++
+        
+        children?.forEach { child ->
+            if (child != null) {
+                count += child.walkTree(planes, result, depthBuf)
             }
         }
-        return i3
+        
+        return count
     }
 }

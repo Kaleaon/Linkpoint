@@ -1,127 +1,88 @@
 package com.lumiyaviewer.lumiya.slproto.avatar
 
 import java.util.Arrays
-import androidx.annotation.NonNull
+import kotlin.math.roundToInt
 
-class SLAvatarParamColor {
-    @NonNull
-    ColorOperation colorOperation
-    @NonNull
-    private Int[] colorValues
-
-    enum ColorOperation {
+class SLAvatarParamColor(
+    val colorOperation: ColorOperation,
+    private val colorValues: IntArray
+) {
+    enum class ColorOperation {
         Default,
         Blend,
         Multiply
     }
 
-    SLAvatarParamColor(@NonNull ColorOperation colorOperation2, @NonNull Int[] iArr) {
-        this.colorOperation = colorOperation2
-        this.colorValues = iArr
+    fun colorAdd(i: Int, i2: Int): Int {
+        var i3 = 255
+        var i4 = (i and 255) + (i2 and 255)
+        var i5 = ((i shr 8) and 255) + ((i2 shr 8) and 255)
+        var i6 = ((i2 shr 16) and 255) + ((i shr 16) and 255)
+        val i7 = ((i shr 24) and 255) + ((i2 shr 24) and 255)
+        
+        if (i4 > 255) i4 = 255
+        if (i5 > 255) i5 = 255
+        if (i6 > 255) i6 = 255
+        if (i7 <= 255) i3 = i7
+        
+        return (i3 shl 24) or (i6 shl 16) or (i5 shl 8) or i4
     }
 
-    Int colorAdd(Int i, Int i2) {
-        Int i3 = 255
-        Int i4 = (i & 255) + (i2 & 255)
-        Int i5 = ((i >> 8) & 255) + ((i2 >> 8) & 255)
-        Int i6 = ((i2 >> 16) & 255) + ((i >> 16) & 255)
-        Int i7 = ((i >> 24) & 255) + ((i2 >> 24) & 255)
-        if (i4 > 255) {
-            i4 = 255
-        }
-        if (i5 > 255) {
-            i5 = 255
-        }
-        if (i6 > 255) {
-            i6 = 255
-        }
-        if (i7 <= 255) {
-            i3 = i7
-        }
-        return (i3 << 24) | (i6 << 16) | (i5 << 8) | i4
+    fun colorLerp(i: Int, i2: Int, f: Float): Int {
+        var i3 = 0
+        val f2 = 1.0f - f
+        var round = (((i and 255).toFloat() * f2) + ((i2 and 255).toFloat() * f)).roundToInt()
+        var round2 = (f2 * ((i shr 8) and 255).toFloat() + f * ((i2 shr 8) and 255).toFloat()).roundToInt()
+        var round3 = (f2 * ((i shr 16) and 255).toFloat() + f * ((i2 shr 16) and 255).toFloat()).roundToInt()
+        val round4 = (f2 * ((i shr 24) and 255).toFloat() + f * ((i2 shr 24) and 255).toFloat()).roundToInt()
+        
+        if (round < 0) round = 0 else if (round > 255) round = 255
+        if (round2 < 0) round2 = 0 else if (round2 > 255) round2 = 255
+        if (round3 < 0) round3 = 0 else if (round3 > 255) round3 = 255
+        if (round4 >= 0) i3 = if (round4 > 255) 255 else round4
+        
+        return (i3 shl 24) or (round3 shl 16) or (round2 shl 8) or round
     }
 
-    Int colorLerp(Int i, Int i2, float f) {
-        Int i3 = 0
-        float f2 = 1.0f - f
-        Int round = Math.round((((float) (i & 255)) * f2) + (((float) (i2 & 255)) * f))
-        Int round2 = Math.round((f2 * ((float) ((i >> 8) & 255))) + (f * ((float) ((i2 >> 8) & 255))))
-        Int round3 = Math.round((f2 * ((float) ((i >> 16) & 255))) + (f * ((float) ((i2 >> 16) & 255))))
-        Int round4 = Math.round((f2 * ((float) ((i >> 24) & 255))) + (f * ((float) ((i2 >> 24) & 255))))
-        if (round < 0) {
-            round = 0
-        } else if (round > 255) {
-            round = 255
-        }
-        if (round2 < 0) {
-            round2 = 0
-        } else if (round2 > 255) {
-            round2 = 255
-        }
-        if (round3 < 0) {
-            round3 = 0
-        } else if (round3 > 255) {
-            round3 = 255
-        }
-        if (round4 >= 0) {
-            i3 = round4 > 255 ? 255 : round4
-        }
-        return (i3 << 24) | (round3 << 16) | (round2 << 8) | round
+    fun colorMult(i: Int, i2: Int): Int {
+        var i3 = 255
+        var i4 = ((i and 255) * (i2 and 255)) / 255
+        var i5 = (((i shr 8) and 255) * ((i2 shr 8) and 255)) / 255
+        var i6 = (((i shr 16) and 255) * ((i2 shr 16) and 255)) / 255
+        val i7 = (((i shr 24) and 255) * ((i2 shr 24) and 255)) / 255
+        
+        if (i4 > 255) i4 = 255
+        if (i5 > 255) i5 = 255
+        if (i6 > 255) i6 = 255
+        if (i7 <= 255) i3 = i7
+        
+        return (i3 shl 24) or (i6 shl 16) or (i5 shl 8) or i4
     }
 
-    Int colorMult(Int i, Int i2) {
-        Int i3 = 255
-        Int i4 = ((i & 255) * (i2 & 255)) / 255
-        Int i5 = (((i >> 8) & 255) * ((i2 >> 8) & 255)) / 255
-        Int i6 = (((i >> 16) & 255) * ((i2 >> 16) & 255)) / 255
-        Int i7 = (((i >> 24) & 255) * ((i2 >> 24) & 255)) / 255
-        if (i4 > 255) {
-            i4 = 255
-        }
-        if (i5 > 255) {
-            i5 = 255
-        }
-        if (i6 > 255) {
-            i6 = 255
-        }
-        if (i7 <= 255) {
-            i3 = i7
-        }
-        return (i3 << 24) | (i6 << 16) | (i5 << 8) | i4
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+        val that = other as SLAvatarParamColor
+        return if (colorOperation == that.colorOperation) {
+            Arrays.equals(colorValues, that.colorValues)
+        } else false
     }
 
-    Boolean equals(Object obj) {
-        if (this == obj) {
-            return true
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false
-        }
-        SLAvatarParamColor sLAvatarParamColor = (SLAvatarParamColor) obj
-        if (this.colorOperation == sLAvatarParamColor.colorOperation) {
-            return Arrays.equals(this.colorValues, sLAvatarParamColor.colorValues)
-        }
-        return false
+    fun getColor(f: Float): Int {
+        if (colorValues.isEmpty()) return 0
+        if (colorValues.size == 1) return colorValues[0]
+        
+        val length = colorValues.size - 1
+        val f2 = length.toFloat() * f
+        val i = f2.toInt()
+        val i2 = i + 1
+        
+        if (i >= length) return colorValues[length]
+        
+        return colorLerp(colorValues[i], colorValues[i2], f2 - i.toFloat())
     }
 
-    Int getColor(float f) {
-        if (this.colorValues.length == 0) {
-            return 0
-        }
-        if (this.colorValues.length == 1) {
-            return this.colorValues[0]
-        }
-        Int length = this.colorValues.length - 1
-        float f2 = ((float) length) * f
-        Int i = (Int) f2
-        Int i2 = i + 1
-        if (i >= length) {
-            return this.colorValues[length]
-        }
-        return colorLerp(this.colorValues[i], this.colorValues[i2], f2 - ((float) i))
-    }
-
-    Int hashCode() {
-        return (this.colorOperation.hashCode() * 31) + Arrays.hashCode(this.colorValues)
+    override fun hashCode(): Int {
+        return (colorOperation.hashCode() * 31) + Arrays.hashCode(colorValues)
     }
 }

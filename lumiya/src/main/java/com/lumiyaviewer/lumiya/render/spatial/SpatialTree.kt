@@ -1,122 +1,121 @@
 package com.lumiyaviewer.lumiya.render.spatial
-import java.util.*
 
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.utils.InlineList
 
-class SpatialTree {
+class SpatialTree(
+    val numBins: Int,
+    xSize: Float,
+    ySize: Float,
+    zSize: Float,
+    val spatialObjectIndex: SpatialObjectIndex
+) {
     val INVALID_BIN: Int = -1
-    private SpatialTreeNode[] bins
-    private val depthBuf: FloatArray = FloatArray(1)
+    private val bins: Array<SpatialTreeNode?> = arrayOfNulls(numBins)
+    private val depthBuf = FloatArray(1)
     private var drawDistance: Float = 1.0f
     private var drawListChanged: Boolean = false
-    private MyAvatarTreeNode myAvatarTreeNode
-    private Int numBins
-    private SpatialTreeNode rootNode
-    SpatialObjectIndex spatialObjectIndex
+    private val myAvatarTreeNode: MyAvatarTreeNode = MyAvatarTreeNode(this)
+    private val rootNode: SpatialTreeNode = SpatialTreeNode(this, xSize, ySize, zSize)
     private var treeWalkNeeded: Boolean = false
 
-    SpatialTree(Int i, Float f, Float f2, Float f3, SpatialObjectIndex spatialObjectIndex) {
-        this.numBins = i
-        this.bins = SpatialTreeNode[i]
-        this.spatialObjectIndex = spatialObjectIndex
-        this.rootNode = SpatialTreeNode(this, f, f2, f3)
-        this.myAvatarTreeNode = MyAvatarTreeNode(this)
+    private fun getNodeForObject(entry: DrawListEntry): InlineList<DrawListEntry> {
+        return if (entry is DrawListAvatarEntry && entry.getObjectAvatarInfo().isMyAvatar()) {
+            myAvatarTreeNode
+        } else {
+            rootNode.findNode(entry.boundingBox)
+        }
     }
 
-    private fun getNodeForObject(drawListEntry: DrawListEntry): InlineList<DrawListEntry> {
-        return ((drawListEntry instanceof DrawListAvatarEntry) && ((DrawListAvatarEntry) drawListEntry).getObjectAvatarInfo().isMyAvatar()) ? this.myAvatarTreeNode : this.rootNode.findNode(drawListEntry.boundingBox)
-    }
-
-    private fun setEntryBin(spatialTreeNode: SpatialTreeNode, i: Int): Unit {
-        if (i != spatialTreeNode.depthBin) {
-            if (spatialTreeNode.depthBin != -1) {
-                if (spatialTreeNode.prevDepth != null) {
-                    spatialTreeNode.prevDepth.nextDepth = spatialTreeNode.nextDepth
+    private fun setEntryBin(node: SpatialTreeNode, binIndex: Int) {
+        if (binIndex != node.depthBin) {
+            if (node.depthBin != -1) {
+                if (node.prevDepth != null) {
+                    node.prevDepth?.nextDepth = node.nextDepth
                 } else {
-                    this.bins[spatialTreeNode.depthBin] = spatialTreeNode.nextDepth
+                    bins[node.depthBin] = node.nextDepth
                 }
-                if (spatialTreeNode.nextDepth != null) {
-                    spatialTreeNode.nextDepth.prevDepth = spatialTreeNode.prevDepth
+                if (node.nextDepth != null) {
+                    node.nextDepth?.prevDepth = node.prevDepth
                 }
-                spatialTreeNode.prevDepth = null
-                spatialTreeNode.nextDepth = null
+                node.prevDepth = null
+                node.nextDepth = null
             }
-            if (i != -1) {
-                spatialTreeNode.nextDepth = this.bins[i]
-                spatialTreeNode.prevDepth = null
-                if (spatialTreeNode.nextDepth != null) {
-                    spatialTreeNode.nextDepth.prevDepth = spatialTreeNode
+            if (binIndex != -1) {
+                node.nextDepth = bins[binIndex]
+                node.prevDepth = null
+                if (node.nextDepth != null) {
+                    node.nextDepth?.prevDepth = node
                 }
-                this.bins[i] = spatialTreeNode
+                bins[binIndex] = node
             }
-            spatialTreeNode.depthBin = i
-            if (spatialTreeNode.getFirst() != null) {
+            node.depthBin = binIndex
+            if (node.first != null) {
                 setDrawListChanged()
             }
         }
     }
 
-    Unit addDrawables(DrawList drawList) {
-        Debug.Printf("SpatialTree: adding drawables.", Any[0])
-        this.myAvatarTreeNode.addDrawables(drawList)
-        for (SpatialTreeNode spatialTreeNode : this.bins) {
-            for (SpatialTreeNode spatialTreeNode2 = r3[r1]; spatialTreeNode2 != null; spatialTreeNode2 = spatialTreeNode2.nextDepth) {
-                spatialTreeNode2.addDrawables(drawList)
+    fun addDrawables(drawList: DrawList) {
+        Debug.Printf("SpatialTree: adding drawables.")
+        myAvatarTreeNode.addDrawables(drawList)
+        for (node in bins) {
+            var current = node
+            while (current != null) {
+                current.addDrawables(drawList)
+                current = current.nextDepth
             }
         }
-        this.drawListChanged = false
+        drawListChanged = false
     }
 
-    Boolean isDrawListChanged() {
-        return this.drawListChanged
+    fun isDrawListChanged(): Boolean {
+        return drawListChanged
     }
 
-    Boolean isTreeWalkNeeded() {
-        return this.treeWalkNeeded
+    fun isTreeWalkNeeded(): Boolean {
+        return treeWalkNeeded
     }
 
-    Unit removeEntry(SpatialTreeNode spatialTreeNode) {
-        setEntryBin(spatialTreeNode, -1)
+    fun removeEntry(node: SpatialTreeNode) {
+        setEntryBin(node, -1)
     }
 
-    Unit removeObject(DrawListEntry drawListEntry) {
-        InlineList list = drawListEntry.getList()
-        list?.removeEntry(drawListEntry)
-        }
+    fun removeObject(entry: DrawListEntry) {
+        val list = entry.list
+        list?.removeEntry(entry)
     }
 
-    Unit setDrawListChanged() {
-        this.drawListChanged = true
+    fun setDrawListChanged() {
+        drawListChanged = true
     }
 
-    Unit setEntryDepth(SpatialTreeNode spatialTreeNode, Float f) {
-        Int i = 0
-        Int round = Math.round(((this.toFloat().numBins) * f) / this.drawDistance)
+    fun setEntryDepth(node: SpatialTreeNode, depth: Float) {
+        var binIndex = 0
+        val round = Math.round((numBins.toFloat() * depth) / drawDistance)
         if (round >= 0) {
-            i = round >= this.numBins ? this.numBins - 1 : round
+            binIndex = if (round >= numBins) numBins - 1 else round
         }
-        setEntryBin(spatialTreeNode, i)
+        setEntryBin(node, binIndex)
     }
 
-    Unit setTreeWalkNeeded() {
-        this.treeWalkNeeded = true
+    fun setTreeWalkNeeded() {
+        treeWalkNeeded = true
     }
 
-    Unit updateObject(DrawListEntry drawListEntry) {
-        InlineList nodeForObject = getNodeForObject(drawListEntry)
-        InlineList list = drawListEntry.getList()
-        if (!(nodeForObject == list || list == null)) {
-            list.removeEntry(drawListEntry)
+    fun updateObject(entry: DrawListEntry) {
+        val nodeForObject = getNodeForObject(entry)
+        val currentList = entry.list
+        if (nodeForObject !== currentList && currentList != null) {
+            currentList.removeEntry(entry)
         }
-        nodeForObject?.addEntry(drawListEntry)
-        }
+        nodeForObject.addEntry(entry)
     }
 
-    Unit walkTree(FrustrumPlanes frustrumPlanes, Float f) {
-        Debug.Printf("SpatialTree: walkTree: starting to walk.", Any[0])
-        this.drawDistance = f
-        this.rootNode.walkTree(frustrumPlanes, 1, this.depthBuf)
-        this.treeWalkNeeded = false
+    fun walkTree(frustrumPlanes: FrustrumPlanes, distance: Float) {
+        Debug.Printf("SpatialTree: walkTree: starting to walk.")
+        drawDistance = distance
+        rootNode.walkTree(frustrumPlanes, 1, depthBuf)
+        treeWalkNeeded = false
     }
 }

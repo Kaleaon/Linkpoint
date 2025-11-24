@@ -4,37 +4,31 @@ import com.lumiyaviewer.lumiya.GlobalOptions
 import com.lumiyaviewer.lumiya.LumiyaApp
 import java.io.File
 import java.util.HashMap
-import java.util.Map
 import java.util.UUID
-import androidx.annotation.Nullable
 
 object DaoManager {
-    private Object lock = Object()
-    private Map<UUID, DaoSession> userDaoSessions = HashMap()
+    private val lock = Any()
+    private val userDaoSessions = HashMap<UUID, DaoSession>()
 
-    @Nullable
-    fun getUserDaoSession(uuid: UUID): DaoSession {
+    fun getUserDaoSession(uuid: UUID?): DaoSession? {
         if (uuid == null) {
             return null
         }
         
-        synchronized (lock) {
-            DaoSession daoSession = userDaoSessions.get(uuid)
+        synchronized(lock) {
+            var daoSession = userDaoSessions[uuid]
             if (daoSession == null) {
                 try {
-                    File cacheDir = GlobalOptions.getInstance().getCacheDir("database")
-                    if (cacheDir == null) {
-                        throw IllegalStateException("Cache directory is null")
-                    }
+                    val cacheDir = GlobalOptions.getInstance().getCacheDir("database")
+                        ?: throw IllegalStateException("Cache directory is null")
                     
-                    File dbFile = File(cacheDir, "userdb-" + uuid.toString() + ".db")
-                    DBOpenHelper dbHelper = DBOpenHelper(LumiyaApp.getContext(), dbFile.getAbsolutePath(), null)
+                    val dbFile = File(cacheDir, "userdb-$uuid.db")
+                    val dbHelper = DBOpenHelper(LumiyaApp.getContext(), dbFile.absolutePath, null)
                     
-                    daoSession = DaoMaster(dbHelper.getWritableDatabase()).newSession()
-                    userDaoSessions.put(uuid, daoSession)
-                } catch (Exception e) {
-                    // Log error but don't throw, return null to indicate failure
-                    android.util.Log.e("DaoManager", "Failed to create DaoSession for user " + uuid, e)
+                    daoSession = DaoMaster(dbHelper.writableDatabase).newSession()
+                    userDaoSessions[uuid] = daoSession
+                } catch (e: Exception) {
+                    android.util.Log.e("DaoManager", "Failed to create DaoSession for user $uuid", e)
                     return null
                 }
             }
@@ -42,36 +36,30 @@ object DaoManager {
         }
     }
     
-    /**
-     * Closes and removes the DaoSession for the given user UUID
-     */
-    fun closeDaoSession(uuid: UUID): Unit {
+    fun closeDaoSession(uuid: UUID?) {
         if (uuid == null) {
             return
         }
         
-        synchronized (lock) {
-            DaoSession daoSession = userDaoSessions.remove(uuid)
+        synchronized(lock) {
+            val daoSession = userDaoSessions.remove(uuid)
             if (daoSession != null) {
                 try {
-                    daoSession.getDatabase().close()
-                } catch (Exception e) {
-                    android.util.Log.w("DaoManager", "Error closing database for user " + uuid, e)
+                    daoSession.database.close()
+                } catch (e: Exception) {
+                    android.util.Log.w("DaoManager", "Error closing database for user $uuid", e)
                 }
             }
         }
     }
     
-    /**
-     * Closes all open DaoSessions - should be called on app shutdown
-     */
-    fun closeAllSessions(): Unit {
-        synchronized (lock) {
-            for (Map.Entry<UUID, DaoSession> entry : userDaoSessions.entrySet()) {
+    fun closeAllSessions() {
+        synchronized(lock) {
+            for ((uuid, daoSession) in userDaoSessions) {
                 try {
-                    entry.getValue().getDatabase().close()
-                } catch (Exception e) {
-                    android.util.Log.w("DaoManager", "Error closing database for user " + entry.getKey(), e)
+                    daoSession.database.close()
+                } catch (e: Exception) {
+                    android.util.Log.w("DaoManager", "Error closing database for user $uuid", e)
                 }
             }
             userDaoSessions.clear()

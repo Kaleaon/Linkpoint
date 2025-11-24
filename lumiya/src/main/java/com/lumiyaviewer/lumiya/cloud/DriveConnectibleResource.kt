@@ -1,7 +1,6 @@
 package com.lumiyaviewer.lumiya.cloud
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.common.api.ResultCallback
@@ -59,10 +58,11 @@ abstract class DriveConnectibleResource(
                         Debug.Printf("Resource '%s': has stored DriveId: %s", resourceName, encodedId)
                         try {
                             val driveId = DriveId.decodeFromString(encodedId)
+                            // Ensure we handle null or invalid state if asDriveFolder fails
                             driveId.asDriveFolder().getMetadata(googleApiClient)
                                 .setResultCallback(onFolderMetadata)
                             foundInPrefs = true
-                        } catch (e: IllegalArgumentException) {
+                        } catch (e: Exception) {
                             Debug.Warning(e)
                         }
                     }
@@ -80,7 +80,12 @@ abstract class DriveConnectibleResource(
             }
             
             Debug.Printf("LumiyaCloud: '%s': searching root folder", resourceName)
-            startSearching(Drive.DriveApi.getRootFolder(googleApiClient))
+            val rootFolder = Drive.DriveApi.getRootFolder(googleApiClient)
+            if (rootFolder != null) {
+                startSearching(rootFolder)
+            } else {
+                onResourceCreationFailed("Root folder is unavailable")
+            }
         }
     }
 
@@ -250,7 +255,12 @@ abstract class DriveConnectibleResource(
             return
         }
         Debug.Printf("Resource '%s': creating resource in root folder.", resourceName)
-        createResource(Drive.DriveApi.getRootFolder(googleApiClient))
+        val rootFolder = Drive.DriveApi.getRootFolder(googleApiClient)
+        if (rootFolder != null) {
+            createResource(rootFolder)
+        } else {
+            onResourceCreationFailed("Root folder is unavailable")
+        }
     }
 
     private fun startSearching(folder: DriveFolder) {

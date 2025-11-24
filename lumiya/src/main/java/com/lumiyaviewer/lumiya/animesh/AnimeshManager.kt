@@ -184,6 +184,34 @@ class AnimeshManager(private val context: Context) {
             false
         }
     }
+
+    fun start() {
+        if (animationUpdateJob == null || !animationUpdateJob!!.isActive) {
+            startAnimationUpdates()
+        }
+    }
+
+    fun registerAnimesh(objectId: UUID, attachmentId: UUID?, skeletonData: Any?) {
+        // Stub implementation
+        Log.d(TAG, "Registering animesh $objectId")
+        val animesh = animeshObjects.getOrPut(objectId) {
+             AnimeshObject(objectId, null)
+        }
+    }
+
+    fun addAnimation(objectId: UUID, animationId: UUID) {
+        Log.d(TAG, "Adding animation $animationId to $objectId")
+         val animesh = animeshObjects[objectId]
+         if (animesh != null) {
+             scope.launch {
+                 val anim = loadAnimation(animationId)
+                 if (!animesh.animations.any { it.animID == anim.animID }) {
+                     animesh.animations.add(anim)
+                     animesh.isPlaying = true
+                 }
+             }
+         }
+    }
     
     private fun startAnimationUpdates() {
         animationUpdateJob = scope.launch {

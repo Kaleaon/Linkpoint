@@ -8,54 +8,53 @@ import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.orm.DBHandle
 import com.lumiyaviewer.lumiya.orm.DBHandleCache
 import java.lang.reflect.InvocationTargetException
-import java.lang.reflect.Method
+import java.util.concurrent.atomic.AtomicReference
 
 class SLInventoryOpenHelper : DBHandleCache.DBOpenHelper {
-    private val DB_VERSION: Int = 21
 
-    private class InstanceHolder {
-        /* access modifiers changed from: private */
-        SLInventoryOpenHelper Instance = SLInventoryOpenHelper()
+    companion object {
+        private const val DB_VERSION = 21
+        private val instance = AtomicReference<SLInventoryOpenHelper>()
 
-        private InstanceHolder() {
+        fun getInstance(): SLInventoryOpenHelper {
+            if (instance.get() == null) {
+                instance.compareAndSet(null, SLInventoryOpenHelper())
+            }
+            return instance.get()!!
         }
     }
 
-    private Unit enableWriteAheadLogging(SQLiteDatabase sQLiteDatabase) {
-        if (sQLiteDatabase == null) {
-            Debug.Printf("Cannot enable WAL on null database")
+    private fun enableWriteAheadLogging(db: SQLiteDatabase?) {
+        if (db == null) {
+            Debug.Log("Cannot enable WAL on null database")
             return
         }
-        
+
         try {
-            Method method = sQLiteDatabase.getClass().getMethod("enableWriteAheadLogging")
-            if (method != null) {
-                method.invoke(sQLiteDatabase)
-                Debug.Printf("Write-ahead logging enabled successfully.")
+            val method = db.javaClass.getMethod("enableWriteAheadLogging")
+            method.invoke(db)
+            Debug.Log("Write-ahead logging enabled successfully.")
+        } catch (e: NoSuchMethodException) {
+            Debug.Log("Write-ahead logging not supported on this Android version.")
+        } catch (e: Exception) {
+            when (e) {
+                is IllegalArgumentException,
+                is IllegalAccessException -> Debug.Log("Write-ahead logging not accessible: ${e.message}")
+                is InvocationTargetException -> Debug.Log("Failed to enable write-ahead logging: ${e.cause?.message ?: e.message}")
+                else -> Debug.Log("Unexpected error enabling write-ahead logging: ${e.message}")
             }
-        } catch (NoSuchMethodException e) {
-            Debug.Printf("Write-ahead logging not supported on this Android version.")
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            Debug.Printf("Write-ahead logging not accessible: %s", e.getMessage())
-        } catch (InvocationTargetException e) {
-            Debug.Printf("Failed to enable write-ahead logging: %s", e.getCause() != null ? e.getCause().getMessage() : e.getMessage())
-        } catch (Exception e) {
-            Debug.Printf("Unexpected error enabling write-ahead logging: %s", e.getMessage())
         }
     }
 
-    SLInventoryOpenHelper getInstance() {
-        return InstanceHolder.Instance
-    }
+    @Throws(SQLiteException::class)
+    private fun initTables(db: SQLiteDatabase): Boolean {
+        db.execSQL("CREATE TABLE IF NOT EXISTS DBVersion (Version INTEGER);")
+        var query: Cursor? = null
+        var isNewDb = false
+        var needsUpgrade = false
 
-    private Boolean initTables(SQLiteDatabase sQLiteDatabase) throws SQLiteException {
-        sQLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS DBVersion (Version INTEGER);")
-        Cursor query = null
-        Boolean isNewDb = false
-        Boolean needsUpgrade = false
-        
         try {
-            query = sQLiteDatabase.query("DBVersion", Array<String>{"Version"}, null, null, null, null, null)
+            query = db.query("DBVersion", arrayOf("Version"), null, null, null, null, null)
             if (!query.moveToFirst()) {
                 isNewDb = true
                 needsUpgrade = true
@@ -67,84 +66,85 @@ class SLInventoryOpenHelper : DBHandleCache.DBOpenHelper {
                 needsUpgrade = false
             }
         } finally {
-            if (query != null) {
-                query.close()
-            }
+            query?.close()
         }
-        
+
         if (needsUpgrade) {
-            Debug.Printf("Database needs upgrade.", Object[0])
+            Debug.Log("Database needs upgrade.")
             try {
                 // Use transaction for atomic database operations
-                sQLiteDatabase.beginTransaction()
+                db.beginTransaction()
                 try {
-                    for (String createStatement : SLInventoryEntry.getCreateTableStatements()) {
-                        Debug.Printf("Inventory init: %s", createStatement)
-                        sQLiteDatabase.execSQL(createStatement)
+                    // Assuming SLInventoryEntry has a static/companion method getCreateTableStatements
+                    // If SLInventoryEntry is not available or doesn't have this, this will need adjustment.
+                    // Based on context, it seems SLInventoryEntry is a key class.
+                     val statements = SLInventoryEntry.getCreateTableStatements()
+                     for (createStatement in statements) {
+                        Debug.Log("Inventory init: $createStatement")
+                        db.execSQL(createStatement)
                     }
-                    ContentValues contentValues = ContentValues()
+                    
+                    val contentValues = ContentValues()
                     contentValues.put("Version", DB_VERSION)
                     if (isNewDb) {
-                        sQLiteDatabase.insert("DBVersion", null, contentValues)
+                        db.insert("DBVersion", null, contentValues)
                     } else {
-                        sQLiteDatabase.update("DBVersion", contentValues, null, null)
+                        db.update("DBVersion", contentValues, null, null)
                     }
-                    sQLiteDatabase.setTransactionSuccessful()
+                    db.setTransactionSuccessful()
                 } finally {
-                    sQLiteDatabase.endTransaction()
+                    db.endTransaction()
                 }
-                Debug.Printf("Upgraded database to version %d", DB_VERSION)
+                Debug.Log("Upgraded database to version $DB_VERSION")
                 return true
-            } catch (Exception e) {
-                SQLiteException sQLiteException = SQLiteException("Database initialization failed: " + e.getMessage())
-                sQLiteException.initCause(e)
-                throw sQLiteException
+            } catch (e: Exception) {
+                val sqliteException = SQLiteException("Database initialization failed: ${e.message}")
+                sqliteException.initCause(e)
+                throw sqliteException
             }
         } else {
-            Debug.Printf("Database does not need upgrade.", Object[0])
+            Debug.Log("Database does not need upgrade.")
             return false
         }
     }
 
-    synchronized DBHandle openDB(String str) {
-        if (str == null || str.trim().isEmpty()) {
-            Debug.Warning("Database filename cannot be null or empty")
+    @Synchronized
+    fun openDB(filename: String?): DBHandle? {
+        if (filename.isNullOrEmpty()) {
+            Debug.Log("Database filename cannot be null or empty")
             return null
         }
-        
-        try {
-            Debug.Printf("Opening inventory DB '%s'", str)
-            return DBHandleCache.getInstance().OpenDB(str, this)
-        } catch (SQLiteException e) {
-            Debug.Warning("Failed to open inventory database: " + str, e)
-            return null
+
+        return try {
+            Debug.Log("Opening inventory DB '$filename'")
+            DBHandleCache.getInstance().OpenDB(filename, this)
+        } catch (e: SQLiteException) {
+            Debug.Log("Failed to open inventory database: $filename - ${e.message}")
+            null
         }
     }
 
-    SQLiteDatabase openOrCreateDatabase(String str) throws SQLiteException {
-        if (str == null || str.trim().isEmpty()) {
+    @Throws(SQLiteException::class)
+    override fun openOrCreateDatabase(path: String): SQLiteDatabase {
+        if (path.trim().isEmpty()) {
             throw SQLiteException("Database path cannot be null or empty")
         }
+
+        // openOrCreateDatabase is a static method on SQLiteDatabase, or we can use the context based one.
+        // Here it seems to imply the static one which takes a CursorFactory (null).
+        var db = SQLiteDatabase.openOrCreateDatabase(path, null)
         
-        SQLiteDatabase openOrCreateDatabase = SQLiteDatabase.openOrCreateDatabase(str, null)
-        if (openOrCreateDatabase == null) {
-            throw SQLiteException("Failed to open database: " + str)
+        Debug.Log("DB file '$path' opened")
+        enableWriteAheadLogging(db)
+
+        if (initTables(db)) {
+            Debug.Log("Reopening DB file '$path' after initialization")
+            db.close()
+
+            db = SQLiteDatabase.openOrCreateDatabase(path, null)
+            enableWriteAheadLogging(db)
         }
-        
-        Debug.Printf("DB file '%s' opened", str)
-        enableWriteAheadLogging(openOrCreateDatabase)
-        
-        if (initTables(openOrCreateDatabase)) {
-            Debug.Printf("Reopening DB file '%s' after initialization", str)
-            openOrCreateDatabase.close()
-            
-            openOrCreateDatabase = SQLiteDatabase.openOrCreateDatabase(str, null)
-            if (openOrCreateDatabase == null) {
-                throw SQLiteException("Failed to reopen database after initialization: " + str)
-            }
-            enableWriteAheadLogging(openOrCreateDatabase)
-        }
-        
-        return openOrCreateDatabase
+
+        return db
     }
 }

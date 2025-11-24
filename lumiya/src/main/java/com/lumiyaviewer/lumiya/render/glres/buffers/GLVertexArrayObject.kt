@@ -6,36 +6,36 @@ import com.lumiyaviewer.lumiya.render.glres.GLGenericResource
 import com.lumiyaviewer.lumiya.render.glres.GLResourceManager
 
 @TargetApi(18)
-class GLVertexArrayObject : GLGenericResource {
-    Int size
-    private IntArray vaoIndices
+class GLVertexArrayObject(
+    glResourceManager: GLResourceManager,
+    size: Int
+) : GLGenericResource(glResourceManager) {
 
-    private class GLVertexArrayObjectReference : GLResourceManager.GLGenericResourceReference {
-        private IntArray vaoIndices
+    val size: Int = size
+    private val vaoIndices: IntArray
 
-        GLVertexArrayObjectReference(GLGenericResource gLGenericResource, GLResourceManager gLResourceManager, IntArray iArr) {
-            super(gLGenericResource, gLResourceManager)
-            this.vaoIndices = iArr
-        }
+    private class GLVertexArrayObjectReference(
+        glResource: GLGenericResource,
+        glResourceManager: GLResourceManager,
+        private val vaoIndices: IntArray
+    ) : GLResourceManager.GLGenericResourceReference(glResource, glResourceManager) {
 
-        fun GLFree(): Unit {
-            GLES30.glDeleteVertexArrays(this.vaoIndices.length, this.vaoIndices, 0)
+        override fun GLFree() {
+            GLES30.glDeleteVertexArrays(vaoIndices.size, vaoIndices, 0)
         }
     }
 
-    @TargetApi(18)
-    constructor(gLResourceManager: GLResourceManager, i: Int) {
-        this.size = i
-        this.vaoIndices = Int[i]
-        GLES30.glGenVertexArrays(i, this.vaoIndices, 0)
-        GLVertexArrayObjectReference(this, gLResourceManager, this.vaoIndices)
+    init {
+        this.vaoIndices = IntArray(size)
+        GLES30.glGenVertexArrays(size, this.vaoIndices, 0)
+        GLVertexArrayObjectReference(this, glResourceManager, this.vaoIndices)
     }
 
-    fun Bind(i: Int): Unit {
+    fun Bind(i: Int) {
         GLES30.glBindVertexArray(this.vaoIndices[i])
     }
 
-    fun Unbind(): Unit {
+    fun Unbind() {
         GLES30.glBindVertexArray(0)
     }
 }

@@ -10,181 +10,166 @@ import com.lumiyaviewer.lumiya.render.glres.GLCleanable
 import com.lumiyaviewer.rawbuffers.DirectByteBuffer
 import androidx.annotation.NonNull
 
-class GLLoadableBuffer : GLCleanable {
-    private var glBuffer: GLBuffer = null
-    @NonNull
-    private DirectByteBuffer rawBuffer
+class GLLoadableBuffer(
+    @NonNull private val rawBuffer: DirectByteBuffer
+) : GLCleanable {
 
-    constructor(directByteBuffer: DirectByteBuffer) {
-        directByteBuffer.position(0)
-        this.rawBuffer = directByteBuffer
+    private var glBuffer: GLBuffer? = null
+
+    init {
+        rawBuffer.position(0)
     }
 
-    Unit Bind(RenderContext renderContext, Int i, Int i2, Int i3, Int i4, Int i5) {
+    fun Bind(renderContext: RenderContext, target: Int, size: Int, type: Int, stride: Int, offset: Int) {
         if (renderContext.useVBO) {
-            if (this.glBuffer == null) {
-                renderContext.KeepBuffer(this.rawBuffer)
-                this.glBuffer = GLBuffer(renderContext.glResourceManager, this.rawBuffer)
-                renderContext.glBindArrayBuffer(this.glBuffer.handle)
-                renderContext.glBufferArrayData(this.rawBuffer.getCapacity(), this.rawBuffer.asByteBuffer(), false)
+            if (glBuffer == null) {
+                renderContext.KeepBuffer(rawBuffer)
+                glBuffer = GLBuffer(renderContext.glResourceManager, rawBuffer)
+                renderContext.glBindArrayBuffer(glBuffer!!.handle)
+                renderContext.glBufferArrayData(rawBuffer.getCapacity(), rawBuffer.asByteBuffer(), false)
                 renderContext.glResourceManager.addCleanable(this)
             } else {
-                renderContext.glBindArrayBuffer(this.glBuffer.handle)
+                renderContext.glBindArrayBuffer(glBuffer!!.handle)
             }
-            GLES10.glEnableClientState(i)
-            switch (i) {
-                case 32884:
-                    GLES11.glVertexPointer(i2, i3, i4, i5)
-                    return
-                case 32885:
-                    GLES11.glNormalPointer(i3, i4, i5)
-                    return
-                case 32888:
-                    GLES11.glTexCoordPointer(i2, i3, i4, i5)
-                    return
-                default:
-                    return
+            GLES10.glEnableClientState(target)
+            when (target) {
+                32884 -> GLES11.glVertexPointer(size, type, stride, offset) // GL_VERTEX_ARRAY
+                32885 -> GLES11.glNormalPointer(type, stride, offset) // GL_NORMAL_ARRAY
+                32888 -> GLES11.glTexCoordPointer(size, type, stride, offset) // GL_TEXTURE_COORD_ARRAY
             }
         } else {
-            renderContext.KeepBuffer(this.rawBuffer)
-            GLES10.glEnableClientState(i)
-            switch (i) {
-                case 32884:
-                    GLES10.glVertexPointer(i2, i3, i4, this.rawBuffer.positionFloat(i5))
-                    return
-                case 32885:
-                    GLES10.glNormalPointer(i3, i4, this.rawBuffer.positionFloat(i5))
-                    return
-                case 32888:
-                    GLES10.glTexCoordPointer(i2, i3, i4, this.rawBuffer.positionFloat(i5))
-                    return
-                default:
-                    return
+            renderContext.KeepBuffer(rawBuffer)
+            GLES10.glEnableClientState(target)
+            // rawBuffer.positionFloat(offset) logic needs to be handled carefully if it returns a Buffer
+            // Assuming positionFloat adjusts position and returns self or buffer
+            when (target) {
+                32884 -> GLES10.glVertexPointer(size, type, stride, rawBuffer.positionFloat(offset))
+                32885 -> GLES10.glNormalPointer(type, stride, rawBuffer.positionFloat(offset))
+                32888 -> GLES10.glTexCoordPointer(size, type, stride, rawBuffer.positionFloat(offset))
             }
         }
     }
 
-    Unit Bind20(RenderContext renderContext, Int i, Int i2, Int i3, Int i4, Int i5) {
-        if (this.glBuffer == null) {
-            renderContext.KeepBuffer(this.rawBuffer)
-            this.glBuffer = GLBuffer(renderContext.glResourceManager, this.rawBuffer)
-            GLES20.glBindBuffer(34962, this.glBuffer.handle)
-            GLES20.glBufferData(34962, this.rawBuffer.getCapacity(), this.rawBuffer.asByteBuffer(), 35044)
+    fun Bind20(renderContext: RenderContext, index: Int, size: Int, type: Int, stride: Int, offset: Int) {
+        if (glBuffer == null) {
+            renderContext.KeepBuffer(rawBuffer)
+            glBuffer = GLBuffer(renderContext.glResourceManager, rawBuffer)
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, glBuffer!!.handle)
+            GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, rawBuffer.getCapacity(), rawBuffer.asByteBuffer(), GLES20.GL_STATIC_DRAW)
             renderContext.glResourceManager.addCleanable(this)
         } else {
-            GLES20.glBindBuffer(34962, this.glBuffer.handle)
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, glBuffer!!.handle)
         }
-        GLES20.glEnableVertexAttribArray(i)
-        GLES20.glVertexAttribPointer(i, i2, i3, false, i4, i5)
+        GLES20.glEnableVertexAttribArray(index)
+        GLES20.glVertexAttribPointer(index, size, type, false, stride, offset)
     }
 
     @TargetApi(18)
-    Unit Bind30Integer(RenderContext renderContext, Int i, Int i2, Int i3, Int i4, Int i5) {
-        if (this.glBuffer == null) {
-            renderContext.KeepBuffer(this.rawBuffer)
-            this.glBuffer = GLBuffer(renderContext.glResourceManager, this.rawBuffer)
-            GLES20.glBindBuffer(34962, this.glBuffer.handle)
-            GLES20.glBufferData(34962, this.rawBuffer.getCapacity(), this.rawBuffer.asByteBuffer(), 35044)
+    fun Bind30Integer(renderContext: RenderContext, index: Int, size: Int, type: Int, stride: Int, offset: Int) {
+        if (glBuffer == null) {
+            renderContext.KeepBuffer(rawBuffer)
+            glBuffer = GLBuffer(renderContext.glResourceManager, rawBuffer)
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, glBuffer!!.handle)
+            GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, rawBuffer.getCapacity(), rawBuffer.asByteBuffer(), GLES20.GL_STATIC_DRAW)
             renderContext.glResourceManager.addCleanable(this)
         } else {
-            GLES20.glBindBuffer(34962, this.glBuffer.handle)
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, glBuffer!!.handle)
         }
-        GLES30.glEnableVertexAttribArray(i)
-        GLES30.glVertexAttribIPointer(i, i2, i3, i4, i5)
+        GLES30.glEnableVertexAttribArray(index)
+        GLES30.glVertexAttribIPointer(index, size, type, stride, offset)
     }
 
-    Unit BindElements(RenderContext renderContext) {
+    fun BindElements(renderContext: RenderContext) {
         if (!renderContext.useVBO) {
             return
         }
-        if (this.glBuffer == null) {
-            renderContext.KeepBuffer(this.rawBuffer)
-            this.glBuffer = GLBuffer(renderContext.glResourceManager, this.rawBuffer)
-            renderContext.glBindElementArrayBuffer(this.glBuffer.handle)
-            renderContext.glBufferElementArrayData(this.rawBuffer.getCapacity(), this.rawBuffer.asByteBuffer(), false)
+        if (glBuffer == null) {
+            renderContext.KeepBuffer(rawBuffer)
+            glBuffer = GLBuffer(renderContext.glResourceManager, rawBuffer)
+            renderContext.glBindElementArrayBuffer(glBuffer!!.handle)
+            renderContext.glBufferElementArrayData(rawBuffer.getCapacity(), rawBuffer.asByteBuffer(), false)
             renderContext.glResourceManager.addCleanable(this)
             return
         }
-        renderContext.glBindElementArrayBuffer(this.glBuffer.handle)
+        renderContext.glBindElementArrayBuffer(glBuffer!!.handle)
     }
 
-    Unit BindElements20(RenderContext renderContext) {
-        if (this.glBuffer == null) {
-            renderContext.KeepBuffer(this.rawBuffer)
-            this.glBuffer = GLBuffer(renderContext.glResourceManager, this.rawBuffer)
-            GLES20.glBindBuffer(34963, this.glBuffer.handle)
-            GLES20.glBufferData(34963, this.rawBuffer.getCapacity(), this.rawBuffer.asByteBuffer(), 35044)
+    fun BindElements20(renderContext: RenderContext) {
+        if (glBuffer == null) {
+            renderContext.KeepBuffer(rawBuffer)
+            glBuffer = GLBuffer(renderContext.glResourceManager, rawBuffer)
+            GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, glBuffer!!.handle)
+            GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, rawBuffer.getCapacity(), rawBuffer.asByteBuffer(), GLES20.GL_STATIC_DRAW)
             renderContext.glResourceManager.addCleanable(this)
             return
         }
-        GLES20.glBindBuffer(34963, this.glBuffer.handle)
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, glBuffer!!.handle)
     }
 
     @TargetApi(18)
-    Unit BindUniform(RenderContext renderContext, Int i) {
-        Boolean z = false
-        if (this.glBuffer == null) {
-            this.glBuffer = GLBuffer(renderContext.glResourceManager, this.rawBuffer)
+    fun BindUniform(renderContext: RenderContext, index: Int) {
+        var created = false
+        if (glBuffer == null) {
+            glBuffer = GLBuffer(renderContext.glResourceManager, rawBuffer)
             renderContext.glResourceManager.addCleanable(this)
-            z = true
+            created = true
         }
-        GLES30.glBindBufferBase(35345, i, this.glBuffer.handle)
-        if (z) {
-            GLES20.glBufferData(35345, this.rawBuffer.getCapacity(), this.rawBuffer.asByteBuffer(), 35044)
+        GLES30.glBindBufferBase(GLES30.GL_UNIFORM_BUFFER, index, glBuffer!!.handle)
+        if (created) {
+            GLES20.glBufferData(GLES30.GL_UNIFORM_BUFFER, rawBuffer.getCapacity(), rawBuffer.asByteBuffer(), GLES20.GL_STATIC_DRAW)
         }
     }
 
     @TargetApi(18)
-    Unit BindUniformDynamic(RenderContext renderContext, Int i, Boolean z) {
-        if ((this.glBuffer == null || z) && this.glBuffer == null) {
-            this.glBuffer = GLBuffer(renderContext.glResourceManager, this.rawBuffer)
+    fun BindUniformDynamic(renderContext: RenderContext, index: Int, update: Boolean) {
+        var created = false
+        if (glBuffer == null) {
+            glBuffer = GLBuffer(renderContext.glResourceManager, rawBuffer)
             renderContext.glResourceManager.addCleanable(this)
-            z2 = true
-        } else {
-            z2 = false
+            created = true
         }
-        GLES30.glBindBufferBase(35345, i, this.glBuffer.handle)
-        if (z2) {
-            GLES20.glBufferData(35345, this.rawBuffer.getCapacity(), this.rawBuffer.asByteBuffer(), 35048)
-        } else if (z) {
-            GLES20.glBufferSubData(35345, 0, this.rawBuffer.getCapacity(), this.rawBuffer.asByteBuffer())
+        
+        GLES30.glBindBufferBase(GLES30.GL_UNIFORM_BUFFER, index, glBuffer!!.handle)
+        if (created) {
+            GLES20.glBufferData(GLES30.GL_UNIFORM_BUFFER, rawBuffer.getCapacity(), rawBuffer.asByteBuffer(), GLES30.GL_DYNAMIC_DRAW)
+        } else if (update) {
+            GLES20.glBufferSubData(GLES30.GL_UNIFORM_BUFFER, 0, rawBuffer.getCapacity(), rawBuffer.asByteBuffer())
         }
     }
 
-    Unit DrawElements(RenderContext renderContext, Int i, Int i2, Int i3, Int i4) {
+    fun DrawElements(renderContext: RenderContext, mode: Int, count: Int, type: Int, indices: Int) {
         if (renderContext.useVBO) {
-            GLES11.glDrawElements(i, i2, i3, i4)
+            GLES11.glDrawElements(mode, count, type, indices)
         } else {
-            GLES10.glDrawElements(i, i2, 5123, this.rawBuffer.position(i4))
+            GLES10.glDrawElements(mode, count, GLES10.GL_UNSIGNED_SHORT, rawBuffer.position(indices))
         }
     }
 
-    Unit DrawElements20(Int i, Int i2, Int i3, Int i4) {
-        GLES20.glDrawElements(i, i2, i3, i4)
+    fun DrawElements20(mode: Int, count: Int, type: Int, indices: Int) {
+        GLES20.glDrawElements(mode, count, type, indices)
     }
 
-    fun GLCleanup(): Unit {
-        this.glBuffer = null
+    override fun GLCleanup() {
+        glBuffer = null
     }
 
-    Unit Reload(RenderContext renderContext) {
-        if (renderContext.useVBO && this.glBuffer != null) {
-            renderContext.KeepBuffer(this.rawBuffer)
-            renderContext.glBindArrayBuffer(this.glBuffer.handle)
-            renderContext.glBufferArrayData(this.rawBuffer.getCapacity(), this.rawBuffer.asByteBuffer(), false)
+    fun Reload(renderContext: RenderContext) {
+        if (renderContext.useVBO && glBuffer != null) {
+            renderContext.KeepBuffer(rawBuffer)
+            renderContext.glBindArrayBuffer(glBuffer!!.handle)
+            renderContext.glBufferArrayData(rawBuffer.getCapacity(), rawBuffer.asByteBuffer(), false)
         }
     }
 
-    fun getFloat(i: Int): Float {
-        return this.rawBuffer.getFloat(i)
+    fun getFloat(index: Int): Float {
+        return rawBuffer.getFloat(index)
     }
 
-    @NonNull
     fun getRawBuffer(): DirectByteBuffer {
-        return this.rawBuffer
+        return rawBuffer
     }
 
-    fun getShort(i: Int): Int {
-        return this.rawBuffer.getShort(i)
+    fun getShort(index: Int): Int {
+        return rawBuffer.getShort(index).toInt()
     }
 }

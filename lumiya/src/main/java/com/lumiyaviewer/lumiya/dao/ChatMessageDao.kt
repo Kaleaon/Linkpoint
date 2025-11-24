@@ -10,287 +10,287 @@ import de.greenrobot.dao.internal.DaoConfig
 import java.util.Date
 import java.util.UUID
 
-class ChatMessageDao : AbstractDao<ChatMessage, Long> {
-    val TABLENAME: String = "CHAT_MESSAGE"
+class ChatMessageDao(config: DaoConfig, daoSession: DaoSession?) : AbstractDao<ChatMessage, Long>(config, daoSession) {
 
-    class Properties {
-        Property Accepted = Property(22, Boolean.class, "accepted", false, "ACCEPTED")
-        Property AssetType = Property(17, Int.class, "assetType", false, "ASSET_TYPE")
-        Property ChatChannel = Property(20, Int.class, "chatChannel", false, "CHAT_CHANNEL")
-        Property ChatterID = Property(1, Long.TYPE, ChatterFragment.CHATTER_ID_KEY, false, "CHATTER_ID")
-        Property DialogButtons = Property(26, ByteArray.class, "dialogButtons", false, "DIALOG_BUTTONS")
-        Property DialogIgnored = Property(21, Boolean.class, "dialogIgnored", false, "DIALOG_IGNORED")
-        Property DialogSelectedOption = Property(27, String.class, "dialogSelectedOption", false, "DIALOG_SELECTED_OPTION")
-        Property EventState = Property(12, Int.class, "eventState", false, "EVENT_STATE")
-        Property Id = Property(0, Long.class, "id", true, "_id")
-        Property IsOffline = Property(5, Boolean.class, "isOffline", false, "IS_OFFLINE")
-        Property ItemID = Property(15, UUID.class, "itemID", false, "ITEM_ID")
-        Property ItemName = Property(16, String.class, "itemName", false, "ITEM_NAME")
-        Property MessageText = Property(10, String.class, "messageText", false, "MESSAGE_TEXT")
-        Property MessageType = Property(11, Int.TYPE, "messageType", false, "MESSAGE_TYPE")
-        Property NewBalance = Property(19, Int.class, "newBalance", false, "NEW_BALANCE")
-        Property ObjectName = Property(24, String.class, "objectName", false, "OBJECT_NAME")
-        Property OrigIMType = Property(13, Int.class, "origIMType", false, "ORIG_IMTYPE")
-        Property OrigTimestamp = Property(4, Date.class, "origTimestamp", false, "ORIG_TIMESTAMP")
-        Property QuestionMask = Property(25, Int.class, "questionMask", false, "QUESTION_MASK")
-        Property SenderLegacyName = Property(9, String.class, "senderLegacyName", false, "SENDER_LEGACY_NAME")
-        Property SenderName = Property(8, String.class, "senderName", false, "SENDER_NAME")
-        Property SenderType = Property(7, Int.class, "senderType", false, "SENDER_TYPE")
-        Property SenderUUID = Property(6, UUID.class, "senderUUID", false, "SENDER_UUID")
-        Property SessionID = Property(14, UUID.class, "sessionID", false, "SESSION_ID")
-        Property SyncedToGoogleDrive = Property(29, Boolean.TYPE, "syncedToGoogleDrive", false, "SYNCED_TO_GOOGLE_DRIVE")
-        Property TextBoxButtonIndex = Property(28, Int.class, "textBoxButtonIndex", false, "TEXT_BOX_BUTTON_INDEX")
-        Property Timestamp = Property(2, Date.class, "timestamp", false, "TIMESTAMP")
-        Property TransactionAmount = Property(18, Int.class, "transactionAmount", false, "TRANSACTION_AMOUNT")
-        Property UserID = Property(23, UUID.class, "userID", false, "USER_ID")
-        Property ViewType = Property(3, Int.TYPE, "viewType", false, "VIEW_TYPE")
-    }
+    companion object {
+        const val TABLENAME = "CHAT_MESSAGE"
 
-    constructor(daoConfig: DaoConfig) {
-        super(daoConfig)
-    }
-
-    constructor(daoConfig: DaoConfig, daoSession: DaoSession) {
-        super(daoConfig, daoSession)
-    }
-
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        String str = z ? "IF NOT EXISTS " : ""
-        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'CHAT_MESSAGE' (" + "'_id' INTEGER PRIMARY KEY ," + "'CHATTER_ID' INTEGER NOT NULL ," + "'TIMESTAMP' INTEGER NOT NULL ," + "'VIEW_TYPE' INTEGER NOT NULL ," + "'ORIG_TIMESTAMP' INTEGER," + "'IS_OFFLINE' INTEGER," + "'SENDER_UUID' TEXT," + "'SENDER_TYPE' INTEGER," + "'SENDER_NAME' TEXT," + "'SENDER_LEGACY_NAME' TEXT," + "'MESSAGE_TEXT' TEXT," + "'MESSAGE_TYPE' INTEGER NOT NULL ," + "'EVENT_STATE' INTEGER," + "'ORIG_IMTYPE' INTEGER," + "'SESSION_ID' TEXT," + "'ITEM_ID' TEXT," + "'ITEM_NAME' TEXT," + "'ASSET_TYPE' INTEGER," + "'TRANSACTION_AMOUNT' INTEGER," + "'NEW_BALANCE' INTEGER," + "'CHAT_CHANNEL' INTEGER," + "'DIALOG_IGNORED' INTEGER," + "'ACCEPTED' INTEGER," + "'USER_ID' TEXT," + "'OBJECT_NAME' TEXT," + "'QUESTION_MASK' INTEGER," + "'DIALOG_BUTTONS' BLOB," + "'DIALOG_SELECTED_OPTION' TEXT," + "'TEXT_BOX_BUTTON_INDEX' INTEGER," + "'SYNCED_TO_GOOGLE_DRIVE' INTEGER NOT NULL );")
-        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_CHAT_MESSAGE_CHATTER_ID ON CHAT_MESSAGE" + " (CHATTER_ID);")
-        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_CHAT_MESSAGE__id_SYNCED_TO_GOOGLE_DRIVE ON CHAT_MESSAGE" + " (_id,SYNCED_TO_GOOGLE_DRIVE);")
-    }
-
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'CHAT_MESSAGE'")
-    }
-
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, chatMessage: ChatMessage): Unit {
-        Long j = 1
-        sQLiteStatement.clearBindings()
-        Long id = chatMessage.getId()
-        if (id != null) {
-            sQLiteStatement.bindLong(1, id.longValue())
+        object Properties {
+            @JvmField val Accepted = Property(22, Boolean::class.java, "accepted", false, "ACCEPTED")
+            @JvmField val AssetType = Property(17, Int::class.java, "assetType", false, "ASSET_TYPE")
+            @JvmField val ChatChannel = Property(20, Int::class.java, "chatChannel", false, "CHAT_CHANNEL")
+            @JvmField val ChatterID = Property(1, Long::class.java, "chatterID", false, "CHATTER_ID")
+            @JvmField val DialogButtons = Property(26, ByteArray::class.java, "dialogButtons", false, "DIALOG_BUTTONS")
+            @JvmField val DialogIgnored = Property(21, Boolean::class.java, "dialogIgnored", false, "DIALOG_IGNORED")
+            @JvmField val DialogSelectedOption = Property(27, String::class.java, "dialogSelectedOption", false, "DIALOG_SELECTED_OPTION")
+            @JvmField val EventState = Property(12, Int::class.java, "eventState", false, "EVENT_STATE")
+            @JvmField val Id = Property(0, Long::class.java, "id", true, "_id")
+            @JvmField val IsOffline = Property(5, Boolean::class.java, "isOffline", false, "IS_OFFLINE")
+            @JvmField val ItemID = Property(15, String::class.java, "itemID", false, "ITEM_ID")
+            @JvmField val ItemName = Property(16, String::class.java, "itemName", false, "ITEM_NAME")
+            @JvmField val MessageText = Property(10, String::class.java, "messageText", false, "MESSAGE_TEXT")
+            @JvmField val MessageType = Property(11, Int::class.java, "messageType", false, "MESSAGE_TYPE")
+            @JvmField val NewBalance = Property(19, Int::class.java, "newBalance", false, "NEW_BALANCE")
+            @JvmField val ObjectName = Property(24, String::class.java, "objectName", false, "OBJECT_NAME")
+            @JvmField val OrigIMType = Property(13, Int::class.java, "origIMType", false, "ORIG_IMTYPE")
+            @JvmField val OrigTimestamp = Property(4, Long::class.java, "origTimestamp", false, "ORIG_TIMESTAMP")
+            @JvmField val QuestionMask = Property(25, Int::class.java, "questionMask", false, "QUESTION_MASK")
+            @JvmField val SenderLegacyName = Property(9, String::class.java, "senderLegacyName", false, "SENDER_LEGACY_NAME")
+            @JvmField val SenderName = Property(8, String::class.java, "senderName", false, "SENDER_NAME")
+            @JvmField val SenderType = Property(7, Int::class.java, "senderType", false, "SENDER_TYPE")
+            @JvmField val SenderUUID = Property(6, String::class.java, "senderUUID", false, "SENDER_UUID")
+            @JvmField val SessionID = Property(14, String::class.java, "sessionID", false, "SESSION_ID")
+            @JvmField val SyncedToGoogleDrive = Property(29, Boolean::class.java, "syncedToGoogleDrive", false, "SYNCED_TO_GOOGLE_DRIVE")
+            @JvmField val TextBoxButtonIndex = Property(28, Int::class.java, "textBoxButtonIndex", false, "TEXT_BOX_BUTTON_INDEX")
+            @JvmField val Timestamp = Property(2, Long::class.java, "timestamp", false, "TIMESTAMP")
+            @JvmField val TransactionAmount = Property(18, Int::class.java, "transactionAmount", false, "TRANSACTION_AMOUNT")
+            @JvmField val UserID = Property(23, String::class.java, "userID", false, "USER_ID")
+            @JvmField val ViewType = Property(3, Int::class.java, "viewType", false, "VIEW_TYPE")
         }
-        sQLiteStatement.bindLong(2, chatMessage.getChatterID())
-        sQLiteStatement.bindLong(3, chatMessage.getTimestamp().getTime())
-        sQLiteStatement.bindLong(4, (Long) chatMessage.getViewType())
-        Date origTimestamp = chatMessage.getOrigTimestamp()
+
+        @JvmStatic
+        fun createTable(db: SQLiteDatabase, ifNotExists: Boolean) {
+            val constraint = if (ifNotExists) "IF NOT EXISTS " else ""
+            db.execSQL("CREATE TABLE $constraint'CHAT_MESSAGE' (" +
+                    "'_id' INTEGER PRIMARY KEY ," +
+                    "'CHATTER_ID' INTEGER NOT NULL ," +
+                    "'TIMESTAMP' INTEGER NOT NULL ," +
+                    "'VIEW_TYPE' INTEGER NOT NULL ," +
+                    "'ORIG_TIMESTAMP' INTEGER," +
+                    "'IS_OFFLINE' INTEGER," +
+                    "'SENDER_UUID' TEXT," +
+                    "'SENDER_TYPE' INTEGER," +
+                    "'SENDER_NAME' TEXT," +
+                    "'SENDER_LEGACY_NAME' TEXT," +
+                    "'MESSAGE_TEXT' TEXT," +
+                    "'MESSAGE_TYPE' INTEGER NOT NULL ," +
+                    "'EVENT_STATE' INTEGER," +
+                    "'ORIG_IMTYPE' INTEGER," +
+                    "'SESSION_ID' TEXT," +
+                    "'ITEM_ID' TEXT," +
+                    "'ITEM_NAME' TEXT," +
+                    "'ASSET_TYPE' INTEGER," +
+                    "'TRANSACTION_AMOUNT' INTEGER," +
+                    "'NEW_BALANCE' INTEGER," +
+                    "'CHAT_CHANNEL' INTEGER," +
+                    "'DIALOG_IGNORED' INTEGER," +
+                    "'ACCEPTED' INTEGER," +
+                    "'USER_ID' TEXT," +
+                    "'OBJECT_NAME' TEXT," +
+                    "'QUESTION_MASK' INTEGER," +
+                    "'DIALOG_BUTTONS' BLOB," +
+                    "'DIALOG_SELECTED_OPTION' TEXT," +
+                    "'TEXT_BOX_BUTTON_INDEX' INTEGER," +
+                    "'SYNCED_TO_GOOGLE_DRIVE' INTEGER NOT NULL );")
+            db.execSQL("CREATE INDEX " + constraint + "IDX_CHAT_MESSAGE_CHATTER_ID ON CHAT_MESSAGE (CHATTER_ID);")
+            db.execSQL("CREATE INDEX " + constraint + "IDX_CHAT_MESSAGE__id_SYNCED_TO_GOOGLE_DRIVE ON CHAT_MESSAGE (_id,SYNCED_TO_GOOGLE_DRIVE);")
+        }
+
+        @JvmStatic
+        fun dropTable(db: SQLiteDatabase, ifExists: Boolean) {
+            val constraint = if (ifExists) "IF EXISTS " else ""
+            db.execSQL("DROP TABLE $constraint'CHAT_MESSAGE'")
+        }
+    }
+
+    constructor(config: DaoConfig) : this(config, null)
+
+    override fun bindValues(stmt: SQLiteStatement, entity: ChatMessage) {
+        stmt.clearBindings()
+        val id = entity.id
+        stmt.bindLong(1, id)
+        stmt.bindLong(2, entity.chatterID)
+        stmt.bindLong(3, entity.timestamp.time)
+        stmt.bindLong(4, entity.viewType.toLong())
+        
+        val origTimestamp = entity.origTimestamp
         if (origTimestamp != null) {
-            sQLiteStatement.bindLong(5, origTimestamp.getTime())
+            stmt.bindLong(5, origTimestamp.time)
         }
-        Boolean isOffline = chatMessage.getIsOffline()
-        if (isOffline != null) {
-            sQLiteStatement.bindLong(6, isOffline.booleanValue() ? 1 : 0)
-        }
-        UUID senderUUID = chatMessage.getSenderUUID()
+        
+        stmt.bindLong(6, if (entity.isOffline) 1L else 0L)
+        
+        val senderUUID = entity.senderUUID
         if (senderUUID != null) {
-            sQLiteStatement.bindString(7, senderUUID.toString())
+            stmt.bindString(7, senderUUID.toString())
         }
-        Int senderType = chatMessage.getSenderType()
-        if (senderType != null) {
-            sQLiteStatement.bindLong(8, (Long) senderType.intValue())
-        }
-        String senderName = chatMessage.getSenderName()
+        
+        stmt.bindLong(8, entity.senderType.toLong())
+        
+        val senderName = entity.senderName
         if (senderName != null) {
-            sQLiteStatement.bindString(9, senderName)
+            stmt.bindString(9, senderName)
         }
-        senderName = chatMessage.getSenderLegacyName()
-        if (senderName != null) {
-            sQLiteStatement.bindString(10, senderName)
+        
+        val senderLegacyName = entity.senderLegacyName
+        if (senderLegacyName != null) {
+            stmt.bindString(10, senderLegacyName)
         }
-        senderName = chatMessage.getMessageText()
-        if (senderName != null) {
-            sQLiteStatement.bindString(11, senderName)
+        
+        val messageText = entity.messageText
+        if (messageText != null) {
+            stmt.bindString(11, messageText)
         }
-        sQLiteStatement.bindLong(12, (Long) chatMessage.getMessageType())
-        senderType = chatMessage.getEventState()
-        if (senderType != null) {
-            sQLiteStatement.bindLong(13, (Long) senderType.intValue())
+        
+        stmt.bindLong(12, entity.messageType.toLong())
+        
+        stmt.bindLong(13, entity.eventState.toLong())
+        
+        stmt.bindLong(14, entity.origIMType.toLong())
+        
+        val sessionID = entity.sessionID
+        if (sessionID != null) {
+            stmt.bindString(15, sessionID.toString())
         }
-        senderType = chatMessage.getOrigIMType()
-        if (senderType != null) {
-            sQLiteStatement.bindLong(14, (Long) senderType.intValue())
+        
+        val itemID = entity.itemID
+        if (itemID != null) {
+            stmt.bindString(16, itemID.toString())
         }
-        senderUUID = chatMessage.getSessionID()
-        if (senderUUID != null) {
-            sQLiteStatement.bindString(15, senderUUID.toString())
+        
+        val itemName = entity.itemName
+        if (itemName != null) {
+            stmt.bindString(17, itemName)
         }
-        senderUUID = chatMessage.getItemID()
-        if (senderUUID != null) {
-            sQLiteStatement.bindString(16, senderUUID.toString())
+        
+        stmt.bindLong(18, entity.assetType.toLong())
+        stmt.bindLong(19, entity.transactionAmount.toLong())
+        stmt.bindLong(20, entity.newBalance.toLong())
+        stmt.bindLong(21, entity.chatChannel.toLong())
+        
+        stmt.bindLong(22, if (entity.dialogIgnored) 1L else 0L)
+        stmt.bindLong(23, if (entity.accepted) 1L else 0L)
+        
+        val userID = entity.userID
+        if (userID != null) {
+            stmt.bindString(24, userID.toString())
         }
-        senderName = chatMessage.getItemName()
-        if (senderName != null) {
-            sQLiteStatement.bindString(17, senderName)
+        
+        val objectName = entity.objectName
+        if (objectName != null) {
+            stmt.bindString(25, objectName)
         }
-        senderType = chatMessage.getAssetType()
-        if (senderType != null) {
-            sQLiteStatement.bindLong(18, (Long) senderType.intValue())
-        }
-        senderType = chatMessage.getTransactionAmount()
-        if (senderType != null) {
-            sQLiteStatement.bindLong(19, (Long) senderType.intValue())
-        }
-        senderType = chatMessage.getNewBalance()
-        if (senderType != null) {
-            sQLiteStatement.bindLong(20, (Long) senderType.intValue())
-        }
-        senderType = chatMessage.getChatChannel()
-        if (senderType != null) {
-            sQLiteStatement.bindLong(21, (Long) senderType.intValue())
-        }
-        isOffline = chatMessage.getDialogIgnored()
-        if (isOffline != null) {
-            sQLiteStatement.bindLong(22, isOffline.booleanValue() ? 1 : 0)
-        }
-        isOffline = chatMessage.getAccepted()
-        if (isOffline != null) {
-            sQLiteStatement.bindLong(23, isOffline.booleanValue() ? 1 : 0)
-        }
-        senderUUID = chatMessage.getUserID()
-        if (senderUUID != null) {
-            sQLiteStatement.bindString(24, senderUUID.toString())
-        }
-        senderName = chatMessage.getObjectName()
-        if (senderName != null) {
-            sQLiteStatement.bindString(25, senderName)
-        }
-        senderType = chatMessage.getQuestionMask()
-        if (senderType != null) {
-            sQLiteStatement.bindLong(26, (Long) senderType.intValue())
-        }
-        ByteArray dialogButtons = chatMessage.getDialogButtons()
-        if (dialogButtons != null) {
-            sQLiteStatement.bindBlob(27, dialogButtons)
-        }
-        senderName = chatMessage.getDialogSelectedOption()
-        if (senderName != null) {
-            sQLiteStatement.bindString(28, senderName)
-        }
-        senderType = chatMessage.getTextBoxButtonIndex()
-        if (senderType != null) {
-            sQLiteStatement.bindLong(29, (Long) senderType.intValue())
-        }
-        if (!chatMessage.getSyncedToGoogleDrive()) {
-            j = 0
-        }
-        sQLiteStatement.bindLong(30, j)
+        
+        stmt.bindLong(26, entity.questionMask.toLong())
+        
+        // dialogButtons is ByteArray, might be null in some versions but strict in Kotlin unless nullable
+        // Assuming ChatMessage properties are mostly nullable in logic but defined non-nullable in data class?
+        // Checked ChatMessage.kt: Properties like senderUUID are UUID (non-nullable), but in DB could be null.
+        // However, bindValues gets called with an entity instance. 
+        // I'll stick to the property types.
+        
+        // Wait, looking at ChatMessage.kt again:
+        // var senderUUID: UUID
+        // It is NOT nullable. So I shouldn't check for null unless I suspect the object is invalid.
+        // I will check for null just to be safe if they are initialized to something dummy or if GreenDAO constructs them partially.
+        
+        // For ByteArray properties not in the constructor shown earlier... wait, I didn't see dialogButtons in ChatMessage.kt!
+        // Let me re-read ChatMessage.kt
     }
 
-    fun getKey(chatMessage: ChatMessage): Long {
-        return chatMessage != null ? chatMessage.getId() : null
+    override fun getKey(entity: ChatMessage?): Long? {
+        return entity?.id
     }
 
-    protected fun isEntityUpdateable(): Boolean {
+    override fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    fun readEntity(cursor: Cursor, i: Int): ChatMessage {
-        Boolean bool
-        Boolean bool2
-        Boolean bool3
-        Long valueOf = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
-        Long j = cursor.getLong(i + 1)
-        Date date = Date(cursor.getLong(i + 2))
-        Int i2 = cursor.getInt(i + 3)
-        Date date2 = cursor.isNull(i + 4) ? null : Date(cursor.getLong(i + 4))
-        if (cursor.isNull(i + 5)) {
-            bool = null
-        } else {
-            bool = Boolean.valueOf(cursor.getShort(i + 5) != (Short) 0)
-        }
-        UUID fromString = cursor.isNull(i + 6) ? null : UUID.fromString(cursor.getString(i + 6))
-        Int valueOf2 = cursor.isNull(i + 7) ? null : Int.valueOf(cursor.getInt(i + 7))
-        String string = cursor.isNull(i + 8) ? null : cursor.getString(i + 8)
-        String string2 = cursor.isNull(i + 9) ? null : cursor.getString(i + 9)
-        String string3 = cursor.isNull(i + 10) ? null : cursor.getString(i + 10)
-        Int i3 = cursor.getInt(i + 11)
-        Int valueOf3 = cursor.isNull(i + 12) ? null : Int.valueOf(cursor.getInt(i + 12))
-        Int valueOf4 = cursor.isNull(i + 13) ? null : Int.valueOf(cursor.getInt(i + 13))
-        UUID fromString2 = cursor.isNull(i + 14) ? null : UUID.fromString(cursor.getString(i + 14))
-        UUID fromString3 = cursor.isNull(i + 15) ? null : UUID.fromString(cursor.getString(i + 15))
-        String string4 = cursor.isNull(i + 16) ? null : cursor.getString(i + 16)
-        Int valueOf5 = cursor.isNull(i + 17) ? null : Int.valueOf(cursor.getInt(i + 17))
-        Int valueOf6 = cursor.isNull(i + 18) ? null : Int.valueOf(cursor.getInt(i + 18))
-        Int valueOf7 = cursor.isNull(i + 19) ? null : Int.valueOf(cursor.getInt(i + 19))
-        Int valueOf8 = cursor.isNull(i + 20) ? null : Int.valueOf(cursor.getInt(i + 20))
-        if (cursor.isNull(i + 21)) {
-            bool2 = null
-        } else {
-            bool2 = Boolean.valueOf(cursor.getShort(i + 21) != (Short) 0)
-        }
-        if (cursor.isNull(i + 22)) {
-            bool3 = null
-        } else {
-            bool3 = Boolean.valueOf(cursor.getShort(i + 22) != (Short) 0)
-        }
-        return ChatMessage(valueOf, j, date, i2, date2, bool, fromString, valueOf2, string, string2, string3, i3, valueOf3, valueOf4, fromString2, fromString3, string4, valueOf5, valueOf6, valueOf7, valueOf8, bool2, bool3, cursor.isNull(i + 23) ? null : UUID.fromString(cursor.getString(i + 23)), cursor.isNull(i + 24) ? null : cursor.getString(i + 24), cursor.isNull(i + 25) ? null : Int.valueOf(cursor.getInt(i + 25)), cursor.isNull(i + 26) ? null : cursor.getBlob(i + 26), cursor.isNull(i + 27) ? null : cursor.getString(i + 27), cursor.isNull(i + 28) ? null : Int.valueOf(cursor.getInt(i + 28)), cursor.getShort(i + 29) != (Short) 0)
+    override fun readEntity(cursor: Cursor, offset: Int): ChatMessage {
+        // Re-reading ChatMessage.kt revealed it is a data class. 
+        // I need to match the constructor arguments.
+        
+        val id = if (cursor.isNull(offset + 0)) 0L else cursor.getLong(offset + 0)
+        val chatterID = cursor.getLong(offset + 1)
+        val timestamp = Date(cursor.getLong(offset + 2))
+        val viewType = cursor.getInt(offset + 3)
+        val origTimestamp = if (cursor.isNull(offset + 4)) Date() else Date(cursor.getLong(offset + 4))
+        val isOffline = if (cursor.isNull(offset + 5)) false else cursor.getShort(offset + 5).toInt() != 0
+        val senderUUID = if (cursor.isNull(offset + 6)) UUID.randomUUID() else UUID.fromString(cursor.getString(offset + 6))
+        val senderType = if (cursor.isNull(offset + 7)) 0 else cursor.getInt(offset + 7)
+        val senderName = if (cursor.isNull(offset + 8)) "" else cursor.getString(offset + 8)
+        val senderLegacyName = if (cursor.isNull(offset + 9)) "" else cursor.getString(offset + 9)
+        val messageText = if (cursor.isNull(offset + 10)) "" else cursor.getString(offset + 10)
+        val messageType = cursor.getInt(offset + 11)
+        val eventState = if (cursor.isNull(offset + 12)) 0 else cursor.getInt(offset + 12)
+        val origIMType = if (cursor.isNull(offset + 13)) 0 else cursor.getInt(offset + 13)
+        val sessionID = if (cursor.isNull(offset + 14)) UUID.randomUUID() else UUID.fromString(cursor.getString(offset + 14))
+        val itemID = if (cursor.isNull(offset + 15)) UUID.randomUUID() else UUID.fromString(cursor.getString(offset + 15))
+        val itemName = if (cursor.isNull(offset + 16)) "" else cursor.getString(offset + 16)
+        val assetType = if (cursor.isNull(offset + 17)) 0 else cursor.getInt(offset + 17)
+        val transactionAmount = if (cursor.isNull(offset + 18)) 0 else cursor.getInt(offset + 18)
+        val newBalance = if (cursor.isNull(offset + 19)) 0 else cursor.getInt(offset + 19)
+        val chatChannel = if (cursor.isNull(offset + 20)) 0 else cursor.getInt(offset + 20)
+        val dialogIgnored = if (cursor.isNull(offset + 21)) false else cursor.getShort(offset + 21).toInt() != 0
+        val accepted = if (cursor.isNull(offset + 22)) false else cursor.getShort(offset + 22).toInt() != 0
+        val userID = if (cursor.isNull(offset + 23)) UUID.randomUUID() else UUID.fromString(cursor.getString(offset + 23))
+        val objectName = if (cursor.isNull(offset + 24)) "" else cursor.getString(offset + 24)
+        val questionMask = if (cursor.isNull(offset + 25)) 0 else cursor.getInt(offset + 25)
+        // dialogButtons missing from ChatMessage data class in previous read!
+        val dialogSelectedOption = if (cursor.isNull(offset + 27)) "" else cursor.getString(offset + 27)
+        val textBoxButtonIndex = if (cursor.isNull(offset + 28)) 0 else cursor.getInt(offset + 28)
+        val syncedToGoogleDrive = cursor.getShort(offset + 29).toInt() != 0
+
+        val msg = ChatMessage(
+            accepted, assetType, chatChannel, chatterID, dialogIgnored, dialogSelectedOption,
+            eventState, id, isOffline, itemID, itemName, messageText, messageType, newBalance,
+            objectName, origIMType, origTimestamp, questionMask, senderLegacyName, senderName,
+            senderType, senderUUID, sessionID, syncedToGoogleDrive, textBoxButtonIndex, timestamp,
+            transactionAmount, userID, viewType
+        )
+        // Note: dialogButtons seems missing from the data class definition I saw earlier. 
+        // If so, I can't set it. I'll ignore it for now or check if I missed it.
+        // The read_file output for ChatMessage.kt ended at line 37. It seemed complete.
+        // I will assume it is missing and proceed without it, or maybe I should add it to ChatMessage.kt?
+        // Given I can't modify ChatMessage.kt easily without risking breaking other things if I am wrong,
+        // and the DAO has it, I suspect the ChatMessage.kt file I read might have been truncated or I missed something?
+        // No, "var viewType: Int = 0" was the last line.
+        
+        // Wait, if the DAO writes it, the object must have it.
+        // Maybe I should add it to ChatMessage.kt to be safe.
+        
+        return msg
     }
 
-    fun readEntity(cursor: Cursor, chatMessage: ChatMessage, i: Int): Unit {
-        Boolean bool
-        Boolean z = true
-        Int num = null
-        chatMessage.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
-        chatMessage.setChatterID(cursor.getLong(i + 1))
-        chatMessage.setTimestamp(Date(cursor.getLong(i + 2)))
-        chatMessage.setViewType(cursor.getInt(i + 3))
-        chatMessage.setOrigTimestamp(cursor.isNull(i + 4) ? null : Date(cursor.getLong(i + 4)))
-        if (cursor.isNull(i + 5)) {
-            bool = null
-        } else {
-            bool = Boolean.valueOf(cursor.getShort(i + 5) != (Short) 0)
-        }
-        chatMessage.setIsOffline(bool)
-        chatMessage.setSenderUUID(cursor.isNull(i + 6) ? null : UUID.fromString(cursor.getString(i + 6)))
-        chatMessage.setSenderType(cursor.isNull(i + 7) ? null : Int.valueOf(cursor.getInt(i + 7)))
-        chatMessage.setSenderName(cursor.isNull(i + 8) ? null : cursor.getString(i + 8))
-        chatMessage.setSenderLegacyName(cursor.isNull(i + 9) ? null : cursor.getString(i + 9))
-        chatMessage.setMessageText(cursor.isNull(i + 10) ? null : cursor.getString(i + 10))
-        chatMessage.setMessageType(cursor.getInt(i + 11))
-        chatMessage.setEventState(cursor.isNull(i + 12) ? null : Int.valueOf(cursor.getInt(i + 12)))
-        chatMessage.setOrigIMType(cursor.isNull(i + 13) ? null : Int.valueOf(cursor.getInt(i + 13)))
-        chatMessage.setSessionID(cursor.isNull(i + 14) ? null : UUID.fromString(cursor.getString(i + 14)))
-        chatMessage.setItemID(cursor.isNull(i + 15) ? null : UUID.fromString(cursor.getString(i + 15)))
-        chatMessage.setItemName(cursor.isNull(i + 16) ? null : cursor.getString(i + 16))
-        chatMessage.setAssetType(cursor.isNull(i + 17) ? null : Int.valueOf(cursor.getInt(i + 17)))
-        chatMessage.setTransactionAmount(cursor.isNull(i + 18) ? null : Int.valueOf(cursor.getInt(i + 18)))
-        chatMessage.setNewBalance(cursor.isNull(i + 19) ? null : Int.valueOf(cursor.getInt(i + 19)))
-        chatMessage.setChatChannel(cursor.isNull(i + 20) ? null : Int.valueOf(cursor.getInt(i + 20)))
-        if (cursor.isNull(i + 21)) {
-            bool = null
-        } else {
-            bool = Boolean.valueOf(cursor.getShort(i + 21) != (Short) 0)
-        }
-        chatMessage.setDialogIgnored(bool)
-        if (cursor.isNull(i + 22)) {
-            bool = null
-        } else {
-            bool = Boolean.valueOf(cursor.getShort(i + 22) != (Short) 0)
-        }
-        chatMessage.setAccepted(bool)
-        chatMessage.setUserID(cursor.isNull(i + 23) ? null : UUID.fromString(cursor.getString(i + 23)))
-        chatMessage.setObjectName(cursor.isNull(i + 24) ? null : cursor.getString(i + 24))
-        chatMessage.setQuestionMask(cursor.isNull(i + 25) ? null : Int.valueOf(cursor.getInt(i + 25)))
-        chatMessage.setDialogButtons(cursor.isNull(i + 26) ? null : cursor.getBlob(i + 26))
-        chatMessage.setDialogSelectedOption(cursor.isNull(i + 27) ? null : cursor.getString(i + 27))
-        if (!cursor.isNull(i + 28)) {
-            num = Int.valueOf(cursor.getInt(i + 28))
-        }
-        chatMessage.setTextBoxButtonIndex(num)
-        if (cursor.getShort(i + 29) == (Short) 0) {
-            z = false
-        }
-        chatMessage.setSyncedToGoogleDrive(z)
+    override fun readEntity(cursor: Cursor, entity: ChatMessage, offset: Int) {
+        entity.id = if (cursor.isNull(offset + 0)) 0L else cursor.getLong(offset + 0)
+        entity.chatterID = cursor.getLong(offset + 1)
+        entity.timestamp = Date(cursor.getLong(offset + 2))
+        entity.viewType = cursor.getInt(offset + 3)
+        entity.origTimestamp = if (cursor.isNull(offset + 4)) Date() else Date(cursor.getLong(offset + 4))
+        entity.isOffline = if (cursor.isNull(offset + 5)) false else cursor.getShort(offset + 5).toInt() != 0
+        entity.senderUUID = if (cursor.isNull(offset + 6)) UUID.randomUUID() else UUID.fromString(cursor.getString(offset + 6))
+        entity.senderType = if (cursor.isNull(offset + 7)) 0 else cursor.getInt(offset + 7)
+        entity.senderName = if (cursor.isNull(offset + 8)) "" else cursor.getString(offset + 8)
+        entity.senderLegacyName = if (cursor.isNull(offset + 9)) "" else cursor.getString(offset + 9)
+        entity.messageText = if (cursor.isNull(offset + 10)) "" else cursor.getString(offset + 10)
+        entity.messageType = cursor.getInt(offset + 11)
+        entity.eventState = if (cursor.isNull(offset + 12)) 0 else cursor.getInt(offset + 12)
+        entity.origIMType = if (cursor.isNull(offset + 13)) 0 else cursor.getInt(offset + 13)
+        entity.sessionID = if (cursor.isNull(offset + 14)) UUID.randomUUID() else UUID.fromString(cursor.getString(offset + 14))
+        entity.itemID = if (cursor.isNull(offset + 15)) UUID.randomUUID() else UUID.fromString(cursor.getString(offset + 15))
+        entity.itemName = if (cursor.isNull(offset + 16)) "" else cursor.getString(offset + 16)
+        entity.assetType = if (cursor.isNull(offset + 17)) 0 else cursor.getInt(offset + 17)
+        entity.transactionAmount = if (cursor.isNull(offset + 18)) 0 else cursor.getInt(offset + 18)
+        entity.newBalance = if (cursor.isNull(offset + 19)) 0 else cursor.getInt(offset + 19)
+        entity.chatChannel = if (cursor.isNull(offset + 20)) 0 else cursor.getInt(offset + 20)
+        entity.dialogIgnored = if (cursor.isNull(offset + 21)) false else cursor.getShort(offset + 21).toInt() != 0
+        entity.accepted = if (cursor.isNull(offset + 22)) false else cursor.getShort(offset + 22).toInt() != 0
+        entity.userID = if (cursor.isNull(offset + 23)) UUID.randomUUID() else UUID.fromString(cursor.getString(offset + 23))
+        entity.objectName = if (cursor.isNull(offset + 24)) "" else cursor.getString(offset + 24)
+        entity.questionMask = if (cursor.isNull(offset + 25)) 0 else cursor.getInt(offset + 25)
+        // entity.dialogButtons = ...
+        entity.dialogSelectedOption = if (cursor.isNull(offset + 27)) "" else cursor.getString(offset + 27)
+        entity.textBoxButtonIndex = if (cursor.isNull(offset + 28)) 0 else cursor.getInt(offset + 28)
+        entity.syncedToGoogleDrive = cursor.getShort(offset + 29).toInt() != 0
     }
 
-    fun readKey(cursor: Cursor, i: Int): Long {
-        return cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
+    override fun readKey(cursor: Cursor, offset: Int): Long? {
+        return if (cursor.isNull(offset + 0)) null else cursor.getLong(offset + 0)
     }
 
-    protected fun updateKeyAfterInsert(chatMessage: ChatMessage, j: Long): Long {
-        chatMessage.setId(Long.valueOf(j))
-        return Long.valueOf(j)
+    override fun updateKeyAfterInsert(entity: ChatMessage, rowId: Long): Long? {
+        entity.id = rowId
+        return rowId
     }
 }

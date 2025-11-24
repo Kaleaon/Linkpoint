@@ -79,9 +79,9 @@ class AudioManagerWrapper(context: Context) : InvocationHandler {
      * Handles audio focus changes
      */
     private fun onAudioFocusChange(focusChange: Int) {
-        mHandler?.sendMessage(
-            mHandler?.obtainMessage(msgCode, focusChange, 0),
-        )
+        mHandler?.let { handler ->
+            handler.sendMessage(handler.obtainMessage(msgCode, focusChange, 0))
+        }
     }
 
     /**

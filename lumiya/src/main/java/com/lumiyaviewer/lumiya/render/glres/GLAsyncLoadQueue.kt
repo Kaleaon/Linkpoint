@@ -6,190 +6,194 @@ import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.render.RenderContext
 import com.lumiyaviewer.lumiya.render.TextureMemoryTracker
 import com.lumiyaviewer.lumiya.render.avatar.AnimationSequenceInfo
-import com.lumiyaviewer.lumiya.render.glres.GLLoadQueue
 import com.lumiyaviewer.lumiya.res.collections.WeakQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
-import androidx.annotation.NonNull
-import androidx.annotation.Nullable
 import javax.microedition.khronos.egl.EGL10
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.egl.EGLContext
 import javax.microedition.khronos.egl.EGLDisplay
 import javax.microedition.khronos.egl.EGLSurface
 
-class GLAsyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
-    /* access modifiers changed from: private */
-    volatile Boolean contextFailed = true
-    /* access modifiers changed from: private */
-    volatile Boolean contextReady = false
-    /* access modifiers changed from: private */
-    Any contextReadyLock = Any()
-    /* access modifiers changed from: private */
-    EGL10 egl10
-    /* access modifiers changed from: private */
-    EGLContext eglBaseContext
-    /* access modifiers changed from: private */
-    EGLConfig eglConfig
-    /* access modifiers changed from: private */
-    EGLDisplay eglDisplay
-    /* access modifiers changed from: private */
-    WeakQueue<GLLoadQueue.GLLoadable> loadedQueue = WeakQueue<>()
-    /* access modifiers changed from: private */
-    AtomicBoolean mustExit = AtomicBoolean(false)
-    /* access modifiers changed from: private */
-    Boolean requestGL30
-    private Thread thread
+class GLAsyncLoadQueue(
+    renderContext: RenderContext,
+    private val egl10: EGL10,
+    private val eglDisplay: EGLDisplay,
+    private val eglConfig: EGLConfig,
+    private val requestGL30: Boolean
+) : GLLoadQueue(), GLLoadQueue.GLLoadHandler {
 
-    private class EGLLoadThread : Runnable {
+    @Volatile private var contextFailed = true
+    @Volatile private var contextReady = false
+    private val contextReadyLock = Any()
+    
+    private val eglBaseContext: EGLContext
+    private val loadedQueue = WeakQueue<GLLoadable>()
+    private val mustExit = AtomicBoolean(false)
+    private val thread: Thread
+
+    private class EGLLoadThread(
+        private val loadQueue: GLAsyncLoadQueue, // Pass outer class instance
+        renderContext: RenderContext
+    ) : Runnable {
         private var eglSurface: EGLSurface? = null
-        private AtomicReference<RenderContext> renderContext
+        private val renderContextRef = AtomicReference(renderContext)
 
-        private EGLLoadThread(RenderContext renderContext2) {
-            this.renderContext = AtomicReference<>(renderContext2)
-        }
-
-        /* synthetic */ EGLLoadThread(GLAsyncLoadQueue gLAsyncLoadQueue, RenderContext renderContext2, EGLLoadThread eGLLoadThread) {
-            this(renderContext2)
-        }
-
-        @Nullable
-        private fun createContext(): EGLContext {
-            Int i = 3
-            Debug.Printf("TexLoad: create[1]: eglGetError = %d", Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
-            EGL10 r2 = GLAsyncLoadQueue.this.egl10
-            EGLDisplay r3 = GLAsyncLoadQueue.this.eglDisplay
-            EGLConfig r4 = GLAsyncLoadQueue.this.eglConfig
-            EGLContext r5 = GLAsyncLoadQueue.this.eglBaseContext
-            IntArray iArr = IntArray(3)
-            iArr[0] = 12440
-            if (!GLAsyncLoadQueue.this.requestGL30) {
-                i = 2
+        private fun createContext(): EGLContext? {
+            var version = 3
+            Debug.Printf("TexLoad: create[1]: eglGetError = %d", loadQueue.egl10.eglGetError())
+            
+            val attribs = intArrayOf(
+                12440, // EGL_CONTEXT_CLIENT_VERSION
+                3,
+                12344 // EGL_NONE
+            )
+            
+            if (!loadQueue.requestGL30) {
+                attribs[1] = 2
             }
-            iArr[1] = i
-            iArr[2] = 12344
-            EGLContext eglCreateContext = r2.eglCreateContext(r3, r4, r5, iArr)
-            Debug.Printf("TexLoad: create[2]: eglGetError = %d", Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
-            EGLSurface eglCreatePbufferSurface = GLAsyncLoadQueue.this.egl10.eglCreatePbufferSurface(GLAsyncLoadQueue.this.eglDisplay, GLAsyncLoadQueue.this.eglConfig, IntArray{12374, 128, 12375, 128, 12344})
-            Debug.Printf("TexLoad: create[3]: eglGetError = %d", Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
+            
+            val eglCreateContext = loadQueue.egl10.eglCreateContext(
+                loadQueue.eglDisplay, 
+                loadQueue.eglConfig, 
+                loadQueue.eglBaseContext, 
+                attribs
+            )
+            
+            Debug.Printf("TexLoad: create[2]: eglGetError = %d", loadQueue.egl10.eglGetError())
+            
+            val pbufferAttribs = intArrayOf(
+                12374, 128, // EGL_WIDTH
+                12375, 128, // EGL_HEIGHT
+                12344 // EGL_NONE
+            )
+            
+            val eglCreatePbufferSurface = loadQueue.egl10.eglCreatePbufferSurface(
+                loadQueue.eglDisplay, 
+                loadQueue.eglConfig, 
+                pbufferAttribs
+            )
+            
+            Debug.Printf("TexLoad: create[3]: eglGetError = %d", loadQueue.egl10.eglGetError())
+            
             if (eglCreateContext == null || eglCreateContext == EGL10.EGL_NO_CONTEXT) {
-                Debug.Printf("TexLoad: Failed to create loader context", Any[0])
-                GLAsyncLoadQueue.this.egl10.eglDestroySurface(GLAsyncLoadQueue.this.eglDisplay, eglCreatePbufferSurface)
+                Debug.Printf("TexLoad: Failed to create loader context")
+                loadQueue.egl10.eglDestroySurface(loadQueue.eglDisplay, eglCreatePbufferSurface)
                 return null
             }
+            
             Debug.Printf("TexLoad: texture loader context created (%s)", eglCreateContext)
             this.eglSurface = eglCreatePbufferSurface
             return eglCreateContext
         }
 
-        fun run(): Unit {
-            RenderContext andSet = this.renderContext.getAndSet((Any) null)
-            EGLContext createContext = createContext()
-            Int i = 0
-            Long j = 0
-            Debug.Printf("TexLoad: Signaling context readiness.", Any[0])
-            synchronized (GLAsyncLoadQueue.this.contextReadyLock) {
-                Boolean unused = GLAsyncLoadQueue.this.contextFailed = createContext == null
-                Boolean unused2 = GLAsyncLoadQueue.this.contextReady = true
-                GLAsyncLoadQueue.this.contextReadyLock.notifyAll()
+        override fun run() {
+            val context = renderContextRef.getAndSet(null)
+            val eglContext = createContext()
+            var consecutiveFails = 0
+            var lastGcTime = 0L
+            
+            Debug.Printf("TexLoad: Signaling context readiness.")
+            synchronized(loadQueue.contextReadyLock) {
+                loadQueue.contextFailed = eglContext == null
+                loadQueue.contextReady = true
+                (loadQueue.contextReadyLock as Object).notifyAll()
             }
-            if (createContext != null) {
-                Debug.Printf("TexLoad: thread init: eglGetError = %d", Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
-                Debug.Printf("TexLoad: thread init: rc = %b, eglGetError = %d", Boolean.valueOf(GLAsyncLoadQueue.this.egl10.eglMakeCurrent(GLAsyncLoadQueue.this.eglDisplay, this.eglSurface, this.eglSurface, createContext)), Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
-                while (true) {
-                    Int i2 = i
-                    if (GLAsyncLoadQueue.this.mustExit.get()) {
-                        break
-                    }
+            
+            if (eglContext != null) {
+                Debug.Printf("TexLoad: thread init: eglGetError = %d", loadQueue.egl10.eglGetError())
+                Debug.Printf("TexLoad: thread init: rc = %b, eglGetError = %d", 
+                    loadQueue.egl10.eglMakeCurrent(loadQueue.eglDisplay, eglSurface, eglSurface, eglContext), 
+                    loadQueue.egl10.eglGetError()
+                )
+                
+                while (!loadQueue.mustExit.get()) {
                     try {
-                        GLLoadQueue.GLLoadable gLLoadable = (GLLoadQueue.GLLoadable) GLAsyncLoadQueue.this.loadQueue.take()
-                        if (!TextureMemoryTracker.canAllocateMemory(gLLoadable.GLGetLoadSize())) {
-                            GLAsyncLoadQueue.this.loadQueue.offer(gLLoadable)
+                        val loadable = loadQueue.loadQueue.take()
+                        if (!TextureMemoryTracker.canAllocateMemory(loadable.GLGetLoadSize())) {
+                            loadQueue.loadQueue.offer(loadable)
                             Thread.sleep(1000)
-                            i = i2 + 1
-                            if (i >= 10) {
-                                Long uptimeMillis = SystemClock.uptimeMillis()
-                                if (uptimeMillis - j >= AnimationSequenceInfo.MAX_ANIMATION_LENGTH) {
-                                    Debug.Printf("TexLoad: invoking GC.", Any[0])
+                            consecutiveFails++
+                            if (consecutiveFails >= 10) {
+                                val uptimeMillis = SystemClock.uptimeMillis()
+                                if (uptimeMillis - lastGcTime >= AnimationSequenceInfo.MAX_ANIMATION_LENGTH) {
+                                    Debug.Printf("TexLoad: invoking GC.")
                                     System.gc()
-                                    i = 0
-                                    j = uptimeMillis
+                                    consecutiveFails = 0
+                                    lastGcTime = uptimeMillis
                                 }
                             }
                         } else {
-                            gLLoadable.GLLoad(andSet, GLAsyncLoadQueue.this)
+                            loadable.GLLoad(context, loadQueue)
                             GLES10.glFinish()
-                            i = 0
+                            consecutiveFails = 0
                         }
-                    } catch (InterruptedException e) {
+                    } catch (e: InterruptedException) {
+                        // Loop will check mustExit
                     }
                 }
-                GLAsyncLoadQueue.this.loadedQueue.clear()
-                Debug.Printf("TexLoad: Working thread exiting.", Any[0])
-                GLAsyncLoadQueue.this.egl10.eglMakeCurrent(GLAsyncLoadQueue.this.eglDisplay, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT)
-                GLAsyncLoadQueue.this.egl10.eglDestroyContext(GLAsyncLoadQueue.this.eglDisplay, createContext)
-                GLAsyncLoadQueue.this.egl10.eglDestroySurface(GLAsyncLoadQueue.this.eglDisplay, this.eglSurface)
-                this.eglSurface = null
+                
+                loadQueue.loadedQueue.clear()
+                Debug.Printf("TexLoad: Working thread exiting.")
+                loadQueue.egl10.eglMakeCurrent(loadQueue.eglDisplay, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT)
+                loadQueue.egl10.eglDestroyContext(loadQueue.eglDisplay, eglContext)
+                loadQueue.egl10.eglDestroySurface(loadQueue.eglDisplay, eglSurface)
+                eglSurface = null
             }
         }
     }
 
-    GLAsyncLoadQueue(RenderContext renderContext, EGL10 egl102, EGLDisplay eGLDisplay, EGLConfig eGLConfig, Boolean z) throws InstantiationException {
-        this.egl10 = egl102
-        this.eglDisplay = eGLDisplay
-        this.eglConfig = eGLConfig
-        this.requestGL30 = z
-        this.eglBaseContext = egl102.eglGetCurrentContext()
-        if (this.eglBaseContext == null || this.eglBaseContext == EGL10.EGL_NO_CONTEXT) {
+    init {
+        eglBaseContext = egl10.eglGetCurrentContext()
+        if (eglBaseContext == null || eglBaseContext == EGL10.EGL_NO_CONTEXT) {
             throw InstantiationException("TexLoad: current context was null")
         }
-        this.thread = Thread(EGLLoadThread(this, renderContext, (EGLLoadThread) null), "EGLLoader")
-        this.thread.setPriority(4)
-        this.thread.start()
+        
+        thread = Thread(EGLLoadThread(this, renderContext), "EGLLoader")
+        thread.priority = 4
+        thread.start()
+        
         try {
-            Debug.Printf("TexLoad: Waiting for thread to create context", Any[0])
-            synchronized (this.contextReadyLock) {
-                while (!this.contextReady) {
-                    this.contextReadyLock.wait()
+            Debug.Printf("TexLoad: Waiting for thread to create context")
+            synchronized(contextReadyLock) {
+                while (!contextReady) {
+                    (contextReadyLock as Object).wait()
                 }
             }
-            Debug.Printf("TexLoad: Context created, failed = %b", Boolean.valueOf(this.contextFailed))
-            if (this.contextFailed) {
+            Debug.Printf("TexLoad: Context created, failed = %b", contextFailed)
+            if (contextFailed) {
                 throw InstantiationException("TexLoad: failed to create context")
             }
-        } catch (InterruptedException e) {
-            throw InstantiationException("Interrupted: " + e.getMessage())
+        } catch (e: InterruptedException) {
+            throw InstantiationException("Interrupted: " + e.message)
         }
     }
 
-    fun GLResourceLoaded(gLLoadable: GLLoadQueue.GLLoadable): Unit {
-        this.loadedQueue.offer(gLLoadable)
+    override fun GLResourceLoaded(gLLoadable: GLLoadable) {
+        loadedQueue.offer(gLLoadable)
     }
 
-    fun RunLoadQueue(renderContext: RenderContext): Unit {
+    override fun RunLoadQueue(renderContext: RenderContext) {
         while (true) {
-            GLLoadQueue.GLLoadable poll = this.loadedQueue.poll()
-            poll?.GLCompleteLoad()
-            } else {
-                return
-            }
+            val poll = loadedQueue.poll() ?: return
+            poll.GLCompleteLoad()
         }
     }
 
-    fun StopLoadQueue(): Unit {
-        Debug.Printf("TexLoad: StopLoadQueue called.", Any[0])
-        this.mustExit.set(true)
-        this.thread.interrupt()
+    override fun StopLoadQueue() {
+        Debug.Printf("TexLoad: StopLoadQueue called.")
+        mustExit.set(true)
+        thread.interrupt()
         try {
-            this.thread.join()
-        } catch (InterruptedException e) {
+            thread.join()
+        } catch (e: InterruptedException) {
         }
         super.StopLoadQueue()
-        Debug.Printf("TexLoad: StopLoadQueue exiting.", Any[0])
+        Debug.Printf("TexLoad: StopLoadQueue exiting.")
     }
 
-    fun remove(gLLoadable: GLLoadQueue.GLLoadable): Unit {
-        this.loadedQueue.remove(gLLoadable)
+    override fun remove(gLLoadable: GLLoadable) {
+        loadedQueue.remove(gLLoadable)
         super.remove(gLLoadable)
     }
 }

@@ -51,7 +51,7 @@ class FilamentAvatarMeshLoader(
                 return null
             }
             gltfLoader.loadFromAssets(DEFAULT_GLTF)?.also {
-                Log.i(TAG, "Loaded default avatar GLB (${it.entityCount} entities)")
+                Log.i(TAG, "Loaded default avatar GLB (${it.entities.size} entities)")
             }
         } catch (t: Throwable) {
             Log.e(TAG, "Failed to load avatar asset $DEFAULT_GLTF", t)
@@ -156,7 +156,7 @@ class FilamentAvatarMeshLoader(
             .bufferCount(1)
             .vertexCount(vertices.size / 8)
             .attribute(VertexBuffer.VertexAttribute.POSITION, 0, VertexBuffer.AttributeType.FLOAT3, 0, strideBytes)
-            .attribute(VertexBuffer.VertexAttribute.NORMAL, 0, VertexBuffer.AttributeType.FLOAT3, 12, strideBytes)
+            .attribute(VertexBuffer.VertexAttribute.TANGENTS, 0, VertexBuffer.AttributeType.FLOAT3, 12, strideBytes)
             .attribute(VertexBuffer.VertexAttribute.UV0, 0, VertexBuffer.AttributeType.FLOAT2, 24, strideBytes)
             .build(engine)
 

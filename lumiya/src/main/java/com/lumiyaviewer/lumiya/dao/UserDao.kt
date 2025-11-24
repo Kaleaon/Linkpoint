@@ -8,115 +8,106 @@ import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
-class UserDao : AbstractDao<User, Long> {
-    val TABLENAME: String = "Users"
+class UserDao(config: DaoConfig, daoSession: DaoSession?) : AbstractDao<User, Long>(config, daoSession) {
 
-    class Properties {
-        Property BadUUID = Property(4, Boolean.TYPE, "badUUID", false, "BAD_UUID")
-        Property DisplayName = Property(3, String.class, "displayName", false, "DISPLAY_NAME")
-        Property Id = Property(0, Long.class, "id", true, "_id")
-        Property IsFriend = Property(5, Boolean.TYPE, "isFriend", false, "IS_FRIEND")
-        Property RightsGiven = Property(6, Int.TYPE, "rightsGiven", false, "RIGHTS_GIVEN")
-        Property RightsHas = Property(7, Int.TYPE, "rightsHas", false, "RIGHTS_HAS")
-        Property UserName = Property(2, String.class, "userName", false, "USER_NAME")
-        Property Uuid = Property(1, UUID.class, "uuid", false, "UUID")
+    companion object {
+        const val TABLENAME = "Users"
+
+        object Properties {
+            @JvmField val BadUUID = Property(4, Boolean::class.java, "badUUID", false, "BAD_UUID")
+            @JvmField val DisplayName = Property(3, String::class.java, "displayName", false, "DISPLAY_NAME")
+            @JvmField val Id = Property(0, Long::class.java, "id", true, "_id")
+            @JvmField val IsFriend = Property(5, Boolean::class.java, "isFriend", false, "IS_FRIEND")
+            @JvmField val RightsGiven = Property(6, Int::class.java, "rightsGiven", false, "RIGHTS_GIVEN")
+            @JvmField val RightsHas = Property(7, Int::class.java, "rightsHas", false, "RIGHTS_HAS")
+            @JvmField val UserName = Property(2, String::class.java, "userName", false, "USER_NAME")
+            @JvmField val Uuid = Property(1, String::class.java, "uuid", false, "UUID")
+        }
+
+        @JvmStatic
+        fun createTable(db: SQLiteDatabase, ifNotExists: Boolean) {
+            val constraint = if (ifNotExists) "IF NOT EXISTS " else ""
+            db.execSQL("CREATE TABLE $constraint'Users' (" +
+                    "'_id' INTEGER PRIMARY KEY ," +
+                    "'UUID' TEXT," +
+                    "'USER_NAME' TEXT," +
+                    "'DISPLAY_NAME' TEXT," +
+                    "'BAD_UUID' INTEGER NOT NULL ," +
+                    "'IS_FRIEND' INTEGER NOT NULL ," +
+                    "'RIGHTS_GIVEN' INTEGER NOT NULL ," +
+                    "'RIGHTS_HAS' INTEGER NOT NULL );")
+            db.execSQL("CREATE INDEX ${constraint}IDX_Users_UUID ON Users (UUID);")
+        }
+
+        @JvmStatic
+        fun dropTable(db: SQLiteDatabase, ifExists: Boolean) {
+            val constraint = if (ifExists) "IF EXISTS " else ""
+            db.execSQL("DROP TABLE $constraint'Users'")
+        }
     }
 
-    constructor(daoConfig: DaoConfig) {
-        super(daoConfig)
-    }
-
-    constructor(daoConfig: DaoConfig, daoSession: DaoSession) {
-        super(daoConfig, daoSession)
-    }
-
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        String str = z ? "IF NOT EXISTS " : ""
-        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'Users' (" + "'_id' INTEGER PRIMARY KEY ," + "'UUID' TEXT," + "'USER_NAME' TEXT," + "'DISPLAY_NAME' TEXT," + "'BAD_UUID' INTEGER NOT NULL ," + "'IS_FRIEND' INTEGER NOT NULL ," + "'RIGHTS_GIVEN' INTEGER NOT NULL ," + "'RIGHTS_HAS' INTEGER NOT NULL );")
-        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_Users_UUID ON Users" + " (UUID);")
-    }
-
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'Users'")
-    }
-
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, user: User): Unit {
-        Long j = 1
-        sQLiteStatement.clearBindings()
-        Long id = user.getId()
+    override fun bindValues(stmt: SQLiteStatement, entity: User) {
+        stmt.clearBindings()
+        val id = entity.id
         if (id != null) {
-            sQLiteStatement.bindLong(1, id.longValue())
+            stmt.bindLong(1, id)
         }
-        UUID uuid = user.getUuid()
+        val uuid = entity.uuid
         if (uuid != null) {
-            sQLiteStatement.bindString(2, uuid.toString())
+            stmt.bindString(2, uuid.toString())
         }
-        String userName = user.getUserName()
+        val userName = entity.userName
         if (userName != null) {
-            sQLiteStatement.bindString(3, userName)
+            stmt.bindString(3, userName)
         }
-        userName = user.getDisplayName()
-        if (userName != null) {
-            sQLiteStatement.bindString(4, userName)
+        val displayName = entity.displayName
+        if (displayName != null) {
+            stmt.bindString(4, displayName)
         }
-        sQLiteStatement.bindLong(5, user.getBadUUID() ? 1 : 0)
-        if (!user.getIsFriend()) {
-            j = 0
-        }
-        sQLiteStatement.bindLong(6, j)
-        sQLiteStatement.bindLong(7, (Long) user.getRightsGiven())
-        sQLiteStatement.bindLong(8, (Long) user.getRightsHas())
+        stmt.bindLong(5, if (entity.badUUID) 1L else 0L)
+        stmt.bindLong(6, if (entity.isFriend) 1L else 0L)
+        stmt.bindLong(7, entity.rightsGiven.toLong())
+        stmt.bindLong(8, entity.rightsHas.toLong())
     }
 
-    fun getKey(user: User): Long {
-        return user != null ? user.getId() : null
+    override fun getKey(entity: User?): Long? {
+        return entity?.id
     }
 
-    protected fun isEntityUpdateable(): Boolean {
+    override fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    fun readEntity(cursor: Cursor, i: Int): User {
-        Boolean z = true
-        String str = null
-        Long valueOf = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
-        UUID fromString = cursor.isNull(i + 1) ? null : UUID.fromString(cursor.getString(i + 1))
-        String string = cursor.isNull(i + 2) ? null : cursor.getString(i + 2)
-        if (!cursor.isNull(i + 3)) {
-            str = cursor.getString(i + 3)
-        }
-        Boolean z2 = cursor.getShort(i + 4) != (Short) 0
-        if (cursor.getShort(i + 5) == (Short) 0) {
-            z = false
-        }
-        return User(valueOf, fromString, string, str, z2, z, cursor.getInt(i + 6), cursor.getInt(i + 7))
+    override fun readEntity(cursor: Cursor, offset: Int): User {
+        val id = if (cursor.isNull(offset + 0)) null else cursor.getLong(offset + 0)
+        val uuid = if (cursor.isNull(offset + 1)) null else UUID.fromString(cursor.getString(offset + 1))
+        val userName = if (cursor.isNull(offset + 2)) null else cursor.getString(offset + 2)
+        val displayName = if (cursor.isNull(offset + 3)) null else cursor.getString(offset + 3)
+        val badUUID = cursor.getShort(offset + 4).toInt() != 0
+        val isFriend = cursor.getShort(offset + 5).toInt() != 0
+        val rightsGiven = cursor.getInt(offset + 6)
+        val rightsHas = cursor.getInt(offset + 7)
+        
+        return User(id, uuid, userName, displayName, badUUID, isFriend, rightsGiven, rightsHas)
     }
 
-    fun readEntity(cursor: Cursor, user: User, i: Int): Unit {
-        Boolean z = true
-        String str = null
-        user.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
-        user.setUuid(cursor.isNull(i + 1) ? null : UUID.fromString(cursor.getString(i + 1)))
-        user.setUserName(cursor.isNull(i + 2) ? null : cursor.getString(i + 2))
-        if (!cursor.isNull(i + 3)) {
-            str = cursor.getString(i + 3)
-        }
-        user.setDisplayName(str)
-        user.setBadUUID(cursor.getShort(i + 4) != (Short) 0)
-        if (cursor.getShort(i + 5) == (Short) 0) {
-            z = false
-        }
-        user.setIsFriend(z)
-        user.setRightsGiven(cursor.getInt(i + 6))
-        user.setRightsHas(cursor.getInt(i + 7))
+    override fun readEntity(cursor: Cursor, entity: User, offset: Int) {
+        entity.id = if (cursor.isNull(offset + 0)) null else cursor.getLong(offset + 0)
+        entity.uuid = if (cursor.isNull(offset + 1)) null else UUID.fromString(cursor.getString(offset + 1))
+        entity.userName = if (cursor.isNull(offset + 2)) null else cursor.getString(offset + 2)
+        entity.displayName = if (cursor.isNull(offset + 3)) null else cursor.getString(offset + 3)
+        entity.badUUID = cursor.getShort(offset + 4).toInt() != 0
+        entity.isFriend = cursor.getShort(offset + 5).toInt() != 0
+        entity.rightsGiven = cursor.getInt(offset + 6)
+        entity.rightsHas = cursor.getInt(offset + 7)
     }
 
-    fun readKey(cursor: Cursor, i: Int): Long {
-        return cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
+    override fun readKey(cursor: Cursor, offset: Int): Long? {
+        return if (cursor.isNull(offset + 0)) null else cursor.getLong(offset + 0)
     }
 
-    protected fun updateKeyAfterInsert(user: User, j: Long): Long {
-        user.setId(Long.valueOf(j))
-        return Long.valueOf(j)
+    override fun updateKeyAfterInsert(entity: User, rowId: Long): Long? {
+        entity.id = rowId
+        return rowId
     }
 }

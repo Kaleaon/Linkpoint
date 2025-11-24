@@ -24,7 +24,7 @@ internal class ErrorResolutionTracker(private val context: Context) {
                 val uuid = iterator.next()
                 val resolvableError = resolvableErrors[uuid] ?: return
 
-                var message = resolvableError.status.statusMessage
+                var message: String = resolvableError.status.statusMessage ?: ""
                 if (Strings.isNullOrEmpty(message)) {
                     message = context.getString(2131099704)
                 }

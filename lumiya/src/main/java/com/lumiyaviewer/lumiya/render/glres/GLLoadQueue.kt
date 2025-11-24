@@ -5,31 +5,29 @@ import com.lumiyaviewer.lumiya.res.collections.WeakQueue
 import androidx.annotation.NonNull
 
 abstract class GLLoadQueue {
-    WeakQueue<GLLoadable> loadQueue = new WeakQueue<>()
+    protected val loadQueue = WeakQueue<GLLoadable>()
 
     interface GLLoadHandler {
-        fun GLResourceLoaded(gLLoadable: GLLoadable): Unit
+        fun GLResourceLoaded(gLLoadable: GLLoadable)
     }
 
     interface GLLoadable {
-        fun GLCompleteLoad(): Unit
-
+        fun GLCompleteLoad()
         fun GLGetLoadSize(): Int
-
         fun GLLoad(renderContext: RenderContext, gLLoadHandler: GLLoadHandler): Int
     }
 
-    abstract fun RunLoadQueue(renderContext: RenderContext): Unit
+    abstract fun RunLoadQueue(renderContext: RenderContext)
 
-    void StopLoadQueue() {
-        this.loadQueue.clear()
+    open fun StopLoadQueue() {
+        loadQueue.clear()
     }
 
-    void add(@NonNull GLLoadable gLLoadable) {
-        this.loadQueue.offer(gLLoadable)
+    open fun add(@NonNull gLLoadable: GLLoadable) {
+        loadQueue.offer(gLLoadable)
     }
 
-    void remove(@NonNull GLLoadable gLLoadable) {
-        this.loadQueue.remove(gLLoadable)
+    open fun remove(@NonNull gLLoadable: GLLoadable) {
+        loadQueue.remove(gLLoadable)
     }
 }

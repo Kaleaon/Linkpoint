@@ -1,7 +1,6 @@
 package com.lumiyaviewer.lumiya.orm
 
 import android.annotation.SuppressLint
-import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
 import com.google.common.base.Joiner

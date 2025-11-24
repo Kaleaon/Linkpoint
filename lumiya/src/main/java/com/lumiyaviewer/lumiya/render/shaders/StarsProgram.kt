@@ -5,7 +5,7 @@ import com.lumiyaviewer.lumiya.render.RenderContext
 
 class StarsProgram : ShaderProgram(
     Shader.StarsVertexShader,
-    Shader.StarsFragmentShader,
+    Shader.StarsFragmentShader
 ) {
     var uMVPMatrix: Int = 0
     var uStarColor: Int = 0

@@ -1,135 +1,157 @@
 package com.lumiyaviewer.lumiya.slproto.prims
 
-import androidx.v4.internal.view.SupportMenu
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdate
 import com.lumiyaviewer.lumiya.slproto.types.LLTersePacking
 import com.lumiyaviewer.lumiya.slproto.types.LLVector2
 import java.nio.ByteBuffer
 
 class PrimPathParams {
-    val CUT_QUANTA: Float = 2.0E-5f
-    val LL_PCODE_PATH_CIRCLE: Byte = 32
-    val LL_PCODE_PATH_CIRCLE2: Byte = 48
-    val LL_PCODE_PATH_FLEXIBLE: Byte = Byte.MIN_VALUE
-    val LL_PCODE_PATH_LINE: Byte = 16
-    val LL_PCODE_PATH_TEST: Byte = 64
-    val REV_QUANTA: Float = 0.015f
-    val SCALE_QUANTA: Float = 0.01f
-    val SHEAR_QUANTA: Float = 0.01f
-    val TAPER_QUANTA: Float = 0.01f
-    Float Begin
-    Byte CurveType
-    Float End
-    Float RadiusOffset
-    Float Revolutions
-    Float ScaleX
-    Float ScaleY
-    Float ShearX
-    Float ShearY
-    Float Skew
-    Float TaperX
-    Float TaperY
-    Float TwistBegin
-    Float TwistEnd
-    private Int hashValue = getHashValue()
+    var begin: Float = 0f
+    var curveType: Byte = 0
+    var end: Float = 0f
+    var radiusOffset: Float = 0f
+    var revolutions: Float = 0f
+    var scaleX: Float = 0f
+    var scaleY: Float = 0f
+    var shearX: Float = 0f
+    var shearY: Float = 0f
+    var skew: Float = 0f
+    var taperX: Float = 0f
+    var taperY: Float = 0f
+    var twistBegin: Float = 0f
+    var twistEnd: Float = 0f
+    
+    private var hashValue: Int = 0
 
-    PrimPathParams(Byte b, Float f, Float f2, Float f3, Float f4, Float f5, Float f6, Float f7, Float f8, Float f9, Float f10, Float f11, Float f12, Float f13) {
-        this.CurveType = b
-        this.Begin = f
-        this.End = f2
-        this.ScaleX = f3
-        this.ScaleY = f4
-        this.ShearX = f5
-        this.ShearY = f6
-        this.TwistBegin = f7
-        this.TwistEnd = f8
-        this.RadiusOffset = f9
-        this.TaperX = f10
-        this.TaperY = f11
-        this.Revolutions = f12
-        this.Skew = f13
+    companion object {
+        const val CUT_QUANTA: Float = 2.0E-5f
+        const val LL_PCODE_PATH_CIRCLE: Byte = 32
+        const val LL_PCODE_PATH_CIRCLE2: Byte = 48
+        const val LL_PCODE_PATH_FLEXIBLE: Byte = Byte.MIN_VALUE
+        const val LL_PCODE_PATH_LINE: Byte = 16
+        const val LL_PCODE_PATH_TEST: Byte = 64
+        const val REV_QUANTA: Float = 0.015f
+        const val SCALE_QUANTA: Float = 0.01f
+        const val SHEAR_QUANTA: Float = 0.01f
+        const val TAPER_QUANTA: Float = 0.01f
     }
 
-    PrimPathParams(ObjectUpdate.ObjectData objectData) {
-        this.CurveType = (Byte) objectData.PathCurve
-        this.Begin = ((Float) (objectData.PathBegin & SupportMenu.USER_MASK)) * 2.0E-5f
-        this.End = ((Float) (50000 - (objectData.PathEnd & SupportMenu.USER_MASK))) * 2.0E-5f
-        this.ScaleX = ((Float) (200 - (objectData.PathScaleX & 255))) * 0.01f
-        this.ScaleY = ((Float) (200 - (objectData.PathScaleY & 255))) * 0.01f
-        this.ShearX = (LLTersePacking.toFloat().getSignedByte(objectData.PathShearX)) * 0.01f
-        this.ShearY = (LLTersePacking.toFloat().getSignedByte(objectData.PathShearY)) * 0.01f
-        this.TwistEnd = (LLTersePacking.toFloat().getSignedByte(objectData.PathTwist)) * 0.01f
-        this.TwistBegin = (LLTersePacking.toFloat().getSignedByte(objectData.PathTwistBegin)) * 0.01f
-        this.RadiusOffset = (LLTersePacking.toFloat().getSignedByte(objectData.PathRadiusOffset)) * 0.01f
-        this.TaperX = (LLTersePacking.toFloat().getSignedByte(objectData.PathTaperX)) * 0.01f
-        this.TaperY = (LLTersePacking.toFloat().getSignedByte(objectData.PathTaperY)) * 0.01f
-        this.Revolutions = (((Float) (objectData.PathRevolutions & 255)) * 0.015f) + 1.0f
-        this.Skew = (LLTersePacking.toFloat().getSignedByte(objectData.PathSkew)) * 0.01f
+    constructor(
+        curveType: Byte, begin: Float, end: Float, scaleX: Float, scaleY: Float,
+        shearX: Float, shearY: Float, twistBegin: Float, twistEnd: Float,
+        radiusOffset: Float, taperX: Float, taperY: Float, revolutions: Float, skew: Float
+    ) {
+        this.curveType = curveType
+        this.begin = begin
+        this.end = end
+        this.scaleX = scaleX
+        this.scaleY = scaleY
+        this.shearX = shearX
+        this.shearY = shearY
+        this.twistBegin = twistBegin
+        this.twistEnd = twistEnd
+        this.radiusOffset = radiusOffset
+        this.taperX = taperX
+        this.taperY = taperY
+        this.revolutions = revolutions
+        this.skew = skew
+        calculateHash()
     }
 
-    PrimPathParams(ByteBuffer byteBuffer) {
-        this.CurveType = byteBuffer.get()
-        this.Begin = ((Float) (byteBuffer.getShort() & 65535)) * 2.0E-5f
-        this.End = ((Float) (50000 - (byteBuffer.getShort() & 65535))) * 2.0E-5f
-        this.ScaleX = ((Float) (200 - (byteBuffer.get() & UnsignedBytes.MAX_VALUE))) * 0.01f
-        this.ScaleY = ((Float) (200 - (byteBuffer.get() & UnsignedBytes.MAX_VALUE))) * 0.01f
-        this.ShearX = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
-        this.ShearY = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
-        this.TwistEnd = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
-        this.TwistBegin = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
-        this.RadiusOffset = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
-        this.TaperX = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
-        this.TaperY = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
-        this.Revolutions = (((Float) (byteBuffer.get() & UnsignedBytes.MAX_VALUE)) * 0.015f) + 1.0f
-        this.Skew = (LLTersePacking.toFloat().getSignedByte(byteBuffer.get())) * 0.01f
+    constructor(objectData: ObjectUpdate.ObjectData) {
+        this.curveType = objectData.PathCurve.toByte()
+        this.begin = (objectData.PathBegin and 65535).toFloat() * CUT_QUANTA
+        this.end = (50000 - (objectData.PathEnd and 65535)).toFloat() * CUT_QUANTA
+        this.scaleX = (200 - (objectData.PathScaleX and 255)).toFloat() * SCALE_QUANTA
+        this.scaleY = (200 - (objectData.PathScaleY and 255)).toFloat() * SCALE_QUANTA
+        this.shearX = LLTersePacking.toFloat(objectData.PathShearX.toByte()) * SHEAR_QUANTA
+        this.shearY = LLTersePacking.toFloat(objectData.PathShearY.toByte()) * SHEAR_QUANTA
+        this.twistEnd = LLTersePacking.toFloat(objectData.PathTwist.toByte()) * 0.01f
+        this.twistBegin = LLTersePacking.toFloat(objectData.PathTwistBegin.toByte()) * 0.01f
+        this.radiusOffset = LLTersePacking.toFloat(objectData.PathRadiusOffset.toByte()) * 0.01f
+        this.taperX = LLTersePacking.toFloat(objectData.PathTaperX.toByte()) * TAPER_QUANTA
+        this.taperY = LLTersePacking.toFloat(objectData.PathTaperY.toByte()) * TAPER_QUANTA
+        this.revolutions = ((objectData.PathRevolutions and 255).toFloat() * REV_QUANTA) + 1.0f
+        this.skew = LLTersePacking.toFloat(objectData.PathSkew.toByte()) * 0.01f
+        calculateHash()
     }
 
-    private Int getHashValue() {
-        return (this.CurveType * 17) + 0 + Float.floatToIntBits(this.Begin) + Float.floatToIntBits(this.End) + Float.floatToIntBits(this.ScaleX) + Float.floatToIntBits(this.ScaleY) + Float.floatToIntBits(this.ShearX) + Float.floatToIntBits(this.ShearY) + Float.floatToIntBits(this.TwistBegin) + Float.floatToIntBits(this.TwistEnd) + Float.floatToIntBits(this.RadiusOffset) + Float.floatToIntBits(this.TaperX) + Float.floatToIntBits(this.TaperY) + Float.floatToIntBits(this.Revolutions) + Float.floatToIntBits(this.Skew)
+    constructor(byteBuffer: ByteBuffer) {
+        this.curveType = byteBuffer.get()
+        this.begin = (byteBuffer.short.toInt() and 65535).toFloat() * CUT_QUANTA
+        this.end = (50000 - (byteBuffer.short.toInt() and 65535)).toFloat() * CUT_QUANTA
+        this.scaleX = (200 - (byteBuffer.get().toInt() and 255)).toFloat() * SCALE_QUANTA
+        this.scaleY = (200 - (byteBuffer.get().toInt() and 255)).toFloat() * SCALE_QUANTA
+        this.shearX = LLTersePacking.toFloat(byteBuffer.get()) * SHEAR_QUANTA
+        this.shearY = LLTersePacking.toFloat(byteBuffer.get()) * SHEAR_QUANTA
+        this.twistEnd = LLTersePacking.toFloat(byteBuffer.get()) * 0.01f
+        this.twistBegin = LLTersePacking.toFloat(byteBuffer.get()) * 0.01f
+        this.radiusOffset = LLTersePacking.toFloat(byteBuffer.get()) * 0.01f
+        this.taperX = LLTersePacking.toFloat(byteBuffer.get()) * TAPER_QUANTA
+        this.taperY = LLTersePacking.toFloat(byteBuffer.get()) * TAPER_QUANTA
+        this.revolutions = ((byteBuffer.get().toInt() and 255).toFloat() * REV_QUANTA) + 1.0f
+        this.skew = LLTersePacking.toFloat(byteBuffer.get()) * 0.01f
+        calculateHash()
     }
 
-    Boolean equals(Any obj) {
-        if (obj == this) {
-            return true
-        }
-        if (!(obj instanceof PrimPathParams)) {
-            return false
-        }
-        PrimPathParams primPathParams = (PrimPathParams) obj
-        if (this.CurveType == primPathParams.CurveType && this.Begin == primPathParams.Begin && this.End == primPathParams.End && this.ScaleX == primPathParams.ScaleX && this.ScaleY == primPathParams.ScaleY && this.ShearX == primPathParams.ShearX && this.ShearY == primPathParams.ShearY && this.TwistBegin == primPathParams.TwistBegin && this.TwistEnd == primPathParams.TwistEnd && this.RadiusOffset == primPathParams.RadiusOffset && this.TaperX == primPathParams.TaperX && this.TaperY == primPathParams.TaperY && this.Revolutions == primPathParams.Revolutions) {
-            return this.Skew == primPathParams.Skew
-        }
-        return false
+    private fun calculateHash() {
+        hashValue = (curveType * 17) + 0 + 
+            java.lang.Float.floatToIntBits(begin) + 
+            java.lang.Float.floatToIntBits(end) + 
+            java.lang.Float.floatToIntBits(scaleX) + 
+            java.lang.Float.floatToIntBits(scaleY) + 
+            java.lang.Float.floatToIntBits(shearX) + 
+            java.lang.Float.floatToIntBits(shearY) + 
+            java.lang.Float.floatToIntBits(twistBegin) + 
+            java.lang.Float.floatToIntBits(twistEnd) + 
+            java.lang.Float.floatToIntBits(radiusOffset) + 
+            java.lang.Float.floatToIntBits(taperX) + 
+            java.lang.Float.floatToIntBits(taperY) + 
+            java.lang.Float.floatToIntBits(revolutions) + 
+            java.lang.Float.floatToIntBits(skew)
     }
 
-    LLVector2 getBeginScale() {
-        LLVector2 lLVector2 = LLVector2(1.0f, 1.0f)
-        if (this.ScaleX > 1.0f) {
-            lLVector2.x = 2.0f - this.ScaleX
-        }
-        if (this.ScaleY > 1.0f) {
-            lLVector2.y = 2.0f - this.ScaleY
-        }
-        return lLVector2
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is PrimPathParams) return false
+        
+        return curveType == other.curveType && 
+               begin == other.begin && 
+               end == other.end && 
+               scaleX == other.scaleX && 
+               scaleY == other.scaleY && 
+               shearX == other.shearX && 
+               shearY == other.shearY && 
+               twistBegin == other.twistBegin && 
+               twistEnd == other.twistEnd && 
+               radiusOffset == other.radiusOffset && 
+               taperX == other.taperX && 
+               taperY == other.taperY && 
+               revolutions == other.revolutions && 
+               skew == other.skew
     }
 
-    LLVector2 getEndScale() {
-        LLVector2 lLVector2 = LLVector2(1.0f, 1.0f)
-        if (this.ScaleX < 1.0f) {
-            lLVector2.x = this.ScaleX
-        }
-        if (this.ScaleY < 1.0f) {
-            lLVector2.y = this.ScaleY
-        }
-        return lLVector2
+    override fun hashCode(): Int {
+        return hashValue
     }
 
-    Int hashCode() {
-        return this.hashValue
+    fun getBeginScale(): LLVector2 {
+        val vector = LLVector2(1.0f, 1.0f)
+        if (scaleX > 1.0f) vector.x = 2.0f - scaleX
+        if (scaleY > 1.0f) vector.y = 2.0f - scaleY
+        return vector
     }
 
-    String toString() {
-        return String.format("CurveType: 0x%02x, Begin: %f, End: %f, Scale: (%f, %f), Shear: (%f, %f), TwistBegin: %f, TwistEnd: %f, RadiusOffset: %f, Taper: (%f, %f), Revolutions: %f, Skew: %f", Any[]{Byte.valueOf(this.CurveType), Float.valueOf(this.Begin), Float.valueOf(this.End), Float.valueOf(this.ScaleX), Float.valueOf(this.ScaleY), Float.valueOf(this.ShearX), Float.valueOf(this.ShearY), Float.valueOf(this.TwistBegin), Float.valueOf(this.TwistEnd), Float.valueOf(this.RadiusOffset), Float.valueOf(this.TaperX), Float.valueOf(this.TaperY), Float.valueOf(this.Revolutions), Float.valueOf(this.Skew)})
+    fun getEndScale(): LLVector2 {
+        val vector = LLVector2(1.0f, 1.0f)
+        if (scaleX < 1.0f) vector.x = scaleX
+        if (scaleY < 1.0f) vector.y = scaleY
+        return vector
+    }
+
+    override fun toString(): String {
+        return "CurveType: 0x%02x, Begin: %f, End: %f, Scale: (%f, %f), Shear: (%f, %f), TwistBegin: %f, TwistEnd: %f, RadiusOffset: %f, Taper: (%f, %f), Revolutions: %f, Skew: %f".format(
+            curveType, begin, end, scaleX, scaleY, shearX, shearY, twistBegin, twistEnd, radiusOffset, taperX, taperY, revolutions, skew
+        )
     }
 }

@@ -20,16 +20,7 @@ data class LogMessageBatch(
     constructor(bundle: Bundle) : this(
         agentUUID = UUID.fromString(bundle.getString("agentUUID") ?: ""),
         agentName = bundle.getString("agentName") ?: "",
-        messages =
-            run {
-                val builder = ImmutableList.builder<LogChatMessage>()
-                bundle.getParcelableArray("messages")?.forEach { parcelable ->
-                    if (parcelable is Bundle) {
-                        builder.add(LogChatMessage(parcelable))
-                    }
-                }
-                builder.build()
-            },
+        messages = extractMessages(bundle),
         lastMessageID = bundle.getLong("lastMessageID"),
     )
 
@@ -47,6 +38,18 @@ data class LogMessageBatch(
         messages = ImmutableList.copyOf(messages),
         lastMessageID = lastMessageID,
     )
+
+    companion object {
+        private fun extractMessages(bundle: Bundle): ImmutableList<LogChatMessage> {
+            val builder = ImmutableList.builder<LogChatMessage>()
+            bundle.getParcelableArray("messages")?.forEach { parcelable ->
+                if (parcelable is Bundle) {
+                    builder.add(LogChatMessage(parcelable))
+                }
+            }
+            return builder.build()
+        }
+    }
 
     /**
      * Converts this batch to a Bundle

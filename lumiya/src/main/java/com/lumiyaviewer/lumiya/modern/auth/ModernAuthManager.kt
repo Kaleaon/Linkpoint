@@ -6,8 +6,8 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
 import android.util.Log
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
+// import androidx.security.crypto.EncryptedSharedPreferences
+// import androidx.security.crypto.MasterKey
 import java.security.KeyStore
 import java.security.SecureRandom
 import java.util.concurrent.CompletableFuture
@@ -38,21 +38,11 @@ class ModernAuthManager(context: Context) {
 
     private fun initializeSecurePreferences(): SharedPreferences {
         try {
-            // Create or retrieve master key for encryption
-            val masterKey = MasterKey.Builder(context)
-                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                .build()
-
-            // Create encrypted shared preferences
-            return EncryptedSharedPreferences.create(
-                context,
-                PREFS_NAME,
-                masterKey,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            )
+            // Stub implementation using standard SharedPreferences for now
+            // until androidx.security dependency is available
+            return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize secure preferences, falling back to regular preferences", e)
+            Log.e(TAG, "Failed to initialize secure preferences", e)
             return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         }
     }

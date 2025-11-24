@@ -1,54 +1,41 @@
 package com.lumiyaviewer.lumiya.slproto.chat
 
 import android.content.Context
-import com.google.common.base.Strings
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.dao.ChatMessage
-import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent
+import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatYesNoEvent
+import com.lumiyaviewer.lumiya.slproto.messages.ImprovedInstantMessage
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
-import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUnknown
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import androidx.annotation.NonNull
 
-class SLChatLureRequestedEvent : SLChatEvent {
-    private String message
+class SLChatLureRequestedEvent : SLChatYesNoEvent {
+    
+    constructor(chatMessage: ChatMessage, uuid: UUID) : super(chatMessage, uuid)
 
-    SLChatLureRequestedEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
-        super(chatMessage, uuid)
-        this.message = chatMessage.getMessageText()
+    constructor(source: ChatMessageSource, uuid: UUID, message: ImprovedInstantMessage) : 
+        super(source, uuid, message, "Teleport requested")
+
+    override fun getMessageType(): ChatMessageType {
+        return ChatMessageType.LureRequested
     }
 
-    SLChatLureRequestedEvent(String str, @NonNull UUID uuid) {
-        super((ChatMessageSource) ChatMessageSourceUnknown.getInstance(), uuid)
-        this.message = str
+    override fun getNoButton(context: Context): String {
+        return context.getString(R.string.lure_req_decline)
     }
 
-    /* access modifiers changed from: protected */
-    @NonNull
-    SLChatEvent.ChatMessageType getMessageType() {
-        return SLChatEvent.ChatMessageType.LureRequested
+    override fun getNoMessage(context: Context): String {
+        return context.getString(R.string.lure_req_declined)
     }
 
-    /* access modifiers changed from: protected */
-    String getText(Context context, @NonNull UserManager userManager) {
-        if (Strings.isNullOrEmpty(this.message)) {
-            return context.getString(R.string.chat_teleport_requested_no_message)
-        }
-        return context.getString(R.string.chat_teleport_requested_message, Array<Any>{this.message})
+    override fun getQuestion(context: Context): String {
+        return context.getString(R.string.lure_req_received)
     }
 
-    SLChatEvent.ChatMessageViewType getViewType() {
-        return SLChatEvent.ChatMessageViewType.VIEW_TYPE_NORMAL
+    override fun getYesButton(context: Context): String {
+        return context.getString(R.string.lure_req_accept)
     }
 
-    /* access modifiers changed from: protected */
-    Boolean isActionMessage(@NonNull UserManager userManager) {
-        return false
-    }
-
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
-        super.serializeToDatabaseObject(chatMessage)
-        chatMessage.setMessageText(this.message)
+    override fun getYesMessage(context: Context): String {
+        return context.getString(R.string.lure_req_accepted)
     }
 }

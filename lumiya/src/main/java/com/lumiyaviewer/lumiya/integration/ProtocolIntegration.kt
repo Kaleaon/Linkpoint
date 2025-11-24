@@ -117,10 +117,10 @@ class IntegratedProtocolHandler(
                     }
                 ))
                 
-                // Send via capabilities
+                // Send via capabilities - using positional arguments or 'data' as param name if named
                 val result = protocolManager.sendLLSDRequest(
-                    url = getCapabilityUrl("AgentSetAppearance"),
-                    llsdData = llsdData
+                    getCapabilityUrl("AgentSetAppearance"),
+                    llsdData // Positional argument for 'data'
                 )
                 
                 result.isSuccess

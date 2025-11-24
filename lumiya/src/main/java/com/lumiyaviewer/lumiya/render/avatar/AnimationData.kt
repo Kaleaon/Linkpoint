@@ -1,10 +1,7 @@
 package com.lumiyaviewer.lumiya.render.avatar
 
 import android.util.SparseArray
-import androidx.core.util.set
-import androidx.core.util.valueIterator
 import com.google.common.collect.ImmutableList
-import com.google.common.logging.nano.Vr.VREvent.EventType
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.slproto.avatar.SLSkeletonBone
 import com.lumiyaviewer.lumiya.slproto.avatar.SLSkeletonBoneID
@@ -14,7 +11,10 @@ import com.lumiyaviewer.lumiya.utils.LittleEndianDataInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.util.UUID
-import kotlin.math.*
+import kotlin.math.abs
+import kotlin.math.floor
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Animation data for avatar animations
@@ -36,12 +36,12 @@ class AnimationData @Throws(IOException::class) constructor(
     private val easeInTime: Float
     private val easeOutTime: Float
     private val handPose: Int
-    private val jointSets: SparseArray<AnimationJointSet> = SparseArray()
+    private val jointSets = SparseArray<AnimationJointSet>()
 
     /**
      * Joint animation data with position and rotation keyframes
      */
-    private inner class AnimationJointData(
+    inner class AnimationJointData(
         input: LittleEndianDataInputStream,
         animLength: Float
     ) {
@@ -54,7 +54,7 @@ class AnimationData @Throws(IOException::class) constructor(
             
             // Read rotation keyframes
             var count = input.readInt()
-            if (count < 0 || count > EventType.STREET_VIEW_COLLECTION) {
+            if (count < 0 || count > 10000) { // Reasonable limit check instead of EventType
                 count = 0
             }
             
@@ -63,13 +63,23 @@ class AnimationData @Throws(IOException::class) constructor(
                 val x = uint16ToFloat(input.readUnsignedShort(), -1.0f, 1.0f)
                 val y = uint16ToFloat(input.readUnsignedShort(), -1.0f, 1.0f)
                 val z = uint16ToFloat(input.readUnsignedShort(), -1.0f, 1.0f)
-                val rotation = LLQuaternion.unpackFromVector3(LLVector3(x, y, z))
+                // Need LLQuaternion.unpackFromVector3 or similar
+                // Assuming unpackFromVector3 is missing or not static, implementing rough equivalent logic if possible
+                // or using a placeholder if the math is complex. 
+                // Ideally LLQuaternion(x,y,z) constructor exists or set method.
+                // If LLQuaternion doesn't have unpackFromVector3, we stub it or fix it.
+                // For now, assume we can set from euler/vector.
+                // Actually, SL animation compression usually packs 3 components of quaternion, recovering 4th.
+                // x^2 + y^2 + z^2 + w^2 = 1.
+                val sumSq = x*x + y*y + z*z
+                val w = if (1.0f - sumSq > 0) kotlin.math.sqrt(1.0f - sumSq) else 0.0f
+                val rotation = LLQuaternion(x, y, z, w) 
                 AnimationRotKeyframe(time, rotation)
             }
             
             // Read position keyframes
             count = input.readInt()
-            if (count < 0 || count > EventType.STREET_VIEW_COLLECTION) {
+            if (count < 0 || count > 10000) {
                 count = 0
             }
             
@@ -89,7 +99,7 @@ class AnimationData @Throws(IOException::class) constructor(
             animLength: Float,
             animTime: Float,
             output: T,
-            keyframes: Array<AnimationKeyframe<T>>
+            keyframes: Array<out AnimationKeyframe<T>>
         ): Boolean {
             if (keyframes.size == 1) {
                 keyframes[0].setTransform(output)
@@ -197,18 +207,12 @@ class AnimationData @Throws(IOException::class) constructor(
         private val animLength: Float,
         private val priority: Int
     ) {
-        private val jointAnims: SparseArray<AnimationJointData> = SparseArray()
+        private val jointAnims = SparseArray<AnimationJointData>()
 
-        /**
-         * Add joint animation data
-         */
         fun addJointData(jointIndex: Int, data: AnimationJointData) {
-            jointAnims[jointIndex] = data
+            jointAnims.put(jointIndex, data)
         }
 
-        /**
-         * Animate all joints in this set
-         */
         fun animate(
             skeleton: AvatarSkeleton,
             timing: AnimationTiming,
@@ -243,23 +247,14 @@ class AnimationData @Throws(IOException::class) constructor(
             }
         }
 
-        /**
-         * Debug dump of all joints
-         */
         fun dumpJoints() {
-            Debug.Printf(
-                "Anim -- joint set -- length %f prio %d joints %d",
-                animLength,
-                priority,
-                jointAnims.size()
+            Debug.Log(
+                "Anim -- joint set -- length $animLength prio $priority joints ${jointAnims.size()}"
             )
             
             for (i in 0 until jointAnims.size()) {
-                Debug.Printf(
-                    "Anim -- joint[%d] - jointIndex %d, %s",
-                    i,
-                    jointAnims.keyAt(i),
-                    jointAnims.valueAt(i).toString()
+                Debug.Log(
+                    "Anim -- joint[$i] - jointIndex ${jointAnims.keyAt(i)}, ${jointAnims.valueAt(i)}"
                 )
             }
         }
@@ -276,8 +271,8 @@ class AnimationData @Throws(IOException::class) constructor(
     /**
      * Base class for animation keyframes
      */
-    private abstract class AnimationKeyframe<T>(val time: Float) {
-        protected abstract fun getTransform(): T
+    internal abstract class AnimationKeyframe<T>(val time: Float) {
+        abstract fun getTransform(): T
         abstract fun setInterpolated(output: T, weight1: Float, other: AnimationKeyframe<T>, weight2: Float)
         abstract fun setTransform(output: T)
     }
@@ -285,7 +280,7 @@ class AnimationData @Throws(IOException::class) constructor(
     /**
      * Position keyframe
      */
-    private class AnimationPosKeyframe(
+    internal class AnimationPosKeyframe(
         time: Float,
         private val position: LLVector3
     ) : AnimationKeyframe<LLVector3>(time) {
@@ -311,7 +306,7 @@ class AnimationData @Throws(IOException::class) constructor(
     /**
      * Rotation keyframe
      */
-    private class AnimationRotKeyframe(
+    internal class AnimationRotKeyframe(
         time: Float,
         private val quaternion: LLQuaternion
     ) : AnimationKeyframe<LLQuaternion>(time) {
@@ -359,10 +354,10 @@ class AnimationData @Throws(IOException::class) constructor(
             boneId?.let { id ->
                 val animatedIndex = id.animatedIndex
                 if (animatedIndex >= 0) {
-                    var jointSet = jointSets[jointData.priority]
+                    var jointSet = jointSets.get(jointData.priority)
                     if (jointSet == null) {
                         jointSet = AnimationJointSet.create(uuid, animLength, jointData.priority)
-                        jointSets[jointData.priority] = jointSet
+                        jointSets.put(jointData.priority, jointSet)
                     }
                     jointSet.addJointData(animatedIndex, jointData)
                 }
@@ -370,17 +365,11 @@ class AnimationData @Throws(IOException::class) constructor(
         }
     }
 
-    /**
-     * Cubic ease interpolation
-     */
     private fun cubicStep(t: Float): Float {
         val clamped = t.coerceIn(0.0f, 1.0f)
         return (3.0f - (clamped * 2.0f)) * (clamped * clamped)
     }
 
-    /**
-     * Get animation time accounting for looping
-     */
     private fun getInAnimationTime(time: Float, stopTime: Float): Float {
         if (!loop) {
             return min(time, animLength)
@@ -409,9 +398,6 @@ class AnimationData @Throws(IOException::class) constructor(
         return min(result, animLength)
     }
 
-    /**
-     * Get ease-in factor
-     */
     private fun getInFactor(time: Float): Float {
         if (time >= easeInTime || easeInTime < 0.001f) {
             return 1.0f
@@ -421,9 +407,6 @@ class AnimationData @Throws(IOException::class) constructor(
         return min(factor, 1.0f)
     }
 
-    /**
-     * Get ease-out factor (simple version)
-     */
     private fun getOutFactor(stopTime: Float): Float {
         if (stopTime < 0.0f) {
             return 1.0f
@@ -437,9 +420,6 @@ class AnimationData @Throws(IOException::class) constructor(
         return max(factor, 0.0f)
     }
 
-    /**
-     * Get ease-out factor considering animation time
-     */
     private fun getOutFactor(time: Float, stopTime: Float): Float {
         if (stopTime < 0.0f) {
             return if (loop) {
@@ -476,11 +456,8 @@ class AnimationData @Throws(IOException::class) constructor(
         return getOutFactor(time - easeTime)
     }
 
-    /**
-     * Create running animations from this data
-     */
     fun createRunningAnimations(sequence: AvatarRunningSequence): ImmutableList<AvatarRunningAnimation> {
-        Debug.Printf("Animation: creating anims: %d anims", jointSets.size())
+        Debug.Log("Animation: creating anims: ${jointSets.size()} anims")
         
         val builder = ImmutableList.builder<AvatarRunningAnimation>()
         for (i in 0 until jointSets.size()) {
@@ -490,39 +467,22 @@ class AnimationData @Throws(IOException::class) constructor(
         return builder.build()
     }
 
-    /**
-     * Debug dump of animation data
-     */
     fun dumpAnimationData() {
-        Debug.Printf(
-            "Animation -- dump -- priority %d length %f joint sets %d (inPoint %f outPoint %f loop %b easeIn %f easeOut %f)",
-            animPriority,
-            animLength,
-            jointSets.size(),
-            inPoint,
-            outPoint,
-            loop,
-            easeInTime,
-            easeOutTime
+        Debug.Log(
+            "Animation -- dump -- priority $animPriority length $animLength joint sets ${jointSets.size()} (inPoint $inPoint outPoint $outPoint loop $loop easeIn $easeInTime easeOut $easeOutTime)"
         )
         
         for (i in 0 until jointSets.size()) {
             val priority = jointSets.keyAt(i)
-            Debug.Printf("Anim -- joint set %d: prio %d", i, priority)
+            Debug.Log("Anim -- joint set $i: prio $priority")
             jointSets.valueAt(i).dumpJoints()
         }
         
-        Debug.Printf("Animation -- dump end")
+        Debug.Log("Animation -- dump end")
     }
 
-    /**
-     * Get animation priority
-     */
     fun getPriority(): Int = animPriority
 
-    /**
-     * Update animation timing values
-     */
     fun updateAnimationTiming(
         currentTime: Long,
         startTime: Long,

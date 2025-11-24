@@ -1,81 +1,75 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.ArrayList
-import java.util.Iterator
 import java.util.UUID
 
 class AgentAnimation : SLMessage {
-    AgentData AgentData_Field
-    ArrayList<AnimationList> AnimationList_Fields = ArrayList<>()
-    ArrayList<PhysicalAvatarEventList> PhysicalAvatarEventList_Fields = ArrayList<>()
+    val AgentData_Field = AgentData()
+    val AnimationList_Fields = ArrayList<AnimationList>()
+    val PhysicalAvatarEventList_Fields = ArrayList<PhysicalAvatarEventList>()
 
     class AgentData {
-        UUID AgentID
-        UUID SessionID
+        var AgentID: UUID? = null
+        var SessionID: UUID? = null
     }
 
     class AnimationList {
-        UUID AnimID
-        Boolean StartAnim
+        var AnimID: UUID? = null
+        var StartAnim: Boolean = false
     }
 
     class PhysicalAvatarEventList {
-        ByteArray TypeData
+        var TypeData: ByteArray? = null
     }
 
     constructor() {
         this.zeroCoded = false
-        this.AgentData_Field = AgentData()
     }
 
-    fun CalcPayloadSize(): Int {
-        Int size = (this.AnimationList_Fields.size() * 17) + 34 + 1
-        Iterator<T> it = this.PhysicalAvatarEventList_Fields.iterator()
-        while (true) {
-            Int i = size
-            if (!it.hasNext()) {
-                return i
-            }
-            size = ((PhysicalAvatarEventList) it.next()).TypeData.length + 1 + i
+    override fun CalcPayloadSize(): Int {
+        var size = (this.AnimationList_Fields.size * 17) + 34 + 1
+        for (event in this.PhysicalAvatarEventList_Fields) {
+            size += (event.TypeData?.size ?: 0) + 1
+        }
+        return size
+    }
+
+    override fun Handle(handler: SLMessageHandler) {
+        handler.HandleAgentAnimation(this)
+    }
+
+    override fun PackPayload(buffer: ByteBuffer) {
+        buffer.put(5.toByte())
+        packUUID(buffer, this.AgentData_Field.AgentID)
+        packUUID(buffer, this.AgentData_Field.SessionID)
+        buffer.put(this.AnimationList_Fields.size.toByte())
+        for (animationList in this.AnimationList_Fields) {
+            packUUID(buffer, animationList.AnimID)
+            packBoolean(buffer, animationList.StartAnim)
+        }
+        buffer.put(this.PhysicalAvatarEventList_Fields.size.toByte())
+        for (physicalAvatarEventList in this.PhysicalAvatarEventList_Fields) {
+            packVariable(buffer, physicalAvatarEventList.TypeData ?: ByteArray(0), 1)
         }
     }
 
-    fun Handle(sLMessageHandler: SLMessageHandler): Unit {
-        sLMessageHandler.HandleAgentAnimation(this)
-    }
-
-    fun PackPayload(byteBuffer: ByteBuffer): Unit {
-        byteBuffer.put((Byte) 5)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        byteBuffer.put((Byte) this.AnimationList_Fields.size())
-        for (AnimationList animationList : this.AnimationList_Fields) {
-            packUUID(byteBuffer, animationList.AnimID)
-            packBoolean(byteBuffer, animationList.StartAnim)
-        }
-        byteBuffer.put((Byte) this.PhysicalAvatarEventList_Fields.size())
-        for (PhysicalAvatarEventList physicalAvatarEventList : this.PhysicalAvatarEventList_Fields) {
-            packVariable(byteBuffer, physicalAvatarEventList.TypeData, 1)
-        }
-    }
-
-    fun UnpackPayload(byteBuffer: ByteBuffer): Unit {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            AnimationList animationList = AnimationList()
-            animationList.AnimID = unpackUUID(byteBuffer)
-            animationList.StartAnim = unpackBoolean(byteBuffer)
+    override fun UnpackPayload(buffer: ByteBuffer) {
+        this.AgentData_Field.AgentID = unpackUUID(buffer)
+        this.AgentData_Field.SessionID = unpackUUID(buffer)
+        val b = buffer.get().toInt() and 0xFF
+        for (i in 0 until b) {
+            val animationList = AnimationList()
+            animationList.AnimID = unpackUUID(buffer)
+            animationList.StartAnim = unpackBoolean(buffer)
             this.AnimationList_Fields.add(animationList)
         }
-        Byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b2; i2++) {
-            PhysicalAvatarEventList physicalAvatarEventList = PhysicalAvatarEventList()
-            physicalAvatarEventList.TypeData = unpackVariable(byteBuffer, 1)
+        val b2 = buffer.get().toInt() and 0xFF
+        for (i in 0 until b2) {
+            val physicalAvatarEventList = PhysicalAvatarEventList()
+            physicalAvatarEventList.TypeData = unpackVariable(buffer, 1)
             this.PhysicalAvatarEventList_Fields.add(physicalAvatarEventList)
         }
     }

@@ -1,24 +1,24 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.ArrayList
 import java.util.UUID
 
 class AgentCachedTexture : SLMessage {
-    AgentData AgentData_Field
-    ArrayList<WearableData> WearableData_Fields = ArrayList<>()
+    var AgentData_Field: AgentData? = null
+    var WearableData_Fields: ArrayList<WearableData>? = ArrayList()
 
     class AgentData {
-        UUID AgentID
-        Int SerialNum
-        UUID SessionID
+        var AgentID: UUID? = null
+        var SerialNum: Int = 0
+        var SessionID: UUID? = null
     }
 
     class WearableData {
-        UUID ID
-        Int TextureIndex
+        var ID: UUID? = null
+        var TextureIndex: Int = 0
     }
 
     constructor() {
@@ -26,38 +26,45 @@ class AgentCachedTexture : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    fun CalcPayloadSize(): Int {
-        return (this.WearableData_Fields.size() * 17) + 41
+    override fun CalcPayloadSize(): Int {
+        val size = WearableData_Fields?.size ?: 0
+        return (size * 17) + 41
     }
 
-    fun Handle(sLMessageHandler: SLMessageHandler): Unit {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAgentCachedTexture(this)
     }
 
-    fun PackPayload(byteBuffer: ByteBuffer): Unit {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((Byte) 1)
+        byteBuffer.put(1.toByte())
         byteBuffer.put(Byte.MIN_VALUE)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        packInt(byteBuffer, this.AgentData_Field.SerialNum)
-        byteBuffer.put((Byte) this.WearableData_Fields.size())
-        for (WearableData wearableData : this.WearableData_Fields) {
+        packUUID(byteBuffer, AgentData_Field?.AgentID)
+        packUUID(byteBuffer, AgentData_Field?.SessionID)
+        packInt(byteBuffer, AgentData_Field?.SerialNum ?: 0)
+        
+        val size = WearableData_Fields?.size ?: 0
+        byteBuffer.put(size.toByte())
+        
+        WearableData_Fields?.forEach { wearableData ->
             packUUID(byteBuffer, wearableData.ID)
-            packByte(byteBuffer, (Byte) wearableData.TextureIndex)
+            packByte(byteBuffer, wearableData.TextureIndex.toByte())
         }
     }
 
-    fun UnpackPayload(byteBuffer: ByteBuffer): Unit {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SerialNum = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            WearableData wearableData = WearableData()
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val agentData = AgentData_Field ?: AgentData()
+        agentData.AgentID = unpackUUID(byteBuffer)
+        agentData.SessionID = unpackUUID(byteBuffer)
+        agentData.SerialNum = unpackInt(byteBuffer)
+        this.AgentData_Field = agentData
+        
+        val count = byteBuffer.get().toInt() and 0xFF
+        for (i in 0 until count) {
+            val wearableData = WearableData()
             wearableData.ID = unpackUUID(byteBuffer)
-            wearableData.TextureIndex = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
-            this.WearableData_Fields.add(wearableData)
+            wearableData.TextureIndex = unpackByte(byteBuffer).toInt() and 0xFF
+            WearableData_Fields?.add(wearableData)
         }
     }
 }

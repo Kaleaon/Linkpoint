@@ -35,7 +35,7 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
                 setupObjectTracking()
 
                 // Setup event listeners for object updates
-                if (protocolManager?.isConnected == true) {
+                if (protocolManager?.isConnected() == true) {
                     setupProtocolListeners()
                 }
 
@@ -76,7 +76,7 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
             }
 
             // Fetch from grid if connected
-            if (protocolManager?.isConnected == true) {
+            if (protocolManager?.isConnected() == true) {
                 try {
                     val obj = requestObjectFromGrid(objectId)
                     if (obj != null) {
@@ -140,7 +140,7 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
                 obj.rotation = rotation
 
                 // Send update to grid if connected
-                if (protocolManager?.isConnected == true) {
+                if (protocolManager?.isConnected() == true) {
                     sendObjectUpdateToGrid(objectId, obj)
                 }
 
@@ -190,7 +190,7 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
             }
 
             // Request from grid
-            if (protocolManager?.isConnected == true) {
+            if (protocolManager?.isConnected() == true) {
                 try {
                     val props = requestPropertiesFromGrid(objectId)
                     if (props != null) {
@@ -242,7 +242,7 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
                 Log.i(TAG, "Touching object: $objectId")
 
                 // Send touch event to grid
-                if (protocolManager?.isConnected == true) {
+                if (protocolManager?.isConnected() == true) {
                     sendTouchEventToGrid(objectId)
                     return@supplyAsync true
                 }
@@ -301,7 +301,7 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
                 objectCache[newObjectId] = obj
 
                 // Send rez command to grid
-                if (protocolManager?.isConnected == true) {
+                if (protocolManager?.isConnected() == true) {
                     sendRezCommandToGrid(inventoryItemId, newObjectId, position, rotation)
                 }
 
@@ -356,7 +356,7 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
                 }
 
                 // Send delete command to grid
-                if (protocolManager?.isConnected == true) {
+                if (protocolManager?.isConnected() == true) {
                     sendDeleteCommandToGrid(objectId)
                 }
 

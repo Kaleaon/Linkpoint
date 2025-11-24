@@ -1,86 +1,84 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.ArrayList
 import java.util.UUID
 
-class AvatarAppearance : SLMessage {
-    ArrayList<AppearanceData> AppearanceData_Fields = ArrayList<>()
-    ObjectData ObjectData_Field
-    Sender Sender_Field
-    ArrayList<VisualParam> VisualParam_Fields = ArrayList<>()
+class AvatarAppearance : SLMessage() {
+    var AppearanceData_Fields: ArrayList<AppearanceData> = ArrayList()
+    var ObjectData_Field: ObjectData = ObjectData()
+    var Sender_Field: Sender = Sender()
+    var VisualParam_Fields: ArrayList<VisualParam> = ArrayList()
 
     class AppearanceData {
-        Int AppearanceVersion
-        Int CofVersion
-        Int Flags
+        var AppearanceVersion: Int = 0
+        var CofVersion: Int = 0
+        var Flags: Int = 0
     }
 
     class ObjectData {
-        byte[] TextureEntry
+        var TextureEntry: ByteArray = ByteArray(0)
     }
 
     class Sender {
-        UUID ID
-        Boolean IsTrial
+        var ID: UUID = UUID.randomUUID()
+        var IsTrial: Boolean = false
     }
 
     class VisualParam {
-        Int ParamValue
+        var ParamValue: Int = 0
     }
 
-    AvatarAppearance() {
+    init {
         this.zeroCoded = true
-        this.Sender_Field = Sender()
-        this.ObjectData_Field = ObjectData()
     }
 
-    Int CalcPayloadSize() {
-        return this.ObjectData_Field.TextureEntry.length + 2 + 21 + 1 + (this.VisualParam_Fields.size() * 1) + 1 + (this.AppearanceData_Fields.size() * 9)
+    override fun CalcPayloadSize(): Int {
+        return ObjectData_Field.TextureEntry.size + 2 + 21 + 1 + (VisualParam_Fields.size * 1) + 1 + (AppearanceData_Fields.size * 9)
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAvatarAppearance(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) -98)
-        packUUID(byteBuffer, this.Sender_Field.ID)
-        packBoolean(byteBuffer, this.Sender_Field.IsTrial)
-        packVariable(byteBuffer, this.ObjectData_Field.TextureEntry, 2)
-        byteBuffer.put((byte) this.VisualParam_Fields.size())
-        for (VisualParam visualParam : this.VisualParam_Fields) {
-            packByte(byteBuffer, (byte) visualParam.ParamValue)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put((-98).toByte())
+        packUUID(byteBuffer, Sender_Field.ID)
+        packBoolean(byteBuffer, Sender_Field.IsTrial)
+        packVariable(byteBuffer, ObjectData_Field.TextureEntry, 2)
+        byteBuffer.put(VisualParam_Fields.size.toByte())
+        for (visualParam in VisualParam_Fields) {
+            packByte(byteBuffer, visualParam.ParamValue.toByte())
         }
-        byteBuffer.put((byte) this.AppearanceData_Fields.size())
-        for (AppearanceData appearanceData : this.AppearanceData_Fields) {
-            packByte(byteBuffer, (byte) appearanceData.AppearanceVersion)
+        byteBuffer.put(AppearanceData_Fields.size.toByte())
+        for (appearanceData in AppearanceData_Fields) {
+            packByte(byteBuffer, appearanceData.AppearanceVersion.toByte())
             packInt(byteBuffer, appearanceData.CofVersion)
             packInt(byteBuffer, appearanceData.Flags)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.Sender_Field.ID = unpackUUID(byteBuffer)
-        this.Sender_Field.IsTrial = unpackBoolean(byteBuffer)
-        this.ObjectData_Field.TextureEntry = unpackVariable(byteBuffer, 2)
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            VisualParam visualParam = VisualParam()
-            visualParam.ParamValue = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
-            this.VisualParam_Fields.add(visualParam)
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        Sender_Field.ID = unpackUUID(byteBuffer)
+        Sender_Field.IsTrial = unpackBoolean(byteBuffer)
+        ObjectData_Field.TextureEntry = unpackVariable(byteBuffer, 2)
+        val b = byteBuffer.get().toInt() and 0xFF
+        for (i in 0 until b) {
+            val visualParam = VisualParam()
+            visualParam.ParamValue = unpackByte(byteBuffer).toInt() and 0xFF
+            VisualParam_Fields.add(visualParam)
         }
-        byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b2; i2++) {
-            AppearanceData appearanceData = AppearanceData()
-            appearanceData.AppearanceVersion = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
+        val b2 = byteBuffer.get().toInt() and 0xFF
+        for (i2 in 0 until b2) {
+            val appearanceData = AppearanceData()
+            appearanceData.AppearanceVersion = unpackByte(byteBuffer).toInt() and 0xFF
             appearanceData.CofVersion = unpackInt(byteBuffer)
             appearanceData.Flags = unpackInt(byteBuffer)
-            this.AppearanceData_Fields.add(appearanceData)
+            AppearanceData_Fields.add(appearanceData)
         }
     }
 }

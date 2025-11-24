@@ -2,75 +2,65 @@ package com.lumiyaviewer.lumiya.slproto.textures
 
 import java.util.UUID
 
-class MutableSLTextureEntryFace {
-    val BUMP_MASK: Byte = 31
-    val FULLBRIGHT_MASK: Byte = 32
-    val MEDIA_MASK: Byte = 1
-    val SHINY_MASK: Byte = -64
-    val TEX_MAP_MASK: Byte = 6
-    Float glow = 0.0f
-    Int hasAttribute
-    Byte materialb = 0
-    Byte mediab = 0
-    Float offsetU = 1.0f
-    Float offsetV = 1.0f
-    Float repeatU = 1.0f
-    Float repeatV = 1.0f
-    Int rgba = -1
-    Float rotation = 0.0f
-    UUID textureID
+class MutableSLTextureEntryFace(var hasAttribute: Int) {
+    var textureID: UUID? = null
+    var rgba: Int = 0
+    var repeatU: Float = 0f
+    var repeatV: Float = 0f
+    var offsetU: Float = 0f
+    var offsetV: Float = 0f
+    var rotation: Float = 0f
+    var glow: Float = 0f
+    var materialb: Byte = 0
+    var mediab: Byte = 0
 
-    MutableSLTextureEntryFace(Int i) {
-        this.hasAttribute = i
-    }
-
-    Unit setGlow(Float f) {
-        this.glow = f
-        this.hasAttribute |= 512
-    }
-
-    Unit setMaterial(Byte b) {
-        this.materialb = b
-        this.hasAttribute |= 128
-    }
-
-    Unit setMedia(Byte b) {
-        this.mediab = b
-        this.hasAttribute |= 256
-    }
-
-    Unit setOffsetU(Float f) {
-        this.offsetU = f
-        this.hasAttribute |= 16
-    }
-
-    Unit setOffsetV(Float f) {
-        this.offsetV = f
-        this.hasAttribute |= 32
-    }
-
-    Unit setRGBA(Int i) {
-        this.rgba = i
-        this.hasAttribute |= 2
-    }
-
-    Unit setRepeatU(Float f) {
-        this.repeatU = f
-        this.hasAttribute |= 4
-    }
-
-    Unit setRepeatV(Float f) {
-        this.repeatV = f
-        this.hasAttribute |= 8
-    }
-
-    Unit setRotation(Float f) {
-        this.rotation = f
-        this.hasAttribute |= 64
-    }
-
-    Unit setTextureID(UUID uuid) {
+    fun setTextureID(uuid: UUID?) {
         this.textureID = uuid
-        this.hasAttribute |= 1
+        hasAttribute = hasAttribute or SLTextureEntryFace.AttributeTextureID
+    }
+    
+    fun setRGBA(value: Int) {
+        this.rgba = value
+        hasAttribute = hasAttribute or SLTextureEntryFace.AttributeRGBA
+    }
+    
+    fun setRepeatU(value: Float) {
+        this.repeatU = value
+        hasAttribute = hasAttribute or SLTextureEntryFace.AttributeRepeatU
+    }
+    
+    fun setRepeatV(value: Float) {
+        this.repeatV = value
+        hasAttribute = hasAttribute or SLTextureEntryFace.AttributeRepeatV
+    }
+    
+    fun setOffsetU(value: Float) {
+        this.offsetU = value
+        hasAttribute = hasAttribute or SLTextureEntryFace.AttributeOffsetU
+    }
+    
+    fun setOffsetV(value: Float) {
+        this.offsetV = value
+        hasAttribute = hasAttribute or SLTextureEntryFace.AttributeOffsetV
+    }
+    
+    fun setRotation(value: Float) {
+        this.rotation = value
+        hasAttribute = hasAttribute or SLTextureEntryFace.AttributeRotation
+    }
+    
+    fun setGlow(value: Float) {
+        this.glow = value
+        hasAttribute = hasAttribute or SLTextureEntryFace.AttributeGlow
+    }
+    
+    fun setMaterial(value: Byte) {
+        this.materialb = value
+        hasAttribute = hasAttribute or SLTextureEntryFace.AttributeMaterial
+    }
+    
+    fun setMedia(value: Byte) {
+        this.mediab = value
+        hasAttribute = hasAttribute or SLTextureEntryFace.AttributeMedia
     }
 }

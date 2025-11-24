@@ -1,7 +1,8 @@
 package com.lumiyaviewer.lumiya.modern.chat
 
 import android.util.Log
-import com.linkpoint.slproto.messages.ChatFromViewerMessage
+import com.lumiyaviewer.lumiya.slproto.messages.ChatFromViewer
+// import com.linkpoint.slproto.messages.ChatFromViewerMessage
 import com.lumiyaviewer.lumiya.modern.protocol.HybridProtocolManager
 import com.lumiyaviewer.lumiya.slproto.auth.SessionManager
 import java.util.UUID
@@ -10,13 +11,6 @@ import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Modern Chat Manager with real network integration
- * 
- * Handles:
- * - Local chat messages (public chat in current location)
- * - Group chat messages
- * - Direct messages (IMs)
- * - Chat history management
- * - Real-time chat events
  */
 class ModernChatManager(private val protocolManager: HybridProtocolManager?) {
 
@@ -46,20 +40,15 @@ class ModernChatManager(private val protocolManager: HybridProtocolManager?) {
     private var listener: ChatEventListener? = null
     private var isInitialized = false
 
-    /**
-     * Initialize the chat manager
-     */
     fun initializeAsync(): CompletableFuture<Boolean> {
         return CompletableFuture.supplyAsync {
             try {
-                // Check if protocol manager is available
                 if (protocolManager == null) {
                     Log.w(TAG, "Protocol manager not available, chat will work in offline mode")
                     isInitialized = true
                     return@supplyAsync true
                 }
 
-                // Verify session is active
                 val session = SessionManager.current()
                 if (session == null) {
                     Log.w(TAG, "No active session, chat initialization deferred")
@@ -78,32 +67,20 @@ class ModernChatManager(private val protocolManager: HybridProtocolManager?) {
         }
     }
 
-    /**
-     * Set chat event listener
-     */
     fun setChatListener(listener: ChatEventListener?) {
         this.listener = listener
     }
 
-    /**
-     * Send local chat message (public chat in current location)
-     * 
-     * @param message The message text to send
-     * @param channel The chat channel (0 = public, 1-2147483647 = custom channels)
-     * @return CompletableFuture<Boolean> indicating success/failure
-     */
     fun sendLocalChatMessage(message: String, channel: Int = 0): CompletableFuture<Boolean> {
         val chat = ChatMessage(content = message, channel = channel)
         history += chat
 
-        // If no protocol manager, just store locally
         if (protocolManager == null) {
             Log.d(TAG, "Offline mode: Local chat message stored locally: $message")
             listener?.onLocalChatReceived(chat)
             return CompletableFuture.completedFuture(true)
         }
 
-        // Get current session
         val session = SessionManager.current()
         if (session == null) {
             Log.e(TAG, "Cannot send chat: No active session")
@@ -113,16 +90,14 @@ class ModernChatManager(private val protocolManager: HybridProtocolManager?) {
 
         return CompletableFuture.supplyAsync {
             try {
-                // Create ChatFromViewer message
-                val chatMessage = ChatFromViewerMessage().apply {
-                    agentId = UUID.fromString(session.reply.agentID ?: UUID.randomUUID().toString())
-                    sessionId = UUID.fromString(session.reply.sessionID ?: UUID.randomUUID().toString())
-                    this.message = message
-                    this.type = 1 // Normal chat
-                    this.channel = channel
+                val chatMessage = ChatFromViewer().apply {
+                    AgentData_Field.AgentID = session.reply.agentID ?: UUID.randomUUID()
+                    AgentData_Field.SessionID = session.reply.sessionID ?: UUID.randomUUID()
+                    ChatData_Field.Message = message.toByteArray(Charsets.UTF_8)
+                    ChatData_Field.Type = 1 // Normal chat
+                    ChatData_Field.Channel = channel
                 }
 
-                // Send via protocol manager
                 val success = protocolManager.sendMessageAsync(chatMessage).get()
                 
                 if (success) {
@@ -142,13 +117,6 @@ class ModernChatManager(private val protocolManager: HybridProtocolManager?) {
         }
     }
 
-    /**
-     * Send group chat message
-     * 
-     * @param message The message text to send
-     * @param groupId The UUID of the group
-     * @return CompletableFuture<Boolean> indicating success/failure
-     */
     fun sendGroupChatMessage(message: String, groupId: String): CompletableFuture<Boolean> {
         val chat = ChatMessage(
             type = ChatMessage.Type.GROUP,
@@ -157,14 +125,12 @@ class ModernChatManager(private val protocolManager: HybridProtocolManager?) {
         )
         history += chat
 
-        // If no protocol manager, just store locally
         if (protocolManager == null) {
             Log.d(TAG, "Offline mode: Group chat message stored locally: $message")
             listener?.onGroupChatReceived(chat)
             return CompletableFuture.completedFuture(true)
         }
 
-        // Get current session
         val session = SessionManager.current()
         if (session == null) {
             Log.e(TAG, "Cannot send group chat: No active session")
@@ -174,15 +140,12 @@ class ModernChatManager(private val protocolManager: HybridProtocolManager?) {
 
         return CompletableFuture.supplyAsync {
             try {
-                // For group chat, we would use ImprovedInstantMessage with dialog type GROUP_INVITATION
-                // This is a simplified implementation - full implementation would use proper IM messages
-                
-                val chatMessage = ChatFromViewerMessage().apply {
-                    agentId = UUID.fromString(session.reply.agentID ?: UUID.randomUUID().toString())
-                    sessionId = UUID.fromString(groupId)
-                    this.message = message
-                    this.type = 1 // Normal chat
-                    this.channel = 0
+                val chatMessage = ChatFromViewer().apply {
+                    AgentData_Field.AgentID = session.reply.agentID ?: UUID.randomUUID()
+                    AgentData_Field.SessionID = try { UUID.fromString(groupId) } catch (e: Exception) { UUID.randomUUID() }
+                    ChatData_Field.Message = message.toByteArray(Charsets.UTF_8)
+                    ChatData_Field.Type = 1 // Normal chat
+                    ChatData_Field.Channel = 0
                 }
 
                 val success = protocolManager.sendMessageAsync(chatMessage).get()
@@ -204,13 +167,6 @@ class ModernChatManager(private val protocolManager: HybridProtocolManager?) {
         }
     }
 
-    /**
-     * Send direct message (IM) to another user
-     * 
-     * @param message The message text to send
-     * @param recipientId The UUID of the recipient
-     * @return CompletableFuture<Boolean> indicating success/failure
-     */
     fun sendDirectMessage(message: String, recipientId: String): CompletableFuture<Boolean> {
         val chat = ChatMessage(
             type = ChatMessage.Type.DIRECT,
@@ -219,13 +175,11 @@ class ModernChatManager(private val protocolManager: HybridProtocolManager?) {
         )
         history += chat
 
-        // If no protocol manager, just store locally
         if (protocolManager == null) {
             Log.d(TAG, "Offline mode: Direct message stored locally: $message")
             return CompletableFuture.completedFuture(true)
         }
 
-        // Get current session
         val session = SessionManager.current()
         if (session == null) {
             Log.e(TAG, "Cannot send direct message: No active session")
@@ -235,15 +189,12 @@ class ModernChatManager(private val protocolManager: HybridProtocolManager?) {
 
         return CompletableFuture.supplyAsync {
             try {
-                // For direct messages, we would use ImprovedInstantMessage
-                // This is a simplified implementation using ChatFromViewer
-                
-                val chatMessage = ChatFromViewerMessage().apply {
-                    agentId = UUID.fromString(session.reply.agentID ?: UUID.randomUUID().toString())
-                    sessionId = UUID.fromString(recipientId)
-                    this.message = message
-                    this.type = 1 // Normal chat
-                    this.channel = 0
+                val chatMessage = ChatFromViewer().apply {
+                    AgentData_Field.AgentID = session.reply.agentID ?: UUID.randomUUID()
+                    AgentData_Field.SessionID = try { UUID.fromString(recipientId) } catch (e: Exception) { UUID.randomUUID() }
+                    ChatData_Field.Message = message.toByteArray(Charsets.UTF_8)
+                    ChatData_Field.Type = 1 // Normal chat
+                    ChatData_Field.Channel = 0
                 }
 
                 val success = protocolManager.sendMessageAsync(chatMessage).get()
@@ -264,22 +215,13 @@ class ModernChatManager(private val protocolManager: HybridProtocolManager?) {
         }
     }
 
-    /**
-     * Get chat history
-     */
     fun getChatHistory(): List<ChatMessage> = history.toList()
 
-    /**
-     * Clear chat history
-     */
     fun clearHistory() {
         history.clear()
         Log.d(TAG, "Chat history cleared")
     }
 
-    /**
-     * Get initialization status
-     */
     fun isInitialized(): Boolean = isInitialized
 
     companion object {

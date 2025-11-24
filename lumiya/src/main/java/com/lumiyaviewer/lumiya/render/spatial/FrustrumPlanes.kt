@@ -1,75 +1,62 @@
 package com.lumiyaviewer.lumiya.render.spatial
 
-class FrustrumPlanes {
-    val INSIDE: Int = 1
-    val INTERSECT: Int = 0
-    private val NUM_PLANES: Int = 6
-    val OUTSIDE: Int = -1
-    private val params: FloatArray = FloatArray(24)
-    private val pnIndex: IntArray = IntArray(36)
+import kotlin.math.sqrt
 
-    constructor(fArr: FloatArray) {
-        Int i = 0
-        while (true) {
-            Int i2 = i
-            if (i2 < 6) {
-                initPlane(i2, fArr, 2 - (i2 / 2), (i2 & 1) != 0 ? -1.0f : 1.0f)
-                i = i2 + 1
-            } else {
-                return
-            }
-        }
+class FrustrumPlanes(fArr: FloatArray) {
+    companion object {
+        const val INSIDE = 1
+        const val INTERSECT = 0
+        const val OUTSIDE = -1
     }
 
-    private fun initPlane(i: Int, fArr: FloatArray, i2: Int, f: Float): Unit {
-        Int i4 = 0
-        Int i5 = i * 4
-        for (i3 = 0; i3 < 4; i3++) {
-            this.params[i5 + i3] = fArr[(i3 * 4) + 3] + (fArr[(i3 * 4) + i2] * f)
-        }
-        Float f2 = 0.0f
-        for (i3 = 0; i3 < 3; i3++) {
-            Float f3 = this.params[i5 + i3]
-            f2 += f3 * f3
-        }
-        f2 = Math.sqrt(f2.toDouble()).toFloat()
-        for (i3 = 0; i3 < 4; i3++) {
-            FloatArray fArr2 = this.params
-            Int i6 = i5 + i3
-            fArr2[i6] = fArr2[i6] / f2
-        }
-        while (i4 < 3) {
-            this.pnIndex[(i * 6) + i4] = this.params[i5 + i4] >= 0.0f ? i4 + 3 : i4
-            this.pnIndex[((i * 6) + i4) + 3] = this.params[i5 + i4] >= 0.0f ? i4 : i4 + 3
-            i4++
-        }
+    data class Plane(val a: Float, val b: Float, val c: Float, val d: Float)
+
+    val nearPlane: Plane
+    val farPlane: Plane
+    val leftPlane: Plane
+    val rightPlane: Plane
+    val topPlane: Plane
+    val bottomPlane: Plane
+
+    init {
+        // Extract planes from VP matrix (fArr)
+        // Assuming fArr is column-major VP matrix
+        // Planes: Left, Right, Bottom, Top, Near, Far
+        
+        val planes = Array(6) { Plane(0f, 0f, 0f, 0f) }
+        
+        // Left
+        planes[0] = extractPlane(fArr, 3, 0, 1f)
+        // Right
+        planes[1] = extractPlane(fArr, 3, 0, -1f)
+        // Bottom
+        planes[2] = extractPlane(fArr, 3, 1, 1f)
+        // Top
+        planes[3] = extractPlane(fArr, 3, 1, -1f)
+        // Near
+        planes[4] = extractPlane(fArr, 3, 2, 1f)
+        // Far
+        planes[5] = extractPlane(fArr, 3, 2, -1f)
+
+        leftPlane = planes[0]
+        rightPlane = planes[1]
+        bottomPlane = planes[2]
+        topPlane = planes[3]
+        nearPlane = planes[4]
+        farPlane = planes[5]
     }
 
-    private fun planeDistance(i: Int, i2: Int, fArr: FloatArray): Float {
-        Float f = 0.0f
-        for (Int i3 = 0; i3 < 3; i3++) {
-            f += this.params[i + i3] * fArr[this.pnIndex[i2 + i3]]
-        }
-        return this.params[i + 3] + f
-    }
-
-    fun testBoundingBox(fArr: FloatArray, fArr2: FloatArray): Int {
-        Int i = 0
-        Int i2 = 0
-        for (Int i3 = 0; i3 < 6; i3++) {
-            if (planeDistance(i2, i, fArr) < 0.0f) {
-                return -1
-            }
-            Float planeDistance = planeDistance(i2, i + 3, fArr)
-            if (i3 == 0) {
-                fArr2[0] = planeDistance
-            }
-            if (planeDistance < 0.0f) {
-                return 0
-            }
-            i2 += 4
-            i += 6
-        }
-        return 1
+    private fun extractPlane(mat: FloatArray, row: Int, axis: Int, sign: Float): Plane {
+        // This logic in original file was:
+        // params[i5 + i3] = fArr[(i3 * 4) + 3] + (fArr[(i3 * 4) + i2] * f)
+        // This corresponds to adding/subtracting a row from the W row (3).
+        
+        val a = mat[3] + sign * mat[0 + axis]
+        val b = mat[7] + sign * mat[4 + axis]
+        val c = mat[11] + sign * mat[8 + axis]
+        val d = mat[15] + sign * mat[12 + axis]
+        
+        val len = sqrt((a * a + b * b + c * c).toDouble()).toFloat()
+        return Plane(a / len, b / len, c / len, d / len)
     }
 }

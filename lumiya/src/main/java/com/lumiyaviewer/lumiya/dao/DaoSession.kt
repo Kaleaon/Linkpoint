@@ -5,164 +5,126 @@ import de.greenrobot.dao.AbstractDao
 import de.greenrobot.dao.AbstractDaoSession
 import de.greenrobot.dao.identityscope.IdentityScopeType
 import de.greenrobot.dao.internal.DaoConfig
-import java.util.Map
 
-class DaoSession : AbstractDaoSession {
-    private val cachedAssetDao: CachedAssetDao = CachedAssetDao(this.cachedAssetDaoConfig, this)
-    private DaoConfig cachedAssetDaoConfig
-    private val cachedResponseDao: CachedResponseDao = CachedResponseDao(this.cachedResponseDaoConfig, this)
-    private DaoConfig cachedResponseDaoConfig
-    private val chatMessageDao: ChatMessageDao = ChatMessageDao(this.chatMessageDaoConfig, this)
-    private DaoConfig chatMessageDaoConfig
-    private val chatterDao: ChatterDao = ChatterDao(this.chatterDaoConfig, this)
-    private DaoConfig chatterDaoConfig
-    private val friendDao: FriendDao = FriendDao(this.friendDaoConfig, this)
-    private DaoConfig friendDaoConfig
-    private val groupMemberDao: GroupMemberDao = GroupMemberDao(this.groupMemberDaoConfig, this)
-    private DaoConfig groupMemberDaoConfig
-    private val groupMemberListDao: GroupMemberListDao = GroupMemberListDao(this.groupMemberListDaoConfig, this)
-    private DaoConfig groupMemberListDaoConfig
-    private val groupRoleMemberDao: GroupRoleMemberDao = GroupRoleMemberDao(this.groupRoleMemberDaoConfig, this)
-    private DaoConfig groupRoleMemberDaoConfig
-    private val groupRoleMemberListDao: GroupRoleMemberListDao = GroupRoleMemberListDao(this.groupRoleMemberListDaoConfig, this)
-    private DaoConfig groupRoleMemberListDaoConfig
-    private val moneyTransactionDao: MoneyTransactionDao = MoneyTransactionDao(this.moneyTransactionDaoConfig, this)
-    private DaoConfig moneyTransactionDaoConfig
-    private val muteListCachedDataDao: MuteListCachedDataDao = MuteListCachedDataDao(this.muteListCachedDataDaoConfig, this)
-    private DaoConfig muteListCachedDataDaoConfig
-    private val searchGridResultDao: SearchGridResultDao = SearchGridResultDao(this.searchGridResultDaoConfig, this)
-    private DaoConfig searchGridResultDaoConfig
-    private val userDao: UserDao = UserDao(this.userDaoConfig, this)
-    private DaoConfig userDaoConfig
-    private val userNameDao: UserNameDao = UserNameDao(this.userNameDaoConfig, this)
-    private DaoConfig userNameDaoConfig
-    private val userPicDao: UserPicDao = UserPicDao(this.userPicDaoConfig, this)
-    private DaoConfig userPicDaoConfig
+class DaoSession(
+    db: SQLiteDatabase,
+    type: IdentityScopeType,
+    daoConfigMap: java.util.Map<Class<out AbstractDao<*, *>>, DaoConfig>
+) : AbstractDaoSession(db) {
 
-    constructor(sQLiteDatabase: SQLiteDatabase, identityScopeType: IdentityScopeType, :: Map<Class<?, map: DaoConfig>) {
-        super(sQLiteDatabase)
-        this.cachedResponseDaoConfig = ((DaoConfig) map.get(CachedResponseDao.class)).clone()
-        this.cachedResponseDaoConfig.initIdentityScope(identityScopeType)
-        this.cachedAssetDaoConfig = ((DaoConfig) map.get(CachedAssetDao.class)).clone()
-        this.cachedAssetDaoConfig.initIdentityScope(identityScopeType)
-        this.moneyTransactionDaoConfig = ((DaoConfig) map.get(MoneyTransactionDao.class)).clone()
-        this.moneyTransactionDaoConfig.initIdentityScope(identityScopeType)
-        this.muteListCachedDataDaoConfig = ((DaoConfig) map.get(MuteListCachedDataDao.class)).clone()
-        this.muteListCachedDataDaoConfig.initIdentityScope(identityScopeType)
-        this.searchGridResultDaoConfig = ((DaoConfig) map.get(SearchGridResultDao.class)).clone()
-        this.searchGridResultDaoConfig.initIdentityScope(identityScopeType)
-        this.groupMemberDaoConfig = ((DaoConfig) map.get(GroupMemberDao.class)).clone()
-        this.groupMemberDaoConfig.initIdentityScope(identityScopeType)
-        this.groupMemberListDaoConfig = ((DaoConfig) map.get(GroupMemberListDao.class)).clone()
-        this.groupMemberListDaoConfig.initIdentityScope(identityScopeType)
-        this.groupRoleMemberDaoConfig = ((DaoConfig) map.get(GroupRoleMemberDao.class)).clone()
-        this.groupRoleMemberDaoConfig.initIdentityScope(identityScopeType)
-        this.groupRoleMemberListDaoConfig = ((DaoConfig) map.get(GroupRoleMemberListDao.class)).clone()
-        this.groupRoleMemberListDaoConfig.initIdentityScope(identityScopeType)
-        this.userDaoConfig = ((DaoConfig) map.get(UserDao.class)).clone()
-        this.userDaoConfig.initIdentityScope(identityScopeType)
-        this.friendDaoConfig = ((DaoConfig) map.get(FriendDao.class)).clone()
-        this.friendDaoConfig.initIdentityScope(identityScopeType)
-        this.userNameDaoConfig = ((DaoConfig) map.get(UserNameDao.class)).clone()
-        this.userNameDaoConfig.initIdentityScope(identityScopeType)
-        this.userPicDaoConfig = ((DaoConfig) map.get(UserPicDao.class)).clone()
-        this.userPicDaoConfig.initIdentityScope(identityScopeType)
-        this.chatMessageDaoConfig = ((DaoConfig) map.get(ChatMessageDao.class)).clone()
-        this.chatMessageDaoConfig.initIdentityScope(identityScopeType)
-        this.chatterDaoConfig = ((DaoConfig) map.get(ChatterDao.class)).clone()
-        this.chatterDaoConfig.initIdentityScope(identityScopeType)
-        registerDao(CachedResponse.class, this.cachedResponseDao)
-        registerDao(CachedAsset.class, this.cachedAssetDao)
-        registerDao(MoneyTransaction.class, this.moneyTransactionDao)
-        registerDao(MuteListCachedData.class, this.muteListCachedDataDao)
-        registerDao(SearchGridResult.class, this.searchGridResultDao)
-        registerDao(GroupMember.class, this.groupMemberDao)
-        registerDao(GroupMemberList.class, this.groupMemberListDao)
-        registerDao(GroupRoleMember.class, this.groupRoleMemberDao)
-        registerDao(GroupRoleMemberList.class, this.groupRoleMemberListDao)
-        registerDao(User.class, this.userDao)
-        registerDao(Friend.class, this.friendDao)
-        registerDao(UserName.class, this.userNameDao)
-        registerDao(UserPic.class, this.userPicDao)
-        registerDao(ChatMessage.class, this.chatMessageDao)
-        registerDao(Chatter.class, this.chatterDao)
+    private val cachedAssetDaoConfig: DaoConfig = daoConfigMap[CachedAssetDao::class.java]!!.clone()
+    private val cachedResponseDaoConfig: DaoConfig = daoConfigMap[CachedResponseDao::class.java]!!.clone()
+    private val chatMessageDaoConfig: DaoConfig = daoConfigMap[ChatMessageDao::class.java]!!.clone()
+    private val chatterDaoConfig: DaoConfig = daoConfigMap[ChatterDao::class.java]!!.clone()
+    private val friendDaoConfig: DaoConfig = daoConfigMap[FriendDao::class.java]!!.clone()
+    private val groupMemberDaoConfig: DaoConfig = daoConfigMap[GroupMemberDao::class.java]!!.clone()
+    private val groupMemberListDaoConfig: DaoConfig = daoConfigMap[GroupMemberListDao::class.java]!!.clone()
+    private val groupRoleMemberDaoConfig: DaoConfig = daoConfigMap[GroupRoleMemberDao::class.java]!!.clone()
+    private val groupRoleMemberListDaoConfig: DaoConfig = daoConfigMap[GroupRoleMemberListDao::class.java]!!.clone()
+    private val moneyTransactionDaoConfig: DaoConfig = daoConfigMap[MoneyTransactionDao::class.java]!!.clone()
+    private val muteListCachedDataDaoConfig: DaoConfig = daoConfigMap[MuteListCachedDataDao::class.java]!!.clone()
+    private val searchGridResultDaoConfig: DaoConfig = daoConfigMap[SearchGridResultDao::class.java]!!.clone()
+    private val userDaoConfig: DaoConfig = daoConfigMap[UserDao::class.java]!!.clone()
+    private val userNameDaoConfig: DaoConfig = daoConfigMap[UserNameDao::class.java]!!.clone()
+    private val userPicDaoConfig: DaoConfig = daoConfigMap[UserPicDao::class.java]!!.clone()
+
+    private val cachedAssetDao: CachedAssetDao
+    private val cachedResponseDao: CachedResponseDao
+    private val chatMessageDao: ChatMessageDao
+    private val chatterDao: ChatterDao
+    private val friendDao: FriendDao
+    private val groupMemberDao: GroupMemberDao
+    private val groupMemberListDao: GroupMemberListDao
+    private val groupRoleMemberDao: GroupRoleMemberDao
+    private val groupRoleMemberListDao: GroupRoleMemberListDao
+    private val moneyTransactionDao: MoneyTransactionDao
+    private val muteListCachedDataDao: MuteListCachedDataDao
+    private val searchGridResultDao: SearchGridResultDao
+    private val userDao: UserDao
+    private val userNameDao: UserNameDao
+    private val userPicDao: UserPicDao
+
+    init {
+        cachedAssetDaoConfig.initIdentityScope(type)
+        cachedResponseDaoConfig.initIdentityScope(type)
+        chatMessageDaoConfig.initIdentityScope(type)
+        chatterDaoConfig.initIdentityScope(type)
+        friendDaoConfig.initIdentityScope(type)
+        groupMemberDaoConfig.initIdentityScope(type)
+        groupMemberListDaoConfig.initIdentityScope(type)
+        groupRoleMemberDaoConfig.initIdentityScope(type)
+        groupRoleMemberListDaoConfig.initIdentityScope(type)
+        moneyTransactionDaoConfig.initIdentityScope(type)
+        muteListCachedDataDaoConfig.initIdentityScope(type)
+        searchGridResultDaoConfig.initIdentityScope(type)
+        userDaoConfig.initIdentityScope(type)
+        userNameDaoConfig.initIdentityScope(type)
+        userPicDaoConfig.initIdentityScope(type)
+
+        cachedAssetDao = CachedAssetDao(cachedAssetDaoConfig, this)
+        cachedResponseDao = CachedResponseDao(cachedResponseDaoConfig, this)
+        chatMessageDao = ChatMessageDao(chatMessageDaoConfig, this)
+        chatterDao = ChatterDao(chatterDaoConfig, this)
+        friendDao = FriendDao(friendDaoConfig, this)
+        groupMemberDao = GroupMemberDao(groupMemberDaoConfig, this)
+        groupMemberListDao = GroupMemberListDao(groupMemberListDaoConfig, this)
+        groupRoleMemberDao = GroupRoleMemberDao(groupRoleMemberDaoConfig, this)
+        groupRoleMemberListDao = GroupRoleMemberListDao(groupRoleMemberListDaoConfig, this)
+        moneyTransactionDao = MoneyTransactionDao(moneyTransactionDaoConfig, this)
+        muteListCachedDataDao = MuteListCachedDataDao(muteListCachedDataDaoConfig, this)
+        searchGridResultDao = SearchGridResultDao(searchGridResultDaoConfig, this)
+        userDao = UserDao(userDaoConfig, this)
+        userNameDao = UserNameDao(userNameDaoConfig, this)
+        userPicDao = UserPicDao(userPicDaoConfig, this)
+
+        registerDao(CachedAsset::class.java, cachedAssetDao)
+        registerDao(CachedResponse::class.java, cachedResponseDao)
+        registerDao(ChatMessage::class.java, chatMessageDao)
+        registerDao(Chatter::class.java, chatterDao)
+        registerDao(Friend::class.java, friendDao)
+        registerDao(GroupMember::class.java, groupMemberDao)
+        registerDao(GroupMemberList::class.java, groupMemberListDao)
+        registerDao(GroupRoleMember::class.java, groupRoleMemberDao)
+        registerDao(GroupRoleMemberList::class.java, groupRoleMemberListDao)
+        registerDao(MoneyTransaction::class.java, moneyTransactionDao)
+        registerDao(MuteListCachedData::class.java, muteListCachedDataDao)
+        registerDao(SearchGridResult::class.java, searchGridResultDao)
+        registerDao(User::class.java, userDao)
+        registerDao(UserName::class.java, userNameDao)
+        registerDao(UserPic::class.java, userPicDao)
     }
 
-    fun clear(): Unit {
-        this.cachedResponseDaoConfig.getIdentityScope().clear()
-        this.cachedAssetDaoConfig.getIdentityScope().clear()
-        this.moneyTransactionDaoConfig.getIdentityScope().clear()
-        this.muteListCachedDataDaoConfig.getIdentityScope().clear()
-        this.searchGridResultDaoConfig.getIdentityScope().clear()
-        this.groupMemberDaoConfig.getIdentityScope().clear()
-        this.groupMemberListDaoConfig.getIdentityScope().clear()
-        this.groupRoleMemberDaoConfig.getIdentityScope().clear()
-        this.groupRoleMemberListDaoConfig.getIdentityScope().clear()
-        this.userDaoConfig.getIdentityScope().clear()
-        this.friendDaoConfig.getIdentityScope().clear()
-        this.userNameDaoConfig.getIdentityScope().clear()
-        this.userPicDaoConfig.getIdentityScope().clear()
-        this.chatMessageDaoConfig.getIdentityScope().clear()
-        this.chatterDaoConfig.getIdentityScope().clear()
+    fun clear() {
+        cachedAssetDaoConfig.identityScope.clear()
+        cachedResponseDaoConfig.identityScope.clear()
+        chatMessageDaoConfig.identityScope.clear()
+        chatterDaoConfig.identityScope.clear()
+        friendDaoConfig.identityScope.clear()
+        groupMemberDaoConfig.identityScope.clear()
+        groupMemberListDaoConfig.identityScope.clear()
+        groupRoleMemberDaoConfig.identityScope.clear()
+        groupRoleMemberListDaoConfig.identityScope.clear()
+        moneyTransactionDaoConfig.identityScope.clear()
+        muteListCachedDataDaoConfig.identityScope.clear()
+        searchGridResultDaoConfig.identityScope.clear()
+        userDaoConfig.identityScope.clear()
+        userNameDaoConfig.identityScope.clear()
+        userPicDaoConfig.identityScope.clear()
     }
 
-    fun getCachedAssetDao(): CachedAssetDao {
-        return this.cachedAssetDao
-    }
-
-    fun getCachedResponseDao(): CachedResponseDao {
-        return this.cachedResponseDao
-    }
-
-    fun getChatMessageDao(): ChatMessageDao {
-        return this.chatMessageDao
-    }
-
-    fun getChatterDao(): ChatterDao {
-        return this.chatterDao
-    }
-
-    fun getFriendDao(): FriendDao {
-        return this.friendDao
-    }
-
-    fun getGroupMemberDao(): GroupMemberDao {
-        return this.groupMemberDao
-    }
-
-    fun getGroupMemberListDao(): GroupMemberListDao {
-        return this.groupMemberListDao
-    }
-
-    fun getGroupRoleMemberDao(): GroupRoleMemberDao {
-        return this.groupRoleMemberDao
-    }
-
-    fun getGroupRoleMemberListDao(): GroupRoleMemberListDao {
-        return this.groupRoleMemberListDao
-    }
-
-    fun getMoneyTransactionDao(): MoneyTransactionDao {
-        return this.moneyTransactionDao
-    }
-
-    fun getMuteListCachedDataDao(): MuteListCachedDataDao {
-        return this.muteListCachedDataDao
-    }
-
-    fun getSearchGridResultDao(): SearchGridResultDao {
-        return this.searchGridResultDao
-    }
-
-    fun getUserDao(): UserDao {
-        return this.userDao
-    }
-
-    fun getUserNameDao(): UserNameDao {
-        return this.userNameDao
-    }
-
-    fun getUserPicDao(): UserPicDao {
-        return this.userPicDao
-    }
+    fun getCachedAssetDao(): CachedAssetDao = cachedAssetDao
+    fun getCachedResponseDao(): CachedResponseDao = cachedResponseDao
+    fun getChatMessageDao(): ChatMessageDao = chatMessageDao
+    fun getChatterDao(): ChatterDao = chatterDao
+    fun getFriendDao(): FriendDao = friendDao
+    fun getGroupMemberDao(): GroupMemberDao = groupMemberDao
+    fun getGroupMemberListDao(): GroupMemberListDao = groupMemberListDao
+    fun getGroupRoleMemberDao(): GroupRoleMemberDao = groupRoleMemberDao
+    fun getGroupRoleMemberListDao(): GroupRoleMemberListDao = groupRoleMemberListDao
+    fun getMoneyTransactionDao(): MoneyTransactionDao = moneyTransactionDao
+    fun getMuteListCachedDataDao(): MuteListCachedDataDao = muteListCachedDataDao
+    fun getSearchGridResultDao(): SearchGridResultDao = searchGridResultDao
+    fun getUserDao(): UserDao = userDao
+    fun getUserNameDao(): UserNameDao = userNameDao
+    fun getUserPicDao(): UserPicDao = userPicDao
 }

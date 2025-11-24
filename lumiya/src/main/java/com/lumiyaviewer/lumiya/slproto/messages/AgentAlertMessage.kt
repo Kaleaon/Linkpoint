@@ -1,46 +1,47 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.UUID
 
 class AgentAlertMessage : SLMessage {
-    AgentData AgentData_Field = AgentData()
-    AlertData AlertData_Field = AlertData()
+    val AgentData_Field = AgentData()
+    val AlertData_Field = AlertData()
 
     class AgentData {
-        UUID AgentID
+        var AgentID: UUID? = null
     }
 
     class AlertData {
-        ByteArray Message
-        Boolean Modal
+        var Message: ByteArray? = null
+        var Modal: Boolean = false
     }
 
     constructor() {
         this.zeroCoded = false
     }
 
-    fun CalcPayloadSize(): Int {
-        return this.AlertData_Field.Message.length + 2 + 20
+    override fun CalcPayloadSize(): Int {
+        return (this.AlertData_Field.Message?.size ?: 0) + 2 + 20
     }
 
-    fun Handle(sLMessageHandler: SLMessageHandler): Unit {
-        sLMessageHandler.HandleAgentAlertMessage(this)
+    override fun Handle(handler: SLMessageHandler) {
+        handler.HandleAgentAlertMessage(this)
     }
 
-    fun PackPayload(byteBuffer: ByteBuffer): Unit {
-        byteBuffer.putShort(-1)
-        byteBuffer.put((Byte) 0)
-        byteBuffer.put((Byte) -121)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packBoolean(byteBuffer, this.AlertData_Field.Modal)
-        packVariable(byteBuffer, this.AlertData_Field.Message, 1)
+    override fun PackPayload(buffer: ByteBuffer) {
+        buffer.putShort(-1)
+        buffer.put(0.toByte())
+        buffer.put((-121).toByte())
+        packUUID(buffer, this.AgentData_Field.AgentID)
+        packBoolean(buffer, this.AlertData_Field.Modal)
+        packVariable(buffer, this.AlertData_Field.Message ?: ByteArray(0), 1)
     }
 
-    fun UnpackPayload(byteBuffer: ByteBuffer): Unit {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AlertData_Field.Modal = unpackBoolean(byteBuffer)
-        this.AlertData_Field.Message = unpackVariable(byteBuffer, 1)
+    override fun UnpackPayload(buffer: ByteBuffer) {
+        this.AgentData_Field.AgentID = unpackUUID(buffer)
+        this.AlertData_Field.Modal = unpackBoolean(buffer)
+        this.AlertData_Field.Message = unpackVariable(buffer, 1)
     }
 }

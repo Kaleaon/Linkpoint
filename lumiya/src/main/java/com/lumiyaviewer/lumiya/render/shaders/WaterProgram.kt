@@ -3,21 +3,19 @@ package com.lumiyaviewer.lumiya.render.shaders
 import android.opengl.GLES20
 
 class WaterProgram : ShaderProgram {
-    Int uAmplitude
-    Int uDirection
-    Int uFrequency
-    Int uMVPMatrix
-    Int uObjWorldMatrix
-    Int uPhase
-    Int uTime
-    Int vColor
-    Int vPosition
+    var uAmplitude: Int = 0
+    var uDirection: Int = 0
+    var uFrequency: Int = 0
+    var uMVPMatrix: Int = 0
+    var uObjWorldMatrix: Int = 0
+    var uPhase: Int = 0
+    var uTime: Int = 0
+    var vColor: Int = 0
+    var vPosition: Int = 0
 
-    constructor() {
-        super(Shader.WaterVertexShader, Shader.WaterFragmentShader)
-    }
+    constructor() : super(Shader.WaterVertexShader, Shader.WaterFragmentShader)
 
-    protected fun bindVariables(): Unit {
+    override fun bindVariables() {
         this.vPosition = GLES20.glGetAttribLocation(this.handle, "vPosition")
         this.vColor = GLES20.glGetUniformLocation(this.handle, "vColor")
         this.uMVPMatrix = GLES20.glGetUniformLocation(this.handle, "uMVPMatrix")

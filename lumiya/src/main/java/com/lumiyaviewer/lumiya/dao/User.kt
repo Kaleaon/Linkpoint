@@ -26,8 +26,13 @@ data class User(
         chatterItemViewBuilder.setThumbnailChatterID(getChatterID(userManager), displayName)
     }
 
-    fun getChatterID(userManager: UserManager): ChatterID {
-        return ChatterID.getUserChatterID(userManager.userID, uuid)
+                override fun getChatterID(userManager: UserManager): ChatterID {
+                    val safeUuid = uuid ?: com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID
+                    return ChatterID.getUserChatterID(userManager.userID, safeUuid)
+                }
+
+    override fun getDisplayName(): String? {
+        return displayName
     }
 
     fun nameNeedsFetching(): Boolean {

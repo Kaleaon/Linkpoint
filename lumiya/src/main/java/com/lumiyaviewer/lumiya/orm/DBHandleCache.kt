@@ -47,7 +47,7 @@ class DBHandleCache private constructor() {
     }
 
     init {
-        Debug.Printf("DBHandleCache: Initialized.")
+        Debug.Log("DBHandleCache: Initialized.")
     }
 
     /**
@@ -61,7 +61,7 @@ class DBHandleCache private constructor() {
             val openRef = refMap.remove(ref)
             if (openRef != null && openRef.releaseReference() <= 0) {
                 val fileName = openRef.getFileName()
-                Debug.Printf("DBHandle: Closing db '%s'", fileName)
+                Debug.Log("DBHandle: Closing db '$fileName'")
                 
                 try {
                     val db = openRef.getDB()
@@ -69,7 +69,7 @@ class DBHandleCache private constructor() {
                         db.close()
                     }
                 } catch (e: SQLiteException) {
-                    Debug.Warning(e)
+                    Debug.Log("Error closing database: ${e.message}")
                 }
                 
                 fileMap.remove(fileName)
@@ -88,13 +88,13 @@ class DBHandleCache private constructor() {
         var openRef = fileMap[filename]
         
         if (openRef == null) {
-            Debug.Printf("DBHandle: Opening db '%s'", filename)
+            Debug.Log("DBHandle: Opening db '$filename'")
             try {
                 val database = helper.openOrCreateDatabase(filename)
                 openRef = DBOpenRef(filename, database)
                 fileMap[filename] = openRef
             } catch (e: SQLiteException) {
-                Debug.Warning("Failed to open database: $filename", e)
+                Debug.Log("Failed to open database: $filename - ${e.message}")
                 throw e
             }
         }

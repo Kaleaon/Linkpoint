@@ -5,7 +5,7 @@ import android.util.Log
 import com.lumiyaviewer.lumiya.animesh.AnimeshManager
 import com.lumiyaviewer.lumiya.auth.LinkpointAuthManager
 import com.lumiyaviewer.lumiya.bom.BakesOnMeshManager
-import com.lumiyaviewer.lumiya.core.LinkpointApplication
+// import com.lumiyaviewer.lumiya.core.LinkpointApplication
 import com.lumiyaviewer.lumiya.eep.EEPManager
 import com.lumiyaviewer.lumiya.pbr.PBRMaterialManager
 import com.lumiyaviewer.lumiya.protocol.LinkpointProtocolManager
@@ -79,7 +79,7 @@ class LinkpointMainApplication : Application() {
         )
         
         // Feature managers
-        animeshManager = AnimeshManager()
+        animeshManager = AnimeshManager(this)
         bomManager = BakesOnMeshManager()
         eepManager = EEPManager()
         pbrManager = PBRMaterialManager()

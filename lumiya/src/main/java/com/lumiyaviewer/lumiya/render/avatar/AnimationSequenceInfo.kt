@@ -3,13 +3,13 @@ package com.lumiyaviewer.lumiya.render.avatar
 import java.util.UUID
 
 open class AnimationSequenceInfo protected constructor(
-    protected val animationID: UUID,
-    protected val sequenceID: Int,
-    protected val runningSince: Long,
-    protected val stoppingSequenceID: Int,
-    protected val stoppingRunningSince: Long,
-    protected val stoppingEasingOutSince: Long,
-    protected val dontEaseIn: Boolean,
+    val animationID: UUID,
+    val sequenceID: Int,
+    val runningSince: Long,
+    val stoppingSequenceID: Int,
+    val stoppingRunningSince: Long,
+    val stoppingEasingOutSince: Long,
+    val dontEaseIn: Boolean,
 ) {
     fun hasStopped(currentTime: Long): Boolean {
         return sequenceID == INVALID_SEQUENCE_ID &&
@@ -20,8 +20,8 @@ open class AnimationSequenceInfo protected constructor(
     }
 
     companion object {
-        protected const val INVALID_SEQUENCE_ID = 0
-        protected const val INVALID_TIMESTAMP = -1L
+        const val INVALID_SEQUENCE_ID = 0
+        const val INVALID_TIMESTAMP = -1L
         const val MAX_ANIMATION_LENGTH = 60000L
 
         @JvmStatic

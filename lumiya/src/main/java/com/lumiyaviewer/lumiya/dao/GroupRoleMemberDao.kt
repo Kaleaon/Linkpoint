@@ -8,66 +8,73 @@ import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
-class GroupRoleMemberDao : AbstractDao<GroupRoleMember, Void> {
-    val TABLENAME: String = "GroupRoleMembers"
+class GroupRoleMemberDao(config: DaoConfig, daoSession: DaoSession?) : AbstractDao<GroupRoleMember, Void>(config, daoSession) {
 
-    class Properties {
-        Property GroupID = Property(0, UUID.class, "groupID", false, "GROUP_ID")
-        Property RequestID = Property(1, UUID.class, "requestID", false, "REQUEST_ID")
-        Property RoleID = Property(2, UUID.class, "roleID", false, "ROLE_ID")
-        Property UserID = Property(3, UUID.class, "userID", false, "USER_ID")
+    companion object {
+        const val TABLENAME = "GroupRoleMembers"
+
+        object Properties {
+            @JvmField val GroupID = Property(0, String::class.java, "groupID", false, "GROUP_ID")
+            @JvmField val RequestID = Property(1, String::class.java, "requestID", false, "REQUEST_ID")
+            @JvmField val RoleID = Property(2, String::class.java, "roleID", false, "ROLE_ID")
+            @JvmField val UserID = Property(3, String::class.java, "userID", false, "USER_ID")
+        }
+
+        @JvmStatic
+        fun createTable(db: SQLiteDatabase, ifNotExists: Boolean) {
+            val constraint = if (ifNotExists) "IF NOT EXISTS " else ""
+            db.execSQL("CREATE TABLE $constraint'GroupRoleMembers' (" +
+                    "'GROUP_ID' TEXT NOT NULL ," +
+                    "'REQUEST_ID' TEXT NOT NULL ," +
+                    "'ROLE_ID' TEXT NOT NULL ," +
+                    "'USER_ID' TEXT NOT NULL );")
+            db.execSQL("CREATE INDEX ${constraint}IDX_GroupRoleMembers_GROUP_ID_ROLE_ID_REQUEST_ID ON GroupRoleMembers (GROUP_ID,ROLE_ID,REQUEST_ID);")
+        }
+
+        @JvmStatic
+        fun dropTable(db: SQLiteDatabase, ifExists: Boolean) {
+            val constraint = if (ifExists) "IF EXISTS " else ""
+            db.execSQL("DROP TABLE $constraint'GroupRoleMembers'")
+        }
     }
 
-    constructor(daoConfig: DaoConfig) {
-        super(daoConfig)
+    override fun bindValues(stmt: SQLiteStatement, entity: GroupRoleMember) {
+        stmt.clearBindings()
+        stmt.bindString(1, entity.groupID.toString())
+        stmt.bindString(2, entity.requestID.toString())
+        stmt.bindString(3, entity.roleID.toString())
+        stmt.bindString(4, entity.userID.toString())
     }
 
-    constructor(daoConfig: DaoConfig, daoSession: DaoSession) {
-        super(daoConfig, daoSession)
-    }
-
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        String str = z ? "IF NOT EXISTS " : ""
-        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'GroupRoleMembers' (" + "'GROUP_ID' TEXT NOT NULL ," + "'REQUEST_ID' TEXT NOT NULL ," + "'ROLE_ID' TEXT NOT NULL ," + "'USER_ID' TEXT NOT NULL );")
-        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_GroupRoleMembers_GROUP_ID_ROLE_ID_REQUEST_ID ON GroupRoleMembers" + " (GROUP_ID,ROLE_ID,REQUEST_ID);")
-    }
-
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'GroupRoleMembers'")
-    }
-
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, groupRoleMember: GroupRoleMember): Unit {
-        sQLiteStatement.clearBindings()
-        sQLiteStatement.bindString(1, groupRoleMember.getGroupID().toString())
-        sQLiteStatement.bindString(2, groupRoleMember.getRequestID().toString())
-        sQLiteStatement.bindString(3, groupRoleMember.getRoleID().toString())
-        sQLiteStatement.bindString(4, groupRoleMember.getUserID().toString())
-    }
-
-    fun getKey(groupRoleMember: GroupRoleMember): Void {
+    override fun getKey(entity: GroupRoleMember?): Void? {
         return null
     }
 
-    protected fun isEntityUpdateable(): Boolean {
+    override fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    fun readEntity(cursor: Cursor, i: Int): GroupRoleMember {
-        return GroupRoleMember(UUID.fromString(cursor.getString(i + 0)), UUID.fromString(cursor.getString(i + 1)), UUID.fromString(cursor.getString(i + 2)), UUID.fromString(cursor.getString(i + 3)))
+    override fun readEntity(cursor: Cursor, offset: Int): GroupRoleMember {
+        return GroupRoleMember(
+            UUID.fromString(cursor.getString(offset + 0)),
+            UUID.fromString(cursor.getString(offset + 1)),
+            UUID.fromString(cursor.getString(offset + 2)),
+            UUID.fromString(cursor.getString(offset + 3))
+        )
     }
 
-    fun readEntity(cursor: Cursor, groupRoleMember: GroupRoleMember, i: Int): Unit {
-        groupRoleMember.setGroupID(UUID.fromString(cursor.getString(i + 0)))
-        groupRoleMember.setRequestID(UUID.fromString(cursor.getString(i + 1)))
-        groupRoleMember.setRoleID(UUID.fromString(cursor.getString(i + 2)))
-        groupRoleMember.setUserID(UUID.fromString(cursor.getString(i + 3)))
+    override fun readEntity(cursor: Cursor, entity: GroupRoleMember, offset: Int) {
+        entity.groupID = UUID.fromString(cursor.getString(offset + 0))
+        entity.requestID = UUID.fromString(cursor.getString(offset + 1))
+        entity.roleID = UUID.fromString(cursor.getString(offset + 2))
+        entity.userID = UUID.fromString(cursor.getString(offset + 3))
     }
 
-    fun readKey(cursor: Cursor, i: Int): Void {
+    override fun readKey(cursor: Cursor, offset: Int): Void? {
         return null
     }
 
-    protected fun updateKeyAfterInsert(groupRoleMember: GroupRoleMember, j: Long): Void {
+    override fun updateKeyAfterInsert(entity: GroupRoleMember, rowId: Long): Void? {
         return null
     }
 }

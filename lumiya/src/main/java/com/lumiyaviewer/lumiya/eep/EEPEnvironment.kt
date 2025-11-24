@@ -108,7 +108,7 @@ data class EEPWaterSettings(
     
     // Normal maps
     val normalMapTextureId: UUID = UUID(0, 0),
-    val normalScale: Pair<Float, Float, Float> = Triple(2f, 2f, 2f),
+    val normalScale: Triple<Float, Float, Float> = Triple(2f, 2f, 2f),
     
     // Transparency
     val transparentTextureId: UUID = UUID(0, 0)

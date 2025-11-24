@@ -7,49 +7,52 @@ import com.lumiyaviewer.lumiya.render.glres.GLResource
 import com.lumiyaviewer.lumiya.render.glres.GLResourceManager
 import com.lumiyaviewer.rawbuffers.DirectByteBuffer
 
-class GLBuffer : GLResource {
-    /* access modifiers changed from: private */
-    ThreadLocal<IntArray> idBuffer = ThreadLocal<IntArray>() {
-        /* access modifiers changed from: protected */
-        IntArray initialValue() {
-            return IntArray(1)
-        }
-    }
-    private DirectByteBuffer rawBuffer
+class GLBuffer(
+    glResourceManager: GLResourceManager,
+    private val rawBuffer: DirectByteBuffer?
+) : GLResource(glResourceManager) {
 
-    private class GLResourceBufferReference : GLResourceManager.GLResourceReference {
-        private DirectByteBuffer rawBuffer
-
-        GLResourceBufferReference(GLResource gLResource, Int i, GLResourceManager gLResourceManager, DirectByteBuffer directByteBuffer) {
-            super(gLResource, i, gLResourceManager)
-            this.rawBuffer = directByteBuffer
-        }
-
-        fun GLFree(): Unit {
-            IntArray iArr = (IntArray) GLBuffer.idBuffer.get()
-            iArr[0] = this.handle
-            Debug.Printf("GLBuffer: deleted buffer %d", Int.valueOf(iArr[0]))
-            GLES11.glDeleteBuffers(1, iArr, 0)
-            if (this.rawBuffer != null) {
-                TextureMemoryTracker.releaseBufferMemory(this.rawBuffer.getCapacity())
+    companion object {
+        private val idBuffer = object : ThreadLocal<IntArray>() {
+            override fun initialValue(): IntArray {
+                return IntArray(1)
             }
         }
     }
 
-    constructor(gLResourceManager: GLResourceManager, directByteBuffer: DirectByteBuffer) {
-        super(gLResourceManager)
-        this.rawBuffer = directByteBuffer
-        if (directByteBuffer != null) {
-            TextureMemoryTracker.allocBufferMemory(directByteBuffer.getCapacity())
+    private class GLResourceBufferReference(
+        glResource: GLResource,
+        handle: Int,
+        glResourceManager: GLResourceManager,
+        private val rawBuffer: DirectByteBuffer?
+    ) : GLResourceManager.GLResourceReference(glResource, handle, glResourceManager) {
+
+        override fun GLFree() {
+            val ids = idBuffer.get()
+            ids!![0] = handle
+            Debug.Printf("GLBuffer: deleted buffer %d", ids[0])
+            GLES11.glDeleteBuffers(1, ids, 0)
+            if (rawBuffer != null) {
+                TextureMemoryTracker.releaseBufferMemory(rawBuffer.getCapacity())
+            }
         }
-        GLResourceBufferReference(this, this.handle, gLResourceManager, this.rawBuffer)
     }
 
-    /* access modifiers changed from: protected */
-    fun Allocate(gLResourceManager: GLResourceManager): Int {
-        IntArray iArr = idBuffer.get()
-        GLES11.glGenBuffers(1, iArr, 0)
-        Debug.Printf("GLBuffer: allocated buffer %d", Int.valueOf(iArr[0]))
-        return iArr[0]
+    init {
+        if (rawBuffer != null) {
+            TextureMemoryTracker.allocBufferMemory(rawBuffer.getCapacity())
+        }
+        // Register for cleanup
+        // Note: In Kotlin, we can't easily replicate the inner class constructor call side-effect 
+        // that registers itself with the manager unless we expose that mechanism.
+        // Assuming GLResourceReference constructor does the registration.
+        GLResourceBufferReference(this, handle, glResourceManager, rawBuffer)
+    }
+
+    override fun Allocate(glResourceManager: GLResourceManager): Int {
+        val ids = idBuffer.get()
+        GLES11.glGenBuffers(1, ids, 0)
+        Debug.Printf("GLBuffer: allocated buffer %d", ids!![0])
+        return ids[0]
     }
 }

@@ -1,95 +1,94 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.base.Ascii
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.ArrayList
-import java.util.Iterator
 import java.util.UUID
 
 class AvatarAnimation : SLMessage {
-    ArrayList<AnimationList> AnimationList_Fields = ArrayList<>()
-    ArrayList<AnimationSourceList> AnimationSourceList_Fields = ArrayList<>()
-    ArrayList<PhysicalAvatarEventList> PhysicalAvatarEventList_Fields = ArrayList<>()
-    Sender Sender_Field
+    var AnimationList_Fields: ArrayList<AnimationList>? = ArrayList()
+    var AnimationSourceList_Fields: ArrayList<AnimationSourceList>? = ArrayList()
+    var PhysicalAvatarEventList_Fields: ArrayList<PhysicalAvatarEventList>? = ArrayList()
+    var Sender_Field: Sender? = null
 
     class AnimationList {
-        UUID AnimID
-        Int AnimSequenceID
+        var AnimID: UUID? = null
+        var AnimSequenceID: Int = 0
     }
 
     class AnimationSourceList {
-        UUID ObjectID
+        var ObjectID: UUID? = null
     }
 
     class PhysicalAvatarEventList {
-        byte[] TypeData
+        var TypeData: ByteArray? = null
     }
 
     class Sender {
-        UUID ID
+        var ID: UUID? = null
     }
 
-    AvatarAnimation() {
+    constructor() {
         this.zeroCoded = false
         this.Sender_Field = Sender()
     }
 
-    Int CalcPayloadSize() {
-        Int size = (this.AnimationList_Fields.size() * 20) + 18 + 1 + (this.AnimationSourceList_Fields.size() * 16) + 1
-        Iterator<T> it = this.PhysicalAvatarEventList_Fields.iterator()
-        while (true) {
-            Int i = size
-            if (!it.hasNext()) {
-                return i
-            }
-            size = ((PhysicalAvatarEventList) it.next()).TypeData.length + 1 + i
+    override fun CalcPayloadSize(): Int {
+        var size = (AnimationList_Fields?.size ?: 0) * 20 + 18 + 1 + (AnimationSourceList_Fields?.size ?: 0) * 16 + 1
+        PhysicalAvatarEventList_Fields?.forEach {
+            size += (it.TypeData?.size ?: 0) + 1
         }
+        return size
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAvatarAnimation(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put(Ascii.DC4)
-        packUUID(byteBuffer, this.Sender_Field.ID)
-        byteBuffer.put((byte) this.AnimationList_Fields.size())
-        for (AnimationList animationList : this.AnimationList_Fields) {
-            packUUID(byteBuffer, animationList.AnimID)
-            packInt(byteBuffer, animationList.AnimSequenceID)
+    override fun PackPayload(byteBuffer: ByteBuffer) {
+        byteBuffer.put(0x14.toByte()) // DC4
+        packUUID(byteBuffer, Sender_Field?.ID)
+        byteBuffer.put((AnimationList_Fields?.size ?: 0).toByte())
+        AnimationList_Fields?.forEach {
+            packUUID(byteBuffer, it.AnimID)
+            packInt(byteBuffer, it.AnimSequenceID)
         }
-        byteBuffer.put((byte) this.AnimationSourceList_Fields.size())
-        for (AnimationSourceList animationSourceList : this.AnimationSourceList_Fields) {
-            packUUID(byteBuffer, animationSourceList.ObjectID)
+        byteBuffer.put((AnimationSourceList_Fields?.size ?: 0).toByte())
+        AnimationSourceList_Fields?.forEach {
+            packUUID(byteBuffer, it.ObjectID)
         }
-        byteBuffer.put((byte) this.PhysicalAvatarEventList_Fields.size())
-        for (PhysicalAvatarEventList physicalAvatarEventList : this.PhysicalAvatarEventList_Fields) {
-            packVariable(byteBuffer, physicalAvatarEventList.TypeData, 1)
+        byteBuffer.put((PhysicalAvatarEventList_Fields?.size ?: 0).toByte())
+        PhysicalAvatarEventList_Fields?.forEach {
+            packVariable(byteBuffer, it.TypeData, 1)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.Sender_Field.ID = unpackUUID(byteBuffer)
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            AnimationList animationList = AnimationList()
-            animationList.AnimID = unpackUUID(byteBuffer)
-            animationList.AnimSequenceID = unpackInt(byteBuffer)
-            this.AnimationList_Fields.add(animationList)
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val sender = Sender_Field ?: Sender()
+        sender.ID = unpackUUID(byteBuffer)
+        this.Sender_Field = sender
+
+        val count1 = byteBuffer.get().toInt() and 0xFF
+        for (i in 0 until count1) {
+            val item = AnimationList()
+            item.AnimID = unpackUUID(byteBuffer)
+            item.AnimSequenceID = unpackInt(byteBuffer)
+            AnimationList_Fields?.add(item)
         }
-        byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b2; i2++) {
-            AnimationSourceList animationSourceList = AnimationSourceList()
-            animationSourceList.ObjectID = unpackUUID(byteBuffer)
-            this.AnimationSourceList_Fields.add(animationSourceList)
+
+        val count2 = byteBuffer.get().toInt() and 0xFF
+        for (i in 0 until count2) {
+            val item = AnimationSourceList()
+            item.ObjectID = unpackUUID(byteBuffer)
+            AnimationSourceList_Fields?.add(item)
         }
-        byte b3 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i3 = 0; i3 < b3; i3++) {
-            PhysicalAvatarEventList physicalAvatarEventList = PhysicalAvatarEventList()
-            physicalAvatarEventList.TypeData = unpackVariable(byteBuffer, 1)
-            this.PhysicalAvatarEventList_Fields.add(physicalAvatarEventList)
+
+        val count3 = byteBuffer.get().toInt() and 0xFF
+        for (i in 0 until count3) {
+            val item = PhysicalAvatarEventList()
+            item.TypeData = unpackVariable(byteBuffer, 1)
+            PhysicalAvatarEventList_Fields?.add(item)
         }
     }
 }
