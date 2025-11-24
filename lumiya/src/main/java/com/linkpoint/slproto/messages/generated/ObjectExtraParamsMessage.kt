@@ -54,7 +54,7 @@ class ObjectExtraParamsMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0063
+    override fun getMessageID(): Int = 0xFFFF0063.toInt()
 
     override fun getMessageName(): String = "ObjectExtraParams"
 }

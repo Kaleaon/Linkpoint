@@ -45,7 +45,7 @@ class SystemMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0194
+    override fun getMessageID(): Int = 0xFFFF0194.toInt()
 
     override fun getMessageName(): String = "SystemMessage"
 }

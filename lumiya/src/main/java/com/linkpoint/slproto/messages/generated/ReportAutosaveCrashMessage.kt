@@ -18,7 +18,7 @@ class ReportAutosaveCrashMessage : SLMessage() {
         status = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0080
+    override fun getMessageID(): Int = 0xFFFF0080.toInt()
 
     override fun getMessageName(): String = "ReportAutosaveCrash"
 }

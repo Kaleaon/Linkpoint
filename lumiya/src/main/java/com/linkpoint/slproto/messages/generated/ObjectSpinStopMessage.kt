@@ -26,7 +26,7 @@ class ObjectSpinStopMessage : SLMessage() {
         objectId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF007A
+    override fun getMessageID(): Int = 0xFFFF007A.toInt()
 
     override fun getMessageName(): String = "ObjectSpinStop"
 }

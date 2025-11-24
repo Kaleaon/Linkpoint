@@ -19,7 +19,7 @@ class UserInfoRequestMessage : SLMessage() {
         sessionId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF018F
+    override fun getMessageID(): Int = 0xFFFF018F.toInt()
 
     override fun getMessageName(): String = "UserInfoRequest"
 }

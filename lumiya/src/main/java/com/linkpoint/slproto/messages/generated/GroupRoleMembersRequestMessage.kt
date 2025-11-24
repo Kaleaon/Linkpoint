@@ -25,7 +25,7 @@ class GroupRoleMembersRequestMessage : SLMessage() {
         requestId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0175
+    override fun getMessageID(): Int = 0xFFFF0175.toInt()
 
     override fun getMessageName(): String = "GroupRoleMembersRequest"
 }

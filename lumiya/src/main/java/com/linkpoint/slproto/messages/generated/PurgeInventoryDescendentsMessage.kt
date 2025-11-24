@@ -26,7 +26,7 @@ class PurgeInventoryDescendentsMessage : SLMessage() {
         folderId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF011D
+    override fun getMessageID(): Int = 0xFFFF011D.toInt()
 
     override fun getMessageName(): String = "PurgeInventoryDescendents"
 }

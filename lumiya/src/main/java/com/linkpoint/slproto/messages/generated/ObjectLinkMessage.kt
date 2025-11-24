@@ -38,7 +38,7 @@ class ObjectLinkMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0073
+    override fun getMessageID(): Int = 0xFFFF0073.toInt()
 
     override fun getMessageName(): String = "ObjectLink"
 }

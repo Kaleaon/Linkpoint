@@ -35,7 +35,7 @@ class MergeParcelMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00DF
+    override fun getMessageID(): Int = 0xFFFF00DF.toInt()
 
     override fun getMessageName(): String = "MergeParcel"
 }

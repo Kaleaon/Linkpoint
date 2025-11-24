@@ -16,7 +16,7 @@ class ClearFollowCamPropertiesMessage : SLMessage() {
         objectId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00A0
+    override fun getMessageID(): Int = 0xFFFF00A0.toInt()
 
     override fun getMessageName(): String = "ClearFollowCamProperties"
 }

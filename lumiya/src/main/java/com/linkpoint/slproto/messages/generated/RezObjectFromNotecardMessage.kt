@@ -88,7 +88,7 @@ class RezObjectFromNotecardMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0126
+    override fun getMessageID(): Int = 0xFFFF0126.toInt()
 
     override fun getMessageName(): String = "RezObjectFromNotecard"
 }

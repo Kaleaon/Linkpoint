@@ -29,7 +29,7 @@ class ParcelPropertiesRequestByIdMessage : SLMessage() {
         localId = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00C5
+    override fun getMessageID(): Int = 0xFFFF00C5.toInt()
 
     override fun getMessageName(): String = "ParcelPropertiesRequestByID"
 }

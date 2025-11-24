@@ -25,7 +25,7 @@ class UserInfoReplyMessage : SLMessage() {
         eMail = unpackVariable(buffer, 2)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0190
+    override fun getMessageID(): Int = 0xFFFF0190.toInt()
 
     override fun getMessageName(): String = "UserInfoReply"
 }

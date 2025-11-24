@@ -50,7 +50,7 @@ class ClassifiedInfoUpdateMessage : SLMessage() {
         priceForListing = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF002D
+    override fun getMessageID(): Int = 0xFFFF002D.toInt()
 
     override fun getMessageName(): String = "ClassifiedInfoUpdate"
 }

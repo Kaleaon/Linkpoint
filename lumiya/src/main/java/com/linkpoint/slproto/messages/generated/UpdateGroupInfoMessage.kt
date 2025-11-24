@@ -47,7 +47,7 @@ class UpdateGroupInfoMessage : SLMessage() {
         maturePublish = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0155
+    override fun getMessageID(): Int = 0xFFFF0155.toInt()
 
     override fun getMessageName(): String = "UpdateGroupInfo"
 }

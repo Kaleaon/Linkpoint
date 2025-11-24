@@ -22,7 +22,7 @@ class SaveAssetIntoInventoryMessage : SLMessage() {
         newAssetId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0110
+    override fun getMessageID(): Int = 0xFFFF0110.toInt()
 
     override fun getMessageName(): String = "SaveAssetIntoInventory"
 }

@@ -32,7 +32,7 @@ class SystemKickUserMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00A6
+    override fun getMessageID(): Int = 0xFFFF00A6.toInt()
 
     override fun getMessageName(): String = "SystemKickUser"
 }

@@ -60,7 +60,7 @@ class DeRezObjectMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0123
+    override fun getMessageID(): Int = 0xFFFF0123.toInt()
 
     override fun getMessageName(): String = "DeRezObject"
 }

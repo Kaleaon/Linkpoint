@@ -75,7 +75,7 @@ class ScriptDialogMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00BE
+    override fun getMessageID(): Int = 0xFFFF00BE.toInt()
 
     override fun getMessageName(): String = "ScriptDialog"
 }

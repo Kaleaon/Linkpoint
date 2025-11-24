@@ -65,7 +65,7 @@ class ParcelInfoReplyMessage : SLMessage() {
         auctionId = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0037
+    override fun getMessageID(): Int = 0xFFFF0037.toInt()
 
     override fun getMessageName(): String = "ParcelInfoReply"
 }

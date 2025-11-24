@@ -22,7 +22,7 @@ class TrackAgentMessage : SLMessage() {
         preyId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0082
+    override fun getMessageID(): Int = 0xFFFF0082.toInt()
 
     override fun getMessageName(): String = "TrackAgent"
 }

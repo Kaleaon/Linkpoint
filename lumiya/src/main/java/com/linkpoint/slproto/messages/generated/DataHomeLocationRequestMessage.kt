@@ -26,7 +26,7 @@ class DataHomeLocationRequestMessage : SLMessage() {
         agentEffectiveMaturity = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0043
+    override fun getMessageID(): Int = 0xFFFF0043.toInt()
 
     override fun getMessageName(): String = "DataHomeLocationRequest"
 }

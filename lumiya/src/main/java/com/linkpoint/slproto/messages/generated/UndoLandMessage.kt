@@ -19,7 +19,7 @@ class UndoLandMessage : SLMessage() {
         sessionId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF004D
+    override fun getMessageID(): Int = 0xFFFF004D.toInt()
 
     override fun getMessageName(): String = "UndoLand"
 }

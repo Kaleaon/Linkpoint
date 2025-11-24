@@ -1,177 +1,60 @@
 package com.lumiyaviewer.lumiya.slproto.llsd.types
 
-import com.google.common.base.Strings
-import com.google.common.collect.ImmutableMap
-import com.google.common.collect.ImmutableSet
-import com.google.common.logging.nano.Vr
 import com.lumiyaviewer.lumiya.slproto.SLMessage
-import com.lumiyaviewer.lumiya.slproto.llsd.LLSDException
-import com.lumiyaviewer.lumiya.slproto.llsd.LLSDInvalidKeyException
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode
-import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNodeFactory
-import com.lumiyaviewer.lumiya.slproto.llsd.LLSDSerialized
-import com.lumiyaviewer.lumiya.slproto.llsd.LLSDValueTypeException
-import com.lumiyaviewer.lumiya.slproto.llsd.LLSDXMLException
 import java.io.DataOutputStream
 import java.io.IOException
-import java.lang.reflect.Field
-import java.lang.reflect.ParameterizedType
-import java.lang.reflect.Type
-import java.net.URI
-import java.util.ArrayList
-import java.util.Date
 import java.util.HashMap
-import java.util.List
-import java.util.Map
-import java.util.Set
-import java.util.UUID
-import androidx.annotation.NonNull
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlSerializer
 
-class LLSDMap : LLSDNode {
-    @NonNull
-    private ImmutableMap<String, LLSDNode> items
+class LLSDMap() : LLSDNode {
+    val items: MutableMap<String, LLSDNode> = HashMap()
 
-    class LLSDMapEntry {
-        String key
-        LLSDNode value
+    constructor(map: Map<String, LLSDNode>) : this() {
+        this.items.putAll(map)
+    }
 
-        LLSDMapEntry(String str, LLSDNode lLSDNode) {
-            this.key = str
-            this.value = lLSDNode
+    operator fun set(key: String, value: LLSDNode) {
+        this.items[key] = value
+    }
+
+    operator fun get(key: String): LLSDNode? {
+        return this.items[key]
+    }
+
+    override fun byKey(key: String): LLSDNode? {
+        return this.items[key]
+    }
+
+    override fun keyExists(key: String): Boolean {
+        return this.items.containsKey(key)
+    }
+
+    val value: Map<String, LLSDNode>
+        get() = items
+
+    @Throws(IOException::class)
+    override fun toBinary(dataOutputStream: DataOutputStream) {
+        dataOutputStream.writeByte('{'.toInt())
+        dataOutputStream.writeInt(items.size)
+        for ((key, value) in items) {
+            dataOutputStream.writeByte('k'.toInt())
+            val keyBytes = SLMessage.stringToVariableUTF(key)
+            dataOutputStream.writeInt(keyBytes.size)
+            dataOutputStream.write(keyBytes)
+            value.toBinary(dataOutputStream)
         }
+        dataOutputStream.writeByte('}'.toInt())
     }
 
-    LLSDMap(Map<String, LLSDNode> map) {
-        this.items = ImmutableMap.copyOf(map)
-    }
-
-    LLSDMap(XmlPullParser xmlPullParser) throws LLSDXMLException, XmlPullParserException, IOException {
-        HashMap hashMap = HashMap()
-        while (xmlPullParser.nextTag() != 3) {
-            xmlPullParser.require(2, (String) null, "key")
-            String nextText = xmlPullParser.nextText()
-            xmlPullParser.nextTag()
-            hashMap.put(nextText, LLSDNodeFactory.parseNode(xmlPullParser))
-        }
-        this.items = ImmutableMap.copyOf(hashMap)
-    }
-
-    LLSDMap(LLSDMapEntry... lLSDMapEntryArr) {
-        HashMap hashMap = HashMap(lLSDMapEntryArr.length)
-        for (LLSDMapEntry lLSDMapEntry : lLSDMapEntryArr) {
-            hashMap.put(lLSDMapEntry.key, lLSDMapEntry.value)
-        }
-        this.items = ImmutableMap.copyOf(hashMap)
-    }
-
-    LLSDNode byKey(String str) throws LLSDInvalidKeyException {
-        LLSDNode lLSDNode = this.items.get(str)
-        if (lLSDNode != null) {
-            return lLSDNode
-        }
-        throw LLSDInvalidKeyException("Map key not found, requested \"" + str + "\"")
-    }
-
-    Set<Map.Entry<String, LLSDNode>> entrySet() {
-        return this.items.entrySet()
-    }
-
-    Boolean keyExists(String str) {
-        return this.items.containsKey(str)
-    }
-
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
-        dataOutputStream.writeByte(Vr.VREvent.VrCore.ErrorCode.CONTROLLER_GATT_CHARACTERISTIC_NOT_FOUND)
-        ImmutableSet<Map.Entry<String, LLSDNode>> entrySet = this.items.entrySet()
-        dataOutputStream.writeInt(entrySet.size())
-        for (Map.Entry entry : entrySet) {
-            dataOutputStream.writeByte(107)
-            byte[] stringToVariableUTF = SLMessage.stringToVariableUTF((String) entry.getKey())
-            dataOutputStream.writeInt(stringToVariableUTF.length)
-            dataOutputStream.write(stringToVariableUTF)
-            ((LLSDNode) entry.getValue()).toBinary(dataOutputStream)
-        }
-        dataOutputStream.writeByte(Vr.VREvent.VrCore.ErrorCode.CONTROLLER_BATTERY_READ_FAILED)
-    }
-
-    <T> T toObject(Class<? : T> cls) throws LLSDException {
-        try {
-            T newInstance = cls.newInstance()
-            for (Field field : cls.getDeclaredFields()) {
-                LLSDSerialized lLSDSerialized = (LLSDSerialized) field.getAnnotation(LLSDSerialized.class)
-                if (lLSDSerialized != null) {
-                    String name = lLSDSerialized.name()
-                    if (Strings.isNullOrEmpty(name)) {
-                        name = field.getName()
-                    }
-                    Class<?> type = field.getType()
-                    if (keyExists(name)) {
-                        LLSDNode byKey = byKey(name)
-                        if (type.equals(Boolean.TYPE)) {
-                            field.setBoolean(newInstance, byKey.asBoolean())
-                        } else if (type.equals(Integer.TYPE)) {
-                            field.setInt(newInstance, byKey.asInt())
-                        } else if (type.equals(Double.TYPE)) {
-                            field.setDouble(newInstance, byKey.asDouble())
-                        } else if (type.equals(Long.TYPE)) {
-                            field.setLong(newInstance, byKey.asLong())
-                        } else if (type.equals(String.class)) {
-                            field.set(newInstance, byKey.asString())
-                        } else if (type.equals(UUID.class)) {
-                            field.set(newInstance, byKey.asUUID())
-                        } else if (type.equals(URI.class)) {
-                            field.set(newInstance, byKey.asURI())
-                        } else if (type.equals(Date.class)) {
-                            field.set(newInstance, byKey.asDate())
-                        } else if (type.equals(byte[].class)) {
-                            field.set(newInstance, byKey.asBinary())
-                        } else if (type.isAssignableFrom(List.class)) {
-                            Type genericType = field.getGenericType()
-                            if (genericType instanceof ParameterizedType) {
-                                Type[] actualTypeArguments = ((ParameterizedType) genericType).getActualTypeArguments()
-                                if (actualTypeArguments.length != 1) {
-                                    throw LLSDValueTypeException(type.getName(), byKey)
-                                }
-                                Type type2 = actualTypeArguments[0]
-                                if (type2 instanceof Class) {
-                                    Int count = byKey.getCount()
-                                    ArrayList arrayList = ArrayList(count)
-                                    for (Int i = 0; i < count; i++) {
-                                        arrayList.add(byKey.byIndex(i).toObject((Class) type2))
-                                    }
-                                    field.set(newInstance, arrayList)
-                                } else {
-                                    throw LLSDValueTypeException(type.getName(), byKey)
-                                }
-                            } else {
-                                throw LLSDValueTypeException(type.getName(), byKey)
-                            }
-                        } else {
-                            continue
-                        }
-                    } else {
-                        continue
-                    }
-                }
-            }
-            return newInstance
-        } catch (IllegalAccessException e) {
-            throw LLSDException(e.getMessage())
-        } catch (InstantiationException e2) {
-            throw LLSDException(e2.getMessage())
-        }
-    }
-
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    @Throws(IOException::class)
+    override fun toXML(xmlSerializer: XmlSerializer) {
         xmlSerializer.startTag("", "map")
-        for (Map.Entry entry : this.items.entrySet()) {
+        for ((key, value) in items) {
             xmlSerializer.startTag("", "key")
-            xmlSerializer.text((String) entry.getKey())
+            xmlSerializer.text(key)
             xmlSerializer.endTag("", "key")
-            ((LLSDNode) entry.getValue()).toXML(xmlSerializer)
+            value.toXML(xmlSerializer)
         }
         xmlSerializer.endTag("", "map")
     }

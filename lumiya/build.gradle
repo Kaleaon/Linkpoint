@@ -12,7 +12,7 @@ android {
 
     // SDK configuration: MinSDK 24, Target/Compile SDK 34 for AGP 8.1.4
     compileSdk 34
-    buildToolsVersion "33.0.2"
+    buildToolsVersion "34.0.0"
 
     // Resource processing tweaks (keep minimal). noCompress keeps ktx2 files uncompressed.
     aaptOptions {

@@ -81,7 +81,7 @@ class UpdateParcelMessage : SLMessage() {
         maturePublish = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00DD
+    override fun getMessageID(): Int = 0xFFFF00DD.toInt()
 
     override fun getMessageName(): String = "UpdateParcel"
 }

@@ -46,7 +46,7 @@ class ObjectRotationMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF005D
+    override fun getMessageID(): Int = 0xFFFF005D.toInt()
 
     override fun getMessageName(): String = "ObjectRotation"
 }

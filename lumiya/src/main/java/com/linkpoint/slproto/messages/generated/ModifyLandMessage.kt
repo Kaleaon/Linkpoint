@@ -84,7 +84,7 @@ class ModifyLandMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF007C
+    override fun getMessageID(): Int = 0xFFFF007C.toInt()
 
     override fun getMessageName(): String = "ModifyLand"
 }

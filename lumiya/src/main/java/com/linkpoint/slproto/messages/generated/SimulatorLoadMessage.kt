@@ -46,7 +46,7 @@ class SimulatorLoadMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF000C
+    override fun getMessageID(): Int = 0xFFFF000C.toInt()
 
     override fun getMessageName(): String = "SimulatorLoad"
 }

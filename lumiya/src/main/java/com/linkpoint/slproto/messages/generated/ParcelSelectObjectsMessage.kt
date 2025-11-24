@@ -48,7 +48,7 @@ class ParcelSelectObjectsMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00CA
+    override fun getMessageID(): Int = 0xFFFF00CA.toInt()
 
     override fun getMessageName(): String = "ParcelSelectObjects"
 }

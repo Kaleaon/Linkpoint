@@ -22,7 +22,7 @@ class EmailMessageRequestMessage : SLMessage() {
         subject = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF014F
+    override fun getMessageID(): Int = 0xFFFF014F.toInt()
 
     override fun getMessageName(): String = "EmailMessageRequest"
 }

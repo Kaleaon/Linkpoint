@@ -41,7 +41,7 @@ class AvatarClassifiedReplyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF002A
+    override fun getMessageID(): Int = 0xFFFF002A.toInt()
 
     override fun getMessageName(): String = "AvatarClassifiedReply"
 }

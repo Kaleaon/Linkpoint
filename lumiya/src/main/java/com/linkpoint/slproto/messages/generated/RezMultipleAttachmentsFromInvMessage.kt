@@ -75,7 +75,7 @@ class RezMultipleAttachmentsFromInvMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF018C
+    override fun getMessageID(): Int = 0xFFFF018C.toInt()
 
     override fun getMessageName(): String = "RezMultipleAttachmentsFromInv"
 }

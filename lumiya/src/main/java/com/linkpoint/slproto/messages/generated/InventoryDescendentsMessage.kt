@@ -138,7 +138,7 @@ class InventoryDescendentsMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0116
+    override fun getMessageID(): Int = 0xFFFF0116.toInt()
 
     override fun getMessageName(): String = "InventoryDescendents"
 }

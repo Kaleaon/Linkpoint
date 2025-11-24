@@ -60,7 +60,7 @@ class AvatarGroupsReplyMessage : SLMessage() {
         listInProfile = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00AD
+    override fun getMessageID(): Int = 0xFFFF00AD.toInt()
 
     override fun getMessageName(): String = "AvatarGroupsReply"
 }

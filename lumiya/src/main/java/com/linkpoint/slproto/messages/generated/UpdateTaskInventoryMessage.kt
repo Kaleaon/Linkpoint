@@ -92,7 +92,7 @@ class UpdateTaskInventoryMessage : SLMessage() {
         crc = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF011E
+    override fun getMessageID(): Int = 0xFFFF011E.toInt()
 
     override fun getMessageName(): String = "UpdateTaskInventory"
 }

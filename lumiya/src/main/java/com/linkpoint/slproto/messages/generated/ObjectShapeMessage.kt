@@ -96,7 +96,7 @@ class ObjectShapeMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0062
+    override fun getMessageID(): Int = 0xFFFF0062.toInt()
 
     override fun getMessageName(): String = "ObjectShape"
 }

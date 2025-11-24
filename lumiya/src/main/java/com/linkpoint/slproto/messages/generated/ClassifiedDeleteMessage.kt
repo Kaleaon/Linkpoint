@@ -22,7 +22,7 @@ class ClassifiedDeleteMessage : SLMessage() {
         classifiedId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF002E
+    override fun getMessageID(): Int = 0xFFFF002E.toInt()
 
     override fun getMessageName(): String = "ClassifiedDelete"
 }

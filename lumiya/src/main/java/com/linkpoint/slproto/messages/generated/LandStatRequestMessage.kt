@@ -31,7 +31,7 @@ class LandStatRequestMessage : SLMessage() {
         parcelLocalId = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF01A5
+    override fun getMessageID(): Int = 0xFFFF01A5.toInt()
 
     override fun getMessageName(): String = "LandStatRequest"
 }

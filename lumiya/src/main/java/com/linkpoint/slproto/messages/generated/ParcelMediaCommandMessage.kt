@@ -21,7 +21,7 @@ class ParcelMediaCommandMessage : SLMessage() {
         time = unpackFloat(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF01A3
+    override fun getMessageID(): Int = 0xFFFF01A3.toInt()
 
     override fun getMessageName(): String = "ParcelMediaCommandMessage"
 }

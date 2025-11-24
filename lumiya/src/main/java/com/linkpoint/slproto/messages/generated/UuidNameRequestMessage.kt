@@ -32,7 +32,7 @@ class UuidNameRequestMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00EB
+    override fun getMessageID(): Int = 0xFFFF00EB.toInt()
 
     override fun getMessageName(): String = "UUIDNameRequest"
 }

@@ -22,7 +22,7 @@ class SimulatorSetMapMessage : SLMessage() {
         mapImage = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0006
+    override fun getMessageID(): Int = 0xFFFF0006.toInt()
 
     override fun getMessageName(): String = "SimulatorSetMap"
 }

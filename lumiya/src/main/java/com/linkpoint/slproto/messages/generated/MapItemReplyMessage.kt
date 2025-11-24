@@ -56,7 +56,7 @@ class MapItemReplyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF019B
+    override fun getMessageID(): Int = 0xFFFF019B.toInt()
 
     override fun getMessageName(): String = "MapItemReply"
 }

@@ -45,7 +45,7 @@ class ObjectCategoryMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF006D
+    override fun getMessageID(): Int = 0xFFFF006D.toInt()
 
     override fun getMessageName(): String = "ObjectCategory"
 }

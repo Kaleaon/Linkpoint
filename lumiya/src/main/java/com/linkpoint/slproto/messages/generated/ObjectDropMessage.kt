@@ -38,7 +38,7 @@ class ObjectDropMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0072
+    override fun getMessageID(): Int = 0xFFFF0072.toInt()
 
     override fun getMessageName(): String = "ObjectDrop"
 }

@@ -40,7 +40,7 @@ class MapBlockRequestMessage : SLMessage() {
         maxY = unpackUInt16(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0197
+    override fun getMessageID(): Int = 0xFFFF0197.toInt()
 
     override fun getMessageName(): String = "MapBlockRequest"
 }

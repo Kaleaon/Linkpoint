@@ -69,7 +69,7 @@ class ObjectFlagUpdateMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF005E
+    override fun getMessageID(): Int = 0xFFFF005E.toInt()
 
     override fun getMessageName(): String = "ObjectFlagUpdate"
 }

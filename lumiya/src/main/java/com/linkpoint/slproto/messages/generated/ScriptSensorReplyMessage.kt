@@ -65,7 +65,7 @@ class ScriptSensorReplyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00F8
+    override fun getMessageID(): Int = 0xFFFF00F8.toInt()
 
     override fun getMessageName(): String = "ScriptSensorReply"
 }

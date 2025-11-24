@@ -50,7 +50,7 @@ class PickInfoUpdateMessage : SLMessage() {
         enabled = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00B9
+    override fun getMessageID(): Int = 0xFFFF00B9.toInt()
 
     override fun getMessageName(): String = "PickInfoUpdate"
 }

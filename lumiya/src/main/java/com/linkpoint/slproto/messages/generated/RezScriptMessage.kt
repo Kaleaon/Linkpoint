@@ -14,7 +14,7 @@ class RezScriptMessage : SLMessage() {
     var folderId: UUID = UUID(0L, 0L)
     var creatorId: UUID = UUID(0L, 0L)
     var ownerId: UUID = UUID(0L, 0L)
-    var groupId: UUID = UUID(0L, 0L)
+    var groupOwnerId: UUID = UUID(0L, 0L) // Renamed to avoid conflict with agent block groupId
     var baseMask: Int = 0
     var ownerMask: Int = 0
     var groupMask: Int = 0
@@ -47,7 +47,7 @@ class RezScriptMessage : SLMessage() {
         packUUID(buffer, folderId)
         packUUID(buffer, creatorId)
         packUUID(buffer, ownerId)
-        packUUID(buffer, groupId)
+        packUUID(buffer, groupOwnerId)
         packInt(buffer, baseMask)
         packInt(buffer, ownerMask)
         packInt(buffer, groupMask)
@@ -76,7 +76,7 @@ class RezScriptMessage : SLMessage() {
         folderId = unpackUUID(buffer)
         creatorId = unpackUUID(buffer)
         ownerId = unpackUUID(buffer)
-        groupId = unpackUUID(buffer)
+        groupOwnerId = unpackUUID(buffer)
         baseMask = unpackInt(buffer)
         ownerMask = unpackInt(buffer)
         groupMask = unpackInt(buffer)
@@ -95,7 +95,7 @@ class RezScriptMessage : SLMessage() {
         crc = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0130
+    override fun getMessageID(): Int = 0xFFFF0130.toInt()
 
     override fun getMessageName(): String = "RezScript"
 }

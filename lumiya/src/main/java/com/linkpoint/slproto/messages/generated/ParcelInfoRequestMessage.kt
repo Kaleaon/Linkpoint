@@ -22,7 +22,7 @@ class ParcelInfoRequestMessage : SLMessage() {
         parcelId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0036
+    override fun getMessageID(): Int = 0xFFFF0036.toInt()
 
     override fun getMessageName(): String = "ParcelInfoRequest"
 }

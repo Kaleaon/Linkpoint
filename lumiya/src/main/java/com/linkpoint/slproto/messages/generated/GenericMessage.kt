@@ -51,7 +51,7 @@ class GenericMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0105
+    override fun getMessageID(): Int = 0xFFFF0105.toInt()
 
     override fun getMessageName(): String = "GenericMessage"
 }

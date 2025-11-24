@@ -19,7 +19,7 @@ class EstateCovenantRequestMessage : SLMessage() {
         sessionId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00CB
+    override fun getMessageID(): Int = 0xFFFF00CB.toInt()
 
     override fun getMessageName(): String = "EstateCovenantRequest"
 }

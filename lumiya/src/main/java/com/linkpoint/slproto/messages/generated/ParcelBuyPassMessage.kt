@@ -22,7 +22,7 @@ class ParcelBuyPassMessage : SLMessage() {
         localId = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00CE
+    override fun getMessageID(): Int = 0xFFFF00CE.toInt()
 
     override fun getMessageName(): String = "ParcelBuyPass"
 }

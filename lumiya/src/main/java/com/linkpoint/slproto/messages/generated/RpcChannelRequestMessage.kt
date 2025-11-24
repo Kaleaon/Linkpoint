@@ -25,7 +25,7 @@ class RpcChannelRequestMessage : SLMessage() {
         itemId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF019D
+    override fun getMessageID(): Int = 0xFFFF019D.toInt()
 
     override fun getMessageName(): String = "RpcChannelRequest"
 }

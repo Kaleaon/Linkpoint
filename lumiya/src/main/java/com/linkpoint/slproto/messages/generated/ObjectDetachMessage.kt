@@ -38,7 +38,7 @@ class ObjectDetachMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0071
+    override fun getMessageID(): Int = 0xFFFF0071.toInt()
 
     override fun getMessageName(): String = "ObjectDetach"
 }

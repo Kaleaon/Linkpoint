@@ -25,7 +25,7 @@ class ClassifiedGodDeleteMessage : SLMessage() {
         queryId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF002F
+    override fun getMessageID(): Int = 0xFFFF002F.toInt()
 
     override fun getMessageName(): String = "ClassifiedGodDelete"
 }

@@ -45,7 +45,7 @@ class ObjectGroupMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0065
+    override fun getMessageID(): Int = 0xFFFF0065.toInt()
 
     override fun getMessageName(): String = "ObjectGroup"
 }

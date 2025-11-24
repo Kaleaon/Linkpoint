@@ -41,7 +41,7 @@ class UndoMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF004B
+    override fun getMessageID(): Int = 0xFFFF004B.toInt()
 
     override fun getMessageName(): String = "Undo"
 }

@@ -47,7 +47,7 @@ class CreateGroupRequestMessage : SLMessage() {
         maturePublish = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0153
+    override fun getMessageID(): Int = 0xFFFF0153.toInt()
 
     override fun getMessageName(): String = "CreateGroupRequest"
 }

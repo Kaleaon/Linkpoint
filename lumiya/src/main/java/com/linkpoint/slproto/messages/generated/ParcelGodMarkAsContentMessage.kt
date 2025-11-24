@@ -22,7 +22,7 @@ class ParcelGodMarkAsContentMessage : SLMessage() {
         localId = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00E3
+    override fun getMessageID(): Int = 0xFFFF00E3.toInt()
 
     override fun getMessageName(): String = "ParcelGodMarkAsContent"
 }

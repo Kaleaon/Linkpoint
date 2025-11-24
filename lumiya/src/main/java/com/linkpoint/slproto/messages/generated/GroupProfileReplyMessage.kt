@@ -68,7 +68,7 @@ class GroupProfileReplyMessage : SLMessage() {
         ownerRole = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0160
+    override fun getMessageID(): Int = 0xFFFF0160.toInt()
 
     override fun getMessageName(): String = "GroupProfileReply"
 }

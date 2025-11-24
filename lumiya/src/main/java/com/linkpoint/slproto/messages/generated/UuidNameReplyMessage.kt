@@ -38,7 +38,7 @@ class UuidNameReplyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00EC
+    override fun getMessageID(): Int = 0xFFFF00EC.toInt()
 
     override fun getMessageName(): String = "UUIDNameReply"
 }

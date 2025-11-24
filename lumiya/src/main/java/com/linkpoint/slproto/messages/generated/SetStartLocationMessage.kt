@@ -36,7 +36,7 @@ class SetStartLocationMessage : SLMessage() {
         locationLookAt = LLVector3.unpack(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0145
+    override fun getMessageID(): Int = 0xFFFF0145.toInt()
 
     override fun getMessageName(): String = "SetStartLocation"
 }

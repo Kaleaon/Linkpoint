@@ -26,7 +26,7 @@ class TeleportLandmarkRequestMessage : SLMessage() {
         landmarkId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0041
+    override fun getMessageID(): Int = 0xFFFF0041.toInt()
 
     override fun getMessageName(): String = "TeleportLandmarkRequest"
 }

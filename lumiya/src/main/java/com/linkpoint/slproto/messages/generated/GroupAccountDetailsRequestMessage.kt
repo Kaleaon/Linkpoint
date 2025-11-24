@@ -35,7 +35,7 @@ class GroupAccountDetailsRequestMessage : SLMessage() {
         currentInterval = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0163
+    override fun getMessageID(): Int = 0xFFFF0163.toInt()
 
     override fun getMessageName(): String = "GroupAccountDetailsRequest"
 }

@@ -34,7 +34,7 @@ class MapItemRequestMessage : SLMessage() {
         regionHandle = unpackLong(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF019A
+    override fun getMessageID(): Int = 0xFFFF019A.toInt()
 
     override fun getMessageName(): String = "MapItemRequest"
 }

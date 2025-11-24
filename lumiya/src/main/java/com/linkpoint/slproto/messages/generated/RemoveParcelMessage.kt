@@ -32,7 +32,7 @@ class RemoveParcelMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00DE
+    override fun getMessageID(): Int = 0xFFFF00DE.toInt()
 
     override fun getMessageName(): String = "RemoveParcel"
 }

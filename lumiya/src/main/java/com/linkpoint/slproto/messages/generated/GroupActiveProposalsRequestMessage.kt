@@ -25,7 +25,7 @@ class GroupActiveProposalsRequestMessage : SLMessage() {
         transactionId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0167
+    override fun getMessageID(): Int = 0xFFFF0167.toInt()
 
     override fun getMessageName(): String = "GroupActiveProposalsRequest"
 }

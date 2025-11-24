@@ -6,15 +6,18 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import okhttp3.MediaType
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
-import java.util.concurrent.TimeUnit
+import okio.ByteString.Companion.toByteString
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 /**
  * Modern hybrid protocol implementation for Second Life communication.
@@ -31,19 +34,20 @@ class HybridProtocolManager {
     }
     
     // Protocol configuration
-    private OkHttpClient http2Client
-    private WebSocketManager webSocketManager
-    private LegacyUDPManager udpManager
-    private ProtocolRouter router
-    private ExecutorService executor
+    private val http2Client: OkHttpClient
+    private val webSocketManager: WebSocketManager
+    private val udpManager: LegacyUDPManager
+    private val router: ProtocolRouter
+    private val executor: ExecutorService
     
     // Connection state
-    private volatile boolean isConnected = false
-    private ConcurrentHashMap<String, CompletableFuture<Response>> pendingRequests = new ConcurrentHashMap<>()
+    @Volatile
+    private var isConnectedVal = false
+    private val pendingRequests = ConcurrentHashMap<String, CompletableFuture<Response>>()
     
-    HybridProtocolManager() {
+    init {
         // HTTP/2 client for CAPS requests
-        this.http2Client = new OkHttpClient.Builder()
+        this.http2Client = OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
@@ -59,52 +63,56 @@ class HybridProtocolManager {
         this.router = ProtocolRouter()
         
         // Executor for async operations
-        this.executor = Executors.newCachedThreadPool(r -> {
-            Thread t = Thread(r, "HybridProtocol-" + r.hashCode())
-            t.setDaemon(true)
-            return t
-        })
+        this.executor = Executors.newCachedThreadPool { r ->
+            val t = Thread(r, "HybridProtocol-" + r.hashCode())
+            t.isDaemon = true
+            t
+        }
     }
     
     /**
      * Initialize the hybrid protocol system with grid endpoints
      */
-    CompletableFuture<Boolean> initializeAsync(String capsURL, String websocketURL) {
+    fun initializeAsync(capsURL: String, websocketURL: String): CompletableFuture<Boolean> {
         Log.i(TAG, "Initializing hybrid protocol system")
         
-        return CompletableFuture.supplyAsync(() -> {
+        return CompletableFuture.supplyAsync({
             try {
                 // Initialize WebSocket connection for real-time events
-                boolean wsConnected = webSocketManager.connectAsync(websocketURL).get(15, TimeUnit.SECONDS)
+                val wsConnected = try {
+                     webSocketManager.connectAsync(websocketURL).get(15, TimeUnit.SECONDS)
+                } catch (e: Exception) {
+                     false
+                }
                 if (!wsConnected) {
                     Log.w(TAG, "WebSocket connection failed, real-time features may be limited")
                 }
                 
                 // Test HTTP/2 CAPS connectivity
-                boolean capsWorking = testCapsConnectivity(capsURL)
+                val capsWorking = testCapsConnectivity(capsURL)
                 if (!capsWorking) {
                     Log.w(TAG, "CAPS HTTP/2 connection issues detected")
                 }
                 
                 // Initialize UDP legacy support
-                boolean udpInitialized = udpManager.initialize()
+                val udpInitialized = udpManager.initialize()
                 
-                isConnected = wsConnected || capsWorking || udpInitialized
+                isConnectedVal = wsConnected || capsWorking || udpInitialized
                 
-                if (isConnected) {
+                if (isConnectedVal) {
                     Log.i(TAG, "Hybrid protocol initialized successfully")
-                    Log.i(TAG, "  WebSocket: " + (wsConnected ? "✅" : "❌"))
-                    Log.i(TAG, "  HTTP/2 CAPS: " + (capsWorking ? "✅" : "❌"))
-                    Log.i(TAG, "  UDP Legacy: " + (udpInitialized ? "✅" : "❌"))
+                    Log.i(TAG, "  WebSocket: " + (if (wsConnected) "✅" else "❌"))
+                    Log.i(TAG, "  HTTP/2 CAPS: " + (if (capsWorking) "✅" else "❌"))
+                    Log.i(TAG, "  UDP Legacy: " + (if (udpInitialized) "✅" else "❌"))
                 } else {
                     Log.e(TAG, "Failed to initialize any protocol transport")
                 }
                 
-                return isConnected
+                isConnectedVal
                 
-            } catch (Exception e) {
+            } catch (e: Exception) {
                 Log.e(TAG, "Protocol initialization failed", e)
-                return false
+                false
             }
         }, executor)
     }
@@ -112,86 +120,85 @@ class HybridProtocolManager {
     /**
      * Send message using optimal transport protocol
      */
-    CompletableFuture<Boolean> sendMessageAsync(SLMessage message) {
-        if (!isConnected) {
+    fun sendMessageAsync(message: SLMessage): CompletableFuture<Boolean> {
+        if (!isConnectedVal) {
             return CompletableFuture.completedFuture(false)
         }
         
         // Determine optimal transport for this message
-        Transport transport = router.getOptimalTransport(message)
+        val transport = router.getOptimalTransport(message)
         
-        Log.d(TAG, "Sending message via " + transport + ": " + message.getClass().getSimpleName())
+        Log.d(TAG, "Sending message via " + transport + ": " + message.javaClass.simpleName)
         
-        switch (transport) {
-            case HTTP2_CAPS:
-                return sendViaHTTP2(message)
-            case WEBSOCKET_RT:
-                return sendViaWebSocket(message)
-            case UDP_LEGACY:
-                return sendViaUDP(message)
-            default:
-                Log.e(TAG, "Unknown transport type: " + transport)
-                return CompletableFuture.completedFuture(false)
+        return when (transport) {
+            Transport.HTTP2_CAPS -> sendViaHTTP2(message)
+            Transport.WEBSOCKET_RT -> sendViaWebSocket(message)
+            Transport.UDP_LEGACY -> sendViaUDP(message)
         }
     }
     
-    private CompletableFuture<Boolean> sendViaHTTP2(SLMessage message) {
-        return CompletableFuture.supplyAsync(() -> {
+    private fun sendViaHTTP2(message: SLMessage): CompletableFuture<Boolean> {
+        return CompletableFuture.supplyAsync({
             try {
                 // Convert SL message to HTTP/2 request
-                byte[] messageData = serializeMessage(message)
-                RequestBody body = RequestBody.create(messageData, MediaType.get("application/octet-stream"))
+                val messageData = serializeMessage(message)
+                val body = messageData.toRequestBody("application/octet-stream".toMediaType())
                 
-                Request request = new Request.Builder()
-                    .url("https://example.com/caps/" + message.getClass().getSimpleName()) // This would be actual CAPS URL
+                val request = Request.Builder()
+                    .url("https://example.com/caps/" + message.javaClass.simpleName) // This would be actual CAPS URL
                     .post(body)
                     .header("Content-Type", "application/octet-stream")
                     .header("User-Agent", "Linkpoint-Hybrid/1.0")
                     .build()
                 
-                try (Response response = http2Client.newCall(request).execute()) {
-                    boolean success = response.isSuccessful()
-                    Log.d(TAG, "HTTP/2 message result: " + response.code())
-                    return success
+                http2Client.newCall(request).execute().use { response ->
+                    val success = response.isSuccessful
+                    Log.d(TAG, "HTTP/2 message result: " + response.code)
+                    success
                 }
                 
-            } catch (Exception e) {
+            } catch (e: Exception) {
                 Log.e(TAG, "HTTP/2 message sending failed", e)
-                return false
+                false
             }
         }, executor)
     }
     
-    private CompletableFuture<Boolean> sendViaWebSocket(SLMessage message) {
+    private fun sendViaWebSocket(message: SLMessage): CompletableFuture<Boolean> {
         return webSocketManager.sendMessage(message)
     }
     
-    private CompletableFuture<Boolean> sendViaUDP(SLMessage message) {
+    private fun sendViaUDP(message: SLMessage): CompletableFuture<Boolean> {
         return udpManager.sendMessage(message)
     }
     
-    private boolean testCapsConnectivity(String capsURL) {
-        try {
-            Request testRequest = new Request.Builder()
+    private fun testCapsConnectivity(capsURL: String): Boolean {
+        return try {
+            val testRequest = Request.Builder()
                 .url(capsURL)
                 .head()
                 .build()
                 
-            try (Response response = http2Client.newCall(testRequest).execute()) {
-                return response.isSuccessful() || response.code() == 405; // 405 Method Not Allowed is OK
+            http2Client.newCall(testRequest).execute().use { response ->
+                response.isSuccessful || response.code == 405 // 405 Method Not Allowed is OK
             }
-        } catch (Exception e) {
+        } catch (e: Exception) {
             Log.w(TAG, "CAPS connectivity test failed", e)
-            return false
+            false
         }
     }
     
-    private byte[] serializeMessage(SLMessage message) {
-        // In a real implementation, this would use modern serialization
-        // For now, use the existing message serialization
+    private fun serializeMessage(message: SLMessage): ByteArray {
         try {
-            return message.serialize()
-        } catch (Exception e) {
+            val buffer = ByteBuffer.allocate(SLMessage.MAX_MESSAGE_SIZE).order(ByteOrder.BIG_ENDIAN)
+            val tempBuffer = ByteBuffer.allocate(SLMessage.MAX_MESSAGE_SIZE).order(ByteOrder.BIG_ENDIAN)
+            message.Pack(buffer, tempBuffer)
+            val length = buffer.position()
+            val data = ByteArray(length)
+            buffer.rewind()
+            buffer.get(data)
+            return data
+        } catch (e: Exception) {
             Log.e(TAG, "Message serialization failed", e)
             return ByteArray(0)
         }
@@ -200,121 +207,110 @@ class HybridProtocolManager {
     /**
      * WebSocket manager for real-time events
      */
-    private class WebSocketManager {
-        private volatile WebSocket webSocket
-        private volatile boolean connected = false
+    private inner class WebSocketManager {
+        @Volatile var webSocket: WebSocket? = null
+        @Volatile var connected = false
         
-        CompletableFuture<Boolean> connectAsync(String websocketURL) {
-            return CompletableFuture.supplyAsync(() -> {
+        fun connectAsync(websocketURL: String): CompletableFuture<Boolean> {
+            return CompletableFuture.supplyAsync {
                 try {
-                    OkHttpClient client = new OkHttpClient.Builder()
+                    val client = OkHttpClient.Builder()
                         .readTimeout(0, TimeUnit.MILLISECONDS) // Keep connection alive
                         .build()
                     
-                    Request request = new Request.Builder()
+                    val request = Request.Builder()
                         .url(websocketURL)
                         .build()
                     
-                    webSocket = client.newWebSocket(request, WebSocketListener() {
-                        @Override
-                        void onOpen(WebSocket webSocket, Response response) {
+                    webSocket = client.newWebSocket(request, object : WebSocketListener() {
+                        override fun onOpen(webSocket: WebSocket, response: Response) {
                             Log.i(TAG, "WebSocket connected")
                             connected = true
                         }
                         
-                        @Override
-                        void onMessage(WebSocket webSocket, String text) {
+                        override fun onMessage(webSocket: WebSocket, text: String) {
                             Log.d(TAG, "WebSocket text message received: " + text)
-                            // Handle incoming text messages
                         }
                         
-                        @Override
-                        void onMessage(WebSocket webSocket, ByteString bytes) {
-                            Log.d(TAG, "WebSocket binary message received: " + bytes.size() + " bytes")
-                            // Handle incoming binary messages
+                        override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+                            Log.d(TAG, "WebSocket binary message received: " + bytes.size + " bytes")
                         }
                         
-                        @Override
-                        void onFailure(WebSocket webSocket, Throwable t, Response response) {
+                        override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                             Log.e(TAG, "WebSocket connection failed", t)
                             connected = false
                         }
                         
-                        @Override
-                        void onClosed(WebSocket webSocket, int code, String reason) {
+                        override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                             Log.i(TAG, "WebSocket closed: " + code + " " + reason)
                             connected = false
                         }
                     })
                     
-                    // Wait a moment for connection to establish
                     Thread.sleep(2000)
-                    return connected
+                    connected
                     
-                } catch (Exception e) {
+                } catch (e: Exception) {
                     Log.e(TAG, "WebSocket connection failed", e)
-                    return false
+                    false
                 }
-            })
+            }
         }
         
-        CompletableFuture<Boolean> sendMessage(SLMessage message) {
-            return CompletableFuture.supplyAsync(() -> {
+        fun sendMessage(message: SLMessage): CompletableFuture<Boolean> {
+            return CompletableFuture.supplyAsync {
                 if (!connected || webSocket == null) {
-                    return false
+                    return@supplyAsync false
                 }
                 
                 try {
-                    byte[] messageData = message.serialize()
-                    boolean sent = webSocket.send(ByteString.of(messageData))
+                    val messageData = serializeMessage(message)
+                    val sent = webSocket!!.send(messageData.toByteString())
                     Log.d(TAG, "WebSocket message sent: " + sent)
-                    return sent
-                } catch (Exception e) {
+                    sent
+                } catch (e: Exception) {
                     Log.e(TAG, "WebSocket message sending failed", e)
-                    return false
+                    false
                 }
-            })
+            }
         }
     }
     
     /**
      * Legacy UDP manager for backwards compatibility
      */
-    private class LegacyUDPManager {
-        boolean initialize() {
-            // Initialize UDP socket for legacy protocol
+    private inner class LegacyUDPManager {
+        fun initialize(): Boolean {
             Log.d(TAG, "Legacy UDP manager initialized")
-            return true; // Simplified for now
+            return true 
         }
         
-        CompletableFuture<Boolean> sendMessage(SLMessage message) {
-            return CompletableFuture.supplyAsync(() -> {
+        fun sendMessage(message: SLMessage): CompletableFuture<Boolean> {
+            return CompletableFuture.supplyAsync {
                 try {
-                    // Send via existing UDP implementation
                     Log.d(TAG, "Sending message via legacy UDP")
-                    return true; // Simplified for now
-                } catch (Exception e) {
+                    true 
+                } catch (e: Exception) {
                     Log.e(TAG, "UDP message sending failed", e)
-                    return false
+                    false
                 }
-            })
+            }
         }
     }
     
     /**
      * Protocol router to determine optimal transport
      */
-    private class ProtocolRouter {
-        Transport getOptimalTransport(SLMessage message) {
-            String messageType = message.getClass().getSimpleName()
+    private inner class ProtocolRouter {
+        fun getOptimalTransport(message: SLMessage): Transport {
+            val messageType = message.javaClass.simpleName
             
-            // Route based on message characteristics
-            if (messageType.contains("Chat") || messageType.contains("IM")) {
-                return Transport.WEBSOCKET_RT; // Real-time messaging
+            return if (messageType.contains("Chat") || messageType.contains("IM")) {
+                Transport.WEBSOCKET_RT 
             } else if (messageType.contains("Asset") || messageType.contains("Upload")) {
-                return Transport.HTTP2_CAPS; // Large data transfers
+                Transport.HTTP2_CAPS 
             } else {
-                return Transport.UDP_LEGACY; // Default to legacy for compatibility
+                Transport.UDP_LEGACY 
             }
         }
     }
@@ -322,27 +318,25 @@ class HybridProtocolManager {
     /**
      * Shutdown the protocol manager
      */
-    void shutdown() {
+    fun shutdown() {
         Log.i(TAG, "Shutting down hybrid protocol manager")
         
-        isConnected = false
+        isConnectedVal = false
         
-        if (webSocketManager.webSocket != null) {
-            webSocketManager.webSocket.close(1000, "Shutdown")
-        }
+        webSocketManager.webSocket?.close(1000, "Shutdown")
         
         executor.shutdown()
         try {
             if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
                 executor.shutdownNow()
             }
-        } catch (InterruptedException e) {
+        } catch (e: InterruptedException) {
             executor.shutdownNow()
             Thread.currentThread().interrupt()
         }
     }
     
-    boolean isConnected() {
-        return isConnected
+    fun isConnected(): Boolean {
+        return isConnectedVal
     }
 }

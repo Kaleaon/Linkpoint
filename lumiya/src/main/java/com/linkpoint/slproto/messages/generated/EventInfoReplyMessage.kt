@@ -56,7 +56,7 @@ class EventInfoReplyMessage : SLMessage() {
         eventFlags = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00B4
+    override fun getMessageID(): Int = 0xFFFF00B4.toInt()
 
     override fun getMessageName(): String = "EventInfoReply"
 }

@@ -25,7 +25,7 @@ class StartAuctionMessage : SLMessage() {
         name = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00E5
+    override fun getMessageID(): Int = 0xFFFF00E5.toInt()
 
     override fun getMessageName(): String = "StartAuction"
 }

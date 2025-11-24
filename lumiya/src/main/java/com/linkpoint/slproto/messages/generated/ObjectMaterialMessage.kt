@@ -45,7 +45,7 @@ class ObjectMaterialMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0061
+    override fun getMessageID(): Int = 0xFFFF0061.toInt()
 
     override fun getMessageName(): String = "ObjectMaterial"
 }

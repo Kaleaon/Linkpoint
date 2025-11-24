@@ -22,7 +22,7 @@ class SetAlwaysRunMessage : SLMessage() {
         alwaysRun = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0058
+    override fun getMessageID(): Int = 0xFFFF0058.toInt()
 
     override fun getMessageName(): String = "SetAlwaysRun"
 }

@@ -44,7 +44,7 @@ class ParcelBuyMessage : SLMessage() {
         area = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00D5
+    override fun getMessageID(): Int = 0xFFFF00D5.toInt()
 
     override fun getMessageName(): String = "ParcelBuy"
 }

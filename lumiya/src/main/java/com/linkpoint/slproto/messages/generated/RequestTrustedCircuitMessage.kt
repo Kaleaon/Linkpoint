@@ -6,9 +6,7 @@ import java.nio.ByteBuffer
 class RequestTrustedCircuitMessage : SLMessage() {
     val rezSingleAttachmentFromInv: MutableList<RezSingleAttachmentFromInvBlock> = mutableListOf()
 
-    data class RezSingleAttachmentFromInvBlock(
-    )
-
+    class RezSingleAttachmentFromInvBlock
 
     override fun packPayload(buffer: ByteBuffer) {
         rezSingleAttachmentFromInv.forEach { entry ->
@@ -26,7 +24,7 @@ class RequestTrustedCircuitMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF018A
+    override fun getMessageID(): Int = 0xFFFF018A.toInt()
 
     override fun getMessageName(): String = "RequestTrustedCircuit"
 }

@@ -16,7 +16,7 @@ class ImageNotInDatabaseMessage : SLMessage() {
         id = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0056
+    override fun getMessageID(): Int = 0xFFFF0056.toInt()
 
     override fun getMessageName(): String = "ImageNotInDatabase"
 }

@@ -26,7 +26,7 @@ class DataServerLogoutMessage : SLMessage() {
         sessionId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00FB
+    override fun getMessageID(): Int = 0xFFFF00FB.toInt()
 
     override fun getMessageName(): String = "DataServerLogout"
 }

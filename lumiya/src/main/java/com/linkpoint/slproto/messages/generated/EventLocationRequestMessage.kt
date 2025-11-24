@@ -23,7 +23,7 @@ class EventLocationRequestMessage : SLMessage() {
         eventId = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0133
+    override fun getMessageID(): Int = 0xFFFF0133.toInt()
 
     override fun getMessageName(): String = "EventLocationRequest"
 }

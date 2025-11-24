@@ -8,36 +8,38 @@ import java.util.UUID
 import org.xmlpull.v1.XmlSerializer
 
 class LLSDString : LLSDNode {
-    private String value
+    val value: String
 
-    LLSDString(String str) {
+    constructor(str: String) {
         this.value = str
     }
 
-    Boolean asBoolean() {
-        return "true".equalsIgnoreCase(this.value)
+    override fun asBoolean(): Boolean {
+        return "true".equals(this.value, ignoreCase = true)
     }
 
-    String asString() {
+    override fun asString(): String {
         return this.value
     }
 
-    UUID asUUID() {
+    override fun asUUID(): UUID {
         return UUID.fromString(this.value)
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    @Throws(IOException::class)
+    override fun toBinary(dataOutputStream: DataOutputStream) {
         dataOutputStream.writeByte(115)
         if (this.value.isEmpty()) {
             dataOutputStream.writeInt(0)
             return
         }
-        byte[] stringToVariableUTF = SLMessage.stringToVariableUTF(this.value)
-        dataOutputStream.writeInt(stringToVariableUTF.length)
+        val stringToVariableUTF = SLMessage.stringToVariableUTF(this.value)
+        dataOutputStream.writeInt(stringToVariableUTF.size)
         dataOutputStream.write(stringToVariableUTF)
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    @Throws(IOException::class)
+    override fun toXML(xmlSerializer: XmlSerializer) {
         xmlSerializer.startTag("", "string")
         xmlSerializer.text(this.value)
         xmlSerializer.endTag("", "string")

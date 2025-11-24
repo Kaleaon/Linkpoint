@@ -25,7 +25,7 @@ class ParcelDwellRequestMessage : SLMessage() {
         parcelId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00DA
+    override fun getMessageID(): Int = 0xFFFF00DA.toInt()
 
     override fun getMessageName(): String = "ParcelDwellRequest"
 }

@@ -82,7 +82,7 @@ class ImprovedInstantMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00FE
+    override fun getMessageID(): Int = 0xFFFF00FE.toInt()
 
     override fun getMessageName(): String = "ImprovedInstantMessage"
 }

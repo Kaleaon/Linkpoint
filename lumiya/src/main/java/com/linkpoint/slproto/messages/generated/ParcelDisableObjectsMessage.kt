@@ -66,7 +66,7 @@ class ParcelDisableObjectsMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00C9
+    override fun getMessageID(): Int = 0xFFFF00C9.toInt()
 
     override fun getMessageName(): String = "ParcelDisableObjects"
 }

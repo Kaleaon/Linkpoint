@@ -64,7 +64,7 @@ class ObjectGrabMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0075
+    override fun getMessageID(): Int = 0xFFFF0075.toInt()
 
     override fun getMessageName(): String = "ObjectGrab"
 }

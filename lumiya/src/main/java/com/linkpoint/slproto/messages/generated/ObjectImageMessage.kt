@@ -48,7 +48,7 @@ class ObjectImageMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0060
+    override fun getMessageID(): Int = 0xFFFF0060.toInt()
 
     override fun getMessageName(): String = "ObjectImage"
 }

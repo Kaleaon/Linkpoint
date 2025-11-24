@@ -17,7 +17,6 @@ import com.lumiyaviewer.lumiya.media.AudioManagerWrapper
 import com.lumiyaviewer.lumiya.media.MediaPlayerWrapper
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleDataPool
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey
-import com.lumiyaviewer.lumiya.slproto.avatar.SLMoveEvents
 import com.lumiyaviewer.lumiya.slproto.users.ParcelData
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import com.lumiyaviewer.lumiya.ui.chat.profiles.ParcelPropertiesFragment
@@ -32,9 +31,35 @@ import java.util.UUID
  */
 class StreamingMediaService : Service() {
     
-    val LOCATION_DESC_KEY = "location_desc"
-    val LOCATION_NAME_KEY = "location_name"
-    val MEDIA_URL_KEY = "media_url"
+    companion object {
+        const val LOCATION_DESC_KEY = "location_desc"
+        const val LOCATION_NAME_KEY = "location_name"
+        const val MEDIA_URL_KEY = "media_url"
+        const val MEDIA_NOTIFY_ID = 1452 // Arbitrary ID
+        
+        /**
+         * Start streaming media service for a parcel
+         */
+        fun startStreamingMediaService(context: Context, userManager: UserManager?) {
+            userManager ?: return
+            
+            val locationInfo = userManager.getCurrentLocationInfoSnapshot() ?: return
+            val parcelData = locationInfo.parcelData ?: return
+            val mediaURL = parcelData.getMediaURL()
+            
+            if (!Strings.isNullOrEmpty(mediaURL)) {
+                val intent = Intent(context, StreamingMediaService::class.java).apply {
+                    action = "com.lumiyaviewer.lumiya.ACTION_PLAY_MEDIA"
+                    ActivityUtils.setActiveAgentID(this, userManager.getUserID())
+                    putExtra(ParcelPropertiesFragment.PARCEL_DATA_KEY, parcelData)
+                    putExtra(MEDIA_URL_KEY, mediaURL)
+                    putExtra(LOCATION_NAME_KEY, parcelData.getName())
+                }
+                context.startService(intent)
+            }
+        }
+    }
+    
     private val MSG_ON_AUDIO_FOCUS_CHANGE = 100
     
     val isPlayingMedia = SubscriptionSingleDataPool<Boolean>()
@@ -182,7 +207,7 @@ class StreamingMediaService : Service() {
             .setOnlyAlertOnce(true)
             .build()
         
-        startForeground(R.id.media_notify_id, notification)
+        startForeground(MEDIA_NOTIFY_ID, notification)
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -207,29 +232,5 @@ class StreamingMediaService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         handleStartService(intent)
         return START_NOT_STICKY
-    }
-    
-    companion object {
-        /**
-         * Start streaming media service for a parcel
-         */
-        fun startStreamingMediaService(context: Context, userManager: UserManager?) {
-            userManager ?: return
-            
-            val locationInfo = userManager.getCurrentLocationInfoSnapshot() ?: return
-            val parcelData = locationInfo.parcelData() ?: return
-            val mediaURL = parcelData.getMediaURL()
-            
-            if (!Strings.isNullOrEmpty(mediaURL)) {
-                val intent = Intent(context, StreamingMediaService::class.java).apply {
-                    action = "com.lumiyaviewer.lumiya.ACTION_PLAY_MEDIA"
-                    ActivityUtils.setActiveAgentID(this, userManager.getUserID())
-                    putExtra(ParcelPropertiesFragment.PARCEL_DATA_KEY, parcelData)
-                    putExtra("media_url", mediaURL)
-                    putExtra("location_name", parcelData.getName())
-                }
-                context.startService(intent)
-            }
-        }
     }
 }

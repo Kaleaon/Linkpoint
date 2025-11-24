@@ -31,7 +31,7 @@ class MapNameRequestMessage : SLMessage() {
         name = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0198
+    override fun getMessageID(): Int = 0xFFFF0198.toInt()
 
     override fun getMessageName(): String = "MapNameRequest"
 }

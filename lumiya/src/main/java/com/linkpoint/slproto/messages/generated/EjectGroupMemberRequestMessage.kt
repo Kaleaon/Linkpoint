@@ -41,7 +41,7 @@ class EjectGroupMemberRequestMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0159
+    override fun getMessageID(): Int = 0xFFFF0159.toInt()
 
     override fun getMessageName(): String = "EjectGroupMemberRequest"
 }

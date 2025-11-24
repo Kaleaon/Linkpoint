@@ -15,24 +15,104 @@ import java.util.UUID
 /**
  * Query parameters for inventory searches
  */
-abstract class InventoryQuery : Parcelable {
-    
-    private val ASSET_TYPE_ANY = -1
-    private val FOLDER_TYPE_ANY = -1
+data class InventoryQuery(
+    val folderId: UUID?,
+    val containsString: String?,
+    val includeFolders: Boolean,
+    val includeItems: Boolean,
+    val newestFirst: Boolean,
+    val folderType: Int,
+    val assetType: Int
+) : Parcelable {
 
-    abstract fun assetType(): Int
-    abstract fun containsString(): String?
-    abstract fun folderId(): UUID?
-    abstract fun folderType(): Int
-    abstract fun includeFolders(): Boolean
-    abstract fun includeItems(): Boolean
-    abstract fun newestFirst(): Boolean
+    private val FOLDER_TYPE_ANY = -1
+    private val ASSET_TYPE_ANY = -1
+
+    constructor(parcel: Parcel) : this(
+        UUIDPool.getUUID(parcel.readString()),
+        parcel.readString(),
+        parcel.readByte() != 0.toByte(),
+        parcel.readByte() != 0.toByte(),
+        parcel.readByte() != 0.toByte(),
+        parcel.readInt(),
+        parcel.readInt()
+    )
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(folderId?.toString())
+        parcel.writeString(containsString)
+        parcel.writeByte(if (includeFolders) 1 else 0)
+        parcel.writeByte(if (includeItems) 1 else 0)
+        parcel.writeByte(if (newestFirst) 1 else 0)
+        parcel.writeInt(folderType)
+        parcel.writeInt(assetType)
+    }
 
     override fun describeContents(): Int = 0
 
-    /**
-     * Execute the query
-     */
+    companion object {
+        @JvmField
+        val CREATOR = object : Parcelable.Creator<InventoryQuery> {
+            override fun createFromParcel(parcel: Parcel): InventoryQuery {
+                return InventoryQuery(parcel)
+            }
+
+            override fun newArray(size: Int): Array<InventoryQuery?> {
+                return arrayOfNulls(size)
+            }
+        }
+
+        fun create(
+            folderId: UUID?,
+            searchString: String?,
+            includeFolders: Boolean,
+            includeItems: Boolean,
+            newestFirst: Boolean,
+            assetType: Int
+        ): InventoryQuery {
+            return InventoryQuery(
+                folderId,
+                searchString,
+                includeFolders,
+                includeItems,
+                newestFirst,
+                -1,
+                assetType
+            )
+        }
+
+        fun create(
+            folderId: UUID?,
+            searchString: String?,
+            includeFolders: Boolean,
+            includeItems: Boolean,
+            newestFirst: Boolean,
+            assetType: SLAssetType?
+        ): InventoryQuery {
+            return InventoryQuery(
+                folderId,
+                searchString,
+                includeFolders,
+                includeItems,
+                newestFirst,
+                -1,
+                assetType?.typeCode ?: -1
+            )
+        }
+
+        fun findFolderWithType(folderId: UUID, folderType: Int): InventoryQuery {
+            return InventoryQuery(
+                folderId,
+                null,
+                true,
+                false,
+                false,
+                folderType,
+                -1
+            )
+        }
+    }
+
     @SuppressLint("DefaultLocale")
     fun query(folder: SLInventoryEntry?, inventoryDB: InventoryDB): InventoryEntryList {
         val conditions = mutableListOf<String>()
@@ -45,7 +125,7 @@ abstract class InventoryQuery : Parcelable {
         }
         
         // Filter by name
-        containsString()?.let { search ->
+        containsString?.let { search ->
             if (!Strings.isNullOrEmpty(search)) {
                 conditions.add("name LIKE ?")
                 args.add("%$search%")
@@ -54,45 +134,45 @@ abstract class InventoryQuery : Parcelable {
         
         // Filter by folders/items
         when {
-            includeFolders() && !includeItems() -> {
+            includeFolders && !includeItems -> {
                 conditions.add(
                     String.format(
                         "(isFolder OR (invType == %d AND assetType == %d))",
                         8,
-                        SLAssetType.AT_LINK_FOLDER.getTypeCode()
+                        SLAssetType.AT_LINK_FOLDER.typeCode
                     )
                 )
             }
-            includeItems() && !includeFolders() -> {
+            includeItems && !includeFolders -> {
                 conditions.add(
                     String.format(
                         "(NOT (isFolder OR (invType == %d AND assetType == %d)))",
                         8,
-                        SLAssetType.AT_LINK_FOLDER.getTypeCode()
+                        SLAssetType.AT_LINK_FOLDER.typeCode
                     )
                 )
             }
         }
         
         // Filter by folder type
-        if (folderType() != FOLDER_TYPE_ANY) {
+        if (folderType != FOLDER_TYPE_ANY) {
             conditions.add("(typeDefault = ?)")
-            args.add(folderType().toString())
+            args.add(folderType.toString())
             conditions.add("isFolder")
         }
         
         // Filter by asset type
-        if (assetType() != ASSET_TYPE_ANY) {
+        if (assetType != ASSET_TYPE_ANY) {
             conditions.add(
                 String.format(
                     "(isFolder OR assetType == %d)",
-                    assetType()
+                    assetType
                 )
             )
         }
         
         // Build order by clause
-        val sortOrder = if (newestFirst()) {
+        val sortOrder = if (newestFirst) {
             "creationDate DESC, name"
         } else {
             "name, creationDate DESC"
@@ -112,97 +192,5 @@ abstract class InventoryQuery : Parcelable {
         )
         
         return InventoryEntryList(folder?.name, folder, results)
-    }
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        val bundle = Bundle().apply {
-            folderId()?.let { putString("folderId", it.toString()) }
-            putString("containsString", containsString())
-            putBoolean("includeFolders", includeFolders())
-            putBoolean("includeItems", includeItems())
-            putBoolean("newestFirst", newestFirst())
-            putInt("assetType", assetType())
-        }
-        parcel.writeBundle(bundle)
-    }
-    
-    companion object {
-        @JvmField
-        val CREATOR = object : Parcelable.Creator<InventoryQuery> {
-            override fun createFromParcel(parcel: Parcel): InventoryQuery {
-                val bundle = parcel.readBundle(javaClass.classLoader)!!
-                return create(
-                    UUIDPool.getUUID(bundle.getString("folderId")),
-                    bundle.getString("containsString"),
-                    bundle.getBoolean("includeFolders"),
-                    bundle.getBoolean("includeItems"),
-                    bundle.getBoolean("newestFirst"),
-                    bundle.getInt("assetType", -1)
-                )
-            }
-
-            override fun newArray(size: Int): Array<InventoryQuery?> {
-                return arrayOfNulls(size)
-            }
-        }
-        
-        /**
-         * Create general inventory query
-         */
-        fun create(
-            folderId: UUID?,
-            searchString: String?,
-            includeFolders: Boolean,
-            includeItems: Boolean,
-            newestFirst: Boolean,
-            assetType: Int
-        ): InventoryQuery {
-            return AutoValue_InventoryQuery(
-                folderId,
-                searchString,
-                includeFolders,
-                includeItems,
-                newestFirst,
-                -1,
-                assetType
-            )
-        }
-
-        /**
-         * Create inventory query with asset type filter
-         */
-        fun create(
-            folderId: UUID?,
-            searchString: String?,
-            includeFolders: Boolean,
-            includeItems: Boolean,
-            newestFirst: Boolean,
-            assetType: SLAssetType?
-        ): InventoryQuery {
-            return AutoValue_InventoryQuery(
-                folderId,
-                searchString,
-                includeFolders,
-                includeItems,
-                newestFirst,
-                -1,
-                assetType?.getTypeCode() ?: -1
-            )
-        }
-
-        /**
-         * Find folder with specific type
-         */
-        fun findFolderWithType(folderId: UUID, folderType: Int): InventoryQuery {
-            return AutoValue_InventoryQuery(
-                folderId,
-                null,
-                true,
-                false,
-                false,
-                folderType,
-                -1
-            )
-        }
     }
 }

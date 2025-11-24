@@ -84,7 +84,7 @@ class GroupVoteHistoryItemReplyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF016A
+    override fun getMessageID(): Int = 0xFFFF016A.toInt()
 
     override fun getMessageName(): String = "GroupVoteHistoryItemReply"
 }

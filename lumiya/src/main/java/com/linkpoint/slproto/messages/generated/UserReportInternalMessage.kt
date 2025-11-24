@@ -69,7 +69,7 @@ class UserReportInternalMessage : SLMessage() {
         versionString = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0015
+    override fun getMessageID(): Int = 0xFFFF0015.toInt()
 
     override fun getMessageName(): String = "UserReportInternal"
 }

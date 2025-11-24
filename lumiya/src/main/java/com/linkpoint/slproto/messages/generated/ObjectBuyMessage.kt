@@ -54,7 +54,7 @@ class ObjectBuyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0066
+    override fun getMessageID(): Int = 0xFFFF0066.toInt()
 
     override fun getMessageName(): String = "ObjectBuy"
 }

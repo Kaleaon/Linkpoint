@@ -25,7 +25,7 @@ class SimWideDeletesMessage : SLMessage() {
         flags = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0081
+    override fun getMessageID(): Int = 0xFFFF0081.toInt()
 
     override fun getMessageName(): String = "SimWideDeletes"
 }

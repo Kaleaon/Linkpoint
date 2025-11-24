@@ -42,7 +42,7 @@ class LogoutReplyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00FD
+    override fun getMessageID(): Int = 0xFFFF00FD.toInt()
 
     override fun getMessageName(): String = "LogoutReply"
 }

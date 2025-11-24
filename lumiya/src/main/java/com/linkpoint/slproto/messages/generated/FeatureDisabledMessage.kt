@@ -22,7 +22,7 @@ class FeatureDisabledMessage : SLMessage() {
         transactionId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0013
+    override fun getMessageID(): Int = 0xFFFF0013.toInt()
 
     override fun getMessageName(): String = "FeatureDisabled"
 }

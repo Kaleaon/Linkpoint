@@ -57,7 +57,7 @@ class LogParcelChangesMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00E0
+    override fun getMessageID(): Int = 0xFFFF00E0.toInt()
 
     override fun getMessageName(): String = "LogParcelChanges"
 }

@@ -25,7 +25,7 @@ class ViewerStartAuctionMessage : SLMessage() {
         snapshotId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00E4
+    override fun getMessageID(): Int = 0xFFFF00E4.toInt()
 
     override fun getMessageName(): String = "ViewerStartAuction"
 }

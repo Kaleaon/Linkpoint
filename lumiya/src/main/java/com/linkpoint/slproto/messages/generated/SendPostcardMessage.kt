@@ -47,7 +47,7 @@ class SendPostcardMessage : SLMessage() {
         maturePublish = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF019C
+    override fun getMessageID(): Int = 0xFFFF019C.toInt()
 
     override fun getMessageName(): String = "SendPostcard"
 }

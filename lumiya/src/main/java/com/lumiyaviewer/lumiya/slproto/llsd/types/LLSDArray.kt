@@ -2,61 +2,54 @@ package com.lumiyaviewer.lumiya.slproto.llsd.types
 
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDInvalidKeyException
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode
-import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNodeFactory
-import com.lumiyaviewer.lumiya.slproto.llsd.LLSDXMLException
 import java.io.DataOutputStream
 import java.io.IOException
 import java.util.ArrayList
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlSerializer
 
 class LLSDArray : LLSDNode {
-    private ArrayList<LLSDNode> items = ArrayList<>()
+    val items = ArrayList<LLSDNode>()
 
-    LLSDArray() {
+    val value: List<LLSDNode>
+        get() = items
+
+    constructor()
+
+    constructor(vararg nodes: LLSDNode) {
+        items.addAll(nodes)
     }
 
-    LLSDArray(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException, LLSDXMLException {
-        while (xmlPullParser.nextTag() != 3) {
-            this.items.add(LLSDNodeFactory.parseNode(xmlPullParser))
+    fun add(node: LLSDNode) {
+        items.add(node)
+    }
+
+    @Throws(LLSDInvalidKeyException::class)
+    override fun byIndex(i: Int): LLSDNode {
+        if (i >= 0 && i < items.size) {
+            return items[i]
         }
+        throw LLSDInvalidKeyException("Array index out of range: req $i, size ${items.size}")
     }
 
-    LLSDArray(LLSDNode... lLSDNodeArr) {
-        for (LLSDNode add : lLSDNodeArr) {
-            this.items.add(add)
+    override fun getCount(): Int {
+        return items.size
+    }
+
+    @Throws(IOException::class)
+    override fun toBinary(dataOutputStream: DataOutputStream) {
+        dataOutputStream.writeByte('['.toInt())
+        dataOutputStream.writeInt(items.size)
+        for (item in items) {
+            item.toBinary(dataOutputStream)
         }
+        dataOutputStream.writeByte(']'.toInt())
     }
 
-    Unit add(LLSDNode lLSDNode) {
-        this.items.add(lLSDNode)
-    }
-
-    LLSDNode byIndex(Int i) throws LLSDInvalidKeyException {
-        if (i >= 0 && i < this.items.size()) {
-            return this.items.get(i)
-        }
-        throw LLSDInvalidKeyException(String.format("Array index out of range: req %d, size %d", Array<Any>{Integer.valueOf(i), Integer.valueOf(this.items.size())}))
-    }
-
-    Int getCount() {
-        return this.items.size()
-    }
-
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
-        dataOutputStream.writeByte(91)
-        dataOutputStream.writeInt(this.items.size())
-        for (LLSDNode binary : this.items) {
-            binary.toBinary(dataOutputStream)
-        }
-        dataOutputStream.writeByte(93)
-    }
-
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    @Throws(IOException::class)
+    override fun toXML(xmlSerializer: XmlSerializer) {
         xmlSerializer.startTag("", "array")
-        for (LLSDNode xml : this.items) {
-            xml.toXML(xmlSerializer)
+        for (item in items) {
+            item.toXML(xmlSerializer)
         }
         xmlSerializer.endTag("", "array")
     }

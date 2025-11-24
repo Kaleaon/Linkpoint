@@ -6,9 +6,7 @@ import java.nio.ByteBuffer
 class SubscribeLoadMessage : SLMessage() {
     val unsubscribeLoad: MutableList<UnsubscribeLoadBlock> = mutableListOf()
 
-    data class UnsubscribeLoadBlock(
-    )
-
+    class UnsubscribeLoadBlock
 
     override fun packPayload(buffer: ByteBuffer) {
         unsubscribeLoad.forEach { entry ->
@@ -26,7 +24,7 @@ class SubscribeLoadMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0007
+    override fun getMessageID(): Int = 0xFFFF0007.toInt()
 
     override fun getMessageName(): String = "SubscribeLoad"
 }

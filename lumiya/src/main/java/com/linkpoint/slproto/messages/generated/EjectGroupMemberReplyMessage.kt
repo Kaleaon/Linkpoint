@@ -22,7 +22,7 @@ class EjectGroupMemberReplyMessage : SLMessage() {
         success = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF015A
+    override fun getMessageID(): Int = 0xFFFF015A.toInt()
 
     override fun getMessageName(): String = "EjectGroupMemberReply"
 }

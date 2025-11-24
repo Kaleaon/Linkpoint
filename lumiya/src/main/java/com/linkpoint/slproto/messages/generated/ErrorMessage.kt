@@ -38,7 +38,7 @@ class ErrorMessage : SLMessage() {
         data = unpackVariable(buffer, 2)
     }
 
-    override fun getMessageID(): Int = 0xFFFF01A7
+    override fun getMessageID(): Int = 0xFFFF01A7.toInt()
 
     override fun getMessageName(): String = "Error"
 }

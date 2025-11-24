@@ -22,7 +22,7 @@ class GroupProfileRequestMessage : SLMessage() {
         groupId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF015F
+    override fun getMessageID(): Int = 0xFFFF015F.toInt()
 
     override fun getMessageName(): String = "GroupProfileRequest"
 }

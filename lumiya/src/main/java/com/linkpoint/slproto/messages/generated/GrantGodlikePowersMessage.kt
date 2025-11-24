@@ -25,7 +25,7 @@ class GrantGodlikePowersMessage : SLMessage() {
         token = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0102
+    override fun getMessageID(): Int = 0xFFFF0102.toInt()
 
     override fun getMessageName(): String = "GrantGodlikePowers"
 }

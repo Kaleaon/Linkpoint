@@ -19,7 +19,7 @@ class ForceScriptControlReleaseMessage : SLMessage() {
         sessionId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00C0
+    override fun getMessageID(): Int = 0xFFFF00C0.toInt()
 
     override fun getMessageName(): String = "ForceScriptControlRelease"
 }

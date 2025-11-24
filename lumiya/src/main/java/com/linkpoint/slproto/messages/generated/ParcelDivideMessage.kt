@@ -31,7 +31,7 @@ class ParcelDivideMessage : SLMessage() {
         north = unpackFloat(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00D3
+    override fun getMessageID(): Int = 0xFFFF00D3.toInt()
 
     override fun getMessageName(): String = "ParcelDivide"
 }

@@ -82,7 +82,7 @@ class RezRestoreToWorldMessage : SLMessage() {
         crc = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF01A9
+    override fun getMessageID(): Int = 0xFFFF01A9.toInt()
 
     override fun getMessageName(): String = "RezRestoreToWorld"
 }

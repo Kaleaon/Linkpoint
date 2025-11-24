@@ -25,7 +25,7 @@ class SetGroupContributionMessage : SLMessage() {
         contribution = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0171
+    override fun getMessageID(): Int = 0xFFFF0171.toInt()
 
     override fun getMessageName(): String = "SetGroupContribution"
 }

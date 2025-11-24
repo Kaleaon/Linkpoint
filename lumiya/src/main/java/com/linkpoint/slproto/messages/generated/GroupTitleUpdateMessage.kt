@@ -25,7 +25,7 @@ class GroupTitleUpdateMessage : SLMessage() {
         titleRoleId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0179
+    override fun getMessageID(): Int = 0xFFFF0179.toInt()
 
     override fun getMessageName(): String = "GroupTitleUpdate"
 }

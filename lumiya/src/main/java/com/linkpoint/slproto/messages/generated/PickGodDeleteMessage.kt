@@ -25,7 +25,7 @@ class PickGodDeleteMessage : SLMessage() {
         queryId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00BB
+    override fun getMessageID(): Int = 0xFFFF00BB.toInt()
 
     override fun getMessageName(): String = "PickGodDelete"
 }

@@ -66,7 +66,7 @@ class GodUpdateRegionInfoMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF008F
+    override fun getMessageID(): Int = 0xFFFF008F.toInt()
 
     override fun getMessageName(): String = "GodUpdateRegionInfo"
 }

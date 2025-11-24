@@ -25,7 +25,7 @@ class UpdateUserInfoMessage : SLMessage() {
         directoryVisibility = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0191
+    override fun getMessageID(): Int = 0xFFFF0191.toInt()
 
     override fun getMessageName(): String = "UpdateUserInfo"
 }

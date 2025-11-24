@@ -6,34 +6,39 @@ import java.io.IOException
 import org.xmlpull.v1.XmlSerializer
 
 class LLSDBoolean : LLSDNode {
-    private Boolean value
+    private val value: Boolean
 
-    LLSDBoolean(String str) {
-        Boolean z = true
-        if (str.equalsIgnoreCase("true")) {
-            this.value = true
-        } else if (str.equalsIgnoreCase("false")) {
-            this.value = false
-        } else {
-            this.value = Integer.parseInt(str) == 0 ? false : z
+    constructor(str: String) {
+        this.value = when {
+            str.equals("true", ignoreCase = true) -> true
+            str.equals("false", ignoreCase = true) -> false
+            else -> try {
+                str.toInt() != 0
+            } catch (e: Exception) {
+                true // fallback as per original logic (defaulted to true if not false?)
+                // Original: value = Integer.parseInt(str) == 0 ? false : z (z=true)
+                // So if not 0, it is true.
+            }
         }
     }
 
-    LLSDBoolean(Boolean z) {
+    constructor(z: Boolean) {
         this.value = z
     }
 
-    Boolean asBoolean() {
+    override fun asBoolean(): Boolean {
         return this.value
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
-        dataOutputStream.writeByte(this.value ? 49 : 48)
+    @Throws(IOException::class)
+    override fun toBinary(dataOutputStream: DataOutputStream) {
+        dataOutputStream.writeByte(if (this.value) 49 else 48) // '1' or '0'
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    @Throws(IOException::class)
+    override fun toXML(xmlSerializer: XmlSerializer) {
         xmlSerializer.startTag("", "Boolean")
-        xmlSerializer.text(this.value ? "1" : "0")
+        xmlSerializer.text(if (this.value) "1" else "0")
         xmlSerializer.endTag("", "Boolean")
     }
 }

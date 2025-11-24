@@ -19,7 +19,7 @@ class VelocityInterpolateOnMessage : SLMessage() {
         sessionId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF007D
+    override fun getMessageID(): Int = 0xFFFF007D.toInt()
 
     override fun getMessageName(): String = "VelocityInterpolateOn"
 }

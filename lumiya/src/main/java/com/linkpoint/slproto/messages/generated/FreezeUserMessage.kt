@@ -25,7 +25,7 @@ class FreezeUserMessage : SLMessage() {
         flags = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00A8
+    override fun getMessageID(): Int = 0xFFFF00A8.toInt()
 
     override fun getMessageName(): String = "FreezeUser"
 }

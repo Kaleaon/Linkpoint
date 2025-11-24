@@ -35,7 +35,7 @@ class ScriptDialogReplyMessage : SLMessage() {
         buttonLabel = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00BF
+    override fun getMessageID(): Int = 0xFFFF00BF.toInt()
 
     override fun getMessageName(): String = "ScriptDialogReply"
 }

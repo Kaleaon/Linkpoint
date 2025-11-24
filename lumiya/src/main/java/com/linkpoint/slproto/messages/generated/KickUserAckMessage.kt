@@ -19,7 +19,7 @@ class KickUserAckMessage : SLMessage() {
         flags = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00A4
+    override fun getMessageID(): Int = 0xFFFF00A4.toInt()
 
     override fun getMessageName(): String = "KickUserAck"
 }

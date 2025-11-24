@@ -31,7 +31,7 @@ class UpdateMuteListEntryMessage : SLMessage() {
         muteFlags = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0107
+    override fun getMessageID(): Int = 0xFFFF0107.toInt()
 
     override fun getMessageName(): String = "UpdateMuteListEntry"
 }

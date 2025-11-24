@@ -108,7 +108,7 @@ class UpdateInventoryItemMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF010A
+    override fun getMessageID(): Int = 0xFFFF010A.toInt()
 
     override fun getMessageName(): String = "UpdateInventoryItem"
 }

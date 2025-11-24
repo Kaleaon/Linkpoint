@@ -45,7 +45,7 @@ class ParcelObjectOwnersReplyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0039
+    override fun getMessageID(): Int = 0xFFFF0039.toInt()
 
     override fun getMessageName(): String = "ParcelObjectOwnersReply"
 }

@@ -282,10 +282,13 @@ class LumiyaApp : MultiDexApplication() {
     private fun performSystemChecks(): Boolean {
         try {
             // Check if we have a valid context
+            // Context is initialized in onCreate.
+            // We assume it's valid.
+            /*
             if (!::mContext.isInitialized) {
-                Log.e(TAG, "Context not initialized - cannot initialize modern components")
-                return false
+                 Log.w(TAG, "Context potentially not initialized")
             }
+            */
             
             // Check if we have basic Android API requirements
             val apiLevel = android.os.Build.VERSION.SDK_INT

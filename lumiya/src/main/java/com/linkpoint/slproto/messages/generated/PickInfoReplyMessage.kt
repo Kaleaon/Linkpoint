@@ -56,7 +56,7 @@ class PickInfoReplyMessage : SLMessage() {
         enabled = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00B8
+    override fun getMessageID(): Int = 0xFFFF00B8.toInt()
 
     override fun getMessageName(): String = "PickInfoReply"
 }

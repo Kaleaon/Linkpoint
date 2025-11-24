@@ -51,7 +51,7 @@ class EstateOwnerMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0104
+    override fun getMessageID(): Int = 0xFFFF0104.toInt()
 
     override fun getMessageName(): String = "EstateOwnerMessage"
 }

@@ -26,7 +26,7 @@ class ClassifiedInfoRequestMessage : SLMessage() {
         classifiedId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF002B
+    override fun getMessageID(): Int = 0xFFFF002B.toInt()
 
     override fun getMessageName(): String = "ClassifiedInfoRequest"
 }

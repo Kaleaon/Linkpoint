@@ -31,7 +31,7 @@ class RegionPresenceRequestByHandleMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF000F
+    override fun getMessageID(): Int = 0xFFFF000F.toInt()
 
     override fun getMessageName(): String = "RegionPresenceRequestByHandle"
 }

@@ -45,7 +45,7 @@ class ObjectExportSelectedMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF007B
+    override fun getMessageID(): Int = 0xFFFF007B.toInt()
 
     override fun getMessageName(): String = "ObjectExportSelected"
 }

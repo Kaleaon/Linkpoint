@@ -22,7 +22,7 @@ class GroupNoticesListRequestMessage : SLMessage() {
         groupId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF003A
+    override fun getMessageID(): Int = 0xFFFF003A.toInt()
 
     override fun getMessageName(): String = "GroupNoticesListRequest"
 }

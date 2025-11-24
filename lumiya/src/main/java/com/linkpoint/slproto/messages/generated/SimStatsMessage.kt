@@ -67,7 +67,7 @@ class SimStatsMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF008C
+    override fun getMessageID(): Int = 0xFFFF008C.toInt()
 
     override fun getMessageName(): String = "SimStats"
 }

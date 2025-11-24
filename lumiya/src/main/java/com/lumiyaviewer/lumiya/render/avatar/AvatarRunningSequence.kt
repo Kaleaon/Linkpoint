@@ -2,18 +2,19 @@ package com.lumiyaviewer.lumiya.render.avatar
 
 import com.google.common.collect.ImmutableList
 
-internal class AvatarRunningSequence(
+class AvatarRunningSequence(
     private val animationData: AnimationData,
     val sequenceID: Int,
     private val runningSince: Long,
     private val stoppingSince: Long,
-    private val dontEaseIn: Boolean,
+    private val dontEaseIn: Boolean
 ) : AnimationTiming() {
+    
     private val runningAnimations: ImmutableList<AvatarRunningAnimation> =
         animationData.createRunningAnimations(this)
 
     fun getAnimationPriority(): Int {
-        return animationData.priority
+        return animationData.getPriority()
     }
 
     fun getRunningAnimations(collection: MutableCollection<AvatarRunningAnimation>) {
@@ -26,7 +27,7 @@ internal class AvatarRunningSequence(
             runningSince,
             stoppingSince,
             dontEaseIn,
-            this,
+            this
         )
     }
 }

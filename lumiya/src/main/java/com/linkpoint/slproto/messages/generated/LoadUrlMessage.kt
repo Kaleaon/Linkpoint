@@ -31,7 +31,7 @@ class LoadUrlMessage : SLMessage() {
         url = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00C2
+    override fun getMessageID(): Int = 0xFFFF00C2.toInt()
 
     override fun getMessageName(): String = "LoadURL"
 }

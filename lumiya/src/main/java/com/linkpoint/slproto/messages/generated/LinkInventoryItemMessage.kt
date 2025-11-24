@@ -47,7 +47,7 @@ class LinkInventoryItemMessage : SLMessage() {
         description = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF01AA
+    override fun getMessageID(): Int = 0xFFFF01AA.toInt()
 
     override fun getMessageName(): String = "LinkInventoryItem"
 }

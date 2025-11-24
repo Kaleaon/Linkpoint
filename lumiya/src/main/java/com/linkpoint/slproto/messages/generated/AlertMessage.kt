@@ -56,7 +56,7 @@ class AlertMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0086
+    override fun getMessageID(): Int = 0xFFFF0086.toInt()
 
     override fun getMessageName(): String = "AlertMessage"
 }

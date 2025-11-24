@@ -22,7 +22,7 @@ class LiveHelpGroupReplyMessage : SLMessage() {
         selection = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF017C
+    override fun getMessageID(): Int = 0xFFFF017C.toInt()
 
     override fun getMessageName(): String = "LiveHelpGroupReply"
 }

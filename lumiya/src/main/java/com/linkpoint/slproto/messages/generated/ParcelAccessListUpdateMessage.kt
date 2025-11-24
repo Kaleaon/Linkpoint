@@ -63,7 +63,7 @@ class ParcelAccessListUpdateMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00D9
+    override fun getMessageID(): Int = 0xFFFF00D9.toInt()
 
     override fun getMessageName(): String = "ParcelAccessListUpdate"
 }

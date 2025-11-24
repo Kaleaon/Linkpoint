@@ -35,7 +35,7 @@ class ParcelRenameMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0192
+    override fun getMessageID(): Int = 0xFFFF0192.toInt()
 
     override fun getMessageName(): String = "ParcelRename"
 }

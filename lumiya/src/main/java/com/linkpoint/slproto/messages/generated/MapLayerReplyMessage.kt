@@ -50,7 +50,7 @@ class MapLayerReplyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0196
+    override fun getMessageID(): Int = 0xFFFF0196.toInt()
 
     override fun getMessageName(): String = "MapLayerReply"
 }

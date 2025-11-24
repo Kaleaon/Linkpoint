@@ -26,7 +26,7 @@ class MoneyBalanceRequestMessage : SLMessage() {
         transactionId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0139
+    override fun getMessageID(): Int = 0xFFFF0139.toInt()
 
     override fun getMessageName(): String = "MoneyBalanceRequest"
 }

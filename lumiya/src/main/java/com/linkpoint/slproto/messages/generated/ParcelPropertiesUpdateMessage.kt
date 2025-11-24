@@ -81,7 +81,7 @@ class ParcelPropertiesUpdateMessage : SLMessage() {
         landingType = unpackByte(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00C6
+    override fun getMessageID(): Int = 0xFFFF00C6.toInt()
 
     override fun getMessageName(): String = "ParcelPropertiesUpdate"
 }

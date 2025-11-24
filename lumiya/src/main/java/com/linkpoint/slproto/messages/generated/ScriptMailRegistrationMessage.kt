@@ -25,7 +25,7 @@ class ScriptMailRegistrationMessage : SLMessage() {
         flags = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF01A2
+    override fun getMessageID(): Int = 0xFFFF01A2.toInt()
 
     override fun getMessageName(): String = "ScriptMailRegistration"
 }

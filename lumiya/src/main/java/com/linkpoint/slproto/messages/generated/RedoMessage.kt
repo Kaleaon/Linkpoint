@@ -41,7 +41,7 @@ class RedoMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF004C
+    override fun getMessageID(): Int = 0xFFFF004C.toInt()
 
     override fun getMessageName(): String = "Redo"
 }

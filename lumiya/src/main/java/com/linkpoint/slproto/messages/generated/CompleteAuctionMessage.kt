@@ -32,7 +32,7 @@ class CompleteAuctionMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00E7
+    override fun getMessageID(): Int = 0xFFFF00E7.toInt()
 
     override fun getMessageName(): String = "CompleteAuction"
 }

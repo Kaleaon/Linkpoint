@@ -28,7 +28,7 @@ class GroupProposalBallotMessage : SLMessage() {
         voteCast = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF016C
+    override fun getMessageID(): Int = 0xFFFF016C.toInt()
 
     override fun getMessageName(): String = "GroupProposalBallot"
 }
