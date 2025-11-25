@@ -66,7 +66,7 @@ class ParcelReturnObjectsMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00C7
+    override fun getMessageID(): Int = 0xFFFF00C7.toInt()
 
     override fun getMessageName(): String = "ParcelReturnObjects"
 }

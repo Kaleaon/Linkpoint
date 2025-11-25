@@ -1,5 +1,4 @@
 package com.lumiyaviewer.lumiya.res.terrain
-import java.util.*
 
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.render.terrain.TerrainPatchGeometry
@@ -8,35 +7,49 @@ import com.lumiyaviewer.lumiya.res.ResourceMemoryCache
 import com.lumiyaviewer.lumiya.res.ResourceRequest
 import com.lumiyaviewer.lumiya.res.executors.PrimComputeExecutor
 import com.lumiyaviewer.lumiya.slproto.terrain.TerrainPatchHeightMap
+import com.lumiyaviewer.lumiya.memory.MemoryManager
 
-class TerrainGeometryCache : ResourceMemoryCache<TerrainPatchHeightMap, TerrainPatchGeometry> {
+class TerrainGeometryCache(memoryManager: MemoryManager) : ResourceMemoryCache<TerrainPatchHeightMap, TerrainPatchGeometry>(memoryManager) {
 
-    private class TerrainGeometryRequest : ResourceRequest<TerrainPatchHeightMap, TerrainPatchGeometry> : Runnable {
-        TerrainGeometryRequest(TerrainPatchHeightMap terrainPatchHeightMap, ResourceManager<TerrainPatchHeightMap, TerrainPatchGeometry> resourceManager) {
-            super(terrainPatchHeightMap, resourceManager)
+    companion object {
+        private var instance: TerrainGeometryCache? = null
+        
+        fun getInstance(): TerrainGeometryCache {
+            if (instance == null) {
+                instance = TerrainGeometryCache(MemoryManager())
+            }
+            return instance!!
         }
+    }
 
-        fun cancelRequest(): Unit {
+    private inner class TerrainGeometryRequest(
+        params: TerrainPatchHeightMap,
+        manager: ResourceManager<TerrainPatchHeightMap, TerrainPatchGeometry>
+    ) : ResourceRequest<TerrainPatchHeightMap, TerrainPatchGeometry>(params, manager), Runnable {
+        
+        override fun cancelRequest() {
             PrimComputeExecutor.getInstance().remove(this)
             super.cancelRequest()
         }
 
-        fun execute(): Unit {
+        override fun execute() {
             PrimComputeExecutor.getInstance().execute(this)
         }
 
-        fun run(): Unit {
+        override fun run() {
             try {
-                completeRequest(TerrainPatchGeometry((TerrainPatchHeightMap) getParams()))
-            } catch (Exception e) {
+                completeRequest(TerrainPatchGeometry(getParams()))
+            } catch (e: Exception) {
                 Debug.Warning(e)
                 completeRequest(null)
             }
         }
     }
 
-    /* access modifiers changed from: protected */
-    fun CreateNewRequest(terrainPatchHeightMap: TerrainPatchHeightMap, resourceManager: TerrainPatchGeometry>): ResourceRequest<TerrainPatchHeightMap, TerrainPatchGeometry> {
-        return TerrainGeometryRequest(terrainPatchHeightMap, resourceManager)
+    override fun CreateNewRequest(
+        params: TerrainPatchHeightMap,
+        manager: ResourceManager<TerrainPatchHeightMap, TerrainPatchGeometry>
+    ): ResourceRequest<TerrainPatchHeightMap, TerrainPatchGeometry> {
+        return TerrainGeometryRequest(params, manager)
     }
 }

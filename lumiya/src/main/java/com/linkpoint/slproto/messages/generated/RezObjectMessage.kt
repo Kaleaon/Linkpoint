@@ -18,14 +18,14 @@ class RezObjectMessage : SLMessage() {
     var rezSelected: Boolean = false
     var removeItem: Boolean = false
     var itemFlags: Int = 0
-    var groupMask: Int = 0
-    var everyoneMask: Int = 0
-    var nextOwnerMask: Int = 0
+    // var groupMask: Int = 0 // Duplicated in inventory block
+    // var everyoneMask: Int = 0 // Duplicated in inventory block
+    // var nextOwnerMask: Int = 0 // Duplicated in inventory block
     var itemId: UUID = UUID(0L, 0L)
     var folderId: UUID = UUID(0L, 0L)
     var creatorId: UUID = UUID(0L, 0L)
     var ownerId: UUID = UUID(0L, 0L)
-    var groupId: UUID = UUID(0L, 0L)
+    var groupOwnerId: UUID = UUID(0L, 0L) // Renamed to avoid conflict with agent block groupId
     var baseMask: Int = 0
     var ownerMask: Int = 0
     var groupMask: Int = 0
@@ -68,7 +68,7 @@ class RezObjectMessage : SLMessage() {
         packUUID(buffer, folderId)
         packUUID(buffer, creatorId)
         packUUID(buffer, ownerId)
-        packUUID(buffer, groupId)
+        packUUID(buffer, groupOwnerId)
         packInt(buffer, baseMask)
         packInt(buffer, ownerMask)
         packInt(buffer, groupMask)
@@ -107,7 +107,7 @@ class RezObjectMessage : SLMessage() {
         folderId = unpackUUID(buffer)
         creatorId = unpackUUID(buffer)
         ownerId = unpackUUID(buffer)
-        groupId = unpackUUID(buffer)
+        groupOwnerId = unpackUUID(buffer)
         baseMask = unpackInt(buffer)
         ownerMask = unpackInt(buffer)
         groupMask = unpackInt(buffer)
@@ -126,7 +126,7 @@ class RezObjectMessage : SLMessage() {
         crc = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0125
+    override fun getMessageID(): Int = 0xFFFF0125.toInt()
 
     override fun getMessageName(): String = "RezObject"
 }

@@ -1,10 +1,34 @@
 package com.lumiyaviewer.lumiya.dao
 
 data class CachedResponse(
-    var key: String,
-    var data: ByteArray? = null,
-    var mustRevalidate: Boolean = false,
+    private var key: String,
+    private var data: ByteArray? = null,
+    private var mustRevalidate: Boolean = false,
 ) {
+    fun getKey(): String? {
+        return key
+    }
+
+    fun setKey(key: String) {
+        this.key = key
+    }
+
+    fun getData(): ByteArray? {
+        return data
+    }
+
+    fun setData(data: ByteArray?) {
+        this.data = data
+    }
+
+    fun getMustRevalidate(): Boolean {
+        return mustRevalidate
+    }
+
+    fun setMustRevalidate(mustRevalidate: Boolean) {
+        this.mustRevalidate = mustRevalidate
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

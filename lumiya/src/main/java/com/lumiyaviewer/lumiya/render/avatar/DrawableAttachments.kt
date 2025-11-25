@@ -1,10 +1,8 @@
 package com.lumiyaviewer.lumiya.render.avatar
-import java.util.*
 
 import android.annotation.SuppressLint
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMultimap
-import com.google.common.collect.ImmutableMultimap.Builder
 import com.google.common.collect.Multimap
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.render.DrawableObject
@@ -12,115 +10,113 @@ import com.lumiyaviewer.lumiya.render.RenderContext
 import com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer
 import com.lumiyaviewer.lumiya.slproto.avatar.SLSkeletonBoneID
 import com.lumiyaviewer.rawbuffers.DirectByteBuffer
-import androidx.annotation.NonNull
-import androidx.annotation.Nullable
-import androidx.annotation.Immutable
 
-@Immutable
 class DrawableAttachments {
     private var glAnimationDataBuffer: GLLoadableBuffer? = null
-    @NonNull
-    private ImmutableMultimap<Int, DrawableObject> nonRigged
-    @NonNull
-    private ImmutableList<DrawableObject> rigged
+    private val nonRigged: ImmutableMultimap<Int, DrawableObject>
+    private val rigged: ImmutableList<DrawableObject>
 
-    DrawableAttachments() {
+    constructor() {
         this.glAnimationDataBuffer = null
         this.nonRigged = ImmutableMultimap.of()
         this.rigged = ImmutableList.of()
     }
 
-    DrawableAttachments(@Nullable Multimap<Int, DrawableObject> multimap) {
+    constructor(multimap: Multimap<Int, DrawableObject>?) {
         this.glAnimationDataBuffer = null
-        Builder builder = ImmutableMultimap.builder()
-        ImmutableList.Builder builder2 = ImmutableList.builder()
+        val builder = ImmutableMultimap.builder<Int, DrawableObject>()
+        val builder2 = ImmutableList.builder<DrawableObject>()
         if (multimap != null) {
-            for (Int num : multimap.keySet()) {
-                for (Any obj : multimap.get(num)) {
+            for (key in multimap.keySet()) {
+                for (obj in multimap.get(key)) {
                     if (obj.isRiggedMesh()) {
                         builder2.add(obj)
                     } else {
-                        builder.put(num, obj)
+                        builder.put(key, obj)
                     }
                 }
             }
         }
         this.nonRigged = builder.build()
         this.rigged = builder2.build()
-        Debug.Printf("Created drawableAttachments: %d rigged, %d non-rigged", Int.valueOf(this.rigged.size()), Int.valueOf(this.nonRigged.size()))
+        Debug.Log("Created drawableAttachments: ${this.rigged.size} rigged, ${this.nonRigged.size()} non-rigged")
     }
 
-    DrawableAttachments(@NonNull DrawableAttachments drawableAttachments) {
+    constructor(drawableAttachments: DrawableAttachments) {
         this.glAnimationDataBuffer = null
-        Builder builder = ImmutableMultimap.builder()
-        ImmutableList.Builder builder2 = ImmutableList.builder()
+        val builder = ImmutableMultimap.builder<Int, DrawableObject>()
+        val builder2 = ImmutableList.builder<DrawableObject>()
         builder2.addAll(drawableAttachments.rigged)
-        for (Any obj : drawableAttachments.nonRigged.keySet()) {
-            for (Any obj2 : drawableAttachments.nonRigged.get(obj)) {
-                if (obj2.isRiggedMesh()) {
-                    builder2.add(obj2)
+        
+        for (key in drawableAttachments.nonRigged.keySet()) {
+            for (obj in drawableAttachments.nonRigged.get(key)) {
+                if (obj.isRiggedMesh()) {
+                    builder2.add(obj)
                 } else {
-                    builder.put(obj, obj2)
+                    builder.put(key, obj)
                 }
             }
         }
         this.nonRigged = builder.build()
         this.rigged = builder2.build()
         this.glAnimationDataBuffer = drawableAttachments.glAnimationDataBuffer
-        Debug.Printf("Updated drawableAttachments: %d rigged, %d non-rigged", Int.valueOf(this.rigged.size()), Int.valueOf(this.nonRigged.size()))
+        Debug.Log("Updated drawableAttachments: ${this.rigged.size} rigged, ${this.nonRigged.size()} non-rigged")
     }
 
-    @SuppressLint({"NewApi"})
-    Boolean Draw(RenderContext renderContext, AvatarSkeleton avatarSkeleton, Boolean z) {
+    @SuppressLint("NewApi")
+    fun Draw(renderContext: RenderContext, avatarSkeleton: AvatarSkeleton, z: Boolean): Boolean {
+        var z3 = false
+        
         if (!this.rigged.isEmpty()) {
             if (renderContext.hasGL30) {
                 renderContext.setupRiggedMeshProgram(true)
+                var z2 = false
                 if (this.glAnimationDataBuffer == null) {
                     this.glAnimationDataBuffer = GLLoadableBuffer(DirectByteBuffer(renderContext.currentRiggedMeshProgram.uAnimationDataBlockSize))
                     z2 = true
-                } else {
-                    z2 = false
                 }
-                if (z || r0) {
-                    this.glAnimationDataBuffer.getRawBuffer().loadFromFloatArray(0, avatarSkeleton.jointWorldMatrix, 0, (SLSkeletonBoneID.VALUES.length + 47) * 16)
+                
+                if (z || z2) {
+                    this.glAnimationDataBuffer?.getRawBuffer()?.loadFromFloatArray(0, avatarSkeleton.getJointWorldMatrix(), 0, (SLSkeletonBoneID.values().size + 47) * 16)
                 }
-                GLLoadableBuffer gLLoadableBuffer = this.glAnimationDataBuffer
+                
                 if (z) {
                     z2 = true
                 }
-                gLLoadableBuffer.BindUniformDynamic(renderContext, 1, z2)
-                Int i = 0
-                for (DrawableObject DrawRigged30 : this.rigged) {
-                    i = DrawRigged30.DrawRigged30(renderContext, 1) | i
+                this.glAnimationDataBuffer?.BindUniformDynamic(renderContext, 1, z2)
+                
+                var i = 0
+                for (obj in this.rigged) {
+                    i = obj.DrawRigged30(renderContext, 1) or i
                 }
-                if ((i & 2) != 0) {
+                
+                if ((i and 2) != 0) {
                     renderContext.setupRiggedMeshProgram(false)
-                    for (DrawableObject DrawRigged302 : this.rigged) {
-                        DrawRigged302.DrawRigged30(renderContext, 2)
+                    for (obj in this.rigged) {
+                        obj.DrawRigged30(renderContext, 2)
                     }
                 }
                 renderContext.clearRiggedMeshProgram()
             } else {
-                for (DrawableObject DrawRigged3022 : this.rigged) {
-                    DrawRigged3022.DrawRigged(renderContext, avatarSkeleton, 3)
+                for (obj in this.rigged) {
+                    obj.DrawRigged(renderContext, avatarSkeleton, 3)
                 }
             }
         }
-        Boolean z3 = false
-        for (Any obj : this.nonRigged.keySet()) {
-            FloatArray attachmentMatrix = avatarSkeleton.getAttachmentMatrix(obj.intValue())
+        
+        for (key in this.nonRigged.keySet()) {
+            val attachmentMatrix = avatarSkeleton.getAttachmentMatrix(key)
             if (attachmentMatrix != null) {
                 renderContext.glObjWorldPushAndMultMatrixf(attachmentMatrix, 0)
-                for (DrawableObject DrawRigged30222 : this.nonRigged.get(obj)) {
-                    if (DrawRigged30222.isRiggedMesh()) {
+                for (obj in this.nonRigged.get(key)) {
+                    if (obj.isRiggedMesh()) {
                         z3 = true
                     } else {
-                        DrawRigged30222.Draw(renderContext, 3)
+                        obj.Draw(renderContext, 3)
                     }
                 }
                 renderContext.glObjWorldPopMatrix()
             }
-            z3 = z3
         }
         return z3
     }

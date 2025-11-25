@@ -28,7 +28,7 @@ class SetScriptRunningMessage : SLMessage() {
         running = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00F5
+    override fun getMessageID(): Int = 0xFFFF00F5.toInt()
 
     override fun getMessageName(): String = "SetScriptRunning"
 }

@@ -174,7 +174,7 @@ class RegionInfoMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF008E
+    override fun getMessageID(): Int = 0xFFFF008E.toInt()
 
     override fun getMessageName(): String = "RegionInfo"
 }

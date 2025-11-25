@@ -95,7 +95,7 @@ class UpdateAttachmentMessage : SLMessage() {
         crc = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF014B
+    override fun getMessageID(): Int = 0xFFFF014B.toInt()
 
     override fun getMessageName(): String = "UpdateAttachment"
 }

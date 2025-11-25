@@ -1,6 +1,7 @@
 package com.lumiyaviewer.lumiya.render.glres.textures
 
 import com.lumiyaviewer.lumiya.Debug
+import com.lumiyaviewer.lumiya.memory.MemoryManager
 import com.lumiyaviewer.lumiya.openjpeg.OpenJPEG
 import com.lumiyaviewer.lumiya.render.RenderContext
 import com.lumiyaviewer.lumiya.render.glres.GLLoadQueue
@@ -9,32 +10,36 @@ import com.lumiyaviewer.lumiya.res.ResourceConsumer
 import com.lumiyaviewer.lumiya.res.terrain.TerrainTextureCache
 import com.lumiyaviewer.lumiya.slproto.terrain.TerrainPatchInfo
 
-class GLTerrainTextureCache : GLResourceCache<TerrainPatchInfo, OpenJPEG, GLLoadedTexture> {
-    private TerrainTextureCache terrainTextureCache
+class GLTerrainTextureCache(
+    gLLoadQueue: GLLoadQueue,
+    private val terrainTextureCache: TerrainTextureCache
+) : GLResourceCache<TerrainPatchInfo, OpenJPEG, GLLoadedTexture>(MemoryManager(), gLLoadQueue) {
 
-    constructor(gLLoadQueue: GLLoadQueue, terrainTextureCache2: TerrainTextureCache) {
-        super(gLLoadQueue)
-        this.terrainTextureCache = terrainTextureCache2
+    override fun CancelRawResource(consumer: ResourceConsumer) {
+        terrainTextureCache.CancelRequest(consumer)
     }
 
-    /* access modifiers changed from: protected */
-    fun CancelRawResource(resourceConsumer: ResourceConsumer): Unit {
-        this.terrainTextureCache.CancelRequest(resourceConsumer)
+    override fun GetResourceSize(raw: OpenJPEG?): Int {
+        return raw?.getLoadedSize() ?: 0
     }
 
-    /* access modifiers changed from: protected */
-    fun GetResourceSize(openJPEG: OpenJPEG): Int {
-        return openJPEG.getLoadedSize()
+    override fun LoadResource(
+        params: TerrainPatchInfo,
+        raw: OpenJPEG?,
+        renderContext: RenderContext
+    ): GLLoadedTexture? {
+        Debug.Log("Terrain: Loading baked texture into GL")
+        return if (raw != null) {
+            GLLoadedTexture(renderContext, raw)
+        } else {
+            null
+        }
     }
 
-    /* access modifiers changed from: protected */
-    fun LoadResource(terrainPatchInfo: TerrainPatchInfo, openJPEG: OpenJPEG, renderContext: RenderContext): GLLoadedTexture {
-        Debug.Printf("Terrain: Loading baked texture into GL", Any[0])
-        return GLLoadedTexture(renderContext, openJPEG)
-    }
-
-    /* access modifiers changed from: protected */
-    fun RequestRawResource(terrainPatchInfo: TerrainPatchInfo, resourceConsumer: ResourceConsumer): Unit {
-        this.terrainTextureCache.RequestResource(terrainPatchInfo, resourceConsumer)
+    override fun RequestRawResource(
+        params: TerrainPatchInfo,
+        consumer: ResourceConsumer
+    ) {
+        terrainTextureCache.RequestResource(params, consumer)
     }
 }

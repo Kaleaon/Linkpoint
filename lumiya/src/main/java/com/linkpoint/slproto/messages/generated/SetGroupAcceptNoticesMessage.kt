@@ -28,7 +28,7 @@ class SetGroupAcceptNoticesMessage : SLMessage() {
         listInProfile = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0172
+    override fun getMessageID(): Int = 0xFFFF0172.toInt()
 
     override fun getMessageName(): String = "SetGroupAcceptNotices"
 }

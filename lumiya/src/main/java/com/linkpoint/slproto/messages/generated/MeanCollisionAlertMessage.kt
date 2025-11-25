@@ -48,7 +48,7 @@ class MeanCollisionAlertMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0088
+    override fun getMessageID(): Int = 0xFFFF0088.toInt()
 
     override fun getMessageName(): String = "MeanCollisionAlert"
 }

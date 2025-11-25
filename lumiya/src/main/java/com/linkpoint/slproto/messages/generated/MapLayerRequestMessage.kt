@@ -28,7 +28,7 @@ class MapLayerRequestMessage : SLMessage() {
         godlike = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0195
+    override fun getMessageID(): Int = 0xFFFF0195.toInt()
 
     override fun getMessageName(): String = "MapLayerRequest"
 }

@@ -22,7 +22,7 @@ class StateSaveMessage : SLMessage() {
         filename = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF007F
+    override fun getMessageID(): Int = 0xFFFF007F.toInt()
 
     override fun getMessageName(): String = "StateSave"
 }

@@ -34,7 +34,7 @@ class EmailMessageReplyMessage : SLMessage() {
         mailFilter = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0150
+    override fun getMessageID(): Int = 0xFFFF0150.toInt()
 
     override fun getMessageName(): String = "EmailMessageReply"
 }

@@ -22,7 +22,7 @@ class InventoryAssetResponseMessage : SLMessage() {
         isReadable = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF011B
+    override fun getMessageID(): Int = 0xFFFF011B.toInt()
 
     override fun getMessageName(): String = "InventoryAssetResponse"
 }

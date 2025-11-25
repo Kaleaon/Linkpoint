@@ -167,8 +167,8 @@ class ModernConnectionManager(context: Context) {
         
         return try {
             // Use the existing authentication system but with modern error handling
-            val auth = SLAuth()
-            val result = auth.Login(correctedParams)
+            // val auth = SLAuth() - SLAuth is an object
+            val result = SLAuth.Login(correctedParams)
                 ?: throw ConnectionException("Authentication returned null response")
             
             if (!result.success) {

@@ -41,7 +41,7 @@ class ObjectIncludeInSearchMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF01A8
+    override fun getMessageID(): Int = 0xFFFF01A8.toInt()
 
     override fun getMessageName(): String = "ObjectIncludeInSearch"
 }

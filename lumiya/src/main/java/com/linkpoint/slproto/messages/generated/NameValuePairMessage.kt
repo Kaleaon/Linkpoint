@@ -35,7 +35,7 @@ class NameValuePairMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0149
+    override fun getMessageID(): Int = 0xFFFF0149.toInt()
 
     override fun getMessageName(): String = "NameValuePair"
 }

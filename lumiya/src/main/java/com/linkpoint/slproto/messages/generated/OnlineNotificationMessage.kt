@@ -32,7 +32,7 @@ class OnlineNotificationMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0142
+    override fun getMessageID(): Int = 0xFFFF0142.toInt()
 
     override fun getMessageName(): String = "OnlineNotification"
 }

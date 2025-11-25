@@ -22,7 +22,7 @@ class ParcelReleaseMessage : SLMessage() {
         localId = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00D4
+    override fun getMessageID(): Int = 0xFFFF00D4.toInt()
 
     override fun getMessageName(): String = "ParcelRelease"
 }

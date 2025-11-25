@@ -25,7 +25,7 @@ class RemoveMuteListEntryMessage : SLMessage() {
         muteName = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0108
+    override fun getMessageID(): Int = 0xFFFF0108.toInt()
 
     override fun getMessageName(): String = "RemoveMuteListEntry"
 }

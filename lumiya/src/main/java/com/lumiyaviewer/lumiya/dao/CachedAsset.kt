@@ -1,11 +1,43 @@
 package com.lumiyaviewer.lumiya.dao
 
 data class CachedAsset(
-    var key: String,
-    var status: Int = 0,
-    var data: ByteArray? = null,
-    var mustRevalidate: Boolean = false,
+    private var key: String? = null,
+    private var status: Int = 0,
+    private var data: ByteArray? = null,
+    private var mustRevalidate: Boolean = false
 ) {
+    fun getKey(): String? {
+        return key
+    }
+
+    fun setKey(key: String?) {
+        this.key = key
+    }
+
+    fun getStatus(): Int {
+        return status
+    }
+
+    fun setStatus(status: Int) {
+        this.status = status
+    }
+
+    fun getData(): ByteArray? {
+        return data
+    }
+
+    fun setData(data: ByteArray?) {
+        this.data = data
+    }
+
+    fun getMustRevalidate(): Boolean {
+        return mustRevalidate
+    }
+
+    fun setMustRevalidate(mustRevalidate: Boolean) {
+        this.mustRevalidate = mustRevalidate
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -26,7 +58,7 @@ data class CachedAsset(
     }
 
     override fun hashCode(): Int {
-        var result = key.hashCode()
+        var result = key?.hashCode() ?: 0
         result = 31 * result + status
         result = 31 * result + (data?.contentHashCode() ?: 0)
         result = 31 * result + mustRevalidate.hashCode()

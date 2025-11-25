@@ -45,7 +45,7 @@ class GroupDataUpdateMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0184
+    override fun getMessageID(): Int = 0xFFFF0184.toInt()
 
     override fun getMessageName(): String = "GroupDataUpdate"
 }

@@ -29,7 +29,7 @@ class ParcelSetOtherCleanTimeMessage : SLMessage() {
         otherCleanTime = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00C8
+    override fun getMessageID(): Int = 0xFFFF00C8.toInt()
 
     override fun getMessageName(): String = "ParcelSetOtherCleanTime"
 }

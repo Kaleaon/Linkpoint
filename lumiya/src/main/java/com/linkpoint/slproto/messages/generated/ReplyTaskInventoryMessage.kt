@@ -26,7 +26,7 @@ class ReplyTaskInventoryMessage : SLMessage() {
         filename = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0122
+    override fun getMessageID(): Int = 0xFFFF0122.toInt()
 
     override fun getMessageName(): String = "ReplyTaskInventory"
 }

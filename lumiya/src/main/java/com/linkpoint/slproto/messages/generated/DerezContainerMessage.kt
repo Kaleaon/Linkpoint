@@ -23,7 +23,7 @@ class DerezContainerMessage : SLMessage() {
         delete = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0068
+    override fun getMessageID(): Int = 0xFFFF0068.toInt()
 
     override fun getMessageName(): String = "DerezContainer"
 }

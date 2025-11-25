@@ -37,7 +37,7 @@ class ScriptControlChangeMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00BD
+    override fun getMessageID(): Int = 0xFFFF00BD.toInt()
 
     override fun getMessageName(): String = "ScriptControlChange"
 }

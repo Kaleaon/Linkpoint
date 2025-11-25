@@ -38,7 +38,7 @@ class RemoveInventoryFolderMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0114
+    override fun getMessageID(): Int = 0xFFFF0114.toInt()
 
     override fun getMessageName(): String = "RemoveInventoryFolder"
 }

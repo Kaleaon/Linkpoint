@@ -2,68 +2,52 @@ package com.lumiyaviewer.lumiya.render.avatar
 
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.slproto.messages.AvatarAppearance
-import com.lumiyaviewer.lumiya.slproto.messages.AvatarAppearance.AppearanceData
-import com.lumiyaviewer.lumiya.slproto.messages.AvatarAppearance.VisualParam
 import java.util.Arrays
-import androidx.annotation.NonNull
-import androidx.annotation.Nullable
 
-object AvatarShapeParams {
-    @NonNull
-    private int[] visualParamValues
+class AvatarShapeParams(private val visualParamValues: IntArray) {
 
-    private AvatarShapeParams(@NonNull int[] iArr) {
-        this.visualParamValues = iArr
-    }
-
-    @NonNull
-    fun create(avatarShapeParams: AvatarShapeParams, avatarAppearance: AvatarAppearance): AvatarShapeParams {
-        Debug.Log("DrawableAvatar: new appearance for avatar " + avatarAppearance.Sender_Field.ID + ", numParams = " + avatarAppearance.VisualParam_Fields.size() + ", appData = " + avatarAppearance.AppearanceData_Fields.size())
-        for (i = 0; i < avatarAppearance.AppearanceData_Fields.size(); i++) {
-            Debug.Printf("appData[%d]: appVer %d, cofVer %d, flags 0x%x", Integer.valueOf(i), Integer.valueOf(((AppearanceData) avatarAppearance.AppearanceData_Fields.get(i)).AppearanceVersion), Integer.valueOf(((AppearanceData) avatarAppearance.AppearanceData_Fields.get(i)).CofVersion), Integer.valueOf(((AppearanceData) avatarAppearance.AppearanceData_Fields.get(i)).Flags))
-        }
-        int[] iArr = IntArray(218)
-        i = 0
-        while (i < 218) {
-            if (i < avatarAppearance.VisualParam_Fields.size()) {
-                iArr[i] = ((VisualParam) avatarAppearance.VisualParam_Fields.get(i)).ParamValue
-            } else {
-                iArr[i] = avatarShapeParams != null ? avatarShapeParams.visualParamValues[i] : 0
+    companion object {
+        fun create(previous: AvatarShapeParams?, appearance: AvatarAppearance): AvatarShapeParams {
+            // Debug logging omitted for brevity/compilation speed, but logic preserved
+            val newValues = IntArray(218)
+            val numParams = appearance.VisualParam_Fields.size
+            
+            for (i in 0 until 218) {
+                if (i < numParams) {
+                    newValues[i] = appearance.VisualParam_Fields[i].ParamValue
+                } else {
+                    newValues[i] = previous?.visualParamValues?.getOrNull(i) ?: 0
+                }
             }
-            i++
+            return AvatarShapeParams(newValues)
         }
-        return AvatarShapeParams(iArr)
-    }
 
-    @NonNull
-    fun create(avatarShapeParams: AvatarShapeParams, iArr: IntArray): AvatarShapeParams {
-        if (iArr.length != 218) {
-            Object obj = IntArray(218)
-            System.arraycopy(iArr, 0, obj, 0, Math.min(iArr.length, 218))
-            Object iArr2
-            if (iArr2.length >= 218 || avatarShapeParams == null) {
-                iArr2 = obj
-            } else {
-                System.arraycopy(avatarShapeParams.visualParamValues, iArr2.length, obj, iArr2.length, 218 - iArr2.length)
-                iArr2 = obj
+        fun create(previous: AvatarShapeParams?, values: IntArray): AvatarShapeParams {
+            if (values.size == 218) return AvatarShapeParams(values)
+            
+            val newValues = IntArray(218)
+            System.arraycopy(values, 0, newValues, 0, Math.min(values.size, 218))
+            
+            if (previous != null && values.size < 218) {
+                val remaining = 218 - values.size
+                System.arraycopy(previous.visualParamValues, values.size, newValues, values.size, remaining)
             }
+            
+            return AvatarShapeParams(newValues)
         }
-        return AvatarShapeParams(iArr2)
     }
 
-    fun equals(obj: Any): Boolean {
-        return obj instanceof AvatarShapeParams ? Arrays.equals(this.visualParamValues, ((AvatarShapeParams) obj).visualParamValues) : false
+    override fun equals(other: Any?): Boolean {
+        return other is AvatarShapeParams && Arrays.equals(visualParamValues, other.visualParamValues)
     }
 
-    fun getParamCount(): Int {
-        return 218
+    override fun hashCode(): Int {
+        return Arrays.hashCode(visualParamValues)
     }
 
-    fun getParamValue(i: Int): Int {
-        return (i < 0 || i >= 218) ? 0 : this.visualParamValues[i]
-    }
+    fun getParamCount(): Int = 218
 
-    fun hashCode(): Int {
-        return Arrays.hashCode(this.visualParamValues)
+    fun getParamValue(index: Int): Int {
+        return if (index in 0 until 218) visualParamValues[index] else 0
     }
 }

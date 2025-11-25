@@ -37,7 +37,7 @@ class LogDwellTimeMessage : SLMessage() {
         avgViewerFps = unpackByte(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0012
+    override fun getMessageID(): Int = 0xFFFF0012.toInt()
 
     override fun getMessageName(): String = "LogDwellTime"
 }

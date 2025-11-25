@@ -45,7 +45,7 @@ class ObjectDescriptionMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF006C
+    override fun getMessageID(): Int = 0xFFFF006C.toInt()
 
     override fun getMessageName(): String = "ObjectDescription"
 }

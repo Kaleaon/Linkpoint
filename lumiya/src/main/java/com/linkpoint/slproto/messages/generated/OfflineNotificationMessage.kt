@@ -32,7 +32,7 @@ class OfflineNotificationMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0143
+    override fun getMessageID(): Int = 0xFFFF0143.toInt()
 
     override fun getMessageName(): String = "OfflineNotification"
 }

@@ -62,7 +62,7 @@ class LandStatReplyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF01A6
+    override fun getMessageID(): Int = 0xFFFF01A6.toInt()
 
     override fun getMessageName(): String = "LandStatReply"
 }

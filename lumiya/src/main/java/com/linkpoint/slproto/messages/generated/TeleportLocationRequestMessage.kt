@@ -29,7 +29,7 @@ class TeleportLocationRequestMessage : SLMessage() {
         lookAt = LLVector3.unpack(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF003F
+    override fun getMessageID(): Int = 0xFFFF003F.toInt()
 
     override fun getMessageName(): String = "TeleportLocationRequest"
 }

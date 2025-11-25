@@ -7,31 +7,36 @@ import java.util.Date
 import org.xmlpull.v1.XmlSerializer
 
 class LLSDDate : LLSDNode {
-    private Date value
+    private val value: Date
 
-    LLSDDate(String str) {
-        try {
-            this.value = Date(str)
-        } catch (Exception e) {
-            this.value = Date()
+    constructor(str: String) {
+        // Deprecated Date constructor, but maintaining compatibility
+        this.value = try {
+            Date(str)
+        } catch (e: Exception) {
+            Date()
         }
     }
 
-    LLSDDate(Date date) {
+    constructor(date: Date) {
         this.value = date
     }
 
-    Date asDate() {
+    override fun asDate(): Date {
         return this.value
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    @Throws(IOException::class)
+    override fun toBinary(dataOutputStream: DataOutputStream) {
         dataOutputStream.writeByte(100)
-        dataOutputStream.writeDouble((double) (this.value.getTime() / 1000))
+        dataOutputStream.writeDouble((this.value.time / 1000).toDouble())
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    @Throws(IOException::class)
+    override fun toXML(xmlSerializer: XmlSerializer) {
         xmlSerializer.startTag("", "date")
+        // toGMTString is deprecated, but using it for now as per original code
+        @Suppress("DEPRECATION")
         xmlSerializer.text(this.value.toGMTString())
         xmlSerializer.endTag("", "date")
     }

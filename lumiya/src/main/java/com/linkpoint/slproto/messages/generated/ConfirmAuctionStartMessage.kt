@@ -19,7 +19,7 @@ class ConfirmAuctionStartMessage : SLMessage() {
         auctionId = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00E6
+    override fun getMessageID(): Int = 0xFFFF00E6.toInt()
 
     override fun getMessageName(): String = "ConfirmAuctionStart"
 }

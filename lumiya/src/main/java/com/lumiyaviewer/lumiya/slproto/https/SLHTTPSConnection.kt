@@ -1,101 +1,81 @@
 package com.lumiyaviewer.lumiya.slproto.https
 
 import com.google.common.net.HttpHeaders
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.lumiyaviewer.lumiya.Debug
+import okhttp3.*
 import java.io.IOException
 import java.net.InetAddress
 import java.net.Proxy
 import java.net.UnknownHostException
 import java.security.SecureRandom
-import java.security.cert.CertificateException
 import java.security.cert.X509Certificate
-import java.util.ArrayList
-import java.util.List
 import java.util.concurrent.TimeUnit
-import javax.net.ssl.HostnameVerifier
-import javax.net.ssl.KeyManager
-import javax.net.ssl.SSLContext
-import javax.net.ssl.SSLSession
-import javax.net.ssl.SSLSocketFactory
-import javax.net.ssl.TrustManager
-import javax.net.ssl.X509TrustManager
-import okhttp3.ConnectionPool
-import okhttp3.Dns
-import okhttp3.HttpUrl
-import okhttp3.Interceptor
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
+import javax.net.ssl.*
 
 class SLHTTPSConnection {
     private val CONNECT_TIMEOUT: Long = 60
     private val READ_TIMEOUT: Long = 60
-    private OkHttpClient okHttpClient = OkHttpClient.Builder().proxy(Proxy.NO_PROXY).dns(SLDNS()).connectionPool(ConnectionPool(8, 5, TimeUnit.MINUTES)).connectTimeout(60, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).hostnameVerifier(HostnameVerifier() {
-        Boolean verify(String str, SSLSession sSLSession) {
-            return true
-        }
-    }).addNetworkInterceptor(CharsetStripInterceptor()).sslSocketFactory(getSocketFactory(), trustEverythingManager).build()
-    private TrustManager[] trustAllCerts = {trustEverythingManager}
-    private X509TrustManager trustEverythingManager = X509TrustManager() {
-        Unit checkClientTrusted(X509Certificate[] x509CertificateArr, String str) throws CertificateException {
-        }
 
-        Unit checkServerTrusted(X509Certificate[] x509CertificateArr, String str) throws CertificateException {
-        }
+    private val trustEverythingManager = object : X509TrustManager {
+        override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
+        override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
+        override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+    }
 
-        X509Certificate[] getAcceptedIssuers() {
-            return X509Certificate[0]
-        }
+    private val trustAllCerts = arrayOf<TrustManager>(trustEverythingManager)
+
+    private val okHttpClient: OkHttpClient
+
+    init {
+        val socketFactory = getSocketFactory() ?: throw RuntimeException("Failed to create SSLSocketFactory")
+        
+        okHttpClient = OkHttpClient.Builder()
+            .proxy(Proxy.NO_PROXY)
+            .dns(SLDNS())
+            .connectionPool(ConnectionPool(8, 5, TimeUnit.MINUTES))
+            .connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
+            .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
+            .hostnameVerifier { _, _ -> true }
+            .addNetworkInterceptor(CharsetStripInterceptor())
+            .sslSocketFactory(socketFactory, trustEverythingManager)
+            .build()
     }
 
     class CharsetStripInterceptor : Interceptor {
-        CharsetStripInterceptor() {
-        }
-
-        Response intercept(Interceptor.Chain chain) throws IOException {
-            Request request = chain.request()
-            String header = request.header(HttpHeaders.CONTENT_TYPE)
-            if (header == null || (!header.contains(";"))) {
+        override fun intercept(chain: Interceptor.Chain): Response {
+            val request = chain.request()
+            var header = request.header(HttpHeaders.CONTENT_TYPE)
+            if (header == null || !header.contains(";")) {
                 return chain.proceed(request)
             }
-            Int indexOf = header.indexOf(";")
+            val indexOf = header.indexOf(";")
             if (indexOf != -1) {
                 header = header.substring(0, indexOf)
             }
-            return chain.proceed(request.newBuilder().header(HttpHeaders.CONTENT_TYPE, header).build())
+            return chain.proceed(request.newBuilder().header(HttpHeaders.CONTENT_TYPE, header!!).build())
         }
     }
 
     class DNSforDNS : Dns {
-        private Dns systemDns = Dns.SYSTEM
+        private val systemDns = Dns.SYSTEM
 
-        DNSforDNS() {
-        }
-
-        List<InetAddress> lookup(String str) throws UnknownHostException {
-            try {
-                List<InetAddress> lookup = this.systemDns.lookup(str)
-                if (lookup == null) {
-                    throw UnknownHostException(str)
-                } else if (!lookup.isEmpty()) {
-                    return lookup
-                } else {
-                    throw UnknownHostException(str)
+        override fun lookup(hostname: String): List<InetAddress> {
+            return try {
+                systemDns.lookup(hostname).ifEmpty {
+                    throw UnknownHostException(hostname)
                 }
-            } catch (UnknownHostException e) {
-                if (str.equalsIgnoreCase("dns.google.com")) {
-                    Debug.Printf("DNS: Falling back to IP addresses for %s", str)
-                    ArrayList arrayList = ArrayList()
-                    arrayList.add(InetAddress.getByName("64.233.164.101"))
-                    arrayList.add(InetAddress.getByName("64.233.164.113"))
-                    arrayList.add(InetAddress.getByName("64.233.164.139"))
-                    arrayList.add(InetAddress.getByName("64.233.164.138"))
-                    arrayList.add(InetAddress.getByName("64.233.164.100"))
-                    arrayList.add(InetAddress.getByName("64.233.164.102"))
-                    return arrayList
+            } catch (e: UnknownHostException) {
+                if (hostname.equals("dns.google.com", ignoreCase = true)) {
+                    Debug.Printf("DNS: Falling back to IP addresses for %s", hostname)
+                    return listOf(
+                        InetAddress.getByName("64.233.164.101"),
+                        InetAddress.getByName("64.233.164.113"),
+                        InetAddress.getByName("64.233.164.139"),
+                        InetAddress.getByName("64.233.164.138"),
+                        InetAddress.getByName("64.233.164.100"),
+                        InetAddress.getByName("64.233.164.102")
+                    )
                 }
                 throw e
             }
@@ -103,95 +83,112 @@ class SLHTTPSConnection {
     }
 
     class SLDNS : Dns {
-        private OkHttpClient httpResolverClient = OkHttpClient.Builder().dns(DNSforDNS()).connectTimeout(60, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).build()
-        private Dns systemDns = Dns.SYSTEM
+        private val httpResolverClient = OkHttpClient.Builder()
+            .dns(DNSforDNS())
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .build()
+        private val systemDns = Dns.SYSTEM
 
-        SLDNS() {
-        }
-
-        private List<InetAddress> tryResolveOverHTTP(String str) throws UnknownHostException {
-            Debug.Printf("DNS: Trying to resolve over HTTPS: hostname = %s", str)
+        private fun tryResolveOverHTTP(hostname: String): List<InetAddress> {
+            Debug.Printf("DNS: Trying to resolve over HTTPS: hostname = %s", hostname)
             try {
-                Response execute = this.httpResolverClient.newCall(Request.Builder().url(HttpUrl.Builder().scheme("https").host("dns.google.com").addPathSegment("resolve").addQueryParameter("name", str).addQueryParameter("type", "A").build()).get().build()).execute()
-                if (execute == null) {
-                    throw UnknownHostException(str)
-                } else if (!execute.isSuccessful()) {
-                    Debug.Printf("DNS: Failed to resolve over HTTPS: error code %d, error message %s", Integer.valueOf(execute.code()), execute.message())
-                    throw UnknownHostException(str)
-                } else {
-                    JsonObject asJsonObject = JsonParser().parse(execute.body().string()).getAsJsonObject()
-                    ArrayList arrayList = ArrayList()
-                    for (JsonElement jsonElement : asJsonObject.getAsJsonArray("Answer")) {
-                        if (jsonElement.isJsonObject()) {
-                            JsonObject asJsonObject2 = jsonElement.getAsJsonObject()
-                            if (asJsonObject2.has("name") && asJsonObject2.has("type") && asJsonObject2.has("data")) {
-                                String asString = asJsonObject2.get("name").getAsString()
-                                Int asInt = asJsonObject2.get("type").getAsInt()
-                                String asString2 = asJsonObject2.get("data").getAsString()
-                                if (asString.equalsIgnoreCase(str + ".") && asInt == 1 && asString2 != null && (!asString2.isEmpty())) {
-                                    Debug.Printf("DNS: Resolving '%s': found good result '%s'", str, asString2)
-                                    InetAddress byName = InetAddress.getByName(asString2)
-                                    if (byName != null) {
-                                        arrayList.add(byName)
+                val request = Request.Builder()
+                    .url(
+                        HttpUrl.Builder()
+                            .scheme("https")
+                            .host("dns.google.com")
+                            .addPathSegment("resolve")
+                            .addQueryParameter("name", hostname)
+                            .addQueryParameter("type", "A")
+                            .build()
+                    )
+                    .get()
+                    .build()
+
+                val response = httpResolverClient.newCall(request).execute()
+                
+                if (!response.isSuccessful) {
+                    Debug.Printf("DNS: Failed to resolve over HTTPS: error code %d, error message %s", response.code(), response.message())
+                    throw UnknownHostException(hostname)
+                }
+
+                val body = response.body()?.string() ?: throw UnknownHostException(hostname)
+                val jsonObject = JsonParser.parseString(body).asJsonObject
+                val resultList = ArrayList<InetAddress>()
+
+                if (jsonObject.has("Answer")) {
+                    for (element in jsonObject.getAsJsonArray("Answer")) {
+                        if (element.isJsonObject) {
+                            val answerObj = element.asJsonObject
+                            if (answerObj.has("name") && answerObj.has("type") && answerObj.has("data")) {
+                                val name = answerObj.get("name").asString
+                                val type = answerObj.get("type").asInt
+                                val data = answerObj.get("data").asString
+
+                                if (name.equals("$hostname.", ignoreCase = true) && type == 1 && !data.isNullOrEmpty()) {
+                                    Debug.Printf("DNS: Resolving '%s': found good result '%s'", hostname, data)
+                                    val address = InetAddress.getByName(data)
+                                    if (address != null) {
+                                        resultList.add(address)
                                     }
                                 }
                             }
                         }
                     }
-                    if (!arrayList.isEmpty()) {
-                        return arrayList
-                    }
-                    Debug.Printf("DNS: Failed to resolve over HTTPS: hostname = %s, no valid answers", str)
-                    throw UnknownHostException(str)
                 }
-            } catch (Exception e) {
-                Debug.Printf("DNS: Failed to resolve over HTTPS: hostname = %s, error = %s", str, e.getMessage())
-                throw UnknownHostException(str)
+
+                if (resultList.isNotEmpty()) {
+                    return resultList
+                }
+                Debug.Printf("DNS: Failed to resolve over HTTPS: hostname = %s, no valid answers", hostname)
+                throw UnknownHostException(hostname)
+
+            } catch (e: Exception) {
+                Debug.Printf("DNS: Failed to resolve over HTTPS: hostname = %s, error = %s", hostname, e.message)
+                throw UnknownHostException(hostname)
             }
         }
 
-        List<InetAddress> lookup(String str) throws UnknownHostException {
-            try {
-                List<InetAddress> lookup = this.systemDns.lookup(str)
-                if (lookup == null) {
-                    throw UnknownHostException(str)
-                } else if (!lookup.isEmpty()) {
-                    return lookup
-                } else {
-                    throw UnknownHostException(str)
+        override fun lookup(hostname: String): List<InetAddress> {
+            return try {
+                systemDns.lookup(hostname).ifEmpty {
+                    throw UnknownHostException(hostname)
                 }
-            } catch (UnknownHostException e) {
-                List<InetAddress> tryResolveOverHTTP = tryResolveOverHTTP(str)
-                if (tryResolveOverHTTP == null) {
-                    throw UnknownHostException(str)
-                } else if (!tryResolveOverHTTP.isEmpty()) {
-                    return tryResolveOverHTTP
-                } else {
-                    throw UnknownHostException(str)
+            } catch (e: UnknownHostException) {
+                try {
+                    val httpResult = tryResolveOverHTTP(hostname)
+                    if (httpResult.isNotEmpty()) {
+                        return httpResult
+                    }
+                    throw UnknownHostException(hostname)
+                } catch (e2: UnknownHostException) {
+                    if (hostname.equals("login.agni.lindenlab.com", ignoreCase = true)) {
+                        Debug.Printf("DNS: Falling back to address for %s", hostname)
+                        return listOf(InetAddress.getByName("216.82.57.58"))
+                    }
+                    throw e2
                 }
-            } catch (UnknownHostException e2) {
-                if (str.equalsIgnoreCase("login.agni.lindenlab.com")) {
-                    Debug.Printf("DNS: Falling back to address for %s", str)
-                    ArrayList arrayList = ArrayList()
-                    arrayList.add(InetAddress.getByName("216.82.57.58"))
-                    return arrayList
-                }
-                throw e2
             }
         }
     }
 
-    OkHttpClient getOkHttpClient() {
+    fun getOkHttpClient(): OkHttpClient {
         return okHttpClient
     }
 
-    private SSLSocketFactory getSocketFactory() {
-        try {
-            SSLContext instance = SSLContext.getInstance("TLS")
-            instance.init((KeyManager[]) null, trustAllCerts, SecureRandom())
-            return instance.getSocketFactory()
-        } catch (Exception e) {
-            return null
+    private fun getSocketFactory(): SSLSocketFactory? {
+        return try {
+            val sslContext = SSLContext.getInstance("TLS")
+            sslContext.init(null, trustAllCerts, SecureRandom())
+            sslContext.socketFactory
+        } catch (e: Exception) {
+            null
         }
+    }
+    
+    companion object {
+        private val instance = SLHTTPSConnection()
+        fun getOkHttpClient(): OkHttpClient = instance.getOkHttpClient()
     }
 }

@@ -1,61 +1,57 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.nio.ByteBuffer
-import java.util.UUID
 
 class DirClassifiedQueryBackend : SLMessage {
-    AgentData AgentData_Field = AgentData()
-    QueryData QueryData_Field = QueryData()
+    var AgentData_Field: AgentData = AgentData()
+    var QueryData_Field: QueryData = QueryData()
 
     class AgentData {
-        UUID AgentID
+        var AgentID: UUID = UUIDPool.ZeroUUID
     }
 
     class QueryData {
-        Int Category
-        Int EstateID
-        Boolean Godlike
-        Int QueryFlags
-        UUID QueryID
-        Int QueryStart
-        byte[] QueryText
+        var Category: Int = 0
+        var QueryFlags: Int = 0
+        var QueryID: UUID = UUIDPool.ZeroUUID
+        var QueryStart: Int = 0
+        var QueryText: ByteArray = ByteArray(0)
     }
 
-    DirClassifiedQueryBackend() {
+    init {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.QueryData_Field.QueryText.length + 17 + 4 + 4 + 4 + 1 + 4 + 20
+    override fun CalcPayloadSize(): Int {
+        return this.QueryData_Field.QueryText.size + 17 + 4 + 4 + 4 + 20
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleDirClassifiedQueryBackend(this)
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleDirClassifiedQueryBackend(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) 40)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put(39.toByte())
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.QueryData_Field.QueryID)
         packVariable(byteBuffer, this.QueryData_Field.QueryText, 1)
         packInt(byteBuffer, this.QueryData_Field.QueryFlags)
         packInt(byteBuffer, this.QueryData_Field.Category)
-        packInt(byteBuffer, this.QueryData_Field.EstateID)
-        packBoolean(byteBuffer, this.QueryData_Field.Godlike)
         packInt(byteBuffer, this.QueryData_Field.QueryStart)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
         this.QueryData_Field.QueryText = unpackVariable(byteBuffer, 1)
         this.QueryData_Field.QueryFlags = unpackInt(byteBuffer)
         this.QueryData_Field.Category = unpackInt(byteBuffer)
-        this.QueryData_Field.EstateID = unpackInt(byteBuffer)
-        this.QueryData_Field.Godlike = unpackBoolean(byteBuffer)
         this.QueryData_Field.QueryStart = unpackInt(byteBuffer)
     }
 }

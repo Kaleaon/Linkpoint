@@ -9,18 +9,20 @@ import com.lumiyaviewer.lumiya.slproto.messages.LoadURL
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import androidx.annotation.NonNull
 
-class SLChatTextEvent : SLChatEvent {
-    protected String text
+open class SLChatTextEvent : SLChatEvent {
+    protected var text: String? = null
 
-    SLChatTextEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
-        super(chatMessage, uuid)
-        this.text = chatMessage.getMessageText()
+    constructor(chatMessage: ChatMessage, uuid: UUID) : super(chatMessage, uuid) {
+        this.text = chatMessage.messageText
     }
 
-    SLChatTextEvent(@NonNull ChatMessageSource chatMessageSource, @NonNull UUID uuid, ImprovedInstantMessage improvedInstantMessage, String str) {
-        super(improvedInstantMessage, uuid, chatMessageSource)
+    constructor(
+        chatMessageSource: ChatMessageSource,
+        uuid: UUID,
+        improvedInstantMessage: ImprovedInstantMessage?,
+        str: String?
+    ) : super(chatMessageSource, uuid) {
         if (str != null) {
             this.text = str
         } else if (improvedInstantMessage != null) {
@@ -30,41 +32,49 @@ class SLChatTextEvent : SLChatEvent {
         }
     }
 
-    SLChatTextEvent(@NonNull ChatMessageSource chatMessageSource, @NonNull UUID uuid, LoadURL loadURL) {
-        super(chatMessageSource, uuid)
+    constructor(chatMessageSource: ChatMessageSource, uuid: UUID, loadURL: LoadURL) : super(chatMessageSource, uuid) {
         this.text = SLMessage.stringFromVariableUTF(loadURL.Data_Field.Message) + ": " + SLMessage.stringFromVariableUTF(loadURL.Data_Field.URL)
     }
 
-    SLChatTextEvent(@NonNull ChatMessageSource chatMessageSource, @NonNull UUID uuid, String str) {
-        super(chatMessageSource, uuid)
+    constructor(chatMessageSource: ChatMessageSource, uuid: UUID, str: String) : super(chatMessageSource, uuid) {
         this.text = str
     }
 
-    /* access modifiers changed from: protected */
-    @NonNull
-    SLChatEvent.ChatMessageType getMessageType() {
-        return SLChatEvent.ChatMessageType.Text
+    override fun getMessageType(): ChatMessageType {
+        return ChatMessageType.Text
     }
 
-    String getRawText() {
-        return (this.text == null || !this.text.startsWith("/me ")) ? this.text : this.text.substring(4)
+    open fun getRawText(): String? {
+        return if (text == null || text?.startsWith("/me ") == false) text else text?.substring(4)
+    }
+    
+    // Helper for compatibility if needed, though getMessage() is the standard
+    open fun getText(context: Context, userManager: UserManager): String? {
+         return getRawText()
     }
 
-    String getText(Context context, @NonNull UserManager userManager) {
-        return (this.text == null || !this.text.startsWith("/me ")) ? this.text : this.text.substring(4)
+    override fun getMessage(): CharSequence {
+        return getRawText() ?: ""
     }
 
-    SLChatEvent.ChatMessageViewType getViewType() {
-        return SLChatEvent.ChatMessageViewType.VIEW_TYPE_NORMAL
+    override fun getViewType(): ChatMessageViewType {
+        return ChatMessageViewType.VIEW_TYPE_NORMAL
     }
 
-    /* access modifiers changed from: protected */
-    Boolean isActionMessage(@NonNull UserManager userManager) {
-        return this.text != null && this.text.startsWith("/me ")
+    open fun isActionMessage(userManager: UserManager): Boolean {
+        return text != null && text!!.startsWith("/me ")
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    override fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
-        chatMessage.setMessageText(this.text)
+        chatMessage.messageText = this.text
+    }
+    
+    override fun getSenderDisplayName(): CharSequence? {
+        return source.name
+    }
+    
+    override fun getChatterID(): com.lumiyaviewer.lumiya.slproto.users.ChatterID {
+        return com.lumiyaviewer.lumiya.slproto.users.ChatterID(agentUUID, "")
     }
 }

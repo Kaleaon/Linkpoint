@@ -32,7 +32,7 @@ class ParcelAccessListRequestMessage : SLMessage() {
         localId = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00D7
+    override fun getMessageID(): Int = 0xFFFF00D7.toInt()
 
     override fun getMessageName(): String = "ParcelAccessListRequest"
 }

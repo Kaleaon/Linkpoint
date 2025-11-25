@@ -25,7 +25,7 @@ class RequestInventoryAssetMessage : SLMessage() {
         itemId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF011A
+    override fun getMessageID(): Int = 0xFFFF011A.toInt()
 
     override fun getMessageName(): String = "RequestInventoryAsset"
 }

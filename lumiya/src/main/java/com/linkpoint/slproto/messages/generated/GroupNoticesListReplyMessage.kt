@@ -53,7 +53,7 @@ class GroupNoticesListReplyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF003B
+    override fun getMessageID(): Int = 0xFFFF003B.toInt()
 
     override fun getMessageName(): String = "GroupNoticesListReply"
 }

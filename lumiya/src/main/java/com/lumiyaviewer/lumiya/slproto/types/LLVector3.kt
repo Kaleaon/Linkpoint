@@ -1,169 +1,188 @@
 package com.lumiyaviewer.lumiya.slproto.types
-import java.util.*
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode
 import com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDDouble
 import com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap
 import java.nio.ByteBuffer
+import kotlin.math.sqrt
+import kotlin.math.max
+import kotlin.math.cos
+import kotlin.math.sin
 
-class LLVector3 {
-    val FP_MAG_THRESHOLD: Float = 1.0E-7f
-    LLVector3 Zero = LLVector3(0.0f, 0.0f, 0.0f)
-    LLVector3 z_axis = LLVector3(0.0f, 0.0f, 1.0f)
-    Float x = 0.0f
-    Float y = 0.0f
-    Float z = 0.0f
+class LLVector3(
+    var x: Float = 0.0f,
+    var y: Float = 0.0f,
+    var z: Float = 0.0f
+) {
 
-    LLVector3() {
+    companion object {
+        const val FP_MAG_THRESHOLD: Float = 1.0E-7f
+        val Zero = LLVector3(0.0f, 0.0f, 0.0f)
+        val z_axis = LLVector3(0.0f, 0.0f, 1.0f)
+
+        fun cross(v1: LLVector3, v2: LLVector3): LLVector3 {
+            return LLVector3(
+                (v1.y * v2.z) - (v2.y * v1.z),
+                (v1.z * v2.x) - (v2.z * v1.x),
+                (v1.x * v2.y) - (v2.x * v1.y)
+            )
+        }
+
+        fun sub(v1: LLVector3, v2: LLVector3): LLVector3 {
+            return LLVector3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z)
+        }
+
+        fun parseFloatVec(byteBuffer: ByteBuffer): LLVector3 {
+            return LLVector3(byteBuffer.float, byteBuffer.float, byteBuffer.float)
+        }
     }
 
-    LLVector3(Float f, Float f2, Float f3) {
-        this.x = f
-        this.y = f2
-        this.z = f3
+    constructor(other: LLVector3) : this(other.x, other.y, other.z)
+
+    // Compatibility wrapper for instance method cross if needed
+    fun cross(v1: LLVector3, v2: LLVector3): LLVector3 = Companion.cross(v1, v2)
+
+    fun lerp(v1: LLVector3, v2: LLVector3, f: Float): LLVector3 {
+        return LLVector3(
+            v1.x + ((v2.x - v1.x) * f),
+            v1.y + ((v2.y - v1.y) * f),
+            v1.z + ((v2.z - v1.z) * f)
+        )
     }
 
-    LLVector3(LLVector3 lLVector3) {
-        this.x = lLVector3.x
-        this.y = lLVector3.y
-        this.z = lLVector3.z
+    fun parseU16Vec(byteBuffer: ByteBuffer, minX: Float, maxX: Float, minY: Float, maxY: Float): LLVector3 {
+        // Assuming LLTersePacking is available
+        return LLVector3(
+            LLTersePacking.U16_to_float(byteBuffer.short.toInt() and 0xFFFF, minX, maxX),
+            LLTersePacking.U16_to_float(byteBuffer.short.toInt() and 0xFFFF, minX, maxX),
+            LLTersePacking.U16_to_float(byteBuffer.short.toInt() and 0xFFFF, minY, maxY)
+        )
     }
 
-    LLVector3 cross(LLVector3 lLVector3, LLVector3 lLVector32) {
-        return LLVector3((lLVector3.y * lLVector32.z) - (lLVector32.y * lLVector3.z), (lLVector3.z * lLVector32.x) - (lLVector32.z * lLVector3.x), (lLVector3.x * lLVector32.y) - (lLVector32.x * lLVector3.y))
+    fun parseU8Vec(byteBuffer: ByteBuffer, minX: Float, maxX: Float, minY: Float, maxY: Float): LLVector3 {
+        return LLVector3(
+            LLTersePacking.U8_to_float(byteBuffer.get().toInt() and 0xFF, minX, maxX),
+            LLTersePacking.U8_to_float(byteBuffer.get().toInt() and 0xFF, minX, maxX),
+            LLTersePacking.U8_to_float(byteBuffer.get().toInt() and 0xFF, minY, maxY)
+        )
     }
 
-    LLVector3 lerp(LLVector3 lLVector3, LLVector3 lLVector32, Float f) {
-        return LLVector3(lLVector3.x + ((lLVector32.x - lLVector3.x) * f), lLVector3.y + ((lLVector32.y - lLVector3.y) * f), lLVector3.z + ((lLVector32.z - lLVector3.z) * f))
+    fun scaleFromMatrix(fArr: FloatArray): LLVector3 {
+        return LLVector3(
+            sqrt((fArr[0] * fArr[0].toDouble()).toFloat() + (fArr[1] * fArr[1]) + (fArr[2] * fArr[2])),
+            sqrt((fArr[4] * fArr[4].toDouble()).toFloat() + (fArr[5] * fArr[5]) + (fArr[6] * fArr[6])),
+            sqrt((fArr[8] * fArr[8].toDouble()).toFloat() + (fArr[9] * fArr[9]) + (fArr[10] * fArr[10]))
+        )
     }
 
-    LLVector3 parseFloatVec(ByteBuffer byteBuffer) {
-        return LLVector3(byteBuffer.getFloat(), byteBuffer.getFloat(), byteBuffer.getFloat())
+    // Removed instance sub(v1, v2) in favor of Companion method, but keeping instance sub(v)
+    // If specific code uses instance sub(v1, v2), it should be updated to use LLVector3.sub(v1, v2)
+
+    fun add(v: LLVector3) {
+        this.x += v.x
+        this.y += v.y
+        this.z += v.z
     }
 
-    LLVector3 parseU16Vec(ByteBuffer byteBuffer, Float f, Float f2, Float f3, Float f4) {
-        return LLVector3(LLTersePacking.U16_to_float(byteBuffer.getShort() & 65535, f, f2), LLTersePacking.U16_to_float(byteBuffer.getShort() & 65535, f, f2), LLTersePacking.U16_to_float(byteBuffer.getShort() & 65535, f3, f4))
-    }
-
-    LLVector3 parseU8Vec(ByteBuffer byteBuffer, Float f, Float f2, Float f3, Float f4) {
-        return LLVector3(LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f, f2), LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f, f2), LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f3, f4))
-    }
-
-    LLVector3 scaleFromMatrix(FloatArray fArr) {
-        return LLVector3(Math.sqrt(((fArr[0] * fArr[0].toDouble()).toFloat() + (fArr[1] * fArr[1]) + (fArr[2] * fArr[2]))), Math.sqrt(((fArr[4] * fArr[4].toDouble()).toFloat() + (fArr[5] * fArr[5]) + (fArr[6] * fArr[6]))), Math.sqrt(((fArr[8] * fArr[8].toDouble()).toFloat() + (fArr[9] * fArr[9]) + (fArr[10] * fArr[10]))))
-    }
-
-    LLVector3 sub(LLVector3 lLVector3, LLVector3 lLVector32) {
-        return LLVector3(lLVector3.x - lLVector32.x, lLVector3.y - lLVector32.y, lLVector3.z - lLVector32.z)
-    }
-
-    Unit add(LLVector3 lLVector3) {
-        this.x += lLVector3.x
-        this.y += lLVector3.y
-        this.z += lLVector3.z
-    }
-
-    Unit addMul(ImmutableVector immutableVector, Float f) {
+    fun addMul(immutableVector: ImmutableVector, f: Float) {
         this.x += immutableVector.x * f
         this.y += immutableVector.y * f
         this.z += immutableVector.z * f
     }
 
-    Unit addMul(LLVector3 lLVector3, Float f) {
-        this.x += lLVector3.x * f
-        this.y += lLVector3.y * f
-        this.z += lLVector3.z * f
+    fun addMul(v: LLVector3, f: Float) {
+        this.x += v.x * f
+        this.y += v.y * f
+        this.z += v.z * f
     }
 
-    Float dot(LLVector3 lLVector3) {
-        return (this.x * lLVector3.x) + (this.y * lLVector3.y) + (this.z * lLVector3.z)
+    fun dot(v: LLVector3): Float {
+        return (this.x * v.x) + (this.y * v.y) + (this.z * v.z)
     }
 
-    Boolean equals(Any obj) {
-        if (obj == this) {
-            return true
-        }
-        if (!(obj instanceof LLVector3)) {
-            return false
-        }
-        LLVector3 lLVector3 = (LLVector3) obj
-        return this.x == lLVector3.x && this.y == lLVector3.y && this.z == lLVector3.z
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is LLVector3) return false
+        return this.x == other.x && this.y == other.y && this.z == other.z
     }
 
-    Float getDistanceTo(LLVector3 lLVector3) {
-        Float f = this.x - lLVector3.x
-        Float f2 = this.y - lLVector3.y
-        Float f3 = this.z - lLVector3.z
-        return Math.sqrt(((f * f.toDouble()).toFloat() + (f2 * f2) + (f3 * f3)))
+    fun getDistanceTo(v: LLVector3): Float {
+        val dx = this.x - v.x
+        val dy = this.y - v.y
+        val dz = this.z - v.z
+        return sqrt((dx * dx).toDouble() + (dy * dy) + (dz * dz)).toFloat()
     }
 
-    Float getMax() {
-        return Math.max(Math.max(this.x, this.y), this.z)
+    fun getMax(): Float {
+        return max(max(this.x, this.y), this.z)
     }
 
-    LLVector3 getRotatedOffset(Float f, Float f2) {
-        Float f3 = (3.1415927f * f2) / 180.0f
-        return LLVector3(((Math.toFloat().cos(f3.toDouble())) * f) + this.x, ((Math.toFloat().sin(f3.toDouble())) * f) + this.y, this.z)
+    fun getRotatedOffset(f: Float, f2: Float): LLVector3 {
+        val f3 = (3.1415927f * f2) / 180.0f
+        return LLVector3(
+            (cos(f3.toDouble()).toFloat() * f) + this.x,
+            (sin(f3.toDouble()).toFloat() * f) + this.y,
+            this.z
+        )
     }
 
-    Int hashCode() {
-        return Float.floatToIntBits(this.x) + Float.floatToIntBits(this.y) + Float.floatToIntBits(this.z)
+    override fun hashCode(): Int {
+        return java.lang.Float.floatToIntBits(this.x) + java.lang.Float.floatToIntBits(this.y) + java.lang.Float.floatToIntBits(this.z)
     }
 
-    Boolean isZero() {
+    fun isZero(): Boolean {
         return this.x == 0.0f && this.y == 0.0f && this.z == 0.0f
     }
 
-    Float magVec() {
-        return Math.sqrt(((this.x * this.x.toDouble()).toFloat() + (this.y * this.y) + (this.z * this.z)))
+    fun magVec(): Float {
+        return sqrt((this.x * this.x).toDouble() + (this.y * this.y) + (this.z * this.z)).toFloat()
     }
 
-    Float magVecSquared() {
+    fun magVecSquared(): Float {
         return (this.x * this.x) + (this.y * this.y) + (this.z * this.z)
     }
 
-    Unit mul(Float f) {
+    fun mul(f: Float) {
         this.x *= f
         this.y *= f
         this.z *= f
     }
 
-    Unit mul(LLQuaternion lLQuaternion) {
-        Float f = (((-lLQuaternion.x) * this.x) - (lLQuaternion.y * this.y)) - (lLQuaternion.z * this.z)
-        Float f2 = ((lLQuaternion.w * this.x) + (lLQuaternion.y * this.z)) - (lLQuaternion.z * this.y)
-        Float f3 = ((lLQuaternion.w * this.y) + (lLQuaternion.z * this.x)) - (lLQuaternion.x * this.z)
-        Float f4 = ((lLQuaternion.w * this.z) + (lLQuaternion.x * this.y)) - (lLQuaternion.y * this.x)
-        this.x = ((((-f) * lLQuaternion.x) + (lLQuaternion.w * f2)) - (lLQuaternion.z * f3)) + (lLQuaternion.y * f4)
-        this.y = ((((-f) * lLQuaternion.y) + (lLQuaternion.w * f3)) - (lLQuaternion.x * f4)) + (lLQuaternion.z * f2)
-        this.z = ((((-f) * lLQuaternion.z) + (f4 * lLQuaternion.w)) - (f2 * lLQuaternion.y)) + (lLQuaternion.x * f3)
+    fun mul(q: LLQuaternion) {
+        val f = (((-q.x) * this.x) - (q.y * this.y)) - (q.z * this.z)
+        val f2 = ((q.w * this.x) + (q.y * this.z)) - (q.z * this.y)
+        val f3 = ((q.w * this.y) + (q.z * this.x)) - (q.x * this.z)
+        val f4 = ((q.w * this.z) + (q.x * this.y)) - (q.y * this.x)
+        this.x = ((((-f) * q.x) + (q.w * f2)) - (q.z * f3)) + (q.y * f4)
+        this.y = ((((-f) * q.y) + (q.w * f3)) - (q.x * f4)) + (q.z * f2)
+        this.z = ((((-f) * q.z) + (f4 * q.w)) - (f2 * q.y)) + (q.x * f3)
     }
 
-    Unit mul(LLVector3 lLVector3) {
-        this.x *= lLVector3.x
-        this.y *= lLVector3.y
-        this.z *= lLVector3.z
+    fun mul(v: LLVector3) {
+        this.x *= v.x
+        this.y *= v.y
+        this.z *= v.z
     }
 
-    Unit mulWeighted(ImmutableVector immutableVector, Float f) {
+    fun mulWeighted(immutableVector: ImmutableVector, f: Float) {
         this.x *= (immutableVector.x * f) + 1.0f
         this.y *= (immutableVector.y * f) + 1.0f
         this.z *= (immutableVector.z * f) + 1.0f
     }
 
-    Unit mulWeighted(LLVector3 lLVector3, Float f) {
-        this.x *= (lLVector3.x * f) + 1.0f
-        this.y *= (lLVector3.y * f) + 1.0f
-        this.z *= (lLVector3.z * f) + 1.0f
+    fun mulWeighted(v: LLVector3, f: Float) {
+        this.x *= (v.x * f) + 1.0f
+        this.y *= (v.y * f) + 1.0f
+        this.z *= (v.z * f) + 1.0f
     }
 
-    Float normVec() {
-        Float sqrt = Math.sqrt(((this.x * this.x.toDouble()).toFloat() + (this.y * this.y) + (this.z * this.z)))
+    fun normVec(): Float {
+        val sqrt = sqrt((this.x * this.x).toDouble() + (this.y * this.y) + (this.z * this.z)).toFloat()
         if (sqrt > 1.0E-7f) {
-            Float f = 1.0f / sqrt
+            val f = 1.0f / sqrt
             this.x *= f
             this.y *= f
-            this.z = f * this.z
+            this.z *= f
         } else {
             this.x = 0.0f
             this.y = 0.0f
@@ -172,75 +191,79 @@ class LLVector3 {
         return sqrt
     }
 
-    Unit set(Float f, Float f2, Float f3) {
+    fun set(f: Float, f2: Float, f3: Float) {
         this.x = f
         this.y = f2
         this.z = f3
     }
 
-    Unit set(LLVector3 lLVector3) {
-        if (lLVector3 != null) {
-            this.x = lLVector3.x
-            this.y = lLVector3.y
-            this.z = lLVector3.z
+    fun set(v: LLVector3?) {
+        if (v != null) {
+            this.x = v.x
+            this.y = v.y
+            this.z = v.z
         }
     }
 
-    Unit setAdd(LLVector3 lLVector3, LLVector3 lLVector32) {
-        this.x = lLVector3.x + lLVector32.x
-        this.y = lLVector3.y + lLVector32.y
-        this.z = lLVector3.z + lLVector32.z
+    fun setAdd(v1: LLVector3, v2: LLVector3) {
+        this.x = v1.x + v2.x
+        this.y = v1.y + v2.y
+        this.z = v1.z + v2.z
     }
 
-    Unit setCross(LLVector3 lLVector3) {
-        Float f = (this.y * lLVector3.z) - (lLVector3.y * this.z)
-        Float f2 = (this.z * lLVector3.x) - (lLVector3.z * this.x)
+    fun setCross(v: LLVector3) {
+        val f = (this.y * v.z) - (v.y * this.z)
+        val f2 = (this.z * v.x) - (v.z * this.x)
+        this.z = (this.x * v.y) - (v.x * this.y)
         this.x = f
         this.y = f2
-        this.z = (this.x * lLVector3.y) - (lLVector3.x * this.y)
     }
 
-    Unit setLerp(LLVector3 lLVector3, Float f, LLVector3 lLVector32, Float f2) {
-        this.x = (lLVector3.x * f) + (lLVector32.x * f2)
-        this.y = (lLVector3.y * f) + (lLVector32.y * f2)
-        this.z = (lLVector3.z * f) + (lLVector32.z * f2)
+    fun setLerp(v1: LLVector3, f: Float, v2: LLVector3, f2_val: Float) {
+        this.x = (v1.x * f) + (v2.x * f2_val)
+        this.y = (v1.y * f) + (v2.y * f2_val)
+        this.z = (v1.z * f) + (v2.z * f2_val)
     }
 
-    Unit setLerp(LLVector3 lLVector3, LLVector3 lLVector32, Float f) {
-        this.x = lLVector3.x + ((lLVector32.x - lLVector3.x) * f)
-        this.y = lLVector3.y + ((lLVector32.y - lLVector3.y) * f)
-        this.z = lLVector3.z + ((lLVector32.z - lLVector3.z) * f)
+    fun setLerp(v1: LLVector3, v2: LLVector3, f: Float) {
+        this.x = v1.x + ((v2.x - v1.x) * f)
+        this.y = v1.y + ((v2.y - v1.y) * f)
+        this.z = v1.z + ((v2.z - v1.z) * f)
     }
 
-    Unit setMul(LLVector3 lLVector3, Float f) {
-        this.x = lLVector3.x * f
-        this.y = lLVector3.y * f
-        this.z = lLVector3.z * f
+    fun setMul(v: LLVector3, f: Float) {
+        this.x = v.x * f
+        this.y = v.y * f
+        this.z = v.z * f
     }
 
-    Unit setMul(LLVector3 lLVector3, LLVector3 lLVector32) {
-        this.x = lLVector3.x * lLVector32.x
-        this.y = lLVector3.y * lLVector32.y
-        this.z = lLVector3.z * lLVector32.z
+    fun setMul(v1: LLVector3, v2: LLVector3) {
+        this.x = v1.x * v2.x
+        this.y = v1.y * v2.y
+        this.z = v1.z * v2.z
     }
 
-    Unit setSub(LLVector3 lLVector3, LLVector3 lLVector32) {
-        this.x = lLVector3.x - lLVector32.x
-        this.y = lLVector3.y - lLVector32.y
-        this.z = lLVector3.z - lLVector32.z
+    fun setSub(v1: LLVector3, v2: LLVector3) {
+        this.x = v1.x - v2.x
+        this.y = v1.y - v2.y
+        this.z = v1.z - v2.z
     }
 
-    Unit sub(LLVector3 lLVector3) {
-        this.x -= lLVector3.x
-        this.y -= lLVector3.y
-        this.z -= lLVector3.z
+    fun sub(v: LLVector3) {
+        this.x -= v.x
+        this.y -= v.y
+        this.z -= v.z
     }
 
-    LLSDNode toLLSD() {
-        return LLSDMap(LLSDMap.LLSDMapEntry("X", LLSDDouble(this.toDouble().x)), LLSDMap.LLSDMapEntry("Y", LLSDDouble(this.toDouble().y)), LLSDMap.LLSDMapEntry("Z", LLSDDouble(this.toDouble().z)))
+    fun toLLSD(): LLSDNode {
+        val map = LLSDMap()
+        map["X"] = LLSDDouble(this.x.toDouble())
+        map["Y"] = LLSDDouble(this.y.toDouble())
+        map["Z"] = LLSDDouble(this.z.toDouble())
+        return map
     }
 
-    String toString() {
-        return String.format("(%f, %f, %f)", Any[]{Float.valueOf(this.x), Float.valueOf(this.y), Float.valueOf(this.z)})
+    override fun toString(): String {
+        return String.format("(%f, %f, %f)", x, y, z)
     }
 }

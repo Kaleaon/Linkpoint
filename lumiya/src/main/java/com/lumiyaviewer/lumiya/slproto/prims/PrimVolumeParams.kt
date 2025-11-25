@@ -9,122 +9,101 @@ import java.nio.ByteOrder
 import java.util.UUID
 
 class PrimVolumeParams {
-    val LL_SCULPT_FLAG_INVERT: Byte = 64
-    val LL_SCULPT_FLAG_MIRROR: Byte = Byte.MIN_VALUE
-    val LL_SCULPT_TYPE_CYLINDER: Byte = 4
-    val LL_SCULPT_TYPE_MASK: Byte = 7
-    val LL_SCULPT_TYPE_MESH: Byte = 5
-    val LL_SCULPT_TYPE_NONE: Byte = 0
-    val LL_SCULPT_TYPE_PLANE: Byte = 3
-    val LL_SCULPT_TYPE_SPHERE: Byte = 1
-    val LL_SCULPT_TYPE_TORUS: Byte = 2
-    val PARAMS_FLEXIBLE: Short = 16
-    val PARAMS_LIGHT: Short = 32
-    val PARAMS_LIGHT_IMAGE: Short = 64
-    val PARAMS_MESH: Short = 96
-    val PARAMS_RESERVED: Short = 80
-    val PARAMS_SCULPT: Short = 48
-    PrimFlexibleParams FlexiParams
-    PrimPathParams PathParams
-    PrimProfileParams ProfileParams
-    UUID SculptID
-    Byte SculptType
+    companion object {
+        const val LL_SCULPT_FLAG_INVERT: Byte = 64
+        const val LL_SCULPT_FLAG_MIRROR: Byte = Byte.MIN_VALUE
+        const val LL_SCULPT_TYPE_CYLINDER: Byte = 4
+        const val LL_SCULPT_TYPE_MASK: Byte = 7
+        const val LL_SCULPT_TYPE_MESH: Byte = 5
+        const val LL_SCULPT_TYPE_NONE: Byte = 0
+        const val LL_SCULPT_TYPE_PLANE: Byte = 3
+        const val LL_SCULPT_TYPE_SPHERE: Byte = 1
+        const val LL_SCULPT_TYPE_TORUS: Byte = 2
+        const val PARAMS_FLEXIBLE: Short = 16
+        const val PARAMS_LIGHT: Short = 32
+        const val PARAMS_LIGHT_IMAGE: Short = 64
+        const val PARAMS_MESH: Short = 96
+        const val PARAMS_RESERVED: Short = 80
+        const val PARAMS_SCULPT: Short = 48
 
-    PrimVolumeParams createFromObjectUpdate(ObjectUpdate.ObjectData objectData) {
-        PrimVolumeParams primVolumeParams = PrimVolumeParams()
-        primVolumeParams.PathParams = PrimParamsPool.get(PrimPathParams(objectData))
-        primVolumeParams.ProfileParams = PrimParamsPool.get(PrimProfileParams.createFromObjectUpdate(objectData))
-        return primVolumeParams
+        fun createFromObjectUpdate(objectData: ObjectUpdate.ObjectData): PrimVolumeParams {
+            val params = PrimVolumeParams()
+            params.PathParams = PrimParamsPool.get(PrimPathParams(objectData))
+            params.ProfileParams = PrimParamsPool.get(PrimProfileParams.createFromObjectUpdate(objectData))
+            return params
+        }
+
+        fun createFromPackedData(byteBuffer: ByteBuffer): PrimVolumeParams {
+            val params = PrimVolumeParams()
+            params.PathParams = PrimParamsPool.get(PrimPathParams(byteBuffer))
+            params.ProfileParams = PrimParamsPool.get(PrimProfileParams.createFromPackedData(byteBuffer))
+            return params
+        }
     }
 
-    PrimVolumeParams createFromPackedData(ByteBuffer byteBuffer) {
-        PrimVolumeParams primVolumeParams = PrimVolumeParams()
-        primVolumeParams.PathParams = PrimParamsPool.get(PrimPathParams(byteBuffer))
-        primVolumeParams.ProfileParams = PrimParamsPool.get(PrimProfileParams.createFromPackedData(byteBuffer))
-        return primVolumeParams
+    var FlexiParams: PrimFlexibleParams? = null
+    var PathParams: PrimPathParams? = null
+    var ProfileParams: PrimProfileParams? = null
+    var SculptID: UUID? = null
+    var SculptType: Byte = 0
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is PrimVolumeParams) return false
+        
+        if (SculptType != other.SculptType) return false
+        if (SculptID != other.SculptID) return false
+        
+        if (ProfileParams != other.ProfileParams) return false
+        if (PathParams != other.PathParams) return false
+        
+        return FlexiParams == other.FlexiParams
     }
 
-    Boolean equals(Any obj) {
-        if (obj == this) {
-            return true
-        }
-        if (!(obj instanceof PrimVolumeParams)) {
-            return false
-        }
-        PrimVolumeParams primVolumeParams = (PrimVolumeParams) obj
-        if (this.SculptType != primVolumeParams.SculptType) {
-            return false
-        }
-        if ((this.SculptID == null) != (primVolumeParams.SculptID == null)) {
-            return false
-        }
-        if (this.SculptID != null && !this.SculptID.equals(primVolumeParams.SculptID)) {
-            return false
-        }
-        if ((this.ProfileParams == null) != (primVolumeParams.ProfileParams == null)) {
-            return false
-        }
-        if (this.ProfileParams != null && !this.ProfileParams.equals(primVolumeParams.ProfileParams)) {
-            return false
-        }
-        if ((this.PathParams == null) != (primVolumeParams.PathParams == null)) {
-            return false
-        }
-        if (this.PathParams != null && !this.PathParams.equals(primVolumeParams.PathParams)) {
-            return false
-        }
-        if ((this.FlexiParams == null) != (primVolumeParams.FlexiParams == null)) {
-            return false
-        }
-        return this.FlexiParams == null || this.FlexiParams.equals(primVolumeParams.FlexiParams)
+    override fun hashCode(): Int {
+        var result = (SculptType * 17).toInt()
+        result += (SculptID?.hashCode() ?: 0) * 3
+        result += (PathParams?.hashCode() ?: 0) * 37
+        result += (ProfileParams?.hashCode() ?: 0)
+        result += FlexiParams?.hashCode() ?: 0
+        return result
     }
 
-    Int hashCode() {
-        Int i = (this.SculptType * 17) + 0
-        if (this.SculptID != null) {
-            i += this.SculptID.hashCode() * 3
-        }
-        Int hashCode = i + (this.PathParams.hashCode() * 37) + this.ProfileParams.hashCode()
-        return this.FlexiParams != null ? hashCode + this.FlexiParams.hashCode() : hashCode
+    fun isFlexible(): Boolean = FlexiParams != null
+
+    fun isMesh(): Boolean {
+        return SculptID != null && (SculptType.toInt() and 7) == 5
     }
 
-    Boolean isFlexible() {
-        return this.FlexiParams != null
+    fun isSculpt(): Boolean {
+        return SculptID != null
     }
 
-    Boolean isMesh() {
-        return this.SculptID != null && (this.SculptType & 7) == 5
+    override fun toString(): String {
+        return "{Volume: SculptType 0x${Integer.toHexString(SculptType.toInt())}, SculptID ${SculptID ?: "null"}, Path = ($PathParams), Profile = ($ProfileParams)}"
     }
 
-    Boolean isSculpt() {
-        return this.SculptID != null
-    }
-
-    String toString() {
-        return "{Volume: SculptType 0x" + Int.toHexString(this.SculptType) + ", SculptID " + (this.SculptID != null ? this.SculptID.toString() : "null") + ", Path = (" + this.PathParams.toString() + "), Profile = (" + this.ProfileParams.toString() + ")}"
-    }
-
-    Unit unpackExtraParams(ByteBuffer byteBuffer) {
+    fun unpackExtraParams(byteBuffer: ByteBuffer) {
         try {
-            Byte b = byteBuffer.get()
-            for (Int i = 0; i < b; i++) {
-                Short s = byteBuffer.getShort()
-                Int i2 = byteBuffer.getInt() + byteBuffer.position()
-                switch (s) {
-                    case 16:
-                        this.FlexiParams = PrimFlexibleParams(byteBuffer, i2)
-                        break
-                    case 48:
-                    case 96:
+            val count = byteBuffer.get().toInt()
+            for (i in 0 until count) {
+                val type = byteBuffer.short.toInt()
+                val nextPos = byteBuffer.int + byteBuffer.position()
+                
+                when (type) {
+                    16 -> FlexiParams = PrimFlexibleParams(byteBuffer, nextPos)
+                    48, 96 -> {
                         byteBuffer.order(ByteOrder.BIG_ENDIAN)
-                        this.SculptID = UUIDPool.getUUID(UUID(byteBuffer.getLong(), byteBuffer.getLong()))
+                        val msb = byteBuffer.long
+                        val lsb = byteBuffer.long
+                        SculptID = UUIDPool.getUUID(msb, lsb)
                         byteBuffer.order(ByteOrder.LITTLE_ENDIAN)
-                        this.SculptType = byteBuffer.get()
-                        break
+                        SculptType = byteBuffer.get()
+                    }
                 }
-                byteBuffer.position(i2)
+                byteBuffer.position(nextPos)
             }
-        } catch (BufferUnderflowException e) {
+        } catch (e: BufferUnderflowException) {
             Debug.Warning(e)
         }
     }

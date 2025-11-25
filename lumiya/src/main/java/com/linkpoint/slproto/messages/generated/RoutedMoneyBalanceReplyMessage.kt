@@ -66,7 +66,7 @@ class RoutedMoneyBalanceReplyMessage : SLMessage() {
         itemDescription = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF013B
+    override fun getMessageID(): Int = 0xFFFF013B.toInt()
 
     override fun getMessageName(): String = "RoutedMoneyBalanceReply"
 }

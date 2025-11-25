@@ -44,7 +44,7 @@ class InviteGroupRequestMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF015D
+    override fun getMessageID(): Int = 0xFFFF015D.toInt()
 
     override fun getMessageName(): String = "InviteGroupRequest"
 }

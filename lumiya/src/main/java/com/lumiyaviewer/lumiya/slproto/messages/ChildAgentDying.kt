@@ -1,40 +1,36 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.lumiyaviewer.lumiya.slproto.SLMessage
-import com.lumiyaviewer.lumiya.slproto.prims.PrimProfileParams
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.nio.ByteBuffer
-import java.util.UUID
 
 class ChildAgentDying : SLMessage {
-    AgentData AgentData_Field = AgentData()
+    var AgentData_Field: AgentData = AgentData()
 
     class AgentData {
-        UUID AgentID
-        UUID SessionID
+        var AgentID: UUID = UUIDPool.ZeroUUID
+        var SessionID: UUID = UUIDPool.ZeroUUID
     }
 
-    ChildAgentDying() {
-        this.zeroCoded = true
+    override fun CalcPayloadSize(): Int {
+        return 32
     }
 
-    Int CalcPayloadSize() {
-        return 36
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleChildAgentDying(this)
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleChildAgentDying(this)
-    }
-
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put(PrimProfileParams.LL_PCODE_HOLE_MASK)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.SessionID)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put((-3).toByte())
+        byteBuffer.put(this.AgentData_Field.AgentID.data)
+        byteBuffer.put(this.AgentData_Field.SessionID.data)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        this.AgentData_Field.AgentID = UUID(byteBuffer)
+        this.AgentData_Field.SessionID = UUID(byteBuffer)
     }
 }

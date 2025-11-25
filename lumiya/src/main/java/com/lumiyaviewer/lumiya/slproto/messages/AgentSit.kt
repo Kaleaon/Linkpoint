@@ -1,37 +1,42 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.UUID
 
 class AgentSit : SLMessage {
-    AgentData AgentData_Field = AgentData()
+    var AgentData_Field: AgentData? = AgentData()
 
     class AgentData {
-        UUID AgentID
-        UUID SessionID
+        var AgentID: UUID? = null
+        var SessionID: UUID? = null
     }
 
-    AgentSit() {
-        this.zeroCoded = false
+    constructor() {
+        this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
+    override fun CalcPayloadSize(): Int {
         return 33
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleAgentSit(this)
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleAgentSit(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put((byte) 7)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.SessionID)
+    override fun PackPayload(byteBuffer: ByteBuffer) {
+        byteBuffer.putShort(-1)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put(10.toByte())
+        packUUID(byteBuffer, AgentData_Field?.AgentID)
+        packUUID(byteBuffer, AgentData_Field?.SessionID)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val agentData = AgentData_Field ?: AgentData()
+        agentData.AgentID = unpackUUID(byteBuffer)
+        agentData.SessionID = unpackUUID(byteBuffer)
+        this.AgentData_Field = agentData
     }
 }

@@ -31,7 +31,7 @@ class ParcelJoinMessage : SLMessage() {
         north = unpackFloat(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00D2
+    override fun getMessageID(): Int = 0xFFFF00D2.toInt()
 
     override fun getMessageName(): String = "ParcelJoin"
 }

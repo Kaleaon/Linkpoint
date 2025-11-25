@@ -22,7 +22,7 @@ class ParcelObjectOwnersRequestMessage : SLMessage() {
         localId = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0038
+    override fun getMessageID(): Int = 0xFFFF0038.toInt()
 
     override fun getMessageName(): String = "ParcelObjectOwnersRequest"
 }

@@ -6,119 +6,175 @@ import android.database.sqlite.SQLiteStatement
 import de.greenrobot.dao.AbstractDao
 import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import java.util.UUID
 
-class ChatterDao : AbstractDao<Chatter, Long> {
-    val TABLENAME: String = "CHATTER"
+class ChatterDao(config: DaoConfig, daoSession: DaoSession?) : AbstractDao<Chatter, Long>(config, daoSession) {
 
-    class Properties {
-        Property Active = Property(3, Boolean.TYPE, "active", false, "ACTIVE")
-        Property Id = Property(0, Long.class, "id", true, "_id")
-        Property LastMessageID = Property(6, Long.class, "lastMessageID", false, "LAST_MESSAGE_ID")
-        Property LastSessionID = Property(7, UUID.class, "lastSessionID", false, "LAST_SESSION_ID")
-        Property Muted = Property(4, Boolean.TYPE, "muted", false, "MUTED")
-        Property Type = Property(1, Int.TYPE, "type", false, "TYPE")
-        Property UnreadCount = Property(5, Int.TYPE, "unreadCount", false, "UNREAD_COUNT")
-        Property Uuid = Property(2, UUID.class, "uuid", false, "UUID")
+    companion object {
+        const val TABLENAME = "CHATTER"
+
+        object Properties {
+            @JvmField val Active = Property(3, Boolean::class.java, "active", false, "ACTIVE")
+            @JvmField val Id = Property(0, Long::class.java, "id", true, "_id")
+            @JvmField val LastMessageID = Property(6, Long::class.java, "lastMessageID", false, "LAST_MESSAGE_ID")
+            @JvmField val LastSessionID = Property(7, String::class.java, "lastSessionID", false, "LAST_SESSION_ID")
+            @JvmField val Muted = Property(4, Boolean::class.java, "muted", false, "MUTED")
+            @JvmField val Type = Property(1, Int::class.java, "type", false, "TYPE")
+            @JvmField val UnreadCount = Property(5, Int::class.java, "unreadCount", false, "UNREAD_COUNT")
+            @JvmField val Uuid = Property(2, String::class.java, "uuid", false, "UUID")
+        }
+
+        @JvmStatic
+        fun createTable(db: SQLiteDatabase, ifNotExists: Boolean) {
+            val constraint = if (ifNotExists) "IF NOT EXISTS " else ""
+            db.execSQL("CREATE TABLE $constraint'CHATTER' (" +
+                    "'_id' INTEGER PRIMARY KEY ," +
+                    "'TYPE' INTEGER NOT NULL ," +
+                    "'UUID' TEXT," +
+                    "'ACTIVE' INTEGER NOT NULL ," +
+                    "'MUTED' INTEGER NOT NULL ," +
+                    "'UNREAD_COUNT' INTEGER NOT NULL ," +
+                    "'LAST_MESSAGE_ID' INTEGER," +
+                    "'LAST_SESSION_ID' TEXT);")
+            db.execSQL("CREATE INDEX " + constraint + "IDX_CHATTER_TYPE_UUID ON CHATTER (TYPE,UUID);")
+        }
+
+        @JvmStatic
+        fun dropTable(db: SQLiteDatabase, ifExists: Boolean) {
+            val constraint = if (ifExists) "IF EXISTS " else ""
+            db.execSQL("DROP TABLE $constraint'CHATTER'")
+        }
     }
 
-    constructor(daoConfig: DaoConfig) {
-        super(daoConfig)
-    }
+    constructor(config: DaoConfig) : this(config, null)
 
-    constructor(daoConfig: DaoConfig, daoSession: DaoSession) {
-        super(daoConfig, daoSession)
-    }
-
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        String str = z ? "IF NOT EXISTS " : ""
-        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'CHATTER' (" + "'_id' INTEGER PRIMARY KEY ," + "'TYPE' INTEGER NOT NULL ," + "'UUID' TEXT," + "'ACTIVE' INTEGER NOT NULL ," + "'MUTED' INTEGER NOT NULL ," + "'UNREAD_COUNT' INTEGER NOT NULL ," + "'LAST_MESSAGE_ID' INTEGER," + "'LAST_SESSION_ID' TEXT);")
-        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_CHATTER_TYPE_UUID ON CHATTER" + " (TYPE,UUID);")
-    }
-
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'CHATTER'")
-    }
-
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, chatter: Chatter): Unit {
-        Long j = 1
-        sQLiteStatement.clearBindings()
-        Long id = chatter.getId()
+    override fun bindValues(stmt: SQLiteStatement, entity: Chatter) {
+        stmt.clearBindings()
+        val id = entity.id
         if (id != null) {
-            sQLiteStatement.bindLong(1, id.longValue())
+            stmt.bindLong(1, id)
         }
-        sQLiteStatement.bindLong(2, (Long) chatter.getType())
-        UUID uuid = chatter.getUuid()
+        stmt.bindLong(2, entity.type.toLong())
+        
+        val uuid = entity.uuid
         if (uuid != null) {
-            sQLiteStatement.bindString(3, uuid.toString())
+            stmt.bindString(3, uuid.toString())
         }
-        sQLiteStatement.bindLong(4, chatter.getActive() ? 1 : 0)
-        if (!chatter.getMuted()) {
-            j = 0
+        
+        stmt.bindLong(4, if (entity.active) 1L else 0L)
+        stmt.bindLong(5, if (entity.muted) 1L else 0L)
+        stmt.bindLong(6, entity.unreadCount.toLong())
+        
+        val lastMessageID = entity.lastMessageID
+        if (lastMessageID != null) {
+            stmt.bindLong(7, lastMessageID)
         }
-        sQLiteStatement.bindLong(5, j)
-        sQLiteStatement.bindLong(6, (Long) chatter.getUnreadCount())
-        id = chatter.getLastMessageID()
-        if (id != null) {
-            sQLiteStatement.bindLong(7, id.longValue())
-        }
-        uuid = chatter.getLastSessionID()
-        if (uuid != null) {
-            sQLiteStatement.bindString(8, uuid.toString())
+        
+        val lastSessionID = entity.lastSessionID
+        if (lastSessionID != null) {
+            stmt.bindString(8, lastSessionID.toString())
         }
     }
 
-    fun getKey(chatter: Chatter): Long {
-        return chatter != null ? chatter.getId() : null
+    override fun getKey(entity: Chatter?): Long? {
+        return entity?.id
     }
 
-    protected fun isEntityUpdateable(): Boolean {
+    override fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    fun readEntity(cursor: Cursor, i: Int): Chatter {
-        Boolean z = true
-        UUID uuid = null
-        Long valueOf = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
-        Int i2 = cursor.getInt(i + 1)
-        UUID fromString = cursor.isNull(i + 2) ? null : UUID.fromString(cursor.getString(i + 2))
-        Boolean z2 = cursor.getShort(i + 3) != (Short) 0
-        if (cursor.getShort(i + 4) == (Short) 0) {
-            z = false
-        }
-        Int i3 = cursor.getInt(i + 5)
-        Long valueOf2 = cursor.isNull(i + 6) ? null : Long.valueOf(cursor.getLong(i + 6))
-        if (!cursor.isNull(i + 7)) {
-            uuid = UUID.fromString(cursor.getString(i + 7))
-        }
-        return Chatter(valueOf, i2, fromString, z2, z, i3, valueOf2, uuid)
+    override fun readEntity(cursor: Cursor, offset: Int): Chatter {
+        val id = if (cursor.isNull(offset + 0)) null else cursor.getLong(offset + 0)
+        val type = cursor.getInt(offset + 1)
+        val uuid = if (cursor.isNull(offset + 2)) null else UUID.fromString(cursor.getString(offset + 2))
+        val active = cursor.getShort(offset + 3).toInt() != 0
+        val muted = cursor.getShort(offset + 4).toInt() != 0
+        val unreadCount = cursor.getInt(offset + 5)
+        val lastMessageID = if (cursor.isNull(offset + 6)) null else cursor.getLong(offset + 6)
+        val lastSessionID = if (cursor.isNull(offset + 7)) null else UUID.fromString(cursor.getString(offset + 7))
+
+        return Chatter(id, type, uuid, active, muted, unreadCount, lastMessageID, lastSessionID)
     }
 
-    fun readEntity(cursor: Cursor, chatter: Chatter, i: Int): Unit {
-        Boolean z = true
-        UUID uuid = null
-        chatter.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
-        chatter.setType(cursor.getInt(i + 1))
-        chatter.setUuid(cursor.isNull(i + 2) ? null : UUID.fromString(cursor.getString(i + 2)))
-        chatter.setActive(cursor.getShort(i + 3) != (Short) 0)
-        if (cursor.getShort(i + 4) == (Short) 0) {
-            z = false
-        }
-        chatter.setMuted(z)
-        chatter.setUnreadCount(cursor.getInt(i + 5))
-        chatter.setLastMessageID(cursor.isNull(i + 6) ? null : Long.valueOf(cursor.getLong(i + 6)))
-        if (!cursor.isNull(i + 7)) {
-            uuid = UUID.fromString(cursor.getString(i + 7))
-        }
-        chatter.setLastSessionID(uuid)
+    override fun readEntity(cursor: Cursor, entity: Chatter, offset: Int) {
+        entity.id = if (cursor.isNull(offset + 0)) null else cursor.getLong(offset + 0)
+        entity.type = cursor.getInt(offset + 1)
+        entity.uuid = if (cursor.isNull(offset + 2)) null else UUID.fromString(cursor.getString(offset + 2))
+        entity.active = cursor.getShort(offset + 3).toInt() != 0
+        entity.muted = cursor.getShort(offset + 4).toInt() != 0
+        entity.unreadCount = cursor.getInt(offset + 5)
+        entity.lastMessageID = if (cursor.isNull(offset + 6)) null else cursor.getLong(offset + 6)
+        entity.lastSessionID = if (cursor.isNull(offset + 7)) null else UUID.fromString(cursor.getString(offset + 7))
     }
 
-    fun readKey(cursor: Cursor, i: Int): Long {
-        return cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
+    override fun readKey(cursor: Cursor, offset: Int): Long? {
+        return if (cursor.isNull(offset + 0)) null else cursor.getLong(offset + 0)
     }
 
-    protected fun updateKeyAfterInsert(chatter: Chatter, j: Long): Long {
-        chatter.setId(Long.valueOf(j))
-        return Long.valueOf(j)
+    override fun updateKeyAfterInsert(entity: Chatter, rowId: Long): Long? {
+        entity.id = rowId
+        return rowId
+    }
+    
+    // --- Extended methods for Repository ---
+
+    fun getActiveFlow(): Flow<List<Chatter>> = flow {
+        val list = queryBuilder().where(Properties.Active.eq(true)).list()
+        emit(list)
+    }
+
+    fun getWithUnreadFlow(): Flow<List<Chatter>> = flow {
+        val list = queryBuilder().where(Properties.UnreadCount.gt(0)).list()
+        emit(list)
+    }
+
+    fun getById(id: Long): Chatter? {
+        return load(id)
+    }
+
+    fun getByUUID(uuid: UUID): Chatter? {
+        val list = queryBuilder().where(Properties.Uuid.eq(uuid.toString())).list()
+        return if (list.isNotEmpty()) list[0] else null
+    }
+
+    fun updateUnreadCount(id: Long, count: Int) {
+        val chatter = load(id)
+        if (chatter != null) {
+            chatter.unreadCount = count
+            update(chatter)
+        }
+    }
+
+    fun clearUnreadCount(id: Long) {
+        val chatter = load(id)
+        if (chatter != null) {
+            chatter.unreadCount = 0
+            update(chatter)
+        }
+    }
+
+    fun setMuted(id: Long, muted: Boolean) {
+        val chatter = load(id)
+        if (chatter != null) {
+            chatter.muted = muted
+            update(chatter)
+        }
+    }
+
+    fun updateLastMessage(chatterId: Long, messageId: Long, sessionID: UUID?) {
+        val chatter = load(chatterId)
+        if (chatter != null) {
+            chatter.lastMessageID = messageId
+            chatter.lastSessionID = sessionID
+            chatter.active = true // usually updated on message
+            update(chatter)
+        }
+    }
+
+    fun deleteInactive() {
+        queryBuilder().where(Properties.Active.eq(false)).buildDelete().executeDeleteWithoutDetachingEntities()
     }
 }

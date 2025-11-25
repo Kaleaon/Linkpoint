@@ -25,7 +25,7 @@ class GroupVoteHistoryRequestMessage : SLMessage() {
         transactionId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0169
+    override fun getMessageID(): Int = 0xFFFF0169.toInt()
 
     override fun getMessageName(): String = "GroupVoteHistoryRequest"
 }

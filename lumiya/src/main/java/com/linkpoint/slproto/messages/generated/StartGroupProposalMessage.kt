@@ -38,7 +38,7 @@ class StartGroupProposalMessage : SLMessage() {
         proposalText = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF016B
+    override fun getMessageID(): Int = 0xFFFF016B.toInt()
 
     override fun getMessageName(): String = "StartGroupProposal"
 }

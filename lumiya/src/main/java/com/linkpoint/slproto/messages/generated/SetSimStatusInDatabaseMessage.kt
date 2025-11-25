@@ -37,7 +37,7 @@ class SetSimStatusInDatabaseMessage : SLMessage() {
         status = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0016
+    override fun getMessageID(): Int = 0xFFFF0016.toInt()
 
     override fun getMessageName(): String = "SetSimStatusInDatabase"
 }

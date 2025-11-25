@@ -42,7 +42,7 @@ class ObjectSelectMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF006E
+    override fun getMessageID(): Int = 0xFFFF006E.toInt()
 
     override fun getMessageName(): String = "ObjectSelect"
 }

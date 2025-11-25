@@ -13,20 +13,6 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Asset Manager for Linkpoint
- * 
- * Manages downloading, caching, and decoding of Second Life assets including:
- * - Textures
- * - Meshes
- * - Sounds
- * - Animations
- * - Scripts
- * 
- * Features:
- * - Automatic caching
- * - Memory management
- * - Background downloading
- * - Cache expiration
- * - Asset decoding
  */
 class AssetManager(private val context: Context) {
     
@@ -55,45 +41,19 @@ class AssetManager(private val context: Context) {
         }
     }
     
-    // In-memory cache for frequently accessed assets
     private val memoryCache = ConcurrentHashMap<String, CachedAsset>()
-    
-    // Download queue
     private val downloadQueue = ConcurrentHashMap<String, Job>()
-    
-    // Coroutine scope for background operations
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     
-    /**
-     * Asset types
-     */
     enum class AssetType {
-        TEXTURE,
-        MESH,
-        SOUND,
-        ANIMATION,
-        SCRIPT,
-        UNKNOWN
+        TEXTURE, MESH, SOUND, ANIMATION, SCRIPT, UNKNOWN
     }
     
-    /**
-     * Cached asset data
-     */
     private data class CachedAsset(
         val data: ByteArray,
         val timestamp: Long = System.currentTimeMillis()
     )
     
-    /**
-     * Download an asset from URL
-     * 
-     * @param assetId Unique asset identifier
-     * @param url Asset URL
-     * @param type Asset type
-     * @param onProgress Progress callback (0.0 to 1.0)
-     * @param onComplete Completion callback with file path
-     * @param onError Error callback
-     */
     fun downloadAsset(
         assetId: String,
         url: String,
@@ -102,13 +62,11 @@ class AssetManager(private val context: Context) {
         onComplete: (String) -> Unit,
         onError: (Exception) -> Unit
     ) {
-        // Check if already downloading
         if (downloadQueue.containsKey(assetId)) {
             Log.d(TAG, "Asset $assetId is already being downloaded")
             return
         }
         
-        // Check cache first
         val cachedFile = getCachedFile(assetId)
         if (cachedFile.exists() && !isExpired(cachedFile)) {
             Log.d(TAG, "Asset $assetId found in cache")
@@ -116,7 +74,6 @@ class AssetManager(private val context: Context) {
             return
         }
         
-        // Start download
         val job = scope.launch {
             try {
                 Log.i(TAG, "Downloading asset $assetId from $url")
@@ -163,25 +120,16 @@ class AssetManager(private val context: Context) {
         downloadQueue[assetId] = job
     }
     
-    /**
-     * Get cached asset file
-     */
     fun getCachedAsset(assetId: String): File? {
         val file = getCachedFile(assetId)
         return if (file.exists() && !isExpired(file)) file else null
     }
     
-    /**
-     * Check if asset is cached
-     */
     fun isCached(assetId: String): Boolean {
         val file = getCachedFile(assetId)
         return file.exists() && !isExpired(file)
     }
     
-    /**
-     * Decode texture asset to Bitmap
-     */
     suspend fun decodeTexture(assetId: String): Bitmap? = withContext(Dispatchers.IO) {
         try {
             val file = getCachedFile(assetId)
@@ -190,16 +138,13 @@ class AssetManager(private val context: Context) {
                 return@withContext null
             }
             
-            // Check memory cache first
             memoryCache[assetId]?.let { cached ->
                 return@withContext BitmapFactory.decodeByteArray(cached.data, 0, cached.data.size)
             }
             
-            // Decode from file
             val bitmap = BitmapFactory.decodeFile(file.absolutePath)
             
             if (bitmap != null) {
-                // Cache in memory for quick access
                 val data = file.readBytes()
                 memoryCache[assetId] = CachedAsset(data)
                 Log.d(TAG, "Texture $assetId decoded and cached")
@@ -212,22 +157,14 @@ class AssetManager(private val context: Context) {
         }
     }
     
-    /**
-     * Clear cache
-     */
     fun clearCache() {
         scope.launch {
             try {
                 Log.i(TAG, "Clearing asset cache")
-                
-                // Clear memory cache
                 memoryCache.clear()
-                
-                // Delete cache files
                 cacheDir.listFiles()?.forEach { file ->
                     file.delete()
                 }
-                
                 Log.i(TAG, "Asset cache cleared")
             } catch (e: Exception) {
                 Log.e(TAG, "Error clearing cache", e)
@@ -235,14 +172,10 @@ class AssetManager(private val context: Context) {
         }
     }
     
-    /**
-     * Clear expired cache entries
-     */
     fun clearExpiredCache() {
         scope.launch {
             try {
                 Log.i(TAG, "Clearing expired cache entries")
-                
                 var deletedCount = 0
                 cacheDir.listFiles()?.forEach { file ->
                     if (isExpired(file)) {
@@ -250,7 +183,6 @@ class AssetManager(private val context: Context) {
                         deletedCount++
                     }
                 }
-                
                 Log.i(TAG, "Cleared $deletedCount expired cache entries")
             } catch (e: Exception) {
                 Log.e(TAG, "Error clearing expired cache", e)
@@ -258,23 +190,14 @@ class AssetManager(private val context: Context) {
         }
     }
     
-    /**
-     * Get cache size in bytes
-     */
     fun getCacheSize(): Long {
         return cacheDir.listFiles()?.sumOf { it.length() } ?: 0L
     }
     
-    /**
-     * Get cache size in MB
-     */
     fun getCacheSizeMB(): Long {
         return getCacheSize() / (1024 * 1024)
     }
     
-    /**
-     * Enforce cache size limit
-     */
     fun enforceCacheSizeLimit() {
         scope.launch {
             try {
@@ -283,7 +206,6 @@ class AssetManager(private val context: Context) {
                 if (currentSize > MAX_CACHE_SIZE_MB) {
                     Log.i(TAG, "Cache size ($currentSize MB) exceeds limit ($MAX_CACHE_SIZE_MB MB)")
                     
-                    // Sort files by last modified time (oldest first)
                     val files = cacheDir.listFiles()?.sortedBy { it.lastModified() } ?: return@launch
                     
                     var deletedSize = 0L
@@ -304,42 +226,28 @@ class AssetManager(private val context: Context) {
         }
     }
     
-    /**
-     * Cancel download
-     */
     fun cancelDownload(assetId: String) {
         downloadQueue[assetId]?.cancel()
         downloadQueue.remove(assetId)
         Log.d(TAG, "Download cancelled for asset $assetId")
     }
     
-    /**
-     * Cancel all downloads
-     */
     fun cancelAllDownloads() {
         downloadQueue.values.forEach { it.cancel() }
         downloadQueue.clear()
         Log.i(TAG, "All downloads cancelled")
     }
     
-    /**
-     * Get download progress
-     */
     fun isDownloading(assetId: String): Boolean {
         return downloadQueue.containsKey(assetId)
     }
     
-    /**
-     * Cleanup resources
-     */
     fun cleanup() {
         cancelAllDownloads()
         memoryCache.clear()
         scope.cancel()
         Log.i(TAG, "AssetManager cleaned up")
     }
-    
-    // Private helper methods
     
     private fun getCachedFile(assetId: String): File {
         return File(cacheDir, assetId)
@@ -360,42 +268,28 @@ class AssetManager(private val context: Context) {
             url.hashCode().toString()
         }
     }
+
+    fun getCacheStats(): AssetCacheStats {
+        val files = cacheDir.listFiles() ?: emptyArray()
+        
+        return AssetCacheStats(
+            totalSize = files.sumOf { it.length() },
+            fileCount = files.size,
+            oldestFile = files.minOfOrNull { it.lastModified() } ?: 0L,
+            newestFile = files.maxOfOrNull { it.lastModified() } ?: 0L
+        )
+    }
 }
 
-/**
- * Asset Download Result
- */
 sealed class AssetDownloadResult {
     data class Success(val filePath: String) : AssetDownloadResult()
     data class Error(val exception: Exception) : AssetDownloadResult()
     data class Progress(val progress: Float) : AssetDownloadResult()
 }
 
-/**
- * Asset Cache Statistics
- */
 data class AssetCacheStats(
     val totalSize: Long,
     val fileCount: Int,
     val oldestFile: Long,
     val newestFile: Long
 )
-
-/**
- * Extension functions
- */
-
-/**
- * Get cache statistics
- */
-fun AssetManager.getCacheStats(): AssetCacheStats {
-    val cacheDir = File(context.cacheDir, "asset_cache")
-    val files = cacheDir.listFiles() ?: emptyArray()
-    
-    return AssetCacheStats(
-        totalSize = files.sumOf { it.length() },
-        fileCount = files.size,
-        oldestFile = files.minOfOrNull { it.lastModified() } ?: 0L,
-        newestFile = files.maxOfOrNull { it.lastModified() } ?: 0L
-    )
-}

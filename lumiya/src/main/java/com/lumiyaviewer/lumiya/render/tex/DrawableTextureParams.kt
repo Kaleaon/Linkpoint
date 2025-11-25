@@ -1,45 +1,23 @@
 package com.lumiyaviewer.lumiya.render.tex
 
 import com.lumiyaviewer.lumiya.slproto.avatar.AvatarTextureFaceIndex
-import java.io.File
-import java.util.Locale
+import com.lumiyaviewer.lumiya.render.tex.TextureClass // Explicit import
 import java.util.UUID
 
-abstract class DrawableTextureParams {
-
-    abstract fun uuid(): UUID
-    abstract fun textureClass(): TextureClass
-    abstract fun avatarFaceIndex(): AvatarTextureFaceIndex?
-    abstract fun avatarUUID(): UUID?
-
-    fun getTextureRawPath(parent: File, highQuality: Boolean): File {
-        val hash = uuid().hashCode()
-        val directoryId = (hash shr 24 xor (hash shr 8 xor hash xor (hash shr 16))) and 0xFF
-
-        var storePath = textureClass().storePath
-        if (textureClass() == TextureClass.Prim && highQuality) {
-            storePath += "-hq"
-        }
-
-        val relative = String.format(
-            Locale.US,
-            "%s-raw/%02x/%s.raw",
-            storePath,
-            directoryId,
-            uuid().toString(),
-        )
-        return File(parent, relative)
-    }
-
+data class DrawableTextureParams(
+    val textureId: UUID = UUID(0, 0),
+    val textureClass: TextureClass = TextureClass.Unknown,
+    val isAvatarTexture: Boolean = false
+) {
     companion object {
-        fun create(uuid: UUID, textureClass: TextureClass): DrawableTextureParams =
-            AutoValue_DrawableTextureParams(uuid, textureClass, null, null)
-
-        fun create(
-            uuid: UUID,
-            avatarTextureFaceIndex: AvatarTextureFaceIndex?,
-            avatarUUID: UUID?,
-        ): DrawableTextureParams =
-            AutoValue_DrawableTextureParams(uuid, TextureClass.Baked, avatarTextureFaceIndex, avatarUUID)
+        @JvmStatic
+        fun create(uuid: UUID, textureClass: TextureClass): DrawableTextureParams {
+            return DrawableTextureParams(textureId = uuid, textureClass = textureClass)
+        }
+        
+        @JvmStatic
+        fun create(uuid: UUID?, faceIndex: AvatarTextureFaceIndex, avatarUUID: UUID): DrawableTextureParams {
+            return DrawableTextureParams(textureId = uuid ?: UUID(0,0), isAvatarTexture = true)
+        }
     }
 }

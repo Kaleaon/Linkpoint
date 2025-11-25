@@ -25,7 +25,7 @@ class GroupTitlesRequestMessage : SLMessage() {
         requestId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0177
+    override fun getMessageID(): Int = 0xFFFF0177.toInt()
 
     override fun getMessageName(): String = "GroupTitlesRequest"
 }

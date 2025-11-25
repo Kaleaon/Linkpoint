@@ -19,7 +19,7 @@ class RetrieveInstantMessagesMessage : SLMessage() {
         sessionId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00FF
+    override fun getMessageID(): Int = 0xFFFF00FF.toInt()
 
     override fun getMessageName(): String = "RetrieveInstantMessages"
 }

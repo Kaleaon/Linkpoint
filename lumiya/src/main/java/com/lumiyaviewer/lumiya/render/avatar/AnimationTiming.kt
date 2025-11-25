@@ -1,6 +1,6 @@
 package com.lumiyaviewer.lumiya.render.avatar
 
-class AnimationTiming {
+open class AnimationTiming {
     var inAnimationTime = 0.0f
     var inFactor = 0.0f
     var outFactor = 1.0f

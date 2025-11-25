@@ -7,82 +7,74 @@ import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import androidx.annotation.NonNull
 
 class SLChatBalanceChangedEvent : SLChatEvent {
-    private Int newBalance
-    private Int transactionAmount
-    private Boolean transactionAmountValid
+    private val newBalance: Int
+    private val transactionAmount: Int
+    private val transactionAmountValid: Boolean
 
-    /* JADX INFO: super call moved to the top of the method (can break code semantics) */
-    SLChatBalanceChangedEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
-        super(chatMessage, uuid)
-        Int i = 0
-        this.transactionAmountValid = chatMessage.getTransactionAmount() != null
-        this.transactionAmount = chatMessage.getTransactionAmount() != null ? chatMessage.getTransactionAmount().intValue() : i
-        this.newBalance = chatMessage.getNewBalance().intValue()
+    constructor(chatMessage: ChatMessage, uuid: UUID) : super(chatMessage, uuid) {
+        this.transactionAmountValid = chatMessage.transactionAmount != null
+        this.transactionAmount = chatMessage.transactionAmount ?: 0
+        this.newBalance = chatMessage.newBalance ?: 0
     }
 
-    SLChatBalanceChangedEvent(@NonNull ChatMessageSource chatMessageSource, @NonNull UUID uuid, Boolean z, Int i, Int i2) {
-        super(chatMessageSource, uuid)
-        this.transactionAmountValid = z
-        this.transactionAmount = i
-        this.newBalance = i2
+    constructor(source: ChatMessageSource, uuid: UUID, valid: Boolean, amount: Int, balance: Int) : super(source, uuid) {
+        this.transactionAmountValid = valid
+        this.transactionAmount = amount
+        this.newBalance = balance
     }
 
-    /* access modifiers changed from: protected */
-    @NonNull
-    SLChatEvent.ChatMessageType getMessageType() {
-        return SLChatEvent.ChatMessageType.BalanceChanged
+    override fun getMessageType(): ChatMessageType {
+        return ChatMessageType.BalanceChanged
     }
 
-    Int getNewBalance() {
-        return this.newBalance
+    fun getNewBalance(): Int {
+        return newBalance
     }
 
-    /* access modifiers changed from: protected */
-    String getText(Context context, @NonNull UserManager userManager) {
-        if (this.transactionAmountValid) {
-            String sourceName = this.source.getSourceName(userManager)
+    override fun getText(context: Context, userManager: UserManager): String {
+        if (transactionAmountValid) {
+            val sourceName = source.getSourceName(userManager)
             if (sourceName != null) {
-                if (this.transactionAmount >= 0) {
-                    return context.getString(R.string.you_were_paid_by_agent, Array<Any>{Integer.valueOf(this.transactionAmount), Integer.valueOf(getNewBalance())})
+                return if (transactionAmount >= 0) {
+                    context.getString(R.string.you_were_paid_by_agent, transactionAmount, newBalance)
+                } else {
+                    context.getString(R.string.you_have_paid_to_agent, -transactionAmount, sourceName, newBalance)
                 }
-                return context.getString(R.string.you_have_paid_to_agent, Array<Any>{Integer.valueOf(-this.transactionAmount), sourceName, Integer.valueOf(getNewBalance())})
-            } else if (this.transactionAmount >= 0) {
-                return context.getString(R.string.you_were_paid, Array<Any>{Integer.valueOf(this.transactionAmount), Integer.valueOf(this.newBalance)})
+            } else if (transactionAmount >= 0) {
+                return context.getString(R.string.you_were_paid, transactionAmount, newBalance)
             } else {
-                return context.getString(R.string.you_have_paid, Array<Any>{Integer.valueOf(-this.transactionAmount), Integer.valueOf(this.newBalance)})
+                return context.getString(R.string.you_have_paid, -transactionAmount, newBalance)
             }
         } else {
-            return context.getString(R.string.your_account_balance_is_now, Array<Any>{Integer.valueOf(this.newBalance)})
+            return context.getString(R.string.your_account_balance_is_now, newBalance)
         }
     }
 
-    Int getTransactionAmount() {
-        return this.transactionAmount
+    fun getTransactionAmount(): Int {
+        return transactionAmount
     }
 
-    Boolean getTransactionAmountValid() {
-        return this.transactionAmountValid
+    fun getTransactionAmountValid(): Boolean {
+        return transactionAmountValid
     }
 
-    SLChatEvent.ChatMessageViewType getViewType() {
-        return SLChatEvent.ChatMessageViewType.VIEW_TYPE_NORMAL
+    override fun getViewType(): ChatMessageViewType {
+        return ChatMessageViewType.VIEW_TYPE_NORMAL
     }
 
-    /* access modifiers changed from: protected */
-    Boolean isActionMessage(@NonNull UserManager userManager) {
-        return this.transactionAmountValid && this.source.getSourceName(userManager) != null && getTransactionAmount() >= 0
+    override fun isActionMessage(userManager: UserManager): Boolean {
+        return transactionAmountValid && source.getSourceName(userManager) != null && getTransactionAmount() >= 0
     }
 
-    Boolean opensNewChatter() {
+    override fun opensNewChatter(): Boolean {
         return false
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    override fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
-        chatMessage.setTransactionAmount(this.transactionAmountValid ? Integer.valueOf(this.transactionAmount) : null)
-        chatMessage.setNewBalance(Integer.valueOf(this.newBalance))
+        chatMessage.transactionAmount = if (transactionAmountValid) transactionAmount else null
+        chatMessage.newBalance = newBalance
     }
 }

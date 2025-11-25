@@ -2,36 +2,31 @@ package com.lumiyaviewer.lumiya.render.shaders
 
 import android.opengl.GLES20
 import com.lumiyaviewer.lumiya.render.RenderContext
-import com.lumiyaviewer.lumiya.slproto.windlight.WindlightPreset
 
-class SkyCloudsProgram : SkyProgram {
-    Int cloudAdd
-    Int cloudColor
-    Int cloudGamma
-    Int textureSampler
+class SkyCloudsProgram : SkyProgram(Shader.SkyFragmentShader) {
+    var cloudAdd: Int = 0
+    var cloudColor: Int = 0
+    var cloudGamma: Int = 0
+    var textureSampler: Int = 0
 
-    constructor() {
-        super(Shader.SkyFragmentShader)
-    }
-
-    fun ApplyWindlight(renderContext: RenderContext): Unit {
+    override fun ApplyWindlight(renderContext: RenderContext) {
         super.ApplyWindlight(renderContext)
-        WindlightPreset windlightPreset = renderContext.windlightPreset
-        GLES20.glUniform3f(this.cloudColor, windlightPreset.cloud_color[0], windlightPreset.cloud_color[1], windlightPreset.cloud_color[2])
-        GLES20.glUniform1f(this.cloudGamma, windlightPreset.cloud_pos_density1[2])
-        GLES20.glUniform1f(this.cloudAdd, windlightPreset.cloud_shadow[0] - 0.5f)
-        GLES20.glUniform1i(this.textureSampler, 0)
+        val windlightPreset = renderContext.windlightPreset ?: return
+        GLES20.glUniform3f(cloudColor, windlightPreset.cloud_color[0], windlightPreset.cloud_color[1], windlightPreset.cloud_color[2])
+        GLES20.glUniform1f(cloudGamma, windlightPreset.cloud_pos_density1[2])
+        GLES20.glUniform1f(cloudAdd, windlightPreset.cloud_shadow[0] - 0.5f)
+        GLES20.glUniform1i(textureSampler, 0)
     }
 
-    protected fun bindVariables(): Unit {
+    override fun bindVariables() {
         super.bindVariables()
-        this.textureSampler = GLES20.glGetUniformLocation(this.handle, "textureSampler")
-        this.cloudColor = GLES20.glGetUniformLocation(this.handle, "cloudColor")
-        this.cloudGamma = GLES20.glGetUniformLocation(this.handle, "cloudGamma")
-        this.cloudAdd = GLES20.glGetUniformLocation(this.handle, "cloudAdd")
+        textureSampler = GLES20.glGetUniformLocation(handle, "textureSampler")
+        cloudColor = GLES20.glGetUniformLocation(handle, "cloudColor")
+        cloudGamma = GLES20.glGetUniformLocation(handle, "cloudGamma")
+        cloudAdd = GLES20.glGetUniformLocation(handle, "cloudAdd")
     }
 
-    fun hasCloudsTexture(): Boolean {
+    override fun hasCloudsTexture(): Boolean {
         return true
     }
 }

@@ -22,7 +22,7 @@ class RpcChannelReplyMessage : SLMessage() {
         channelId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF019E
+    override fun getMessageID(): Int = 0xFFFF019E.toInt()
 
     override fun getMessageName(): String = "RpcChannelReply"
 }

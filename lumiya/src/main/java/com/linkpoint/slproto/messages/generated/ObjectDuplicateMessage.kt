@@ -52,7 +52,7 @@ class ObjectDuplicateMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF005A
+    override fun getMessageID(): Int = 0xFFFF005A.toInt()
 
     override fun getMessageName(): String = "ObjectDuplicate"
 }

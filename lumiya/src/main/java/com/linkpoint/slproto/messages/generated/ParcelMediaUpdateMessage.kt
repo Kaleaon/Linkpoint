@@ -37,7 +37,7 @@ class ParcelMediaUpdateMessage : SLMessage() {
         mediaLoop = unpackByte(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF01A4
+    override fun getMessageID(): Int = 0xFFFF01A4.toInt()
 
     override fun getMessageName(): String = "ParcelMediaUpdate"
 }

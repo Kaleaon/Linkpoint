@@ -1,45 +1,46 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.nio.ByteBuffer
-import java.util.UUID
 
 class CreateGroupRequest : SLMessage {
-    AgentData AgentData_Field = AgentData()
-    GroupData GroupData_Field = GroupData()
+    var AgentData_Field: AgentData = AgentData()
+    var GroupData_Field: GroupData = GroupData()
 
     class AgentData {
-        UUID AgentID
-        UUID SessionID
+        var AgentID: UUID = UUIDPool.ZeroUUID
+        var SessionID: UUID = UUIDPool.ZeroUUID
     }
 
     class GroupData {
-        Boolean AllowPublish
-        byte[] Charter
-        UUID InsigniaID
-        Boolean MaturePublish
-        Int MembershipFee
-        byte[] Name
-        Boolean OpenEnrollment
-        Boolean ShowInList
+        var Charter: ByteArray = ByteArray(0)
+        var InsigniaID: UUID = UUIDPool.ZeroUUID
+        var MembershipFee: Int = 0
+        var Name: ByteArray = ByteArray(0)
+        var OpenEnrollment: Boolean = false
+        var ShowInList: Boolean = false
+        var UseInsignia: Boolean = false
     }
 
-    CreateGroupRequest() {
+    init {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.GroupData_Field.Name.length + 1 + 2 + this.GroupData_Field.Charter.length + 1 + 16 + 4 + 1 + 1 + 1 + 36
+    override fun CalcPayloadSize(): Int {
+        return this.GroupData_Field.Name.size + 32 + 1 + 2 + this.GroupData_Field.Charter.size + 1 + 1 + 1 + 16 + 4 + 1 + 1
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleCreateGroupRequest(this)
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleCreateGroupRequest(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 1)
-        byteBuffer.put((byte) 83)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put(31.toByte())
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packVariable(byteBuffer, this.GroupData_Field.Name, 1)
@@ -48,11 +49,11 @@ class CreateGroupRequest : SLMessage {
         packUUID(byteBuffer, this.GroupData_Field.InsigniaID)
         packInt(byteBuffer, this.GroupData_Field.MembershipFee)
         packBoolean(byteBuffer, this.GroupData_Field.OpenEnrollment)
-        packBoolean(byteBuffer, this.GroupData_Field.AllowPublish)
-        packBoolean(byteBuffer, this.GroupData_Field.MaturePublish)
+        packBoolean(byteBuffer, this.GroupData_Field.UseInsignia)
+        byteBuffer.put(0.toByte()) // MaturePublish
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.GroupData_Field.Name = unpackVariable(byteBuffer, 1)
@@ -61,7 +62,7 @@ class CreateGroupRequest : SLMessage {
         this.GroupData_Field.InsigniaID = unpackUUID(byteBuffer)
         this.GroupData_Field.MembershipFee = unpackInt(byteBuffer)
         this.GroupData_Field.OpenEnrollment = unpackBoolean(byteBuffer)
-        this.GroupData_Field.AllowPublish = unpackBoolean(byteBuffer)
-        this.GroupData_Field.MaturePublish = unpackBoolean(byteBuffer)
+        this.GroupData_Field.UseInsignia = unpackBoolean(byteBuffer)
+        byteBuffer.get() // MaturePublish
     }
 }

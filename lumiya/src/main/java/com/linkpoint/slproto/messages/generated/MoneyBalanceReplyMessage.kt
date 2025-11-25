@@ -59,7 +59,7 @@ class MoneyBalanceReplyMessage : SLMessage() {
         itemDescription = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF013A
+    override fun getMessageID(): Int = 0xFFFF013A.toInt()
 
     override fun getMessageName(): String = "MoneyBalanceReply"
 }

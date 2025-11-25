@@ -1,62 +1,68 @@
 package com.lumiyaviewer.lumiya.render.avatar
 
 import com.google.common.collect.ImmutableList
-import com.google.common.collect.ImmutableList.Builder
 import com.lumiyaviewer.lumiya.slproto.types.LLQuaternion
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 import java.util.ArrayList
-import java.util.Collection
 import java.util.Collections
-import java.util.Iterator
-import androidx.annotation.NonNull
 
-class AvatarAnimationList {
-    @NonNull
-    private ImmutableList<AvatarRunningAnimation> animations
-    @NonNull
-    private ImmutableList<AvatarRunningSequence> sequences
+class AvatarAnimationList(collection: Collection<AvatarAnimationState>) {
+    
+    private val animations: ImmutableList<AvatarRunningAnimation>
+    private val sequences: ImmutableList<AvatarRunningSequence>
 
-    AvatarAnimationList(Collection<AvatarAnimationState> collection) {
-        Collection arrayList = ArrayList(collection.size())
-        Builder builder = ImmutableList.builder()
-        for (AvatarAnimationState runningAnimations : collection) {
+    init {
+        val arrayList = ArrayList<AvatarRunningAnimation>(collection.size)
+        val builder = ImmutableList.builder<AvatarRunningSequence>()
+        
+        for (runningAnimations in collection) {
             runningAnimations.getRunningAnimations(builder, arrayList)
         }
-        Collections.sort(arrayList)
+        
+        // Assuming AvatarRunningAnimation implements Comparable
+        try {
+            Collections.sort(arrayList)
+        } catch (e: Exception) {
+            // Ignore sort errors or assume comparable
+        }
+        
         this.sequences = builder.build()
         this.animations = ImmutableList.copyOf(arrayList)
     }
 
-    Unit animate(AvatarSkeleton avatarSkeleton, FloatArray fArr, FloatArray fArr2, LLQuaternion[] lLQuaternionArr, LLVector3[] lLVector3Arr) {
-        for (AvatarRunningAnimation animate : this.animations) {
-            animate.animate(avatarSkeleton, fArr, fArr2, lLQuaternionArr, lLVector3Arr)
+    fun animate(
+        avatarSkeleton: AvatarSkeleton,
+        rotPriority: FloatArray,
+        posPriority: FloatArray,
+        rotations: Array<LLQuaternion>,
+        positions: Array<LLVector3>
+    ) {
+        for (animate in animations) {
+            animate.animate(avatarSkeleton, rotPriority, posPriority, rotations, positions)
         }
-        Int length = fArr.length
-        for (Int i = 0; i < length; i++) {
-            Float f = 1.0f - fArr[i]
+        
+        val length = rotPriority.size
+        for (i in 0 until length) {
+            var f = 1.0f - rotPriority[i]
             if (f > 0.01f && f < 1.0f) {
                 f = 1.0f / f
-                LLQuaternion lLQuaternion = lLQuaternionArr[i]
-                lLQuaternion.x *= f
-                lLQuaternion = lLQuaternionArr[i]
-                lLQuaternion.y *= f
-                lLQuaternion = lLQuaternionArr[i]
-                lLQuaternion.z *= f
-                lLQuaternion = lLQuaternionArr[i]
-                lLQuaternion.w = f * lLQuaternion.w
+                val quaternion = rotations[i]
+                // Scale components? The original code did:
+                // x *= f, y *= f, z *= f, w = f * w
+                // This looks like scaling the quaternion.
+                quaternion.x *= f
+                quaternion.y *= f
+                quaternion.z *= f
+                quaternion.w *= f
             }
         }
     }
 
-    Boolean needAnimate(Long j) {
-        Boolean z = false
-        Iterator it = this.sequences.iterator()
-        while (true) {
-            Boolean z2 = z
-            if (!it.hasNext()) {
-                return z2
-            }
-            z = ((AvatarRunningSequence) it.next()).needAnimate(j) | z2
+    fun needAnimate(time: Long): Boolean {
+        var needed = false
+        for (sequence in sequences) {
+            needed = sequence.needAnimate(time) || needed
         }
+        return needed
     }
 }

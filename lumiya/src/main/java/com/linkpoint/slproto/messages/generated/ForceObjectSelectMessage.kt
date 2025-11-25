@@ -34,7 +34,7 @@ class ForceObjectSelectMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00CD
+    override fun getMessageID(): Int = 0xFFFF00CD.toInt()
 
     override fun getMessageName(): String = "ForceObjectSelect"
 }

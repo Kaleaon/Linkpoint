@@ -70,7 +70,7 @@ class ObjectDuplicateOnRayMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF005B
+    override fun getMessageID(): Int = 0xFFFF005B.toInt()
 
     override fun getMessageName(): String = "ObjectDuplicateOnRay"
 }

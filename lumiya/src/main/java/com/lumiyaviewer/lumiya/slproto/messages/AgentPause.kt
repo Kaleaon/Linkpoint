@@ -1,42 +1,45 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.UUID
 
 class AgentPause : SLMessage {
-    AgentData AgentData_Field = AgentData()
+    var AgentData_Field: AgentData? = AgentData()
 
     class AgentData {
-        UUID AgentID
-        Int SerialNum
-        UUID SessionID
+        var AgentID: UUID? = null
+        var SerialNum: Int = 0
+        var SessionID: UUID? = null
     }
 
-    AgentPause() {
+    constructor() {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    override fun CalcPayloadSize(): Int {
         return 40
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAgentPause(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) 78)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        packInt(byteBuffer, this.AgentData_Field.SerialNum)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put(78.toByte())
+        packUUID(byteBuffer, AgentData_Field?.AgentID)
+        packUUID(byteBuffer, AgentData_Field?.SessionID)
+        packInt(byteBuffer, AgentData_Field?.SerialNum ?: 0)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SerialNum = unpackInt(byteBuffer)
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val data = AgentData_Field ?: AgentData()
+        data.AgentID = unpackUUID(byteBuffer)
+        data.SessionID = unpackUUID(byteBuffer)
+        data.SerialNum = unpackInt(byteBuffer)
+        this.AgentData_Field = data
     }
 }

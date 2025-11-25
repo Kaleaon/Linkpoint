@@ -44,7 +44,7 @@ class ScriptTeleportRequestMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00C3
+    override fun getMessageID(): Int = 0xFFFF00C3.toInt()
 
     override fun getMessageName(): String = "ScriptTeleportRequest"
 }

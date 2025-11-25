@@ -75,7 +75,7 @@ class GroupActiveProposalItemReplyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0168
+    override fun getMessageID(): Int = 0xFFFF0168.toInt()
 
     override fun getMessageName(): String = "GroupActiveProposalItemReply"
 }

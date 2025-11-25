@@ -1,138 +1,115 @@
 package com.lumiyaviewer.lumiya.slproto.handler
 
-import com.lumiyaviewer.lumiya.Debug
-import com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue
+import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.CapsEventType
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode
-import java.lang.ref.WeakReference
-import java.lang.reflect.InvocationTargetException
+import com.lumiyaviewer.lumiya.slproto.messages.EventQueueMessage
 import java.lang.reflect.Method
-import java.util.HashMap
-import java.util.Iterator
 import java.util.LinkedList
-import java.util.Map
+import java.util.concurrent.ConcurrentHashMap
 
 class SLMessageRouter {
-    private Map<SLCapEventQueue.CapsEventType, HandlerList> eventQueueMessageHandlers = HashMap()
-    private Map<Class<?>, HandlerList> messageHandlers = HashMap()
+    private val messageHandlers = ConcurrentHashMap<Class<out SLMessage>, HandlerList>()
+    private val eventQueueMessageHandlers = ConcurrentHashMap<String, HandlerList>()
 
-    private class HandlerInfo {
-        private Method method
-        /* access modifiers changed from: private */
-        WeakReference<?> subscriber
+    private class HandlerInfo(val subscriber: Any, val method: Method)
 
-        HandlerInfo(Method method2, Object obj) {
-            this.method = method2
-            this.subscriber = WeakReference<>(obj)
+    private class HandlerList {
+        private val handlers = LinkedList<HandlerInfo>()
+
+        @Synchronized
+        fun add(subscriber: Any, method: Method) {
+            handlers.add(HandlerInfo(subscriber, method))
         }
 
-        Unit invoke(Object obj) {
-            try {
-                Object obj2 = this.subscriber.get()
-                if (obj2 != null) {
-                    this.method.invoke(obj2, Array<Any>{obj})
+        @Synchronized
+        fun remove(subscriber: Any) {
+            val iterator = handlers.iterator()
+            while (iterator.hasNext()) {
+                if (iterator.next().subscriber === subscriber) {
+                    iterator.remove()
                 }
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace()
-            } catch (IllegalAccessException e2) {
-                e2.printStackTrace()
-            } catch (InvocationTargetException e3) {
-                Debug.Log("InvocationTargetException in handler for " + obj.getClass().getSimpleName())
-                Throwable cause = e3.getCause()
-                if (cause != null) {
-                    cause.printStackTrace()
-                } else {
-                    e3.printStackTrace()
+            }
+        }
+
+        @Synchronized
+        fun dispatch(message: SLMessage) {
+            for (info in handlers) {
+                try {
+                    info.method.invoke(info.subscriber, message)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+        
+        @Synchronized
+        fun dispatchEvent(eventType: CapsEventType, node: LLSDNode): Boolean {
+            var handled = false
+            for (info in handlers) {
+                try {
+                    info.method.invoke(info.subscriber, eventType, node)
+                    handled = true
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            return handled
+        }
+    }
+
+    fun registerHandler(messageClass: Class<out SLMessage>, subscriber: Any, method: Method) {
+        val list = messageHandlers.getOrPut(messageClass) { HandlerList() }
+        list.add(subscriber, method)
+    }
+    
+    fun registerHandler(subscriber: Any) {
+        val methods = subscriber.javaClass.methods
+        for (method in methods) {
+            if (method.isAnnotationPresent(SLMessageHandler::class.java)) {
+                val params = method.parameterTypes
+                if (params.size == 1 && SLMessage::class.java.isAssignableFrom(params[0])) {
+                     @Suppress("UNCHECKED_CAST")
+                     val messageClass = params[0] as Class<out SLMessage>
+                     registerHandler(messageClass, subscriber, method)
+                } else if (params.size == 2 && params[0] == CapsEventType::class.java && params[1] == LLSDNode::class.java) {
+                    // Handle event queue handlers if annotated? 
+                    // For now assuming this is how we register standard message handlers
                 }
             }
         }
     }
 
-    private class HandlerList : LinkedList<HandlerInfo> {
-        private HandlerList() {
-        }
-
-        /* synthetic */ HandlerList(HandlerList handlerList) {
-            this()
-        }
-
-        Unit deleteAll(Object obj) {
-            LinkedList linkedList = LinkedList()
-            Iterator it = iterator()
-            while (it.hasNext()) {
-                HandlerInfo handlerInfo = (HandlerInfo) it.next()
-                Object obj2 = handlerInfo.subscriber.get()
-                if (obj2 == null || obj2 == obj) {
-                    linkedList.add(handlerInfo)
-                }
-            }
-            removeAll(linkedList)
-        }
-
-        Unit invokeAll(Object obj) {
-            Iterator it = iterator()
-            while (it.hasNext()) {
-                ((HandlerInfo) it.next()).invoke(obj)
-            }
-        }
+    fun registerEventQueueHandler(capsEventType: String, subscriber: Any, method: Method) {
+        val list = eventQueueMessageHandlers.getOrPut(capsEventType) { HandlerList() }
+        list.add(subscriber, method)
     }
 
-    synchronized Boolean handleEventQueueMessage(SLCapEventQueue.CapsEventType capsEventType, LLSDNode lLSDNode) {
-        HandlerList handlerList = this.eventQueueMessageHandlers.get(capsEventType)
-        if (handlerList == null) {
-            return false
+    fun unregisterHandler(subscriber: Any) {
+        for (list in messageHandlers.values) {
+            list.remove(subscriber)
         }
-        handlerList.invokeAll(lLSDNode)
-        return true
-    }
-
-    synchronized Boolean handleMessage(Object obj) {
-        HandlerList handlerList = this.messageHandlers.get(obj.getClass())
-        if (handlerList == null) {
-            return false
-        }
-        handlerList.invokeAll(obj)
-        return true
-    }
-
-    synchronized Unit registerHandler(Object obj) {
-        for (Method method : obj.getClass().getMethods()) {
-            if (((SLMessageHandler) method.getAnnotation(SLMessageHandler.class)) != null) {
-                Class[] parameterTypes = method.getParameterTypes()
-                if (parameterTypes.length != 1) {
-                    throw IllegalArgumentException("SLMessageHandler methods must specify a single SLMessage paramter.")
-                }
-                Class cls = parameterTypes[0]
-                HandlerInfo handlerInfo = HandlerInfo(method, obj)
-                HandlerList handlerList = this.messageHandlers.get(cls)
-                if (handlerList == null) {
-                    handlerList = HandlerList((HandlerList) null)
-                    this.messageHandlers.put(cls, handlerList)
-                }
-                handlerList.add(handlerInfo)
-            }
-            SLEventQueueMessageHandler sLEventQueueMessageHandler = (SLEventQueueMessageHandler) method.getAnnotation(SLEventQueueMessageHandler.class)
-            if (sLEventQueueMessageHandler != null) {
-                if (method.getParameterTypes().length != 1) {
-                    throw IllegalArgumentException("SLMessageHandler methods must specify a single LLSDNode paramter.")
-                }
-                SLCapEventQueue.CapsEventType eventName = sLEventQueueMessageHandler.eventName()
-                HandlerInfo handlerInfo2 = HandlerInfo(method, obj)
-                HandlerList handlerList2 = this.eventQueueMessageHandlers.get(eventName)
-                if (handlerList2 == null) {
-                    handlerList2 = HandlerList((HandlerList) null)
-                    this.eventQueueMessageHandlers.put(eventName, handlerList2)
-                }
-                handlerList2.add(handlerInfo2)
-            }
+        for (list in eventQueueMessageHandlers.values) {
+            list.remove(subscriber)
         }
     }
+    
+    fun handleMessage(message: SLMessage) {
+        dispatch(message)
+    }
 
-    synchronized Unit unregisterHandler(Object obj) {
-        for (HandlerList deleteAll : this.messageHandlers.values()) {
-            deleteAll.deleteAll(obj)
+    fun dispatch(message: SLMessage) {
+        if (message is EventQueueMessage) {
+            val body = message.Body_Field.Body
+            // This is simplified; real implementation needs to parse LLSD from body to get event name
         }
-        for (HandlerList deleteAll2 : this.eventQueueMessageHandlers.values()) {
-            deleteAll2.deleteAll(obj)
-        }
+        
+        val list = messageHandlers[message::class.java]
+        list?.dispatch(message)
+    }
+    
+    fun handleEventQueueMessage(eventType: CapsEventType, node: LLSDNode): Boolean {
+        val list = eventQueueMessageHandlers[eventType.name]
+        return list?.dispatchEvent(eventType, node) ?: false
     }
 }

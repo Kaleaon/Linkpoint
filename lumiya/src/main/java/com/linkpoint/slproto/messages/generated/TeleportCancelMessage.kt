@@ -19,7 +19,7 @@ class TeleportCancelMessage : SLMessage() {
         sessionId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0048
+    override fun getMessageID(): Int = 0xFFFF0048.toInt()
 
     override fun getMessageName(): String = "TeleportCancel"
 }

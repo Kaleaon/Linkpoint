@@ -34,7 +34,7 @@ class EventGodDeleteMessage : SLMessage() {
         queryStart = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00B7
+    override fun getMessageID(): Int = 0xFFFF00B7.toInt()
 
     override fun getMessageName(): String = "EventGodDelete"
 }

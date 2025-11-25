@@ -3,38 +3,35 @@ package com.lumiyaviewer.lumiya.render.shaders
 import android.opengl.GLES20
 import com.lumiyaviewer.lumiya.Debug
 
-abstract class ShaderProgram {
-    private Shader fragmentShader
-    protected int handle
-    private Shader vertexShader
+abstract class ShaderProgram(
+    private val vertexShader: Shader,
+    private val fragmentShader: Shader
+) {
+    protected var handle: Int = 0
 
-    ShaderProgram(Shader shader, Shader shader2) {
-        this.vertexShader = shader
-        this.fragmentShader = shader2
-    }
-
-    int Compile(ShaderPreprocessor shaderPreprocessor) throws ShaderCompileException {
-        this.vertexShader.Compile(shaderPreprocessor)
-        this.fragmentShader.Compile(shaderPreprocessor)
-        Debug.Printf("Shaders: Linking...", Array<Object>(0))
-        this.handle = GLES20.glCreateProgram()
-        GLES20.glAttachShader(this.handle, this.vertexShader.getHandle())
-        GLES20.glAttachShader(this.handle, this.fragmentShader.getHandle())
-        GLES20.glLinkProgram(this.handle)
-        int[] iArr = IntArray(1)
-        GLES20.glGetProgramiv(this.handle, 35714, iArr, 0)
+    @Throws(ShaderCompileException::class)
+    fun Compile(shaderPreprocessor: ShaderPreprocessor): Int {
+        vertexShader.Compile(shaderPreprocessor)
+        fragmentShader.Compile(shaderPreprocessor)
+        Debug.Log("Shaders: Linking...")
+        handle = GLES20.glCreateProgram()
+        GLES20.glAttachShader(handle, vertexShader.getHandle())
+        GLES20.glAttachShader(handle, fragmentShader.getHandle())
+        GLES20.glLinkProgram(handle)
+        val iArr = IntArray(1)
+        GLES20.glGetProgramiv(handle, GLES20.GL_LINK_STATUS, iArr, 0)
         if (iArr[0] != 1) {
-            throw ShaderCompileException(String.format("Shader link error: '%s'", new Array<Any>{GLES20.glGetProgramInfoLog(this.handle)}))
+            throw ShaderCompileException("Shader link error: " + GLES20.glGetProgramInfoLog(handle))
         }
-        Debug.Printf("Shaders: Binding variables...", Array<Object>(0))
+        Debug.Log("Shaders: Binding variables...")
         bindVariables()
-        Debug.Printf("Shaders: Compiled, handle %d", Integer.valueOf(this.handle))
-        return this.handle
+        Debug.Printf("Shaders: Compiled, handle %d", arrayOf(handle))
+        return handle
     }
 
-    protected abstract fun bindVariables(): Unit
+    protected abstract fun bindVariables()
 
     fun getHandle(): Int {
-        return this.handle
+        return handle
     }
 }

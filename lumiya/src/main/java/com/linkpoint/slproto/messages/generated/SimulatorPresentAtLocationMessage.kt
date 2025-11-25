@@ -84,7 +84,7 @@ class SimulatorPresentAtLocationMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF000B
+    override fun getMessageID(): Int = 0xFFFF000B.toInt()
 
     override fun getMessageName(): String = "SimulatorPresentAtLocation"
 }

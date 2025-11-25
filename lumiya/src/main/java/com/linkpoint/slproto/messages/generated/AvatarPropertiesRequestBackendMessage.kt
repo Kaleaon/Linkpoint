@@ -25,7 +25,7 @@ class AvatarPropertiesRequestBackendMessage : SLMessage() {
         webProfilesDisabled = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00AA
+    override fun getMessageID(): Int = 0xFFFF00AA.toInt()
 
     override fun getMessageName(): String = "AvatarPropertiesRequestBackend"
 }

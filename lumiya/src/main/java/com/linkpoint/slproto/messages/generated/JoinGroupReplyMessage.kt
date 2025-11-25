@@ -22,7 +22,7 @@ class JoinGroupReplyMessage : SLMessage() {
         success = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0158
+    override fun getMessageID(): Int = 0xFFFF0158.toInt()
 
     override fun getMessageName(): String = "JoinGroupReply"
 }

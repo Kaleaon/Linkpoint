@@ -48,7 +48,7 @@ class ObjectBypassModUpdateMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF01AF
+    override fun getMessageID(): Int = 0xFFFF01AF.toInt()
 
     override fun getMessageName(): String = "ObjectBypassModUpdate"
 }

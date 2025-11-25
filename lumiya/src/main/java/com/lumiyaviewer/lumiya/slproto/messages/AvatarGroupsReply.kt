@@ -1,90 +1,82 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.ArrayList
-import java.util.Iterator
 import java.util.UUID
 
 class AvatarGroupsReply : SLMessage {
-    AgentData AgentData_Field
-    ArrayList<GroupData> GroupData_Fields = ArrayList<>()
-    NewGroupData NewGroupData_Field
+    var AgentData_Field: AgentData = AgentData()
+    var GroupData_Fields: ArrayList<GroupData> = ArrayList()
+    var NewGroupData_Field: NewGroupData = NewGroupData()
 
     class AgentData {
-        UUID AgentID
-        UUID AvatarID
+        var AgentID: UUID? = null
+        var AvatarID: UUID? = null
     }
 
     class GroupData {
-        Boolean AcceptNotices
-        UUID GroupID
-        UUID GroupInsigniaID
-        byte[] GroupName
-        Long GroupPowers
-        byte[] GroupTitle
+        var AcceptNotices: Boolean = false
+        var GroupID: UUID? = null
+        var GroupInsigniaID: UUID? = null
+        var GroupName: ByteArray = ByteArray(0)
+        var GroupPowers: Long = 0
+        var GroupTitle: ByteArray = ByteArray(0)
     }
 
     class NewGroupData {
-        Boolean ListInProfile
+        var ListInProfile: Boolean = false
     }
 
-    AvatarGroupsReply() {
+    constructor() {
         this.zeroCoded = true
-        this.AgentData_Field = AgentData()
-        this.NewGroupData_Field = NewGroupData()
     }
 
-    Int CalcPayloadSize() {
-        Int i = 37
-        Iterator<T> it = this.GroupData_Fields.iterator()
-        while (true) {
-            Int i2 = i
-            if (!it.hasNext()) {
-                return i2 + 1
-            }
-            GroupData groupData = (GroupData) it.next()
-            i = groupData.GroupName.length + groupData.GroupTitle.length + 10 + 16 + 1 + 16 + i2
+    override fun CalcPayloadSize(): Int {
+        var length = 37
+        for (groupData in GroupData_Fields) {
+            length += groupData.GroupName.size + groupData.GroupTitle.size + 10 + 16 + 1 + 16
         }
+        return length + 1
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAvatarGroupsReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) -83)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.AvatarID)
-        byteBuffer.put((byte) this.GroupData_Fields.size())
-        for (GroupData groupData : this.GroupData_Fields) {
+        byteBuffer.put(0.toByte())
+        byteBuffer.put((-83).toByte())
+        packUUID(byteBuffer, AgentData_Field.AgentID!!)
+        packUUID(byteBuffer, AgentData_Field.AvatarID!!)
+        byteBuffer.put(GroupData_Fields.size.toByte())
+        for (groupData in GroupData_Fields) {
             packLong(byteBuffer, groupData.GroupPowers)
             packBoolean(byteBuffer, groupData.AcceptNotices)
             packVariable(byteBuffer, groupData.GroupTitle, 1)
-            packUUID(byteBuffer, groupData.GroupID)
+            packUUID(byteBuffer, groupData.GroupID!!)
             packVariable(byteBuffer, groupData.GroupName, 1)
-            packUUID(byteBuffer, groupData.GroupInsigniaID)
+            packUUID(byteBuffer, groupData.GroupInsigniaID!!)
         }
-        packBoolean(byteBuffer, this.NewGroupData_Field.ListInProfile)
+        packBoolean(byteBuffer, NewGroupData_Field.ListInProfile)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.AvatarID = unpackUUID(byteBuffer)
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            GroupData groupData = GroupData()
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        AgentData_Field.AgentID = unpackUUID(byteBuffer)
+        AgentData_Field.AvatarID = unpackUUID(byteBuffer)
+        val b = (byteBuffer.get().toInt() and 0xFF)
+        for (i in 0 until b) {
+            val groupData = GroupData()
             groupData.GroupPowers = unpackLong(byteBuffer)
             groupData.AcceptNotices = unpackBoolean(byteBuffer)
             groupData.GroupTitle = unpackVariable(byteBuffer, 1)
             groupData.GroupID = unpackUUID(byteBuffer)
             groupData.GroupName = unpackVariable(byteBuffer, 1)
             groupData.GroupInsigniaID = unpackUUID(byteBuffer)
-            this.GroupData_Fields.add(groupData)
+            GroupData_Fields.add(groupData)
         }
-        this.NewGroupData_Field.ListInProfile = unpackBoolean(byteBuffer)
+        NewGroupData_Field.ListInProfile = unpackBoolean(byteBuffer)
     }
 }

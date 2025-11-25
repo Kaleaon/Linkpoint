@@ -5,62 +5,39 @@ import android.os.Bundle
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.UUID
-import androidx.annotation.NonNull
-import androidx.annotation.Nullable
 
-class ActivityUtils {
-    val EXTRA_ACTIVE_AGENT_UUID: String = "activeAgentUUID"
-    val FRAGMENT_SELECTION_KEY: String = "fragmentSelection"
+object ActivityUtils {
+    const val EXTRA_ACTIVE_AGENT_UUID: String = "activeAgentUUID"
+    const val FRAGMENT_SELECTION_KEY: String = "fragmentSelection"
 
-    @Nullable
-    UUID getActiveAgentID(@Nullable Intent intent) {
-        String stringExtra
-        if (intent == null || (stringExtra = intent.getStringExtra("activeAgentUUID")) == null) {
-            return null
-        }
-        return UUIDPool.getUUID(stringExtra)
+    fun getActiveAgentID(intent: Intent?): UUID? {
+        val stringExtra = intent?.getStringExtra(EXTRA_ACTIVE_AGENT_UUID)
+        return if (stringExtra != null) UUIDPool.getUUID(stringExtra) else null
     }
 
-    @Nullable
-    UUID getActiveAgentID(@Nullable Bundle bundle) {
-        String string
-        if (bundle == null || (string = bundle.getString("activeAgentUUID")) == null) {
-            return null
-        }
-        return UUIDPool.getUUID(string)
+    fun getActiveAgentID(bundle: Bundle?): UUID? {
+        val string = bundle?.getString(EXTRA_ACTIVE_AGENT_UUID)
+        return if (string != null) UUIDPool.getUUID(string) else null
     }
 
-    @Nullable
-    Bundle getFragmentSelection(@Nullable Bundle bundle) {
-        if (bundle != null) {
-            return bundle.getBundle(FRAGMENT_SELECTION_KEY)
-        }
-        return null
+    fun getFragmentSelection(bundle: Bundle?): Bundle? {
+        return bundle?.getBundle(FRAGMENT_SELECTION_KEY)
     }
 
-    @Nullable
-    UserManager getUserManager(@Nullable Intent intent) {
-        UUID activeAgentID = getActiveAgentID(intent)
-        if (activeAgentID != null) {
-            return UserManager.getUserManager(activeAgentID)
-        }
-        return null
+    fun getUserManager(intent: Intent?): UserManager? {
+        val activeAgentID = getActiveAgentID(intent)
+        return if (activeAgentID != null) UserManager.getUserManager(activeAgentID) else null
     }
 
-    @Nullable
-    UserManager getUserManager(@Nullable Bundle bundle) {
-        UUID activeAgentID = getActiveAgentID(bundle)
-        if (activeAgentID != null) {
-            return UserManager.getUserManager(activeAgentID)
-        }
-        return null
+    fun getUserManager(bundle: Bundle?): UserManager? {
+        val activeAgentID = getActiveAgentID(bundle)
+        return if (activeAgentID != null) UserManager.getUserManager(activeAgentID) else null
     }
 
-    @NonNull
-    Bundle makeFragmentArguments(@Nullable UUID uuid, @Nullable Bundle bundle) {
-        Bundle bundle2 = Bundle()
+    fun makeFragmentArguments(uuid: UUID?, bundle: Bundle?): Bundle {
+        val bundle2 = Bundle()
         if (uuid != null) {
-            bundle2.putString("activeAgentUUID", uuid.toString())
+            bundle2.putString(EXTRA_ACTIVE_AGENT_UUID, uuid.toString())
         }
         if (bundle != null) {
             bundle2.putBundle(FRAGMENT_SELECTION_KEY, bundle)
@@ -68,19 +45,19 @@ class ActivityUtils {
         return bundle2
     }
 
-    Unit setActiveAgentID(Intent intent, UUID uuid) {
+    fun setActiveAgentID(intent: Intent, uuid: UUID?) {
         if (uuid != null) {
-            intent.putExtra("activeAgentUUID", uuid.toString())
+            intent.putExtra(EXTRA_ACTIVE_AGENT_UUID, uuid.toString())
         }
     }
 
-    Unit setActiveAgentID(Bundle bundle, UUID uuid) {
+    fun setActiveAgentID(bundle: Bundle, uuid: UUID?) {
         if (uuid != null) {
-            bundle.putString("activeAgentUUID", uuid.toString())
+            bundle.putString(EXTRA_ACTIVE_AGENT_UUID, uuid.toString())
         }
     }
 
-    Unit setFragmentSelection(@Nullable Bundle bundle, @Nullable Bundle bundle2) {
+    fun setFragmentSelection(bundle: Bundle?, bundle2: Bundle?) {
         if (bundle == null) {
             return
         }

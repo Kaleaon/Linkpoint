@@ -46,7 +46,7 @@ class TelehubInfoMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF000A
+    override fun getMessageID(): Int = 0xFFFF000A.toInt()
 
     override fun getMessageName(): String = "TelehubInfo"
 }

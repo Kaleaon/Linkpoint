@@ -1,128 +1,135 @@
 package com.lumiyaviewer.lumiya.slproto.types
 
-class LLVector4 {
-    val FP_MAG_THRESHOLD: Float = 1.0E-7f
-    Float w
-    Float x
-    Float y
-    Float z
+import kotlin.math.sqrt
+import kotlin.math.max
+import kotlin.math.min
 
-    LLVector4() {
+class LLVector4 {
+    companion object {
+        const val FP_MAG_THRESHOLD: Float = 1.0E-7f
+    }
+
+    var w: Float = 0.0f
+    var x: Float = 0.0f
+    var y: Float = 0.0f
+    var z: Float = 0.0f
+
+    constructor() {
         this.x = 0.0f
         this.y = 0.0f
         this.z = 0.0f
         this.w = 0.0f
     }
 
-    LLVector4(Float f, Float f2, Float f3) {
+    constructor(f: Float, f2: Float, f3: Float) {
         this.x = f
         this.y = f2
         this.z = f3
         this.w = 0.0f
     }
 
-    LLVector4(Float f, Float f2, Float f3, Float f4) {
+    constructor(f: Float, f2: Float, f3: Float, f4: Float) {
         this.x = f
         this.y = f2
         this.z = f3
         this.w = f4
     }
 
-    LLVector4(LLVector3 lLVector3) {
+    constructor(lLVector3: LLVector3) {
         this.x = lLVector3.x
         this.y = lLVector3.y
         this.z = lLVector3.z
         this.w = 0.0f
     }
 
-    LLVector4(LLVector4 lLVector4) {
+    constructor(lLVector4: LLVector4) {
         this.x = lLVector4.x
         this.y = lLVector4.y
         this.z = lLVector4.z
         this.w = lLVector4.w
     }
 
-    LLVector4 add(LLVector4 lLVector4, LLVector4 lLVector42) {
+    fun add(lLVector4: LLVector4, lLVector42: LLVector4): LLVector4 {
         return LLVector4(lLVector4.x + lLVector42.x, lLVector4.y + lLVector42.y, lLVector4.z + lLVector42.z, lLVector4.w + lLVector42.w)
     }
 
-    LLVector4 cross3(LLVector4 lLVector4, LLVector4 lLVector42) {
+    fun cross3(lLVector4: LLVector4, lLVector42: LLVector4): LLVector4 {
         return LLVector4((lLVector4.y * lLVector42.z) - (lLVector4.z * lLVector42.y), (lLVector4.z * lLVector42.x) - (lLVector4.x * lLVector42.z), (lLVector4.x * lLVector42.y) - (lLVector4.y * lLVector42.x), 0.0f)
     }
 
-    LLVector4 sub(LLVector4 lLVector4, LLVector4 lLVector42) {
+    fun sub(lLVector4: LLVector4, lLVector42: LLVector4): LLVector4 {
         return LLVector4(lLVector4.x - lLVector42.x, lLVector4.y - lLVector42.y, lLVector4.z - lLVector42.z, lLVector4.w - lLVector42.w)
     }
 
-    Unit add(LLVector4 lLVector4) {
+    fun add(lLVector4: LLVector4) {
         this.x += lLVector4.x
         this.y += lLVector4.y
         this.z += lLVector4.z
         this.w += lLVector4.w
     }
 
-    Unit clear() {
+    fun clear() {
         this.x = 0.0f
         this.y = 0.0f
         this.z = 0.0f
         this.w = 0.0f
     }
 
-    Float dot3(LLVector4 lLVector4) {
+    fun dot3(lLVector4: LLVector4): Float {
         return (this.x * lLVector4.x) + (this.y * lLVector4.y) + (this.z * lLVector4.z)
     }
 
-    Unit mul(Float f) {
+    fun mul(f: Float) {
         this.x *= f
         this.y *= f
         this.z *= f
         this.w *= f
     }
 
-    Float normalize3() {
-        Float sqrt = Math.sqrt(((this.x * this.x.toDouble()).toFloat() + (this.y * this.y) + (this.z * this.z)))
-        if (sqrt > 1.0E-7f) {
-            Float f = 1.0f / sqrt
+    fun normalize3(): Float {
+        val sqrtVal = sqrt(((this.x * this.x).toDouble() + (this.y * this.y).toDouble() + (this.z * this.z).toDouble())).toFloat()
+        if (sqrtVal > FP_MAG_THRESHOLD) {
+            val f = 1.0f / sqrtVal
             this.x *= f
             this.y *= f
-            this.z = f * this.z
+            this.z *= f // Fixed: z = f * z is same as z *= f
         } else {
             this.x = 0.0f
             this.y = 0.0f
             this.z = 0.0f
         }
-        return sqrt
+        return sqrtVal
     }
 
-    Unit set(Float f, Float f2, Float f3) {
+    fun set(f: Float, f2: Float, f3: Float) {
         this.x = f
         this.y = f2
         this.z = f3
         this.w = 0.0f
     }
 
-    Unit set(LLVector4 lLVector4) {
+    fun set(lLVector4: LLVector4) {
         this.x = lLVector4.x
         this.y = lLVector4.y
         this.z = lLVector4.z
         this.w = lLVector4.w
     }
 
-    Unit setMax(LLVector4 lLVector4) {
-        this.x = Math.max(this.x, lLVector4.x)
-        this.y = Math.max(this.y, lLVector4.y)
-        this.z = Math.max(this.z, lLVector4.z)
-        this.w = Math.max(this.w, lLVector4.w)
+    fun setMax(lLVector4: LLVector4) {
+        this.x = max(this.x, lLVector4.x)
+        this.y = max(this.y, lLVector4.y)
+        this.z = max(this.z, lLVector4.z)
+        this.w = max(this.w, lLVector4.w)
     }
 
-    Unit setMin(LLVector4 lLVector4) {
-        this.x = Math.min(this.x, lLVector4.x)
-        this.y = Math.min(this.y, lLVector4.y)
-        this.z = Math.min(this.z, lLVector4.z)
-        this.w = Math.min(this.w, lLVector4.w)
+    fun setMin(lLVector4: LLVector4) {
+        this.x = min(this.x, lLVector4.x)
+        this.y = min(this.y, lLVector4.y)
+        this.z = min(this.z, lLVector4.z)
+        this.w = min(this.w, lLVector4.w)
     }
 
-    String toString() {
-        return String.format("(%f, %f, %f)", Any[]{Float.valueOf(this.x), Float.valueOf(this.y), Float.valueOf(this.z)})
+    override fun toString(): String {
+        return String.format("(%f, %f, %f, %f)", x, y, z, w)
     }
 }

@@ -6,9 +6,7 @@ import java.nio.ByteBuffer
 class NameMessage : SLMessage() {
     val description: MutableList<DescriptionBlock> = mutableListOf()
 
-    data class DescriptionBlock(
-    )
-
+    class DescriptionBlock
 
     override fun packPayload(buffer: ByteBuffer) {
         require(description.size <= 0xFF) { "Description size exceeds 255 (" + description.size + ")" }

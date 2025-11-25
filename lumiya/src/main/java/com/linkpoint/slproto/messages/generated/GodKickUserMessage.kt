@@ -28,7 +28,7 @@ class GodKickUserMessage : SLMessage() {
         reason = unpackVariable(buffer, 2)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00A5
+    override fun getMessageID(): Int = 0xFFFF00A5.toInt()
 
     override fun getMessageName(): String = "GodKickUser"
 }

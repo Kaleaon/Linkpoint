@@ -51,7 +51,7 @@ class LogTextMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0187
+    override fun getMessageID(): Int = 0xFFFF0187.toInt()
 
     override fun getMessageName(): String = "LogTextMessage"
 }

@@ -1,169 +1,169 @@
 package com.lumiyaviewer.lumiya.ui.chat.contacts
-import java.util.*
 
 import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.annotation.Nullable
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView
 import com.lumiyaviewer.lumiya.ui.chat.TypingIndicatorView
-import androidx.annotation.Nullable
+import java.util.Locale
 
 class ChatterItemViewBuilder {
-    private Float distance
-    private Boolean distanceSet = false
-    private Boolean isActiveGroup
-    private Boolean isOnline
-    private String label
-    private String lastMessage
-    private Boolean onlineVisible = false
-    private ChatterID thumbnailChatterID
-    private Int thumbnailDefaultIcon
-    private String thumbnailLabel
-    private Int unreadCount
-    private Boolean voiceActive
+    private var distance = 0f
+    private var distanceSet = false
+    private var isActiveGroup = false
+    private var isOnline = false
+    private var label: String? = null
+    private var lastMessage: String? = null
+    private var onlineVisible = false
+    private var thumbnailChatterID: ChatterID? = null
+    private var thumbnailDefaultIcon = 0
+    private var thumbnailLabel: String? = null
+    private var unreadCount = 0
+    private var voiceActive = false
 
-    ChatterItemViewBuilder() {
+    constructor() {
         reset()
     }
 
-    @Nullable
-    View getView(LayoutInflater layoutInflater, View view, ViewGroup viewGroup, Boolean z) {
-        Int i = R.id.userDistanceInlineTextView
-        Int i2 = 8
-        View view2 = (view == null || view.getId() != R.id.contactListItemLayout) ? null : view
-        View inflate = view2 == null ? layoutInflater.inflate(R.layout.contact_list_item, viewGroup, false) : view2
-        if (inflate != null) {
-            ((TextView) inflate.findViewById(R.id.userNameTextView)).setText(this.label)
-            View findViewById = inflate.findViewById(R.id.onlineUserIcon)
-            if (findViewById != null) {
-                if (this.onlineVisible) {
-                    findViewById.setVisibility(0)
+    fun getView(inflater: LayoutInflater, convertView: View?, parent: ViewGroup?, isInline: Boolean): View {
+        var view = convertView
+        if (view == null || view.id != R.id.contactListItemLayout) {
+            view = inflater.inflate(R.layout.contact_list_item, parent, false)
+        }
+        
+        val itemView = view!!
+        
+        val userNameTextView = itemView.findViewById<TextView>(R.id.userNameTextView)
+        if (userNameTextView != null) {
+            userNameTextView.text = label
+        }
+
+        val onlineIcon = itemView.findViewById<View>(R.id.onlineUserIcon)
+        onlineIcon?.visibility = if (onlineVisible) View.VISIBLE else View.GONE
+
+        val activeVoiceIcon = itemView.findViewById<View>(R.id.activeVoiceIcon)
+        activeVoiceIcon?.visibility = if (voiceActive) View.VISIBLE else View.GONE
+
+        val distanceTextView = itemView.findViewById<TextView>(
+            if (isInline) R.id.userDistanceInlineTextView else R.id.userDistanceTextView
+        )
+        
+        if (distanceTextView != null) {
+            if (distanceSet) {
+                val distText = if (distance >= 9.5f) {
+                    Math.round(distance).toString()
                 } else {
-                    findViewById.setVisibility(8)
+                    String.format(Locale.US, "%.1f", distance)
                 }
-            }
-            View findViewById2 = inflate.findViewById(R.id.activeVoiceIcon)
-            if (findViewById2 != null) {
-                findViewById2.setVisibility(this.voiceActive ? 0 : 8)
-            }
-            TextView textView = (TextView) inflate.findViewById(z ? R.id.userDistanceInlineTextView : R.id.userDistanceTextView)
-            if (textView != null) {
-                if (this.distanceSet) {
-                    textView.setText((this.distance >= 9.5f ? Int.toString(Math.round(this.distance)) : String.format("%.1f", Any[]{Float.valueOf(this.distance)})) + " m")
-                    if (this.distance <= 20.0f) {
-                        textView.setTypeface(textView.getTypeface(), 1)
-                    } else {
-                        textView.setTypeface(Typeface.create(textView.getTypeface(), 0))
-                    }
-                    textView.setVisibility(0)
+                distanceTextView.text = "$distText m"
+                
+                if (distance <= 20.0f) {
+                    distanceTextView.setTypeface(distanceTextView.typeface, Typeface.BOLD)
                 } else {
-                    textView.setText((CharSequence) null)
-                    textView.setVisibility(z ? 8 : 4)
+                    distanceTextView.setTypeface(Typeface.create(distanceTextView.typeface, Typeface.NORMAL))
                 }
-            }
-            if (z) {
-                i = R.id.userDistanceTextView
-            }
-            View findViewById3 = inflate.findViewById(i)
-            if (findViewById3 != null) {
-                findViewById3.setVisibility(8)
-            }
-            TextView textView2 = (TextView) inflate.findViewById(R.id.unreadCountTextView)
-            if (textView2 != null) {
-                textView2.setText(Int.toString(this.unreadCount))
-                if (this.unreadCount != 0) {
-                    textView2.setVisibility(0)
-                } else {
-                    textView2.setVisibility(8)
-                }
-            }
-            TextView textView3 = (TextView) inflate.findViewById(R.id.lastMessageText)
-            if (textView3 != null) {
-                if (this.lastMessage != null) {
-                    textView3.setText(this.lastMessage)
-                    textView3.setVisibility(0)
-                } else {
-                    textView3.setVisibility(8)
-                }
-            }
-            View findViewById4 = inflate.findViewById(R.id.activeGroupIcon)
-            if (findViewById4 != null) {
-                findViewById4.setVisibility(this.isActiveGroup ? 0 : 8)
-            }
-            ChatterPicView chatterPicView = (ChatterPicView) inflate.findViewById(R.id.userPicView)
-            if (chatterPicView != null) {
-                chatterPicView.setDefaultIcon(this.thumbnailDefaultIcon, false)
-                chatterPicView.setChatterID(this.thumbnailChatterID, this.thumbnailLabel)
-                if (!(this.thumbnailChatterID == null && this.thumbnailDefaultIcon == -1)) {
-                    i2 = 0
-                }
-                chatterPicView.setVisibility(i2)
-            }
-            TypingIndicatorView typingIndicatorView = (TypingIndicatorView) inflate.findViewById(R.id.typing_indicator)
-            if (typingIndicatorView != null) {
-                typingIndicatorView.setChatterID(this.thumbnailChatterID)
+                distanceTextView.visibility = View.VISIBLE
+            } else {
+                distanceTextView.text = null
+                distanceTextView.visibility = if (isInline) View.GONE else View.INVISIBLE
             }
         }
-        return inflate
+
+        val otherDistanceId = if (isInline) R.id.userDistanceTextView else R.id.userDistanceInlineTextView
+        itemView.findViewById<View>(otherDistanceId)?.visibility = View.GONE
+
+        val unreadCountTextView = itemView.findViewById<TextView>(R.id.unreadCountTextView)
+        if (unreadCountTextView != null) {
+            unreadCountTextView.text = unreadCount.toString()
+            unreadCountTextView.visibility = if (unreadCount != 0) View.VISIBLE else View.GONE
+        }
+
+        val lastMessageText = itemView.findViewById<TextView>(R.id.lastMessageText)
+        if (lastMessageText != null) {
+            if (lastMessage != null) {
+                lastMessageText.text = lastMessage
+                lastMessageText.visibility = View.VISIBLE
+            } else {
+                lastMessageText.visibility = View.GONE
+            }
+        }
+
+        val activeGroupIcon = itemView.findViewById<View>(R.id.activeGroupIcon)
+        activeGroupIcon?.visibility = if (isActiveGroup) View.VISIBLE else View.GONE
+
+        val chatterPicView = itemView.findViewById<ChatterPicView>(R.id.userPicView)
+        if (chatterPicView != null) {
+            chatterPicView.setDefaultIcon(thumbnailDefaultIcon, false)
+            chatterPicView.setChatterID(thumbnailChatterID, thumbnailLabel)
+            
+            val visible = !(thumbnailChatterID == null && thumbnailDefaultIcon == -1)
+            chatterPicView.visibility = if (visible) View.VISIBLE else View.GONE
+        }
+
+        val typingIndicator = itemView.findViewById<TypingIndicatorView>(R.id.typing_indicator)
+        typingIndicator?.setChatterID(thumbnailChatterID)
+
+        return itemView
     }
 
-    Unit reset() {
-        this.label = null
-        this.onlineVisible = false
-        this.distanceSet = false
-        this.unreadCount = 0
-        this.lastMessage = null
-        this.isActiveGroup = false
-        this.thumbnailChatterID = null
-        this.thumbnailLabel = null
-        this.thumbnailDefaultIcon = -1
-        this.voiceActive = false
+    fun reset() {
+        label = null
+        onlineVisible = false
+        distanceSet = false
+        unreadCount = 0
+        lastMessage = null
+        isActiveGroup = false
+        thumbnailChatterID = null
+        thumbnailLabel = null
+        thumbnailDefaultIcon = -1
+        voiceActive = false
     }
 
-    Unit setActiveGroup(Boolean z) {
-        this.isActiveGroup = z
+    fun setActiveGroup(active: Boolean) {
+        isActiveGroup = active
     }
 
-    Unit setDistance(Float f) {
-        if (Float.isNaN(f)) {
-            this.distanceSet = false
+    fun setDistance(dist: Float) {
+        if (java.lang.Float.isNaN(dist)) {
+            distanceSet = false
             return
         }
-        this.distanceSet = true
-        this.distance = f
+        distanceSet = true
+        distance = dist
     }
 
-    Unit setLabel(String str) {
-        this.label = str
+    fun setLabel(l: String?) {
+        label = l
     }
 
-    Unit setLastMessage(String str) {
-        this.lastMessage = str
+    fun setLastMessage(msg: String?) {
+        lastMessage = msg
     }
 
-    Unit setOnlineStatusIcon(Boolean z, Boolean z2) {
-        this.onlineVisible = z
-        this.isOnline = z2
+    fun setOnlineStatusIcon(visible: Boolean, online: Boolean) {
+        onlineVisible = visible
+        isOnline = online
     }
 
-    Unit setThumbnailChatterID(ChatterID chatterID, String str) {
-        this.thumbnailChatterID = chatterID
-        this.thumbnailLabel = str
+    fun setThumbnailChatterID(id: ChatterID?, label: String?) {
+        thumbnailChatterID = id
+        thumbnailLabel = label
     }
 
-    Unit setThumbnailDefaultIcon(Int i) {
-        this.thumbnailDefaultIcon = i
+    fun setThumbnailDefaultIcon(icon: Int) {
+        thumbnailDefaultIcon = icon
     }
 
-    Unit setUnreadCount(Int i) {
-        this.unreadCount = i
+    fun setUnreadCount(count: Int) {
+        unreadCount = count
     }
 
-    Unit setVoiceActive(Boolean z) {
-        this.voiceActive = z
+    fun setVoiceActive(active: Boolean) {
+        voiceActive = active
     }
 }

@@ -22,7 +22,7 @@ class LeaveGroupRequestMessage : SLMessage() {
         groupId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF015B
+    override fun getMessageID(): Int = 0xFFFF015B.toInt()
 
     override fun getMessageName(): String = "LeaveGroupRequest"
 }

@@ -1,64 +1,62 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.ArrayList
 import java.util.UUID
 
 class AcceptCallingCard : SLMessage {
-    AgentData AgentData_Field
-    ArrayList<FolderData> FolderData_Fields = ArrayList<>()
-    TransactionBlock TransactionBlock_Field
+    val AgentData_Field = AgentData()
+    val FolderData_Fields = ArrayList<FolderData>()
+    val TransactionBlock_Field = TransactionBlock()
 
     class AgentData {
-        UUID AgentID
-        UUID SessionID
+        var AgentID: UUID? = null
+        var SessionID: UUID? = null
     }
 
     class FolderData {
-        UUID FolderID
+        var FolderID: UUID? = null
     }
 
     class TransactionBlock {
-        UUID TransactionID
+        var TransactionID: UUID? = null
     }
 
-    AcceptCallingCard() {
+    constructor() {
         this.zeroCoded = false
-        this.AgentData_Field = AgentData()
-        this.TransactionBlock_Field = TransactionBlock()
     }
 
-    Int CalcPayloadSize() {
-        return (this.FolderData_Fields.size() * 16) + 53
+    override fun CalcPayloadSize(): Int {
+        return (this.FolderData_Fields.size * 16) + 53
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleAcceptCallingCard(this)
+    override fun Handle(handler: SLMessageHandler) {
+        handler.HandleAcceptCallingCard(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1)
-        byteBuffer.put((Byte) 1)
-        byteBuffer.put((Byte) 46)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        packUUID(byteBuffer, this.TransactionBlock_Field.TransactionID)
-        byteBuffer.put((Byte) this.FolderData_Fields.size())
-        for (FolderData folderData : this.FolderData_Fields) {
-            packUUID(byteBuffer, folderData.FolderID)
+    override fun PackPayload(buffer: ByteBuffer) {
+        buffer.putShort(-1)
+        buffer.put(1.toByte())
+        buffer.put(46.toByte())
+        packUUID(buffer, this.AgentData_Field.AgentID)
+        packUUID(buffer, this.AgentData_Field.SessionID)
+        packUUID(buffer, this.TransactionBlock_Field.TransactionID)
+        buffer.put(this.FolderData_Fields.size.toByte())
+        for (folderData in this.FolderData_Fields) {
+            packUUID(buffer, folderData.FolderID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        this.TransactionBlock_Field.TransactionID = unpackUUID(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            FolderData folderData = FolderData()
-            folderData.FolderID = unpackUUID(byteBuffer)
+    override fun UnpackPayload(buffer: ByteBuffer) {
+        this.AgentData_Field.AgentID = unpackUUID(buffer)
+        this.AgentData_Field.SessionID = unpackUUID(buffer)
+        this.TransactionBlock_Field.TransactionID = unpackUUID(buffer)
+        val count = buffer.get().toInt() and 0xFF
+        for (i in 0 until count) {
+            val folderData = FolderData()
+            folderData.FolderID = unpackUUID(buffer)
             this.FolderData_Fields.add(folderData)
         }
     }

@@ -5,29 +5,24 @@ import java.io.DataOutputStream
 import java.io.IOException
 import org.xmlpull.v1.XmlSerializer
 
-class LLSDDouble : LLSDNode {
-    private double value
+class LLSDDouble(private val value: Double) : LLSDNode {
 
-    LLSDDouble(double d) {
-        this.value = d
-    }
+    constructor(str: String) : this(str.toDouble())
 
-    LLSDDouble(String str) {
-        this.value = Double.parseDouble(str)
-    }
-
-    double asDouble() {
+    fun asDouble(): Double {
         return this.value
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    @Throws(IOException::class)
+    override fun toBinary(dataOutputStream: DataOutputStream) {
         dataOutputStream.writeByte(114)
         dataOutputStream.writeDouble(this.value)
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    @Throws(IOException::class)
+    override fun toXML(xmlSerializer: XmlSerializer) {
         xmlSerializer.startTag("", "real")
-        xmlSerializer.text(Double.toString(this.value))
+        xmlSerializer.text(this.value.toString())
         xmlSerializer.endTag("", "real")
     }
 }

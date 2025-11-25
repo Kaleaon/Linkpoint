@@ -29,7 +29,7 @@ class TeleportLocalMessage : SLMessage() {
         teleportFlags = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0040
+    override fun getMessageID(): Int = 0xFFFF0040.toInt()
 
     override fun getMessageName(): String = "TeleportLocal"
 }

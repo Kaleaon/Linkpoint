@@ -80,7 +80,7 @@ class MapBlockReplyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0199
+    override fun getMessageID(): Int = 0xFFFF0199.toInt()
 
     override fun getMessageName(): String = "MapBlockReply"
 }

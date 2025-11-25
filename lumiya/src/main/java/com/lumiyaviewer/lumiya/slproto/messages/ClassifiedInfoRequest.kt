@@ -1,44 +1,45 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.nio.ByteBuffer
-import java.util.UUID
 
 class ClassifiedInfoRequest : SLMessage {
-    AgentData AgentData_Field = AgentData()
-    Data Data_Field = Data()
+    var AgentData_Field: AgentData = AgentData()
+    var Data_Field: Data = Data()
 
     class AgentData {
-        UUID AgentID
-        UUID SessionID
+        var AgentID: UUID = UUIDPool.ZeroUUID
+        var SessionID: UUID = UUIDPool.ZeroUUID
     }
 
     class Data {
-        UUID ClassifiedID
+        var ClassifiedID: UUID = UUIDPool.ZeroUUID
     }
 
-    ClassifiedInfoRequest() {
+    init {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return 52
+    override fun CalcPayloadSize(): Int {
+        return 48
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleClassifiedInfoRequest(this)
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleClassifiedInfoRequest(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) 43)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put((-1).toByte())
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packUUID(byteBuffer, this.Data_Field.ClassifiedID)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.Data_Field.ClassifiedID = unpackUUID(byteBuffer)

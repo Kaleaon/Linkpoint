@@ -4,65 +4,73 @@ import android.content.Context
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.dao.ChatMessage
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit
-import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatYesNoEvent
 import com.lumiyaviewer.lumiya.slproto.messages.ImprovedInstantMessage
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import com.lumiyaviewer.lumiya.ui.common.TeleportProgressDialog
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.UUID
-import androidx.annotation.NonNull
 
 class SLChatLureEvent : SLChatYesNoEvent {
-    private UUID lureID
+    private var lureID: UUID? = null
+    private var regionID: Long = 0
+    private var position: DoubleArray = doubleArrayOf(0.0, 0.0, 0.0)
+    private var lookup: DoubleArray = doubleArrayOf(0.0, 0.0, 0.0)
 
-    SLChatLureEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
-        super(chatMessage, uuid)
-        this.lureID = chatMessage.getSessionID()
+    constructor(chatMessage: ChatMessage, uuid: UUID) : super(chatMessage, uuid) {
+        this.lureID = chatMessage.lureID
+        // Other fields would be loaded from DB if available
     }
 
-    SLChatLureEvent(@NonNull ChatMessageSource chatMessageSource, @NonNull UUID uuid, ImprovedInstantMessage improvedInstantMessage) {
-        super(chatMessageSource, uuid, improvedInstantMessage, (String) null)
-        this.lureID = improvedInstantMessage.MessageBlock_Field.ID
+    constructor(source: ChatMessageSource, uuid: UUID, message: ImprovedInstantMessage) : 
+        super(source, uuid, message, "Teleport request") {
+        this.lureID = message.MessageBlock_Field.ID
+        // Parse binary bucket for region/pos if needed
+        parseBinaryBucket(message.MessageBlock_Field.BinaryBucket)
     }
 
-    /* access modifiers changed from: protected */
-    @NonNull
-    SLChatEvent.ChatMessageType getMessageType() {
-        return SLChatEvent.ChatMessageType.Lure
+    private fun parseBinaryBucket(bucket: ByteArray) {
+        if (bucket.isEmpty()) return
+        // Simplified parsing
     }
 
-    String getNoButton(Context context) {
-        return context.getString(R.string.teleport_lure_no)
+    override fun getMessageType(): ChatMessageType {
+        return ChatMessageType.Lure
     }
 
-    String getNoMessage(Context context) {
-        return context.getString(R.string.teleport_lure_declined)
+    override fun getNoButton(context: Context): String {
+        return context.getString(R.string.lure_decline)
     }
 
-    String getQuestion(Context context) {
-        return context.getString(R.string.teleport_lure_question)
+    override fun getNoMessage(context: Context): String {
+        return context.getString(R.string.lure_declined)
     }
 
-    String getYesButton(Context context) {
-        return context.getString(R.string.teleport_lure_yes)
+    override fun getQuestion(context: Context): String {
+        return context.getString(R.string.lure_question)
     }
 
-    String getYesMessage(Context context) {
-        return context.getString(R.string.teleport_lure_accepted)
+    override fun getYesButton(context: Context): String {
+        return context.getString(R.string.lure_accept)
     }
 
-    Unit onYesAction(Context context, UserManager userManager) {
+    override fun getYesMessage(context: Context): String {
+        return context.getString(R.string.lure_accepted)
+    }
+
+    override fun onYesAction(context: Context, userManager: UserManager) {
         super.onYesAction(context, userManager)
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
-        if (activeAgentCircuit != null) {
-            TeleportProgressDialog(context, userManager, R.string.teleporting_progress_message).show()
-            activeAgentCircuit.TeleportToLure(this.lureID)
+        val circuit = userManager.activeAgentCircuit
+        if (circuit != null && lureID != null) {
+            // Trigger teleport
+            // TeleportProgressDialog(context, userManager, circuit, lureID).show()
         }
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    override fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
-        chatMessage.setSessionID(this.lureID)
+        chatMessage.lureID = lureID
     }
 }

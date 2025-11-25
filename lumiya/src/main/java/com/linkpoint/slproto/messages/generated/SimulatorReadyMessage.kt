@@ -42,7 +42,7 @@ class SimulatorReadyMessage : SLMessage() {
         telehubPos = LLVector3.unpack(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0009
+    override fun getMessageID(): Int = 0xFFFF0009.toInt()
 
     override fun getMessageName(): String = "SimulatorReady"
 }

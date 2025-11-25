@@ -25,7 +25,7 @@ class AvatarPickerRequestMessage : SLMessage() {
         name = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF001A
+    override fun getMessageID(): Int = 0xFFFF001A.toInt()
 
     override fun getMessageName(): String = "AvatarPickerRequest"
 }

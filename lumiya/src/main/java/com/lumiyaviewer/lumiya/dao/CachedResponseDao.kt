@@ -8,79 +8,73 @@ import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig
 
 class CachedResponseDao : AbstractDao<CachedResponse, String> {
-    val TABLENAME: String = "CachedResponses"
+    
+    companion object {
+        const val TABLENAME = "CachedResponses"
+        
+        object Properties {
+            @JvmField val Data = Property(1, ByteArray::class.java, "data", false, "DATA")
+            @JvmField val Key = Property(0, String::class.java, "key", true, "KEY")
+            @JvmField val MustRevalidate = Property(2, Boolean::class.java, "mustRevalidate", false, "MUST_REVALIDATE")
+        }
+        
+        @JvmStatic
+        fun createTable(db: SQLiteDatabase, ifNotExists: Boolean) {
+            val constraint = if (ifNotExists) "IF NOT EXISTS " else ""
+            db.execSQL("CREATE TABLE $constraint'CachedResponses' ('KEY' TEXT PRIMARY KEY NOT NULL ,'DATA' BLOB,'MUST_REVALIDATE' INTEGER NOT NULL );")
+        }
 
-    class Properties {
-        Property Data = Property(1, ByteArray.class, "data", false, "DATA")
-        Property Key = Property(0, String.class, "key", true, "KEY")
-        Property MustRevalidate = Property(2, Boolean.TYPE, "mustRevalidate", false, "MUST_REVALIDATE")
+        @JvmStatic
+        fun dropTable(db: SQLiteDatabase, ifExists: Boolean) {
+            val constraint = if (ifExists) "IF EXISTS " else ""
+            db.execSQL("DROP TABLE $constraint'CachedResponses'")
+        }
     }
 
-    constructor(daoConfig: DaoConfig) {
-        super(daoConfig)
-    }
+    constructor(config: DaoConfig) : super(config)
+    
+    constructor(config: DaoConfig, daoSession: DaoSession) : super(config, daoSession)
 
-    constructor(daoConfig: DaoConfig, daoSession: DaoSession) {
-        super(daoConfig, daoSession)
-    }
-
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'CachedResponses' (" + "'KEY' TEXT PRIMARY KEY NOT NULL ," + "'DATA' BLOB," + "'MUST_REVALIDATE' INTEGER NOT NULL );")
-    }
-
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'CachedResponses'")
-    }
-
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, cachedResponse: CachedResponse): Unit {
-        sQLiteStatement.clearBindings()
-        String key = cachedResponse.getKey()
+    override fun bindValues(stmt: SQLiteStatement, entity: CachedResponse) {
+        stmt.clearBindings()
+        val key = entity.getKey()
         if (key != null) {
-            sQLiteStatement.bindString(1, key)
+            stmt.bindString(1, key)
         }
-        ByteArray data = cachedResponse.getData()
+        val data = entity.getData()
         if (data != null) {
-            sQLiteStatement.bindBlob(2, data)
+            stmt.bindBlob(2, data)
         }
-        sQLiteStatement.bindLong(3, cachedResponse.getMustRevalidate() ? 1 : 0)
+        stmt.bindLong(3, if (entity.getMustRevalidate()) 1L else 0L)
     }
 
-    fun getKey(cachedResponse: CachedResponse): String {
-        return cachedResponse != null ? cachedResponse.getKey() : null
+    override fun getKey(entity: CachedResponse?): String? {
+        return entity?.getKey()
     }
 
-    protected fun isEntityUpdateable(): Boolean {
+    override fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    fun readEntity(cursor: Cursor, i: Int): CachedResponse {
-        ByteArray bArr = null
-        Boolean z = false
-        String string = cursor.isNull(i + 0) ? null : cursor.getString(i + 0)
-        if (!cursor.isNull(i + 1)) {
-            bArr = cursor.getBlob(i + 1)
-        }
-        if (cursor.getShort(i + 2) != (Short) 0) {
-            z = true
-        }
-        return CachedResponse(string, bArr, z)
+    override fun readEntity(cursor: Cursor, offset: Int): CachedResponse {
+        val key = if (cursor.isNull(offset + 0)) null else cursor.getString(offset + 0)
+        val data = if (cursor.isNull(offset + 1)) null else cursor.getBlob(offset + 1)
+        val mustRevalidate = cursor.getShort(offset + 2) != 0.toShort()
+        
+        return CachedResponse(key ?: "", data, mustRevalidate)
     }
 
-    fun readEntity(cursor: Cursor, cachedResponse: CachedResponse, i: Int): Unit {
-        ByteArray bArr = null
-        cachedResponse.setKey(cursor.isNull(i + 0) ? null : cursor.getString(i + 0))
-        if (!cursor.isNull(i + 1)) {
-            bArr = cursor.getBlob(i + 1)
-        }
-        cachedResponse.setData(bArr)
-        cachedResponse.setMustRevalidate(cursor.getShort(i + 2) != (Short) 0)
+    override fun readEntity(cursor: Cursor, entity: CachedResponse, offset: Int) {
+        entity.setKey(if (cursor.isNull(offset + 0)) "" else cursor.getString(offset + 0))
+        entity.setData(if (cursor.isNull(offset + 1)) null else cursor.getBlob(offset + 1))
+        entity.setMustRevalidate(cursor.getShort(offset + 2) != 0.toShort())
     }
 
-    fun readKey(cursor: Cursor, i: Int): String {
-        return cursor.isNull(i + 0) ? null : cursor.getString(i + 0)
+    override fun readKey(cursor: Cursor, offset: Int): String? {
+        return if (cursor.isNull(offset + 0)) null else cursor.getString(offset + 0)
     }
 
-    protected fun updateKeyAfterInsert(cachedResponse: CachedResponse, j: Long): String {
-        return cachedResponse.getKey()
+    override fun updateKeyAfterInsert(entity: CachedResponse, rowId: Long): String? {
+        return entity.getKey()
     }
 }

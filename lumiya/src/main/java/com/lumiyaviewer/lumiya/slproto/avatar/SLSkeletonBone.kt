@@ -4,177 +4,121 @@ import android.opengl.Matrix
 import com.lumiyaviewer.lumiya.render.avatar.AnimationSkeletonData
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 
-class SLSkeletonBone {
-    private LLVector3 basePosition
-    SLSkeletonBoneID boneID
-    private Int boneIndex
-    private SLSkeletonBone[] childBones
-    private SLSkeletonBone[] collisionVolumes
-    private LLVector3 defaultBasePosition
-    private float globalBaseX
-    private float globalBaseY
-    private float globalBaseZ
-    private float[] globalMatrix = float[16]
-    private LLVector3 offset
-    private SLSkeletonBone parent
-    private LLVector3 scale
-    private float[] tempMatrix = float[16]
-    private LLVector3 usePosition
+class SLSkeletonBone(
+    val boneID: SLSkeletonBoneID,
+    pos: LLVector3,
+    rot: LLVector3,
+    val childBones: Array<SLSkeletonBone>?,
+    val collisionVolumes: Array<SLSkeletonBone>?
+) {
+    private val basePosition: LLVector3 = LLVector3(rot)
+    private val defaultBasePosition: LLVector3 = LLVector3(basePosition)
+    private val offset: LLVector3 = LLVector3()
+    private val scale: LLVector3 = LLVector3(1.0f, 1.0f, 1.0f)
+    private val usePosition: LLVector3 = if (boneID.isJoint) basePosition else LLVector3(pos)
+    private var parent: SLSkeletonBone? = null
+    private var globalBaseX: Float = 0.0f
+    private var globalBaseY: Float = 0.0f
+    private var globalBaseZ: Float = 0.0f
+    private val globalMatrix: FloatArray = FloatArray(16)
+    private val tempMatrix: FloatArray = FloatArray(16)
+    private val boneIndex: Int = boneID.ordinal
 
-    SLSkeletonBone(SLSkeletonBoneID sLSkeletonBoneID, LLVector3 lLVector3, LLVector3 lLVector32, SLSkeletonBone[] sLSkeletonBoneArr, SLSkeletonBone[] sLSkeletonBoneArr2) {
-        this.boneID = sLSkeletonBoneID
-        this.boneIndex = sLSkeletonBoneID.ordinal()
-        this.basePosition = LLVector3(lLVector32)
-        LLVector3 lLVector33 = LLVector3(lLVector3)
-        this.defaultBasePosition = LLVector3(this.basePosition)
-        this.offset = LLVector3()
-        this.scale = LLVector3(1.0f, 1.0f, 1.0f)
-        this.childBones = sLSkeletonBoneArr
-        this.collisionVolumes = sLSkeletonBoneArr2
-        this.usePosition = sLSkeletonBoneID.isJoint ? this.basePosition : lLVector33
-        this.parent = null
-        this.globalBaseX = 0.0f
-        this.globalBaseY = 0.0f
-        this.globalBaseZ = 0.0f
-        if (sLSkeletonBoneArr != null) {
-            for (SLSkeletonBone sLSkeletonBone : sLSkeletonBoneArr) {
-                sLSkeletonBone.parent = this
-            }
-        }
-        if (sLSkeletonBoneArr2 != null) {
-            for (SLSkeletonBone sLSkeletonBone2 : sLSkeletonBoneArr2) {
-                sLSkeletonBone2.parent = this
-            }
-        }
+    init {
+        childBones?.forEach { it.parent = this }
+        collisionVolumes?.forEach { it.parent = this }
     }
 
-    /* access modifiers changed from: package-private */
-    Unit deform(LLVector3 lLVector3, LLVector3 lLVector32) {
-        this.offset.add(lLVector3)
-        this.scale.mul(lLVector32)
+    fun deform(v1: LLVector3, v2: LLVector3) {
+        offset.add(v1)
+        scale.mul(v2)
     }
 
-    Unit deformHierarchy(LLVector3 lLVector3, LLVector3 lLVector32) {
-        this.offset.add(lLVector3)
-        this.scale.mul(lLVector32)
-        if (this.collisionVolumes != null) {
-            for (SLSkeletonBone deform : this.collisionVolumes) {
-                deform.deform(lLVector3, lLVector32)
-            }
-        }
+    fun deformHierarchy(v1: LLVector3, v2: LLVector3) {
+        offset.add(v1)
+        scale.mul(v2)
+        collisionVolumes?.forEach { it.deform(v1, v2) }
     }
 
-    LLVector3 getBasePosition() {
-        return this.basePosition
-    }
+    fun getBasePosition(): LLVector3 = basePosition
 
-    float[] getGlobalMatrix() {
-        return this.globalMatrix
-    }
+    fun getGlobalMatrix(): FloatArray = globalMatrix
 
-    float getPositionX() {
-        return this.basePosition.x + this.offset.x
-    }
+    fun getPositionX(): Float = basePosition.x + offset.x
+    fun getPositionY(): Float = basePosition.y + offset.y
+    fun getPositionZ(): Float = basePosition.z + offset.z
 
-    float getPositionY() {
-        return this.basePosition.y + this.offset.y
-    }
+    fun getScaleX(): Float = scale.x
+    fun getScaleY(): Float = scale.y
+    fun getScaleZ(): Float = scale.z
 
-    float getPositionZ() {
-        return this.basePosition.z + this.offset.z
-    }
-
-    float getScaleX() {
-        return this.scale.x
-    }
-
-    float getScaleY() {
-        return this.scale.y
-    }
-
-    float getScaleZ() {
-        return this.scale.z
-    }
-
-    /* access modifiers changed from: package-private */
-    Int prepareSkeleton(SLSkeletonBone[] sLSkeletonBoneArr, Int i) {
-        Int i2 = 0
-        Int i3 = i + 1
-        sLSkeletonBoneArr[i] = this
-        if (this.parent == null) {
-            this.globalBaseX = this.defaultBasePosition.x
-            this.globalBaseY = this.defaultBasePosition.y
-            this.globalBaseZ = this.defaultBasePosition.z
+    fun prepareSkeleton(arr: Array<SLSkeletonBone?>, i: Int): Int {
+        var currentIndex = i
+        arr[currentIndex++] = this
+        
+        if (parent == null) {
+            globalBaseX = defaultBasePosition.x
+            globalBaseY = defaultBasePosition.y
+            globalBaseZ = defaultBasePosition.z
         } else {
-            this.globalBaseX = this.parent.globalBaseX + this.defaultBasePosition.x
-            this.globalBaseY = this.parent.globalBaseY + this.defaultBasePosition.y
-            this.globalBaseZ = this.parent.globalBaseZ + this.defaultBasePosition.z
+            globalBaseX = parent!!.globalBaseX + defaultBasePosition.x
+            globalBaseY = parent!!.globalBaseY + defaultBasePosition.y
+            globalBaseZ = parent!!.globalBaseZ + defaultBasePosition.z
         }
-        if (this.childBones != null) {
-            SLSkeletonBone[] sLSkeletonBoneArr2 = this.childBones
-            Int length = sLSkeletonBoneArr2.length
-            Int i4 = 0
-            while (i4 < length) {
-                Int prepareSkeleton = sLSkeletonBoneArr2[i4].prepareSkeleton(sLSkeletonBoneArr, i3)
-                i4++
-                i3 = prepareSkeleton
-            }
-        }
-        if (this.collisionVolumes != null) {
-            SLSkeletonBone[] sLSkeletonBoneArr3 = this.collisionVolumes
-            Int length2 = sLSkeletonBoneArr3.length
-            while (i2 < length2) {
-                Int prepareSkeleton2 = sLSkeletonBoneArr3[i2].prepareSkeleton(sLSkeletonBoneArr, i3)
-                i2++
-                i3 = prepareSkeleton2
-            }
-        }
-        return i3
+
+        childBones?.forEach { currentIndex = it.prepareSkeleton(arr, currentIndex) }
+        collisionVolumes?.forEach { currentIndex = it.prepareSkeleton(arr, currentIndex) }
+        
+        return currentIndex
     }
 
-    /* access modifiers changed from: package-private */
-    Unit setPositionOverride(LLVector3 lLVector3) {
-        this.basePosition.set(lLVector3)
+    fun setPositionOverride(v: LLVector3) {
+        basePosition.set(v)
     }
 
-    /* access modifiers changed from: package-private */
-    Unit updateGlobalPos(AnimationSkeletonData animationSkeletonData, float[] fArr, float[] fArr2) {
-        float f
-        float f2
-        float f3
-        Int i = this.boneID.animatedIndex
-        Int i2 = i * 4
-        Int i3 = i * 16
+    fun updateGlobalPos(data: AnimationSkeletonData, fArr: FloatArray, fArr2: FloatArray) {
+        var f = 0.0f
+        var f2 = 0.0f
+        var f3 = 0.0f
+        val i = boneID.animatedIndex
+        val i2 = i * 4
+        val i3 = i * 16
+
         if (i >= 0) {
-            float[] animOffsets = animationSkeletonData.getAnimOffsets()
-            float f4 = animOffsets[i2 + 3]
+            val animOffsets = data.getAnimOffsets()
+            val f4 = animOffsets[i2 + 3]
             if (f4 > 0.0f) {
-                float f5 = f4 * animOffsets[i2]
+                f3 = f4 * animOffsets[i2]
                 f2 = f4 * animOffsets[i2 + 1]
-                f3 = f5
                 f = animOffsets[i2 + 2] * f4
-            } else {
-                f = 0.0f
-                f2 = 0.0f
-                f3 = 0.0f
             }
-        } else {
-            f = 0.0f
-            f2 = 0.0f
-            f3 = 0.0f
         }
-        if (this.parent != null) {
-            Matrix.translateM(this.tempMatrix, 0, this.parent.globalMatrix, 0, f3 + (this.usePosition.x * this.parent.scale.x) + this.offset.x, f2 + (this.usePosition.y * this.parent.scale.y) + this.offset.y, (this.usePosition.z * this.parent.scale.z) + this.offset.z + f)
+
+        val parentBone = parent
+        if (parentBone != null) {
+            Matrix.translateM(
+                tempMatrix, 0, parentBone.globalMatrix, 0,
+                f3 + (usePosition.x * parentBone.scale.x) + offset.x,
+                f2 + (usePosition.y * parentBone.scale.y) + offset.y,
+                (usePosition.z * parentBone.scale.z) + offset.z + f
+            )
         } else {
-            Matrix.setIdentityM(this.tempMatrix, 0)
-            Matrix.translateM(this.tempMatrix, 0, this.usePosition.x + this.offset.x + f3, this.usePosition.y + this.offset.y + f2, f + this.usePosition.z + this.offset.z)
+            Matrix.setIdentityM(tempMatrix, 0)
+            Matrix.translateM(
+                tempMatrix, 0,
+                usePosition.x + offset.x + f3,
+                usePosition.y + offset.y + f2,
+                f + usePosition.z + offset.z
+            )
         }
+
         if (i >= 0) {
-            Matrix.multiplyMM(this.globalMatrix, 0, this.tempMatrix, 0, animationSkeletonData.getAnimMatrix(), i3)
+            Matrix.multiplyMM(globalMatrix, 0, tempMatrix, 0, data.getAnimMatrix(), i3)
         } else {
-            System.arraycopy(this.tempMatrix, 0, this.globalMatrix, 0, 16)
+            System.arraycopy(tempMatrix, 0, globalMatrix, 0, 16)
         }
-        Matrix.scaleM(fArr2, this.boneIndex * 16, this.globalMatrix, 0, this.scale.x, this.scale.y, this.scale.z)
-        Matrix.translateM(fArr, this.boneIndex * 16, fArr2, this.boneIndex * 16, -this.globalBaseX, -this.globalBaseY, -this.globalBaseZ)
+
+        Matrix.scaleM(fArr2, boneIndex * 16, globalMatrix, 0, scale.x, scale.y, scale.z)
+        Matrix.translateM(fArr, boneIndex * 16, fArr2, boneIndex * 16, -globalBaseX, -globalBaseY, -globalBaseZ)
     }
 }

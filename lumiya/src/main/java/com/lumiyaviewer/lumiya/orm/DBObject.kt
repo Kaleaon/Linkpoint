@@ -5,7 +5,9 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteStatement
+import android.os.Parcel
 import android.os.Parcelable
+import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.nio.ByteBuffer
 import java.util.UUID
 

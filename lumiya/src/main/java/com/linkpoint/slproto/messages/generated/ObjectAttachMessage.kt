@@ -49,7 +49,7 @@ class ObjectAttachMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0070
+    override fun getMessageID(): Int = 0xFFFF0070.toInt()
 
     override fun getMessageName(): String = "ObjectAttach"
 }

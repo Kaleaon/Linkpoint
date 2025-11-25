@@ -7,66 +7,39 @@ import java.util.UUID
 import org.xmlpull.v1.XmlSerializer
 
 class LLSDUUID : LLSDNode {
-    private UUID value
+    private val value: UUID
 
-    LLSDUUID() {
-        this.value = null
+    constructor() {
+        this.value = UUID(0, 0)
     }
 
-    LLSDUUID(String str) {
-        Int length = str.length()
-        Long j = 0
-        Int i = 0
-        Int i2 = 0
-        Long j2 = 0
-        Long j3 = 0
-        Int i3 = 0
-        while (i3 < length) {
-            char charAt = str.charAt(i3)
-            if (charAt != '-') {
-                j = (j << 4) | ((Long) ((charAt < '0' || charAt > '9') ? (charAt < 'a' || charAt > 'f') ? (charAt < 'A' || charAt > 'F') ? 0 : (charAt - 'A') + 10 : (charAt - 'a') + 10 : charAt - '0'))
-                i++
-                if (i >= 16) {
-                    if (i2 == 0) {
-                        j3 = j
-                    } else {
-                        j2 = j
-                    }
-                    i2++
-                }
-            }
-            i3++
-            j2 = j2
-            j3 = j3
-            i = i
-            i2 = i2
-        }
-        this.value = UUID(j3, j2)
+    constructor(str: String) {
+        this.value = UUID.fromString(str)
     }
 
-    LLSDUUID(UUID uuid) {
+    constructor(uuid: UUID) {
         this.value = uuid
     }
 
-    String asString() {
+    override fun asString(): String {
         return this.value.toString()
     }
 
-    UUID asUUID() {
+    override fun asUUID(): UUID {
         return this.value
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    @Throws(IOException::class)
+    override fun toBinary(dataOutputStream: DataOutputStream) {
         dataOutputStream.writeByte(117)
-        dataOutputStream.writeLong(this.value.getMostSignificantBits())
-        dataOutputStream.writeLong(this.value.getLeastSignificantBits())
+        dataOutputStream.writeLong(this.value.mostSignificantBits)
+        dataOutputStream.writeLong(this.value.leastSignificantBits)
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    @Throws(IOException::class)
+    override fun toXML(xmlSerializer: XmlSerializer) {
         xmlSerializer.startTag("", "uuid")
-        if (this.value != null) {
-            xmlSerializer.text(this.value.toString())
-        }
+        xmlSerializer.text(this.value.toString())
         xmlSerializer.endTag("", "uuid")
     }
 }

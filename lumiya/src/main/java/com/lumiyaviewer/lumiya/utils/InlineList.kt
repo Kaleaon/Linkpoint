@@ -1,9 +1,9 @@
 package com.lumiyaviewer.lumiya.utils
 
-class InlineList<T : InlineListEntry<T>> {
-    private var first: T? = null
+open class InlineList<T : InlineListEntry<T>> {
+    protected var first: T? = null
 
-    fun addEntry(t: T) {
+    open fun addEntry(t: T) {
         val list = t.getList()
         if (list !== this) {
             list?.removeEntry(t)
@@ -17,7 +17,7 @@ class InlineList<T : InlineListEntry<T>> {
 
     fun getFirst(): T? = first
 
-    fun removeEntry(t: T) {
+    open fun removeEntry(t: T) {
         if (t.getList() === this) {
             val next = t.getNext()
             val prev = t.getPrev()
@@ -35,7 +35,7 @@ class InlineList<T : InlineListEntry<T>> {
         }
     }
 
-    fun requestEntryRemoval(t: T) {
+    open fun requestEntryRemoval(t: T) {
         // Empty implementation
     }
 }

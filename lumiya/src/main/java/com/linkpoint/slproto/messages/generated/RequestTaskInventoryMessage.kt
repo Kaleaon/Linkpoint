@@ -22,7 +22,7 @@ class RequestTaskInventoryMessage : SLMessage() {
         localId = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0121
+    override fun getMessageID(): Int = 0xFFFF0121.toInt()
 
     override fun getMessageName(): String = "RequestTaskInventory"
 }

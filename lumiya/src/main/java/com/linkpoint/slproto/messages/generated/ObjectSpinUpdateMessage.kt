@@ -30,7 +30,7 @@ class ObjectSpinUpdateMessage : SLMessage() {
         rotation = LLQuaternion.unpack(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0079
+    override fun getMessageID(): Int = 0xFFFF0079.toInt()
 
     override fun getMessageName(): String = "ObjectSpinUpdate"
 }

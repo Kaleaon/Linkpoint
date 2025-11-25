@@ -48,7 +48,7 @@ class ChatPassMessage : SLMessage() {
         message = unpackVariable(buffer, 2)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00EF
+    override fun getMessageID(): Int = 0xFFFF00EF.toInt()
 
     override fun getMessageName(): String = "ChatPass"
 }

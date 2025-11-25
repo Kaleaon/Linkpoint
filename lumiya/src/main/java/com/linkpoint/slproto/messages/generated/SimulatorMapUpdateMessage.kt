@@ -15,7 +15,7 @@ class SimulatorMapUpdateMessage : SLMessage() {
         flags = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0005
+    override fun getMessageID(): Int = 0xFFFF0005.toInt()
 
     override fun getMessageName(): String = "SimulatorMapUpdate"
 }

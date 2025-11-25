@@ -66,7 +66,7 @@ class AvatarTextureUpdateMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0004
+    override fun getMessageID(): Int = 0xFFFF0004.toInt()
 
     override fun getMessageName(): String = "AvatarTextureUpdate"
 }

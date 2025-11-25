@@ -25,7 +25,7 @@ class EstateCovenantReplyMessage : SLMessage() {
         estateOwnerId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00CC
+    override fun getMessageID(): Int = 0xFFFF00CC.toInt()
 
     override fun getMessageName(): String = "EstateCovenantReply"
 }

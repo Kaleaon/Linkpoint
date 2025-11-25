@@ -3,139 +3,148 @@ package com.lumiyaviewer.lumiya.slproto.inventory
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.orm.DBObject
 import com.lumiyaviewer.lumiya.slproto.SLMessage
-import com.lumiyaviewer.lumiya.slproto.inventory.SLInventory
 import com.lumiyaviewer.lumiya.slproto.messages.FetchInventoryDescendents
 import com.lumiyaviewer.lumiya.slproto.messages.InventoryDescendents
 import java.util.HashSet
-import java.util.Set
 import java.util.UUID
 
-class SLInventoryUDPFetchRequest : SLInventoryFetchRequest {
-    private Set<UUID> existingChildren = HashSet()
-    private Int receivedCount = 0
+class SLInventoryUDPFetchRequest(
+    inventory: SLInventory,
+    folderUUID: UUID
+) : SLInventoryFetchRequest(inventory, folderUUID) {
 
-    SLInventoryUDPFetchRequest(SLInventory sLInventory, UUID uuid) throws SLInventory.NoInventoryItemException {
-        super(sLInventory, uuid)
-    }
+    private val existingChildren = HashSet<UUID>()
+    private var receivedCount = 0
 
-    /* access modifiers changed from: package-private */
-    Boolean HandleInventoryDescendents(InventoryDescendents inventoryDescendents) {
-        Debug.Log("Inventory: UDP fetch: exp count " + inventoryDescendents.AgentData_Field.Descendents + ", recv count " + this.receivedCount + ", " + " with this: " + (this.receivedCount + inventoryDescendents.FolderData_Fields.size() + inventoryDescendents.ItemData_Fields.size()))
-        Int i = inventoryDescendents.AgentData_Field.Descendents
-        Int i2 = 0
-        this.db.beginTransaction()
-        if (this.folderEntry.version != inventoryDescendents.AgentData_Field.Version) {
-            this.folderEntry.version = inventoryDescendents.AgentData_Field.Version
-            this.db.saveEntry(this.folderEntry)
-        }
-        for (InventoryDescendents.FolderData folderData : inventoryDescendents.FolderData_Fields) {
-            if (folderData.ParentID.equals(this.folderEntry.uuid) && !(folderData.FolderID.getLeastSignificantBits() == 0 && folderData.FolderID.getMostSignificantBits() == 0)) {
-                try {
-                    SLInventoryEntry sLInventoryEntry = SLInventoryEntry()
-                    sLInventoryEntry.uuid = folderData.FolderID
-                    sLInventoryEntry.parent_id = this.folderEntry.getId()
-                    sLInventoryEntry.name = SLMessage.stringFromVariableOEM(folderData.Name)
-                    sLInventoryEntry.typeDefault = folderData.Type
-                    sLInventoryEntry.parentUUID = folderData.ParentID
-                    sLInventoryEntry.agentUUID = inventoryDescendents.AgentData_Field.AgentID
-                    sLInventoryEntry.isFolder = true
-                    sLInventoryEntry.updateOrInsert(this.db.getDatabase())
-                    i2++
-                    if (i2 > 16) {
-                        this.db.yieldIfContendedSafely()
-                        i2 = 0
-                    }
-                    this.existingChildren.add(sLInventoryEntry.uuid)
-                } catch (DBObject.DatabaseBindingException e) {
-                    Debug.Warning(e)
-                }
-            }
-            try {
-                this.receivedCount++
-            } catch (DBObject.DatabaseBindingException e2) {
-                Debug.Warning(e2)
-                this.db.endTransaction()
-            } catch (Throwable th) {
-                this.db.endTransaction()
-                throw th
-            }
-        }
-        for (InventoryDescendents.ItemData itemData : inventoryDescendents.ItemData_Fields) {
-            if (!(itemData.ItemID.getLeastSignificantBits() == 0 && itemData.ItemID.getMostSignificantBits() == 0)) {
-                try {
-                    SLInventoryEntry sLInventoryEntry2 = SLInventoryEntry()
-                    sLInventoryEntry2.uuid = itemData.ItemID
-                    sLInventoryEntry2.name = SLMessage.stringFromVariableOEM(itemData.Name)
-                    sLInventoryEntry2.description = SLMessage.stringFromVariableUTF(itemData.Description)
-                    if (itemData.FolderID.equals(this.folderEntry.uuid)) {
-                        sLInventoryEntry2.parent_id = this.folderEntry.getId()
-                        sLInventoryEntry2.parentUUID = itemData.FolderID
-                    } else {
-                        SLInventoryEntry findEntry = this.db.findEntry(itemData.FolderID)
-                        if (findEntry != null) {
-                            sLInventoryEntry2.parent_id = findEntry.getId()
-                        } else {
-                            sLInventoryEntry2.parent_id = 0
-                        }
-                        sLInventoryEntry2.parentUUID = itemData.FolderID
-                    }
-                    sLInventoryEntry2.agentUUID = inventoryDescendents.AgentData_Field.AgentID
-                    sLInventoryEntry2.isFolder = false
-                    sLInventoryEntry2.assetType = itemData.Type
-                    sLInventoryEntry2.assetUUID = itemData.AssetID
-                    sLInventoryEntry2.invType = itemData.InvType
-                    sLInventoryEntry2.flags = itemData.Flags
-                    sLInventoryEntry2.creationDate = itemData.CreationDate
-                    sLInventoryEntry2.creatorUUID = itemData.CreatorID
-                    sLInventoryEntry2.groupUUID = itemData.GroupID
-                    sLInventoryEntry2.lastOwnerUUID = UUID(0, 0)
-                    sLInventoryEntry2.ownerUUID = itemData.OwnerID
-                    sLInventoryEntry2.isGroupOwned = itemData.GroupOwned
-                    sLInventoryEntry2.baseMask = itemData.BaseMask
-                    sLInventoryEntry2.ownerMask = itemData.OwnerMask
-                    sLInventoryEntry2.groupMask = itemData.GroupMask
-                    sLInventoryEntry2.everyoneMask = itemData.EveryoneMask
-                    sLInventoryEntry2.nextOwnerMask = itemData.NextOwnerMask
-                    sLInventoryEntry2.salePrice = itemData.SalePrice
-                    sLInventoryEntry2.saleType = itemData.SaleType
-                    sLInventoryEntry2.updateOrInsert(this.db.getDatabase())
-                    Int i3 = i2 + 1
-                    if (i3 > 16) {
-                        this.db.yieldIfContendedSafely()
-                        i3 = 0
-                    }
-                    if (sLInventoryEntry2.parent_id == this.folderEntry.getId()) {
-                        this.existingChildren.add(sLInventoryEntry2.uuid)
-                    }
-                } catch (DBObject.DatabaseBindingException e3) {
-                    Debug.Warning(e3)
-                }
-            }
-            this.receivedCount++
-        }
-        this.db.setTransactionSuccessful()
-        this.db.endTransaction()
-        if (this.receivedCount < i) {
-            return false
-        }
-        this.db.retainChildren(this.folderEntry.getId(), this.existingChildren)
-        completeFetch(true, false)
-        return true
-    }
-
-    Unit cancel() {
-    }
-
-    Unit start() {
-        Debug.Log("Inventory: UDP fetching folder " + this.folderUUID.toString())
-        FetchInventoryDescendents fetchInventoryDescendents = FetchInventoryDescendents()
-        fetchInventoryDescendents.AgentData_Field.AgentID = this.inventory.getCircuitInfo().agentID
-        fetchInventoryDescendents.AgentData_Field.SessionID = this.inventory.getCircuitInfo().sessionID
-        fetchInventoryDescendents.InventoryData_Field.FolderID = this.folderUUID
-        fetchInventoryDescendents.InventoryData_Field.OwnerID = this.inventory.getCircuitInfo().agentID
+    override fun start() {
+        Debug.Log("Inventory: UDP fetching folder " + folderUUID.toString())
+        val fetchInventoryDescendents = FetchInventoryDescendents()
+        
+        // Assuming getCircuitInfo() returns non-nullable or we handle it
+        val circuit = inventory.getCircuitInfo()
+        fetchInventoryDescendents.AgentData_Field.AgentID = circuit.agentID
+        fetchInventoryDescendents.AgentData_Field.SessionID = circuit.sessionID
+        
+        fetchInventoryDescendents.InventoryData_Field.FolderID = folderUUID
+        fetchInventoryDescendents.InventoryData_Field.OwnerID = circuit.agentID
         fetchInventoryDescendents.InventoryData_Field.FetchFolders = true
         fetchInventoryDescendents.InventoryData_Field.FetchItems = true
         fetchInventoryDescendents.isReliable = true
-        this.inventory.SendMessage(fetchInventoryDescendents)
+        
+        inventory.SendMessage(fetchInventoryDescendents)
+    }
+
+    override fun cancel() {
+        // No-op for UDP request usually, or we could set a flag
+    }
+
+    fun HandleInventoryDescendents(inventoryDescendents: InventoryDescendents): Boolean {
+        val totalExpected = inventoryDescendents.AgentData_Field.Descendents
+        Debug.Log("Inventory: UDP fetch: exp count $totalExpected, recv count $receivedCount")
+        
+        val db = this.db
+        if (db == null) return false // Should not happen if properly initialized
+
+        db.beginTransaction()
+        try {
+             // Update folder version
+            if (folderEntry.version != inventoryDescendents.AgentData_Field.Version) {
+                folderEntry.version = inventoryDescendents.AgentData_Field.Version
+                db.saveEntry(folderEntry)
+            }
+
+            // Process Folders
+            for (folderData in inventoryDescendents.FolderData_Fields) {
+                if (folderData.ParentID == folderEntry.uuid && 
+                    !(folderData.FolderID.mostSignificantBits == 0L && folderData.FolderID.leastSignificantBits == 0L)) {
+                    
+                    try {
+                        val entry = SLInventoryEntry()
+                        entry.uuid = folderData.FolderID
+                        entry.parent_id = folderEntry.getId()
+                        entry.name = SLMessage.stringFromVariableOEM(folderData.Name)
+                        entry.typeDefault = folderData.Type
+                        entry.parentUUID = folderData.ParentID
+                        entry.agentUUID = inventoryDescendents.AgentData_Field.AgentID
+                        entry.isFolder = true
+                        
+                        entry.updateOrInsert(db.getDatabase())
+                        existingChildren.add(entry.uuid)
+                    } catch (e: DBObject.DatabaseBindingException) {
+                        Debug.Log("Error saving folder: " + e.message)
+                    }
+                }
+                receivedCount++
+            }
+
+            // Process Items
+            for (itemData in inventoryDescendents.ItemData_Fields) {
+                 if (!(itemData.ItemID.mostSignificantBits == 0L && itemData.ItemID.leastSignificantBits == 0L)) {
+                    try {
+                        val entry = SLInventoryEntry()
+                        entry.uuid = itemData.ItemID
+                        entry.name = SLMessage.stringFromVariableOEM(itemData.Name)
+                        entry.description = SLMessage.stringFromVariableUTF(itemData.Description)
+                        
+                        if (itemData.FolderID == folderEntry.uuid) {
+                            entry.parent_id = folderEntry.getId()
+                            entry.parentUUID = itemData.FolderID
+                        } else {
+                            val findEntry = db.findEntry(itemData.FolderID)
+                            if (findEntry != null) {
+                                entry.parent_id = findEntry.getId()
+                            } else {
+                                entry.parent_id = 0
+                            }
+                            entry.parentUUID = itemData.FolderID
+                        }
+                        
+                        entry.agentUUID = inventoryDescendents.AgentData_Field.AgentID
+                        entry.isFolder = false
+                        entry.assetType = itemData.Type
+                        entry.assetUUID = itemData.AssetID
+                        entry.invType = itemData.InvType
+                        entry.flags = itemData.Flags
+                        entry.creationDate = itemData.CreationDate
+                        entry.creatorUUID = itemData.CreatorID
+                        entry.groupUUID = itemData.GroupID
+                        entry.lastOwnerUUID = UUID(0, 0)
+                        entry.ownerUUID = itemData.OwnerID
+                        entry.isGroupOwned = itemData.GroupOwned
+                        entry.baseMask = itemData.BaseMask
+                        entry.ownerMask = itemData.OwnerMask
+                        entry.groupMask = itemData.GroupMask
+                        entry.everyoneMask = itemData.EveryoneMask
+                        entry.nextOwnerMask = itemData.NextOwnerMask
+                        entry.salePrice = itemData.SalePrice
+                        entry.saleType = itemData.SaleType
+                        
+                        entry.updateOrInsert(db.getDatabase())
+                        
+                        if (entry.parent_id == folderEntry.getId()) {
+                            existingChildren.add(entry.uuid)
+                        }
+                    } catch (e: DBObject.DatabaseBindingException) {
+                        Debug.Log("Error saving item: " + e.message)
+                    }
+                 }
+                 receivedCount++
+            }
+
+            db.setTransactionSuccessful()
+        } catch (e: Exception) {
+            Debug.Log("Error handling inventory descendents: " + e.message)
+            throw e
+        } finally {
+            db.endTransaction()
+        }
+
+        if (receivedCount < totalExpected) {
+            return false
+        }
+
+        db.retainChildren(folderEntry.getId(), existingChildren)
+        completeFetch(true, false)
+        return true
     }
 }

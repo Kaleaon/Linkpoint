@@ -19,7 +19,7 @@ class DeRezAckMessage : SLMessage() {
         success = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0124
+    override fun getMessageID(): Int = 0xFFFF0124.toInt()
 
     override fun getMessageName(): String = "DeRezAck"
 }

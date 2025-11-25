@@ -1,38 +1,40 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.nio.ByteBuffer
-import java.util.UUID
 
 class CreateTrustedCircuit : SLMessage {
-    DataBlock DataBlock_Field = DataBlock()
+    var DataBlock_Field: DataBlock = DataBlock()
 
     class DataBlock {
-        byte[] Digest
-        UUID EndPointID
+        var Digest: ByteArray = ByteArray(0)
+        var EndPointID: UUID = UUIDPool.ZeroUUID
     }
 
-    CreateTrustedCircuit() {
+    init {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    override fun CalcPayloadSize(): Int {
         return 52
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleCreateTrustedCircuit(this)
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleCreateTrustedCircuit(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 1)
-        byteBuffer.put((byte) -120)
+        byteBuffer.put(1.toByte())
+        byteBuffer.put((-120).toByte())
         packUUID(byteBuffer, this.DataBlock_Field.EndPointID)
         packFixed(byteBuffer, this.DataBlock_Field.Digest, 32)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.DataBlock_Field.EndPointID = unpackUUID(byteBuffer)
         this.DataBlock_Field.Digest = unpackFixed(byteBuffer, 32)
     }

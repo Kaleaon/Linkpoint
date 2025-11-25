@@ -25,7 +25,7 @@ class CreateGroupReplyMessage : SLMessage() {
         message = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0154
+    override fun getMessageID(): Int = 0xFFFF0154.toInt()
 
     override fun getMessageName(): String = "CreateGroupReply"
 }

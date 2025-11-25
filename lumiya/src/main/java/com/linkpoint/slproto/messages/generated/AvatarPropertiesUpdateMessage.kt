@@ -44,7 +44,7 @@ class AvatarPropertiesUpdateMessage : SLMessage() {
         profileUrl = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00AE
+    override fun getMessageID(): Int = 0xFFFF00AE.toInt()
 
     override fun getMessageName(): String = "AvatarPropertiesUpdate"
 }

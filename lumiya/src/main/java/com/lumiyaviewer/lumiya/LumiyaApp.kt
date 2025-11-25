@@ -18,7 +18,7 @@ import android.util.Log
 import android.view.Display
 import android.view.WindowManager
 import com.lumiyaviewer.lumiya.fixes.ResourceConflictResolver
-import com.lumiyaviewer.lumiya.modern.samples.ModernLinkpointDemo
+// import com.lumiyaviewer.lumiya.modern.samples.ModernLinkpointDemo
 import com.lumiyaviewer.lumiya.debug.AutoLogUploader
 
 /**
@@ -39,7 +39,7 @@ class LumiyaApp : MultiDexApplication() {
         }
         
         // Modern components
-        private var modernDemo: ModernLinkpointDemo? = null
+        // private var modernDemo: ModernLinkpointDemo? = null
         
         fun getContext(): Context = mContext
         
@@ -67,18 +67,7 @@ class LumiyaApp : MultiDexApplication() {
             return buildString {
                 append("Lumiya Application Status:\n")
                 append("- Context: OK\n")
-                append("- Modern Components: ${if (modernDemo != null) "Active" else "Safe Mode"}\n")
-                
-                modernDemo?.let { demo ->
-                    try {
-                        append("- Graphics: ${demo.getGraphicsInfo()}\n")
-                        append("- Connection: ${if (demo.isConnected()) "Connected" else "Disconnected"}\n")
-                    } catch (e: Exception) {
-                        append("- Component Status: Error checking - ${e.message}\n")
-                    }
-                } ?: run {
-                    append("- Running in Safe Mode - basic functionality only\n")
-                }
+                append("- Modern Components: Disabled\n")
             }
         }
     
@@ -157,7 +146,7 @@ class LumiyaApp : MultiDexApplication() {
         /**
          * Get modern components demo instance
          */
-        fun getModernDemo(): ModernLinkpointDemo? = modernDemo
+        // fun getModernDemo(): ModernLinkpointDemo? = modernDemo
     }
 
     override fun onCreate() {
@@ -183,7 +172,7 @@ class LumiyaApp : MultiDexApplication() {
             // GlobalOptions.getInstance().initialize();  // Temporarily disabled due to dependencies
             
             // Initialize modern Linkpoint components with comprehensive exception handling
-            initializeModernSystems()
+            // initializeModernSystems()
             
             // Initialize automatic log upload for debug builds
             initializeDebugLogUpload()
@@ -208,7 +197,7 @@ class LumiyaApp : MultiDexApplication() {
             }
             
             // Set a safe fallback state
-            modernDemo = null
+            // modernDemo = null
             Log.w(TAG, "Application will continue in SAFE MODE with basic functionality only")
             
             // Don't re-throw - allow the app to continue running
@@ -219,62 +208,7 @@ class LumiyaApp : MultiDexApplication() {
      * Initialize modern Second Life protocol and rendering systems
      * Uses defensive programming to prevent crashes if modern components fail
      */
-    private fun initializeModernSystems() {
-        Log.i(TAG, "Initializing modern Linkpoint components...")
-        
-        try {
-            // Pre-flight checks before initializing modern components
-            if (!performSystemChecks()) {
-                Log.w(TAG, "System compatibility checks failed - skipping modern components")
-                modernDemo = null
-                return
-            }
-            
-            // Initialize modern components with individual exception handling
-            modernDemo = ModernLinkpointDemo(this)
-            Log.i(TAG, "Modern Linkpoint systems initialized successfully")
-            
-        } catch (e: NoClassDefFoundError) {
-            Log.e(TAG, "Modern system object not found - likely missing dependency", e)
-            Log.e(TAG, "Missing class: ${e.message}")
-            modernDemo = null
-            
-        } catch (e: UnsatisfiedLinkError) {
-            Log.e(TAG, "Native library loading failed - modern graphics features will be disabled", e)
-            Log.e(TAG, "Library loading error: ${e.message}")
-            modernDemo = null
-            
-        } catch (e: SecurityException) {
-            Log.e(TAG, "Security error during modern system initialization", e)
-            modernDemo = null
-            
-        } catch (e: OutOfMemoryError) {
-            Log.e(TAG, "Out of memory during modern system initialization", e)
-            modernDemo = null
-            // Force garbage collection
-            System.gc()
-            
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize modern systems - continuing with graceful degradation", e)
-            modernDemo = null
-            
-            // Log specific error for debugging
-            Log.e(TAG, "Modern component initialization failed: ${e.javaClass.simpleName} - ${e.message}")
-            
-        } catch (t: Throwable) {
-            // Catch any other throwables that might occur
-            Log.e(TAG, "Unexpected error during modern system initialization", t)
-            modernDemo = null
-        }
-        
-        // Log status
-        if (modernDemo != null) {
-            Log.i(TAG, "Modern components active - full feature set available")
-        } else {
-            Log.w(TAG, "Modern components disabled - using legacy compatibility mode")
-            Log.w(TAG, "App will function with basic Second Life viewer features only")
-        }
-    }
+    // private fun initializeModernSystems() { ... }
     
     /**
      * Perform system compatibility checks before initializing modern components
@@ -282,10 +216,13 @@ class LumiyaApp : MultiDexApplication() {
     private fun performSystemChecks(): Boolean {
         try {
             // Check if we have a valid context
+            // Context is initialized in onCreate.
+            // We assume it's valid.
+            /*
             if (!::mContext.isInitialized) {
-                Log.e(TAG, "Context not initialized - cannot initialize modern components")
-                return false
+                 Log.w(TAG, "Context potentially not initialized")
             }
+            */
             
             // Check if we have basic Android API requirements
             val apiLevel = android.os.Build.VERSION.SDK_INT

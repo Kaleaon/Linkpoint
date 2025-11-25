@@ -4,33 +4,29 @@ import com.lumiyaviewer.lumiya.res.ResourceManager
 import com.lumiyaviewer.lumiya.res.ResourceMemoryCache
 import com.lumiyaviewer.lumiya.res.ResourceRequest
 import com.lumiyaviewer.lumiya.res.executors.PrimComputeExecutor
+import com.lumiyaviewer.lumiya.memory.MemoryManager
 
-class DrawableTextCache : ResourceMemoryCache<DrawableTextParams, DrawableTextBitmap> {
-    private Int fontSize
+class DrawableTextCache(private val fontSize: Int) : ResourceMemoryCache<DrawableTextParams, DrawableTextBitmap>(MemoryManager()) {
 
-    private class TextGenRequest : ResourceRequest<DrawableTextParams, DrawableTextBitmap> : Runnable {
-        private Int fontSize
+    private inner class TextGenRequest(
+        params: DrawableTextParams,
+        private val fontSize: Int,
+        manager: ResourceManager<DrawableTextParams, DrawableTextBitmap>
+    ) : ResourceRequest<DrawableTextParams, DrawableTextBitmap>(params, manager), Runnable {
 
-        TextGenRequest(DrawableTextParams drawableTextParams, Int i, ResourceManager<DrawableTextParams, DrawableTextBitmap> resourceManager) {
-            super(drawableTextParams, resourceManager)
-            this.fontSize = i
-        }
-
-        fun execute(): Unit {
+        override fun execute() {
             PrimComputeExecutor.getInstance().execute(this)
         }
 
-        fun run(): Unit {
-            completeRequest(DrawableTextBitmap((DrawableTextParams) getParams(), this.fontSize))
+        override fun run() {
+            completeRequest(DrawableTextBitmap(getParams(), this.fontSize))
         }
     }
 
-    constructor(i: Int) {
-        this.fontSize = i
-    }
-
-    /* access modifiers changed from: protected */
-    fun CreateNewRequest(drawableTextParams: DrawableTextParams, resourceManager: DrawableTextBitmap>): ResourceRequest<DrawableTextParams, DrawableTextBitmap> {
-        return TextGenRequest(drawableTextParams, this.fontSize, resourceManager)
+    override fun CreateNewRequest(
+        params: DrawableTextParams,
+        manager: ResourceManager<DrawableTextParams, DrawableTextBitmap>
+    ): ResourceRequest<DrawableTextParams, DrawableTextBitmap> {
+        return TextGenRequest(params, this.fontSize, manager)
     }
 }

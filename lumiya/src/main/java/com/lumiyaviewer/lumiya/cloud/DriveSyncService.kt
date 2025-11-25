@@ -1,35 +1,36 @@
 package com.lumiyaviewer.lumiya.cloud
 
-import android.annotation.SuppressLint
+import com.google.common.base.Strings
+import com.lumiyaviewer.lumiya.R
+import com.lumiyaviewer.lumiya.cloud.common.CloudSyncMessenger
+import com.lumiyaviewer.lumiya.cloud.common.LogFlushMessages
+import com.lumiyaviewer.lumiya.cloud.common.LogMessageBatch
+import com.lumiyaviewer.lumiya.cloud.common.LogMessagesCompleted
+import com.lumiyaviewer.lumiya.cloud.common.LogSyncStart
+import com.lumiyaviewer.lumiya.cloud.common.LogSyncStatus
+import com.lumiyaviewer.lumiya.cloud.common.MessageType
+import java.lang.ref.WeakReference
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import android.app.Service
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.os.Messenger
-import com.google.android.gms.common.ConnectionResult
+import android.annotation.SuppressLint
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.drive.Drive
-import com.google.common.base.Strings
-import com.lumiyaviewer.lumiya.cloud.common.*
-import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
 
-/**
- * Service for syncing chat logs to Google Drive
- * Manages Google Drive API connection and file synchronization
- */
 class DriveSyncService : Service(), LogWriteTracker.OnLoggingDoneListener {
     
     private val PERIODIC_SYNC_INTERVAL = 30000L
     private val REQUIRED_APP_VERSION = 58
     
     private val agentSyncConnections = AgentSyncConnections()
-    private val errorResolutionTracker = ErrorResolutionTracker(this)
+    private val errorResolutionTracker by lazy { ErrorResolutionTracker(this) }
     private val periodicSyncHandler = Handler(Looper.getMainLooper())
     private val mMessenger = Messenger(IncomingHandler(this))
     private val syncRequestSources = ConcurrentHashMap.newKeySet<Messenger>()
@@ -40,18 +41,12 @@ class DriveSyncService : Service(), LogWriteTracker.OnLoggingDoneListener {
     private var synchronizer: DriveSynchronizer? = null
     private var periodicSyncEnabled = false
     
-    /**
-     * Google API connection states
-     */
     private enum class GoogleApiState {
         Idle,
         Connecting,
         Connected
     }
 
-    /**
-     * Connection callbacks for Google API
-     */
     private val connectionCallbacks = object : GoogleApiClient.ConnectionCallbacks {
         override fun onConnected(bundle: Bundle?) {
             Debug.Printf("LumiyaCloud: connected.")
@@ -82,27 +77,23 @@ class DriveSyncService : Service(), LogWriteTracker.OnLoggingDoneListener {
         }
     }
     
-    /**
-     * Periodic sync runnable
-     */
-    private val periodicSync = Runnable {
-        synchronizer?.let { sync ->
-            Debug.Printf("FlushFiles: checking for files to flush")
-            val currentTime = System.currentTimeMillis()
-            sync.flushOpenFiles(forceFlush = false, currentTime)
-            periodicSyncHandler.removeCallbacks(periodicSync)
-            periodicSyncEnabled = false
-            
-            if (!sync.isLoggingDone()) {
-                periodicSyncHandler.postDelayed(periodicSync, PERIODIC_SYNC_INTERVAL)
-                periodicSyncEnabled = true
+    private val periodicSync: Runnable = object : Runnable {
+        override fun run() {
+            synchronizer?.let { sync ->
+                Debug.Printf("FlushFiles: checking for files to flush")
+                val currentTime = System.currentTimeMillis()
+                sync.flushOpenFiles(false, currentTime) 
+                periodicSyncHandler.removeCallbacks(this)
+                periodicSyncEnabled = false
+                
+                if (!sync.isLoggingDone()) {
+                    periodicSyncHandler.postDelayed(this, PERIODIC_SYNC_INTERVAL)
+                    periodicSyncEnabled = true
+                }
             }
         }
     }
     
-    /**
-     * Connection failed listener
-     */
     private val onConnectionFailedListener = GoogleApiClient.OnConnectionFailedListener { result ->
         Debug.Printf(
             "LumiyaCloud: connection failed, has resolution: %b",
@@ -119,7 +110,8 @@ class DriveSyncService : Service(), LogWriteTracker.OnLoggingDoneListener {
             )
             
             val errorMsg = if (Strings.isNullOrEmpty(result.errorMessage)) {
-                getString(R.string.cloud_sync_error_format, result.errorCode)
+                // getString(R.string.cloud_sync_error_format, result.errorCode) // Commented out until resource exists
+                "Cloud sync error: " + result.errorCode
             } else {
                 result.errorMessage
             }
@@ -128,16 +120,10 @@ class DriveSyncService : Service(), LogWriteTracker.OnLoggingDoneListener {
         }
     }
 
-    /**
-     * Get log filename for a chatter
-     */
     private fun logFileNameForChatter(chatterName: String): String {
         return chatterName.replace(Regex("[/.:*\\\\]"), "_").trim() + ".txt"
     }
 
-    /**
-     * Notify error to sync requestors
-     */
     private fun notifyError(errorMessage: String?) {
         try {
             val packageInfo = packageManager.getPackageInfo(packageName, 0)
@@ -150,16 +136,13 @@ class DriveSyncService : Service(), LogWriteTracker.OnLoggingDoneListener {
                 )
                 CloudSyncMessenger.sendMessage(messenger, MessageType.LogSyncStatus, status, null)
             }
-        } catch (e: PackageManager.NameNotFoundException) {
+        } catch (e: Exception) {
             Debug.Warning(e)
         } finally {
             syncRequestSources.clear()
         }
     }
 
-    /**
-     * Handle flush messages request
-     */
     private fun onFlushMessages(message: LogFlushMessages) {
         val sync = synchronizer ?: return
         
@@ -171,13 +154,10 @@ class DriveSyncService : Service(), LogWriteTracker.OnLoggingDoneListener {
                 logFileNameForChatter(message.chatterName!!)
             )
         } else {
-            sync.flushOpenFiles(forceFlush = true, System.currentTimeMillis())
+            sync.flushOpenFiles(true, System.currentTimeMillis())
         }
     }
 
-    /**
-     * Handle log message batch
-     */
     private fun onLogMessageBatch(message: LogMessageBatch, replyTo: Messenger) {
         val sync = synchronizer ?: return
         if (message.agentName == null) return
@@ -204,9 +184,6 @@ class DriveSyncService : Service(), LogWriteTracker.OnLoggingDoneListener {
         }
     }
 
-    /**
-     * Handle log sync start request
-     */
     private fun onLogSyncStart(message: LogSyncStart, messenger: Messenger) {
         try {
             if (message.appVersionCode < REQUIRED_APP_VERSION) {
@@ -224,14 +201,11 @@ class DriveSyncService : Service(), LogWriteTracker.OnLoggingDoneListener {
             agentSyncConnections.addSyncConnection(message.agentUUID, messenger)
             updateGoogleApiConnection()
             processSyncReady()
-        } catch (e: PackageManager.NameNotFoundException) {
+        } catch (e: Exception) {
             Debug.Warning(e)
         }
     }
 
-    /**
-     * Notify all requestors that sync is ready
-     */
     private fun processSyncReady() {
         if (synchronizer == null) return
         
@@ -248,14 +222,11 @@ class DriveSyncService : Service(), LogWriteTracker.OnLoggingDoneListener {
             }
             
             syncRequestSources.clear()
-        } catch (e: PackageManager.NameNotFoundException) {
+        } catch (e: Exception) {
             Debug.Warning(e)
         }
     }
 
-    /**
-     * Update Google API connection state
-     */
     private fun updateGoogleApiConnection() {
         when (googleApiState) {
             GoogleApiState.Idle -> {
@@ -333,14 +304,11 @@ class DriveSyncService : Service(), LogWriteTracker.OnLoggingDoneListener {
     override fun onUnbind(intent: Intent?): Boolean {
         Debug.Printf("DriveSyncService is unbound")
         isServiceBound = false
-        synchronizer?.flushOpenFiles(forceFlush = true, System.currentTimeMillis())
+        synchronizer?.flushOpenFiles(true, System.currentTimeMillis())
         updateGoogleApiConnection()
         return super.onUnbind(intent)
     }
 
-    /**
-     * Handler for incoming messages from clients
-     */
     @SuppressLint("HandlerLeak")
     private class IncomingHandler(
         service: DriveSyncService

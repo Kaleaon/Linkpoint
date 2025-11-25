@@ -31,7 +31,7 @@ class ScriptQuestionMessage : SLMessage() {
         experienceId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00BC
+    override fun getMessageID(): Int = 0xFFFF00BC.toInt()
 
     override fun getMessageName(): String = "ScriptQuestion"
 }

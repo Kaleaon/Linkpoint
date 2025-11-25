@@ -34,7 +34,7 @@ class ScriptDataReplyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0152
+    override fun getMessageID(): Int = 0xFFFF0152.toInt()
 
     override fun getMessageName(): String = "ScriptDataReply"
 }

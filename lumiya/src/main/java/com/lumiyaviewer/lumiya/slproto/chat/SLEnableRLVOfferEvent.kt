@@ -1,7 +1,6 @@
 package com.lumiyaviewer.lumiya.slproto.chat
 
 import android.content.Context
-import android.content.SharedPreferences
 import com.lumiyaviewer.lumiya.LumiyaApp
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.dao.ChatMessage
@@ -12,66 +11,66 @@ import com.lumiyaviewer.lumiya.slproto.messages.ChatFromSimulator
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceObject
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import androidx.annotation.NonNull
 
 class SLEnableRLVOfferEvent : SLChatYesNoEvent {
-    SLEnableRLVOfferEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
-        super(chatMessage, uuid)
+
+    constructor(chatMessage: ChatMessage, uuid: UUID) : super(chatMessage, uuid)
+
+    constructor(chatFromSimulator: ChatFromSimulator, uuid: UUID) : super(
+        ChatMessageSourceObject(
+            chatFromSimulator.ChatData_Field.SourceID,
+            SLMessage.stringFromVariableOEM(chatFromSimulator.ChatData_Field.FromName)
+        ),
+        uuid,
+        SLMessage.stringFromVariableUTF(chatFromSimulator.ChatData_Field.Message)
+    )
+
+    override fun getMessageType(): ChatMessageType {
+        return ChatMessageType.EnableRLVOffer
     }
 
-    SLEnableRLVOfferEvent(ChatFromSimulator chatFromSimulator, @NonNull UUID uuid) {
-        super(ChatMessageSourceObject(chatFromSimulator.ChatData_Field.SourceID, SLMessage.stringFromVariableOEM(chatFromSimulator.ChatData_Field.FromName)), uuid, SLMessage.stringFromVariableUTF(chatFromSimulator.ChatData_Field.Message))
-    }
-
-    /* access modifiers changed from: protected */
-    @NonNull
-    SLChatEvent.ChatMessageType getMessageType() {
-        return SLChatEvent.ChatMessageType.EnableRLVOffer
-    }
-
-    String getNoButton(Context context) {
+    override fun getNoButton(context: Context): String {
         return context.getString(R.string.enable_rlv_no)
     }
 
-    String getNoMessage(Context context) {
+    override fun getNoMessage(context: Context): String {
         return context.getString(R.string.enable_rlv_declined)
     }
 
-    String getQuestion(Context context) {
+    override fun getQuestion(context: Context): String {
         return context.getString(R.string.enable_rlv_question)
     }
 
-    String getText(Context context, @NonNull UserManager userManager) {
+    fun getText(context: Context, userManager: UserManager): String {
         return context.getString(R.string.rlv_enable_chat_message)
     }
 
-    String getYesButton(Context context) {
+    override fun getYesButton(context: Context): String {
         return context.getString(R.string.enable_rlv_yes)
     }
 
-    String getYesMessage(Context context) {
+    override fun getYesMessage(context: Context): String {
         return context.getString(R.string.enable_rlv_accepted)
     }
 
-    Boolean isObjectPopup() {
+    fun isObjectPopup(): Boolean {
         return true
     }
 
-    /* access modifiers changed from: protected */
-    Unit onNoAction(Context context, UserManager userManager) {
+    override fun onNoAction(context: Context, userManager: UserManager) {
         super.onNoAction(context, userManager)
-        userManager.getObjectPopupsManager().cancelObjectPopup(this)
+        userManager.objectPopupsManager.cancelObjectPopup(this)
     }
 
-    Unit onYesAction(Context context, UserManager userManager) {
+    override fun onYesAction(context: Context, userManager: UserManager) {
         super.onYesAction(context, userManager)
-        SharedPreferences.Editor edit = LumiyaApp.getDefaultSharedPreferences().edit()
+        val edit = LumiyaApp.getDefaultSharedPreferences().edit()
         edit.putBoolean("rlv_enabled", true)
         edit.commit()
-        userManager.getObjectPopupsManager().cancelObjectPopup(this)
+        userManager.objectPopupsManager.cancelObjectPopup(this)
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    override fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

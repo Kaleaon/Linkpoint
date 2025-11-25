@@ -19,7 +19,7 @@ class RequestRegionInfoMessage : SLMessage() {
         sessionId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF008D
+    override fun getMessageID(): Int = 0xFFFF008D.toInt()
 
     override fun getMessageName(): String = "RequestRegionInfo"
 }

@@ -1,6 +1,5 @@
 package com.lumiyaviewer.lumiya.slproto.avatar
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.openjpeg.OpenJPEG
 import com.lumiyaviewer.lumiya.render.GLTexture
@@ -8,79 +7,110 @@ import com.lumiyaviewer.rawbuffers.DirectByteBuffer
 import java.io.DataInputStream
 import java.io.IOException
 import java.nio.ByteBuffer
-import java.nio.FloatBuffer
-import java.nio.IntBuffer
+import kotlin.math.floor
 
-class SLPolyMorphData {
-    private DirectByteBuffer indexBuffer
-    private Boolean isMasked
-    private SLPolyMesh mesh
-    private SLVisualParamID morphID
-    private Int numVertices
-    private DirectByteBuffer texCoordsBuffer
-    private DirectByteBuffer vertexBuffer
+class SLPolyMorphData(
+    private val morphID: SLVisualParamID,
+    private val mesh: SLPolyMesh,
+    dataInputStream: DataInputStream
+) {
+    private val isMasked: Boolean
+    private val numVertices: Int
+    private val vertexBuffer: DirectByteBuffer
+    private val texCoordsBuffer: DirectByteBuffer
+    private val indexBuffer: DirectByteBuffer
 
-    SLPolyMorphData(SLVisualParamID sLVisualParamID, SLPolyMesh sLPolyMesh, DataInputStream dataInputStream) throws IOException {
-        Boolean z = false
-        this.morphID = sLVisualParamID
-        this.mesh = sLPolyMesh
-        this.isMasked = dataInputStream.readByte() != 0 ? true : z
-        this.numVertices = dataInputStream.readInt()
-        this.vertexBuffer = DirectByteBuffer(this.numVertices * 24)
-        this.texCoordsBuffer = DirectByteBuffer(this.numVertices * 8)
-        this.indexBuffer = DirectByteBuffer(this.numVertices * 4)
-        this.vertexBuffer.read(dataInputStream)
-        this.texCoordsBuffer.read(dataInputStream)
-        this.indexBuffer.read(dataInputStream)
-        Debug.Log("SLPolyMorphData: Loaded morph '" + sLVisualParamID + "', vertices = " + this.numVertices)
+    init {
+        isMasked = dataInputStream.readByte().toInt() != 0
+        numVertices = dataInputStream.readInt()
+        vertexBuffer = DirectByteBuffer(numVertices * 24)
+        texCoordsBuffer = DirectByteBuffer(numVertices * 8)
+        indexBuffer = DirectByteBuffer(numVertices * 4)
+        
+        vertexBuffer.read(dataInputStream)
+        texCoordsBuffer.read(dataInputStream)
+        indexBuffer.read(dataInputStream)
+        
+        Debug.Log("SLPolyMorphData: Loaded morph '$morphID', vertices = $numVertices")
     }
 
-    Unit applyMorphData(SLMeshData sLMeshData, float f, GLTexture gLTexture) {
-        ByteBuffer byteBuffer = null
-        Int i3 = 0
-        if (this.isMasked && gLTexture != null) {
-            i2 = gLTexture.getWidth()
-            i = gLTexture.getHeight()
-            byteBuffer = gLTexture.getExtraComponentsBuffer()
+    fun applyMorphData(sLMeshData: SLMeshData, f: Float, gLTexture: GLTexture?) {
+        var byteBuffer: ByteBuffer? = null
+        var width = 0
+        var height = 0
+        var offset = 0
+        
+        if (isMasked && gLTexture != null) {
+            width = gLTexture.width
+            height = gLTexture.height
+            byteBuffer = gLTexture.extraComponentsBuffer
             if (byteBuffer != null) {
-                i3 = byteBuffer.position()
+                offset = byteBuffer.position()
             }
-        } else {
-            i = 0
-            i2 = 0
         }
-        OpenJPEG.applyMeshMorph(f, sLMeshData.vertexBuffer.asByteBuffer(), sLMeshData.texCoordsBuffer.asByteBuffer(), this.numVertices, this.indexBuffer.asByteBuffer(), this.vertexBuffer.asByteBuffer(), this.texCoordsBuffer.asByteBuffer(), i2, i, i3, byteBuffer)
+        
+        OpenJPEG.applyMeshMorph(
+            f,
+            sLMeshData.vertexBuffer.asByteBuffer(),
+            sLMeshData.texCoordsBuffer.asByteBuffer(),
+            numVertices,
+            indexBuffer.asByteBuffer(),
+            vertexBuffer.asByteBuffer(),
+            texCoordsBuffer.asByteBuffer(),
+            width,
+            height,
+            offset,
+            byteBuffer
+        )
     }
 
-    Unit applyMorphDataSlow(SLMeshData sLMeshData, float f, GLTexture gLTexture) {
-        FloatBuffer asFloatBuffer = this.vertexBuffer.asFloatBuffer()
-        FloatBuffer asFloatBuffer2 = this.texCoordsBuffer.asFloatBuffer()
-        IntBuffer asIntBuffer = this.indexBuffer.asIntBuffer()
-        FloatBuffer asFloatBuffer3 = sLMeshData.vertexBuffer.asFloatBuffer()
-        FloatBuffer asFloatBuffer4 = sLMeshData.texCoordsBuffer.asFloatBuffer()
-        Boolean z = this.isMasked && gLTexture != null
-        Int i = 0
-        Int i2 = 0
-        ByteBuffer byteBuffer = null
-        Int i3 = 0
-        if (z) {
-            i = gLTexture.getWidth()
-            i2 = gLTexture.getHeight()
-            byteBuffer = gLTexture.getExtraComponentsBuffer()
-            if (byteBuffer != null) {
-                i3 = byteBuffer.position()
+    fun applyMorphDataSlow(sLMeshData: SLMeshData, f: Float, gLTexture: GLTexture?) {
+        val asFloatBuffer = vertexBuffer.asFloatBuffer()
+        val asFloatBuffer2 = texCoordsBuffer.asFloatBuffer()
+        val asIntBuffer = indexBuffer.asIntBuffer()
+        val asFloatBuffer3 = sLMeshData.vertexBuffer.asFloatBuffer()
+        val asFloatBuffer4 = sLMeshData.texCoordsBuffer.asFloatBuffer()
+        
+        var useMask = isMasked && gLTexture != null
+        var width = 0
+        var height = 0
+        var maskBuffer: ByteBuffer? = null
+        var maskOffset = 0
+        
+        if (useMask) {
+            width = gLTexture!!.width
+            height = gLTexture.height
+            maskBuffer = gLTexture.extraComponentsBuffer
+            if (maskBuffer != null) {
+                maskOffset = maskBuffer.position()
             } else {
-                z = false
+                useMask = false
             }
         }
-        for (Int i4 = 0; i4 < this.numVertices; i4++) {
-            Int i5 = asIntBuffer.get(i4)
-            float f2 = z ? (((float) (byteBuffer.get((Math.toInt().floor((double) (asFloatBuffer4.get((i5 * 2) + 0) * ((float) i)))) + (((Math.toInt().floor((double) (asFloatBuffer4.get((i5 * 2) + 1) * ((float) i2)))) * i) + i3)) & UnsignedBytes.MAX_VALUE)) / 255.0f) * f : f
-            for (Int i6 = 0; i6 < 6; i6++) {
-                asFloatBuffer3.put((i5 * 6) + i6, asFloatBuffer3.get((i5 * 6) + i6) + (asFloatBuffer.get((i4 * 6) + i6) * f2))
+        
+        for (i in 0 until numVertices) {
+            val index = asIntBuffer.get(i)
+            var factor = f
+            
+            if (useMask && maskBuffer != null) {
+                val u = asFloatBuffer4.get(index * 2 + 0)
+                val v = asFloatBuffer4.get(index * 2 + 1)
+                val x = floor(u * width).toInt()
+                val y = floor(v * height).toInt()
+                val maskVal = maskBuffer.get(maskOffset + y * width + x).toInt() and 0xFF
+                factor = (maskVal / 255.0f) * f
             }
-            for (Int i7 = 0; i7 < 2; i7++) {
-                asFloatBuffer4.put((i5 * 2) + i7, asFloatBuffer4.get((i5 * 2) + i7) + (asFloatBuffer2.get((i4 * 2) + i7) * f2))
+            
+            for (j in 0 until 6) {
+                val original = asFloatBuffer3.get(index * 6 + j)
+                val morph = asFloatBuffer.get(i * 6 + j)
+                asFloatBuffer3.put(index * 6 + j, original + morph * factor)
+            }
+            
+            for (j in 0 until 2) {
+                val original = asFloatBuffer4.get(index * 2 + j)
+                val morph = asFloatBuffer2.get(i * 2 + j)
+                asFloatBuffer4.put(index * 2 + j, original + morph * factor)
             }
         }
     }

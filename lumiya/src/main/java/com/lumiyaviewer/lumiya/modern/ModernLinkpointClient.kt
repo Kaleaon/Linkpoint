@@ -92,7 +92,7 @@ class ModernLinkpointClient(context: Context) {
                 val authResult = authManager.authenticateAsync(username, password).get()
                 
                 if (!authResult.isSuccessful()) {
-                    throw LoginException("Authentication failed: ${authResult.getErrorMessage()}")
+                    throw LoginException("Authentication failed: ${authResult.errorMessage}")
                 }
                 
                 Log.i(TAG, "Authentication successful")

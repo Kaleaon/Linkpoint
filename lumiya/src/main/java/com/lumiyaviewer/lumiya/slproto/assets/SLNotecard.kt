@@ -23,9 +23,9 @@ class SLNotecard {
     
     private val DELIM_ANY = " \t\n"
     private val DELIM_EOL = "\n"
-    private var attachments: MutableList<NotecardAttachment>
+    private var attachments: MutableList<NotecardAttachment> = ArrayList()
     private val isScript: Boolean
-    private var notecardText: String
+    private var notecardText: String = ""
 
     /**
      * Clickable span for notecard attachments

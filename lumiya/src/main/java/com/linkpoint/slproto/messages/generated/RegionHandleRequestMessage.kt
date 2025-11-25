@@ -16,7 +16,7 @@ class RegionHandleRequestMessage : SLMessage() {
         regionId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0135
+    override fun getMessageID(): Int = 0xFFFF0135.toInt()
 
     override fun getMessageName(): String = "RegionHandleRequest"
 }

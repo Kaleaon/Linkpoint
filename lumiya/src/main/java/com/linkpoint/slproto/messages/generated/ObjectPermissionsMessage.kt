@@ -54,7 +54,7 @@ class ObjectPermissionsMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0069
+    override fun getMessageID(): Int = 0xFFFF0069.toInt()
 
     override fun getMessageName(): String = "ObjectPermissions"
 }

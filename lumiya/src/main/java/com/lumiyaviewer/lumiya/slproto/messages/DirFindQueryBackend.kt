@@ -1,42 +1,44 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.nio.ByteBuffer
-import java.util.UUID
 
 class DirFindQueryBackend : SLMessage {
-    AgentData AgentData_Field = AgentData()
-    QueryData QueryData_Field = QueryData()
+    var AgentData_Field: AgentData = AgentData()
+    var QueryData_Field: QueryData = QueryData()
 
     class AgentData {
-        UUID AgentID
+        var AgentID: UUID = UUIDPool.ZeroUUID
     }
 
     class QueryData {
-        Int EstateID
-        Boolean Godlike
-        Int QueryFlags
-        UUID QueryID
-        Int QueryStart
-        byte[] QueryText
+        var EstateID: Int = 0
+        var Godlike: Boolean = false
+        var QueryFlags: Int = 0
+        var QueryID: UUID = UUIDPool.ZeroUUID
+        var QueryStart: Int = 0
+        var QueryText: ByteArray = ByteArray(0)
     }
 
-    DirFindQueryBackend() {
+    init {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.QueryData_Field.QueryText.length + 17 + 4 + 4 + 4 + 1 + 20
+    override fun CalcPayloadSize(): Int {
+        return this.QueryData_Field.QueryText.size + 17 + 4 + 4 + 4 + 1 + 20
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleDirFindQueryBackend(this)
+    override fun handleMessage(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleDirFindQueryBackend(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) 32)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put(32.toByte())
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.QueryData_Field.QueryID)
         packVariable(byteBuffer, this.QueryData_Field.QueryText, 1)
@@ -46,7 +48,7 @@ class DirFindQueryBackend : SLMessage {
         packBoolean(byteBuffer, this.QueryData_Field.Godlike)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
         this.QueryData_Field.QueryText = unpackVariable(byteBuffer, 1)

@@ -1,57 +1,55 @@
 package com.lumiyaviewer.lumiya.render.shaders
 
-import com.google.common.base.Objects
-import com.google.common.collect.ImmutableMap
 import java.io.BufferedReader
 import java.io.IOException
-import java.util.Map
-import java.util.Map.Entry
-import androidx.annotation.Nullable
+import java.util.HashMap
 
-class ShaderPreprocessor {
-    private ImmutableMap<String, String> definedMacros
+class ShaderPreprocessor(map: Map<String, String>) {
+    private val definedMacros: Map<String, String>
 
-    constructor(map: String>) {
-        this.definedMacros = ImmutableMap.copyOf((Map) map)
+    init {
+        definedMacros = HashMap(map)
     }
 
-    @Nullable
-    private String processCode(BufferedReader bufferedReader, @Nullable StringBuilder stringBuilder) throws IOException {
-        String str = null
-        while (true) {
-            String readLine = bufferedReader.readLine()
-            if (readLine == null) {
-                return str
-            }
-            readLine = readLine.trim()
-            if (readLine.startsWith("#endif") || readLine.startsWith("#else")) {
-                return readLine
-            }
-            if (readLine.startsWith("#ifdef") || readLine.startsWith("#ifndef")) {
-                Boolean startsWith = readLine.startsWith("#ifdef")
-                Boolean containsKey = this.definedMacros.containsKey(readLine.substring(readLine.indexOf(32)).trim())
-                Any processCode = processCode(bufferedReader, startsWith == containsKey ? stringBuilder : null)
-                if (Objects.equal(processCode, "#else")) {
-                    processCode = processCode(bufferedReader, startsWith != containsKey ? stringBuilder : null)
-                }
-                if (!Objects.equal(processCode, "#endif")) {
-                    throw IOException("#endif expected")
-                }
-            } else if (stringBuilder != null) {
-                String str2 = readLine
-                for (Entry entry : this.definedMacros.entrySet()) {
-                    str2 = str2.replace((CharSequence) entry.getKey(), (CharSequence) entry.getValue())
-                }
-                stringBuilder.append(str2).append("\r\n")
-                str = str2
-            }
-            str = readLine
-        }
-    }
-
-    String processCode(BufferedReader bufferedReader) throws IOException {
-        StringBuilder stringBuilder = StringBuilder()
+    @Throws(IOException::class)
+    fun processCode(bufferedReader: BufferedReader): String {
+        val stringBuilder = StringBuilder()
         processCode(bufferedReader, stringBuilder)
         return stringBuilder.toString()
+    }
+
+    @Throws(IOException::class)
+    private fun processCode(bufferedReader: BufferedReader, stringBuilder: StringBuilder?): String? {
+        var line: String?
+        while (bufferedReader.readLine().also { line = it } != null) {
+            var currentLine = line!!.trim()
+            if (currentLine.startsWith("#endif") || currentLine.startsWith("#else")) {
+                return currentLine
+            }
+            if (currentLine.startsWith("#ifdef") || currentLine.startsWith("#ifndef")) {
+                val isIfDef = currentLine.startsWith("#ifdef")
+                val macroName = currentLine.substring(currentLine.indexOf(' ')).trim()
+                val isDefined = definedMacros.containsKey(macroName)
+                
+                // Recursively process block
+                var processedLine = processCode(bufferedReader, if (isIfDef == isDefined) stringBuilder else null)
+                
+                if (processedLine == "#else") {
+                    processedLine = processCode(bufferedReader, if (isIfDef != isDefined) stringBuilder else null)
+                }
+                
+                if (processedLine != "#endif") {
+                    throw IOException("#endif expected")
+                }
+            } else {
+                if (stringBuilder != null) {
+                    for ((key, value) in definedMacros) {
+                        currentLine = currentLine.replace(key, value)
+                    }
+                    stringBuilder.append(currentLine).append("\r\n")
+                }
+            }
+        }
+        return null
     }
 }

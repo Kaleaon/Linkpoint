@@ -34,7 +34,7 @@ class RpcScriptRequestInboundMessage : SLMessage() {
         stringValue = unpackVariable(buffer, 2)
     }
 
-    override fun getMessageID(): Int = 0xFFFF019F
+    override fun getMessageID(): Int = 0xFFFF019F.toInt()
 
     override fun getMessageName(): String = "RpcScriptRequestInbound"
 }

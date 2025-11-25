@@ -15,7 +15,7 @@ class SetCpuRatioMessage : SLMessage() {
         ratio = unpackByte(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0147
+    override fun getMessageID(): Int = 0xFFFF0147.toInt()
 
     override fun getMessageName(): String = "SetCPURatio"
 }

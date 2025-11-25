@@ -47,7 +47,7 @@ class LogFailedMoneyTransactionMessage : SLMessage() {
         failureType = unpackByte(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0014
+    override fun getMessageID(): Int = 0xFFFF0014.toInt()
 
     override fun getMessageName(): String = "LogFailedMoneyTransaction"
 }

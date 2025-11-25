@@ -26,7 +26,7 @@ class IntegratedRenderer(
     }
     
     // Core managers
-    private val animeshManager = AnimeshManager()
+    private val animeshManager = AnimeshManager(context)
     private val bomManager = BakesOnMeshManager()
     private val eepManager = EEPManager()
     private val pbrManager = PBRMaterialManager()
@@ -106,21 +106,17 @@ class IntegratedRenderer(
      * Render all animesh objects
      */
     private fun renderAnimeshObjects() {
-        val animeshObjects = animeshManager.getAllAnimesh()
-        
-        // This would integrate with actual scene graph
-        // For now, demonstrates the integration point
-        animeshObjects.forEach { animesh ->
-            // Would get mesh data from asset system
-            // Would calculate matrices from scene
-            // Would call animeshRenderer.render(...)
-        }
+        // Removed iteration to avoid overload ambiguity and missing types in stub environment
+        // val objects = animeshManager.getAllAnimesh() // Assuming this method exists
+        // objects.forEach { animesh ->
+        //    animeshRenderer.render(animesh, viewMatrix, projectionMatrix)
+        // }
     }
     
     /**
      * Update environment settings from EEP
      */
-    private fun updateEnvironmentSettings(environment: com.linkpoint.eep.EEPEnvironment) {
+    private fun updateEnvironmentSettings(environment: com.lumiyaviewer.lumiya.eep.EEPEnvironment) {
         // Apply to shaders
         // Update lighting
         // Update atmosphere

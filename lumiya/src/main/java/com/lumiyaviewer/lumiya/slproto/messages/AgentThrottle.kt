@@ -1,52 +1,58 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.UUID
 
 class AgentThrottle : SLMessage {
-    AgentData AgentData_Field = AgentData()
-    Throttle Throttle_Field = Throttle()
+    var AgentData_Field: AgentData? = AgentData()
+    var Throttle_Field: Throttle? = Throttle()
 
     class AgentData {
-        UUID AgentID
-        Int CircuitCode
-        UUID SessionID
+        var AgentID: UUID? = null
+        var CircuitCode: Int = 0
+        var SessionID: UUID? = null
     }
 
     class Throttle {
-        Int GenCounter
-        byte[] Throttles
+        var GenCounter: Int = 0
+        var Throttles: ByteArray? = null
     }
 
-    AgentThrottle() {
-        this.zeroCoded = true
+    constructor() {
+        this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.Throttle_Field.Throttles.length + 5 + 40
+    override fun CalcPayloadSize(): Int {
+        return (Throttle_Field?.Throttles?.size ?: 0) + 2 + 48
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAgentThrottle(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) 81)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        packInt(byteBuffer, this.AgentData_Field.CircuitCode)
-        packInt(byteBuffer, this.Throttle_Field.GenCounter)
-        packVariable(byteBuffer, this.Throttle_Field.Throttles, 1)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put(81.toByte())
+        packUUID(byteBuffer, AgentData_Field?.AgentID!!)
+        packUUID(byteBuffer, AgentData_Field?.SessionID!!)
+        packInt(byteBuffer, AgentData_Field?.CircuitCode ?: 0)
+        packInt(byteBuffer, Throttle_Field?.GenCounter ?: 0)
+        packVariable(byteBuffer, Throttle_Field?.Throttles!!, 2)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        this.AgentData_Field.CircuitCode = unpackInt(byteBuffer)
-        this.Throttle_Field.GenCounter = unpackInt(byteBuffer)
-        this.Throttle_Field.Throttles = unpackVariable(byteBuffer, 1)
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val agentData = AgentData_Field ?: AgentData()
+        agentData.AgentID = unpackUUID(byteBuffer)
+        agentData.SessionID = unpackUUID(byteBuffer)
+        agentData.CircuitCode = unpackInt(byteBuffer)
+        this.AgentData_Field = agentData
+
+        val throttle = Throttle_Field ?: Throttle()
+        throttle.GenCounter = unpackInt(byteBuffer)
+        throttle.Throttles = unpackVariable(byteBuffer, 2)
+        this.Throttle_Field = throttle
     }
 }

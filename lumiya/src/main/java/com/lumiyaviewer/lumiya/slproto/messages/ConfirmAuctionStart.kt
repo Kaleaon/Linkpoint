@@ -1,38 +1,39 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.nio.ByteBuffer
-import java.util.UUID
 
 class ConfirmAuctionStart : SLMessage {
-    AuctionData AuctionData_Field = AuctionData()
+    var AuctionData_Field: AuctionData = AuctionData()
 
     class AuctionData {
-        Int AuctionID
-        UUID ParcelID
+        var AuctionID: Int = 0
+        var ParcelID: UUID = UUIDPool.ZeroUUID
     }
 
-    ConfirmAuctionStart() {
+    init {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    override fun CalcPayloadSize(): Int {
         return 24
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleConfirmAuctionStart(this)
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleConfirmAuctionStart(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) -26)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put((-26).toByte())
         packUUID(byteBuffer, this.AuctionData_Field.ParcelID)
         packInt(byteBuffer, this.AuctionData_Field.AuctionID)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AuctionData_Field.ParcelID = unpackUUID(byteBuffer)
         this.AuctionData_Field.AuctionID = unpackInt(byteBuffer)
     }

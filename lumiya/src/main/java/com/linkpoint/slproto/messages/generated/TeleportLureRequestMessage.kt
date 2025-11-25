@@ -25,7 +25,7 @@ class TeleportLureRequestMessage : SLMessage() {
         teleportFlags = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0047
+    override fun getMessageID(): Int = 0xFFFF0047.toInt()
 
     override fun getMessageName(): String = "TeleportLureRequest"
 }

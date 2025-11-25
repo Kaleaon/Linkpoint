@@ -1,35 +1,35 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.base.Ascii
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import com.lumiyaviewer.lumiya.slproto.types.LLVector4
 import java.nio.ByteBuffer
 
 class CameraConstraint : SLMessage {
-    CameraCollidePlane CameraCollidePlane_Field = CameraCollidePlane()
+    var CameraCollidePlane_Field: CameraCollidePlane = CameraCollidePlane()
 
     class CameraCollidePlane {
-        LLVector4 Plane
+        var Plane: LLVector4 = LLVector4()
     }
 
-    CameraConstraint() {
+    constructor() {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
+    override fun CalcPayloadSize(): Int {
         return 17
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleCameraConstraint(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put(Ascii.SYN)
-        packLLVector4(byteBuffer, this.CameraCollidePlane_Field.Plane)
+    override fun PackPayload(byteBuffer: ByteBuffer) {
+        byteBuffer.put(22.toByte()) // Ascii.SYN
+        packLLVector4(byteBuffer, CameraCollidePlane_Field.Plane)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.CameraCollidePlane_Field.Plane = unpackLLVector4(byteBuffer)
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        CameraCollidePlane_Field.Plane = unpackLLVector4(byteBuffer)
     }
 }

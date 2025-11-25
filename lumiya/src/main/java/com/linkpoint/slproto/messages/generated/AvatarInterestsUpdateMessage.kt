@@ -38,7 +38,7 @@ class AvatarInterestsUpdateMessage : SLMessage() {
         languagesText = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00AF
+    override fun getMessageID(): Int = 0xFFFF00AF.toInt()
 
     override fun getMessageName(): String = "AvatarInterestsUpdate"
 }

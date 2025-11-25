@@ -1,65 +1,64 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.ArrayList
 import java.util.UUID
 
 class ActivateGestures : SLMessage {
-    AgentData AgentData_Field
-    ArrayList<Data> Data_Fields = ArrayList<>()
+    val AgentData_Field = AgentData()
+    val Data_Fields = ArrayList<Data>()
 
     class AgentData {
-        UUID AgentID
-        Int Flags
-        UUID SessionID
+        var AgentID: UUID? = null
+        var Flags: Int = 0
+        var SessionID: UUID? = null
     }
 
     class Data {
-        UUID AssetID
-        Int GestureFlags
-        UUID ItemID
+        var AssetID: UUID? = null
+        var GestureFlags: Int = 0
+        var ItemID: UUID? = null
     }
 
     constructor() {
         this.zeroCoded = false
-        this.AgentData_Field = AgentData()
     }
 
-    fun CalcPayloadSize(): Int {
-        return (this.Data_Fields.size() * 36) + 41
+    override fun CalcPayloadSize(): Int {
+        return (this.Data_Fields.size * 36) + 41
     }
 
-    fun Handle(sLMessageHandler: SLMessageHandler): Unit {
-        sLMessageHandler.HandleActivateGestures(this)
+    override fun Handle(handler: SLMessageHandler) {
+        handler.HandleActivateGestures(this)
     }
 
-    fun PackPayload(byteBuffer: ByteBuffer): Unit {
-        byteBuffer.putShort(-1)
-        byteBuffer.put((Byte) 1)
-        byteBuffer.put((Byte) 60)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        packInt(byteBuffer, this.AgentData_Field.Flags)
-        byteBuffer.put((Byte) this.Data_Fields.size())
-        for (Data data : this.Data_Fields) {
-            packUUID(byteBuffer, data.ItemID)
-            packUUID(byteBuffer, data.AssetID)
-            packInt(byteBuffer, data.GestureFlags)
+    override fun PackPayload(buffer: ByteBuffer) {
+        buffer.putShort(-1)
+        buffer.put(1.toByte())
+        buffer.put(60.toByte())
+        packUUID(buffer, this.AgentData_Field.AgentID)
+        packUUID(buffer, this.AgentData_Field.SessionID)
+        packInt(buffer, this.AgentData_Field.Flags)
+        buffer.put(this.Data_Fields.size.toByte())
+        for (data in this.Data_Fields) {
+            packUUID(buffer, data.ItemID)
+            packUUID(buffer, data.AssetID)
+            packInt(buffer, data.GestureFlags)
         }
     }
 
-    fun UnpackPayload(byteBuffer: ByteBuffer): Unit {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        this.AgentData_Field.Flags = unpackInt(byteBuffer)
-        Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            Data data = Data()
-            data.ItemID = unpackUUID(byteBuffer)
-            data.AssetID = unpackUUID(byteBuffer)
-            data.GestureFlags = unpackInt(byteBuffer)
+    override fun UnpackPayload(buffer: ByteBuffer) {
+        this.AgentData_Field.AgentID = unpackUUID(buffer)
+        this.AgentData_Field.SessionID = unpackUUID(buffer)
+        this.AgentData_Field.Flags = unpackInt(buffer)
+        val count = buffer.get().toInt() and 0xFF
+        for (i in 0 until count) {
+            val data = Data()
+            data.ItemID = unpackUUID(buffer)
+            data.AssetID = unpackUUID(buffer)
+            data.GestureFlags = unpackInt(buffer)
             this.Data_Fields.add(data)
         }
     }

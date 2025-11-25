@@ -47,7 +47,7 @@ class LargeGenericMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF01AE
+    override fun getMessageID(): Int = 0xFFFF01AE.toInt()
 
     override fun getMessageName(): String = "LargeGenericMessage"
 }

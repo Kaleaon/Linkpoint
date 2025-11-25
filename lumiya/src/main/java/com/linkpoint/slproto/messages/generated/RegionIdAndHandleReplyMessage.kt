@@ -19,7 +19,7 @@ class RegionIdAndHandleReplyMessage : SLMessage() {
         regionHandle = unpackLong(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0136
+    override fun getMessageID(): Int = 0xFFFF0136.toInt()
 
     override fun getMessageName(): String = "RegionIDAndHandleReply"
 }

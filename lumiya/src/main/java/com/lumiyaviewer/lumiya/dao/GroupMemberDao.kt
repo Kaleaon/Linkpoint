@@ -8,93 +8,93 @@ import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
-class GroupMemberDao : AbstractDao<GroupMember, Void> {
-    val TABLENAME: String = "GroupMembers"
+class GroupMemberDao(config: DaoConfig, daoSession: DaoSession?) : AbstractDao<GroupMember, Void>(config, daoSession) {
 
-    class Properties {
-        Property AgentPowers = Property(5, Long.TYPE, "agentPowers", false, "AGENT_POWERS")
-        Property Contribution = Property(3, Int.TYPE, "contribution", false, "CONTRIBUTION")
-        Property GroupID = Property(0, UUID.class, "groupID", false, "GROUP_ID")
-        Property IsOwner = Property(7, Boolean.TYPE, "isOwner", false, "IS_OWNER")
-        Property OnlineStatus = Property(4, String.class, "onlineStatus", false, "ONLINE_STATUS")
-        Property RequestID = Property(1, UUID.class, "requestID", false, "REQUEST_ID")
-        Property Title = Property(6, String.class, "title", false, "TITLE")
-        Property UserID = Property(2, UUID.class, "userID", false, "USER_ID")
+    companion object {
+        const val TABLENAME = "GroupMembers"
+
+        object Properties {
+            @JvmField val AgentPowers = Property(5, Long::class.java, "agentPowers", false, "AGENT_POWERS")
+            @JvmField val Contribution = Property(3, Int::class.java, "contribution", false, "CONTRIBUTION")
+            @JvmField val GroupID = Property(0, String::class.java, "groupID", false, "GROUP_ID")
+            @JvmField val IsOwner = Property(7, Boolean::class.java, "isOwner", false, "IS_OWNER")
+            @JvmField val OnlineStatus = Property(4, String::class.java, "onlineStatus", false, "ONLINE_STATUS")
+            @JvmField val RequestID = Property(1, String::class.java, "requestID", false, "REQUEST_ID")
+            @JvmField val Title = Property(6, String::class.java, "title", false, "TITLE")
+            @JvmField val UserID = Property(2, String::class.java, "userID", false, "USER_ID")
+        }
+
+        @JvmStatic
+        fun createTable(db: SQLiteDatabase, ifNotExists: Boolean) {
+            val constraint = if (ifNotExists) "IF NOT EXISTS " else ""
+            db.execSQL("CREATE TABLE $constraint'GroupMembers' (" +
+                    "'GROUP_ID' TEXT NOT NULL ," +
+                    "'REQUEST_ID' TEXT NOT NULL ," +
+                    "'USER_ID' TEXT NOT NULL ," +
+                    "'CONTRIBUTION' INTEGER NOT NULL ," +
+                    "'ONLINE_STATUS' TEXT NOT NULL ," +
+                    "'AGENT_POWERS' INTEGER NOT NULL ," +
+                    "'TITLE' TEXT NOT NULL ," +
+                    "'IS_OWNER' INTEGER NOT NULL );")
+            db.execSQL("CREATE INDEX ${constraint}IDX_GroupMembers_GROUP_ID_REQUEST_ID ON GroupMembers (GROUP_ID,REQUEST_ID);")
+        }
+
+        @JvmStatic
+        fun dropTable(db: SQLiteDatabase, ifExists: Boolean) {
+            val constraint = if (ifExists) "IF EXISTS " else ""
+            db.execSQL("DROP TABLE $constraint'GroupMembers'")
+        }
     }
 
-    constructor(daoConfig: DaoConfig) {
-        super(daoConfig)
+    override fun bindValues(stmt: SQLiteStatement, entity: GroupMember) {
+        stmt.clearBindings()
+        stmt.bindString(1, entity.groupID.toString())
+        stmt.bindString(2, entity.requestID.toString())
+        stmt.bindString(3, entity.userID.toString())
+        stmt.bindLong(4, entity.contribution.toLong())
+        stmt.bindString(5, entity.onlineStatus)
+        stmt.bindLong(6, entity.agentPowers)
+        stmt.bindString(7, entity.title)
+        stmt.bindLong(8, if (entity.isOwner) 1L else 0L)
     }
 
-    constructor(daoConfig: DaoConfig, daoSession: DaoSession) {
-        super(daoConfig, daoSession)
-    }
-
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        String str = z ? "IF NOT EXISTS " : ""
-        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'GroupMembers' (" + "'GROUP_ID' TEXT NOT NULL ," + "'REQUEST_ID' TEXT NOT NULL ," + "'USER_ID' TEXT NOT NULL ," + "'CONTRIBUTION' INTEGER NOT NULL ," + "'ONLINE_STATUS' TEXT NOT NULL ," + "'AGENT_POWERS' INTEGER NOT NULL ," + "'TITLE' TEXT NOT NULL ," + "'IS_OWNER' INTEGER NOT NULL );")
-        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_GroupMembers_GROUP_ID_REQUEST_ID ON GroupMembers" + " (GROUP_ID,REQUEST_ID);")
-    }
-
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'GroupMembers'")
-    }
-
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, groupMember: GroupMember): Unit {
-        sQLiteStatement.clearBindings()
-        sQLiteStatement.bindString(1, groupMember.getGroupID().toString())
-        sQLiteStatement.bindString(2, groupMember.getRequestID().toString())
-        sQLiteStatement.bindString(3, groupMember.getUserID().toString())
-        sQLiteStatement.bindLong(4, (Long) groupMember.getContribution())
-        sQLiteStatement.bindString(5, groupMember.getOnlineStatus())
-        sQLiteStatement.bindLong(6, groupMember.getAgentPowers())
-        sQLiteStatement.bindString(7, groupMember.getTitle())
-        sQLiteStatement.bindLong(8, groupMember.getIsOwner() ? 1 : 0)
-    }
-
-    fun getKey(groupMember: GroupMember): Void {
+    override fun getKey(entity: GroupMember?): Void? {
         return null
     }
 
-    protected fun isEntityUpdateable(): Boolean {
+    override fun isEntityUpdateable(): Boolean {
         return true
     }
 
-    fun readEntity(cursor: Cursor, i: Int): GroupMember {
-        Boolean z = false
-        UUID fromString = UUID.fromString(cursor.getString(i + 0))
-        UUID fromString2 = UUID.fromString(cursor.getString(i + 1))
-        UUID fromString3 = UUID.fromString(cursor.getString(i + 2))
-        Int i2 = cursor.getInt(i + 3)
-        String string = cursor.getString(i + 4)
-        Long j = cursor.getLong(i + 5)
-        String string2 = cursor.getString(i + 6)
-        if (cursor.getShort(i + 7) != (Short) 0) {
-            z = true
-        }
-        return GroupMember(fromString, fromString2, fromString3, i2, string, j, string2, z)
+    override fun readEntity(cursor: Cursor, offset: Int): GroupMember {
+        return GroupMember(
+            UUID.fromString(cursor.getString(offset + 0)),
+            UUID.fromString(cursor.getString(offset + 1)),
+            UUID.fromString(cursor.getString(offset + 2)),
+            cursor.getInt(offset + 3),
+            cursor.getString(offset + 4),
+            cursor.getLong(offset + 5),
+            cursor.getString(offset + 6),
+            cursor.getShort(offset + 7).toInt() != 0
+        )
     }
 
-    fun readEntity(cursor: Cursor, groupMember: GroupMember, i: Int): Unit {
-        Boolean z = false
-        groupMember.setGroupID(UUID.fromString(cursor.getString(i + 0)))
-        groupMember.setRequestID(UUID.fromString(cursor.getString(i + 1)))
-        groupMember.setUserID(UUID.fromString(cursor.getString(i + 2)))
-        groupMember.setContribution(cursor.getInt(i + 3))
-        groupMember.setOnlineStatus(cursor.getString(i + 4))
-        groupMember.setAgentPowers(cursor.getLong(i + 5))
-        groupMember.setTitle(cursor.getString(i + 6))
-        if (cursor.getShort(i + 7) != (Short) 0) {
-            z = true
-        }
-        groupMember.setIsOwner(z)
+    override fun readEntity(cursor: Cursor, entity: GroupMember, offset: Int) {
+        entity.groupID = UUID.fromString(cursor.getString(offset + 0))
+        entity.requestID = UUID.fromString(cursor.getString(offset + 1))
+        entity.userID = UUID.fromString(cursor.getString(offset + 2))
+        entity.contribution = cursor.getInt(offset + 3)
+        entity.onlineStatus = cursor.getString(offset + 4)
+        entity.agentPowers = cursor.getLong(offset + 5)
+        entity.title = cursor.getString(offset + 6)
+        entity.isOwner = cursor.getShort(offset + 7).toInt() != 0
     }
 
-    fun readKey(cursor: Cursor, i: Int): Void {
+    override fun readKey(cursor: Cursor, offset: Int): Void? {
         return null
     }
 
-    protected fun updateKeyAfterInsert(groupMember: GroupMember, j: Long): Void {
+    override fun updateKeyAfterInsert(entity: GroupMember, rowId: Long): Void? {
         return null
     }
 }

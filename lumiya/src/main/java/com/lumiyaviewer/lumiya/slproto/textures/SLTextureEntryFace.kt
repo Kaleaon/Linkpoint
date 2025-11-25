@@ -5,88 +5,102 @@ import java.util.UUID
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 
-abstract class SLTextureEntryFace {
-    Int AttributeAll = -1
-    Int AttributeGlow = 512
-    Int AttributeMaterial = 128
-    Int AttributeMedia = 256
-    Int AttributeOffsetU = 16
-    Int AttributeOffsetV = 32
-    Int AttributeRGBA = 2
-    Int AttributeRepeatU = 4
-    Int AttributeRepeatV = 8
-    Int AttributeRotation = 64
-    Int AttributeTextureID = 1
-    private InternPool<SLTextureEntryFace> pool = InternPool<>()
+data class SLTextureEntryFace(
+    val textureID: UUID?,
+    val rgba: Int,
+    val repeatU: Float,
+    val repeatV: Float,
+    val offsetU: Float,
+    val offsetV: Float,
+    val rotation: Float,
+    val glow: Float,
+    val materialb: Byte,
+    val mediab: Byte,
+    val hasAttribute: Int
+) {
+    
+    fun getGlow(defaultFace: SLTextureEntryFace): Float {
+        return if ((hasAttribute and AttributeGlow) != 0) glow else defaultFace.glow
+    }
 
-    SLTextureEntryFace create(MutableSLTextureEntryFace mutableSLTextureEntryFace) {
-        if (mutableSLTextureEntryFace == null) {
-            return null
+    fun getMaterial(defaultFace: SLTextureEntryFace): Byte {
+        return if ((hasAttribute and AttributeMaterial) != 0) materialb else defaultFace.materialb
+    }
+
+    fun getMedia(defaultFace: SLTextureEntryFace): Byte {
+        return if ((hasAttribute and AttributeMedia) != 0) mediab else defaultFace.mediab
+    }
+
+    fun getOffsetU(defaultFace: SLTextureEntryFace): Float {
+        return if ((hasAttribute and AttributeOffsetU) != 0) offsetU else defaultFace.offsetU
+    }
+
+    fun getOffsetV(defaultFace: SLTextureEntryFace): Float {
+        return if ((hasAttribute and AttributeOffsetV) != 0) offsetV else defaultFace.offsetV
+    }
+
+    fun getRGBA(defaultFace: SLTextureEntryFace): Int {
+        return if ((hasAttribute and AttributeRGBA) != 0) rgba else defaultFace.rgba
+    }
+
+    fun getRepeatU(defaultFace: SLTextureEntryFace): Float {
+        return if ((hasAttribute and AttributeRepeatU) != 0) repeatU else defaultFace.repeatU
+    }
+
+    fun getRepeatV(defaultFace: SLTextureEntryFace): Float {
+        return if ((hasAttribute and AttributeRepeatV) != 0) repeatV else defaultFace.repeatV
+    }
+
+    fun getRotation(defaultFace: SLTextureEntryFace): Float {
+        return if ((hasAttribute and AttributeRotation) != 0) rotation else defaultFace.rotation
+    }
+
+    fun getTextureID(defaultFace: SLTextureEntryFace): UUID? {
+        return if ((hasAttribute and AttributeTextureID) != 0) textureID else defaultFace.textureID
+    }
+
+    companion object {
+        const val AttributeAll = -1
+        const val AttributeGlow = 512
+        const val AttributeMaterial = 128
+        const val AttributeMedia = 256
+        const val AttributeOffsetU = 16
+        const val AttributeOffsetV = 32
+        const val AttributeRGBA = 2
+        const val AttributeRepeatU = 4
+        const val AttributeRepeatV = 8
+        const val AttributeRotation = 64
+        const val AttributeTextureID = 1
+        
+        private val pool = InternPool<SLTextureEntryFace>()
+
+        fun create(mutable: MutableSLTextureEntryFace?): SLTextureEntryFace? {
+            if (mutable == null) return null
+            return pool.intern(SLTextureEntryFace(
+                mutable.textureID,
+                mutable.rgba,
+                mutable.repeatU,
+                mutable.repeatV,
+                mutable.offsetU,
+                mutable.offsetV,
+                mutable.rotation,
+                mutable.glow,
+                mutable.materialb,
+                mutable.mediab,
+                mutable.hasAttribute
+            ))
         }
-        return pool.intern(AutoValue_SLTextureEntryFace(mutableSLTextureEntryFace.textureID, mutableSLTextureEntryFace.rgba, mutableSLTextureEntryFace.repeatU, mutableSLTextureEntryFace.repeatV, mutableSLTextureEntryFace.offsetU, mutableSLTextureEntryFace.offsetV, mutableSLTextureEntryFace.rotation, mutableSLTextureEntryFace.glow, mutableSLTextureEntryFace.materialb, mutableSLTextureEntryFace.mediab, mutableSLTextureEntryFace.hasAttribute))
     }
-
-    Float getGlow(@NonNull SLTextureEntryFace sLTextureEntryFace) {
-        return (hasAttribute() & 512) != 0 ? glow() : sLTextureEntryFace.glow()
-    }
-
-    Byte getMaterial(@NonNull SLTextureEntryFace sLTextureEntryFace) {
-        return (hasAttribute() & 128) != 0 ? materialb() : sLTextureEntryFace.materialb()
-    }
-
-    Byte getMedia(@NonNull SLTextureEntryFace sLTextureEntryFace) {
-        return (hasAttribute() & 256) != 0 ? mediab() : sLTextureEntryFace.mediab()
-    }
-
-    Float getOffsetU(@NonNull SLTextureEntryFace sLTextureEntryFace) {
-        return (hasAttribute() & 16) != 0 ? offsetU() : sLTextureEntryFace.offsetU()
-    }
-
-    Float getOffsetV(@NonNull SLTextureEntryFace sLTextureEntryFace) {
-        return (hasAttribute() & 32) != 0 ? offsetV() : sLTextureEntryFace.offsetV()
-    }
-
-    Int getRGBA(@NonNull SLTextureEntryFace sLTextureEntryFace) {
-        return (hasAttribute() & 2) != 0 ? rgba() : sLTextureEntryFace.rgba()
-    }
-
-    Float getRepeatU(@NonNull SLTextureEntryFace sLTextureEntryFace) {
-        return (hasAttribute() & 4) != 0 ? repeatU() : sLTextureEntryFace.repeatU()
-    }
-
-    Float getRepeatV(@NonNull SLTextureEntryFace sLTextureEntryFace) {
-        return (hasAttribute() & 8) != 0 ? repeatV() : sLTextureEntryFace.repeatV()
-    }
-
-    Float getRotation(@NonNull SLTextureEntryFace sLTextureEntryFace) {
-        return (hasAttribute() & 64) != 0 ? rotation() : sLTextureEntryFace.rotation()
-    }
-
-    @Nullable
-    UUID getTextureID(@NonNull SLTextureEntryFace sLTextureEntryFace) {
-        return (hasAttribute() & 1) != 0 ? textureID() : sLTextureEntryFace.textureID()
-    }
-
-    abstract Float glow()
-
-    abstract Int hasAttribute()
-
-    abstract Byte materialb()
-
-    abstract Byte mediab()
-
-    abstract Float offsetU()
-
-    abstract Float offsetV()
-
-    abstract Float repeatU()
-
-    abstract Float repeatV()
-
-    abstract Int rgba()
-
-    abstract Float rotation()
-
-    @Nullable
-    abstract UUID textureID()
+    
+    // Compatibility methods
+    fun textureID() = textureID
+    fun rgba() = rgba
+    fun repeatU() = repeatU
+    fun repeatV() = repeatV
+    fun offsetU() = offsetU
+    fun offsetV() = offsetV
+    fun rotation() = rotation
+    fun glow() = glow
+    fun materialb() = materialb
+    fun mediab() = mediab
 }

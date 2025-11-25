@@ -25,7 +25,7 @@ class AvatarNotesUpdateMessage : SLMessage() {
         notes = unpackVariable(buffer, 2)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00B1
+    override fun getMessageID(): Int = 0xFFFF00B1.toInt()
 
     override fun getMessageName(): String = "AvatarNotesUpdate"
 }

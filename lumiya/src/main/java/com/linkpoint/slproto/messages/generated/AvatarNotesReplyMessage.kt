@@ -22,7 +22,7 @@ class AvatarNotesReplyMessage : SLMessage() {
         notes = unpackVariable(buffer, 2)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00B0
+    override fun getMessageID(): Int = 0xFFFF00B0.toInt()
 
     override fun getMessageName(): String = "AvatarNotesReply"
 }

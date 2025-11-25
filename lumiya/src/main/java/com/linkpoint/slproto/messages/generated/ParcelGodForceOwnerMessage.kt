@@ -29,7 +29,7 @@ class ParcelGodForceOwnerMessage : SLMessage() {
         localId = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00D6
+    override fun getMessageID(): Int = 0xFFFF00D6.toInt()
 
     override fun getMessageName(): String = "ParcelGodForceOwner"
 }

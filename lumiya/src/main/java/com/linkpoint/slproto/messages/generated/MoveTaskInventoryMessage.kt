@@ -28,7 +28,7 @@ class MoveTaskInventoryMessage : SLMessage() {
         itemId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0120
+    override fun getMessageID(): Int = 0xFFFF0120.toInt()
 
     override fun getMessageName(): String = "MoveTaskInventory"
 }

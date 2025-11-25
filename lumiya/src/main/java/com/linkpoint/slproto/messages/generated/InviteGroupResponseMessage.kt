@@ -31,7 +31,7 @@ class InviteGroupResponseMessage : SLMessage() {
         groupLimit = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF015E
+    override fun getMessageID(): Int = 0xFFFF015E.toInt()
 
     override fun getMessageName(): String = "InviteGroupResponse"
 }

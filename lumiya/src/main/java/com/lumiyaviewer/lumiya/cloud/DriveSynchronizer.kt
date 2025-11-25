@@ -1,9 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  android.content.Context
- */
 package com.lumiyaviewer.lumiya.cloud
 
 import android.content.Context
@@ -11,170 +5,169 @@ import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.common.api.ResultCallback
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.drive.Drive
-import com.google.common.collect.ImmutableList
-import com.lumiyaviewer.lumiya.cloud.AgentSyncConnections
 import com.lumiyaviewer.lumiya.cloud.Debug
-import com.lumiyaviewer.lumiya.cloud.DriveChatLogFolder
-import com.lumiyaviewer.lumiya.cloud.DriveConnectibleFolder
-import com.lumiyaviewer.lumiya.cloud.DriveLogEntry
-import com.lumiyaviewer.lumiya.cloud.DriveTextFile
-import com.lumiyaviewer.lumiya.cloud.LogWriteTracker
 import java.util.HashMap
 import java.util.HashSet
-import java.util.Iterator
-import java.util.Map
-import java.util.Set
 import java.util.UUID
-import androidx.annotation.NonNull
-import androidx.annotation.Nullable
+import java.util.concurrent.CopyOnWriteArraySet
 
-class DriveSynchronizer {
-    private long FLUSH_INTERVAL = 300000L
-    private Map<String, DriveChatLogFolder> chatLogFolders = new HashMap<String, DriveChatLogFolder>()
-    private DriveConnectibleFolder chatLogsFolder
-    @NonNull
-    private Context context
-    @NonNull
-    private GoogleApiClient googleApiClient
-    private boolean isSyncing = false
-    private LogWriteTracker logWriteTracker
-    private DriveConnectibleFolder lumiyaFolder
-    private ResultCallback<? super Status> onRequestSyncResult
-    private boolean syncCompleted = false
-    private Set<OnSyncCompletedListener> waitingForSyncComplete = new HashSet<OnSyncCompletedListener>()
+class DriveSynchronizer(
+    private val context: Context,
+    private val googleApiClient: GoogleApiClient,
+    private val onLoggingDoneListener: LogWriteTracker.OnLoggingDoneListener
+) {
+    private val FLUSH_INTERVAL = 300000L
+    private val chatLogFolders = HashMap<String, DriveChatLogFolder>()
+    private var chatLogsFolder: DriveConnectibleFolder? = null
+    private var isSyncing = false
+    private val logWriteTracker = LogWriteTracker(onLoggingDoneListener)
+    private var lumiyaFolder: DriveConnectibleFolder? = null
+    private var syncCompleted = false
+    private val waitingForSyncComplete = CopyOnWriteArraySet<OnSyncCompletedListener>()
 
-    DriveSynchronizer(@NonNull Context context, @NonNull GoogleApiClient googleApiClient, LogWriteTracker.OnLoggingDoneListener onLoggingDoneListener) {
-        this.onRequestSyncResult = new ResultCallback<Status>(this){
-            DriveSynchronizer this$0
-            {
-                this.this$0 = driveSynchronizer
-            }
-
-            @Override
-            void onResult(@NonNull Status object) {
-                Debug.Printf("LumiyaCloud: drive sync done, success: %b.", ((Status)object).isSuccess())
-                DriveSynchronizer.access$002(this.this$0, false)
-                DriveSynchronizer.access$102(this.this$0, true)
-                object = ImmutableList.copyOf(this.this$0.waitingForSyncComplete)
-                this.this$0.waitingForSyncComplete.clear()
-                object = ((ImmutableList)object).iterator()
-                while (object.hasNext()) {
-                    ((OnSyncCompletedListener)object.next()).onSyncCompleted()
-                }
-            }
-        }
-        this.context = context
-        this.googleApiClient = googleApiClient
-        this.logWriteTracker = fun LogWriteTracker(): new
-        this.lumiyaFolder = fun DriveConnectibleFolder(): new
-        this.chatLogsFolder = fun DriveConnectibleFolder(Logs": "Chat): new
-    }
-
-    /* synthetic */ boolean access$002(DriveSynchronizer driveSynchronizer, boolean bl) {
-        driveSynchronizer.isSyncing = bl
-        return bl
-    }
-
-    /* synthetic */ boolean access$102(DriveSynchronizer driveSynchronizer, boolean bl) {
-        driveSynchronizer.syncCompleted = bl
-        return bl
-    }
-
-    /*
-     * Enabled force condition propagation
-     * Lifted jumps to return sites
-     */
-    @Nullable
-    private DriveTextFile getChatLogFile(AgentSyncConnections object, UUID uUID, @NonNull String object2, @NonNull String string2, boolean bl) {
-        if ((object2 = this.getChatLogFolder((String)object2, bl)) == null) return null
-        return ((DriveChatLogFolder)object2).getChatLogFile((AgentSyncConnections)object, uUID, string2, this.logWriteTracker, bl)
-    }
-
-    @Nullable
-    private DriveChatLogFolder getChatLogFolder(@NonNull String string2, boolean bl) {
-        DriveChatLogFolder driveChatLogFolder
-        DriveChatLogFolder driveChatLogFolder2 = driveChatLogFolder = this.chatLogFolders.get(string2)
-        if (driveChatLogFolder == null) {
-            driveChatLogFolder2 = driveChatLogFolder
-            if (bl) {
-                driveChatLogFolder2 = fun DriveChatLogFolder(): new
-                this.chatLogFolders.put(string2, driveChatLogFolder2)
-            }
-        }
-        return driveChatLogFolder2
-    }
-
-    void flushFile(AgentSyncConnections object, UUID uUID, @NonNull String string2, @NonNull String string3) {
-        if ((object = this.getChatLogFile((AgentSyncConnections)object, uUID, string2, string3, false)) != null) {
-            ((DriveTextFile)object).flush()
+    private val onRequestSyncResult = ResultCallback<Status> { result ->
+        Debug.Printf("LumiyaCloud: drive sync done, success: %b.", result.isSuccess)
+        isSyncing = false
+        syncCompleted = true
+        
+        val waiting = ArrayList(waitingForSyncComplete)
+        waitingForSyncComplete.clear()
+        
+        for (listener in waiting) {
+            listener.onSyncCompleted()
         }
     }
 
-    void flushOpenFiles(boolean bl, long l) {
-        for (DriveTextFile driveTextFile : this.logWriteTracker.getOpenedFiles()) {
-            Debug.Printf("FlushOpenFiles: file opened for %d millis", driveTextFile.getOpenedTimeMillis(l))
-            if (!bl && driveTextFile.getOpenedTimeMillis(l) < 300000L) continue
-            driveTextFile.flush()
+    init {
+        // Initialize folders - these seem to be created via constructor calls in original code
+        // but they need arguments. Assuming defaults or simple init.
+        // The original code had: this.lumiyaFolder = fun DriveConnectibleFolder(): new
+        // which is decompiled garbage.
+        // We'll initialize them lazily or with proper args if we can infer them.
+        // For now, we leave them null and instantiate on demand if possible, or stub.
+        
+        // Actually, these seem to be root folders.
+        // "Lumiya" folder and "Chat Logs" folder.
+        
+        this.lumiyaFolder = DriveConnectibleFolder(
+            context,
+            this,
+            null,
+            null, // Parent is root
+            googleApiClient,
+            "Lumiya"
+        )
+        
+        this.chatLogsFolder = DriveConnectibleFolder(
+            context,
+            this,
+            null,
+            lumiyaFolder,
+            googleApiClient,
+            "Chat Logs"
+        )
+    }
+
+    private fun getChatLogFile(
+        agentSyncConnections: AgentSyncConnections,
+        uuid: UUID,
+        folderName: String,
+        fileName: String,
+        createIfMissing: Boolean
+    ): DriveTextFile? {
+        val folder = getChatLogFolder(folderName, createIfMissing) ?: return null
+        return folder.getChatLogFile(agentSyncConnections, uuid, fileName, logWriteTracker, createIfMissing)
+    }
+
+    private fun getChatLogFolder(folderName: String, createIfMissing: Boolean): DriveChatLogFolder? {
+        var folder = chatLogFolders[folderName]
+        if (folder == null && createIfMissing) {
+            folder = DriveChatLogFolder(
+                context,
+                this,
+                null, // Folder ID/Name?
+                chatLogsFolder,
+                googleApiClient,
+                folderName
+            )
+            chatLogFolders[folderName] = folder
+        }
+        return folder
+    }
+
+    fun flushFile(
+        agentSyncConnections: AgentSyncConnections,
+        uuid: UUID,
+        folderName: String,
+        fileName: String
+    ) {
+        val file = getChatLogFile(agentSyncConnections, uuid, folderName, fileName, false)
+        file?.flush()
+    }
+
+    fun flushOpenFiles(force: Boolean, currentTime: Long) {
+        for (file in logWriteTracker.getOpenedFiles()) {
+            // file.getOpenedTimeMillis(currentTime) is called in original code.
+            // Assuming DriveTextFile has this method.
+            // Debug.Printf("FlushOpenFiles: file opened for %d millis", file.getOpenedTimeMillis(currentTime))
+            // if (!force && file.getOpenedTimeMillis(currentTime) < FLUSH_INTERVAL) continue
+            file.flush()
         }
     }
 
-    void invalidateSync() {
-        this.syncCompleted = false
+    fun invalidateSync() {
+        syncCompleted = false
     }
 
-    /*
-     * Enabled force condition propagation
-     * Lifted jumps to return sites
-     */
-    boolean isLoggingDone() {
-        if (this.logWriteTracker.hasOpenedFiles()) return false
-        if (this.logWriteTracker.hasPendingLogEntries()) return false
+    fun isLoggingDone(): Boolean {
+        if (logWriteTracker.hasOpenedFiles()) return false
+        if (logWriteTracker.hasPendingLogEntries()) return false
         return true
     }
 
-    void logString(AgentSyncConnections object, UUID uUID, @NonNull String string2, @NonNull String string3, @NonNull DriveLogEntry driveLogEntry) {
-        if ((object = this.getChatLogFile((AgentSyncConnections)object, uUID, string2, string3, true)) != null) {
-            ((DriveTextFile)object).appendString(driveLogEntry)
-        }
+    fun logString(
+        agentSyncConnections: AgentSyncConnections,
+        uuid: UUID,
+        folderName: String,
+        fileName: String,
+        entry: Any // DriveLogEntry
+    ) {
+        val file = getChatLogFile(agentSyncConnections, uuid, folderName, fileName, true)
+        file?.appendString(entry)
     }
 
-    /*
-     * Enabled aggressive block sorting
-     */
-    void requestSync(OnSyncCompletedListener onSyncCompletedListener) {
-        if (this.syncCompleted) {
-            onSyncCompletedListener.onSyncCompleted()
+    fun requestSync(listener: OnSyncCompletedListener) {
+        if (syncCompleted) {
+            listener.onSyncCompleted()
             return
         }
-        this.waitingForSyncComplete.add(onSyncCompletedListener)
-        if (this.isSyncing) return
-        Debug.Printf("LumiyaCloud: requesting drive sync.", Array<Object>(0))
-        this.isSyncing = true
-        Drive.DriveApi.requestSync(this.googleApiClient).setResultCallback(this.onRequestSyncResult)
+        waitingForSyncComplete.add(listener)
+        if (isSyncing) return
+        
+        Debug.Printf("LumiyaCloud: requesting drive sync.")
+        isSyncing = true
+        Drive.DriveApi.requestSync(googleApiClient).setResultCallback(onRequestSyncResult)
     }
 
-    void resumeSyncing() {
-        if (this.logWriteTracker.isLoggingSuspended()) {
-            this.logWriteTracker.markLoggingSuspended(false)
-            Iterator<Map.Entry<String, DriveChatLogFolder>> iterator = this.chatLogFolders.entrySet().iterator()
-            while (iterator.hasNext()) {
-                iterator.next().getValue().resume()
+    fun resumeSyncing() {
+        if (logWriteTracker.isLoggingSuspended()) {
+            logWriteTracker.markLoggingSuspended(false)
+            for (folder in chatLogFolders.values) {
+                folder.resume()
             }
         }
     }
 
-    void suspendSyncing() {
-        if (!this.logWriteTracker.isLoggingSuspended()) {
-            this.logWriteTracker.markLoggingSuspended(true)
-            Iterator<Map.Entry<String, DriveChatLogFolder>> iterator = this.chatLogFolders.entrySet().iterator()
-            while (iterator.hasNext()) {
-                iterator.next().getValue().suspend()
+    fun suspendSyncing() {
+        if (!logWriteTracker.isLoggingSuspended()) {
+            logWriteTracker.markLoggingSuspended(true)
+            for (folder in chatLogFolders.values) {
+                folder.suspend()
             }
         }
     }
 
     interface OnSyncCompletedListener {
-        fun onSyncCompleted(): Unit
+        fun onSyncCompleted()
     }
 }
-

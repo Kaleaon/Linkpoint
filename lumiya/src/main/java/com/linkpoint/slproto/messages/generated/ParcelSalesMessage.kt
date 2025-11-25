@@ -35,7 +35,7 @@ class ParcelSalesMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00E2
+    override fun getMessageID(): Int = 0xFFFF00E2.toInt()
 
     override fun getMessageName(): String = "ParcelSales"
 }

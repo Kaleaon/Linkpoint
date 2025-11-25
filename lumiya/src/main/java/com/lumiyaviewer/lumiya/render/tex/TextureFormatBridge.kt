@@ -2,9 +2,7 @@ package com.lumiyaviewer.lumiya.render.tex
 
 import android.content.Context
 import android.util.Log
-
 import com.lumiyaviewer.lumiya.render.ModernTextureManager
-
 import java.io.IOException
 import java.io.InputStream
 
@@ -13,20 +11,20 @@ import java.io.InputStream
  * This class provides a migration path and fallback mechanisms
  */
 class TextureFormatBridge {
-    private val TAG: String = "TextureFormatBridge"
+    private val TAG = "TextureFormatBridge"
     
-    private ModernTextureManager modernManager
-    private boolean modernManagerInitialized = false
+    private var modernManager: ModernTextureManager? = null
+    private var modernManagerInitialized = false
     
     /**
      * Initialize the texture format bridge
      */
-    void initialize(Context context) {
+    fun initialize(context: Context) {
         try {
             modernManager = ModernTextureManager(context)
             modernManagerInitialized = true
             Log.i(TAG, "Modern texture manager initialized successfully")
-        } catch (Exception e) {
+        } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize modern texture manager, falling back to legacy system", e)
             modernManagerInitialized = false
         }
@@ -35,31 +33,36 @@ class TextureFormatBridge {
     /**
      * Check if modern texture system is available
      */
-    boolean isModernTextureSystemAvailable() {
+    fun isModernTextureSystemAvailable(): Boolean {
         return modernManagerInitialized && modernManager != null
     }
     
     /**
      * Detect texture format from stream header
      */
-    TextureFormat detectTextureFormat(InputStream stream) throws IOException {
+    @Throws(IOException::class)
+    fun detectTextureFormat(stream: InputStream): TextureFormat {
         // Read first few bytes to detect format
+        if (!stream.markSupported()) {
+            return TextureFormat.JPEG2000 // Fallback
+        }
+        
         stream.mark(16)
-        byte[] header = ByteArray(12)
-        int bytesRead = stream.read(header)
+        val header = ByteArray(12)
+        val bytesRead = stream.read(header)
         stream.reset()
         
         if (bytesRead >= 12) {
-            // Check for KTX2 magic bytes: 0xAB, 0x4B, 0x54, 0x58, 0x20, 0x32, 0x30, 0xBB, 0x0D, 0x0A, 0x1A, 0x0A
-            if (header[0] == (byte)0xAB && header[1] == 0x4B && header[2] == 0x54 && header[3] == 0x58 &&
-                header[4] == 0x20 && header[5] == 0x32 && header[6] == 0x30 && header[7] == (byte)0xBB &&
-                header[8] == 0x0D && header[9] == 0x0A && header[10] == 0x1A && header[11] == 0x0A) {
+            // Check for KTX2 magic bytes
+            if (header[0] == 0xAB.toByte() && header[1] == 0x4B.toByte() && header[2] == 0x54.toByte() && header[3] == 0x58.toByte() &&
+                header[4] == 0x20.toByte() && header[5] == 0x32.toByte() && header[6] == 0x30.toByte() && header[7] == 0xBB.toByte() &&
+                header[8] == 0x0D.toByte() && header[9] == 0x0A.toByte() && header[10] == 0x1A.toByte() && header[11] == 0x0A.toByte()) {
                 return TextureFormat.KTX2
             }
             
-            // Check for JPEG2000 magic bytes (JP2 format): 0x00, 0x00, 0x00, 0x0C, 0x6A, 0x50, 0x20, 0x20
-            if (header[0] == 0x00 && header[1] == 0x00 && header[2] == 0x00 && header[3] == 0x0C &&
-                header[4] == 0x6A && header[5] == 0x50 && header[6] == 0x20 && header[7] == 0x20) {
+            // Check for JPEG2000 magic bytes
+            if (header[0] == 0x00.toByte() && header[1] == 0x00.toByte() && header[2] == 0x00.toByte() && header[3] == 0x0C.toByte() &&
+                header[4] == 0x6A.toByte() && header[5] == 0x50.toByte() && header[6] == 0x20.toByte() && header[7] == 0x20.toByte()) {
                 return TextureFormat.JPEG2000
             }
         }
@@ -71,25 +74,23 @@ class TextureFormatBridge {
     /**
      * Load texture using appropriate system based on format
      */
-    TextureData loadTexture(InputStream stream) throws IOException {
-        TextureFormat format = detectTextureFormat(stream)
+    @Throws(IOException::class)
+    fun loadTexture(stream: InputStream): TextureData {
+        val format = detectTextureFormat(stream)
         
-        switch (format) {
-            case KTX2:
-                return loadKTX2Texture(stream)
-            case JPEG2000:
-                return loadJPEG2000Texture(stream)
-            default:
-                throw IOException("Unsupported texture format: " + format)
+        return when (format) {
+            TextureFormat.KTX2 -> loadKTX2Texture(stream)
+            TextureFormat.JPEG2000 -> loadJPEG2000Texture(stream)
         }
     }
     
-    private TextureData loadKTX2Texture(InputStream stream) throws IOException {
+    @Throws(IOException::class)
+    private fun loadKTX2Texture(stream: InputStream): TextureData {
         if (!isModernTextureSystemAvailable()) {
             throw IOException("Modern texture system not available")
         }
         
-        ModernTextureManager.TextureData modernData = modernManager.loadKTX2Texture(stream)
+        val modernData = modernManager!!.loadKTX2Texture(stream)
         
         // Convert to unified TextureData format
         return TextureData(
@@ -102,9 +103,8 @@ class TextureFormatBridge {
         )
     }
     
-    private TextureData loadJPEG2000Texture(InputStream stream) throws IOException {
-        // This would integrate with the existing OpenJPEG system
-        // For now, return a placeholder
+    @Throws(IOException::class)
+    private fun loadJPEG2000Texture(stream: InputStream): TextureData {
         throw IOException("JPEG2000 texture loading not implemented in bridge")
     }
     
@@ -119,28 +119,43 @@ class TextureFormatBridge {
     /**
      * Unified texture data structure
      */
-    class TextureData {
-        int width
-        int height
-        byte[] data
-        TextureFormat format
-        int openGLFormat
-        boolean compressed
-        
-        TextureData(int width, int height, byte[] data, TextureFormat format, 
-                          int openGLFormat, boolean compressed) {
-            this.width = width
-            this.height = height
-            this.data = data
-            this.format = format
-            this.openGLFormat = openGLFormat
-            this.compressed = compressed
-        }
-        
-        @Override
-        String toString() {
+    data class TextureData(
+        val width: Int,
+        val height: Int,
+        val data: ByteArray,
+        val format: TextureFormat,
+        val openGLFormat: Int,
+        val compressed: Boolean
+    ) {
+        override fun toString(): String {
             return String.format("TextureData[%dx%d, %s, %s, %d bytes]",
-                    width, height, format, compressed ? "compressed" : "uncompressed", data.length)
+                    width, height, format, if (compressed) "compressed" else "uncompressed", data.size)
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as TextureData
+
+            if (width != other.width) return false
+            if (height != other.height) return false
+            if (!data.contentEquals(other.data)) return false
+            if (format != other.format) return false
+            if (openGLFormat != other.openGLFormat) return false
+            if (compressed != other.compressed) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = width
+            result = 31 * result + height
+            result = 31 * result + data.contentHashCode()
+            result = 31 * result + format.hashCode()
+            result = 31 * result + openGLFormat
+            result = 31 * result + compressed.hashCode()
+            return result
         }
     }
 }

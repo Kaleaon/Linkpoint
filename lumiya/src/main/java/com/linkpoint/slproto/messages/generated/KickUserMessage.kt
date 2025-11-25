@@ -29,7 +29,7 @@ class KickUserMessage : SLMessage() {
         reason = unpackVariable(buffer, 2)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00A3
+    override fun getMessageID(): Int = 0xFFFF00A3.toInt()
 
     override fun getMessageName(): String = "KickUser"
 }

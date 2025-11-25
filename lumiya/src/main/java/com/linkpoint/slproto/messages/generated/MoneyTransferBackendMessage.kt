@@ -56,7 +56,7 @@ class MoneyTransferBackendMessage : SLMessage() {
         description = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0138
+    override fun getMessageID(): Int = 0xFFFF0138.toInt()
 
     override fun getMessageName(): String = "MoneyTransferBackend"
 }

@@ -44,7 +44,7 @@ class AvatarPickerReplyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF001C
+    override fun getMessageID(): Int = 0xFFFF001C.toInt()
 
     override fun getMessageName(): String = "AvatarPickerReply"
 }

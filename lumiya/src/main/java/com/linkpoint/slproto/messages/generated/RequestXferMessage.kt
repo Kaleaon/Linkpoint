@@ -38,7 +38,7 @@ class RequestXferMessage : SLMessage() {
         vFileType = unpackShort(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF009C
+    override fun getMessageID(): Int = 0xFFFF009C.toInt()
 
     override fun getMessageName(): String = "RequestXfer"
 }

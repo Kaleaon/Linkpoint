@@ -62,7 +62,7 @@ open class SLCircuit @JvmOverloads constructor(
     private val receivedAcks: MutableList<Int> = previousCircuit?.receivedAcks ?: mutableListOf()
     protected val lastSeqNum: AtomicInteger = previousCircuit?.lastSeqNum ?: AtomicInteger(0)
 
-    private val selector: Selector = gridConn.selector
+    private val selector: Selector = gridConn.getSelector()
     private val datagramChannel: DatagramChannel = previousCircuit?.datagramChannel ?: DatagramChannel.open().apply {
         configureBlocking(false)
         connect(circuitInfo.socketAddress)
@@ -82,9 +82,6 @@ open class SLCircuit @JvmOverloads constructor(
     private var lastPingID: Byte = previousCircuit?.lastPingID ?: 0
     private var timedOut: Boolean = previousCircuit?.timedOut ?: false
 
-    /**
-     * Close the circuit, unregistering from the selector and closing the datagram channel.
-     */
     open fun closeCircuit() {
         try {
             selectionKey.cancel()
@@ -101,25 +98,16 @@ open class SLCircuit @JvmOverloads constructor(
         processCloseCircuit()
     }
 
-    /**
-     * Default handler for CAPS event queue messages.
-     */
     open fun defaultEventQueueHandler(eventType: CapsEventType, node: LLSDNode) {
         if (!messageRouter.handleEventQueueMessage(eventType, node)) {
             Debug.Log("Unhandled event queue message: type = $eventType")
         }
     }
 
-    /**
-     * Default handler routed from [SLMessageRouter].
-     */
-    open fun defaultMessageHandler(message: SLMessage) {
+    override fun DefaultMessageHandler(message: SLMessage) {
         messageRouter.handleMessage(message)
     }
 
-    /**
-     * Dispatch an incoming message to the appropriate handler.
-     */
     fun handleMessage(message: SLMessage) {
         message.handleMessage(this)
     }
@@ -321,7 +309,7 @@ open class SLCircuit @JvmOverloads constructor(
         if (pingSentCount < UNANSWERED_PINGS) {
             val startPing = StartPingCheck().apply {
                 val oldestUnacked = unackedQueue.peek()?.seqNum ?: lastSeqNum.get()
-                PingID_Field.PingID = lastPingID
+                PingID_Field.PingID = lastPingID.toInt() // Fix Byte to Int conversion
                 PingID_Field.OldestUnacked = oldestUnacked
             }
 
@@ -406,11 +394,9 @@ open class SLCircuit @JvmOverloads constructor(
         }
     }
 
-    // Legacy Java-style method aliases ------------------------------------
-
     fun DefaultEventQueueHandler(eventType: CapsEventType, node: LLSDNode) = defaultEventQueueHandler(eventType, node)
 
-    fun DefaultMessageHandler(message: SLMessage) = defaultMessageHandler(message)
+    // fun DefaultMessageHandler(message: SLMessage) = defaultMessageHandler(message) // Removed to avoid conflict with override
 
     fun HandleMessage(message: SLMessage) = handleMessage(message)
 

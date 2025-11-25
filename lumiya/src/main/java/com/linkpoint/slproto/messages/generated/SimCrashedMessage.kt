@@ -38,7 +38,7 @@ class SimCrashedMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0148
+    override fun getMessageID(): Int = 0xFFFF0148.toInt()
 
     override fun getMessageName(): String = "SimCrashed"
 }

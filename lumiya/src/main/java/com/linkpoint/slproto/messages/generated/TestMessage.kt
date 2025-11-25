@@ -40,7 +40,7 @@ class TestMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0001
+    override fun getMessageID(): Int = 0xFFFF0001.toInt()
 
     override fun getMessageName(): String = "TestMessage"
 }

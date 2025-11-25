@@ -38,7 +38,7 @@ class SetFollowCamPropertiesMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF009F
+    override fun getMessageID(): Int = 0xFFFF009F.toInt()
 
     override fun getMessageName(): String = "SetFollowCamProperties"
 }

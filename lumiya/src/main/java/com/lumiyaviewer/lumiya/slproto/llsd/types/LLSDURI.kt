@@ -8,35 +8,45 @@ import java.net.URI
 import org.xmlpull.v1.XmlSerializer
 
 class LLSDURI : LLSDNode {
-    private URI value
+    private val value: URI
 
-    LLSDURI(String str) {
-        this.value = URI.create("")
+    constructor(str: String) {
+        this.value = try {
+            URI.create(str)
+        } catch (e: Exception) {
+            URI.create("")
+        }
     }
 
-    LLSDURI(URI uri) {
+    constructor(uri: URI) {
         this.value = uri
     }
 
-    URI asURI() {
+    fun asURI(): URI {
         return this.value
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
-        String uri = this.value.toString()
-        dataOutputStream.writeByte(108)
+    @Throws(IOException::class)
+    override fun toBinary(dataOutputStream: DataOutputStream) {
+        val uri = this.value.toString()
+        dataOutputStream.writeByte(108) // 'l'
         if (uri.isEmpty()) {
             dataOutputStream.writeInt(0)
             return
         }
-        byte[] stringToVariableUTF = SLMessage.stringToVariableUTF(uri)
-        dataOutputStream.writeInt(stringToVariableUTF.length)
+        val stringToVariableUTF = SLMessage.stringToVariableUTF(uri)
+        dataOutputStream.writeInt(stringToVariableUTF.size)
         dataOutputStream.write(stringToVariableUTF)
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    @Throws(IOException::class)
+    override fun toXML(xmlSerializer: XmlSerializer) {
         xmlSerializer.startTag("", "uri")
         xmlSerializer.text(this.value.toString())
         xmlSerializer.endTag("", "uri")
+    }
+    
+    override fun asString(): String {
+        return this.value.toString()
     }
 }

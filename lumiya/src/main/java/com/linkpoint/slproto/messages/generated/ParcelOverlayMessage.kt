@@ -22,7 +22,7 @@ class ParcelOverlayMessage : SLMessage() {
         data = unpackVariable(buffer, 2)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00C4
+    override fun getMessageID(): Int = 0xFFFF00C4.toInt()
 
     override fun getMessageName(): String = "ParcelOverlay"
 }

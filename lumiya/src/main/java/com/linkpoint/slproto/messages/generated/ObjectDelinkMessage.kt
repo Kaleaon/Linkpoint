@@ -38,7 +38,7 @@ class ObjectDelinkMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0074
+    override fun getMessageID(): Int = 0xFFFF0074.toInt()
 
     override fun getMessageName(): String = "ObjectDelink"
 }

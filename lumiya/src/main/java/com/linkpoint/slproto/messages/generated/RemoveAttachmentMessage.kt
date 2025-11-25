@@ -25,7 +25,7 @@ class RemoveAttachmentMessage : SLMessage() {
         itemId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF014C
+    override fun getMessageID(): Int = 0xFFFF014C.toInt()
 
     override fun getMessageName(): String = "RemoveAttachment"
 }

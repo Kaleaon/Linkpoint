@@ -45,7 +45,7 @@ class ObjectClickActionMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF005F
+    override fun getMessageID(): Int = 0xFFFF005F.toInt()
 
     override fun getMessageName(): String = "ObjectClickAction"
 }

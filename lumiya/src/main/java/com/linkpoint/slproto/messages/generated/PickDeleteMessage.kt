@@ -22,7 +22,7 @@ class PickDeleteMessage : SLMessage() {
         pickId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00BA
+    override fun getMessageID(): Int = 0xFFFF00BA.toInt()
 
     override fun getMessageName(): String = "PickDelete"
 }

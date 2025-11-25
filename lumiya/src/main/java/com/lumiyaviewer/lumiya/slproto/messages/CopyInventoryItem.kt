@@ -1,79 +1,74 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.base.Ascii
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.nio.ByteBuffer
 import java.util.ArrayList
-import java.util.Iterator
-import java.util.UUID
 
 class CopyInventoryItem : SLMessage {
-    AgentData AgentData_Field
-    ArrayList<InventoryData> InventoryData_Fields = ArrayList<>()
+    var AgentData_Field: AgentData = AgentData()
+    var InventoryData_Fields: ArrayList<InventoryData> = ArrayList()
 
     class AgentData {
-        UUID AgentID
-        UUID SessionID
+        var AgentID: UUID = UUIDPool.ZeroUUID
+        var SessionID: UUID = UUIDPool.ZeroUUID
     }
 
     class InventoryData {
-        Int CallbackID
-        UUID NewFolderID
-        byte[] NewName
-        UUID OldAgentID
-        UUID OldItemID
+        var CallbackID: Int = 0
+        var NewFolderID: UUID = UUIDPool.ZeroUUID
+        var NewName: ByteArray = ByteArray(0)
+        var OldAgentID: UUID = UUIDPool.ZeroUUID
+        var OldItemID: UUID = UUIDPool.ZeroUUID
     }
 
-    CopyInventoryItem() {
+    init {
         this.zeroCoded = true
-        this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
-        Int i = 37
-        Iterator<T> it = this.InventoryData_Fields.iterator()
-        while (true) {
-            Int i2 = i
-            if (!it.hasNext()) {
-                return i2
-            }
-            i = ((InventoryData) it.next()).NewName.length + 53 + i2
+    override fun CalcPayloadSize(): Int {
+        var size = 32
+        for (data in InventoryData_Fields) {
+            size += data.NewName.size + 53
         }
+        return size
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleCopyInventoryItem(this)
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleCopyInventoryItem(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 1)
-        byteBuffer.put(Ascii.CR)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put(29.toByte())
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        byteBuffer.put((byte) this.InventoryData_Fields.size())
-        for (InventoryData inventoryData : this.InventoryData_Fields) {
-            packInt(byteBuffer, inventoryData.CallbackID)
-            packUUID(byteBuffer, inventoryData.OldAgentID)
-            packUUID(byteBuffer, inventoryData.OldItemID)
-            packUUID(byteBuffer, inventoryData.NewFolderID)
-            packVariable(byteBuffer, inventoryData.NewName, 1)
+        val count = this.InventoryData_Fields.size
+        byteBuffer.put(count.toByte())
+        for (data in this.InventoryData_Fields) {
+            packInt(byteBuffer, data.CallbackID)
+            packUUID(byteBuffer, data.OldAgentID)
+            packUUID(byteBuffer, data.OldItemID)
+            packUUID(byteBuffer, data.NewFolderID)
+            packVariable(byteBuffer, data.NewName, 1)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            InventoryData inventoryData = InventoryData()
-            inventoryData.CallbackID = unpackInt(byteBuffer)
-            inventoryData.OldAgentID = unpackUUID(byteBuffer)
-            inventoryData.OldItemID = unpackUUID(byteBuffer)
-            inventoryData.NewFolderID = unpackUUID(byteBuffer)
-            inventoryData.NewName = unpackVariable(byteBuffer, 1)
-            this.InventoryData_Fields.add(inventoryData)
+        val count = byteBuffer.get().toInt() and 0xFF
+        for (i in 0 until count) {
+            val data = InventoryData()
+            data.CallbackID = unpackInt(byteBuffer)
+            data.OldAgentID = unpackUUID(byteBuffer)
+            data.OldItemID = unpackUUID(byteBuffer)
+            data.NewFolderID = unpackUUID(byteBuffer)
+            data.NewName = unpackVariable(byteBuffer, 1)
+            this.InventoryData_Fields.add(data)
         }
     }
 }

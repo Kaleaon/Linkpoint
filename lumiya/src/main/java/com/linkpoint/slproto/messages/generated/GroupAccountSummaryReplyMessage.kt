@@ -83,7 +83,7 @@ class GroupAccountSummaryReplyMessage : SLMessage() {
         taxDate = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0162
+    override fun getMessageID(): Int = 0xFFFF0162.toInt()
 
     override fun getMessageName(): String = "GroupAccountSummaryReply"
 }

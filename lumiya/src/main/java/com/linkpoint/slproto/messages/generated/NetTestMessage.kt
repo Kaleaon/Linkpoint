@@ -15,7 +15,7 @@ class NetTestMessage : SLMessage() {
         port = unpackUInt16(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0146
+    override fun getMessageID(): Int = 0xFFFF0146.toInt()
 
     override fun getMessageName(): String = "NetTest"
 }

@@ -44,7 +44,7 @@ class StartLureMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0046
+    override fun getMessageID(): Int = 0xFFFF0046.toInt()
 
     override fun getMessageName(): String = "StartLure"
 }

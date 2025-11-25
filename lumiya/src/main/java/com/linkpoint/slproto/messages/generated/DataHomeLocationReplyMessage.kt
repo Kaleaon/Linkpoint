@@ -26,7 +26,7 @@ class DataHomeLocationReplyMessage : SLMessage() {
         lookAt = LLVector3.unpack(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0044
+    override fun getMessageID(): Int = 0xFFFF0044.toInt()
 
     override fun getMessageName(): String = "DataHomeLocationReply"
 }

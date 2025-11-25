@@ -38,7 +38,7 @@ class PayPriceReplyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00A2
+    override fun getMessageID(): Int = 0xFFFF00A2.toInt()
 
     override fun getMessageName(): String = "PayPriceReply"
 }

@@ -25,7 +25,7 @@ class EjectUserMessage : SLMessage() {
         flags = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00A7
+    override fun getMessageID(): Int = 0xFFFF00A7.toInt()
 
     override fun getMessageName(): String = "EjectUser"
 }

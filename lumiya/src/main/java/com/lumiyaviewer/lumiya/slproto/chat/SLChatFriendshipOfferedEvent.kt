@@ -3,65 +3,59 @@ package com.lumiyaviewer.lumiya.slproto.chat
 import android.content.Context
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.dao.ChatMessage
-import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatYesNoEvent
 import com.lumiyaviewer.lumiya.slproto.messages.ImprovedInstantMessage
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import androidx.annotation.NonNull
 
 class SLChatFriendshipOfferedEvent : SLChatYesNoEvent {
-    UUID sessionID
+    private val sessionID: UUID
 
-    SLChatFriendshipOfferedEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
-        super(chatMessage, uuid)
-        this.sessionID = chatMessage.getSessionID()
+    constructor(chatMessage: ChatMessage, uuid: UUID) : super(chatMessage, uuid) {
+        this.sessionID = chatMessage.sessionID ?: UUID(0, 0) // Assuming sessionID can be null in ChatMessage
     }
 
-    SLChatFriendshipOfferedEvent(@NonNull ChatMessageSource chatMessageSource, @NonNull UUID uuid, ImprovedInstantMessage improvedInstantMessage) {
-        super(chatMessageSource, uuid, improvedInstantMessage, (String) null)
-        this.sessionID = improvedInstantMessage.MessageBlock_Field.ID
+    constructor(source: ChatMessageSource, uuid: UUID, message: ImprovedInstantMessage) : super(source, uuid, message, null) {
+        this.sessionID = message.MessageBlock_Field.ID
     }
 
-    /* access modifiers changed from: protected */
-    @NonNull
-    SLChatEvent.ChatMessageType getMessageType() {
-        return SLChatEvent.ChatMessageType.FriendshipOffered
+    override fun getMessageType(): ChatMessageType {
+        return ChatMessageType.FriendshipOffered
     }
 
-    String getNoButton(Context context) {
+    override fun getNoButton(context: Context): String {
         return context.getString(R.string.friendship_request_no)
     }
 
-    String getNoMessage(Context context) {
+    override fun getNoMessage(context: Context): String {
         return context.getString(R.string.friendship_request_declined)
     }
 
-    String getQuestion(Context context) {
+    override fun getQuestion(context: Context): String {
         return context.getString(R.string.friendship_request_question)
     }
 
-    String getYesButton(Context context) {
+    override fun getYesButton(context: Context): String {
         return context.getString(R.string.friendship_request_yes)
     }
 
-    String getYesMessage(Context context) {
+    override fun getYesMessage(context: Context): String {
         return context.getString(R.string.friendship_request_accepted)
     }
 
-    Unit onYesAction(Context context, UserManager userManager) {
+    override fun onYesAction(context: Context, userManager: UserManager) {
         super.onYesAction(context, userManager)
-        UUID sourceUUID = this.source.getSourceUUID()
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
+        val sourceUUID = source.getSourceUUID()
+        val activeAgentCircuit = userManager.activeAgentCircuit
         if (sourceUUID != null && activeAgentCircuit != null) {
-            activeAgentCircuit.AcceptFriendship(sourceUUID, this.sessionID)
+            activeAgentCircuit.AcceptFriendship(sourceUUID, sessionID)
         }
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    override fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
-        chatMessage.setSessionID(this.sessionID)
+        chatMessage.sessionID = sessionID
     }
 }

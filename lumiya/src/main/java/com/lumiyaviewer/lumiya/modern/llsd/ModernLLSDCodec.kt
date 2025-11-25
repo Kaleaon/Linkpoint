@@ -6,14 +6,11 @@ import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 import com.lumiyaviewer.lumiya.slproto.types.LLQuaternion
 
 import org.json.JSONObject
-import org.json.JSONArray
 import org.json.JSONException
 
 import java.util.UUID
 import java.util.Date
-import java.util.Map
 import java.util.HashMap
-import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNodeType
 
 /**
  * Modern JVM-first LLSD codec with LibreMetaverse-style API compatibility.
@@ -21,83 +18,87 @@ import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNodeType
  * while offering modern Java 8+ streaming and functional programming features.
  */
 object ModernLLSDCodec {
-    
+
     /**
      * Convert LLSD to JSON with modern streaming support
      */
     fun toJSON(llsd: LLSDNode): JSONObject {
-        try {
+        return try {
             // Simplified approach for now - just return basic JSON structure
-            return JSONObject().put("simplified", true)
-        } catch (JSONException e) {
-            return JSONObject()
+            JSONObject().put("simplified", true)
+        } catch (e: JSONException) {
+            JSONObject()
         }
     }
-    
+
     /**
      * Create modern LLSD primitives with LibreMetaverse-compatible API
      */
     object Primitives {
-        
+
         fun createVector3(vector: LLVector3): LLSDMap {
-            Map<String, LLSDNode> map = new HashMap<>()
-            map.put("X", LLSDDouble(vector.x))
-            map.put("Y", LLSDDouble(vector.y))
-            map.put("Z", LLSDDouble(vector.z))
+            val map = HashMap<String, LLSDNode>()
+            map["X"] = LLSDDouble(vector.x.toDouble())
+            map["Y"] = LLSDDouble(vector.y.toDouble())
+            map["Z"] = LLSDDouble(vector.z.toDouble())
             return LLSDMap(map)
         }
-        
+
         fun createQuaternion(quat: LLQuaternion): LLSDMap {
-            Map<String, LLSDNode> map = new HashMap<>()
-            map.put("X", LLSDDouble(quat.x))
-            map.put("Y", LLSDDouble(quat.y))
-            map.put("Z", LLSDDouble(quat.z))
-            map.put("W", LLSDDouble(quat.w))
+            val map = HashMap<String, LLSDNode>()
+            map["X"] = LLSDDouble(quat.x.toDouble())
+            map["Y"] = LLSDDouble(quat.y.toDouble())
+            map["Z"] = LLSDDouble(quat.z.toDouble())
+            map["W"] = LLSDDouble(quat.w.toDouble())
             return LLSDMap(map)
         }
-        
+
         fun createUUID(uuid: UUID): LLSDUUID {
+            // Assuming LLSDUUID has a constructor taking UUID or similar
+            // If LLSDUUID is like LLSDDouble (Java-in-Kotlin), I might need to fix it too.
+            // For now, assuming it exists or I'll fix it later.
             return LLSDUUID(uuid)
         }
-        
+
         fun createDate(date: Date): LLSDDate {
+            // Assuming LLSDDate exists
             return LLSDDate(date)
         }
-        
+
         fun createColor4(r: Float, g: Float, b: Float, a: Float): LLSDMap {
-            Map<String, LLSDNode> map = new HashMap<>()
-            map.put("R", LLSDDouble(r))
-            map.put("G", LLSDDouble(g))
-            map.put("B", LLSDDouble(b))
-            map.put("A", LLSDDouble(a))
+            val map = HashMap<String, LLSDNode>()
+            map["R"] = LLSDDouble(r.toDouble())
+            map["G"] = LLSDDouble(g.toDouble())
+            map["B"] = LLSDDouble(b.toDouble())
+            map["A"] = LLSDDouble(a.toDouble())
             return LLSDMap(map)
         }
     }
-    
+
     /**
-     * Modern streaming parser for LLSD data 
+     * Modern streaming parser for LLSD data
      */
     object StreamingParser {
-        
-        fun parseModern(input: String): LLSDNode {
-            try {
+
+        fun parseModern(input: String?): LLSDNode {
+            return try {
                 // Use simplified parsing approach
                 if (input == null || input.trim().isEmpty()) {
-                    return LLSDMap(new HashMap<>())
+                    return LLSDMap(HashMap())
                 }
                 // For now, return a simple map - full LLSD parsing is complex
-                return LLSDMap(new HashMap<>())
-            } catch (Exception e) {
-                return LLSDMap(new HashMap<>())
+                LLSDMap(HashMap())
+            } catch (e: Exception) {
+                LLSDMap(HashMap())
             }
         }
-        
+
         fun serializeModern(node: LLSDNode): String {
-            try {
+            return try {
                 // Simplified serialization for now
-                return "<llsd><map /></llsd>"
-            } catch (Exception e) {
-                return "<llsd><map /></llsd>"
+                "<llsd><map /></llsd>"
+            } catch (e: Exception) {
+                "<llsd><map /></llsd>"
             }
         }
     }

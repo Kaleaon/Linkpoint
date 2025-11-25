@@ -1,80 +1,74 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.nio.ByteBuffer
 import java.util.ArrayList
-import java.util.Iterator
-import java.util.UUID
 
 class DirGroupsReply : SLMessage {
-    AgentData AgentData_Field
-    QueryData QueryData_Field
-    ArrayList<QueryReplies> QueryReplies_Fields = ArrayList<>()
+    var AgentData_Field: AgentData = AgentData()
+    var QueryData_Field: QueryData = QueryData()
+    var QueryReplies_Fields: ArrayList<QueryReplies> = ArrayList()
 
     class AgentData {
-        UUID AgentID
+        var AgentID: UUID = UUIDPool.ZeroUUID
     }
 
     class QueryData {
-        UUID QueryID
+        var QueryID: UUID = UUIDPool.ZeroUUID
     }
 
     class QueryReplies {
-        UUID GroupID
-        byte[] GroupName
-        Int Members
-        float SearchOrder
+        var GroupID: UUID = UUIDPool.ZeroUUID
+        var GroupName: ByteArray = ByteArray(0)
+        var Members: Int = 0
+        var SearchOrder: Float = 0f
     }
 
-    DirGroupsReply() {
+    init {
         this.zeroCoded = true
-        this.AgentData_Field = AgentData()
-        this.QueryData_Field = QueryData()
     }
 
-    Int CalcPayloadSize() {
-        Int i = 37
-        Iterator<T> it = this.QueryReplies_Fields.iterator()
-        while (true) {
-            Int i2 = i
-            if (!it.hasNext()) {
-                return i2
-            }
-            i = ((QueryReplies) it.next()).GroupName.length + 17 + 4 + 4 + i2
+    override fun CalcPayloadSize(): Int {
+        var size = 33
+        for (reply in QueryReplies_Fields) {
+            size += reply.GroupName.size + 1 + 16 + 4 + 4
         }
+        return size
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleDirGroupsReply(this)
+    override fun handleMessage(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleDirGroupsReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) 38)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put(42.toByte())
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.QueryData_Field.QueryID)
-        byteBuffer.put((byte) this.QueryReplies_Fields.size())
-        for (QueryReplies queryReplies : this.QueryReplies_Fields) {
-            packUUID(byteBuffer, queryReplies.GroupID)
-            packVariable(byteBuffer, queryReplies.GroupName, 1)
-            packInt(byteBuffer, queryReplies.Members)
-            packFloat(byteBuffer, queryReplies.SearchOrder)
+        byteBuffer.put(this.QueryReplies_Fields.size.toByte())
+        for (reply in this.QueryReplies_Fields) {
+            packUUID(byteBuffer, reply.GroupID)
+            packVariable(byteBuffer, reply.GroupName, 1)
+            packInt(byteBuffer, reply.Members)
+            packFloat(byteBuffer, reply.SearchOrder)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            QueryReplies queryReplies = QueryReplies()
-            queryReplies.GroupID = unpackUUID(byteBuffer)
-            queryReplies.GroupName = unpackVariable(byteBuffer, 1)
-            queryReplies.Members = unpackInt(byteBuffer)
-            queryReplies.SearchOrder = unpackFloat(byteBuffer)
-            this.QueryReplies_Fields.add(queryReplies)
+        val count = byteBuffer.get().toInt() and 0xFF
+        for (i in 0 until count) {
+            val reply = QueryReplies()
+            reply.GroupID = unpackUUID(byteBuffer)
+            reply.GroupName = unpackVariable(byteBuffer, 1)
+            reply.Members = unpackInt(byteBuffer)
+            reply.SearchOrder = unpackFloat(byteBuffer)
+            this.QueryReplies_Fields.add(reply)
         }
     }
 }

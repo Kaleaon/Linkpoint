@@ -1,101 +1,80 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.nio.ByteBuffer
 import java.util.ArrayList
-import java.util.Iterator
-import java.util.UUID
 
 class DirClassifiedReply : SLMessage {
-    AgentData AgentData_Field
-    QueryData QueryData_Field
-    ArrayList<QueryReplies> QueryReplies_Fields = ArrayList<>()
-    ArrayList<StatusData> StatusData_Fields = ArrayList<>()
+    var AgentData_Field: AgentData = AgentData()
+    var QueryAnswers_Fields: ArrayList<QueryAnswers> = ArrayList()
+    var QueryData_Field: QueryData = QueryData()
 
     class AgentData {
-        UUID AgentID
+        var AgentID: UUID = UUIDPool.ZeroUUID
+    }
+
+    class QueryAnswers {
+        var ClassifiedFlags: Int = 0
+        var ClassifiedID: UUID = UUIDPool.ZeroUUID
+        var CreationDate: Int = 0
+        var ExpirationDate: Int = 0
+        var Name: ByteArray = ByteArray(0)
+        var PriceForListing: Int = 0
     }
 
     class QueryData {
-        UUID QueryID
+        var QueryID: UUID = UUIDPool.ZeroUUID
     }
 
-    class QueryReplies {
-        Int ClassifiedFlags
-        UUID ClassifiedID
-        Int CreationDate
-        Int ExpirationDate
-        byte[] Name
-        Int PriceForListing
-    }
-
-    class StatusData {
-        Int Status
-    }
-
-    DirClassifiedReply() {
+    init {
         this.zeroCoded = true
-        this.AgentData_Field = AgentData()
-        this.QueryData_Field = QueryData()
     }
 
-    Int CalcPayloadSize() {
-        Int i = 37
-        Iterator<T> it = this.QueryReplies_Fields.iterator()
-        while (true) {
-            Int i2 = i
-            if (!it.hasNext()) {
-                return i2 + 1 + (this.StatusData_Fields.size() * 4)
-            }
-            i = ((QueryReplies) it.next()).Name.length + 17 + 1 + 4 + 4 + 4 + i2
+    override fun CalcPayloadSize(): Int {
+        var size = 33
+        for (answer in QueryAnswers_Fields) {
+            size += answer.Name.size + 1 + 36
         }
+        return size
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleDirClassifiedReply(this)
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleDirClassifiedReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) 41)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put(40.toByte())
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.QueryData_Field.QueryID)
-        byteBuffer.put((byte) this.QueryReplies_Fields.size())
-        for (QueryReplies queryReplies : this.QueryReplies_Fields) {
-            packUUID(byteBuffer, queryReplies.ClassifiedID)
-            packVariable(byteBuffer, queryReplies.Name, 1)
-            packByte(byteBuffer, (byte) queryReplies.ClassifiedFlags)
-            packInt(byteBuffer, queryReplies.CreationDate)
-            packInt(byteBuffer, queryReplies.ExpirationDate)
-            packInt(byteBuffer, queryReplies.PriceForListing)
-        }
-        byteBuffer.put((byte) this.StatusData_Fields.size())
-        for (StatusData statusData : this.StatusData_Fields) {
-            packInt(byteBuffer, statusData.Status)
+        byteBuffer.put(this.QueryAnswers_Fields.size.toByte())
+        for (answer in this.QueryAnswers_Fields) {
+            packUUID(byteBuffer, answer.ClassifiedID)
+            packVariable(byteBuffer, answer.Name, 1)
+            packInt(byteBuffer, answer.ClassifiedFlags)
+            packInt(byteBuffer, answer.CreationDate)
+            packInt(byteBuffer, answer.ExpirationDate)
+            packInt(byteBuffer, answer.PriceForListing)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            QueryReplies queryReplies = QueryReplies()
-            queryReplies.ClassifiedID = unpackUUID(byteBuffer)
-            queryReplies.Name = unpackVariable(byteBuffer, 1)
-            queryReplies.ClassifiedFlags = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
-            queryReplies.CreationDate = unpackInt(byteBuffer)
-            queryReplies.ExpirationDate = unpackInt(byteBuffer)
-            queryReplies.PriceForListing = unpackInt(byteBuffer)
-            this.QueryReplies_Fields.add(queryReplies)
-        }
-        byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b2; i2++) {
-            StatusData statusData = StatusData()
-            statusData.Status = unpackInt(byteBuffer)
-            this.StatusData_Fields.add(statusData)
+        val b = byteBuffer.get().toInt() and 0xFF
+        for (i in 0 until b) {
+            val answer = QueryAnswers()
+            answer.ClassifiedID = unpackUUID(byteBuffer)
+            answer.Name = unpackVariable(byteBuffer, 1)
+            answer.ClassifiedFlags = unpackInt(byteBuffer)
+            answer.CreationDate = unpackInt(byteBuffer)
+            answer.ExpirationDate = unpackInt(byteBuffer)
+            answer.PriceForListing = unpackInt(byteBuffer)
+            this.QueryAnswers_Fields.add(answer)
         }
     }
 }

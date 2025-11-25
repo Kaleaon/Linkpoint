@@ -1,30 +1,19 @@
 package com.lumiyaviewer.lumiya.slproto.objects
 
-import com.google.common.collect.ImmutableList
-import com.lumiyaviewer.lumiya.slproto.objects.SLObjectDisplayInfo
+import com.lumiyaviewer.lumiya.slproto.types.LLQuaternion
+import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 import java.util.UUID
-import androidx.annotation.NonNull
-import androidx.annotation.Nullable
 
-class SLAvatarObjectDisplayInfo : SLObjectDisplayInfo : SLObjectDisplayInfo.HasChildrenObjects {
-    @NonNull
-    ImmutableList<SLObjectDisplayInfo> children
-    private Boolean implicitlyAdded
-    @NonNull
-    UUID uuid
-
-    SLAvatarObjectDisplayInfo(@Nullable String str, SLObjectInfo sLObjectInfo, Float f, @NonNull ImmutableList<SLObjectDisplayInfo> immutableList, Boolean z) {
-        super(sLObjectInfo.localID, str, f, sLObjectInfo.hierLevel)
-        this.children = immutableList
-        this.implicitlyAdded = z
-        this.uuid = sLObjectInfo.getId()
-    }
-
-    ImmutableList<SLObjectDisplayInfo> getChildren() {
-        return this.children
-    }
-
-    Boolean isImplicitlyAdded() {
-        return this.implicitlyAdded
-    }
+class SLAvatarObjectDisplayInfo(
+    override val name: String?,
+    val info: SLObjectInfo,
+    override val distance: Float,
+    val children: List<SLObjectDisplayInfo>,
+    val implicitlyAdded: Boolean
+) : SLObjectDisplayInfo {
+    override val localID: Int get() = info.localID
+    override fun getUUID(): UUID = info.getUUID()
+    override fun getPosition(): LLVector3 = info.getPosition()
+    override fun getRotation(): LLQuaternion? = info.getRotation()
+    override fun getScale(): LLVector3 = info.getScale()
 }

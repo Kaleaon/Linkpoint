@@ -52,7 +52,7 @@ class ScriptSensorRequestMessage : SLMessage() {
         searchRegions = unpackByte(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00F7
+    override fun getMessageID(): Int = 0xFFFF00F7.toInt()
 
     override fun getMessageName(): String = "ScriptSensorRequest"
 }

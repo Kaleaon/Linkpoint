@@ -135,7 +135,7 @@ class ViewerStatsMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0083
+    override fun getMessageID(): Int = 0xFFFF0083.toInt()
 
     override fun getMessageName(): String = "ViewerStats"
 }

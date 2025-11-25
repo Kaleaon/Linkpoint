@@ -10,6 +10,7 @@ import com.lumiyaviewer.lumiya.slproto.messages.SLMessageFactory
 import com.lumiyaviewer.lumiya.slproto.messages.UseCircuitCode
 import com.lumiyaviewer.lumiya.slproto.modules.SLModules
 import java.io.IOException
+import java.util.UUID
 
 /**
  * Minimal agent circuit implementation providing enough functionality for initial networking.
@@ -17,12 +18,12 @@ import java.io.IOException
 class SLAgentCircuit(
     private val gridConnection: SLGridConnection,
     circuitInfo: SLCircuitInfo,
-    private val authReply: SLAuthReply,
+    paramAuthReply: SLAuthReply, // Renamed to avoid conflict
     private val caps: SLCaps,
     tempCircuit: SLTempCircuit?,
-) : SLThreadingCircuit(gridConnection, circuitInfo, authReply, tempCircuit), SLCapEventQueue.ICapsEventHandler {
+) : SLThreadingCircuit(gridConnection, circuitInfo, paramAuthReply, tempCircuit), SLCapEventQueue.ICapsEventHandler {
 
-    private val modules: SLModules? = if (!authReply.isTemporary) {
+    private val modules: SLModules? = if (!paramAuthReply.isTemporary) {
         try {
             SLModules(this, caps, gridConnection)
         } catch (ex: Exception) {
@@ -57,9 +58,9 @@ class SLAgentCircuit(
     fun SendUseCode() {
         val message = UseCircuitCode().apply {
             isReliable = true
-            CircuitCode_Field.Code = authReply.circuitCode
-            CircuitCode_Field.SessionID = authReply.sessionID
-            CircuitCode_Field.ID = authReply.agentID
+            CircuitCode_Field.Code = authReply.circuitCode // Accesses inherited property
+            CircuitCode_Field.SessionID = authReply.sessionID ?: UUID(0,0)
+            CircuitCode_Field.ID = authReply.agentID ?: UUID(0,0)
         }
         sendMessage(message)
     }
@@ -99,19 +100,18 @@ class SLAgentCircuit(
         try {
             val body = event.eventBody
             val sim = body.byKey("sim-ip-and-port").asString()
-            val seed = body.byKey("seed-capability").asString()
             val agentId = body.byKey("agent-id").asUUID()
             val parts = sim.split(":")
             if (parts.size != 2) return
+            
             val tempReply = SLAuthReply(
-                authReply.loginURL,
-                authReply.seedCapability,
+                authReply, // Access inherited property
+                true, // fromTeleport
+                true, // isTemporary
                 agentId,
                 parts[0],
                 parts[1].toInt(),
-                authReply.circuitCode,
-                true,
-                true,
+                authReply.seedCapability
             )
             gridConnection.addTempCircuit(tempReply)
         } catch (ex: Exception) {
@@ -120,6 +120,6 @@ class SLAgentCircuit(
     }
 
     companion object {
-        private const val LOGOUT_MESSAGE_ID = -9000 // Placeholder identifier for LogoutRequest
+        private const val LOGOUT_MESSAGE_ID = -9000
     }
 }

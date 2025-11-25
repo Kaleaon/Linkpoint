@@ -34,7 +34,7 @@ class GroupNoticeAddMessage : SLMessage() {
         binaryBucket = unpackVariable(buffer, 2)
     }
 
-    override fun getMessageID(): Int = 0xFFFF003D
+    override fun getMessageID(): Int = 0xFFFF003D.toInt()
 
     override fun getMessageName(): String = "GroupNoticeAdd"
 }

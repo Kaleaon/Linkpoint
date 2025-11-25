@@ -56,7 +56,7 @@ class GroupRoleUpdateMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF017A
+    override fun getMessageID(): Int = 0xFFFF017A.toInt()
 
     override fun getMessageName(): String = "GroupRoleUpdate"
 }

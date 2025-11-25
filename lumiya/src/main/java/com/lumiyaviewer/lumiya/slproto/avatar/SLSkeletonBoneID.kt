@@ -1,10 +1,12 @@
 package com.lumiyaviewer.lumiya.slproto.avatar
-import java.util.*
 
-import com.google.common.collect.ImmutableMap
-import com.google.common.logging.nano.Vr
+import java.util.HashMap
 
-enum SLSkeletonBoneID {
+enum class SLSkeletonBoneID(
+    val isJoint: Boolean,
+    val isExtended: Boolean,
+    val animatedIndex: Int
+) {
     mPelvis(true, false, 0),
     mTorso(true, false, 1),
     mChest(true, false, 2),
@@ -150,39 +152,57 @@ enum SLSkeletonBoneID {
     mWing4FanRight(true, true, 116),
     mTail1(true, true, 117),
     mTail2(true, true, 118),
-    mTail3(true, true, Vr.VREvent.VrCore.ErrorCode.CONTROLLER_UNSUPPORTED),
-    mTail4(true, true, Vr.VREvent.VrCore.ErrorCode.CONTROLLER_INFO_READ_ERROR),
-    mTail5(true, true, Vr.VREvent.VrCore.ErrorCode.CONTROLLER_GATT_DISCOVERY_FAILED),
-    mTail6(true, true, Vr.VREvent.VrCore.ErrorCode.CONTROLLER_GATT_SERVICE_NOT_FOUND),
-    mGroin(true, true, Vr.VREvent.VrCore.ErrorCode.CONTROLLER_GATT_CHARACTERISTIC_NOT_FOUND),
-    mHindLimbsRoot(true, true, Vr.VREvent.VrCore.ErrorCode.CONTROLLER_GATT_NOTIFY_FAILED),
-    mHindLimb1Left(true, true, Vr.VREvent.VrCore.ErrorCode.CONTROLLER_BATTERY_READ_FAILED),
-    mHindLimb2Left(true, true, Vr.VREvent.VrCore.ErrorCode.CONTROLLER_STUCK),
-    mHindLimb3Left(true, true, Vr.VREvent.VrCore.ErrorCode.CONTROLLER_UNSTUCK),
+    mTail3(true, true, 119),
+    mTail4(true, true, 120),
+    mTail5(true, true, 121),
+    mTail6(true, true, 122),
+    mGroin(true, true, 123),
+    mHindLimbsRoot(true, true, 124),
+    mHindLimb1Left(true, true, 125),
+    mHindLimb2Left(true, true, 126),
+    mHindLimb3Left(true, true, 127),
     mHindLimb4Left(true, true, 128),
     mHindLimb1Right(true, true, 129),
     mHindLimb2Right(true, true, 130),
     mHindLimb3Right(true, true, 131),
-    mHindLimb4Right(true, true, 132)
-    
-    val NUM_ANIMATED: Int = 133
-    val NUM_BASE_BONES: Int = 52
-    val NUM_BASE_JOINTS: Int = 26
-    val NUM_JOINTS: Int = 133
-    SLSkeletonBoneID[] VALUES = null
-    ImmutableMap<String, SLSkeletonBoneID> bones
-    Int animatedIndex
-    Boolean isExtended
-    Boolean isJoint
+    mHindLimb4Right(true, true, 132);
 
-    {
-        VALUES = values()
-        bones = ImmutableMap.Builder().put("avatar_mPelvis", mPelvis).put("mPelvis", mPelvis).put("hip", mPelvis).put("mTorso", mTorso).put("avatar_mTorso", mTorso).put("abdomen", mTorso).put("avatar_mChest", mChest).put("chest", mChest).put("mChest", mChest).put("mNeck", mNeck).put("neck", mNeck).put("avatar_mNeck", mNeck).put("head", mHead).put("avatar_mHead", mHead).put("mHead", mHead).put("mSkull", mSkull).put("figureHair", mSkull).put("avatar_mSkull", mSkull).put("mEyeRight", mEyeRight).put("avatar_mEyeRight", mEyeRight).put("mEyeLeft", mEyeLeft).put("avatar_mEyeLeft", mEyeLeft).put("avatar_mCollarLeft", mCollarLeft).put("mCollarLeft", mCollarLeft).put("lCollar", mCollarLeft).put("avatar_mShoulderLeft", mShoulderLeft).put("lShldr", mShoulderLeft).put("mShoulderLeft", mShoulderLeft).put("lForeArm", mElbowLeft).put("avatar_mElbowLeft", mElbowLeft).put("mElbowLeft", mElbowLeft).put("avatar_mWristLeft", mWristLeft).put("mWristLeft", mWristLeft).put("lHand", mWristLeft).put("rCollar", mCollarRight).put("mCollarRight", mCollarRight).put("avatar_mCollarRight", mCollarRight).put("mShoulderRight", mShoulderRight).put("rShldr", mShoulderRight).put("avatar_mShoulderRight", mShoulderRight).put("mElbowRight", mElbowRight).put("rForeArm", mElbowRight).put("avatar_mElbowRight", mElbowRight).put("avatar_mWristRight", mWristRight).put("mWristRight", mWristRight).put("rHand", mWristRight).put("mHipRight", mHipRight).put("avatar_mHipRight", mHipRight).put("rThigh", mHipRight).put("avatar_mKneeRight", mKneeRight).put("rShin", mKneeRight).put("mKneeRight", mKneeRight).put("avatar_mAnkleRight", mAnkleRight).put("rFoot", mAnkleRight).put("mAnkleRight", mAnkleRight).put("avatar_mFootRight", mFootRight).put("mFootRight", mFootRight).put("mToeRight", mToeRight).put("avatar_mToeRight", mToeRight).put("avatar_mHipLeft", mHipLeft).put("lThigh", mHipLeft).put("mHipLeft", mHipLeft).put("mKneeLeft", mKneeLeft).put("lShin", mKneeLeft).put("avatar_mKneeLeft", mKneeLeft).put("mAnkleLeft", mAnkleLeft).put("lFoot", mAnkleLeft).put("avatar_mAnkleLeft", mAnkleLeft).put("mFootLeft", mFootLeft).put("avatar_mFootLeft", mFootLeft).put("avatar_mToeLeft", mToeLeft).put("mToeLeft", mToeLeft).put("PELVIS", PELVIS).put("BUTT", BUTT).put("BELLY", BELLY).put("LEFT_HANDLE", LEFT_HANDLE).put("RIGHT_HANDLE", RIGHT_HANDLE).put("LOWER_BACK", LOWER_BACK).put("CHEST", CHEST).put("LEFT_PEC", LEFT_PEC).put("RIGHT_PEC", RIGHT_PEC).put("UPPER_BACK", UPPER_BACK).put("NECK", NECK).put("HEAD", HEAD).put("L_CLAVICLE", L_CLAVICLE).put("L_UPPER_ARM", L_UPPER_ARM).put("L_LOWER_ARM", L_LOWER_ARM).put("L_HAND", L_HAND).put("R_CLAVICLE", R_CLAVICLE).put("R_UPPER_ARM", R_UPPER_ARM).put("R_LOWER_ARM", R_LOWER_ARM).put("R_HAND", R_HAND).put("R_UPPER_LEG", R_UPPER_LEG).put("R_LOWER_LEG", R_LOWER_LEG).put("R_FOOT", R_FOOT).put("L_UPPER_LEG", L_UPPER_LEG).put("L_LOWER_LEG", L_LOWER_LEG).put("L_FOOT", L_FOOT).put("mSpine1", mSpine1).put("mSpine2", mSpine2).put("mSpine3", mSpine3).put("mSpine4", mSpine4).put("mFaceRoot", mFaceRoot).put("mFaceEyeAltRight", mFaceEyeAltRight).put("mFaceEyeAltLeft", mFaceEyeAltLeft).put("mFaceForeheadLeft", mFaceForeheadLeft).put("mFaceForeheadRight", mFaceForeheadRight).put("mFaceEyebrowOuterLeft", mFaceEyebrowOuterLeft).put("mFaceEyebrowCenterLeft", mFaceEyebrowCenterLeft).put("mFaceEyebrowInnerLeft", mFaceEyebrowInnerLeft).put("mFaceEyebrowOuterRight", mFaceEyebrowOuterRight).put("mFaceEyebrowCenterRight", mFaceEyebrowCenterRight).put("mFaceEyebrowInnerRight", mFaceEyebrowInnerRight).put("mFaceEyeLidUpperLeft", mFaceEyeLidUpperLeft).put("mFaceEyeLidLowerLeft", mFaceEyeLidLowerLeft).put("mFaceEyeLidUpperRight", mFaceEyeLidUpperRight).put("mFaceEyeLidLowerRight", mFaceEyeLidLowerRight).put("mFaceEar1Left", mFaceEar1Left).put("mFaceEar2Left", mFaceEar2Left).put("mFaceEar1Right", mFaceEar1Right).put("mFaceEar2Right", mFaceEar2Right).put("mFaceNoseLeft", mFaceNoseLeft).put("mFaceNoseCenter", mFaceNoseCenter).put("mFaceNoseRight", mFaceNoseRight).put("mFaceCheekLowerLeft", mFaceCheekLowerLeft).put("mFaceCheekUpperLeft", mFaceCheekUpperLeft).put("mFaceCheekLowerRight", mFaceCheekLowerRight).put("mFaceCheekUpperRight", mFaceCheekUpperRight).put("mFaceJaw", mFaceJaw).put("mFaceChin", mFaceChin).put("mFaceTeethLower", mFaceTeethLower).put("mFaceLipLowerLeft", mFaceLipLowerLeft).put("mFaceLipLowerRight", mFaceLipLowerRight).put("mFaceLipLowerCenter", mFaceLipLowerCenter).put("mFaceTongueBase", mFaceTongueBase).put("mFaceTongueTip", mFaceTongueTip).put("mFaceJawShaper", mFaceJawShaper).put("mFaceForeheadCenter", mFaceForeheadCenter).put("mFaceNoseBase", mFaceNoseBase).put("mFaceTeethUpper", mFaceTeethUpper).put("mFaceLipUpperLeft", mFaceLipUpperLeft).put("mFaceLipUpperRight", mFaceLipUpperRight).put("mFaceLipCornerLeft", mFaceLipCornerLeft).put("mFaceLipCornerRight", mFaceLipCornerRight).put("mFaceLipUpperCenter", mFaceLipUpperCenter).put("mFaceEyecornerInnerLeft", mFaceEyecornerInnerLeft).put("mFaceEyecornerInnerRight", mFaceEyecornerInnerRight).put("mFaceNoseBridge", mFaceNoseBridge).put("mHandMiddle1Left", mHandMiddle1Left).put("mHandMiddle2Left", mHandMiddle2Left).put("mHandMiddle3Left", mHandMiddle3Left).put("mHandIndex1Left", mHandIndex1Left).put("mHandIndex2Left", mHandIndex2Left).put("mHandIndex3Left", mHandIndex3Left).put("mHandRing1Left", mHandRing1Left).put("mHandRing2Left", mHandRing2Left).put("mHandRing3Left", mHandRing3Left).put("mHandPinky1Left", mHandPinky1Left).put("mHandPinky2Left", mHandPinky2Left).put("mHandPinky3Left", mHandPinky3Left).put("mHandThumb1Left", mHandThumb1Left).put("mHandThumb2Left", mHandThumb2Left).put("mHandThumb3Left", mHandThumb3Left).put("mHandMiddle1Right", mHandMiddle1Right).put("mHandMiddle2Right", mHandMiddle2Right).put("mHandMiddle3Right", mHandMiddle3Right).put("mHandIndex1Right", mHandIndex1Right).put("mHandIndex2Right", mHandIndex2Right).put("mHandIndex3Right", mHandIndex3Right).put("mHandRing1Right", mHandRing1Right).put("mHandRing2Right", mHandRing2Right).put("mHandRing3Right", mHandRing3Right).put("mHandPinky1Right", mHandPinky1Right).put("mHandPinky2Right", mHandPinky2Right).put("mHandPinky3Right", mHandPinky3Right).put("mHandThumb1Right", mHandThumb1Right).put("mHandThumb2Right", mHandThumb2Right).put("mHandThumb3Right", mHandThumb3Right).put("mWingsRoot", mWingsRoot).put("mWing1Left", mWing1Left).put("mWing2Left", mWing2Left).put("mWing3Left", mWing3Left).put("mWing4Left", mWing4Left).put("mWing4FanLeft", mWing4FanLeft).put("mWing1Right", mWing1Right).put("mWing2Right", mWing2Right).put("mWing3Right", mWing3Right).put("mWing4Right", mWing4Right).put("mWing4FanRight", mWing4FanRight).put("mTail1", mTail1).put("mTail2", mTail2).put("mTail3", mTail3).put("mTail4", mTail4).put("mTail5", mTail5).put("mTail6", mTail6).put("mGroin", mGroin).put("mHindLimbsRoot", mHindLimbsRoot).put("mHindLimb1Left", mHindLimb1Left).put("mHindLimb2Left", mHindLimb2Left).put("mHindLimb3Left", mHindLimb3Left).put("mHindLimb4Left", mHindLimb4Left).put("mHindLimb1Right", mHindLimb1Right).put("mHindLimb2Right", mHindLimb2Right).put("mHindLimb3Right", mHindLimb3Right).put("mHindLimb4Right", mHindLimb4Right).build()
-    }
-
-    private SLSkeletonBoneID(Boolean z, Boolean z2, Int i) {
-        this.isJoint = z
-        this.isExtended = z2
-        this.animatedIndex = i
+    companion object {
+        val NUM_ANIMATED: Int = 133
+        val NUM_BASE_BONES: Int = 52
+        val NUM_BASE_JOINTS: Int = 26
+        val NUM_JOINTS: Int = 133
+        
+        val bones: Map<String, SLSkeletonBoneID>
+        
+        init {
+            val map = HashMap<String, SLSkeletonBoneID>()
+            for (bone in values()) {
+                map[bone.name] = bone
+            }
+            // Add aliases
+            map["avatar_mPelvis"] = mPelvis
+            map["hip"] = mPelvis
+            map["abdomen"] = mTorso
+            map["chest"] = mChest
+            map["neck"] = mNeck
+            map["figureHair"] = mSkull
+            map["lCollar"] = mCollarLeft
+            map["lShldr"] = mShoulderLeft
+            map["lForeArm"] = mElbowLeft
+            map["lHand"] = mWristLeft
+            map["rCollar"] = mCollarRight
+            map["rShldr"] = mShoulderRight
+            map["rForeArm"] = mElbowRight
+            map["rHand"] = mWristRight
+            map["rThigh"] = mHipRight
+            map["rShin"] = mKneeRight
+            map["rFoot"] = mAnkleRight
+            map["lThigh"] = mHipLeft
+            map["lShin"] = mKneeLeft
+            map["lFoot"] = mAnkleLeft
+            
+            bones = map
+        }
     }
 }

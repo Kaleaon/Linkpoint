@@ -6,9 +6,7 @@ import java.nio.ByteBuffer
 class TallyVotesMessage : SLMessage() {
     val groupMembersRequest: MutableList<GroupMembersRequestBlock> = mutableListOf()
 
-    data class GroupMembersRequestBlock(
-    )
-
+    class GroupMembersRequestBlock
 
     override fun packPayload(buffer: ByteBuffer) {
         groupMembersRequest.forEach { entry ->
@@ -26,7 +24,7 @@ class TallyVotesMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF016D
+    override fun getMessageID(): Int = 0xFFFF016D.toInt()
 
     override fun getMessageName(): String = "TallyVotes"
 }

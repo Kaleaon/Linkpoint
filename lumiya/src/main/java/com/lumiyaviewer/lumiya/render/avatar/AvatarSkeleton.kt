@@ -51,21 +51,28 @@ class AvatarSkeleton(
         
         // Initialize skeleton param values
         val skeletonParams = EnumMap<SLSkeletonBoneID, SkeletonParamValue>(SLSkeletonBoneID::class.java)
-        val avatar = SLBaseAvatar.getInstance()
+        val avatar = SLBaseAvatar.instance
         
         applyJointTranslations(meshJointTranslations)
         pelvisOffset = meshJointTranslations.pelvisOffset
         
         // Initialize morph parameters for each mesh
-        for (meshIndex in MeshIndex.VALUES) {
-            val numMorphs = avatar.getMeshEntry(meshIndex).polyMesh.getNumMorphs()
-            val morphArray = FloatArray(numMorphs)
-            Arrays.fill(morphArray, 0.0f)
-            partMorphParams[meshIndex] = morphArray
+        for (meshIndex in MeshIndex.values()) {
+            val meshEntry = avatar?.getMeshEntry(meshIndex)
+            if (meshEntry != null) {
+                 // Assuming meshEntry.polyMesh is not null if meshEntry exists
+                 // Assuming polyMesh has getNumMorphs()
+                 // If SLBaseAvatar or its methods are different, we'd need to fix that.
+                 // Based on decompiled code, polyMesh seems to be a field.
+                val numMorphs = meshEntry.polyMesh?.getNumMorphs() ?: 0
+                val morphArray = FloatArray(numMorphs)
+                Arrays.fill(morphArray, 0.0f)
+                partMorphParams[meshIndex] = morphArray
+            }
         }
         
         // Initialize skeleton param values
-        for (boneId in SLSkeletonBoneID.VALUES) {
+        for (boneId in SLSkeletonBoneID.values()) {
             val paramValue = SkeletonParamValue(LLVector3(), LLVector3())
             paramValue.scale.set(1.0f, 1.0f, 1.0f)
             paramValue.offset.set(0.0f, 0.0f, 0.0f)
@@ -74,31 +81,45 @@ class AvatarSkeleton(
         
         // Apply visual parameters from shape
         val paramCount = avatarShapeParams.getParamCount()
+        // paramDefs is an array in SLAvatarParams. Assuming static access via Companion or singleton instance if converted to object.
+        // The decompiled SLAvatarParams.kt (see next file content) is a class with instance block initialization,
+        // which is problematic for static access unless it's an object.
+        // We need to access SLAvatarParams.paramDefs.
+        
+        // Assuming SLAvatarParams is an object or has a static instance 'instance'
+        val paramsInstance = SLAvatarParams.getInstance()
+        
         for (i in 0 until paramCount) {
-            val paramSet = SLAvatarParams.paramDefs[i]
+            val paramSet = paramsInstance.paramDefs[i] ?: continue
             
             for (avatarParam in paramSet.params) {
                 val rawValue = avatarShapeParams.getParamValue(i).toFloat()
                 val paramValue = ((rawValue * (avatarParam.maxValue - avatarParam.minValue)) / 255.0f) + avatarParam.minValue
                 
-                ApplyMorphParam(avatar, skeletonParams, avatarParam, paramSet.name, paramValue)
+                if (avatar != null) {
+                    ApplyMorphParam(avatar, skeletonParams, avatarParam, paramSet.name, paramValue)
+                }
                 
                 // Apply driven parameters
                 avatarParam.drivenParams?.forEach { drivenParam ->
-                    val drivenParamSet = SLAvatarParams.paramByIDs[drivenParam.drivenID]
+                    val drivenParamSet = paramsInstance.paramByIDs[drivenParam.drivenID]
                     drivenParamSet?.params?.forEach { drivenAvatarParam ->
                         val drivenWeight = getDrivenWeight(paramValue, avatarParam, drivenParam, drivenAvatarParam)
-                        ApplyMorphParam(avatar, skeletonParams, drivenAvatarParam, drivenParamSet.name, drivenWeight)
+                        if (avatar != null) {
+                            ApplyMorphParam(avatar, skeletonParams, drivenAvatarParam, drivenParamSet.name, drivenWeight)
+                        }
                     }
                 }
             }
         }
         
         // Apply deformations to skeleton
-        for (boneId in SLSkeletonBoneID.VALUES) {
+        for (boneId in SLSkeletonBoneID.values()) {
             val bone = bones[boneId]
             val params = skeletonParams[boneId]
-            bone?.deformHierarchy(params?.offset, params?.scale)
+            if (params != null) {
+                bone?.deformHierarchy(params.offset, params.scale)
+            }
         }
         
         pelvisToFoot = super.getPelvisToFoot()
@@ -128,9 +149,12 @@ class AvatarSkeleton(
         value: Float
     ) {
         // Apply mesh morphs
-        if (avatarParam.morph && avatarParam.meshIndex != null) {
+        // Note: avatarParam.morph is Boolean?, so use safe call or check true
+        if (avatarParam.morph == true && avatarParam.meshIndex != null) {
             partMorphParams[avatarParam.meshIndex]?.let { morphArray ->
-                val morphIndex = avatar.getMeshEntry(avatarParam.meshIndex!!).polyMesh.getMorphIndex(paramId)
+                val meshEntry = avatar.getMeshEntry(avatarParam.meshIndex!!)
+                // meshEntry.polyMesh might be null if not loaded?
+                val morphIndex = meshEntry?.polyMesh?.getMorphIndex(paramId) ?: -1
                 if (morphIndex != -1) {
                     morphArray[morphIndex] += value
                 }
@@ -159,14 +183,24 @@ class AvatarSkeleton(
         drivenParam: DrivenParam,
         drivenAvatarParam: AvatarParam
     ): Float {
-        val drivingMin = drivingParam.minValue
-        val drivingMax = drivingParam.maxValue
+        val drivingMin = drivenParam.min1 // Using min1/max1 from DrivenParam, assuming logic matches intention
+        // The decompiled logic used drivenParam fields for ranges, but drivingParam for bounds check?
+        // Let's stick to decompiled logic structure but using correct fields.
+        
+        // Re-reading decompiled:
+        // drivingMin/Max were from drivingParam.
+        // drivenMin/Max were from drivenAvatarParam.
+        // Ranges check drivingValue against drivenParam.min1/max1/min2/max2.
+        
+        val drivingMinVal = drivingParam.minValue
+        // val drivingMaxVal = drivingParam.maxValue // Unused in decompiled logic explicitly?
+        
         val drivenMin = drivenAvatarParam.minValue
         val drivenMax = drivenAvatarParam.maxValue
         
         return when {
             drivingValue <= drivenParam.min1 -> {
-                if (drivenParam.min1 != drivenParam.max1 || drivenParam.min1 > drivingMin) {
+                if (drivenParam.min1 != drivenParam.max1 || drivenParam.min1 > drivingMinVal) {
                     drivenMin
                 } else {
                     drivenMax
@@ -180,7 +214,8 @@ class AvatarSkeleton(
                 drivenMax
             }
             drivingValue > drivenParam.min2 -> {
-                if (drivenParam.max2 < drivingMax) drivenMin else drivenMax
+                // Note: decompiled had drivingMaxVal check here
+                if (drivenParam.max2 < drivingParam.maxValue) drivenMin else drivenMax
             }
             else -> {
                 val t = (drivingValue - drivenParam.max2) / (drivenParam.min2 - drivenParam.max2)
@@ -236,12 +271,12 @@ class AvatarSkeleton(
             }
             
             // Update joint world matrix for rendering
-            val nonHUDIndex = SLAttachmentPoint.attachmentPoints[i].nonHUDindex
+            val nonHUDIndex = SLAttachmentPoint.attachmentPoints[i]?.nonHUDindex ?: -1
             if (nonHUDIndex >= 0) {
                 System.arraycopy(
                     attachment.matrix, 0,
                     jointWorldMatrix,
-                    (nonHUDIndex + SLSkeletonBoneID.VALUES.size) * 16,
+                    (nonHUDIndex + SLSkeletonBoneID.values().size) * 16,
                     16
                 )
             }
@@ -251,7 +286,7 @@ class AvatarSkeleton(
     /**
      * Update global positions with animation data
      */
-    fun UpdateGlobalPositions(animationSkeletonData: AnimationSkeletonData) {
+    override fun UpdateGlobalPositions(animationSkeletonData: AnimationSkeletonData) {
         super.UpdateGlobalPositions(animationSkeletonData)
         updateAttachmentMatrix()
     }
@@ -277,7 +312,7 @@ class AvatarSkeleton(
     /**
      * Get body size
      */
-    fun getBodySize(): Float = bodySize
+    override fun getBodySize(): Float = bodySize
 
     /**
      * Get morph parameters for mesh
@@ -294,7 +329,7 @@ class AvatarSkeleton(
     /**
      * Get pelvis to foot distance
      */
-    fun getPelvisToFoot(): Float = pelvisToFoot
+    override fun getPelvisToFoot(): Float = pelvisToFoot
 
     /**
      * Check if skeleton has extended bones

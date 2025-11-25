@@ -60,7 +60,7 @@ class ParcelClaimMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00D1
+    override fun getMessageID(): Int = 0xFFFF00D1.toInt()
 
     override fun getMessageName(): String = "ParcelClaim"
 }

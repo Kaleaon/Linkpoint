@@ -37,7 +37,7 @@ class SetSimPresenceInDatabaseMessage : SLMessage() {
         status = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0017
+    override fun getMessageID(): Int = 0xFFFF0017.toInt()
 
     override fun getMessageName(): String = "SetSimPresenceInDatabase"
 }

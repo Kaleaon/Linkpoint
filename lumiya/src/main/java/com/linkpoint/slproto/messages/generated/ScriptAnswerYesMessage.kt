@@ -28,7 +28,7 @@ class ScriptAnswerYesMessage : SLMessage() {
         questions = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0084
+    override fun getMessageID(): Int = 0xFFFF0084.toInt()
 
     override fun getMessageName(): String = "ScriptAnswerYes"
 }

@@ -1,39 +1,39 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.base.Ascii
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.UUID
 
 class AttachedSoundGainChange : SLMessage {
-    DataBlock DataBlock_Field = DataBlock()
+    var DataBlock_Field: DataBlock = DataBlock()
 
     class DataBlock {
-        float Gain
-        UUID ObjectID
+        var Gain: Float = 0f
+        var ObjectID: UUID? = null
     }
 
-    AttachedSoundGainChange() {
+    constructor() {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    override fun CalcPayloadSize(): Int {
         return 22
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAttachedSoundGainChange(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put((byte) -1)
-        byteBuffer.put(Ascii.SO)
-        packUUID(byteBuffer, this.DataBlock_Field.ObjectID)
-        packFloat(byteBuffer, this.DataBlock_Field.Gain)
+    override fun PackPayload(byteBuffer: ByteBuffer) {
+        byteBuffer.put((-1).toByte())
+        byteBuffer.put(14.toByte()) // Ascii.SO
+        packUUID(byteBuffer, DataBlock_Field.ObjectID!!)
+        packFloat(byteBuffer, DataBlock_Field.Gain)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.DataBlock_Field.ObjectID = unpackUUID(byteBuffer)
-        this.DataBlock_Field.Gain = unpackFloat(byteBuffer)
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        DataBlock_Field.ObjectID = unpackUUID(byteBuffer)
+        DataBlock_Field.Gain = unpackFloat(byteBuffer)
     }
 }

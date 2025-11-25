@@ -25,7 +25,7 @@ class RevokePermissionsMessage : SLMessage() {
         objectPermissions = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00C1
+    override fun getMessageID(): Int = 0xFFFF00C1.toInt()
 
     override fun getMessageName(): String = "RevokePermissions"
 }

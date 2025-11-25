@@ -32,7 +32,7 @@ class UuidGroupNameRequestMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00ED
+    override fun getMessageID(): Int = 0xFFFF00ED.toInt()
 
     override fun getMessageName(): String = "UUIDGroupNameRequest"
 }

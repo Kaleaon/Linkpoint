@@ -16,7 +16,7 @@ class RequestPayPriceMessage : SLMessage() {
         objectId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00A1
+    override fun getMessageID(): Int = 0xFFFF00A1.toInt()
 
     override fun getMessageName(): String = "RequestPayPrice"
 }

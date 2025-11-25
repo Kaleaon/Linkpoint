@@ -25,7 +25,7 @@ class ParcelDeedToGroupMessage : SLMessage() {
         localId = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00CF
+    override fun getMessageID(): Int = 0xFFFF00CF.toInt()
 
     override fun getMessageName(): String = "ParcelDeedToGroup"
 }

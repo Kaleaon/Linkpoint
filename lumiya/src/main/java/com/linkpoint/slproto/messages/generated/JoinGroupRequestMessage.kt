@@ -26,7 +26,7 @@ class JoinGroupRequestMessage : SLMessage() {
         groupId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0157
+    override fun getMessageID(): Int = 0xFFFF0157.toInt()
 
     override fun getMessageName(): String = "JoinGroupRequest"
 }

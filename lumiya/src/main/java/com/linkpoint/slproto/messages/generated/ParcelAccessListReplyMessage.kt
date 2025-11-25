@@ -54,7 +54,7 @@ class ParcelAccessListReplyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF00D8
+    override fun getMessageID(): Int = 0xFFFF00D8.toInt()
 
     override fun getMessageName(): String = "ParcelAccessListReply"
 }

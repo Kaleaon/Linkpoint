@@ -59,7 +59,7 @@ class RequestParcelTransferMessage : SLMessage() {
         gridY = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00DC
+    override fun getMessageID(): Int = 0xFFFF00DC.toInt()
 
     override fun getMessageName(): String = "RequestParcelTransfer"
 }

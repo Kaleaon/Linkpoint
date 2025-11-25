@@ -1,50 +1,52 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
+import java.util.ArrayList
 import java.util.UUID
 
 class EjectGroupMemberReply : SLMessage {
-    AgentData AgentData_Field = AgentData()
-    EjectData EjectData_Field = EjectData()
-    GroupData GroupData_Field = GroupData()
+    var AgentData_Field: AgentData = AgentData()
+    var GroupData_Field: GroupData = GroupData()
+    var EjectData_Field: EjectData = EjectData()
 
     class AgentData {
-        UUID AgentID
-    }
-
-    class EjectData {
-        Boolean Success
+        var AgentID: UUID = UUID(0, 0)
     }
 
     class GroupData {
-        UUID GroupID
+        var GroupID: UUID = UUID(0, 0)
     }
 
-    EjectGroupMemberReply() {
-        this.zeroCoded = false
+    class EjectData {
+        var Success: Boolean = false
     }
 
-    Int CalcPayloadSize() {
-        return 37
+    init {
+        this.zeroCoded = true
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleEjectGroupMemberReply(this)
+    override fun CalcPayloadSize(): Int {
+        return 33
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 1)
-        byteBuffer.put((byte) 90)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.GroupData_Field.GroupID)
-        packBoolean(byteBuffer, this.EjectData_Field.Success)
+    override fun handleMessage(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleEjectGroupMemberReply(this)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.GroupData_Field.GroupID = unpackUUID(byteBuffer)
-        this.EjectData_Field.Success = unpackBoolean(byteBuffer)
+    override fun PackPayload(buffer: ByteBuffer) {
+        buffer.putShort(-1)
+        buffer.put(0.toByte())
+        buffer.put(72.toByte())
+        packUUID(buffer, this.AgentData_Field.AgentID)
+        packUUID(buffer, this.GroupData_Field.GroupID)
+        packBoolean(buffer, this.EjectData_Field.Success)
+    }
+
+    override fun UnpackPayload(buffer: ByteBuffer) {
+        this.AgentData_Field.AgentID = unpackUUID(buffer)
+        this.GroupData_Field.GroupID = unpackUUID(buffer)
+        this.EjectData_Field.Success = unpackBoolean(buffer)
     }
 }

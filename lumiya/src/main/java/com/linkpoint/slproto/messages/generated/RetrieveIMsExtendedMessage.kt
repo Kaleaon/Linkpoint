@@ -22,7 +22,7 @@ class RetrieveIMsExtendedMessage : SLMessage() {
         isPremium = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF01AB
+    override fun getMessageID(): Int = 0xFFFF01AB.toInt()
 
     override fun getMessageName(): String = "RetrieveIMsExtended"
 }

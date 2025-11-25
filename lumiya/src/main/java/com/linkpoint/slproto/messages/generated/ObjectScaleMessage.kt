@@ -46,7 +46,7 @@ class ObjectScaleMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF005C
+    override fun getMessageID(): Int = 0xFFFF005C.toInt()
 
     override fun getMessageName(): String = "ObjectScale"
 }

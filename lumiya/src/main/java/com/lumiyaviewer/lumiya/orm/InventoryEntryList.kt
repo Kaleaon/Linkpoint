@@ -8,113 +8,84 @@ import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry
 import java.util.AbstractList
 import java.util.concurrent.ExecutionException
-import androidx.annotation.NonNull
-import androidx.annotation.Nullable
 
 class InventoryEntryList : AbstractList<SLInventoryEntry> {
-    /* access modifiers changed from: private */
-    @Nullable
-    Cursor cursor
-    private LoadingCache<Int, SLInventoryEntry> entryCache
-    @Nullable
-    private SLInventoryEntry folder
-    /* access modifiers changed from: private */
-    Any lock
-    private Int size
-    @Nullable
-    private String title
+    
+    private var cursor: Cursor? = null
+    private val entryCache: LoadingCache<Int, SLInventoryEntry>
+    private var folder: SLInventoryEntry? = null
+    private val lock = Any()
+    private var listSize: Int = 0
+    private var title: String? = null
 
     constructor() {
-        this.lock = Any()
-        this.entryCache = CacheBuilder.newBuilder().maximumSize(1000).weakValues().build(CacheLoader<Int, SLInventoryEntry>() {
-            fun load(num: Int): SLInventoryEntry {
-                SLInventoryEntry sLInventoryEntry
-                if (InventoryEntryList.this.cursor == null) {
-                    sLInventoryEntry = null
-                } else if (!InventoryEntryList.this.cursor.isClosed()) {
-                    synchronized (InventoryEntryList.this.lock) {
-                        try {
-                            InventoryEntryList.this.cursor.moveToPosition(num.intValue())
-                            sLInventoryEntry = SLInventoryEntry(InventoryEntryList.this.cursor)
-                        } catch (Exception e) {
-                            Debug.Warning(e)
-                            sLInventoryEntry = null
-                        }
-                    }
-                } else {
-                    sLInventoryEntry = null
-                }
-                return sLInventoryEntry == null ? SLInventoryEntry() : sLInventoryEntry
-            }
-        this.title = null
         this.cursor = null
-        this.folder = null
-        this.size = 0
+        this.entryCache = createCache()
+        this.listSize = 0
     }
 
-    InventoryEntryList(@Nullable String str, @Nullable SLInventoryEntry sLInventoryEntry, @Nullable Cursor cursor2) {
-        this.lock = Any()
-        this.entryCache = CacheBuilder.newBuilder().maximumSize(1000).weakValues().build(CacheLoader<Int, SLInventoryEntry>() {
-            fun load(num: Int): SLInventoryEntry {
-                SLInventoryEntry sLInventoryEntry
-                if (InventoryEntryList.this.cursor == null) {
-                    sLInventoryEntry = null
-                } else if (!InventoryEntryList.this.cursor.isClosed()) {
-                    synchronized (InventoryEntryList.this.lock) {
-                        try {
-                            InventoryEntryList.this.cursor.moveToPosition(num.intValue())
-                            sLInventoryEntry = SLInventoryEntry(InventoryEntryList.this.cursor)
-                        } catch (Exception e) {
-                            Debug.Warning(e)
-                            sLInventoryEntry = null
+    constructor(title: String?, folder: SLInventoryEntry?, cursor: Cursor?) {
+        this.title = title
+        this.folder = folder
+        this.cursor = cursor
+        this.listSize = cursor?.count ?: 0
+        this.entryCache = createCache()
+    }
+
+    private fun createCache(): LoadingCache<Int, SLInventoryEntry> {
+        return CacheBuilder.newBuilder()
+            .maximumSize(1000)
+            .weakValues()
+            .build(object : CacheLoader<Int, SLInventoryEntry>() {
+                override fun load(key: Int): SLInventoryEntry {
+                    var entry: SLInventoryEntry? = null
+                    if (cursor == null) {
+                        entry = null
+                    } else if (!cursor!!.isClosed) {
+                        synchronized(lock) {
+                            try {
+                                cursor!!.moveToPosition(key)
+                                entry = SLInventoryEntry(cursor!!)
+                            } catch (e: Exception) {
+                                Debug.Warning(e)
+                                entry = null
+                            }
                         }
                     }
-                } else {
-                    sLInventoryEntry = null
+                    return entry ?: SLInventoryEntry() // Return empty entry if failed
                 }
-                return sLInventoryEntry == null ? SLInventoryEntry() : sLInventoryEntry
-            }
-        this.title = str
-        this.folder = sLInventoryEntry
-        this.cursor = cursor2
-        this.size = cursor2 != null ? cursor2.getCount() : 0
+            })
     }
 
-    fun close(): Unit {
-        synchronized (this.lock) {
-            if (this.cursor != null && !this.cursor.isClosed()) {
-                this.cursor.close()
+    fun close() {
+        synchronized(lock) {
+            if (cursor != null && !cursor!!.isClosed) {
+                cursor!!.close()
             }
         }
     }
 
-    fun get(i: Int): SLInventoryEntry {
-        if (this.cursor == null || !(!this.cursor.isClosed())) {
-            Any[] objArr = Any[2]
-            objArr[0] = Int.valueOf(i)
-            objArr[1] = this.cursor == null ? "null" : "closed"
-            Debug.Printf("InventoryEntryList: returning null for %d because cursor is %s", objArr)
-            return null
+    override fun get(index: Int): SLInventoryEntry {
+        if (cursor == null || cursor!!.isClosed) {
+            Debug.Printf("InventoryEntryList: returning null for %d because cursor is %s", index, if (cursor == null) "null" else "closed")
+            return SLInventoryEntry() // Return empty instead of null to satisfy AbstractList contract
         }
         try {
-            return this.entryCache.get(Int.valueOf(i))
-        } catch (ExecutionException e) {
+            return entryCache.get(index)
+        } catch (e: ExecutionException) {
             Debug.Warning(e)
-            return null
+            return SLInventoryEntry()
         }
     }
 
-    @Nullable
-    fun getFolder(): SLInventoryEntry {
-        return this.folder
+    fun getFolder(): SLInventoryEntry? {
+        return folder
     }
 
-    @Nullable
-    fun getTitle(): String {
-        return this.title
+    fun getTitle(): String? {
+        return title
     }
 
-    fun size(): Int {
-        return this.size
-    }
+    override val size: Int
+        get() = listSize
 }

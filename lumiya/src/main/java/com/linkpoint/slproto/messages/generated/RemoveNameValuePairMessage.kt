@@ -35,7 +35,7 @@ class RemoveNameValuePairMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF014A
+    override fun getMessageID(): Int = 0xFFFF014A.toInt()
 
     override fun getMessageName(): String = "RemoveNameValuePair"
 }

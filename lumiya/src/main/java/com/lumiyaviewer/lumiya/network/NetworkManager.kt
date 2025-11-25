@@ -80,9 +80,9 @@ class NetworkManager(private val context: Context) {
     }
     
     /**
-     * Network Request
+     * HTTP Request
      */
-    data class NetworkRequest(
+    data class HttpRequest(
         val url: String,
         val method: HttpMethod = HttpMethod.GET,
         val headers: Map<String, String> = emptyMap(),
@@ -213,7 +213,7 @@ class NetworkManager(private val context: Context) {
     /**
      * Execute HTTP request
      */
-    suspend fun executeRequest(request: NetworkRequest): NetworkResult = withContext(Dispatchers.IO) {
+    suspend fun executeRequest(request: HttpRequest): NetworkResult = withContext(Dispatchers.IO) {
         try {
             Log.d(TAG, "Executing ${request.method} request to ${request.url}")
             
@@ -277,7 +277,7 @@ class NetworkManager(private val context: Context) {
      * Execute request with retry
      */
     suspend fun executeRequestWithRetry(
-        request: NetworkRequest,
+        request: HttpRequest,
         maxAttempts: Int = MAX_RETRY_ATTEMPTS
     ): NetworkResult = withContext(Dispatchers.IO) {
         var lastResult: NetworkResult? = null
@@ -309,7 +309,7 @@ class NetworkManager(private val context: Context) {
         headers: Map<String, String> = emptyMap()
     ): NetworkResult {
         return executeRequest(
-            NetworkRequest(
+            HttpRequest(
                 url = url,
                 method = HttpMethod.GET,
                 headers = headers
@@ -326,7 +326,7 @@ class NetworkManager(private val context: Context) {
         headers: Map<String, String> = emptyMap()
     ): NetworkResult {
         return executeRequest(
-            NetworkRequest(
+            HttpRequest(
                 url = url,
                 method = HttpMethod.POST,
                 body = body,
@@ -344,7 +344,7 @@ class NetworkManager(private val context: Context) {
         headers: Map<String, String> = emptyMap()
     ): NetworkResult {
         return executeRequest(
-            NetworkRequest(
+            HttpRequest(
                 url = url,
                 method = HttpMethod.PUT,
                 body = body,
@@ -361,7 +361,7 @@ class NetworkManager(private val context: Context) {
         headers: Map<String, String> = emptyMap()
     ): NetworkResult {
         return executeRequest(
-            NetworkRequest(
+            HttpRequest(
                 url = url,
                 method = HttpMethod.DELETE,
                 headers = headers

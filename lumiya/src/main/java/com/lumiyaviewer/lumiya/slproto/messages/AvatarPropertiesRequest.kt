@@ -1,42 +1,43 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.UUID
 
 class AvatarPropertiesRequest : SLMessage {
-    AgentData AgentData_Field = AgentData()
+    var AgentData_Field: AgentData = AgentData()
 
     class AgentData {
-        UUID AgentID
-        UUID AvatarID
-        UUID SessionID
+        var AgentID: UUID? = null
+        var AvatarID: UUID? = null
+        var SessionID: UUID? = null
     }
 
-    AvatarPropertiesRequest() {
+    constructor() {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    override fun CalcPayloadSize(): Int {
         return 52
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAvatarPropertiesRequest(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) -87)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        packUUID(byteBuffer, this.AgentData_Field.AvatarID)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put((-87).toByte())
+        packUUID(byteBuffer, AgentData_Field.AgentID!!)
+        packUUID(byteBuffer, AgentData_Field.SessionID!!)
+        packUUID(byteBuffer, AgentData_Field.AvatarID!!)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        this.AgentData_Field.AvatarID = unpackUUID(byteBuffer)
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        AgentData_Field.AgentID = unpackUUID(byteBuffer)
+        AgentData_Field.SessionID = unpackUUID(byteBuffer)
+        AgentData_Field.AvatarID = unpackUUID(byteBuffer)
     }
 }

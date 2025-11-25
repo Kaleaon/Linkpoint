@@ -15,7 +15,7 @@ class NearestLandingRegionUpdatedMessage : SLMessage() {
         regionHandle = unpackLong(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0092
+    override fun getMessageID(): Int = 0xFFFF0092.toInt()
 
     override fun getMessageName(): String = "NearestLandingRegionUpdated"
 }

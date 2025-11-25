@@ -37,7 +37,7 @@ class ScriptDataRequestMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0151
+    override fun getMessageID(): Int = 0xFFFF0151.toInt()
 
     override fun getMessageName(): String = "ScriptDataRequest"
 }

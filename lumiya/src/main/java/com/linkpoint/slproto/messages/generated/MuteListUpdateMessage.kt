@@ -19,7 +19,7 @@ class MuteListUpdateMessage : SLMessage() {
         filename = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF013E
+    override fun getMessageID(): Int = 0xFFFF013E.toInt()
 
     override fun getMessageName(): String = "MuteListUpdate"
 }

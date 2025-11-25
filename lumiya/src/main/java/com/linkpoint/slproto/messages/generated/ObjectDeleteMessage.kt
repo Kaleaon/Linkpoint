@@ -45,7 +45,7 @@ class ObjectDeleteMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0059
+    override fun getMessageID(): Int = 0xFFFF0059.toInt()
 
     override fun getMessageName(): String = "ObjectDelete"
 }

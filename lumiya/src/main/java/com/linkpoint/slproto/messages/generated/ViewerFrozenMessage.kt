@@ -15,7 +15,7 @@ class ViewerFrozenMessage : SLMessage() {
         data = unpackBoolean(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0089
+    override fun getMessageID(): Int = 0xFFFF0089.toInt()
 
     override fun getMessageName(): String = "ViewerFrozenMessage"
 }

@@ -1,87 +1,80 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.nio.ByteBuffer
 import java.util.ArrayList
-import java.util.Iterator
-import java.util.UUID
 
 class DirPeopleReply : SLMessage {
-    AgentData AgentData_Field
-    QueryData QueryData_Field
-    ArrayList<QueryReplies> QueryReplies_Fields = ArrayList<>()
+    var AgentData_Field: AgentData = AgentData()
+    var QueryData_Field: QueryData = QueryData()
+    var QueryReplies_Fields: ArrayList<QueryReplies> = ArrayList()
 
     class AgentData {
-        UUID AgentID
+        var AgentID: UUID = UUIDPool.ZeroUUID
     }
 
     class QueryData {
-        UUID QueryID
+        var QueryID: UUID = UUIDPool.ZeroUUID
     }
 
     class QueryReplies {
-        UUID AgentID
-        byte[] FirstName
-        byte[] Group
-        byte[] LastName
-        Boolean Online
-        Int Reputation
+        var AgentID: UUID = UUIDPool.ZeroUUID
+        var FirstName: ByteArray = ByteArray(0)
+        var GroupName: ByteArray = ByteArray(0)
+        var LastName: ByteArray = ByteArray(0)
+        var Online: Boolean = false
+        var Reputation: Int = 0
     }
 
-    DirPeopleReply() {
+    init {
         this.zeroCoded = true
-        this.AgentData_Field = AgentData()
-        this.QueryData_Field = QueryData()
     }
 
-    Int CalcPayloadSize() {
-        Int i = 37
-        Iterator<T> it = this.QueryReplies_Fields.iterator()
-        while (true) {
-            Int i2 = i
-            if (!it.hasNext()) {
-                return i2
-            }
-            QueryReplies queryReplies = (QueryReplies) it.next()
-            i = queryReplies.Group.length + queryReplies.FirstName.length + 17 + 1 + queryReplies.LastName.length + 1 + 1 + 4 + i2
+    override fun CalcPayloadSize(): Int {
+        var size = 33
+        for (reply in QueryReplies_Fields) {
+            size += reply.FirstName.size + 1 + reply.LastName.size + 1 + reply.GroupName.size + 1 + 16 + 1 + 4
         }
+        return size
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleDirPeopleReply(this)
+    override fun handleMessage(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleDirPeopleReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) 36)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put(30.toByte())
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.QueryData_Field.QueryID)
-        byteBuffer.put((byte) this.QueryReplies_Fields.size())
-        for (QueryReplies queryReplies : this.QueryReplies_Fields) {
-            packUUID(byteBuffer, queryReplies.AgentID)
-            packVariable(byteBuffer, queryReplies.FirstName, 1)
-            packVariable(byteBuffer, queryReplies.LastName, 1)
-            packVariable(byteBuffer, queryReplies.Group, 1)
-            packBoolean(byteBuffer, queryReplies.Online)
-            packInt(byteBuffer, queryReplies.Reputation)
+        byteBuffer.put(this.QueryReplies_Fields.size.toByte())
+        for (reply in this.QueryReplies_Fields) {
+            packUUID(byteBuffer, reply.AgentID)
+            packVariable(byteBuffer, reply.FirstName, 1)
+            packVariable(byteBuffer, reply.LastName, 1)
+            packVariable(byteBuffer, reply.GroupName, 1)
+            packBoolean(byteBuffer, reply.Online)
+            packInt(byteBuffer, reply.Reputation)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            QueryReplies queryReplies = QueryReplies()
-            queryReplies.AgentID = unpackUUID(byteBuffer)
-            queryReplies.FirstName = unpackVariable(byteBuffer, 1)
-            queryReplies.LastName = unpackVariable(byteBuffer, 1)
-            queryReplies.Group = unpackVariable(byteBuffer, 1)
-            queryReplies.Online = unpackBoolean(byteBuffer)
-            queryReplies.Reputation = unpackInt(byteBuffer)
-            this.QueryReplies_Fields.add(queryReplies)
+        val count = byteBuffer.get().toInt() and 0xFF
+        for (i in 0 until count) {
+            val reply = QueryReplies()
+            reply.AgentID = unpackUUID(byteBuffer)
+            reply.FirstName = unpackVariable(byteBuffer, 1)
+            reply.LastName = unpackVariable(byteBuffer, 1)
+            reply.GroupName = unpackVariable(byteBuffer, 1)
+            reply.Online = unpackBoolean(byteBuffer)
+            reply.Reputation = unpackInt(byteBuffer)
+            this.QueryReplies_Fields.add(reply)
         }
     }
 }

@@ -22,7 +22,7 @@ class InitiateDownloadMessage : SLMessage() {
         viewerFilename = unpackVariable(buffer, 1)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0193
+    override fun getMessageID(): Int = 0xFFFF0193.toInt()
 
     override fun getMessageName(): String = "InitiateDownload"
 }

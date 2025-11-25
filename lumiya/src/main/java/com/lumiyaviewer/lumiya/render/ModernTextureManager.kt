@@ -71,10 +71,10 @@ class ModernTextureManager(private val context: Context) {
             
             initialized = true
             
-        } catch (UnsatisfiedLinkError e) {
+        } catch (e: UnsatisfiedLinkError) {
             Log.e(TAG, "Native library not available", e)
             throw RuntimeException("Native library loading failed", e)
-        } catch (Exception e) {
+        } catch (e: Exception) {
             Log.e(TAG, "Unexpected error during initialization", e)
             throw RuntimeException("ModernTextureManager initialization failed", e)
         }

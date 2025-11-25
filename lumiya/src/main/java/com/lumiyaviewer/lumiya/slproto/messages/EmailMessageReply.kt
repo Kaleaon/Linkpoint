@@ -1,54 +1,47 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.UUID
 
 class EmailMessageReply : SLMessage {
-    DataBlock DataBlock_Field = DataBlock()
+    var AgentData_Field: AgentData = AgentData()
+    var DataBlock_Field: DataBlock = DataBlock()
+
+    class AgentData {
+        var AgentID: UUID = UUID(0, 0)
+        var GroupID: UUID = UUID(0, 0)
+    }
 
     class DataBlock {
-        byte[] Data
-        byte[] FromAddress
-        byte[] MailFilter
-        Int More
-        UUID ObjectID
-        byte[] Subject
-        Int Time
+        var EmailID: UUID = UUID(0, 0)
     }
 
-    EmailMessageReply() {
-        this.zeroCoded = false
+    init {
+        this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.DataBlock_Field.FromAddress.length + 25 + 1 + this.DataBlock_Field.Subject.length + 2 + this.DataBlock_Field.Data.length + 1 + this.DataBlock_Field.MailFilter.length + 4
+    override fun CalcPayloadSize(): Int {
+        return 48
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleEmailMessageReply(this)
+    override fun handleMessage(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleEmailMessageReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 1)
-        byteBuffer.put((byte) 80)
-        packUUID(byteBuffer, this.DataBlock_Field.ObjectID)
-        packInt(byteBuffer, this.DataBlock_Field.More)
-        packInt(byteBuffer, this.DataBlock_Field.Time)
-        packVariable(byteBuffer, this.DataBlock_Field.FromAddress, 1)
-        packVariable(byteBuffer, this.DataBlock_Field.Subject, 1)
-        packVariable(byteBuffer, this.DataBlock_Field.Data, 2)
-        packVariable(byteBuffer, this.DataBlock_Field.MailFilter, 1)
+    override fun PackPayload(buffer: ByteBuffer) {
+        buffer.putShort(-1)
+        buffer.put(0.toByte())
+        buffer.put(104.toByte())
+        packUUID(buffer, this.AgentData_Field.AgentID)
+        packUUID(buffer, this.AgentData_Field.GroupID)
+        packUUID(buffer, this.DataBlock_Field.EmailID)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.DataBlock_Field.ObjectID = unpackUUID(byteBuffer)
-        this.DataBlock_Field.More = unpackInt(byteBuffer)
-        this.DataBlock_Field.Time = unpackInt(byteBuffer)
-        this.DataBlock_Field.FromAddress = unpackVariable(byteBuffer, 1)
-        this.DataBlock_Field.Subject = unpackVariable(byteBuffer, 1)
-        this.DataBlock_Field.Data = unpackVariable(byteBuffer, 2)
-        this.DataBlock_Field.MailFilter = unpackVariable(byteBuffer, 1)
+    override fun UnpackPayload(buffer: ByteBuffer) {
+        this.AgentData_Field.AgentID = unpackUUID(buffer)
+        this.AgentData_Field.GroupID = unpackUUID(buffer)
+        this.DataBlock_Field.EmailID = unpackUUID(buffer)
     }
 }

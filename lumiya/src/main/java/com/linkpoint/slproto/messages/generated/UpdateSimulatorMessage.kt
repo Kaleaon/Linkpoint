@@ -25,7 +25,7 @@ class UpdateSimulatorMessage : SLMessage() {
         simAccess = unpackByte(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0011
+    override fun getMessageID(): Int = 0xFFFF0011.toInt()
 
     override fun getMessageName(): String = "UpdateSimulator"
 }

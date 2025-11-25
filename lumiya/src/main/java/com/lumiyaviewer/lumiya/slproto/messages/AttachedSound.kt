@@ -1,49 +1,48 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.base.Ascii
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.UUID
 
 class AttachedSound : SLMessage {
-    DataBlock DataBlock_Field = DataBlock()
+    var DataBlock_Field: DataBlock = DataBlock()
 
     class DataBlock {
-        Int Flags
-        float Gain
-        UUID ObjectID
-        UUID OwnerID
-        UUID SoundID
+        var Flags: Int = 0
+        var Gain: Float = 0f
+        var ObjectID: UUID? = null
+        var OwnerID: UUID? = null
+        var SoundID: UUID? = null
     }
 
-    AttachedSound() {
+    constructor() {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    override fun CalcPayloadSize(): Int {
         return 55
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAttachedSound(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put((byte) -1)
-        byteBuffer.put(Ascii.CR)
-        packUUID(byteBuffer, this.DataBlock_Field.SoundID)
-        packUUID(byteBuffer, this.DataBlock_Field.ObjectID)
-        packUUID(byteBuffer, this.DataBlock_Field.OwnerID)
-        packFloat(byteBuffer, this.DataBlock_Field.Gain)
-        packByte(byteBuffer, (byte) this.DataBlock_Field.Flags)
+    override fun PackPayload(byteBuffer: ByteBuffer) {
+        byteBuffer.put((-1).toByte())
+        byteBuffer.put(13.toByte()) // Ascii.CR
+        packUUID(byteBuffer, DataBlock_Field.SoundID!!)
+        packUUID(byteBuffer, DataBlock_Field.ObjectID!!)
+        packUUID(byteBuffer, DataBlock_Field.OwnerID!!)
+        packFloat(byteBuffer, DataBlock_Field.Gain)
+        packByte(byteBuffer, DataBlock_Field.Flags.toByte())
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.DataBlock_Field.SoundID = unpackUUID(byteBuffer)
-        this.DataBlock_Field.ObjectID = unpackUUID(byteBuffer)
-        this.DataBlock_Field.OwnerID = unpackUUID(byteBuffer)
-        this.DataBlock_Field.Gain = unpackFloat(byteBuffer)
-        this.DataBlock_Field.Flags = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        DataBlock_Field.SoundID = unpackUUID(byteBuffer)
+        DataBlock_Field.ObjectID = unpackUUID(byteBuffer)
+        DataBlock_Field.OwnerID = unpackUUID(byteBuffer)
+        DataBlock_Field.Gain = unpackFloat(byteBuffer)
+        DataBlock_Field.Flags = (unpackByte(byteBuffer).toInt() and 0xFF)
     }
 }

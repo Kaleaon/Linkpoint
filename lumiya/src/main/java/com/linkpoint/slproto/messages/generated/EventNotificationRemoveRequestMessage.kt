@@ -22,7 +22,7 @@ class EventNotificationRemoveRequestMessage : SLMessage() {
         eventId = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00B6
+    override fun getMessageID(): Int = 0xFFFF00B6.toInt()
 
     override fun getMessageName(): String = "EventNotificationRemoveRequest"
 }

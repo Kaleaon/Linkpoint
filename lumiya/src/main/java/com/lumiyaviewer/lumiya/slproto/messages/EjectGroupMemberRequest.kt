@@ -1,65 +1,56 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.ArrayList
 import java.util.UUID
 
 class EjectGroupMemberRequest : SLMessage {
-    AgentData AgentData_Field
-    ArrayList<EjectData> EjectData_Fields = ArrayList<>()
-    GroupData GroupData_Field
+    var AgentData_Field: AgentData = AgentData()
+    var EjectData_Fields: ArrayList<EjectData> = ArrayList()
 
     class AgentData {
-        UUID AgentID
-        UUID SessionID
+        var AgentID: UUID = UUID(0, 0)
+        var GroupID: UUID = UUID(0, 0)
     }
 
     class EjectData {
-        UUID EjecteeID
+        var EjecteeID: UUID = UUID(0, 0)
     }
 
-    class GroupData {
-        UUID GroupID
+    init {
+        this.zeroCoded = true
     }
 
-    EjectGroupMemberRequest() {
-        this.zeroCoded = false
-        this.AgentData_Field = AgentData()
-        this.GroupData_Field = GroupData()
+    override fun CalcPayloadSize(): Int {
+        return 32 + 1 + (EjectData_Fields.size * 16)
     }
 
-    Int CalcPayloadSize() {
-        return (this.EjectData_Fields.size() * 16) + 53
+    override fun handleMessage(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleEjectGroupMemberRequest(this)
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleEjectGroupMemberRequest(this)
-    }
-
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 1)
-        byteBuffer.put((byte) 89)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        packUUID(byteBuffer, this.GroupData_Field.GroupID)
-        byteBuffer.put((byte) this.EjectData_Fields.size())
-        for (EjectData ejectData : this.EjectData_Fields) {
-            packUUID(byteBuffer, ejectData.EjecteeID)
+    override fun PackPayload(buffer: ByteBuffer) {
+        buffer.putShort(-1)
+        buffer.put(0.toByte())
+        buffer.put(71.toByte())
+        packUUID(buffer, this.AgentData_Field.AgentID)
+        packUUID(buffer, this.AgentData_Field.GroupID)
+        buffer.put(this.EjectData_Fields.size.toByte())
+        for (data in this.EjectData_Fields) {
+            packUUID(buffer, data.EjecteeID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        this.GroupData_Field.GroupID = unpackUUID(byteBuffer)
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            EjectData ejectData = EjectData()
-            ejectData.EjecteeID = unpackUUID(byteBuffer)
-            this.EjectData_Fields.add(ejectData)
+    override fun UnpackPayload(buffer: ByteBuffer) {
+        this.AgentData_Field.AgentID = unpackUUID(buffer)
+        this.AgentData_Field.GroupID = unpackUUID(buffer)
+        val count = buffer.get().toInt() and 0xFF
+        for (i in 0 until count) {
+            val data = EjectData()
+            data.EjecteeID = unpackUUID(buffer)
+            this.EjectData_Fields.add(data)
         }
     }
 }

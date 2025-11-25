@@ -10,76 +10,94 @@ import kotlin.concurrent.withLock
 
 /**
  * Priority-based blocking queue that bins items by priority level
- * Higher priority items are processed before lower priority items
  */
 class PriorityBinQueue<T>(
     private val queueFactory: QueueFactory<T>
-) : BlockingQueue<T> {
+) : java.util.AbstractQueue<T>(), BlockingQueue<T> {
     
     private val lock = ReentrantLock()
     private val notEmpty = lock.newCondition()
     private val queues: SortedMap<Int, Queue<T>> = TreeMap()
 
-    /**
-     * Factory for creating queue instances for each priority bin
-     */
     fun interface QueueFactory<T> {
         fun getQueue(): Queue<T>
     }
 
-    /**
-     * Get priority of an item
-     */
     private fun getPriority(item: Any?): Int {
         return if (item is HasPriority) item.getPriority() else 0
     }
 
-    override fun add(element: T): Boolean {
+    override fun offer(e: T): Boolean {
+        if (e == null) throw NullPointerException()
         lock.withLock {
-            val priority = getPriority(element)
-            Debug.Printf("PriorityBinQueue: added %s with prio %d", element.toString(), priority)
-            
+            val priority = getPriority(e)
             val queue = queues.getOrPut(priority) { queueFactory.getQueue() }
-            val result = queue.add(element)
+            val result = queue.add(e)
             notEmpty.signalAll()
             return result
         }
     }
 
-    override fun addAll(elements: Collection<T>): Boolean {
+    override fun offer(e: T, timeout: Long, unit: TimeUnit): Boolean {
+        return offer(e)
+    }
+
+    override fun poll(): T? {
         lock.withLock {
-            var modified = false
-            for (element in elements) {
-                val priority = getPriority(element)
-                val queue = queues.getOrPut(priority) { queueFactory.getQueue() }
-                modified = queue.add(element) or modified
-                notEmpty.signalAll()
+            for (queue in queues.values) {
+                val iterator = queue.iterator()
+                while (iterator.hasNext()) {
+                    val item = iterator.next()
+                    item?.let {
+                        iterator.remove()
+                        return it
+                    }
+                }
             }
-            return modified
+            return null
         }
     }
 
-    override fun clear() {
+    override fun poll(timeout: Long, unit: TimeUnit): T? {
         lock.withLock {
-            queues.clear()
-        }
-    }
-
-    override fun contains(element: T): Boolean {
-        lock.withLock {
-            val queue = queues[getPriority(element)]
-            return queue?.contains(element) ?: false
-        }
-    }
-
-    override fun containsAll(elements: Collection<T>): Boolean {
-        lock.withLock {
-            return elements.all { element ->
-                val queue = queues[getPriority(element)]
-                queue?.contains(element) == true
+            var nanos = unit.toNanos(timeout)
+            while (true) {
+                val item = poll()
+                if (item != null) return item
+                if (nanos <= 0) return null
+                nanos = notEmpty.awaitNanos(nanos)
             }
         }
     }
+
+    override fun peek(): T? {
+        lock.withLock {
+            for (queue in queues.values) {
+                if (queue.isNotEmpty()) {
+                    for (item in queue) {
+                        item?.let { return it }
+                    }
+                }
+            }
+            return null
+        }
+    }
+
+    override fun put(e: T) {
+        offer(e)
+    }
+
+    override fun take(): T {
+        lock.withLock {
+            while (true) {
+                val item = poll()
+                if (item != null) return item
+                notEmpty.await()
+            }
+        }
+    }
+
+    override fun remainingCapacity(): Int = Integer.MAX_VALUE
 
     override fun drainTo(c: MutableCollection<in T>): Int {
         lock.withLock {
@@ -111,153 +129,12 @@ class PriorityBinQueue<T>(
         }
     }
 
-    override fun element(): T {
-        return peek() ?: throw NoSuchElementException()
-    }
-
-    override fun isEmpty(): Boolean {
-        lock.withLock {
-            return queues.values.all { it.isEmpty() }
-        }
-    }
-
     override fun iterator(): MutableIterator<T> {
         throw UnsupportedOperationException("Iterator not supported for PriorityBinQueue")
     }
 
-    override fun offer(e: T): Boolean = add(e)
-
-    override fun offer(e: T, timeout: Long, unit: TimeUnit): Boolean = add(e)
-
-    override fun peek(): T? {
-        lock.withLock {
-            for (queue in queues.values) {
-                if (queue.isNotEmpty()) {
-                    for (item in queue) {
-                        item?.let { return it }
-                    }
-                }
-            }
-            return null
+    override val size: Int
+        get() = lock.withLock {
+            queues.values.sumOf { it.size }
         }
-    }
-
-    override fun poll(): T? {
-        lock.withLock {
-            for (queue in queues.values) {
-                val iterator = queue.iterator()
-                while (iterator.hasNext()) {
-                    val item = iterator.next()
-                    item?.let {
-                        iterator.remove()
-                        return it
-                    }
-                }
-            }
-            return null
-        }
-    }
-
-    override fun poll(timeout: Long, unit: TimeUnit): T? {
-        lock.withLock {
-            do {
-                poll()?.let { return it }
-            } while (notEmpty.await(timeout, unit))
-            return null
-        }
-    }
-
-    override fun put(e: T) {
-        add(e)
-    }
-
-    override fun remainingCapacity(): Int = Integer.MAX_VALUE
-
-    override fun remove(): T {
-        return poll() ?: throw NoSuchElementException()
-    }
-
-    override fun remove(element: T): Boolean {
-        lock.withLock {
-            val queue = queues[getPriority(element)]
-            return queue?.remove(element) ?: false
-        }
-    }
-
-    override fun removeAll(elements: Collection<T>): Boolean {
-        lock.withLock {
-            var modified = false
-            for (element in elements) {
-                val queue = queues[getPriority(element)]
-                queue?.let {
-                    modified = it.remove(element) or modified
-                }
-            }
-            return modified
-        }
-    }
-
-    override fun retainAll(elements: Collection<T>): Boolean {
-        lock.withLock {
-            var modified = false
-            for (queue in queues.values) {
-                modified = queue.retainAll(elements.toSet()) or modified
-            }
-            return modified
-        }
-    }
-
-    override fun size(): Int {
-        lock.withLock {
-            return queues.values.sumOf { it.size }
-        }
-    }
-
-    override fun take(): T {
-        lock.withLock {
-            while (true) {
-                poll()?.let { return it }
-                notEmpty.await()
-            }
-        }
-    }
-
-    override fun toArray(): Array<Any?> {
-        lock.withLock {
-            val arrays = queues.values.map { it.toTypedArray() }
-            val totalSize = arrays.sumOf { it.size }
-            val result = arrayOfNulls<Any>(totalSize)
-            
-            var offset = 0
-            for (array in arrays) {
-                System.arraycopy(array, 0, result, offset, array.size)
-                offset += array.size
-            }
-            
-            return result
-        }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T1> toArray(a: Array<T1>): Array<T1> {
-        lock.withLock {
-            val arrays = queues.values.map { it.toTypedArray() }
-            val totalSize = arrays.sumOf { it.size }
-            
-            val result = if (a.size >= totalSize) {
-                Arrays.fill(a, null)
-                a
-            } else {
-                arrayOfNulls<Any>(totalSize) as Array<T1>
-            }
-            
-            var offset = 0
-            for (array in arrays) {
-                System.arraycopy(array, 0, result, offset, array.size)
-                offset += array.size
-            }
-            
-            return result
-        }
-    }
 }

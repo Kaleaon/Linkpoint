@@ -6,134 +6,111 @@ import java.io.UnsupportedEncodingException
 import java.util.UUID
 
 class SLWearableData {
-    String name
-    ImmutableList<WearableParam> params
-    ImmutableList<WearableTexture> textures
+    var name: String = ""
+    lateinit var params: ImmutableList<WearableParam>
+    lateinit var textures: ImmutableList<WearableTexture>
 
     class WearableFormatException : AssetFormatException {
-        WearableFormatException() {
-            super("Unsupported wearable format")
-        }
-
-        WearableFormatException(Throwable th) {
-            super("Unsupported wearable format", th)
-        }
+        constructor() : super("Unsupported wearable format")
+        constructor(cause: Throwable) : super("Unsupported wearable format", cause)
     }
 
-    class WearableParam {
-        Int paramIndex
-        Float paramValue
+    class WearableParam(val paramIndex: Int, val paramValue: Float)
 
-        WearableParam(Int i, Float f) {
-            this.paramIndex = i
-            this.paramValue = f
-        }
-    }
+    class WearableTexture(val layer: Int, val textureID: UUID)
 
-    class WearableTexture {
-        Int layer
-        UUID textureID
-
-        WearableTexture(Int i, UUID uuid) {
-            this.layer = i
-            this.textureID = uuid
-        }
-    }
-
-    SLWearableData(ByteArray bArr) throws WearableFormatException {
+    constructor(data: ByteArray) {
         try {
-            Array<String> split = String(bArr, "ISO-8859-1").trim().split("\n+")
-            if (split.length < 2) {
+            val content = String(data, charset("ISO-8859-1")).trim()
+            val lines = content.split(Regex("\n+"))
+            
+            if (lines.size < 2 || !lines[0].trim().startsWith("LLWearable")) {
                 throw WearableFormatException()
-            } else if (!split[0].trim().startsWith("LLWearable")) {
-                throw WearableFormatException()
-            } else {
-                try {
-                    this.name = split[1]
-                    ImmutableList.Builder builder = ImmutableList.builder()
-                    ImmutableList.Builder builder2 = ImmutableList.builder()
-                    Int i2 = 2
-                    while (i2 < split.length) {
-                        Array<String> split2 = split[i2].trim().split("\\s+")
-                        if (split2.length < 1) {
-                            i2++
-                        } else if (split2[0].equalsIgnoreCase("permissions") || split2[0].equalsIgnoreCase("sale_info")) {
-                            i2++
-                            if (i2 >= split.length) {
-                                throw WearableFormatException()
-                            } else if (!split[i2].trim().equalsIgnoreCase("{")) {
-                                throw WearableFormatException()
-                            } else {
-                                while (true) {
-                                    if (i2 >= split.length) {
-                                        break
-                                    } else if (split[i2].trim().equalsIgnoreCase("}")) {
-                                        i2++
-                                        break
-                                    } else {
-                                        i2++
-                                    }
-                                }
-                            }
-                        } else {
-                            if (split2[0].equalsIgnoreCase("parameters")) {
-                                Int parseInt = Int.parseInt(split2[1])
-                                i = i2 + 1
-                                Int i3 = 0
-                                while (i3 < parseInt) {
-                                    if (i >= split.length) {
-                                        throw WearableFormatException()
-                                    }
-                                    try {
-                                        Array<String> split3 = split[i].trim().split("\\s+")
-                                        if (split3.length < 2) {
-                                            throw WearableFormatException()
-                                        }
-                                        builder.add((Any) WearableParam(Int.parseInt(split3[0]), Float.parseFloat(split3[1])))
-                                        i++
-                                        i3++
-                                    } catch (WearableFormatException e) {
-                                        Debug.Warning(e)
-                                    } catch (NumberFormatException e2) {
-                                        Debug.Warning(e2)
-                                    }
-                                }
-                            } else if (split2[0].equalsIgnoreCase("textures")) {
-                                Int parseInt2 = Int.parseInt(split2[1])
-                                Int i4 = i2 + 1
-                                Int i5 = 0
-                                while (i5 < parseInt2) {
-                                    if (i >= split.length) {
-                                        throw WearableFormatException()
-                                    }
-                                    try {
-                                        Array<String> split4 = split[i].trim().split("\\s+")
-                                        if (split4.length < 2) {
-                                            throw WearableFormatException()
-                                        }
-                                        builder2.add((Any) WearableTexture(Int.parseInt(split4[0]), UUID.fromString(split4[1])))
-                                        i4 = i + 1
-                                        i5++
-                                    } catch (WearableFormatException e3) {
-                                        Debug.Warning(e3)
-                                    } catch (NumberFormatException e4) {
-                                        Debug.Warning(e4)
-                                    }
-                                }
-                            } else {
-                                i2++
-                            }
-                            i2 = i
-                        }
-                    }
-                    this.params = builder.build()
-                    this.textures = builder2.build()
-                } catch (NumberFormatException e5) {
-                    throw WearableFormatException(e5)
-                }
             }
-        } catch (UnsupportedEncodingException e6) {
-            throw WearableFormatException(e6)
+            
+            try {
+                name = lines[1]
+                val paramBuilder = ImmutableList.builder<WearableParam>()
+                val textureBuilder = ImmutableList.builder<WearableTexture>()
+                
+                var i = 2
+                while (i < lines.size) {
+                    val line = lines[i].trim()
+                    val parts = line.split(Regex("\\s+"))
+                    
+                    if (parts.isEmpty() || parts[0].isEmpty()) {
+                        i++
+                        continue
+                    }
+                    
+                    if (parts[0].equals("permissions", ignoreCase = true) || 
+                        parts[0].equals("sale_info", ignoreCase = true)) {
+                        
+                        i++
+                        if (i >= lines.size || !lines[i].trim().equals("{", ignoreCase = true)) {
+                            throw WearableFormatException()
+                        }
+                        
+                        while (i < lines.size) {
+                            if (lines[i].trim().equals("}", ignoreCase = true)) {
+                                i++
+                                break
+                            }
+                            i++
+                        }
+                    } else if (parts[0].equals("parameters", ignoreCase = true)) {
+                        val count = Integer.parseInt(parts[1])
+                        i++
+                        
+                        var processed = 0
+                        while (processed < count && i < lines.size) {
+                            try {
+                                val pParts = lines[i].trim().split(Regex("\\s+"))
+                                if (pParts.size < 2) throw WearableFormatException()
+                                
+                                paramBuilder.add(WearableParam(
+                                    Integer.parseInt(pParts[0]),
+                                    pParts[1].toFloat()
+                                ))
+                            } catch (e: Exception) {
+                                Debug.Warning(e)
+                            }
+                            i++
+                            processed++
+                        }
+                    } else if (parts[0].equals("textures", ignoreCase = true)) {
+                        val count = Integer.parseInt(parts[1])
+                        i++
+                        
+                        var processed = 0
+                        while (processed < count && i < lines.size) {
+                            try {
+                                val tParts = lines[i].trim().split(Regex("\\s+"))
+                                if (tParts.size < 2) throw WearableFormatException()
+                                
+                                textureBuilder.add(WearableTexture(
+                                    Integer.parseInt(tParts[0]),
+                                    UUID.fromString(tParts[1])
+                                ))
+                            } catch (e: Exception) {
+                                Debug.Warning(e)
+                            }
+                            i++
+                            processed++
+                        }
+                    } else {
+                        i++
+                    }
+                }
+                
+                params = paramBuilder.build()
+                textures = textureBuilder.build()
+                
+            } catch (e: NumberFormatException) {
+                throw WearableFormatException(e)
+            }
+        } catch (e: UnsupportedEncodingException) {
+            throw WearableFormatException(e)
         }
     }
 }

@@ -51,7 +51,7 @@ class GroupTitlesReplyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0178
+    override fun getMessageID(): Int = 0xFFFF0178.toInt()
 
     override fun getMessageName(): String = "GroupTitlesReply"
 }

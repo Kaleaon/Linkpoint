@@ -51,7 +51,7 @@ class ObjectOwnerMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0064
+    override fun getMessageID(): Int = 0xFFFF0064.toInt()
 
     override fun getMessageName(): String = "ObjectOwner"
 }

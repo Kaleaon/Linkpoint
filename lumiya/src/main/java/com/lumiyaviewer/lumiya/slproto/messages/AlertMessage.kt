@@ -1,66 +1,59 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.ArrayList
-import java.util.Iterator
 
 class AlertMessage : SLMessage {
-    AlertData AlertData_Field
-    ArrayList<AlertInfo> AlertInfo_Fields = ArrayList<>()
+    var AlertData_Field: AlertData = AlertData()
+    var AlertInfo_Fields: ArrayList<AlertInfo> = ArrayList()
 
     class AlertData {
-        byte[] Message
+        var Message: ByteArray = ByteArray(0)
     }
 
     class AlertInfo {
-        byte[] ExtraParams
-        byte[] Message
+        var ExtraParams: ByteArray = ByteArray(0)
+        var Message: ByteArray = ByteArray(0)
     }
 
-    AlertMessage() {
+    constructor() {
         this.zeroCoded = false
-        this.AlertData_Field = AlertData()
     }
 
-    Int CalcPayloadSize() {
-        Int length = this.AlertData_Field.Message.length + 1 + 4 + 1
-        Iterator<T> it = this.AlertInfo_Fields.iterator()
-        while (true) {
-            Int i = length
-            if (!it.hasNext()) {
-                return i
-            }
-            AlertInfo alertInfo = (AlertInfo) it.next()
-            length = alertInfo.ExtraParams.length + alertInfo.Message.length + 1 + 1 + i
+    override fun CalcPayloadSize(): Int {
+        var length = AlertData_Field.Message.size + 1 + 4 + 1
+        for (alertInfo in AlertInfo_Fields) {
+            length += alertInfo.ExtraParams.size + alertInfo.Message.size + 1 + 1
         }
+        return length
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAlertMessage(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) -122)
-        packVariable(byteBuffer, this.AlertData_Field.Message, 1)
-        byteBuffer.put((byte) this.AlertInfo_Fields.size())
-        for (AlertInfo alertInfo : this.AlertInfo_Fields) {
+        byteBuffer.put(0.toByte())
+        byteBuffer.put(-122.toByte())
+        packVariable(byteBuffer, AlertData_Field.Message, 1)
+        byteBuffer.put(AlertInfo_Fields.size.toByte())
+        for (alertInfo in AlertInfo_Fields) {
             packVariable(byteBuffer, alertInfo.Message, 1)
             packVariable(byteBuffer, alertInfo.ExtraParams, 1)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AlertData_Field.Message = unpackVariable(byteBuffer, 1)
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            AlertInfo alertInfo = AlertInfo()
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        AlertData_Field.Message = unpackVariable(byteBuffer, 1)
+        val b = (byteBuffer.get().toInt() and 0xFF)
+        for (i in 0 until b) {
+            val alertInfo = AlertInfo()
             alertInfo.Message = unpackVariable(byteBuffer, 1)
             alertInfo.ExtraParams = unpackVariable(byteBuffer, 1)
-            this.AlertInfo_Fields.add(alertInfo)
+            AlertInfo_Fields.add(alertInfo)
         }
     }
 }

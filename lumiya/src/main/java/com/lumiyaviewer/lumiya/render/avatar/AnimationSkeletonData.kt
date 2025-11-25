@@ -6,53 +6,58 @@ import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 import java.util.Arrays
 
 class AnimationSkeletonData {
-    private Int numAnimatedBones = 133
-    private val animMatrix: FloatArray = FloatArray(2128)
-    private val animMatrix_Swap: FloatArray = FloatArray(2128)
-    private val animOffsets: FloatArray = FloatArray(532)
-    private val animOffsets_Swap: FloatArray = FloatArray(532)
-    private LLVector3[] animPosArray = LLVector3[133]
-    private val animPriorityPosArray: FloatArray = FloatArray(133)
-    private val animPriorityRotArray: FloatArray = FloatArray(133)
-    private LLQuaternion[] animRotArray = LLQuaternion[133]
+    private val numAnimatedBones = 133
+    private var animMatrix: FloatArray = FloatArray(2128)
+    private var animMatrix_Swap: FloatArray = FloatArray(2128)
+    private var animOffsets: FloatArray = FloatArray(532)
+    private var animOffsets_Swap: FloatArray = FloatArray(532)
+    
+    private val animPosArray = Array(numAnimatedBones) { LLVector3() }
+    private val animPriorityPosArray = FloatArray(numAnimatedBones)
+    private val animPriorityRotArray = FloatArray(numAnimatedBones)
+    private val animRotArray = Array(numAnimatedBones) { LLQuaternion() }
 
-    AnimationSkeletonData() {
-        for (Int i = 0; i < 133; i++) {
-            Matrix.setIdentityM(this.animMatrix, i * 16)
-            this.animPosArray[i] = LLVector3()
-            this.animRotArray[i] = LLQuaternion()
+    init {
+        for (i in 0 until numAnimatedBones) {
+            Matrix.setIdentityM(animMatrix, i * 16)
         }
-        Arrays.fill(this.animOffsets, 0.0f)
+        Arrays.fill(animOffsets, 0.0f)
     }
 
-    Unit animate(AvatarSkeleton avatarSkeleton, AvatarAnimationList avatarAnimationList) {
-        Arrays.fill(this.animPriorityRotArray, 1.0f)
-        Arrays.fill(this.animPriorityPosArray, 1.0f)
-        for (i = 0; i < 133; i++) {
-            this.animRotArray[i].setZero()
-            this.animPosArray[i].set(0.0f, 0.0f, 0.0f)
+    fun animate(avatarSkeleton: AvatarSkeleton, avatarAnimationList: AvatarAnimationList) {
+        Arrays.fill(animPriorityRotArray, 1.0f)
+        Arrays.fill(animPriorityPosArray, 1.0f)
+        for (i in 0 until numAnimatedBones) {
+            animRotArray[i].setZero()
+            animPosArray[i].set(0.0f, 0.0f, 0.0f)
         }
-        avatarAnimationList.animate(avatarSkeleton, this.animPriorityRotArray, this.animPriorityPosArray, this.animRotArray, this.animPosArray)
-        for (i = 0; i < 133; i++) {
-            this.animRotArray[i].getInverseMatrix(this.animMatrix_Swap, i * 16)
-            this.animOffsets_Swap[(i * 4) + 0] = this.animPosArray[i].x
-            this.animOffsets_Swap[(i * 4) + 1] = this.animPosArray[i].y
-            this.animOffsets_Swap[(i * 4) + 2] = this.animPosArray[i].z
-            this.animOffsets_Swap[(i * 4) + 3] = 1.0f - this.animPriorityPosArray[i]
+        
+        avatarAnimationList.animate(avatarSkeleton, animPriorityRotArray, animPriorityPosArray, animRotArray, animPosArray)
+        
+        for (i in 0 until numAnimatedBones) {
+            // Assuming getInverseMatrix writes to the array at offset
+            animRotArray[i].getInverseMatrix(animMatrix_Swap, i * 16)
+            animOffsets_Swap[(i * 4) + 0] = animPosArray[i].x
+            animOffsets_Swap[(i * 4) + 1] = animPosArray[i].y
+            animOffsets_Swap[(i * 4) + 2] = animPosArray[i].z
+            animOffsets_Swap[(i * 4) + 3] = 1.0f - animPriorityPosArray[i]
         }
-        FloatArray fArr = this.animMatrix
-        this.animMatrix = this.animMatrix_Swap
-        this.animMatrix_Swap = fArr
-        fArr = this.animOffsets
-        this.animOffsets = this.animOffsets_Swap
-        this.animOffsets_Swap = fArr
+        
+        // Swap buffers
+        val tempMatrix = animMatrix
+        animMatrix = animMatrix_Swap
+        animMatrix_Swap = tempMatrix
+        
+        val tempOffsets = animOffsets
+        animOffsets = animOffsets_Swap
+        animOffsets_Swap = tempOffsets
     }
 
-    FloatArray getAnimMatrix() {
-        return this.animMatrix
+    fun getAnimMatrix(): FloatArray {
+        return animMatrix
     }
 
-    FloatArray getAnimOffsets() {
-        return this.animOffsets
+    fun getAnimOffsets(): FloatArray {
+        return animOffsets
     }
 }

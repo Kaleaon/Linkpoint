@@ -30,7 +30,7 @@ class EventLocationReplyMessage : SLMessage() {
         regionPos = LLVector3.unpack(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0134
+    override fun getMessageID(): Int = 0xFFFF0134.toInt()
 
     override fun getMessageName(): String = "EventLocationReply"
 }

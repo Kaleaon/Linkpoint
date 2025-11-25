@@ -51,7 +51,7 @@ class GodlikeMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0103
+    override fun getMessageID(): Int = 0xFFFF0103.toInt()
 
     override fun getMessageName(): String = "GodlikeMessage"
 }

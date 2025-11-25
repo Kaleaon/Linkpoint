@@ -63,7 +63,7 @@ class GroupMembersReplyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF016F
+    override fun getMessageID(): Int = 0xFFFF016F.toInt()
 
     override fun getMessageName(): String = "GroupMembersReply"
 }

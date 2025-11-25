@@ -15,7 +15,7 @@ class TeleportLandingStatusChangedMessage : SLMessage() {
         regionHandle = unpackLong(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0093
+    override fun getMessageID(): Int = 0xFFFF0093.toInt()
 
     override fun getMessageName(): String = "TeleportLandingStatusChanged"
 }

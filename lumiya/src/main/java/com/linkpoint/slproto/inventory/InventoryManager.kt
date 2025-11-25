@@ -152,10 +152,11 @@ class InventoryManager(private val capsManager: CapsManager) {
                     val folderId = response["folder_id"]
                     if (folderId is LLSDUUID) {
                         val folder = InventoryFolder(
-                            folderId = folderId.value
-                            parentId = parentId
-                            name = name
-                            type = type
+                            folderId = folderId.value,
+                            parentId = parentId,
+                            name = name,
+                            type = type,
+                            preferredType = -1
                         )
                         folderCache[folderId.value] = folder
                         folder
@@ -299,12 +300,12 @@ data class InventoryFolder(
  * Inventory permissions
  */
 data class InventoryPermissions(
-    val baseMask: Int = 0
-    val ownerMask: Int = 0
-    val groupMask: Int = 0
-    val everyoneMask: Int = 0
-    val nextOwnerMask: Int = 0
-    val isOwnerGroup: Boolean = false
+    val baseMask: Int = 0,
+    val ownerMask: Int = 0,
+    val groupMask: Int = 0,
+    val everyoneMask: Int = 0,
+    val nextOwnerMask: Int = 0,
+    val isOwnerGroup: Boolean = false,
 ) {
     companion object {
         const val PERM_TRANSFER = 0x00002000

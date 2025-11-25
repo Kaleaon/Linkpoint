@@ -1,46 +1,47 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.UUID
 
 class AvatarNotesReply : SLMessage {
-    AgentData AgentData_Field = AgentData()
-    Data Data_Field = Data()
+    var AgentData_Field: AgentData = AgentData()
+    var Data_Field: Data = Data()
 
     class AgentData {
-        UUID AgentID
+        var AgentID: UUID? = null
     }
 
     class Data {
-        byte[] Notes
-        UUID TargetID
+        var Notes: ByteArray = ByteArray(0)
+        var TargetID: UUID? = null
     }
 
-    AvatarNotesReply() {
+    constructor() {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.Data_Field.Notes.length + 18 + 20
+    override fun CalcPayloadSize(): Int {
+        return Data_Field.Notes.size + 18 + 20
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAvatarNotesReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) -80)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.Data_Field.TargetID)
-        packVariable(byteBuffer, this.Data_Field.Notes, 2)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put((-80).toByte())
+        packUUID(byteBuffer, AgentData_Field.AgentID!!)
+        packUUID(byteBuffer, Data_Field.TargetID!!)
+        packVariable(byteBuffer, Data_Field.Notes, 2)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.Data_Field.TargetID = unpackUUID(byteBuffer)
-        this.Data_Field.Notes = unpackVariable(byteBuffer, 2)
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        AgentData_Field.AgentID = unpackUUID(byteBuffer)
+        Data_Field.TargetID = unpackUUID(byteBuffer)
+        Data_Field.Notes = unpackVariable(byteBuffer, 2)
     }
 }

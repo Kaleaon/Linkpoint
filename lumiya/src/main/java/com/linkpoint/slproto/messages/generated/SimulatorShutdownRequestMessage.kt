@@ -6,9 +6,7 @@ import java.nio.ByteBuffer
 class SimulatorShutdownRequestMessage : SLMessage() {
     val regionPresenceRequestByRegionId: MutableList<RegionPresenceRequestByRegionIdBlock> = mutableListOf()
 
-    data class RegionPresenceRequestByRegionIdBlock(
-    )
-
+    class RegionPresenceRequestByRegionIdBlock
 
     override fun packPayload(buffer: ByteBuffer) {
         regionPresenceRequestByRegionId.forEach { entry ->
@@ -26,7 +24,7 @@ class SimulatorShutdownRequestMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF000D
+    override fun getMessageID(): Int = 0xFFFF000D.toInt()
 
     override fun getMessageName(): String = "SimulatorShutdownRequest"
 }

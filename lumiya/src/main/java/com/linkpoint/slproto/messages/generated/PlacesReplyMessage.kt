@@ -81,7 +81,7 @@ class PlacesReplyMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF001E
+    override fun getMessageID(): Int = 0xFFFF001E.toInt()
 
     override fun getMessageName(): String = "PlacesReply"
 }

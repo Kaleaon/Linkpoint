@@ -1,11 +1,18 @@
 package com.lumiyaviewer.lumiya.slproto.inventory
-import java.util.*
 
 import androidx.v4.os.EnvironmentCompat
 import com.google.common.collect.ImmutableMap
 import com.lumiyaviewer.lumiya.R
 
-enum SLAssetType {
+enum class SLAssetType(
+    val typeCode: Int,
+    val stringCode: String,
+    val invType: SLInventoryType,
+    val specialFolderType: Int,
+    val drawableResource: Int,
+    val typeDescription: Int,
+    val actionDescription: Int
+) {
     AT_TEXTURE(0, "texture", SLInventoryType.IT_TEXTURE, 0, R.drawable.inv_image, R.string.asset_type_texture, R.string.asset_action_view),
     AT_SOUND(1, "sound", SLInventoryType.IT_SOUND, 1, R.drawable.inv_sound, R.string.asset_type_sound, -1),
     AT_CALLINGCARD(2, "callcard", SLInventoryType.IT_CALLINGCARD, 2, R.drawable.inv_vcard, R.string.asset_type_calling_card, -1),
@@ -29,74 +36,26 @@ enum SLAssetType {
     AT_LINK_FOLDER(25, "link_f", SLInventoryType.IT_UNKNOWN, 6, R.drawable.inv_link, R.string.asset_type_link, -1),
     AT_MESH(49, "mesh", SLInventoryType.IT_MESH, 6, R.drawable.inv_object, R.string.asset_type_object, -1),
     AT_WIDGET(40, "widget", SLInventoryType.IT_WIDGET, 6, R.drawable.inv_object, R.string.asset_type_object, -1),
-    AT_UNKNOWN(-1, EnvironmentCompat.MEDIA_UNKNOWN, SLInventoryType.IT_UNKNOWN, -1, -1, -1, -1)
-    
-    private ImmutableMap<String, SLAssetType> tagMap = null
-    private Int actionDescription
-    private Int drawableResource
-    private SLInventoryType invType
-    private Int specialFolderType
-    private String stringCode
-    private Int typeCode
-    private Int typeDescription
+    AT_UNKNOWN(-1, EnvironmentCompat.MEDIA_UNKNOWN, SLInventoryType.IT_UNKNOWN, -1, -1, -1, -1);
 
-    {
-        ImmutableMap.Builder builder = ImmutableMap.builder()
-        for (SLAssetType sLAssetType : values()) {
-            builder.put(sLAssetType.stringCode, sLAssetType)
-        }
-        tagMap = builder.build()
-    }
-
-    private SLAssetType(Int i, String str, SLInventoryType sLInventoryType, Int i2, Int i3, Int i4, Int i5) {
-        this.typeCode = i
-        this.stringCode = str
-        this.invType = sLInventoryType
-        this.specialFolderType = i2
-        this.drawableResource = i3
-        this.typeDescription = i4
-        this.actionDescription = i5
-    }
-
-    SLAssetType getByString(String str) {
-        SLAssetType sLAssetType = tagMap.get(str)
-        return sLAssetType == null ? AT_UNKNOWN : sLAssetType
-    }
-
-    SLAssetType getByType(Int i) {
-        for (SLAssetType sLAssetType : values()) {
-            if (sLAssetType.typeCode == i) {
-                return sLAssetType
+    companion object {
+        private val tagMap = ImmutableMap.builder<String, SLAssetType>().apply {
+            for (type in values()) {
+                put(type.stringCode, type)
             }
+        }.build()
+
+        fun getByString(str: String): SLAssetType {
+            return tagMap[str] ?: AT_UNKNOWN
         }
-        return AT_UNKNOWN
-    }
 
-    Int getActionDescription() {
-        return this.actionDescription
-    }
-
-    Int getDrawableResource() {
-        return this.drawableResource
-    }
-
-    SLInventoryType getInventoryType() {
-        return this.invType
-    }
-
-    Int getSpecialFolderType() {
-        return this.specialFolderType
-    }
-
-    String getStringCode() {
-        return this.stringCode
-    }
-
-    Int getTypeCode() {
-        return this.typeCode
-    }
-
-    Int getTypeDescription() {
-        return this.typeDescription
+        fun getByType(type: Int): SLAssetType {
+            for (assetType in values()) {
+                if (assetType.typeCode == type) {
+                    return assetType
+                }
+            }
+            return AT_UNKNOWN
+        }
     }
 }

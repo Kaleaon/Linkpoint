@@ -22,7 +22,7 @@ class MuteListRequestMessage : SLMessage() {
         muteCrc = unpackInt(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF0106
+    override fun getMessageID(): Int = 0xFFFF0106.toInt()
 
     override fun getMessageName(): String = "MuteListRequest"
 }

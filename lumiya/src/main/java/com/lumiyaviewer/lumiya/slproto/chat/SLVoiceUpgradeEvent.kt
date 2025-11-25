@@ -10,77 +10,77 @@ import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatYesNoEvent
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUnknown
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.util.UUID
-import androidx.annotation.NonNull
 
 class SLVoiceUpgradeEvent : SLChatYesNoEvent {
-    private Boolean isInstall
-    private String upgradeURL
+    private var isInstall: Boolean = false
+    private var upgradeURL: String? = null
 
-    /* JADX INFO: super call moved to the top of the method (can break code semantics) */
-    SLVoiceUpgradeEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
-        super(chatMessage, uuid)
-        Boolean z = false
-        this.upgradeURL = chatMessage.getItemName()
-        this.isInstall = chatMessage.getAssetType().intValue() != 0 ? true : z
+    constructor(chatMessage: ChatMessage, uuid: UUID) : super(chatMessage, uuid) {
+        this.upgradeURL = chatMessage.itemName
+        this.isInstall = chatMessage.assetType != 0
     }
 
-    SLVoiceUpgradeEvent(@NonNull UUID uuid, String str, Boolean z, String str2) {
-        super(ChatMessageSourceUnknown.getInstance(), uuid, str)
+    constructor(uuid: UUID, str: String, z: Boolean, str2: String) : super(
+        ChatMessageSourceUnknown.getInstance(),
+        uuid,
+        str
+    ) {
         this.upgradeURL = str2
         this.isInstall = z
     }
 
-    /* access modifiers changed from: protected */
-    @NonNull
-    SLChatEvent.ChatMessageType getMessageType() {
-        return SLChatEvent.ChatMessageType.VoiceUpgrade
+    override fun getMessageType(): ChatMessageType {
+        return ChatMessageType.VoiceUpgrade
     }
 
-    String getNoButton(Context context) {
+    override fun getNoButton(context: Context): String {
         return context.getString(R.string.voice_upgrade_no)
     }
 
-    String getNoMessage(Context context) {
-        return this.isInstall ? context.getString(R.string.voice_install_declined) : context.getString(R.string.voice_upgrade_declined)
+    override fun getNoMessage(context: Context): String {
+        return if (isInstall) context.getString(R.string.voice_install_declined) else context.getString(R.string.voice_upgrade_declined)
     }
 
-    String getQuestion(Context context) {
-        return this.isInstall ? context.getString(R.string.install_now_question) : context.getString(R.string.upgrade_now_question)
+    override fun getQuestion(context: Context): String {
+        return if (isInstall) context.getString(R.string.install_now_question) else context.getString(R.string.upgrade_now_question)
     }
 
-    String getText(Context context, @NonNull UserManager userManager) {
-        return this.text
+    override fun getText(context: Context, userManager: UserManager): String? {
+        return this.getMessage().toString()
     }
 
-    String getYesButton(Context context) {
-        return this.isInstall ? context.getString(R.string.voice_install_yes) : context.getString(R.string.voice_upgrade_yes)
+    override fun getYesButton(context: Context): String {
+        return if (isInstall) context.getString(R.string.voice_install_yes) else context.getString(R.string.voice_upgrade_yes)
     }
 
-    String getYesMessage(Context context) {
+    override fun getYesMessage(context: Context): String {
         return ""
     }
 
-    Boolean isObjectPopup() {
+    fun isObjectPopup(): Boolean {
         return false
     }
 
-    /* access modifiers changed from: protected */
-    Unit onNoAction(Context context, UserManager userManager) {
+    override fun onNoAction(context: Context, userManager: UserManager) {
         super.onNoAction(context, userManager)
-        userManager.getObjectPopupsManager().cancelObjectPopup(this)
+        userManager.objectPopupsManager.cancelObjectPopup(this)
     }
 
-    Unit onYesAction(Context context, UserManager userManager) {
+    override fun onYesAction(context: Context, userManager: UserManager) {
         super.onYesAction(context, userManager)
-        userManager.getObjectPopupsManager().cancelObjectPopup(this)
-        Intent intent = Intent("android.intent.action.VIEW")
-        intent.setData(Uri.parse(this.upgradeURL))
-        context.startActivity(intent)
+        userManager.objectPopupsManager.cancelObjectPopup(this)
+        try {
+            val intent = Intent("android.intent.action.VIEW")
+            intent.data = Uri.parse(this.upgradeURL)
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            // ignore
+        }
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    override fun serializeToDatabaseObject(chatMessage: ChatMessage) {
         super.serializeToDatabaseObject(chatMessage)
-        chatMessage.setItemName(this.upgradeURL)
-        chatMessage.setAssetType(Integer.valueOf(this.isInstall ? 1 : 0))
+        chatMessage.itemName = this.upgradeURL
+        chatMessage.assetType = if (this.isInstall) 1 else 0
     }
 }

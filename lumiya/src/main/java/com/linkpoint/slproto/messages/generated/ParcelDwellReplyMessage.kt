@@ -25,7 +25,7 @@ class ParcelDwellReplyMessage : SLMessage() {
         dwell = unpackFloat(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF00DB
+    override fun getMessageID(): Int = 0xFFFF00DB.toInt()
 
     override fun getMessageName(): String = "ParcelDwellReply"
 }

@@ -19,7 +19,7 @@ class LiveHelpGroupRequestMessage : SLMessage() {
         agentId = unpackUUID(buffer)
     }
 
-    override fun getMessageID(): Int = 0xFFFF017B
+    override fun getMessageID(): Int = 0xFFFF017B.toInt()
 
     override fun getMessageName(): String = "LiveHelpGroupRequest"
 }

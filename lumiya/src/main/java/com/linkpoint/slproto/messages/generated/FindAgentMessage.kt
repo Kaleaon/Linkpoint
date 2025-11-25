@@ -45,7 +45,7 @@ class FindAgentMessage : SLMessage() {
         }
     }
 
-    override fun getMessageID(): Int = 0xFFFF0100
+    override fun getMessageID(): Int = 0xFFFF0100.toInt()
 
     override fun getMessageName(): String = "FindAgent"
 }
