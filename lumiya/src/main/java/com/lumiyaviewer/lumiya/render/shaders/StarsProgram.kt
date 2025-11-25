@@ -12,7 +12,9 @@ class StarsProgram : ShaderProgram(
     var vPosition: Int = 0
 
     fun ApplyWindlight(renderContext: RenderContext) {
-        GLES20.glUniform4f(uStarColor, 1.0f, 1.0f, 1.0f, renderContext.windlightPreset.star_brightness)
+        renderContext.windlightPreset?.let { preset ->
+            GLES20.glUniform4f(uStarColor, 1.0f, 1.0f, 1.0f, preset.star_brightness)
+        }
     }
 
     override fun bindVariables() {

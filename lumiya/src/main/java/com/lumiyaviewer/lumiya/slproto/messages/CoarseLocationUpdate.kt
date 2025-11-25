@@ -1,75 +1,74 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
-import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.nio.ByteBuffer
 import java.util.ArrayList
-import java.util.UUID
 
 class CoarseLocationUpdate : SLMessage {
-    ArrayList<AgentData> AgentData_Fields = ArrayList<>()
-    Index Index_Field
-    ArrayList<Location> Location_Fields = ArrayList<>()
+    var AgentData_Fields: ArrayList<AgentData> = ArrayList()
+    var Index_Field: Index = Index()
+    var Location_Fields: ArrayList<Location> = ArrayList()
 
     class AgentData {
-        UUID AgentID
+        var AgentID: UUID = UUIDPool.ZeroUUID
     }
 
     class Index {
-        Int Prey
-        Int You
+        var Prey: Int = 0
+        var You: Int = 0
     }
 
     class Location {
-        Int X
-        Int Y
-        Int Z
+        var X: Int = 0
+        var Y: Int = 0
+        var Z: Int = 0
     }
 
-    CoarseLocationUpdate() {
+    init {
         this.zeroCoded = false
-        this.Index_Field = Index()
     }
 
-    Int CalcPayloadSize() {
-        return (this.Location_Fields.size() * 3) + 3 + 4 + 1 + (this.AgentData_Fields.size() * 16)
+    override fun CalcPayloadSize(): Int {
+        return (this.Location_Fields.size * 3) + 3 + 4 + 1 + (this.AgentData_Fields.size * 16)
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleCoarseLocationUpdate(this)
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleCoarseLocationUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put((byte) -1)
-        byteBuffer.put((byte) 6)
-        byteBuffer.put((byte) this.Location_Fields.size())
-        for (Location location : this.Location_Fields) {
-            packByte(byteBuffer, (byte) location.X)
-            packByte(byteBuffer, (byte) location.Y)
-            packByte(byteBuffer, (byte) location.Z)
+    override fun PackPayload(byteBuffer: ByteBuffer) {
+        byteBuffer.put(-1)
+        byteBuffer.put(6)
+        byteBuffer.put(this.Location_Fields.size.toByte())
+        for (location in this.Location_Fields) {
+            packByte(byteBuffer, location.X.toByte())
+            packByte(byteBuffer, location.Y.toByte())
+            packByte(byteBuffer, location.Z.toByte())
         }
-        packShort(byteBuffer, (short) this.Index_Field.You)
-        packShort(byteBuffer, (short) this.Index_Field.Prey)
-        byteBuffer.put((byte) this.AgentData_Fields.size())
-        for (AgentData agentData : this.AgentData_Fields) {
+        packShort(byteBuffer, this.Index_Field.You.toShort())
+        packShort(byteBuffer, this.Index_Field.Prey.toShort())
+        byteBuffer.put(this.AgentData_Fields.size.toByte())
+        for (agentData in this.AgentData_Fields) {
             packUUID(byteBuffer, agentData.AgentID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            Location location = Location()
-            location.X = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
-            location.Y = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
-            location.Z = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val locationCount = byteBuffer.get().toInt() and 0xFF
+        for (i in 0 until locationCount) {
+            val location = Location()
+            location.X = unpackByte(byteBuffer).toInt() and 0xFF
+            location.Y = unpackByte(byteBuffer).toInt() and 0xFF
+            location.Z = unpackByte(byteBuffer).toInt() and 0xFF
             this.Location_Fields.add(location)
         }
-        this.Index_Field.You = unpackShort(byteBuffer)
-        this.Index_Field.Prey = unpackShort(byteBuffer)
-        byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b2; i2++) {
-            AgentData agentData = AgentData()
+        this.Index_Field.You = unpackShort(byteBuffer).toInt()
+        this.Index_Field.Prey = unpackShort(byteBuffer).toInt()
+        val agentCount = byteBuffer.get().toInt() and 0xFF
+        for (i in 0 until agentCount) {
+            val agentData = AgentData()
             agentData.AgentID = unpackUUID(byteBuffer)
             this.AgentData_Fields.add(agentData)
         }

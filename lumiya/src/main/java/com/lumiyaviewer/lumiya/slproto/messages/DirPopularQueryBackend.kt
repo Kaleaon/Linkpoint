@@ -1,52 +1,54 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.nio.ByteBuffer
-import java.util.UUID
 
 class DirPopularQueryBackend : SLMessage {
-    AgentData AgentData_Field = AgentData()
-    QueryData QueryData_Field = QueryData()
+    var AgentData_Field: AgentData = AgentData()
+    var QueryData_Field: QueryData = QueryData()
 
     class AgentData {
-        UUID AgentID
+        var AgentID: UUID = UUIDPool.ZeroUUID
     }
 
     class QueryData {
-        Int EstateID
-        Boolean Godlike
-        Int QueryFlags
-        UUID QueryID
+        var EstateID: Int = 0
+        var Godlike: Boolean = false
+        var QueryFlags: Int = 0
+        var QueryID: UUID = UUIDPool.ZeroUUID
     }
 
-    DirPopularQueryBackend() {
+    init {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
+    override fun CalcPayloadSize(): Int {
         return 45
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleDirPopularQueryBackend(this)
+    override fun handleMessage(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleDirPopularQueryBackend(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) 52)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.QueryData_Field.QueryID)
-        packInt(byteBuffer, this.QueryData_Field.QueryFlags)
-        packInt(byteBuffer, this.QueryData_Field.EstateID)
-        packBoolean(byteBuffer, this.QueryData_Field.Godlike)
+    override fun PackPayload(buffer: ByteBuffer) {
+        buffer.putShort(-1)
+        buffer.put(0.toByte())
+        buffer.put(52.toByte())
+        packUUID(buffer, this.AgentData_Field.AgentID)
+        packUUID(buffer, this.QueryData_Field.QueryID)
+        packInt(buffer, this.QueryData_Field.QueryFlags)
+        packInt(buffer, this.QueryData_Field.EstateID)
+        packBoolean(buffer, this.QueryData_Field.Godlike)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
-        this.QueryData_Field.QueryFlags = unpackInt(byteBuffer)
-        this.QueryData_Field.EstateID = unpackInt(byteBuffer)
-        this.QueryData_Field.Godlike = unpackBoolean(byteBuffer)
+    override fun UnpackPayload(buffer: ByteBuffer) {
+        this.AgentData_Field.AgentID = unpackUUID(buffer)
+        this.QueryData_Field.QueryID = unpackUUID(buffer)
+        this.QueryData_Field.QueryFlags = unpackInt(buffer)
+        this.QueryData_Field.EstateID = unpackInt(buffer)
+        this.QueryData_Field.Godlike = unpackBoolean(buffer)
     }
 }

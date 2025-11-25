@@ -1,57 +1,54 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
-import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
-import java.util.ArrayList
-import java.util.UUID
 
 class ChangeUserRights : SLMessage {
-    AgentData AgentData_Field
-    ArrayList<Rights> Rights_Fields = ArrayList<>()
+    var AgentData_Field: AgentData = AgentData()
+    var Rights_Fields: ArrayList<Rights> = ArrayList()
 
     class AgentData {
-        UUID AgentID
+        var AgentID: com.lumiyaviewer.lumiya.slproto.types.UUID = com.lumiyaviewer.lumiya.slproto.types.UUIDPool.ZeroUUID
+        var SessionID: com.lumiyaviewer.lumiya.slproto.types.UUID = com.lumiyaviewer.lumiya.slproto.types.UUIDPool.ZeroUUID
     }
 
     class Rights {
-        UUID AgentRelated
-        Int RelatedRights
+        var AgentRelated: com.lumiyaviewer.lumiya.slproto.types.UUID = com.lumiyaviewer.lumiya.slproto.types.UUIDPool.ZeroUUID
+        var RelatedRights: Int = 0
     }
 
-    ChangeUserRights() {
-        this.zeroCoded = false
-        this.AgentData_Field = AgentData()
+    override fun CalcPayloadSize(): Int {
+        var size = 32
+        for (i in Rights_Fields) {
+            size += 20
+        }
+        return size
     }
 
-    Int CalcPayloadSize() {
-        return (this.Rights_Fields.size() * 20) + 21
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // Not implemented
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleChangeUserRights(this)
-    }
-
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 1)
-        byteBuffer.put((byte) 65)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        byteBuffer.put((byte) this.Rights_Fields.size())
-        for (Rights rights : this.Rights_Fields) {
-            packUUID(byteBuffer, rights.AgentRelated)
-            packInt(byteBuffer, rights.RelatedRights)
+    override fun PackPayload(byteBuffer: ByteBuffer) {
+        byteBuffer.put(this.AgentData_Field.AgentID.data)
+        byteBuffer.put(this.AgentData_Field.SessionID.data)
+        val size = this.Rights_Fields.size
+        byteBuffer.put(size.toByte())
+        for (data in this.Rights_Fields) {
+            byteBuffer.put(data.AgentRelated.data)
+            byteBuffer.putInt(data.RelatedRights)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            Rights rights = Rights()
-            rights.AgentRelated = unpackUUID(byteBuffer)
-            rights.RelatedRights = unpackInt(byteBuffer)
-            this.Rights_Fields.add(rights)
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        this.AgentData_Field.AgentID = com.lumiyaviewer.lumiya.slproto.types.UUID(byteBuffer)
+        this.AgentData_Field.SessionID = com.lumiyaviewer.lumiya.slproto.types.UUID(byteBuffer)
+        val count = byteBuffer.get().toInt() and 0xFF
+        for (i in 0 until count) {
+            val data = Rights()
+            data.AgentRelated = com.lumiyaviewer.lumiya.slproto.types.UUID(byteBuffer)
+            data.RelatedRights = byteBuffer.getInt()
+            this.Rights_Fields.add(data)
         }
     }
 }

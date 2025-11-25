@@ -1,49 +1,50 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.UUID
 
 class EjectUser : SLMessage {
-    AgentData AgentData_Field = AgentData()
-    Data Data_Field = Data()
+    var AgentData_Field: AgentData = AgentData()
+    var Data_Field: Data = Data()
 
     class AgentData {
-        UUID AgentID
-        UUID SessionID
+        var AgentID: UUID = UUID(0, 0)
+        var SessionID: UUID = UUID(0, 0)
     }
 
     class Data {
-        Int Flags
-        UUID TargetID
+        var UserID: UUID = UUID(0, 0)
+        var Flags: Int = 0
     }
 
-    EjectUser() {
-        this.zeroCoded = false
+    init {
+        this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return 56
+    override fun CalcPayloadSize(): Int {
+        return 48 + 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleEjectUser(this)
+    override fun handleMessage(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleEjectUser(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) -89)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        packUUID(byteBuffer, this.Data_Field.TargetID)
-        packInt(byteBuffer, this.Data_Field.Flags)
+    override fun PackPayload(buffer: ByteBuffer) {
+        buffer.putShort(-1)
+        buffer.put(0.toByte())
+        buffer.put(141.toByte())
+        packUUID(buffer, this.AgentData_Field.AgentID)
+        packUUID(buffer, this.AgentData_Field.SessionID)
+        packUUID(buffer, this.Data_Field.UserID)
+        packInt(buffer, this.Data_Field.Flags)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        this.Data_Field.TargetID = unpackUUID(byteBuffer)
-        this.Data_Field.Flags = unpackInt(byteBuffer)
+    override fun UnpackPayload(buffer: ByteBuffer) {
+        this.AgentData_Field.AgentID = unpackUUID(buffer)
+        this.AgentData_Field.SessionID = unpackUUID(buffer)
+        this.Data_Field.UserID = unpackUUID(buffer)
+        this.Data_Field.Flags = unpackInt(buffer)
     }
 }

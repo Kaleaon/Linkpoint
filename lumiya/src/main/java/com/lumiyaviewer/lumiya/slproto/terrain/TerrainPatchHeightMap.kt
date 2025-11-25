@@ -1,70 +1,81 @@
 package com.lumiyaviewer.lumiya.slproto.terrain
 
-import com.google.common.primitives.Floats
 import java.util.Arrays
+import kotlin.math.max
+import kotlin.math.min
 
 class TerrainPatchHeightMap {
-    private Int hashCode = getHashCode()
-    private FloatArray heightMap
-    private Int mapHeight
-    private Int mapWidth
-    private FloatArray normalMap
-    private Float waterHeight
+    private val hashCode: Int
+    private val heightMap: FloatArray
+    private val mapHeight: Int
+    private val mapWidth: Int
+    private val normalMap: FloatArray
+    private val waterHeight: Float
 
-    TerrainPatchHeightMap(Float f, FloatArray fArr, FloatArray fArr2, Int i, Int i2) {
+    constructor(f: Float, fArr: FloatArray, fArr2: FloatArray, i: Int, i2: Int) {
         this.waterHeight = f
         this.mapWidth = i
         this.mapHeight = i2
-        this.heightMap = Float[fArr.length]
-        System.arraycopy(fArr, 0, this.heightMap, 0, fArr.length)
-        this.normalMap = Float[fArr2.length]
-        System.arraycopy(fArr2, 0, this.normalMap, 0, fArr2.length)
+        this.heightMap = FloatArray(fArr.size)
+        System.arraycopy(fArr, 0, this.heightMap, 0, fArr.size)
+        this.normalMap = FloatArray(fArr2.size)
+        System.arraycopy(fArr2, 0, this.normalMap, 0, fArr2.size)
+        this.hashCode = calculateHashCode()
     }
 
-    private Int getHashCode() {
-        return Float.floatToIntBits(this.waterHeight) + 0 + Arrays.hashCode(this.heightMap) + Arrays.hashCode(this.normalMap) + this.mapWidth + this.mapHeight
+    private fun calculateHashCode(): Int {
+        return java.lang.Float.floatToIntBits(this.waterHeight) + 0 + Arrays.hashCode(this.heightMap) + Arrays.hashCode(this.normalMap) + this.mapWidth + this.mapHeight
     }
 
-    Boolean equals(Any obj) {
-        if (!(obj instanceof TerrainPatchHeightMap)) {
+    override fun equals(other: Any?): Boolean {
+        if (other !is TerrainPatchHeightMap) {
             return false
         }
-        TerrainPatchHeightMap terrainPatchHeightMap = (TerrainPatchHeightMap) obj
-        if (terrainPatchHeightMap.waterHeight == this.waterHeight && terrainPatchHeightMap.mapWidth == this.mapWidth && terrainPatchHeightMap.mapHeight == this.mapHeight && Arrays.equals(terrainPatchHeightMap.heightMap, this.heightMap)) {
-            return Arrays.equals(terrainPatchHeightMap.normalMap, this.normalMap)
+        if (other.waterHeight == this.waterHeight && other.mapWidth == this.mapWidth && other.mapHeight == this.mapHeight && Arrays.equals(other.heightMap, this.heightMap)) {
+            return Arrays.equals(other.normalMap, this.normalMap)
         }
         return false
     }
 
-    FloatArray getHeightArray() {
+    fun getHeightArray(): FloatArray {
         return this.heightMap
     }
 
-    Int getMapHeight() {
+    fun getMapHeight(): Int {
         return this.mapHeight
     }
 
-    Int getMapWidth() {
+    fun getMapWidth(): Int {
         return this.mapWidth
     }
 
-    Float getMaxHeight() {
-        return Floats.max(this.heightMap)
+    fun getMaxHeight(): Float {
+        if (heightMap.isEmpty()) return 0f
+        var maxVal = heightMap[0]
+        for (v in heightMap) {
+            if (v > maxVal) maxVal = v
+        }
+        return maxVal
     }
 
-    Float getMinHeight() {
-        return Floats.min(this.heightMap)
+    fun getMinHeight(): Float {
+        if (heightMap.isEmpty()) return 0f
+        var minVal = heightMap[0]
+        for (v in heightMap) {
+            if (v < minVal) minVal = v
+        }
+        return minVal
     }
 
-    FloatArray getNormalArray() {
+    fun getNormalArray(): FloatArray {
         return this.normalMap
     }
 
-    Float getWaterHeight() {
+    fun getWaterHeight(): Float {
         return this.waterHeight
     }
 
-    Int hashCode() {
+    override fun hashCode(): Int {
         return this.hashCode
     }
 }

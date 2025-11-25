@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * Circuit implementation that processes inbound messages on a dedicated worker thread.
  */
-class SLThreadingCircuit @JvmOverloads constructor(
+open class SLThreadingCircuit @JvmOverloads constructor(
     gridConnection: SLGridConnection,
     circuitInfo: SLCircuitInfo,
     authReply: SLAuthReply,

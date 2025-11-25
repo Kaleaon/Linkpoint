@@ -1,59 +1,59 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.base.Ascii
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import com.lumiyaviewer.lumiya.slproto.types.LLQuaternion
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 import java.nio.ByteBuffer
 import java.util.UUID
 
 class AvatarSitResponse : SLMessage {
-    SitObject SitObject_Field = SitObject()
-    SitTransform SitTransform_Field = SitTransform()
+    var SitObject_Field: SitObject = SitObject()
+    var SitTransform_Field: SitTransform = SitTransform()
 
     class SitObject {
-        UUID ID
+        var ID: UUID? = null
     }
 
     class SitTransform {
-        Boolean AutoPilot
-        LLVector3 CameraAtOffset
-        LLVector3 CameraEyeOffset
-        Boolean ForceMouselook
-        LLVector3 SitPosition
-        LLQuaternion SitRotation
+        var AutoPilot: Boolean = false
+        var CameraAtOffset: LLVector3 = LLVector3()
+        var CameraEyeOffset: LLVector3 = LLVector3()
+        var ForceMouselook: Boolean = false
+        var SitPosition: LLVector3 = LLVector3()
+        var SitRotation: LLQuaternion = LLQuaternion()
     }
 
-    AvatarSitResponse() {
+    constructor() {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
+    override fun CalcPayloadSize(): Int {
         return 67
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAvatarSitResponse(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put(Ascii.NAK)
-        packUUID(byteBuffer, this.SitObject_Field.ID)
-        packBoolean(byteBuffer, this.SitTransform_Field.AutoPilot)
-        packLLVector3(byteBuffer, this.SitTransform_Field.SitPosition)
-        packLLQuaternion(byteBuffer, this.SitTransform_Field.SitRotation)
-        packLLVector3(byteBuffer, this.SitTransform_Field.CameraEyeOffset)
-        packLLVector3(byteBuffer, this.SitTransform_Field.CameraAtOffset)
-        packBoolean(byteBuffer, this.SitTransform_Field.ForceMouselook)
+    override fun PackPayload(byteBuffer: ByteBuffer) {
+        byteBuffer.put(21.toByte()) // Ascii.NAK
+        packUUID(byteBuffer, SitObject_Field.ID!!)
+        packBoolean(byteBuffer, SitTransform_Field.AutoPilot)
+        packLLVector3(byteBuffer, SitTransform_Field.SitPosition)
+        packLLQuaternion(byteBuffer, SitTransform_Field.SitRotation)
+        packLLVector3(byteBuffer, SitTransform_Field.CameraEyeOffset)
+        packLLVector3(byteBuffer, SitTransform_Field.CameraAtOffset)
+        packBoolean(byteBuffer, SitTransform_Field.ForceMouselook)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.SitObject_Field.ID = unpackUUID(byteBuffer)
-        this.SitTransform_Field.AutoPilot = unpackBoolean(byteBuffer)
-        this.SitTransform_Field.SitPosition = unpackLLVector3(byteBuffer)
-        this.SitTransform_Field.SitRotation = unpackLLQuaternion(byteBuffer)
-        this.SitTransform_Field.CameraEyeOffset = unpackLLVector3(byteBuffer)
-        this.SitTransform_Field.CameraAtOffset = unpackLLVector3(byteBuffer)
-        this.SitTransform_Field.ForceMouselook = unpackBoolean(byteBuffer)
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        SitObject_Field.ID = unpackUUID(byteBuffer)
+        SitTransform_Field.AutoPilot = unpackBoolean(byteBuffer)
+        SitTransform_Field.SitPosition = unpackLLVector3(byteBuffer)
+        SitTransform_Field.SitRotation = unpackLLQuaternion(byteBuffer)
+        SitTransform_Field.CameraEyeOffset = unpackLLVector3(byteBuffer)
+        SitTransform_Field.CameraAtOffset = unpackLLVector3(byteBuffer)
+        SitTransform_Field.ForceMouselook = unpackBoolean(byteBuffer)
     }
 }

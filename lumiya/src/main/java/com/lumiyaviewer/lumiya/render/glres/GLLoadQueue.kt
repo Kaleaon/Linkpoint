@@ -1,33 +1,20 @@
 package com.lumiyaviewer.lumiya.render.glres
 
 import com.lumiyaviewer.lumiya.render.RenderContext
-import com.lumiyaviewer.lumiya.res.collections.WeakQueue
-import androidx.annotation.NonNull
 
-abstract class GLLoadQueue {
-    protected val loadQueue = WeakQueue<GLLoadable>()
-
-    interface GLLoadHandler {
-        fun GLResourceLoaded(gLLoadable: GLLoadable)
-    }
-
+interface GLLoadQueue {
     interface GLLoadable {
         fun GLCompleteLoad()
         fun GLGetLoadSize(): Int
-        fun GLLoad(renderContext: RenderContext, gLLoadHandler: GLLoadHandler): Int
+        fun GLLoad(renderContext: RenderContext, loadHandler: GLLoadHandler): Int
     }
 
-    abstract fun RunLoadQueue(renderContext: RenderContext)
-
-    open fun StopLoadQueue() {
-        loadQueue.clear()
+    interface GLLoadHandler {
+        fun GLResourceLoaded(loadable: GLLoadable)
     }
-
-    open fun add(@NonNull gLLoadable: GLLoadable) {
-        loadQueue.offer(gLLoadable)
-    }
-
-    open fun remove(@NonNull gLLoadable: GLLoadable) {
-        loadQueue.remove(gLLoadable)
-    }
+    
+    fun add(loadable: GLLoadable)
+    fun remove(loadable: GLLoadable)
+    fun RunLoadQueue(renderContext: RenderContext)
+    fun StopLoadQueue()
 }

@@ -32,16 +32,10 @@ class DrawableFaceTexture(
             return false
         } else {
             textureRequested = true
-            // Assuming renderContext.drawableStore is available and has glTextureCache
-            // If not, we might need to pass store in constructor or get it from somewhere else
-            // Based on decompiled code:
-            // this.glTextureCache = renderContext.drawableStore.glTextureCache
-            
-            // Using safe call just in case, though decompiled code suggests it's there
             val cache = renderContext.drawableStore?.glTextureCache
             if (cache != null) {
                 glTextureCache = cache
-                renderContext.glResourceManager?.addCleanable(this)
+                renderContext.glResourceManager.addCleanable(this)
                 cache.RequestResource(drawableTextureParams, this)
             }
             return false

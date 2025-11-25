@@ -1,7 +1,6 @@
 package com.lumiyaviewer.lumiya.render.avatar
 
 import android.opengl.Matrix
-import com.google.common.base.Objects
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.render.DrawableStore
 import com.lumiyaviewer.lumiya.render.RenderContext
@@ -9,14 +8,13 @@ import com.lumiyaviewer.lumiya.slproto.objects.SLObjectAvatarInfo
 import com.lumiyaviewer.lumiya.slproto.types.LLQuaternion
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever
-import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever.OnChatterNameUpdated
 import java.util.UUID
 
 class DrawableAvatarStub(
-    protected val drawableStore: DrawableStore,
+    protected val drawableStore: DrawableStore?,
     agentUUID: UUID,
     val avatarObject: SLObjectAvatarInfo
-) : OnChatterNameUpdated {
+) : ChatterNameRetriever.OnChatterNameUpdated {
     
     private val chatterNameRetriever: ChatterNameRetriever
     
@@ -27,7 +25,9 @@ class DrawableAvatarStub(
     private var nameTag: String? = null
 
     init {
-        // Using getUserChatterID with avatar ID as per decompiled code
+        // ChatterNameRetriever constructor might need adjustment based on actual class
+        // Assuming ChatterNameRetriever(ChatterID, OnChatterNameUpdated, Handler?)
+        // If ChatID.getUserChatterID(agentUUID, avatarObject.getId()) is correct
         this.chatterNameRetriever = ChatterNameRetriever(
             ChatterID.getUserChatterID(agentUUID, avatarObject.getId()), 
             this, 
@@ -36,7 +36,7 @@ class DrawableAvatarStub(
     }
 
     private fun setNameTag(str: String?) {
-        if (!Objects.equal(this.nameTag, str)) {
+        if (this.nameTag != str) {
             this.nameTag = str
             Debug.Printf("DrawableAvatar: setting: nameTag = %s", str ?: "null")
             if (str != null) {
@@ -64,7 +64,7 @@ class DrawableAvatarStub(
     }
 
     fun getWorldMatrix(renderContext: RenderContext): FloatArray? {
-        if (!this.avatarObject.isMyAvatar() || this.avatarObject.parentID != 0L) { // Note: parentID is long in decompiled code logic (check SLObjectAvatarInfo)
+        if (!this.avatarObject.isMyAvatar() || this.avatarObject.getParentID() != 0) { 
             return this.avatarObject.worldMatrix
         }
         val matrix = FloatArray(32)

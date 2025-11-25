@@ -7,10 +7,7 @@ import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 
-enum class Shader(
-    private val type: Int,
-    private val fileName: String
-) {
+enum class Shader(private val type: Int, private val fileName: String) {
     PrimFragmentShader(35632, "prim.fsh"),
     PrimFragmentShader30(35632, "prim_30.fsh"),
     PrimOpaqueFragmentShader(35632, "prim_opaque.fsh"),
@@ -36,48 +33,42 @@ enum class Shader(
     RawVertexShader(35633, "raw.vsh"),
     RawFragmentShader(35632, "raw.fsh"),
     FXAAVertexShader(35633, "fxaa.vsh"),
-    FXAAFragmentShader(35632, "fxaa.fsh")
-    
-    private String fileName
-    private int handle
-    private int type
+    FXAAFragmentShader(35632, "fxaa.fsh");
 
-    private Shader(int i, String str) {
-        this.type = i
-        this.fileName = str
-    }
+    private var handle: Int = 0
 
-    private String getShaderCode(ShaderPreprocessor shaderPreprocessor) {
-        try {
-            BufferedReader bufferedReader = BufferedReader(InputStreamReader(LumiyaApp.getAssetManager().open("shaders/" + this.fileName)))
-            String processCode = shaderPreprocessor.processCode(bufferedReader)
-            bufferedReader.close()
-            return processCode
-        } catch (IOException e) {
-            return null
+    private fun getShaderCode(shaderPreprocessor: ShaderPreprocessor): String? {
+        return try {
+            LumiyaApp.getAssetManager()?.open("shaders/$fileName")?.use { open ->
+                BufferedReader(InputStreamReader(open)).use { bufferedReader ->
+                    shaderPreprocessor.processCode(bufferedReader)
+                }
+            }
+        } catch (e: IOException) {
+            null
         }
     }
 
-    int Compile(ShaderPreprocessor shaderPreprocessor) throws ShaderCompileException {
-        Debug.Printf("Shaders: Compiling shader '%s'...", this.fileName)
-        String shaderCode = getShaderCode(shaderPreprocessor)
-        if (shaderCode == null) {
-            this.handle = 0
-            throw ShaderCompileException("No shader code for " + this.fileName)
+    @Throws(ShaderCompileException::class)
+    fun Compile(shaderPreprocessor: ShaderPreprocessor): Int {
+        Debug.Printf("Shaders: Compiling shader '%s'...", arrayOf(fileName))
+        val shaderCode = getShaderCode(shaderPreprocessor) ?: run {
+            handle = 0
+            throw ShaderCompileException("No shader code for $fileName")
         }
-        this.handle = GLES20.glCreateShader(this.type)
-        GLES20.glShaderSource(this.handle, shaderCode)
-        GLES20.glCompileShader(this.handle)
-        int[] iArr = IntArray(1)
-        GLES20.glGetShaderiv(this.handle, 35713, iArr, 0)
+        handle = GLES20.glCreateShader(type)
+        GLES20.glShaderSource(handle, shaderCode)
+        GLES20.glCompileShader(handle)
+        val iArr = IntArray(1)
+        GLES20.glGetShaderiv(handle, GLES20.GL_COMPILE_STATUS, iArr, 0)
         if (iArr[0] == 1) {
-            return this.handle
+            return handle
         }
-        shaderCode = GLES20.glGetShaderInfoLog(this.handle)
-        throw ShaderCompileException(String.format("Shader (%s) compile error: '%s'", new Array<Any>{this.fileName, shaderCode}))
+        val errorLog = GLES20.glGetShaderInfoLog(handle)
+        throw ShaderCompileException("Shader ($fileName) compile error: '$errorLog'")
     }
 
-    int getHandle() {
-        return this.handle
+    fun getHandle(): Int {
+        return handle
     }
 }

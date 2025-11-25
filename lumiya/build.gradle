@@ -201,6 +201,9 @@ dependencies {
     implementation 'com.google.android.filament:gltfio-android:1.66.0'
     implementation 'com.google.android.filament:filamat-android:1.66.0'
 
+    // Dependency Injection
+    implementation 'javax.inject:javax.inject:1'
+
     // GreenDAO
     implementation 'de.greenrobot:greendao:2.1.0'
 

@@ -1,61 +1,65 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.base.Ascii
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.ArrayList
 import java.util.UUID
 
 class AgentIsNowWearing : SLMessage {
-    AgentData AgentData_Field
-    ArrayList<WearableData> WearableData_Fields = ArrayList<>()
+    var AgentData_Field: AgentData? = AgentData()
+    var WearableData_Fields: ArrayList<WearableData>? = ArrayList()
 
     class AgentData {
-        UUID AgentID
-        UUID SessionID
+        var AgentID: UUID? = null
+        var SessionID: UUID? = null
     }
 
     class WearableData {
-        UUID ItemID
-        Int WearableType
+        var ItemID: UUID? = null
+        var WearableType: Int = 0
     }
 
-    AgentIsNowWearing() {
+    constructor() {
         this.zeroCoded = true
-        this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
-        return (this.WearableData_Fields.size() * 17) + 37
+    override fun CalcPayloadSize(): Int {
+        return (WearableData_Fields?.size ?: 0) * 17 + 37
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAgentIsNowWearing(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 1)
-        byteBuffer.put(Ascii.DEL)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        byteBuffer.put((byte) this.WearableData_Fields.size())
-        for (WearableData wearableData : this.WearableData_Fields) {
-            packUUID(byteBuffer, wearableData.ItemID)
-            packByte(byteBuffer, (byte) wearableData.WearableType)
+        byteBuffer.put(1.toByte())
+        byteBuffer.put(127.toByte()) // Ascii.DEL
+        packUUID(byteBuffer, AgentData_Field?.AgentID)
+        packUUID(byteBuffer, AgentData_Field?.SessionID)
+        
+        val size = WearableData_Fields?.size ?: 0
+        byteBuffer.put(size.toByte())
+        
+        WearableData_Fields?.forEach { item ->
+            packUUID(byteBuffer, item.ItemID)
+            packByte(byteBuffer, item.WearableType.toByte())
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            WearableData wearableData = WearableData()
-            wearableData.ItemID = unpackUUID(byteBuffer)
-            wearableData.WearableType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
-            this.WearableData_Fields.add(wearableData)
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val agentData = AgentData_Field ?: AgentData()
+        agentData.AgentID = unpackUUID(byteBuffer)
+        agentData.SessionID = unpackUUID(byteBuffer)
+        this.AgentData_Field = agentData
+        
+        val count = byteBuffer.get().toInt() and 0xFF
+        for (i in 0 until count) {
+            val item = WearableData()
+            item.ItemID = unpackUUID(byteBuffer)
+            item.WearableType = unpackByte(byteBuffer).toInt() and 0xFF
+            WearableData_Fields?.add(item)
         }
     }
 }

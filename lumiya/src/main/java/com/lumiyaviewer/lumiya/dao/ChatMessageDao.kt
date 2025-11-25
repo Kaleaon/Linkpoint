@@ -3,14 +3,18 @@ package com.lumiyaviewer.lumiya.dao
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteStatement
-import com.lumiyaviewer.lumiya.ui.common.ChatterFragment
 import de.greenrobot.dao.AbstractDao
 import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import java.util.Date
 import java.util.UUID
 
 class ChatMessageDao(config: DaoConfig, daoSession: DaoSession?) : AbstractDao<ChatMessage, Long>(config, daoSession) {
+
+    // Store session explicitly to avoid visibility issues or implicit super access problems
+    private val myDaoSession: DaoSession? = daoSession
 
     companion object {
         const val TABLENAME = "CHAT_MESSAGE"
@@ -173,19 +177,12 @@ class ChatMessageDao(config: DaoConfig, daoSession: DaoSession?) : AbstractDao<C
         
         stmt.bindLong(26, entity.questionMask.toLong())
         
-        // dialogButtons is ByteArray, might be null in some versions but strict in Kotlin unless nullable
-        // Assuming ChatMessage properties are mostly nullable in logic but defined non-nullable in data class?
-        // Checked ChatMessage.kt: Properties like senderUUID are UUID (non-nullable), but in DB could be null.
-        // However, bindValues gets called with an entity instance. 
-        // I'll stick to the property types.
-        
-        // Wait, looking at ChatMessage.kt again:
-        // var senderUUID: UUID
-        // It is NOT nullable. So I shouldn't check for null unless I suspect the object is invalid.
-        // I will check for null just to be safe if they are initialized to something dummy or if GreenDAO constructs them partially.
-        
-        // For ByteArray properties not in the constructor shown earlier... wait, I didn't see dialogButtons in ChatMessage.kt!
-        // Let me re-read ChatMessage.kt
+        val dialogSelectedOption = entity.dialogSelectedOption
+        if (dialogSelectedOption != null) {
+            stmt.bindString(27, dialogSelectedOption)
+        }
+        stmt.bindLong(28, entity.textBoxButtonIndex.toLong())
+        stmt.bindLong(29, if (entity.syncedToGoogleDrive) 1L else 0L)
     }
 
     override fun getKey(entity: ChatMessage?): Long? {
@@ -197,9 +194,6 @@ class ChatMessageDao(config: DaoConfig, daoSession: DaoSession?) : AbstractDao<C
     }
 
     override fun readEntity(cursor: Cursor, offset: Int): ChatMessage {
-        // Re-reading ChatMessage.kt revealed it is a data class. 
-        // I need to match the constructor arguments.
-        
         val id = if (cursor.isNull(offset + 0)) 0L else cursor.getLong(offset + 0)
         val chatterID = cursor.getLong(offset + 1)
         val timestamp = Date(cursor.getLong(offset + 2))
@@ -226,30 +220,17 @@ class ChatMessageDao(config: DaoConfig, daoSession: DaoSession?) : AbstractDao<C
         val userID = if (cursor.isNull(offset + 23)) UUID.randomUUID() else UUID.fromString(cursor.getString(offset + 23))
         val objectName = if (cursor.isNull(offset + 24)) "" else cursor.getString(offset + 24)
         val questionMask = if (cursor.isNull(offset + 25)) 0 else cursor.getInt(offset + 25)
-        // dialogButtons missing from ChatMessage data class in previous read!
         val dialogSelectedOption = if (cursor.isNull(offset + 27)) "" else cursor.getString(offset + 27)
         val textBoxButtonIndex = if (cursor.isNull(offset + 28)) 0 else cursor.getInt(offset + 28)
         val syncedToGoogleDrive = cursor.getShort(offset + 29).toInt() != 0
 
-        val msg = ChatMessage(
+        return ChatMessage(
             accepted, assetType, chatChannel, chatterID, dialogIgnored, dialogSelectedOption,
             eventState, id, isOffline, itemID, itemName, messageText, messageType, newBalance,
             objectName, origIMType, origTimestamp, questionMask, senderLegacyName, senderName,
             senderType, senderUUID, sessionID, syncedToGoogleDrive, textBoxButtonIndex, timestamp,
             transactionAmount, userID, viewType
         )
-        // Note: dialogButtons seems missing from the data class definition I saw earlier. 
-        // If so, I can't set it. I'll ignore it for now or check if I missed it.
-        // The read_file output for ChatMessage.kt ended at line 37. It seemed complete.
-        // I will assume it is missing and proceed without it, or maybe I should add it to ChatMessage.kt?
-        // Given I can't modify ChatMessage.kt easily without risking breaking other things if I am wrong,
-        // and the DAO has it, I suspect the ChatMessage.kt file I read might have been truncated or I missed something?
-        // No, "var viewType: Int = 0" was the last line.
-        
-        // Wait, if the DAO writes it, the object must have it.
-        // Maybe I should add it to ChatMessage.kt to be safe.
-        
-        return msg
     }
 
     override fun readEntity(cursor: Cursor, entity: ChatMessage, offset: Int) {
@@ -279,7 +260,6 @@ class ChatMessageDao(config: DaoConfig, daoSession: DaoSession?) : AbstractDao<C
         entity.userID = if (cursor.isNull(offset + 23)) UUID.randomUUID() else UUID.fromString(cursor.getString(offset + 23))
         entity.objectName = if (cursor.isNull(offset + 24)) "" else cursor.getString(offset + 24)
         entity.questionMask = if (cursor.isNull(offset + 25)) 0 else cursor.getInt(offset + 25)
-        // entity.dialogButtons = ...
         entity.dialogSelectedOption = if (cursor.isNull(offset + 27)) "" else cursor.getString(offset + 27)
         entity.textBoxButtonIndex = if (cursor.isNull(offset + 28)) 0 else cursor.getInt(offset + 28)
         entity.syncedToGoogleDrive = cursor.getShort(offset + 29).toInt() != 0
@@ -292,5 +272,64 @@ class ChatMessageDao(config: DaoConfig, daoSession: DaoSession?) : AbstractDao<C
     override fun updateKeyAfterInsert(entity: ChatMessage, rowId: Long): Long? {
         entity.id = rowId
         return rowId
+    }
+    
+    fun getByChatterIdFlow(chatterId: Long): Flow<List<ChatMessage>> = flow {
+        val list = queryBuilder()
+            .where(Properties.ChatterID.eq(chatterId))
+            .orderAsc(Properties.Timestamp)
+            .list()
+        emit(list)
+    }
+
+    fun getRecentByChatterId(chatterId: Long, limit: Int): List<ChatMessage> {
+        return queryBuilder()
+            .where(Properties.ChatterID.eq(chatterId))
+            .orderDesc(Properties.Timestamp)
+            .limit(limit)
+            .list()
+            .reversed()
+    }
+
+    fun searchByText(query: String): List<ChatMessage> {
+        return queryBuilder()
+            .where(Properties.MessageText.like("%$query%"))
+            .list()
+    }
+
+    fun getOfflineMessagesFlow(): Flow<List<ChatMessage>> = flow {
+        val list = queryBuilder()
+            .where(Properties.IsOffline.eq(true))
+            .list()
+        emit(list)
+    }
+
+    fun getUnsyncedMessages(): List<ChatMessage> {
+        return queryBuilder()
+            .where(Properties.SyncedToGoogleDrive.eq(false))
+            .list()
+    }
+
+    fun markAsSynced(messageIds: List<Long>) {
+        if (messageIds.isEmpty()) return
+        
+        myDaoSession?.runInTx {
+            for (id in messageIds) {
+                val msg = load(id)
+                if (msg != null) {
+                    msg.syncedToGoogleDrive = true
+                    update(msg)
+                }
+            }
+        }
+    }
+
+    fun deleteOlderThan(date: Date): Int {
+        val builder = queryBuilder()
+        builder.where(Properties.Timestamp.lt(date.time))
+        val list = builder.list()
+        val count = list.size
+        deleteInTx(list)
+        return count
     }
 }

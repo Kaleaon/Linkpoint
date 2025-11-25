@@ -1,38 +1,40 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.nio.ByteBuffer
-import java.util.UUID
 
 class DetachAttachmentIntoInv : SLMessage {
-    ObjectData ObjectData_Field = ObjectData()
+    var ObjectData_Field: ObjectData = ObjectData()
 
     class ObjectData {
-        UUID AgentID
-        UUID ItemID
+        var AgentID: UUID = UUIDPool.ZeroUUID
+        var ItemID: UUID = UUIDPool.ZeroUUID
     }
 
-    DetachAttachmentIntoInv() {
+    init {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    override fun CalcPayloadSize(): Int {
         return 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleDetachAttachmentIntoInv(this)
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleDetachAttachmentIntoInv(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 1)
-        byteBuffer.put((byte) -115)
+        byteBuffer.put(1.toByte())
+        byteBuffer.put((-115).toByte())
         packUUID(byteBuffer, this.ObjectData_Field.AgentID)
         packUUID(byteBuffer, this.ObjectData_Field.ItemID)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.ObjectData_Field.AgentID = unpackUUID(byteBuffer)
         this.ObjectData_Field.ItemID = unpackUUID(byteBuffer)
     }

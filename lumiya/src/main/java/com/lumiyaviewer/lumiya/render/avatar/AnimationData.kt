@@ -271,7 +271,7 @@ class AnimationData @Throws(IOException::class) constructor(
     /**
      * Base class for animation keyframes
      */
-    internal abstract class AnimationKeyframe<T>(val time: Float) {
+    abstract class AnimationKeyframe<T>(val time: Float) {
         abstract fun getTransform(): T
         abstract fun setInterpolated(output: T, weight1: Float, other: AnimationKeyframe<T>, weight2: Float)
         abstract fun setTransform(output: T)
@@ -280,7 +280,7 @@ class AnimationData @Throws(IOException::class) constructor(
     /**
      * Position keyframe
      */
-    internal class AnimationPosKeyframe(
+    class AnimationPosKeyframe(
         time: Float,
         private val position: LLVector3
     ) : AnimationKeyframe<LLVector3>(time) {
@@ -306,7 +306,7 @@ class AnimationData @Throws(IOException::class) constructor(
     /**
      * Rotation keyframe
      */
-    internal class AnimationRotKeyframe(
+    class AnimationRotKeyframe(
         time: Float,
         private val quaternion: LLQuaternion
     ) : AnimationKeyframe<LLQuaternion>(time) {

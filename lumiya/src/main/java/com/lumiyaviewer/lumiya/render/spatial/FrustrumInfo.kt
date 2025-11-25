@@ -4,11 +4,11 @@ import android.opengl.Matrix
 import java.util.Arrays
 
 class FrustrumInfo {
-    FloatArray mvpMatrix
-    Float viewDistance
-    Float viewX
-    Float viewY
-    Float viewZ
+    var mvpMatrix: FloatArray
+    var viewDistance: Float
+    var viewX: Float
+    var viewY: Float
+    var viewZ: Float
 
     constructor(f: Float, f2: Float, f3: Float, f4: Float, fArr: FloatArray, i: Int) {
         this.viewX = f
@@ -28,28 +28,22 @@ class FrustrumInfo {
         Matrix.multiplyMM(this.mvpMatrix, 0, fArr2, i2, fArr, i)
     }
 
-    /* DevToolsApp WARNING: Missing block: B:7:0x0018, code:
-            return false
-     */
-    fun equals(obj: java.lang.Any): Boolean {
-        if (!(obj instanceof FrustrumInfo)) {
+    override fun equals(other: Any?): Boolean {
+        if (other !is FrustrumInfo) {
             return false
         }
         
-        FrustrumInfo other = (FrustrumInfo) obj
-        
-        // Compare all Float fields
-        if (Float.compare(other.viewX, this.viewX) != 0) return false
-        if (Float.compare(other.viewY, this.viewY) != 0) return false
-        if (Float.compare(other.viewZ, this.viewZ) != 0) return false
-        if (Float.compare(other.viewDistance, this.viewDistance) != 0) return false
+        // Compare Float fields
+        if (other.viewX.compareTo(this.viewX) != 0) return false
+        if (other.viewY.compareTo(this.viewY) != 0) return false
+        if (other.viewZ.compareTo(this.viewZ) != 0) return false
+        if (other.viewDistance.compareTo(this.viewDistance) != 0) return false
         
         // Compare matrix arrays
-        return Arrays == this.mvpMatrix, other.mvpMatrix
-    }
+        return Arrays.equals(this.mvpMatrix, other.mvpMatrix)
     }
 
-    fun hashCode(): Int {
-        return ((((Float.floatToIntBits(this.viewX) + 0) + Float.floatToIntBits(this.viewY)) + Float.floatToIntBits(this.viewZ)) + Float.floatToIntBits(this.viewDistance)) + Arrays.hashCode(this.mvpMatrix)
+    override fun hashCode(): Int {
+        return ((((java.lang.Float.floatToIntBits(this.viewX) + 0) + java.lang.Float.floatToIntBits(this.viewY)) + java.lang.Float.floatToIntBits(this.viewZ)) + java.lang.Float.floatToIntBits(this.viewDistance)) + Arrays.hashCode(this.mvpMatrix)
     }
 }

@@ -1,69 +1,63 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.ArrayList
-import java.util.Iterator
 import java.util.UUID
 
 class AvatarPicksReply : SLMessage {
-    AgentData AgentData_Field
-    ArrayList<Data> Data_Fields = ArrayList<>()
+    var AgentData_Field: AgentData = AgentData()
+    var Data_Fields: ArrayList<Data> = ArrayList()
 
     class AgentData {
-        UUID AgentID
-        UUID TargetID
+        var AgentID: UUID? = null
+        var TargetID: UUID? = null
     }
 
     class Data {
-        UUID PickID
-        byte[] PickName
+        var PickID: UUID? = null
+        var PickName: ByteArray = ByteArray(0)
     }
 
-    AvatarPicksReply() {
+    constructor() {
         this.zeroCoded = false
-        this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
-        Int i = 37
-        Iterator<T> it = this.Data_Fields.iterator()
-        while (true) {
-            Int i2 = i
-            if (!it.hasNext()) {
-                return i2
-            }
-            i = ((Data) it.next()).PickName.length + 17 + i2
+    override fun CalcPayloadSize(): Int {
+        var length = 37
+        for (data in Data_Fields) {
+            length += data.PickName.size + 17
         }
+        return length
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAvatarPicksReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) -78)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.TargetID)
-        byteBuffer.put((byte) this.Data_Fields.size())
-        for (Data data : this.Data_Fields) {
-            packUUID(byteBuffer, data.PickID)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put((-78).toByte())
+        packUUID(byteBuffer, AgentData_Field.AgentID!!)
+        packUUID(byteBuffer, AgentData_Field.TargetID!!)
+        byteBuffer.put(Data_Fields.size.toByte())
+        for (data in Data_Fields) {
+            packUUID(byteBuffer, data.PickID!!)
             packVariable(byteBuffer, data.PickName, 1)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.TargetID = unpackUUID(byteBuffer)
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            Data data = Data()
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        AgentData_Field.AgentID = unpackUUID(byteBuffer)
+        AgentData_Field.TargetID = unpackUUID(byteBuffer)
+        val b = (byteBuffer.get().toInt() and 0xFF)
+        for (i in 0 until b) {
+            val data = Data()
             data.PickID = unpackUUID(byteBuffer)
             data.PickName = unpackVariable(byteBuffer, 1)
-            this.Data_Fields.add(data)
+            Data_Fields.add(data)
         }
     }
 }

@@ -81,4 +81,24 @@ class FriendDao(config: DaoConfig, daoSession: DaoSession?) : AbstractDao<Friend
     override fun updateKeyAfterInsert(entity: Friend, rowId: Long): UUID? {
         return entity.uuid
     }
+    
+    // Added missing methods referenced by UserRepository
+    fun getAll(): List<Friend> {
+        return queryBuilder().list()
+    }
+    
+    fun getOnline(): List<Friend> {
+        return queryBuilder().where(Properties.IsOnline.eq(true)).list()
+    }
+    
+    fun deleteByUUID(uuid: UUID) {
+        val entity = getByUUID(uuid)
+        if (entity != null) {
+            delete(entity)
+        }
+    }
+    
+    fun getByUUID(uuid: UUID): Friend? {
+        return load(uuid)
+    }
 }

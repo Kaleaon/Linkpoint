@@ -1,46 +1,43 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
-import java.util.ArrayList
 import java.util.UUID
 
 class CancelAuction : SLMessage {
-    ArrayList<ParcelData> ParcelData_Fields = ArrayList<>()
+    var AgentData_Field: AgentData = AgentData()
 
-    class ParcelData {
-        UUID ParcelID
+    class AgentData {
+        var AgentID: UUID? = null
+        var AuctionID: Int = 0
+        var SessionID: UUID? = null
     }
 
-    CancelAuction() {
-        this.zeroCoded = false
+    constructor() {
+        this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return (this.ParcelData_Fields.size() * 16) + 5
+    override fun CalcPayloadSize(): Int {
+        return 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleCancelAuction(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) -24)
-        byteBuffer.put((byte) this.ParcelData_Fields.size())
-        for (ParcelData parcelData : this.ParcelData_Fields) {
-            packUUID(byteBuffer, parcelData.ParcelID)
-        }
+        byteBuffer.put(1.toByte())
+        byteBuffer.put(23.toByte()) // Ascii.ETB
+        packUUID(byteBuffer, AgentData_Field.AgentID!!)
+        packUUID(byteBuffer, AgentData_Field.SessionID!!)
+        packInt(byteBuffer, AgentData_Field.AuctionID)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            ParcelData parcelData = ParcelData()
-            parcelData.ParcelID = unpackUUID(byteBuffer)
-            this.ParcelData_Fields.add(parcelData)
-        }
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        AgentData_Field.AgentID = unpackUUID(byteBuffer)
+        AgentData_Field.SessionID = unpackUUID(byteBuffer)
+        AgentData_Field.AuctionID = unpackInt(byteBuffer)
     }
 }

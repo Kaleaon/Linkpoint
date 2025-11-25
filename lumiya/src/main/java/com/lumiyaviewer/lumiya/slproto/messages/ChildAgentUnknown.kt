@@ -1,38 +1,39 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.nio.ByteBuffer
-import java.util.UUID
 
 class ChildAgentUnknown : SLMessage {
-    AgentData AgentData_Field = AgentData()
+    var AgentData_Field: AgentData = AgentData()
 
     class AgentData {
-        UUID AgentID
-        UUID SessionID
+        var AgentID: UUID = UUIDPool.ZeroUUID
+        var SessionID: UUID = UUIDPool.ZeroUUID
     }
 
-    ChildAgentUnknown() {
+    init {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    override fun CalcPayloadSize(): Int {
         return 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleChildAgentUnknown(this)
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleChildAgentUnknown(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) -15)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put((-15).toByte())
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
     }

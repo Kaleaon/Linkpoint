@@ -29,7 +29,7 @@ object GLRayTrace {
         if (renderContext.hasGL20) {
             Matrix.multiplyMV(fArr2, 4, renderContext.modelViewMatrix.getMatrixData(), renderContext.modelViewMatrix.getMatrixDataOffset(), fArr2, 0)
         } else {
-            Matrix.multiplyMV(fArr2, 4, renderContext.projectionMatrix.getMatrixData(), renderContext.projectionMatrix.getMatrixDataOffset(), fArr2, 0)
+            Matrix.multiplyMV(fArr2, 4, renderContext.projectionMatrix, 0, fArr2, 0)
         }
         return fArr2[6]
     }

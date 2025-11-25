@@ -1,60 +1,54 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
-import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
-import java.util.ArrayList
-import java.util.UUID
 
 class ChangeInventoryItemFlags : SLMessage {
-    AgentData AgentData_Field
-    ArrayList<InventoryData> InventoryData_Fields = ArrayList<>()
+    var AgentData_Field: AgentData = AgentData()
+    var InventoryData_Fields: ArrayList<InventoryData> = ArrayList()
 
     class AgentData {
-        UUID AgentID
-        UUID SessionID
+        var AgentID: com.lumiyaviewer.lumiya.slproto.types.UUID = com.lumiyaviewer.lumiya.slproto.types.UUIDPool.ZeroUUID
+        var SessionID: com.lumiyaviewer.lumiya.slproto.types.UUID = com.lumiyaviewer.lumiya.slproto.types.UUIDPool.ZeroUUID
     }
 
     class InventoryData {
-        Int Flags
-        UUID ItemID
+        var ItemID: com.lumiyaviewer.lumiya.slproto.types.UUID = com.lumiyaviewer.lumiya.slproto.types.UUIDPool.ZeroUUID
+        var Flags: Int = 0
     }
 
-    ChangeInventoryItemFlags() {
-        this.zeroCoded = false
-        this.AgentData_Field = AgentData()
+    override fun CalcPayloadSize(): Int {
+        var size = 32
+        for (i in InventoryData_Fields) {
+            size += 20
+        }
+        return size
     }
 
-    Int CalcPayloadSize() {
-        return (this.InventoryData_Fields.size() * 20) + 37
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // Not implemented for this message
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleChangeInventoryItemFlags(this)
-    }
-
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 1)
-        byteBuffer.put((byte) 15)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        byteBuffer.put((byte) this.InventoryData_Fields.size())
-        for (InventoryData inventoryData : this.InventoryData_Fields) {
-            packUUID(byteBuffer, inventoryData.ItemID)
-            packInt(byteBuffer, inventoryData.Flags)
+    override fun PackPayload(byteBuffer: ByteBuffer) {
+        byteBuffer.put(this.AgentData_Field.AgentID.data)
+        byteBuffer.put(this.AgentData_Field.SessionID.data)
+        val size = this.InventoryData_Fields.size
+        byteBuffer.put(size.toByte())
+        for (data in this.InventoryData_Fields) {
+            byteBuffer.put(data.ItemID.data)
+            byteBuffer.putInt(data.Flags)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            InventoryData inventoryData = InventoryData()
-            inventoryData.ItemID = unpackUUID(byteBuffer)
-            inventoryData.Flags = unpackInt(byteBuffer)
-            this.InventoryData_Fields.add(inventoryData)
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        this.AgentData_Field.AgentID = com.lumiyaviewer.lumiya.slproto.types.UUID(byteBuffer)
+        this.AgentData_Field.SessionID = com.lumiyaviewer.lumiya.slproto.types.UUID(byteBuffer)
+        val count = byteBuffer.get().toInt() and 0xFF
+        for (i in 0 until count) {
+            val data = InventoryData()
+            data.ItemID = com.lumiyaviewer.lumiya.slproto.types.UUID(byteBuffer)
+            data.Flags = byteBuffer.getInt()
+            this.InventoryData_Fields.add(data)
         }
     }
 }

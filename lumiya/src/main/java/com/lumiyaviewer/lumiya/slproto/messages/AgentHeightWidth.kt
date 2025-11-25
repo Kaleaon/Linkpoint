@@ -1,55 +1,61 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.UUID
 
 class AgentHeightWidth : SLMessage {
-    AgentData AgentData_Field = AgentData()
-    HeightWidthBlock HeightWidthBlock_Field = HeightWidthBlock()
+    var AgentData_Field: AgentData? = AgentData()
+    var HeightWidthBlock_Field: HeightWidthBlock? = HeightWidthBlock()
 
     class AgentData {
-        UUID AgentID
-        Int CircuitCode
-        UUID SessionID
+        var AgentID: UUID? = null
+        var CircuitCode: Int = 0
+        var SessionID: UUID? = null
     }
 
     class HeightWidthBlock {
-        Int GenCounter
-        Int Height
-        Int Width
+        var GenCounter: Int = 0
+        var Height: Int = 0
+        var Width: Int = 0
     }
 
-    AgentHeightWidth() {
+    constructor() {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    override fun CalcPayloadSize(): Int {
         return 48
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAgentHeightWidth(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) 83)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        packInt(byteBuffer, this.AgentData_Field.CircuitCode)
-        packInt(byteBuffer, this.HeightWidthBlock_Field.GenCounter)
-        packShort(byteBuffer, (short) this.HeightWidthBlock_Field.Height)
-        packShort(byteBuffer, (short) this.HeightWidthBlock_Field.Width)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put(83.toByte())
+        packUUID(byteBuffer, AgentData_Field?.AgentID)
+        packUUID(byteBuffer, AgentData_Field?.SessionID)
+        packInt(byteBuffer, AgentData_Field?.CircuitCode ?: 0)
+        packInt(byteBuffer, HeightWidthBlock_Field?.GenCounter ?: 0)
+        packShort(byteBuffer, (HeightWidthBlock_Field?.Height ?: 0).toShort())
+        packShort(byteBuffer, (HeightWidthBlock_Field?.Width ?: 0).toShort())
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        this.AgentData_Field.CircuitCode = unpackInt(byteBuffer)
-        this.HeightWidthBlock_Field.GenCounter = unpackInt(byteBuffer)
-        this.HeightWidthBlock_Field.Height = unpackShort(byteBuffer) & 65535
-        this.HeightWidthBlock_Field.Width = unpackShort(byteBuffer) & 65535
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val agentData = AgentData_Field ?: AgentData()
+        agentData.AgentID = unpackUUID(byteBuffer)
+        agentData.SessionID = unpackUUID(byteBuffer)
+        agentData.CircuitCode = unpackInt(byteBuffer)
+        this.AgentData_Field = agentData
+
+        val block = HeightWidthBlock_Field ?: HeightWidthBlock()
+        block.GenCounter = unpackInt(byteBuffer)
+        block.Height = unpackShort(byteBuffer).toInt() and 0xFFFF
+        block.Width = unpackShort(byteBuffer).toInt() and 0xFFFF
+        this.HeightWidthBlock_Field = block
     }
 }

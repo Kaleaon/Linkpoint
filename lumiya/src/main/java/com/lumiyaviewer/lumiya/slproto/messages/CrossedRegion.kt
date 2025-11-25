@@ -1,63 +1,65 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.net.Inet4Address
 import java.nio.ByteBuffer
-import java.util.UUID
 
 class CrossedRegion : SLMessage {
-    AgentData AgentData_Field = AgentData()
-    Info Info_Field = Info()
-    RegionData RegionData_Field = RegionData()
+    var AgentData_Field: AgentData = AgentData()
+    var Info_Field: Info = Info()
+    var RegionData_Field: RegionData = RegionData()
 
     class AgentData {
-        UUID AgentID
-        UUID SessionID
+        var AgentID: UUID = UUIDPool.ZeroUUID
+        var SessionID: UUID = UUIDPool.ZeroUUID
     }
 
     class Info {
-        LLVector3 LookAt
-        LLVector3 Position
+        var LookAt: LLVector3 = LLVector3()
+        var Position: LLVector3 = LLVector3()
     }
 
     class RegionData {
-        Long RegionHandle
-        byte[] SeedCapability
-        Inet4Address SimIP
-        Int SimPort
+        var RegionHandle: Long = 0
+        var SeedCapability: ByteArray = ByteArray(0)
+        var SimIP: Inet4Address? = null
+        var SimPort: Int = 0
     }
 
-    CrossedRegion() {
+    init {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.RegionData_Field.SeedCapability.length + 16 + 34 + 24
+    override fun CalcPayloadSize(): Int {
+        return this.RegionData_Field.SeedCapability.size + 16 + 34 + 24
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleCrossedRegion(this)
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleCrossedRegion(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put((byte) -1)
-        byteBuffer.put((byte) 7)
+    override fun PackPayload(byteBuffer: ByteBuffer) {
+        byteBuffer.put((-1).toByte())
+        byteBuffer.put(7.toByte())
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        packIPAddress(byteBuffer, this.RegionData_Field.SimIP)
-        packShort(byteBuffer, (short) this.RegionData_Field.SimPort)
+        this.RegionData_Field.SimIP?.let { packIPAddress(byteBuffer, it) }
+        packShort(byteBuffer, this.RegionData_Field.SimPort.toShort())
         packLong(byteBuffer, this.RegionData_Field.RegionHandle)
         packVariable(byteBuffer, this.RegionData_Field.SeedCapability, 2)
         packLLVector3(byteBuffer, this.Info_Field.Position)
         packLLVector3(byteBuffer, this.Info_Field.LookAt)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.RegionData_Field.SimIP = unpackIPAddress(byteBuffer)
-        this.RegionData_Field.SimPort = unpackShort(byteBuffer) & 65535
+        this.RegionData_Field.SimPort = unpackShort(byteBuffer).toInt() and 0xFFFF
         this.RegionData_Field.RegionHandle = unpackLong(byteBuffer)
         this.RegionData_Field.SeedCapability = unpackVariable(byteBuffer, 2)
         this.Info_Field.Position = unpackLLVector3(byteBuffer)

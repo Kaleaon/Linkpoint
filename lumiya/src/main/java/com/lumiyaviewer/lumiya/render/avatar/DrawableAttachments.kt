@@ -77,7 +77,7 @@ class DrawableAttachments {
                 }
                 
                 if (z || z2) {
-                    this.glAnimationDataBuffer?.getRawBuffer()?.loadFromFloatArray(0, avatarSkeleton.jointWorldMatrix, 0, (SLSkeletonBoneID.values().size + 47) * 16)
+                    this.glAnimationDataBuffer?.getRawBuffer()?.loadFromFloatArray(0, avatarSkeleton.getJointWorldMatrix(), 0, (SLSkeletonBoneID.values().size + 47) * 16)
                 }
                 
                 if (z) {

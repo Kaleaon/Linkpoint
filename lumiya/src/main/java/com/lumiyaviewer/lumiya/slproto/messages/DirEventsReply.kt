@@ -1,102 +1,96 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.nio.ByteBuffer
 import java.util.ArrayList
-import java.util.Iterator
-import java.util.UUID
 
 class DirEventsReply : SLMessage {
-    AgentData AgentData_Field
-    QueryData QueryData_Field
-    ArrayList<QueryReplies> QueryReplies_Fields = ArrayList<>()
-    ArrayList<StatusData> StatusData_Fields = ArrayList<>()
+    var AgentData_Field: AgentData = AgentData()
+    var QueryData_Field: QueryData = QueryData()
+    var QueryReplies_Fields: ArrayList<QueryReplies> = ArrayList()
+    var StatusData_Fields: ArrayList<StatusData> = ArrayList()
 
     class AgentData {
-        UUID AgentID
+        var AgentID: UUID = UUIDPool.ZeroUUID
     }
 
     class QueryData {
-        UUID QueryID
+        var QueryID: UUID = UUIDPool.ZeroUUID
     }
 
     class QueryReplies {
-        byte[] Date
-        Int EventFlags
-        Int EventID
-        byte[] Name
-        UUID OwnerID
-        Int UnixTime
+        var Date: ByteArray = ByteArray(0)
+        var EventFlags: Int = 0
+        var EventID: Int = 0
+        var Name: ByteArray = ByteArray(0)
+        var OwnerID: UUID = UUIDPool.ZeroUUID
+        var UnixTime: Int = 0
     }
 
     class StatusData {
-        Int Status
+        var Status: Int = 0
     }
 
-    DirEventsReply() {
+    init {
         this.zeroCoded = true
-        this.AgentData_Field = AgentData()
-        this.QueryData_Field = QueryData()
     }
 
-    Int CalcPayloadSize() {
-        Int i = 37
-        Iterator<T> it = this.QueryReplies_Fields.iterator()
-        while (true) {
-            Int i2 = i
-            if (!it.hasNext()) {
-                return i2 + 1 + (this.StatusData_Fields.size() * 4)
-            }
-            QueryReplies queryReplies = (QueryReplies) it.next()
-            i = queryReplies.Date.length + queryReplies.Name.length + 17 + 4 + 1 + 4 + 4 + i2
+    override fun CalcPayloadSize(): Int {
+        var size = 37
+        for (reply in QueryReplies_Fields) {
+            size += reply.Date.size + reply.Name.size + 17 + 4 + 1 + 4 + 4
         }
+        size += 1 + (StatusData_Fields.size * 4)
+        return size
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleDirEventsReply(this)
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleDirEventsReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) 37)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put(37.toByte())
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.QueryData_Field.QueryID)
-        byteBuffer.put((byte) this.QueryReplies_Fields.size())
-        for (QueryReplies queryReplies : this.QueryReplies_Fields) {
-            packUUID(byteBuffer, queryReplies.OwnerID)
-            packVariable(byteBuffer, queryReplies.Name, 1)
-            packInt(byteBuffer, queryReplies.EventID)
-            packVariable(byteBuffer, queryReplies.Date, 1)
-            packInt(byteBuffer, queryReplies.UnixTime)
-            packInt(byteBuffer, queryReplies.EventFlags)
+        byteBuffer.put(this.QueryReplies_Fields.size.toByte())
+        for (reply in this.QueryReplies_Fields) {
+            packUUID(byteBuffer, reply.OwnerID)
+            packVariable(byteBuffer, reply.Name, 1)
+            packInt(byteBuffer, reply.EventID)
+            packVariable(byteBuffer, reply.Date, 1)
+            packInt(byteBuffer, reply.UnixTime)
+            packInt(byteBuffer, reply.EventFlags)
         }
-        byteBuffer.put((byte) this.StatusData_Fields.size())
-        for (StatusData statusData : this.StatusData_Fields) {
-            packInt(byteBuffer, statusData.Status)
+        byteBuffer.put(this.StatusData_Fields.size.toByte())
+        for (status in this.StatusData_Fields) {
+            packInt(byteBuffer, status.Status)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            QueryReplies queryReplies = QueryReplies()
-            queryReplies.OwnerID = unpackUUID(byteBuffer)
-            queryReplies.Name = unpackVariable(byteBuffer, 1)
-            queryReplies.EventID = unpackInt(byteBuffer)
-            queryReplies.Date = unpackVariable(byteBuffer, 1)
-            queryReplies.UnixTime = unpackInt(byteBuffer)
-            queryReplies.EventFlags = unpackInt(byteBuffer)
-            this.QueryReplies_Fields.add(queryReplies)
+        val b = byteBuffer.get().toInt() and 0xFF
+        for (i in 0 until b) {
+            val reply = QueryReplies()
+            reply.OwnerID = unpackUUID(byteBuffer)
+            reply.Name = unpackVariable(byteBuffer, 1)
+            reply.EventID = unpackInt(byteBuffer)
+            reply.Date = unpackVariable(byteBuffer, 1)
+            reply.UnixTime = unpackInt(byteBuffer)
+            reply.EventFlags = unpackInt(byteBuffer)
+            this.QueryReplies_Fields.add(reply)
         }
-        byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b2; i2++) {
-            StatusData statusData = StatusData()
-            statusData.Status = unpackInt(byteBuffer)
-            this.StatusData_Fields.add(statusData)
+        val b2 = byteBuffer.get().toInt() and 0xFF
+        for (i in 0 until b2) {
+            val status = StatusData()
+            status.Status = unpackInt(byteBuffer)
+            this.StatusData_Fields.add(status)
         }
     }
 }

@@ -3,7 +3,6 @@ package com.lumiyaviewer.lumiya.render.avatar
 import com.lumiyaviewer.lumiya.render.DrawableStore
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectAvatarInfo
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3
-import java.util.Map
 import java.util.UUID
 
 // Stub for DrawableAvatar
@@ -38,5 +37,9 @@ class DrawableAvatar(
 
     fun IsAnimationStopped(animID: UUID?): Boolean {
         return true // Stub
+    }
+    
+    fun updateAttachments() {
+        // Stub
     }
 }

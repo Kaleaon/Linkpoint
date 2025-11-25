@@ -1,46 +1,38 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.nio.ByteBuffer
-import java.util.ArrayList
-import java.util.UUID
 
 class CompleteAuction : SLMessage {
-    ArrayList<ParcelData> ParcelData_Fields = ArrayList<>()
+    var AuctionData_Field: AuctionData = AuctionData()
 
-    class ParcelData {
-        UUID ParcelID
+    class AuctionData {
+        var AuctionID: Int = 0
     }
 
-    CompleteAuction() {
+    init {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return (this.ParcelData_Fields.size() * 16) + 5
+    override fun CalcPayloadSize(): Int {
+        return 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleCompleteAuction(this)
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleCompleteAuction(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) -25)
-        byteBuffer.put((byte) this.ParcelData_Fields.size())
-        for (ParcelData parcelData : this.ParcelData_Fields) {
-            packUUID(byteBuffer, parcelData.ParcelID)
-        }
+        byteBuffer.put(0.toByte())
+        byteBuffer.put((-27).toByte())
+        packInt(byteBuffer, this.AuctionData_Field.AuctionID)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            ParcelData parcelData = ParcelData()
-            parcelData.ParcelID = unpackUUID(byteBuffer)
-            this.ParcelData_Fields.add(parcelData)
-        }
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        this.AuctionData_Field.AuctionID = unpackInt(byteBuffer)
     }
 }

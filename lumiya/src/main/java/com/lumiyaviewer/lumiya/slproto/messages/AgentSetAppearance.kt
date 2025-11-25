@@ -1,90 +1,102 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 import java.nio.ByteBuffer
 import java.util.ArrayList
 import java.util.UUID
 
 class AgentSetAppearance : SLMessage {
-    AgentData AgentData_Field
-    ObjectData ObjectData_Field
-    ArrayList<VisualParam> VisualParam_Fields = ArrayList<>()
-    ArrayList<WearableData> WearableData_Fields = ArrayList<>()
+    var AgentData_Field: AgentData? = AgentData()
+    var ObjectData_Field: ObjectData? = ObjectData()
+    var VisualParam_Fields: ArrayList<VisualParam>? = ArrayList()
+    var WearableData_Fields: ArrayList<WearableData>? = ArrayList()
 
     class AgentData {
-        UUID AgentID
-        Int SerialNum
-        UUID SessionID
-        LLVector3 Size
+        var AgentID: UUID? = null
+        var SerialNum: Int = 0
+        var SessionID: UUID? = null
+        var Size: LLVector3? = LLVector3()
     }
 
     class ObjectData {
-        byte[] TextureEntry
+        var TextureEntry: ByteArray? = null
     }
 
     class VisualParam {
-        Int ParamValue
+        var ParamValue: Int = 0
     }
 
     class WearableData {
-        UUID CacheID
-        Int TextureIndex
+        var CacheID: UUID? = null
+        var TextureIndex: Int = 0
     }
 
-    AgentSetAppearance() {
+    constructor() {
         this.zeroCoded = true
-        this.AgentData_Field = AgentData()
-        this.ObjectData_Field = ObjectData()
     }
 
-    Int CalcPayloadSize() {
-        return (this.WearableData_Fields.size() * 17) + 53 + this.ObjectData_Field.TextureEntry.length + 2 + 1 + (this.VisualParam_Fields.size() * 1)
+    override fun CalcPayloadSize(): Int {
+        return (WearableData_Fields?.size ?: 0) * 17 + 53 + (ObjectData_Field?.TextureEntry?.size ?: 0) + 2 + 1 + (VisualParam_Fields?.size ?: 0) * 1
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAgentSetAppearance(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) 84)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        packInt(byteBuffer, this.AgentData_Field.SerialNum)
-        packLLVector3(byteBuffer, this.AgentData_Field.Size)
-        byteBuffer.put((byte) this.WearableData_Fields.size())
-        for (WearableData wearableData : this.WearableData_Fields) {
-            packUUID(byteBuffer, wearableData.CacheID)
-            packByte(byteBuffer, (byte) wearableData.TextureIndex)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put(84.toByte())
+        packUUID(byteBuffer, AgentData_Field?.AgentID)
+        packUUID(byteBuffer, AgentData_Field?.SessionID)
+        packInt(byteBuffer, AgentData_Field?.SerialNum ?: 0)
+        packLLVector3(byteBuffer, AgentData_Field?.Size)
+        
+        val wearableSize = WearableData_Fields?.size ?: 0
+        byteBuffer.put(wearableSize.toByte())
+        
+        WearableData_Fields?.forEach { item ->
+            packUUID(byteBuffer, item.CacheID)
+            packByte(byteBuffer, item.TextureIndex.toByte())
         }
-        packVariable(byteBuffer, this.ObjectData_Field.TextureEntry, 2)
-        byteBuffer.put((byte) this.VisualParam_Fields.size())
-        for (VisualParam visualParam : this.VisualParam_Fields) {
-            packByte(byteBuffer, (byte) visualParam.ParamValue)
+        
+        packVariable(byteBuffer, ObjectData_Field?.TextureEntry, 2)
+        
+        val visualParamSize = VisualParam_Fields?.size ?: 0
+        byteBuffer.put(visualParamSize.toByte())
+        
+        VisualParam_Fields?.forEach { item ->
+            packByte(byteBuffer, item.ParamValue.toByte())
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SerialNum = unpackInt(byteBuffer)
-        this.AgentData_Field.Size = unpackLLVector3(byteBuffer)
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            WearableData wearableData = WearableData()
-            wearableData.CacheID = unpackUUID(byteBuffer)
-            wearableData.TextureIndex = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
-            this.WearableData_Fields.add(wearableData)
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val agentData = AgentData_Field ?: AgentData()
+        agentData.AgentID = unpackUUID(byteBuffer)
+        agentData.SessionID = unpackUUID(byteBuffer)
+        agentData.SerialNum = unpackInt(byteBuffer)
+        agentData.Size = unpackLLVector3(byteBuffer)
+        this.AgentData_Field = agentData
+        
+        val wearableCount = byteBuffer.get().toInt() and 0xFF
+        for (i in 0 until wearableCount) {
+            val item = WearableData()
+            item.CacheID = unpackUUID(byteBuffer)
+            item.TextureIndex = unpackByte(byteBuffer).toInt() and 0xFF
+            WearableData_Fields?.add(item)
         }
-        this.ObjectData_Field.TextureEntry = unpackVariable(byteBuffer, 2)
-        byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b2; i2++) {
-            VisualParam visualParam = VisualParam()
-            visualParam.ParamValue = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
-            this.VisualParam_Fields.add(visualParam)
+        
+        val objectData = ObjectData_Field ?: ObjectData()
+        objectData.TextureEntry = unpackVariable(byteBuffer, 2)
+        this.ObjectData_Field = objectData
+        
+        val visualParamCount = byteBuffer.get().toInt() and 0xFF
+        for (i in 0 until visualParamCount) {
+            val item = VisualParam()
+            item.ParamValue = unpackByte(byteBuffer).toInt() and 0xFF
+            VisualParam_Fields?.add(item)
         }
     }
 }

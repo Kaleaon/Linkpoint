@@ -131,13 +131,11 @@ class DrawableGeometry : GLCleanable {
     }
 
     constructor(params: PrimVolumeParams?, openJPEG: OpenJPEG?) {
-        // Stub implementation to allow compilation
-        // Logic from decompiled source is complex and relies on PrimVolume which might be missing
+        // Stub implementation
         this.isRiggedMesh = false
         this.meshData = null
         this.vertexArrayObject = null
         
-        // Minimal valid initialization to prevent crashes if called
         this.FaceCount = 0
         this.IndexCount = 0
         this.VertexCount = 0
@@ -149,7 +147,7 @@ class DrawableGeometry : GLCleanable {
     }
 
     fun ApplyJointTranslations(translations: MeshJointTranslations?) {
-        if (isRiggedMesh && meshData != null && meshData!!.isRiggedMesh()) {
+        if (isRiggedMesh && meshData != null && meshData!!.isRiggedMesh() && translations != null) {
             meshData!!.ApplyJointTranslations(translations)
         }
     }
@@ -176,7 +174,6 @@ class DrawableGeometry : GLCleanable {
     fun GLBindBuffers20(renderContext: RenderContext?): GLLoadableBuffer? {
         if (renderContext == null || VertexBuffer == null) return null
         
-        // Simplified binding logic
         if (facesCombined) {
             VertexBuffer!!.Bind20(renderContext, renderContext.curPrimProgram.vPosition, 3, 5126, 24, 0)
             VertexBuffer!!.Bind20(renderContext, renderContext.curPrimProgram.vNormal, 3, 5126, 24, 12)
@@ -195,7 +192,9 @@ class DrawableGeometry : GLCleanable {
     }
 
     fun GLDrawAll10(renderContext: RenderContext?) {
-        IndexBuffer?.DrawElements(renderContext, 4, IndexCount, 5123, 0)
+        if (renderContext != null) { // Added null check
+            IndexBuffer?.DrawElements(renderContext, 4, IndexCount, 5123, 0)
+        }
     }
 
     fun GLDrawAll20(renderContext: RenderContext?) {

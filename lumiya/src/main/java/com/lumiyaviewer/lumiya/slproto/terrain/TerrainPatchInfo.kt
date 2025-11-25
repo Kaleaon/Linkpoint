@@ -2,60 +2,51 @@ package com.lumiyaviewer.lumiya.slproto.terrain
 
 import java.util.Arrays
 
-class TerrainPatchInfo {
-    private Int hashCode = getHashCode()
-    private TerrainPatchHeightMap heightMap
-    private Int layerMask
-    private FloatArray textureHeightMap
-    private TerrainTextures textures
+class TerrainPatchInfo(
+    val heightMap: TerrainPatchHeightMap,
+    val textures: TerrainTextures,
+    f: Float,
+    f2: Float,
+    f3: Float,
+    f4: Float
+) {
+    private val hashCode: Int
+    private val layerMask: Int
+    private val textureHeightMap: FloatArray
 
-    TerrainPatchInfo(TerrainPatchHeightMap terrainPatchHeightMap, TerrainTextures terrainTextures, Float f, Float f2, Float f3, Float f4) {
-        this.heightMap = terrainPatchHeightMap
-        this.textures = terrainTextures
-        this.textureHeightMap = terrainTextures.getTextureHeightMap(terrainPatchHeightMap.getHeightArray(), terrainPatchHeightMap.getMapWidth(), terrainPatchHeightMap.getMapHeight(), f, f2, f3, f4)
-        this.layerMask = terrainTextures.getNeededLayerMask(this.textureHeightMap)
+    init {
+        this.textureHeightMap = textures.getTextureHeightMap(
+            heightMap.getHeightArray(),
+            heightMap.getMapWidth(),
+            heightMap.getMapHeight(),
+            f, f2, f3, f4
+        )
+        this.layerMask = textures.getNeededLayerMask(this.textureHeightMap)
+        this.hashCode = calculateHashCode()
     }
 
-    private Int getHashCode() {
-        return this.heightMap.hashCode() + this.textures.hashCode() + this.layerMask + Arrays.hashCode(this.textureHeightMap)
+    private fun calculateHashCode(): Int {
+        return heightMap.hashCode() + textures.hashCode() + layerMask + Arrays.hashCode(textureHeightMap)
     }
 
-    Boolean equals(Any obj) {
-        if (!(obj instanceof TerrainPatchInfo)) {
+    override fun equals(other: Any?): Boolean {
+        if (other !is TerrainPatchInfo) return false
+        
+        if (this.heightMap != other.heightMap || 
+            this.textures != other.textures || 
+            this.layerMask != other.layerMask) {
             return false
         }
-        TerrainPatchInfo terrainPatchInfo = (TerrainPatchInfo) obj
-        if (!this.heightMap.equals(terrainPatchInfo.heightMap) || !this.textures.equals(terrainPatchInfo.textures) || this.layerMask != terrainPatchInfo.layerMask) {
-            return false
-        }
-        return Arrays.equals(this.textureHeightMap, terrainPatchInfo.textureHeightMap)
+        return Arrays.equals(this.textureHeightMap, other.textureHeightMap)
     }
 
-    TerrainPatchHeightMap getHeightMap() {
-        return this.heightMap
-    }
+    fun getLayerMask(): Int = layerMask
 
-    Int getLayerMask() {
-        return this.layerMask
-    }
+    fun getMaxHeight(): Float = heightMap.getMaxHeight()
 
-    Float getMaxHeight() {
-        return this.heightMap.getMaxHeight()
-    }
+    fun getMinHeight(): Float = heightMap.getMinHeight()
 
-    Float getMinHeight() {
-        return this.heightMap.getMinHeight()
-    }
+    fun getTextureHeightMap(): FloatArray = textureHeightMap
 
-    FloatArray getTextureHeightMap() {
-        return this.textureHeightMap
-    }
-
-    TerrainTextures getTextures() {
-        return this.textures
-    }
-
-    Int hashCode() {
-        return this.hashCode
-    }
+    override fun hashCode(): Int = hashCode
 }

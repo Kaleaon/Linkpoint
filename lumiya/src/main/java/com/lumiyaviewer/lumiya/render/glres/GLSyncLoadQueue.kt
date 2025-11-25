@@ -3,49 +3,68 @@ package com.lumiyaviewer.lumiya.render.glres
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.render.RenderContext
 import com.lumiyaviewer.lumiya.render.TextureMemoryTracker
-import com.lumiyaviewer.lumiya.render.glres.GLLoadQueue
-import androidx.annotation.NonNull
+import java.util.LinkedList
+import java.util.Queue
 
-class GLSyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
-    private val MAX_LOADS_PER_FRAME: Int = 16
-    private val MAX_SIZE_PER_FRAME: Int = 4194304
-    private val WAIT_FRAMES_AFTER_LOAD: Int = 3
-    private var framesWait: Int = 0
+class GLSyncLoadQueue : GLLoadQueue, GLLoadQueue.GLLoadHandler {
+    private val MAX_LOADS_PER_FRAME = 16
+    private val MAX_SIZE_PER_FRAME = 4194304
+    private val WAIT_FRAMES_AFTER_LOAD = 3
+    private var framesWait = 0
+    
+    private val loadQueue: Queue<GLLoadQueue.GLLoadable> = LinkedList()
 
-    fun GLResourceLoaded(gLLoadable: GLLoadQueue.GLLoadable): Unit {
-        gLLoadable.GLCompleteLoad()
+    override fun add(loadable: GLLoadQueue.GLLoadable) {
+        loadQueue.add(loadable)
     }
 
-    fun RunLoadQueue(renderContext: RenderContext): Unit {
-        GLLoadQueue.GLLoadable gLLoadable
+    override fun remove(loadable: GLLoadQueue.GLLoadable) {
+        loadQueue.remove(loadable)
+    }
+
+    override fun GLResourceLoaded(loadable: GLLoadQueue.GLLoadable) {
+        loadable.GLCompleteLoad()
+    }
+
+    override fun RunLoadQueue(renderContext: RenderContext) {
         if (this.framesWait != 0) {
             this.framesWait--
             return
         }
-        Int i = 0
-        Int i2 = 0
+        
+        var loadedCount = 0
+        var loadedSize = 0
+        
         while (true) {
-            if (!TextureMemoryTracker.canAllocateMemory(0) || (gLLoadable = (GLLoadQueue.GLLoadable) this.loadQueue.poll()) == null) {
+            if (!TextureMemoryTracker.canAllocateMemory(0)) {
                 break
-            } else if (!TextureMemoryTracker.canAllocateMemory(gLLoadable.GLGetLoadSize())) {
+            }
+            
+            val loadable = loadQueue.poll() ?: break
+            
+            if (!TextureMemoryTracker.canAllocateMemory(loadable.GLGetLoadSize())) {
                 TextureMemoryTracker.stall()
-                this.loadQueue.add(gLLoadable)
+                loadQueue.add(loadable)
                 break
-            } else {
-                Int GLLoad = gLLoadable.GLLoad(renderContext, this) + i
-                this.framesWait = 3
-                Int i3 = i2 + 1
-                if (i3 >= 16 || GLLoad >= 4194304) {
-                    i2 = i3
-                    i = GLLoad
-                } else {
-                    i2 = i3
-                    i = GLLoad
-                }
+            }
+            
+            val size = loadable.GLLoad(renderContext, this)
+            loadedSize += size
+            loadedCount++
+            
+            framesWait = WAIT_FRAMES_AFTER_LOAD
+            
+            if (loadedCount >= MAX_LOADS_PER_FRAME || loadedSize >= MAX_SIZE_PER_FRAME) {
+                break
             }
         }
-        if (i2 != 0) {
-            Debug.Printf("waitForMemory: loadedCount %d, size %d", Int.valueOf(i2), Int.valueOf(i))
+        
+        if (loadedCount != 0) {
+            Debug.Log("waitForMemory: loadedCount $loadedCount, size $loadedSize")
         }
+    }
+
+    override fun StopLoadQueue() {
+        // No thread to stop for sync queue
     }
 }

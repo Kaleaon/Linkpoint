@@ -4,7 +4,7 @@ import android.opengl.GLES20
 
 class FlexiPrimProgram(z: Boolean) : PrimProgram(
     Shader.FlexiVertexShader,
-    if (z) Shader.PrimOpaqueFragmentShader else Shader.PrimFragmentShader,
+    if (z) Shader.PrimOpaqueFragmentShader else Shader.PrimFragmentShader
 ) {
     var uNumSectionMatrices: Int = 0
     var uSectionMatrices: Int = 0

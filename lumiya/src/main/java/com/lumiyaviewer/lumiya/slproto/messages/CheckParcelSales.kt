@@ -1,44 +1,38 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
-import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
-import java.util.ArrayList
 
 class CheckParcelSales : SLMessage {
-    ArrayList<RegionData> RegionData_Fields = ArrayList<>()
+    var RegionData_Fields: ArrayList<RegionData> = ArrayList()
 
     class RegionData {
-        Long RegionHandle
+        var RegionHandle: Long = 0
     }
 
-    CheckParcelSales() {
-        this.zeroCoded = false
+    override fun CalcPayloadSize(): Int {
+        return (this.RegionData_Fields.size * 8) + 5
     }
 
-    Int CalcPayloadSize() {
-        return (this.RegionData_Fields.size() * 8) + 5
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleCheckParcelSales(this)
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleCheckParcelSales(this)
-    }
-
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) -31)
-        byteBuffer.put((byte) this.RegionData_Fields.size())
-        for (RegionData regionData : this.RegionData_Fields) {
-            packLong(byteBuffer, regionData.RegionHandle)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put((-31).toByte())
+        byteBuffer.put(this.RegionData_Fields.size.toByte())
+        for (regionData in this.RegionData_Fields) {
+            byteBuffer.putLong(regionData.RegionHandle)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            RegionData regionData = RegionData()
-            regionData.RegionHandle = unpackLong(byteBuffer)
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val b = byteBuffer.get().toInt() and 0xFF
+        for (i in 0 until b) {
+            val regionData = RegionData()
+            regionData.RegionHandle = byteBuffer.long
             this.RegionData_Fields.add(regionData)
         }
     }

@@ -1,71 +1,79 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.nio.ByteBuffer
-import java.util.UUID
 
 class CreateInventoryItem : SLMessage {
-    AgentData AgentData_Field = AgentData()
-    InventoryBlock InventoryBlock_Field = InventoryBlock()
+    var AgentData_Field: AgentData = AgentData()
+    var InventoryBlock_Field: InventoryBlock = InventoryBlock()
 
     class AgentData {
-        UUID AgentID
-        UUID SessionID
+        var AgentID: UUID = UUIDPool.ZeroUUID
+        var SessionID: UUID = UUIDPool.ZeroUUID
     }
 
     class InventoryBlock {
-        Int CallbackID
-        byte[] Description
-        UUID FolderID
-        Int InvType
-        byte[] Name
-        Int NextOwnerMask
-        UUID TransactionID
-        Int Type
-        Int WearableType
+        var CallbackID: Int = 0
+        var CreationDate: Int = 0
+        var Desc: ByteArray = ByteArray(0)
+        var EveryoneMask: Int = 0
+        var Flags: Int = 0
+        var FolderID: UUID = UUIDPool.ZeroUUID
+        var GroupMask: Int = 0
+        var InvType: Int = 0
+        var Name: ByteArray = ByteArray(0)
+        var NextOwnerMask: Int = 0
+        var OwnerMask: Int = 0 // Renamed from OwnerMask to match packet spec usually, assuming OwnerMask
+        var TransactionID: UUID = UUIDPool.ZeroUUID
+        var Type: Int = 0
+        var WearableType: Int = 0
     }
 
-    CreateInventoryItem() {
+    init {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.InventoryBlock_Field.Name.length + 44 + 1 + this.InventoryBlock_Field.Description.length + 36
+    override fun CalcPayloadSize(): Int {
+        return this.InventoryBlock_Field.Name.size + 67 + 1 + this.InventoryBlock_Field.Desc.size + 1 + 32
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleCreateInventoryItem(this)
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleCreateInventoryItem(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 1)
-        byteBuffer.put((byte) 49)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put(33.toByte())
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packInt(byteBuffer, this.InventoryBlock_Field.CallbackID)
         packUUID(byteBuffer, this.InventoryBlock_Field.FolderID)
         packUUID(byteBuffer, this.InventoryBlock_Field.TransactionID)
         packInt(byteBuffer, this.InventoryBlock_Field.NextOwnerMask)
-        packByte(byteBuffer, (byte) this.InventoryBlock_Field.Type)
-        packByte(byteBuffer, (byte) this.InventoryBlock_Field.InvType)
-        packByte(byteBuffer, (byte) this.InventoryBlock_Field.WearableType)
+        packByte(byteBuffer, this.InventoryBlock_Field.Type.toByte())
+        packByte(byteBuffer, this.InventoryBlock_Field.InvType.toByte())
+        packByte(byteBuffer, this.InventoryBlock_Field.WearableType.toByte())
         packVariable(byteBuffer, this.InventoryBlock_Field.Name, 1)
-        packVariable(byteBuffer, this.InventoryBlock_Field.Description, 1)
+        packVariable(byteBuffer, this.InventoryBlock_Field.Desc, 1)
+        packInt(byteBuffer, this.InventoryBlock_Field.CreationDate)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.InventoryBlock_Field.CallbackID = unpackInt(byteBuffer)
         this.InventoryBlock_Field.FolderID = unpackUUID(byteBuffer)
         this.InventoryBlock_Field.TransactionID = unpackUUID(byteBuffer)
         this.InventoryBlock_Field.NextOwnerMask = unpackInt(byteBuffer)
-        this.InventoryBlock_Field.Type = unpackByte(byteBuffer)
-        this.InventoryBlock_Field.InvType = unpackByte(byteBuffer)
-        this.InventoryBlock_Field.WearableType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
+        this.InventoryBlock_Field.Type = unpackByte(byteBuffer).toInt()
+        this.InventoryBlock_Field.InvType = unpackByte(byteBuffer).toInt()
+        this.InventoryBlock_Field.WearableType = unpackByte(byteBuffer).toInt()
         this.InventoryBlock_Field.Name = unpackVariable(byteBuffer, 1)
-        this.InventoryBlock_Field.Description = unpackVariable(byteBuffer, 1)
+        this.InventoryBlock_Field.Desc = unpackVariable(byteBuffer, 1)
+        this.InventoryBlock_Field.CreationDate = unpackInt(byteBuffer)
     }
 }

@@ -1,52 +1,59 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.UUID
 
 class BuyObjectInventory : SLMessage {
-    AgentData AgentData_Field = AgentData()
-    Data Data_Field = Data()
+    var AgentData_Field: AgentData = AgentData()
+    var Data_Field: Data = Data()
 
     class AgentData {
-        UUID AgentID
-        UUID SessionID
+        var AgentID: UUID? = null
+        var SessionID: UUID? = null
     }
 
     class Data {
-        UUID FolderID
-        UUID ItemID
-        UUID ObjectID
+        var FolderID: UUID? = null
+        var ItemID: UUID? = null
+        var OwnerID: UUID? = null
+        var SalePrice: Int = 0
+        var TransactionID: UUID? = null
     }
 
-    BuyObjectInventory() {
+    constructor() {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
+    override fun CalcPayloadSize(): Int {
         return 84
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleBuyObjectInventory(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) 103)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        packUUID(byteBuffer, this.Data_Field.ObjectID)
-        packUUID(byteBuffer, this.Data_Field.ItemID)
-        packUUID(byteBuffer, this.Data_Field.FolderID)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put((-86).toByte())
+        packUUID(byteBuffer, AgentData_Field.AgentID!!)
+        packUUID(byteBuffer, AgentData_Field.SessionID!!)
+        packUUID(byteBuffer, Data_Field.ItemID!!)
+        packUUID(byteBuffer, Data_Field.FolderID!!)
+        packUUID(byteBuffer, Data_Field.OwnerID!!)
+        packUUID(byteBuffer, Data_Field.TransactionID!!)
+        packInt(byteBuffer, Data_Field.SalePrice)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        this.Data_Field.ObjectID = unpackUUID(byteBuffer)
-        this.Data_Field.ItemID = unpackUUID(byteBuffer)
-        this.Data_Field.FolderID = unpackUUID(byteBuffer)
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        AgentData_Field.AgentID = unpackUUID(byteBuffer)
+        AgentData_Field.SessionID = unpackUUID(byteBuffer)
+        Data_Field.ItemID = unpackUUID(byteBuffer)
+        Data_Field.FolderID = unpackUUID(byteBuffer)
+        Data_Field.OwnerID = unpackUUID(byteBuffer)
+        Data_Field.TransactionID = unpackUUID(byteBuffer)
+        Data_Field.SalePrice = unpackInt(byteBuffer)
     }
 }

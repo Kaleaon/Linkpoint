@@ -6,6 +6,8 @@ import android.database.sqlite.SQLiteStatement
 import de.greenrobot.dao.AbstractDao
 import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import java.util.UUID
 
 class ChatterDao(config: DaoConfig, daoSession: DaoSession?) : AbstractDao<Chatter, Long>(config, daoSession) {
@@ -115,5 +117,64 @@ class ChatterDao(config: DaoConfig, daoSession: DaoSession?) : AbstractDao<Chatt
     override fun updateKeyAfterInsert(entity: Chatter, rowId: Long): Long? {
         entity.id = rowId
         return rowId
+    }
+    
+    // --- Extended methods for Repository ---
+
+    fun getActiveFlow(): Flow<List<Chatter>> = flow {
+        val list = queryBuilder().where(Properties.Active.eq(true)).list()
+        emit(list)
+    }
+
+    fun getWithUnreadFlow(): Flow<List<Chatter>> = flow {
+        val list = queryBuilder().where(Properties.UnreadCount.gt(0)).list()
+        emit(list)
+    }
+
+    fun getById(id: Long): Chatter? {
+        return load(id)
+    }
+
+    fun getByUUID(uuid: UUID): Chatter? {
+        val list = queryBuilder().where(Properties.Uuid.eq(uuid.toString())).list()
+        return if (list.isNotEmpty()) list[0] else null
+    }
+
+    fun updateUnreadCount(id: Long, count: Int) {
+        val chatter = load(id)
+        if (chatter != null) {
+            chatter.unreadCount = count
+            update(chatter)
+        }
+    }
+
+    fun clearUnreadCount(id: Long) {
+        val chatter = load(id)
+        if (chatter != null) {
+            chatter.unreadCount = 0
+            update(chatter)
+        }
+    }
+
+    fun setMuted(id: Long, muted: Boolean) {
+        val chatter = load(id)
+        if (chatter != null) {
+            chatter.muted = muted
+            update(chatter)
+        }
+    }
+
+    fun updateLastMessage(chatterId: Long, messageId: Long, sessionID: UUID?) {
+        val chatter = load(chatterId)
+        if (chatter != null) {
+            chatter.lastMessageID = messageId
+            chatter.lastSessionID = sessionID
+            chatter.active = true // usually updated on message
+            update(chatter)
+        }
+    }
+
+    fun deleteInactive() {
+        queryBuilder().where(Properties.Active.eq(false)).buildDelete().executeDeleteWithoutDetachingEntities()
     }
 }

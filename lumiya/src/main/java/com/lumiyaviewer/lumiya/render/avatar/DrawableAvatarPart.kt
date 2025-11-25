@@ -2,7 +2,6 @@ package com.lumiyaviewer.lumiya.render.avatar
 
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.openjpeg.OpenJPEG
-import com.lumiyaviewer.lumiya.render.GLTexture
 import com.lumiyaviewer.lumiya.render.RenderContext
 import com.lumiyaviewer.lumiya.render.drawable.DrawableFaceTexture
 import com.lumiyaviewer.lumiya.render.glres.textures.GLTextureCache
@@ -12,7 +11,6 @@ import com.lumiyaviewer.lumiya.res.executors.PrimComputeExecutor
 import com.lumiyaviewer.lumiya.res.textures.TextureCache
 import com.lumiyaviewer.lumiya.slproto.avatar.AvatarTextureFaceIndex
 import com.lumiyaviewer.lumiya.slproto.avatar.SLAnimatedMeshData
-import com.lumiyaviewer.lumiya.slproto.avatar.SLMeshData
 import com.lumiyaviewer.lumiya.slproto.avatar.SLPolyMesh
 import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.Arrays
@@ -30,8 +28,9 @@ class DrawableAvatarPart(
     @Volatile private var meshData: SLAnimatedMeshData? = null
     @Volatile private var meshDataUpdated: Boolean = false
     
+    // Use explicit types to avoid inference errors
     private val meshUpdate = Runnable {
-        val rawTex: GLTexture?
+        val rawTex: OpenJPEG?
         val params: FloatArray?
         
         Debug.Printf("Avatar: meshUpdate entered for part %s", faceIndex.toString())
@@ -44,7 +43,7 @@ class DrawableAvatarPart(
         if (params != null && rawTex != null) {
             Debug.Printf("Avatar: meshUpdate: part %s params %s", faceIndex.toString(), Arrays.toString(params))
             val newMeshData = SLAnimatedMeshData(referenceMeshData, hasGL20)
-            // referenceMeshData.applyMorphData(newMeshData, params!!, rawTex!!) // Stubbed in SLPolyMesh
+            // referenceMeshData.applyMorphData(newMeshData, params!!, rawTex!!) // Stubbed
             
             synchronized(updateLock) {
                 meshData = newMeshData
@@ -83,14 +82,14 @@ class DrawableAvatarPart(
         
         if (currentMeshData != null) {
             if (updateSkeleton && skeleton != null) {
-                // referenceMeshData.applySkeleton(currentMeshData, skeleton) // Stubbed in SLPolyMesh
+                // referenceMeshData.applySkeleton(currentMeshData, skeleton) // Stubbed
                 currentMeshData!!.setVerticesDirty()
             }
             // currentMeshData!!.GLDraw(renderContext, currentTexture) // Stubbed
         }
     }
 
-    override fun OnResourceReady(resource: Any, isSync: Boolean) {
+    override fun OnResourceReady(resource: Any?, isIntermediate: Boolean) {
         Debug.Printf("Avatar: (requesting meshUpdate) face %s texture %s", faceIndex.toString(), resource.toString())
         if (resource is OpenJPEG) {
             synchronized(updateLock) {
@@ -143,6 +142,7 @@ class DrawableAvatarPart(
             
             this.textureUUID = effectiveUUID
             
+            // Fixed create call with safe arguments
             val textureParams = DrawableTextureParams.create(effectiveUUID, faceIndex, avatarUUID)
             TextureCache.getInstance().RequestResource(textureParams, this)
             this.texture = DrawableFaceTexture(textureParams)

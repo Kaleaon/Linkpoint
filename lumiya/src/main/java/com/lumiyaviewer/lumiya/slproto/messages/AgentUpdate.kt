@@ -1,70 +1,74 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import com.lumiyaviewer.lumiya.slproto.types.LLQuaternion
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 import java.nio.ByteBuffer
 import java.util.UUID
 
 class AgentUpdate : SLMessage {
-    AgentData AgentData_Field = AgentData()
+    var AgentData_Field: AgentData? = AgentData()
 
     class AgentData {
-        UUID AgentID
-        LLQuaternion BodyRotation
-        LLVector3 CameraAtAxis
-        LLVector3 CameraCenter
-        LLVector3 CameraLeftAxis
-        LLVector3 CameraUpAxis
-        Int ControlFlags
-        float Far
-        Int Flags
-        LLQuaternion HeadRotation
-        UUID SessionID
-        Int State
+        var AgentID: UUID? = null
+        var BodyRotation: LLQuaternion? = LLQuaternion()
+        var CameraAtAxis: LLVector3? = LLVector3()
+        var CameraCenter: LLVector3? = LLVector3()
+        var CameraLeftAxis: LLVector3? = LLVector3()
+        var CameraUpAxis: LLVector3? = LLVector3()
+        var ControlFlags: Int = 0
+        var Far: Float = 0f
+        var Flags: Byte = 0
+        var HeadRotation: LLQuaternion? = LLQuaternion()
+        var SessionID: UUID? = null
+        var State: Byte = 0
     }
 
-    AgentUpdate() {
-        this.zeroCoded = true
+    constructor() {
+        this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return 115
+    override fun CalcPayloadSize(): Int {
+        return 118
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAgentUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put((byte) 4)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        packLLQuaternion(byteBuffer, this.AgentData_Field.BodyRotation)
-        packLLQuaternion(byteBuffer, this.AgentData_Field.HeadRotation)
-        packByte(byteBuffer, (byte) this.AgentData_Field.State)
-        packLLVector3(byteBuffer, this.AgentData_Field.CameraCenter)
-        packLLVector3(byteBuffer, this.AgentData_Field.CameraAtAxis)
-        packLLVector3(byteBuffer, this.AgentData_Field.CameraLeftAxis)
-        packLLVector3(byteBuffer, this.AgentData_Field.CameraUpAxis)
-        packFloat(byteBuffer, this.AgentData_Field.Far)
-        packInt(byteBuffer, this.AgentData_Field.ControlFlags)
-        packByte(byteBuffer, (byte) this.AgentData_Field.Flags)
+    override fun PackPayload(byteBuffer: ByteBuffer) {
+        byteBuffer.putShort(-1)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put(4.toByte())
+        packUUID(byteBuffer, AgentData_Field?.AgentID!!)
+        packUUID(byteBuffer, AgentData_Field?.SessionID!!)
+        packLLQuaternion(byteBuffer, AgentData_Field?.BodyRotation!!)
+        packLLQuaternion(byteBuffer, AgentData_Field?.HeadRotation!!)
+        packByte(byteBuffer, AgentData_Field?.State ?: 0)
+        packLLVector3(byteBuffer, AgentData_Field?.CameraCenter!!)
+        packLLVector3(byteBuffer, AgentData_Field?.CameraAtAxis!!)
+        packLLVector3(byteBuffer, AgentData_Field?.CameraLeftAxis!!)
+        packLLVector3(byteBuffer, AgentData_Field?.CameraUpAxis!!)
+        packFloat(byteBuffer, AgentData_Field?.Far ?: 0f)
+        packInt(byteBuffer, AgentData_Field?.ControlFlags ?: 0)
+        packByte(byteBuffer, AgentData_Field?.Flags ?: 0)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        this.AgentData_Field.BodyRotation = unpackLLQuaternion(byteBuffer)
-        this.AgentData_Field.HeadRotation = unpackLLQuaternion(byteBuffer)
-        this.AgentData_Field.State = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
-        this.AgentData_Field.CameraCenter = unpackLLVector3(byteBuffer)
-        this.AgentData_Field.CameraAtAxis = unpackLLVector3(byteBuffer)
-        this.AgentData_Field.CameraLeftAxis = unpackLLVector3(byteBuffer)
-        this.AgentData_Field.CameraUpAxis = unpackLLVector3(byteBuffer)
-        this.AgentData_Field.Far = unpackFloat(byteBuffer)
-        this.AgentData_Field.ControlFlags = unpackInt(byteBuffer)
-        this.AgentData_Field.Flags = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val agentData = AgentData_Field ?: AgentData()
+        agentData.AgentID = unpackUUID(byteBuffer)
+        agentData.SessionID = unpackUUID(byteBuffer)
+        agentData.BodyRotation = unpackLLQuaternion(byteBuffer)
+        agentData.HeadRotation = unpackLLQuaternion(byteBuffer)
+        agentData.State = unpackByte(byteBuffer)
+        agentData.CameraCenter = unpackLLVector3(byteBuffer)
+        agentData.CameraAtAxis = unpackLLVector3(byteBuffer)
+        agentData.CameraLeftAxis = unpackLLVector3(byteBuffer)
+        agentData.CameraUpAxis = unpackLLVector3(byteBuffer)
+        agentData.Far = unpackFloat(byteBuffer)
+        agentData.ControlFlags = unpackInt(byteBuffer)
+        agentData.Flags = unpackByte(byteBuffer)
+        this.AgentData_Field = agentData
     }
 }

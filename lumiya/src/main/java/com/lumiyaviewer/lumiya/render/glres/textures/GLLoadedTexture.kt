@@ -14,7 +14,7 @@ import java.io.IOException
 /**
  * GL texture loaded from bitmap or OpenJPEG data
  */
-class GLLoadedTexture : GLResourceTexture {
+class GLLoadedTexture : GLResourceTexture, GLTexture {
     
     private val hasAlphaLayer: Boolean
     val height: Int
@@ -103,24 +103,24 @@ class GLLoadedTexture : GLResourceTexture {
     /**
      * Bind texture for drawing
      */
-    fun GLDraw() {
+    override fun GLDraw() {
         GLES10.glBindTexture(GLES10.GL_TEXTURE_2D, handle)
     }
 
     /**
      * Get texture height
      */
-    fun getHeight(): Int = height
+    override fun getHeight(): Int = height
 
     /**
      * Get texture width
      */
-    fun getWidth(): Int = width
+    override fun getWidth(): Int = width
 
     /**
      * Check if texture has alpha channel
      */
-    fun hasAlphaLayer(): Boolean = hasAlphaLayer
+    override fun hasAlphaLayer(): Boolean = hasAlphaLayer
 
     companion object {
         /**

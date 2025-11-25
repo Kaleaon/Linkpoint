@@ -1,42 +1,43 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.UUID
 
 class AssetUploadComplete : SLMessage {
-    AssetBlock AssetBlock_Field = AssetBlock()
+    var AssetBlock_Field: AssetBlock = AssetBlock()
 
     class AssetBlock {
-        Boolean Success
-        Int Type
-        UUID UUID
+        var Success: Boolean = false
+        var Type: Int = 0
+        var UUID: UUID? = null
     }
 
-    AssetUploadComplete() {
+    constructor() {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    override fun CalcPayloadSize(): Int {
         return 22
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAssetUploadComplete(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 1)
-        byteBuffer.put((byte) 78)
-        packUUID(byteBuffer, this.AssetBlock_Field.UUID)
-        packByte(byteBuffer, (byte) this.AssetBlock_Field.Type)
-        packBoolean(byteBuffer, this.AssetBlock_Field.Success)
+        byteBuffer.put(1.toByte())
+        byteBuffer.put(78.toByte())
+        packUUID(byteBuffer, AssetBlock_Field.UUID!!)
+        packByte(byteBuffer, AssetBlock_Field.Type.toByte())
+        packBoolean(byteBuffer, AssetBlock_Field.Success)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AssetBlock_Field.UUID = unpackUUID(byteBuffer)
-        this.AssetBlock_Field.Type = unpackByte(byteBuffer)
-        this.AssetBlock_Field.Success = unpackBoolean(byteBuffer)
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        AssetBlock_Field.UUID = unpackUUID(byteBuffer)
+        AssetBlock_Field.Type = unpackByte(byteBuffer).toInt()
+        AssetBlock_Field.Success = unpackBoolean(byteBuffer)
     }
 }

@@ -4,12 +4,11 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.slproto.messages.SLMessageFactory
-import com.lumiyaviewer.lumiya.slproto.messages.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import com.lumiyaviewer.lumiya.slproto.types.LLQuaternion
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3d
 import com.lumiyaviewer.lumiya.slproto.types.LLVector4
-import com.lumiyaviewer.rawbuffers.DirectByteBuffer
 import java.net.Inet4Address
 import java.net.InetAddress
 import java.net.UnknownHostException
@@ -41,7 +40,7 @@ abstract class SLMessage : Parcelable {
         handler.dispatch(this)
     }
 
-    fun Handle(handler: SLMessageHandler) = handleMessage(handler)
+    open fun Handle(handler: SLMessageHandler) = handleMessage(handler)
 
     @Throws(Exception::class)
     abstract fun PackPayload(buffer: ByteBuffer)
@@ -434,19 +433,18 @@ abstract class SLMessage : Parcelable {
             String(data, OEM_CHARSET).trimEnd('\u0000')
 
         private fun ZeroDecode(destination: ByteBuffer, source: ByteBuffer) {
-            require(destination.hasArray()) { "Destination buffer must be backed by an array" }
-            require(source.hasArray()) { "Source buffer must be backed by an array" }
-
-            val destArray = destination.array()
-            val destOffset = destination.arrayOffset() + destination.position()
-            val destRemaining = destination.capacity() - destination.position()
-
-            val srcArray = source.array()
-            val srcOffset = source.arrayOffset() + source.position()
-            val srcRemaining = source.remaining()
-
-            val decodedLength = DirectByteBuffer.zeroDecode(destArray, destOffset, destRemaining, srcArray, srcOffset, srcRemaining)
-            destination.position(destination.position() + decodedLength)
+            while (source.hasRemaining()) {
+                val b = source.get()
+                if (b.toInt() == 0) {
+                    var runLength = source.get().toInt() and 0xFF
+                    while (runLength > 0) {
+                        destination.put(0)
+                        runLength--
+                    }
+                } else {
+                    destination.put(b)
+                }
+            }
         }
 
         private fun ZeroEncode(source: ByteBuffer, destination: ByteBuffer) {

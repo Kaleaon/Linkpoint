@@ -1,118 +1,105 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
-import com.google.common.base.Ascii
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.ArrayList
-import java.util.Iterator
 import java.util.UUID
 
 class BulkUpdateInventory : SLMessage {
-    AgentData AgentData_Field
-    ArrayList<FolderData> FolderData_Fields = ArrayList<>()
-    ArrayList<ItemData> ItemData_Fields = ArrayList<>()
+    var AgentData_Field: AgentData = AgentData()
+    var FolderData_Fields: ArrayList<FolderData> = ArrayList()
+    var ItemData_Fields: ArrayList<ItemData> = ArrayList()
 
     class AgentData {
-        UUID AgentID
-        UUID TransactionID
+        var AgentID: UUID? = null
+        var TransactionID: UUID? = null
     }
 
     class FolderData {
-        UUID FolderID
-        byte[] Name
-        UUID ParentID
-        Int Type
+        var FolderID: UUID? = null
+        var Name: ByteArray = ByteArray(0)
+        var ParentID: UUID? = null
+        var Type: Int = 0
     }
 
     class ItemData {
-        UUID AssetID
-        Int BaseMask
-        Int CRC
-        Int CallbackID
-        Int CreationDate
-        UUID CreatorID
-        byte[] Description
-        Int EveryoneMask
-        Int Flags
-        UUID FolderID
-        UUID GroupID
-        Int GroupMask
-        Boolean GroupOwned
-        Int InvType
-        UUID ItemID
-        byte[] Name
-        Int NextOwnerMask
-        UUID OwnerID
-        Int OwnerMask
-        Int SalePrice
-        Int SaleType
-        Int Type
+        var AssetID: UUID? = null
+        var BaseMask: Int = 0
+        var CRC: Int = 0
+        var CallbackID: Int = 0
+        var CreationDate: Int = 0
+        var CreatorID: UUID? = null
+        var Description: ByteArray = ByteArray(0)
+        var EveryoneMask: Int = 0
+        var Flags: Int = 0
+        var FolderID: UUID? = null
+        var GroupID: UUID? = null
+        var GroupMask: Int = 0
+        var GroupOwned: Boolean = false
+        var InvType: Int = 0
+        var ItemID: UUID? = null
+        var Name: ByteArray = ByteArray(0)
+        var NextOwnerMask: Int = 0
+        var OwnerID: UUID? = null
+        var OwnerMask: Int = 0
+        var SalePrice: Int = 0
+        var SaleType: Int = 0
+        var Type: Int = 0
     }
 
-    BulkUpdateInventory() {
+    constructor() {
         this.zeroCoded = true
-        this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
-        Int i2 = 37
-        Iterator<T> it = this.FolderData_Fields.iterator()
-        while (true) {
-            i = i2
-            if (!it.hasNext()) {
-                break
-            }
-            i2 = ((FolderData) it.next()).Name.length + 34 + i
+    override fun CalcPayloadSize(): Int {
+        var length = 37
+        for (folderData in FolderData_Fields) {
+            length += folderData.Name.size + 34
         }
-        Int i3 = i + 1
-        Iterator<T> it2 = this.ItemData_Fields.iterator()
-        while (true) {
-            Int i4 = i3
-            if (!it2.hasNext()) {
-                return i4
-            }
-            ItemData itemData = (ItemData) it2.next()
-            i3 = itemData.Description.length + itemData.Name.length + 133 + 1 + 4 + 4 + i4
+        length++
+        for (itemData in ItemData_Fields) {
+            length += itemData.Description.size + itemData.Name.size + 133 + 1 + 4 + 4
         }
+        return length
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleBulkUpdateInventory(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 1)
-        byteBuffer.put(Ascii.EM)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.TransactionID)
-        byteBuffer.put((byte) this.FolderData_Fields.size())
-        for (FolderData folderData : this.FolderData_Fields) {
-            packUUID(byteBuffer, folderData.FolderID)
-            packUUID(byteBuffer, folderData.ParentID)
-            packByte(byteBuffer, (byte) folderData.Type)
+        byteBuffer.put(1.toByte())
+        byteBuffer.put(25.toByte()) // Ascii.EM
+        packUUID(byteBuffer, AgentData_Field.AgentID!!)
+        packUUID(byteBuffer, AgentData_Field.TransactionID!!)
+        byteBuffer.put(FolderData_Fields.size.toByte())
+        for (folderData in FolderData_Fields) {
+            packUUID(byteBuffer, folderData.FolderID!!)
+            packUUID(byteBuffer, folderData.ParentID!!)
+            packByte(byteBuffer, folderData.Type.toByte())
             packVariable(byteBuffer, folderData.Name, 1)
         }
-        byteBuffer.put((byte) this.ItemData_Fields.size())
-        for (ItemData itemData : this.ItemData_Fields) {
-            packUUID(byteBuffer, itemData.ItemID)
+        byteBuffer.put(ItemData_Fields.size.toByte())
+        for (itemData in ItemData_Fields) {
+            packUUID(byteBuffer, itemData.ItemID!!)
             packInt(byteBuffer, itemData.CallbackID)
-            packUUID(byteBuffer, itemData.FolderID)
-            packUUID(byteBuffer, itemData.CreatorID)
-            packUUID(byteBuffer, itemData.OwnerID)
-            packUUID(byteBuffer, itemData.GroupID)
+            packUUID(byteBuffer, itemData.FolderID!!)
+            packUUID(byteBuffer, itemData.CreatorID!!)
+            packUUID(byteBuffer, itemData.OwnerID!!)
+            packUUID(byteBuffer, itemData.GroupID!!)
             packInt(byteBuffer, itemData.BaseMask)
             packInt(byteBuffer, itemData.OwnerMask)
             packInt(byteBuffer, itemData.GroupMask)
             packInt(byteBuffer, itemData.EveryoneMask)
             packInt(byteBuffer, itemData.NextOwnerMask)
             packBoolean(byteBuffer, itemData.GroupOwned)
-            packUUID(byteBuffer, itemData.AssetID)
-            packByte(byteBuffer, (byte) itemData.Type)
-            packByte(byteBuffer, (byte) itemData.InvType)
+            packUUID(byteBuffer, itemData.AssetID!!)
+            packByte(byteBuffer, itemData.Type.toByte())
+            packByte(byteBuffer, itemData.InvType.toByte())
             packInt(byteBuffer, itemData.Flags)
-            packByte(byteBuffer, (byte) itemData.SaleType)
+            packByte(byteBuffer, itemData.SaleType.toByte())
             packInt(byteBuffer, itemData.SalePrice)
             packVariable(byteBuffer, itemData.Name, 1)
             packVariable(byteBuffer, itemData.Description, 1)
@@ -121,21 +108,21 @@ class BulkUpdateInventory : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.TransactionID = unpackUUID(byteBuffer)
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
-            FolderData folderData = FolderData()
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        AgentData_Field.AgentID = unpackUUID(byteBuffer)
+        AgentData_Field.TransactionID = unpackUUID(byteBuffer)
+        val b = (byteBuffer.get().toInt() and 0xFF)
+        for (i in 0 until b) {
+            val folderData = FolderData()
             folderData.FolderID = unpackUUID(byteBuffer)
             folderData.ParentID = unpackUUID(byteBuffer)
-            folderData.Type = unpackByte(byteBuffer)
+            folderData.Type = (unpackByte(byteBuffer).toInt() and 0xFF)
             folderData.Name = unpackVariable(byteBuffer, 1)
-            this.FolderData_Fields.add(folderData)
+            FolderData_Fields.add(folderData)
         }
-        byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b2; i2++) {
-            ItemData itemData = ItemData()
+        val b2 = (byteBuffer.get().toInt() and 0xFF)
+        for (i in 0 until b2) {
+            val itemData = ItemData()
             itemData.ItemID = unpackUUID(byteBuffer)
             itemData.CallbackID = unpackInt(byteBuffer)
             itemData.FolderID = unpackUUID(byteBuffer)
@@ -149,16 +136,16 @@ class BulkUpdateInventory : SLMessage {
             itemData.NextOwnerMask = unpackInt(byteBuffer)
             itemData.GroupOwned = unpackBoolean(byteBuffer)
             itemData.AssetID = unpackUUID(byteBuffer)
-            itemData.Type = unpackByte(byteBuffer)
-            itemData.InvType = unpackByte(byteBuffer)
+            itemData.Type = (unpackByte(byteBuffer).toInt() and 0xFF)
+            itemData.InvType = (unpackByte(byteBuffer).toInt() and 0xFF)
             itemData.Flags = unpackInt(byteBuffer)
-            itemData.SaleType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
+            itemData.SaleType = (unpackByte(byteBuffer).toInt() and 0xFF)
             itemData.SalePrice = unpackInt(byteBuffer)
             itemData.Name = unpackVariable(byteBuffer, 1)
             itemData.Description = unpackVariable(byteBuffer, 1)
             itemData.CreationDate = unpackInt(byteBuffer)
             itemData.CRC = unpackInt(byteBuffer)
-            this.ItemData_Fields.add(itemData)
+            ItemData_Fields.add(itemData)
         }
     }
 }

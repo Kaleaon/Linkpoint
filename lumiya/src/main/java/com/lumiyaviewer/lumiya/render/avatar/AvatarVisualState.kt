@@ -83,11 +83,14 @@ class AvatarVisualState(
         
         val drawableAvatar = SpatialIndex.getInstance().getDrawableAvatar(avatarObject)
 
-        for (anim in avatarAnimation.AnimationList_Fields) {
+        val animationList = avatarAnimation.AnimationList_Fields ?: emptyList()
+        for (anim in animationList) {
             val uuid = anim.AnimID
-            seenAnims.add(uuid)
-            existingAnims.remove(uuid)
-            startAnimation(uuid, anim.AnimSequenceID, currentTime, drawableAvatar)
+            if (uuid != null) {
+                seenAnims.add(uuid)
+                existingAnims.remove(uuid)
+                startAnimation(uuid, anim.AnimSequenceID, currentTime, drawableAvatar)
+            }
         }
 
         if (Collections.disjoint(seenAnims, basicAnimations)) {
@@ -166,7 +169,7 @@ class AvatarVisualState(
 
     @Synchronized
     fun createDrawableAvatar(store: DrawableStore?): DrawableAvatar {
-        val avatar = DrawableAvatar(store, agentUUID, avatarObject, avatarUUID, animations)
+        val avatar = DrawableAvatar(store, agentUUID, avatarObject, avatarUUID, animations as Map<UUID, AnimationSequenceInfo>)
         avatar.UpdateShapeParams(avatarShapeParams)
         avatar.UpdateTextures(textures)
         return avatar

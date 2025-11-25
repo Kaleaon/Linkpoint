@@ -1,10 +1,11 @@
 package com.lumiyaviewer.lumiya.render.glres.textures
 
-import android.graphics.Bitmap
-import com.lumiyaviewer.lumiya.render.RenderContext
-
-class GLLoadedTextTexture(
-    renderContext: RenderContext,
-    bitmap: Bitmap,
-    val baselineOffset: Float,
-) : GLLoadedTexture(renderContext, bitmap)
+class GLLoadedTextTexture {
+    val width: Int = 0
+    val height: Int = 0
+    val baselineOffset: Float = 0f
+    
+    fun GLDraw() {
+        // Stub
+    }
+}

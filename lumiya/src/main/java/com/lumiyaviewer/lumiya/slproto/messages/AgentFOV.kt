@@ -1,52 +1,58 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
 import java.nio.ByteBuffer
 import java.util.UUID
 
 class AgentFOV : SLMessage {
-    AgentData AgentData_Field = AgentData()
-    FOVBlock FOVBlock_Field = FOVBlock()
+    var AgentData_Field: AgentData? = AgentData()
+    var FOVBlock_Field: FOVBlock? = FOVBlock()
 
     class AgentData {
-        UUID AgentID
-        Int CircuitCode
-        UUID SessionID
+        var AgentID: UUID? = null
+        var CircuitCode: Int = 0
+        var SessionID: UUID? = null
     }
 
     class FOVBlock {
-        Int GenCounter
-        float VerticalAngle
+        var GenCounter: Int = 0
+        var VerticalAngle: Float = 0f
     }
 
-    AgentFOV() {
+    constructor() {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    override fun CalcPayloadSize(): Int {
         return 48
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
         sLMessageHandler.HandleAgentFOV(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 0)
-        byteBuffer.put((byte) 82)
-        packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        packInt(byteBuffer, this.AgentData_Field.CircuitCode)
-        packInt(byteBuffer, this.FOVBlock_Field.GenCounter)
-        packFloat(byteBuffer, this.FOVBlock_Field.VerticalAngle)
+        byteBuffer.put(0.toByte())
+        byteBuffer.put(82.toByte())
+        packUUID(byteBuffer, AgentData_Field?.AgentID)
+        packUUID(byteBuffer, AgentData_Field?.SessionID)
+        packInt(byteBuffer, AgentData_Field?.CircuitCode ?: 0)
+        packInt(byteBuffer, FOVBlock_Field?.GenCounter ?: 0)
+        packFloat(byteBuffer, FOVBlock_Field?.VerticalAngle ?: 0f)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
-        this.AgentData_Field.CircuitCode = unpackInt(byteBuffer)
-        this.FOVBlock_Field.GenCounter = unpackInt(byteBuffer)
-        this.FOVBlock_Field.VerticalAngle = unpackFloat(byteBuffer)
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
+        val agentData = AgentData_Field ?: AgentData()
+        agentData.AgentID = unpackUUID(byteBuffer)
+        agentData.SessionID = unpackUUID(byteBuffer)
+        agentData.CircuitCode = unpackInt(byteBuffer)
+        this.AgentData_Field = agentData
+
+        val fovBlock = FOVBlock_Field ?: FOVBlock()
+        fovBlock.GenCounter = unpackInt(byteBuffer)
+        fovBlock.VerticalAngle = unpackFloat(byteBuffer)
+        this.FOVBlock_Field = fovBlock
     }
 }

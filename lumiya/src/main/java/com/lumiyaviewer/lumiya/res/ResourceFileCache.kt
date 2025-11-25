@@ -1,10 +1,11 @@
 package com.lumiyaviewer.lumiya.res
 
+import com.lumiyaviewer.lumiya.memory.MemoryManager
 import com.lumiyaviewer.lumiya.res.executors.LoaderExecutor
 import java.io.File
 
-abstract class ResourceFileCache<ResourceParams, ResourceType> :
-    ResourceMemoryCache<ResourceParams, ResourceType>() {
+abstract class ResourceFileCache<ResourceParams, ResourceType>(memoryManager: MemoryManager) :
+    ResourceMemoryCache<ResourceParams, ResourceType>(memoryManager) {
 
     override fun CreateNewRequest(
         params: ResourceParams,
@@ -35,17 +36,17 @@ abstract class ResourceFileCache<ResourceParams, ResourceType> :
     ) : ResourceRequest<ResourceParams, ResourceType>(params, manager), Runnable {
 
         override fun cancelRequest() {
-            LoaderExecutor.getInstance().remove(this)
+            LoaderExecutor.remove(this)
             super.cancelRequest()
         }
 
         override fun execute() {
-            LoaderExecutor.getInstance().execute(this)
+            LoaderExecutor.execute(this)
         }
 
         override fun run() {
             val resource = try {
-                createResourceFromFile(params(), file)
+                createResourceFromFile(this.params, file)
             } catch (t: Throwable) {
                 null
             }

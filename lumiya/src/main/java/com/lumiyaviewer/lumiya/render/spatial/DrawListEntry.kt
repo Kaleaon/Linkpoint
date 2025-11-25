@@ -12,9 +12,9 @@ abstract class DrawListEntry : InlineListEntry<DrawListEntry> {
     val boundingBox = FloatArray(6)
     
     @Volatile
-    private var list: InlineList<DrawListEntry>? = null
-    private var next: DrawListEntry? = null
-    private var prev: DrawListEntry? = null
+    internal var list: InlineList<DrawListEntry>? = null
+    internal var next: DrawListEntry? = null
+    internal var prev: DrawListEntry? = null
 
     /**
      * Add this entry to a draw list
@@ -30,7 +30,7 @@ abstract class DrawListEntry : InlineListEntry<DrawListEntry> {
     /**
      * Request removal of this entry from its list
      */
-    fun requestEntryRemoval() {
+    override fun requestEntryRemoval() {
         list?.requestEntryRemoval(this)
     }
 

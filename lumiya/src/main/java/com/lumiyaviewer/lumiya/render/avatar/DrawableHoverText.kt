@@ -27,50 +27,53 @@ class DrawableHoverText(
         y: Float,
         z: Float,
         offsetY: Float,
-        matrixStack: MatrixStack, // Changed from FloatArray to MatrixStack based on usage
+        projectionMatrix: FloatArray?, // This was confusing in decompiled code, treating as FloatArray for compatibility if needed, but logic used matrixStack
         colorize: Boolean,
         color: Int
     ) {
+        // Fallback or alternative signature
+        // If projectionMatrix is passed, use it. If not, logic assumes MatrixStack?
+        // The decompiled code had "float[] fArr" which was used as projection matrix data.
+        // Let's assume standard matrix operations.
+        
         val mvMatrix = FloatArray(16)
         val matrixData = renderContext.modelViewMatrix.getMatrixData()
         val matrixDataOffset = renderContext.modelViewMatrix.getMatrixDataOffset()
-        val projectionMatrixData = matrixStack.getMatrixData()
-        val projectionMatrixOffset = matrixStack.getMatrixDataOffset()
-
-        mvMatrix[0] = x
-        mvMatrix[1] = y
-        mvMatrix[2] = z
-        mvMatrix[3] = 1.0f
-
-        // Transform world coordinates to view coordinates
-        Matrix.multiplyMV(mvMatrix, 4, matrixData, matrixDataOffset, mvMatrix, 0)
         
-        // Add offset in view space (Y axis)
-        mvMatrix[5] += offsetY
-
-        // Determine screen coordinates
+        // Manual construction of translation vector? No, mvMatrix is result.
+        // Decompiled logic:
+        /*
+        r0[0] = f; r0[1] = f2; r0[2] = f3; r0[3] = 1.0f;
+        Matrix.multiplyMV(r0, 4, matrixData, matrixDataOffset, r0, 0);
+        */
+        // r0 is length 8 float array in decompiled code.
+        
+        val tempVec = FloatArray(8)
+        tempVec[0] = x
+        tempVec[1] = y
+        tempVec[2] = z
+        tempVec[3] = 1.0f
+        
+        Matrix.multiplyMV(tempVec, 4, matrixData, matrixDataOffset, tempVec, 0)
+        
+        tempVec[5] += offsetY
+        
         if (renderContext.hasGL20) {
-            // For GL20, we pass view-space coordinates to shader? 
-            // The logic in decompiled code seemed to copy r0 to beginning of array
-             System.arraycopy(mvMatrix, 4, mvMatrix, 0, 4)
+             System.arraycopy(tempVec, 4, mvMatrix, 0, 4)
         } else {
-            // Project to screen/clip space
-             Matrix.multiplyMV(mvMatrix, 0, projectionMatrixData, projectionMatrixOffset, mvMatrix, 4)
+             if (projectionMatrix != null) {
+                 Matrix.multiplyMV(mvMatrix, 0, projectionMatrix, 0, tempVec, 4)
+             }
         }
 
         if (mvMatrix[3] != 0.0f) {
             val screenX = mvMatrix[0] / mvMatrix[3]
             val screenY = mvMatrix[1] / mvMatrix[3]
+            val depth = mvMatrix[2] / mvMatrix[3] // Assuming this is what was intended
             
-            if (mvMatrix[3] != 0.0f) {
-                GLDraw(renderContext, screenX, screenY, mvMatrix[2] / mvMatrix[3], colorize, color)
-            }
+            GLDraw(renderContext, screenX, screenY, depth, colorize, color)
         }
     }
-    
-    // Overloaded version if needed to match signature of decompiled code
-    // The decompiled code showed `MatrixStack` in signature but usage `matrixStack.getMatrixData()`.
-    // I assumed `matrixStack` is indeed `MatrixStack` type.
 
     override fun GLCleanup() {
         textTextureCache.CancelRequest(this)

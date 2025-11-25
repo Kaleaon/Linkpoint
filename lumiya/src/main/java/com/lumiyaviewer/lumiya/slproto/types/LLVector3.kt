@@ -1,6 +1,5 @@
 package com.lumiyaviewer.lumiya.slproto.types
 
-import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode
 import com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDDouble
 import com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap
@@ -29,6 +28,10 @@ class LLVector3(
             )
         }
 
+        fun sub(v1: LLVector3, v2: LLVector3): LLVector3 {
+            return LLVector3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z)
+        }
+
         fun parseFloatVec(byteBuffer: ByteBuffer): LLVector3 {
             return LLVector3(byteBuffer.float, byteBuffer.float, byteBuffer.float)
         }
@@ -36,8 +39,7 @@ class LLVector3(
 
     constructor(other: LLVector3) : this(other.x, other.y, other.z)
 
-    // Compatibility wrapper for instance method cross if needed, 
-    // but static/companion is better. Keeping instance for now if used elsewhere.
+    // Compatibility wrapper for instance method cross if needed
     fun cross(v1: LLVector3, v2: LLVector3): LLVector3 = Companion.cross(v1, v2)
 
     fun lerp(v1: LLVector3, v2: LLVector3, f: Float): LLVector3 {
@@ -73,9 +75,8 @@ class LLVector3(
         )
     }
 
-    fun sub(v1: LLVector3, v2: LLVector3): LLVector3 {
-        return LLVector3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z)
-    }
+    // Removed instance sub(v1, v2) in favor of Companion method, but keeping instance sub(v)
+    // If specific code uses instance sub(v1, v2), it should be updated to use LLVector3.sub(v1, v2)
 
     fun add(v: LLVector3) {
         this.x += v.x

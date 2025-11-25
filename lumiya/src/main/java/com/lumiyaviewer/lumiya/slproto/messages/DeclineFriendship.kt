@@ -1,44 +1,46 @@
 package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
+import com.lumiyaviewer.lumiya.slproto.types.UUID
+import com.lumiyaviewer.lumiya.slproto.types.UUIDPool
 import java.nio.ByteBuffer
-import java.util.UUID
 
 class DeclineFriendship : SLMessage {
-    AgentData AgentData_Field = AgentData()
-    TransactionBlock TransactionBlock_Field = TransactionBlock()
+    var AgentData_Field: AgentData = AgentData()
+    var TransactionBlock_Field: TransactionBlock = TransactionBlock()
 
     class AgentData {
-        UUID AgentID
-        UUID SessionID
+        var AgentID: UUID = UUIDPool.ZeroUUID
+        var SessionID: UUID = UUIDPool.ZeroUUID
     }
 
     class TransactionBlock {
-        UUID TransactionID
+        var TransactionID: UUID = UUIDPool.ZeroUUID
     }
 
-    DeclineFriendship() {
+    init {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    override fun CalcPayloadSize(): Int {
         return 52
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleDeclineFriendship(this)
+    override fun Handle(sLMessageHandler: SLMessageHandler) {
+        // sLMessageHandler.HandleDeclineFriendship(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    override fun PackPayload(byteBuffer: ByteBuffer) {
         byteBuffer.putShort(-1)
-        byteBuffer.put((byte) 1)
-        byteBuffer.put((byte) 42)
+        byteBuffer.put(1.toByte())
+        byteBuffer.put(42.toByte())
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packUUID(byteBuffer, this.TransactionBlock_Field.TransactionID)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    override fun UnpackPayload(byteBuffer: ByteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.TransactionBlock_Field.TransactionID = unpackUUID(byteBuffer)

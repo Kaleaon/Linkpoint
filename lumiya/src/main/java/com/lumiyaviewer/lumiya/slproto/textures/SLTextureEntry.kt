@@ -272,6 +272,8 @@ class SLTextureEntry {
     }
     
     fun getFaceMask(): Int = faceMask
+    
+    fun isSingleFace(): Boolean = faceMask == 0
 
     companion object {
         const val MAX_FACES = 32

@@ -1,7 +1,7 @@
 package com.lumiyaviewer.lumiya.repository
 
-import com.lumiyaviewer.lumiya.database.dao.FriendDao
-import com.lumiyaviewer.lumiya.database.entities.FriendEntity
+import com.lumiyaviewer.lumiya.dao.Friend
+import com.lumiyaviewer.lumiya.dao.FriendDao
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,21 +24,21 @@ class UserRepository @Inject constructor(
     /**
      * Get all friends
      */
-    suspend fun getAllFriends(): List<FriendEntity> {
+    suspend fun getAllFriends(): List<Friend> {
         return friendDao.getAll()
     }
     
     /**
      * Get online friends
      */
-    suspend fun getOnlineFriends(): List<FriendEntity> {
+    suspend fun getOnlineFriends(): List<Friend> {
         return friendDao.getOnline()
     }
     
     /**
      * Add a friend
      */
-    suspend fun addFriend(friend: FriendEntity): Long {
+    suspend fun addFriend(friend: Friend): Long {
         return friendDao.insert(friend)
     }
     
@@ -52,14 +52,14 @@ class UserRepository @Inject constructor(
     /**
      * Update friend
      */
-    suspend fun updateFriend(friend: FriendEntity) {
+    suspend fun updateFriend(friend: Friend) {
         friendDao.update(friend)
     }
     
     /**
      * Get friend by UUID
      */
-    suspend fun getFriendByUUID(uuid: UUID): FriendEntity? {
+    suspend fun getFriendByUUID(uuid: UUID): Friend? {
         return friendDao.getByUUID(uuid)
     }
 

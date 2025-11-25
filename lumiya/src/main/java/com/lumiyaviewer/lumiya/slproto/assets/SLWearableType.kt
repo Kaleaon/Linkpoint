@@ -23,46 +23,20 @@ enum class SLWearableType(
     WT_SKIRT(12, SLAssetType.AT_CLOTHING, false, "Skirt"),
     WT_ALPHA(13, SLAssetType.AT_CLOTHING, false, "Alpha"),
     WT_TATTOO(14, SLAssetType.AT_CLOTHING, false, "Tattoo"),
-    WT_PHYSICS(15, SLAssetType.AT_CLOTHING, false, "Physics")
-    
-    private SLAssetType assetType
-    private boolean isCritical
-    private String name
-    private int typeCode
+    WT_PHYSICS(15, SLAssetType.AT_CLOTHING, false, "Physics");
 
-    private SLWearableType(int i, SLAssetType sLAssetType, boolean z, String str) {
-        this.typeCode = i
-        this.assetType = sLAssetType
-        this.isCritical = z
-        this.name = str
-    }
-
-    SLWearableType getByCode(int i) {
-        for (SLWearableType sLWearableType : values()) {
-            if (sLWearableType.typeCode == i) {
-                return sLWearableType
+    companion object {
+        fun getByCode(i: Int): SLWearableType? {
+            for (type in values()) {
+                if (type.typeCode == i) return type
             }
+            return null
         }
-        return null
     }
 
-    SLAssetType getAssetType() {
-        return this.assetType
-    }
-
-    boolean getIsCritical() {
-        return this.isCritical
-    }
-
-    String getName() {
-        return this.name
-    }
-
-    int getTypeCode() {
-        return this.typeCode
-    }
-
-    boolean isBodyPart() {
-        return this.assetType == SLAssetType.AT_BODYPART
-    }
+    fun getAssetType(): SLAssetType = assetType
+    fun getIsCritical(): Boolean = isCritical
+    fun getName(): String = name
+    fun getTypeCode(): Int = typeCode
+    fun isBodyPart(): Boolean = assetType == SLAssetType.AT_BODYPART
 }

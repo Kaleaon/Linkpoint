@@ -46,7 +46,7 @@ class SpatialObjectIndex(
     private val objectsToUpdate: MutableSet<DrawListObjectEntry> = Collections.newSetFromMap(IdentityHashMap())
     private val objectsUpdateTask = ObjectsUpdateTask()
     
-    val spatialTree: SpatialTree
+    lateinit var spatialTree: SpatialTree
     private val terrain = Array(16) { arrayOfNulls<DrawListTerrainEntry>(16) }
     private val terrainDirty = HashMap<Int, TerrainData>()
     private val terrainLock = Any()
@@ -157,11 +157,6 @@ class SpatialObjectIndex(
                     if (handleRemoveObject(entry)) changes = true
                 }
                 
-                // Using bitwise OR logic from original code which returned booleans indicating changes?
-                // The original code was: i |= ... handleUpdateObject
-                // But handleUpdateObject returns false in the decompiled code provided.
-                // Assuming handleUpdateObject/handleRemoveObject might trigger tree changes.
-                
                 if (spatialTree.isDrawListChanged() || spatialTree.isTreeWalkNeeded()) {
                     drawListUpdateRequested.set(true)
                 }
@@ -191,7 +186,6 @@ class SpatialObjectIndex(
     private fun removeObject(entry: DrawListObjectEntry) {
         var added: Boolean
         synchronized(objectUpdateRemoveLock) {
-            // Logic: Remove from update list, add to remove list
             objectsToUpdate.remove(entry)
             added = objectsToRemove.add(entry)
         }
@@ -230,7 +224,7 @@ class SpatialObjectIndex(
     fun setViewport(info: FrustrumInfo, planes: FrustrumPlanes) {
         var changed = false
         synchronized(lock) {
-            if (frustrumInfo == null || frustrumInfo != info) { // Check reference equality or content
+            if (frustrumInfo == null || frustrumInfo != info) {
                 frustrumInfo = info
                 changed = true
             }
