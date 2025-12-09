@@ -37,7 +37,7 @@ class ModernSecondLifeFeatures {
     /**
      * Initialize all modern Second Life features
      */
-    CompletableFuture<Boolean> initializeAsync() {
+    fun initializeAsync(): CompletableFuture<Boolean> {
         Log.i(TAG, "Initializing modern Second Life features")
         
         return CompletableFuture.supplyAsync(() -> {
@@ -79,19 +79,19 @@ class ModernSecondLifeFeatures {
     }
     
     // Getters for feature managers
-    ModernAvatarManager getAvatarManager() {
+    fun getAvatarManager(): ModernAvatarManager {
         return avatarManager
     }
     
-    ModernInventoryManager getInventoryManager() {
+    fun getInventoryManager(): ModernInventoryManager {
         return inventoryManager
     }
     
-    ModernChatManager getChatManager() {
+    fun getChatManager(): ModernChatManager {
         return chatManager
     }
     
-    ModernObjectManager getObjectManager() {
+    fun getObjectManager(): ModernObjectManager {
         return objectManager
     }
     
@@ -110,7 +110,7 @@ class ModernSecondLifeFeatures {
             this.protocolManager = protocolManager
         }
         
-        CompletableFuture<Boolean> initializeAsync() {
+        fun initializeAsync(): CompletableFuture<Boolean> {
             return CompletableFuture.supplyAsync(() -> {
                 Log.i(TAG, "Initializing avatar manager")
                 // Initialize avatar appearance system
@@ -118,7 +118,7 @@ class ModernSecondLifeFeatures {
             })
         }
         
-        CompletableFuture<AvatarData> getAvatarDataAsync(UUID avatarId) {
+        fun getAvatarDataAsync(UUID avatarId): CompletableFuture<AvatarData> {
             return CompletableFuture.supplyAsync(() -> {
                 // Fetch avatar data with modern features
                 AvatarData data = AvatarData()
@@ -130,7 +130,7 @@ class ModernSecondLifeFeatures {
             })
         }
         
-        CompletableFuture<Boolean> updateAvatarAppearanceAsync(AvatarAppearance appearance) {
+        fun updateAvatarAppearanceAsync(AvatarAppearance appearance): CompletableFuture<Boolean> {
             return CompletableFuture.supplyAsync(() -> {
                 Log.i(TAG, "Updating avatar appearance with modern features")
                 // Update avatar with PBR materials, blend shapes, etc.
@@ -165,7 +165,7 @@ class ModernSecondLifeFeatures {
             this.protocolManager = protocolManager
         }
         
-        CompletableFuture<Boolean> initializeAsync() {
+        fun initializeAsync(): CompletableFuture<Boolean> {
             return CompletableFuture.supplyAsync(() -> {
                 Log.i(TAG, "Initializing inventory manager")
                 // Initialize modern inventory system with cloud sync
@@ -197,7 +197,7 @@ class ModernSecondLifeFeatures {
             })
         }
         
-        CompletableFuture<Boolean> transferItemAsync(UUID itemID, UUID targetFolder) {
+        fun transferItemAsync(UUID itemID, UUID targetFolder): CompletableFuture<Boolean> {
             return CompletableFuture.supplyAsync(() -> {
                 Log.i(TAG, "Transferring item with modern inventory system")
                 return true
@@ -229,7 +229,7 @@ class ModernSecondLifeFeatures {
             this.protocolManager = protocolManager
         }
         
-        CompletableFuture<Boolean> initializeAsync() {
+        fun initializeAsync(): CompletableFuture<Boolean> {
             return CompletableFuture.supplyAsync(() -> {
                 Log.i(TAG, "Initializing chat manager with modern features")
                 // Initialize real-time chat, voice integration, etc.
@@ -237,7 +237,7 @@ class ModernSecondLifeFeatures {
             })
         }
         
-        CompletableFuture<Boolean> sendChatMessageAsync(String message, ChatChannel channel) {
+        fun sendChatMessageAsync(String message, ChatChannel channel): CompletableFuture<Boolean> {
             return CompletableFuture.supplyAsync(() -> {
                 Log.d(TAG, "Sending chat message via modern system: " + message)
                 
@@ -254,7 +254,7 @@ class ModernSecondLifeFeatures {
             })
         }
         
-        List<ChatMessage> getChatHistory() {
+        fun getChatHistory(): List<ChatMessage> {
             return new ArrayList<>(chatHistory)
         }
         
@@ -283,7 +283,7 @@ class ModernSecondLifeFeatures {
             this.protocolManager = protocolManager
         }
         
-        CompletableFuture<Boolean> initializeAsync() {
+        fun initializeAsync(): CompletableFuture<Boolean> {
             return CompletableFuture.supplyAsync(() -> {
                 Log.i(TAG, "Initializing object manager with modern rendering")
                 // Initialize PBR rendering, LOD system, etc.
@@ -291,7 +291,7 @@ class ModernSecondLifeFeatures {
             })
         }
         
-        CompletableFuture<WorldObject> getObjectAsync(UUID objectID) {
+        fun getObjectAsync(UUID objectID): CompletableFuture<WorldObject> {
             return CompletableFuture.supplyAsync(() -> {
                 WorldObject cached = objectCache.get(objectID)
                 if (cached != null) {
@@ -311,7 +311,7 @@ class ModernSecondLifeFeatures {
             })
         }
         
-        CompletableFuture<Boolean> updateObjectAsync(UUID objectID, ObjectUpdate update) {
+        fun updateObjectAsync(UUID objectID, ObjectUpdate update): CompletableFuture<Boolean> {
             return CompletableFuture.supplyAsync(() -> {
                 Log.d(TAG, "Updating object with modern features: " + objectID)
                 

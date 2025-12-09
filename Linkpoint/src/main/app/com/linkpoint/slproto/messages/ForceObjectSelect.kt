@@ -22,29 +22,29 @@ class ForceObjectSelect : SLMessage {
         this.Header_Field = Header()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.Data_Fields.size() * 4) + 6
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleForceObjectSelect(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -51)
         packBoolean(byteBuffer, this.Header_Field.ResetList)
-        byteBuffer.put((byte) this.Data_Fields.size())
+        byteBuffer.put((this as byte).Data_Fields.size())
         for (Data data : this.Data_Fields) {
             packInt(byteBuffer, data.LocalID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.Header_Field.ResetList = unpackBoolean(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             Data data = Data()
             data.LocalID = unpackInt(byteBuffer)
             this.Data_Fields.add(data)

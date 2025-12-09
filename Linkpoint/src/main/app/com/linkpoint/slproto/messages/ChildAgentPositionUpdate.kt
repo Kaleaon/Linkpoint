@@ -28,15 +28,15 @@ class ChildAgentPositionUpdate : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 130
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleChildAgentPositionUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put(Ascii.ESC)
         packLong(byteBuffer, this.AgentData_Field.RegionHandle)
         packInt(byteBuffer, this.AgentData_Field.ViewerCircuitCode)
@@ -52,7 +52,7 @@ class ChildAgentPositionUpdate : SLMessage {
         packBoolean(byteBuffer, this.AgentData_Field.ChangedGrid)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.RegionHandle = unpackLong(byteBuffer)
         this.AgentData_Field.ViewerCircuitCode = unpackInt(byteBuffer)
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)

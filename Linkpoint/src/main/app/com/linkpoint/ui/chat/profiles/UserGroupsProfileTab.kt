@@ -43,7 +43,7 @@ class UserGroupsProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoada
             this(context)
         }
 
-        Int getCount() {
+        fun getCount(): Int {
             if (this.avatarGroupList != null) {
                 return this.avatarGroupList.size()
             }
@@ -57,29 +57,29 @@ class UserGroupsProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoada
             return (AvatarGroupList.AvatarGroupEntry) this.avatarGroupList.get(i)
         }
 
-        Long getItemId(Int i) {
+        fun getItemId(Int i): Long {
             return (Long) i
         }
 
-        View getView(Int i, View view, ViewGroup viewGroup) {
+        fun getView(Int i, View view, ViewGroup viewGroup): View {
             if (view == null) {
                 view = this.inflater.inflate(17367043, viewGroup, false)
             }
             AvatarGroupList.AvatarGroupEntry item = getItem(i)
             if (item != null) {
-                ((TextView) view.findViewById(16908308)).setText(item.GroupName)
+                ((view as TextView).findViewById(16908308)).setText(item.GroupName)
             }
             return view
         }
 
-        Boolean hasStableIds() {
+        fun hasStableIds(): Boolean {
             return false
         }
 
         /* access modifiers changed from: package-private */
-        Unit setData(AvatarGroupList avatarGroupList2) {
+        fun setData(AvatarGroupList avatarGroupList2): Unit {
             ImmutableList.Builder builder = ImmutableList.Builder()
-            builder.addAll((Iterable) avatarGroupList2.Groups.values())
+            builder.addAll((avatarGroupList2 as Iterable).Groups.values())
             this.avatarGroupList = builder.build()
             notifyDataSetChanged()
         }
@@ -95,18 +95,18 @@ class UserGroupsProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoada
     }
 
     @Nullable
-    View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle): View {
         View inflate = layoutInflater.inflate(R.layout.user_profile_tab_groups, viewGroup, false)
         this.groupsAdapter = GroupsAdapter(layoutInflater.getContext(), (GroupsAdapter) null)
-        ((ListView) inflate.findViewById(R.id.groups_list_view)).setAdapter(this.groupsAdapter)
-        ((ListView) inflate.findViewById(R.id.groups_list_view)).setOnItemClickListener($Lambda$929W_sYALf9zQuqLbMSJpktRAzI(this))
-        ((LoadingLayout) inflate.findViewById(R.id.loading_layout)).setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout))
-        this.loadableMonitor.setLoadingLayout((LoadingLayout) inflate.findViewById(R.id.loading_layout), getString(R.string.no_user_selected), getString(R.string.user_picks_fail))
-        this.loadableMonitor.setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout))
+        ((inflate as ListView).findViewById(R.id.groups_list_view)).setAdapter(this.groupsAdapter)
+        ((inflate as ListView).findViewById(R.id.groups_list_view)).setOnItemClickListener($Lambda$929W_sYALf9zQuqLbMSJpktRAzI(this))
+        ((inflate as LoadingLayout).findViewById(R.id.loading_layout)).setSwipeRefreshLayout((inflate as SwipeRefreshLayout).findViewById(R.id.swipe_refresh_layout))
+        this.loadableMonitor.setLoadingLayout((inflate as LoadingLayout).findViewById(R.id.loading_layout), getString(R.string.no_user_selected), getString(R.string.user_picks_fail))
+        this.loadableMonitor.setSwipeRefreshLayout((inflate as SwipeRefreshLayout).findViewById(R.id.swipe_refresh_layout))
         return inflate
     }
 
-    Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged(): Unit {
         try {
             this.loadableMonitor.setEmptyMessage(this.avatarGroups.get().Groups.isEmpty(), getString(R.string.no_groups))
             if (this.groupsAdapter != null) {
@@ -118,7 +118,7 @@ class UserGroupsProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoada
     }
 
     /* access modifiers changed from: protected */
-    Unit onShowUser(@Nullable ChatterID chatterID) {
+    fun onShowUser(@Nullable ChatterID chatterID): Unit {
         UserManager userManager
         this.loadableMonitor.unsubscribeAll()
         if ((chatterID instanceof ChatterID.ChatterIDUser) && (userManager = chatterID.getUserManager()) != null) {

@@ -24,7 +24,7 @@ class NameValuePair : SLMessage {
         this.TaskData_Field = TaskData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 21
         Iterator<T> it = this.NameValueData_Fields.iterator()
         while (true) {
@@ -32,29 +32,29 @@ class NameValuePair : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            i = ((NameValueData) it.next()).NVPair.length + 2 + i2
+            i = ((it as NameValueData).next()).NVPair.size + 2 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleNameValuePair(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 73)
         packUUID(byteBuffer, this.TaskData_Field.ID)
-        byteBuffer.put((Byte) this.NameValueData_Fields.size())
+        byteBuffer.put((this as Byte).NameValueData_Fields.size())
         for (NameValueData nameValueData : this.NameValueData_Fields) {
             packVariable(byteBuffer, nameValueData.NVPair, 2)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.TaskData_Field.ID = unpackUUID(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             NameValueData nameValueData = NameValueData()
             nameValueData.NVPair = unpackVariable(byteBuffer, 2)
             this.NameValueData_Fields.add(nameValueData)

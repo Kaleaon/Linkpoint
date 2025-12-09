@@ -17,24 +17,24 @@ class EnableSimulator : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 18
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleEnableSimulator(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -105)
         packLong(byteBuffer, this.SimulatorInfo_Field.Handle)
         packIPAddress(byteBuffer, this.SimulatorInfo_Field.IP)
-        packShort(byteBuffer, (short) this.SimulatorInfo_Field.Port)
+        packShort(byteBuffer, (this as short).SimulatorInfo_Field.Port)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.SimulatorInfo_Field.Handle = unpackLong(byteBuffer)
         this.SimulatorInfo_Field.IP = unpackIPAddress(byteBuffer)
         this.SimulatorInfo_Field.Port = unpackShort(byteBuffer) & 65535

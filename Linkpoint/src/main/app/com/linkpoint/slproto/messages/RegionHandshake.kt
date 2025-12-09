@@ -63,20 +63,20 @@ class RegionHandshake : SLMessage {
         this.RegionInfo3_Field = RegionInfo3()
     }
 
-    Int CalcPayloadSize() {
-        return this.RegionInfo_Field.SimName.length + 6 + 16 + 1 + 4 + 4 + 16 + 16 + 16 + 16 + 16 + 16 + 16 + 16 + 16 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 16 + this.RegionInfo3_Field.ColoName.length + 9 + 1 + this.RegionInfo3_Field.ProductSKU.length + 1 + this.RegionInfo3_Field.ProductName.length + 1 + (this.RegionInfo4_Fields.size() * 16)
+    fun CalcPayloadSize(): Int {
+        return this.RegionInfo_Field.SimName.size + 6 + 16 + 1 + 4 + 4 + 16 + 16 + 16 + 16 + 16 + 16 + 16 + 16 + 16 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 16 + this.RegionInfo3_Field.ColoName.size + 9 + 1 + this.RegionInfo3_Field.ProductSKU.size + 1 + this.RegionInfo3_Field.ProductName.size + 1 + (this.RegionInfo4_Fields.size() * 16)
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRegionHandshake(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -108)
         packInt(byteBuffer, this.RegionInfo_Field.RegionFlags)
-        packByte(byteBuffer, (Byte) this.RegionInfo_Field.SimAccess)
+        packByte(byteBuffer, (this as Byte).RegionInfo_Field.SimAccess)
         packVariable(byteBuffer, this.RegionInfo_Field.SimName, 1)
         packUUID(byteBuffer, this.RegionInfo_Field.SimOwner)
         packBoolean(byteBuffer, this.RegionInfo_Field.IsEstateManager)
@@ -105,14 +105,14 @@ class RegionHandshake : SLMessage {
         packVariable(byteBuffer, this.RegionInfo3_Field.ColoName, 1)
         packVariable(byteBuffer, this.RegionInfo3_Field.ProductSKU, 1)
         packVariable(byteBuffer, this.RegionInfo3_Field.ProductName, 1)
-        byteBuffer.put((Byte) this.RegionInfo4_Fields.size())
+        byteBuffer.put((this as Byte).RegionInfo4_Fields.size())
         for (RegionInfo4 regionInfo4 : this.RegionInfo4_Fields) {
             packLong(byteBuffer, regionInfo4.RegionFlagsExtended)
             packLong(byteBuffer, regionInfo4.RegionProtocols)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.RegionInfo_Field.RegionFlags = unpackInt(byteBuffer)
         this.RegionInfo_Field.SimAccess = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.RegionInfo_Field.SimName = unpackVariable(byteBuffer, 1)
@@ -144,7 +144,7 @@ class RegionHandshake : SLMessage {
         this.RegionInfo3_Field.ProductSKU = unpackVariable(byteBuffer, 1)
         this.RegionInfo3_Field.ProductName = unpackVariable(byteBuffer, 1)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             RegionInfo4 regionInfo4 = RegionInfo4()
             regionInfo4.RegionFlagsExtended = unpackLong(byteBuffer)
             regionInfo4.RegionProtocols = unpackLong(byteBuffer)

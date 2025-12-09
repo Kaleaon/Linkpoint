@@ -12,12 +12,12 @@ class ChatMessageSourceSystem : ChatMessageSource {
     }
 
     @NonNull
-    ChatterID getDefaultChatter(UUID uuid) {
+    fun getDefaultChatter(UUID uuid): ChatterID {
         return ChatterID.getLocalChatterID(uuid)
     }
 
     @Nullable
-    String getSourceName(@NonNull UserManager userManager) {
+    fun getSourceName(@NonNull UserManager userManager): String {
         return null
     }
 
@@ -27,7 +27,7 @@ class ChatMessageSourceSystem : ChatMessageSource {
     }
 
     @Nullable
-    UUID getSourceUUID() {
+    fun getSourceUUID(): UUID {
         return null
     }
 }

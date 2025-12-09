@@ -13,7 +13,7 @@ class ActivityUtils {
     val FRAGMENT_SELECTION_KEY: String = "fragmentSelection"
 
     @Nullable
-    UUID getActiveAgentID(@Nullable Intent intent) {
+    fun getActiveAgentID(@Nullable Intent intent): UUID {
         String stringExtra
         if (intent == null || (stringExtra = intent.getStringExtra("activeAgentUUID")) == null) {
             return null
@@ -22,7 +22,7 @@ class ActivityUtils {
     }
 
     @Nullable
-    UUID getActiveAgentID(@Nullable Bundle bundle) {
+    fun getActiveAgentID(@Nullable Bundle bundle): UUID {
         String string
         if (bundle == null || (string = bundle.getString("activeAgentUUID")) == null) {
             return null
@@ -31,7 +31,7 @@ class ActivityUtils {
     }
 
     @Nullable
-    Bundle getFragmentSelection(@Nullable Bundle bundle) {
+    fun getFragmentSelection(@Nullable Bundle bundle): Bundle {
         if (bundle != null) {
             return bundle.getBundle(FRAGMENT_SELECTION_KEY)
         }
@@ -39,7 +39,7 @@ class ActivityUtils {
     }
 
     @Nullable
-    UserManager getUserManager(@Nullable Intent intent) {
+    fun getUserManager(@Nullable Intent intent): UserManager {
         UUID activeAgentID = getActiveAgentID(intent)
         if (activeAgentID != null) {
             return UserManager.getUserManager(activeAgentID)
@@ -48,7 +48,7 @@ class ActivityUtils {
     }
 
     @Nullable
-    UserManager getUserManager(@Nullable Bundle bundle) {
+    fun getUserManager(@Nullable Bundle bundle): UserManager {
         UUID activeAgentID = getActiveAgentID(bundle)
         if (activeAgentID != null) {
             return UserManager.getUserManager(activeAgentID)
@@ -57,7 +57,7 @@ class ActivityUtils {
     }
 
     @NonNull
-    Bundle makeFragmentArguments(@Nullable UUID uuid, @Nullable Bundle bundle) {
+    fun makeFragmentArguments(@Nullable UUID uuid, @Nullable Bundle bundle): Bundle {
         Bundle bundle2 = Bundle()
         if (uuid != null) {
             bundle2.putString("activeAgentUUID", uuid.toString())
@@ -68,19 +68,19 @@ class ActivityUtils {
         return bundle2
     }
 
-    Unit setActiveAgentID(Intent intent, UUID uuid) {
+    fun setActiveAgentID(Intent intent, UUID uuid): Unit {
         if (uuid != null) {
             intent.putExtra("activeAgentUUID", uuid.toString())
         }
     }
 
-    Unit setActiveAgentID(Bundle bundle, UUID uuid) {
+    fun setActiveAgentID(Bundle bundle, UUID uuid): Unit {
         if (uuid != null) {
             bundle.putString("activeAgentUUID", uuid.toString())
         }
     }
 
-    Unit setFragmentSelection(@Nullable Bundle bundle, @Nullable Bundle bundle2) {
+    fun setFragmentSelection(@Nullable Bundle bundle, @Nullable Bundle bundle2): Unit {
         if (bundle == null) {
             return
         }

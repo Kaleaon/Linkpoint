@@ -19,15 +19,15 @@ class ScriptQuestion : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.Data_Field.ObjectName.length + 33 + 1 + this.Data_Field.ObjectOwner.length + 4 + 4
+    fun CalcPayloadSize(): Int {
+        return this.Data_Field.ObjectName.size + 33 + 1 + this.Data_Field.ObjectOwner.size + 4 + 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleScriptQuestion(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -68)
@@ -38,7 +38,7 @@ class ScriptQuestion : SLMessage {
         packInt(byteBuffer, this.Data_Field.Questions)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.Data_Field.TaskID = unpackUUID(byteBuffer)
         this.Data_Field.ItemID = unpackUUID(byteBuffer)
         this.Data_Field.ObjectName = unpackVariable(byteBuffer, 1)

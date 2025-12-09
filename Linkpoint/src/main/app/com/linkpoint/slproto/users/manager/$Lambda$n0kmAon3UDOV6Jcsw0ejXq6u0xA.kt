@@ -8,14 +8,14 @@ import java.util.*
     private /* synthetic */ Any f207$f0
 
     private /* synthetic */ Unit $m$0() {
-        ((ChatterDisplayDataList) this.f207$f0).m288lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ChatterDisplayDataList_2957()
+        ((this as ChatterDisplayDataList).f207$f0).m288lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ChatterDisplayDataList_2957()
     }
 
     /* synthetic */ $Lambda$n0kmAon3UDOV6Jcsw0ejXq6u0xA(Any obj) {
         this.f207$f0 = obj
     }
 
-    Unit run() {
+    fun run(): Unit {
         $m$0()
     }
 }

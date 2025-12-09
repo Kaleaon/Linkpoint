@@ -15,7 +15,7 @@ class CardboardControlsPlaceholder : ViewGroup {
     private OnViewInvalidateListener onViewInvalidateListener = null
 
     interface OnViewInvalidateListener {
-        Unit onViewInvalidated()
+        fun onViewInvalidated()
     }
 
     CardboardControlsPlaceholder(Context context) {
@@ -35,7 +35,7 @@ class CardboardControlsPlaceholder : ViewGroup {
         super(context, attributeSet, i, i2)
     }
 
-    ViewParent invalidateChildInParent(IntArray iArr, Rect rect) {
+    fun invalidateChildInParent(IntArray iArr, Rect rect): ViewParent {
         ViewParent invalidateChildInParent = super.invalidateChildInParent(iArr, rect)
         if (this.onViewInvalidateListener != null) {
             this.onViewInvalidateListener.onViewInvalidated()
@@ -44,17 +44,17 @@ class CardboardControlsPlaceholder : ViewGroup {
     }
 
     /* access modifiers changed from: protected */
-    Unit onLayout(Boolean z, Int i, Int i2, Int i3, Int i4) {
+    fun onLayout(Boolean z, Int i, Int i2, Int i3, Int i4): Unit {
         Int childCount = getChildCount()
-        for (Int i5 = 0; i5 < childCount; i5++) {
+        for (i5 in 0 until childCount) {
             getChildAt(i5).layout(0, 0, this.fixedWidth, this.fixedHeight)
         }
     }
 
     /* access modifiers changed from: protected */
-    Unit onMeasure(Int i, Int i2) {
+    fun onMeasure(Int i, Int i2): Unit {
         Int childCount = getChildCount()
-        for (Int i3 = 0; i3 < childCount; i3++) {
+        for (i3 in 0 until childCount) {
             View childAt = getChildAt(i3)
             if (childAt.getVisibility() != 8) {
                 measureChild(childAt, View.MeasureSpec.makeMeasureSpec(this.fixedWidth, 1073741824), View.MeasureSpec.makeMeasureSpec(this.fixedHeight, 1073741824))
@@ -63,13 +63,13 @@ class CardboardControlsPlaceholder : ViewGroup {
         setMeasuredDimension(0, 0)
     }
 
-    Unit setFixedSize(Int i, Int i2) {
+    fun setFixedSize(Int i, Int i2): Unit {
         this.fixedWidth = i
         this.fixedHeight = i2
         requestLayout()
     }
 
-    Unit setOnViewInvalidateListener(OnViewInvalidateListener onViewInvalidateListener2) {
+    fun setOnViewInvalidateListener(OnViewInvalidateListener onViewInvalidateListener2): Unit {
         this.onViewInvalidateListener = onViewInvalidateListener2
     }
 }

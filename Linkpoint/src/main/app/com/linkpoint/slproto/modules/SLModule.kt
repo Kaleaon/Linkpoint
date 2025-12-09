@@ -22,20 +22,20 @@ class SLModule {
         sLAgentCircuit.RegisterMessageHandler(this)
     }
 
-    Unit HandleCircuitReady() {
+    fun HandleCircuitReady(): Unit {
     }
 
-    Unit HandleCloseCircuit() {
+    fun HandleCloseCircuit(): Unit {
     }
 
-    Unit HandleGlobalOptionsChange() {
+    fun HandleGlobalOptionsChange(): Unit {
     }
 
-    Unit SendMessage(SLMessage sLMessage) {
+    fun SendMessage(SLMessage sLMessage): Unit {
         this.agentCircuit.SendMessage(sLMessage)
     }
 
-    SLCircuitInfo getCircuitInfo() {
+    fun getCircuitInfo(): SLCircuitInfo {
         return this.circuitInfo
     }
 }

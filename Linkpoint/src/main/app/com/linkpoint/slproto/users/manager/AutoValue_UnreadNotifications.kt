@@ -21,11 +21,11 @@ class AutoValue_UnreadNotifications : UnreadNotifications {
     }
 
     @NonNull
-    UUID agentUUID() {
+    fun agentUUID(): UUID {
         return this.agentUUID
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -39,16 +39,16 @@ class AutoValue_UnreadNotifications : UnreadNotifications {
         return false
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         return ((this.agentUUID.hashCode() ^ 1000003) * 1000003) ^ this.notificationGroups.hashCode()
     }
 
     @NonNull
-    ImmutableMap<NotificationType, UnreadNotificationInfo> notificationGroups() {
+    fun notificationGroups(): ImmutableMap<NotificationType, UnreadNotificationInfo> {
         return this.notificationGroups
     }
 
-    String toString() {
+    fun toString(): String {
         return "UnreadNotifications{agentUUID=" + this.agentUUID + ", " + "notificationGroups=" + this.notificationGroups + "}"
     }
 }

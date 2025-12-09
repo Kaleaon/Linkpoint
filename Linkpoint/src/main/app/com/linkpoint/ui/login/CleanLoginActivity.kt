@@ -122,7 +122,7 @@ class CleanLoginActivity : AppCompatActivity {
     private Unit setupLoginButton() {
         loginButton.setOnClickListener(View.OnClickListener() {
             @Override
-            Unit onClick(View v) {
+            fun onClick(View v): Unit {
                 performLogin()
             }
         })
@@ -226,7 +226,7 @@ class CleanLoginActivity : AppCompatActivity {
         
         try {
             // Find the parent layout
-            ViewGroup parentLayout = (ViewGroup) statusText.getParent()
+            ViewGroup parentLayout = (statusText as ViewGroup).getParent()
             
             // Create debug log upload button
             Button debugUploadButton = Button(this)

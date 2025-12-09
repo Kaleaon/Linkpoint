@@ -17,11 +17,11 @@ class SLPrimObjectDisplayInfoWithChildren : SLPrimObjectDisplayInfo : SLObjectDi
     }
 
     @NonNull
-    ImmutableList<SLObjectDisplayInfo> getChildren() {
+    fun getChildren(): ImmutableList<SLObjectDisplayInfo> {
         return this.children
     }
 
-    Boolean isImplicitlyAdded() {
+    fun isImplicitlyAdded(): Boolean {
         return this.implicitlyAdded
     }
 }

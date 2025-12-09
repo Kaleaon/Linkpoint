@@ -29,7 +29,7 @@ class MuteListAdapter : BaseAdapter {
         if (f461comlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues != null) {
             return f461comlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues
         }
-        IntArray iArr = Int[MuteType.values().length]
+        IntArray iArr = Int[MuteType.values().size]
         try {
             iArr[MuteType.AGENT.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -58,29 +58,29 @@ class MuteListAdapter : BaseAdapter {
         this.layoutInflater = LayoutInflater.from(context)
     }
 
-    Int getCount() {
+    fun getCount(): Int {
         return this.muteList.size()
     }
 
-    MuteListEntry getItem(Int i) {
+    fun getItem(Int i): MuteListEntry {
         if (i < 0 || i >= this.muteList.size()) {
             return null
         }
-        return (MuteListEntry) this.muteList.get(i)
+        return (this as MuteListEntry).muteList.get(i)
     }
 
-    Long getItemId(Int i) {
+    fun getItemId(Int i): Long {
         return 0
     }
 
-    View getView(Int i, View view, ViewGroup viewGroup) {
+    fun getView(Int i, View view, ViewGroup viewGroup): View {
         MuteListEntry item = getItem(i)
         if (item != null) {
             if (view == null) {
                 view = this.layoutInflater.inflate(R.layout.mute_list_item, viewGroup, false)
             }
             if (view != null) {
-                ((TextView) view.findViewById(R.id.muteName)).setText(item.name)
+                ((view as TextView).findViewById(R.id.muteName)).setText(item.name)
                 switch (m646getcomlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues()[item.type.ordinal()]) {
                     case 1:
                     case 4:
@@ -94,7 +94,7 @@ class MuteListAdapter : BaseAdapter {
                         i2 = R.drawable.inv_link
                         break
                 }
-                ((ImageView) view.findViewById(R.id.muteTypeIcon)).setImageResource(i2)
+                ((view as ImageView).findViewById(R.id.muteTypeIcon)).setImageResource(i2)
                 SwipeDismissListViewTouchListener.restoreViewState(view)
                 return view
             }
@@ -102,12 +102,12 @@ class MuteListAdapter : BaseAdapter {
         return null
     }
 
-    Boolean hasStableIds() {
+    fun hasStableIds(): Boolean {
         return false
     }
 
     /* access modifiers changed from: package-private */
-    Unit setData(@Nullable List<MuteListEntry> list) {
+    fun setData(@Nullable List<MuteListEntry> list): Unit {
         this.muteList = list != null ? ImmutableList.copyOf(list) : ImmutableList.of()
         notifyDataSetChanged()
     }

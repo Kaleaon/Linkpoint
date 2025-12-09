@@ -47,7 +47,7 @@ class ImageAssetView : View {
             this()
         }
 
-        Unit OnResourceReady(Any obj, Boolean z) {
+        fun OnResourceReady(Any obj, Boolean z): Unit {
             if (obj instanceof OpenJPEG) {
                 this.texture = (OpenJPEG) obj
             }
@@ -57,7 +57,7 @@ class ImageAssetView : View {
         }
 
         /* access modifiers changed from: protected */
-        Bitmap doInBackground(UUID... uuidArr) {
+        fun doInBackground(UUID... uuidArr): Bitmap {
             Debug.Printf("loading asset ID %s", uuidArr[0].toString())
             TextureCache.getInstance().RequestResource(DrawableTextureParams.create(uuidArr[0], TextureClass.Asset), this)
             synchronized (this.textureReady) {
@@ -81,7 +81,7 @@ class ImageAssetView : View {
         }
 
         /* access modifiers changed from: protected */
-        Unit onPostExecute(Bitmap bitmap) {
+        fun onPostExecute(Bitmap bitmap): Unit {
             Bitmap unused = ImageAssetView.this.imageBitmap = bitmap
             if (ImageAssetView.this.verticalFit) {
                 ImageAssetView.this.requestLayout()
@@ -104,7 +104,7 @@ class ImageAssetView : View {
     }
 
     /* access modifiers changed from: protected */
-    Unit onAttachedToWindow() {
+    fun onAttachedToWindow(): Unit {
         super.onAttachedToWindow()
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics()
         TypedValue typedValue = TypedValue()
@@ -118,7 +118,7 @@ class ImageAssetView : View {
     }
 
     /* access modifiers changed from: protected */
-    Unit onDraw(Canvas canvas) {
+    fun onDraw(Canvas canvas): Unit {
         Int width = getWidth()
         Int height = getHeight()
         this.bitmapPaint.setStyle(Paint.Style.STROKE)
@@ -127,7 +127,7 @@ class ImageAssetView : View {
         if (this.imageBitmap == null || width == 0 || height == 0) {
             canvas.drawARGB(50, 0, 0, 0)
             String str = (this.assetID == null || UUIDPool.ZeroUUID.equals(this.assetID)) ? "No image" : this.loadTask == null ? "Failed to load" : this.loadTask.getStatus() == AsyncTask.Status.FINISHED ? "Failed to load" : "Loading..."
-            this.textPaint.getTextBounds(str, 0, str.length(), this.bitmapSrcRect)
+            this.textPaint.getTextBounds(str, 0, str.size(), this.bitmapSrcRect)
             canvas.drawText(str, (width.toFloat()) / 2.0f, ((height.toFloat()) / 2.0f) + ((this.toFloat().bitmapSrcRect.height()) / 2.0f), this.textPaint)
             return
         }
@@ -167,7 +167,7 @@ class ImageAssetView : View {
     }
 
     /* access modifiers changed from: protected */
-    Unit onMeasure(Int i, Int i2) {
+    fun onMeasure(Int i, Int i2): Unit {
         if (View.MeasureSpec.getMode(i) == 0 && View.MeasureSpec.getMode(i2) == 0) {
             super.onMeasure(i, i2)
             return
@@ -183,12 +183,12 @@ class ImageAssetView : View {
         setMeasuredDimension(size, min)
     }
 
-    Unit setAlignTop(Boolean z) {
+    fun setAlignTop(Boolean z): Unit {
         this.alignTop = z
         invalidate()
     }
 
-    Unit setAssetID(UUID uuid) {
+    fun setAssetID(UUID uuid): Unit {
         Any[] objArr = Any[1]
         objArr[0] = uuid != null ? uuid.toString() : null
         Debug.Printf("asset ID: %s", objArr)
@@ -214,7 +214,7 @@ class ImageAssetView : View {
         }
     }
 
-    Unit setVerticalFit(Boolean z) {
+    fun setVerticalFit(Boolean z): Unit {
         this.verticalFit = z
         requestLayout()
     }

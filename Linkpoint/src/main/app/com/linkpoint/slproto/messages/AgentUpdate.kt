@@ -29,31 +29,31 @@ class AgentUpdate : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 115
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAgentUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put((byte) 4)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packLLQuaternion(byteBuffer, this.AgentData_Field.BodyRotation)
         packLLQuaternion(byteBuffer, this.AgentData_Field.HeadRotation)
-        packByte(byteBuffer, (byte) this.AgentData_Field.State)
+        packByte(byteBuffer, (this as byte).AgentData_Field.State)
         packLLVector3(byteBuffer, this.AgentData_Field.CameraCenter)
         packLLVector3(byteBuffer, this.AgentData_Field.CameraAtAxis)
         packLLVector3(byteBuffer, this.AgentData_Field.CameraLeftAxis)
         packLLVector3(byteBuffer, this.AgentData_Field.CameraUpAxis)
         packFloat(byteBuffer, this.AgentData_Field.Far)
         packInt(byteBuffer, this.AgentData_Field.ControlFlags)
-        packByte(byteBuffer, (byte) this.AgentData_Field.Flags)
+        packByte(byteBuffer, (this as byte).AgentData_Field.Flags)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.BodyRotation = unpackLLQuaternion(byteBuffer)

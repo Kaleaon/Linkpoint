@@ -14,15 +14,15 @@ class SubscribableList<T> : AbstractList<T> {
     private Any lock = Any()
     private Map<List<T>, Optional<Executor>> targets = WeakHashMap()
 
-    Unit add(Int i, T t) {
+    fun add(Int i, T t): Unit {
         ImmutableList<Map.Entry<List<T>, Optional<Executor>>> copyOf
         synchronized (this.lock) {
             this.backingList.add(i, t)
             copyOf = ImmutableList.copyOf(this.targets.entrySet())
         }
         for (Map.Entry entry : copyOf) {
-            List list = (List) entry.getKey()
-            Executor executor = (Executor) ((Optional) entry.getValue()).orNull()
+            List list = (entry as List).getKey()
+            Executor executor = (Executor) ((entry as Optional).getValue()).orNull()
             if (executor != null) {
                 executor.execute(Runnable(i, list, t) {
 
@@ -114,7 +114,7 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
         }
     }
 
-    List<T> addSubscription(List<T> list, Optional<Executor> optional) {
+    fun addSubscription(List<T> list, Optional<Executor> optional): List<T> {
         ImmutableList<T> copyOf
         synchronized (this.lock) {
             this.targets.put(list, optional)
@@ -123,15 +123,15 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
         return copyOf
     }
 
-    Unit clear() {
+    fun clear(): Unit {
         ImmutableList<Map.Entry<List<T>, Optional<Executor>>> copyOf
         synchronized (this.lock) {
             this.backingList.clear()
             copyOf = ImmutableList.copyOf(this.targets.entrySet())
         }
         for (Map.Entry entry : copyOf) {
-            List list = (List) entry.getKey()
-            Executor executor = (Executor) ((Optional) entry.getValue()).orNull()
+            List list = (entry as List).getKey()
+            Executor executor = (Executor) ((entry as Optional).getValue()).orNull()
             if (executor != null) {
                 list.getClass()
                 executor.execute($Lambda$Gzuh54B3D66vdv4A7qntNjZJmM(list))
@@ -141,7 +141,7 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
         }
     }
 
-    T get(Int i) {
+    fun get(Int i): T {
         T t
         synchronized (this.lock) {
             t = this.backingList.get(i)
@@ -149,7 +149,7 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
         return t
     }
 
-    T remove(Int i) {
+    fun remove(Int i): T {
         T remove
         ImmutableList<Map.Entry<List<T>, Optional<Executor>>> copyOf
         synchronized (this.lock) {
@@ -157,8 +157,8 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
             copyOf = ImmutableList.copyOf(this.targets.entrySet())
         }
         for (Map.Entry entry : copyOf) {
-            List list = (List) entry.getKey()
-            Executor executor = (Executor) ((Optional) entry.getValue()).orNull()
+            List list = (entry as List).getKey()
+            Executor executor = (Executor) ((entry as Optional).getValue()).orNull()
             if (executor != null) {
                 executor.execute(Runnable(i, list) {
 
@@ -248,13 +248,13 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
         return remove
     }
 
-    Unit removeSubscription(List<T> list) {
+    fun removeSubscription(List<T> list): Unit {
         synchronized (this.lock) {
             this.targets.remove(list)
         }
     }
 
-    T set(Int i, T t) {
+    fun set(Int i, T t): T {
         T t2
         ImmutableList<Map.Entry<List<T>, Optional<Executor>>> copyOf
         synchronized (this.lock) {
@@ -262,8 +262,8 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
             copyOf = ImmutableList.copyOf(this.targets.entrySet())
         }
         for (Map.Entry entry : copyOf) {
-            List list = (List) entry.getKey()
-            Executor executor = (Executor) ((Optional) entry.getValue()).orNull()
+            List list = (entry as List).getKey()
+            Executor executor = (Executor) ((entry as Optional).getValue()).orNull()
             if (executor != null) {
                 executor.execute(Runnable(i, list, t) {
 
@@ -356,7 +356,7 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
         return t2
     }
 
-    Int size() {
+    fun size(): Int {
         Int size
         synchronized (this.lock) {
             size = this.backingList.size()

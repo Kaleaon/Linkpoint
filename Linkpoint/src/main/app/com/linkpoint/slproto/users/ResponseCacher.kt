@@ -29,8 +29,8 @@ abstract class ResponseCacher<KeyType, MessageType> : Refreshable<KeyType> {
         this.pool.setCacheInvalidateHandler($Lambda$Tb8OaRVtYXRJ6N6ca7skHX1PNws(this), executor)
         this.requestHandler = RateLimitRequestHandler<>(RequestProcessor<KeyType, MessageType, MessageType>(this.pool, executor) {
             /* access modifiers changed from: protected */
-            Boolean isRequestComplete(@NonNull KeyType keytype, MessageType messagetype) {
-                CachedResponse cachedResponse = (CachedResponse) ResponseCacher.this.cachedresponseDao.load(ResponseCacher.this.getKeyString(keytype))
+            fun isRequestComplete(@NonNull KeyType keytype, MessageType messagetype): Boolean {
+                CachedResponse cachedResponse = (ResponseCacher as CachedResponse).this.cachedresponseDao.load(ResponseCacher.this.getKeyString(keytype))
                 if (cachedResponse != null) {
                     return !cachedResponse.getMustRevalidate()
                 }
@@ -39,8 +39,8 @@ abstract class ResponseCacher<KeyType, MessageType> : Refreshable<KeyType> {
 
             /* access modifiers changed from: protected */
             @Nullable
-            MessageType processRequest(@NonNull KeyType keytype) {
-                CachedResponse cachedResponse = (CachedResponse) ResponseCacher.this.cachedresponseDao.load(ResponseCacher.this.getKeyString(keytype))
+            fun processRequest(@NonNull KeyType keytype): MessageType {
+                CachedResponse cachedResponse = (ResponseCacher as CachedResponse).this.cachedresponseDao.load(ResponseCacher.this.getKeyString(keytype))
                 if (cachedResponse == null || cachedResponse.getData() == null) {
                     return null
                 }
@@ -50,7 +50,7 @@ abstract class ResponseCacher<KeyType, MessageType> : Refreshable<KeyType> {
             }
 
             /* access modifiers changed from: protected */
-            MessageType processResult(@NonNull KeyType keytype, MessageType messagetype) {
+            fun processResult(@NonNull KeyType keytype, MessageType messagetype): MessageType {
                 Debug.Printf("%s: saving cached data for key %s", str, keytype.toString())
                 if (messagetype != null) {
                     ResponseCacher.this.cachedresponseDao.insertOrReplace(CachedResponse(ResponseCacher.this.getKeyString(keytype), ResponseCacher.this.storeCached(messagetype), false))
@@ -60,22 +60,22 @@ abstract class ResponseCacher<KeyType, MessageType> : Refreshable<KeyType> {
     }
 
     /* access modifiers changed from: private */
-    String getKeyString(@NonNull KeyType keytype) {
+    fun getKeyString(@NonNull KeyType keytype): String {
         return this.keyPrefix + ":" + keytype.toString()
     }
 
-    Subscribable<KeyType, MessageType> getPool() {
+    fun getPool(): Subscribable<KeyType, MessageType> {
         return this.pool
     }
 
-    RequestSource<KeyType, MessageType> getRequestSource() {
+    fun getRequestSource(): RequestSource<KeyType, MessageType> {
         return this.requestHandler
     }
 
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_ResponseCacher_1058  reason: not valid java name */
     /* synthetic */ Unit m267lambda$com_lumiyaviewer_lumiya_slproto_users_ResponseCacher_1058(Any obj) {
-        CachedResponse cachedResponse = (CachedResponse) this.cachedresponseDao.load(getKeyString(obj))
+        CachedResponse cachedResponse = (this as CachedResponse).cachedresponseDao.load(getKeyString(obj))
         if (cachedResponse != null) {
             cachedResponse.setMustRevalidate(true)
             this.cachedresponseDao.update(cachedResponse)
@@ -83,12 +83,12 @@ abstract class ResponseCacher<KeyType, MessageType> : Refreshable<KeyType> {
     }
 
     /* access modifiers changed from: protected */
-    abstract MessageType loadCached(Byte[] bArr)
+    abstract MessageType loadCached(ByteArray bArr)
 
-    Unit requestUpdate(KeyType keytype) {
+    fun requestUpdate(KeyType keytype): Unit {
         this.pool.requestUpdate(keytype)
     }
 
     /* access modifiers changed from: protected */
-    abstract Byte[] storeCached(@NonNull MessageType messagetype)
+    abstract ByteArray storeCached(@NonNull MessageType messagetype)
 }

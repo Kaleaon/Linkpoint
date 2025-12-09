@@ -70,7 +70,7 @@ class RLVController : SLModule {
         this.agentCircuit.HandleChatEvent(this.agentCircuit.getLocalChatterID(), SLEnableRLVOfferEvent(chatFromSimulator, this.agentCircuit.getAgentUUID()), true)
     }
 
-    Unit HandleGlobalOptionsChange() {
+    fun HandleGlobalOptionsChange(): Unit {
         Boolean rLVEnabled = GlobalOptions.getInstance().getRLVEnabled()
         if (rLVEnabled && (!this.RLVEnabled) && this.RLVEnablingOffered && this.RLVEnablingCommand != null) {
             this.RLVEnablingOffered = false
@@ -80,11 +80,11 @@ class RLVController : SLModule {
         this.RLVEnabled = rLVEnabled
     }
 
-    Boolean autoAcceptTeleport(UUID uuid) {
+    fun autoAcceptTeleport(UUID uuid): Boolean {
         return this.RLVEnabled && this.restrictions.isAllowed(RLVRestrictionType.accepttp, uuid.toString(), (UUID) null)
     }
 
-    Boolean canDetachItem(Int i, UUID uuid) {
+    fun canDetachItem(Int i, UUID uuid): Boolean {
         SLAttachmentPoint sLAttachmentPoint
         String str = null
         if (!this.RLVEnabled) {
@@ -96,67 +96,67 @@ class RLVController : SLModule {
         return str == null || this.restrictions.isAllowed(RLVRestrictionType.detach, str, uuid)
     }
 
-    Boolean canRecvChat(String str, UUID uuid) {
+    fun canRecvChat(String str, UUID uuid): Boolean {
         return !this.RLVEnabled || str.startsWith("/") || this.restrictions.isAllowed(RLVRestrictionType.recvchat, uuid.toString(), (UUID) null)
     }
 
-    Boolean canRecvIM(UUID uuid) {
+    fun canRecvIM(UUID uuid): Boolean {
         return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.recvim, uuid.toString(), (UUID) null)
     }
 
-    Boolean canSendIM(UUID uuid) {
+    fun canSendIM(UUID uuid): Boolean {
         return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.sendim, uuid.toString(), (UUID) null)
     }
 
-    Boolean canShowInventory() {
+    fun canShowInventory(): Boolean {
         return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.showinv, "", (UUID) null)
     }
 
-    Boolean canSit() {
+    fun canSit(): Boolean {
         return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.sit, "", (UUID) null)
     }
 
-    Boolean canStandUp() {
+    fun canStandUp(): Boolean {
         return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.unsit, "", (UUID) null)
     }
 
-    Boolean canTakeItemOff(SLWearableType sLWearableType) {
+    fun canTakeItemOff(SLWearableType sLWearableType): Boolean {
         return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.remoutfit, sLWearableType.getName(), (UUID) null)
     }
 
-    Boolean canTeleportBySitting() {
+    fun canTeleportBySitting(): Boolean {
         return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.sittp, "", (UUID) null)
     }
 
-    Boolean canTeleportToLandmark() {
+    fun canTeleportToLandmark(): Boolean {
         return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.tplm, "", (UUID) null)
     }
 
-    Boolean canTeleportToLocation() {
+    fun canTeleportToLocation(): Boolean {
         return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.tploc, "", (UUID) null)
     }
 
-    Boolean canTeleportToLure(UUID uuid) {
+    fun canTeleportToLure(UUID uuid): Boolean {
         return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.tplure, uuid.toString(), (UUID) null)
     }
 
-    Boolean canViewNotecard() {
+    fun canViewNotecard(): Boolean {
         return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.viewnote, "", (UUID) null)
     }
 
-    Boolean canWearItem(SLWearableType sLWearableType) {
+    fun canWearItem(SLWearableType sLWearableType): Boolean {
         return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.addoutfit, sLWearableType.getName(), (UUID) null)
     }
 
-    SLModules getModules() {
+    fun getModules(): SLModules {
         return this.agentCircuit.getModules()
     }
 
-    RLVRestrictions getRestrictions() {
+    fun getRestrictions(): RLVRestrictions {
         return this.restrictions
     }
 
-    Boolean onIncomingChat(ChatFromSimulator chatFromSimulator) {
+    fun onIncomingChat(ChatFromSimulator chatFromSimulator): Boolean {
         if (chatFromSimulator.ChatData_Field.SourceType != 2 || chatFromSimulator.ChatData_Field.ChatType != 8) {
             return false
         }
@@ -176,7 +176,7 @@ class RLVController : SLModule {
         return true
     }
 
-    Boolean onIncomingIM(ImprovedInstantMessage improvedInstantMessage) {
+    fun onIncomingIM(ImprovedInstantMessage improvedInstantMessage): Boolean {
         if (!this.RLVEnabled) {
             return false
         }
@@ -195,7 +195,7 @@ class RLVController : SLModule {
         return false
     }
 
-    Boolean onSendLocalChat(Int i, String str) {
+    fun onSendLocalChat(Int i, String str): Boolean {
         if (!this.RLVEnabled) {
             return true
         }
@@ -229,7 +229,7 @@ class RLVController : SLModule {
         return true
     }
 
-    Unit sayOnChannel(Int i, String str) {
+    fun sayOnChannel(Int i, String str): Unit {
         Debug.Printf("RLV reply (%d): '%s'", Int.valueOf(i), str)
         ChatFromViewer chatFromViewer = ChatFromViewer()
         chatFromViewer.AgentData_Field.AgentID = this.circuitInfo.agentID
@@ -241,7 +241,7 @@ class RLVController : SLModule {
         SendMessage(chatFromViewer)
     }
 
-    Unit teleportToGlobalPos(UUID uuid, LLVector3 lLVector3) {
+    fun teleportToGlobalPos(UUID uuid, LLVector3 lLVector3): Unit {
         if (this.RLVEnabled && this.restrictions.isAllowed(RLVRestrictionType.tploc, "", (UUID) null, uuid)) {
             this.agentCircuit.TeleportToGlobalPosition(lLVector3)
         }

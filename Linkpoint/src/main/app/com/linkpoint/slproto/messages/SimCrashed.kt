@@ -24,31 +24,31 @@ class SimCrashed : SLMessage {
         this.Data_Field = Data()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.Users_Fields.size() * 16) + 13
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleSimCrashed(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 72)
         packInt(byteBuffer, this.Data_Field.RegionX)
         packInt(byteBuffer, this.Data_Field.RegionY)
-        byteBuffer.put((Byte) this.Users_Fields.size())
+        byteBuffer.put((this as Byte).Users_Fields.size())
         for (Users users : this.Users_Fields) {
             packUUID(byteBuffer, users.AgentID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.Data_Field.RegionX = unpackInt(byteBuffer)
         this.Data_Field.RegionY = unpackInt(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             Users users = Users()
             users.AgentID = unpackUUID(byteBuffer)
             this.Users_Fields.add(users)

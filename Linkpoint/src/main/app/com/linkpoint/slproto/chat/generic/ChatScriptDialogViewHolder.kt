@@ -44,7 +44,7 @@ class ChatScriptDialogViewHolder : ChatEventViewHolder : View.OnClickListener {
         }
     }
 
-    Unit onClick(View view) {
+    fun onClick(View view): Unit {
         switch (view.getId()) {
             case R.id.buttonDialogIgnore:
                 if (this.dialogEvent != null) {
@@ -70,7 +70,7 @@ class ChatScriptDialogViewHolder : ChatEventViewHolder : View.OnClickListener {
         }
     }
 
-    Unit setDialogEvent(@Nullable SLChatScriptDialog sLChatScriptDialog) {
+    fun setDialogEvent(@Nullable SLChatScriptDialog sLChatScriptDialog): Unit {
         this.dialogEvent = sLChatScriptDialog
     }
 }

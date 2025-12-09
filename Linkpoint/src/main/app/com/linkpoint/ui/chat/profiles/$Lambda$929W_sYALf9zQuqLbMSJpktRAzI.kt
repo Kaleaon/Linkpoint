@@ -11,14 +11,14 @@ import android.widget.AdapterView
     private /* synthetic */ Any f270$f0
 
     private /* synthetic */ Unit $m$0(AdapterView adapterView, View view, Int i, Long j) {
-        ((UserGroupsProfileTab) this.f270$f0).m508lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserGroupsProfileTab_2041(adapterView, view, i, j)
+        ((this as UserGroupsProfileTab).f270$f0).m508lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserGroupsProfileTab_2041(adapterView, view, i, j)
     }
 
     /* synthetic */ $Lambda$929W_sYALf9zQuqLbMSJpktRAzI(Any obj) {
         this.f270$f0 = obj
     }
 
-    Unit onItemClick(AdapterView adapterView, View view, Int i, Long j) {
+    fun onItemClick(AdapterView adapterView, View view, Int i, Long j): Unit {
         $m$0(adapterView, view, i, j)
     }
 }

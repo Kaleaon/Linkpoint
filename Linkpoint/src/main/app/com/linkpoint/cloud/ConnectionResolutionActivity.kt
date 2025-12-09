@@ -66,7 +66,7 @@ class ConnectionResolutionActivity
         return messenger
     }
 
-    Intent getResolvableErrorIntent(Context context, @NonNull UUID uUID) {
+    fun getResolvableErrorIntent(Context context, @NonNull UUID uUID): Intent {
         context = Intent(context, ConnectionResolutionActivity.class)
         context.putExtra(RESOLVABLE_ERROR_TAG, uUID.toString())
         context.setFlags(0x10000000)

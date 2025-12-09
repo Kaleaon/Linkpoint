@@ -18,7 +18,7 @@ class AutoValue_UnreadNotificationInfo_ObjectPopupNotification : UnreadNotificat
         this.lastObjectPopup = optional
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -32,24 +32,24 @@ class AutoValue_UnreadNotificationInfo_ObjectPopupNotification : UnreadNotificat
         return false
     }
 
-    Int freshObjectPopupsCount() {
+    fun freshObjectPopupsCount(): Int {
         return this.freshObjectPopupsCount
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         return ((((this.freshObjectPopupsCount ^ 1000003) * 1000003) ^ this.objectPopupsCount) * 1000003) ^ this.lastObjectPopup.hashCode()
     }
 
     @NonNull
-    Optional<UnreadNotificationInfo.ObjectPopupMessage> lastObjectPopup() {
+    fun lastObjectPopup(): Optional<UnreadNotificationInfo.ObjectPopupMessage> {
         return this.lastObjectPopup
     }
 
-    Int objectPopupsCount() {
+    fun objectPopupsCount(): Int {
         return this.objectPopupsCount
     }
 
-    String toString() {
+    fun toString(): String {
         return "ObjectPopupNotification{freshObjectPopupsCount=" + this.freshObjectPopupsCount + ", " + "objectPopupsCount=" + this.objectPopupsCount + ", " + "lastObjectPopup=" + this.lastObjectPopup + "}"
     }
 }

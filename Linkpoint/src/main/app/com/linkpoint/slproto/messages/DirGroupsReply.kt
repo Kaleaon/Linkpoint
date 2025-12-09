@@ -22,7 +22,7 @@ class DirGroupsReply : SLMessage {
 
     class QueryReplies {
         UUID GroupID
-        byte[] GroupName
+        ByteArray GroupName
         Int Members
         float SearchOrder
     }
@@ -33,7 +33,7 @@ class DirGroupsReply : SLMessage {
         this.QueryData_Field = QueryData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 37
         Iterator<T> it = this.QueryReplies_Fields.iterator()
         while (true) {
@@ -41,21 +41,21 @@ class DirGroupsReply : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            i = ((QueryReplies) it.next()).GroupName.length + 17 + 4 + 4 + i2
+            i = ((it as QueryReplies).next()).GroupName.size + 17 + 4 + 4 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleDirGroupsReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 38)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.QueryData_Field.QueryID)
-        byteBuffer.put((byte) this.QueryReplies_Fields.size())
+        byteBuffer.put((this as byte).QueryReplies_Fields.size())
         for (QueryReplies queryReplies : this.QueryReplies_Fields) {
             packUUID(byteBuffer, queryReplies.GroupID)
             packVariable(byteBuffer, queryReplies.GroupName, 1)
@@ -64,11 +64,11 @@ class DirGroupsReply : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             QueryReplies queryReplies = QueryReplies()
             queryReplies.GroupID = unpackUUID(byteBuffer)
             queryReplies.GroupName = unpackVariable(byteBuffer, 1)

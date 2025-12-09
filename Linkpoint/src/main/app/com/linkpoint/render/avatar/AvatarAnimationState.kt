@@ -36,7 +36,7 @@ class AvatarAnimationState : ResourceConsumer {
             this.stoppingAnimation = null
         }
 
-        Unit getRunningAnimations(Builder<AvatarRunningSequence> builder, Collection<AvatarRunningAnimation> collection) {
+        fun getRunningAnimations(Builder<AvatarRunningSequence> builder, Collection<AvatarRunningAnimation> collection): Unit {
             if (this.runningAnimation != null) {
                 builder.add(this.runningAnimation)
                 this.runningAnimation.getRunningAnimations(collection)
@@ -47,7 +47,7 @@ class AvatarAnimationState : ResourceConsumer {
             }
         }
 
-        Boolean hasStopped() {
+        fun hasStopped(): Boolean {
             return this.runningAnimation != null ? false : this.stoppingAnimation != null ? this.stoppingAnimation.hasStopped() : true
         }
     }
@@ -69,7 +69,7 @@ class AvatarAnimationState : ResourceConsumer {
         }
     }
 
-    Unit getRunningAnimations(Builder<AvatarRunningSequence> builder, Collection<AvatarRunningAnimation> collection) {
+    fun getRunningAnimations(Builder<AvatarRunningSequence> builder, Collection<AvatarRunningAnimation> collection): Unit {
         AnimationPair animationPair = this.animationPair
         if (animationPair == null && this.animationData != null) {
             animationPair = AnimationPair(this.sequenceInfo, this.animationData)
@@ -79,12 +79,12 @@ class AvatarAnimationState : ResourceConsumer {
         }
     }
 
-    Boolean hasStopped() {
+    fun hasStopped(): Boolean {
         AnimationPair animationPair = this.animationPair
         return animationPair != null ? animationPair.hasStopped() : false
     }
 
-    Unit updateSequenceInfo(@NonNull AnimationSequenceInfo animationSequenceInfo) {
+    fun updateSequenceInfo(@NonNull AnimationSequenceInfo animationSequenceInfo): Unit {
         this.sequenceInfo = animationSequenceInfo
         this.animationPair = null
     }

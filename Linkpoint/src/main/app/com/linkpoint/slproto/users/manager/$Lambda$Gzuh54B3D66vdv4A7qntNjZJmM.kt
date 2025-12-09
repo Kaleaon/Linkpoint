@@ -9,14 +9,14 @@ import java.util.List
     private /* synthetic */ Any f166$f0
 
     private /* synthetic */ Unit $m$0() {
-        ((List) this.f166$f0).clear()
+        ((this as List).f166$f0).clear()
     }
 
     /* synthetic */ $Lambda$Gzuh54B3D66vdv4A7qntNjZJmM(Any obj) {
         this.f166$f0 = obj
     }
 
-    Unit run() {
+    fun run(): Unit {
         $m$0()
     }
 }

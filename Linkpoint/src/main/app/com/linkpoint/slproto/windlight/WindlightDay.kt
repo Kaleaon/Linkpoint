@@ -3,17 +3,17 @@ package com.linkpoint.slproto.windlight
 class WindlightDay {
     private val defaultPresets: Array<String> = {"A%2D12AM", "A%2D3AM", "A%2D6AM", "A%2D9AM", "A%2D12PM", "A%2D3PM", "A%2D6PM", "A%2D9PM"}
     private val hourTable: FloatArray = {0.0f, 0.125f, 0.25f, 0.375f, 0.5f, 0.625f, 0.75f, 0.875f}
-    private WindlightPreset[] presets = WindlightPreset[defaultPresets.length]
+    private WindlightPreset[] presets = WindlightPreset[defaultPresets.size]
 
     WindlightDay() {
-        for (Int i = 0; i < this.presets.length; i++) {
+        for (i in 0 until this.presets.size) {
             this.presets[i] = WindlightPreset("windlight/" + defaultPresets[i] + ".xml")
         }
     }
 
-    Unit InterpolatePreset(WindlightPreset windlightPreset, Float f) {
+    fun InterpolatePreset(WindlightPreset windlightPreset, Float f): Unit {
         Int i2 = 0
-        Int length = hourTable.length - 1
+        Int length = hourTable.size - 1
         while (true) {
             if (length < 0) {
                 i = -1
@@ -27,7 +27,7 @@ class WindlightDay {
         }
         if (i != -1) {
             Int i3 = i + 1
-            if (i3 < hourTable.length) {
+            if (i3 < hourTable.size) {
                 i2 = i3
             }
             Float f2 = hourTable[i]

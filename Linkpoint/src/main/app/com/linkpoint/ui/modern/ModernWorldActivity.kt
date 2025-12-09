@@ -258,7 +258,7 @@ class ModernWorldActivity : AppCompatActivity {
     }
     
     @Override
-    Boolean onCreateOptionsMenu(Menu menu) {
+    fun onCreateOptionsMenu(Menu menu): Boolean {
         // Create modern menu options
         menu.add(0, 1, 0, "Settings").setIcon(android.R.drawable.ic_menu_preferences)
         menu.add(0, 2, 0, "Inventory").setIcon(android.R.drawable.ic_menu_view)
@@ -267,7 +267,7 @@ class ModernWorldActivity : AppCompatActivity {
     }
     
     @Override
-    Boolean onOptionsItemSelected(MenuItem item) {
+    fun onOptionsItemSelected(MenuItem item): Boolean {
         switch (item.getItemId()) {
             case android.R.id.home:
                 finish()

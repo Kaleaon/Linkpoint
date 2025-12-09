@@ -10,14 +10,14 @@ import com.linkpoint.react.Subscription
     private /* synthetic */ Any f215$f0
 
     private /* synthetic */ Unit $m$0(Any obj) {
-        ((ChatterUserSubscription) this.f215$f0).m299com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref0((UserName) obj)
+        ((this as ChatterUserSubscription).f215$f0).m299com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref0((UserName) obj)
     }
 
     /* synthetic */ $Lambda$o86h7H3WuAxnvPtFprunJr0Jq8o(Any obj) {
         this.f215$f0 = obj
     }
 
-    Unit onData(Any obj) {
+    fun onData(Any obj): Unit {
         $m$0(obj)
     }
 }

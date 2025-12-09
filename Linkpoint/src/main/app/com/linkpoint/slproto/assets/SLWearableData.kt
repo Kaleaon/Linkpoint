@@ -43,7 +43,7 @@ class SLWearableData {
     SLWearableData(ByteArray bArr) throws WearableFormatException {
         try {
             Array<String> split = String(bArr, "ISO-8859-1").trim().split("\n+")
-            if (split.length < 2) {
+            if (split.size < 2) {
                 throw WearableFormatException()
             } else if (!split[0].trim().startsWith("LLWearable")) {
                 throw WearableFormatException()
@@ -53,19 +53,19 @@ class SLWearableData {
                     ImmutableList.Builder builder = ImmutableList.builder()
                     ImmutableList.Builder builder2 = ImmutableList.builder()
                     Int i2 = 2
-                    while (i2 < split.length) {
+                    while (i2 < split.size) {
                         Array<String> split2 = split[i2].trim().split("\\s+")
-                        if (split2.length < 1) {
+                        if (split2.size < 1) {
                             i2++
                         } else if (split2[0].equalsIgnoreCase("permissions") || split2[0].equalsIgnoreCase("sale_info")) {
                             i2++
-                            if (i2 >= split.length) {
+                            if (i2 >= split.size) {
                                 throw WearableFormatException()
                             } else if (!split[i2].trim().equalsIgnoreCase("{")) {
                                 throw WearableFormatException()
                             } else {
                                 while (true) {
-                                    if (i2 >= split.length) {
+                                    if (i2 >= split.size) {
                                         break
                                     } else if (split[i2].trim().equalsIgnoreCase("}")) {
                                         i2++
@@ -81,12 +81,12 @@ class SLWearableData {
                                 i = i2 + 1
                                 Int i3 = 0
                                 while (i3 < parseInt) {
-                                    if (i >= split.length) {
+                                    if (i >= split.size) {
                                         throw WearableFormatException()
                                     }
                                     try {
                                         Array<String> split3 = split[i].trim().split("\\s+")
-                                        if (split3.length < 2) {
+                                        if (split3.size < 2) {
                                             throw WearableFormatException()
                                         }
                                         builder.add((Any) WearableParam(Int.parseInt(split3[0]), Float.parseFloat(split3[1])))
@@ -103,12 +103,12 @@ class SLWearableData {
                                 Int i4 = i2 + 1
                                 Int i5 = 0
                                 while (i5 < parseInt2) {
-                                    if (i >= split.length) {
+                                    if (i >= split.size) {
                                         throw WearableFormatException()
                                     }
                                     try {
                                         Array<String> split4 = split[i].trim().split("\\s+")
-                                        if (split4.length < 2) {
+                                        if (split4.size < 2) {
                                             throw WearableFormatException()
                                         }
                                         builder2.add((Any) WearableTexture(Int.parseInt(split4[0]), UUID.fromString(split4[1])))

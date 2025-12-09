@@ -24,9 +24,9 @@ class EmulatorManager {
     
     // Emulator status callback interface
     interface EmulatorCallback {
-        Unit onSuccess(String message)
-        Unit onError(String error)
-        Unit onStatusUpdate(String status)
+        fun onSuccess(String message)
+        fun onError(String error)
+        fun onStatusUpdate(String status)
     }
     
     // AVD information class
@@ -46,7 +46,7 @@ class EmulatorManager {
         }
         
         @Override
-        String toString() {
+        fun toString(): String {
             return String.format("%s (API %s, %s)", name, apiLevel, abi)
         }
     }
@@ -66,7 +66,7 @@ class EmulatorManager {
     /**
      * Check if emulator management is available
      */
-    Boolean isAvailable() {
+    fun isAvailable(): Boolean {
         // Check if Android SDK is available
         String androidHome = System.getenv("ANDROID_HOME")
         if (androidHome == null || androidHome.isEmpty()) {
@@ -85,14 +85,14 @@ class EmulatorManager {
     /**
      * List all available AVDs
      */
-    Unit listAVDs(EmulatorCallback callback) {
+    fun listAVDs(EmulatorCallback callback): Unit {
         EmulatorTask("list-avds", callback).execute()
     }
     
     /**
      * Create a AVD
      */
-    Unit createAVD(String name, String device, String apiLevel, String abi, EmulatorCallback callback) {
+    fun createAVD(String name, String device, String apiLevel, String abi, EmulatorCallback callback): Unit {
         Array<String> args = {"create", name, "--device", device, "--api", apiLevel, "--abi", abi}
         EmulatorTask(args, callback).execute()
     }
@@ -100,35 +100,35 @@ class EmulatorManager {
     /**
      * Start an AVD
      */
-    Unit startAVD(String name, EmulatorCallback callback) {
+    fun startAVD(String name, EmulatorCallback callback): Unit {
         EmulatorTask("start", name, callback).execute()
     }
     
     /**
      * Stop an AVD
      */
-    Unit stopAVD(String name, EmulatorCallback callback) {
+    fun stopAVD(String name, EmulatorCallback callback): Unit {
         EmulatorTask("stop", name, callback).execute()
     }
     
     /**
      * Delete an AVD
      */
-    Unit deleteAVD(String name, EmulatorCallback callback) {
+    fun deleteAVD(String name, EmulatorCallback callback): Unit {
         EmulatorTask("delete", name, callback).execute()
     }
     
     /**
      * Get emulator status
      */
-    Unit getStatus(EmulatorCallback callback) {
+    fun getStatus(EmulatorCallback callback): Unit {
         EmulatorTask("status", callback).execute()
     }
     
     /**
      * Install system image
      */
-    Unit installSystemImage(String apiLevel, String abi, String tag, EmulatorCallback callback) {
+    fun installSystemImage(String apiLevel, String abi, String tag, EmulatorCallback callback): Unit {
         Array<String> args = {"install-image", apiLevel, abi, tag}
         EmulatorTask(args, callback).execute()
     }
@@ -136,14 +136,14 @@ class EmulatorManager {
     /**
      * List available device profiles
      */
-    Unit listDevices(EmulatorCallback callback) {
+    fun listDevices(EmulatorCallback callback): Unit {
         EmulatorTask("list-devices", callback).execute()
     }
     
     /**
      * List available system images
      */
-    Unit listSystemImages(EmulatorCallback callback) {
+    fun listSystemImages(EmulatorCallback callback): Unit {
         EmulatorTask("list-images", callback).execute()
     }
     
@@ -250,7 +250,7 @@ class EmulatorManager {
     /**
      * Parse AVD list output into structured data
      */
-    List<AVDInfo> parseAVDList(String output) {
+    fun parseAVDList(String output): List<AVDInfo> {
         List<AVDInfo> avds = ArrayList<>()
         
         Array<String> lines = output.split("\n")
@@ -300,7 +300,7 @@ class EmulatorManager {
     /**
      * Create a formatted summary of AVD information
      */
-    String formatAVDSummary(List<AVDInfo> avds) {
+    fun formatAVDSummary(List<AVDInfo> avds): String {
         if (avds.isEmpty()) {
             return "No AVDs found"
         }

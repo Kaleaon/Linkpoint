@@ -24,29 +24,29 @@ class TeleportFinish : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.Info_Field.SeedCapability.length + 36 + 1 + 4 + 4
+    fun CalcPayloadSize(): Int {
+        return this.Info_Field.SeedCapability.size + 36 + 1 + 4 + 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleTeleportFinish(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 69)
         packUUID(byteBuffer, this.Info_Field.AgentID)
         packInt(byteBuffer, this.Info_Field.LocationID)
         packIPAddress(byteBuffer, this.Info_Field.SimIP)
-        packShort(byteBuffer, (Short) this.Info_Field.SimPort)
+        packShort(byteBuffer, (this as Short).Info_Field.SimPort)
         packLong(byteBuffer, this.Info_Field.RegionHandle)
         packVariable(byteBuffer, this.Info_Field.SeedCapability, 2)
-        packByte(byteBuffer, (Byte) this.Info_Field.SimAccess)
+        packByte(byteBuffer, (this as Byte).Info_Field.SimAccess)
         packInt(byteBuffer, this.Info_Field.TeleportFlags)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.Info_Field.AgentID = unpackUUID(byteBuffer)
         this.Info_Field.LocationID = unpackInt(byteBuffer)
         this.Info_Field.SimIP = unpackIPAddress(byteBuffer)

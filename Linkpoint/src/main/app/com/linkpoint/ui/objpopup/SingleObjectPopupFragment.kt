@@ -23,16 +23,16 @@ import androidx.annotation.Nullable
 
 class SingleObjectPopupFragment : Fragment {
     private SwipeDismissAdvancedBehavior.OnDismissListener dismissListener = SwipeDismissAdvancedBehavior.OnDismissListener() {
-        Unit onDismiss(View view) {
+        fun onDismiss(View view): Unit {
             SingleObjectPopupFragment.this.hideAndDismiss()
         }
 
-        Unit onDragStateChanged(Int i) {
+        fun onDragStateChanged(Int i): Unit {
         }
     }
     private View.OnClickListener frameClickListener = $Lambda$gmgx9kG_frukRCwYiu6KI4GSv6k(this)
 
-    SingleObjectPopupFragment create(@NonNull UUID uuid) {
+    fun create(@NonNull UUID uuid): SingleObjectPopupFragment {
         SingleObjectPopupFragment singleObjectPopupFragment = SingleObjectPopupFragment()
         singleObjectPopupFragment.setArguments(ActivityUtils.makeFragmentArguments(uuid, (Bundle) null))
         return singleObjectPopupFragment
@@ -53,7 +53,7 @@ class SingleObjectPopupFragment : Fragment {
     }
 
     /* access modifiers changed from: private */
-    Unit hideAndDismiss() {
+    fun hideAndDismiss(): Unit {
         FragmentActivity activity = getActivity()
         if (activity instanceof ConnectedActivity) {
             ((ConnectedActivity) activity).dismissSingleObjectPopup()
@@ -67,7 +67,7 @@ class SingleObjectPopupFragment : Fragment {
     }
 
     @Nullable
-    View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle): View {
         SLChatEvent sLChatEvent
         View inflate = layoutInflater.inflate(R.layout.object_popups_single_fragment_layout, viewGroup, false)
         UserManager userManager = getUserManager()
@@ -87,7 +87,7 @@ class SingleObjectPopupFragment : Fragment {
         if (sLChatEvent == null) {
             hideAndDismiss()
         } else {
-            CoordinatorLayout coordinatorLayout = (CoordinatorLayout) inflate.findViewById(R.id.single_object_popup_container)
+            CoordinatorLayout coordinatorLayout = (inflate as CoordinatorLayout).findViewById(R.id.single_object_popup_container)
             ChatEventViewHolder createViewHolder = SLChatEvent.createViewHolder(LayoutInflater.from(getContext()), sLChatEvent.getViewType().ordinal(), coordinatorLayout, (RecyclerView.Adapter) null)
             sLChatEvent.bindViewHolder(createViewHolder, userManager, (ChatEventTimestampUpdater) null)
             coordinatorLayout.addView(createViewHolder.itemView)
@@ -109,14 +109,14 @@ class SingleObjectPopupFragment : Fragment {
         return inflate
     }
 
-    Unit onResume() {
+    fun onResume(): Unit {
         super.onResume()
         if (getEvent() == null) {
             hideAndDismiss()
         }
     }
 
-    Unit onStart() {
+    fun onStart(): Unit {
         super.onStart()
         if (getEvent() == null) {
             hideAndDismiss()

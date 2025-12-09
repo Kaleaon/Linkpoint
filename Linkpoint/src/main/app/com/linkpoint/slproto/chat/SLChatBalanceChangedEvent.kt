@@ -36,12 +36,12 @@ class SLChatBalanceChangedEvent : SLChatEvent {
         return SLChatEvent.ChatMessageType.BalanceChanged
     }
 
-    Int getNewBalance() {
+    fun getNewBalance(): Int {
         return this.newBalance
     }
 
     /* access modifiers changed from: protected */
-    String getText(Context context, @NonNull UserManager userManager) {
+    fun getText(Context context, @NonNull UserManager userManager): String {
         if (this.transactionAmountValid) {
             String sourceName = this.source.getSourceName(userManager)
             if (sourceName != null) {
@@ -59,11 +59,11 @@ class SLChatBalanceChangedEvent : SLChatEvent {
         }
     }
 
-    Int getTransactionAmount() {
+    fun getTransactionAmount(): Int {
         return this.transactionAmount
     }
 
-    Boolean getTransactionAmountValid() {
+    fun getTransactionAmountValid(): Boolean {
         return this.transactionAmountValid
     }
 
@@ -72,15 +72,15 @@ class SLChatBalanceChangedEvent : SLChatEvent {
     }
 
     /* access modifiers changed from: protected */
-    Boolean isActionMessage(@NonNull UserManager userManager) {
+    fun isActionMessage(@NonNull UserManager userManager): Boolean {
         return this.transactionAmountValid && this.source.getSourceName(userManager) != null && getTransactionAmount() >= 0
     }
 
-    Boolean opensNewChatter() {
+    fun opensNewChatter(): Boolean {
         return false
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setTransactionAmount(this.transactionAmountValid ? Integer.valueOf(this.transactionAmount) : null)
         chatMessage.setNewBalance(Integer.valueOf(this.newBalance))

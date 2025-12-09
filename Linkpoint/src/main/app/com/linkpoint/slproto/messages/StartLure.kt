@@ -31,35 +31,35 @@ class StartLure : SLMessage {
         this.Info_Field = Info()
     }
 
-    Int CalcPayloadSize() {
-        return this.Info_Field.Message.length + 2 + 36 + 1 + (this.TargetData_Fields.size() * 16)
+    fun CalcPayloadSize(): Int {
+        return this.Info_Field.Message.size + 2 + 36 + 1 + (this.TargetData_Fields.size() * 16)
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleStartLure(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 70)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        packByte(byteBuffer, (Byte) this.Info_Field.LureType)
+        packByte(byteBuffer, (this as Byte).Info_Field.LureType)
         packVariable(byteBuffer, this.Info_Field.Message, 1)
-        byteBuffer.put((Byte) this.TargetData_Fields.size())
+        byteBuffer.put((this as Byte).TargetData_Fields.size())
         for (TargetData targetData : this.TargetData_Fields) {
             packUUID(byteBuffer, targetData.TargetID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.Info_Field.LureType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.Info_Field.Message = unpackVariable(byteBuffer, 1)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             TargetData targetData = TargetData()
             targetData.TargetID = unpackUUID(byteBuffer)
             this.TargetData_Fields.add(targetData)

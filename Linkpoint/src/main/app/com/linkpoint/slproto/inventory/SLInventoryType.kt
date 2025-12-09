@@ -30,7 +30,7 @@ enum SLInventoryType {
     private Int typeCode
 
     {
-        tagMap = HashMap(values().length * 2)
+        tagMap = HashMap(values().size * 2)
         for (SLInventoryType sLInventoryType : values()) {
             tagMap.put(sLInventoryType.stringCode, sLInventoryType)
         }
@@ -42,12 +42,12 @@ enum SLInventoryType {
         this.readableName = str2
     }
 
-    SLInventoryType getByString(String str) {
+    fun getByString(String str): SLInventoryType {
         SLInventoryType sLInventoryType = tagMap.get(str)
         return sLInventoryType == null ? IT_UNKNOWN : sLInventoryType
     }
 
-    SLInventoryType getByType(Int i) {
+    fun getByType(Int i): SLInventoryType {
         for (SLInventoryType sLInventoryType : values()) {
             if (sLInventoryType.typeCode == i) {
                 return sLInventoryType
@@ -56,15 +56,15 @@ enum SLInventoryType {
         return IT_UNKNOWN
     }
 
-    String getReadableName() {
+    fun getReadableName(): String {
         return this.readableName
     }
 
-    String getStringCode() {
+    fun getStringCode(): String {
         return this.stringCode
     }
 
-    Int getTypeCode() {
+    fun getTypeCode(): Int {
         return this.typeCode
     }
 }

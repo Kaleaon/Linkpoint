@@ -110,7 +110,7 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
                 }
             }
             SpatialTreeNode spatialTreeNode = null
-            for (Int i = 0; i < 3; i++) {
+            for (i in 0 until 3) {
                 if (this.parent.children[i] != null) {
                     if (spatialTreeNode != null) {
                         spatialTreeNode = null
@@ -145,7 +145,7 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
             }
             if (this.children != null) {
                 SpatialTreeNode[] spatialTreeNodeArr = this.children
-                Int length = spatialTreeNodeArr.length
+                Int length = spatialTreeNodeArr.size
                 Int i5 = 0
                 while (i5 < length) {
                     SpatialTreeNode spatialTreeNode = spatialTreeNodeArr[i5]
@@ -293,7 +293,7 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
         }
         if (this.children != null) {
             SpatialTreeNode[] spatialTreeNodeArr = this.children
-            Int length = spatialTreeNodeArr.length
+            Int length = spatialTreeNodeArr.size
             while (i2 < length) {
                 SpatialTreeNode spatialTreeNode = spatialTreeNodeArr[i2]
                 if (spatialTreeNode != null) {

@@ -32,7 +32,7 @@ class BakeLayer {
         if (f64comlumiyaviewerlumiyaslprotoavatarSLAvatarParamColor$ColorOperationSwitchesValues != null) {
             return f64comlumiyaviewerlumiyaslprotoavatarSLAvatarParamColor$ColorOperationSwitchesValues
         }
-        IntArray iArr = Int[SLAvatarParamColor.ColorOperation.values().length]
+        IntArray iArr = Int[SLAvatarParamColor.ColorOperation.values().size]
         try {
             iArr[SLAvatarParamColor.ColorOperation.Blend.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -72,7 +72,7 @@ class BakeLayer {
         if (this.layerName.equals("lipstick")) {
             Debug.Log(String.format("Baking: lipstick start color %08x default %08x", Array<Any>{Integer.valueOf(i), Integer.valueOf(i2)}))
         }
-        Int length = iArr.length
+        Int length = iArr.size
         Int i3 = 0
         Int i4 = i
         while (i3 < length) {
@@ -114,7 +114,7 @@ class BakeLayer {
 
     private Int getNetColor(BakeProcess bakeProcess) {
         IntArray iArr = this.paramIDs
-        Int length = iArr.length
+        Int length = iArr.size
         Int i = 0
         while (true) {
             if (i >= length) {
@@ -146,7 +146,7 @@ class BakeLayer {
     /* JADX WARNING: Removed duplicated region for block: B:52:0x0243  */
     /* JADX WARNING: Removed duplicated region for block: B:73:? A[RETURN, SYNTHETIC] */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    Unit Bake(com.linkpoint.openjpeg.OpenJPEG r21, com.linkpoint.slproto.baker.BakeProcess r22) {
+    fun Bake(com.linkpoint.openjpeg.OpenJPEG r21, com.linkpoint.slproto.baker.BakeProcess r22): Unit {
         /*
             r20 = this
             r15 = 0
@@ -192,7 +192,7 @@ class BakeLayer {
             r18 = r0
             r4 = 0
             r0 = r18
-            Int r0 = r0.length
+            Int r0 = r0.size
             r19 = r0
             r16 = r4
         L_0x0057:
@@ -491,7 +491,7 @@ class BakeLayer {
         throw UnsupportedOperationException("Method not decompiled: com.linkpoint.slproto.baker.BakeLayer.Bake(com.linkpoint.openjpeg.OpenJPEG, com.linkpoint.slproto.baker.BakeProcess):Unit")
     }
 
-    Unit BakeAlpha(OpenJPEG openJPEG, BakeProcess bakeProcess) {
+    fun BakeAlpha(OpenJPEG openJPEG, BakeProcess bakeProcess): Unit {
         if (!this.isRenderPassBump) {
             if (this.tgaTexture != null) {
                 try {

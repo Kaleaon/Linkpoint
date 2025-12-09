@@ -10,14 +10,14 @@ import com.linkpoint.slproto.users.manager.CurrentLocationInfo
     private /* synthetic */ Any f147$f0
 
     private /* synthetic */ Unit $m$0(Any obj) {
-        ((ChatterNameRetriever) this.f147$f0).m262com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref0((CurrentLocationInfo) obj)
+        ((this as ChatterNameRetriever).f147$f0).m262com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref0((CurrentLocationInfo) obj)
     }
 
     /* synthetic */ $Lambda$Tr7QBnh_GnHDqFtHSpMdsLw3Yfs(Any obj) {
         this.f147$f0 = obj
     }
 
-    Unit onData(Any obj) {
+    fun onData(Any obj): Unit {
         $m$0(obj)
     }
 }

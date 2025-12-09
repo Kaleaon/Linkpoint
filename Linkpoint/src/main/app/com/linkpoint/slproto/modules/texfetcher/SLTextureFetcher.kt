@@ -42,7 +42,7 @@ class SLTextureFetcher : SLModule : SLIdleHandler {
         }
     }
 
-    Unit BeginFetch(SLTextureFetchRequest sLTextureFetchRequest) {
+    fun BeginFetch(SLTextureFetchRequest sLTextureFetchRequest): Unit {
         SLTextureFetchRequest sLTextureFetchRequest2 = null
         synchronized (this) {
             File file = sLTextureFetchRequest.destFile
@@ -65,13 +65,13 @@ class SLTextureFetcher : SLModule : SLIdleHandler {
         RunUDPQueue()
     }
 
-    Unit HandleCloseCircuit() {
+    fun HandleCloseCircuit(): Unit {
         StopFetching()
         super.HandleCloseCircuit()
     }
 
     @SLMessageHandler
-    Unit HandleImageData(ImageData imageData) {
+    fun HandleImageData(ImageData imageData): Unit {
         SLTextureFetchRequest sLTextureFetchRequest
         synchronized (this) {
             TextureUDPTransfer textureUDPTransfer = this.udpTransfers.get(imageData.ImageID_Field.ID)
@@ -91,7 +91,7 @@ class SLTextureFetcher : SLModule : SLIdleHandler {
     }
 
     @SLMessageHandler
-    Unit HandleImageNotInDatabase(ImageNotInDatabase imageNotInDatabase) {
+    fun HandleImageNotInDatabase(ImageNotInDatabase imageNotInDatabase): Unit {
         SLTextureFetchRequest sLTextureFetchRequest
         synchronized (this) {
             Debug.Log("TextureUDP: Image not in database: " + imageNotInDatabase.ImageID_Field.ID)
@@ -105,7 +105,7 @@ class SLTextureFetcher : SLModule : SLIdleHandler {
     }
 
     @SLMessageHandler
-    Unit HandleImagePacket(ImagePacket imagePacket) {
+    fun HandleImagePacket(ImagePacket imagePacket): Unit {
         SLTextureFetchRequest sLTextureFetchRequest
         synchronized (this) {
             TextureUDPTransfer textureUDPTransfer = this.udpTransfers.get(imagePacket.ImageID_Field.ID)
@@ -126,7 +126,7 @@ class SLTextureFetcher : SLModule : SLIdleHandler {
         }
     }
 
-    Unit ProcessIdle() {
+    fun ProcessIdle(): Unit {
         HashSet hashSet
         HashSet<UUID> hashSet2 = null
         Long currentTimeMillis = System.currentTimeMillis()
@@ -163,19 +163,19 @@ class SLTextureFetcher : SLModule : SLIdleHandler {
         }
     }
 
-    Unit StopFetching() {
+    fun StopFetching(): Unit {
         this.udpQueue.clear()
     }
 
-    Unit UpdatePriority(SLTextureFetchRequest sLTextureFetchRequest) {
+    fun UpdatePriority(SLTextureFetchRequest sLTextureFetchRequest): Unit {
         this.udpQueue.updatePriority(sLTextureFetchRequest)
     }
 
-    String getAgentAppearanceService() {
+    fun getAgentAppearanceService(): String {
         return this.agentAppearanceService
     }
 
-    String getCapURL() {
+    fun getCapURL(): String {
         return this.capURL
     }
 }

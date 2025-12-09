@@ -21,22 +21,22 @@ class SendXferPacket : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.DataPacket_Field.Data.length + 2 + 13
+    fun CalcPayloadSize(): Int {
+        return this.DataPacket_Field.Data.size + 2 + 13
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleSendXferPacket(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put(Ascii.DC2)
         packLong(byteBuffer, this.XferID_Field.ID)
         packInt(byteBuffer, this.XferID_Field.Packet)
         packVariable(byteBuffer, this.DataPacket_Field.Data, 2)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.XferID_Field.ID = unpackLong(byteBuffer)
         this.XferID_Field.Packet = unpackInt(byteBuffer)
         this.DataPacket_Field.Data = unpackVariable(byteBuffer, 2)

@@ -63,21 +63,21 @@ class ViewerStats : SLMessage {
         this.zeroCoded = true
         this.AgentData_Field = AgentData()
         this.DownloadTotals_Field = DownloadTotals()
-        for (Int i = 0; i < 2; i++) {
+        for (i in 0 until 2) {
             this.NetStats_Fields[i] = NetStats()
         }
         this.FailStats_Field = FailStats()
     }
 
-    Int CalcPayloadSize() {
-        return this.AgentData_Field.SysOS.length + 74 + 1 + this.AgentData_Field.SysCPU.length + 1 + this.AgentData_Field.SysGPU.length + 4 + 12 + 32 + 24 + 1 + (this.MiscStats_Fields.size() * 12)
+    fun CalcPayloadSize(): Int {
+        return this.AgentData_Field.SysOS.size + 74 + 1 + this.AgentData_Field.SysCPU.size + 1 + this.AgentData_Field.SysGPU.size + 4 + 12 + 32 + 24 + 1 + (this.MiscStats_Fields.size() * 12)
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleViewerStats(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -125)
@@ -88,7 +88,7 @@ class ViewerStats : SLMessage {
         packFloat(byteBuffer, this.AgentData_Field.RunTime)
         packFloat(byteBuffer, this.AgentData_Field.SimFPS)
         packFloat(byteBuffer, this.AgentData_Field.FPS)
-        packByte(byteBuffer, (Byte) this.AgentData_Field.AgentsInView)
+        packByte(byteBuffer, (this as Byte).AgentData_Field.AgentsInView)
         packFloat(byteBuffer, this.AgentData_Field.Ping)
         packDouble(byteBuffer, this.AgentData_Field.MetersTraveled)
         packInt(byteBuffer, this.AgentData_Field.RegionsVisited)
@@ -99,7 +99,7 @@ class ViewerStats : SLMessage {
         packInt(byteBuffer, this.DownloadTotals_Field.World)
         packInt(byteBuffer, this.DownloadTotals_Field.Objects)
         packInt(byteBuffer, this.DownloadTotals_Field.Textures)
-        for (Int i = 0; i < 2; i++) {
+        for (i in 0 until 2) {
             packInt(byteBuffer, this.NetStats_Fields[i].Bytes)
             packInt(byteBuffer, this.NetStats_Fields[i].Packets)
             packInt(byteBuffer, this.NetStats_Fields[i].Compressed)
@@ -111,14 +111,14 @@ class ViewerStats : SLMessage {
         packInt(byteBuffer, this.FailStats_Field.FailedResends)
         packInt(byteBuffer, this.FailStats_Field.OffCircuit)
         packInt(byteBuffer, this.FailStats_Field.Invalid)
-        byteBuffer.put((Byte) this.MiscStats_Fields.size())
+        byteBuffer.put((this as Byte).MiscStats_Fields.size())
         for (MiscStats miscStats : this.MiscStats_Fields) {
             packInt(byteBuffer, miscStats.Type)
             packDouble(byteBuffer, miscStats.Value)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.IP = unpackIPAddress(byteBuffer)
@@ -137,7 +137,7 @@ class ViewerStats : SLMessage {
         this.DownloadTotals_Field.World = unpackInt(byteBuffer)
         this.DownloadTotals_Field.Objects = unpackInt(byteBuffer)
         this.DownloadTotals_Field.Textures = unpackInt(byteBuffer)
-        for (Int i = 0; i < 2; i++) {
+        for (i in 0 until 2) {
             this.NetStats_Fields[i].Bytes = unpackInt(byteBuffer)
             this.NetStats_Fields[i].Packets = unpackInt(byteBuffer)
             this.NetStats_Fields[i].Compressed = unpackInt(byteBuffer)
@@ -150,7 +150,7 @@ class ViewerStats : SLMessage {
         this.FailStats_Field.OffCircuit = unpackInt(byteBuffer)
         this.FailStats_Field.Invalid = unpackInt(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b; i2++) {
+        for (i2 in 0 until b) {
             MiscStats miscStats = MiscStats()
             miscStats.Type = unpackInt(byteBuffer)
             miscStats.Value = unpackDouble(byteBuffer)

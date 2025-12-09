@@ -10,7 +10,7 @@ class EstateCovenantReply : SLMessage {
     class Data {
         UUID CovenantID
         Int CovenantTimestamp
-        byte[] EstateName
+        ByteArray EstateName
         UUID EstateOwnerID
     }
 
@@ -18,15 +18,15 @@ class EstateCovenantReply : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.Data_Field.EstateName.length + 21 + 16 + 4
+    fun CalcPayloadSize(): Int {
+        return this.Data_Field.EstateName.size + 21 + 16 + 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleEstateCovenantReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -52)
@@ -36,7 +36,7 @@ class EstateCovenantReply : SLMessage {
         packUUID(byteBuffer, this.Data_Field.EstateOwnerID)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.Data_Field.CovenantID = unpackUUID(byteBuffer)
         this.Data_Field.CovenantTimestamp = unpackInt(byteBuffer)
         this.Data_Field.EstateName = unpackVariable(byteBuffer, 1)

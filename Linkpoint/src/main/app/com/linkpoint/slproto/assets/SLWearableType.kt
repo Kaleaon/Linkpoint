@@ -37,7 +37,7 @@ enum class SLWearableType(
         this.name = str
     }
 
-    SLWearableType getByCode(int i) {
+    fun getByCode(int i): SLWearableType {
         for (SLWearableType sLWearableType : values()) {
             if (sLWearableType.typeCode == i) {
                 return sLWearableType
@@ -46,7 +46,7 @@ enum class SLWearableType(
         return null
     }
 
-    SLAssetType getAssetType() {
+    fun getAssetType(): SLAssetType {
         return this.assetType
     }
 
@@ -54,7 +54,7 @@ enum class SLWearableType(
         return this.isCritical
     }
 
-    String getName() {
+    fun getName(): String {
         return this.name
     }
 

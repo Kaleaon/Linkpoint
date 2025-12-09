@@ -23,15 +23,15 @@ class SetSimStatusInDatabase : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.Data_Field.HostName.length + 17 + 4 + 4 + 4 + 4 + 4 + 1 + this.Data_Field.Status.length + 4
+    fun CalcPayloadSize(): Int {
+        return this.Data_Field.HostName.size + 17 + 4 + 4 + 4 + 4 + 4 + 1 + this.Data_Field.Status.size + 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleSetSimStatusInDatabase(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.SYN)
@@ -45,7 +45,7 @@ class SetSimStatusInDatabase : SLMessage {
         packVariable(byteBuffer, this.Data_Field.Status, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.Data_Field.RegionID = unpackUUID(byteBuffer)
         this.Data_Field.HostName = unpackVariable(byteBuffer, 1)
         this.Data_Field.X = unpackInt(byteBuffer)

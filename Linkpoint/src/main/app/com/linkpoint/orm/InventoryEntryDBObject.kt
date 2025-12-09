@@ -99,18 +99,22 @@ class InventoryEntryDBObject : DBObject : Parcelable {
         this.salePrice = parcel.readInt()
     }
 
-    Array<String> getCreateTableStatements() {
+    fun getCreateTableStatements(): Array<String> {
         return Array<String>{"DROP TABLE IF EXISTS Entries;", "CREATE TABLE Entries (_id INTEGER PRIMARY KEY,parent_id BIGINT,uuid_high BIGINT,uuid_low BIGINT,parentUUID_high BIGINT,parentUUID_low BIGINT,name TEXT,isFolder BOOLEAN,typeDefault INTEGER,version INTEGER,sessionID_high BIGINT,sessionID_low BIGINT,fetchFailed BOOLEAN,description TEXT,flags INTEGER,invType INTEGER,assetType INTEGER,creationDate INTEGER,_blobField BLOB);", "CREATE INDEX Entries_parent_id ON Entries (parent_id);", "CREATE INDEX Entries_uuid ON Entries (uuid_high, uuid_low);"}
     }
 
-    Cursor query(SQLiteDatabase sQLiteDatabase, String str, Array<String> strArr, String str2) throws DBObject.DatabaseBindingException {
+    @Throws(DBObject.DatabaseBindingException::class)
+
+    fun query(SQLiteDatabase sQLiteDatabase, String str, Array<String> strArr, String str2): Cursor {
         if (sQLiteDatabase == null) {
             throw DBObject.DatabaseBindingException("Database not opened")
         }
         return sQLiteDatabase.query(tableName, fieldNames, str, strArr, (String) null, (String) null, str2)
     }
 
-    Cursor query(DBHandle dBHandle, String str, Array<String> strArr, String str2) throws DBObject.DatabaseBindingException {
+    @Throws(DBObject.DatabaseBindingException::class)
+
+    fun query(DBHandle dBHandle, String str, Array<String> strArr, String str2): Cursor {
         if (dBHandle == null) {
             throw DBObject.DatabaseBindingException("Database not opened")
         }
@@ -309,7 +313,7 @@ class InventoryEntryDBObject : DBObject : Parcelable {
         return contentValues
     }
 
-    Array<String> getFieldNames() {
+    fun getFieldNames(): Array<String> {
         return fieldNames
     }
 

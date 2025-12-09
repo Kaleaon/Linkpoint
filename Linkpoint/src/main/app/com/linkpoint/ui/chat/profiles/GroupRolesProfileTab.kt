@@ -55,7 +55,7 @@ class GroupRolesProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoada
             this()
         }
 
-        Int getCount() {
+        fun getCount(): Int {
             if (this.data != null) {
                 return this.data.RoleData_Fields.size()
             }
@@ -69,11 +69,11 @@ class GroupRolesProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoada
             return this.data.RoleData_Fields.get(i)
         }
 
-        Long getItemId(Int i) {
+        fun getItemId(Int i): Long {
             return (Long) i
         }
 
-        View getView(Int i, View view, ViewGroup viewGroup) {
+        fun getView(Int i, View view, ViewGroup viewGroup): View {
             GroupTitlesReply.GroupData groupData
             Int i2 = 1
             if (view == null) {
@@ -82,8 +82,8 @@ class GroupRolesProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoada
             GroupRoleDataReply.RoleData item = getItem(i)
             if (item != null) {
                 Int i3 = (!item.RoleID.equals(UUIDPool.ZeroUUID) || this.groupProfile == null) ? item.Members : this.groupProfile.GroupData_Field.GroupMembershipCount
-                ((TextView) view.findViewById(R.id.role_name)).setText(SLMessage.stringFromVariableOEM(item.Name))
-                ((TextView) view.findViewById(R.id.role_member_count)).setText(GroupRolesProfileTab.this.getResources().getQuantityString(R.plurals.members, i3, Any[]{Int.valueOf(i3)}))
+                ((view as TextView).findViewById(R.id.role_name)).setText(SLMessage.stringFromVariableOEM(item.Name))
+                ((view as TextView).findViewById(R.id.role_member_count)).setText(GroupRolesProfileTab.this.getResources().getQuantityString(R.plurals.members, i3, Any[]{Int.valueOf(i3)}))
                 if (this.titlesByRole == null || (groupData = this.titlesByRole.get(item.RoleID)) == null) {
                     z = false
                     z2 = false
@@ -92,7 +92,7 @@ class GroupRolesProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoada
                     z2 = true
                 }
                 view.findViewById(R.id.role_mine_check_mark).setVisibility(z2 ? 0 : 4)
-                TextView textView = (TextView) view.findViewById(R.id.role_name)
+                TextView textView = (view as TextView).findViewById(R.id.role_name)
                 if (!z) {
                     i2 = 0
                 }
@@ -101,11 +101,11 @@ class GroupRolesProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoada
             return view
         }
 
-        Boolean hasStableIds() {
+        fun hasStableIds(): Boolean {
             return false
         }
 
-        Unit setData(@Nullable GroupRoleDataReply groupRoleDataReply, @Nullable GroupTitlesReply groupTitlesReply, @Nullable GroupProfileReply groupProfileReply) {
+        fun setData(@Nullable GroupRoleDataReply groupRoleDataReply, @Nullable GroupTitlesReply groupTitlesReply, @Nullable GroupProfileReply groupProfileReply): Unit {
             this.data = groupRoleDataReply
             if (groupTitlesReply != null) {
                 this.titlesByRole = HashMap()
@@ -139,7 +139,7 @@ class GroupRolesProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoada
 
     /* access modifiers changed from: private */
     /* renamed from: onAddNewRoleButton */
-    Unit m497com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRolesProfileTabmthref0(View view) {
+    fun m497com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRolesProfileTabmthref0(View view): Unit {
         if ((getMyGroupPowers() & 16) != 0) {
             DetailsActivity.showEmbeddedDetails(getActivity(), GroupRoleDetailsFragment.class, GroupRoleDetailsFragment.makeSelection(this.chatterID, (UUID) null))
         }
@@ -155,13 +155,13 @@ class GroupRolesProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoada
     }
 
     @Nullable
-    View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle): View {
         View inflate = layoutInflater.inflate(R.layout.group_profile_tab_roles, viewGroup, false)
         if (this.adapter == null) {
             this.adapter = GroupRoleAdapter(this, (GroupRoleAdapter) null)
         }
-        ((ListView) inflate.findViewById(R.id.group_profile_roles_list)).setAdapter(this.adapter)
-        ((ListView) inflate.findViewById(R.id.group_profile_roles_list)).setOnItemClickListener(AdapterView.OnItemClickListener(this) {
+        ((inflate as ListView).findViewById(R.id.group_profile_roles_list)).setAdapter(this.adapter)
+        ((inflate as ListView).findViewById(R.id.group_profile_roles_list)).setOnItemClickListener(AdapterView.OnItemClickListener(this) {
 
             /* renamed from: -$f0 */
             private /* synthetic */ Any f336$f0
@@ -230,13 +230,13 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$zWKNE
 */
 
         inflate.findViewById(R.id.add_new_role_button).setOnClickListener($Lambda$zWKNEqUupU__bUM7E0seQ8xMgmU(this))
-        ((LoadingLayout) inflate.findViewById(R.id.loading_layout)).setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout))
-        this.loadableMonitor.setLoadingLayout((LoadingLayout) inflate.findViewById(R.id.loading_layout), getString(R.string.no_group_selected), getString(R.string.group_profile_fail))
-        this.loadableMonitor.setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout))
+        ((inflate as LoadingLayout).findViewById(R.id.loading_layout)).setSwipeRefreshLayout((inflate as SwipeRefreshLayout).findViewById(R.id.swipe_refresh_layout))
+        this.loadableMonitor.setLoadingLayout((inflate as LoadingLayout).findViewById(R.id.loading_layout), getString(R.string.no_group_selected), getString(R.string.group_profile_fail))
+        this.loadableMonitor.setSwipeRefreshLayout((inflate as SwipeRefreshLayout).findViewById(R.id.swipe_refresh_layout))
         return inflate
     }
 
-    Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged(): Unit {
         try {
             if (this.myGroupList.get().Groups.get(this.groupRoles.get().GroupData_Field.GroupID) != null && !this.groupTitles.isSubscribed()) {
                 this.groupTitles.subscribe(this.userManager.getGroupTitles().getPool(), this.groupRoles.get().GroupData_Field.GroupID)
@@ -254,7 +254,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$zWKNE
     }
 
     /* access modifiers changed from: protected */
-    Unit onShowUser(@Nullable ChatterID chatterID) {
+    fun onShowUser(@Nullable ChatterID chatterID): Unit {
         this.loadableMonitor.unsubscribeAll()
         if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDGroup)) {
             UUID chatterUUID = ((ChatterID.ChatterIDGroup) chatterID).getChatterUUID()

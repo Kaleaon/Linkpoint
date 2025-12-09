@@ -103,14 +103,14 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
 
     }
     private TextWatcher textChangedListener = TextWatcher() {
-        Unit afterTextChanged(Editable editable) {
+        fun afterTextChanged(Editable editable): Unit {
             GroupRoleDetailsFragment.this.updateUnsavedChanges()
         }
 
-        Unit beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+        fun beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3): Unit {
         }
 
-        Unit onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+        fun onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3): Unit {
         }
     }
     private MenuItem undoMenuItem
@@ -155,7 +155,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
             j = selectedRoleData.Powers
             str2 = stringFromVariableOEM3
         }
-        return !Objects.equal(str, ((TextView) view.findViewById(R.id.role_name_edit)).getText().toString()) || !Objects.equal(stringFromVariableOEM, ((TextView) view.findViewById(R.id.role_title_edit)).getText().toString()) || !Objects.equal(str2, ((TextView) view.findViewById(R.id.role_description_edit)).getText().toString()) || j != getSelectedPowers(j, (ViewGroup) view.findViewById(R.id.role_permission_list_layout))
+        return !Objects.equal(str, ((view as TextView).findViewById(R.id.role_name_edit)).getText().toString()) || !Objects.equal(stringFromVariableOEM, ((view as TextView).findViewById(R.id.role_title_edit)).getText().toString()) || !Objects.equal(str2, ((view as TextView).findViewById(R.id.role_description_edit)).getText().toString()) || j != getSelectedPowers(j, (view as ViewGroup).findViewById(R.id.role_permission_list_layout))
     }
 
     private Unit askForSavingChanges(Runnable runnable) {
@@ -163,10 +163,10 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
         if (view != null) {
             GroupRoleDataReply.RoleData selectedRoleData = getSelectedRoleData()
             Long defaultPowers = selectedRoleData == null ? getDefaultPowers() : selectedRoleData.Powers
-            String charSequence = ((TextView) view.findViewById(R.id.role_name_edit)).getText().toString()
-            String charSequence2 = ((TextView) view.findViewById(R.id.role_title_edit)).getText().toString()
-            String charSequence3 = ((TextView) view.findViewById(R.id.role_description_edit)).getText().toString()
-            Long selectedPowers = getSelectedPowers(defaultPowers, (ViewGroup) view.findViewById(R.id.role_permission_list_layout))
+            String charSequence = ((view as TextView).findViewById(R.id.role_name_edit)).getText().toString()
+            String charSequence2 = ((view as TextView).findViewById(R.id.role_title_edit)).getText().toString()
+            String charSequence3 = ((view as TextView).findViewById(R.id.role_description_edit)).getText().toString()
+            Long selectedPowers = getSelectedPowers(defaultPowers, (view as ViewGroup).findViewById(R.id.role_permission_list_layout))
             AlertDialog.Builder builder = AlertDialog.Builder(getContext())
             builder.setMessage(getString(R.string.save_changes_question)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(selectedPowers, this, charSequence, charSequence2, charSequence3, runnable) {
 
@@ -528,7 +528,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
         runnable.run()
     }
 
-    Bundle makeSelection(ChatterID chatterID, @Nullable UUID uuid) {
+    fun makeSelection(ChatterID chatterID, @Nullable UUID uuid): Bundle {
         Bundle makeSelection = ChatterFragment.makeSelection(chatterID)
         if (uuid != null) {
             makeSelection.putString(ROLE_ID_KEY, uuid.toString())
@@ -551,25 +551,25 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
         if (view != null) {
             if (selectedRoleData != null) {
                 Int memberCount = getMemberCount()
-                ((EditText) view.findViewById(R.id.role_name_edit)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Name))
-                ((TextView) view.findViewById(R.id.role_name_view)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Name))
-                ((EditText) view.findViewById(R.id.role_title_edit)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Title))
-                ((TextView) view.findViewById(R.id.role_title_view)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Title))
-                ((EditText) view.findViewById(R.id.role_description_edit)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Description))
-                ((TextView) view.findViewById(R.id.role_description_view)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Description))
-                ((TextView) view.findViewById(R.id.role_member_count)).setText(getResources().getQuantityString(R.plurals.members, memberCount, Any[]{Int.valueOf(memberCount)}))
-                setPermissionCheckboxes(selectedRoleData.Powers, (ViewGroup) view.findViewById(R.id.role_permission_list_layout))
+                ((view as EditText).findViewById(R.id.role_name_edit)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Name))
+                ((view as TextView).findViewById(R.id.role_name_view)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Name))
+                ((view as EditText).findViewById(R.id.role_title_edit)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Title))
+                ((view as TextView).findViewById(R.id.role_title_view)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Title))
+                ((view as EditText).findViewById(R.id.role_description_edit)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Description))
+                ((view as TextView).findViewById(R.id.role_description_view)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Description))
+                ((view as TextView).findViewById(R.id.role_member_count)).setText(getResources().getQuantityString(R.plurals.members, memberCount, Any[]{Int.valueOf(memberCount)}))
+                setPermissionCheckboxes(selectedRoleData.Powers, (view as ViewGroup).findViewById(R.id.role_permission_list_layout))
                 view.findViewById(R.id.group_role_members_card_view).setVisibility(0)
             } else {
                 view.findViewById(R.id.group_role_members_card_view).setVisibility(8)
-                ((EditText) view.findViewById(R.id.role_name_edit)).setText("")
-                ((EditText) view.findViewById(R.id.role_title_edit)).setText("")
-                ((EditText) view.findViewById(R.id.role_description_edit)).setText("")
-                ((TextView) view.findViewById(R.id.role_name_view)).setText("")
-                ((TextView) view.findViewById(R.id.role_title_view)).setText("")
-                ((TextView) view.findViewById(R.id.role_description_view)).setText("")
-                ((TextView) view.findViewById(R.id.role_member_count)).setText("")
-                setPermissionCheckboxes(getDefaultPowers(), (ViewGroup) view.findViewById(R.id.role_permission_list_layout))
+                ((view as EditText).findViewById(R.id.role_name_edit)).setText("")
+                ((view as EditText).findViewById(R.id.role_title_edit)).setText("")
+                ((view as EditText).findViewById(R.id.role_description_edit)).setText("")
+                ((view as TextView).findViewById(R.id.role_name_view)).setText("")
+                ((view as TextView).findViewById(R.id.role_title_view)).setText("")
+                ((view as TextView).findViewById(R.id.role_description_view)).setText("")
+                ((view as TextView).findViewById(R.id.role_member_count)).setText("")
+                setPermissionCheckboxes(getDefaultPowers(), (view as ViewGroup).findViewById(R.id.role_permission_list_layout))
             }
             view.findViewById(R.id.role_name_edit).setVisibility(z ? 0 : 8)
             view.findViewById(R.id.role_name_view).setVisibility(!z ? 0 : 8)
@@ -587,7 +587,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
 
     private Unit setPermissionCheckboxes(Long j, ViewGroup viewGroup) {
         Int childCount = viewGroup.getChildCount()
-        for (Int i = 0; i < childCount; i++) {
+        for (i in 0 until childCount) {
             View childAt = viewGroup.getChildAt(i)
             if (childAt instanceof CheckedTextView) {
                 Any tag = childAt.getTag(R.id.perm_checkbox_mask)
@@ -599,7 +599,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
     }
 
     /* access modifiers changed from: private */
-    Unit updateUnsavedChanges() {
+    fun updateUnsavedChanges(): Unit {
         Boolean anyChanges = anyChanges()
         if (anyChanges != this.hasChanged) {
             this.hasChanged = anyChanges
@@ -673,7 +673,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
         }
     }
 
-    Boolean onBackButtonPressed() {
+    fun onBackButtonPressed(): Boolean {
         if (!anyChanges()) {
             return false
         }
@@ -752,12 +752,12 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
         return true
     }
 
-    Unit onCreate(@android.support.annotation.Nullable Bundle bundle) {
+    fun onCreate(@android.support.annotation.Nullable Bundle bundle): Unit {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    Unit onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater): Unit {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.group_role_edit_menu, menu)
         this.undoMenuItem = menu.findItem(R.id.item_undo)
@@ -767,15 +767,15 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
     }
 
     @Nullable
-    View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle): View {
         View inflate = layoutInflater.inflate(R.layout.group_role_details_layout, viewGroup, false)
-        ((LoadingLayout) inflate.findViewById(R.id.loading_layout)).setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout))
-        this.loadableMonitor.setLoadingLayout((LoadingLayout) inflate.findViewById(R.id.loading_layout), getString(R.string.no_group_selected), getString(R.string.group_profile_fail))
-        this.loadableMonitor.setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout))
-        ((TextView) inflate.findViewById(R.id.role_name_edit)).addTextChangedListener(this.textChangedListener)
-        ((TextView) inflate.findViewById(R.id.role_title_edit)).addTextChangedListener(this.textChangedListener)
-        ((TextView) inflate.findViewById(R.id.role_description_edit)).addTextChangedListener(this.textChangedListener)
-        createPermEntries(layoutInflater, (ViewGroup) inflate.findViewById(R.id.role_permission_list_layout))
+        ((inflate as LoadingLayout).findViewById(R.id.loading_layout)).setSwipeRefreshLayout((inflate as SwipeRefreshLayout).findViewById(R.id.swipe_refresh_layout))
+        this.loadableMonitor.setLoadingLayout((inflate as LoadingLayout).findViewById(R.id.loading_layout), getString(R.string.no_group_selected), getString(R.string.group_profile_fail))
+        this.loadableMonitor.setSwipeRefreshLayout((inflate as SwipeRefreshLayout).findViewById(R.id.swipe_refresh_layout))
+        ((inflate as TextView).findViewById(R.id.role_name_edit)).addTextChangedListener(this.textChangedListener)
+        ((inflate as TextView).findViewById(R.id.role_title_edit)).addTextChangedListener(this.textChangedListener)
+        ((inflate as TextView).findViewById(R.id.role_description_edit)).addTextChangedListener(this.textChangedListener)
+        createPermEntries(layoutInflater, (inflate as ViewGroup).findViewById(R.id.role_permission_list_layout))
         inflate.findViewById(R.id.button_view_role_members).setOnClickListener(View.OnClickListener(this) {
 
             /* renamed from: -$f0 */
@@ -847,11 +847,11 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
         return inflate
     }
 
-    Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged(): Unit {
         setLoadedValues()
     }
 
-    Boolean onOptionsItemSelected(MenuItem menuItem) {
+    fun onOptionsItemSelected(MenuItem menuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_undo:
                 setLoadedValues()
@@ -865,7 +865,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
     }
 
     /* access modifiers changed from: protected */
-    Unit onShowUser(@Nullable ChatterID chatterID) {
+    fun onShowUser(@Nullable ChatterID chatterID): Unit {
         this.loadableMonitor.unsubscribeAll()
         if (getArguments().containsKey(ROLE_ID_KEY)) {
             this.RoleID = UUIDPool.getUUID(getArguments().getString(ROLE_ID_KEY))

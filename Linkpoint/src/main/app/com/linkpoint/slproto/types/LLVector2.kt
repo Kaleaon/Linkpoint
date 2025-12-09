@@ -20,24 +20,24 @@ class LLVector2 {
         this.y = lLVector2.y
     }
 
-    LLVector2 sub(LLVector2 lLVector2, LLVector2 lLVector22) {
+    fun sub(LLVector2 lLVector2, LLVector2 lLVector22): LLVector2 {
         return LLVector2(lLVector2.x - lLVector22.x, lLVector2.y - lLVector22.y)
     }
 
-    LLVector2 sum(LLVector2 lLVector2, LLVector2 lLVector22) {
+    fun sum(LLVector2 lLVector2, LLVector2 lLVector22): LLVector2 {
         return LLVector2(lLVector2.x + lLVector22.x, lLVector2.y + lLVector22.y)
     }
 
-    Unit add(LLVector2 lLVector2) {
+    fun add(LLVector2 lLVector2): Unit {
         this.x += lLVector2.x
         this.y += lLVector2.y
     }
 
-    Float dot(LLVector2 lLVector2) {
+    fun dot(LLVector2 lLVector2): Float {
         return (this.x * lLVector2.x) + (this.y * lLVector2.y)
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -48,20 +48,20 @@ class LLVector2 {
         return this.x == lLVector2.x && this.y == lLVector2.y
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         return Float.floatToIntBits(this.x) + Float.floatToIntBits(this.y)
     }
 
-    Float magVec() {
+    fun magVec(): Float {
         return Math.sqrt(((this.x * this.x.toDouble()).toFloat() + (this.y * this.y)))
     }
 
-    Unit mul(Float f) {
+    fun mul(Float f): Unit {
         this.x *= f
         this.y *= f
     }
 
-    Float normVec() {
+    fun normVec(): Float {
         Float sqrt = Math.sqrt(((this.x * this.x.toDouble()).toFloat() + (this.y * this.y)))
         if (sqrt > 1.0E-7f) {
             Float f = 1.0f / sqrt
@@ -74,22 +74,22 @@ class LLVector2 {
         return sqrt
     }
 
-    Unit set(Float f, Float f2) {
+    fun set(Float f, Float f2): Unit {
         this.x = f
         this.y = f2
     }
 
-    Unit setMax(LLVector2 lLVector2) {
+    fun setMax(LLVector2 lLVector2): Unit {
         this.x = Math.max(this.x, lLVector2.x)
         this.y = Math.max(this.y, lLVector2.y)
     }
 
-    Unit setMin(LLVector2 lLVector2) {
+    fun setMin(LLVector2 lLVector2): Unit {
         this.x = Math.min(this.x, lLVector2.x)
         this.y = Math.min(this.y, lLVector2.y)
     }
 
-    String toString() {
+    fun toString(): String {
         return String.format("(%f, %f)", Any[]{Float.valueOf(this.x), Float.valueOf(this.y)})
     }
 }

@@ -20,21 +20,21 @@ abstract class MasterDetailsActivity : DetailsActivity {
     abstract FragmentActivityFactory getDetailsFragmentFactory()
 
     /* access modifiers changed from: protected */
-    Bundle getNewDetailsFragmentArguments(@Nullable Bundle bundle, @Nullable Bundle bundle2) {
+    fun getNewDetailsFragmentArguments(@Nullable Bundle bundle, @Nullable Bundle bundle2): Bundle {
         return bundle2
     }
 
     /* access modifiers changed from: protected */
-    Boolean isAlwaysImplicitFragment(Class<? : Fragment> cls) {
+    fun isAlwaysImplicitFragment(Class<? : Fragment> cls): Boolean {
         return false
     }
 
     /* access modifiers changed from: protected */
-    Boolean isRootDetailsFragment(Class<? : Fragment> cls) {
+    fun isRootDetailsFragment(Class<? : Fragment> cls): Boolean {
         return getDetailsFragmentFactory().getFragmentClass().isAssignableFrom(cls)
     }
 
-    Boolean isSplitScreen() {
+    fun isSplitScreen(): Boolean {
         return this.isSplitScreen
     }
 
@@ -50,7 +50,7 @@ abstract class MasterDetailsActivity : DetailsActivity {
     /* JADX WARNING: Removed duplicated region for block: B:88:0x01f2  */
     /* JADX WARNING: Removed duplicated region for block: B:97:0x0222 A[ADDED_TO_REGION] */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    Unit onCreate(@android.support.annotation.Nullable android.os.Bundle r15) {
+    fun onCreate(@android.support.annotation.Nullable android.os.Bundle r15): Unit {
         /*
             r14 = this
             r13 = 2131755654(0x7f100286, Float:1.9142193E38)
@@ -330,7 +330,7 @@ abstract class MasterDetailsActivity : DetailsActivity {
     abstract Fragment onCreateMasterFragment(Intent intent, @Nullable Bundle bundle)
 
     /* access modifiers changed from: protected */
-    Boolean onDetailsStackEmpty() {
+    fun onDetailsStackEmpty(): Boolean {
         FragmentManager supportFragmentManager
         Fragment findFragmentById
         if (this.isSplitScreen || (findFragmentById = supportFragmentManager.findFragmentById(R.id.details)) == null || !(!findFragmentById.isDetached())) {
@@ -362,7 +362,7 @@ abstract class MasterDetailsActivity : DetailsActivity {
     }
 
     /* access modifiers changed from: protected */
-    Unit onNewIntent(Intent intent) {
+    fun onNewIntent(Intent intent): Unit {
         Bundle bundle = null
         super.onNewIntent(intent)
         Debug.Printf("MasterDetailsActivity: onNewIntent, intent = %s", intent)
@@ -386,12 +386,12 @@ abstract class MasterDetailsActivity : DetailsActivity {
     }
 
     /* access modifiers changed from: protected */
-    Unit onSaveInstanceState(Bundle bundle) {
+    fun onSaveInstanceState(Bundle bundle): Unit {
         super.onSaveInstanceState(bundle)
     }
 
     /* access modifiers changed from: protected */
-    Unit replaceDetailsFragment(FragmentManager fragmentManager, Fragment fragment) {
+    fun replaceDetailsFragment(FragmentManager fragmentManager, Fragment fragment): Unit {
         Fragment findFragmentById
         FragmentTransaction beginTransaction = fragmentManager.beginTransaction()
         beginTransaction.setCustomAnimations(R.anim.slide_from_right, 17432577, 0, 17432577)
@@ -403,7 +403,7 @@ abstract class MasterDetailsActivity : DetailsActivity {
         updateTitle()
     }
 
-    Fragment showDetailsFragment(Class<? : Fragment> cls, Intent intent, Bundle bundle) {
+    fun showDetailsFragment(Class<? : Fragment> cls, Intent intent, Bundle bundle): Fragment {
         Bundle arguments
         Fragment showDetailsFragment = super.showDetailsFragment(cls, intent, bundle)
         if (!(showDetailsFragment == null || (arguments = showDetailsFragment.getArguments()) == null)) {
@@ -413,7 +413,7 @@ abstract class MasterDetailsActivity : DetailsActivity {
     }
 
     /* access modifiers changed from: protected */
-    Unit updateTitleNoDetails() {
+    fun updateTitleNoDetails(): Unit {
         Fragment findFragmentById = getSupportFragmentManager().findFragmentById(R.id.selector)
         if (findFragmentById == null || !(findFragmentById instanceof FragmentHasTitle) || !findFragmentById.isAdded()) {
             z = false

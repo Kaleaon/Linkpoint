@@ -24,30 +24,30 @@ class ChangeUserRights : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.Rights_Fields.size() * 20) + 21
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleChangeUserRights(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 65)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        byteBuffer.put((byte) this.Rights_Fields.size())
+        byteBuffer.put((this as byte).Rights_Fields.size())
         for (Rights rights : this.Rights_Fields) {
             packUUID(byteBuffer, rights.AgentRelated)
             packInt(byteBuffer, rights.RelatedRights)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             Rights rights = Rights()
             rights.AgentRelated = unpackUUID(byteBuffer)
             rights.RelatedRights = unpackInt(byteBuffer)

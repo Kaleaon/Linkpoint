@@ -35,7 +35,7 @@ class SearchGridAdapter : RecyclerView.Adapter<SearchViewHolder> {
     OnSearchResultClickListener onSearchResultClickListener
 
     interface OnSearchResultClickListener {
-        Unit onSearchResultClicked(SearchGridResult searchGridResult)
+        fun onSearchResultClicked(SearchGridResult searchGridResult)
     }
 
     class SearchViewHolder : RecyclerView.ViewHolder : ChatterNameRetriever.OnChatterNameUpdated, View.OnClickListener {
@@ -56,7 +56,7 @@ class SearchGridAdapter : RecyclerView.Adapter<SearchViewHolder> {
 
         /* access modifiers changed from: package-private */
         @SuppressLint({"DefaultLocale", "SetTextI18n"})
-        Unit bindToData(SearchGridResult searchGridResult2) {
+        fun bindToData(SearchGridResult searchGridResult2): Unit {
             this.searchGridResult = searchGridResult2
             this.resultItemName.setText(searchGridResult2.getItemName())
             if (searchGridResult2.getItemType() == SearchGridQuery.SearchType.Groups.ordinal()) {
@@ -84,21 +84,21 @@ class SearchGridAdapter : RecyclerView.Adapter<SearchViewHolder> {
             }
         }
 
-        Unit onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever2) {
+        fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever2): Unit {
             String resolvedName
             if (chatterNameRetriever2 == this.chatterNameRetriever && (resolvedName = chatterNameRetriever2.getResolvedName()) != null) {
                 this.resultItemName.setText(resolvedName)
             }
         }
 
-        Unit onClick(View view) {
+        fun onClick(View view): Unit {
             if (SearchGridAdapter.this.onSearchResultClickListener != null && this.searchGridResult != null) {
                 SearchGridAdapter.this.onSearchResultClickListener.onSearchResultClicked(this.searchGridResult)
             }
         }
 
         /* access modifiers changed from: package-private */
-        Unit onRecycled() {
+        fun onRecycled(): Unit {
             this.userPicView.setChatterID((ChatterID) null, (String) null)
             if (this.chatterNameRetriever != null) {
                 this.chatterNameRetriever.dispose()
@@ -114,13 +114,13 @@ class SearchGridAdapter : RecyclerView.Adapter<SearchViewHolder> {
         @UiThread
         SearchViewHolder_ViewBinding(SearchViewHolder searchViewHolder, View view) {
             this.target = searchViewHolder
-            searchViewHolder.resultItemName = (TextView) Utils.findRequiredViewAsType(view, R.id.result_item_name, "field 'resultItemName'", TextView.class)
-            searchViewHolder.userPicView = (ChatterPicView) Utils.findRequiredViewAsType(view, R.id.userPicView, "field 'userPicView'", ChatterPicView.class)
-            searchViewHolder.resultMemberCount = (TextView) Utils.findRequiredViewAsType(view, R.id.result_member_count, "field 'resultMemberCount'", TextView.class)
+            searchViewHolder.resultItemName = (Utils as TextView).findRequiredViewAsType(view, R.id.result_item_name, "field 'resultItemName'", TextView.class)
+            searchViewHolder.userPicView = (Utils as ChatterPicView).findRequiredViewAsType(view, R.id.userPicView, "field 'userPicView'", ChatterPicView.class)
+            searchViewHolder.resultMemberCount = (Utils as TextView).findRequiredViewAsType(view, R.id.result_member_count, "field 'resultMemberCount'", TextView.class)
         }
 
         @CallSuper
-        Unit unbind() {
+        fun unbind(): Unit {
             SearchViewHolder searchViewHolder = this.target
             if (searchViewHolder == null) {
                 throw IllegalStateException("Bindings already cleared.")
@@ -140,35 +140,35 @@ class SearchGridAdapter : RecyclerView.Adapter<SearchViewHolder> {
         setHasStableIds(true)
     }
 
-    Int getItemCount() {
+    fun getItemCount(): Int {
         if (this.data != null) {
             return this.data.size()
         }
         return 0
     }
 
-    Long getItemId(Int i) {
+    fun getItemId(Int i): Long {
         if (this.data == null || i < 0 || i >= this.data.size()) {
             return -1
         }
         return this.data.get(i).getId().longValue()
     }
 
-    Unit onBindViewHolder(SearchViewHolder searchViewHolder, Int i) {
+    fun onBindViewHolder(SearchViewHolder searchViewHolder, Int i): Unit {
         if (this.data != null && i >= 0 && i < this.data.size()) {
             searchViewHolder.bindToData(this.data.get(i))
         }
     }
 
-    SearchViewHolder onCreateViewHolder(ViewGroup viewGroup, Int i) {
+    fun onCreateViewHolder(ViewGroup viewGroup, Int i): SearchViewHolder {
         return SearchViewHolder(this.inflater.inflate(R.layout.search_result_item, viewGroup, false))
     }
 
-    Unit onViewRecycled(SearchViewHolder searchViewHolder) {
+    fun onViewRecycled(SearchViewHolder searchViewHolder): Unit {
         searchViewHolder.onRecycled()
     }
 
-    Unit setData(@Nullable LazyList<SearchGridResult> lazyList) {
+    fun setData(@Nullable LazyList<SearchGridResult> lazyList): Unit {
         this.data = lazyList
         notifyDataSetChanged()
     }

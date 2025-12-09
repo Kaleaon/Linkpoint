@@ -22,7 +22,7 @@ enum LLSDNodeType {
     private String tagName
 
     {
-        tagMap = HashMap<>(values().length * 2)
+        tagMap = HashMap<>(values().size * 2)
         for (LLSDNodeType lLSDNodeType : values()) {
             tagMap.put(lLSDNodeType.tagName, lLSDNodeType)
         }
@@ -32,7 +32,7 @@ enum LLSDNodeType {
         this.tagName = str
     }
 
-    LLSDNodeType byTag(String str) {
+    fun byTag(String str): LLSDNodeType {
         return tagMap.get(str)
     }
 }

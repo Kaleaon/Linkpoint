@@ -12,7 +12,7 @@ import com.linkpoint.slproto.users.ChatterID
     private /* synthetic */ Any f177$f1
 
     private /* synthetic */ Unit $m$0() {
-        ((ActiveChattersManager) this.f176$f0).m279lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_5516((ChatterID) this.f177$f1)
+        ((this as ActiveChattersManager).f176$f0).m279lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_5516((this as ChatterID).f177$f1)
     }
 
     /* synthetic */ $Lambda$bC26PUjVA14BMgZPIZxiNFWFltI(Any obj, Any obj2) {
@@ -20,7 +20,7 @@ import com.linkpoint.slproto.users.ChatterID
         this.f177$f1 = obj2
     }
 
-    Unit run() {
+    fun run(): Unit {
         $m$0()
     }
 }

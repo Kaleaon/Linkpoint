@@ -28,15 +28,15 @@ class AvatarSitResponse : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 67
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAvatarSitResponse(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put(Ascii.NAK)
         packUUID(byteBuffer, this.SitObject_Field.ID)
         packBoolean(byteBuffer, this.SitTransform_Field.AutoPilot)
@@ -47,7 +47,7 @@ class AvatarSitResponse : SLMessage {
         packBoolean(byteBuffer, this.SitTransform_Field.ForceMouselook)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.SitObject_Field.ID = unpackUUID(byteBuffer)
         this.SitTransform_Field.AutoPilot = unpackBoolean(byteBuffer)
         this.SitTransform_Field.SitPosition = unpackLLVector3(byteBuffer)

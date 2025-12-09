@@ -15,15 +15,15 @@ class AbortXfer : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 16
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAbortXfer(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -99)
@@ -31,7 +31,7 @@ class AbortXfer : SLMessage {
         packInt(byteBuffer, this.XferID_Field.Result)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.XferID_Field.ID = unpackLong(byteBuffer)
         this.XferID_Field.Result = unpackInt(byteBuffer)
     }

@@ -23,7 +23,7 @@ class AutoValue_GroupManager_GroupMemberRolesQuery : GroupManager.GroupMemberRol
         this.requestID = uuid3
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -37,23 +37,23 @@ class AutoValue_GroupManager_GroupMemberRolesQuery : GroupManager.GroupMemberRol
         return this.requestID.equals(groupMemberRolesQuery.requestID())
     }
 
-    UUID groupID() {
+    fun groupID(): UUID {
         return this.groupID
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         return ((((this.groupID.hashCode() ^ 1000003) * 1000003) ^ this.memberID.hashCode()) * 1000003) ^ this.requestID.hashCode()
     }
 
-    UUID memberID() {
+    fun memberID(): UUID {
         return this.memberID
     }
 
-    UUID requestID() {
+    fun requestID(): UUID {
         return this.requestID
     }
 
-    String toString() {
+    fun toString(): String {
         return "GroupMemberRolesQuery{groupID=" + this.groupID + ", " + "memberID=" + this.memberID + ", " + "requestID=" + this.requestID + "}"
     }
 }

@@ -11,12 +11,12 @@ class AlertMessage : SLMessage {
     ArrayList<AlertInfo> AlertInfo_Fields = ArrayList<>()
 
     class AlertData {
-        byte[] Message
+        ByteArray Message
     }
 
     class AlertInfo {
-        byte[] ExtraParams
-        byte[] Message
+        ByteArray ExtraParams
+        ByteArray Message
     }
 
     AlertMessage() {
@@ -24,39 +24,39 @@ class AlertMessage : SLMessage {
         this.AlertData_Field = AlertData()
     }
 
-    Int CalcPayloadSize() {
-        Int length = this.AlertData_Field.Message.length + 1 + 4 + 1
+    fun CalcPayloadSize(): Int {
+        Int length = this.AlertData_Field.Message.size + 1 + 4 + 1
         Iterator<T> it = this.AlertInfo_Fields.iterator()
         while (true) {
             Int i = length
             if (!it.hasNext()) {
                 return i
             }
-            AlertInfo alertInfo = (AlertInfo) it.next()
-            length = alertInfo.ExtraParams.length + alertInfo.Message.length + 1 + 1 + i
+            AlertInfo alertInfo = (it as AlertInfo).next()
+            length = alertInfo.ExtraParams.size + alertInfo.Message.size + 1 + 1 + i
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAlertMessage(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -122)
         packVariable(byteBuffer, this.AlertData_Field.Message, 1)
-        byteBuffer.put((byte) this.AlertInfo_Fields.size())
+        byteBuffer.put((this as byte).AlertInfo_Fields.size())
         for (AlertInfo alertInfo : this.AlertInfo_Fields) {
             packVariable(byteBuffer, alertInfo.Message, 1)
             packVariable(byteBuffer, alertInfo.ExtraParams, 1)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AlertData_Field.Message = unpackVariable(byteBuffer, 1)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             AlertInfo alertInfo = AlertInfo()
             alertInfo.Message = unpackVariable(byteBuffer, 1)
             alertInfo.ExtraParams = unpackVariable(byteBuffer, 1)

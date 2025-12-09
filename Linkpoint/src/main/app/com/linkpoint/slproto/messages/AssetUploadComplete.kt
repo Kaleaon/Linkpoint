@@ -17,24 +17,24 @@ class AssetUploadComplete : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 22
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAssetUploadComplete(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 78)
         packUUID(byteBuffer, this.AssetBlock_Field.UUID)
-        packByte(byteBuffer, (byte) this.AssetBlock_Field.Type)
+        packByte(byteBuffer, (this as byte).AssetBlock_Field.Type)
         packBoolean(byteBuffer, this.AssetBlock_Field.Success)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AssetBlock_Field.UUID = unpackUUID(byteBuffer)
         this.AssetBlock_Field.Type = unpackByte(byteBuffer)
         this.AssetBlock_Field.Success = unpackBoolean(byteBuffer)

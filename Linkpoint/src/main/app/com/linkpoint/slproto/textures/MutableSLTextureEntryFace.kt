@@ -24,52 +24,52 @@ class MutableSLTextureEntryFace {
         this.hasAttribute = i
     }
 
-    Unit setGlow(Float f) {
+    fun setGlow(Float f): Unit {
         this.glow = f
         this.hasAttribute |= 512
     }
 
-    Unit setMaterial(Byte b) {
+    fun setMaterial(Byte b): Unit {
         this.materialb = b
         this.hasAttribute |= 128
     }
 
-    Unit setMedia(Byte b) {
+    fun setMedia(Byte b): Unit {
         this.mediab = b
         this.hasAttribute |= 256
     }
 
-    Unit setOffsetU(Float f) {
+    fun setOffsetU(Float f): Unit {
         this.offsetU = f
         this.hasAttribute |= 16
     }
 
-    Unit setOffsetV(Float f) {
+    fun setOffsetV(Float f): Unit {
         this.offsetV = f
         this.hasAttribute |= 32
     }
 
-    Unit setRGBA(Int i) {
+    fun setRGBA(Int i): Unit {
         this.rgba = i
         this.hasAttribute |= 2
     }
 
-    Unit setRepeatU(Float f) {
+    fun setRepeatU(Float f): Unit {
         this.repeatU = f
         this.hasAttribute |= 4
     }
 
-    Unit setRepeatV(Float f) {
+    fun setRepeatV(Float f): Unit {
         this.repeatV = f
         this.hasAttribute |= 8
     }
 
-    Unit setRotation(Float f) {
+    fun setRotation(Float f): Unit {
         this.rotation = f
         this.hasAttribute |= 64
     }
 
-    Unit setTextureID(UUID uuid) {
+    fun setTextureID(UUID uuid): Unit {
         this.textureID = uuid
         this.hasAttribute |= 1
     }

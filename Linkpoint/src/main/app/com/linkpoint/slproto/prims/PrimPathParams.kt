@@ -89,7 +89,7 @@ class PrimPathParams {
         return (this.CurveType * 17) + 0 + Float.floatToIntBits(this.Begin) + Float.floatToIntBits(this.End) + Float.floatToIntBits(this.ScaleX) + Float.floatToIntBits(this.ScaleY) + Float.floatToIntBits(this.ShearX) + Float.floatToIntBits(this.ShearY) + Float.floatToIntBits(this.TwistBegin) + Float.floatToIntBits(this.TwistEnd) + Float.floatToIntBits(this.RadiusOffset) + Float.floatToIntBits(this.TaperX) + Float.floatToIntBits(this.TaperY) + Float.floatToIntBits(this.Revolutions) + Float.floatToIntBits(this.Skew)
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -103,7 +103,7 @@ class PrimPathParams {
         return false
     }
 
-    LLVector2 getBeginScale() {
+    fun getBeginScale(): LLVector2 {
         LLVector2 lLVector2 = LLVector2(1.0f, 1.0f)
         if (this.ScaleX > 1.0f) {
             lLVector2.x = 2.0f - this.ScaleX
@@ -114,7 +114,7 @@ class PrimPathParams {
         return lLVector2
     }
 
-    LLVector2 getEndScale() {
+    fun getEndScale(): LLVector2 {
         LLVector2 lLVector2 = LLVector2(1.0f, 1.0f)
         if (this.ScaleX < 1.0f) {
             lLVector2.x = this.ScaleX
@@ -125,11 +125,11 @@ class PrimPathParams {
         return lLVector2
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         return this.hashValue
     }
 
-    String toString() {
+    fun toString(): String {
         return String.format("CurveType: 0x%02x, Begin: %f, End: %f, Scale: (%f, %f), Shear: (%f, %f), TwistBegin: %f, TwistEnd: %f, RadiusOffset: %f, Taper: (%f, %f), Revolutions: %f, Skew: %f", Any[]{Byte.valueOf(this.CurveType), Float.valueOf(this.Begin), Float.valueOf(this.End), Float.valueOf(this.ScaleX), Float.valueOf(this.ScaleY), Float.valueOf(this.ShearX), Float.valueOf(this.ShearY), Float.valueOf(this.TwistBegin), Float.valueOf(this.TwistEnd), Float.valueOf(this.RadiusOffset), Float.valueOf(this.TaperX), Float.valueOf(this.TaperY), Float.valueOf(this.Revolutions), Float.valueOf(this.Skew)})
     }
 }

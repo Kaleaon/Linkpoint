@@ -22,22 +22,22 @@ class EventGodDelete : SLMessage {
         Int QueryFlags
         UUID QueryID
         Int QueryStart
-        byte[] QueryText
+        ByteArray QueryText
     }
 
     EventGodDelete() {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.QueryData_Field.QueryText.length + 17 + 4 + 4 + 40
+    fun CalcPayloadSize(): Int {
+        return this.QueryData_Field.QueryText.size + 17 + 4 + 4 + 40
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleEventGodDelete(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -73)
@@ -50,7 +50,7 @@ class EventGodDelete : SLMessage {
         packInt(byteBuffer, this.QueryData_Field.QueryStart)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.EventData_Field.EventID = unpackInt(byteBuffer)

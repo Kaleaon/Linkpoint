@@ -110,7 +110,7 @@ class SLTransfer {
     }
 
     /* access modifiers changed from: package-private */
-    Unit HandleTransferInfo(SLTransferManager sLTransferManager, TransferInfo transferInfo) {
+    fun HandleTransferInfo(SLTransferManager sLTransferManager, TransferInfo transferInfo): Unit {
         this.statusKnown = true
         this.status = transferInfo.TransferInfoData_Field.Status
         this.size = transferInfo.TransferInfoData_Field.Size
@@ -121,48 +121,48 @@ class SLTransfer {
     }
 
     /* access modifiers changed from: package-private */
-    Unit HandleTransferPacket(SLTransferManager sLTransferManager, TransferPacket transferPacket) {
+    fun HandleTransferPacket(SLTransferManager sLTransferManager, TransferPacket transferPacket): Unit {
         this.queuedPackets.put(Int.valueOf(transferPacket.TransferData_Field.Packet), transferPacket)
         RunQueuedPackets(sLTransferManager)
     }
 
     /* access modifiers changed from: package-private */
-    Int getAssetType() {
+    fun getAssetType(): Int {
         return this.assetType
     }
 
     /* access modifiers changed from: package-private */
-    UUID getAssetUUID() {
+    fun getAssetUUID(): UUID {
         return this.assetUUID
     }
 
     /* access modifiers changed from: package-private */
-    Int getChannelType() {
+    fun getChannelType(): Int {
         return this.channelType
     }
 
     /* access modifiers changed from: package-private */
-    ByteArray getData() {
+    fun getData(): ByteArray {
         return this.data
     }
 
     /* access modifiers changed from: package-private */
-    Float getPriority() {
+    fun getPriority(): Float {
         return this.priority
     }
 
     /* access modifiers changed from: package-private */
-    Int getStatus() {
+    fun getStatus(): Int {
         return this.status
     }
 
     /* access modifiers changed from: package-private */
-    UUID getTransferUUID() {
+    fun getTransferUUID(): UUID {
         return this.transferUUID
     }
 
     /* access modifiers changed from: package-private */
-    TransferRequest makeTransferRequest() {
+    fun makeTransferRequest(): TransferRequest {
         TransferRequest transferRequest = TransferRequest()
         transferRequest.TransferInfo_Field.TransferID = this.transferUUID
         transferRequest.TransferInfo_Field.ChannelType = this.channelType

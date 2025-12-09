@@ -26,7 +26,7 @@ class DirClassifiedReply : SLMessage {
         UUID ClassifiedID
         Int CreationDate
         Int ExpirationDate
-        byte[] Name
+        ByteArray Name
         Int PriceForListing
     }
 
@@ -40,7 +40,7 @@ class DirClassifiedReply : SLMessage {
         this.QueryData_Field = QueryData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 37
         Iterator<T> it = this.QueryReplies_Fields.iterator()
         while (true) {
@@ -48,40 +48,40 @@ class DirClassifiedReply : SLMessage {
             if (!it.hasNext()) {
                 return i2 + 1 + (this.StatusData_Fields.size() * 4)
             }
-            i = ((QueryReplies) it.next()).Name.length + 17 + 1 + 4 + 4 + 4 + i2
+            i = ((it as QueryReplies).next()).Name.size + 17 + 1 + 4 + 4 + 4 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleDirClassifiedReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 41)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.QueryData_Field.QueryID)
-        byteBuffer.put((byte) this.QueryReplies_Fields.size())
+        byteBuffer.put((this as byte).QueryReplies_Fields.size())
         for (QueryReplies queryReplies : this.QueryReplies_Fields) {
             packUUID(byteBuffer, queryReplies.ClassifiedID)
             packVariable(byteBuffer, queryReplies.Name, 1)
-            packByte(byteBuffer, (byte) queryReplies.ClassifiedFlags)
+            packByte(byteBuffer, (queryReplies as byte).ClassifiedFlags)
             packInt(byteBuffer, queryReplies.CreationDate)
             packInt(byteBuffer, queryReplies.ExpirationDate)
             packInt(byteBuffer, queryReplies.PriceForListing)
         }
-        byteBuffer.put((byte) this.StatusData_Fields.size())
+        byteBuffer.put((this as byte).StatusData_Fields.size())
         for (StatusData statusData : this.StatusData_Fields) {
             packInt(byteBuffer, statusData.Status)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             QueryReplies queryReplies = QueryReplies()
             queryReplies.ClassifiedID = unpackUUID(byteBuffer)
             queryReplies.Name = unpackVariable(byteBuffer, 1)
@@ -92,7 +92,7 @@ class DirClassifiedReply : SLMessage {
             this.QueryReplies_Fields.add(queryReplies)
         }
         byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b2; i2++) {
+        for (i2 in 0 until b2) {
             StatusData statusData = StatusData()
             statusData.Status = unpackInt(byteBuffer)
             this.StatusData_Fields.add(statusData)

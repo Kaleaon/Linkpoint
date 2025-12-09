@@ -22,21 +22,21 @@ class InventoryListAdapter : CursorAdapter {
         this.avatarAppearance = sLAvatarAppearance
     }
 
-    Unit bindView(View view, Context context, Cursor cursor) {
+    fun bindView(View view, Context context, Cursor cursor): Unit {
         SLInventoryEntry sLInventoryEntry = SLInventoryEntry(cursor)
-        ((TextView) view.findViewById(R.id.itemNameTextView)).setText(sLInventoryEntry.name)
+        ((view as TextView).findViewById(R.id.itemNameTextView)).setText(sLInventoryEntry.name)
         Int drawableResource = sLInventoryEntry.getDrawableResource()
         if (drawableResource >= 0) {
-            ((ImageView) view.findViewById(R.id.itemTypeIconView)).setImageResource(drawableResource)
+            ((view as ImageView).findViewById(R.id.itemTypeIconView)).setImageResource(drawableResource)
             Int subtypeDrawableResource = sLInventoryEntry.getSubtypeDrawableResource()
             if (subtypeDrawableResource >= 0) {
-                ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageResource(subtypeDrawableResource)
+                ((view as ImageView).findViewById(R.id.itemSubTypeIconView)).setImageResource(subtypeDrawableResource)
             } else {
-                ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageBitmap((Bitmap) null)
+                ((view as ImageView).findViewById(R.id.itemSubTypeIconView)).setImageBitmap((Bitmap) null)
             }
         } else {
-            ((ImageView) view.findViewById(R.id.itemTypeIconView)).setImageBitmap((Bitmap) null)
-            ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageBitmap((Bitmap) null)
+            ((view as ImageView).findViewById(R.id.itemTypeIconView)).setImageBitmap((Bitmap) null)
+            ((view as ImageView).findViewById(R.id.itemSubTypeIconView)).setImageBitmap((Bitmap) null)
         }
         if (this.avatarAppearance != null) {
             view.findViewById(R.id.itemWornIcon).setVisibility(this.avatarAppearance.isItemWorn(sLInventoryEntry) ? 0 : 8)
@@ -45,7 +45,7 @@ class InventoryListAdapter : CursorAdapter {
         }
     }
 
-    View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-        return ((LayoutInflater) context.getSystemService("layout_inflater")).inflate(R.layout.inventory_item, viewGroup, false)
+    fun newView(Context context, Cursor cursor, ViewGroup viewGroup): View {
+        return ((context as LayoutInflater).getSystemService("layout_inflater")).inflate(R.layout.inventory_item, viewGroup, false)
     }
 }

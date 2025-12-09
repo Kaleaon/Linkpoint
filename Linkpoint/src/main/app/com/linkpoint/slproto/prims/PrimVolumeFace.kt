@@ -61,7 +61,7 @@ class PrimVolumeFace {
         Vector2Array vector2Array = this.TexCoords
         Vector3Array vector3Array2 = this.Positions
         Vector3Array vector3Array3 = this.Normals
-        for (Int i2 = 0; i2 < size; i2++) {
+        for (i2 in 0 until size) {
             if ((this.TypeMask & 512) != 0) {
                 vector2Array.set(i2, 0.5f + arrayList.get(i2).x, arrayList.get(i2).y + 0.5f)
             } else {
@@ -104,7 +104,7 @@ class PrimVolumeFace {
                 i3 = 1
                 i4 = 2
             }
-            for (Int i5 = 0; i5 < i - 2; i5++) {
+            for (i5 in 0 until i - 2) {
                 this.Indices[i5 * 3] = (Short) (i - 1)
                 this.Indices[(i5 * 3) + i3] = (Short) i5
                 this.Indices[(i5 * 3) + i4] = (Short) (i5 + 1)
@@ -305,8 +305,8 @@ class PrimVolumeFace {
         Int i18 = 0
         Int i19 = 0
         Boolean z5 = (this.TypeMask & 256) != 0
-        for (Int i20 = 0; i20 < this.NumT - 1; i20++) {
-            for (Int i21 = 0; i21 < this.NumS - 1; i21++) {
+        for (i20 in 0 until this.NumT - 1) {
+            for (i21 in 0 until this.NumS - 1) {
                 Int i22 = i18 + 1
                 this.Indices[i18] = (Short) ((this.NumS * i20) + i21)
                 Int i23 = i22 + 1
@@ -368,20 +368,20 @@ class PrimVolumeFace {
         this.Normals.clear()
         LLVector3[] lLVector3Arr = LLVector3[3]
         ShortArray sArr = ShortArray(3)
-        for (Int i28 = 0; i28 < 3; i28++) {
+        for (i28 in 0 until 3) {
             lLVector3Arr[i28] = LLVector3()
         }
         LLVector3 lLVector33 = LLVector3()
         LLVector3 lLVector34 = LLVector3()
-        for (Int i29 = 0; i29 < this.NumIndices / 3; i29++) {
-            for (Int i30 = 0; i30 < 3; i30++) {
+        for (i29 in 0 until this.NumIndices / 3) {
+            for (i30 in 0 until 3) {
                 sArr[i30] = this.Indices[(i29 * 3) + i30]
                 vector3Array2.get(sArr[i30], lLVector3Arr[i30])
             }
             lLVector33.setSub(lLVector3Arr[0], lLVector3Arr[1])
             lLVector34.setSub(lLVector3Arr[0], lLVector3Arr[2])
             lLVector33.setCross(lLVector34)
-            for (Int i31 = 0; i31 < 3; i31++) {
+            for (i31 in 0 until 3) {
                 this.Normals.add(sArr[i31], lLVector33)
             }
             this.Normals.add(sArr[(i29 & 1) + 1], lLVector33)
@@ -399,12 +399,12 @@ class PrimVolumeFace {
         Boolean z7 = lLVector35.dot(lLVector35) < 1.0E-6f
         if (b2 == 0) {
             if (!primVolume.Path.Open) {
-                for (Int i32 = 0; i32 < this.NumS; i32++) {
+                for (i32 in 0 until this.NumS) {
                     vector3Array3.setAdd(i32, (this.NumS * (this.NumT - 1)) + i32)
                 }
             }
             if (!primVolume.Path.Open && (!z6)) {
-                for (Int i33 = 0; i33 < this.NumT; i33++) {
+                for (i33 in 0 until this.NumT) {
                     vector3Array3.setAdd(this.NumS * i33, ((this.NumS * i33) + this.NumS) - 1)
                 }
             }
@@ -412,14 +412,14 @@ class PrimVolumeFace {
                 return true
             }
             if (z6) {
-                for (Int i34 = 0; i34 < this.NumT; i34++) {
+                for (i34 in 0 until this.NumT) {
                     vector3Array3.set(this.NumS * i34, 1.0f, 0.0f, 0.0f)
                 }
             }
             if (!z7) {
                 return true
             }
-            for (Int i35 = 0; i35 < this.NumT; i35++) {
+            for (i35 in 0 until this.NumT) {
                 vector3Array3.set(((this.NumS * i35) + this.NumS) - 1, -1.0f, 0.0f, 0.0f)
             }
             return true
@@ -429,29 +429,29 @@ class PrimVolumeFace {
         Boolean z10 = b2 == 2
         if (z8) {
             LLVector3 lLVector38 = LLVector3()
-            for (Int i36 = 0; i36 < this.NumS; i36++) {
+            for (i36 in 0 until this.NumS) {
                 vector3Array3.addToVector(i36, lLVector38)
             }
-            for (Int i37 = 0; i37 < this.NumS; i37++) {
+            for (i37 in 0 until this.NumS) {
                 vector3Array3.set(i37, lLVector38)
             }
             lLVector38.set(0.0f, 0.0f, 0.0f)
-            for (Int i38 = 0; i38 < this.NumS; i38++) {
+            for (i38 in 0 until this.NumS) {
                 vector3Array3.addToVector((this.NumS * (this.NumT - 1)) + i38, lLVector38)
             }
-            for (Int i39 = 0; i39 < this.NumS; i39++) {
+            for (i39 in 0 until this.NumS) {
                 vector3Array3.set((this.NumS * (this.NumT - 1)) + i39, lLVector38)
             }
         }
         if (z9) {
-            for (Int i40 = 0; i40 < this.NumT; i40++) {
+            for (i40 in 0 until this.NumT) {
                 vector3Array3.setAdd(this.NumS * i40, ((this.NumS * i40) + this.NumS) - 1)
             }
         }
         if (!z10) {
             return true
         }
-        for (Int i41 = 0; i41 < this.NumS; i41++) {
+        for (i41 in 0 until this.NumS) {
             vector3Array3.setAdd(i41, (this.NumS * (this.NumT - 1)) + i41)
         }
         return true
@@ -590,7 +590,7 @@ class PrimVolumeFace {
         }
     }
 
-    Boolean create(PrimVolume primVolume) {
+    fun create(PrimVolume primVolume): Boolean {
         Boolean createCap = (this.TypeMask & 2) != 0 ? createCap(primVolume) : ((this.TypeMask & 4) == 0 && (this.TypeMask & 8) == 0) ? false : createSide(primVolume)
         if (createCap) {
             this.TexCoordExtents[0] = LLVector2(1.0f, 1.0f)

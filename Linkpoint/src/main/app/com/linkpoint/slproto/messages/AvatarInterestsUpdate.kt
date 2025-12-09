@@ -14,26 +14,26 @@ class AvatarInterestsUpdate : SLMessage {
     }
 
     class PropertiesData {
-        byte[] LanguagesText
+        ByteArray LanguagesText
         Int SkillsMask
-        byte[] SkillsText
+        ByteArray SkillsText
         Int WantToMask
-        byte[] WantToText
+        ByteArray WantToText
     }
 
     AvatarInterestsUpdate() {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.PropertiesData_Field.WantToText.length + 5 + 4 + 1 + this.PropertiesData_Field.SkillsText.length + 1 + this.PropertiesData_Field.LanguagesText.length + 36
+    fun CalcPayloadSize(): Int {
+        return this.PropertiesData_Field.WantToText.size + 5 + 4 + 1 + this.PropertiesData_Field.SkillsText.size + 1 + this.PropertiesData_Field.LanguagesText.size + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAvatarInterestsUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -81)
@@ -46,7 +46,7 @@ class AvatarInterestsUpdate : SLMessage {
         packVariable(byteBuffer, this.PropertiesData_Field.LanguagesText, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.PropertiesData_Field.WantToMask = unpackInt(byteBuffer)

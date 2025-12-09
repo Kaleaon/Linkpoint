@@ -18,7 +18,7 @@ import com.linkpoint.slproto.users.manager.ObjectPopupsManager
         this.f199$f0 = obj
     }
 
-    Unit run() {
+    fun run(): Unit {
         $m$0()
     }
 }

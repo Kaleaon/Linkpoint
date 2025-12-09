@@ -18,15 +18,15 @@ class RpcChannelRequest : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 44
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRpcChannelRequest(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -99)
@@ -36,7 +36,7 @@ class RpcChannelRequest : SLMessage {
         packUUID(byteBuffer, this.DataBlock_Field.ItemID)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.DataBlock_Field.GridX = unpackInt(byteBuffer)
         this.DataBlock_Field.GridY = unpackInt(byteBuffer)
         this.DataBlock_Field.TaskID = unpackUUID(byteBuffer)

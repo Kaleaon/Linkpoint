@@ -14,17 +14,17 @@ class GroupProfileReply : SLMessage {
 
     class GroupData {
         Boolean AllowPublish
-        byte[] Charter
+        ByteArray Charter
         UUID FounderID
         UUID GroupID
         Int GroupMembershipCount
         Int GroupRolesCount
         UUID InsigniaID
         Boolean MaturePublish
-        byte[] MemberTitle
+        ByteArray MemberTitle
         Int MembershipFee
         Int Money
-        byte[] Name
+        ByteArray Name
         Boolean OpenEnrollment
         UUID OwnerRole
         Long PowersMask
@@ -35,15 +35,15 @@ class GroupProfileReply : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.GroupData_Field.Name.length + 17 + 2 + this.GroupData_Field.Charter.length + 1 + 1 + this.GroupData_Field.MemberTitle.length + 8 + 16 + 16 + 4 + 1 + 4 + 4 + 4 + 1 + 1 + 16 + 20
+    fun CalcPayloadSize(): Int {
+        return this.GroupData_Field.Name.size + 17 + 2 + this.GroupData_Field.Charter.size + 1 + 1 + this.GroupData_Field.MemberTitle.size + 8 + 16 + 16 + 4 + 1 + 4 + 4 + 4 + 1 + 1 + 16 + 20
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleGroupProfileReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 96)
@@ -66,7 +66,7 @@ class GroupProfileReply : SLMessage {
         packUUID(byteBuffer, this.GroupData_Field.OwnerRole)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.GroupData_Field.GroupID = unpackUUID(byteBuffer)
         this.GroupData_Field.Name = unpackVariable(byteBuffer, 1)

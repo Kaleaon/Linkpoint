@@ -55,7 +55,7 @@ class SLMinimap : SLModule {
     private val parcelIDs: IntArray = IntArray(4096)
     private Map<Int, ParcelData> parcels = ConcurrentHashMap()
     private RequestHandler<SubscriptionSingleKey> userLocationRequestHandler = SimpleRequestHandler<SubscriptionSingleKey>() {
-        Unit onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey) {
+        fun onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey): Unit {
             if (SLMinimap.this.userLocationsResultHandler != null) {
                 SLMinimap.this.userLocationsResultHandler.onResultData(subscriptionSingleKey, UserLocations(SLMinimap.this.myAvatarPosition, SLMinimap.this.getMyAvatarHeading(), SLMinimap.this.userPositions))
             }
@@ -85,11 +85,11 @@ class SLMinimap : SLModule {
             System.arraycopy(iArr, 0, this.colors, (this.bitmapHeight * i2) + i, iArr.length)
         }
 
-        Bitmap makeBitmap() {
+        fun makeBitmap(): Bitmap {
             return Bitmap.createBitmap(this.colors, this.bitmapWidth, this.bitmapHeight, Bitmap.Config.ARGB_8888)
         }
 
-        Unit updateBitmap(Bitmap bitmap) {
+        fun updateBitmap(Bitmap bitmap): Unit {
             bitmap.setPixels(this.colors, 0, this.bitmapWidth, 0, 0, this.bitmapWidth, this.bitmapHeight)
         }
     }
@@ -133,7 +133,7 @@ class SLMinimap : SLModule {
     }
 
     /* access modifiers changed from: private */
-    Float getMyAvatarHeading() {
+    fun getMyAvatarHeading(): Float {
         return (this.agentCircuit.getModules().avatarControl.getAgentHeading() * 3.1415927f) / 180.0f
     }
 
@@ -154,7 +154,7 @@ class SLMinimap : SLModule {
 
     /* access modifiers changed from: private */
     /* renamed from: updateAvatarParcelData */
-    Unit m212com_lumiyaviewer_lumiya_slproto_modules_SLMinimapmthref0() {
+    fun m212com_lumiyaviewer_lumiya_slproto_modules_SLMinimapmthref0(): Unit {
         ParcelData parcelData = null
         if (this.myAvatarParcelDataIndex >= 0) {
             parcelData = this.parcels.get(Int.valueOf(this.parcelIDs[this.myAvatarParcelDataIndex]))
@@ -170,7 +170,7 @@ class SLMinimap : SLModule {
         this.userManager.setCurrentLocationInfo(CurrentLocationInfo.create(parcelData, this.nearbyUsersCount, this.chatRangeUsersCount, sLVoice.getCurrentParcelVoiceChannel()))
     }
 
-    Unit HandleCloseCircuit() {
+    fun HandleCloseCircuit(): Unit {
         if (this.userManager != null) {
             this.userManager.getUserLocationsPool().detachRequestHandler(this.userLocationRequestHandler)
         }
@@ -185,7 +185,7 @@ class SLMinimap : SLModule {
     /* JADX WARNING: Removed duplicated region for block: B:79:0x01c0  */
     @com.linkpoint.slproto.handler.SLMessageHandler
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    Unit HandleCoarseLocationUpdate(com.linkpoint.slproto.messages.CoarseLocationUpdate r14) {
+    fun HandleCoarseLocationUpdate(com.linkpoint.slproto.messages.CoarseLocationUpdate r14): Unit {
         /*
             r13 = this
             r3 = 0
@@ -444,7 +444,7 @@ class SLMinimap : SLModule {
     }
 
     @SLMessageHandler
-    Unit HandleParcelOverlay(ParcelOverlay parcelOverlay) {
+    fun HandleParcelOverlay(ParcelOverlay parcelOverlay): Unit {
         Debug.Log("ParcelOverlay: SequenceID = " + parcelOverlay.ParcelData_Field.SequenceID)
         ByteArray bArr = parcelOverlay.ParcelData_Field.Data
         Int length = bArr.length / 64
@@ -534,7 +534,7 @@ class SLMinimap : SLModule {
     /* JADX WARNING: Removed duplicated region for block: B:40:? A[RETURN, SYNTHETIC] */
     @com.linkpoint.slproto.handler.SLEventQueueMessageHandler(eventName = com.linkpoint.slproto.caps.SLCapEventQueue.CapsEventType.ParcelProperties)
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    Unit HandleParcelProperties(com.linkpoint.slproto.llsd.LLSDNode r10) {
+    fun HandleParcelProperties(com.linkpoint.slproto.llsd.LLSDNode r10): Unit {
         /*
             r9 = this
             r2 = 0
@@ -601,7 +601,7 @@ class SLMinimap : SLModule {
         throw UnsupportedOperationException("Method not decompiled: com.linkpoint.slproto.modules.SLMinimap.HandleParcelProperties(com.linkpoint.slproto.llsd.LLSDNode):Unit")
     }
 
-    Float getDistanceToUser(@Nullable UUID uuid) {
+    fun getDistanceToUser(@Nullable UUID uuid): Float {
         if (uuid == null) {
             return null
         }
@@ -610,7 +610,7 @@ class SLMinimap : SLModule {
     }
 
     @Nullable
-    LLVector3 getNearbyAgentLocation(UUID uuid) {
+    fun getNearbyAgentLocation(UUID uuid): LLVector3 {
         SLObjectInfo avatarObject
         if (this.gridConn != null && this.gridConn.parcelInfo != null && (avatarObject = this.gridConn.parcelInfo.getAvatarObject(uuid)) != null) {
             return avatarObject.getAbsolutePosition()
@@ -621,7 +621,7 @@ class SLMinimap : SLModule {
         return LLVector3(this.myAvatarPosition.getX(), this.myAvatarPosition.getY(), this.myAvatarPosition.getZ())
     }
 
-    List<ChatterID> getNearbyChatterList() {
+    fun getNearbyChatterList(): List<ChatterID> {
         ArrayList arrayList = ArrayList(this.userPositions.size())
         for (UserLocation userLocation : this.userPositions.values()) {
             arrayList.add(userLocation.chatterID)
@@ -629,7 +629,7 @@ class SLMinimap : SLModule {
         return arrayList
     }
 
-    Unit requestUpdateAvatarParcelData() {
+    fun requestUpdateAvatarParcelData(): Unit {
         this.agentCircuit.execute($Lambda$eaDiotW55nmaHN5_b1ikeJpLLsk(this))
     }
 }

@@ -46,7 +46,7 @@ class DrawableAvatarStub : OnChatterNameUpdated {
         }
     }
 
-    FloatArray getWorldMatrix(RenderContext renderContext) {
+    fun getWorldMatrix(RenderContext renderContext): FloatArray {
         if (!this.avatarObject.isMyAvatar() || this.avatarObject.parentID != 0) {
             return this.avatarObject.worldMatrix
         }

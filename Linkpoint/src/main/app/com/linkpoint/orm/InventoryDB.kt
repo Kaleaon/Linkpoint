@@ -28,7 +28,9 @@ class InventoryDB {
         }
     }
 
-    Unit deleteEntry(@NonNull SLInventoryEntry sLInventoryEntry) throws DBObject.DatabaseBindingException {
+    @Throws(DBObject.DatabaseBindingException::class)
+
+    fun deleteEntry(@NonNull SLInventoryEntry sLInventoryEntry) {
         if (sLInventoryEntry == null) {
             throw IllegalArgumentException("SLInventoryEntry cannot be null")
         }
@@ -115,7 +117,8 @@ class InventoryDB {
     }
 
     @NonNull
-    SLInventoryEntry loadEntry(Long j) throws DBObject.DatabaseBindingException {
+    @Throws(DBObject.DatabaseBindingException::class)
+    fun loadEntry(Long j): SLInventoryEntry {
         return SLInventoryEntry(this.db, j)
     }
 
@@ -260,7 +263,9 @@ class InventoryDB {
         throw UnsupportedOperationException("Method not decompiled: com.linkpoint.orm.InventoryDB.retainChildren(Long, java.util.Set):Unit")
     }
 
-    Unit saveEntry(@NonNull SLInventoryEntry sLInventoryEntry) throws DBObject.DatabaseBindingException {
+    @Throws(DBObject.DatabaseBindingException::class)
+
+    fun saveEntry(@NonNull SLInventoryEntry sLInventoryEntry) {
         if (sLInventoryEntry == null) {
             throw IllegalArgumentException("SLInventoryEntry cannot be null")
         }

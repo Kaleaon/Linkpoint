@@ -23,52 +23,52 @@ class TaskInventoryListAdapter : BaseAdapter {
         this.context = context2
     }
 
-    Int getCount() {
+    fun getCount(): Int {
         if (this.taskInventory != null) {
             return this.taskInventory.entries.size()
         }
         return 0
     }
 
-    SLInventoryEntry getItem(Int i) {
+    fun getItem(Int i): SLInventoryEntry {
         if (this.taskInventory != null) {
-            return (SLInventoryEntry) this.taskInventory.entries.get(i)
+            return (this as SLInventoryEntry).taskInventory.entries.get(i)
         }
         return null
     }
 
-    Long getItemId(Int i) {
+    fun getItemId(Int i): Long {
         return (Long) i
     }
 
-    View getView(Int i, View view, ViewGroup viewGroup) {
+    fun getView(Int i, View view, ViewGroup viewGroup): View {
         if (view == null) {
-            view = ((LayoutInflater) this.context.getSystemService("layout_inflater")).inflate(R.layout.inventory_item, viewGroup, false)
+            view = ((this as LayoutInflater).context.getSystemService("layout_inflater")).inflate(R.layout.inventory_item, viewGroup, false)
         }
         SLInventoryEntry item = getItem(i)
-        ((TextView) view.findViewById(R.id.itemNameTextView)).setText(item.name)
+        ((view as TextView).findViewById(R.id.itemNameTextView)).setText(item.name)
         Int drawableResource = item.getDrawableResource()
         if (drawableResource >= 0) {
-            ((ImageView) view.findViewById(R.id.itemTypeIconView)).setImageResource(drawableResource)
+            ((view as ImageView).findViewById(R.id.itemTypeIconView)).setImageResource(drawableResource)
             Int subtypeDrawableResource = item.getSubtypeDrawableResource()
             if (subtypeDrawableResource >= 0) {
-                ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageResource(subtypeDrawableResource)
+                ((view as ImageView).findViewById(R.id.itemSubTypeIconView)).setImageResource(subtypeDrawableResource)
             } else {
-                ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageBitmap((Bitmap) null)
+                ((view as ImageView).findViewById(R.id.itemSubTypeIconView)).setImageBitmap((Bitmap) null)
             }
         } else {
-            ((ImageView) view.findViewById(R.id.itemTypeIconView)).setImageBitmap((Bitmap) null)
-            ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageBitmap((Bitmap) null)
+            ((view as ImageView).findViewById(R.id.itemTypeIconView)).setImageBitmap((Bitmap) null)
+            ((view as ImageView).findViewById(R.id.itemSubTypeIconView)).setImageBitmap((Bitmap) null)
         }
         view.findViewById(R.id.itemWornIcon).setVisibility(8)
         return view
     }
 
-    Boolean hasStableIds() {
+    fun hasStableIds(): Boolean {
         return false
     }
 
-    Unit setData(SLTaskInventory sLTaskInventory) {
+    fun setData(SLTaskInventory sLTaskInventory): Unit {
         this.taskInventory = sLTaskInventory
         notifyDataSetChanged()
     }

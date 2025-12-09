@@ -33,7 +33,7 @@ class PrimFlexibleInfo {
         }
     }
 
-    Boolean doFlexibleUpdate(PrimFlexibleParams primFlexibleParams, FloatArray fArr, Int i, Float f, Float f2, Float f3) {
+    fun doFlexibleUpdate(PrimFlexibleParams primFlexibleParams, FloatArray fArr, Int i, Float f, Float f2, Float f3): Boolean {
         Long currentTimeMillis = System.currentTimeMillis()
         if (currentTimeMillis < this.lastUpdateMillis + MIN_UPDATE_INTERVAL) {
             return false
@@ -60,7 +60,7 @@ class PrimFlexibleInfo {
         return true
     }
 
-    Boolean doFlexibleUpdateSlow(PrimFlexibleParams primFlexibleParams, FloatArray fArr, Int i, Float f, Float f2, Float f3) {
+    fun doFlexibleUpdateSlow(PrimFlexibleParams primFlexibleParams, FloatArray fArr, Int i, Float f, Float f2, Float f3): Boolean {
         Long currentTimeMillis = System.currentTimeMillis()
         if (currentTimeMillis < this.lastUpdateMillis + MIN_UPDATE_INTERVAL) {
             return false
@@ -89,7 +89,7 @@ class PrimFlexibleInfo {
         LLVector3 sub = LLVector3.sub(lLVector3, lLVector34)
         if (this.sections == null) {
             this.sections = FlexibleSection[this.NumSections]
-            for (Int i2 = 0; i2 < this.NumSections; i2++) {
+            for (i2 in 0 until this.NumSections) {
                 this.sections[i2] = FlexibleSection((FlexibleSection) null)
                 this.sections[i2].Position = LLVector3(sub)
                 this.sections[i2].Position.addMul(lLVector33, (i2.toFloat()) * f5)
@@ -201,7 +201,7 @@ class PrimFlexibleInfo {
         }
     }
 
-    GLLoadableBuffer getFlexedVertexBuffer(RenderContext renderContext, GLLoadableBuffer gLLoadableBuffer, Int i) {
+    fun getFlexedVertexBuffer(RenderContext renderContext, GLLoadableBuffer gLLoadableBuffer, Int i): GLLoadableBuffer {
         if (this.sectionMatrices != null) {
             if (this.needVertexBufferUpdate) {
                 DirectByteBuffer rawBuffer = gLLoadableBuffer.getRawBuffer()
@@ -219,7 +219,7 @@ class PrimFlexibleInfo {
         return gLLoadableBuffer
     }
 
-    FloatArray getMatrices() {
+    fun getMatrices(): FloatArray {
         return this.sectionMatrices
     }
 }

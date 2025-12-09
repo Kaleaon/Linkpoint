@@ -8,47 +8,51 @@ import java.io.IOException
 import org.xmlpull.v1.XmlSerializer
 
 class LLSDBinary : LLSDNode {
-    private byte[] value
+    private ByteArray value
 
     LLSDBinary(String str) {
         this.value = Base64.decode(str)
     }
 
-    LLSDBinary(byte[] bArr) {
+    LLSDBinary(ByteArray bArr) {
         this.value = bArr
     }
 
-    byte[] asBinary() {
+    fun asBinary(): ByteArray {
         return this.value
     }
 
-    Int asInt() {
+    fun asInt(): Int {
         Int i = 0
         byte b = 0
-        while (i < 4 && i < this.value.length) {
+        while (i < 4 && i < this.value.size) {
             b = (b << 8) | (this.value[i] & UnsignedBytes.MAX_VALUE)
             i++
         }
         return b
     }
 
-    Long asLong() {
+    fun asLong(): Long {
         Long j = 0
         Int i = 0
-        while (i < 8 && i < this.value.length) {
+        while (i < 8 && i < this.value.size) {
             j = (j << 8) | ((Long) (this.value[i] & UnsignedBytes.MAX_VALUE))
             i++
         }
         return j
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    @Throws(IOException::class)
+
+    fun toBinary(DataOutputStream dataOutputStream) {
         dataOutputStream.writeByte(98)
-        dataOutputStream.writeInt(this.value.length)
+        dataOutputStream.writeInt(this.value.size)
         dataOutputStream.write(this.value)
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    @Throws(IOException::class)
+
+    fun toXML(XmlSerializer xmlSerializer) {
         xmlSerializer.startTag("", "binary")
         xmlSerializer.text(android.util.Base64.encodeToString(this.value, android.util.Base64.DEFAULT))
         xmlSerializer.endTag("", "binary")

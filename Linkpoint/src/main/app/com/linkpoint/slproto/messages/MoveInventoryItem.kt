@@ -29,7 +29,7 @@ class MoveInventoryItem : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 38
         Iterator<T> it = this.InventoryData_Fields.iterator()
         while (true) {
@@ -37,22 +37,22 @@ class MoveInventoryItem : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            i = ((InventoryData) it.next()).NewName.length + 33 + i2
+            i = ((it as InventoryData).next()).NewName.size + 33 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleMoveInventoryItem(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put(Ascii.FF)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packBoolean(byteBuffer, this.AgentData_Field.Stamp)
-        byteBuffer.put((Byte) this.InventoryData_Fields.size())
+        byteBuffer.put((this as Byte).InventoryData_Fields.size())
         for (InventoryData inventoryData : this.InventoryData_Fields) {
             packUUID(byteBuffer, inventoryData.ItemID)
             packUUID(byteBuffer, inventoryData.FolderID)
@@ -60,12 +60,12 @@ class MoveInventoryItem : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.Stamp = unpackBoolean(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             InventoryData inventoryData = InventoryData()
             inventoryData.ItemID = unpackUUID(byteBuffer)
             inventoryData.FolderID = unpackUUID(byteBuffer)

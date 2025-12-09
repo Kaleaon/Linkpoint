@@ -9,14 +9,14 @@ import com.linkpoint.render.WorldViewRenderer
     private /* synthetic */ Any f513$f0
 
     private /* synthetic */ Unit $m$0() {
-        ((WorldViewRenderer) this.f513$f0).enableDrawing()
+        ((this as WorldViewRenderer).f513$f0).enableDrawing()
     }
 
     /* synthetic */ $Lambda$WbegR8yVWPTDY8X58dwHEd9HRSQ(Any obj) {
         this.f513$f0 = obj
     }
 
-    Unit run() {
+    fun run(): Unit {
         $m$0()
     }
 }

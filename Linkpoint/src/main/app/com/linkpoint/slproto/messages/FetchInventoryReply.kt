@@ -22,7 +22,7 @@ class FetchInventoryReply : SLMessage {
         Int CRC
         Int CreationDate
         UUID CreatorID
-        byte[] Description
+        ByteArray Description
         Int EveryoneMask
         Int Flags
         UUID FolderID
@@ -31,7 +31,7 @@ class FetchInventoryReply : SLMessage {
         Boolean GroupOwned
         Int InvType
         UUID ItemID
-        byte[] Name
+        ByteArray Name
         Int NextOwnerMask
         UUID OwnerID
         Int OwnerMask
@@ -45,7 +45,7 @@ class FetchInventoryReply : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 21
         Iterator<T> it = this.InventoryData_Fields.iterator()
         while (true) {
@@ -53,21 +53,21 @@ class FetchInventoryReply : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            InventoryData inventoryData = (InventoryData) it.next()
-            i = inventoryData.Description.length + inventoryData.Name.length + 129 + 1 + 4 + 4 + i2
+            InventoryData inventoryData = (it as InventoryData).next()
+            i = inventoryData.Description.size + inventoryData.Name.size + 129 + 1 + 4 + 4 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleFetchInventoryReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put(Ascii.CAN)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        byteBuffer.put((byte) this.InventoryData_Fields.size())
+        byteBuffer.put((this as byte).InventoryData_Fields.size())
         for (InventoryData inventoryData : this.InventoryData_Fields) {
             packUUID(byteBuffer, inventoryData.ItemID)
             packUUID(byteBuffer, inventoryData.FolderID)
@@ -81,10 +81,10 @@ class FetchInventoryReply : SLMessage {
             packInt(byteBuffer, inventoryData.NextOwnerMask)
             packBoolean(byteBuffer, inventoryData.GroupOwned)
             packUUID(byteBuffer, inventoryData.AssetID)
-            packByte(byteBuffer, (byte) inventoryData.Type)
-            packByte(byteBuffer, (byte) inventoryData.InvType)
+            packByte(byteBuffer, (inventoryData as byte).Type)
+            packByte(byteBuffer, (inventoryData as byte).InvType)
             packInt(byteBuffer, inventoryData.Flags)
-            packByte(byteBuffer, (byte) inventoryData.SaleType)
+            packByte(byteBuffer, (inventoryData as byte).SaleType)
             packInt(byteBuffer, inventoryData.SalePrice)
             packVariable(byteBuffer, inventoryData.Name, 1)
             packVariable(byteBuffer, inventoryData.Description, 1)
@@ -93,10 +93,10 @@ class FetchInventoryReply : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             InventoryData inventoryData = InventoryData()
             inventoryData.ItemID = unpackUUID(byteBuffer)
             inventoryData.FolderID = unpackUUID(byteBuffer)

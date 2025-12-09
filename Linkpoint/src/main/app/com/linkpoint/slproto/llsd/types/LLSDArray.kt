@@ -29,22 +29,26 @@ class LLSDArray : LLSDNode {
         }
     }
 
-    Unit add(LLSDNode lLSDNode) {
+    fun add(LLSDNode lLSDNode): Unit {
         this.items.add(lLSDNode)
     }
 
-    LLSDNode byIndex(Int i) throws LLSDInvalidKeyException {
+    @Throws(LLSDInvalidKeyException::class)
+
+    fun byIndex(Int i): LLSDNode {
         if (i >= 0 && i < this.items.size()) {
             return this.items.get(i)
         }
         throw LLSDInvalidKeyException(String.format("Array index out of range: req %d, size %d", Array<Any>{Integer.valueOf(i), Integer.valueOf(this.items.size())}))
     }
 
-    Int getCount() {
+    fun getCount(): Int {
         return this.items.size()
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    @Throws(IOException::class)
+
+    fun toBinary(DataOutputStream dataOutputStream) {
         dataOutputStream.writeByte(91)
         dataOutputStream.writeInt(this.items.size())
         for (LLSDNode binary : this.items) {
@@ -53,7 +57,9 @@ class LLSDArray : LLSDNode {
         dataOutputStream.writeByte(93)
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    @Throws(IOException::class)
+
+    fun toXML(XmlSerializer xmlSerializer) {
         xmlSerializer.startTag("", "array")
         for (LLSDNode xml : this.items) {
             xml.toXML(xmlSerializer)

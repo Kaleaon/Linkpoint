@@ -58,12 +58,12 @@ enum SLAssetType {
         this.actionDescription = i5
     }
 
-    SLAssetType getByString(String str) {
+    fun getByString(String str): SLAssetType {
         SLAssetType sLAssetType = tagMap.get(str)
         return sLAssetType == null ? AT_UNKNOWN : sLAssetType
     }
 
-    SLAssetType getByType(Int i) {
+    fun getByType(Int i): SLAssetType {
         for (SLAssetType sLAssetType : values()) {
             if (sLAssetType.typeCode == i) {
                 return sLAssetType
@@ -72,31 +72,31 @@ enum SLAssetType {
         return AT_UNKNOWN
     }
 
-    Int getActionDescription() {
+    fun getActionDescription(): Int {
         return this.actionDescription
     }
 
-    Int getDrawableResource() {
+    fun getDrawableResource(): Int {
         return this.drawableResource
     }
 
-    SLInventoryType getInventoryType() {
+    fun getInventoryType(): SLInventoryType {
         return this.invType
     }
 
-    Int getSpecialFolderType() {
+    fun getSpecialFolderType(): Int {
         return this.specialFolderType
     }
 
-    String getStringCode() {
+    fun getStringCode(): String {
         return this.stringCode
     }
 
-    Int getTypeCode() {
+    fun getTypeCode(): Int {
         return this.typeCode
     }
 
-    Int getTypeDescription() {
+    fun getTypeDescription(): Int {
         return this.typeDescription
     }
 }

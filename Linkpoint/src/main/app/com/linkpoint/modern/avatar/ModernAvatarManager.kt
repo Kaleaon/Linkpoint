@@ -43,7 +43,7 @@ class ModernAvatarManager {
     /**
      * Initialize avatar manager
      */
-    CompletableFuture<Boolean> initializeAsync() {
+    fun initializeAsync(): CompletableFuture<Boolean> {
         Log.i(TAG, "Initializing modern avatar management system")
         
         return CompletableFuture.supplyAsync(() -> {
@@ -61,7 +61,7 @@ class ModernAvatarManager {
     /**
      * Create and initialize avatar for rendering
      */
-    CompletableFuture<Boolean> createAvatar(UUID avatarId, MockSLObject avatarObject) {
+    fun createAvatar(UUID avatarId, MockSLObject avatarObject): CompletableFuture<Boolean> {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 Log.i(TAG, "Creating avatar: " + avatarId)
@@ -94,7 +94,7 @@ class ModernAvatarManager {
     /**
      * Update avatar appearance (textures, shape, etc.)
      */
-    CompletableFuture<Boolean> updateAvatarAppearance(UUID avatarId, AvatarAppearance appearance) {
+    fun updateAvatarAppearance(UUID avatarId, AvatarAppearance appearance): CompletableFuture<Boolean> {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 AvatarState state = avatarStates.get(avatarId)
@@ -129,7 +129,7 @@ class ModernAvatarManager {
     /**
      * Update avatar texture
      */
-    CompletableFuture<Boolean> updateAvatarTexture(UUID avatarId, String textureType, UUID textureId, byte[] textureData) {
+    fun updateAvatarTexture(UUID avatarId, String textureType, UUID textureId, byte[] textureData): CompletableFuture<Boolean> {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 AvatarState state = avatarStates.get(avatarId)
@@ -168,7 +168,7 @@ class ModernAvatarManager {
     /**
      * Start avatar animation
      */
-    CompletableFuture<Boolean> startAvatarAnimation(UUID avatarId, String animationId, boolean loop) {
+    fun startAvatarAnimation(UUID avatarId, String animationId, boolean loop): CompletableFuture<Boolean> {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 AvatarState state = avatarStates.get(avatarId)
@@ -205,21 +205,21 @@ class ModernAvatarManager {
     /**
      * Get avatar visual state for rendering system
      */
-    Object getAvatarVisualState(UUID avatarId) {
+    fun getAvatarVisualState(UUID avatarId): Object {
         return visualStates.get(avatarId)
     }
     
     /**
      * Get avatar state information
      */
-    AvatarState getAvatarState(UUID avatarId) {
+    fun getAvatarState(UUID avatarId): AvatarState {
         return avatarStates.get(avatarId)
     }
     
     /**
      * Remove avatar
      */
-    CompletableFuture<Boolean> removeAvatar(UUID avatarId) {
+    fun removeAvatar(UUID avatarId): CompletableFuture<Boolean> {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 AvatarState state = avatarStates.remove(avatarId)
@@ -246,7 +246,7 @@ class ModernAvatarManager {
     /**
      * Validate avatar rendering capability
      */
-    CompletableFuture<Boolean> validateAvatarRendering() {
+    fun validateAvatarRendering(): CompletableFuture<Boolean> {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 Log.i(TAG, "Validating avatar rendering system...")
@@ -344,11 +344,11 @@ class ModernAvatarManager {
         }
         
         // Getters
-        UUID getAvatarId() { return avatarId; }
-        MockSLObject getAvatarObject() { return avatarObject; }
-        AvatarAppearance getAppearance() { return appearance; }
-        String getCurrentAnimation() { return currentAnimation; }
-        AvatarTextureInfo getTexture(String type) { return textures.get(type); }
+        fun getAvatarId(): UUID { return avatarId; }
+        fun getAvatarObject(): MockSLObject { return avatarObject; }
+        fun getAppearance(): AvatarAppearance { return appearance; }
+        fun getCurrentAnimation(): String { return currentAnimation; }
+        fun getTexture(String type): AvatarTextureInfo { return textures.get(type); }
         long getCreatedTime() { return createdTime; }
     }
     
@@ -363,8 +363,8 @@ class ModernAvatarManager {
             this.textureData = textureData
         }
         
-        String getType() { return type; }
-        UUID getTextureId() { return textureId; }
+        fun getType(): String { return type; }
+        fun getTextureId(): UUID { return textureId; }
         byte[] getTextureData() { return textureData; }
     }
     
@@ -397,32 +397,32 @@ class ModernAvatarManager {
             private float[] hairColor = {0.4f, 0.3f, 0.2f, 1.0f}
             private float[] eyeColor = {0.2f, 0.4f, 0.8f, 1.0f}
             
-            Builder withBodyHeight(float height) {
+            fun withBodyHeight(float height): Builder {
                 this.bodyHeight = height
                 return this
             }
             
-            Builder withBodyWidth(float width) {
+            fun withBodyWidth(float width): Builder {
                 this.bodyWidth = width
                 return this
             }
             
-            Builder withSkinColor(float r, float g, float b, float a) {
+            fun withSkinColor(float r, float g, float b, float a): Builder {
                 this.skinColor = arrayOf(){r, g, b, a}
                 return this
             }
             
-            Builder withHairColor(float r, float g, float b, float a) {
+            fun withHairColor(float r, float g, float b, float a): Builder {
                 this.hairColor = arrayOf(){r, g, b, a}
                 return this
             }
             
-            Builder withEyeColor(float r, float g, float b, float a) {
+            fun withEyeColor(float r, float g, float b, float a): Builder {
                 this.eyeColor = arrayOf(){r, g, b, a}
                 return this
             }
             
-            AvatarAppearance build() {
+            fun build(): AvatarAppearance {
                 return fun AvatarAppearance(): new
             }
         }
@@ -436,7 +436,7 @@ class ModernAvatarManager {
             this.objectUUID = objectUUID
         }
         
-        UUID getObjectUUID() {
+        fun getObjectUUID(): UUID {
             return objectUUID
         }
     }

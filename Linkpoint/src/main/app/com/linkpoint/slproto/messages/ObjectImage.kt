@@ -27,7 +27,7 @@ class ObjectImage : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 37
         Iterator<T> it = this.ObjectData_Fields.iterator()
         while (true) {
@@ -35,22 +35,22 @@ class ObjectImage : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            ObjectData objectData = (ObjectData) it.next()
-            i = objectData.TextureEntry.length + objectData.MediaURL.length + 5 + 2 + i2
+            ObjectData objectData = (it as ObjectData).next()
+            i = objectData.TextureEntry.size + objectData.MediaURL.size + 5 + 2 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleObjectImage(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 96)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        byteBuffer.put((Byte) this.ObjectData_Fields.size())
+        byteBuffer.put((this as Byte).ObjectData_Fields.size())
         for (ObjectData objectData : this.ObjectData_Fields) {
             packInt(byteBuffer, objectData.ObjectLocalID)
             packVariable(byteBuffer, objectData.MediaURL, 1)
@@ -58,11 +58,11 @@ class ObjectImage : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             ObjectData objectData = ObjectData()
             objectData.ObjectLocalID = unpackInt(byteBuffer)
             objectData.MediaURL = unpackVariable(byteBuffer, 1)

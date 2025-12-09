@@ -52,7 +52,7 @@ class InsetColoringLayout : FrameLayout {
     }
 
     /* access modifiers changed from: protected */
-    Unit onDraw(Canvas canvas) {
+    fun onDraw(Canvas canvas): Unit {
         Int width = getWidth()
         Int height = getHeight()
         this.backgroundPaint.setColor(this.backgroundColor)
@@ -71,7 +71,7 @@ class InsetColoringLayout : FrameLayout {
     }
 
     /* access modifiers changed from: protected */
-    Unit onLayout(Boolean z, Int i, Int i2, Int i3, Int i4) {
+    fun onLayout(Boolean z, Int i, Int i2, Int i3, Int i4): Unit {
         View childAt
         super.onLayout(z, i, i2, i3, i4)
         if (getChildCount() > 0 && (childAt = getChildAt(0)) != null) {

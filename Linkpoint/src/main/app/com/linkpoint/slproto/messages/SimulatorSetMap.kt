@@ -17,15 +17,15 @@ class SimulatorSetMap : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 32
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleSimulatorSetMap(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 6)
@@ -34,7 +34,7 @@ class SimulatorSetMap : SLMessage {
         packUUID(byteBuffer, this.MapData_Field.MapImage)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.MapData_Field.RegionHandle = unpackLong(byteBuffer)
         this.MapData_Field.Type = unpackInt(byteBuffer)
         this.MapData_Field.MapImage = unpackUUID(byteBuffer)

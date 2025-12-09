@@ -16,10 +16,10 @@ class CreateInventoryItem : SLMessage {
 
     class InventoryBlock {
         Int CallbackID
-        byte[] Description
+        ByteArray Description
         UUID FolderID
         Int InvType
-        byte[] Name
+        ByteArray Name
         Int NextOwnerMask
         UUID TransactionID
         Int Type
@@ -30,15 +30,15 @@ class CreateInventoryItem : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.InventoryBlock_Field.Name.length + 44 + 1 + this.InventoryBlock_Field.Description.length + 36
+    fun CalcPayloadSize(): Int {
+        return this.InventoryBlock_Field.Name.size + 44 + 1 + this.InventoryBlock_Field.Description.size + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleCreateInventoryItem(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 49)
@@ -48,14 +48,14 @@ class CreateInventoryItem : SLMessage {
         packUUID(byteBuffer, this.InventoryBlock_Field.FolderID)
         packUUID(byteBuffer, this.InventoryBlock_Field.TransactionID)
         packInt(byteBuffer, this.InventoryBlock_Field.NextOwnerMask)
-        packByte(byteBuffer, (byte) this.InventoryBlock_Field.Type)
-        packByte(byteBuffer, (byte) this.InventoryBlock_Field.InvType)
-        packByte(byteBuffer, (byte) this.InventoryBlock_Field.WearableType)
+        packByte(byteBuffer, (this as byte).InventoryBlock_Field.Type)
+        packByte(byteBuffer, (this as byte).InventoryBlock_Field.InvType)
+        packByte(byteBuffer, (this as byte).InventoryBlock_Field.WearableType)
         packVariable(byteBuffer, this.InventoryBlock_Field.Name, 1)
         packVariable(byteBuffer, this.InventoryBlock_Field.Description, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.InventoryBlock_Field.CallbackID = unpackInt(byteBuffer)

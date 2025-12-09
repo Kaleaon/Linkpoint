@@ -16,7 +16,7 @@ class MuteListKey {
         this.uuid = uuid2
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (!(obj instanceof MuteListKey)) {
             return false
         }
@@ -30,7 +30,7 @@ class MuteListKey {
         return this.uuid == null || this.uuid.equals(muteListKey.uuid)
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         Int i = 0
         if (this.muteType != null) {
             i = this.muteType.hashCode() + 0

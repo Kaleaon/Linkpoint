@@ -14,28 +14,28 @@ class AvatarPropertiesUpdate : SLMessage {
     }
 
     class PropertiesData {
-        byte[] AboutText
+        ByteArray AboutText
         Boolean AllowPublish
-        byte[] FLAboutText
+        ByteArray FLAboutText
         UUID FLImageID
         UUID ImageID
         Boolean MaturePublish
-        byte[] ProfileURL
+        ByteArray ProfileURL
     }
 
     AvatarPropertiesUpdate() {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.PropertiesData_Field.AboutText.length + 34 + 1 + this.PropertiesData_Field.FLAboutText.length + 1 + 1 + 1 + this.PropertiesData_Field.ProfileURL.length + 36
+    fun CalcPayloadSize(): Int {
+        return this.PropertiesData_Field.AboutText.size + 34 + 1 + this.PropertiesData_Field.FLAboutText.size + 1 + 1 + 1 + this.PropertiesData_Field.ProfileURL.size + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAvatarPropertiesUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -82)
@@ -50,7 +50,7 @@ class AvatarPropertiesUpdate : SLMessage {
         packVariable(byteBuffer, this.PropertiesData_Field.ProfileURL, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.PropertiesData_Field.ImageID = unpackUUID(byteBuffer)

@@ -21,25 +21,25 @@ class AttachedSound : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 55
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAttachedSound(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put((byte) -1)
         byteBuffer.put(Ascii.CR)
         packUUID(byteBuffer, this.DataBlock_Field.SoundID)
         packUUID(byteBuffer, this.DataBlock_Field.ObjectID)
         packUUID(byteBuffer, this.DataBlock_Field.OwnerID)
         packFloat(byteBuffer, this.DataBlock_Field.Gain)
-        packByte(byteBuffer, (byte) this.DataBlock_Field.Flags)
+        packByte(byteBuffer, (this as byte).DataBlock_Field.Flags)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.DataBlock_Field.SoundID = unpackUUID(byteBuffer)
         this.DataBlock_Field.ObjectID = unpackUUID(byteBuffer)
         this.DataBlock_Field.OwnerID = unpackUUID(byteBuffer)

@@ -34,24 +34,24 @@ class UserReport : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.ReportData_Field.AbuseRegionName.length + 64 + 16 + 1 + this.ReportData_Field.Summary.length + 2 + this.ReportData_Field.Details.length + 1 + this.ReportData_Field.VersionString.length + 36
+    fun CalcPayloadSize(): Int {
+        return this.ReportData_Field.AbuseRegionName.size + 64 + 16 + 1 + this.ReportData_Field.Summary.size + 2 + this.ReportData_Field.Details.size + 1 + this.ReportData_Field.VersionString.size + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleUserReport(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -123)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        packByte(byteBuffer, (Byte) this.ReportData_Field.ReportType)
-        packByte(byteBuffer, (Byte) this.ReportData_Field.Category)
+        packByte(byteBuffer, (this as Byte).ReportData_Field.ReportType)
+        packByte(byteBuffer, (this as Byte).ReportData_Field.Category)
         packLLVector3(byteBuffer, this.ReportData_Field.Position)
-        packByte(byteBuffer, (Byte) this.ReportData_Field.CheckFlags)
+        packByte(byteBuffer, (this as Byte).ReportData_Field.CheckFlags)
         packUUID(byteBuffer, this.ReportData_Field.ScreenshotID)
         packUUID(byteBuffer, this.ReportData_Field.ObjectID)
         packUUID(byteBuffer, this.ReportData_Field.AbuserID)
@@ -62,7 +62,7 @@ class UserReport : SLMessage {
         packVariable(byteBuffer, this.ReportData_Field.VersionString, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ReportData_Field.ReportType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE

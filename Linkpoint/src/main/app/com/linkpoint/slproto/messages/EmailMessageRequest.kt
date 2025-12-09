@@ -8,24 +8,24 @@ class EmailMessageRequest : SLMessage {
     DataBlock DataBlock_Field = DataBlock()
 
     class DataBlock {
-        byte[] FromAddress
+        ByteArray FromAddress
         UUID ObjectID
-        byte[] Subject
+        ByteArray Subject
     }
 
     EmailMessageRequest() {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.DataBlock_Field.FromAddress.length + 17 + 1 + this.DataBlock_Field.Subject.length + 4
+    fun CalcPayloadSize(): Int {
+        return this.DataBlock_Field.FromAddress.size + 17 + 1 + this.DataBlock_Field.Subject.size + 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleEmailMessageRequest(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 79)
@@ -34,7 +34,7 @@ class EmailMessageRequest : SLMessage {
         packVariable(byteBuffer, this.DataBlock_Field.Subject, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.DataBlock_Field.ObjectID = unpackUUID(byteBuffer)
         this.DataBlock_Field.FromAddress = unpackVariable(byteBuffer, 1)
         this.DataBlock_Field.Subject = unpackVariable(byteBuffer, 1)

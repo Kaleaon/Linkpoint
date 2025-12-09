@@ -46,23 +46,23 @@ class SLChatPermissionRequestEvent : SLChatYesNoEvent {
         return SLChatEvent.ChatMessageType.PermissionRequest
     }
 
-    String getNoButton(Context context) {
+    fun getNoButton(Context context): String {
         return context.getString(R.string.permission_request_no)
     }
 
-    String getNoMessage(Context context) {
+    fun getNoMessage(Context context): String {
         return context.getString(R.string.permission_request_declined)
     }
 
-    String getQuestion(Context context) {
+    fun getQuestion(Context context): String {
         return context.getString(R.string.permission_request_question)
     }
 
-    Int getQuestions() {
+    fun getQuestions(): Int {
         return this.Questions
     }
 
-    String getText(Context context, @NonNull UserManager userManager) {
+    fun getText(Context context, @NonNull UserManager userManager): String {
         String str = ""
         for (SLScriptPermissions sLScriptPermissions : SLScriptPermissions.values()) {
             if ((this.Questions & sLScriptPermissions.getPermMask()) != 0) {
@@ -75,25 +75,25 @@ class SLChatPermissionRequestEvent : SLChatYesNoEvent {
         return context.getString(R.string.permission_request_format, Array<Any>{this.ObjectOwner, str})
     }
 
-    String getYesButton(Context context) {
+    fun getYesButton(Context context): String {
         return context.getString(R.string.permission_request_yes)
     }
 
-    String getYesMessage(Context context) {
+    fun getYesMessage(Context context): String {
         return context.getString(R.string.permission_request_accepted)
     }
 
-    Boolean isObjectPopup() {
+    fun isObjectPopup(): Boolean {
         return true
     }
 
     /* access modifiers changed from: protected */
-    Unit onNoAction(Context context, UserManager userManager) {
+    fun onNoAction(Context context, UserManager userManager): Unit {
         super.onNoAction(context, userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    Unit onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(Context context, UserManager userManager): Unit {
         super.onYesAction(context, userManager)
         SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
@@ -102,7 +102,7 @@ class SLChatPermissionRequestEvent : SLChatYesNoEvent {
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setItemID(this.ItemID)
         chatMessage.setItemName(this.ObjectOwner)

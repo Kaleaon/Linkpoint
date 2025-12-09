@@ -9,11 +9,11 @@ import androidx.annotation.Nullable
 abstract class AssetKey {
     private Joiner toStringJoiner = Joiner.on(':').useForNull("null")
 
-    AssetKey createAssetKey(@Nullable UUID uuid, UUID uuid2, UUID uuid3, Int i) {
+    fun createAssetKey(@Nullable UUID uuid, UUID uuid2, UUID uuid3, Int i): AssetKey {
         return AutoValue_AssetKey(2, 2, uuid3, i, uuid2, uuid, (UUID) null)
     }
 
-    AssetKey createInventoryKey(SLInventoryEntry sLInventoryEntry, @Nullable UUID uuid) {
+    fun createInventoryKey(SLInventoryEntry sLInventoryEntry, @Nullable UUID uuid): AssetKey {
         return AutoValue_AssetKey(2, 3, sLInventoryEntry.assetUUID, sLInventoryEntry.assetType, sLInventoryEntry.ownerUUID, sLInventoryEntry.uuid, uuid)
     }
 
@@ -36,7 +36,7 @@ abstract class AssetKey {
     abstract UUID taskUUID()
 
     @NonNull
-    String toString() {
+    fun toString(): String {
         return toStringJoiner.join(Int.valueOf(channelType()), Int.valueOf(sourceType()), assetUUID(), Int.valueOf(assetType()), ownerUUID(), itemUUID(), taskUUID())
     }
 }

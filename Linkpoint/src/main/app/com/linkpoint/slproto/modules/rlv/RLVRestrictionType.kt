@@ -35,7 +35,7 @@ enum RLVRestrictionType {
         this.ruleMatchType = rLVRuleMatchType
     }
 
-    RLVRuleMatchType getRuleMatchType() {
+    fun getRuleMatchType(): RLVRuleMatchType {
         return this.ruleMatchType
     }
 }

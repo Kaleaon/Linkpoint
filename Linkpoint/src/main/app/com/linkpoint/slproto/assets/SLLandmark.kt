@@ -19,14 +19,14 @@ class SLLandmark {
     SLLandmark(ByteArray bArr) throws LandmarkFormatException {
         try {
             Array<String> split = String(bArr, "ISO-8859-1").trim().split("\n+")
-            if (split.length < 1) {
+            if (split.size < 1) {
                 throw LandmarkFormatException()
             } else if (!split[0].trim().equalsIgnoreCase("Landmark version 2")) {
                 throw LandmarkFormatException()
             } else {
-                for (Int i = 1; i < split.length; i++) {
+                for (i in 1 until split.size) {
                     Array<String> split2 = split[i].trim().split("\\s+")
-                    if (split2.length >= 1) {
+                    if (split2.size >= 1) {
                         if (split2[0].equalsIgnoreCase("region_id")) {
                             this.regionUUID = UUID.fromString(split2[1])
                         } else if (split2[0].equalsIgnoreCase("local_pos")) {

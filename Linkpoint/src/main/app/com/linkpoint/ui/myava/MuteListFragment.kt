@@ -179,7 +179,7 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$dntbaqhB2OOLQ
     }
 
     /* access modifiers changed from: private */
-    Unit doUnblock(MuteListEntry muteListEntry) {
+    fun doUnblock(MuteListEntry muteListEntry): Unit {
         try {
             this.agentCircuit.get().getModules().muteList.Unblock(muteListEntry)
         } catch (SubscriptionData.DataNotReadyException e) {
@@ -187,7 +187,7 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$dntbaqhB2OOLQ
         }
     }
 
-    Bundle makeSelection(UUID uuid) {
+    fun makeSelection(UUID uuid): Bundle {
         Bundle bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         return bundle
@@ -195,7 +195,7 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$dntbaqhB2OOLQ
 
     /* access modifiers changed from: private */
     /* renamed from: onMuteList */
-    Unit m649com_lumiyaviewer_lumiya_ui_myava_MuteListFragmentmthref0(ImmutableList<MuteListEntry> immutableList) {
+    fun m649com_lumiyaviewer_lumiya_ui_myava_MuteListFragmentmthref0(ImmutableList<MuteListEntry> immutableList): Unit {
         if (this.adapter != null) {
             this.adapter.setData(immutableList)
         }
@@ -215,7 +215,7 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$dntbaqhB2OOLQ
     }
 
     @OnClick({2131755492})
-    Unit onAddMuteListButtonClick() {
+    fun onAddMuteListButtonClick(): Unit {
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         FragmentActivity activity = getActivity()
         if (activity != null && userManager != null) {
@@ -223,7 +223,7 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$dntbaqhB2OOLQ
         }
     }
 
-    Boolean onContextItemSelected(MenuItem menuItem) {
+    fun onContextItemSelected(MenuItem menuItem): Boolean {
         MuteListEntry item
         AdapterView.AdapterContextMenuInfo adapterContextMenuInfo = (AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo()
         if (adapterContextMenuInfo == null || this.adapter == null || (item = this.adapter.getItem(adapterContextMenuInfo.position)) == null) {
@@ -238,22 +238,22 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$dntbaqhB2OOLQ
         }
     }
 
-    Unit onCreate(@Nullable Bundle bundle) {
+    fun onCreate(@Nullable Bundle bundle): Unit {
         super.onCreate(bundle)
     }
 
-    View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         View inflate = layoutInflater.inflate(R.layout.mute_list, viewGroup, false)
         this.unbinder = ButterKnife.bind((Any) this, inflate)
         this.adapter = MuteListAdapter(layoutInflater.getContext())
         this.muteList.setAdapter(this.adapter)
         SwipeDismissListViewTouchListener swipeDismissListViewTouchListener = SwipeDismissListViewTouchListener(this.muteList, SwipeDismissListViewTouchListener.DismissCallbacks() {
-            Boolean canDismiss(ListView listView, Int i) {
+            fun canDismiss(ListView listView, Int i): Boolean {
                 return true
             }
 
-            Unit onDismiss(ListView listView, Int i) {
+            fun onDismiss(ListView listView, Int i): Unit {
                 MuteListEntry item
                 ListAdapter adapter = listView.getAdapter()
                 if ((adapter instanceof MuteListAdapter) && (item = ((MuteListAdapter) adapter).getItem(i)) != null) {
@@ -334,7 +334,7 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$dntbaqhB2OOLQ
         return inflate
     }
 
-    Unit onDestroyView() {
+    fun onDestroyView(): Unit {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -342,7 +342,7 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$dntbaqhB2OOLQ
         super.onDestroyView()
     }
 
-    Unit onStart() {
+    fun onStart(): Unit {
         super.onStart()
         setTitle(getString(R.string.mute_list_fragment_title), (String) null)
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
@@ -352,7 +352,7 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$dntbaqhB2OOLQ
         }
     }
 
-    Unit onStop() {
+    fun onStop(): Unit {
         this.muteListData.unsubscribe()
         this.agentCircuit.unsubscribe()
         super.onStop()

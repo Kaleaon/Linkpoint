@@ -63,26 +63,26 @@ class NearbyPeopleMinimapFragment : Fragment {
             setHasStableIds(true)
         }
 
-        Int getItemCount() {
+        fun getItemCount(): Int {
             return this.chatters.size()
         }
 
-        Long getItemId(Int i) {
+        fun getItemId(Int i): Long {
             UUID optionalChatterUUID
             Long l
-            if (i < 0 || i >= this.chatters.size() || (optionalChatterUUID = ((ChatterDisplayData) this.chatters.get(i)).chatterID.getOptionalChatterUUID()) == null || (l = this.stableIds.get(optionalChatterUUID)) == null) {
+            if (i < 0 || i >= this.chatters.size() || (optionalChatterUUID = ((this as ChatterDisplayData).chatters.get(i)).chatterID.getOptionalChatterUUID()) == null || (l = this.stableIds.get(optionalChatterUUID)) == null) {
                 return -1
             }
             return l.longValue()
         }
 
-        Unit onBindViewHolder(NearbyUserViewHolder nearbyUserViewHolder, Int i) {
+        fun onBindViewHolder(NearbyUserViewHolder nearbyUserViewHolder, Int i): Unit {
             Boolean z = false
             if (i >= 0 && i < this.chatters.size()) {
                 Context context2 = this.context
                 LayoutInflater layoutInflater2 = this.layoutInflater
                 UserManager userManager2 = this.userManager
-                ChatterDisplayData chatterDisplayData = (ChatterDisplayData) this.chatters.get(i)
+                ChatterDisplayData chatterDisplayData = (this as ChatterDisplayData).chatters.get(i)
                 if (i == this.selectedPosition) {
                     z = true
                 }
@@ -90,11 +90,11 @@ class NearbyPeopleMinimapFragment : Fragment {
             }
         }
 
-        NearbyUserViewHolder onCreateViewHolder(ViewGroup viewGroup, Int i) {
+        fun onCreateViewHolder(ViewGroup viewGroup, Int i): NearbyUserViewHolder {
             return NearbyUserViewHolder(this.layoutInflater.inflate(R.layout.minimap_user_item, viewGroup, false))
         }
 
-        Unit setChatters(@Nullable ImmutableList<ChatterDisplayData> immutableList) {
+        fun setChatters(@Nullable ImmutableList<ChatterDisplayData> immutableList): Unit {
             if (immutableList == null) {
                 immutableList = ImmutableList.of()
             }
@@ -105,7 +105,7 @@ class NearbyPeopleMinimapFragment : Fragment {
             while (true) {
                 Int i2 = i
                 if (i2 < this.chatters.size()) {
-                    UUID optionalChatterUUID = ((ChatterDisplayData) this.chatters.get(i2)).chatterID.getOptionalChatterUUID()
+                    UUID optionalChatterUUID = ((this as ChatterDisplayData).chatters.get(i2)).chatterID.getOptionalChatterUUID()
                     if (optionalChatterUUID != null) {
                         hashSet.add(optionalChatterUUID)
                         if (!this.stableIds.containsKey(optionalChatterUUID)) {
@@ -125,7 +125,7 @@ class NearbyPeopleMinimapFragment : Fragment {
             }
         }
 
-        Unit setSelected(UUID uuid) {
+        fun setSelected(UUID uuid): Unit {
             this.selectedUUID = uuid
             if (uuid != null) {
                 Int i2 = 0
@@ -134,7 +134,7 @@ class NearbyPeopleMinimapFragment : Fragment {
                     if (i >= this.chatters.size()) {
                         break
                     }
-                    UUID optionalChatterUUID = ((ChatterDisplayData) this.chatters.get(i)).chatterID.getOptionalChatterUUID()
+                    UUID optionalChatterUUID = ((this as ChatterDisplayData).chatters.get(i)).chatterID.getOptionalChatterUUID()
                     if (optionalChatterUUID != null && Objects.equal(uuid, optionalChatterUUID)) {
                         break
                     }
@@ -161,15 +161,15 @@ class NearbyPeopleMinimapFragment : Fragment {
 
         NearbyUserViewHolder(View view) {
             super(view)
-            this.userItemViewHolder = (FrameLayout) view.findViewById(R.id.user_item_view_holder)
-            this.cardView = (CardView) view.findViewById(R.id.user_card_view)
+            this.userItemViewHolder = (view as FrameLayout).findViewById(R.id.user_item_view_holder)
+            this.cardView = (view as CardView).findViewById(R.id.user_card_view)
             this.cardSelectedElevation = this.cardView.getCardElevation()
             this.selectedLayout = view.findViewById(R.id.user_item_selected_layout)
             this.userItemViewHolder.setOnClickListener(this)
             view.findViewById(R.id.user_item_chat_button).setOnClickListener(this)
         }
 
-        Unit bindToData(Context context, LayoutInflater layoutInflater, UserManager userManager, ChatterDisplayData chatterDisplayData2, Boolean z) {
+        fun bindToData(Context context, LayoutInflater layoutInflater, UserManager userManager, ChatterDisplayData chatterDisplayData2, Boolean z): Unit {
             this.viewBuilder.reset()
             chatterDisplayData2.buildView(context, this.viewBuilder, userManager)
             View childAt = this.userItemViewHolder.getChildAt(0)
@@ -192,7 +192,7 @@ class NearbyPeopleMinimapFragment : Fragment {
             this.chatterDisplayData = chatterDisplayData2
         }
 
-        Unit onClick(View view) {
+        fun onClick(View view): Unit {
             switch (view.getId()) {
                 case R.id.user_item_view_holder:
                     FragmentManager fragmentManager = NearbyPeopleMinimapFragment.this.getFragmentManager()
@@ -217,7 +217,7 @@ class NearbyPeopleMinimapFragment : Fragment {
         }
     }
 
-    Fragment newInstance(UUID uuid) {
+    fun newInstance(UUID uuid): Fragment {
         NearbyPeopleMinimapFragment nearbyPeopleMinimapFragment = NearbyPeopleMinimapFragment()
         nearbyPeopleMinimapFragment.setArguments(ActivityUtils.makeFragmentArguments(uuid, (Bundle) null))
         return nearbyPeopleMinimapFragment
@@ -225,7 +225,7 @@ class NearbyPeopleMinimapFragment : Fragment {
 
     /* access modifiers changed from: private */
     /* renamed from: onChatterList */
-    Unit m645com_lumiyaviewer_lumiya_ui_minimap_NearbyPeopleMinimapFragmentmthref0(ImmutableList<ChatterDisplayData> immutableList) {
+    fun m645com_lumiyaviewer_lumiya_ui_minimap_NearbyPeopleMinimapFragmentmthref0(ImmutableList<ChatterDisplayData> immutableList): Unit {
         Int i = 8
         if (this.adapter != null) {
             this.adapter.setChatters(immutableList)
@@ -242,7 +242,7 @@ class NearbyPeopleMinimapFragment : Fragment {
     }
 
     @Nullable
-    View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         View inflate = layoutInflater.inflate(R.layout.minimap_users, viewGroup, false)
         ButterKnife.bind((Any) this, inflate)
@@ -254,7 +254,7 @@ class NearbyPeopleMinimapFragment : Fragment {
         return inflate
     }
 
-    Unit onStart() {
+    fun onStart(): Unit {
         super.onStart()
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
@@ -264,12 +264,12 @@ class NearbyPeopleMinimapFragment : Fragment {
         }
     }
 
-    Unit onStop() {
+    fun onStop(): Unit {
         this.chatterList.unsubscribe()
         super.onStop()
     }
 
-    Unit setSelectedUser(UUID uuid) {
+    fun setSelectedUser(UUID uuid): Unit {
         if (this.adapter != null) {
             this.adapter.setSelected(uuid)
         }

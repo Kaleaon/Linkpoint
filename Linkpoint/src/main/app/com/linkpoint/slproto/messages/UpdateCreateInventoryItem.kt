@@ -48,7 +48,7 @@ class UpdateCreateInventoryItem : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 38
         Iterator<T> it = this.InventoryData_Fields.iterator()
         while (true) {
@@ -56,23 +56,23 @@ class UpdateCreateInventoryItem : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            InventoryData inventoryData = (InventoryData) it.next()
-            i = inventoryData.Description.length + inventoryData.Name.length + 133 + 1 + 4 + 4 + i2
+            InventoryData inventoryData = (it as InventoryData).next()
+            i = inventoryData.Description.size + inventoryData.Name.size + 133 + 1 + 4 + 4 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleUpdateCreateInventoryItem(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put(Ascii.VT)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packBoolean(byteBuffer, this.AgentData_Field.SimApproved)
         packUUID(byteBuffer, this.AgentData_Field.TransactionID)
-        byteBuffer.put((Byte) this.InventoryData_Fields.size())
+        byteBuffer.put((this as Byte).InventoryData_Fields.size())
         for (InventoryData inventoryData : this.InventoryData_Fields) {
             packUUID(byteBuffer, inventoryData.ItemID)
             packUUID(byteBuffer, inventoryData.FolderID)
@@ -87,10 +87,10 @@ class UpdateCreateInventoryItem : SLMessage {
             packInt(byteBuffer, inventoryData.NextOwnerMask)
             packBoolean(byteBuffer, inventoryData.GroupOwned)
             packUUID(byteBuffer, inventoryData.AssetID)
-            packByte(byteBuffer, (Byte) inventoryData.Type)
-            packByte(byteBuffer, (Byte) inventoryData.InvType)
+            packByte(byteBuffer, (inventoryData as Byte).Type)
+            packByte(byteBuffer, (inventoryData as Byte).InvType)
             packInt(byteBuffer, inventoryData.Flags)
-            packByte(byteBuffer, (Byte) inventoryData.SaleType)
+            packByte(byteBuffer, (inventoryData as Byte).SaleType)
             packInt(byteBuffer, inventoryData.SalePrice)
             packVariable(byteBuffer, inventoryData.Name, 1)
             packVariable(byteBuffer, inventoryData.Description, 1)
@@ -99,12 +99,12 @@ class UpdateCreateInventoryItem : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SimApproved = unpackBoolean(byteBuffer)
         this.AgentData_Field.TransactionID = unpackUUID(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             InventoryData inventoryData = InventoryData()
             inventoryData.ItemID = unpackUUID(byteBuffer)
             inventoryData.FolderID = unpackUUID(byteBuffer)

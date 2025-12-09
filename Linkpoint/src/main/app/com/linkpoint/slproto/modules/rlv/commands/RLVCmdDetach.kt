@@ -12,10 +12,10 @@ class RLVCmdDetach : RLVCmdGenericRestriction {
     }
 
     /* access modifiers changed from: protected */
-    Unit HandleForce(RLVController rLVController, UUID uuid, String str) {
+    fun HandleForce(RLVController rLVController, UUID uuid, String str): Unit {
         UUID attachmentUUID
         SLAvatarAppearance sLAvatarAppearance = rLVController.getModules().avatarAppearance
-        for (Int i = 0; i < 56; i++) {
+        for (i in 0 until 56) {
             if (SLAttachmentPoint.attachmentPoints[i] != null) {
                 String lowerCase = SLAttachmentPoint.attachmentPoints[i].name.toLowerCase()
                 if ((str.equals("") || lowerCase.equalsIgnoreCase(str)) && (attachmentUUID = sLAvatarAppearance.getAttachmentUUID(i)) != null && rLVController.getRestrictions().isAllowed(RLVRestrictionType.detach, lowerCase, attachmentUUID)) {

@@ -16,12 +16,12 @@ class ImprovedInstantMessage : SLMessage {
     }
 
     class MessageBlock {
-        byte[] BinaryBucket
+        ByteArray BinaryBucket
         Int Dialog
-        byte[] FromAgentName
+        ByteArray FromAgentName
         Boolean FromGroup
         UUID ID
-        byte[] Message
+        ByteArray Message
         Int Offline
         Int ParentEstateID
         LLVector3 Position
@@ -34,15 +34,15 @@ class ImprovedInstantMessage : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.MessageBlock_Field.FromAgentName.length + 72 + 2 + this.MessageBlock_Field.Message.length + 2 + this.MessageBlock_Field.BinaryBucket.length + 36
+    fun CalcPayloadSize(): Int {
+        return this.MessageBlock_Field.FromAgentName.size + 72 + 2 + this.MessageBlock_Field.Message.size + 2 + this.MessageBlock_Field.BinaryBucket.size + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleImprovedInstantMessage(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -2)
@@ -53,8 +53,8 @@ class ImprovedInstantMessage : SLMessage {
         packInt(byteBuffer, this.MessageBlock_Field.ParentEstateID)
         packUUID(byteBuffer, this.MessageBlock_Field.RegionID)
         packLLVector3(byteBuffer, this.MessageBlock_Field.Position)
-        packByte(byteBuffer, (byte) this.MessageBlock_Field.Offline)
-        packByte(byteBuffer, (byte) this.MessageBlock_Field.Dialog)
+        packByte(byteBuffer, (this as byte).MessageBlock_Field.Offline)
+        packByte(byteBuffer, (this as byte).MessageBlock_Field.Dialog)
         packUUID(byteBuffer, this.MessageBlock_Field.ID)
         packInt(byteBuffer, this.MessageBlock_Field.Timestamp)
         packVariable(byteBuffer, this.MessageBlock_Field.FromAgentName, 1)
@@ -62,7 +62,7 @@ class ImprovedInstantMessage : SLMessage {
         packVariable(byteBuffer, this.MessageBlock_Field.BinaryBucket, 2)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.MessageBlock_Field.FromGroup = unpackBoolean(byteBuffer)

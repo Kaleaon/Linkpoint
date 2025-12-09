@@ -72,7 +72,7 @@ class TextureUDPTransfer {
         }
     }
 
-    Unit HandleImageData(ImageData imageData) {
+    fun HandleImageData(ImageData imageData): Unit {
         this.lastReceivedPacket = System.currentTimeMillis()
         this.headerReceived = true
         this.size = imageData.ImageID_Field.Size
@@ -81,11 +81,11 @@ class TextureUDPTransfer {
         HandleDataPacket(0, imageData.ImageDataData_Field.Data)
     }
 
-    Unit HandleImagePacket(ImagePacket imagePacket) {
+    fun HandleImagePacket(ImagePacket imagePacket): Unit {
         HandleDataPacket(imagePacket.ImageID_Field.Packet, imagePacket.ImageData_Field.Data)
     }
 
-    Boolean RetryTransfer(SLAgentCircuit sLAgentCircuit, SLCircuitInfo sLCircuitInfo) {
+    fun RetryTransfer(SLAgentCircuit sLAgentCircuit, SLCircuitInfo sLCircuitInfo): Boolean {
         this.retries++
         if (this.retries > 2) {
             return false
@@ -94,7 +94,7 @@ class TextureUDPTransfer {
         return true
     }
 
-    Unit StartTransfer(SLAgentCircuit sLAgentCircuit, SLCircuitInfo sLCircuitInfo) {
+    fun StartTransfer(SLAgentCircuit sLAgentCircuit, SLCircuitInfo sLCircuitInfo): Unit {
         Int i = 0
         Debug.Log("TextureUDP: starting transfer, image ID = " + this.fetchReq.textureID)
         this.lastReceivedPacket = System.currentTimeMillis()
@@ -115,15 +115,15 @@ class TextureUDPTransfer {
         sLAgentCircuit.SendMessage(requestImage)
     }
 
-    File getOutputFile() {
+    fun getOutputFile(): File {
         return this.outputFile
     }
 
-    Boolean hasStalled() {
+    fun hasStalled(): Boolean {
         return System.currentTimeMillis() > this.lastReceivedPacket + PACKET_TIMEOUT
     }
 
-    Boolean isCompleted() {
+    fun isCompleted(): Boolean {
         return this.completed
     }
 }

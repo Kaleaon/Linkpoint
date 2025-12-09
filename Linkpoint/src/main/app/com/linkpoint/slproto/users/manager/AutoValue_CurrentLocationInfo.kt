@@ -17,7 +17,7 @@ class AutoValue_CurrentLocationInfo : CurrentLocationInfo {
         this.parcelVoiceChannel = voiceChannelInfo
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -33,7 +33,7 @@ class AutoValue_CurrentLocationInfo : CurrentLocationInfo {
         return false
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         Int i = 0
         Int hashCode = ((((((this.parcelData == null ? 0 : this.parcelData.hashCode()) ^ 1000003) * 1000003) ^ this.nearbyUsers) * 1000003) ^ this.inChatRangeUsers) * 1000003
         if (this.parcelVoiceChannel != null) {
@@ -42,25 +42,25 @@ class AutoValue_CurrentLocationInfo : CurrentLocationInfo {
         return hashCode ^ i
     }
 
-    Int inChatRangeUsers() {
+    fun inChatRangeUsers(): Int {
         return this.inChatRangeUsers
     }
 
-    Int nearbyUsers() {
+    fun nearbyUsers(): Int {
         return this.nearbyUsers
     }
 
     @Nullable
-    ParcelData parcelData() {
+    fun parcelData(): ParcelData {
         return this.parcelData
     }
 
     @Nullable
-    VoiceChannelInfo parcelVoiceChannel() {
+    fun parcelVoiceChannel(): VoiceChannelInfo {
         return this.parcelVoiceChannel
     }
 
-    String toString() {
+    fun toString(): String {
         return "CurrentLocationInfo{parcelData=" + this.parcelData + ", " + "nearbyUsers=" + this.nearbyUsers + ", " + "inChatRangeUsers=" + this.inChatRangeUsers + ", " + "parcelVoiceChannel=" + this.parcelVoiceChannel + "}"
     }
 }

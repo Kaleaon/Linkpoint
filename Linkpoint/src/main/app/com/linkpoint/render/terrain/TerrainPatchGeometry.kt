@@ -48,7 +48,7 @@ class TerrainPatchGeometry {
             if (i3 >= 17) {
                 break
             }
-            for (Int i4 = 0; i4 < 17; i4++) {
+            for (i4 in 0 until 17) {
                 directByteBuffer.putFloat(i4.toFloat())
                 directByteBuffer.putFloat(i3.toFloat())
                 directByteBuffer.putFloat(heightArray[i2 + i4])
@@ -73,7 +73,7 @@ class TerrainPatchGeometry {
         while (true) {
             Int i7 = i5
             if (i7 < 16) {
-                for (Int i8 = 0; i8 < 16; i8++) {
+                for (i8 in 0 until 16) {
                     Int i9 = i6 + i8
                     Int i10 = i9 + 1
                     Int i11 = i9 + 17
@@ -129,7 +129,7 @@ class TerrainPatchGeometry {
         GLES11.glMatrixMode(5888)
     }
 
-    Unit GLDraw(RenderContext renderContext, FloatArray fArr, GLLoadedTexture gLLoadedTexture) {
+    fun GLDraw(RenderContext renderContext, FloatArray fArr, GLLoadedTexture gLLoadedTexture): Unit {
         if (this.index_count != 0) {
             if (!renderContext.hasGL20) {
                 renderContext.glObjWorldPushAndMultMatrixf(fArr, 0)

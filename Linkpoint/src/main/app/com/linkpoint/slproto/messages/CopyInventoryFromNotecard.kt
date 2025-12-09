@@ -32,15 +32,15 @@ class CopyInventoryFromNotecard : SLMessage {
         this.NotecardData_Field = NotecardData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.InventoryData_Fields.size() * 32) + 69
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleCopyInventoryFromNotecard(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 9)
@@ -48,20 +48,20 @@ class CopyInventoryFromNotecard : SLMessage {
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packUUID(byteBuffer, this.NotecardData_Field.NotecardItemID)
         packUUID(byteBuffer, this.NotecardData_Field.ObjectID)
-        byteBuffer.put((byte) this.InventoryData_Fields.size())
+        byteBuffer.put((this as byte).InventoryData_Fields.size())
         for (InventoryData inventoryData : this.InventoryData_Fields) {
             packUUID(byteBuffer, inventoryData.ItemID)
             packUUID(byteBuffer, inventoryData.FolderID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.NotecardData_Field.NotecardItemID = unpackUUID(byteBuffer)
         this.NotecardData_Field.ObjectID = unpackUUID(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             InventoryData inventoryData = InventoryData()
             inventoryData.ItemID = unpackUUID(byteBuffer)
             inventoryData.FolderID = unpackUUID(byteBuffer)

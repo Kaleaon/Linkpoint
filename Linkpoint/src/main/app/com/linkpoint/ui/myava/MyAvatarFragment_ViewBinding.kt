@@ -17,13 +17,13 @@ class MyAvatarFragment_ViewBinding : Unbinder {
     @UiThread
     MyAvatarFragment_ViewBinding(MyAvatarFragment myAvatarFragment, View view) {
         this.target = myAvatarFragment
-        myAvatarFragment.myAvatarPic = (ChatterPicView) Utils.findRequiredViewAsType(view, R.id.my_avatar_pic, "field 'myAvatarPic'", ChatterPicView.class)
-        myAvatarFragment.myAvatarName = (TextView) Utils.findRequiredViewAsType(view, R.id.my_avatar_name, "field 'myAvatarName'", TextView.class)
-        myAvatarFragment.myAvatarOptionsList = (ListView) Utils.findRequiredViewAsType(view, R.id.my_ava_options_list, "field 'myAvatarOptionsList'", ListView.class)
+        myAvatarFragment.myAvatarPic = (Utils as ChatterPicView).findRequiredViewAsType(view, R.id.my_avatar_pic, "field 'myAvatarPic'", ChatterPicView.class)
+        myAvatarFragment.myAvatarName = (Utils as TextView).findRequiredViewAsType(view, R.id.my_avatar_name, "field 'myAvatarName'", TextView.class)
+        myAvatarFragment.myAvatarOptionsList = (Utils as ListView).findRequiredViewAsType(view, R.id.my_ava_options_list, "field 'myAvatarOptionsList'", ListView.class)
     }
 
     @CallSuper
-    Unit unbind() {
+    fun unbind(): Unit {
         MyAvatarFragment myAvatarFragment = this.target
         if (myAvatarFragment == null) {
             throw IllegalStateException("Bindings already cleared.")

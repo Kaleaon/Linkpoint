@@ -14,30 +14,34 @@ class LLSDString : LLSDNode {
         this.value = str
     }
 
-    Boolean asBoolean() {
+    fun asBoolean(): Boolean {
         return "true".equalsIgnoreCase(this.value)
     }
 
-    String asString() {
+    fun asString(): String {
         return this.value
     }
 
-    UUID asUUID() {
+    fun asUUID(): UUID {
         return UUID.fromString(this.value)
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    @Throws(IOException::class)
+
+    fun toBinary(DataOutputStream dataOutputStream) {
         dataOutputStream.writeByte(115)
         if (this.value.isEmpty()) {
             dataOutputStream.writeInt(0)
             return
         }
-        byte[] stringToVariableUTF = SLMessage.stringToVariableUTF(this.value)
-        dataOutputStream.writeInt(stringToVariableUTF.length)
+        ByteArray stringToVariableUTF = SLMessage.stringToVariableUTF(this.value)
+        dataOutputStream.writeInt(stringToVariableUTF.size)
         dataOutputStream.write(stringToVariableUTF)
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    @Throws(IOException::class)
+
+    fun toXML(XmlSerializer xmlSerializer) {
         xmlSerializer.startTag("", "string")
         xmlSerializer.text(this.value)
         xmlSerializer.endTag("", "string")

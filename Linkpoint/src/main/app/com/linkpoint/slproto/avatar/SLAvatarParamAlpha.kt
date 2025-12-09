@@ -16,7 +16,7 @@ class SLAvatarParamAlpha {
         this.multiplyBlend = z2
     }
 
-    Boolean equals(Object obj) {
+    fun equals(Object obj): Boolean {
         if (this == obj) {
             return true
         }
@@ -30,7 +30,7 @@ class SLAvatarParamAlpha {
         return false
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         Int i = 1
         Int hashCode = ((this.skipIfZero ? 1 : 0) + (((this.tgaFile != null ? this.tgaFile.hashCode() : 0) + ((this.domain != 0.0f ? Float.floatToIntBits(this.domain) : 0) * 31)) * 31)) * 31
         if (!this.multiplyBlend) {

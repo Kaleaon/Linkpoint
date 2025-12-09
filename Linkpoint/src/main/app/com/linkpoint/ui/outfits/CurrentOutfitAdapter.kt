@@ -27,7 +27,7 @@ class CurrentOutfitAdapter : BaseAdapter : DismissableAdapter {
         this.inflater = LayoutInflater.from(context)
     }
 
-    Boolean canDismiss(Int i) {
+    fun canDismiss(Int i): Boolean {
         SLAvatarAppearance.WornItem item = getItem(i)
         if (item == null || this.avatarAppearance == null) {
             return false
@@ -41,7 +41,7 @@ class CurrentOutfitAdapter : BaseAdapter : DismissableAdapter {
         return false
     }
 
-    Int getCount() {
+    fun getCount(): Int {
         return this.wornItems.size()
     }
 
@@ -52,42 +52,42 @@ class CurrentOutfitAdapter : BaseAdapter : DismissableAdapter {
         return (SLAvatarAppearance.WornItem) this.wornItems.get(i)
     }
 
-    Long getItemId(Int i) {
+    fun getItemId(Int i): Long {
         return (Long) i
     }
 
-    Int getItemViewType(Int i) {
+    fun getItemViewType(Int i): Int {
         return 0
     }
 
-    View getView(Int i, View view, ViewGroup viewGroup) {
+    fun getView(Int i, View view, ViewGroup viewGroup): View {
         View view2 = null
         if (view == null || view.getId() == R.id.outfitItemLayout) {
             view2 = view
         }
         View inflate = view2 == null ? this.inflater.inflate(R.layout.outfit_item, viewGroup, false) : view2
         SLAvatarAppearance.WornItem wornItem = (SLAvatarAppearance.WornItem) this.wornItems.get(i)
-        ((TextView) inflate.findViewById(R.id.itemNameTextView)).setText(wornItem.getName())
+        ((inflate as TextView).findViewById(R.id.itemNameTextView)).setText(wornItem.getName())
         if (wornItem.getWornOn() != null) {
-            ((ImageView) inflate.findViewById(R.id.itemTypeIconView)).setImageResource(R.drawable.inv_clothes)
+            ((inflate as ImageView).findViewById(R.id.itemTypeIconView)).setImageResource(R.drawable.inv_clothes)
             inflate.findViewById(R.id.itemTouchableIcon).setVisibility(8)
         } else {
-            ((ImageView) inflate.findViewById(R.id.itemTypeIconView)).setImageResource(R.drawable.inv_object)
+            ((inflate as ImageView).findViewById(R.id.itemTypeIconView)).setImageResource(R.drawable.inv_object)
             inflate.findViewById(R.id.itemTouchableIcon).setVisibility(wornItem.getIsTouchable() ? 0 : 8)
         }
         SwipeDismissListViewTouchListener.restoreViewState(inflate)
         return inflate
     }
 
-    Boolean hasStableIds() {
+    fun hasStableIds(): Boolean {
         return false
     }
 
-    Boolean isEmpty() {
+    fun isEmpty(): Boolean {
         return this.wornItems.isEmpty()
     }
 
-    Unit onDismiss(Int i) {
+    fun onDismiss(Int i): Unit {
         SLAvatarAppearance.WornItem item = getItem(i)
         if (item != null && this.avatarAppearance != null) {
             if (item.getWornOn() != null) {
@@ -98,11 +98,11 @@ class CurrentOutfitAdapter : BaseAdapter : DismissableAdapter {
         }
     }
 
-    Unit setAvatarAppearance(@Nullable SLAvatarAppearance sLAvatarAppearance) {
+    fun setAvatarAppearance(@Nullable SLAvatarAppearance sLAvatarAppearance): Unit {
         this.avatarAppearance = sLAvatarAppearance
     }
 
-    Unit setData(ImmutableList<SLAvatarAppearance.WornItem> immutableList) {
+    fun setData(ImmutableList<SLAvatarAppearance.WornItem> immutableList): Unit {
         if (immutableList == null) {
             immutableList = ImmutableList.of()
         }

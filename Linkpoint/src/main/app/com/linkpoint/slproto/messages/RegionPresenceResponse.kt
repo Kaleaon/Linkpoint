@@ -25,7 +25,7 @@ class RegionPresenceResponse : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 5
         Iterator<T> it = this.RegionData_Fields.iterator()
         while (true) {
@@ -33,33 +33,33 @@ class RegionPresenceResponse : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            i = ((RegionData) it.next()).Message.length + 43 + i2
+            i = ((it as RegionData).next()).Message.size + 43 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRegionPresenceResponse(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 16)
-        byteBuffer.put((Byte) this.RegionData_Fields.size())
+        byteBuffer.put((this as Byte).RegionData_Fields.size())
         for (RegionData regionData : this.RegionData_Fields) {
             packUUID(byteBuffer, regionData.RegionID)
             packLong(byteBuffer, regionData.RegionHandle)
             packIPAddress(byteBuffer, regionData.InternalRegionIP)
             packIPAddress(byteBuffer, regionData.ExternalRegionIP)
-            packShort(byteBuffer, (Short) regionData.RegionPort)
+            packShort(byteBuffer, (regionData as Short).RegionPort)
             packDouble(byteBuffer, regionData.ValidUntil)
             packVariable(byteBuffer, regionData.Message, 1)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             RegionData regionData = RegionData()
             regionData.RegionID = unpackUUID(byteBuffer)
             regionData.RegionHandle = unpackLong(byteBuffer)

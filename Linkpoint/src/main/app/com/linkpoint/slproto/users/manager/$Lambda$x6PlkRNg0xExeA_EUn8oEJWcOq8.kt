@@ -10,14 +10,14 @@ import com.linkpoint.voice.common.model.VoiceChatInfo
     private /* synthetic */ Any f222$f0
 
     private /* synthetic */ Unit $m$0(Any obj) {
-        ((ChatterSubscription) this.f222$f0).m297com_lumiyaviewer_lumiya_slproto_users_manager_ChatterSubscriptionmthref0((VoiceChatInfo) obj)
+        ((this as ChatterSubscription).f222$f0).m297com_lumiyaviewer_lumiya_slproto_users_manager_ChatterSubscriptionmthref0((VoiceChatInfo) obj)
     }
 
     /* synthetic */ $Lambda$x6PlkRNg0xExeA_EUn8oEJWcOq8(Any obj) {
         this.f222$f0 = obj
     }
 
-    Unit onData(Any obj) {
+    fun onData(Any obj): Unit {
         $m$0(obj)
     }
 }

@@ -34,16 +34,19 @@ class SLHTTPSConnection {
     private val CONNECT_TIMEOUT: Long = 60
     private val READ_TIMEOUT: Long = 60
     private OkHttpClient okHttpClient = OkHttpClient.Builder().proxy(Proxy.NO_PROXY).dns(SLDNS()).connectionPool(ConnectionPool(8, 5, TimeUnit.MINUTES)).connectTimeout(60, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).hostnameVerifier(HostnameVerifier() {
-        Boolean verify(String str, SSLSession sSLSession) {
+        fun verify(String str, SSLSession sSLSession): Boolean {
             return true
         }
     }).addNetworkInterceptor(CharsetStripInterceptor()).sslSocketFactory(getSocketFactory(), trustEverythingManager).build()
     private TrustManager[] trustAllCerts = {trustEverythingManager}
     private X509TrustManager trustEverythingManager = X509TrustManager() {
-        Unit checkClientTrusted(X509Certificate[] x509CertificateArr, String str) throws CertificateException {
+        @Throws(CertificateException::class)
+        fun checkClientTrusted(X509Certificate[] x509CertificateArr, String str) {
         }
 
-        Unit checkServerTrusted(X509Certificate[] x509CertificateArr, String str) throws CertificateException {
+        @Throws(CertificateException::class)
+
+        fun checkServerTrusted(X509Certificate[] x509CertificateArr, String str) {
         }
 
         X509Certificate[] getAcceptedIssuers() {
@@ -55,7 +58,9 @@ class SLHTTPSConnection {
         CharsetStripInterceptor() {
         }
 
-        Response intercept(Interceptor.Chain chain) throws IOException {
+        @Throws(IOException::class)
+
+        fun intercept(Interceptor.Chain chain): Response {
             Request request = chain.request()
             String header = request.header(HttpHeaders.CONTENT_TYPE)
             if (header == null || (!header.contains(";"))) {
@@ -75,7 +80,9 @@ class SLHTTPSConnection {
         DNSforDNS() {
         }
 
-        List<InetAddress> lookup(String str) throws UnknownHostException {
+        @Throws(UnknownHostException::class)
+
+        fun lookup(String str): List<InetAddress> {
             try {
                 List<InetAddress> lookup = this.systemDns.lookup(str)
                 if (lookup == null) {
@@ -150,7 +157,9 @@ class SLHTTPSConnection {
             }
         }
 
-        List<InetAddress> lookup(String str) throws UnknownHostException {
+        @Throws(UnknownHostException::class)
+
+        fun lookup(String str): List<InetAddress> {
             try {
                 List<InetAddress> lookup = this.systemDns.lookup(str)
                 if (lookup == null) {
@@ -181,7 +190,7 @@ class SLHTTPSConnection {
         }
     }
 
-    OkHttpClient getOkHttpClient() {
+    fun getOkHttpClient(): OkHttpClient {
         return okHttpClient
     }
 

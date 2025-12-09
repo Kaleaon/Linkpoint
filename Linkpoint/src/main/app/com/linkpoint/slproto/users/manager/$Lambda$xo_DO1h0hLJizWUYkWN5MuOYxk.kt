@@ -10,7 +10,7 @@ import de.greenrobot.dao.query.LazyList
         BalanceManager.m286lambda$com_lumiyaviewer_lumiya_slproto_users_manager_BalanceManager_1705((LazyList) obj)
     }
 
-    Unit onDispose(Any obj) {
+    fun onDispose(Any obj): Unit {
         $m$0(obj)
     }
 }

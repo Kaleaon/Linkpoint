@@ -18,19 +18,19 @@ class ScriptControlChange : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.Data_Fields.size() * 6) + 5
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleScriptControlChange(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -67)
-        byteBuffer.put((Byte) this.Data_Fields.size())
+        byteBuffer.put((this as Byte).Data_Fields.size())
         for (Data data : this.Data_Fields) {
             packBoolean(byteBuffer, data.TakeControls)
             packInt(byteBuffer, data.Controls)
@@ -38,9 +38,9 @@ class ScriptControlChange : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             Data data = Data()
             data.TakeControls = unpackBoolean(byteBuffer)
             data.Controls = unpackInt(byteBuffer)

@@ -30,7 +30,7 @@ class AutoValue_SLTextureEntryFace : SLTextureEntryFace {
         this.hasAttribute = i2
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -46,56 +46,56 @@ class AutoValue_SLTextureEntryFace : SLTextureEntryFace {
         return false
     }
 
-    Float glow() {
+    fun glow(): Float {
         return this.glow
     }
 
-    Int hasAttribute() {
+    fun hasAttribute(): Int {
         return this.hasAttribute
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         return (((((((((((((((((((((this.textureID == null ? 0 : this.textureID.hashCode()) ^ 1000003) * 1000003) ^ this.rgba) * 1000003) ^ Float.floatToIntBits(this.repeatU)) * 1000003) ^ Float.floatToIntBits(this.repeatV)) * 1000003) ^ Float.floatToIntBits(this.offsetU)) * 1000003) ^ Float.floatToIntBits(this.offsetV)) * 1000003) ^ Float.floatToIntBits(this.rotation)) * 1000003) ^ Float.floatToIntBits(this.glow)) * 1000003) ^ this.materialb) * 1000003) ^ this.mediab) * 1000003) ^ this.hasAttribute
     }
 
-    Byte materialb() {
+    fun materialb(): Byte {
         return this.materialb
     }
 
-    Byte mediab() {
+    fun mediab(): Byte {
         return this.mediab
     }
 
-    Float offsetU() {
+    fun offsetU(): Float {
         return this.offsetU
     }
 
-    Float offsetV() {
+    fun offsetV(): Float {
         return this.offsetV
     }
 
-    Float repeatU() {
+    fun repeatU(): Float {
         return this.repeatU
     }
 
-    Float repeatV() {
+    fun repeatV(): Float {
         return this.repeatV
     }
 
-    Int rgba() {
+    fun rgba(): Int {
         return this.rgba
     }
 
-    Float rotation() {
+    fun rotation(): Float {
         return this.rotation
     }
 
     @Nullable
-    UUID textureID() {
+    fun textureID(): UUID {
         return this.textureID
     }
 
-    String toString() {
+    fun toString(): String {
         return "SLTextureEntryFace{textureID=" + this.textureID + ", " + "rgba=" + this.rgba + ", " + "repeatU=" + this.repeatU + ", " + "repeatV=" + this.repeatV + ", " + "offsetU=" + this.offsetU + ", " + "offsetV=" + this.offsetV + ", " + "rotation=" + this.rotation + ", " + "glow=" + this.glow + ", " + "materialb=" + this.materialb + ", " + "mediab=" + this.mediab + ", " + "hasAttribute=" + this.hasAttribute + "}"
     }
 }

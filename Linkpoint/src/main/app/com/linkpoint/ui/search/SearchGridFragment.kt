@@ -51,7 +51,7 @@ class SearchGridFragment : FragmentWithTitle : LoadableMonitor.OnLoadableDataCha
         if (f584comlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues != null) {
             return f584comlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues
         }
-        IntArray iArr = Int[SearchGridQuery.SearchType.values().length]
+        IntArray iArr = Int[SearchGridQuery.SearchType.values().size]
         try {
             iArr[SearchGridQuery.SearchType.Groups.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -91,7 +91,7 @@ class SearchGridFragment : FragmentWithTitle : LoadableMonitor.OnLoadableDataCha
         }
     }
 
-    SearchGridFragment newInstance(UUID uuid) {
+    fun newInstance(UUID uuid): SearchGridFragment {
         SearchGridFragment searchGridFragment = SearchGridFragment()
         Bundle bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
@@ -99,23 +99,23 @@ class SearchGridFragment : FragmentWithTitle : LoadableMonitor.OnLoadableDataCha
         return searchGridFragment
     }
 
-    View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         View inflate = layoutInflater.inflate(R.layout.search_fragment, viewGroup, false)
         this.unbinder = ButterKnife.bind((Any) this, inflate)
         this.adapter = SearchGridAdapter(layoutInflater.getContext(), ActivityUtils.getActiveAgentID(getArguments()), this)
         this.searchResultsList.setAdapter(this.adapter)
         setTitle(getString(R.string.search), (String) null)
-        this.loadableMonitor.setLoadingLayout((LoadingLayout) inflate.findViewById(R.id.loading_layout), getString(R.string.enter_text_to_search), getString(R.string.search_fail))
+        this.loadableMonitor.setLoadingLayout((inflate as LoadingLayout).findViewById(R.id.loading_layout), getString(R.string.enter_text_to_search), getString(R.string.search_fail))
         return inflate
     }
 
-    Unit onDestroyView() {
+    fun onDestroyView(): Unit {
         this.unbinder.unbind()
         super.onDestroyView()
     }
 
-    Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged(): Unit {
         if (this.adapter != null) {
             LazyList data = this.searchResults.getData()
             this.adapter.setData(data)
@@ -124,11 +124,11 @@ class SearchGridFragment : FragmentWithTitle : LoadableMonitor.OnLoadableDataCha
     }
 
     @OnClick({2131755640})
-    Unit onSearchButtonClicked() {
+    fun onSearchButtonClicked(): Unit {
         beginSearch()
     }
 
-    Unit onSearchResultClicked(SearchGridResult searchGridResult) {
+    fun onSearchResultClicked(SearchGridResult searchGridResult): Unit {
         UUID activeAgentID = ActivityUtils.getActiveAgentID(getArguments())
         if (searchGridResult != null && activeAgentID != null) {
             switch (m851getcomlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues()[SearchGridQuery.SearchType.values()[searchGridResult.getItemType()].ordinal()]) {
@@ -148,7 +148,7 @@ class SearchGridFragment : FragmentWithTitle : LoadableMonitor.OnLoadableDataCha
     }
 
     @OnEditorAction({2131755639})
-    Boolean onSearchTextAction(Int i, KeyEvent keyEvent) {
+    fun onSearchTextAction(Int i, KeyEvent keyEvent): Boolean {
         if (i != 3 && (keyEvent == null || keyEvent.getAction() != 0 || keyEvent.getKeyCode() != 66)) {
             return false
         }

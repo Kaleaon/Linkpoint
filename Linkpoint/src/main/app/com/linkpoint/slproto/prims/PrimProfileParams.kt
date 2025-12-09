@@ -32,11 +32,11 @@ class PrimProfileParams {
         this.Hollow = f3
     }
 
-    PrimProfileParams createFromObjectUpdate(ObjectUpdate.ObjectData objectData) {
+    fun createFromObjectUpdate(ObjectUpdate.ObjectData objectData): PrimProfileParams {
         return PrimProfileParams((Byte) objectData.ProfileCurve, ((Float) (objectData.ProfileBegin & SupportMenu.USER_MASK)) * 2.0E-5f, 1.0f - (((Float) (objectData.ProfileEnd & SupportMenu.USER_MASK)) * 2.0E-5f), ((Float) (objectData.ProfileHollow & SupportMenu.USER_MASK)) * 2.0E-5f)
     }
 
-    PrimProfileParams createFromPackedData(ByteBuffer byteBuffer) {
+    fun createFromPackedData(ByteBuffer byteBuffer): PrimProfileParams {
         return PrimProfileParams(byteBuffer.get(), ((Float) (byteBuffer.getShort() & 65535)) * 2.0E-5f, 1.0f - (((Float) (byteBuffer.getShort() & 65535)) * 2.0E-5f), ((Float) (byteBuffer.getShort() & 65535)) * 2.0E-5f)
     }
 
@@ -44,7 +44,7 @@ class PrimProfileParams {
         return (this.CurveType * 17) + Float.floatToIntBits(this.Begin) + Float.floatToIntBits(this.End) + Float.floatToIntBits(this.Hollow)
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -55,11 +55,11 @@ class PrimProfileParams {
         return this.CurveType == primProfileParams.CurveType && this.Begin == primProfileParams.Begin && this.End == primProfileParams.End && this.Hollow == primProfileParams.Hollow
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         return this.hashValue
     }
 
-    String toString() {
+    fun toString(): String {
         return String.format("CurveType: 0x%02x, Begin: %f, End: %f, Hollow: %f", Any[]{Byte.valueOf(this.CurveType), Float.valueOf(this.Begin), Float.valueOf(this.End), Float.valueOf(this.Hollow)})
     }
 }

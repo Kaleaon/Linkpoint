@@ -33,9 +33,9 @@ class ParcelData : Serializable {
         this.area = lLSDNode.keyExists("Area") ? lLSDNode.byKey("Area").asInt() : 0
         ByteArray asBinary = lLSDNode.byKey("Bitmap").asBinary()
         Int i = 0
-        while (i < asBinary.length && i < 512) {
+        while (i < asBinary.size && i < 512) {
             Byte b = asBinary[i]
-            for (Int i2 = 0; i2 < 8; i2++) {
+            for (i2 in 0 until 8) {
                 if ((b & 1) != 0) {
                     this.parcelBitmap[(i * 8) + i2] = true
                 }
@@ -45,39 +45,39 @@ class ParcelData : Serializable {
         }
     }
 
-    Int getArea() {
+    fun getArea(): Int {
         return this.area
     }
 
-    String getDescription() {
+    fun getDescription(): String {
         return this.description
     }
 
-    String getMediaURL() {
+    fun getMediaURL(): String {
         return this.mediaURL
     }
 
-    String getName() {
+    fun getName(): String {
         return this.name
     }
 
-    UUID getOwnerID() {
+    fun getOwnerID(): UUID {
         return this.ownerID
     }
 
-    BooleanArray getParcelBitmap() {
+    fun getParcelBitmap(): BooleanArray {
         return this.parcelBitmap
     }
 
-    Int getParcelID() {
+    fun getParcelID(): Int {
         return this.parcelID
     }
 
-    UUID getSnapshotUUID() {
+    fun getSnapshotUUID(): UUID {
         return this.snapshotUUID
     }
 
-    Boolean isGroupOwned() {
+    fun isGroupOwned(): Boolean {
         return this.isGroupOwned
     }
 }

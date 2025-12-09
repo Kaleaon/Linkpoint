@@ -107,7 +107,7 @@ Method generation error in method: com.linkpoint.ui.objects.-$Lambda$2R1p9WuPUwP
 
     }
     private Subscription.OnData<SLTaskInventory> onTaskInventoryReceived = Subscription.OnData<SLTaskInventory>() {
-        Unit onData(SLTaskInventory sLTaskInventory) {
+        fun onData(SLTaskInventory sLTaskInventory): Unit {
             SLTaskInventory unused = TaskInventoryFragment.this.taskInventory = sLTaskInventory
             View view = TaskInventoryFragment.this.getView()
             if (view != null) {
@@ -386,7 +386,7 @@ Method generation error in method: com.linkpoint.ui.objects.-$Lambda$2R1p9WuPUwP
                 ProgressDialog show = ProgressDialog.show(getContext(), (CharSequence) null, getString(R.string.copying_object_contents), true, true)
                 sLInventory.CopyObjectContents(or, objectLocalID, hashSet, Function<UUID, Void>() {
                     @Nullable
-                    Void apply(@Nullable UUID uuid) {
+                    fun apply(@Nullable UUID uuid): Void {
                         UIThreadExecutor.getInstance().execute(Runnable(objectLocalID, this, userManager, show, uuid) {
 
                             /* renamed from: -$f0 */
@@ -575,7 +575,7 @@ Method generation error in method: com.linkpoint.ui.objects.-$Lambda$2R1p9WuPUwP
         }
     }
 
-    Bundle makeSelection(UUID uuid, UUID uuid2, Int i) {
+    fun makeSelection(UUID uuid, UUID uuid2, Int i): Bundle {
         Bundle bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         if (uuid2 != null) {
@@ -606,17 +606,17 @@ Method generation error in method: com.linkpoint.ui.objects.-$Lambda$2R1p9WuPUwP
         }
     }
 
-    Unit onCreate(@android.support.annotation.Nullable Bundle bundle) {
+    fun onCreate(@android.support.annotation.Nullable Bundle bundle): Unit {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    Unit onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater): Unit {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.task_inventory_menu, menu)
     }
 
-    View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         View inflate = layoutInflater.inflate(R.layout.task_inventory, viewGroup, false)
         ((ListView) inflate.findViewById(R.id.taskInventoryListView)).setAdapter(TaskInventoryListAdapter(layoutInflater.getContext()))
@@ -692,7 +692,7 @@ Method generation error in method: com.linkpoint.ui.objects.-$Lambda$2R1p9WuPUwP
         return inflate
     }
 
-    Boolean onOptionsItemSelected(MenuItem menuItem) {
+    fun onOptionsItemSelected(MenuItem menuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_copy_all:
                 copyAllToInventory(false)
@@ -702,7 +702,7 @@ Method generation error in method: com.linkpoint.ui.objects.-$Lambda$2R1p9WuPUwP
         }
     }
 
-    Unit onStart() {
+    fun onStart(): Unit {
         super.onStart()
         setTitle(getString(R.string.object_contents_title), (String) null)
         UserManager userManager = getUserManager()
@@ -713,7 +713,7 @@ Method generation error in method: com.linkpoint.ui.objects.-$Lambda$2R1p9WuPUwP
         }
     }
 
-    Unit onStop() {
+    fun onStop(): Unit {
         if (this.taskInventorySubscription != null) {
             this.taskInventorySubscription.unsubscribe()
             this.taskInventorySubscription = null

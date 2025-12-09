@@ -8,7 +8,7 @@ import java.util.Comparator
         return NearbyChattersDisplayDataList.m332lambda$com_lumiyaviewer_lumiya_slproto_users_manager_NearbyChattersDisplayDataList_807((ChatterDisplayData) obj, (ChatterDisplayData) obj2)
     }
 
-    Int compare(Any obj, Any obj2) {
+    fun compare(Any obj, Any obj2): Int {
         return $m$0(obj, obj2)
     }
 }

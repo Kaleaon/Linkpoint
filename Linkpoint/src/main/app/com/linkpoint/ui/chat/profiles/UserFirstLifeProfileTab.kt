@@ -49,7 +49,7 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLo
 
     /* access modifiers changed from: protected */
     @OnClick({2131755706})
-    Unit onAboutEditClicked(View view) {
+    fun onAboutEditClicked(View view): Unit {
         if (this.chatterID != null) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserAboutTextEditFragment.class, UserAboutTextEditFragment.makeSelection(this.chatterID, true))
         }
@@ -57,7 +57,7 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLo
 
     /* access modifiers changed from: protected */
     @OnClick({2131755698})
-    Unit onChangePicClicked(View view) {
+    fun onChangePicClicked(View view): Unit {
         AvatarPropertiesReply data = this.avatarProperties.getData()
         if (this.chatterID != null && data != null) {
             Bundle bundle = Bundle()
@@ -67,7 +67,7 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLo
     }
 
     @Nullable
-    View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle): View {
         View inflate = layoutInflater.inflate(R.layout.user_profile_tab_first, viewGroup, false)
         this.unbinder = ButterKnife.bind((Any) this, inflate)
         this.loadingLayout.setSwipeRefreshLayout(this.swipeRefreshLayout)
@@ -76,7 +76,7 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLo
         return inflate
     }
 
-    Unit onDestroyView() {
+    fun onDestroyView(): Unit {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -84,7 +84,7 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLo
         super.onDestroyView()
     }
 
-    Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged(): Unit {
         Boolean z = true
         if (getView() != null) {
             try {
@@ -103,7 +103,7 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLo
     }
 
     /* access modifiers changed from: protected */
-    Unit onShowUser(@Nullable ChatterID chatterID) {
+    fun onShowUser(@Nullable ChatterID chatterID): Unit {
         Int i = 0
         this.loadableMonitor.unsubscribeAll()
         if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDUser)) {

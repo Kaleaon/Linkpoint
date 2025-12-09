@@ -27,7 +27,7 @@ class SearchManager {
         }
     }
 
-    SearchGridResultDao getSearchGridResultDao() {
+    fun getSearchGridResultDao(): SearchGridResultDao {
         return this.searchGridResultDao
     }
 

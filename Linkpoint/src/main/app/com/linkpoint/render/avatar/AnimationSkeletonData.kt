@@ -17,7 +17,7 @@ class AnimationSkeletonData {
     private LLQuaternion[] animRotArray = LLQuaternion[133]
 
     AnimationSkeletonData() {
-        for (Int i = 0; i < 133; i++) {
+        for (i in 0 until 133) {
             Matrix.setIdentityM(this.animMatrix, i * 16)
             this.animPosArray[i] = LLVector3()
             this.animRotArray[i] = LLQuaternion()
@@ -25,7 +25,7 @@ class AnimationSkeletonData {
         Arrays.fill(this.animOffsets, 0.0f)
     }
 
-    Unit animate(AvatarSkeleton avatarSkeleton, AvatarAnimationList avatarAnimationList) {
+    fun animate(AvatarSkeleton avatarSkeleton, AvatarAnimationList avatarAnimationList): Unit {
         Arrays.fill(this.animPriorityRotArray, 1.0f)
         Arrays.fill(this.animPriorityPosArray, 1.0f)
         for (i = 0; i < 133; i++) {
@@ -48,11 +48,11 @@ class AnimationSkeletonData {
         this.animOffsets_Swap = fArr
     }
 
-    FloatArray getAnimMatrix() {
+    fun getAnimMatrix(): FloatArray {
         return this.animMatrix
     }
 
-    FloatArray getAnimOffsets() {
+    fun getAnimOffsets(): FloatArray {
         return this.animOffsets
     }
 }

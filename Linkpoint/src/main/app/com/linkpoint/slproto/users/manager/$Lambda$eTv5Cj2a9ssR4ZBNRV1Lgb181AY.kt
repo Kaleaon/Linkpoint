@@ -10,14 +10,14 @@ import com.linkpoint.slproto.messages.GroupProfileReply
     private /* synthetic */ Any f198$f0
 
     private /* synthetic */ Unit $m$0(Any obj) {
-        ((ChatterGroupSubscription) this.f198$f0).m289com_lumiyaviewer_lumiya_slproto_users_manager_ChatterGroupSubscriptionmthref0((GroupProfileReply) obj)
+        ((this as ChatterGroupSubscription).f198$f0).m289com_lumiyaviewer_lumiya_slproto_users_manager_ChatterGroupSubscriptionmthref0((GroupProfileReply) obj)
     }
 
     /* synthetic */ $Lambda$eTv5Cj2a9ssR4ZBNRV1Lgb181AY(Any obj) {
         this.f198$f0 = obj
     }
 
-    Unit onData(Any obj) {
+    fun onData(Any obj): Unit {
         $m$0(obj)
     }
 }

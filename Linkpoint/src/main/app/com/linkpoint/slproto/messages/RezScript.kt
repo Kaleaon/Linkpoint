@@ -49,15 +49,15 @@ class RezScript : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.InventoryBlock_Field.Name.length + 129 + 1 + this.InventoryBlock_Field.Description.length + 4 + 4 + 57
+    fun CalcPayloadSize(): Int {
+        return this.InventoryBlock_Field.Name.size + 129 + 1 + this.InventoryBlock_Field.Description.size + 4 + 4 + 57
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRezScript(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 48)
@@ -78,10 +78,10 @@ class RezScript : SLMessage {
         packInt(byteBuffer, this.InventoryBlock_Field.NextOwnerMask)
         packBoolean(byteBuffer, this.InventoryBlock_Field.GroupOwned)
         packUUID(byteBuffer, this.InventoryBlock_Field.TransactionID)
-        packByte(byteBuffer, (Byte) this.InventoryBlock_Field.Type)
-        packByte(byteBuffer, (Byte) this.InventoryBlock_Field.InvType)
+        packByte(byteBuffer, (this as Byte).InventoryBlock_Field.Type)
+        packByte(byteBuffer, (this as Byte).InventoryBlock_Field.InvType)
         packInt(byteBuffer, this.InventoryBlock_Field.Flags)
-        packByte(byteBuffer, (Byte) this.InventoryBlock_Field.SaleType)
+        packByte(byteBuffer, (this as Byte).InventoryBlock_Field.SaleType)
         packInt(byteBuffer, this.InventoryBlock_Field.SalePrice)
         packVariable(byteBuffer, this.InventoryBlock_Field.Name, 1)
         packVariable(byteBuffer, this.InventoryBlock_Field.Description, 1)
@@ -89,7 +89,7 @@ class RezScript : SLMessage {
         packInt(byteBuffer, this.InventoryBlock_Field.CRC)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)

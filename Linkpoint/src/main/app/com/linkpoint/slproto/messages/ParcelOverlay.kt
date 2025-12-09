@@ -15,15 +15,15 @@ class ParcelOverlay : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.ParcelData_Field.Data.length + 6 + 4
+    fun CalcPayloadSize(): Int {
+        return this.ParcelData_Field.Data.size + 6 + 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleParcelOverlay(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -60)
@@ -31,7 +31,7 @@ class ParcelOverlay : SLMessage {
         packVariable(byteBuffer, this.ParcelData_Field.Data, 2)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.ParcelData_Field.SequenceID = unpackInt(byteBuffer)
         this.ParcelData_Field.Data = unpackVariable(byteBuffer, 2)
     }

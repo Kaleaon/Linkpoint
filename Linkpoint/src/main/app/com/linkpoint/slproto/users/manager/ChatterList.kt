@@ -44,7 +44,8 @@ class ChatterList {
         this.activeChattersManager = ActiveChattersManager(userManager2, this.daoSession, this)
         RequestFinalProcessor<UUID, Float>(this.nearbyDistancePool, userManager2.getDatabaseExecutor()) {
             /* access modifiers changed from: protected */
-            Float processRequest(@NonNull UUID uuid) throws Throwable {
+            @Throws(Throwable::class)
+            fun processRequest(@NonNull UUID uuid): Float {
                 SLModules modules
                 SLAgentCircuit activeAgentCircuit = userManager2.getActiveAgentCircuit()
                 if (activeAgentCircuit == null || (modules = activeAgentCircuit.getModules()) == null) {
@@ -55,7 +56,8 @@ class ChatterList {
         }
         RequestFinalProcessor<UUID, Boolean>(this.typingUsersPool, userManager2.getDatabaseExecutor()) {
             /* access modifiers changed from: protected */
-            Boolean processRequest(@NonNull UUID uuid) throws Throwable {
+            @Throws(Throwable::class)
+            fun processRequest(@NonNull UUID uuid): Boolean {
                 SLAgentCircuit activeAgentCircuit = userManager2.getActiveAgentCircuit()
                 if (activeAgentCircuit != null) {
                     return activeAgentCircuit.isUserTyping(uuid)
@@ -74,7 +76,7 @@ class ChatterList {
                 if (f225comlumiyaviewerlumiyaslprotousersmanagerChatterListTypeSwitchesValues != null) {
                     return f225comlumiyaviewerlumiyaslprotousersmanagerChatterListTypeSwitchesValues
                 }
-                IntArray iArr = Int[ChatterListType.values().length]
+                IntArray iArr = Int[ChatterListType.values().size]
                 try {
                     iArr[ChatterListType.Active.ordinal()] = 1
                 } catch (NoSuchFieldError e) {
@@ -100,16 +102,16 @@ class ChatterList {
             }
 
             /* access modifiers changed from: protected */
-            Unit cancelRequest(@NonNull ChatterListType chatterListType) {
-                ChatterDisplayDataList chatterDisplayDataList = (ChatterDisplayDataList) ChatterList.this.chatterLists.remove(chatterListType)
+            fun cancelRequest(@NonNull ChatterListType chatterListType): Unit {
+                ChatterDisplayDataList chatterDisplayDataList = (ChatterList as ChatterDisplayDataList).this.chatterLists.remove(chatterListType)
                 if (chatterDisplayDataList != null) {
                     chatterDisplayDataList.dispose()
                 }
             }
 
             /* access modifiers changed from: protected */
-            ImmutableList<ChatterDisplayData> processRequest(@NonNull ChatterListType chatterListType) {
-                ChatterDisplayDataList chatterDisplayDataList = (ChatterDisplayDataList) ChatterList.this.chatterLists.get(chatterListType)
+            fun processRequest(@NonNull ChatterListType chatterListType): ImmutableList<ChatterDisplayData> {
+                ChatterDisplayDataList chatterDisplayDataList = (ChatterList as ChatterDisplayDataList).this.chatterLists.get(chatterListType)
                 if (chatterDisplayDataList == null) {
                     switch (m296getcomlumiyaviewerlumiyaslprotousersmanagerChatterListTypeSwitchesValues()[chatterListType.ordinal()]) {
                         case 1:
@@ -137,7 +139,7 @@ class ChatterList {
     }
 
     @NonNull
-    ActiveChattersManager getActiveChattersManager() {
+    fun getActiveChattersManager(): ActiveChattersManager {
         return this.activeChattersManager
     }
 
@@ -145,21 +147,21 @@ class ChatterList {
         return this.chatterListPool
     }
 
-    Subscribable<UUID, Float> getDistanceToUser() {
+    fun getDistanceToUser(): Subscribable<UUID, Float> {
         return this.nearbyDistancePool
     }
 
     @NonNull
-    FriendManager getFriendManager() {
+    fun getFriendManager(): FriendManager {
         return this.friendManager
     }
 
     @NonNull
-    GroupManager getGroupManager() {
+    fun getGroupManager(): GroupManager {
         return this.groupManager
     }
 
-    Subscribable<UUID, Boolean> getUserTypingStatus() {
+    fun getUserTypingStatus(): Subscribable<UUID, Boolean> {
         return this.typingUsersPool
     }
 
@@ -170,26 +172,26 @@ class ChatterList {
     }
 
     /* access modifiers changed from: package-private */
-    Unit notifyListUpdated(ChatterListType chatterListType) {
+    fun notifyListUpdated(ChatterListType chatterListType): Unit {
         this.chatterListPool.requestUpdate(chatterListType)
     }
 
-    Unit updateDistanceToAllUsers() {
+    fun updateDistanceToAllUsers(): Unit {
         this.nearbyDistancePool.requestUpdateAll()
     }
 
-    Unit updateDistanceToUser(UUID uuid) {
+    fun updateDistanceToUser(UUID uuid): Unit {
         this.nearbyDistancePool.requestUpdate(uuid)
     }
 
-    Unit updateList(ChatterListType chatterListType) {
+    fun updateList(ChatterListType chatterListType): Unit {
         ChatterDisplayDataList chatterDisplayDataList = this.chatterLists.get(chatterListType)
         if (chatterDisplayDataList != null) {
             chatterDisplayDataList.requestRefresh(this.userManager.getDatabaseExecutor())
         }
     }
 
-    Unit updateUserTypingStatus(UUID uuid) {
+    fun updateUserTypingStatus(UUID uuid): Unit {
         this.typingUsersPool.requestUpdate(uuid)
     }
 }

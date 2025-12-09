@@ -28,33 +28,33 @@ class RequestImage : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.RequestImageData_Fields.size() * 26) + 34
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRequestImage(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put((Byte) 8)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        byteBuffer.put((Byte) this.RequestImageData_Fields.size())
+        byteBuffer.put((this as Byte).RequestImageData_Fields.size())
         for (RequestImageData requestImageData : this.RequestImageData_Fields) {
             packUUID(byteBuffer, requestImageData.Image)
-            packByte(byteBuffer, (Byte) requestImageData.DiscardLevel)
+            packByte(byteBuffer, (requestImageData as Byte).DiscardLevel)
             packFloat(byteBuffer, requestImageData.DownloadPriority)
             packInt(byteBuffer, requestImageData.Packet)
-            packByte(byteBuffer, (Byte) requestImageData.Type)
+            packByte(byteBuffer, (requestImageData as Byte).Type)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             RequestImageData requestImageData = RequestImageData()
             requestImageData.Image = unpackUUID(byteBuffer)
             requestImageData.DiscardLevel = unpackByte(byteBuffer)

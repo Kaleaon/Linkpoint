@@ -55,15 +55,15 @@ class RegionInfo : SLMessage {
         this.RegionInfo2_Field = RegionInfo2()
     }
 
-    Int CalcPayloadSize() {
-        return this.RegionInfoData_Field.SimName.length + 1 + 4 + 4 + 4 + 1 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + 4 + 36 + this.RegionInfo2_Field.ProductSKU.length + 1 + 1 + this.RegionInfo2_Field.ProductName.length + 4 + 4 + 4 + 1 + (this.RegionInfo3_Fields.size() * 8)
+    fun CalcPayloadSize(): Int {
+        return this.RegionInfoData_Field.SimName.size + 1 + 4 + 4 + 4 + 1 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + 4 + 36 + this.RegionInfo2_Field.ProductSKU.size + 1 + 1 + this.RegionInfo2_Field.ProductName.size + 4 + 4 + 4 + 1 + (this.RegionInfo3_Fields.size() * 8)
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRegionInfo(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -114)
@@ -73,8 +73,8 @@ class RegionInfo : SLMessage {
         packInt(byteBuffer, this.RegionInfoData_Field.EstateID)
         packInt(byteBuffer, this.RegionInfoData_Field.ParentEstateID)
         packInt(byteBuffer, this.RegionInfoData_Field.RegionFlags)
-        packByte(byteBuffer, (Byte) this.RegionInfoData_Field.SimAccess)
-        packByte(byteBuffer, (Byte) this.RegionInfoData_Field.MaxAgents)
+        packByte(byteBuffer, (this as Byte).RegionInfoData_Field.SimAccess)
+        packByte(byteBuffer, (this as Byte).RegionInfoData_Field.MaxAgents)
         packFloat(byteBuffer, this.RegionInfoData_Field.BillableFactor)
         packFloat(byteBuffer, this.RegionInfoData_Field.ObjectBonusFactor)
         packFloat(byteBuffer, this.RegionInfoData_Field.WaterHeight)
@@ -90,13 +90,13 @@ class RegionInfo : SLMessage {
         packInt(byteBuffer, this.RegionInfo2_Field.MaxAgents32)
         packInt(byteBuffer, this.RegionInfo2_Field.HardMaxAgents)
         packInt(byteBuffer, this.RegionInfo2_Field.HardMaxObjects)
-        byteBuffer.put((Byte) this.RegionInfo3_Fields.size())
+        byteBuffer.put((this as Byte).RegionInfo3_Fields.size())
         for (RegionInfo3 regionInfo3 : this.RegionInfo3_Fields) {
             packLong(byteBuffer, regionInfo3.RegionFlagsExtended)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.RegionInfoData_Field.SimName = unpackVariable(byteBuffer, 1)
@@ -121,7 +121,7 @@ class RegionInfo : SLMessage {
         this.RegionInfo2_Field.HardMaxAgents = unpackInt(byteBuffer)
         this.RegionInfo2_Field.HardMaxObjects = unpackInt(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             RegionInfo3 regionInfo3 = RegionInfo3()
             regionInfo3.RegionFlagsExtended = unpackLong(byteBuffer)
             this.RegionInfo3_Fields.add(regionInfo3)

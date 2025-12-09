@@ -33,15 +33,15 @@ class ObjectFlagUpdate : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.ExtraPhysics_Fields.size() * 17) + 45
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleObjectFlagUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 94)
@@ -52,9 +52,9 @@ class ObjectFlagUpdate : SLMessage {
         packBoolean(byteBuffer, this.AgentData_Field.IsTemporary)
         packBoolean(byteBuffer, this.AgentData_Field.IsPhantom)
         packBoolean(byteBuffer, this.AgentData_Field.CastsShadows)
-        byteBuffer.put((Byte) this.ExtraPhysics_Fields.size())
+        byteBuffer.put((this as Byte).ExtraPhysics_Fields.size())
         for (ExtraPhysics extraPhysics : this.ExtraPhysics_Fields) {
-            packByte(byteBuffer, (Byte) extraPhysics.PhysicsShapeType)
+            packByte(byteBuffer, (extraPhysics as Byte).PhysicsShapeType)
             packFloat(byteBuffer, extraPhysics.Density)
             packFloat(byteBuffer, extraPhysics.Friction)
             packFloat(byteBuffer, extraPhysics.Restitution)
@@ -62,7 +62,7 @@ class ObjectFlagUpdate : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.ObjectLocalID = unpackInt(byteBuffer)
@@ -71,7 +71,7 @@ class ObjectFlagUpdate : SLMessage {
         this.AgentData_Field.IsPhantom = unpackBoolean(byteBuffer)
         this.AgentData_Field.CastsShadows = unpackBoolean(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             ExtraPhysics extraPhysics = ExtraPhysics()
             extraPhysics.PhysicsShapeType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             extraPhysics.Density = unpackFloat(byteBuffer)

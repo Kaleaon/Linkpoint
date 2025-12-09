@@ -20,7 +20,7 @@ class AgentGroupDataUpdate : SLMessage {
         Int Contribution
         UUID GroupID
         UUID GroupInsigniaID
-        byte[] GroupName
+        ByteArray GroupName
         Long GroupPowers
     }
 
@@ -29,7 +29,7 @@ class AgentGroupDataUpdate : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 21
         Iterator<T> it = this.GroupData_Fields.iterator()
         while (true) {
@@ -37,20 +37,20 @@ class AgentGroupDataUpdate : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            i = ((GroupData) it.next()).GroupName.length + 46 + i2
+            i = ((it as GroupData).next()).GroupName.size + 46 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAgentGroupDataUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) -123)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
-        byteBuffer.put((byte) this.GroupData_Fields.size())
+        byteBuffer.put((this as byte).GroupData_Fields.size())
         for (GroupData groupData : this.GroupData_Fields) {
             packUUID(byteBuffer, groupData.GroupID)
             packLong(byteBuffer, groupData.GroupPowers)
@@ -61,10 +61,10 @@ class AgentGroupDataUpdate : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             GroupData groupData = GroupData()
             groupData.GroupID = unpackUUID(byteBuffer)
             groupData.GroupPowers = unpackLong(byteBuffer)

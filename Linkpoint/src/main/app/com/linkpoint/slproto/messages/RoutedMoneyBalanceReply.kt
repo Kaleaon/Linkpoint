@@ -39,20 +39,20 @@ class RoutedMoneyBalanceReply : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.MoneyData_Field.Description.length + 46 + 10 + this.TransactionInfo_Field.ItemDescription.length + 43
+    fun CalcPayloadSize(): Int {
+        return this.MoneyData_Field.Description.size + 46 + 10 + this.TransactionInfo_Field.ItemDescription.size + 43
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRoutedMoneyBalanceReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 59)
         packIPAddress(byteBuffer, this.TargetBlock_Field.TargetIP)
-        packShort(byteBuffer, (Short) this.TargetBlock_Field.TargetPort)
+        packShort(byteBuffer, (this as Short).TargetBlock_Field.TargetPort)
         packUUID(byteBuffer, this.MoneyData_Field.AgentID)
         packUUID(byteBuffer, this.MoneyData_Field.TransactionID)
         packBoolean(byteBuffer, this.MoneyData_Field.TransactionSuccess)
@@ -69,7 +69,7 @@ class RoutedMoneyBalanceReply : SLMessage {
         packVariable(byteBuffer, this.TransactionInfo_Field.ItemDescription, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.TargetBlock_Field.TargetIP = unpackIPAddress(byteBuffer)
         this.TargetBlock_Field.TargetPort = unpackShort(byteBuffer) & 65535
         this.MoneyData_Field.AgentID = unpackUUID(byteBuffer)

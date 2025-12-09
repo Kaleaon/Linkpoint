@@ -16,15 +16,15 @@ class DetachAttachmentIntoInv : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleDetachAttachmentIntoInv(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) -115)
@@ -32,7 +32,7 @@ class DetachAttachmentIntoInv : SLMessage {
         packUUID(byteBuffer, this.ObjectData_Field.ItemID)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.ObjectData_Field.AgentID = unpackUUID(byteBuffer)
         this.ObjectData_Field.ItemID = unpackUUID(byteBuffer)
     }

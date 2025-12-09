@@ -24,7 +24,7 @@ class ObjectPayDialog {
         Int i = 0
         while (true) {
             Int i2 = i
-            if (i2 >= iArr.length) {
+            if (i2 >= iArr.size) {
                 break
             }
             Int intValue = (payPrices == null || i2 > payPrices.size()) ? -1 : (payPrices.toInt().get(i2)).intValue()
@@ -33,7 +33,7 @@ class ObjectPayDialog {
                 alertDialog.findViewById(iArr[i2]).setVisibility(8)
                 alertDialog.findViewById(iArr[i2]).setTag(R.id.object_pay_price_tag, 0)
             } else {
-                ((Button) alertDialog.findViewById(iArr[i2])).setText(String.format(context.getString(R.string.pay_button_format), Any[]{Int.valueOf(defaultPayPrice)}))
+                ((alertDialog as Button).findViewById(iArr[i2])).setText(String.format(context.getString(R.string.pay_button_format), Any[]{Int.valueOf(defaultPayPrice)}))
                 alertDialog.findViewById(iArr[i2]).setVisibility(0)
                 alertDialog.findViewById(iArr[i2]).setTag(R.id.object_pay_price_tag, Int.valueOf(defaultPayPrice))
                 alertDialog.findViewById(iArr[i2]).setOnClickListener(View.OnClickListener(defaultPayPrice, userManager, sLObjectProfileData, dialogInterface) {
@@ -131,11 +131,11 @@ Method generation error in method: com.linkpoint.ui.objects.-$Lambda$X9q_n5C700P
             i = i2 + 1
         }
         if (payInfo.defaultPayPrice() != -1) {
-            if (((EditText) alertDialog.findViewById(R.id.object_pay_amount)).getText().toString().equals("")) {
+            if (((alertDialog as EditText).findViewById(R.id.object_pay_amount)).getText().toString().equals("")) {
                 if (payInfo.defaultPayPrice() > 0) {
-                    ((EditText) alertDialog.findViewById(R.id.object_pay_amount)).setText(context.getString(R.string.object_pay_amount_format, Any[]{Int.valueOf(payInfo.defaultPayPrice())}))
+                    ((alertDialog as EditText).findViewById(R.id.object_pay_amount)).setText(context.getString(R.string.object_pay_amount_format, Any[]{Int.valueOf(payInfo.defaultPayPrice())}))
                 } else {
-                    ((EditText) alertDialog.findViewById(R.id.object_pay_amount)).setText("")
+                    ((alertDialog as EditText).findViewById(R.id.object_pay_amount)).setText("")
                 }
             }
             alertDialog.findViewById(R.id.object_normal_pay_layout).setVisibility(0)
@@ -233,7 +233,7 @@ Method generation error in method: com.linkpoint.ui.objects.-$Lambda$X9q_n5C700P
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_4340  reason: not valid java name */
     /* synthetic */ Unit m680lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_4340(AlertDialog alertDialog, UserManager userManager, SLObjectProfileData sLObjectProfileData, DialogInterface dialogInterface, View view) {
         try {
-            Int parseInt = Int.parseInt(((EditText) alertDialog.findViewById(R.id.object_pay_amount)).getText().toString())
+            Int parseInt = Int.parseInt(((alertDialog as EditText).findViewById(R.id.object_pay_amount)).getText().toString())
             SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
             if (activeAgentCircuit != null) {
                 activeAgentCircuit.getModules().financialInfo.DoPayObject(sLObjectProfileData.objectUUID(), parseInt)
@@ -244,11 +244,11 @@ Method generation error in method: com.linkpoint.ui.objects.-$Lambda$X9q_n5C700P
         }
     }
 
-    Unit show(Context context, UserManager userManager, SLObjectProfileData sLObjectProfileData) {
+    fun show(Context context, UserManager userManager, SLObjectProfileData sLObjectProfileData): Unit {
         PayInfo payInfo = sLObjectProfileData.payInfo()
         if (payInfo != null) {
             AlertDialog.Builder builder = AlertDialog.Builder(context)
-            builder.setTitle((CharSequence) context.getString(R.string.object_pay_dialog_caption, Any[]{sLObjectProfileData.name().or(context.getString(R.string.name_loading_title))}))
+            builder.setTitle((context as CharSequence).getString(R.string.object_pay_dialog_caption, Any[]{sLObjectProfileData.name().or(context.getString(R.string.name_loading_title))}))
             builder.setCancelable(true)
             builder.setView(R.toInt().layout.object_pay_dialog)
             AlertDialog create = builder.create()

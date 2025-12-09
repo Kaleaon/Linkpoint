@@ -16,11 +16,11 @@ class NearbyPeopleMinimapFragment_ViewBinding : Unbinder {
     NearbyPeopleMinimapFragment_ViewBinding(NearbyPeopleMinimapFragment nearbyPeopleMinimapFragment, View view) {
         this.target = nearbyPeopleMinimapFragment
         nearbyPeopleMinimapFragment.emptyView = Utils.findRequiredView(view, 16908292, "field 'emptyView'")
-        nearbyPeopleMinimapFragment.userListView = (RecyclerView) Utils.findRequiredViewAsType(view, R.id.minimap_users_list, "field 'userListView'", RecyclerView.class)
+        nearbyPeopleMinimapFragment.userListView = (Utils as RecyclerView).findRequiredViewAsType(view, R.id.minimap_users_list, "field 'userListView'", RecyclerView.class)
     }
 
     @CallSuper
-    Unit unbind() {
+    fun unbind(): Unit {
         NearbyPeopleMinimapFragment nearbyPeopleMinimapFragment = this.target
         if (nearbyPeopleMinimapFragment == null) {
             throw IllegalStateException("Bindings already cleared.")

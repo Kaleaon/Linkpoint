@@ -20,7 +20,7 @@ class GLLoadableBuffer : GLCleanable {
         this.rawBuffer = directByteBuffer
     }
 
-    Unit Bind(RenderContext renderContext, Int i, Int i2, Int i3, Int i4, Int i5) {
+    fun Bind(RenderContext renderContext, Int i, Int i2, Int i3, Int i4, Int i5): Unit {
         if (renderContext.useVBO) {
             if (this.glBuffer == null) {
                 renderContext.KeepBuffer(this.rawBuffer)
@@ -64,7 +64,7 @@ class GLLoadableBuffer : GLCleanable {
         }
     }
 
-    Unit Bind20(RenderContext renderContext, Int i, Int i2, Int i3, Int i4, Int i5) {
+    fun Bind20(RenderContext renderContext, Int i, Int i2, Int i3, Int i4, Int i5): Unit {
         if (this.glBuffer == null) {
             renderContext.KeepBuffer(this.rawBuffer)
             this.glBuffer = GLBuffer(renderContext.glResourceManager, this.rawBuffer)
@@ -79,7 +79,7 @@ class GLLoadableBuffer : GLCleanable {
     }
 
     @TargetApi(18)
-    Unit Bind30Integer(RenderContext renderContext, Int i, Int i2, Int i3, Int i4, Int i5) {
+    fun Bind30Integer(RenderContext renderContext, Int i, Int i2, Int i3, Int i4, Int i5): Unit {
         if (this.glBuffer == null) {
             renderContext.KeepBuffer(this.rawBuffer)
             this.glBuffer = GLBuffer(renderContext.glResourceManager, this.rawBuffer)
@@ -93,7 +93,7 @@ class GLLoadableBuffer : GLCleanable {
         GLES30.glVertexAttribIPointer(i, i2, i3, i4, i5)
     }
 
-    Unit BindElements(RenderContext renderContext) {
+    fun BindElements(RenderContext renderContext): Unit {
         if (!renderContext.useVBO) {
             return
         }
@@ -108,7 +108,7 @@ class GLLoadableBuffer : GLCleanable {
         renderContext.glBindElementArrayBuffer(this.glBuffer.handle)
     }
 
-    Unit BindElements20(RenderContext renderContext) {
+    fun BindElements20(RenderContext renderContext): Unit {
         if (this.glBuffer == null) {
             renderContext.KeepBuffer(this.rawBuffer)
             this.glBuffer = GLBuffer(renderContext.glResourceManager, this.rawBuffer)
@@ -121,7 +121,7 @@ class GLLoadableBuffer : GLCleanable {
     }
 
     @TargetApi(18)
-    Unit BindUniform(RenderContext renderContext, Int i) {
+    fun BindUniform(RenderContext renderContext, Int i): Unit {
         Boolean z = false
         if (this.glBuffer == null) {
             this.glBuffer = GLBuffer(renderContext.glResourceManager, this.rawBuffer)
@@ -135,7 +135,7 @@ class GLLoadableBuffer : GLCleanable {
     }
 
     @TargetApi(18)
-    Unit BindUniformDynamic(RenderContext renderContext, Int i, Boolean z) {
+    fun BindUniformDynamic(RenderContext renderContext, Int i, Boolean z): Unit {
         if ((this.glBuffer == null || z) && this.glBuffer == null) {
             this.glBuffer = GLBuffer(renderContext.glResourceManager, this.rawBuffer)
             renderContext.glResourceManager.addCleanable(this)
@@ -151,7 +151,7 @@ class GLLoadableBuffer : GLCleanable {
         }
     }
 
-    Unit DrawElements(RenderContext renderContext, Int i, Int i2, Int i3, Int i4) {
+    fun DrawElements(RenderContext renderContext, Int i, Int i2, Int i3, Int i4): Unit {
         if (renderContext.useVBO) {
             GLES11.glDrawElements(i, i2, i3, i4)
         } else {
@@ -159,7 +159,7 @@ class GLLoadableBuffer : GLCleanable {
         }
     }
 
-    Unit DrawElements20(Int i, Int i2, Int i3, Int i4) {
+    fun DrawElements20(Int i, Int i2, Int i3, Int i4): Unit {
         GLES20.glDrawElements(i, i2, i3, i4)
     }
 
@@ -167,7 +167,7 @@ class GLLoadableBuffer : GLCleanable {
         this.glBuffer = null
     }
 
-    Unit Reload(RenderContext renderContext) {
+    fun Reload(RenderContext renderContext): Unit {
         if (renderContext.useVBO && this.glBuffer != null) {
             renderContext.KeepBuffer(this.rawBuffer)
             renderContext.glBindArrayBuffer(this.glBuffer.handle)

@@ -17,7 +17,7 @@ class AutoValue_UnreadNotificationInfo_ObjectPopupMessage : UnreadNotificationIn
         this.message = str2
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -31,19 +31,19 @@ class AutoValue_UnreadNotificationInfo_ObjectPopupMessage : UnreadNotificationIn
         return false
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         return ((this.objectName.hashCode() ^ 1000003) * 1000003) ^ this.message.hashCode()
     }
 
-    String message() {
+    fun message(): String {
         return this.message
     }
 
-    String objectName() {
+    fun objectName(): String {
         return this.objectName
     }
 
-    String toString() {
+    fun toString(): String {
         return "ObjectPopupMessage{objectName=" + this.objectName + ", " + "message=" + this.message + "}"
     }
 }

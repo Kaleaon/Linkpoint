@@ -42,7 +42,7 @@ abstract class TextFieldEditFragment : ChatterFragment : BackButtonHandler {
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_TextFieldEditFragment_1854  reason: not valid java name */
     /* synthetic */ Unit m556lambda$com_lumiyaviewer_lumiya_ui_common_TextFieldEditFragment_1854(View view, DialogInterface dialogInterface, Int i) {
-        ((TextView) view.findViewById(R.id.field_edit_text)).setText(this.originalText)
+        ((view as TextView).findViewById(R.id.field_edit_text)).setText(this.originalText)
         dialogInterface.dismiss()
     }
 
@@ -64,12 +64,12 @@ abstract class TextFieldEditFragment : ChatterFragment : BackButtonHandler {
         closeFragment()
     }
 
-    Boolean onBackButtonPressed() {
+    fun onBackButtonPressed(): Boolean {
         View view = getView()
         if (view == null) {
             return false
         }
-        String charSequence = ((TextView) view.findViewById(R.id.field_edit_text)).getText().toString()
+        String charSequence = ((view as TextView).findViewById(R.id.field_edit_text)).getText().toString()
         if (Objects.equal(charSequence, this.originalText)) {
             return false
         }
@@ -239,12 +239,12 @@ Method generation error in method: com.linkpoint.ui.common.-$Lambda$DtZUcoBgRyVu
         return true
     }
 
-    Unit onCreate(@Nullable Bundle bundle) {
+    fun onCreate(@Nullable Bundle bundle): Unit {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    Unit onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater): Unit {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.user_notes_edit_menu, menu)
         this.undoMenuItem = menu.findItem(R.id.item_undo)
@@ -252,12 +252,12 @@ Method generation error in method: com.linkpoint.ui.common.-$Lambda$DtZUcoBgRyVu
     }
 
     @Nullable
-    View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle): View {
         View inflate = layoutInflater.inflate(R.layout.user_text_field_edit, viewGroup, false)
-        TextView textView = (TextView) inflate.findViewById(R.id.field_edit_text)
+        TextView textView = (inflate as TextView).findViewById(R.id.field_edit_text)
         textView.setHint(getFieldHint(layoutInflater.getContext()))
         textView.addTextChangedListener(TextWatcher() {
-            Unit afterTextChanged(Editable editable) {
+            fun afterTextChanged(Editable editable): Unit {
                 Boolean z = !Objects.equal(textView.getText().toString(), TextFieldEditFragment.this.originalText)
                 if (z != TextFieldEditFragment.this.hasChanged) {
                     Boolean unused = TextFieldEditFragment.this.hasChanged = z
@@ -267,19 +267,19 @@ Method generation error in method: com.linkpoint.ui.common.-$Lambda$DtZUcoBgRyVu
                 }
             }
 
-            Unit beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+            fun beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3): Unit {
             }
 
-            Unit onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+            fun onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3): Unit {
             }
         return inflate
     }
 
-    Boolean onOptionsItemSelected(MenuItem menuItem) {
+    fun onOptionsItemSelected(MenuItem menuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_undo:
                 View view = getView()
-                if (view != null && !Objects.equal(((TextView) view.findViewById(R.id.field_edit_text)).getText().toString(), this.originalText)) {
+                if (view != null && !Objects.equal(((view as TextView).findViewById(R.id.field_edit_text)).getText().toString(), this.originalText)) {
                     AlertDialog.Builder builder = AlertDialog.Builder(getContext())
                     builder.setMessage(getString(R.string.discard_changes_question)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(this, view) {
 
@@ -381,11 +381,11 @@ Method generation error in method: com.linkpoint.ui.common.-$Lambda$DtZUcoBgRyVu
     abstract Unit saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str)
 
     /* access modifiers changed from: protected */
-    Unit setOriginalText(String str) {
+    fun setOriginalText(String str): Unit {
         this.originalText = str
         View view = getView()
         if (view != null) {
-            ((TextView) view.findViewById(R.id.field_edit_text)).setText(str)
+            ((view as TextView).findViewById(R.id.field_edit_text)).setText(str)
         }
     }
 }

@@ -30,33 +30,33 @@ class EjectGroupMemberRequest : SLMessage {
         this.GroupData_Field = GroupData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.EjectData_Fields.size() * 16) + 53
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleEjectGroupMemberRequest(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 89)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packUUID(byteBuffer, this.GroupData_Field.GroupID)
-        byteBuffer.put((byte) this.EjectData_Fields.size())
+        byteBuffer.put((this as byte).EjectData_Fields.size())
         for (EjectData ejectData : this.EjectData_Fields) {
             packUUID(byteBuffer, ejectData.EjecteeID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.GroupData_Field.GroupID = unpackUUID(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             EjectData ejectData = EjectData()
             ejectData.EjecteeID = unpackUUID(byteBuffer)
             this.EjectData_Fields.add(ejectData)

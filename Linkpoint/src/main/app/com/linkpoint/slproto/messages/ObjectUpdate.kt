@@ -72,7 +72,7 @@ class ObjectUpdate : SLMessage {
         this.RegionData_Field = RegionData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 12
         Iterator<T> it = this.ObjectData_Fields.iterator()
         while (true) {
@@ -80,50 +80,50 @@ class ObjectUpdate : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            ObjectData objectData = (ObjectData) it.next()
-            i = objectData.ExtraParams.length + objectData.ObjectData.length + 41 + 4 + 4 + 1 + 1 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 2 + 2 + 2 + 2 + objectData.TextureEntry.length + 1 + objectData.TextureAnim.length + 2 + objectData.NameValue.length + 2 + objectData.Data.length + 1 + objectData.Text.length + 4 + 1 + objectData.MediaURL.length + 1 + objectData.PSBlock.length + 1 + 16 + 16 + 4 + 1 + 4 + 1 + 12 + 12 + i2
+            ObjectData objectData = (it as ObjectData).next()
+            i = objectData.ExtraParams.size + objectData.ObjectData.size + 41 + 4 + 4 + 1 + 1 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 2 + 2 + 2 + 2 + objectData.TextureEntry.size + 1 + objectData.TextureAnim.size + 2 + objectData.NameValue.size + 2 + objectData.Data.size + 1 + objectData.Text.size + 4 + 1 + objectData.MediaURL.size + 1 + objectData.PSBlock.size + 1 + 16 + 16 + 4 + 1 + 4 + 1 + 12 + 12 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleObjectUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put(Ascii.FF)
         packLong(byteBuffer, this.RegionData_Field.RegionHandle)
-        packShort(byteBuffer, (Short) this.RegionData_Field.TimeDilation)
-        byteBuffer.put((Byte) this.ObjectData_Fields.size())
+        packShort(byteBuffer, (this as Short).RegionData_Field.TimeDilation)
+        byteBuffer.put((this as Byte).ObjectData_Fields.size())
         for (ObjectData objectData : this.ObjectData_Fields) {
             packInt(byteBuffer, objectData.ID)
-            packByte(byteBuffer, (Byte) objectData.State)
+            packByte(byteBuffer, (objectData as Byte).State)
             packUUID(byteBuffer, objectData.FullID)
             packInt(byteBuffer, objectData.CRC)
-            packByte(byteBuffer, (Byte) objectData.PCode)
-            packByte(byteBuffer, (Byte) objectData.Material)
-            packByte(byteBuffer, (Byte) objectData.ClickAction)
+            packByte(byteBuffer, (objectData as Byte).PCode)
+            packByte(byteBuffer, (objectData as Byte).Material)
+            packByte(byteBuffer, (objectData as Byte).ClickAction)
             packLLVector3(byteBuffer, objectData.Scale)
             packVariable(byteBuffer, objectData.ObjectData, 1)
             packInt(byteBuffer, objectData.ParentID)
             packInt(byteBuffer, objectData.UpdateFlags)
-            packByte(byteBuffer, (Byte) objectData.PathCurve)
-            packByte(byteBuffer, (Byte) objectData.ProfileCurve)
-            packShort(byteBuffer, (Short) objectData.PathBegin)
-            packShort(byteBuffer, (Short) objectData.PathEnd)
-            packByte(byteBuffer, (Byte) objectData.PathScaleX)
-            packByte(byteBuffer, (Byte) objectData.PathScaleY)
-            packByte(byteBuffer, (Byte) objectData.PathShearX)
-            packByte(byteBuffer, (Byte) objectData.PathShearY)
-            packByte(byteBuffer, (Byte) objectData.PathTwist)
-            packByte(byteBuffer, (Byte) objectData.PathTwistBegin)
-            packByte(byteBuffer, (Byte) objectData.PathRadiusOffset)
-            packByte(byteBuffer, (Byte) objectData.PathTaperX)
-            packByte(byteBuffer, (Byte) objectData.PathTaperY)
-            packByte(byteBuffer, (Byte) objectData.PathRevolutions)
-            packByte(byteBuffer, (Byte) objectData.PathSkew)
-            packShort(byteBuffer, (Short) objectData.ProfileBegin)
-            packShort(byteBuffer, (Short) objectData.ProfileEnd)
-            packShort(byteBuffer, (Short) objectData.ProfileHollow)
+            packByte(byteBuffer, (objectData as Byte).PathCurve)
+            packByte(byteBuffer, (objectData as Byte).ProfileCurve)
+            packShort(byteBuffer, (objectData as Short).PathBegin)
+            packShort(byteBuffer, (objectData as Short).PathEnd)
+            packByte(byteBuffer, (objectData as Byte).PathScaleX)
+            packByte(byteBuffer, (objectData as Byte).PathScaleY)
+            packByte(byteBuffer, (objectData as Byte).PathShearX)
+            packByte(byteBuffer, (objectData as Byte).PathShearY)
+            packByte(byteBuffer, (objectData as Byte).PathTwist)
+            packByte(byteBuffer, (objectData as Byte).PathTwistBegin)
+            packByte(byteBuffer, (objectData as Byte).PathRadiusOffset)
+            packByte(byteBuffer, (objectData as Byte).PathTaperX)
+            packByte(byteBuffer, (objectData as Byte).PathTaperY)
+            packByte(byteBuffer, (objectData as Byte).PathRevolutions)
+            packByte(byteBuffer, (objectData as Byte).PathSkew)
+            packShort(byteBuffer, (objectData as Short).ProfileBegin)
+            packShort(byteBuffer, (objectData as Short).ProfileEnd)
+            packShort(byteBuffer, (objectData as Short).ProfileHollow)
             packVariable(byteBuffer, objectData.TextureEntry, 2)
             packVariable(byteBuffer, objectData.TextureAnim, 1)
             packVariable(byteBuffer, objectData.NameValue, 2)
@@ -136,19 +136,19 @@ class ObjectUpdate : SLMessage {
             packUUID(byteBuffer, objectData.Sound)
             packUUID(byteBuffer, objectData.OwnerID)
             packFloat(byteBuffer, objectData.Gain)
-            packByte(byteBuffer, (Byte) objectData.Flags)
+            packByte(byteBuffer, (objectData as Byte).Flags)
             packFloat(byteBuffer, objectData.Radius)
-            packByte(byteBuffer, (Byte) objectData.JointType)
+            packByte(byteBuffer, (objectData as Byte).JointType)
             packLLVector3(byteBuffer, objectData.JointPivot)
             packLLVector3(byteBuffer, objectData.JointAxisOrAnchor)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.RegionData_Field.RegionHandle = unpackLong(byteBuffer)
         this.RegionData_Field.TimeDilation = unpackShort(byteBuffer) & 65535
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             ObjectData objectData = ObjectData()
             objectData.ID = unpackInt(byteBuffer)
             objectData.State = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE

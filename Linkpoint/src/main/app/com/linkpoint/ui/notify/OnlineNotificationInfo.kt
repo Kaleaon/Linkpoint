@@ -26,7 +26,7 @@ class OnlineNotificationInfo {
         if (f465comlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues != null) {
             return f465comlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues
         }
-        IntArray iArr = Int[SLGridConnection.ConnectionState.values().length]
+        IntArray iArr = Int[SLGridConnection.ConnectionState.values().size]
         try {
             iArr[SLGridConnection.ConnectionState.Connected.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -158,7 +158,7 @@ class OnlineNotificationInfo {
         throw UnsupportedOperationException("Method not decompiled: com.linkpoint.ui.notify.OnlineNotificationInfo.<init>(Boolean, android.content.Context, java.lang.String, com.linkpoint.slproto.SLGridConnection, com.linkpoint.slproto.users.ChatterNameRetriever, com.linkpoint.slproto.users.manager.CurrentLocationInfo):Unit")
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (!(obj instanceof OnlineNotificationInfo)) {
             return false
         }
@@ -166,7 +166,7 @@ class OnlineNotificationInfo {
         return Objects.equal(this.titleText, onlineNotificationInfo.titleText) && Objects.equal(this.contentText, onlineNotificationInfo.contentText) && this.visible == onlineNotificationInfo.visible && this.hasProgress == onlineNotificationInfo.hasProgress
     }
 
-    Notification getNotification(Context context) {
+    fun getNotification(Context context): Notification {
         if (!this.visible) {
             return null
         }

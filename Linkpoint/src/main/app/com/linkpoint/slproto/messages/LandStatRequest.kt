@@ -14,7 +14,7 @@ class LandStatRequest : SLMessage {
     }
 
     class RequestData {
-        byte[] Filter
+        ByteArray Filter
         Int ParcelLocalID
         Int ReportType
         Int RequestFlags
@@ -24,15 +24,15 @@ class LandStatRequest : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.RequestData_Field.Filter.length + 9 + 4 + 36
+    fun CalcPayloadSize(): Int {
+        return this.RequestData_Field.Filter.size + 9 + 4 + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleLandStatRequest(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) -91)
@@ -44,7 +44,7 @@ class LandStatRequest : SLMessage {
         packInt(byteBuffer, this.RequestData_Field.ParcelLocalID)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.RequestData_Field.ReportType = unpackInt(byteBuffer)

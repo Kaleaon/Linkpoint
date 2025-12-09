@@ -26,7 +26,7 @@ enum ELLPath {
         this.code = i
     }
 
-    Int getCode() {
+    fun getCode(): Int {
         return this.code
     }
 }

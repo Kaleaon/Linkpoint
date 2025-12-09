@@ -11,14 +11,14 @@ import android.widget.AdapterView
     private /* synthetic */ Any f503$f0
 
     private /* synthetic */ Unit $m$0(AdapterView adapterView, View view, Int i, Long j) {
-        ((OutfitsFragment) this.f503$f0).m702lambda$com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragment_13544(adapterView, view, i, j)
+        ((this as OutfitsFragment).f503$f0).m702lambda$com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragment_13544(adapterView, view, i, j)
     }
 
     /* synthetic */ $Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs(Any obj) {
         this.f503$f0 = obj
     }
 
-    Unit onItemClick(AdapterView adapterView, View view, Int i, Long j) {
+    fun onItemClick(AdapterView adapterView, View view, Int i, Long j): Unit {
         $m$0(adapterView, view, i, j)
     }
 }

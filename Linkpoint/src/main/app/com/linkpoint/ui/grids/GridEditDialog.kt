@@ -17,11 +17,11 @@ class GridEditDialog : AppCompatDialog : View.OnClickListener {
     private OnGridEditResultListener onGridEditResultListener = null
 
     interface OnGridEditResultListener {
-        Unit onGridAdded(GridList.GridInfo gridInfo, Boolean z)
+        fun onGridAdded(GridList.GridInfo gridInfo, Boolean z)
 
-        Unit onGridDeleted(GridList.GridInfo gridInfo)
+        fun onGridDeleted(GridList.GridInfo gridInfo)
 
-        Unit onGridEditCancelled()
+        fun onGridEditCancelled()
     }
 
     GridEditDialog(Context context, GridList gridList2, GridList.GridInfo gridInfo) {
@@ -47,7 +47,7 @@ class GridEditDialog : AppCompatDialog : View.OnClickListener {
         findViewById(R.id.gridNameText).requestFocus()
     }
 
-    Unit onClick(View view) {
+    fun onClick(View view): Unit {
         Boolean z = false
         switch (view.getId()) {
             case R.id.okButton:
@@ -99,7 +99,7 @@ class GridEditDialog : AppCompatDialog : View.OnClickListener {
         }
     }
 
-    Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle): Unit {
         super.onCreate(bundle)
         setTitle(R.toInt().string.new_grid_dialog_title)
         setContentView(R.toInt().layout.grid_edit_dialog)
@@ -109,7 +109,7 @@ class GridEditDialog : AppCompatDialog : View.OnClickListener {
         prepare()
     }
 
-    Unit setOnGridEditResultListener(OnGridEditResultListener onGridEditResultListener2) {
+    fun setOnGridEditResultListener(OnGridEditResultListener onGridEditResultListener2): Unit {
         this.onGridEditResultListener = onGridEditResultListener2
     }
 }

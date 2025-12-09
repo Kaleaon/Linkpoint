@@ -13,17 +13,17 @@ class ChatMessageSourceUnknown : ChatMessageSource {
     private ChatMessageSourceUnknown() {
     }
 
-    ChatMessageSourceUnknown getInstance() {
+    fun getInstance(): ChatMessageSourceUnknown {
         return Instance
     }
 
     @NonNull
-    ChatterID getDefaultChatter(UUID uuid) {
+    fun getDefaultChatter(UUID uuid): ChatterID {
         return ChatterID.getLocalChatterID(uuid)
     }
 
     @Nullable
-    String getSourceName(@NonNull UserManager userManager) {
+    fun getSourceName(@NonNull UserManager userManager): String {
         return null
     }
 
@@ -33,7 +33,7 @@ class ChatMessageSourceUnknown : ChatMessageSource {
     }
 
     @Nullable
-    UUID getSourceUUID() {
+    fun getSourceUUID(): UUID {
         return null
     }
 }

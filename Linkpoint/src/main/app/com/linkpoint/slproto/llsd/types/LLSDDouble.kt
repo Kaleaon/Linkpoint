@@ -20,12 +20,16 @@ class LLSDDouble : LLSDNode {
         return this.value
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    @Throws(IOException::class)
+
+    fun toBinary(DataOutputStream dataOutputStream) {
         dataOutputStream.writeByte(114)
         dataOutputStream.writeDouble(this.value)
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    @Throws(IOException::class)
+
+    fun toXML(XmlSerializer xmlSerializer) {
         xmlSerializer.startTag("", "real")
         xmlSerializer.text(Double.toString(this.value))
         xmlSerializer.endTag("", "real")

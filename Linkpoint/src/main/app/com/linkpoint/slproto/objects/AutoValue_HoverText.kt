@@ -12,11 +12,11 @@ class AutoValue_HoverText : HoverText {
         this.color = i
     }
 
-    Int color() {
+    fun color(): Int {
         return this.color
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -30,15 +30,15 @@ class AutoValue_HoverText : HoverText {
         return false
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         return ((this.text.hashCode() ^ 1000003) * 1000003) ^ this.color
     }
 
-    String text() {
+    fun text(): String {
         return this.text
     }
 
-    String toString() {
+    fun toString(): String {
         return "HoverText{text=" + this.text + ", " + "color=" + this.color + "}"
     }
 }

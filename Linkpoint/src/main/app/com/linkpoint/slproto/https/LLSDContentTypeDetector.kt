@@ -24,18 +24,18 @@ class LLSDContentTypeDetector {
             r1 = 0
             r0 = 64
             r11.mark(r0)
-            byte[] r2 = byte[r10]
+            ByteArray r2 = byte[r10]
             r2 = {-17, -69, -65} // fill-array
             r0 = 32
-            byte[] r4 = byte[r0]
-            Int r0 = r4.length
+            ByteArray r4 = byte[r0]
+            Int r0 = r4.size
             Int r5 = r11.read(r4, r1, r0)
-            Int r0 = r2.length
+            Int r0 = r2.size
             if (r5 < r0) goto L_0x00c7
             r0 = r1
         L_0x001a:
             if (r0 >= r5) goto L_0x008c
-            Int r6 = r2.length
+            Int r6 = r2.size
             if (r0 >= r6) goto L_0x008c
             byte r6 = r4[r0]
             byte r7 = r2[r0]
@@ -43,7 +43,7 @@ class LLSDContentTypeDetector {
             r0 = r1
         L_0x0026:
             if (r0 == 0) goto L_0x00c7
-            Int r0 = r2.length
+            Int r0 = r2.size
         L_0x0029:
             java.lang.String r6 = java.lang.String
             Int r2 = r5 - r0

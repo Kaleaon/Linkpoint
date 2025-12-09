@@ -46,11 +46,11 @@ class AutoValue_UnreadNotificationInfo : UnreadNotificationInfo {
         this.objectPopupInfo = objectPopupNotification
     }
 
-    UUID agentUUID() {
+    fun agentUUID(): UUID {
         return this.agentUUID
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -64,21 +64,21 @@ class AutoValue_UnreadNotificationInfo : UnreadNotificationInfo {
         return this.objectPopupInfo.equals(unreadNotificationInfo.objectPopupInfo())
     }
 
-    Int freshMessagesCount() {
+    fun freshMessagesCount(): Int {
         return this.freshMessagesCount
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         return ((((((((((((((this.agentUUID.hashCode() ^ 1000003) * 1000003) ^ this.totalUnreadCount) * 1000003) ^ this.unreadSources.hashCode()) * 1000003) ^ this.mostImportantType.hashCode()) * 1000003) ^ this.freshMessagesCount) * 1000003) ^ this.mostImportantFreshType.hashCode()) * 1000003) ^ this.singleFreshSource.hashCode()) * 1000003) ^ this.objectPopupInfo.hashCode()
     }
 
     @NonNull
-    Optional<NotificationType> mostImportantFreshType() {
+    fun mostImportantFreshType(): Optional<NotificationType> {
         return this.mostImportantFreshType
     }
 
     @NonNull
-    Optional<NotificationType> mostImportantType() {
+    fun mostImportantType(): Optional<NotificationType> {
         return this.mostImportantType
     }
 
@@ -88,20 +88,20 @@ class AutoValue_UnreadNotificationInfo : UnreadNotificationInfo {
     }
 
     @NonNull
-    Optional<UnreadNotificationInfo.UnreadMessageSource> singleFreshSource() {
+    fun singleFreshSource(): Optional<UnreadNotificationInfo.UnreadMessageSource> {
         return this.singleFreshSource
     }
 
-    String toString() {
+    fun toString(): String {
         return "UnreadNotificationInfo{agentUUID=" + this.agentUUID + ", " + "totalUnreadCount=" + this.totalUnreadCount + ", " + "unreadSources=" + this.unreadSources + ", " + "mostImportantType=" + this.mostImportantType + ", " + "freshMessagesCount=" + this.freshMessagesCount + ", " + "mostImportantFreshType=" + this.mostImportantFreshType + ", " + "singleFreshSource=" + this.singleFreshSource + ", " + "objectPopupInfo=" + this.objectPopupInfo + "}"
     }
 
-    Int totalUnreadCount() {
+    fun totalUnreadCount(): Int {
         return this.totalUnreadCount
     }
 
     @NonNull
-    ImmutableList<UnreadNotificationInfo.UnreadMessageSource> unreadSources() {
+    fun unreadSources(): ImmutableList<UnreadNotificationInfo.UnreadMessageSource> {
         return this.unreadSources
     }
 }

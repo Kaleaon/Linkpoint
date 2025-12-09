@@ -9,7 +9,7 @@ import java.util.Comparator
         return Long.signum(((Long) ((Identifiable) obj).getId()).longValue() - ((Long) ((Identifiable) obj2).getId()).longValue())
     }
 
-    Int compare(Any obj, Any obj2) {
+    fun compare(Any obj, Any obj2): Int {
         return $m$0(obj, obj2)
     }
 }

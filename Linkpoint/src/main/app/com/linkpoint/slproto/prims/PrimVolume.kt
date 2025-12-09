@@ -29,7 +29,7 @@ class PrimVolume {
     private Int sculptRequestedT
     PrimVolumeParams volumeParams
 
-    PrimVolume create(PrimVolumeParams primVolumeParams, Float f, Boolean z, Boolean z2, GLTexture gLTexture) {
+    fun create(PrimVolumeParams primVolumeParams, Float f, Boolean z, Boolean z2, GLTexture gLTexture): PrimVolume {
         if (primVolumeParams.isSculpt()) {
             if (gLTexture == null) {
                 return null
@@ -60,7 +60,7 @@ class PrimVolume {
         if (!this.GenerateSingleFace) {
             Int numFaces = getNumFaces()
             this.VolumeFaces.ensureCapacity(numFaces)
-            for (Int i = 0; i < numFaces; i++) {
+            for (i in 0 until numFaces) {
                 PrimVolumeFace primVolumeFace = PrimVolumeFace()
                 PrimProfile.Face face = this.Profile.Faces.get(i)
                 primVolumeFace.BeginS = face.Index
@@ -128,10 +128,10 @@ class PrimVolume {
         Int size = this.Path.Path.size()
         Int size2 = this.Profile.Profile.size()
         this.Mesh = Vector3Array(size2 * size)
-        for (Int i2 = 0; i2 < size; i2++) {
+        for (i2 in 0 until size) {
             LLVector2 lLVector2 = this.Path.Path.get(i2).scale
             LLQuaternion lLQuaternion = this.Path.Path.get(i2).rot
-            for (Int i3 = 0; i3 < size2; i3++) {
+            for (i3 in 0 until size2) {
                 Int i4 = (i2 * size2) + i3
                 this.Mesh.set(i4, lLVector2.x * this.Profile.Profile.get(i3).x, this.Profile.Profile.get(i3).y * lLVector2.y, 0.0f)
                 this.Mesh.mul(i4, lLQuaternion)
@@ -198,7 +198,7 @@ class PrimVolume {
         Int i4 = 0
         Int i5 = 0
         while (i4 < size) {
-            for (Int i6 = 0; i6 < size2; i6++) {
+            for (i6 in 0 until size2) {
                 Int i7 = i6 + i5
                 Int i8 = (Int) ((((Float) (z3 ? (size2 - i6) - 1 : i6)) / ((Float) (size2 - 1))) * (i.toFloat()))
                 Int i9 = (Int) (((i4.toFloat()) / ((Float) (size - 1))) * (i2.toFloat()))
@@ -260,12 +260,12 @@ class PrimVolume {
     }
 
     /* access modifiers changed from: package-private */
-    Byte getPathType() {
+    fun getPathType(): Byte {
         return this.volumeParams.PathParams.CurveType
     }
 
     /* access modifiers changed from: package-private */
-    Byte getProfileType() {
+    fun getProfileType(): Byte {
         return this.volumeParams.ProfileParams.CurveType
     }
 }

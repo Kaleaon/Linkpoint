@@ -30,21 +30,21 @@ class PrimVolumeParams {
     UUID SculptID
     Byte SculptType
 
-    PrimVolumeParams createFromObjectUpdate(ObjectUpdate.ObjectData objectData) {
+    fun createFromObjectUpdate(ObjectUpdate.ObjectData objectData): PrimVolumeParams {
         PrimVolumeParams primVolumeParams = PrimVolumeParams()
         primVolumeParams.PathParams = PrimParamsPool.get(PrimPathParams(objectData))
         primVolumeParams.ProfileParams = PrimParamsPool.get(PrimProfileParams.createFromObjectUpdate(objectData))
         return primVolumeParams
     }
 
-    PrimVolumeParams createFromPackedData(ByteBuffer byteBuffer) {
+    fun createFromPackedData(ByteBuffer byteBuffer): PrimVolumeParams {
         PrimVolumeParams primVolumeParams = PrimVolumeParams()
         primVolumeParams.PathParams = PrimParamsPool.get(PrimPathParams(byteBuffer))
         primVolumeParams.ProfileParams = PrimParamsPool.get(PrimProfileParams.createFromPackedData(byteBuffer))
         return primVolumeParams
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -79,7 +79,7 @@ class PrimVolumeParams {
         return this.FlexiParams == null || this.FlexiParams.equals(primVolumeParams.FlexiParams)
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         Int i = (this.SculptType * 17) + 0
         if (this.SculptID != null) {
             i += this.SculptID.hashCode() * 3
@@ -88,26 +88,26 @@ class PrimVolumeParams {
         return this.FlexiParams != null ? hashCode + this.FlexiParams.hashCode() : hashCode
     }
 
-    Boolean isFlexible() {
+    fun isFlexible(): Boolean {
         return this.FlexiParams != null
     }
 
-    Boolean isMesh() {
+    fun isMesh(): Boolean {
         return this.SculptID != null && (this.SculptType & 7) == 5
     }
 
-    Boolean isSculpt() {
+    fun isSculpt(): Boolean {
         return this.SculptID != null
     }
 
-    String toString() {
+    fun toString(): String {
         return "{Volume: SculptType 0x" + Int.toHexString(this.SculptType) + ", SculptID " + (this.SculptID != null ? this.SculptID.toString() : "null") + ", Path = (" + this.PathParams.toString() + "), Profile = (" + this.ProfileParams.toString() + ")}"
     }
 
-    Unit unpackExtraParams(ByteBuffer byteBuffer) {
+    fun unpackExtraParams(ByteBuffer byteBuffer): Unit {
         try {
             Byte b = byteBuffer.get()
-            for (Int i = 0; i < b; i++) {
+            for (i in 0 until b) {
                 Short s = byteBuffer.getShort()
                 Int i2 = byteBuffer.getInt() + byteBuffer.position()
                 switch (s) {

@@ -25,7 +25,7 @@ class SLMessageRouter {
             this.subscriber = WeakReference<>(obj)
         }
 
-        Unit invoke(Object obj) {
+        fun invoke(Object obj): Unit {
             try {
                 Object obj2 = this.subscriber.get()
                 if (obj2 != null) {
@@ -55,11 +55,11 @@ class SLMessageRouter {
             this()
         }
 
-        Unit deleteAll(Object obj) {
+        fun deleteAll(Object obj): Unit {
             LinkedList linkedList = LinkedList()
             Iterator it = iterator()
             while (it.hasNext()) {
-                HandlerInfo handlerInfo = (HandlerInfo) it.next()
+                HandlerInfo handlerInfo = (it as HandlerInfo).next()
                 Object obj2 = handlerInfo.subscriber.get()
                 if (obj2 == null || obj2 == obj) {
                     linkedList.add(handlerInfo)
@@ -68,10 +68,10 @@ class SLMessageRouter {
             removeAll(linkedList)
         }
 
-        Unit invokeAll(Object obj) {
+        fun invokeAll(Object obj): Unit {
             Iterator it = iterator()
             while (it.hasNext()) {
-                ((HandlerInfo) it.next()).invoke(obj)
+                ((it as HandlerInfo).next()).invoke(obj)
             }
         }
     }
@@ -96,9 +96,9 @@ class SLMessageRouter {
 
     synchronized Unit registerHandler(Object obj) {
         for (Method method : obj.getClass().getMethods()) {
-            if (((SLMessageHandler) method.getAnnotation(SLMessageHandler.class)) != null) {
+            if (((method as SLMessageHandler).getAnnotation(SLMessageHandler.class)) != null) {
                 Class[] parameterTypes = method.getParameterTypes()
-                if (parameterTypes.length != 1) {
+                if (parameterTypes.size != 1) {
                     throw IllegalArgumentException("SLMessageHandler methods must specify a single SLMessage paramter.")
                 }
                 Class cls = parameterTypes[0]
@@ -110,9 +110,9 @@ class SLMessageRouter {
                 }
                 handlerList.add(handlerInfo)
             }
-            SLEventQueueMessageHandler sLEventQueueMessageHandler = (SLEventQueueMessageHandler) method.getAnnotation(SLEventQueueMessageHandler.class)
+            SLEventQueueMessageHandler sLEventQueueMessageHandler = (method as SLEventQueueMessageHandler).getAnnotation(SLEventQueueMessageHandler.class)
             if (sLEventQueueMessageHandler != null) {
-                if (method.getParameterTypes().length != 1) {
+                if (method.getParameterTypes().size != 1) {
                     throw IllegalArgumentException("SLMessageHandler methods must specify a single LLSDNode paramter.")
                 }
                 SLCapEventQueue.CapsEventType eventName = sLEventQueueMessageHandler.eventName()

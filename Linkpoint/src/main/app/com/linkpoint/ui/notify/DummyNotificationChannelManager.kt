@@ -13,30 +13,30 @@ class DummyNotificationChannelManager : NotificationChannelManager {
     val DEFAULT_NOTIFICATION_CHANNEL: String = "miscellaneous"
     private ImmutableSet<NotificationType> allChannels = ImmutableSet.of(NotificationType.LocalChat, NotificationType.Group, NotificationType.Private)
 
-    Boolean areNotificationsSystemControlled() {
+    fun areNotificationsSystemControlled(): Boolean {
         return false
     }
 
     @NonNull
-    ImmutableSet<NotificationType> getEnabledTypes(Context context) {
+    fun getEnabledTypes(Context context): ImmutableSet<NotificationType> {
         return allChannels
     }
 
     @NonNull
-    String getNotificationChannelName(@NonNull NotificationChannels.Channel channel) {
+    fun getNotificationChannelName(@NonNull NotificationChannels.Channel channel): String {
         return DEFAULT_NOTIFICATION_CHANNEL
     }
 
     @Nullable
-    String getNotificationSummary(Context context, @NonNull NotificationChannels.Channel channel) {
+    fun getNotificationSummary(Context context, @NonNull NotificationChannels.Channel channel): String {
         return null
     }
 
-    Boolean showSystemNotificationSettings(Context context, @Nullable Fragment fragment, @NonNull NotificationChannels.Channel channel) {
+    fun showSystemNotificationSettings(Context context, @Nullable Fragment fragment, @NonNull NotificationChannels.Channel channel): Boolean {
         return false
     }
 
-    Boolean useNotificationGroups() {
+    fun useNotificationGroups(): Boolean {
         return Build.VERSION.SDK_INT >= 24
     }
 }

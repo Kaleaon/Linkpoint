@@ -60,14 +60,16 @@ class LLSDMap : LLSDNode {
     }
 
     LLSDMap(LLSDMapEntry... lLSDMapEntryArr) {
-        HashMap hashMap = HashMap(lLSDMapEntryArr.length)
+        HashMap hashMap = HashMap(lLSDMapEntryArr.size)
         for (LLSDMapEntry lLSDMapEntry : lLSDMapEntryArr) {
             hashMap.put(lLSDMapEntry.key, lLSDMapEntry.value)
         }
         this.items = ImmutableMap.copyOf(hashMap)
     }
 
-    LLSDNode byKey(String str) throws LLSDInvalidKeyException {
+    @Throws(LLSDInvalidKeyException::class)
+
+    fun byKey(String str): LLSDNode {
         LLSDNode lLSDNode = this.items.get(str)
         if (lLSDNode != null) {
             return lLSDNode
@@ -79,20 +81,22 @@ class LLSDMap : LLSDNode {
         return this.items.entrySet()
     }
 
-    Boolean keyExists(String str) {
+    fun keyExists(String str): Boolean {
         return this.items.containsKey(str)
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    @Throws(IOException::class)
+
+    fun toBinary(DataOutputStream dataOutputStream) {
         dataOutputStream.writeByte(Vr.VREvent.VrCore.ErrorCode.CONTROLLER_GATT_CHARACTERISTIC_NOT_FOUND)
         ImmutableSet<Map.Entry<String, LLSDNode>> entrySet = this.items.entrySet()
         dataOutputStream.writeInt(entrySet.size())
         for (Map.Entry entry : entrySet) {
             dataOutputStream.writeByte(107)
-            byte[] stringToVariableUTF = SLMessage.stringToVariableUTF((String) entry.getKey())
-            dataOutputStream.writeInt(stringToVariableUTF.length)
+            ByteArray stringToVariableUTF = SLMessage.stringToVariableUTF((entry as String).getKey())
+            dataOutputStream.writeInt(stringToVariableUTF.size)
             dataOutputStream.write(stringToVariableUTF)
-            ((LLSDNode) entry.getValue()).toBinary(dataOutputStream)
+            ((entry as LLSDNode).getValue()).toBinary(dataOutputStream)
         }
         dataOutputStream.writeByte(Vr.VREvent.VrCore.ErrorCode.CONTROLLER_BATTERY_READ_FAILED)
     }
@@ -101,7 +105,7 @@ class LLSDMap : LLSDNode {
         try {
             T newInstance = cls.newInstance()
             for (Field field : cls.getDeclaredFields()) {
-                LLSDSerialized lLSDSerialized = (LLSDSerialized) field.getAnnotation(LLSDSerialized.class)
+                LLSDSerialized lLSDSerialized = (field as LLSDSerialized).getAnnotation(LLSDSerialized.class)
                 if (lLSDSerialized != null) {
                     String name = lLSDSerialized.name()
                     if (Strings.isNullOrEmpty(name)) {
@@ -126,20 +130,20 @@ class LLSDMap : LLSDNode {
                             field.set(newInstance, byKey.asURI())
                         } else if (type.equals(Date.class)) {
                             field.set(newInstance, byKey.asDate())
-                        } else if (type.equals(byte[].class)) {
+                        } else if (type.equals(ByteArray.class)) {
                             field.set(newInstance, byKey.asBinary())
                         } else if (type.isAssignableFrom(List.class)) {
                             Type genericType = field.getGenericType()
                             if (genericType instanceof ParameterizedType) {
                                 Type[] actualTypeArguments = ((ParameterizedType) genericType).getActualTypeArguments()
-                                if (actualTypeArguments.length != 1) {
+                                if (actualTypeArguments.size != 1) {
                                     throw LLSDValueTypeException(type.getName(), byKey)
                                 }
                                 Type type2 = actualTypeArguments[0]
                                 if (type2 instanceof Class) {
                                     Int count = byKey.getCount()
                                     ArrayList arrayList = ArrayList(count)
-                                    for (Int i = 0; i < count; i++) {
+                                    for (i in 0 until count) {
                                         arrayList.add(byKey.byIndex(i).toObject((Class) type2))
                                     }
                                     field.set(newInstance, arrayList)
@@ -165,13 +169,15 @@ class LLSDMap : LLSDNode {
         }
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    @Throws(IOException::class)
+
+    fun toXML(XmlSerializer xmlSerializer) {
         xmlSerializer.startTag("", "map")
         for (Map.Entry entry : this.items.entrySet()) {
             xmlSerializer.startTag("", "key")
-            xmlSerializer.text((String) entry.getKey())
+            xmlSerializer.text((entry as String).getKey())
             xmlSerializer.endTag("", "key")
-            ((LLSDNode) entry.getValue()).toXML(xmlSerializer)
+            ((entry as LLSDNode).getValue()).toXML(xmlSerializer)
         }
         xmlSerializer.endTag("", "map")
     }

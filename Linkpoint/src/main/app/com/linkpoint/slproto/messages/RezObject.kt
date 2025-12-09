@@ -60,15 +60,15 @@ class RezObject : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.InventoryData_Field.Name.length + 129 + 1 + this.InventoryData_Field.Description.length + 4 + 4 + 128
+    fun CalcPayloadSize(): Int {
+        return this.InventoryData_Field.Name.size + 129 + 1 + this.InventoryData_Field.Description.size + 4 + 4 + 128
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRezObject(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 37)
@@ -76,7 +76,7 @@ class RezObject : SLMessage {
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packUUID(byteBuffer, this.AgentData_Field.GroupID)
         packUUID(byteBuffer, this.RezData_Field.FromTaskID)
-        packByte(byteBuffer, (Byte) this.RezData_Field.BypassRaycast)
+        packByte(byteBuffer, (this as Byte).RezData_Field.BypassRaycast)
         packLLVector3(byteBuffer, this.RezData_Field.RayStart)
         packLLVector3(byteBuffer, this.RezData_Field.RayEnd)
         packUUID(byteBuffer, this.RezData_Field.RayTargetID)
@@ -99,10 +99,10 @@ class RezObject : SLMessage {
         packInt(byteBuffer, this.InventoryData_Field.NextOwnerMask)
         packBoolean(byteBuffer, this.InventoryData_Field.GroupOwned)
         packUUID(byteBuffer, this.InventoryData_Field.TransactionID)
-        packByte(byteBuffer, (Byte) this.InventoryData_Field.Type)
-        packByte(byteBuffer, (Byte) this.InventoryData_Field.InvType)
+        packByte(byteBuffer, (this as Byte).InventoryData_Field.Type)
+        packByte(byteBuffer, (this as Byte).InventoryData_Field.InvType)
         packInt(byteBuffer, this.InventoryData_Field.Flags)
-        packByte(byteBuffer, (Byte) this.InventoryData_Field.SaleType)
+        packByte(byteBuffer, (this as Byte).InventoryData_Field.SaleType)
         packInt(byteBuffer, this.InventoryData_Field.SalePrice)
         packVariable(byteBuffer, this.InventoryData_Field.Name, 1)
         packVariable(byteBuffer, this.InventoryData_Field.Description, 1)
@@ -110,7 +110,7 @@ class RezObject : SLMessage {
         packInt(byteBuffer, this.InventoryData_Field.CRC)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)

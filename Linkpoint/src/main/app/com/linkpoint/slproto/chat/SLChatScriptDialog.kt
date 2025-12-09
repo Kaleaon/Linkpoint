@@ -29,7 +29,7 @@ import androidx.annotation.Nullable
 
 class SLChatScriptDialog : SLChatDialogEvent {
     /* access modifiers changed from: private */
-    Int[] dialogButtonIds = {R.id.buttonDialog1, R.id.buttonDialog2, R.id.buttonDialog3, R.id.buttonDialog4, R.id.buttonDialog5, R.id.buttonDialog6, R.id.buttonDialog7, R.id.buttonDialog8, R.id.buttonDialog9, R.id.buttonDialog10, R.id.buttonDialog11, R.id.buttonDialog12}
+    IntArray dialogButtonIds = {R.id.buttonDialog1, R.id.buttonDialog2, R.id.buttonDialog3, R.id.buttonDialog4, R.id.buttonDialog5, R.id.buttonDialog6, R.id.buttonDialog7, R.id.buttonDialog8, R.id.buttonDialog9, R.id.buttonDialog10, R.id.buttonDialog11, R.id.buttonDialog12}
     /* access modifiers changed from: private */
     String[] buttons
     private String selectedOption = null
@@ -44,8 +44,8 @@ class SLChatScriptDialog : SLChatDialogEvent {
             setCancelable(true)
             setTitle(str)
             ((TextView) findViewById(R.id.dialogQuestionText)).setText(str2)
-            for (Int i = 0; i < SLChatScriptDialog.dialogButtonIds.length; i++) {
-                if (i < SLChatScriptDialog.this.buttons.length) {
+            for (i in 0 until SLChatScriptDialog.dialogButtonIds.size) {
+                if (i < SLChatScriptDialog.this.buttons.size) {
                     ((Button) findViewById(SLChatScriptDialog.dialogButtonIds[i])).setText(SLChatScriptDialog.this.buttons[i])
                     findViewById(SLChatScriptDialog.dialogButtonIds[i]).setOnClickListener(this)
                     findViewById(SLChatScriptDialog.dialogButtonIds[i]).setVisibility(0)
@@ -56,15 +56,15 @@ class SLChatScriptDialog : SLChatDialogEvent {
             setOnCancelListener(this)
         }
 
-        Unit onCancel(DialogInterface dialogInterface) {
+        fun onCancel(DialogInterface dialogInterface): Unit {
             SLChatScriptDialog.this.onDialogIgnored(this.userManager)
             dismiss()
         }
 
-        Unit onClick(View view) {
+        fun onClick(View view): Unit {
             Int i = 0
             while (true) {
-                if (i >= SLChatScriptDialog.dialogButtonIds.length) {
+                if (i >= SLChatScriptDialog.dialogButtonIds.size) {
                     break
                 } else if (view.getId() == SLChatScriptDialog.dialogButtonIds[i]) {
                     SLChatScriptDialog.this.onDialogButton(this.userManager, i)
@@ -95,7 +95,7 @@ class SLChatScriptDialog : SLChatDialogEvent {
         this.buttons = strArr
     }
 
-    Unit bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, @Nullable ChatEventTimestampUpdater chatEventTimestampUpdater) {
+    fun bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, @Nullable ChatEventTimestampUpdater chatEventTimestampUpdater): Unit {
         super.bindViewHolder(chatEventViewHolder, userManager, chatEventTimestampUpdater)
         if (chatEventViewHolder instanceof ChatScriptDialogViewHolder) {
             ChatScriptDialogViewHolder chatScriptDialogViewHolder = (ChatScriptDialogViewHolder) chatEventViewHolder
@@ -112,8 +112,8 @@ class SLChatScriptDialog : SLChatDialogEvent {
                 return
             }
             chatScriptDialogViewHolder.dialogResultTextView.findViewById(R.id.dialogResultTextView).setVisibility(8)
-            for (Int i = 0; i < chatScriptDialogViewHolder.dialogButtons.length; i++) {
-                if (i < this.buttons.length) {
+            for (i in 0 until chatScriptDialogViewHolder.dialogButtons.size) {
+                if (i < this.buttons.size) {
                     chatScriptDialogViewHolder.dialogButtons[i].setText(this.buttons[i])
                     chatScriptDialogViewHolder.dialogButtons[i].setVisibility(0)
                 } else {
@@ -139,12 +139,12 @@ class SLChatScriptDialog : SLChatDialogEvent {
         return SLChatEvent.ChatMessageViewType.VIEW_TYPE_DIALOG
     }
 
-    Boolean isObjectPopup() {
+    fun isObjectPopup(): Boolean {
         return true
     }
 
-    Unit onDialogButton(UserManager userManager, Int i) {
-        if (i >= 0 && i < this.buttons.length) {
+    fun onDialogButton(UserManager userManager, Int i): Unit {
+        if (i >= 0 && i < this.buttons.size) {
             this.selectedOption = this.buttons[i]
             UUID sourceUUID = this.source.getSourceUUID()
             SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
@@ -155,12 +155,12 @@ class SLChatScriptDialog : SLChatDialogEvent {
         }
     }
 
-    Unit onDialogIgnored(UserManager userManager) {
+    fun onDialogIgnored(UserManager userManager): Unit {
         super.onDialogIgnored(userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
         super.serializeToDatabaseObject(chatMessage)
         try {
             ByteArrayOutputStream byteArrayOutputStream = ByteArrayOutputStream()
@@ -172,7 +172,7 @@ class SLChatScriptDialog : SLChatDialogEvent {
         chatMessage.setDialogSelectedOption(this.selectedOption)
     }
 
-    Unit showDialog(Context context, UserManager userManager) {
+    fun showDialog(Context context, UserManager userManager): Unit {
         ScriptDialogDialog(context, userManager, this.source.getSourceName(userManager), this.text).show()
     }
 }

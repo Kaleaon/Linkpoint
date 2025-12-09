@@ -46,11 +46,11 @@ class AutoValue_SLObjectProfileData : SLObjectProfileData {
         this.isModifiable = z5
     }
 
-    Optional<String> description() {
+    fun description(): Optional<String> {
         return this.description
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -66,11 +66,11 @@ class AutoValue_SLObjectProfileData : SLObjectProfileData {
         return false
     }
 
-    Optional<String> floatingText() {
+    fun floatingText(): Optional<String> {
         return this.floatingText
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         Int i = 0
         Int i2 = 1231
         Int hashCode = ((((this.isDead ? 1231 : 1237) ^ (((this.isCopyable ? 1231 : 1237) ^ (((((((this.isPayable ? 1231 : 1237) ^ (((this.touchName == null ? 0 : this.touchName.hashCode()) ^ (((this.isTouchable ? 1231 : 1237) ^ (((this.ownerUUID == null ? 0 : this.ownerUUID.hashCode()) ^ (((((((this.objectUUID == null ? 0 : this.objectUUID.hashCode()) ^ 1000003) * 1000003) ^ this.name.hashCode()) * 1000003) ^ this.description.hashCode()) * 1000003)) * 1000003)) * 1000003)) * 1000003)) * 1000003) ^ this.saleType) * 1000003) ^ this.salePrice) * 1000003)) * 1000003)) * 1000003) ^ this.floatingText.hashCode()) * 1000003
@@ -84,59 +84,59 @@ class AutoValue_SLObjectProfileData : SLObjectProfileData {
         return i3 ^ i2
     }
 
-    Boolean isCopyable() {
+    fun isCopyable(): Boolean {
         return this.isCopyable
     }
 
-    Boolean isDead() {
+    fun isDead(): Boolean {
         return this.isDead
     }
 
-    Boolean isModifiable() {
+    fun isModifiable(): Boolean {
         return this.isModifiable
     }
 
-    Boolean isPayable() {
+    fun isPayable(): Boolean {
         return this.isPayable
     }
 
-    Boolean isTouchable() {
+    fun isTouchable(): Boolean {
         return this.isTouchable
     }
 
-    Optional<String> name() {
+    fun name(): Optional<String> {
         return this.name
     }
 
     @Nullable
-    UUID objectUUID() {
+    fun objectUUID(): UUID {
         return this.objectUUID
     }
 
     @Nullable
-    UUID ownerUUID() {
+    fun ownerUUID(): UUID {
         return this.ownerUUID
     }
 
     @Nullable
-    PayInfo payInfo() {
+    fun payInfo(): PayInfo {
         return this.payInfo
     }
 
-    Int salePrice() {
+    fun salePrice(): Int {
         return this.salePrice
     }
 
-    Byte saleType() {
+    fun saleType(): Byte {
         return this.saleType
     }
 
-    String toString() {
+    fun toString(): String {
         return "SLObjectProfileData{objectUUID=" + this.objectUUID + ", " + "name=" + this.name + ", " + "description=" + this.description + ", " + "ownerUUID=" + this.ownerUUID + ", " + "isTouchable=" + this.isTouchable + ", " + "touchName=" + this.touchName + ", " + "isPayable=" + this.isPayable + ", " + "saleType=" + this.saleType + ", " + "salePrice=" + this.salePrice + ", " + "isCopyable=" + this.isCopyable + ", " + "isDead=" + this.isDead + ", " + "floatingText=" + this.floatingText + ", " + "payInfo=" + this.payInfo + ", " + "isModifiable=" + this.isModifiable + "}"
     }
 
     @Nullable
-    String touchName() {
+    fun touchName(): String {
         return this.touchName
     }
 }

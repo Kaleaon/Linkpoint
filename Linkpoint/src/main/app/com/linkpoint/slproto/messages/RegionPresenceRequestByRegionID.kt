@@ -18,27 +18,27 @@ class RegionPresenceRequestByRegionID : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.RegionData_Fields.size() * 16) + 5
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRegionPresenceRequestByRegionID(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.SO)
-        byteBuffer.put((Byte) this.RegionData_Fields.size())
+        byteBuffer.put((this as Byte).RegionData_Fields.size())
         for (RegionData regionData : this.RegionData_Fields) {
             packUUID(byteBuffer, regionData.RegionID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             RegionData regionData = RegionData()
             regionData.RegionID = unpackUUID(byteBuffer)
             this.RegionData_Fields.add(regionData)

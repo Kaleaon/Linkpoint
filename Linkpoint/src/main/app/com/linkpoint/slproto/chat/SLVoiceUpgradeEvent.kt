@@ -36,41 +36,41 @@ class SLVoiceUpgradeEvent : SLChatYesNoEvent {
         return SLChatEvent.ChatMessageType.VoiceUpgrade
     }
 
-    String getNoButton(Context context) {
+    fun getNoButton(Context context): String {
         return context.getString(R.string.voice_upgrade_no)
     }
 
-    String getNoMessage(Context context) {
+    fun getNoMessage(Context context): String {
         return this.isInstall ? context.getString(R.string.voice_install_declined) : context.getString(R.string.voice_upgrade_declined)
     }
 
-    String getQuestion(Context context) {
+    fun getQuestion(Context context): String {
         return this.isInstall ? context.getString(R.string.install_now_question) : context.getString(R.string.upgrade_now_question)
     }
 
-    String getText(Context context, @NonNull UserManager userManager) {
+    fun getText(Context context, @NonNull UserManager userManager): String {
         return this.text
     }
 
-    String getYesButton(Context context) {
+    fun getYesButton(Context context): String {
         return this.isInstall ? context.getString(R.string.voice_install_yes) : context.getString(R.string.voice_upgrade_yes)
     }
 
-    String getYesMessage(Context context) {
+    fun getYesMessage(Context context): String {
         return ""
     }
 
-    Boolean isObjectPopup() {
+    fun isObjectPopup(): Boolean {
         return false
     }
 
     /* access modifiers changed from: protected */
-    Unit onNoAction(Context context, UserManager userManager) {
+    fun onNoAction(Context context, UserManager userManager): Unit {
         super.onNoAction(context, userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    Unit onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(Context context, UserManager userManager): Unit {
         super.onYesAction(context, userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
         Intent intent = Intent("android.intent.action.VIEW")
@@ -78,7 +78,7 @@ class SLVoiceUpgradeEvent : SLChatYesNoEvent {
         context.startActivity(intent)
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setItemName(this.upgradeURL)
         chatMessage.setAssetType(Integer.valueOf(this.isInstall ? 1 : 0))

@@ -72,7 +72,7 @@ class BakeProcess : SLTextureUploadRequest.TextureUploadCompleteListener {
             this.texture = wearableTexture
         }
 
-        Unit OnResourceReady(Object obj, Boolean z) {
+        fun OnResourceReady(Object obj, Boolean z): Unit {
             if (obj instanceof OpenJPEG) {
                 this.textureData = (OpenJPEG) obj
             }
@@ -86,17 +86,17 @@ class BakeProcess : SLTextureUploadRequest.TextureUploadCompleteListener {
         }
 
         /* access modifiers changed from: package-private */
-        OpenJPEG getTextureData() {
+        fun getTextureData(): OpenJPEG {
             return this.textureData
         }
 
         /* access modifiers changed from: package-private */
-        Boolean getTextureReady() {
+        fun getTextureReady(): Boolean {
             return this.textureReady
         }
 
         /* access modifiers changed from: package-private */
-        Unit requestData() {
+        fun requestData(): Unit {
             TextureCache.getInstance().RequestResource(DrawableTextureParams.create(this.texture.textureID, TextureClass.Asset), this)
         }
     }
@@ -139,7 +139,7 @@ class BakeProcess : SLTextureUploadRequest.TextureUploadCompleteListener {
 
     /* access modifiers changed from: private */
     /* renamed from: bakeAppearance */
-    Unit m140com_lumiyaviewer_lumiya_slproto_baker_BakeProcessmthref0() {
+    fun m140com_lumiyaviewer_lumiya_slproto_baker_BakeProcessmthref0(): Unit {
         Debug.Printf("Baking: Requesting texture data.", Object[0])
         for (List<WearableTextureData> it : this.wearables.values()) {
             for (WearableTextureData requestData : it) {
@@ -199,7 +199,7 @@ class BakeProcess : SLTextureUploadRequest.TextureUploadCompleteListener {
     private Map<Integer, Float> calcAllParamValues(Table<SLWearableType, UUID, SLWearable> table) {
         HashMap hashMap = HashMap()
         for (Map.Entry entry : SLAvatarParams.paramByIDs.entrySet()) {
-            hashMap.put((Integer) entry.getKey(), Float.valueOf(((SLAvatarParams.AvatarParam) ((SLAvatarParams.ParamSet) entry.getValue()).params.get(0)).defValue))
+            hashMap.put((entry as Integer).getKey(), Float.valueOf(((SLAvatarParams.AvatarParam) ((SLAvatarParams.ParamSet) entry.getValue()).params.get(0)).defValue))
         }
         for (SLWearable wearableData : table.values()) {
             SLWearableData wearableData2 = wearableData.getWearableData()
@@ -247,13 +247,13 @@ class BakeProcess : SLTextureUploadRequest.TextureUploadCompleteListener {
     }
 
     /* access modifiers changed from: private */
-    Unit notifyTextureReady() {
+    fun notifyTextureReady(): Unit {
         synchronized (this.textureReadyLock) {
             this.textureReadyLock.notifyAll()
         }
     }
 
-    Unit OnTextureUploadComplete(SLTextureUploadRequest sLTextureUploadRequest) {
+    fun OnTextureUploadComplete(SLTextureUploadRequest sLTextureUploadRequest): Unit {
         if (sLTextureUploadRequest instanceof BakedImageUploadRequest) {
             BakedImageUploadRequest bakedImageUploadRequest = (BakedImageUploadRequest) sLTextureUploadRequest
             Debug.Log("Baking: texture " + bakedImageUploadRequest.bakedIndex + " uploaded, UUID = " + bakedImageUploadRequest.getTextureID())
@@ -261,7 +261,7 @@ class BakeProcess : SLTextureUploadRequest.TextureUploadCompleteListener {
             this.bakedImages.put(bakedImageUploadRequest.bakedIndex, bakedImageUploadRequest.bakedImage)
             Boolean isWearingSkirt = isWearingSkirt()
             BakedTextureIndex[] values = BakedTextureIndex.values()
-            Int length = values.length
+            Int length = values.size
             Int i3 = 0
             Boolean z2 = true
             Int i4 = 0
@@ -305,12 +305,13 @@ class BakeProcess : SLTextureUploadRequest.TextureUploadCompleteListener {
         }
     }
 
-    Unit cancel() {
+    fun cancel(): Unit {
         this.bakingThread.interrupt()
     }
 
     /* access modifiers changed from: package-private */
-    List<OpenJPEG> getLocalTexture(AvatarTextureFaceIndex avatarTextureFaceIndex) throws DefaultTextureException {
+    @Throws(DefaultTextureException::class)
+    fun getLocalTexture(AvatarTextureFaceIndex avatarTextureFaceIndex): List<OpenJPEG> {
         OpenJPEG textureData
         Boolean z = false
         LinkedList linkedList = null

@@ -49,152 +49,152 @@ class CardboardActivity_ViewBinding : Unbinder {
     CardboardActivity_ViewBinding(CardboardActivity cardboardActivity, View view) {
         this.target = cardboardActivity
         View findRequiredView = Utils.findRequiredView(view, R.id.button_speak, "field 'buttonSpeak' and method 'onSpeakButton'")
-        cardboardActivity.buttonSpeak = (ImageButton) Utils.castView(findRequiredView, R.id.button_speak, "field 'buttonSpeak'", ImageButton.class)
+        cardboardActivity.buttonSpeak = (Utils as ImageButton).castView(findRequiredView, R.id.button_speak, "field 'buttonSpeak'", ImageButton.class)
         this.view2131755256 = findRequiredView
         findRequiredView.setOnClickListener(DebouncingOnClickListener() {
-            Unit doClick(View view) {
+            fun doClick(View view): Unit {
                 cardboardActivity.onSpeakButton()
             }
         View findRequiredView2 = Utils.findRequiredView(view, R.id.button_chat, "field 'buttonChat' and method 'onChatButton'")
-        cardboardActivity.buttonChat = (ImageButton) Utils.castView(findRequiredView2, R.id.button_chat, "field 'buttonChat'", ImageButton.class)
+        cardboardActivity.buttonChat = (Utils as ImageButton).castView(findRequiredView2, R.id.button_chat, "field 'buttonChat'", ImageButton.class)
         this.view2131755257 = findRequiredView2
         findRequiredView2.setOnClickListener(DebouncingOnClickListener() {
-            Unit doClick(View view) {
+            fun doClick(View view): Unit {
                 cardboardActivity.onChatButton()
             }
         View findRequiredView3 = Utils.findRequiredView(view, R.id.button_speech_send, "field 'buttonSpeechSend' and method 'onSpeechSendButton'")
-        cardboardActivity.buttonSpeechSend = (ImageButton) Utils.castView(findRequiredView3, R.id.button_speech_send, "field 'buttonSpeechSend'", ImageButton.class)
+        cardboardActivity.buttonSpeechSend = (Utils as ImageButton).castView(findRequiredView3, R.id.button_speech_send, "field 'buttonSpeechSend'", ImageButton.class)
         this.view2131755281 = findRequiredView3
         findRequiredView3.setOnClickListener(DebouncingOnClickListener() {
-            Unit doClick(View view) {
+            fun doClick(View view): Unit {
                 cardboardActivity.onSpeechSendButton()
             }
-        cardboardActivity.speechRecognitionResults = (TextView) Utils.findRequiredViewAsType(view, R.id.speech_recognition_results, "field 'speechRecognitionResults'", TextView.class)
-        cardboardActivity.chatsOverlayLayout = (LinearLayout) Utils.findRequiredViewAsType(view, R.id.cardboard_ims, "field 'chatsOverlayLayout'", LinearLayout.class)
+        cardboardActivity.speechRecognitionResults = (Utils as TextView).findRequiredViewAsType(view, R.id.speech_recognition_results, "field 'speechRecognitionResults'", TextView.class)
+        cardboardActivity.chatsOverlayLayout = (Utils as LinearLayout).findRequiredViewAsType(view, R.id.cardboard_ims, "field 'chatsOverlayLayout'", LinearLayout.class)
         View findRequiredView4 = Utils.findRequiredView(view, R.id.cardboard_aim_controls, "field 'cardboardAimControls' and method 'onAimControlsTouch'")
-        cardboardActivity.cardboardAimControls = (ViewGroup) Utils.castView(findRequiredView4, R.id.cardboard_aim_controls, "field 'cardboardAimControls'", ViewGroup.class)
+        cardboardActivity.cardboardAimControls = (Utils as ViewGroup).castView(findRequiredView4, R.id.cardboard_aim_controls, "field 'cardboardAimControls'", ViewGroup.class)
         this.view2131755265 = findRequiredView4
         findRequiredView4.setOnTouchListener(View.OnTouchListener() {
-            Boolean onTouch(View view, MotionEvent motionEvent) {
+            fun onTouch(View view, MotionEvent motionEvent): Boolean {
                 return cardboardActivity.onAimControlsTouch(view, motionEvent)
             }
         View findRequiredView5 = Utils.findRequiredView(view, R.id.cardboard_speak_controls, "field 'cardboardSpeakControls' and method 'onSpeakControlsTouch'")
-        cardboardActivity.cardboardSpeakControls = (ViewGroup) Utils.castView(findRequiredView5, R.id.cardboard_speak_controls, "field 'cardboardSpeakControls'", ViewGroup.class)
+        cardboardActivity.cardboardSpeakControls = (Utils as ViewGroup).castView(findRequiredView5, R.id.cardboard_speak_controls, "field 'cardboardSpeakControls'", ViewGroup.class)
         this.view2131755277 = findRequiredView5
         findRequiredView5.setOnTouchListener(View.OnTouchListener() {
-            Boolean onTouch(View view, MotionEvent motionEvent) {
+            fun onTouch(View view, MotionEvent motionEvent): Boolean {
                 return cardboardActivity.m768com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref6(view, motionEvent)
             }
         View findRequiredView6 = Utils.findRequiredView(view, R.id.cardboard_object_controls, "field 'cardboardObjectControls' and method 'onObjectControlsTouch'")
-        cardboardActivity.cardboardObjectControls = (ViewGroup) Utils.castView(findRequiredView6, R.id.cardboard_object_controls, "field 'cardboardObjectControls'", ViewGroup.class)
+        cardboardActivity.cardboardObjectControls = (Utils as ViewGroup).castView(findRequiredView6, R.id.cardboard_object_controls, "field 'cardboardObjectControls'", ViewGroup.class)
         this.view2131755266 = findRequiredView6
         findRequiredView6.setOnTouchListener(View.OnTouchListener() {
-            Boolean onTouch(View view, MotionEvent motionEvent) {
+            fun onTouch(View view, MotionEvent motionEvent): Boolean {
                 return cardboardActivity.m769com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref7(view, motionEvent)
             }
         View findRequiredView7 = Utils.findRequiredView(view, R.id.object_touch_button, "field 'buttonTouchObject' and method 'onObjectTouch'")
-        cardboardActivity.buttonTouchObject = (ImageButton) Utils.castView(findRequiredView7, R.id.object_touch_button, "field 'buttonTouchObject'", ImageButton.class)
+        cardboardActivity.buttonTouchObject = (Utils as ImageButton).castView(findRequiredView7, R.id.object_touch_button, "field 'buttonTouchObject'", ImageButton.class)
         this.view2131755268 = findRequiredView7
         findRequiredView7.setOnClickListener(DebouncingOnClickListener() {
-            Unit doClick(View view) {
+            fun doClick(View view): Unit {
                 cardboardActivity.onObjectTouch()
             }
         View findRequiredView8 = Utils.findRequiredView(view, R.id.cardboard_script_dialog, "field 'cardboardScriptDialog' and method 'onScriptDialogOutsideTouch'")
-        cardboardActivity.cardboardScriptDialog = (ViewGroup) Utils.castView(findRequiredView8, R.id.cardboard_script_dialog, "field 'cardboardScriptDialog'", ViewGroup.class)
+        cardboardActivity.cardboardScriptDialog = (Utils as ViewGroup).castView(findRequiredView8, R.id.cardboard_script_dialog, "field 'cardboardScriptDialog'", ViewGroup.class)
         this.view2131755282 = findRequiredView8
         findRequiredView8.setOnTouchListener(View.OnTouchListener() {
-            Boolean onTouch(View view, MotionEvent motionEvent) {
+            fun onTouch(View view, MotionEvent motionEvent): Boolean {
                 return cardboardActivity.m770com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref8(view, motionEvent)
             }
-        cardboardActivity.speakLevelIndicator = (ProgressBar) Utils.findRequiredViewAsType(view, R.id.speak_level_indicator, "field 'speakLevelIndicator'", ProgressBar.class)
+        cardboardActivity.speakLevelIndicator = (Utils as ProgressBar).findRequiredViewAsType(view, R.id.speak_level_indicator, "field 'speakLevelIndicator'", ProgressBar.class)
         View findRequiredView9 = Utils.findRequiredView(view, R.id.cardboard_yes_button, "field 'yesButton' and method 'onYesButton'")
-        cardboardActivity.yesButton = (ImageButton) Utils.castView(findRequiredView9, R.id.cardboard_yes_button, "field 'yesButton'", ImageButton.class)
+        cardboardActivity.yesButton = (Utils as ImageButton).castView(findRequiredView9, R.id.cardboard_yes_button, "field 'yesButton'", ImageButton.class)
         this.view2131755274 = findRequiredView9
         findRequiredView9.setOnClickListener(DebouncingOnClickListener() {
-            Unit doClick(View view) {
+            fun doClick(View view): Unit {
                 cardboardActivity.onYesButton()
             }
         View findRequiredView10 = Utils.findRequiredView(view, R.id.object_chat_button, "field 'buttonObjectChat' and method 'onObjectChat'")
-        cardboardActivity.buttonObjectChat = (ImageButton) Utils.castView(findRequiredView10, R.id.object_chat_button, "field 'buttonObjectChat'", ImageButton.class)
+        cardboardActivity.buttonObjectChat = (Utils as ImageButton).castView(findRequiredView10, R.id.object_chat_button, "field 'buttonObjectChat'", ImageButton.class)
         this.view2131755270 = findRequiredView10
         findRequiredView10.setOnClickListener(DebouncingOnClickListener() {
-            Unit doClick(View view) {
+            fun doClick(View view): Unit {
                 cardboardActivity.onObjectChat()
             }
-        cardboardActivity.yesNoText = (TextView) Utils.findRequiredViewAsType(view, R.id.cardboard_yesno_text, "field 'yesNoText'", TextView.class)
-        cardboardActivity.cardboardDetailsPage = (ViewGroup) Utils.findRequiredViewAsType(view, R.id.cardboard_details_page, "field 'cardboardDetailsPage'", ViewGroup.class)
-        cardboardActivity.moveButtonsLayout = (ViewGroup) Utils.findRequiredViewAsType(view, R.id.move_buttons_layout, "field 'moveButtonsLayout'", ViewGroup.class)
+        cardboardActivity.yesNoText = (Utils as TextView).findRequiredViewAsType(view, R.id.cardboard_yesno_text, "field 'yesNoText'", TextView.class)
+        cardboardActivity.cardboardDetailsPage = (Utils as ViewGroup).findRequiredViewAsType(view, R.id.cardboard_details_page, "field 'cardboardDetailsPage'", ViewGroup.class)
+        cardboardActivity.moveButtonsLayout = (Utils as ViewGroup).findRequiredViewAsType(view, R.id.move_buttons_layout, "field 'moveButtonsLayout'", ViewGroup.class)
         View findRequiredView11 = Utils.findRequiredView(view, R.id.button_stand_up, "field 'buttonStandUp' and method 'onStandUpButton'")
-        cardboardActivity.buttonStandUp = (ImageButton) Utils.castView(findRequiredView11, R.id.button_stand_up, "field 'buttonStandUp'", ImageButton.class)
+        cardboardActivity.buttonStandUp = (Utils as ImageButton).castView(findRequiredView11, R.id.button_stand_up, "field 'buttonStandUp'", ImageButton.class)
         this.view2131755264 = findRequiredView11
         findRequiredView11.setOnClickListener(DebouncingOnClickListener() {
-            Unit doClick(View view) {
+            fun doClick(View view): Unit {
                 cardboardActivity.onStandUpButton()
             }
-        cardboardActivity.speakNowText = (TextView) Utils.findRequiredViewAsType(view, R.id.speak_now_text, "field 'speakNowText'", TextView.class)
+        cardboardActivity.speakNowText = (Utils as TextView).findRequiredViewAsType(view, R.id.speak_now_text, "field 'speakNowText'", TextView.class)
         View findRequiredView12 = Utils.findRequiredView(view, R.id.button_move_forward, "field 'buttonMoveForward' and method 'onCamButtonTouch'")
-        cardboardActivity.buttonMoveForward = (ImageButton) Utils.castView(findRequiredView12, R.id.button_move_forward, "field 'buttonMoveForward'", ImageButton.class)
+        cardboardActivity.buttonMoveForward = (Utils as ImageButton).castView(findRequiredView12, R.id.button_move_forward, "field 'buttonMoveForward'", ImageButton.class)
         this.view2131755260 = findRequiredView12
         findRequiredView12.setOnTouchListener(View.OnTouchListener() {
-            Boolean onTouch(View view, MotionEvent motionEvent) {
+            fun onTouch(View view, MotionEvent motionEvent): Boolean {
                 return cardboardActivity.onCamButtonTouch(view, motionEvent)
             }
-        cardboardActivity.dialogQuestionText = (TextView) Utils.findRequiredViewAsType(view, R.id.dialogQuestionText, "field 'dialogQuestionText'", TextView.class)
-        cardboardActivity.objectNameView = (TextView) Utils.findRequiredViewAsType(view, R.id.cardboard_object_name, "field 'objectNameView'", TextView.class)
+        cardboardActivity.dialogQuestionText = (Utils as TextView).findRequiredViewAsType(view, R.id.dialogQuestionText, "field 'dialogQuestionText'", TextView.class)
+        cardboardActivity.objectNameView = (Utils as TextView).findRequiredViewAsType(view, R.id.cardboard_object_name, "field 'objectNameView'", TextView.class)
         View findRequiredView13 = Utils.findRequiredView(view, R.id.button_move_backward, "field 'buttonMoveBackward' and method 'onCamButtonTouch'")
-        cardboardActivity.buttonMoveBackward = (ImageButton) Utils.castView(findRequiredView13, R.id.button_move_backward, "field 'buttonMoveBackward'", ImageButton.class)
+        cardboardActivity.buttonMoveBackward = (Utils as ImageButton).castView(findRequiredView13, R.id.button_move_backward, "field 'buttonMoveBackward'", ImageButton.class)
         this.view2131755262 = findRequiredView13
         findRequiredView13.setOnTouchListener(View.OnTouchListener() {
-            Boolean onTouch(View view, MotionEvent motionEvent) {
+            fun onTouch(View view, MotionEvent motionEvent): Boolean {
                 return cardboardActivity.onCamButtonTouch(view, motionEvent)
             }
-        cardboardActivity.voiceStatusView = (VoiceStatusView) Utils.findRequiredViewAsType(view, R.id.cardboard_voice_status_view, "field 'voiceStatusView'", VoiceStatusView.class)
+        cardboardActivity.voiceStatusView = (Utils as VoiceStatusView).findRequiredViewAsType(view, R.id.cardboard_voice_status_view, "field 'voiceStatusView'", VoiceStatusView.class)
         View findRequiredView14 = Utils.findRequiredView(view, R.id.cardboard_no_button, "field 'noButton' and method 'onNoButton'")
-        cardboardActivity.noButton = (ImageButton) Utils.castView(findRequiredView14, R.id.cardboard_no_button, "field 'noButton'", ImageButton.class)
+        cardboardActivity.noButton = (Utils as ImageButton).castView(findRequiredView14, R.id.cardboard_no_button, "field 'noButton'", ImageButton.class)
         this.view2131755275 = findRequiredView14
         findRequiredView14.setOnClickListener(DebouncingOnClickListener() {
-            Unit doClick(View view) {
+            fun doClick(View view): Unit {
                 cardboardActivity.onNoButton()
             }
         View findRequiredView15 = Utils.findRequiredView(view, R.id.button_touch, "field 'buttonTouch' and method 'onTouchButton'")
-        cardboardActivity.buttonTouch = (ImageButton) Utils.castView(findRequiredView15, R.id.button_touch, "field 'buttonTouch'", ImageButton.class)
+        cardboardActivity.buttonTouch = (Utils as ImageButton).castView(findRequiredView15, R.id.button_touch, "field 'buttonTouch'", ImageButton.class)
         this.view2131755255 = findRequiredView15
         findRequiredView15.setOnClickListener(DebouncingOnClickListener() {
-            Unit doClick(View view) {
+            fun doClick(View view): Unit {
                 cardboardActivity.onTouchButton()
             }
         View findRequiredView16 = Utils.findRequiredView(view, R.id.button_turn_left, "field 'buttonTurnLeft' and method 'onCamButtonTouch'")
-        cardboardActivity.buttonTurnLeft = (ImageButton) Utils.castView(findRequiredView16, R.id.button_turn_left, "field 'buttonTurnLeft'", ImageButton.class)
+        cardboardActivity.buttonTurnLeft = (Utils as ImageButton).castView(findRequiredView16, R.id.button_turn_left, "field 'buttonTurnLeft'", ImageButton.class)
         this.view2131755261 = findRequiredView16
         findRequiredView16.setOnTouchListener(View.OnTouchListener() {
-            Boolean onTouch(View view, MotionEvent motionEvent) {
+            fun onTouch(View view, MotionEvent motionEvent): Boolean {
                 return cardboardActivity.onCamButtonTouch(view, motionEvent)
             }
         View findRequiredView17 = Utils.findRequiredView(view, R.id.button_turn_right, "field 'buttonTurnRight' and method 'onCamButtonTouch'")
-        cardboardActivity.buttonTurnRight = (ImageButton) Utils.castView(findRequiredView17, R.id.button_turn_right, "field 'buttonTurnRight'", ImageButton.class)
+        cardboardActivity.buttonTurnRight = (Utils as ImageButton).castView(findRequiredView17, R.id.button_turn_right, "field 'buttonTurnRight'", ImageButton.class)
         this.view2131755263 = findRequiredView17
         findRequiredView17.setOnTouchListener(View.OnTouchListener() {
-            Boolean onTouch(View view, MotionEvent motionEvent) {
+            fun onTouch(View view, MotionEvent motionEvent): Boolean {
                 return cardboardActivity.onCamButtonTouch(view, motionEvent)
             }
         View findRequiredView18 = Utils.findRequiredView(view, R.id.object_sit_button, "field 'buttonSit' and method 'onObjectSit'")
-        cardboardActivity.buttonSit = (ImageButton) Utils.castView(findRequiredView18, R.id.object_sit_button, "field 'buttonSit'", ImageButton.class)
+        cardboardActivity.buttonSit = (Utils as ImageButton).castView(findRequiredView18, R.id.object_sit_button, "field 'buttonSit'", ImageButton.class)
         this.view2131755269 = findRequiredView18
         findRequiredView18.setOnClickListener(DebouncingOnClickListener() {
-            Unit doClick(View view) {
+            fun doClick(View view): Unit {
                 cardboardActivity.onObjectSit()
             }
-        cardboardActivity.cardboardPrimaryControls = (ViewGroup) Utils.findRequiredViewAsType(view, R.id.cardboard_primary_controls, "field 'cardboardPrimaryControls'", ViewGroup.class)
+        cardboardActivity.cardboardPrimaryControls = (Utils as ViewGroup).findRequiredViewAsType(view, R.id.cardboard_primary_controls, "field 'cardboardPrimaryControls'", ViewGroup.class)
         View findRequiredView19 = Utils.findRequiredView(view, R.id.cardboard_yesno_dialog, "method 'onYesNoOutsideTouch'")
         this.view2131755272 = findRequiredView19
         findRequiredView19.setOnTouchListener(View.OnTouchListener() {
-            Boolean onTouch(View view, MotionEvent motionEvent) {
+            fun onTouch(View view, MotionEvent motionEvent): Boolean {
                 return cardboardActivity.m771com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref9(view, motionEvent)
             }
     }
 
     @CallSuper
-    Unit unbind() {
+    fun unbind(): Unit {
         CardboardActivity cardboardActivity = this.target
         if (cardboardActivity == null) {
             throw IllegalStateException("Bindings already cleared.")

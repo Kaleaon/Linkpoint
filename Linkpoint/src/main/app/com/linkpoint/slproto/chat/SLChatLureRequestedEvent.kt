@@ -20,7 +20,7 @@ class SLChatLureRequestedEvent : SLChatEvent {
     }
 
     SLChatLureRequestedEvent(String str, @NonNull UUID uuid) {
-        super((ChatMessageSource) ChatMessageSourceUnknown.getInstance(), uuid)
+        super((ChatMessageSourceUnknown as ChatMessageSource).getInstance(), uuid)
         this.message = str
     }
 
@@ -31,7 +31,7 @@ class SLChatLureRequestedEvent : SLChatEvent {
     }
 
     /* access modifiers changed from: protected */
-    String getText(Context context, @NonNull UserManager userManager) {
+    fun getText(Context context, @NonNull UserManager userManager): String {
         if (Strings.isNullOrEmpty(this.message)) {
             return context.getString(R.string.chat_teleport_requested_no_message)
         }
@@ -43,11 +43,11 @@ class SLChatLureRequestedEvent : SLChatEvent {
     }
 
     /* access modifiers changed from: protected */
-    Boolean isActionMessage(@NonNull UserManager userManager) {
+    fun isActionMessage(@NonNull UserManager userManager): Boolean {
         return false
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setMessageText(this.message)
     }

@@ -9,12 +9,12 @@ import java.io.IOException
 class LLSDXMLAsyncRequest {
 
     interface LLSDXMLResultListener {
-        Unit onLLSDXMLResult(LLSDNode lLSDNode)
+        fun onLLSDXMLResult(LLSDNode lLSDNode)
     }
 
     LLSDXMLAsyncRequest(String str, LLSDNode lLSDNode, LLSDXMLResultListener lLSDXMLResultListener) {
         Thread(Runnable() {
-            Unit run() {
+            fun run(): Unit {
                 LLSDNode lLSDNode
                 try {
                     lLSDNode = LLSDXMLRequest().PerformRequest(str, lLSDNode)

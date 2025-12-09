@@ -32,7 +32,7 @@ class CameraParams {
     private Float tiltFlingSpeed = 0.0f
     private Boolean useOffset = false
 
-    Float angleMinusAngle(Float f, Float f2) {
+    fun angleMinusAngle(Float f, Float f2): Float {
         return wrapAngle(wrapAngle(f) - wrapAngle(f2))
     }
 
@@ -101,7 +101,7 @@ class CameraParams {
         }
     }
 
-    Float wrapAngle(Float f) {
+    fun wrapAngle(Float f): Float {
         Float f2 = (f + 180.0f) % 360.0f
         if (f2 < 0.0f) {
             f2 += 360.0f
@@ -109,7 +109,7 @@ class CameraParams {
         return f2 - 180.0f
     }
 
-    Unit copyFrom(@Nullable CameraParams cameraParams) {
+    fun copyFrom(@Nullable CameraParams cameraParams): Unit {
         Float f
         Float f2
         Float f3
@@ -142,7 +142,7 @@ class CameraParams {
         }
     }
 
-    Unit fling(Float f, Float f2) {
+    fun fling(Float f, Float f2): Unit {
         synchronized (this.lock) {
             this.headingFlingSpeed = f
             this.tiltFlingSpeed = f2
@@ -151,7 +151,7 @@ class CameraParams {
         }
     }
 
-    Float getHeading() {
+    fun getHeading(): Float {
         Float f
         synchronized (this.lock) {
             f = this.heading
@@ -160,7 +160,7 @@ class CameraParams {
     }
 
     @NonNull
-    LLVector3 getPosition() {
+    fun getPosition(): LLVector3 {
         LLVector3 lLVector3
         synchronized (this.lock) {
             lLVector3 = this.position
@@ -168,7 +168,7 @@ class CameraParams {
         return lLVector3
     }
 
-    Float getTilt() {
+    fun getTilt(): Float {
         Float f
         synchronized (this.lock) {
             f = this.tilt
@@ -176,7 +176,7 @@ class CameraParams {
         return f
     }
 
-    Unit getVRCamera(@Nullable CameraParams cameraParams, HeadTransformCompat headTransformCompat) {
+    fun getVRCamera(@Nullable CameraParams cameraParams, HeadTransformCompat headTransformCompat): Unit {
         Float f
         Float f2
         Float f3
@@ -208,21 +208,21 @@ class CameraParams {
         }
     }
 
-    Boolean isFlinging() {
+    fun isFlinging(): Boolean {
         synchronized (this.lock) {
             z = this.isFlinging
         }
         return z
     }
 
-    Boolean isValid() {
+    fun isValid(): Boolean {
         synchronized (this.lock) {
             z = this.isValid
         }
         return z
     }
 
-    Unit rotate(Float f, Float f2) {
+    fun rotate(Float f, Float f2): Unit {
         synchronized (this.lock) {
             this.heading = wrapAngle(this.heading + f)
             this.tilt = Math.max(Math.min(this.tilt + f2, MAX_PITCH), MIN_PITCH)
@@ -230,7 +230,7 @@ class CameraParams {
         }
     }
 
-    Unit set(@Nullable LLVector3 lLVector3, Float f, Float f2) {
+    fun set(@Nullable LLVector3 lLVector3, Float f, Float f2): Unit {
         synchronized (this.lock) {
             if (lLVector3 != null) {
                 this.position.set(lLVector3)
@@ -241,13 +241,13 @@ class CameraParams {
         }
     }
 
-    Unit setHeading(Float f) {
+    fun setHeading(Float f): Unit {
         synchronized (this.lock) {
             this.heading = f
         }
     }
 
-    Unit setPosition(@Nullable LLVector3 lLVector3) {
+    fun setPosition(@Nullable LLVector3 lLVector3): Unit {
         synchronized (this.lock) {
             if (lLVector3 != null) {
                 this.position.set(lLVector3)
@@ -257,7 +257,7 @@ class CameraParams {
         }
     }
 
-    Unit setPosition(@Nullable LLVector3 lLVector3, Float f) {
+    fun setPosition(@Nullable LLVector3 lLVector3, Float f): Unit {
         synchronized (this.lock) {
             if (lLVector3 != null) {
                 this.position.set(lLVector3)
@@ -270,7 +270,7 @@ class CameraParams {
         }
     }
 
-    Unit startManualControl(Float f, Float f2, Float f3, Float f4) {
+    fun startManualControl(Float f, Float f2, Float f3, Float f4): Unit {
         synchronized (this.lock) {
             if (!this.isManualControl) {
                 LLVector3 lLVector3 = LLVector3(this.position)
@@ -292,13 +292,13 @@ class CameraParams {
         }
     }
 
-    Unit stopManualControl() {
+    fun stopManualControl(): Unit {
         synchronized (this.lock) {
             this.isManualControl = false
         }
     }
 
-    Unit zoom(Float f, Float f2, Float f3, Float f4, Float f5) {
+    fun zoom(Float f, Float f2, Float f3, Float f4, Float f5): Unit {
         synchronized (this.lock) {
             Float f6 = f - 1.0f
             LLVector3 lLVector3 = LLVector3(this.position)

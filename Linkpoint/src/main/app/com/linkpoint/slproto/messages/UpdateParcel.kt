@@ -37,15 +37,15 @@ class UpdateParcel : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.ParcelData_Field.Name.length + 43 + 1 + this.ParcelData_Field.Description.length + 1 + this.ParcelData_Field.MusicURL.length + 4 + 4 + 4 + 4 + 1 + 1 + 1 + 16 + 12 + 4 + 16 + 1 + 1 + 4
+    fun CalcPayloadSize(): Int {
+        return this.ParcelData_Field.Name.size + 43 + 1 + this.ParcelData_Field.Description.size + 1 + this.ParcelData_Field.MusicURL.size + 4 + 4 + 4 + 4 + 1 + 1 + 1 + 16 + 12 + 4 + 16 + 1 + 1 + 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleUpdateParcel(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -35)
@@ -53,7 +53,7 @@ class UpdateParcel : SLMessage {
         packLong(byteBuffer, this.ParcelData_Field.RegionHandle)
         packUUID(byteBuffer, this.ParcelData_Field.OwnerID)
         packBoolean(byteBuffer, this.ParcelData_Field.GroupOwned)
-        packByte(byteBuffer, (Byte) this.ParcelData_Field.Status)
+        packByte(byteBuffer, (this as Byte).ParcelData_Field.Status)
         packVariable(byteBuffer, this.ParcelData_Field.Name, 1)
         packVariable(byteBuffer, this.ParcelData_Field.Description, 1)
         packVariable(byteBuffer, this.ParcelData_Field.MusicURL, 1)
@@ -63,7 +63,7 @@ class UpdateParcel : SLMessage {
         packInt(byteBuffer, this.ParcelData_Field.BillableArea)
         packBoolean(byteBuffer, this.ParcelData_Field.ShowDir)
         packBoolean(byteBuffer, this.ParcelData_Field.IsForSale)
-        packByte(byteBuffer, (Byte) this.ParcelData_Field.Category)
+        packByte(byteBuffer, (this as Byte).ParcelData_Field.Category)
         packUUID(byteBuffer, this.ParcelData_Field.SnapshotID)
         packLLVector3(byteBuffer, this.ParcelData_Field.UserLocation)
         packInt(byteBuffer, this.ParcelData_Field.SalePrice)
@@ -72,7 +72,7 @@ class UpdateParcel : SLMessage {
         packBoolean(byteBuffer, this.ParcelData_Field.MaturePublish)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.ParcelData_Field.ParcelID = unpackUUID(byteBuffer)
         this.ParcelData_Field.RegionHandle = unpackLong(byteBuffer)
         this.ParcelData_Field.OwnerID = unpackUUID(byteBuffer)

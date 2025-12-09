@@ -49,7 +49,7 @@ class SLBaseAvatar {
         this()
     }
 
-    SLBaseAvatar getInstance() {
+    fun getInstance(): SLBaseAvatar {
         return InstanceHolder.Instance
     }
 
@@ -79,7 +79,7 @@ class SLBaseAvatar {
         }
     }
 
-    MeshEntry getMeshEntry(MeshIndex meshIndex) {
+    fun getMeshEntry(MeshIndex meshIndex): MeshEntry {
         return this.meshes.get(meshIndex)
     }
 }

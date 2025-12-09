@@ -23,12 +23,12 @@ class GroupRoleDataReply : SLMessage {
     }
 
     class RoleData {
-        byte[] Description
+        ByteArray Description
         Int Members
-        byte[] Name
+        ByteArray Name
         Long Powers
         UUID RoleID
-        byte[] Title
+        ByteArray Title
     }
 
     GroupRoleDataReply() {
@@ -37,7 +37,7 @@ class GroupRoleDataReply : SLMessage {
         this.GroupData_Field = GroupData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 57
         Iterator<T> it = this.RoleData_Fields.iterator()
         while (true) {
@@ -45,16 +45,16 @@ class GroupRoleDataReply : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            RoleData roleData = (RoleData) it.next()
-            i = roleData.Description.length + roleData.Name.length + 17 + 1 + roleData.Title.length + 1 + 8 + 4 + i2
+            RoleData roleData = (it as RoleData).next()
+            i = roleData.Description.size + roleData.Name.size + 17 + 1 + roleData.Title.size + 1 + 8 + 4 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleGroupRoleDataReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 116)
@@ -62,7 +62,7 @@ class GroupRoleDataReply : SLMessage {
         packUUID(byteBuffer, this.GroupData_Field.GroupID)
         packUUID(byteBuffer, this.GroupData_Field.RequestID)
         packInt(byteBuffer, this.GroupData_Field.RoleCount)
-        byteBuffer.put((byte) this.RoleData_Fields.size())
+        byteBuffer.put((this as byte).RoleData_Fields.size())
         for (RoleData roleData : this.RoleData_Fields) {
             packUUID(byteBuffer, roleData.RoleID)
             packVariable(byteBuffer, roleData.Name, 1)
@@ -73,13 +73,13 @@ class GroupRoleDataReply : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.GroupData_Field.GroupID = unpackUUID(byteBuffer)
         this.GroupData_Field.RequestID = unpackUUID(byteBuffer)
         this.GroupData_Field.RoleCount = unpackInt(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             RoleData roleData = RoleData()
             roleData.RoleID = unpackUUID(byteBuffer)
             roleData.Name = unpackVariable(byteBuffer, 1)

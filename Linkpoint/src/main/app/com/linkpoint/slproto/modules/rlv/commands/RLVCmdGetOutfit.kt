@@ -9,7 +9,7 @@ import com.linkpoint.slproto.modules.rlv.RLVController
 import java.util.UUID
 
 class RLVCmdGetOutfit : RLVCommand {
-    Unit Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2) {
+    fun Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2): Unit {
         try {
             Int parseInt = Int.parseInt(str)
             SLAvatarAppearance sLAvatarAppearance = rLVController.getModules().avatarAppearance

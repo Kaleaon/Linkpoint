@@ -11,43 +11,43 @@ import com.linkpoint.ui.common.MasterDetailsActivity
 
 class SettingsActivity : MasterDetailsActivity {
     private FragmentActivityFactory detailsFragmentFactory = FragmentActivityFactory() {
-        Intent createIntent(Context context, Bundle bundle) {
+        fun createIntent(Context context, Bundle bundle): Intent {
             return null
         }
 
-        Class<? : Fragment> getFragmentClass() {
+        fun getFragmentClass(): Class<? : Fragment> {
             return SettingsFragment.class
         }
     }
 
     /* access modifiers changed from: protected */
-    FragmentActivityFactory getDetailsFragmentFactory() {
+    fun getDetailsFragmentFactory(): FragmentActivityFactory {
         return this.detailsFragmentFactory
     }
 
     /* access modifiers changed from: protected */
-    Bundle getNewDetailsFragmentArguments(@Nullable Bundle bundle, @Nullable Bundle bundle2) {
+    fun getNewDetailsFragmentArguments(@Nullable Bundle bundle, @Nullable Bundle bundle2): Bundle {
         return bundle == null ? SettingsFragment.makeSelection(SettingsPage.PageConnection.getPageResourceId()) : super.getNewDetailsFragmentArguments(bundle, bundle2)
     }
 
     /* access modifiers changed from: protected */
-    Boolean handleConnectionEvents() {
+    fun handleConnectionEvents(): Boolean {
         return false
     }
 
     /* access modifiers changed from: protected */
-    Boolean isRootDetailsFragment(Class<? : Fragment> cls) {
+    fun isRootDetailsFragment(Class<? : Fragment> cls): Boolean {
         return cls == SettingsFragment.class
     }
 
     /* access modifiers changed from: protected */
-    Unit onCreate(@Nullable Bundle bundle) {
+    fun onCreate(@Nullable Bundle bundle): Unit {
         super.onCreate(bundle)
         setDefaultTitle(getString(R.string.settings_title), (String) null)
     }
 
     /* access modifiers changed from: protected */
-    Fragment onCreateMasterFragment(Intent intent, @Nullable Bundle bundle) {
+    fun onCreateMasterFragment(Intent intent, @Nullable Bundle bundle): Fragment {
         return SettingsSelectionFragment()
     }
 }

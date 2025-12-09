@@ -8,7 +8,7 @@ class CreateTrustedCircuit : SLMessage {
     DataBlock DataBlock_Field = DataBlock()
 
     class DataBlock {
-        byte[] Digest
+        ByteArray Digest
         UUID EndPointID
     }
 
@@ -16,15 +16,15 @@ class CreateTrustedCircuit : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 52
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleCreateTrustedCircuit(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) -120)
@@ -32,7 +32,7 @@ class CreateTrustedCircuit : SLMessage {
         packFixed(byteBuffer, this.DataBlock_Field.Digest, 32)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.DataBlock_Field.EndPointID = unpackUUID(byteBuffer)
         this.DataBlock_Field.Digest = unpackFixed(byteBuffer, 32)
     }

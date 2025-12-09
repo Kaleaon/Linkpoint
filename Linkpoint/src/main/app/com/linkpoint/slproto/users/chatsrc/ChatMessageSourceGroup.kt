@@ -20,12 +20,12 @@ class ChatMessageSourceGroup : ChatMessageSource {
     }
 
     @NonNull
-    ChatterID getDefaultChatter(UUID uuid2) {
+    fun getDefaultChatter(UUID uuid2): ChatterID {
         return ChatterID.getGroupChatterID(uuid2, this.uuid)
     }
 
     @Nullable
-    String getSourceName(@NonNull UserManager userManager) {
+    fun getSourceName(@NonNull UserManager userManager): String {
         return this.name
     }
 
@@ -35,11 +35,11 @@ class ChatMessageSourceGroup : ChatMessageSource {
     }
 
     @Nullable
-    UUID getSourceUUID() {
+    fun getSourceUUID(): UUID {
         return this.uuid
     }
 
-    Unit serializeTo(@NonNull ChatMessage chatMessage) {
+    fun serializeTo(@NonNull ChatMessage chatMessage): Unit {
         super.serializeTo(chatMessage)
         chatMessage.setSenderUUID(this.uuid)
         chatMessage.setSenderName(this.name)

@@ -23,7 +23,7 @@ class InventoryDescendents : SLMessage {
 
     class FolderData {
         UUID FolderID
-        byte[] Name
+        ByteArray Name
         UUID ParentID
         Int Type
     }
@@ -34,7 +34,7 @@ class InventoryDescendents : SLMessage {
         Int CRC
         Int CreationDate
         UUID CreatorID
-        byte[] Description
+        ByteArray Description
         Int EveryoneMask
         Int Flags
         UUID FolderID
@@ -43,7 +43,7 @@ class InventoryDescendents : SLMessage {
         Boolean GroupOwned
         Int InvType
         UUID ItemID
-        byte[] Name
+        ByteArray Name
         Int NextOwnerMask
         UUID OwnerID
         Int OwnerMask
@@ -57,7 +57,7 @@ class InventoryDescendents : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i2 = 61
         Iterator<T> it = this.FolderData_Fields.iterator()
         while (true) {
@@ -65,7 +65,7 @@ class InventoryDescendents : SLMessage {
             if (!it.hasNext()) {
                 break
             }
-            i2 = ((FolderData) it.next()).Name.length + 34 + i
+            i2 = ((it as FolderData).next()).Name.size + 34 + i
         }
         Int i3 = i + 1
         Iterator<T> it2 = this.ItemData_Fields.iterator()
@@ -74,16 +74,16 @@ class InventoryDescendents : SLMessage {
             if (!it2.hasNext()) {
                 return i4
             }
-            ItemData itemData = (ItemData) it2.next()
-            i3 = itemData.Description.length + itemData.Name.length + 129 + 1 + 4 + 4 + i4
+            ItemData itemData = (it2 as ItemData).next()
+            i3 = itemData.Description.size + itemData.Name.size + 129 + 1 + 4 + 4 + i4
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleInventoryDescendents(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put(Ascii.SYN)
@@ -92,14 +92,14 @@ class InventoryDescendents : SLMessage {
         packUUID(byteBuffer, this.AgentData_Field.OwnerID)
         packInt(byteBuffer, this.AgentData_Field.Version)
         packInt(byteBuffer, this.AgentData_Field.Descendents)
-        byteBuffer.put((byte) this.FolderData_Fields.size())
+        byteBuffer.put((this as byte).FolderData_Fields.size())
         for (FolderData folderData : this.FolderData_Fields) {
             packUUID(byteBuffer, folderData.FolderID)
             packUUID(byteBuffer, folderData.ParentID)
-            packByte(byteBuffer, (byte) folderData.Type)
+            packByte(byteBuffer, (folderData as byte).Type)
             packVariable(byteBuffer, folderData.Name, 1)
         }
-        byteBuffer.put((byte) this.ItemData_Fields.size())
+        byteBuffer.put((this as byte).ItemData_Fields.size())
         for (ItemData itemData : this.ItemData_Fields) {
             packUUID(byteBuffer, itemData.ItemID)
             packUUID(byteBuffer, itemData.FolderID)
@@ -113,10 +113,10 @@ class InventoryDescendents : SLMessage {
             packInt(byteBuffer, itemData.NextOwnerMask)
             packBoolean(byteBuffer, itemData.GroupOwned)
             packUUID(byteBuffer, itemData.AssetID)
-            packByte(byteBuffer, (byte) itemData.Type)
-            packByte(byteBuffer, (byte) itemData.InvType)
+            packByte(byteBuffer, (itemData as byte).Type)
+            packByte(byteBuffer, (itemData as byte).InvType)
             packInt(byteBuffer, itemData.Flags)
-            packByte(byteBuffer, (byte) itemData.SaleType)
+            packByte(byteBuffer, (itemData as byte).SaleType)
             packInt(byteBuffer, itemData.SalePrice)
             packVariable(byteBuffer, itemData.Name, 1)
             packVariable(byteBuffer, itemData.Description, 1)
@@ -125,14 +125,14 @@ class InventoryDescendents : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.FolderID = unpackUUID(byteBuffer)
         this.AgentData_Field.OwnerID = unpackUUID(byteBuffer)
         this.AgentData_Field.Version = unpackInt(byteBuffer)
         this.AgentData_Field.Descendents = unpackInt(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             FolderData folderData = FolderData()
             folderData.FolderID = unpackUUID(byteBuffer)
             folderData.ParentID = unpackUUID(byteBuffer)
@@ -141,7 +141,7 @@ class InventoryDescendents : SLMessage {
             this.FolderData_Fields.add(folderData)
         }
         byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b2; i2++) {
+        for (i2 in 0 until b2) {
             ItemData itemData = ItemData()
             itemData.ItemID = unpackUUID(byteBuffer)
             itemData.FolderID = unpackUUID(byteBuffer)

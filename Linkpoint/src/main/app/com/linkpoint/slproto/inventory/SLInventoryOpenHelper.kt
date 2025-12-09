@@ -44,7 +44,7 @@ class SLInventoryOpenHelper : DBHandleCache.DBOpenHelper {
         }
     }
 
-    SLInventoryOpenHelper getInstance() {
+    fun getInstance(): SLInventoryOpenHelper {
         return InstanceHolder.Instance
     }
 
@@ -121,7 +121,9 @@ class SLInventoryOpenHelper : DBHandleCache.DBOpenHelper {
         }
     }
 
-    SQLiteDatabase openOrCreateDatabase(String str) throws SQLiteException {
+    @Throws(SQLiteException::class)
+
+    fun openOrCreateDatabase(String str): SQLiteDatabase {
         if (str == null || str.trim().isEmpty()) {
             throw SQLiteException("Database path cannot be null or empty")
         }

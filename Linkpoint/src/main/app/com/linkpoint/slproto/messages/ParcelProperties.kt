@@ -71,15 +71,15 @@ class ParcelProperties : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.ParcelData_Field.Bitmap.length + 84 + 4 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + this.ParcelData_Field.Name.length + 1 + this.ParcelData_Field.Desc.length + 1 + this.ParcelData_Field.MusicURL.length + 1 + this.ParcelData_Field.MediaURL.length + 16 + 1 + 16 + 4 + 4 + 1 + 16 + 16 + 12 + 12 + 1 + 1 + 1 + 1 + 1 + 1 + 1
+    fun CalcPayloadSize(): Int {
+        return this.ParcelData_Field.Bitmap.size + 84 + 4 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + this.ParcelData_Field.Name.size + 1 + this.ParcelData_Field.Desc.size + 1 + this.ParcelData_Field.MusicURL.size + 1 + this.ParcelData_Field.MediaURL.size + 16 + 1 + 16 + 4 + 4 + 1 + 16 + 16 + 12 + 12 + 1 + 1 + 1 + 1 + 1 + 1 + 1
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleParcelProperties(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put(Ascii.ETB)
         packInt(byteBuffer, this.ParcelData_Field.RequestResult)
         packInt(byteBuffer, this.ParcelData_Field.SequenceID)
@@ -98,7 +98,7 @@ class ParcelProperties : SLMessage {
         packLLVector3(byteBuffer, this.ParcelData_Field.AABBMax)
         packVariable(byteBuffer, this.ParcelData_Field.Bitmap, 2)
         packInt(byteBuffer, this.ParcelData_Field.Area)
-        packByte(byteBuffer, (Byte) this.ParcelData_Field.Status)
+        packByte(byteBuffer, (this as Byte).ParcelData_Field.Status)
         packInt(byteBuffer, this.ParcelData_Field.SimWideMaxPrims)
         packInt(byteBuffer, this.ParcelData_Field.SimWideTotalPrims)
         packInt(byteBuffer, this.ParcelData_Field.MaxPrims)
@@ -116,16 +116,16 @@ class ParcelProperties : SLMessage {
         packVariable(byteBuffer, this.ParcelData_Field.MusicURL, 1)
         packVariable(byteBuffer, this.ParcelData_Field.MediaURL, 1)
         packUUID(byteBuffer, this.ParcelData_Field.MediaID)
-        packByte(byteBuffer, (Byte) this.ParcelData_Field.MediaAutoScale)
+        packByte(byteBuffer, (this as Byte).ParcelData_Field.MediaAutoScale)
         packUUID(byteBuffer, this.ParcelData_Field.GroupID)
         packInt(byteBuffer, this.ParcelData_Field.PassPrice)
         packFloat(byteBuffer, this.ParcelData_Field.PassHours)
-        packByte(byteBuffer, (Byte) this.ParcelData_Field.Category)
+        packByte(byteBuffer, (this as Byte).ParcelData_Field.Category)
         packUUID(byteBuffer, this.ParcelData_Field.AuthBuyerID)
         packUUID(byteBuffer, this.ParcelData_Field.SnapshotID)
         packLLVector3(byteBuffer, this.ParcelData_Field.UserLocation)
         packLLVector3(byteBuffer, this.ParcelData_Field.UserLookAt)
-        packByte(byteBuffer, (Byte) this.ParcelData_Field.LandingType)
+        packByte(byteBuffer, (this as Byte).ParcelData_Field.LandingType)
         packBoolean(byteBuffer, this.ParcelData_Field.RegionPushOverride)
         packBoolean(byteBuffer, this.ParcelData_Field.RegionDenyAnonymous)
         packBoolean(byteBuffer, this.ParcelData_Field.RegionDenyIdentified)
@@ -133,7 +133,7 @@ class ParcelProperties : SLMessage {
         packBoolean(byteBuffer, this.AgeVerificationBlock_Field.RegionDenyAgeUnverified)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.ParcelData_Field.RequestResult = unpackInt(byteBuffer)
         this.ParcelData_Field.SequenceID = unpackInt(byteBuffer)
         this.ParcelData_Field.SnapSelection = unpackBoolean(byteBuffer)

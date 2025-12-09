@@ -57,7 +57,7 @@ class SpatialTree {
         }
     }
 
-    Unit addDrawables(DrawList drawList) {
+    fun addDrawables(DrawList drawList): Unit {
         Debug.Printf("SpatialTree: adding drawables.", Any[0])
         this.myAvatarTreeNode.addDrawables(drawList)
         for (SpatialTreeNode spatialTreeNode : this.bins) {
@@ -68,29 +68,29 @@ class SpatialTree {
         this.drawListChanged = false
     }
 
-    Boolean isDrawListChanged() {
+    fun isDrawListChanged(): Boolean {
         return this.drawListChanged
     }
 
-    Boolean isTreeWalkNeeded() {
+    fun isTreeWalkNeeded(): Boolean {
         return this.treeWalkNeeded
     }
 
-    Unit removeEntry(SpatialTreeNode spatialTreeNode) {
+    fun removeEntry(SpatialTreeNode spatialTreeNode): Unit {
         setEntryBin(spatialTreeNode, -1)
     }
 
-    Unit removeObject(DrawListEntry drawListEntry) {
+    fun removeObject(DrawListEntry drawListEntry): Unit {
         InlineList list = drawListEntry.getList()
         list?.removeEntry(drawListEntry)
         }
     }
 
-    Unit setDrawListChanged() {
+    fun setDrawListChanged(): Unit {
         this.drawListChanged = true
     }
 
-    Unit setEntryDepth(SpatialTreeNode spatialTreeNode, Float f) {
+    fun setEntryDepth(SpatialTreeNode spatialTreeNode, Float f): Unit {
         Int i = 0
         Int round = Math.round(((this.toFloat().numBins) * f) / this.drawDistance)
         if (round >= 0) {
@@ -99,11 +99,11 @@ class SpatialTree {
         setEntryBin(spatialTreeNode, i)
     }
 
-    Unit setTreeWalkNeeded() {
+    fun setTreeWalkNeeded(): Unit {
         this.treeWalkNeeded = true
     }
 
-    Unit updateObject(DrawListEntry drawListEntry) {
+    fun updateObject(DrawListEntry drawListEntry): Unit {
         InlineList nodeForObject = getNodeForObject(drawListEntry)
         InlineList list = drawListEntry.getList()
         if (!(nodeForObject == list || list == null)) {
@@ -113,7 +113,7 @@ class SpatialTree {
         }
     }
 
-    Unit walkTree(FrustrumPlanes frustrumPlanes, Float f) {
+    fun walkTree(FrustrumPlanes frustrumPlanes, Float f): Unit {
         Debug.Printf("SpatialTree: walkTree: starting to walk.", Any[0])
         this.drawDistance = f
         this.rootNode.walkTree(frustrumPlanes, 1, this.depthBuf)

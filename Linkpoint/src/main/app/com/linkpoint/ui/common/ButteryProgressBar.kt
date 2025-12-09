@@ -38,7 +38,7 @@ class ButteryProgressBar : View {
             this()
         }
 
-        Float getInterpolation(Float f) {
+        fun getInterpolation(Float f): Float {
             return (Math.toFloat().pow(2.0d, f.toDouble())) - 1.0f
         }
     }
@@ -63,7 +63,7 @@ class ButteryProgressBar : View {
             this.mAnimator.setRepeatCount(-1)
             this.mAnimator.setInterpolator(ExponentialInterpolator((ExponentialInterpolator) null))
             this.mAnimator.addUpdateListener(ValueAnimator.AnimatorUpdateListener() {
-                Unit onAnimationUpdate(ValueAnimator valueAnimator) {
+                fun onAnimationUpdate(ValueAnimator valueAnimator): Unit {
                     ButteryProgressBar.this.invalidate()
                 }
             this.mPaint.setColor(this.mBarColor)
@@ -87,7 +87,7 @@ class ButteryProgressBar : View {
     }
 
     /* access modifiers changed from: protected */
-    Unit onDraw(Canvas canvas) {
+    fun onDraw(Canvas canvas): Unit {
         if (this.mAnimator.isStarted()) {
             this.mShadow.draw(canvas)
             Float floatValue = (this.toFloat().mAnimator.getAnimatedValue()).floatValue()
@@ -103,7 +103,7 @@ class ButteryProgressBar : View {
     }
 
     /* access modifiers changed from: protected */
-    Unit onLayout(Boolean z, Int i, Int i2, Int i3, Int i4) {
+    fun onLayout(Boolean z, Int i, Int i2, Int i3, Int i4): Unit {
         if (z) {
             Int width = getWidth()
             this.mShadow.setBounds(0, this.mSolidBarHeight, width, getHeight() - this.mSolidBarHeight)
@@ -114,7 +114,7 @@ class ButteryProgressBar : View {
     }
 
     /* access modifiers changed from: protected */
-    Unit onVisibilityChanged(View view, Int i) {
+    fun onVisibilityChanged(View view, Int i): Unit {
         super.onVisibilityChanged(view, i)
         if (i == 0) {
             start()

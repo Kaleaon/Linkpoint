@@ -25,15 +25,15 @@ class StartGroupProposal : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.ProposalData_Field.ProposalText.length + 29 + 36
+    fun CalcPayloadSize(): Int {
+        return this.ProposalData_Field.ProposalText.size + 29 + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleStartGroupProposal(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 107)
@@ -46,7 +46,7 @@ class StartGroupProposal : SLMessage {
         packVariable(byteBuffer, this.ProposalData_Field.ProposalText, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ProposalData_Field.GroupID = unpackUUID(byteBuffer)

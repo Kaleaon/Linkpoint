@@ -42,7 +42,7 @@ class ActivateGestures : SLMessage {
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packInt(byteBuffer, this.AgentData_Field.Flags)
-        byteBuffer.put((Byte) this.Data_Fields.size())
+        byteBuffer.put((this as Byte).Data_Fields.size())
         for (Data data : this.Data_Fields) {
             packUUID(byteBuffer, data.ItemID)
             packUUID(byteBuffer, data.AssetID)
@@ -55,7 +55,7 @@ class ActivateGestures : SLMessage {
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.Flags = unpackInt(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             Data data = Data()
             data.ItemID = unpackUUID(byteBuffer)
             data.AssetID = unpackUUID(byteBuffer)

@@ -13,7 +13,7 @@ class AgentPosition {
     private LLVector3 velocity = LLVector3()
 
     @Nullable
-    ImmutableVector getImmutablePosition() {
+    fun getImmutablePosition(): ImmutableVector {
         ImmutableVector immutableVector = null
         synchronized (this.lock) {
             if (this.isValid) {
@@ -23,7 +23,7 @@ class AgentPosition {
         return immutableVector
     }
 
-    Boolean getInterpolatedPosition(@NonNull LLVector3 lLVector3) {
+    fun getInterpolatedPosition(@NonNull LLVector3 lLVector3): Boolean {
         synchronized (this.lock) {
             if (this.isValid) {
                 if (this.velocity.x == 0.0f && this.velocity.y == 0.0f && this.velocity.z == 0.0f) {
@@ -41,7 +41,7 @@ class AgentPosition {
     }
 
     @NonNull
-    LLVector3 getPosition() {
+    fun getPosition(): LLVector3 {
         LLVector3 lLVector3 = LLVector3()
         synchronized (this.lock) {
             if (this.isValid) {
@@ -51,7 +51,7 @@ class AgentPosition {
         return lLVector3
     }
 
-    Boolean getPosition(@NonNull LLVector3 lLVector3) {
+    fun getPosition(@NonNull LLVector3 lLVector3): Boolean {
         synchronized (this.lock) {
             if (this.isValid) {
                 lLVector3.set(this.position)
@@ -63,14 +63,14 @@ class AgentPosition {
         return z
     }
 
-    Boolean isValid() {
+    fun isValid(): Boolean {
         synchronized (this.lock) {
             z = this.isValid
         }
         return z
     }
 
-    Unit set(@NonNull LLVector3 lLVector3, @Nullable LLVector3 lLVector32) {
+    fun set(@NonNull LLVector3 lLVector3, @Nullable LLVector3 lLVector32): Unit {
         synchronized (this.lock) {
             this.position.set(lLVector3)
             LLVector3 lLVector33 = this.velocity

@@ -116,7 +116,7 @@ class LLQuaternion {
         }
     }
 
-    LLQuaternion fromEuler(Float f, Float f2, Float f3) {
+    fun fromEuler(Float f, Float f2, Float f3): LLQuaternion {
         Double cos = Math.cos((Double) (f / 2.0f))
         Double sin = Math.sin((Double) (f / 2.0f))
         Double cos2 = Math.cos((Double) (f2 / 2.0f))
@@ -128,11 +128,11 @@ class LLQuaternion {
         return LLQuaternion((Float) ((sin * cos2 * cos3) + (cos * sin2 * sin3)), (Float) (((cos * sin2) * cos3) - ((sin * cos2) * sin3)), (Float) ((d * sin3) + (d2 * cos3)), (Float) ((d * cos3) - (d2 * sin3)))
     }
 
-    LLQuaternion lerp(LLQuaternion lLQuaternion, LLQuaternion lLQuaternion2, Float f) {
+    fun lerp(LLQuaternion lLQuaternion, LLQuaternion lLQuaternion2, Float f): LLQuaternion {
         return LLQuaternion(lLQuaternion.x + ((lLQuaternion2.x - lLQuaternion.x) * f), lLQuaternion.y + ((lLQuaternion2.y - lLQuaternion.y) * f), lLQuaternion.z + ((lLQuaternion2.z - lLQuaternion.z) * f), lLQuaternion.w + ((lLQuaternion2.w - lLQuaternion.w) * f))
     }
 
-    LLQuaternion mayaQ(Float f, Float f2, Float f3, Order order) {
+    fun mayaQ(Float f, Float f2, Float f3, Order order): LLQuaternion {
         LLQuaternion lLQuaternion = LLQuaternion()
         LLQuaternion lLQuaternion2 = LLQuaternion()
         LLQuaternion lLQuaternion3 = LLQuaternion()
@@ -170,7 +170,7 @@ class LLQuaternion {
         return lLQuaternion5
     }
 
-    LLQuaternion parseFloatVec3(ByteBuffer byteBuffer) {
+    fun parseFloatVec3(ByteBuffer byteBuffer): LLQuaternion {
         Float f = 0.0f
         Float f2 = byteBuffer.getFloat()
         Float f3 = byteBuffer.getFloat()
@@ -182,15 +182,15 @@ class LLQuaternion {
         return LLQuaternion(f2, f3, f4, f)
     }
 
-    LLQuaternion parseU16Vec3(ByteBuffer byteBuffer, Float f, Float f2) {
+    fun parseU16Vec3(ByteBuffer byteBuffer, Float f, Float f2): LLQuaternion {
         return LLQuaternion(LLTersePacking.U16_to_float(byteBuffer.getShort() & 65535, f, f2), LLTersePacking.U16_to_float(byteBuffer.getShort() & 65535, f, f2), LLTersePacking.U16_to_float(byteBuffer.getShort() & 65535, f, f2), LLTersePacking.U16_to_float(byteBuffer.getShort() & 65535, f, f2))
     }
 
-    LLQuaternion parseU8Vec3(ByteBuffer byteBuffer, Float f, Float f2) {
+    fun parseU8Vec3(ByteBuffer byteBuffer, Float f, Float f2): LLQuaternion {
         return LLQuaternion(LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f, f2), LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f, f2), LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f, f2), LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f, f2))
     }
 
-    LLQuaternion shortestArc(LLVector3 lLVector3, LLVector3 lLVector32) {
+    fun shortestArc(LLVector3 lLVector3, LLVector3 lLVector32): LLQuaternion {
         LLVector3 lLVector33 = LLVector3(lLVector3)
         LLVector3 lLVector34 = LLVector3(lLVector32)
         Float normVec = lLVector33.normVec()
@@ -218,7 +218,7 @@ class LLQuaternion {
         return lLQuaternion
     }
 
-    LLQuaternion unpackFromVector3(LLVector3 lLVector3) {
+    fun unpackFromVector3(LLVector3 lLVector3): LLQuaternion {
         Float f = 0.0f
         Float magVecSquared = 1.0f - lLVector3.magVecSquared()
         Float f2 = lLVector3.x
@@ -230,18 +230,18 @@ class LLQuaternion {
         return LLQuaternion(f2, f3, f4, f)
     }
 
-    Unit addMul(LLQuaternion lLQuaternion, Float f) {
+    fun addMul(LLQuaternion lLQuaternion, Float f): Unit {
         this.x += lLQuaternion.x * f
         this.y += lLQuaternion.y * f
         this.z += lLQuaternion.z * f
         this.w += lLQuaternion.w * f
     }
 
-    LLQuaternion conjQuat() {
+    fun conjQuat(): LLQuaternion {
         return LLQuaternion(this.x * -1.0f, this.y * -1.0f, this.z * -1.0f, this.w)
     }
 
-    Float getAngleAxis(LLVector3 lLVector3) {
+    fun getAngleAxis(LLVector3 lLVector3): Float {
         Float f = -1.0f
         Float f2 = this.w
         if (f2 > 1.0f) {
@@ -265,7 +265,7 @@ class LLQuaternion {
         return acos
     }
 
-    Unit getInverseMatrix(FloatArray fArr, Int i) {
+    fun getInverseMatrix(FloatArray fArr, Int i): Unit {
         Float f = this.x * this.x
         Float f2 = this.y * this.y
         Float f3 = this.z * this.z
@@ -293,7 +293,7 @@ class LLQuaternion {
         fArr[i + 15] = 1.0f
     }
 
-    FloatArray getInverseMatrix() {
+    fun getInverseMatrix(): FloatArray {
         if (this.inverseMatrix != null) {
             return this.inverseMatrix
         }
@@ -310,7 +310,7 @@ class LLQuaternion {
         return this.inverseMatrix
     }
 
-    FloatArray getMatrix() {
+    fun getMatrix(): FloatArray {
         if (this.matrix != null) {
             return this.matrix
         }
@@ -327,7 +327,7 @@ class LLQuaternion {
         return this.matrix
     }
 
-    Float normalize() {
+    fun normalize(): Float {
         Float sqrt = Math.sqrt(((this.x * this.x.toDouble()).toFloat() + (this.y * this.y) + (this.z * this.z) + (this.w * this.w)))
         if (sqrt <= 1.0E-7f) {
             this.x = 0.0f
@@ -346,7 +346,7 @@ class LLQuaternion {
         return sqrt
     }
 
-    Unit set(LLQuaternion lLQuaternion) {
+    fun set(LLQuaternion lLQuaternion): Unit {
         this.x = lLQuaternion.x
         this.y = lLQuaternion.y
         this.z = lLQuaternion.z
@@ -355,14 +355,14 @@ class LLQuaternion {
         this.inverseMatrix = null
     }
 
-    Unit setIdentity() {
+    fun setIdentity(): Unit {
         this.x = 0.0f
         this.y = 0.0f
         this.z = 0.0f
         this.w = 1.0f
     }
 
-    Unit setLerp(LLQuaternion lLQuaternion, Float f, LLQuaternion lLQuaternion2, Float f2) {
+    fun setLerp(LLQuaternion lLQuaternion, Float f, LLQuaternion lLQuaternion2, Float f2): Unit {
         this.x = (lLQuaternion.x * f) + (lLQuaternion2.x * f2)
         this.y = (lLQuaternion.y * f) + (lLQuaternion2.y * f2)
         this.z = (lLQuaternion.z * f) + (lLQuaternion2.z * f2)
@@ -371,7 +371,7 @@ class LLQuaternion {
         this.inverseMatrix = null
     }
 
-    Unit setMul(LLQuaternion lLQuaternion, LLQuaternion lLQuaternion2) {
+    fun setMul(LLQuaternion lLQuaternion, LLQuaternion lLQuaternion2): Unit {
         this.x = (((lLQuaternion2.w * lLQuaternion.x) + (lLQuaternion2.x * lLQuaternion.w)) + (lLQuaternion2.y * lLQuaternion.z)) - (lLQuaternion2.z * lLQuaternion.y)
         this.y = (((lLQuaternion2.w * lLQuaternion.y) + (lLQuaternion2.y * lLQuaternion.w)) + (lLQuaternion2.z * lLQuaternion.x)) - (lLQuaternion2.x * lLQuaternion.z)
         this.z = (((lLQuaternion2.w * lLQuaternion.z) + (lLQuaternion2.z * lLQuaternion.w)) + (lLQuaternion2.x * lLQuaternion.y)) - (lLQuaternion2.y * lLQuaternion.x)
@@ -380,7 +380,7 @@ class LLQuaternion {
         this.inverseMatrix = null
     }
 
-    Unit setQuat(Float f, Float f2, Float f3, Float f4) {
+    fun setQuat(Float f, Float f2, Float f3, Float f4): Unit {
         LLVector3 lLVector3 = LLVector3(f2, f3, f4)
         lLVector3.normVec()
         Float f5 = 0.5f * f
@@ -394,7 +394,7 @@ class LLQuaternion {
         this.inverseMatrix = null
     }
 
-    Unit setQuat(Float f, LLVector3 lLVector3) {
+    fun setQuat(Float f, LLVector3 lLVector3): Unit {
         LLVector3 lLVector32 = LLVector3(lLVector3)
         lLVector32.normVec()
         Float f2 = 0.5f * f
@@ -408,21 +408,21 @@ class LLQuaternion {
         this.inverseMatrix = null
     }
 
-    Unit setRaw(Float f, Float f2, Float f3, Float f4) {
+    fun setRaw(Float f, Float f2, Float f3, Float f4): Unit {
         this.x = f
         this.y = f2
         this.z = f3
         this.w = f4
     }
 
-    Unit setZero() {
+    fun setZero(): Unit {
         this.x = 0.0f
         this.y = 0.0f
         this.z = 0.0f
         this.w = 0.0f
     }
 
-    String toString() {
+    fun toString(): String {
         return String.format("(%.2f, %.2f, %.2f, %.2f)", Any[]{Float.valueOf(this.x), Float.valueOf(this.y), Float.valueOf(this.z), Float.valueOf(this.w)})
     }
 }

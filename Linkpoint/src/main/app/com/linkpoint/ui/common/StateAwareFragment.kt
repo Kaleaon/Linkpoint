@@ -6,30 +6,30 @@ class StateAwareFragment : Fragment {
     private Boolean fragmentStarted = false
     private Boolean fragmentVisible = false
 
-    Boolean isFragmentStarted() {
+    fun isFragmentStarted(): Boolean {
         return this.fragmentStarted
     }
 
-    Boolean isFragmentVisible() {
+    fun isFragmentVisible(): Boolean {
         return this.fragmentVisible
     }
 
-    Unit onPause() {
+    fun onPause(): Unit {
         this.fragmentVisible = false
         super.onPause()
     }
 
-    Unit onResume() {
+    fun onResume(): Unit {
         super.onResume()
         this.fragmentVisible = true
     }
 
-    Unit onStart() {
+    fun onStart(): Unit {
         super.onStart()
         this.fragmentStarted = true
     }
 
-    Unit onStop() {
+    fun onStop(): Unit {
         this.fragmentStarted = false
         super.onStop()
     }

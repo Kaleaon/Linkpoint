@@ -20,7 +20,7 @@ import androidx.annotation.Nullable
 
 class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
     Parcelable.Creator<SLInventoryEntry> CREATOR = Parcelable.Creator<SLInventoryEntry>() {
-        SLInventoryEntry createFromParcel(Parcel parcel) {
+        fun createFromParcel(Parcel parcel): SLInventoryEntry {
             return SLInventoryEntry(parcel, (SLInventoryEntry) null)
         }
 
@@ -107,7 +107,7 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
         super(dBHandle != null ? dBHandle.getDB() : null, j)
     }
 
-    SLInventoryEntry find(SQLiteDatabase sQLiteDatabase, UUID uuid) {
+    fun find(SQLiteDatabase sQLiteDatabase, UUID uuid): SLInventoryEntry {
         try {
             Cursor query = sQLiteDatabase.query(InventoryEntryDBObject.tableName, fieldNames, "uuid_low = ? AND uuid_high = ?", Array<String>{Long.toString(uuid.getLeastSignificantBits()), Long.toString(uuid.getMostSignificantBits())}, (String) null, (String) null, (String) null)
             if (query.moveToFirst()) {
@@ -123,7 +123,9 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
         }
     }
 
-    SLInventoryEntry findOrCreate(SQLiteDatabase sQLiteDatabase, UUID uuid) throws DBObject.DatabaseBindingException {
+    @Throws(DBObject.DatabaseBindingException::class)
+
+    fun findOrCreate(SQLiteDatabase sQLiteDatabase, UUID uuid): SLInventoryEntry {
         if (sQLiteDatabase == null) {
             throw DBObject.DatabaseBindingException(SLInventoryEntry.class, "database is null")
         } else if (uuid == null) {
@@ -142,7 +144,9 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
         }
     }
 
-    SLInventoryEntry findOrCreateForUpdate(SQLiteDatabase sQLiteDatabase, UUID uuid) throws DBObject.DatabaseBindingException {
+    @Throws(DBObject.DatabaseBindingException::class)
+
+    fun findOrCreateForUpdate(SQLiteDatabase sQLiteDatabase, UUID uuid): SLInventoryEntry {
         if (sQLiteDatabase == null) {
             throw DBObject.DatabaseBindingException(SLInventoryEntry.class, "database is null")
         } else if (uuid == null) {
@@ -205,7 +209,9 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
         }
     }
 
-    SQLiteStatement getInsertStatement(SQLiteDatabase sQLiteDatabase) throws DBObject.DatabaseBindingException {
+    @Throws(DBObject.DatabaseBindingException::class)
+
+    fun getInsertStatement(SQLiteDatabase sQLiteDatabase): SQLiteStatement {
         if (sQLiteDatabase == null) {
             throw DBObject.DatabaseBindingException("Database is closed")
         } else if (!sQLiteDatabase.isOpen()) {
@@ -221,7 +227,9 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
         }
     }
 
-    SQLiteStatement getUpdateStatement(SQLiteDatabase sQLiteDatabase) throws DBObject.DatabaseBindingException {
+    @Throws(DBObject.DatabaseBindingException::class)
+
+    fun getUpdateStatement(SQLiteDatabase sQLiteDatabase): SQLiteStatement {
         if (sQLiteDatabase == null) {
             throw DBObject.DatabaseBindingException("Database is closed")
         } else if (!sQLiteDatabase.isOpen()) {
@@ -287,7 +295,9 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
         }
     }
 
-    SLInventoryEntry parseString(SimpleStringParser simpleStringParser) throws SimpleStringParser.StringParsingException {
+    @Throws(SimpleStringParser.StringParsingException::class)
+
+    fun parseString(SimpleStringParser simpleStringParser): SLInventoryEntry {
         SLInventoryEntry sLInventoryEntry = SLInventoryEntry()
         simpleStringParser.expectToken("{", DELIM_EOL)
         while (true) {
@@ -325,7 +335,7 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
         }
     }
 
-    Cursor query(SQLiteDatabase sQLiteDatabase, String str, Array<String> strArr, String str2) {
+    fun query(SQLiteDatabase sQLiteDatabase, String str, Array<String> strArr, String str2): Cursor {
         if (sQLiteDatabase == null) {
             return null
         }
@@ -337,7 +347,7 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
         }
     }
 
-    Cursor query(DBHandle dBHandle, String str, Array<String> strArr, String str2) {
+    fun query(DBHandle dBHandle, String str, Array<String> strArr, String str2): Cursor {
         if (dBHandle == null) {
             return null
         }
@@ -349,7 +359,7 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
         }
     }
 
-    Int getActionDescriptionResId() {
+    fun getActionDescriptionResId(): Int {
         SLAssetType byType = SLAssetType.getByType(this.assetType)
         if (byType != null) {
             return byType.getActionDescription()
@@ -375,7 +385,7 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
         r0 = com.linkpoint.slproto.inventory.SLAssetType.getByType(r1.assetType)
      */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    Int getDrawableResource() {
+    fun getDrawableResource(): Int {
         /*
             r1 = this
             Boolean r0 = r1.isFolder
@@ -398,11 +408,11 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
         throw UnsupportedOperationException("Method not decompiled: com.linkpoint.slproto.inventory.SLInventoryEntry.getDrawableResource():Int")
     }
 
-    String getReadableTextForLink() {
+    fun getReadableTextForLink(): String {
         return SLInventoryType.getByType(this.invType).getReadableName() + ": " + this.name
     }
 
-    Int getSubtypeDrawableResource() {
+    fun getSubtypeDrawableResource(): Int {
         if (this.isFolder) {
             switch (this.typeDefault) {
                 case 0:
@@ -447,7 +457,7 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
         }
     }
 
-    Int getTypeDescriptionResId() {
+    fun getTypeDescriptionResId(): Int {
         SLAssetType byType = SLAssetType.getByType(this.assetType)
         if (byType != null) {
             return byType.getTypeDescription()
@@ -500,43 +510,47 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
         }
     }
 
-    Boolean isAnimation() {
+    fun isAnimation(): Boolean {
         if (this.assetType == SLAssetType.AT_ANIMATION.getTypeCode()) {
             return true
         }
         return this.assetType == SLAssetType.AT_LINK.getTypeCode() && this.invType == 19
     }
 
-    Boolean isCopyable() {
+    fun isCopyable(): Boolean {
         return ((this.ownerMask & this.baseMask) & 32768) != 0
     }
 
-    Boolean isFolderOrFolderLink() {
+    fun isFolderOrFolderLink(): Boolean {
         return this.isFolder || this.assetType == SLAssetType.AT_LINK_FOLDER.getTypeCode()
     }
 
-    Boolean isLink() {
+    fun isLink(): Boolean {
         return this.assetType == SLAssetType.AT_LINK.getTypeCode() || this.assetType == SLAssetType.AT_LINK_FOLDER.getTypeCode()
     }
 
-    Boolean isWearable() {
+    fun isWearable(): Boolean {
         if (this.assetType == SLAssetType.AT_BODYPART.getTypeCode() || this.assetType == SLAssetType.AT_CLOTHING.getTypeCode()) {
             return true
         }
         return this.assetType == SLAssetType.AT_LINK.getTypeCode() && this.invType == SLInventoryType.IT_WEARABLE.getTypeCode()
     }
 
-    Unit updateOrInsert(SQLiteDatabase sQLiteDatabase) throws DBObject.DatabaseBindingException {
+    @Throws(DBObject.DatabaseBindingException::class)
+
+    fun updateOrInsert(SQLiteDatabase sQLiteDatabase) {
         super.updateOrInsert(sQLiteDatabase, "uuid_low = ? AND uuid_high = ?", Array<String>{Long.toString(this.uuid.getLeastSignificantBits()), Long.toString(this.uuid.getMostSignificantBits())})
     }
 
-    Unit updateOrInsert(SQLiteStatement sQLiteStatement, SQLiteStatement sQLiteStatement2) throws DBObject.DatabaseBindingException {
+    @Throws(DBObject.DatabaseBindingException::class)
+
+    fun updateOrInsert(SQLiteStatement sQLiteStatement, SQLiteStatement sQLiteStatement2) {
         sQLiteStatement.bindLong(19, this.uuid.getMostSignificantBits())
         sQLiteStatement.bindLong(20, this.uuid.getLeastSignificantBits())
         super.updateOrInsert(sQLiteStatement, sQLiteStatement2)
     }
 
-    Object whatIsItemWornOn(@Nullable ImmutableMap<UUID, String> immutableMap, @Nullable Table<SLWearableType, UUID, SLWearable> table, Boolean z) {
+    fun whatIsItemWornOn(@Nullable ImmutableMap<UUID, String> immutableMap, @Nullable Table<SLWearableType, UUID, SLWearable> table, Boolean z): Object {
         if (this.assetType == SLAssetType.AT_LINK.getTypeCode()) {
             if (this.invType == SLInventoryType.IT_WEARABLE.getTypeCode()) {
                 if (table != null) {

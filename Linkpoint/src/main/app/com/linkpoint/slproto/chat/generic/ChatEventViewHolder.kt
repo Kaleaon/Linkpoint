@@ -29,11 +29,11 @@ class ChatEventViewHolder : RecyclerView.ViewHolder {
         super(view)
         View.OnClickListener userPicClickListener
         this.adapter = WeakReference<>(adapter2)
-        this.timestampView = (TextView) view.findViewById(R.id.chatMessageTimestamp)
-        this.textView = (TextView) view.findViewById(R.id.chatMessageTextView)
+        this.timestampView = (view as TextView).findViewById(R.id.chatMessageTimestamp)
+        this.textView = (view as TextView).findViewById(R.id.chatMessageTextView)
         this.bubbleView = view.findViewById(R.id.chatMessageBubble)
-        this.chatSourceIcon = (ChatterPicView) view.findViewById(R.id.chatMessageSourceIcon)
-        this.chatSourceIconRight = (ChatterPicView) view.findViewById(R.id.chatMessageSourceIconRight)
+        this.chatSourceIcon = (view as ChatterPicView).findViewById(R.id.chatMessageSourceIcon)
+        this.chatSourceIconRight = (view as ChatterPicView).findViewById(R.id.chatMessageSourceIconRight)
         if ((adapter2 instanceof HasUserPicClickHandler) && (userPicClickListener = ((HasUserPicClickHandler) adapter2).getUserPicClickListener()) != null) {
             if (this.chatSourceIcon != null) {
                 this.chatSourceIcon.setOnClickListener(userPicClickListener)
@@ -45,7 +45,7 @@ class ChatEventViewHolder : RecyclerView.ViewHolder {
     }
 
     /* access modifiers changed from: package-private */
-    Unit requestAdapterUpdate() {
+    fun requestAdapterUpdate(): Unit {
         RecyclerView.Adapter adapter2 = (RecyclerView.Adapter) this.adapter.get()
         if (adapter2 != null) {
             adapter2.notifyItemChanged(getAdapterPosition())
@@ -53,12 +53,12 @@ class ChatEventViewHolder : RecyclerView.ViewHolder {
     }
 
     /* access modifiers changed from: package-private */
-    Unit setupTimestampUpdate(Context context, Long j) {
+    fun setupTimestampUpdate(Context context, Long j): Unit {
         this.updateTimestamp = j
         updateTimestamp(context)
     }
 
-    Unit updateTimestamp(Context context) {
+    fun updateTimestamp(Context context): Unit {
         if (this.timestampView == null) {
             return
         }

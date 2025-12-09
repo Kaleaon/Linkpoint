@@ -18,11 +18,11 @@ class GroupRoleUpdate : SLMessage {
     }
 
     class RoleData {
-        byte[] Description
-        byte[] Name
+        ByteArray Description
+        ByteArray Name
         Long Powers
         UUID RoleID
-        byte[] Title
+        ByteArray Title
         Int UpdateType
     }
 
@@ -31,7 +31,7 @@ class GroupRoleUpdate : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 53
         Iterator<T> it = this.RoleData_Fields.iterator()
         while (true) {
@@ -39,39 +39,39 @@ class GroupRoleUpdate : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            RoleData roleData = (RoleData) it.next()
-            i = roleData.Title.length + roleData.Name.length + 17 + 1 + roleData.Description.length + 1 + 8 + 1 + i2
+            RoleData roleData = (it as RoleData).next()
+            i = roleData.Title.size + roleData.Name.size + 17 + 1 + roleData.Description.size + 1 + 8 + 1 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleGroupRoleUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 122)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packUUID(byteBuffer, this.AgentData_Field.GroupID)
-        byteBuffer.put((byte) this.RoleData_Fields.size())
+        byteBuffer.put((this as byte).RoleData_Fields.size())
         for (RoleData roleData : this.RoleData_Fields) {
             packUUID(byteBuffer, roleData.RoleID)
             packVariable(byteBuffer, roleData.Name, 1)
             packVariable(byteBuffer, roleData.Description, 1)
             packVariable(byteBuffer, roleData.Title, 1)
             packLong(byteBuffer, roleData.Powers)
-            packByte(byteBuffer, (byte) roleData.UpdateType)
+            packByte(byteBuffer, (roleData as byte).UpdateType)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             RoleData roleData = RoleData()
             roleData.RoleID = unpackUUID(byteBuffer)
             roleData.Name = unpackVariable(byteBuffer, 1)

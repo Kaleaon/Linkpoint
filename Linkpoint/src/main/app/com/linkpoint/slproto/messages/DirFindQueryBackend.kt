@@ -18,22 +18,22 @@ class DirFindQueryBackend : SLMessage {
         Int QueryFlags
         UUID QueryID
         Int QueryStart
-        byte[] QueryText
+        ByteArray QueryText
     }
 
     DirFindQueryBackend() {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.QueryData_Field.QueryText.length + 17 + 4 + 4 + 4 + 1 + 20
+    fun CalcPayloadSize(): Int {
+        return this.QueryData_Field.QueryText.size + 17 + 4 + 4 + 4 + 1 + 20
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleDirFindQueryBackend(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 32)
@@ -46,7 +46,7 @@ class DirFindQueryBackend : SLMessage {
         packBoolean(byteBuffer, this.QueryData_Field.Godlike)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
         this.QueryData_Field.QueryText = unpackVariable(byteBuffer, 1)

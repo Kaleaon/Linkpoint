@@ -24,7 +24,7 @@ class SLTextureUploadRequest : Runnable {
     private Int textureLayer
 
     interface TextureUploadCompleteListener {
-        Unit OnTextureUploadComplete(SLTextureUploadRequest sLTextureUploadRequest)
+        fun OnTextureUploadComplete(SLTextureUploadRequest sLTextureUploadRequest)
     }
 
     SLTextureUploadRequest(File file, Int i) {
@@ -32,11 +32,11 @@ class SLTextureUploadRequest : Runnable {
         this.textureLayer = i
     }
 
-    UUID getTextureID() {
+    fun getTextureID(): UUID {
         return this.textureID
     }
 
-    Unit run() {
+    fun run(): Unit {
         Response execute
         try {
             String asString = LLSDXMLRequest().PerformRequest(this.capURL, LLSDUndefined()).byKey("uploader").asString()
@@ -65,11 +65,11 @@ class SLTextureUploadRequest : Runnable {
         }
     }
 
-    Unit setCapURL(String str) {
+    fun setCapURL(String str): Unit {
         this.capURL = str
     }
 
-    Unit setOnUploadComplete(TextureUploadCompleteListener textureUploadCompleteListener) {
+    fun setOnUploadComplete(TextureUploadCompleteListener textureUploadCompleteListener): Unit {
         this.onUploadComplete = textureUploadCompleteListener
     }
 }

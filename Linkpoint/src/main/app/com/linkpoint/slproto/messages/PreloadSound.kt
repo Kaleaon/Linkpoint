@@ -19,18 +19,18 @@ class PreloadSound : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.DataBlock_Fields.size() * 48) + 3
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandlePreloadSound(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) 15)
-        byteBuffer.put((Byte) this.DataBlock_Fields.size())
+        byteBuffer.put((this as Byte).DataBlock_Fields.size())
         for (DataBlock dataBlock : this.DataBlock_Fields) {
             packUUID(byteBuffer, dataBlock.ObjectID)
             packUUID(byteBuffer, dataBlock.OwnerID)
@@ -38,9 +38,9 @@ class PreloadSound : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             DataBlock dataBlock = DataBlock()
             dataBlock.ObjectID = unpackUUID(byteBuffer)
             dataBlock.OwnerID = unpackUUID(byteBuffer)

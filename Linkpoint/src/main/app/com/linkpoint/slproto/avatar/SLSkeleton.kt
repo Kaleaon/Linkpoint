@@ -8,23 +8,23 @@ import java.util.Map
 
 class SLSkeleton {
     Map<SLSkeletonBoneID, SLSkeletonBone> bones = EnumMap(SLSkeletonBoneID.class)
-    float[] jointMatrix = float[(SLSkeletonBoneID.VALUES.length * 16)]
-    float[] jointWorldMatrix = float[((SLSkeletonBoneID.VALUES.length + 47) * 16)]
+    FloatArray jointMatrix = float[(SLSkeletonBoneID.VALUES.size * 16)]
+    FloatArray jointWorldMatrix = float[((SLSkeletonBoneID.VALUES.size + 47) * 16)]
     SLSkeletonBone rootBone
-    private SLSkeletonBone[] updateBones = SLSkeletonBone[SLSkeletonBoneID.VALUES.length]
+    private SLSkeletonBone[] updateBones = SLSkeletonBone[SLSkeletonBoneID.VALUES.size]
 
-    Unit UpdateGlobalPositions(AnimationSkeletonData animationSkeletonData) {
+    fun UpdateGlobalPositions(AnimationSkeletonData animationSkeletonData): Unit {
         for (SLSkeletonBone updateGlobalPos : this.updateBones) {
             updateGlobalPos.updateGlobalPos(animationSkeletonData, this.jointMatrix, this.jointWorldMatrix)
         }
     }
 
     /* access modifiers changed from: protected */
-    Unit applyJointTranslations(MeshJointTranslations meshJointTranslations) {
+    fun applyJointTranslations(MeshJointTranslations meshJointTranslations): Unit {
         for (Map.Entry entry : this.bones.entrySet()) {
-            float[] fArr = meshJointTranslations.jointTranslations.get(entry.getKey())
+            FloatArray fArr = meshJointTranslations.jointTranslations.get(entry.getKey())
             if (fArr != null) {
-                ((SLSkeletonBone) entry.getValue()).setPositionOverride(LLVector3(fArr[0], fArr[1], fArr[2]))
+                ((entry as SLSkeletonBone).getValue()).setPositionOverride(LLVector3(fArr[0], fArr[1], fArr[2]))
             }
         }
     }
@@ -56,7 +56,7 @@ class SLSkeleton {
     }
 
     /* access modifiers changed from: protected */
-    Unit prepareSkeleton() {
+    fun prepareSkeleton(): Unit {
         this.rootBone.prepareSkeleton(this.updateBones, 0)
     }
 }

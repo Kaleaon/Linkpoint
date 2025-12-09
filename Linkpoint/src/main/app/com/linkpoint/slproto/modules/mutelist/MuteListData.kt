@@ -18,7 +18,7 @@ import androidx.annotation.Immutable
 @Immutable
 class MuteListData {
     private Ordering<MuteListEntry> ordering = Ordering<MuteListEntry>() {
-        Int compare(MuteListEntry muteListEntry, MuteListEntry muteListEntry2) {
+        fun compare(MuteListEntry muteListEntry, MuteListEntry muteListEntry2): Int {
             Int viewOrder = muteListEntry.type.getViewOrder() - muteListEntry2.type.getViewOrder()
             return viewOrder != 0 ? viewOrder : muteListEntry.name.compareToIgnoreCase(muteListEntry2.name)
         }
@@ -60,7 +60,7 @@ class MuteListData {
                             i = 0
                         }
                         Debug.Printf("MuteList: line '%s' type %d idstring '%s' name '%s' flags %d", readLine.trim(), Int.valueOf(intToken), nextToken, nextToken2, Int.valueOf(i))
-                        if (intToken >= 0 && intToken < MuteType.values().length) {
+                        if (intToken >= 0 && intToken < MuteType.values().size) {
                             MuteType muteType = MuteType.values()[intToken]
                             MuteListEntry muteListEntry = MuteListEntry(muteType, UUID.fromString(nextToken), nextToken2, i)
                             if (muteType == MuteType.BY_NAME) {
@@ -84,7 +84,7 @@ class MuteListData {
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_3795  reason: not valid java name */
     /* synthetic */ Boolean m226lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_3795(MuteListEntry muteListEntry, Map.Entry entry) {
         if (entry != null) {
-            return !((String) entry.getKey()).equals(muteListEntry.name)
+            return !((entry as String).getKey()).equals(muteListEntry.name)
         }
         return false
     }
@@ -92,7 +92,7 @@ class MuteListData {
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4217  reason: not valid java name */
     /* synthetic */ Boolean m227lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4217(MuteListKey muteListKey, Map.Entry entry) {
         if (entry != null) {
-            return !((MuteListKey) entry.getKey()).equals(muteListKey)
+            return !((entry as MuteListKey).getKey()).equals(muteListKey)
         }
         return false
     }
@@ -100,7 +100,7 @@ class MuteListData {
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4795  reason: not valid java name */
     /* synthetic */ Boolean m228lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4795(MuteListEntry muteListEntry, Map.Entry entry) {
         if (entry != null) {
-            return !((String) entry.getKey()).equals(muteListEntry.name)
+            return !((entry as String).getKey()).equals(muteListEntry.name)
         }
         return false
     }
@@ -108,12 +108,12 @@ class MuteListData {
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_5273  reason: not valid java name */
     /* synthetic */ Boolean m229lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_5273(MuteListKey muteListKey, Map.Entry entry) {
         if (entry != null) {
-            return !((MuteListKey) entry.getKey()).equals(muteListKey)
+            return !((entry as MuteListKey).getKey()).equals(muteListKey)
         }
         return false
     }
 
-    MuteListData Block(MuteListEntry muteListEntry) {
+    fun Block(MuteListEntry muteListEntry): MuteListData {
         MuteListKey muteListKey = MuteListKey(muteListEntry)
         if (muteListKey.muteType == MuteType.BY_NAME) {
             ImmutableMap.Builder builder = ImmutableMap.builder()
@@ -128,14 +128,14 @@ class MuteListData {
             private /* synthetic */ Any f124$f0
 
             private /* synthetic */ Boolean $m$0(Any obj) {
-                return MuteListData.m229lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_5273((MuteListKey) this.f124$f0, (Map.Entry) obj)
+                return MuteListData.m229lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_5273((this as MuteListKey).f124$f0, (Map.Entry) obj)
             }
 
             {
                 this.f124$f0 = r1
             }
 
-            Boolean apply(Any obj) {
+            fun apply(Any obj): Boolean {
                 return $m$0(obj)
             }
         }))
@@ -143,7 +143,7 @@ class MuteListData {
         return MuteListData(builder2.build(), this.muteListNames)
     }
 
-    MuteListData Unblock(MuteListEntry muteListEntry) {
+    fun Unblock(MuteListEntry muteListEntry): MuteListData {
         MuteListKey muteListKey = MuteListKey(muteListEntry)
         if (muteListKey.muteType == MuteType.BY_NAME) {
             ImmutableMap.Builder builder = ImmutableMap.builder()
@@ -153,14 +153,14 @@ class MuteListData {
                 private /* synthetic */ Any f125$f0
 
                 private /* synthetic */ Boolean $m$0(Any obj) {
-                    return MuteListData.m226lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_3795((MuteListEntry) this.f125$f0, (Map.Entry) obj)
+                    return MuteListData.m226lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_3795((this as MuteListEntry).f125$f0, (Map.Entry) obj)
                 }
 
                 {
                     this.f125$f0 = r1
                 }
 
-                Boolean apply(Any obj) {
+                fun apply(Any obj): Boolean {
                     return $m$0(obj)
                 }
             }))
@@ -173,32 +173,32 @@ class MuteListData {
             private /* synthetic */ Any f126$f0
 
             private /* synthetic */ Boolean $m$0(Any obj) {
-                return MuteListData.m227lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4217((MuteListKey) this.f126$f0, (Map.Entry) obj)
+                return MuteListData.m227lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4217((this as MuteListKey).f126$f0, (Map.Entry) obj)
             }
 
             {
                 this.f126$f0 = r1
             }
 
-            Boolean apply(Any obj) {
+            fun apply(Any obj): Boolean {
                 return $m$0(obj)
             }
         }))
         return MuteListData(builder2.build(), this.muteListNames)
     }
 
-    ImmutableList<MuteListEntry> getMuteList() {
+    fun getMuteList(): ImmutableList<MuteListEntry> {
         ImmutableList.Builder builder = ImmutableList.builder()
-        builder.addAll((Iterable) this.muteList.values())
-        builder.addAll((Iterable) this.muteListNames.values())
+        builder.addAll((this as Iterable).muteList.values())
+        builder.addAll((this as Iterable).muteListNames.values())
         return ordering.immutableSortedCopy(builder.build())
     }
 
-    Boolean isMuted(UUID uuid, MuteType muteType) {
+    fun isMuted(UUID uuid, MuteType muteType): Boolean {
         return this.muteList.containsKey(MuteListKey(muteType, uuid))
     }
 
-    Boolean isMutedByName(String str) {
+    fun isMutedByName(String str): Boolean {
         return this.muteListNames.containsKey(str)
     }
 }

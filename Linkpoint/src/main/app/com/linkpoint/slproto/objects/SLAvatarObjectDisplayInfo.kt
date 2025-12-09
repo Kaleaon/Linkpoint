@@ -20,11 +20,11 @@ class SLAvatarObjectDisplayInfo : SLObjectDisplayInfo : SLObjectDisplayInfo.HasC
         this.uuid = sLObjectInfo.getId()
     }
 
-    ImmutableList<SLObjectDisplayInfo> getChildren() {
+    fun getChildren(): ImmutableList<SLObjectDisplayInfo> {
         return this.children
     }
 
-    Boolean isImplicitlyAdded() {
+    fun isImplicitlyAdded(): Boolean {
         return this.implicitlyAdded
     }
 }

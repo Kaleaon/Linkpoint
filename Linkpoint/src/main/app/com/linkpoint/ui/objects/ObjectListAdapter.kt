@@ -28,7 +28,7 @@ class ObjectListAdapter : BaseExpandableListAdapter {
         this.context = context2
     }
 
-    SLObjectDisplayInfo getChild(Int i, Int i2) {
+    fun getChild(Int i, Int i2): SLObjectDisplayInfo {
         SLObjectDisplayInfo sLObjectDisplayInfo = (SLObjectDisplayInfo) this.objects.get(i)
         if (sLObjectDisplayInfo instanceof SLObjectDisplayInfo.HasChildrenObjects) {
             return (SLObjectDisplayInfo) ((SLObjectDisplayInfo.HasChildrenObjects) sLObjectDisplayInfo).getChildren().get(i2)
@@ -36,11 +36,11 @@ class ObjectListAdapter : BaseExpandableListAdapter {
         return null
     }
 
-    Long getChildId(Int i, Int i2) {
+    fun getChildId(Int i, Int i2): Long {
         return (Long) getChild(i, i2).localID
     }
 
-    View getChildView(Int i, Int i2, Boolean z, View view, ViewGroup viewGroup) {
+    fun getChildView(Int i, Int i2, Boolean z, View view, ViewGroup viewGroup): View {
         View view2 = getView(getChild(i, i2), view, viewGroup)
         view2.findViewById(R.id.groupIndicatorCollapsed).setVisibility(8)
         view2.findViewById(R.id.groupIndicatorExpanded).setVisibility(4)
@@ -49,7 +49,7 @@ class ObjectListAdapter : BaseExpandableListAdapter {
         return view2
     }
 
-    Int getChildrenCount(Int i) {
+    fun getChildrenCount(Int i): Int {
         SLObjectDisplayInfo sLObjectDisplayInfo = (SLObjectDisplayInfo) this.objects.get(i)
         if (sLObjectDisplayInfo instanceof SLObjectDisplayInfo.HasChildrenObjects) {
             return ((SLObjectDisplayInfo.HasChildrenObjects) sLObjectDisplayInfo).getChildren().size()
@@ -58,23 +58,23 @@ class ObjectListAdapter : BaseExpandableListAdapter {
     }
 
     @NonNull
-    ImmutableList<SLObjectDisplayInfo> getData() {
+    fun getData(): ImmutableList<SLObjectDisplayInfo> {
         return this.objects
     }
 
-    SLObjectDisplayInfo getGroup(Int i) {
+    fun getGroup(Int i): SLObjectDisplayInfo {
         return (SLObjectDisplayInfo) this.objects.get(i)
     }
 
-    Int getGroupCount() {
+    fun getGroupCount(): Int {
         return this.objects.size()
     }
 
-    Long getGroupId(Int i) {
+    fun getGroupId(Int i): Long {
         return (Long) getGroup(i).localID
     }
 
-    View getGroupView(Int i, Boolean z, View view, ViewGroup viewGroup) {
+    fun getGroupView(Int i, Boolean z, View view, ViewGroup viewGroup): View {
         View view2 = getView(getGroup(i), view, viewGroup)
         if (getChildrenCount(i) == 0) {
             view2.findViewById(R.id.groupIndicatorCollapsed).setVisibility(4)
@@ -89,7 +89,7 @@ class ObjectListAdapter : BaseExpandableListAdapter {
         if (viewGroup instanceof ExpandableListView) {
             ExpandableListView expandableListView = (ExpandableListView) viewGroup
             AnonymousClass1 r1 = View.OnClickListener() {
-                Unit onClick(View view) {
+                fun onClick(View view): Unit {
                     if (view.getVisibility() == 0) {
                         switch (view.getId()) {
                             case R.id.groupIndicatorCollapsed:
@@ -118,7 +118,7 @@ class ObjectListAdapter : BaseExpandableListAdapter {
         return view2
     }
 
-    View getView(SLObjectDisplayInfo sLObjectDisplayInfo, View view, ViewGroup viewGroup) {
+    fun getView(SLObjectDisplayInfo sLObjectDisplayInfo, View view, ViewGroup viewGroup): View {
         String str = null
         Int i = 0
         if (view == null) {
@@ -151,15 +151,15 @@ class ObjectListAdapter : BaseExpandableListAdapter {
         return view
     }
 
-    Boolean hasStableIds() {
+    fun hasStableIds(): Boolean {
         return true
     }
 
-    Boolean isChildSelectable(Int i, Int i2) {
+    fun isChildSelectable(Int i, Int i2): Boolean {
         return true
     }
 
-    Unit setData(@NonNull ImmutableList<SLObjectDisplayInfo> immutableList) {
+    fun setData(@NonNull ImmutableList<SLObjectDisplayInfo> immutableList): Unit {
         this.objects = immutableList
         notifyDataSetChanged()
     }

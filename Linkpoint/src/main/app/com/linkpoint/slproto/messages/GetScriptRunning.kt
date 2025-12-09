@@ -16,15 +16,15 @@ class GetScriptRunning : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleGetScriptRunning(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -13)
@@ -32,7 +32,7 @@ class GetScriptRunning : SLMessage {
         packUUID(byteBuffer, this.Script_Field.ItemID)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.Script_Field.ObjectID = unpackUUID(byteBuffer)
         this.Script_Field.ItemID = unpackUUID(byteBuffer)
     }

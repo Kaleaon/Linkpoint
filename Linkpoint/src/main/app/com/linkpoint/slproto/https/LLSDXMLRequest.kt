@@ -17,7 +17,7 @@ class LLSDXMLRequest {
     private MediaType MEDIA_TYPE_LLSD_XML = MediaType.parse("application/llsd+xml")
     private AtomicReference<Call> callRef = AtomicReference<>((Object) null)
 
-    Unit InterruptRequest() {
+    fun InterruptRequest(): Unit {
         Call call = this.callRef.get()
         if (call != null) {
             try {
@@ -28,7 +28,9 @@ class LLSDXMLRequest {
         }
     }
 
-    LLSDNode PerformRequest(String str, LLSDNode lLSDNode) throws IOException, LLSDXMLException {
+    @Throws(IOException::class, LLSDXMLException::class)
+
+    fun PerformRequest(String str, LLSDNode lLSDNode): LLSDNode {
         Response execute
         Request.Builder url = Request.Builder().url(str)
         if (lLSDNode != null) {

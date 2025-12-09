@@ -18,26 +18,26 @@ class ObjectPopupsActionProvider : ActionProvider : View.OnClickListener {
     private TextView popupCountTextView = null
 
     interface ObjectPopupsClickListener {
-        Unit onObjectPopupsClicked()
+        fun onObjectPopupsClicked()
     }
 
     ObjectPopupsActionProvider(Context context) {
         super(context)
     }
 
-    Boolean isVisible() {
+    fun isVisible(): Boolean {
         return this.objectPopupCount != 0
     }
 
-    Unit onClick(View view) {
+    fun onClick(View view): Unit {
         if (this.objectPopupsClickListener != null) {
             this.objectPopupsClickListener.onObjectPopupsClicked()
         }
     }
 
-    View onCreateActionView() {
+    fun onCreateActionView(): View {
         View inflate = LayoutInflater.from(getContext()).inflate(R.layout.object_popups_action_provider, (ViewGroup) null)
-        this.popupCountTextView = (TextView) inflate.findViewById(R.id.popupCountTextView)
+        this.popupCountTextView = (inflate as TextView).findViewById(R.id.popupCountTextView)
         if (this.popupCountTextView != null) {
             this.popupCountTextView.setText(Int.toString(this.objectPopupCount))
         }
@@ -45,11 +45,11 @@ class ObjectPopupsActionProvider : ActionProvider : View.OnClickListener {
         return inflate
     }
 
-    Boolean overridesItemVisibility() {
+    fun overridesItemVisibility(): Boolean {
         return true
     }
 
-    Unit setObjectPopupCount(Int i) {
+    fun setObjectPopupCount(Int i): Unit {
         if (this.objectPopupCount != i) {
             this.objectPopupCount = i
             if (this.popupCountTextView != null) {
@@ -59,7 +59,7 @@ class ObjectPopupsActionProvider : ActionProvider : View.OnClickListener {
         }
     }
 
-    Unit setObjectPopupsClickListener(@Nullable ObjectPopupsClickListener objectPopupsClickListener2) {
+    fun setObjectPopupsClickListener(@Nullable ObjectPopupsClickListener objectPopupsClickListener2): Unit {
         this.objectPopupsClickListener = objectPopupsClickListener2
     }
 }

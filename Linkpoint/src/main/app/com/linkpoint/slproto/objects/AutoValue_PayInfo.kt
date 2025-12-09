@@ -13,11 +13,11 @@ class AutoValue_PayInfo : PayInfo {
         this.payPrices = immutableList
     }
 
-    Int defaultPayPrice() {
+    fun defaultPayPrice(): Int {
         return this.defaultPayPrice
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -31,16 +31,16 @@ class AutoValue_PayInfo : PayInfo {
         return false
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         return (this.payPrices == null ? 0 : this.payPrices.hashCode()) ^ (1000003 * (this.defaultPayPrice ^ 1000003))
     }
 
     @Nullable
-    ImmutableList<Int> payPrices() {
+    fun payPrices(): ImmutableList<Int> {
         return this.payPrices
     }
 
-    String toString() {
+    fun toString(): String {
         return "PayInfo{defaultPayPrice=" + this.defaultPayPrice + ", " + "payPrices=" + this.payPrices + "}"
     }
 }

@@ -15,11 +15,11 @@ class CreateGroupRequest : SLMessage {
 
     class GroupData {
         Boolean AllowPublish
-        byte[] Charter
+        ByteArray Charter
         UUID InsigniaID
         Boolean MaturePublish
         Int MembershipFee
-        byte[] Name
+        ByteArray Name
         Boolean OpenEnrollment
         Boolean ShowInList
     }
@@ -28,15 +28,15 @@ class CreateGroupRequest : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.GroupData_Field.Name.length + 1 + 2 + this.GroupData_Field.Charter.length + 1 + 16 + 4 + 1 + 1 + 1 + 36
+    fun CalcPayloadSize(): Int {
+        return this.GroupData_Field.Name.size + 1 + 2 + this.GroupData_Field.Charter.size + 1 + 16 + 4 + 1 + 1 + 1 + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleCreateGroupRequest(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 83)
@@ -52,7 +52,7 @@ class CreateGroupRequest : SLMessage {
         packBoolean(byteBuffer, this.GroupData_Field.MaturePublish)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.GroupData_Field.Name = unpackVariable(byteBuffer, 1)

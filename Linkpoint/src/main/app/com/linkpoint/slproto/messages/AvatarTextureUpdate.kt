@@ -23,7 +23,7 @@ class AvatarTextureUpdate : SLMessage {
 
     class WearableData {
         UUID CacheID
-        byte[] HostName
+        ByteArray HostName
         Int TextureIndex
     }
 
@@ -32,7 +32,7 @@ class AvatarTextureUpdate : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 22
         Iterator<T> it = this.WearableData_Fields.iterator()
         while (true) {
@@ -40,37 +40,37 @@ class AvatarTextureUpdate : SLMessage {
             if (!it.hasNext()) {
                 return i2 + 1 + (this.TextureData_Fields.size() * 16)
             }
-            i = ((WearableData) it.next()).HostName.length + 18 + i2
+            i = ((it as WearableData).next()).HostName.size + 18 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAvatarTextureUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 4)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packBoolean(byteBuffer, this.AgentData_Field.TexturesChanged)
-        byteBuffer.put((byte) this.WearableData_Fields.size())
+        byteBuffer.put((this as byte).WearableData_Fields.size())
         for (WearableData wearableData : this.WearableData_Fields) {
             packUUID(byteBuffer, wearableData.CacheID)
-            packByte(byteBuffer, (byte) wearableData.TextureIndex)
+            packByte(byteBuffer, (wearableData as byte).TextureIndex)
             packVariable(byteBuffer, wearableData.HostName, 1)
         }
-        byteBuffer.put((byte) this.TextureData_Fields.size())
+        byteBuffer.put((this as byte).TextureData_Fields.size())
         for (TextureData textureData : this.TextureData_Fields) {
             packUUID(byteBuffer, textureData.TextureID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.TexturesChanged = unpackBoolean(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             WearableData wearableData = WearableData()
             wearableData.CacheID = unpackUUID(byteBuffer)
             wearableData.TextureIndex = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
@@ -78,7 +78,7 @@ class AvatarTextureUpdate : SLMessage {
             this.WearableData_Fields.add(wearableData)
         }
         byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b2; i2++) {
+        for (i2 in 0 until b2) {
             TextureData textureData = TextureData()
             textureData.TextureID = unpackUUID(byteBuffer)
             this.TextureData_Fields.add(textureData)

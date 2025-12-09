@@ -26,58 +26,58 @@ class UserMainProfileTab_ViewBinding : Unbinder {
     @UiThread
     UserMainProfileTab_ViewBinding(UserMainProfileTab userMainProfileTab, View view) {
         this.target = userMainProfileTab
-        userMainProfileTab.textProfilePrimaryName = (TextView) Utils.findRequiredViewAsType(view, R.id.text_profile_primary_name, "field 'textProfilePrimaryName'", TextView.class)
+        userMainProfileTab.textProfilePrimaryName = (Utils as TextView).findRequiredViewAsType(view, R.id.text_profile_primary_name, "field 'textProfilePrimaryName'", TextView.class)
         userMainProfileTab.userProfileNotesCaption = Utils.findRequiredView(view, R.id.user_profile_notes_caption, "field 'userProfileNotesCaption'")
-        userMainProfileTab.textProfileOnline = (TextView) Utils.findRequiredViewAsType(view, R.id.text_profile_online, "field 'textProfileOnline'", TextView.class)
-        userMainProfileTab.userProfilePartnerPic = (ChatterPicView) Utils.findRequiredViewAsType(view, R.id.user_profile_partner_pic, "field 'userProfilePartnerPic'", ChatterPicView.class)
-        userMainProfileTab.userProfilePartnerName = (TextView) Utils.findRequiredViewAsType(view, R.id.user_profile_partner_name, "field 'userProfilePartnerName'", TextView.class)
+        userMainProfileTab.textProfileOnline = (Utils as TextView).findRequiredViewAsType(view, R.id.text_profile_online, "field 'textProfileOnline'", TextView.class)
+        userMainProfileTab.userProfilePartnerPic = (Utils as ChatterPicView).findRequiredViewAsType(view, R.id.user_profile_partner_pic, "field 'userProfilePartnerPic'", ChatterPicView.class)
+        userMainProfileTab.userProfilePartnerName = (Utils as TextView).findRequiredViewAsType(view, R.id.user_profile_partner_name, "field 'userProfilePartnerName'", TextView.class)
         userMainProfileTab.userWebProfileCardView = Utils.findRequiredView(view, R.id.user_web_profile_card_view, "field 'userWebProfileCardView'")
-        userMainProfileTab.swipeRefreshLayout = (SwipeRefreshLayout) Utils.findRequiredViewAsType(view, R.id.swipe_refresh_layout, "field 'swipeRefreshLayout'", SwipeRefreshLayout.class)
-        userMainProfileTab.textProfileSecondaryName = (TextView) Utils.findRequiredViewAsType(view, R.id.text_profile_secondary_name, "field 'textProfileSecondaryName'", TextView.class)
+        userMainProfileTab.swipeRefreshLayout = (Utils as SwipeRefreshLayout).findRequiredViewAsType(view, R.id.swipe_refresh_layout, "field 'swipeRefreshLayout'", SwipeRefreshLayout.class)
+        userMainProfileTab.textProfileSecondaryName = (Utils as TextView).findRequiredViewAsType(view, R.id.text_profile_secondary_name, "field 'textProfileSecondaryName'", TextView.class)
         View findRequiredView = Utils.findRequiredView(view, R.id.change_pic_button, "field 'changePicButton' and method 'onChangePicClicked'")
-        userMainProfileTab.changePicButton = (Button) Utils.castView(findRequiredView, R.id.change_pic_button, "field 'changePicButton'", Button.class)
+        userMainProfileTab.changePicButton = (Utils as Button).castView(findRequiredView, R.id.change_pic_button, "field 'changePicButton'", Button.class)
         this.view2131755698 = findRequiredView
         findRequiredView.setOnClickListener(DebouncingOnClickListener() {
-            Unit doClick(View view) {
+            fun doClick(View view): Unit {
                 userMainProfileTab.onChangePicClicked(view)
             }
-        userMainProfileTab.userPicView = (ImageAssetView) Utils.findRequiredViewAsType(view, R.id.user_pic_view, "field 'userPicView'", ImageAssetView.class)
-        userMainProfileTab.userProfileAboutText = (TextView) Utils.findRequiredViewAsType(view, R.id.user_profile_about_text, "field 'userProfileAboutText'", TextView.class)
-        userMainProfileTab.textProfileAge = (TextView) Utils.findRequiredViewAsType(view, R.id.text_profile_age, "field 'textProfileAge'", TextView.class)
-        userMainProfileTab.loadingLayout = (LoadingLayout) Utils.findRequiredViewAsType(view, R.id.loading_layout, "field 'loadingLayout'", LoadingLayout.class)
-        userMainProfileTab.textProfileAgentKey = (TextView) Utils.findRequiredViewAsType(view, R.id.text_profile_agent_key, "field 'textProfileAgentKey'", TextView.class)
+        userMainProfileTab.userPicView = (Utils as ImageAssetView).findRequiredViewAsType(view, R.id.user_pic_view, "field 'userPicView'", ImageAssetView.class)
+        userMainProfileTab.userProfileAboutText = (Utils as TextView).findRequiredViewAsType(view, R.id.user_profile_about_text, "field 'userProfileAboutText'", TextView.class)
+        userMainProfileTab.textProfileAge = (Utils as TextView).findRequiredViewAsType(view, R.id.text_profile_age, "field 'textProfileAge'", TextView.class)
+        userMainProfileTab.loadingLayout = (Utils as LoadingLayout).findRequiredViewAsType(view, R.id.loading_layout, "field 'loadingLayout'", LoadingLayout.class)
+        userMainProfileTab.textProfileAgentKey = (Utils as TextView).findRequiredViewAsType(view, R.id.text_profile_agent_key, "field 'textProfileAgentKey'", TextView.class)
         View findRequiredView2 = Utils.findRequiredView(view, R.id.about_edit_button, "field 'aboutEditButton' and method 'onAboutEditClicked'")
-        userMainProfileTab.aboutEditButton = (Button) Utils.castView(findRequiredView2, R.id.about_edit_button, "field 'aboutEditButton'", Button.class)
+        userMainProfileTab.aboutEditButton = (Utils as Button).castView(findRequiredView2, R.id.about_edit_button, "field 'aboutEditButton'", Button.class)
         this.view2131755706 = findRequiredView2
         findRequiredView2.setOnClickListener(DebouncingOnClickListener() {
-            Unit doClick(View view) {
+            fun doClick(View view): Unit {
                 userMainProfileTab.onAboutEditClicked(view)
             }
-        userMainProfileTab.userWebProfileLink = (TextView) Utils.findRequiredViewAsType(view, R.id.user_web_profile_link, "field 'userWebProfileLink'", TextView.class)
+        userMainProfileTab.userWebProfileLink = (Utils as TextView).findRequiredViewAsType(view, R.id.user_web_profile_link, "field 'userWebProfileLink'", TextView.class)
         userMainProfileTab.userPartnerCardView = Utils.findRequiredView(view, R.id.user_partner_card_view, "field 'userPartnerCardView'")
-        userMainProfileTab.textProfileNotesText = (TextView) Utils.findRequiredViewAsType(view, R.id.text_profile_notes_text, "field 'textProfileNotesText'", TextView.class)
+        userMainProfileTab.textProfileNotesText = (Utils as TextView).findRequiredViewAsType(view, R.id.text_profile_notes_text, "field 'textProfileNotesText'", TextView.class)
         View findRequiredView3 = Utils.findRequiredView(view, R.id.user_profile_view_partner_button, "method 'onViewProfileClicked'")
         this.view2131755715 = findRequiredView3
         findRequiredView3.setOnClickListener(DebouncingOnClickListener() {
-            Unit doClick(View view) {
+            fun doClick(View view): Unit {
                 userMainProfileTab.onViewProfileClicked(view)
             }
         View findRequiredView4 = Utils.findRequiredView(view, R.id.button_edit_notes, "method 'onEditNotesClicked'")
         this.view2131755724 = findRequiredView4
         findRequiredView4.setOnClickListener(DebouncingOnClickListener() {
-            Unit doClick(View view) {
+            fun doClick(View view): Unit {
                 userMainProfileTab.onEditNotesClicked(view)
             }
         View findRequiredView5 = Utils.findRequiredView(view, R.id.button_copy_agent_key, "method 'onCopyAgentKeyClicked'")
         this.view2131755720 = findRequiredView5
         findRequiredView5.setOnClickListener(DebouncingOnClickListener() {
-            Unit doClick(View view) {
+            fun doClick(View view): Unit {
                 userMainProfileTab.onCopyAgentKeyClicked(view)
             }
     }
 
     @CallSuper
-    Unit unbind() {
+    fun unbind(): Unit {
         UserMainProfileTab userMainProfileTab = this.target
         if (userMainProfileTab == null) {
             throw IllegalStateException("Bindings already cleared.")

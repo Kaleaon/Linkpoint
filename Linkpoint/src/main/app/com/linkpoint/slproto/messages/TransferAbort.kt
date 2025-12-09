@@ -16,15 +16,15 @@ class TransferAbort : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 24
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleTransferAbort(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -101)
@@ -32,7 +32,7 @@ class TransferAbort : SLMessage {
         packInt(byteBuffer, this.TransferInfo_Field.ChannelType)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.TransferInfo_Field.TransferID = unpackUUID(byteBuffer)
         this.TransferInfo_Field.ChannelType = unpackInt(byteBuffer)
     }

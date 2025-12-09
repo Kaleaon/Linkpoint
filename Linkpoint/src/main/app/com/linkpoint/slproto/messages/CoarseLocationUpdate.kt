@@ -31,34 +31,34 @@ class CoarseLocationUpdate : SLMessage {
         this.Index_Field = Index()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.Location_Fields.size() * 3) + 3 + 4 + 1 + (this.AgentData_Fields.size() * 16)
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleCoarseLocationUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put((byte) -1)
         byteBuffer.put((byte) 6)
-        byteBuffer.put((byte) this.Location_Fields.size())
+        byteBuffer.put((this as byte).Location_Fields.size())
         for (Location location : this.Location_Fields) {
-            packByte(byteBuffer, (byte) location.X)
-            packByte(byteBuffer, (byte) location.Y)
-            packByte(byteBuffer, (byte) location.Z)
+            packByte(byteBuffer, (location as byte).X)
+            packByte(byteBuffer, (location as byte).Y)
+            packByte(byteBuffer, (location as byte).Z)
         }
-        packShort(byteBuffer, (short) this.Index_Field.You)
-        packShort(byteBuffer, (short) this.Index_Field.Prey)
-        byteBuffer.put((byte) this.AgentData_Fields.size())
+        packShort(byteBuffer, (this as short).Index_Field.You)
+        packShort(byteBuffer, (this as short).Index_Field.Prey)
+        byteBuffer.put((this as byte).AgentData_Fields.size())
         for (AgentData agentData : this.AgentData_Fields) {
             packUUID(byteBuffer, agentData.AgentID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             Location location = Location()
             location.X = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             location.Y = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
@@ -68,7 +68,7 @@ class CoarseLocationUpdate : SLMessage {
         this.Index_Field.You = unpackShort(byteBuffer)
         this.Index_Field.Prey = unpackShort(byteBuffer)
         byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b2; i2++) {
+        for (i2 in 0 until b2) {
             AgentData agentData = AgentData()
             agentData.AgentID = unpackUUID(byteBuffer)
             this.AgentData_Fields.add(agentData)

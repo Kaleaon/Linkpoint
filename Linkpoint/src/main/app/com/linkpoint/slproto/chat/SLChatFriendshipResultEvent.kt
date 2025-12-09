@@ -30,7 +30,7 @@ class SLChatFriendshipResultEvent : SLChatEvent {
     }
 
     /* access modifiers changed from: protected */
-    String getText(Context context, @NonNull UserManager userManager) {
+    fun getText(Context context, @NonNull UserManager userManager): String {
         return context.getString(this.accepted ? R.string.friendship_accepted : R.string.friendship_declined)
     }
 
@@ -39,11 +39,11 @@ class SLChatFriendshipResultEvent : SLChatEvent {
     }
 
     /* access modifiers changed from: protected */
-    Boolean isActionMessage(@NonNull UserManager userManager) {
+    fun isActionMessage(@NonNull UserManager userManager): Boolean {
         return true
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setAccepted(Boolean.valueOf(this.accepted))
     }

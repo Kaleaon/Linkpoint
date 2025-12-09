@@ -30,41 +30,41 @@ class RemoveInventoryObjects : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.FolderData_Fields.size() * 16) + 37 + 1 + (this.ItemData_Fields.size() * 16)
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRemoveInventoryObjects(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put(Ascii.FS)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        byteBuffer.put((Byte) this.FolderData_Fields.size())
+        byteBuffer.put((this as Byte).FolderData_Fields.size())
         for (FolderData folderData : this.FolderData_Fields) {
             packUUID(byteBuffer, folderData.FolderID)
         }
-        byteBuffer.put((Byte) this.ItemData_Fields.size())
+        byteBuffer.put((this as Byte).ItemData_Fields.size())
         for (ItemData itemData : this.ItemData_Fields) {
             packUUID(byteBuffer, itemData.ItemID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             FolderData folderData = FolderData()
             folderData.FolderID = unpackUUID(byteBuffer)
             this.FolderData_Fields.add(folderData)
         }
         Byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b2; i2++) {
+        for (i2 in 0 until b2) {
             ItemData itemData = ItemData()
             itemData.ItemID = unpackUUID(byteBuffer)
             this.ItemData_Fields.add(itemData)

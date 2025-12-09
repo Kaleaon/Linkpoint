@@ -8,7 +8,7 @@ class AssetUploadRequest : SLMessage {
     AssetBlock AssetBlock_Field = AssetBlock()
 
     class AssetBlock {
-        byte[] AssetData
+        ByteArray AssetData
         Boolean StoreLocal
         Boolean Tempfile
         UUID TransactionID
@@ -19,26 +19,26 @@ class AssetUploadRequest : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.AssetBlock_Field.AssetData.length + 21 + 4
+    fun CalcPayloadSize(): Int {
+        return this.AssetBlock_Field.AssetData.size + 21 + 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAssetUploadRequest(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 77)
         packUUID(byteBuffer, this.AssetBlock_Field.TransactionID)
-        packByte(byteBuffer, (byte) this.AssetBlock_Field.Type)
+        packByte(byteBuffer, (this as byte).AssetBlock_Field.Type)
         packBoolean(byteBuffer, this.AssetBlock_Field.Tempfile)
         packBoolean(byteBuffer, this.AssetBlock_Field.StoreLocal)
         packVariable(byteBuffer, this.AssetBlock_Field.AssetData, 2)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AssetBlock_Field.TransactionID = unpackUUID(byteBuffer)
         this.AssetBlock_Field.Type = unpackByte(byteBuffer)
         this.AssetBlock_Field.Tempfile = unpackBoolean(byteBuffer)

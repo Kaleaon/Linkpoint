@@ -20,34 +20,34 @@ class TestMessage : SLMessage {
     TestMessage() {
         this.zeroCoded = true
         this.TestBlock1_Field = TestBlock1()
-        for (Int i = 0; i < 4; i++) {
+        for (i in 0 until 4) {
             this.NeighborBlock_Fields[i] = NeighborBlock()
         }
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 56
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleTestMessage(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 1)
         packInt(byteBuffer, this.TestBlock1_Field.Test1)
-        for (Int i = 0; i < 4; i++) {
+        for (i in 0 until 4) {
             packInt(byteBuffer, this.NeighborBlock_Fields[i].Test0)
             packInt(byteBuffer, this.NeighborBlock_Fields[i].Test1)
             packInt(byteBuffer, this.NeighborBlock_Fields[i].Test2)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.TestBlock1_Field.Test1 = unpackInt(byteBuffer)
-        for (Int i = 0; i < 4; i++) {
+        for (i in 0 until 4) {
             this.NeighborBlock_Fields[i].Test0 = unpackInt(byteBuffer)
             this.NeighborBlock_Fields[i].Test1 = unpackInt(byteBuffer)
             this.NeighborBlock_Fields[i].Test2 = unpackInt(byteBuffer)

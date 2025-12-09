@@ -9,14 +9,14 @@ import com.linkpoint.slproto.users.ChatterNameRetriever
     private /* synthetic */ Any f334$f0
 
     private /* synthetic */ Unit $m$0(ChatterNameRetriever chatterNameRetriever) {
-        ((UserMainProfileTab) this.f334$f0).m509lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserMainProfileTab_9585(chatterNameRetriever)
+        ((this as UserMainProfileTab).f334$f0).m509lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserMainProfileTab_9585(chatterNameRetriever)
     }
 
     /* synthetic */ $Lambda$wqoLfTfjESd1OUBLJEQMKRim4S0(Any obj) {
         this.f334$f0 = obj
     }
 
-    Unit onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
+    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever): Unit {
         $m$0(chatterNameRetriever)
     }
 }

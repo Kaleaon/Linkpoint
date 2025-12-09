@@ -65,7 +65,7 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
             return true
         }
 
-        Int clampViewPositionHorizontal(View view, Int i, Int i2) {
+        fun clampViewPositionHorizontal(View view, Int i, Int i2): Int {
             Int i3 = 0
             if (view.getTop() != this.mOriginalCapturedViewTop) {
                 return this.mOriginalCapturedViewLeft
@@ -78,7 +78,7 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
             return SwipeDismissAdvancedBehavior.clamp(width, i, i3 + i4)
         }
 
-        Int clampViewPositionVertical(View view, Int i, Int i2) {
+        fun clampViewPositionVertical(View view, Int i, Int i2): Int {
             Int i3 = 0
             if (view.getLeft() != this.mOriginalCapturedViewLeft) {
                 return this.mOriginalCapturedViewTop
@@ -91,32 +91,32 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
             return SwipeDismissAdvancedBehavior.clamp(height, i, i3 + i4)
         }
 
-        Int getViewHorizontalDragRange(View view) {
+        fun getViewHorizontalDragRange(View view): Int {
             if ((SwipeDismissAdvancedBehavior.this.mSwipeDirection & 3) != 0) {
                 return view.getWidth()
             }
             return 0
         }
 
-        Int getViewVerticalDragRange(View view) {
+        fun getViewVerticalDragRange(View view): Int {
             if ((SwipeDismissAdvancedBehavior.this.mSwipeDirection & 12) != 0) {
                 return view.getWidth()
             }
             return 0
         }
 
-        Unit onViewCaptured(View view, Int i) {
+        fun onViewCaptured(View view, Int i): Unit {
             this.mOriginalCapturedViewLeft = view.getLeft()
             this.mOriginalCapturedViewTop = view.getTop()
         }
 
-        Unit onViewDragStateChanged(Int i) {
+        fun onViewDragStateChanged(Int i): Unit {
             if (SwipeDismissAdvancedBehavior.this.mListener != null) {
                 SwipeDismissAdvancedBehavior.this.mListener.onDragStateChanged(i)
             }
         }
 
-        Unit onViewPositionChanged(View view, Int i, Int i2, Int i3, Int i4) {
+        fun onViewPositionChanged(View view, Int i, Int i2, Int i3, Int i4): Unit {
             Int i5 = 0
             Int abs = (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 3) != 0 ? Math.abs(i - this.mOriginalCapturedViewLeft) : 0
             if ((SwipeDismissAdvancedBehavior.this.mSwipeDirection & 12) != 0) {
@@ -129,7 +129,7 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
             }
         }
 
-        Unit onViewReleased(View view, Float f, Float f2) {
+        fun onViewReleased(View view, Float f, Float f2): Unit {
             Int width = view.getWidth()
             Int height = view.getHeight()
             Int left = view.getLeft()
@@ -160,7 +160,7 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
             }
         }
 
-        Boolean tryCaptureView(View view, Int i) {
+        fun tryCaptureView(View view, Int i): Boolean {
             return SwipeDismissAdvancedBehavior.this.canSwipeDismissView(view)
         }
     }
@@ -177,9 +177,9 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
     ViewDragHelper mViewDragHelper
 
     interface OnDismissListener {
-        Unit onDismiss(View view)
+        fun onDismiss(View view)
 
-        Unit onDragStateChanged(Int i)
+        fun onDragStateChanged(Int i)
     }
 
     private class SettleRunnable : Runnable {
@@ -191,7 +191,7 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
             this.mDismiss = z
         }
 
-        Unit run() {
+        fun run(): Unit {
             if (SwipeDismissAdvancedBehavior.this.mViewDragHelper != null && SwipeDismissAdvancedBehavior.this.mViewDragHelper.continueSettling(true)) {
                 ViewCompat.postOnAnimation(this.mView, this)
             } else if (this.mDismiss && SwipeDismissAdvancedBehavior.this.mListener != null) {
@@ -205,12 +205,12 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
     }
 
     /* access modifiers changed from: private */
-    Float clamp(Float f, Float f2, Float f3) {
+    fun clamp(Float f, Float f2, Float f3): Float {
         return Math.min(Math.max(f, f2), f3)
     }
 
     /* access modifiers changed from: private */
-    Int clamp(Int i, Int i2, Int i3) {
+    fun clamp(Int i, Int i2, Int i3): Int {
         return Math.min(Math.max(i, i2), i3)
     }
 
@@ -220,22 +220,22 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
         }
     }
 
-    Float fraction(Float f, Float f2, Float f3) {
+    fun fraction(Float f, Float f2, Float f3): Float {
         return (f3 - f) / (f2 - f)
     }
 
-    Boolean canSwipeDismissView(@NonNull View view) {
+    fun canSwipeDismissView(@NonNull View view): Boolean {
         return true
     }
 
-    Int getDragState() {
+    fun getDragState(): Int {
         if (this.mViewDragHelper != null) {
             return this.mViewDragHelper.getViewDragState()
         }
         return 0
     }
 
-    Boolean onInterceptTouchEvent(CoordinatorLayout coordinatorLayout, V v, MotionEvent motionEvent) {
+    fun onInterceptTouchEvent(CoordinatorLayout coordinatorLayout, V v, MotionEvent motionEvent): Boolean {
         switch (MotionEventCompat.getActionMasked(motionEvent)) {
             case 1:
             case 3:
@@ -255,7 +255,7 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
         return this.mViewDragHelper.shouldInterceptTouchEvent(motionEvent)
     }
 
-    Boolean onTouchEvent(CoordinatorLayout coordinatorLayout, V v, MotionEvent motionEvent) {
+    fun onTouchEvent(CoordinatorLayout coordinatorLayout, V v, MotionEvent motionEvent): Boolean {
         if (this.mViewDragHelper == null) {
             return false
         }
@@ -263,28 +263,28 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
         return true
     }
 
-    Unit setDragDismissDistance(Float f) {
+    fun setDragDismissDistance(Float f): Unit {
         this.mDragDismissThreshold = clamp(0.0f, f, 1.0f)
     }
 
-    Unit setEndAlphaSwipeDistance(Float f) {
+    fun setEndAlphaSwipeDistance(Float f): Unit {
         this.mAlphaEndSwipeDistance = clamp(0.0f, f, 1.0f)
     }
 
-    Unit setListener(OnDismissListener onDismissListener) {
+    fun setListener(OnDismissListener onDismissListener): Unit {
         this.mListener = onDismissListener
     }
 
-    Unit setSensitivity(Float f) {
+    fun setSensitivity(Float f): Unit {
         this.mSensitivity = f
         this.mSensitivitySet = true
     }
 
-    Unit setStartAlphaSwipeDistance(Float f) {
+    fun setStartAlphaSwipeDistance(Float f): Unit {
         this.mAlphaStartSwipeDistance = clamp(0.0f, f, 1.0f)
     }
 
-    Unit setSwipeDirection(Int i) {
+    fun setSwipeDirection(Int i): Unit {
         this.mSwipeDirection = i
     }
 }

@@ -31,7 +31,7 @@ class SLChatTextBoxDialog : SLChatDialogEvent {
         this.textBoxButtonIndex = i
     }
 
-    Unit bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, @Nullable ChatEventTimestampUpdater chatEventTimestampUpdater) {
+    fun bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, @Nullable ChatEventTimestampUpdater chatEventTimestampUpdater): Unit {
         super.bindViewHolder(chatEventViewHolder, userManager, chatEventTimestampUpdater)
         if (chatEventViewHolder instanceof ChatTextBoxViewHolder) {
             ChatTextBoxViewHolder chatTextBoxViewHolder = (ChatTextBoxViewHolder) chatEventViewHolder
@@ -61,7 +61,7 @@ class SLChatTextBoxDialog : SLChatDialogEvent {
         return SLChatEvent.ChatMessageViewType.VIEW_TYPE_TEXTBOX
     }
 
-    Boolean isObjectPopup() {
+    fun isObjectPopup(): Boolean {
         return true
     }
 
@@ -82,13 +82,13 @@ class SLChatTextBoxDialog : SLChatDialogEvent {
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setTextBoxButtonIndex(Integer.valueOf(this.textBoxButtonIndex))
         chatMessage.setDialogSelectedOption(this.enteredValue)
     }
 
-    Unit showDialog(Context context, UserManager userManager) {
+    fun showDialog(Context context, UserManager userManager): Unit {
         TextFieldDialogBuilder(context).setTitle(this.text).setOnTextEnteredListener(TextFieldDialogBuilder.OnTextEnteredListener(this, userManager) {
 
             /* renamed from: -$f0 */

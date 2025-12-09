@@ -11,7 +11,7 @@ class PrimDrawParams {
         this.textures = sLTextureEntry
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -31,15 +31,15 @@ class PrimDrawParams {
         return this.textures == null || this.textures.equals(primDrawParams.textures)
     }
 
-    SLTextureEntry getTextures() {
+    fun getTextures(): SLTextureEntry {
         return this.textures
     }
 
-    PrimVolumeParams getVolumeParams() {
+    fun getVolumeParams(): PrimVolumeParams {
         return this.volumeParams
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         Int i = 0
         if (this.volumeParams != null) {
             i = this.volumeParams.hashCode() + 0

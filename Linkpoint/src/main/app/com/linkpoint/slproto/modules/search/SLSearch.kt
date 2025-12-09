@@ -63,7 +63,7 @@ class SLSearch : SLModule {
     /* access modifiers changed from: private */
     AtomicReference<SearchGridQuery> currentSearchQuery = AtomicReference<>((Any) null)
     private RequestHandler<UUID> parcelInfoRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        Unit onRequest(@NonNull UUID uuid) {
+        fun onRequest(@NonNull UUID uuid): Unit {
             Debug.Printf("ParcelInfo: Requesting for %s", uuid)
             ParcelInfoRequest parcelInfoRequest = ParcelInfoRequest()
             parcelInfoRequest.AgentData_Field.AgentID = SLSearch.this.circuitInfo.agentID
@@ -102,7 +102,7 @@ class SLSearch : SLModule {
             return iArr
         }
 
-        Unit onRequest(@NonNull SearchGridQuery searchGridQuery) {
+        fun onRequest(@NonNull SearchGridQuery searchGridQuery): Unit {
             SLSearch.this.currentSearchQuery.set(searchGridQuery)
             switch (m238getcomlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues()[searchGridQuery.searchType().ordinal()]) {
                 case 1:
@@ -134,7 +134,7 @@ class SLSearch : SLModule {
     }
 
     /* access modifiers changed from: private */
-    Unit SearchGroups(String str, UUID uuid) {
+    fun SearchGroups(String str, UUID uuid): Unit {
         DirFindQuery dirFindQuery = DirFindQuery()
         dirFindQuery.AgentData_Field.AgentID = this.circuitInfo.agentID
         dirFindQuery.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -147,7 +147,7 @@ class SLSearch : SLModule {
     }
 
     /* access modifiers changed from: private */
-    Unit SearchPeople(String str, UUID uuid) {
+    fun SearchPeople(String str, UUID uuid): Unit {
         DirFindQuery dirFindQuery = DirFindQuery()
         dirFindQuery.AgentData_Field.AgentID = this.circuitInfo.agentID
         dirFindQuery.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -160,7 +160,7 @@ class SLSearch : SLModule {
     }
 
     /* access modifiers changed from: private */
-    Unit SearchPlaces(String str, UUID uuid) {
+    fun SearchPlaces(String str, UUID uuid): Unit {
         DirPlacesQuery dirPlacesQuery = DirPlacesQuery()
         dirPlacesQuery.AgentData_Field.AgentID = this.circuitInfo.agentID
         dirPlacesQuery.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -181,7 +181,7 @@ class SLSearch : SLModule {
     }
 
     @SLMessageHandler
-    Unit DirGroupsReply(DirGroupsReply dirGroupsReply) {
+    fun DirGroupsReply(DirGroupsReply dirGroupsReply): Unit {
         UUID uuid = dirGroupsReply.QueryData_Field.QueryID
         SearchGridQuery searchGridQuery = this.currentSearchQuery.get()
         if (Objects.equal(searchGridQuery.searchUUID(), uuid) && this.userManager != null && this.searchResultHandler != null) {
@@ -197,7 +197,7 @@ class SLSearch : SLModule {
     }
 
     @SLMessageHandler
-    Unit DirPeopleReply(DirPeopleReply dirPeopleReply) {
+    fun DirPeopleReply(DirPeopleReply dirPeopleReply): Unit {
         SearchGridQuery searchGridQuery = this.currentSearchQuery.get()
         UUID uuid = dirPeopleReply.QueryData_Field.QueryID
         if (Objects.equal(searchGridQuery.searchUUID(), uuid) && this.userManager != null && this.searchResultHandler != null) {
@@ -214,7 +214,7 @@ class SLSearch : SLModule {
     }
 
     @SLMessageHandler
-    Unit DirPlacesReply(DirPlacesReply dirPlacesReply) {
+    fun DirPlacesReply(DirPlacesReply dirPlacesReply): Unit {
         SearchGridQuery searchGridQuery = this.currentSearchQuery.get()
         for (DirPlacesReply.QueryData queryData : dirPlacesReply.QueryData_Fields) {
             UUID uuid = queryData.QueryID
@@ -231,7 +231,7 @@ class SLSearch : SLModule {
         }
     }
 
-    Unit HandleCloseCircuit() {
+    fun HandleCloseCircuit(): Unit {
         if (this.userManager != null) {
             this.userManager.getSearchManager().searchResults().detachRequestHandler(this.searchRequestHandler)
             this.userManager.parcelInfoData().getRequestSource().detachRequestHandler(this.parcelInfoRequestHandler)
@@ -240,7 +240,7 @@ class SLSearch : SLModule {
     }
 
     @SLMessageHandler
-    Unit ParcelInfoReply(ParcelInfoReply parcelInfoReply) {
+    fun ParcelInfoReply(ParcelInfoReply parcelInfoReply): Unit {
         Debug.Printf("ParcelInfo: Got reply for %s", parcelInfoReply.Data_Field.ParcelID)
         if (this.parcelInfoResultHandler != null) {
             this.parcelInfoResultHandler.onResultData(parcelInfoReply.Data_Field.ParcelID, parcelInfoReply)

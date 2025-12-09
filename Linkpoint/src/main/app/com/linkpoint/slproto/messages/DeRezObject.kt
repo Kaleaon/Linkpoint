@@ -35,33 +35,33 @@ class DeRezObject : SLMessage {
         this.AgentBlock_Field = AgentBlock()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.ObjectData_Fields.size() * 4) + 88
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleDeRezObject(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 35)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packUUID(byteBuffer, this.AgentBlock_Field.GroupID)
-        packByte(byteBuffer, (byte) this.AgentBlock_Field.Destination)
+        packByte(byteBuffer, (this as byte).AgentBlock_Field.Destination)
         packUUID(byteBuffer, this.AgentBlock_Field.DestinationID)
         packUUID(byteBuffer, this.AgentBlock_Field.TransactionID)
-        packByte(byteBuffer, (byte) this.AgentBlock_Field.PacketCount)
-        packByte(byteBuffer, (byte) this.AgentBlock_Field.PacketNumber)
-        byteBuffer.put((byte) this.ObjectData_Fields.size())
+        packByte(byteBuffer, (this as byte).AgentBlock_Field.PacketCount)
+        packByte(byteBuffer, (this as byte).AgentBlock_Field.PacketNumber)
+        byteBuffer.put((this as byte).ObjectData_Fields.size())
         for (ObjectData objectData : this.ObjectData_Fields) {
             packInt(byteBuffer, objectData.ObjectLocalID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentBlock_Field.GroupID = unpackUUID(byteBuffer)
@@ -71,7 +71,7 @@ class DeRezObject : SLMessage {
         this.AgentBlock_Field.PacketCount = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.AgentBlock_Field.PacketNumber = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             ObjectData objectData = ObjectData()
             objectData.ObjectLocalID = unpackInt(byteBuffer)
             this.ObjectData_Fields.add(objectData)

@@ -120,14 +120,14 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$MA84F
             this.cardSelectedColor = typedValue.data
         }
 
-        Int getItemCount() {
+        fun getItemCount(): Int {
             if (this.data != null) {
                 return this.data.size()
             }
             return 0
         }
 
-        Unit onBindViewHolder(GroupMemberViewHolder groupMemberViewHolder, Int i) {
+        fun onBindViewHolder(GroupMemberViewHolder groupMemberViewHolder, Int i): Unit {
             Boolean z = false
             if (this.data != null && (!this.data.isClosed()) && i >= 0 && i < this.data.size()) {
                 GroupMember groupMember = this.data.get(i)
@@ -138,21 +138,21 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$MA84F
             }
         }
 
-        GroupMemberViewHolder onCreateViewHolder(ViewGroup viewGroup, Int i) {
+        fun onCreateViewHolder(ViewGroup viewGroup, Int i): GroupMemberViewHolder {
             return GroupMemberViewHolder(this.layoutInflater.inflate(R.layout.group_member_list_item, viewGroup, false), GroupMembersProfileTab.this.userManager.getUserID(), this.cardSelectedColor)
         }
 
-        Unit onViewRecycled(GroupMemberViewHolder groupMemberViewHolder) {
+        fun onViewRecycled(GroupMemberViewHolder groupMemberViewHolder): Unit {
             groupMemberViewHolder.recycle()
         }
 
-        Unit setData(LazyList<GroupMember> lazyList) {
+        fun setData(LazyList<GroupMember> lazyList): Unit {
             this.data = lazyList
             this.selectedPosition = -1
             notifyDataSetChanged()
         }
 
-        Unit setSelectedPosition(Int i) {
+        fun setSelectedPosition(Int i): Unit {
             if (i != this.selectedPosition) {
                 Int i2 = this.selectedPosition
                 this.selectedPosition = i
@@ -206,7 +206,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$MA84F
         }
 
         /* access modifiers changed from: package-private */
-        Unit bindToData(GroupMember groupMember, Boolean z) {
+        fun bindToData(GroupMember groupMember, Boolean z): Unit {
             Int i = 0
             String str = null
             ChatterID.ChatterIDUser userChatterID = groupMember != null ? ChatterID.getUserChatterID(this.agentUUID, groupMember.getUserID()) : null
@@ -247,14 +247,14 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$MA84F
             button.setVisibility(i)
         }
 
-        Unit onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever2) {
+        fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever2): Unit {
             if (chatterNameRetriever2 != null) {
                 this.userNameTextView.setText(chatterNameRetriever2.getResolvedName())
                 this.userPicView.setChatterID(chatterNameRetriever2.chatterID, chatterNameRetriever2.getResolvedName())
             }
         }
 
-        Unit onClick(View view) {
+        fun onClick(View view): Unit {
             switch (view.getId()) {
                 case R.id.group_member_card_view:
                     if (GroupMembersProfileTab.this.getArguments().containsKey(GroupMembersProfileTab.ROLE_TO_ADD_KEY)) {
@@ -296,7 +296,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$MA84F
         }
 
         /* access modifiers changed from: package-private */
-        Unit recycle() {
+        fun recycle(): Unit {
             if (this.chatterNameRetriever != null) {
                 this.chatterNameRetriever.dispose()
                 this.chatterNameRetriever = null
@@ -307,7 +307,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$MA84F
     }
 
     /* access modifiers changed from: private */
-    Unit addGroupRoleMember(ChatterID.ChatterIDUser chatterIDUser) {
+    fun addGroupRoleMember(ChatterID.ChatterIDUser chatterIDUser): Unit {
         UUID uuid = UUIDPool.getUUID(getArguments().getString(ROLE_TO_ADD_KEY))
         if (uuid != null) {
             AlertDialog.Builder(getContext()).setTitle(R.toInt().string.add_role_member_confirm).setPositiveButton(R.toInt().string.yes_add_button, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, uuid, chatterIDUser) {
@@ -414,7 +414,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$MA84F
     }
 
     /* access modifiers changed from: private */
-    Unit ejectGroupMember(ChatterID.ChatterIDUser chatterIDUser) {
+    fun ejectGroupMember(ChatterID.ChatterIDUser chatterIDUser): Unit {
         AlertDialog.Builder(getContext()).setTitle(R.toInt().string.eject_member_confirm).setPositiveButton(R.toInt().string.yes_eject_button, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, chatterIDUser) {
 
             /* renamed from: -$f0 */
@@ -593,7 +593,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$MA84F
         }
     }
 
-    Bundle makeSelection(ChatterID chatterID, @Nullable UUID uuid) {
+    fun makeSelection(ChatterID chatterID, @Nullable UUID uuid): Bundle {
         Bundle makeSelection = ChatterFragment.makeSelection(chatterID)
         if (uuid != null) {
             makeSelection.putString(ROLE_TO_ADD_KEY, uuid.toString())
@@ -603,7 +603,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$MA84F
 
     /* access modifiers changed from: private */
     /* renamed from: onGroupMemberList */
-    Unit m473com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMembersProfileTabmthref0(UUID uuid) {
+    fun m473com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMembersProfileTabmthref0(UUID uuid): Unit {
         Debug.Printf("GroupMemberList: got dataset ID = %s", uuid)
         if (this.userManager != null && (this.chatterID instanceof ChatterID.ChatterIDGroup)) {
             this.groupMembers.subscribe(this.userManager.getChatterList().getGroupManager().getGroupMembersList(), GroupManager.GroupMembersQuery.create(((ChatterID.ChatterIDGroup) this.chatterID).getChatterUUID(), uuid))
@@ -636,7 +636,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$MA84F
         dialogInterface.dismiss()
     }
 
-    View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle): View {
         View inflate = layoutInflater.inflate(R.layout.group_profile_tab_members, viewGroup, false)
         ((LoadingLayout) inflate.findViewById(R.id.loading_layout)).setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout))
         this.adapter = GroupMemberListRecyclerAdapter(getContext())
@@ -646,7 +646,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$MA84F
         return inflate
     }
 
-    Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged(): Unit {
         if (this.adapter != null) {
             this.adapter.setData(this.groupMembers.getData())
             this.adapter.notifyDataSetChanged()
@@ -656,7 +656,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$MA84F
     }
 
     /* access modifiers changed from: protected */
-    Unit onShowUser(@Nullable ChatterID chatterID) {
+    fun onShowUser(@Nullable ChatterID chatterID): Unit {
         this.loadableMonitor.unsubscribeAll()
         if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDGroup)) {
             UUID chatterUUID = ((ChatterID.ChatterIDGroup) chatterID).getChatterUUID()

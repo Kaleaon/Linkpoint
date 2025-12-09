@@ -32,7 +32,7 @@ abstract class ChatterFragment : FragmentWithTitle : ChatterNameRetriever.OnChat
         return null
     }
 
-    Bundle makeSelection(ChatterID chatterID2) {
+    fun makeSelection(ChatterID chatterID2): Bundle {
         Bundle bundle = Bundle()
         bundle.putParcelable(CHATTER_ID_KEY, chatterID2)
         return bundle
@@ -56,11 +56,11 @@ abstract class ChatterFragment : FragmentWithTitle : ChatterNameRetriever.OnChat
     }
 
     /* access modifiers changed from: protected */
-    String decorateFragmentTitle(String str) {
+    fun decorateFragmentTitle(String str): String {
         return str
     }
 
-    Unit onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
+    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever): Unit {
         Any[] objArr = Any[1]
         objArr[0] = this.chatterID != null ? this.chatterID.toString() : "null"
         Debug.Printf("updateTitle: ChatterNameRetriever: retrieved for %s", objArr)
@@ -77,18 +77,18 @@ abstract class ChatterFragment : FragmentWithTitle : ChatterNameRetriever.OnChat
     /* access modifiers changed from: protected */
     abstract Unit onShowUser(@Nullable ChatterID chatterID2)
 
-    Unit onStart() {
+    fun onStart(): Unit {
         super.onStart()
         setNewUser((ChatterID) getArguments().getParcelable(CHATTER_ID_KEY))
     }
 
-    Unit onStop() {
+    fun onStop(): Unit {
         setNewUser((ChatterID) null)
         super.onStop()
     }
 
     /* access modifiers changed from: package-private */
-    Unit setNewUser(@Nullable ChatterID chatterID2) {
+    fun setNewUser(@Nullable ChatterID chatterID2): Unit {
         UserManager userManager2 = null
         this.chatterID = chatterID2
         if (chatterID2 != null) {
@@ -106,7 +106,7 @@ abstract class ChatterFragment : FragmentWithTitle : ChatterNameRetriever.OnChat
     }
 
     /* access modifiers changed from: protected */
-    Unit setShowChatterTitle(Boolean z) {
+    fun setShowChatterTitle(Boolean z): Unit {
         this.showChatterTitle = z
     }
 }

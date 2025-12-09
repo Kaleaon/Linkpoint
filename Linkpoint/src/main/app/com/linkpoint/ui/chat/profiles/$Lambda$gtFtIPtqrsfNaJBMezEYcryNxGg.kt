@@ -10,14 +10,14 @@ import com.linkpoint.slproto.messages.AvatarNotesReply
     private /* synthetic */ Any f282$f0
 
     private /* synthetic */ Unit $m$0(Any obj) {
-        ((UserNotesEditFragment) this.f282$f0).m510com_lumiyaviewer_lumiya_ui_chat_profiles_UserNotesEditFragmentmthref0((AvatarNotesReply) obj)
+        ((this as UserNotesEditFragment).f282$f0).m510com_lumiyaviewer_lumiya_ui_chat_profiles_UserNotesEditFragmentmthref0((AvatarNotesReply) obj)
     }
 
     /* synthetic */ $Lambda$gtFtIPtqrsfNaJBMezEYcryNxGg(Any obj) {
         this.f282$f0 = obj
     }
 
-    Unit onData(Any obj) {
+    fun onData(Any obj): Unit {
         $m$0(obj)
     }
 }

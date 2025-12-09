@@ -30,15 +30,15 @@ class RezSingleAttachmentFromInv : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.ObjectData_Field.Name.length + 50 + 1 + this.ObjectData_Field.Description.length + 36
+    fun CalcPayloadSize(): Int {
+        return this.ObjectData_Field.Name.size + 50 + 1 + this.ObjectData_Field.Description.size + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRezSingleAttachmentFromInv(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -117)
@@ -46,7 +46,7 @@ class RezSingleAttachmentFromInv : SLMessage {
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packUUID(byteBuffer, this.ObjectData_Field.ItemID)
         packUUID(byteBuffer, this.ObjectData_Field.OwnerID)
-        packByte(byteBuffer, (Byte) this.ObjectData_Field.AttachmentPt)
+        packByte(byteBuffer, (this as Byte).ObjectData_Field.AttachmentPt)
         packInt(byteBuffer, this.ObjectData_Field.ItemFlags)
         packInt(byteBuffer, this.ObjectData_Field.GroupMask)
         packInt(byteBuffer, this.ObjectData_Field.EveryoneMask)
@@ -55,7 +55,7 @@ class RezSingleAttachmentFromInv : SLMessage {
         packVariable(byteBuffer, this.ObjectData_Field.Description, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ObjectData_Field.ItemID = unpackUUID(byteBuffer)

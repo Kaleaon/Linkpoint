@@ -1,31 +1,23 @@
 package com.linkpoint.slproto.avatar
 
 import java.util.Arrays
-import androidx.annotation.NonNull
 
-class SLAvatarParamColor {
-    @NonNull
-    ColorOperation colorOperation
-    @NonNull
-    private Int[] colorValues
-
-    enum ColorOperation {
+class SLAvatarParamColor(
+    val colorOperation: ColorOperation,
+    private val colorValues: IntArray
+) {
+    enum class ColorOperation {
         Default,
         Blend,
         Multiply
     }
 
-    SLAvatarParamColor(@NonNull ColorOperation colorOperation2, @NonNull Int[] iArr) {
-        this.colorOperation = colorOperation2
-        this.colorValues = iArr
-    }
-
-    Int colorAdd(Int i, Int i2) {
-        Int i3 = 255
-        Int i4 = (i & 255) + (i2 & 255)
-        Int i5 = ((i >> 8) & 255) + ((i2 >> 8) & 255)
-        Int i6 = ((i2 >> 16) & 255) + ((i >> 16) & 255)
-        Int i7 = ((i >> 24) & 255) + ((i2 >> 24) & 255)
+    fun colorAdd(i: Int, i2: Int): Int {
+        var i3 = 255
+        var i4 = (i and 255) + (i2 and 255)
+        var i5 = ((i shr 8) and 255) + ((i2 shr 8) and 255)
+        var i6 = ((i2 shr 16) and 255) + ((i shr 16) and 255)
+        val i7 = ((i shr 24) and 255) + ((i2 shr 24) and 255)
         if (i4 > 255) {
             i4 = 255
         }
@@ -38,16 +30,16 @@ class SLAvatarParamColor {
         if (i7 <= 255) {
             i3 = i7
         }
-        return (i3 << 24) | (i6 << 16) | (i5 << 8) | i4
+        return (i3 shl 24) or (i6 shl 16) or (i5 shl 8) or i4
     }
 
-    Int colorLerp(Int i, Int i2, float f) {
-        Int i3 = 0
-        float f2 = 1.0f - f
-        Int round = Math.round((((float) (i & 255)) * f2) + (((float) (i2 & 255)) * f))
-        Int round2 = Math.round((f2 * ((float) ((i >> 8) & 255))) + (f * ((float) ((i2 >> 8) & 255))))
-        Int round3 = Math.round((f2 * ((float) ((i >> 16) & 255))) + (f * ((float) ((i2 >> 16) & 255))))
-        Int round4 = Math.round((f2 * ((float) ((i >> 24) & 255))) + (f * ((float) ((i2 >> 24) & 255))))
+    fun colorLerp(i: Int, i2: Int, f: Float): Int {
+        var result3 = 0
+        val f2 = 1.0f - f
+        var round = Math.round(((i and 255).toFloat() * f2) + ((i2 and 255).toFloat() * f))
+        var round2 = Math.round((f2 * ((i shr 8) and 255).toFloat()) + (f * ((i2 shr 8) and 255).toFloat()))
+        var round3 = Math.round((f2 * ((i shr 16) and 255).toFloat()) + (f * ((i2 shr 16) and 255).toFloat()))
+        val round4 = Math.round((f2 * ((i shr 24) and 255).toFloat()) + (f * ((i2 shr 24) and 255).toFloat()))
         if (round < 0) {
             round = 0
         } else if (round > 255) {
@@ -64,17 +56,17 @@ class SLAvatarParamColor {
             round3 = 255
         }
         if (round4 >= 0) {
-            i3 = round4 > 255 ? 255 : round4
+            result3 = if (round4 > 255) 255 else round4
         }
-        return (i3 << 24) | (round3 << 16) | (round2 << 8) | round
+        return (result3 shl 24) or (round3 shl 16) or (round2 shl 8) or round
     }
 
-    Int colorMult(Int i, Int i2) {
-        Int i3 = 255
-        Int i4 = ((i & 255) * (i2 & 255)) / 255
-        Int i5 = (((i >> 8) & 255) * ((i2 >> 8) & 255)) / 255
-        Int i6 = (((i >> 16) & 255) * ((i2 >> 16) & 255)) / 255
-        Int i7 = (((i >> 24) & 255) * ((i2 >> 24) & 255)) / 255
+    fun colorMult(i: Int, i2: Int): Int {
+        var i3 = 255
+        var i4 = ((i and 255) * (i2 and 255)) / 255
+        var i5 = (((i shr 8) and 255) * ((i2 shr 8) and 255)) / 255
+        var i6 = (((i shr 16) and 255) * ((i2 shr 16) and 255)) / 255
+        val i7 = (((i shr 24) and 255) * ((i2 shr 24) and 255)) / 255
         if (i4 > 255) {
             i4 = 255
         }
@@ -87,41 +79,41 @@ class SLAvatarParamColor {
         if (i7 <= 255) {
             i3 = i7
         }
-        return (i3 << 24) | (i6 << 16) | (i5 << 8) | i4
+        return (i3 shl 24) or (i6 shl 16) or (i5 shl 8) or i4
     }
 
-    Boolean equals(Object obj) {
-        if (this == obj) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
             return true
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (other == null || javaClass != other.javaClass) {
             return false
         }
-        SLAvatarParamColor sLAvatarParamColor = (SLAvatarParamColor) obj
-        if (this.colorOperation == sLAvatarParamColor.colorOperation) {
-            return Arrays.equals(this.colorValues, sLAvatarParamColor.colorValues)
+        val sLAvatarParamColor = other as SLAvatarParamColor
+        if (colorOperation == sLAvatarParamColor.colorOperation) {
+            return Arrays.equals(colorValues, sLAvatarParamColor.colorValues)
         }
         return false
     }
 
-    Int getColor(float f) {
-        if (this.colorValues.length == 0) {
+    fun getColor(f: Float): Int {
+        if (colorValues.isEmpty()) {
             return 0
         }
-        if (this.colorValues.length == 1) {
-            return this.colorValues[0]
+        if (colorValues.size == 1) {
+            return colorValues[0]
         }
-        Int length = this.colorValues.length - 1
-        float f2 = ((float) length) * f
-        Int i = (Int) f2
-        Int i2 = i + 1
+        val length = colorValues.size - 1
+        val f2 = length.toFloat() * f
+        val i = f2.toInt()
+        val i2 = i + 1
         if (i >= length) {
-            return this.colorValues[length]
+            return colorValues[length]
         }
-        return colorLerp(this.colorValues[i], this.colorValues[i2], f2 - ((float) i))
+        return colorLerp(colorValues[i], colorValues[i2], f2 - i.toFloat())
     }
 
-    Int hashCode() {
-        return (this.colorOperation.hashCode() * 31) + Arrays.hashCode(this.colorValues)
+    override fun hashCode(): Int {
+        return (colorOperation.hashCode() * 31) + Arrays.hashCode(colorValues)
     }
 }

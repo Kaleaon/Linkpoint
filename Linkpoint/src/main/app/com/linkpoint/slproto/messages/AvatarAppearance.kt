@@ -19,7 +19,7 @@ class AvatarAppearance : SLMessage {
     }
 
     class ObjectData {
-        byte[] TextureEntry
+        ByteArray TextureEntry
     }
 
     class Sender {
@@ -37,45 +37,45 @@ class AvatarAppearance : SLMessage {
         this.ObjectData_Field = ObjectData()
     }
 
-    Int CalcPayloadSize() {
-        return this.ObjectData_Field.TextureEntry.length + 2 + 21 + 1 + (this.VisualParam_Fields.size() * 1) + 1 + (this.AppearanceData_Fields.size() * 9)
+    fun CalcPayloadSize(): Int {
+        return this.ObjectData_Field.TextureEntry.size + 2 + 21 + 1 + (this.VisualParam_Fields.size() * 1) + 1 + (this.AppearanceData_Fields.size() * 9)
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAvatarAppearance(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -98)
         packUUID(byteBuffer, this.Sender_Field.ID)
         packBoolean(byteBuffer, this.Sender_Field.IsTrial)
         packVariable(byteBuffer, this.ObjectData_Field.TextureEntry, 2)
-        byteBuffer.put((byte) this.VisualParam_Fields.size())
+        byteBuffer.put((this as byte).VisualParam_Fields.size())
         for (VisualParam visualParam : this.VisualParam_Fields) {
-            packByte(byteBuffer, (byte) visualParam.ParamValue)
+            packByte(byteBuffer, (visualParam as byte).ParamValue)
         }
-        byteBuffer.put((byte) this.AppearanceData_Fields.size())
+        byteBuffer.put((this as byte).AppearanceData_Fields.size())
         for (AppearanceData appearanceData : this.AppearanceData_Fields) {
-            packByte(byteBuffer, (byte) appearanceData.AppearanceVersion)
+            packByte(byteBuffer, (appearanceData as byte).AppearanceVersion)
             packInt(byteBuffer, appearanceData.CofVersion)
             packInt(byteBuffer, appearanceData.Flags)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.Sender_Field.ID = unpackUUID(byteBuffer)
         this.Sender_Field.IsTrial = unpackBoolean(byteBuffer)
         this.ObjectData_Field.TextureEntry = unpackVariable(byteBuffer, 2)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             VisualParam visualParam = VisualParam()
             visualParam.ParamValue = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             this.VisualParam_Fields.add(visualParam)
         }
         byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b2; i2++) {
+        for (i2 in 0 until b2) {
             AppearanceData appearanceData = AppearanceData()
             appearanceData.AppearanceVersion = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             appearanceData.CofVersion = unpackInt(byteBuffer)

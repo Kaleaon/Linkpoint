@@ -34,15 +34,15 @@ class ObjectDuplicateOnRay : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.ObjectData_Fields.size() * 4) + 101
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleObjectDuplicateOnRay(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 91)
@@ -57,13 +57,13 @@ class ObjectDuplicateOnRay : SLMessage {
         packBoolean(byteBuffer, this.AgentData_Field.CopyRotates)
         packUUID(byteBuffer, this.AgentData_Field.RayTargetID)
         packInt(byteBuffer, this.AgentData_Field.DuplicateFlags)
-        byteBuffer.put((Byte) this.ObjectData_Fields.size())
+        byteBuffer.put((this as Byte).ObjectData_Fields.size())
         for (ObjectData objectData : this.ObjectData_Fields) {
             packInt(byteBuffer, objectData.ObjectLocalID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
@@ -76,7 +76,7 @@ class ObjectDuplicateOnRay : SLMessage {
         this.AgentData_Field.RayTargetID = unpackUUID(byteBuffer)
         this.AgentData_Field.DuplicateFlags = unpackInt(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             ObjectData objectData = ObjectData()
             objectData.ObjectLocalID = unpackInt(byteBuffer)
             this.ObjectData_Fields.add(objectData)

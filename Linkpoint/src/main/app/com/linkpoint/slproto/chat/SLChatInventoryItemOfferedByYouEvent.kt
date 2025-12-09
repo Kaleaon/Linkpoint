@@ -19,7 +19,7 @@ class SLChatInventoryItemOfferedByYouEvent : SLChatEvent {
     }
 
     SLChatInventoryItemOfferedByYouEvent(@NonNull UUID uuid, String str) {
-        super((ChatMessageSource) ChatMessageSourceUnknown.getInstance(), uuid)
+        super((ChatMessageSourceUnknown as ChatMessageSource).getInstance(), uuid)
         this.itemName = str
     }
 
@@ -30,7 +30,7 @@ class SLChatInventoryItemOfferedByYouEvent : SLChatEvent {
     }
 
     /* access modifiers changed from: protected */
-    String getText(Context context, @NonNull UserManager userManager) {
+    fun getText(Context context, @NonNull UserManager userManager): String {
         return context.getString(R.string.chat_inventory_own_offer_format, Object[]{this.itemName})
     }
 
@@ -39,11 +39,11 @@ class SLChatInventoryItemOfferedByYouEvent : SLChatEvent {
     }
 
     /* access modifiers changed from: protected */
-    Boolean isActionMessage(@NonNull UserManager userManager) {
+    fun isActionMessage(@NonNull UserManager userManager): Boolean {
         return false
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setItemName(this.itemName)
     }

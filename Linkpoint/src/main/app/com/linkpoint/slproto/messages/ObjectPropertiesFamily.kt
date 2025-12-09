@@ -31,15 +31,15 @@ class ObjectPropertiesFamily : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.ObjectData_Field.Name.length + 102 + 1 + this.ObjectData_Field.Description.length + 2
+    fun CalcPayloadSize(): Int {
+        return this.ObjectData_Field.Name.size + 102 + 1 + this.ObjectData_Field.Description.size + 2
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleObjectPropertiesFamily(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) 10)
         packInt(byteBuffer, this.ObjectData_Field.RequestFlags)
@@ -52,7 +52,7 @@ class ObjectPropertiesFamily : SLMessage {
         packInt(byteBuffer, this.ObjectData_Field.EveryoneMask)
         packInt(byteBuffer, this.ObjectData_Field.NextOwnerMask)
         packInt(byteBuffer, this.ObjectData_Field.OwnershipCost)
-        packByte(byteBuffer, (Byte) this.ObjectData_Field.SaleType)
+        packByte(byteBuffer, (this as Byte).ObjectData_Field.SaleType)
         packInt(byteBuffer, this.ObjectData_Field.SalePrice)
         packInt(byteBuffer, this.ObjectData_Field.Category)
         packUUID(byteBuffer, this.ObjectData_Field.LastOwnerID)
@@ -60,7 +60,7 @@ class ObjectPropertiesFamily : SLMessage {
         packVariable(byteBuffer, this.ObjectData_Field.Description, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.ObjectData_Field.RequestFlags = unpackInt(byteBuffer)
         this.ObjectData_Field.ObjectID = unpackUUID(byteBuffer)
         this.ObjectData_Field.OwnerID = unpackUUID(byteBuffer)

@@ -414,14 +414,14 @@ class ModernSettingsActivity : AppCompatActivity {
     }
     
     @Override
-    Boolean onCreateOptionsMenu(Menu menu) {
+    fun onCreateOptionsMenu(Menu menu): Boolean {
         menu.add(0, 1, 0, "Save Settings").setIcon(android.R.drawable.ic_menu_save)
         menu.add(0, 2, 0, "Help").setIcon(android.R.drawable.ic_menu_help)
         return true
     }
     
     @Override
-    Boolean onOptionsItemSelected(MenuItem item) {
+    fun onOptionsItemSelected(MenuItem item): Boolean {
         switch (item.getItemId()) {
             case android.R.id.home:
                 finish()
@@ -457,17 +457,17 @@ class ModernSettingsActivity : AppCompatActivity {
                            if (isAvailable) {
                                emulatorManager.getStatus(EmulatorManager.EmulatorCallback() {
                                    @Override
-                                   Unit onSuccess(String message) {
+                                   fun onSuccess(String message): Unit {
                                        runOnUiThread(() -> showToast("Status checked - see notification"))
                                    }
                                    
                                    @Override
-                                   Unit onError(String error) {
+                                   fun onError(String error): Unit {
                                        runOnUiThread(() -> showToast("Status check failed"))
                                    }
                                    
                                    @Override
-                                   Unit onStatusUpdate(String status) {
+                                   fun onStatusUpdate(String status): Unit {
                                        // Update UI if needed
                                    }
                            } else {
@@ -494,7 +494,7 @@ class ModernSettingsActivity : AppCompatActivity {
                            if (isAvailable) {
                                emulatorManager.listAVDs(EmulatorManager.EmulatorCallback() {
                                    @Override
-                                   Unit onSuccess(String output) {
+                                   fun onSuccess(String output): Unit {
                                        runOnUiThread(() -> {
                                            String summary = EmulatorManager.formatAVDSummary(
                                                EmulatorManager.parseAVDList(output))
@@ -502,12 +502,12 @@ class ModernSettingsActivity : AppCompatActivity {
                                    }
                                    
                                    @Override
-                                   Unit onError(String error) {
+                                   fun onError(String error): Unit {
                                        runOnUiThread(() -> showToast("Failed to list AVDs"))
                                    }
                                    
                                    @Override
-                                   Unit onStatusUpdate(String status) {
+                                   fun onStatusUpdate(String status): Unit {
                                        // Update UI if needed
                                    }
                            } else {

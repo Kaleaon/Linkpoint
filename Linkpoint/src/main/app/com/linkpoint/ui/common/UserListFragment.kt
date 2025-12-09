@@ -33,7 +33,7 @@ abstract class UserListFragment : Fragment {
     private Unit updateListViews() {
         ListView listView
         View view = getView()
-        if (view != null && (listView = (ListView) view.findViewById(R.id.contactList)) != null) {
+        if (view != null && (listView = (view as ListView).findViewById(R.id.contactList)) != null) {
             listView.invalidateViews()
         }
     }
@@ -42,7 +42,7 @@ abstract class UserListFragment : Fragment {
     abstract ListAdapter createListAdapter(Context context, LoaderManager loaderManager, UserManager userManager2)
 
     /* access modifiers changed from: protected */
-    Unit handleUserDefaultAction(ChatterID chatterID) {
+    fun handleUserDefaultAction(ChatterID chatterID): Unit {
         if (this.userManager != null) {
             Bundle makeSelection = ChatFragment.makeSelection(chatterID)
             Bundle arguments = getArguments()
@@ -54,7 +54,7 @@ abstract class UserListFragment : Fragment {
     }
 
     /* access modifiers changed from: protected */
-    Boolean itemsMayBeDismissed() {
+    fun itemsMayBeDismissed(): Boolean {
         return false
     }
 
@@ -68,16 +68,16 @@ abstract class UserListFragment : Fragment {
         }
     }
 
-    Unit onActivityCreated(Bundle bundle) {
+    fun onActivityCreated(Bundle bundle): Unit {
         super.onActivityCreated(bundle)
         View view = getView()
         if (view != null) {
-            ListView listView = (ListView) view.findViewById(R.id.contactList)
+            ListView listView = (view as ListView).findViewById(R.id.contactList)
             listView.setOnItemClickListener($Lambda$1wR8wJi1eGgAIYEhals_u5j3nM(this))
             registerForContextMenu(listView)
             if (itemsMayBeDismissed()) {
                 SwipeDismissListViewTouchListener swipeDismissListViewTouchListener = SwipeDismissListViewTouchListener(listView, SwipeDismissListViewTouchListener.DismissCallbacks() {
-                    Boolean canDismiss(ListView listView, Int i) {
+                    fun canDismiss(ListView listView, Int i): Boolean {
                         ListAdapter adapter = listView.getAdapter()
                         if (adapter instanceof DismissableAdapter) {
                             return ((DismissableAdapter) adapter).canDismiss(i)
@@ -85,7 +85,7 @@ abstract class UserListFragment : Fragment {
                         return false
                     }
 
-                    Unit onDismiss(ListView listView, Int i) {
+                    fun onDismiss(ListView listView, Int i): Unit {
                         ListAdapter adapter = listView.getAdapter()
                         if (adapter instanceof DismissableAdapter) {
                             ((DismissableAdapter) adapter).onDismiss(i)
@@ -97,22 +97,22 @@ abstract class UserListFragment : Fragment {
         }
     }
 
-    Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle): Unit {
         super.onCreate(bundle)
         this.userManager = ActivityUtils.getUserManager(getArguments())
     }
 
-    View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle): View {
         return layoutInflater.inflate(R.layout.contacts_group, viewGroup, false)
     }
 
-    Unit onStart() {
+    fun onStart(): Unit {
         ListView listView
         ListAdapter listAdapter = null
         super.onStart()
         View view = getView()
         Debug.Printf("UserListFragment: onStart, rootView = %s", view)
-        if (view != null && (listView = (ListView) view.findViewById(R.id.contactList)) != null && listView.getAdapter() == null) {
+        if (view != null && (listView = (view as ListView).findViewById(R.id.contactList)) != null && listView.getAdapter() == null) {
             UserManager userManager2 = ActivityUtils.getUserManager(getArguments())
             if (userManager2 != null) {
                 listAdapter = createListAdapter(getActivity(), getLoaderManager(), userManager2)
@@ -121,11 +121,11 @@ abstract class UserListFragment : Fragment {
         }
     }
 
-    Unit onStop() {
+    fun onStop(): Unit {
         ListView listView
         View view = getView()
         Debug.Printf("UserListFragment: onStop, rootView = %s", view)
-        if (!(view == null || (listView = (ListView) view.findViewById(R.id.contactList)) == null)) {
+        if (!(view == null || (listView = (view as ListView).findViewById(R.id.contactList)) == null)) {
             ListAdapter adapter = listView.getAdapter()
             if (adapter instanceof Closeable) {
                 try {
@@ -140,7 +140,7 @@ abstract class UserListFragment : Fragment {
     }
 
     @EventHandler
-    Unit onUserInfoChanged(EventUserInfoChanged eventUserInfoChanged) {
+    fun onUserInfoChanged(EventUserInfoChanged eventUserInfoChanged): Unit {
         if (this.userManager != null && this.userManager.getUserID().equals(eventUserInfoChanged.agentUUID) && eventUserInfoChanged.isProfileChanged()) {
             updateListViews()
         }

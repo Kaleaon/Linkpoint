@@ -19,8 +19,8 @@ class AvatarPickerReply : SLMessage {
 
     class Data {
         UUID AvatarID
-        byte[] FirstName
-        byte[] LastName
+        ByteArray FirstName
+        ByteArray LastName
     }
 
     AvatarPickerReply() {
@@ -28,7 +28,7 @@ class AvatarPickerReply : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 37
         Iterator<T> it = this.Data_Fields.iterator()
         while (true) {
@@ -36,22 +36,22 @@ class AvatarPickerReply : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            Data data = (Data) it.next()
-            i = data.LastName.length + data.FirstName.length + 17 + 1 + i2
+            Data data = (it as Data).next()
+            i = data.LastName.size + data.FirstName.size + 17 + 1 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAvatarPickerReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put(Ascii.FS)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.QueryID)
-        byteBuffer.put((byte) this.Data_Fields.size())
+        byteBuffer.put((this as byte).Data_Fields.size())
         for (Data data : this.Data_Fields) {
             packUUID(byteBuffer, data.AvatarID)
             packVariable(byteBuffer, data.FirstName, 1)
@@ -59,11 +59,11 @@ class AvatarPickerReply : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.QueryID = unpackUUID(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             Data data = Data()
             data.AvatarID = unpackUUID(byteBuffer)
             data.FirstName = unpackVariable(byteBuffer, 1)

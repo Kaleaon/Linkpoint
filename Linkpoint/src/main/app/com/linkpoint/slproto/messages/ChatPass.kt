@@ -12,8 +12,8 @@ class ChatPass : SLMessage {
     class ChatData {
         Int Channel
         UUID ID
-        byte[] Message
-        byte[] Name
+        ByteArray Message
+        ByteArray Name
         UUID OwnerID
         LLVector3 Position
         float Radius
@@ -26,15 +26,15 @@ class ChatPass : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.ChatData_Field.Name.length + 49 + 1 + 1 + 4 + 1 + 2 + this.ChatData_Field.Message.length + 4
+    fun CalcPayloadSize(): Int {
+        return this.ChatData_Field.Name.size + 49 + 1 + 1 + 4 + 1 + 2 + this.ChatData_Field.Message.size + 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleChatPass(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -17)
@@ -43,14 +43,14 @@ class ChatPass : SLMessage {
         packUUID(byteBuffer, this.ChatData_Field.ID)
         packUUID(byteBuffer, this.ChatData_Field.OwnerID)
         packVariable(byteBuffer, this.ChatData_Field.Name, 1)
-        packByte(byteBuffer, (byte) this.ChatData_Field.SourceType)
-        packByte(byteBuffer, (byte) this.ChatData_Field.Type)
+        packByte(byteBuffer, (this as byte).ChatData_Field.SourceType)
+        packByte(byteBuffer, (this as byte).ChatData_Field.Type)
         packFloat(byteBuffer, this.ChatData_Field.Radius)
-        packByte(byteBuffer, (byte) this.ChatData_Field.SimAccess)
+        packByte(byteBuffer, (this as byte).ChatData_Field.SimAccess)
         packVariable(byteBuffer, this.ChatData_Field.Message, 2)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.ChatData_Field.Channel = unpackInt(byteBuffer)
         this.ChatData_Field.Position = unpackLLVector3(byteBuffer)
         this.ChatData_Field.ID = unpackUUID(byteBuffer)

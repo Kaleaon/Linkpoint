@@ -122,7 +122,7 @@ class PrimProfile {
             LLVector3 lLVector33 = LLVector3((Math.toFloat().cos(f5.toDouble())) * f10, (Math.toFloat().sin(f5.toDouble())) * f10, f4)
             if (this.Profile.size() > 0) {
                 LLVector3 lLVector34 = this.Profile.get(this.Profile.size() - 1)
-                for (Int i3 = 0; i3 < i2; i3++) {
+                for (i3 in 0 until i2) {
                     this.Profile.add(LLVector3.lerp(lLVector34, lLVector33, (1.0f / ((Float) (i2 + 1))) * ((Float) (i3 + 1))))
                 }
             }
@@ -137,7 +137,7 @@ class PrimProfile {
             LLVector3 lerp = LLVector3.lerp(lLVector3, lLVector35, f15)
             if (this.Profile.size() > 0) {
                 LLVector3 lLVector36 = this.Profile.get(this.Profile.size() - 1)
-                for (Int i4 = 0; i4 < i2; i4++) {
+                for (i4 in 0 until i2) {
                     this.Profile.add(LLVector3.lerp(lLVector36, lerp, (1.0f / ((Float) (i2 + 1))) * ((Float) (i4 + 1))))
                 }
             }
@@ -182,7 +182,7 @@ class PrimProfile {
         return ((f6 - f5) * f3 >= 0.99f || primProfileParams.Hollow > 0.0f) ? i3 : i3 + 1
     }
 
-    Int getNumPoints(PrimProfileParams primProfileParams, Boolean z, Float f, Int i, Boolean z2, Int i2) {
+    fun getNumPoints(PrimProfileParams primProfileParams, Boolean z, Float f, Int i, Boolean z2, Int i2): Int {
         if (f < 0.0f) {
             f = 0.0f
         }
@@ -223,7 +223,7 @@ class PrimProfile {
     }
 
     /* access modifiers changed from: protected */
-    Unit genNormals(PrimProfileParams primProfileParams) {
+    fun genNormals(PrimProfileParams primProfileParams): Unit {
         LLVector3 lLVector3
         Int size = this.Profile.size()
         Int i = this.TotalOut != 0 ? this.TotalOut : this.Total / 2
@@ -231,7 +231,7 @@ class PrimProfile {
         this.EdgeCenters = LLVector3[(size * 2)]
         this.Normals = LLVector2[size]
         Boolean z = primProfileParams.Hollow > 0.0f
-        for (Int i2 = 0; i2 < size; i2++) {
+        for (i2 in 0 until size) {
             this.Normals[i2] = LLVector2(this.Profile.get(i2).x, this.Profile.get(i2).y)
             if (z && i2 >= i) {
                 this.Normals[i2].mul(-1.0f)
@@ -247,7 +247,7 @@ class PrimProfile {
             this.Normals[i2].normVec()
         }
         Int i7 = this.Concave ? 2 : 1
-        for (Int i8 = 0; i8 < i7; i8++) {
+        for (i8 in 0 until i7) {
             Int i9 = 0
             while (true) {
                 Int i10 = i9
@@ -285,7 +285,7 @@ class PrimProfile {
         }
     }
 
-    Boolean generate(PrimProfileParams primProfileParams, Boolean z, Float f, Int i, Boolean z2, Int i2) {
+    fun generate(PrimProfileParams primProfileParams, Boolean z, Float f, Int i, Boolean z2, Int i2): Boolean {
         Float f2
         Byte b
         Float f3

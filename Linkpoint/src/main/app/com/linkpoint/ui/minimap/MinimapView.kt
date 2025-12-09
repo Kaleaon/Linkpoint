@@ -41,7 +41,7 @@ class MinimapView : View {
     private Float prevTouchY = 0.0f
     private ScaleGestureDetector scaleGestureDetector
     private ScaleGestureDetector.OnScaleGestureListener scaleGestureListener = ScaleGestureDetector.SimpleOnScaleGestureListener() {
-        Boolean onScale(ScaleGestureDetector scaleGestureDetector) {
+        fun onScale(ScaleGestureDetector scaleGestureDetector): Boolean {
             Float unused = MinimapView.this.actualZoomFactor = Math.min(Math.max(MinimapView.this.actualZoomFactor * scaleGestureDetector.getScaleFactor(), 1.0f), 5.0f)
             MinimapView.this.invalidate()
             return true
@@ -54,7 +54,7 @@ class MinimapView : View {
     private Paint userMarkPaint = Paint()
 
     interface OnUserClickListener {
-        Unit onUserClick(UUID uuid)
+        fun onUserClick(UUID uuid)
     }
 
     MinimapView(Context context) {
@@ -143,7 +143,7 @@ class MinimapView : View {
     }
 
     /* access modifiers changed from: protected */
-    Unit onDraw(Canvas canvas) {
+    fun onDraw(Canvas canvas): Unit {
         if (this.minimapBitmap != null) {
             Int width = getWidth()
             Int height = getHeight()
@@ -195,7 +195,7 @@ class MinimapView : View {
     }
 
     /* access modifiers changed from: protected */
-    Unit onMeasure(Int i, Int i2) {
+    fun onMeasure(Int i, Int i2): Unit {
         Display defaultDisplay = ((WindowManager) getContext().getSystemService("window")).getDefaultDisplay()
         if (Build.VERSION.SDK_INT >= 13) {
             defaultDisplay.getSize(this.displaySize)
@@ -212,7 +212,7 @@ class MinimapView : View {
         setMeasuredDimension(min, min)
     }
 
-    Boolean onTouchEvent(MotionEvent motionEvent) {
+    fun onTouchEvent(MotionEvent motionEvent): Boolean {
         Int i = 0
         this.scaleGestureDetector.onTouchEvent(motionEvent)
         switch (motionEvent.getActionMasked()) {
@@ -257,7 +257,7 @@ class MinimapView : View {
     }
 
     /* access modifiers changed from: package-private */
-    Unit setMinimapBitmap(@Nullable SLMinimap.MinimapBitmap minimapBitmap2) {
+    fun setMinimapBitmap(@Nullable SLMinimap.MinimapBitmap minimapBitmap2): Unit {
         if (minimapBitmap2 == null) {
             if (this.minimapBitmap != null) {
                 this.minimapBitmap.recycle()
@@ -272,12 +272,12 @@ class MinimapView : View {
     }
 
     /* access modifiers changed from: package-private */
-    Unit setOnUserClickListener(OnUserClickListener onUserClickListener2) {
+    fun setOnUserClickListener(OnUserClickListener onUserClickListener2): Unit {
         this.onUserClickListener = onUserClickListener2
     }
 
     /* access modifiers changed from: package-private */
-    Unit setSelectedUser(@Nullable UUID uuid) {
+    fun setSelectedUser(@Nullable UUID uuid): Unit {
         if (!Objects.equal(uuid, this.selectedUser)) {
             this.selectedUser = uuid
             invalidate()
@@ -285,7 +285,7 @@ class MinimapView : View {
     }
 
     /* access modifiers changed from: package-private */
-    Unit setUserLocations(@Nullable SLMinimap.UserLocations userLocations2) {
+    fun setUserLocations(@Nullable SLMinimap.UserLocations userLocations2): Unit {
         this.userLocations = userLocations2
         invalidate()
     }

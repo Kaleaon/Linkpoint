@@ -36,13 +36,13 @@ class ManageGridsActivity : ThemedActivity : GridEditDialog.OnGridEditResultList
             super(context, R.layout.grid_list_item, list)
         }
 
-        View getView(Int i, View view, ViewGroup viewGroup) {
+        fun getView(Int i, View view, ViewGroup viewGroup): View {
             LayoutInflater from = LayoutInflater.from(getContext())
             if (view == null) {
                 view = from.inflate(R.layout.grid_list_item, viewGroup, false)
             }
-            TextView textView = (TextView) view.findViewById(R.id.gridNameTextView)
-            TextView textView2 = (TextView) view.findViewById(R.id.gridURLTextView)
+            TextView textView = (view as TextView).findViewById(R.id.gridNameTextView)
+            TextView textView2 = (view as TextView).findViewById(R.id.gridURLTextView)
             Any item = getItem(i)
             if (item != null) {
                 GridList.GridInfo gridInfo = (GridList.GridInfo) item
@@ -54,7 +54,7 @@ class ManageGridsActivity : ThemedActivity : GridEditDialog.OnGridEditResultList
         }
 
         /* access modifiers changed from: package-private */
-        Unit updateList() {
+        fun updateList(): Unit {
             super.notifyDataSetChanged()
         }
     }
@@ -73,13 +73,13 @@ class ManageGridsActivity : ThemedActivity : GridEditDialog.OnGridEditResultList
     }
 
     @OnClick({2131755484})
-    Unit onAddNewGridButton() {
+    fun onAddNewGridButton(): Unit {
         GridEditDialog gridEditDialog = GridEditDialog(this, this.gridList, (GridList.GridInfo) null)
         gridEditDialog.setOnGridEditResultListener(this)
         gridEditDialog.show()
     }
 
-    Boolean onContextItemSelected(MenuItem menuItem) {
+    fun onContextItemSelected(MenuItem menuItem): Boolean {
         Any item = this.adapter.getItem(((AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo()).position)
         if (item != null) {
             GridList.GridInfo gridInfo = (GridList.GridInfo) item
@@ -186,7 +186,7 @@ Method generation error in method: com.linkpoint.ui.grids.-$Lambda$mB53054QosfH2
         return super.onContextItemSelected(menuItem)
     }
 
-    Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle): Unit {
         super.onCreate(bundle)
         setContentView(R.toInt().layout.manage_grids)
         ButterKnife.bind((Activity) this)
@@ -198,7 +198,7 @@ Method generation error in method: com.linkpoint.ui.grids.-$Lambda$mB53054QosfH2
         registerForContextMenu(this.gridListView)
     }
 
-    Unit onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+    fun onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo): Unit {
         super.onCreateContextMenu(contextMenu, view, contextMenuInfo)
         Any item = this.adapter.getItem(((AdapterView.AdapterContextMenuInfo) contextMenuInfo).position)
         if (item != null && !((GridList.GridInfo) item).isPredefinedGrid()) {
@@ -206,7 +206,7 @@ Method generation error in method: com.linkpoint.ui.grids.-$Lambda$mB53054QosfH2
         }
     }
 
-    Unit onGridAdded(GridList.GridInfo gridInfo, Boolean z) {
+    fun onGridAdded(GridList.GridInfo gridInfo, Boolean z): Unit {
         if (z) {
             this.gridList.addNewGrid(gridInfo)
         } else {
@@ -220,14 +220,14 @@ Method generation error in method: com.linkpoint.ui.grids.-$Lambda$mB53054QosfH2
         }
     }
 
-    Unit onGridDeleted(GridList.GridInfo gridInfo) {
+    fun onGridDeleted(GridList.GridInfo gridInfo): Unit {
         deleteGrid(gridInfo)
     }
 
-    Unit onGridEditCancelled() {
+    fun onGridEditCancelled(): Unit {
     }
 
-    Unit onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j): Unit {
         GridList.GridInfo gridInfo
         if (this.adapter != null && (gridInfo = (GridList.GridInfo) this.adapter.getItem(i)) != null && !gridInfo.isPredefinedGrid()) {
             GridEditDialog gridEditDialog = GridEditDialog(this, this.gridList, gridInfo)

@@ -71,7 +71,7 @@ class DrawableAttachments {
     }
 
     @SuppressLint({"NewApi"})
-    Boolean Draw(RenderContext renderContext, AvatarSkeleton avatarSkeleton, Boolean z) {
+    fun Draw(RenderContext renderContext, AvatarSkeleton avatarSkeleton, Boolean z): Boolean {
         if (!this.rigged.isEmpty()) {
             if (renderContext.hasGL30) {
                 renderContext.setupRiggedMeshProgram(true)
@@ -82,7 +82,7 @@ class DrawableAttachments {
                     z2 = false
                 }
                 if (z || r0) {
-                    this.glAnimationDataBuffer.getRawBuffer().loadFromFloatArray(0, avatarSkeleton.jointWorldMatrix, 0, (SLSkeletonBoneID.VALUES.length + 47) * 16)
+                    this.glAnimationDataBuffer.getRawBuffer().loadFromFloatArray(0, avatarSkeleton.jointWorldMatrix, 0, (SLSkeletonBoneID.VALUES.size + 47) * 16)
                 }
                 GLLoadableBuffer gLLoadableBuffer = this.glAnimationDataBuffer
                 if (z) {

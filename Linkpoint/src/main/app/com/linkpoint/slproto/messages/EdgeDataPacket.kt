@@ -10,7 +10,7 @@ class EdgeDataPacket : SLMessage {
 
     class EdgeData {
         Int Direction
-        byte[] LayerData
+        ByteArray LayerData
         Int LayerType
     }
 
@@ -18,22 +18,22 @@ class EdgeDataPacket : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.EdgeData_Field.LayerData.length + 4 + 1
+    fun CalcPayloadSize(): Int {
+        return this.EdgeData_Field.LayerData.size + 4 + 1
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleEdgeDataPacket(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put(Ascii.CAN)
-        packByte(byteBuffer, (byte) this.EdgeData_Field.LayerType)
-        packByte(byteBuffer, (byte) this.EdgeData_Field.Direction)
+        packByte(byteBuffer, (this as byte).EdgeData_Field.LayerType)
+        packByte(byteBuffer, (this as byte).EdgeData_Field.Direction)
         packVariable(byteBuffer, this.EdgeData_Field.LayerData, 2)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.EdgeData_Field.LayerType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.EdgeData_Field.Direction = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.EdgeData_Field.LayerData = unpackVariable(byteBuffer, 2)

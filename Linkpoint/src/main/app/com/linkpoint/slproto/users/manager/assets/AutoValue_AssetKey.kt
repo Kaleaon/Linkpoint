@@ -22,20 +22,20 @@ class AutoValue_AssetKey : AssetKey {
         this.taskUUID = uuid4
     }
 
-    Int assetType() {
+    fun assetType(): Int {
         return this.assetType
     }
 
     @Nullable
-    UUID assetUUID() {
+    fun assetUUID(): UUID {
         return this.assetUUID
     }
 
-    Int channelType() {
+    fun channelType(): Int {
         return this.channelType
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -49,7 +49,7 @@ class AutoValue_AssetKey : AssetKey {
         return this.taskUUID == null ? assetKey.taskUUID() == null : this.taskUUID.equals(assetKey.taskUUID())
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         Int i = 0
         Int hashCode = ((this.itemUUID == null ? 0 : this.itemUUID.hashCode()) ^ (((this.ownerUUID == null ? 0 : this.ownerUUID.hashCode()) ^ (((((this.assetUUID == null ? 0 : this.assetUUID.hashCode()) ^ ((((this.channelType ^ 1000003) * 1000003) ^ this.sourceType) * 1000003)) * 1000003) ^ this.assetType) * 1000003)) * 1000003)) * 1000003
         if (this.taskUUID != null) {
@@ -59,21 +59,21 @@ class AutoValue_AssetKey : AssetKey {
     }
 
     @Nullable
-    UUID itemUUID() {
+    fun itemUUID(): UUID {
         return this.itemUUID
     }
 
     @Nullable
-    UUID ownerUUID() {
+    fun ownerUUID(): UUID {
         return this.ownerUUID
     }
 
-    Int sourceType() {
+    fun sourceType(): Int {
         return this.sourceType
     }
 
     @Nullable
-    UUID taskUUID() {
+    fun taskUUID(): UUID {
         return this.taskUUID
     }
 }

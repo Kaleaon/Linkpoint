@@ -30,7 +30,7 @@ class ViewerEffect : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 35
         Iterator<T> it = this.Effect_Fields.iterator()
         while (true) {
@@ -38,35 +38,35 @@ class ViewerEffect : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            i = ((Effect) it.next()).TypeData.length + 42 + i2
+            i = ((it as Effect).next()).TypeData.size + 42 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleViewerEffect(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) 17)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        byteBuffer.put((Byte) this.Effect_Fields.size())
+        byteBuffer.put((this as Byte).Effect_Fields.size())
         for (Effect effect : this.Effect_Fields) {
             packUUID(byteBuffer, effect.ID)
             packUUID(byteBuffer, effect.AgentID)
-            packByte(byteBuffer, (Byte) effect.Type)
+            packByte(byteBuffer, (effect as Byte).Type)
             packFloat(byteBuffer, effect.Duration)
             packFixed(byteBuffer, effect.Color, 4)
             packVariable(byteBuffer, effect.TypeData, 1)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             Effect effect = Effect()
             effect.ID = unpackUUID(byteBuffer)
             effect.AgentID = unpackUUID(byteBuffer)

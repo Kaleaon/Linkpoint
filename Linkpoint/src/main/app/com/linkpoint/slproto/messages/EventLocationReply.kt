@@ -23,15 +23,15 @@ class EventLocationReply : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 49
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleEventLocationReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 52)
@@ -41,7 +41,7 @@ class EventLocationReply : SLMessage {
         packLLVector3(byteBuffer, this.EventData_Field.RegionPos)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
         this.EventData_Field.Success = unpackBoolean(byteBuffer)
         this.EventData_Field.RegionID = unpackUUID(byteBuffer)

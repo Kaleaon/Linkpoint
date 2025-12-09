@@ -10,7 +10,7 @@ import de.greenrobot.dao.query.LazyList
         ((LazyList) obj).close()
     }
 
-    Unit onDispose(Any obj) {
+    fun onDispose(Any obj): Unit {
         $m$0(obj)
     }
 }

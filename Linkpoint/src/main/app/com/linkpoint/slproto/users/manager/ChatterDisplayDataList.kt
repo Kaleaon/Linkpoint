@@ -48,7 +48,7 @@ abstract class ChatterDisplayDataList {
         }
         Iterator<Map.Entry<ChatterID, ChatterSubscription>> it = this.chatterSubscriptions.entrySet().iterator()
         while (it.hasNext()) {
-            ChatterSubscription chatterSubscription3 = (ChatterSubscription) it.next().getValue()
+            ChatterSubscription chatterSubscription3 = (it as ChatterSubscription).next().getValue()
             if (!chatterSubscription3.isValid) {
                 it.remove()
                 chatterSubscription3.dispose()
@@ -57,13 +57,13 @@ abstract class ChatterDisplayDataList {
         Debug.Printf("FriendList: refreshList: %d subscriptions", Int.valueOf(this.chatterSubscriptions.size()))
     }
 
-    Unit dispose() {
+    fun dispose(): Unit {
         for (ChatterSubscription unsubscribe : this.chatterSubscriptions.values()) {
             unsubscribe.unsubscribe()
         }
     }
 
-    ImmutableList<ChatterDisplayData> getChatterList() {
+    fun getChatterList(): ImmutableList<ChatterDisplayData> {
         return this.chatters.getChatterList()
     }
 
@@ -78,7 +78,7 @@ abstract class ChatterDisplayDataList {
     }
 
     /* access modifiers changed from: package-private */
-    Unit requestRefresh(@Nullable Executor executor) {
+    fun requestRefresh(@Nullable Executor executor): Unit {
         Debug.Printf("FriendList: requestRefresh: needsRefresh = %s", Boolean.toString(this.needsRefresh.get()))
         if (this.needsRefresh.getAndSet(true)) {
             return

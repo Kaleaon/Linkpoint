@@ -16,22 +16,22 @@ class AgentThrottle : SLMessage {
 
     class Throttle {
         Int GenCounter
-        byte[] Throttles
+        ByteArray Throttles
     }
 
     AgentThrottle() {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.Throttle_Field.Throttles.length + 5 + 40
+    fun CalcPayloadSize(): Int {
+        return this.Throttle_Field.Throttles.size + 5 + 40
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAgentThrottle(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 81)
@@ -42,7 +42,7 @@ class AgentThrottle : SLMessage {
         packVariable(byteBuffer, this.Throttle_Field.Throttles, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.CircuitCode = unpackInt(byteBuffer)

@@ -112,7 +112,7 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
 
     /* access modifiers changed from: protected */
     @OnClick({2131755706})
-    Unit onAboutEditClicked(View view) {
+    fun onAboutEditClicked(View view): Unit {
         if (this.chatterID != null) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserAboutTextEditFragment.class, UserAboutTextEditFragment.makeSelection(this.chatterID, false))
         }
@@ -120,7 +120,7 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
 
     /* access modifiers changed from: protected */
     @OnClick({2131755698})
-    Unit onChangePicClicked(View view) {
+    fun onChangePicClicked(View view): Unit {
         AvatarPropertiesReply data = this.avatarProperties.getData()
         if (this.chatterID != null && data != null) {
             Bundle bundle = Bundle()
@@ -129,7 +129,7 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
         }
     }
 
-    Unit onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
+    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever): Unit {
         super.onChatterNameUpdated(chatterNameRetriever)
         View view = getView()
         if (this.chatterID != null && Objects.equal(chatterNameRetriever.chatterID, this.chatterID) && view != null) {
@@ -140,7 +140,7 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
 
     /* access modifiers changed from: protected */
     @OnClick({2131755720})
-    Unit onCopyAgentKeyClicked(View view) {
+    fun onCopyAgentKeyClicked(View view): Unit {
         if (this.chatterID instanceof ChatterID.ChatterIDUser) {
             String uuid = ((ChatterID.ChatterIDUser) this.chatterID).getChatterUUID().toString()
             if (Build.VERSION.SDK_INT < 11) {
@@ -153,7 +153,7 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
     }
 
     @Nullable
-    View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle): View {
         View inflate = layoutInflater.inflate(R.layout.user_profile_tab_main, viewGroup, false)
         this.unbinder = ButterKnife.bind((Any) this, inflate)
         this.userPicView.setAlignTop(true)
@@ -164,7 +164,7 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
         return inflate
     }
 
-    Unit onDestroyView() {
+    fun onDestroyView(): Unit {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -174,13 +174,13 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
 
     /* access modifiers changed from: protected */
     @OnClick({2131755724})
-    Unit onEditNotesClicked(View view) {
+    fun onEditNotesClicked(View view): Unit {
         if (this.chatterID != null) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserNotesEditFragment.class, UserNotesEditFragment.makeSelection(this.chatterID))
         }
     }
 
-    Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged(): Unit {
         if (getView() != null) {
             try {
                 AvatarPropertiesReply avatarPropertiesReply = this.avatarProperties.get()
@@ -226,7 +226,7 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
     }
 
     /* access modifiers changed from: protected */
-    Unit onShowUser(@Nullable ChatterID chatterID) {
+    fun onShowUser(@Nullable ChatterID chatterID): Unit {
         Int i = 0
         View view = getView()
         this.loadableMonitor.unsubscribeAll()
@@ -258,7 +258,7 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
 
     /* access modifiers changed from: protected */
     @OnClick({2131755715})
-    Unit onViewProfileClicked(View view) {
+    fun onViewProfileClicked(View view): Unit {
         if (this.chatterID != null) {
             try {
                 UUID uuid = this.avatarProperties.get().PropertiesData_Field.PartnerID

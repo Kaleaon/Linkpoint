@@ -12,7 +12,7 @@ class AutoValue_UnreadMessageInfo : UnreadMessageInfo {
         this.lastMessage = sLChatEvent
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -26,20 +26,20 @@ class AutoValue_UnreadMessageInfo : UnreadMessageInfo {
         return false
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         return (this.lastMessage == null ? 0 : this.lastMessage.hashCode()) ^ (1000003 * (this.unreadCount ^ 1000003))
     }
 
     @Nullable
-    SLChatEvent lastMessage() {
+    fun lastMessage(): SLChatEvent {
         return this.lastMessage
     }
 
-    String toString() {
+    fun toString(): String {
         return "UnreadMessageInfo{unreadCount=" + this.unreadCount + ", " + "lastMessage=" + this.lastMessage + "}"
     }
 
-    Int unreadCount() {
+    fun unreadCount(): Int {
         return this.unreadCount
     }
 }

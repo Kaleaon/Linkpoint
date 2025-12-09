@@ -20,22 +20,22 @@ class CreateLandmarkForEvent : SLMessage {
 
     class InventoryBlock {
         UUID FolderID
-        byte[] Name
+        ByteArray Name
     }
 
     CreateLandmarkForEvent() {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.InventoryBlock_Field.Name.length + 17 + 40
+    fun CalcPayloadSize(): Int {
+        return this.InventoryBlock_Field.Name.size + 17 + 40
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleCreateLandmarkForEvent(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 50)
@@ -46,7 +46,7 @@ class CreateLandmarkForEvent : SLMessage {
         packVariable(byteBuffer, this.InventoryBlock_Field.Name, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.EventData_Field.EventID = unpackInt(byteBuffer)

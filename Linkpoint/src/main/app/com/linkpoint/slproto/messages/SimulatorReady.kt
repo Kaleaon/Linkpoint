@@ -28,20 +28,20 @@ class SimulatorReady : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.SimulatorBlock_Field.SimName.length + 1 + 1 + 4 + 16 + 4 + 4 + 4 + 13
+    fun CalcPayloadSize(): Int {
+        return this.SimulatorBlock_Field.SimName.size + 1 + 1 + 4 + 16 + 4 + 4 + 4 + 13
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleSimulatorReady(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 9)
         packVariable(byteBuffer, this.SimulatorBlock_Field.SimName, 1)
-        packByte(byteBuffer, (Byte) this.SimulatorBlock_Field.SimAccess)
+        packByte(byteBuffer, (this as Byte).SimulatorBlock_Field.SimAccess)
         packInt(byteBuffer, this.SimulatorBlock_Field.RegionFlags)
         packUUID(byteBuffer, this.SimulatorBlock_Field.RegionID)
         packInt(byteBuffer, this.SimulatorBlock_Field.EstateID)
@@ -50,7 +50,7 @@ class SimulatorReady : SLMessage {
         packLLVector3(byteBuffer, this.TelehubBlock_Field.TelehubPos)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.SimulatorBlock_Field.SimName = unpackVariable(byteBuffer, 1)
         this.SimulatorBlock_Field.SimAccess = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.SimulatorBlock_Field.RegionFlags = unpackInt(byteBuffer)

@@ -26,7 +26,7 @@ class ObjectUpdateCompressed : SLMessage {
         this.RegionData_Field = RegionData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 12
         Iterator<T> it = this.ObjectData_Fields.iterator()
         while (true) {
@@ -34,30 +34,30 @@ class ObjectUpdateCompressed : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            i = ((ObjectData) it.next()).Data.length + 6 + i2
+            i = ((it as ObjectData).next()).Data.size + 6 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleObjectUpdateCompressed(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put(Ascii.CR)
         packLong(byteBuffer, this.RegionData_Field.RegionHandle)
-        packShort(byteBuffer, (Short) this.RegionData_Field.TimeDilation)
-        byteBuffer.put((Byte) this.ObjectData_Fields.size())
+        packShort(byteBuffer, (this as Short).RegionData_Field.TimeDilation)
+        byteBuffer.put((this as Byte).ObjectData_Fields.size())
         for (ObjectData objectData : this.ObjectData_Fields) {
             packInt(byteBuffer, objectData.UpdateFlags)
             packVariable(byteBuffer, objectData.Data, 2)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.RegionData_Field.RegionHandle = unpackLong(byteBuffer)
         this.RegionData_Field.TimeDilation = unpackShort(byteBuffer) & 65535
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             ObjectData objectData = ObjectData()
             objectData.UpdateFlags = unpackInt(byteBuffer)
             objectData.Data = unpackVariable(byteBuffer, 2)

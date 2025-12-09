@@ -11,10 +11,10 @@ class LinkMovementMethodSafe : LinkMovementMethod {
     private OnLinkOpenErrorListener onLinkOpenErrorListener = null
 
     interface OnLinkOpenErrorListener {
-        Unit OnLinkOpenError(String str)
+        fun OnLinkOpenError(String str)
     }
 
-    Boolean onKeyDown(TextView textView, Spannable spannable, Int i, KeyEvent keyEvent) {
+    fun onKeyDown(TextView textView, Spannable spannable, Int i, KeyEvent keyEvent): Boolean {
         try {
             return super.onKeyDown(textView, spannable, i, keyEvent)
         } catch (Exception e) {
@@ -26,7 +26,7 @@ class LinkMovementMethodSafe : LinkMovementMethod {
         }
     }
 
-    Boolean onKeyUp(TextView textView, Spannable spannable, Int i, KeyEvent keyEvent) {
+    fun onKeyUp(TextView textView, Spannable spannable, Int i, KeyEvent keyEvent): Boolean {
         try {
             return super.onKeyUp(textView, spannable, i, keyEvent)
         } catch (Exception e) {
@@ -38,7 +38,7 @@ class LinkMovementMethodSafe : LinkMovementMethod {
         }
     }
 
-    Boolean onTouchEvent(TextView textView, Spannable spannable, MotionEvent motionEvent) {
+    fun onTouchEvent(TextView textView, Spannable spannable, MotionEvent motionEvent): Boolean {
         try {
             return super.onTouchEvent(textView, spannable, motionEvent)
         } catch (Exception e) {
@@ -50,7 +50,7 @@ class LinkMovementMethodSafe : LinkMovementMethod {
         }
     }
 
-    Boolean onTrackballEvent(TextView textView, Spannable spannable, MotionEvent motionEvent) {
+    fun onTrackballEvent(TextView textView, Spannable spannable, MotionEvent motionEvent): Boolean {
         try {
             return super.onTrackballEvent(textView, spannable, motionEvent)
         } catch (Exception e) {
@@ -62,7 +62,7 @@ class LinkMovementMethodSafe : LinkMovementMethod {
         }
     }
 
-    Unit setOnLinkOpenErrorListener(OnLinkOpenErrorListener onLinkOpenErrorListener2) {
+    fun setOnLinkOpenErrorListener(OnLinkOpenErrorListener onLinkOpenErrorListener2): Unit {
         this.onLinkOpenErrorListener = onLinkOpenErrorListener2
     }
 }

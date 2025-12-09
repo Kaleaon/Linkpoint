@@ -16,22 +16,22 @@ class SimStatus : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleSimStatus(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put((Byte) -1)
         byteBuffer.put(Ascii.FF)
         packBoolean(byteBuffer, this.SimStatusData_Field.CanAcceptAgents)
         packBoolean(byteBuffer, this.SimStatusData_Field.CanAcceptTasks)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.SimStatusData_Field.CanAcceptAgents = unpackBoolean(byteBuffer)
         this.SimStatusData_Field.CanAcceptTasks = unpackBoolean(byteBuffer)
     }

@@ -23,15 +23,19 @@ class LLSDBoolean : LLSDNode {
         this.value = z
     }
 
-    Boolean asBoolean() {
+    fun asBoolean(): Boolean {
         return this.value
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    @Throws(IOException::class)
+
+    fun toBinary(DataOutputStream dataOutputStream) {
         dataOutputStream.writeByte(this.value ? 49 : 48)
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    @Throws(IOException::class)
+
+    fun toXML(XmlSerializer xmlSerializer) {
         xmlSerializer.startTag("", "Boolean")
         xmlSerializer.text(this.value ? "1" : "0")
         xmlSerializer.endTag("", "Boolean")

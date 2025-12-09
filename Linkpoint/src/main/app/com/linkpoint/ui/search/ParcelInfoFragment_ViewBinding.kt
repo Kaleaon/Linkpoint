@@ -20,29 +20,29 @@ class ParcelInfoFragment_ViewBinding : Unbinder {
     @UiThread
     ParcelInfoFragment_ViewBinding(ParcelInfoFragment parcelInfoFragment, View view) {
         this.target = parcelInfoFragment
-        parcelInfoFragment.parcelImageView = (ImageAssetView) Utils.findRequiredViewAsType(view, R.id.parcel_image_view, "field 'parcelImageView'", ImageAssetView.class)
-        parcelInfoFragment.parcelDetailsDescription = (TextView) Utils.findRequiredViewAsType(view, R.id.parcel_details_desc, "field 'parcelDetailsDescription'", TextView.class)
-        parcelInfoFragment.parcelOwnerName = (TextView) Utils.findRequiredViewAsType(view, R.id.parcel_owner_name, "field 'parcelOwnerName'", TextView.class)
-        parcelInfoFragment.parcelOwnerPic = (ChatterPicView) Utils.findRequiredViewAsType(view, R.id.parcel_owner_pic, "field 'parcelOwnerPic'", ChatterPicView.class)
-        parcelInfoFragment.parcelSimName = (TextView) Utils.findRequiredViewAsType(view, R.id.parcel_sim_name, "field 'parcelSimName'", TextView.class)
-        parcelInfoFragment.parcelDetailsName = (TextView) Utils.findRequiredViewAsType(view, R.id.parcel_details_name, "field 'parcelDetailsName'", TextView.class)
-        parcelInfoFragment.parcelLocation = (TextView) Utils.findRequiredViewAsType(view, R.id.parcel_location, "field 'parcelLocation'", TextView.class)
+        parcelInfoFragment.parcelImageView = (Utils as ImageAssetView).findRequiredViewAsType(view, R.id.parcel_image_view, "field 'parcelImageView'", ImageAssetView.class)
+        parcelInfoFragment.parcelDetailsDescription = (Utils as TextView).findRequiredViewAsType(view, R.id.parcel_details_desc, "field 'parcelDetailsDescription'", TextView.class)
+        parcelInfoFragment.parcelOwnerName = (Utils as TextView).findRequiredViewAsType(view, R.id.parcel_owner_name, "field 'parcelOwnerName'", TextView.class)
+        parcelInfoFragment.parcelOwnerPic = (Utils as ChatterPicView).findRequiredViewAsType(view, R.id.parcel_owner_pic, "field 'parcelOwnerPic'", ChatterPicView.class)
+        parcelInfoFragment.parcelSimName = (Utils as TextView).findRequiredViewAsType(view, R.id.parcel_sim_name, "field 'parcelSimName'", TextView.class)
+        parcelInfoFragment.parcelDetailsName = (Utils as TextView).findRequiredViewAsType(view, R.id.parcel_details_name, "field 'parcelDetailsName'", TextView.class)
+        parcelInfoFragment.parcelLocation = (Utils as TextView).findRequiredViewAsType(view, R.id.parcel_location, "field 'parcelLocation'", TextView.class)
         View findRequiredView = Utils.findRequiredView(view, R.id.parcel_teleport_button, "method 'onParcelTeleportButton'")
         this.view2131755600 = findRequiredView
         findRequiredView.setOnClickListener(DebouncingOnClickListener() {
-            Unit doClick(View view) {
+            fun doClick(View view): Unit {
                 parcelInfoFragment.onParcelTeleportButton()
             }
         View findRequiredView2 = Utils.findRequiredView(view, R.id.parcel_owner_profile_button, "method 'onParcelOwnerProfileClick'")
         this.view2131755608 = findRequiredView2
         findRequiredView2.setOnClickListener(DebouncingOnClickListener() {
-            Unit doClick(View view) {
+            fun doClick(View view): Unit {
                 parcelInfoFragment.onParcelOwnerProfileClick()
             }
     }
 
     @CallSuper
-    Unit unbind() {
+    fun unbind(): Unit {
         ParcelInfoFragment parcelInfoFragment = this.target
         if (parcelInfoFragment == null) {
             throw IllegalStateException("Bindings already cleared.")

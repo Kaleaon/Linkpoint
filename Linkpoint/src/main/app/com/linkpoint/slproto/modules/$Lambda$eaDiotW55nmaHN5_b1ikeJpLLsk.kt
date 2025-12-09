@@ -7,14 +7,14 @@ package com.linkpoint.slproto.modules
     private /* synthetic */ Any f122$f0
 
     private /* synthetic */ Unit $m$0() {
-        ((SLMinimap) this.f122$f0).m212com_lumiyaviewer_lumiya_slproto_modules_SLMinimapmthref0()
+        ((this as SLMinimap).f122$f0).m212com_lumiyaviewer_lumiya_slproto_modules_SLMinimapmthref0()
     }
 
     /* synthetic */ $Lambda$eaDiotW55nmaHN5_b1ikeJpLLsk(Any obj) {
         this.f122$f0 = obj
     }
 
-    Unit run() {
+    fun run(): Unit {
         $m$0()
     }
 }

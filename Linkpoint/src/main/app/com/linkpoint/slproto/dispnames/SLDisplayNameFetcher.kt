@@ -29,7 +29,7 @@ class SLDisplayNameFetcher : SLModule {
     private val MAX_BATCH_SIZE: Int = 4
     private String capsURL
     private Runnable httpThreadRunnable = Runnable() {
-        Unit run() {
+        fun run(): Unit {
             UUID nextRequest
             RequestQueue<UUID, UserName> userNameRequestQueue = SLDisplayNameFetcher.this.userManager.getUserNameRequestQueue()
             HashSet<UUID> hashSet = HashSet<>()
@@ -55,12 +55,12 @@ class SLDisplayNameFetcher : SLModule {
         }
     }
     private RequestHandler<UUID> requestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        Unit onRequest(@NonNull UUID uuid) {
+        fun onRequest(@NonNull UUID uuid): Unit {
             UUIDNameRequest uUIDNameRequest = UUIDNameRequest()
             UUIDNameRequest.UUIDNameBlock uUIDNameBlock = UUIDNameRequest.UUIDNameBlock()
             uUIDNameBlock.ID = uuid
             uUIDNameRequest.UUIDNameBlock_Fields.add(uUIDNameBlock)
-            while (uUIDNameRequest.UUIDNameBlock_Fields.size() < 4 && SLDisplayNameFetcher.this.requestQueue != null && ((UUID) SLDisplayNameFetcher.this.requestQueue.getNextRequest()) != null) {
+            while (uUIDNameRequest.UUIDNameBlock_Fields.size() < 4 && SLDisplayNameFetcher.this.requestQueue != null && ((SLDisplayNameFetcher as UUID).this.requestQueue.getNextRequest()) != null) {
                 UUIDNameRequest.UUIDNameBlock uUIDNameBlock2 = UUIDNameRequest.UUIDNameBlock()
                 uUIDNameBlock2.ID = uuid
                 uUIDNameRequest.UUIDNameBlock_Fields.add(uUIDNameBlock2)
@@ -103,7 +103,7 @@ class SLDisplayNameFetcher : SLModule {
     }
 
     /* access modifiers changed from: private */
-    Unit requestNamesHttp(Set<UUID> set, RequestQueue<UUID, UserName> requestQueue2) {
+    fun requestNamesHttp(Set<UUID> set, RequestQueue<UUID, UserName> requestQueue2): Unit {
         StringBuilder append = StringBuilder(this.capsURL).append('/')
         Boolean z = true
         for (UUID uuid : set) {
@@ -121,7 +121,7 @@ class SLDisplayNameFetcher : SLModule {
             if (PerformRequest != null) {
                 if (PerformRequest.keyExists("agents")) {
                     LLSDNode byKey = PerformRequest.byKey("agents")
-                    for (Int i = 0; i < byKey.getCount(); i++) {
+                    for (i in 0 until byKey.getCount()) {
                         LLSDNode byIndex = byKey.byIndex(i)
                         UUID asUUID = byIndex.byKey("id").asUUID()
                         UserName userName = UserName(asUUID, byIndex.byKey("username").asString(), byIndex.byKey("display_name").asString(), false)
@@ -133,7 +133,7 @@ class SLDisplayNameFetcher : SLModule {
                 }
                 if (PerformRequest.keyExists("bad_ids")) {
                     LLSDNode byKey2 = PerformRequest.byKey("bad_ids")
-                    for (Int i2 = 0; i2 < byKey2.getCount(); i2++) {
+                    for (i2 in 0 until byKey2.getCount()) {
                         UUID fromString = UUID.fromString(byKey2.byIndex(i2).asString())
                         UserName userName2 = UserName(fromString, (String) null, (String) null, true)
                         if (this.resultHandler != null) {
@@ -148,7 +148,7 @@ class SLDisplayNameFetcher : SLModule {
         }
     }
 
-    Unit HandleCloseCircuit() {
+    fun HandleCloseCircuit(): Unit {
         this.threadMustExit.set(true)
         if (this.xmlReq != null) {
             this.xmlReq.InterruptRequest()
@@ -162,7 +162,7 @@ class SLDisplayNameFetcher : SLModule {
     }
 
     @SLMessageHandler
-    Unit HandleUUIDNameReply(UUIDNameReply uUIDNameReply) {
+    fun HandleUUIDNameReply(UUIDNameReply uUIDNameReply): Unit {
         for (UUIDNameReply.UUIDNameBlock uUIDNameBlock : uUIDNameReply.UUIDNameBlock_Fields) {
             UUID uuid = uUIDNameBlock.ID
             String str = SLMessage.stringFromVariableOEM(uUIDNameBlock.FirstName) + " " + SLMessage.stringFromVariableOEM(uUIDNameBlock.LastName)

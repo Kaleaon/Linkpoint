@@ -18,7 +18,7 @@ class ScriptDataReply : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 5
         Iterator<T> it = this.DataBlock_Fields.iterator()
         while (true) {
@@ -26,28 +26,28 @@ class ScriptDataReply : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            i = ((DataBlock) it.next()).Reply.length + 10 + i2
+            i = ((it as DataBlock).next()).Reply.size + 10 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleScriptDataReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 82)
-        byteBuffer.put((Byte) this.DataBlock_Fields.size())
+        byteBuffer.put((this as Byte).DataBlock_Fields.size())
         for (DataBlock dataBlock : this.DataBlock_Fields) {
             packLong(byteBuffer, dataBlock.Hash)
             packVariable(byteBuffer, dataBlock.Reply, 2)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             DataBlock dataBlock = DataBlock()
             dataBlock.Hash = unpackLong(byteBuffer)
             dataBlock.Reply = unpackVariable(byteBuffer, 2)

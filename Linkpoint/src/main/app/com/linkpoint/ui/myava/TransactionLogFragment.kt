@@ -43,7 +43,7 @@ class TransactionLogFragment : FragmentWithTitle : LoadableMonitor.OnLoadableDat
     private SubscriptionData<SubscriptionSingleKey, LazyList<MoneyTransaction>> moneyTransactions = SubscriptionData<>(UIThreadExecutor.getInstance())
     /* access modifiers changed from: private */
     Runnable scrollToBottomRunnable = Runnable() {
-        Unit run() {
+        fun run(): Unit {
             Int itemCount
             Boolean unused = TransactionLogFragment.this.scrollToBottomRunnablePosted = false
             if (TransactionLogFragment.this.unbinder != null) {
@@ -144,7 +144,7 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$N_xrT8AwWQ2Oj
         builder.create().show()
     }
 
-    Bundle makeSelection(UUID uuid) {
+    fun makeSelection(UUID uuid): Bundle {
         Bundle bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         return bundle
@@ -171,17 +171,17 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$N_xrT8AwWQ2Oj
         performClearTransactionLog()
     }
 
-    Unit onCreate(@Nullable Bundle bundle) {
+    fun onCreate(@Nullable Bundle bundle): Unit {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    Unit onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater): Unit {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.transaction_log_menu, menu)
     }
 
-    View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         View inflate = layoutInflater.inflate(R.layout.transaction_log, viewGroup, false)
         this.unbinder = ButterKnife.bind((Any) this, inflate)
@@ -191,7 +191,7 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$N_xrT8AwWQ2Oj
         return inflate
     }
 
-    Unit onDestroyView() {
+    fun onDestroyView(): Unit {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -199,7 +199,7 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$N_xrT8AwWQ2Oj
         super.onDestroyView()
     }
 
-    Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged(): Unit {
         LazyList data = this.moneyTransactions.getData()
         if (data != null) {
             this.loadableMonitor.setEmptyMessage(data.isEmpty(), getString(R.string.no_transactions_per_session))
@@ -210,7 +210,7 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$N_xrT8AwWQ2Oj
         }
     }
 
-    Boolean onOptionsItemSelected(MenuItem menuItem) {
+    fun onOptionsItemSelected(MenuItem menuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_clear_transaction_log:
                 clearTransactionLog()
@@ -220,7 +220,7 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$N_xrT8AwWQ2Oj
         }
     }
 
-    Unit onStart() {
+    fun onStart(): Unit {
         super.onStart()
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
@@ -228,12 +228,12 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$N_xrT8AwWQ2Oj
         }
     }
 
-    Unit onStop() {
+    fun onStop(): Unit {
         this.loadableMonitor.unsubscribeAll()
         super.onStop()
     }
 
-    Unit onTransactionClicked(MoneyTransaction moneyTransaction) {
+    fun onTransactionClicked(MoneyTransaction moneyTransaction): Unit {
         UUID activeAgentID = ActivityUtils.getActiveAgentID(getArguments())
         if (activeAgentID != null) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserProfileFragment.class, UserProfileFragment.makeSelection(ChatterID.getUserChatterID(activeAgentID, moneyTransaction.getAgentUUID())))

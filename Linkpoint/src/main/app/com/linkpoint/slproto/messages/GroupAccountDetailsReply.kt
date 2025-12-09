@@ -19,14 +19,14 @@ class GroupAccountDetailsReply : SLMessage {
 
     class HistoryData {
         Int Amount
-        byte[] Description
+        ByteArray Description
     }
 
     class MoneyData {
         Int CurrentInterval
         Int IntervalDays
         UUID RequestID
-        byte[] StartDate
+        ByteArray StartDate
     }
 
     GroupAccountDetailsReply() {
@@ -35,23 +35,23 @@ class GroupAccountDetailsReply : SLMessage {
         this.MoneyData_Field = MoneyData()
     }
 
-    Int CalcPayloadSize() {
-        Int length = this.MoneyData_Field.StartDate.length + 25 + 36 + 1
+    fun CalcPayloadSize(): Int {
+        Int length = this.MoneyData_Field.StartDate.size + 25 + 36 + 1
         Iterator<T> it = this.HistoryData_Fields.iterator()
         while (true) {
             Int i = length
             if (!it.hasNext()) {
                 return i
             }
-            length = ((HistoryData) it.next()).Description.length + 1 + 4 + i
+            length = ((it as HistoryData).next()).Description.size + 1 + 4 + i
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleGroupAccountDetailsReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 100)
@@ -61,14 +61,14 @@ class GroupAccountDetailsReply : SLMessage {
         packInt(byteBuffer, this.MoneyData_Field.IntervalDays)
         packInt(byteBuffer, this.MoneyData_Field.CurrentInterval)
         packVariable(byteBuffer, this.MoneyData_Field.StartDate, 1)
-        byteBuffer.put((byte) this.HistoryData_Fields.size())
+        byteBuffer.put((this as byte).HistoryData_Fields.size())
         for (HistoryData historyData : this.HistoryData_Fields) {
             packVariable(byteBuffer, historyData.Description, 1)
             packInt(byteBuffer, historyData.Amount)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
         this.MoneyData_Field.RequestID = unpackUUID(byteBuffer)
@@ -76,7 +76,7 @@ class GroupAccountDetailsReply : SLMessage {
         this.MoneyData_Field.CurrentInterval = unpackInt(byteBuffer)
         this.MoneyData_Field.StartDate = unpackVariable(byteBuffer, 1)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             HistoryData historyData = HistoryData()
             historyData.Description = unpackVariable(byteBuffer, 1)
             historyData.Amount = unpackInt(byteBuffer)

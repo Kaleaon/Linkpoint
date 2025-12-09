@@ -14,16 +14,16 @@ class FragmentWithTitle : StateAwareFragment : FragmentHasTitle {
     private val fragmentTitle: String = null
 
     @Nullable
-    String getSubTitle() {
+    fun getSubTitle(): String {
         return this.fragmentSubTitle
     }
 
     @Nullable
-    String getTitle() {
+    fun getTitle(): String {
         return this.fragmentTitle
     }
 
-    Unit onCreate(@android.support.annotation.Nullable Bundle bundle) {
+    fun onCreate(@android.support.annotation.Nullable Bundle bundle): Unit {
         super.onCreate(bundle)
         if (bundle != null) {
             this.fragmentTitle = bundle.getString(FRAGMENT_TITLE_TAG)
@@ -31,7 +31,7 @@ class FragmentWithTitle : StateAwareFragment : FragmentHasTitle {
         }
     }
 
-    Unit onDetach() {
+    fun onDetach(): Unit {
         super.onDetach()
         FragmentActivity activity = getActivity()
         if (activity instanceof DetailsActivity) {
@@ -39,7 +39,7 @@ class FragmentWithTitle : StateAwareFragment : FragmentHasTitle {
         }
     }
 
-    Unit onHiddenChanged(Boolean z) {
+    fun onHiddenChanged(Boolean z): Unit {
         super.onHiddenChanged(z)
         FragmentActivity activity = getActivity()
         if (activity instanceof DetailsActivity) {
@@ -47,13 +47,13 @@ class FragmentWithTitle : StateAwareFragment : FragmentHasTitle {
         }
     }
 
-    Unit onSaveInstanceState(Bundle bundle) {
+    fun onSaveInstanceState(Bundle bundle): Unit {
         super.onSaveInstanceState(bundle)
         bundle.putString(FRAGMENT_TITLE_TAG, this.fragmentTitle)
         bundle.putString(FRAGMENT_SUBTITLE_TAG, this.fragmentSubTitle)
     }
 
-    Unit onStart() {
+    fun onStart(): Unit {
         super.onStart()
         FragmentActivity activity = getActivity()
         if (activity instanceof DetailsActivity) {
@@ -61,7 +61,7 @@ class FragmentWithTitle : StateAwareFragment : FragmentHasTitle {
         }
     }
 
-    Unit setTitle(@Nullable String str, @Nullable String str2) {
+    fun setTitle(@Nullable String str, @Nullable String str2): Unit {
         this.fragmentTitle = str
         this.fragmentSubTitle = str2
         FragmentActivity activity = getActivity()

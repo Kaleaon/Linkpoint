@@ -80,7 +80,7 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
 
     /* access modifiers changed from: private */
     /* renamed from: onUnreadCountChanged */
-    Unit m298com_lumiyaviewer_lumiya_slproto_users_manager_ChatterSubscriptionmthref1(UnreadMessageInfo unreadMessageInfo) {
+    fun m298com_lumiyaviewer_lumiya_slproto_users_manager_ChatterSubscriptionmthref1(UnreadMessageInfo unreadMessageInfo): Unit {
         if (unreadMessageInfo != null) {
             setChatterDisplayData(this.displayData.withUnreadInfo(unreadMessageInfo))
         }
@@ -88,7 +88,7 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceChatInfoChanged */
-    Unit m297com_lumiyaviewer_lumiya_slproto_users_manager_ChatterSubscriptionmthref0(VoiceChatInfo voiceChatInfo) {
+    fun m297com_lumiyaviewer_lumiya_slproto_users_manager_ChatterSubscriptionmthref0(VoiceChatInfo voiceChatInfo): Unit {
         Boolean z = false
         ChatterDisplayData chatterDisplayData = this.displayData
         if (!(voiceChatInfo == null || voiceChatInfo.state == VoiceChatInfo.VoiceChatState.None)) {
@@ -97,19 +97,19 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
         setChatterDisplayData(chatterDisplayData.withVoiceActive(z))
     }
 
-    Unit dispose() {
+    fun dispose(): Unit {
         unsubscribe()
         this.chatterList.removeChatter(this.displayData)
     }
 
     /* access modifiers changed from: package-private */
-    Unit setChatterDisplayData(@NonNull ChatterDisplayData chatterDisplayData) {
+    fun setChatterDisplayData(@NonNull ChatterDisplayData chatterDisplayData): Unit {
         ChatterDisplayData chatterDisplayData2 = this.displayData
         this.displayData = chatterDisplayData
         this.chatterList.replaceChatter(chatterDisplayData2, this.displayData)
     }
 
-    Unit unsubscribe() {
+    fun unsubscribe(): Unit {
         this.unreadCountSubscription.unsubscribe()
         this.voiceChatInfoSubscription.unsubscribe()
     }

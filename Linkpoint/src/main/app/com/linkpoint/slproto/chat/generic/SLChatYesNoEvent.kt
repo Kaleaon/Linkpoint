@@ -18,7 +18,7 @@ import androidx.annotation.Nullable
 abstract class SLChatYesNoEvent : SLChatTextEvent {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-chat-generic-SLChatYesNoEvent$EventStateSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] f74comlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues = null
+    private /* synthetic */ IntArray f74comlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues = null
     @NonNull
     private EventState eventState = EventState.EventNew
 
@@ -35,11 +35,11 @@ abstract class SLChatYesNoEvent : SLChatTextEvent {
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-chat-generic-SLChatYesNoEvent$EventStateSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] m157getcomlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues() {
+    private /* synthetic */ IntArray m157getcomlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues() {
         if (f74comlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues != null) {
             return f74comlumiyaviewerlumiyaslprotochatgenericSLChatYesNoEvent$EventStateSwitchesValues
         }
-        Int[] iArr = Int[EventState.values().length]
+        IntArray iArr = Int[EventState.values().size]
         try {
             iArr[EventState.EventAccepted.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -69,7 +69,7 @@ abstract class SLChatYesNoEvent : SLChatTextEvent {
         super(chatMessageSource, uuid, str)
     }
 
-    Unit bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, @Nullable ChatEventTimestampUpdater chatEventTimestampUpdater) {
+    fun bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, @Nullable ChatEventTimestampUpdater chatEventTimestampUpdater): Unit {
         super.bindViewHolder(chatEventViewHolder, userManager, chatEventTimestampUpdater)
         if (chatEventViewHolder instanceof ChatYesNoEventViewHolder) {
             ChatYesNoEventViewHolder chatYesNoEventViewHolder = (ChatYesNoEventViewHolder) chatEventViewHolder
@@ -117,7 +117,7 @@ abstract class SLChatYesNoEvent : SLChatTextEvent {
     }
 
     @NonNull
-    EventState getEventState() {
+    fun getEventState(): EventState {
         return this.eventState
     }
 
@@ -141,17 +141,17 @@ abstract class SLChatYesNoEvent : SLChatTextEvent {
     abstract String getYesMessage(Context context)
 
     /* access modifiers changed from: protected */
-    Unit onNoAction(Context context, UserManager userManager) {
+    fun onNoAction(Context context, UserManager userManager): Unit {
         this.eventState = EventState.EventCancelled
         notifyEventUpdated(userManager)
     }
 
-    Unit onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(Context context, UserManager userManager): Unit {
         this.eventState = EventState.EventAccepted
         notifyEventUpdated(userManager)
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setEventState(Integer.valueOf(this.eventState.ordinal()))
     }

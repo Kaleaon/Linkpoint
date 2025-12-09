@@ -14,7 +14,7 @@ class AvatarNotesUpdate : SLMessage {
     }
 
     class Data {
-        byte[] Notes
+        ByteArray Notes
         UUID TargetID
     }
 
@@ -22,15 +22,15 @@ class AvatarNotesUpdate : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.Data_Field.Notes.length + 18 + 36
+    fun CalcPayloadSize(): Int {
+        return this.Data_Field.Notes.size + 18 + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAvatarNotesUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -79)
@@ -40,7 +40,7 @@ class AvatarNotesUpdate : SLMessage {
         packVariable(byteBuffer, this.Data_Field.Notes, 2)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.Data_Field.TargetID = unpackUUID(byteBuffer)

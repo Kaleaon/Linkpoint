@@ -22,26 +22,26 @@ class TouchableObjectListAdapter : BaseAdapter {
         this.context = context2
     }
 
-    Int getCount() {
+    fun getCount(): Int {
         return this.objects.size()
     }
 
-    SLObjectInfo getItem(Int i) {
+    fun getItem(Int i): SLObjectInfo {
         if (i < 0 || i >= this.objects.size()) {
             return null
         }
-        return (SLObjectInfo) this.objects.get(i)
+        return (this as SLObjectInfo).objects.get(i)
     }
 
-    Long getItemId(Int i) {
+    fun getItemId(Int i): Long {
         SLObjectInfo item = getItem(i)
         if (item != null) {
-            return (Long) item.localID
+            return (item as Long).localID
         }
         return -1
     }
 
-    View getView(Int i, View view, ViewGroup viewGroup) {
+    fun getView(Int i, View view, ViewGroup viewGroup): View {
         View view2 = null
         SLObjectInfo item = getItem(i)
         if (item == null) {
@@ -50,21 +50,21 @@ class TouchableObjectListAdapter : BaseAdapter {
         if (view == null || view.getId() == R.id.touchable_object_list_item) {
             view2 = view
         }
-        View inflate = view2 == null ? ((LayoutInflater) this.context.getSystemService("layout_inflater")).inflate(R.layout.touchable_object_list_item, viewGroup, false) : view2
-        ((TextView) inflate.findViewById(R.id.touchable_objectNameTextView)).setText(item.getName())
+        View inflate = view2 == null ? ((this as LayoutInflater).context.getSystemService("layout_inflater")).inflate(R.layout.touchable_object_list_item, viewGroup, false) : view2
+        ((inflate as TextView).findViewById(R.id.touchable_objectNameTextView)).setText(item.getName())
         inflate.findViewById(R.id.touchable_touchIconView).setVisibility(item.isTouchable() ? 0 : 4)
         return inflate
     }
 
-    Boolean hasStableIds() {
+    fun hasStableIds(): Boolean {
         return true
     }
 
-    Boolean isEmpty() {
+    fun isEmpty(): Boolean {
         return this.objects.isEmpty()
     }
 
-    Unit setData(@Nullable ImmutableList<SLObjectInfo> immutableList) {
+    fun setData(@Nullable ImmutableList<SLObjectInfo> immutableList): Unit {
         if (immutableList == null) {
             immutableList = ImmutableList.of()
         }

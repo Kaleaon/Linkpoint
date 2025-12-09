@@ -35,7 +35,7 @@ class WindlightPreset {
     }
 
     private Unit darkenUnderWater(FloatArray fArr, FloatArray fArr2) {
-        for (Int i = 0; i < fArr2.length; i++) {
+        for (i in 0 until fArr2.size) {
             if (i == 2 || i == 3) {
                 fArr[i] = fArr2[i]
             } else {
@@ -45,20 +45,20 @@ class WindlightPreset {
     }
 
     private Unit gammaFloatArray(FloatArray fArr, Float f, Float f2) {
-        for (Int i = 0; i < fArr.length; i++) {
+        for (i in 0 until fArr.size) {
             fArr[i] = (Math.toFloat().pow(fArr.toDouble()[i], (Double) (1.0f / f))) * f2
         }
     }
 
     private Unit getFloatArray(LLSDNode lLSDNode, FloatArray fArr, Float f) throws LLSDException {
-        for (Int i = 0; i < fArr.length; i++) {
+        for (i in 0 until fArr.size) {
             fArr[i] = (lLSDNode.toFloat().byIndex(i).asDouble()) / f
         }
     }
 
     private Unit lerpFloatArray(FloatArray fArr, FloatArray fArr2, FloatArray fArr3, Float f) {
         Int i = 0
-        while (i < fArr.length && i < fArr2.length && i < fArr3.length) {
+        while (i < fArr.size && i < fArr2.size && i < fArr3.size) {
             fArr[i] = (fArr2[i] * (1.0f - f)) + (fArr3[i] * f)
             i++
         }
@@ -93,11 +93,11 @@ class WindlightPreset {
         }
     }
 
-    Unit reset() {
+    fun reset(): Unit {
         loadFromAssetFile("windlight/A%2D12PM.xml")
     }
 
-    Unit setByInterpolation(WindlightPreset windlightPreset, WindlightPreset windlightPreset2, Float f) {
+    fun setByInterpolation(WindlightPreset windlightPreset, WindlightPreset windlightPreset2, Float f): Unit {
         this.star_brightness = (windlightPreset.star_brightness * (1.0f - f)) + (windlightPreset2.star_brightness * f)
         lerpFloatArray(this.ambient, windlightPreset.ambient, windlightPreset2.ambient, f)
         lerpFloatArray(this.ambientBelowWater, windlightPreset.ambientBelowWater, windlightPreset2.ambientBelowWater, f)
