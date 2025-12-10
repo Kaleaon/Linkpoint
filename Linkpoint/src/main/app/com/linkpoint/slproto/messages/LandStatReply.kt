@@ -15,11 +15,11 @@ class LandStatReply : SLMessage {
         float LocationX
         float LocationY
         float LocationZ
-        byte[] OwnerName
+        ByteArray OwnerName
         float Score
         UUID TaskID
         Int TaskLocalID
-        byte[] TaskName
+        ByteArray TaskName
     }
 
     class RequestData {
@@ -33,7 +33,7 @@ class LandStatReply : SLMessage {
         this.RequestData_Field = RequestData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 17
         Iterator<T> it = this.ReportData_Fields.iterator()
         while (true) {
@@ -41,23 +41,23 @@ class LandStatReply : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            ReportData reportData = (ReportData) it.next()
-            i = reportData.OwnerName.length + reportData.TaskName.length + 37 + 1 + i2
+            ReportData reportData = (it as ReportData).next()
+            i = reportData.OwnerName.size + reportData.TaskName.size + 37 + 1 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleLandStatReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) -90)
         packInt(byteBuffer, this.RequestData_Field.ReportType)
         packInt(byteBuffer, this.RequestData_Field.RequestFlags)
         packInt(byteBuffer, this.RequestData_Field.TotalObjectCount)
-        byteBuffer.put((byte) this.ReportData_Fields.size())
+        byteBuffer.put((this as byte).ReportData_Fields.size())
         for (ReportData reportData : this.ReportData_Fields) {
             packInt(byteBuffer, reportData.TaskLocalID)
             packUUID(byteBuffer, reportData.TaskID)
@@ -70,12 +70,12 @@ class LandStatReply : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.RequestData_Field.ReportType = unpackInt(byteBuffer)
         this.RequestData_Field.RequestFlags = unpackInt(byteBuffer)
         this.RequestData_Field.TotalObjectCount = unpackInt(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             ReportData reportData = ReportData()
             reportData.TaskLocalID = unpackInt(byteBuffer)
             reportData.TaskID = unpackUUID(byteBuffer)

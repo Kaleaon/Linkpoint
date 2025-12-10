@@ -18,7 +18,7 @@ class FriendDisplayDataList : ChatterDisplayDataList {
     }
 
     /* access modifiers changed from: protected */
-    List<ChatterID> getChatters() {
+    fun getChatters(): List<ChatterID> {
         List<Friend> list = this.onlineFriends ? this.userManager.getDaoSession().getFriendDao().queryBuilder().where(FriendDao.Properties.IsOnline.eq(true), WhereCondition[0]).list() : this.userManager.getDaoSession().getFriendDao().loadAll()
         ArrayList arrayList = ArrayList(list.size())
         for (Friend uuid : list) {

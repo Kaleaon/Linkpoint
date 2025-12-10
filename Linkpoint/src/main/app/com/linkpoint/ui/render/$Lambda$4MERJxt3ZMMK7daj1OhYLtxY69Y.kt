@@ -7,14 +7,14 @@ package com.linkpoint.ui.render
     private /* synthetic */ Any f511$f0
 
     private /* synthetic */ Unit $m$0() {
-        ((CardboardTransitionActivity) this.f511$f0).m786lambda$com_lumiyaviewer_lumiya_ui_render_CardboardTransitionActivity_1411()
+        ((this as CardboardTransitionActivity).f511$f0).m786lambda$com_lumiyaviewer_lumiya_ui_render_CardboardTransitionActivity_1411()
     }
 
     /* synthetic */ $Lambda$4MERJxt3ZMMK7daj1OhYLtxY69Y(Any obj) {
         this.f511$f0 = obj
     }
 
-    Unit run() {
+    fun run(): Unit {
         $m$0()
     }
 }

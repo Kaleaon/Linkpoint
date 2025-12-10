@@ -15,22 +15,22 @@ class SetCPURatio : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 5
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleSetCPURatio(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 71)
-        packByte(byteBuffer, (Byte) this.Data_Field.Ratio)
+        packByte(byteBuffer, (this as Byte).Data_Field.Ratio)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.Data_Field.Ratio = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
     }
 }

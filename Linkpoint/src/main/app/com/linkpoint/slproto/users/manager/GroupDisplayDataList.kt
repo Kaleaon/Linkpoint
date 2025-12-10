@@ -13,14 +13,14 @@ class GroupDisplayDataList : ChatterDisplayDataList {
     }
 
     /* access modifiers changed from: protected */
-    List<ChatterID> getChatters() {
+    fun getChatters(): List<ChatterID> {
         AvatarGroupList avatarGroupList = this.userManager.getChatterList().getGroupManager().getAvatarGroupList()
         if (avatarGroupList == null) {
             return ImmutableList.of()
         }
         ImmutableList.Builder builder = ImmutableList.Builder()
         for (AvatarGroupList.AvatarGroupEntry avatarGroupEntry : avatarGroupList.Groups.values()) {
-            builder.add((Any) ChatterID.getGroupChatterID(this.userManager.getUserID(), avatarGroupEntry.GroupID))
+            builder.add((ChatterID as Any).getGroupChatterID(this.userManager.getUserID(), avatarGroupEntry.GroupID))
         }
         return builder.build()
     }

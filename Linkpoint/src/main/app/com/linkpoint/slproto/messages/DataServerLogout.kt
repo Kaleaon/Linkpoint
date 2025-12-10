@@ -19,15 +19,15 @@ class DataServerLogout : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 41
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleDataServerLogout(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -5)
@@ -37,7 +37,7 @@ class DataServerLogout : SLMessage {
         packUUID(byteBuffer, this.UserData_Field.SessionID)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.UserData_Field.AgentID = unpackUUID(byteBuffer)
         this.UserData_Field.ViewerIP = unpackIPAddress(byteBuffer)
         this.UserData_Field.Disconnect = unpackBoolean(byteBuffer)

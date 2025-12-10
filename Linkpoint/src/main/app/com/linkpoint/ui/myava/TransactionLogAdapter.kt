@@ -36,7 +36,7 @@ class TransactionLogAdapter : RecyclerView.Adapter<TransactionViewHolder> {
     OnTransactionClickListener onTransactionClickListener
 
     interface OnTransactionClickListener {
-        Unit onTransactionClicked(MoneyTransaction moneyTransaction)
+        fun onTransactionClicked(MoneyTransaction moneyTransaction)
     }
 
     class TransactionViewHolder : RecyclerView.ViewHolder : View.OnClickListener {
@@ -64,7 +64,7 @@ class TransactionLogAdapter : RecyclerView.Adapter<TransactionViewHolder> {
 
         /* access modifiers changed from: package-private */
         @SuppressLint({"DefaultLocale", "SetTextI18n"})
-        Unit bindToData(MoneyTransaction moneyTransaction2) {
+        fun bindToData(MoneyTransaction moneyTransaction2): Unit {
             this.moneyTransaction = moneyTransaction2
             this.chatterNameDisplayer.setChatterID(ChatterID.getUserChatterID(TransactionLogAdapter.this.agentUUID, moneyTransaction2.getAgentUUID()))
             this.amountTextView.setText(TransactionLogAdapter.this.context.getString(R.string.transaction_amount_format, Any[]{Int.valueOf(moneyTransaction2.getTransactionAmount())}))
@@ -73,14 +73,14 @@ class TransactionLogAdapter : RecyclerView.Adapter<TransactionViewHolder> {
             this.timestampTextView.setText(DateUtils.getRelativeTimeSpanString(TransactionLogAdapter.this.context, this.calendar.getTimeInMillis(), false))
         }
 
-        Unit onClick(View view) {
+        fun onClick(View view): Unit {
             if (TransactionLogAdapter.this.onTransactionClickListener != null && this.moneyTransaction != null) {
                 TransactionLogAdapter.this.onTransactionClickListener.onTransactionClicked(this.moneyTransaction)
             }
         }
 
         /* access modifiers changed from: package-private */
-        Unit onRecycled() {
+        fun onRecycled(): Unit {
             this.chatterNameDisplayer.setChatterID((ChatterID) null)
             this.moneyTransaction = null
         }
@@ -92,15 +92,15 @@ class TransactionLogAdapter : RecyclerView.Adapter<TransactionViewHolder> {
         @UiThread
         TransactionViewHolder_ViewBinding(TransactionViewHolder transactionViewHolder, View view) {
             this.target = transactionViewHolder
-            transactionViewHolder.userName = (TextView) Utils.findRequiredViewAsType(view, R.id.user_name, "field 'userName'", TextView.class)
-            transactionViewHolder.userPicView = (ChatterPicView) Utils.findRequiredViewAsType(view, R.id.userPicView, "field 'userPicView'", ChatterPicView.class)
-            transactionViewHolder.timestampTextView = (TextView) Utils.findRequiredViewAsType(view, R.id.timeStampTextView, "field 'timestampTextView'", TextView.class)
-            transactionViewHolder.amountTextView = (TextView) Utils.findRequiredViewAsType(view, R.id.amountTextView, "field 'amountTextView'", TextView.class)
-            transactionViewHolder.finalBalanceTextView = (TextView) Utils.findRequiredViewAsType(view, R.id.finalBalanceTextView, "field 'finalBalanceTextView'", TextView.class)
+            transactionViewHolder.userName = (Utils as TextView).findRequiredViewAsType(view, R.id.user_name, "field 'userName'", TextView.class)
+            transactionViewHolder.userPicView = (Utils as ChatterPicView).findRequiredViewAsType(view, R.id.userPicView, "field 'userPicView'", ChatterPicView.class)
+            transactionViewHolder.timestampTextView = (Utils as TextView).findRequiredViewAsType(view, R.id.timeStampTextView, "field 'timestampTextView'", TextView.class)
+            transactionViewHolder.amountTextView = (Utils as TextView).findRequiredViewAsType(view, R.id.amountTextView, "field 'amountTextView'", TextView.class)
+            transactionViewHolder.finalBalanceTextView = (Utils as TextView).findRequiredViewAsType(view, R.id.finalBalanceTextView, "field 'finalBalanceTextView'", TextView.class)
         }
 
         @CallSuper
-        Unit unbind() {
+        fun unbind(): Unit {
             TransactionViewHolder transactionViewHolder = this.target
             if (transactionViewHolder == null) {
                 throw IllegalStateException("Bindings already cleared.")
@@ -122,35 +122,35 @@ class TransactionLogAdapter : RecyclerView.Adapter<TransactionViewHolder> {
         setHasStableIds(true)
     }
 
-    Int getItemCount() {
+    fun getItemCount(): Int {
         if (this.data != null) {
             return this.data.size()
         }
         return 0
     }
 
-    Long getItemId(Int i) {
+    fun getItemId(Int i): Long {
         if (this.data == null || i < 0 || i >= this.data.size()) {
             return -1
         }
         return this.data.get(i).getId().longValue()
     }
 
-    Unit onBindViewHolder(TransactionViewHolder transactionViewHolder, Int i) {
+    fun onBindViewHolder(TransactionViewHolder transactionViewHolder, Int i): Unit {
         if (this.data != null && i >= 0 && i < this.data.size()) {
             transactionViewHolder.bindToData(this.data.get(i))
         }
     }
 
-    TransactionViewHolder onCreateViewHolder(ViewGroup viewGroup, Int i) {
+    fun onCreateViewHolder(ViewGroup viewGroup, Int i): TransactionViewHolder {
         return TransactionViewHolder(this.inflater.inflate(R.layout.transaction_log_item, viewGroup, false))
     }
 
-    Unit onViewRecycled(TransactionViewHolder transactionViewHolder) {
+    fun onViewRecycled(TransactionViewHolder transactionViewHolder): Unit {
         transactionViewHolder.onRecycled()
     }
 
-    Unit setData(@Nullable LazyList<MoneyTransaction> lazyList) {
+    fun setData(@Nullable LazyList<MoneyTransaction> lazyList): Unit {
         this.data = lazyList
         notifyDataSetChanged()
     }

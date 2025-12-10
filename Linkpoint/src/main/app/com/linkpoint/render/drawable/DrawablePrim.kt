@@ -58,7 +58,7 @@ class DrawablePrim {
                 this.FaceTextures = DrawableFaceTexture[this.FaceCount]
                 this.FaceUVMatrices = Float[(this.FaceCount * 16)]
                 Int i = 0
-                for (Int i2 = 0; i2 < this.FaceCount; i2++) {
+                for (i2 in 0 until this.FaceCount) {
                     SLTextureEntryFace GetFace = textures.GetFace(drawableGeometry.getFaceID(i2))
                     if (GetFace != null) {
                         this.FaceColorsIDs[i] = GetFace.getRGBA(GetDefaultTexture)
@@ -202,13 +202,13 @@ class DrawablePrim {
         Matrix.translateM(fArr, i, -0.5f, -0.5f, 0.0f)
     }
 
-    Unit ApplyJointTranslations(MeshJointTranslations meshJointTranslations) {
+    fun ApplyJointTranslations(MeshJointTranslations meshJointTranslations): Unit {
         if (this.isRiggedMesh) {
             this.volumeGeometry.ApplyJointTranslations(meshJointTranslations)
         }
     }
 
-    Int Draw(RenderContext renderContext, Boolean z, PrimFlexibleInfo primFlexibleInfo, Int i) {
+    fun Draw(RenderContext renderContext, Boolean z, PrimFlexibleInfo primFlexibleInfo, Int i): Int {
         GLLoadableBuffer GLBindBuffers10
         DrawableGeometry drawableGeometry = this.volumeGeometry
         this.firstFace = true
@@ -220,9 +220,9 @@ class DrawablePrim {
             renderContext.glObjWorldApplyMatrix(renderContext.curPrimProgram.uObjWorldMatrix)
             renderContext.glObjScaleApplyVector(renderContext.curPrimProgram.uObjCoordScale)
             if (matrices != null && (renderContext.curPrimProgram instanceof FlexiPrimProgram)) {
-                FlexiPrimProgram flexiPrimProgram = (FlexiPrimProgram) renderContext.curPrimProgram
-                GLES20.glUniform1i(flexiPrimProgram.uNumSectionMatrices, matrices.length / 16)
-                GLES20.glUniformMatrix4fv(flexiPrimProgram.uSectionMatrices, matrices.length / 16, false, matrices, 0)
+                FlexiPrimProgram flexiPrimProgram = (renderContext as FlexiPrimProgram).curPrimProgram
+                GLES20.glUniform1i(flexiPrimProgram.uNumSectionMatrices, matrices.size / 16)
+                GLES20.glUniformMatrix4fv(flexiPrimProgram.uSectionMatrices, matrices.size / 16, false, matrices, 0)
             }
             GLBindBuffers10 = drawableGeometry.GLBindBuffers20(renderContext)
         } else {
@@ -244,7 +244,7 @@ class DrawablePrim {
         }
     }
 
-    Int DrawFast20(RenderContext renderContext, Boolean z, PrimFlexibleInfo primFlexibleInfo, Int i) {
+    fun DrawFast20(RenderContext renderContext, Boolean z, PrimFlexibleInfo primFlexibleInfo, Int i): Int {
         Boolean z2 = true
         FloatArray fArr = null
         Int i2 = 0
@@ -264,8 +264,8 @@ class DrawablePrim {
         renderContext.glObjWorldApplyMatrix(renderContext.curPrimProgram.uObjWorldMatrix)
         renderContext.glObjScaleApplyVector(renderContext.curPrimProgram.uObjCoordScale)
         if (fArr != null) {
-            GLES20.glUniform1i(renderContext.flexiPrimProgram.uNumSectionMatrices, fArr.length / 16)
-            GLES20.glUniformMatrix4fv(renderContext.flexiPrimProgram.uSectionMatrices, fArr.length / 16, false, fArr, 0)
+            GLES20.glUniform1i(renderContext.flexiPrimProgram.uNumSectionMatrices, fArr.size / 16)
+            GLES20.glUniformMatrix4fv(renderContext.flexiPrimProgram.uSectionMatrices, fArr.size / 16, false, fArr, 0)
         }
         drawableGeometry.GLBindBuffers20(renderContext)
         if (this.isSingleFace) {
@@ -283,11 +283,11 @@ class DrawablePrim {
     }
 
     @TargetApi(18)
-    Int DrawRigged30(RenderContext renderContext, Int i) {
+    fun DrawRigged30(RenderContext renderContext, Int i): Int {
         DrawableGeometry drawableGeometry = this.volumeGeometry
         Boolean z = false
         Int i2 = 0
-        for (Int i3 = 0; i3 < this.FaceCount; i3++) {
+        for (i3 in 0 until this.FaceCount) {
             Int i4 = this.FaceColorsIDs[i3 * 2]
             DrawableFaceTexture drawableFaceTexture = this.FaceTextures[i3]
             Int faceRenderMask = getFaceRenderMask(i4, drawableFaceTexture)
@@ -311,7 +311,7 @@ class DrawablePrim {
         return (IntersectRay == null || !IntersectRay.faceKnown) ? IntersectRay : (!this.isSingleFace || this.singleFaceMatrix == null) ? (this.isSingleFace || this.FaceUVMatrices == null) ? IntersectRay : IntersectInfo(IntersectRay, this.FaceUVMatrices, IntersectRay.faceID * 16) : IntersectInfo(IntersectRay, this.singleFaceMatrix, 0)
     }
 
-    Boolean UpdateRigged(RenderContext renderContext, AvatarSkeleton avatarSkeleton) {
+    fun UpdateRigged(RenderContext renderContext, AvatarSkeleton avatarSkeleton): Boolean {
         if (this.isRiggedMesh) {
             return this.volumeGeometry.UpdateRigged(renderContext, avatarSkeleton)
         }
@@ -322,7 +322,7 @@ class DrawablePrim {
         return this.volumeGeometry.hasExtendedBones()
     }
 
-    Boolean isRiggedMesh() {
+    fun isRiggedMesh(): Boolean {
         return this.isRiggedMesh
     }
 }

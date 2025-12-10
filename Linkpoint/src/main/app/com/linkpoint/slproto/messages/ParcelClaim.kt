@@ -35,15 +35,15 @@ class ParcelClaim : SLMessage {
         this.Data_Field = Data()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.ParcelData_Fields.size() * 16) + 55
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleParcelClaim(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -47)
@@ -52,7 +52,7 @@ class ParcelClaim : SLMessage {
         packUUID(byteBuffer, this.Data_Field.GroupID)
         packBoolean(byteBuffer, this.Data_Field.IsGroupOwned)
         packBoolean(byteBuffer, this.Data_Field.Final)
-        byteBuffer.put((Byte) this.ParcelData_Fields.size())
+        byteBuffer.put((this as Byte).ParcelData_Fields.size())
         for (ParcelData parcelData : this.ParcelData_Fields) {
             packFloat(byteBuffer, parcelData.West)
             packFloat(byteBuffer, parcelData.South)
@@ -61,14 +61,14 @@ class ParcelClaim : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.Data_Field.GroupID = unpackUUID(byteBuffer)
         this.Data_Field.IsGroupOwned = unpackBoolean(byteBuffer)
         this.Data_Field.Final = unpackBoolean(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             ParcelData parcelData = ParcelData()
             parcelData.West = unpackFloat(byteBuffer)
             parcelData.South = unpackFloat(byteBuffer)

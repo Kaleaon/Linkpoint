@@ -7,14 +7,14 @@ package com.linkpoint.ui.avapicker
     private /* synthetic */ Any f233$f0
 
     private /* synthetic */ Unit $m$0() {
-        ((AvatarPickerForShare) this.f233$f0).m387lambda$com_lumiyaviewer_lumiya_ui_avapicker_AvatarPickerForShare_1468()
+        ((this as AvatarPickerForShare).f233$f0).m387lambda$com_lumiyaviewer_lumiya_ui_avapicker_AvatarPickerForShare_1468()
     }
 
     /* synthetic */ $Lambda$GxFBFkg7vdmipTAXKE3eB6HqSs(Any obj) {
         this.f233$f0 = obj
     }
 
-    Unit run() {
+    fun run(): Unit {
         $m$0()
     }
 }

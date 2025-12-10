@@ -48,7 +48,7 @@ class InventoryManager {
     private RequestHandler<InventoryQuery> queryRequestHandler = RequestHandler<InventoryQuery>() {
         private Map<InventoryQuery, FolderSubscription> folderQueries = ConcurrentHashMap()
 
-        Unit onRequest(@NonNull InventoryQuery inventoryQuery) {
+        fun onRequest(@NonNull InventoryQuery inventoryQuery): Unit {
             FolderSubscription put
             if (inventoryQuery.containsString() != null) {
                 InventoryManager.this.entryListPool.onResultData(inventoryQuery, inventoryQuery.query((SLInventoryEntry) null, InventoryManager.this.inventoryDB))
@@ -56,7 +56,7 @@ class InventoryManager {
             }
             UUID folderId = inventoryQuery.folderId()
             if (folderId == null) {
-                folderId = (UUID) InventoryManager.this.rootFolderID.get()
+                folderId = (InventoryManager as UUID).this.rootFolderID.get()
             }
             Debug.Printf("Inventory: queryRequestHandler: folderId = '%s'", folderId)
             if (folderId != null && (put = this.folderQueries.put(inventoryQuery, FolderSubscription(InventoryManager.this, inventoryQuery, folderId, (FolderSubscription) null))) != null) {
@@ -64,7 +64,7 @@ class InventoryManager {
             }
         }
 
-        Unit onRequestCancelled(@NonNull InventoryQuery inventoryQuery) {
+        fun onRequestCancelled(@NonNull InventoryQuery inventoryQuery): Unit {
             FolderSubscription folderSubscription = this.folderQueries.get(inventoryQuery)
             if (folderSubscription != null) {
                 folderSubscription.unsubscribe()
@@ -90,20 +90,20 @@ class InventoryManager {
             this(inventoryQuery, uuid)
         }
 
-        Unit onData(SLInventoryEntry sLInventoryEntry) {
+        fun onData(SLInventoryEntry sLInventoryEntry): Unit {
             if (sLInventoryEntry != null) {
                 Debug.Printf("Inventory: folder subscription got name: %s with folderId = '%s'", sLInventoryEntry.name, sLInventoryEntry.uuid)
             }
             InventoryManager.this.entryListPool.onResultData(this.query, this.query.query(sLInventoryEntry, InventoryManager.this.inventoryDB))
         }
 
-        Unit onError(Throwable th) {
+        fun onError(Throwable th): Unit {
             Debug.Printf("Inventory: subscription error: %s", th)
             Debug.Warning(th)
             InventoryManager.this.entryListPool.onResultError(this.query, th)
         }
 
-        Unit unsubscribe() {
+        fun unsubscribe(): Unit {
             this.subscription.unsubscribe()
         }
     }
@@ -127,18 +127,18 @@ class InventoryManager {
         this.inventoryDB = userInventoryDB
         this.folderRequestProcessor = RequestProcessor<UUID, SLInventoryEntry, SLInventoryEntry>(this.folderEntryPool, this.inventoryDbExecutor) {
             /* access modifiers changed from: protected */
-            Boolean isRequestComplete(@NonNull UUID uuid, SLInventoryEntry sLInventoryEntry) {
+            fun isRequestComplete(@NonNull UUID uuid, SLInventoryEntry sLInventoryEntry): Boolean {
                 return sLInventoryEntry != null && Objects.equal(sLInventoryEntry.sessionID, InventoryManager.this.currentSessionID.get())
             }
 
             /* access modifiers changed from: protected */
             @Nullable
-            SLInventoryEntry processRequest(@NonNull UUID uuid) {
+            fun processRequest(@NonNull UUID uuid): SLInventoryEntry {
                 return userInventoryDB.findEntry(uuid)
             }
 
             /* access modifiers changed from: protected */
-            SLInventoryEntry processResult(@NonNull UUID uuid, SLInventoryEntry sLInventoryEntry) {
+            fun processResult(@NonNull UUID uuid, SLInventoryEntry sLInventoryEntry): SLInventoryEntry {
                 if (sLInventoryEntry != null) {
                     Debug.Printf("Inventory: entry subscription got name: %s with folderId = '%s'", sLInventoryEntry.name, sLInventoryEntry.uuid)
                 }
@@ -313,72 +313,72 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
     }
 
     /* access modifiers changed from: private */
-    Unit updateSearchResults() {
+    fun updateSearchResults(): Unit {
         this.entryListPool.requestUpdateSome($Lambda$JIBenvPHaOomPgMJhTFPuiVXBzY())
     }
 
-    Unit copyToClipboard(@Nullable InventoryClipboardEntry inventoryClipboardEntry) {
+    fun copyToClipboard(@Nullable InventoryClipboardEntry inventoryClipboardEntry): Unit {
         this.clipboardPool.setData(SubscriptionSingleKey.Value, inventoryClipboardEntry)
     }
 
-    Subscribable<SubscriptionSingleKey, InventoryClipboardEntry> getClipboard() {
+    fun getClipboard(): Subscribable<SubscriptionSingleKey, InventoryClipboardEntry> {
         return this.clipboardPool
     }
 
-    InventoryDB getDatabase() {
+    fun getDatabase(): InventoryDB {
         return this.inventoryDB
     }
 
-    Executor getExecutor() {
+    fun getExecutor(): Executor {
         return this.inventoryDbExecutor
     }
 
-    Subscribable<UUID, SLInventoryEntry> getFolderEntryPool() {
+    fun getFolderEntryPool(): Subscribable<UUID, SLInventoryEntry> {
         return this.folderEntryPool
     }
 
-    Subscribable<UUID, Boolean> getFolderLoading() {
+    fun getFolderLoading(): Subscribable<UUID, Boolean> {
         return this.folderLoadingPool
     }
 
-    RequestSource<UUID, Boolean> getFolderLoadingRequestSource() {
+    fun getFolderLoadingRequestSource(): RequestSource<UUID, Boolean> {
         return this.folderLoadingPool
     }
 
-    RequestSource<UUID, SLInventoryEntry> getFolderRequestSource() {
+    fun getFolderRequestSource(): RequestSource<UUID, SLInventoryEntry> {
         return this.folderRequestProcessor
     }
 
-    Subscribable<InventoryQuery, InventoryEntryList> getInventoryEntries() {
+    fun getInventoryEntries(): Subscribable<InventoryQuery, InventoryEntryList> {
         return this.entryListPool
     }
 
     @Nullable
-    UUID getRootFolder() {
+    fun getRootFolder(): UUID {
         return this.rootFolderID.get()
     }
 
-    Subscribable<SubscriptionSingleKey, Boolean> getSearchProcess() {
+    fun getSearchProcess(): Subscribable<SubscriptionSingleKey, Boolean> {
         return this.searchProcessPool
     }
 
-    RequestSource<SubscriptionSingleKey, Boolean> getSearchProcessRequestSource() {
+    fun getSearchProcessRequestSource(): RequestSource<SubscriptionSingleKey, Boolean> {
         return this.searchProcessPool
     }
 
-    SubscriptionPool<SubscriptionSingleKey, Boolean> getSearchRunning() {
+    fun getSearchRunning(): SubscriptionPool<SubscriptionSingleKey, Boolean> {
         return this.searchRunningPool
     }
 
-    Unit requestFolderUpdate(@NonNull UUID uuid) {
+    fun requestFolderUpdate(@NonNull UUID uuid): Unit {
         this.folderEntryPool.requestUpdate(uuid)
     }
 
-    Unit setCurrentSessionID(UUID uuid) {
+    fun setCurrentSessionID(UUID uuid): Unit {
         this.currentSessionID.set(uuid)
     }
 
-    Unit setRootFolder(UUID uuid) {
+    fun setRootFolder(UUID uuid): Unit {
         this.rootFolderID.set(uuid)
     }
 }

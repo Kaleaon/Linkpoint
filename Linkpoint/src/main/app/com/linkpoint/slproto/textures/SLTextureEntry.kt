@@ -23,7 +23,7 @@ class SLTextureEntry {
         this.DefaultTexture = sLTextureEntryFace
         this.FaceTextures = sLTextureEntryFaceArr
         Int i = 0
-        for (Int i2 = 0; i2 < sLTextureEntryFaceArr.length; i2++) {
+        for (i2 in 0 until sLTextureEntryFaceArr.size) {
             if (sLTextureEntryFaceArr[i2] != null) {
                 i |= 1 << i2
             }
@@ -233,7 +233,7 @@ class SLTextureEntry {
             this.FaceTextures = emptyFaces
         } else {
             this.FaceTextures = SLTextureEntryFace[i23]
-            for (Int i25 = 0; i25 < i23; i25++) {
+            for (i25 in 0 until i23) {
                 this.FaceTextures[i25] = SLTextureEntryFace.create(mutableSLTextureEntryFaceArr[i25])
             }
         }
@@ -284,7 +284,7 @@ class SLTextureEntry {
         }
         Debug.Log(String.format("WriteFaceBitfield: faceBits = 0x%08x, count %d", Any[]{Int.valueOf(i), Int.valueOf(i2)}))
         Int i5 = (i2 - 1) * 7
-        for (Int i6 = 0; i6 < i2; i6++) {
+        for (i6 in 0 until i2) {
             Byte b = (Byte) ((i >> i5) & Vr.VREvent.VrCore.ErrorCode.CONTROLLER_UNSTUCK)
             if (i6 != i2 - 1) {
                 b = (Byte) (b | 128)
@@ -295,11 +295,11 @@ class SLTextureEntry {
         }
     }
 
-    SLTextureEntry create(SLTextureEntryFace sLTextureEntryFace, SLTextureEntryFace[] sLTextureEntryFaceArr) {
+    fun create(SLTextureEntryFace sLTextureEntryFace, SLTextureEntryFace[] sLTextureEntryFaceArr): SLTextureEntry {
         return pool.intern(SLTextureEntry(sLTextureEntryFace, sLTextureEntryFaceArr))
     }
 
-    SLTextureEntry create(ByteBuffer byteBuffer, Int i) {
+    fun create(ByteBuffer byteBuffer, Int i): SLTextureEntry {
         return pool.intern(SLTextureEntry(byteBuffer, i))
     }
 
@@ -308,9 +308,9 @@ class SLTextureEntry {
     }
 
     private Int getHashValue() {
-        Int length = this.FaceTextures.length + this.faceMask + this.DefaultTexture.hashCode()
+        Int length = this.FaceTextures.size + this.faceMask + this.DefaultTexture.hashCode()
         Int i = 1
-        for (Int i2 = 0; i2 < this.FaceTextures.length; i2++) {
+        for (i2 in 0 until this.FaceTextures.size) {
             if ((this.faceMask & i) != 0) {
                 length += this.FaceTextures[i2].hashCode()
             }
@@ -361,18 +361,18 @@ class SLTextureEntry {
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN)
     }
 
-    SLTextureEntryFace GetDefaultTexture() {
+    fun GetDefaultTexture(): SLTextureEntryFace {
         return this.DefaultTexture
     }
 
-    SLTextureEntryFace GetFace(Int i) {
+    fun GetFace(Int i): SLTextureEntryFace {
         if (i >= 32) {
             return null
         }
-        return i >= this.FaceTextures.length ? this.DefaultTexture : this.FaceTextures[i] != null ? this.FaceTextures[i] : this.DefaultTexture
+        return i >= this.FaceTextures.size ? this.DefaultTexture : this.FaceTextures[i] != null ? this.FaceTextures[i] : this.DefaultTexture
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -380,11 +380,11 @@ class SLTextureEntry {
             return false
         }
         SLTextureEntry sLTextureEntry = (SLTextureEntry) obj
-        if (this.faceMask != sLTextureEntry.faceMask || this.FaceTextures.length != sLTextureEntry.FaceTextures.length || !this.DefaultTexture.equals(sLTextureEntry.DefaultTexture)) {
+        if (this.faceMask != sLTextureEntry.faceMask || this.FaceTextures.size != sLTextureEntry.FaceTextures.size || !this.DefaultTexture.equals(sLTextureEntry.DefaultTexture)) {
             return false
         }
         Int i = 1
-        for (Int i2 = 0; i2 < this.FaceTextures.length; i2++) {
+        for (i2 in 0 until this.FaceTextures.size) {
             if ((this.faceMask & i) != 0 && !this.FaceTextures[i2].equals(sLTextureEntry.FaceTextures[i2])) {
                 return false
             }
@@ -393,22 +393,22 @@ class SLTextureEntry {
         return true
     }
 
-    Int getFaceMask() {
+    fun getFaceMask(): Int {
         return this.faceMask
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         return this.hashValue
     }
 
-    Boolean isSingleFace() {
+    fun isSingleFace(): Boolean {
         return this.faceMask == 0
     }
 
-    ByteArray packByteArray() {
+    fun packByteArray(): ByteArray {
         ByteBuffer allocate = ByteBuffer.allocate(SupportMenu.USER_MASK)
         putUUID(allocate, this.DefaultTexture.textureID())
-        for (Int i = 0; i < this.FaceTextures.length; i++) {
+        for (i in 0 until this.FaceTextures.size) {
             if (this.FaceTextures[i] != null) {
                 if (this.DefaultTexture.textureID() == null ? true : !this.FaceTextures[i].getTextureID(this.DefaultTexture).equals(this.DefaultTexture.textureID())) {
                     WriteFaceBitfield(allocate, 1 << i)
@@ -418,7 +418,7 @@ class SLTextureEntry {
         }
         WriteFaceBitfield(allocate, 0)
         allocate.putInt(this.DefaultTexture.rgba())
-        for (Int i2 = 0; i2 < this.FaceTextures.length; i2++) {
+        for (i2 in 0 until this.FaceTextures.size) {
             if (!(this.FaceTextures[i2] == null || this.FaceTextures[i2].getRGBA(this.DefaultTexture) == this.DefaultTexture.rgba())) {
                 WriteFaceBitfield(allocate, 1 << i2)
                 allocate.putInt(this.FaceTextures[i2].getRGBA(this.DefaultTexture))
@@ -426,7 +426,7 @@ class SLTextureEntry {
         }
         WriteFaceBitfield(allocate, 0)
         allocate.putFloat(this.DefaultTexture.repeatU())
-        for (Int i3 = 0; i3 < this.FaceTextures.length; i3++) {
+        for (i3 in 0 until this.FaceTextures.size) {
             if (!(this.FaceTextures[i3] == null || this.FaceTextures[i3].getRepeatU(this.DefaultTexture) == this.DefaultTexture.repeatU())) {
                 WriteFaceBitfield(allocate, 1 << i3)
                 allocate.putFloat(this.FaceTextures[i3].getRepeatU(this.DefaultTexture))
@@ -434,7 +434,7 @@ class SLTextureEntry {
         }
         WriteFaceBitfield(allocate, 0)
         allocate.putFloat(this.DefaultTexture.repeatV())
-        for (Int i4 = 0; i4 < this.FaceTextures.length; i4++) {
+        for (i4 in 0 until this.FaceTextures.size) {
             if (!(this.FaceTextures[i4] == null || this.FaceTextures[i4].getRepeatV(this.DefaultTexture) == this.DefaultTexture.repeatV())) {
                 WriteFaceBitfield(allocate, 1 << i4)
                 allocate.putFloat(this.FaceTextures[i4].getRepeatV(this.DefaultTexture))
@@ -442,7 +442,7 @@ class SLTextureEntry {
         }
         WriteFaceBitfield(allocate, 0)
         putOffset(allocate, this.DefaultTexture.offsetU())
-        for (Int i5 = 0; i5 < this.FaceTextures.length; i5++) {
+        for (i5 in 0 until this.FaceTextures.size) {
             if (!(this.FaceTextures[i5] == null || this.FaceTextures[i5].getOffsetU(this.DefaultTexture) == this.DefaultTexture.offsetU())) {
                 WriteFaceBitfield(allocate, 1 << i5)
                 putOffset(allocate, this.FaceTextures[i5].getOffsetU(this.DefaultTexture))
@@ -450,7 +450,7 @@ class SLTextureEntry {
         }
         WriteFaceBitfield(allocate, 0)
         putOffset(allocate, this.DefaultTexture.offsetV())
-        for (Int i6 = 0; i6 < this.FaceTextures.length; i6++) {
+        for (i6 in 0 until this.FaceTextures.size) {
             if (!(this.FaceTextures[i6] == null || this.FaceTextures[i6].getOffsetV(this.DefaultTexture) == this.DefaultTexture.offsetV())) {
                 WriteFaceBitfield(allocate, 1 << i6)
                 putOffset(allocate, this.FaceTextures[i6].getOffsetV(this.DefaultTexture))
@@ -458,7 +458,7 @@ class SLTextureEntry {
         }
         WriteFaceBitfield(allocate, 0)
         putRotation(allocate, this.DefaultTexture.rotation())
-        for (Int i7 = 0; i7 < this.FaceTextures.length; i7++) {
+        for (i7 in 0 until this.FaceTextures.size) {
             if (!(this.FaceTextures[i7] == null || this.FaceTextures[i7].getRotation(this.DefaultTexture) == this.DefaultTexture.rotation())) {
                 WriteFaceBitfield(allocate, 1 << i7)
                 putRotation(allocate, this.FaceTextures[i7].getRotation(this.DefaultTexture))
@@ -466,7 +466,7 @@ class SLTextureEntry {
         }
         WriteFaceBitfield(allocate, 0)
         allocate.put(this.DefaultTexture.materialb())
-        for (Int i8 = 0; i8 < this.FaceTextures.length; i8++) {
+        for (i8 in 0 until this.FaceTextures.size) {
             if (!(this.FaceTextures[i8] == null || this.FaceTextures[i8].getMaterial(this.DefaultTexture) == this.DefaultTexture.materialb())) {
                 WriteFaceBitfield(allocate, 1 << i8)
                 allocate.put(this.FaceTextures[i8].getMaterial(this.DefaultTexture))
@@ -474,7 +474,7 @@ class SLTextureEntry {
         }
         WriteFaceBitfield(allocate, 0)
         allocate.put(this.DefaultTexture.mediab())
-        for (Int i9 = 0; i9 < this.FaceTextures.length; i9++) {
+        for (i9 in 0 until this.FaceTextures.size) {
             if (!(this.FaceTextures[i9] == null || this.FaceTextures[i9].getMedia(this.DefaultTexture) == this.DefaultTexture.mediab())) {
                 WriteFaceBitfield(allocate, 1 << i9)
                 allocate.put(this.FaceTextures[i9].getMedia(this.DefaultTexture))
@@ -482,7 +482,7 @@ class SLTextureEntry {
         }
         WriteFaceBitfield(allocate, 0)
         putGlow(allocate, this.DefaultTexture.glow())
-        for (Int i10 = 0; i10 < this.FaceTextures.length; i10++) {
+        for (i10 in 0 until this.FaceTextures.size) {
             if (!(this.FaceTextures[i10] == null || this.FaceTextures[i10].getGlow(this.DefaultTexture) == this.DefaultTexture.glow())) {
                 WriteFaceBitfield(allocate, 1 << i10)
                 putGlow(allocate, this.FaceTextures[i10].getGlow(this.DefaultTexture))

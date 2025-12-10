@@ -10,7 +10,7 @@ class ImageData : SLMessage {
     ImageID ImageID_Field = ImageID()
 
     class ImageDataData {
-        byte[] Data
+        ByteArray Data
     }
 
     class ImageID {
@@ -24,24 +24,24 @@ class ImageData : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.ImageDataData_Field.Data.length + 2 + 24
+    fun CalcPayloadSize(): Int {
+        return this.ImageDataData_Field.Data.size + 2 + 24
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleImageData(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put((byte) 9)
         packUUID(byteBuffer, this.ImageID_Field.ID)
-        packByte(byteBuffer, (byte) this.ImageID_Field.Codec)
+        packByte(byteBuffer, (this as byte).ImageID_Field.Codec)
         packInt(byteBuffer, this.ImageID_Field.Size)
-        packShort(byteBuffer, (short) this.ImageID_Field.Packets)
+        packShort(byteBuffer, (this as short).ImageID_Field.Packets)
         packVariable(byteBuffer, this.ImageDataData_Field.Data, 2)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.ImageID_Field.ID = unpackUUID(byteBuffer)
         this.ImageID_Field.Codec = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.ImageID_Field.Size = unpackInt(byteBuffer)

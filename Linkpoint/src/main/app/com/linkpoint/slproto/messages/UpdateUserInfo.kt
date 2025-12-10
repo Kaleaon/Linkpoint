@@ -22,15 +22,15 @@ class UpdateUserInfo : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.UserData_Field.DirectoryVisibility.length + 2 + 36
+    fun CalcPayloadSize(): Int {
+        return this.UserData_Field.DirectoryVisibility.size + 2 + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleUpdateUserInfo(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -111)
@@ -40,7 +40,7 @@ class UpdateUserInfo : SLMessage {
         packVariable(byteBuffer, this.UserData_Field.DirectoryVisibility, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.UserData_Field.IMViaEMail = unpackBoolean(byteBuffer)

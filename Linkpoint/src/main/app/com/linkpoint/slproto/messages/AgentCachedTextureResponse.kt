@@ -36,7 +36,7 @@ class AgentCachedTextureResponse : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            i = ((WearableData) it.next()).HostName.length + 18 + i2
+            i = ((it as WearableData).next()).HostName.size + 18 + i2
         }
     }
 
@@ -51,10 +51,10 @@ class AgentCachedTextureResponse : SLMessage {
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packInt(byteBuffer, this.AgentData_Field.SerialNum)
-        byteBuffer.put((Byte) this.WearableData_Fields.size())
+        byteBuffer.put((this as Byte).WearableData_Fields.size())
         for (WearableData wearableData : this.WearableData_Fields) {
             packUUID(byteBuffer, wearableData.TextureID)
-            packByte(byteBuffer, (Byte) wearableData.TextureIndex)
+            packByte(byteBuffer, (wearableData as Byte).TextureIndex)
             packVariable(byteBuffer, wearableData.HostName, 1)
         }
     }
@@ -64,7 +64,7 @@ class AgentCachedTextureResponse : SLMessage {
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.SerialNum = unpackInt(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             WearableData wearableData = WearableData()
             wearableData.TextureID = unpackUUID(byteBuffer)
             wearableData.TextureIndex = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE

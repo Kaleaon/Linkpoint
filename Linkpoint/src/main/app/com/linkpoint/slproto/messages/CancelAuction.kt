@@ -17,27 +17,27 @@ class CancelAuction : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.ParcelData_Fields.size() * 16) + 5
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleCancelAuction(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -24)
-        byteBuffer.put((byte) this.ParcelData_Fields.size())
+        byteBuffer.put((this as byte).ParcelData_Fields.size())
         for (ParcelData parcelData : this.ParcelData_Fields) {
             packUUID(byteBuffer, parcelData.ParcelID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             ParcelData parcelData = ParcelData()
             parcelData.ParcelID = unpackUUID(byteBuffer)
             this.ParcelData_Fields.add(parcelData)

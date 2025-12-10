@@ -28,15 +28,15 @@ class LinkInventoryItem : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.InventoryBlock_Field.Name.length + 55 + 1 + this.InventoryBlock_Field.Description.length + 36
+    fun CalcPayloadSize(): Int {
+        return this.InventoryBlock_Field.Name.size + 55 + 1 + this.InventoryBlock_Field.Description.size + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleLinkInventoryItem(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -86)
@@ -46,13 +46,13 @@ class LinkInventoryItem : SLMessage {
         packUUID(byteBuffer, this.InventoryBlock_Field.FolderID)
         packUUID(byteBuffer, this.InventoryBlock_Field.TransactionID)
         packUUID(byteBuffer, this.InventoryBlock_Field.OldItemID)
-        packByte(byteBuffer, (Byte) this.InventoryBlock_Field.Type)
-        packByte(byteBuffer, (Byte) this.InventoryBlock_Field.InvType)
+        packByte(byteBuffer, (this as Byte).InventoryBlock_Field.Type)
+        packByte(byteBuffer, (this as Byte).InventoryBlock_Field.InvType)
         packVariable(byteBuffer, this.InventoryBlock_Field.Name, 1)
         packVariable(byteBuffer, this.InventoryBlock_Field.Description, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.InventoryBlock_Field.CallbackID = unpackInt(byteBuffer)

@@ -34,11 +34,11 @@ abstract class SLChatDialogEvent : SLChatTextEvent {
     }
 
     /* access modifiers changed from: protected */
-    Unit onDialogIgnored(UserManager userManager) {
+    fun onDialogIgnored(UserManager userManager): Unit {
         this.ignored = true
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setChatChannel(Integer.valueOf(this.chatChannel))
         chatMessage.setDialogIgnored(Boolean.valueOf(this.ignored))

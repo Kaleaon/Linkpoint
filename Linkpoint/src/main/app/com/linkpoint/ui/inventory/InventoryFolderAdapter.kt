@@ -43,7 +43,7 @@ class InventoryFolderAdapter : BaseAdapter : View.OnClickListener {
     private Table<SLWearableType, UUID, SLWearable> wornWearables = null
 
     interface OnItemCheckboxClickListener {
-        Unit onItemCheckboxClicked(SLInventoryEntry sLInventoryEntry)
+        fun onItemCheckboxClicked(SLInventoryEntry sLInventoryEntry)
     }
 
     InventoryFolderAdapter(LayoutInflater layoutInflater, Boolean z) {
@@ -55,15 +55,15 @@ class InventoryFolderAdapter : BaseAdapter : View.OnClickListener {
         return sLInventoryEntry.whatIsItemWornOn(this.wornAttachments, this.wornWearables, false) != null
     }
 
-    Int getCount() {
+    fun getCount(): Int {
         return this.data.size()
     }
 
-    SLInventoryEntry getItem(Int i) {
+    fun getItem(Int i): SLInventoryEntry {
         return this.data.get(i)
     }
 
-    Long getItemId(Int i) {
+    fun getItemId(Int i): Long {
         SLInventoryEntry item = getItem(i)
         if (item != null) {
             return item.getId()
@@ -71,7 +71,7 @@ class InventoryFolderAdapter : BaseAdapter : View.OnClickListener {
         return -1
     }
 
-    View getView(Int i, View view, ViewGroup viewGroup) {
+    fun getView(Int i, View view, ViewGroup viewGroup): View {
         SLInventoryEntry sLInventoryEntry
         Boolean z = true
         Int i4 = 0
@@ -80,7 +80,7 @@ class InventoryFolderAdapter : BaseAdapter : View.OnClickListener {
         }
         SLInventoryEntry item = getItem(i)
         if (item != null) {
-            TextView textView = (TextView) view.findViewById(R.id.itemNameTextView)
+            TextView textView = (view as TextView).findViewById(R.id.itemNameTextView)
             textView.setText(item.name)
             Int i5 = -1
             Int i6 = -1
@@ -104,15 +104,15 @@ class InventoryFolderAdapter : BaseAdapter : View.OnClickListener {
                 i3 = i6
             }
             if (i2 >= 0) {
-                ((ImageView) view.findViewById(R.id.itemTypeIconView)).setImageResource(i2)
+                ((view as ImageView).findViewById(R.id.itemTypeIconView)).setImageResource(i2)
                 if (i3 >= 0) {
-                    ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageResource(i3)
+                    ((view as ImageView).findViewById(R.id.itemSubTypeIconView)).setImageResource(i3)
                 } else {
-                    ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageBitmap((Bitmap) null)
+                    ((view as ImageView).findViewById(R.id.itemSubTypeIconView)).setImageBitmap((Bitmap) null)
                 }
             } else {
-                ((ImageView) view.findViewById(R.id.itemTypeIconView)).setImageBitmap((Bitmap) null)
-                ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageBitmap((Bitmap) null)
+                ((view as ImageView).findViewById(R.id.itemTypeIconView)).setImageBitmap((Bitmap) null)
+                ((view as ImageView).findViewById(R.id.itemSubTypeIconView)).setImageBitmap((Bitmap) null)
             }
             if (this.wornOutfitFolder == null || !Objects.equal(this.wornOutfitFolder, item.uuid)) {
                 textView.setTypeface((Typeface) null, 0)
@@ -134,14 +134,14 @@ class InventoryFolderAdapter : BaseAdapter : View.OnClickListener {
                         }
                         view.findViewById(R.id.item_worn_checkbox).setVisibility(0)
                         view.findViewById(R.id.item_worn_checkbox).setTag(R.id.tag_outfit_object, item)
-                        ((CheckBox) view.findViewById(R.id.item_worn_checkbox)).setChecked(z2)
+                        ((view as CheckBox).findViewById(R.id.item_worn_checkbox)).setChecked(z2)
                         view.findViewById(R.id.item_worn_checkbox).setEnabled(z)
                         view.findViewById(R.id.item_worn_checkbox).setOnClickListener(this)
                     }
                     z = false
                     view.findViewById(R.id.item_worn_checkbox).setVisibility(0)
                     view.findViewById(R.id.item_worn_checkbox).setTag(R.id.tag_outfit_object, item)
-                    ((CheckBox) view.findViewById(R.id.item_worn_checkbox)).setChecked(z2)
+                    ((view as CheckBox).findViewById(R.id.item_worn_checkbox)).setChecked(z2)
                     view.findViewById(R.id.item_worn_checkbox).setEnabled(z)
                     view.findViewById(R.id.item_worn_checkbox).setOnClickListener(this)
                 } else {
@@ -160,11 +160,11 @@ class InventoryFolderAdapter : BaseAdapter : View.OnClickListener {
         return view
     }
 
-    Boolean hasStableIds() {
+    fun hasStableIds(): Boolean {
         return true
     }
 
-    Unit onClick(View view) {
+    fun onClick(View view): Unit {
         if (this.onItemCheckboxClickListener != null) {
             Any tag = view.getTag(R.id.tag_outfit_object)
             if (tag instanceof SLInventoryEntry) {
@@ -173,12 +173,12 @@ class InventoryFolderAdapter : BaseAdapter : View.OnClickListener {
         }
     }
 
-    Unit setAvatarAppearance(@Nullable SLAvatarAppearance sLAvatarAppearance) {
+    fun setAvatarAppearance(@Nullable SLAvatarAppearance sLAvatarAppearance): Unit {
         this.avatarAppearance = sLAvatarAppearance
         notifyDataSetChanged()
     }
 
-    Unit setData(@Nullable InventoryEntryList inventoryEntryList) {
+    fun setData(@Nullable InventoryEntryList inventoryEntryList): Unit {
         if (inventoryEntryList == null) {
             inventoryEntryList = InventoryEntryList()
         }
@@ -186,26 +186,26 @@ class InventoryFolderAdapter : BaseAdapter : View.OnClickListener {
         notifyDataSetChanged()
     }
 
-    Unit setDatabase(InventoryDB inventoryDB) {
+    fun setDatabase(InventoryDB inventoryDB): Unit {
         this.database = inventoryDB
         notifyDataSetChanged()
     }
 
-    Unit setOnItemCheckboxClickListener(@Nullable OnItemCheckboxClickListener onItemCheckboxClickListener2) {
+    fun setOnItemCheckboxClickListener(@Nullable OnItemCheckboxClickListener onItemCheckboxClickListener2): Unit {
         this.onItemCheckboxClickListener = onItemCheckboxClickListener2
     }
 
-    Unit setWornAttachments(@Nullable ImmutableMap<UUID, String> immutableMap) {
+    fun setWornAttachments(@Nullable ImmutableMap<UUID, String> immutableMap): Unit {
         this.wornAttachments = immutableMap
         notifyDataSetChanged()
     }
 
-    Unit setWornOutfitFolder(@Nullable UUID uuid) {
+    fun setWornOutfitFolder(@Nullable UUID uuid): Unit {
         this.wornOutfitFolder = uuid
         notifyDataSetChanged()
     }
 
-    Unit setWornWearables(@Nullable Table<SLWearableType, UUID, SLWearable> table) {
+    fun setWornWearables(@Nullable Table<SLWearableType, UUID, SLWearable> table): Unit {
         this.wornWearables = table
         notifyDataSetChanged()
     }

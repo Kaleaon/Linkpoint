@@ -19,15 +19,15 @@ class RpcScriptReplyInbound : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.DataBlock_Field.StringValue.length + 54 + 4
+    fun CalcPayloadSize(): Int {
+        return this.DataBlock_Field.StringValue.size + 54 + 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRpcScriptReplyInbound(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -95)
@@ -38,7 +38,7 @@ class RpcScriptReplyInbound : SLMessage {
         packVariable(byteBuffer, this.DataBlock_Field.StringValue, 2)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.DataBlock_Field.TaskID = unpackUUID(byteBuffer)
         this.DataBlock_Field.ItemID = unpackUUID(byteBuffer)
         this.DataBlock_Field.ChannelID = unpackUUID(byteBuffer)

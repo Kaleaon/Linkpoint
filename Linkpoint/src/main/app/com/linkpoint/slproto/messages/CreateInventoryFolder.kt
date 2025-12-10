@@ -15,7 +15,7 @@ class CreateInventoryFolder : SLMessage {
 
     class FolderData {
         UUID FolderID
-        byte[] Name
+        ByteArray Name
         UUID ParentID
         Int Type
     }
@@ -24,15 +24,15 @@ class CreateInventoryFolder : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.FolderData_Field.Name.length + 34 + 36
+    fun CalcPayloadSize(): Int {
+        return this.FolderData_Field.Name.size + 34 + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleCreateInventoryFolder(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 17)
@@ -40,11 +40,11 @@ class CreateInventoryFolder : SLMessage {
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packUUID(byteBuffer, this.FolderData_Field.FolderID)
         packUUID(byteBuffer, this.FolderData_Field.ParentID)
-        packByte(byteBuffer, (byte) this.FolderData_Field.Type)
+        packByte(byteBuffer, (this as byte).FolderData_Field.Type)
         packVariable(byteBuffer, this.FolderData_Field.Name, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.FolderData_Field.FolderID = unpackUUID(byteBuffer)

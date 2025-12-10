@@ -75,7 +75,7 @@ Method generation error in method: com.linkpoint.ui.minimap.-$Lambda$XqnH7RvGuiq
 */
 
 
-    Fragment newInstance(UUID uuid) {
+    fun newInstance(UUID uuid): Fragment {
         MinimapFragment minimapFragment = MinimapFragment()
         minimapFragment.setArguments(ActivityUtils.makeFragmentArguments(uuid, (Bundle) null))
         return minimapFragment
@@ -83,34 +83,34 @@ Method generation error in method: com.linkpoint.ui.minimap.-$Lambda$XqnH7RvGuiq
 
     /* access modifiers changed from: private */
     /* renamed from: onMinimapBitmap */
-    Unit m640com_lumiyaviewer_lumiya_ui_minimap_MinimapFragmentmthref0(SLMinimap.MinimapBitmap minimapBitmap2) {
+    fun m640com_lumiyaviewer_lumiya_ui_minimap_MinimapFragmentmthref0(SLMinimap.MinimapBitmap minimapBitmap2): Unit {
         View view = getView()
         if (view != null) {
-            ((MinimapView) view.findViewById(R.id.minimapView)).setMinimapBitmap(minimapBitmap2)
+            ((view as MinimapView).findViewById(R.id.minimapView)).setMinimapBitmap(minimapBitmap2)
         }
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onUserLocations */
-    Unit m641com_lumiyaviewer_lumiya_ui_minimap_MinimapFragmentmthref1(SLMinimap.UserLocations userLocations2) {
+    fun m641com_lumiyaviewer_lumiya_ui_minimap_MinimapFragmentmthref1(SLMinimap.UserLocations userLocations2): Unit {
         View view = getView()
         if (view != null) {
-            ((MinimapView) view.findViewById(R.id.minimapView)).setUserLocations(userLocations2)
+            ((view as MinimapView).findViewById(R.id.minimapView)).setUserLocations(userLocations2)
         }
     }
 
-    Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle): Unit {
         super.onCreate(bundle)
     }
 
-    View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         View inflate = layoutInflater.inflate(R.layout.minimap_fragment, viewGroup, false)
-        ((MinimapView) inflate.findViewById(R.id.minimapView)).setOnUserClickListener(this)
+        ((inflate as MinimapView).findViewById(R.id.minimapView)).setOnUserClickListener(this)
         return inflate
     }
 
-    Unit onStart() {
+    fun onStart(): Unit {
         super.onStart()
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
@@ -122,13 +122,13 @@ Method generation error in method: com.linkpoint.ui.minimap.-$Lambda$XqnH7RvGuiq
         this.userLocations.unsubscribe()
     }
 
-    Unit onStop() {
+    fun onStop(): Unit {
         this.minimapBitmap.unsubscribe()
         this.userLocations.unsubscribe()
         super.onStop()
     }
 
-    Unit onUserClick(UUID uuid) {
+    fun onUserClick(UUID uuid): Unit {
         FragmentManager fragmentManager = getFragmentManager()
         if (fragmentManager != null) {
             Fragment findFragmentById = fragmentManager.findFragmentById(R.id.details)
@@ -138,7 +138,7 @@ Method generation error in method: com.linkpoint.ui.minimap.-$Lambda$XqnH7RvGuiq
         }
         View view = getView()
         if (view != null) {
-            ((MinimapView) view.findViewById(R.id.minimapView)).setSelectedUser(uuid)
+            ((view as MinimapView).findViewById(R.id.minimapView)).setSelectedUser(uuid)
         }
     }
 }

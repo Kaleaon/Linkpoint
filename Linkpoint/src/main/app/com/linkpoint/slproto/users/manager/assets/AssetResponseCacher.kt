@@ -25,8 +25,8 @@ class AssetResponseCacher : Refreshable<AssetKey> {
         this.pool.setCacheInvalidateHandler($Lambda$9LOU8pkPwNYFJNwesblYMTVNE0(this), executor)
         this.requestHandler = RateLimitRequestHandler<>(RequestProcessor<AssetKey, AssetData, AssetData>(this.pool, executor) {
             /* access modifiers changed from: protected */
-            Boolean isRequestComplete(@NonNull AssetKey assetKey, AssetData assetData) {
-                CachedAsset cachedAsset = (CachedAsset) AssetResponseCacher.this.cachedAssetDao.load(assetKey.toString())
+            fun isRequestComplete(@NonNull AssetKey assetKey, AssetData assetData): Boolean {
+                CachedAsset cachedAsset = (AssetResponseCacher as CachedAsset).this.cachedAssetDao.load(assetKey.toString())
                 if (cachedAsset != null) {
                     return !cachedAsset.getMustRevalidate()
                 }
@@ -35,8 +35,8 @@ class AssetResponseCacher : Refreshable<AssetKey> {
 
             /* access modifiers changed from: protected */
             @Nullable
-            AssetData processRequest(@NonNull AssetKey assetKey) {
-                CachedAsset cachedAsset = (CachedAsset) AssetResponseCacher.this.cachedAssetDao.load(assetKey.toString())
+            fun processRequest(@NonNull AssetKey assetKey): AssetData {
+                CachedAsset cachedAsset = (AssetResponseCacher as CachedAsset).this.cachedAssetDao.load(assetKey.toString())
                 if (cachedAsset != null) {
                     AssetData assetData = AssetData(cachedAsset.getStatus(), cachedAsset.getData())
                     Debug.Printf("AssetCache: returning cached response for key %s", assetKey)
@@ -47,7 +47,7 @@ class AssetResponseCacher : Refreshable<AssetKey> {
             }
 
             /* access modifiers changed from: protected */
-            AssetData processResult(@NonNull AssetKey assetKey, AssetData assetData) {
+            fun processResult(@NonNull AssetKey assetKey, AssetData assetData): AssetData {
                 Debug.Printf("AssetCache: saving cached data for key %s", assetKey.toString())
                 if (assetData != null) {
                     AssetResponseCacher.this.cachedAssetDao.insertOrReplace(CachedAsset(assetKey.toString(), assetData.getStatus(), assetData.getData(), false))
@@ -56,25 +56,25 @@ class AssetResponseCacher : Refreshable<AssetKey> {
             }
     }
 
-    Subscribable<AssetKey, AssetData> getPool() {
+    fun getPool(): Subscribable<AssetKey, AssetData> {
         return this.pool
     }
 
-    RequestSource<AssetKey, AssetData> getRequestSource() {
+    fun getRequestSource(): RequestSource<AssetKey, AssetData> {
         return this.requestHandler
     }
 
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_assets_AssetResponseCacher_872  reason: not valid java name */
     /* synthetic */ Unit m378lambda$com_lumiyaviewer_lumiya_slproto_users_manager_assets_AssetResponseCacher_872(AssetKey assetKey) {
-        CachedAsset cachedAsset = (CachedAsset) this.cachedAssetDao.load(assetKey.toString())
+        CachedAsset cachedAsset = (this as CachedAsset).cachedAssetDao.load(assetKey.toString())
         if (cachedAsset != null) {
             cachedAsset.setMustRevalidate(true)
             this.cachedAssetDao.update(cachedAsset)
         }
     }
 
-    Unit requestUpdate(AssetKey assetKey) {
+    fun requestUpdate(AssetKey assetKey): Unit {
         this.pool.requestUpdate(assetKey)
     }
 }

@@ -26,34 +26,34 @@ class TransferInventory : SLMessage {
         this.InfoBlock_Field = InfoBlock()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.InventoryBlock_Fields.size() * 17) + 53
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleTransferInventory(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 39)
         packUUID(byteBuffer, this.InfoBlock_Field.SourceID)
         packUUID(byteBuffer, this.InfoBlock_Field.DestID)
         packUUID(byteBuffer, this.InfoBlock_Field.TransactionID)
-        byteBuffer.put((Byte) this.InventoryBlock_Fields.size())
+        byteBuffer.put((this as Byte).InventoryBlock_Fields.size())
         for (InventoryBlock inventoryBlock : this.InventoryBlock_Fields) {
             packUUID(byteBuffer, inventoryBlock.InventoryID)
-            packByte(byteBuffer, (Byte) inventoryBlock.Type)
+            packByte(byteBuffer, (inventoryBlock as Byte).Type)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.InfoBlock_Field.SourceID = unpackUUID(byteBuffer)
         this.InfoBlock_Field.DestID = unpackUUID(byteBuffer)
         this.InfoBlock_Field.TransactionID = unpackUUID(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             InventoryBlock inventoryBlock = InventoryBlock()
             inventoryBlock.InventoryID = unpackUUID(byteBuffer)
             inventoryBlock.Type = unpackByte(byteBuffer)

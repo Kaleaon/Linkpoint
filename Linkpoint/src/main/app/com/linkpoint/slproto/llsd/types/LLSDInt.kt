@@ -20,20 +20,24 @@ class LLSDInt : LLSDNode {
         }
     }
 
-    Boolean asBoolean() {
+    fun asBoolean(): Boolean {
         return this.value != 0
     }
 
-    Int asInt() {
+    fun asInt(): Int {
         return this.value
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    @Throws(IOException::class)
+
+    fun toBinary(DataOutputStream dataOutputStream) {
         dataOutputStream.writeByte(105)
         dataOutputStream.writeInt(this.value)
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    @Throws(IOException::class)
+
+    fun toXML(XmlSerializer xmlSerializer) {
         xmlSerializer.startTag("", "integer")
         xmlSerializer.text(Integer.toString(this.value))
         xmlSerializer.endTag("", "integer")

@@ -28,7 +28,7 @@ class UserPicBitmapCache : ResourceMemoryCache<UUID, Bitmap> {
         /* access modifiers changed from: private */
         volatile File compressedFile = null
         private Runnable decompressRunnable = Runnable() {
-            Unit run() {
+            fun run(): Unit {
                 try {
                     Bitmap asBitmap = OpenJPEG(UserPicBitmapRequest.this.compressedFile, 128, 128, false).getAsBitmap()
                     ByteArrayOutputStream byteArrayOutputStream = ByteArrayOutputStream()
@@ -44,7 +44,7 @@ class UserPicBitmapCache : ResourceMemoryCache<UUID, Bitmap> {
         }
         private volatile Future<?> decompressorFuture
         private Runnable loadRunnable = Runnable() {
-            Unit run() {
+            fun run(): Unit {
                 ByteArray userPic = UserPicBitmapCache.this.userManager.getUserPic((UUID) UserPicBitmapRequest.this.getParams())
                 Any[] objArr = Any[2]
                 objArr[0] = UserPicBitmapRequest.this.getParams()
@@ -63,7 +63,7 @@ class UserPicBitmapCache : ResourceMemoryCache<UUID, Bitmap> {
             super(uuid, resourceManager)
         }
 
-        Unit OnResourceReady(Any obj, Boolean z) {
+        fun OnResourceReady(Any obj, Boolean z): Unit {
             Any[] objArr = Any[2]
             objArr[0] = getParams()
             objArr[1] = obj != null ? obj.toString() : "null"
@@ -76,7 +76,7 @@ class UserPicBitmapCache : ResourceMemoryCache<UUID, Bitmap> {
             }
         }
 
-        Unit cancelRequest() {
+        fun cancelRequest(): Unit {
             Debug.Printf("DecompressRequest: cancelled (%s)", ((UUID) getParams()).toString())
             Future<?> future = this.decompressorFuture
             if (future != null) {
@@ -90,7 +90,7 @@ class UserPicBitmapCache : ResourceMemoryCache<UUID, Bitmap> {
             super.cancelRequest()
         }
 
-        Unit execute() {
+        fun execute(): Unit {
             Debug.Printf("UserPic: Requesting load for %s", getParams())
             this.loaderFuture = LoaderExecutor.getInstance().submit(this.loadRunnable)
         }
@@ -101,7 +101,7 @@ class UserPicBitmapCache : ResourceMemoryCache<UUID, Bitmap> {
     }
 
     /* access modifiers changed from: protected */
-    ResourceRequest<UUID, Bitmap> CreateNewRequest(UUID uuid, ResourceManager<UUID, Bitmap> resourceManager) {
+    fun CreateNewRequest(UUID uuid, ResourceManager<UUID, Bitmap> resourceManager): ResourceRequest<UUID, Bitmap> {
         return UserPicBitmapRequest(uuid, resourceManager)
     }
 }

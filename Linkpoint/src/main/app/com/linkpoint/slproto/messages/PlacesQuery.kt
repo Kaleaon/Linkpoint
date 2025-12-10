@@ -31,15 +31,15 @@ class PlacesQuery : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.QueryData_Field.QueryText.length + 1 + 4 + 1 + 1 + this.QueryData_Field.SimName.length + 68
+    fun CalcPayloadSize(): Int {
+        return this.QueryData_Field.QueryText.size + 1 + 4 + 1 + 1 + this.QueryData_Field.SimName.size + 68
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandlePlacesQuery(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.GS)
@@ -49,11 +49,11 @@ class PlacesQuery : SLMessage {
         packUUID(byteBuffer, this.TransactionData_Field.TransactionID)
         packVariable(byteBuffer, this.QueryData_Field.QueryText, 1)
         packInt(byteBuffer, this.QueryData_Field.QueryFlags)
-        packByte(byteBuffer, (Byte) this.QueryData_Field.Category)
+        packByte(byteBuffer, (this as Byte).QueryData_Field.Category)
         packVariable(byteBuffer, this.QueryData_Field.SimName, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.QueryID = unpackUUID(byteBuffer)

@@ -23,12 +23,12 @@ class FriendManager {
     @NonNull
     FriendDao friendDao
     private OnListUpdated onFriendListUpdated = OnListUpdated() {
-        Unit onListUpdated() {
+        fun onListUpdated(): Unit {
             FriendManager.this.chatterList.notifyListUpdated(ChatterListType.Friends)
         }
     }
     private OnListUpdated onFriendsOnlineListUpdated = OnListUpdated() {
-        Unit onListUpdated() {
+        fun onListUpdated(): Unit {
             FriendManager.this.chatterList.notifyListUpdated(ChatterListType.FriendsOnline)
         }
     }
@@ -42,8 +42,8 @@ class FriendManager {
         this.chatterList = chatterList2
         RequestFinalProcessor<UUID, Boolean>(this.onlineStatus, userManager2.getDatabaseExecutor()) {
             /* access modifiers changed from: protected */
-            Boolean processRequest(@NonNull UUID uuid) {
-                Friend friend = (Friend) FriendManager.this.friendDao.load(uuid)
+            fun processRequest(@NonNull UUID uuid): Boolean {
+                Friend friend = (FriendManager as Friend).this.friendDao.load(uuid)
                 if (friend != null) {
                     return Boolean.valueOf(friend.getIsOnline())
                 }
@@ -52,42 +52,42 @@ class FriendManager {
         }
     }
 
-    Unit addFriend(UUID uuid) {
-        if (((Friend) this.friendDao.load(uuid)) == null) {
+    fun addFriend(UUID uuid): Unit {
+        if (((this as Friend).friendDao.load(uuid)) == null) {
             this.friendDao.insert(Friend(uuid, 1, 1, false))
         }
         this.chatterList.updateList(ChatterListType.Friends)
         this.chatterList.updateList(ChatterListType.FriendsOnline)
     }
 
-    Friend getFriend(@Nullable UUID uuid) {
+    fun getFriend(@Nullable UUID uuid): Friend {
         if (uuid != null) {
-            return (Friend) this.friendDao.load(uuid)
+            return (this as Friend).friendDao.load(uuid)
         }
         return null
     }
 
-    ChatterDisplayDataList getFriendList() {
+    fun getFriendList(): ChatterDisplayDataList {
         return FriendDisplayDataList(this.userManager, this.onFriendListUpdated, false)
     }
 
-    ChatterDisplayDataList getFriendsOnlineList() {
+    fun getFriendsOnlineList(): ChatterDisplayDataList {
         return FriendDisplayDataList(this.userManager, this.onFriendsOnlineListUpdated, true)
     }
 
-    Subscribable<UUID, Boolean> getOnlineStatus() {
+    fun getOnlineStatus(): Subscribable<UUID, Boolean> {
         return this.onlineStatus
     }
 
-    Unit removeFriend(UUID uuid) {
+    fun removeFriend(UUID uuid): Unit {
         this.friendDao.deleteByKey(uuid)
         this.chatterList.updateList(ChatterListType.Friends)
         this.chatterList.updateList(ChatterListType.FriendsOnline)
     }
 
-    Unit setUsersOnline(List<UUID> list, Boolean z) {
+    fun setUsersOnline(List<UUID> list, Boolean z): Unit {
         for (UUID uuid : list) {
-            Friend friend = (Friend) this.friendDao.load(uuid)
+            Friend friend = (this as Friend).friendDao.load(uuid)
             if (friend != null) {
                 friend.setIsOnline(z)
                 this.friendDao.update(friend)
@@ -97,11 +97,11 @@ class FriendManager {
         this.chatterList.updateList(ChatterListType.FriendsOnline)
     }
 
-    Unit updateFriendList(ImmutableList<SLAuthReply.Friend> immutableList) {
+    fun updateFriendList(ImmutableList<SLAuthReply.Friend> immutableList): Unit {
         HashSet hashSet = HashSet()
         for (SLAuthReply.Friend friend : immutableList) {
             UUID uuid = friend.uuid
-            Friend friend2 = (Friend) this.friendDao.load(uuid)
+            Friend friend2 = (this as Friend).friendDao.load(uuid)
             if (friend2 == null) {
                 this.friendDao.insertOrReplace(Friend(uuid, friend.rightsGiven, friend.rightsHas, false))
             } else if (friend2.getRightsGiven() != friend.rightsGiven || friend2.getRightsHas() != friend.rightsHas || friend2.getIsOnline()) {

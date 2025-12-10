@@ -301,7 +301,7 @@ class SLAuthReply {
         return false
     }
 
-    Boolean equals(Object obj) {
+    fun equals(Object obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -312,7 +312,7 @@ class SLAuthReply {
         return this.simAddress.equals(sLAuthReply.simAddress) && this.simPort == sLAuthReply.simPort && this.agentID.equals(sLAuthReply.agentID) && this.sessionID.equals(sLAuthReply.sessionID) && this.circuitCode == sLAuthReply.circuitCode
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         return this.simAddress.hashCode() + 0 + this.simPort + this.agentID.hashCode() + this.sessionID.hashCode() + this.circuitCode
     }
 }

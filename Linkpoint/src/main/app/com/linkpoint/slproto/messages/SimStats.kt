@@ -37,15 +37,15 @@ class SimStats : SLMessage {
         this.PidStat_Field = PidStat()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.Stat_Fields.size() * 8) + 21 + 4 + 1 + (this.RegionInfo_Fields.size() * 8)
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleSimStats(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -116)
@@ -53,25 +53,25 @@ class SimStats : SLMessage {
         packInt(byteBuffer, this.Region_Field.RegionY)
         packInt(byteBuffer, this.Region_Field.RegionFlags)
         packInt(byteBuffer, this.Region_Field.ObjectCapacity)
-        byteBuffer.put((Byte) this.Stat_Fields.size())
+        byteBuffer.put((this as Byte).Stat_Fields.size())
         for (Stat stat : this.Stat_Fields) {
             packInt(byteBuffer, stat.StatID)
             packFloat(byteBuffer, stat.StatValue)
         }
         packInt(byteBuffer, this.PidStat_Field.PID)
-        byteBuffer.put((Byte) this.RegionInfo_Fields.size())
+        byteBuffer.put((this as Byte).RegionInfo_Fields.size())
         for (RegionInfo regionInfo : this.RegionInfo_Fields) {
             packLong(byteBuffer, regionInfo.RegionFlagsExtended)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.Region_Field.RegionX = unpackInt(byteBuffer)
         this.Region_Field.RegionY = unpackInt(byteBuffer)
         this.Region_Field.RegionFlags = unpackInt(byteBuffer)
         this.Region_Field.ObjectCapacity = unpackInt(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             Stat stat = Stat()
             stat.StatID = unpackInt(byteBuffer)
             stat.StatValue = unpackFloat(byteBuffer)
@@ -79,7 +79,7 @@ class SimStats : SLMessage {
         }
         this.PidStat_Field.PID = unpackInt(byteBuffer)
         Byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b2; i2++) {
+        for (i2 in 0 until b2) {
             RegionInfo regionInfo = RegionInfo()
             regionInfo.RegionFlagsExtended = unpackLong(byteBuffer)
             this.RegionInfo_Fields.add(regionInfo)

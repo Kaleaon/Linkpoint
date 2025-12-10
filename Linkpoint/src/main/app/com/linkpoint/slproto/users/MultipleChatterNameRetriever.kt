@@ -20,7 +20,7 @@ class MultipleChatterNameRetriever : ChatterNameRetriever.OnChatterNameUpdated {
     private Map<UUID, ChatterNameRetriever> retrievers = HashMap()
 
     interface OnChatterNameUpdated {
-        Unit onChatterNameUpdated(MultipleChatterNameRetriever multipleChatterNameRetriever)
+        fun onChatterNameUpdated(MultipleChatterNameRetriever multipleChatterNameRetriever)
     }
 
     MultipleChatterNameRetriever(UUID uuid, OnChatterNameUpdated onChatterNameUpdated, Executor executor2) {
@@ -29,7 +29,7 @@ class MultipleChatterNameRetriever : ChatterNameRetriever.OnChatterNameUpdated {
         this.executor = executor2
     }
 
-    String addChatter(UUID uuid) {
+    fun addChatter(UUID uuid): String {
         ChatterNameRetriever chatterNameRetriever
         ChatterNameRetriever put
         synchronized (this.lock) {
@@ -48,7 +48,7 @@ class MultipleChatterNameRetriever : ChatterNameRetriever.OnChatterNameUpdated {
         return chatterNameRetriever2.getResolvedName()
     }
 
-    Unit clearChatters() {
+    fun clearChatters(): Unit {
         HashSet<ChatterNameRetriever> hashSet = null
         synchronized (this.lock) {
             Iterator<Map.Entry<UUID, ChatterNameRetriever>> it = this.retrievers.entrySet().iterator()
@@ -57,7 +57,7 @@ class MultipleChatterNameRetriever : ChatterNameRetriever.OnChatterNameUpdated {
                 if (hashSet == null) {
                     hashSet = HashSet<>()
                 }
-                hashSet.add((ChatterNameRetriever) next.getValue())
+                hashSet.add((next as ChatterNameRetriever).getValue())
                 it.remove()
             }
         }
@@ -68,14 +68,14 @@ class MultipleChatterNameRetriever : ChatterNameRetriever.OnChatterNameUpdated {
         }
     }
 
-    Unit onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
-        OnChatterNameUpdated onChatterNameUpdated = (OnChatterNameUpdated) this.listener.get()
+    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever): Unit {
+        OnChatterNameUpdated onChatterNameUpdated = (this as OnChatterNameUpdated).listener.get()
         if (onChatterNameUpdated != null) {
             onChatterNameUpdated.onChatterNameUpdated(this)
         }
     }
 
-    Unit retainChatters(Set<UUID> set) {
+    fun retainChatters(Set<UUID> set): Unit {
         HashSet<ChatterNameRetriever> hashSet = null
         synchronized (this.lock) {
             Iterator<Map.Entry<UUID, ChatterNameRetriever>> it = this.retrievers.entrySet().iterator()
@@ -85,7 +85,7 @@ class MultipleChatterNameRetriever : ChatterNameRetriever.OnChatterNameUpdated {
                     if (hashSet == null) {
                         hashSet = HashSet<>()
                     }
-                    hashSet.add((ChatterNameRetriever) next.getValue())
+                    hashSet.add((next as ChatterNameRetriever).getValue())
                     it.remove()
                 }
                 hashSet = hashSet

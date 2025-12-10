@@ -18,23 +18,27 @@ class LLSDURI : LLSDNode {
         this.value = uri
     }
 
-    URI asURI() {
+    fun asURI(): URI {
         return this.value
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    @Throws(IOException::class)
+
+    fun toBinary(DataOutputStream dataOutputStream) {
         String uri = this.value.toString()
         dataOutputStream.writeByte(108)
         if (uri.isEmpty()) {
             dataOutputStream.writeInt(0)
             return
         }
-        byte[] stringToVariableUTF = SLMessage.stringToVariableUTF(uri)
-        dataOutputStream.writeInt(stringToVariableUTF.length)
+        ByteArray stringToVariableUTF = SLMessage.stringToVariableUTF(uri)
+        dataOutputStream.writeInt(stringToVariableUTF.size)
         dataOutputStream.write(stringToVariableUTF)
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    @Throws(IOException::class)
+
+    fun toXML(XmlSerializer xmlSerializer) {
         xmlSerializer.startTag("", "uri")
         xmlSerializer.text(this.value.toString())
         xmlSerializer.endTag("", "uri")

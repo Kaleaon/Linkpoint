@@ -34,20 +34,20 @@ class UserReportInternal : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.ReportData_Field.AbuseRegionName.length + 155 + 16 + 1 + this.ReportData_Field.Summary.length + 2 + this.ReportData_Field.Details.length + 1 + this.ReportData_Field.VersionString.length + 4
+    fun CalcPayloadSize(): Int {
+        return this.ReportData_Field.AbuseRegionName.size + 155 + 16 + 1 + this.ReportData_Field.Summary.size + 2 + this.ReportData_Field.Details.size + 1 + this.ReportData_Field.VersionString.size + 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleUserReportInternal(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.NAK)
-        packByte(byteBuffer, (Byte) this.ReportData_Field.ReportType)
-        packByte(byteBuffer, (Byte) this.ReportData_Field.Category)
+        packByte(byteBuffer, (this as Byte).ReportData_Field.ReportType)
+        packByte(byteBuffer, (this as Byte).ReportData_Field.Category)
         packUUID(byteBuffer, this.ReportData_Field.ReporterID)
         packLLVector3(byteBuffer, this.ReportData_Field.ViewerPosition)
         packLLVector3(byteBuffer, this.ReportData_Field.AgentPosition)
@@ -65,7 +65,7 @@ class UserReportInternal : SLMessage {
         packVariable(byteBuffer, this.ReportData_Field.VersionString, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.ReportData_Field.ReportType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.ReportData_Field.Category = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.ReportData_Field.ReporterID = unpackUUID(byteBuffer)

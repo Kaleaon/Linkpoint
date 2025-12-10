@@ -40,7 +40,7 @@ class ShaderPreprocessor {
             } else if (stringBuilder != null) {
                 String str2 = readLine
                 for (Entry entry : this.definedMacros.entrySet()) {
-                    str2 = str2.replace((CharSequence) entry.getKey(), (CharSequence) entry.getValue())
+                    str2 = str2.replace((entry as CharSequence).getKey(), (entry as CharSequence).getValue())
                 }
                 stringBuilder.append(str2).append("\r\n")
                 str = str2
@@ -49,7 +49,9 @@ class ShaderPreprocessor {
         }
     }
 
-    String processCode(BufferedReader bufferedReader) throws IOException {
+    @Throws(IOException::class)
+
+    fun processCode(BufferedReader bufferedReader): String {
         StringBuilder stringBuilder = StringBuilder()
         processCode(bufferedReader, stringBuilder)
         return stringBuilder.toString()

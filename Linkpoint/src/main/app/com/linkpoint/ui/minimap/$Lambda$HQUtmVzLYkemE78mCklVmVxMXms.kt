@@ -10,14 +10,14 @@ import com.linkpoint.slproto.users.manager.CurrentLocationInfo
     private /* synthetic */ Any f452$f0
 
     private /* synthetic */ Unit $m$0(Any obj) {
-        ((MinimapActivity) this.f452$f0).m639com_lumiyaviewer_lumiya_ui_minimap_MinimapActivitymthref0((CurrentLocationInfo) obj)
+        ((this as MinimapActivity).f452$f0).m639com_lumiyaviewer_lumiya_ui_minimap_MinimapActivitymthref0((CurrentLocationInfo) obj)
     }
 
     /* synthetic */ $Lambda$HQUtmVzLYkemE78mCklVmVxMXms(Any obj) {
         this.f452$f0 = obj
     }
 
-    Unit onData(Any obj) {
+    fun onData(Any obj): Unit {
         $m$0(obj)
     }
 }

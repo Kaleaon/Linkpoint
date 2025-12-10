@@ -52,7 +52,7 @@ class PreferenceSubPage : Preference {
     }
 
     /* access modifiers changed from: package-private */
-    NotificationType getNotificationType() {
+    fun getNotificationType(): NotificationType {
         if (this.pageNotificationDetails) {
             return this.notificationType
         }
@@ -60,11 +60,11 @@ class PreferenceSubPage : Preference {
     }
 
     /* access modifiers changed from: package-private */
-    Int getPageResource() {
+    fun getPageResource(): Int {
         return this.pageResource
     }
 
-    CharSequence getSummary() {
+    fun getSummary(): CharSequence {
         if (!this.pageNotificationDetails || this.notificationType == null) {
             return super.getSummary()
         }

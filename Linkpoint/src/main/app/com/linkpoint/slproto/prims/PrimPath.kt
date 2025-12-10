@@ -110,7 +110,7 @@ class PrimPath {
         this.Total = this.Path.size()
     }
 
-    Boolean generate(PrimPathParams primPathParams, Float f, Int i, Boolean z, Int i2) {
+    fun generate(PrimPathParams primPathParams, Float f, Int i, Boolean z, Int i2): Boolean {
         if (!this.Dirty && (!z)) {
             return false
         }
@@ -149,7 +149,7 @@ class PrimPath {
             case 64:
                 this.Step = 1.0f / ((Float) 4)
                 this.Path.ensureCapacity(5)
-                for (Int i5 = 0; i5 < 5; i5++) {
+                for (i5 in 0 until 5) {
                     Float f3 = (i5.toFloat()) * this.Step
                     PathPoint pathPoint = PathPoint()
                     pathPoint.pos.set(0.0f, PrimMath.lerp(0.0f, (Float) ((-Math.sin((Double) (primPathParams.TwistEnd * 3.1415927f * f3))) * 0.5d), f3), PrimMath.lerp(-0.5f, (Float) (Math.cos((Double) (primPathParams.TwistEnd * 3.1415927f * f3)) * 0.5d), f3))
@@ -169,7 +169,7 @@ class PrimPath {
                 this.Path.ensureCapacity(floor2)
                 LLVector2 beginScale = primPathParams.getBeginScale()
                 LLVector2 endScale = primPathParams.getEndScale()
-                for (Int i6 = 0; i6 < floor2; i6++) {
+                for (i6 in 0 until floor2) {
                     Float lerp = PrimMath.lerp(primPathParams.Begin, primPathParams.End, (i6.toFloat()) * this.Step)
                     PathPoint pathPoint2 = PathPoint()
                     pathPoint2.pos.set(PrimMath.lerp(0.0f, primPathParams.ShearX, lerp), PrimMath.lerp(0.0f, primPathParams.ShearY, lerp), lerp - 0.5f)

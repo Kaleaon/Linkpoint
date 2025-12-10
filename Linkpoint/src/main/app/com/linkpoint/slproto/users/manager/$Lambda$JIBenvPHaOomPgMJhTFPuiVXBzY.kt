@@ -9,7 +9,7 @@ import com.linkpoint.orm.InventoryQuery
         return InventoryManager.m325lambda$com_lumiyaviewer_lumiya_slproto_users_manager_InventoryManager_6838((InventoryQuery) obj)
     }
 
-    Boolean apply(Any obj) {
+    fun apply(Any obj): Boolean {
         return $m$0(obj)
     }
 }

@@ -10,7 +10,7 @@ class LayerData : SLMessage {
     LayerID LayerID_Field = LayerID()
 
     class LayerDataData {
-        byte[] Data
+        ByteArray Data
     }
 
     class LayerID {
@@ -21,21 +21,21 @@ class LayerData : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.LayerDataData_Field.Data.length + 2 + 2
+    fun CalcPayloadSize(): Int {
+        return this.LayerDataData_Field.Data.size + 2 + 2
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleLayerData(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put(Ascii.VT)
-        packByte(byteBuffer, (byte) this.LayerID_Field.Type)
+        packByte(byteBuffer, (this as byte).LayerID_Field.Type)
         packVariable(byteBuffer, this.LayerDataData_Field.Data, 2)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.LayerID_Field.Type = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.LayerDataData_Field.Data = unpackVariable(byteBuffer, 2)
     }

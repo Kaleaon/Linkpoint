@@ -17,15 +17,15 @@ class AgentPause : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 40
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAgentPause(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 78)
@@ -34,7 +34,7 @@ class AgentPause : SLMessage {
         packInt(byteBuffer, this.AgentData_Field.SerialNum)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.SerialNum = unpackInt(byteBuffer)

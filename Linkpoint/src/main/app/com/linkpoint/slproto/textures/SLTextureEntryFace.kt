@@ -19,51 +19,51 @@ abstract class SLTextureEntryFace {
     Int AttributeTextureID = 1
     private InternPool<SLTextureEntryFace> pool = InternPool<>()
 
-    SLTextureEntryFace create(MutableSLTextureEntryFace mutableSLTextureEntryFace) {
+    fun create(MutableSLTextureEntryFace mutableSLTextureEntryFace): SLTextureEntryFace {
         if (mutableSLTextureEntryFace == null) {
             return null
         }
         return pool.intern(AutoValue_SLTextureEntryFace(mutableSLTextureEntryFace.textureID, mutableSLTextureEntryFace.rgba, mutableSLTextureEntryFace.repeatU, mutableSLTextureEntryFace.repeatV, mutableSLTextureEntryFace.offsetU, mutableSLTextureEntryFace.offsetV, mutableSLTextureEntryFace.rotation, mutableSLTextureEntryFace.glow, mutableSLTextureEntryFace.materialb, mutableSLTextureEntryFace.mediab, mutableSLTextureEntryFace.hasAttribute))
     }
 
-    Float getGlow(@NonNull SLTextureEntryFace sLTextureEntryFace) {
+    fun getGlow(@NonNull SLTextureEntryFace sLTextureEntryFace): Float {
         return (hasAttribute() & 512) != 0 ? glow() : sLTextureEntryFace.glow()
     }
 
-    Byte getMaterial(@NonNull SLTextureEntryFace sLTextureEntryFace) {
+    fun getMaterial(@NonNull SLTextureEntryFace sLTextureEntryFace): Byte {
         return (hasAttribute() & 128) != 0 ? materialb() : sLTextureEntryFace.materialb()
     }
 
-    Byte getMedia(@NonNull SLTextureEntryFace sLTextureEntryFace) {
+    fun getMedia(@NonNull SLTextureEntryFace sLTextureEntryFace): Byte {
         return (hasAttribute() & 256) != 0 ? mediab() : sLTextureEntryFace.mediab()
     }
 
-    Float getOffsetU(@NonNull SLTextureEntryFace sLTextureEntryFace) {
+    fun getOffsetU(@NonNull SLTextureEntryFace sLTextureEntryFace): Float {
         return (hasAttribute() & 16) != 0 ? offsetU() : sLTextureEntryFace.offsetU()
     }
 
-    Float getOffsetV(@NonNull SLTextureEntryFace sLTextureEntryFace) {
+    fun getOffsetV(@NonNull SLTextureEntryFace sLTextureEntryFace): Float {
         return (hasAttribute() & 32) != 0 ? offsetV() : sLTextureEntryFace.offsetV()
     }
 
-    Int getRGBA(@NonNull SLTextureEntryFace sLTextureEntryFace) {
+    fun getRGBA(@NonNull SLTextureEntryFace sLTextureEntryFace): Int {
         return (hasAttribute() & 2) != 0 ? rgba() : sLTextureEntryFace.rgba()
     }
 
-    Float getRepeatU(@NonNull SLTextureEntryFace sLTextureEntryFace) {
+    fun getRepeatU(@NonNull SLTextureEntryFace sLTextureEntryFace): Float {
         return (hasAttribute() & 4) != 0 ? repeatU() : sLTextureEntryFace.repeatU()
     }
 
-    Float getRepeatV(@NonNull SLTextureEntryFace sLTextureEntryFace) {
+    fun getRepeatV(@NonNull SLTextureEntryFace sLTextureEntryFace): Float {
         return (hasAttribute() & 8) != 0 ? repeatV() : sLTextureEntryFace.repeatV()
     }
 
-    Float getRotation(@NonNull SLTextureEntryFace sLTextureEntryFace) {
+    fun getRotation(@NonNull SLTextureEntryFace sLTextureEntryFace): Float {
         return (hasAttribute() & 64) != 0 ? rotation() : sLTextureEntryFace.rotation()
     }
 
     @Nullable
-    UUID getTextureID(@NonNull SLTextureEntryFace sLTextureEntryFace) {
+    fun getTextureID(@NonNull SLTextureEntryFace sLTextureEntryFace): UUID {
         return (hasAttribute() & 1) != 0 ? textureID() : sLTextureEntryFace.textureID()
     }
 

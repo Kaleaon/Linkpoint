@@ -21,15 +21,15 @@ class RequestTaskInventory : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 40
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRequestTaskInventory(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 33)
@@ -38,7 +38,7 @@ class RequestTaskInventory : SLMessage {
         packInt(byteBuffer, this.InventoryData_Field.LocalID)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.InventoryData_Field.LocalID = unpackInt(byteBuffer)

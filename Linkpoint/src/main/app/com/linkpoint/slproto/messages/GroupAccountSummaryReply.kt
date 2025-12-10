@@ -40,15 +40,15 @@ class GroupAccountSummaryReply : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return this.MoneyData_Field.StartDate.length + 25 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + this.MoneyData_Field.LastTaxDate.length + 1 + this.MoneyData_Field.TaxDate.length + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleGroupAccountSummaryReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 98)
@@ -76,7 +76,7 @@ class GroupAccountSummaryReply : SLMessage {
         packVariable(byteBuffer, this.MoneyData_Field.TaxDate, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
         this.MoneyData_Field.RequestID = unpackUUID(byteBuffer)

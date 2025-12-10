@@ -31,7 +31,7 @@ class TouchableObjectsFragment : Fragment : AdapterView.OnItemClickListener {
         return UUIDPool.getUUID(arguments.getString(OBJECT_UUID_KEY))
     }
 
-    Bundle makeSelection(UUID uuid, UUID uuid2) {
+    fun makeSelection(UUID uuid, UUID uuid2): Bundle {
         Bundle bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         bundle.putString(OBJECT_UUID_KEY, uuid2.toString())
@@ -40,13 +40,13 @@ class TouchableObjectsFragment : Fragment : AdapterView.OnItemClickListener {
 
     /* access modifiers changed from: private */
     /* renamed from: onTouchableObjects */
-    Unit m691com_lumiyaviewer_lumiya_ui_objects_TouchableObjectsFragmentmthref0(ImmutableList<SLObjectInfo> immutableList) {
+    fun m691com_lumiyaviewer_lumiya_ui_objects_TouchableObjectsFragmentmthref0(ImmutableList<SLObjectInfo> immutableList): Unit {
         if (this.listAdapter != null) {
             this.listAdapter.setData(immutableList)
         }
     }
 
-    View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         View inflate = layoutInflater.inflate(R.layout.touchable_object_list, viewGroup, false)
         this.listAdapter = TouchableObjectListAdapter(layoutInflater.getContext())
@@ -56,7 +56,7 @@ class TouchableObjectsFragment : Fragment : AdapterView.OnItemClickListener {
         return inflate
     }
 
-    Unit onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j): Unit {
         SLAgentCircuit sLAgentCircuit = null
         if (this.listAdapter != null) {
             SLObjectInfo item = this.listAdapter.getItem(i)
@@ -70,7 +70,7 @@ class TouchableObjectsFragment : Fragment : AdapterView.OnItemClickListener {
         }
     }
 
-    Unit onStart() {
+    fun onStart(): Unit {
         super.onStart()
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         UUID objectUUID = getObjectUUID()
@@ -81,7 +81,7 @@ class TouchableObjectsFragment : Fragment : AdapterView.OnItemClickListener {
         }
     }
 
-    Unit onStop() {
+    fun onStop(): Unit {
         this.touchableObjects.unsubscribe()
         super.onStop()
     }

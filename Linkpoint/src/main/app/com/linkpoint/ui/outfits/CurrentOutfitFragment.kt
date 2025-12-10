@@ -28,22 +28,22 @@ class CurrentOutfitFragment : Fragment : LoadableMonitor.OnLoadableDataChangedLi
     private LoadableMonitor loadableMonitor = LoadableMonitor(this.wornItems).withOptionalLoadables(this.agentCircuit).withDataChangedListener(this)
     private SubscriptionData<SubscriptionSingleKey, ImmutableList<SLAvatarAppearance.WornItem>> wornItems = SubscriptionData<>(UIThreadExecutor.getInstance())
 
-    Bundle makeSelection(UUID uuid) {
+    fun makeSelection(UUID uuid): Bundle {
         Bundle bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         return bundle
     }
 
-    View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         View inflate = layoutInflater.inflate(R.layout.current_outfit_fragment, viewGroup, false)
         this.listAdapter = CurrentOutfitAdapter(layoutInflater.getContext())
-        ListView listView = (ListView) inflate.findViewById(R.id.currentOutfitListView)
+        ListView listView = (inflate as ListView).findViewById(R.id.currentOutfitListView)
         listView.setAdapter(this.listAdapter)
         listView.setOnItemClickListener(this)
         listView.setEmptyView(inflate.findViewById(16908292))
         SwipeDismissListViewTouchListener swipeDismissListViewTouchListener = SwipeDismissListViewTouchListener(listView, SwipeDismissListViewTouchListener.DismissCallbacks() {
-            Boolean canDismiss(ListView listView, Int i) {
+            fun canDismiss(ListView listView, Int i): Boolean {
                 ListAdapter adapter = listView.getAdapter()
                 if (adapter instanceof DismissableAdapter) {
                     return ((DismissableAdapter) adapter).canDismiss(i)
@@ -51,7 +51,7 @@ class CurrentOutfitFragment : Fragment : LoadableMonitor.OnLoadableDataChangedLi
                 return false
             }
 
-            Unit onDismiss(ListView listView, Int i) {
+            fun onDismiss(ListView listView, Int i): Unit {
                 ListAdapter adapter = listView.getAdapter()
                 if (adapter instanceof DismissableAdapter) {
                     ((DismissableAdapter) adapter).onDismiss(i)
@@ -62,7 +62,7 @@ class CurrentOutfitFragment : Fragment : LoadableMonitor.OnLoadableDataChangedLi
         return inflate
     }
 
-    Unit onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j): Unit {
         SLAvatarAppearance.WornItem item
         SLAgentCircuit data = this.agentCircuit.getData()
         if (this.listAdapter != null && data != null && (item = this.listAdapter.getItem(i)) != null && item.getIsTouchable() && item.getWornOn() == null) {
@@ -70,7 +70,7 @@ class CurrentOutfitFragment : Fragment : LoadableMonitor.OnLoadableDataChangedLi
         }
     }
 
-    Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged(): Unit {
         if (this.listAdapter != null) {
             SLAgentCircuit data = this.agentCircuit.getData()
             this.listAdapter.setAvatarAppearance(data != null ? data.getModules().avatarAppearance : null)
@@ -78,7 +78,7 @@ class CurrentOutfitFragment : Fragment : LoadableMonitor.OnLoadableDataChangedLi
         }
     }
 
-    Unit onStart() {
+    fun onStart(): Unit {
         super.onStart()
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
@@ -89,7 +89,7 @@ class CurrentOutfitFragment : Fragment : LoadableMonitor.OnLoadableDataChangedLi
         this.loadableMonitor.unsubscribeAll()
     }
 
-    Unit onStop() {
+    fun onStop(): Unit {
         this.loadableMonitor.unsubscribeAll()
         super.onStop()
     }

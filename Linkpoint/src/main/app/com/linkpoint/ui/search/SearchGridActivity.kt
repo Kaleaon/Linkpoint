@@ -12,17 +12,17 @@ import com.linkpoint.ui.common.MasterDetailsActivity
 
 class SearchGridActivity : MasterDetailsActivity {
     /* access modifiers changed from: protected */
-    FragmentActivityFactory getDetailsFragmentFactory() {
+    fun getDetailsFragmentFactory(): FragmentActivityFactory {
         return null
     }
 
     /* access modifiers changed from: protected */
-    Boolean isRootDetailsFragment(Class<? : Fragment> cls) {
+    fun isRootDetailsFragment(Class<? : Fragment> cls): Boolean {
         return cls == UserProfileFragment.class || cls == GroupProfileFragment.class || cls == ParcelInfoFragment.class
     }
 
     /* access modifiers changed from: protected */
-    Fragment onCreateMasterFragment(Intent intent, @Nullable Bundle bundle) {
+    fun onCreateMasterFragment(Intent intent, @Nullable Bundle bundle): Fragment {
         return SearchGridFragment.newInstance(ActivityUtils.getActiveAgentID(intent))
     }
 }

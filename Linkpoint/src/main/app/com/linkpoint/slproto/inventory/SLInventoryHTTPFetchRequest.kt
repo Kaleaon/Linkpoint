@@ -27,7 +27,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
         /* JADX WARNING: Removed duplicated region for block: B:39:0x0170  */
         /* JADX WARNING: Removed duplicated region for block: B:40:0x0172  */
         /* Code decompiled incorrectly, please refer to instructions dump. */
-        Unit run() {
+        fun run(): Unit {
             /*
                 r15 = this
                 r14 = 3
@@ -238,7 +238,8 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
         }
 
         /* access modifiers changed from: package-private */
-        Unit addEntry(SLInventoryEntry sLInventoryEntry) throws InterruptedException {
+        @Throws(InterruptedException::class)
+        fun addEntry(SLInventoryEntry sLInventoryEntry) {
             this.commitEntryQueue.put(sLInventoryEntry)
         }
 
@@ -248,7 +249,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
         /* JADX WARNING: Removed duplicated region for block: B:27:0x007f  */
         /* JADX WARNING: Removed duplicated region for block: B:65:? A[RETURN, SYNTHETIC] */
         /* Code decompiled incorrectly, please refer to instructions dump. */
-        Unit run() {
+        fun run(): Unit {
             /*
                 r11 = this
                 r3 = 1
@@ -421,7 +422,8 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
         }
 
         /* access modifiers changed from: package-private */
-        Unit stopAndWait(Boolean z) throws InterruptedException {
+        @Throws(InterruptedException::class)
+        fun stopAndWait(Boolean z) {
             if (!z) {
                 this.aborted = true
             }
@@ -456,14 +458,18 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
             } : super.onArrayBegin(str)
         }
 
-        Unit onMapEnd(String str) throws LLSDXMLException, InterruptedException {
+        @Throws(LLSDXMLException::class, InterruptedException::class)
+
+        fun onMapEnd(String str) {
             if (this.gotUUID != null && this.gotUUID.equals(SLInventoryHTTPFetchRequest.this.folderUUID) && this.gotVersion != SLInventoryHTTPFetchRequest.this.folderEntry.version) {
                 SLInventoryHTTPFetchRequest.this.folderEntry.version = this.gotVersion
                 this.commitThread.addEntry(SLInventoryHTTPFetchRequest.this.folderEntry)
             }
         }
 
-        Unit onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
+        @Throws(LLSDXMLException::class, LLSDValueTypeException::class)
+
+        fun onPrimitiveValue(String str, LLSDNode lLSDNode) {
             Debug.Printf("InvFetch: FolderDataContentHandler: key '%s' value '%s'", str, lLSDNode)
             if (str.equals("version")) {
                 this.gotVersion = lLSDNode.asInt()
@@ -486,7 +492,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
             if (f111comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues != null) {
                 return f111comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues
             }
-            IntArray iArr = Int[FolderValueKey.values().length]
+            IntArray iArr = Int[FolderValueKey.values().size]
             try {
                 iArr[FolderValueKey.agent_id.ordinal()] = 1
             } catch (NoSuchFieldError e) {
@@ -532,7 +538,9 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
             this.entry.isFolder = true
         }
 
-        Unit onMapEnd(String str) throws LLSDXMLException, InterruptedException {
+        @Throws(LLSDXMLException::class, InterruptedException::class)
+
+        fun onMapEnd(String str) {
             if (this.entry.parentUUID == null) {
                 this.entry.parentUUID = SLInventoryHTTPFetchRequest.this.folderEntry.parentUUID
                 this.entry.parent_id = SLInventoryHTTPFetchRequest.this.folderEntry.getId()
@@ -543,7 +551,9 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
             this.commitThread.addEntry(this.entry)
         }
 
-        Unit onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
+        @Throws(LLSDXMLException::class, LLSDValueTypeException::class)
+
+        fun onPrimitiveValue(String str, LLSDNode lLSDNode) {
             FolderValueKey byTag = FolderValueKey.byTag(str)
             if (byTag != null) {
                 switch (m189getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues()[byTag.ordinal()]) {
@@ -613,13 +623,13 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
         private Map<String, FolderValueKey> tagMap = null
 
         {
-            tagMap = HashMap(values().length * 2)
+            tagMap = HashMap(values().size * 2)
             for (FolderValueKey folderValueKey : values()) {
                 tagMap.put(folderValueKey.toString(), folderValueKey)
             }
         }
 
-        FolderValueKey byTag(String str) {
+        fun byTag(String str): FolderValueKey {
             return tagMap.get(str)
         }
     }
@@ -643,7 +653,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
                 if (f113comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues != null) {
                     return f113comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues
                 }
-                IntArray iArr = Int[PermissionsValueKey.values().length]
+                IntArray iArr = Int[PermissionsValueKey.values().size]
                 try {
                     iArr[PermissionsValueKey.base_mask.ordinal()] = 1
                 } catch (NoSuchFieldError e) {
@@ -688,7 +698,9 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
                 return iArr
             }
 
-            Unit onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
+            @Throws(LLSDXMLException::class, LLSDValueTypeException::class)
+
+            fun onPrimitiveValue(String str, LLSDNode lLSDNode) {
                 PermissionsValueKey byTag = PermissionsValueKey.byTag(str)
                 if (byTag != null) {
                     switch (m192getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues()[byTag.ordinal()]) {
@@ -731,7 +743,8 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
             }
         }
         private LLSDStreamingParser.LLSDContentHandler saleInfoHandler = LLSDStreamingParser.LLSDDefaultContentHandler() {
-            Unit onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
+            @Throws(LLSDXMLException::class, LLSDValueTypeException::class)
+            fun onPrimitiveValue(String str, LLSDNode lLSDNode) {
                 if (str.equals("sale_type")) {
                     if (lLSDNode.isString()) {
                         ItemEntryContentHandler.this.entry.saleType = SLSaleType.getByString(lLSDNode.asString()).getTypeCode()
@@ -751,7 +764,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
             if (f112comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues != null) {
                 return f112comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues
             }
-            IntArray iArr = Int[ItemValueKey.values().length]
+            IntArray iArr = Int[ItemValueKey.values().size]
             try {
                 iArr[ItemValueKey.agent_id.ordinal()] = 1
             } catch (NoSuchFieldError e) {
@@ -806,7 +819,9 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
             return str.equals("permissions") ? this.permissionsHandler : str.equals("sale_info") ? this.saleInfoHandler : super.onMapBegin(str)
         }
 
-        Unit onMapEnd(String str) throws LLSDXMLException, InterruptedException {
+        @Throws(LLSDXMLException::class, InterruptedException::class)
+
+        fun onMapEnd(String str) {
             if (this.entry.parentUUID == null) {
                 this.entry.parentUUID = SLInventoryHTTPFetchRequest.this.folderEntry.parentUUID
                 this.entry.parent_id = SLInventoryHTTPFetchRequest.this.folderEntry.getId()
@@ -817,7 +832,9 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
             this.commitThread.addEntry(this.entry)
         }
 
-        Unit onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
+        @Throws(LLSDXMLException::class, LLSDValueTypeException::class)
+
+        fun onPrimitiveValue(String str, LLSDNode lLSDNode) {
             ItemValueKey byTag = ItemValueKey.byTag(str)
             if (byTag != null) {
                 switch (m191getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues()[byTag.ordinal()]) {
@@ -893,13 +910,13 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
         private Map<String, ItemValueKey> tagMap = null
 
         {
-            tagMap = HashMap(values().length * 2)
+            tagMap = HashMap(values().size * 2)
             for (ItemValueKey itemValueKey : values()) {
                 tagMap.put(itemValueKey.toString(), itemValueKey)
             }
         }
 
-        ItemValueKey byTag(String str) {
+        fun byTag(String str): ItemValueKey {
             return tagMap.get(str)
         }
     }
@@ -919,13 +936,13 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
         private Map<String, PermissionsValueKey> tagMap = null
 
         {
-            tagMap = HashMap(values().length * 2)
+            tagMap = HashMap(values().size * 2)
             for (PermissionsValueKey permissionsValueKey : values()) {
                 tagMap.put(permissionsValueKey.toString(), permissionsValueKey)
             }
         }
 
-        PermissionsValueKey byTag(String str) {
+        fun byTag(String str): PermissionsValueKey {
             return tagMap.get(str)
         }
     }
@@ -960,7 +977,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
         this.capURL = str
     }
 
-    Unit cancel() {
+    fun cancel(): Unit {
         this.isCancelled.set(true)
         LLSDStreamingXMLRequest lLSDStreamingXMLRequest = this.streamingXmlReqRef.get()
         if (lLSDStreamingXMLRequest != null) {
@@ -972,7 +989,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
         }
     }
 
-    Unit start() {
+    fun start(): Unit {
         if (!this.isCancelled.get() && this.futureRef.get() == null) {
             this.futureRef.set(GenericHTTPExecutor.getInstance().submit(this.httpRequest))
         }

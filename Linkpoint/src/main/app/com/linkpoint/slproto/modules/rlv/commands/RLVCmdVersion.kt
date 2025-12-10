@@ -140,11 +140,11 @@ class RLVCmdVersion : RLVCommand {
         return iArr
     }
 
-    String getManualVersionReply() {
+    fun getManualVersionReply(): String {
         return String.format("RestrainedLove viewer v%d.%d.%d", Any[]{1, 10, 1})
     }
 
-    Unit Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2) {
+    fun Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2): Unit {
         try {
             Int parseInt = Int.parseInt(str)
             switch (m232getcomlumiyaviewerlumiyaslprotomodulesrlvRLVCommandsSwitchesValues()[rLVCommands.ordinal()]) {

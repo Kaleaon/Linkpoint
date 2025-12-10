@@ -12,14 +12,14 @@ import com.linkpoint.ui.render.OnHoverListenerCompat
     private /* synthetic */ Any f593$f0
 
     private /* synthetic */ Boolean $m$0(View view, MotionEvent motionEvent) {
-        return VoiceStatusView.m866lambda$com_lumiyaviewer_lumiya_ui_voice_VoiceStatusView_6407((OnHoverListenerCompat) this.f593$f0, view, motionEvent)
+        return VoiceStatusView.m866lambda$com_lumiyaviewer_lumiya_ui_voice_VoiceStatusView_6407((this as OnHoverListenerCompat).f593$f0, view, motionEvent)
     }
 
     /* synthetic */ $Lambda$LRu9qjGWbEJmZF4NfrRGigLGXl8(Any obj) {
         this.f593$f0 = obj
     }
 
-    Boolean onHover(View view, MotionEvent motionEvent) {
+    fun onHover(View view, MotionEvent motionEvent): Boolean {
         return $m$0(view, motionEvent)
     }
 }

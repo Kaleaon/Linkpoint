@@ -11,8 +11,8 @@ class ImprovedTerseObjectUpdate : SLMessage {
     RegionData RegionData_Field
 
     class ObjectData {
-        byte[] Data
-        byte[] TextureEntry
+        ByteArray Data
+        ByteArray TextureEntry
     }
 
     class RegionData {
@@ -25,7 +25,7 @@ class ImprovedTerseObjectUpdate : SLMessage {
         this.RegionData_Field = RegionData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 12
         Iterator<T> it = this.ObjectData_Fields.iterator()
         while (true) {
@@ -33,31 +33,31 @@ class ImprovedTerseObjectUpdate : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            ObjectData objectData = (ObjectData) it.next()
-            i = objectData.TextureEntry.length + objectData.Data.length + 1 + 2 + i2
+            ObjectData objectData = (it as ObjectData).next()
+            i = objectData.TextureEntry.size + objectData.Data.size + 1 + 2 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleImprovedTerseObjectUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put((byte) 15)
         packLong(byteBuffer, this.RegionData_Field.RegionHandle)
-        packShort(byteBuffer, (short) this.RegionData_Field.TimeDilation)
-        byteBuffer.put((byte) this.ObjectData_Fields.size())
+        packShort(byteBuffer, (this as short).RegionData_Field.TimeDilation)
+        byteBuffer.put((this as byte).ObjectData_Fields.size())
         for (ObjectData objectData : this.ObjectData_Fields) {
             packVariable(byteBuffer, objectData.Data, 1)
             packVariable(byteBuffer, objectData.TextureEntry, 2)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.RegionData_Field.RegionHandle = unpackLong(byteBuffer)
         this.RegionData_Field.TimeDilation = unpackShort(byteBuffer) & 65535
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             ObjectData objectData = ObjectData()
             objectData.Data = unpackVariable(byteBuffer, 1)
             objectData.TextureEntry = unpackVariable(byteBuffer, 2)

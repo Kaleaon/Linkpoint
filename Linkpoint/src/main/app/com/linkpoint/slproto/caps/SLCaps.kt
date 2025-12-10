@@ -86,7 +86,7 @@ class SLCaps {
         }
     }
 
-    String repairURL(String str, String str2) {
+    fun repairURL(String str, String str2): String {
         try {
             return URL(str).getHost().endsWith(".lindenlab.com") ? repairCapabilityURL(true, str2) : str2
         } catch (Exception e) {
@@ -95,7 +95,7 @@ class SLCaps {
         }
     }
 
-    Unit GetCapabilites(String str, String str2) {
+    fun GetCapabilites(String str, String str2): Unit {
         Int i = 0
         while (i < 1) {
             try {
@@ -108,11 +108,13 @@ class SLCaps {
         }
     }
 
-    String getCapability(SLCapability sLCapability) {
+    fun getCapability(SLCapability sLCapability): String {
         return this.caps.get(sLCapability)
     }
 
-    String getCapabilityOrThrow(SLCapability sLCapability) throws NoSuchCapabilityException {
+    @Throws(NoSuchCapabilityException::class)
+
+    fun getCapabilityOrThrow(SLCapability sLCapability): String {
         String str = this.caps.get(sLCapability)
         if (str != null) {
             return str

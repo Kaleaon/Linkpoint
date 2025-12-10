@@ -18,12 +18,12 @@ class ThemedActivity : AppCompatActivity {
     private Int selectedThemeId = -1
 
     /* access modifiers changed from: protected */
-    Boolean isLightTheme() {
+    fun isLightTheme(): Boolean {
         return this.selectedThemeId != 2131427371
     }
 
     /* access modifiers changed from: protected */
-    Unit onCreate(@Nullable Bundle bundle) {
+    fun onCreate(@Nullable Bundle bundle): Unit {
         this.selectedThemeId = GlobalOptions.getInstance().getThemeResourceId()
         Debug.Printf("Theme: activity theme 0x%x", Int.valueOf(this.selectedThemeId))
         Int i = this.selectedThemeId
@@ -32,7 +32,7 @@ class ThemedActivity : AppCompatActivity {
     }
 
     /* access modifiers changed from: protected */
-    Unit onResume() {
+    fun onResume(): Unit {
         super.onResume()
         Int themeResourceId = GlobalOptions.getInstance().getThemeResourceId()
         Debug.Printf("Theme: resume, activity theme 0x%x", Int.valueOf(themeResourceId))
@@ -42,19 +42,19 @@ class ThemedActivity : AppCompatActivity {
     }
 
     /* access modifiers changed from: protected */
-    Unit onStart() {
+    fun onStart(): Unit {
         super.onStart()
         EventBus.getInstance().subscribe((Activity) this)
     }
 
     /* access modifiers changed from: protected */
-    Unit onStop() {
+    fun onStop(): Unit {
         EventBus.getInstance().unsubscribeActivity(this)
         super.onStop()
     }
 
     @EventHandler
-    Unit onThemeChangedEvent(ThemeChangedEvent themeChangedEvent) {
+    fun onThemeChangedEvent(ThemeChangedEvent themeChangedEvent): Unit {
         Debug.Printf("Theme: old theme id 0x%x, theme id 0x%x", Int.valueOf(this.selectedThemeId), Int.valueOf(themeChangedEvent.themeResourceId))
         if (Build.VERSION.SDK_INT >= 11) {
             recreate()

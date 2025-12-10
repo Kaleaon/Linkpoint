@@ -30,7 +30,7 @@ class TeleportProgressDialog : ProgressDialog : DialogInterface.OnCancelListener
         setOnCancelListener(this)
     }
 
-    Unit TeleportToLandmark(Context context, UserManager userManager2, UUID uuid, Boolean z) {
+    fun TeleportToLandmark(Context context, UserManager userManager2, UUID uuid, Boolean z): Unit {
         SLAgentCircuit activeAgentCircuit
         if (userManager2 != null && (activeAgentCircuit = userManager2.getActiveAgentCircuit()) != null && activeAgentCircuit.getModules().rlvController.canTeleportToLandmark()) {
             $Lambda$8gWLFwrhoxKapEC8iWggaUhFR1c.AnonymousClass2 r1 = Runnable(activeAgentCircuit, uuid, context, userManager2) {
@@ -225,7 +225,7 @@ Method generation error in method: com.linkpoint.ui.common.-$Lambda$8gWLFwrhoxKa
     }
 
     @EventHandler
-    Unit handleTeleportResult(SLTeleportResultEvent sLTeleportResultEvent) {
+    fun handleTeleportResult(SLTeleportResultEvent sLTeleportResultEvent): Unit {
         Boolean isShowing = isShowing()
         Debug.Log("TeleportResult: success = " + sLTeleportResultEvent.success)
         try {
@@ -249,7 +249,7 @@ Method generation error in method: com.linkpoint.ui.common.-$Lambda$8gWLFwrhoxKa
         }
     }
 
-    Unit onCancel(DialogInterface dialogInterface) {
+    fun onCancel(DialogInterface dialogInterface): Unit {
         if (this.userManager != null) {
             try {
                 SLAgentCircuit activeAgentCircuit = this.userManager.getActiveAgentCircuit()
@@ -262,14 +262,14 @@ Method generation error in method: com.linkpoint.ui.common.-$Lambda$8gWLFwrhoxKa
         }
     }
 
-    Unit onStart() {
+    fun onStart(): Unit {
         super.onStart()
         if (this.userManager != null) {
             this.userManager.getEventBus().subscribe(this, (Activity) null, this.mHandler)
         }
     }
 
-    Unit onStop() {
+    fun onStop(): Unit {
         if (this.userManager != null) {
             this.userManager.getEventBus().unsubscribe(this)
         }

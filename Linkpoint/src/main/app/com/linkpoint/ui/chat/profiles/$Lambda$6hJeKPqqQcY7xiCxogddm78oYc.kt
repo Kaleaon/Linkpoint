@@ -10,14 +10,14 @@ import com.linkpoint.slproto.messages.AvatarPropertiesReply
     private /* synthetic */ Any f269$f0
 
     private /* synthetic */ Unit $m$0(Any obj) {
-        ((ProfileTextFieldEditFragment) this.f269$f0).m507com_lumiyaviewer_lumiya_ui_chat_profiles_ProfileTextFieldEditFragmentmthref0((AvatarPropertiesReply) obj)
+        ((this as ProfileTextFieldEditFragment).f269$f0).m507com_lumiyaviewer_lumiya_ui_chat_profiles_ProfileTextFieldEditFragmentmthref0((AvatarPropertiesReply) obj)
     }
 
     /* synthetic */ $Lambda$6hJeKPqqQcY7xiCxogddm78oYc(Any obj) {
         this.f269$f0 = obj
     }
 
-    Unit onData(Any obj) {
+    fun onData(Any obj): Unit {
         $m$0(obj)
     }
 }

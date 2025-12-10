@@ -126,7 +126,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$srzsajEQj
         }
     }
 
-    Intent createIntent(Context context, @NonNull UUID uuid, @Nullable UUID uuid2, @Nullable SLInventoryEntry sLInventoryEntry, Boolean z, @Nullable UUID uuid3, Int i) {
+    fun createIntent(Context context, @NonNull UUID uuid, @Nullable UUID uuid2, @Nullable SLInventoryEntry sLInventoryEntry, Boolean z, @Nullable UUID uuid3, Int i): Intent {
         Intent intent = Intent(context, NotecardEditActivity.class)
         intent.putExtra("activeAgentUUID", uuid.toString())
         if (uuid2 != null) {
@@ -167,7 +167,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$srzsajEQj
 
     /* access modifiers changed from: private */
     /* renamed from: onAgentCircuit */
-    Unit m622com_lumiyaviewer_lumiya_ui_inventory_NotecardEditActivitymthref1(SLAgentCircuit sLAgentCircuit) {
+    fun m622com_lumiyaviewer_lumiya_ui_inventory_NotecardEditActivitymthref1(SLAgentCircuit sLAgentCircuit): Unit {
         if (sLAgentCircuit != null && !sLAgentCircuit.getModules().rlvController.canViewNotecard()) {
             finish()
         }
@@ -176,7 +176,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$srzsajEQj
 
     /* access modifiers changed from: private */
     /* renamed from: onNotecardLoaded */
-    Unit m621com_lumiyaviewer_lumiya_ui_inventory_NotecardEditActivitymthref0(AssetData assetData) {
+    fun m621com_lumiyaviewer_lumiya_ui_inventory_NotecardEditActivitymthref0(AssetData assetData): Unit {
         if (assetData.getStatus() == 1) {
             try {
                 this.notecard = SLNotecard(assetData.getData(), this.isEditingScript)
@@ -485,7 +485,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$srzsajEQj
     }
 
     /* access modifiers changed from: protected */
-    Unit onActivityResult(Int i, Int i2, Intent intent) {
+    fun onActivityResult(Int i, Int i2, Intent intent): Unit {
         SLInventoryEntry sLInventoryEntry
         switch (i) {
             case 1:
@@ -503,7 +503,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$srzsajEQj
         }
     }
 
-    Unit onAttachmentClick(SLInventoryEntry sLInventoryEntry) {
+    fun onAttachmentClick(SLInventoryEntry sLInventoryEntry): Unit {
         if (sLInventoryEntry.invType == SLInventoryType.IT_LANDMARK.getTypeCode()) {
             CharSequence[] charSequenceArr = {getString(R.string.attachment_action_teleport), getString(R.string.attachment_action_copy)}
             AlertDialog.Builder builder = AlertDialog.Builder(this)
@@ -670,7 +670,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$srzsajEQj
         builder2.create().show()
     }
 
-    Unit onClick(View view) {
+    fun onClick(View view): Unit {
         switch (view.getId()) {
             case R.id.notecardErrorDiscard:
                 this.lastErrorMessage = null
@@ -690,7 +690,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$srzsajEQj
         }
     }
 
-    Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle): Unit {
         super.onCreate(bundle)
         Intent intent = getIntent()
         if (intent != null) {
@@ -727,7 +727,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$srzsajEQj
         updateButtonsForMode()
     }
 
-    Boolean onCreateOptionsMenu(Menu menu) {
+    fun onCreateOptionsMenu(Menu menu): Boolean {
         getMenuInflater().inflate(R.menu.notecard_menu, menu)
         this.menuItemNewAttachment = menu.findItem(R.id.item_new_attachment)
         if (this.menuItemNewAttachment == null) {
@@ -737,7 +737,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$srzsajEQj
         return true
     }
 
-    Boolean onOptionsItemSelected(MenuItem menuItem) {
+    fun onOptionsItemSelected(MenuItem menuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_new_attachment:
                 createNewAttachment()

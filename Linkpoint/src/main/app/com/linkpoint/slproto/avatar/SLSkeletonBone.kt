@@ -14,11 +14,11 @@ class SLSkeletonBone {
     private float globalBaseX
     private float globalBaseY
     private float globalBaseZ
-    private float[] globalMatrix = float[16]
+    private FloatArray globalMatrix = float[16]
     private LLVector3 offset
     private SLSkeletonBone parent
     private LLVector3 scale
-    private float[] tempMatrix = float[16]
+    private FloatArray tempMatrix = float[16]
     private LLVector3 usePosition
 
     SLSkeletonBone(SLSkeletonBoneID sLSkeletonBoneID, LLVector3 lLVector3, LLVector3 lLVector32, SLSkeletonBone[] sLSkeletonBoneArr, SLSkeletonBone[] sLSkeletonBoneArr2) {
@@ -49,12 +49,12 @@ class SLSkeletonBone {
     }
 
     /* access modifiers changed from: package-private */
-    Unit deform(LLVector3 lLVector3, LLVector3 lLVector32) {
+    fun deform(LLVector3 lLVector3, LLVector3 lLVector32): Unit {
         this.offset.add(lLVector3)
         this.scale.mul(lLVector32)
     }
 
-    Unit deformHierarchy(LLVector3 lLVector3, LLVector3 lLVector32) {
+    fun deformHierarchy(LLVector3 lLVector3, LLVector3 lLVector32): Unit {
         this.offset.add(lLVector3)
         this.scale.mul(lLVector32)
         if (this.collisionVolumes != null) {
@@ -64,11 +64,11 @@ class SLSkeletonBone {
         }
     }
 
-    LLVector3 getBasePosition() {
+    fun getBasePosition(): LLVector3 {
         return this.basePosition
     }
 
-    float[] getGlobalMatrix() {
+    fun getGlobalMatrix(): FloatArray {
         return this.globalMatrix
     }
 
@@ -97,7 +97,7 @@ class SLSkeletonBone {
     }
 
     /* access modifiers changed from: package-private */
-    Int prepareSkeleton(SLSkeletonBone[] sLSkeletonBoneArr, Int i) {
+    fun prepareSkeleton(SLSkeletonBone[] sLSkeletonBoneArr, Int i): Int {
         Int i2 = 0
         Int i3 = i + 1
         sLSkeletonBoneArr[i] = this
@@ -112,7 +112,7 @@ class SLSkeletonBone {
         }
         if (this.childBones != null) {
             SLSkeletonBone[] sLSkeletonBoneArr2 = this.childBones
-            Int length = sLSkeletonBoneArr2.length
+            Int length = sLSkeletonBoneArr2.size
             Int i4 = 0
             while (i4 < length) {
                 Int prepareSkeleton = sLSkeletonBoneArr2[i4].prepareSkeleton(sLSkeletonBoneArr, i3)
@@ -122,7 +122,7 @@ class SLSkeletonBone {
         }
         if (this.collisionVolumes != null) {
             SLSkeletonBone[] sLSkeletonBoneArr3 = this.collisionVolumes
-            Int length2 = sLSkeletonBoneArr3.length
+            Int length2 = sLSkeletonBoneArr3.size
             while (i2 < length2) {
                 Int prepareSkeleton2 = sLSkeletonBoneArr3[i2].prepareSkeleton(sLSkeletonBoneArr, i3)
                 i2++
@@ -133,12 +133,12 @@ class SLSkeletonBone {
     }
 
     /* access modifiers changed from: package-private */
-    Unit setPositionOverride(LLVector3 lLVector3) {
+    fun setPositionOverride(LLVector3 lLVector3): Unit {
         this.basePosition.set(lLVector3)
     }
 
     /* access modifiers changed from: package-private */
-    Unit updateGlobalPos(AnimationSkeletonData animationSkeletonData, float[] fArr, float[] fArr2) {
+    fun updateGlobalPos(AnimationSkeletonData animationSkeletonData, FloatArray fArr, FloatArray fArr2): Unit {
         float f
         float f2
         float f3
@@ -146,7 +146,7 @@ class SLSkeletonBone {
         Int i2 = i * 4
         Int i3 = i * 16
         if (i >= 0) {
-            float[] animOffsets = animationSkeletonData.getAnimOffsets()
+            FloatArray animOffsets = animationSkeletonData.getAnimOffsets()
             float f4 = animOffsets[i2 + 3]
             if (f4 > 0.0f) {
                 float f5 = f4 * animOffsets[i2]

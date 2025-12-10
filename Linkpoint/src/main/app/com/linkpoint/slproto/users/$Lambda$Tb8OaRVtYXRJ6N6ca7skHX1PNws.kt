@@ -9,14 +9,14 @@ import com.linkpoint.react.Refreshable
     private /* synthetic */ Any f146$f0
 
     private /* synthetic */ Unit $m$0(Any obj) {
-        ((ResponseCacher) this.f146$f0).m267lambda$com_lumiyaviewer_lumiya_slproto_users_ResponseCacher_1058(obj)
+        ((this as ResponseCacher).f146$f0).m267lambda$com_lumiyaviewer_lumiya_slproto_users_ResponseCacher_1058(obj)
     }
 
     /* synthetic */ $Lambda$Tb8OaRVtYXRJ6N6ca7skHX1PNws(Any obj) {
         this.f146$f0 = obj
     }
 
-    Unit requestUpdate(Any obj) {
+    fun requestUpdate(Any obj): Unit {
         $m$0(obj)
     }
 }

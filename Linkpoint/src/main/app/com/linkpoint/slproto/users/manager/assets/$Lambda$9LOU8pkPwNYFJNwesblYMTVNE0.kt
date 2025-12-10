@@ -9,14 +9,14 @@ import com.linkpoint.react.Refreshable
     private /* synthetic */ Any f227$f0
 
     private /* synthetic */ Unit $m$0(Any obj) {
-        ((AssetResponseCacher) this.f227$f0).m378lambda$com_lumiyaviewer_lumiya_slproto_users_manager_assets_AssetResponseCacher_872((AssetKey) obj)
+        ((this as AssetResponseCacher).f227$f0).m378lambda$com_lumiyaviewer_lumiya_slproto_users_manager_assets_AssetResponseCacher_872((AssetKey) obj)
     }
 
     /* synthetic */ $Lambda$9LOU8pkPwNYFJNwesblYMTVNE0(Any obj) {
         this.f227$f0 = obj
     }
 
-    Unit requestUpdate(Any obj) {
+    fun requestUpdate(Any obj): Unit {
         $m$0(obj)
     }
 }

@@ -36,22 +36,22 @@ class ObjectDeGrab : SLMessage {
         this.ObjectData_Field = ObjectData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.SurfaceInfo_Fields.size() * 64) + 41
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleObjectDeGrab(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 119)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packInt(byteBuffer, this.ObjectData_Field.LocalID)
-        byteBuffer.put((Byte) this.SurfaceInfo_Fields.size())
+        byteBuffer.put((this as Byte).SurfaceInfo_Fields.size())
         for (SurfaceInfo surfaceInfo : this.SurfaceInfo_Fields) {
             packLLVector3(byteBuffer, surfaceInfo.UVCoord)
             packLLVector3(byteBuffer, surfaceInfo.STCoord)
@@ -62,12 +62,12 @@ class ObjectDeGrab : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ObjectData_Field.LocalID = unpackInt(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             SurfaceInfo surfaceInfo = SurfaceInfo()
             surfaceInfo.UVCoord = unpackLLVector3(byteBuffer)
             surfaceInfo.STCoord = unpackLLVector3(byteBuffer)

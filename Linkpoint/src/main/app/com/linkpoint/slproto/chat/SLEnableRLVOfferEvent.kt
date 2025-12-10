@@ -29,41 +29,41 @@ class SLEnableRLVOfferEvent : SLChatYesNoEvent {
         return SLChatEvent.ChatMessageType.EnableRLVOffer
     }
 
-    String getNoButton(Context context) {
+    fun getNoButton(Context context): String {
         return context.getString(R.string.enable_rlv_no)
     }
 
-    String getNoMessage(Context context) {
+    fun getNoMessage(Context context): String {
         return context.getString(R.string.enable_rlv_declined)
     }
 
-    String getQuestion(Context context) {
+    fun getQuestion(Context context): String {
         return context.getString(R.string.enable_rlv_question)
     }
 
-    String getText(Context context, @NonNull UserManager userManager) {
+    fun getText(Context context, @NonNull UserManager userManager): String {
         return context.getString(R.string.rlv_enable_chat_message)
     }
 
-    String getYesButton(Context context) {
+    fun getYesButton(Context context): String {
         return context.getString(R.string.enable_rlv_yes)
     }
 
-    String getYesMessage(Context context) {
+    fun getYesMessage(Context context): String {
         return context.getString(R.string.enable_rlv_accepted)
     }
 
-    Boolean isObjectPopup() {
+    fun isObjectPopup(): Boolean {
         return true
     }
 
     /* access modifiers changed from: protected */
-    Unit onNoAction(Context context, UserManager userManager) {
+    fun onNoAction(Context context, UserManager userManager): Unit {
         super.onNoAction(context, userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    Unit onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(Context context, UserManager userManager): Unit {
         super.onYesAction(context, userManager)
         SharedPreferences.Editor edit = LumiyaApp.getDefaultSharedPreferences().edit()
         edit.putBoolean("rlv_enabled", true)
@@ -71,7 +71,7 @@ class SLEnableRLVOfferEvent : SLChatYesNoEvent {
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

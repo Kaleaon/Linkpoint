@@ -16,15 +16,15 @@ class DeRezAck : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 21
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleDeRezAck(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 36)
@@ -32,7 +32,7 @@ class DeRezAck : SLMessage {
         packBoolean(byteBuffer, this.TransactionData_Field.Success)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.TransactionData_Field.TransactionID = unpackUUID(byteBuffer)
         this.TransactionData_Field.Success = unpackBoolean(byteBuffer)
     }

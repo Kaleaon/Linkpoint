@@ -22,17 +22,17 @@ class ManageGridsActivity_ViewBinding : Unbinder {
     @UiThread
     ManageGridsActivity_ViewBinding(ManageGridsActivity manageGridsActivity, View view) {
         this.target = manageGridsActivity
-        manageGridsActivity.gridListView = (ListView) Utils.findRequiredViewAsType(view, R.id.gridList, "field 'gridListView'", ListView.class)
+        manageGridsActivity.gridListView = (Utils as ListView).findRequiredViewAsType(view, R.id.gridList, "field 'gridListView'", ListView.class)
         View findRequiredView = Utils.findRequiredView(view, R.id.add_new_grid_button, "method 'onAddNewGridButton'")
         this.view2131755484 = findRequiredView
         findRequiredView.setOnClickListener(DebouncingOnClickListener() {
-            Unit doClick(View view) {
+            fun doClick(View view): Unit {
                 manageGridsActivity.onAddNewGridButton()
             }
     }
 
     @CallSuper
-    Unit unbind() {
+    fun unbind(): Unit {
         ManageGridsActivity manageGridsActivity = this.target
         if (manageGridsActivity == null) {
             throw IllegalStateException("Bindings already cleared.")

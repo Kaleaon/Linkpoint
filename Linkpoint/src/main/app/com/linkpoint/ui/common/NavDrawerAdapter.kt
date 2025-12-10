@@ -25,13 +25,13 @@ import java.util.UUID
 
 class NavDrawerAdapter : ArrayAdapter<NavDrawerItem> : AdapterView.OnItemClickListener {
     private NavDrawerItem[] items = {NavDrawerActivityItem(R.id.item_chat, R.attr.MenuIconLocalChatThemed, R.string.nav_chat, ChatNewActivity.class), NavDrawerActivityItem(R.id.item_3d_view, R.attr.MenuIconWorldViewThemed, R.string.nav_3d_view, WorldViewActivity.class), NavDrawerActivityItem(R.id.item_objects, R.attr.MenuIconObjectsThemed, R.string.nav_objects, ObjectListNewActivity.class), NavDrawerActivityItem(R.id.item_inventory, R.attr.MenuIconInventoryThemed, R.string.nav_inventory, InventoryActivity.class), NavDrawerActivityItem(R.id.item_minimap, R.attr.MenuIconMinimapThemed, R.string.nav_minimap, MinimapActivity.class), NavDrawerItem(R.id.item_teleport_home, R.attr.MenuIconHomeThemed, R.string.nav_teleport_home) {
-        Unit onClick(Context context) {
+        fun onClick(Context context): Unit {
             if (context instanceof Activity) {
                 TeleportHomeDialog.show((Activity) context)
             }
         }
     }, NavDrawerActivityItem(R.id.item_my_avatar, R.attr.MenuIconCardThemed, R.string.nav_my_avatar, MyAvatarActivity.class), NavDrawerActivityItem(R.id.item_people_search, R.attr.MenuIconSearchThemed, R.string.nav_search, SearchGridActivity.class), NavDrawerActivityItem(R.id.item_settings, R.attr.MenuIconSettingsThemed, R.string.nav_settings, SettingsActivity.class), NavDrawerItem(R.id.item_signout, R.attr.MenuIconSignOffThemed, R.string.nav_signout) {
-        Unit onClick(Context context) {
+        fun onClick(Context context): Unit {
             if (context instanceof Activity) {
                 LogoutDialog.show((Activity) context)
             }
@@ -46,7 +46,7 @@ class NavDrawerAdapter : ArrayAdapter<NavDrawerItem> : AdapterView.OnItemClickLi
             this.activityClass = cls
         }
 
-        Unit onClick(Context context) {
+        fun onClick(Context context): Unit {
             UUID activeAgentID
             Intent intent = Intent(context, this.activityClass)
             intent.addFlags(131072)
@@ -68,7 +68,7 @@ class NavDrawerAdapter : ArrayAdapter<NavDrawerItem> : AdapterView.OnItemClickLi
             this.labelId = i3
         }
 
-        Unit onClick(Context context) {
+        fun onClick(Context context): Unit {
         }
     }
 
@@ -76,7 +76,7 @@ class NavDrawerAdapter : ArrayAdapter<NavDrawerItem> : AdapterView.OnItemClickLi
         super(context, R.layout.nav_drawer_list_item, items)
     }
 
-    View getView(Int i, View view, ViewGroup viewGroup) {
+    fun getView(Int i, View view, ViewGroup viewGroup): View {
         NavDrawerItem navDrawerItem = (NavDrawerItem) getItem(i)
         if (navDrawerItem == null) {
             return null
@@ -86,12 +86,12 @@ class NavDrawerAdapter : ArrayAdapter<NavDrawerItem> : AdapterView.OnItemClickLi
         }
         TypedValue typedValue = TypedValue()
         getContext().getTheme().resolveAttribute(navDrawerItem.iconId, typedValue, true)
-        ((TextView) view.findViewById(R.id.navDrawerItemName)).setText(getContext().getString(navDrawerItem.labelId))
-        ((ImageView) view.findViewById(R.id.navDrawerItemIcon)).setImageResource(typedValue.resourceId)
+        ((view as TextView).findViewById(R.id.navDrawerItemName)).setText(getContext().getString(navDrawerItem.labelId))
+        ((view as ImageView).findViewById(R.id.navDrawerItemIcon)).setImageResource(typedValue.resourceId)
         return view
     }
 
-    Unit onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j): Unit {
         NavDrawerItem navDrawerItem = (NavDrawerItem) getItem(i)
         if (navDrawerItem != null) {
             navDrawerItem.onClick(adapterView.getContext())

@@ -19,11 +19,11 @@ enum SettingsPage {
         this.pageTitle = i2
     }
 
-    Int getPageResourceId() {
+    fun getPageResourceId(): Int {
         return this.pageResourceId
     }
 
-    Int getPageTitle() {
+    fun getPageTitle(): Int {
         return this.pageTitle
     }
 }

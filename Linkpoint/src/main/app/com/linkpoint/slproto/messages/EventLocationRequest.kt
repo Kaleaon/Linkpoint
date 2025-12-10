@@ -20,15 +20,15 @@ class EventLocationRequest : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 24
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleEventLocationRequest(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 51)
@@ -36,7 +36,7 @@ class EventLocationRequest : SLMessage {
         packInt(byteBuffer, this.EventData_Field.EventID)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
         this.EventData_Field.EventID = unpackInt(byteBuffer)
     }

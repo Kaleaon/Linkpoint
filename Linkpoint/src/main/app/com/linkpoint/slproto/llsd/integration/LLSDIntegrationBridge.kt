@@ -49,7 +49,8 @@ class LLSDIntegrationBridge {
     /**
      * Parse LLSD from XML string using the external library
      */
-    LLSDNode parseFromXML(String xmlString) throws LLSDXMLException {
+    @Throws(LLSDXMLException::class)
+    fun parseFromXML(String xmlString): LLSDNode {
         try {
             // Try to use external library if available
             try {
@@ -70,7 +71,8 @@ class LLSDIntegrationBridge {
     /**
      * Parse LLSD from InputStream using the external library
      */
-    LLSDNode parseFromStream(InputStream inputStream) throws LLSDXMLException {
+    @Throws(LLSDXMLException::class)
+    fun parseFromStream(InputStream inputStream): LLSDNode {
         try {
             // Try to use external library if available
             try {
@@ -92,7 +94,8 @@ class LLSDIntegrationBridge {
      * Convert external LLSD library objects to Linkpoint LLSD nodes
      */
     @SuppressWarnings("unchecked")
-    LLSDNode convertExternalToLinkpoint(Object externalObject) throws LLSDXMLException {
+    @Throws(LLSDXMLException::class)
+    fun convertExternalToLinkpoint(Object externalObject): LLSDNode {
         if (externalObject == null) {
             return LLSDUndefined()
         }
@@ -144,7 +147,8 @@ class LLSDIntegrationBridge {
      * Parse LLSD from JSON string using enhanced library (FUTURE)
      * Currently falls back to XML parsing for compatibility
      */
-    LLSDNode parseFromJSON(String jsonString) throws LLSDXMLException {
+    @Throws(LLSDXMLException::class)
+    fun parseFromJSON(String jsonString): LLSDNode {
         try {
             // FUTURE: Use @Kaleaon's LLSDJsonParser when Android-compatible
             // For now, treat as XML if it looks like LLSD-XML, otherwise create simple string node
@@ -164,7 +168,8 @@ class LLSDIntegrationBridge {
      * Parse LLSD from Notation format using enhanced library (FUTURE)
      * Currently creates a simple string representation for compatibility
      */
-    LLSDNode parseFromNotation(String notationString) throws LLSDXMLException {
+    @Throws(LLSDXMLException::class)
+    fun parseFromNotation(String notationString): LLSDNode {
         try {
             // FUTURE: Use @Kaleaon's LLSDNotationParser when Android-compatible
             // For now, wrap in basic LLSD XML structure
@@ -179,7 +184,8 @@ class LLSDIntegrationBridge {
      * Auto-detect LLSD format and parse using enhanced library (FUTURE)
      * Currently performs basic format detection with fallback parsing
      */
-    LLSDNode parseAuto(String llsdData) throws LLSDXMLException {
+    @Throws(LLSDXMLException::class)
+    fun parseAuto(String llsdData): LLSDNode {
         try {
             // Simple format detection - enhanced detection coming with @Kaleaon's library
             String trimmed = llsdData.trim()
@@ -202,7 +208,8 @@ class LLSDIntegrationBridge {
      * CURRENT: Uses jacobilinden/llsd-java with fallback to original implementation
      * FUTURE: Will use @Kaleaon's enhanced library with advanced features
      */
-    LLSDNode parseWithFallback(InputStream inputStream, String contentType) throws LLSDXMLException {
+    @Throws(LLSDXMLException::class)
+    fun parseWithFallback(InputStream inputStream, String contentType): LLSDNode {
         // Try external library first (currently jacobilinden, future: @Kaleaon's enhanced)
         try {
             return parseFromStream(inputStream)
@@ -227,7 +234,7 @@ class LLSDIntegrationBridge {
      * Get information about the current LLSD integration status
      * This method provides migration status and feature availability
      */
-    String getIntegrationInfo() {
+    fun getIntegrationInfo(): String {
         return "LLSD Integration Status:\n" +
                "- Current: jacobilinden/llsd-java (base functionality)\n" + 
                "- Enhanced: @Kaleaon's Kotlin LLSD features (Android-compatible)\n" +
@@ -242,7 +249,7 @@ class LLSDIntegrationBridge {
      * Demonstrate @Kaleaon's Kotlin LLSD features (Android-compatible)
      * This shows the enhanced capabilities now available
      */
-    Unit demonstrateKotlinFeatures() {
+    fun demonstrateKotlinFeatures(): Unit {
         try {
             // This would typically be called from Kotlin code, but we can demonstrate from Java
             Log.i(TAG, "Kotlin LLSD features now available!")

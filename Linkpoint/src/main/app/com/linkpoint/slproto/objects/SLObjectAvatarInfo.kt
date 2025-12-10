@@ -19,46 +19,46 @@ class SLObjectAvatarInfo : SLObjectInfo {
         this.avatarVisualState = AvatarVisualState(uuid, this, uuid2)
     }
 
-    Unit ApplyAvatarAnimation(AvatarAnimation avatarAnimation) {
+    fun ApplyAvatarAnimation(AvatarAnimation avatarAnimation): Unit {
         this.avatarVisualState.ApplyAvatarAnimation(avatarAnimation)
     }
 
-    Unit ApplyAvatarAppearance(AvatarAppearance avatarAppearance) {
+    fun ApplyAvatarAppearance(AvatarAppearance avatarAppearance): Unit {
         this.avatarVisualState.ApplyAvatarAppearance(avatarAppearance)
     }
 
-    Unit ApplyAvatarTextures(SLTextureEntry sLTextureEntry, Boolean z) {
+    fun ApplyAvatarTextures(SLTextureEntry sLTextureEntry, Boolean z): Unit {
         this.avatarVisualState.ApplyTextures(sLTextureEntry, z)
     }
 
-    Unit ApplyAvatarVisualParams(IntArray iArr) {
+    fun ApplyAvatarVisualParams(IntArray iArr): Unit {
         this.avatarVisualState.ApplyVisualParams(iArr)
     }
 
     /* access modifiers changed from: protected */
     @NonNull
-    DrawListObjectEntry createDrawListEntry() {
+    fun createDrawListEntry(): DrawListObjectEntry {
         return DrawListAvatarEntry(this)
     }
 
     @NonNull
-    AvatarVisualState getAvatarVisualState() {
+    fun getAvatarVisualState(): AvatarVisualState {
         return this.avatarVisualState
     }
 
-    String getName() {
+    fun getName(): String {
         return this.isMyAvatar ? "(my avatar)" : "(avatar)"
     }
 
-    Boolean isAvatar() {
+    fun isAvatar(): Boolean {
         return true
     }
 
-    Boolean isMyAvatar() {
+    fun isMyAvatar(): Boolean {
         return this.isMyAvatar
     }
 
-    Unit onTexturesUpdate(SLTextureEntry sLTextureEntry) {
+    fun onTexturesUpdate(SLTextureEntry sLTextureEntry): Unit {
         this.avatarVisualState.ApplyTextures(sLTextureEntry, false)
     }
 }

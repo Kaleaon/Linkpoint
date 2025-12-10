@@ -39,13 +39,13 @@ class InventoryActivity : MasterDetailsActivity {
     val TRANSFER_TO_INTENT_TAG: String = "transferToID"
     val TRANSFER_TO_NAME_TAG: String = "transferToName"
     private FragmentActivityFactory InventoryDetailsFragmentFactory = FragmentActivityFactory() {
-        Intent createIntent(Context context, Bundle bundle) {
+        fun createIntent(Context context, Bundle bundle): Intent {
             Intent intent = Intent(context, InventoryActivity.class)
             intent.putExtra(MasterDetailsActivity.INTENT_SELECTION_KEY, bundle)
             return intent
         }
 
-        Class<? : Fragment> getFragmentClass() {
+        fun getFragmentClass(): Class<? : Fragment> {
             return InventoryFragment.class
         }
     }
@@ -70,21 +70,21 @@ class InventoryActivity : MasterDetailsActivity {
         }
     }
 
-    Intent makeFolderIntent(Context context, UUID uuid, UUID uuid2) {
+    fun makeFolderIntent(Context context, UUID uuid, UUID uuid2): Intent {
         Intent intent = Intent(context, InventoryActivity.class)
         intent.putExtra("activeAgentUUID", uuid.toString())
         intent.putExtra(INITIAL_FOLDER_ID_TAG, uuid2.toString())
         return intent
     }
 
-    Intent makeSaveItemIntent(Context context, UUID uuid, InventorySaveInfo inventorySaveInfo) {
+    fun makeSaveItemIntent(Context context, UUID uuid, InventorySaveInfo inventorySaveInfo): Intent {
         Intent intent = Intent(context, InventoryActivity.class)
         intent.putExtra("activeAgentUUID", uuid.toString())
         intent.putExtra(SAVE_INFO_INTENT_TAG, inventorySaveInfo)
         return intent
     }
 
-    Intent makeSelectActionIntent(Context context, UUID uuid, SelectAction selectAction, Bundle bundle, @Nullable SLAssetType sLAssetType) {
+    fun makeSelectActionIntent(Context context, UUID uuid, SelectAction selectAction, Bundle bundle, @Nullable SLAssetType sLAssetType): Intent {
         Intent intent = Intent(context, InventoryActivity.class)
         intent.putExtra("activeAgentUUID", uuid.toString())
         intent.putExtra(SELECT_ITEM_INTENT_TAG, true)
@@ -96,14 +96,14 @@ class InventoryActivity : MasterDetailsActivity {
         return intent
     }
 
-    Intent makeSelectIntent(Context context, UUID uuid) {
+    fun makeSelectIntent(Context context, UUID uuid): Intent {
         Intent intent = Intent(context, InventoryActivity.class)
         intent.putExtra("activeAgentUUID", uuid.toString())
         intent.putExtra(SELECT_ITEM_INTENT_TAG, true)
         return intent
     }
 
-    Intent makeTransferIntent(Context context, UUID uuid, UUID uuid2, String str) {
+    fun makeTransferIntent(Context context, UUID uuid, UUID uuid2, String str): Intent {
         Intent intent = Intent(context, InventoryActivity.class)
         intent.putExtra("activeAgentUUID", uuid.toString())
         intent.putExtra(SELECT_ITEM_INTENT_TAG, true)
@@ -123,7 +123,7 @@ class InventoryActivity : MasterDetailsActivity {
     }
 
     /* access modifiers changed from: private */
-    Unit updateSearchAction() {
+    fun updateSearchAction(): Unit {
         String str
         if (!this.activityStarted || !this.searchActive) {
             this.searchProcess.unsubscribe()
@@ -145,7 +145,7 @@ class InventoryActivity : MasterDetailsActivity {
     }
 
     /* access modifiers changed from: package-private */
-    Unit clearSearchMode() {
+    fun clearSearchMode(): Unit {
         this.searchActive = false
         if (this.searchMenuItem != null) {
             MenuItemCompat.collapseActionView(this.searchMenuItem)
@@ -153,17 +153,17 @@ class InventoryActivity : MasterDetailsActivity {
     }
 
     /* access modifiers changed from: protected */
-    FragmentActivityFactory getDetailsFragmentFactory() {
+    fun getDetailsFragmentFactory(): FragmentActivityFactory {
         return this.InventoryDetailsFragmentFactory
     }
 
     /* access modifiers changed from: protected */
-    Bundle getNewDetailsFragmentArguments(@Nullable Bundle bundle, @Nullable Bundle bundle2) {
+    fun getNewDetailsFragmentArguments(@Nullable Bundle bundle, @Nullable Bundle bundle2): Bundle {
         return bundle != null ? InventoryFragment.makeDetailsArguments(bundle) : super.getNewDetailsFragmentArguments((Bundle) null, bundle2)
     }
 
     /* access modifiers changed from: protected */
-    Boolean isAlwaysImplicitFragment(Class<? : Fragment> cls) {
+    fun isAlwaysImplicitFragment(Class<? : Fragment> cls): Boolean {
         return cls.equals(InventoryFragment.class)
     }
 
@@ -178,7 +178,7 @@ class InventoryActivity : MasterDetailsActivity {
     }
 
     /* access modifiers changed from: protected */
-    Unit onCreate(@Nullable Bundle bundle) {
+    fun onCreate(@Nullable Bundle bundle): Unit {
         super.onCreate(bundle)
         if (bundle != null) {
             this.searchActive = bundle.getBoolean(SEARCH_ACTIVE_TAG)
@@ -187,7 +187,7 @@ class InventoryActivity : MasterDetailsActivity {
     }
 
     /* access modifiers changed from: protected */
-    Fragment onCreateMasterFragment(Intent intent, @Nullable Bundle bundle) {
+    fun onCreateMasterFragment(Intent intent, @Nullable Bundle bundle): Fragment {
         InventorySaveInfo inventorySaveInfo
         SLInventoryEntry findSpecialFolder
         if (bundle == null || bundle.isEmpty()) {
@@ -204,7 +204,7 @@ class InventoryActivity : MasterDetailsActivity {
         return InventoryFragment.newInstance(bundle, true)
     }
 
-    Boolean onCreateOptionsMenu(Menu menu) {
+    fun onCreateOptionsMenu(Menu menu): Boolean {
         getMenuInflater().inflate(R.menu.inventory_menu, menu)
         this.searchMenuItem = menu.findItem(R.id.inventory_search_item)
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(this.searchMenuItem)
@@ -213,23 +213,23 @@ class InventoryActivity : MasterDetailsActivity {
             searchView.setQuery(this.nameFilter, false)
         }
         searchView.setOnQueryTextListener(SearchView.OnQueryTextListener() {
-            Boolean onQueryTextChange(String str) {
+            fun onQueryTextChange(String str): Boolean {
                 String unused = InventoryActivity.this.nameFilter = str
                 InventoryActivity.this.updateSearchAction()
                 return true
             }
 
-            Boolean onQueryTextSubmit(String str) {
+            fun onQueryTextSubmit(String str): Boolean {
                 return true
             }
         MenuItemCompat.setOnActionExpandListener(this.searchMenuItem, MenuItemCompat.OnActionExpandListener() {
-            Boolean onMenuItemActionCollapse(MenuItem menuItem) {
+            fun onMenuItemActionCollapse(MenuItem menuItem): Boolean {
                 Boolean unused = InventoryActivity.this.searchActive = false
                 InventoryActivity.this.updateSearchAction()
                 return true
             }
 
-            Boolean onMenuItemActionExpand(MenuItem menuItem) {
+            fun onMenuItemActionExpand(MenuItem menuItem): Boolean {
                 Boolean unused = InventoryActivity.this.searchActive = true
                 InventoryActivity.this.updateSearchAction()
                 return true
@@ -237,7 +237,7 @@ class InventoryActivity : MasterDetailsActivity {
         return true
     }
 
-    Boolean onOptionsItemSelected(MenuItem menuItem) {
+    fun onOptionsItemSelected(MenuItem menuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_sort_order:
                 selectSortOrder()
@@ -248,7 +248,7 @@ class InventoryActivity : MasterDetailsActivity {
     }
 
     /* access modifiers changed from: protected */
-    Unit onSaveInstanceState(Bundle bundle) {
+    fun onSaveInstanceState(Bundle bundle): Unit {
         super.onSaveInstanceState(bundle)
         if (bundle != null) {
             bundle.putBoolean(SEARCH_ACTIVE_TAG, this.searchActive)
@@ -257,14 +257,14 @@ class InventoryActivity : MasterDetailsActivity {
     }
 
     /* access modifiers changed from: protected */
-    Unit onStart() {
+    fun onStart(): Unit {
         super.onStart()
         this.activityStarted = true
         updateSearchAction()
     }
 
     /* access modifiers changed from: protected */
-    Unit onStop() {
+    fun onStop(): Unit {
         this.activityStarted = false
         updateSearchAction()
         super.onStop()

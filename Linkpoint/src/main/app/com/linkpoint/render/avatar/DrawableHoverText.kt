@@ -24,7 +24,7 @@ class DrawableHoverText : ResourceConsumer, GLCleanable {
         this.backgroundColor = i
     }
 
-    Unit DrawAtWorld(RenderContext renderContext, Float f, Float f2, Float f3, Float f4, MatrixStack matrixStack, Boolean z, Int i) {
+    fun DrawAtWorld(RenderContext renderContext, Float f, Float f2, Float f3, Float f4, MatrixStack matrixStack, Boolean z, Int i): Unit {
         r0 = FloatArray(8)
         FloatArray matrixData = renderContext.modelViewMatrix.getMatrixData()
         Int matrixDataOffset = renderContext.modelViewMatrix.getMatrixDataOffset()
@@ -58,7 +58,7 @@ class DrawableHoverText : ResourceConsumer, GLCleanable {
         this.hoverTextTexture = null
     }
 
-    Unit GLDraw(RenderContext renderContext, Float f, Float f2, Float f3, Boolean z, Int i) {
+    fun GLDraw(RenderContext renderContext, Float f, Float f2, Float f3, Boolean z, Int i): Unit {
         if (!this.textureRequested) {
             this.textureRequested = true
             this.textTextureCache.RequestResource(DrawableTextParams.create(this.hoverText, this.backgroundColor), this)

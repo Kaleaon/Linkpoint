@@ -11,14 +11,14 @@ import android.view.View
     private /* synthetic */ Any f429$f0
 
     private /* synthetic */ Unit $m$0(View view) {
-        ((Dialog) this.f429$f0).dismiss()
+        ((this as Dialog).f429$f0).dismiss()
     }
 
     /* synthetic */ $Lambda$OIe5MtmKyVPF26gruCQoZkxXroQ(Any obj) {
         this.f429$f0 = obj
     }
 
-    Unit onClick(View view) {
+    fun onClick(View view): Unit {
         $m$0(view)
     }
 }

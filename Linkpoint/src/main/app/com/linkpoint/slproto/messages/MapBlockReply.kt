@@ -38,7 +38,7 @@ class MapBlockReply : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 25
         Iterator<T> it = this.Data_Fields.iterator()
         while (true) {
@@ -46,43 +46,43 @@ class MapBlockReply : SLMessage {
             if (!it.hasNext()) {
                 return i2 + 1 + (this.Size_Fields.size() * 4)
             }
-            i = ((Data) it.next()).Name.length + 5 + 1 + 4 + 1 + 1 + 16 + i2
+            i = ((it as Data).next()).Name.size + 5 + 1 + 4 + 1 + 1 + 16 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleMapBlockReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -103)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packInt(byteBuffer, this.AgentData_Field.Flags)
-        byteBuffer.put((Byte) this.Data_Fields.size())
+        byteBuffer.put((this as Byte).Data_Fields.size())
         for (Data data : this.Data_Fields) {
-            packShort(byteBuffer, (Short) data.X)
-            packShort(byteBuffer, (Short) data.Y)
+            packShort(byteBuffer, (data as Short).X)
+            packShort(byteBuffer, (data as Short).Y)
             packVariable(byteBuffer, data.Name, 1)
-            packByte(byteBuffer, (Byte) data.Access)
+            packByte(byteBuffer, (data as Byte).Access)
             packInt(byteBuffer, data.RegionFlags)
-            packByte(byteBuffer, (Byte) data.WaterHeight)
-            packByte(byteBuffer, (Byte) data.Agents)
+            packByte(byteBuffer, (data as Byte).WaterHeight)
+            packByte(byteBuffer, (data as Byte).Agents)
             packUUID(byteBuffer, data.MapImageID)
         }
-        byteBuffer.put((Byte) this.Size_Fields.size())
+        byteBuffer.put((this as Byte).Size_Fields.size())
         for (Size size : this.Size_Fields) {
-            packShort(byteBuffer, (Short) size.SizeX)
-            packShort(byteBuffer, (Short) size.SizeY)
+            packShort(byteBuffer, (size as Short).SizeX)
+            packShort(byteBuffer, (size as Short).SizeY)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.Flags = unpackInt(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             Data data = Data()
             data.X = unpackShort(byteBuffer) & 65535
             data.Y = unpackShort(byteBuffer) & 65535
@@ -95,7 +95,7 @@ class MapBlockReply : SLMessage {
             this.Data_Fields.add(data)
         }
         Byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b2; i2++) {
+        for (i2 in 0 until b2) {
             Size size = Size()
             size.SizeX = unpackShort(byteBuffer) & 65535
             size.SizeY = unpackShort(byteBuffer) & 65535

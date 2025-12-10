@@ -23,11 +23,11 @@ class ChatTextBoxViewHolder : ChatEventViewHolder : View.OnClickListener, View.O
 
     ChatTextBoxViewHolder(View view, RecyclerView.Adapter adapter) {
         super(view, adapter)
-        this.dialogResultTextView = (TextView) view.findViewById(R.id.dialogResultTextView)
+        this.dialogResultTextView = (view as TextView).findViewById(R.id.dialogResultTextView)
         this.dialogButtonsLayout = view.findViewById(R.id.dialogButtonsLayout)
-        this.textBoxSend = (Button) view.findViewById(R.id.buttonTextBoxSend)
-        this.dialogButtonIgnore = (Button) view.findViewById(R.id.buttonDialogIgnore)
-        this.textBox = (EditText) view.findViewById(R.id.llTextBoxEdit)
+        this.textBoxSend = (view as Button).findViewById(R.id.buttonTextBoxSend)
+        this.dialogButtonIgnore = (view as Button).findViewById(R.id.buttonDialogIgnore)
+        this.textBox = (view as EditText).findViewById(R.id.llTextBoxEdit)
         if (this.textBoxSend != null) {
             this.textBoxSend.setOnClickListener(this)
         }
@@ -40,7 +40,7 @@ class ChatTextBoxViewHolder : ChatEventViewHolder : View.OnClickListener, View.O
         }
     }
 
-    Unit onClick(View view) {
+    fun onClick(View view): Unit {
         switch (view.getId()) {
             case R.id.buttonDialogIgnore:
                 if (this.textBoxEvent != null) {
@@ -67,14 +67,14 @@ class ChatTextBoxViewHolder : ChatEventViewHolder : View.OnClickListener, View.O
         }
     }
 
-    Unit onFocusChange(View view, Boolean z) {
+    fun onFocusChange(View view, Boolean z): Unit {
         if (view == this.textBox && this.textBox != null && !z) {
             this.textBox.setVisibility(4)
             this.textBoxSend.setText(R.string.textbox_reply_caption)
         }
     }
 
-    Boolean onKey(View view, Int i, KeyEvent keyEvent) {
+    fun onKey(View view, Int i, KeyEvent keyEvent): Boolean {
         if (keyEvent.getAction() != 0 || i != 66 || view.getId() != R.id.llTextBoxEdit) {
             return false
         }
@@ -86,7 +86,7 @@ class ChatTextBoxViewHolder : ChatEventViewHolder : View.OnClickListener, View.O
         return true
     }
 
-    Unit setTextBoxEvent(@Nullable SLChatTextBoxDialog sLChatTextBoxDialog) {
+    fun setTextBoxEvent(@Nullable SLChatTextBoxDialog sLChatTextBoxDialog): Unit {
         if (this.textBoxEvent != sLChatTextBoxDialog) {
             this.textBoxEvent = sLChatTextBoxDialog
             if (this.textBox != null) {

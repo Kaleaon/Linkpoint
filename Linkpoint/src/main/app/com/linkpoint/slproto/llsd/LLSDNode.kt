@@ -38,7 +38,7 @@ abstract class LLSDNode {
         if (f114comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues != null) {
             return f114comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues
         }
-        IntArray iArr = Int[LLSDContentTypeDetector.LLSDContentType.values().length]
+        IntArray iArr = Int[LLSDContentTypeDetector.LLSDContentType.values().size]
         try {
             iArr[LLSDContentTypeDetector.LLSDContentType.llsdBinary.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -51,7 +51,9 @@ abstract class LLSDNode {
         return iArr
     }
 
-    LLSDNode fromAny(InputStream inputStream, String str) throws LLSDXMLException {
+    @Throws(LLSDXMLException::class)
+
+    fun fromAny(InputStream inputStream, String str): LLSDNode {
         try {
             BufferedInputStream bufferedInputStream = BufferedInputStream(inputStream, 65536)
             switch (m195getcomlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues()[LLSDContentTypeDetector.DetectContentType(bufferedInputStream, str).ordinal()]) {
@@ -148,10 +150,10 @@ abstract class LLSDNode {
             return r4
         L_0x006f:
             Int r0 = r6.readInt()     // Catch:{ IOException -> 0x0026 }
-            byte[] r0 = byte[r0]     // Catch:{ IOException -> 0x0026 }
+            ByteArray r0 = byte[r0]     // Catch:{ IOException -> 0x0026 }
             r6.readFully(r0)     // Catch:{ IOException -> 0x0026 }
             com.linkpoint.slproto.llsd.types.LLSDBinary r1 = com.linkpoint.slproto.llsd.types.LLSDBinary     // Catch:{ IOException -> 0x0026 }
-            r1.<init>((byte[]) r0)     // Catch:{ IOException -> 0x0026 }
+            r1.<init>((ByteArray) r0)     // Catch:{ IOException -> 0x0026 }
             return r1
         L_0x007e:
             Int r0 = r6.readInt()     // Catch:{ IOException -> 0x0026 }
@@ -161,7 +163,7 @@ abstract class LLSDNode {
             r0.<init>(r1)     // Catch:{ IOException -> 0x0026 }
             return r0
         L_0x008d:
-            byte[] r0 = byte[r0]     // Catch:{ IOException -> 0x0026 }
+            ByteArray r0 = byte[r0]     // Catch:{ IOException -> 0x0026 }
             r6.readFully(r0)     // Catch:{ IOException -> 0x0026 }
             com.linkpoint.slproto.llsd.types.LLSDString r1 = com.linkpoint.slproto.llsd.types.LLSDString     // Catch:{ IOException -> 0x0026 }
             java.lang.String r0 = com.linkpoint.slproto.SLMessage.stringFromVariableUTF(r0)     // Catch:{ IOException -> 0x0026 }
@@ -175,7 +177,7 @@ abstract class LLSDNode {
             r0.<init>((java.lang.String) r1)     // Catch:{ IOException -> 0x0026 }
             return r0
         L_0x00ab:
-            byte[] r0 = byte[r0]     // Catch:{ IOException -> 0x0026 }
+            ByteArray r0 = byte[r0]     // Catch:{ IOException -> 0x0026 }
             r6.readFully(r0)     // Catch:{ IOException -> 0x0026 }
             com.linkpoint.slproto.llsd.types.LLSDURI r1 = com.linkpoint.slproto.llsd.types.LLSDURI     // Catch:{ IOException -> 0x0026 }
             java.lang.String r0 = com.linkpoint.slproto.SLMessage.stringFromVariableUTF(r0)     // Catch:{ IOException -> 0x0026 }
@@ -226,7 +228,7 @@ abstract class LLSDNode {
             throw r0     // Catch:{ IOException -> 0x0026 }
         L_0x0116:
             Int r3 = r6.readInt()     // Catch:{ IOException -> 0x0026 }
-            byte[] r3 = byte[r3]     // Catch:{ IOException -> 0x0026 }
+            ByteArray r3 = byte[r3]     // Catch:{ IOException -> 0x0026 }
             r6.readFully(r3)     // Catch:{ IOException -> 0x0026 }
             java.lang.String r3 = com.linkpoint.slproto.SLMessage.stringFromVariableUTF(r3)     // Catch:{ IOException -> 0x0026 }
             com.linkpoint.slproto.llsd.LLSDNode r4 = fromBinary(r6)     // Catch:{ IOException -> 0x0026 }
@@ -254,7 +256,9 @@ abstract class LLSDNode {
         throw UnsupportedOperationException("Method not decompiled: com.linkpoint.slproto.llsd.LLSDNode.fromBinary(java.io.DataInputStream):com.linkpoint.slproto.llsd.LLSDNode")
     }
 
-    LLSDNode fromBinaryFile(File file) throws LLSDXMLException {
+    @Throws(LLSDXMLException::class)
+
+    fun fromBinaryFile(File file): LLSDNode {
         DataInputStream dataInputStream
         try {
             dataInputStream = DataInputStream(FileInputStream(file))
@@ -283,7 +287,9 @@ abstract class LLSDNode {
         }
     }
 
-    LLSDNode parseXML(InputStream inputStream, String str) throws LLSDXMLException {
+    @Throws(LLSDXMLException::class)
+
+    fun parseXML(InputStream inputStream, String str): LLSDNode {
         try {
             XmlPullParser newPullParser = XmlPullParserFactory.newInstance().newPullParser()
             newPullParser.setInput(inputStream, str)
@@ -305,15 +311,21 @@ abstract class LLSDNode {
         }
     }
 
-    byte[] asBinary() throws LLSDValueTypeException {
+    @Throws(LLSDValueTypeException::class)
+
+    fun asBinary(): ByteArray {
         throw LLSDValueTypeException("binary", this)
     }
 
-    Boolean asBoolean() throws LLSDValueTypeException {
+    @Throws(LLSDValueTypeException::class)
+
+    fun asBoolean(): Boolean {
         throw LLSDValueTypeException("Boolean", this)
     }
 
-    Date asDate() throws LLSDValueTypeException {
+    @Throws(LLSDValueTypeException::class)
+
+    fun asDate(): Date {
         throw LLSDValueTypeException("date", this)
     }
 
@@ -321,79 +333,99 @@ abstract class LLSDNode {
         throw LLSDValueTypeException("real", this)
     }
 
-    Int asInt() throws LLSDValueTypeException {
+    @Throws(LLSDValueTypeException::class)
+
+    fun asInt(): Int {
         throw LLSDValueTypeException("integer", this)
     }
 
-    Long asLong() throws LLSDValueTypeException {
+    @Throws(LLSDValueTypeException::class)
+
+    fun asLong(): Long {
         throw LLSDValueTypeException("Long", this)
     }
 
-    String asString() throws LLSDValueTypeException {
+    @Throws(LLSDValueTypeException::class)
+
+    fun asString(): String {
         throw LLSDValueTypeException("string", this)
     }
 
-    URI asURI() throws LLSDValueTypeException {
+    @Throws(LLSDValueTypeException::class)
+
+    fun asURI(): URI {
         throw LLSDValueTypeException("uri", this)
     }
 
-    UUID asUUID() throws LLSDValueTypeException {
+    @Throws(LLSDValueTypeException::class)
+
+    fun asUUID(): UUID {
         throw LLSDValueTypeException("uuid", this)
     }
 
-    LLSDNode byIndex(Int i) throws LLSDException {
+    @Throws(LLSDException::class)
+
+    fun byIndex(Int i): LLSDNode {
         throw LLSDValueTypeException("array", this)
     }
 
-    LLSDNode byKey(String str) throws LLSDException {
+    @Throws(LLSDException::class)
+
+    fun byKey(String str): LLSDNode {
         throw LLSDValueTypeException("map", this)
     }
 
-    Int getCount() throws LLSDException {
+    @Throws(LLSDException::class)
+
+    fun getCount(): Int {
         throw LLSDValueTypeException("array", this)
     }
 
-    Boolean isBinary() {
+    fun isBinary(): Boolean {
         return this instanceof LLSDBinary
     }
 
-    Boolean isBoolean() {
+    fun isBoolean(): Boolean {
         return this instanceof LLSDBoolean
     }
 
-    Boolean isDate() {
+    fun isDate(): Boolean {
         return this instanceof LLSDDate
     }
 
-    Boolean isDouble() {
+    fun isDouble(): Boolean {
         return this instanceof LLSDDouble
     }
 
-    Boolean isInt() {
+    fun isInt(): Boolean {
         return this instanceof LLSDInt
     }
 
-    Boolean isLong() {
+    fun isLong(): Boolean {
         return this instanceof LLSDInt
     }
 
-    Boolean isString() {
+    fun isString(): Boolean {
         return this instanceof LLSDString
     }
 
-    Boolean isURI() {
+    fun isURI(): Boolean {
         return this instanceof LLSDURI
     }
 
-    Boolean isUUID() {
+    fun isUUID(): Boolean {
         return this instanceof LLSDUUID
     }
 
-    Boolean keyExists(String str) throws LLSDException {
+    @Throws(LLSDException::class)
+
+    fun keyExists(String str): Boolean {
         throw LLSDValueTypeException("map", this)
     }
 
-    String serializeToXML() throws IOException {
+    @Throws(IOException::class)
+
+    fun serializeToXML(): String {
         XmlSerializer newSerializer = Xml.newSerializer()
         StringWriter stringWriter = StringWriter()
         newSerializer.setOutput(stringWriter)
@@ -404,7 +436,9 @@ abstract class LLSDNode {
         return stringWriter.toString()
     }
 
-    Unit serializeToXML(OutputStream outputStream, String str) throws IOException {
+    @Throws(IOException::class)
+
+    fun serializeToXML(OutputStream outputStream, String str) {
         XmlSerializer newSerializer = Xml.newSerializer()
         newSerializer.setOutput(outputStream, str)
         newSerializer.startTag("", "llsd")

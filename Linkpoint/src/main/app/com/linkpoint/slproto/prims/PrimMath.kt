@@ -6,11 +6,11 @@ class PrimMath {
     val F_DEG_TO_RAD: Float = 0.017453292f
     val F_PI: Float = 3.1415927f
 
-    Float lerp(Float f, Float f2, Float f3) {
+    fun lerp(Float f, Float f2, Float f3): Float {
         return ((f2 - f) * f3) + f
     }
 
-    FloatArray lookAt(LLVector3 lLVector3, LLVector3 lLVector32, LLVector3 lLVector33) {
+    fun lookAt(LLVector3 lLVector3, LLVector3 lLVector32, LLVector3 lLVector33): FloatArray {
         FloatArray fArr = FloatArray(16)
         LLVector3 sub = LLVector3.sub(lLVector32, lLVector3)
         sub.normVec()

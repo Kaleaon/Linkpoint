@@ -18,7 +18,7 @@ class AutoValue_SLObjectFilterInfo : SLObjectFilterInfo {
         this.range = f
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -32,11 +32,11 @@ class AutoValue_SLObjectFilterInfo : SLObjectFilterInfo {
         return false
     }
 
-    String filterText() {
+    fun filterText(): String {
         return this.filterText
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         Int i = 1231
         Int hashCode = ((this.showNonDescriptive ? 1231 : 1237) ^ (((this.showAttachments ? 1231 : 1237) ^ ((this.filterText.hashCode() ^ 1000003) * 1000003)) * 1000003)) * 1000003
         if (!this.showNonTouchable) {
@@ -45,23 +45,23 @@ class AutoValue_SLObjectFilterInfo : SLObjectFilterInfo {
         return ((hashCode ^ i) * 1000003) ^ Float.floatToIntBits(this.range)
     }
 
-    Float range() {
+    fun range(): Float {
         return this.range
     }
 
-    Boolean showAttachments() {
+    fun showAttachments(): Boolean {
         return this.showAttachments
     }
 
-    Boolean showNonDescriptive() {
+    fun showNonDescriptive(): Boolean {
         return this.showNonDescriptive
     }
 
-    Boolean showNonTouchable() {
+    fun showNonTouchable(): Boolean {
         return this.showNonTouchable
     }
 
-    String toString() {
+    fun toString(): String {
         return "SLObjectFilterInfo{filterText=" + this.filterText + ", " + "showAttachments=" + this.showAttachments + ", " + "showNonDescriptive=" + this.showNonDescriptive + ", " + "showNonTouchable=" + this.showNonTouchable + ", " + "range=" + this.range + "}"
     }
 }

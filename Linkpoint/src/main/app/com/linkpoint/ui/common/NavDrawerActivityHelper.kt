@@ -26,11 +26,11 @@ class NavDrawerActivityHelper : AdapterView.OnItemClickListener {
 
     NavDrawerActivityHelper(Activity activity) {
         ActionBar supportActionBar
-        this.drawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout)
+        this.drawerLayout = (activity as DrawerLayout).findViewById(R.id.drawer_layout)
         if (this.drawerLayout != null) {
             this.drawerToggle = DrawerToggle(activity, this.drawerLayout, R.string.open_menu, R.string.close_menu)
             this.drawerLayout.setDrawerListener(this.drawerToggle)
-            ListView listView = (ListView) this.drawerLayout.findViewById(R.id.left_drawer)
+            ListView listView = (this as ListView).drawerLayout.findViewById(R.id.left_drawer)
             if (listView != null) {
                 this.drawerAdapter = NavDrawerAdapter(activity)
                 listView.setAdapter(this.drawerAdapter)
@@ -49,7 +49,7 @@ class NavDrawerActivityHelper : AdapterView.OnItemClickListener {
         this.drawerAdapter = null
     }
 
-    Boolean onBackPressed() {
+    fun onBackPressed(): Boolean {
         if (this.drawerLayout == null || !this.drawerLayout.isDrawerOpen(this.drawerLayout.findViewById(R.id.left_drawer))) {
             return false
         }
@@ -57,13 +57,13 @@ class NavDrawerActivityHelper : AdapterView.OnItemClickListener {
         return true
     }
 
-    Unit onConfigurationChanged(Configuration configuration) {
+    fun onConfigurationChanged(Configuration configuration): Unit {
         if (this.drawerToggle != null) {
             this.drawerToggle.onConfigurationChanged(configuration)
         }
     }
 
-    Unit onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j): Unit {
         if (this.drawerLayout != null) {
             this.drawerLayout.closeDrawers()
         }
@@ -72,11 +72,11 @@ class NavDrawerActivityHelper : AdapterView.OnItemClickListener {
         }
     }
 
-    Boolean onOptionsItemSelected(MenuItem menuItem) {
+    fun onOptionsItemSelected(MenuItem menuItem): Boolean {
         return this.drawerToggle != null && this.drawerToggle.onOptionsItemSelected(menuItem)
     }
 
-    Unit syncState() {
+    fun syncState(): Unit {
         if (this.drawerToggle != null) {
             this.drawerToggle.syncState()
         }

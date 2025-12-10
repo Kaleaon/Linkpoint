@@ -8,7 +8,7 @@ import com.linkpoint.slproto.modules.rlv.RLVRestrictionType
 import java.util.UUID
 
 class RLVCmdGetStatus : RLVCommand {
-    Unit Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2) {
+    fun Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2): Unit {
         String str3
         String str4
         try {

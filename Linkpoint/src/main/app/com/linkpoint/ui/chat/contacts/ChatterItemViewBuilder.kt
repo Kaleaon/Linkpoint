@@ -31,13 +31,13 @@ class ChatterItemViewBuilder {
     }
 
     @Nullable
-    View getView(LayoutInflater layoutInflater, View view, ViewGroup viewGroup, Boolean z) {
+    fun getView(LayoutInflater layoutInflater, View view, ViewGroup viewGroup, Boolean z): View {
         Int i = R.id.userDistanceInlineTextView
         Int i2 = 8
         View view2 = (view == null || view.getId() != R.id.contactListItemLayout) ? null : view
         View inflate = view2 == null ? layoutInflater.inflate(R.layout.contact_list_item, viewGroup, false) : view2
         if (inflate != null) {
-            ((TextView) inflate.findViewById(R.id.userNameTextView)).setText(this.label)
+            ((inflate as TextView).findViewById(R.id.userNameTextView)).setText(this.label)
             View findViewById = inflate.findViewById(R.id.onlineUserIcon)
             if (findViewById != null) {
                 if (this.onlineVisible) {
@@ -50,7 +50,7 @@ class ChatterItemViewBuilder {
             if (findViewById2 != null) {
                 findViewById2.setVisibility(this.voiceActive ? 0 : 8)
             }
-            TextView textView = (TextView) inflate.findViewById(z ? R.id.userDistanceInlineTextView : R.id.userDistanceTextView)
+            TextView textView = (inflate as TextView).findViewById(z ? R.id.userDistanceInlineTextView : R.id.userDistanceTextView)
             if (textView != null) {
                 if (this.distanceSet) {
                     textView.setText((this.distance >= 9.5f ? Int.toString(Math.round(this.distance)) : String.format("%.1f", Any[]{Float.valueOf(this.distance)})) + " m")
@@ -72,7 +72,7 @@ class ChatterItemViewBuilder {
             if (findViewById3 != null) {
                 findViewById3.setVisibility(8)
             }
-            TextView textView2 = (TextView) inflate.findViewById(R.id.unreadCountTextView)
+            TextView textView2 = (inflate as TextView).findViewById(R.id.unreadCountTextView)
             if (textView2 != null) {
                 textView2.setText(Int.toString(this.unreadCount))
                 if (this.unreadCount != 0) {
@@ -81,7 +81,7 @@ class ChatterItemViewBuilder {
                     textView2.setVisibility(8)
                 }
             }
-            TextView textView3 = (TextView) inflate.findViewById(R.id.lastMessageText)
+            TextView textView3 = (inflate as TextView).findViewById(R.id.lastMessageText)
             if (textView3 != null) {
                 if (this.lastMessage != null) {
                     textView3.setText(this.lastMessage)
@@ -94,7 +94,7 @@ class ChatterItemViewBuilder {
             if (findViewById4 != null) {
                 findViewById4.setVisibility(this.isActiveGroup ? 0 : 8)
             }
-            ChatterPicView chatterPicView = (ChatterPicView) inflate.findViewById(R.id.userPicView)
+            ChatterPicView chatterPicView = (inflate as ChatterPicView).findViewById(R.id.userPicView)
             if (chatterPicView != null) {
                 chatterPicView.setDefaultIcon(this.thumbnailDefaultIcon, false)
                 chatterPicView.setChatterID(this.thumbnailChatterID, this.thumbnailLabel)
@@ -103,7 +103,7 @@ class ChatterItemViewBuilder {
                 }
                 chatterPicView.setVisibility(i2)
             }
-            TypingIndicatorView typingIndicatorView = (TypingIndicatorView) inflate.findViewById(R.id.typing_indicator)
+            TypingIndicatorView typingIndicatorView = (inflate as TypingIndicatorView).findViewById(R.id.typing_indicator)
             if (typingIndicatorView != null) {
                 typingIndicatorView.setChatterID(this.thumbnailChatterID)
             }
@@ -111,7 +111,7 @@ class ChatterItemViewBuilder {
         return inflate
     }
 
-    Unit reset() {
+    fun reset(): Unit {
         this.label = null
         this.onlineVisible = false
         this.distanceSet = false
@@ -124,11 +124,11 @@ class ChatterItemViewBuilder {
         this.voiceActive = false
     }
 
-    Unit setActiveGroup(Boolean z) {
+    fun setActiveGroup(Boolean z): Unit {
         this.isActiveGroup = z
     }
 
-    Unit setDistance(Float f) {
+    fun setDistance(Float f): Unit {
         if (Float.isNaN(f)) {
             this.distanceSet = false
             return
@@ -137,33 +137,33 @@ class ChatterItemViewBuilder {
         this.distance = f
     }
 
-    Unit setLabel(String str) {
+    fun setLabel(String str): Unit {
         this.label = str
     }
 
-    Unit setLastMessage(String str) {
+    fun setLastMessage(String str): Unit {
         this.lastMessage = str
     }
 
-    Unit setOnlineStatusIcon(Boolean z, Boolean z2) {
+    fun setOnlineStatusIcon(Boolean z, Boolean z2): Unit {
         this.onlineVisible = z
         this.isOnline = z2
     }
 
-    Unit setThumbnailChatterID(ChatterID chatterID, String str) {
+    fun setThumbnailChatterID(ChatterID chatterID, String str): Unit {
         this.thumbnailChatterID = chatterID
         this.thumbnailLabel = str
     }
 
-    Unit setThumbnailDefaultIcon(Int i) {
+    fun setThumbnailDefaultIcon(Int i): Unit {
         this.thumbnailDefaultIcon = i
     }
 
-    Unit setUnreadCount(Int i) {
+    fun setUnreadCount(Int i): Unit {
         this.unreadCount = i
     }
 
-    Unit setVoiceActive(Boolean z) {
+    fun setVoiceActive(Boolean z): Unit {
         this.voiceActive = z
     }
 }

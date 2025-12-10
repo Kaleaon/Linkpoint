@@ -11,14 +11,14 @@ import com.linkpoint.react.Subscription
     private /* synthetic */ Any f252$f0
 
     private /* synthetic */ Unit $m$0(Any obj) {
-        ((ActiveChatsListAdapter) this.f252$f0).m428lambda$com_lumiyaviewer_lumiya_ui_chat_contacts_ActiveChatsListAdapter_6525((ImmutableList) obj)
+        ((this as ActiveChatsListAdapter).f252$f0).m428lambda$com_lumiyaviewer_lumiya_ui_chat_contacts_ActiveChatsListAdapter_6525((ImmutableList) obj)
     }
 
     /* synthetic */ $Lambda$6auIiCEAvthJHC9LU_XlJZMtEQ(Any obj) {
         this.f252$f0 = obj
     }
 
-    Unit onData(Any obj) {
+    fun onData(Any obj): Unit {
         $m$0(obj)
     }
 }

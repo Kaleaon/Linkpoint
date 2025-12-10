@@ -23,15 +23,15 @@ class AgentRequestSit : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 61
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAgentRequestSit(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put((byte) 6)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
@@ -39,7 +39,7 @@ class AgentRequestSit : SLMessage {
         packLLVector3(byteBuffer, this.TargetObject_Field.Offset)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.TargetObject_Field.TargetID = unpackUUID(byteBuffer)

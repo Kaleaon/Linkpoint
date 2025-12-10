@@ -27,8 +27,8 @@ class GroupMembersReply : SLMessage {
         Long AgentPowers
         Int Contribution
         Boolean IsOwner
-        byte[] OnlineStatus
-        byte[] Title
+        ByteArray OnlineStatus
+        ByteArray Title
     }
 
     GroupMembersReply() {
@@ -37,7 +37,7 @@ class GroupMembersReply : SLMessage {
         this.GroupData_Field = GroupData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 57
         Iterator<T> it = this.MemberData_Fields.iterator()
         while (true) {
@@ -45,16 +45,16 @@ class GroupMembersReply : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            MemberData memberData = (MemberData) it.next()
-            i = memberData.Title.length + memberData.OnlineStatus.length + 21 + 8 + 1 + 1 + i2
+            MemberData memberData = (it as MemberData).next()
+            i = memberData.Title.size + memberData.OnlineStatus.size + 21 + 8 + 1 + 1 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleGroupMembersReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 111)
@@ -62,7 +62,7 @@ class GroupMembersReply : SLMessage {
         packUUID(byteBuffer, this.GroupData_Field.GroupID)
         packUUID(byteBuffer, this.GroupData_Field.RequestID)
         packInt(byteBuffer, this.GroupData_Field.MemberCount)
-        byteBuffer.put((byte) this.MemberData_Fields.size())
+        byteBuffer.put((this as byte).MemberData_Fields.size())
         for (MemberData memberData : this.MemberData_Fields) {
             packUUID(byteBuffer, memberData.AgentID)
             packInt(byteBuffer, memberData.Contribution)
@@ -73,13 +73,13 @@ class GroupMembersReply : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.GroupData_Field.GroupID = unpackUUID(byteBuffer)
         this.GroupData_Field.RequestID = unpackUUID(byteBuffer)
         this.GroupData_Field.MemberCount = unpackInt(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             MemberData memberData = MemberData()
             memberData.AgentID = unpackUUID(byteBuffer)
             memberData.Contribution = unpackInt(byteBuffer)

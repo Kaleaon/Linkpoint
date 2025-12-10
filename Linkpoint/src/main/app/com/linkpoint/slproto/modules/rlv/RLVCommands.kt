@@ -63,7 +63,7 @@ enum RLVCommands {
         this.handler = cls
     }
 
-    RLVCommands getCommand(String str) {
+    fun getCommand(String str): RLVCommands {
         try {
             return valueOf(str)
         } catch (IllegalArgumentException e) {
@@ -71,9 +71,9 @@ enum RLVCommands {
         }
     }
 
-    RLVCommand getHandler() {
+    fun getHandler(): RLVCommand {
         try {
-            return (RLVCommand) this.handler.newInstance()
+            return (this as RLVCommand).handler.newInstance()
         } catch (IllegalArgumentException e) {
             return null
         } catch (InstantiationException e2) {

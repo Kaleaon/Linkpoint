@@ -18,7 +18,7 @@ class AvatarClassifiedReply : SLMessage {
 
     class Data {
         UUID ClassifiedID
-        byte[] Name
+        ByteArray Name
     }
 
     AvatarClassifiedReply() {
@@ -26,7 +26,7 @@ class AvatarClassifiedReply : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 37
         Iterator<T> it = this.Data_Fields.iterator()
         while (true) {
@@ -34,32 +34,32 @@ class AvatarClassifiedReply : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            i = ((Data) it.next()).Name.length + 17 + i2
+            i = ((it as Data).next()).Name.size + 17 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAvatarClassifiedReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 42)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.TargetID)
-        byteBuffer.put((byte) this.Data_Fields.size())
+        byteBuffer.put((this as byte).Data_Fields.size())
         for (Data data : this.Data_Fields) {
             packUUID(byteBuffer, data.ClassifiedID)
             packVariable(byteBuffer, data.Name, 1)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.TargetID = unpackUUID(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             Data data = Data()
             data.ClassifiedID = unpackUUID(byteBuffer)
             data.Name = unpackVariable(byteBuffer, 1)

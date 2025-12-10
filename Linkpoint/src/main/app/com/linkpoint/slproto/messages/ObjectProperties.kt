@@ -44,7 +44,7 @@ class ObjectProperties : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 3
         Iterator<T> it = this.ObjectData_Fields.iterator()
         while (true) {
@@ -52,19 +52,19 @@ class ObjectProperties : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            ObjectData objectData = (ObjectData) it.next()
-            i = objectData.TextureID.length + objectData.Name.length + 175 + 1 + objectData.Description.length + 1 + objectData.TouchName.length + 1 + objectData.SitName.length + 1 + i2
+            ObjectData objectData = (it as ObjectData).next()
+            i = objectData.TextureID.size + objectData.Name.size + 175 + 1 + objectData.Description.size + 1 + objectData.TouchName.size + 1 + objectData.SitName.size + 1 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleObjectProperties(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) 9)
-        byteBuffer.put((Byte) this.ObjectData_Fields.size())
+        byteBuffer.put((this as Byte).ObjectData_Fields.size())
         for (ObjectData objectData : this.ObjectData_Fields) {
             packUUID(byteBuffer, objectData.ObjectID)
             packUUID(byteBuffer, objectData.CreatorID)
@@ -77,13 +77,13 @@ class ObjectProperties : SLMessage {
             packInt(byteBuffer, objectData.EveryoneMask)
             packInt(byteBuffer, objectData.NextOwnerMask)
             packInt(byteBuffer, objectData.OwnershipCost)
-            packByte(byteBuffer, (Byte) objectData.SaleType)
+            packByte(byteBuffer, (objectData as Byte).SaleType)
             packInt(byteBuffer, objectData.SalePrice)
-            packByte(byteBuffer, (Byte) objectData.AggregatePerms)
-            packByte(byteBuffer, (Byte) objectData.AggregatePermTextures)
-            packByte(byteBuffer, (Byte) objectData.AggregatePermTexturesOwner)
+            packByte(byteBuffer, (objectData as Byte).AggregatePerms)
+            packByte(byteBuffer, (objectData as Byte).AggregatePermTextures)
+            packByte(byteBuffer, (objectData as Byte).AggregatePermTexturesOwner)
             packInt(byteBuffer, objectData.Category)
-            packShort(byteBuffer, (Short) objectData.InventorySerial)
+            packShort(byteBuffer, (objectData as Short).InventorySerial)
             packUUID(byteBuffer, objectData.ItemID)
             packUUID(byteBuffer, objectData.FolderID)
             packUUID(byteBuffer, objectData.FromTaskID)
@@ -96,9 +96,9 @@ class ObjectProperties : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             ObjectData objectData = ObjectData()
             objectData.ObjectID = unpackUUID(byteBuffer)
             objectData.CreatorID = unpackUUID(byteBuffer)

@@ -19,8 +19,8 @@ class ClassifiedInfoUpdate : SLMessage {
         Int Category
         Int ClassifiedFlags
         UUID ClassifiedID
-        byte[] Desc
-        byte[] Name
+        ByteArray Desc
+        ByteArray Name
         UUID ParcelID
         Int ParentEstate
         LLVector3d PosGlobal
@@ -32,15 +32,15 @@ class ClassifiedInfoUpdate : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.Data_Field.Name.length + 21 + 2 + this.Data_Field.Desc.length + 16 + 4 + 16 + 24 + 1 + 4 + 36
+    fun CalcPayloadSize(): Int {
+        return this.Data_Field.Name.size + 21 + 2 + this.Data_Field.Desc.size + 16 + 4 + 16 + 24 + 1 + 4 + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleClassifiedInfoUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 45)
@@ -54,11 +54,11 @@ class ClassifiedInfoUpdate : SLMessage {
         packInt(byteBuffer, this.Data_Field.ParentEstate)
         packUUID(byteBuffer, this.Data_Field.SnapshotID)
         packLLVector3d(byteBuffer, this.Data_Field.PosGlobal)
-        packByte(byteBuffer, (byte) this.Data_Field.ClassifiedFlags)
+        packByte(byteBuffer, (this as byte).Data_Field.ClassifiedFlags)
         packInt(byteBuffer, this.Data_Field.PriceForListing)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.Data_Field.ClassifiedID = unpackUUID(byteBuffer)

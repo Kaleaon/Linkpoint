@@ -24,7 +24,7 @@ class GodUpdateRegionInfo : SLMessage {
         Int RedirectGridX
         Int RedirectGridY
         Int RegionFlags
-        byte[] SimName
+        ByteArray SimName
     }
 
     class RegionInfo2 {
@@ -37,15 +37,15 @@ class GodUpdateRegionInfo : SLMessage {
         this.RegionInfo_Field = RegionInfo()
     }
 
-    Int CalcPayloadSize() {
-        return this.RegionInfo_Field.SimName.length + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 36 + 1 + (this.RegionInfo2_Fields.size() * 8)
+    fun CalcPayloadSize(): Int {
+        return this.RegionInfo_Field.SimName.size + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 36 + 1 + (this.RegionInfo2_Fields.size() * 8)
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleGodUpdateRegionInfo(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -113)
@@ -59,13 +59,13 @@ class GodUpdateRegionInfo : SLMessage {
         packInt(byteBuffer, this.RegionInfo_Field.PricePerMeter)
         packInt(byteBuffer, this.RegionInfo_Field.RedirectGridX)
         packInt(byteBuffer, this.RegionInfo_Field.RedirectGridY)
-        byteBuffer.put((byte) this.RegionInfo2_Fields.size())
+        byteBuffer.put((this as byte).RegionInfo2_Fields.size())
         for (RegionInfo2 regionInfo2 : this.RegionInfo2_Fields) {
             packLong(byteBuffer, regionInfo2.RegionFlagsExtended)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.RegionInfo_Field.SimName = unpackVariable(byteBuffer, 1)
@@ -77,7 +77,7 @@ class GodUpdateRegionInfo : SLMessage {
         this.RegionInfo_Field.RedirectGridX = unpackInt(byteBuffer)
         this.RegionInfo_Field.RedirectGridY = unpackInt(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             RegionInfo2 regionInfo2 = RegionInfo2()
             regionInfo2.RegionFlagsExtended = unpackLong(byteBuffer)
             this.RegionInfo2_Fields.add(regionInfo2)

@@ -31,7 +31,7 @@ abstract class ChatMessageSource {
         if (f151comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues != null) {
             return f151comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues
         }
-        IntArray iArr = Int[ChatMessageSourceType.values().length]
+        IntArray iArr = Int[ChatMessageSourceType.values().size]
         try {
             iArr[ChatMessageSourceType.Group.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -57,7 +57,7 @@ abstract class ChatMessageSource {
     }
 
     @NonNull
-    ChatMessageSource loadFrom(@NonNull ChatMessage chatMessage) {
+    fun loadFrom(@NonNull ChatMessage chatMessage): ChatMessageSource {
         switch (m268getcomlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues()[ChatMessageSourceType.VALUES[chatMessage.getSenderType().intValue()].ordinal()]) {
             case 1:
                 return ChatMessageSourceGroup(chatMessage)
@@ -86,7 +86,7 @@ abstract class ChatMessageSource {
     @Nullable
     abstract UUID getSourceUUID()
 
-    Unit serializeTo(@NonNull ChatMessage chatMessage) {
+    fun serializeTo(@NonNull ChatMessage chatMessage): Unit {
         chatMessage.setSenderType(Int.valueOf(getSourceType().ordinal()))
     }
 }

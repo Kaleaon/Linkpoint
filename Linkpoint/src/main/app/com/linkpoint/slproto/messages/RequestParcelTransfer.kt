@@ -33,15 +33,15 @@ class RequestParcelTransfer : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 114
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRequestParcelTransfer(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -36)
@@ -50,7 +50,7 @@ class RequestParcelTransfer : SLMessage {
         packUUID(byteBuffer, this.Data_Field.SourceID)
         packUUID(byteBuffer, this.Data_Field.DestID)
         packUUID(byteBuffer, this.Data_Field.OwnerID)
-        packByte(byteBuffer, (Byte) this.Data_Field.Flags)
+        packByte(byteBuffer, (this as Byte).Data_Field.Flags)
         packInt(byteBuffer, this.Data_Field.TransactionType)
         packInt(byteBuffer, this.Data_Field.Amount)
         packInt(byteBuffer, this.Data_Field.BillableArea)
@@ -61,7 +61,7 @@ class RequestParcelTransfer : SLMessage {
         packInt(byteBuffer, this.RegionData_Field.GridY)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.Data_Field.TransactionID = unpackUUID(byteBuffer)
         this.Data_Field.TransactionTime = unpackInt(byteBuffer)
         this.Data_Field.SourceID = unpackUUID(byteBuffer)

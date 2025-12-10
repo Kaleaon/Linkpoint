@@ -34,7 +34,7 @@ class ScriptSensorReply : SLMessage {
         this.Requester_Field = Requester()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 21
         Iterator<T> it = this.SensedData_Fields.iterator()
         while (true) {
@@ -42,20 +42,20 @@ class ScriptSensorReply : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            i = ((SensedData) it.next()).Name.length + 85 + 4 + 4 + i2
+            i = ((it as SensedData).next()).Name.size + 85 + 4 + 4 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleScriptSensorReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -8)
         packUUID(byteBuffer, this.Requester_Field.SourceID)
-        byteBuffer.put((Byte) this.SensedData_Fields.size())
+        byteBuffer.put((this as Byte).SensedData_Fields.size())
         for (SensedData sensedData : this.SensedData_Fields) {
             packUUID(byteBuffer, sensedData.ObjectID)
             packUUID(byteBuffer, sensedData.OwnerID)
@@ -69,10 +69,10 @@ class ScriptSensorReply : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.Requester_Field.SourceID = unpackUUID(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             SensedData sensedData = SensedData()
             sensedData.ObjectID = unpackUUID(byteBuffer)
             sensedData.OwnerID = unpackUUID(byteBuffer)

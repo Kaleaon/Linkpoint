@@ -18,11 +18,11 @@ import androidx.annotation.Nullable
 class ObjectPopupsFragment : Fragment {
     private val AGENT_UUID_KEY: String = "agentUUID"
     private ItemTouchHelper.Callback itemTouchCallback = ItemTouchHelper.SimpleCallback(0, 12) {
-        Boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder viewHolder2) {
+        fun onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder viewHolder2): Boolean {
             return false
         }
 
-        Unit onSwiped(RecyclerView.ViewHolder viewHolder, Int i) {
+        fun onSwiped(RecyclerView.ViewHolder viewHolder, Int i): Unit {
             RecyclerView recyclerView
             RecyclerView.Adapter adapter
             UserManager r1 = ObjectPopupsFragment.this.getUserManager()
@@ -36,7 +36,7 @@ class ObjectPopupsFragment : Fragment {
         }
     }
 
-    ObjectPopupsFragment create(@NonNull UUID uuid) {
+    fun create(@NonNull UUID uuid): ObjectPopupsFragment {
         ObjectPopupsFragment objectPopupsFragment = ObjectPopupsFragment()
         Bundle bundle = Bundle()
         bundle.putString(AGENT_UUID_KEY, uuid.toString())
@@ -46,7 +46,7 @@ class ObjectPopupsFragment : Fragment {
 
     /* access modifiers changed from: private */
     @Nullable
-    UserManager getUserManager() {
+    fun getUserManager(): UserManager {
         Bundle arguments = getArguments()
         if (arguments == null || !arguments.containsKey(AGENT_UUID_KEY)) {
             return null
@@ -55,7 +55,7 @@ class ObjectPopupsFragment : Fragment {
     }
 
     @Nullable
-    View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle): View {
         View inflate = layoutInflater.inflate(R.layout.object_popups_fragment_layout, viewGroup, false)
         RecyclerView recyclerView = (RecyclerView) inflate.findViewById(R.id.objectPopupsList)
         recyclerView.setHasFixedSize(true)
@@ -64,7 +64,7 @@ class ObjectPopupsFragment : Fragment {
         return inflate
     }
 
-    Unit onStart() {
+    fun onStart(): Unit {
         RecyclerView recyclerView
         super.onStart()
         UserManager userManager = getUserManager()
@@ -74,7 +74,7 @@ class ObjectPopupsFragment : Fragment {
         }
     }
 
-    Unit onStop() {
+    fun onStop(): Unit {
         RecyclerView recyclerView
         View view = getView()
         if (!(view == null || (recyclerView = (RecyclerView) view.findViewById(R.id.objectPopupsList)) == null)) {

@@ -270,21 +270,21 @@ class EmulatorSettingsActivity : AppCompatActivity {
     private EmulatorManager.EmulatorCallback createCallback(String operation) {
         return EmulatorManager.EmulatorCallback() {
             @Override
-            Unit onSuccess(String message) {
+            fun onSuccess(String message): Unit {
                 runOnUiThread(() -> {
                     updateStatus(operation + " completed")
                     showResultDialog("Success", message)
             }
             
             @Override
-            Unit onError(String error) {
+            fun onError(String error): Unit {
                 runOnUiThread(() -> {
                     updateStatus(operation + " failed")
                     showResultDialog("Error", error)
             }
             
             @Override
-            Unit onStatusUpdate(String status) {
+            fun onStatusUpdate(String status): Unit {
                 updateStatus(status)
             }
         }
@@ -295,7 +295,7 @@ class EmulatorSettingsActivity : AppCompatActivity {
         
         emulatorManager.listAVDs(EmulatorManager.EmulatorCallback() {
             @Override
-            Unit onSuccess(String output) {
+            fun onSuccess(String output): Unit {
                 runOnUiThread(() -> {
                     updateStatus("AVD list updated")
                     
@@ -321,14 +321,14 @@ class EmulatorSettingsActivity : AppCompatActivity {
             }
             
             @Override
-            Unit onError(String error) {
+            fun onError(String error): Unit {
                 runOnUiThread(() -> {
                     updateStatus("Failed to load AVD list")
                     showResultDialog("Error", "Failed to load AVD list:\n" + error)
             }
             
             @Override
-            Unit onStatusUpdate(String status) {
+            fun onStatusUpdate(String status): Unit {
                 updateStatus(status)
             }
     }
@@ -361,7 +361,7 @@ class EmulatorSettingsActivity : AppCompatActivity {
         if (!avd.apiLevel.isEmpty()) details.append("API: ").append(avd.apiLevel).append("  ")
         if (!avd.abi.isEmpty()) details.append("ABI: ").append(avd.abi)
         
-        if (details.length() > 0) {
+        if (details.size() > 0) {
             TextView detailsText = TextView(this)
             detailsText.setText(details.toString())
             detailsText.setTextSize(12)
@@ -440,9 +440,9 @@ class EmulatorSettingsActivity : AppCompatActivity {
         
         builder.setPositiveButton("Create", (dialog, which) -> {
             String name = nameInput.getText().toString().trim()
-            String device = (String) deviceSpinner.getSelectedItem()
-            String api = (String) apiSpinner.getSelectedItem()
-            String abi = (String) abiSpinner.getSelectedItem()
+            String device = (deviceSpinner as String).getSelectedItem()
+            String api = (apiSpinner as String).getSelectedItem()
+            String abi = (abiSpinner as String).getSelectedItem()
             
             if (name.isEmpty()) {
                 Toast.makeText(this, "Please enter an AVD name", Toast.LENGTH_SHORT).show()
@@ -536,6 +536,6 @@ class EmulatorSettingsActivity : AppCompatActivity {
     }
     
     private interface SimpleInputCallback {
-        Unit onInput(String input)
+        fun onInput(String input)
     }
 }

@@ -11,14 +11,14 @@ import com.linkpoint.react.Subscription
     private /* synthetic */ Any f117$f0
 
     private /* synthetic */ Unit $m$0(Any obj) {
-        ((SLAvatarAppearance) this.f117$f0).m200com_lumiyaviewer_lumiya_slproto_modules_SLAvatarAppearancemthref0((InventoryEntryList) obj)
+        ((this as SLAvatarAppearance).f117$f0).m200com_lumiyaviewer_lumiya_slproto_modules_SLAvatarAppearancemthref0((InventoryEntryList) obj)
     }
 
     /* synthetic */ $Lambda$Jp5Too8LbDpaKzeYKjkvQvC1hZo(Any obj) {
         this.f117$f0 = obj
     }
 
-    Unit onData(Any obj) {
+    fun onData(Any obj): Unit {
         $m$0(obj)
     }
 }

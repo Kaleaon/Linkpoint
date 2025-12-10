@@ -16,22 +16,22 @@ class AvatarPickerRequest : SLMessage {
     }
 
     class Data {
-        byte[] Name
+        ByteArray Name
     }
 
     AvatarPickerRequest() {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.Data_Field.Name.length + 1 + 52
+    fun CalcPayloadSize(): Int {
+        return this.Data_Field.Name.size + 1 + 52
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAvatarPickerRequest(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put(Ascii.SUB)
@@ -41,7 +41,7 @@ class AvatarPickerRequest : SLMessage {
         packVariable(byteBuffer, this.Data_Field.Name, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.QueryID = unpackUUID(byteBuffer)

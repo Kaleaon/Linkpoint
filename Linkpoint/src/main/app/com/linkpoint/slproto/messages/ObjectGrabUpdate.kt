@@ -39,15 +39,15 @@ class ObjectGrabUpdate : SLMessage {
         this.ObjectData_Field = ObjectData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.SurfaceInfo_Fields.size() * 64) + 81
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleObjectGrabUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 118)
@@ -57,7 +57,7 @@ class ObjectGrabUpdate : SLMessage {
         packLLVector3(byteBuffer, this.ObjectData_Field.GrabOffsetInitial)
         packLLVector3(byteBuffer, this.ObjectData_Field.GrabPosition)
         packInt(byteBuffer, this.ObjectData_Field.TimeSinceLast)
-        byteBuffer.put((Byte) this.SurfaceInfo_Fields.size())
+        byteBuffer.put((this as Byte).SurfaceInfo_Fields.size())
         for (SurfaceInfo surfaceInfo : this.SurfaceInfo_Fields) {
             packLLVector3(byteBuffer, surfaceInfo.UVCoord)
             packLLVector3(byteBuffer, surfaceInfo.STCoord)
@@ -68,7 +68,7 @@ class ObjectGrabUpdate : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ObjectData_Field.ObjectID = unpackUUID(byteBuffer)
@@ -76,7 +76,7 @@ class ObjectGrabUpdate : SLMessage {
         this.ObjectData_Field.GrabPosition = unpackLLVector3(byteBuffer)
         this.ObjectData_Field.TimeSinceLast = unpackInt(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             SurfaceInfo surfaceInfo = SurfaceInfo()
             surfaceInfo.UVCoord = unpackLLVector3(byteBuffer)
             surfaceInfo.STCoord = unpackLLVector3(byteBuffer)

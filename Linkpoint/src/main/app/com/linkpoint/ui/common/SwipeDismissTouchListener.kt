@@ -46,7 +46,7 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
     interface DismissCallbacks {
         Boolean canDismiss(Any obj)
 
-        Unit onDismiss(View view, Any obj)
+        fun onDismiss(View view, Any obj)
     }
 
     SwipeDismissTouchListener(View view, Any obj, DismissCallbacks dismissCallbacks, Boolean z, Boolean z2, Boolean z3, Boolean z4) {
@@ -61,19 +61,19 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
         this.mSlop = viewConfiguration.getScaledTouchSlop()
         this.mMinFlingVelocity = viewConfiguration.getScaledMinimumFlingVelocity() * 16
         this.mMaxFlingVelocity = viewConfiguration.getScaledMaximumFlingVelocity()
-        this.mAnimationTime = (Long) view.getContext().getResources().getInteger(17694720)
+        this.mAnimationTime = (view as Long).getContext().getResources().getInteger(17694720)
         this.mView = view
         this.mToken = obj
         this.mCallbacks = dismissCallbacks
     }
 
     /* access modifiers changed from: private */
-    Unit performDismiss() {
+    fun performDismiss(): Unit {
         ViewGroup.LayoutParams layoutParams = this.mView.getLayoutParams()
         Int height = this.mView.getHeight()
         ValueAnimator duration = ValueAnimator.ofInt(IntArray{height, 1}).setDuration(this.mAnimationTime)
         duration.addListener(AnimatorListenerAdapter() {
-            Unit onAnimationEnd(Animator animator) {
+            fun onAnimationEnd(Animator animator): Unit {
                 SwipeDismissTouchListener.this.mCallbacks.onDismiss(SwipeDismissTouchListener.this.mView, SwipeDismissTouchListener.this.mToken)
                 SwipeDismissTouchListener.this.mView.setAlpha(1.0f)
                 SwipeDismissTouchListener.this.mView.setTranslationX(0.0f)
@@ -82,18 +82,18 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
                 SwipeDismissTouchListener.this.mView.setLayoutParams(layoutParams)
             }
         duration.addUpdateListener(ValueAnimator.AnimatorUpdateListener() {
-            Unit onAnimationUpdate(ValueAnimator valueAnimator) {
+            fun onAnimationUpdate(ValueAnimator valueAnimator): Unit {
                 layoutParams.height = (valueAnimator.toInt().getAnimatedValue()).intValue()
                 SwipeDismissTouchListener.this.mView.setLayoutParams(layoutParams)
             }
         duration.start()
     }
 
-    Boolean dispatchTouchEvent(MotionEvent motionEvent) {
+    fun dispatchTouchEvent(MotionEvent motionEvent): Boolean {
         return false
     }
 
-    Boolean onInterceptTouchEvent(MotionEvent motionEvent) {
+    fun onInterceptTouchEvent(MotionEvent motionEvent): Boolean {
         Float f
         Float f2
         Boolean z3 = true
@@ -165,7 +165,7 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
                     }
                     if (z3) {
                         this.mView.animate().translationX(f2).translationY(f).alpha(0.0f).setDuration(this.mAnimationTime).setListener(AnimatorListenerAdapter() {
-                            Unit onAnimationEnd(Animator animator) {
+                            fun onAnimationEnd(Animator animator): Unit {
                                 SwipeDismissTouchListener.this.performDismiss()
                             }
                     } else if (this.mSwiping) {
@@ -259,7 +259,7 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
         return false
     }
 
-    Boolean onTouchEvent(MotionEvent motionEvent) {
+    fun onTouchEvent(MotionEvent motionEvent): Boolean {
         return false
     }
 }

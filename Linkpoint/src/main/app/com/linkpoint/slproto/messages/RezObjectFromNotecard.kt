@@ -50,15 +50,15 @@ class RezObjectFromNotecard : SLMessage {
         this.NotecardData_Field = NotecardData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.InventoryData_Fields.size() * 16) + 161
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRezObjectFromNotecard(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 38)
@@ -66,7 +66,7 @@ class RezObjectFromNotecard : SLMessage {
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packUUID(byteBuffer, this.AgentData_Field.GroupID)
         packUUID(byteBuffer, this.RezData_Field.FromTaskID)
-        packByte(byteBuffer, (Byte) this.RezData_Field.BypassRaycast)
+        packByte(byteBuffer, (this as Byte).RezData_Field.BypassRaycast)
         packLLVector3(byteBuffer, this.RezData_Field.RayStart)
         packLLVector3(byteBuffer, this.RezData_Field.RayEnd)
         packUUID(byteBuffer, this.RezData_Field.RayTargetID)
@@ -79,13 +79,13 @@ class RezObjectFromNotecard : SLMessage {
         packInt(byteBuffer, this.RezData_Field.NextOwnerMask)
         packUUID(byteBuffer, this.NotecardData_Field.NotecardItemID)
         packUUID(byteBuffer, this.NotecardData_Field.ObjectID)
-        byteBuffer.put((Byte) this.InventoryData_Fields.size())
+        byteBuffer.put((this as Byte).InventoryData_Fields.size())
         for (InventoryData inventoryData : this.InventoryData_Fields) {
             packUUID(byteBuffer, inventoryData.ItemID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
@@ -104,7 +104,7 @@ class RezObjectFromNotecard : SLMessage {
         this.NotecardData_Field.NotecardItemID = unpackUUID(byteBuffer)
         this.NotecardData_Field.ObjectID = unpackUUID(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             InventoryData inventoryData = InventoryData()
             inventoryData.ItemID = unpackUUID(byteBuffer)
             this.InventoryData_Fields.add(inventoryData)

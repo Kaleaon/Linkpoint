@@ -43,11 +43,11 @@ class RingtonePreference : Preference {
     }
 
     /* access modifiers changed from: package-private */
-    Int getDefaultRawResource() {
+    fun getDefaultRawResource(): Int {
         return this.defaultRawResource
     }
 
-    CharSequence getSummary() {
+    fun getSummary(): CharSequence {
         String string = getSharedPreferences().getString(getKey(), (String) null)
         if (string == null) {
             return "Default"

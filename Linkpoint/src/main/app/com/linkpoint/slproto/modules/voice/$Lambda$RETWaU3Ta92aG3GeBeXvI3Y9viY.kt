@@ -9,14 +9,14 @@ import com.linkpoint.react.Subscription
     private /* synthetic */ Any f131$f0
 
     private /* synthetic */ Unit $m$0(Any obj) {
-        ((SLVoice) this.f131$f0).m250com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref0((Boolean) obj)
+        ((this as SLVoice).f131$f0).m250com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref0((Boolean) obj)
     }
 
     /* synthetic */ $Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY(Any obj) {
         this.f131$f0 = obj
     }
 
-    Unit onData(Any obj) {
+    fun onData(Any obj): Unit {
         $m$0(obj)
     }
 }

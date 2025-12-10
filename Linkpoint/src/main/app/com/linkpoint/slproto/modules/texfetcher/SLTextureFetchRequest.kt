@@ -22,7 +22,7 @@ class SLTextureFetchRequest : HasPriority {
     private Int visibleRangeCategory
 
     interface TextureFetchCompleteListener {
-        Unit OnTextureFetchComplete(SLTextureFetchRequest sLTextureFetchRequest)
+        fun OnTextureFetchComplete(SLTextureFetchRequest sLTextureFetchRequest)
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues  reason: not valid java name */
@@ -30,7 +30,7 @@ class SLTextureFetchRequest : HasPriority {
         if (f130comlumiyaviewerlumiyarendertexTextureClassSwitchesValues != null) {
             return f130comlumiyaviewerlumiyarendertexTextureClassSwitchesValues
         }
-        IntArray iArr = Int[TextureClass.values().length]
+        IntArray iArr = Int[TextureClass.values().size]
         try {
             iArr[TextureClass.Asset.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -66,7 +66,7 @@ class SLTextureFetchRequest : HasPriority {
         this.destFile = file
     }
 
-    Int getPriorityForClass(TextureClass textureClass2, Int i) {
+    fun getPriorityForClass(TextureClass textureClass2, Int i): Int {
         switch (m239getcomlumiyaviewerlumiyarendertexTextureClassSwitchesValues()[textureClass2.ordinal()]) {
             case 1:
                 return TexturePriority.Asset.ordinal()
@@ -92,11 +92,11 @@ class SLTextureFetchRequest : HasPriority {
         }
     }
 
-    Int getPriority() {
+    fun getPriority(): Int {
         return getPriorityForClass(this.textureClass, this.visibleRangeCategory)
     }
 
-    Unit setOnFetchComplete(TextureFetchCompleteListener textureFetchCompleteListener) {
+    fun setOnFetchComplete(TextureFetchCompleteListener textureFetchCompleteListener): Unit {
         this.onFetchComplete = textureFetchCompleteListener
     }
 }

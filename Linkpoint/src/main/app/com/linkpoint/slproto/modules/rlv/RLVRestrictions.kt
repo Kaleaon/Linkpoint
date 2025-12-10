@@ -25,7 +25,7 @@ class RLVRestrictions {
             if (f127comlumiyaviewerlumiyaslprotomodulesrlvRLVRestrictionType$RLVRuleMatchTypeSwitchesValues != null) {
                 return f127comlumiyaviewerlumiyaslprotomodulesrlvRLVRestrictionType$RLVRuleMatchTypeSwitchesValues
             }
-            IntArray iArr = Int[RLVRestrictionType.RLVRuleMatchType.values().length]
+            IntArray iArr = Int[RLVRestrictionType.RLVRuleMatchType.values().size]
             try {
                 iArr[RLVRestrictionType.RLVRuleMatchType.TargetNoExceptions.ordinal()] = 1
             } catch (NoSuchFieldError e) {
@@ -54,7 +54,7 @@ class RLVRestrictions {
             this()
         }
 
-        Unit addRestriction(UUID uuid, String str) {
+        fun addRestriction(UUID uuid, String str): Unit {
             HashSet hashSet = this.restMap.get(str)
             if (hashSet == null) {
                 hashSet = HashSet()
@@ -63,16 +63,16 @@ class RLVRestrictions {
             hashSet.add(uuid)
         }
 
-        Set<String> getTargets() {
+        fun getTargets(): Set<String> {
             return this.restMap.keySet()
         }
 
-        Boolean hasRestrictionsByObject(UUID uuid) {
+        fun hasRestrictionsByObject(UUID uuid): Boolean {
             if (uuid == null) {
                 return !this.restMap.isEmpty()
             }
             for (Map.Entry value : this.restMap.entrySet()) {
-                if (((HashSet) value.getValue()).contains(uuid)) {
+                if (((value as HashSet).getValue()).contains(uuid)) {
                     return true
                 }
             }
@@ -81,7 +81,7 @@ class RLVRestrictions {
 
         /* JADX WARNING: Removed duplicated region for block: B:42:0x009e  */
         /* Code decompiled incorrectly, please refer to instructions dump. */
-        Boolean isAllowed(com.linkpoint.slproto.modules.rlv.RLVRestrictionType.RLVRuleMatchType r6, java.lang.String r7, java.util.UUID r8, java.util.UUID r9) {
+        fun isAllowed(com.linkpoint.slproto.modules.rlv.RLVRestrictionType.RLVRuleMatchType r6, java.lang.String r7, java.util.UUID r8, java.util.UUID r9): Boolean {
             /*
                 r5 = this
                 r4 = 1
@@ -179,16 +179,16 @@ class RLVRestrictions {
             throw UnsupportedOperationException("Method not decompiled: com.linkpoint.slproto.modules.rlv.RLVRestrictions.RLVRestrictionList.isAllowed(com.linkpoint.slproto.modules.rlv.RLVRestrictionType$RLVRuleMatchType, java.lang.String, java.util.UUID, java.util.UUID):Boolean")
         }
 
-        Boolean isEmpty() {
+        fun isEmpty(): Boolean {
             return this.restMap.isEmpty()
         }
 
-        Unit removeAllForObject(UUID uuid) {
+        fun removeAllForObject(UUID uuid): Unit {
             HashSet<String> hashSet = HashSet<>()
             for (Map.Entry entry : this.restMap.entrySet()) {
-                ((HashSet) entry.getValue()).remove(uuid)
-                if (((HashSet) entry.getValue()).isEmpty()) {
-                    hashSet.add((String) entry.getKey())
+                ((entry as HashSet).getValue()).remove(uuid)
+                if (((entry as HashSet).getValue()).isEmpty()) {
+                    hashSet.add((entry as String).getKey())
                 }
             }
             for (String remove : hashSet) {
@@ -196,7 +196,7 @@ class RLVRestrictions {
             }
         }
 
-        Unit removeRestriction(UUID uuid, String str) {
+        fun removeRestriction(UUID uuid, String str): Unit {
             HashSet hashSet = this.restMap.get(str)
             if (hashSet != null) {
                 hashSet.remove(uuid)
@@ -224,8 +224,8 @@ class RLVRestrictions {
         LinkedList linkedList
         linkedList = LinkedList()
         for (Map.Entry entry : this.restrictions.entrySet()) {
-            if (((RLVRestrictionList) entry.getValue()).hasRestrictionsByObject(uuid)) {
-                linkedList.add((RLVRestrictionType) entry.getKey())
+            if (((entry as RLVRestrictionList).getValue()).hasRestrictionsByObject(uuid)) {
+                linkedList.add((entry as RLVRestrictionType).getKey())
             }
         }
         return linkedList

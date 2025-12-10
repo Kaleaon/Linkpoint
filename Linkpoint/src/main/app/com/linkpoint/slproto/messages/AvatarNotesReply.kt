@@ -13,7 +13,7 @@ class AvatarNotesReply : SLMessage {
     }
 
     class Data {
-        byte[] Notes
+        ByteArray Notes
         UUID TargetID
     }
 
@@ -21,15 +21,15 @@ class AvatarNotesReply : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.Data_Field.Notes.length + 18 + 20
+    fun CalcPayloadSize(): Int {
+        return this.Data_Field.Notes.size + 18 + 20
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAvatarNotesReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -80)
@@ -38,7 +38,7 @@ class AvatarNotesReply : SLMessage {
         packVariable(byteBuffer, this.Data_Field.Notes, 2)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.Data_Field.TargetID = unpackUUID(byteBuffer)
         this.Data_Field.Notes = unpackVariable(byteBuffer, 2)

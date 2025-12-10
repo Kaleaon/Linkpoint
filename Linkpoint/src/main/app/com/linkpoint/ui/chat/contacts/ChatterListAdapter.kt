@@ -23,7 +23,7 @@ abstract class ChatterListAdapter : BaseAdapter : ListAdapter {
         this.inflater = LayoutInflater.from(context2)
     }
 
-    View getView(Int i, View view, ViewGroup viewGroup) {
+    fun getView(Int i, View view, ViewGroup viewGroup): View {
         Any item = getItem(i)
         if (!(item instanceof ChatterDisplayInfo)) {
             return null
@@ -34,7 +34,7 @@ abstract class ChatterListAdapter : BaseAdapter : ListAdapter {
     }
 
     /* access modifiers changed from: package-private */
-    Unit setUserDistanceInline(Boolean z) {
+    fun setUserDistanceInline(Boolean z): Unit {
         this.userDistanceInline = z
     }
 }

@@ -19,15 +19,15 @@ class ChildAgentAlive : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 45
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleChildAgentAlive(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put(Ascii.SUB)
         packLong(byteBuffer, this.AgentData_Field.RegionHandle)
         packInt(byteBuffer, this.AgentData_Field.ViewerCircuitCode)
@@ -35,7 +35,7 @@ class ChildAgentAlive : SLMessage {
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.RegionHandle = unpackLong(byteBuffer)
         this.AgentData_Field.ViewerCircuitCode = unpackInt(byteBuffer)
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)

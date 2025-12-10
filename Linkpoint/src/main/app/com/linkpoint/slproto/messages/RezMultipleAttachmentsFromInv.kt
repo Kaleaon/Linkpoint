@@ -41,7 +41,7 @@ class RezMultipleAttachmentsFromInv : SLMessage {
         this.HeaderData_Field = HeaderData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 55
         Iterator<T> it = this.ObjectData_Fields.iterator()
         while (true) {
@@ -49,29 +49,29 @@ class RezMultipleAttachmentsFromInv : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            ObjectData objectData = (ObjectData) it.next()
-            i = objectData.Description.length + objectData.Name.length + 50 + 1 + i2
+            ObjectData objectData = (it as ObjectData).next()
+            i = objectData.Description.size + objectData.Name.size + 50 + 1 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRezMultipleAttachmentsFromInv(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -116)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packUUID(byteBuffer, this.HeaderData_Field.CompoundMsgID)
-        packByte(byteBuffer, (Byte) this.HeaderData_Field.TotalObjects)
+        packByte(byteBuffer, (this as Byte).HeaderData_Field.TotalObjects)
         packBoolean(byteBuffer, this.HeaderData_Field.FirstDetachAll)
-        byteBuffer.put((Byte) this.ObjectData_Fields.size())
+        byteBuffer.put((this as Byte).ObjectData_Fields.size())
         for (ObjectData objectData : this.ObjectData_Fields) {
             packUUID(byteBuffer, objectData.ItemID)
             packUUID(byteBuffer, objectData.OwnerID)
-            packByte(byteBuffer, (Byte) objectData.AttachmentPt)
+            packByte(byteBuffer, (objectData as Byte).AttachmentPt)
             packInt(byteBuffer, objectData.ItemFlags)
             packInt(byteBuffer, objectData.GroupMask)
             packInt(byteBuffer, objectData.EveryoneMask)
@@ -81,14 +81,14 @@ class RezMultipleAttachmentsFromInv : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.HeaderData_Field.CompoundMsgID = unpackUUID(byteBuffer)
         this.HeaderData_Field.TotalObjects = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.HeaderData_Field.FirstDetachAll = unpackBoolean(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             ObjectData objectData = ObjectData()
             objectData.ItemID = unpackUUID(byteBuffer)
             objectData.OwnerID = unpackUUID(byteBuffer)

@@ -35,33 +35,33 @@ abstract class RecyclerSubscribableListAdapter<T> : RecyclerView.Adapter {
             throw UnsupportedOperationException("Method not decompiled: com.linkpoint.ui.common.RecyclerSubscribableListAdapter.LocalItemList.<init>(com.linkpoint.ui.common.RecyclerSubscribableListAdapter, com.linkpoint.slproto.users.manager.SubscribableList, com.google.common.base.Optional):Unit")
         }
 
-        Unit add(Int i, T t) {
+        fun add(Int i, T t): Unit {
             this.backingList.add(i, t)
             RecyclerSubscribableListAdapter.this.notifyItemInserted(i)
         }
 
-        Unit clear() {
+        fun clear(): Unit {
             this.backingList.clear()
             RecyclerSubscribableListAdapter.this.notifyDataSetChanged()
         }
 
-        T get(Int i) {
+        fun get(Int i): T {
             return this.backingList.get(i)
         }
 
-        T remove(Int i) {
+        fun remove(Int i): T {
             T remove = this.backingList.remove(i)
             RecyclerSubscribableListAdapter.this.notifyItemRemoved(i)
             return remove
         }
 
-        T set(Int i, T t) {
+        fun set(Int i, T t): T {
             T t2 = this.backingList.set(i, t)
             RecyclerSubscribableListAdapter.this.notifyItemChanged(i)
             return t2
         }
 
-        Int size() {
+        fun size(): Int {
             return this.backingList.size()
         }
     }
@@ -76,16 +76,16 @@ abstract class RecyclerSubscribableListAdapter<T> : RecyclerView.Adapter {
     /* access modifiers changed from: protected */
     abstract RecyclerView.ViewHolder createObjectViewHolder(ViewGroup viewGroup, Int i)
 
-    Int getItemCount() {
+    fun getItemCount(): Int {
         return this.localItemList.size()
     }
 
-    Int getItemViewType(Int i) {
+    fun getItemViewType(Int i): Int {
         return getObjectViewType(this.localItemList.get(i))
     }
 
     @Nullable
-    T getObject(Int i) {
+    fun getObject(Int i): T {
         if (i < 0 || i >= this.localItemList.size()) {
             return null
         }
@@ -95,7 +95,7 @@ abstract class RecyclerSubscribableListAdapter<T> : RecyclerView.Adapter {
     /* access modifiers changed from: protected */
     abstract Int getObjectViewType(T t)
 
-    Unit onBindViewHolder(RecyclerView.ViewHolder viewHolder, Int i) {
+    fun onBindViewHolder(RecyclerView.ViewHolder viewHolder, Int i): Unit {
         bindObjectViewHolder(viewHolder, this.localItemList.get(i))
     }
 

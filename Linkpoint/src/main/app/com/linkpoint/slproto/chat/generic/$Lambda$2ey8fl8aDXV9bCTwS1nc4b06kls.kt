@@ -11,7 +11,7 @@ import com.linkpoint.slproto.chat.generic.SLChatEvent
         return SLChatEvent.ChatMessageViewType.m151com_lumiyaviewer_lumiya_slproto_chat_generic_SLChatEvent$ChatMessageViewTypemthref0(view, adapter)
     }
 
-    ChatEventViewHolder createViewHolder(View view, RecyclerView.Adapter adapter) {
+    fun createViewHolder(View view, RecyclerView.Adapter adapter): ChatEventViewHolder {
         return $m$0(view, adapter)
     }
 }

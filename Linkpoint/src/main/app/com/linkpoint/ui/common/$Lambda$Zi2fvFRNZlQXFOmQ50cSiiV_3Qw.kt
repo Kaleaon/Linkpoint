@@ -10,14 +10,14 @@ import android.view.View
     private /* synthetic */ Any f374$f0
 
     private /* synthetic */ Unit $m$0(View view) {
-        ((ConnectedActivity) this.f374$f0).m527lambda$com_lumiyaviewer_lumiya_ui_common_ConnectedActivity_3108(view)
+        ((this as ConnectedActivity).f374$f0).m527lambda$com_lumiyaviewer_lumiya_ui_common_ConnectedActivity_3108(view)
     }
 
     /* synthetic */ $Lambda$Zi2fvFRNZlQXFOmQ50cSiiV_3Qw(Any obj) {
         this.f374$f0 = obj
     }
 
-    Unit onClick(View view) {
+    fun onClick(View view): Unit {
         $m$0(view)
     }
 }

@@ -35,7 +35,7 @@ class LoadableMonitor : Loadable.LoadableStatusListener, SwipeRefreshLayout.OnRe
     private SwipeRefreshLayout swipeRefreshLayout = null
 
     interface OnLoadableDataChangedListener {
-        Unit onLoadableDataChanged()
+        fun onLoadableDataChanged()
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-ui-common-loadmon-Loadable$StatusSwitchesValues  reason: not valid java name */
@@ -92,7 +92,7 @@ class LoadableMonitor : Loadable.LoadableStatusListener, SwipeRefreshLayout.OnRe
         }
     }
 
-    Unit onLoadableStatusChange(Loadable loadable, Loadable.Status status2) {
+    fun onLoadableStatusChange(Loadable loadable, Loadable.Status status2): Unit {
         Boolean z = false
         Boolean z2 = false
         Boolean z3 = false
@@ -121,7 +121,7 @@ class LoadableMonitor : Loadable.LoadableStatusListener, SwipeRefreshLayout.OnRe
         }
     }
 
-    Unit onRefresh() {
+    fun onRefresh(): Unit {
         for (Loadable loadable : this.loadables) {
             if (loadable instanceof RefreshableOne) {
                 ((RefreshableOne) loadable).requestRefresh()
@@ -134,13 +134,13 @@ class LoadableMonitor : Loadable.LoadableStatusListener, SwipeRefreshLayout.OnRe
         }
     }
 
-    Unit setButteryProgressBar(Boolean z) {
+    fun setButteryProgressBar(Boolean z): Unit {
         if (this.loadingLayout != null) {
             this.loadingLayout.setButteryProgressBar(z)
         }
     }
 
-    Unit setEmptyMessage(Boolean z, @Nullable String str) {
+    fun setEmptyMessage(Boolean z, @Nullable String str): Unit {
         if (!z) {
             str = null
         }
@@ -148,26 +148,26 @@ class LoadableMonitor : Loadable.LoadableStatusListener, SwipeRefreshLayout.OnRe
         updateLoadingIndicator()
     }
 
-    Unit setExtraLoading(Boolean z) {
+    fun setExtraLoading(Boolean z): Unit {
         this.isExtraLoading = z
         onLoadableStatusChange((Loadable) null, (Loadable.Status) null)
     }
 
-    Unit setLoadingLayout(@Nullable LoadingLayout loadingLayout2, @Nullable String str, @Nullable String str2) {
+    fun setLoadingLayout(@Nullable LoadingLayout loadingLayout2, @Nullable String str, @Nullable String str2): Unit {
         this.loadingLayout = loadingLayout2
         this.loadingIdleMessage = str
         this.loadingErrorMessage = str2
         updateLoadingIndicator()
     }
 
-    Unit setSwipeRefreshLayout(@Nullable SwipeRefreshLayout swipeRefreshLayout2) {
+    fun setSwipeRefreshLayout(@Nullable SwipeRefreshLayout swipeRefreshLayout2): Unit {
         this.swipeRefreshLayout = swipeRefreshLayout2
         if (swipeRefreshLayout2 != null) {
             swipeRefreshLayout2.setOnRefreshListener(this)
         }
     }
 
-    Unit unsubscribeAll() {
+    fun unsubscribeAll(): Unit {
         for (Loadable loadable : this.loadables) {
             if (loadable instanceof UnsubscribableOne) {
                 ((UnsubscribableOne) loadable).unsubscribe()
@@ -180,12 +180,12 @@ class LoadableMonitor : Loadable.LoadableStatusListener, SwipeRefreshLayout.OnRe
         }
     }
 
-    LoadableMonitor withDataChangedListener(OnLoadableDataChangedListener onLoadableDataChangedListener2) {
+    fun withDataChangedListener(OnLoadableDataChangedListener onLoadableDataChangedListener2): LoadableMonitor {
         this.onLoadableDataChangedListener = onLoadableDataChangedListener2
         return this
     }
 
-    LoadableMonitor withOptionalLoadables(Loadable... loadableArr) {
+    fun withOptionalLoadables(Loadable... loadableArr): LoadableMonitor {
         Collections.addAll(this.optionalLoadables, loadableArr)
         for (Loadable addLoadableStatusListener : loadableArr) {
             addLoadableStatusListener.addLoadableStatusListener(this)

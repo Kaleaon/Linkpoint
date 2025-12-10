@@ -9,14 +9,14 @@ import com.linkpoint.slproto.users.MultipleChatterNameRetriever
     private /* synthetic */ Any f208$f0
 
     private /* synthetic */ Unit $m$0(MultipleChatterNameRetriever multipleChatterNameRetriever) {
-        ((ObjectsManager) this.f208$f0).m347lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ObjectsManager_2320(multipleChatterNameRetriever)
+        ((this as ObjectsManager).f208$f0).m347lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ObjectsManager_2320(multipleChatterNameRetriever)
     }
 
     /* synthetic */ $Lambda$n3FxEEuksYOCADj00lseQFiZ3z4(Any obj) {
         this.f208$f0 = obj
     }
 
-    Unit onChatterNameUpdated(MultipleChatterNameRetriever multipleChatterNameRetriever) {
+    fun onChatterNameUpdated(MultipleChatterNameRetriever multipleChatterNameRetriever): Unit {
         $m$0(multipleChatterNameRetriever)
     }
 }

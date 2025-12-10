@@ -19,7 +19,7 @@ class GenericHTTPExecutor : ThreadPoolExecutor {
 
     private GenericHTTPExecutor() {
         super(1, 3, 60, TimeUnit.SECONDS, LinkedBlockingQueue<>(), ThreadFactory() {
-            Thread newThread(@NonNull Runnable runnable) {
+            fun newThread(@NonNull Runnable runnable): Thread {
                 return Thread(runnable, "HTTPAccess")
             }
         })
@@ -28,7 +28,7 @@ class GenericHTTPExecutor : ThreadPoolExecutor {
 
     // Removed synthetic constructor artifact from decompiler
 
-    ExecutorService getInstance() {
+    fun getInstance(): ExecutorService {
         return InstanceHolder.instance
     }
 }

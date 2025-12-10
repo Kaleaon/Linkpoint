@@ -26,41 +26,41 @@ class SystemMessage : SLMessage {
         this.MethodData_Field = MethodData()
     }
 
-    Int CalcPayloadSize() {
-        Int length = this.MethodData_Field.Method.length + 1 + 16 + 32 + 4 + 1
+    fun CalcPayloadSize(): Int {
+        Int length = this.MethodData_Field.Method.size + 1 + 16 + 32 + 4 + 1
         Iterator<T> it = this.ParamList_Fields.iterator()
         while (true) {
             Int i = length
             if (!it.hasNext()) {
                 return i
             }
-            length = ((ParamList) it.next()).Parameter.length + 1 + i
+            length = ((it as ParamList).next()).Parameter.size + 1 + i
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleSystemMessage(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -108)
         packVariable(byteBuffer, this.MethodData_Field.Method, 1)
         packUUID(byteBuffer, this.MethodData_Field.Invoice)
         packFixed(byteBuffer, this.MethodData_Field.Digest, 32)
-        byteBuffer.put((Byte) this.ParamList_Fields.size())
+        byteBuffer.put((this as Byte).ParamList_Fields.size())
         for (ParamList paramList : this.ParamList_Fields) {
             packVariable(byteBuffer, paramList.Parameter, 1)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.MethodData_Field.Method = unpackVariable(byteBuffer, 1)
         this.MethodData_Field.Invoice = unpackUUID(byteBuffer)
         this.MethodData_Field.Digest = unpackFixed(byteBuffer, 32)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             ParamList paramList = ParamList()
             paramList.Parameter = unpackVariable(byteBuffer, 1)
             this.ParamList_Fields.add(paramList)

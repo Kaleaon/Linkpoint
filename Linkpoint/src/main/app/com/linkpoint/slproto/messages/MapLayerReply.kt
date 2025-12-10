@@ -28,21 +28,21 @@ class MapLayerReply : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.LayerData_Fields.size() * 32) + 25
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleMapLayerReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -106)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packInt(byteBuffer, this.AgentData_Field.Flags)
-        byteBuffer.put((Byte) this.LayerData_Fields.size())
+        byteBuffer.put((this as Byte).LayerData_Fields.size())
         for (LayerData layerData : this.LayerData_Fields) {
             packInt(byteBuffer, layerData.Left)
             packInt(byteBuffer, layerData.Right)
@@ -52,11 +52,11 @@ class MapLayerReply : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.Flags = unpackInt(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             LayerData layerData = LayerData()
             layerData.Left = unpackInt(byteBuffer)
             layerData.Right = unpackInt(byteBuffer)

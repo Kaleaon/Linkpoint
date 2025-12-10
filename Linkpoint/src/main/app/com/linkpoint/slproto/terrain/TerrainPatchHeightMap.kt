@@ -15,17 +15,17 @@ class TerrainPatchHeightMap {
         this.waterHeight = f
         this.mapWidth = i
         this.mapHeight = i2
-        this.heightMap = Float[fArr.length]
-        System.arraycopy(fArr, 0, this.heightMap, 0, fArr.length)
-        this.normalMap = Float[fArr2.length]
-        System.arraycopy(fArr2, 0, this.normalMap, 0, fArr2.length)
+        this.heightMap = Float[fArr.size]
+        System.arraycopy(fArr, 0, this.heightMap, 0, fArr.size)
+        this.normalMap = Float[fArr2.size]
+        System.arraycopy(fArr2, 0, this.normalMap, 0, fArr2.size)
     }
 
     private Int getHashCode() {
         return Float.floatToIntBits(this.waterHeight) + 0 + Arrays.hashCode(this.heightMap) + Arrays.hashCode(this.normalMap) + this.mapWidth + this.mapHeight
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (!(obj instanceof TerrainPatchHeightMap)) {
             return false
         }
@@ -36,35 +36,35 @@ class TerrainPatchHeightMap {
         return false
     }
 
-    FloatArray getHeightArray() {
+    fun getHeightArray(): FloatArray {
         return this.heightMap
     }
 
-    Int getMapHeight() {
+    fun getMapHeight(): Int {
         return this.mapHeight
     }
 
-    Int getMapWidth() {
+    fun getMapWidth(): Int {
         return this.mapWidth
     }
 
-    Float getMaxHeight() {
+    fun getMaxHeight(): Float {
         return Floats.max(this.heightMap)
     }
 
-    Float getMinHeight() {
+    fun getMinHeight(): Float {
         return Floats.min(this.heightMap)
     }
 
-    FloatArray getNormalArray() {
+    fun getNormalArray(): FloatArray {
         return this.normalMap
     }
 
-    Float getWaterHeight() {
+    fun getWaterHeight(): Float {
         return this.waterHeight
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         return this.hashCode
     }
 }

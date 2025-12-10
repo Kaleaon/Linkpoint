@@ -13,7 +13,7 @@ class AutoValue_MyAvatarState : MyAvatarState {
         this.hasHUDs = z3
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -27,11 +27,11 @@ class AutoValue_MyAvatarState : MyAvatarState {
         return false
     }
 
-    Boolean hasHUDs() {
+    fun hasHUDs(): Boolean {
         return this.hasHUDs
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         Int i = 1231
         Int i2 = ((this.isFlying ? 1231 : 1237) ^ (((((this.isSitting ? 1231 : 1237) ^ 1000003) * 1000003) ^ this.sittingOn) * 1000003)) * 1000003
         if (!this.hasHUDs) {
@@ -40,19 +40,19 @@ class AutoValue_MyAvatarState : MyAvatarState {
         return i2 ^ i
     }
 
-    Boolean isFlying() {
+    fun isFlying(): Boolean {
         return this.isFlying
     }
 
-    Boolean isSitting() {
+    fun isSitting(): Boolean {
         return this.isSitting
     }
 
-    Int sittingOn() {
+    fun sittingOn(): Int {
         return this.sittingOn
     }
 
-    String toString() {
+    fun toString(): String {
         return "MyAvatarState{isSitting=" + this.isSitting + ", " + "sittingOn=" + this.sittingOn + ", " + "isFlying=" + this.isFlying + ", " + "hasHUDs=" + this.hasHUDs + "}"
     }
 }

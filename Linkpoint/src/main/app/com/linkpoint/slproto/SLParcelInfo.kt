@@ -355,7 +355,7 @@ class SLParcelInfo {
     /* DevToolsApp WARNING: Removed duplicated region for block: B:64:0x00f7  */
     /* DevToolsApp WARNING: Removed duplicated region for block: B:60:0x00f1  */
     /* DevToolsApp WARNING: Removed duplicated region for block: B:64:0x00f7  */
-    Boolean killObject(com.linkpoint.slproto.SLAgentCircuit agentCircuit, Int localID) {
+    fun killObject(com.linkpoint.slproto.SLAgentCircuit agentCircuit, Int localID): Boolean {
         Boolean wasMyAvatarUpdated = false
         Boolean returnValue = false
         
@@ -507,7 +507,7 @@ class SLParcelInfo {
         }
     }
 
-    Unit setSunHour(Float f) {
+    fun setSunHour(Float f): Unit {
         Debug.Printf("Windlight: Simulator sun hour set to %f", Float.valueOf(f))
         synchronized (this.simSunHourLock) {
             this.simSunHour = f

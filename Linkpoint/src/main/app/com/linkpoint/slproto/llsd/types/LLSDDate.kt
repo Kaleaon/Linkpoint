@@ -21,16 +21,20 @@ class LLSDDate : LLSDNode {
         this.value = date
     }
 
-    Date asDate() {
+    fun asDate(): Date {
         return this.value
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    @Throws(IOException::class)
+
+    fun toBinary(DataOutputStream dataOutputStream) {
         dataOutputStream.writeByte(100)
         dataOutputStream.writeDouble((double) (this.value.getTime() / 1000))
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    @Throws(IOException::class)
+
+    fun toXML(XmlSerializer xmlSerializer) {
         xmlSerializer.startTag("", "date")
         xmlSerializer.text(this.value.toGMTString())
         xmlSerializer.endTag("", "date")

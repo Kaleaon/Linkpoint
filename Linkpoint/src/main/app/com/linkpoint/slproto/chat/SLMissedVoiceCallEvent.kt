@@ -27,27 +27,27 @@ class SLMissedVoiceCallEvent : SLChatYesNoEvent {
         return SLChatEvent.ChatMessageType.MissedVoiceCall
     }
 
-    String getNoButton(Context context) {
+    fun getNoButton(Context context): String {
         return context.getString(R.string.missed_voice_call_no)
     }
 
-    String getNoMessage(Context context) {
+    fun getNoMessage(Context context): String {
         return context.getString(R.string.missed_voice_call_declined)
     }
 
-    String getQuestion(Context context) {
+    fun getQuestion(Context context): String {
         return context.getString(R.string.missed_voice_call_question)
     }
 
-    String getYesButton(Context context) {
+    fun getYesButton(Context context): String {
         return context.getString(R.string.missed_voice_call_yes)
     }
 
-    String getYesMessage(Context context) {
+    fun getYesMessage(Context context): String {
         return ""
     }
 
-    Unit onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(Context context, UserManager userManager): Unit {
         SLModules modules
         super.onYesAction(context, userManager)
         SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
@@ -56,7 +56,7 @@ class SLMissedVoiceCallEvent : SLChatYesNoEvent {
         }
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

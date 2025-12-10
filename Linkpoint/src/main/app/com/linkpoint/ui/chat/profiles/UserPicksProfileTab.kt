@@ -52,7 +52,7 @@ class UserPicksProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadab
             this(context)
         }
 
-        Int getCount() {
+        fun getCount(): Int {
             if (this.picksReply != null) {
                 return this.picksReply.Data_Fields.size()
             }
@@ -66,27 +66,27 @@ class UserPicksProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadab
             return this.picksReply.Data_Fields.get(i)
         }
 
-        Long getItemId(Int i) {
+        fun getItemId(Int i): Long {
             return (Long) i
         }
 
-        View getView(Int i, View view, ViewGroup viewGroup) {
+        fun getView(Int i, View view, ViewGroup viewGroup): View {
             if (view == null) {
                 view = this.inflater.inflate(17367043, viewGroup, false)
             }
             AvatarPicksReply.Data item = getItem(i)
             if (item != null) {
-                ((TextView) view.findViewById(16908308)).setText(SLMessage.stringFromVariableUTF(item.PickName))
+                ((view as TextView).findViewById(16908308)).setText(SLMessage.stringFromVariableUTF(item.PickName))
             }
             return view
         }
 
-        Boolean hasStableIds() {
+        fun hasStableIds(): Boolean {
             return false
         }
 
         /* access modifiers changed from: package-private */
-        Unit setData(AvatarPicksReply avatarPicksReply) {
+        fun setData(AvatarPicksReply avatarPicksReply): Unit {
             this.picksReply = avatarPicksReply
             notifyDataSetChanged()
         }
@@ -94,7 +94,7 @@ class UserPicksProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadab
 
     /* access modifiers changed from: private */
     /* renamed from: onAddNewPick */
-    Unit m520com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTabmthref0(View view) {
+    fun m520com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTabmthref0(View view): Unit {
         ParcelData parcelData = null
         if (this.userManager != null && (this.chatterID instanceof ChatterID.ChatterIDUser)) {
             CurrentLocationInfo currentLocationInfoSnapshot = this.userManager.getCurrentLocationInfoSnapshot()
@@ -105,7 +105,7 @@ class UserPicksProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadab
             if (parcelData != null && activeAgentCircuit != null) {
                 Int count = this.picksAdapter != null ? this.picksAdapter.getCount() : 0
                 AlertDialog.Builder builder = AlertDialog.Builder(getContext())
-                String str = (String) Optional.fromNullable(Strings.emptyToNull(parcelData.getName())).or(getString(R.string.name_loading_title))
+                String str = (Optional as String).fromNullable(Strings.emptyToNull(parcelData.getName())).or(getString(R.string.name_loading_title))
                 builder.setMessage(getString(R.string.create_pick_question, str)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(count, this, activeAgentCircuit, str, parcelData) {
 
                     /* renamed from: -$f0 */
@@ -225,13 +225,13 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$0JruY
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTab_4543  reason: not valid java name */
     /* synthetic */ Unit m522lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTab_4543(SLAgentCircuit sLAgentCircuit, String str, ParcelData parcelData, Int i, DialogInterface dialogInterface, Int i2) {
         UUID randomUUID = UUID.randomUUID()
-        sLAgentCircuit.getModules().userProfiles.UpdatePickInfo(randomUUID, this.userManager.getUserID(), UUIDPool.ZeroUUID, str, Strings.nullToEmpty(parcelData.getDescription()), (UUID) Optional.fromNullable(parcelData.getSnapshotUUID()).or(UUIDPool.ZeroUUID), sLAgentCircuit.getAgentGlobalPosition(), i, true)
+        sLAgentCircuit.getModules().userProfiles.UpdatePickInfo(randomUUID, this.userManager.getUserID(), UUIDPool.ZeroUUID, str, Strings.nullToEmpty(parcelData.getDescription()), (Optional as UUID).fromNullable(parcelData.getSnapshotUUID()).or(UUIDPool.ZeroUUID), sLAgentCircuit.getAgentGlobalPosition(), i, true)
         DetailsActivity.showEmbeddedDetails(getActivity(), UserPickFragment.class, UserPickFragment.makeSelection(this.chatterID.agentUUID, AvatarPickKey(((ChatterID.ChatterIDUser) this.chatterID).getChatterUUID(), randomUUID)))
         dialogInterface.dismiss()
     }
 
     @Nullable
-    View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle): View {
         View inflate = layoutInflater.inflate(R.layout.user_profile_tab_picks, viewGroup, false)
         this.picksAdapter = PicksAdapter(layoutInflater.getContext(), (PicksAdapter) null)
         inflate.findViewById(R.id.add_new_pick_button).setOnClickListener(View.OnClickListener(this) {
@@ -302,8 +302,8 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$0JruY
             
 */
 
-        ((ListView) inflate.findViewById(R.id.picks_list_view)).setAdapter(this.picksAdapter)
-        ((ListView) inflate.findViewById(R.id.picks_list_view)).setOnItemClickListener(AdapterView.OnItemClickListener(this) {
+        ((inflate as ListView).findViewById(R.id.picks_list_view)).setAdapter(this.picksAdapter)
+        ((inflate as ListView).findViewById(R.id.picks_list_view)).setOnItemClickListener(AdapterView.OnItemClickListener(this) {
 
             /* renamed from: -$f0 */
             private /* synthetic */ Any f258$f0
@@ -371,13 +371,13 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$0JruY
             
 */
 
-        ((LoadingLayout) inflate.findViewById(R.id.loading_layout)).setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout))
-        this.loadableMonitor.setLoadingLayout((LoadingLayout) inflate.findViewById(R.id.loading_layout), getString(R.string.no_user_selected), getString(R.string.user_picks_fail))
-        this.loadableMonitor.setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout))
+        ((inflate as LoadingLayout).findViewById(R.id.loading_layout)).setSwipeRefreshLayout((inflate as SwipeRefreshLayout).findViewById(R.id.swipe_refresh_layout))
+        this.loadableMonitor.setLoadingLayout((inflate as LoadingLayout).findViewById(R.id.loading_layout), getString(R.string.no_user_selected), getString(R.string.user_picks_fail))
+        this.loadableMonitor.setSwipeRefreshLayout((inflate as SwipeRefreshLayout).findViewById(R.id.swipe_refresh_layout))
         return inflate
     }
 
-    Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged(): Unit {
         try {
             if (this.picksAdapter != null) {
                 this.picksAdapter.setData(this.avatarPicks.getData())
@@ -389,7 +389,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$0JruY
     }
 
     /* access modifiers changed from: protected */
-    Unit onShowUser(@Nullable ChatterID chatterID) {
+    fun onShowUser(@Nullable ChatterID chatterID): Unit {
         UserManager userManager
         Int i = 0
         this.loadableMonitor.unsubscribeAll()

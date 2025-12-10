@@ -27,15 +27,15 @@ class MapBlockRequest : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 53
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleMapBlockRequest(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -105)
@@ -44,13 +44,13 @@ class MapBlockRequest : SLMessage {
         packInt(byteBuffer, this.AgentData_Field.Flags)
         packInt(byteBuffer, this.AgentData_Field.EstateID)
         packBoolean(byteBuffer, this.AgentData_Field.Godlike)
-        packShort(byteBuffer, (Short) this.PositionData_Field.MinX)
-        packShort(byteBuffer, (Short) this.PositionData_Field.MaxX)
-        packShort(byteBuffer, (Short) this.PositionData_Field.MinY)
-        packShort(byteBuffer, (Short) this.PositionData_Field.MaxY)
+        packShort(byteBuffer, (this as Short).PositionData_Field.MinX)
+        packShort(byteBuffer, (this as Short).PositionData_Field.MaxX)
+        packShort(byteBuffer, (this as Short).PositionData_Field.MinY)
+        packShort(byteBuffer, (this as Short).PositionData_Field.MaxY)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.Flags = unpackInt(byteBuffer)

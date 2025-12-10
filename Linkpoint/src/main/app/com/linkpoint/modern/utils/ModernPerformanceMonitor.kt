@@ -43,8 +43,8 @@ class ModernPerformanceMonitor {
             this.description = description
         }
         
-        String getDisplayName() { return displayName; }
-        String getDescription() { return description; }
+        fun getDisplayName(): String { return displayName; }
+        fun getDescription(): String { return description; }
     }
     
     // Performance metrics
@@ -145,7 +145,7 @@ class ModernPerformanceMonitor {
     /**
      * Get performance metrics for a specific operation
      */
-    PerformanceMetrics getMetrics(String operationName) {
+    fun getMetrics(String operationName): PerformanceMetrics {
         List<Long> durations = operationDurations.get(operationName)
         if (durations == null || durations.isEmpty()) {
             return null
@@ -167,7 +167,7 @@ class ModernPerformanceMonitor {
     /**
      * Run comprehensive benchmark for a specific category
      */
-    BenchmarkResult runBenchmark(BenchmarkCategory category, Context context) {
+    fun runBenchmark(BenchmarkCategory category, Context context): BenchmarkResult {
         Log.i(TAG, "Starting benchmark for category: " + category.getDisplayName())
         long benchmarkStartTime = SystemClock.elapsedRealtime()
         
@@ -412,7 +412,7 @@ class ModernPerformanceMonitor {
     /**
      * Get current memory usage statistics
      */
-    String getMemoryUsageReport() {
+    fun getMemoryUsageReport(): String {
         Runtime runtime = Runtime.getRuntime()
         long totalMemory = runtime.totalMemory()
         long freeMemory = runtime.freeMemory()
@@ -454,7 +454,7 @@ class ModernPerformanceMonitor {
     /**
      * Export performance data as formatted report
      */
-    String exportPerformanceReport() {
+    fun exportPerformanceReport(): String {
         StringBuilder report = StringBuilder()
         report.append("=== Linkpoint Modern Performance Report ===\n")
         report.append("Generated: ").append(new java.util.Date()).append("\n\n")

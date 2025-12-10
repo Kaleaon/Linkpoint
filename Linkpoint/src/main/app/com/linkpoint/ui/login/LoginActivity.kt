@@ -273,10 +273,10 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
         }
     }
 
-    Unit afterTextChanged(Editable editable) {
+    fun afterTextChanged(Editable editable): Unit {
     }
 
-    Unit beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+    fun beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3): Unit {
         if (this.enableAutoClear) {
             EditText editText = (EditText) findViewById(R.id.editPassword)
             if (editText.getText().toString().equals(getString(R.string.saved_password))) {
@@ -288,12 +288,12 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
         }
     }
 
-    SharedPreferences getPreferences(Int i) {
+    fun getPreferences(Int i): SharedPreferences {
         return getSharedPreferences("LoginActivity", i)
     }
 
     @EventHandler
-    Unit handleLoginResult(SLLoginResultEvent sLLoginResultEvent) {
+    fun handleLoginResult(SLLoginResultEvent sLLoginResultEvent): Unit {
         this.loggingIn = false
         Debug.Printf("LoginProgressActivity: result.success = %b", Boolean.valueOf(sLLoginResultEvent.success))
         if (sLLoginResultEvent.success) {
@@ -316,7 +316,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
     }
 
     @EventHandler
-    Unit handleReconnectingEvent(SLReconnectingEvent sLReconnectingEvent) {
+    fun handleReconnectingEvent(SLReconnectingEvent sLReconnectingEvent): Unit {
         updateConnectingStatus()
     }
 
@@ -329,7 +329,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
     }
 
     /* access modifiers changed from: protected */
-    Unit onActivityResult(Int i, Int i2, Intent intent) {
+    fun onActivityResult(Int i, Int i2, Intent intent): Unit {
         AccountList.AccountInfo accountInfo
         Debug.Log("LoginActivity: onActivityResult: requestCode = " + i + ", resultCode = " + i2)
         if (intent != null) {
@@ -386,7 +386,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
         }
     }
 
-    Unit onClick(View view) {
+    fun onClick(View view): Unit {
         switch (view.getId()) {
             case R.id.whatsnewText:
                 startActivity(Intent(this, WhatsNewActivity.class))
@@ -407,7 +407,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
         }
     }
 
-    Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle): Unit {
         super.onCreate(bundle)
         SLGridConnection gridConnection = GridConnectionService.getGridConnection()
         if (gridConnection != null) {
@@ -442,7 +442,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
             /* JADX WARNING: type inference failed for: r5v0, types: [android.widget.AdapterView<?>, android.widget.AdapterView] */
             /* JADX WARNING: Unknown variable types count: 1 */
             /* Code decompiled incorrectly, please refer to instructions dump. */
-            Unit onItemSelected(android.widget.AdapterView<?> r5, android.view.View r6, Int r7, Long r8) {
+            fun onItemSelected(android.widget.AdapterView<?> r5, android.view.View r6, Int r7, Long r8): Unit {
                 /*
                     r4 = this
                     r3 = 0
@@ -477,14 +477,14 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
                 throw UnsupportedOperationException("Method not decompiled: com.linkpoint.ui.login.LoginActivity.AnonymousClass1.onItemSelected(android.widget.AdapterView, android.view.View, Int, Long):Unit")
             }
 
-            Unit onNothingSelected(AdapterView<?> adapterView) {
+            fun onNothingSelected(AdapterView<?> adapterView): Unit {
             }
         findViewById(R.id.whatsnewText).getViewTreeObserver().addOnGlobalLayoutListener($Lambda$U_ZFuxgsYW8weMauiDTqAtaKePI(this))
         checkIfGridAvailable()
         findViewById(R.id.loginCancelButton).setOnClickListener(this)
     }
 
-    Boolean onCreateOptionsMenu(Menu menu) {
+    fun onCreateOptionsMenu(Menu menu): Boolean {
         getMenuInflater().inflate(R.menu.login_menu, menu)
         ImmutableList.Builder builder = ImmutableList.builder()
         builder.add((Any) menu.findItem(R.id.item_manage_accounts))
@@ -495,7 +495,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
         return true
     }
 
-    Unit onGridAdded(GridList.GridInfo gridInfo, Boolean z) {
+    fun onGridAdded(GridList.GridInfo gridInfo, Boolean z): Unit {
         if (z) {
             this.gridList.addNewGrid(gridInfo)
         }
@@ -512,14 +512,14 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
         }
     }
 
-    Unit onGridDeleted(GridList.GridInfo gridInfo) {
+    fun onGridDeleted(GridList.GridInfo gridInfo): Unit {
     }
 
-    Unit onGridEditCancelled() {
+    fun onGridEditCancelled(): Unit {
         ((Spinner) findViewById(R.id.spinnerGrid)).setSelection(this.lastSelectedGrid)
     }
 
-    Boolean onOptionsItemSelected(MenuItem menuItem) {
+    fun onOptionsItemSelected(MenuItem menuItem): Boolean {
         switch (menuItem.getItemId()) {
             case R.id.item_settings:
                 startActivity(Intent(this, SettingsActivity.class))
@@ -541,7 +541,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
     }
 
     /* access modifiers changed from: protected */
-    Unit onResume() {
+    fun onResume(): Unit {
         super.onResume()
         Debug.Printf("LoginActivity: Resumed.", Any[0])
         checkIfGridAvailable()
@@ -564,16 +564,16 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
     }
 
     /* access modifiers changed from: protected */
-    Unit onStart() {
+    fun onStart(): Unit {
         super.onStart()
         checkIfGridAvailable()
     }
 
     /* access modifiers changed from: protected */
-    Unit onStop() {
+    fun onStop(): Unit {
         super.onStop()
     }
 
-    Unit onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+    fun onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3): Unit {
     }
 }

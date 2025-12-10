@@ -30,7 +30,7 @@ class ChildAgentUpdate : SLMessage {
         Int AgentAccess
         UUID AgentID
         LLVector3 AgentPos
-        byte[] AgentTextures
+        ByteArray AgentTextures
         LLVector3 AgentVel
         Boolean AlwaysRun
         float Aspect
@@ -49,7 +49,7 @@ class ChildAgentUpdate : SLMessage {
         Long RegionHandle
         UUID SessionID
         LLVector3 Size
-        byte[] Throttles
+        ByteArray Throttles
         LLVector3 UpAxis
         Int ViewerCircuitCode
     }
@@ -74,7 +74,7 @@ class ChildAgentUpdate : SLMessage {
     }
 
     class NVPairData {
-        byte[] NVPairs
+        ByteArray NVPairs
     }
 
     class VisualParam {
@@ -86,23 +86,23 @@ class ChildAgentUpdate : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
-        Int length = this.AgentData_Field.Throttles.length + 138 + 4 + 12 + 12 + 4 + 4 + 1 + 1 + 16 + 1 + 2 + this.AgentData_Field.AgentTextures.length + 16 + 1 + 1 + (this.GroupData_Fields.size() * 25) + 1 + (this.AnimationData_Fields.size() * 32) + 1 + (this.GranterBlock_Fields.size() * 16) + 1
+    fun CalcPayloadSize(): Int {
+        Int length = this.AgentData_Field.Throttles.size + 138 + 4 + 12 + 12 + 4 + 4 + 1 + 1 + 16 + 1 + 2 + this.AgentData_Field.AgentTextures.size + 16 + 1 + 1 + (this.GroupData_Fields.size() * 25) + 1 + (this.AnimationData_Fields.size() * 32) + 1 + (this.GranterBlock_Fields.size() * 16) + 1
         Iterator<T> it = this.NVPairData_Fields.iterator()
         while (true) {
             Int i = length
             if (!it.hasNext()) {
                 return i + 1 + (this.VisualParam_Fields.size() * 1) + 1 + (this.AgentAccess_Fields.size() * 2) + 1 + (this.AgentInfo_Fields.size() * 4)
             }
-            length = ((NVPairData) it.next()).NVPairs.length + 2 + i
+            length = ((it as NVPairData).next()).NVPairs.size + 2 + i
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleChildAgentUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put(Ascii.EM)
         packLong(byteBuffer, this.AgentData_Field.RegionHandle)
         packInt(byteBuffer, this.AgentData_Field.ViewerCircuitCode)
@@ -124,47 +124,47 @@ class ChildAgentUpdate : SLMessage {
         packLLQuaternion(byteBuffer, this.AgentData_Field.BodyRotation)
         packInt(byteBuffer, this.AgentData_Field.ControlFlags)
         packFloat(byteBuffer, this.AgentData_Field.EnergyLevel)
-        packByte(byteBuffer, (byte) this.AgentData_Field.GodLevel)
+        packByte(byteBuffer, (this as byte).AgentData_Field.GodLevel)
         packBoolean(byteBuffer, this.AgentData_Field.AlwaysRun)
         packUUID(byteBuffer, this.AgentData_Field.PreyAgent)
-        packByte(byteBuffer, (byte) this.AgentData_Field.AgentAccess)
+        packByte(byteBuffer, (this as byte).AgentData_Field.AgentAccess)
         packVariable(byteBuffer, this.AgentData_Field.AgentTextures, 2)
         packUUID(byteBuffer, this.AgentData_Field.ActiveGroupID)
-        byteBuffer.put((byte) this.GroupData_Fields.size())
+        byteBuffer.put((this as byte).GroupData_Fields.size())
         for (GroupData groupData : this.GroupData_Fields) {
             packUUID(byteBuffer, groupData.GroupID)
             packLong(byteBuffer, groupData.GroupPowers)
             packBoolean(byteBuffer, groupData.AcceptNotices)
         }
-        byteBuffer.put((byte) this.AnimationData_Fields.size())
+        byteBuffer.put((this as byte).AnimationData_Fields.size())
         for (AnimationData animationData : this.AnimationData_Fields) {
             packUUID(byteBuffer, animationData.Animation)
             packUUID(byteBuffer, animationData.ObjectID)
         }
-        byteBuffer.put((byte) this.GranterBlock_Fields.size())
+        byteBuffer.put((this as byte).GranterBlock_Fields.size())
         for (GranterBlock granterBlock : this.GranterBlock_Fields) {
             packUUID(byteBuffer, granterBlock.GranterID)
         }
-        byteBuffer.put((byte) this.NVPairData_Fields.size())
+        byteBuffer.put((this as byte).NVPairData_Fields.size())
         for (NVPairData nVPairData : this.NVPairData_Fields) {
             packVariable(byteBuffer, nVPairData.NVPairs, 2)
         }
-        byteBuffer.put((byte) this.VisualParam_Fields.size())
+        byteBuffer.put((this as byte).VisualParam_Fields.size())
         for (VisualParam visualParam : this.VisualParam_Fields) {
-            packByte(byteBuffer, (byte) visualParam.ParamValue)
+            packByte(byteBuffer, (visualParam as byte).ParamValue)
         }
-        byteBuffer.put((byte) this.AgentAccess_Fields.size())
+        byteBuffer.put((this as byte).AgentAccess_Fields.size())
         for (AgentAccess agentAccess : this.AgentAccess_Fields) {
-            packByte(byteBuffer, (byte) agentAccess.AgentLegacyAccess)
-            packByte(byteBuffer, (byte) agentAccess.AgentMaxAccess)
+            packByte(byteBuffer, (agentAccess as byte).AgentLegacyAccess)
+            packByte(byteBuffer, (agentAccess as byte).AgentMaxAccess)
         }
-        byteBuffer.put((byte) this.AgentInfo_Fields.size())
+        byteBuffer.put((this as byte).AgentInfo_Fields.size())
         for (AgentInfo agentInfo : this.AgentInfo_Fields) {
             packInt(byteBuffer, agentInfo.Flags)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.RegionHandle = unpackLong(byteBuffer)
         this.AgentData_Field.ViewerCircuitCode = unpackInt(byteBuffer)
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
@@ -192,7 +192,7 @@ class ChildAgentUpdate : SLMessage {
         this.AgentData_Field.AgentTextures = unpackVariable(byteBuffer, 2)
         this.AgentData_Field.ActiveGroupID = unpackUUID(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             GroupData groupData = GroupData()
             groupData.GroupID = unpackUUID(byteBuffer)
             groupData.GroupPowers = unpackLong(byteBuffer)
@@ -200,39 +200,39 @@ class ChildAgentUpdate : SLMessage {
             this.GroupData_Fields.add(groupData)
         }
         byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b2; i2++) {
+        for (i2 in 0 until b2) {
             AnimationData animationData = AnimationData()
             animationData.Animation = unpackUUID(byteBuffer)
             animationData.ObjectID = unpackUUID(byteBuffer)
             this.AnimationData_Fields.add(animationData)
         }
         byte b3 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i3 = 0; i3 < b3; i3++) {
+        for (i3 in 0 until b3) {
             GranterBlock granterBlock = GranterBlock()
             granterBlock.GranterID = unpackUUID(byteBuffer)
             this.GranterBlock_Fields.add(granterBlock)
         }
         byte b4 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i4 = 0; i4 < b4; i4++) {
+        for (i4 in 0 until b4) {
             NVPairData nVPairData = NVPairData()
             nVPairData.NVPairs = unpackVariable(byteBuffer, 2)
             this.NVPairData_Fields.add(nVPairData)
         }
         byte b5 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i5 = 0; i5 < b5; i5++) {
+        for (i5 in 0 until b5) {
             VisualParam visualParam = VisualParam()
             visualParam.ParamValue = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             this.VisualParam_Fields.add(visualParam)
         }
         byte b6 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i6 = 0; i6 < b6; i6++) {
+        for (i6 in 0 until b6) {
             AgentAccess agentAccess = AgentAccess()
             agentAccess.AgentLegacyAccess = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             agentAccess.AgentMaxAccess = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             this.AgentAccess_Fields.add(agentAccess)
         }
         byte b7 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i7 = 0; i7 < b7; i7++) {
+        for (i7 in 0 until b7) {
             AgentInfo agentInfo = AgentInfo()
             agentInfo.Flags = unpackInt(byteBuffer)
             this.AgentInfo_Fields.add(agentInfo)

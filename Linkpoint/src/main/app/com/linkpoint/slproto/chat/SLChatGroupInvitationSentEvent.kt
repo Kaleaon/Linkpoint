@@ -25,7 +25,7 @@ class SLChatGroupInvitationSentEvent : SLChatEvent {
     }
 
     /* access modifiers changed from: protected */
-    String getText(Context context, @NonNull UserManager userManager) {
+    fun getText(Context context, @NonNull UserManager userManager): String {
         String sourceName = this.source.getSourceName(userManager)
         Array<Any> objArr = Object[1]
         if (sourceName == null) {
@@ -40,11 +40,11 @@ class SLChatGroupInvitationSentEvent : SLChatEvent {
     }
 
     /* access modifiers changed from: protected */
-    Boolean isActionMessage(@NonNull UserManager userManager) {
+    fun isActionMessage(@NonNull UserManager userManager): Boolean {
         return false
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

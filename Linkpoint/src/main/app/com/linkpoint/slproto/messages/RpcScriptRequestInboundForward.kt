@@ -22,20 +22,20 @@ class RpcScriptRequestInboundForward : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.DataBlock_Field.StringValue.length + 60 + 4
+    fun CalcPayloadSize(): Int {
+        return this.DataBlock_Field.StringValue.size + 60 + 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRpcScriptRequestInboundForward(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -96)
         packIPAddress(byteBuffer, this.DataBlock_Field.RPCServerIP)
-        packShort(byteBuffer, (Short) this.DataBlock_Field.RPCServerPort)
+        packShort(byteBuffer, (this as Short).DataBlock_Field.RPCServerPort)
         packUUID(byteBuffer, this.DataBlock_Field.TaskID)
         packUUID(byteBuffer, this.DataBlock_Field.ItemID)
         packUUID(byteBuffer, this.DataBlock_Field.ChannelID)
@@ -43,7 +43,7 @@ class RpcScriptRequestInboundForward : SLMessage {
         packVariable(byteBuffer, this.DataBlock_Field.StringValue, 2)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.DataBlock_Field.RPCServerIP = unpackIPAddress(byteBuffer)
         this.DataBlock_Field.RPCServerPort = unpackShort(byteBuffer) & 65535
         this.DataBlock_Field.TaskID = unpackUUID(byteBuffer)

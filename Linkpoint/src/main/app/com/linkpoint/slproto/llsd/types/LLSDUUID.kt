@@ -14,7 +14,7 @@ class LLSDUUID : LLSDNode {
     }
 
     LLSDUUID(String str) {
-        Int length = str.length()
+        Int length = str.size()
         Long j = 0
         Int i = 0
         Int i2 = 0
@@ -48,21 +48,25 @@ class LLSDUUID : LLSDNode {
         this.value = uuid
     }
 
-    String asString() {
+    fun asString(): String {
         return this.value.toString()
     }
 
-    UUID asUUID() {
+    fun asUUID(): UUID {
         return this.value
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    @Throws(IOException::class)
+
+    fun toBinary(DataOutputStream dataOutputStream) {
         dataOutputStream.writeByte(117)
         dataOutputStream.writeLong(this.value.getMostSignificantBits())
         dataOutputStream.writeLong(this.value.getLeastSignificantBits())
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    @Throws(IOException::class)
+
+    fun toXML(XmlSerializer xmlSerializer) {
         xmlSerializer.startTag("", "uuid")
         if (this.value != null) {
             xmlSerializer.text(this.value.toString())

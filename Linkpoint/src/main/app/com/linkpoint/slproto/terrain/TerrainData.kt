@@ -103,7 +103,7 @@ class TerrainData {
         }
     }
 
-    Unit ProcessLayerData(ByteArray bArr) {
+    fun ProcessLayerData(ByteArray bArr): Unit {
         TerrainPatch DecompressPatch
         BitBuffer bitBuffer = BitBuffer(bArr)
         Int bits = bitBuffer.getBits(16)
@@ -114,10 +114,10 @@ class TerrainData {
                 Int x = DecompressPatch.getX()
                 Int y = DecompressPatch.getY()
                 if (x < 16 && y < 16) {
-                    for (Int i = 0; i < bits2; i++) {
+                    for (i in 0 until bits2) {
                         Int i2 = (y * 16) + i
                         if (i2 >= 0 && i2 < 256) {
-                            for (Int i3 = 0; i3 < bits2; i3++) {
+                            for (i3 in 0 until bits2) {
                                 Int i4 = (x * 16) + i3
                                 if (i4 >= 0 && i4 < 256) {
                                     this.heightMap[(i2 * 256) + i4] = DecompressPatch.heightMap[(i * bits2) + i3]
@@ -136,7 +136,7 @@ class TerrainData {
         Debug.Printf("Terrain: LayerData received, valid count is now %d", Int.valueOf(this.validCount))
     }
 
-    TerrainPatchInfo getPatchInfo(Int i, Int i2) {
+    fun getPatchInfo(Int i, Int i2): TerrainPatchInfo {
         synchronized (this.vertexLock) {
             if (this.patchDirtyMap[(i2 * 16) + i]) {
                 this.patchDirtyMap[(i2 * 16) + i] = false
@@ -144,7 +144,7 @@ class TerrainData {
             }
         }
         Boolean z = true
-        for (Int i3 = 0; i3 < 17; i3++) {
+        for (i3 in 0 until 17) {
             Int i4 = ((i2 * 16) + i3) * InputDeviceCompat.SOURCE_KEYBOARD
             Int i5 = 0
             while (true) {
@@ -168,7 +168,7 @@ class TerrainData {
             Int i7 = i6
             if (i7 < 17) {
                 Int i8 = ((i2 * 16) + i7) * InputDeviceCompat.SOURCE_KEYBOARD
-                for (Int i9 = 0; i9 < 17; i9++) {
+                for (i9 in 0 until 17) {
                     Float f = this.vertexHeights[i8 + i9 + (i * 16)]
                     Float f2 = this.vertexNormals[(i8 + i9 + (i * 16)) * 2]
                     Float f3 = this.vertexNormals[((i8 + i9 + (i * 16)) * 2) + 1]
@@ -183,27 +183,27 @@ class TerrainData {
         }
     }
 
-    Boolean isUnderWater(Float f) {
+    fun isUnderWater(Float f): Boolean {
         return this.waterHeightValid && f < this.waterHeight
     }
 
-    Unit reset() {
+    fun reset(): Unit {
         synchronized (this.vertexLock) {
             this.waterHeightValid = false
             this.validCount = 0
-            for (Int i = 0; i < 65536; i++) {
+            for (i in 0 until 65536) {
                 this.validMap[i] = false
             }
-            for (Int i2 = 0; i2 < 66049; i2++) {
+            for (i2 in 0 until 66049) {
                 this.vertexValids[i2] = false
             }
-            for (Int i3 = 0; i3 < 256; i3++) {
+            for (i3 in 0 until 256) {
                 this.patchDirtyMap[i3] = false
             }
         }
     }
 
-    Unit updateEntireTerrain() {
+    fun updateEntireTerrain(): Unit {
         markVerticesDirty(0, 0, 256, 256)
     }
 }

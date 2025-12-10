@@ -16,15 +16,15 @@ class RegionIDAndHandleReply : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 28
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRegionIDAndHandleReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 54)
@@ -32,7 +32,7 @@ class RegionIDAndHandleReply : SLMessage {
         packLong(byteBuffer, this.ReplyBlock_Field.RegionHandle)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.ReplyBlock_Field.RegionID = unpackUUID(byteBuffer)
         this.ReplyBlock_Field.RegionHandle = unpackLong(byteBuffer)
     }

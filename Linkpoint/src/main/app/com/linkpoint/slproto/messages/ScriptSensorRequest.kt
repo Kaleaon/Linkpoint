@@ -28,15 +28,15 @@ class ScriptSensorRequest : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.Requester_Field.SearchName.length + 73 + 4 + 4 + 4 + 8 + 1 + 4
+    fun CalcPayloadSize(): Int {
+        return this.Requester_Field.SearchName.size + 73 + 4 + 4 + 4 + 8 + 1 + 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleScriptSensorRequest(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -9)
@@ -50,10 +50,10 @@ class ScriptSensorRequest : SLMessage {
         packFloat(byteBuffer, this.Requester_Field.Range)
         packFloat(byteBuffer, this.Requester_Field.Arc)
         packLong(byteBuffer, this.Requester_Field.RegionHandle)
-        packByte(byteBuffer, (Byte) this.Requester_Field.SearchRegions)
+        packByte(byteBuffer, (this as Byte).Requester_Field.SearchRegions)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.Requester_Field.SourceID = unpackUUID(byteBuffer)
         this.Requester_Field.RequestID = unpackUUID(byteBuffer)
         this.Requester_Field.SearchID = unpackUUID(byteBuffer)

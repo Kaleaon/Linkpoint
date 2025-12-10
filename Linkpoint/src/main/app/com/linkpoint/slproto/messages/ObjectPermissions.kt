@@ -33,36 +33,36 @@ class ObjectPermissions : SLMessage {
         this.HeaderData_Field = HeaderData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.ObjectData_Fields.size() * 10) + 38
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleObjectPermissions(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 105)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packBoolean(byteBuffer, this.HeaderData_Field.Override)
-        byteBuffer.put((Byte) this.ObjectData_Fields.size())
+        byteBuffer.put((this as Byte).ObjectData_Fields.size())
         for (ObjectData objectData : this.ObjectData_Fields) {
             packInt(byteBuffer, objectData.ObjectLocalID)
-            packByte(byteBuffer, (Byte) objectData.Field)
-            packByte(byteBuffer, (Byte) objectData.Set)
+            packByte(byteBuffer, (objectData as Byte).Field)
+            packByte(byteBuffer, (objectData as Byte).Set)
             packInt(byteBuffer, objectData.Mask)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.HeaderData_Field.Override = unpackBoolean(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             ObjectData objectData = ObjectData()
             objectData.ObjectLocalID = unpackInt(byteBuffer)
             objectData.Field = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE

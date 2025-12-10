@@ -26,7 +26,7 @@ class ObjectDescription : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 37
         Iterator<T> it = this.ObjectData_Fields.iterator()
         while (true) {
@@ -34,32 +34,32 @@ class ObjectDescription : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            i = ((ObjectData) it.next()).Description.length + 5 + i2
+            i = ((it as ObjectData).next()).Description.size + 5 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleObjectDescription(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 108)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        byteBuffer.put((Byte) this.ObjectData_Fields.size())
+        byteBuffer.put((this as Byte).ObjectData_Fields.size())
         for (ObjectData objectData : this.ObjectData_Fields) {
             packInt(byteBuffer, objectData.LocalID)
             packVariable(byteBuffer, objectData.Description, 1)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             ObjectData objectData = ObjectData()
             objectData.LocalID = unpackInt(byteBuffer)
             objectData.Description = unpackVariable(byteBuffer, 1)

@@ -8,10 +8,10 @@ import com.linkpoint.slproto.types.LLVector3
 import java.util.UUID
 
 class RLVCmdTeleportTo : RLVCommand {
-    Unit Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2) {
+    fun Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2): Unit {
         if (str.equals("force") && str2 != null) {
             Array<String> split = str2.split("/")
-            if (split.length >= 3) {
+            if (split.size >= 3) {
                 try {
                     rLVController.teleportToGlobalPos(uuid, LLVector3(Float.parseFloat(split[0]), Float.parseFloat(split[1]), Float.parseFloat(split[2])))
                 } catch (NumberFormatException e) {

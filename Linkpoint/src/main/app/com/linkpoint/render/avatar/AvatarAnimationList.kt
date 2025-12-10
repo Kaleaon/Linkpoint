@@ -27,12 +27,12 @@ class AvatarAnimationList {
         this.animations = ImmutableList.copyOf(arrayList)
     }
 
-    Unit animate(AvatarSkeleton avatarSkeleton, FloatArray fArr, FloatArray fArr2, LLQuaternion[] lLQuaternionArr, LLVector3[] lLVector3Arr) {
+    fun animate(AvatarSkeleton avatarSkeleton, FloatArray fArr, FloatArray fArr2, LLQuaternion[] lLQuaternionArr, LLVector3[] lLVector3Arr): Unit {
         for (AvatarRunningAnimation animate : this.animations) {
             animate.animate(avatarSkeleton, fArr, fArr2, lLQuaternionArr, lLVector3Arr)
         }
-        Int length = fArr.length
-        for (Int i = 0; i < length; i++) {
+        Int length = fArr.size
+        for (i in 0 until length) {
             Float f = 1.0f - fArr[i]
             if (f > 0.01f && f < 1.0f) {
                 f = 1.0f / f
@@ -48,7 +48,7 @@ class AvatarAnimationList {
         }
     }
 
-    Boolean needAnimate(Long j) {
+    fun needAnimate(Long j): Boolean {
         Boolean z = false
         Iterator it = this.sequences.iterator()
         while (true) {
@@ -56,7 +56,7 @@ class AvatarAnimationList {
             if (!it.hasNext()) {
                 return z2
             }
-            z = ((AvatarRunningSequence) it.next()).needAnimate(j) | z2
+            z = ((it as AvatarRunningSequence).next()).needAnimate(j) | z2
         }
     }
 }

@@ -19,23 +19,23 @@ class DirPlacesQueryBackend : SLMessage {
         Int QueryFlags
         UUID QueryID
         Int QueryStart
-        byte[] QueryText
-        byte[] SimName
+        ByteArray QueryText
+        ByteArray SimName
     }
 
     DirPlacesQueryBackend() {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.QueryData_Field.QueryText.length + 17 + 4 + 1 + 1 + this.QueryData_Field.SimName.length + 4 + 1 + 4 + 20
+    fun CalcPayloadSize(): Int {
+        return this.QueryData_Field.QueryText.size + 17 + 4 + 1 + 1 + this.QueryData_Field.SimName.size + 4 + 1 + 4 + 20
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleDirPlacesQueryBackend(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 34)
@@ -43,14 +43,14 @@ class DirPlacesQueryBackend : SLMessage {
         packUUID(byteBuffer, this.QueryData_Field.QueryID)
         packVariable(byteBuffer, this.QueryData_Field.QueryText, 1)
         packInt(byteBuffer, this.QueryData_Field.QueryFlags)
-        packByte(byteBuffer, (byte) this.QueryData_Field.Category)
+        packByte(byteBuffer, (this as byte).QueryData_Field.Category)
         packVariable(byteBuffer, this.QueryData_Field.SimName, 1)
         packInt(byteBuffer, this.QueryData_Field.EstateID)
         packBoolean(byteBuffer, this.QueryData_Field.Godlike)
         packInt(byteBuffer, this.QueryData_Field.QueryStart)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
         this.QueryData_Field.QueryText = unpackVariable(byteBuffer, 1)

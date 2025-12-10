@@ -23,29 +23,29 @@ class MergeParcel : SLMessage {
         this.MasterParcelData_Field = MasterParcelData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.SlaveParcelData_Fields.size() * 16) + 21
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleMergeParcel(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -33)
         packUUID(byteBuffer, this.MasterParcelData_Field.MasterID)
-        byteBuffer.put((Byte) this.SlaveParcelData_Fields.size())
+        byteBuffer.put((this as Byte).SlaveParcelData_Fields.size())
         for (SlaveParcelData slaveParcelData : this.SlaveParcelData_Fields) {
             packUUID(byteBuffer, slaveParcelData.SlaveID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.MasterParcelData_Field.MasterID = unpackUUID(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             SlaveParcelData slaveParcelData = SlaveParcelData()
             slaveParcelData.SlaveID = unpackUUID(byteBuffer)
             this.SlaveParcelData_Fields.add(slaveParcelData)

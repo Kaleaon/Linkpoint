@@ -111,7 +111,7 @@ Method generation error in method: com.linkpoint.ui.login.-$Lambda$Ido4EAnXE9yUs
         return null
     }
 
-    Unit show(Activity activity) {
+    fun show(Activity activity): Unit {
         UUID activeAgentID = ActivityUtils.getActiveAgentID(activity.getIntent())
         if (activeAgentID != null) {
             LogoutDialog logoutDialog = LogoutDialog(activity)
@@ -121,7 +121,7 @@ Method generation error in method: com.linkpoint.ui.login.-$Lambda$Ido4EAnXE9yUs
     }
 
     @EventHandler
-    Unit handleDisconnectEvent(SLDisconnectEvent sLDisconnectEvent) {
+    fun handleDisconnectEvent(SLDisconnectEvent sLDisconnectEvent): Unit {
         Debug.Printf("LogoutDialog: disconnect event", Any[0])
         dismiss()
     }
@@ -144,7 +144,7 @@ Method generation error in method: com.linkpoint.ui.login.-$Lambda$Ido4EAnXE9yUs
     }
 
     /* access modifiers changed from: protected */
-    Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle): Unit {
         super.onCreate(bundle)
         setProgressStyle(0)
         setMessage(getContext().getString(R.string.logging_out))
@@ -153,7 +153,7 @@ Method generation error in method: com.linkpoint.ui.login.-$Lambda$Ido4EAnXE9yUs
         }
     }
 
-    Bundle onSaveInstanceState() {
+    fun onSaveInstanceState(): Bundle {
         Bundle onSaveInstanceState = super.onSaveInstanceState()
         if (onSaveInstanceState == null) {
             onSaveInstanceState = Bundle()
@@ -164,7 +164,7 @@ Method generation error in method: com.linkpoint.ui.login.-$Lambda$Ido4EAnXE9yUs
         return onSaveInstanceState
     }
 
-    Unit onStart() {
+    fun onStart(): Unit {
         SLAgentCircuit activeAgentCircuit
         SLGridConnection gridConnection
         Boolean z = false
@@ -184,13 +184,13 @@ Method generation error in method: com.linkpoint.ui.login.-$Lambda$Ido4EAnXE9yUs
     }
 
     /* access modifiers changed from: protected */
-    Unit onStop() {
+    fun onStop(): Unit {
         this.handler.removeCallbacks(this.onDisconnectTimeout)
         this.eventBus.unsubscribe(this)
         super.onStop()
     }
 
-    Unit setAgentUUID(UUID uuid) {
+    fun setAgentUUID(UUID uuid): Unit {
         this.agentUUID = uuid
     }
 }

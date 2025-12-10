@@ -238,7 +238,7 @@ class ModernRenderContext {
     /**
      * Calculate and get the Model-View-Projection matrix
      */
-    FloatArray getMVPMatrix() {
+    fun getMVPMatrix(): FloatArray {
         // Calculate MVP = Projection * View * Model
         FloatArray temp = FloatArray(16)
         Matrix.multiplyMM(temp, 0, viewMatrix, 0, modelMatrix, 0)
@@ -246,15 +246,15 @@ class ModernRenderContext {
         return mvpMatrix
     }
     
-    FloatArray getModelMatrix() {
+    fun getModelMatrix(): FloatArray {
         return modelMatrix
     }
     
-    FloatArray getViewMatrix() {
+    fun getViewMatrix(): FloatArray {
         return viewMatrix
     }
     
-    FloatArray getProjectionMatrix() {
+    fun getProjectionMatrix(): FloatArray {
         return projectionMatrix
     }
     
@@ -301,7 +301,7 @@ class ModernRenderContext {
     fun hasTessellation(): Boolean { return hasTessellation; }
     fun hasGeometryShaders(): Boolean { return hasGeometryShaders; }
     fun getRenderPipeline(): ModernRenderPipeline { return renderPipeline; }
-    IntArray getViewport() { return viewport; }
+    fun getViewport(): IntArray { return viewport; }
     
     /**
      * Cleanup resources

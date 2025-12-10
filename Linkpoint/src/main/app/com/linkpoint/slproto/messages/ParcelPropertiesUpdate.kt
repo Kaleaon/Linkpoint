@@ -41,15 +41,15 @@ class ParcelPropertiesUpdate : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.ParcelData_Field.Name.length + 17 + 1 + this.ParcelData_Field.Desc.length + 1 + this.ParcelData_Field.MusicURL.length + 1 + this.ParcelData_Field.MediaURL.length + 16 + 1 + 16 + 4 + 4 + 1 + 16 + 16 + 12 + 12 + 1 + 36
+    fun CalcPayloadSize(): Int {
+        return this.ParcelData_Field.Name.size + 17 + 1 + this.ParcelData_Field.Desc.size + 1 + this.ParcelData_Field.MusicURL.size + 1 + this.ParcelData_Field.MediaURL.size + 16 + 1 + 16 + 4 + 4 + 1 + 16 + 16 + 12 + 12 + 1 + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleParcelPropertiesUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -58)
@@ -64,19 +64,19 @@ class ParcelPropertiesUpdate : SLMessage {
         packVariable(byteBuffer, this.ParcelData_Field.MusicURL, 1)
         packVariable(byteBuffer, this.ParcelData_Field.MediaURL, 1)
         packUUID(byteBuffer, this.ParcelData_Field.MediaID)
-        packByte(byteBuffer, (Byte) this.ParcelData_Field.MediaAutoScale)
+        packByte(byteBuffer, (this as Byte).ParcelData_Field.MediaAutoScale)
         packUUID(byteBuffer, this.ParcelData_Field.GroupID)
         packInt(byteBuffer, this.ParcelData_Field.PassPrice)
         packFloat(byteBuffer, this.ParcelData_Field.PassHours)
-        packByte(byteBuffer, (Byte) this.ParcelData_Field.Category)
+        packByte(byteBuffer, (this as Byte).ParcelData_Field.Category)
         packUUID(byteBuffer, this.ParcelData_Field.AuthBuyerID)
         packUUID(byteBuffer, this.ParcelData_Field.SnapshotID)
         packLLVector3(byteBuffer, this.ParcelData_Field.UserLocation)
         packLLVector3(byteBuffer, this.ParcelData_Field.UserLookAt)
-        packByte(byteBuffer, (Byte) this.ParcelData_Field.LandingType)
+        packByte(byteBuffer, (this as Byte).ParcelData_Field.LandingType)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ParcelData_Field.LocalID = unpackInt(byteBuffer)

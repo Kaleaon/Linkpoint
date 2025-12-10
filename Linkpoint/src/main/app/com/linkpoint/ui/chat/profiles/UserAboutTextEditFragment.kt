@@ -23,30 +23,30 @@ class UserAboutTextEditFragment : ProfileTextFieldEditFragment {
         return false
     }
 
-    Bundle makeSelection(ChatterID chatterID, Boolean z) {
+    fun makeSelection(ChatterID chatterID, Boolean z): Bundle {
         Bundle makeSelection = ChatterFragment.makeSelection(chatterID)
         makeSelection.putBoolean(IS_FIRST_LIFE_KEY, z)
         return makeSelection
     }
 
     /* access modifiers changed from: protected */
-    String decorateFragmentTitle(String str) {
+    fun decorateFragmentTitle(String str): String {
         return getString(R.string.edit_about_title, str)
     }
 
     /* access modifiers changed from: protected */
-    String getFieldHint(Context context) {
+    fun getFieldHint(Context context): String {
         return getString(R.string.edit_about_hint)
     }
 
     /* access modifiers changed from: protected */
-    Unit onAvatarProperties(AvatarPropertiesReply avatarPropertiesReply) {
+    fun onAvatarProperties(AvatarPropertiesReply avatarPropertiesReply): Unit {
         this.avatarProperties = avatarPropertiesReply
         setOriginalText(isFirstLife() ? SLMessage.stringFromVariableOEM(this.avatarProperties.PropertiesData_Field.FLAboutText) : SLMessage.stringFromVariableUTF(avatarPropertiesReply.PropertiesData_Field.AboutText))
     }
 
     /* access modifiers changed from: protected */
-    Unit saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str) {
+    fun saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str): Unit {
         Boolean z = true
         if (this.avatarProperties != null) {
             String stringFromVariableUTF = SLMessage.stringFromVariableUTF(this.avatarProperties.PropertiesData_Field.AboutText)

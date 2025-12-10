@@ -9,118 +9,115 @@ import com.linkpoint.render.shaders.RiggedMeshProgram30
 import com.linkpoint.utils.InternPool
 import com.linkpoint.rawbuffers.DirectByteBuffer
 import java.util.Arrays
-import androidx.annotation.NonNull
 
-class MeshRiggingData {
-    private InternPool<MeshRiggingData> riggingDataPool = InternPool<>()
-    private GLLoadableBuffer glRiggingDataBuffer = null
-    private Boolean hasExtendedBones
-    private Int hashCode
-    @NonNull
-    private float[] jointMatrices
-    @NonNull
-    private Int[] joints
-    private float[] mappedJointMatrices
-    private float[] mappedJointVectors
+class MeshRiggingData private constructor(
+    private val joints: IntArray,
+    private val jointMatrices: FloatArray,
+    private val hasExtendedBones: Boolean
+) {
+    private var glRiggingDataBuffer: GLLoadableBuffer? = null
+    private val hashCode: Int = calcHashCode()
+    private var mappedJointMatrices: FloatArray? = null
+    private var mappedJointVectors: FloatArray? = null
 
-    private MeshRiggingData(@NonNull Int[] iArr, @NonNull float[] fArr, Boolean z) {
-        this.joints = iArr
-        this.jointMatrices = fArr
-        this.hasExtendedBones = z
-        this.hashCode = calcHashCode()
+    companion object {
+        private val riggingDataPool: InternPool<MeshRiggingData> = InternPool()
+
+        fun create(joints: IntArray, jointMatrices: FloatArray, hasExtendedBones: Boolean): MeshRiggingData {
+            return riggingDataPool.intern(MeshRiggingData(joints, jointMatrices, hasExtendedBones))
+        }
     }
 
-    private DirectByteBuffer PrepareRiggingUniformBuffer(RenderContext renderContext) {
-        RiggedMeshProgram30 riggedMeshProgram30 = renderContext.currentRiggedMeshProgram
-        DirectByteBuffer directByteBuffer = DirectByteBuffer(riggedMeshProgram30.uRiggingDataBlockSize)
-        for (Int i = 0; i < this.joints.length; i++) {
-            directByteBuffer.putRawInt(riggedMeshProgram30.uJointMapOffset + (riggedMeshProgram30.uJointMapArrayStride * i), this.joints[i])
+    private fun PrepareRiggingUniformBuffer(renderContext: RenderContext): DirectByteBuffer {
+        val riggedMeshProgram30 = renderContext.currentRiggedMeshProgram
+        val directByteBuffer = DirectByteBuffer(riggedMeshProgram30.uRiggingDataBlockSize)
+        for (i in 0 until joints.size) {
+            directByteBuffer.putRawInt(riggedMeshProgram30.uJointMapOffset + (riggedMeshProgram30.uJointMapArrayStride * i), joints[i])
         }
-        for (Int i2 = 0; i2 < this.joints.length; i2++) {
-            Int i3 = (riggedMeshProgram30.uJointMatricesOffset + (riggedMeshProgram30.uJointMatricesArrayStride * i2)) / 4
-            for (Int i4 = 0; i4 < 4; i4++) {
-                directByteBuffer.loadFromFloatArray(((riggedMeshProgram30.uJointMatricesColumnStride * i4) / 4) + i3, this.jointMatrices, (i2 * 16) + (i4 * 4), 4)
+        for (i2 in 0 until joints.size) {
+            val i3 = (riggedMeshProgram30.uJointMatricesOffset + (riggedMeshProgram30.uJointMatricesArrayStride * i2)) / 4
+            for (i4 in 0 until 4) {
+                directByteBuffer.loadFromFloatArray(((riggedMeshProgram30.uJointMatricesColumnStride * i4) / 4) + i3, jointMatrices, (i2 * 16) + (i4 * 4), 4)
             }
         }
         return directByteBuffer
     }
 
-    private Int calcHashCode() {
-        return (Arrays.hashCode(this.joints) * 31) + Arrays.hashCode(this.jointMatrices)
+    private fun calcHashCode(): Int {
+        return (Arrays.hashCode(joints) * 31) + Arrays.hashCode(jointMatrices)
     }
 
-    MeshRiggingData create(@NonNull Int[] iArr, @NonNull float[] fArr, Boolean z) {
-        return riggingDataPool.intern(MeshRiggingData(iArr, fArr, z))
-    }
-
-    /* access modifiers changed from: package-private */
-    Unit PrepareInfluenceBuffers(RenderContext renderContext, float[] fArr) {
+    fun PrepareInfluenceBuffers(renderContext: RenderContext, fArr: FloatArray) {
         GLES20.glUseProgram(renderContext.riggedMeshProgram.getHandle())
         GLES20.glUniformMatrix4fv(renderContext.riggedMeshProgram.uBindShapeMatrix, 1, false, fArr, 0)
-        GLES20.glUniform4fv(renderContext.riggedMeshProgram.uJointVectors, this.mappedJointVectors.length / 4, this.mappedJointVectors, 0)
+        val mappedVectors = mappedJointVectors
+        if (mappedVectors != null) {
+            GLES20.glUniform4fv(renderContext.riggedMeshProgram.uJointVectors, mappedVectors.size / 4, mappedVectors, 0)
+        }
     }
 
-    Unit SetupBuffers30(RenderContext renderContext) {
-        if (this.glRiggingDataBuffer == null) {
-            this.glRiggingDataBuffer = GLLoadableBuffer(PrepareRiggingUniformBuffer(renderContext))
+    fun SetupBuffers30(renderContext: RenderContext) {
+        if (glRiggingDataBuffer == null) {
+            glRiggingDataBuffer = GLLoadableBuffer(PrepareRiggingUniformBuffer(renderContext))
         }
-        this.glRiggingDataBuffer.BindUniform(renderContext, 2)
+        glRiggingDataBuffer?.BindUniform(renderContext, 2)
     }
 
-    /* access modifiers changed from: package-private */
-    Unit UpdateRigged(MeshFace meshFace, float[] fArr, DirectByteBuffer directByteBuffer, Int i) {
-        meshFace.UpdateRigged(directByteBuffer, i, fArr, this.mappedJointMatrices)
+    fun UpdateRigged(meshFace: MeshFace, fArr: FloatArray, directByteBuffer: DirectByteBuffer, i: Int) {
+        val matrices = mappedJointMatrices
+        if (matrices != null) {
+            meshFace.UpdateRigged(directByteBuffer, i, fArr, matrices)
+        }
     }
 
-    /* access modifiers changed from: package-private */
-    Unit UpdateRiggedMatrices(AvatarSkeleton avatarSkeleton) {
-        if (this.mappedJointMatrices == null) {
-            this.mappedJointMatrices = float[(this.joints.length * 16)]
+    fun UpdateRiggedMatrices(avatarSkeleton: AvatarSkeleton) {
+        if (mappedJointMatrices == null) {
+            mappedJointMatrices = FloatArray(joints.size * 16)
         }
-        if (this.mappedJointVectors == null) {
-            this.mappedJointVectors = float[(this.joints.length * 3 * 4)]
+        if (mappedJointVectors == null) {
+            mappedJointVectors = FloatArray(joints.size * 3 * 4)
         }
-        float[] fArr = avatarSkeleton.jointWorldMatrix
-        for (Int i = 0; i < this.joints.length; i++) {
-            if (this.joints[i] >= 0) {
-                Matrix.multiplyMM(this.mappedJointMatrices, i * 16, fArr, this.joints[i] * 16, this.jointMatrices, i * 16)
+        val fArr = avatarSkeleton.jointWorldMatrix
+        val mappedMatrices = mappedJointMatrices!!
+        val mappedVectors = mappedJointVectors!!
+        for (i in joints.indices) {
+            if (joints[i] >= 0) {
+                Matrix.multiplyMM(mappedMatrices, i * 16, fArr, joints[i] * 16, jointMatrices, i * 16)
             } else {
-                Matrix.setIdentityM(this.mappedJointMatrices, i * 16)
+                Matrix.setIdentityM(mappedMatrices, i * 16)
             }
-            for (Int i2 = 0; i2 < 3; i2++) {
-                this.mappedJointVectors[(i * 3 * 4) + (i2 * 4) + 0] = this.mappedJointMatrices[(i * 16) + i2 + 0]
-                this.mappedJointVectors[(i * 3 * 4) + (i2 * 4) + 1] = this.mappedJointMatrices[(i * 16) + i2 + 4]
-                this.mappedJointVectors[(i * 3 * 4) + (i2 * 4) + 2] = this.mappedJointMatrices[(i * 16) + i2 + 8]
-                this.mappedJointVectors[(i * 3 * 4) + (i2 * 4) + 3] = this.mappedJointMatrices[(i * 16) + i2 + 12]
+            for (i2 in 0 until 3) {
+                mappedVectors[(i * 3 * 4) + (i2 * 4) + 0] = mappedMatrices[(i * 16) + i2 + 0]
+                mappedVectors[(i * 3 * 4) + (i2 * 4) + 1] = mappedMatrices[(i * 16) + i2 + 4]
+                mappedVectors[(i * 3 * 4) + (i2 * 4) + 2] = mappedMatrices[(i * 16) + i2 + 8]
+                mappedVectors[(i * 3 * 4) + (i2 * 4) + 3] = mappedMatrices[(i * 16) + i2 + 12]
             }
         }
     }
 
-    Boolean equals(Object obj) {
-        if (this == obj) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
             return true
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (other == null || javaClass != other.javaClass) {
             return false
         }
-        MeshRiggingData meshRiggingData = (MeshRiggingData) obj
-        if (Arrays.equals(this.joints, meshRiggingData.joints)) {
-            return Arrays.equals(this.jointMatrices, meshRiggingData.jointMatrices)
+        val meshRiggingData = other as MeshRiggingData
+        if (Arrays.equals(joints, meshRiggingData.joints)) {
+            return Arrays.equals(jointMatrices, meshRiggingData.jointMatrices)
         }
         return false
     }
 
-    /* access modifiers changed from: package-private */
-    Boolean fitsGL20() {
-        return this.joints.length <= 52
+    fun fitsGL20(): Boolean {
+        return joints.size <= 52
     }
 
-    /* access modifiers changed from: package-private */
-    Boolean hasExtendedBones() {
-        return this.hasExtendedBones
+    fun hasExtendedBones(): Boolean {
+        return hasExtendedBones
     }
 
-    Int hashCode() {
-        return this.hashCode
+    override fun hashCode(): Int {
+        return hashCode
     }
 }

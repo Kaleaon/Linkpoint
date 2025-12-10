@@ -10,14 +10,14 @@ import android.content.DialogInterface
     private /* synthetic */ Any f450$f0
 
     private /* synthetic */ Unit $m$0(DialogInterface dialogInterface, Int i) {
-        ((TeleportSLURLActivity) this.f450$f0).m638lambda$com_lumiyaviewer_lumiya_ui_login_TeleportSLURLActivity_4598(dialogInterface, i)
+        ((this as TeleportSLURLActivity).f450$f0).m638lambda$com_lumiyaviewer_lumiya_ui_login_TeleportSLURLActivity_4598(dialogInterface, i)
     }
 
     /* synthetic */ $Lambda$txy91ryZVkviKYu9VXLZHkYSvg0(Any obj) {
         this.f450$f0 = obj
     }
 
-    Unit onClick(DialogInterface dialogInterface, Int i) {
+    fun onClick(DialogInterface dialogInterface, Int i): Unit {
         $m$0(dialogInterface, i)
     }
 }

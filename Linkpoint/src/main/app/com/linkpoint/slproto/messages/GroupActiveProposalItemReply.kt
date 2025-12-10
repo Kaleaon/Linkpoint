@@ -19,13 +19,13 @@ class GroupActiveProposalItemReply : SLMessage {
 
     class ProposalData {
         Boolean AlreadyVoted
-        byte[] EndDateTime
+        ByteArray EndDateTime
         float Majority
-        byte[] ProposalText
+        ByteArray ProposalText
         Int Quorum
-        byte[] StartDateTime
-        byte[] TerseDateID
-        byte[] VoteCast
+        ByteArray StartDateTime
+        ByteArray TerseDateID
+        ByteArray VoteCast
         UUID VoteID
         UUID VoteInitiator
     }
@@ -41,7 +41,7 @@ class GroupActiveProposalItemReply : SLMessage {
         this.TransactionData_Field = TransactionData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 57
         Iterator<T> it = this.ProposalData_Fields.iterator()
         while (true) {
@@ -49,16 +49,16 @@ class GroupActiveProposalItemReply : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            ProposalData proposalData = (ProposalData) it.next()
-            i = proposalData.ProposalText.length + proposalData.TerseDateID.length + 33 + 1 + proposalData.StartDateTime.length + 1 + proposalData.EndDateTime.length + 1 + 1 + proposalData.VoteCast.length + 4 + 4 + 1 + i2
+            ProposalData proposalData = (it as ProposalData).next()
+            i = proposalData.ProposalText.size + proposalData.TerseDateID.size + 33 + 1 + proposalData.StartDateTime.size + 1 + proposalData.EndDateTime.size + 1 + 1 + proposalData.VoteCast.size + 4 + 4 + 1 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleGroupActiveProposalItemReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 104)
@@ -66,7 +66,7 @@ class GroupActiveProposalItemReply : SLMessage {
         packUUID(byteBuffer, this.AgentData_Field.GroupID)
         packUUID(byteBuffer, this.TransactionData_Field.TransactionID)
         packInt(byteBuffer, this.TransactionData_Field.TotalNumItems)
-        byteBuffer.put((byte) this.ProposalData_Fields.size())
+        byteBuffer.put((this as byte).ProposalData_Fields.size())
         for (ProposalData proposalData : this.ProposalData_Fields) {
             packUUID(byteBuffer, proposalData.VoteID)
             packUUID(byteBuffer, proposalData.VoteInitiator)
@@ -81,13 +81,13 @@ class GroupActiveProposalItemReply : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
         this.TransactionData_Field.TransactionID = unpackUUID(byteBuffer)
         this.TransactionData_Field.TotalNumItems = unpackInt(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             ProposalData proposalData = ProposalData()
             proposalData.VoteID = unpackUUID(byteBuffer)
             proposalData.VoteInitiator = unpackUUID(byteBuffer)

@@ -17,22 +17,22 @@ class AttachedSoundGainChange : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 22
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAttachedSoundGainChange(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put((byte) -1)
         byteBuffer.put(Ascii.SO)
         packUUID(byteBuffer, this.DataBlock_Field.ObjectID)
         packFloat(byteBuffer, this.DataBlock_Field.Gain)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.DataBlock_Field.ObjectID = unpackUUID(byteBuffer)
         this.DataBlock_Field.Gain = unpackFloat(byteBuffer)
     }

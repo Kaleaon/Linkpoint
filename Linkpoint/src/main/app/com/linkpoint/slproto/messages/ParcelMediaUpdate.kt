@@ -27,29 +27,29 @@ class ParcelMediaUpdate : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.DataBlock_Field.MediaURL.length + 1 + 16 + 1 + 4 + this.DataBlockExtended_Field.MediaType.length + 1 + 1 + this.DataBlockExtended_Field.MediaDesc.length + 4 + 4 + 1
+    fun CalcPayloadSize(): Int {
+        return this.DataBlock_Field.MediaURL.size + 1 + 16 + 1 + 4 + this.DataBlockExtended_Field.MediaType.size + 1 + 1 + this.DataBlockExtended_Field.MediaDesc.size + 4 + 4 + 1
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleParcelMediaUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -92)
         packVariable(byteBuffer, this.DataBlock_Field.MediaURL, 1)
         packUUID(byteBuffer, this.DataBlock_Field.MediaID)
-        packByte(byteBuffer, (Byte) this.DataBlock_Field.MediaAutoScale)
+        packByte(byteBuffer, (this as Byte).DataBlock_Field.MediaAutoScale)
         packVariable(byteBuffer, this.DataBlockExtended_Field.MediaType, 1)
         packVariable(byteBuffer, this.DataBlockExtended_Field.MediaDesc, 1)
         packInt(byteBuffer, this.DataBlockExtended_Field.MediaWidth)
         packInt(byteBuffer, this.DataBlockExtended_Field.MediaHeight)
-        packByte(byteBuffer, (Byte) this.DataBlockExtended_Field.MediaLoop)
+        packByte(byteBuffer, (this as Byte).DataBlockExtended_Field.MediaLoop)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.DataBlock_Field.MediaURL = unpackVariable(byteBuffer, 1)
         this.DataBlock_Field.MediaID = unpackUUID(byteBuffer)
         this.DataBlock_Field.MediaAutoScale = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE

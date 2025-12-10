@@ -16,22 +16,22 @@ class GroupProposalBallot : SLMessage {
     class ProposalData {
         UUID GroupID
         UUID ProposalID
-        byte[] VoteCast
+        ByteArray VoteCast
     }
 
     GroupProposalBallot() {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.ProposalData_Field.VoteCast.length + 33 + 36
+    fun CalcPayloadSize(): Int {
+        return this.ProposalData_Field.VoteCast.size + 33 + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleGroupProposalBallot(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 108)
@@ -42,7 +42,7 @@ class GroupProposalBallot : SLMessage {
         packVariable(byteBuffer, this.ProposalData_Field.VoteCast, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ProposalData_Field.ProposalID = unpackUUID(byteBuffer)

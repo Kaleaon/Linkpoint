@@ -69,7 +69,7 @@ class HybridProtocolManager {
     /**
      * Initialize the hybrid protocol system with grid endpoints
      */
-    CompletableFuture<Boolean> initializeAsync(String capsURL, String websocketURL) {
+    fun initializeAsync(String capsURL, String websocketURL): CompletableFuture<Boolean> {
         Log.i(TAG, "Initializing hybrid protocol system")
         
         return CompletableFuture.supplyAsync(() -> {
@@ -112,7 +112,7 @@ class HybridProtocolManager {
     /**
      * Send message using optimal transport protocol
      */
-    CompletableFuture<Boolean> sendMessageAsync(SLMessage message) {
+    fun sendMessageAsync(SLMessage message): CompletableFuture<Boolean> {
         if (!isConnected) {
             return CompletableFuture.completedFuture(false)
         }
@@ -204,7 +204,7 @@ class HybridProtocolManager {
         private volatile WebSocket webSocket
         private volatile boolean connected = false
         
-        CompletableFuture<Boolean> connectAsync(String websocketURL) {
+        fun connectAsync(String websocketURL): CompletableFuture<Boolean> {
             return CompletableFuture.supplyAsync(() -> {
                 try {
                     OkHttpClient client = new OkHttpClient.Builder()
@@ -258,7 +258,7 @@ class HybridProtocolManager {
             })
         }
         
-        CompletableFuture<Boolean> sendMessage(SLMessage message) {
+        fun sendMessage(SLMessage message): CompletableFuture<Boolean> {
             return CompletableFuture.supplyAsync(() -> {
                 if (!connected || webSocket == null) {
                     return false
@@ -287,7 +287,7 @@ class HybridProtocolManager {
             return true; // Simplified for now
         }
         
-        CompletableFuture<Boolean> sendMessage(SLMessage message) {
+        fun sendMessage(SLMessage message): CompletableFuture<Boolean> {
             return CompletableFuture.supplyAsync(() -> {
                 try {
                     // Send via existing UDP implementation
@@ -305,7 +305,7 @@ class HybridProtocolManager {
      * Protocol router to determine optimal transport
      */
     private class ProtocolRouter {
-        Transport getOptimalTransport(SLMessage message) {
+        fun getOptimalTransport(SLMessage message): Transport {
             String messageType = message.getClass().getSimpleName()
             
             // Route based on message characteristics

@@ -48,13 +48,13 @@ class LogParcelChanges : SLMessage {
         byteBuffer.put((Byte) -32)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packLong(byteBuffer, this.RegionData_Field.RegionHandle)
-        byteBuffer.put((Byte) this.ParcelData_Fields.size())
+        byteBuffer.put((this as Byte).ParcelData_Fields.size())
         for (ParcelData parcelData : this.ParcelData_Fields) {
             packUUID(byteBuffer, parcelData.ParcelID)
             packUUID(byteBuffer, parcelData.OwnerID)
             packBoolean(byteBuffer, parcelData.IsOwnerGroup)
             packInt(byteBuffer, parcelData.ActualArea)
-            packByte(byteBuffer, (Byte) parcelData.Action)
+            packByte(byteBuffer, (parcelData as Byte).Action)
             packUUID(byteBuffer, parcelData.TransactionID)
         }
     }
@@ -63,7 +63,7 @@ class LogParcelChanges : SLMessage {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.RegionData_Field.RegionHandle = unpackLong(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             ParcelData parcelData = ParcelData()
             parcelData.ParcelID = unpackUUID(byteBuffer)
             parcelData.OwnerID = unpackUUID(byteBuffer)

@@ -19,7 +19,7 @@ class ParcelRename : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 5
         Iterator<T> it = this.ParcelData_Fields.iterator()
         while (true) {
@@ -27,28 +27,28 @@ class ParcelRename : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            i = ((ParcelData) it.next()).NewName.length + 17 + i2
+            i = ((it as ParcelData).next()).NewName.size + 17 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleParcelRename(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -110)
-        byteBuffer.put((Byte) this.ParcelData_Fields.size())
+        byteBuffer.put((this as Byte).ParcelData_Fields.size())
         for (ParcelData parcelData : this.ParcelData_Fields) {
             packUUID(byteBuffer, parcelData.ParcelID)
             packVariable(byteBuffer, parcelData.NewName, 1)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             ParcelData parcelData = ParcelData()
             parcelData.ParcelID = unpackUUID(byteBuffer)
             parcelData.NewName = unpackVariable(byteBuffer, 1)

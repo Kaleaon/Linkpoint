@@ -8,12 +8,12 @@ class EmailMessageReply : SLMessage {
     DataBlock DataBlock_Field = DataBlock()
 
     class DataBlock {
-        byte[] Data
-        byte[] FromAddress
-        byte[] MailFilter
+        ByteArray Data
+        ByteArray FromAddress
+        ByteArray MailFilter
         Int More
         UUID ObjectID
-        byte[] Subject
+        ByteArray Subject
         Int Time
     }
 
@@ -21,15 +21,15 @@ class EmailMessageReply : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.DataBlock_Field.FromAddress.length + 25 + 1 + this.DataBlock_Field.Subject.length + 2 + this.DataBlock_Field.Data.length + 1 + this.DataBlock_Field.MailFilter.length + 4
+    fun CalcPayloadSize(): Int {
+        return this.DataBlock_Field.FromAddress.size + 25 + 1 + this.DataBlock_Field.Subject.size + 2 + this.DataBlock_Field.Data.size + 1 + this.DataBlock_Field.MailFilter.size + 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleEmailMessageReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 80)
@@ -42,7 +42,7 @@ class EmailMessageReply : SLMessage {
         packVariable(byteBuffer, this.DataBlock_Field.MailFilter, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.DataBlock_Field.ObjectID = unpackUUID(byteBuffer)
         this.DataBlock_Field.More = unpackInt(byteBuffer)
         this.DataBlock_Field.Time = unpackInt(byteBuffer)

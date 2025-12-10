@@ -28,15 +28,15 @@ class MoneyTransferBackend : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.MoneyData_Field.Description.length + 88 + 4
+    fun CalcPayloadSize(): Int {
+        return this.MoneyData_Field.Description.size + 88 + 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleMoneyTransferBackend(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 56)
@@ -44,10 +44,10 @@ class MoneyTransferBackend : SLMessage {
         packInt(byteBuffer, this.MoneyData_Field.TransactionTime)
         packUUID(byteBuffer, this.MoneyData_Field.SourceID)
         packUUID(byteBuffer, this.MoneyData_Field.DestID)
-        packByte(byteBuffer, (Byte) this.MoneyData_Field.Flags)
+        packByte(byteBuffer, (this as Byte).MoneyData_Field.Flags)
         packInt(byteBuffer, this.MoneyData_Field.Amount)
-        packByte(byteBuffer, (Byte) this.MoneyData_Field.AggregatePermNextOwner)
-        packByte(byteBuffer, (Byte) this.MoneyData_Field.AggregatePermInventory)
+        packByte(byteBuffer, (this as Byte).MoneyData_Field.AggregatePermNextOwner)
+        packByte(byteBuffer, (this as Byte).MoneyData_Field.AggregatePermInventory)
         packInt(byteBuffer, this.MoneyData_Field.TransactionType)
         packUUID(byteBuffer, this.MoneyData_Field.RegionID)
         packInt(byteBuffer, this.MoneyData_Field.GridX)
@@ -55,7 +55,7 @@ class MoneyTransferBackend : SLMessage {
         packVariable(byteBuffer, this.MoneyData_Field.Description, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.MoneyData_Field.TransactionID = unpackUUID(byteBuffer)
         this.MoneyData_Field.TransactionTime = unpackInt(byteBuffer)
         this.MoneyData_Field.SourceID = unpackUUID(byteBuffer)

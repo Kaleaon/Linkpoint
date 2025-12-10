@@ -31,7 +31,7 @@ class LogTextMessage : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            i = ((DataBlock) it.next()).Message.length + 54 + i2
+            i = ((it as DataBlock).next()).Message.size + 54 + i2
         }
     }
 
@@ -43,7 +43,7 @@ class LogTextMessage : SLMessage {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -121)
-        byteBuffer.put((Byte) this.DataBlock_Fields.size())
+        byteBuffer.put((this as Byte).DataBlock_Fields.size())
         for (DataBlock dataBlock : this.DataBlock_Fields) {
             packUUID(byteBuffer, dataBlock.FromAgentId)
             packUUID(byteBuffer, dataBlock.ToAgentId)
@@ -56,7 +56,7 @@ class LogTextMessage : SLMessage {
 
     fun UnpackPayload(byteBuffer: ByteBuffer): Unit {
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             DataBlock dataBlock = DataBlock()
             dataBlock.FromAgentId = unpackUUID(byteBuffer)
             dataBlock.ToAgentId = unpackUUID(byteBuffer)

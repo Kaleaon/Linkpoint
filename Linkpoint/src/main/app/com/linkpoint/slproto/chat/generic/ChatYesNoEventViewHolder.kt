@@ -43,10 +43,10 @@ class ChatYesNoEventViewHolder : ChatEventViewHolder : View.OnClickListener {
         this.cardViewDisabledBackground = typedValue.data
         view.getContext().getTheme().resolveAttribute(R.attr.CardViewDisabledText, typedValue, true)
         this.cardViewDisabledText = typedValue.data
-        this.yesButton = (Button) view.findViewById(R.id.buttonYesNoAccept)
-        this.noButton = (Button) view.findViewById(R.id.buttonYesNoDecline)
-        this.questionMsg = (TextView) view.findViewById(R.id.yesNoMessageTextView)
-        this.cardView = (CardView) view.findViewById(R.id.chatMessageCardView)
+        this.yesButton = (view as Button).findViewById(R.id.buttonYesNoAccept)
+        this.noButton = (view as Button).findViewById(R.id.buttonYesNoDecline)
+        this.questionMsg = (view as TextView).findViewById(R.id.yesNoMessageTextView)
+        this.cardView = (view as CardView).findViewById(R.id.chatMessageCardView)
         if (this.yesButton != null) {
             this.yesButton.setOnClickListener(this)
         }
@@ -58,8 +58,8 @@ class ChatYesNoEventViewHolder : ChatEventViewHolder : View.OnClickListener {
     private Unit fadeCardView() {
         if (!this.cardViewFaded && Build.VERSION.SDK_INT >= 11) {
             if (this.fadeAnimatorSet == null) {
-                ObjectAnimator objectAnimator = (ObjectAnimator) AnimatorInflater.loadAnimator(this.cardView.getContext(), R.animator.cardview_background_fade)
-                ObjectAnimator objectAnimator2 = (ObjectAnimator) AnimatorInflater.loadAnimator(this.cardView.getContext(), R.animator.cardview_text_unfade)
+                ObjectAnimator objectAnimator = (AnimatorInflater as ObjectAnimator).loadAnimator(this.cardView.getContext(), R.animator.cardview_background_fade)
+                ObjectAnimator objectAnimator2 = (AnimatorInflater as ObjectAnimator).loadAnimator(this.cardView.getContext(), R.animator.cardview_text_unfade)
                 ObjectAnimator clone = objectAnimator2.clone()
                 objectAnimator.setTarget(this.cardView)
                 objectAnimator2.setTarget(this.textView)
@@ -72,7 +72,7 @@ class ChatYesNoEventViewHolder : ChatEventViewHolder : View.OnClickListener {
         }
     }
 
-    Unit makeCardViewDisabled() {
+    fun makeCardViewDisabled(): Unit {
         if (!this.cardViewFaded) {
             this.cardView.setCardBackgroundColor(this.cardViewDisabledBackground)
             this.questionMsg.setTextColor(this.cardViewDisabledText)
@@ -80,7 +80,7 @@ class ChatYesNoEventViewHolder : ChatEventViewHolder : View.OnClickListener {
         }
     }
 
-    Unit makeCardViewEnabled() {
+    fun makeCardViewEnabled(): Unit {
         if (this.cardViewFaded) {
             this.cardViewFaded = false
             if (this.fadeAnimatorSet != null && Build.VERSION.SDK_INT >= 11) {
@@ -92,7 +92,7 @@ class ChatYesNoEventViewHolder : ChatEventViewHolder : View.OnClickListener {
         this.textView.setTextColor(this.cardViewDefaultText)
     }
 
-    Unit onClick(View view) {
+    fun onClick(View view): Unit {
         switch (view.getId()) {
             case R.id.buttonYesNoAccept:
                 if (this.yesNoEvent != null && this.yesNoEvent.getEventState() == SLChatYesNoEvent.EventState.EventNew) {
@@ -113,7 +113,7 @@ class ChatYesNoEventViewHolder : ChatEventViewHolder : View.OnClickListener {
         }
     }
 
-    Unit setEvent(SLChatYesNoEvent sLChatYesNoEvent) {
+    fun setEvent(SLChatYesNoEvent sLChatYesNoEvent): Unit {
         this.yesNoEvent = sLChatYesNoEvent
     }
 }

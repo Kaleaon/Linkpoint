@@ -49,7 +49,7 @@ class ConnectionDiagnostics {
     /**
      * Comprehensive connection diagnosis for Second Life services.
      */
-    CompletableFuture<DiagnosticResult> diagnoseAsync() {
+    fun diagnoseAsync(): CompletableFuture<DiagnosticResult> {
         return CompletableFuture.supplyAsync(() -> {
             Log.i(TAG, "Starting comprehensive Second Life connection diagnosis")
             
@@ -201,11 +201,11 @@ class ConnectionDiagnostics {
             issues.append(issue)
         }
         
-        String getIssues() {
+        fun getIssues(): String {
             return issues.toString()
         }
         
-        HealthLevel getOverallHealth() {
+        fun getOverallHealth(): HealthLevel {
             if (loginServerWorking) {
                 return HealthLevel.EXCELLENT
             } else if (httpsWorking) {

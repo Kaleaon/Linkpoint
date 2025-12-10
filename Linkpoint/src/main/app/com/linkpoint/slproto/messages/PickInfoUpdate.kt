@@ -31,15 +31,15 @@ class PickInfoUpdate : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.Data_Field.Name.length + 50 + 2 + this.Data_Field.Desc.length + 16 + 24 + 4 + 1 + 36
+    fun CalcPayloadSize(): Int {
+        return this.Data_Field.Name.size + 50 + 2 + this.Data_Field.Desc.size + 16 + 24 + 4 + 1 + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandlePickInfoUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -71)
@@ -57,7 +57,7 @@ class PickInfoUpdate : SLMessage {
         packBoolean(byteBuffer, this.Data_Field.Enabled)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.Data_Field.PickID = unpackUUID(byteBuffer)

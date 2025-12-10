@@ -11,17 +11,17 @@ class Vector3Array : VectorArray {
         super(vectorArray, i)
     }
 
-    Unit MatrixScale(FloatArray fArr, Int i, Int i2) {
+    fun MatrixScale(FloatArray fArr, Int i, Int i2): Unit {
         Int i3 = this.offset + (this.numComponents * i2)
         Matrix.scaleM(fArr, i, this.data[i3 + 0], this.data[i3 + 1], this.data[i3 + 2])
     }
 
-    Unit MatrixTranslate(FloatArray fArr, Int i, FloatArray fArr2, Int i2, Int i3) {
+    fun MatrixTranslate(FloatArray fArr, Int i, FloatArray fArr2, Int i2, Int i3): Unit {
         Int i4 = this.offset + (this.numComponents * i3)
         Matrix.translateM(fArr, i, fArr2, i2, this.data[i4 + 0], this.data[i4 + 1], this.data[i4 + 2])
     }
 
-    Unit add(Int i, LLVector3 lLVector3) {
+    fun add(Int i, LLVector3 lLVector3): Unit {
         Int i2 = this.offset + (this.numComponents * i)
         FloatArray fArr = this.data
         Int i3 = i2 + 0
@@ -34,16 +34,16 @@ class Vector3Array : VectorArray {
         fArr3[i5] = fArr3[i5] + lLVector3.z
     }
 
-    Unit addToVector(Int i, LLVector3 lLVector3) {
+    fun addToVector(Int i, LLVector3 lLVector3): Unit {
         Int i2 = this.offset + (this.numComponents * i)
         lLVector3.x += this.data[i2 + 0]
         lLVector3.y += this.data[i2 + 1]
         lLVector3.z = this.data[i2 + 2] + lLVector3.z
     }
 
-    Unit clear() {
+    fun clear(): Unit {
         Int i = this.offset
-        for (Int i2 = 0; i2 < this.length; i2++) {
+        for (i2 in 0 until this.size) {
             this.data[i + 0] = 0.0f
             this.data[i + 1] = 0.0f
             this.data[i + 2] = 0.0f
@@ -51,7 +51,7 @@ class Vector3Array : VectorArray {
         }
     }
 
-    Float distToPlane(Int i, LLVector3 lLVector3, LLVector3 lLVector32) {
+    fun distToPlane(Int i, LLVector3 lLVector3, LLVector3 lLVector32): Float {
         Int i2 = this.offset + (this.numComponents * i)
         Float f = this.data[i2 + 0] - lLVector3.x
         Float f2 = this.data[i2 + 1] - lLVector3.y
@@ -59,9 +59,9 @@ class Vector3Array : VectorArray {
         return (f3 * lLVector32.z) + (f * lLVector32.x) + (f2 * lLVector32.y)
     }
 
-    Unit fill(Int i, Int i2, LLVector3 lLVector3) {
+    fun fill(Int i, Int i2, LLVector3 lLVector3): Unit {
         Int i3 = (this.numComponents * i) + this.offset
-        for (Int i4 = 0; i4 < i2; i4++) {
+        for (i4 in 0 until i2) {
             this.data[i3 + 0] = lLVector3.x
             this.data[i3 + 1] = lLVector3.y
             this.data[i3 + 2] = lLVector3.z
@@ -69,19 +69,19 @@ class Vector3Array : VectorArray {
         }
     }
 
-    LLVector3 get(Int i) {
+    fun get(Int i): LLVector3 {
         Int i2 = this.offset + (this.numComponents * i)
         return LLVector3(this.data[i2 + 0], this.data[i2 + 1], this.data[i2 + 2])
     }
 
-    Unit get(Int i, LLVector3 lLVector3) {
+    fun get(Int i, LLVector3 lLVector3): Unit {
         Int i2 = this.offset + (this.numComponents * i)
         lLVector3.x = this.data[i2 + 0]
         lLVector3.y = this.data[i2 + 1]
         lLVector3.z = this.data[i2 + 2]
     }
 
-    Float getDistanceTo(Int i, LLVector3 lLVector3) {
+    fun getDistanceTo(Int i, LLVector3 lLVector3): Float {
         Int i2 = this.offset + (this.numComponents * i)
         Float f = this.data[i2 + 0] - lLVector3.x
         Float f2 = this.data[i2 + 1] - lLVector3.y
@@ -89,7 +89,7 @@ class Vector3Array : VectorArray {
         return Math.sqrt(((f3 * f3.toDouble()).toFloat() + (f * f) + (f2 * f2)))
     }
 
-    Float getMaxComponent(Int i) {
+    fun getMaxComponent(Int i): Float {
         Int i2 = (this.numComponents * i) + this.offset
         Float f = this.data[i2 + 0]
         if (this.data[i2 + 1] > f) {
@@ -98,7 +98,7 @@ class Vector3Array : VectorArray {
         return this.data[i2 + 2] > f ? this.data[i2 + 2] : f
     }
 
-    Unit getSub(Int i, Int i2, LLVector3 lLVector3) {
+    fun getSub(Int i, Int i2, LLVector3 lLVector3): Unit {
         Int i3 = this.offset + (this.numComponents * i)
         Int i4 = this.offset + (this.numComponents * i2)
         lLVector3.x = this.data[i3 + 0] - this.data[i4 + 0]
@@ -106,7 +106,7 @@ class Vector3Array : VectorArray {
         lLVector3.z = this.data[i3 + 2] - this.data[i4 + 2]
     }
 
-    Unit getSub(Int i, Vector3Array vector3Array, Int i2, LLVector3 lLVector3) {
+    fun getSub(Int i, Vector3Array vector3Array, Int i2, LLVector3 lLVector3): Unit {
         Int i3 = this.offset + (this.numComponents * i)
         Int i4 = vector3Array.offset + (vector3Array.numComponents * i2)
         lLVector3.x = this.data[i3 + 0] - vector3Array.data[i4 + 0]
@@ -114,7 +114,7 @@ class Vector3Array : VectorArray {
         lLVector3.z = this.data[i3 + 2] - vector3Array.data[i4 + 2]
     }
 
-    Unit minMaxVector(Int i, LLVector3 lLVector3, LLVector3 lLVector32) {
+    fun minMaxVector(Int i, LLVector3 lLVector3, LLVector3 lLVector32): Unit {
         Int i2 = this.offset + (this.numComponents * i)
         Float f = this.data[i2 + 0]
         Float f2 = this.data[i2 + 1]
@@ -139,9 +139,9 @@ class Vector3Array : VectorArray {
         }
     }
 
-    Unit minMaxVector(LLVector3 lLVector3, LLVector3 lLVector32) {
+    fun minMaxVector(LLVector3 lLVector3, LLVector3 lLVector32): Unit {
         Int i = this.offset
-        for (Int i2 = 0; i2 < this.length; i2++) {
+        for (i2 in 0 until this.size) {
             Float f = this.data[i + 0]
             Float f2 = this.data[i + 1]
             Float f3 = this.data[i + 2]
@@ -167,7 +167,7 @@ class Vector3Array : VectorArray {
         }
     }
 
-    Unit mul(Int i, LLQuaternion lLQuaternion) {
+    fun mul(Int i, LLQuaternion lLQuaternion): Unit {
         Int i2 = this.offset + (this.numComponents * i)
         Float f = this.data[i2 + 0]
         Float f2 = this.data[i2 + 1]
@@ -181,21 +181,21 @@ class Vector3Array : VectorArray {
         this.data[i2 + 2] = (((f7 * lLQuaternion.w) + ((-f4) * lLQuaternion.z)) - (lLQuaternion.y * f5)) + (lLQuaternion.x * f6)
     }
 
-    Unit set(Int i, Float f, Float f2, Float f3) {
+    fun set(Int i, Float f, Float f2, Float f3): Unit {
         Int i2 = this.offset + (this.numComponents * i)
         this.data[i2 + 0] = f
         this.data[i2 + 1] = f2
         this.data[i2 + 2] = f3
     }
 
-    Unit set(Int i, LLVector3 lLVector3) {
+    fun set(Int i, LLVector3 lLVector3): Unit {
         Int i2 = this.offset + (this.numComponents * i)
         this.data[i2 + 0] = lLVector3.x
         this.data[i2 + 1] = lLVector3.y
         this.data[i2 + 2] = lLVector3.z
     }
 
-    Unit set(Int i, Vector3Array vector3Array, Int i2) {
+    fun set(Int i, Vector3Array vector3Array, Int i2): Unit {
         Int i3 = this.offset + (this.numComponents * i)
         Int i4 = vector3Array.offset + (vector3Array.numComponents * i2)
         this.data[i3 + 0] = vector3Array.data[i4 + 0]
@@ -203,10 +203,10 @@ class Vector3Array : VectorArray {
         this.data[i3 + 2] = vector3Array.data[i4 + 2]
     }
 
-    Unit setAdd(Int i, Int i2) {
+    fun setAdd(Int i, Int i2): Unit {
         Int i3 = (this.numComponents * i) + this.offset
         Int i4 = (this.numComponents * i2) + this.offset
-        for (Int i5 = 0; i5 < 3; i5++) {
+        for (i5 in 0 until 3) {
             FloatArray fArr = this.data
             Int i6 = i3 + i5
             fArr[i6] = fArr[i6] + this.data[i4 + i5]
@@ -214,7 +214,7 @@ class Vector3Array : VectorArray {
         }
     }
 
-    Unit subFromVector(LLVector3 lLVector3, Int i) {
+    fun subFromVector(LLVector3 lLVector3, Int i): Unit {
         Int i2 = this.offset + (this.numComponents * i)
         lLVector3.x -= this.data[i2 + 0]
         lLVector3.y -= this.data[i2 + 1]

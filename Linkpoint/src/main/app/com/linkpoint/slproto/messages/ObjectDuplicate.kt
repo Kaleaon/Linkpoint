@@ -33,15 +33,15 @@ class ObjectDuplicate : SLMessage {
         this.SharedData_Field = SharedData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.ObjectData_Fields.size() * 4) + 69
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleObjectDuplicate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 90)
@@ -50,20 +50,20 @@ class ObjectDuplicate : SLMessage {
         packUUID(byteBuffer, this.AgentData_Field.GroupID)
         packLLVector3(byteBuffer, this.SharedData_Field.Offset)
         packInt(byteBuffer, this.SharedData_Field.DuplicateFlags)
-        byteBuffer.put((Byte) this.ObjectData_Fields.size())
+        byteBuffer.put((this as Byte).ObjectData_Fields.size())
         for (ObjectData objectData : this.ObjectData_Fields) {
             packInt(byteBuffer, objectData.ObjectLocalID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
         this.SharedData_Field.Offset = unpackLLVector3(byteBuffer)
         this.SharedData_Field.DuplicateFlags = unpackInt(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             ObjectData objectData = ObjectData()
             objectData.ObjectLocalID = unpackInt(byteBuffer)
             this.ObjectData_Fields.add(objectData)

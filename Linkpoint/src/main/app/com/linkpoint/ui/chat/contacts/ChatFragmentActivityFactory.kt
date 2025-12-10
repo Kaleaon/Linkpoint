@@ -22,21 +22,21 @@ class ChatFragmentActivityFactory : FragmentActivityFactory {
         }
     }
 
-    ChatFragmentActivityFactory getInstance() {
+    fun getInstance(): ChatFragmentActivityFactory {
         return InstanceHolder.Instance
     }
 
-    Intent createIntent(Context context, Bundle bundle) {
+    fun createIntent(Context context, Bundle bundle): Intent {
         ChatterID chatterID
         Intent intent = Intent(context, ChatNewActivity.class)
         intent.putExtra(MasterDetailsActivity.INTENT_SELECTION_KEY, bundle)
-        if (!(bundle == null || !bundle.containsKey(ChatterFragment.CHATTER_ID_KEY) || (chatterID = (ChatterID) bundle.getParcelable(ChatterFragment.CHATTER_ID_KEY)) == null)) {
+        if (!(bundle == null || !bundle.containsKey(ChatterFragment.CHATTER_ID_KEY) || (chatterID = (bundle as ChatterID).getParcelable(ChatterFragment.CHATTER_ID_KEY)) == null)) {
             ActivityUtils.setActiveAgentID(intent, chatterID.agentUUID)
         }
         return intent
     }
 
-    Class<? : Fragment> getFragmentClass() {
+    fun getFragmentClass(): Class<? : Fragment> {
         return ChatFragment.class
     }
 }

@@ -22,15 +22,15 @@ class RequestObjectPropertiesFamily : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 54
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRequestObjectPropertiesFamily(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) 5)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
@@ -39,7 +39,7 @@ class RequestObjectPropertiesFamily : SLMessage {
         packUUID(byteBuffer, this.ObjectData_Field.ObjectID)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ObjectData_Field.RequestFlags = unpackInt(byteBuffer)

@@ -10,14 +10,14 @@ import android.content.DialogInterface
     private /* synthetic */ Any f371$f0
 
     private /* synthetic */ Unit $m$0(DialogInterface dialogInterface, Int i) {
-        ((TextFieldDialogBuilder) this.f371$f0).m549lambda$com_lumiyaviewer_lumiya_ui_common_TextFieldDialogBuilder_2200(dialogInterface, i)
+        ((this as TextFieldDialogBuilder).f371$f0).m549lambda$com_lumiyaviewer_lumiya_ui_common_TextFieldDialogBuilder_2200(dialogInterface, i)
     }
 
     /* synthetic */ $Lambda$PTYOAfnVIwPVEdUoAgskdOeAqDw(Any obj) {
         this.f371$f0 = obj
     }
 
-    Unit onClick(DialogInterface dialogInterface, Int i) {
+    fun onClick(DialogInterface dialogInterface, Int i): Unit {
         $m$0(dialogInterface, i)
     }
 }

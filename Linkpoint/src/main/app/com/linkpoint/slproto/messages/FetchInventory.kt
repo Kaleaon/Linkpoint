@@ -26,32 +26,32 @@ class FetchInventory : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.InventoryData_Fields.size() * 32) + 37
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleFetchInventory(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put(Ascii.ETB)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
-        byteBuffer.put((byte) this.InventoryData_Fields.size())
+        byteBuffer.put((this as byte).InventoryData_Fields.size())
         for (InventoryData inventoryData : this.InventoryData_Fields) {
             packUUID(byteBuffer, inventoryData.OwnerID)
             packUUID(byteBuffer, inventoryData.ItemID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             InventoryData inventoryData = InventoryData()
             inventoryData.OwnerID = unpackUUID(byteBuffer)
             inventoryData.ItemID = unpackUUID(byteBuffer)

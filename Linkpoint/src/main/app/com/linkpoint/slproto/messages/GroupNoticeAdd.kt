@@ -14,11 +14,11 @@ class GroupNoticeAdd : SLMessage {
     }
 
     class MessageBlock {
-        byte[] BinaryBucket
+        ByteArray BinaryBucket
         Int Dialog
-        byte[] FromAgentName
+        ByteArray FromAgentName
         UUID ID
-        byte[] Message
+        ByteArray Message
         UUID ToGroupID
     }
 
@@ -26,28 +26,28 @@ class GroupNoticeAdd : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.MessageBlock_Field.FromAgentName.length + 34 + 2 + this.MessageBlock_Field.Message.length + 2 + this.MessageBlock_Field.BinaryBucket.length + 20
+    fun CalcPayloadSize(): Int {
+        return this.MessageBlock_Field.FromAgentName.size + 34 + 2 + this.MessageBlock_Field.Message.size + 2 + this.MessageBlock_Field.BinaryBucket.size + 20
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleGroupNoticeAdd(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 61)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.MessageBlock_Field.ToGroupID)
         packUUID(byteBuffer, this.MessageBlock_Field.ID)
-        packByte(byteBuffer, (byte) this.MessageBlock_Field.Dialog)
+        packByte(byteBuffer, (this as byte).MessageBlock_Field.Dialog)
         packVariable(byteBuffer, this.MessageBlock_Field.FromAgentName, 1)
         packVariable(byteBuffer, this.MessageBlock_Field.Message, 2)
         packVariable(byteBuffer, this.MessageBlock_Field.BinaryBucket, 2)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.MessageBlock_Field.ToGroupID = unpackUUID(byteBuffer)
         this.MessageBlock_Field.ID = unpackUUID(byteBuffer)

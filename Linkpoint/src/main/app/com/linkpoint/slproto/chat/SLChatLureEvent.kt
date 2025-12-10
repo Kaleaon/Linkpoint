@@ -32,27 +32,27 @@ class SLChatLureEvent : SLChatYesNoEvent {
         return SLChatEvent.ChatMessageType.Lure
     }
 
-    String getNoButton(Context context) {
+    fun getNoButton(Context context): String {
         return context.getString(R.string.teleport_lure_no)
     }
 
-    String getNoMessage(Context context) {
+    fun getNoMessage(Context context): String {
         return context.getString(R.string.teleport_lure_declined)
     }
 
-    String getQuestion(Context context) {
+    fun getQuestion(Context context): String {
         return context.getString(R.string.teleport_lure_question)
     }
 
-    String getYesButton(Context context) {
+    fun getYesButton(Context context): String {
         return context.getString(R.string.teleport_lure_yes)
     }
 
-    String getYesMessage(Context context) {
+    fun getYesMessage(Context context): String {
         return context.getString(R.string.teleport_lure_accepted)
     }
 
-    Unit onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(Context context, UserManager userManager): Unit {
         super.onYesAction(context, userManager)
         SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
@@ -61,7 +61,7 @@ class SLChatLureEvent : SLChatYesNoEvent {
         }
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setSessionID(this.lureID)
     }

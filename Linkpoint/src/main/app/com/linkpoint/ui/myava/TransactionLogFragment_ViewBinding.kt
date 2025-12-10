@@ -15,12 +15,12 @@ class TransactionLogFragment_ViewBinding : Unbinder {
     @UiThread
     TransactionLogFragment_ViewBinding(TransactionLogFragment transactionLogFragment, View view) {
         this.target = transactionLogFragment
-        transactionLogFragment.transactionLogView = (RecyclerView) Utils.findRequiredViewAsType(view, R.id.transactionLogView, "field 'transactionLogView'", RecyclerView.class)
-        transactionLogFragment.loadingLayout = (LoadingLayout) Utils.findRequiredViewAsType(view, R.id.loading_layout, "field 'loadingLayout'", LoadingLayout.class)
+        transactionLogFragment.transactionLogView = (Utils as RecyclerView).findRequiredViewAsType(view, R.id.transactionLogView, "field 'transactionLogView'", RecyclerView.class)
+        transactionLogFragment.loadingLayout = (Utils as LoadingLayout).findRequiredViewAsType(view, R.id.loading_layout, "field 'loadingLayout'", LoadingLayout.class)
     }
 
     @CallSuper
-    Unit unbind() {
+    fun unbind(): Unit {
         TransactionLogFragment transactionLogFragment = this.target
         if (transactionLogFragment == null) {
             throw IllegalStateException("Bindings already cleared.")

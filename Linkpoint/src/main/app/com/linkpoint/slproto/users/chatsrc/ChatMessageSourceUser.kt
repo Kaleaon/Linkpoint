@@ -30,12 +30,12 @@ class ChatMessageSourceUser : ChatMessageSource {
     }
 
     @NonNull
-    ChatterID getDefaultChatter(UUID uuid2) {
+    fun getDefaultChatter(UUID uuid2): ChatterID {
         return ChatterID.getUserChatterID(uuid2, this.uuid)
     }
 
     @Nullable
-    String getSourceName(@NonNull UserManager userManager) {
+    fun getSourceName(@NonNull UserManager userManager): String {
         return GlobalOptions.getInstance().isLegacyUserNames() ? this.legacyName : this.displayName
     }
 
@@ -45,22 +45,22 @@ class ChatMessageSourceUser : ChatMessageSource {
     }
 
     @Nullable
-    UUID getSourceUUID() {
+    fun getSourceUUID(): UUID {
         return this.uuid
     }
 
-    Unit serializeTo(@NonNull ChatMessage chatMessage) {
+    fun serializeTo(@NonNull ChatMessage chatMessage): Unit {
         super.serializeTo(chatMessage)
         chatMessage.setSenderUUID(this.uuid)
         chatMessage.setSenderName(this.displayName)
         chatMessage.setSenderLegacyName(this.legacyName)
     }
 
-    Unit setDisplayName(@Nullable String str) {
+    fun setDisplayName(@Nullable String str): Unit {
         this.displayName = str
     }
 
-    Unit setLegacyName(@Nullable String str) {
+    fun setLegacyName(@Nullable String str): Unit {
         this.legacyName = str
     }
 }

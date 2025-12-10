@@ -36,7 +36,7 @@ class SLUserNameFetcher : SLModule : RequestListener {
     private Runnable threadRunnable = Runnable() {
         /* JADX WARNING: No exception handlers in catch block: Catch:{  } */
         /* Code decompiled incorrectly, please refer to instructions dump. */
-        Unit run() {
+        fun run(): Unit {
             /*
                 r2 = this
             L_0x0000:
@@ -100,7 +100,7 @@ class SLUserNameFetcher : SLModule : RequestListener {
     }
 
     /* access modifiers changed from: private */
-    Boolean FetchSomeNamesOverHTTP() {
+    fun FetchSomeNamesOverHTTP(): Boolean {
         String str
         LLSDNode lLSDNode
         List<UUID> uUIDsToFetch = getUUIDsToFetch(4)
@@ -113,7 +113,7 @@ class SLUserNameFetcher : SLModule : RequestListener {
         while (true) {
             str = str2
             if (it.hasNext()) {
-                str2 = (z ? str + "?" : str + "&") + "ids=" + ((UUID) it.next()).toString()
+                str2 = (z ? str + "?" : str + "&") + "ids=" + ((it as UUID).next()).toString()
                 z = false
             } else {
                 try {
@@ -132,7 +132,7 @@ class SLUserNameFetcher : SLModule : RequestListener {
             try {
                 if (lLSDNode.keyExists("agents")) {
                     LLSDNode byKey = lLSDNode.byKey("agents")
-                    for (Int i = 0; i < byKey.getCount(); i++) {
+                    for (i in 0 until byKey.getCount()) {
                         LLSDNode byIndex = byKey.byIndex(i)
                         UUID asUUID = byIndex.byKey("id").asUUID()
                         String asString = byIndex.byKey("display_name").asString()
@@ -145,7 +145,7 @@ class SLUserNameFetcher : SLModule : RequestListener {
                 }
                 if (lLSDNode.keyExists("bad_ids")) {
                     LLSDNode byKey2 = lLSDNode.byKey("bad_ids")
-                    for (Int i2 = 0; i2 < byKey2.getCount(); i2++) {
+                    for (i2 in 0 until byKey2.getCount()) {
                         UUID fromString = UUID.fromString(byKey2.byIndex(i2).asString())
                         if (this.userManager != null) {
                             this.userManager.setUserBadUUID(fromString)
@@ -189,7 +189,7 @@ class SLUserNameFetcher : SLModule : RequestListener {
         return arrayList
     }
 
-    Unit HandleCloseCircuit() {
+    fun HandleCloseCircuit(): Unit {
         this.threadMustExit = true
         if (this.xmlReq != null) {
             this.xmlReq.InterruptRequest()
@@ -218,7 +218,7 @@ class SLUserNameFetcher : SLModule : RequestListener {
         }
     }
 
-    Unit onNewRequest() {
+    fun onNewRequest(): Unit {
         if (this.workingThread != null) {
             this.lock.lock()
             try {

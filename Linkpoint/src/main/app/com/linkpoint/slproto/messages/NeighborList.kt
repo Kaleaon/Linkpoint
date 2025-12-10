@@ -21,38 +21,38 @@ class NeighborList : SLMessage {
 
     NeighborList() {
         this.zeroCoded = false
-        for (Int i = 0; i < 4; i++) {
+        for (i in 0 until 4) {
             this.NeighborBlock_Fields[i] = NeighborBlock()
         }
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 1
-        for (Int i2 = 0; i2 < 4; i2++) {
-            i += this.NeighborBlock_Fields[i2].Name.length + 29 + 1
+        for (i2 in 0 until 4) {
+            i += this.NeighborBlock_Fields[i2].Name.size + 29 + 1
         }
         return i
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleNeighborList(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put((Byte) 3)
-        for (Int i = 0; i < 4; i++) {
+        for (i in 0 until 4) {
             packIPAddress(byteBuffer, this.NeighborBlock_Fields[i].IP)
-            packShort(byteBuffer, (Short) this.NeighborBlock_Fields[i].Port)
+            packShort(byteBuffer, (this as Short).NeighborBlock_Fields[i].Port)
             packIPAddress(byteBuffer, this.NeighborBlock_Fields[i].PublicIP)
-            packShort(byteBuffer, (Short) this.NeighborBlock_Fields[i].PublicPort)
+            packShort(byteBuffer, (this as Short).NeighborBlock_Fields[i].PublicPort)
             packUUID(byteBuffer, this.NeighborBlock_Fields[i].RegionID)
             packVariable(byteBuffer, this.NeighborBlock_Fields[i].Name, 1)
-            packByte(byteBuffer, (Byte) this.NeighborBlock_Fields[i].SimAccess)
+            packByte(byteBuffer, (this as Byte).NeighborBlock_Fields[i].SimAccess)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
-        for (Int i = 0; i < 4; i++) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+        for (i in 0 until 4) {
             this.NeighborBlock_Fields[i].IP = unpackIPAddress(byteBuffer)
             this.NeighborBlock_Fields[i].Port = unpackShort(byteBuffer) & 65535
             this.NeighborBlock_Fields[i].PublicIP = unpackIPAddress(byteBuffer)

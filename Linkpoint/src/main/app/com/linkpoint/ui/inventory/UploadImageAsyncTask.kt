@@ -54,12 +54,12 @@ class UploadImageAsyncTask : AsyncTask<UploadImageParams, Void, UploadImageResul
     }
 
     /* access modifiers changed from: protected */
-    UploadImageResult doInBackground(UploadImageParams... uploadImageParamsArr) {
+    fun doInBackground(UploadImageParams... uploadImageParamsArr): UploadImageResult {
         Bitmap bitmap
         String str
         Boolean z2 = true
         String str2 = null
-        Int length = uploadImageParamsArr.length
+        Int length = uploadImageParamsArr.size
         Int i = 0
         while (i < length) {
             UploadImageParams uploadImageParams = uploadImageParamsArr[i]
@@ -92,7 +92,7 @@ class UploadImageAsyncTask : AsyncTask<UploadImageParams, Void, UploadImageResul
             Int i2 = bitmap.hasAlpha() ? 4 : 3
             OpenJPEG openJPEG = OpenJPEG(width2, height2, i2, i2, 0, 0)
             IntArray iArr = Int[width2]
-            for (Int i3 = 0; i3 < height2; i3++) {
+            for (i3 in 0 until height2) {
                 bitmap.getPixels(iArr, 0, width2, 0, i3, width2, 1)
                 openJPEG.putPixelRow((height2 - 1) - i3, iArr, width2)
             }
@@ -194,7 +194,7 @@ class UploadImageAsyncTask : AsyncTask<UploadImageParams, Void, UploadImageResul
     /* access modifiers changed from: protected */
     /* JADX WARNING: Multi-variable type inference failed */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    Unit onPostExecute(com.linkpoint.ui.inventory.UploadImageAsyncTask.UploadImageResult r4) {
+    fun onPostExecute(com.linkpoint.ui.inventory.UploadImageAsyncTask.UploadImageResult r4): Unit {
         /*
             r3 = this
             r2 = 0
@@ -256,7 +256,7 @@ class UploadImageAsyncTask : AsyncTask<UploadImageParams, Void, UploadImageResul
     }
 
     /* access modifiers changed from: protected */
-    Unit onPreExecute() {
+    fun onPreExecute(): Unit {
         super.onPreExecute()
         this.progressDialog = ProgressDialog(this.context)
         this.progressDialog.setMessage(this.context.getString(R.string.uploading_picture))

@@ -22,15 +22,15 @@ class RemoveMuteListEntry : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.MuteData_Field.MuteName.length + 17 + 36
+    fun CalcPayloadSize(): Int {
+        return this.MuteData_Field.MuteName.size + 17 + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleRemoveMuteListEntry(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 8)
@@ -40,7 +40,7 @@ class RemoveMuteListEntry : SLMessage {
         packVariable(byteBuffer, this.MuteData_Field.MuteName, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.MuteData_Field.MuteID = unpackUUID(byteBuffer)

@@ -24,15 +24,15 @@ class AgentHeightWidth : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 48
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAgentHeightWidth(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 83)
@@ -40,11 +40,11 @@ class AgentHeightWidth : SLMessage {
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packInt(byteBuffer, this.AgentData_Field.CircuitCode)
         packInt(byteBuffer, this.HeightWidthBlock_Field.GenCounter)
-        packShort(byteBuffer, (short) this.HeightWidthBlock_Field.Height)
-        packShort(byteBuffer, (short) this.HeightWidthBlock_Field.Width)
+        packShort(byteBuffer, (this as short).HeightWidthBlock_Field.Height)
+        packShort(byteBuffer, (this as short).HeightWidthBlock_Field.Width)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.CircuitCode = unpackInt(byteBuffer)

@@ -10,14 +10,14 @@ import java.util.Map
     private /* synthetic */ Any f123$f0
 
     private /* synthetic */ Boolean $m$0(Any obj) {
-        return MuteListData.m228lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4795((MuteListEntry) this.f123$f0, (Map.Entry) obj)
+        return MuteListData.m228lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4795((this as MuteListEntry).f123$f0, (Map.Entry) obj)
     }
 
     /* synthetic */ $Lambda$pgqqKd1WN3Cb6t0a10SOVDLtoOA(Any obj) {
         this.f123$f0 = obj
     }
 
-    Boolean apply(Any obj) {
+    fun apply(Any obj): Boolean {
         return $m$0(obj)
     }
 }

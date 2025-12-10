@@ -42,7 +42,8 @@ class TextureFormatBridge {
     /**
      * Detect texture format from stream header
      */
-    TextureFormat detectTextureFormat(InputStream stream) throws IOException {
+    @Throws(IOException::class)
+    fun detectTextureFormat(InputStream stream): TextureFormat {
         // Read first few bytes to detect format
         stream.mark(16)
         byte[] header = ByteArray(12)
@@ -71,7 +72,8 @@ class TextureFormatBridge {
     /**
      * Load texture using appropriate system based on format
      */
-    TextureData loadTexture(InputStream stream) throws IOException {
+    @Throws(IOException::class)
+    fun loadTexture(InputStream stream): TextureData {
         TextureFormat format = detectTextureFormat(stream)
         
         switch (format) {
@@ -138,7 +140,7 @@ class TextureFormatBridge {
         }
         
         @Override
-        String toString() {
+        fun toString(): String {
             return String.format("TextureData[%dx%d, %s, %s, %d bytes]",
                     width, height, format, compressed ? "compressed" : "uncompressed", data.length)
         }

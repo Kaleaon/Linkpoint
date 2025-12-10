@@ -25,13 +25,13 @@ class SLWorldMap : SLModule {
         super(sLAgentCircuit)
     }
 
-    Unit CancelPendingTeleports() {
+    fun CancelPendingTeleports(): Unit {
         this.teleportToAgentUUID = null
         this.teleportTargetName = null
     }
 
     @SLMessageHandler
-    Unit HandleFindAgent(FindAgent findAgent) {
+    fun HandleFindAgent(FindAgent findAgent): Unit {
         if (this.teleportToAgentUUID != null && findAgent.AgentBlock_Field.Prey.equals(this.teleportToAgentUUID)) {
             Debug.Printf("FindAgent: hunter %s prey %s", findAgent.AgentBlock_Field.Hunter.toString(), findAgent.AgentBlock_Field.Prey.toString())
             for (FindAgent.LocationBlock locationBlock : findAgent.LocationBlock_Fields) {
@@ -55,7 +55,7 @@ class SLWorldMap : SLModule {
     }
 
     @SLMessageHandler
-    Unit HandleMapBlockReply(MapBlockReply mapBlockReply) {
+    fun HandleMapBlockReply(MapBlockReply mapBlockReply): Unit {
         Boolean z2 = false
         Boolean z3 = false
         Iterator<T> it = mapBlockReply.Data_Fields.iterator()
@@ -85,7 +85,7 @@ class SLWorldMap : SLModule {
         }
     }
 
-    Boolean TeleportToAgent(UUID uuid) {
+    fun TeleportToAgent(UUID uuid): Boolean {
         if (!this.agentCircuit.getModules().rlvController.canTeleportToLocation()) {
             return false
         }
@@ -104,7 +104,7 @@ class SLWorldMap : SLModule {
         }
     }
 
-    Boolean TeleportToRegionByName(String str, Int i, Int i2, Int i3) {
+    fun TeleportToRegionByName(String str, Int i, Int i2, Int i3): Boolean {
         if (!this.agentCircuit.getModules().rlvController.canTeleportToLocation()) {
             return false
         }

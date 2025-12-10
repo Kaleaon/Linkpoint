@@ -24,7 +24,7 @@ class SLXfer {
     private Int receivedDataLen
 
     interface SLXferCompletionListener {
-        Unit onXferComplete(Any obj, String str, ByteArray bArr)
+        fun onXferComplete(Any obj, String str, ByteArray bArr)
     }
 
     private class XferListenerInvocation {
@@ -36,7 +36,7 @@ class SLXfer {
             this.listener = sLXferCompletionListener
         }
 
-        Unit invokeListener(String str, ByteArray bArr) {
+        fun invokeListener(String str, ByteArray bArr): Unit {
             this.listener.onXferComplete(this.tag, str, bArr)
         }
     }
@@ -52,21 +52,21 @@ class SLXfer {
         this.expectedPacketNum = 0
     }
 
-    Unit HandleDataPacket(SLXferManager sLXferManager, SendXferPacket sendXferPacket) {
+    fun HandleDataPacket(SLXferManager sLXferManager, SendXferPacket sendXferPacket): Unit {
         Int length
         Int i = 4
-        Debug.Printf("XferPacket: packetNum %d (0x%x), dataLen %d", Int.valueOf(sendXferPacket.XferID_Field.Packet), Int.valueOf(sendXferPacket.XferID_Field.Packet), Int.valueOf(sendXferPacket.DataPacket_Field.Data.length))
+        Debug.Printf("XferPacket: packetNum %d (0x%x), dataLen %d", Int.valueOf(sendXferPacket.XferID_Field.Packet), Int.valueOf(sendXferPacket.XferID_Field.Packet), Int.valueOf(sendXferPacket.DataPacket_Field.Data.size))
         Int i2 = Int.MAX_VALUE & sendXferPacket.XferID_Field.Packet
         Boolean z = (sendXferPacket.XferID_Field.Packet & Int.MIN_VALUE) != 0
         if (i2 == this.expectedPacketNum) {
             if (i2 != 0) {
                 i = 0
-                length = sendXferPacket.DataPacket_Field.Data.length
-            } else if (sendXferPacket.DataPacket_Field.Data.length >= 4) {
+                length = sendXferPacket.DataPacket_Field.Data.size
+            } else if (sendXferPacket.DataPacket_Field.Data.size >= 4) {
                 this.expectedDataLen = (sendXferPacket.DataPacket_Field.Data[0] & UnsignedBytes.MAX_VALUE) | ((sendXferPacket.DataPacket_Field.Data[1] << 8) & 65280) | ((sendXferPacket.DataPacket_Field.Data[2] << 16) & 16711680) | ((sendXferPacket.DataPacket_Field.Data[3] << Ascii.CAN) & -16777216)
                 Debug.Printf("XferPacket: expected data len = %d (0x%x)", Int.valueOf(this.expectedDataLen), Int.valueOf(this.expectedDataLen))
                 this.receivedData = Byte[this.expectedDataLen]
-                length = sendXferPacket.DataPacket_Field.Data.length - 4
+                length = sendXferPacket.DataPacket_Field.Data.size - 4
             } else {
                 return
             }
@@ -90,7 +90,7 @@ class SLXfer {
         }
     }
 
-    Unit StartTransfer(SLXferManager sLXferManager) {
+    fun StartTransfer(SLXferManager sLXferManager): Unit {
         RequestXfer requestXfer = RequestXfer()
         requestXfer.XferID_Field.ID = this.id
         requestXfer.XferID_Field.Filename = SLMessage.stringToVariableOEM(this.fileName)
@@ -103,25 +103,25 @@ class SLXfer {
         sLXferManager.SendMessage(requestXfer)
     }
 
-    Unit addListener(SLXferCompletionListener sLXferCompletionListener, Any obj) {
+    fun addListener(SLXferCompletionListener sLXferCompletionListener, Any obj): Unit {
         this.listeners.add(XferListenerInvocation(obj, sLXferCompletionListener))
     }
 
-    ByteArray getData() {
+    fun getData(): ByteArray {
         return this.receivedData
     }
 
-    String getFilename() {
+    fun getFilename(): String {
         return this.fileName
     }
 
-    Unit invokeListeners() {
+    fun invokeListeners(): Unit {
         for (XferListenerInvocation invokeListener : this.listeners) {
             invokeListener.invokeListener(this.fileName, this.receivedData)
         }
     }
 
-    Boolean isCompleted() {
+    fun isCompleted(): Boolean {
         return this.hasCompleted
     }
 }

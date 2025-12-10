@@ -53,7 +53,7 @@ class MyAvatarFragment : FragmentWithTitle : AdapterView.OnItemClickListener, Ch
             if (f463comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues != null) {
                 return f463comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues
             }
-            IntArray iArr = Int[MyAvatarDetailsPages.values().length]
+            IntArray iArr = Int[MyAvatarDetailsPages.values().size]
             try {
                 iArr[MyAvatarDetailsPages.pageBalance.ordinal()] = 1
             } catch (NoSuchFieldError e) {
@@ -78,7 +78,7 @@ class MyAvatarFragment : FragmentWithTitle : AdapterView.OnItemClickListener, Ch
             super(context, 17367043, MyAvatarDetailsPages.values())
         }
 
-        View getView(Int i, View view, ViewGroup viewGroup) {
+        fun getView(Int i, View view, ViewGroup viewGroup): View {
             String string
             View view2 = super.getView(i, view, viewGroup)
             MyAvatarDetailsPages myAvatarDetailsPages = (MyAvatarDetailsPages) getItem(i)
@@ -107,7 +107,7 @@ class MyAvatarFragment : FragmentWithTitle : AdapterView.OnItemClickListener, Ch
         if (f462comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues != null) {
             return f462comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues
         }
-        IntArray iArr = Int[MyAvatarDetailsPages.values().length]
+        IntArray iArr = Int[MyAvatarDetailsPages.values().size]
         try {
             iArr[MyAvatarDetailsPages.pageBalance.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -132,13 +132,13 @@ class MyAvatarFragment : FragmentWithTitle : AdapterView.OnItemClickListener, Ch
         return ActivityUtils.getActiveAgentID(getArguments())
     }
 
-    Bundle makeSelection(UUID uuid) {
+    fun makeSelection(UUID uuid): Bundle {
         Bundle bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         return bundle
     }
 
-    MyAvatarFragment newInstance(UUID uuid) {
+    fun newInstance(UUID uuid): MyAvatarFragment {
         MyAvatarFragment myAvatarFragment = MyAvatarFragment()
         myAvatarFragment.setArguments(makeSelection(uuid))
         return myAvatarFragment
@@ -146,7 +146,7 @@ class MyAvatarFragment : FragmentWithTitle : AdapterView.OnItemClickListener, Ch
 
     /* access modifiers changed from: private */
     /* renamed from: onMyBalance */
-    Unit m654com_lumiyaviewer_lumiya_ui_myava_MyAvatarFragmentmthref0(Int num) {
+    fun m654com_lumiyaviewer_lumiya_ui_myava_MyAvatarFragmentmthref0(Int num): Unit {
         if (this.unbinder != null) {
             ListAdapter adapter = this.myAvatarOptionsList.getAdapter()
             if (adapter instanceof MyAvatarPagesAdapter) {
@@ -155,7 +155,7 @@ class MyAvatarFragment : FragmentWithTitle : AdapterView.OnItemClickListener, Ch
         }
     }
 
-    Unit onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
+    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever): Unit {
         String resolvedName = chatterNameRetriever.getResolvedName()
         if (this.unbinder != null) {
             this.myAvatarName.setText(resolvedName != null ? resolvedName : getString(R.string.name_loading_title))
@@ -164,7 +164,7 @@ class MyAvatarFragment : FragmentWithTitle : AdapterView.OnItemClickListener, Ch
         setTitle(resolvedName, (String) null)
     }
 
-    View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         View inflate = layoutInflater.inflate(R.layout.my_avatar, viewGroup, false)
         this.unbinder = ButterKnife.bind((Any) this, inflate)
@@ -173,7 +173,7 @@ class MyAvatarFragment : FragmentWithTitle : AdapterView.OnItemClickListener, Ch
         return inflate
     }
 
-    Unit onDestroyView() {
+    fun onDestroyView(): Unit {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -181,7 +181,7 @@ class MyAvatarFragment : FragmentWithTitle : AdapterView.OnItemClickListener, Ch
         super.onDestroyView()
     }
 
-    Unit onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j): Unit {
         UUID agentUUID = getAgentUUID()
         Any itemAtPosition = adapterView.getItemAtPosition(i)
         if ((itemAtPosition instanceof MyAvatarDetailsPages) && agentUUID != null) {
@@ -204,7 +204,7 @@ class MyAvatarFragment : FragmentWithTitle : AdapterView.OnItemClickListener, Ch
         }
     }
 
-    Unit onStart() {
+    fun onStart(): Unit {
         super.onStart()
         UUID agentUUID = getAgentUUID()
         UserManager userManager = UserManager.getUserManager(agentUUID)
@@ -216,7 +216,7 @@ class MyAvatarFragment : FragmentWithTitle : AdapterView.OnItemClickListener, Ch
         }
     }
 
-    Unit onStop() {
+    fun onStop(): Unit {
         if (this.myAvatarNameRetriever != null) {
             this.myAvatarNameRetriever.dispose()
             this.myAvatarNameRetriever = null

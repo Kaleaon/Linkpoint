@@ -17,15 +17,15 @@ class LiveHelpGroupReply : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.ReplyData_Field.Selection.length + 33 + 4
+    fun CalcPayloadSize(): Int {
+        return this.ReplyData_Field.Selection.size + 33 + 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleLiveHelpGroupReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 124)
@@ -34,7 +34,7 @@ class LiveHelpGroupReply : SLMessage {
         packVariable(byteBuffer, this.ReplyData_Field.Selection, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.ReplyData_Field.RequestID = unpackUUID(byteBuffer)
         this.ReplyData_Field.GroupID = unpackUUID(byteBuffer)
         this.ReplyData_Field.Selection = unpackVariable(byteBuffer, 1)

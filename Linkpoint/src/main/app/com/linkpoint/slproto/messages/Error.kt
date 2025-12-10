@@ -14,26 +14,26 @@ class Error : SLMessage {
 
     class Data {
         Int Code
-        byte[] Data
+        ByteArray Data
         UUID ID
-        byte[] Message
-        byte[] System
-        byte[] Token
+        ByteArray Message
+        ByteArray System
+        ByteArray Token
     }
 
     Error() {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.Data_Field.Token.length + 5 + 16 + 1 + this.Data_Field.System.length + 2 + this.Data_Field.Message.length + 2 + this.Data_Field.Data.length + 20
+    fun CalcPayloadSize(): Int {
+        return this.Data_Field.Token.size + 5 + 16 + 1 + this.Data_Field.System.size + 2 + this.Data_Field.Message.size + 2 + this.Data_Field.Data.size + 20
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleError(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) -89)
@@ -46,7 +46,7 @@ class Error : SLMessage {
         packVariable(byteBuffer, this.Data_Field.Data, 2)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.Data_Field.Code = unpackInt(byteBuffer)
         this.Data_Field.Token = unpackVariable(byteBuffer, 1)

@@ -31,15 +31,15 @@ class AutoValue_UnreadNotificationInfo_UnreadMessageSource : UnreadNotificationI
     }
 
     @NonNull
-    ChatterID chatterID() {
+    fun chatterID(): ChatterID {
         return this.chatterID
     }
 
-    Optional<String> chatterName() {
+    fun chatterName(): Optional<String> {
         return this.chatterName
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (obj == this) {
             return true
         }
@@ -53,20 +53,20 @@ class AutoValue_UnreadNotificationInfo_UnreadMessageSource : UnreadNotificationI
         return this.unreadMessagesCount == unreadMessageSource.unreadMessagesCount()
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         return ((((((this.chatterID.hashCode() ^ 1000003) * 1000003) ^ this.chatterName.hashCode()) * 1000003) ^ this.unreadMessages.hashCode()) * 1000003) ^ this.unreadMessagesCount
     }
 
-    String toString() {
+    fun toString(): String {
         return "UnreadMessageSource{chatterID=" + this.chatterID + ", " + "chatterName=" + this.chatterName + ", " + "unreadMessages=" + this.unreadMessages + ", " + "unreadMessagesCount=" + this.unreadMessagesCount + "}"
     }
 
     @NonNull
-    ImmutableList<SLChatEvent> unreadMessages() {
+    fun unreadMessages(): ImmutableList<SLChatEvent> {
         return this.unreadMessages
     }
 
-    Int unreadMessagesCount() {
+    fun unreadMessagesCount(): Int {
         return this.unreadMessagesCount
     }
 }

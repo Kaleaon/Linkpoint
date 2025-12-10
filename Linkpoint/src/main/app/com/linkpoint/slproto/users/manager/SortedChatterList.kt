@@ -21,7 +21,7 @@ class SortedChatterList {
     }
 
     /* access modifiers changed from: package-private */
-    Unit addChatter(ChatterDisplayData chatterDisplayData) {
+    fun addChatter(ChatterDisplayData chatterDisplayData): Unit {
         Boolean add
         synchronized (this.lock) {
             add = this.chatters.add(chatterDisplayData)
@@ -36,7 +36,7 @@ class SortedChatterList {
         }
     }
 
-    ImmutableList<ChatterDisplayData> getChatterList() {
+    fun getChatterList(): ImmutableList<ChatterDisplayData> {
         ImmutableList<ChatterDisplayData> immutableList
         synchronized (this.lock) {
             if (this.sortedList == null) {
@@ -49,7 +49,7 @@ class SortedChatterList {
     }
 
     /* access modifiers changed from: package-private */
-    Unit removeChatter(ChatterDisplayData chatterDisplayData) {
+    fun removeChatter(ChatterDisplayData chatterDisplayData): Unit {
         Boolean remove
         synchronized (this.lock) {
             remove = this.chatters.remove(chatterDisplayData)
@@ -64,7 +64,7 @@ class SortedChatterList {
     }
 
     /* access modifiers changed from: package-private */
-    Unit replaceChatter(ChatterDisplayData chatterDisplayData, ChatterDisplayData chatterDisplayData2) {
+    fun replaceChatter(ChatterDisplayData chatterDisplayData, ChatterDisplayData chatterDisplayData2): Unit {
         Boolean z = false
         synchronized (this.lock) {
             if (this.chatters.remove(chatterDisplayData)) {

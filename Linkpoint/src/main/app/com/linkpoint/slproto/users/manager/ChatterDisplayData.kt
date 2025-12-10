@@ -30,7 +30,7 @@ class ChatterDisplayData : ChatterDisplayInfo, Comparable<ChatterDisplayData> {
         this.voiceActive = z2
     }
 
-    Unit buildView(Context context, ChatterItemViewBuilder chatterItemViewBuilder, UserManager userManager) {
+    fun buildView(Context context, ChatterItemViewBuilder chatterItemViewBuilder, UserManager userManager): Unit {
         chatterItemViewBuilder.setLabel(this.displayName)
         chatterItemViewBuilder.setThumbnailChatterID(this.chatterID, this.displayName)
         chatterItemViewBuilder.setOnlineStatusIcon(this.isOnline, this.isOnline)
@@ -44,7 +44,7 @@ class ChatterDisplayData : ChatterDisplayInfo, Comparable<ChatterDisplayData> {
         chatterItemViewBuilder.setDistance(this.distanceToUser)
     }
 
-    Int compareTo(@NonNull ChatterDisplayData chatterDisplayData) {
+    fun compareTo(@NonNull ChatterDisplayData chatterDisplayData): Int {
         Int compare = Booleans.compare(Strings.isNullOrEmpty(this.displayName), Strings.isNullOrEmpty(chatterDisplayData.displayName))
         if (compare != 0) {
             return compare
@@ -53,42 +53,42 @@ class ChatterDisplayData : ChatterDisplayInfo, Comparable<ChatterDisplayData> {
         return compareTo != 0 ? compareTo : this.chatterID.compareTo(chatterDisplayData.chatterID)
     }
 
-    ChatterID getChatterID(UserManager userManager) {
+    fun getChatterID(UserManager userManager): ChatterID {
         return this.chatterID
     }
 
     @Nullable
-    String getDisplayName() {
+    fun getDisplayName(): String {
         return this.displayName
     }
 
     /* access modifiers changed from: package-private */
     @NonNull
-    ChatterDisplayData withDisplayName(String str) {
+    fun withDisplayName(String str): ChatterDisplayData {
         return ChatterDisplayData(this.chatterID, str, this.isOnline, this.unreadCount, this.lastMessage, this.distanceToUser, this.voiceActive)
     }
 
     /* access modifiers changed from: package-private */
     @NonNull
-    ChatterDisplayData withDistanceToUser(Float f) {
+    fun withDistanceToUser(Float f): ChatterDisplayData {
         return ChatterDisplayData(this.chatterID, this.displayName, this.isOnline, this.unreadCount, this.lastMessage, f, this.voiceActive)
     }
 
     /* access modifiers changed from: package-private */
     @NonNull
-    ChatterDisplayData withOnlineStatus(Boolean z) {
+    fun withOnlineStatus(Boolean z): ChatterDisplayData {
         return ChatterDisplayData(this.chatterID, this.displayName, z, this.unreadCount, this.lastMessage, this.distanceToUser, this.voiceActive)
     }
 
     /* access modifiers changed from: package-private */
     @NonNull
-    ChatterDisplayData withUnreadInfo(@NonNull UnreadMessageInfo unreadMessageInfo) {
+    fun withUnreadInfo(@NonNull UnreadMessageInfo unreadMessageInfo): ChatterDisplayData {
         return ChatterDisplayData(this.chatterID, this.displayName, this.isOnline, unreadMessageInfo.unreadCount(), unreadMessageInfo.lastMessage(), this.distanceToUser, this.voiceActive)
     }
 
     /* access modifiers changed from: package-private */
     @NonNull
-    ChatterDisplayData withVoiceActive(Boolean z) {
+    fun withVoiceActive(Boolean z): ChatterDisplayData {
         return ChatterDisplayData(this.chatterID, this.displayName, this.isOnline, this.unreadCount, this.lastMessage, this.distanceToUser, z)
     }
 }

@@ -11,14 +11,14 @@ import android.widget.AdapterView
     private /* synthetic */ Any f337$f0
 
     private /* synthetic */ Unit $m$0(AdapterView adapterView, View view, Int i, Long j) {
-        ((UserListFragment) this.f337$f0).m578lambda$com_lumiyaviewer_lumiya_ui_common_UserListFragment_1689(adapterView, view, i, j)
+        ((this as UserListFragment).f337$f0).m578lambda$com_lumiyaviewer_lumiya_ui_common_UserListFragment_1689(adapterView, view, i, j)
     }
 
     /* synthetic */ $Lambda$1wR8wJi1eGgAIYEhals_u5j3nM(Any obj) {
         this.f337$f0 = obj
     }
 
-    Unit onItemClick(AdapterView adapterView, View view, Int i, Long j) {
+    fun onItemClick(AdapterView adapterView, View view, Int i, Long j): Unit {
         $m$0(adapterView, view, i, j)
     }
 }

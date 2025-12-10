@@ -27,15 +27,15 @@ class ParcelPropertiesRequest : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 55
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleParcelPropertiesRequest(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put((Byte) -1)
         byteBuffer.put(Ascii.VT)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
@@ -48,7 +48,7 @@ class ParcelPropertiesRequest : SLMessage {
         packBoolean(byteBuffer, this.ParcelData_Field.SnapSelection)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ParcelData_Field.SequenceID = unpackInt(byteBuffer)

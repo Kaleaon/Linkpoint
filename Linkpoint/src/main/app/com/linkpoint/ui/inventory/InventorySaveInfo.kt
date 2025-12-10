@@ -9,7 +9,7 @@ import androidx.annotation.Nullable
 
 class InventorySaveInfo : Parcelable {
     Parcelable.Creator<InventorySaveInfo> CREATOR = Parcelable.Creator<InventorySaveInfo>() {
-        InventorySaveInfo createFromParcel(Parcel parcel) {
+        fun createFromParcel(Parcel parcel): InventorySaveInfo {
             return InventorySaveInfo(parcel)
         }
 
@@ -64,11 +64,11 @@ class InventorySaveInfo : Parcelable {
         this.inventoryOfferMessageId = j
     }
 
-    Int describeContents() {
+    fun describeContents(): Int {
         return 0
     }
 
-    Unit writeToParcel(Parcel parcel, Int i) {
+    fun writeToParcel(Parcel parcel, Int i): Unit {
         parcel.writeInt(this.saveType.ordinal())
         if (this.saveItemUUID != null) {
             parcel.writeByte((Byte) 1)

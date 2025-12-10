@@ -20,15 +20,15 @@ class ClassifiedInfoReply : SLMessage {
         UUID ClassifiedID
         Int CreationDate
         UUID CreatorID
-        byte[] Desc
+        ByteArray Desc
         Int ExpirationDate
-        byte[] Name
+        ByteArray Name
         UUID ParcelID
-        byte[] ParcelName
+        ByteArray ParcelName
         Int ParentEstate
         LLVector3d PosGlobal
         Int PriceForListing
-        byte[] SimName
+        ByteArray SimName
         UUID SnapshotID
     }
 
@@ -36,15 +36,15 @@ class ClassifiedInfoReply : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.Data_Field.Name.length + 45 + 2 + this.Data_Field.Desc.length + 16 + 4 + 16 + 1 + this.Data_Field.SimName.length + 24 + 1 + this.Data_Field.ParcelName.length + 1 + 4 + 20
+    fun CalcPayloadSize(): Int {
+        return this.Data_Field.Name.size + 45 + 2 + this.Data_Field.Desc.size + 16 + 4 + 16 + 1 + this.Data_Field.SimName.size + 24 + 1 + this.Data_Field.ParcelName.size + 1 + 4 + 20
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleClassifiedInfoReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 44)
@@ -62,11 +62,11 @@ class ClassifiedInfoReply : SLMessage {
         packVariable(byteBuffer, this.Data_Field.SimName, 1)
         packLLVector3d(byteBuffer, this.Data_Field.PosGlobal)
         packVariable(byteBuffer, this.Data_Field.ParcelName, 1)
-        packByte(byteBuffer, (byte) this.Data_Field.ClassifiedFlags)
+        packByte(byteBuffer, (this as byte).Data_Field.ClassifiedFlags)
         packInt(byteBuffer, this.Data_Field.PriceForListing)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.Data_Field.ClassifiedID = unpackUUID(byteBuffer)
         this.Data_Field.CreatorID = unpackUUID(byteBuffer)

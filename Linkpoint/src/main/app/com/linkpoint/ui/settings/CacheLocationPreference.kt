@@ -23,7 +23,7 @@ class CacheLocationPreference : Preference {
         super(context, attributeSet, i, i2)
     }
 
-    String makeDisplayableCacheLocation(String str) {
+    fun makeDisplayableCacheLocation(String str): String {
         Int indexOf = str.indexOf("/Android")
         if (indexOf >= 0) {
             str = str.substring(0, indexOf)
@@ -32,7 +32,7 @@ class CacheLocationPreference : Preference {
         return indexOf2 >= 0 ? str.substring(0, indexOf2) : str
     }
 
-    CharSequence getSummary() {
+    fun getSummary(): CharSequence {
         String persistedString = getPersistedString((String) null)
         return Strings.isNullOrEmpty(persistedString) ? getContext().getString(R.string.default_cache_location) : makeDisplayableCacheLocation(persistedString)
     }

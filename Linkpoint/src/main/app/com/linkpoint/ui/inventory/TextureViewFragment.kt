@@ -45,7 +45,7 @@ class TextureViewFragment : StateAwareFragment {
             this()
         }
 
-        Unit OnResourceReady(Any obj, Boolean z) {
+        fun OnResourceReady(Any obj, Boolean z): Unit {
             if (obj instanceof OpenJPEG) {
                 this.texture = (OpenJPEG) obj
             }
@@ -55,7 +55,7 @@ class TextureViewFragment : StateAwareFragment {
         }
 
         /* access modifiers changed from: protected */
-        Bitmap doInBackground(UUID... uuidArr) {
+        fun doInBackground(UUID... uuidArr): Bitmap {
             Debug.Printf("loading asset ID %s", uuidArr[0].toString())
             TextureCache.getInstance().RequestResource(DrawableTextureParams.create(uuidArr[0], TextureClass.Asset), this)
             synchronized (this.textureReady) {
@@ -79,7 +79,7 @@ class TextureViewFragment : StateAwareFragment {
         }
 
         /* access modifiers changed from: protected */
-        Unit onPostExecute(Bitmap bitmap) {
+        fun onPostExecute(Bitmap bitmap): Unit {
             if (!(!TextureViewFragment.this.isFragmentStarted() || TextureViewFragment.this.textureImageView == null || TextureViewFragment.this.loadingLayout == null)) {
                 if (bitmap != null) {
                     TextureViewFragment.this.loadingLayout.showContent((String) null)
@@ -95,14 +95,14 @@ class TextureViewFragment : StateAwareFragment {
         }
 
         /* access modifiers changed from: protected */
-        Unit onPreExecute() {
+        fun onPreExecute(): Unit {
             if (TextureViewFragment.this.isFragmentStarted() && TextureViewFragment.this.loadingLayout != null) {
                 TextureViewFragment.this.loadingLayout.showLoading()
             }
         }
     }
 
-    Bundle makeArguments(UUID uuid, UUID uuid2) {
+    fun makeArguments(UUID uuid, UUID uuid2): Bundle {
         Bundle bundle = Bundle()
         bundle.putString("activeAgentUUID", uuid.toString())
         bundle.putString(ASSET_UUID_KEY, uuid2.toString())
@@ -110,7 +110,7 @@ class TextureViewFragment : StateAwareFragment {
     }
 
     @Nullable
-    View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle): View {
         View inflate = layoutInflater.inflate(R.layout.texture_view_fragment, viewGroup, false)
         this.loadingLayout = (LoadingLayout) inflate.findViewById(R.id.loading_layout)
         this.textureImageView = (ImageView) inflate.findViewById(R.id.texture_image_view)
@@ -118,7 +118,7 @@ class TextureViewFragment : StateAwareFragment {
         return inflate
     }
 
-    Unit onStart() {
+    fun onStart(): Unit {
         super.onStart()
         UUID uuid = UUIDPool.getUUID(getArguments().getString(ASSET_UUID_KEY))
         if (uuid != null) {
@@ -131,7 +131,7 @@ class TextureViewFragment : StateAwareFragment {
         }
     }
 
-    Unit onStop() {
+    fun onStop(): Unit {
         if (this.loadAssetImageTask != null) {
             this.loadAssetImageTask.cancel(true)
             this.loadAssetImageTask = null

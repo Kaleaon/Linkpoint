@@ -21,15 +21,15 @@ class TeleportProgress : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.Info_Field.Message.length + 5 + 20
+    fun CalcPayloadSize(): Int {
+        return this.Info_Field.Message.size + 5 + 20
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleTeleportProgress(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 66)
@@ -38,7 +38,7 @@ class TeleportProgress : SLMessage {
         packVariable(byteBuffer, this.Info_Field.Message, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.Info_Field.TeleportFlags = unpackInt(byteBuffer)
         this.Info_Field.Message = unpackVariable(byteBuffer, 1)

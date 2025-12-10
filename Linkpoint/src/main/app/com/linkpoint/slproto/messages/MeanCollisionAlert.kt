@@ -21,31 +21,31 @@ class MeanCollisionAlert : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.MeanCollision_Fields.size() * 41) + 5
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleMeanCollisionAlert(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -120)
-        byteBuffer.put((Byte) this.MeanCollision_Fields.size())
+        byteBuffer.put((this as Byte).MeanCollision_Fields.size())
         for (MeanCollision meanCollision : this.MeanCollision_Fields) {
             packUUID(byteBuffer, meanCollision.Victim)
             packUUID(byteBuffer, meanCollision.Perp)
             packInt(byteBuffer, meanCollision.Time)
             packFloat(byteBuffer, meanCollision.Mag)
-            packByte(byteBuffer, (Byte) meanCollision.Type)
+            packByte(byteBuffer, (meanCollision as Byte).Type)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             MeanCollision meanCollision = MeanCollision()
             meanCollision.Victim = unpackUUID(byteBuffer)
             meanCollision.Perp = unpackUUID(byteBuffer)

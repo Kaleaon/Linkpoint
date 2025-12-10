@@ -7,14 +7,14 @@ package com.linkpoint.voiceintf
     private /* synthetic */ Any f608$f0
 
     private /* synthetic */ Unit $m$0() {
-        ((VoicePluginServiceConnection) this.f608$f0).m905lambda$com_lumiyaviewer_lumiya_voiceintf_VoicePluginServiceConnection_17898()
+        ((this as VoicePluginServiceConnection).f608$f0).m905lambda$com_lumiyaviewer_lumiya_voiceintf_VoicePluginServiceConnection_17898()
     }
 
     /* synthetic */ $Lambda$KEiwggiQxhrsJugAMeHgzXJrgrA(Any obj) {
         this.f608$f0 = obj
     }
 
-    Unit run() {
+    fun run(): Unit {
         $m$0()
     }
 }

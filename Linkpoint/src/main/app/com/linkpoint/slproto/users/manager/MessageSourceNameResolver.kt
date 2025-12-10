@@ -20,11 +20,11 @@ class MessageSourceNameResolver {
     Any lock = Any()
     /* access modifiers changed from: private */
     Subscription.OnData<UserName> onUserName = Subscription.OnData<UserName>() {
-        Unit onData(UserName userName) {
+        fun onData(UserName userName): Unit {
             NameRequestEntry nameRequestEntry
             HashSet hashSet = null
             synchronized (MessageSourceNameResolver.this.lock) {
-                nameRequestEntry = (NameRequestEntry) MessageSourceNameResolver.this.requestEntryMap.get(userName.getUuid())
+                nameRequestEntry = (MessageSourceNameResolver as NameRequestEntry).this.requestEntryMap.get(userName.getUuid())
                 if (nameRequestEntry != null) {
                     HashSet hashSet2 = HashSet(nameRequestEntry.getMessageIDs())
                     if (userName.isComplete()) {
@@ -62,26 +62,26 @@ class MessageSourceNameResolver {
             this.messageDatabaseIDs.add(l)
         }
 
-        Unit addMessageID(Long l) {
+        fun addMessageID(Long l): Unit {
             this.messageDatabaseIDs.add(l)
         }
 
-        Set<Long> getMessageIDs() {
+        fun getMessageIDs(): Set<Long> {
             return this.messageDatabaseIDs
         }
 
-        Unit subscribe() {
+        fun subscribe(): Unit {
             this.subscription = MessageSourceNameResolver.this.userManager.getUserNames().subscribe(this.userUUID, MessageSourceNameResolver.this.dbExecutor, MessageSourceNameResolver.this.onUserName)
         }
 
-        Unit unsubscribe() {
+        fun unsubscribe(): Unit {
             this.subscription.unsubscribe()
             this.subscription = null
         }
     }
 
     interface OnMessageSourcesResolvedListener {
-        Unit onMessageSourcesResolved(Set<Long> set, UserName userName)
+        fun onMessageSourcesResolved(Set<Long> set, UserName userName)
     }
 
     MessageSourceNameResolver(@NonNull UserManager userManager2, OnMessageSourcesResolvedListener onMessageSourcesResolvedListener) {
@@ -90,7 +90,7 @@ class MessageSourceNameResolver {
         this.dbExecutor = userManager2.getDatabaseExecutor()
     }
 
-    Unit requestResolve(UUID uuid, Long l) {
+    fun requestResolve(UUID uuid, Long l): Unit {
         NameRequestEntry nameRequestEntry
         Boolean z = false
         synchronized (this.lock) {

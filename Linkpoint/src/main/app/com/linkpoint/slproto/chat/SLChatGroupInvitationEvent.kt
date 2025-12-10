@@ -32,7 +32,7 @@ class SLChatGroupInvitationEvent : SLChatYesNoEvent {
         super(chatMessageSource, uuid, improvedInstantMessage, (String) null)
         this.groupID = improvedInstantMessage.AgentData_Field.AgentID
         this.sessionID = improvedInstantMessage.MessageBlock_Field.ID
-        if (improvedInstantMessage.MessageBlock_Field.BinaryBucket.length < 4) {
+        if (improvedInstantMessage.MessageBlock_Field.BinaryBucket.size < 4) {
             this.joinFee = 0
             return
         }
@@ -55,26 +55,26 @@ class SLChatGroupInvitationEvent : SLChatYesNoEvent {
         return SLChatEvent.ChatMessageType.GroupInvitation
     }
 
-    String getNoButton(Context context) {
+    fun getNoButton(Context context): String {
         return context.getString(R.string.join_group_no)
     }
 
-    String getNoMessage(Context context) {
+    fun getNoMessage(Context context): String {
         return context.getString(R.string.join_group_declined)
     }
 
-    String getQuestion(Context context) {
+    fun getQuestion(Context context): String {
         if (this.joinFee == 0) {
             return context.getString(R.string.join_group_question_free)
         }
         return context.getString(R.string.join_group_question_not_free, Array<Any>{Integer.valueOf(this.joinFee)})
     }
 
-    String getYesButton(Context context) {
+    fun getYesButton(Context context): String {
         return context.getString(R.string.join_group_yes)
     }
 
-    String getYesMessage(Context context) {
+    fun getYesMessage(Context context): String {
         return context.getString(R.string.join_group_accepted)
     }
 
@@ -86,12 +86,12 @@ class SLChatGroupInvitationEvent : SLChatYesNoEvent {
     }
 
     /* access modifiers changed from: protected */
-    Unit onNoAction(Context context, UserManager userManager) {
+    fun onNoAction(Context context, UserManager userManager): Unit {
         super.onNoAction(context, userManager)
         DoAcceptGroupInvite(this.groupID, this.sessionID, false)
     }
 
-    Unit onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(Context context, UserManager userManager): Unit {
         super.onYesAction(context, userManager)
         if (this.joinFee == 0) {
             DoAcceptGroupInvite(this.groupID, this.sessionID, true)
@@ -180,7 +180,7 @@ Method generation error in method: com.linkpoint.slproto.chat.-$Lambda$hXLxI3fDe
         builder.create().show()
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setTransactionAmount(Integer.valueOf(this.joinFee))
         chatMessage.setSessionID(this.sessionID)

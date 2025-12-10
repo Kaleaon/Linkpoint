@@ -31,34 +31,34 @@ class InviteGroupRequest : SLMessage {
         this.GroupData_Field = GroupData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.InviteData_Fields.size() * 32) + 53
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleInviteGroupRequest(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 93)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packUUID(byteBuffer, this.GroupData_Field.GroupID)
-        byteBuffer.put((byte) this.InviteData_Fields.size())
+        byteBuffer.put((this as byte).InviteData_Fields.size())
         for (InviteData inviteData : this.InviteData_Fields) {
             packUUID(byteBuffer, inviteData.InviteeID)
             packUUID(byteBuffer, inviteData.RoleID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.GroupData_Field.GroupID = unpackUUID(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             InviteData inviteData = InviteData()
             inviteData.InviteeID = unpackUUID(byteBuffer)
             inviteData.RoleID = unpackUUID(byteBuffer)

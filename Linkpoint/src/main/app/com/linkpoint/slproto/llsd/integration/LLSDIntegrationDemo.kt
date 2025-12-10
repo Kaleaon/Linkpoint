@@ -15,7 +15,7 @@ class LLSDIntegrationDemo {
     /**
      * Demonstrate LLSD integration with simple examples
      */
-    Unit runDemo() {
+    fun runDemo(): Unit {
         try {
             Log.i(TAG, "Starting LLSD Integration Demo")
             
@@ -72,7 +72,7 @@ class LLSDIntegrationDemo {
     /**
      * Test fallback functionality
      */
-    Unit testFallback() {
+    fun testFallback(): Unit {
         try {
             Log.i(TAG, "Testing fallback functionality")
             

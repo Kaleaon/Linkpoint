@@ -21,14 +21,14 @@ class MinimapActivity_ViewBinding : Unbinder {
     @UiThread
     MinimapActivity_ViewBinding(MinimapActivity minimapActivity, View view) {
         this.target = minimapActivity
-        minimapActivity.selectorLayout = (FrameLayout) Utils.findRequiredViewAsType(view, R.id.selector, "field 'selectorLayout'", FrameLayout.class)
-        minimapActivity.splitMainLayout = (LinearLayout) Utils.findRequiredViewAsType(view, R.id.splitMainLayout, "field 'splitMainLayout'", LinearLayout.class)
+        minimapActivity.selectorLayout = (Utils as FrameLayout).findRequiredViewAsType(view, R.id.selector, "field 'selectorLayout'", FrameLayout.class)
+        minimapActivity.splitMainLayout = (Utils as LinearLayout).findRequiredViewAsType(view, R.id.splitMainLayout, "field 'splitMainLayout'", LinearLayout.class)
         minimapActivity.splitObjectPopupsLeftSpacer = Utils.findRequiredView(view, R.id.split_object_popups_left_spacer, "field 'splitObjectPopupsLeftSpacer'")
-        minimapActivity.detailsLayout = (ViewGroup) Utils.findRequiredViewAsType(view, R.id.detailsWithOnlineStatus, "field 'detailsLayout'", ViewGroup.class)
+        minimapActivity.detailsLayout = (Utils as ViewGroup).findRequiredViewAsType(view, R.id.detailsWithOnlineStatus, "field 'detailsLayout'", ViewGroup.class)
     }
 
     @CallSuper
-    Unit unbind() {
+    fun unbind(): Unit {
         MinimapActivity minimapActivity = this.target
         if (minimapActivity == null) {
             throw IllegalStateException("Bindings already cleared.")

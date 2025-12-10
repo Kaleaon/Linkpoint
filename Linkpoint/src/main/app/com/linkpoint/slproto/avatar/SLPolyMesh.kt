@@ -9,129 +9,135 @@ import com.linkpoint.slproto.types.LLVector3
 import com.linkpoint.rawbuffers.DirectByteBuffer
 import java.io.DataInputStream
 import java.io.IOException
-import java.nio.FloatBuffer
 import java.util.EnumMap
-import java.util.Map
 
 class SLPolyMesh : SLMeshData {
-    protected Boolean hasWeights
-    IntArray jointMap
-    private Map<SLVisualParamID, Integer> morphIndices = EnumMap(SLVisualParamID.class)
-    private SLPolyMorphData[] morphs
-    protected DirectByteBuffer weightsBuffer
+    protected var hasWeights: Boolean = false
+    var jointMap: IntArray? = null
+    private val morphIndices: MutableMap<SLVisualParamID, Int> = EnumMap(SLVisualParamID::class.java)
+    private lateinit var morphs: Array<SLPolyMorphData>
+    protected var weightsBuffer: DirectByteBuffer? = null
 
-    SLPolyMesh(DataInputStream dataInputStream, DataInputStream dataInputStream2) throws IOException {
+    @Throws(IOException::class)
+    constructor(dataInputStream: DataInputStream, dataInputStream2: DataInputStream?) {
         this.position = LLVector3(dataInputStream.readFloat(), dataInputStream.readFloat(), dataInputStream.readFloat())
         this.scale = LLVector3(dataInputStream.readFloat(), dataInputStream.readFloat(), dataInputStream.readFloat())
         this.rotation = LLQuaternion(dataInputStream.readFloat(), dataInputStream.readFloat(), dataInputStream.readFloat(), dataInputStream.readFloat())
-        this.hasWeights = dataInputStream.readByte() != 0
+        this.hasWeights = dataInputStream.readByte().toInt() != 0
         this.numVertices = dataInputStream.readInt()
         this.vertexBuffer = DirectByteBuffer(this.numVertices * 24)
         this.texCoordsBuffer = DirectByteBuffer(this.numVertices * 8)
-        this.vertexBuffer.read(dataInputStream)
-        this.texCoordsBuffer.read(dataInputStream)
+        this.vertexBuffer?.read(dataInputStream)
+        this.texCoordsBuffer?.read(dataInputStream)
         if (this.hasWeights) {
             this.weightsBuffer = DirectByteBuffer(this.numVertices * 4)
-            this.weightsBuffer.read(dataInputStream)
+            this.weightsBuffer?.read(dataInputStream)
         }
         this.numFaces = dataInputStream.readInt()
         this.indexBuffer = DirectByteBuffer(this.numFaces * 2 * 3)
-        this.indexBuffer.read(dataInputStream)
-        Int readInt = dataInputStream.readInt()
-        this.morphs = SLPolyMorphData[readInt]
-        Int i = 0
-        Int i2 = 0
-        DataInputStream dataInputStream3 = dataInputStream
-        while (i < readInt) {
+        this.indexBuffer?.read(dataInputStream)
+        val readInt = dataInputStream.readInt()
+        this.morphs = Array(readInt) { SLPolyMorphData.EMPTY }
+        var i2 = 0
+        var currentStream = dataInputStream
+        for (i in 0 until readInt) {
             if (i2 >= 50 && dataInputStream2 != null) {
                 i2 = 0
-                dataInputStream3 = dataInputStream2
+                currentStream = dataInputStream2
             }
-            SLVisualParamID sLVisualParamID = SLVisualParamID.values()[dataInputStream3.readInt()]
-            this.morphs[i] = SLPolyMorphData(sLVisualParamID, this, dataInputStream3)
-            this.morphIndices.put(sLVisualParamID, Integer.valueOf(i))
-            i++
+            val sLVisualParamID = SLVisualParamID.values()[currentStream.readInt()]
+            this.morphs[i] = SLPolyMorphData(sLVisualParamID, this, currentStream)
+            this.morphIndices[sLVisualParamID] = i
             i2++
         }
-        Int readInt2 = dataInputStream3.readInt()
-        this.jointMap = Int[readInt2]
-        for (Int i3 = 0; i3 < readInt2; i3++) {
-            this.jointMap[i3] = dataInputStream3.readInt()
+        val readInt2 = currentStream.readInt()
+        this.jointMap = IntArray(readInt2)
+        for (i3 in 0 until readInt2) {
+            this.jointMap!![i3] = currentStream.readInt()
         }
-        Debug.Log("SLPolyMesh: Loaded, numVerts = " + this.numVertices + ", faces = " + this.numFaces + ", morphs = " + this.morphs.length)
+        Debug.Log("SLPolyMesh: Loaded, numVerts = " + this.numVertices + ", faces = " + this.numFaces + ", morphs = " + this.morphs.size)
     }
 
-    Unit applyMorphData(SLMeshData sLMeshData, float[] fArr, GLTexture gLTexture) {
-        for (Int i = 0; i < fArr.length; i++) {
+    fun applyMorphData(sLMeshData: SLMeshData, fArr: FloatArray, gLTexture: GLTexture?) {
+        for (i in fArr.indices) {
             this.morphs[i].applyMorphData(sLMeshData, fArr[i], gLTexture)
         }
     }
 
-    Unit applySkeleton(SLAnimatedMeshData sLAnimatedMeshData, float[] fArr) {
-        DirectByteBuffer animatedVertexData
-        if (this.hasWeights && this.jointMap != null && (animatedVertexData = sLAnimatedMeshData.getAnimatedVertexData()) != null) {
-            OpenJPEG.applyMorphingTransform(this.numVertices, sLAnimatedMeshData.vertexBuffer.asByteBuffer(), animatedVertexData.asByteBuffer(), this.weightsBuffer.asByteBuffer(), this.jointMap, fArr)
-        }
-    }
-
-    Unit applySkeletonSlow(SLAnimatedMeshData sLAnimatedMeshData, float[] fArr) {
-        DirectByteBuffer animatedVertexData
-        double d
-        if (this.hasWeights && this.jointMap != null && (animatedVertexData = sLAnimatedMeshData.getAnimatedVertexData()) != null) {
-            FloatBuffer asFloatBuffer = this.weightsBuffer.asFloatBuffer()
-            FloatBuffer asFloatBuffer2 = sLAnimatedMeshData.vertexBuffer.asFloatBuffer()
-            FloatBuffer asFloatBuffer3 = animatedVertexData.asFloatBuffer()
-            float[] fArr2 = float[16]
-            float[] fArr3 = float[16]
-            double d2 = -1.0d
-            Int i = 0
-            while (i < this.numVertices) {
-                float f = asFloatBuffer.get(i)
-                if (((double) f) != d2) {
-                    float floor = (float) Math.floor((double) f)
-                    float f2 = f - floor
-                    Int i2 = (floor.toInt()) - 1
-                    Int i3 = 0
-                    if (i2 >= 0 && i2 < this.jointMap.length) {
-                        i3 = this.jointMap[i2]
-                    }
-                    Int i4 = (i2 + 1 < 0 || i2 + 1 >= this.jointMap.length) ? i3 : this.jointMap[i2 + 1]
-                    d = (double) f
-                    Int i5 = i3 * 16
-                    Int i6 = i4 * 16
-                    if (i5 == i6) {
-                        System.arraycopy(fArr, i5, fArr3, 0, 16)
-                    } else {
-                        for (Int i7 = 0; i7 < 16; i7++) {
-                            fArr3[i7] = (fArr[i5 + i7] * (1.0f - f2)) + (fArr[i6 + i7] * f2)
-                        }
-                    }
-                } else {
-                    d = d2
-                }
-                fArr2[0] = asFloatBuffer2.get((i * 6) + 0)
-                fArr2[1] = asFloatBuffer2.get((i * 6) + 1)
-                fArr2[2] = asFloatBuffer2.get((i * 6) + 2)
-                fArr2[3] = 1.0f
-                Matrix.multiplyMV(fArr2, 4, fArr3, 0, fArr2, 0)
-                asFloatBuffer3.put((i * 6) + 0, fArr2[4])
-                asFloatBuffer3.put((i * 6) + 1, fArr2[5])
-                asFloatBuffer3.put((i * 6) + 2, fArr2[6])
-                i++
-                d2 = d
+    fun applySkeleton(sLAnimatedMeshData: SLAnimatedMeshData, fArr: FloatArray) {
+        val jMap = this.jointMap
+        val wBuffer = this.weightsBuffer
+        if (this.hasWeights && jMap != null && wBuffer != null) {
+            val animatedVertexData = sLAnimatedMeshData.getAnimatedVertexData()
+            val vertBuf = sLAnimatedMeshData.vertexBuffer
+            if (animatedVertexData != null && vertBuf != null) {
+                OpenJPEG.applyMorphingTransform(
+                    this.numVertices,
+                    vertBuf.asByteBuffer(),
+                    animatedVertexData.asByteBuffer(),
+                    wBuffer.asByteBuffer(),
+                    jMap,
+                    fArr
+                )
             }
         }
     }
 
-    Int getMorphIndex(SLVisualParamID sLVisualParamID) {
-        Integer num = this.morphIndices.get(sLVisualParamID)
-        if (num == null) {
-            return -1
+    fun applySkeletonSlow(sLAnimatedMeshData: SLAnimatedMeshData, fArr: FloatArray) {
+        val jMap = this.jointMap
+        val wBuffer = this.weightsBuffer
+        if (!this.hasWeights || jMap == null || wBuffer == null) return
+        
+        val animatedVertexData = sLAnimatedMeshData.getAnimatedVertexData()
+        val vertBuf = sLAnimatedMeshData.vertexBuffer
+        if (animatedVertexData == null || vertBuf == null) return
+        
+        val asFloatBuffer = wBuffer.asFloatBuffer()
+        val asFloatBuffer2 = vertBuf.asFloatBuffer()
+        val asFloatBuffer3 = animatedVertexData.asFloatBuffer()
+        val fArr2 = FloatArray(16)
+        val fArr3 = FloatArray(16)
+        var d2 = -1.0
+        
+        for (i in 0 until this.numVertices) {
+            val f = asFloatBuffer.get(i)
+            val d = f.toDouble()
+            if (d != d2) {
+                val floor = Math.floor(f.toDouble()).toFloat()
+                val f2 = f - floor
+                val i2 = floor.toInt() - 1
+                var i3 = 0
+                if (i2 >= 0 && i2 < jMap.size) {
+                    i3 = jMap[i2]
+                }
+                val i4 = if (i2 + 1 < 0 || i2 + 1 >= jMap.size) i3 else jMap[i2 + 1]
+                val i5 = i3 * 16
+                val i6 = i4 * 16
+                if (i5 == i6) {
+                    System.arraycopy(fArr, i5, fArr3, 0, 16)
+                } else {
+                    for (i7 in 0 until 16) {
+                        fArr3[i7] = (fArr[i5 + i7] * (1.0f - f2)) + (fArr[i6 + i7] * f2)
+                    }
+                }
+            }
+            d2 = d
+            fArr2[0] = asFloatBuffer2.get((i * 6) + 0)
+            fArr2[1] = asFloatBuffer2.get((i * 6) + 1)
+            fArr2[2] = asFloatBuffer2.get((i * 6) + 2)
+            fArr2[3] = 1.0f
+            Matrix.multiplyMV(fArr2, 4, fArr3, 0, fArr2, 0)
+            asFloatBuffer3.put((i * 6) + 0, fArr2[4])
+            asFloatBuffer3.put((i * 6) + 1, fArr2[5])
+            asFloatBuffer3.put((i * 6) + 2, fArr2[6])
         }
-        return num.intValue()
     }
 
-    Int getNumMorphs() {
-        return this.morphs.length
+    fun getMorphIndex(sLVisualParamID: SLVisualParamID): Int {
+        return this.morphIndices[sLVisualParamID] ?: -1
+    }
+
+    fun getNumMorphs(): Int {
+        return this.morphs.size
     }
 }

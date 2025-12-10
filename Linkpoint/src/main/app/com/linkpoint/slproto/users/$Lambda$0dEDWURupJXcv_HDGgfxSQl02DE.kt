@@ -19,7 +19,7 @@ import com.linkpoint.slproto.users.ChatterID
         this.f144$f0 = obj
     }
 
-    Unit onData(Any obj) {
+    fun onData(Any obj): Unit {
         $m$0(obj)
     }
 }

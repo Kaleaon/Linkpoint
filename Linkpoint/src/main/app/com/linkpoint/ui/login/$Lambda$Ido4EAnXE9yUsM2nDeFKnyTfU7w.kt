@@ -7,14 +7,14 @@ package com.linkpoint.ui.login
     private /* synthetic */ Any f447$f0
 
     private /* synthetic */ Unit $m$0() {
-        ((LogoutDialog) this.f447$f0).m637lambda$com_lumiyaviewer_lumiya_ui_login_LogoutDialog_3137()
+        ((this as LogoutDialog).f447$f0).m637lambda$com_lumiyaviewer_lumiya_ui_login_LogoutDialog_3137()
     }
 
     /* synthetic */ $Lambda$Ido4EAnXE9yUsM2nDeFKnyTfU7w(Any obj) {
         this.f447$f0 = obj
     }
 
-    Unit run() {
+    fun run(): Unit {
         $m$0()
     }
 }

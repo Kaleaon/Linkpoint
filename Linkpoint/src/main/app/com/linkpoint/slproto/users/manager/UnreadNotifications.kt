@@ -12,14 +12,14 @@ import java.util.UUID
 import androidx.annotation.NonNull
 
 abstract class UnreadNotifications {
-    UnreadNotifications create(@NonNull UUID uuid, @NonNull ImmutableMap<NotificationType, UnreadNotificationInfo> immutableMap) {
+    fun create(@NonNull UUID uuid, @NonNull ImmutableMap<NotificationType, UnreadNotificationInfo> immutableMap): UnreadNotifications {
         return AutoValue_UnreadNotifications(uuid, immutableMap)
     }
 
     @NonNull
     abstract UUID agentUUID()
 
-    UnreadNotifications filter(@NonNull ImmutableSet<NotificationType> immutableSet) {
+    fun filter(@NonNull ImmutableSet<NotificationType> immutableSet): UnreadNotifications {
         if (immutableSet.containsAll(notificationGroups().keySet())) {
             return this
         }
@@ -32,7 +32,7 @@ abstract class UnreadNotifications {
         return create(agentUUID(), builder.build())
     }
 
-    UnreadNotificationInfo merge() {
+    fun merge(): UnreadNotificationInfo {
         UnreadNotificationInfo.ObjectPopupNotification objectPopupNotification
         ImmutableList.Builder builder
         ImmutableMap<NotificationType, UnreadNotificationInfo> notificationGroups = notificationGroups()
@@ -59,14 +59,14 @@ abstract class UnreadNotifications {
             if (!it.hasNext()) {
                 break
             }
-            UnreadNotificationInfo unreadNotificationInfo = notificationGroups.get((NotificationType) it.next())
+            UnreadNotificationInfo unreadNotificationInfo = notificationGroups.get((it as NotificationType).next())
             if (unreadNotificationInfo != null) {
                 Int i4 = unreadNotificationInfo.totalUnreadCount() + i
                 if (!unreadNotificationInfo.unreadSources().isEmpty()) {
                     if (builder == null) {
                         builder = ImmutableList.builder()
                     }
-                    builder.addAll((Iterable) unreadNotificationInfo.unreadSources())
+                    builder.addAll((unreadNotificationInfo as Iterable).unreadSources())
                 }
                 NotificationType orNull = unreadNotificationInfo.mostImportantType().orNull()
                 if (orNull != null && (notificationType == null || orNull.compareTo(notificationType) > 0)) {

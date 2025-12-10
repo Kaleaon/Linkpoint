@@ -23,22 +23,22 @@ class AgentMovementComplete : SLMessage {
     }
 
     class SimData {
-        byte[] ChannelVersion
+        ByteArray ChannelVersion
     }
 
     AgentMovementComplete() {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.SimData_Field.ChannelVersion.length + 2 + 72
+    fun CalcPayloadSize(): Int {
+        return this.SimData_Field.ChannelVersion.size + 2 + 72
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAgentMovementComplete(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -6)
@@ -51,7 +51,7 @@ class AgentMovementComplete : SLMessage {
         packVariable(byteBuffer, this.SimData_Field.ChannelVersion, 2)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.Data_Field.Position = unpackLLVector3(byteBuffer)

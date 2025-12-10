@@ -21,11 +21,11 @@ enum SLScriptPermissions {
         this.message = str
     }
 
-    String getMessage() {
+    fun getMessage(): String {
         return this.message
     }
 
-    Int getPermMask() {
+    fun getPermMask(): Int {
         return this.permMask
     }
 }

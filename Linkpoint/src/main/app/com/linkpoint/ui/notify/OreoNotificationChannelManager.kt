@@ -42,14 +42,14 @@ class OreoNotificationChannelManager : NotificationChannelManager {
         }
     }
 
-    Boolean areNotificationsSystemControlled() {
+    fun areNotificationsSystemControlled(): Boolean {
         return true
     }
 
     @NonNull
-    ImmutableSet<NotificationType> getEnabledTypes(Context context) {
+    fun getEnabledTypes(Context context): ImmutableSet<NotificationType> {
         NotificationChannels instance = NotificationChannels.getInstance()
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService("notification")
+        NotificationManager notificationManager = (context as NotificationManager).getSystemService("notification")
         ImmutableSet.Builder builder = ImmutableSet.builder()
         for (NotificationType notificationType : NotificationType.VALUES) {
             NotificationChannel notificationChannel = notificationManager.getNotificationChannel(getNotificationChannelName(instance.getChannelByType(notificationType)))
@@ -61,7 +61,7 @@ class OreoNotificationChannelManager : NotificationChannelManager {
     }
 
     @NonNull
-    String getNotificationChannelName(@NonNull NotificationChannels.Channel channel) {
+    fun getNotificationChannelName(@NonNull NotificationChannels.Channel channel): String {
         String str
         synchronized (this.lock) {
             NotificationChannel notificationChannel = this.channels.get(channel)
@@ -69,7 +69,7 @@ class OreoNotificationChannelManager : NotificationChannelManager {
                 str = notificationChannel.getId()
             } else {
                 Context context = LumiyaApp.getContext()
-                NotificationManager notificationManager = (NotificationManager) context.getSystemService("notification")
+                NotificationManager notificationManager = (context as NotificationManager).getSystemService("notification")
                 NotificationChannelSettings notificationChannelSettings = this.channelSettings.get(channel)
                 NotificationChannel notificationChannel2 = NotificationChannel(channel.channelId, context.getString(channel.nameStringId), notificationChannelSettings.importance)
                 notificationChannel2.setDescription(context.getString(channel.descriptionStringId))
@@ -90,8 +90,8 @@ class OreoNotificationChannelManager : NotificationChannelManager {
     }
 
     @Nullable
-    String getNotificationSummary(Context context, @NonNull NotificationChannels.Channel channel) {
-        NotificationChannel notificationChannel = ((NotificationManager) context.getSystemService("notification")).getNotificationChannel(getNotificationChannelName(channel))
+    fun getNotificationSummary(Context context, @NonNull NotificationChannels.Channel channel): String {
+        NotificationChannel notificationChannel = ((context as NotificationManager).getSystemService("notification")).getNotificationChannel(getNotificationChannelName(channel))
         if (notificationChannel == null) {
             return null
         }
@@ -110,7 +110,7 @@ class OreoNotificationChannelManager : NotificationChannelManager {
         }
     }
 
-    Boolean showSystemNotificationSettings(Context context, @Nullable Fragment fragment, @NonNull NotificationChannels.Channel channel) {
+    fun showSystemNotificationSettings(Context context, @Nullable Fragment fragment, @NonNull NotificationChannels.Channel channel): Boolean {
         Intent intent = Intent("android.settings.CHANNEL_NOTIFICATION_SETTINGS")
         intent.putExtra("android.provider.extra.CHANNEL_ID", getNotificationChannelName(channel))
         intent.putExtra("android.provider.extra.APP_PACKAGE", context.getPackageName())
@@ -122,7 +122,7 @@ class OreoNotificationChannelManager : NotificationChannelManager {
         return true
     }
 
-    Boolean useNotificationGroups() {
+    fun useNotificationGroups(): Boolean {
         return true
     }
 }

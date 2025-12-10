@@ -10,14 +10,14 @@ import com.linkpoint.slproto.messages.PickInfoReply
     private /* synthetic */ Any f281$f0
 
     private /* synthetic */ Unit $m$0(Any obj) {
-        ((PickDescriptionEditFragment) this.f281$f0).m506com_lumiyaviewer_lumiya_ui_chat_profiles_PickDescriptionEditFragmentmthref0((PickInfoReply) obj)
+        ((this as PickDescriptionEditFragment).f281$f0).m506com_lumiyaviewer_lumiya_ui_chat_profiles_PickDescriptionEditFragmentmthref0((PickInfoReply) obj)
     }
 
     /* synthetic */ $Lambda$Y7Ne2VWglUcvjFUgJydWWKVgIXM(Any obj) {
         this.f281$f0 = obj
     }
 
-    Unit onData(Any obj) {
+    fun onData(Any obj): Unit {
         $m$0(obj)
     }
 }

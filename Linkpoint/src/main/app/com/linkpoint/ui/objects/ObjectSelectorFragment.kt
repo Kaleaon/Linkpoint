@@ -58,7 +58,7 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
         private /* synthetic */ Any f500$f0
 
         private /* synthetic */ Unit $m$0(Throwable th) {
-            ((ObjectSelectorFragment) this.f500$f0).m682lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectSelectorFragment_10042(th)
+            ((this as ObjectSelectorFragment).f500$f0).m682lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectSelectorFragment_10042(th)
         }
 
         {
@@ -84,11 +84,11 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
         if (view.findViewById(R.id.filterPanel).getVisibility() != 0) {
             return SLObjectFilterInfo.create()
         }
-        Float progress = (Float) ((SeekBar) view.findViewById(R.id.objectListSeekBar)).getProgress()
+        Float progress = (Float) ((view as SeekBar).findViewById(R.id.objectListSeekBar)).getProgress()
         if (progress >= 1.0f) {
             f = progress
         }
-        return SLObjectFilterInfo.create(this.searchView.getQuery().toString(), ((CheckBox) view.findViewById(R.id.includeAttachments)).isChecked(), ((CheckBox) view.findViewById(R.id.includeStubs)).isChecked(), ((CheckBox) view.findViewById(R.id.includeNonTouchable)).isChecked(), f)
+        return SLObjectFilterInfo.create(this.searchView.getQuery().toString(), ((view as CheckBox).findViewById(R.id.includeAttachments)).isChecked(), ((view as CheckBox).findViewById(R.id.includeStubs)).isChecked(), ((view as CheckBox).findViewById(R.id.includeNonTouchable)).isChecked(), f)
     }
 
     @Nullable
@@ -96,7 +96,7 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
         return ActivityUtils.getUserManager(getArguments())
     }
 
-    ObjectSelectorFragment newInstance(Bundle bundle) {
+    fun newInstance(Bundle bundle): ObjectSelectorFragment {
         ObjectSelectorFragment objectSelectorFragment = ObjectSelectorFragment()
         objectSelectorFragment.setArguments(bundle)
         return objectSelectorFragment
@@ -115,7 +115,7 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
     }
 
     /* access modifiers changed from: private */
-    Unit updateFilter() {
+    fun updateFilter(): Unit {
         SLAgentCircuit activeAgentCircuit
         SLModules modules
         SLObjectFilterInfo filter = getFilter()
@@ -141,7 +141,7 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
                 findViewById.setVisibility(8)
             }
             view.findViewById(R.id.empty_object_list_progress).setVisibility(8)
-            ((TextView) view.findViewById(R.id.empty_object_list_message)).setText(R.string.object_list_not_connected)
+            ((view as TextView).findViewById(R.id.empty_object_list_message)).setText(R.string.object_list_not_connected)
             view.findViewById(R.id.empty_object_list).setVisibility(0)
             view.findViewById(R.id.objectListView).setVisibility(8)
         }
@@ -159,14 +159,14 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
                 findViewById.setVisibility(objectDisplayList.isLoading ? 0 : 8)
             }
             view.findViewById(R.id.empty_object_list_progress).setVisibility(objectDisplayList.isLoading ? 0 : 8)
-            ((TextView) view.findViewById(R.id.empty_object_list_message)).setText(objectDisplayList.isLoading ? R.string.object_list_loading : R.string.object_list_result_empty)
+            ((view as TextView).findViewById(R.id.empty_object_list_message)).setText(objectDisplayList.isLoading ? R.string.object_list_loading : R.string.object_list_result_empty)
             view.findViewById(R.id.empty_object_list).setVisibility(immutableList.isEmpty() ? 0 : 8)
             View findViewById2 = view.findViewById(R.id.objectListView)
             if (!immutableList.isEmpty()) {
                 i = 0
             }
             findViewById2.setVisibility(i)
-            ExpandableListView expandableListView = (ExpandableListView) view.findViewById(R.id.objectListView)
+            ExpandableListView expandableListView = (view as ExpandableListView).findViewById(R.id.objectListView)
             ExpandableListAdapter expandableListAdapter = expandableListView.getExpandableListAdapter()
             if (expandableListAdapter instanceof ObjectListAdapter) {
                 HashSet hashSet = HashSet()
@@ -176,8 +176,8 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
                     }
                 }
                 ArrayList<Int> arrayList = ArrayList<>()
-                for (Int i2 = 0; i2 < immutableList.size(); i2++) {
-                    SLObjectDisplayInfo sLObjectDisplayInfo2 = (SLObjectDisplayInfo) immutableList.get(i2)
+                for (i2 in 0 until immutableList.size()) {
+                    SLObjectDisplayInfo sLObjectDisplayInfo2 = (immutableList as SLObjectDisplayInfo).get(i2)
                     if ((sLObjectDisplayInfo2 instanceof SLPrimObjectDisplayInfoWithChildren) && ((SLPrimObjectDisplayInfoWithChildren) sLObjectDisplayInfo2).isImplicitlyAdded() && !hashSet.contains(Int.valueOf(sLObjectDisplayInfo2.localID))) {
                         arrayList.add(Int.valueOf(i2))
                     }
@@ -190,11 +190,11 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
         }
     }
 
-    Unit onCheckedChanged(CompoundButton compoundButton, Boolean z) {
+    fun onCheckedChanged(CompoundButton compoundButton, Boolean z): Unit {
         updateFilter()
     }
 
-    Boolean onChildClick(ExpandableListView expandableListView, View view, Int i, Int i2, Long j) {
+    fun onChildClick(ExpandableListView expandableListView, View view, Int i, Int i2, Long j): Boolean {
         SLObjectDisplayInfo child
         ExpandableListAdapter expandableListAdapter = expandableListView.getExpandableListAdapter()
         if (!(expandableListAdapter instanceof ObjectListAdapter) || (child = ((ObjectListAdapter) expandableListAdapter).getChild(i, i2)) == null) {
@@ -204,27 +204,27 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
         return true
     }
 
-    Unit onCreate(@android.support.annotation.Nullable Bundle bundle) {
+    fun onCreate(@android.support.annotation.Nullable Bundle bundle): Unit {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    Unit onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater): Unit {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.menu_object_selector, menu)
-        this.searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.action_search))
+        this.searchView = (MenuItemCompat as SearchView).getActionView(menu.findItem(R.id.action_search))
         this.searchView.setOnQueryTextListener(SearchView.OnQueryTextListener() {
-            Boolean onQueryTextChange(String str) {
+            fun onQueryTextChange(String str): Boolean {
                 Debug.Printf("searchview: textchange", Any[0])
                 ObjectSelectorFragment.this.updateFilter()
                 return true
             }
 
-            Boolean onQueryTextSubmit(String str) {
+            fun onQueryTextSubmit(String str): Boolean {
                 return true
             }
         MenuItemCompat.setOnActionExpandListener(menu.findItem(R.id.action_search), MenuItemCompat.OnActionExpandListener() {
-            Boolean onMenuItemActionCollapse(MenuItem menuItem) {
+            fun onMenuItemActionCollapse(MenuItem menuItem): Boolean {
                 View view = ObjectSelectorFragment.this.getView()
                 if (view != null) {
                     view.findViewById(R.id.filterPanel).setVisibility(8)
@@ -237,7 +237,7 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
                 return true
             }
 
-            Boolean onMenuItemActionExpand(MenuItem menuItem) {
+            fun onMenuItemActionExpand(MenuItem menuItem): Boolean {
                 View view = ObjectSelectorFragment.this.getView()
                 if (view != null) {
                     view.findViewById(R.id.filterPanel).setVisibility(0)
@@ -248,26 +248,26 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
             }
     }
 
-    View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         View inflate = layoutInflater.inflate(R.layout.object_list, viewGroup, false)
-        ((ExpandableListView) inflate.findViewById(R.id.objectListView)).setAdapter(ObjectListAdapter(layoutInflater.getContext()))
-        ((ExpandableListView) inflate.findViewById(R.id.objectListView)).setOnGroupClickListener(this)
-        ((ExpandableListView) inflate.findViewById(R.id.objectListView)).setOnChildClickListener(this)
-        ((SeekBar) inflate.findViewById(R.id.objectListSeekBar)).setMax(256)
-        ((SeekBar) inflate.findViewById(R.id.objectListSeekBar)).setOnSeekBarChangeListener(this)
-        ((CheckBox) inflate.findViewById(R.id.includeAttachments)).setOnCheckedChangeListener(this)
-        ((CheckBox) inflate.findViewById(R.id.includeStubs)).setOnCheckedChangeListener(this)
-        ((CheckBox) inflate.findViewById(R.id.includeNonTouchable)).setOnCheckedChangeListener(this)
+        ((inflate as ExpandableListView).findViewById(R.id.objectListView)).setAdapter(ObjectListAdapter(layoutInflater.getContext()))
+        ((inflate as ExpandableListView).findViewById(R.id.objectListView)).setOnGroupClickListener(this)
+        ((inflate as ExpandableListView).findViewById(R.id.objectListView)).setOnChildClickListener(this)
+        ((inflate as SeekBar).findViewById(R.id.objectListSeekBar)).setMax(256)
+        ((inflate as SeekBar).findViewById(R.id.objectListSeekBar)).setOnSeekBarChangeListener(this)
+        ((inflate as CheckBox).findViewById(R.id.includeAttachments)).setOnCheckedChangeListener(this)
+        ((inflate as CheckBox).findViewById(R.id.includeStubs)).setOnCheckedChangeListener(this)
+        ((inflate as CheckBox).findViewById(R.id.includeNonTouchable)).setOnCheckedChangeListener(this)
         if (Build.VERSION.SDK_INT >= 14) {
             ButteryProgressBar butteryProgressBar = ButteryProgressBar(layoutInflater.getContext())
             butteryProgressBar.setId(R.id.object_progress_bar)
-            ((FrameLayout) inflate.findViewById(R.id.object_list_root_layout)).addView(butteryProgressBar, FrameLayout.LayoutParams(-1, TypedValue.toInt().applyDimension(1, 4.0f, layoutInflater.getContext().getResources().getDisplayMetrics())))
+            ((inflate as FrameLayout).findViewById(R.id.object_list_root_layout)).addView(butteryProgressBar, FrameLayout.LayoutParams(-1, TypedValue.toInt().applyDimension(1, 4.0f, layoutInflater.getContext().getResources().getDisplayMetrics())))
         }
         return inflate
     }
 
-    Boolean onGroupClick(ExpandableListView expandableListView, View view, Int i, Long j) {
+    fun onGroupClick(ExpandableListView expandableListView, View view, Int i, Long j): Boolean {
         SLObjectDisplayInfo group
         Debug.Printf("displayObjects: onGroupClick: view %s id %d", view, Int.valueOf(view.getId()))
         ExpandableListAdapter expandableListAdapter = expandableListView.getExpandableListAdapter()
@@ -277,17 +277,17 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
         return true
     }
 
-    Unit onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
+    fun onProgressChanged(SeekBar seekBar, Int i, Boolean z): Unit {
         View view = getView()
         if (view != null) {
-            ((TextView) view.findViewById(R.id.objectListRangeDisplay)).setText(getString(R.string.object_range_format, Int.valueOf(i)))
+            ((view as TextView).findViewById(R.id.objectListRangeDisplay)).setText(getString(R.string.object_range_format, Int.valueOf(i)))
             if (z) {
                 updateFilter()
             }
         }
     }
 
-    Unit onStart() {
+    fun onStart(): Unit {
         SLModules modules
         Int i = 256
         super.onStart()
@@ -306,16 +306,16 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
                     } else if (objectSelectRange <= 256) {
                         i = objectSelectRange
                     }
-                    ((SeekBar) view.findViewById(R.id.objectListSeekBar)).setProgress(i)
+                    ((view as SeekBar).findViewById(R.id.objectListSeekBar)).setProgress(i)
                 }
             }
         }
     }
 
-    Unit onStartTrackingTouch(SeekBar seekBar) {
+    fun onStartTrackingTouch(SeekBar seekBar): Unit {
     }
 
-    Unit onStop() {
+    fun onStop(): Unit {
         SLAgentCircuit activeAgentCircuit
         SLModules modules
         if (this.subscription != null) {
@@ -329,6 +329,6 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
         super.onStop()
     }
 
-    Unit onStopTrackingTouch(SeekBar seekBar) {
+    fun onStopTrackingTouch(SeekBar seekBar): Unit {
     }
 }

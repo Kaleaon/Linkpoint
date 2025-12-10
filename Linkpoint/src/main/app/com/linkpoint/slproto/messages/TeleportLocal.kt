@@ -20,15 +20,15 @@ class TeleportLocal : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return 52
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleTeleportLocal(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 64)
@@ -39,7 +39,7 @@ class TeleportLocal : SLMessage {
         packInt(byteBuffer, this.Info_Field.TeleportFlags)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.Info_Field.AgentID = unpackUUID(byteBuffer)
         this.Info_Field.LocationID = unpackInt(byteBuffer)
         this.Info_Field.Position = unpackLLVector3(byteBuffer)

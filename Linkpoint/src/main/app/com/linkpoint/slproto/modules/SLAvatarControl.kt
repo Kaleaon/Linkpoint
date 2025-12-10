@@ -68,7 +68,7 @@ class SLAvatarControl : SLModule {
     private Any agentUpdateScheduleLock = Any()
     private volatile AgentUpdateTimerTask agentUpdateTask
     private RequestHandler<SubscriptionSingleKey> avatarStateRequestHandler = AsyncRequestHandler(this.agentCircuit, SimpleRequestHandler<SubscriptionSingleKey>() {
-        Unit onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey) {
+        fun onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey): Unit {
             if (SLAvatarControl.this.myAvatarStateResultHandler != null) {
                 SLAvatarControl.this.myAvatarStateResultHandler.onResultData(subscriptionSingleKey, SLAvatarControl.this.getMyAvatarState())
             }
@@ -105,11 +105,11 @@ class SLAvatarControl : SLModule {
         }
 
         /* access modifiers changed from: package-private */
-        Int getScheduledInterval() {
+        fun getScheduledInterval(): Int {
             return this.scheduledInterval
         }
 
-        Unit run() {
+        fun run(): Unit {
             if (SLAvatarControl.this.enableAgentUpdates) {
                 SLAvatarControl.this.SendAgentUpdate(SLAvatarControl.this.agentCircuit.getModules().drawDistance)
             }
@@ -147,7 +147,7 @@ class SLAvatarControl : SLModule {
     }
 
     /* access modifiers changed from: private */
-    Unit SendAgentUpdate(SLDrawDistance sLDrawDistance) {
+    fun SendAgentUpdate(SLDrawDistance sLDrawDistance): Unit {
         if (this.agentPosition.getPosition(this.agentUpdateCameraCenter)) {
             this.ActiveMotionMask = this.AgentMotionMask
             AgentUpdate agentUpdate = AgentUpdate()
@@ -228,7 +228,7 @@ class SLAvatarControl : SLModule {
 
     /* access modifiers changed from: private */
     @NonNull
-    MyAvatarState getMyAvatarState() {
+    fun getMyAvatarState(): MyAvatarState {
         SLAttachmentPoint sLAttachmentPoint
         Boolean z4 = false
         Boolean isFlying2 = getIsFlying()
@@ -360,7 +360,7 @@ class SLAvatarControl : SLModule {
         }
     }
 
-    Unit ApplyAvatarAnimation(SLObjectAvatarInfo sLObjectAvatarInfo, AvatarAnimation avatarAnimation) {
+    fun ApplyAvatarAnimation(SLObjectAvatarInfo sLObjectAvatarInfo, AvatarAnimation avatarAnimation): Unit {
         HashSet hashSet = HashSet()
         synchronized (this) {
             for (AvatarAnimation.AnimationList animationList : avatarAnimation.AnimationList_Fields) {
@@ -379,18 +379,18 @@ class SLAvatarControl : SLModule {
     }
 
     /* access modifiers changed from: package-private */
-    Unit DisableFastUpdates() {
+    fun DisableFastUpdates(): Unit {
         Debug.Log("AgentUpdate: Disabling fast updates.")
         rescheduleAgentUpdate()
     }
 
     /* access modifiers changed from: package-private */
-    Unit EnableFastUpdates() {
+    fun EnableFastUpdates(): Unit {
         Debug.Log("AgentUpdate: Enabling fast updates.")
         rescheduleAgentUpdate()
     }
 
-    Unit ForceSitOnObject(UUID uuid) {
+    fun ForceSitOnObject(UUID uuid): Unit {
         if (uuid != null) {
             Debug.Log("AvatarSit: Attempting to sit on object " + uuid.toString())
             AgentRequestSit agentRequestSit = AgentRequestSit()
@@ -409,7 +409,7 @@ class SLAvatarControl : SLModule {
     }
 
     @SLMessageHandler
-    Unit HandleAvatarSitResponse(AvatarSitResponse avatarSitResponse) {
+    fun HandleAvatarSitResponse(AvatarSitResponse avatarSitResponse): Unit {
         UUID uuid = avatarSitResponse.SitObject_Field.ID
         if (uuid.getLeastSignificantBits() == 0 && uuid.getMostSignificantBits() == 0) {
             Debug.Log("AvatarSit: Got null sit response")
@@ -423,7 +423,7 @@ class SLAvatarControl : SLModule {
         SendMessage(agentSit)
     }
 
-    Unit HandleCloseCircuit() {
+    fun HandleCloseCircuit(): Unit {
         if (this.userManager != null) {
             this.userManager.getObjectsManager().myAvatarState().detachRequestHandler(this.avatarStateRequestHandler)
         }
@@ -431,7 +431,7 @@ class SLAvatarControl : SLModule {
     }
 
     @SLMessageHandler
-    Unit HandleScriptQuestion(ScriptQuestion scriptQuestion) {
+    fun HandleScriptQuestion(ScriptQuestion scriptQuestion): Unit {
         Debug.Log("ScriptQuestion: ItemID = " + scriptQuestion.Data_Field.ItemID + ", questions = " + String.format("%08x", Any[]{Int.valueOf(scriptQuestion.Data_Field.Questions)}))
         SLChatPermissionRequestEvent sLChatPermissionRequestEvent = SLChatPermissionRequestEvent(scriptQuestion, this.agentCircuit.getAgentUUID())
         if (sLChatPermissionRequestEvent.getQuestions() != 0) {
@@ -439,7 +439,7 @@ class SLAvatarControl : SLModule {
         }
     }
 
-    Unit ScriptAnswerYes(UUID uuid, UUID uuid2, Int i) {
+    fun ScriptAnswerYes(UUID uuid, UUID uuid2, Int i): Unit {
         ScriptAnswerYes scriptAnswerYes = ScriptAnswerYes()
         scriptAnswerYes.AgentData_Field.AgentID = this.circuitInfo.agentID
         scriptAnswerYes.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -450,7 +450,7 @@ class SLAvatarControl : SLModule {
         SendMessage(scriptAnswerYes)
     }
 
-    Unit SitOnObject(UUID uuid) {
+    fun SitOnObject(UUID uuid): Unit {
         if (this.agentCircuit.getModules().rlvController.canSit()) {
             try {
                 if (this.parcelInfo != null) {
@@ -477,7 +477,7 @@ class SLAvatarControl : SLModule {
         }
     }
 
-    Unit StartAgentMotion(Int i) {
+    fun StartAgentMotion(Int i): Unit {
         Boolean z = false
         synchronized (this) {
             if (!((i & 8) == 0 && (i & 16) == 0)) {
@@ -502,7 +502,7 @@ class SLAvatarControl : SLModule {
         rescheduleAgentUpdate()
     }
 
-    Unit StopAvatarAnimations() {
+    fun StopAvatarAnimations(): Unit {
         processStopAvatarAnimations()
         this.needClearAnims = true
         this.needFastUpdates = 10
@@ -510,7 +510,7 @@ class SLAvatarControl : SLModule {
         rescheduleAgentUpdate()
     }
 
-    Boolean getAgentAndCameraPosition(@NonNull LLVector3 lLVector3, @NonNull CameraParams cameraParams2) {
+    fun getAgentAndCameraPosition(@NonNull LLVector3 lLVector3, @NonNull CameraParams cameraParams2): Boolean {
         Float f
         this.agentPosition.getInterpolatedPosition(lLVector3)
         synchronized (this.turningLock) {
@@ -536,23 +536,23 @@ class SLAvatarControl : SLModule {
         return this.cameraParams.isFlinging()
     }
 
-    Float getAgentHeading() {
+    fun getAgentHeading(): Float {
         return this.agentHeading
     }
 
     @NonNull
-    AgentPosition getAgentPosition() {
+    fun getAgentPosition(): AgentPosition {
         return this.agentPosition
     }
 
-    Boolean getIsManualCamming() {
+    fun getIsManualCamming(): Boolean {
         synchronized (this.cammingLock) {
             z = this.isManualCamming
         }
         return z
     }
 
-    Unit getVRCamera(HeadTransformCompat headTransformCompat, @NonNull LLVector3 lLVector3, @NonNull CameraParams cameraParams2) {
+    fun getVRCamera(HeadTransformCompat headTransformCompat, @NonNull LLVector3 lLVector3, @NonNull CameraParams cameraParams2): Unit {
         this.agentPosition.getInterpolatedPosition(lLVector3)
         synchronized (this.cammingLock) {
             if (!this.isManualCamming) {
@@ -562,7 +562,7 @@ class SLAvatarControl : SLModule {
         cameraParams2.getVRCamera(this.cameraParams, headTransformCompat)
     }
 
-    Unit playAnimation(UUID uuid, Boolean z) {
+    fun playAnimation(UUID uuid, Boolean z): Unit {
         AgentAnimation agentAnimation = AgentAnimation()
         agentAnimation.AgentData_Field.AgentID = this.circuitInfo.agentID
         agentAnimation.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -574,13 +574,13 @@ class SLAvatarControl : SLModule {
         SendMessage(agentAnimation)
     }
 
-    Unit processCameraFling(Float f, Float f2) {
+    fun processCameraFling(Float f, Float f2): Unit {
         synchronized (this.cammingLock) {
             this.cameraParams.fling(f, f2)
         }
     }
 
-    Unit processCameraRotate(Float f, Float f2) {
+    fun processCameraRotate(Float f, Float f2): Unit {
         synchronized (this.cammingLock) {
             this.cameraParams.rotate(f, f2)
             if (!this.isCamming) {
@@ -589,21 +589,21 @@ class SLAvatarControl : SLModule {
         }
     }
 
-    Unit processCameraZoom(Float f, Float f2, Float f3, Float f4, Float f5) {
+    fun processCameraZoom(Float f, Float f2, Float f3, Float f4, Float f5): Unit {
         synchronized (this.cammingLock) {
             this.isCamming = true
             this.cameraParams.zoom(f, f2, f3, f4, f5)
         }
     }
 
-    Unit setAgentHeading(Float f) {
+    fun setAgentHeading(Float f): Unit {
         synchronized (this.cammingLock) {
             this.cameraParams.setHeading(f)
             this.agentHeading = this.cameraParams.getHeading()
         }
     }
 
-    Unit setAgentPosition(@NonNull LLVector3 lLVector3, @Nullable LLVector3 lLVector32) {
+    fun setAgentPosition(@NonNull LLVector3 lLVector3, @Nullable LLVector3 lLVector32): Unit {
         synchronized (this.cammingLock) {
             this.agentPosition.set(lLVector3, lLVector32)
             if (!this.cameraParams.isValid() || (!this.isCamming && (!this.isManualCamming))) {
@@ -616,7 +616,7 @@ class SLAvatarControl : SLModule {
         }
     }
 
-    Unit setCameraManualControl(Boolean z) {
+    fun setCameraManualControl(Boolean z): Unit {
         synchronized (this.cammingLock) {
             this.isManualCamming = z
             if (!z) {
@@ -628,7 +628,7 @@ class SLAvatarControl : SLModule {
         }
     }
 
-    Unit setEnableAgentUpdates(Boolean z) {
+    fun setEnableAgentUpdates(Boolean z): Unit {
         this.enableAgentUpdates = z
         if (z) {
             scheduleAgentUpdate(0, 1000)
@@ -637,7 +637,7 @@ class SLAvatarControl : SLModule {
         }
     }
 
-    Unit startCameraManualControl(Float f, Float f2, Float f3, Float f4) {
+    fun startCameraManualControl(Float f, Float f2, Float f3, Float f4): Unit {
         synchronized (this.cammingLock) {
             this.isCamming = true
             this.isManualCamming = true
@@ -645,7 +645,7 @@ class SLAvatarControl : SLModule {
         }
     }
 
-    Unit startTurning(Float f) {
+    fun startTurning(Float f): Unit {
         synchronized (this.turningLock) {
             if (!this.isTurning || this.turningSpeed != f) {
                 this.isTurning = true
@@ -656,13 +656,13 @@ class SLAvatarControl : SLModule {
         }
     }
 
-    Unit stopCameraManualControl() {
+    fun stopCameraManualControl(): Unit {
         synchronized (this.cammingLock) {
             this.cameraParams.stopManualControl()
         }
     }
 
-    Unit stopCamming() {
+    fun stopCamming(): Unit {
         synchronized (this.cammingLock) {
             if (this.isCamming) {
                 this.isCamming = false
@@ -673,7 +673,7 @@ class SLAvatarControl : SLModule {
         }
     }
 
-    Unit stopFlying() {
+    fun stopFlying(): Unit {
         Boolean z = true
         synchronized (this) {
             if (this.isFlying) {
@@ -688,7 +688,7 @@ class SLAvatarControl : SLModule {
         }
     }
 
-    Unit stopTurning() {
+    fun stopTurning(): Unit {
         synchronized (this.turningLock) {
             this.isTurning = false
         }

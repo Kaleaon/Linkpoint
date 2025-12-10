@@ -17,7 +17,7 @@ enum SLSaleType {
         this.stringCode = str
     }
 
-    SLSaleType getByString(String str) {
+    fun getByString(String str): SLSaleType {
         for (SLSaleType sLSaleType : values()) {
             if (sLSaleType.stringCode.equalsIgnoreCase(str)) {
                 return sLSaleType
@@ -26,7 +26,7 @@ enum SLSaleType {
         return FS_UNKNOWN
     }
 
-    SLSaleType getByType(Int i) {
+    fun getByType(Int i): SLSaleType {
         for (SLSaleType sLSaleType : values()) {
             if (sLSaleType.typeCode == i) {
                 return sLSaleType
@@ -35,11 +35,11 @@ enum SLSaleType {
         return FS_UNKNOWN
     }
 
-    String getStringCode() {
+    fun getStringCode(): String {
         return this.stringCode
     }
 
-    Int getTypeCode() {
+    fun getTypeCode(): Int {
         return this.typeCode
     }
 }

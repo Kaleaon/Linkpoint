@@ -39,7 +39,7 @@ class DrawableGeometry : GLCleanable {
         this.FaceCount = meshData2.getFaceCount()
         Int i = 0
         Int i2 = 0
-        for (Int i3 = 0; i3 < this.FaceCount; i3++) {
+        for (i3 in 0 until this.FaceCount) {
             MeshFace face = meshData2.getFace(i3)
             if (face.getVertices() != null) {
                 i += face.getNumVertices()
@@ -63,7 +63,7 @@ class DrawableGeometry : GLCleanable {
         Int i6 = 0
         Int i7 = 0
         this.facesCombined = false
-        for (Int i8 = 0; i8 < this.FaceCount; i8++) {
+        for (i8 in 0 until this.FaceCount) {
             MeshFace face2 = meshData2.getFace(i8)
             DirectByteBuffer vertices = face2.getVertices()
             DirectByteBuffer texCoords = face2.getTexCoords()
@@ -78,7 +78,7 @@ class DrawableGeometry : GLCleanable {
                 }
                 DirectByteBuffer indices = face2.getIndices()
                 Int numIndices = face2.getNumIndices()
-                for (Int i9 = 0; i9 < numIndices; i9++) {
+                for (i9 in 0 until numIndices) {
                     if ((indices.getShort(i9) & 65535) >= numVertices) {
                         throw CreateFailureException("Too many vertices")
                     }
@@ -321,7 +321,7 @@ class DrawableGeometry : GLCleanable {
     }
 
     /* access modifiers changed from: package-private */
-    Unit ApplyJointTranslations(MeshJointTranslations meshJointTranslations) {
+    fun ApplyJointTranslations(MeshJointTranslations meshJointTranslations): Unit {
         MeshData meshData2
         if (isRiggedMesh() && (meshData2 = this.meshData) != null && meshData2.isRiggedMesh()) {
             meshData2.ApplyJointTranslations(meshJointTranslations)
@@ -329,7 +329,7 @@ class DrawableGeometry : GLCleanable {
     }
 
     /* access modifiers changed from: package-private */
-    GLLoadableBuffer GLBindBuffers10(RenderContext renderContext, PrimFlexibleInfo primFlexibleInfo) {
+    fun GLBindBuffers10(RenderContext renderContext, PrimFlexibleInfo primFlexibleInfo): GLLoadableBuffer {
         GLLoadableBuffer flexedVertexBuffer = primFlexibleInfo != null ? primFlexibleInfo.getFlexedVertexBuffer(renderContext, this.VertexBuffer, this.VertexCount) : this.VertexBuffer
         if (this.facesCombined) {
             flexedVertexBuffer.Bind(renderContext, 32884, 3, 5126, 24, 0)
@@ -341,7 +341,7 @@ class DrawableGeometry : GLCleanable {
     }
 
     /* access modifiers changed from: package-private */
-    GLLoadableBuffer GLBindBuffers20(RenderContext renderContext) {
+    fun GLBindBuffers20(RenderContext renderContext): GLLoadableBuffer {
         if (renderContext.hasGL30) {
             if (this.vertexArrayObject == null) {
                 if (this.facesCombined) {
@@ -387,7 +387,7 @@ class DrawableGeometry : GLCleanable {
     }
 
     /* access modifiers changed from: package-private */
-    Unit GLBindBuffersRigged30(RenderContext renderContext) {
+    fun GLBindBuffersRigged30(RenderContext renderContext): Unit {
         if (this.isRiggedMesh && this.meshData != null) {
             this.meshData.SetupBuffers30(renderContext)
             if (this.vertexArrayObject == null) {
@@ -418,12 +418,12 @@ class DrawableGeometry : GLCleanable {
     }
 
     /* access modifiers changed from: package-private */
-    Unit GLDrawAll10(RenderContext renderContext) {
+    fun GLDrawAll10(RenderContext renderContext): Unit {
         this.IndexBuffer.DrawElements(renderContext, 4, this.IndexCount, 5123, 0)
     }
 
     /* access modifiers changed from: package-private */
-    Unit GLDrawAll20(RenderContext renderContext) {
+    fun GLDrawAll20(RenderContext renderContext): Unit {
         if (!renderContext.hasGL30) {
             this.IndexBuffer.DrawElements20(4, this.IndexCount, 5123, 0)
         } else if (this.vertexArrayObject != null) {
@@ -434,7 +434,7 @@ class DrawableGeometry : GLCleanable {
     }
 
     /* access modifiers changed from: package-private */
-    Unit GLDrawFace10(RenderContext renderContext, Int i, GLLoadableBuffer gLLoadableBuffer) {
+    fun GLDrawFace10(RenderContext renderContext, Int i, GLLoadableBuffer gLLoadableBuffer): Unit {
         Int i2 = i * 3
         if (!this.facesCombined) {
             gLLoadableBuffer.Bind(renderContext, 32884, 3, 5126, 24, this.FaceVertexStartsCounts[i * 2] * 24)
@@ -445,7 +445,7 @@ class DrawableGeometry : GLCleanable {
     }
 
     /* access modifiers changed from: package-private */
-    Unit GLDrawFace20(RenderContext renderContext, Int i) {
+    fun GLDrawFace20(RenderContext renderContext, Int i): Unit {
         Int i2 = i * 3
         if (!renderContext.hasGL30) {
             if (!this.facesCombined) {
@@ -469,7 +469,7 @@ class DrawableGeometry : GLCleanable {
     }
 
     /* access modifiers changed from: package-private */
-    Unit GLDrawRiggedFace30(RenderContext renderContext, Int i) {
+    fun GLDrawRiggedFace30(RenderContext renderContext, Int i): Unit {
         if (this.vertexArrayObject != null) {
             Int i2 = i * 3
             this.vertexArrayObject.Bind(i)
@@ -484,14 +484,14 @@ class DrawableGeometry : GLCleanable {
         Int i2 = 0
         Float f = 0.0f
         LLVector3[] lLVector3Arr = LLVector3[3]
-        for (Int i3 = 0; i3 < 3; i3++) {
+        for (i3 in 0 until 3) {
             lLVector3Arr[i3] = LLVector3()
         }
-        for (Int i4 = 0; i4 < this.FaceCount; i4++) {
+        for (i4 in 0 until this.FaceCount) {
             Int i5 = i4 * 3
             Int i6 = this.FaceIndexStartsCounts[i5 + 1]
             Int i7 = this.FaceIndexStartsCounts[i5 + 2]
-            for (Int i8 = 0; i8 < i7; i8 += 3) {
+            for (i8 in 0 until i7 step 3) {
                 Int i9 = 0
                 while (true) {
                     Int i10 = i9
@@ -533,7 +533,7 @@ class DrawableGeometry : GLCleanable {
     }
 
     /* access modifiers changed from: package-private */
-    Boolean UpdateRigged(RenderContext renderContext, AvatarSkeleton avatarSkeleton) {
+    fun UpdateRigged(RenderContext renderContext, AvatarSkeleton avatarSkeleton): Boolean {
         MeshData meshData2
         if (!this.isRiggedMesh || (meshData2 = this.meshData) == null || !meshData2.isRiggedMesh()) {
             return false
@@ -541,7 +541,7 @@ class DrawableGeometry : GLCleanable {
         meshData2.UpdateRiggedMatrices(avatarSkeleton)
         if (!renderContext.hasGL20 || (!meshData2.riggingFitsGL20())) {
             DirectByteBuffer rawBuffer = this.VertexBuffer.getRawBuffer()
-            for (Int i = 0; i < this.FaceCount; i++) {
+            for (i in 0 until this.FaceCount) {
                 meshData2.UpdateRigged(i, rawBuffer, this.FaceVertexStartsCounts[i * 2])
             }
             this.VertexBuffer.Reload(renderContext)
@@ -552,29 +552,29 @@ class DrawableGeometry : GLCleanable {
     }
 
     /* access modifiers changed from: package-private */
-    Int getFaceCount() {
+    fun getFaceCount(): Int {
         return this.FaceCount
     }
 
-    Int getFaceFirstVertex(Int i) {
+    fun getFaceFirstVertex(Int i): Int {
         return this.FaceVertexStartsCounts[i * 2]
     }
 
     /* access modifiers changed from: package-private */
-    Int getFaceID(Int i) {
+    fun getFaceID(Int i): Int {
         return this.FaceIndexStartsCounts[i * 3]
     }
 
-    Int getFaceVertexCount(Int i) {
+    fun getFaceVertexCount(Int i): Int {
         return this.FaceVertexStartsCounts[(i * 2) + 1]
     }
 
-    Int getVertexCount() {
+    fun getVertexCount(): Int {
         return this.VertexCount
     }
 
     /* access modifiers changed from: package-private */
-    Boolean hasExtendedBones() {
+    fun hasExtendedBones(): Boolean {
         if (this.meshData != null) {
             return this.meshData.hasExtendedBones()
         }
@@ -582,17 +582,17 @@ class DrawableGeometry : GLCleanable {
     }
 
     /* access modifiers changed from: package-private */
-    Boolean isFacesCombined() {
+    fun isFacesCombined(): Boolean {
         return this.facesCombined
     }
 
     /* access modifiers changed from: package-private */
-    Boolean isRiggedMesh() {
+    fun isRiggedMesh(): Boolean {
         return this.isRiggedMesh
     }
 
     /* access modifiers changed from: package-private */
-    Boolean riggingFitsGL20() {
+    fun riggingFitsGL20(): Boolean {
         if (!this.isRiggedMesh || this.meshData == null) {
             return false
         }

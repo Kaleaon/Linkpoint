@@ -18,22 +18,22 @@ class UserNotesEditFragment : TextFieldEditFragment : BackButtonHandler {
 
     /* access modifiers changed from: private */
     /* renamed from: onAvatarNotes */
-    Unit m510com_lumiyaviewer_lumiya_ui_chat_profiles_UserNotesEditFragmentmthref0(AvatarNotesReply avatarNotesReply) {
+    fun m510com_lumiyaviewer_lumiya_ui_chat_profiles_UserNotesEditFragmentmthref0(AvatarNotesReply avatarNotesReply): Unit {
         setOriginalText(SLMessage.stringFromVariableUTF(avatarNotesReply.Data_Field.Notes).trim())
     }
 
     /* access modifiers changed from: protected */
-    String decorateFragmentTitle(String str) {
+    fun decorateFragmentTitle(String str): String {
         return getString(R.string.notes_for_title, str)
     }
 
     /* access modifiers changed from: protected */
-    String getFieldHint(Context context) {
+    fun getFieldHint(Context context): String {
         return context.getString(R.string.user_notes_hint)
     }
 
     /* access modifiers changed from: protected */
-    Unit onShowUser(@Nullable ChatterID chatterID) {
+    fun onShowUser(@Nullable ChatterID chatterID): Unit {
         if (this.avatarNotesSubscription != null) {
             this.avatarNotesSubscription.unsubscribe()
             this.avatarNotesSubscription = null
@@ -44,7 +44,7 @@ class UserNotesEditFragment : TextFieldEditFragment : BackButtonHandler {
     }
 
     /* access modifiers changed from: protected */
-    Unit saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str) {
+    fun saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str): Unit {
         sLAgentCircuit.getModules().userProfiles.SaveUserNotes(chatterID.getOptionalChatterUUID(), str)
     }
 }

@@ -16,7 +16,7 @@ class ChatFromViewer : SLMessage {
 
     class ChatData {
         Int Channel
-        byte[] Message
+        ByteArray Message
         Int Type
     }
 
@@ -24,26 +24,26 @@ class ChatFromViewer : SLMessage {
         this.zeroCoded = true
     }
 
-    Int CalcPayloadSize() {
-        return this.ChatData_Field.Message.length + 2 + 1 + 4 + 36
+    fun CalcPayloadSize(): Int {
+        return this.ChatData_Field.Message.size + 2 + 1 + 4 + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleChatFromViewer(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 80)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packVariable(byteBuffer, this.ChatData_Field.Message, 2)
-        packByte(byteBuffer, (byte) this.ChatData_Field.Type)
+        packByte(byteBuffer, (this as byte).ChatData_Field.Type)
         packInt(byteBuffer, this.ChatData_Field.Channel)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ChatData_Field.Message = unpackVariable(byteBuffer, 2)

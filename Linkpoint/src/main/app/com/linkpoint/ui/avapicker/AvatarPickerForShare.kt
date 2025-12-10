@@ -14,14 +14,14 @@ class AvatarPickerForShare : AvatarPickerFragment {
     private val INVENTORY_ENTRY_KEY: String = "inventoryEntry"
     private InventoryFragmentHelper inventoryFragmentHelper = InventoryFragmentHelper(this)
 
-    Bundle makeArguments(UUID uuid, SLInventoryEntry sLInventoryEntry) {
+    fun makeArguments(UUID uuid, SLInventoryEntry sLInventoryEntry): Bundle {
         Bundle bundle = Bundle()
         bundle.putString("activeAgentUUID", uuid.toString())
         bundle.putParcelable(INVENTORY_ENTRY_KEY, sLInventoryEntry)
         return bundle
     }
 
-    String getTitle() {
+    fun getTitle(): String {
         return getString(R.string.share_with_title)
     }
 
@@ -35,7 +35,7 @@ class AvatarPickerForShare : AvatarPickerFragment {
     }
 
     /* access modifiers changed from: protected */
-    Unit onAvatarSelected(ChatterID chatterID, @Nullable String str) {
+    fun onAvatarSelected(ChatterID chatterID, @Nullable String str): Unit {
         Bundle arguments = getArguments()
         if (arguments != null && arguments.containsKey(INVENTORY_ENTRY_KEY)) {
             this.inventoryFragmentHelper.ConfirmShareInventoryEntry((SLInventoryEntry) arguments.getParcelable(INVENTORY_ENTRY_KEY), chatterID, str, $Lambda$GxFBFkg7vdmipTAXKE3eB6HqSs(this))

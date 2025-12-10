@@ -7,7 +7,7 @@ import androidx.annotation.NonNull
 
 class AvatarPickKey : Parcelable {
     Parcelable.Creator<AvatarPickKey> CREATOR = Parcelable.Creator<AvatarPickKey>() {
-        AvatarPickKey createFromParcel(Parcel parcel) {
+        fun createFromParcel(Parcel parcel): AvatarPickKey {
             return AvatarPickKey(parcel)
         }
 
@@ -30,11 +30,11 @@ class AvatarPickKey : Parcelable {
         this.pickID = uuid2
     }
 
-    Int describeContents() {
+    fun describeContents(): Int {
         return 0
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (this == obj) {
             return true
         }
@@ -48,15 +48,15 @@ class AvatarPickKey : Parcelable {
         return this.pickID.equals(avatarPickKey.pickID)
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         return (this.avatarID.hashCode() * 31) + this.pickID.hashCode()
     }
 
-    String toString() {
+    fun toString(): String {
         return "AvatarPicksKey{avatarID=" + this.avatarID + ", pickID=" + this.pickID + '}'
     }
 
-    Unit writeToParcel(Parcel parcel, Int i) {
+    fun writeToParcel(Parcel parcel, Int i): Unit {
         parcel.writeString(this.avatarID.toString())
         parcel.writeString(this.pickID.toString())
     }

@@ -19,7 +19,7 @@ class NearbyChattersDisplayDataList : ChatterDisplayDataList {
     }
 
     /* access modifiers changed from: protected */
-    List<ChatterID> getChatters() {
+    fun getChatters(): List<ChatterID> {
         SLModules modules
         List<ChatterID> list = null
         SLAgentCircuit activeAgentCircuit = this.userManager.getActiveAgentCircuit()

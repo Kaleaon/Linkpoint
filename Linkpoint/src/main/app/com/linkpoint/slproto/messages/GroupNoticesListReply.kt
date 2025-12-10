@@ -18,10 +18,10 @@ class GroupNoticesListReply : SLMessage {
 
     class Data {
         Int AssetType
-        byte[] FromName
+        ByteArray FromName
         Boolean HasAttachment
         UUID NoticeID
-        byte[] Subject
+        ByteArray Subject
         Int Timestamp
     }
 
@@ -30,7 +30,7 @@ class GroupNoticesListReply : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 37
         Iterator<T> it = this.Data_Fields.iterator()
         while (true) {
@@ -38,37 +38,37 @@ class GroupNoticesListReply : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            Data data = (Data) it.next()
-            i = data.Subject.length + data.FromName.length + 22 + 2 + 1 + 1 + i2
+            Data data = (it as Data).next()
+            i = data.Subject.size + data.FromName.size + 22 + 2 + 1 + 1 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleGroupNoticesListReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 59)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.GroupID)
-        byteBuffer.put((byte) this.Data_Fields.size())
+        byteBuffer.put((this as byte).Data_Fields.size())
         for (Data data : this.Data_Fields) {
             packUUID(byteBuffer, data.NoticeID)
             packInt(byteBuffer, data.Timestamp)
             packVariable(byteBuffer, data.FromName, 2)
             packVariable(byteBuffer, data.Subject, 2)
             packBoolean(byteBuffer, data.HasAttachment)
-            packByte(byteBuffer, (byte) data.AssetType)
+            packByte(byteBuffer, (data as byte).AssetType)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             Data data = Data()
             data.NoticeID = unpackUUID(byteBuffer)
             data.Timestamp = unpackInt(byteBuffer)

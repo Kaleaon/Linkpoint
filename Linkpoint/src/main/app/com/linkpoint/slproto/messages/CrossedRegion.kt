@@ -23,7 +23,7 @@ class CrossedRegion : SLMessage {
 
     class RegionData {
         Long RegionHandle
-        byte[] SeedCapability
+        ByteArray SeedCapability
         Inet4Address SimIP
         Int SimPort
     }
@@ -32,28 +32,28 @@ class CrossedRegion : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.RegionData_Field.SeedCapability.length + 16 + 34 + 24
+    fun CalcPayloadSize(): Int {
+        return this.RegionData_Field.SeedCapability.size + 16 + 34 + 24
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleCrossedRegion(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.put((byte) -1)
         byteBuffer.put((byte) 7)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packIPAddress(byteBuffer, this.RegionData_Field.SimIP)
-        packShort(byteBuffer, (short) this.RegionData_Field.SimPort)
+        packShort(byteBuffer, (this as short).RegionData_Field.SimPort)
         packLong(byteBuffer, this.RegionData_Field.RegionHandle)
         packVariable(byteBuffer, this.RegionData_Field.SeedCapability, 2)
         packLLVector3(byteBuffer, this.Info_Field.Position)
         packLLVector3(byteBuffer, this.Info_Field.LookAt)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.RegionData_Field.SimIP = unpackIPAddress(byteBuffer)

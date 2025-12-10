@@ -24,29 +24,29 @@ class ObjectListNewActivity : MasterDetailsActivity {
             }
         }
 
-        ObjectDetailsActivityFactory getInstance() {
+        fun getInstance(): ObjectDetailsActivityFactory {
             return InstanceHolder.Instance
         }
 
-        Intent createIntent(Context context, Bundle bundle) {
+        fun createIntent(Context context, Bundle bundle): Intent {
             Intent intent = Intent(context, ObjectListNewActivity.class)
             intent.putExtra(MasterDetailsActivity.INTENT_SELECTION_KEY, bundle)
             ActivityUtils.setActiveAgentID(intent, ActivityUtils.getActiveAgentID(bundle))
             return intent
         }
 
-        Class<? : Fragment> getFragmentClass() {
+        fun getFragmentClass(): Class<? : Fragment> {
             return ObjectDetailsFragment.class
         }
     }
 
     /* access modifiers changed from: protected */
-    FragmentActivityFactory getDetailsFragmentFactory() {
+    fun getDetailsFragmentFactory(): FragmentActivityFactory {
         return ObjectDetailsActivityFactory.getInstance()
     }
 
     /* access modifiers changed from: protected */
-    Boolean isRootDetailsFragment(Class<? : Fragment> cls) {
+    fun isRootDetailsFragment(Class<? : Fragment> cls): Boolean {
         if (cls != UserProfileFragment.class) {
             return super.isRootDetailsFragment(cls)
         }
@@ -54,13 +54,13 @@ class ObjectListNewActivity : MasterDetailsActivity {
     }
 
     /* access modifiers changed from: protected */
-    Unit onCreate(@Nullable Bundle bundle) {
+    fun onCreate(@Nullable Bundle bundle): Unit {
         super.onCreate(bundle)
         setDefaultTitle(getString(R.string.objects_activity_caption), (String) null)
     }
 
     /* access modifiers changed from: protected */
-    Fragment onCreateMasterFragment(Intent intent, @Nullable Bundle bundle) {
+    fun onCreateMasterFragment(Intent intent, @Nullable Bundle bundle): Fragment {
         return ObjectSelectorFragment.newInstance(ActivityUtils.makeFragmentArguments(ActivityUtils.getActiveAgentID(intent), (Bundle) null))
     }
 }

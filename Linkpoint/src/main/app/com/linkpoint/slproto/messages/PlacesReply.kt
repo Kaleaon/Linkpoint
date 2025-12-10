@@ -44,7 +44,7 @@ class PlacesReply : SLMessage {
         this.TransactionData_Field = TransactionData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 53
         Iterator<T> it = this.QueryData_Fields.iterator()
         while (true) {
@@ -52,30 +52,30 @@ class PlacesReply : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            QueryData queryData = (QueryData) it.next()
-            i = queryData.SimName.length + queryData.Name.length + 17 + 1 + queryData.Desc.length + 4 + 4 + 1 + 4 + 4 + 4 + 1 + 16 + 4 + 4 + i2
+            QueryData queryData = (it as QueryData).next()
+            i = queryData.SimName.size + queryData.Name.size + 17 + 1 + queryData.Desc.size + 4 + 4 + 1 + 4 + 4 + 4 + 1 + 16 + 4 + 4 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandlePlacesReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.RS)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.QueryID)
         packUUID(byteBuffer, this.TransactionData_Field.TransactionID)
-        byteBuffer.put((Byte) this.QueryData_Fields.size())
+        byteBuffer.put((this as Byte).QueryData_Fields.size())
         for (QueryData queryData : this.QueryData_Fields) {
             packUUID(byteBuffer, queryData.OwnerID)
             packVariable(byteBuffer, queryData.Name, 1)
             packVariable(byteBuffer, queryData.Desc, 1)
             packInt(byteBuffer, queryData.ActualArea)
             packInt(byteBuffer, queryData.BillableArea)
-            packByte(byteBuffer, (Byte) queryData.Flags)
+            packByte(byteBuffer, (queryData as Byte).Flags)
             packFloat(byteBuffer, queryData.GlobalX)
             packFloat(byteBuffer, queryData.GlobalY)
             packFloat(byteBuffer, queryData.GlobalZ)
@@ -86,12 +86,12 @@ class PlacesReply : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.QueryID = unpackUUID(byteBuffer)
         this.TransactionData_Field.TransactionID = unpackUUID(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             QueryData queryData = QueryData()
             queryData.OwnerID = unpackUUID(byteBuffer)
             queryData.Name = unpackVariable(byteBuffer, 1)

@@ -32,7 +32,7 @@ class DetailsActivity : ConnectedActivity {
 
     private class DetailsStackEntry : Parcelable {
         Parcelable.Creator<DetailsStackEntry> CREATOR = Parcelable.Creator<DetailsStackEntry>() {
-            DetailsStackEntry createFromParcel(Parcel parcel) {
+            fun createFromParcel(Parcel parcel): DetailsStackEntry {
                 return DetailsStackEntry(parcel)
             }
 
@@ -76,11 +76,11 @@ class DetailsActivity : ConnectedActivity {
             this(fragment2)
         }
 
-        Int describeContents() {
+        fun describeContents(): Int {
             return 0
         }
 
-        Fragment getFragment(Context context) {
+        fun getFragment(Context context): Fragment {
             Fragment fragment2 = this.fragment.get()
             if (fragment2 == null) {
                 fragment2 = Fragment.instantiate(context, this.className, this.arguments)
@@ -91,7 +91,7 @@ class DetailsActivity : ConnectedActivity {
             return fragment2
         }
 
-        Unit writeToParcel(Parcel parcel, Int i) {
+        fun writeToParcel(Parcel parcel, Int i): Unit {
             parcel.writeString(this.className)
             if (this.arguments != null) {
                 parcel.writeByte((Byte) 1)
@@ -124,13 +124,13 @@ class DetailsActivity : ConnectedActivity {
         return !onDetailsStackEmpty
     }
 
-    Unit showDetails(Activity activity, FragmentActivityFactory fragmentActivityFactory, Bundle bundle) {
+    fun showDetails(Activity activity, FragmentActivityFactory fragmentActivityFactory, Bundle bundle): Unit {
         if (!showEmbeddedDetails(activity, fragmentActivityFactory.getFragmentClass(), bundle)) {
             activity.startActivity(fragmentActivityFactory.createIntent(activity, bundle))
         }
     }
 
-    Boolean showEmbeddedDetails(Activity activity, Class<? : Fragment> cls, Bundle bundle) {
+    fun showEmbeddedDetails(Activity activity, Class<? : Fragment> cls, Bundle bundle): Boolean {
         if (!(activity instanceof DetailsActivity) || !((DetailsActivity) activity).acceptsDetailFragment(cls)) {
             return false
         }
@@ -139,12 +139,12 @@ class DetailsActivity : ConnectedActivity {
     }
 
     /* access modifiers changed from: protected */
-    Boolean acceptsDetailFragment(Class<? : Fragment> cls) {
+    fun acceptsDetailFragment(Class<? : Fragment> cls): Boolean {
         return true
     }
 
     /* access modifiers changed from: protected */
-    Unit addDetailsToStack(FragmentManager fragmentManager) {
+    fun addDetailsToStack(FragmentManager fragmentManager): Unit {
         Fragment findFragmentById = fragmentManager.findFragmentById(R.id.details)
         if (findFragmentById != null) {
             this.detailsStack.add(DetailsStackEntry(findFragmentById, (DetailsStackEntry) null))
@@ -152,11 +152,11 @@ class DetailsActivity : ConnectedActivity {
     }
 
     /* access modifiers changed from: package-private */
-    Unit clearDetailsStack() {
+    fun clearDetailsStack(): Unit {
         this.detailsStack.clear()
     }
 
-    Boolean closeDetailsFragment(Fragment fragment) {
+    fun closeDetailsFragment(Fragment fragment): Boolean {
         FragmentManager supportFragmentManager = getSupportFragmentManager()
         if (supportFragmentManager.findFragmentById(R.id.details) == fragment) {
             return goBack(supportFragmentManager)
@@ -165,7 +165,7 @@ class DetailsActivity : ConnectedActivity {
     }
 
     @Nullable
-    Fragment getCurrentDetailsFragment() {
+    fun getCurrentDetailsFragment(): Fragment {
         Fragment findFragmentById
         FragmentManager supportFragmentManager = getSupportFragmentManager()
         if (supportFragmentManager == null || (findFragmentById = supportFragmentManager.findFragmentById(R.id.details)) == null || !findFragmentById.isAdded() || !(!findFragmentById.isDetached()) || !(!findFragmentById.isHidden())) {
@@ -174,7 +174,7 @@ class DetailsActivity : ConnectedActivity {
         return findFragmentById
     }
 
-    Boolean handleBackPressed() {
+    fun handleBackPressed(): Boolean {
         FragmentManager supportFragmentManager = getSupportFragmentManager()
         Fragment findFragmentById = supportFragmentManager.findFragmentById(R.id.details)
         if ((findFragmentById instanceof BackButtonHandler) && findFragmentById.isAdded() && (!findFragmentById.isDetached()) && ((BackButtonHandler) findFragmentById).onBackButtonPressed()) {
@@ -187,12 +187,12 @@ class DetailsActivity : ConnectedActivity {
     }
 
     /* access modifiers changed from: protected */
-    Boolean isRootDetailsFragment(Class<? : Fragment> cls) {
+    fun isRootDetailsFragment(Class<? : Fragment> cls): Boolean {
         return true
     }
 
     /* access modifiers changed from: protected */
-    Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle): Unit {
         super.onCreate(bundle)
         if (bundle != null) {
             ArrayList parcelableArrayList = bundle.getParcelableArrayList(DETAILS_STACK_TAG)
@@ -205,7 +205,7 @@ class DetailsActivity : ConnectedActivity {
     }
 
     /* access modifiers changed from: protected */
-    Boolean onDetailsStackEmpty() {
+    fun onDetailsStackEmpty(): Boolean {
         FragmentManager supportFragmentManager = getSupportFragmentManager()
         Fragment findFragmentById = supportFragmentManager.findFragmentById(R.id.details)
         if (findFragmentById == null) {
@@ -218,17 +218,17 @@ class DetailsActivity : ConnectedActivity {
         return false
     }
 
-    Unit onFragmentTitleUpdated() {
+    fun onFragmentTitleUpdated(): Unit {
         updateTitle()
     }
 
     /* access modifiers changed from: protected */
-    Unit onPostCreate(@android.support.annotation.Nullable Bundle bundle) {
+    fun onPostCreate(@android.support.annotation.Nullable Bundle bundle): Unit {
         super.onPostCreate(bundle)
         updateTitle()
     }
 
-    Unit onRequestPermissionsResult(Int i, @NonNull Array<String> strArr, @NonNull IntArray iArr) {
+    fun onRequestPermissionsResult(Int i, @NonNull Array<String> strArr, @NonNull IntArray iArr): Unit {
         super.onRequestPermissionsResult(i, strArr, iArr)
         List<Fragment> fragments = getSupportFragmentManager().getFragments()
         if (fragments != null) {
@@ -239,7 +239,7 @@ class DetailsActivity : ConnectedActivity {
     }
 
     /* access modifiers changed from: protected */
-    Unit onSaveInstanceState(Bundle bundle) {
+    fun onSaveInstanceState(Bundle bundle): Unit {
         bundle.putParcelableArrayList(DETAILS_STACK_TAG, this.detailsStack)
         bundle.putString(DEFAULT_TITLE_TAG, this.defaultTitle)
         bundle.putString(DEFAULT_SUBTITLE_TAG, this.defaultSubTitle)
@@ -247,7 +247,7 @@ class DetailsActivity : ConnectedActivity {
     }
 
     /* access modifiers changed from: protected */
-    Unit removeAllDetails() {
+    fun removeAllDetails(): Unit {
         FragmentManager supportFragmentManager = getSupportFragmentManager()
         if (supportFragmentManager.findFragmentById(R.id.details) != null) {
             clearDetailsStack()
@@ -256,7 +256,7 @@ class DetailsActivity : ConnectedActivity {
     }
 
     /* access modifiers changed from: protected */
-    Unit replaceDetailsFragment(FragmentManager fragmentManager, Fragment fragment) {
+    fun replaceDetailsFragment(FragmentManager fragmentManager, Fragment fragment): Unit {
         FragmentTransaction beginTransaction = fragmentManager.beginTransaction()
         beginTransaction.setCustomAnimations(R.anim.slide_from_right, 0, 0, R.anim.slide_to_right)
         beginTransaction.replace(R.id.details, fragment)
@@ -266,7 +266,7 @@ class DetailsActivity : ConnectedActivity {
     }
 
     /* access modifiers changed from: protected */
-    Unit setActivityTitle(@Nullable String str, @Nullable String str2) {
+    fun setActivityTitle(@Nullable String str, @Nullable String str2): Unit {
         ActionBar supportActionBar = getSupportActionBar()
         Debug.Printf("updateTitle: title '%s' actionBar %s", str, supportActionBar)
         if (supportActionBar != null) {
@@ -276,7 +276,7 @@ class DetailsActivity : ConnectedActivity {
         setTitle(str)
     }
 
-    Boolean setCurrentDetailsArguments(Class<? : Fragment> cls, Bundle bundle) {
+    fun setCurrentDetailsArguments(Class<? : Fragment> cls, Bundle bundle): Boolean {
         Fragment findFragmentById
         FragmentManager supportFragmentManager = getSupportFragmentManager()
         if (supportFragmentManager == null || (findFragmentById = supportFragmentManager.findFragmentById(R.id.details)) == null || !cls.isInstance(findFragmentById) || !(findFragmentById instanceof ReloadableFragment) || findFragmentById.getArguments() == null) {
@@ -286,14 +286,14 @@ class DetailsActivity : ConnectedActivity {
         return true
     }
 
-    Unit setDefaultTitle(@Nullable String str, @Nullable String str2) {
+    fun setDefaultTitle(@Nullable String str, @Nullable String str2): Unit {
         this.defaultTitle = str
         this.defaultSubTitle = str2
         updateTitle()
     }
 
     @Nullable
-    Fragment showDetailsFragment(Class<? : Fragment> cls, Intent intent, Bundle bundle) {
+    fun showDetailsFragment(Class<? : Fragment> cls, Intent intent, Bundle bundle): Fragment {
         Debug.Printf("DetailsActivity: fragmentClass %s, intent %s, arguments %s", cls.toString(), intent, bundle)
         FragmentManager supportFragmentManager = getSupportFragmentManager()
         if (supportFragmentManager == null) {
@@ -345,7 +345,7 @@ class DetailsActivity : ConnectedActivity {
     /* JADX WARNING: Removed duplicated region for block: B:14:0x007c  */
     /* JADX WARNING: Removed duplicated region for block: B:18:? A[RETURN, SYNTHETIC] */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    Unit updateTitle() {
+    fun updateTitle(): Unit {
         /*
             r7 = this
             r6 = 2
@@ -411,7 +411,7 @@ class DetailsActivity : ConnectedActivity {
     }
 
     /* access modifiers changed from: protected */
-    Unit updateTitleNoDetails() {
+    fun updateTitleNoDetails(): Unit {
         if (this.defaultTitle != null) {
             setActivityTitle(this.defaultTitle, this.defaultSubTitle)
         }

@@ -22,7 +22,7 @@ class DirPopularReply : SLMessage {
 
     class QueryReplies {
         float Dwell
-        byte[] Name
+        ByteArray Name
         UUID ParcelID
     }
 
@@ -32,7 +32,7 @@ class DirPopularReply : SLMessage {
         this.QueryData_Field = QueryData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 37
         Iterator<T> it = this.QueryReplies_Fields.iterator()
         while (true) {
@@ -40,21 +40,21 @@ class DirPopularReply : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            i = ((QueryReplies) it.next()).Name.length + 17 + 4 + i2
+            i = ((it as QueryReplies).next()).Name.size + 17 + 4 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleDirPopularReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 53)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.QueryData_Field.QueryID)
-        byteBuffer.put((byte) this.QueryReplies_Fields.size())
+        byteBuffer.put((this as byte).QueryReplies_Fields.size())
         for (QueryReplies queryReplies : this.QueryReplies_Fields) {
             packUUID(byteBuffer, queryReplies.ParcelID)
             packVariable(byteBuffer, queryReplies.Name, 1)
@@ -62,11 +62,11 @@ class DirPopularReply : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             QueryReplies queryReplies = QueryReplies()
             queryReplies.ParcelID = unpackUUID(byteBuffer)
             queryReplies.Name = unpackVariable(byteBuffer, 1)

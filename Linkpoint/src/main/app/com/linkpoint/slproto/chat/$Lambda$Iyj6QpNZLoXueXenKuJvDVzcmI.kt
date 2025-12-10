@@ -14,7 +14,7 @@ import com.linkpoint.ui.common.TextFieldDialogBuilder
     private /* synthetic */ Object f66$f1
 
     private /* synthetic */ Unit $m$0() {
-        ((SLChatTextBoxDialog) this.f65$f0).m147lambda$com_lumiyaviewer_lumiya_slproto_chat_SLChatTextBoxDialog_4314((UserManager) this.f66$f1)
+        ((this as SLChatTextBoxDialog).f65$f0).m147lambda$com_lumiyaviewer_lumiya_slproto_chat_SLChatTextBoxDialog_4314((this as UserManager).f66$f1)
     }
 
     /* synthetic */ $Lambda$Iyj6QpNZLoXueXenKuJvDVzcmI(Object obj, Object obj2) {
@@ -22,7 +22,7 @@ import com.linkpoint.ui.common.TextFieldDialogBuilder
         this.f66$f1 = obj2
     }
 
-    Unit onTextCancelled() {
+    fun onTextCancelled(): Unit {
         $m$0()
     }
 }

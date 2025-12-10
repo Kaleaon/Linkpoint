@@ -53,11 +53,11 @@ class SLChatInventoryItemOfferedEvent : SLChatYesNoEvent {
     }
 
     protected SLAssetType extractAssetType(ImprovedInstantMessage improvedInstantMessage) {
-        return improvedInstantMessage.MessageBlock_Field.BinaryBucket.length >= 1 ? SLAssetType.getByType(improvedInstantMessage.MessageBlock_Field.BinaryBucket[0]) : SLAssetType.AT_UNKNOWN
+        return improvedInstantMessage.MessageBlock_Field.BinaryBucket.size >= 1 ? SLAssetType.getByType(improvedInstantMessage.MessageBlock_Field.BinaryBucket[0]) : SLAssetType.AT_UNKNOWN
     }
 
     protected UUID extractItemID(ImprovedInstantMessage improvedInstantMessage) {
-        if (improvedInstantMessage.MessageBlock_Field.BinaryBucket.length < 17) {
+        if (improvedInstantMessage.MessageBlock_Field.BinaryBucket.size < 17) {
             return null
         }
         ByteBuffer wrap = ByteBuffer.wrap(improvedInstantMessage.MessageBlock_Field.BinaryBucket)
@@ -66,15 +66,15 @@ class SLChatInventoryItemOfferedEvent : SLChatYesNoEvent {
         return UUID(wrap.getLong(), wrap.getLong())
     }
 
-    SLAssetType getAssetType() {
+    fun getAssetType(): SLAssetType {
         return this.assetType
     }
 
-    UUID getItemID() {
+    fun getItemID(): UUID {
         return this.itemID
     }
 
-    String getItemName() {
+    fun getItemName(): String {
         return this.itemName
     }
 
@@ -84,37 +84,37 @@ class SLChatInventoryItemOfferedEvent : SLChatYesNoEvent {
         return SLChatEvent.ChatMessageType.InventoryItemOffered
     }
 
-    String getNoButton(Context context) {
+    fun getNoButton(Context context): String {
         return context.getString(R.string.inv_offer_no)
     }
 
-    String getNoMessage(Context context) {
+    fun getNoMessage(Context context): String {
         return context.getString(R.string.inv_offer_declined)
     }
 
-    String getQuestion(Context context) {
+    fun getQuestion(Context context): String {
         return context.getString(R.string.inv_offer_question)
     }
 
-    String getText(Context context, @NonNull UserManager userManager) {
+    fun getText(Context context, @NonNull UserManager userManager): String {
         return context.getString(R.string.chat_inventory_other_offer_format, Object[]{this.itemName})
     }
 
-    String getYesButton(Context context) {
+    fun getYesButton(Context context): String {
         return context.getString(R.string.inv_offer_yes)
     }
 
-    String getYesMessage(Context context) {
+    fun getYesMessage(Context context): String {
         return context.getString(R.string.inv_offer_accepted)
     }
 
     /* access modifiers changed from: protected */
-    Boolean isActionMessage(@NonNull UserManager userManager) {
+    fun isActionMessage(@NonNull UserManager userManager): Boolean {
         return true
     }
 
     /* access modifiers changed from: protected */
-    Unit onNoAction(Context context, UserManager userManager) {
+    fun onNoAction(Context context, UserManager userManager): Unit {
         super.onNoAction(context, userManager)
         UUID sourceUUID = this.source.getSourceUUID()
         SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
@@ -126,7 +126,7 @@ class SLChatInventoryItemOfferedEvent : SLChatYesNoEvent {
         }
     }
 
-    Unit onOfferAccepted(Context context, UserManager userManager, UUID uuid) {
+    fun onOfferAccepted(Context context, UserManager userManager, UUID uuid): Unit {
         super.onYesAction(context, userManager)
         SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
@@ -137,13 +137,13 @@ class SLChatInventoryItemOfferedEvent : SLChatYesNoEvent {
         }
     }
 
-    Unit onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(Context context, UserManager userManager): Unit {
         if (this.dbMessage != null) {
             context.startActivity(InventoryActivity.makeSaveItemIntent(context, this.agentUUID, InventorySaveInfo(InventorySaveInfo.InventorySaveType.InventoryOffer, this.itemID, getItemName(), (UUID) null, this.assetType, this.dbMessage.getId().longValue())))
         }
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
         Integer num = null
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setOrigIMType(Integer.valueOf(this.origIMType))

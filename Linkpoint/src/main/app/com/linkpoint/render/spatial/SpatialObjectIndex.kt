@@ -202,11 +202,11 @@ class SpatialObjectIndex {
         }
     }
 
-    Unit disableIndex() {
+    fun disableIndex(): Unit {
         this.indexDisabled = true
     }
 
-    DrawableAvatar getDrawableAvatar(SLObjectInfo sLObjectInfo) {
+    fun getDrawableAvatar(SLObjectInfo sLObjectInfo): DrawableAvatar {
         return (DrawableAvatar) this.drawableStore.drawableAvatarCache.getIfPresent(sLObjectInfo)
     }
 
@@ -214,7 +214,7 @@ class SpatialObjectIndex {
         return this.objectsInFrustrum
     }
 
-    Unit requestEntryRemoval(DrawListEntry drawListEntry) {
+    fun requestEntryRemoval(DrawListEntry drawListEntry): Unit {
         if (drawListEntry instanceof DrawListObjectEntry) {
             removeObject((DrawListObjectEntry) drawListEntry)
         }
@@ -262,7 +262,7 @@ class SpatialObjectIndex {
         }
     }
 
-    Unit updateTerrainPatch(Int i, Int i2, TerrainData terrainData) {
+    fun updateTerrainPatch(Int i, Int i2, TerrainData terrainData): Unit {
         synchronized (this.terrainLock) {
             this.terrainDirty.put(Int.valueOf((i2 * 16) + i), terrainData)
         }

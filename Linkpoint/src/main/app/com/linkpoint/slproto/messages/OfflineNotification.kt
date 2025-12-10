@@ -17,27 +17,27 @@ class OfflineNotification : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.AgentBlock_Fields.size() * 16) + 5
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleOfflineNotification(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 67)
-        byteBuffer.put((Byte) this.AgentBlock_Fields.size())
+        byteBuffer.put((this as Byte).AgentBlock_Fields.size())
         for (AgentBlock agentBlock : this.AgentBlock_Fields) {
             packUUID(byteBuffer, agentBlock.AgentID)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             AgentBlock agentBlock = AgentBlock()
             agentBlock.AgentID = unpackUUID(byteBuffer)
             this.AgentBlock_Fields.add(agentBlock)

@@ -16,15 +16,15 @@ class MuteListUpdate : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.MuteData_Field.Filename.length + 17 + 4
+    fun CalcPayloadSize(): Int {
+        return this.MuteData_Field.Filename.size + 17 + 4
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleMuteListUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 62)
@@ -32,7 +32,7 @@ class MuteListUpdate : SLMessage {
         packVariable(byteBuffer, this.MuteData_Field.Filename, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.MuteData_Field.AgentID = unpackUUID(byteBuffer)
         this.MuteData_Field.Filename = unpackVariable(byteBuffer, 1)
     }

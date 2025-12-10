@@ -27,35 +27,35 @@ class AgentWearablesUpdate : SLMessage {
         this.AgentData_Field = AgentData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         return (this.WearableData_Fields.size() * 33) + 41
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAgentWearablesUpdate(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 126)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packInt(byteBuffer, this.AgentData_Field.SerialNum)
-        byteBuffer.put((byte) this.WearableData_Fields.size())
+        byteBuffer.put((this as byte).WearableData_Fields.size())
         for (WearableData wearableData : this.WearableData_Fields) {
             packUUID(byteBuffer, wearableData.ItemID)
             packUUID(byteBuffer, wearableData.AssetID)
-            packByte(byteBuffer, (byte) wearableData.WearableType)
+            packByte(byteBuffer, (wearableData as byte).WearableType)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.SerialNum = unpackInt(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             WearableData wearableData = WearableData()
             wearableData.ItemID = unpackUUID(byteBuffer)
             wearableData.AssetID = unpackUUID(byteBuffer)

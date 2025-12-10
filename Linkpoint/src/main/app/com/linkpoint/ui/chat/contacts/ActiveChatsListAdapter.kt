@@ -69,7 +69,7 @@ class ActiveChatsListAdapter : BaseAdapter : Closeable, DismissableAdapter {
             this(chatterID2)
         }
 
-        Unit buildView(Context context, ChatterItemViewBuilder chatterItemViewBuilder, UserManager userManager) {
+        fun buildView(Context context, ChatterItemViewBuilder chatterItemViewBuilder, UserManager userManager): Unit {
             Boolean z = false
             StringBuilder sb = StringBuilder(context.getString(R.string.local_chat_item_title))
             if (ActiveChatsListAdapter.this.currentLocationInfo != null) {
@@ -93,20 +93,20 @@ class ActiveChatsListAdapter : BaseAdapter : Closeable, DismissableAdapter {
             chatterItemViewBuilder.setVoiceActive(z)
         }
 
-        ChatterID getChatterID(UserManager userManager) {
+        fun getChatterID(UserManager userManager): ChatterID {
             return this.chatterID
         }
 
         @Nullable
-        String getDisplayName() {
+        fun getDisplayName(): String {
             return ActiveChatsListAdapter.this.context.getString(R.string.local_chat_item_title)
         }
 
-        Unit setUnreadInfo(UnreadMessageInfo unreadMessageInfo2) {
+        fun setUnreadInfo(UnreadMessageInfo unreadMessageInfo2): Unit {
             this.unreadMessageInfo = unreadMessageInfo2
         }
 
-        Unit setVoiceChatInfo(VoiceChatInfo voiceChatInfo2) {
+        fun setVoiceChatInfo(VoiceChatInfo voiceChatInfo2): Unit {
             this.voiceChatInfo = voiceChatInfo2
         }
     }
@@ -114,7 +114,7 @@ class ActiveChatsListAdapter : BaseAdapter : Closeable, DismissableAdapter {
     private class OnlineFriendsHeaderRow {
         private Boolean isAnyoneOnline = false
 
-        View getView(LayoutInflater layoutInflater, View view, ViewGroup viewGroup) {
+        fun getView(LayoutInflater layoutInflater, View view, ViewGroup viewGroup): View {
             View view2 = null
             Int i = this.isAnyoneOnline ? R.id.list_header_title : R.id.list_header_small_title
             Int i2 = this.isAnyoneOnline ? R.layout.list_header : R.layout.list_header_small
@@ -124,11 +124,11 @@ class ActiveChatsListAdapter : BaseAdapter : Closeable, DismissableAdapter {
             if (view2 == null) {
                 view2 = layoutInflater.inflate(i2, viewGroup, false)
             }
-            ((TextView) view2.findViewById(i)).setText(this.isAnyoneOnline ? R.string.friends_online_caption : R.string.no_friends_online_caption)
+            ((view2 as TextView).findViewById(i)).setText(this.isAnyoneOnline ? R.string.friends_online_caption : R.string.no_friends_online_caption)
             return view2
         }
 
-        Unit setAnyoneOnline(Boolean z) {
+        fun setAnyoneOnline(Boolean z): Unit {
             this.isAnyoneOnline = z
         }
     }
@@ -431,15 +431,17 @@ Method generation error in method: com.linkpoint.ui.chat.contacts.-$Lambda$6auIi
 
     }
 
-    Boolean areAllItemsEnabled() {
+    fun areAllItemsEnabled(): Boolean {
         return false
     }
 
-    Boolean canDismiss(Int i) {
+    fun canDismiss(Int i): Boolean {
         return i > 0 && i <= this.activeChatters.size()
     }
 
-    Unit close() throws IOException {
+    @Throws(IOException::class)
+
+    fun close() {
         this.activeChattersSubscription.unsubscribe()
         this.onlineFriendsSubscription.unsubscribe()
         this.currentLocationInfoSubscription.unsubscribe()
@@ -447,11 +449,11 @@ Method generation error in method: com.linkpoint.ui.chat.contacts.-$Lambda$6auIi
         this.localVoiceChatSubscription.unsubscribe()
     }
 
-    Int getCount() {
+    fun getCount(): Int {
         return this.activeChatters.size() + 1 + 1 + this.onlineFriends.size()
     }
 
-    Any getItem(Int i) {
+    fun getItem(Int i): Any {
         Int size = this.activeChatters.size()
         if (i == 0) {
             return this.localChatItem
@@ -468,15 +470,15 @@ Method generation error in method: com.linkpoint.ui.chat.contacts.-$Lambda$6auIi
         return null
     }
 
-    Long getItemId(Int i) {
+    fun getItemId(Int i): Long {
         return 0
     }
 
-    Int getItemViewType(Int i) {
+    fun getItemViewType(Int i): Int {
         return i == this.activeChatters.size() + 1 ? 1 : 0
     }
 
-    View getView(Int i, View view, ViewGroup viewGroup) {
+    fun getView(Int i, View view, ViewGroup viewGroup): View {
         Any item = getItem(i)
         if (item == this.onlineFriendsHeader) {
             return this.onlineFriendsHeader.getView(this.inflater, view, viewGroup)
@@ -493,19 +495,19 @@ Method generation error in method: com.linkpoint.ui.chat.contacts.-$Lambda$6auIi
         return view2
     }
 
-    Int getViewTypeCount() {
+    fun getViewTypeCount(): Int {
         return 2
     }
 
-    Boolean hasStableIds() {
+    fun hasStableIds(): Boolean {
         return false
     }
 
-    Boolean isEmpty() {
+    fun isEmpty(): Boolean {
         return false
     }
 
-    Boolean isEnabled(Int i) {
+    fun isEnabled(Int i): Boolean {
         return i != this.activeChatters.size() + 1
     }
 
@@ -546,7 +548,7 @@ Method generation error in method: com.linkpoint.ui.chat.contacts.-$Lambda$6auIi
         notifyDataSetChanged()
     }
 
-    Unit onDismiss(Int i) {
+    fun onDismiss(Int i): Unit {
         ChatterID chatterID
         Any item = getItem(i)
         if ((item instanceof ChatterDisplayInfo) && (chatterID = ((ChatterDisplayInfo) item).getChatterID(this.userManager)) != null) {

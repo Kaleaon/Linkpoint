@@ -20,7 +20,7 @@ class TerrainPatchInfo {
         return this.heightMap.hashCode() + this.textures.hashCode() + this.layerMask + Arrays.hashCode(this.textureHeightMap)
     }
 
-    Boolean equals(Any obj) {
+    fun equals(Any obj): Boolean {
         if (!(obj instanceof TerrainPatchInfo)) {
             return false
         }
@@ -31,31 +31,31 @@ class TerrainPatchInfo {
         return Arrays.equals(this.textureHeightMap, terrainPatchInfo.textureHeightMap)
     }
 
-    TerrainPatchHeightMap getHeightMap() {
+    fun getHeightMap(): TerrainPatchHeightMap {
         return this.heightMap
     }
 
-    Int getLayerMask() {
+    fun getLayerMask(): Int {
         return this.layerMask
     }
 
-    Float getMaxHeight() {
+    fun getMaxHeight(): Float {
         return this.heightMap.getMaxHeight()
     }
 
-    Float getMinHeight() {
+    fun getMinHeight(): Float {
         return this.heightMap.getMinHeight()
     }
 
-    FloatArray getTextureHeightMap() {
+    fun getTextureHeightMap(): FloatArray {
         return this.textureHeightMap
     }
 
-    TerrainTextures getTextures() {
+    fun getTextures(): TerrainTextures {
         return this.textures
     }
 
-    Int hashCode() {
+    fun hashCode(): Int {
         return this.hashCode
     }
 }

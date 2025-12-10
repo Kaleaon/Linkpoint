@@ -27,7 +27,7 @@ class DrawableFaceTexture : ResourceConsumer, GLCleanable {
         this.hasAlphaLayer = false
     }
 
-    Boolean GLDraw(RenderContext renderContext) {
+    fun GLDraw(RenderContext renderContext): Boolean {
         GLLoadedTexture gLLoadedTexture = this.loadedTexture
         gLLoadedTexture?.GLDraw()
             return true

@@ -15,18 +15,18 @@ import java.util.UUID
 import androidx.annotation.Nullable
 
 class AvatarPickerForMute : AvatarPickerFragment {
-    Bundle makeArguments(UUID uuid) {
+    fun makeArguments(UUID uuid): Bundle {
         Bundle bundle = Bundle()
         ActivityUtils.setActiveAgentID(bundle, uuid)
         return bundle
     }
 
-    String getTitle() {
+    fun getTitle(): String {
         return getString(R.string.select_avatar_to_mute)
     }
 
     /* access modifiers changed from: protected */
-    Unit onAvatarSelected(ChatterID chatterID, @Nullable String str) {
+    fun onAvatarSelected(ChatterID chatterID, @Nullable String str): Unit {
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
             SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()

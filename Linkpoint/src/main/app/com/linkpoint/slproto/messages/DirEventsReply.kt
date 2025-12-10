@@ -22,10 +22,10 @@ class DirEventsReply : SLMessage {
     }
 
     class QueryReplies {
-        byte[] Date
+        ByteArray Date
         Int EventFlags
         Int EventID
-        byte[] Name
+        ByteArray Name
         UUID OwnerID
         Int UnixTime
     }
@@ -40,7 +40,7 @@ class DirEventsReply : SLMessage {
         this.QueryData_Field = QueryData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 37
         Iterator<T> it = this.QueryReplies_Fields.iterator()
         while (true) {
@@ -48,22 +48,22 @@ class DirEventsReply : SLMessage {
             if (!it.hasNext()) {
                 return i2 + 1 + (this.StatusData_Fields.size() * 4)
             }
-            QueryReplies queryReplies = (QueryReplies) it.next()
-            i = queryReplies.Date.length + queryReplies.Name.length + 17 + 4 + 1 + 4 + 4 + i2
+            QueryReplies queryReplies = (it as QueryReplies).next()
+            i = queryReplies.Date.size + queryReplies.Name.size + 17 + 4 + 1 + 4 + 4 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleDirEventsReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 37)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.QueryData_Field.QueryID)
-        byteBuffer.put((byte) this.QueryReplies_Fields.size())
+        byteBuffer.put((this as byte).QueryReplies_Fields.size())
         for (QueryReplies queryReplies : this.QueryReplies_Fields) {
             packUUID(byteBuffer, queryReplies.OwnerID)
             packVariable(byteBuffer, queryReplies.Name, 1)
@@ -72,17 +72,17 @@ class DirEventsReply : SLMessage {
             packInt(byteBuffer, queryReplies.UnixTime)
             packInt(byteBuffer, queryReplies.EventFlags)
         }
-        byteBuffer.put((byte) this.StatusData_Fields.size())
+        byteBuffer.put((this as byte).StatusData_Fields.size())
         for (StatusData statusData : this.StatusData_Fields) {
             packInt(byteBuffer, statusData.Status)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             QueryReplies queryReplies = QueryReplies()
             queryReplies.OwnerID = unpackUUID(byteBuffer)
             queryReplies.Name = unpackVariable(byteBuffer, 1)
@@ -93,7 +93,7 @@ class DirEventsReply : SLMessage {
             this.QueryReplies_Fields.add(queryReplies)
         }
         byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b2; i2++) {
+        for (i2 in 0 until b2) {
             StatusData statusData = StatusData()
             statusData.Status = unpackInt(byteBuffer)
             this.StatusData_Fields.add(statusData)

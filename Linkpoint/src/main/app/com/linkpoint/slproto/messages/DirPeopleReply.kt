@@ -22,9 +22,9 @@ class DirPeopleReply : SLMessage {
 
     class QueryReplies {
         UUID AgentID
-        byte[] FirstName
-        byte[] Group
-        byte[] LastName
+        ByteArray FirstName
+        ByteArray Group
+        ByteArray LastName
         Boolean Online
         Int Reputation
     }
@@ -35,7 +35,7 @@ class DirPeopleReply : SLMessage {
         this.QueryData_Field = QueryData()
     }
 
-    Int CalcPayloadSize() {
+    fun CalcPayloadSize(): Int {
         Int i = 37
         Iterator<T> it = this.QueryReplies_Fields.iterator()
         while (true) {
@@ -43,22 +43,22 @@ class DirPeopleReply : SLMessage {
             if (!it.hasNext()) {
                 return i2
             }
-            QueryReplies queryReplies = (QueryReplies) it.next()
-            i = queryReplies.Group.length + queryReplies.FirstName.length + 17 + 1 + queryReplies.LastName.length + 1 + 1 + 4 + i2
+            QueryReplies queryReplies = (it as QueryReplies).next()
+            i = queryReplies.Group.size + queryReplies.FirstName.size + 17 + 1 + queryReplies.LastName.size + 1 + 1 + 4 + i2
         }
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleDirPeopleReply(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 36)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.QueryData_Field.QueryID)
-        byteBuffer.put((byte) this.QueryReplies_Fields.size())
+        byteBuffer.put((this as byte).QueryReplies_Fields.size())
         for (QueryReplies queryReplies : this.QueryReplies_Fields) {
             packUUID(byteBuffer, queryReplies.AgentID)
             packVariable(byteBuffer, queryReplies.FirstName, 1)
@@ -69,11 +69,11 @@ class DirPeopleReply : SLMessage {
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             QueryReplies queryReplies = QueryReplies()
             queryReplies.AgentID = unpackUUID(byteBuffer)
             queryReplies.FirstName = unpackVariable(byteBuffer, 1)

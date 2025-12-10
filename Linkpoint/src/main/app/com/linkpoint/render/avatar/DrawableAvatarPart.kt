@@ -59,7 +59,7 @@ class DrawableAvatarPart : ResourceConsumer {
         PrimComputeExecutor.getInstance().execute(this.meshUpdate)
     }
 
-    Unit GLDraw(RenderContext renderContext, FloatArray fArr, Boolean z) {
+    fun GLDraw(RenderContext renderContext, FloatArray fArr, Boolean z): Unit {
         SLAnimatedMeshData sLAnimatedMeshData
         DrawableFaceTexture drawableFaceTexture
         if (renderContext.hasGL20) {
@@ -100,7 +100,7 @@ class DrawableAvatarPart : ResourceConsumer {
         return this.faceIndex
     }
 
-    Unit setPartMorphParams(FloatArray fArr) {
+    fun setPartMorphParams(FloatArray fArr): Unit {
         Int equals
         synchronized (this.updateLock) {
             equals = Arrays == this.partMorphParams, fArr ^ 1
@@ -117,7 +117,7 @@ class DrawableAvatarPart : ResourceConsumer {
     /* DevToolsApp WARNING: Missing block: B:31:0x0065, code:
             return
      */
-    Unit setTexture(com.linkpoint.render.glres.textures.GLTextureCache glTextureCache, UUID textureUUID) {
+    fun setTexture(com.linkpoint.render.glres.textures.GLTextureCache glTextureCache, UUID textureUUID): Unit {
         synchronized (this.updateLock) {
             // Log texture change for debugging
             Debug.Printf("Avatar: face %s texture %s", 

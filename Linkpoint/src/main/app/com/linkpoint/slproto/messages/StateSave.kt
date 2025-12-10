@@ -22,15 +22,15 @@ class StateSave : SLMessage {
         this.zeroCoded = false
     }
 
-    Int CalcPayloadSize() {
-        return this.DataBlock_Field.Filename.length + 1 + 36
+    fun CalcPayloadSize(): Int {
+        return this.DataBlock_Field.Filename.size + 1 + 36
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleStateSave(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.DEL)
@@ -39,7 +39,7 @@ class StateSave : SLMessage {
         packVariable(byteBuffer, this.DataBlock_Field.Filename, 1)
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.DataBlock_Field.Filename = unpackVariable(byteBuffer, 1)

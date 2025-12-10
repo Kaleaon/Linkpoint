@@ -16,11 +16,11 @@ class TextFieldDialogBuilder {
     private val title: String = null
 
     interface OnTextCancelledListener {
-        Unit onTextCancelled()
+        fun onTextCancelled()
     }
 
     interface OnTextEnteredListener {
-        Unit onTextEntered(String str)
+        fun onTextEntered(String str)
     }
 
     TextFieldDialogBuilder(Context context2) {
@@ -45,27 +45,27 @@ class TextFieldDialogBuilder {
         }
     }
 
-    TextFieldDialogBuilder setDefaultText(String str) {
+    fun setDefaultText(String str): TextFieldDialogBuilder {
         this.defaultText = str
         return this
     }
 
-    TextFieldDialogBuilder setOnTextCancelledListener(OnTextCancelledListener onTextCancelledListener) {
+    fun setOnTextCancelledListener(OnTextCancelledListener onTextCancelledListener): TextFieldDialogBuilder {
         this.cancelledListener = onTextCancelledListener
         return this
     }
 
-    TextFieldDialogBuilder setOnTextEnteredListener(OnTextEnteredListener onTextEnteredListener) {
+    fun setOnTextEnteredListener(OnTextEnteredListener onTextEnteredListener): TextFieldDialogBuilder {
         this.listener = onTextEnteredListener
         return this
     }
 
-    TextFieldDialogBuilder setTitle(String str) {
+    fun setTitle(String str): TextFieldDialogBuilder {
         this.title = str
         return this
     }
 
-    Unit show() {
+    fun show(): Unit {
         AlertDialog.Builder builder = AlertDialog.Builder(this.context)
         builder.setTitle(this.title)
         EditText editText = EditText(this.context)

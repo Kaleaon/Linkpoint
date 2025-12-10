@@ -11,14 +11,14 @@ import com.linkpoint.react.Subscription
     private /* synthetic */ Any f484$f0
 
     private /* synthetic */ Unit $m$0(Any obj) {
-        ((TouchableObjectsFragment) this.f484$f0).m691com_lumiyaviewer_lumiya_ui_objects_TouchableObjectsFragmentmthref0((ImmutableList) obj)
+        ((this as TouchableObjectsFragment).f484$f0).m691com_lumiyaviewer_lumiya_ui_objects_TouchableObjectsFragmentmthref0((ImmutableList) obj)
     }
 
     /* synthetic */ $Lambda$LilZ3G1QEr_14fK4lPNJzUyzlBg(Any obj) {
         this.f484$f0 = obj
     }
 
-    Unit onData(Any obj) {
+    fun onData(Any obj): Unit {
         $m$0(obj)
     }
 }

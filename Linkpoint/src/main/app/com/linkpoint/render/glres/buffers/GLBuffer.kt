@@ -11,7 +11,7 @@ class GLBuffer : GLResource {
     /* access modifiers changed from: private */
     ThreadLocal<IntArray> idBuffer = ThreadLocal<IntArray>() {
         /* access modifiers changed from: protected */
-        IntArray initialValue() {
+        fun initialValue(): IntArray {
             return IntArray(1)
         }
     }

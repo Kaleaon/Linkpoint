@@ -67,7 +67,7 @@ class WebRTCManager {
     /**
      * Enable voice communication
      */
-    CompletableFuture<Boolean> enableVoice() {
+    fun enableVoice(): CompletableFuture<Boolean> {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 if (!voiceEnabled) {
@@ -92,7 +92,7 @@ class WebRTCManager {
     /**
      * Connect to voice channel (e.g., spatial voice, group voice)
      */
-    CompletableFuture<Boolean> connectToVoiceChannel(String channelId, String signalingServer) {
+    fun connectToVoiceChannel(String channelId, String signalingServer): CompletableFuture<Boolean> {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 Log.i(TAG, "Connecting to voice channel: " + channelId)
@@ -125,7 +125,7 @@ class WebRTCManager {
     /**
      * Disconnect from current voice channel
      */
-    CompletableFuture<Boolean> disconnectFromVoiceChannel() {
+    fun disconnectFromVoiceChannel(): CompletableFuture<Boolean> {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 if (peerConnection != null) {
@@ -154,7 +154,7 @@ class WebRTCManager {
     /**
      * Create offer for outgoing voice call (mock implementation)
      */
-    CompletableFuture<MockSessionDescription> createOffer() {
+    fun createOffer(): CompletableFuture<MockSessionDescription> {
         return CompletableFuture.supplyAsync(() -> {
             if (peerConnection != null) {
                 // Mock SDP offer creation
@@ -173,7 +173,7 @@ class WebRTCManager {
     /**
      * Handle incoming answer (mock implementation)
      */
-    CompletableFuture<Boolean> setRemoteDescription(MockSessionDescription answer) {
+    fun setRemoteDescription(MockSessionDescription answer): CompletableFuture<Boolean> {
         return CompletableFuture.supplyAsync(() -> {
             if (peerConnection != null) {
                 Log.d(TAG, "Mock remote description set")
@@ -212,7 +212,7 @@ class WebRTCManager {
         return isConnected
     }
     
-    String getCurrentVoiceChannel() {
+    fun getCurrentVoiceChannel(): String {
         return currentVoiceChannel
     }
     

@@ -64,7 +64,7 @@ class HybridSLTransport {
     /**
      * Send message using optimal transport route
      */
-    CompletableFuture<SLResponse> sendMessage(ModernMessage message) {
+    fun sendMessage(ModernMessage message): CompletableFuture<SLResponse> {
         TransportRoute route = router.selectOptimalRoute(message)
         
         Log.d(TAG, "Routing message via " + route.getTransport() + ": " + message.getClass().getSimpleName())
@@ -260,7 +260,7 @@ class HybridSLTransport {
             this.timestamp = System.currentTimeMillis()
         }
         
-        String getType() {
+        fun getType(): String {
             return type
         }
         
@@ -276,7 +276,7 @@ class HybridSLTransport {
         /**
          * Convert message to JSON format for WebSocket transport
          */
-        String toJSON() {
+        fun toJSON(): String {
             return String.format("{\"type\":\"%s\",\"timestamp\":%d,\"data\":%s}", 
                                type, timestamp, getMessageDataJSON())
         }
@@ -301,8 +301,8 @@ class HybridSLTransport {
     /**
      * Upload asset with progress tracking
      */
-    CompletableFuture<String> uploadAsset(byte[] assetData, String contentType, 
-                                                HTTP2CapsClient.ProgressListener progressListener) {
+    fun uploadAsset(byte[] assetData, String contentType, 
+                                                HTTP2CapsClient.ProgressListener progressListener): CompletableFuture<String> {
         try {
             // Get actual upload URL from CAPS
             String uploadUrl = capsClient.getCapability("NewFileAgentInventory");
@@ -348,7 +348,7 @@ class HybridSLTransport {
      */
     private class MessageRouter {
         
-        TransportRoute selectOptimalRoute(ModernMessage message) {
+        fun selectOptimalRoute(ModernMessage message): TransportRoute {
             // Basic routing logic - can be enhanced based on message type
             String messageType = message.getClass().getSimpleName()
             
@@ -381,11 +381,11 @@ class HybridSLTransport {
             this.url = url
         }
         
-        TransportType getTransport() {
+        fun getTransport(): TransportType {
             return transport
         }
         
-        String getUrl() {
+        fun getUrl(): String {
             return url
         }
     }
@@ -411,11 +411,11 @@ class HybridSLTransport {
             this.data = data
         }
         
-        String getType() {
+        fun getType(): String {
             return type
         }
         
-        String getData() {
+        fun getData(): String {
             return data
         }
     }

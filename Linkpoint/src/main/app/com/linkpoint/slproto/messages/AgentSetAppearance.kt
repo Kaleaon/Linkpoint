@@ -21,7 +21,7 @@ class AgentSetAppearance : SLMessage {
     }
 
     class ObjectData {
-        byte[] TextureEntry
+        ByteArray TextureEntry
     }
 
     class VisualParam {
@@ -39,15 +39,15 @@ class AgentSetAppearance : SLMessage {
         this.ObjectData_Field = ObjectData()
     }
 
-    Int CalcPayloadSize() {
-        return (this.WearableData_Fields.size() * 17) + 53 + this.ObjectData_Field.TextureEntry.length + 2 + 1 + (this.VisualParam_Fields.size() * 1)
+    fun CalcPayloadSize(): Int {
+        return (this.WearableData_Fields.size() * 17) + 53 + this.ObjectData_Field.TextureEntry.size + 2 + 1 + (this.VisualParam_Fields.size() * 1)
     }
 
-    Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler): Unit {
         sLMessageHandler.HandleAgentSetAppearance(this)
     }
 
-    Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer): Unit {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 84)
@@ -55,25 +55,25 @@ class AgentSetAppearance : SLMessage {
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
         packInt(byteBuffer, this.AgentData_Field.SerialNum)
         packLLVector3(byteBuffer, this.AgentData_Field.Size)
-        byteBuffer.put((byte) this.WearableData_Fields.size())
+        byteBuffer.put((this as byte).WearableData_Fields.size())
         for (WearableData wearableData : this.WearableData_Fields) {
             packUUID(byteBuffer, wearableData.CacheID)
-            packByte(byteBuffer, (byte) wearableData.TextureIndex)
+            packByte(byteBuffer, (wearableData as byte).TextureIndex)
         }
         packVariable(byteBuffer, this.ObjectData_Field.TextureEntry, 2)
-        byteBuffer.put((byte) this.VisualParam_Fields.size())
+        byteBuffer.put((this as byte).VisualParam_Fields.size())
         for (VisualParam visualParam : this.VisualParam_Fields) {
-            packByte(byteBuffer, (byte) visualParam.ParamValue)
+            packByte(byteBuffer, (visualParam as byte).ParamValue)
         }
     }
 
-    Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.SerialNum = unpackInt(byteBuffer)
         this.AgentData_Field.Size = unpackLLVector3(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i = 0; i < b; i++) {
+        for (i in 0 until b) {
             WearableData wearableData = WearableData()
             wearableData.CacheID = unpackUUID(byteBuffer)
             wearableData.TextureIndex = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
@@ -81,7 +81,7 @@ class AgentSetAppearance : SLMessage {
         }
         this.ObjectData_Field.TextureEntry = unpackVariable(byteBuffer, 2)
         byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE
-        for (Int i2 = 0; i2 < b2; i2++) {
+        for (i2 in 0 until b2) {
             VisualParam visualParam = VisualParam()
             visualParam.ParamValue = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
             this.VisualParam_Fields.add(visualParam)

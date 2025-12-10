@@ -28,37 +28,37 @@ class SLChatLureRequestEvent : SLChatYesNoEvent {
         return SLChatEvent.ChatMessageType.LureRequest
     }
 
-    String getNoButton(Context context) {
+    fun getNoButton(Context context): String {
         return context.getString(R.string.teleport_lure_request_no)
     }
 
-    String getNoMessage(Context context) {
+    fun getNoMessage(Context context): String {
         return context.getString(R.string.teleport_lure_request_declined)
     }
 
-    String getQuestion(Context context) {
+    fun getQuestion(Context context): String {
         return context.getString(R.string.teleport_lure_request_question)
     }
 
-    String getText(Context context, @NonNull UserManager userManager) {
+    fun getText(Context context, @NonNull UserManager userManager): String {
         String string = context.getString(R.string.teleport_lure_request_message)
         return !Strings.isNullOrEmpty(this.text) ? string + ": " + this.text : string + "."
     }
 
-    String getYesButton(Context context) {
+    fun getYesButton(Context context): String {
         return context.getString(R.string.teleport_lure_request_yes)
     }
 
-    String getYesMessage(Context context) {
+    fun getYesMessage(Context context): String {
         return context.getString(R.string.teleport_lure_request_accepted)
     }
 
     /* access modifiers changed from: protected */
-    Boolean isActionMessage(@NonNull UserManager userManager) {
+    fun isActionMessage(@NonNull UserManager userManager): Boolean {
         return true
     }
 
-    Unit onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(Context context, UserManager userManager): Unit {
         super.onYesAction(context, userManager)
         UUID sourceUUID = this.source.getSourceUUID()
         SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
@@ -71,7 +71,7 @@ class SLChatLureRequestEvent : SLChatYesNoEvent {
         }
     }
 
-    Unit serializeToDatabaseObject(@NonNull ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

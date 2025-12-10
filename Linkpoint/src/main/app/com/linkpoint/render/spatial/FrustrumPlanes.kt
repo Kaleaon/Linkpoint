@@ -47,7 +47,7 @@ class FrustrumPlanes {
 
     private fun planeDistance(i: Int, i2: Int, fArr: FloatArray): Float {
         Float f = 0.0f
-        for (Int i3 = 0; i3 < 3; i3++) {
+        for (i3 in 0 until 3) {
             f += this.params[i + i3] * fArr[this.pnIndex[i2 + i3]]
         }
         return this.params[i + 3] + f
@@ -56,7 +56,7 @@ class FrustrumPlanes {
     fun testBoundingBox(fArr: FloatArray, fArr2: FloatArray): Int {
         Int i = 0
         Int i2 = 0
-        for (Int i3 = 0; i3 < 6; i3++) {
+        for (i3 in 0 until 6) {
             if (planeDistance(i2, i, fArr) < 0.0f) {
                 return -1
             }

@@ -9,7 +9,7 @@ import android.content.DialogInterface
         dialogInterface.dismiss()
     }
 
-    Unit onClick(DialogInterface dialogInterface, Int i) {
+    fun onClick(DialogInterface dialogInterface, Int i): Unit {
         $m$0(dialogInterface, i)
     }
 }

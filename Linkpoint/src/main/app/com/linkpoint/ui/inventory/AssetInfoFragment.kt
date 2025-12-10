@@ -158,7 +158,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$OIe5MtmKy
         return ((CheckBox) dialog.findViewById(i3)).isChecked() ? i4 | 8192 : i4
     }
 
-    Bundle makeSelection(UUID uuid, UUID uuid2) {
+    fun makeSelection(UUID uuid, UUID uuid2): Bundle {
         Bundle bundle = Bundle()
         if (uuid != null) {
             bundle.putString("activeAgentUUID", uuid.toString())
@@ -496,7 +496,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$OIe5MtmKy
         dialog.dismiss()
     }
 
-    Unit onClick(View view) {
+    fun onClick(View view): Unit {
         SLInventoryEntry data = this.entrySubscription.getData()
         if (data != null) {
             switch (view.getId()) {
@@ -543,12 +543,12 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$OIe5MtmKy
         }
     }
 
-    Unit onCreate(@Nullable Bundle bundle) {
+    fun onCreate(@Nullable Bundle bundle): Unit {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    Unit onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater): Unit {
         menuInflater.inflate(R.menu.inventory_item_menu, menu)
         this.menuItemDelete = menu.findItem(R.id.inventory_item_delete_item)
         this.menuItemRename = menu.findItem(R.id.inventory_item_rename_item)
@@ -558,7 +558,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$OIe5MtmKy
         updateMenuItems()
     }
 
-    View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
+    fun onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle): View {
         super.onCreateView(layoutInflater, viewGroup, bundle)
         View inflate = layoutInflater.inflate(R.layout.asset_info, viewGroup, false)
         ((LoadingLayout) inflate.findViewById(R.id.loading_layout)).setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout))
@@ -579,7 +579,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$OIe5MtmKy
         return inflate
     }
 
-    Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged(): Unit {
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         try {
             showEntryInfo(this.entrySubscription.get())
@@ -593,7 +593,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$OIe5MtmKy
         }
     }
 
-    Boolean onOptionsItemSelected(MenuItem menuItem) {
+    fun onOptionsItemSelected(MenuItem menuItem): Boolean {
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
             try {
@@ -706,22 +706,22 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$OIe5MtmKy
         return super.onOptionsItemSelected(menuItem)
     }
 
-    Unit onPrepareOptionsMenu(Menu menu) {
+    fun onPrepareOptionsMenu(Menu menu): Unit {
         super.onPrepareOptionsMenu(menu)
         updateMenuItems()
     }
 
-    Unit onStart() {
+    fun onStart(): Unit {
         super.onStart()
         showEntry(UUIDPool.getUUID(getArguments().getString(ITEM_UUID_KEY)))
     }
 
-    Unit onStop() {
+    fun onStop(): Unit {
         showEntry((UUID) null)
         super.onStop()
     }
 
-    Unit setFragmentArgs(Intent intent, Bundle bundle) {
+    fun setFragmentArgs(Intent intent, Bundle bundle): Unit {
         UUID activeAgentID = ActivityUtils.getActiveAgentID(intent)
         if (activeAgentID != null) {
             getArguments().putString("activeAgentUUID", activeAgentID.toString())

@@ -26,7 +26,7 @@ class PickDescriptionEditFragment : TextFieldEditFragment {
         return (AvatarPickKey) arguments.getParcelable(AVATAR_PICK_KEY)
     }
 
-    Bundle makeSelection(ChatterID chatterID, AvatarPickKey avatarPickKey) {
+    fun makeSelection(ChatterID chatterID, AvatarPickKey avatarPickKey): Bundle {
         Bundle makeSelection = ChatterFragment.makeSelection(chatterID)
         makeSelection.putParcelable(AVATAR_PICK_KEY, avatarPickKey)
         return makeSelection
@@ -34,19 +34,19 @@ class PickDescriptionEditFragment : TextFieldEditFragment {
 
     /* access modifiers changed from: private */
     /* renamed from: onPickInfoReply */
-    Unit m506com_lumiyaviewer_lumiya_ui_chat_profiles_PickDescriptionEditFragmentmthref0(PickInfoReply pickInfoReply) {
+    fun m506com_lumiyaviewer_lumiya_ui_chat_profiles_PickDescriptionEditFragmentmthref0(PickInfoReply pickInfoReply): Unit {
         if (pickInfoReply != null) {
             setOriginalText(SLMessage.stringFromVariableUTF(pickInfoReply.Data_Field.Desc))
         }
     }
 
     /* access modifiers changed from: protected */
-    String getFieldHint(Context context) {
+    fun getFieldHint(Context context): String {
         return getString(R.string.pick_description_edit_hint)
     }
 
     /* access modifiers changed from: protected */
-    Unit onShowUser(@Nullable ChatterID chatterID) {
+    fun onShowUser(@Nullable ChatterID chatterID): Unit {
         AvatarPickKey pickKey = getPickKey()
         if (this.userManager == null || !(chatterID instanceof ChatterID.ChatterIDUser) || pickKey == null) {
             this.pickInfo.unsubscribe()
@@ -56,7 +56,7 @@ class PickDescriptionEditFragment : TextFieldEditFragment {
     }
 
     /* access modifiers changed from: protected */
-    Unit saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str) {
+    fun saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str): Unit {
         AvatarPickKey pickKey = getPickKey()
         PickInfoReply data = this.pickInfo.getData()
         if (sLAgentCircuit != null && pickKey != null && data != null) {

@@ -51,7 +51,7 @@ class GroupManager {
     /* access modifiers changed from: private */
     SubscriptionPool<GroupRoleMembersQuery, LazyList<GroupRoleMember>> groupRoleMemberSubscriptionPool = SubscriptionPool<>()
     private OnListUpdated onGroupListUpdated = OnListUpdated() {
-        Unit onListUpdated() {
+        fun onListUpdated(): Unit {
             GroupManager.this.chatterList.notifyListUpdated(ChatterListType.Groups)
         }
     }
@@ -60,7 +60,7 @@ class GroupManager {
     private UserManager userManager
 
     abstract class GroupMemberRolesQuery {
-        GroupMemberRolesQuery create(UUID uuid, UUID uuid2, UUID uuid3) {
+        fun create(UUID uuid, UUID uuid2, UUID uuid3): GroupMemberRolesQuery {
             return AutoValue_GroupManager_GroupMemberRolesQuery(uuid, uuid2, uuid3)
         }
 
@@ -72,7 +72,7 @@ class GroupManager {
     }
 
     abstract class GroupMembersQuery {
-        GroupMembersQuery create(UUID uuid, UUID uuid2) {
+        fun create(UUID uuid, UUID uuid2): GroupMembersQuery {
             return AutoValue_GroupManager_GroupMembersQuery(uuid, uuid2)
         }
 
@@ -82,7 +82,7 @@ class GroupManager {
     }
 
     abstract class GroupRoleMembersQuery {
-        GroupRoleMembersQuery create(UUID uuid, UUID uuid2, UUID uuid3) {
+        fun create(UUID uuid, UUID uuid2, UUID uuid3): GroupRoleMembersQuery {
             return AutoValue_GroupManager_GroupRoleMembersQuery(uuid, uuid2, uuid3)
         }
 
@@ -175,8 +175,8 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
         this.groupMemberDataSetHandler = RateLimitRequestHandler<>(RequestProcessor<UUID, UUID, UUID>(this.groupMemberDataSetPool, userManager2.getDatabaseExecutor()) {
             /* access modifiers changed from: protected */
             @Nullable
-            UUID processRequest(@NonNull UUID uuid) {
-                GroupMemberList groupMemberList = (GroupMemberList) GroupManager.this.groupMemberListDao.load(uuid)
+            fun processRequest(@NonNull UUID uuid): UUID {
+                GroupMemberList groupMemberList = (GroupManager as GroupMemberList).this.groupMemberListDao.load(uuid)
                 if (groupMemberList != null) {
                     return groupMemberList.getRequestID()
                 }
@@ -184,14 +184,14 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
             }
 
             /* access modifiers changed from: protected */
-            UUID processResult(@NonNull UUID uuid, UUID uuid2) {
+            fun processResult(@NonNull UUID uuid, UUID uuid2): UUID {
                 GroupManager.this.groupMemberListDao.insertOrReplace(GroupMemberList(uuid, uuid2))
                 return uuid2
             }
         this.groupRoleMemberDataSetHandler = RateLimitRequestHandler<>(RequestProcessor<UUID, UUID, UUID>(this.groupRoleMemberDataSetPool, userManager2.getDatabaseExecutor()) {
             /* access modifiers changed from: protected */
-            Boolean isRequestComplete(@NonNull UUID uuid, UUID uuid2) {
-                GroupRoleMemberList groupRoleMemberList = (GroupRoleMemberList) GroupManager.this.groupRoleMemberListDao.load(uuid)
+            fun isRequestComplete(@NonNull UUID uuid, UUID uuid2): Boolean {
+                GroupRoleMemberList groupRoleMemberList = (GroupManager as GroupRoleMemberList).this.groupRoleMemberListDao.load(uuid)
                 if (groupRoleMemberList != null) {
                     return !groupRoleMemberList.getMustRevalidate()
                 }
@@ -200,8 +200,8 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
 
             /* access modifiers changed from: protected */
             @Nullable
-            UUID processRequest(@NonNull UUID uuid) {
-                GroupRoleMemberList groupRoleMemberList = (GroupRoleMemberList) GroupManager.this.groupRoleMemberListDao.load(uuid)
+            fun processRequest(@NonNull UUID uuid): UUID {
+                GroupRoleMemberList groupRoleMemberList = (GroupManager as GroupRoleMemberList).this.groupRoleMemberListDao.load(uuid)
                 if (groupRoleMemberList != null) {
                     return groupRoleMemberList.getRequestID()
                 }
@@ -209,18 +209,18 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
             }
 
             /* access modifiers changed from: protected */
-            UUID processResult(@NonNull UUID uuid, UUID uuid2) {
+            fun processResult(@NonNull UUID uuid, UUID uuid2): UUID {
                 GroupManager.this.groupRoleMemberListDao.insertOrReplace(GroupRoleMemberList(uuid, uuid2, false))
                 return uuid2
             }
         this.groupRoleMemberSubscriptionPool.attachRequestHandler(AsyncRequestHandler(userManager2.getDatabaseExecutor(), SimpleRequestHandler<GroupRoleMembersQuery>() {
-            Unit onRequest(@NonNull GroupRoleMembersQuery groupRoleMembersQuery) {
+            fun onRequest(@NonNull GroupRoleMembersQuery groupRoleMembersQuery): Unit {
                 GroupManager.this.groupRoleMemberSubscriptionPool.onResultData(groupRoleMembersQuery, GroupManager.this.groupRoleMemberDao.queryBuilder().where(GroupRoleMemberDao.Properties.GroupID.eq(groupRoleMembersQuery.groupID()), GroupRoleMemberDao.Properties.RoleID.eq(groupRoleMembersQuery.roleID()), GroupRoleMemberDao.Properties.RequestID.eq(groupRoleMembersQuery.requestID())).listLazyUncached())
             }
         }))
         this.groupRoleMemberSubscriptionPool.setDisposeHandler($Lambda$u_XXTkSOKCgaVXhhUplrxzPP28(), userManager2.getDatabaseExecutor())
         this.groupMembersSubscriptionPool.attachRequestHandler(AsyncRequestHandler(userManager2.getDatabaseExecutor(), SimpleRequestHandler<GroupMembersQuery>() {
-            Unit onRequest(@NonNull GroupMembersQuery groupMembersQuery) {
+            fun onRequest(@NonNull GroupMembersQuery groupMembersQuery): Unit {
                 GroupManager.this.groupMembersSubscriptionPool.onResultData(groupMembersQuery, GroupManager.this.groupMemberDao.queryBuilder().where(GroupMemberDao.Properties.GroupID.eq(groupMembersQuery.groupID()), GroupMemberDao.Properties.RequestID.eq(groupMembersQuery.requestID())).listLazyUncached())
             }
         }))
@@ -290,11 +290,11 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
 
         }, userManager2.getDatabaseExecutor())
         this.groupMemberRolesSubscriptionPool.attachRequestHandler(AsyncRequestHandler(userManager2.getDatabaseExecutor(), SimpleRequestHandler<GroupMemberRolesQuery>() {
-            Unit onRequest(@NonNull GroupMemberRolesQuery groupMemberRolesQuery) {
+            fun onRequest(@NonNull GroupMemberRolesQuery groupMemberRolesQuery): Unit {
                 LazyList<GroupRoleMember> listLazyUncached = GroupManager.this.groupRoleMemberDao.queryBuilder().where(GroupRoleMemberDao.Properties.GroupID.eq(groupMemberRolesQuery.groupID()), GroupRoleMemberDao.Properties.UserID.eq(groupMemberRolesQuery.memberID()), GroupRoleMemberDao.Properties.RequestID.eq(groupMemberRolesQuery.requestID())).listLazyUncached()
                 ImmutableSet.Builder builder = ImmutableSet.builder()
                 for (GroupRoleMember roleID : listLazyUncached) {
-                    builder.add((Any) roleID.getRoleID())
+                    builder.add((roleID as Any).getRoleID())
                 }
                 listLazyUncached.close()
                 GroupManager.this.groupMemberRolesSubscriptionPool.onResultData(groupMemberRolesQuery, builder.build())
@@ -304,22 +304,22 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
 
     /* access modifiers changed from: private */
     /* renamed from: onAvatarGroupListsReply */
-    Unit m314com_lumiyaviewer_lumiya_slproto_users_manager_GroupManagermthref0(AvatarGroupList avatarGroupList) {
+    fun m314com_lumiyaviewer_lumiya_slproto_users_manager_GroupManagermthref0(AvatarGroupList avatarGroupList): Unit {
         this.avatarGroupListRef.set(avatarGroupList)
         this.chatterList.notifyListUpdated(ChatterListType.Groups)
     }
 
     @Nullable
-    AvatarGroupList getAvatarGroupList() {
+    fun getAvatarGroupList(): AvatarGroupList {
         return this.avatarGroupListRef.get()
     }
 
     /* access modifiers changed from: package-private */
-    ChatterDisplayDataList getGroupList() {
+    fun getGroupList(): ChatterDisplayDataList {
         return GroupDisplayDataList(this.userManager, this.onGroupListUpdated)
     }
 
-    RequestSource<UUID, UUID> getGroupMemberDataSetRequestSource() {
+    fun getGroupMemberDataSetRequestSource(): RequestSource<UUID, UUID> {
         return this.groupMemberDataSetHandler
     }
 
@@ -327,7 +327,7 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
         return this.groupMemberRolesSubscriptionPool
     }
 
-    Subscribable<UUID, UUID> getGroupMembers() {
+    fun getGroupMembers(): Subscribable<UUID, UUID> {
         return this.groupMemberDataSetPool
     }
 
@@ -335,7 +335,7 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
         return this.groupMembersSubscriptionPool
     }
 
-    RequestSource<UUID, UUID> getGroupRoleMemberDataSetRequestSource() {
+    fun getGroupRoleMemberDataSetRequestSource(): RequestSource<UUID, UUID> {
         return this.groupRoleMemberDataSetHandler
     }
 
@@ -343,14 +343,14 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
         return this.groupRoleMemberSubscriptionPool
     }
 
-    Subscribable<UUID, UUID> getGroupRoleMembers() {
+    fun getGroupRoleMembers(): Subscribable<UUID, UUID> {
         return this.groupRoleMemberDataSetPool
     }
 
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_GroupManager_10304  reason: not valid java name */
     /* synthetic */ Unit m315lambda$com_lumiyaviewer_lumiya_slproto_users_manager_GroupManager_10304(UUID uuid) {
-        GroupRoleMemberList groupRoleMemberList = (GroupRoleMemberList) this.groupRoleMemberListDao.load(uuid)
+        GroupRoleMemberList groupRoleMemberList = (this as GroupRoleMemberList).groupRoleMemberListDao.load(uuid)
         if (groupRoleMemberList != null) {
             groupRoleMemberList.setMustRevalidate(true)
             this.groupRoleMemberListDao.update(groupRoleMemberList)
@@ -358,7 +358,7 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
         this.groupRoleMemberDataSetPool.requestUpdate(uuid)
     }
 
-    Unit requestGroupRoleMembersRefresh(UUID uuid) {
+    fun requestGroupRoleMembersRefresh(UUID uuid): Unit {
         this.userManager.getDatabaseExecutor().execute(Runnable(this, uuid) {
 
             /* renamed from: -$f0 */
@@ -432,7 +432,7 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
 
     }
 
-    Unit requestRefreshMemberList(UUID uuid) {
+    fun requestRefreshMemberList(UUID uuid): Unit {
         this.groupMemberDataSetPool.requestUpdate(uuid)
     }
 }

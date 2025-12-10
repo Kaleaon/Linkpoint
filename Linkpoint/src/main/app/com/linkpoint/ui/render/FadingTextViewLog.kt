@@ -21,7 +21,7 @@ import java.util.Map
 class FadingTextViewLog {
     private val STALE_CHAT_TIMEOUT: Long = 5000
     private Runnable RemoveStaleChatsTask = Runnable() {
-        Unit run() {
+        fun run(): Unit {
             Boolean unused = FadingTextViewLog.this.removeStaleChatsPosted = false
             if (FadingTextViewLog.this.chatsOverlayLayout != null) {
                 Long uptimeMillis = SystemClock.uptimeMillis()
@@ -35,7 +35,7 @@ class FadingTextViewLog {
                         TextView textView = ((ChatEventOverlay) entry.getValue()).textView
                         if (Build.VERSION.SDK_INT >= 14) {
                             textView.animate().alpha(0.0f).setDuration(1000).setListener(AnimatorListenerAdapter() {
-                                Unit onAnimationEnd(Animator animator) {
+                                fun onAnimationEnd(Animator animator): Unit {
                                     FadingTextViewLog.this.chatsOverlayLayout.removeView(textView)
                                 }
                             }).start()
@@ -70,7 +70,7 @@ class FadingTextViewLog {
     }
 
     /* access modifiers changed from: package-private */
-    Unit clearChatEvents() {
+    fun clearChatEvents(): Unit {
         if (this.chatsOverlayLayout != null) {
             this.chatsOverlayLayout.removeAllViews()
         }
@@ -78,7 +78,7 @@ class FadingTextViewLog {
     }
 
     /* access modifiers changed from: package-private */
-    Unit handleChatEvent(ActiveChattersManager.ChatMessageEvent chatMessageEvent) {
+    fun handleChatEvent(ActiveChattersManager.ChatMessageEvent chatMessageEvent): Unit {
         TextView textView = null
         SLChatEvent loadFromDatabaseObject = SLChatEvent.loadFromDatabaseObject(chatMessageEvent.chatMessage, this.userManager.getUserID())
         if (loadFromDatabaseObject != null) {
@@ -116,7 +116,7 @@ class FadingTextViewLog {
     }
 
     /* access modifiers changed from: package-private */
-    Unit postRemovingStaleChats() {
+    fun postRemovingStaleChats(): Unit {
         Map.Entry next
         if (!this.removeStaleChatsPosted) {
             Iterator<Map.Entry<Long, ChatEventOverlay>> it = this.chatEventOverlays.entrySet().iterator()

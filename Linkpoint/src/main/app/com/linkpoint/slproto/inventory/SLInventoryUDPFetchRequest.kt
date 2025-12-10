@@ -19,7 +19,7 @@ class SLInventoryUDPFetchRequest : SLInventoryFetchRequest {
     }
 
     /* access modifiers changed from: package-private */
-    Boolean HandleInventoryDescendents(InventoryDescendents inventoryDescendents) {
+    fun HandleInventoryDescendents(InventoryDescendents inventoryDescendents): Boolean {
         Debug.Log("Inventory: UDP fetch: exp count " + inventoryDescendents.AgentData_Field.Descendents + ", recv count " + this.receivedCount + ", " + " with this: " + (this.receivedCount + inventoryDescendents.FolderData_Fields.size() + inventoryDescendents.ItemData_Fields.size()))
         Int i = inventoryDescendents.AgentData_Field.Descendents
         Int i2 = 0
@@ -123,10 +123,10 @@ class SLInventoryUDPFetchRequest : SLInventoryFetchRequest {
         return true
     }
 
-    Unit cancel() {
+    fun cancel(): Unit {
     }
 
-    Unit start() {
+    fun start(): Unit {
         Debug.Log("Inventory: UDP fetching folder " + this.folderUUID.toString())
         FetchInventoryDescendents fetchInventoryDescendents = FetchInventoryDescendents()
         fetchInventoryDescendents.AgentData_Field.AgentID = this.inventory.getCircuitInfo().agentID
