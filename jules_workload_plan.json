@@ -1,0 +1,95 @@
+{
+  "workloads": [
+    {
+      "title": "Enhance iOS Platform Views",
+      "description": "Add missing UI components and improve the iOS platform implementation",
+      "target_files": [
+        "platforms/iOS/Views/LoginView.swift",
+        "platforms/iOS/Views/MainTabView.swift",
+        "platforms/iOS/ViewModels/AuthViewModel.swift"
+      ],
+      "instructions": "\nImprove the iOS platform implementation:\n1. Add a ChatView.swift component similar to platforms/PWA/components/ChatView.tsx\n2. Add an InventoryView.swift component similar to platforms/PWA/components/InventoryView.tsx\n3. Enhance AuthViewModel.swift with better error handling and state management\n4. Add SwiftUI animations and transitions to improve UX\n5. Ensure all views follow iOS Human Interface Guidelines\n",
+      "priority": 1,
+      "task_id": null,
+      "status": "PENDING"
+    },
+    {
+      "title": "Improve PWA Demo Test Coverage",
+      "description": "Add comprehensive tests for the PWA-demo JavaScript modules",
+      "target_files": [
+        "PWA-demo/tests/auth-test.js",
+        "PWA-demo/tests/chat-test.js",
+        "PWA-demo/tests/inventory-test.js",
+        "PWA-demo/tests/protocol-test.js"
+      ],
+      "instructions": "\nImprove the PWA-demo test suite:\n1. Add unit tests for authentication flow in PWA-demo/js/auth/\n2. Add tests for chat functionality in PWA-demo/js/chat/\n3. Add tests for inventory management in PWA-demo/js/inventory/\n4. Add tests for LLSD protocol handling in PWA-demo/js/protocol/\n5. Ensure tests can run standalone without external dependencies\n6. Add mock data for testing grid connections\n",
+      "priority": 2,
+      "task_id": null,
+      "status": "PENDING"
+    },
+    {
+      "title": "Update Getting Started Documentation",
+      "description": "Improve the getting started guide and add setup tutorials",
+      "target_files": [
+        "docs/Getting_Started_Guide.md",
+        "docs/Sample_Application_User_Guide.md"
+      ],
+      "instructions": "\nEnhance the documentation:\n1. Update Getting_Started_Guide.md with clearer step-by-step instructions\n2. Add troubleshooting section for common setup issues\n3. Add screenshots placeholders and clearer command examples\n4. Update Sample_Application_User_Guide.md with latest features\n5. Add cross-references to other documentation files\n6. Ensure all code examples are up to date and work\n",
+      "priority": 3,
+      "task_id": null,
+      "status": "PENDING"
+    },
+    {
+      "title": "Improve Build and Utility Scripts",
+      "description": "Enhance shell scripts with better error handling and documentation",
+      "target_files": [
+        "scripts/convert_textures.sh",
+        "scripts/emulator_manager.sh",
+        "scripts/generate_file_inventory.sh"
+      ],
+      "instructions": "\nImprove the shell scripts:\n1. Add proper error handling with exit codes\n2. Add usage/help documentation with -h flag\n3. Add input validation and parameter checking\n4. Add logging functionality for debugging\n5. Make scripts more portable (POSIX compliant where possible)\n6. Add progress indicators for long-running operations\n",
+      "priority": 2,
+      "task_id": null,
+      "status": "PENDING"
+    },
+    {
+      "title": "Enhance Android Unit Tests",
+      "description": "Improve test coverage for Android app test classes",
+      "target_files": [
+        "app/src/test/java/com/lumiyaviewer/lumiya/ui/theme/ThemeUtilsTest.kt",
+        "app/src/test/java/com/lumiyaviewer/lumiya/ui/settings/EmulatorManagerTest.kt"
+      ],
+      "instructions": "\nEnhance the Android test files:\n1. Add more test cases for edge cases in ThemeUtilsTest.kt\n2. Add tests for dark mode and light mode transitions\n3. Improve EmulatorManagerTest.kt with better mock setups\n4. Add tests for error scenarios\n5. Add parameterized tests where appropriate\n6. Ensure tests follow Android testing best practices\n",
+      "priority": 2,
+      "task_id": null,
+      "status": "PENDING"
+    },
+    {
+      "title": "Enhance PWA Platform Components",
+      "description": "Improve the Next.js PWA platform components",
+      "target_files": [
+        "platforms/PWA/components/ProfileView.tsx",
+        "platforms/PWA/components/WorldView.tsx"
+      ],
+      "instructions": "\nEnhance the PWA platform components:\n1. Add better TypeScript types to ProfileView.tsx\n2. Improve accessibility in ProfileView.tsx (aria labels, keyboard navigation)\n3. Add loading states and error boundaries to WorldView.tsx\n4. Improve responsive design for mobile devices\n5. Add unit tests for the components\n6. Follow React best practices for hooks and state management\n",
+      "priority": 1,
+      "task_id": null,
+      "status": "PENDING"
+    }
+  ],
+  "repo_context": {
+    "owner": "Kaleaon",
+    "repo": "Linkpoint",
+    "branch": "cursor/jules-workload-management-5468",
+    "description": "Linkpoint - Modern Second Life/OpenSim mobile viewer",
+    "language": "Kotlin",
+    "additionalLanguages": [
+      "TypeScript",
+      "Swift",
+      "JavaScript",
+      "Python"
+    ]
+  },
+  "total_files": 16,
+  "generated_at": "2026-01-06 14:29:46"
+}
