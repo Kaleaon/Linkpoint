@@ -47,8 +47,9 @@
             android:layout_height="48dp"
             android:layout_weight="1"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_menu_send"
-            android:contentDescription="Chat" />
+            android:src="@drawable/ic_chat"
+            android:tint="@android:color/white"
+            android:contentDescription="@string/chat" />
 
         <ImageButton
             android:id="@+id/inventoryButton"
@@ -56,8 +57,9 @@
             android:layout_height="48dp"
             android:layout_weight="1"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_menu_agenda"
-            android:contentDescription="Inventory" />
+            android:src="@drawable/ic_inventory"
+            android:tint="@android:color/white"
+            android:contentDescription="@string/inventory" />
 
         <ImageButton
             android:id="@+id/mapButton"
@@ -65,8 +67,9 @@
             android:layout_height="48dp"
             android:layout_weight="1"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_menu_mapmode"
-            android:contentDescription="Map" />
+            android:src="@drawable/ic_map"
+            android:tint="@android:color/white"
+            android:contentDescription="@string/minimap" />
 
         <ImageButton
             android:id="@+id/settingsButton"
@@ -74,8 +77,9 @@
             android:layout_height="48dp"
             android:layout_weight="1"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_menu_preferences"
-            android:contentDescription="Settings" />
+            android:src="@drawable/ic_settings"
+            android:tint="@android:color/white"
+            android:contentDescription="@string/settings" />
     </LinearLayout>
 
 </FrameLayout>

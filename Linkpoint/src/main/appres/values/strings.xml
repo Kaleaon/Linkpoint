@@ -2,4 +2,46 @@
 <resources>
     <string name="app_name">Linkpoint</string>
     <string name="app_description">Second Life Viewer for Android</string>
+    
+    <!-- Navigation -->
+    <string name="chat">Chat</string>
+    <string name="inventory">Inventory</string>
+    <string name="minimap">Map</string>
+    <string name="settings">Settings</string>
+    
+    <!-- Login -->
+    <string name="login">Login</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="grid">Grid</string>
+    <string name="remember_me">Remember me</string>
+    <string name="logging_in">Logging in…</string>
+    <string name="login_failed">Login failed</string>
+    
+    <!-- Chat -->
+    <string name="send">Send</string>
+    <string name="type_message">Type a message…</string>
+    <string name="nearby_chat">Nearby Chat</string>
+    <string name="local_chat">Local Chat</string>
+    
+    <!-- Inventory -->
+    <string name="my_inventory">My Inventory</string>
+    <string name="loading">Loading…</string>
+    <string name="empty_folder">Empty folder</string>
+    
+    <!-- Settings -->
+    <string name="graphics">Graphics</string>
+    <string name="audio">Audio</string>
+    <string name="account">Account</string>
+    <string name="about">About</string>
+    <string name="logout">Logout</string>
+    
+    <!-- General -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="error">Error</string>
+    <string name="success">Success</string>
+    <string name="teleport">Teleport</string>
 </resources>
