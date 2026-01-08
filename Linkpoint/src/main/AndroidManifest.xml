@@ -73,6 +73,18 @@
             android:exported="false"
             android:parentActivityName=".ui.MainActivity" />
 
+        <!-- Minimap Activity -->
+        <activity
+            android:name=".ui.MinimapActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.MainActivity" />
+
+        <!-- Settings Activity -->
+        <activity
+            android:name=".ui.SettingsActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.MainActivity" />
+
         <!-- SLURL Handler -->
         <activity
             android:name=".ui.SLURLActivity"

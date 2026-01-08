@@ -77,13 +77,24 @@ class MainActivity : AppCompatActivity() {
         }
         
         findViewById<ImageButton>(R.id.mapButton).setOnClickListener {
-            // TODO: Implement map view
-            android.widget.Toast.makeText(this, "Map coming soon!", android.widget.Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, MinimapActivity::class.java))
         }
         
         findViewById<ImageButton>(R.id.settingsButton).setOnClickListener {
-            // TODO: Implement settings
-            android.widget.Toast.makeText(this, "Settings coming soon!", android.widget.Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+    }
+    
+    private fun setupTouchControls() {
+        // Add touch handling for camera control
+        surfaceView.setOnTouchListener { _, event ->
+            when (event.actionMasked) {
+                android.view.MotionEvent.ACTION_MOVE -> {
+                    // Pan/rotate camera based on touch
+                    // This would be connected to camera controls
+                }
+            }
+            true
         }
     }
     

@@ -142,11 +142,13 @@ class InventoryActivity : AppCompatActivity() {
             .show()
     }
     
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (folderStack.isNotEmpty()) {
             val parent = folderStack.removeAt(folderStack.size - 1)
             displayFolder(parent)
         } else {
+            @Suppress("DEPRECATION")
             super.onBackPressed()
         }
     }
