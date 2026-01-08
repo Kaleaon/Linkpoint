@@ -128,22 +128,23 @@ class ChatAdapter(private val messages: List<ChatMessage>) : RecyclerView.Adapte
     
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val message = messages[position]
+        val context = holder.itemView.context
         
         holder.senderText.text = message.sender
         holder.messageText.text = message.content
         holder.timeText.text = dateFormat.format(Date(message.timestamp))
         
-        // Style based on message type
-        val textColor = when (message.type) {
-            ChatMessageType.SYSTEM -> android.graphics.Color.parseColor("#2196F3")
-            ChatMessageType.WHISPER -> android.graphics.Color.parseColor("#9C27B0")
-            ChatMessageType.SHOUT -> android.graphics.Color.parseColor("#FF5722")
-            ChatMessageType.EMOTE -> android.graphics.Color.parseColor("#4CAF50")
-            ChatMessageType.IM -> android.graphics.Color.parseColor("#03A9F4")
-            else -> android.graphics.Color.WHITE
+        // Style based on message type using color resources
+        val textColorRes = when (message.type) {
+            ChatMessageType.SYSTEM -> R.color.chat_system
+            ChatMessageType.WHISPER -> R.color.chat_whisper
+            ChatMessageType.SHOUT -> R.color.chat_shout
+            ChatMessageType.EMOTE -> R.color.chat_emote
+            ChatMessageType.IM -> R.color.chat_im
+            else -> R.color.chat_normal
         }
         
-        holder.messageText.setTextColor(textColor)
+        holder.messageText.setTextColor(androidx.core.content.ContextCompat.getColor(context, textColorRes))
     }
     
     override fun getItemCount() = messages.size

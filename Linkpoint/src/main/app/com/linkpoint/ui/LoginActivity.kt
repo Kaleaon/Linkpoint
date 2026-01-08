@@ -118,8 +118,8 @@ class LoginActivity : AppCompatActivity() {
     }
     
     private fun showGridSelector() {
-        // Show grid selection dialog
-        val grids = arrayOf("Second Life", "OSGrid", "InWorldz", "Kitely")
+        // Show grid selection dialog using grids from SecondLifeConnection
+        val grids = SecondLifeConnection.GRIDS.keys.toTypedArray()
         
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("Select Grid")

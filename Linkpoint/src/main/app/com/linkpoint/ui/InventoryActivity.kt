@@ -78,18 +78,29 @@ class InventoryActivity : AppCompatActivity() {
     }
     
     private fun buildPath(): String {
-        val path = StringBuilder("My Inventory")
+        // Build path from folder stack (excluding root) plus current folder
+        val pathParts = mutableListOf<String>()
+        
+        // Add all folders from stack except root
         for (folder in folderStack) {
-            path.append(" > ${folder.name}")
-        }
-        if (folderStack.isNotEmpty() || currentFolder?.name != "My Inventory") {
-            currentFolder?.let { 
-                if (it.name != "My Inventory") {
-                    path.append(" > ${it.name}")
-                }
+            if (folder.name != "My Inventory") {
+                pathParts.add(folder.name)
             }
         }
-        return path.toString()
+        
+        // Add current folder if not root
+        currentFolder?.let {
+            if (it.name != "My Inventory") {
+                pathParts.add(it.name)
+            }
+        }
+        
+        // Build final path string
+        return if (pathParts.isEmpty()) {
+            "My Inventory"
+        } else {
+            "My Inventory > ${pathParts.joinToString(" > ")}"
+        }
     }
     
     private fun onItemClicked(item: InventoryItem) {
@@ -177,14 +188,7 @@ data class InventoryFolder(
 
 class InventoryAdapter(
     private val onItemClick: (InventoryItem) -> Unit
-) : RecyclerView.Adapter<InventoryAdapter.ViewHolder>() {
-    
-    private var items = listOf<InventoryItem>()
-    
-    fun submitList(newItems: List<InventoryItem>) {
-        items = newItems
-        notifyDataSetChanged()
-    }
+) : androidx.recyclerview.widget.ListAdapter<InventoryItem, InventoryAdapter.ViewHolder>(InventoryDiffCallback()) {
     
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val iconView: ImageView = view.findViewById(R.id.itemIcon)
@@ -199,7 +203,7 @@ class InventoryAdapter(
     }
     
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = items[position]
+        val item = getItem(position)
         
         holder.nameText.text = item.name
         holder.typeText.text = item.type.name.lowercase().replaceFirstChar { it.uppercase() }
@@ -221,6 +225,17 @@ class InventoryAdapter(
             onItemClick(item)
         }
     }
+}
+
+/**
+ * DiffUtil callback for efficient RecyclerView updates
+ */
+class InventoryDiffCallback : androidx.recyclerview.widget.DiffUtil.ItemCallback<InventoryItem>() {
+    override fun areItemsTheSame(oldItem: InventoryItem, newItem: InventoryItem): Boolean {
+        return oldItem.id == newItem.id
+    }
     
-    override fun getItemCount() = items.size
+    override fun areContentsTheSame(oldItem: InventoryItem, newItem: InventoryItem): Boolean {
+        return oldItem == newItem
+    }
 }

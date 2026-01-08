@@ -113,12 +113,30 @@ class SecondLifeConnection {
         }
     }
     
+    /**
+     * Escape special XML characters to prevent XML injection
+     */
+    private fun escapeXml(input: String): String {
+        return input
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("\"", "&quot;")
+            .replace("'", "&apos;")
+    }
+    
     private fun buildLoginXml(
         firstName: String,
         lastName: String,
         passwordHash: String,
         startLocation: String
     ): String {
+        // Escape all user-provided input to prevent XML injection
+        val safeFirstName = escapeXml(firstName)
+        val safeLastName = escapeXml(lastName)
+        val safePasswordHash = escapeXml(passwordHash)
+        val safeStartLocation = escapeXml(startLocation)
+        
         return """
 <?xml version="1.0"?>
 <methodCall>
@@ -129,19 +147,19 @@ class SecondLifeConnection {
                 <struct>
                     <member>
                         <name>first</name>
-                        <value><string>$firstName</string></value>
+                        <value><string>$safeFirstName</string></value>
                     </member>
                     <member>
                         <name>last</name>
-                        <value><string>$lastName</string></value>
+                        <value><string>$safeLastName</string></value>
                     </member>
                     <member>
                         <name>passwd</name>
-                        <value><string>$passwordHash</string></value>
+                        <value><string>$safePasswordHash</string></value>
                     </member>
                     <member>
                         <name>start</name>
-                        <value><string>$startLocation</string></value>
+                        <value><string>$safeStartLocation</string></value>
                     </member>
                     <member>
                         <name>channel</name>

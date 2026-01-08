@@ -166,7 +166,10 @@ class MainActivity : AppCompatActivity() {
             override fun onNativeWindowChanged(surface: android.view.Surface) {
                 swapChain?.let { engine.destroySwapChain(it) }
                 swapChain = engine.createSwapChain(surface)
-                displayHelper.attach(renderer, surfaceView.display)
+                // Safely attach display helper - surfaceView.display may be null on some devices
+                surfaceView.display?.let { display ->
+                    displayHelper.attach(renderer, display)
+                }
             }
             
             override fun onDetachedFromSurface() {
