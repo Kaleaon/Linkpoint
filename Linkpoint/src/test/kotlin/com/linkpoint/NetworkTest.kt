@@ -21,10 +21,24 @@ class NetworkTest {
     fun `test grid URLs are defined`() {
         assertTrue("Should have Second Life grid", 
             SecondLifeConnection.GRIDS.containsKey("Second Life"))
-        assertTrue("Should have OSGrid", 
-            SecondLifeConnection.GRIDS.containsKey("OSGrid"))
         assertTrue("Should have Second Life Beta", 
             SecondLifeConnection.GRIDS.containsKey("Second Life Beta"))
+        assertTrue("Should have Kitely", 
+            SecondLifeConnection.GRIDS.containsKey("Kitely"))
+    }
+    
+    @Test
+    fun `test insecure grids are separated`() {
+        // Insecure HTTP grids should be in a separate map
+        assertTrue("Should have insecure grids map", 
+            SecondLifeConnection.INSECURE_GRIDS.isNotEmpty())
+    }
+    
+    @Test
+    fun `test secure grids use HTTPS`() {
+        SecondLifeConnection.GRIDS.forEach { (name, url) ->
+            assertTrue("$name should use HTTPS", url.startsWith("https://"))
+        }
     }
     
     @Test
@@ -41,7 +55,8 @@ class NetworkTest {
     
     @Test
     fun `test grid count`() {
-        assertTrue("Should have at least 3 grids", SecondLifeConnection.GRIDS.size >= 3)
+        // Secure grids only (HTTP grids are in INSECURE_GRIDS)
+        assertTrue("Should have at least 3 secure grids", SecondLifeConnection.GRIDS.size >= 3)
     }
     
     @Test

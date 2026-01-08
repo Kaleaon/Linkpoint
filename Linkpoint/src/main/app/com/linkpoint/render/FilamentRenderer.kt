@@ -220,14 +220,22 @@ class FilamentRenderer(private val context: Context) {
             }
             .build(engine)
         
-        // Set vertex data
-        val vertexBuffer = ByteBuffer.allocateDirect(vertices.size * 4)
+        // Set vertex data - keep ByteBuffer reference to avoid ClassCastException
+        val vertexByteBuffer = ByteBuffer.allocateDirect(vertices.size * 4)
             .order(ByteOrder.nativeOrder())
-            .asFloatBuffer()
-            .put(vertices)
-            .flip()
+        vertexByteBuffer.asFloatBuffer().put(vertices)
+        vertexByteBuffer.rewind()
         
-        vb.setBufferAt(engine, 0, vertexBuffer as ByteBuffer)
+        vb.setBufferAt(engine, 0, vertexByteBuffer)
+        
+        // Set UV buffer if provided
+        if (uvs != null) {
+            val uvByteBuffer = ByteBuffer.allocateDirect(uvs.size * 4)
+                .order(ByteOrder.nativeOrder())
+            uvByteBuffer.asFloatBuffer().put(uvs)
+            uvByteBuffer.rewind()
+            vb.setBufferAt(engine, if (normals != null) 2 else 1, uvByteBuffer)
+        }
         
         // Create index buffer
         val ib = IndexBuffer.Builder()
@@ -235,13 +243,13 @@ class FilamentRenderer(private val context: Context) {
             .bufferType(IndexBuffer.Builder.IndexType.USHORT)
             .build(engine)
         
-        val indexBuffer = ByteBuffer.allocateDirect(indices.size * 2)
+        // Keep ByteBuffer reference to avoid ClassCastException
+        val indexByteBuffer = ByteBuffer.allocateDirect(indices.size * 2)
             .order(ByteOrder.nativeOrder())
-            .asShortBuffer()
-            .put(indices)
-            .flip()
+        indexByteBuffer.asShortBuffer().put(indices)
+        indexByteBuffer.rewind()
         
-        ib.setBuffer(engine, indexBuffer as ByteBuffer)
+        ib.setBuffer(engine, indexByteBuffer)
         
         // Create default material
         val material = createDefaultMaterial()

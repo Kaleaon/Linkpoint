@@ -131,8 +131,10 @@ class MainActivity : AppCompatActivity() {
             resolution = 360
         }
         
-        // Set up the camera
-        val aspectRatio = surfaceView.width.toFloat() / surfaceView.height.toFloat()
+        // Set up the camera with safe aspect ratio (may be 0 before layout)
+        val w = surfaceView.width
+        val h = surfaceView.height
+        val aspectRatio = if (h > 0) w.toFloat() / h.toFloat() else 16f / 9f  // Default to 16:9
         camera.setProjection(45.0, aspectRatio.toDouble(), 0.1, 1000.0, Camera.Fov.VERTICAL)
         camera.lookAt(
             0.0, 0.0, 5.0,    // eye position

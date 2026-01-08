@@ -23,13 +23,19 @@ class SecondLifeConnection {
         private const val SL_LOGIN_URL = "https://login.agni.lindenlab.com/cgi-bin/login.cgi"
         private const val BETA_LOGIN_URL = "https://login.aditi.lindenlab.com/cgi-bin/login.cgi"
         
-        // Grid URLs
+        // Grid URLs - HTTPS required for security
+        // Note: Some OpenSim grids may not support HTTPS
         val GRIDS = mapOf(
             "Second Life" to SL_LOGIN_URL,
             "Second Life Beta" to BETA_LOGIN_URL,
-            "OSGrid" to "http://login.osgrid.org/",
-            "InWorldz" to "http://login.inworldz.com:8002/",
             "Kitely" to "https://login.kitely.com/"
+        )
+        
+        // Insecure grids (HTTP) - blocked by default for security
+        // Users must explicitly acknowledge the security risk to use these
+        val INSECURE_GRIDS = mapOf(
+            "OSGrid (Insecure)" to "http://login.osgrid.org/",
+            "InWorldz (Insecure)" to "http://login.inworldz.com:8002/"
         )
     }
     
@@ -65,6 +71,15 @@ class SecondLifeConnection {
         Log.d(TAG, "Attempting login for $firstName $lastName on $gridName")
         
         val loginUrl = GRIDS[gridName] ?: SL_LOGIN_URL
+        
+        // Security: Block insecure HTTP login URLs to prevent credential interception
+        if (!loginUrl.startsWith("https://")) {
+            Log.w(TAG, "Insecure login URL blocked: $loginUrl")
+            return@withContext LoginResult(
+                success = false,
+                message = "Insecure connection blocked: $gridName uses HTTP. HTTPS is required for secure login."
+            )
+        }
         
         // Create password hash (MD5 for SL compatibility)
         val passwordHash = "\$1\$${md5Hash(password)}"
