@@ -1,0 +1,86 @@
+name: Auto bump Android versionCode (PR)
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    branches: [ main, develop ]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: auto-bump-version-code-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  bump:
+    name: Bump versionCode if needed
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Compute base/head version codes
+        id: versions
+        run: |
+          set -euo pipefail
+          git fetch origin "${{ github.base_ref }}:${{ github.base_ref }}"
+          
+          BASE_CODE=$(python3 - <<'PY'
+          import re, subprocess, sys
+          try:
+              txt = subprocess.check_output(["git","show","${{ github.base_ref }}:build.gradle.kts"], text=True)
+              m = re.search(r"(?m)^\s*versionCode\s*=\s*(\d+)\s*$", txt)
+              if not m: 
+                  print("0")
+                  sys.exit(0)
+              print(m.group(1))
+          except:
+              print("0")
+          PY
+          )
+          
+          HEAD_CODE=$(python3 scripts/bump_version_code.py --file build.gradle.kts)
+          echo "base=$BASE_CODE" >> "$GITHUB_OUTPUT"
+          echo "head=$HEAD_CODE" >> "$GITHUB_OUTPUT"
+          echo "Base versionCode: $BASE_CODE"
+          echo "Head versionCode: $HEAD_CODE"
+
+      - name: Bump versionCode to be > base
+        id: bump
+        run: |
+          set -euo pipefail
+          BASE="${{ steps.versions.outputs.base }}"
+          HEAD="${{ steps.versions.outputs.head }}"
+          if [ "$HEAD" -le "$BASE" ]; then
+            NEW=$((BASE + 1))
+            python3 scripts/bump_version_code.py --file build.gradle.kts --set "$NEW"
+            echo "new=$NEW" >> "$GITHUB_OUTPUT"
+          else
+            echo "No bump needed."
+            echo "new=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit & push (only if changed)
+        if: ${{ steps.bump.outputs.new != '' }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add build.gradle.kts
+          git commit -m "chore: bump versionCode to ${{ steps.bump.outputs.new }}"
+          git push

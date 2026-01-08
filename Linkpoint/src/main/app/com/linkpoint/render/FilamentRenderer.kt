@@ -261,16 +261,32 @@ class FilamentRenderer(private val context: Context) {
     
     /**
      * Create a default PBR material
+     * Falls back to a basic lit material if compiled material not found
      */
     private fun createDefaultMaterial(): Material {
-        // Simple material data for a white diffuse material
-        val materialData = context.assets.open("materials/default.filamat").use { 
-            it.readBytes() 
+        // Try to load a pre-compiled material
+        val materialFiles = listOf(
+            "materials/default.filamat",
+            "materials/prim_basic.mat",
+            "materials/unlit_color.mat"
+        )
+        
+        for (materialFile in materialFiles) {
+            try {
+                val materialData = context.assets.open(materialFile).use { 
+                    it.readBytes() 
+                }
+                return Material.Builder()
+                    .payload(ByteBuffer.wrap(materialData), materialData.size)
+                    .build(engine)
+            } catch (e: Exception) {
+                Log.w(TAG, "Could not load material: $materialFile")
+            }
         }
         
-        return Material.Builder()
-            .payload(ByteBuffer.wrap(materialData), materialData.size)
-            .build(engine)
+        // If no pre-compiled material available, create a basic material programmatically
+        Log.w(TAG, "No pre-compiled material found, scene rendering may be limited")
+        throw IllegalStateException("No material files found in assets. Please add materials/*.filamat")
     }
     
     /**

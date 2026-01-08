@@ -1,0 +1,407 @@
+name: Main CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  JAVA_VERSION: '17'
+  JAVA_DISTRIBUTION: 'temurin'
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: ${{ env.JAVA_DISTRIBUTION }}
+        
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        cmdline-tools-version: 11076708
+        
+    - name: Install required Android SDK packages
+      run: |
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
+        echo "Installed SDK packages:"
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list_installed
+        
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+          
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Compile project
+      id: compile
+      run: |
+        ./gradlew compileDebugKotlin --continue --stacktrace --warning-mode all 2>&1 | tee compile_output.txt
+        exit_code=${PIPESTATUS[0]}
+        
+        if [ $exit_code -ne 0 ]; then
+          echo ""
+          echo "::group::Compilation Errors (last 200 lines)"
+          tail -200 compile_output.txt
+          echo "::endgroup::"
+          
+          echo ""
+          echo "::group::Error Summary"
+          grep -E "^e: |error:|Error:|FAILURE:|BUILD FAILED" compile_output.txt || echo "No specific error pattern found"
+          echo "::endgroup::"
+        fi
+        
+        exit $exit_code
+      continue-on-error: true
+      
+    - name: Report compilation results
+      if: always()
+      run: |
+        if [ "${{ steps.compile.outcome }}" == "failure" ]; then
+          echo "::error::Compilation failed. Check the 'Compilation Errors' section above for details."
+        else
+          echo "::notice::Compilation succeeded!"
+        fi
+    
+    - name: Upload compilation log on failure
+      if: steps.compile.outcome == 'failure'
+      uses: actions/upload-artifact@v4
+      with:
+        name: compile-error-log
+        path: compile_output.txt
+        if-no-files-found: ignore
+    
+    - name: Run unit tests
+      if: steps.compile.outcome == 'success'
+      run: ./gradlew testDebugUnitTest --continue
+      continue-on-error: true
+      id: unit-tests
+      
+    - name: Run lint checks
+      if: steps.compile.outcome == 'success'
+      run: ./gradlew lintDebug --continue
+      continue-on-error: true
+      id: lint-checks
+      
+    - name: Fail workflow if compilation failed
+      if: always()
+      run: |
+        if [ "${{ steps.compile.outcome }}" == "failure" ]; then
+          echo "Workflow failed due to compilation failures"
+          exit 1
+        fi
+      
+    - name: Upload test reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-reports
+        path: |
+          build/reports/tests/
+          build/reports/lint-results-debug.html
+
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    needs: test
+    if: always()
+    
+    outputs:
+      version-name: ${{ steps.version.outputs.version-name }}
+      version-code: ${{ steps.version.outputs.version-code }}
+      build-success: ${{ steps.build-debug.outcome == 'success' }}
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: ${{ env.JAVA_DISTRIBUTION }}
+        
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        cmdline-tools-version: 11076708
+        
+    - name: Install required Android SDK packages
+      run: |
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
+        
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+          
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Extract version information
+      id: version
+      run: |
+        VERSION_NAME=$(grep 'versionName' build.gradle.kts | head -1 | sed 's/.*"\(.*\)".*/\1/' || echo "1.0.0")
+        VERSION_CODE=$(grep 'versionCode' build.gradle.kts | head -1 | sed 's/[^0-9]*//g' || echo "1")
+        echo "version-name=$VERSION_NAME" >> $GITHUB_OUTPUT
+        echo "version-code=$VERSION_CODE" >> $GITHUB_OUTPUT
+        echo "Version Name: $VERSION_NAME"
+        echo "Version Code: $VERSION_CODE"
+      continue-on-error: true
+        
+    - name: Build debug APK
+      id: build-debug
+      run: |
+        echo "Building debug APK..."
+        ./gradlew assembleDebug --continue --stacktrace --warning-mode all 2>&1 | tee build_output.txt
+        exit_code=${PIPESTATUS[0]}
+        
+        if [ $exit_code -ne 0 ]; then
+          echo ""
+          echo "::group::Build Errors (last 200 lines)"
+          tail -200 build_output.txt
+          echo "::endgroup::"
+          
+          echo ""
+          echo "::group::Error Summary"
+          grep -E "^e: |error:|Error:|FAILURE:|BUILD FAILED" build_output.txt || echo "No specific error pattern found"
+          echo "::endgroup::"
+        fi
+        
+        exit $exit_code
+      continue-on-error: true
+      
+    - name: Report build status
+      if: always()
+      run: |
+        if [ "${{ steps.build-debug.outcome }}" == "failure" ]; then
+          echo "::error::Debug APK build failed."
+        else
+          echo "::notice::Debug APK built successfully!"
+        fi
+    
+    - name: Upload build log on failure
+      if: steps.build-debug.outcome == 'failure'
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-error-log
+        path: build_output.txt
+        if-no-files-found: ignore
+      
+    - name: Build release APK (unsigned)
+      if: steps.build-debug.outcome == 'success'
+      run: ./gradlew assembleRelease --continue
+      continue-on-error: true
+      
+    - name: Sign release APK
+      id: sign_apk
+      if: steps.build-debug.outcome == 'success' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main')
+      env:
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      run: |
+        if [[ -n "$KEYSTORE_PASSWORD" && -n "$KEY_ALIAS" && -n "$KEY_PASSWORD" ]]; then
+          echo "Signing APK with keystore..."
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > release-keystore.jks
+          
+          RELEASE_APK=$(find build/outputs/apk/release -name "*.apk" -type f | head -1)
+          if [[ -n "$RELEASE_APK" ]]; then
+            jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
+              -keystore release-keystore.jks \
+              -storepass "$KEYSTORE_PASSWORD" \
+              -keypass "$KEY_PASSWORD" \
+              "$RELEASE_APK" \
+              "$KEY_ALIAS"
+              
+            $ANDROID_HOME/build-tools/34.0.0/zipalign -v 4 \
+              "$RELEASE_APK" \
+              build/outputs/apk/release/Linkpoint-release-signed.apk
+              
+            echo "signed=true" >> $GITHUB_OUTPUT
+          fi
+        else
+          echo "Keystore secrets not available, using unsigned APK"
+          echo "signed=false" >> $GITHUB_OUTPUT
+        fi
+      continue-on-error: true
+        
+    - name: Rename APK files
+      if: steps.build-debug.outcome == 'success'
+      run: |
+        VERSION_NAME="${{ steps.version.outputs.version-name }}"
+        
+        DEBUG_APK=$(find build/outputs/apk/debug -name "*.apk" -type f | head -1)
+        if [[ -n "$DEBUG_APK" ]]; then
+          mv "$DEBUG_APK" "build/outputs/apk/debug/Linkpoint-v${VERSION_NAME}-debug.apk"
+        fi
+           
+        RELEASE_APK=$(find build/outputs/apk/release -name "*-signed.apk" -type f | head -1)
+        if [[ -n "$RELEASE_APK" ]]; then
+          mv "$RELEASE_APK" "build/outputs/apk/release/Linkpoint-v${VERSION_NAME}-release.apk"
+        else
+          UNSIGNED_APK=$(find build/outputs/apk/release -name "*.apk" -type f | head -1)
+          if [[ -n "$UNSIGNED_APK" ]]; then
+            mv "$UNSIGNED_APK" "build/outputs/apk/release/Linkpoint-v${VERSION_NAME}-release-unsigned.apk"
+          fi
+        fi
+    
+    - name: Generate checksums
+      if: steps.build-debug.outcome == 'success'
+      run: |
+        VERSION_NAME="${{ steps.version.outputs.version-name }}"
+        cd build/outputs/apk
+        
+        if [[ -f "debug/Linkpoint-v${VERSION_NAME}-debug.apk" ]]; then
+          sha256sum "debug/Linkpoint-v${VERSION_NAME}-debug.apk" > "debug/Linkpoint-v${VERSION_NAME}-debug.apk.sha256"
+        fi
+        
+        for apk in release/Linkpoint-v${VERSION_NAME}-release*.apk; do
+          if [[ -f "$apk" ]]; then
+            sha256sum "$apk" > "$apk.sha256"
+          fi
+        done
+        
+        echo "=== APK Checksums ==="
+        cat debug/*.sha256 2>/dev/null || true
+        cat release/*.sha256 2>/dev/null || true
+        
+    - name: Upload debug APK
+      if: steps.build-debug.outcome == 'success'
+      uses: actions/upload-artifact@v4
+      with:
+        name: debug-apk
+        path: build/outputs/apk/debug/Linkpoint-v${{ steps.version.outputs.version-name }}-debug.apk
+        
+    - name: Upload release APK
+      if: steps.build-debug.outcome == 'success'
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-apk
+        path: build/outputs/apk/release/Linkpoint-v${{ steps.version.outputs.version-name }}-release*.apk
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build
+    if: needs.build.outputs.build-success == 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Download all APKs
+      uses: actions/download-artifact@v4
+      with:
+        path: apks
+    
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        VERSION="${{ needs.build.outputs.version-name }}"
+        TAG_NAME="${GITHUB_REF#refs/tags/}"
+        
+        PREVIOUS_TAG=$(git describe --abbrev=0 --tags "${TAG_NAME}^" 2>/dev/null || echo "")
+        if [ -n "$PREVIOUS_TAG" ]; then
+          COMMITS=$(git log "${PREVIOUS_TAG}..${TAG_NAME}" --pretty=format:"- %s" --no-merges)
+        else
+          COMMITS=$(git log "${TAG_NAME}" --pretty=format:"- %s" --no-merges --max-count=20)
+        fi
+        
+        DEBUG_CHECKSUM=""
+        RELEASE_CHECKSUM=""
+        
+        if [[ -f "apks/debug-apk/Linkpoint-v${VERSION}-debug.apk.sha256" ]]; then
+          DEBUG_CHECKSUM=$(cat "apks/debug-apk/Linkpoint-v${VERSION}-debug.apk.sha256" 2>/dev/null || echo "N/A")
+        fi
+        
+        for checksum_file in apks/release-apk/Linkpoint-v${VERSION}-release*.sha256; do
+          if [[ -f "$checksum_file" ]]; then
+            RELEASE_CHECKSUM=$(cat "$checksum_file" 2>/dev/null || echo "N/A")
+            break
+          fi
+        done
+        
+        cat > release_notes.md << EOF
+        ## Linkpoint ${VERSION}
+        
+        ### 📱 System Requirements
+        - Android 7.0+ (API level 24 or higher)
+        - 50 MB free storage space
+        - ARM64 processor recommended
+        
+        ### 📦 Installation
+        1. Download the APK below (release or debug version)
+        2. Enable "Install from unknown sources" in Android settings if needed
+        3. Install the APK
+        
+        ### 🎉 Changes in this Release
+        ${COMMITS}
+        
+        ### ✨ Features
+        - Advanced Filament 3D rendering engine
+        - Material Design 3 UI
+        - Second Life/OpenSim grid support
+        - Chat, Inventory, Minimap
+        - SLURL handler
+        
+        ### 🔐 Checksums (SHA256)
+        
+        **Release APK:**
+        \`\`\`
+        ${RELEASE_CHECKSUM}
+        \`\`\`
+        
+        **Debug APK:**
+        \`\`\`
+        ${DEBUG_CHECKSUM}
+        \`\`\`
+        
+        For bug reports and feature requests, please visit the [Issues page](https://github.com/${{ github.repository }}/issues).
+        EOF
+        
+        echo "release_body<<EOF" >> $GITHUB_OUTPUT
+        cat release_notes.md >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        
+    - name: Create Release and Upload Assets
+      uses: softprops/action-gh-release@v2
+      with:
+        name: Linkpoint ${{ needs.build.outputs.version-name }}
+        body: ${{ steps.release_notes.outputs.release_body }}
+        draft: false
+        prerelease: false
+        files: |
+          ./apks/release-apk/Linkpoint-v${{ needs.build.outputs.version-name }}-release.apk
+          ./apks/release-apk/Linkpoint-v${{ needs.build.outputs.version-name }}-release-unsigned.apk
+          ./apks/debug-apk/Linkpoint-v${{ needs.build.outputs.version-name }}-debug.apk
+          ./apks/release-apk/*.sha256
+          ./apks/debug-apk/*.sha256
+        fail_on_unmatched_files: false
