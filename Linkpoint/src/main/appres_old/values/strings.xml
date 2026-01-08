@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Linkpoint</string>
+    <string name="app_description">Second Life Viewer for Android</string>
+    
+    <!-- Login Screen -->
+    <string name="login_title">Login to Second Life</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="logging_in">Logging in…</string>
+    <string name="login_failed">Login failed</string>
+    <string name="login_success">Login successful!</string>
+    <string name="select_grid">Select Grid</string>
+    
+    <!-- Grids -->
+    <string name="grid_second_life">Second Life</string>
+    <string name="grid_osgrid">OSGrid</string>
+    <string name="grid_inworldz">InWorldz</string>
+    <string name="grid_kitely">Kitely</string>
+    
+    <!-- Main Screen -->
+    <string name="chat">Chat</string>
+    <string name="inventory">Inventory</string>
+    <string name="map">Map</string>
+    <string name="settings">Settings</string>
+    <string name="nearby">Nearby</string>
+    <string name="friends">Friends</string>
+    <string name="groups">Groups</string>
+    
+    <!-- Actions -->
+    <string name="teleport">Teleport</string>
+    <string name="send">Send</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="close">Close</string>
+    
+    <!-- Inventory -->
+    <string name="inventory_activity_title">Inventory</string>
+    <string name="objects_activity_title">Objects</string>
+    
+    <!-- Errors -->
+    <string name="error_network">Network error</string>
+    <string name="error_connection">Connection error</string>
+    <string name="error_timeout">Connection timed out</string>
+    <string name="error_invalid_credentials">Invalid username or password</string>
+    
+    <!-- Settings -->
+    <string name="settings_graphics">Graphics</string>
+    <string name="settings_sound">Sound</string>
+    <string name="settings_chat">Chat</string>
+    <string name="settings_privacy">Privacy</string>
+    <string name="settings_advanced">Advanced</string>
+    <string name="settings_about">About</string>
+</resources>

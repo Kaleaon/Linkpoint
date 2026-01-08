@@ -1,0 +1,28 @@
+package com.linkpoint.slproto.messages
+
+import com.linkpoint.slproto.SLMessage
+import java.nio.ByteBuffer
+import java.util.UUID
+
+class StateSaveMessage : SLMessage() {
+    var agentId: UUID = UUID(0L, 0L)
+    var sessionId: UUID = UUID(0L, 0L)
+    var filename: ByteArray = ByteArray(0)
+
+
+    override fun packPayload(buffer: ByteBuffer) {
+        packUUID(buffer, agentId)
+        packUUID(buffer, sessionId)
+        packVariable(buffer, filename, 1)
+    }
+
+    override fun unpackPayload(buffer: ByteBuffer) {
+        agentId = unpackUUID(buffer)
+        sessionId = unpackUUID(buffer)
+        filename = unpackVariable(buffer, 1)
+    }
+
+    override fun getMessageID(): Int = 0xFFFF007F.toInt()
+
+    override fun getMessageName(): String = "StateSave"
+}

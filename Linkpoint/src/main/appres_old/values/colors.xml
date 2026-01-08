@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Colors -->
+    <color name="primary">#3F51B5</color>
+    <color name="primary_dark">#303F9F</color>
+    <color name="primary_light">#C5CAE9</color>
+    
+    <!-- Pink Theme Colors -->
+    <color name="primary_pink">#E91E63</color>
+    <color name="primary_dark_pink">#C2185B</color>
+    <color name="primary_light_pink">#F8BBD0</color>
+    
+    <!-- Accent Colors (used by legacy styles) -->
+    <color name="accent">#FF4081</color>
+    <color name="accent_bright_dark">#F50057</color>
+    <color name="accent_bright_light">#FF80AB</color>
+    <color name="accent_pink">#FF80AB</color>
+    <color name="accent_bright_pink">#FF4081</color>
+    
+    <!-- Secondary Colors -->
+    <color name="secondary">#FF4081</color>
+    <color name="secondary_dark">#F50057</color>
+    <color name="secondary_light">#FF80AB</color>
+    
+    <!-- CardView Colors -->
+    <color name="cardview_dark_background">#424242</color>
+    <color name="cardview_light_background">#FFFFFF</color>
+    
+    <!-- Background Colors -->
+    <color name="background">#121212</color>
+    <color name="background_light">#1E1E1E</color>
+    <color name="surface">#1E1E1E</color>
+    <color name="surface_light">#2D2D2D</color>
+    
+    <!-- Text Colors -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B3FFFFFF</color>
+    <color name="text_disabled">#61FFFFFF</color>
+    <color name="text_on_primary">#FFFFFF</color>
+    <color name="text_on_secondary">#FFFFFF</color>
+    
+    <!-- Status Colors -->
+    <color name="online">#4CAF50</color>
+    <color name="away">#FFC107</color>
+    <color name="busy">#F44336</color>
+    <color name="offline">#9E9E9E</color>
+    
+    <!-- Chat Colors -->
+    <color name="chat_system">#2196F3</color>
+    <color name="chat_whisper">#9C27B0</color>
+    <color name="chat_shout">#FF5722</color>
+    <color name="chat_normal">#FFFFFF</color>
+    <color name="chat_im">#4CAF50</color>
+    <color name="chat_group">#03A9F4</color>
+    
+    <!-- UI Colors -->
+    <color name="divider">#1FFFFFFF</color>
+    <color name="error">#CF6679</color>
+    <color name="success">#4CAF50</color>
+    <color name="warning">#FFC107</color>
+    <color name="info">#2196F3</color>
+    
+    <!-- Common -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
+</resources>
