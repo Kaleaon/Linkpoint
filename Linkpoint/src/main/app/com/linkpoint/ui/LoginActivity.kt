@@ -1,6 +1,9 @@
 package com.linkpoint.ui
 
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -83,6 +86,13 @@ class LoginActivity : AppCompatActivity() {
             return
         }
         
+        // Check network connectivity before attempting login
+        if (!isNetworkAvailable()) {
+            statusText.text = "No internet connection"
+            Toast.makeText(this, "Please check your internet connection and try again.", Toast.LENGTH_LONG).show()
+            return
+        }
+        
         // Start login process
         setLoading(true)
         statusText.text = "Connecting..."
@@ -101,12 +111,25 @@ class LoginActivity : AppCompatActivity() {
                     Toast.makeText(this@LoginActivity, result.message, Toast.LENGTH_LONG).show()
                 }
             } catch (e: Exception) {
-                statusText.text = "Error: ${e.message}"
-                Toast.makeText(this@LoginActivity, "Connection error: ${e.message}", Toast.LENGTH_LONG).show()
+                val errorMessage = e.message ?: "An unexpected error occurred"
+                statusText.text = "Error: $errorMessage"
+                Toast.makeText(this@LoginActivity, "Connection error: $errorMessage", Toast.LENGTH_LONG).show()
             } finally {
                 setLoading(false)
             }
         }
+    }
+    
+    /**
+     * Check if network is available and has internet capability
+     */
+    private fun isNetworkAvailable(): Boolean {
+        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+               capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
     }
     
     private fun setLoading(loading: Boolean) {

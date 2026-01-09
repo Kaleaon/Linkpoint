@@ -115,15 +115,27 @@ class SecondLifeConnection {
             }
         } catch (e: IOException) {
             Log.e(TAG, "Login network error", e)
+            val errorMessage = when {
+                e.message.isNullOrBlank() -> "Unable to connect. Please check your internet connection and try again."
+                e.message!!.contains("timeout", ignoreCase = true) -> "Connection timed out. Please check your network and try again."
+                e.message!!.contains("host", ignoreCase = true) -> "Could not reach server. Please check your internet connection."
+                e.message!!.contains("ssl", ignoreCase = true) || e.message!!.contains("certificate", ignoreCase = true) -> "Secure connection failed. Please try again."
+                else -> "Network error: ${e.message}"
+            }
             LoginResult(
                 success = false,
-                message = "Network error: ${e.message}"
+                message = errorMessage
             )
         } catch (e: Exception) {
             Log.e(TAG, "Login error", e)
+            val errorMessage = if (e.message.isNullOrBlank()) {
+                "An unexpected error occurred. Please try again."
+            } else {
+                "Error: ${e.message}"
+            }
             LoginResult(
                 success = false,
-                message = "Error: ${e.message}"
+                message = errorMessage
             )
         }
     }
