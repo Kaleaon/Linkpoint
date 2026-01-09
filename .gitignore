@@ -128,11 +128,6 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
+
+# Android SDK files (should not be committed)
+android-sdk/
