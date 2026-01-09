@@ -121,15 +121,25 @@ class LoginActivity : AppCompatActivity() {
     }
     
     /**
-     * Check if network is available and has internet capability
+     * Check if network is available
+     * 
+     * Note: We only check for basic connectivity, not NET_CAPABILITY_VALIDATED,
+     * because some mobile networks (especially 5G) may report as not validated
+     * even when they work fine. The actual connection attempt will determine
+     * if the network is truly functional.
      */
     private fun isNetworkAvailable(): Boolean {
         val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val network = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
         
+        // Check for any transport type (WiFi, Cellular, Ethernet, etc.)
+        // Don't require NET_CAPABILITY_VALIDATED as it can be false on some mobile networks
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-               capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+               (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN))
     }
     
     private fun setLoading(loading: Boolean) {
