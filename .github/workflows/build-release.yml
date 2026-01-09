@@ -11,6 +11,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    
+    defaults:
+      run:
+        working-directory: Linkpoint
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,20 +39,23 @@ jobs:
             "platforms;android-34" \
             "build-tools;34.0.0"
 
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
       - name: Build Debug
-        run: ./gradlew :app:assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --stacktrace
 
       - name: Build Release
-        run: ./gradlew :app:assembleRelease --stacktrace
+        run: ./gradlew assembleRelease --stacktrace
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: Linkpoint-debug-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: Linkpoint/build/outputs/apk/debug/*.apk
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
           name: Linkpoint-release-APK
-          path: app/build/outputs/apk/release/app-release.apk
+          path: Linkpoint/build/outputs/apk/release/*.apk

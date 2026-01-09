@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Linkpoint Logo - A stylized chain link / connection point -->
+    <group
+        android:translateX="27"
+        android:translateY="27">
+        
+        <!-- Outer ring -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M27,0C12.09,0,0,12.09,0,27s12.09,27,27,27s27-12.09,27-27S41.91,0,27,0z
+                             M27,48c-11.58,0-21-9.42-21-21s9.42-21,21-21s21,9.42,21,21S38.58,48,27,48z"/>
+        
+        <!-- Inner connection points -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M27,12c-8.28,0-15,6.72-15,15s6.72,15,15,15s15-6.72,15-15S35.28,12,27,12z
+                             M27,36c-4.97,0-9-4.03-9-9s4.03-9,9-9s9,4.03,9,9S31.97,36,27,36z"/>
+        
+        <!-- Center dot -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M27,22c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5S29.76,22,27,22z"/>
+        
+        <!-- Connection lines -->
+        <path
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="3"
+            android:pathData="M27,0L27,12M27,42L27,54M0,27L12,27M42,27L54,27"/>
+            
+    </group>
+</vector>

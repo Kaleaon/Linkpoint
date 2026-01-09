@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="Graphics"
+        android:iconSpaceReserved="false">
+
+        <ListPreference
+            android:key="graphics_quality"
+            android:title="Graphics Quality"
+            android:summary="Adjust rendering quality"
+            android:entries="@array/graphics_quality_entries"
+            android:entryValues="@array/graphics_quality_values"
+            android:defaultValue="medium"
+            android:iconSpaceReserved="false" />
+
+        <SeekBarPreference
+            android:key="draw_distance"
+            android:title="Draw Distance"
+            android:summary="How far you can see"
+            android:defaultValue="128"
+            android:max="512"
+            app:min="32"
+            app:showSeekBarValue="true"
+            android:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="enable_shadows"
+            android:title="Enable Shadows"
+            android:summary="Render shadows (performance impact)"
+            android:defaultValue="true"
+            android:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="enable_bloom"
+            android:title="Enable Bloom"
+            android:summary="HDR bloom effect"
+            android:defaultValue="true"
+            android:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Chat"
+        android:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            android:key="show_timestamps"
+            android:title="Show Timestamps"
+            android:summary="Display time for each message"
+            android:defaultValue="true"
+            android:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="chat_notifications"
+            android:title="Chat Notifications"
+            android:summary="Show notifications for new messages"
+            android:defaultValue="true"
+            android:iconSpaceReserved="false" />
+
+        <ListPreference
+            android:key="chat_font_size"
+            android:title="Chat Font Size"
+            android:summary="Text size in chat"
+            android:entries="@array/font_size_entries"
+            android:entryValues="@array/font_size_values"
+            android:defaultValue="medium"
+            android:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Sound"
+        android:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            android:key="enable_sounds"
+            android:title="Enable Sounds"
+            android:summary="Play in-world sounds"
+            android:defaultValue="true"
+            android:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="enable_music"
+            android:title="Enable Music"
+            android:summary="Play streaming music"
+            android:defaultValue="true"
+            android:iconSpaceReserved="false" />
+
+        <SeekBarPreference
+            android:key="master_volume"
+            android:title="Master Volume"
+            android:defaultValue="80"
+            android:max="100"
+            app:min="0"
+            app:showSeekBarValue="true"
+            android:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Account"
+        android:iconSpaceReserved="false">
+
+        <Preference
+            android:key="logout"
+            android:title="Logout"
+            android:summary="Sign out of Second Life"
+            android:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="clear_cache"
+            android:title="Clear Cache"
+            android:summary="Delete cached textures and data"
+            android:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="About"
+        android:iconSpaceReserved="false">
+
+        <Preference
+            android:key="about"
+            android:title="About Linkpoint"
+            android:selectable="false"
+            android:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

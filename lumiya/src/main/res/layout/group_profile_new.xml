@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<com.lumiyaviewer.lumiya.ui.common.LoadingLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:id="@+id/loading_layout" android:layout_width="match_parent" android:layout_height="wrap_content">
-    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent">
-        <com.astuetz.PagerSlidingTabStrip android:id="@+id/user_profile_tabs" android:background="?attr/colorPrimary" android:layout_width="match_parent" android:layout_height="?attr/actionBarSize" app:pstsIndicatorColor="?attr/controlLabelColor" app:pstsShouldExpand="true" app:pstsTabTextColor="?attr/controlLabelColor"/>
-        <android.support.v4.view.ViewPager android:id="@+id/user_profile_pager" android:layout_width="match_parent" android:layout_height="match_parent"/>
-    </LinearLayout>
-</com.lumiyaviewer.lumiya.ui.common.LoadingLayout>

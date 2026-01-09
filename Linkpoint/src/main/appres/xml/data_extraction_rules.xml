@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Data extraction rules for Android 12+ (API 31+).
+    Controls what data can be transferred during device-to-device migration.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- Exclude all sensitive data from cloud backups -->
+        <exclude domain="sharedpref" path="." />
+        <exclude domain="database" path="." />
+        <exclude domain="cache" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <!-- Allow some preferences during device transfer, but not credentials -->
+        <exclude domain="sharedpref" path="credentials.xml" />
+        <exclude domain="sharedpref" path="session.xml" />
+        <exclude domain="database" path="." />
+    </device-transfer>
+</data-extraction-rules>

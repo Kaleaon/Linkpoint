@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt">
-    <item android:icon="?attr/MenuIconLocalChat" android:id="@+id/item_chat" android:title="@string/chat_menu_item_title" app:showAsAction="ifRoom"/>
-    <item android:icon="?attr/MenuIconHanger" android:id="@+id/item_outfits" android:title="@string/outfits_menu_item_title" app:showAsAction="ifRoom"/>
-    <item android:icon="?attr/MenuIconTarget" android:id="@+id/item_select_object" android:title="@string/select_object_menu_item_title" app:showAsAction="ifRoom"/>
-    <item android:id="@+id/item_cardboard_view" android:title="@string/cardboard_view_menu_title" app:showAsAction="never"/>
-    <item android:icon="?attr/MenuIconShare" android:id="@+id/item_take_screenshot" android:title="@string/share_screenshot_menu_item" app:showAsAction="never"/>
-    <item android:id="@+id/item_stop_animations" android:title="@string/stop_avatar_animations" app:showAsAction="never"/>
-</menu>

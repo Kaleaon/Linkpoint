@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:title="@string/prefs_category_notifications_im">
-    <CheckBoxPreference android:title="Enable notification" android:key="enableNotifyPrivateIM" android:summary="Notify for private IMs" android:defaultValue="true"/>
-    <CheckBoxPreference android:title="Private IM sound" android:key="soundOnPrivateIM" android:summary="Play sound on private message" android:dependency="enableNotifyPrivateIM" android:defaultValue="true"/>
-    <com.lumiyaviewer.lumiya.ui.settings.RingtonePreference android:title="Sound for private IMs" android:key="notifySoundPrivateIM" android:summary="Sound to play when private message is received" android:dependency="soundOnPrivateIM" android:defaultValue="content://settings/system/notification_sound" android:ringtoneType="notification" android:showDefault="true" app:defaultRawResource="@raw/lumiya_private_message"/>
-    <ListPreference android:entries="@array/pref_led_action" android:title="Blink LED for private IMs" android:key="notifyLEDprivateIMs" android:summary="%s" android:dependency="enableNotifyPrivateIM" android:defaultValue="none" android:entryValues="@array/pref_led_action_values"/>
-    <ListPreference android:entries="@array/pref_led_color" android:title="LED color for private IMs" android:key="notifyLEDColorPrivateIMs" android:summary="%s" android:dependency="enableNotifyPrivateIM" android:defaultValue="FF0000" android:entryValues="@array/pref_led_color_values"/>
-</PreferenceScreen>

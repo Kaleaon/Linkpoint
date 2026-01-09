@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:title="@string/prefs_category_notifications">
-    <CheckBoxPreference android:title="Always in status bar" android:key="onlineNotify" android:summary="Show online status icon in status bar" android:defaultValue="true"/>
-    <CheckBoxPreference android:title="Message sounds" android:key="soundOnNotify" android:summary="Enable message sounds" android:defaultValue="true"/>
-    <com.lumiyaviewer.lumiya.ui.settings.PreferenceSubPage android:title="Local chat messages" app:pageResource="@xml/preferences_notifications_local" app:pageNotificationDetails="true" app:notificationType="LocalChat"/>
-    <com.lumiyaviewer.lumiya.ui.settings.PreferenceSubPage android:title="Private messages" app:pageResource="@xml/preferences_notifications_im" app:pageNotificationDetails="true" app:notificationType="Private"/>
-    <com.lumiyaviewer.lumiya.ui.settings.PreferenceSubPage android:title="Group messages" app:pageResource="@xml/preferences_notifications_group" app:pageNotificationDetails="true" app:notificationType="Group"/>
-</PreferenceScreen>

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:title="@string/prefs_category_connection">
-    <ListPreference android:entries="@array/entries_start_location" android:title="Start location" android:key="start_location" android:summary="%s" android:defaultValue="last" android:dialogTitle="Start location" android:entryValues="@array/entryvalues_start_location"/>
-    <CheckBoxPreference android:title="Don&apos;t save user name" android:key="noSaveUserName" android:summary="Do not store last used user name" android:defaultValue="false"/>
-    <CheckBoxPreference android:title="Auto reconnect" android:key="auto_reconnect" android:summary="Attempt to reconnect after connection loss" android:defaultValue="true"/>
-    <com.lumiyaviewer.lumiya.ui.settings.FriendlyEditTextPreference android:title="Reconnection attempts" android:key="reconnect_attempts" android:summary="Try %s times to reconnect" android:dependency="auto_reconnect" android:defaultValue="10" android:inputType="number"/>
-    <CheckBoxPreference android:title="Keep Wi-Fi on" android:key="keep_wifi_on" android:summary="Prevent Wi-Fi from sleeping while connected" android:defaultValue="true"/>
-</PreferenceScreen>

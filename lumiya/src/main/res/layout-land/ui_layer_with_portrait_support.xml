@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:layout_width="match_parent" android:layout_height="match_parent">
-    <include android:id="@+id/ui_back_button" layout="@layout/back_button"/>
-    <RelativeLayout android:id="@+id/ui_alignment_marker" android:background="@color/alignment_marker_color" android:layout_width="@dimen/alignment_marker_thickness" android:layout_height="@dimen/alignment_marker_height" android:layout_alignParentBottom="true" android:layout_centerHorizontal="true"/>
-    <include android:id="@+id/ui_settings_button" layout="@layout/settings_button"/>
-</RelativeLayout>
