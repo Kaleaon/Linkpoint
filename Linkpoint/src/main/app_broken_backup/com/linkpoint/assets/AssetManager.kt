@@ -387,15 +387,6 @@ data class AssetCacheStats(
 
 /**
  * Get cache statistics
+ * Note: This requires access to AssetManager's internal state, 
+ * so it's implemented as a method inside the class instead
  */
-fun AssetManager.getCacheStats(): AssetCacheStats {
-    val cacheDir = File(context.cacheDir, "asset_cache")
-    val files = cacheDir.listFiles() ?: emptyArray()
-    
-    return AssetCacheStats(
-        totalSize = files.sumOf { it.length() },
-        fileCount = files.size,
-        oldestFile = files.minOfOrNull { it.lastModified() } ?: 0L,
-        newestFile = files.maxOfOrNull { it.lastModified() } ?: 0L
-    )
-}
