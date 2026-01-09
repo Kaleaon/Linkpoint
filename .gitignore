@@ -58,6 +58,8 @@ lint/tmp/
 *.zip
 *.tar.gz
 *.jar
+# Exception: Keep gradle wrapper jar for builds
+!**/gradle-wrapper.jar
 *.idsig
 *.args
 classes.dex.xml
