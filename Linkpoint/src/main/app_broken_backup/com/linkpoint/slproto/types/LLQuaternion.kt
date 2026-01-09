@@ -23,34 +23,47 @@ class LLQuaternion(
     companion object {
         const val FP_MAG_THRESHOLD: Float = 1.0E-7f
         
-        @JvmField
-        val Identity = LLQuaternion(0.0f, 0.0f, 0.0f, 1.0f)
+        /**
+         * Returns a new identity quaternion (0, 0, 0, 1).
+         * Note: Returns a new instance each call to prevent mutation of shared state.
+         */
+        @JvmStatic
+        fun identity(): LLQuaternion = LLQuaternion(0.0f, 0.0f, 0.0f, 1.0f)
         
+        /**
+         * Creates a quaternion from a rotation matrix.
+         * Uses Shoemake's algorithm for numerical stability.
+         */
         @JvmStatic
         fun fromMatrix(matrix: FloatArray): LLQuaternion {
             val quat = LLQuaternion()
-            val trace = matrix[0] + 1.0f + matrix[5] + matrix[10]
+            // Standard trace = m00 + m11 + m22
+            val trace = matrix[0] + matrix[5] + matrix[10]
             
-            if (trace > 0.5f) {
-                val s = (sqrt(trace.toDouble()) * 2.0).toFloat()
+            if (trace > 0.0f) {
+                // Positive trace: use standard formula
+                val s = sqrt((trace + 1.0f).toDouble()).toFloat() * 2.0f
+                quat.w = s * 0.25f
                 quat.x = (matrix[9] - matrix[6]) / s
                 quat.y = (matrix[2] - matrix[8]) / s
                 quat.z = (matrix[4] - matrix[1]) / s
-                quat.w = s * 0.25f
             } else if (matrix[0] > matrix[5] && matrix[0] > matrix[10]) {
-                val s = (sqrt(((matrix[0] + 1.0f) - matrix[5] - matrix[10]).toDouble()) * 2.0).toFloat()
+                // m00 is largest diagonal element
+                val s = sqrt((1.0f + matrix[0] - matrix[5] - matrix[10]).toDouble()).toFloat() * 2.0f
                 quat.x = 0.25f * s
                 quat.y = (matrix[4] + matrix[1]) / s
                 quat.z = (matrix[2] + matrix[8]) / s
                 quat.w = (matrix[9] - matrix[6]) / s
             } else if (matrix[5] > matrix[10]) {
-                val s = (sqrt(((matrix[5] + 1.0f) - matrix[0] - matrix[10]).toDouble()) * 2.0).toFloat()
+                // m11 is largest diagonal element
+                val s = sqrt((1.0f + matrix[5] - matrix[0] - matrix[10]).toDouble()).toFloat() * 2.0f
                 quat.x = (matrix[4] + matrix[1]) / s
                 quat.y = 0.25f * s
                 quat.z = (matrix[9] + matrix[6]) / s
                 quat.w = (matrix[2] - matrix[8]) / s
             } else {
-                val s = (sqrt(((matrix[10] + 1.0f) - matrix[0] - matrix[5]).toDouble()) * 2.0).toFloat()
+                // m22 is largest diagonal element
+                val s = sqrt((1.0f + matrix[10] - matrix[0] - matrix[5]).toDouble()).toFloat() * 2.0f
                 quat.x = (matrix[2] + matrix[8]) / s
                 quat.y = (matrix[9] + matrix[6]) / s
                 quat.z = 0.25f * s
@@ -69,6 +82,10 @@ class LLQuaternion(
             ).also { it.normalize() }
         }
         
+        /**
+         * Spherical linear interpolation between two quaternions.
+         * Handles edge cases where quaternions are very close to prevent division by zero.
+         */
         @JvmStatic
         fun slerp(a: LLQuaternion, b: LLQuaternion, t: Float): LLQuaternion {
             var bx = b.x
@@ -87,13 +104,20 @@ class LLQuaternion(
                 dot = -dot
             }
             
-            // If quaternions are very close, use linear interpolation
+            // If quaternions are very close, use linear interpolation to avoid division by zero
             if (dot > 0.9995f) {
                 return lerp(a, LLQuaternion(bx, by, bz, bw), t)
             }
             
-            val theta = acos(dot.toDouble()).toFloat()
+            // Clamp dot to valid range for acos
+            val clampedDot = if (dot > 1.0f) 1.0f else if (dot < -1.0f) -1.0f else dot
+            val theta = acos(clampedDot.toDouble()).toFloat()
             val sinTheta = sin(theta.toDouble()).toFloat()
+            
+            // Guard against division by zero - fall back to lerp if sinTheta is too small
+            if (sinTheta < FP_MAG_THRESHOLD) {
+                return lerp(a, LLQuaternion(bx, by, bz, bw), t)
+            }
             
             val wa = sin(((1.0f - t) * theta).toDouble()).toFloat() / sinTheta
             val wb = sin((t * theta).toDouble()).toFloat() / sinTheta

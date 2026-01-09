@@ -21,17 +21,33 @@ class LLVector3(
     companion object {
         const val FP_MAG_THRESHOLD: Float = 1.0E-7f
         
-        @JvmField
-        val Zero = LLVector3(0.0f, 0.0f, 0.0f)
+        /**
+         * Returns a new zero vector (0, 0, 0).
+         * Note: Returns a new instance each call to prevent mutation of shared state.
+         */
+        @JvmStatic
+        fun zero(): LLVector3 = LLVector3(0.0f, 0.0f, 0.0f)
         
-        @JvmField
-        val ZAxis = LLVector3(0.0f, 0.0f, 1.0f)
+        /**
+         * Returns a new Z-axis unit vector (0, 0, 1).
+         * Note: Returns a new instance each call to prevent mutation of shared state.
+         */
+        @JvmStatic
+        fun zAxis(): LLVector3 = LLVector3(0.0f, 0.0f, 1.0f)
         
-        @JvmField
-        val XAxis = LLVector3(1.0f, 0.0f, 0.0f)
+        /**
+         * Returns a new X-axis unit vector (1, 0, 0).
+         * Note: Returns a new instance each call to prevent mutation of shared state.
+         */
+        @JvmStatic
+        fun xAxis(): LLVector3 = LLVector3(1.0f, 0.0f, 0.0f)
         
-        @JvmField
-        val YAxis = LLVector3(0.0f, 1.0f, 0.0f)
+        /**
+         * Returns a new Y-axis unit vector (0, 1, 0).
+         * Note: Returns a new instance each call to prevent mutation of shared state.
+         */
+        @JvmStatic
+        fun yAxis(): LLVector3 = LLVector3(0.0f, 1.0f, 0.0f)
         
         @JvmStatic
         fun cross(a: LLVector3, b: LLVector3): LLVector3 {
@@ -134,9 +150,10 @@ class LLVector3(
     }
     
     override fun hashCode(): Int {
-        return java.lang.Float.floatToIntBits(x) + 
-               java.lang.Float.floatToIntBits(y) + 
-               java.lang.Float.floatToIntBits(z)
+        var result = java.lang.Float.floatToIntBits(x)
+        result = 31 * result + java.lang.Float.floatToIntBits(y)
+        result = 31 * result + java.lang.Float.floatToIntBits(z)
+        return result
     }
     
     fun isZero(): Boolean {
