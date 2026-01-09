@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,12 +24,27 @@ class InventoryActivity : AppCompatActivity() {
     private var currentFolder: InventoryFolder? = null
     private val folderStack = mutableListOf<InventoryFolder>()
     
+    private val backPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            if (folderStack.isNotEmpty()) {
+                val parent = folderStack.removeAt(folderStack.size - 1)
+                displayFolder(parent)
+            } else {
+                isEnabled = false
+                onBackPressedDispatcher.onBackPressed()
+            }
+        }
+    }
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_inventory)
         
         supportActionBar?.title = "Inventory"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        
+        // Register modern back press handler
+        onBackPressedDispatcher.addCallback(this, backPressedCallback)
         
         initViews()
         loadRootInventory()
@@ -153,19 +169,9 @@ class InventoryActivity : AppCompatActivity() {
             .show()
     }
     
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        if (folderStack.isNotEmpty()) {
-            val parent = folderStack.removeAt(folderStack.size - 1)
-            displayFolder(parent)
-        } else {
-            @Suppress("DEPRECATION")
-            super.onBackPressed()
-        }
-    }
-    
     override fun onSupportNavigateUp(): Boolean {
-        onBackPressed()
+        // Use the back pressed dispatcher which handles folder navigation
+        onBackPressedDispatcher.onBackPressed()
         return true
     }
 }
