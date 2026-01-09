@@ -5,157 +5,157 @@ import android.util.Log
 import com.linkpoint.eventbus.EventBus
 import com.linkpoint.slproto.SLGridConnection
 import com.linkpoint.slproto.auth.SLAuthParams
-import com.linkpoint.slproto.auth.SLAuthReply
 import com.linkpoint.slproto.events.SLConnectionStateChangedEvent
 import com.linkpoint.slproto.events.SLDisconnectEvent
 import com.linkpoint.slproto.events.SLLoginResultEvent
-import java.util.concurrent.CompletableFuture
+import kotlinx.coroutines.*
 
 /**
  * Integration bridge between the modern connection system and legacy SLGridConnection.
  * This class provides backwards compatibility while adding modern reliability features.
+ * 
+ * Fixed from original broken syntax to proper Kotlin.
  */
-class ConnectionIntegrationBridge {
-    private const val TAG: String = "ConnectionBridge"
+class ConnectionIntegrationBridge(context: Context) {
     
-    private val Context context
-    private val ModernConnectionManager modernManager
-    private val EventBus eventBus
-    
-    public ConnectionIntegrationBridge(Context context) {
-        this.context = context.getApplicationContext()
-        this.modernManager = ModernConnectionManager(context)
-        this.eventBus = EventBus.getInstance()
+    companion object {
+        private const val TAG = "ConnectionBridge"
     }
+    
+    private val appContext: Context = context.applicationContext
+    private val modernManager: ModernConnectionManager = ModernConnectionManager(appContext)
+    private val eventBus: EventBus = EventBus.getInstance()
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     
     /**
      * Enhanced connection method that uses modern connection manager
      * but integrates with existing event system.
      */
-    public CompletableFuture<Boolean> connectWithModernReliability(SLAuthParams authParams) {
+    fun connectWithModernReliability(authParams: SLAuthParams, callback: (Boolean) -> Unit) {
         Log.i(TAG, "Starting enhanced connection with modern reliability features")
         
         // Emit connection state change
-        eventBus.publish(SLConnectionStateChangedEvent(
-            SLGridConnection.ConnectionState.Connecting))
+        eventBus.publish(SLConnectionStateChangedEvent(SLGridConnection.ConnectionState.Connecting))
         
-        return modernManager.connectAsync(authParams)
-            .thenApply(authReply -> {
-                if (authReply != null && authReply.success) {
+        scope.launch {
+            try {
+                val authReply = modernManager.connectAsync(authParams)
+                
+                if (authReply.success) {
                     Log.i(TAG, "Modern connection successful, integrating with legacy system")
                     
                     // Emit successful login event
                     eventBus.publish(SLLoginResultEvent(
-                        true, 
-                        "Connection established successfully", 
-                        authReply.agentID))
+                        true,
+                        "Connection established successfully",
+                        authReply.agentID
+                    ))
                     
                     // Emit connection state change
                     eventBus.publish(SLConnectionStateChangedEvent(
-                        SLGridConnection.ConnectionState.Connected))
+                        SLGridConnection.ConnectionState.Connected
+                    ))
                     
-                    return true
+                    callback(true)
                 } else {
-                    String errorMessage = authReply != null ? authReply.message : 
-                        "Unknown authentication error"
-                    Log.e(TAG, "Modern connection failed: " + errorMessage)
+                    val errorMessage = authReply.message ?: "Unknown authentication error"
+                    Log.e(TAG, "Modern connection failed: $errorMessage")
                     
                     // Emit failure events
                     eventBus.publish(SLLoginResultEvent(
-                        false, 
-                        errorMessage, 
-                        null))
+                        false,
+                        errorMessage,
+                        null
+                    ))
                     
                     eventBus.publish(SLConnectionStateChangedEvent(
-                        SLGridConnection.ConnectionState.Idle))
+                        SLGridConnection.ConnectionState.Idle
+                    ))
                     
-                    return false
+                    callback(false)
                 }
-            })
-            .exceptionally(throwable -> {
-                Log.e(TAG, "Connection failed with exception", throwable)
+            } catch (e: Exception) {
+                Log.e(TAG, "Connection failed with exception", e)
                 
                 // Emit disconnect event
                 eventBus.publish(SLDisconnectEvent(
-                    false, 
-                    "Connection failed: " + throwable.getMessage()))
+                    false,
+                    "Connection failed: ${e.message}"
+                ))
                 
                 eventBus.publish(SLConnectionStateChangedEvent(
-                    SLGridConnection.ConnectionState.Idle))
+                    SLGridConnection.ConnectionState.Idle
+                ))
                 
-                return false
-            })
+                callback(false)
+            }
+        }
     }
     
     /**
      * Run diagnostics and return detailed connection health information
      */
-    public CompletableFuture<String> getDiagnosticReport() {
-        ConnectionDiagnostics diagnostics = ConnectionDiagnostics(context)
+    fun getDiagnosticReport(callback: (String) -> Unit) {
+        val diagnostics = ConnectionDiagnostics(appContext)
         
-        return diagnostics.diagnoseAsync().thenApply(result -> {
-            StringBuilder report = StringBuilder()
-            report.append("=== Second Life Connection Diagnostic Report ===\n")
-            report.append("Network Available: ").append(result.networkAvailable ? "✅" : "❌").append("\n")
-            report.append("DNS Resolution: ").append(result.dnsWorking ? "✅" : "❌").append("\n")
-            report.append("HTTPS Connectivity: ").append(result.httpsWorking ? "✅" : "❌").append("\n")
-            report.append("Login Server Access: ").append(result.loginServerWorking ? "✅" : "❌").append("\n")
-            report.append("Proxy/Firewall Detected: ").append(result.proxyDetected ? "⚠️" : "✅").append("\n")
-            report.append("Overall Health: ").append(result.getOverallHealth()).append("\n")
+        scope.launch {
+            val result = diagnostics.diagnoseAsync()
             
-            if (!result.getIssues().isEmpty()) {
-                report.append("Issues Found: ").append(result.getIssues()).append("\n")
+            val report = buildString {
+                appendLine("=== Second Life Connection Diagnostic Report ===")
+                appendLine("Network Available: ${if (result.networkAvailable) "✓" else "✗"}")
+                appendLine("DNS Resolution: ${if (result.dnsWorking) "✓" else "✗"}")
+                appendLine("HTTPS Connectivity: ${if (result.httpsWorking) "✓" else "✗"}")
+                appendLine("Login Server Access: ${if (result.loginServerWorking) "✓" else "✗"}")
+                appendLine("Proxy/Firewall Detected: ${if (result.proxyDetected) "!" else "✓"}")
+                appendLine("Overall Health: ${result.getOverallHealth()}")
+                
+                if (result.getIssues().isNotEmpty()) {
+                    appendLine("Issues Found: ${result.getIssues()}")
+                }
+                
+                // Add recommendations based on health level
+                appendLine()
+                append("Recommendation: ")
+                appendLine(when (result.getOverallHealth()) {
+                    ConnectionDiagnostics.DiagnosticResult.HealthLevel.EXCELLENT ->
+                        "Connection should work perfectly!"
+                    ConnectionDiagnostics.DiagnosticResult.HealthLevel.GOOD ->
+                        "Connection should work. Login servers may be temporarily unavailable."
+                    ConnectionDiagnostics.DiagnosticResult.HealthLevel.POOR ->
+                        "Limited connectivity. Check firewall/proxy settings."
+                    ConnectionDiagnostics.DiagnosticResult.HealthLevel.CRITICAL ->
+                        "Network issues detected. Check internet connection."
+                    ConnectionDiagnostics.DiagnosticResult.HealthLevel.NO_CONNECTIVITY ->
+                        "No network available. Enable WiFi or mobile data."
+                })
             }
             
-            // Add recommendations based on health level
-            switch (result.getOverallHealth()) {
-                case EXCELLENT:
-                    report.append("Recommendation: Connection should work perfectly!\n")
-                    break
-                case GOOD:
-                    report.append("Recommendation: Connection should work. Login servers may be temporarily unavailable.\n")
-                    break
-                case POOR:
-                    report.append("Recommendation: Limited connectivity. Check firewall/proxy settings.\n")
-                    break
-                case CRITICAL:
-                    report.append("Recommendation: Network issues detected. Check internet connection.\n")
-                    break
-                case NO_CONNECTIVITY:
-                    report.append("Recommendation: No network available. Enable WiFi or mobile data.\n")
-                    break
-            }
-            
-            return report.toString()
-        })
+            callback(report)
+        }
     }
     
     /**
      * Get current connection manager state
      */
-    public ModernConnectionManager.ConnectionState getCurrentState() {
-        return modernManager.getState()
-    }
+    fun getCurrentState(): ModernConnectionManager.ConnectionState = modernManager.getState()
     
     /**
      * Get the last error message if any
      */
-    public String getLastError() {
-        return modernManager.getLastError()
-    }
+    fun getLastError(): String? = modernManager.getLastError()
     
     /**
      * Get number of active connections
      */
-    public Int getActiveConnectionCount() {
-        return modernManager.getActiveConnectionCount()
-    }
+    fun getActiveConnectionCount(): Int = modernManager.getActiveConnectionCount()
     
     /**
      * Shutdown the connection manager
      */
     fun shutdown() {
         Log.i(TAG, "Shutting down connection integration bridge")
+        scope.cancel()
         modernManager.shutdown()
     }
 }
