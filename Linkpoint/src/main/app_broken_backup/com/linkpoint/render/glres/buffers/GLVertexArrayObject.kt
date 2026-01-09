@@ -18,7 +18,7 @@ class GLVertexArrayObject : GLGenericResource {
             this.vaoIndices = iArr
         }
 
-        fun GLFree(): Unit {
+        fun GLFree()  {
             GLES30.glDeleteVertexArrays(this.vaoIndices.length, this.vaoIndices, 0)
         }
     }
@@ -31,11 +31,11 @@ class GLVertexArrayObject : GLGenericResource {
         GLVertexArrayObjectReference(this, gLResourceManager, this.vaoIndices)
     }
 
-    fun Bind(i: Int): Unit {
+    fun Bind(i: Int)  {
         GLES30.glBindVertexArray(this.vaoIndices[i])
     }
 
-    fun Unbind(): Unit {
+    fun Unbind()  {
         GLES30.glBindVertexArray(0)
     }
 }

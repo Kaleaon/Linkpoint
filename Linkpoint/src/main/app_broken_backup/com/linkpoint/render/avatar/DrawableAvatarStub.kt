@@ -25,10 +25,10 @@ class DrawableAvatarStub : OnChatterNameUpdated {
         this.chatterNameRetriever = ChatterNameRetriever(ChatterID.getUserChatterID(uuid, sLObjectAvatarInfo.getId()), this, null)
     }
 
-    private fun setNameTag(str: String): Unit {
+    private fun setNameTag(str: String)  {
         if (!Objects.equal(this.nameTag, str)) {
             this.nameTag = str
-            String str2 = "DrawableAvatar: setting: nameTag = %s"
+            var str2: String = "DrawableAvatar: setting: nameTag = %s"
             Any[] objArr = Any[1]
             objArr[0] = str != null ? str : "null"
             Debug.Printf(str2, objArr)
@@ -38,7 +38,7 @@ class DrawableAvatarStub : OnChatterNameUpdated {
         }
     }
 
-    fun DrawNameTag(renderContext: RenderContext): Unit {
+    fun DrawNameTag(renderContext: RenderContext)  {
         DrawableHoverText drawableHoverText = this.drawableNameTag
         FloatArray worldMatrix = getWorldMatrix(renderContext)
         if (drawableHoverText != null && worldMatrix != null) {
@@ -60,7 +60,7 @@ class DrawableAvatarStub : OnChatterNameUpdated {
         return fArr
     }
 
-    fun onChatterNameUpdated(chatterNameRetriever: ChatterNameRetriever): Unit {
+    fun onChatterNameUpdated(chatterNameRetriever: ChatterNameRetriever)  {
         setNameTag(chatterNameRetriever.getResolvedName())
     }
 }

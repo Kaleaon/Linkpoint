@@ -48,7 +48,7 @@ class PrimProfileParams {
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof PrimProfileParams)) {
+        if (!(obj is PrimProfileParams)) {
             return false
         }
         PrimProfileParams primProfileParams = (PrimProfileParams) obj

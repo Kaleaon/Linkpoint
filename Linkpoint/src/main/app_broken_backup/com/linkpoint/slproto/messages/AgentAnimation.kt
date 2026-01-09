@@ -32,10 +32,10 @@ class AgentAnimation : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int size = (this.AnimationList_Fields.size() * 17) + 34 + 1
+        var size: Int = (this.AnimationList_Fields.size() * 17) + 34 + 1
         Iterator<T> it = this.PhysicalAvatarEventList_Fields.iterator()
         while (true) {
-            Int i = size
+            var i: Int = size
             if (!it.hasNext()) {
                 return i
             }
@@ -43,11 +43,11 @@ class AgentAnimation : SLMessage {
         }
     }
 
-    fun Handle(sLMessageHandler: SLMessageHandler): Unit {
+    fun Handle(sLMessageHandler: SLMessageHandler)  {
         sLMessageHandler.HandleAgentAnimation(this)
     }
 
-    fun PackPayload(byteBuffer: ByteBuffer): Unit {
+    fun PackPayload(byteBuffer: ByteBuffer)  {
         byteBuffer.put((Byte) 5)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
@@ -62,7 +62,7 @@ class AgentAnimation : SLMessage {
         }
     }
 
-    fun UnpackPayload(byteBuffer: ByteBuffer): Unit {
+    fun UnpackPayload(byteBuffer: ByteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE

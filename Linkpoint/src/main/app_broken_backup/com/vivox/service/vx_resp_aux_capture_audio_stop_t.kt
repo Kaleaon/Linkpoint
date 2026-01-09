@@ -46,7 +46,7 @@ class vx_resp_aux_capture_audio_stop_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_void getAudioBufferPtr() {
-        Long l = VxClientProxyJNI.vx_resp_aux_capture_audio_stop_t_audioBufferPtr_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_aux_capture_audio_stop_t_audioBufferPtr_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_void(l, false)
         return null
     }
@@ -56,7 +56,7 @@ class vx_resp_aux_capture_audio_stop_t {
      * Lifted jumps to return sites
      */
     vx_resp_base_t getBase() {
-        Long l = VxClientProxyJNI.vx_resp_aux_capture_audio_stop_t_base_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_aux_capture_audio_stop_t_base_get(this.swigCPtr, this)
         if (l != 0L) return vx_resp_base_t(l, false)
         return null
     }

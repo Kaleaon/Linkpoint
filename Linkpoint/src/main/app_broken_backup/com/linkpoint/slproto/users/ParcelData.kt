@@ -32,7 +32,7 @@ class ParcelData : Serializable {
         this.isGroupOwned = lLSDNode.keyExists("IsGroupOwned") ? lLSDNode.byKey("IsGroupOwned").asBoolean() : false
         this.area = lLSDNode.keyExists("Area") ? lLSDNode.byKey("Area").asInt() : 0
         ByteArray asBinary = lLSDNode.byKey("Bitmap").asBinary()
-        Int i = 0
+        var i: Int = 0
         while (i < asBinary.size && i < 512) {
             Byte b = asBinary[i]
             for (i2 in 0 until 8) {

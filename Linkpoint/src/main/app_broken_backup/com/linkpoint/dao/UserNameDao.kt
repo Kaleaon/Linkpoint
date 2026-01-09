@@ -26,21 +26,21 @@ class UserNameDao : AbstractDao<UserName, UUID> {
         super(daoConfig, daoSession)
     }
 
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'UserNames' (" + "'UUID' TEXT PRIMARY KEY ," + "'USER_NAME' TEXT," + "'DISPLAY_NAME' TEXT," + "'IS_BAD_UUID' INTEGER NOT NULL );")
     }
 
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'UserNames'")
     }
 
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, userName: UserName): Unit {
+    protected fun bindValues(sQLiteStatement: SQLiteStatement, userName: UserName)  {
         sQLiteStatement.clearBindings()
         UUID uuid = userName.getUuid()
         if (uuid != null) {
             sQLiteStatement.bindString(1, uuid.toString())
         }
-        String userName2 = userName.getUserName()
+        var userName2: String = userName.getUserName()
         if (userName2 != null) {
             sQLiteStatement.bindString(2, userName2)
         }
@@ -60,10 +60,10 @@ class UserNameDao : AbstractDao<UserName, UUID> {
     }
 
     fun readEntity(cursor: Cursor, i: Int): UserName {
-        Boolean z = false
-        String str = null
+        var z: Boolean = false
+        var str: String = null
         UUID fromString = cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0))
-        String string = cursor.isNull(i + 1) ? null : cursor.getString(i + 1)
+        var string: String = cursor.isNull(i + 1) ? null : cursor.getString(i + 1)
         if (!cursor.isNull(i + 2)) {
             str = cursor.getString(i + 2)
         }
@@ -73,8 +73,8 @@ class UserNameDao : AbstractDao<UserName, UUID> {
         return UserName(fromString, string, str, z)
     }
 
-    fun readEntity(cursor: Cursor, userName: UserName, i: Int): Unit {
-        String str = null
+    fun readEntity(cursor: Cursor, userName: UserName, i: Int)  {
+        var str: String = null
         userName.setUuid(cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0)))
         userName.setUserName(cursor.isNull(i + 1) ? null : cursor.getString(i + 1))
         if (!cursor.isNull(i + 2)) {

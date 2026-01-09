@@ -5,6 +5,8 @@ open class VectorArray {
     protected val numComponents: Int
     protected val length: Int
     protected val offset: Int
+    
+    val size: Int get() = length
 
     constructor(numComponents: Int, length: Int) {
         this.data = FloatArray(numComponents * length)
@@ -20,19 +22,11 @@ open class VectorArray {
         this.offset = offset
     }
 
-    fun getData(): FloatArray {
-        return data
-    }
+    fun getData(): FloatArray = data
 
-    fun getElementOffset(index: Int): Int {
-        return offset + (numComponents * index)
-    }
+    fun getElementOffset(index: Int): Int = offset + (numComponents * index)
 
-    fun getLength(): Int {
-        return length
-    }
+    fun getLength(): Int = length
 
-    fun getNumComponents(): Int {
-        return numComponents
-    }
+    fun getNumComponents(): Int = numComponents
 }

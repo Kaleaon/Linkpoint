@@ -20,7 +20,7 @@ class InventoryDB {
         this.db = sQLiteDatabase
     }
 
-    fun beginTransaction(): Unit {
+    fun beginTransaction()  {
         if (Build.VERSION.SDK_INT >= 11) {
             this.db.beginTransactionNonExclusive()
         } else {
@@ -37,7 +37,7 @@ class InventoryDB {
         sLInventoryEntry.delete(this.db)
     }
 
-    fun endTransaction(): Unit {
+    fun endTransaction()  {
         this.db.endTransaction()
     }
 
@@ -134,7 +134,7 @@ class InventoryDB {
         return
      */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    fun retainChildren(r16: Long, r18: java.util.Set<java.util.UUID>): Unit {
+    fun retainChildren(r16: Long, r18: java.util.Set<java.util.UUID>)  {
         /*
             r15 = this
             android.database.sqlite.SQLiteDatabase r2 = r15.db     // Catch:{ SQLiteException -> 0x0086 }
@@ -168,7 +168,7 @@ class InventoryDB {
             java.lang.StringBuilder r3 = r3.append(r0)     // Catch:{ SQLiteException -> 0x0086 }
             java.lang.String r4 = ", count = "
             java.lang.StringBuilder r3 = r3.append(r4)     // Catch:{ SQLiteException -> 0x0086 }
-            Int r4 = r2.getCount()     // Catch:{ SQLiteException -> 0x0086 }
+            var r4: Int = r2.getCount()     // Catch:{ SQLiteException -> 0x0086 }
             java.lang.StringBuilder r3 = r3.append(r4)     // Catch:{ SQLiteException -> 0x0086 }
             java.lang.String r3 = r3.toString()     // Catch:{ SQLiteException -> 0x0086 }
             com.linkpoint.Debug.Log(r3)     // Catch:{ SQLiteException -> 0x0086 }
@@ -176,19 +176,19 @@ class InventoryDB {
             java.util.ArrayList r6 = java.util.ArrayList     // Catch:{ SQLiteException -> 0x0086 }
             r6.<init>()     // Catch:{ SQLiteException -> 0x0086 }
         L_0x005c:
-            Boolean r4 = r2.moveToNext()     // Catch:{ SQLiteException -> 0x0086 }
+            var r4: Boolean = r2.moveToNext()     // Catch:{ SQLiteException -> 0x0086 }
             if (r4 == 0) goto L_0x008b
             java.util.UUID r4 = java.util.UUID     // Catch:{ SQLiteException -> 0x0086 }
             r5 = 2
-            Long r8 = r2.getLong(r5)     // Catch:{ SQLiteException -> 0x0086 }
+            var r8: Long = r2.getLong(r5)     // Catch:{ SQLiteException -> 0x0086 }
             r5 = 1
-            Long r10 = r2.getLong(r5)     // Catch:{ SQLiteException -> 0x0086 }
+            var r10: Long = r2.getLong(r5)     // Catch:{ SQLiteException -> 0x0086 }
             r4.<init>(r8, r10)     // Catch:{ SQLiteException -> 0x0086 }
             r0 = r18
-            Boolean r4 = r0.contains(r4)     // Catch:{ SQLiteException -> 0x0086 }
+            var r4: Boolean = r0.contains(r4)     // Catch:{ SQLiteException -> 0x0086 }
             if (r4 != 0) goto L_0x005c
             r4 = 0
-            Long r4 = r2.getLong(r4)     // Catch:{ SQLiteException -> 0x0086 }
+            var r4: Long = r2.getLong(r4)     // Catch:{ SQLiteException -> 0x0086 }
             java.lang.Long r4 = java.lang.Long.valueOf(r4)     // Catch:{ SQLiteException -> 0x0086 }
             r6.add(r4)     // Catch:{ SQLiteException -> 0x0086 }
             goto L_0x005c
@@ -209,7 +209,7 @@ class InventoryDB {
             java.util.Iterator r7 = r6.iterator()     // Catch:{ all -> 0x00fc }
             r4 = r2
         L_0x009c:
-            Boolean r2 = r7.hasNext()     // Catch:{ all -> 0x00fc }
+            var r2: Boolean = r7.hasNext()     // Catch:{ all -> 0x00fc }
             if (r2 == 0) goto L_0x00d1
             java.lang.Any r2 = r7.next()     // Catch:{ all -> 0x00fc }
             java.lang.Long r2 = (java.lang.Long) r2     // Catch:{ all -> 0x00fc }
@@ -218,13 +218,13 @@ class InventoryDB {
             java.lang.String r10 = "_id = ?"
             r11 = 1
             java.lang.Array<String> r11 = java.lang.String[r11]     // Catch:{ all -> 0x00fc }
-            Long r12 = r2.longValue()     // Catch:{ all -> 0x00fc }
+            var r12: Long = r2.longValue()     // Catch:{ all -> 0x00fc }
             java.lang.String r2 = java.lang.Long.toString(r12)     // Catch:{ all -> 0x00fc }
             r12 = 0
             r11[r12] = r2     // Catch:{ all -> 0x00fc }
             r8.delete(r9, r10, r11)     // Catch:{ all -> 0x00fc }
-            Int r3 = r3 + 1
-            Int r2 = r4 + 1
+            var r3: Int = r3 + 1
+            var r2: Int = r4 + 1
             r4 = 16
             if (r2 < r4) goto L_0x00cf
             r2 = 0
@@ -256,7 +256,7 @@ class InventoryDB {
         L_0x0101:
             r2 = move-exception
             com.linkpoint.Debug.Warning(r2)     // Catch:{ SQLiteException -> 0x0086 }
-            Int r2 = r5 + 1
+            var r2: Int = r5 + 1
             r5 = r2
             goto L_0x0090
         */
@@ -272,11 +272,11 @@ class InventoryDB {
         sLInventoryEntry.save(this.db)
     }
 
-    fun setTransactionSuccessful(): Unit {
+    fun setTransactionSuccessful()  {
         this.db.setTransactionSuccessful()
     }
 
-    fun yieldIfContendedSafely(): Unit {
+    fun yieldIfContendedSafely()  {
         this.db.yieldIfContendedSafely()
     }
 }

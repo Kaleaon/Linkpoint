@@ -5,12 +5,18 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.linkpoint.LinkpointApp
+import com.linkpoint.network.SecondLifeConnection
+import kotlinx.coroutines.launch
 
 /**
  * Handles SLURL (Second Life URL) intents
  * Parses secondlife:// URLs and http://maps.secondlife.com URLs
  */
 class SLURLActivity : AppCompatActivity() {
+    
+    private val connection: SecondLifeConnection by lazy { LinkpointApp.getInstance().connection }
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,18 +94,7 @@ class SLURLActivity : AppCompatActivity() {
             .setTitle("Teleport")
             .setMessage("Teleport to ${slurl.regionName}\nPosition: (${slurl.x.toInt()}, ${slurl.y.toInt()}, ${slurl.z.toInt()})?")
             .setPositiveButton("Teleport") { _, _ ->
-                // TODO: Implement teleport functionality
-                Toast.makeText(this, "Teleporting to ${slurl.regionName}...", Toast.LENGTH_LONG).show()
-                
-                // Launch main activity with teleport intent
-                val mainIntent = Intent(this, MainActivity::class.java).apply {
-                    putExtra("teleport_region", slurl.regionName)
-                    putExtra("teleport_x", slurl.x)
-                    putExtra("teleport_y", slurl.y)
-                    putExtra("teleport_z", slurl.z)
-                }
-                startActivity(mainIntent)
-                finish()
+                performTeleport(slurl)
             }
             .setNegativeButton("Cancel") { _, _ ->
                 finish()
@@ -108,6 +103,35 @@ class SLURLActivity : AppCompatActivity() {
                 finish()
             }
             .show()
+    }
+    
+    private fun performTeleport(slurl: SLURL) {
+        Toast.makeText(this, "Teleporting to ${slurl.regionName}...", Toast.LENGTH_LONG).show()
+        
+        lifecycleScope.launch {
+            val result = connection.teleportToLocation(
+                regionName = slurl.regionName,
+                x = slurl.x,
+                y = slurl.y,
+                z = slurl.z
+            )
+            
+            if (result.success) {
+                // Launch main activity with teleport result
+                val mainIntent = Intent(this@SLURLActivity, MainActivity::class.java).apply {
+                    putExtra("teleport_region", slurl.regionName)
+                    putExtra("teleport_x", slurl.x)
+                    putExtra("teleport_y", slurl.y)
+                    putExtra("teleport_z", slurl.z)
+                    putExtra("teleport_success", true)
+                }
+                startActivity(mainIntent)
+            } else {
+                Toast.makeText(this@SLURLActivity, "Teleport failed: ${result.message}", Toast.LENGTH_LONG).show()
+            }
+            
+            finish()
+        }
     }
     
     data class SLURL(

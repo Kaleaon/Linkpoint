@@ -86,7 +86,7 @@ abstract class ChatMessageSource {
     @Nullable
     abstract UUID getSourceUUID()
 
-    fun serializeTo(@NonNull ChatMessage chatMessage): Unit {
+    fun serializeTo(@NonNull ChatMessage chatMessage)  {
         chatMessage.setSenderType(Int.valueOf(getSourceType().ordinal()))
     }
 }

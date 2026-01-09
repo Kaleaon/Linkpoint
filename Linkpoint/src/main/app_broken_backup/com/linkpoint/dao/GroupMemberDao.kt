@@ -30,17 +30,17 @@ class GroupMemberDao : AbstractDao<GroupMember, Void> {
         super(daoConfig, daoSession)
     }
 
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        String str = z ? "IF NOT EXISTS " : ""
+    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
+        var str: String = z ? "IF NOT EXISTS " : ""
         sQLiteDatabase.execSQL("CREATE TABLE " + str + "'GroupMembers' (" + "'GROUP_ID' TEXT NOT NULL ," + "'REQUEST_ID' TEXT NOT NULL ," + "'USER_ID' TEXT NOT NULL ," + "'CONTRIBUTION' INTEGER NOT NULL ," + "'ONLINE_STATUS' TEXT NOT NULL ," + "'AGENT_POWERS' INTEGER NOT NULL ," + "'TITLE' TEXT NOT NULL ," + "'IS_OWNER' INTEGER NOT NULL );")
         sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_GroupMembers_GROUP_ID_REQUEST_ID ON GroupMembers" + " (GROUP_ID,REQUEST_ID);")
     }
 
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'GroupMembers'")
     }
 
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, groupMember: GroupMember): Unit {
+    protected fun bindValues(sQLiteStatement: SQLiteStatement, groupMember: GroupMember)  {
         sQLiteStatement.clearBindings()
         sQLiteStatement.bindString(1, groupMember.getGroupID().toString())
         sQLiteStatement.bindString(2, groupMember.getRequestID().toString())
@@ -61,22 +61,22 @@ class GroupMemberDao : AbstractDao<GroupMember, Void> {
     }
 
     fun readEntity(cursor: Cursor, i: Int): GroupMember {
-        Boolean z = false
+        var z: Boolean = false
         UUID fromString = UUID.fromString(cursor.getString(i + 0))
         UUID fromString2 = UUID.fromString(cursor.getString(i + 1))
         UUID fromString3 = UUID.fromString(cursor.getString(i + 2))
-        Int i2 = cursor.getInt(i + 3)
-        String string = cursor.getString(i + 4)
-        Long j = cursor.getLong(i + 5)
-        String string2 = cursor.getString(i + 6)
+        var i2: Int = cursor.getInt(i + 3)
+        var string: String = cursor.getString(i + 4)
+        var j: Long = cursor.getLong(i + 5)
+        var string2: String = cursor.getString(i + 6)
         if (cursor.getShort(i + 7) != (Short) 0) {
             z = true
         }
         return GroupMember(fromString, fromString2, fromString3, i2, string, j, string2, z)
     }
 
-    fun readEntity(cursor: Cursor, groupMember: GroupMember, i: Int): Unit {
-        Boolean z = false
+    fun readEntity(cursor: Cursor, groupMember: GroupMember, i: Int)  {
+        var z: Boolean = false
         groupMember.setGroupID(UUID.fromString(cursor.getString(i + 0)))
         groupMember.setRequestID(UUID.fromString(cursor.getString(i + 1)))
         groupMember.setUserID(UUID.fromString(cursor.getString(i + 2)))

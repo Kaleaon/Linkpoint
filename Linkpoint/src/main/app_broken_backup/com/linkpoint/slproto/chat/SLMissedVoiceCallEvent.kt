@@ -47,7 +47,7 @@ class SLMissedVoiceCallEvent : SLChatYesNoEvent {
         return ""
     }
 
-    fun onYesAction(Context context, UserManager userManager): Unit {
+    fun onYesAction(Context context, UserManager userManager)  {
         SLModules modules
         super.onYesAction(context, userManager)
         SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
@@ -56,7 +56,7 @@ class SLMissedVoiceCallEvent : SLChatYesNoEvent {
         }
     }
 
-    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage)  {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

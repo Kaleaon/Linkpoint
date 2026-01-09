@@ -1,5 +1,7 @@
 package com.linkpoint.render.shaders
 
+import kotlin.math.*
+
 import android.opengl.GLES20
 import com.linkpoint.render.RenderContext
 import com.linkpoint.slproto.windlight.WindlightPreset
@@ -22,10 +24,10 @@ class BasicPrimProgram : ShaderProgram {
         super(shader, shader2)
     }
 
-    fun SetupLighting(renderContext: RenderContext, windlightPreset: WindlightPreset): Unit {
+    fun SetupLighting(renderContext: RenderContext, windlightPreset: WindlightPreset)  {
         if (windlightPreset != null) {
             GLES20.glUniform3f(this.LightDiffuseDir, windlightPreset.lightnorm[0], windlightPreset.lightnorm[2], -windlightPreset.lightnorm[1])
-            if (Math.abs(windlightPreset.lightnorm[1]) > 0.1f) {
+            if (abs(windlightPreset.lightnorm[1]) > 0.1f) {
                 GLES20.glUniform3fv(this.LightDiffuseColor, 1, renderContext.underWater ? windlightPreset.sunlightBelowWater : windlightPreset.sunlight_color, 0)
             } else {
                 GLES20.glUniform3f(this.LightDiffuseColor, 0.0f, 0.0f, 0.0f)
@@ -38,7 +40,7 @@ class BasicPrimProgram : ShaderProgram {
         GLES20.glUniform3f(this.LightAmbientColor, 1.0f, 1.0f, 1.0f)
     }
 
-    protected fun bindVariables(): Unit {
+    protected fun bindVariables()  {
         this.vPosition = GLES20.glGetAttribLocation(this.handle, "vPosition")
         this.vTexCoord = GLES20.glGetAttribLocation(this.handle, "vTexCoord")
         this.vNormal = GLES20.glGetAttribLocation(this.handle, "vNormal")
@@ -53,7 +55,7 @@ class BasicPrimProgram : ShaderProgram {
         this.LightAmbientColor = GLES20.glGetUniformLocation(this.handle, "LightAmbientColor")
     }
 
-    fun setTextureEnabled(z: Boolean): Unit {
+    fun setTextureEnabled(z: Boolean)  {
         GLES20.glUniform1i(this.useTexture, z ? 1 : 0)
     }
 }

@@ -20,11 +20,11 @@ class KickUserAck : SLMessage {
         return 24
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleKickUserAck(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -92)
@@ -32,7 +32,7 @@ class KickUserAck : SLMessage {
         packInt(byteBuffer, this.UserInfo_Field.Flags)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.UserInfo_Field.SessionID = unpackUUID(byteBuffer)
         this.UserInfo_Field.Flags = unpackInt(byteBuffer)
     }

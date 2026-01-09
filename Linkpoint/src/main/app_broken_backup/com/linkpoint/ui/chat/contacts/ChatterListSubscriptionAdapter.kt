@@ -69,7 +69,7 @@ class ChatterListSubscriptionAdapter : ChatterListSimpleAdapter : Subscription.O
         return super.isEnabled(i)
     }
 
-    fun onData(ImmutableList<ChatterDisplayData> immutableList): Unit {
+    fun onData(ImmutableList<ChatterDisplayData> immutableList)  {
         if (this.predicate == null) {
             setData(immutableList)
         } else {

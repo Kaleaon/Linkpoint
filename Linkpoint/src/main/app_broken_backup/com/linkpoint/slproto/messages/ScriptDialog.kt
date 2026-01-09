@@ -36,10 +36,10 @@ class ScriptDialog : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int length = this.Data_Field.FirstName.size + 17 + 1 + this.Data_Field.LastName.size + 1 + this.Data_Field.ObjectName.size + 2 + this.Data_Field.Message.size + 4 + 16 + 4 + 1
+        var length: Int = this.Data_Field.FirstName.size + 17 + 1 + this.Data_Field.LastName.size + 1 + this.Data_Field.ObjectName.size + 2 + this.Data_Field.Message.size + 4 + 16 + 4 + 1
         Iterator<T> it = this.Buttons_Fields.iterator()
         while (true) {
-            Int i = length
+            var i: Int = length
             if (!it.hasNext()) {
                 return i + 1 + (this.OwnerData_Fields.size() * 16)
             }
@@ -47,11 +47,11 @@ class ScriptDialog : SLMessage {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleScriptDialog(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -66)
@@ -72,7 +72,7 @@ class ScriptDialog : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.Data_Field.ObjectID = unpackUUID(byteBuffer)
         this.Data_Field.FirstName = unpackVariable(byteBuffer, 1)
         this.Data_Field.LastName = unpackVariable(byteBuffer, 1)

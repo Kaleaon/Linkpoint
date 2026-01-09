@@ -33,9 +33,9 @@ abstract class ChatterDisplayDataList {
         for (ChatterID chatterID : getChatters()) {
             ChatterSubscription chatterSubscription2 = this.chatterSubscriptions.get(chatterID)
             if (chatterSubscription2 == null) {
-                if (chatterID instanceof ChatterID.ChatterIDUser) {
+                if (chatterID is ChatterID.ChatterIDUser) {
                     chatterSubscription2 = ChatterUserSubscription(this.chatters, (ChatterID.ChatterIDUser) chatterID, this.userManager)
-                } else if (chatterID instanceof ChatterID.ChatterIDGroup) {
+                } else if (chatterID is ChatterID.ChatterIDGroup) {
                     chatterSubscription2 = ChatterGroupSubscription(this.chatters, (ChatterID.ChatterIDGroup) chatterID, this.userManager)
                 }
                 if (chatterSubscription2 != null) {
@@ -57,7 +57,7 @@ abstract class ChatterDisplayDataList {
         Debug.Printf("FriendList: refreshList: %d subscriptions", Int.valueOf(this.chatterSubscriptions.size()))
     }
 
-    fun dispose(): Unit {
+    fun dispose()  {
         for (ChatterSubscription unsubscribe : this.chatterSubscriptions.values()) {
             unsubscribe.unsubscribe()
         }
@@ -78,7 +78,7 @@ abstract class ChatterDisplayDataList {
     }
 
     /* access modifiers changed from: package-private */
-    fun requestRefresh(@Nullable Executor executor): Unit {
+    fun requestRefresh(@Nullable Executor executor)  {
         Debug.Printf("FriendList: requestRefresh: needsRefresh = %s", Boolean.toString(this.needsRefresh.get()))
         if (this.needsRefresh.getAndSet(true)) {
             return

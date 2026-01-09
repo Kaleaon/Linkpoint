@@ -1,4 +1,6 @@
 package com.linkpoint.modern.graphics
+
+import kotlin.math.*
 import java.util.*
 
 import android.opengl.GLES30
@@ -46,7 +48,7 @@ class ModernRenderPipeline {
     
     fun initialize(): Boolean {
         // Check OpenGL ES version
-        String version = GLES30.glGetString(GLES30.GL_VERSION)
+        var version: String = GLES30.glGetString(GLES30.GL_VERSION)
         Log.i(TAG, "OpenGL ES version: " + version)
         
         isES3Available = version != null && (version.contains("OpenGL ES 3.") || version.contains("OpenGL ES 3."))
@@ -62,8 +64,8 @@ class ModernRenderPipeline {
     
     private fun initializeModernPipeline(): Boolean {
         // Create modern PBR shader program
-        String vertexShader = getModernVertexShader()
-        String fragmentShader = getModernFragmentShader()
+        var vertexShader: String = getModernVertexShader()
+        var fragmentShader: String = getModernFragmentShader()
         
         pbrShaderProgram = createShaderProgram(vertexShader, fragmentShader)
         if (pbrShaderProgram == -1) {
@@ -126,8 +128,8 @@ class ModernRenderPipeline {
     
     private fun initializeLegacyPipeline(): Boolean {
         // Create legacy shader program for OpenGL ES 2.0
-        String vertexShader = getLegacyVertexShader()
-        String fragmentShader = getLegacyFragmentShader()
+        var vertexShader: String = getLegacyVertexShader()
+        var fragmentShader: String = getLegacyFragmentShader()
         
         legacyShaderProgram = createShaderProgram(vertexShader, fragmentShader)
         if (legacyShaderProgram == -1) {
@@ -139,7 +141,7 @@ class ModernRenderPipeline {
         return true
     }
     
-    fun renderFrame(params: RenderParams): Unit {
+    fun renderFrame(params: RenderParams)  {
         if (isES3Available && pbrShaderProgram != -1) {
             renderModernFrame(params)
         } else if (legacyShaderProgram != -1) {
@@ -147,7 +149,7 @@ class ModernRenderPipeline {
         }
     }
     
-    private fun renderModernFrame(params: RenderParams): Unit {
+    private fun renderModernFrame(params: RenderParams)  {
         GLES30.glUseProgram(pbrShaderProgram)
         
         // Set up matrices
@@ -180,7 +182,7 @@ class ModernRenderPipeline {
         
         // Set lighting parameters
         GLES30.glUniform3fv(uDirectionalLight, 4, params.directionalLight, 0)
-        GLES30.glUniform1i(uNumPointLights, Math.min(params.numPointLights, 4)); // Limit to 4 point lights
+        GLES30.glUniform1i(uNumPointLights, min(params.numPointLights, 4)); // Limit to 4 point lights
         
         // Draw geometry
         if (params.vertexBuffer > 0) {
@@ -191,7 +193,7 @@ class ModernRenderPipeline {
         checkGLError("renderModernFrame")
     }
     
-    private fun renderLegacyFrame(params: RenderParams): Unit {
+    private fun renderLegacyFrame(params: RenderParams)  {
         GLES30.glUseProgram(legacyShaderProgram)
         
         // Basic legacy rendering
@@ -201,17 +203,17 @@ class ModernRenderPipeline {
     }
     
     private fun createShaderProgram(vertexSource: String, fragmentSource: String): Int {
-        Int vertexShader = loadShader(GLES30.GL_VERTEX_SHADER, vertexSource)
+        var vertexShader: Int = loadShader(GLES30.GL_VERTEX_SHADER, vertexSource)
         if (vertexShader == 0) {
             return -1
         }
         
-        Int fragmentShader = loadShader(GLES30.GL_FRAGMENT_SHADER, fragmentSource)
+        var fragmentShader: Int = loadShader(GLES30.GL_FRAGMENT_SHADER, fragmentSource)
         if (fragmentShader == 0) {
             return -1
         }
         
-        Int program = GLES30.glCreateProgram()
+        var program: Int = GLES30.glCreateProgram()
         if (program == 0) {
             Log.e(TAG, "Error creating shader program")
             return -1
@@ -237,7 +239,7 @@ class ModernRenderPipeline {
     }
     
     private fun loadShader(type: Int, shaderCode: String): Int {
-        Int shader = GLES30.glCreateShader(type)
+        var shader: Int = GLES30.glCreateShader(type)
         if (shader == 0) {
             Log.e(TAG, "Error creating shader")
             return 0
@@ -257,8 +259,8 @@ class ModernRenderPipeline {
         return shader
     }
     
-    private fun checkGLError(operation: String): Unit {
-        Int error = GLES30.glGetError()
+    private fun checkGLError(operation: String)  {
+        var error: Int = GLES30.glGetError()
         if (error != GLES30.GL_NO_ERROR) {
             Log.e(TAG, "OpenGL error in " + operation + ": " + error)
         }
@@ -369,7 +371,7 @@ class ModernRenderPipeline {
         return isES3Available
     }
     
-    fun cleanup(): Unit {
+    fun cleanup()  {
         if (pbrShaderProgram != -1) {
             GLES30.glDeleteProgram(pbrShaderProgram)
         }
@@ -388,17 +390,17 @@ class ModernRenderPipeline {
         FloatArray cameraPosition = FloatArray(3)
         
         // Texture handles
-        Int albedoTexture = 0
-        Int normalTexture = 0
-        Int metallicRoughnessTexture = 0
+        var albedoTexture: Int = 0
+        var normalTexture: Int = 0
+        var metallicRoughnessTexture: Int = 0
         
         // Lighting
         FloatArray directionalLight = FloatArray(16); // 4 lights * 4 components
-        Int numPointLights = 0
+        var numPointLights: Int = 0
         
         // Geometry
-        Int vertexBuffer = 0
-        Int indexBuffer = 0
-        Int vertexCount = 0
+        var vertexBuffer: Int = 0
+        var indexBuffer: Int = 0
+        var vertexCount: Int = 0
     }
 }

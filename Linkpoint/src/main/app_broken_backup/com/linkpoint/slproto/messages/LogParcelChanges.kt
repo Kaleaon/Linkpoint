@@ -38,11 +38,11 @@ class LogParcelChanges : SLMessage {
         return (this.ParcelData_Fields.size() * 54) + 29
     }
 
-    fun Handle(sLMessageHandler: SLMessageHandler): Unit {
+    fun Handle(sLMessageHandler: SLMessageHandler)  {
         sLMessageHandler.HandleLogParcelChanges(this)
     }
 
-    fun PackPayload(byteBuffer: ByteBuffer): Unit {
+    fun PackPayload(byteBuffer: ByteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -32)
@@ -59,7 +59,7 @@ class LogParcelChanges : SLMessage {
         }
     }
 
-    fun UnpackPayload(byteBuffer: ByteBuffer): Unit {
+    fun UnpackPayload(byteBuffer: ByteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.RegionData_Field.RegionHandle = unpackLong(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE

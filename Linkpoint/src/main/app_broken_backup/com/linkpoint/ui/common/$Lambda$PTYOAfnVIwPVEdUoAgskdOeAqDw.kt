@@ -17,7 +17,7 @@ import android.content.DialogInterface
         this.f371$f0 = obj
     }
 
-    fun onClick(DialogInterface dialogInterface, Int i): Unit {
+    fun onClick(DialogInterface dialogInterface, Int i)  {
         $m$0(dialogInterface, i)
     }
 }

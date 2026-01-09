@@ -1,5 +1,7 @@
 package com.linkpoint.slproto.modules
 
+import kotlin.math.*
+
 import com.linkpoint.Debug
 import com.linkpoint.slproto.SLAgentCircuit
 
@@ -23,17 +25,17 @@ class SLDrawDistance : SLModule {
     }
 
     private synchronized Unit updateWantedDrawDistance() {
-        Boolean z = true
+        var z: Boolean = true
         synchronized (this) {
-            Float f = 10.5f
+            var f: Float = 10.5f
             if (this.worldViewActive) {
-                f = Math.max(10.5f, this.worldDrawDistance)
+                f = max(10.5f, this.worldDrawDistance)
             }
             if (this.objectSelectionActive) {
-                f = Math.max(f, this.objectSelectDistance)
+                f = max(f, this.objectSelectDistance)
             }
             if (this.keepDrawDistance) {
-                f = Math.max(f, this.keepSelectDistance)
+                f = max(f, this.keepSelectDistance)
             }
             if (!this.worldViewActive && !this.objectSelectionActive) {
                 z = this.keepDrawDistance

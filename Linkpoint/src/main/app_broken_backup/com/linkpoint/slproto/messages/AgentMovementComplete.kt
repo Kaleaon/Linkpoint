@@ -34,11 +34,11 @@ class AgentMovementComplete : SLMessage {
         return this.SimData_Field.ChannelVersion.size + 2 + 72
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleAgentMovementComplete(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -6)
@@ -51,7 +51,7 @@ class AgentMovementComplete : SLMessage {
         packVariable(byteBuffer, this.SimData_Field.ChannelVersion, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.Data_Field.Position = unpackLLVector3(byteBuffer)

@@ -17,7 +17,7 @@ class TeleportHomeDialog {
         dialogInterface.dismiss()
     }
 
-    fun show(Activity activity): Unit {
+    fun show(Activity activity)  {
         SLAgentCircuit activeAgentCircuit
         UserManager userManager = ActivityUtils.getUserManager(activity.getIntent())
         if (userManager != null && (activeAgentCircuit = userManager.getActiveAgentCircuit()) != null && activeAgentCircuit.getModules().rlvController.canTeleportToLocation()) {

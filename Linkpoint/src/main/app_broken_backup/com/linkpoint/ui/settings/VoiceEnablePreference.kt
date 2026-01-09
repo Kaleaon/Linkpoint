@@ -34,7 +34,7 @@ class VoiceEnablePreference : CheckBoxPreference {
     }
 
     private Unit initVoicePrefCapability() {
-        Boolean isPluginSupported = VoicePluginServiceConnection.isPluginSupported()
+        var isPluginSupported: Boolean = VoicePluginServiceConnection.isPluginSupported()
         setEnabled(isPluginSupported)
         if (!isPluginSupported) {
             setChecked(false)
@@ -52,7 +52,7 @@ class VoiceEnablePreference : CheckBoxPreference {
     }
 
     /* access modifiers changed from: protected */
-    fun onClick(): Unit {
+    fun onClick()  {
         VoicePluginServiceConnection.setInstallOfferDisplayed(true)
         super.onClick()
         if (isChecked() && !VoicePluginServiceConnection.checkPluginInstalled(getContext())) {

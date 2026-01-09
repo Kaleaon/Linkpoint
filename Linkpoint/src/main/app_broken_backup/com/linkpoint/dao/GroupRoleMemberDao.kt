@@ -26,17 +26,17 @@ class GroupRoleMemberDao : AbstractDao<GroupRoleMember, Void> {
         super(daoConfig, daoSession)
     }
 
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        String str = z ? "IF NOT EXISTS " : ""
+    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
+        var str: String = z ? "IF NOT EXISTS " : ""
         sQLiteDatabase.execSQL("CREATE TABLE " + str + "'GroupRoleMembers' (" + "'GROUP_ID' TEXT NOT NULL ," + "'REQUEST_ID' TEXT NOT NULL ," + "'ROLE_ID' TEXT NOT NULL ," + "'USER_ID' TEXT NOT NULL );")
         sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_GroupRoleMembers_GROUP_ID_ROLE_ID_REQUEST_ID ON GroupRoleMembers" + " (GROUP_ID,ROLE_ID,REQUEST_ID);")
     }
 
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'GroupRoleMembers'")
     }
 
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, groupRoleMember: GroupRoleMember): Unit {
+    protected fun bindValues(sQLiteStatement: SQLiteStatement, groupRoleMember: GroupRoleMember)  {
         sQLiteStatement.clearBindings()
         sQLiteStatement.bindString(1, groupRoleMember.getGroupID().toString())
         sQLiteStatement.bindString(2, groupRoleMember.getRequestID().toString())
@@ -56,7 +56,7 @@ class GroupRoleMemberDao : AbstractDao<GroupRoleMember, Void> {
         return GroupRoleMember(UUID.fromString(cursor.getString(i + 0)), UUID.fromString(cursor.getString(i + 1)), UUID.fromString(cursor.getString(i + 2)), UUID.fromString(cursor.getString(i + 3)))
     }
 
-    fun readEntity(cursor: Cursor, groupRoleMember: GroupRoleMember, i: Int): Unit {
+    fun readEntity(cursor: Cursor, groupRoleMember: GroupRoleMember, i: Int)  {
         groupRoleMember.setGroupID(UUID.fromString(cursor.getString(i + 0)))
         groupRoleMember.setRequestID(UUID.fromString(cursor.getString(i + 1)))
         groupRoleMember.setRoleID(UUID.fromString(cursor.getString(i + 2)))

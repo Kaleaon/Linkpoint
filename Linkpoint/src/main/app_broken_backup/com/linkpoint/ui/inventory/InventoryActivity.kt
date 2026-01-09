@@ -52,9 +52,9 @@ class InventoryActivity : MasterDetailsActivity {
     private Boolean activityStarted = false
     private val fragmentSearchString: String = null
     /* access modifiers changed from: private */
-    String nameFilter = null
+    var nameFilter: String = null
     /* access modifiers changed from: private */
-    Boolean searchActive = false
+    var searchActive: Boolean = false
     private MenuItem searchMenuItem = null
     private SubscriptionData<SubscriptionSingleKey, Boolean> searchProcess = SubscriptionData<>(UIThreadExecutor.getInstance())
 
@@ -115,7 +115,7 @@ class InventoryActivity : MasterDetailsActivity {
     }
 
     private Unit selectSortOrder() {
-        Int sortOrder = InventoryFragmentHelper.getSortOrder(this)
+        var sortOrder: Int = InventoryFragmentHelper.getSortOrder(this)
         AlertDialog.Builder builder = AlertDialog.Builder(this)
         builder.setTitle(R.string.sort_order_caption)
         builder.setSingleChoiceItems(CharSequence[]{"Newest first", "Alphabetical"}, sortOrder, $Lambda$Tc22ivDU79Y83KauKGybv49CW7A(sortOrder, this))
@@ -123,7 +123,7 @@ class InventoryActivity : MasterDetailsActivity {
     }
 
     /* access modifiers changed from: private */
-    fun updateSearchAction(): Unit {
+    fun updateSearchAction()  {
         String str
         if (!this.activityStarted || !this.searchActive) {
             this.searchProcess.unsubscribe()
@@ -138,14 +138,14 @@ class InventoryActivity : MasterDetailsActivity {
         if (!Objects.equal(this.fragmentSearchString, str)) {
             this.fragmentSearchString = str
             Fragment findFragmentById = getSupportFragmentManager().findFragmentById(R.id.selector)
-            if (findFragmentById instanceof InventoryFragment) {
+            if (findFragmentById is InventoryFragment) {
                 ((InventoryFragment) findFragmentById).setSearchString(Strings.emptyToNull(str))
             }
         }
     }
 
     /* access modifiers changed from: package-private */
-    fun clearSearchMode(): Unit {
+    fun clearSearchMode()  {
         this.searchActive = false
         if (this.searchMenuItem != null) {
             MenuItemCompat.collapseActionView(this.searchMenuItem)
@@ -178,7 +178,7 @@ class InventoryActivity : MasterDetailsActivity {
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(@Nullable Bundle bundle): Unit {
+    fun onCreate(@Nullable Bundle bundle)  {
         super.onCreate(bundle)
         if (bundle != null) {
             this.searchActive = bundle.getBoolean(SEARCH_ACTIVE_TAG)
@@ -194,7 +194,7 @@ class InventoryActivity : MasterDetailsActivity {
             if (getIntent().hasExtra(INITIAL_FOLDER_ID_TAG)) {
                 bundle = InventoryFragment.makeSelection(UUIDPool.getUUID(getIntent().getStringExtra(INITIAL_FOLDER_ID_TAG)), (String) null)
             } else if (!(!getIntent().hasExtra(SAVE_INFO_INTENT_TAG) || (inventorySaveInfo = (InventorySaveInfo) getIntent().getParcelableExtra(SAVE_INFO_INTENT_TAG)) == null || inventorySaveInfo.assetType == null || inventorySaveInfo.assetType == SLAssetType.AT_UNKNOWN)) {
-                Int specialFolderType = inventorySaveInfo.assetType.getSpecialFolderType()
+                var specialFolderType: Int = inventorySaveInfo.assetType.getSpecialFolderType()
                 UserManager userManager = ActivityUtils.getUserManager(getIntent())
                 if (!(userManager == null || (findSpecialFolder = userManager.getInventoryManager().getDatabase().findSpecialFolder(userManager.getInventoryManager().getRootFolder(), specialFolderType)) == null)) {
                     bundle = InventoryFragment.makeSelection(findSpecialFolder.uuid, (String) null)
@@ -214,7 +214,7 @@ class InventoryActivity : MasterDetailsActivity {
         }
         searchView.setOnQueryTextListener(SearchView.OnQueryTextListener() {
             fun onQueryTextChange(String str): Boolean {
-                String unused = InventoryActivity.this.nameFilter = str
+                var unused: String = InventoryActivity.this.nameFilter = str
                 InventoryActivity.this.updateSearchAction()
                 return true
             }
@@ -224,13 +224,13 @@ class InventoryActivity : MasterDetailsActivity {
             }
         MenuItemCompat.setOnActionExpandListener(this.searchMenuItem, MenuItemCompat.OnActionExpandListener() {
             fun onMenuItemActionCollapse(MenuItem menuItem): Boolean {
-                Boolean unused = InventoryActivity.this.searchActive = false
+                var unused: Boolean = InventoryActivity.this.searchActive = false
                 InventoryActivity.this.updateSearchAction()
                 return true
             }
 
             fun onMenuItemActionExpand(MenuItem menuItem): Boolean {
-                Boolean unused = InventoryActivity.this.searchActive = true
+                var unused: Boolean = InventoryActivity.this.searchActive = true
                 InventoryActivity.this.updateSearchAction()
                 return true
             }
@@ -248,7 +248,7 @@ class InventoryActivity : MasterDetailsActivity {
     }
 
     /* access modifiers changed from: protected */
-    fun onSaveInstanceState(Bundle bundle): Unit {
+    fun onSaveInstanceState(Bundle bundle)  {
         super.onSaveInstanceState(bundle)
         if (bundle != null) {
             bundle.putBoolean(SEARCH_ACTIVE_TAG, this.searchActive)
@@ -257,14 +257,14 @@ class InventoryActivity : MasterDetailsActivity {
     }
 
     /* access modifiers changed from: protected */
-    fun onStart(): Unit {
+    fun onStart()  {
         super.onStart()
         this.activityStarted = true
         updateSearchAction()
     }
 
     /* access modifiers changed from: protected */
-    fun onStop(): Unit {
+    fun onStop()  {
         this.activityStarted = false
         updateSearchAction()
         super.onStop()

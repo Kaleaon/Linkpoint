@@ -23,11 +23,11 @@ class ScriptQuestion : SLMessage {
         return this.Data_Field.ObjectName.size + 33 + 1 + this.Data_Field.ObjectOwner.size + 4 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleScriptQuestion(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -68)
@@ -38,7 +38,7 @@ class ScriptQuestion : SLMessage {
         packInt(byteBuffer, this.Data_Field.Questions)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.Data_Field.TaskID = unpackUUID(byteBuffer)
         this.Data_Field.ItemID = unpackUUID(byteBuffer)
         this.Data_Field.ObjectName = unpackVariable(byteBuffer, 1)

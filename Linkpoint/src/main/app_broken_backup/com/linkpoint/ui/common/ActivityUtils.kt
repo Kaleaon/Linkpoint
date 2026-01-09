@@ -68,19 +68,19 @@ class ActivityUtils {
         return bundle2
     }
 
-    fun setActiveAgentID(Intent intent, UUID uuid): Unit {
+    fun setActiveAgentID(Intent intent, UUID uuid)  {
         if (uuid != null) {
             intent.putExtra("activeAgentUUID", uuid.toString())
         }
     }
 
-    fun setActiveAgentID(Bundle bundle, UUID uuid): Unit {
+    fun setActiveAgentID(Bundle bundle, UUID uuid)  {
         if (uuid != null) {
             bundle.putString("activeAgentUUID", uuid.toString())
         }
     }
 
-    fun setFragmentSelection(@Nullable Bundle bundle, @Nullable Bundle bundle2): Unit {
+    fun setFragmentSelection(@Nullable Bundle bundle, @Nullable Bundle bundle2)  {
         if (bundle == null) {
             return
         }

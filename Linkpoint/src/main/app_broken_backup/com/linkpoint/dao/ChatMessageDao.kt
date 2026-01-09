@@ -54,21 +54,21 @@ class ChatMessageDao : AbstractDao<ChatMessage, Long> {
         super(daoConfig, daoSession)
     }
 
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        String str = z ? "IF NOT EXISTS " : ""
+    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
+        var str: String = z ? "IF NOT EXISTS " : ""
         sQLiteDatabase.execSQL("CREATE TABLE " + str + "'CHAT_MESSAGE' (" + "'_id' INTEGER PRIMARY KEY ," + "'CHATTER_ID' INTEGER NOT NULL ," + "'TIMESTAMP' INTEGER NOT NULL ," + "'VIEW_TYPE' INTEGER NOT NULL ," + "'ORIG_TIMESTAMP' INTEGER," + "'IS_OFFLINE' INTEGER," + "'SENDER_UUID' TEXT," + "'SENDER_TYPE' INTEGER," + "'SENDER_NAME' TEXT," + "'SENDER_LEGACY_NAME' TEXT," + "'MESSAGE_TEXT' TEXT," + "'MESSAGE_TYPE' INTEGER NOT NULL ," + "'EVENT_STATE' INTEGER," + "'ORIG_IMTYPE' INTEGER," + "'SESSION_ID' TEXT," + "'ITEM_ID' TEXT," + "'ITEM_NAME' TEXT," + "'ASSET_TYPE' INTEGER," + "'TRANSACTION_AMOUNT' INTEGER," + "'NEW_BALANCE' INTEGER," + "'CHAT_CHANNEL' INTEGER," + "'DIALOG_IGNORED' INTEGER," + "'ACCEPTED' INTEGER," + "'USER_ID' TEXT," + "'OBJECT_NAME' TEXT," + "'QUESTION_MASK' INTEGER," + "'DIALOG_BUTTONS' BLOB," + "'DIALOG_SELECTED_OPTION' TEXT," + "'TEXT_BOX_BUTTON_INDEX' INTEGER," + "'SYNCED_TO_GOOGLE_DRIVE' INTEGER NOT NULL );")
         sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_CHAT_MESSAGE_CHATTER_ID ON CHAT_MESSAGE" + " (CHATTER_ID);")
         sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_CHAT_MESSAGE__id_SYNCED_TO_GOOGLE_DRIVE ON CHAT_MESSAGE" + " (_id,SYNCED_TO_GOOGLE_DRIVE);")
     }
 
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'CHAT_MESSAGE'")
     }
 
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, chatMessage: ChatMessage): Unit {
-        Long j = 1
+    protected fun bindValues(sQLiteStatement: SQLiteStatement, chatMessage: ChatMessage)  {
+        var j: Long = 1
         sQLiteStatement.clearBindings()
-        Long id = chatMessage.getId()
+        var id: Long = chatMessage.getId()
         if (id != null) {
             sQLiteStatement.bindLong(1, id.longValue())
         }
@@ -79,7 +79,7 @@ class ChatMessageDao : AbstractDao<ChatMessage, Long> {
         if (origTimestamp != null) {
             sQLiteStatement.bindLong(5, origTimestamp.getTime())
         }
-        Boolean isOffline = chatMessage.getIsOffline()
+        var isOffline: Boolean = chatMessage.getIsOffline()
         if (isOffline != null) {
             sQLiteStatement.bindLong(6, isOffline.booleanValue() ? 1 : 0)
         }
@@ -87,11 +87,11 @@ class ChatMessageDao : AbstractDao<ChatMessage, Long> {
         if (senderUUID != null) {
             sQLiteStatement.bindString(7, senderUUID.toString())
         }
-        Int senderType = chatMessage.getSenderType()
+        var senderType: Int = chatMessage.getSenderType()
         if (senderType != null) {
             sQLiteStatement.bindLong(8, (Long) senderType.intValue())
         }
-        String senderName = chatMessage.getSenderName()
+        var senderName: String = chatMessage.getSenderName()
         if (senderName != null) {
             sQLiteStatement.bindString(9, senderName)
         }
@@ -190,10 +190,10 @@ class ChatMessageDao : AbstractDao<ChatMessage, Long> {
         Boolean bool
         Boolean bool2
         Boolean bool3
-        Long valueOf = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
-        Long j = cursor.getLong(i + 1)
+        var valueOf: Long = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
+        var j: Long = cursor.getLong(i + 1)
         Date date = Date(cursor.getLong(i + 2))
-        Int i2 = cursor.getInt(i + 3)
+        var i2: Int = cursor.getInt(i + 3)
         Date date2 = cursor.isNull(i + 4) ? null : Date(cursor.getLong(i + 4))
         if (cursor.isNull(i + 5)) {
             bool = null
@@ -201,20 +201,20 @@ class ChatMessageDao : AbstractDao<ChatMessage, Long> {
             bool = Boolean.valueOf(cursor.getShort(i + 5) != (Short) 0)
         }
         UUID fromString = cursor.isNull(i + 6) ? null : UUID.fromString(cursor.getString(i + 6))
-        Int valueOf2 = cursor.isNull(i + 7) ? null : Int.valueOf(cursor.getInt(i + 7))
-        String string = cursor.isNull(i + 8) ? null : cursor.getString(i + 8)
-        String string2 = cursor.isNull(i + 9) ? null : cursor.getString(i + 9)
-        String string3 = cursor.isNull(i + 10) ? null : cursor.getString(i + 10)
-        Int i3 = cursor.getInt(i + 11)
-        Int valueOf3 = cursor.isNull(i + 12) ? null : Int.valueOf(cursor.getInt(i + 12))
-        Int valueOf4 = cursor.isNull(i + 13) ? null : Int.valueOf(cursor.getInt(i + 13))
+        var valueOf2: Int = cursor.isNull(i + 7) ? null : Int.valueOf(cursor.getInt(i + 7))
+        var string: String = cursor.isNull(i + 8) ? null : cursor.getString(i + 8)
+        var string2: String = cursor.isNull(i + 9) ? null : cursor.getString(i + 9)
+        var string3: String = cursor.isNull(i + 10) ? null : cursor.getString(i + 10)
+        var i3: Int = cursor.getInt(i + 11)
+        var valueOf3: Int = cursor.isNull(i + 12) ? null : Int.valueOf(cursor.getInt(i + 12))
+        var valueOf4: Int = cursor.isNull(i + 13) ? null : Int.valueOf(cursor.getInt(i + 13))
         UUID fromString2 = cursor.isNull(i + 14) ? null : UUID.fromString(cursor.getString(i + 14))
         UUID fromString3 = cursor.isNull(i + 15) ? null : UUID.fromString(cursor.getString(i + 15))
-        String string4 = cursor.isNull(i + 16) ? null : cursor.getString(i + 16)
-        Int valueOf5 = cursor.isNull(i + 17) ? null : Int.valueOf(cursor.getInt(i + 17))
-        Int valueOf6 = cursor.isNull(i + 18) ? null : Int.valueOf(cursor.getInt(i + 18))
-        Int valueOf7 = cursor.isNull(i + 19) ? null : Int.valueOf(cursor.getInt(i + 19))
-        Int valueOf8 = cursor.isNull(i + 20) ? null : Int.valueOf(cursor.getInt(i + 20))
+        var string4: String = cursor.isNull(i + 16) ? null : cursor.getString(i + 16)
+        var valueOf5: Int = cursor.isNull(i + 17) ? null : Int.valueOf(cursor.getInt(i + 17))
+        var valueOf6: Int = cursor.isNull(i + 18) ? null : Int.valueOf(cursor.getInt(i + 18))
+        var valueOf7: Int = cursor.isNull(i + 19) ? null : Int.valueOf(cursor.getInt(i + 19))
+        var valueOf8: Int = cursor.isNull(i + 20) ? null : Int.valueOf(cursor.getInt(i + 20))
         if (cursor.isNull(i + 21)) {
             bool2 = null
         } else {
@@ -228,10 +228,10 @@ class ChatMessageDao : AbstractDao<ChatMessage, Long> {
         return ChatMessage(valueOf, j, date, i2, date2, bool, fromString, valueOf2, string, string2, string3, i3, valueOf3, valueOf4, fromString2, fromString3, string4, valueOf5, valueOf6, valueOf7, valueOf8, bool2, bool3, cursor.isNull(i + 23) ? null : UUID.fromString(cursor.getString(i + 23)), cursor.isNull(i + 24) ? null : cursor.getString(i + 24), cursor.isNull(i + 25) ? null : Int.valueOf(cursor.getInt(i + 25)), cursor.isNull(i + 26) ? null : cursor.getBlob(i + 26), cursor.isNull(i + 27) ? null : cursor.getString(i + 27), cursor.isNull(i + 28) ? null : Int.valueOf(cursor.getInt(i + 28)), cursor.getShort(i + 29) != (Short) 0)
     }
 
-    fun readEntity(cursor: Cursor, chatMessage: ChatMessage, i: Int): Unit {
+    fun readEntity(cursor: Cursor, chatMessage: ChatMessage, i: Int)  {
         Boolean bool
-        Boolean z = true
-        Int num = null
+        var z: Boolean = true
+        var num: Int = null
         chatMessage.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
         chatMessage.setChatterID(cursor.getLong(i + 1))
         chatMessage.setTimestamp(Date(cursor.getLong(i + 2)))

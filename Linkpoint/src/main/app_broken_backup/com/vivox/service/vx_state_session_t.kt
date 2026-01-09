@@ -101,7 +101,7 @@ class vx_state_session_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_p_vx_state_participant getState_participants() {
-        Long l = VxClientProxyJNI.vx_state_session_t_state_participants_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_state_session_t_state_participants_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_p_vx_state_participant(l, false)
         return null
     }

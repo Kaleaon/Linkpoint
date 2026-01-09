@@ -30,11 +30,11 @@ class GroupNoticeAdd : SLMessage {
         return this.MessageBlock_Field.FromAgentName.size + 34 + 2 + this.MessageBlock_Field.Message.size + 2 + this.MessageBlock_Field.BinaryBucket.size + 20
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleGroupNoticeAdd(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 61)
@@ -47,7 +47,7 @@ class GroupNoticeAdd : SLMessage {
         packVariable(byteBuffer, this.MessageBlock_Field.BinaryBucket, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.MessageBlock_Field.ToGroupID = unpackUUID(byteBuffer)
         this.MessageBlock_Field.ID = unpackUUID(byteBuffer)

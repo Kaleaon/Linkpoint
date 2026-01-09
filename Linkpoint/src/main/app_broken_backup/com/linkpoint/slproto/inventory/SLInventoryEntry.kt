@@ -248,7 +248,7 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
     private Unit parsePermissions(SimpleStringParser simpleStringParser, SLInventoryEntry sLInventoryEntry) throws SimpleStringParser.StringParsingException {
         simpleStringParser.expectToken("{", DELIM_EOL)
         while (true) {
-            String nextToken = simpleStringParser.nextToken(DELIM_ANY)
+            var nextToken: String = simpleStringParser.nextToken(DELIM_ANY)
             if (!nextToken.equals("}")) {
                 if (nextToken.equals("base_mask")) {
                     sLInventoryEntry.baseMask = simpleStringParser.getHexToken(DELIM_EOL)
@@ -280,7 +280,7 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
     private Unit parseSaleInfo(SimpleStringParser simpleStringParser, SLInventoryEntry sLInventoryEntry) throws SimpleStringParser.StringParsingException {
         simpleStringParser.expectToken("{", DELIM_EOL)
         while (true) {
-            String nextToken = simpleStringParser.nextToken(DELIM_ANY)
+            var nextToken: String = simpleStringParser.nextToken(DELIM_ANY)
             if (!nextToken.equals("}")) {
                 if (nextToken.equals("sale_type")) {
                     sLInventoryEntry.saleType = SLSaleType.getByString(simpleStringParser.nextToken(DELIM_EOL)).getTypeCode()
@@ -301,7 +301,7 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
         SLInventoryEntry sLInventoryEntry = SLInventoryEntry()
         simpleStringParser.expectToken("{", DELIM_EOL)
         while (true) {
-            String nextToken = simpleStringParser.nextToken(DELIM_ANY)
+            var nextToken: String = simpleStringParser.nextToken(DELIM_ANY)
             if (nextToken.equals("}")) {
                 return sLInventoryEntry
             }
@@ -388,21 +388,21 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
     fun getDrawableResource(): Int {
         /*
             r1 = this
-            Boolean r0 = r1.isFolder
+            var r0: Boolean = r1.isFolder
             if (r0 == 0) goto L_0x0008
             r0 = 2130837696(0x7f0200c0, float:1.7280353E38)
             return r0
         L_0x0008:
-            Boolean r0 = r1.isLink()
+            var r0: Boolean = r1.isLink()
             if (r0 != 0) goto L_0x001b
-            Int r0 = r1.assetType
+            var r0: Int = r1.assetType
             com.linkpoint.slproto.inventory.SLAssetType r0 = com.linkpoint.slproto.inventory.SLAssetType.getByType(r0)
             if (r0 == 0) goto L_0x001b
-            Int r0 = r0.getDrawableResource()
+            var r0: Int = r0.getDrawableResource()
             return r0
         L_0x001b:
-            Int r0 = r1.invType
-            Int r0 = getDrawableResourceForType(r0)
+            var r0: Int = r1.invType
+            var r0: Int = getDrawableResourceForType(r0)
             return r0
         */
         throw UnsupportedOperationException("Method not decompiled: com.linkpoint.slproto.inventory.SLInventoryEntry.getDrawableResource():Int")

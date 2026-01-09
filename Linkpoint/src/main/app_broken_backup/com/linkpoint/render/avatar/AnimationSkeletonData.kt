@@ -25,7 +25,7 @@ class AnimationSkeletonData {
         Arrays.fill(this.animOffsets, 0.0f)
     }
 
-    fun animate(AvatarSkeleton avatarSkeleton, AvatarAnimationList avatarAnimationList): Unit {
+    fun animate(AvatarSkeleton avatarSkeleton, AvatarAnimationList avatarAnimationList)  {
         Arrays.fill(this.animPriorityRotArray, 1.0f)
         Arrays.fill(this.animPriorityPosArray, 1.0f)
         for (i = 0; i < 133; i++) {

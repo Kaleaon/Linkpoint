@@ -14,13 +14,13 @@ class LLSDUUID : LLSDNode {
     }
 
     LLSDUUID(String str) {
-        Int length = str.size()
-        Long j = 0
-        Int i = 0
-        Int i2 = 0
-        Long j2 = 0
-        Long j3 = 0
-        Int i3 = 0
+        var length: Int = str.size()
+        var j: Long = 0
+        var i: Int = 0
+        var i2: Int = 0
+        var j2: Long = 0
+        var j3: Long = 0
+        var i3: Int = 0
         while (i3 < length) {
             char charAt = str.charAt(i3)
             if (charAt != '-') {

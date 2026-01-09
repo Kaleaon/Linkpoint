@@ -1,5 +1,7 @@
 package com.linkpoint.modern.protocol
 
+import kotlin.math.*
+
 import android.util.Log
 
 import java.util.concurrent.CompletableFuture
@@ -103,8 +105,8 @@ class HybridSLTransport {
             }
             
             // Convert message to WebSocket format
-            String jsonMessage = message.toJSON()
-            Log.d(TAG, "Sending WebSocket message: " + jsonMessage.substring(0, Math.min(100, jsonMessage.length())))
+            var jsonMessage: String = message.toJSON()
+            Log.d(TAG, "Sending WebSocket message: " + jsonMessage.substring(0, min(100, jsonMessage.length())))
             
             // Send via WebSocket (OkHttp WebSocket send returns boolean)
             boolean sent = eventClient.sendRawMessage(jsonMessage)
@@ -152,7 +154,7 @@ class HybridSLTransport {
                 
                 Matcher matcher = capPattern.matcher(seedCapability)
                 if (matcher.find()) {
-                    String capUrl = matcher.group(1).trim()
+                    var capUrl: String = matcher.group(1).trim()
                     capabilities.put(capName, capUrl)
                     Log.d(TAG, "Parsed capability: " + capName + " -> " + capUrl)
                 }
@@ -164,8 +166,8 @@ class HybridSLTransport {
                 Matcher jsonMatcher = jsonPattern.matcher(seedCapability)
                 
                 while (jsonMatcher.find()) {
-                    String key = jsonMatcher.group(1)
-                    String value = jsonMatcher.group(2)
+                    var key: String = jsonMatcher.group(1)
+                    var value: String = jsonMatcher.group(2)
                     
                     // Only store known capability names
                     for (String capName : capabilityNames) {
@@ -194,8 +196,8 @@ class HybridSLTransport {
     private SLResponse parseHTTP2Response(String responseData) {
         try {
             // Basic LLSD-XML parsing for Second Life responses
-            String responseType = "caps_response"
-            String parsedData = responseData
+            var responseType: String = "caps_response"
+            var parsedData: String = responseData
             
             if (responseData != null) {
                 // Extract common LLSD response patterns
@@ -208,9 +210,9 @@ class HybridSLTransport {
                     
                     StringBuilder parsed = StringBuilder("LLSD Map: ")
                     while (matcher.find()) {
-                        String key = matcher.group(1)
-                        String type = matcher.group(2)
-                        String value = matcher.group(3)
+                        var key: String = matcher.group(1)
+                        var type: String = matcher.group(2)
+                        var value: String = matcher.group(3)
                         parsed.append(key).append("=").append(value).append(" ")
                     }
                     
@@ -305,7 +307,7 @@ class HybridSLTransport {
                                                 HTTP2CapsClient.ProgressListener progressListener): CompletableFuture<String> {
         try {
             // Get actual upload URL from CAPS
-            String uploadUrl = capsClient.getCapability("NewFileAgentInventory");
+            var uploadUrl: String = capsClient.getCapability("NewFileAgentInventory");
             if (uploadUrl == null || uploadUrl.isEmpty()) {
                 uploadUrl = capsClient.getCapability("UploadBakedTexture");
             }
@@ -350,7 +352,7 @@ class HybridSLTransport {
         
         fun selectOptimalRoute(ModernMessage message): TransportRoute {
             // Basic routing logic - can be enhanced based on message type
-            String messageType = message.getClass().getSimpleName()
+            var messageType: String = message.getClass().getSimpleName()
             
             // Route asset-related messages via HTTP/2 CAPS
             if (messageType.contains("Asset") || messageType.contains("Upload") || 

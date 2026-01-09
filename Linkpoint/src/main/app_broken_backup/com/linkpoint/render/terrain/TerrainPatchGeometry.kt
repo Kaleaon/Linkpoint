@@ -1,4 +1,6 @@
 package com.linkpoint.render.terrain
+
+import kotlin.math.*
 import java.util.*
 
 import android.opengl.GLES10
@@ -13,7 +15,7 @@ import com.linkpoint.utils.IdentityMatrix
 import com.linkpoint.rawbuffers.DirectByteBuffer
 
 class TerrainPatchGeometry {
-    Int DrawPatchSize = 16
+    var DrawPatchSize: Int = 16
     private Int index_size_bytes = 3072
     private Int vertex_size_bytes = 9248
     private val waterAmplitude: FloatArray = {0.5f, 0.5f, 0.3f, 0.4f}
@@ -38,13 +40,13 @@ class TerrainPatchGeometry {
         this.index_count = 0
         this.water_index_count = 0
         LLVector3 lLVector3 = LLVector3()
-        Float waterHeight = terrainPatchHeightMap.getWaterHeight()
+        var waterHeight: Float = terrainPatchHeightMap.getWaterHeight()
         FloatArray heightArray = terrainPatchHeightMap.getHeightArray()
         FloatArray normalArray = terrainPatchHeightMap.getNormalArray()
-        Int i = 0
-        Int i2 = 0
+        var i: Int = 0
+        var i2: Int = 0
         while (true) {
-            Int i3 = i
+            var i3: Int = i
             if (i3 >= 17) {
                 break
             }
@@ -68,16 +70,16 @@ class TerrainPatchGeometry {
         }
         directByteBuffer3.position(0)
         directByteBuffer4.position(0)
-        Int i5 = 0
-        Int i6 = 0
+        var i5: Int = 0
+        var i6: Int = 0
         while (true) {
-            Int i7 = i5
+            var i7: Int = i5
             if (i7 < 16) {
                 for (i8 in 0 until 16) {
-                    Int i9 = i6 + i8
-                    Int i10 = i9 + 1
-                    Int i11 = i9 + 17
-                    Int i12 = i11 + 1
+                    var i9: Int = i6 + i8
+                    var i10: Int = i9 + 1
+                    var i11: Int = i9 + 17
+                    var i12: Int = i11 + 1
                     directByteBuffer3.putShort((Short) i9)
                     directByteBuffer3.putShort((Short) i10)
                     directByteBuffer3.putShort((Short) i11)
@@ -85,7 +87,7 @@ class TerrainPatchGeometry {
                     directByteBuffer3.putShort((Short) i12)
                     directByteBuffer3.putShort((Short) i11)
                     this.index_count += 6
-                    if (Math.min(Math.min(Math.min(directByteBuffer.getFloat((i9 * 8) + 2), directByteBuffer.getFloat((i10 * 8) + 2)), directByteBuffer.getFloat((i11 * 8) + 2)), directByteBuffer.getFloat((i12 * 8) + 2)) <= waterHeight) {
+                    if (min(min(min(directByteBuffer.getFloat((i9 * 8) + 2), directByteBuffer.getFloat((i10 * 8) + 2)), directByteBuffer.getFloat((i11 * 8) + 2)), directByteBuffer.getFloat((i12 * 8) + 2)) <= waterHeight) {
                         directByteBuffer4.putShort((Short) i9)
                         directByteBuffer4.putShort((Short) i10)
                         directByteBuffer4.putShort((Short) i11)
@@ -107,7 +109,7 @@ class TerrainPatchGeometry {
         }
     }
 
-    fun GLPrepare(renderContext: RenderContext): Unit {
+    fun GLPrepare(renderContext: RenderContext)  {
         if (renderContext.hasGL20) {
             GLES20.glUseProgram(renderContext.primProgram.getHandle())
             renderContext.glModelApplyMatrix(renderContext.primProgram.uMVPMatrix)
@@ -129,7 +131,7 @@ class TerrainPatchGeometry {
         GLES11.glMatrixMode(5888)
     }
 
-    fun GLDraw(RenderContext renderContext, FloatArray fArr, GLLoadedTexture gLLoadedTexture): Unit {
+    fun GLDraw(RenderContext renderContext, FloatArray fArr, GLLoadedTexture gLLoadedTexture)  {
         if (this.index_count != 0) {
             if (!renderContext.hasGL20) {
                 renderContext.glObjWorldPushAndMultMatrixf(fArr, 0)

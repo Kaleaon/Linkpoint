@@ -43,11 +43,11 @@ class RoutedMoneyBalanceReply : SLMessage {
         return this.MoneyData_Field.Description.size + 46 + 10 + this.TransactionInfo_Field.ItemDescription.size + 43
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleRoutedMoneyBalanceReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 59)
@@ -69,7 +69,7 @@ class RoutedMoneyBalanceReply : SLMessage {
         packVariable(byteBuffer, this.TransactionInfo_Field.ItemDescription, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.TargetBlock_Field.TargetIP = unpackIPAddress(byteBuffer)
         this.TargetBlock_Field.TargetPort = unpackShort(byteBuffer) & 65535
         this.MoneyData_Field.AgentID = unpackUUID(byteBuffer)

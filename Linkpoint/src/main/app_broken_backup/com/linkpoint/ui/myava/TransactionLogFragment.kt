@@ -43,13 +43,13 @@ class TransactionLogFragment : FragmentWithTitle : LoadableMonitor.OnLoadableDat
     private SubscriptionData<SubscriptionSingleKey, LazyList<MoneyTransaction>> moneyTransactions = SubscriptionData<>(UIThreadExecutor.getInstance())
     /* access modifiers changed from: private */
     Runnable scrollToBottomRunnable = Runnable() {
-        fun run(): Unit {
+        fun run()  {
             Int itemCount
-            Boolean unused = TransactionLogFragment.this.scrollToBottomRunnablePosted = false
+            var unused: Boolean = TransactionLogFragment.this.scrollToBottomRunnablePosted = false
             if (TransactionLogFragment.this.unbinder != null) {
                 RecyclerView recyclerView = TransactionLogFragment.this.transactionLogView
                 if (recyclerView.hasPendingAdapterUpdates()) {
-                    Boolean unused2 = TransactionLogFragment.this.scrollToBottomRunnablePosted = true
+                    var unused2: Boolean = TransactionLogFragment.this.scrollToBottomRunnablePosted = true
                     TransactionLogFragment.this.mHandler.post(TransactionLogFragment.this.scrollToBottomRunnable)
                 } else if (TransactionLogFragment.this.adapter != null && (itemCount = TransactionLogFragment.this.adapter.getItemCount()) > 0) {
                     recyclerView.scrollToPosition(itemCount - 1)
@@ -58,7 +58,7 @@ class TransactionLogFragment : FragmentWithTitle : LoadableMonitor.OnLoadableDat
         }
     }
     /* access modifiers changed from: private */
-    Boolean scrollToBottomRunnablePosted = false
+    var scrollToBottomRunnablePosted: Boolean = false
     @BindView(2131755676)
     RecyclerView transactionLogView
     /* access modifiers changed from: private */
@@ -171,12 +171,12 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$N_xrT8AwWQ2Oj
         performClearTransactionLog()
     }
 
-    fun onCreate(@Nullable Bundle bundle): Unit {
+    fun onCreate(@Nullable Bundle bundle)  {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater): Unit {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater)  {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.transaction_log_menu, menu)
     }
@@ -191,7 +191,7 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$N_xrT8AwWQ2Oj
         return inflate
     }
 
-    fun onDestroyView(): Unit {
+    fun onDestroyView()  {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -199,7 +199,7 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$N_xrT8AwWQ2Oj
         super.onDestroyView()
     }
 
-    fun onLoadableDataChanged(): Unit {
+    fun onLoadableDataChanged()  {
         LazyList data = this.moneyTransactions.getData()
         if (data != null) {
             this.loadableMonitor.setEmptyMessage(data.isEmpty(), getString(R.string.no_transactions_per_session))
@@ -220,7 +220,7 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$N_xrT8AwWQ2Oj
         }
     }
 
-    fun onStart(): Unit {
+    fun onStart()  {
         super.onStart()
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
@@ -228,12 +228,12 @@ Method generation error in method: com.linkpoint.ui.myava.-$Lambda$N_xrT8AwWQ2Oj
         }
     }
 
-    fun onStop(): Unit {
+    fun onStop()  {
         this.loadableMonitor.unsubscribeAll()
         super.onStop()
     }
 
-    fun onTransactionClicked(MoneyTransaction moneyTransaction): Unit {
+    fun onTransactionClicked(MoneyTransaction moneyTransaction)  {
         UUID activeAgentID = ActivityUtils.getActiveAgentID(getArguments())
         if (activeAgentID != null) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserProfileFragment.class, UserProfileFragment.makeSelection(ChatterID.getUserChatterID(activeAgentID, moneyTransaction.getAgentUUID())))

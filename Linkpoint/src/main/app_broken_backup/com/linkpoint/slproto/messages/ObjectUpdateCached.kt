@@ -30,11 +30,11 @@ class ObjectUpdateCached : SLMessage {
         return (this.ObjectData_Fields.size() * 12) + 12
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleObjectUpdateCached(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.put(Ascii.SO)
         packLong(byteBuffer, this.RegionData_Field.RegionHandle)
         packShort(byteBuffer, (this as Short).RegionData_Field.TimeDilation)
@@ -46,7 +46,7 @@ class ObjectUpdateCached : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.RegionData_Field.RegionHandle = unpackLong(byteBuffer)
         this.RegionData_Field.TimeDilation = unpackShort(byteBuffer) & 65535
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE

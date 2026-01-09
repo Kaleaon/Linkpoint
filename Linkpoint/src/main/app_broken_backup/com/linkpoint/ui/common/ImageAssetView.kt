@@ -1,5 +1,7 @@
 package com.linkpoint.ui.common
 
+import kotlin.math.*
+
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -33,7 +35,7 @@ class ImageAssetView : View {
     LoadAssetImageTask loadTask
     private Paint textPaint = Paint()
     /* access modifiers changed from: private */
-    Boolean verticalFit = false
+    var verticalFit: Boolean = false
 
     private class LoadAssetImageTask : AsyncTask<UUID, Void, Bitmap> : ResourceConsumer {
         private volatile OpenJPEG texture
@@ -47,8 +49,8 @@ class ImageAssetView : View {
             this()
         }
 
-        fun OnResourceReady(Any obj, Boolean z): Unit {
-            if (obj instanceof OpenJPEG) {
+        fun OnResourceReady(Any obj, Boolean z)  {
+            if (obj is OpenJPEG) {
                 this.texture = (OpenJPEG) obj
             }
             synchronized (this.textureReady) {
@@ -81,7 +83,7 @@ class ImageAssetView : View {
         }
 
         /* access modifiers changed from: protected */
-        fun onPostExecute(Bitmap bitmap): Unit {
+        fun onPostExecute(Bitmap bitmap)  {
             Bitmap unused = ImageAssetView.this.imageBitmap = bitmap
             if (ImageAssetView.this.verticalFit) {
                 ImageAssetView.this.requestLayout()
@@ -104,12 +106,12 @@ class ImageAssetView : View {
     }
 
     /* access modifiers changed from: protected */
-    fun onAttachedToWindow(): Unit {
+    fun onAttachedToWindow()  {
         super.onAttachedToWindow()
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics()
         TypedValue typedValue = TypedValue()
         getContext().getTheme().resolveAttribute(R.attr.chatBubbleText, typedValue, true)
-        Int i = typedValue.data
+        var i: Int = typedValue.data
         this.textPaint.setStyle(Paint.Style.STROKE)
         this.textPaint.setColor(i)
         this.textPaint.setTextAlign(Paint.Align.CENTER)
@@ -118,26 +120,26 @@ class ImageAssetView : View {
     }
 
     /* access modifiers changed from: protected */
-    fun onDraw(Canvas canvas): Unit {
-        Int width = getWidth()
-        Int height = getHeight()
+    fun onDraw(Canvas canvas)  {
+        var width: Int = getWidth()
+        var height: Int = getHeight()
         this.bitmapPaint.setStyle(Paint.Style.STROKE)
         this.bitmapPaint.setARGB(255, 192, 192, 192)
         this.bitmapPaint.setTextAlign(Paint.Align.CENTER)
         if (this.imageBitmap == null || width == 0 || height == 0) {
             canvas.drawARGB(50, 0, 0, 0)
-            String str = (this.assetID == null || UUIDPool.ZeroUUID.equals(this.assetID)) ? "No image" : this.loadTask == null ? "Failed to load" : this.loadTask.getStatus() == AsyncTask.Status.FINISHED ? "Failed to load" : "Loading..."
+            var str: String = (this.assetID == null || UUIDPool.ZeroUUID.equals(this.assetID)) ? "No image" : this.loadTask == null ? "Failed to load" : this.loadTask.getStatus() == AsyncTask.Status.FINISHED ? "Failed to load" : "Loading..."
             this.textPaint.getTextBounds(str, 0, str.size(), this.bitmapSrcRect)
             canvas.drawText(str, (width.toFloat()) / 2.0f, ((height.toFloat()) / 2.0f) + ((this.toFloat().bitmapSrcRect.height()) / 2.0f), this.textPaint)
             return
         }
-        Int width2 = this.imageBitmap.getWidth()
-        Int height2 = this.imageBitmap.getHeight()
-        Float max = Math.max((width2.toFloat()) / (width.toFloat()), (height2.toFloat()) / (height.toFloat()))
-        Int round = Math.round((width2.toFloat()) / max)
-        Int round2 = Math.round((height2.toFloat()) / max)
-        Int i = (width / 2) - (round / 2)
-        Int i2 = this.alignTop ? 0 : (height / 2) - (round2 / 2)
+        var width2: Int = this.imageBitmap.getWidth()
+        var height2: Int = this.imageBitmap.getHeight()
+        var max: Float = max((width2.toFloat()) / (width.toFloat()), (height2.toFloat()) / (height.toFloat()))
+        var round: Int = Math.round((width2.toFloat()) / max)
+        var round2: Int = Math.round((height2.toFloat()) / max)
+        var i: Int = (width / 2) - (round / 2)
+        var i2: Int = this.alignTop ? 0 : (height / 2) - (round2 / 2)
         this.bitmapDestRect.left = i + 1
         this.bitmapDestRect.top = i2 + 1
         this.bitmapDestRect.right = (round + i) - 1
@@ -167,13 +169,13 @@ class ImageAssetView : View {
     }
 
     /* access modifiers changed from: protected */
-    fun onMeasure(Int i, Int i2): Unit {
+    fun onMeasure(Int i, Int i2)  {
         if (View.MeasureSpec.getMode(i) == 0 && View.MeasureSpec.getMode(i2) == 0) {
             super.onMeasure(i, i2)
             return
         }
-        Int min = Math.min(View.MeasureSpec.getMode(i2) != 0 ? View.MeasureSpec.getSize(i2) : Int.MAX_VALUE, View.MeasureSpec.getMode(i) != 0 ? View.MeasureSpec.getSize(i) : Int.MAX_VALUE)
-        Int size = View.MeasureSpec.getMode(i) == 1073741824 ? View.MeasureSpec.getSize(i) : min
+        var min: Int = min(View.MeasureSpec.getMode(i2) != 0 ? View.MeasureSpec.getSize(i2) : Int.MAX_VALUE, View.MeasureSpec.getMode(i) != 0 ? View.MeasureSpec.getSize(i) : Int.MAX_VALUE)
+        var size: Int = View.MeasureSpec.getMode(i) == 1073741824 ? View.MeasureSpec.getSize(i) : min
         if (View.MeasureSpec.getMode(i2) == 1073741824) {
             min = View.MeasureSpec.getSize(i2)
         }
@@ -183,12 +185,12 @@ class ImageAssetView : View {
         setMeasuredDimension(size, min)
     }
 
-    fun setAlignTop(Boolean z): Unit {
+    fun setAlignTop(Boolean z)  {
         this.alignTop = z
         invalidate()
     }
 
-    fun setAssetID(UUID uuid): Unit {
+    fun setAssetID(UUID uuid)  {
         Any[] objArr = Any[1]
         objArr[0] = uuid != null ? uuid.toString() : null
         Debug.Printf("asset ID: %s", objArr)
@@ -214,7 +216,7 @@ class ImageAssetView : View {
         }
     }
 
-    fun setVerticalFit(Boolean z): Unit {
+    fun setVerticalFit(Boolean z)  {
         this.verticalFit = z
         requestLayout()
     }

@@ -23,11 +23,11 @@ class AssetUploadRequest : SLMessage {
         return this.AssetBlock_Field.AssetData.size + 21 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleAssetUploadRequest(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 77)
@@ -38,7 +38,7 @@ class AssetUploadRequest : SLMessage {
         packVariable(byteBuffer, this.AssetBlock_Field.AssetData, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AssetBlock_Field.TransactionID = unpackUUID(byteBuffer)
         this.AssetBlock_Field.Type = unpackByte(byteBuffer)
         this.AssetBlock_Field.Tempfile = unpackBoolean(byteBuffer)

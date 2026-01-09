@@ -34,7 +34,7 @@ class AutoValue_SLTextureEntryFace : SLTextureEntryFace {
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof SLTextureEntryFace)) {
+        if (!(obj is SLTextureEntryFace)) {
             return false
         }
         SLTextureEntryFace sLTextureEntryFace = (SLTextureEntryFace) obj

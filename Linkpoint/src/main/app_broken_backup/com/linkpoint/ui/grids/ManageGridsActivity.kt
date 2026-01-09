@@ -54,7 +54,7 @@ class ManageGridsActivity : ThemedActivity : GridEditDialog.OnGridEditResultList
         }
 
         /* access modifiers changed from: package-private */
-        fun updateList(): Unit {
+        fun updateList()  {
             super.notifyDataSetChanged()
         }
     }
@@ -73,7 +73,7 @@ class ManageGridsActivity : ThemedActivity : GridEditDialog.OnGridEditResultList
     }
 
     @OnClick({2131755484})
-    fun onAddNewGridButton(): Unit {
+    fun onAddNewGridButton()  {
         GridEditDialog gridEditDialog = GridEditDialog(this, this.gridList, (GridList.GridInfo) null)
         gridEditDialog.setOnGridEditResultListener(this)
         gridEditDialog.show()
@@ -186,7 +186,7 @@ Method generation error in method: com.linkpoint.ui.grids.-$Lambda$mB53054QosfH2
         return super.onContextItemSelected(menuItem)
     }
 
-    fun onCreate(Bundle bundle): Unit {
+    fun onCreate(Bundle bundle)  {
         super.onCreate(bundle)
         setContentView(R.toInt().layout.manage_grids)
         ButterKnife.bind((Activity) this)
@@ -198,7 +198,7 @@ Method generation error in method: com.linkpoint.ui.grids.-$Lambda$mB53054QosfH2
         registerForContextMenu(this.gridListView)
     }
 
-    fun onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo): Unit {
+    fun onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo)  {
         super.onCreateContextMenu(contextMenu, view, contextMenuInfo)
         Any item = this.adapter.getItem(((AdapterView.AdapterContextMenuInfo) contextMenuInfo).position)
         if (item != null && !((GridList.GridInfo) item).isPredefinedGrid()) {
@@ -206,7 +206,7 @@ Method generation error in method: com.linkpoint.ui.grids.-$Lambda$mB53054QosfH2
         }
     }
 
-    fun onGridAdded(GridList.GridInfo gridInfo, Boolean z): Unit {
+    fun onGridAdded(GridList.GridInfo gridInfo, Boolean z)  {
         if (z) {
             this.gridList.addNewGrid(gridInfo)
         } else {
@@ -220,14 +220,14 @@ Method generation error in method: com.linkpoint.ui.grids.-$Lambda$mB53054QosfH2
         }
     }
 
-    fun onGridDeleted(GridList.GridInfo gridInfo): Unit {
+    fun onGridDeleted(GridList.GridInfo gridInfo)  {
         deleteGrid(gridInfo)
     }
 
-    fun onGridEditCancelled(): Unit {
+    fun onGridEditCancelled()  {
     }
 
-    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j): Unit {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j)  {
         GridList.GridInfo gridInfo
         if (this.adapter != null && (gridInfo = (GridList.GridInfo) this.adapter.getItem(i)) != null && !gridInfo.isPredefinedGrid()) {
             GridEditDialog gridEditDialog = GridEditDialog(this, this.gridList, gridInfo)

@@ -42,7 +42,7 @@ class VivoxMessageController {
             fun handleMessage(Message object) {
                 block4: {
                     block3: {
-                        if (!(((Message)object).obj instanceof vx_message_base_t)) break block3
+                        if (!(((Message)object).obj is vx_message_base_t)) break block3
                         object = (vx_message_base_t)((Message)object).obj
                         if (((vx_message_base_t)object).getType() != vx_message_type.msg_event) break block4
                         object = vx_evt_base_t(vx_message_base_t.getCPtr((vx_message_base_t)object), false)
@@ -67,7 +67,7 @@ class VivoxMessageController {
                     if (vx_message_base_t2 == null) continue
                     Object object = vx_message_base_t2.getType()
                     Debug.Printf("Voice: got vxMessage (%s)", object)
-                    Boolean bl2 = bl = false
+                    var bl2: Boolean = bl = false
                     if (object == vx_message_type.msg_response) {
                         object = vx_resp_base_t(vx_message_base_t.getCPtr(vx_message_base_t2), false)
                         Object object2 = ((vx_resp_base_t)object).getRequest()
@@ -98,7 +98,7 @@ class VivoxMessageController {
     }
 
     fun sendRequest(vx_req_base_t vx_req_base_t2) {
-        String string2 = this.getRequestID()
+        var string2: String = this.getRequestID()
         Debug.Printf("Voice: sending request with cookie '%s'", string2)
         VxClientProxy.set_request_cookie(vx_req_base_t2, string2)
         VxClientProxy.vx_issue_request(vx_req_base_t2)
@@ -110,12 +110,12 @@ class VivoxMessageController {
      */
     public vx_resp_base_t sendRequestAndWait(vx_req_base_t object) {
         Object var3_3 = null
-        String string2 = this.getRequestID()
+        var string2: String = this.getRequestID()
         Debug.Printf("Voice: sending request with cookie '%s'", string2)
         VxClientProxy.set_request_cookie((vx_req_base_t)object, string2)
         PendingRequest pendingRequest = PendingRequest()
         this.pendingRequests.put(string2, pendingRequest)
-        Int n = VxClientProxy.vx_issue_request((vx_req_base_t)object)
+        var n: Int = VxClientProxy.vx_issue_request((vx_req_base_t)object)
         if (n != 0) {
             Debug.Printf("Voice: vx_issue_request returned %d", n)
             return var3_3

@@ -27,14 +27,14 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
         /* JADX WARNING: Removed duplicated region for block: B:39:0x0170  */
         /* JADX WARNING: Removed duplicated region for block: B:40:0x0172  */
         /* Code decompiled incorrectly, please refer to instructions dump. */
-        fun run(): Unit {
+        fun run()  {
             /*
                 r15 = this
                 r14 = 3
                 r13 = 2
                 r2 = 0
                 r3 = 1
-                Long r6 = java.lang.System.currentTimeMillis()     // Catch:{ Exception -> 0x0176 }
+                var r6: Long = java.lang.System.currentTimeMillis()     // Catch:{ Exception -> 0x0176 }
                 java.lang.String r0 = "InventoryFetcher: Going to fetch folder: %s"
                 r1 = 1
                 java.lang.Array<Any> r1 = java.lang.Object[r1]     // Catch:{ Exception -> 0x0176 }
@@ -135,8 +135,8 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
                 java.lang.String r5 = r5.toString()     // Catch:{ Exception -> 0x012d }
                 r8 = 0
                 r4[r8] = r5     // Catch:{ Exception -> 0x012d }
-                Long r8 = java.lang.System.currentTimeMillis()     // Catch:{ Exception -> 0x012d }
-                Long r6 = r8 - r6
+                var r8: Long = java.lang.System.currentTimeMillis()     // Catch:{ Exception -> 0x012d }
+                var r6: Long = r8 - r6
                 java.lang.Long r5 = java.lang.Long.valueOf(r6)     // Catch:{ Exception -> 0x012d }
                 r6 = 1
                 r4[r6] = r5     // Catch:{ Exception -> 0x012d }
@@ -146,11 +146,11 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
                 r4 = 0
                 r0.set(r4)     // Catch:{ Exception -> 0x012d }
             L_0x00f3:
-                Boolean r0 = java.lang.Thread.interrupted()
+                var r0: Boolean = java.lang.Thread.interrupted()
                 if (r0 != 0) goto L_0x0170
                 com.linkpoint.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.linkpoint.slproto.inventory.SLInventoryHTTPFetchRequest.this
                 java.util.concurrent.atomic.AtomicBoolean r0 = r0.isCancelled
-                Boolean r0 = r0.get()
+                var r0: Boolean = r0.get()
             L_0x0103:
                 java.lang.String r4 = "InventoryFetcher: done processing folder %s: success %s cancelled %b"
                 java.lang.Array<Any> r5 = java.lang.Object[r14]
@@ -194,13 +194,13 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
                 goto L_0x00c6
             L_0x0156:
                 r9.interrupt()     // Catch:{ Exception -> 0x012d }
-                Boolean r0 = java.lang.Thread.interrupted()     // Catch:{ Exception -> 0x012d }
+                var r0: Boolean = java.lang.Thread.interrupted()     // Catch:{ Exception -> 0x012d }
                 if (r0 != 0) goto L_0x00c8
                 com.linkpoint.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.linkpoint.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ Exception -> 0x012d }
                 java.util.concurrent.atomic.AtomicBoolean r0 = r0.isCancelled     // Catch:{ Exception -> 0x012d }
-                Boolean r0 = r0.get()     // Catch:{ Exception -> 0x012d }
+                var r0: Boolean = r0.get()     // Catch:{ Exception -> 0x012d }
                 if (r0 != 0) goto L_0x00c8
-                Int r0 = r4 + 1
+                var r0: Int = r4 + 1
                 r4 = r0
                 goto L_0x0081
             L_0x0170:
@@ -249,7 +249,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
         /* JADX WARNING: Removed duplicated region for block: B:27:0x007f  */
         /* JADX WARNING: Removed duplicated region for block: B:65:? A[RETURN, SYNTHETIC] */
         /* Code decompiled incorrectly, please refer to instructions dump. */
-        fun run(): Unit {
+        fun run()  {
             /*
                 r11 = this
                 r3 = 1
@@ -261,7 +261,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
                 r5 = r4
                 r6 = r4
             L_0x000b:
-                Boolean r0 = java.lang.Thread.interrupted()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
+                var r0: Boolean = java.lang.Thread.interrupted()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
                 if (r0 != 0) goto L_0x003b
                 java.util.concurrent.BlockingQueue<com.linkpoint.slproto.inventory.SLInventoryEntry> r0 = r11.commitEntryQueue     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
                 java.lang.Object r0 = r0.poll()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
@@ -286,7 +286,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
                 com.linkpoint.slproto.inventory.SLInventoryEntry r6 = r11.stopEntry     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
                 if (r7 != r6) goto L_0x0093
             L_0x003b:
-                Boolean r0 = java.lang.Thread.interrupted()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
+                var r0: Boolean = java.lang.Thread.interrupted()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
                 if (r0 != 0) goto L_0x0105
                 r0 = r3
             L_0x0042:
@@ -300,7 +300,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
                 java.lang.String r0 = "true"
             L_0x0050:
                 r7[r4] = r0
-                Int r0 = r8.size()
+                var r0: Int = r8.size()
                 java.lang.Integer r0 = java.lang.Integer.valueOf(r0)
                 r7[r3] = r0
                 com.linkpoint.Debug.Printf(r5, r7)
@@ -318,7 +318,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
                 r1.close()
             L_0x0077:
                 if (r6 == 0) goto L_0x0092
-                Boolean r0 = r11.aborted
+                var r0: Boolean = r11.aborted
                 r0 = r0 ^ 1
                 if (r0 == 0) goto L_0x0092
                 java.lang.String r0 = "InvFetch: commit thread successful, calling retainChildren."
@@ -327,7 +327,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
                 com.linkpoint.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.linkpoint.slproto.inventory.SLInventoryHTTPFetchRequest.this
                 com.linkpoint.orm.InventoryDB r0 = r0.db
                 com.linkpoint.slproto.inventory.SLInventoryHTTPFetchRequest r1 = com.linkpoint.slproto.inventory.SLInventoryHTTPFetchRequest.this
-                Long r2 = r1.folderId
+                var r2: Long = r1.folderId
                 r0.retainChildren(r2, r8)
             L_0x0092:
                 return
@@ -338,7 +338,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
                 r6.beginTransaction()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
                 r5 = r3
             L_0x009d:
-                Int r0 = r0 + 1
+                var r0: Int = r0 + 1
                 r6 = 16
                 if (r0 < r6) goto L_0x010a
                 com.linkpoint.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.linkpoint.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
@@ -348,7 +348,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
             L_0x00ab:
                 java.util.UUID r0 = r7.uuid     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
                 r8.add(r0)     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                Int r0 = android.os.Build.VERSION.SDK_INT     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
+                var r0: Int = android.os.Build.VERSION.SDK_INT     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
                 r9 = 11
                 if (r0 < r9) goto L_0x00da
                 if (r2 != 0) goto L_0x00c4
@@ -977,7 +977,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
         this.capURL = str
     }
 
-    fun cancel(): Unit {
+    fun cancel()  {
         this.isCancelled.set(true)
         LLSDStreamingXMLRequest lLSDStreamingXMLRequest = this.streamingXmlReqRef.get()
         if (lLSDStreamingXMLRequest != null) {
@@ -989,7 +989,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest {
         }
     }
 
-    fun start(): Unit {
+    fun start()  {
         if (!this.isCancelled.get() && this.futureRef.get() == null) {
             this.futureRef.set(GenericHTTPExecutor.getInstance().submit(this.httpRequest))
         }

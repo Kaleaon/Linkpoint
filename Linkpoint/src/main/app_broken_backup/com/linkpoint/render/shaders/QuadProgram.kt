@@ -16,7 +16,7 @@ class QuadProgram : ShaderProgram {
         super(Shader.QuadVertexShader, Shader.QuadFragmentShader)
     }
 
-    protected fun bindVariables(): Unit {
+    protected fun bindVariables()  {
         this.vPosition = GLES20.glGetAttribLocation(this.handle, "vPosition")
         this.vTexCoord = GLES20.glGetAttribLocation(this.handle, "vTexCoord")
         this.sTexture = GLES20.glGetUniformLocation(this.handle, "sTexture")

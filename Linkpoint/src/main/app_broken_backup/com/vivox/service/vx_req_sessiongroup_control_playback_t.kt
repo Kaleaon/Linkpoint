@@ -46,7 +46,7 @@ class vx_req_sessiongroup_control_playback_t {
      * Lifted jumps to return sites
      */
     vx_req_base_t getBase() {
-        Long l = VxClientProxyJNI.vx_req_sessiongroup_control_playback_t_base_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_req_sessiongroup_control_playback_t_base_get(this.swigCPtr, this)
         if (l != 0L) return vx_req_base_t(l, false)
         return null
     }

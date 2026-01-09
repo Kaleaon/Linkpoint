@@ -56,7 +56,7 @@ class ND_ERROR {
 
     private ND_ERROR(String string2) {
         this.swigName = string2
-        Int n = swigNext
+        var n: Int = swigNext
         swigNext = n + 1
         this.swigValue = n
     }
@@ -81,7 +81,7 @@ class ND_ERROR {
         if (n < swigValues.length && n >= 0 && ND_ERROR.swigValues[n].swigValue == n) {
             return swigValues[n]
         }
-        Int n2 = 0
+        var n2: Int = 0
         while (n2 < swigValues.length) {
             if (ND_ERROR.swigValues[n2].swigValue == n) {
                 return swigValues[n2]

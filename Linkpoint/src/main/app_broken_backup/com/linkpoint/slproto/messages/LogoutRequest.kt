@@ -20,11 +20,11 @@ class LogoutRequest : SLMessage {
         return 36
     }
 
-    fun Handle(sLMessageHandler: SLMessageHandler): Unit {
+    fun Handle(sLMessageHandler: SLMessageHandler)  {
         sLMessageHandler.HandleLogoutRequest(this)
     }
 
-    fun PackPayload(byteBuffer: ByteBuffer): Unit {
+    fun PackPayload(byteBuffer: ByteBuffer)  {
         byteBuffer.putShort((-1).toShort())
         byteBuffer.put(0x00.toByte())
         byteBuffer.put(0x02.toByte()) // Correct ID for LogoutRequest
@@ -32,7 +32,7 @@ class LogoutRequest : SLMessage {
         packUUID(byteBuffer, this.AgentData_Field.SessionID)
     }
 
-    fun UnpackPayload(byteBuffer: ByteBuffer): Unit {
+    fun UnpackPayload(byteBuffer: ByteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
     }

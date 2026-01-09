@@ -29,7 +29,7 @@ class LLSDArray : LLSDNode {
         }
     }
 
-    fun add(LLSDNode lLSDNode): Unit {
+    fun add(LLSDNode lLSDNode)  {
         this.items.add(lLSDNode)
     }
 

@@ -20,16 +20,16 @@ class CameraConstraint : SLMessage {
         return 17
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleCameraConstraint(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.put(Ascii.SYN)
         packLLVector4(byteBuffer, this.CameraCollidePlane_Field.Plane)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.CameraCollidePlane_Field.Plane = unpackLLVector4(byteBuffer)
     }
 }

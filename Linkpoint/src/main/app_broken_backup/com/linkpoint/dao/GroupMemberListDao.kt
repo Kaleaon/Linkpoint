@@ -24,15 +24,15 @@ class GroupMemberListDao : AbstractDao<GroupMemberList, UUID> {
         super(daoConfig, daoSession)
     }
 
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'GroupMemberLists' (" + "'GROUP_ID' TEXT PRIMARY KEY ," + "'REQUEST_ID' TEXT NOT NULL );")
     }
 
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'GroupMemberLists'")
     }
 
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, groupMemberList: GroupMemberList): Unit {
+    protected fun bindValues(sQLiteStatement: SQLiteStatement, groupMemberList: GroupMemberList)  {
         sQLiteStatement.clearBindings()
         UUID groupID = groupMemberList.getGroupID()
         if (groupID != null) {
@@ -53,7 +53,7 @@ class GroupMemberListDao : AbstractDao<GroupMemberList, UUID> {
         return GroupMemberList(cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0)), UUID.fromString(cursor.getString(i + 1)))
     }
 
-    fun readEntity(cursor: Cursor, groupMemberList: GroupMemberList, i: Int): Unit {
+    fun readEntity(cursor: Cursor, groupMemberList: GroupMemberList, i: Int)  {
         groupMemberList.setGroupID(cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0)))
         groupMemberList.setRequestID(UUID.fromString(cursor.getString(i + 1)))
     }

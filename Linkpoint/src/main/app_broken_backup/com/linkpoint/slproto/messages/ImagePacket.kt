@@ -25,18 +25,18 @@ class ImagePacket : SLMessage {
         return this.ImageData_Field.Data.size + 2 + 19
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleImagePacket(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.put((byte) 10)
         packUUID(byteBuffer, this.ImageID_Field.ID)
         packShort(byteBuffer, (this as short).ImageID_Field.Packet)
         packVariable(byteBuffer, this.ImageData_Field.Data, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.ImageID_Field.ID = unpackUUID(byteBuffer)
         this.ImageID_Field.Packet = unpackShort(byteBuffer) & 65535
         this.ImageData_Field.Data = unpackVariable(byteBuffer, 2)

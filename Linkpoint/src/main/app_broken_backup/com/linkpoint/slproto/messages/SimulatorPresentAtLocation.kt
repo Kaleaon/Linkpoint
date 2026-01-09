@@ -54,11 +54,11 @@ class SimulatorPresentAtLocation : SLMessage {
         return this.SimulatorBlock_Field.SimName.size + 1 + 1 + 4 + 16 + 4 + 4 + 42 + 1 + (this.TelehubBlock_Fields.size() * 13)
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleSimulatorPresentAtLocation(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.VT)
@@ -83,7 +83,7 @@ class SimulatorPresentAtLocation : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.SimulatorPublicHostBlock_Field.Port = unpackShort(byteBuffer) & 65535
         this.SimulatorPublicHostBlock_Field.SimulatorIP = unpackIPAddress(byteBuffer)
         this.SimulatorPublicHostBlock_Field.GridX = unpackInt(byteBuffer)

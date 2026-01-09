@@ -34,10 +34,10 @@ class LandStatReply : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int i = 17
+        var i: Int = 17
         Iterator<T> it = this.ReportData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            var i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -46,11 +46,11 @@ class LandStatReply : SLMessage {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleLandStatReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) -90)
@@ -70,7 +70,7 @@ class LandStatReply : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.RequestData_Field.ReportType = unpackInt(byteBuffer)
         this.RequestData_Field.RequestFlags = unpackInt(byteBuffer)
         this.RequestData_Field.TotalObjectCount = unpackInt(byteBuffer)

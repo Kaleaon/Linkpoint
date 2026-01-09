@@ -1,5 +1,7 @@
 package com.linkpoint.slproto.mesh
 
+import kotlin.math.*
+
 import android.opengl.GLES20
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.Maps
@@ -109,7 +111,7 @@ class MeshData {
                 
                 if (fromBinary3.keyExists("joint_names")) {
                     val byKey = fromBinary3.byKey("joint_names")
-                    val min = Math.min(byKey.getCount(), MAX_RIGGED_MESH_JOINTS)
+                    val min = min(byKey.getCount(), MAX_RIGGED_MESH_JOINTS)
                     val iArr2 = IntArray(min)
                     for (i4 in 0 until min) {
                         val asString = byKey.byIndex(i4).asString()

@@ -20,11 +20,11 @@ class CreateTrustedCircuit : SLMessage {
         return 52
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleCreateTrustedCircuit(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) -120)
@@ -32,7 +32,7 @@ class CreateTrustedCircuit : SLMessage {
         packFixed(byteBuffer, this.DataBlock_Field.Digest, 32)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.DataBlock_Field.EndPointID = unpackUUID(byteBuffer)
         this.DataBlock_Field.Digest = unpackFixed(byteBuffer, 32)
     }

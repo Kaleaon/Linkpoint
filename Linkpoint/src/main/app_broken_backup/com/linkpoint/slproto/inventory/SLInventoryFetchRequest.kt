@@ -28,7 +28,7 @@ abstract class SLInventoryFetchRequest {
     abstract Unit cancel()
 
     /* access modifiers changed from: protected */
-    fun completeFetch(Boolean z, Boolean z2): Unit {
+    fun completeFetch(Boolean z, Boolean z2)  {
         this.inventory.onFetchComplete(this, this.folderUUID, this.folderId, z, z2)
     }
 

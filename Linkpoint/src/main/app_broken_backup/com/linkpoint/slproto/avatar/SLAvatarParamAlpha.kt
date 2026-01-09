@@ -31,8 +31,8 @@ class SLAvatarParamAlpha {
     }
 
     fun hashCode(): Int {
-        Int i = 1
-        Int hashCode = ((this.skipIfZero ? 1 : 0) + (((this.tgaFile != null ? this.tgaFile.hashCode() : 0) + ((this.domain != 0.0f ? Float.floatToIntBits(this.domain) : 0) * 31)) * 31)) * 31
+        var i: Int = 1
+        var hashCode: Int = ((this.skipIfZero ? 1 : 0) + (((this.tgaFile != null ? this.tgaFile.hashCode() : 0) + ((this.domain != 0.0f ? Float.floatToIntBits(this.domain) : 0) * 31)) * 31)) * 31
         if (!this.multiplyBlend) {
             i = 0
         }

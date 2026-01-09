@@ -38,9 +38,9 @@ abstract class AvatarPickerFragment : FragmentWithTitle : AdapterView.OnItemClic
             this.context = context2
         }
 
-        fun destroyItem(ViewGroup viewGroup, Int i, Any obj): Unit {
-            if (obj instanceof View) {
-                if (obj instanceof ListView) {
+        fun destroyItem(ViewGroup viewGroup, Int i, Any obj)  {
+            if (obj is View) {
+                if (obj is ListView) {
                     ((ListView) obj).setAdapter((ListAdapter) null)
                 }
                 viewGroup.removeView((View) obj)
@@ -96,7 +96,7 @@ abstract class AvatarPickerFragment : FragmentWithTitle : AdapterView.OnItemClic
         }
 
         fun apply(@Nullable ChatterDisplayData chatterDisplayData): Boolean {
-            return chatterDisplayData != null && (chatterDisplayData.chatterID instanceof ChatterID.ChatterIDUser) && chatterDisplayData.chatterID.isValidUUID()
+            return chatterDisplayData != null && (chatterDisplayData.chatterID is ChatterID.ChatterIDUser) && chatterDisplayData.chatterID.isValidUUID()
         }
     }
 
@@ -138,7 +138,7 @@ abstract class AvatarPickerFragment : FragmentWithTitle : AdapterView.OnItemClic
     }
 
     /* access modifiers changed from: protected */
-    fun createExtraView(LayoutInflater layoutInflater, FrameLayout frameLayout): Unit {
+    fun createExtraView(LayoutInflater layoutInflater, FrameLayout frameLayout)  {
     }
 
     abstract String getTitle()
@@ -155,10 +155,10 @@ abstract class AvatarPickerFragment : FragmentWithTitle : AdapterView.OnItemClic
         return inflate
     }
 
-    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j): Unit {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j)  {
         ChatterID chatterID
         Any itemAtPosition = adapterView.getItemAtPosition(i)
-        if ((itemAtPosition instanceof ChatterDisplayInfo) && (chatterID = ((ChatterDisplayInfo) itemAtPosition).getChatterID(ActivityUtils.getUserManager(getArguments()))) != null) {
+        if ((itemAtPosition is ChatterDisplayInfo) && (chatterID = ((ChatterDisplayInfo) itemAtPosition).getChatterID(ActivityUtils.getUserManager(getArguments()))) != null) {
             onAvatarSelected(chatterID, ((ChatterDisplayInfo) itemAtPosition).getDisplayName())
         }
     }

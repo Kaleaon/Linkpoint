@@ -21,17 +21,17 @@ class AtomicPassObject : SLMessage {
         return 18
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleAtomicPassObject(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.put(Ascii.FS)
         packUUID(byteBuffer, this.TaskData_Field.TaskID)
         packBoolean(byteBuffer, this.TaskData_Field.AttachmentNeedsSave)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.TaskData_Field.TaskID = unpackUUID(byteBuffer)
         this.TaskData_Field.AttachmentNeedsSave = unpackBoolean(byteBuffer)
     }

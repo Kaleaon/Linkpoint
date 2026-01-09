@@ -86,12 +86,12 @@ class SLChatGroupInvitationEvent : SLChatYesNoEvent {
     }
 
     /* access modifiers changed from: protected */
-    fun onNoAction(Context context, UserManager userManager): Unit {
+    fun onNoAction(Context context, UserManager userManager)  {
         super.onNoAction(context, userManager)
         DoAcceptGroupInvite(this.groupID, this.sessionID, false)
     }
 
-    fun onYesAction(Context context, UserManager userManager): Unit {
+    fun onYesAction(Context context, UserManager userManager)  {
         super.onYesAction(context, userManager)
         if (this.joinFee == 0) {
             DoAcceptGroupInvite(this.groupID, this.sessionID, true)
@@ -180,7 +180,7 @@ Method generation error in method: com.linkpoint.slproto.chat.-$Lambda$hXLxI3fDe
         builder.create().show()
     }
 
-    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage)  {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setTransactionAmount(Integer.valueOf(this.joinFee))
         chatMessage.setSessionID(this.sessionID)

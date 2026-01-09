@@ -40,11 +40,11 @@ class ClassifiedInfoReply : SLMessage {
         return this.Data_Field.Name.size + 45 + 2 + this.Data_Field.Desc.size + 16 + 4 + 16 + 1 + this.Data_Field.SimName.size + 24 + 1 + this.Data_Field.ParcelName.size + 1 + 4 + 20
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleClassifiedInfoReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 44)
@@ -66,7 +66,7 @@ class ClassifiedInfoReply : SLMessage {
         packInt(byteBuffer, this.Data_Field.PriceForListing)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.Data_Field.ClassifiedID = unpackUUID(byteBuffer)
         this.Data_Field.CreatorID = unpackUUID(byteBuffer)

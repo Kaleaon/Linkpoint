@@ -54,7 +54,7 @@ class AutoValue_SLObjectProfileData : SLObjectProfileData {
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof SLObjectProfileData)) {
+        if (!(obj is SLObjectProfileData)) {
             return false
         }
         SLObjectProfileData sLObjectProfileData = (SLObjectProfileData) obj
@@ -71,13 +71,13 @@ class AutoValue_SLObjectProfileData : SLObjectProfileData {
     }
 
     fun hashCode(): Int {
-        Int i = 0
-        Int i2 = 1231
-        Int hashCode = ((((this.isDead ? 1231 : 1237) ^ (((this.isCopyable ? 1231 : 1237) ^ (((((((this.isPayable ? 1231 : 1237) ^ (((this.touchName == null ? 0 : this.touchName.hashCode()) ^ (((this.isTouchable ? 1231 : 1237) ^ (((this.ownerUUID == null ? 0 : this.ownerUUID.hashCode()) ^ (((((((this.objectUUID == null ? 0 : this.objectUUID.hashCode()) ^ 1000003) * 1000003) ^ this.name.hashCode()) * 1000003) ^ this.description.hashCode()) * 1000003)) * 1000003)) * 1000003)) * 1000003)) * 1000003) ^ this.saleType) * 1000003) ^ this.salePrice) * 1000003)) * 1000003)) * 1000003) ^ this.floatingText.hashCode()) * 1000003
+        var i: Int = 0
+        var i2: Int = 1231
+        var hashCode: Int = ((((this.isDead ? 1231 : 1237) ^ (((this.isCopyable ? 1231 : 1237) ^ (((((((this.isPayable ? 1231 : 1237) ^ (((this.touchName == null ? 0 : this.touchName.hashCode()) ^ (((this.isTouchable ? 1231 : 1237) ^ (((this.ownerUUID == null ? 0 : this.ownerUUID.hashCode()) ^ (((((((this.objectUUID == null ? 0 : this.objectUUID.hashCode()) ^ 1000003) * 1000003) ^ this.name.hashCode()) * 1000003) ^ this.description.hashCode()) * 1000003)) * 1000003)) * 1000003)) * 1000003)) * 1000003) ^ this.saleType) * 1000003) ^ this.salePrice) * 1000003)) * 1000003)) * 1000003) ^ this.floatingText.hashCode()) * 1000003
         if (this.payInfo != null) {
             i = this.payInfo.hashCode()
         }
-        Int i3 = (hashCode ^ i) * 1000003
+        var i3: Int = (hashCode ^ i) * 1000003
         if (!this.isModifiable) {
             i2 = 1237
         }

@@ -68,7 +68,7 @@ class EmulatorManager {
      */
     fun isAvailable(): Boolean {
         // Check if Android SDK is available
-        String androidHome = System.getenv("ANDROID_HOME")
+        var androidHome: String = System.getenv("ANDROID_HOME")
         if (androidHome == null || androidHome.isEmpty()) {
             return false
         }
@@ -85,14 +85,14 @@ class EmulatorManager {
     /**
      * List all available AVDs
      */
-    fun listAVDs(EmulatorCallback callback): Unit {
+    fun listAVDs(EmulatorCallback callback)  {
         EmulatorTask("list-avds", callback).execute()
     }
     
     /**
      * Create a AVD
      */
-    fun createAVD(String name, String device, String apiLevel, String abi, EmulatorCallback callback): Unit {
+    fun createAVD(String name, String device, String apiLevel, String abi, EmulatorCallback callback)  {
         Array<String> args = {"create", name, "--device", device, "--api", apiLevel, "--abi", abi}
         EmulatorTask(args, callback).execute()
     }
@@ -100,35 +100,35 @@ class EmulatorManager {
     /**
      * Start an AVD
      */
-    fun startAVD(String name, EmulatorCallback callback): Unit {
+    fun startAVD(String name, EmulatorCallback callback)  {
         EmulatorTask("start", name, callback).execute()
     }
     
     /**
      * Stop an AVD
      */
-    fun stopAVD(String name, EmulatorCallback callback): Unit {
+    fun stopAVD(String name, EmulatorCallback callback)  {
         EmulatorTask("stop", name, callback).execute()
     }
     
     /**
      * Delete an AVD
      */
-    fun deleteAVD(String name, EmulatorCallback callback): Unit {
+    fun deleteAVD(String name, EmulatorCallback callback)  {
         EmulatorTask("delete", name, callback).execute()
     }
     
     /**
      * Get emulator status
      */
-    fun getStatus(EmulatorCallback callback): Unit {
+    fun getStatus(EmulatorCallback callback)  {
         EmulatorTask("status", callback).execute()
     }
     
     /**
      * Install system image
      */
-    fun installSystemImage(String apiLevel, String abi, String tag, EmulatorCallback callback): Unit {
+    fun installSystemImage(String apiLevel, String abi, String tag, EmulatorCallback callback)  {
         Array<String> args = {"install-image", apiLevel, abi, tag}
         EmulatorTask(args, callback).execute()
     }
@@ -136,14 +136,14 @@ class EmulatorManager {
     /**
      * List available device profiles
      */
-    fun listDevices(EmulatorCallback callback): Unit {
+    fun listDevices(EmulatorCallback callback)  {
         EmulatorTask("list-devices", callback).execute()
     }
     
     /**
      * List available system images
      */
-    fun listSystemImages(EmulatorCallback callback): Unit {
+    fun listSystemImages(EmulatorCallback callback)  {
         EmulatorTask("list-images", callback).execute()
     }
     
@@ -212,7 +212,7 @@ class EmulatorManager {
                 }
                 
                 // Wait for process to complete
-                Int exitCode = process.waitFor()
+                var exitCode: Int = process.waitFor()
                 
                 if (exitCode != 0) {
                     hasError = true
@@ -263,13 +263,13 @@ class EmulatorManager {
                 if (currentAVD != null) {
                     avds.add(currentAVD)
                 }
-                String name = line.substring(5).trim()
+                var name: String = line.substring(5).trim()
                 currentAVD = AVDInfo(name, "", "", "", "")
             } else if (currentAVD != null) {
                 if (line.startsWith("Device:")) {
                     currentAVD.device = line.substring(7).trim()
                 } else if (line.startsWith("API level:") || line.startsWith("Based on:")) {
-                    String apiInfo = line.substring(line.indexOf(":") + 1).trim()
+                    var apiInfo: String = line.substring(line.indexOf(":") + 1).trim()
                     // Extract API number if present
                     if (apiInfo.contains("API level")) {
                         Array<String> parts = apiInfo.split("API level")

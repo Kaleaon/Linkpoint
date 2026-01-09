@@ -23,7 +23,7 @@ class LLSDBinary : LLSDNode {
     }
 
     fun asInt(): Int {
-        Int i = 0
+        var i: Int = 0
         byte b = 0
         while (i < 4 && i < this.value.size) {
             b = (b << 8) | (this.value[i] & UnsignedBytes.MAX_VALUE)
@@ -33,8 +33,8 @@ class LLSDBinary : LLSDNode {
     }
 
     fun asLong(): Long {
-        Long j = 0
-        Int i = 0
+        var j: Long = 0
+        var i: Int = 0
         while (i < 8 && i < this.value.size) {
             j = (j << 8) | ((Long) (this.value[i] & UnsignedBytes.MAX_VALUE))
             i++

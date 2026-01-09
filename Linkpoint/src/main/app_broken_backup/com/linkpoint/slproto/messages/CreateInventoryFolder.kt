@@ -28,11 +28,11 @@ class CreateInventoryFolder : SLMessage {
         return this.FolderData_Field.Name.size + 34 + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleCreateInventoryFolder(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 17)
@@ -44,7 +44,7 @@ class CreateInventoryFolder : SLMessage {
         packVariable(byteBuffer, this.FolderData_Field.Name, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.FolderData_Field.FolderID = unpackUUID(byteBuffer)

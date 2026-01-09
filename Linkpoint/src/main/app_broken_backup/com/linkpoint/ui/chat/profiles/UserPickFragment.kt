@@ -234,7 +234,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$pe_zD
 
     /* access modifiers changed from: private */
     /* renamed from: onPickInfo */
-    fun m515com_lumiyaviewer_lumiya_ui_chat_profiles_UserPickFragmentmthref0(PickInfoReply pickInfoReply): Unit {
+    fun m515com_lumiyaviewer_lumiya_ui_chat_profiles_UserPickFragmentmthref0(PickInfoReply pickInfoReply)  {
         if (pickInfoReply != null) {
             LLVector3d lLVector3d = pickInfoReply.Data_Field.PosGlobal
             Debug.Printf("GlobalPos: got pick global pos %f, %f, %f", Double.valueOf(lLVector3d.x), Double.valueOf(lLVector3d.y), Double.valueOf(lLVector3d.z))
@@ -341,7 +341,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$pe_zD
     }
 
     private Unit updateMenuItems() {
-        Boolean z = false
+        var z: Boolean = false
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         AvatarPickKey pickKey = getPickKey()
         if (!(userManager == null || pickKey == null)) {
@@ -362,7 +362,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$pe_zD
         if (activeAgentCircuit != null) {
             activeAgentCircuit.getModules().userProfiles.DeletePick(avatarPickKey.pickID)
             FragmentActivity activity = getActivity()
-            if (activity instanceof DetailsActivity) {
+            if (activity is DetailsActivity) {
                 ((DetailsActivity) activity).closeDetailsFragment(this)
             }
         }
@@ -395,7 +395,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$pe_zD
 
     /* access modifiers changed from: protected */
     @OnClick({2131755698})
-    fun onChangePic(View view): Unit {
+    fun onChangePic(View view)  {
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         AvatarPickKey pickKey = getPickKey()
         PickInfoReply data = this.pickInfo.getData()
@@ -406,12 +406,12 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$pe_zD
         }
     }
 
-    fun onCreate(@Nullable Bundle bundle): Unit {
+    fun onCreate(@Nullable Bundle bundle)  {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater): Unit {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater)  {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.pick_menu, menu)
         this.menuItemRename = menu.findItem(R.id.item_pick_rename)
@@ -430,7 +430,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$pe_zD
 
     /* access modifiers changed from: protected */
     @OnClick({2131755700})
-    fun onDescEdit(View view): Unit {
+    fun onDescEdit(View view)  {
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         AvatarPickKey pickKey = getPickKey()
         if (userManager != null && pickKey != null) {
@@ -438,7 +438,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$pe_zD
         }
     }
 
-    fun onDestroyView(): Unit {
+    fun onDestroyView()  {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -460,7 +460,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$pe_zD
 
     /* access modifiers changed from: protected */
     @OnClick({2131755696})
-    fun onSetLocation(View view): Unit {
+    fun onSetLocation(View view)  {
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         AvatarPickKey pickKey = getPickKey()
         PickInfoReply data = this.pickInfo.getData()
@@ -631,14 +631,14 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$pe_zD
         }
     }
 
-    fun onStart(): Unit {
-        Int i = 0
+    fun onStart()  {
+        var i: Int = 0
         super.onStart()
         setTitle(getString(R.string.name_loading_title), (String) null)
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
             AvatarPickKey pickKey = getPickKey()
-            Boolean equals = userManager.getUserID().equals(pickKey.avatarID)
+            var equals: Boolean = userManager.getUserID().equals(pickKey.avatarID)
             this.userPickDescEditButton.setVisibility(equals ? 0 : 8)
             this.changePicButton.setVisibility(equals ? 0 : 8)
             Button button = this.setLocationButton
@@ -652,14 +652,14 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$pe_zD
         this.pickInfo.unsubscribe()
     }
 
-    fun onStop(): Unit {
+    fun onStop()  {
         this.pickInfo.unsubscribe()
         super.onStop()
     }
 
     /* access modifiers changed from: protected */
     @OnClick({2131755697})
-    fun onTeleportToPickClick(View view): Unit {
+    fun onTeleportToPickClick(View view)  {
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         PickInfoReply data = this.pickInfo.getData()
         if (data != null && userManager != null) {

@@ -11,7 +11,7 @@ import java.io.IOException
 object ModernTextureManagerTest {
     private val TAG: String = "ModernTextureManagerTest"
     
-    fun runBasicTests(context: Context): Unit {
+    fun runBasicTests(context: Context)  {
         Log.i(TAG, "Starting ModernTextureManager tests...")
         
         try {
@@ -55,7 +55,7 @@ object ModernTextureManagerTest {
             ModernTextureManager manager = ModernTextureManager(context)
             if (manager.isInitialized()) {
                 int optimalFormat = manager.getOptimalTextureFormat()
-                String formatName = ModernTextureManager.getFormatName(optimalFormat)
+                var formatName: String = ModernTextureManager.getFormatName(optimalFormat)
                 
                 Log.i(TAG, "✓ Optimal texture format detected: " + formatName + " (" + optimalFormat + ")")
             } else {
@@ -70,10 +70,10 @@ object ModernTextureManagerTest {
         Log.i(TAG, "Testing format utilities...")
         
         // Test format name mapping
-        String astcName = ModernTextureManager.getFormatName(ModernTextureManager.FORMAT_ASTC_4x4_RGBA)
-        String etc2Name = ModernTextureManager.getFormatName(ModernTextureManager.FORMAT_ETC2_RGBA)
-        String bc7Name = ModernTextureManager.getFormatName(ModernTextureManager.FORMAT_BC7_RGBA)
-        String rgbaName = ModernTextureManager.getFormatName(ModernTextureManager.FORMAT_RGBA32)
+        var astcName: String = ModernTextureManager.getFormatName(ModernTextureManager.FORMAT_ASTC_4x4_RGBA)
+        var etc2Name: String = ModernTextureManager.getFormatName(ModernTextureManager.FORMAT_ETC2_RGBA)
+        var bc7Name: String = ModernTextureManager.getFormatName(ModernTextureManager.FORMAT_BC7_RGBA)
+        var rgbaName: String = ModernTextureManager.getFormatName(ModernTextureManager.FORMAT_RGBA32)
         
         Log.i(TAG, "✓ Format names: ASTC=" + astcName + ", ETC2=" + etc2Name + 
                    ", BC7=" + bc7Name + ", RGBA=" + rgbaName)

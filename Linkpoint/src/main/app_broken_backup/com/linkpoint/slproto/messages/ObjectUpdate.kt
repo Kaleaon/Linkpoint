@@ -73,10 +73,10 @@ class ObjectUpdate : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int i = 12
+        var i: Int = 12
         Iterator<T> it = this.ObjectData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            var i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -85,11 +85,11 @@ class ObjectUpdate : SLMessage {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleObjectUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.put(Ascii.FF)
         packLong(byteBuffer, this.RegionData_Field.RegionHandle)
         packShort(byteBuffer, (this as Short).RegionData_Field.TimeDilation)
@@ -144,7 +144,7 @@ class ObjectUpdate : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.RegionData_Field.RegionHandle = unpackLong(byteBuffer)
         this.RegionData_Field.TimeDilation = unpackShort(byteBuffer) & 65535
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE

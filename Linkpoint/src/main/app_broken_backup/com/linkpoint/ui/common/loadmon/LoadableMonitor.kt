@@ -92,10 +92,10 @@ class LoadableMonitor : Loadable.LoadableStatusListener, SwipeRefreshLayout.OnRe
         }
     }
 
-    fun onLoadableStatusChange(Loadable loadable, Loadable.Status status2): Unit {
-        Boolean z = false
-        Boolean z2 = false
-        Boolean z3 = false
+    fun onLoadableStatusChange(Loadable loadable, Loadable.Status status2)  {
+        var z: Boolean = false
+        var z2: Boolean = false
+        var z3: Boolean = false
         for (Loadable loadableStatus : this.loadables) {
             Loadable.Status loadableStatus2 = loadableStatus.getLoadableStatus()
             switch (m579getcomlumiyaviewerlumiyauicommonloadmonLoadable$StatusSwitchesValues()[loadableStatus2.ordinal()]) {
@@ -121,26 +121,26 @@ class LoadableMonitor : Loadable.LoadableStatusListener, SwipeRefreshLayout.OnRe
         }
     }
 
-    fun onRefresh(): Unit {
+    fun onRefresh()  {
         for (Loadable loadable : this.loadables) {
-            if (loadable instanceof RefreshableOne) {
+            if (loadable is RefreshableOne) {
                 ((RefreshableOne) loadable).requestRefresh()
             }
         }
         for (Loadable loadable2 : this.optionalLoadables) {
-            if (loadable2 instanceof RefreshableOne) {
+            if (loadable2 is RefreshableOne) {
                 ((RefreshableOne) loadable2).requestRefresh()
             }
         }
     }
 
-    fun setButteryProgressBar(Boolean z): Unit {
+    fun setButteryProgressBar(Boolean z)  {
         if (this.loadingLayout != null) {
             this.loadingLayout.setButteryProgressBar(z)
         }
     }
 
-    fun setEmptyMessage(Boolean z, @Nullable String str): Unit {
+    fun setEmptyMessage(Boolean z, @Nullable String str)  {
         if (!z) {
             str = null
         }
@@ -148,33 +148,33 @@ class LoadableMonitor : Loadable.LoadableStatusListener, SwipeRefreshLayout.OnRe
         updateLoadingIndicator()
     }
 
-    fun setExtraLoading(Boolean z): Unit {
+    fun setExtraLoading(Boolean z)  {
         this.isExtraLoading = z
         onLoadableStatusChange((Loadable) null, (Loadable.Status) null)
     }
 
-    fun setLoadingLayout(@Nullable LoadingLayout loadingLayout2, @Nullable String str, @Nullable String str2): Unit {
+    fun setLoadingLayout(@Nullable LoadingLayout loadingLayout2, @Nullable String str, @Nullable String str2)  {
         this.loadingLayout = loadingLayout2
         this.loadingIdleMessage = str
         this.loadingErrorMessage = str2
         updateLoadingIndicator()
     }
 
-    fun setSwipeRefreshLayout(@Nullable SwipeRefreshLayout swipeRefreshLayout2): Unit {
+    fun setSwipeRefreshLayout(@Nullable SwipeRefreshLayout swipeRefreshLayout2)  {
         this.swipeRefreshLayout = swipeRefreshLayout2
         if (swipeRefreshLayout2 != null) {
             swipeRefreshLayout2.setOnRefreshListener(this)
         }
     }
 
-    fun unsubscribeAll(): Unit {
+    fun unsubscribeAll()  {
         for (Loadable loadable : this.loadables) {
-            if (loadable instanceof UnsubscribableOne) {
+            if (loadable is UnsubscribableOne) {
                 ((UnsubscribableOne) loadable).unsubscribe()
             }
         }
         for (Loadable loadable2 : this.optionalLoadables) {
-            if (loadable2 instanceof UnsubscribableOne) {
+            if (loadable2 is UnsubscribableOne) {
                 ((UnsubscribableOne) loadable2).unsubscribe()
             }
         }

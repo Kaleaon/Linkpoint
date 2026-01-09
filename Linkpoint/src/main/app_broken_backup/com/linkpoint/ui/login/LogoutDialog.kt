@@ -111,7 +111,7 @@ Method generation error in method: com.linkpoint.ui.login.-$Lambda$Ido4EAnXE9yUs
         return null
     }
 
-    fun show(Activity activity): Unit {
+    fun show(Activity activity)  {
         UUID activeAgentID = ActivityUtils.getActiveAgentID(activity.getIntent())
         if (activeAgentID != null) {
             LogoutDialog logoutDialog = LogoutDialog(activity)
@@ -121,7 +121,7 @@ Method generation error in method: com.linkpoint.ui.login.-$Lambda$Ido4EAnXE9yUs
     }
 
     @EventHandler
-    fun handleDisconnectEvent(SLDisconnectEvent sLDisconnectEvent): Unit {
+    fun handleDisconnectEvent(SLDisconnectEvent sLDisconnectEvent)  {
         Debug.Printf("LogoutDialog: disconnect event", Any[0])
         dismiss()
     }
@@ -131,7 +131,7 @@ Method generation error in method: com.linkpoint.ui.login.-$Lambda$Ido4EAnXE9yUs
     /* synthetic */ Unit m637lambda$com_lumiyaviewer_lumiya_ui_login_LogoutDialog_3137() {
         SLAgentCircuit activeAgentCircuit
         SLGridConnection gridConnection
-        Boolean z = true
+        var z: Boolean = true
         UserManager userManager = getUserManager()
         if (userManager == null || (activeAgentCircuit = userManager.getActiveAgentCircuit()) == null || (gridConnection = activeAgentCircuit.getGridConnection()) == null) {
             z = false
@@ -144,7 +144,7 @@ Method generation error in method: com.linkpoint.ui.login.-$Lambda$Ido4EAnXE9yUs
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(Bundle bundle): Unit {
+    fun onCreate(Bundle bundle)  {
         super.onCreate(bundle)
         setProgressStyle(0)
         setMessage(getContext().getString(R.string.logging_out))
@@ -164,10 +164,10 @@ Method generation error in method: com.linkpoint.ui.login.-$Lambda$Ido4EAnXE9yUs
         return onSaveInstanceState
     }
 
-    fun onStart(): Unit {
+    fun onStart()  {
         SLAgentCircuit activeAgentCircuit
         SLGridConnection gridConnection
-        Boolean z = false
+        var z: Boolean = false
         super.onStart()
         this.eventBus.subscribe(this, (Activity) null, this.handler)
         UserManager userManager = getUserManager()
@@ -184,13 +184,13 @@ Method generation error in method: com.linkpoint.ui.login.-$Lambda$Ido4EAnXE9yUs
     }
 
     /* access modifiers changed from: protected */
-    fun onStop(): Unit {
+    fun onStop()  {
         this.handler.removeCallbacks(this.onDisconnectTimeout)
         this.eventBus.unsubscribe(this)
         super.onStop()
     }
 
-    fun setAgentUUID(UUID uuid): Unit {
+    fun setAgentUUID(UUID uuid)  {
         this.agentUUID = uuid
     }
 }

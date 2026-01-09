@@ -107,7 +107,7 @@ class LLSDNodeFactory {
     @Throws(XmlPullParserException::class, IOException::class, LLSDXMLException::class)
 
     fun parseNode(XmlPullParser xmlPullParser): LLSDNode {
-        String name = xmlPullParser.getName()
+        var name: String = xmlPullParser.getName()
         LLSDNodeConstructor lLSDNodeConstructor = tagMap.get(name)
         if (lLSDNodeConstructor != null) {
             return lLSDNodeConstructor.createNodeFromXML(xmlPullParser)

@@ -26,11 +26,11 @@ class ParcelDwellReply : SLMessage {
         return 44
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleParcelDwellReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -37)
@@ -40,7 +40,7 @@ class ParcelDwellReply : SLMessage {
         packFloat(byteBuffer, this.Data_Field.Dwell)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.Data_Field.LocalID = unpackInt(byteBuffer)
         this.Data_Field.ParcelID = unpackUUID(byteBuffer)

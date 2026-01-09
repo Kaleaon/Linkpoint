@@ -50,7 +50,7 @@ class vx_evt_base_t {
      * Lifted jumps to return sites
      */
     vx_message_base_t getMessage() {
-        Long l = VxClientProxyJNI.vx_evt_base_t_message_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_evt_base_t_message_get(this.swigCPtr, this)
         if (l != 0L) return vx_message_base_t(l, false)
         return null
     }

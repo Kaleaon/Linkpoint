@@ -54,7 +54,7 @@ class ObjectListNewActivity : MasterDetailsActivity {
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(@Nullable Bundle bundle): Unit {
+    fun onCreate(@Nullable Bundle bundle)  {
         super.onCreate(bundle)
         setDefaultTitle(getString(R.string.objects_activity_caption), (String) null)
     }

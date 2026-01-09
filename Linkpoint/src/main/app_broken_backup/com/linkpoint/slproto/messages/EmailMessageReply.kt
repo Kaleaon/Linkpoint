@@ -25,11 +25,11 @@ class EmailMessageReply : SLMessage {
         return this.DataBlock_Field.FromAddress.size + 25 + 1 + this.DataBlock_Field.Subject.size + 2 + this.DataBlock_Field.Data.size + 1 + this.DataBlock_Field.MailFilter.size + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleEmailMessageReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 80)
@@ -42,7 +42,7 @@ class EmailMessageReply : SLMessage {
         packVariable(byteBuffer, this.DataBlock_Field.MailFilter, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.DataBlock_Field.ObjectID = unpackUUID(byteBuffer)
         this.DataBlock_Field.More = unpackInt(byteBuffer)
         this.DataBlock_Field.Time = unpackInt(byteBuffer)

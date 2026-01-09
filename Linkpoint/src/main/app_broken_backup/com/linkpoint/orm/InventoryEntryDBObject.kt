@@ -22,10 +22,10 @@ class InventoryEntryDBObject : DBObject : Parcelable {
         }
     }
     protected Array<String> fieldNames = {"_id", "parent_id", "uuid_high", "uuid_low", "parentUUID_high", "parentUUID_low", "name", "isFolder", "typeDefault", "version", "sessionID_high", "sessionID_low", "fetchFailed", "description", "flags", "invType", "assetType", "creationDate", "_blobField"}
-    String insertQuery = "INSERT INTO Entries (parent_id,uuid_high,uuid_low,parentUUID_high,parentUUID_low,name,isFolder,typeDefault,version,sessionID_high,sessionID_low,fetchFailed,description,flags,invType,assetType,creationDate,_blobField) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);"
-    Int insertUpdateParamCount = 18
-    String tableName = "Entries"
-    String updateQuery = "UPDATE Entries SET parent_id=?,uuid_high=?,uuid_low=?,parentUUID_high=?,parentUUID_low=?,name=?,isFolder=?,typeDefault=?,version=?,sessionID_high=?,sessionID_low=?,fetchFailed=?,description=?,flags=?,invType=?,assetType=?,creationDate=?,_blobField=?"
+    var insertQuery: String = "INSERT INTO Entries (parent_id,uuid_high,uuid_low,parentUUID_high,parentUUID_low,name,isFolder,typeDefault,version,sessionID_high,sessionID_low,fetchFailed,description,flags,invType,assetType,creationDate,_blobField) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);"
+    var insertUpdateParamCount: Int = 18
+    var tableName: String = "Entries"
+    var updateQuery: String = "UPDATE Entries SET parent_id=?,uuid_high=?,uuid_low=?,parentUUID_high=?,parentUUID_low=?,name=?,isFolder=?,typeDefault=?,version=?,sessionID_high=?,sessionID_low=?,fetchFailed=?,description=?,flags=?,invType=?,assetType=?,creationDate=?,_blobField=?"
     UUID agentUUID
     Int assetType
     UUID assetUUID
@@ -67,7 +67,7 @@ class InventoryEntryDBObject : DBObject : Parcelable {
     }
 
     protected InventoryEntryDBObject(Parcel parcel) {
-        Boolean z = true
+        var z: Boolean = true
         this._id = parcel.readLong()
         this.parent_id = parcel.readLong()
         this.uuid = UUID(parcel.readLong(), parcel.readLong())
@@ -121,8 +121,8 @@ class InventoryEntryDBObject : DBObject : Parcelable {
         return dBHandle.getDB().queryWithFactory(dBHandle, false, tableName, fieldNames, str, strArr, (String) null, (String) null, str2, (String) null)
     }
 
-    fun bindInsertOrUpdate(sQLiteStatement: SQLiteStatement): Unit {
-        Int i = 1
+    fun bindInsertOrUpdate(sQLiteStatement: SQLiteStatement)  {
+        var i: Int = 1
         sQLiteStatement.bindLong(1, this.parent_id)
         if (this.uuid != null) {
             sQLiteStatement.bindLong(2, this.uuid.getMostSignificantBits())
@@ -321,8 +321,8 @@ class InventoryEntryDBObject : DBObject : Parcelable {
         return tableName
     }
 
-    fun loadFromCursor(cursor: Cursor): Unit {
-        Boolean z = true
+    fun loadFromCursor(cursor: Cursor)  {
+        var z: Boolean = true
         this._id = cursor.getLong(0)
         this.parent_id = cursor.getLong(1)
         this.uuid = UUID(cursor.getLong(2), cursor.getLong(3))
@@ -358,8 +358,8 @@ class InventoryEntryDBObject : DBObject : Parcelable {
         this.salePrice = wrap.getInt()
     }
 
-    fun writeToParcel(parcel: Parcel, i: Int): Unit {
-        Int i2 = 1
+    fun writeToParcel(parcel: Parcel, i: Int)  {
+        var i2: Int = 1
         parcel.writeLong(this._id)
         parcel.writeLong(this.parent_id)
         if (this.uuid != null) {

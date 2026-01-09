@@ -32,7 +32,7 @@ class FrustrumInfo {
             return false
      */
     fun equals(obj: java.lang.Any): Boolean {
-        if (!(obj instanceof FrustrumInfo)) {
+        if (!(obj is FrustrumInfo)) {
             return false
         }
         

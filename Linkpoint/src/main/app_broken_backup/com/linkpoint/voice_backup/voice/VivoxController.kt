@@ -174,7 +174,7 @@ private VivoxController instance
     private Boolean hasActiveSession() {
         Boolean bl
         block1: {
-            Boolean bl2 = false
+            var bl2: Boolean = false
             Iterator<VoiceSession> iterator = this.voiceSessions.values().iterator()
             do {
                 bl = bl2
@@ -292,7 +292,7 @@ private VivoxController instance
     private Unit setLocalMicEnabled(Boolean bl) {
         if (this.voiceConnector != null) {
             VoiceConnector voiceConnector = this.voiceConnector
-            Boolean bl2 = !bl
+            var bl2: Boolean = !bl
             voiceConnector.setMuteLocalMic(bl2)
             this.localMicEnabled = bl
             for (VoiceSession voiceSession : this.voiceSessions.values()) {
@@ -726,9 +726,9 @@ private VivoxController instance
             object2 = this.voiceSessions.get(((vx_evt_participant_updated_t)object3).getSession_handle())
             if (object2 == null) return
             if (object == null) return
-            Boolean bl = ((vx_evt_participant_updated_t)object3).getIs_speaking() != 0
+            var bl: Boolean = ((vx_evt_participant_updated_t)object3).getIs_speaking() != 0
             object3 = VoiceChannelInfo.agentUUIDFromURI(((vx_evt_participant_updated_t)object3).getParticipant_uri())
-            Boolean bl2 = Objects.equal(object3, ((VoiceAccountConnection)object).getVoiceLoginInfo().agentUUID)
+            var bl2: Boolean = Objects.equal(object3, ((VoiceAccountConnection)object).getVoiceLoginInfo().agentUUID)
             Debug.Printf("Voice: speaking %b, speakerID %s (mine: %b)", bl, object3, bl2)
             if (object3 == null) return
             if (bl2) return

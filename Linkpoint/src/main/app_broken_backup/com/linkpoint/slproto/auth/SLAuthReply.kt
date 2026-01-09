@@ -72,19 +72,19 @@ class SLAuthReply {
     SLAuthReply(String str, String str2, @NonNull XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
         this.gridName = str
         this.loginURL = str2
-        Boolean z = false
-        String str3 = null
-        String str4 = null
+        var z: Boolean = false
+        var str3: String = null
+        var str4: String = null
         UUID uuid = null
         UUID uuid2 = null
         UUID uuid3 = null
-        Int i = 0
-        String str5 = null
-        Int i2 = 0
-        String str6 = null
-        Boolean z2 = false
-        String str7 = ""
-        String str8 = null
+        var i: Int = 0
+        var str5: String = null
+        var i2: Int = 0
+        var str6: String = null
+        var z2: Boolean = false
+        var str7: String = ""
+        var str8: String = null
         UUID uuid4 = null
         Collection of = ImmutableList.of()
         xmlPullParser.nextTag()
@@ -96,7 +96,7 @@ class SLAuthReply {
                     if (skipUntilTag(xmlPullParser, "struct")) {
                         while (skipUntilTag(xmlPullParser, "member")) {
                             if (skipUntilTag(xmlPullParser, "name")) {
-                                String innerText = getInnerText(xmlPullParser)
+                                var innerText: String = getInnerText(xmlPullParser)
                                 finishTag(xmlPullParser)
                                 if (skipUntilTag(xmlPullParser, VrSettingsProviderContract.SETTING_VALUE_KEY)) {
                                     if (innerText.equalsIgnoreCase("session_id")) {
@@ -114,7 +114,7 @@ class SLAuthReply {
                                     } else if (innerText.equalsIgnoreCase("seed_capability")) {
                                         str6 = getSimpleValue(xmlPullParser)
                                     } else if (innerText.equalsIgnoreCase("login")) {
-                                        String simpleValue = getSimpleValue(xmlPullParser)
+                                        var simpleValue: String = getSimpleValue(xmlPullParser)
                                         z2 = simpleValue.equalsIgnoreCase("true")
                                         z = simpleValue.equalsIgnoreCase("indeterminate")
                                     } else if (innerText.equalsIgnoreCase("next_url")) {
@@ -181,7 +181,7 @@ class SLAuthReply {
         if (xmlPullParser.getEventType() != 4) {
             return ""
         }
-        String text = xmlPullParser.getText()
+        var text: String = xmlPullParser.getText()
         xmlPullParser.next()
         return text
     }
@@ -194,7 +194,7 @@ class SLAuthReply {
                     if (skipUntilTag(xmlPullParser, "struct")) {
                         while (skipUntilTag(xmlPullParser, "member")) {
                             if (skipUntilTag(xmlPullParser, "name")) {
-                                String innerText = getInnerText(xmlPullParser)
+                                var innerText: String = getInnerText(xmlPullParser)
                                 finishTag(xmlPullParser)
                                 if (skipUntilTag(xmlPullParser, VrSettingsProviderContract.SETTING_VALUE_KEY)) {
                                     if (innerText.equalsIgnoreCase("folder_id")) {
@@ -220,7 +220,7 @@ class SLAuthReply {
         while (xmlPullParser.getEventType() == 4) {
             xmlPullParser.next()
         }
-        String nextText = xmlPullParser.nextText()
+        var nextText: String = xmlPullParser.nextText()
         xmlPullParser.nextTag()
         Debug.Printf("got value '%s'", nextText)
         return nextText
@@ -232,12 +232,12 @@ class SLAuthReply {
             if (skipUntilTag(xmlPullParser, "data")) {
                 while (skipUntilTag(xmlPullParser, VrSettingsProviderContract.SETTING_VALUE_KEY)) {
                     if (skipUntilTag(xmlPullParser, "struct")) {
-                        Int i = 0
-                        Int i2 = 0
+                        var i: Int = 0
+                        var i2: Int = 0
                         UUID uuid = null
                         while (skipUntilTag(xmlPullParser, "member")) {
                             if (skipUntilTag(xmlPullParser, "name")) {
-                                String innerText = getInnerText(xmlPullParser)
+                                var innerText: String = getInnerText(xmlPullParser)
                                 finishTag(xmlPullParser)
                                 if (skipUntilTag(xmlPullParser, VrSettingsProviderContract.SETTING_VALUE_KEY)) {
                                     if (innerText.equalsIgnoreCase("buddy_id")) {
@@ -267,7 +267,7 @@ class SLAuthReply {
     }
 
     private Unit skipTag(XmlPullParser xmlPullParser) throws XmlPullParserException, IOException {
-        Int i = 0
+        var i: Int = 0
         while (true) {
             switch (xmlPullParser.next()) {
                 case 1:
@@ -305,7 +305,7 @@ class SLAuthReply {
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof SLAuthReply)) {
+        if (!(obj is SLAuthReply)) {
             return false
         }
         SLAuthReply sLAuthReply = (SLAuthReply) obj

@@ -35,11 +35,11 @@ class EconomyData : SLMessage {
         return 72
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleEconomyData(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put(Ascii.EM)
@@ -62,7 +62,7 @@ class EconomyData : SLMessage {
         packInt(byteBuffer, this.Info_Field.PriceGroupCreate)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.Info_Field.ObjectCapacity = unpackInt(byteBuffer)
         this.Info_Field.ObjectCount = unpackInt(byteBuffer)
         this.Info_Field.PriceEnergyUnit = unpackInt(byteBuffer)

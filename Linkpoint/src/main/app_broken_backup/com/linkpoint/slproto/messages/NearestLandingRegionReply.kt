@@ -18,18 +18,18 @@ class NearestLandingRegionReply : SLMessage {
         return 12
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleNearestLandingRegionReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -111)
         packLong(byteBuffer, this.LandingRegionData_Field.RegionHandle)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.LandingRegionData_Field.RegionHandle = unpackLong(byteBuffer)
     }
 }

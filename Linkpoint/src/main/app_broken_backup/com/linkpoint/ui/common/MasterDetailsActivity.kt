@@ -50,7 +50,7 @@ abstract class MasterDetailsActivity : DetailsActivity {
     /* JADX WARNING: Removed duplicated region for block: B:88:0x01f2  */
     /* JADX WARNING: Removed duplicated region for block: B:97:0x0222 A[ADDED_TO_REGION] */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    fun onCreate(@android.support.annotation.Nullable android.os.Bundle r15): Unit {
+    fun onCreate(@android.support.annotation.Nullable android.os.Bundle r15)  {
         /*
             r14 = this
             r13 = 2131755654(0x7f100286, Float:1.9142193E38)
@@ -59,9 +59,9 @@ abstract class MasterDetailsActivity : DetailsActivity {
             r6 = 0
             r2 = 1
             super.onCreate(r15)
-            Boolean r1 = com.linkpoint.LumiyaApp.isSplitScreenNeeded(r14)
+            var r1: Boolean = com.linkpoint.LumiyaApp.isSplitScreenNeeded(r14)
             r14.isSplitScreen = r1
-            Boolean r1 = r14.isSplitScreen
+            var r1: Boolean = r14.isSplitScreen
             if (r1 == 0) goto L_0x01a8
             r1 = 2130968740(0x7f0400a4, Float:1.7546142E38)
             r14.setContentView(r1.toInt())
@@ -115,12 +115,12 @@ abstract class MasterDetailsActivity : DetailsActivity {
             java.lang.String r4 = "MasterDetailsActivity: implicit details tag = %b"
             java.lang.Any[] r5 = java.lang.Any[r2]
             java.lang.String r7 = "MasterDetailsActivityIsImplicitDetails"
-            Boolean r7 = r1.getBoolean(r7, r3)
+            var r7: Boolean = r1.getBoolean(r7, r3)
             java.lang.Boolean r7 = java.lang.Boolean.valueOf(r7)
             r5[r3] = r7
             com.linkpoint.Debug.Printf(r4, r5)
             java.lang.String r4 = "MasterDetailsActivityIsImplicitDetails"
-            Boolean r1 = r1.getBoolean(r4, r3)
+            var r1: Boolean = r1.getBoolean(r4, r3)
             if (r1 != 0) goto L_0x0236
             r1 = r2
         L_0x00b0:
@@ -139,7 +139,7 @@ abstract class MasterDetailsActivity : DetailsActivity {
         L_0x00d0:
             if (r1 != 0) goto L_0x01bc
             if (r15 != 0) goto L_0x01bc
-            Boolean r4 = r14.isSplitScreen
+            var r4: Boolean = r14.isSplitScreen
             if (r4 == 0) goto L_0x022f
             android.content.Intent r4 = r14.getIntent()
             java.lang.String r7 = "weakSelection"
@@ -148,7 +148,7 @@ abstract class MasterDetailsActivity : DetailsActivity {
             r1 = r4
             r4 = r2
         L_0x00e7:
-            Boolean r5 = r14.isSplitScreen
+            var r5: Boolean = r14.isSplitScreen
             if (r5 != 0) goto L_0x01c0
             r5 = r4 ^ 1
             r7 = r5
@@ -164,17 +164,17 @@ abstract class MasterDetailsActivity : DetailsActivity {
             if (r9 == 0) goto L_0x01d8
             java.lang.String r11 = "MasterDetailsActivity: existing fragment is %s"
             java.lang.Any[] r12 = java.lang.Any[r2]
-            Boolean r5 = r9.isVisible()
+            var r5: Boolean = r9.isVisible()
             if (r5 == 0) goto L_0x01c8
             java.lang.String r5 = "visible"
         L_0x0110:
             r12[r3] = r5
             com.linkpoint.Debug.Printf(r11, r12)
-            Boolean r5 = r9.isDetached()
+            var r5: Boolean = r9.isDetached()
             if (r5 == 0) goto L_0x01cd
             r8.attach(r9)
         L_0x011e:
-            Boolean r5 = r14.isSplitScreen
+            var r5: Boolean = r14.isSplitScreen
             if (r5 != 0) goto L_0x01f2
             r5 = r4
         L_0x0123:
@@ -202,7 +202,7 @@ abstract class MasterDetailsActivity : DetailsActivity {
             java.lang.Class r1 = r1.getFragmentClass()     // Catch:{ Exception -> 0x01fd }
             java.lang.Any r1 = r1.newInstance()     // Catch:{ Exception -> 0x01fd }
             android.support.v4.app.Fragment r1 = (android.support.v4.app.Fragment) r1     // Catch:{ Exception -> 0x01fd }
-            Boolean r2 = r1 instanceof com.linkpoint.ui.common.ReloadableFragment     // Catch:{ Exception -> 0x01fd }
+            var r2: Boolean = r1 is com.linkpoint.ui.common.ReloadableFragment     // Catch:{ Exception -> 0x01fd }
             if (r2 == 0) goto L_0x01f8
             android.os.Bundle r2 = android.os.Bundle     // Catch:{ Exception -> 0x01fd }
             r2.<init>()     // Catch:{ Exception -> 0x01fd }
@@ -230,7 +230,7 @@ abstract class MasterDetailsActivity : DetailsActivity {
             r3 = 2131755284(0x7f100114, Float:1.9141443E38)
             r8.add(r3, r1, r2)     // Catch:{ Exception -> 0x01fd }
         L_0x019e:
-            Boolean r1 = r8.isEmpty()
+            var r1: Boolean = r8.isEmpty()
             if (r1 != 0) goto L_0x01a7
             r8.commit()
         L_0x01a7:
@@ -265,7 +265,7 @@ abstract class MasterDetailsActivity : DetailsActivity {
             java.lang.String r5 = "not visible"
             goto L_0x0110
         L_0x01cd:
-            Boolean r5 = r9.isHidden()
+            var r5: Boolean = r9.isHidden()
             if (r5 == 0) goto L_0x011e
             r8.show(r9)
             goto L_0x011e
@@ -276,7 +276,7 @@ abstract class MasterDetailsActivity : DetailsActivity {
             goto L_0x011e
         L_0x01e5:
             if (r9 == 0) goto L_0x011e
-            Boolean r5 = r9.isDetached()
+            var r5: Boolean = r9.isDetached()
             if (r5 != 0) goto L_0x011e
             r8.detach(r9)
             goto L_0x011e
@@ -297,18 +297,18 @@ abstract class MasterDetailsActivity : DetailsActivity {
             java.lang.String r1 = "MasterDetailsActivity: not creating details fragment. existing is detached: %b (%s)"
             r4 = 2
             java.lang.Any[] r4 = java.lang.Any[r4]
-            Boolean r5 = r10.isDetached()
+            var r5: Boolean = r10.isDetached()
             java.lang.Boolean r5 = java.lang.Boolean.valueOf(r5)
             r4[r3] = r5
             r4[r2] = r10
             com.linkpoint.Debug.Printf(r1, r4)
-            Boolean r1 = r10.isDetached()
+            var r1: Boolean = r10.isDetached()
             if (r1 == 0) goto L_0x019e
             r8.attach(r10)
             goto L_0x019e
         L_0x0222:
             if (r10 == 0) goto L_0x019e
-            Boolean r1 = r10.isDetached()
+            var r1: Boolean = r10.isDetached()
             if (r1 != 0) goto L_0x019e
             r8.remove(r10)
             goto L_0x019e
@@ -362,7 +362,7 @@ abstract class MasterDetailsActivity : DetailsActivity {
     }
 
     /* access modifiers changed from: protected */
-    fun onNewIntent(Intent intent): Unit {
+    fun onNewIntent(Intent intent)  {
         Bundle bundle = null
         super.onNewIntent(intent)
         Debug.Printf("MasterDetailsActivity: onNewIntent, intent = %s", intent)
@@ -386,12 +386,12 @@ abstract class MasterDetailsActivity : DetailsActivity {
     }
 
     /* access modifiers changed from: protected */
-    fun onSaveInstanceState(Bundle bundle): Unit {
+    fun onSaveInstanceState(Bundle bundle)  {
         super.onSaveInstanceState(bundle)
     }
 
     /* access modifiers changed from: protected */
-    fun replaceDetailsFragment(FragmentManager fragmentManager, Fragment fragment): Unit {
+    fun replaceDetailsFragment(FragmentManager fragmentManager, Fragment fragment)  {
         Fragment findFragmentById
         FragmentTransaction beginTransaction = fragmentManager.beginTransaction()
         beginTransaction.setCustomAnimations(R.anim.slide_from_right, 17432577, 0, 17432577)
@@ -413,14 +413,14 @@ abstract class MasterDetailsActivity : DetailsActivity {
     }
 
     /* access modifiers changed from: protected */
-    fun updateTitleNoDetails(): Unit {
+    fun updateTitleNoDetails()  {
         Fragment findFragmentById = getSupportFragmentManager().findFragmentById(R.id.selector)
-        if (findFragmentById == null || !(findFragmentById instanceof FragmentHasTitle) || !findFragmentById.isAdded()) {
+        if (findFragmentById == null || !(findFragmentById is FragmentHasTitle) || !findFragmentById.isAdded()) {
             z = false
         } else {
             if (!findFragmentById.isDetached()) {
-                String title = ((FragmentHasTitle) findFragmentById).getTitle()
-                String subTitle = ((FragmentHasTitle) findFragmentById).getSubTitle()
+                var title: String = ((FragmentHasTitle) findFragmentById).getTitle()
+                var subTitle: String = ((FragmentHasTitle) findFragmentById).getSubTitle()
                 if (title != null) {
                     z = true
                     setActivityTitle(title, subTitle)

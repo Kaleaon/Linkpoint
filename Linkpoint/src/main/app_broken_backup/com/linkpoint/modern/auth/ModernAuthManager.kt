@@ -102,19 +102,19 @@ class ModernAuthManager {
      * Check for cached authentication tokens
      */
     private fun checkCachedTokens(username: String): AuthResult {
-        String cachedUsername = securePrefs.getString(KEY_USERNAME, null)
+        var cachedUsername: String = securePrefs.getString(KEY_USERNAME, null)
         if (!username == cachedUsername) {
             return AuthResult.failure("No cached tokens for user")
         }
         
-        Long tokenExpiry = securePrefs.getLong(KEY_TOKEN_EXPIRY, 0)
+        var tokenExpiry: Long = securePrefs.getLong(KEY_TOKEN_EXPIRY, 0)
         if (System.currentTimeMillis() >= tokenExpiry) {
             Log.d(TAG, "Cached tokens have expired")
             return AuthResult.failure("Cached tokens expired")
         }
         
-        String accessToken = securePrefs.getString(KEY_ACCESS_TOKEN, null)
-        String refreshToken = securePrefs.getString(KEY_REFRESH_TOKEN, null)
+        var accessToken: String = securePrefs.getString(KEY_ACCESS_TOKEN, null)
+        var refreshToken: String = securePrefs.getString(KEY_REFRESH_TOKEN, null)
         
         if (accessToken != null && refreshToken != null) {
             return AuthResult.success(accessToken, refreshToken, tokenExpiry)
@@ -133,9 +133,9 @@ class ModernAuthManager {
             // or make OAuth2 calls when Second Life supports it
             
             // Generate a mock access token (in real implementation, this comes from server)
-            String accessToken = generateSecureToken()
-            String refreshToken = generateSecureToken()
-            Long expiryTime = System.currentTimeMillis() + (24 * 60 * 60 * 1000); // 24 hours
+            var accessToken: String = generateSecureToken()
+            var refreshToken: String = generateSecureToken()
+            var expiryTime: Long = System.currentTimeMillis() + (24 * 60 * 60 * 1000); // 24 hours
             
             Log.d(TAG, "Password authentication completed successfully")
             return AuthResult.success(accessToken, refreshToken, expiryTime)
@@ -148,7 +148,7 @@ class ModernAuthManager {
     /**
      * Cache authentication result securely
      */
-    private fun cacheAuthResult(username: String, result: AuthResult): Unit {
+    private fun cacheAuthResult(username: String, result: AuthResult)  {
         SharedPreferences.Editor editor = securePrefs.edit()
         editor.putString(KEY_USERNAME, username)
         editor.putString(KEY_ACCESS_TOKEN, result.getAccessToken())
@@ -203,7 +203,7 @@ class ModernAuthManager {
     /**
      * Clear all cached authentication data
      */
-    fun clearAuthCache(): Unit {
+    fun clearAuthCache()  {
         SharedPreferences.Editor editor = securePrefs.edit()
         editor.clear()
         editor.apply()

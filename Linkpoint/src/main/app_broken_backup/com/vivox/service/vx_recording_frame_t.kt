@@ -49,7 +49,7 @@ class vx_recording_frame_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_void getFrame_data() {
-        Long l = VxClientProxyJNI.vx_recording_frame_t_frame_data_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_recording_frame_t_frame_data_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_void(l, false)
         return null
     }

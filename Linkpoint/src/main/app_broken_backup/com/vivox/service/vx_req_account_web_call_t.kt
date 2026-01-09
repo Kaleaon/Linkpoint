@@ -50,7 +50,7 @@ class vx_req_account_web_call_t {
      * Lifted jumps to return sites
      */
     vx_req_base_t getBase() {
-        Long l = VxClientProxyJNI.vx_req_account_web_call_t_base_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_req_account_web_call_t_base_get(this.swigCPtr, this)
         if (l != 0L) return vx_req_base_t(l, false)
         return null
     }
@@ -64,7 +64,7 @@ class vx_req_account_web_call_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_p_vx_name_value_pair getParameters() {
-        Long l = VxClientProxyJNI.vx_req_account_web_call_t_parameters_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_req_account_web_call_t_parameters_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_p_vx_name_value_pair(l, false)
         return null
     }

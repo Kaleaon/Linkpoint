@@ -49,7 +49,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
     private val MASK_ENABLED_LOCAL: Int = 1
     private val MAX_CHATTERS_PER_NOTIFICATION: Int = 3
     private val MAX_MESSAGES_PER_NOTIFICATION: Int = 3
-    Boolean unreadNotificationKey = Boolean.FALSE
+    var unreadNotificationKey: Boolean = Boolean.FALSE
     @NonNull
     private ChatMessageDao chatMessageDao
     @NonNull
@@ -70,7 +70,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
     SubscriptionPool<Boolean, UnreadNotifications> unreadNotificationInfoPool = SubscriptionPool<>()
     /* access modifiers changed from: private */
     Runnable updateChatterDataRunnable = Runnable() {
-        fun run(): Unit {
+        fun run()  {
             UnreadNotificationManager.this.updateUnreadChatterData()
             UnreadNotificationManager.this.updateExecutor.execute(UnreadNotificationManager.this.updateNotificationDataRunnable)
         }
@@ -79,7 +79,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
     Executor updateExecutor
     /* access modifiers changed from: private */
     Runnable updateNotificationDataRunnable = Runnable() {
-        fun run(): Unit {
+        fun run()  {
             UnreadNotificationManager.this.unreadNotificationInfoPool.onResultData(UnreadNotificationManager.unreadNotificationKey, UnreadNotificationManager.this.getUnreadNotification())
         }
     }
@@ -98,7 +98,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         this.updateExecutor = userManager2.getDatabaseRunOnceExecutor()
         this.emptyNotification = UnreadNotificationInfo.create(userManager2.getUserID(), 0, (List<UnreadNotificationInfo.UnreadMessageSource>) null, (NotificationType) null, 0, (NotificationType) null, (UnreadNotificationInfo.UnreadMessageSource) null, UnreadNotificationInfo.ObjectPopupNotification.create(0, 0, (UnreadNotificationInfo.ObjectPopupMessage) null))
         this.unreadNotificationInfoPool.attachRequestHandler(SimpleRequestHandler<Boolean>() {
-            fun onRequest(@NonNull Boolean bool): Unit {
+            fun onRequest(@NonNull Boolean bool)  {
                 UnreadNotificationManager.this.updateExecutor.execute(UnreadNotificationManager.this.updateChatterDataRunnable)
             }
         updateTypesFromPreferences(LumiyaApp.getDefaultSharedPreferences())
@@ -112,25 +112,25 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         ArrayList arrayList
         UnreadNotificationInfo.UnreadMessageSource unreadMessageSource
         Int intValue
-        Boolean z = System.currentTimeMillis() >= this.lastFreshMessageNotification.get() + FRESH_MESSAGES_NOTIFICATION_INTERVAL
+        var z: Boolean = System.currentTimeMillis() >= this.lastFreshMessageNotification.get() + FRESH_MESSAGES_NOTIFICATION_INTERVAL
         ImmutableMap.Builder builder = ImmutableMap.builder()
         for (NotificationType notificationType2 : NotificationType.VALUES) {
-            Int i2 = 0
-            Int i3 = 0
+            var i2: Int = 0
+            var i3: Int = 0
             NotificationType notificationType3 = null
             NotificationType notificationType4 = null
-            Long l = null
-            Boolean z2 = false
+            var l: Long = null
+            var z2: Boolean = false
             if (!this.chatterSources.isEmpty()) {
                 HashMap hashMap = HashMap()
                 Iterator<T> it = this.chatterSources.entrySet().iterator()
                 while (true) {
-                    Int i4 = i3
-                    Int i5 = i2
+                    var i4: Int = i3
+                    var i5: Int = i2
                     NotificationType notificationType5 = notificationType4
                     NotificationType notificationType6 = notificationType3
-                    Boolean z3 = z2
-                    Long l2 = l
+                    var z3: Boolean = z2
+                    var l2: Long = l
                     if (it.hasNext()) {
                         Map.Entry entry = (Map.Entry) it.next()
                         ChatterNameRetriever chatterNameRetriever = (ChatterNameRetriever) entry.getValue()
@@ -140,13 +140,13 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
                             if (chatterID.getChatterType() == ChatterID.ChatterType.Local || chatterNameRetriever.getResolvedName() != null) {
                                 Chatter chatter = (Chatter) this.chatterDao.load((Long) entry.getKey())
                                 if (chatter != null) {
-                                    Int unreadCount = chatter.getUnreadCount()
-                                    Int i6 = i5 + unreadCount
+                                    var unreadCount: Int = chatter.getUnreadCount()
+                                    var i6: Int = i5 + unreadCount
                                     hashMap.put(chatter.getId(), UnreadNotificationInfo.UnreadMessageSource.create(chatterID, chatterNameRetriever.getResolvedName(), (List<SLChatEvent>) null, unreadCount))
                                     NotificationType notificationType8 = (notificationType6 == null || notificationType7.compareTo(notificationType6) > 0) ? notificationType7 : notificationType6
                                     if (z) {
                                         synchronized (this.freshMessageCountsLock) {
-                                            Int remove = this.freshMessageCounts.remove(chatter.getId())
+                                            var remove: Int = this.freshMessageCounts.remove(chatter.getId())
                                             intValue = remove != null ? remove.intValue() : 0
                                         }
                                         i4 += intValue
@@ -197,12 +197,12 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
                         i3 = i4
                         i2 = i5
                     } else {
-                        Int i7 = hashMap.size() <= 1 ? 3 : 1
+                        var i7: Int = hashMap.size() <= 1 ? 3 : 1
                         ArrayList arrayList2 = ArrayList(hashMap.size())
                         UnreadNotificationInfo.UnreadMessageSource unreadMessageSource2 = null
                         for (Map.Entry entry2 : hashMap.entrySet()) {
                             LinkedList linkedList = LinkedList()
-                            Int unreadMessagesCount = ((UnreadNotificationInfo.UnreadMessageSource) entry2.getValue()).unreadMessagesCount()
+                            var unreadMessagesCount: Int = ((UnreadNotificationInfo.UnreadMessageSource) entry2.getValue()).unreadMessagesCount()
                             if (unreadMessagesCount > i7) {
                                 unreadMessagesCount = i7
                             }
@@ -235,7 +235,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
             if (z && !(i3 == 0 && notification.freshObjectPopupsCount() == 0)) {
                 this.lastFreshMessageNotification.set(System.currentTimeMillis())
             }
-            Boolean z4 = false
+            var z4: Boolean = false
             if (arrayList != null && !arrayList.isEmpty()) {
                 z4 = true
             }
@@ -253,7 +253,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
     }
 
     private Unit updateTypesFromPreferences(SharedPreferences sharedPreferences) {
-        Int i = 0
+        var i: Int = 0
         if (NotificationChannels.getInstance().areNotificationsSystemControlled()) {
             i = 7
         } else {
@@ -271,8 +271,8 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
     }
 
     /* access modifiers changed from: private */
-    fun updateUnreadChatterData(): Unit {
-        Int i = this.maskEnabled.get()
+    fun updateUnreadChatterData()  {
+        var i: Int = this.maskEnabled.get()
         if (i == 0) {
             this.totalUnreadCount.set(0)
             this.totalSourcesCount.set(0)
@@ -299,8 +299,8 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
             where = where.where(ChatterDao.Properties.Type.in((Collection<?>) arrayList), WhereCondition[0])
         }
         HashSet hashSet = null
-        Int i2 = 0
-        Int i3 = 0
+        var i2: Int = 0
+        var i3: Int = 0
         NotificationType notificationType = null
         for (Chatter chatter : where.orderDesc(ChatterDao.Properties.LastMessageID).listLazy()) {
             ChatterID fromDatabaseObject = ChatterID.fromDatabaseObject(this.userManager.getUserID(), chatter)
@@ -340,12 +340,12 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         }
     }
 
-    fun addFreshMessage(@NonNull Chatter chatter): Unit {
+    fun addFreshMessage(@NonNull Chatter chatter)  {
         ChatterID.ChatterType chatterType
-        Boolean z = true
-        Long id = chatter.getId()
+        var z: Boolean = true
+        var id: Long = chatter.getId()
         if (id != null) {
-            Int i = this.maskEnabled.get()
+            var i: Int = this.maskEnabled.get()
             if (i == 0) {
                 z = false
             } else if (i != 7 && (((chatterType = ChatterID.ChatterType.VALUES[chatter.getType()]) != ChatterID.ChatterType.User || (i & 4) == 0) && ((chatterType != ChatterID.ChatterType.Group || (i & 2) == 0) && (chatterType != ChatterID.ChatterType.Local || (i & 1) == 0)))) {
@@ -353,7 +353,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
             }
             if (z) {
                 synchronized (this.freshMessageCountsLock) {
-                    Int num = this.freshMessageCounts.get(id)
+                    var num: Int = this.freshMessageCounts.get(id)
                     this.freshMessageCounts.put(id, Int.valueOf((num != null ? num.intValue() : 0) + 1))
                 }
                 return
@@ -377,8 +377,8 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         return null
     }
 
-    fun clearFreshMessages(@NonNull Chatter chatter): Unit {
-        Long id = chatter.getId()
+    fun clearFreshMessages(@NonNull Chatter chatter)  {
+        var id: Long = chatter.getId()
         if (id != null) {
             synchronized (this.freshMessageCountsLock) {
                 this.freshMessageCounts.remove(id)
@@ -386,7 +386,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         }
     }
 
-    fun clearNotifyCapture(@Nullable NotifyCapture notifyCapture2): Unit {
+    fun clearNotifyCapture(@Nullable NotifyCapture notifyCapture2)  {
         synchronized (this.notifyCaptureLock) {
             if (this.notifyCapture != null && this.notifyCapture.get() == notifyCapture2) {
                 this.notifyCapture = null
@@ -399,18 +399,18 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         return this.unreadNotificationInfoPool
     }
 
-    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever): Unit {
+    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever)  {
         this.updateExecutor.execute(this.updateNotificationDataRunnable)
     }
 
     @EventHandler
-    fun onGlobalPreferencesChanged(GlobalOptions.GlobalOptionsChangedEvent globalOptionsChangedEvent): Unit {
+    fun onGlobalPreferencesChanged(GlobalOptions.GlobalOptionsChangedEvent globalOptionsChangedEvent)  {
         if (globalOptionsChangedEvent.preferences != null) {
             updateTypesFromPreferences(globalOptionsChangedEvent.preferences)
         }
     }
 
-    fun setNotifyCapture(@Nullable NotifyCapture notifyCapture2): Unit {
+    fun setNotifyCapture(@Nullable NotifyCapture notifyCapture2)  {
         synchronized (this.notifyCaptureLock) {
             this.notifyCapture = WeakReference<>(notifyCapture2)
             updateUnreadNotifications()
@@ -418,7 +418,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
     }
 
     /* access modifiers changed from: package-private */
-    fun updateUnreadNotifications(): Unit {
+    fun updateUnreadNotifications()  {
         this.unreadNotificationInfoPool.requestUpdate(unreadNotificationKey)
     }
 }

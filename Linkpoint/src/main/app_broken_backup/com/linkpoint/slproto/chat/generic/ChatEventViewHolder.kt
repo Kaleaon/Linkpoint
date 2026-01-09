@@ -34,7 +34,7 @@ class ChatEventViewHolder : RecyclerView.ViewHolder {
         this.bubbleView = view.findViewById(R.id.chatMessageBubble)
         this.chatSourceIcon = (view as ChatterPicView).findViewById(R.id.chatMessageSourceIcon)
         this.chatSourceIconRight = (view as ChatterPicView).findViewById(R.id.chatMessageSourceIconRight)
-        if ((adapter2 instanceof HasUserPicClickHandler) && (userPicClickListener = ((HasUserPicClickHandler) adapter2).getUserPicClickListener()) != null) {
+        if ((adapter2 is HasUserPicClickHandler) && (userPicClickListener = ((HasUserPicClickHandler) adapter2).getUserPicClickListener()) != null) {
             if (this.chatSourceIcon != null) {
                 this.chatSourceIcon.setOnClickListener(userPicClickListener)
             }
@@ -45,7 +45,7 @@ class ChatEventViewHolder : RecyclerView.ViewHolder {
     }
 
     /* access modifiers changed from: package-private */
-    fun requestAdapterUpdate(): Unit {
+    fun requestAdapterUpdate()  {
         RecyclerView.Adapter adapter2 = (RecyclerView.Adapter) this.adapter.get()
         if (adapter2 != null) {
             adapter2.notifyItemChanged(getAdapterPosition())
@@ -53,17 +53,17 @@ class ChatEventViewHolder : RecyclerView.ViewHolder {
     }
 
     /* access modifiers changed from: package-private */
-    fun setupTimestampUpdate(Context context, Long j): Unit {
+    fun setupTimestampUpdate(Context context, Long j)  {
         this.updateTimestamp = j
         updateTimestamp(context)
     }
 
-    fun updateTimestamp(Context context): Unit {
+    fun updateTimestamp(Context context)  {
         if (this.timestampView == null) {
             return
         }
         if (this.updateTimestamp != 0) {
-            Long currentTimeMillis = System.currentTimeMillis()
+            var currentTimeMillis: Long = System.currentTimeMillis()
             this.timestampView.setText(currentTimeMillis < this.updateTimestamp + AnimationSequenceInfo.MAX_ANIMATION_LENGTH ? context.getString(R.string.now) : DateUtils.getRelativeTimeSpanString(this.updateTimestamp, currentTimeMillis, AnimationSequenceInfo.MAX_ANIMATION_LENGTH, 262144))
             this.timestampView.setVisibility(0)
             return

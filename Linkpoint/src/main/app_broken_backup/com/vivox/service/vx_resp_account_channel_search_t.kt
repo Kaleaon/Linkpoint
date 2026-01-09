@@ -46,7 +46,7 @@ class vx_resp_account_channel_search_t {
      * Lifted jumps to return sites
      */
     vx_resp_base_t getBase() {
-        Long l = VxClientProxyJNI.vx_resp_account_channel_search_t_base_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_account_channel_search_t_base_get(this.swigCPtr, this)
         if (l != 0L) return vx_resp_base_t(l, false)
         return null
     }
@@ -60,7 +60,7 @@ class vx_resp_account_channel_search_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_p_vx_channel getChannels() {
-        Long l = VxClientProxyJNI.vx_resp_account_channel_search_t_channels_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_account_channel_search_t_channels_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_p_vx_channel(l, false)
         return null
     }

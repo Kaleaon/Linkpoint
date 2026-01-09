@@ -15,7 +15,7 @@ class vx_sessiongroup_playback_mode {
 
     private vx_sessiongroup_playback_mode(String string2) {
         this.swigName = string2
-        Int n = swigNext
+        var n: Int = swigNext
         swigNext = n + 1
         this.swigValue = n
     }
@@ -40,7 +40,7 @@ class vx_sessiongroup_playback_mode {
         if (n < swigValues.length && n >= 0 && vx_sessiongroup_playback_mode.swigValues[n].swigValue == n) {
             return swigValues[n]
         }
-        Int n2 = 0
+        var n2: Int = 0
         while (n2 < swigValues.length) {
             if (vx_sessiongroup_playback_mode.swigValues[n2].swigValue == n) {
                 return swigValues[n2]

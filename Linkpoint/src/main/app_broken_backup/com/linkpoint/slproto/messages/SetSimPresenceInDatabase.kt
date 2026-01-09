@@ -27,11 +27,11 @@ class SetSimPresenceInDatabase : SLMessage {
         return this.SimData_Field.HostName.size + 17 + 4 + 4 + 4 + 4 + 4 + 1 + this.SimData_Field.Status.size + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleSetSimPresenceInDatabase(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.ETB)
@@ -45,7 +45,7 @@ class SetSimPresenceInDatabase : SLMessage {
         packVariable(byteBuffer, this.SimData_Field.Status, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.SimData_Field.RegionID = unpackUUID(byteBuffer)
         this.SimData_Field.HostName = unpackVariable(byteBuffer, 1)
         this.SimData_Field.GridX = unpackInt(byteBuffer)

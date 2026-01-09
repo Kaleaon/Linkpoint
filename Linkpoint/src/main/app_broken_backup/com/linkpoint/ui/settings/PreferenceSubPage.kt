@@ -38,7 +38,7 @@ class PreferenceSubPage : Preference {
         try {
             this.pageResource = obtainStyledAttributes.getResourceId(0, this.pageResource)
             this.pageNotificationDetails = obtainStyledAttributes.getBoolean(1, this.pageNotificationDetails)
-            String string = obtainStyledAttributes.getString(2)
+            var string: String = obtainStyledAttributes.getString(2)
             if (string != null) {
                 this.notificationType = NotificationType.valueOf(string)
             }
@@ -70,7 +70,7 @@ class PreferenceSubPage : Preference {
         }
         NotificationChannels instance = NotificationChannels.getInstance()
         if (instance.areNotificationsSystemControlled()) {
-            String notificationSummary = instance.getNotificationSummary(getContext(), instance.getChannelByType(this.notificationType))
+            var notificationSummary: String = instance.getNotificationSummary(getContext(), instance.getChannelByType(this.notificationType))
             return notificationSummary != null ? notificationSummary : super.getSummary()
         }
         NotificationSettings notificationSettings = NotificationSettings(this.notificationType)

@@ -35,11 +35,11 @@ class PlacesQuery : SLMessage {
         return this.QueryData_Field.QueryText.size + 1 + 4 + 1 + 1 + this.QueryData_Field.SimName.size + 68
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandlePlacesQuery(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.GS)
@@ -53,7 +53,7 @@ class PlacesQuery : SLMessage {
         packVariable(byteBuffer, this.QueryData_Field.SimName, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.QueryID = unpackUUID(byteBuffer)

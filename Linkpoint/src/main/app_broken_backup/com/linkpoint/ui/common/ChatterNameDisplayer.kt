@@ -36,7 +36,7 @@ class ChatterNameDisplayer : ChatterNameRetriever.OnChatterNameUpdated {
             clearViews()
             return
         }
-        String resolvedName = this.nameRetriever.getResolvedName()
+        var resolvedName: String = this.nameRetriever.getResolvedName()
         if (this.nameTextView != null) {
             this.nameTextView.setText(resolvedName != null ? resolvedName : this.nameTextView.getContext().getString(R.string.name_loading_title))
         }
@@ -45,7 +45,7 @@ class ChatterNameDisplayer : ChatterNameRetriever.OnChatterNameUpdated {
         }
     }
 
-    fun bindViews(@Nullable TextView textView, @Nullable ChatterPicView chatterPicView): Unit {
+    fun bindViews(@Nullable TextView textView, @Nullable ChatterPicView chatterPicView)  {
         this.nameTextView = textView
         this.picView = chatterPicView
         updateViews()
@@ -58,21 +58,21 @@ class ChatterNameDisplayer : ChatterNameRetriever.OnChatterNameUpdated {
 
     @NonNull
     fun getResolvedName(Context context): String {
-        String str = null
+        var str: String = null
         if (this.nameRetriever != null) {
             str = this.nameRetriever.getResolvedName()
         }
         return str != null ? str : context.getString(R.string.name_loading_title)
     }
 
-    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever): Unit {
+    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever)  {
         if (chatterNameRetriever == this.nameRetriever) {
             this.alreadyUpdated = true
             updateViews()
         }
     }
 
-    fun setChatterID(@Nullable ChatterID chatterID2): Unit {
+    fun setChatterID(@Nullable ChatterID chatterID2)  {
         if (!Objects.equal(chatterID2, this.chatterID)) {
             if (this.nameRetriever != null) {
                 this.nameRetriever.dispose()
@@ -99,7 +99,7 @@ class ChatterNameDisplayer : ChatterNameRetriever.OnChatterNameUpdated {
         }
     }
 
-    fun unbindViews(): Unit {
+    fun unbindViews()  {
         this.nameTextView = null
         this.picView = null
     }

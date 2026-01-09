@@ -29,11 +29,11 @@ class AvatarInterestsUpdate : SLMessage {
         return this.PropertiesData_Field.WantToText.size + 5 + 4 + 1 + this.PropertiesData_Field.SkillsText.size + 1 + this.PropertiesData_Field.LanguagesText.size + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleAvatarInterestsUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -81)
@@ -46,7 +46,7 @@ class AvatarInterestsUpdate : SLMessage {
         packVariable(byteBuffer, this.PropertiesData_Field.LanguagesText, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.PropertiesData_Field.WantToMask = unpackInt(byteBuffer)

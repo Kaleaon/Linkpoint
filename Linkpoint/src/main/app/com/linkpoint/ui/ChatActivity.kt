@@ -7,11 +7,16 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.linkpoint.LinkpointApp
 import com.linkpoint.R
+import com.linkpoint.network.SecondLifeConnection
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -26,6 +31,7 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var adapter: ChatAdapter
     
     private val messages = mutableListOf<ChatMessage>()
+    private val connection: SecondLifeConnection by lazy { LinkpointApp.getInstance().connection }
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,19 +70,39 @@ class ChatActivity : AppCompatActivity() {
     }
     
     private fun sendMessage(text: String) {
+        // Determine chat type
+        val (chatType, displayText) = when {
+            text.startsWith("/me ") -> SecondLifeConnection.ChatType.NORMAL to text
+            text.startsWith("/shout ") -> SecondLifeConnection.ChatType.SHOUT to text.removePrefix("/shout ")
+            text.startsWith("/whisper ") -> SecondLifeConnection.ChatType.WHISPER to text.removePrefix("/whisper ")
+            else -> SecondLifeConnection.ChatType.NORMAL to text
+        }
+        
+        val messageType = when (chatType) {
+            SecondLifeConnection.ChatType.SHOUT -> ChatMessageType.SHOUT
+            SecondLifeConnection.ChatType.WHISPER -> ChatMessageType.WHISPER
+            else -> if (text.startsWith("/me ")) ChatMessageType.EMOTE else ChatMessageType.NORMAL
+        }
+        
         val message = ChatMessage(
             id = UUID.randomUUID().toString(),
             sender = "You",
-            content = text,
+            content = displayText,
             timestamp = System.currentTimeMillis(),
-            type = if (text.startsWith("/me ")) ChatMessageType.EMOTE else ChatMessageType.NORMAL
+            type = messageType
         )
         
         messages.add(message)
         adapter.notifyItemInserted(messages.size - 1)
         recyclerView.scrollToPosition(messages.size - 1)
         
-        // TODO: Send to SL server
+        // Send to SL server
+        lifecycleScope.launch {
+            val sent = connection.sendChatMessage(displayText, channel = 0, type = chatType)
+            if (!sent) {
+                Toast.makeText(this@ChatActivity, "Failed to send message", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
     
     private fun addSystemMessage(text: String) {

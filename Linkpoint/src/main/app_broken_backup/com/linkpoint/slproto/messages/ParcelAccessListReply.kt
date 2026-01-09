@@ -32,11 +32,11 @@ class ParcelAccessListReply : SLMessage {
         return (this.List_Fields.size() * 24) + 33
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleParcelAccessListReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -40)
@@ -52,7 +52,7 @@ class ParcelAccessListReply : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.Data_Field.AgentID = unpackUUID(byteBuffer)
         this.Data_Field.SequenceID = unpackInt(byteBuffer)
         this.Data_Field.Flags = unpackInt(byteBuffer)

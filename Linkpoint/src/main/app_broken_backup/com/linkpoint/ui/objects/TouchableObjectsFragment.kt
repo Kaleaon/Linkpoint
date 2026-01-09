@@ -40,7 +40,7 @@ class TouchableObjectsFragment : Fragment : AdapterView.OnItemClickListener {
 
     /* access modifiers changed from: private */
     /* renamed from: onTouchableObjects */
-    fun m691com_lumiyaviewer_lumiya_ui_objects_TouchableObjectsFragmentmthref0(ImmutableList<SLObjectInfo> immutableList): Unit {
+    fun m691com_lumiyaviewer_lumiya_ui_objects_TouchableObjectsFragmentmthref0(ImmutableList<SLObjectInfo> immutableList)  {
         if (this.listAdapter != null) {
             this.listAdapter.setData(immutableList)
         }
@@ -56,7 +56,7 @@ class TouchableObjectsFragment : Fragment : AdapterView.OnItemClickListener {
         return inflate
     }
 
-    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j): Unit {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j)  {
         SLAgentCircuit sLAgentCircuit = null
         if (this.listAdapter != null) {
             SLObjectInfo item = this.listAdapter.getItem(i)
@@ -70,7 +70,7 @@ class TouchableObjectsFragment : Fragment : AdapterView.OnItemClickListener {
         }
     }
 
-    fun onStart(): Unit {
+    fun onStart()  {
         super.onStart()
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         UUID objectUUID = getObjectUUID()
@@ -81,7 +81,7 @@ class TouchableObjectsFragment : Fragment : AdapterView.OnItemClickListener {
         }
     }
 
-    fun onStop(): Unit {
+    fun onStop()  {
         this.touchableObjects.unsubscribe()
         super.onStop()
     }

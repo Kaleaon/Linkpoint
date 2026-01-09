@@ -26,10 +26,10 @@ class ImprovedTerseObjectUpdate : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int i = 12
+        var i: Int = 12
         Iterator<T> it = this.ObjectData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            var i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -38,11 +38,11 @@ class ImprovedTerseObjectUpdate : SLMessage {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleImprovedTerseObjectUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.put((byte) 15)
         packLong(byteBuffer, this.RegionData_Field.RegionHandle)
         packShort(byteBuffer, (this as short).RegionData_Field.TimeDilation)
@@ -53,7 +53,7 @@ class ImprovedTerseObjectUpdate : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.RegionData_Field.RegionHandle = unpackLong(byteBuffer)
         this.RegionData_Field.TimeDilation = unpackShort(byteBuffer) & 65535
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE

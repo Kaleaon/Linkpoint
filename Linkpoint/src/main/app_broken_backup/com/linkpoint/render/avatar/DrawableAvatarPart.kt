@@ -22,7 +22,7 @@ class DrawableAvatarPart : ResourceConsumer {
     private volatile SLAnimatedMeshData meshData
     private volatile Boolean meshDataUpdated
     private val meshUpdate: Runnable = Runnable() {
-        fun run(): Unit {
+        fun run()  {
             GLTexture -get3
             FloatArray -get2
             Debug.Printf("Avatar: meshUpdate entered for part %s", DrawableAvatarPart.this.faceIndex.toString())
@@ -55,11 +55,11 @@ class DrawableAvatarPart : ResourceConsumer {
         this.hasGL20 = z
     }
 
-    private fun RequestMeshUpdate(): Unit {
+    private fun RequestMeshUpdate()  {
         PrimComputeExecutor.getInstance().execute(this.meshUpdate)
     }
 
-    fun GLDraw(RenderContext renderContext, FloatArray fArr, Boolean z): Unit {
+    fun GLDraw(RenderContext renderContext, FloatArray fArr, Boolean z)  {
         SLAnimatedMeshData sLAnimatedMeshData
         DrawableFaceTexture drawableFaceTexture
         if (renderContext.hasGL20) {
@@ -82,13 +82,13 @@ class DrawableAvatarPart : ResourceConsumer {
         }
     }
 
-    fun OnResourceReady(obj: Any, z: Boolean): Unit {
-        String str = "Avatar: (requesting meshUpdate) face %s texture %s"
+    fun OnResourceReady(obj: Any, z: Boolean)  {
+        var str: String = "Avatar: (requesting meshUpdate) face %s texture %s"
         Any[] objArr = Any[2]
         objArr[0] = this.faceIndex.toString()
         objArr[1] = obj != null ? obj.toString() : "null"
         Debug.Printf(str, objArr)
-        if (obj instanceof OpenJPEG) {
+        if (obj is OpenJPEG) {
             synchronized (this.updateLock) {
                 this.rawTexture = (OpenJPEG) obj
             }
@@ -100,7 +100,7 @@ class DrawableAvatarPart : ResourceConsumer {
         return this.faceIndex
     }
 
-    fun setPartMorphParams(FloatArray fArr): Unit {
+    fun setPartMorphParams(FloatArray fArr)  {
         Int equals
         synchronized (this.updateLock) {
             equals = Arrays == this.partMorphParams, fArr ^ 1
@@ -117,7 +117,7 @@ class DrawableAvatarPart : ResourceConsumer {
     /* DevToolsApp WARNING: Missing block: B:31:0x0065, code:
             return
      */
-    fun setTexture(com.linkpoint.render.glres.textures.GLTextureCache glTextureCache, UUID textureUUID): Unit {
+    fun setTexture(com.linkpoint.render.glres.textures.GLTextureCache glTextureCache, UUID textureUUID)  {
         synchronized (this.updateLock) {
             // Log texture change for debugging
             Debug.Printf("Avatar: face %s texture %s", 

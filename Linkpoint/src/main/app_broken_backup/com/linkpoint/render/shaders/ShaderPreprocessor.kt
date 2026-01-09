@@ -17,9 +17,9 @@ class ShaderPreprocessor {
 
     @Nullable
     private String processCode(BufferedReader bufferedReader, @Nullable StringBuilder stringBuilder) throws IOException {
-        String str = null
+        var str: String = null
         while (true) {
-            String readLine = bufferedReader.readLine()
+            var readLine: String = bufferedReader.readLine()
             if (readLine == null) {
                 return str
             }
@@ -28,8 +28,8 @@ class ShaderPreprocessor {
                 return readLine
             }
             if (readLine.startsWith("#ifdef") || readLine.startsWith("#ifndef")) {
-                Boolean startsWith = readLine.startsWith("#ifdef")
-                Boolean containsKey = this.definedMacros.containsKey(readLine.substring(readLine.indexOf(32)).trim())
+                var startsWith: Boolean = readLine.startsWith("#ifdef")
+                var containsKey: Boolean = this.definedMacros.containsKey(readLine.substring(readLine.indexOf(32)).trim())
                 Any processCode = processCode(bufferedReader, startsWith == containsKey ? stringBuilder : null)
                 if (Objects.equal(processCode, "#else")) {
                     processCode = processCode(bufferedReader, startsWith != containsKey ? stringBuilder : null)
@@ -38,7 +38,7 @@ class ShaderPreprocessor {
                     throw IOException("#endif expected")
                 }
             } else if (stringBuilder != null) {
-                String str2 = readLine
+                var str2: String = readLine
                 for (Entry entry : this.definedMacros.entrySet()) {
                     str2 = str2.replace((entry as CharSequence).getKey(), (entry as CharSequence).getValue())
                 }

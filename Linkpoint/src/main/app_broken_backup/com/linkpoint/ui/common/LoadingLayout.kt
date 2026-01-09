@@ -81,7 +81,7 @@ class LoadingLayout : FrameLayout {
     }
 
     private Unit setMode(Boolean z, Boolean z2, Boolean z3) {
-        Int childCount = getChildCount()
+        var childCount: Int = getChildCount()
         for (i in 0 until childCount) {
             View childAt = getChildAt(i)
             if (childAt == this.progressBar) {
@@ -102,18 +102,18 @@ class LoadingLayout : FrameLayout {
         }
     }
 
-    fun setButteryProgressBar(Boolean z): Unit {
+    fun setButteryProgressBar(Boolean z)  {
         this.butteryBarVisible = z
         if (this.butteryProgressBar != null) {
             this.butteryProgressBar.setVisibility(z ? 0 : 8)
         }
     }
 
-    fun setSwipeRefreshLayout(@Nullable SwipeRefreshLayout swipeRefreshLayout2): Unit {
+    fun setSwipeRefreshLayout(@Nullable SwipeRefreshLayout swipeRefreshLayout2)  {
         this.swipeRefreshLayout = swipeRefreshLayout2
     }
 
-    fun showContent(@Nullable String str): Unit {
+    fun showContent(@Nullable String str)  {
         setMode(false, str != null, true)
         this.textView.setText(str)
         if (this.swipeRefreshLayout != null) {
@@ -121,11 +121,11 @@ class LoadingLayout : FrameLayout {
         }
     }
 
-    fun showLoading(): Unit {
+    fun showLoading()  {
         setMode(true, false, false)
     }
 
-    fun showMessage(String str): Unit {
+    fun showMessage(String str)  {
         setMode(false, true, false)
         this.textView.setText(str)
     }

@@ -27,10 +27,10 @@ class SystemMessage : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int length = this.MethodData_Field.Method.size + 1 + 16 + 32 + 4 + 1
+        var length: Int = this.MethodData_Field.Method.size + 1 + 16 + 32 + 4 + 1
         Iterator<T> it = this.ParamList_Fields.iterator()
         while (true) {
-            Int i = length
+            var i: Int = length
             if (!it.hasNext()) {
                 return i
             }
@@ -38,11 +38,11 @@ class SystemMessage : SLMessage {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleSystemMessage(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -108)
@@ -55,7 +55,7 @@ class SystemMessage : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.MethodData_Field.Method = unpackVariable(byteBuffer, 1)
         this.MethodData_Field.Invoice = unpackUUID(byteBuffer)
         this.MethodData_Field.Digest = unpackFixed(byteBuffer, 32)

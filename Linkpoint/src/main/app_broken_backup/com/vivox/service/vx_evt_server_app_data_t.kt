@@ -49,7 +49,7 @@ class vx_evt_server_app_data_t {
      * Lifted jumps to return sites
      */
     vx_evt_base_t getBase() {
-        Long l = VxClientProxyJNI.vx_evt_server_app_data_t_base_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_evt_server_app_data_t_base_get(this.swigCPtr, this)
         if (l != 0L) return vx_evt_base_t(l, false)
         return null
     }

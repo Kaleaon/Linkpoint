@@ -1,95 +1,136 @@
 package com.linkpoint.slproto.types
 
-class LLVector2 {
-    val FP_MAG_THRESHOLD: Float = 1.0E-7f
-    Float x
-    Float y
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.sqrt
 
-    LLVector2() {
-        this.x = 0.0f
-        this.y = 0.0f
-    }
-
-    LLVector2(Float f, Float f2) {
-        this.x = f
-        this.y = f2
-    }
-
-    LLVector2(LLVector2 lLVector2) {
-        this.x = lLVector2.x
-        this.y = lLVector2.y
-    }
-
-    fun sub(LLVector2 lLVector2, LLVector2 lLVector22): LLVector2 {
-        return LLVector2(lLVector2.x - lLVector22.x, lLVector2.y - lLVector22.y)
-    }
-
-    fun sum(LLVector2 lLVector2, LLVector2 lLVector22): LLVector2 {
-        return LLVector2(lLVector2.x + lLVector22.x, lLVector2.y + lLVector22.y)
-    }
-
-    fun add(LLVector2 lLVector2): Unit {
-        this.x += lLVector2.x
-        this.y += lLVector2.y
-    }
-
-    fun dot(LLVector2 lLVector2): Float {
-        return (this.x * lLVector2.x) + (this.y * lLVector2.y)
-    }
-
-    fun equals(Any obj): Boolean {
-        if (obj == this) {
-            return true
+/**
+ * 2D Vector class for Second Life coordinate system
+ * Used for UV coordinates, 2D positions, etc.
+ */
+class LLVector2(
+    var x: Float = 0.0f,
+    var y: Float = 0.0f
+) {
+    companion object {
+        const val FP_MAG_THRESHOLD: Float = 1.0E-7f
+        
+        @JvmField
+        val Zero = LLVector2(0.0f, 0.0f)
+        
+        @JvmField
+        val One = LLVector2(1.0f, 1.0f)
+        
+        @JvmStatic
+        fun sub(a: LLVector2, b: LLVector2): LLVector2 {
+            return LLVector2(a.x - b.x, a.y - b.y)
         }
-        if (!(obj instanceof LLVector2)) {
-            return false
+        
+        @JvmStatic
+        fun sum(a: LLVector2, b: LLVector2): LLVector2 {
+            return LLVector2(a.x + b.x, a.y + b.y)
         }
-        LLVector2 lLVector2 = (LLVector2) obj
-        return this.x == lLVector2.x && this.y == lLVector2.y
     }
-
-    fun hashCode(): Int {
-        return Float.floatToIntBits(this.x) + Float.floatToIntBits(this.y)
+    
+    constructor(other: LLVector2) : this(other.x, other.y)
+    
+    fun add(other: LLVector2) {
+        x += other.x
+        y += other.y
     }
-
+    
+    fun dot(other: LLVector2): Float {
+        return (x * other.x) + (y * other.y)
+    }
+    
+    override fun equals(other: Any?): Boolean {
+        if (other === this) return true
+        if (other !is LLVector2) return false
+        return x == other.x && y == other.y
+    }
+    
+    override fun hashCode(): Int {
+        return java.lang.Float.floatToIntBits(x) + java.lang.Float.floatToIntBits(y)
+    }
+    
     fun magVec(): Float {
-        return Math.sqrt(((this.x * this.x.toDouble()).toFloat() + (this.y * this.y)))
+        return sqrt((x * x + y * y).toDouble()).toFloat()
     }
-
-    fun mul(Float f): Unit {
-        this.x *= f
-        this.y *= f
+    
+    fun magVecSquared(): Float {
+        return x * x + y * y
     }
-
+    
+    fun mul(scale: Float) {
+        x *= scale
+        y *= scale
+    }
+    
     fun normVec(): Float {
-        Float sqrt = Math.sqrt(((this.x * this.x.toDouble()).toFloat() + (this.y * this.y)))
-        if (sqrt > 1.0E-7f) {
-            Float f = 1.0f / sqrt
-            this.x *= f
-            this.y = f * this.y
+        val magnitude = sqrt((x * x + y * y).toDouble()).toFloat()
+        if (magnitude > FP_MAG_THRESHOLD) {
+            val invMag = 1.0f / magnitude
+            x *= invMag
+            y *= invMag
         } else {
-            this.x = 0.0f
-            this.y = 0.0f
+            x = 0.0f
+            y = 0.0f
         }
-        return sqrt
+        return magnitude
     }
-
-    fun set(Float f, Float f2): Unit {
-        this.x = f
-        this.y = f2
+    
+    fun set(newX: Float, newY: Float) {
+        x = newX
+        y = newY
     }
-
-    fun setMax(LLVector2 lLVector2): Unit {
-        this.x = Math.max(this.x, lLVector2.x)
-        this.y = Math.max(this.y, lLVector2.y)
+    
+    fun set(other: LLVector2?) {
+        if (other != null) {
+            x = other.x
+            y = other.y
+        }
     }
-
-    fun setMin(LLVector2 lLVector2): Unit {
-        this.x = Math.min(this.x, lLVector2.x)
-        this.y = Math.min(this.y, lLVector2.y)
+    
+    fun setMax(other: LLVector2) {
+        x = max(x, other.x)
+        y = max(y, other.y)
     }
-
-    fun toString(): String {
-        return String.format("(%f, %f)", Any[]{Float.valueOf(this.x), Float.valueOf(this.y)})
+    
+    fun setMin(other: LLVector2) {
+        x = min(x, other.x)
+        y = min(y, other.y)
+    }
+    
+    fun isZero(): Boolean {
+        return x == 0.0f && y == 0.0f
+    }
+    
+    override fun toString(): String {
+        return String.format("(%.4f, %.4f)", x, y)
+    }
+    
+    // Operator overloads
+    operator fun plus(other: LLVector2): LLVector2 {
+        return LLVector2(x + other.x, y + other.y)
+    }
+    
+    operator fun minus(other: LLVector2): LLVector2 {
+        return LLVector2(x - other.x, y - other.y)
+    }
+    
+    operator fun times(scale: Float): LLVector2 {
+        return LLVector2(x * scale, y * scale)
+    }
+    
+    operator fun times(other: LLVector2): LLVector2 {
+        return LLVector2(x * other.x, y * other.y)
+    }
+    
+    operator fun div(scale: Float): LLVector2 {
+        return LLVector2(x / scale, y / scale)
+    }
+    
+    operator fun unaryMinus(): LLVector2 {
+        return LLVector2(-x, -y)
     }
 }

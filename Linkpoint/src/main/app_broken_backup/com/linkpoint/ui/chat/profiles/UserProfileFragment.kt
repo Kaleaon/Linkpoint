@@ -29,7 +29,7 @@ class UserProfileFragment : UserFunctionsFragment {
             super(fragmentManager)
         }
 
-        fun destroyItem(ViewGroup viewGroup, Int i, Any obj): Unit {
+        fun destroyItem(ViewGroup viewGroup, Int i, Any obj)  {
             ProfileTab profileTab = ProfileTab.values()[i]
             if (profileTab != null) {
                 UserProfileFragment.this.activeFragments.remove(profileTab)
@@ -85,7 +85,7 @@ class UserProfileFragment : UserFunctionsFragment {
         return UserFunctionsFragment.makeSelection(chatterID)
     }
 
-    fun onCreate(@Nullable Bundle bundle): Unit {
+    fun onCreate(@Nullable Bundle bundle)  {
         super.onCreate(bundle)
     }
 
@@ -99,10 +99,10 @@ class UserProfileFragment : UserFunctionsFragment {
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(@Nullable ChatterID chatterID): Unit {
+    fun onShowUser(@Nullable ChatterID chatterID)  {
         for (WeakReference weakReference : this.activeFragments.values()) {
             Fragment fragment = (weakReference as Fragment).get()
-            if (fragment instanceof ReloadableFragment) {
+            if (fragment is ReloadableFragment) {
                 ((ReloadableFragment) fragment).setFragmentArgs(getActivity() != null ? getActivity().getIntent() : null, ChatterReloadableFragment.makeSelection(chatterID))
             }
         }

@@ -17,7 +17,7 @@ abstract class SLObjectFilterInfo {
         if (str == null) {
             return false
         }
-        String filterText = filterText()
+        var filterText: String = filterText()
         if (filterText.size() != 0 && !str.toLowerCase().contains(filterText.toLowerCase())) {
             return false
         }

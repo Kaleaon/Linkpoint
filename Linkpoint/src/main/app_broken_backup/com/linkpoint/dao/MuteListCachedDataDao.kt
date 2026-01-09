@@ -25,17 +25,17 @@ class MuteListCachedDataDao : AbstractDao<MuteListCachedData, Long> {
         super(daoConfig, daoSession)
     }
 
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'MUTE_LIST_CACHED_DATA' (" + "'_id' INTEGER PRIMARY KEY ," + "'CRC' INTEGER NOT NULL ," + "'DATA' BLOB NOT NULL );")
     }
 
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'MUTE_LIST_CACHED_DATA'")
     }
 
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, muteListCachedData: MuteListCachedData): Unit {
+    protected fun bindValues(sQLiteStatement: SQLiteStatement, muteListCachedData: MuteListCachedData)  {
         sQLiteStatement.clearBindings()
-        Long id = muteListCachedData.getId()
+        var id: Long = muteListCachedData.getId()
         if (id != null) {
             sQLiteStatement.bindLong(1, id.longValue())
         }
@@ -55,7 +55,7 @@ class MuteListCachedDataDao : AbstractDao<MuteListCachedData, Long> {
         return MuteListCachedData(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)), cursor.getInt(i + 1), cursor.getBlob(i + 2))
     }
 
-    fun readEntity(cursor: Cursor, muteListCachedData: MuteListCachedData, i: Int): Unit {
+    fun readEntity(cursor: Cursor, muteListCachedData: MuteListCachedData, i: Int)  {
         muteListCachedData.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
         muteListCachedData.setCRC(cursor.getInt(i + 1))
         muteListCachedData.setData(cursor.getBlob(i + 2))

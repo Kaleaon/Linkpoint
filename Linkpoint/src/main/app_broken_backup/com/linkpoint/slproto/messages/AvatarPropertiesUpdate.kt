@@ -31,11 +31,11 @@ class AvatarPropertiesUpdate : SLMessage {
         return this.PropertiesData_Field.AboutText.size + 34 + 1 + this.PropertiesData_Field.FLAboutText.size + 1 + 1 + 1 + this.PropertiesData_Field.ProfileURL.size + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleAvatarPropertiesUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -82)
@@ -50,7 +50,7 @@ class AvatarPropertiesUpdate : SLMessage {
         packVariable(byteBuffer, this.PropertiesData_Field.ProfileURL, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.PropertiesData_Field.ImageID = unpackUUID(byteBuffer)

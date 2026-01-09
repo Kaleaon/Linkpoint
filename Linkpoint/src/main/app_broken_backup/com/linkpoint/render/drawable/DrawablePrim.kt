@@ -42,7 +42,7 @@ class DrawablePrim {
 
     constructor(primDrawParams: PrimDrawParams, drawableGeometry: DrawableGeometry) {
         this.volumeGeometry = drawableGeometry
-        Boolean isFacesCombined = drawableGeometry.isFacesCombined()
+        var isFacesCombined: Boolean = drawableGeometry.isFacesCombined()
         this.isRiggedMesh = drawableGeometry.isRiggedMesh()
         this.riggingFitsGL20 = this.isRiggedMesh ? drawableGeometry.riggingFitsGL20() : false
         this.FaceCount = drawableGeometry.getFaceCount()
@@ -57,7 +57,7 @@ class DrawablePrim {
                 this.FaceColorsIDs = Int[(this.FaceCount * 2)]
                 this.FaceTextures = DrawableFaceTexture[this.FaceCount]
                 this.FaceUVMatrices = Float[(this.FaceCount * 16)]
-                Int i = 0
+                var i: Int = 0
                 for (i2 in 0 until this.FaceCount) {
                     SLTextureEntryFace GetFace = textures.GetFace(drawableGeometry.getFaceID(i2))
                     if (GetFace != null) {
@@ -104,11 +104,11 @@ class DrawablePrim {
     }
 
     private fun DrawFace(renderContext: RenderContext, drawableGeometry: DrawableGeometry, gLLoadableBuffer: GLLoadableBuffer, z: Boolean, i: Int, i2: Int, drawableFaceTexture: DrawableFaceTexture, fArr: FloatArray, i3: Int, i4: Int): Int {
-        Int faceRenderMask = getFaceRenderMask(i2, drawableFaceTexture)
+        var faceRenderMask: Int = getFaceRenderMask(i2, drawableFaceTexture)
         if ((faceRenderMask & i4) == 0) {
             return faceRenderMask
         }
-        Boolean z2 = false
+        var z2: Boolean = false
         if (!z) {
             if (renderContext.hasGL20) {
                 GLES20.glUniform4f(renderContext.curPrimProgram.vColor, ((Float) (255 - ((i2 >> 0) & 255))) / 255.0f, ((Float) (255 - ((i2 >> 8) & 255))) / 255.0f, ((Float) (255 - ((i2 >> 16) & 255))) / 255.0f, ((Float) (255 - ((i2 >> 24) & 255))) / 255.0f)
@@ -164,7 +164,7 @@ class DrawablePrim {
     }
 
     private fun DrawFaceFast20(renderContext: RenderContext, drawableGeometry: DrawableGeometry, i: Int, i2: Int, drawableFaceTexture: DrawableFaceTexture, fArr: FloatArray, i3: Int, i4: Int): Int {
-        Int faceRenderMask = getFaceRenderMask(i2, drawableFaceTexture)
+        var faceRenderMask: Int = getFaceRenderMask(i2, drawableFaceTexture)
         if ((faceRenderMask & i4) == 0) {
             return faceRenderMask
         }
@@ -180,7 +180,7 @@ class DrawablePrim {
     }
 
     private fun getFaceRenderMask(i: Int, drawableFaceTexture: DrawableFaceTexture): Int {
-        Boolean z = false
+        var z: Boolean = false
         if ((i & ViewCompat.MEASURED_STATE_MASK) == -16777216) {
             return 0
         }
@@ -193,7 +193,7 @@ class DrawablePrim {
         return z ? 2 : 1
     }
 
-    private fun initFaceUVMatrix(sLTextureEntryFace: SLTextureEntryFace, sLTextureEntryFace2: SLTextureEntryFace, fArr: FloatArray, i: Int): Unit {
+    private fun initFaceUVMatrix(sLTextureEntryFace: SLTextureEntryFace, sLTextureEntryFace2: SLTextureEntryFace, fArr: FloatArray, i: Int)  {
         FloatArray fArr2 = FloatArray(16)
         Matrix.setIdentityM(fArr2, 0)
         Matrix.translateM(fArr2, 0, sLTextureEntryFace2.getOffsetU(sLTextureEntryFace) + 0.5f, sLTextureEntryFace2.getOffsetV(sLTextureEntryFace) + 0.5f, 0.0f)
@@ -202,7 +202,7 @@ class DrawablePrim {
         Matrix.translateM(fArr, i, -0.5f, -0.5f, 0.0f)
     }
 
-    fun ApplyJointTranslations(MeshJointTranslations meshJointTranslations): Unit {
+    fun ApplyJointTranslations(MeshJointTranslations meshJointTranslations)  {
         if (this.isRiggedMesh) {
             this.volumeGeometry.ApplyJointTranslations(meshJointTranslations)
         }
@@ -219,7 +219,7 @@ class DrawablePrim {
             renderContext.glModelApplyMatrix(renderContext.curPrimProgram.uMVPMatrix)
             renderContext.glObjWorldApplyMatrix(renderContext.curPrimProgram.uObjWorldMatrix)
             renderContext.glObjScaleApplyVector(renderContext.curPrimProgram.uObjCoordScale)
-            if (matrices != null && (renderContext.curPrimProgram instanceof FlexiPrimProgram)) {
+            if (matrices != null && (renderContext.curPrimProgram is FlexiPrimProgram)) {
                 FlexiPrimProgram flexiPrimProgram = (renderContext as FlexiPrimProgram).curPrimProgram
                 GLES20.glUniform1i(flexiPrimProgram.uNumSectionMatrices, matrices.size / 16)
                 GLES20.glUniformMatrix4fv(flexiPrimProgram.uSectionMatrices, matrices.size / 16, false, matrices, 0)
@@ -232,10 +232,10 @@ class DrawablePrim {
         if (this.isSingleFace) {
             return DrawFace(renderContext, drawableGeometry, GLBindBuffers10, z, -1, this.singleFaceColor, this.singleFaceTexture, this.singleFaceMatrix, 0, i)
         }
-        Int i2 = 0
-        Int i3 = 0
+        var i2: Int = 0
+        var i3: Int = 0
         while (true) {
-            Int i4 = i2
+            var i4: Int = i2
             if (i3 >= this.FaceCount) {
                 return i4
             }
@@ -245,9 +245,9 @@ class DrawablePrim {
     }
 
     fun DrawFast20(RenderContext renderContext, Boolean z, PrimFlexibleInfo primFlexibleInfo, Int i): Int {
-        Boolean z2 = true
+        var z2: Boolean = true
         FloatArray fArr = null
-        Int i2 = 0
+        var i2: Int = 0
         DrawableGeometry drawableGeometry = this.volumeGeometry
         if (primFlexibleInfo != null) {
             fArr = primFlexibleInfo.getMatrices()
@@ -271,9 +271,9 @@ class DrawablePrim {
         if (this.isSingleFace) {
             return DrawFaceFast20(renderContext, drawableGeometry, -1, this.singleFaceColor, this.singleFaceTexture, this.singleFaceMatrix, 0, i)
         }
-        Int i3 = 0
+        var i3: Int = 0
         while (true) {
-            Int i4 = i2
+            var i4: Int = i2
             if (i3 >= this.FaceCount) {
                 return i4
             }
@@ -285,12 +285,12 @@ class DrawablePrim {
     @TargetApi(18)
     fun DrawRigged30(RenderContext renderContext, Int i): Int {
         DrawableGeometry drawableGeometry = this.volumeGeometry
-        Boolean z = false
-        Int i2 = 0
+        var z: Boolean = false
+        var i2: Int = 0
         for (i3 in 0 until this.FaceCount) {
-            Int i4 = this.FaceColorsIDs[i3 * 2]
+            var i4: Int = this.FaceColorsIDs[i3 * 2]
             DrawableFaceTexture drawableFaceTexture = this.FaceTextures[i3]
-            Int faceRenderMask = getFaceRenderMask(i4, drawableFaceTexture)
+            var faceRenderMask: Int = getFaceRenderMask(i4, drawableFaceTexture)
             i2 |= faceRenderMask
             if ((faceRenderMask & i) != 0) {
                 if (!z) {

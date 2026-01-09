@@ -22,7 +22,7 @@ class SLTextureEntry {
     private SLTextureEntry(SLTextureEntryFace sLTextureEntryFace, SLTextureEntryFace[] sLTextureEntryFaceArr) {
         this.DefaultTexture = sLTextureEntryFace
         this.FaceTextures = sLTextureEntryFaceArr
-        Int i = 0
+        var i: Int = 0
         for (i2 in 0 until sLTextureEntryFaceArr.size) {
             if (sLTextureEntryFaceArr[i2] != null) {
                 i |= 1 << i2
@@ -46,13 +46,13 @@ class SLTextureEntry {
         IntArray iArr2 = IntArray(1)
         mutableSLTextureEntryFace.setTextureID(UUIDPool.getUUID(getUUID(byteBuffer)))
         while (true) {
-            Int ReadFaceBitfield = ReadFaceBitfield(byteBuffer, iArr2)
+            var ReadFaceBitfield: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield == 0) {
                 break
             }
             UUID uuid = UUIDPool.getUUID(getUUID(byteBuffer))
-            Int i2 = 1
-            Int i3 = 0
+            var i2: Int = 1
+            var i3: Int = 0
             while (i3 < iArr2[0]) {
                 if ((ReadFaceBitfield & i2) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i3, iArr).setTextureID(uuid)
@@ -63,13 +63,13 @@ class SLTextureEntry {
         }
         mutableSLTextureEntryFace.setRGBA(byteBuffer.getInt())
         while (true) {
-            Int ReadFaceBitfield2 = ReadFaceBitfield(byteBuffer, iArr2)
+            var ReadFaceBitfield2: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield2 == 0) {
                 break
             }
-            Int i4 = byteBuffer.getInt()
-            Int i5 = 1
-            Int i6 = 0
+            var i4: Int = byteBuffer.getInt()
+            var i5: Int = 1
+            var i6: Int = 0
             while (i6 < iArr2[0]) {
                 if ((ReadFaceBitfield2 & i5) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i6, iArr).setRGBA(i4)
@@ -80,13 +80,13 @@ class SLTextureEntry {
         }
         mutableSLTextureEntryFace.setRepeatU(byteBuffer.getFloat())
         while (true) {
-            Int ReadFaceBitfield3 = ReadFaceBitfield(byteBuffer, iArr2)
+            var ReadFaceBitfield3: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield3 == 0) {
                 break
             }
-            Float f = byteBuffer.getFloat()
-            Int i7 = 1
-            Int i8 = 0
+            var f: Float = byteBuffer.getFloat()
+            var i7: Int = 1
+            var i8: Int = 0
             while (i8 < iArr2[0]) {
                 if ((ReadFaceBitfield3 & i7) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i8, iArr).setRepeatU(f)
@@ -97,13 +97,13 @@ class SLTextureEntry {
         }
         mutableSLTextureEntryFace.setRepeatV(byteBuffer.getFloat())
         while (true) {
-            Int ReadFaceBitfield4 = ReadFaceBitfield(byteBuffer, iArr2)
+            var ReadFaceBitfield4: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield4 == 0) {
                 break
             }
-            Float f2 = byteBuffer.getFloat()
-            Int i9 = 1
-            Int i10 = 0
+            var f2: Float = byteBuffer.getFloat()
+            var i9: Int = 1
+            var i10: Int = 0
             while (i10 < iArr2[0]) {
                 if ((ReadFaceBitfield4 & i9) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i10, iArr).setRepeatV(f2)
@@ -114,13 +114,13 @@ class SLTextureEntry {
         }
         mutableSLTextureEntryFace.setOffsetU(getOffset(byteBuffer))
         while (true) {
-            Int ReadFaceBitfield5 = ReadFaceBitfield(byteBuffer, iArr2)
+            var ReadFaceBitfield5: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield5 == 0) {
                 break
             }
-            Float offset = getOffset(byteBuffer)
-            Int i11 = 1
-            Int i12 = 0
+            var offset: Float = getOffset(byteBuffer)
+            var i11: Int = 1
+            var i12: Int = 0
             while (i12 < iArr2[0]) {
                 if ((ReadFaceBitfield5 & i11) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i12, iArr).setOffsetU(offset)
@@ -131,13 +131,13 @@ class SLTextureEntry {
         }
         mutableSLTextureEntryFace.setOffsetV(getOffset(byteBuffer))
         while (true) {
-            Int ReadFaceBitfield6 = ReadFaceBitfield(byteBuffer, iArr2)
+            var ReadFaceBitfield6: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield6 == 0) {
                 break
             }
-            Float offset2 = getOffset(byteBuffer)
-            Int i13 = 1
-            Int i14 = 0
+            var offset2: Float = getOffset(byteBuffer)
+            var i13: Int = 1
+            var i14: Int = 0
             while (i14 < iArr2[0]) {
                 if ((ReadFaceBitfield6 & i13) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i14, iArr).setOffsetV(offset2)
@@ -148,13 +148,13 @@ class SLTextureEntry {
         }
         mutableSLTextureEntryFace.setRotation(getRotation(byteBuffer))
         while (true) {
-            Int ReadFaceBitfield7 = ReadFaceBitfield(byteBuffer, iArr2)
+            var ReadFaceBitfield7: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield7 == 0) {
                 break
             }
-            Float rotation = getRotation(byteBuffer)
-            Int i15 = 1
-            Int i16 = 0
+            var rotation: Float = getRotation(byteBuffer)
+            var i15: Int = 1
+            var i16: Int = 0
             while (i16 < iArr2[0]) {
                 if ((ReadFaceBitfield7 & i15) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i16, iArr).setRotation(rotation)
@@ -165,13 +165,13 @@ class SLTextureEntry {
         }
         mutableSLTextureEntryFace.setMaterial(byteBuffer.get())
         while (true) {
-            Int ReadFaceBitfield8 = ReadFaceBitfield(byteBuffer, iArr2)
+            var ReadFaceBitfield8: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield8 == 0) {
                 break
             }
             Byte b = byteBuffer.get()
-            Int i17 = 1
-            Int i18 = 0
+            var i17: Int = 1
+            var i18: Int = 0
             while (i18 < iArr2[0]) {
                 if ((ReadFaceBitfield8 & i17) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i18, iArr).setMaterial(b)
@@ -182,13 +182,13 @@ class SLTextureEntry {
         }
         mutableSLTextureEntryFace.setMedia(byteBuffer.get())
         while (true) {
-            Int ReadFaceBitfield9 = ReadFaceBitfield(byteBuffer, iArr2)
+            var ReadFaceBitfield9: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield9 == 0) {
                 break
             }
             Byte b2 = byteBuffer.get()
-            Int i19 = 1
-            Int i20 = 0
+            var i19: Int = 1
+            var i20: Int = 0
             while (i20 < iArr2[0]) {
                 if ((ReadFaceBitfield9 & i19) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i20, iArr).setMedia(b2)
@@ -199,13 +199,13 @@ class SLTextureEntry {
         }
         mutableSLTextureEntryFace.setGlow(getGlow(byteBuffer))
         while (true) {
-            Int ReadFaceBitfield10 = ReadFaceBitfield(byteBuffer, iArr2)
+            var ReadFaceBitfield10: Int = ReadFaceBitfield(byteBuffer, iArr2)
             if (ReadFaceBitfield10 == 0) {
                 break
             }
-            Float glow = getGlow(byteBuffer)
-            Int i21 = 1
-            Int i22 = 0
+            var glow: Float = getGlow(byteBuffer)
+            var i21: Int = 1
+            var i22: Int = 0
             while (i22 < iArr2[0]) {
                 if ((ReadFaceBitfield10 & i21) != 0) {
                     CreateFace(mutableSLTextureEntryFaceArr, i22, iArr).setGlow(glow)
@@ -215,8 +215,8 @@ class SLTextureEntry {
             }
         }
         this.faceMask = iArr[0]
-        Int i23 = 0
-        Int i24 = -1
+        var i23: Int = 0
+        var i24: Int = -1
         while (true) {
             if (i23 >= 33) {
                 i23 = 0
@@ -268,8 +268,8 @@ class SLTextureEntry {
     }
 
     private Unit WriteFaceBitfield(ByteBuffer byteBuffer, Int i) {
-        Int i3 = 0
-        Int i4 = i
+        var i3: Int = 0
+        var i4: Int = i
         while (true) {
             if (i3 >= 6) {
                 i2 = 0
@@ -283,7 +283,7 @@ class SLTextureEntry {
             }
         }
         Debug.Log(String.format("WriteFaceBitfield: faceBits = 0x%08x, count %d", Any[]{Int.valueOf(i), Int.valueOf(i2)}))
-        Int i5 = (i2 - 1) * 7
+        var i5: Int = (i2 - 1) * 7
         for (i6 in 0 until i2) {
             Byte b = (Byte) ((i >> i5) & Vr.VREvent.VrCore.ErrorCode.CONTROLLER_UNSTUCK)
             if (i6 != i2 - 1) {
@@ -308,8 +308,8 @@ class SLTextureEntry {
     }
 
     private Int getHashValue() {
-        Int length = this.FaceTextures.size + this.faceMask + this.DefaultTexture.hashCode()
-        Int i = 1
+        var length: Int = this.FaceTextures.size + this.faceMask + this.DefaultTexture.hashCode()
+        var i: Int = 1
         for (i2 in 0 until this.FaceTextures.size) {
             if ((this.faceMask & i) != 0) {
                 length += this.FaceTextures[i2].hashCode()
@@ -348,7 +348,7 @@ class SLTextureEntry {
 
     private Unit putUUID(ByteBuffer byteBuffer, UUID uuid) {
         Long j
-        Long j2 = 0
+        var j2: Long = 0
         byteBuffer.order(ByteOrder.BIG_ENDIAN)
         if (uuid != null) {
             j = uuid.getMostSignificantBits()
@@ -376,14 +376,14 @@ class SLTextureEntry {
         if (obj == this) {
             return true
         }
-        if (obj == null || !(obj instanceof SLTextureEntry)) {
+        if (obj == null || !(obj is SLTextureEntry)) {
             return false
         }
         SLTextureEntry sLTextureEntry = (SLTextureEntry) obj
         if (this.faceMask != sLTextureEntry.faceMask || this.FaceTextures.size != sLTextureEntry.FaceTextures.size || !this.DefaultTexture.equals(sLTextureEntry.DefaultTexture)) {
             return false
         }
-        Int i = 1
+        var i: Int = 1
         for (i2 in 0 until this.FaceTextures.size) {
             if ((this.faceMask & i) != 0 && !this.FaceTextures[i2].equals(sLTextureEntry.FaceTextures[i2])) {
                 return false

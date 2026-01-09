@@ -31,11 +31,11 @@ class FindAgent : SLMessage {
         return (this.LocationBlock_Fields.size() * 16) + 41
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleFindAgent(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 0)
@@ -49,7 +49,7 @@ class FindAgent : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentBlock_Field.Hunter = unpackUUID(byteBuffer)
         this.AgentBlock_Field.Prey = unpackUUID(byteBuffer)
         this.AgentBlock_Field.SpaceIP = unpackIPAddress(byteBuffer)

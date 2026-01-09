@@ -22,14 +22,14 @@ class ObjectPopupsFragment : Fragment {
             return false
         }
 
-        fun onSwiped(RecyclerView.ViewHolder viewHolder, Int i): Unit {
+        fun onSwiped(RecyclerView.ViewHolder viewHolder, Int i)  {
             RecyclerView recyclerView
             RecyclerView.Adapter adapter
             UserManager r1 = ObjectPopupsFragment.this.getUserManager()
             View view = ObjectPopupsFragment.this.getView()
             if (view != null && r1 != null && (recyclerView = (RecyclerView) view.findViewById(R.id.objectPopupsList)) != null && (adapter = recyclerView.getAdapter()) != null) {
-                Int adapterPosition = viewHolder.getAdapterPosition()
-                if (adapter instanceof ObjectPopupsAdapter) {
+                var adapterPosition: Int = viewHolder.getAdapterPosition()
+                if (adapter is ObjectPopupsAdapter) {
                     r1.getObjectPopupsManager().cancelObjectPopup((SLChatEvent) ((ObjectPopupsAdapter) adapter).getObject(adapterPosition))
                 }
             }
@@ -64,7 +64,7 @@ class ObjectPopupsFragment : Fragment {
         return inflate
     }
 
-    fun onStart(): Unit {
+    fun onStart()  {
         RecyclerView recyclerView
         super.onStart()
         UserManager userManager = getUserManager()
@@ -74,7 +74,7 @@ class ObjectPopupsFragment : Fragment {
         }
     }
 
-    fun onStop(): Unit {
+    fun onStop()  {
         RecyclerView recyclerView
         View view = getView()
         if (!(view == null || (recyclerView = (RecyclerView) view.findViewById(R.id.objectPopupsList)) == null)) {

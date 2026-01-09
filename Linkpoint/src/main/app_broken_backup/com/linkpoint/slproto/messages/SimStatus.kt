@@ -20,18 +20,18 @@ class SimStatus : SLMessage {
         return 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleSimStatus(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.put((Byte) -1)
         byteBuffer.put(Ascii.FF)
         packBoolean(byteBuffer, this.SimStatusData_Field.CanAcceptAgents)
         packBoolean(byteBuffer, this.SimStatusData_Field.CanAcceptTasks)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.SimStatusData_Field.CanAcceptAgents = unpackBoolean(byteBuffer)
         this.SimStatusData_Field.CanAcceptTasks = unpackBoolean(byteBuffer)
     }

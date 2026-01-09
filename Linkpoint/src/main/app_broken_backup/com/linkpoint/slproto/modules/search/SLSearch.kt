@@ -63,7 +63,7 @@ class SLSearch : SLModule {
     /* access modifiers changed from: private */
     AtomicReference<SearchGridQuery> currentSearchQuery = AtomicReference<>((Any) null)
     private RequestHandler<UUID> parcelInfoRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        fun onRequest(@NonNull UUID uuid): Unit {
+        fun onRequest(@NonNull UUID uuid)  {
             Debug.Printf("ParcelInfo: Requesting for %s", uuid)
             ParcelInfoRequest parcelInfoRequest = ParcelInfoRequest()
             parcelInfoRequest.AgentData_Field.AgentID = SLSearch.this.circuitInfo.agentID
@@ -102,7 +102,7 @@ class SLSearch : SLModule {
             return iArr
         }
 
-        fun onRequest(@NonNull SearchGridQuery searchGridQuery): Unit {
+        fun onRequest(@NonNull SearchGridQuery searchGridQuery)  {
             SLSearch.this.currentSearchQuery.set(searchGridQuery)
             switch (m238getcomlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues()[searchGridQuery.searchType().ordinal()]) {
                 case 1:
@@ -134,7 +134,7 @@ class SLSearch : SLModule {
     }
 
     /* access modifiers changed from: private */
-    fun SearchGroups(String str, UUID uuid): Unit {
+    fun SearchGroups(String str, UUID uuid)  {
         DirFindQuery dirFindQuery = DirFindQuery()
         dirFindQuery.AgentData_Field.AgentID = this.circuitInfo.agentID
         dirFindQuery.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -147,7 +147,7 @@ class SLSearch : SLModule {
     }
 
     /* access modifiers changed from: private */
-    fun SearchPeople(String str, UUID uuid): Unit {
+    fun SearchPeople(String str, UUID uuid)  {
         DirFindQuery dirFindQuery = DirFindQuery()
         dirFindQuery.AgentData_Field.AgentID = this.circuitInfo.agentID
         dirFindQuery.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -160,7 +160,7 @@ class SLSearch : SLModule {
     }
 
     /* access modifiers changed from: private */
-    fun SearchPlaces(String str, UUID uuid): Unit {
+    fun SearchPlaces(String str, UUID uuid)  {
         DirPlacesQuery dirPlacesQuery = DirPlacesQuery()
         dirPlacesQuery.AgentData_Field.AgentID = this.circuitInfo.agentID
         dirPlacesQuery.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -181,14 +181,14 @@ class SLSearch : SLModule {
     }
 
     @SLMessageHandler
-    fun DirGroupsReply(DirGroupsReply dirGroupsReply): Unit {
+    fun DirGroupsReply(DirGroupsReply dirGroupsReply)  {
         UUID uuid = dirGroupsReply.QueryData_Field.QueryID
         SearchGridQuery searchGridQuery = this.currentSearchQuery.get()
         if (Objects.equal(searchGridQuery.searchUUID(), uuid) && this.userManager != null && this.searchResultHandler != null) {
             SearchGridResultDao searchGridResultDao = this.userManager.getSearchManager().getSearchGridResultDao()
             for (DirGroupsReply.QueryReplies queryReplies : dirGroupsReply.QueryReplies_Fields) {
                 if (!queryReplies.GroupID.equals(UUIDPool.ZeroUUID)) {
-                    String stringFromVariableOEM = SLMessage.stringFromVariableOEM(queryReplies.GroupName)
+                    var stringFromVariableOEM: String = SLMessage.stringFromVariableOEM(queryReplies.GroupName)
                     searchGridResultDao.insert(SearchGridResult((Long) null, uuid, SearchGridQuery.SearchType.Groups.ordinal(), queryReplies.GroupID, stringFromVariableOEM, LevensteinDistance.computeLevensteinDistance(stringFromVariableOEM, searchGridQuery.searchText()), Int.valueOf(queryReplies.Members)))
                 }
             }
@@ -197,7 +197,7 @@ class SLSearch : SLModule {
     }
 
     @SLMessageHandler
-    fun DirPeopleReply(DirPeopleReply dirPeopleReply): Unit {
+    fun DirPeopleReply(DirPeopleReply dirPeopleReply)  {
         SearchGridQuery searchGridQuery = this.currentSearchQuery.get()
         UUID uuid = dirPeopleReply.QueryData_Field.QueryID
         if (Objects.equal(searchGridQuery.searchUUID(), uuid) && this.userManager != null && this.searchResultHandler != null) {
@@ -205,7 +205,7 @@ class SLSearch : SLModule {
             for (DirPeopleReply.QueryReplies queryReplies : dirPeopleReply.QueryReplies_Fields) {
                 UUID uuid2 = queryReplies.AgentID
                 if (uuid2.getLeastSignificantBits() != 0 || uuid2.getMostSignificantBits() != 0) {
-                    String str = SLMessage.stringFromVariableOEM(queryReplies.FirstName) + " " + SLMessage.stringFromVariableOEM(queryReplies.LastName)
+                    var str: String = SLMessage.stringFromVariableOEM(queryReplies.FirstName) + " " + SLMessage.stringFromVariableOEM(queryReplies.LastName)
                     searchGridResultDao.insert(SearchGridResult((Long) null, uuid, SearchGridQuery.SearchType.People.ordinal(), uuid2, str, LevensteinDistance.computeLevensteinDistance(str, searchGridQuery.searchText()), 0))
                 }
             }
@@ -214,7 +214,7 @@ class SLSearch : SLModule {
     }
 
     @SLMessageHandler
-    fun DirPlacesReply(DirPlacesReply dirPlacesReply): Unit {
+    fun DirPlacesReply(DirPlacesReply dirPlacesReply)  {
         SearchGridQuery searchGridQuery = this.currentSearchQuery.get()
         for (DirPlacesReply.QueryData queryData : dirPlacesReply.QueryData_Fields) {
             UUID uuid = queryData.QueryID
@@ -222,7 +222,7 @@ class SLSearch : SLModule {
                 SearchGridResultDao searchGridResultDao = this.userManager.getSearchManager().getSearchGridResultDao()
                 for (DirPlacesReply.QueryReplies queryReplies : dirPlacesReply.QueryReplies_Fields) {
                     if (!queryReplies.ParcelID.equals(UUIDPool.ZeroUUID)) {
-                        String stringFromVariableOEM = SLMessage.stringFromVariableOEM(queryReplies.Name)
+                        var stringFromVariableOEM: String = SLMessage.stringFromVariableOEM(queryReplies.Name)
                         searchGridResultDao.insert(SearchGridResult((Long) null, uuid, SearchGridQuery.SearchType.Places.ordinal(), queryReplies.ParcelID, stringFromVariableOEM, LevensteinDistance.computeLevensteinDistance(stringFromVariableOEM, searchGridQuery.searchText()), 0))
                     }
                 }
@@ -231,7 +231,7 @@ class SLSearch : SLModule {
         }
     }
 
-    fun HandleCloseCircuit(): Unit {
+    fun HandleCloseCircuit()  {
         if (this.userManager != null) {
             this.userManager.getSearchManager().searchResults().detachRequestHandler(this.searchRequestHandler)
             this.userManager.parcelInfoData().getRequestSource().detachRequestHandler(this.parcelInfoRequestHandler)
@@ -240,7 +240,7 @@ class SLSearch : SLModule {
     }
 
     @SLMessageHandler
-    fun ParcelInfoReply(ParcelInfoReply parcelInfoReply): Unit {
+    fun ParcelInfoReply(ParcelInfoReply parcelInfoReply)  {
         Debug.Printf("ParcelInfo: Got reply for %s", parcelInfoReply.Data_Field.ParcelID)
         if (this.parcelInfoResultHandler != null) {
             this.parcelInfoResultHandler.onResultData(parcelInfoReply.Data_Field.ParcelID, parcelInfoReply)

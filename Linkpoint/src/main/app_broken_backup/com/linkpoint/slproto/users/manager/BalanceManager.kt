@@ -18,7 +18,7 @@ class BalanceManager {
     /* access modifiers changed from: private */
     SubscriptionPool<SubscriptionSingleKey, Int> balancePool = SubscriptionPool<>()
     private SimpleRequestHandler<SubscriptionSingleKey> balanceRequestHandler = SimpleRequestHandler<SubscriptionSingleKey>() {
-        fun onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey): Unit {
+        fun onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey)  {
             SLFinancialInfo sLFinancialInfo = (BalanceManager as SLFinancialInfo).this.financialInfo.get()
             if (sLFinancialInfo == null) {
                 BalanceManager.this.balancePool.onResultError(SubscriptionSingleKey.Value, SLGridConnection.NotConnectedException())
@@ -42,7 +42,7 @@ class BalanceManager {
     SubscriptionPool<SubscriptionSingleKey, LazyList<MoneyTransaction>> moneyTransactionPool = SubscriptionPool<>()
     /* access modifiers changed from: private */
     Runnable requestBalanceRunnable = Runnable() {
-        fun run(): Unit {
+        fun run()  {
             SLFinancialInfo sLFinancialInfo = (BalanceManager as SLFinancialInfo).this.financialInfo.get()
             if (sLFinancialInfo != null) {
                 sLFinancialInfo.AskForMoneyBalance()
@@ -59,7 +59,7 @@ class BalanceManager {
         this.moneyTransactionDao = userManager2.getDaoSession().getMoneyTransactionDao()
         this.balancePool.attachRequestHandler(this.balanceRequestHandler)
         this.moneyTransactionPool.attachRequestHandler(AsyncRequestHandler(userManager2.getDatabaseExecutor(), SimpleRequestHandler<SubscriptionSingleKey>() {
-            fun onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey): Unit {
+            fun onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey)  {
                 BalanceManager.this.moneyTransactionPool.onResultData(subscriptionSingleKey, BalanceManager.this.moneyTransactionDao.queryBuilder().orderAsc(MoneyTransactionDao.Properties.Timestamp).listLazy())
             }
         }))
@@ -73,11 +73,11 @@ class BalanceManager {
         }
     }
 
-    fun clearFinancialInfo(SLFinancialInfo sLFinancialInfo): Unit {
+    fun clearFinancialInfo(SLFinancialInfo sLFinancialInfo)  {
         this.financialInfo.compareAndSet(sLFinancialInfo, (Any) null)
     }
 
-    fun clearMoneyTransactions(): Unit {
+    fun clearMoneyTransactions()  {
         this.userManager.getDatabaseExecutor().execute(Runnable(this) {
 
             /* renamed from: -$f0 */
@@ -163,15 +163,15 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
         return this.moneyTransactionPool
     }
 
-    fun setFinancialInfo(SLFinancialInfo sLFinancialInfo): Unit {
+    fun setFinancialInfo(SLFinancialInfo sLFinancialInfo)  {
         this.financialInfo.set(sLFinancialInfo)
     }
 
-    fun updateBalance(Int i): Unit {
+    fun updateBalance(Int i)  {
         this.balancePool.onResultData(SubscriptionSingleKey.Value, Int.valueOf(i))
     }
 
-    fun updateMoneyTransactions(): Unit {
+    fun updateMoneyTransactions()  {
         this.moneyTransactionPool.requestUpdate(SubscriptionSingleKey.Value)
     }
 }

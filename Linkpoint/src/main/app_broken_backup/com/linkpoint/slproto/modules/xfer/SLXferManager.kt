@@ -21,7 +21,7 @@ class SLXferManager : SLModule {
 
     @SLMessageHandler
     synchronized Unit HandleSendXferPacket(SendXferPacket sendXferPacket) {
-        Long valueOf = Long.valueOf(sendXferPacket.XferID_Field.ID)
+        var valueOf: Long = Long.valueOf(sendXferPacket.XferID_Field.ID)
         SLXfer sLXfer = this.activeTransfers.get(valueOf)
         if (sLXfer != null) {
             sLXfer.HandleDataPacket(this, sendXferPacket)
@@ -35,9 +35,9 @@ class SLXferManager : SLModule {
 
     synchronized Unit RequestXfer(String str, ELLPath eLLPath, Boolean z, SLXfer.SLXferCompletionListener sLXferCompletionListener, Any obj) {
         SLXfer sLXfer
-        Long l = this.activeTransferIDs.get(str)
+        var l: Long = this.activeTransferIDs.get(str)
         if (l == null || (sLXfer = this.activeTransfers.get(l)) == null) {
-            Long valueOf = Long.valueOf(this.nextID.incrementAndGet())
+            var valueOf: Long = Long.valueOf(this.nextID.incrementAndGet())
             this.activeTransferIDs.put(str, valueOf)
             SLXfer sLXfer2 = SLXfer(valueOf.longValue(), str, eLLPath, z)
             sLXfer2.addListener(sLXferCompletionListener, obj)

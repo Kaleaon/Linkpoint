@@ -88,11 +88,11 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
     TextView userWebProfileLink
 
     private String getAge(AvatarPropertiesReply avatarPropertiesReply) {
-        String trim = SLMessage.stringFromVariableOEM(avatarPropertiesReply.PropertiesData_Field.BornOn).trim()
+        var trim: String = SLMessage.stringFromVariableOEM(avatarPropertiesReply.PropertiesData_Field.BornOn).trim()
         if (trim.equals("")) {
             return trim
         }
-        String format = String.format(getString(R.string.born_since), Any[]{trim})
+        var format: String = String.format(getString(R.string.born_since), Any[]{trim})
         try {
             Date parse = SimpleDateFormat("MM/dd/yyyy").parse(trim)
             return String.format(getString(R.string.age_days), Any[]{Long.valueOf((Date().getTime() - parse.getTime()) / 86400000)})
@@ -112,7 +112,7 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
 
     /* access modifiers changed from: protected */
     @OnClick({2131755706})
-    fun onAboutEditClicked(View view): Unit {
+    fun onAboutEditClicked(View view)  {
         if (this.chatterID != null) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserAboutTextEditFragment.class, UserAboutTextEditFragment.makeSelection(this.chatterID, false))
         }
@@ -120,7 +120,7 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
 
     /* access modifiers changed from: protected */
     @OnClick({2131755698})
-    fun onChangePicClicked(View view): Unit {
+    fun onChangePicClicked(View view)  {
         AvatarPropertiesReply data = this.avatarProperties.getData()
         if (this.chatterID != null && data != null) {
             Bundle bundle = Bundle()
@@ -129,7 +129,7 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
         }
     }
 
-    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever): Unit {
+    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever)  {
         super.onChatterNameUpdated(chatterNameRetriever)
         View view = getView()
         if (this.chatterID != null && Objects.equal(chatterNameRetriever.chatterID, this.chatterID) && view != null) {
@@ -140,9 +140,9 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
 
     /* access modifiers changed from: protected */
     @OnClick({2131755720})
-    fun onCopyAgentKeyClicked(View view): Unit {
-        if (this.chatterID instanceof ChatterID.ChatterIDUser) {
-            String uuid = ((ChatterID.ChatterIDUser) this.chatterID).getChatterUUID().toString()
+    fun onCopyAgentKeyClicked(View view)  {
+        if (this.chatterID is ChatterID.ChatterIDUser) {
+            var uuid: String = ((ChatterID.ChatterIDUser) this.chatterID).getChatterUUID().toString()
             if (Build.VERSION.SDK_INT < 11) {
                 ((ClipboardManager) getActivity().getSystemService("clipboard")).setText(uuid)
             } else {
@@ -164,7 +164,7 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
         return inflate
     }
 
-    fun onDestroyView(): Unit {
+    fun onDestroyView()  {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -174,13 +174,13 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
 
     /* access modifiers changed from: protected */
     @OnClick({2131755724})
-    fun onEditNotesClicked(View view): Unit {
+    fun onEditNotesClicked(View view)  {
         if (this.chatterID != null) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserNotesEditFragment.class, UserNotesEditFragment.makeSelection(this.chatterID))
         }
     }
 
-    fun onLoadableDataChanged(): Unit {
+    fun onLoadableDataChanged()  {
         if (getView() != null) {
             try {
                 AvatarPropertiesReply avatarPropertiesReply = this.avatarProperties.get()
@@ -200,7 +200,7 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
                     this.userPartnerCardView.setVisibility(0)
                     this.partnerNameRetriever = ChatterNameRetriever(userChatterID, this.onPartnerNameReady, UIThreadExecutor.getInstance())
                 }
-                String trim = SLMessage.stringFromVariableOEM(avatarPropertiesReply.PropertiesData_Field.ProfileURL).trim()
+                var trim: String = SLMessage.stringFromVariableOEM(avatarPropertiesReply.PropertiesData_Field.ProfileURL).trim()
                 if (!trim.isEmpty()) {
                     this.userWebProfileLink.setText(trim)
                     Linkify.addLinks(this.userWebProfileLink, 15)
@@ -208,7 +208,7 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
                 } else {
                     this.userWebProfileCardView.setVisibility(8)
                 }
-                String trim2 = SLMessage.stringFromVariableUTF(this.avatarNotes.get().Data_Field.Notes).trim()
+                var trim2: String = SLMessage.stringFromVariableUTF(this.avatarNotes.get().Data_Field.Notes).trim()
                 if (trim2.isEmpty()) {
                     this.textProfileNotesText.setText(R.string.user_notes_no_notes)
                     this.textProfileNotesText.setTypeface((Typeface) null, 2)
@@ -226,22 +226,22 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(@Nullable ChatterID chatterID): Unit {
-        Int i = 0
+    fun onShowUser(@Nullable ChatterID chatterID)  {
+        var i: Int = 0
         View view = getView()
         this.loadableMonitor.unsubscribeAll()
         if (this.partnerNameRetriever != null) {
             this.partnerNameRetriever.dispose()
             this.partnerNameRetriever = null
         }
-        if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDUser)) {
+        if (this.userManager != null && (chatterID is ChatterID.ChatterIDUser)) {
             UUID chatterUUID = ((ChatterID.ChatterIDUser) chatterID).getChatterUUID()
             this.avatarProperties.subscribe(this.userManager.getAvatarProperties().getPool(), chatterUUID)
             this.onlineStatus.subscribe(this.userManager.getChatterList().getFriendManager().getOnlineStatus(), chatterUUID)
             this.avatarNotes.subscribe(this.userManager.getAvatarNotes().getPool(), chatterUUID)
             if (view != null) {
                 this.textProfileAgentKey.setText(chatterUUID.toString())
-                Boolean equals = chatterUUID.equals(this.userManager.getUserID())
+                var equals: Boolean = chatterUUID.equals(this.userManager.getUserID())
                 this.aboutEditButton.setVisibility(equals ? 0 : 8)
                 Button button = this.changePicButton
                 if (!equals) {
@@ -258,7 +258,7 @@ class UserMainProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadabl
 
     /* access modifiers changed from: protected */
     @OnClick({2131755715})
-    fun onViewProfileClicked(View view): Unit {
+    fun onViewProfileClicked(View view)  {
         if (this.chatterID != null) {
             try {
                 UUID uuid = this.avatarProperties.get().PropertiesData_Field.PartnerID

@@ -88,11 +88,11 @@ class AvatarGroupList : Serializable {
     }
 
     AvatarGroupList(AgentGroupDataInfo agentGroupDataInfo) {
-        Boolean z = false
+        var z: Boolean = false
         this.avatarID = agentGroupDataInfo.AgentData.get(0).AvatarID != null ? agentGroupDataInfo.AgentData.get(0).AvatarID : agentGroupDataInfo.AgentData.get(0).AgentID
         Debug.Printf("AvatarGroupList: created from AgentGroupDataInfo (%s)", this.avatarID)
         ImmutableMap.Builder builder = ImmutableMap.Builder()
-        Int i = 0
+        var i: Int = 0
         while (i < agentGroupDataInfo.GroupData.size()) {
             AgentGroupDataInfo.NewGroupDataEntry newGroupDataEntry = (agentGroupDataInfo.NewGroupData == null || i >= agentGroupDataInfo.NewGroupData.size()) ? null : agentGroupDataInfo.NewGroupData.get(i)
             UUID uuid = agentGroupDataInfo.GroupData.get(i).GroupID

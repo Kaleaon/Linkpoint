@@ -49,7 +49,7 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLo
 
     /* access modifiers changed from: protected */
     @OnClick({2131755706})
-    fun onAboutEditClicked(View view): Unit {
+    fun onAboutEditClicked(View view)  {
         if (this.chatterID != null) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserAboutTextEditFragment.class, UserAboutTextEditFragment.makeSelection(this.chatterID, true))
         }
@@ -57,7 +57,7 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLo
 
     /* access modifiers changed from: protected */
     @OnClick({2131755698})
-    fun onChangePicClicked(View view): Unit {
+    fun onChangePicClicked(View view)  {
         AvatarPropertiesReply data = this.avatarProperties.getData()
         if (this.chatterID != null && data != null) {
             Bundle bundle = Bundle()
@@ -76,7 +76,7 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLo
         return inflate
     }
 
-    fun onDestroyView(): Unit {
+    fun onDestroyView()  {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -84,12 +84,12 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLo
         super.onDestroyView()
     }
 
-    fun onLoadableDataChanged(): Unit {
-        Boolean z = true
+    fun onLoadableDataChanged()  {
+        var z: Boolean = true
         if (getView() != null) {
             try {
                 AvatarPropertiesReply avatarPropertiesReply = this.avatarProperties.get()
-                Boolean z2 = (avatarPropertiesReply.PropertiesData_Field.Flags & 8) != 0
+                var z2: Boolean = (avatarPropertiesReply.PropertiesData_Field.Flags & 8) != 0
                 if ((avatarPropertiesReply.PropertiesData_Field.Flags & 4) == 0) {
                     z = false
                 }
@@ -103,14 +103,14 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLo
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(@Nullable ChatterID chatterID): Unit {
-        Int i = 0
+    fun onShowUser(@Nullable ChatterID chatterID)  {
+        var i: Int = 0
         this.loadableMonitor.unsubscribeAll()
-        if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDUser)) {
+        if (this.userManager != null && (chatterID is ChatterID.ChatterIDUser)) {
             UUID chatterUUID = ((ChatterID.ChatterIDUser) chatterID).getChatterUUID()
             this.avatarProperties.subscribe(this.userManager.getAvatarProperties().getPool(), chatterUUID)
             if (this.unbinder != null) {
-                Boolean equals = chatterUUID.equals(this.userManager.getUserID())
+                var equals: Boolean = chatterUUID.equals(this.userManager.getUserID())
                 this.aboutEditButton.setVisibility(equals ? 0 : 8)
                 Button button = this.changePicButton
                 if (!equals) {

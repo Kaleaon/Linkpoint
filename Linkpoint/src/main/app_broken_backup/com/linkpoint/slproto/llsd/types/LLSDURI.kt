@@ -25,7 +25,7 @@ class LLSDURI : LLSDNode {
     @Throws(IOException::class)
 
     fun toBinary(DataOutputStream dataOutputStream) {
-        String uri = this.value.toString()
+        var uri: String = this.value.toString()
         dataOutputStream.writeByte(108)
         if (uri.isEmpty()) {
             dataOutputStream.writeInt(0)

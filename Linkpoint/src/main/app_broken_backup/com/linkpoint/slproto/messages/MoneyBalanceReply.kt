@@ -36,11 +36,11 @@ class MoneyBalanceReply : SLMessage {
         return this.MoneyData_Field.Description.size + 46 + 4 + this.TransactionInfo_Field.ItemDescription.size + 43
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleMoneyBalanceReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 58)
@@ -60,7 +60,7 @@ class MoneyBalanceReply : SLMessage {
         packVariable(byteBuffer, this.TransactionInfo_Field.ItemDescription, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.MoneyData_Field.AgentID = unpackUUID(byteBuffer)
         this.MoneyData_Field.TransactionID = unpackUUID(byteBuffer)
         this.MoneyData_Field.TransactionSuccess = unpackBoolean(byteBuffer)

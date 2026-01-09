@@ -16,11 +16,11 @@ class DrawableTextCache : ResourceMemoryCache<DrawableTextParams, DrawableTextBi
             this.fontSize = i
         }
 
-        fun execute(): Unit {
+        fun execute()  {
             PrimComputeExecutor.getInstance().execute(this)
         }
 
-        fun run(): Unit {
+        fun run()  {
             completeRequest(DrawableTextBitmap((DrawableTextParams) getParams(), this.fontSize))
         }
     }

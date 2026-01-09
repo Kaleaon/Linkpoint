@@ -32,11 +32,11 @@ class MoneyTransferBackend : SLMessage {
         return this.MoneyData_Field.Description.size + 88 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleMoneyTransferBackend(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 56)
@@ -55,7 +55,7 @@ class MoneyTransferBackend : SLMessage {
         packVariable(byteBuffer, this.MoneyData_Field.Description, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.MoneyData_Field.TransactionID = unpackUUID(byteBuffer)
         this.MoneyData_Field.TransactionTime = unpackInt(byteBuffer)
         this.MoneyData_Field.SourceID = unpackUUID(byteBuffer)

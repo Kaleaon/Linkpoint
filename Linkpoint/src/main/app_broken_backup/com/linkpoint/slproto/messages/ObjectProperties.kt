@@ -45,10 +45,10 @@ class ObjectProperties : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int i = 3
+        var i: Int = 3
         Iterator<T> it = this.ObjectData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            var i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -57,11 +57,11 @@ class ObjectProperties : SLMessage {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleObjectProperties(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) 9)
         byteBuffer.put((this as Byte).ObjectData_Fields.size())
@@ -96,7 +96,7 @@ class ObjectProperties : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (i in 0 until b) {
             ObjectData objectData = ObjectData()

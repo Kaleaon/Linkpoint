@@ -20,11 +20,11 @@ class ParcelMediaCommandMessage : SLMessage {
         return 16
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleParcelMediaCommandMessage(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -93)
@@ -33,7 +33,7 @@ class ParcelMediaCommandMessage : SLMessage {
         packFloat(byteBuffer, this.CommandBlock_Field.Time)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.CommandBlock_Field.Flags = unpackInt(byteBuffer)
         this.CommandBlock_Field.Command = unpackInt(byteBuffer)
         this.CommandBlock_Field.Time = unpackFloat(byteBuffer)

@@ -1,223 +1,199 @@
 package com.linkpoint.slproto.types
 
 import android.opengl.Matrix
+import kotlin.math.sqrt
 
+/**
+ * Array of Vector3 values stored in a continuous float array
+ * Used for efficient vertex/normal storage and manipulation
+ */
 class Vector3Array : VectorArray {
-    Vector3Array(Int i) {
-        super(3, i)
+    
+    constructor(length: Int) : super(3, length)
+    
+    constructor(source: VectorArray, offset: Int) : super(source, offset)
+    
+    fun matrixScale(matrix: FloatArray, matrixOffset: Int, index: Int) {
+        val i = offset + (numComponents * index)
+        Matrix.scaleM(matrix, matrixOffset, data[i + 0], data[i + 1], data[i + 2])
     }
-
-    Vector3Array(VectorArray vectorArray, Int i) {
-        super(vectorArray, i)
+    
+    fun matrixTranslate(destMatrix: FloatArray, destOffset: Int, srcMatrix: FloatArray, srcOffset: Int, index: Int) {
+        val i = offset + (numComponents * index)
+        Matrix.translateM(destMatrix, destOffset, srcMatrix, srcOffset, data[i + 0], data[i + 1], data[i + 2])
     }
-
-    fun MatrixScale(FloatArray fArr, Int i, Int i2): Unit {
-        Int i3 = this.offset + (this.numComponents * i2)
-        Matrix.scaleM(fArr, i, this.data[i3 + 0], this.data[i3 + 1], this.data[i3 + 2])
+    
+    fun add(index: Int, vec: LLVector3) {
+        val i = offset + (numComponents * index)
+        data[i + 0] += vec.x
+        data[i + 1] += vec.y
+        data[i + 2] += vec.z
     }
-
-    fun MatrixTranslate(FloatArray fArr, Int i, FloatArray fArr2, Int i2, Int i3): Unit {
-        Int i4 = this.offset + (this.numComponents * i3)
-        Matrix.translateM(fArr, i, fArr2, i2, this.data[i4 + 0], this.data[i4 + 1], this.data[i4 + 2])
+    
+    fun addToVector(index: Int, vec: LLVector3) {
+        val i = offset + (numComponents * index)
+        vec.x += data[i + 0]
+        vec.y += data[i + 1]
+        vec.z += data[i + 2]
     }
-
-    fun add(Int i, LLVector3 lLVector3): Unit {
-        Int i2 = this.offset + (this.numComponents * i)
-        FloatArray fArr = this.data
-        Int i3 = i2 + 0
-        fArr[i3] = fArr[i3] + lLVector3.x
-        FloatArray fArr2 = this.data
-        Int i4 = i2 + 1
-        fArr2[i4] = fArr2[i4] + lLVector3.y
-        FloatArray fArr3 = this.data
-        Int i5 = i2 + 2
-        fArr3[i5] = fArr3[i5] + lLVector3.z
-    }
-
-    fun addToVector(Int i, LLVector3 lLVector3): Unit {
-        Int i2 = this.offset + (this.numComponents * i)
-        lLVector3.x += this.data[i2 + 0]
-        lLVector3.y += this.data[i2 + 1]
-        lLVector3.z = this.data[i2 + 2] + lLVector3.z
-    }
-
-    fun clear(): Unit {
-        Int i = this.offset
-        for (i2 in 0 until this.size) {
-            this.data[i + 0] = 0.0f
-            this.data[i + 1] = 0.0f
-            this.data[i + 2] = 0.0f
-            i += this.numComponents
+    
+    fun clear() {
+        var i = offset
+        for (j in 0 until size) {
+            data[i + 0] = 0.0f
+            data[i + 1] = 0.0f
+            data[i + 2] = 0.0f
+            i += numComponents
         }
     }
-
-    fun distToPlane(Int i, LLVector3 lLVector3, LLVector3 lLVector32): Float {
-        Int i2 = this.offset + (this.numComponents * i)
-        Float f = this.data[i2 + 0] - lLVector3.x
-        Float f2 = this.data[i2 + 1] - lLVector3.y
-        Float f3 = this.data[i2 + 2] - lLVector3.z
-        return (f3 * lLVector32.z) + (f * lLVector32.x) + (f2 * lLVector32.y)
+    
+    fun distToPlane(index: Int, point: LLVector3, normal: LLVector3): Float {
+        val i = offset + (numComponents * index)
+        val dx = data[i + 0] - point.x
+        val dy = data[i + 1] - point.y
+        val dz = data[i + 2] - point.z
+        return (dx * normal.x) + (dy * normal.y) + (dz * normal.z)
     }
-
-    fun fill(Int i, Int i2, LLVector3 lLVector3): Unit {
-        Int i3 = (this.numComponents * i) + this.offset
-        for (i4 in 0 until i2) {
-            this.data[i3 + 0] = lLVector3.x
-            this.data[i3 + 1] = lLVector3.y
-            this.data[i3 + 2] = lLVector3.z
-            i3 += this.numComponents
+    
+    fun fill(startIndex: Int, count: Int, vec: LLVector3) {
+        var i = (numComponents * startIndex) + offset
+        for (j in 0 until count) {
+            data[i + 0] = vec.x
+            data[i + 1] = vec.y
+            data[i + 2] = vec.z
+            i += numComponents
         }
     }
-
-    fun get(Int i): LLVector3 {
-        Int i2 = this.offset + (this.numComponents * i)
-        return LLVector3(this.data[i2 + 0], this.data[i2 + 1], this.data[i2 + 2])
+    
+    operator fun get(index: Int): LLVector3 {
+        val i = offset + (numComponents * index)
+        return LLVector3(data[i + 0], data[i + 1], data[i + 2])
     }
-
-    fun get(Int i, LLVector3 lLVector3): Unit {
-        Int i2 = this.offset + (this.numComponents * i)
-        lLVector3.x = this.data[i2 + 0]
-        lLVector3.y = this.data[i2 + 1]
-        lLVector3.z = this.data[i2 + 2]
+    
+    fun get(index: Int, vec: LLVector3) {
+        val i = offset + (numComponents * index)
+        vec.x = data[i + 0]
+        vec.y = data[i + 1]
+        vec.z = data[i + 2]
     }
-
-    fun getDistanceTo(Int i, LLVector3 lLVector3): Float {
-        Int i2 = this.offset + (this.numComponents * i)
-        Float f = this.data[i2 + 0] - lLVector3.x
-        Float f2 = this.data[i2 + 1] - lLVector3.y
-        Float f3 = this.data[i2 + 2] - lLVector3.z
-        return Math.sqrt(((f3 * f3.toDouble()).toFloat() + (f * f) + (f2 * f2)))
+    
+    fun getDistanceTo(index: Int, vec: LLVector3): Float {
+        val i = offset + (numComponents * index)
+        val dx = data[i + 0] - vec.x
+        val dy = data[i + 1] - vec.y
+        val dz = data[i + 2] - vec.z
+        return sqrt((dx * dx + dy * dy + dz * dz).toDouble()).toFloat()
     }
-
-    fun getMaxComponent(Int i): Float {
-        Int i2 = (this.numComponents * i) + this.offset
-        Float f = this.data[i2 + 0]
-        if (this.data[i2 + 1] > f) {
-            f = this.data[i2 + 1]
-        }
-        return this.data[i2 + 2] > f ? this.data[i2 + 2] : f
+    
+    fun getMaxComponent(index: Int): Float {
+        val i = (numComponents * index) + offset
+        var max = data[i + 0]
+        if (data[i + 1] > max) max = data[i + 1]
+        if (data[i + 2] > max) max = data[i + 2]
+        return max
     }
-
-    fun getSub(Int i, Int i2, LLVector3 lLVector3): Unit {
-        Int i3 = this.offset + (this.numComponents * i)
-        Int i4 = this.offset + (this.numComponents * i2)
-        lLVector3.x = this.data[i3 + 0] - this.data[i4 + 0]
-        lLVector3.y = this.data[i3 + 1] - this.data[i4 + 1]
-        lLVector3.z = this.data[i3 + 2] - this.data[i4 + 2]
+    
+    fun getSub(index1: Int, index2: Int, result: LLVector3) {
+        val i1 = offset + (numComponents * index1)
+        val i2 = offset + (numComponents * index2)
+        result.x = data[i1 + 0] - data[i2 + 0]
+        result.y = data[i1 + 1] - data[i2 + 1]
+        result.z = data[i1 + 2] - data[i2 + 2]
     }
-
-    fun getSub(Int i, Vector3Array vector3Array, Int i2, LLVector3 lLVector3): Unit {
-        Int i3 = this.offset + (this.numComponents * i)
-        Int i4 = vector3Array.offset + (vector3Array.numComponents * i2)
-        lLVector3.x = this.data[i3 + 0] - vector3Array.data[i4 + 0]
-        lLVector3.y = this.data[i3 + 1] - vector3Array.data[i4 + 1]
-        lLVector3.z = this.data[i3 + 2] - vector3Array.data[i4 + 2]
+    
+    fun getSub(index: Int, other: Vector3Array, otherIndex: Int, result: LLVector3) {
+        val i1 = offset + (numComponents * index)
+        val i2 = other.offset + (other.numComponents * otherIndex)
+        result.x = data[i1 + 0] - other.data[i2 + 0]
+        result.y = data[i1 + 1] - other.data[i2 + 1]
+        result.z = data[i1 + 2] - other.data[i2 + 2]
     }
-
-    fun minMaxVector(Int i, LLVector3 lLVector3, LLVector3 lLVector32): Unit {
-        Int i2 = this.offset + (this.numComponents * i)
-        Float f = this.data[i2 + 0]
-        Float f2 = this.data[i2 + 1]
-        Float f3 = this.data[i2 + 2]
-        if (lLVector3.x > f) {
-            lLVector3.x = f
-        }
-        if (lLVector32.x < f) {
-            lLVector32.x = f
-        }
-        if (lLVector3.y > f2) {
-            lLVector3.y = f2
-        }
-        if (lLVector32.y < f2) {
-            lLVector32.y = f2
-        }
-        if (lLVector3.z > f3) {
-            lLVector3.z = f3
-        }
-        if (lLVector32.z < f3) {
-            lLVector32.z = f3
-        }
+    
+    fun minMaxVector(index: Int, min: LLVector3, max: LLVector3) {
+        val i = offset + (numComponents * index)
+        val x = data[i + 0]
+        val y = data[i + 1]
+        val z = data[i + 2]
+        if (min.x > x) min.x = x
+        if (max.x < x) max.x = x
+        if (min.y > y) min.y = y
+        if (max.y < y) max.y = y
+        if (min.z > z) min.z = z
+        if (max.z < z) max.z = z
     }
-
-    fun minMaxVector(LLVector3 lLVector3, LLVector3 lLVector32): Unit {
-        Int i = this.offset
-        for (i2 in 0 until this.size) {
-            Float f = this.data[i + 0]
-            Float f2 = this.data[i + 1]
-            Float f3 = this.data[i + 2]
-            if (lLVector3.x > f) {
-                lLVector3.x = f
-            }
-            if (lLVector32.x < f) {
-                lLVector32.x = f
-            }
-            if (lLVector3.y > f2) {
-                lLVector3.y = f2
-            }
-            if (lLVector32.y < f2) {
-                lLVector32.y = f2
-            }
-            if (lLVector3.z > f3) {
-                lLVector3.z = f3
-            }
-            if (lLVector32.z < f3) {
-                lLVector32.z = f3
-            }
-            i += this.numComponents
+    
+    fun minMaxVector(min: LLVector3, max: LLVector3) {
+        var i = offset
+        for (j in 0 until size) {
+            val x = data[i + 0]
+            val y = data[i + 1]
+            val z = data[i + 2]
+            if (min.x > x) min.x = x
+            if (max.x < x) max.x = x
+            if (min.y > y) min.y = y
+            if (max.y < y) max.y = y
+            if (min.z > z) min.z = z
+            if (max.z < z) max.z = z
+            i += numComponents
         }
     }
-
-    fun mul(Int i, LLQuaternion lLQuaternion): Unit {
-        Int i2 = this.offset + (this.numComponents * i)
-        Float f = this.data[i2 + 0]
-        Float f2 = this.data[i2 + 1]
-        Float f3 = this.data[i2 + 2]
-        Float f4 = (((-lLQuaternion.x) * f) - (lLQuaternion.y * f2)) - (lLQuaternion.z * f3)
-        Float f5 = ((lLQuaternion.w * f) + (lLQuaternion.y * f3)) - (lLQuaternion.z * f2)
-        Float f6 = ((lLQuaternion.w * f2) + (lLQuaternion.z * f)) - (lLQuaternion.x * f3)
-        Float f7 = ((f2 * lLQuaternion.x) + (f3 * lLQuaternion.w)) - (f * lLQuaternion.y)
-        this.data[i2 + 0] = ((((-f4) * lLQuaternion.x) + (lLQuaternion.w * f5)) - (lLQuaternion.z * f6)) + (lLQuaternion.y * f7)
-        this.data[i2 + 1] = ((((-f4) * lLQuaternion.y) + (lLQuaternion.w * f6)) - (lLQuaternion.x * f7)) + (lLQuaternion.z * f5)
-        this.data[i2 + 2] = (((f7 * lLQuaternion.w) + ((-f4) * lLQuaternion.z)) - (lLQuaternion.y * f5)) + (lLQuaternion.x * f6)
+    
+    fun mul(index: Int, quat: LLQuaternion) {
+        val i = offset + (numComponents * index)
+        val x = data[i + 0]
+        val y = data[i + 1]
+        val z = data[i + 2]
+        
+        val qx = quat.x
+        val qy = quat.y
+        val qz = quat.z
+        val qw = quat.w
+        
+        val f = ((-qx * x) - (qy * y)) - (qz * z)
+        val f2 = ((qw * x) + (qy * z)) - (qz * y)
+        val f3 = ((qw * y) + (qz * x)) - (qx * z)
+        val f4 = ((y * qx) + (z * qw)) - (x * qy)
+        
+        data[i + 0] = (((-f * qx) + (qw * f2)) - (qz * f3)) + (qy * f4)
+        data[i + 1] = (((-f * qy) + (qw * f3)) - (qx * f4)) + (qz * f2)
+        data[i + 2] = (((f4 * qw) + ((-f) * qz)) - (f2 * qy)) + (qx * f3)
     }
-
-    fun set(Int i, Float f, Float f2, Float f3): Unit {
-        Int i2 = this.offset + (this.numComponents * i)
-        this.data[i2 + 0] = f
-        this.data[i2 + 1] = f2
-        this.data[i2 + 2] = f3
+    
+    fun set(index: Int, x: Float, y: Float, z: Float) {
+        val i = offset + (numComponents * index)
+        data[i + 0] = x
+        data[i + 1] = y
+        data[i + 2] = z
     }
-
-    fun set(Int i, LLVector3 lLVector3): Unit {
-        Int i2 = this.offset + (this.numComponents * i)
-        this.data[i2 + 0] = lLVector3.x
-        this.data[i2 + 1] = lLVector3.y
-        this.data[i2 + 2] = lLVector3.z
+    
+    fun set(index: Int, vec: LLVector3) {
+        val i = offset + (numComponents * index)
+        data[i + 0] = vec.x
+        data[i + 1] = vec.y
+        data[i + 2] = vec.z
     }
-
-    fun set(Int i, Vector3Array vector3Array, Int i2): Unit {
-        Int i3 = this.offset + (this.numComponents * i)
-        Int i4 = vector3Array.offset + (vector3Array.numComponents * i2)
-        this.data[i3 + 0] = vector3Array.data[i4 + 0]
-        this.data[i3 + 1] = vector3Array.data[i4 + 1]
-        this.data[i3 + 2] = vector3Array.data[i4 + 2]
+    
+    fun set(index: Int, other: Vector3Array, otherIndex: Int) {
+        val i1 = offset + (numComponents * index)
+        val i2 = other.offset + (other.numComponents * otherIndex)
+        data[i1 + 0] = other.data[i2 + 0]
+        data[i1 + 1] = other.data[i2 + 1]
+        data[i1 + 2] = other.data[i2 + 2]
     }
-
-    fun setAdd(Int i, Int i2): Unit {
-        Int i3 = (this.numComponents * i) + this.offset
-        Int i4 = (this.numComponents * i2) + this.offset
-        for (i5 in 0 until 3) {
-            FloatArray fArr = this.data
-            Int i6 = i3 + i5
-            fArr[i6] = fArr[i6] + this.data[i4 + i5]
-            this.data[i4 + i5] = this.data[i3 + i5]
+    
+    fun setAdd(index1: Int, index2: Int) {
+        val i1 = (numComponents * index1) + offset
+        val i2 = (numComponents * index2) + offset
+        for (j in 0 until 3) {
+            data[i1 + j] += data[i2 + j]
+            data[i2 + j] = data[i1 + j]
         }
     }
-
-    fun subFromVector(LLVector3 lLVector3, Int i): Unit {
-        Int i2 = this.offset + (this.numComponents * i)
-        lLVector3.x -= this.data[i2 + 0]
-        lLVector3.y -= this.data[i2 + 1]
-        lLVector3.z -= this.data[i2 + 2]
+    
+    fun subFromVector(vec: LLVector3, index: Int) {
+        val i = offset + (numComponents * index)
+        vec.x -= data[i + 0]
+        vec.y -= data[i + 1]
+        vec.z -= data[i + 2]
     }
 }

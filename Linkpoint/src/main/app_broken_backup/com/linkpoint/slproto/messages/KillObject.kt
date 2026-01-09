@@ -20,11 +20,11 @@ class KillObject : SLMessage {
         return (this.ObjectData_Fields.size() * 4) + 2
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleKillObject(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.put((byte) 16)
         byteBuffer.put((this as byte).ObjectData_Fields.size())
         for (ObjectData objectData : this.ObjectData_Fields) {
@@ -32,7 +32,7 @@ class KillObject : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (i in 0 until b) {
             ObjectData objectData = ObjectData()

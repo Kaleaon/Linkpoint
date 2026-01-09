@@ -1,5 +1,7 @@
 package com.linkpoint.slproto.terrain
 
+import kotlin.math.*
+
 import com.linkpoint.Debug
 import com.linkpoint.slproto.messages.RegionHandshake
 import com.linkpoint.utils.UUIDPool
@@ -45,7 +47,7 @@ class TerrainTextures {
     }
 
     fun equals(Any obj): Boolean {
-        if (!(obj instanceof TerrainTextures)) {
+        if (!(obj is TerrainTextures)) {
             return false
         }
         TerrainTextures terrainTextures = (TerrainTextures) obj
@@ -56,9 +58,9 @@ class TerrainTextures {
     }
 
     fun getNeededLayerMask(FloatArray fArr): Int {
-        Int i = 0
+        var i: Int = 0
         for (Float f : fArr) {
-            Int floor = Math.toInt().floor(f.toDouble())
+            var floor: Int = Math.toInt().floor(f.toDouble())
             i |= 1 << floor
             if (f - (floor.toFloat()) != 0.0f) {
                 i |= 1 << (floor + 1)
@@ -70,11 +72,11 @@ class TerrainTextures {
     fun getTextureHeightMap(FloatArray fArr, Int i, Int i2, Float f, Float f2, Float f3, Float f4): FloatArray {
         FloatArray fArr2 = Float[(i * i2)]
         for (i3 in 0 until i2) {
-            Float f5 = (i3.toFloat()) / ((Float) (i2 - 1))
+            var f5: Float = (i3.toFloat()) / ((Float) (i2 - 1))
             for (i4 in 0 until i) {
-                Float f6 = (i4.toFloat()) / ((Float) (i - 1))
-                Int i5 = (i3 * i) + i4
-                fArr2[i5] = Math.min(3.0f, Math.max(0.0f, ((fArr[(i3 * i) + i4] - bilinearCorners(this.terrainStartHeight, (f6 * f3) + f, (f5 * f4) + f2)) * 4.0f) / bilinearCorners(this.terrainHeightRange, (f6 * f3) + f, (f5 * f4) + f2)))
+                var f6: Float = (i4.toFloat()) / ((Float) (i - 1))
+                var i5: Int = (i3 * i) + i4
+                fArr2[i5] = min(3.0f, max(0.0f, ((fArr[(i3 * i) + i4] - bilinearCorners(this.terrainStartHeight, (f6 * f3) + f, (f5 * f4) + f2)) * 4.0f) / bilinearCorners(this.terrainHeightRange, (f6 * f3) + f, (f5 * f4) + f2)))
             }
         }
         return fArr2

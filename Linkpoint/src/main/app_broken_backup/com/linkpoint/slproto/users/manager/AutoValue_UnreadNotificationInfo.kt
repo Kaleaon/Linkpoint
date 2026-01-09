@@ -54,7 +54,7 @@ class AutoValue_UnreadNotificationInfo : UnreadNotificationInfo {
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof UnreadNotificationInfo)) {
+        if (!(obj is UnreadNotificationInfo)) {
             return false
         }
         UnreadNotificationInfo unreadNotificationInfo = (UnreadNotificationInfo) obj

@@ -1,4 +1,6 @@
 package com.linkpoint.render.spatial
+
+import kotlin.math.*
 import java.util.*
 
 import com.linkpoint.utils.InlineList
@@ -6,7 +8,7 @@ import com.linkpoint.utils.InlineList
 class SpatialTreeNode : InlineList<DrawListEntry> {
     private val MIN_SIZE: Float = 2.0f
     private SpatialTreeNode[] children = null
-    Int depthBin = -1
+    var depthBin: Int = -1
     private Int indexInParent
     private Boolean leaf
     SpatialTreeNode nextDepth = null
@@ -31,11 +33,11 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
         this.position = FloatArray(12)
         this.parent = spatialTreeNode
         this.indexInParent = i
-        Boolean z = true
-        Int i2 = 0
+        var z: Boolean = true
+        var i2: Int = 0
         while (i2 < 3) {
-            Float f = spatialTreeNode.position[i2 + 6]
-            Float f2 = spatialTreeNode.position[i2 + 9] - f
+            var f: Float = spatialTreeNode.position[i2 + 6]
+            var f2: Float = spatialTreeNode.position[i2 + 9] - f
             if (i2 == spatialTreeNode.splitAxis) {
                 f2 /= MIN_SIZE
                 f += (f2 / MIN_SIZE) * (i.toFloat())
@@ -51,10 +53,10 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
         this.splitAxis = longestAxis()
     }
 
-    private fun enlargeForBoundingBox(z: Boolean, fArr: FloatArray): Unit {
+    private fun enlargeForBoundingBox(z: Boolean, fArr: FloatArray)  {
         if (this.parent != null) {
-            Int i = 0
-            Boolean z2 = false
+            var i: Int = 0
+            var z2: Boolean = false
             while (i < 3) {
                 if (z || fArr[i] < this.position[i]) {
                     this.position[i] = fArr[i]
@@ -78,11 +80,11 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
     }
 
     private fun longestAxis(): Int {
-        Int i = 0
-        Float f = 0.0f
-        Int i2 = 0
+        var i: Int = 0
+        var f: Float = 0.0f
+        var i2: Int = 0
         while (i < 3) {
-            Float f2 = this.position[i + 9] - this.position[i + 6]
+            var f2: Float = this.position[i + 9] - this.position[i + 6]
             if (f2 > f) {
                 i2 = i
             } else {
@@ -94,7 +96,7 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
         return i2
     }
 
-    private fun removeFromParent(): Unit {
+    private fun removeFromParent()  {
         this.spatialTree.removeEntry(this)
         if (this.parent != null && this.parent.children != null) {
             this.parent.children[this.indexInParent] = null
@@ -127,17 +129,17 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
         }
     }
 
-    private fun shrinkBoundingBox(): Unit {
-        Int i = 1
+    private fun shrinkBoundingBox()  {
+        var i: Int = 1
         if (this.parent != null) {
             Any obj = FloatArray(6)
             DrawListEntry drawListEntry = (DrawListEntry) getFirst()
-            Int i4 = 0
+            var i4: Int = 0
             while (drawListEntry != null) {
                 i2 = 0
                 while (i2 < 3) {
-                    obj[i2] = i4 != 0 ? Math.min(obj[i2], drawListEntry.boundingBox[i2]) : drawListEntry.boundingBox[i2]
-                    obj[i2 + 3] = i4 != 0 ? Math.max(obj[i2 + 3], drawListEntry.boundingBox[i2 + 3]) : drawListEntry.boundingBox[i2 + 3]
+                    obj[i2] = i4 != 0 ? min(obj[i2], drawListEntry.boundingBox[i2]) : drawListEntry.boundingBox[i2]
+                    obj[i2 + 3] = i4 != 0 ? max(obj[i2 + 3], drawListEntry.boundingBox[i2 + 3]) : drawListEntry.boundingBox[i2 + 3]
                     i2++
                 }
                 drawListEntry = drawListEntry.getNext()
@@ -145,15 +147,15 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
             }
             if (this.children != null) {
                 SpatialTreeNode[] spatialTreeNodeArr = this.children
-                Int length = spatialTreeNodeArr.size
-                Int i5 = 0
+                var length: Int = spatialTreeNodeArr.size
+                var i5: Int = 0
                 while (i5 < length) {
                     SpatialTreeNode spatialTreeNode = spatialTreeNodeArr[i5]
                     if (spatialTreeNode != null) {
                         i2 = 0
                         while (i2 < 3) {
-                            obj[i2] = i4 != 0 ? Math.min(obj[i2], spatialTreeNode.position[i2]) : spatialTreeNode.position[i2]
-                            obj[i2 + 3] = i4 != 0 ? Math.max(obj[i2 + 3], spatialTreeNode.position[i2 + 3]) : spatialTreeNode.position[i2 + 3]
+                            obj[i2] = i4 != 0 ? min(obj[i2], spatialTreeNode.position[i2]) : spatialTreeNode.position[i2]
+                            obj[i2 + 3] = i4 != 0 ? max(obj[i2 + 3], spatialTreeNode.position[i2 + 3]) : spatialTreeNode.position[i2 + 3]
                             i2++
                         }
                         i3 = 1
@@ -180,15 +182,15 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
         }
     }
 
-    fun addDrawables(drawList: DrawList): Unit {
+    fun addDrawables(drawList: DrawList)  {
         for (DrawListEntry drawListEntry = (DrawListEntry) getFirst(); drawListEntry != null; drawListEntry = drawListEntry.getNext()) {
             drawListEntry.addToDrawList(drawList)
         }
     }
 
-    fun addEntry(drawListEntry: DrawListEntry): Unit {
+    fun addEntry(drawListEntry: DrawListEntry)  {
         Any obj = 1
-        Boolean z = getFirst() == null && this.children == null
+        var z: Boolean = getFirst() == null && this.children == null
         if (this.singleChild == null) {
             obj = null
         }
@@ -211,17 +213,17 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
         if (this.leaf) {
             return this
         }
-        Float f = Float.POSITIVE_INFINITY
-        Int i = 0
-        Int i2 = -1
+        var f: Float = Float.POSITIVE_INFINITY
+        var i: Int = 0
+        var i2: Int = -1
         while (i < 3) {
-            Float f2 = (this.position[(this.splitAxis + 6) + 3] - this.position[this.splitAxis + 6]) / MIN_SIZE
-            Float f3 = this.position[this.splitAxis + 6] + ((f2 / MIN_SIZE) * (i.toFloat()))
+            var f2: Float = (this.position[(this.splitAxis + 6) + 3] - this.position[this.splitAxis + 6]) / MIN_SIZE
+            var f3: Float = this.position[this.splitAxis + 6] + ((f2 / MIN_SIZE) * (i.toFloat()))
             if (fArr[this.splitAxis] < f3 || fArr[this.splitAxis + 3] > f3 + f2) {
                 f2 = f
                 i3 = i2
             } else {
-                f2 = Math.abs(((f2 / MIN_SIZE) + f3) - ((fArr[this.splitAxis] + fArr[this.splitAxis + 3]) / MIN_SIZE))
+                f2 = abs(((f2 / MIN_SIZE) + f3) - ((fArr[this.splitAxis] + fArr[this.splitAxis + 3]) / MIN_SIZE))
                 if (f2 < f) {
                     i3 = i
                 } else {
@@ -253,7 +255,7 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
         return this.children[i2].findNode(fArr)
     }
 
-    fun removeEntry(drawListEntry: DrawListEntry): Unit {
+    fun removeEntry(drawListEntry: DrawListEntry)  {
         super.removeEntry(drawListEntry)
         if (this.depthBin != -1) {
             this.spatialTree.setDrawListChanged()
@@ -268,12 +270,12 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
         shrinkBoundingBox()
     }
 
-    fun requestEntryRemoval(drawListEntry: DrawListEntry): Unit {
+    fun requestEntryRemoval(drawListEntry: DrawListEntry)  {
         this.spatialTree.spatialObjectIndex.requestEntryRemoval(drawListEntry)
     }
 
     fun walkTree(frustrumPlanes: FrustrumPlanes, i: Int, fArr: FloatArray): Int {
-        Int i2 = 0
+        var i2: Int = 0
         if (this.singleChild != null && getFirst() == null) {
             return this.singleChild.walkTree(frustrumPlanes, i, fArr)
         }
@@ -293,7 +295,7 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
         }
         if (this.children != null) {
             SpatialTreeNode[] spatialTreeNodeArr = this.children
-            Int length = spatialTreeNodeArr.size
+            var length: Int = spatialTreeNodeArr.size
             while (i2 < length) {
                 SpatialTreeNode spatialTreeNode = spatialTreeNodeArr[i2]
                 if (spatialTreeNode != null) {

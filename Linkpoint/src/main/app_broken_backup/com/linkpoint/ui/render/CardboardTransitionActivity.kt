@@ -19,7 +19,7 @@ class CardboardTransitionActivity : AppCompatActivity {
 
     /* access modifiers changed from: private */
     /* renamed from: tryToStartCardboard */
-    fun m785com_lumiyaviewer_lumiya_ui_render_CardboardTransitionActivitymthref0(): Unit {
+    fun m785com_lumiyaviewer_lumiya_ui_render_CardboardTransitionActivitymthref0()  {
         if (this.waitAttempts >= 15 || (!TextureMemoryTracker.hasActiveRenderer())) {
             this.handler.postDelayed($Lambda$4MERJxt3ZMMK7daj1OhYLtxY69Y(this), WAIT_INTERVAL)
             return
@@ -113,7 +113,7 @@ Method generation error in method: com.linkpoint.ui.render.-$Lambda$4MERJxt3ZMMK
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(@Nullable Bundle bundle): Unit {
+    fun onCreate(@Nullable Bundle bundle)  {
         super.onCreate(bundle)
         requestWindowFeature(1)
         getWindow().setFlags(1024, 1024)
@@ -121,7 +121,7 @@ Method generation error in method: com.linkpoint.ui.render.-$Lambda$4MERJxt3ZMMK
     }
 
     /* access modifiers changed from: protected */
-    fun onResume(): Unit {
+    fun onResume()  {
         super.onResume()
         m785com_lumiyaviewer_lumiya_ui_render_CardboardTransitionActivitymthref0()
     }

@@ -17,7 +17,7 @@ class vx_participant_removed_reason {
 
     private vx_participant_removed_reason(String string2) {
         this.swigName = string2
-        Int n = swigNext
+        var n: Int = swigNext
         swigNext = n + 1
         this.swigValue = n
     }
@@ -42,7 +42,7 @@ class vx_participant_removed_reason {
         if (n < swigValues.length && n >= 0 && vx_participant_removed_reason.swigValues[n].swigValue == n) {
             return swigValues[n]
         }
-        Int n2 = 0
+        var n2: Int = 0
         while (n2 < swigValues.length) {
             if (vx_participant_removed_reason.swigValues[n2].swigValue == n) {
                 return swigValues[n2]

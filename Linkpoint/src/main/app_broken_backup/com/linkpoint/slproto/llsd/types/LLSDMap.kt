@@ -52,7 +52,7 @@ class LLSDMap : LLSDNode {
         HashMap hashMap = HashMap()
         while (xmlPullParser.nextTag() != 3) {
             xmlPullParser.require(2, (String) null, "key")
-            String nextText = xmlPullParser.nextText()
+            var nextText: String = xmlPullParser.nextText()
             xmlPullParser.nextTag()
             hashMap.put(nextText, LLSDNodeFactory.parseNode(xmlPullParser))
         }
@@ -107,7 +107,7 @@ class LLSDMap : LLSDNode {
             for (Field field : cls.getDeclaredFields()) {
                 LLSDSerialized lLSDSerialized = (field as LLSDSerialized).getAnnotation(LLSDSerialized.class)
                 if (lLSDSerialized != null) {
-                    String name = lLSDSerialized.name()
+                    var name: String = lLSDSerialized.name()
                     if (Strings.isNullOrEmpty(name)) {
                         name = field.getName()
                     }
@@ -134,14 +134,14 @@ class LLSDMap : LLSDNode {
                             field.set(newInstance, byKey.asBinary())
                         } else if (type.isAssignableFrom(List.class)) {
                             Type genericType = field.getGenericType()
-                            if (genericType instanceof ParameterizedType) {
+                            if (genericType is ParameterizedType) {
                                 Type[] actualTypeArguments = ((ParameterizedType) genericType).getActualTypeArguments()
                                 if (actualTypeArguments.size != 1) {
                                     throw LLSDValueTypeException(type.getName(), byKey)
                                 }
                                 Type type2 = actualTypeArguments[0]
-                                if (type2 instanceof Class) {
-                                    Int count = byKey.getCount()
+                                if (type2 is Class) {
+                                    var count: Int = byKey.getCount()
                                     ArrayList arrayList = ArrayList(count)
                                     for (i in 0 until count) {
                                         arrayList.add(byKey.byIndex(i).toObject((Class) type2))

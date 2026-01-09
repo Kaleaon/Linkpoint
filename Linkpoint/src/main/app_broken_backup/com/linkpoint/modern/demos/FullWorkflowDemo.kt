@@ -21,7 +21,7 @@ class FullWorkflowDemo {
         Log.i(TAG, "Full workflow demo initialized")
     }
     
-    fun demonstrateCompleteWorkflow(): Unit {
+    fun demonstrateCompleteWorkflow()  {
         Log.i(TAG, "=== STARTING COMPLETE LINKPOINT WORKFLOW DEMONSTRATION ===")
         
         demonstrateAuthentication()
@@ -30,12 +30,12 @@ class FullWorkflowDemo {
         Log.i(TAG, "=== COMPLETE WORKFLOW DEMONSTRATION FINISHED ===")
     }
     
-    private fun demonstrateAuthentication(): Unit {
+    private fun demonstrateAuthentication()  {
         Log.i(TAG, "--- Phase 1: Modern Authentication ---")
         modernDemo.demonstrateModernAuthentication("demo_user", "demo_password")
     }
     
-    private fun demonstrateAssetLoading(): Unit {
+    private fun demonstrateAssetLoading()  {
         Log.i(TAG, "--- Phase 2: Asset Streaming ---")
         modernDemo.demonstrateAssetStreaming()
     }

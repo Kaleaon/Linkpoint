@@ -20,7 +20,7 @@ class AutoValue_DrawableTextParams : DrawableTextParams {
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof DrawableTextParams)) {
+        if (!(obj is DrawableTextParams)) {
             return false
         }
         DrawableTextParams drawableTextParams = (DrawableTextParams) obj

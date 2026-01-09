@@ -3,6 +3,6 @@ package com.linkpoint.rawbuffers
 class R {
 
     class string {
-        Int app_name = 2131296324
+        var app_name: Int = 2131296324
     }
 }

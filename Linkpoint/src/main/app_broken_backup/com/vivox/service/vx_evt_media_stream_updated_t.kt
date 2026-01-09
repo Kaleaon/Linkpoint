@@ -46,7 +46,7 @@ class vx_evt_media_stream_updated_t {
      * Lifted jumps to return sites
      */
     vx_evt_base_t getBase() {
-        Long l = VxClientProxyJNI.vx_evt_media_stream_updated_t_base_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_evt_media_stream_updated_t_base_get(this.swigCPtr, this)
         if (l != 0L) return vx_evt_base_t(l, false)
         return null
     }

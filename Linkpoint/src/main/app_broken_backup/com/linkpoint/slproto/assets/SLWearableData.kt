@@ -52,7 +52,7 @@ class SLWearableData {
                     this.name = split[1]
                     ImmutableList.Builder builder = ImmutableList.builder()
                     ImmutableList.Builder builder2 = ImmutableList.builder()
-                    Int i2 = 2
+                    var i2: Int = 2
                     while (i2 < split.size) {
                         Array<String> split2 = split[i2].trim().split("\\s+")
                         if (split2.size < 1) {
@@ -77,9 +77,9 @@ class SLWearableData {
                             }
                         } else {
                             if (split2[0].equalsIgnoreCase("parameters")) {
-                                Int parseInt = Int.parseInt(split2[1])
+                                var parseInt: Int = Int.parseInt(split2[1])
                                 i = i2 + 1
-                                Int i3 = 0
+                                var i3: Int = 0
                                 while (i3 < parseInt) {
                                     if (i >= split.size) {
                                         throw WearableFormatException()
@@ -99,9 +99,9 @@ class SLWearableData {
                                     }
                                 }
                             } else if (split2[0].equalsIgnoreCase("textures")) {
-                                Int parseInt2 = Int.parseInt(split2[1])
-                                Int i4 = i2 + 1
-                                Int i5 = 0
+                                var parseInt2: Int = Int.parseInt(split2[1])
+                                var i4: Int = i2 + 1
+                                var i5: Int = 0
                                 while (i5 < parseInt2) {
                                     if (i >= split.size) {
                                         throw WearableFormatException()

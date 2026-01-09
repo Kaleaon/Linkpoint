@@ -47,7 +47,7 @@ class vx_resp_aux_get_render_devices_t {
      * Lifted jumps to return sites
      */
     vx_resp_base_t getBase() {
-        Long l = VxClientProxyJNI.vx_resp_aux_get_render_devices_t_base_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_aux_get_render_devices_t_base_get(this.swigCPtr, this)
         if (l != 0L) return vx_resp_base_t(l, false)
         return null
     }
@@ -61,7 +61,7 @@ class vx_resp_aux_get_render_devices_t {
      * Lifted jumps to return sites
      */
     vx_device_t getCurrent_render_device() {
-        Long l = VxClientProxyJNI.vx_resp_aux_get_render_devices_t_current_render_device_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_aux_get_render_devices_t_current_render_device_get(this.swigCPtr, this)
         if (l != 0L) return vx_device_t(l, false)
         return null
     }
@@ -71,7 +71,7 @@ class vx_resp_aux_get_render_devices_t {
      * Lifted jumps to return sites
      */
     vx_device_t getEffective_render_device() {
-        Long l = VxClientProxyJNI.vx_resp_aux_get_render_devices_t_effective_render_device_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_aux_get_render_devices_t_effective_render_device_get(this.swigCPtr, this)
         if (l != 0L) return vx_device_t(l, false)
         return null
     }
@@ -81,7 +81,7 @@ class vx_resp_aux_get_render_devices_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_p_vx_device getRender_devices() {
-        Long l = VxClientProxyJNI.vx_resp_aux_get_render_devices_t_render_devices_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_aux_get_render_devices_t_render_devices_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_p_vx_device(l, false)
         return null
     }

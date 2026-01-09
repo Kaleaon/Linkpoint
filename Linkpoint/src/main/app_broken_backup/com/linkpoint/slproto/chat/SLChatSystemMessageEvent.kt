@@ -42,7 +42,7 @@ class SLChatSystemMessageEvent : SLChatEvent {
         return true
     }
 
-    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage)  {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setMessageText(this.text)
     }

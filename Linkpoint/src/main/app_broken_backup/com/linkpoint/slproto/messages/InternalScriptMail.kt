@@ -22,11 +22,11 @@ class InternalScriptMail : SLMessage {
         return this.DataBlock_Field.From.size + 1 + 16 + 1 + this.DataBlock_Field.Subject.size + 2 + this.DataBlock_Field.Body.size + 2
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleInternalScriptMail(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.put((byte) -1)
         byteBuffer.put((byte) 16)
         packVariable(byteBuffer, this.DataBlock_Field.From, 1)
@@ -35,7 +35,7 @@ class InternalScriptMail : SLMessage {
         packVariable(byteBuffer, this.DataBlock_Field.Body, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.DataBlock_Field.From = unpackVariable(byteBuffer, 1)
         this.DataBlock_Field.To = unpackUUID(byteBuffer)
         this.DataBlock_Field.Subject = unpackVariable(byteBuffer, 1)

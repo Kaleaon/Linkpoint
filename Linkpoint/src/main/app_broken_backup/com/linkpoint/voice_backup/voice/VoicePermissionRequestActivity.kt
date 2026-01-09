@@ -56,7 +56,7 @@ class VoicePermissionRequestActivity : AppCompatActivity() {
         if (this.serviceMessenger != null && (intent = this.getIntent()).hasExtra(VOICE_INIT_REPLY_TO)) {
             Message message = Message.obtain()
             message.what = 300
-            Int n = bl ? 1 : 0
+            var n: Int = bl ? 1 : 0
             message.arg1 = n
             message.obj = intent.getParcelableExtra(VOICE_INIT_REPLY_TO)
             try {

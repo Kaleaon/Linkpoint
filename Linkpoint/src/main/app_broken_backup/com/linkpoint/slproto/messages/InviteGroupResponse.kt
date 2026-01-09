@@ -23,11 +23,11 @@ class InviteGroupResponse : SLMessage {
         return 72
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleInviteGroupResponse(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 94)
@@ -38,7 +38,7 @@ class InviteGroupResponse : SLMessage {
         packInt(byteBuffer, this.InviteData_Field.MembershipFee)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.InviteData_Field.AgentID = unpackUUID(byteBuffer)
         this.InviteData_Field.InviteeID = unpackUUID(byteBuffer)
         this.InviteData_Field.GroupID = unpackUUID(byteBuffer)

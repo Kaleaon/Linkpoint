@@ -107,12 +107,12 @@ Method generation error in method: com.linkpoint.ui.objects.-$Lambda$2R1p9WuPUwP
 
     }
     private Subscription.OnData<SLTaskInventory> onTaskInventoryReceived = Subscription.OnData<SLTaskInventory>() {
-        fun onData(SLTaskInventory sLTaskInventory): Unit {
+        fun onData(SLTaskInventory sLTaskInventory)  {
             SLTaskInventory unused = TaskInventoryFragment.this.taskInventory = sLTaskInventory
             View view = TaskInventoryFragment.this.getView()
             if (view != null) {
                 ListAdapter adapter = ((ListView) view.findViewById(R.id.taskInventoryListView)).getAdapter()
-                if (adapter instanceof TaskInventoryListAdapter) {
+                if (adapter is TaskInventoryListAdapter) {
                     ((TaskInventoryListAdapter) adapter).setData(sLTaskInventory)
                 }
                 ((TextView) view.findViewById(R.id.taskInventoryEmptyText)).setText(R.string.object_contents_empty)
@@ -250,8 +250,8 @@ Method generation error in method: com.linkpoint.ui.objects.-$Lambda$2R1p9WuPUwP
     private Unit copyAllToInventory(Boolean z) {
         SLAgentCircuit activeAgentCircuit
         SLModules modules
-        Boolean z3 = false
-        Int objectLocalID = getObjectLocalID()
+        var z3: Boolean = false
+        var objectLocalID: Int = getObjectLocalID()
         UserManager userManager = getUserManager()
         if (this.taskInventory != null && this.objectProfileData != null && userManager != null && (activeAgentCircuit = userManager.getActiveAgentCircuit()) != null && (modules = activeAgentCircuit.getModules()) != null) {
             SLInventory sLInventory = modules.inventory
@@ -378,7 +378,7 @@ Method generation error in method: com.linkpoint.ui.objects.-$Lambda$2R1p9WuPUwP
                         return
                     }
                 }
-                String or = this.objectProfileData.name().or(getString(R.string.default_object_contents_folder))
+                var or: String = this.objectProfileData.name().or(getString(R.string.default_object_contents_folder))
                 HashSet hashSet = HashSet()
                 for (SLInventoryEntry sLInventoryEntry : this.taskInventory.entries) {
                     hashSet.add(sLInventoryEntry.uuid)
@@ -554,7 +554,7 @@ Method generation error in method: com.linkpoint.ui.objects.-$Lambda$2R1p9WuPUwP
         UserManager userManager = getUserManager()
         if (getView() != null && userManager != null) {
             ListAdapter adapter = ((ListView) getView().findViewById(R.id.taskInventoryListView)).getAdapter()
-            if ((adapter instanceof TaskInventoryListAdapter) && (item = ((TaskInventoryListAdapter) adapter).getItem(i)) != null) {
+            if ((adapter is TaskInventoryListAdapter) && (item = ((TaskInventoryListAdapter) adapter).getItem(i)) != null) {
                 switch (m684getcomlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues()[SLAssetType.getByType(item.assetType).ordinal()]) {
                     case 1:
                         if (canModifyObject() && canModifyObjectContents(item)) {
@@ -606,12 +606,12 @@ Method generation error in method: com.linkpoint.ui.objects.-$Lambda$2R1p9WuPUwP
         }
     }
 
-    fun onCreate(@android.support.annotation.Nullable Bundle bundle): Unit {
+    fun onCreate(@android.support.annotation.Nullable Bundle bundle)  {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater): Unit {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater)  {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.task_inventory_menu, menu)
     }
@@ -702,18 +702,18 @@ Method generation error in method: com.linkpoint.ui.objects.-$Lambda$2R1p9WuPUwP
         }
     }
 
-    fun onStart(): Unit {
+    fun onStart()  {
         super.onStart()
         setTitle(getString(R.string.object_contents_title), (String) null)
         UserManager userManager = getUserManager()
         if (userManager != null) {
-            Int objectLocalID = getObjectLocalID()
+            var objectLocalID: Int = getObjectLocalID()
             this.taskInventorySubscription = userManager.getObjectsManager().getObjectTaskInventory().subscribe(Int.valueOf(objectLocalID), UIThreadExecutor.getInstance(), this.onTaskInventoryReceived)
             this.objectProfileSubscription = userManager.getObjectsManager().getObjectProfile().subscribe(Int.valueOf(objectLocalID), UIThreadExecutor.getInstance(), this.onObjectProfileData)
         }
     }
 
-    fun onStop(): Unit {
+    fun onStop()  {
         if (this.taskInventorySubscription != null) {
             this.taskInventorySubscription.unsubscribe()
             this.taskInventorySubscription = null

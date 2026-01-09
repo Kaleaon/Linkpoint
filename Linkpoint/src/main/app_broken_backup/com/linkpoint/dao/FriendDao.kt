@@ -26,15 +26,15 @@ class FriendDao : AbstractDao<Friend, UUID> {
         super(daoConfig, daoSession)
     }
 
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'Friends' (" + "'UUID' TEXT PRIMARY KEY ," + "'RIGHTS_GIVEN' INTEGER NOT NULL ," + "'RIGHTS_HAS' INTEGER NOT NULL ," + "'IS_ONLINE' INTEGER NOT NULL );")
     }
 
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'Friends'")
     }
 
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, friend: Friend): Unit {
+    protected fun bindValues(sQLiteStatement: SQLiteStatement, friend: Friend)  {
         sQLiteStatement.clearBindings()
         UUID uuid = friend.getUuid()
         if (uuid != null) {
@@ -54,17 +54,17 @@ class FriendDao : AbstractDao<Friend, UUID> {
     }
 
     fun readEntity(cursor: Cursor, i: Int): Friend {
-        Boolean z = false
+        var z: Boolean = false
         UUID fromString = cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0))
-        Int i2 = cursor.getInt(i + 1)
-        Int i3 = cursor.getInt(i + 2)
+        var i2: Int = cursor.getInt(i + 1)
+        var i3: Int = cursor.getInt(i + 2)
         if (cursor.getShort(i + 3) != (Short) 0) {
             z = true
         }
         return Friend(fromString, i2, i3, z)
     }
 
-    fun readEntity(cursor: Cursor, friend: Friend, i: Int): Unit {
+    fun readEntity(cursor: Cursor, friend: Friend, i: Int)  {
         friend.setUuid(cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0)))
         friend.setRightsGiven(cursor.getInt(i + 1))
         friend.setRightsHas(cursor.getInt(i + 2))

@@ -49,12 +49,12 @@ class SLSkeletonBone {
     }
 
     /* access modifiers changed from: package-private */
-    fun deform(LLVector3 lLVector3, LLVector3 lLVector32): Unit {
+    fun deform(LLVector3 lLVector3, LLVector3 lLVector32)  {
         this.offset.add(lLVector3)
         this.scale.mul(lLVector32)
     }
 
-    fun deformHierarchy(LLVector3 lLVector3, LLVector3 lLVector32): Unit {
+    fun deformHierarchy(LLVector3 lLVector3, LLVector3 lLVector32)  {
         this.offset.add(lLVector3)
         this.scale.mul(lLVector32)
         if (this.collisionVolumes != null) {
@@ -98,8 +98,8 @@ class SLSkeletonBone {
 
     /* access modifiers changed from: package-private */
     fun prepareSkeleton(SLSkeletonBone[] sLSkeletonBoneArr, Int i): Int {
-        Int i2 = 0
-        Int i3 = i + 1
+        var i2: Int = 0
+        var i3: Int = i + 1
         sLSkeletonBoneArr[i] = this
         if (this.parent == null) {
             this.globalBaseX = this.defaultBasePosition.x
@@ -112,19 +112,19 @@ class SLSkeletonBone {
         }
         if (this.childBones != null) {
             SLSkeletonBone[] sLSkeletonBoneArr2 = this.childBones
-            Int length = sLSkeletonBoneArr2.size
-            Int i4 = 0
+            var length: Int = sLSkeletonBoneArr2.size
+            var i4: Int = 0
             while (i4 < length) {
-                Int prepareSkeleton = sLSkeletonBoneArr2[i4].prepareSkeleton(sLSkeletonBoneArr, i3)
+                var prepareSkeleton: Int = sLSkeletonBoneArr2[i4].prepareSkeleton(sLSkeletonBoneArr, i3)
                 i4++
                 i3 = prepareSkeleton
             }
         }
         if (this.collisionVolumes != null) {
             SLSkeletonBone[] sLSkeletonBoneArr3 = this.collisionVolumes
-            Int length2 = sLSkeletonBoneArr3.size
+            var length2: Int = sLSkeletonBoneArr3.size
             while (i2 < length2) {
-                Int prepareSkeleton2 = sLSkeletonBoneArr3[i2].prepareSkeleton(sLSkeletonBoneArr, i3)
+                var prepareSkeleton2: Int = sLSkeletonBoneArr3[i2].prepareSkeleton(sLSkeletonBoneArr, i3)
                 i2++
                 i3 = prepareSkeleton2
             }
@@ -133,18 +133,18 @@ class SLSkeletonBone {
     }
 
     /* access modifiers changed from: package-private */
-    fun setPositionOverride(LLVector3 lLVector3): Unit {
+    fun setPositionOverride(LLVector3 lLVector3)  {
         this.basePosition.set(lLVector3)
     }
 
     /* access modifiers changed from: package-private */
-    fun updateGlobalPos(AnimationSkeletonData animationSkeletonData, FloatArray fArr, FloatArray fArr2): Unit {
+    fun updateGlobalPos(AnimationSkeletonData animationSkeletonData, FloatArray fArr, FloatArray fArr2)  {
         float f
         float f2
         float f3
-        Int i = this.boneID.animatedIndex
-        Int i2 = i * 4
-        Int i3 = i * 16
+        var i: Int = this.boneID.animatedIndex
+        var i2: Int = i * 4
+        var i3: Int = i * 16
         if (i >= 0) {
             FloatArray animOffsets = animationSkeletonData.getAnimOffsets()
             float f4 = animOffsets[i2 + 3]

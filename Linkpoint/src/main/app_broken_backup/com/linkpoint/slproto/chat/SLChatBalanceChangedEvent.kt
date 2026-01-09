@@ -17,7 +17,7 @@ class SLChatBalanceChangedEvent : SLChatEvent {
     /* JADX INFO: super call moved to the top of the method (can break code semantics) */
     SLChatBalanceChangedEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
         super(chatMessage, uuid)
-        Int i = 0
+        var i: Int = 0
         this.transactionAmountValid = chatMessage.getTransactionAmount() != null
         this.transactionAmount = chatMessage.getTransactionAmount() != null ? chatMessage.getTransactionAmount().intValue() : i
         this.newBalance = chatMessage.getNewBalance().intValue()
@@ -43,7 +43,7 @@ class SLChatBalanceChangedEvent : SLChatEvent {
     /* access modifiers changed from: protected */
     fun getText(Context context, @NonNull UserManager userManager): String {
         if (this.transactionAmountValid) {
-            String sourceName = this.source.getSourceName(userManager)
+            var sourceName: String = this.source.getSourceName(userManager)
             if (sourceName != null) {
                 if (this.transactionAmount >= 0) {
                     return context.getString(R.string.you_were_paid_by_agent, Array<Any>{Integer.valueOf(this.transactionAmount), Integer.valueOf(getNewBalance())})
@@ -80,7 +80,7 @@ class SLChatBalanceChangedEvent : SLChatEvent {
         return false
     }
 
-    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage)  {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setTransactionAmount(this.transactionAmountValid ? Integer.valueOf(this.transactionAmount) : null)
         chatMessage.setNewBalance(Integer.valueOf(this.newBalance))

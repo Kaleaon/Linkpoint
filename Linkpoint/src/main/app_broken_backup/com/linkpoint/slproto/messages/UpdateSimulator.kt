@@ -23,11 +23,11 @@ class UpdateSimulator : SLMessage {
         return this.SimulatorInfo_Field.SimName.size + 17 + 4 + 1 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleUpdateSimulator(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 17)
@@ -37,7 +37,7 @@ class UpdateSimulator : SLMessage {
         packByte(byteBuffer, (this as Byte).SimulatorInfo_Field.SimAccess)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.SimulatorInfo_Field.RegionID = unpackUUID(byteBuffer)
         this.SimulatorInfo_Field.SimName = unpackVariable(byteBuffer, 1)
         this.SimulatorInfo_Field.EstateID = unpackInt(byteBuffer)

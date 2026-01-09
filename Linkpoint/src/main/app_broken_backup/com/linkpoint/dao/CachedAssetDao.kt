@@ -26,17 +26,17 @@ class CachedAssetDao : AbstractDao<CachedAsset, String> {
         super(daoConfig, daoSession)
     }
 
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'CachedAssets' (" + "'KEY' TEXT PRIMARY KEY NOT NULL ," + "'STATUS' INTEGER NOT NULL ," + "'DATA' BLOB," + "'MUST_REVALIDATE' INTEGER NOT NULL );")
     }
 
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'CachedAssets'")
     }
 
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, cachedAsset: CachedAsset): Unit {
+    protected fun bindValues(sQLiteStatement: SQLiteStatement, cachedAsset: CachedAsset)  {
         sQLiteStatement.clearBindings()
-        String key = cachedAsset.getKey()
+        var key: String = cachedAsset.getKey()
         if (key != null) {
             sQLiteStatement.bindString(1, key)
         }
@@ -58,9 +58,9 @@ class CachedAssetDao : AbstractDao<CachedAsset, String> {
 
     fun readEntity(cursor: Cursor, i: Int): CachedAsset {
         ByteArray bArr = null
-        Boolean z = false
-        String string = cursor.isNull(i + 0) ? null : cursor.getString(i + 0)
-        Int i2 = cursor.getInt(i + 1)
+        var z: Boolean = false
+        var string: String = cursor.isNull(i + 0) ? null : cursor.getString(i + 0)
+        var i2: Int = cursor.getInt(i + 1)
         if (!cursor.isNull(i + 2)) {
             bArr = cursor.getBlob(i + 2)
         }
@@ -70,7 +70,7 @@ class CachedAssetDao : AbstractDao<CachedAsset, String> {
         return CachedAsset(string, i2, bArr, z)
     }
 
-    fun readEntity(cursor: Cursor, cachedAsset: CachedAsset, i: Int): Unit {
+    fun readEntity(cursor: Cursor, cachedAsset: CachedAsset, i: Int)  {
         ByteArray bArr = null
         cachedAsset.setKey(cursor.isNull(i + 0) ? null : cursor.getString(i + 0))
         cachedAsset.setStatus(cursor.getInt(i + 1))

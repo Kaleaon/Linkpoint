@@ -41,11 +41,11 @@ class SimStats : SLMessage {
         return (this.Stat_Fields.size() * 8) + 21 + 4 + 1 + (this.RegionInfo_Fields.size() * 8)
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleSimStats(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -116)
@@ -65,7 +65,7 @@ class SimStats : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.Region_Field.RegionX = unpackInt(byteBuffer)
         this.Region_Field.RegionY = unpackInt(byteBuffer)
         this.Region_Field.RegionFlags = unpackInt(byteBuffer)

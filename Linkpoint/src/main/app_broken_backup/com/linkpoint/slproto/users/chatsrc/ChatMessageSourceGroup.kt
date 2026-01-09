@@ -39,7 +39,7 @@ class ChatMessageSourceGroup : ChatMessageSource {
         return this.uuid
     }
 
-    fun serializeTo(@NonNull ChatMessage chatMessage): Unit {
+    fun serializeTo(@NonNull ChatMessage chatMessage)  {
         super.serializeTo(chatMessage)
         chatMessage.setSenderUUID(this.uuid)
         chatMessage.setSenderName(this.name)

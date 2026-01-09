@@ -23,11 +23,11 @@ import androidx.annotation.Nullable
 
 class SingleObjectPopupFragment : Fragment {
     private SwipeDismissAdvancedBehavior.OnDismissListener dismissListener = SwipeDismissAdvancedBehavior.OnDismissListener() {
-        fun onDismiss(View view): Unit {
+        fun onDismiss(View view)  {
             SingleObjectPopupFragment.this.hideAndDismiss()
         }
 
-        fun onDragStateChanged(Int i): Unit {
+        fun onDragStateChanged(Int i)  {
         }
     }
     private View.OnClickListener frameClickListener = $Lambda$gmgx9kG_frukRCwYiu6KI4GSv6k(this)
@@ -53,9 +53,9 @@ class SingleObjectPopupFragment : Fragment {
     }
 
     /* access modifiers changed from: private */
-    fun hideAndDismiss(): Unit {
+    fun hideAndDismiss()  {
         FragmentActivity activity = getActivity()
-        if (activity instanceof ConnectedActivity) {
+        if (activity is ConnectedActivity) {
             ((ConnectedActivity) activity).dismissSingleObjectPopup()
         }
     }
@@ -92,7 +92,7 @@ class SingleObjectPopupFragment : Fragment {
             sLChatEvent.bindViewHolder(createViewHolder, userManager, (ChatEventTimestampUpdater) null)
             coordinatorLayout.addView(createViewHolder.itemView)
             ViewGroup.LayoutParams layoutParams = createViewHolder.itemView.getLayoutParams()
-            if (layoutParams instanceof CoordinatorLayout.LayoutParams) {
+            if (layoutParams is CoordinatorLayout.LayoutParams) {
                 SwipeDismissAdvancedBehavior swipeDismissAdvancedBehavior = SwipeDismissAdvancedBehavior()
                 swipeDismissAdvancedBehavior.setSwipeDirection(7)
                 swipeDismissAdvancedBehavior.setListener(this.dismissListener)
@@ -109,14 +109,14 @@ class SingleObjectPopupFragment : Fragment {
         return inflate
     }
 
-    fun onResume(): Unit {
+    fun onResume()  {
         super.onResume()
         if (getEvent() == null) {
             hideAndDismiss()
         }
     }
 
-    fun onStart(): Unit {
+    fun onStart()  {
         super.onStart()
         if (getEvent() == null) {
             hideAndDismiss()

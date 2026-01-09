@@ -114,7 +114,7 @@ class SLChatInventoryItemOfferedEvent : SLChatYesNoEvent {
     }
 
     /* access modifiers changed from: protected */
-    fun onNoAction(Context context, UserManager userManager): Unit {
+    fun onNoAction(Context context, UserManager userManager)  {
         super.onNoAction(context, userManager)
         UUID sourceUUID = this.source.getSourceUUID()
         SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
@@ -126,7 +126,7 @@ class SLChatInventoryItemOfferedEvent : SLChatYesNoEvent {
         }
     }
 
-    fun onOfferAccepted(Context context, UserManager userManager, UUID uuid): Unit {
+    fun onOfferAccepted(Context context, UserManager userManager, UUID uuid)  {
         super.onYesAction(context, userManager)
         SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
@@ -137,13 +137,13 @@ class SLChatInventoryItemOfferedEvent : SLChatYesNoEvent {
         }
     }
 
-    fun onYesAction(Context context, UserManager userManager): Unit {
+    fun onYesAction(Context context, UserManager userManager)  {
         if (this.dbMessage != null) {
             context.startActivity(InventoryActivity.makeSaveItemIntent(context, this.agentUUID, InventorySaveInfo(InventorySaveInfo.InventorySaveType.InventoryOffer, this.itemID, getItemName(), (UUID) null, this.assetType, this.dbMessage.getId().longValue())))
         }
     }
 
-    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage)  {
         Integer num = null
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setOrigIMType(Integer.valueOf(this.origIMType))

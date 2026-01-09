@@ -28,11 +28,11 @@ class ScriptDialogReply : SLMessage {
         return this.Data_Field.ButtonLabel.size + 25 + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleScriptDialogReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -65)
@@ -44,7 +44,7 @@ class ScriptDialogReply : SLMessage {
         packVariable(byteBuffer, this.Data_Field.ButtonLabel, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.Data_Field.ObjectID = unpackUUID(byteBuffer)

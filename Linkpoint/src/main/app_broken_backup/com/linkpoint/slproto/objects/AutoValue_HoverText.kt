@@ -20,7 +20,7 @@ class AutoValue_HoverText : HoverText {
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof HoverText)) {
+        if (!(obj is HoverText)) {
             return false
         }
         HoverText hoverText = (HoverText) obj

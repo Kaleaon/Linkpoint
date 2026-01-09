@@ -47,7 +47,7 @@ class vx_resp_aux_diagnostic_state_dump_t {
      * Lifted jumps to return sites
      */
     vx_resp_base_t getBase() {
-        Long l = VxClientProxyJNI.vx_resp_aux_diagnostic_state_dump_t_base_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_aux_diagnostic_state_dump_t_base_get(this.swigCPtr, this)
         if (l != 0L) return vx_resp_base_t(l, false)
         return null
     }
@@ -57,7 +57,7 @@ class vx_resp_aux_diagnostic_state_dump_t {
      * Lifted jumps to return sites
      */
     vx_device_t getCurrent_capture_device() {
-        Long l = VxClientProxyJNI.vx_resp_aux_diagnostic_state_dump_t_current_capture_device_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_aux_diagnostic_state_dump_t_current_capture_device_get(this.swigCPtr, this)
         if (l != 0L) return vx_device_t(l, false)
         return null
     }
@@ -67,7 +67,7 @@ class vx_resp_aux_diagnostic_state_dump_t {
      * Lifted jumps to return sites
      */
     vx_device_t getCurrent_render_device() {
-        Long l = VxClientProxyJNI.vx_resp_aux_diagnostic_state_dump_t_current_render_device_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_aux_diagnostic_state_dump_t_current_render_device_get(this.swigCPtr, this)
         if (l != 0L) return vx_device_t(l, false)
         return null
     }
@@ -77,7 +77,7 @@ class vx_resp_aux_diagnostic_state_dump_t {
      * Lifted jumps to return sites
      */
     vx_device_t getEffective_capture_device() {
-        Long l = VxClientProxyJNI.vx_resp_aux_diagnostic_state_dump_t_effective_capture_device_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_aux_diagnostic_state_dump_t_effective_capture_device_get(this.swigCPtr, this)
         if (l != 0L) return vx_device_t(l, false)
         return null
     }
@@ -87,7 +87,7 @@ class vx_resp_aux_diagnostic_state_dump_t {
      * Lifted jumps to return sites
      */
     vx_device_t getEffective_render_device() {
-        Long l = VxClientProxyJNI.vx_resp_aux_diagnostic_state_dump_t_effective_render_device_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_aux_diagnostic_state_dump_t_effective_render_device_get(this.swigCPtr, this)
         if (l != 0L) return vx_device_t(l, false)
         return null
     }
@@ -101,7 +101,7 @@ class vx_resp_aux_diagnostic_state_dump_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_p_vx_state_connector getState_connectors() {
-        Long l = VxClientProxyJNI.vx_resp_aux_diagnostic_state_dump_t_state_connectors_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_aux_diagnostic_state_dump_t_state_connectors_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_p_vx_state_connector(l, false)
         return null
     }

@@ -39,7 +39,7 @@ class AutoValue_AssetKey : AssetKey {
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof AssetKey)) {
+        if (!(obj is AssetKey)) {
             return false
         }
         AssetKey assetKey = (AssetKey) obj
@@ -50,8 +50,8 @@ class AutoValue_AssetKey : AssetKey {
     }
 
     fun hashCode(): Int {
-        Int i = 0
-        Int hashCode = ((this.itemUUID == null ? 0 : this.itemUUID.hashCode()) ^ (((this.ownerUUID == null ? 0 : this.ownerUUID.hashCode()) ^ (((((this.assetUUID == null ? 0 : this.assetUUID.hashCode()) ^ ((((this.channelType ^ 1000003) * 1000003) ^ this.sourceType) * 1000003)) * 1000003) ^ this.assetType) * 1000003)) * 1000003)) * 1000003
+        var i: Int = 0
+        var hashCode: Int = ((this.itemUUID == null ? 0 : this.itemUUID.hashCode()) ^ (((this.ownerUUID == null ? 0 : this.ownerUUID.hashCode()) ^ (((((this.assetUUID == null ? 0 : this.assetUUID.hashCode()) ^ ((((this.channelType ^ 1000003) * 1000003) ^ this.sourceType) * 1000003)) * 1000003) ^ this.assetType) * 1000003)) * 1000003)) * 1000003
         if (this.taskUUID != null) {
             i = this.taskUUID.hashCode()
         }

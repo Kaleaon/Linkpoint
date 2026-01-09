@@ -14,7 +14,7 @@ class PrimFlexibleParams {
     Float WindSensitivity
 
     PrimFlexibleParams(ByteBuffer byteBuffer, Int i) {
-        Int i2 = 0
+        var i2: Int = 0
         Byte b = byteBuffer.get()
         Byte b2 = byteBuffer.get()
         this.Tension = ((Float) (b & Ascii.DEL)) / 10.0f
@@ -34,7 +34,7 @@ class PrimFlexibleParams {
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof PrimFlexibleParams)) {
+        if (!(obj is PrimFlexibleParams)) {
             return false
         }
         PrimFlexibleParams primFlexibleParams = (PrimFlexibleParams) obj

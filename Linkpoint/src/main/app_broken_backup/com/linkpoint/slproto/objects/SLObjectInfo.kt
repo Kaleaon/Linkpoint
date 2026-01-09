@@ -1,5 +1,7 @@
 package com.linkpoint.slproto.objects
 
+import kotlin.math.*
+
 import android.opengl.Matrix
 import com.google.common.base.Ascii
 import com.google.common.base.Objects
@@ -675,12 +677,12 @@ abstract class SLObjectInfo : Identifiable<UUID>, SLObjectDisplayInfo {
             maxExt.y = fArr[5]
             maxExt.z = fArr[6]
         } else {
-            minExt.x = Math.min(minExt.x, fArr[4])
-            minExt.y = Math.min(minExt.y, fArr[5])
-            minExt.z = Math.min(minExt.z, fArr[6])
-            maxExt.x = Math.max(maxExt.x, fArr[4])
-            maxExt.y = Math.max(maxExt.y, fArr[5])
-            maxExt.z = Math.max(maxExt.z, fArr[6])
+            minExt.x = min(minExt.x, fArr[4])
+            minExt.y = min(minExt.y, fArr[5])
+            minExt.z = min(minExt.z, fArr[6])
+            maxExt.x = max(maxExt.x, fArr[4])
+            maxExt.y = max(maxExt.y, fArr[5])
+            maxExt.z = max(maxExt.z, fArr[6])
         }
         
         fArr[0] = data[offset1 + 0] / 2.0f
@@ -690,12 +692,12 @@ abstract class SLObjectInfo : Identifiable<UUID>, SLObjectDisplayInfo {
         
         Matrix.multiplyMV(fArr, 4, matrixStack.matrixData, matrixStack.matrixDataOffset, fArr, 0)
         
-        minExt.x = Math.min(minExt.x, fArr[4])
-        minExt.y = Math.min(minExt.y, fArr[5])
-        minExt.z = Math.min(minExt.z, fArr[6])
-        maxExt.x = Math.max(maxExt.x, fArr[4])
-        maxExt.y = Math.max(maxExt.y, fArr[5])
-        maxExt.z = Math.max(maxExt.z, fArr[6])
+        minExt.x = min(minExt.x, fArr[4])
+        minExt.y = min(minExt.y, fArr[5])
+        minExt.z = min(minExt.z, fArr[6])
+        maxExt.x = max(maxExt.x, fArr[4])
+        maxExt.y = max(maxExt.y, fArr[5])
+        maxExt.z = max(maxExt.z, fArr[6])
         
         for (child in treeNode) {
             child.getObjectExtents(matrixStack, false, minExt, maxExt)

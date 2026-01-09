@@ -25,10 +25,10 @@ class AlertMessage : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int length = this.AlertData_Field.Message.size + 1 + 4 + 1
+        var length: Int = this.AlertData_Field.Message.size + 1 + 4 + 1
         Iterator<T> it = this.AlertInfo_Fields.iterator()
         while (true) {
-            Int i = length
+            var i: Int = length
             if (!it.hasNext()) {
                 return i
             }
@@ -37,11 +37,11 @@ class AlertMessage : SLMessage {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleAlertMessage(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -122)
@@ -53,7 +53,7 @@ class AlertMessage : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AlertData_Field.Message = unpackVariable(byteBuffer, 1)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (i in 0 until b) {

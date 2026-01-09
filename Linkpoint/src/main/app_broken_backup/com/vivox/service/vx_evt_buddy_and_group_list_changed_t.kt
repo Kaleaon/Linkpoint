@@ -51,7 +51,7 @@ class vx_evt_buddy_and_group_list_changed_t {
      * Lifted jumps to return sites
      */
     vx_evt_base_t getBase() {
-        Long l = VxClientProxyJNI.vx_evt_buddy_and_group_list_changed_t_base_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_evt_buddy_and_group_list_changed_t_base_get(this.swigCPtr, this)
         if (l != 0L) return vx_evt_base_t(l, false)
         return null
     }
@@ -61,7 +61,7 @@ class vx_evt_buddy_and_group_list_changed_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_p_vx_buddy getBuddies() {
-        Long l = VxClientProxyJNI.vx_evt_buddy_and_group_list_changed_t_buddies_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_evt_buddy_and_group_list_changed_t_buddies_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_p_vx_buddy(l, false)
         return null
     }
@@ -79,7 +79,7 @@ class vx_evt_buddy_and_group_list_changed_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_p_vx_group getGroups() {
-        Long l = VxClientProxyJNI.vx_evt_buddy_and_group_list_changed_t_groups_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_evt_buddy_and_group_list_changed_t_groups_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_p_vx_group(l, false)
         return null
     }

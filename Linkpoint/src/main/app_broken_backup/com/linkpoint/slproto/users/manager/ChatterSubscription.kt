@@ -80,7 +80,7 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
 
     /* access modifiers changed from: private */
     /* renamed from: onUnreadCountChanged */
-    fun m298com_lumiyaviewer_lumiya_slproto_users_manager_ChatterSubscriptionmthref1(UnreadMessageInfo unreadMessageInfo): Unit {
+    fun m298com_lumiyaviewer_lumiya_slproto_users_manager_ChatterSubscriptionmthref1(UnreadMessageInfo unreadMessageInfo)  {
         if (unreadMessageInfo != null) {
             setChatterDisplayData(this.displayData.withUnreadInfo(unreadMessageInfo))
         }
@@ -88,8 +88,8 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceChatInfoChanged */
-    fun m297com_lumiyaviewer_lumiya_slproto_users_manager_ChatterSubscriptionmthref0(VoiceChatInfo voiceChatInfo): Unit {
-        Boolean z = false
+    fun m297com_lumiyaviewer_lumiya_slproto_users_manager_ChatterSubscriptionmthref0(VoiceChatInfo voiceChatInfo)  {
+        var z: Boolean = false
         ChatterDisplayData chatterDisplayData = this.displayData
         if (!(voiceChatInfo == null || voiceChatInfo.state == VoiceChatInfo.VoiceChatState.None)) {
             z = true
@@ -97,19 +97,19 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
         setChatterDisplayData(chatterDisplayData.withVoiceActive(z))
     }
 
-    fun dispose(): Unit {
+    fun dispose()  {
         unsubscribe()
         this.chatterList.removeChatter(this.displayData)
     }
 
     /* access modifiers changed from: package-private */
-    fun setChatterDisplayData(@NonNull ChatterDisplayData chatterDisplayData): Unit {
+    fun setChatterDisplayData(@NonNull ChatterDisplayData chatterDisplayData)  {
         ChatterDisplayData chatterDisplayData2 = this.displayData
         this.displayData = chatterDisplayData
         this.chatterList.replaceChatter(chatterDisplayData2, this.displayData)
     }
 
-    fun unsubscribe(): Unit {
+    fun unsubscribe()  {
         this.unreadCountSubscription.unsubscribe()
         this.voiceChatInfoSubscription.unsubscribe()
     }

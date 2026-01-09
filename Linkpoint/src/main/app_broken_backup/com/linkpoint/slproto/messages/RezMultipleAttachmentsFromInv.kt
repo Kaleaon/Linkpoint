@@ -42,10 +42,10 @@ class RezMultipleAttachmentsFromInv : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int i = 55
+        var i: Int = 55
         Iterator<T> it = this.ObjectData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            var i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -54,11 +54,11 @@ class RezMultipleAttachmentsFromInv : SLMessage {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleRezMultipleAttachmentsFromInv(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -116)
@@ -81,7 +81,7 @@ class RezMultipleAttachmentsFromInv : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.HeaderData_Field.CompoundMsgID = unpackUUID(byteBuffer)

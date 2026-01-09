@@ -28,14 +28,14 @@ class LLSDContentTypeDetector {
             r2 = {-17, -69, -65} // fill-array
             r0 = 32
             ByteArray r4 = byte[r0]
-            Int r0 = r4.size
-            Int r5 = r11.read(r4, r1, r0)
-            Int r0 = r2.size
+            var r0: Int = r4.size
+            var r5: Int = r11.read(r4, r1, r0)
+            var r0: Int = r2.size
             if (r5 < r0) goto L_0x00c7
             r0 = r1
         L_0x001a:
             if (r0 >= r5) goto L_0x008c
-            Int r6 = r2.size
+            var r6: Int = r2.size
             if (r0 >= r6) goto L_0x008c
             byte r6 = r4[r0]
             byte r7 = r2[r0]
@@ -43,20 +43,20 @@ class LLSDContentTypeDetector {
             r0 = r1
         L_0x0026:
             if (r0 == 0) goto L_0x00c7
-            Int r0 = r2.size
+            var r0: Int = r2.size
         L_0x0029:
             java.lang.String r6 = java.lang.String
-            Int r2 = r5 - r0
+            var r2: Int = r5 - r0
             java.lang.String r5 = "UTF-8"
             r6.<init>(r4, r0, r2, r5)
             r11.reset()
-            Long r4 = (Long) r0
+            var r4: Long = (Long) r0
             r11.skip(r4)
             java.lang.String r2 = "<llsd>"
-            Boolean r2 = r6.startsWith(r2)
+            var r2: Boolean = r6.startsWith(r2)
             if (r2 != 0) goto L_0x004c
             java.lang.String r2 = "<?xml"
-            Boolean r2 = r6.startsWith(r2)
+            var r2: Boolean = r6.startsWith(r2)
             if (r2 == 0) goto L_0x0091
         L_0x004c:
             r2 = r3
@@ -84,7 +84,7 @@ class LLSDContentTypeDetector {
         L_0x0073:
             if (r2 != 0) goto L_0x007f
             java.lang.String r0 = "application/llsd+binary"
-            Boolean r0 = r12.equalsIgnoreCase(r0)
+            var r0: Boolean = r12.equalsIgnoreCase(r0)
             if (r0 == 0) goto L_0x007f
             r4 = r3
         L_0x007f:
@@ -98,17 +98,17 @@ class LLSDContentTypeDetector {
             r0 = r3
             goto L_0x0026
         L_0x008e:
-            Int r0 = r0 + 1
+            var r0: Int = r0 + 1
             goto L_0x001a
         L_0x0091:
             java.lang.String r2 = "<? LLSD/Binary ?>"
-            Boolean r2 = r6.startsWith(r2)
+            var r2: Boolean = r6.startsWith(r2)
             if (r2 != 0) goto L_0x00ac
             java.lang.String r2 = "{"
-            Boolean r2 = r6.startsWith(r2)
+            var r2: Boolean = r6.startsWith(r2)
             if (r2 != 0) goto L_0x00ac
             java.lang.String r2 = "<?llsd/binary"
-            Boolean r2 = r6.startsWith(r2)
+            var r2: Boolean = r6.startsWith(r2)
             if (r2 == 0) goto L_0x00c4
         L_0x00ac:
             r2 = r1

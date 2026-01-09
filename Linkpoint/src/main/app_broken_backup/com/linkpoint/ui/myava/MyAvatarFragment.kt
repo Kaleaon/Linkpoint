@@ -82,10 +82,10 @@ class MyAvatarFragment : FragmentWithTitle : AdapterView.OnItemClickListener, Ch
             String string
             View view2 = super.getView(i, view, viewGroup)
             MyAvatarDetailsPages myAvatarDetailsPages = (MyAvatarDetailsPages) getItem(i)
-            if ((view2 instanceof TextView) && myAvatarDetailsPages != null) {
+            if ((view2 is TextView) && myAvatarDetailsPages != null) {
                 switch (m655getcomlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues()[myAvatarDetailsPages.ordinal()]) {
                     case 1:
-                        Int num = MyAvatarFragment.toInt().this.myBalance.getData()
+                        var num: Int = MyAvatarFragment.toInt().this.myBalance.getData()
                         if (num != null) {
                             string = MyAvatarFragment.this.getString(R.string.my_ava_balance_title, num)
                         } else {
@@ -146,17 +146,17 @@ class MyAvatarFragment : FragmentWithTitle : AdapterView.OnItemClickListener, Ch
 
     /* access modifiers changed from: private */
     /* renamed from: onMyBalance */
-    fun m654com_lumiyaviewer_lumiya_ui_myava_MyAvatarFragmentmthref0(Int num): Unit {
+    fun m654com_lumiyaviewer_lumiya_ui_myava_MyAvatarFragmentmthref0(Int num)  {
         if (this.unbinder != null) {
             ListAdapter adapter = this.myAvatarOptionsList.getAdapter()
-            if (adapter instanceof MyAvatarPagesAdapter) {
+            if (adapter is MyAvatarPagesAdapter) {
                 ((MyAvatarPagesAdapter) adapter).notifyDataSetChanged()
             }
         }
     }
 
-    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever): Unit {
-        String resolvedName = chatterNameRetriever.getResolvedName()
+    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever)  {
+        var resolvedName: String = chatterNameRetriever.getResolvedName()
         if (this.unbinder != null) {
             this.myAvatarName.setText(resolvedName != null ? resolvedName : getString(R.string.name_loading_title))
             this.myAvatarPic.setChatterID(chatterNameRetriever.chatterID, resolvedName)
@@ -173,7 +173,7 @@ class MyAvatarFragment : FragmentWithTitle : AdapterView.OnItemClickListener, Ch
         return inflate
     }
 
-    fun onDestroyView(): Unit {
+    fun onDestroyView()  {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -181,10 +181,10 @@ class MyAvatarFragment : FragmentWithTitle : AdapterView.OnItemClickListener, Ch
         super.onDestroyView()
     }
 
-    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j): Unit {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j)  {
         UUID agentUUID = getAgentUUID()
         Any itemAtPosition = adapterView.getItemAtPosition(i)
-        if ((itemAtPosition instanceof MyAvatarDetailsPages) && agentUUID != null) {
+        if ((itemAtPosition is MyAvatarDetailsPages) && agentUUID != null) {
             switch (m653getcomlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues()[((MyAvatarDetailsPages) itemAtPosition).ordinal()]) {
                 case 1:
                     DetailsActivity.showEmbeddedDetails(getActivity(), TransactionLogFragment.class, TransactionLogFragment.makeSelection(agentUUID))
@@ -204,7 +204,7 @@ class MyAvatarFragment : FragmentWithTitle : AdapterView.OnItemClickListener, Ch
         }
     }
 
-    fun onStart(): Unit {
+    fun onStart()  {
         super.onStart()
         UUID agentUUID = getAgentUUID()
         UserManager userManager = UserManager.getUserManager(agentUUID)
@@ -216,7 +216,7 @@ class MyAvatarFragment : FragmentWithTitle : AdapterView.OnItemClickListener, Ch
         }
     }
 
-    fun onStop(): Unit {
+    fun onStop()  {
         if (this.myAvatarNameRetriever != null) {
             this.myAvatarNameRetriever.dispose()
             this.myAvatarNameRetriever = null

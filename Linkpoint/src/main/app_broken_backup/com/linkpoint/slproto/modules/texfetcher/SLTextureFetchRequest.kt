@@ -96,7 +96,7 @@ class SLTextureFetchRequest : HasPriority {
         return getPriorityForClass(this.textureClass, this.visibleRangeCategory)
     }
 
-    fun setOnFetchComplete(TextureFetchCompleteListener textureFetchCompleteListener): Unit {
+    fun setOnFetchComplete(TextureFetchCompleteListener textureFetchCompleteListener)  {
         this.onFetchComplete = textureFetchCompleteListener
     }
 }

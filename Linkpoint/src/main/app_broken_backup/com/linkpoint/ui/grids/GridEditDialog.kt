@@ -47,12 +47,12 @@ class GridEditDialog : AppCompatDialog : View.OnClickListener {
         findViewById(R.id.gridNameText).requestFocus()
     }
 
-    fun onClick(View view): Unit {
-        Boolean z = false
+    fun onClick(View view)  {
+        var z: Boolean = false
         switch (view.getId()) {
             case R.id.okButton:
-                String charSequence = ((TextView) findViewById(R.id.gridNameText)).getText().toString()
-                String charSequence2 = ((TextView) findViewById(R.id.gridLoginURIText)).getText().toString()
+                var charSequence: String = ((TextView) findViewById(R.id.gridNameText)).getText().toString()
+                var charSequence2: String = ((TextView) findViewById(R.id.gridLoginURIText)).getText().toString()
                 if (charSequence.equals("")) {
                     Toast.makeText(getContext(), getContext().getString(R.string.grid_name_empty_error), 0).show()
                     return
@@ -99,7 +99,7 @@ class GridEditDialog : AppCompatDialog : View.OnClickListener {
         }
     }
 
-    fun onCreate(Bundle bundle): Unit {
+    fun onCreate(Bundle bundle)  {
         super.onCreate(bundle)
         setTitle(R.toInt().string.new_grid_dialog_title)
         setContentView(R.toInt().layout.grid_edit_dialog)
@@ -109,7 +109,7 @@ class GridEditDialog : AppCompatDialog : View.OnClickListener {
         prepare()
     }
 
-    fun setOnGridEditResultListener(OnGridEditResultListener onGridEditResultListener2): Unit {
+    fun setOnGridEditResultListener(OnGridEditResultListener onGridEditResultListener2)  {
         this.onGridEditResultListener = onGridEditResultListener2
     }
 }

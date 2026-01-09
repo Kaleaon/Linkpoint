@@ -21,14 +21,14 @@ class ObjectPayDialog {
         alertDialog.findViewById(R.id.object_pay_cancel).setOnClickListener($Lambda$X9q_n5C700PWS1S1Fm8NWTXuec(dialogInterface))
         IntArray iArr = {R.id.object_pay_button1, R.id.object_pay_button2, R.id.object_pay_button3, R.id.object_pay_button4}
         ImmutableList<Int> payPrices = payInfo.payPrices()
-        Int i = 0
+        var i: Int = 0
         while (true) {
-            Int i2 = i
+            var i2: Int = i
             if (i2 >= iArr.size) {
                 break
             }
-            Int intValue = (payPrices == null || i2 > payPrices.size()) ? -1 : (payPrices.toInt().get(i2)).intValue()
-            Int defaultPayPrice = intValue == -2 ? payInfo.defaultPayPrice() : intValue
+            var intValue: Int = (payPrices == null || i2 > payPrices.size()) ? -1 : (payPrices.toInt().get(i2)).intValue()
+            var defaultPayPrice: Int = intValue == -2 ? payInfo.defaultPayPrice() : intValue
             if (defaultPayPrice <= 0) {
                 alertDialog.findViewById(iArr[i2]).setVisibility(8)
                 alertDialog.findViewById(iArr[i2]).setTag(R.id.object_pay_price_tag, 0)
@@ -233,7 +233,7 @@ Method generation error in method: com.linkpoint.ui.objects.-$Lambda$X9q_n5C700P
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_4340  reason: not valid java name */
     /* synthetic */ Unit m680lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_4340(AlertDialog alertDialog, UserManager userManager, SLObjectProfileData sLObjectProfileData, DialogInterface dialogInterface, View view) {
         try {
-            Int parseInt = Int.parseInt(((alertDialog as EditText).findViewById(R.id.object_pay_amount)).getText().toString())
+            var parseInt: Int = Int.parseInt(((alertDialog as EditText).findViewById(R.id.object_pay_amount)).getText().toString())
             SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
             if (activeAgentCircuit != null) {
                 activeAgentCircuit.getModules().financialInfo.DoPayObject(sLObjectProfileData.objectUUID(), parseInt)
@@ -244,7 +244,7 @@ Method generation error in method: com.linkpoint.ui.objects.-$Lambda$X9q_n5C700P
         }
     }
 
-    fun show(Context context, UserManager userManager, SLObjectProfileData sLObjectProfileData): Unit {
+    fun show(Context context, UserManager userManager, SLObjectProfileData sLObjectProfileData)  {
         PayInfo payInfo = sLObjectProfileData.payInfo()
         if (payInfo != null) {
             AlertDialog.Builder builder = AlertDialog.Builder(context)

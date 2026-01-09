@@ -162,8 +162,8 @@ class VoicePluginServiceConnection : ServiceConnection {
             return iArr
         }
 
-        fun handleMessage(Message message): Unit {
-            if (message.what == 200 && (message.obj instanceof Bundle)) {
+        fun handleMessage(Message message)  {
+            if (message.what == 200 && (message.obj is Bundle)) {
                 Bundle bundle = (Bundle) message.obj
                 if (bundle.containsKey("message") && bundle.containsKey("messageType")) {
                     try {
@@ -250,7 +250,7 @@ class VoicePluginServiceConnection : ServiceConnection {
     }
 
     /* access modifiers changed from: private */
-    fun onVoiceAudioProperties(VoiceAudioProperties voiceAudioProperties): Unit {
+    fun onVoiceAudioProperties(VoiceAudioProperties voiceAudioProperties)  {
         VoiceBluetoothState voiceBluetoothState = null
         Any[] objArr = Any[1]
         if (voiceAudioProperties != null) {
@@ -265,7 +265,7 @@ class VoicePluginServiceConnection : ServiceConnection {
     }
 
     /* access modifiers changed from: private */
-    fun onVoiceChannelStatus(VoiceChannelStatus voiceChannelStatus): Unit {
+    fun onVoiceChannelStatus(VoiceChannelStatus voiceChannelStatus)  {
         SLModules modules
         if (voiceChannelStatus.chatInfo.state == VoiceChatInfo.VoiceChatState.None) {
             cancelNotifications(voiceChannelStatus.channelInfo.voiceChannelURI)
@@ -275,7 +275,7 @@ class VoicePluginServiceConnection : ServiceConnection {
             ChatterID chatterID = (ChatterID) this.voiceChannels.inverse().get(voiceChannelStatus.channelInfo)
             if (chatterID != null) {
                 userManager2.setVoiceChatInfo(chatterID, voiceChannelStatus.chatInfo)
-                if (voiceChannelStatus.chatInfo.state == VoiceChatInfo.VoiceChatState.None && voiceChannelStatus.chatInfo.previousState == VoiceChatInfo.VoiceChatState.Ringing && (chatterID instanceof ChatterID.ChatterIDUser)) {
+                if (voiceChannelStatus.chatInfo.state == VoiceChatInfo.VoiceChatState.None && voiceChannelStatus.chatInfo.previousState == VoiceChatInfo.VoiceChatState.Ringing && (chatterID is ChatterID.ChatterIDUser)) {
                     userManager2.getChatterList().getActiveChattersManager().HandleChatEvent(chatterID, SLMissedVoiceCallEvent(ChatMessageSourceUser(((ChatterID.ChatterIDUser) chatterID).getChatterUUID()), userManager2.getUserID(), LumiyaApp.getContext().getString(R.string.missed_voice_call)), true)
                 }
                 if (voiceChannelStatus.chatInfo.state == VoiceChatInfo.VoiceChatState.Active) {
@@ -290,7 +290,7 @@ class VoicePluginServiceConnection : ServiceConnection {
     }
 
     /* access modifiers changed from: private */
-    fun onVoiceInitializeReply(VoiceInitializeReply voiceInitializeReply): Unit {
+    fun onVoiceInitializeReply(VoiceInitializeReply voiceInitializeReply)  {
         if (!voiceInitializeReply.appVersionOk) {
             UserManager userManager2 = this.userManager.get()
             if (userManager2 != null) {
@@ -316,7 +316,7 @@ class VoicePluginServiceConnection : ServiceConnection {
     }
 
     /* access modifiers changed from: private */
-    fun onVoiceLoginStatus(VoiceLoginStatus voiceLoginStatus): Unit {
+    fun onVoiceLoginStatus(VoiceLoginStatus voiceLoginStatus)  {
         SLModules modules
         UserManager userManager2 = this.userManager.get()
         if (userManager2 != null) {
@@ -329,7 +329,7 @@ class VoicePluginServiceConnection : ServiceConnection {
     }
 
     /* access modifiers changed from: private */
-    fun onVoiceRinging(VoiceRinging voiceRinging): Unit {
+    fun onVoiceRinging(VoiceRinging voiceRinging)  {
         UserManager userManager2 = this.userManager.get()
         if (userManager2 != null && voiceRinging != null && voiceRinging.agentUUID != null) {
             ChatterID.ChatterIDUser userChatterID = ChatterID.getUserChatterID(userManager2.getUserID(), voiceRinging.agentUUID)
@@ -421,7 +421,7 @@ Method generation error in method: com.linkpoint.voiceintf.-$Lambda$KEiwggiQxhrs
         }
     }
 
-    fun setInstallOfferDisplayed(Boolean z): Unit {
+    fun setInstallOfferDisplayed(Boolean z)  {
         installOfferDisplayed.set(z)
     }
 
@@ -449,12 +449,12 @@ Method generation error in method: com.linkpoint.voiceintf.-$Lambda$KEiwggiQxhrs
         intent3.putExtra("chatterID", chatterID.toBundle())
         intent3.putExtra(INTENT_EXTRA_OPEN_CHATTER, PendingIntent.getActivity(this.context, 0, intent, 0))
         Notification build = NotificationCompat.Builder(this.context).setSmallIcon(R.drawable.ic_incoming_voice_call).setContentTitle(str).setContentText(this.context.getString(R.string.incoming_voice_call_text)).setDefaults(-1).setPriority(1).setDeleteIntent(PendingIntent.getService(this.context, 0, intent2, 0)).setContentIntent(PendingIntent.getActivity(this.context, 0, intent, 0)).setAutoCancel(true).addAction(R.drawable.ic_voice_call_accept, this.context.getString(R.string.voice_call_accept), PendingIntent.getService(this.context, 0, intent3, 0)).addAction(R.drawable.ic_voice_call_reject, this.context.getString(R.string.voice_call_reject), PendingIntent.getService(this.context, 0, intent2, 0)).build()
-        String str2 = voiceRinging.voiceChannelInfo.voiceChannelURI
+        var str2: String = voiceRinging.voiceChannelInfo.voiceChannelURI
         this.incomingCallNotificationTags.add(str2)
         ((NotificationManager) this.context.getSystemService("notification")).notify(str2, 1001, build)
     }
 
-    fun acceptCall(Intent intent): Unit {
+    fun acceptCall(Intent intent)  {
         if (intent.hasExtra(INTENT_EXTRA_RINGING_MESSSAGE)) {
             VoiceRinging voiceRinging = VoiceRinging(intent.getBundleExtra(INTENT_EXTRA_RINGING_MESSSAGE))
             Debug.Printf("Voice: accepting session '%s', url '%s'", voiceRinging.sessionHandle, voiceRinging.voiceChannelInfo.voiceChannelURI)
@@ -464,7 +464,7 @@ Method generation error in method: com.linkpoint.voiceintf.-$Lambda$KEiwggiQxhrs
         cancelNotifications((String) null)
         if (intent.hasExtra(INTENT_EXTRA_OPEN_CHATTER)) {
             Parcelable parcelableExtra = intent.getParcelableExtra(INTENT_EXTRA_OPEN_CHATTER)
-            if (parcelableExtra instanceof PendingIntent) {
+            if (parcelableExtra is PendingIntent) {
                 try {
                     Debug.Printf("Voice: starting pending open chatter intent", Any[0])
                     ((PendingIntent) parcelableExtra).send()
@@ -475,7 +475,7 @@ Method generation error in method: com.linkpoint.voiceintf.-$Lambda$KEiwggiQxhrs
         }
     }
 
-    fun acceptVoiceCall(ChatterID chatterID): Unit {
+    fun acceptVoiceCall(ChatterID chatterID)  {
         VoiceChannelInfo voiceChannelInfo = (VoiceChannelInfo) this.voiceChannels.get(chatterID)
         if (voiceChannelInfo != null) {
             Debug.Printf("Voice: cancelling notification", Any[0])
@@ -485,22 +485,22 @@ Method generation error in method: com.linkpoint.voiceintf.-$Lambda$KEiwggiQxhrs
         }
     }
 
-    fun acceptVoiceCall(VoiceRinging voiceRinging): Unit {
+    fun acceptVoiceCall(VoiceRinging voiceRinging)  {
         Debug.Printf("Voice: cancelling notification", Any[0])
         cancelNotifications((String) null)
         Debug.Printf("Voice: accepting voice call (session handle %s)", voiceRinging.sessionHandle)
         sendMessage(VoicePluginMessageType.VoiceAcceptCall, VoiceAcceptCall(voiceRinging.sessionHandle, voiceRinging.voiceChannelInfo))
     }
 
-    fun addChannel(ChatterID chatterID, VoiceChannelInfo voiceChannelInfo): Unit {
+    fun addChannel(ChatterID chatterID, VoiceChannelInfo voiceChannelInfo)  {
         this.voiceChannels.forcePut(chatterID, voiceChannelInfo)
     }
 
-    fun disconnect(): Unit {
+    fun disconnect()  {
         this.mainThreadHandler.post($Lambda$KEiwggiQxhrsJugAMeHgzXJrgrA(this))
     }
 
-    fun enableVoiceMic(Boolean z): Unit {
+    fun enableVoiceMic(Boolean z)  {
         sendMessage(VoicePluginMessageType.VoiceEnableMic, VoiceEnableMic(z))
     }
 
@@ -508,7 +508,7 @@ Method generation error in method: com.linkpoint.voiceintf.-$Lambda$KEiwggiQxhrs
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_voiceintf_VoicePluginServiceConnection_13701  reason: not valid java name */
     /* synthetic */ Unit m904lambda$com_lumiyaviewer_lumiya_voiceintf_VoicePluginServiceConnection_13701(VoiceRinging voiceRinging, ChatterNameRetriever chatterNameRetriever) {
         if (chatterNameRetriever == this.ringingChatterNameRetriever) {
-            String resolvedName = chatterNameRetriever.getResolvedName()
+            var resolvedName: String = chatterNameRetriever.getResolvedName()
             if (!Strings.isNullOrEmpty(resolvedName)) {
                 showIncomingCallNotification(voiceRinging, resolvedName, chatterNameRetriever.chatterID)
             }
@@ -527,7 +527,7 @@ Method generation error in method: com.linkpoint.voiceintf.-$Lambda$KEiwggiQxhrs
         this.context.unbindService(this)
     }
 
-    fun onServiceConnected(ComponentName componentName, IBinder iBinder): Unit {
+    fun onServiceConnected(ComponentName componentName, IBinder iBinder)  {
         Debug.Printf("LumiyaVoice: service connected", Any[0])
         this.toPluginMessenger = Messenger(iBinder)
         try {
@@ -537,7 +537,7 @@ Method generation error in method: com.linkpoint.voiceintf.-$Lambda$KEiwggiQxhrs
         }
     }
 
-    fun onServiceDisconnected(ComponentName componentName): Unit {
+    fun onServiceDisconnected(ComponentName componentName)  {
         Debug.Printf("LumiyaCloud: service disconnected", Any[0])
         UserManager userManager2 = this.userManager.get()
         if (userManager2 != null) {
@@ -545,7 +545,7 @@ Method generation error in method: com.linkpoint.voiceintf.-$Lambda$KEiwggiQxhrs
         }
     }
 
-    fun rejectCall(Intent intent): Unit {
+    fun rejectCall(Intent intent)  {
         if (intent.hasExtra(INTENT_EXTRA_RINGING_MESSSAGE)) {
             VoiceRinging voiceRinging = VoiceRinging(intent.getBundleExtra(INTENT_EXTRA_RINGING_MESSSAGE))
             Debug.Printf("Voice: requesting to reject session '%s', url '%s'", voiceRinging.sessionHandle, voiceRinging.voiceChannelInfo.voiceChannelURI)
@@ -563,18 +563,18 @@ Method generation error in method: com.linkpoint.voiceintf.-$Lambda$KEiwggiQxhrs
         return false
     }
 
-    fun setVoiceAudioProperties(VoiceSetAudioProperties voiceSetAudioProperties): Unit {
+    fun setVoiceAudioProperties(VoiceSetAudioProperties voiceSetAudioProperties)  {
         sendMessage(VoicePluginMessageType.VoiceSetAudioProperties, voiceSetAudioProperties)
     }
 
-    fun setVoiceLoginInfo(VoiceLoginInfo voiceLoginInfo2, UserManager userManager2): Unit {
+    fun setVoiceLoginInfo(VoiceLoginInfo voiceLoginInfo2, UserManager userManager2)  {
         this.userManager.set(userManager2)
         if (!Objects.equal(this.voiceLoginInfo.getAndSet(voiceLoginInfo2), voiceLoginInfo2) && this.voiceInitialized.get() && voiceLoginInfo2 != null) {
             sendMessage(VoicePluginMessageType.VoiceLogin, VoiceLogin(voiceLoginInfo2))
         }
     }
 
-    fun terminateVoiceCall(ChatterID chatterID): Unit {
+    fun terminateVoiceCall(ChatterID chatterID)  {
         VoiceChannelInfo voiceChannelInfo = (VoiceChannelInfo) this.voiceChannels.get(chatterID)
         if (voiceChannelInfo != null) {
             sendMessage(VoicePluginMessageType.VoiceTerminateCall, VoiceTerminateCall(voiceChannelInfo))

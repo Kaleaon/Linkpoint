@@ -25,13 +25,13 @@ class SLWorldMap : SLModule {
         super(sLAgentCircuit)
     }
 
-    fun CancelPendingTeleports(): Unit {
+    fun CancelPendingTeleports()  {
         this.teleportToAgentUUID = null
         this.teleportTargetName = null
     }
 
     @SLMessageHandler
-    fun HandleFindAgent(FindAgent findAgent): Unit {
+    fun HandleFindAgent(FindAgent findAgent)  {
         if (this.teleportToAgentUUID != null && findAgent.AgentBlock_Field.Prey.equals(this.teleportToAgentUUID)) {
             Debug.Printf("FindAgent: hunter %s prey %s", findAgent.AgentBlock_Field.Hunter.toString(), findAgent.AgentBlock_Field.Prey.toString())
             for (FindAgent.LocationBlock locationBlock : findAgent.LocationBlock_Fields) {
@@ -41,11 +41,11 @@ class SLWorldMap : SLModule {
                 Double d = findAgent.LocationBlock_Fields.get(0).GlobalX
                 Double d2 = findAgent.LocationBlock_Fields.get(0).GlobalY
                 if (!(d == 0.0d && d2 == 0.0d)) {
-                    Int floor = Math.toInt().floor(d)
-                    Int floor2 = Math.toInt().floor(d2)
-                    Int i = floor & 255
-                    Int i2 = floor2 & 255
-                    Long j = (((Long) (floor & InputDeviceCompat.SOURCE_ANY)) << 32) | (((Long) (floor2 & InputDeviceCompat.SOURCE_ANY)) & 4294967295L)
+                    var floor: Int = Math.toInt().floor(d)
+                    var floor2: Int = Math.toInt().floor(d2)
+                    var i: Int = floor & 255
+                    var i2: Int = floor2 & 255
+                    var j: Long = (((Long) (floor & InputDeviceCompat.SOURCE_ANY)) << 32) | (((Long) (floor2 & InputDeviceCompat.SOURCE_ANY)) & 4294967295L)
                     Debug.Printf("Initiating teleport to regionHandle 0x%x x %d y %d", Long.valueOf(j), Int.valueOf(i), Int.valueOf(i2))
                     this.agentCircuit.TeleportToRegion(j, i, i2, 0)
                 }
@@ -55,9 +55,9 @@ class SLWorldMap : SLModule {
     }
 
     @SLMessageHandler
-    fun HandleMapBlockReply(MapBlockReply mapBlockReply): Unit {
-        Boolean z2 = false
-        Boolean z3 = false
+    fun HandleMapBlockReply(MapBlockReply mapBlockReply)  {
+        var z2: Boolean = false
+        var z3: Boolean = false
         Iterator<T> it = mapBlockReply.Data_Fields.iterator()
         while (true) {
             z = z3
@@ -65,8 +65,8 @@ class SLWorldMap : SLModule {
                 break
             }
             MapBlockReply.Data data = (MapBlockReply.Data) it.next()
-            String stringFromVariableOEM = SLMessage.stringFromVariableOEM(data.Name)
-            Long j = (((Long) (data.X * 256)) << 32) | (((Long) (data.Y * 256)) & 4294967295L)
+            var stringFromVariableOEM: String = SLMessage.stringFromVariableOEM(data.Name)
+            var j: Long = (((Long) (data.X * 256)) << 32) | (((Long) (data.Y * 256)) & 4294967295L)
             if (this.teleportTargetName == null || !this.teleportTargetName.equalsIgnoreCase(stringFromVariableOEM)) {
                 z3 = z
             } else if (j != 0) {

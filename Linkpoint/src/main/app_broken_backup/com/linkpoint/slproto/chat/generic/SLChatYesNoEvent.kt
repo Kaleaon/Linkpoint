@@ -69,9 +69,9 @@ abstract class SLChatYesNoEvent : SLChatTextEvent {
         super(chatMessageSource, uuid, str)
     }
 
-    fun bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, @Nullable ChatEventTimestampUpdater chatEventTimestampUpdater): Unit {
+    fun bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, @Nullable ChatEventTimestampUpdater chatEventTimestampUpdater)  {
         super.bindViewHolder(chatEventViewHolder, userManager, chatEventTimestampUpdater)
-        if (chatEventViewHolder instanceof ChatYesNoEventViewHolder) {
+        if (chatEventViewHolder is ChatYesNoEventViewHolder) {
             ChatYesNoEventViewHolder chatYesNoEventViewHolder = (ChatYesNoEventViewHolder) chatEventViewHolder
             chatYesNoEventViewHolder.setEvent(this)
             TextView textView = chatYesNoEventViewHolder.questionMsg
@@ -141,17 +141,17 @@ abstract class SLChatYesNoEvent : SLChatTextEvent {
     abstract String getYesMessage(Context context)
 
     /* access modifiers changed from: protected */
-    fun onNoAction(Context context, UserManager userManager): Unit {
+    fun onNoAction(Context context, UserManager userManager)  {
         this.eventState = EventState.EventCancelled
         notifyEventUpdated(userManager)
     }
 
-    fun onYesAction(Context context, UserManager userManager): Unit {
+    fun onYesAction(Context context, UserManager userManager)  {
         this.eventState = EventState.EventAccepted
         notifyEventUpdated(userManager)
     }
 
-    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage)  {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setEventState(Integer.valueOf(this.eventState.ordinal()))
     }

@@ -20,11 +20,11 @@ class DerezContainer : SLMessage {
         return 21
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleDerezContainer(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 104)
@@ -32,7 +32,7 @@ class DerezContainer : SLMessage {
         packBoolean(byteBuffer, this.Data_Field.Delete)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.Data_Field.ObjectID = unpackUUID(byteBuffer)
         this.Data_Field.Delete = unpackBoolean(byteBuffer)
     }

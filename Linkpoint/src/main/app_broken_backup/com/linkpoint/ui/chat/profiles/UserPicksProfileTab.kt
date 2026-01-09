@@ -86,7 +86,7 @@ class UserPicksProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadab
         }
 
         /* access modifiers changed from: package-private */
-        fun setData(AvatarPicksReply avatarPicksReply): Unit {
+        fun setData(AvatarPicksReply avatarPicksReply)  {
             this.picksReply = avatarPicksReply
             notifyDataSetChanged()
         }
@@ -94,18 +94,18 @@ class UserPicksProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoadab
 
     /* access modifiers changed from: private */
     /* renamed from: onAddNewPick */
-    fun m520com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTabmthref0(View view): Unit {
+    fun m520com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTabmthref0(View view)  {
         ParcelData parcelData = null
-        if (this.userManager != null && (this.chatterID instanceof ChatterID.ChatterIDUser)) {
+        if (this.userManager != null && (this.chatterID is ChatterID.ChatterIDUser)) {
             CurrentLocationInfo currentLocationInfoSnapshot = this.userManager.getCurrentLocationInfoSnapshot()
             if (currentLocationInfoSnapshot != null) {
                 parcelData = currentLocationInfoSnapshot.parcelData()
             }
             SLAgentCircuit activeAgentCircuit = this.userManager.getActiveAgentCircuit()
             if (parcelData != null && activeAgentCircuit != null) {
-                Int count = this.picksAdapter != null ? this.picksAdapter.getCount() : 0
+                var count: Int = this.picksAdapter != null ? this.picksAdapter.getCount() : 0
                 AlertDialog.Builder builder = AlertDialog.Builder(getContext())
-                String str = (Optional as String).fromNullable(Strings.emptyToNull(parcelData.getName())).or(getString(R.string.name_loading_title))
+                var str: String = (Optional as String).fromNullable(Strings.emptyToNull(parcelData.getName())).or(getString(R.string.name_loading_title))
                 builder.setMessage(getString(R.string.create_pick_question, str)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(count, this, activeAgentCircuit, str, parcelData) {
 
                     /* renamed from: -$f0 */
@@ -216,7 +216,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$0JruY
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTab_2539  reason: not valid java name */
     /* synthetic */ Unit m521lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTab_2539(AdapterView adapterView, View view, Int i, Long j) {
         Any item = adapterView.getAdapter().getItem(i)
-        if ((item instanceof AvatarPicksReply.Data) && (this.chatterID instanceof ChatterID.ChatterIDUser)) {
+        if ((item is AvatarPicksReply.Data) && (this.chatterID is ChatterID.ChatterIDUser)) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserPickFragment.class, UserPickFragment.makeSelection(this.chatterID.agentUUID, AvatarPickKey(((ChatterID.ChatterIDUser) this.chatterID).getChatterUUID(), ((AvatarPicksReply.Data) item).PickID)))
         }
     }
@@ -377,7 +377,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$0JruY
         return inflate
     }
 
-    fun onLoadableDataChanged(): Unit {
+    fun onLoadableDataChanged()  {
         try {
             if (this.picksAdapter != null) {
                 this.picksAdapter.setData(this.avatarPicks.getData())
@@ -389,11 +389,11 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$0JruY
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(@Nullable ChatterID chatterID): Unit {
+    fun onShowUser(@Nullable ChatterID chatterID)  {
         UserManager userManager
-        Int i = 0
+        var i: Int = 0
         this.loadableMonitor.unsubscribeAll()
-        if (!(chatterID instanceof ChatterID.ChatterIDUser) || (userManager = chatterID.getUserManager()) == null) {
+        if (!(chatterID is ChatterID.ChatterIDUser) || (userManager = chatterID.getUserManager()) == null) {
             z = false
         } else {
             z = userManager.getUserID().equals(((ChatterID.ChatterIDUser) chatterID).getChatterUUID())

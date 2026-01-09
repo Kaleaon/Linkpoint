@@ -51,7 +51,7 @@ class GroupManager {
     /* access modifiers changed from: private */
     SubscriptionPool<GroupRoleMembersQuery, LazyList<GroupRoleMember>> groupRoleMemberSubscriptionPool = SubscriptionPool<>()
     private OnListUpdated onGroupListUpdated = OnListUpdated() {
-        fun onListUpdated(): Unit {
+        fun onListUpdated()  {
             GroupManager.this.chatterList.notifyListUpdated(ChatterListType.Groups)
         }
     }
@@ -214,13 +214,13 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
                 return uuid2
             }
         this.groupRoleMemberSubscriptionPool.attachRequestHandler(AsyncRequestHandler(userManager2.getDatabaseExecutor(), SimpleRequestHandler<GroupRoleMembersQuery>() {
-            fun onRequest(@NonNull GroupRoleMembersQuery groupRoleMembersQuery): Unit {
+            fun onRequest(@NonNull GroupRoleMembersQuery groupRoleMembersQuery)  {
                 GroupManager.this.groupRoleMemberSubscriptionPool.onResultData(groupRoleMembersQuery, GroupManager.this.groupRoleMemberDao.queryBuilder().where(GroupRoleMemberDao.Properties.GroupID.eq(groupRoleMembersQuery.groupID()), GroupRoleMemberDao.Properties.RoleID.eq(groupRoleMembersQuery.roleID()), GroupRoleMemberDao.Properties.RequestID.eq(groupRoleMembersQuery.requestID())).listLazyUncached())
             }
         }))
         this.groupRoleMemberSubscriptionPool.setDisposeHandler($Lambda$u_XXTkSOKCgaVXhhUplrxzPP28(), userManager2.getDatabaseExecutor())
         this.groupMembersSubscriptionPool.attachRequestHandler(AsyncRequestHandler(userManager2.getDatabaseExecutor(), SimpleRequestHandler<GroupMembersQuery>() {
-            fun onRequest(@NonNull GroupMembersQuery groupMembersQuery): Unit {
+            fun onRequest(@NonNull GroupMembersQuery groupMembersQuery)  {
                 GroupManager.this.groupMembersSubscriptionPool.onResultData(groupMembersQuery, GroupManager.this.groupMemberDao.queryBuilder().where(GroupMemberDao.Properties.GroupID.eq(groupMembersQuery.groupID()), GroupMemberDao.Properties.RequestID.eq(groupMembersQuery.requestID())).listLazyUncached())
             }
         }))
@@ -290,7 +290,7 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
 
         }, userManager2.getDatabaseExecutor())
         this.groupMemberRolesSubscriptionPool.attachRequestHandler(AsyncRequestHandler(userManager2.getDatabaseExecutor(), SimpleRequestHandler<GroupMemberRolesQuery>() {
-            fun onRequest(@NonNull GroupMemberRolesQuery groupMemberRolesQuery): Unit {
+            fun onRequest(@NonNull GroupMemberRolesQuery groupMemberRolesQuery)  {
                 LazyList<GroupRoleMember> listLazyUncached = GroupManager.this.groupRoleMemberDao.queryBuilder().where(GroupRoleMemberDao.Properties.GroupID.eq(groupMemberRolesQuery.groupID()), GroupRoleMemberDao.Properties.UserID.eq(groupMemberRolesQuery.memberID()), GroupRoleMemberDao.Properties.RequestID.eq(groupMemberRolesQuery.requestID())).listLazyUncached()
                 ImmutableSet.Builder builder = ImmutableSet.builder()
                 for (GroupRoleMember roleID : listLazyUncached) {
@@ -304,7 +304,7 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
 
     /* access modifiers changed from: private */
     /* renamed from: onAvatarGroupListsReply */
-    fun m314com_lumiyaviewer_lumiya_slproto_users_manager_GroupManagermthref0(AvatarGroupList avatarGroupList): Unit {
+    fun m314com_lumiyaviewer_lumiya_slproto_users_manager_GroupManagermthref0(AvatarGroupList avatarGroupList)  {
         this.avatarGroupListRef.set(avatarGroupList)
         this.chatterList.notifyListUpdated(ChatterListType.Groups)
     }
@@ -358,7 +358,7 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
         this.groupRoleMemberDataSetPool.requestUpdate(uuid)
     }
 
-    fun requestGroupRoleMembersRefresh(UUID uuid): Unit {
+    fun requestGroupRoleMembersRefresh(UUID uuid)  {
         this.userManager.getDatabaseExecutor().execute(Runnable(this, uuid) {
 
             /* renamed from: -$f0 */
@@ -432,7 +432,7 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
 
     }
 
-    fun requestRefreshMemberList(UUID uuid): Unit {
+    fun requestRefreshMemberList(UUID uuid)  {
         this.groupMemberDataSetPool.requestUpdate(uuid)
     }
 }

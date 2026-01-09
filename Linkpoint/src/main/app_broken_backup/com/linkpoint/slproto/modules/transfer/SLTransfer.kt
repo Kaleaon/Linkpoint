@@ -96,7 +96,7 @@ class SLTransfer {
             while (!this.queuedPackets.isEmpty() && (transferPacket = this.queuedPackets.get(Int.valueOf(this.nextPacket))) != null) {
                 this.queuedPackets.remove(Int.valueOf(this.nextPacket))
                 this.nextPacket++
-                Int length = transferPacket.TransferData_Field.Data.length
+                var length: Int = transferPacket.TransferData_Field.Data.length
                 System.arraycopy(transferPacket.TransferData_Field.Data, 0, this.data, this.currentSize, length)
                 this.currentSize = length + this.currentSize
                 if (transferPacket.TransferData_Field.Status != 0) {
@@ -110,7 +110,7 @@ class SLTransfer {
     }
 
     /* access modifiers changed from: package-private */
-    fun HandleTransferInfo(SLTransferManager sLTransferManager, TransferInfo transferInfo): Unit {
+    fun HandleTransferInfo(SLTransferManager sLTransferManager, TransferInfo transferInfo)  {
         this.statusKnown = true
         this.status = transferInfo.TransferInfoData_Field.Status
         this.size = transferInfo.TransferInfoData_Field.Size
@@ -121,7 +121,7 @@ class SLTransfer {
     }
 
     /* access modifiers changed from: package-private */
-    fun HandleTransferPacket(SLTransferManager sLTransferManager, TransferPacket transferPacket): Unit {
+    fun HandleTransferPacket(SLTransferManager sLTransferManager, TransferPacket transferPacket)  {
         this.queuedPackets.put(Int.valueOf(transferPacket.TransferData_Field.Packet), transferPacket)
         RunQueuedPackets(sLTransferManager)
     }

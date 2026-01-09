@@ -52,9 +52,9 @@ class InsetColoringLayout : FrameLayout {
     }
 
     /* access modifiers changed from: protected */
-    fun onDraw(Canvas canvas): Unit {
-        Int width = getWidth()
-        Int height = getHeight()
+    fun onDraw(Canvas canvas)  {
+        var width: Int = getWidth()
+        var height: Int = getHeight()
         this.backgroundPaint.setColor(this.backgroundColor)
         if (this.childPaddingTop != 0) {
             canvas.drawRect(0.0f, 0.0f, width.toFloat(), this.toFloat().childPaddingTop, this.backgroundPaint)
@@ -71,7 +71,7 @@ class InsetColoringLayout : FrameLayout {
     }
 
     /* access modifiers changed from: protected */
-    fun onLayout(Boolean z, Int i, Int i2, Int i3, Int i4): Unit {
+    fun onLayout(Boolean z, Int i, Int i2, Int i3, Int i4)  {
         View childAt
         super.onLayout(z, i, i2, i3, i4)
         if (getChildCount() > 0 && (childAt = getChildAt(0)) != null) {

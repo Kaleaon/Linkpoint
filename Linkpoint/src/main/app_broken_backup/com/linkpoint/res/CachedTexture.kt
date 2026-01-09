@@ -58,7 +58,7 @@ class CachedTexture {
         return released
     }
     
-    fun release(): Unit {
+    fun release()  {
         released = true
         // In a real implementation, this would free GPU resources
     }

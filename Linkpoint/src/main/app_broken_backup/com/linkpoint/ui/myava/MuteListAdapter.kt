@@ -107,7 +107,7 @@ class MuteListAdapter : BaseAdapter {
     }
 
     /* access modifiers changed from: package-private */
-    fun setData(@Nullable List<MuteListEntry> list): Unit {
+    fun setData(@Nullable List<MuteListEntry> list)  {
         this.muteList = list != null ? ImmutableList.copyOf(list) : ImmutableList.of()
         notifyDataSetChanged()
     }

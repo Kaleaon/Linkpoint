@@ -32,11 +32,11 @@ class LogFailedMoneyTransaction : SLMessage {
         return 78
     }
 
-    fun Handle(sLMessageHandler: SLMessageHandler): Unit {
+    fun Handle(sLMessageHandler: SLMessageHandler)  {
         sLMessageHandler.HandleLogFailedMoneyTransaction(this)
     }
 
-    fun PackPayload(byteBuffer: ByteBuffer): Unit {
+    fun PackPayload(byteBuffer: ByteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.DC4)
@@ -53,7 +53,7 @@ class LogFailedMoneyTransaction : SLMessage {
         packByte(byteBuffer, (Byte) this.TransactionData_Field.FailureType)
     }
 
-    fun UnpackPayload(byteBuffer: ByteBuffer): Unit {
+    fun UnpackPayload(byteBuffer: ByteBuffer)  {
         this.TransactionData_Field.TransactionID = unpackUUID(byteBuffer)
         this.TransactionData_Field.TransactionTime = unpackInt(byteBuffer)
         this.TransactionData_Field.TransactionType = unpackInt(byteBuffer)

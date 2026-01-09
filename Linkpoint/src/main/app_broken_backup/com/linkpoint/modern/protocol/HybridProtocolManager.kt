@@ -306,7 +306,7 @@ class HybridProtocolManager {
      */
     private class ProtocolRouter {
         fun getOptimalTransport(SLMessage message): Transport {
-            String messageType = message.getClass().getSimpleName()
+            var messageType: String = message.getClass().getSimpleName()
             
             // Route based on message characteristics
             if (messageType.contains("Chat") || messageType.contains("IM")) {

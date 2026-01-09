@@ -1,5 +1,7 @@
 package com.linkpoint.ui.minimap
 
+import kotlin.math.*
+
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -26,7 +28,7 @@ class MinimapView : View {
     private val USER_MARK_TOUCH_SLACK: Float = 50.0f
     private Int activePointerId = -1
     /* access modifiers changed from: private */
-    Float actualZoomFactor = 1.0f
+    var actualZoomFactor: Float = 1.0f
     private Rect bitmapDstRect = Rect()
     private Paint bitmapPaint = Paint()
     private Rect bitmapSrcRect = Rect()
@@ -42,7 +44,7 @@ class MinimapView : View {
     private ScaleGestureDetector scaleGestureDetector
     private ScaleGestureDetector.OnScaleGestureListener scaleGestureListener = ScaleGestureDetector.SimpleOnScaleGestureListener() {
         fun onScale(ScaleGestureDetector scaleGestureDetector): Boolean {
-            Float unused = MinimapView.this.actualZoomFactor = Math.min(Math.max(MinimapView.this.actualZoomFactor * scaleGestureDetector.getScaleFactor(), 1.0f), 5.0f)
+            var unused: Float = MinimapView.this.actualZoomFactor = min(max(MinimapView.this.actualZoomFactor * scaleGestureDetector.getScaleFactor(), 1.0f), 5.0f)
             MinimapView.this.invalidate()
             return true
         }
@@ -73,10 +75,10 @@ class MinimapView : View {
     }
 
     private Unit drawUserMark(ImmutableVector immutableVector, Canvas canvas, Paint paint, Rect rect, Boolean z, Float f, Boolean z2) {
-        Float x = immutableVector.getX()
-        Float y = immutableVector.getY()
-        Float width = (rect.toFloat().left) + ((x / 256.0f) * (rect.toFloat().width()))
-        Float width2 = (rect.toFloat().top) + (((256.0f - y) / 256.0f) * (rect.toFloat().width()))
+        var x: Float = immutableVector.getX()
+        var y: Float = immutableVector.getY()
+        var width: Float = (rect.toFloat().left) + ((x / 256.0f) * (rect.toFloat().width()))
+        var width2: Float = (rect.toFloat().top) + (((256.0f - y) / 256.0f) * (rect.toFloat().width()))
         if (!z) {
             paint.setARGB(255, 0, 255, 0)
         } else {
@@ -89,12 +91,12 @@ class MinimapView : View {
         paint.setStyle(Paint.Style.STROKE)
         canvas.drawCircle(width, width2, 5.0f, paint)
         if (z && (!Float.isNaN(f))) {
-            Float cos = (Float) (Math.cos(f.toDouble()) * 20.0d)
-            Float sin = (Float) (Math.sin(f.toDouble()) * 20.0d)
-            Float cos2 = (Float) ((Math.cos(f.toDouble()) * 15.0d) - (Math.sin(f.toDouble()) * -5.0d))
-            Float cos3 = (Float) ((Math.cos(f.toDouble()) * -5.0d) + (Math.sin(f.toDouble()) * 15.0d))
-            Float cos4 = (Float) ((Math.cos(f.toDouble()) * 15.0d) - (Math.sin(f.toDouble()) * 5.0d))
-            Float cos5 = (Float) ((Math.cos(f.toDouble()) * 5.0d) + (Math.sin(f.toDouble()) * 15.0d))
+            var cos: Float = (Float) (cos(f.toDouble()) * 20.0d)
+            var sin: Float = (Float) (sin(f.toDouble()) * 20.0d)
+            var cos2: Float = (Float) ((cos(f.toDouble()) * 15.0d) - (sin(f.toDouble()) * -5.0d))
+            var cos3: Float = (Float) ((cos(f.toDouble()) * -5.0d) + (sin(f.toDouble()) * 15.0d))
+            var cos4: Float = (Float) ((cos(f.toDouble()) * 15.0d) - (sin(f.toDouble()) * 5.0d))
+            var cos5: Float = (Float) ((cos(f.toDouble()) * 5.0d) + (sin(f.toDouble()) * 15.0d))
             paint.setStrokeWidth(3.0f)
             canvas.drawLine(width, width2, width + cos, width2 - sin, paint)
             canvas.drawLine(width + cos, width2 - sin, cos2 + width, width2 - cos3, paint)
@@ -111,20 +113,20 @@ class MinimapView : View {
         UUID uuid
         UUID uuid2 = null
         if (this.userLocations != null && this.lastDrawRect != null) {
-            Float applyDimension = TypedValue.applyDimension(1, USER_MARK_TOUCH_SLACK, getResources().getDisplayMetrics())
-            Float f3 = 0.0f
+            var applyDimension: Float = TypedValue.applyDimension(1, USER_MARK_TOUCH_SLACK, getResources().getDisplayMetrics())
+            var f3: Float = 0.0f
             Iterator<T> it = this.userLocations.userPositions.entrySet().iterator()
             while (true) {
                 uuid = uuid2
-                Float f4 = f3
+                var f4: Float = f3
                 if (!it.hasNext()) {
                     break
                 }
                 Map.Entry entry = (Map.Entry) it.next()
                 ImmutableVector immutableVector = ((SLMinimap.UserLocation) entry.getValue()).location
-                Float abs = Math.abs((((immutableVector.getX() / 256.0f) * (this.toFloat().lastDrawRect.width())) + (this.toFloat().lastDrawRect.left)) - f)
-                Float abs2 = Math.abs(((((256.0f - immutableVector.getY()) / 256.0f) * (this.toFloat().lastDrawRect.width())) + (this.toFloat().lastDrawRect.top)) - f2)
-                f3 = Math.sqrt(((abs2 * abs2.toDouble()).toFloat() + (abs * abs)))
+                var abs: Float = abs((((immutableVector.getX() / 256.0f) * (this.toFloat().lastDrawRect.width())) + (this.toFloat().lastDrawRect.left)) - f)
+                var abs2: Float = abs(((((256.0f - immutableVector.getY()) / 256.0f) * (this.toFloat().lastDrawRect.width())) + (this.toFloat().lastDrawRect.top)) - f2)
+                f3 = sqrt(((abs2 * abs2.toDouble()).toFloat() + (abs * abs)))
                 if (f3 < applyDimension) {
                     if (uuid == null) {
                         uuid2 = (UUID) entry.getKey()
@@ -143,20 +145,20 @@ class MinimapView : View {
     }
 
     /* access modifiers changed from: protected */
-    fun onDraw(Canvas canvas): Unit {
+    fun onDraw(Canvas canvas)  {
         if (this.minimapBitmap != null) {
-            Int width = getWidth()
-            Int height = getHeight()
-            Int round = Math.round((Math.toFloat().min(width, height)) * this.actualZoomFactor)
-            Int i = width / 2
-            Int i2 = height / 2
+            var width: Int = getWidth()
+            var height: Int = getHeight()
+            var round: Int = Math.round((Math.toFloat().min(width, height)) * this.actualZoomFactor)
+            var i: Int = width / 2
+            var i2: Int = height / 2
             if (round <= width) {
                 this.mapOffsetX = 0.0f
             }
             if (round <= height) {
                 this.mapOffsetY = 0.0f
             }
-            Int i3 = (i - (round / 2)) + (this.toInt().mapOffsetX)
+            var i3: Int = (i - (round / 2)) + (this.toInt().mapOffsetX)
             if (i3 > 0 && round > width) {
                 this.mapOffsetX = (Float) ((round / 2) - i)
                 i3 = (i - (round / 2)) + (this.toInt().mapOffsetX)
@@ -165,7 +167,7 @@ class MinimapView : View {
                 this.mapOffsetX = (Float) (((width - round) - i) + (round / 2))
                 i3 = (i - (round / 2)) + (this.toInt().mapOffsetX)
             }
-            Int i4 = (i2 - (round / 2)) + (this.toInt().mapOffsetY)
+            var i4: Int = (i2 - (round / 2)) + (this.toInt().mapOffsetY)
             if (i4 > 0 && round > height) {
                 this.mapOffsetY = (Float) ((round / 2) - i2)
                 i4 = (i2 - (round / 2)) + (this.toInt().mapOffsetY)
@@ -195,25 +197,25 @@ class MinimapView : View {
     }
 
     /* access modifiers changed from: protected */
-    fun onMeasure(Int i, Int i2): Unit {
+    fun onMeasure(Int i, Int i2)  {
         Display defaultDisplay = ((WindowManager) getContext().getSystemService("window")).getDefaultDisplay()
         if (Build.VERSION.SDK_INT >= 13) {
             defaultDisplay.getSize(this.displaySize)
         } else {
             this.displaySize.set(defaultDisplay.getWidth(), defaultDisplay.getHeight())
         }
-        Int min = Math.min(this.displaySize.x, this.displaySize.y)
+        var min: Int = min(this.displaySize.x, this.displaySize.y)
         if (View.MeasureSpec.getMode(i) != 0) {
-            min = Math.min(min, View.MeasureSpec.getSize(i))
+            min = min(min, View.MeasureSpec.getSize(i))
         }
         if (View.MeasureSpec.getMode(i2) != 0) {
-            min = Math.min(min, View.MeasureSpec.getSize(i2))
+            min = min(min, View.MeasureSpec.getSize(i2))
         }
         setMeasuredDimension(min, min)
     }
 
     fun onTouchEvent(MotionEvent motionEvent): Boolean {
-        Int i = 0
+        var i: Int = 0
         this.scaleGestureDetector.onTouchEvent(motionEvent)
         switch (motionEvent.getActionMasked()) {
             case 0:
@@ -226,9 +228,9 @@ class MinimapView : View {
                 this.activePointerId = -1
                 break
             case 2:
-                Int findPointerIndex = motionEvent.findPointerIndex(this.activePointerId)
-                Float x = motionEvent.getX(findPointerIndex)
-                Float y = motionEvent.getY(findPointerIndex)
+                var findPointerIndex: Int = motionEvent.findPointerIndex(this.activePointerId)
+                var x: Float = motionEvent.getX(findPointerIndex)
+                var y: Float = motionEvent.getY(findPointerIndex)
                 if (!this.scaleGestureDetector.isInProgress()) {
                     this.mapOffsetX = (x - this.prevTouchX) + this.mapOffsetX
                     this.mapOffsetY += y - this.prevTouchY
@@ -241,7 +243,7 @@ class MinimapView : View {
                 this.activePointerId = -1
                 break
             case 6:
-                Int actionIndex = motionEvent.getActionIndex()
+                var actionIndex: Int = motionEvent.getActionIndex()
                 if (motionEvent.getPointerId(actionIndex) == this.activePointerId) {
                     if (actionIndex == 0) {
                         i = 1
@@ -257,7 +259,7 @@ class MinimapView : View {
     }
 
     /* access modifiers changed from: package-private */
-    fun setMinimapBitmap(@Nullable SLMinimap.MinimapBitmap minimapBitmap2): Unit {
+    fun setMinimapBitmap(@Nullable SLMinimap.MinimapBitmap minimapBitmap2)  {
         if (minimapBitmap2 == null) {
             if (this.minimapBitmap != null) {
                 this.minimapBitmap.recycle()
@@ -272,12 +274,12 @@ class MinimapView : View {
     }
 
     /* access modifiers changed from: package-private */
-    fun setOnUserClickListener(OnUserClickListener onUserClickListener2): Unit {
+    fun setOnUserClickListener(OnUserClickListener onUserClickListener2)  {
         this.onUserClickListener = onUserClickListener2
     }
 
     /* access modifiers changed from: package-private */
-    fun setSelectedUser(@Nullable UUID uuid): Unit {
+    fun setSelectedUser(@Nullable UUID uuid)  {
         if (!Objects.equal(uuid, this.selectedUser)) {
             this.selectedUser = uuid
             invalidate()
@@ -285,7 +287,7 @@ class MinimapView : View {
     }
 
     /* access modifiers changed from: package-private */
-    fun setUserLocations(@Nullable SLMinimap.UserLocations userLocations2): Unit {
+    fun setUserLocations(@Nullable SLMinimap.UserLocations userLocations2)  {
         this.userLocations = userLocations2
         invalidate()
     }

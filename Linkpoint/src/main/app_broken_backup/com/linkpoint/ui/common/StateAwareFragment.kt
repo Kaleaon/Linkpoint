@@ -14,22 +14,22 @@ class StateAwareFragment : Fragment {
         return this.fragmentVisible
     }
 
-    fun onPause(): Unit {
+    fun onPause()  {
         this.fragmentVisible = false
         super.onPause()
     }
 
-    fun onResume(): Unit {
+    fun onResume()  {
         super.onResume()
         this.fragmentVisible = true
     }
 
-    fun onStart(): Unit {
+    fun onStart()  {
         super.onStart()
         this.fragmentStarted = true
     }
 
-    fun onStop(): Unit {
+    fun onStop()  {
         this.fragmentStarted = false
         super.onStop()
     }

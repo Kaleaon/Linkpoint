@@ -20,11 +20,11 @@ class TransferInventoryAck : SLMessage {
         return 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleTransferInventoryAck(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 40)
@@ -32,7 +32,7 @@ class TransferInventoryAck : SLMessage {
         packUUID(byteBuffer, this.InfoBlock_Field.InventoryID)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.InfoBlock_Field.TransactionID = unpackUUID(byteBuffer)
         this.InfoBlock_Field.InventoryID = unpackUUID(byteBuffer)
     }

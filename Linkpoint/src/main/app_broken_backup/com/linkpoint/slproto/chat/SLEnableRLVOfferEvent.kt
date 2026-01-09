@@ -58,12 +58,12 @@ class SLEnableRLVOfferEvent : SLChatYesNoEvent {
     }
 
     /* access modifiers changed from: protected */
-    fun onNoAction(Context context, UserManager userManager): Unit {
+    fun onNoAction(Context context, UserManager userManager)  {
         super.onNoAction(context, userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    fun onYesAction(Context context, UserManager userManager): Unit {
+    fun onYesAction(Context context, UserManager userManager)  {
         super.onYesAction(context, userManager)
         SharedPreferences.Editor edit = LumiyaApp.getDefaultSharedPreferences().edit()
         edit.putBoolean("rlv_enabled", true)
@@ -71,7 +71,7 @@ class SLEnableRLVOfferEvent : SLChatYesNoEvent {
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage)  {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

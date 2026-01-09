@@ -21,8 +21,8 @@ class SLInventoryUDPFetchRequest : SLInventoryFetchRequest {
     /* access modifiers changed from: package-private */
     fun HandleInventoryDescendents(InventoryDescendents inventoryDescendents): Boolean {
         Debug.Log("Inventory: UDP fetch: exp count " + inventoryDescendents.AgentData_Field.Descendents + ", recv count " + this.receivedCount + ", " + " with this: " + (this.receivedCount + inventoryDescendents.FolderData_Fields.size() + inventoryDescendents.ItemData_Fields.size()))
-        Int i = inventoryDescendents.AgentData_Field.Descendents
-        Int i2 = 0
+        var i: Int = inventoryDescendents.AgentData_Field.Descendents
+        var i2: Int = 0
         this.db.beginTransaction()
         if (this.folderEntry.version != inventoryDescendents.AgentData_Field.Version) {
             this.folderEntry.version = inventoryDescendents.AgentData_Field.Version
@@ -99,7 +99,7 @@ class SLInventoryUDPFetchRequest : SLInventoryFetchRequest {
                     sLInventoryEntry2.salePrice = itemData.SalePrice
                     sLInventoryEntry2.saleType = itemData.SaleType
                     sLInventoryEntry2.updateOrInsert(this.db.getDatabase())
-                    Int i3 = i2 + 1
+                    var i3: Int = i2 + 1
                     if (i3 > 16) {
                         this.db.yieldIfContendedSafely()
                         i3 = 0
@@ -123,10 +123,10 @@ class SLInventoryUDPFetchRequest : SLInventoryFetchRequest {
         return true
     }
 
-    fun cancel(): Unit {
+    fun cancel()  {
     }
 
-    fun start(): Unit {
+    fun start()  {
         Debug.Log("Inventory: UDP fetching folder " + this.folderUUID.toString())
         FetchInventoryDescendents fetchInventoryDescendents = FetchInventoryDescendents()
         fetchInventoryDescendents.AgentData_Field.AgentID = this.inventory.getCircuitInfo().agentID

@@ -56,7 +56,7 @@ class SLFinancialInfo : SLModule {
         }
     }
 
-    fun AskForMoneyBalance(): Unit {
+    fun AskForMoneyBalance()  {
         MoneyBalanceRequest moneyBalanceRequest = MoneyBalanceRequest()
         moneyBalanceRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         moneyBalanceRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -65,7 +65,7 @@ class SLFinancialInfo : SLModule {
         SendMessage(moneyBalanceRequest)
     }
 
-    fun DoPayObject(UUID uuid, Int i): Unit {
+    fun DoPayObject(UUID uuid, Int i)  {
         MoneyTransferRequest moneyTransferRequest = MoneyTransferRequest()
         moneyTransferRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         moneyTransferRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -81,7 +81,7 @@ class SLFinancialInfo : SLModule {
         SendMessage(moneyTransferRequest)
     }
 
-    fun DoPayUser(UUID uuid, Int i, String str): Unit {
+    fun DoPayUser(UUID uuid, Int i, String str)  {
         MoneyTransferRequest moneyTransferRequest = MoneyTransferRequest()
         moneyTransferRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         moneyTransferRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -97,13 +97,13 @@ class SLFinancialInfo : SLModule {
         SendMessage(moneyTransferRequest)
     }
 
-    fun HandleCircuitReady(): Unit {
+    fun HandleCircuitReady()  {
         super.HandleCircuitReady()
         AskForMoneyBalance()
         RequestEconomyData()
     }
 
-    fun HandleCloseCircuit(): Unit {
+    fun HandleCloseCircuit()  {
         if (this.userManager != null) {
             this.userManager.getBalanceManager().clearFinancialInfo(this)
         }
@@ -111,13 +111,13 @@ class SLFinancialInfo : SLModule {
     }
 
     @SLMessageHandler
-    fun HandleEconomyData(EconomyData economyData): Unit {
+    fun HandleEconomyData(EconomyData economyData)  {
         this.uploadCost.set(economyData.Info_Field.PriceUpload)
         Debug.Printf("Upload: upload cost %d", Int.valueOf(this.uploadCost.get()))
     }
 
     @SLMessageHandler
-    fun HandleMoneyBalanceReply(MoneyBalanceReply moneyBalanceReply): Unit {
+    fun HandleMoneyBalanceReply(MoneyBalanceReply moneyBalanceReply)  {
         UUID uuid
         UUID uuid2 = null
         SLBalanceChangedEvent sLBalanceChangedEvent = SLBalanceChangedEvent(this.balanceKnown, this.balance, moneyBalanceReply.MoneyData_Field.MoneyBalance)
@@ -141,7 +141,7 @@ class SLFinancialInfo : SLModule {
         this.eventBus.publish(sLBalanceChangedEvent)
     }
 
-    fun RecordChatEvent(UUID uuid, Int i, Int i2): Unit {
+    fun RecordChatEvent(UUID uuid, Int i, Int i2)  {
         if (this.moneyTransactionDao != null) {
             this.moneyTransactionDao.insert(MoneyTransaction((Long) null, Date(), uuid, i, i2))
             if (this.userManager != null) {
@@ -168,7 +168,7 @@ class SLFinancialInfo : SLModule {
         return this.uploadCost.get()
     }
 
-    fun reset(): Unit {
+    fun reset()  {
         synchronized (this.balanceLock) {
             this.balanceKnown = false
             this.balance = 0

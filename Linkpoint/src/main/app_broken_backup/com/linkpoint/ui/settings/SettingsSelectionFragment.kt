@@ -25,7 +25,7 @@ class SettingsSelectionFragment : Fragment : AdapterView.OnItemClickListener {
         fun getView(Int i, View view, ViewGroup viewGroup): View {
             View view2 = super.getView(i, view, viewGroup)
             SettingsPage settingsPage = (SettingsPage) getItem(i)
-            if ((view2 instanceof TextView) && settingsPage != null) {
+            if ((view2 is TextView) && settingsPage != null) {
                 ((TextView) view2).setText(settingsPage.getPageTitle())
             }
             return view2
@@ -41,7 +41,7 @@ class SettingsSelectionFragment : Fragment : AdapterView.OnItemClickListener {
         return inflate
     }
 
-    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j): Unit {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j)  {
         SettingsPage[] values = SettingsPage.values()
         if (i >= 0 && i < values.size) {
             DetailsActivity.showEmbeddedDetails(getActivity(), SettingsFragment.class, SettingsFragment.makeSelection(values[i].getPageResourceId()))

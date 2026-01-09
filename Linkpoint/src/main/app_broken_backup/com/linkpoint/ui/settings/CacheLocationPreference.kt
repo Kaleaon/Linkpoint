@@ -24,16 +24,16 @@ class CacheLocationPreference : Preference {
     }
 
     fun makeDisplayableCacheLocation(String str): String {
-        Int indexOf = str.indexOf("/Android")
+        var indexOf: Int = str.indexOf("/Android")
         if (indexOf >= 0) {
             str = str.substring(0, indexOf)
         }
-        Int indexOf2 = str.indexOf("/com.linkpoint")
+        var indexOf2: Int = str.indexOf("/com.linkpoint")
         return indexOf2 >= 0 ? str.substring(0, indexOf2) : str
     }
 
     fun getSummary(): CharSequence {
-        String persistedString = getPersistedString((String) null)
+        var persistedString: String = getPersistedString((String) null)
         return Strings.isNullOrEmpty(persistedString) ? getContext().getString(R.string.default_cache_location) : makeDisplayableCacheLocation(persistedString)
     }
 }

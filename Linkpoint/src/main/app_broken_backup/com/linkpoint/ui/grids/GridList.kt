@@ -61,17 +61,17 @@ class GridList {
             return this.predefinedGrid
         }
 
-        fun saveToPreferences(SharedPreferences.Editor editor, String str): Unit {
+        fun saveToPreferences(SharedPreferences.Editor editor, String str)  {
             editor.putString(str + "_grid_name", this.GridName)
             editor.putString(str + "_login_url", this.LoginURL)
             editor.putString(str + "_grid", this.GridUUID.toString())
         }
 
-        fun setGridName(String str): Unit {
+        fun setGridName(String str)  {
             this.GridName = str
         }
 
-        fun setLoginURL(String str): Unit {
+        fun setLoginURL(String str)  {
             this.LoginURL = str
         }
 
@@ -90,12 +90,12 @@ class GridList {
         loadGrids()
     }
 
-    fun addNewGrid(GridInfo gridInfo): Unit {
+    fun addNewGrid(GridInfo gridInfo)  {
         this.customGrids.add(gridInfo)
         savePreferences()
     }
 
-    fun deleteGrid(GridInfo gridInfo): Unit {
+    fun deleteGrid(GridInfo gridInfo)  {
         this.customGrids.remove(gridInfo)
         savePreferences()
     }
@@ -133,7 +133,7 @@ class GridList {
     }
 
     fun getGridIndex(UUID uuid): Int {
-        Int i = 0
+        var i: Int = 0
         for (GridInfo gridUUID : this.predefGrids) {
             if (gridUUID.getGridUUID().equals(uuid)) {
                 return i
@@ -167,21 +167,21 @@ class GridList {
         return gridList
     }
 
-    fun loadGrids(): Unit {
+    fun loadGrids()  {
         this.customGrids.clear()
         SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.context.getApplicationContext())
-        Int i = defaultSharedPreferences.getInt("custom_grid_1_count", 0)
+        var i: Int = defaultSharedPreferences.getInt("custom_grid_1_count", 0)
         for (i2 in 0 until i) {
             this.customGrids.add(GridInfo(defaultSharedPreferences, "custom_grid_1_" + i2))
         }
     }
 
-    fun savePreferences(): Unit {
+    fun savePreferences()  {
         SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(this.context.getApplicationContext()).edit()
         edit.putInt("custom_grid_1_count", this.customGrids.size())
-        Int i = 0
+        var i: Int = 0
         while (true) {
-            Int i2 = i
+            var i2: Int = i
             if (i2 < this.customGrids.size()) {
                 this.customGrids.get(i2).saveToPreferences(edit, "custom_grid_1_" + i2)
                 i = i2 + 1

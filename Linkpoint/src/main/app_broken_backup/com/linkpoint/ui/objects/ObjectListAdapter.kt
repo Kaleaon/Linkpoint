@@ -30,7 +30,7 @@ class ObjectListAdapter : BaseExpandableListAdapter {
 
     fun getChild(Int i, Int i2): SLObjectDisplayInfo {
         SLObjectDisplayInfo sLObjectDisplayInfo = (SLObjectDisplayInfo) this.objects.get(i)
-        if (sLObjectDisplayInfo instanceof SLObjectDisplayInfo.HasChildrenObjects) {
+        if (sLObjectDisplayInfo is SLObjectDisplayInfo.HasChildrenObjects) {
             return (SLObjectDisplayInfo) ((SLObjectDisplayInfo.HasChildrenObjects) sLObjectDisplayInfo).getChildren().get(i2)
         }
         return null
@@ -51,7 +51,7 @@ class ObjectListAdapter : BaseExpandableListAdapter {
 
     fun getChildrenCount(Int i): Int {
         SLObjectDisplayInfo sLObjectDisplayInfo = (SLObjectDisplayInfo) this.objects.get(i)
-        if (sLObjectDisplayInfo instanceof SLObjectDisplayInfo.HasChildrenObjects) {
+        if (sLObjectDisplayInfo is SLObjectDisplayInfo.HasChildrenObjects) {
             return ((SLObjectDisplayInfo.HasChildrenObjects) sLObjectDisplayInfo).getChildren().size()
         }
         return 0
@@ -86,10 +86,10 @@ class ObjectListAdapter : BaseExpandableListAdapter {
             view2.findViewById(R.id.groupIndicatorCollapsed).setVisibility(0)
             view2.findViewById(R.id.groupIndicatorExpanded).setVisibility(8)
         }
-        if (viewGroup instanceof ExpandableListView) {
+        if (viewGroup is ExpandableListView) {
             ExpandableListView expandableListView = (ExpandableListView) viewGroup
             AnonymousClass1 r1 = View.OnClickListener() {
-                fun onClick(View view): Unit {
+                fun onClick(View view)  {
                     if (view.getVisibility() == 0) {
                         switch (view.getId()) {
                             case R.id.groupIndicatorCollapsed:
@@ -119,13 +119,13 @@ class ObjectListAdapter : BaseExpandableListAdapter {
     }
 
     fun getView(SLObjectDisplayInfo sLObjectDisplayInfo, View view, ViewGroup viewGroup): View {
-        String str = null
-        Int i = 0
+        var str: String = null
+        var i: Int = 0
         if (view == null) {
             view = LayoutInflater.from(this.context).inflate(R.layout.object_list_item, viewGroup, false)
         }
         view.findViewById(R.id.object_hierarchy_padding).setLayoutParams(LinearLayout.LayoutParams((Int) (TypedValue.applyDimension(1, 10.0f, this.context.getResources().getDisplayMetrics()) * (sLObjectDisplayInfo.toFloat().hierarchyLevel)), -1))
-        view.findViewById(R.id.avatarIconView).setVisibility(sLObjectDisplayInfo instanceof SLAvatarObjectDisplayInfo ? 0 : 8)
+        view.findViewById(R.id.avatarIconView).setVisibility(sLObjectDisplayInfo is SLAvatarObjectDisplayInfo ? 0 : 8)
         if (sLObjectDisplayInfo.name != null) {
             ((TextView) view.findViewById(R.id.objectNameTextView)).setText(sLObjectDisplayInfo.name)
         } else {
@@ -136,7 +136,7 @@ class ObjectListAdapter : BaseExpandableListAdapter {
             str = String.format("%d m", Any[]{Int.valueOf(Math.round(sLObjectDisplayInfo.distance))})
         }
         textView.setText(str)
-        if (sLObjectDisplayInfo instanceof SLPrimObjectDisplayInfo) {
+        if (sLObjectDisplayInfo is SLPrimObjectDisplayInfo) {
             SLPrimObjectDisplayInfo sLPrimObjectDisplayInfo = (SLPrimObjectDisplayInfo) sLObjectDisplayInfo
             view.findViewById(R.id.touchIconView).setVisibility(sLPrimObjectDisplayInfo.touchable ? 0 : 4)
             View findViewById = view.findViewById(R.id.payIconView)
@@ -159,7 +159,7 @@ class ObjectListAdapter : BaseExpandableListAdapter {
         return true
     }
 
-    fun setData(@NonNull ImmutableList<SLObjectDisplayInfo> immutableList): Unit {
+    fun setData(@NonNull ImmutableList<SLObjectDisplayInfo> immutableList)  {
         this.objects = immutableList
         notifyDataSetChanged()
     }

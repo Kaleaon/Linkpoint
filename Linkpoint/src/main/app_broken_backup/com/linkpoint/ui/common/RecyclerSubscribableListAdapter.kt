@@ -35,12 +35,12 @@ abstract class RecyclerSubscribableListAdapter<T> : RecyclerView.Adapter {
             throw UnsupportedOperationException("Method not decompiled: com.linkpoint.ui.common.RecyclerSubscribableListAdapter.LocalItemList.<init>(com.linkpoint.ui.common.RecyclerSubscribableListAdapter, com.linkpoint.slproto.users.manager.SubscribableList, com.google.common.base.Optional):Unit")
         }
 
-        fun add(Int i, T t): Unit {
+        fun add(Int i, T t)  {
             this.backingList.add(i, t)
             RecyclerSubscribableListAdapter.this.notifyItemInserted(i)
         }
 
-        fun clear(): Unit {
+        fun clear()  {
             this.backingList.clear()
             RecyclerSubscribableListAdapter.this.notifyDataSetChanged()
         }
@@ -95,7 +95,7 @@ abstract class RecyclerSubscribableListAdapter<T> : RecyclerView.Adapter {
     /* access modifiers changed from: protected */
     abstract Int getObjectViewType(T t)
 
-    fun onBindViewHolder(RecyclerView.ViewHolder viewHolder, Int i): Unit {
+    fun onBindViewHolder(RecyclerView.ViewHolder viewHolder, Int i)  {
         bindObjectViewHolder(viewHolder, this.localItemList.get(i))
     }
 

@@ -48,7 +48,7 @@ class MultipleChatterNameRetriever : ChatterNameRetriever.OnChatterNameUpdated {
         return chatterNameRetriever2.getResolvedName()
     }
 
-    fun clearChatters(): Unit {
+    fun clearChatters()  {
         HashSet<ChatterNameRetriever> hashSet = null
         synchronized (this.lock) {
             Iterator<Map.Entry<UUID, ChatterNameRetriever>> it = this.retrievers.entrySet().iterator()
@@ -68,14 +68,14 @@ class MultipleChatterNameRetriever : ChatterNameRetriever.OnChatterNameUpdated {
         }
     }
 
-    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever): Unit {
+    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever)  {
         OnChatterNameUpdated onChatterNameUpdated = (this as OnChatterNameUpdated).listener.get()
         if (onChatterNameUpdated != null) {
             onChatterNameUpdated.onChatterNameUpdated(this)
         }
     }
 
-    fun retainChatters(Set<UUID> set): Unit {
+    fun retainChatters(Set<UUID> set)  {
         HashSet<ChatterNameRetriever> hashSet = null
         synchronized (this.lock) {
             Iterator<Map.Entry<UUID, ChatterNameRetriever>> it = this.retrievers.entrySet().iterator()

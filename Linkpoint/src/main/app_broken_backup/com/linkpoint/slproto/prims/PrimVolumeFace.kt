@@ -1,5 +1,7 @@
 package com.linkpoint.slproto.prims
 
+import kotlin.math.*
+
 import com.linkpoint.slproto.prims.PrimPath
 import com.linkpoint.slproto.types.LLVector2
 import com.linkpoint.slproto.types.LLVector3
@@ -44,8 +46,8 @@ class PrimVolumeFace {
         }
         Vector3Array vector3Array = primVolume.Mesh
         ArrayList<LLVector3> arrayList = primVolume.Profile.Profile
-        Int size = arrayList.size()
-        Int size2 = (arrayList.size() - 2) * 3
+        var size: Int = arrayList.size()
+        var size2: Int = (arrayList.size() - 2) * 3
         if ((this.TypeMask & 64) == 0 && (this.TypeMask & 128) == 0) {
             resizeVertices(size + 1)
             resizeIndices(size2 + 3)
@@ -53,7 +55,7 @@ class PrimVolumeFace {
             resizeVertices(size)
             resizeIndices(size2)
         }
-        Int size3 = (this.TypeMask & 512) != 0 ? primVolume.Profile.Total * (primVolume.Path.Path.size() - 1) : this.BeginS
+        var size3: Int = (this.TypeMask & 512) != 0 ? primVolume.Profile.Total * (primVolume.Path.Path.size() - 1) : this.BeginS
         LLVector2 lLVector2 = LLVector2()
         LLVector2 lLVector22 = LLVector2()
         LLVector3 lLVector3 = this.Extents[0]
@@ -98,8 +100,8 @@ class PrimVolumeFace {
         }
         vector3Array3.fill(0, i, cross)
         if ((this.TypeMask & 64) == 0) {
-            Int i3 = 2
-            Int i4 = 1
+            var i3: Int = 2
+            var i4: Int = 1
             if ((this.TypeMask & 512) != 0) {
                 i3 = 1
                 i4 = 2
@@ -111,11 +113,11 @@ class PrimVolumeFace {
             }
             return true
         } else if ((this.TypeMask & 512) != 0) {
-            Int i6 = 0
-            Int i7 = i - 1
-            Int i8 = 0
+            var i6: Int = 0
+            var i7: Int = i - 1
+            var i8: Int = 0
             while (true) {
-                Int i9 = i8
+                var i9: Int = i8
                 if (i7 - i6 <= 1) {
                     return true
                 }
@@ -127,12 +129,12 @@ class PrimVolumeFace {
                 lLVector36.z = 0.0f
                 lLVector37.z = 0.0f
                 lLVector38.z = 0.0f
-                Float f = ((lLVector35.x * lLVector37.y) - (lLVector37.x * lLVector35.y)) + ((lLVector37.x * lLVector36.y) - (lLVector36.x * lLVector37.y)) + ((lLVector36.x * lLVector35.y) - (lLVector35.x * lLVector36.y))
-                Float f2 = ((lLVector35.x * lLVector38.y) - (lLVector38.x * lLVector35.y)) + ((lLVector38.x * lLVector37.y) - (lLVector37.x * lLVector38.y)) + ((lLVector37.x * lLVector35.y) - (lLVector35.x * lLVector37.y))
-                Float f3 = ((lLVector36.x * lLVector35.y) - (lLVector35.x * lLVector36.y)) + ((lLVector35.x * lLVector38.y) - (lLVector38.x * lLVector35.y)) + ((lLVector38.x * lLVector36.y) - (lLVector36.x * lLVector38.y))
-                Float f4 = ((lLVector36.x * lLVector37.y) - (lLVector37.x * lLVector36.y)) + ((lLVector37.x * lLVector38.y) - (lLVector38.x * lLVector37.y)) + ((lLVector38.x * lLVector36.y) - (lLVector36.x * lLVector38.y))
-                Boolean z3 = true
-                Boolean z4 = true
+                var f: Float = ((lLVector35.x * lLVector37.y) - (lLVector37.x * lLVector35.y)) + ((lLVector37.x * lLVector36.y) - (lLVector36.x * lLVector37.y)) + ((lLVector36.x * lLVector35.y) - (lLVector35.x * lLVector36.y))
+                var f2: Float = ((lLVector35.x * lLVector38.y) - (lLVector38.x * lLVector35.y)) + ((lLVector38.x * lLVector37.y) - (lLVector37.x * lLVector38.y)) + ((lLVector37.x * lLVector35.y) - (lLVector35.x * lLVector37.y))
+                var f3: Float = ((lLVector36.x * lLVector35.y) - (lLVector35.x * lLVector36.y)) + ((lLVector35.x * lLVector38.y) - (lLVector38.x * lLVector35.y)) + ((lLVector38.x * lLVector36.y) - (lLVector36.x * lLVector38.y))
+                var f4: Float = ((lLVector36.x * lLVector37.y) - (lLVector37.x * lLVector36.y)) + ((lLVector37.x * lLVector38.y) - (lLVector38.x * lLVector37.y)) + ((lLVector38.x * lLVector36.y) - (lLVector36.x * lLVector38.y))
+                var z3: Boolean = true
+                var z4: Boolean = true
                 if (f < 0.0f) {
                     z3 = false
                 }
@@ -153,17 +155,17 @@ class PrimVolumeFace {
                     z2 = LLVector3.sub(lLVector35, lLVector37).magVecSquared() < LLVector3.sub(lLVector36, lLVector38).magVecSquared()
                 }
                 if (z2) {
-                    Int i10 = i9 + 1
+                    var i10: Int = i9 + 1
                     this.Indices[i9] = (Short) i6
-                    Int i11 = i10 + 1
+                    var i11: Int = i10 + 1
                     this.Indices[i10] = (Short) (i6 + 1)
                     i8 = i11 + 1
                     this.Indices[i11] = (Short) i7
                     i6++
                 } else {
-                    Int i12 = i9 + 1
+                    var i12: Int = i9 + 1
                     this.Indices[i9] = (Short) i6
-                    Int i13 = i12 + 1
+                    var i13: Int = i12 + 1
                     this.Indices[i12] = (Short) (i7 - 1)
                     i8 = i13 + 1
                     this.Indices[i13] = (Short) i7
@@ -171,11 +173,11 @@ class PrimVolumeFace {
                 }
             }
         } else {
-            Int i14 = 0
-            Int i15 = i - 1
-            Int i16 = 0
+            var i14: Int = 0
+            var i15: Int = i - 1
+            var i16: Int = 0
             while (true) {
-                Int i17 = i16
+                var i17: Int = i16
                 if (i15 - i14 <= 1) {
                     return true
                 }
@@ -187,12 +189,12 @@ class PrimVolumeFace {
                 lLVector310.z = 0.0f
                 lLVector311.z = 0.0f
                 lLVector312.z = 0.0f
-                Float f5 = ((lLVector39.x * lLVector311.y) - (lLVector311.x * lLVector39.y)) + ((lLVector311.x * lLVector310.y) - (lLVector310.x * lLVector311.y)) + ((lLVector310.x * lLVector39.y) - (lLVector39.x * lLVector310.y))
-                Float f6 = ((lLVector39.x * lLVector312.y) - (lLVector312.x * lLVector39.y)) + ((lLVector312.x * lLVector311.y) - (lLVector311.x * lLVector312.y)) + ((lLVector311.x * lLVector39.y) - (lLVector39.x * lLVector311.y))
-                Float f7 = ((lLVector310.x * lLVector39.y) - (lLVector39.x * lLVector310.y)) + ((lLVector39.x * lLVector312.y) - (lLVector312.x * lLVector39.y)) + ((lLVector312.x * lLVector310.y) - (lLVector310.x * lLVector312.y))
-                Float f8 = ((lLVector310.x * lLVector311.y) - (lLVector311.x * lLVector310.y)) + ((lLVector311.x * lLVector312.y) - (lLVector312.x * lLVector311.y)) + ((lLVector312.x * lLVector310.y) - (lLVector310.x * lLVector312.y))
-                Boolean z5 = true
-                Boolean z6 = true
+                var f5: Float = ((lLVector39.x * lLVector311.y) - (lLVector311.x * lLVector39.y)) + ((lLVector311.x * lLVector310.y) - (lLVector310.x * lLVector311.y)) + ((lLVector310.x * lLVector39.y) - (lLVector39.x * lLVector310.y))
+                var f6: Float = ((lLVector39.x * lLVector312.y) - (lLVector312.x * lLVector39.y)) + ((lLVector312.x * lLVector311.y) - (lLVector311.x * lLVector312.y)) + ((lLVector311.x * lLVector39.y) - (lLVector39.x * lLVector311.y))
+                var f7: Float = ((lLVector310.x * lLVector39.y) - (lLVector39.x * lLVector310.y)) + ((lLVector39.x * lLVector312.y) - (lLVector312.x * lLVector39.y)) + ((lLVector312.x * lLVector310.y) - (lLVector310.x * lLVector312.y))
+                var f8: Float = ((lLVector310.x * lLVector311.y) - (lLVector311.x * lLVector310.y)) + ((lLVector311.x * lLVector312.y) - (lLVector312.x * lLVector311.y)) + ((lLVector312.x * lLVector310.y) - (lLVector310.x * lLVector312.y))
+                var z5: Boolean = true
+                var z6: Boolean = true
                 if (f5 < 0.0f) {
                     z5 = false
                 }
@@ -213,17 +215,17 @@ class PrimVolumeFace {
                     z = LLVector3.sub(lLVector39, lLVector311).magVecSquared() < LLVector3.sub(lLVector310, lLVector312).magVecSquared()
                 }
                 if (z) {
-                    Int i18 = i17 + 1
+                    var i18: Int = i17 + 1
                     this.Indices[i17] = (Short) i14
-                    Int i19 = i18 + 1
+                    var i19: Int = i18 + 1
                     this.Indices[i18] = (Short) i15
                     i16 = i19 + 1
                     this.Indices[i19] = (Short) (i14 + 1)
                     i14++
                 } else {
-                    Int i20 = i17 + 1
+                    var i20: Int = i17 + 1
                     this.Indices[i17] = (Short) i14
-                    Int i21 = i20 + 1
+                    var i21: Int = i20 + 1
                     this.Indices[i20] = (Short) i15
                     i16 = i21 + 1
                     this.Indices[i21] = (Short) (i15 - 1)
@@ -234,44 +236,44 @@ class PrimVolumeFace {
     }
 
     private Boolean createSide(PrimVolume primVolume) {
-        Boolean z = (this.TypeMask & 256) != 0
+        var z: Boolean = (this.TypeMask & 256) != 0
         Byte b = primVolume.volumeParams.SculptType
         Byte b2 = (Byte) (b & 7)
-        Boolean z2 = (b & 64) != 0
-        Boolean z3 = (b & Byte.MIN_VALUE) != 0
-        Boolean z4 = z2 ? !z3 : z3
+        var z2: Boolean = (b & 64) != 0
+        var z3: Boolean = (b & Byte.MIN_VALUE) != 0
+        var z4: Boolean = z2 ? !z3 : z3
         Vector3Array vector3Array = primVolume.Mesh
         ArrayList<LLVector3> arrayList = primVolume.Profile.Profile
         ArrayList<PrimPath.PathPoint> arrayList2 = primVolume.Path.Path
-        Int i6 = primVolume.Profile.Total
-        Int i7 = (this.NumS - 1) * (this.NumT - 1) * 6
+        var i6: Int = primVolume.Profile.Total
+        var i7: Int = (this.NumS - 1) * (this.NumT - 1) * 6
         resizeVertices(this.NumS * this.NumT)
         resizeIndices(i7)
         this.Edge = Int[i7]
         Vector3Array vector3Array2 = this.Positions
         Vector3Array vector3Array3 = this.Normals
         Vector2Array vector2Array = this.TexCoords
-        Int floor = Math.toInt().floor(arrayList.toDouble().get(this.BeginS).z)
-        Int i8 = ((this.TypeMask & 16) == 0 || (this.TypeMask & 256) == 0 || this.NumS <= 2) ? this.NumS : this.NumS / 2
-        Int i9 = this.BeginT
-        Int i10 = 0
+        var floor: Int = Math.toInt().floor(arrayList.toDouble().get(this.BeginS).z)
+        var i8: Int = ((this.TypeMask & 16) == 0 || (this.TypeMask & 256) == 0 || this.NumS <= 2) ? this.NumS : this.NumS / 2
+        var i9: Int = this.BeginT
+        var i10: Int = 0
         while (true) {
-            Int i11 = i9
+            var i11: Int = i9
             if (i11 >= this.BeginT + this.NumT) {
                 break
             }
-            Float f = arrayList2.get(i11).TexT
-            Int i12 = 0
-            Int i13 = i10
+            var f: Float = arrayList2.get(i11).TexT
+            var i12: Int = 0
+            var i13: Int = i10
             while (i12 < i8) {
-                Float f2 = ((this.TypeMask & 4) != 0 || this.BeginS + i12 >= arrayList.size()) ? i12 != 0 ? 1.0f : 0.0f : !z ? arrayList.get(this.BeginS + i12).z : arrayList.get(this.BeginS + i12).z - (floor.toFloat())
+                var f2: Float = ((this.TypeMask & 4) != 0 || this.BeginS + i12 >= arrayList.size()) ? i12 != 0 ? 1.0f : 0.0f : !z ? arrayList.get(this.BeginS + i12).z : arrayList.get(this.BeginS + i12).z - (floor.toFloat())
                 if (z4) {
                     f2 = 1.0f - f2
                 }
-                Int i14 = this.BeginS + i12 >= i6 ? this.BeginS + i12 + ((i11 - 1) * i6) : this.BeginS + i12 + (i6 * i11)
+                var i14: Int = this.BeginS + i12 >= i6 ? this.BeginS + i12 + ((i11 - 1) * i6) : this.BeginS + i12 + (i6 * i11)
                 vector3Array2.set(i13, vector3Array, i14)
                 vector2Array.set(i13, f2, f)
-                Int i15 = i13 + 1
+                var i15: Int = i13 + 1
                 if ((this.TypeMask & 16) == 0 || (this.TypeMask & 256) == 0 || this.NumS <= 2 || i12 <= 0) {
                     i5 = i15
                 } else {
@@ -285,9 +287,9 @@ class PrimVolumeFace {
             if ((this.TypeMask & 16) == 0 || (this.TypeMask & 256) == 0 || this.NumS <= 2) {
                 i10 = i13
             } else {
-                Int i16 = (this.TypeMask & 128) != 0 ? i8 - 1 : 0
-                Int i17 = this.BeginS + i16 + (i6 * i11)
-                Float f3 = this.BeginS + i16 < arrayList.size() ? arrayList.get(i16 + this.BeginS).z - (floor.toFloat()) : i16 != 0 ? 1.0f : 0.0f
+                var i16: Int = (this.TypeMask & 128) != 0 ? i8 - 1 : 0
+                var i17: Int = this.BeginS + i16 + (i6 * i11)
+                var f3: Float = this.BeginS + i16 < arrayList.size() ? arrayList.get(i16 + this.BeginS).z - (floor.toFloat()) : i16 != 0 ? 1.0f : 0.0f
                 vector3Array2.set(i13, vector3Array, i17)
                 vector2Array.set(i13, f3, f)
                 i10 = i13 + 1
@@ -302,24 +304,24 @@ class PrimVolumeFace {
         this.Center = LLVector3(lLVector3)
         this.Center.add(lLVector32)
         this.Center.mul(0.5f)
-        Int i18 = 0
-        Int i19 = 0
-        Boolean z5 = (this.TypeMask & 256) != 0
+        var i18: Int = 0
+        var i19: Int = 0
+        var z5: Boolean = (this.TypeMask & 256) != 0
         for (i20 in 0 until this.NumT - 1) {
             for (i21 in 0 until this.NumS - 1) {
-                Int i22 = i18 + 1
+                var i22: Int = i18 + 1
                 this.Indices[i18] = (Short) ((this.NumS * i20) + i21)
-                Int i23 = i22 + 1
+                var i23: Int = i22 + 1
                 this.Indices[i22] = (Short) (i21 + 1 + (this.NumS * (i20 + 1)))
-                Int i24 = i23 + 1
+                var i24: Int = i23 + 1
                 this.Indices[i23] = (Short) ((this.NumS * (i20 + 1)) + i21)
-                Int i25 = i24 + 1
+                var i25: Int = i24 + 1
                 this.Indices[i24] = (Short) ((this.NumS * i20) + i21)
-                Int i26 = i25 + 1
+                var i26: Int = i25 + 1
                 this.Indices[i25] = (Short) (i21 + 1 + (this.NumS * i20))
                 i18 = i26 + 1
                 this.Indices[i26] = (Short) (i21 + 1 + (this.NumS * (i20 + 1)))
-                Int i27 = i19 + 1
+                var i27: Int = i19 + 1
                 this.Edge[i19] = ((this.NumS - 1) * 2 * i20) + (i21 * 2) + 1
                 if (i20 < this.NumT - 2) {
                     this.Edge[i27] = ((this.NumS - 1) * 2 * (i20 + 1)) + (i21 * 2) + 1
@@ -392,11 +394,11 @@ class PrimVolumeFace {
         vector3Array2.get(0, lLVector36)
         vector3Array2.get(this.NumS * (this.NumT - 2), lLVector37)
         lLVector35.setSub(lLVector36, lLVector37)
-        Boolean z6 = lLVector35.dot(lLVector35) < 1.0E-6f
+        var z6: Boolean = lLVector35.dot(lLVector35) < 1.0E-6f
         vector3Array2.get(this.NumS - 1, lLVector36)
         vector3Array2.get(((this.NumS * (this.NumT - 2)) + this.NumS) - 1, lLVector37)
         lLVector35.setSub(lLVector36, lLVector37)
-        Boolean z7 = lLVector35.dot(lLVector35) < 1.0E-6f
+        var z7: Boolean = lLVector35.dot(lLVector35) < 1.0E-6f
         if (b2 == 0) {
             if (!primVolume.Path.Open) {
                 for (i32 in 0 until this.NumS) {
@@ -424,9 +426,9 @@ class PrimVolumeFace {
             }
             return true
         }
-        Boolean z8 = b2 == 1
-        Boolean z9 = b2 == 1 || b2 == 2 || b2 == 4
-        Boolean z10 = b2 == 2
+        var z8: Boolean = b2 == 1
+        var z9: Boolean = b2 == 1 || b2 == 2 || b2 == 4
+        var z10: Boolean = b2 == 2
         if (z8) {
             LLVector3 lLVector38 = LLVector3()
             for (i36 in 0 until this.NumS) {
@@ -460,19 +462,19 @@ class PrimVolumeFace {
     private Boolean createUnCutCubeCap(PrimVolume primVolume) {
         Vector3Array vector3Array = primVolume.Mesh
         ArrayList<LLVector3> arrayList = primVolume.Profile.Profile
-        Int i2 = primVolume.Profile.Total
-        Int size = primVolume.Path.Path.size()
-        Int size2 = (arrayList.size() - 1) / 4
+        var i2: Int = primVolume.Profile.Total
+        var size: Int = primVolume.Path.Path.size()
+        var size2: Int = (arrayList.size() - 1) / 4
         LLVector3 lLVector3 = this.Extents[0]
         LLVector3 lLVector32 = this.Extents[1]
-        Int i3 = (this.TypeMask & 512) != 0 ? i2 * (size - 1) : this.BeginS
+        var i3: Int = (this.TypeMask & 512) != 0 ? i2 * (size - 1) : this.BeginS
         VertexArray vertexArray2 = VertexArray(4)
         LLVector3 lLVector33 = LLVector3()
         Vector3Array vertices = vertexArray2.getVertices()
         Vector2Array texCoords = vertexArray2.getTexCoords()
-        Int i4 = 0
+        var i4: Int = 0
         while (true) {
-            Int i5 = i4
+            var i5: Int = i4
             if (i5 >= 4) {
                 break
             }
@@ -493,20 +495,20 @@ class PrimVolumeFace {
         }
         resizeVertices((size2 + 1) * (size2 + 1))
         Vector3Array vector3Array2 = this.Positions
-        Int i6 = 0
+        var i6: Int = 0
         LLVector3 lLVector35 = LLVector3()
         LLVector3 lLVector36 = LLVector3()
         LLVector2 lLVector2 = LLVector2()
         LLVector2 lLVector22 = LLVector2()
-        Int i7 = 0
+        var i7: Int = 0
         while (true) {
-            Int i8 = i7
+            var i8: Int = i7
             if (i8 >= size2 + 1) {
                 break
             }
-            Int i9 = 0
+            var i9: Int = 0
             while (true) {
-                Int i10 = i9
+                var i10: Int = i9
                 if (i10 >= size2 + 1) {
                     break
                 }
@@ -529,26 +531,26 @@ class PrimVolumeFace {
         resizeIndices(size2 * size2 * 6)
         ShortArray sArr = this.Indices
         ShortArray sArr2 = {0, 1, (Short) (size2 + 1 + 1), (Short) (size2 + 1 + 1), (Short) (size2 + 1), 0}
-        Int i11 = 0
-        Int i12 = 0
+        var i11: Int = 0
+        var i12: Int = 0
         while (true) {
-            Int i13 = i12
+            var i13: Int = i12
             if (i13 >= size2) {
                 return true
             }
-            Int i14 = 0
+            var i14: Int = 0
             while (i14 < size2) {
                 if ((this.TypeMask & 512) != 0) {
                     i = i11
-                    Int i15 = 5
+                    var i15: Int = 5
                     while (i15 >= 0) {
                         sArr[i] = (Short) (((size2 + 1) * i14) + i13 + sArr2[i15])
                         i15--
                         i++
                     }
                 } else {
-                    Int i16 = i11
-                    Int i17 = 0
+                    var i16: Int = i11
+                    var i17: Int = 0
                     while (i17 < 6) {
                         sArr[i] = (Short) (((size2 + 1) * i14) + i13 + sArr2[i17])
                         i17++
@@ -591,15 +593,15 @@ class PrimVolumeFace {
     }
 
     fun create(PrimVolume primVolume): Boolean {
-        Boolean createCap = (this.TypeMask & 2) != 0 ? createCap(primVolume) : ((this.TypeMask & 4) == 0 && (this.TypeMask & 8) == 0) ? false : createSide(primVolume)
+        var createCap: Boolean = (this.TypeMask & 2) != 0 ? createCap(primVolume) : ((this.TypeMask & 4) == 0 && (this.TypeMask & 8) == 0) ? false : createSide(primVolume)
         if (createCap) {
             this.TexCoordExtents[0] = LLVector2(1.0f, 1.0f)
             this.TexCoordExtents[1] = LLVector2(0.0f, 0.0f)
             this.TexCoords.minMaxVector(this.TexCoordExtents[0], this.TexCoordExtents[1])
-            this.TexCoordExtents[0].x = Math.max(0.0f, this.TexCoordExtents[0].x)
-            this.TexCoordExtents[0].y = Math.max(0.0f, this.TexCoordExtents[0].y)
-            this.TexCoordExtents[1].x = Math.min(1.0f, this.TexCoordExtents[1].x)
-            this.TexCoordExtents[1].y = Math.min(1.0f, this.TexCoordExtents[1].y)
+            this.TexCoordExtents[0].x = max(0.0f, this.TexCoordExtents[0].x)
+            this.TexCoordExtents[0].y = max(0.0f, this.TexCoordExtents[0].y)
+            this.TexCoordExtents[1].x = min(1.0f, this.TexCoordExtents[1].x)
+            this.TexCoordExtents[1].y = min(1.0f, this.TexCoordExtents[1].y)
         }
         return createCap
     }

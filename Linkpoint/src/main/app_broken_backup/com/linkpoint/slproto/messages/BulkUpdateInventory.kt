@@ -56,7 +56,7 @@ class BulkUpdateInventory : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int i2 = 37
+        var i2: Int = 37
         Iterator<T> it = this.FolderData_Fields.iterator()
         while (true) {
             i = i2
@@ -65,10 +65,10 @@ class BulkUpdateInventory : SLMessage {
             }
             i2 = ((it as FolderData).next()).Name.size + 34 + i
         }
-        Int i3 = i + 1
+        var i3: Int = i + 1
         Iterator<T> it2 = this.ItemData_Fields.iterator()
         while (true) {
-            Int i4 = i3
+            var i4: Int = i3
             if (!it2.hasNext()) {
                 return i4
             }
@@ -77,11 +77,11 @@ class BulkUpdateInventory : SLMessage {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleBulkUpdateInventory(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put(Ascii.EM)
@@ -121,7 +121,7 @@ class BulkUpdateInventory : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.TransactionID = unpackUUID(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE

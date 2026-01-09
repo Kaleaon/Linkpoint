@@ -23,11 +23,11 @@ class TransferRequest : SLMessage {
         return this.TransferInfo_Field.Params.size + 30 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleTransferRequest(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -103)
@@ -38,7 +38,7 @@ class TransferRequest : SLMessage {
         packVariable(byteBuffer, this.TransferInfo_Field.Params, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.TransferInfo_Field.TransferID = unpackUUID(byteBuffer)
         this.TransferInfo_Field.ChannelType = unpackInt(byteBuffer)
         this.TransferInfo_Field.SourceType = unpackInt(byteBuffer)

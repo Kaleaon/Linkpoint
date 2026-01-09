@@ -30,20 +30,20 @@ class UserDao : AbstractDao<User, Long> {
         super(daoConfig, daoSession)
     }
 
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        String str = z ? "IF NOT EXISTS " : ""
+    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
+        var str: String = z ? "IF NOT EXISTS " : ""
         sQLiteDatabase.execSQL("CREATE TABLE " + str + "'Users' (" + "'_id' INTEGER PRIMARY KEY ," + "'UUID' TEXT," + "'USER_NAME' TEXT," + "'DISPLAY_NAME' TEXT," + "'BAD_UUID' INTEGER NOT NULL ," + "'IS_FRIEND' INTEGER NOT NULL ," + "'RIGHTS_GIVEN' INTEGER NOT NULL ," + "'RIGHTS_HAS' INTEGER NOT NULL );")
         sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_Users_UUID ON Users" + " (UUID);")
     }
 
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'Users'")
     }
 
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, user: User): Unit {
-        Long j = 1
+    protected fun bindValues(sQLiteStatement: SQLiteStatement, user: User)  {
+        var j: Long = 1
         sQLiteStatement.clearBindings()
-        Long id = user.getId()
+        var id: Long = user.getId()
         if (id != null) {
             sQLiteStatement.bindLong(1, id.longValue())
         }
@@ -51,7 +51,7 @@ class UserDao : AbstractDao<User, Long> {
         if (uuid != null) {
             sQLiteStatement.bindString(2, uuid.toString())
         }
-        String userName = user.getUserName()
+        var userName: String = user.getUserName()
         if (userName != null) {
             sQLiteStatement.bindString(3, userName)
         }
@@ -77,24 +77,24 @@ class UserDao : AbstractDao<User, Long> {
     }
 
     fun readEntity(cursor: Cursor, i: Int): User {
-        Boolean z = true
-        String str = null
-        Long valueOf = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
+        var z: Boolean = true
+        var str: String = null
+        var valueOf: Long = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
         UUID fromString = cursor.isNull(i + 1) ? null : UUID.fromString(cursor.getString(i + 1))
-        String string = cursor.isNull(i + 2) ? null : cursor.getString(i + 2)
+        var string: String = cursor.isNull(i + 2) ? null : cursor.getString(i + 2)
         if (!cursor.isNull(i + 3)) {
             str = cursor.getString(i + 3)
         }
-        Boolean z2 = cursor.getShort(i + 4) != (Short) 0
+        var z2: Boolean = cursor.getShort(i + 4) != (Short) 0
         if (cursor.getShort(i + 5) == (Short) 0) {
             z = false
         }
         return User(valueOf, fromString, string, str, z2, z, cursor.getInt(i + 6), cursor.getInt(i + 7))
     }
 
-    fun readEntity(cursor: Cursor, user: User, i: Int): Unit {
-        Boolean z = true
-        String str = null
+    fun readEntity(cursor: Cursor, user: User, i: Int)  {
+        var z: Boolean = true
+        var str: String = null
         user.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
         user.setUuid(cursor.isNull(i + 1) ? null : UUID.fromString(cursor.getString(i + 1)))
         user.setUserName(cursor.isNull(i + 2) ? null : cursor.getString(i + 2))

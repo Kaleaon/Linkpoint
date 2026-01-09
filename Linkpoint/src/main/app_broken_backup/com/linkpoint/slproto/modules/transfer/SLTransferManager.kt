@@ -31,14 +31,14 @@ class SLTransferManager : SLModule {
     /* access modifiers changed from: private */
     Map<UUID, SLTransfer> activeTransfers = Collections.synchronizedMap(HashMap())
     private RequestHandler<AssetKey> assetRequestHandler = AsyncRequestHandler(this.agentCircuit, RequestHandler<AssetKey>() {
-        fun onRequest(@NonNull AssetKey assetKey): Unit {
+        fun onRequest(@NonNull AssetKey assetKey)  {
             Debug.Printf("Transfer: Requested asset download for %s", assetKey)
             SLTransfer sLTransfer = SLTransfer(SLTransferManager.this.circuitInfo.agentID, SLTransferManager.this.circuitInfo.sessionID, assetKey, SLTransferManager.DEFAULT_PRIORITY)
             SLTransferManager.this.activeTransferIds.forcePut(assetKey, sLTransfer.getTransferUUID())
             SLTransferManager.this.BeginTransfer(sLTransfer)
         }
 
-        fun onRequestCancelled(@NonNull AssetKey assetKey): Unit {
+        fun onRequestCancelled(@NonNull AssetKey assetKey)  {
             SLTransfer sLTransfer
             UUID uuid = (UUID) SLTransferManager.this.activeTransferIds.remove(assetKey)
             if (uuid != null && (sLTransfer = (SLTransfer) SLTransferManager.this.activeTransfers.get(uuid)) != null) {
@@ -59,14 +59,14 @@ class SLTransferManager : SLModule {
     }
 
     /* access modifiers changed from: private */
-    fun BeginTransfer(SLTransfer sLTransfer): Unit {
+    fun BeginTransfer(SLTransfer sLTransfer)  {
         Debug.Printf("Transfer: Starting transfer: assetUUID %s, assetType %d", sLTransfer.getAssetUUID().toString(), Int.valueOf(sLTransfer.getAssetType()))
         this.activeTransfers.put(sLTransfer.getTransferUUID(), sLTransfer)
         this.agentCircuit.SendMessage(sLTransfer.makeTransferRequest())
     }
 
     /* access modifiers changed from: private */
-    fun CancelTransfer(SLTransfer sLTransfer): Unit {
+    fun CancelTransfer(SLTransfer sLTransfer)  {
         this.activeTransfers.remove(sLTransfer.getTransferUUID())
         TransferAbort transferAbort = TransferAbort()
         transferAbort.TransferInfo_Field.TransferID = sLTransfer.getTransferUUID()
@@ -76,7 +76,7 @@ class SLTransferManager : SLModule {
     }
 
     /* access modifiers changed from: package-private */
-    fun EndTransfer(SLTransfer sLTransfer): Unit {
+    fun EndTransfer(SLTransfer sLTransfer)  {
         Int status
         this.activeTransfers.remove(sLTransfer.getTransferUUID())
         AssetKey assetKey = (AssetKey) this.activeTransferIds.inverse().remove(sLTransfer.getTransferUUID())
@@ -85,7 +85,7 @@ class SLTransferManager : SLModule {
         }
     }
 
-    fun HandleCloseCircuit(): Unit {
+    fun HandleCloseCircuit()  {
         AnimationCache.getInstance().setAssetResponseCacher((AssetResponseCacher) null)
         if (this.userManager != null) {
             this.userManager.getAssetResponseCacher().getRequestSource().detachRequestHandler(this.assetRequestHandler)
@@ -94,7 +94,7 @@ class SLTransferManager : SLModule {
     }
 
     @SLMessageHandler
-    fun HandleTransferInfo(TransferInfo transferInfo): Unit {
+    fun HandleTransferInfo(TransferInfo transferInfo)  {
         SLTransfer sLTransfer = this.activeTransfers.get(transferInfo.TransferInfoData_Field.TransferID)
         if (sLTransfer != null) {
             Debug.Log(String.format("Transfer: Info recd, status %d, size %d", Any[]{Int.valueOf(transferInfo.TransferInfoData_Field.Status), Int.valueOf(transferInfo.TransferInfoData_Field.Size)}))
@@ -103,7 +103,7 @@ class SLTransferManager : SLModule {
     }
 
     @SLMessageHandler
-    fun HandleTransferPacket(TransferPacket transferPacket): Unit {
+    fun HandleTransferPacket(TransferPacket transferPacket)  {
         SLTransfer sLTransfer = this.activeTransfers.get(transferPacket.TransferData_Field.TransferID)
         if (sLTransfer != null) {
             Debug.Log(String.format("Transfer: data recd, packet %d, status %d, size %d.", Any[]{Int.valueOf(transferPacket.TransferData_Field.Packet), Int.valueOf(transferPacket.TransferData_Field.Status), Int.valueOf(transferPacket.TransferData_Field.Data.length)}))

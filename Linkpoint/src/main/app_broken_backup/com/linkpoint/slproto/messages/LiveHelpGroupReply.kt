@@ -21,11 +21,11 @@ class LiveHelpGroupReply : SLMessage {
         return this.ReplyData_Field.Selection.size + 33 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleLiveHelpGroupReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 124)
@@ -34,7 +34,7 @@ class LiveHelpGroupReply : SLMessage {
         packVariable(byteBuffer, this.ReplyData_Field.Selection, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.ReplyData_Field.RequestID = unpackUUID(byteBuffer)
         this.ReplyData_Field.GroupID = unpackUUID(byteBuffer)
         this.ReplyData_Field.Selection = unpackVariable(byteBuffer, 1)

@@ -59,7 +59,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
     /* access modifiers changed from: private */
     GridList gridList = null
     /* access modifiers changed from: private */
-    Int lastSelectedGrid = 0
+    var lastSelectedGrid: Int = 0
     /* access modifiers changed from: private */
     UUID lastSelectedGridUUID
     private Boolean loggingIn = false
@@ -84,11 +84,11 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
         String str2
         SLURL slurl
         SharedPreferences preferences = getPreferences(0)
-        String editable = ((EditText) findViewById(R.id.editUserName)).getText().toString()
-        String editable2 = ((EditText) findViewById(R.id.editPassword)).getText().toString()
+        var editable: String = ((EditText) findViewById(R.id.editUserName)).getText().toString()
+        var editable2: String = ((EditText) findViewById(R.id.editPassword)).getText().toString()
         GridList.GridInfo selectedGrid = getSelectedGrid()
-        Boolean isChecked = ((CheckBox) findViewById(R.id.savePassword)).isChecked()
-        String str3 = ""
+        var isChecked: Boolean = ((CheckBox) findViewById(R.id.savePassword)).isChecked()
+        var str3: String = ""
         if (editable2.equals(getString(R.string.saved_password))) {
             str3 = preferences.getString(KEY_PASSWORD, "")
             z = true
@@ -96,7 +96,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
             z = false
         }
         if (!z) {
-            String passwordHash = SLAuth.getPasswordHash(editable2)
+            var passwordHash: String = SLAuth.getPasswordHash(editable2)
             Debug.Log("Login: not using saved hash, password = " + editable2 + ", hash: " + passwordHash)
             str = passwordHash
         } else {
@@ -116,10 +116,10 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
             ((EditText) findViewById(R.id.editPassword)).setText("")
         }
         this.enableAutoClear = true
-        String string = preferences.getString(KEY_CLIENT_ID, "")
-        String string2 = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString("start_location", "last")
-        Boolean saveUserName = getSaveUserName()
-        Boolean z2 = isChecked ? saveUserName : false
+        var string: String = preferences.getString(KEY_CLIENT_ID, "")
+        var string2: String = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString("start_location", "last")
+        var saveUserName: Boolean = getSaveUserName()
+        var z2: Boolean = isChecked ? saveUserName : false
         SharedPreferences.Editor edit = preferences.edit()
         edit.putString(KEY_LOGIN, saveUserName ? editable : "")
         edit.putBoolean(KEY_SAVE_PASSWORD, isChecked)
@@ -142,7 +142,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
         } catch (Exception e) {
             slurl = null
         }
-        String loginStartLocation = slurl != null ? slurl.getLoginStartLocation() : string2
+        var loginStartLocation: String = slurl != null ? slurl.getLoginStartLocation() : string2
         Debug.Log("Start location (LoginActivity): " + loginStartLocation)
         this.loggingIn = true
         Intent intent = Intent(this, GridConnectionService.class)
@@ -181,13 +181,13 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
 
     private GridList.GridInfo getSelectedGrid() {
         Any selectedItem = ((Spinner) findViewById(R.id.spinnerGrid)).getSelectedItem()
-        return selectedItem instanceof GridList.GridInfo ? (GridList.GridInfo) selectedItem : this.gridList.getDefaultGrid()
+        return selectedItem is GridList.GridInfo ? (GridList.GridInfo) selectedItem : this.gridList.getDefaultGrid()
     }
 
     private Unit loadSavedLogin() {
         SharedPreferences preferences = getPreferences(0)
         if (getSaveUserName()) {
-            String string = preferences.getString(KEY_PASSWORD, "")
+            var string: String = preferences.getString(KEY_PASSWORD, "")
             ((EditText) findViewById(R.id.editUserName)).setText(preferences.getString(KEY_LOGIN, ""))
             ((CheckBox) findViewById(R.id.savePassword)).setChecked(preferences.getBoolean(KEY_SAVE_PASSWORD, true))
             if (!string.equals("")) {
@@ -212,13 +212,13 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
 
     private Unit setSelectedGrid() {
         try {
-            String string = getPreferences(0).getString(KEY_SELECTED_GRID, "")
+            var string: String = getPreferences(0).getString(KEY_SELECTED_GRID, "")
             if (!string.equals("")) {
-                Int gridIndex = this.gridList.getGridIndex(UUID.fromString(string))
+                var gridIndex: Int = this.gridList.getGridIndex(UUID.fromString(string))
                 ((Spinner) findViewById(R.id.spinnerGrid)).setSelection(gridIndex)
                 this.lastSelectedGrid = gridIndex
                 Any selectedItem = ((Spinner) findViewById(R.id.spinnerGrid)).getSelectedItem()
-                if (selectedItem instanceof GridList.GridInfo) {
+                if (selectedItem is GridList.GridInfo) {
                     this.lastSelectedGridUUID = ((GridList.GridInfo) selectedItem).getGridUUID()
                 }
             }
@@ -227,7 +227,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
     }
 
     private Unit showProgressView(Boolean z) {
-        Int i = 8
+        var i: Int = 8
         View findViewById = findViewById(R.id.login_progress_layout)
         View findViewById2 = findViewById(R.id.login_root_view)
         if (!(findViewById == null || findViewById2 == null)) {
@@ -250,7 +250,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
 
     private Unit updateConnectingStatus() {
         SLGridConnection gridConnection
-        Boolean z = this.loggingIn
+        var z: Boolean = this.loggingIn
         if (!z && (gridConnection = GridConnectionService.getGridConnection()) != null && gridConnection.getConnectionState() == SLGridConnection.ConnectionState.Connecting) {
             showProgressView(true)
             if (gridConnection.getIsReconnecting()) {
@@ -267,16 +267,16 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
     }
 
     private Unit updateMenuItems() {
-        Boolean z = !progressViewVisible()
+        var z: Boolean = !progressViewVisible()
         for (MenuItem visible : this.menuItems) {
             visible.setVisible(z)
         }
     }
 
-    fun afterTextChanged(Editable editable): Unit {
+    fun afterTextChanged(Editable editable)  {
     }
 
-    fun beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3): Unit {
+    fun beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3)  {
         if (this.enableAutoClear) {
             EditText editText = (EditText) findViewById(R.id.editPassword)
             if (editText.getText().toString().equals(getString(R.string.saved_password))) {
@@ -293,7 +293,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
     }
 
     @EventHandler
-    fun handleLoginResult(SLLoginResultEvent sLLoginResultEvent): Unit {
+    fun handleLoginResult(SLLoginResultEvent sLLoginResultEvent)  {
         this.loggingIn = false
         Debug.Printf("LoginProgressActivity: result.success = %b", Boolean.valueOf(sLLoginResultEvent.success))
         if (sLLoginResultEvent.success) {
@@ -302,7 +302,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
             return
         }
         if (!isFinishing() && progressViewVisible()) {
-            String str = "Login to Second Life has failed."
+            var str: String = "Login to Second Life has failed."
             if (!Strings.isNullOrEmpty(sLLoginResultEvent.message)) {
                 str = sLLoginResultEvent.message
             }
@@ -316,7 +316,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
     }
 
     @EventHandler
-    fun handleReconnectingEvent(SLReconnectingEvent sLReconnectingEvent): Unit {
+    fun handleReconnectingEvent(SLReconnectingEvent sLReconnectingEvent)  {
         updateConnectingStatus()
     }
 
@@ -329,7 +329,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
     }
 
     /* access modifiers changed from: protected */
-    fun onActivityResult(Int i, Int i2, Intent intent): Unit {
+    fun onActivityResult(Int i, Int i2, Intent intent)  {
         AccountList.AccountInfo accountInfo
         Debug.Log("LoginActivity: onActivityResult: requestCode = " + i + ", resultCode = " + i2)
         if (intent != null) {
@@ -340,7 +340,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
         switch (i) {
             case 3:
                 if (i2 == -1 && intent != null && (accountInfo = (AccountList.AccountInfo) intent.getParcelableExtra("selected_account")) != null) {
-                    String passwordHash = accountInfo.getPasswordHash()
+                    var passwordHash: String = accountInfo.getPasswordHash()
                     ((EditText) findViewById(R.id.editUserName)).setText(accountInfo.getLoginName())
                     ((CheckBox) findViewById(R.id.savePassword)).setChecked(!passwordHash.equals(""))
                     this.enableAutoClear = false
@@ -353,11 +353,11 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
                     }
                     this.enableAutoClear = true
                     if (accountInfo.getGridUUID() != null) {
-                        Int gridIndex = this.gridList.getGridIndex(accountInfo.getGridUUID())
+                        var gridIndex: Int = this.gridList.getGridIndex(accountInfo.getGridUUID())
                         ((Spinner) findViewById(R.id.spinnerGrid)).setSelection(gridIndex)
                         this.lastSelectedGrid = gridIndex
                         Any selectedItem = ((Spinner) findViewById(R.id.spinnerGrid)).getSelectedItem()
-                        if (selectedItem instanceof GridList.GridInfo) {
+                        if (selectedItem is GridList.GridInfo) {
                             this.lastSelectedGridUUID = ((GridList.GridInfo) selectedItem).getGridUUID()
                         }
                     }
@@ -386,7 +386,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
         }
     }
 
-    fun onClick(View view): Unit {
+    fun onClick(View view)  {
         switch (view.getId()) {
             case R.id.whatsnewText:
                 startActivity(Intent(this, WhatsNewActivity.class))
@@ -407,7 +407,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
         }
     }
 
-    fun onCreate(Bundle bundle): Unit {
+    fun onCreate(Bundle bundle)  {
         super.onCreate(bundle)
         SLGridConnection gridConnection = GridConnectionService.getGridConnection()
         if (gridConnection != null) {
@@ -442,16 +442,16 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
             /* JADX WARNING: type inference failed for: r5v0, types: [android.widget.AdapterView<?>, android.widget.AdapterView] */
             /* JADX WARNING: Unknown variable types count: 1 */
             /* Code decompiled incorrectly, please refer to instructions dump. */
-            fun onItemSelected(android.widget.AdapterView<?> r5, android.view.View r6, Int r7, Long r8): Unit {
+            fun onItemSelected(android.widget.AdapterView<?> r5, android.view.View r6, Int r7, Long r8)  {
                 /*
                     r4 = this
                     r3 = 0
                     com.linkpoint.ui.login.LoginActivity r0 = com.linkpoint.ui.login.LoginActivity.this
-                    Int r0 = r0.lastSelectedGrid
+                    var r0: Int = r0.lastSelectedGrid
                     if (r7 == r0) goto L_0x0032
                     android.widget.Adapter r0 = r5.getAdapter()
                     java.lang.Any r0 = r0.getItem(r7)
-                    Boolean r1 = r0 instanceof com.linkpoint.ui.grids.GridList.GridInfo
+                    var r1: Boolean = r0 is com.linkpoint.ui.grids.GridList.GridInfo
                     if (r1 == 0) goto L_0x0032
                     com.linkpoint.ui.grids.GridList$GridInfo r0 = (com.linkpoint.ui.grids.GridList.GridInfo) r0
                     java.lang.String r1 = r0.getLoginURL()
@@ -468,7 +468,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
                     return
                 L_0x0033:
                     com.linkpoint.ui.login.LoginActivity r1 = com.linkpoint.ui.login.LoginActivity.this
-                    Int unused = r1.lastSelectedGrid = r7
+                    var unused: Int = r1.lastSelectedGrid = r7
                     com.linkpoint.ui.login.LoginActivity r1 = com.linkpoint.ui.login.LoginActivity.this
                     java.util.UUID r0 = r0.getGridUUID()
                     java.util.UUID unused = r1.lastSelectedGridUUID = r0
@@ -477,7 +477,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
                 throw UnsupportedOperationException("Method not decompiled: com.linkpoint.ui.login.LoginActivity.AnonymousClass1.onItemSelected(android.widget.AdapterView, android.view.View, Int, Long):Unit")
             }
 
-            fun onNothingSelected(AdapterView<?> adapterView): Unit {
+            fun onNothingSelected(AdapterView<?> adapterView)  {
             }
         findViewById(R.id.whatsnewText).getViewTreeObserver().addOnGlobalLayoutListener($Lambda$U_ZFuxgsYW8weMauiDTqAtaKePI(this))
         checkIfGridAvailable()
@@ -495,27 +495,27 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
         return true
     }
 
-    fun onGridAdded(GridList.GridInfo gridInfo, Boolean z): Unit {
+    fun onGridAdded(GridList.GridInfo gridInfo, Boolean z)  {
         if (z) {
             this.gridList.addNewGrid(gridInfo)
         }
         this.gridList.getGridList(this.gridDisplayList, true)
         this.gridDisplayAdapter.notifyDataSetChanged()
-        Int count = ((Spinner) findViewById(R.id.spinnerGrid)).getAdapter().getCount()
+        var count: Int = ((Spinner) findViewById(R.id.spinnerGrid)).getAdapter().getCount()
         if (count > 1) {
             ((Spinner) findViewById(R.id.spinnerGrid)).setSelection(count - 2)
             this.lastSelectedGrid = count - 2
             Any selectedItem = ((Spinner) findViewById(R.id.spinnerGrid)).getSelectedItem()
-            if (selectedItem instanceof GridList.GridInfo) {
+            if (selectedItem is GridList.GridInfo) {
                 this.lastSelectedGridUUID = ((GridList.GridInfo) selectedItem).getGridUUID()
             }
         }
     }
 
-    fun onGridDeleted(GridList.GridInfo gridInfo): Unit {
+    fun onGridDeleted(GridList.GridInfo gridInfo)  {
     }
 
-    fun onGridEditCancelled(): Unit {
+    fun onGridEditCancelled()  {
         ((Spinner) findViewById(R.id.spinnerGrid)).setSelection(this.lastSelectedGrid)
     }
 
@@ -541,7 +541,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
     }
 
     /* access modifiers changed from: protected */
-    fun onResume(): Unit {
+    fun onResume()  {
         super.onResume()
         Debug.Printf("LoginActivity: Resumed.", Any[0])
         checkIfGridAvailable()
@@ -564,16 +564,16 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
     }
 
     /* access modifiers changed from: protected */
-    fun onStart(): Unit {
+    fun onStart()  {
         super.onStart()
         checkIfGridAvailable()
     }
 
     /* access modifiers changed from: protected */
-    fun onStop(): Unit {
+    fun onStop()  {
         super.onStop()
     }
 
-    fun onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3): Unit {
+    fun onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3)  {
     }
 }

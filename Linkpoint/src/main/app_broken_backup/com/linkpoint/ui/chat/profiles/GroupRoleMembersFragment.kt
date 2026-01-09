@@ -122,7 +122,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$TbI0i
             return 0
         }
 
-        fun onBindViewHolder(MemberViewHolder memberViewHolder, Int i): Unit {
+        fun onBindViewHolder(MemberViewHolder memberViewHolder, Int i)  {
             if (this.data != null && i >= 0 && i < this.data.size()) {
                 memberViewHolder.bindToData(this.data.get(i), this.canDeleteMembers, this.canDeleteMyself)
             }
@@ -132,11 +132,11 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$TbI0i
             return MemberViewHolder(this.layoutInflater.inflate(R.layout.group_role_member_list_item, viewGroup, false), GroupRoleMembersFragment.this.userManager.getUserID())
         }
 
-        fun onViewRecycled(MemberViewHolder memberViewHolder): Unit {
+        fun onViewRecycled(MemberViewHolder memberViewHolder)  {
             memberViewHolder.recycle()
         }
 
-        fun setData(LazyList<GroupRoleMember> lazyList, Boolean z, Boolean z2): Unit {
+        fun setData(LazyList<GroupRoleMember> lazyList, Boolean z, Boolean z2)  {
             this.data = lazyList
             this.canDeleteMembers = z
             this.canDeleteMyself = z2
@@ -163,8 +163,8 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$TbI0i
         }
 
         /* access modifiers changed from: package-private */
-        fun bindToData(GroupRoleMember groupRoleMember, Boolean z, Boolean z2): Unit {
-            Int i = 0
+        fun bindToData(GroupRoleMember groupRoleMember, Boolean z, Boolean z2)  {
+            var i: Int = 0
             ChatterID.ChatterIDUser userChatterID = groupRoleMember != null ? ChatterID.getUserChatterID(this.agentUUID, groupRoleMember.getUserID()) : null
             if (!Objects.equal(userChatterID, this.boundChatterID)) {
                 if (this.chatterNameRetriever != null) {
@@ -193,14 +193,14 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$TbI0i
             imageButton.setVisibility(i)
         }
 
-        fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever2): Unit {
+        fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever2)  {
             if (chatterNameRetriever2 != null) {
                 this.userNameTextView.setText(chatterNameRetriever2.getResolvedName())
                 this.userPicView.setChatterID(chatterNameRetriever2.chatterID, chatterNameRetriever2.getResolvedName())
             }
         }
 
-        fun onClick(View view): Unit {
+        fun onClick(View view)  {
             switch (view.getId()) {
                 case R.id.role_member_remove_button:
                     if (this.boundChatterID != null && this.canDelete) {
@@ -214,7 +214,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$TbI0i
         }
 
         /* access modifiers changed from: package-private */
-        fun recycle(): Unit {
+        fun recycle()  {
             if (this.chatterNameRetriever != null) {
                 this.chatterNameRetriever.dispose()
                 this.chatterNameRetriever = null
@@ -226,7 +226,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$TbI0i
 
     @Nullable
     private AvatarGroupList.AvatarGroupEntry getMyGroupEntry() {
-        if (!(this.chatterID instanceof ChatterID.ChatterIDGroup)) {
+        if (!(this.chatterID is ChatterID.ChatterIDGroup)) {
             return null
         }
         try {
@@ -254,14 +254,14 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$TbI0i
 
     /* access modifiers changed from: private */
     /* renamed from: onGroupRoleMemberList */
-    fun m494com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRoleMembersFragmentmthref0(UUID uuid): Unit {
-        if (this.userManager != null && (this.chatterID instanceof ChatterID.ChatterIDGroup) && this.RoleID != null) {
+    fun m494com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRoleMembersFragmentmthref0(UUID uuid)  {
+        if (this.userManager != null && (this.chatterID is ChatterID.ChatterIDGroup) && this.RoleID != null) {
             this.roleMembers.subscribe(this.userManager.getChatterList().getGroupManager().getGroupRoleMemberList(), GroupManager.GroupRoleMembersQuery.create(((ChatterID.ChatterIDGroup) this.chatterID).getChatterUUID(), this.RoleID, uuid))
         }
     }
 
     /* access modifiers changed from: private */
-    fun removeMemberFromRole(ChatterID.ChatterIDUser chatterIDUser): Unit {
+    fun removeMemberFromRole(ChatterID.ChatterIDUser chatterIDUser)  {
         AlertDialog.Builder(getContext()).setTitle(R.string.remove_member_from_role_confirm).setPositiveButton(R.string.yes_remove, DialogInterface.OnClickListener(this, chatterIDUser) {
 
             /* renamed from: -$f0 */
@@ -451,16 +451,16 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$TbI0i
         return inflate
     }
 
-    fun onLoadableDataChanged(): Unit {
+    fun onLoadableDataChanged()  {
         GroupTitlesReply data
         AvatarGroupList.AvatarGroupEntry myGroupEntry
-        Boolean z3 = true
-        Int i = 0
+        var z3: Boolean = true
+        var i: Int = 0
         if (!(this.userManager == null || (myGroupEntry = getMyGroupEntry()) == null || this.groupTitles.isSubscribed())) {
             this.groupTitles.subscribe(this.userManager.getGroupTitles().getPool(), myGroupEntry.GroupID)
         }
         this.canAddMembers = false
-        Long myGroupPowers = getMyGroupPowers()
+        var myGroupPowers: Long = getMyGroupPowers()
         if ((256 & myGroupPowers) != 0) {
             this.canAddMembers = true
         } else if (!((128 & myGroupPowers) == 0 || (data = this.groupTitles.getData()) == null)) {
@@ -506,10 +506,10 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$TbI0i
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(@Nullable ChatterID chatterID): Unit {
+    fun onShowUser(@Nullable ChatterID chatterID)  {
         this.loadableMonitor.unsubscribeAll()
         this.RoleID = UUIDPool.getUUID(getArguments().getString(ROLE_ID_KEY))
-        if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDGroup)) {
+        if (this.userManager != null && (chatterID is ChatterID.ChatterIDGroup)) {
             UUID chatterUUID = ((ChatterID.ChatterIDGroup) chatterID).getChatterUUID()
             Debug.Printf("GroupRoleMemberList: subscribing for group %s", chatterUUID)
             this.agentCircuit.subscribe(UserManager.agentCircuits(), chatterID.agentUUID)

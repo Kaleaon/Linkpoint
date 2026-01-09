@@ -18,7 +18,7 @@ import android.widget.AdapterView
         this.f503$f0 = obj
     }
 
-    fun onItemClick(AdapterView adapterView, View view, Int i, Long j): Unit {
+    fun onItemClick(AdapterView adapterView, View view, Int i, Long j)  {
         $m$0(adapterView, view, i, j)
     }
 }

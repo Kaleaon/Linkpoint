@@ -49,7 +49,7 @@ class vx_req_session_set_3d_position_t {
      * Lifted jumps to return sites
      */
     vx_req_base_t getBase() {
-        Long l = VxClientProxyJNI.vx_req_session_set_3d_position_t_base_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_req_session_set_3d_position_t_base_get(this.swigCPtr, this)
         if (l != 0L) return vx_req_base_t(l, false)
         return null
     }
@@ -59,7 +59,7 @@ class vx_req_session_set_3d_position_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_double getListener_at_orientation() {
-        Long l = VxClientProxyJNI.vx_req_session_set_3d_position_t_listener_at_orientation_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_req_session_set_3d_position_t_listener_at_orientation_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_double(l, false)
         return null
     }
@@ -69,7 +69,7 @@ class vx_req_session_set_3d_position_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_double getListener_left_orientation() {
-        Long l = VxClientProxyJNI.vx_req_session_set_3d_position_t_listener_left_orientation_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_req_session_set_3d_position_t_listener_left_orientation_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_double(l, false)
         return null
     }
@@ -79,7 +79,7 @@ class vx_req_session_set_3d_position_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_double getListener_position() {
-        Long l = VxClientProxyJNI.vx_req_session_set_3d_position_t_listener_position_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_req_session_set_3d_position_t_listener_position_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_double(l, false)
         return null
     }
@@ -89,7 +89,7 @@ class vx_req_session_set_3d_position_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_double getListener_up_orientation() {
-        Long l = VxClientProxyJNI.vx_req_session_set_3d_position_t_listener_up_orientation_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_req_session_set_3d_position_t_listener_up_orientation_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_double(l, false)
         return null
     }
@@ -99,7 +99,7 @@ class vx_req_session_set_3d_position_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_double getListener_velocity() {
-        Long l = VxClientProxyJNI.vx_req_session_set_3d_position_t_listener_velocity_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_req_session_set_3d_position_t_listener_velocity_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_double(l, false)
         return null
     }
@@ -117,7 +117,7 @@ class vx_req_session_set_3d_position_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_double getSpeaker_at_orientation() {
-        Long l = VxClientProxyJNI.vx_req_session_set_3d_position_t_speaker_at_orientation_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_req_session_set_3d_position_t_speaker_at_orientation_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_double(l, false)
         return null
     }
@@ -127,7 +127,7 @@ class vx_req_session_set_3d_position_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_double getSpeaker_left_orientation() {
-        Long l = VxClientProxyJNI.vx_req_session_set_3d_position_t_speaker_left_orientation_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_req_session_set_3d_position_t_speaker_left_orientation_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_double(l, false)
         return null
     }
@@ -137,7 +137,7 @@ class vx_req_session_set_3d_position_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_double getSpeaker_position() {
-        Long l = VxClientProxyJNI.vx_req_session_set_3d_position_t_speaker_position_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_req_session_set_3d_position_t_speaker_position_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_double(l, false)
         return null
     }
@@ -147,7 +147,7 @@ class vx_req_session_set_3d_position_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_double getSpeaker_up_orientation() {
-        Long l = VxClientProxyJNI.vx_req_session_set_3d_position_t_speaker_up_orientation_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_req_session_set_3d_position_t_speaker_up_orientation_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_double(l, false)
         return null
     }
@@ -157,7 +157,7 @@ class vx_req_session_set_3d_position_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_double getSpeaker_velocity() {
-        Long l = VxClientProxyJNI.vx_req_session_set_3d_position_t_speaker_velocity_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_req_session_set_3d_position_t_speaker_velocity_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_double(l, false)
         return null
     }

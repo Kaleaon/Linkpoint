@@ -77,7 +77,7 @@ class UserGroupsProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoada
         }
 
         /* access modifiers changed from: package-private */
-        fun setData(AvatarGroupList avatarGroupList2): Unit {
+        fun setData(AvatarGroupList avatarGroupList2)  {
             ImmutableList.Builder builder = ImmutableList.Builder()
             builder.addAll((avatarGroupList2 as Iterable).Groups.values())
             this.avatarGroupList = builder.build()
@@ -89,7 +89,7 @@ class UserGroupsProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoada
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_UserGroupsProfileTab_2041  reason: not valid java name */
     /* synthetic */ Unit m508lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserGroupsProfileTab_2041(AdapterView adapterView, View view, Int i, Long j) {
         Any item = adapterView.getAdapter().getItem(i)
-        if ((item instanceof AvatarGroupList.AvatarGroupEntry) && (this.chatterID instanceof ChatterID.ChatterIDUser)) {
+        if ((item is AvatarGroupList.AvatarGroupEntry) && (this.chatterID is ChatterID.ChatterIDUser)) {
             DetailsActivity.showEmbeddedDetails(getActivity(), GroupProfileFragment.class, GroupProfileFragment.makeSelection(ChatterID.getGroupChatterID(this.chatterID.agentUUID, ((AvatarGroupList.AvatarGroupEntry) item).GroupID)))
         }
     }
@@ -106,7 +106,7 @@ class UserGroupsProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoada
         return inflate
     }
 
-    fun onLoadableDataChanged(): Unit {
+    fun onLoadableDataChanged()  {
         try {
             this.loadableMonitor.setEmptyMessage(this.avatarGroups.get().Groups.isEmpty(), getString(R.string.no_groups))
             if (this.groupsAdapter != null) {
@@ -118,10 +118,10 @@ class UserGroupsProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoada
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(@Nullable ChatterID chatterID): Unit {
+    fun onShowUser(@Nullable ChatterID chatterID)  {
         UserManager userManager
         this.loadableMonitor.unsubscribeAll()
-        if ((chatterID instanceof ChatterID.ChatterIDUser) && (userManager = chatterID.getUserManager()) != null) {
+        if ((chatterID is ChatterID.ChatterIDUser) && (userManager = chatterID.getUserManager()) != null) {
             this.avatarGroups.subscribe(userManager.getAvatarGroupLists().getPool(), ((ChatterID.ChatterIDUser) chatterID).getChatterUUID())
         }
     }

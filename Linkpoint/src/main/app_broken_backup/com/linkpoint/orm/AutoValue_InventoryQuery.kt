@@ -35,7 +35,7 @@ class AutoValue_InventoryQuery : InventoryQuery {
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof InventoryQuery)) {
+        if (!(obj is InventoryQuery)) {
             return false
         }
         InventoryQuery inventoryQuery = (InventoryQuery) obj
@@ -59,13 +59,13 @@ class AutoValue_InventoryQuery : InventoryQuery {
     }
 
     fun hashCode(): Int {
-        Int i = 0
-        Int i2 = 1231
-        Int hashCode = ((this.folderId == null ? 0 : this.folderId.hashCode()) ^ 1000003) * 1000003
+        var i: Int = 0
+        var i2: Int = 1231
+        var hashCode: Int = ((this.folderId == null ? 0 : this.folderId.hashCode()) ^ 1000003) * 1000003
         if (this.containsString != null) {
             i = this.containsString.hashCode()
         }
-        Int i3 = ((this.includeItems ? 1231 : 1237) ^ (((this.includeFolders ? 1231 : 1237) ^ ((hashCode ^ i) * 1000003)) * 1000003)) * 1000003
+        var i3: Int = ((this.includeItems ? 1231 : 1237) ^ (((this.includeFolders ? 1231 : 1237) ^ ((hashCode ^ i) * 1000003)) * 1000003)) * 1000003
         if (!this.newestFirst) {
             i2 = 1237
         }

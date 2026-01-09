@@ -11,13 +11,13 @@ import java.util.UUID
 class RLVCmdGetAttach : RLVCommand {
     private val NUM_ATTACHMENT_POINTS_LSL: Int = 41
 
-    fun Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2): Unit {
+    fun Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2)  {
         try {
-            Int parseInt = Int.parseInt(str)
+            var parseInt: Int = Int.parseInt(str)
             SLAvatarAppearance sLAvatarAppearance = rLVController.getModules().avatarAppearance
-            String str3 = ""
+            var str3: String = ""
             for (i in 0 until 41) {
-                String str4 = "nonexistent"
+                var str4: String = "nonexistent"
                 if (SLAttachmentPoint.attachmentPoints[i] != null) {
                     str4 = SLAttachmentPoint.attachmentPoints[i].name.toLowerCase()
                 }

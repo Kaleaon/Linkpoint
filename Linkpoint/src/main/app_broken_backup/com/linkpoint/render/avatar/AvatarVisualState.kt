@@ -34,7 +34,7 @@ class AvatarVisualState {
         this.avatarUUID = uuid2
     }
 
-    private fun startAnimation(uuid: UUID, i: Int, j: Long, drawableAvatar: DrawableAvatar): Unit {
+    private fun startAnimation(uuid: UUID, i: Int, j: Long, drawableAvatar: DrawableAvatar)  {
         AnimationSequenceInfo animationSequenceInfo
         AnimationSequenceInfo animationSequenceInfo2 = (AnimationSequenceInfo) this.animations.get(uuid)
         if (animationSequenceInfo2 == null) {
@@ -70,7 +70,7 @@ class AvatarVisualState {
     }
 
     synchronized Unit ApplyAvatarAnimation(AvatarAnimation avatarAnimation) {
-        Long currentTimeMillis = System.currentTimeMillis()
+        var currentTimeMillis: Long = System.currentTimeMillis()
         Collection hashSet = HashSet()
         Iterable<UUID> hashSet2 = HashSet()
         hashSet2.addAll(this.animations.keySet())
@@ -97,7 +97,7 @@ class AvatarVisualState {
                         animationSequenceInfo2 = animationSequenceInfo
                         i = 0
                     } else {
-                        Int obj2 = 1
+                        var obj2: Int = 1
                         animationSequenceInfo2 = animationSequenceInfo
                         i = 1
                     }

@@ -29,7 +29,7 @@ class SLChatPermissionRequestEvent : SLChatYesNoEvent {
     /* JADX INFO: super call moved to the top of the method (can break code semantics) */
     SLChatPermissionRequestEvent(ScriptQuestion scriptQuestion, @NonNull UUID uuid) {
         super(ChatMessageSourceObject(scriptQuestion.Data_Field.TaskID, SLMessage.stringFromVariableOEM(scriptQuestion.Data_Field.ObjectName)), uuid, (String) null)
-        Int i = 0
+        var i: Int = 0
         this.ObjectOwner = SLMessage.stringFromVariableOEM(scriptQuestion.Data_Field.ObjectOwner)
         this.ItemID = scriptQuestion.Data_Field.ItemID
         for (SLScriptPermissions sLScriptPermissions : SLScriptPermissions.values()) {
@@ -63,7 +63,7 @@ class SLChatPermissionRequestEvent : SLChatYesNoEvent {
     }
 
     fun getText(Context context, @NonNull UserManager userManager): String {
-        String str = ""
+        var str: String = ""
         for (SLScriptPermissions sLScriptPermissions : SLScriptPermissions.values()) {
             if ((this.Questions & sLScriptPermissions.getPermMask()) != 0) {
                 if (!str.equals("")) {
@@ -88,12 +88,12 @@ class SLChatPermissionRequestEvent : SLChatYesNoEvent {
     }
 
     /* access modifiers changed from: protected */
-    fun onNoAction(Context context, UserManager userManager): Unit {
+    fun onNoAction(Context context, UserManager userManager)  {
         super.onNoAction(context, userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    fun onYesAction(Context context, UserManager userManager): Unit {
+    fun onYesAction(Context context, UserManager userManager)  {
         super.onYesAction(context, userManager)
         SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
@@ -102,7 +102,7 @@ class SLChatPermissionRequestEvent : SLChatYesNoEvent {
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage)  {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setItemID(this.ItemID)
         chatMessage.setItemName(this.ObjectOwner)

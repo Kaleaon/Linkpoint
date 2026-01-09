@@ -24,11 +24,11 @@ class SimulatorViewerTimeMessage : SLMessage {
         return 48
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleSimulatorViewerTimeMessage(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -106)
@@ -40,7 +40,7 @@ class SimulatorViewerTimeMessage : SLMessage {
         packLLVector3(byteBuffer, this.TimeInfo_Field.SunAngVelocity)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.TimeInfo_Field.UsecSinceStart = unpackLong(byteBuffer)
         this.TimeInfo_Field.SecPerDay = unpackInt(byteBuffer)
         this.TimeInfo_Field.SecPerYear = unpackInt(byteBuffer)

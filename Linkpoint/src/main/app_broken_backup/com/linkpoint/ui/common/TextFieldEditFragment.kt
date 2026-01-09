@@ -23,15 +23,15 @@ import androidx.annotation.Nullable
 
 abstract class TextFieldEditFragment : ChatterFragment : BackButtonHandler {
     /* access modifiers changed from: private */
-    Boolean hasChanged = false
+    var hasChanged: Boolean = false
     /* access modifiers changed from: private */
-    String originalText = ""
+    var originalText: String = ""
     /* access modifiers changed from: private */
     MenuItem undoMenuItem
 
     private Unit closeFragment() {
         FragmentActivity activity = getActivity()
-        if (activity instanceof DetailsActivity) {
+        if (activity is DetailsActivity) {
             ((DetailsActivity) activity).closeDetailsFragment(this)
         }
     }
@@ -69,7 +69,7 @@ abstract class TextFieldEditFragment : ChatterFragment : BackButtonHandler {
         if (view == null) {
             return false
         }
-        String charSequence = ((view as TextView).findViewById(R.id.field_edit_text)).getText().toString()
+        var charSequence: String = ((view as TextView).findViewById(R.id.field_edit_text)).getText().toString()
         if (Objects.equal(charSequence, this.originalText)) {
             return false
         }
@@ -239,12 +239,12 @@ Method generation error in method: com.linkpoint.ui.common.-$Lambda$DtZUcoBgRyVu
         return true
     }
 
-    fun onCreate(@Nullable Bundle bundle): Unit {
+    fun onCreate(@Nullable Bundle bundle)  {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater): Unit {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater)  {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.user_notes_edit_menu, menu)
         this.undoMenuItem = menu.findItem(R.id.item_undo)
@@ -257,20 +257,20 @@ Method generation error in method: com.linkpoint.ui.common.-$Lambda$DtZUcoBgRyVu
         TextView textView = (inflate as TextView).findViewById(R.id.field_edit_text)
         textView.setHint(getFieldHint(layoutInflater.getContext()))
         textView.addTextChangedListener(TextWatcher() {
-            fun afterTextChanged(Editable editable): Unit {
-                Boolean z = !Objects.equal(textView.getText().toString(), TextFieldEditFragment.this.originalText)
+            fun afterTextChanged(Editable editable)  {
+                var z: Boolean = !Objects.equal(textView.getText().toString(), TextFieldEditFragment.this.originalText)
                 if (z != TextFieldEditFragment.this.hasChanged) {
-                    Boolean unused = TextFieldEditFragment.this.hasChanged = z
+                    var unused: Boolean = TextFieldEditFragment.this.hasChanged = z
                     if (TextFieldEditFragment.this.undoMenuItem != null) {
                         TextFieldEditFragment.this.undoMenuItem.setVisible(TextFieldEditFragment.this.hasChanged)
                     }
                 }
             }
 
-            fun beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3): Unit {
+            fun beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3)  {
             }
 
-            fun onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3): Unit {
+            fun onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3)  {
             }
         return inflate
     }
@@ -381,7 +381,7 @@ Method generation error in method: com.linkpoint.ui.common.-$Lambda$DtZUcoBgRyVu
     abstract Unit saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str)
 
     /* access modifiers changed from: protected */
-    fun setOriginalText(String str): Unit {
+    fun setOriginalText(String str)  {
         this.originalText = str
         View view = getView()
         if (view != null) {

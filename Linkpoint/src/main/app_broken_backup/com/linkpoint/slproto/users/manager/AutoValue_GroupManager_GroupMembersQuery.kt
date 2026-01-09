@@ -22,7 +22,7 @@ class AutoValue_GroupManager_GroupMembersQuery : GroupManager.GroupMembersQuery 
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof GroupManager.GroupMembersQuery)) {
+        if (!(obj is GroupManager.GroupMembersQuery)) {
             return false
         }
         GroupManager.GroupMembersQuery groupMembersQuery = (GroupManager.GroupMembersQuery) obj

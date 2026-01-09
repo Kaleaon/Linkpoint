@@ -49,12 +49,12 @@ class ConnectionResolutionActivity
             this.this$0 = connectionResolutionActivity
         }
 
-        fun onServiceConnected(componentName: ComponentName, iBinder: IBinder): Unit {
+        fun onServiceConnected(componentName: ComponentName, iBinder: IBinder)  {
             Debug.Printf("LumiyaCloud: bound to local service", Array<Object>(0))
             ConnectionResolutionActivity.access$002(this.this$0, Messenger(iBinder))
         }
 
-        fun onServiceDisconnected(componentName: ComponentName): Unit {
+        fun onServiceDisconnected(componentName: ComponentName)  {
             ConnectionResolutionActivity.access$002(this.this$0, null)
         }
     }
@@ -86,7 +86,7 @@ class ConnectionResolutionActivity
      * Enabled unnecessary exception pruning
      * Enabled aggressive exception aggregation
      */
-    protected fun onActivityResult(n: Int, n2: Int, object: Intent): Unit {
+    protected fun onActivityResult(n: Int, n2: Int, object: Intent)  {
         void var3_8
         boolean bl = true
         Object var3_4 = null
@@ -141,7 +141,7 @@ class ConnectionResolutionActivity
      * Enabled force condition propagation
      * Lifted jumps to return sites
      */
-    protected fun onCreate(object: Bundle): Unit {
+    protected fun onCreate(object: Bundle)  {
         super.onCreate((Bundle)object)
         object = this.getIntent()
         if (object.hasExtra(CONNECTION_RESULT_TAG)) {
@@ -186,7 +186,7 @@ class ConnectionResolutionActivity
         this.finish()
     }
 
-    protected fun onDestroy(): Unit {
+    protected fun onDestroy()  {
         Debug.Printf("LumiyaCloud: destroyed resolution activity", Array<Object>(0))
         if (this.serviceMessenger != null) {
             Debug.Printf("LumiyaCloud: unbinding from local service", Array<Object>(0))

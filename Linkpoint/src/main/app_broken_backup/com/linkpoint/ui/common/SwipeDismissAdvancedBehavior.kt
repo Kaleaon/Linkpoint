@@ -1,4 +1,6 @@
 package com.linkpoint.ui.common
+
+import kotlin.math.*
 import java.util.*
 
 import androidx.annotation.NonNull
@@ -28,15 +30,15 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
     val SWIPE_DIRECTION_X: Int = 3
     val SWIPE_DIRECTION_Y: Int = 12
     /* access modifiers changed from: private */
-    Float mAlphaEndSwipeDistance = 1.0f
+    var mAlphaEndSwipeDistance: Float = 1.0f
     /* access modifiers changed from: private */
-    Float mAlphaStartSwipeDistance = 0.0f
+    var mAlphaStartSwipeDistance: Float = 0.0f
     private ViewDragHelper.Callback mDragCallback = ViewDragHelper.Callback() {
         private Int mOriginalCapturedViewLeft
         private Int mOriginalCapturedViewTop
 
         private Boolean shouldDismiss(View view, Float f, Float f2) {
-            Float scaledMinimumFlingVelocity = ViewConfiguration.toFloat().get(view.getContext()).getScaledMinimumFlingVelocity()
+            var scaledMinimumFlingVelocity: Float = ViewConfiguration.toFloat().get(view.getContext()).getScaledMinimumFlingVelocity()
             if (f < (-scaledMinimumFlingVelocity) && (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 1) != 0) {
                 return true
             }
@@ -49,16 +51,16 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
             if (f2 > scaledMinimumFlingVelocity && (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 8) != 0) {
                 return true
             }
-            Int left = view.getLeft() - this.mOriginalCapturedViewLeft
-            Int round = Math.round((view.toFloat().getWidth()) * SwipeDismissAdvancedBehavior.this.mDragDismissThreshold)
+            var left: Int = view.getLeft() - this.mOriginalCapturedViewLeft
+            var round: Int = Math.round((view.toFloat().getWidth()) * SwipeDismissAdvancedBehavior.this.mDragDismissThreshold)
             if (left < (-round) && (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 1) != 0) {
                 return true
             }
             if (left > round && (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 2) != 0) {
                 return true
             }
-            Int top = view.getTop() - this.mOriginalCapturedViewTop
-            Int round2 = Math.round((view.toFloat().getHeight()) * SwipeDismissAdvancedBehavior.this.mDragDismissThreshold)
+            var top: Int = view.getTop() - this.mOriginalCapturedViewTop
+            var round2: Int = Math.round((view.toFloat().getHeight()) * SwipeDismissAdvancedBehavior.this.mDragDismissThreshold)
             if (top >= (-round2) || (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 4) == 0) {
                 return top > round2 && (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 8) != 0
             }
@@ -66,12 +68,12 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
         }
 
         fun clampViewPositionHorizontal(View view, Int i, Int i2): Int {
-            Int i3 = 0
+            var i3: Int = 0
             if (view.getTop() != this.mOriginalCapturedViewTop) {
                 return this.mOriginalCapturedViewLeft
             }
-            Int width = this.mOriginalCapturedViewLeft - ((SwipeDismissAdvancedBehavior.this.mSwipeDirection & 1) != 0 ? view.getWidth() : 0)
-            Int i4 = this.mOriginalCapturedViewLeft
+            var width: Int = this.mOriginalCapturedViewLeft - ((SwipeDismissAdvancedBehavior.this.mSwipeDirection & 1) != 0 ? view.getWidth() : 0)
+            var i4: Int = this.mOriginalCapturedViewLeft
             if ((SwipeDismissAdvancedBehavior.this.mSwipeDirection & 2) != 0) {
                 i3 = view.getWidth()
             }
@@ -79,12 +81,12 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
         }
 
         fun clampViewPositionVertical(View view, Int i, Int i2): Int {
-            Int i3 = 0
+            var i3: Int = 0
             if (view.getLeft() != this.mOriginalCapturedViewLeft) {
                 return this.mOriginalCapturedViewTop
             }
-            Int height = this.mOriginalCapturedViewTop - ((SwipeDismissAdvancedBehavior.this.mSwipeDirection & 4) != 0 ? view.getHeight() : 0)
-            Int i4 = this.mOriginalCapturedViewTop
+            var height: Int = this.mOriginalCapturedViewTop - ((SwipeDismissAdvancedBehavior.this.mSwipeDirection & 4) != 0 ? view.getHeight() : 0)
+            var i4: Int = this.mOriginalCapturedViewTop
             if ((SwipeDismissAdvancedBehavior.this.mSwipeDirection & 8) != 0) {
                 i3 = view.getHeight()
             }
@@ -105,37 +107,37 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
             return 0
         }
 
-        fun onViewCaptured(View view, Int i): Unit {
+        fun onViewCaptured(View view, Int i)  {
             this.mOriginalCapturedViewLeft = view.getLeft()
             this.mOriginalCapturedViewTop = view.getTop()
         }
 
-        fun onViewDragStateChanged(Int i): Unit {
+        fun onViewDragStateChanged(Int i)  {
             if (SwipeDismissAdvancedBehavior.this.mListener != null) {
                 SwipeDismissAdvancedBehavior.this.mListener.onDragStateChanged(i)
             }
         }
 
-        fun onViewPositionChanged(View view, Int i, Int i2, Int i3, Int i4): Unit {
-            Int i5 = 0
-            Int abs = (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 3) != 0 ? Math.abs(i - this.mOriginalCapturedViewLeft) : 0
+        fun onViewPositionChanged(View view, Int i, Int i2, Int i3, Int i4)  {
+            var i5: Int = 0
+            var abs: Int = (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 3) != 0 ? abs(i - this.mOriginalCapturedViewLeft) : 0
             if ((SwipeDismissAdvancedBehavior.this.mSwipeDirection & 12) != 0) {
-                i5 = Math.abs(i2 - this.mOriginalCapturedViewTop)
+                i5 = abs(i2 - this.mOriginalCapturedViewTop)
             }
             if (abs == 0 && i5 == 0) {
                 ViewCompat.setAlpha(view, 1.0f)
             } else {
-                ViewCompat.setAlpha(view, 1.0f - Math.max(SwipeDismissAdvancedBehavior.clamp(0.0f, SwipeDismissAdvancedBehavior.fraction((view.toFloat().getWidth()) * SwipeDismissAdvancedBehavior.this.mAlphaStartSwipeDistance, (view.toFloat().getWidth()) * SwipeDismissAdvancedBehavior.this.mAlphaEndSwipeDistance, abs.toFloat()), 1.0f), SwipeDismissAdvancedBehavior.clamp(0.0f, SwipeDismissAdvancedBehavior.fraction((view.toFloat().getHeight()) * SwipeDismissAdvancedBehavior.this.mAlphaStartSwipeDistance, (view.toFloat().getHeight()) * SwipeDismissAdvancedBehavior.this.mAlphaEndSwipeDistance, i5.toFloat()), 1.0f)))
+                ViewCompat.setAlpha(view, 1.0f - max(SwipeDismissAdvancedBehavior.clamp(0.0f, SwipeDismissAdvancedBehavior.fraction((view.toFloat().getWidth()) * SwipeDismissAdvancedBehavior.this.mAlphaStartSwipeDistance, (view.toFloat().getWidth()) * SwipeDismissAdvancedBehavior.this.mAlphaEndSwipeDistance, abs.toFloat()), 1.0f), SwipeDismissAdvancedBehavior.clamp(0.0f, SwipeDismissAdvancedBehavior.fraction((view.toFloat().getHeight()) * SwipeDismissAdvancedBehavior.this.mAlphaStartSwipeDistance, (view.toFloat().getHeight()) * SwipeDismissAdvancedBehavior.this.mAlphaEndSwipeDistance, i5.toFloat()), 1.0f)))
             }
         }
 
-        fun onViewReleased(View view, Float f, Float f2): Unit {
-            Int width = view.getWidth()
-            Int height = view.getHeight()
-            Int left = view.getLeft()
-            Int top = view.getTop()
+        fun onViewReleased(View view, Float f, Float f2)  {
+            var width: Int = view.getWidth()
+            var height: Int = view.getHeight()
+            var left: Int = view.getLeft()
+            var top: Int = view.getTop()
             if (shouldDismiss(view, f, f2)) {
-                Float scaledMinimumFlingVelocity = ViewConfiguration.toFloat().get(view.getContext()).getScaledMinimumFlingVelocity()
+                var scaledMinimumFlingVelocity: Float = ViewConfiguration.toFloat().get(view.getContext()).getScaledMinimumFlingVelocity()
                 if (f < (-scaledMinimumFlingVelocity) && (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 1) != 0) {
                     left = this.mOriginalCapturedViewLeft - width
                 } else if (f > scaledMinimumFlingVelocity && (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 2) != 0) {
@@ -165,14 +167,14 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
         }
     }
     /* access modifiers changed from: private */
-    Float mDragDismissThreshold = 1.0f
+    var mDragDismissThreshold: Float = 1.0f
     private Boolean mIgnoreEvents
     /* access modifiers changed from: private */
     OnDismissListener mListener
     private Float mSensitivity = 0.0f
     private Boolean mSensitivitySet
     /* access modifiers changed from: private */
-    Int mSwipeDirection = 15
+    var mSwipeDirection: Int = 15
     /* access modifiers changed from: private */
     ViewDragHelper mViewDragHelper
 
@@ -191,7 +193,7 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
             this.mDismiss = z
         }
 
-        fun run(): Unit {
+        fun run()  {
             if (SwipeDismissAdvancedBehavior.this.mViewDragHelper != null && SwipeDismissAdvancedBehavior.this.mViewDragHelper.continueSettling(true)) {
                 ViewCompat.postOnAnimation(this.mView, this)
             } else if (this.mDismiss && SwipeDismissAdvancedBehavior.this.mListener != null) {
@@ -206,12 +208,12 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
 
     /* access modifiers changed from: private */
     fun clamp(Float f, Float f2, Float f3): Float {
-        return Math.min(Math.max(f, f2), f3)
+        return min(max(f, f2), f3)
     }
 
     /* access modifiers changed from: private */
     fun clamp(Int i, Int i2, Int i3): Int {
-        return Math.min(Math.max(i, i2), i3)
+        return min(max(i, i2), i3)
     }
 
     private Unit ensureViewDragHelper(ViewGroup viewGroup) {
@@ -263,28 +265,28 @@ class SwipeDismissAdvancedBehavior<V : View> : CoordinatorLayout.Behavior<V> {
         return true
     }
 
-    fun setDragDismissDistance(Float f): Unit {
+    fun setDragDismissDistance(Float f)  {
         this.mDragDismissThreshold = clamp(0.0f, f, 1.0f)
     }
 
-    fun setEndAlphaSwipeDistance(Float f): Unit {
+    fun setEndAlphaSwipeDistance(Float f)  {
         this.mAlphaEndSwipeDistance = clamp(0.0f, f, 1.0f)
     }
 
-    fun setListener(OnDismissListener onDismissListener): Unit {
+    fun setListener(OnDismissListener onDismissListener)  {
         this.mListener = onDismissListener
     }
 
-    fun setSensitivity(Float f): Unit {
+    fun setSensitivity(Float f)  {
         this.mSensitivity = f
         this.mSensitivitySet = true
     }
 
-    fun setStartAlphaSwipeDistance(Float f): Unit {
+    fun setStartAlphaSwipeDistance(Float f)  {
         this.mAlphaStartSwipeDistance = clamp(0.0f, f, 1.0f)
     }
 
-    fun setSwipeDirection(Int i): Unit {
+    fun setSwipeDirection(Int i)  {
         this.mSwipeDirection = i
     }
 }

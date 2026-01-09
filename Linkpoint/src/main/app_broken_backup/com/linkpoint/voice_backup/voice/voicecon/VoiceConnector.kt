@@ -96,7 +96,7 @@ class VoiceConnector {
     fun setMuteLocalMic(Boolean bl) {
         vx_req_connector_mute_local_mic_t vx_req_connector_mute_local_mic_t2 = vx_req_connector_mute_local_mic_t()
         vx_req_connector_mute_local_mic_t2.setConnector_handle(this.handle)
-        Int n = bl ? 1 : 0
+        var n: Int = bl ? 1 : 0
         vx_req_connector_mute_local_mic_t2.setMute_level(n)
         this.messageController.sendRequest(vx_req_connector_mute_local_mic_t2.getBase())
     }
@@ -107,7 +107,7 @@ class VoiceConnector {
     fun setMuteLocalSpeaker(Boolean bl) {
         vx_req_connector_mute_local_speaker_t vx_req_connector_mute_local_speaker_t2 = vx_req_connector_mute_local_speaker_t()
         vx_req_connector_mute_local_speaker_t2.setConnector_handle(this.handle)
-        Int n = bl ? 1 : 0
+        var n: Int = bl ? 1 : 0
         vx_req_connector_mute_local_speaker_t2.setMute_level(n)
         this.messageController.sendRequest(vx_req_connector_mute_local_speaker_t2.getBase())
     }

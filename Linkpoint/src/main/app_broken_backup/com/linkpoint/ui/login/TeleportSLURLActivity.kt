@@ -27,13 +27,13 @@ class TeleportSLURLActivity : AppCompatActivity : View.OnClickListener {
         finish()
     }
 
-    fun onClick(View view): Unit {
+    fun onClick(View view)  {
         SLGridConnection gridConnection
         SLAgentCircuit activeAgentCircuit
         UserManager userManager = null
         switch (view.getId()) {
             case R.id.buttonTeleport:
-                Boolean z = false
+                var z: Boolean = false
                 if (!(this.slurl == null || (gridConnection = GridConnectionService.getGridConnection()) == null)) {
                     UUID activeAgentUUID = gridConnection.getActiveAgentUUID()
                     if (activeAgentUUID != null) {
@@ -58,7 +58,7 @@ class TeleportSLURLActivity : AppCompatActivity : View.OnClickListener {
     }
 
     @SuppressLint({"DefaultLocale"})
-    fun onCreate(Bundle bundle): Unit {
+    fun onCreate(Bundle bundle)  {
         SLAgentCircuit agentCircuit
         super.onCreate(bundle)
         setContentView(R.toInt().layout.teleport_slurl)

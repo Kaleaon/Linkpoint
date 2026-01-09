@@ -29,13 +29,13 @@ class AvatarPickerForShare : AvatarPickerFragment {
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_avapicker_AvatarPickerForShare_1468  reason: not valid java name */
     /* synthetic */ Unit m387lambda$com_lumiyaviewer_lumiya_ui_avapicker_AvatarPickerForShare_1468() {
         FragmentActivity activity = getActivity()
-        if (activity instanceof DetailsActivity) {
+        if (activity is DetailsActivity) {
             ((DetailsActivity) activity).closeDetailsFragment(this)
         }
     }
 
     /* access modifiers changed from: protected */
-    fun onAvatarSelected(ChatterID chatterID, @Nullable String str): Unit {
+    fun onAvatarSelected(ChatterID chatterID, @Nullable String str)  {
         Bundle arguments = getArguments()
         if (arguments != null && arguments.containsKey(INVENTORY_ENTRY_KEY)) {
             this.inventoryFragmentHelper.ConfirmShareInventoryEntry((SLInventoryEntry) arguments.getParcelable(INVENTORY_ENTRY_KEY), chatterID, str, $Lambda$GxFBFkg7vdmipTAXKE3eB6HqSs(this))

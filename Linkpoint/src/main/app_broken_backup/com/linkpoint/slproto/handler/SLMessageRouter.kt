@@ -25,7 +25,7 @@ class SLMessageRouter {
             this.subscriber = WeakReference<>(obj)
         }
 
-        fun invoke(Object obj): Unit {
+        fun invoke(Object obj)  {
             try {
                 Object obj2 = this.subscriber.get()
                 if (obj2 != null) {
@@ -55,7 +55,7 @@ class SLMessageRouter {
             this()
         }
 
-        fun deleteAll(Object obj): Unit {
+        fun deleteAll(Object obj)  {
             LinkedList linkedList = LinkedList()
             Iterator it = iterator()
             while (it.hasNext()) {
@@ -68,7 +68,7 @@ class SLMessageRouter {
             removeAll(linkedList)
         }
 
-        fun invokeAll(Object obj): Unit {
+        fun invokeAll(Object obj)  {
             Iterator it = iterator()
             while (it.hasNext()) {
                 ((it as HandlerInfo).next()).invoke(obj)

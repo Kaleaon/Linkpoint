@@ -50,7 +50,7 @@ enum class Shader(
     private String getShaderCode(ShaderPreprocessor shaderPreprocessor) {
         try {
             BufferedReader bufferedReader = BufferedReader(InputStreamReader(LumiyaApp.getAssetManager().open("shaders/" + this.fileName)))
-            String processCode = shaderPreprocessor.processCode(bufferedReader)
+            var processCode: String = shaderPreprocessor.processCode(bufferedReader)
             bufferedReader.close()
             return processCode
         } catch (IOException e) {
@@ -60,7 +60,7 @@ enum class Shader(
 
     int Compile(ShaderPreprocessor shaderPreprocessor) throws ShaderCompileException {
         Debug.Printf("Shaders: Compiling shader '%s'...", this.fileName)
-        String shaderCode = getShaderCode(shaderPreprocessor)
+        var shaderCode: String = getShaderCode(shaderPreprocessor)
         if (shaderCode == null) {
             this.handle = 0
             throw ShaderCompileException("No shader code for " + this.fileName)

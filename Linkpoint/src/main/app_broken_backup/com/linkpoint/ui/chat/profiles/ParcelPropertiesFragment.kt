@@ -196,7 +196,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$3KadV
         }
 
         /* access modifiers changed from: protected */
-        fun onPostExecute(Boolean bool): Unit {
+        fun onPostExecute(Boolean bool)  {
             this.progressDialog.dismiss()
             if (bool == null || (!bool.booleanValue())) {
                 AlertDialog.Builder(ParcelPropertiesFragment.this.getContext()).setMessage(R.toInt().string.set_home_failed).setCancelable(true).create().show()
@@ -206,7 +206,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$3KadV
         }
 
         /* access modifiers changed from: protected */
-        fun onPreExecute(): Unit {
+        fun onPreExecute()  {
             this.progressDialog = ProgressDialog.show(ParcelPropertiesFragment.this.getContext(), (CharSequence) null, ParcelPropertiesFragment.this.getString(R.string.setting_home_location), true)
         }
     }
@@ -220,21 +220,21 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$3KadV
 
     /* access modifiers changed from: private */
     /* renamed from: onAgentCircuit */
-    fun m503com_lumiyaviewer_lumiya_ui_chat_profiles_ParcelPropertiesFragmentmthref1(SLAgentCircuit sLAgentCircuit): Unit {
+    fun m503com_lumiyaviewer_lumiya_ui_chat_profiles_ParcelPropertiesFragmentmthref1(SLAgentCircuit sLAgentCircuit)  {
         updateSimOptions()
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onIsPlayingMedia */
-    fun m502com_lumiyaviewer_lumiya_ui_chat_profiles_ParcelPropertiesFragmentmthref0(Boolean bool): Unit {
+    fun m502com_lumiyaviewer_lumiya_ui_chat_profiles_ParcelPropertiesFragmentmthref0(Boolean bool)  {
         updatePlayingStatus()
     }
 
     private Unit updatePlayingStatus() {
-        Int i = 0
+        var i: Int = 0
         if (this.unbinder != null) {
-            Boolean data = this.isPlayingMedia.getData()
-            Boolean booleanValue = data != null ? data.booleanValue() : false
+            var data: Boolean = this.isPlayingMedia.getData()
+            var booleanValue: Boolean = data != null ? data.booleanValue() : false
             this.mediaPlayButton.setVisibility(booleanValue ? 8 : 0)
             Button button = this.mediaStopButton
             if (!booleanValue) {
@@ -245,10 +245,10 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$3KadV
     }
 
     private Unit updateSimOptions() {
-        Int i = 0
+        var i: Int = 0
         if (this.unbinder != null) {
             SLAgentCircuit data = this.agentCircuit.getData()
-            Boolean isEstateManager = data != null ? data.getIsEstateManager() : false
+            var isEstateManager: Boolean = data != null ? data.getIsEstateManager() : false
             CardView cardView = this.simRestartCardView
             if (!isEstateManager) {
                 i = 8
@@ -282,7 +282,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$3KadV
         return inflate
     }
 
-    fun onDestroyView(): Unit {
+    fun onDestroyView()  {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.ownerNameDisplayer.unbindViews()
@@ -292,7 +292,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$3KadV
     }
 
     @OnClick({2131755608})
-    fun onOwnerProfileButton(): Unit {
+    fun onOwnerProfileButton()  {
         if (this.parcelData == null) {
             return
         }
@@ -304,7 +304,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$3KadV
     }
 
     @OnClick({2131755614})
-    fun onParcelMediaPlay(): Unit {
+    fun onParcelMediaPlay()  {
         if (this.parcelData != null && (!Strings.isNullOrEmpty(this.parcelData.getMediaURL())) && this.userManager != null) {
             Intent intent = Intent(getContext(), StreamingMediaService.class)
             intent.setAction("com.linkpoint.ACTION_PLAY_MEDIA")
@@ -317,14 +317,14 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$3KadV
     }
 
     @OnClick({2131755615})
-    fun onParcelMediaStop(): Unit {
+    fun onParcelMediaStop()  {
         Intent intent = Intent(getContext(), StreamingMediaService.class)
         intent.setAction("com.linkpoint.ACTION_STOP_MEDIA")
         getContext().startService(intent)
     }
 
     @OnClick({2131755611})
-    fun onSetHomeButton(): Unit {
+    fun onSetHomeButton()  {
         if (this.agentCircuit.getData() != null) {
             AlertDialog.Builder(getContext()).setMessage(R.toInt().string.set_home_confirm_title).setCancelable(true).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
 
@@ -424,7 +424,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$3KadV
     }
 
     @OnClick({2131755617})
-    fun onSimRestartButton(): Unit {
+    fun onSimRestartButton()  {
         SLAgentCircuit data = this.agentCircuit.getData()
         if (data != null) {
             AlertDialog.Builder(getContext()).setMessage(R.toInt().string.restart_region_confirm_title).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, data) {
@@ -622,7 +622,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$3KadV
         }
     }
 
-    fun onStart(): Unit {
+    fun onStart()  {
         super.onStart()
         this.userManager = UserManager.getUserManager(UUIDPool.getUUID(getArguments().getString("activeAgentUUID")))
         this.parcelData = (ParcelData) getArguments().getSerializable(PARCEL_DATA_KEY)
@@ -643,7 +643,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$3KadV
         }
     }
 
-    fun onStop(): Unit {
+    fun onStop()  {
         this.userManager = null
         this.parcelData = null
         this.ownerNameDisplayer.setChatterID((ChatterID) null)

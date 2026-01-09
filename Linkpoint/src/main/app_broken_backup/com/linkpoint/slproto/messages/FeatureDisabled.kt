@@ -21,11 +21,11 @@ class FeatureDisabled : SLMessage {
         return this.FailureInfo_Field.ErrorMessage.size + 1 + 16 + 16 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleFeatureDisabled(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 19)
@@ -34,7 +34,7 @@ class FeatureDisabled : SLMessage {
         packUUID(byteBuffer, this.FailureInfo_Field.TransactionID)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.FailureInfo_Field.ErrorMessage = unpackVariable(byteBuffer, 1)
         this.FailureInfo_Field.AgentID = unpackUUID(byteBuffer)
         this.FailureInfo_Field.TransactionID = unpackUUID(byteBuffer)

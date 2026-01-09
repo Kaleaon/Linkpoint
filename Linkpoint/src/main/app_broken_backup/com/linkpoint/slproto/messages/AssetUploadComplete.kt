@@ -21,11 +21,11 @@ class AssetUploadComplete : SLMessage {
         return 22
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleAssetUploadComplete(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 78)
@@ -34,7 +34,7 @@ class AssetUploadComplete : SLMessage {
         packBoolean(byteBuffer, this.AssetBlock_Field.Success)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AssetBlock_Field.UUID = unpackUUID(byteBuffer)
         this.AssetBlock_Field.Type = unpackByte(byteBuffer)
         this.AssetBlock_Field.Success = unpackBoolean(byteBuffer)

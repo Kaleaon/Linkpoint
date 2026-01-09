@@ -29,7 +29,7 @@ class SLDisplayNameFetcher : SLModule {
     private val MAX_BATCH_SIZE: Int = 4
     private String capsURL
     private Runnable httpThreadRunnable = Runnable() {
-        fun run(): Unit {
+        fun run()  {
             UUID nextRequest
             RequestQueue<UUID, UserName> userNameRequestQueue = SLDisplayNameFetcher.this.userManager.getUserNameRequestQueue()
             HashSet<UUID> hashSet = HashSet<>()
@@ -55,7 +55,7 @@ class SLDisplayNameFetcher : SLModule {
         }
     }
     private RequestHandler<UUID> requestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        fun onRequest(@NonNull UUID uuid): Unit {
+        fun onRequest(@NonNull UUID uuid)  {
             UUIDNameRequest uUIDNameRequest = UUIDNameRequest()
             UUIDNameRequest.UUIDNameBlock uUIDNameBlock = UUIDNameRequest.UUIDNameBlock()
             uUIDNameBlock.ID = uuid
@@ -103,9 +103,9 @@ class SLDisplayNameFetcher : SLModule {
     }
 
     /* access modifiers changed from: private */
-    fun requestNamesHttp(Set<UUID> set, RequestQueue<UUID, UserName> requestQueue2): Unit {
+    fun requestNamesHttp(Set<UUID> set, RequestQueue<UUID, UserName> requestQueue2)  {
         StringBuilder append = StringBuilder(this.capsURL).append('/')
-        Boolean z = true
+        var z: Boolean = true
         for (UUID uuid : set) {
             Debug.Printf("UserName: Requesting name for %s over HTTP", uuid)
             if (z) {
@@ -148,7 +148,7 @@ class SLDisplayNameFetcher : SLModule {
         }
     }
 
-    fun HandleCloseCircuit(): Unit {
+    fun HandleCloseCircuit()  {
         this.threadMustExit.set(true)
         if (this.xmlReq != null) {
             this.xmlReq.InterruptRequest()
@@ -162,10 +162,10 @@ class SLDisplayNameFetcher : SLModule {
     }
 
     @SLMessageHandler
-    fun HandleUUIDNameReply(UUIDNameReply uUIDNameReply): Unit {
+    fun HandleUUIDNameReply(UUIDNameReply uUIDNameReply)  {
         for (UUIDNameReply.UUIDNameBlock uUIDNameBlock : uUIDNameReply.UUIDNameBlock_Fields) {
             UUID uuid = uUIDNameBlock.ID
-            String str = SLMessage.stringFromVariableOEM(uUIDNameBlock.FirstName) + " " + SLMessage.stringFromVariableOEM(uUIDNameBlock.LastName)
+            var str: String = SLMessage.stringFromVariableOEM(uUIDNameBlock.FirstName) + " " + SLMessage.stringFromVariableOEM(uUIDNameBlock.LastName)
             UserName userName = UserName(uuid, str, str, false)
             if (this.resultHandler != null) {
                 this.resultHandler.onResultData(uuid, userName)

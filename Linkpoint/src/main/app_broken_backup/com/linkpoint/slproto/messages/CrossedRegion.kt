@@ -36,11 +36,11 @@ class CrossedRegion : SLMessage {
         return this.RegionData_Field.SeedCapability.size + 16 + 34 + 24
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleCrossedRegion(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.put((byte) -1)
         byteBuffer.put((byte) 7)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
@@ -53,7 +53,7 @@ class CrossedRegion : SLMessage {
         packLLVector3(byteBuffer, this.Info_Field.LookAt)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.RegionData_Field.SimIP = unpackIPAddress(byteBuffer)

@@ -50,7 +50,7 @@ class SLCaps {
             Debug.Warning(e)
             z = false
         }
-        String repairCapabilityURL = repairCapabilityURL(z, str2)
+        var repairCapabilityURL: String = repairCapabilityURL(z, str2)
         LLSDXMLRequest lLSDXMLRequest = LLSDXMLRequest()
         LLSDArray lLSDArray = LLSDArray()
         for (SLCapability name : SLCapability.values()) {
@@ -59,7 +59,7 @@ class SLCaps {
         LLSDNode PerformRequest = lLSDXMLRequest.PerformRequest(repairCapabilityURL, lLSDArray)
         for (SLCapability sLCapability : SLCapability.values()) {
             if (PerformRequest.keyExists(sLCapability.name())) {
-                String repairCapabilityURL2 = repairCapabilityURL(z, PerformRequest.byKey(sLCapability.name()).asString())
+                var repairCapabilityURL2: String = repairCapabilityURL(z, PerformRequest.byKey(sLCapability.name()).asString())
                 this.caps.put(sLCapability, repairCapabilityURL2)
                 Debug.Log("GetCapabilities: " + sLCapability.name() + " = " + repairCapabilityURL2)
             } else {
@@ -73,11 +73,11 @@ class SLCaps {
             return str
         }
         try {
-            String host = URL(str).getHost()
+            var host: String = URL(str).getHost()
             if (host.contains(".") || !host.startsWith("sim")) {
                 return str
             }
-            String replace = str.replace(host, host + ".agni.lindenlab.com")
+            var replace: String = str.replace(host, host + ".agni.lindenlab.com")
             Debug.Printf("Repaired capability URL to %s", replace)
             return replace
         } catch (Exception e) {
@@ -95,8 +95,8 @@ class SLCaps {
         }
     }
 
-    fun GetCapabilites(String str, String str2): Unit {
-        Int i = 0
+    fun GetCapabilites(String str, String str2)  {
+        var i: Int = 0
         while (i < 1) {
             try {
                 GetCapabilitesOnce(str, str2)
@@ -115,7 +115,7 @@ class SLCaps {
     @Throws(NoSuchCapabilityException::class)
 
     fun getCapabilityOrThrow(SLCapability sLCapability): String {
-        String str = this.caps.get(sLCapability)
+        var str: String = this.caps.get(sLCapability)
         if (str != null) {
             return str
         }

@@ -56,7 +56,7 @@ class AvatarPickKey : Parcelable {
         return "AvatarPicksKey{avatarID=" + this.avatarID + ", pickID=" + this.pickID + '}'
     }
 
-    fun writeToParcel(Parcel parcel, Int i): Unit {
+    fun writeToParcel(Parcel parcel, Int i)  {
         parcel.writeString(this.avatarID.toString())
         parcel.writeString(this.pickID.toString())
     }

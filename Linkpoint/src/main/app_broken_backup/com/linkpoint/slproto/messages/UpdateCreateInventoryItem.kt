@@ -49,10 +49,10 @@ class UpdateCreateInventoryItem : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int i = 38
+        var i: Int = 38
         Iterator<T> it = this.InventoryData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            var i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -61,11 +61,11 @@ class UpdateCreateInventoryItem : SLMessage {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleUpdateCreateInventoryItem(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put(Ascii.VT)
@@ -99,7 +99,7 @@ class UpdateCreateInventoryItem : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SimApproved = unpackBoolean(byteBuffer)
         this.AgentData_Field.TransactionID = unpackUUID(byteBuffer)

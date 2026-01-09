@@ -42,7 +42,7 @@ abstract class UserListFragment : Fragment {
     abstract ListAdapter createListAdapter(Context context, LoaderManager loaderManager, UserManager userManager2)
 
     /* access modifiers changed from: protected */
-    fun handleUserDefaultAction(ChatterID chatterID): Unit {
+    fun handleUserDefaultAction(ChatterID chatterID)  {
         if (this.userManager != null) {
             Bundle makeSelection = ChatFragment.makeSelection(chatterID)
             Bundle arguments = getArguments()
@@ -63,12 +63,12 @@ abstract class UserListFragment : Fragment {
     /* synthetic */ Unit m578lambda$com_lumiyaviewer_lumiya_ui_common_UserListFragment_1689(AdapterView adapterView, View view, Int i, Long j) {
         ChatterID chatterID
         Any itemAtPosition = adapterView.getItemAtPosition(i)
-        if ((itemAtPosition instanceof ChatterDisplayInfo) && this.userManager != null && (chatterID = ((ChatterDisplayInfo) itemAtPosition).getChatterID(this.userManager)) != null) {
+        if ((itemAtPosition is ChatterDisplayInfo) && this.userManager != null && (chatterID = ((ChatterDisplayInfo) itemAtPosition).getChatterID(this.userManager)) != null) {
             handleUserDefaultAction(chatterID)
         }
     }
 
-    fun onActivityCreated(Bundle bundle): Unit {
+    fun onActivityCreated(Bundle bundle)  {
         super.onActivityCreated(bundle)
         View view = getView()
         if (view != null) {
@@ -79,15 +79,15 @@ abstract class UserListFragment : Fragment {
                 SwipeDismissListViewTouchListener swipeDismissListViewTouchListener = SwipeDismissListViewTouchListener(listView, SwipeDismissListViewTouchListener.DismissCallbacks() {
                     fun canDismiss(ListView listView, Int i): Boolean {
                         ListAdapter adapter = listView.getAdapter()
-                        if (adapter instanceof DismissableAdapter) {
+                        if (adapter is DismissableAdapter) {
                             return ((DismissableAdapter) adapter).canDismiss(i)
                         }
                         return false
                     }
 
-                    fun onDismiss(ListView listView, Int i): Unit {
+                    fun onDismiss(ListView listView, Int i)  {
                         ListAdapter adapter = listView.getAdapter()
-                        if (adapter instanceof DismissableAdapter) {
+                        if (adapter is DismissableAdapter) {
                             ((DismissableAdapter) adapter).onDismiss(i)
                         }
                     }
@@ -97,7 +97,7 @@ abstract class UserListFragment : Fragment {
         }
     }
 
-    fun onCreate(Bundle bundle): Unit {
+    fun onCreate(Bundle bundle)  {
         super.onCreate(bundle)
         this.userManager = ActivityUtils.getUserManager(getArguments())
     }
@@ -106,7 +106,7 @@ abstract class UserListFragment : Fragment {
         return layoutInflater.inflate(R.layout.contacts_group, viewGroup, false)
     }
 
-    fun onStart(): Unit {
+    fun onStart()  {
         ListView listView
         ListAdapter listAdapter = null
         super.onStart()
@@ -121,13 +121,13 @@ abstract class UserListFragment : Fragment {
         }
     }
 
-    fun onStop(): Unit {
+    fun onStop()  {
         ListView listView
         View view = getView()
         Debug.Printf("UserListFragment: onStop, rootView = %s", view)
         if (!(view == null || (listView = (view as ListView).findViewById(R.id.contactList)) == null)) {
             ListAdapter adapter = listView.getAdapter()
-            if (adapter instanceof Closeable) {
+            if (adapter is Closeable) {
                 try {
                     ((Closeable) adapter).close()
                 } catch (IOException e) {
@@ -140,7 +140,7 @@ abstract class UserListFragment : Fragment {
     }
 
     @EventHandler
-    fun onUserInfoChanged(EventUserInfoChanged eventUserInfoChanged): Unit {
+    fun onUserInfoChanged(EventUserInfoChanged eventUserInfoChanged)  {
         if (this.userManager != null && this.userManager.getUserID().equals(eventUserInfoChanged.agentUUID) && eventUserInfoChanged.isProfileChanged()) {
             updateListViews()
         }

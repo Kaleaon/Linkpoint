@@ -71,7 +71,7 @@ class SearchGridFragment : FragmentWithTitle : LoadableMonitor.OnLoadableDataCha
     private Unit beginSearch() {
         SearchGridQuery.SearchType searchType
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
-        String trim = this.searchString.getText().toString().trim()
+        var trim: String = this.searchString.getText().toString().trim()
         if (!trim.isEmpty() && userManager != null) {
             switch (this.radioGroupSearchType.getCheckedRadioButtonId()) {
                 case R.id.radio_people:
@@ -110,12 +110,12 @@ class SearchGridFragment : FragmentWithTitle : LoadableMonitor.OnLoadableDataCha
         return inflate
     }
 
-    fun onDestroyView(): Unit {
+    fun onDestroyView()  {
         this.unbinder.unbind()
         super.onDestroyView()
     }
 
-    fun onLoadableDataChanged(): Unit {
+    fun onLoadableDataChanged()  {
         if (this.adapter != null) {
             LazyList data = this.searchResults.getData()
             this.adapter.setData(data)
@@ -124,11 +124,11 @@ class SearchGridFragment : FragmentWithTitle : LoadableMonitor.OnLoadableDataCha
     }
 
     @OnClick({2131755640})
-    fun onSearchButtonClicked(): Unit {
+    fun onSearchButtonClicked()  {
         beginSearch()
     }
 
-    fun onSearchResultClicked(SearchGridResult searchGridResult): Unit {
+    fun onSearchResultClicked(SearchGridResult searchGridResult)  {
         UUID activeAgentID = ActivityUtils.getActiveAgentID(getArguments())
         if (searchGridResult != null && activeAgentID != null) {
             switch (m851getcomlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues()[SearchGridQuery.SearchType.values()[searchGridResult.getItemType()].ordinal()]) {

@@ -103,14 +103,14 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
 
     }
     private TextWatcher textChangedListener = TextWatcher() {
-        fun afterTextChanged(Editable editable): Unit {
+        fun afterTextChanged(Editable editable)  {
             GroupRoleDetailsFragment.this.updateUnsavedChanges()
         }
 
-        fun beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3): Unit {
+        fun beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3)  {
         }
 
-        fun onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3): Unit {
+        fun onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3)  {
         }
     }
     private MenuItem undoMenuItem
@@ -148,10 +148,10 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
             if (selectedRoleData == null) {
                 return false
             }
-            String stringFromVariableOEM2 = SLMessage.stringFromVariableOEM(selectedRoleData.Name)
+            var stringFromVariableOEM2: String = SLMessage.stringFromVariableOEM(selectedRoleData.Name)
             str = stringFromVariableOEM2
             stringFromVariableOEM = SLMessage.stringFromVariableOEM(selectedRoleData.Title)
-            String stringFromVariableOEM3 = SLMessage.stringFromVariableOEM(selectedRoleData.Description)
+            var stringFromVariableOEM3: String = SLMessage.stringFromVariableOEM(selectedRoleData.Description)
             j = selectedRoleData.Powers
             str2 = stringFromVariableOEM3
         }
@@ -162,11 +162,11 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
         View view = getView()
         if (view != null) {
             GroupRoleDataReply.RoleData selectedRoleData = getSelectedRoleData()
-            Long defaultPowers = selectedRoleData == null ? getDefaultPowers() : selectedRoleData.Powers
-            String charSequence = ((view as TextView).findViewById(R.id.role_name_edit)).getText().toString()
-            String charSequence2 = ((view as TextView).findViewById(R.id.role_title_edit)).getText().toString()
-            String charSequence3 = ((view as TextView).findViewById(R.id.role_description_edit)).getText().toString()
-            Long selectedPowers = getSelectedPowers(defaultPowers, (view as ViewGroup).findViewById(R.id.role_permission_list_layout))
+            var defaultPowers: Long = selectedRoleData == null ? getDefaultPowers() : selectedRoleData.Powers
+            var charSequence: String = ((view as TextView).findViewById(R.id.role_name_edit)).getText().toString()
+            var charSequence2: String = ((view as TextView).findViewById(R.id.role_title_edit)).getText().toString()
+            var charSequence3: String = ((view as TextView).findViewById(R.id.role_description_edit)).getText().toString()
+            var selectedPowers: Long = getSelectedPowers(defaultPowers, (view as ViewGroup).findViewById(R.id.role_permission_list_layout))
             AlertDialog.Builder builder = AlertDialog.Builder(getContext())
             builder.setMessage(getString(R.string.save_changes_question)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(selectedPowers, this, charSequence, charSequence2, charSequence3, runnable) {
 
@@ -484,15 +484,15 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
 
     private Long getSelectedPowers(Long j, ViewGroup viewGroup) {
         Long j2
-        Int childCount = viewGroup.getChildCount()
-        Int i = 0
-        Long j3 = j
+        var childCount: Int = viewGroup.getChildCount()
+        var i: Int = 0
+        var j3: Long = j
         while (i < childCount) {
             View childAt = viewGroup.getChildAt(i)
-            if (childAt instanceof CheckedTextView) {
+            if (childAt is CheckedTextView) {
                 Any tag = childAt.getTag(R.id.perm_checkbox_mask)
-                if (tag instanceof Long) {
-                    Long longValue = ((Long) tag).longValue()
+                if (tag is Long) {
+                    var longValue: Long = ((Long) tag).longValue()
                     j2 = ((CheckedTextView) childAt).isChecked() ? j3 | longValue : (~longValue) & j3
                     i++
                     j3 = j2
@@ -537,20 +537,20 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
     }
 
     private Unit setLoadedValues() {
-        Int i = 0
+        var i: Int = 0
         GroupRoleDataReply.RoleData selectedRoleData = getSelectedRoleData()
-        Long myGroupPowers = getMyGroupPowers()
-        Boolean z = (64 & myGroupPowers) != 0
-        Boolean equal = Objects.equal(this.RoleID, UUIDPool.ZeroUUID)
+        var myGroupPowers: Long = getMyGroupPowers()
+        var z: Boolean = (64 & myGroupPowers) != 0
+        var equal: Boolean = Objects.equal(this.RoleID, UUIDPool.ZeroUUID)
         GroupProfileReply data = this.groupProfile.getData()
-        Boolean equal2 = data != null ? Objects.equal(data.GroupData_Field.OwnerRole, this.RoleID) : false
+        var equal2: Boolean = data != null ? Objects.equal(data.GroupData_Field.OwnerRole, this.RoleID) : false
         if (this.deleteMenuItem != null) {
             this.deleteMenuItem.setVisible((this.RoleID == null || (myGroupPowers & 32) == 0 || !(equal2 ^ true)) ? false : !equal)
         }
         View view = getView()
         if (view != null) {
             if (selectedRoleData != null) {
-                Int memberCount = getMemberCount()
+                var memberCount: Int = getMemberCount()
                 ((view as EditText).findViewById(R.id.role_name_edit)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Name))
                 ((view as TextView).findViewById(R.id.role_name_view)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Name))
                 ((view as EditText).findViewById(R.id.role_title_edit)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Title))
@@ -586,12 +586,12 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
     }
 
     private Unit setPermissionCheckboxes(Long j, ViewGroup viewGroup) {
-        Int childCount = viewGroup.getChildCount()
+        var childCount: Int = viewGroup.getChildCount()
         for (i in 0 until childCount) {
             View childAt = viewGroup.getChildAt(i)
-            if (childAt instanceof CheckedTextView) {
+            if (childAt is CheckedTextView) {
                 Any tag = childAt.getTag(R.id.perm_checkbox_mask)
-                if (tag instanceof Long) {
+                if (tag is Long) {
                     ((CheckedTextView) childAt).setChecked((((Long) tag).longValue() & j) != 0)
                 }
             }
@@ -599,8 +599,8 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
     }
 
     /* access modifiers changed from: private */
-    fun updateUnsavedChanges(): Unit {
-        Boolean anyChanges = anyChanges()
+    fun updateUnsavedChanges()  {
+        var anyChanges: Boolean = anyChanges()
         if (anyChanges != this.hasChanged) {
             this.hasChanged = anyChanges
             if (this.undoMenuItem != null) {
@@ -612,10 +612,10 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRoleDetailsFragment_11905  reason: not valid java name */
     /* synthetic */ Unit m486lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRoleDetailsFragment_11905(View view) {
-        Long myGroupPowers = getMyGroupPowers()
+        var myGroupPowers: Long = getMyGroupPowers()
         GroupProfileReply data = this.groupProfile.getData()
         if ((myGroupPowers & 1024) != 0 ? !(data != null ? Objects.equal(data.GroupData_Field.OwnerRole, this.RoleID) : false) : false) {
-            if (view instanceof Checkable) {
+            if (view is Checkable) {
                 ((Checkable) view).toggle()
             }
             updateUnsavedChanges()
@@ -627,13 +627,13 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
     /* synthetic */ Unit m487lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRoleDetailsFragment_23112(DialogInterface dialogInterface, Int i) {
         dialogInterface.dismiss()
         try {
-            if ((this.chatterID instanceof ChatterID.ChatterIDGroup) && this.RoleID != null) {
+            if ((this.chatterID is ChatterID.ChatterIDGroup) && this.RoleID != null) {
                 this.agentCircuit.get().getModules().groupManager.DeleteRole(((ChatterID.ChatterIDGroup) this.chatterID).getChatterUUID(), this.RoleID)
             }
         } catch (SubscriptionData.DataNotReadyException e) {
         }
         FragmentActivity activity = getActivity()
-        if (activity instanceof DetailsActivity) {
+        if (activity is DetailsActivity) {
             ((DetailsActivity) activity).closeDetailsFragment(this)
         }
     }
@@ -642,7 +642,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRoleDetailsFragment_24146  reason: not valid java name */
     /* synthetic */ Unit m488lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRoleDetailsFragment_24146() {
         FragmentActivity activity = getActivity()
-        if (activity instanceof DetailsActivity) {
+        if (activity is DetailsActivity) {
             ((DetailsActivity) activity).closeDetailsFragment(this)
         }
     }
@@ -652,7 +652,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
     /* synthetic */ Unit m489lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRoleDetailsFragment_25587(String str, String str2, String str3, Long j, Runnable runnable, DialogInterface dialogInterface, Int i) {
         dialogInterface.dismiss()
         try {
-            if (this.chatterID instanceof ChatterID.ChatterIDGroup) {
+            if (this.chatterID is ChatterID.ChatterIDGroup) {
                 this.agentCircuit.get().getModules().groupManager.SetRoleProperties(((ChatterID.ChatterIDGroup) this.chatterID).getChatterUUID(), this.RoleID, str, str2, str3, j)
             }
         } catch (SubscriptionData.DataNotReadyException e) {
@@ -752,12 +752,12 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
         return true
     }
 
-    fun onCreate(@android.support.annotation.Nullable Bundle bundle): Unit {
+    fun onCreate(@android.support.annotation.Nullable Bundle bundle)  {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater): Unit {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater)  {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.group_role_edit_menu, menu)
         this.undoMenuItem = menu.findItem(R.id.item_undo)
@@ -847,7 +847,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
         return inflate
     }
 
-    fun onLoadableDataChanged(): Unit {
+    fun onLoadableDataChanged()  {
         setLoadedValues()
     }
 
@@ -865,7 +865,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(@Nullable ChatterID chatterID): Unit {
+    fun onShowUser(@Nullable ChatterID chatterID)  {
         this.loadableMonitor.unsubscribeAll()
         if (getArguments().containsKey(ROLE_ID_KEY)) {
             this.RoleID = UUIDPool.getUUID(getArguments().getString(ROLE_ID_KEY))
@@ -873,7 +873,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$oqvWE
             this.RoleID = null
         }
         Debug.Printf("Group role details: role = %s", this.RoleID)
-        if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDGroup)) {
+        if (this.userManager != null && (chatterID is ChatterID.ChatterIDGroup)) {
             UUID chatterUUID = ((ChatterID.ChatterIDGroup) chatterID).getChatterUUID()
             this.groupRoles.subscribe(this.userManager.getGroupRoles().getPool(), chatterUUID)
             this.myGroupList.subscribe(this.userManager.getAvatarGroupLists().getPool(), chatterID.agentUUID)

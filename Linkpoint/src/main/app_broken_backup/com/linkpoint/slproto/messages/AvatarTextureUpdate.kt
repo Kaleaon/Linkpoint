@@ -33,10 +33,10 @@ class AvatarTextureUpdate : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int i = 22
+        var i: Int = 22
         Iterator<T> it = this.WearableData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            var i2: Int = i
             if (!it.hasNext()) {
                 return i2 + 1 + (this.TextureData_Fields.size() * 16)
             }
@@ -44,11 +44,11 @@ class AvatarTextureUpdate : SLMessage {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleAvatarTextureUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 4)
@@ -66,7 +66,7 @@ class AvatarTextureUpdate : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.TexturesChanged = unpackBoolean(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE

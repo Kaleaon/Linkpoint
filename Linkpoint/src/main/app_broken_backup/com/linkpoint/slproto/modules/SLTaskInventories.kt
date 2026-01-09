@@ -30,7 +30,7 @@ class SLTaskInventories : SLModule : SLXfer.SLXferCompletionListener {
     SLTaskInventories(SLAgentCircuit sLAgentCircuit) {
         super(sLAgentCircuit)
         this.requestHandler = AsyncRequestHandler(sLAgentCircuit, SimpleRequestHandler<Int>() {
-            fun onRequest(@NonNull Int num): Unit {
+            fun onRequest(@NonNull Int num)  {
                 SLTaskInventories.this.RequestTaskInventory(num.intValue())
             }
         this.userManager = UserManager.getUserManager(sLAgentCircuit.getAgentUUID())
@@ -42,7 +42,7 @@ class SLTaskInventories : SLModule : SLXfer.SLXferCompletionListener {
     }
 
     /* access modifiers changed from: private */
-    fun RequestTaskInventory(Int i): Unit {
+    fun RequestTaskInventory(Int i)  {
         Debug.Printf("taskID = %d", Int.valueOf(i))
         RequestTaskInventory requestTaskInventory = RequestTaskInventory()
         requestTaskInventory.AgentData_Field.AgentID = this.circuitInfo.agentID
@@ -60,7 +60,7 @@ class SLTaskInventories : SLModule : SLXfer.SLXferCompletionListener {
             ImmutableList.Builder builder = ImmutableList.builder()
             SimpleStringParser simpleStringParser = SimpleStringParser(SLMessage.stringFromVariableUTF(bArr), DELIM_ANY)
             while (!simpleStringParser.endOfString()) {
-                String nextToken = simpleStringParser.nextToken(DELIM_ANY)
+                var nextToken: String = simpleStringParser.nextToken(DELIM_ANY)
                 Debug.Printf("TaskInventory: got token: '%s'", nextToken)
                 if (nextToken.equalsIgnoreCase("inv_object")) {
                     simpleStringParser.nextToken(DELIM_EOL)
@@ -79,7 +79,7 @@ class SLTaskInventories : SLModule : SLXfer.SLXferCompletionListener {
         }
     }
 
-    fun HandleCloseCircuit(): Unit {
+    fun HandleCloseCircuit()  {
         if (this.userManager != null) {
             this.userManager.getObjectsManager().getTaskInventoryRequestSource().detachRequestHandler(this.requestHandler)
         }
@@ -87,8 +87,8 @@ class SLTaskInventories : SLModule : SLXfer.SLXferCompletionListener {
     }
 
     @SLMessageHandler
-    fun HandleReplyTaskInventory(ReplyTaskInventory replyTaskInventory): Unit {
-        String stringFromVariableOEM = SLMessage.stringFromVariableOEM(replyTaskInventory.InventoryData_Field.Filename)
+    fun HandleReplyTaskInventory(ReplyTaskInventory replyTaskInventory)  {
+        var stringFromVariableOEM: String = SLMessage.stringFromVariableOEM(replyTaskInventory.InventoryData_Field.Filename)
         Debug.Printf("taskID = %s, serial = %d, filename = '%s'", replyTaskInventory.InventoryData_Field.TaskID.toString(), Int.valueOf(replyTaskInventory.InventoryData_Field.Serial), stringFromVariableOEM)
         if (!stringFromVariableOEM.equals("")) {
             this.agentCircuit.getModules().xferManager.RequestXfer(stringFromVariableOEM, ELLPath.LL_PATH_CACHE, true, this, replyTaskInventory.InventoryData_Field.TaskID)
@@ -97,8 +97,8 @@ class SLTaskInventories : SLModule : SLXfer.SLXferCompletionListener {
         }
     }
 
-    fun onXferComplete(Any obj, String str, ByteArray bArr): Unit {
-        if (obj instanceof UUID) {
+    fun onXferComplete(Any obj, String str, ByteArray bArr)  {
+        if (obj is UUID) {
             UUID uuid = (UUID) obj
             Debug.Printf("onXferComplete with file = '%s', data length = %d", str, Int.valueOf(bArr.length))
             SLTaskInventory parseTaskInventory = parseTaskInventory(bArr)

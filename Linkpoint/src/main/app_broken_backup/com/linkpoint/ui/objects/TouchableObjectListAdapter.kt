@@ -64,7 +64,7 @@ class TouchableObjectListAdapter : BaseAdapter {
         return this.objects.isEmpty()
     }
 
-    fun setData(@Nullable ImmutableList<SLObjectInfo> immutableList): Unit {
+    fun setData(@Nullable ImmutableList<SLObjectInfo> immutableList)  {
         if (immutableList == null) {
             immutableList = ImmutableList.of()
         }

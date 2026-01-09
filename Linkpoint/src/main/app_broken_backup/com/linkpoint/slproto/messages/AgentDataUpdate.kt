@@ -25,11 +25,11 @@ class AgentDataUpdate : SLMessage {
         return this.AgentData_Field.FirstName.size + 17 + 1 + this.AgentData_Field.LastName.size + 1 + this.AgentData_Field.GroupTitle.size + 16 + 8 + 1 + this.AgentData_Field.GroupName.size + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleAgentDataUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) -125)
@@ -42,7 +42,7 @@ class AgentDataUpdate : SLMessage {
         packVariable(byteBuffer, this.AgentData_Field.GroupName, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.FirstName = unpackVariable(byteBuffer, 1)
         this.AgentData_Field.LastName = unpackVariable(byteBuffer, 1)
