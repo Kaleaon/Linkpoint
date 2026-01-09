@@ -2,227 +2,219 @@ package com.linkpoint.modern.connection
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.NetworkInfo
+import android.net.NetworkCapabilities
+import android.os.Build
 import android.util.Log
-import java.io.IOException
-import java.net.InetAddress
-import java.net.URL
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.TimeUnit
-import javax.net.ssl.HttpsURLConnection
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.Response
+import java.net.InetAddress
+import java.util.concurrent.TimeUnit
 
 /**
  * Modern connection diagnostics for Second Life grid connectivity.
  * Provides comprehensive testing and troubleshooting capabilities.
+ * 
+ * Fixed from original broken syntax to proper Kotlin.
  */
-class ConnectionDiagnostics {
-    private const val TAG: String = "ConnectionDiagnostics"
+class ConnectionDiagnostics(private val context: Context) {
     
-    // Second Life endpoints for testing
-    private const val String[] SL_LOGIN_ENDPOINTS = {
-        "https://login.agni.lindenlab.com/cgi-bin/login.cgi",  // Main grid
-        "https://login.aditi.lindenlab.com/cgi-bin/login.cgi"   // Beta grid
+    companion object {
+        private const val TAG = "ConnectionDiagnostics"
+        
+        // Second Life endpoints for testing
+        private val SL_LOGIN_ENDPOINTS = arrayOf(
+            "https://login.agni.lindenlab.com/cgi-bin/login.cgi",  // Main grid
+            "https://login.aditi.lindenlab.com/cgi-bin/login.cgi"   // Beta grid
+        )
+        
+        private val SL_TEST_DOMAINS = arrayOf(
+            "login.agni.lindenlab.com",
+            "login.aditi.lindenlab.com",
+            "secondlife.com",
+            "lindenlab.com"
+        )
     }
     
-    private const val String[] SL_TEST_DOMAINS = {
-        "login.agni.lindenlab.com",
-        "login.aditi.lindenlab.com",
-        "secondlife.com",
-        "lindenlab.com"
-    }
-
-    private val Context context
-    private val OkHttpClient httpClient
-    
-    public ConnectionDiagnostics(Context context) {
-        this.context = context
-        this.httpClient = OkHttpClient.Builder()
+    private val httpClient: OkHttpClient by lazy {
+        OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
             .writeTimeout(10, TimeUnit.SECONDS)
             .build()
     }
-
+    
     /**
      * Comprehensive connection diagnosis for Second Life services.
      */
-    public CompletableFuture<DiagnosticResult> diagnoseAsync() {
-        return CompletableFuture.supplyAsync(() -> {
-            Log.i(TAG, "Starting comprehensive Second Life connection diagnosis")
-            
-            DiagnosticResult result = DiagnosticResult()
-            
-            // Test 1: Network availability
-            result.networkAvailable = isNetworkAvailable()
-            if (!result.networkAvailable) {
-                result.addIssue("No network connection available")
-                return result
-            }
-            
-            // Test 2: DNS resolution
-            result.dnsWorking = testDNSResolution()
-            if (!result.dnsWorking) {
-                result.addIssue("DNS resolution failed for Second Life domains")
-            }
-            
-            // Test 3: HTTPS connectivity
-            result.httpsWorking = testHTTPSConnectivity()
-            if (!result.httpsWorking) {
-                result.addIssue("HTTPS connectivity issues detected")
-            }
-            
-            // Test 4: Second Life login server accessibility
-            result.loginServerWorking = testLoginServerAccess()
-            if (!result.loginServerWorking) {
-                result.addIssue("Cannot reach Second Life login servers")
-            }
-            
-            // Test 5: Firewall/proxy detection
-            result.proxyDetected = detectProxyOrFirewall()
-            if (result.proxyDetected) {
-                result.addIssue("Proxy or firewall detected - may impact connectivity")
-            }
-            
-            Log.i(TAG, "Diagnosis complete. Overall health: " + result.getOverallHealth())
-            return result
-        })
+    suspend fun diagnoseAsync(): DiagnosticResult = withContext(Dispatchers.IO) {
+        Log.i(TAG, "Starting comprehensive Second Life connection diagnosis")
+        
+        val result = DiagnosticResult()
+        
+        // Test 1: Network availability
+        result.networkAvailable = isNetworkAvailable()
+        if (!result.networkAvailable) {
+            result.addIssue("No network connection available")
+            return@withContext result
+        }
+        
+        // Test 2: DNS resolution
+        result.dnsWorking = testDNSResolution()
+        if (!result.dnsWorking) {
+            result.addIssue("DNS resolution failed for Second Life domains")
+        }
+        
+        // Test 3: HTTPS connectivity
+        result.httpsWorking = testHTTPSConnectivity()
+        if (!result.httpsWorking) {
+            result.addIssue("HTTPS connectivity issues detected")
+        }
+        
+        // Test 4: Second Life login server accessibility
+        result.loginServerWorking = testLoginServerAccess()
+        if (!result.loginServerWorking) {
+            result.addIssue("Cannot reach Second Life login servers")
+        }
+        
+        // Test 5: Firewall/proxy detection
+        result.proxyDetected = detectProxyOrFirewall()
+        if (result.proxyDetected) {
+            result.addIssue("Proxy or firewall detected - may impact connectivity")
+        }
+        
+        Log.i(TAG, "Diagnosis complete. Overall health: ${result.getOverallHealth()}")
+        result
     }
-
-    private Boolean isNetworkAvailable() {
-        try {
-            ConnectivityManager cm = (ConnectivityManager) 
-                context.getSystemService(Context.CONNECTIVITY_SERVICE)
+    
+    private fun isNetworkAvailable(): Boolean {
+        return try {
+            val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+                ?: return false
             
-            if (cm == null) return false
-            
-            NetworkInfo activeNetwork = cm.getActiveNetworkInfo()
-            return activeNetwork != null && activeNetwork.isConnectedOrConnecting()
-        } catch (Exception e) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val network = cm.activeNetwork ?: return false
+                val capabilities = cm.getNetworkCapabilities(network) ?: return false
+                
+                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            } else {
+                @Suppress("DEPRECATION")
+                val activeNetwork = cm.activeNetworkInfo
+                activeNetwork != null && activeNetwork.isConnectedOrConnecting
+            }
+        } catch (e: Exception) {
             Log.e(TAG, "Error checking network availability", e)
-            return false
+            false
         }
     }
-
-    private Boolean testDNSResolution() {
-        for (String domain : SL_TEST_DOMAINS) {
+    
+    private fun testDNSResolution(): Boolean {
+        for (domain in SL_TEST_DOMAINS) {
             try {
-                InetAddress[] addresses = InetAddress.getAllByName(domain)
-                if (addresses.length > 0) {
-                    Log.d(TAG, "DNS resolution successful for " + domain + 
-                        " -> " + addresses[0].getHostAddress())
-                    return true; // At least one domain resolves
+                val addresses = InetAddress.getAllByName(domain)
+                if (addresses.isNotEmpty()) {
+                    Log.d(TAG, "DNS resolution successful for $domain -> ${addresses[0].hostAddress}")
+                    return true
                 }
-            } catch (Exception e) {
-                Log.w(TAG, "DNS resolution failed for " + domain, e)
+            } catch (e: Exception) {
+                Log.w(TAG, "DNS resolution failed for $domain", e)
             }
         }
         return false
     }
-
-    private Boolean testHTTPSConnectivity() {
-        try {
-            Request request = Request.Builder()
+    
+    private fun testHTTPSConnectivity(): Boolean {
+        return try {
+            val request = Request.Builder()
                 .url("https://secondlife.com")
-                .head() // Use HEAD to minimize data transfer
+                .head()
                 .build()
-                
-            try (Response response = httpClient.newCall(request).execute()) {
-                return response.isSuccessful()
+            
+            httpClient.newCall(request).execute().use { response ->
+                response.isSuccessful
             }
-        } catch (Exception e) {
+        } catch (e: Exception) {
             Log.w(TAG, "HTTPS connectivity test failed", e)
-            return false
+            false
         }
     }
-
-    private Boolean testLoginServerAccess() {
-        for (String endpoint : SL_LOGIN_ENDPOINTS) {
+    
+    private fun testLoginServerAccess(): Boolean {
+        for (endpoint in SL_LOGIN_ENDPOINTS) {
             try {
-                Request request = Request.Builder()
+                val request = Request.Builder()
                     .url(endpoint)
                     .head()
                     .build()
-                    
-                try (Response response = httpClient.newCall(request).execute()) {
-                    if (response.isSuccessful() || response.code() == 405) { // 405 Method Not Allowed is OK for login endpoint
-                        Log.d(TAG, "Login server accessible: " + endpoint)
+                
+                httpClient.newCall(request).execute().use { response ->
+                    // 405 Method Not Allowed is OK for login endpoint
+                    if (response.isSuccessful || response.code == 405) {
+                        Log.d(TAG, "Login server accessible: $endpoint")
                         return true
                     }
                 }
-            } catch (Exception e) {
-                Log.w(TAG, "Login server test failed for " + endpoint, e)
+            } catch (e: Exception) {
+                Log.w(TAG, "Login server test failed for $endpoint", e)
             }
         }
         return false
     }
-
-    private Boolean detectProxyOrFirewall() {
-        // Simple heuristic: if we can reach general internet but not SL-specific endpoints
-        try {
+    
+    private fun detectProxyOrFirewall(): Boolean {
+        return try {
             // Test general connectivity
-            Request googleTest = Request.Builder()
+            val googleTest = Request.Builder()
                 .url("https://www.google.com")
                 .head()
                 .build()
-                
-            Boolean canReachInternet
-            try (Response response = httpClient.newCall(googleTest).execute()) {
-                canReachInternet = response.isSuccessful()
+            
+            val canReachInternet = httpClient.newCall(googleTest).execute().use { response ->
+                response.isSuccessful
             }
             
-            if (canReachInternet && !testLoginServerAccess()) {
-                return true; // Can reach internet but not SL servers - likely proxy/firewall
-            }
-        } catch (Exception e) {
+            // Can reach internet but not SL servers - likely proxy/firewall
+            canReachInternet && !testLoginServerAccess()
+        } catch (e: Exception) {
             Log.d(TAG, "Proxy detection test error", e)
+            false
         }
-        return false
     }
-
+    
     /**
      * Result of connection diagnostics
      */
-    @JvmStatic
-    class DiagnosticResult {
-        public Boolean networkAvailable = false
-        public Boolean dnsWorking = false
-        public Boolean httpsWorking = false
-        public Boolean loginServerWorking = false
-        public Boolean proxyDetected = false
+    data class DiagnosticResult(
+        var networkAvailable: Boolean = false,
+        var dnsWorking: Boolean = false,
+        var httpsWorking: Boolean = false,
+        var loginServerWorking: Boolean = false,
+        var proxyDetected: Boolean = false
+    ) {
+        private val issues = StringBuilder()
         
-        private StringBuilder issues = StringBuilder()
-        
-        fun addIssue(String issue) {
-            if (issues.length() > 0) {
+        fun addIssue(issue: String) {
+            if (issues.isNotEmpty()) {
                 issues.append("; ")
             }
             issues.append(issue)
         }
         
-        public String getIssues() {
-            return issues.toString()
-        }
+        fun getIssues(): String = issues.toString()
         
-        public HealthLevel getOverallHealth() {
-            if (loginServerWorking) {
-                return HealthLevel.EXCELLENT
-            } else if (httpsWorking) {
-                return HealthLevel.GOOD
-            } else if (dnsWorking) {
-                return HealthLevel.POOR
-            } else if (networkAvailable) {
-                return HealthLevel.CRITICAL
-            } else {
-                return HealthLevel.NO_CONNECTIVITY
-            }
+        fun getOverallHealth(): HealthLevel = when {
+            loginServerWorking -> HealthLevel.EXCELLENT
+            httpsWorking -> HealthLevel.GOOD
+            dnsWorking -> HealthLevel.POOR
+            networkAvailable -> HealthLevel.CRITICAL
+            else -> HealthLevel.NO_CONNECTIVITY
         }
         
         enum class HealthLevel {
             EXCELLENT,
-            GOOD, 
+            GOOD,
             POOR,
             CRITICAL,
             NO_CONNECTIVITY
