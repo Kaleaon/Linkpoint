@@ -44,9 +44,11 @@ class MainActivity : AppCompatActivity() {
         override fun doFrame(frameTimeNanos: Long) {
             choreographer.postFrameCallback(this)
             
-            if (uiHelper.isReadyToRender) {
+            // Safely check both conditions before rendering
+            val chain = swapChain
+            if (chain != null && uiHelper.isReadyToRender) {
                 // Render frame
-                if (renderer.beginFrame(swapChain!!, frameTimeNanos)) {
+                if (renderer.beginFrame(chain, frameTimeNanos)) {
                     renderer.render(view)
                     renderer.endFrame()
                 }

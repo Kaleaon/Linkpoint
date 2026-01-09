@@ -159,7 +159,8 @@ class FilamentRenderer(private val context: Context) {
      * Render a frame
      */
     fun render(frameTimeNanos: Long): Boolean {
-        if (!isInitialized || swapChain == null) return false
+        val chain = swapChain
+        if (!isInitialized || chain == null) return false
         
         if (!uiHelper.isReadyToRender) return false
         
@@ -171,7 +172,7 @@ class FilamentRenderer(private val context: Context) {
         )
         
         // Begin frame
-        if (renderer.beginFrame(swapChain!!, frameTimeNanos)) {
+        if (renderer.beginFrame(chain, frameTimeNanos)) {
             renderer.render(view)
             renderer.endFrame()
             return true
@@ -251,32 +252,46 @@ class FilamentRenderer(private val context: Context) {
         
         ib.setBuffer(engine, indexByteBuffer)
         
-        // Create default material
+        // Create default material (may be null if no compiled materials available)
         val material = createDefaultMaterial()
         
         // Create renderable
-        RenderableManager.Builder(1)
+        val builder = RenderableManager.Builder(1)
             .geometry(0, RenderableManager.PrimitiveType.TRIANGLES, vb, ib, 0, indices.size)
-            .material(0, material.defaultInstance)
             .castShadows(true)
             .receiveShadows(true)
-            .build(engine, entity)
+        
+        // Only set material if one is available
+        material?.let { 
+            builder.material(0, it.defaultInstance)
+        }
+        
+        builder.build(engine, entity)
         
         scene.addEntity(entity)
+        
+        Log.d(TAG, "Created mesh entity: $entity with ${indices.size} indices" + 
+            if (material == null) " (no material)" else "")
         
         return entity
     }
     
+    // Cached default material
+    private var defaultMaterial: Material? = null
+    
     /**
      * Create a default PBR material
-     * Falls back to a basic lit material if compiled material not found
+     * Returns null if no compiled material is available
      */
-    private fun createDefaultMaterial(): Material {
-        // Try to load a pre-compiled material
+    private fun createDefaultMaterial(): Material? {
+        // Return cached material if available
+        defaultMaterial?.let { return it }
+        
+        // Try to load a pre-compiled material (.filamat files)
         val materialFiles = listOf(
             "materials/default.filamat",
-            "materials/prim_basic.mat",
-            "materials/unlit_color.mat"
+            "materials/prim_basic.filamat",
+            "materials/unlit_color.filamat"
         )
         
         for (materialFile in materialFiles) {
@@ -284,17 +299,27 @@ class FilamentRenderer(private val context: Context) {
                 val materialData = context.assets.open(materialFile).use { 
                     it.readBytes() 
                 }
-                return Material.Builder()
+                val material = Material.Builder()
                     .payload(ByteBuffer.wrap(materialData), materialData.size)
                     .build(engine)
+                defaultMaterial = material
+                Log.i(TAG, "Loaded material: $materialFile")
+                return material
             } catch (e: Exception) {
-                Log.w(TAG, "Could not load material: $materialFile")
+                Log.d(TAG, "Could not load material: $materialFile")
             }
         }
         
-        // If no pre-compiled material available, create a basic material programmatically
-        Log.w(TAG, "No pre-compiled material found, scene rendering may be limited")
-        throw IllegalStateException("No material files found in assets. Please add materials/*.filamat")
+        // No materials available - log helpful message
+        Log.w(TAG, """
+            No pre-compiled .filamat materials found in assets/materials/.
+            To compile materials, use the Filament matc tool:
+              matc -a opengl -p mobile -o output.filamat input.mat
+            
+            Meshes will be added to scene but may not render correctly without materials.
+        """.trimIndent())
+        
+        return null
     }
     
     /**
