@@ -34,8 +34,8 @@ object MeshCache : ResourceFileCache<UUID, MeshData>() {
         runCatching { MeshData(file) }.getOrNull()
 
     override fun createResourceGenRequest(
-        params: UUID
-        manager: ResourceManager<UUID, MeshData>
+        params: UUID,
+        manager: ResourceManager<UUID, MeshData>,
         output: File
     ): ResourceRequest<UUID, MeshData> {
         return object : ResourceRequest<UUID, MeshData>(params, manager), Runnable {

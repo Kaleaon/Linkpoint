@@ -40,7 +40,7 @@ object TextureCache : ResourceMemoryCache<DrawableTextureParams, OpenJPEG>() {
     fun getInstance(): TextureCache = this
 
     override fun CreateNewRequest(
-        params: DrawableTextureParams
+        params: DrawableTextureParams,
         manager: ResourceManager<DrawableTextureParams, OpenJPEG>
     ): ResourceRequest<DrawableTextureParams, OpenJPEG> {
         return object : ResourceRequest<DrawableTextureParams, OpenJPEG>(params, manager) {
