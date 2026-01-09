@@ -1,6 +1,2 @@
-include ':app'
-include ':lumiya'
-
-project(':lumiya').projectDir = file('lumiya')
-
+// Linkpoint is the only project - clean Kotlin Second Life viewer
 includeBuild('Linkpoint')

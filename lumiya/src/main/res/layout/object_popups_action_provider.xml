@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="match_parent" style="@style/Base.Widget.AppCompat.ActionButton">
-    <ImageView android:layout_gravity="center" android:layout_width="match_parent" android:layout_height="match_parent" android:src="?attr/MenuIconObjects" android:scaleType="fitCenter"/>
-    <TextView android:textSize="14sp" android:textStyle="bold" android:textColor="#ffffff" android:layout_gravity="center" android:id="@+id/popupCountTextView" android:background="?attr/objectPopupsCounterBackground" android:paddingLeft="3dp" android:paddingTop="1dp" android:paddingRight="3dp" android:paddingBottom="1dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:layout_marginRight="10dp" android:singleLine="true"/>
-</FrameLayout>

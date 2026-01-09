@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<animation-list xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:oneshot="false">
-    <item android:duration="200" android:drawable="@drawable/ic_voice_speaking_1"/>
-    <item android:duration="200" android:drawable="@drawable/ic_voice_speaking_2"/>
-    <item android:duration="200" android:drawable="@drawable/ic_voice_speaking_3"/>
-    <item android:duration="200" android:drawable="@drawable/ic_voice_speaking_4"/>
-</animation-list>

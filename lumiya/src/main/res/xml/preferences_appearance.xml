@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:title="@string/prefs_category_appearance">
-    <ListPreference android:entries="@array/entries_theme" android:title="Visual theme" android:key="theme" android:summary="%s" android:dialogTitle="Visual theme" android:entryValues="@array/entryvalues_theme"/>
-    <ListPreference android:entries="@array/entries_split_screens" android:title="Split screens" android:key="split_screens" android:summary="%s" android:defaultValue="auto" android:dialogTitle="Split screens" android:entryValues="@array/entryvalues_split_screens"/>
-</PreferenceScreen>
