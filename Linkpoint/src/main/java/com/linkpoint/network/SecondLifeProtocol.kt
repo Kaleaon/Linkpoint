@@ -1,6 +1,7 @@
 package com.linkpoint.network
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
 import com.linkpoint.core.ConnectionState
 import com.linkpoint.core.RegionInfo
@@ -22,10 +23,17 @@ import java.security.MessageDigest
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.SSLException
+import javax.net.ssl.SSLHandshakeException
+import javax.net.ssl.SSLPeerUnverifiedException
 
 /**
  * Second Life protocol implementation
  * Handles login, message sending, and grid communication
+ * 
+ * Optimized for Android 9+ with:
+ * - Proper SSL/TLS configuration for modern Android
+ * - Adaptive timeouts based on network conditions
+ * - Enhanced error handling for mobile networks
  */
 class SecondLifeProtocol(private val context: Context) {
     
@@ -33,22 +41,39 @@ class SecondLifeProtocol(private val context: Context) {
         private const val TAG = "SLProtocol"
         private const val VIEWER_NAME = "Linkpoint"
         private const val VIEWER_VERSION = "1.0.0"
+        
+        // Base timeout values (will be multiplied by network quality factor)
+        private const val BASE_CONNECT_TIMEOUT_SECONDS = 30L
+        private const val BASE_READ_TIMEOUT_SECONDS = 60L
+        private const val BASE_WRITE_TIMEOUT_SECONDS = 30L
+        
+        // Maximum timeout values to prevent indefinite waiting
+        private const val MAX_CONNECT_TIMEOUT_SECONDS = 90L
+        private const val MAX_READ_TIMEOUT_SECONDS = 180L
+        private const val MAX_WRITE_TIMEOUT_SECONDS = 90L
     }
     
     /**
      * Retry interceptor for handling transient mobile network failures.
      * LTE/mobile networks often experience brief connection drops that succeed on retry.
+     * 
+     * Enhanced for Android 9+ with SSL-specific error handling.
      */
-    private class MobileNetworkRetryInterceptor(private val maxRetries: Int = 3) : Interceptor {
+    private class MobileNetworkRetryInterceptor(
+        private val maxRetries: Int = 3,
+        private val initialDelayMs: Long = 500L
+    ) : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response {
             val request = chain.request()
             var lastException: IOException? = null
             
             repeat(maxRetries) { attempt ->
                 try {
-                    // Exponential backoff: 0ms, 500ms, 1500ms
+                    // Exponential backoff with jitter
                     if (attempt > 0) {
-                        val backoffMs = (attempt * 500L)
+                        val baseDelay = initialDelayMs * (1 shl (attempt - 1)) // 500, 1000, 2000...
+                        val jitter = (Math.random() * 200).toLong() // Add 0-200ms jitter
+                        val backoffMs = baseDelay + jitter
                         Thread.sleep(backoffMs)
                         Log.d(TAG, "Retry attempt ${attempt + 1}/$maxRetries after ${backoffMs}ms backoff")
                     }
@@ -59,14 +84,45 @@ class SecondLifeProtocol(private val context: Context) {
                 } catch (e: UnknownHostException) {
                     Log.w(TAG, "DNS failure on attempt ${attempt + 1}/$maxRetries: ${e.message}")
                     lastException = e
+                    // DNS failures often resolve quickly, don't wait long
+                    if (attempt < maxRetries - 1) {
+                        Thread.sleep(100)
+                    }
+                } catch (e: SSLHandshakeException) {
+                    // SSL handshake failures may be transient on unstable networks
+                    val isTransient = e.message?.let { msg ->
+                        msg.contains("Connection reset", ignoreCase = true) ||
+                        msg.contains("closed", ignoreCase = true) ||
+                        msg.contains("stream", ignoreCase = true) ||
+                        msg.contains("timeout", ignoreCase = true)
+                    } ?: false
+                    
+                    if (isTransient) {
+                        Log.w(TAG, "Transient SSL handshake issue on attempt ${attempt + 1}/$maxRetries: ${e.message}")
+                        lastException = e
+                    } else {
+                        // Non-transient SSL errors should not be retried (e.g., certificate errors)
+                        Log.e(TAG, "Non-transient SSL handshake error: ${e.message}")
+                        throw e
+                    }
+                } catch (e: SSLPeerUnverifiedException) {
+                    // Certificate verification failures should not be retried
+                    Log.e(TAG, "SSL certificate verification failed: ${e.message}")
+                    throw e
                 } catch (e: SSLException) {
-                    // SSL handshake failures can be transient on mobile networks
-                    if (e.message?.contains("Connection reset", ignoreCase = true) == true ||
-                        e.message?.contains("closed", ignoreCase = true) == true) {
+                    // Other SSL exceptions might be transient on mobile networks
+                    val isTransient = e.message?.let { msg ->
+                        msg.contains("Connection reset", ignoreCase = true) ||
+                        msg.contains("closed", ignoreCase = true) ||
+                        msg.contains("I/O error", ignoreCase = true) ||
+                        msg.contains("stream", ignoreCase = true)
+                    } ?: false
+                    
+                    if (isTransient) {
                         Log.w(TAG, "SSL connection issue on attempt ${attempt + 1}/$maxRetries: ${e.message}")
                         lastException = e
                     } else {
-                        throw e // Non-transient SSL error
+                        throw e
                     }
                 } catch (e: IOException) {
                     // Check if this is a retryable error
@@ -74,7 +130,10 @@ class SecondLifeProtocol(private val context: Context) {
                         msg.contains("timeout", ignoreCase = true) ||
                         msg.contains("reset", ignoreCase = true) ||
                         msg.contains("closed", ignoreCase = true) ||
-                        msg.contains("failed to connect", ignoreCase = true)
+                        msg.contains("failed to connect", ignoreCase = true) ||
+                        msg.contains("ECONNRESET", ignoreCase = true) ||
+                        msg.contains("ECONNREFUSED", ignoreCase = true) ||
+                        msg.contains("ENETUNREACH", ignoreCase = true)
                     } ?: false
                     
                     if (isRetryable) {
@@ -91,25 +150,51 @@ class SecondLifeProtocol(private val context: Context) {
     }
     
     /**
-     * OkHttp client optimized for mobile/LTE networks:
-     * - Extended timeouts for high-latency mobile connections
-     * - Connection pooling for efficiency
-     * - Retry interceptor for transient failures
-     * - HTTP/2 support with HTTP/1.1 fallback
+     * Create an OkHttp client with adaptive timeouts based on network conditions
      */
-    private val httpClient = OkHttpClient.Builder()
-        .connectTimeout(45, TimeUnit.SECONDS)  // Extended for LTE latency
-        .readTimeout(90, TimeUnit.SECONDS)     // Extended for slow mobile data
-        .writeTimeout(45, TimeUnit.SECONDS)    // Extended for upload on mobile
-        .retryOnConnectionFailure(true)        // Enable automatic connection retry
-        .connectionPool(ConnectionPool(
-            maxIdleConnections = 5,
-            keepAliveDuration = 5,
-            timeUnit = TimeUnit.MINUTES
-        ))
-        .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
-        .addInterceptor(MobileNetworkRetryInterceptor(maxRetries = 3))
-        .build()
+    private fun createHttpClient(): OkHttpClient {
+        // Get network info for adaptive timeouts
+        val networkInfo = NetworkDiagnostics.getNetworkInfo(context)
+        val timeoutMultiplier = networkInfo.timeoutMultiplier.coerceIn(1.0f, 3.0f)
+        val retryCount = networkInfo.recommendedRetries
+        
+        Log.d(TAG, "Creating HTTP client - Network: ${networkInfo.displayName}, " +
+            "Timeout multiplier: ${timeoutMultiplier}x, Retries: $retryCount")
+        
+        // Calculate adaptive timeouts
+        val connectTimeout = (BASE_CONNECT_TIMEOUT_SECONDS * timeoutMultiplier).toLong()
+            .coerceAtMost(MAX_CONNECT_TIMEOUT_SECONDS)
+        val readTimeout = (BASE_READ_TIMEOUT_SECONDS * timeoutMultiplier).toLong()
+            .coerceAtMost(MAX_READ_TIMEOUT_SECONDS)
+        val writeTimeout = (BASE_WRITE_TIMEOUT_SECONDS * timeoutMultiplier).toLong()
+            .coerceAtMost(MAX_WRITE_TIMEOUT_SECONDS)
+        
+        Log.d(TAG, "Adaptive timeouts - Connect: ${connectTimeout}s, Read: ${readTimeout}s, Write: ${writeTimeout}s")
+        
+        val builder = OkHttpClient.Builder()
+            .connectTimeout(connectTimeout, TimeUnit.SECONDS)
+            .readTimeout(readTimeout, TimeUnit.SECONDS)
+            .writeTimeout(writeTimeout, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(true)
+            .connectionPool(ConnectionPool(
+                maxIdleConnections = 5,
+                keepAliveDuration = 5,
+                timeUnit = TimeUnit.MINUTES
+            ))
+            .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
+            .addInterceptor(MobileNetworkRetryInterceptor(
+                maxRetries = retryCount,
+                initialDelayMs = (500 * timeoutMultiplier).toLong()
+            ))
+        
+        // Configure SSL for Android 9+ compatibility
+        SSLHelper.configureSSL(builder, debugMode = false)
+        
+        return builder.build()
+    }
+    
+    // Lazy initialization of HTTP client
+    private val httpClient: OkHttpClient by lazy { createHttpClient() }
     
     /**
      * Perform login to the grid
@@ -170,6 +255,9 @@ class SecondLifeProtocol(private val context: Context) {
             Log.e(TAG, "Login network error: ${e.javaClass.simpleName}: ${e.message}", e)
             app.sessionManager.setConnectionState(ConnectionState.ERROR)
             
+            // Get current network info for context
+            val networkInfo = NetworkDiagnostics.getNetworkInfo(context)
+            
             val technicalDetails = buildString {
                 appendLine("URL: $loginUri")
                 appendLine("Exception: ${e.javaClass.simpleName}")
@@ -177,31 +265,15 @@ class SecondLifeProtocol(private val context: Context) {
                 e.cause?.let { cause ->
                     appendLine("Cause: ${cause.javaClass.simpleName}: ${cause.message}")
                 }
+                appendLine()
+                appendLine("--- Network Status ---")
+                appendLine("Connected: ${networkInfo.isConnected}")
+                appendLine("Type: ${networkInfo.displayName}")
+                appendLine("Est. Bandwidth: ${networkInfo.estimatedBandwidthKbps}kbps")
+                appendLine("Android: ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
             }
             
-            val (errorMessage, errorCode) = when {
-                e is SocketTimeoutException -> 
-                    "Connection timed out after multiple retries. The Second Life servers may be slow or unreachable." to "TIMEOUT"
-                e is UnknownHostException -> 
-                    "Cannot resolve server address. Please check your internet connection and DNS settings." to "DNS_FAILED"
-                e is SSLException -> 
-                    "SSL/TLS connection failed: ${e.message?.take(100) ?: "handshake error"}. This may be a network or certificate issue." to "SSL_ERROR"
-                e.message?.contains("timeout", ignoreCase = true) == true -> 
-                    "Connection timed out. The server is not responding." to "TIMEOUT"
-                e.message?.contains("host", ignoreCase = true) == true -> 
-                    "Could not reach the login server. Check your internet connection." to "HOST_UNREACHABLE"
-                e.message?.contains("reset", ignoreCase = true) == true || 
-                e.message?.contains("closed", ignoreCase = true) == true ->
-                    "Connection was reset by the server or network. Please try again." to "CONNECTION_RESET"
-                e.message?.contains("failed to connect", ignoreCase = true) == true ->
-                    "Failed to connect to ${loginUri.substringAfter("://").substringBefore("/")}. Check network access." to "CONNECTION_FAILED"
-                e.message?.contains("refused", ignoreCase = true) == true ->
-                    "Connection refused by server. The login service may be down." to "CONNECTION_REFUSED"
-                e.message.isNullOrBlank() -> 
-                    "Network error occurred with no details. Please check your internet connection." to "UNKNOWN_NETWORK"
-                else -> 
-                    "Network error: ${e.message}" to "NETWORK_ERROR"
-            }
+            val (errorMessage, errorCode) = generateNetworkErrorMessage(e, loginUri, networkInfo)
             
             Log.w(TAG, "Login network error [$errorCode]: $errorMessage")
             LoginResult.Failure(errorMessage, errorCode = errorCode, technicalDetails = technicalDetails)
@@ -214,13 +286,153 @@ class SecondLifeProtocol(private val context: Context) {
                 appendLine("Exception: ${e.javaClass.simpleName}")
                 appendLine("Message: ${e.message ?: "none"}")
                 appendLine("Stack: ${e.stackTrace.take(5).joinToString("\n  ")}")
+                appendLine("Android: ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
             }
             
             val errorMessage = when {
-                e.message.isNullOrBlank() -> "An unexpected error occurred during login."
+                e.message.isNullOrBlank() -> "An unexpected error occurred during login. Please try again."
                 else -> "Error: ${e.message}"
             }
             LoginResult.Failure(errorMessage, errorCode = "UNEXPECTED", technicalDetails = technicalDetails)
+        }
+    }
+    
+    /**
+     * Generate user-friendly, actionable error messages based on the exception type
+     * and current network conditions.
+     */
+    private fun generateNetworkErrorMessage(
+        e: IOException,
+        loginUri: String,
+        networkInfo: NetworkDiagnostics.NetworkInfo
+    ): Pair<String, String> {
+        val serverHost = loginUri.substringAfter("://").substringBefore("/")
+        
+        return when {
+            // Timeout errors
+            e is SocketTimeoutException -> {
+                val message = buildString {
+                    append("Connection timed out. ")
+                    when (networkInfo.type) {
+                        NetworkDiagnostics.NetworkType.CELLULAR_2G -> 
+                            append("Your 2G connection is very slow. Try moving to an area with better signal or use Wi-Fi.")
+                        NetworkDiagnostics.NetworkType.CELLULAR_3G ->
+                            append("Your 3G connection may be too slow. Try moving to an area with better signal or use Wi-Fi.")
+                        NetworkDiagnostics.NetworkType.NONE ->
+                            append("No network connection detected. Please connect to the internet and try again.")
+                        else ->
+                            append("The Second Life servers may be slow or your connection is unstable. Please try again.")
+                    }
+                }
+                message to "TIMEOUT"
+            }
+            
+            // DNS resolution errors
+            e is UnknownHostException -> {
+                val message = when {
+                    !networkInfo.isConnected ->
+                        "Cannot connect to the internet. Please check your Wi-Fi or mobile data is enabled."
+                    else ->
+                        "Cannot resolve '$serverHost'. Please check your internet connection. " +
+                        "If the problem persists, try switching between Wi-Fi and mobile data."
+                }
+                message to "DNS_FAILED"
+            }
+            
+            // SSL/TLS errors with Android 9+ context
+            e is SSLHandshakeException -> {
+                val message = when {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && 
+                    e.message?.contains("CERTIFICATE", ignoreCase = true) == true ->
+                        "SSL certificate error. This may be a server configuration issue. " +
+                        "If you're using a VPN or proxy, try disabling it temporarily."
+                    e.message?.contains("WRONG_VERSION", ignoreCase = true) == true ->
+                        "SSL/TLS version mismatch. The server may require a different security protocol."
+                    else ->
+                        "Secure connection failed. Please check your network settings and try again. " +
+                        "If you're on a public Wi-Fi network, try switching to mobile data."
+                }
+                message to "SSL_HANDSHAKE"
+            }
+            
+            e is SSLPeerUnverifiedException -> {
+                "The server's security certificate could not be verified. " +
+                "This may indicate a network security issue. " +
+                "Avoid using public Wi-Fi for login if possible." to "SSL_CERT_UNVERIFIED"
+            }
+            
+            e is SSLException -> {
+                val message = when {
+                    e.message?.contains("Connection reset", ignoreCase = true) == true ->
+                        "Secure connection was interrupted. This is often temporary - please try again."
+                    e.message?.contains("closed", ignoreCase = true) == true ->
+                        "Connection closed unexpectedly. Please check your network and try again."
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.P ->
+                        "Secure connection failed (Android ${Build.VERSION.RELEASE}). " +
+                        "Please ensure you have a stable internet connection and try again."
+                    else ->
+                        "SSL/TLS error: ${e.message?.take(80) ?: "Connection failed"}. Please try again."
+                }
+                message to "SSL_ERROR"
+            }
+            
+            // Connection reset/closed errors
+            e.message?.contains("reset", ignoreCase = true) == true ||
+            e.message?.contains("ECONNRESET", ignoreCase = true) == true -> {
+                val message = when (networkInfo.type) {
+                    NetworkDiagnostics.NetworkType.CELLULAR_LTE,
+                    NetworkDiagnostics.NetworkType.CELLULAR_4G,
+                    NetworkDiagnostics.NetworkType.CELLULAR_3G -> 
+                        "Connection was reset. Mobile networks can be unstable. Please try again, " +
+                        "or connect to Wi-Fi for a more stable connection."
+                    else ->
+                        "Connection was reset by the network. Please try again in a moment."
+                }
+                message to "CONNECTION_RESET"
+            }
+            
+            // Connection refused
+            e.message?.contains("refused", ignoreCase = true) == true ||
+            e.message?.contains("ECONNREFUSED", ignoreCase = true) == true -> {
+                "The login server is not accepting connections. " +
+                "Second Life servers may be undergoing maintenance. " +
+                "Please check status.secondlifegrid.net for updates." to "CONNECTION_REFUSED"
+            }
+            
+            // Network unreachable
+            e.message?.contains("ENETUNREACH", ignoreCase = true) == true ||
+            e.message?.contains("unreachable", ignoreCase = true) == true -> {
+                "Network is unreachable. Please check that your internet connection is working properly." to "NETWORK_UNREACHABLE"
+            }
+            
+            // Failed to connect (general)
+            e.message?.contains("failed to connect", ignoreCase = true) == true -> {
+                val message = when {
+                    !networkInfo.isConnected ->
+                        "No internet connection. Please enable Wi-Fi or mobile data."
+                    networkInfo.type == NetworkDiagnostics.NetworkType.CELLULAR_2G ->
+                        "Failed to connect. Your 2G connection may be too slow. Try using Wi-Fi."
+                    else ->
+                        "Failed to connect to $serverHost. " +
+                        "Please check your internet connection and try again."
+                }
+                message to "CONNECTION_FAILED"
+            }
+            
+            // Timeout in message
+            e.message?.contains("timeout", ignoreCase = true) == true -> {
+                "Connection timed out. The server is taking too long to respond. " +
+                "Please try again or check your internet speed." to "TIMEOUT"
+            }
+            
+            // Unknown or generic errors
+            e.message.isNullOrBlank() -> {
+                "A network error occurred. Please check your internet connection and try again." to "UNKNOWN_NETWORK"
+            }
+            
+            else -> {
+                "Network error: ${e.message?.take(100)}. Please try again." to "NETWORK_ERROR"
+            }
         }
     }
     

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Network Security Configuration for Linkpoint
+    
+    This configuration is CRITICAL for Android 9+ (API 28+) to ensure:
+    1. HTTPS connections work properly with server certificates
+    2. Cleartext HTTP is blocked by default for security
+    3. Specific domains that require HTTP are explicitly whitelisted
+    4. Debug builds can inspect traffic if needed
+    
+    Without this config, login will fail silently on Android 9+ devices!
+-->
+<network-security-config>
+    
+    <!-- Base configuration: HTTPS only, trust system CAs -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <!-- Trust the system certificate authorities -->
+            <certificates src="system" />
+            <!-- Trust user-installed CAs for enterprise environments -->
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+    
+    <!-- Second Life Production Login Server -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">lindenlab.com</domain>
+        <domain includeSubdomains="true">secondlife.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+        <!-- Pin to known good certificates for extra security (optional) -->
+        <!-- Uncomment if you want certificate pinning:
+        <pin-set expiration="2027-01-01">
+            <pin digest="SHA-256">...</pin>
+        </pin-set>
+        -->
+    </domain-config>
+    
+    <!-- Second Life Beta/Aditi Grid -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">agni.lindenlab.com</domain>
+        <domain includeSubdomains="true">aditi.lindenlab.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+    
+    <!-- Kitely Grid (OpenSim) -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">kitely.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+    
+    <!-- 
+        Legacy OpenSim Grids that may require HTTP (cleartext)
+        WARNING: These are less secure - credentials sent in cleartext!
+        Only enable for grids you trust on secure networks.
+    -->
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- OSGrid - popular OpenSim grid (HTTP only) -->
+        <domain includeSubdomains="true">osgrid.org</domain>
+        
+        <!-- Other OpenSim grids that haven't upgraded to HTTPS -->
+        <!-- Add additional grids here as needed -->
+        <domain includeSubdomains="true">inworldz.com</domain>
+        
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </domain-config>
+    
+    <!-- 
+        Debug configuration: Allow inspection in debug builds
+        This permits network traffic analysis tools like Charles Proxy
+        to debug SSL/TLS issues during development.
+    -->
+    <debug-overrides>
+        <trust-anchors>
+            <!-- In debug builds, also trust user-installed CAs -->
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+    
+</network-security-config>
