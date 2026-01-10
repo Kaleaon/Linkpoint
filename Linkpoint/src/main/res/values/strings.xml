@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Linkpoint</string>
+    <string name="app_description">Second Life Viewer for Android and XR</string>
+    
+    <!-- Login -->
+    <string name="login_title">Login</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="password">Password</string>
+    <string name="grid">Grid</string>
+    <string name="start_location">Start Location</string>
+    <string name="remember_me">Remember me</string>
+    <string name="login">Login</string>
+    <string name="logging_in">Logging in…</string>
+    <string name="login_failed">Login Failed</string>
+    
+    <!-- Navigation -->
+    <string name="nav_chat">Chat</string>
+    <string name="nav_inventory">Inventory</string>
+    <string name="nav_minimap">Minimap</string>
+    <string name="nav_avatar">My Avatar</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_xr_mode">XR Mode</string>
+    <string name="nav_logout">Logout</string>
+    
+    <!-- Chat -->
+    <string name="type_message">Type a message…</string>
+    <string name="send">Send</string>
+    <string name="tab_local">Local</string>
+    <string name="tab_ims">IMs</string>
+    <string name="tab_groups">Groups</string>
+    <string name="tab_nearby">Nearby</string>
+    
+    <!-- Inventory -->
+    <string name="inventory_empty">This folder is empty</string>
+    
+    <!-- Settings -->
+    <string name="settings_graphics">Graphics</string>
+    <string name="settings_audio">Audio</string>
+    <string name="settings_network">Network</string>
+    <string name="settings_xr">XR/VR</string>
+    
+    <!-- XR -->
+    <string name="xr_not_available">XR mode is not available on this device</string>
+    <string name="xr_mode_started">Entering XR mode…</string>
+    
+    <!-- General -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="loading">Loading…</string>
+    <string name="error">Error</string>
+    <string name="unknown_region">Unknown Region</string>
+</resources>

@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Face selector -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Face"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <Spinner
+        android:id="@+id/faceSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/spinner_background"
+        android:entries="@array/face_options" />
+
+    <!-- Texture -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Texture UUID"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/textureUUID"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:hint="UUID"
+        android:textColorHint="@color/text_secondary"
+        android:textColor="@color/white"
+        android:background="@drawable/input_background"
+        android:paddingHorizontal="12dp"
+        android:inputType="text" />
+
+    <!-- Color -->
+    <Button
+        android:id="@+id/colorButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Select Color"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+    <!-- Repeat -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Repeats per Face"
+        android:textColor="@color/white"
+        android:textSize="14sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/repeatU"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:hint="U"
+            android:text="1"
+            android:textColorHint="@color/text_secondary"
+            android:textColor="@color/white"
+            android:background="@drawable/input_background"
+            android:paddingHorizontal="8dp"
+            android:inputType="numberDecimal|numberSigned"
+            android:textSize="14sp" />
+
+        <EditText
+            android:id="@+id/repeatV"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:hint="V"
+            android:text="1"
+            android:textColorHint="@color/text_secondary"
+            android:textColor="@color/white"
+            android:background="@drawable/input_background"
+            android:paddingHorizontal="8dp"
+            android:inputType="numberDecimal|numberSigned"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+    <!-- Offset -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Offset"
+        android:textColor="@color/white"
+        android:textSize="14sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/offsetU"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:hint="U"
+            android:text="0"
+            android:textColorHint="@color/text_secondary"
+            android:textColor="@color/white"
+            android:background="@drawable/input_background"
+            android:paddingHorizontal="8dp"
+            android:inputType="numberDecimal|numberSigned"
+            android:textSize="14sp" />
+
+        <EditText
+            android:id="@+id/offsetV"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:hint="V"
+            android:text="0"
+            android:textColorHint="@color/text_secondary"
+            android:textColor="@color/white"
+            android:background="@drawable/input_background"
+            android:paddingHorizontal="8dp"
+            android:inputType="numberDecimal|numberSigned"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+    <!-- Rotation -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Rotation (degrees)"
+        android:textColor="@color/white"
+        android:textSize="14sp" />
+
+    <EditText
+        android:id="@+id/rotation"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="4dp"
+        android:text="0"
+        android:textColor="@color/white"
+        android:background="@drawable/input_background"
+        android:paddingHorizontal="12dp"
+        android:inputType="numberDecimal|numberSigned" />
+
+    <!-- Shininess -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Shininess"
+        android:textColor="@color/white"
+        android:textSize="14sp" />
+
+    <Spinner
+        android:id="@+id/shinySpinner"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/spinner_background"
+        android:entries="@array/shiny_options" />
+
+    <!-- Bumpiness -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Bumpiness"
+        android:textColor="@color/white"
+        android:textSize="14sp" />
+
+    <Spinner
+        android:id="@+id/bumpSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/spinner_background"
+        android:entries="@array/bump_options" />
+
+    <!-- Full Bright -->
+    <CheckBox
+        android:id="@+id/fullbrightCheck"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Full Bright"
+        android:textColor="@color/white" />
+
+    <!-- Glow -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Glow"
+        android:textColor="@color/white"
+        android:textSize="14sp" />
+
+    <SeekBar
+        android:id="@+id/glowSeekbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:progress="0" />
+
+    <Button
+        android:id="@+id/applyTexture"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Apply Texture" />
+
+</LinearLayout>

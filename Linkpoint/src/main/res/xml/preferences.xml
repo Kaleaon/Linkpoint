@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Graphics Settings -->
+    <PreferenceCategory android:title="Graphics">
+
+        <ListPreference
+            android:key="graphics_quality"
+            android:title="Graphics Quality"
+            android:summary="Overall rendering quality"
+            android:entries="@array/graphics_quality_entries"
+            android:entryValues="@array/graphics_quality_values"
+            android:defaultValue="medium" />
+
+        <SeekBarPreference
+            android:key="draw_distance"
+            android:title="Draw Distance"
+            android:summary="How far to render objects"
+            android:min="32"
+            android:max="512"
+            android:defaultValue="128"
+            app:showSeekBarValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="enable_shadows"
+            android:title="Shadows"
+            android:summary="Enable dynamic shadows"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="enable_water_reflections"
+            android:title="Water Reflections"
+            android:summary="Enable water reflections"
+            android:defaultValue="true" />
+
+    </PreferenceCategory>
+
+    <!-- Audio Settings -->
+    <PreferenceCategory android:title="Audio">
+
+        <SeekBarPreference
+            android:key="master_volume"
+            android:title="Master Volume"
+            android:min="0"
+            android:max="100"
+            android:defaultValue="75"
+            app:showSeekBarValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="enable_voice"
+            android:title="Voice Chat"
+            android:summary="Enable voice chat"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="enable_streaming"
+            android:title="Streaming Audio"
+            android:summary="Play parcel audio streams"
+            android:defaultValue="true" />
+
+    </PreferenceCategory>
+
+    <!-- XR Settings -->
+    <PreferenceCategory android:title="XR / VR">
+
+        <SwitchPreferenceCompat
+            android:key="enable_xr"
+            android:title="Enable XR Mode"
+            android:summary="Allow VR/AR viewing"
+            android:defaultValue="true" />
+
+        <ListPreference
+            android:key="xr_mode"
+            android:title="XR Mode"
+            android:summary="Preferred XR mode"
+            android:entries="@array/xr_mode_entries"
+            android:entryValues="@array/xr_mode_values"
+            android:defaultValue="auto" />
+
+        <SeekBarPreference
+            android:key="xr_movement_speed"
+            android:title="Movement Speed"
+            android:summary="XR locomotion speed"
+            android:min="1"
+            android:max="10"
+            android:defaultValue="5"
+            app:showSeekBarValue="true" />
+
+    </PreferenceCategory>
+
+    <!-- Network Settings -->
+    <PreferenceCategory android:title="Network">
+
+        <SwitchPreferenceCompat
+            android:key="http2_enabled"
+            android:title="Use HTTP/2"
+            android:summary="Use HTTP/2 for asset downloads"
+            android:defaultValue="true" />
+
+        <SeekBarPreference
+            android:key="bandwidth_limit"
+            android:title="Bandwidth Limit"
+            android:summary="Maximum bandwidth (0 = unlimited)"
+            android:min="0"
+            android:max="10000"
+            android:defaultValue="0"
+            app:showSeekBarValue="true" />
+
+    </PreferenceCategory>
+
+    <!-- About -->
+    <PreferenceCategory android:title="About">
+
+        <Preference
+            android:key="version"
+            android:title="Version"
+            android:summary="1.0.0" />
+
+        <Preference
+            android:key="licenses"
+            android:title="Open Source Licenses" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

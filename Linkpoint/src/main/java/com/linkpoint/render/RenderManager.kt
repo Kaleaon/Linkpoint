@@ -1,0 +1,238 @@
+package com.linkpoint.render
+
+import android.content.Context
+import android.util.Log
+import android.view.Surface
+import android.view.SurfaceView
+import com.google.android.filament.*
+import com.google.android.filament.android.DisplayHelper
+import com.google.android.filament.android.UiHelper
+import com.linkpoint.xr.XRFrameData
+
+/**
+ * Manages rendering using Google Filament
+ * Supports both standard and XR rendering modes
+ */
+class RenderManager(private val context: Context) {
+    
+    companion object {
+        private const val TAG = "RenderManager"
+    }
+    
+    // Filament components
+    private var engine: Engine? = null
+    private var renderer: Renderer? = null
+    private var scene: Scene? = null
+    private var view: View? = null
+    private var camera: Camera? = null
+    private var swapChain: SwapChain? = null
+    
+    // Helpers
+    private var uiHelper: UiHelper? = null
+    private var displayHelper: DisplayHelper? = null
+    
+    // State
+    private var isInitialized = false
+    private var isXRMode = false
+    
+    // Camera matrices
+    private val viewMatrix = FloatArray(16)
+    private val projectionMatrix = FloatArray(16)
+    
+    /**
+     * Initialize the rendering engine
+     */
+    fun initialize(surfaceView: SurfaceView): Boolean {
+        if (isInitialized) return true
+        
+        try {
+            Log.d(TAG, "Initializing Filament engine...")
+            
+            engine = Engine.create()
+            renderer = engine!!.createRenderer()
+            scene = engine!!.createScene()
+            view = engine!!.createView()
+            camera = engine!!.createCamera(engine!!.entityManager.create())
+            
+            view!!.scene = scene
+            view!!.camera = camera
+            
+            // Setup UI helper for surface management
+            uiHelper = UiHelper(UiHelper.ContextErrorPolicy.DONT_CHECK).apply {
+                renderCallback = object : UiHelper.RendererCallback {
+                    override fun onNativeWindowChanged(surface: Surface) {
+                        swapChain?.let { engine?.destroySwapChain(it) }
+                        swapChain = engine?.createSwapChain(surface)
+                    }
+                    
+                    override fun onDetachedFromSurface() {
+                        swapChain?.let {
+                            engine?.destroySwapChain(it)
+                            swapChain = null
+                        }
+                    }
+                    
+                    override fun onResized(width: Int, height: Int) {
+                        view?.viewport = Viewport(0, 0, width, height)
+                        updateProjection(width, height)
+                    }
+                }
+                attachTo(surfaceView)
+            }
+            
+            // Setup display helper
+            displayHelper = DisplayHelper(context)
+            
+            // Configure renderer
+            renderer!!.clearOptions = renderer!!.clearOptions.apply {
+                clear = true
+            }
+            
+            // Setup default lighting
+            setupDefaultLighting()
+            
+            isInitialized = true
+            Log.i(TAG, "Filament engine initialized successfully")
+            return true
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to initialize Filament", e)
+            shutdown()
+            return false
+        }
+    }
+    
+    private fun setupDefaultLighting() {
+        // Create a simple directional light (sun)
+        val sunlight = EntityManager.get().create()
+        LightManager.Builder(LightManager.Type.SUN)
+            .color(1.0f, 0.95f, 0.9f)
+            .intensity(100000.0f)
+            .direction(-0.5f, -1.0f, -0.5f)
+            .castShadows(true)
+            .build(engine!!, sunlight)
+        scene!!.addEntity(sunlight)
+        
+        // Add ambient light
+        scene!!.indirectLight = IndirectLight.Builder()
+            .intensity(30000.0f)
+            .build(engine!!)
+    }
+    
+    private fun updateProjection(width: Int, height: Int) {
+        val aspect = width.toFloat() / height.toFloat()
+        camera?.setProjection(
+            45.0,           // FOV in degrees
+            aspect.toDouble(),
+            0.1,            // near plane
+            1000.0,         // far plane
+            Camera.Fov.VERTICAL
+        )
+    }
+    
+    /**
+     * Render a frame
+     */
+    fun renderFrame() {
+        if (!isInitialized) return
+        
+        val engine = this.engine ?: return
+        val renderer = this.renderer ?: return
+        val view = this.view ?: return
+        val swapChain = this.swapChain ?: return
+        
+        if (renderer.beginFrame(swapChain, System.nanoTime())) {
+            renderer.render(view)
+            renderer.endFrame()
+        }
+    }
+    
+    /**
+     * Render a frame in XR mode (stereo rendering)
+     */
+    fun renderXRFrame(xrData: XRFrameData) {
+        if (!isInitialized) return
+        
+        val engine = this.engine ?: return
+        val renderer = this.renderer ?: return
+        val view = this.view ?: return
+        val swapChain = this.swapChain ?: return
+        
+        if (renderer.beginFrame(swapChain, xrData.predictedDisplayTime)) {
+            // Left eye
+            camera?.setCustomProjection(
+                xrData.leftProjection.toDoubleArray(),
+                0.1, 1000.0
+            )
+            camera?.setModelMatrix(xrData.leftEyeMatrix)
+            renderer.render(view)
+            
+            // Right eye
+            camera?.setCustomProjection(
+                xrData.rightProjection.toDoubleArray(),
+                0.1, 1000.0
+            )
+            camera?.setModelMatrix(xrData.rightEyeMatrix)
+            renderer.render(view)
+            
+            renderer.endFrame()
+        }
+    }
+    
+    /**
+     * Set camera position and orientation
+     */
+    fun setCameraTransform(
+        posX: Float, posY: Float, posZ: Float,
+        targetX: Float, targetY: Float, targetZ: Float
+    ) {
+        camera?.lookAt(
+            posX.toDouble(), posY.toDouble(), posZ.toDouble(),
+            targetX.toDouble(), targetY.toDouble(), targetZ.toDouble(),
+            0.0, 0.0, 1.0  // Up vector (Z-up for SL)
+        )
+    }
+    
+    /**
+     * Get the Filament engine
+     */
+    fun getEngine(): Engine? = engine
+    
+    /**
+     * Get the Filament scene
+     */
+    fun getScene(): Scene? = scene
+    
+    /**
+     * Shutdown rendering
+     */
+    fun shutdown() {
+        Log.i(TAG, "Shutting down render manager")
+        
+        uiHelper?.detach()
+        
+        engine?.let { eng ->
+            swapChain?.let { eng.destroySwapChain(it) }
+            view?.let { eng.destroyView(it) }
+            scene?.let { eng.destroyScene(it) }
+            camera?.let { eng.destroyCameraComponent(eng.entityManager.create()) }
+            renderer?.let { eng.destroyRenderer(it) }
+            eng.destroy()
+        }
+        
+        engine = null
+        renderer = null
+        scene = null
+        view = null
+        camera = null
+        swapChain = null
+        uiHelper = null
+        displayHelper = null
+        
+        isInitialized = false
+    }
+    
+    private fun FloatArray.toDoubleArray(): DoubleArray {
+        return DoubleArray(this.size) { this[it].toDouble() }
+    }
+}
