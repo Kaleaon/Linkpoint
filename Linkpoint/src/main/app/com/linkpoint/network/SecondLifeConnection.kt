@@ -3,13 +3,20 @@ package com.linkpoint.network
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.ConnectionPool
+import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 import java.io.IOException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
+import javax.net.ssl.SSLException
 
 /**
  * Handles Second Life grid authentication and connection
@@ -39,10 +46,80 @@ class SecondLifeConnection {
         )
     }
     
+    /**
+     * Retry interceptor for handling transient mobile network failures.
+     * LTE/mobile networks often experience brief connection drops that succeed on retry.
+     */
+    private class MobileNetworkRetryInterceptor(private val maxRetries: Int = 3) : Interceptor {
+        override fun intercept(chain: Interceptor.Chain): Response {
+            val request = chain.request()
+            var lastException: IOException? = null
+            
+            repeat(maxRetries) { attempt ->
+                try {
+                    // Exponential backoff: 0ms, 500ms, 1500ms
+                    if (attempt > 0) {
+                        val backoffMs = (attempt * 500L)
+                        Thread.sleep(backoffMs)
+                        Log.d(TAG, "Retry attempt ${attempt + 1}/$maxRetries after ${backoffMs}ms backoff")
+                    }
+                    return chain.proceed(request)
+                } catch (e: SocketTimeoutException) {
+                    Log.w(TAG, "Timeout on attempt ${attempt + 1}/$maxRetries: ${e.message}")
+                    lastException = e
+                } catch (e: UnknownHostException) {
+                    Log.w(TAG, "DNS failure on attempt ${attempt + 1}/$maxRetries: ${e.message}")
+                    lastException = e
+                } catch (e: SSLException) {
+                    // SSL handshake failures can be transient on mobile networks
+                    if (e.message?.contains("Connection reset", ignoreCase = true) == true ||
+                        e.message?.contains("closed", ignoreCase = true) == true) {
+                        Log.w(TAG, "SSL connection issue on attempt ${attempt + 1}/$maxRetries: ${e.message}")
+                        lastException = e
+                    } else {
+                        throw e // Non-transient SSL error
+                    }
+                } catch (e: IOException) {
+                    // Check if this is a retryable error
+                    val isRetryable = e.message?.let { msg ->
+                        msg.contains("timeout", ignoreCase = true) ||
+                        msg.contains("reset", ignoreCase = true) ||
+                        msg.contains("closed", ignoreCase = true) ||
+                        msg.contains("failed to connect", ignoreCase = true)
+                    } ?: false
+                    
+                    if (isRetryable) {
+                        Log.w(TAG, "Retryable error on attempt ${attempt + 1}/$maxRetries: ${e.message}")
+                        lastException = e
+                    } else {
+                        throw e
+                    }
+                }
+            }
+            
+            throw lastException ?: IOException("Failed after $maxRetries attempts")
+        }
+    }
+    
+    /**
+     * OkHttp client optimized for mobile/LTE networks:
+     * - Extended timeouts for high-latency mobile connections
+     * - Connection pooling for efficiency
+     * - Retry interceptor for transient failures
+     * - HTTP/2 support with HTTP/1.1 fallback
+     */
     private val httpClient = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
+        .connectTimeout(45, TimeUnit.SECONDS)  // Extended for LTE latency
+        .readTimeout(90, TimeUnit.SECONDS)     // Extended for slow mobile data
+        .writeTimeout(45, TimeUnit.SECONDS)    // Extended for upload on mobile
+        .retryOnConnectionFailure(true)        // Enable automatic connection retry
+        .connectionPool(ConnectionPool(
+            maxIdleConnections = 5,
+            keepAliveDuration = 5,
+            timeUnit = TimeUnit.MINUTES
+        ))
+        .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
+        .addInterceptor(MobileNetworkRetryInterceptor(maxRetries = 3))
         .build()
     
     private var sessionId: String? = null
@@ -116,10 +193,18 @@ class SecondLifeConnection {
         } catch (e: IOException) {
             Log.e(TAG, "Login network error", e)
             val errorMessage = when {
-                e.message.isNullOrBlank() -> "Unable to connect. Please check your internet connection and try again."
-                e.message!!.contains("timeout", ignoreCase = true) -> "Connection timed out. Please check your network and try again."
-                e.message!!.contains("host", ignoreCase = true) -> "Could not reach server. Please check your internet connection."
-                e.message!!.contains("ssl", ignoreCase = true) || e.message!!.contains("certificate", ignoreCase = true) -> "Secure connection failed. Please try again."
+                e.message.isNullOrBlank() -> 
+                    "Unable to connect. Please check your internet connection and try again."
+                e is SocketTimeoutException || e.message!!.contains("timeout", ignoreCase = true) -> 
+                    "Connection timed out. If you're on mobile data, try moving to an area with better signal or switch to Wi-Fi."
+                e is UnknownHostException || e.message!!.contains("host", ignoreCase = true) -> 
+                    "Could not reach server. Please check your internet connection. If on mobile data, try toggling airplane mode."
+                e.message!!.contains("ssl", ignoreCase = true) || e.message!!.contains("certificate", ignoreCase = true) -> 
+                    "Secure connection failed. This may be a temporary network issue. Please try again."
+                e.message!!.contains("reset", ignoreCase = true) || e.message!!.contains("closed", ignoreCase = true) ->
+                    "Connection was interrupted. This often happens on mobile networks. Please try again."
+                e.message!!.contains("failed to connect", ignoreCase = true) ->
+                    "Could not connect to server. Please check your network connection and try again."
                 else -> "Network error: ${e.message}"
             }
             LoginResult(
