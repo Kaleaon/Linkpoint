@@ -203,10 +203,12 @@ class TextureManager(
     }
     
     private fun decodeJPEG2000(data: ByteArray): Bitmap? {
-        // TODO: Implement JPEG2000 decoding using OpenJPEG native library
-        // For now, return null (textures won't render until J2K support is added)
-        Log.w(TAG, "JPEG2000 decoding not implemented yet")
-        return null
+        return try {
+            JPEG2000Decoder.decode(data)
+        } catch (e: Exception) {
+            Log.e(TAG, "JPEG2000 decode failed", e)
+            null
+        }
     }
     
     private suspend fun downloadWorker() {

@@ -29,7 +29,15 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
         ndk {
-            abiFilters += listOf("arm64-v8a")
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+        }
+        
+        // CMake configuration for native code
+        externalNativeBuild {
+            cmake {
+                cppFlags += "-std=c++17"
+                arguments += "-DANDROID_STL=c++_shared"
+            }
         }
         
         vectorDrawables.useSupportLibrary = true
@@ -37,6 +45,13 @@ android {
         // Add build info to BuildConfig
         buildConfigField("String", "BUILD_TIME", "\"${System.currentTimeMillis()}\"")
         buildConfigField("String", "GIT_COMMIT", "\"${getGitHash()}\"")
+    }
+    
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
     }
     
     signingConfigs {
@@ -86,6 +101,7 @@ android {
         buildConfig = true
         dataBinding = false
         compose = true
+        prefab = true  // Enable Prefab for native dependencies
     }
     
     composeOptions {
@@ -225,6 +241,9 @@ dependencies {
     
     // Google Cardboard SDK - requires local repository or AAR
     // implementation("com.google.cardboard:sdk:1.21.0")
+    
+    // OpenJPEG for JPEG2000 texture decoding (Second Life textures)
+    implementation("com.viliussutkus89.ndk.thirdparty:openjpeg-ndk26-static:2.5.0-beta-4")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
