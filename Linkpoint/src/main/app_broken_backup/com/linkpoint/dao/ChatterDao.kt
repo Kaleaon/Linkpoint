@@ -30,20 +30,20 @@ class ChatterDao : AbstractDao<Chatter, Long> {
         super(daoConfig, daoSession)
     }
 
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        String str = z ? "IF NOT EXISTS " : ""
+    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
+        var str: String = z ? "IF NOT EXISTS " : ""
         sQLiteDatabase.execSQL("CREATE TABLE " + str + "'CHATTER' (" + "'_id' INTEGER PRIMARY KEY ," + "'TYPE' INTEGER NOT NULL ," + "'UUID' TEXT," + "'ACTIVE' INTEGER NOT NULL ," + "'MUTED' INTEGER NOT NULL ," + "'UNREAD_COUNT' INTEGER NOT NULL ," + "'LAST_MESSAGE_ID' INTEGER," + "'LAST_SESSION_ID' TEXT);")
         sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_CHATTER_TYPE_UUID ON CHATTER" + " (TYPE,UUID);")
     }
 
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'CHATTER'")
     }
 
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, chatter: Chatter): Unit {
-        Long j = 1
+    protected fun bindValues(sQLiteStatement: SQLiteStatement, chatter: Chatter)  {
+        var j: Long = 1
         sQLiteStatement.clearBindings()
-        Long id = chatter.getId()
+        var id: Long = chatter.getId()
         if (id != null) {
             sQLiteStatement.bindLong(1, id.longValue())
         }
@@ -77,25 +77,25 @@ class ChatterDao : AbstractDao<Chatter, Long> {
     }
 
     fun readEntity(cursor: Cursor, i: Int): Chatter {
-        Boolean z = true
+        var z: Boolean = true
         UUID uuid = null
-        Long valueOf = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
-        Int i2 = cursor.getInt(i + 1)
+        var valueOf: Long = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
+        var i2: Int = cursor.getInt(i + 1)
         UUID fromString = cursor.isNull(i + 2) ? null : UUID.fromString(cursor.getString(i + 2))
-        Boolean z2 = cursor.getShort(i + 3) != (Short) 0
+        var z2: Boolean = cursor.getShort(i + 3) != (Short) 0
         if (cursor.getShort(i + 4) == (Short) 0) {
             z = false
         }
-        Int i3 = cursor.getInt(i + 5)
-        Long valueOf2 = cursor.isNull(i + 6) ? null : Long.valueOf(cursor.getLong(i + 6))
+        var i3: Int = cursor.getInt(i + 5)
+        var valueOf2: Long = cursor.isNull(i + 6) ? null : Long.valueOf(cursor.getLong(i + 6))
         if (!cursor.isNull(i + 7)) {
             uuid = UUID.fromString(cursor.getString(i + 7))
         }
         return Chatter(valueOf, i2, fromString, z2, z, i3, valueOf2, uuid)
     }
 
-    fun readEntity(cursor: Cursor, chatter: Chatter, i: Int): Unit {
-        Boolean z = true
+    fun readEntity(cursor: Cursor, chatter: Chatter, i: Int)  {
+        var z: Boolean = true
         UUID uuid = null
         chatter.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
         chatter.setType(cursor.getInt(i + 1))

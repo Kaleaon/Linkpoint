@@ -27,7 +27,7 @@ class AutoValue_SearchGridQuery : SearchGridQuery {
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof SearchGridQuery)) {
+        if (!(obj is SearchGridQuery)) {
             return false
         }
         SearchGridQuery searchGridQuery = (SearchGridQuery) obj

@@ -1,5 +1,7 @@
 package com.linkpoint.slproto.avatar
 
+import kotlin.math.*
+
 import android.opengl.Matrix
 import com.linkpoint.Debug
 import com.linkpoint.openjpeg.OpenJPEG
@@ -103,7 +105,7 @@ class SLPolyMesh : SLMeshData {
             val f = asFloatBuffer.get(i)
             val d = f.toDouble()
             if (d != d2) {
-                val floor = Math.floor(f.toDouble()).toFloat()
+                val floor = floor(f.toDouble()).toFloat()
                 val f2 = f - floor
                 val i2 = floor.toInt() - 1
                 var i3 = 0

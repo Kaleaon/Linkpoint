@@ -74,7 +74,7 @@ class AssetResponseCacher : Refreshable<AssetKey> {
         }
     }
 
-    fun requestUpdate(AssetKey assetKey): Unit {
+    fun requestUpdate(AssetKey assetKey)  {
         this.pool.requestUpdate(assetKey)
     }
 }

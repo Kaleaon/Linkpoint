@@ -28,17 +28,17 @@ class MoneyTransactionDao : AbstractDao<MoneyTransaction, Long> {
         super(daoConfig, daoSession)
     }
 
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'MONEY_TRANSACTION' (" + "'_id' INTEGER PRIMARY KEY ," + "'TIMESTAMP' INTEGER NOT NULL ," + "'AGENT_UUID' TEXT," + "'TRANSACTION_AMOUNT' INTEGER NOT NULL ," + "'NEW_BALANCE' INTEGER NOT NULL );")
     }
 
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'MONEY_TRANSACTION'")
     }
 
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, moneyTransaction: MoneyTransaction): Unit {
+    protected fun bindValues(sQLiteStatement: SQLiteStatement, moneyTransaction: MoneyTransaction)  {
         sQLiteStatement.clearBindings()
-        Long id = moneyTransaction.getId()
+        var id: Long = moneyTransaction.getId()
         if (id != null) {
             sQLiteStatement.bindLong(1, id.longValue())
         }
@@ -61,7 +61,7 @@ class MoneyTransactionDao : AbstractDao<MoneyTransaction, Long> {
 
     fun readEntity(cursor: Cursor, i: Int): MoneyTransaction {
         UUID uuid = null
-        Long valueOf = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
+        var valueOf: Long = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
         Date date = Date(cursor.getLong(i + 1))
         if (!cursor.isNull(i + 2)) {
             uuid = UUID.fromString(cursor.getString(i + 2))
@@ -69,7 +69,7 @@ class MoneyTransactionDao : AbstractDao<MoneyTransaction, Long> {
         return MoneyTransaction(valueOf, date, uuid, cursor.getInt(i + 3), cursor.getInt(i + 4))
     }
 
-    fun readEntity(cursor: Cursor, moneyTransaction: MoneyTransaction, i: Int): Unit {
+    fun readEntity(cursor: Cursor, moneyTransaction: MoneyTransaction, i: Int)  {
         UUID uuid = null
         moneyTransaction.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
         moneyTransaction.setTimestamp(Date(cursor.getLong(i + 1)))

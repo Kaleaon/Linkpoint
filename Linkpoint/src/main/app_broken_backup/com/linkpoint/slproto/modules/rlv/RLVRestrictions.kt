@@ -54,7 +54,7 @@ class RLVRestrictions {
             this()
         }
 
-        fun addRestriction(UUID uuid, String str): Unit {
+        fun addRestriction(UUID uuid, String str)  {
             HashSet hashSet = this.restMap.get(str)
             if (hashSet == null) {
                 hashSet = HashSet()
@@ -90,27 +90,27 @@ class RLVRestrictions {
                 if (r6 != r0) goto L_0x0025
                 java.util.Map<java.lang.String, java.util.HashSet<java.util.UUID>> r0 = r5.restMap
                 java.lang.String r1 = ""
-                Boolean r0 = r0.containsKey(r1)
+                var r0: Boolean = r0.containsKey(r1)
                 if (r0 == 0) goto L_0x0012
                 return r4
             L_0x0012:
                 java.lang.String r0 = ""
-                Boolean r0 = r7.equals(r0)
+                var r0: Boolean = r7.equals(r0)
                 if (r0 != 0) goto L_0x0024
                 java.util.Map<java.lang.String, java.util.HashSet<java.util.UUID>> r0 = r5.restMap
-                Boolean r0 = r0.containsKey(r7)
+                var r0: Boolean = r0.containsKey(r7)
                 if (r0 == 0) goto L_0x0024
                 return r4
             L_0x0024:
                 return r3
             L_0x0025:
                 java.util.Map<java.lang.String, java.util.HashSet<java.util.UUID>> r0 = r5.restMap
-                Boolean r0 = r0.isEmpty()
+                var r0: Boolean = r0.isEmpty()
                 if (r0 == 0) goto L_0x002e
                 return r4
             L_0x002e:
                 IntArray r0 = m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRestrictionType$RLVRuleMatchTypeSwitchesValues()
-                Int r1 = r6.ordinal()
+                var r1: Int = r6.ordinal()
                 r0 = r0[r1]
                 switch(r0) {
                     case 1: goto L_0x0083
@@ -123,26 +123,26 @@ class RLVRestrictions {
             L_0x003c:
                 java.util.Map<java.lang.String, java.util.HashSet<java.util.UUID>> r0 = r5.restMap
                 java.lang.String r1 = ""
-                Boolean r0 = r0.containsKey(r1)
+                var r0: Boolean = r0.containsKey(r1)
                 if (r0 == 0) goto L_0x003b
                 java.lang.String r0 = ""
-                Boolean r0 = r7.equals(r0)
+                var r0: Boolean = r7.equals(r0)
                 if (r0 != 0) goto L_0x0059
                 java.util.Map<java.lang.String, java.util.HashSet<java.util.UUID>> r0 = r5.restMap
-                Boolean r0 = r0.containsKey(r7)
+                var r0: Boolean = r0.containsKey(r7)
                 if (r0 == 0) goto L_0x0059
                 return r4
             L_0x0059:
                 return r3
             L_0x005a:
                 java.util.Map<java.lang.String, java.util.HashSet<java.util.UUID>> r0 = r5.restMap
-                Boolean r0 = r0.containsKey(r7)
+                var r0: Boolean = r0.containsKey(r7)
                 if (r0 == 0) goto L_0x0063
                 return r3
             L_0x0063:
                 java.util.Map<java.lang.String, java.util.HashSet<java.util.UUID>> r0 = r5.restMap
                 java.lang.String r1 = ""
-                Boolean r0 = r0.containsKey(r1)
+                var r0: Boolean = r0.containsKey(r1)
                 if (r0 == 0) goto L_0x003b
                 if (r8 != 0) goto L_0x0071
                 return r3
@@ -151,12 +151,12 @@ class RLVRestrictions {
                 java.lang.String r1 = ""
                 java.lang.Any r0 = r0.get(r1)
                 java.util.HashSet r0 = (java.util.HashSet) r0
-                Boolean r0 = r0.contains(r8)
+                var r0: Boolean = r0.contains(r8)
                 if (r0 == 0) goto L_0x003b
                 return r3
             L_0x0083:
                 java.util.Map<java.lang.String, java.util.HashSet<java.util.UUID>> r0 = r5.restMap
-                Boolean r0 = r0.isEmpty()
+                var r0: Boolean = r0.isEmpty()
                 if (r0 != 0) goto L_0x003b
                 if (r9 != 0) goto L_0x008e
                 return r3
@@ -165,13 +165,13 @@ class RLVRestrictions {
                 java.util.Collection r0 = r0.values()
                 java.util.Iterator r1 = r0.iterator()
             L_0x0098:
-                Boolean r0 = r1.hasNext()
+                var r0: Boolean = r1.hasNext()
                 if (r0 == 0) goto L_0x003b
                 java.lang.Any r0 = r1.next()
                 java.util.HashSet r0 = (java.util.HashSet) r0
-                Int r2 = r0.size()
+                var r2: Int = r0.size()
                 if (r2 != r4) goto L_0x00b0
-                Boolean r0 = r0.contains(r9)
+                var r0: Boolean = r0.contains(r9)
                 if (r0 != 0) goto L_0x0098
             L_0x00b0:
                 return r3
@@ -183,7 +183,7 @@ class RLVRestrictions {
             return this.restMap.isEmpty()
         }
 
-        fun removeAllForObject(UUID uuid): Unit {
+        fun removeAllForObject(UUID uuid)  {
             HashSet<String> hashSet = HashSet<>()
             for (Map.Entry entry : this.restMap.entrySet()) {
                 ((entry as HashSet).getValue()).remove(uuid)
@@ -196,7 +196,7 @@ class RLVRestrictions {
             }
         }
 
-        fun removeRestriction(UUID uuid, String str): Unit {
+        fun removeRestriction(UUID uuid, String str)  {
             HashSet hashSet = this.restMap.get(str)
             if (hashSet != null) {
                 hashSet.remove(uuid)

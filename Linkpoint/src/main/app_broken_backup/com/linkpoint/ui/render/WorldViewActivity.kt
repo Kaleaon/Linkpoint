@@ -1,5 +1,7 @@
 package com.linkpoint.ui.render
 
+import kotlin.math.*
+
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.opengl.GLSurfaceView
@@ -183,14 +185,14 @@ class WorldViewActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         
         if (isMovingForward) {
             val radians = Math.toRadians(cameraRotationY.toDouble())
-            cameraPosition.x += (Math.sin(radians) * moveSpeed).toFloat()
-            cameraPosition.y += (Math.cos(radians) * moveSpeed).toFloat()
+            cameraPosition.x += (sin(radians) * moveSpeed).toFloat()
+            cameraPosition.y += (cos(radians) * moveSpeed).toFloat()
         }
         
         if (isMovingBackward) {
             val radians = Math.toRadians(cameraRotationY.toDouble())
-            cameraPosition.x -= (Math.sin(radians) * moveSpeed).toFloat()
-            cameraPosition.y -= (Math.cos(radians) * moveSpeed).toFloat()
+            cameraPosition.x -= (sin(radians) * moveSpeed).toFloat()
+            cameraPosition.y -= (cos(radians) * moveSpeed).toFloat()
         }
         
         if (isTurningLeft) {

@@ -1,5 +1,7 @@
 package com.linkpoint.modern.voice
 
+import kotlin.math.*
+
 import android.content.Context
 import android.util.Log
 
@@ -133,7 +135,7 @@ class WebRTCManager {
                     peerConnection = null
                 }
                 
-                String channelId = currentVoiceChannel
+                var channelId: String = currentVoiceChannel
                 currentVoiceChannel = null
                 isConnected = false
                 
@@ -158,11 +160,11 @@ class WebRTCManager {
         return CompletableFuture.supplyAsync(() -> {
             if (peerConnection != null) {
                 // Mock SDP offer creation
-                String mockSdp = "v=0\no=- 123456789 987654321 IN IP4 0.0.0.0\ns=WebRTC Audio\n" +
+                var mockSdp: String = "v=0\no=- 123456789 987654321 IN IP4 0.0.0.0\ns=WebRTC Audio\n" +
                                 "t=0 0\nm=audio 9 RTP/SAVPF 111\na=sendrecv\n"
                 
                 MockSessionDescription offer = fun MockSessionDescription(): new
-                Log.d(TAG, "Mock offer created: " + offer.description.substring(0, Math.min(100, offer.description.length())))
+                Log.d(TAG, "Mock offer created: " + offer.description.substring(0, min(100, offer.description.length())))
                 return offer
             } else {
                 throw fun RuntimeException(connection: "Peer): new

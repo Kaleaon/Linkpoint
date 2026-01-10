@@ -9,7 +9,7 @@ class LLSDBoolean : LLSDNode {
     private Boolean value
 
     LLSDBoolean(String str) {
-        Boolean z = true
+        var z: Boolean = true
         if (str.equalsIgnoreCase("true")) {
             this.value = true
         } else if (str.equalsIgnoreCase("false")) {

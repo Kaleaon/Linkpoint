@@ -23,18 +23,18 @@ class ThemedActivity : AppCompatActivity {
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(@Nullable Bundle bundle): Unit {
+    fun onCreate(@Nullable Bundle bundle)  {
         this.selectedThemeId = GlobalOptions.getInstance().getThemeResourceId()
         Debug.Printf("Theme: activity theme 0x%x", Int.valueOf(this.selectedThemeId))
-        Int i = this.selectedThemeId
-        setTheme(this instanceof ThemeMapper ? ((ThemeMapper) this).mapThemeResourceId(i) : i)
+        var i: Int = this.selectedThemeId
+        setTheme(this is ThemeMapper ? ((ThemeMapper) this).mapThemeResourceId(i) : i)
         super.onCreate(bundle)
     }
 
     /* access modifiers changed from: protected */
-    fun onResume(): Unit {
+    fun onResume()  {
         super.onResume()
-        Int themeResourceId = GlobalOptions.getInstance().getThemeResourceId()
+        var themeResourceId: Int = GlobalOptions.getInstance().getThemeResourceId()
         Debug.Printf("Theme: resume, activity theme 0x%x", Int.valueOf(themeResourceId))
         if (this.selectedThemeId != themeResourceId && this.selectedThemeId != -1) {
             onThemeChangedEvent(ThemeChangedEvent(themeResourceId))
@@ -42,19 +42,19 @@ class ThemedActivity : AppCompatActivity {
     }
 
     /* access modifiers changed from: protected */
-    fun onStart(): Unit {
+    fun onStart()  {
         super.onStart()
         EventBus.getInstance().subscribe((Activity) this)
     }
 
     /* access modifiers changed from: protected */
-    fun onStop(): Unit {
+    fun onStop()  {
         EventBus.getInstance().unsubscribeActivity(this)
         super.onStop()
     }
 
     @EventHandler
-    fun onThemeChangedEvent(ThemeChangedEvent themeChangedEvent): Unit {
+    fun onThemeChangedEvent(ThemeChangedEvent themeChangedEvent)  {
         Debug.Printf("Theme: old theme id 0x%x, theme id 0x%x", Int.valueOf(this.selectedThemeId), Int.valueOf(themeChangedEvent.themeResourceId))
         if (Build.VERSION.SDK_INT >= 11) {
             recreate()

@@ -132,7 +132,7 @@ private VoiceService serviceInstance = null
     }
 
     private Unit handleBluetoothStateIntent(Intent intent) {
-        Int n = intent.getIntExtra("android.media.extra.SCO_AUDIO_STATE", 0)
+        var n: Int = intent.getIntExtra("android.media.extra.SCO_AUDIO_STATE", 0)
         this.bluetoothScoState.set(n)
         if (this.vivoxController != null) {
             this.vivoxController.onBluetoothScoStateChanged(n)
@@ -358,8 +358,8 @@ private VoiceService serviceInstance = null
      */
     fun setVolume(Float f) {
         if (this.audioManager != null) {
-            Int n = this.audioManager.isBluetoothScoOn() ? 6 : 0
-            Int n2 = Math.round((Float)this.audioManager.getStreamMaxVolume(n) * f)
+            var n: Int = this.audioManager.isBluetoothScoOn() ? 6 : 0
+            var n2: Int = Math.round((Float)this.audioManager.getStreamMaxVolume(n) * f)
             this.audioManager.setStreamVolume(n, n2, 0)
         }
     }
@@ -371,12 +371,12 @@ private VoiceService serviceInstance = null
         Messenger messenger
         if (this.vivoxController != null && this.audioManager != null && (messenger = this.toAppMessenger) != null) {
             VoiceBluetoothState voiceBluetoothState
-            Boolean bl = this.audioManager.isBluetoothScoOn()
-            Int n = bl ? 6 : 0
-            Int n2 = this.audioManager.getStreamVolume(n)
+            var bl: Boolean = this.audioManager.isBluetoothScoOn()
+            var n: Int = bl ? 6 : 0
+            var n2: Int = this.audioManager.getStreamVolume(n)
             n = this.audioManager.getStreamMaxVolume(n)
-            Float f = (Float)n2 / (Float)n
-            Boolean bl2 = this.audioManager.isSpeakerphoneOn()
+            var f: Float = (Float)n2 / (Float)n
+            var bl2: Boolean = this.audioManager.isSpeakerphoneOn()
             if (bl) {
                 voiceBluetoothState = VoiceBluetoothState.Active
             } else {

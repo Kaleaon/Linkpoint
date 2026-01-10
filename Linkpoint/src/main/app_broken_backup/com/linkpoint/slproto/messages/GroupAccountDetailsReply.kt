@@ -36,10 +36,10 @@ class GroupAccountDetailsReply : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int length = this.MoneyData_Field.StartDate.size + 25 + 36 + 1
+        var length: Int = this.MoneyData_Field.StartDate.size + 25 + 36 + 1
         Iterator<T> it = this.HistoryData_Fields.iterator()
         while (true) {
-            Int i = length
+            var i: Int = length
             if (!it.hasNext()) {
                 return i
             }
@@ -47,11 +47,11 @@ class GroupAccountDetailsReply : SLMessage {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleGroupAccountDetailsReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 100)
@@ -68,7 +68,7 @@ class GroupAccountDetailsReply : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
         this.MoneyData_Field.RequestID = unpackUUID(byteBuffer)

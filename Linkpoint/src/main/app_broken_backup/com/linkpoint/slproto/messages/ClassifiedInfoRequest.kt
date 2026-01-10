@@ -25,11 +25,11 @@ class ClassifiedInfoRequest : SLMessage {
         return 52
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleClassifiedInfoRequest(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) 43)
@@ -38,7 +38,7 @@ class ClassifiedInfoRequest : SLMessage {
         packUUID(byteBuffer, this.Data_Field.ClassifiedID)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.Data_Field.ClassifiedID = unpackUUID(byteBuffer)

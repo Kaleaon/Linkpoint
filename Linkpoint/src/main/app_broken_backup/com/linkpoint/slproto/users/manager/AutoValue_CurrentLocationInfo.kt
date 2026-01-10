@@ -21,7 +21,7 @@ class AutoValue_CurrentLocationInfo : CurrentLocationInfo {
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof CurrentLocationInfo)) {
+        if (!(obj is CurrentLocationInfo)) {
             return false
         }
         CurrentLocationInfo currentLocationInfo = (CurrentLocationInfo) obj
@@ -34,8 +34,8 @@ class AutoValue_CurrentLocationInfo : CurrentLocationInfo {
     }
 
     fun hashCode(): Int {
-        Int i = 0
-        Int hashCode = ((((((this.parcelData == null ? 0 : this.parcelData.hashCode()) ^ 1000003) * 1000003) ^ this.nearbyUsers) * 1000003) ^ this.inChatRangeUsers) * 1000003
+        var i: Int = 0
+        var hashCode: Int = ((((((this.parcelData == null ? 0 : this.parcelData.hashCode()) ^ 1000003) * 1000003) ^ this.nearbyUsers) * 1000003) ^ this.inChatRangeUsers) * 1000003
         if (this.parcelVoiceChannel != null) {
             i = this.parcelVoiceChannel.hashCode()
         }

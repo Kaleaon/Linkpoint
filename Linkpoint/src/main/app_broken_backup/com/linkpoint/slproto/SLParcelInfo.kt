@@ -71,12 +71,12 @@ class SLParcelInfo {
                     addDisplayObjects = null
                 }
                 LLVector3 absolutePosition = sLObjectInfo.getAbsolutePosition()
-                Float distanceTo = immutableVector.distanceTo(absolutePosition.x, absolutePosition.y, absolutePosition.z)
-                Int isEmpty = addDisplayObjects != null ? addDisplayObjects.isEmpty() ^ 1 : 0
-                Boolean objectMatches = sLObjectFilterInfo.objectMatches(sLObjectInfo, distanceTo, z2)
+                var distanceTo: Float = immutableVector.distanceTo(absolutePosition.x, absolutePosition.y, absolutePosition.z)
+                var isEmpty: Int = addDisplayObjects != null ? addDisplayObjects.isEmpty() ^ 1 : 0
+                var objectMatches: Boolean = sLObjectFilterInfo.objectMatches(sLObjectInfo, distanceTo, z2)
                 if (isEmpty != 0 || objectMatches) {
-                    String knownName = getKnownName(sLObjectInfo, multipleChatterNameRetriever, set)
-                    Boolean nameMatches = sLObjectFilterInfo.nameMatches(knownName)
+                    var knownName: String = getKnownName(sLObjectInfo, multipleChatterNameRetriever, set)
+                    var nameMatches: Boolean = sLObjectFilterInfo.nameMatches(knownName)
                     if (isEmpty != 0 || nameMatches) {
                         if (isEmpty != 0) {
                             z3 = (objectMatches ? nameMatches : 0) ^ 1
@@ -107,7 +107,7 @@ class SLParcelInfo {
 
     @Nullable
     private fun getKnownName(sLObjectInfo: SLObjectInfo, multipleChatterNameRetriever: MultipleChatterNameRetriever, set: Set<UUID>): String {
-        String str = null
+        var str: String = null
         if (sLObjectInfo.isAvatar()) {
             UUID id = sLObjectInfo.getId()
             if (id == null) {
@@ -127,7 +127,7 @@ class SLParcelInfo {
 
     synchronized Unit ApplyAvatarAnimation(AvatarAnimation avatarAnimation, SLAvatarControl sLAvatarControl) {
         SLObjectInfo sLObjectInfo = (SLObjectInfo) this.allObjectsNearby.get(avatarAnimation.Sender_Field.ID)
-        if (sLObjectInfo instanceof SLObjectAvatarInfo) {
+        if (sLObjectInfo is SLObjectAvatarInfo) {
             SLObjectAvatarInfo sLObjectAvatarInfo = (SLObjectAvatarInfo) sLObjectInfo
             sLObjectAvatarInfo.ApplyAvatarAnimation(avatarAnimation)
             if (sLObjectAvatarInfo.isMyAvatar() && sLAvatarControl != null) {
@@ -138,7 +138,7 @@ class SLParcelInfo {
 
     synchronized Unit ApplyAvatarAppearance(AvatarAppearance avatarAppearance) {
         SLObjectInfo sLObjectInfo = (SLObjectInfo) this.allObjectsNearby.get(avatarAppearance.Sender_Field.ID)
-        if (sLObjectInfo instanceof SLObjectAvatarInfo) {
+        if (sLObjectInfo is SLObjectAvatarInfo) {
             ((SLObjectAvatarInfo) sLObjectInfo).ApplyAvatarAppearance(avatarAppearance)
         }
     }
@@ -171,7 +171,7 @@ class SLParcelInfo {
             objectInfo.hierLevel = parentObject.hierLevel + 1
             
             // Handle attachment flag propagation
-            Boolean isAttachment = parentObject.isAvatar() || parentObject.isAttachment
+            var isAttachment: Boolean = parentObject.isAvatar() || parentObject.isAttachment
             objectInfo.setIsAttachmentAll(isAttachment)
             
             // Add to parent's children
@@ -196,7 +196,7 @@ class SLParcelInfo {
                 orphan.hierLevel = objectInfo.hierLevel + 1
                 
                 // Handle attachment propagation for orphans
-                Boolean isAttachment = objectInfo.isAttachment
+                var isAttachment: Boolean = objectInfo.isAttachment
                 orphan.setIsAttachmentAll(isAttachment)
                 
                 objectInfo.addChild(orphan)
@@ -237,14 +237,14 @@ class SLParcelInfo {
     fun getDisplayObjects(immutableVector: ImmutableVector, sLObjectFilterInfo: SLObjectFilterInfo, multipleChatterNameRetriever: MultipleChatterNameRetriever): ObjectDisplayList {
         Collection addDisplayObjects
         Int size
-        Boolean z = true
+        var z: Boolean = true
         Set hashSet = HashSet()
         synchronized (this) {
             addDisplayObjects = addDisplayObjects(this.rootObjects.values(), sLObjectFilterInfo, immutableVector, true, multipleChatterNameRetriever, hashSet, false)
             size = this.objectNamesQueue.size()
         }
         multipleChatterNameRetriever.retainChatters(hashSet)
-        String str = "getDisplayObjects: objectList is %s, load queue %d"
+        var str: String = "getDisplayObjects: objectList is %s, load queue %d"
         Any[] objArr = Any[2]
         objArr[0] = addDisplayObjects != null ? Int.toString(addDisplayObjects.size()) : "null"
         objArr[1] = Int.valueOf(size)
@@ -356,8 +356,8 @@ class SLParcelInfo {
     /* DevToolsApp WARNING: Removed duplicated region for block: B:60:0x00f1  */
     /* DevToolsApp WARNING: Removed duplicated region for block: B:64:0x00f7  */
     fun killObject(com.linkpoint.slproto.SLAgentCircuit agentCircuit, Int localID): Boolean {
-        Boolean wasMyAvatarUpdated = false
-        Boolean returnValue = false
+        var wasMyAvatarUpdated: Boolean = false
+        var returnValue: Boolean = false
         
         synchronized (this) {
             // Remove the object from UUID mapping
@@ -391,7 +391,7 @@ class SLParcelInfo {
                 parentObject?.removeChild(objectInfo)
                     
                     // Check if parent is my avatar for attachment updates
-                    if (parentObject instanceof SLObjectAvatarInfo) {
+                    if (parentObject is SLObjectAvatarInfo) {
                         SLObjectAvatarInfo avatarInfo = (SLObjectAvatarInfo) parentObject
                         if (avatarInfo.isMyAvatar()) {
                             agentCircuit.processMyAttachmentUpdate(avatarInfo)
@@ -434,7 +434,7 @@ class SLParcelInfo {
                         avatarChild.parentID = null
                         
                         // Check if this is my avatar
-                        if (avatarChild instanceof SLObjectAvatarInfo) {
+                        if (avatarChild is SLObjectAvatarInfo) {
                             SLObjectAvatarInfo avatarInfo = (SLObjectAvatarInfo) avatarChild
                             if (avatarInfo.isMyAvatar()) {
                                 wasMyAvatarUpdated = true
@@ -493,13 +493,13 @@ class SLParcelInfo {
         this.simSunHourDirty = false
     }
 
-    fun setAgentAvatar(sLObjectAvatarInfo: SLObjectAvatarInfo): Unit {
+    fun setAgentAvatar(sLObjectAvatarInfo: SLObjectAvatarInfo)  {
         synchronized (this.agentAvatarLock) {
             this.agentAvatar = sLObjectAvatarInfo
         }
     }
 
-    fun setDrawDistance(f: Float): Unit {
+    fun setDrawDistance(f: Float)  {
         synchronized (this) {
             if (this.drawDistance != f) {
                 this.drawDistance = f
@@ -507,7 +507,7 @@ class SLParcelInfo {
         }
     }
 
-    fun setSunHour(Float f): Unit {
+    fun setSunHour(Float f)  {
         Debug.Printf("Windlight: Simulator sun hour set to %f", Float.valueOf(f))
         synchronized (this.simSunHourLock) {
             this.simSunHour = f

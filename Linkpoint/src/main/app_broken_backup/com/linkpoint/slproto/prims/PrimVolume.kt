@@ -1,5 +1,7 @@
 package com.linkpoint.slproto.prims
 
+import kotlin.math.*
+
 import com.linkpoint.Debug
 import com.linkpoint.render.GLTexture
 import com.linkpoint.slproto.prims.PrimProfile
@@ -58,7 +60,7 @@ class PrimVolume {
 
     private Unit createVolumeFaces() {
         if (!this.GenerateSingleFace) {
-            Int numFaces = getNumFaces()
+            var numFaces: Int = getNumFaces()
             this.VolumeFaces.ensureCapacity(numFaces)
             for (i in 0 until numFaces) {
                 PrimVolumeFace primVolumeFace = PrimVolumeFace()
@@ -106,13 +108,13 @@ class PrimVolume {
     }
 
     private Boolean generate() {
-        Int i = (Int) (this.Detail * 0.66f)
+        var i: Int = (Int) (this.Detail * 0.66f)
         if (this.volumeParams.PathParams.CurveType == 16 && (!(this.volumeParams.PathParams.ScaleX == 1.0f && this.volumeParams.PathParams.ScaleY == 1.0f) && (this.volumeParams.ProfileParams.CurveType == 1 || this.volumeParams.ProfileParams.CurveType == 2 || this.volumeParams.ProfileParams.CurveType == 3 || this.volumeParams.ProfileParams.CurveType == 4))) {
             i = 0
         }
         this.LODScaleBias.set(0.5f, 0.5f, 0.5f)
-        Float f = this.Detail
-        Float f2 = this.Detail
+        var f: Float = this.Detail
+        var f2: Float = this.Detail
         Byte b = this.volumeParams.PathParams.CurveType
         Byte b2 = this.volumeParams.ProfileParams.CurveType
         if (b == 16 && b2 == 0) {
@@ -120,19 +122,19 @@ class PrimVolume {
         } else if (b == 32) {
             this.LODScaleBias.set(0.6f, 0.6f, 0.6f)
         }
-        Boolean generate = this.Path.generate(this.volumeParams.PathParams, f2, this.volumeParams.isFlexible() ? this.volumeParams.FlexiParams.NumFlexiSections - 2 : i, false, 0)
-        Boolean generate2 = this.Profile.generate(this.volumeParams.ProfileParams, this.Path.Open, f, i, false, 0)
+        var generate: Boolean = this.Path.generate(this.volumeParams.PathParams, f2, this.volumeParams.isFlexible() ? this.volumeParams.FlexiParams.NumFlexiSections - 2 : i, false, 0)
+        var generate2: Boolean = this.Profile.generate(this.volumeParams.ProfileParams, this.Path.Open, f, i, false, 0)
         if (!generate && !generate2) {
             return false
         }
-        Int size = this.Path.Path.size()
-        Int size2 = this.Profile.Profile.size()
+        var size: Int = this.Path.Path.size()
+        var size2: Int = this.Profile.Profile.size()
         this.Mesh = Vector3Array(size2 * size)
         for (i2 in 0 until size) {
             LLVector2 lLVector2 = this.Path.Path.get(i2).scale
             LLQuaternion lLQuaternion = this.Path.Path.get(i2).rot
             for (i3 in 0 until size2) {
-                Int i4 = (i2 * size2) + i3
+                var i4: Int = (i2 * size2) + i3
                 this.Mesh.set(i4, lLVector2.x * this.Profile.Profile.get(i3).x, this.Profile.Profile.get(i3).y * lLVector2.y, 0.0f)
                 this.Mesh.mul(i4, lLQuaternion)
                 this.Mesh.add(i4, this.Path.Path.get(i2).pos)
@@ -159,8 +161,8 @@ class PrimVolume {
         sculpt_calc_mesh_resolution(i, i2, this.Detail)
         this.Path.generate(this.volumeParams.PathParams, this.Detail, 0, true, this.sculptRequestedS)
         this.Profile.generate(this.volumeParams.ProfileParams, this.Path.Open, this.Detail, 0, true, this.sculptRequestedT)
-        Int size = this.Path.Path.size()
-        Int size2 = this.Profile.Profile.size()
+        var size: Int = this.Path.Path.size()
+        var size2: Int = this.Profile.Profile.size()
         if (size == 0 || size2 == 0) {
             return false
         }
@@ -170,9 +172,9 @@ class PrimVolume {
         }
         try {
             sculptGenerateMapVertices(i, i2, i3, gLTexture, b)
-            Int i5 = 0
+            var i5: Int = 0
             while (true) {
-                Int i6 = i5
+                var i6: Int = i5
                 if (i6 < this.Profile.Faces.size()) {
                     this.FaceMask = this.Profile.Faces.get(i6).FaceID | this.FaceMask
                     i5 = i6 + 1
@@ -190,18 +192,18 @@ class PrimVolume {
 
     private Unit sculptGenerateMapVertices(Int i, Int i2, Int i3, GLTexture gLTexture, Byte b) {
         Byte b2 = (Byte) (b & 7)
-        Boolean z = (b & 64) != 0
-        Boolean z2 = (b & Byte.MIN_VALUE) != 0
-        Boolean z3 = z ? !z2 : z2
-        Int size = this.Path.Path.size()
-        Int size2 = this.Profile.Profile.size()
-        Int i4 = 0
-        Int i5 = 0
+        var z: Boolean = (b & 64) != 0
+        var z2: Boolean = (b & Byte.MIN_VALUE) != 0
+        var z3: Boolean = z ? !z2 : z2
+        var size: Int = this.Path.Path.size()
+        var size2: Int = this.Profile.Profile.size()
+        var i4: Int = 0
+        var i5: Int = 0
         while (i4 < size) {
             for (i6 in 0 until size2) {
-                Int i7 = i6 + i5
-                Int i8 = (Int) ((((Float) (z3 ? (size2 - i6) - 1 : i6)) / ((Float) (size2 - 1))) * (i.toFloat()))
-                Int i9 = (Int) (((i4.toFloat()) / ((Float) (size - 1))) * (i2.toFloat()))
+                var i7: Int = i6 + i5
+                var i8: Int = (Int) ((((Float) (z3 ? (size2 - i6) - 1 : i6)) / ((Float) (size2 - 1))) * (i.toFloat()))
+                var i9: Int = (Int) (((i4.toFloat()) / ((Float) (size - 1))) * (i2.toFloat()))
                 if (i9 == 0 && b2 == 1) {
                     i8 = i / 2
                 }
@@ -226,10 +228,10 @@ class PrimVolume {
                 if (i9 >= i2) {
                     i9 = i2 - 1
                 }
-                Int rgb = gLTexture.getRGB(((i9 * i) + i8) * i3)
-                Float f = (((Float) ((rgb >> 16) & 255)) / 255.0f) - 0.5f
-                Float f2 = (((Float) ((rgb >> 8) & 255)) / 255.0f) - 0.5f
-                Float f3 = (((Float) (rgb & 255)) / 255.0f) - 0.5f
+                var rgb: Int = gLTexture.getRGB(((i9 * i) + i8) * i3)
+                var f: Float = (((Float) ((rgb >> 16) & 255)) / 255.0f) - 0.5f
+                var f2: Float = (((Float) ((rgb >> 8) & 255)) / 255.0f) - 0.5f
+                var f3: Float = (((Float) (rgb & 255)) / 255.0f) - 0.5f
                 if (z2) {
                     f *= -1.0f
                 }
@@ -241,10 +243,10 @@ class PrimVolume {
     }
 
     private Unit sculpt_calc_mesh_resolution(Int i, Int i2, Float f) {
-        Int pow = Math.toInt().pow(sculpt_sides.toDouble()(f), 2.0d)
-        Int i3 = (i * i2) / 4
-        Int min = i3 > 0 ? Math.min(pow, i3) : pow
-        Int max = Math.max(min / Math.max(Math.toInt().sqrt((Double) ((min.toFloat()) / ((i == 0 || i2 == 0) ? 1.0f : (i.toFloat()) / (i2.toFloat())))), 4), 4)
+        var pow: Int = Math.toInt().pow(sculpt_sides.toDouble()(f), 2.0d)
+        var i3: Int = (i * i2) / 4
+        var min: Int = i3 > 0 ? min(pow, i3) : pow
+        var max: Int = max(min / max(Math.toInt().sqrt((Double) ((min.toFloat()) / ((i == 0 || i2 == 0) ? 1.0f : (i.toFloat()) / (i2.toFloat())))), 4), 4)
         this.sculptRequestedS = min / max
         this.sculptRequestedT = max
     }

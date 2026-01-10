@@ -32,8 +32,8 @@ class ChatterItemViewBuilder {
 
     @Nullable
     fun getView(LayoutInflater layoutInflater, View view, ViewGroup viewGroup, Boolean z): View {
-        Int i = R.id.userDistanceInlineTextView
-        Int i2 = 8
+        var i: Int = R.id.userDistanceInlineTextView
+        var i2: Int = 8
         View view2 = (view == null || view.getId() != R.id.contactListItemLayout) ? null : view
         View inflate = view2 == null ? layoutInflater.inflate(R.layout.contact_list_item, viewGroup, false) : view2
         if (inflate != null) {
@@ -111,7 +111,7 @@ class ChatterItemViewBuilder {
         return inflate
     }
 
-    fun reset(): Unit {
+    fun reset()  {
         this.label = null
         this.onlineVisible = false
         this.distanceSet = false
@@ -124,11 +124,11 @@ class ChatterItemViewBuilder {
         this.voiceActive = false
     }
 
-    fun setActiveGroup(Boolean z): Unit {
+    fun setActiveGroup(Boolean z)  {
         this.isActiveGroup = z
     }
 
-    fun setDistance(Float f): Unit {
+    fun setDistance(Float f)  {
         if (Float.isNaN(f)) {
             this.distanceSet = false
             return
@@ -137,33 +137,33 @@ class ChatterItemViewBuilder {
         this.distance = f
     }
 
-    fun setLabel(String str): Unit {
+    fun setLabel(String str)  {
         this.label = str
     }
 
-    fun setLastMessage(String str): Unit {
+    fun setLastMessage(String str)  {
         this.lastMessage = str
     }
 
-    fun setOnlineStatusIcon(Boolean z, Boolean z2): Unit {
+    fun setOnlineStatusIcon(Boolean z, Boolean z2)  {
         this.onlineVisible = z
         this.isOnline = z2
     }
 
-    fun setThumbnailChatterID(ChatterID chatterID, String str): Unit {
+    fun setThumbnailChatterID(ChatterID chatterID, String str)  {
         this.thumbnailChatterID = chatterID
         this.thumbnailLabel = str
     }
 
-    fun setThumbnailDefaultIcon(Int i): Unit {
+    fun setThumbnailDefaultIcon(Int i)  {
         this.thumbnailDefaultIcon = i
     }
 
-    fun setUnreadCount(Int i): Unit {
+    fun setUnreadCount(Int i)  {
         this.unreadCount = i
     }
 
-    fun setVoiceActive(Boolean z): Unit {
+    fun setVoiceActive(Boolean z)  {
         this.voiceActive = z
     }
 }

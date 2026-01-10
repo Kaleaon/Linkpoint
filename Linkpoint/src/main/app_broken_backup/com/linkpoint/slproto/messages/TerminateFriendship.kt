@@ -25,11 +25,11 @@ class TerminateFriendship : SLMessage {
         return 52
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleTerminateFriendship(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 44)
@@ -38,7 +38,7 @@ class TerminateFriendship : SLMessage {
         packUUID(byteBuffer, this.ExBlock_Field.OtherID)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ExBlock_Field.OtherID = unpackUUID(byteBuffer)

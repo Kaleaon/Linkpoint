@@ -45,7 +45,7 @@ class vx_resp_aux_play_audio_buffer_t {
      * Lifted jumps to return sites
      */
     vx_resp_base_t getBase() {
-        Long l = VxClientProxyJNI.vx_resp_aux_play_audio_buffer_t_base_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_aux_play_audio_buffer_t_base_get(this.swigCPtr, this)
         if (l != 0L) return vx_resp_base_t(l, false)
         return null
     }

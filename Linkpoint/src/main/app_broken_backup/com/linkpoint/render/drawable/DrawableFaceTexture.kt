@@ -18,7 +18,7 @@ class DrawableFaceTexture : ResourceConsumer, GLCleanable {
         this.drawableTextureParams = drawableTextureParams2
     }
 
-    fun GLCleanup(): Unit {
+    fun GLCleanup()  {
         if (this.glTextureCache != null) {
             this.glTextureCache.CancelRequest(this)
         }
@@ -42,8 +42,8 @@ class DrawableFaceTexture : ResourceConsumer, GLCleanable {
         }
     }
 
-    fun OnResourceReady(obj: Any, z: Boolean): Unit {
-        if (obj instanceof GLLoadedTexture) {
+    fun OnResourceReady(obj: Any, z: Boolean)  {
+        if (obj is GLLoadedTexture) {
             GLLoadedTexture gLLoadedTexture = (GLLoadedTexture) obj
             this.loadedTexture = gLLoadedTexture
             this.hasAlphaLayer = gLLoadedTexture.hasAlphaLayer()

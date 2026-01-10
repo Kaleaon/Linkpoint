@@ -1,4 +1,6 @@
 package com.linkpoint.slproto.terrain
+
+import kotlin.math.*
 import java.util.*
 
 import androidx.core.view.InputDeviceCompat
@@ -8,9 +10,9 @@ import com.linkpoint.slproto.messages.RegionHandshake
 import com.linkpoint.utils.BitBuffer
 
 class TerrainData {
-    Int PatchesPerEdge = 16
-    Int PatchesSize = 16
-    Int TerrainPerEdge = 256
+    var PatchesPerEdge: Int = 16
+    var PatchesSize: Int = 16
+    var TerrainPerEdge: Int = 256
     private val heightMap: FloatArray = FloatArray(65536)
     private val patchDirtyMap: BooleanArray = BooleanArray(256)
     private volatile TerrainTextures terrainTextures = TerrainTextures()
@@ -32,10 +34,10 @@ class TerrainData {
     }
 
     private Unit markVerticesDirty(Int i, Int i2, Int i3, Int i4) {
-        Int i5 = i / 16
-        Int i6 = i2 / 16
-        Int i7 = i3 / 16
-        Int i8 = i4 / 16
+        var i5: Int = i / 16
+        var i6: Int = i2 / 16
+        var i7: Int = i3 / 16
+        var i8: Int = i4 / 16
         synchronized (this.vertexLock) {
             for (Int i9 = i6; i9 <= i8; i9++) {
                 for (Int i10 = i5; i10 <= i7; i10++) {
@@ -57,12 +59,12 @@ class TerrainData {
     private Unit updateVerticesInRegion(Int i, Int i2, Int i3, Int i4) {
         while (i2 <= i4) {
             for (Int i5 = i; i5 <= i3; i5++) {
-                Int min = Math.min(Math.max(0, i5 - 1), 255)
-                Int min2 = Math.min(Math.max(0, i2 - 1), 255)
-                Int min3 = Math.min(Math.max(0, i5), 255)
-                Int min4 = Math.min(Math.max(0, i2), 255)
-                Float f = 0.0f
-                Int i6 = 0
+                var min: Int = min(max(0, i5 - 1), 255)
+                var min2: Int = min(max(0, i2 - 1), 255)
+                var min3: Int = min(max(0, i5), 255)
+                var min4: Int = min(max(0, i2), 255)
+                var f: Float = 0.0f
+                var i6: Int = 0
                 if (min >= 0 && min < 256 && min2 >= 0 && min2 < 256 && this.validMap[(min2 * 256) + min]) {
                     f = 0.0f + this.heightMap[(min2 * 256) + min]
                     i6 = 1
@@ -81,8 +83,8 @@ class TerrainData {
                 }
                 if (i6 == 4) {
                     this.vertexHeights[(i2 * InputDeviceCompat.SOURCE_KEYBOARD) + i5] = f / (i6.toFloat())
-                    Float f2 = this.heightMap[(min4 * 256) + min3] - this.heightMap[min + (min4 * 256)]
-                    Float f3 = this.heightMap[(min4 * 256) + min3] - this.heightMap[(min2 * 256) + min3]
+                    var f2: Float = this.heightMap[(min4 * 256) + min3] - this.heightMap[min + (min4 * 256)]
+                    var f3: Float = this.heightMap[(min4 * 256) + min3] - this.heightMap[(min2 * 256) + min3]
                     this.vertexNormals[((i2 * InputDeviceCompat.SOURCE_KEYBOARD) + i5) * 2] = f2
                     this.vertexNormals[(((i2 * InputDeviceCompat.SOURCE_KEYBOARD) + i5) * 2) + 1] = f3
                     this.vertexValids[(i2 * InputDeviceCompat.SOURCE_KEYBOARD) + i5] = true
@@ -103,22 +105,22 @@ class TerrainData {
         }
     }
 
-    fun ProcessLayerData(ByteArray bArr): Unit {
+    fun ProcessLayerData(ByteArray bArr)  {
         TerrainPatch DecompressPatch
         BitBuffer bitBuffer = BitBuffer(bArr)
-        Int bits = bitBuffer.getBits(16)
-        Int bits2 = bitBuffer.getBits(8)
+        var bits: Int = bitBuffer.getBits(16)
+        var bits2: Int = bitBuffer.getBits(8)
         Debug.Log(String.format("Terrain: ProcessLayerData: stride 0x%x patchSize 0x%x type 0x%x", Any[]{Int.valueOf(bits), Int.valueOf(bits2), Int.valueOf(bitBuffer.getBits(8))}))
         synchronized (this.vertexLock) {
             while (!bitBuffer.isEOF() && (DecompressPatch = TerrainPatch.DecompressPatch(bitBuffer, bits2)) != null) {
-                Int x = DecompressPatch.getX()
-                Int y = DecompressPatch.getY()
+                var x: Int = DecompressPatch.getX()
+                var y: Int = DecompressPatch.getY()
                 if (x < 16 && y < 16) {
                     for (i in 0 until bits2) {
-                        Int i2 = (y * 16) + i
+                        var i2: Int = (y * 16) + i
                         if (i2 >= 0 && i2 < 256) {
                             for (i3 in 0 until bits2) {
-                                Int i4 = (x * 16) + i3
+                                var i4: Int = (x * 16) + i3
                                 if (i4 >= 0 && i4 < 256) {
                                     this.heightMap[(i2 * 256) + i4] = DecompressPatch.heightMap[(i * bits2) + i3]
                                     if (!this.validMap[(i2 * 256) + i4]) {
@@ -143,10 +145,10 @@ class TerrainData {
                 updateVerticesInRegion(i * 16, i2 * 16, (i + 1) * 16, (i2 + 1) * 16)
             }
         }
-        Boolean z = true
+        var z: Boolean = true
         for (i3 in 0 until 17) {
-            Int i4 = ((i2 * 16) + i3) * InputDeviceCompat.SOURCE_KEYBOARD
-            Int i5 = 0
+            var i4: Int = ((i2 * 16) + i3) * InputDeviceCompat.SOURCE_KEYBOARD
+            var i5: Int = 0
             while (true) {
                 if (i5 >= 17) {
                     break
@@ -163,15 +165,15 @@ class TerrainData {
         }
         FloatArray fArr = FloatArray(289)
         FloatArray fArr2 = FloatArray(578)
-        Int i6 = 0
+        var i6: Int = 0
         while (true) {
-            Int i7 = i6
+            var i7: Int = i6
             if (i7 < 17) {
-                Int i8 = ((i2 * 16) + i7) * InputDeviceCompat.SOURCE_KEYBOARD
+                var i8: Int = ((i2 * 16) + i7) * InputDeviceCompat.SOURCE_KEYBOARD
                 for (i9 in 0 until 17) {
-                    Float f = this.vertexHeights[i8 + i9 + (i * 16)]
-                    Float f2 = this.vertexNormals[(i8 + i9 + (i * 16)) * 2]
-                    Float f3 = this.vertexNormals[((i8 + i9 + (i * 16)) * 2) + 1]
+                    var f: Float = this.vertexHeights[i8 + i9 + (i * 16)]
+                    var f2: Float = this.vertexNormals[(i8 + i9 + (i * 16)) * 2]
+                    var f3: Float = this.vertexNormals[((i8 + i9 + (i * 16)) * 2) + 1]
                     fArr[(i7 * 17) + i9] = f
                     fArr2[((i7 * 17) + i9) * 2] = f2
                     fArr2[(((i7 * 17) + i9) * 2) + 1] = f3
@@ -187,7 +189,7 @@ class TerrainData {
         return this.waterHeightValid && f < this.waterHeight
     }
 
-    fun reset(): Unit {
+    fun reset()  {
         synchronized (this.vertexLock) {
             this.waterHeightValid = false
             this.validCount = 0
@@ -203,7 +205,7 @@ class TerrainData {
         }
     }
 
-    fun updateEntireTerrain(): Unit {
+    fun updateEntireTerrain()  {
         markVerticesDirty(0, 0, 256, 256)
     }
 }

@@ -38,7 +38,7 @@ class NavDrawerActivityHelper : AdapterView.OnItemClickListener {
             } else {
                 this.drawerAdapter = null
             }
-            if ((activity instanceof AppCompatActivity) && (supportActionBar = ((AppCompatActivity) activity).getSupportActionBar()) != null) {
+            if ((activity is AppCompatActivity) && (supportActionBar = ((AppCompatActivity) activity).getSupportActionBar()) != null) {
                 supportActionBar.setDisplayHomeAsUpEnabled(true)
                 supportActionBar.setHomeButtonEnabled(true)
                 return
@@ -57,13 +57,13 @@ class NavDrawerActivityHelper : AdapterView.OnItemClickListener {
         return true
     }
 
-    fun onConfigurationChanged(Configuration configuration): Unit {
+    fun onConfigurationChanged(Configuration configuration)  {
         if (this.drawerToggle != null) {
             this.drawerToggle.onConfigurationChanged(configuration)
         }
     }
 
-    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j): Unit {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j)  {
         if (this.drawerLayout != null) {
             this.drawerLayout.closeDrawers()
         }
@@ -76,7 +76,7 @@ class NavDrawerActivityHelper : AdapterView.OnItemClickListener {
         return this.drawerToggle != null && this.drawerToggle.onOptionsItemSelected(menuItem)
     }
 
-    fun syncState(): Unit {
+    fun syncState()  {
         if (this.drawerToggle != null) {
             this.drawerToggle.syncState()
         }

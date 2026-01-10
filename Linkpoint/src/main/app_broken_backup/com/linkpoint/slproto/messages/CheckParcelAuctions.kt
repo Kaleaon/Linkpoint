@@ -20,11 +20,11 @@ class CheckParcelAuctions : SLMessage {
         return (this.RegionData_Fields.size() * 8) + 5
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleCheckParcelAuctions(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -23)
@@ -34,7 +34,7 @@ class CheckParcelAuctions : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (i in 0 until b) {
             RegionData regionData = RegionData()

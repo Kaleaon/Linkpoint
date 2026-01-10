@@ -31,7 +31,7 @@ import androidx.annotation.Nullable
 class SLMinimap : SLModule {
     val CHAT_RANGE: Float = 20.0f
     private Int parcelBitmapSize = 256
-    Int parcelDataSize = 64
+    var parcelDataSize: Int = 64
     private Byte parcelOverlayFlagBorderSouth = Byte.MIN_VALUE
     private Byte parcelOverlayFlagBorderWest = 64
     private Byte parcelOverlayFlagPrivate = 32
@@ -55,7 +55,7 @@ class SLMinimap : SLModule {
     private val parcelIDs: IntArray = IntArray(4096)
     private Map<Int, ParcelData> parcels = ConcurrentHashMap()
     private RequestHandler<SubscriptionSingleKey> userLocationRequestHandler = SimpleRequestHandler<SubscriptionSingleKey>() {
-        fun onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey): Unit {
+        fun onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey)  {
             if (SLMinimap.this.userLocationsResultHandler != null) {
                 SLMinimap.this.userLocationsResultHandler.onResultData(subscriptionSingleKey, UserLocations(SLMinimap.this.myAvatarPosition, SLMinimap.this.getMyAvatarHeading(), SLMinimap.this.userPositions))
             }
@@ -89,7 +89,7 @@ class SLMinimap : SLModule {
             return Bitmap.createBitmap(this.colors, this.bitmapWidth, this.bitmapHeight, Bitmap.Config.ARGB_8888)
         }
 
-        fun updateBitmap(Bitmap bitmap): Unit {
+        fun updateBitmap(Bitmap bitmap)  {
             bitmap.setPixels(this.colors, 0, this.bitmapWidth, 0, 0, this.bitmapWidth, this.bitmapHeight)
         }
     }
@@ -123,7 +123,7 @@ class SLMinimap : SLModule {
     /* JADX INFO: super call moved to the top of the method (can break code semantics) */
     SLMinimap(SLAgentCircuit sLAgentCircuit) {
         super(sLAgentCircuit)
-        Boolean z = false
+        var z: Boolean = false
         if (this.userManager != null) {
             this.userLocationsResultHandler = this.userManager.getUserLocationsPool().attachRequestHandler(this.userLocationRequestHandler)
         } else {
@@ -138,9 +138,9 @@ class SLMinimap : SLModule {
     }
 
     private Int getParcelDataIndex(ImmutableVector immutableVector) {
-        Int i = 0
-        Int floor = Math.toInt().floor((Double) ((immutableVector.getX() * 64.0f) / 256.0f))
-        Int floor2 = Math.toInt().floor((Double) ((immutableVector.getY() * 64.0f) / 256.0f))
+        var i: Int = 0
+        var floor: Int = Math.toInt().floor((Double) ((immutableVector.getX() * 64.0f) / 256.0f))
+        var floor2: Int = Math.toInt().floor((Double) ((immutableVector.getY() * 64.0f) / 256.0f))
         if (floor < 0) {
             floor = 0
         } else if (floor >= 64) {
@@ -154,7 +154,7 @@ class SLMinimap : SLModule {
 
     /* access modifiers changed from: private */
     /* renamed from: updateAvatarParcelData */
-    fun m212com_lumiyaviewer_lumiya_slproto_modules_SLMinimapmthref0(): Unit {
+    fun m212com_lumiyaviewer_lumiya_slproto_modules_SLMinimapmthref0()  {
         ParcelData parcelData = null
         if (this.myAvatarParcelDataIndex >= 0) {
             parcelData = this.parcels.get(Int.valueOf(this.parcelIDs[this.myAvatarParcelDataIndex]))
@@ -170,7 +170,7 @@ class SLMinimap : SLModule {
         this.userManager.setCurrentLocationInfo(CurrentLocationInfo.create(parcelData, this.nearbyUsersCount, this.chatRangeUsersCount, sLVoice.getCurrentParcelVoiceChannel()))
     }
 
-    fun HandleCloseCircuit(): Unit {
+    fun HandleCloseCircuit()  {
         if (this.userManager != null) {
             this.userManager.getUserLocationsPool().detachRequestHandler(this.userLocationRequestHandler)
         }
@@ -185,17 +185,17 @@ class SLMinimap : SLModule {
     /* JADX WARNING: Removed duplicated region for block: B:79:0x01c0  */
     @com.linkpoint.slproto.handler.SLMessageHandler
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    fun HandleCoarseLocationUpdate(com.linkpoint.slproto.messages.CoarseLocationUpdate r14): Unit {
+    fun HandleCoarseLocationUpdate(com.linkpoint.slproto.messages.CoarseLocationUpdate r14)  {
         /*
             r13 = this
             r3 = 0
             r8 = 1
             r2 = 0
-            Int r0 = r13.myAvatarParcelDataIndex
+            var r0: Int = r13.myAvatarParcelDataIndex
             if (r0 < 0) goto L_0x01e8
             java.util.Map<java.lang.Int, com.linkpoint.slproto.users.ParcelData> r0 = r13.parcels
             IntArray r1 = r13.parcelIDs
-            Int r4 = r13.myAvatarParcelDataIndex
+            var r4: Int = r13.myAvatarParcelDataIndex
             r1 = r1[r4]
             java.lang.Int r1 = java.lang.Int.valueOf(r1)
             java.lang.Any r0 = r0.get(r1)
@@ -204,7 +204,7 @@ class SLMinimap : SLModule {
         L_0x001a:
             java.util.HashSet r9 = java.util.HashSet
             java.util.ArrayList<com.linkpoint.slproto.messages.CoarseLocationUpdate$Location> r0 = r14.Location_Fields
-            Int r0 = r0.size()
+            var r0: Int = r0.size()
             r9.<init>(r0)
             r4 = r1
             r5 = r2
@@ -213,38 +213,38 @@ class SLMinimap : SLModule {
             r2 = r3
         L_0x002a:
             java.util.ArrayList<com.linkpoint.slproto.messages.CoarseLocationUpdate$Location> r0 = r14.Location_Fields
-            Int r0 = r0.size()
+            var r0: Int = r0.size()
             if (r2 >= r0) goto L_0x00d4
             java.util.ArrayList<com.linkpoint.slproto.messages.CoarseLocationUpdate$AgentData> r0 = r14.AgentData_Fields
-            Int r0 = r0.size()
+            var r0: Int = r0.size()
             if (r2 >= r0) goto L_0x00d4
             java.util.ArrayList<com.linkpoint.slproto.messages.CoarseLocationUpdate$Location> r0 = r14.Location_Fields
             java.lang.Any r0 = r0.get(r2)
             com.linkpoint.slproto.messages.CoarseLocationUpdate$Location r0 = (com.linkpoint.slproto.messages.CoarseLocationUpdate.Location) r0
             com.linkpoint.slproto.types.ImmutableVector r10 = com.linkpoint.slproto.types.ImmutableVector
-            Int r11 = r0.X
-            Float r11 = r11.toFloat()
-            Int r12 = r0.Y
-            Float r12 = r12.toFloat()
-            Int r0 = r0.Z
-            Int r0 = r0 * 4
-            Float r0 = r0.toFloat()
+            var r11: Int = r0.X
+            var r11: Float = r11.toFloat()
+            var r12: Int = r0.Y
+            var r12: Float = r12.toFloat()
+            var r0: Int = r0.Z
+            var r0: Int = r0 * 4
+            var r0: Float = r0.toFloat()
             r10.<init>(r11, r12, r0)
             com.linkpoint.slproto.messages.CoarseLocationUpdate$Index r0 = r14.Index_Field
-            Int r0 = r0.You
+            var r0: Int = r0.You
             if (r2 != r0) goto L_0x0086
             com.linkpoint.slproto.types.ImmutableVector r0 = r13.myAvatarPosition
-            Boolean r0 = com.google.common.base.Objects.equal(r10, r0)
+            var r0: Boolean = com.google.common.base.Objects.equal(r10, r0)
             if (r0 != 0) goto L_0x0082
             r13.myAvatarPosition = r10
             com.linkpoint.slproto.types.ImmutableVector r0 = r13.myAvatarPosition
-            Int r0 = r13.getParcelDataIndex(r0)
-            Int r6 = r13.myAvatarParcelDataIndex
+            var r0: Int = r13.getParcelDataIndex(r0)
+            var r6: Int = r13.myAvatarParcelDataIndex
             if (r0 == r6) goto L_0x01e5
             r13.myAvatarParcelDataIndex = r0
             java.util.Map<java.lang.Int, com.linkpoint.slproto.users.ParcelData> r0 = r13.parcels
             IntArray r4 = r13.parcelIDs
-            Int r6 = r13.myAvatarParcelDataIndex
+            var r6: Int = r13.myAvatarParcelDataIndex
             r4 = r4[r6]
             java.lang.Int r4 = java.lang.Int.valueOf(r4)
             java.lang.Any r0 = r0.get(r4)
@@ -252,7 +252,7 @@ class SLMinimap : SLModule {
             r4 = r0
             r6 = r8
         L_0x0082:
-            Int r0 = r2 + 1
+            var r0: Int = r2 + 1
             r2 = r0
             goto L_0x002a
         L_0x0086:
@@ -261,14 +261,14 @@ class SLMinimap : SLModule {
             com.linkpoint.slproto.messages.CoarseLocationUpdate$AgentData r0 = (com.linkpoint.slproto.messages.CoarseLocationUpdate.AgentData) r0
             java.util.UUID r11 = r0.AgentID
             java.util.UUID r0 = com.linkpoint.utils.UUIDPool.ZeroUUID
-            Boolean r0 = r0.equals(r11)
+            var r0: Boolean = r0.equals(r11)
             if (r0 != 0) goto L_0x0082
             java.util.Map<java.util.UUID, com.linkpoint.slproto.modules.SLMinimap$UserLocation> r0 = r13.userPositions
             java.lang.Any r0 = r0.get(r11)
             com.linkpoint.slproto.modules.SLMinimap$UserLocation r0 = (com.linkpoint.slproto.modules.SLMinimap.UserLocation) r0
             if (r0 == 0) goto L_0x00bd
             com.linkpoint.slproto.types.ImmutableVector r12 = r0.location
-            Boolean r12 = r10.equals(r12)
+            var r12: Boolean = r10.equals(r12)
             if (r12 != 0) goto L_0x01e2
             r0.location = r10
             r0 = r8
@@ -298,11 +298,11 @@ class SLMinimap : SLModule {
             java.util.Set r0 = r0.keySet()
             java.util.Iterator r2 = r0.iterator()
         L_0x00de:
-            Boolean r0 = r2.hasNext()
+            var r0: Boolean = r2.hasNext()
             if (r0 == 0) goto L_0x00ff
             java.lang.Any r0 = r2.next()
             java.util.UUID r0 = (java.util.UUID) r0
-            Boolean r10 = r9.contains(r0)
+            var r10: Boolean = r9.contains(r0)
             if (r10 != 0) goto L_0x00de
             r2.remove()
             if (r5 != 0) goto L_0x00fa
@@ -320,13 +320,13 @@ class SLMinimap : SLModule {
             java.util.Collection r0 = r0.values()
             java.util.Iterator r2 = r0.iterator()
         L_0x010f:
-            Boolean r0 = r2.hasNext()
+            var r0: Boolean = r2.hasNext()
             if (r0 == 0) goto L_0x0126
             java.lang.Any r0 = r2.next()
             com.linkpoint.slproto.modules.SLMinimap$UserLocation r0 = (com.linkpoint.slproto.modules.SLMinimap.UserLocation) r0
             com.linkpoint.slproto.types.ImmutableVector r9 = r13.myAvatarPosition
             com.linkpoint.slproto.types.ImmutableVector r10 = r0.location
-            Float r9 = r9.distanceTo(r10)
+            var r9: Float = r9.distanceTo(r10)
             r0.distance = r9
             goto L_0x010f
         L_0x0126:
@@ -340,15 +340,15 @@ class SLMinimap : SLModule {
             java.util.Iterator r9 = r0.iterator()
             r2 = r3
         L_0x0136:
-            Boolean r0 = r9.hasNext()
+            var r0: Boolean = r9.hasNext()
             if (r0 == 0) goto L_0x0177
             java.lang.Any r0 = r9.next()
             com.linkpoint.slproto.modules.SLMinimap$UserLocation r0 = (com.linkpoint.slproto.modules.SLMinimap.UserLocation) r0
-            Float r0 = r0.distance
+            var r0: Float = r0.distance
             r10 = 1101004800(0x41a00000, Float:20.0)
-            Int r0 = (r0 > r10 ? 1 : (r0 == r10 ? 0 : -1))
+            var r0: Int = (r0 > r10 ? 1 : (r0 == r10 ? 0 : -1))
             if (r0 > 0) goto L_0x01dc
-            Int r0 = r2 + 1
+            var r0: Int = r2 + 1
         L_0x014c:
             r2 = r0
             goto L_0x0136
@@ -356,7 +356,7 @@ class SLMinimap : SLModule {
             if (r5 == 0) goto L_0x01df
             java.util.Iterator r2 = r5.iterator()
         L_0x0154:
-            Boolean r0 = r2.hasNext()
+            var r0: Boolean = r2.hasNext()
             if (r0 == 0) goto L_0x0175
             java.lang.Any r0 = r2.next()
             java.util.UUID r0 = (java.util.UUID) r0
@@ -366,24 +366,24 @@ class SLMinimap : SLModule {
             if (r0 == 0) goto L_0x0154
             com.linkpoint.slproto.types.ImmutableVector r9 = r13.myAvatarPosition
             com.linkpoint.slproto.types.ImmutableVector r10 = r0.location
-            Float r9 = r9.distanceTo(r10)
+            var r9: Float = r9.distanceTo(r10)
             r0.distance = r9
             goto L_0x0154
         L_0x0175:
             r0 = r8
             goto L_0x0127
         L_0x0177:
-            Int r0 = r13.chatRangeUsersCount
+            var r0: Int = r13.chatRangeUsersCount
             if (r2 == r0) goto L_0x017e
             r13.chatRangeUsersCount = r2
             r3 = r8
         L_0x017e:
-            Int r0 = r13.nearbyUsersCount
+            var r0: Int = r13.nearbyUsersCount
             java.util.Map<java.util.UUID, com.linkpoint.slproto.modules.SLMinimap$UserLocation> r2 = r13.userPositions
-            Int r2 = r2.size()
+            var r2: Int = r2.size()
             if (r0 == r2) goto L_0x0191
             java.util.Map<java.util.UUID, com.linkpoint.slproto.modules.SLMinimap$UserLocation> r0 = r13.userPositions
-            Int r0 = r0.size()
+            var r0: Int = r0.size()
             r13.nearbyUsersCount = r0
             r3 = r8
         L_0x0191:
@@ -416,7 +416,7 @@ class SLMinimap : SLModule {
             if (r5 == 0) goto L_0x01b0
             java.util.Iterator r1 = r5.iterator()
         L_0x01c6:
-            Boolean r0 = r1.hasNext()
+            var r0: Boolean = r1.hasNext()
             if (r0 == 0) goto L_0x01b0
             java.lang.Any r0 = r1.next()
             java.util.UUID r0 = (java.util.UUID) r0
@@ -444,21 +444,21 @@ class SLMinimap : SLModule {
     }
 
     @SLMessageHandler
-    fun HandleParcelOverlay(ParcelOverlay parcelOverlay): Unit {
+    fun HandleParcelOverlay(ParcelOverlay parcelOverlay)  {
         Debug.Log("ParcelOverlay: SequenceID = " + parcelOverlay.ParcelData_Field.SequenceID)
         ByteArray bArr = parcelOverlay.ParcelData_Field.Data
-        Int length = bArr.length / 64
+        var length: Int = bArr.length / 64
         IntArray iArr = Int[(length * 4 * 64 * 4)]
-        Int i = 0
-        Int i2 = 0
+        var i: Int = 0
+        var i2: Int = 0
         while (i2 < length) {
-            Int i3 = i2 + (parcelOverlay.ParcelData_Field.SequenceID * 16)
-            Int i4 = 0
+            var i3: Int = i2 + (parcelOverlay.ParcelData_Field.SequenceID * 16)
+            var i4: Int = 0
             while (true) {
-                Int i5 = i4
-                Int i6 = i
+                var i5: Int = i4
+                var i6: Int = i
                 if (i5 < 64) {
-                    Int i7 = 0
+                    var i7: Int = 0
                     switch ((Byte) (bArr[i6] & 15)) {
                         case 0:
                             i7 = Color.rgb(0, 192, 0)
@@ -480,12 +480,12 @@ class SLMinimap : SLModule {
                             break
                     }
                     if ((bArr[i6] & 32) != 0) {
-                        Int red = Color.red(i7)
-                        Int green = Color.green(i7)
-                        Int blue = Color.blue(i7)
-                        Int i8 = red + 64
+                        var red: Int = Color.red(i7)
+                        var green: Int = Color.green(i7)
+                        var blue: Int = Color.blue(i7)
+                        var i8: Int = red + 64
                         if (i8 >= 255) {
-                            Int i9 = i8 - 255
+                            var i9: Int = i8 - 255
                             i8 -= i9
                             green -= i9
                             blue -= i9
@@ -498,14 +498,14 @@ class SLMinimap : SLModule {
                         }
                         i7 = Color.rgb(i8, green, blue)
                     }
-                    Int i10 = 0
+                    var i10: Int = 0
                     while (true) {
-                        Int i11 = i10
+                        var i11: Int = i10
                         if (i11 < 4) {
-                            Int i12 = ((((length * 4) - 1) - ((i2 * 4) + i11)) * 256) + (i5 * 4)
-                            Int i13 = 0
+                            var i12: Int = ((((length * 4) - 1) - ((i2 * 4) + i11)) * 256) + (i5 * 4)
+                            var i13: Int = 0
                             while (true) {
-                                Int i14 = i13
+                                var i14: Int = i13
                                 if (i14 < 4) {
                                     iArr[i12 + i14] = ((i11 != 0 || i3 == 0 || (bArr[i6] & Byte.MIN_VALUE) == 0) && (i14 != 0 || i5 == 0 || (bArr[i6] & 64) == 0)) ? i7 : -1
                                     i13 = i14 + 1
@@ -534,7 +534,7 @@ class SLMinimap : SLModule {
     /* JADX WARNING: Removed duplicated region for block: B:40:? A[RETURN, SYNTHETIC] */
     @com.linkpoint.slproto.handler.SLEventQueueMessageHandler(eventName = com.linkpoint.slproto.caps.SLCapEventQueue.CapsEventType.ParcelProperties)
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    fun HandleParcelProperties(com.linkpoint.slproto.llsd.LLSDNode r10): Unit {
+    fun HandleParcelProperties(com.linkpoint.slproto.llsd.LLSDNode r10)  {
         /*
             r9 = this
             r2 = 0
@@ -543,12 +543,12 @@ class SLMinimap : SLModule {
             r3 = r2
             r1 = r2
         L_0x000a:
-            Int r0 = r4.getCount()     // Catch:{ LLSDException -> 0x0055 }
+            var r0: Int = r4.getCount()     // Catch:{ LLSDException -> 0x0055 }
             if (r3 >= r0) goto L_0x004f
             com.linkpoint.slproto.llsd.LLSDNode r0 = r4.byIndex(r3)     // Catch:{ LLSDException -> 0x0055 }
             com.linkpoint.slproto.users.ParcelData r5 = com.linkpoint.slproto.users.ParcelData     // Catch:{ LLSDException -> 0x0040 }
             r5.<init>(r0)     // Catch:{ LLSDException -> 0x0040 }
-            Int r6 = r5.getParcelID()     // Catch:{ LLSDException -> 0x0040 }
+            var r6: Int = r5.getParcelID()     // Catch:{ LLSDException -> 0x0040 }
             java.util.Map<java.lang.Int, com.linkpoint.slproto.users.ParcelData> r0 = r9.parcels     // Catch:{ LLSDException -> 0x0040 }
             java.lang.Int r7 = java.lang.Int.valueOf(r6)     // Catch:{ LLSDException -> 0x0040 }
             r0.put(r7, r5)     // Catch:{ LLSDException -> 0x0040 }
@@ -558,15 +558,15 @@ class SLMinimap : SLModule {
         L_0x002c:
             r7 = 4096(0x1000, Float:5.74E-42)
             if (r1 >= r7) goto L_0x0045
-            Boolean r7 = r5[r1]     // Catch:{ LLSDException -> 0x0057 }
+            var r7: Boolean = r5[r1]     // Catch:{ LLSDException -> 0x0057 }
             if (r7 == 0) goto L_0x003d
             IntArray r7 = r9.parcelIDs     // Catch:{ LLSDException -> 0x0057 }
             r7[r1] = r6     // Catch:{ LLSDException -> 0x0057 }
-            Int r7 = r9.myAvatarParcelDataIndex     // Catch:{ LLSDException -> 0x0057 }
+            var r7: Int = r9.myAvatarParcelDataIndex     // Catch:{ LLSDException -> 0x0057 }
             if (r1 != r7) goto L_0x003d
             r0 = 1
         L_0x003d:
-            Int r1 = r1 + 1
+            var r1: Int = r1 + 1
             goto L_0x002c
         L_0x0040:
             r0 = move-exception
@@ -574,7 +574,7 @@ class SLMinimap : SLModule {
             com.linkpoint.Debug.Warning(r0)     // Catch:{ LLSDException -> 0x0055 }
             r0 = r1
         L_0x0045:
-            Int r1 = r3 + 1
+            var r1: Int = r3 + 1
             r3 = r1
             r1 = r0
             goto L_0x000a
@@ -629,7 +629,7 @@ class SLMinimap : SLModule {
         return arrayList
     }
 
-    fun requestUpdateAvatarParcelData(): Unit {
+    fun requestUpdateAvatarParcelData()  {
         this.agentCircuit.execute($Lambda$eaDiotW55nmaHN5_b1ikeJpLLsk(this))
     }
 }

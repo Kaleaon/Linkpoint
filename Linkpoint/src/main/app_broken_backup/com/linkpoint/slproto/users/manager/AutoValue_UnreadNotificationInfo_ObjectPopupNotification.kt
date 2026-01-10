@@ -22,7 +22,7 @@ class AutoValue_UnreadNotificationInfo_ObjectPopupNotification : UnreadNotificat
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof UnreadNotificationInfo.ObjectPopupNotification)) {
+        if (!(obj is UnreadNotificationInfo.ObjectPopupNotification)) {
             return false
         }
         UnreadNotificationInfo.ObjectPopupNotification objectPopupNotification = (UnreadNotificationInfo.ObjectPopupNotification) obj

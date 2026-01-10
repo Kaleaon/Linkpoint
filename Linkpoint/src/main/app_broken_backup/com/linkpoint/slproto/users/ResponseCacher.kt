@@ -85,7 +85,7 @@ abstract class ResponseCacher<KeyType, MessageType> : Refreshable<KeyType> {
     /* access modifiers changed from: protected */
     abstract MessageType loadCached(ByteArray bArr)
 
-    fun requestUpdate(KeyType keytype): Unit {
+    fun requestUpdate(KeyType keytype)  {
         this.pool.requestUpdate(keytype)
     }
 

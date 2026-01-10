@@ -13,7 +13,7 @@ class Debug {
 
     Unit AlwaysPrintf(String string2, Any ... objectArray) {
         StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[3]
-        String string3 = stackTraceElement.getClassName()
+        var string3: String = stackTraceElement.getClassName()
         string3 = string3.substring(string3.lastIndexOf(46) + 1)
         Log.d((String)LOG_TAG, (String)("[" + string3 + "::" + stackTraceElement.getMethodName() + "] " + String.format(string2, objectArray)))
     }

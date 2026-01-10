@@ -14,7 +14,7 @@ class SubscribableList<T> : AbstractList<T> {
     private Any lock = Any()
     private Map<List<T>, Optional<Executor>> targets = WeakHashMap()
 
-    fun add(Int i, T t): Unit {
+    fun add(Int i, T t)  {
         ImmutableList<Map.Entry<List<T>, Optional<Executor>>> copyOf
         synchronized (this.lock) {
             this.backingList.add(i, t)
@@ -123,7 +123,7 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
         return copyOf
     }
 
-    fun clear(): Unit {
+    fun clear()  {
         ImmutableList<Map.Entry<List<T>, Optional<Executor>>> copyOf
         synchronized (this.lock) {
             this.backingList.clear()
@@ -248,7 +248,7 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
         return remove
     }
 
-    fun removeSubscription(List<T> list): Unit {
+    fun removeSubscription(List<T> list)  {
         synchronized (this.lock) {
             this.targets.remove(list)
         }

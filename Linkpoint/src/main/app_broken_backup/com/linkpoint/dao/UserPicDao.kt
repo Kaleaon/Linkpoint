@@ -24,23 +24,23 @@ class UserPicDao : AbstractDao<UserPic, Long> {
         super(daoConfig, daoSession)
     }
 
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        String str = z ? "IF NOT EXISTS " : ""
+    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
+        var str: String = z ? "IF NOT EXISTS " : ""
         sQLiteDatabase.execSQL("CREATE TABLE " + str + "'USER_PIC' (" + "'_id' INTEGER PRIMARY KEY ," + "'UUID' TEXT," + "'BITMAP' BLOB);")
         sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_USER_PIC_UUID ON USER_PIC" + " (UUID);")
     }
 
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'USER_PIC'")
     }
 
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, userPic: UserPic): Unit {
+    protected fun bindValues(sQLiteStatement: SQLiteStatement, userPic: UserPic)  {
         sQLiteStatement.clearBindings()
-        Long id = userPic.getId()
+        var id: Long = userPic.getId()
         if (id != null) {
             sQLiteStatement.bindLong(1, id.longValue())
         }
-        String uuid = userPic.getUuid()
+        var uuid: String = userPic.getUuid()
         if (uuid != null) {
             sQLiteStatement.bindString(2, uuid)
         }
@@ -60,15 +60,15 @@ class UserPicDao : AbstractDao<UserPic, Long> {
 
     fun readEntity(cursor: Cursor, i: Int): UserPic {
         ByteArray bArr = null
-        Long valueOf = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
-        String string = cursor.isNull(i + 1) ? null : cursor.getString(i + 1)
+        var valueOf: Long = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0))
+        var string: String = cursor.isNull(i + 1) ? null : cursor.getString(i + 1)
         if (!cursor.isNull(i + 2)) {
             bArr = cursor.getBlob(i + 2)
         }
         return UserPic(valueOf, string, bArr)
     }
 
-    fun readEntity(cursor: Cursor, userPic: UserPic, i: Int): Unit {
+    fun readEntity(cursor: Cursor, userPic: UserPic, i: Int)  {
         ByteArray bArr = null
         userPic.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
         userPic.setUuid(cursor.isNull(i + 1) ? null : cursor.getString(i + 1))

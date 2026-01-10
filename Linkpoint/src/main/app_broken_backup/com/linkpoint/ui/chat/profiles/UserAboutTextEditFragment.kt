@@ -40,17 +40,17 @@ class UserAboutTextEditFragment : ProfileTextFieldEditFragment {
     }
 
     /* access modifiers changed from: protected */
-    fun onAvatarProperties(AvatarPropertiesReply avatarPropertiesReply): Unit {
+    fun onAvatarProperties(AvatarPropertiesReply avatarPropertiesReply)  {
         this.avatarProperties = avatarPropertiesReply
         setOriginalText(isFirstLife() ? SLMessage.stringFromVariableOEM(this.avatarProperties.PropertiesData_Field.FLAboutText) : SLMessage.stringFromVariableUTF(avatarPropertiesReply.PropertiesData_Field.AboutText))
     }
 
     /* access modifiers changed from: protected */
-    fun saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str): Unit {
-        Boolean z = true
+    fun saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str)  {
+        var z: Boolean = true
         if (this.avatarProperties != null) {
-            String stringFromVariableUTF = SLMessage.stringFromVariableUTF(this.avatarProperties.PropertiesData_Field.AboutText)
-            String stringFromVariableOEM = SLMessage.stringFromVariableOEM(this.avatarProperties.PropertiesData_Field.FLAboutText)
+            var stringFromVariableUTF: String = SLMessage.stringFromVariableUTF(this.avatarProperties.PropertiesData_Field.AboutText)
+            var stringFromVariableOEM: String = SLMessage.stringFromVariableOEM(this.avatarProperties.PropertiesData_Field.FLAboutText)
             if (isFirstLife()) {
                 stringFromVariableOEM = str
             } else {
@@ -59,7 +59,7 @@ class UserAboutTextEditFragment : ProfileTextFieldEditFragment {
             SLUserProfiles sLUserProfiles = sLAgentCircuit.getModules().userProfiles
             UUID uuid = this.avatarProperties.PropertiesData_Field.ImageID
             UUID uuid2 = this.avatarProperties.PropertiesData_Field.FLImageID
-            Boolean z2 = (this.avatarProperties.PropertiesData_Field.Flags & 1) != 0
+            var z2: Boolean = (this.avatarProperties.PropertiesData_Field.Flags & 1) != 0
             if ((this.avatarProperties.PropertiesData_Field.Flags & 2) == 0) {
                 z = false
             }

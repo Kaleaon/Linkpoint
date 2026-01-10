@@ -24,7 +24,7 @@ class GLResourceTexture : GLSizedResource {
             TextureMemoryTracker.allocTextureMemory(i2)
         }
 
-        fun GLFree(): Unit {
+        fun GLFree()  {
             TextureMemoryTracker.releaseTextureMemory(this.loadedSize)
             IntArray iArr = (IntArray) GLResourceTexture.idBuffer.get()
             iArr[0] = this.handle

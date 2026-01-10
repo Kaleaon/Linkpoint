@@ -19,11 +19,11 @@ class ReportAutosaveCrash : SLMessage {
         return 12
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleReportAutosaveCrash(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Byte.MIN_VALUE)
@@ -31,7 +31,7 @@ class ReportAutosaveCrash : SLMessage {
         packInt(byteBuffer, this.AutosaveData_Field.Status)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AutosaveData_Field.PID = unpackInt(byteBuffer)
         this.AutosaveData_Field.Status = unpackInt(byteBuffer)
     }

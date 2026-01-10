@@ -29,10 +29,10 @@ class AgentCachedTextureResponse : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int i = 41
+        var i: Int = 41
         Iterator<T> it = this.WearableData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            var i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -40,11 +40,11 @@ class AgentCachedTextureResponse : SLMessage {
         }
     }
 
-    fun Handle(sLMessageHandler: SLMessageHandler): Unit {
+    fun Handle(sLMessageHandler: SLMessageHandler)  {
         sLMessageHandler.HandleAgentCachedTextureResponse(this)
     }
 
-    fun PackPayload(byteBuffer: ByteBuffer): Unit {
+    fun PackPayload(byteBuffer: ByteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -127)
@@ -59,7 +59,7 @@ class AgentCachedTextureResponse : SLMessage {
         }
     }
 
-    fun UnpackPayload(byteBuffer: ByteBuffer): Unit {
+    fun UnpackPayload(byteBuffer: ByteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.SerialNum = unpackInt(byteBuffer)

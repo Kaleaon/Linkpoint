@@ -34,11 +34,11 @@ class AcceptFriendship : SLMessage {
         return (this.FolderData_Fields.size() * 16) + 53
     }
 
-    fun Handle(sLMessageHandler: SLMessageHandler): Unit {
+    fun Handle(sLMessageHandler: SLMessageHandler)  {
         sLMessageHandler.HandleAcceptFriendship(this)
     }
 
-    fun PackPayload(byteBuffer: ByteBuffer): Unit {
+    fun PackPayload(byteBuffer: ByteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 41)
@@ -51,7 +51,7 @@ class AcceptFriendship : SLMessage {
         }
     }
 
-    fun UnpackPayload(byteBuffer: ByteBuffer): Unit {
+    fun UnpackPayload(byteBuffer: ByteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.TransactionBlock_Field.TransactionID = unpackUUID(byteBuffer)

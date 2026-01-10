@@ -3,6 +3,7 @@ package com.linkpoint.graphics.filament
 import android.util.Log
 import com.google.android.filament.*
 import com.linkpoint.slproto.types.LLVector3
+import java.nio.ByteBuffer
 import kotlin.math.*
 
 /**
@@ -16,7 +17,7 @@ import kotlin.math.*
  * - Windlight integration
  */
 class FilamentLightingManager(
-    private val engine: Engine
+    private val engine: Engine,
     private val scene: Scene
 ) {
     companion object {
@@ -78,8 +79,8 @@ class FilamentLightingManager(
      * Update sun light direction and color (e.g., for time of day)
      */
     fun updateSunLight(
-        direction: LLVector3
-        color: LLVector3
+        direction: LLVector3,
+        color: LLVector3,
         intensity: Float = 100000f
     ) {
         if (sunLight == 0) {
@@ -100,9 +101,9 @@ class FilamentLightingManager(
      * Create a point light
      */
     fun createPointLight(
-        position: LLVector3
-        color: LLVector3
-        intensity: Float = 10000f
+        position: LLVector3,
+        color: LLVector3,
+        intensity: Float = 10000f,
         radius: Float = 10f
     ): Int {
         if (pointLights.size >= MAX_POINT_LIGHTS) {
@@ -162,14 +163,14 @@ class FilamentLightingManager(
      * @param ambientColor RGB color of ambient light
      */
     fun setWindlightSettings(
-        sunAngle: Float
-        sunColor: LLVector3
+        sunAngle: Float,
+        sunColor: LLVector3,
         ambientColor: LLVector3
     ) {
         // Convert sun angle to direction vector
         val sunDir = LLVector3(
-            sin(sunAngle)
-            -cos(sunAngle)
+            sin(sunAngle),
+            -cos(sunAngle),
             -0.3f
         )
         
@@ -233,8 +234,7 @@ class FilamentLightingManager(
         
         Log.i(TAG, "Lighting manager destroyed")
     }
-}
-
+    
     /**
      * Load skybox texture from assets
      */
@@ -339,4 +339,4 @@ class FilamentLightingManager(
             .sampler(Texture.Sampler.SAMPLER_CUBEMAP)
             .build(engine)
     }
-
+}

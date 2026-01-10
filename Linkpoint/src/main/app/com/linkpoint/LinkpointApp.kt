@@ -2,6 +2,7 @@ package com.linkpoint
 
 import android.app.Application
 import android.util.Log
+import com.linkpoint.network.SecondLifeConnection
 
 /**
  * Main Application class for Linkpoint - Second Life viewer for Android
@@ -19,6 +20,11 @@ class LinkpointApp : Application() {
         }
     }
     
+    /**
+     * Connection to Second Life grid
+     */
+    val connection: SecondLifeConnection by lazy { SecondLifeConnection() }
+    
     override fun onCreate() {
         super.onCreate()
         instance = this
@@ -31,6 +37,9 @@ class LinkpointApp : Application() {
     private fun initializeServices() {
         // Initialize rendering engine
         Log.d(TAG, "Initializing services...")
+        
+        // Pre-initialize the connection (lazy, but touch it here to trigger early init if needed)
+        Log.d(TAG, "SL Connection initialized: ${connection.isConnected()}")
     }
     
     override fun onTerminate() {

@@ -20,7 +20,7 @@ class MessageSourceNameResolver {
     Any lock = Any()
     /* access modifiers changed from: private */
     Subscription.OnData<UserName> onUserName = Subscription.OnData<UserName>() {
-        fun onData(UserName userName): Unit {
+        fun onData(UserName userName)  {
             NameRequestEntry nameRequestEntry
             HashSet hashSet = null
             synchronized (MessageSourceNameResolver.this.lock) {
@@ -62,7 +62,7 @@ class MessageSourceNameResolver {
             this.messageDatabaseIDs.add(l)
         }
 
-        fun addMessageID(Long l): Unit {
+        fun addMessageID(Long l)  {
             this.messageDatabaseIDs.add(l)
         }
 
@@ -70,11 +70,11 @@ class MessageSourceNameResolver {
             return this.messageDatabaseIDs
         }
 
-        fun subscribe(): Unit {
+        fun subscribe()  {
             this.subscription = MessageSourceNameResolver.this.userManager.getUserNames().subscribe(this.userUUID, MessageSourceNameResolver.this.dbExecutor, MessageSourceNameResolver.this.onUserName)
         }
 
-        fun unsubscribe(): Unit {
+        fun unsubscribe()  {
             this.subscription.unsubscribe()
             this.subscription = null
         }
@@ -90,9 +90,9 @@ class MessageSourceNameResolver {
         this.dbExecutor = userManager2.getDatabaseExecutor()
     }
 
-    fun requestResolve(UUID uuid, Long l): Unit {
+    fun requestResolve(UUID uuid, Long l)  {
         NameRequestEntry nameRequestEntry
-        Boolean z = false
+        var z: Boolean = false
         synchronized (this.lock) {
             nameRequestEntry = this.requestEntryMap.get(uuid)
             if (nameRequestEntry == null) {

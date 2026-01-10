@@ -76,7 +76,7 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
     private Subscription<SubscriptionSingleKey, ObjectsManager.ObjectDisplayList> subscription
 
     private SLObjectFilterInfo getFilter() {
-        Float f = 1.0f
+        var f: Float = 1.0f
         View view = getView()
         if (view == null) {
             return SLObjectFilterInfo.create()
@@ -84,7 +84,7 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
         if (view.findViewById(R.id.filterPanel).getVisibility() != 0) {
             return SLObjectFilterInfo.create()
         }
-        Float progress = (Float) ((view as SeekBar).findViewById(R.id.objectListSeekBar)).getProgress()
+        var progress: Float = (Float) ((view as SeekBar).findViewById(R.id.objectListSeekBar)).getProgress()
         if (progress >= 1.0f) {
             f = progress
         }
@@ -107,7 +107,7 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
         if (activeAgentID == null) {
             return
         }
-        if (sLObjectDisplayInfo instanceof SLAvatarObjectDisplayInfo) {
+        if (sLObjectDisplayInfo is SLAvatarObjectDisplayInfo) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserProfileFragment.class, UserProfileFragment.makeSelection(ChatterID.getUserChatterID(activeAgentID, ((SLAvatarObjectDisplayInfo) sLObjectDisplayInfo).uuid)))
             return
         }
@@ -115,7 +115,7 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
     }
 
     /* access modifiers changed from: private */
-    fun updateFilter(): Unit {
+    fun updateFilter()  {
         SLAgentCircuit activeAgentCircuit
         SLModules modules
         SLObjectFilterInfo filter = getFilter()
@@ -135,7 +135,7 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectSelectorFragment_10042  reason: not valid java name */
     /* synthetic */ Unit m682lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectSelectorFragment_10042(Throwable th) {
         View view
-        if ((th instanceof SLGridConnection.NotConnectedException) && (view = getView()) != null) {
+        if ((th is SLGridConnection.NotConnectedException) && (view = getView()) != null) {
             View findViewById = view.findViewById(R.id.object_progress_bar)
             if (findViewById != null) {
                 findViewById.setVisibility(8)
@@ -150,7 +150,7 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectSelectorFragment_10971  reason: not valid java name */
     /* synthetic */ Unit m683lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectSelectorFragment_10971(ObjectsManager.ObjectDisplayList objectDisplayList) {
-        Int i = 8
+        var i: Int = 8
         ImmutableList<SLObjectDisplayInfo> immutableList = objectDisplayList.objects
         View view = getView()
         if (view != null) {
@@ -168,17 +168,17 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
             findViewById2.setVisibility(i)
             ExpandableListView expandableListView = (view as ExpandableListView).findViewById(R.id.objectListView)
             ExpandableListAdapter expandableListAdapter = expandableListView.getExpandableListAdapter()
-            if (expandableListAdapter instanceof ObjectListAdapter) {
+            if (expandableListAdapter is ObjectListAdapter) {
                 HashSet hashSet = HashSet()
                 for (SLObjectDisplayInfo sLObjectDisplayInfo : ((ObjectListAdapter) expandableListAdapter).getData()) {
-                    if ((sLObjectDisplayInfo instanceof SLPrimObjectDisplayInfoWithChildren) && !((SLPrimObjectDisplayInfoWithChildren) sLObjectDisplayInfo).isImplicitlyAdded()) {
+                    if ((sLObjectDisplayInfo is SLPrimObjectDisplayInfoWithChildren) && !((SLPrimObjectDisplayInfoWithChildren) sLObjectDisplayInfo).isImplicitlyAdded()) {
                         hashSet.add(Int.valueOf(sLObjectDisplayInfo.localID))
                     }
                 }
                 ArrayList<Int> arrayList = ArrayList<>()
                 for (i2 in 0 until immutableList.size()) {
                     SLObjectDisplayInfo sLObjectDisplayInfo2 = (immutableList as SLObjectDisplayInfo).get(i2)
-                    if ((sLObjectDisplayInfo2 instanceof SLPrimObjectDisplayInfoWithChildren) && ((SLPrimObjectDisplayInfoWithChildren) sLObjectDisplayInfo2).isImplicitlyAdded() && !hashSet.contains(Int.valueOf(sLObjectDisplayInfo2.localID))) {
+                    if ((sLObjectDisplayInfo2 is SLPrimObjectDisplayInfoWithChildren) && ((SLPrimObjectDisplayInfoWithChildren) sLObjectDisplayInfo2).isImplicitlyAdded() && !hashSet.contains(Int.valueOf(sLObjectDisplayInfo2.localID))) {
                         arrayList.add(Int.valueOf(i2))
                     }
                 }
@@ -190,26 +190,26 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
         }
     }
 
-    fun onCheckedChanged(CompoundButton compoundButton, Boolean z): Unit {
+    fun onCheckedChanged(CompoundButton compoundButton, Boolean z)  {
         updateFilter()
     }
 
     fun onChildClick(ExpandableListView expandableListView, View view, Int i, Int i2, Long j): Boolean {
         SLObjectDisplayInfo child
         ExpandableListAdapter expandableListAdapter = expandableListView.getExpandableListAdapter()
-        if (!(expandableListAdapter instanceof ObjectListAdapter) || (child = ((ObjectListAdapter) expandableListAdapter).getChild(i, i2)) == null) {
+        if (!(expandableListAdapter is ObjectListAdapter) || (child = ((ObjectListAdapter) expandableListAdapter).getChild(i, i2)) == null) {
             return true
         }
         showObjectDetails(child)
         return true
     }
 
-    fun onCreate(@android.support.annotation.Nullable Bundle bundle): Unit {
+    fun onCreate(@android.support.annotation.Nullable Bundle bundle)  {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater): Unit {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater)  {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.menu_object_selector, menu)
         this.searchView = (MenuItemCompat as SearchView).getActionView(menu.findItem(R.id.action_search))
@@ -271,13 +271,13 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
         SLObjectDisplayInfo group
         Debug.Printf("displayObjects: onGroupClick: view %s id %d", view, Int.valueOf(view.getId()))
         ExpandableListAdapter expandableListAdapter = expandableListView.getExpandableListAdapter()
-        if ((expandableListAdapter instanceof ObjectListAdapter) && (group = ((ObjectListAdapter) expandableListAdapter).getGroup(i)) != null) {
+        if ((expandableListAdapter is ObjectListAdapter) && (group = ((ObjectListAdapter) expandableListAdapter).getGroup(i)) != null) {
             showObjectDetails(group)
         }
         return true
     }
 
-    fun onProgressChanged(SeekBar seekBar, Int i, Boolean z): Unit {
+    fun onProgressChanged(SeekBar seekBar, Int i, Boolean z)  {
         View view = getView()
         if (view != null) {
             ((view as TextView).findViewById(R.id.objectListRangeDisplay)).setText(getString(R.string.object_range_format, Int.valueOf(i)))
@@ -287,9 +287,9 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
         }
     }
 
-    fun onStart(): Unit {
+    fun onStart()  {
         SLModules modules
-        Int i = 256
+        var i: Int = 256
         super.onStart()
         UserManager userManager = getUserManager()
         if (userManager != null) {
@@ -300,7 +300,7 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
                 modules.drawDistance.EnableObjectSelect()
                 View view = getView()
                 if (view != null) {
-                    Int objectSelectRange = modules.toInt().drawDistance.getObjectSelectRange()
+                    var objectSelectRange: Int = modules.toInt().drawDistance.getObjectSelectRange()
                     if (objectSelectRange < 1) {
                         i = 1
                     } else if (objectSelectRange <= 256) {
@@ -312,10 +312,10 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
         }
     }
 
-    fun onStartTrackingTouch(SeekBar seekBar): Unit {
+    fun onStartTrackingTouch(SeekBar seekBar)  {
     }
 
-    fun onStop(): Unit {
+    fun onStop()  {
         SLAgentCircuit activeAgentCircuit
         SLModules modules
         if (this.subscription != null) {
@@ -329,6 +329,6 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
         super.onStop()
     }
 
-    fun onStopTrackingTouch(SeekBar seekBar): Unit {
+    fun onStopTrackingTouch(SeekBar seekBar)  {
     }
 }

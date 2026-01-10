@@ -30,7 +30,7 @@ class ChatterDisplayData : ChatterDisplayInfo, Comparable<ChatterDisplayData> {
         this.voiceActive = z2
     }
 
-    fun buildView(Context context, ChatterItemViewBuilder chatterItemViewBuilder, UserManager userManager): Unit {
+    fun buildView(Context context, ChatterItemViewBuilder chatterItemViewBuilder, UserManager userManager)  {
         chatterItemViewBuilder.setLabel(this.displayName)
         chatterItemViewBuilder.setThumbnailChatterID(this.chatterID, this.displayName)
         chatterItemViewBuilder.setOnlineStatusIcon(this.isOnline, this.isOnline)
@@ -45,11 +45,11 @@ class ChatterDisplayData : ChatterDisplayInfo, Comparable<ChatterDisplayData> {
     }
 
     fun compareTo(@NonNull ChatterDisplayData chatterDisplayData): Int {
-        Int compare = Booleans.compare(Strings.isNullOrEmpty(this.displayName), Strings.isNullOrEmpty(chatterDisplayData.displayName))
+        var compare: Int = Booleans.compare(Strings.isNullOrEmpty(this.displayName), Strings.isNullOrEmpty(chatterDisplayData.displayName))
         if (compare != 0) {
             return compare
         }
-        Int compareTo = (this.displayName != null ? this.displayName : "").compareTo(chatterDisplayData.displayName != null ? chatterDisplayData.displayName : "")
+        var compareTo: Int = (this.displayName != null ? this.displayName : "").compareTo(chatterDisplayData.displayName != null ? chatterDisplayData.displayName : "")
         return compareTo != 0 ? compareTo : this.chatterID.compareTo(chatterDisplayData.chatterID)
     }
 

@@ -24,17 +24,17 @@ class CachedResponseDao : AbstractDao<CachedResponse, String> {
         super(daoConfig, daoSession)
     }
 
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'CachedResponses' (" + "'KEY' TEXT PRIMARY KEY NOT NULL ," + "'DATA' BLOB," + "'MUST_REVALIDATE' INTEGER NOT NULL );")
     }
 
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'CachedResponses'")
     }
 
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, cachedResponse: CachedResponse): Unit {
+    protected fun bindValues(sQLiteStatement: SQLiteStatement, cachedResponse: CachedResponse)  {
         sQLiteStatement.clearBindings()
-        String key = cachedResponse.getKey()
+        var key: String = cachedResponse.getKey()
         if (key != null) {
             sQLiteStatement.bindString(1, key)
         }
@@ -55,8 +55,8 @@ class CachedResponseDao : AbstractDao<CachedResponse, String> {
 
     fun readEntity(cursor: Cursor, i: Int): CachedResponse {
         ByteArray bArr = null
-        Boolean z = false
-        String string = cursor.isNull(i + 0) ? null : cursor.getString(i + 0)
+        var z: Boolean = false
+        var string: String = cursor.isNull(i + 0) ? null : cursor.getString(i + 0)
         if (!cursor.isNull(i + 1)) {
             bArr = cursor.getBlob(i + 1)
         }
@@ -66,7 +66,7 @@ class CachedResponseDao : AbstractDao<CachedResponse, String> {
         return CachedResponse(string, bArr, z)
     }
 
-    fun readEntity(cursor: Cursor, cachedResponse: CachedResponse, i: Int): Unit {
+    fun readEntity(cursor: Cursor, cachedResponse: CachedResponse, i: Int)  {
         ByteArray bArr = null
         cachedResponse.setKey(cursor.isNull(i + 0) ? null : cursor.getString(i + 0))
         if (!cursor.isNull(i + 1)) {

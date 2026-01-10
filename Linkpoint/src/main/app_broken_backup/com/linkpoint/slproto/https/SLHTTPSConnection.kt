@@ -62,11 +62,11 @@ class SLHTTPSConnection {
 
         fun intercept(Interceptor.Chain chain): Response {
             Request request = chain.request()
-            String header = request.header(HttpHeaders.CONTENT_TYPE)
+            var header: String = request.header(HttpHeaders.CONTENT_TYPE)
             if (header == null || (!header.contains(";"))) {
                 return chain.proceed(request)
             }
-            Int indexOf = header.indexOf(";")
+            var indexOf: Int = header.indexOf(";")
             if (indexOf != -1) {
                 header = header.substring(0, indexOf)
             }
@@ -132,9 +132,9 @@ class SLHTTPSConnection {
                         if (jsonElement.isJsonObject()) {
                             JsonObject asJsonObject2 = jsonElement.getAsJsonObject()
                             if (asJsonObject2.has("name") && asJsonObject2.has("type") && asJsonObject2.has("data")) {
-                                String asString = asJsonObject2.get("name").getAsString()
-                                Int asInt = asJsonObject2.get("type").getAsInt()
-                                String asString2 = asJsonObject2.get("data").getAsString()
+                                var asString: String = asJsonObject2.get("name").getAsString()
+                                var asInt: Int = asJsonObject2.get("type").getAsInt()
+                                var asString2: String = asJsonObject2.get("data").getAsString()
                                 if (asString.equalsIgnoreCase(str + ".") && asInt == 1 && asString2 != null && (!asString2.isEmpty())) {
                                     Debug.Printf("DNS: Resolving '%s': found good result '%s'", str, asString2)
                                     InetAddress byName = InetAddress.getByName(asString2)

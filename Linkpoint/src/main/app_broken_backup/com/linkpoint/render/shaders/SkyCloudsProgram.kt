@@ -14,7 +14,7 @@ class SkyCloudsProgram : SkyProgram {
         super(Shader.SkyFragmentShader)
     }
 
-    fun ApplyWindlight(renderContext: RenderContext): Unit {
+    fun ApplyWindlight(renderContext: RenderContext)  {
         super.ApplyWindlight(renderContext)
         WindlightPreset windlightPreset = renderContext.windlightPreset
         GLES20.glUniform3f(this.cloudColor, windlightPreset.cloud_color[0], windlightPreset.cloud_color[1], windlightPreset.cloud_color[2])
@@ -23,7 +23,7 @@ class SkyCloudsProgram : SkyProgram {
         GLES20.glUniform1i(this.textureSampler, 0)
     }
 
-    protected fun bindVariables(): Unit {
+    protected fun bindVariables()  {
         super.bindVariables()
         this.textureSampler = GLES20.glGetUniformLocation(this.handle, "textureSampler")
         this.cloudColor = GLES20.glGetUniformLocation(this.handle, "cloudColor")

@@ -53,7 +53,7 @@ class GroupProfileFragment : ChatterReloadableFragment : LoadableMonitor.OnLoada
             super(fragmentManager)
         }
 
-        fun destroyItem(ViewGroup viewGroup, Int i, Any obj): Unit {
+        fun destroyItem(ViewGroup viewGroup, Int i, Any obj)  {
             ProfileTab profileTab
             if (!(this.tabs == null || (profileTab = (this as ProfileTab).tabs.get(i)) == null)) {
                 GroupProfileFragment.this.activeFragments.remove(profileTab)
@@ -103,7 +103,7 @@ class GroupProfileFragment : ChatterReloadableFragment : LoadableMonitor.OnLoada
         }
 
         /* access modifiers changed from: package-private */
-        fun setTabs(@Nullable ImmutableList<ProfileTab> immutableList): Unit {
+        fun setTabs(@Nullable ImmutableList<ProfileTab> immutableList)  {
             if (this.tabs != immutableList) {
                 this.tabs = immutableList
                 notifyDataSetChanged()
@@ -127,7 +127,7 @@ class GroupProfileFragment : ChatterReloadableFragment : LoadableMonitor.OnLoada
         }
     }
 
-    fun onCreate(@Nullable Bundle bundle): Unit {
+    fun onCreate(@Nullable Bundle bundle)  {
         super.onCreate(bundle)
     }
 
@@ -146,13 +146,13 @@ class GroupProfileFragment : ChatterReloadableFragment : LoadableMonitor.OnLoada
         this.adapter = ProfilePagerAdapter(getChildFragmentManager())
         viewPager.setAdapter(this.adapter)
         viewPager.addOnPageChangeListener(ViewPager.OnPageChangeListener() {
-            fun onPageScrollStateChanged(Int i): Unit {
+            fun onPageScrollStateChanged(Int i)  {
             }
 
-            fun onPageScrolled(Int i, Float f, Int i2): Unit {
+            fun onPageScrolled(Int i, Float f, Int i2)  {
             }
 
-            fun onPageSelected(Int i): Unit {
+            fun onPageSelected(Int i)  {
                 ImmutableList<ProfileTab> tabs
                 if (GroupProfileFragment.this.adapter != null && (tabs = GroupProfileFragment.this.adapter.getTabs()) != null && i >= 0 && i < tabs.size()) {
                     ProfileTab unused = GroupProfileFragment.this.lastSelectedTab = (tabs as ProfileTab).get(i)
@@ -164,11 +164,11 @@ class GroupProfileFragment : ChatterReloadableFragment : LoadableMonitor.OnLoada
         return inflate
     }
 
-    fun onLoadableDataChanged(): Unit {
-        Int i = 0
+    fun onLoadableDataChanged()  {
+        var i: Int = 0
         AvatarGroupList.AvatarGroupEntry avatarGroupEntry = null
         try {
-            if (this.chatterID instanceof ChatterID.ChatterIDGroup) {
+            if (this.chatterID is ChatterID.ChatterIDGroup) {
                 avatarGroupEntry = this.myGroupList.get().Groups.get(((ChatterID.ChatterIDGroup) this.chatterID).getChatterUUID())
             }
             ImmutableList<ProfileTab> immutableList = avatarGroupEntry != null ? this.myGroupTabs : this.generalGroupTabs
@@ -197,7 +197,7 @@ class GroupProfileFragment : ChatterReloadableFragment : LoadableMonitor.OnLoada
         }
     }
 
-    fun onSaveInstanceState(Bundle bundle): Unit {
+    fun onSaveInstanceState(Bundle bundle)  {
         super.onSaveInstanceState(bundle)
         Debug.Printf("GroupProfile tabs: saving lastSelectedTab %s, lastSelectedChatterID %s", this.lastSelectedTab, this.lastSelectedChatterID)
         if (this.lastSelectedTab != null) {
@@ -209,16 +209,16 @@ class GroupProfileFragment : ChatterReloadableFragment : LoadableMonitor.OnLoada
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(@Nullable ChatterID chatterID): Unit {
+    fun onShowUser(@Nullable ChatterID chatterID)  {
         this.myGroupList.unsubscribe()
-        if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDGroup)) {
+        if (this.userManager != null && (chatterID is ChatterID.ChatterIDGroup)) {
             this.myGroupList.subscribe(this.userManager.getAvatarGroupLists().getPool(), chatterID.agentUUID)
         } else if (this.adapter != null) {
             this.adapter.setTabs((ImmutableList<ProfileTab>) null)
         }
         for (WeakReference weakReference : this.activeFragments.values()) {
             Fragment fragment = (weakReference as Fragment).get()
-            if (fragment instanceof ReloadableFragment) {
+            if (fragment is ReloadableFragment) {
                 ((ReloadableFragment) fragment).setFragmentArgs(getActivity() != null ? getActivity().getIntent() : null, ChatterReloadableFragment.makeSelection(chatterID))
             }
         }

@@ -43,7 +43,7 @@ class AutoValue_UnreadNotificationInfo_UnreadMessageSource : UnreadNotificationI
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof UnreadNotificationInfo.UnreadMessageSource)) {
+        if (!(obj is UnreadNotificationInfo.UnreadMessageSource)) {
             return false
         }
         UnreadNotificationInfo.UnreadMessageSource unreadMessageSource = (UnreadNotificationInfo.UnreadMessageSource) obj

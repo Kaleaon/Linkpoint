@@ -132,7 +132,7 @@ abstract class LLSDNode {
             return r0
         L_0x0048:
             com.linkpoint.slproto.llsd.types.LLSDInt r0 = com.linkpoint.slproto.llsd.types.LLSDInt     // Catch:{ IOException -> 0x0026 }
-            Int r1 = r6.readInt()     // Catch:{ IOException -> 0x0026 }
+            var r1: Int = r6.readInt()     // Catch:{ IOException -> 0x0026 }
             r0.<init>(r1.toInt())     // Catch:{ IOException -> 0x0026 }
             return r0
         L_0x0052:
@@ -141,22 +141,22 @@ abstract class LLSDNode {
             r0.<init>((double) r2)     // Catch:{ IOException -> 0x0026 }
             return r0
         L_0x005c:
-            Long r0 = r6.readLong()     // Catch:{ IOException -> 0x0026 }
-            Long r2 = r6.readLong()     // Catch:{ IOException -> 0x0026 }
+            var r0: Long = r6.readLong()     // Catch:{ IOException -> 0x0026 }
+            var r2: Long = r6.readLong()     // Catch:{ IOException -> 0x0026 }
             com.linkpoint.slproto.llsd.types.LLSDUUID r4 = com.linkpoint.slproto.llsd.types.LLSDUUID     // Catch:{ IOException -> 0x0026 }
             java.util.UUID r5 = java.util.UUID     // Catch:{ IOException -> 0x0026 }
             r5.<init>(r0, r2)     // Catch:{ IOException -> 0x0026 }
             r4.<init>((java.util.UUID) r5)     // Catch:{ IOException -> 0x0026 }
             return r4
         L_0x006f:
-            Int r0 = r6.readInt()     // Catch:{ IOException -> 0x0026 }
+            var r0: Int = r6.readInt()     // Catch:{ IOException -> 0x0026 }
             ByteArray r0 = byte[r0]     // Catch:{ IOException -> 0x0026 }
             r6.readFully(r0)     // Catch:{ IOException -> 0x0026 }
             com.linkpoint.slproto.llsd.types.LLSDBinary r1 = com.linkpoint.slproto.llsd.types.LLSDBinary     // Catch:{ IOException -> 0x0026 }
             r1.<init>((ByteArray) r0)     // Catch:{ IOException -> 0x0026 }
             return r1
         L_0x007e:
-            Int r0 = r6.readInt()     // Catch:{ IOException -> 0x0026 }
+            var r0: Int = r6.readInt()     // Catch:{ IOException -> 0x0026 }
             if (r0 != 0) goto L_0x008d
             com.linkpoint.slproto.llsd.types.LLSDString r0 = com.linkpoint.slproto.llsd.types.LLSDString     // Catch:{ IOException -> 0x0026 }
             java.lang.String r1 = ""
@@ -170,7 +170,7 @@ abstract class LLSDNode {
             r1.<init>(r0)     // Catch:{ IOException -> 0x0026 }
             return r1
         L_0x009c:
-            Int r0 = r6.readInt()     // Catch:{ IOException -> 0x0026 }
+            var r0: Int = r6.readInt()     // Catch:{ IOException -> 0x0026 }
             if (r0 != 0) goto L_0x00ab
             com.linkpoint.slproto.llsd.types.LLSDURI r0 = com.linkpoint.slproto.llsd.types.LLSDURI     // Catch:{ IOException -> 0x0026 }
             java.lang.String r1 = ""
@@ -189,19 +189,19 @@ abstract class LLSDNode {
             java.util.Date r3 = java.util.Date     // Catch:{ IOException -> 0x0026 }
             r4 = 4652007308841189376(0x408f400000000000, double:1000.0)
             double r0 = r0 * r4
-            Long r0 = java.lang.Math.round(r0)     // Catch:{ IOException -> 0x0026 }
+            var r0: Long = java.lang.Math.round(r0)     // Catch:{ IOException -> 0x0026 }
             r3.<init>(r0)     // Catch:{ IOException -> 0x0026 }
             r2.<init>((java.util.Date) r3)     // Catch:{ IOException -> 0x0026 }
             return r2
         L_0x00d3:
-            Int r1 = r6.readInt()     // Catch:{ IOException -> 0x0026 }
+            var r1: Int = r6.readInt()     // Catch:{ IOException -> 0x0026 }
             com.linkpoint.slproto.llsd.types.LLSDArray r2 = com.linkpoint.slproto.llsd.types.LLSDArray     // Catch:{ IOException -> 0x0026 }
             r2.<init>()     // Catch:{ IOException -> 0x0026 }
         L_0x00dc:
             if (r0 >= r1) goto L_0x00e8
             com.linkpoint.slproto.llsd.LLSDNode r3 = fromBinary(r6)     // Catch:{ IOException -> 0x0026 }
             r2.add(r3)     // Catch:{ IOException -> 0x0026 }
-            Int r0 = r0 + 1
+            var r0: Int = r0 + 1
             goto L_0x00dc
         L_0x00e8:
             byte r0 = r6.readByte()     // Catch:{ IOException -> 0x0026 }
@@ -214,7 +214,7 @@ abstract class LLSDNode {
         L_0x00f9:
             return r2
         L_0x00fa:
-            Int r1 = r6.readInt()     // Catch:{ IOException -> 0x0026 }
+            var r1: Int = r6.readInt()     // Catch:{ IOException -> 0x0026 }
             java.util.HashMap r2 = java.util.HashMap     // Catch:{ IOException -> 0x0026 }
             r2.<init>(r1)     // Catch:{ IOException -> 0x0026 }
         L_0x0103:
@@ -227,13 +227,13 @@ abstract class LLSDNode {
             r0.<init>(r1)     // Catch:{ IOException -> 0x0026 }
             throw r0     // Catch:{ IOException -> 0x0026 }
         L_0x0116:
-            Int r3 = r6.readInt()     // Catch:{ IOException -> 0x0026 }
+            var r3: Int = r6.readInt()     // Catch:{ IOException -> 0x0026 }
             ByteArray r3 = byte[r3]     // Catch:{ IOException -> 0x0026 }
             r6.readFully(r3)     // Catch:{ IOException -> 0x0026 }
             java.lang.String r3 = com.linkpoint.slproto.SLMessage.stringFromVariableUTF(r3)     // Catch:{ IOException -> 0x0026 }
             com.linkpoint.slproto.llsd.LLSDNode r4 = fromBinary(r6)     // Catch:{ IOException -> 0x0026 }
             r2.put(r3, r4)     // Catch:{ IOException -> 0x0026 }
-            Int r0 = r0 + 1
+            var r0: Int = r0 + 1
             goto L_0x0103
         L_0x012d:
             com.linkpoint.slproto.llsd.types.LLSDMap r0 = com.linkpoint.slproto.llsd.types.LLSDMap     // Catch:{ IOException -> 0x0026 }
@@ -382,39 +382,39 @@ abstract class LLSDNode {
     }
 
     fun isBinary(): Boolean {
-        return this instanceof LLSDBinary
+        return this is LLSDBinary
     }
 
     fun isBoolean(): Boolean {
-        return this instanceof LLSDBoolean
+        return this is LLSDBoolean
     }
 
     fun isDate(): Boolean {
-        return this instanceof LLSDDate
+        return this is LLSDDate
     }
 
     fun isDouble(): Boolean {
-        return this instanceof LLSDDouble
+        return this is LLSDDouble
     }
 
     fun isInt(): Boolean {
-        return this instanceof LLSDInt
+        return this is LLSDInt
     }
 
     fun isLong(): Boolean {
-        return this instanceof LLSDInt
+        return this is LLSDInt
     }
 
     fun isString(): Boolean {
-        return this instanceof LLSDString
+        return this is LLSDString
     }
 
     fun isURI(): Boolean {
-        return this instanceof LLSDURI
+        return this is LLSDURI
     }
 
     fun isUUID(): Boolean {
-        return this instanceof LLSDUUID
+        return this is LLSDUUID
     }
 
     @Throws(LLSDException::class)

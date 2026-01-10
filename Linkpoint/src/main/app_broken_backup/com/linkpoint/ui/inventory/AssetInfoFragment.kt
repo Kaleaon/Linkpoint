@@ -148,7 +148,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$OIe5MtmKy
     }
 
     private Int getCheckboxes(Dialog dialog, Int i, Int i2, Int i3) {
-        Int i4 = 0
+        var i4: Int = 0
         if (((CheckBox) dialog.findViewById(i)).isChecked()) {
             i4 = 32768
         }
@@ -177,7 +177,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$OIe5MtmKy
     }
 
     private Unit setCheckboxes(Dialog dialog, Int i, Int i2, Int i3, Int i4, Int i5, Boolean z) {
-        Boolean z2 = false
+        var z2: Boolean = false
         ((CheckBox) dialog.findViewById(i3)).setChecked((i & 32768) != 0)
         ((CheckBox) dialog.findViewById(i4)).setChecked((i & 16384) != 0)
         ((CheckBox) dialog.findViewById(i5)).setChecked((i & 8192) != 0)
@@ -309,20 +309,20 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$OIe5MtmKy
     }
 
     private Unit showEntryInfo(@NonNull SLInventoryEntry sLInventoryEntry) {
-        Int i = 0
-        Int i2 = 8
+        var i: Int = 0
+        var i2: Int = 8
         View view = getView()
         if (view != null) {
             ((TextView) view.findViewById(R.id.asset_info_name)).setText(sLInventoryEntry.name)
             ((TextView) view.findViewById(R.id.asset_info_description)).setText(!Strings.isNullOrEmpty(sLInventoryEntry.description) ? sLInventoryEntry.description : getResources().getString(R.string.asset_no_description))
             ((TextView) view.findViewById(R.id.asset_info_type)).setText(sLInventoryEntry.getTypeDescriptionResId())
-            Int drawableResource = sLInventoryEntry.getDrawableResource()
+            var drawableResource: Int = sLInventoryEntry.getDrawableResource()
             if (drawableResource >= 0) {
                 ((ImageView) view.findViewById(R.id.asset_info_icon)).setImageResource(drawableResource)
             } else {
                 ((ImageView) view.findViewById(R.id.asset_info_icon)).setImageBitmap((Bitmap) null)
             }
-            Int actionDescriptionResId = sLInventoryEntry.getActionDescriptionResId()
+            var actionDescriptionResId: Int = sLInventoryEntry.getActionDescriptionResId()
             if (actionDescriptionResId >= 0) {
                 ((Button) view.findViewById(R.id.asset_action_button)).setText(actionDescriptionResId)
                 view.findViewById(R.id.asset_action_button).setVisibility(0)
@@ -336,13 +336,13 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$OIe5MtmKy
             showPermissions(sLInventoryEntry.everyoneMask, R.id.asset_permission_everyone_copy, R.id.asset_permission_everyone_modify, R.id.asset_permission_everyone_transfer)
             showPermissions(sLInventoryEntry.nextOwnerMask, R.id.asset_permission_next_owner_copy, R.id.asset_permission_next_owner_modify, R.id.asset_permission_next_owner_transfer)
             SLAgentCircuit data = this.agentCircuit.getData()
-            Boolean z = data != null
+            var z: Boolean = data != null
             if (!z || !(sLInventoryEntry.assetType == SLAssetType.AT_OBJECT.getTypeCode() || (sLInventoryEntry.assetType == SLAssetType.AT_LINK.getTypeCode() && sLInventoryEntry.invType == SLInventoryType.IT_OBJECT.getTypeCode()))) {
                 view.findViewById(R.id.asset_attach_button).setVisibility(8)
                 view.findViewById(R.id.asset_detach_button).setVisibility(8)
             } else {
-                Boolean z2 = sLInventoryEntry.whatIsItemWornOn(this.wornAttachments.getData(), this.wornWearables.getData(), false) != null
-                Boolean canDetachItem = z2 ? data.getModules().avatarAppearance.canDetachItem(sLInventoryEntry) : false
+                var z2: Boolean = sLInventoryEntry.whatIsItemWornOn(this.wornAttachments.getData(), this.wornWearables.getData(), false) != null
+                var canDetachItem: Boolean = z2 ? data.getModules().avatarAppearance.canDetachItem(sLInventoryEntry) : false
                 view.findViewById(R.id.asset_attach_button).setVisibility(z2 ? 8 : 0)
                 view.findViewById(R.id.asset_detach_button).setVisibility(canDetachItem ? 0 : 8)
             }
@@ -360,7 +360,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$OIe5MtmKy
                 view.findViewById(R.id.asset_worn_text).setVisibility(8)
             } else {
                 Any whatIsItemWornOn = sLInventoryEntry.whatIsItemWornOn(this.wornAttachments.getData(), this.wornWearables.getData(), false)
-                if (whatIsItemWornOn instanceof SLWearableType) {
+                if (whatIsItemWornOn is SLWearableType) {
                     view.findViewById(R.id.asset_wear_button).setVisibility(8)
                     if (((SLWearableType) whatIsItemWornOn).isBodyPart()) {
                         view.findViewById(R.id.asset_take_off_button).setVisibility(8)
@@ -374,7 +374,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$OIe5MtmKy
                     findViewById.setVisibility(i2)
                 } else {
                     view.findViewById(R.id.asset_take_off_button).setVisibility(8)
-                    Boolean canWearItem = data.getModules().avatarAppearance.canWearItem(sLInventoryEntry)
+                    var canWearItem: Boolean = data.getModules().avatarAppearance.canWearItem(sLInventoryEntry)
                     View findViewById2 = view.findViewById(R.id.asset_wear_button)
                     if (!canWearItem) {
                         i = 8
@@ -428,7 +428,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$OIe5MtmKy
             return
         }
         view.findViewById(i).setVisibility(0)
-        String resolvedName = chatterNameRetriever.getResolvedName()
+        var resolvedName: String = chatterNameRetriever.getResolvedName()
         ((TextView) view.findViewById(i2)).setText(resolvedName != null ? resolvedName : getString(R.string.name_loading_title))
         ((ChatterPicView) view.findViewById(i3)).setChatterID(chatterNameRetriever.chatterID, resolvedName)
     }
@@ -484,7 +484,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$OIe5MtmKy
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_inventory_AssetInfoFragment_20027  reason: not valid java name */
     /* synthetic */ Unit m584lambda$com_lumiyaviewer_lumiya_ui_inventory_AssetInfoFragment_20027() {
         FragmentActivity activity = getActivity()
-        if (activity instanceof DetailsActivity) {
+        if (activity is DetailsActivity) {
             ((DetailsActivity) activity).closeDetailsFragment(this)
         }
     }
@@ -496,12 +496,12 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$OIe5MtmKy
         dialog.dismiss()
     }
 
-    fun onClick(View view): Unit {
+    fun onClick(View view)  {
         SLInventoryEntry data = this.entrySubscription.getData()
         if (data != null) {
             switch (view.getId()) {
                 case R.id.asset_action_button:
-                    Int actionDescriptionResId = data.getActionDescriptionResId()
+                    var actionDescriptionResId: Int = data.getActionDescriptionResId()
                     if (actionDescriptionResId >= 0 && this.inventoryFragmentHelper.isActionAllowed(data, actionDescriptionResId)) {
                         this.inventoryFragmentHelper.PerformInventoryAction(data, actionDescriptionResId)
                         return
@@ -543,12 +543,12 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$OIe5MtmKy
         }
     }
 
-    fun onCreate(@Nullable Bundle bundle): Unit {
+    fun onCreate(@Nullable Bundle bundle)  {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater): Unit {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater)  {
         menuInflater.inflate(R.menu.inventory_item_menu, menu)
         this.menuItemDelete = menu.findItem(R.id.inventory_item_delete_item)
         this.menuItemRename = menu.findItem(R.id.inventory_item_rename_item)
@@ -579,7 +579,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$OIe5MtmKy
         return inflate
     }
 
-    fun onLoadableDataChanged(): Unit {
+    fun onLoadableDataChanged()  {
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         try {
             showEntryInfo(this.entrySubscription.get())
@@ -706,22 +706,22 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$OIe5MtmKy
         return super.onOptionsItemSelected(menuItem)
     }
 
-    fun onPrepareOptionsMenu(Menu menu): Unit {
+    fun onPrepareOptionsMenu(Menu menu)  {
         super.onPrepareOptionsMenu(menu)
         updateMenuItems()
     }
 
-    fun onStart(): Unit {
+    fun onStart()  {
         super.onStart()
         showEntry(UUIDPool.getUUID(getArguments().getString(ITEM_UUID_KEY)))
     }
 
-    fun onStop(): Unit {
+    fun onStop()  {
         showEntry((UUID) null)
         super.onStop()
     }
 
-    fun setFragmentArgs(Intent intent, Bundle bundle): Unit {
+    fun setFragmentArgs(Intent intent, Bundle bundle)  {
         UUID activeAgentID = ActivityUtils.getActiveAgentID(intent)
         if (activeAgentID != null) {
             getArguments().putString("activeAgentUUID", activeAgentID.toString())

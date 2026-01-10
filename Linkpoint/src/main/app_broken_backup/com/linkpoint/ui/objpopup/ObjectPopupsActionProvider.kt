@@ -29,7 +29,7 @@ class ObjectPopupsActionProvider : ActionProvider : View.OnClickListener {
         return this.objectPopupCount != 0
     }
 
-    fun onClick(View view): Unit {
+    fun onClick(View view)  {
         if (this.objectPopupsClickListener != null) {
             this.objectPopupsClickListener.onObjectPopupsClicked()
         }
@@ -49,7 +49,7 @@ class ObjectPopupsActionProvider : ActionProvider : View.OnClickListener {
         return true
     }
 
-    fun setObjectPopupCount(Int i): Unit {
+    fun setObjectPopupCount(Int i)  {
         if (this.objectPopupCount != i) {
             this.objectPopupCount = i
             if (this.popupCountTextView != null) {
@@ -59,7 +59,7 @@ class ObjectPopupsActionProvider : ActionProvider : View.OnClickListener {
         }
     }
 
-    fun setObjectPopupsClickListener(@Nullable ObjectPopupsClickListener objectPopupsClickListener2): Unit {
+    fun setObjectPopupsClickListener(@Nullable ObjectPopupsClickListener objectPopupsClickListener2)  {
         this.objectPopupsClickListener = objectPopupsClickListener2
     }
 }

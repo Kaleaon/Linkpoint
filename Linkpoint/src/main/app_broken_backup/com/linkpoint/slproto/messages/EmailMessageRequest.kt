@@ -21,11 +21,11 @@ class EmailMessageRequest : SLMessage {
         return this.DataBlock_Field.FromAddress.size + 17 + 1 + this.DataBlock_Field.Subject.size + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleEmailMessageRequest(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 79)
@@ -34,7 +34,7 @@ class EmailMessageRequest : SLMessage {
         packVariable(byteBuffer, this.DataBlock_Field.Subject, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.DataBlock_Field.ObjectID = unpackUUID(byteBuffer)
         this.DataBlock_Field.FromAddress = unpackVariable(byteBuffer, 1)
         this.DataBlock_Field.Subject = unpackVariable(byteBuffer, 1)

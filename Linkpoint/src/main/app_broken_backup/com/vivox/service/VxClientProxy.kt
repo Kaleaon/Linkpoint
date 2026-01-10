@@ -515,7 +515,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_message_base_t get_next_message(Int n) {
-        Long l = VxClientProxyJNI.get_next_message(n)
+        var l: Long = VxClientProxyJNI.get_next_message(n)
         if (l != 0L) return vx_message_base_t(l, false)
         return null
     }
@@ -525,7 +525,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_message_base_t get_next_message_no_wait() {
-        Long l = VxClientProxyJNI.get_next_message_no_wait()
+        var l: Long = VxClientProxyJNI.get_next_message_no_wait()
         if (l != 0L) return vx_message_base_t(l, false)
         return null
     }
@@ -555,7 +555,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_p_vx_name_value_pair name_value_pairs_create(Int n) {
-        Long l = VxClientProxyJNI.name_value_pairs_create(n)
+        var l: Long = VxClientProxyJNI.name_value_pairs_create(n)
         if (l != 0L) return SWIGTYPE_p_p_vx_name_value_pair(l, false)
         return null
     }
@@ -729,7 +729,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_void vx_copy_audioBuffer(SWIGTYPE_p_void sWIGTYPE_p_void) {
-        Long l = VxClientProxyJNI.vx_copy_audioBuffer(SWIGTYPE_p_void.getCPtr(sWIGTYPE_p_void))
+        var l: Long = VxClientProxyJNI.vx_copy_audioBuffer(SWIGTYPE_p_void.getCPtr(sWIGTYPE_p_void))
         if (l != 0L) return SWIGTYPE_p_void(l, false)
         return null
     }
@@ -767,7 +767,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_buddy_t vx_evt_buddy_and_group_list_changed_t_get_buddies_item(vx_evt_buddy_and_group_list_changed_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_evt_buddy_and_group_list_changed_t_get_buddies_item(vx_evt_buddy_and_group_list_changed_t.getCPtr((vx_evt_buddy_and_group_list_changed_t)object), (vx_evt_buddy_and_group_list_changed_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_evt_buddy_and_group_list_changed_t_get_buddies_item(vx_evt_buddy_and_group_list_changed_t.getCPtr((vx_evt_buddy_and_group_list_changed_t)object), (vx_evt_buddy_and_group_list_changed_t)object, n)
         if (l != 0L) return vx_buddy_t(l, false)
         return null
     }
@@ -777,7 +777,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_group_t vx_evt_buddy_and_group_list_changed_t_get_groups_item(vx_evt_buddy_and_group_list_changed_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_evt_buddy_and_group_list_changed_t_get_groups_item(vx_evt_buddy_and_group_list_changed_t.getCPtr((vx_evt_buddy_and_group_list_changed_t)object), (vx_evt_buddy_and_group_list_changed_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_evt_buddy_and_group_list_changed_t_get_groups_item(vx_evt_buddy_and_group_list_changed_t.getCPtr((vx_evt_buddy_and_group_list_changed_t)object), (vx_evt_buddy_and_group_list_changed_t)object, n)
         if (l != 0L) return vx_group_t(l, false)
         return null
     }
@@ -895,7 +895,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_account_login_state_change_t vx_message_base_t2vx_evt_account_login_state_change_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_account_login_state_change_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_account_login_state_change_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_account_login_state_change_t(l, false)
         return null
     }
@@ -905,7 +905,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_aux_audio_properties_t vx_message_base_t2vx_evt_aux_audio_properties_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_aux_audio_properties_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_aux_audio_properties_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_aux_audio_properties_t(l, false)
         return null
     }
@@ -915,7 +915,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_buddy_and_group_list_changed_t vx_message_base_t2vx_evt_buddy_and_group_list_changed_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_buddy_and_group_list_changed_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_buddy_and_group_list_changed_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_buddy_and_group_list_changed_t(l, false)
         return null
     }
@@ -925,7 +925,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_buddy_changed_t vx_message_base_t2vx_evt_buddy_changed_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_buddy_changed_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_buddy_changed_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_buddy_changed_t(l, false)
         return null
     }
@@ -935,7 +935,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_buddy_group_changed_t vx_message_base_t2vx_evt_buddy_group_changed_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_buddy_group_changed_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_buddy_group_changed_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_buddy_group_changed_t(l, false)
         return null
     }
@@ -945,7 +945,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_buddy_presence_t vx_message_base_t2vx_evt_buddy_presence_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_buddy_presence_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_buddy_presence_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_buddy_presence_t(l, false)
         return null
     }
@@ -955,7 +955,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_idle_state_changed_t vx_message_base_t2vx_evt_idle_state_changed_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_idle_state_changed_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_idle_state_changed_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_idle_state_changed_t(l, false)
         return null
     }
@@ -965,7 +965,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_keyboard_mouse_t vx_message_base_t2vx_evt_keyboard_mouse_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_keyboard_mouse_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_keyboard_mouse_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_keyboard_mouse_t(l, false)
         return null
     }
@@ -975,7 +975,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_media_completion_t vx_message_base_t2vx_evt_media_completion_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_media_completion_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_media_completion_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_media_completion_t(l, false)
         return null
     }
@@ -985,7 +985,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_media_stream_updated_t vx_message_base_t2vx_evt_media_stream_updated_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_media_stream_updated_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_media_stream_updated_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_media_stream_updated_t(l, false)
         return null
     }
@@ -995,7 +995,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_message_t vx_message_base_t2vx_evt_message_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_message_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_message_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_message_t(l, false)
         return null
     }
@@ -1005,7 +1005,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_network_message_t vx_message_base_t2vx_evt_network_message_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_network_message_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_network_message_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_network_message_t(l, false)
         return null
     }
@@ -1015,7 +1015,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_participant_added_t vx_message_base_t2vx_evt_participant_added_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_participant_added_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_participant_added_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_participant_added_t(l, false)
         return null
     }
@@ -1025,7 +1025,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_participant_removed_t vx_message_base_t2vx_evt_participant_removed_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_participant_removed_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_participant_removed_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_participant_removed_t(l, false)
         return null
     }
@@ -1035,7 +1035,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_participant_updated_t vx_message_base_t2vx_evt_participant_updated_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_participant_updated_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_participant_updated_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_participant_updated_t(l, false)
         return null
     }
@@ -1045,7 +1045,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_server_app_data_t vx_message_base_t2vx_evt_server_app_data_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_server_app_data_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_server_app_data_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_server_app_data_t(l, false)
         return null
     }
@@ -1055,7 +1055,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_session_added_t vx_message_base_t2vx_evt_session_added_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_session_added_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_session_added_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_session_added_t(l, false)
         return null
     }
@@ -1065,7 +1065,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_session_notification_t vx_message_base_t2vx_evt_session_notification_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_session_notification_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_session_notification_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_session_notification_t(l, false)
         return null
     }
@@ -1075,7 +1075,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_session_removed_t vx_message_base_t2vx_evt_session_removed_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_session_removed_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_session_removed_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_session_removed_t(l, false)
         return null
     }
@@ -1085,7 +1085,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_session_updated_t vx_message_base_t2vx_evt_session_updated_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_session_updated_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_session_updated_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_session_updated_t(l, false)
         return null
     }
@@ -1095,7 +1095,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_sessiongroup_added_t vx_message_base_t2vx_evt_sessiongroup_added_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_sessiongroup_added_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_sessiongroup_added_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_sessiongroup_added_t(l, false)
         return null
     }
@@ -1105,7 +1105,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_sessiongroup_playback_frame_played_t vx_message_base_t2vx_evt_sessiongroup_playback_frame_played_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_sessiongroup_playback_frame_played_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_sessiongroup_playback_frame_played_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_sessiongroup_playback_frame_played_t(l, false)
         return null
     }
@@ -1115,7 +1115,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_sessiongroup_removed_t vx_message_base_t2vx_evt_sessiongroup_removed_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_sessiongroup_removed_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_sessiongroup_removed_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_sessiongroup_removed_t(l, false)
         return null
     }
@@ -1125,7 +1125,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_sessiongroup_updated_t vx_message_base_t2vx_evt_sessiongroup_updated_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_sessiongroup_updated_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_sessiongroup_updated_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_sessiongroup_updated_t(l, false)
         return null
     }
@@ -1135,7 +1135,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_subscription_t vx_message_base_t2vx_evt_subscription_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_subscription_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_subscription_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_subscription_t(l, false)
         return null
     }
@@ -1145,7 +1145,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_text_stream_updated_t vx_message_base_t2vx_evt_text_stream_updated_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_text_stream_updated_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_text_stream_updated_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_text_stream_updated_t(l, false)
         return null
     }
@@ -1155,7 +1155,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_user_app_data_t vx_message_base_t2vx_evt_user_app_data_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_user_app_data_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_user_app_data_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_user_app_data_t(l, false)
         return null
     }
@@ -1165,7 +1165,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_evt_voice_service_connection_state_changed_t vx_message_base_t2vx_evt_voice_service_connection_state_changed_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_evt_voice_service_connection_state_changed_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_evt_voice_service_connection_state_changed_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_evt_voice_service_connection_state_changed_t(l, false)
         return null
     }
@@ -1175,7 +1175,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_anonymous_login_t vx_message_base_t2vx_req_account_anonymous_login_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_anonymous_login_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_anonymous_login_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_anonymous_login_t(l, false)
         return null
     }
@@ -1185,7 +1185,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_authtoken_login_t vx_message_base_t2vx_req_account_authtoken_login_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_authtoken_login_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_authtoken_login_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_authtoken_login_t(l, false)
         return null
     }
@@ -1195,7 +1195,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_buddy_delete_t vx_message_base_t2vx_req_account_buddy_delete_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_buddy_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_buddy_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_buddy_delete_t(l, false)
         return null
     }
@@ -1205,7 +1205,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_buddy_search_t vx_message_base_t2vx_req_account_buddy_search_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_buddy_search_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_buddy_search_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_buddy_search_t(l, false)
         return null
     }
@@ -1215,7 +1215,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_buddy_set_t vx_message_base_t2vx_req_account_buddy_set_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_buddy_set_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_buddy_set_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_buddy_set_t(l, false)
         return null
     }
@@ -1225,7 +1225,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_buddygroup_delete_t vx_message_base_t2vx_req_account_buddygroup_delete_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_buddygroup_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_buddygroup_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_buddygroup_delete_t(l, false)
         return null
     }
@@ -1235,7 +1235,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_buddygroup_set_t vx_message_base_t2vx_req_account_buddygroup_set_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_buddygroup_set_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_buddygroup_set_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_buddygroup_set_t(l, false)
         return null
     }
@@ -1245,7 +1245,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_channel_add_acl_t vx_message_base_t2vx_req_account_channel_add_acl_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_add_acl_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_add_acl_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_channel_add_acl_t(l, false)
         return null
     }
@@ -1255,7 +1255,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_channel_add_moderator_t vx_message_base_t2vx_req_account_channel_add_moderator_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_add_moderator_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_add_moderator_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_channel_add_moderator_t(l, false)
         return null
     }
@@ -1265,7 +1265,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_channel_change_owner_t vx_message_base_t2vx_req_account_channel_change_owner_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_change_owner_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_change_owner_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_channel_change_owner_t(l, false)
         return null
     }
@@ -1275,7 +1275,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_channel_create_t vx_message_base_t2vx_req_account_channel_create_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_create_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_create_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_channel_create_t(l, false)
         return null
     }
@@ -1285,7 +1285,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_channel_delete_t vx_message_base_t2vx_req_account_channel_delete_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_channel_delete_t(l, false)
         return null
     }
@@ -1295,7 +1295,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_channel_favorite_delete_t vx_message_base_t2vx_req_account_channel_favorite_delete_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_favorite_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_favorite_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_channel_favorite_delete_t(l, false)
         return null
     }
@@ -1305,7 +1305,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_channel_favorite_group_delete_t vx_message_base_t2vx_req_account_channel_favorite_group_delete_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_favorite_group_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_favorite_group_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_channel_favorite_group_delete_t(l, false)
         return null
     }
@@ -1315,7 +1315,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_channel_favorite_group_set_t vx_message_base_t2vx_req_account_channel_favorite_group_set_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_favorite_group_set_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_favorite_group_set_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_channel_favorite_group_set_t(l, false)
         return null
     }
@@ -1325,7 +1325,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_channel_favorite_set_t vx_message_base_t2vx_req_account_channel_favorite_set_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_favorite_set_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_favorite_set_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_channel_favorite_set_t(l, false)
         return null
     }
@@ -1335,7 +1335,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_channel_favorites_get_list_t vx_message_base_t2vx_req_account_channel_favorites_get_list_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_favorites_get_list_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_favorites_get_list_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_channel_favorites_get_list_t(l, false)
         return null
     }
@@ -1345,7 +1345,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_channel_get_acl_t vx_message_base_t2vx_req_account_channel_get_acl_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_get_acl_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_get_acl_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_channel_get_acl_t(l, false)
         return null
     }
@@ -1355,7 +1355,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_channel_get_info_t vx_message_base_t2vx_req_account_channel_get_info_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_get_info_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_get_info_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_channel_get_info_t(l, false)
         return null
     }
@@ -1365,7 +1365,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_channel_get_moderators_t vx_message_base_t2vx_req_account_channel_get_moderators_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_get_moderators_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_get_moderators_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_channel_get_moderators_t(l, false)
         return null
     }
@@ -1375,7 +1375,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_channel_get_participants_t vx_message_base_t2vx_req_account_channel_get_participants_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_get_participants_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_get_participants_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_channel_get_participants_t(l, false)
         return null
     }
@@ -1385,7 +1385,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_channel_remove_acl_t vx_message_base_t2vx_req_account_channel_remove_acl_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_remove_acl_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_remove_acl_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_channel_remove_acl_t(l, false)
         return null
     }
@@ -1395,7 +1395,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_channel_remove_moderator_t vx_message_base_t2vx_req_account_channel_remove_moderator_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_remove_moderator_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_remove_moderator_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_channel_remove_moderator_t(l, false)
         return null
     }
@@ -1405,7 +1405,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_channel_search_t vx_message_base_t2vx_req_account_channel_search_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_search_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_search_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_channel_search_t(l, false)
         return null
     }
@@ -1415,7 +1415,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_channel_update_t vx_message_base_t2vx_req_account_channel_update_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_update_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_channel_update_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_channel_update_t(l, false)
         return null
     }
@@ -1425,7 +1425,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_create_auto_accept_rule_t vx_message_base_t2vx_req_account_create_auto_accept_rule_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_create_auto_accept_rule_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_create_auto_accept_rule_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_create_auto_accept_rule_t(l, false)
         return null
     }
@@ -1435,7 +1435,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_create_block_rule_t vx_message_base_t2vx_req_account_create_block_rule_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_create_block_rule_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_create_block_rule_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_create_block_rule_t(l, false)
         return null
     }
@@ -1445,7 +1445,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_delete_auto_accept_rule_t vx_message_base_t2vx_req_account_delete_auto_accept_rule_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_delete_auto_accept_rule_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_delete_auto_accept_rule_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_delete_auto_accept_rule_t(l, false)
         return null
     }
@@ -1455,7 +1455,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_delete_block_rule_t vx_message_base_t2vx_req_account_delete_block_rule_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_delete_block_rule_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_delete_block_rule_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_delete_block_rule_t(l, false)
         return null
     }
@@ -1465,7 +1465,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_get_account_t vx_message_base_t2vx_req_account_get_account_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_get_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_get_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_get_account_t(l, false)
         return null
     }
@@ -1475,7 +1475,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_get_session_fonts_t vx_message_base_t2vx_req_account_get_session_fonts_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_get_session_fonts_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_get_session_fonts_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_get_session_fonts_t(l, false)
         return null
     }
@@ -1485,7 +1485,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_get_template_fonts_t vx_message_base_t2vx_req_account_get_template_fonts_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_get_template_fonts_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_get_template_fonts_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_get_template_fonts_t(l, false)
         return null
     }
@@ -1495,7 +1495,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_list_auto_accept_rules_t vx_message_base_t2vx_req_account_list_auto_accept_rules_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_list_auto_accept_rules_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_list_auto_accept_rules_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_list_auto_accept_rules_t(l, false)
         return null
     }
@@ -1505,7 +1505,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_list_block_rules_t vx_message_base_t2vx_req_account_list_block_rules_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_list_block_rules_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_list_block_rules_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_list_block_rules_t(l, false)
         return null
     }
@@ -1515,7 +1515,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_list_buddies_and_groups_t vx_message_base_t2vx_req_account_list_buddies_and_groups_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_list_buddies_and_groups_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_list_buddies_and_groups_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_list_buddies_and_groups_t(l, false)
         return null
     }
@@ -1525,7 +1525,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_login_t vx_message_base_t2vx_req_account_login_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_login_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_login_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_login_t(l, false)
         return null
     }
@@ -1535,7 +1535,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_logout_t vx_message_base_t2vx_req_account_logout_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_logout_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_logout_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_logout_t(l, false)
         return null
     }
@@ -1545,7 +1545,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_post_crash_dump_t vx_message_base_t2vx_req_account_post_crash_dump_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_post_crash_dump_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_post_crash_dump_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_post_crash_dump_t(l, false)
         return null
     }
@@ -1555,7 +1555,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_send_message_t vx_message_base_t2vx_req_account_send_message_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_send_message_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_send_message_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_send_message_t(l, false)
         return null
     }
@@ -1565,7 +1565,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_send_sms_t vx_message_base_t2vx_req_account_send_sms_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_send_sms_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_send_sms_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_send_sms_t(l, false)
         return null
     }
@@ -1575,7 +1575,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_send_subscription_reply_t vx_message_base_t2vx_req_account_send_subscription_reply_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_send_subscription_reply_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_send_subscription_reply_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_send_subscription_reply_t(l, false)
         return null
     }
@@ -1585,7 +1585,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_send_user_app_data_t vx_message_base_t2vx_req_account_send_user_app_data_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_send_user_app_data_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_send_user_app_data_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_send_user_app_data_t(l, false)
         return null
     }
@@ -1595,7 +1595,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_set_login_properties_t vx_message_base_t2vx_req_account_set_login_properties_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_set_login_properties_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_set_login_properties_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_set_login_properties_t(l, false)
         return null
     }
@@ -1605,7 +1605,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_set_presence_t vx_message_base_t2vx_req_account_set_presence_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_set_presence_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_set_presence_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_set_presence_t(l, false)
         return null
     }
@@ -1615,7 +1615,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_update_account_t vx_message_base_t2vx_req_account_update_account_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_update_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_update_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_update_account_t(l, false)
         return null
     }
@@ -1625,7 +1625,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_account_web_call_t vx_message_base_t2vx_req_account_web_call_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_account_web_call_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_account_web_call_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_account_web_call_t(l, false)
         return null
     }
@@ -1635,7 +1635,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_capture_audio_start_t vx_message_base_t2vx_req_aux_capture_audio_start_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_capture_audio_start_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_capture_audio_start_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_capture_audio_start_t(l, false)
         return null
     }
@@ -1645,7 +1645,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_capture_audio_stop_t vx_message_base_t2vx_req_aux_capture_audio_stop_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_capture_audio_stop_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_capture_audio_stop_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_capture_audio_stop_t(l, false)
         return null
     }
@@ -1655,7 +1655,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_connectivity_info_t vx_message_base_t2vx_req_aux_connectivity_info_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_connectivity_info_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_connectivity_info_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_connectivity_info_t(l, false)
         return null
     }
@@ -1665,7 +1665,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_create_account_t vx_message_base_t2vx_req_aux_create_account_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_create_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_create_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_create_account_t(l, false)
         return null
     }
@@ -1675,7 +1675,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_deactivate_account_t vx_message_base_t2vx_req_aux_deactivate_account_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_deactivate_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_deactivate_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_deactivate_account_t(l, false)
         return null
     }
@@ -1685,7 +1685,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_get_capture_devices_t vx_message_base_t2vx_req_aux_get_capture_devices_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_get_capture_devices_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_get_capture_devices_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_get_capture_devices_t(l, false)
         return null
     }
@@ -1695,7 +1695,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_get_mic_level_t vx_message_base_t2vx_req_aux_get_mic_level_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_get_mic_level_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_get_mic_level_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_get_mic_level_t(l, false)
         return null
     }
@@ -1705,7 +1705,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_get_render_devices_t vx_message_base_t2vx_req_aux_get_render_devices_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_get_render_devices_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_get_render_devices_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_get_render_devices_t(l, false)
         return null
     }
@@ -1715,7 +1715,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_get_speaker_level_t vx_message_base_t2vx_req_aux_get_speaker_level_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_get_speaker_level_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_get_speaker_level_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_get_speaker_level_t(l, false)
         return null
     }
@@ -1725,7 +1725,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_get_vad_properties_t vx_message_base_t2vx_req_aux_get_vad_properties_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_get_vad_properties_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_get_vad_properties_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_get_vad_properties_t(l, false)
         return null
     }
@@ -1735,7 +1735,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_global_monitor_keyboard_mouse_t vx_message_base_t2vx_req_aux_global_monitor_keyboard_mouse_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_global_monitor_keyboard_mouse_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_global_monitor_keyboard_mouse_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_global_monitor_keyboard_mouse_t(l, false)
         return null
     }
@@ -1745,7 +1745,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_play_audio_buffer_t vx_message_base_t2vx_req_aux_play_audio_buffer_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_play_audio_buffer_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_play_audio_buffer_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_play_audio_buffer_t(l, false)
         return null
     }
@@ -1755,7 +1755,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_reactivate_account_t vx_message_base_t2vx_req_aux_reactivate_account_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_reactivate_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_reactivate_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_reactivate_account_t(l, false)
         return null
     }
@@ -1765,7 +1765,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_render_audio_modify_t vx_message_base_t2vx_req_aux_render_audio_modify_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_render_audio_modify_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_render_audio_modify_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_render_audio_modify_t(l, false)
         return null
     }
@@ -1775,7 +1775,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_render_audio_start_t vx_message_base_t2vx_req_aux_render_audio_start_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_render_audio_start_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_render_audio_start_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_render_audio_start_t(l, false)
         return null
     }
@@ -1785,7 +1785,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_render_audio_stop_t vx_message_base_t2vx_req_aux_render_audio_stop_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_render_audio_stop_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_render_audio_stop_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_render_audio_stop_t(l, false)
         return null
     }
@@ -1795,7 +1795,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_reset_password_t vx_message_base_t2vx_req_aux_reset_password_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_reset_password_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_reset_password_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_reset_password_t(l, false)
         return null
     }
@@ -1805,7 +1805,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_set_capture_device_t vx_message_base_t2vx_req_aux_set_capture_device_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_set_capture_device_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_set_capture_device_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_set_capture_device_t(l, false)
         return null
     }
@@ -1815,7 +1815,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_set_idle_timeout_t vx_message_base_t2vx_req_aux_set_idle_timeout_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_set_idle_timeout_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_set_idle_timeout_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_set_idle_timeout_t(l, false)
         return null
     }
@@ -1825,7 +1825,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_set_mic_level_t vx_message_base_t2vx_req_aux_set_mic_level_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_set_mic_level_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_set_mic_level_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_set_mic_level_t(l, false)
         return null
     }
@@ -1835,7 +1835,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_set_render_device_t vx_message_base_t2vx_req_aux_set_render_device_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_set_render_device_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_set_render_device_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_set_render_device_t(l, false)
         return null
     }
@@ -1845,7 +1845,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_set_speaker_level_t vx_message_base_t2vx_req_aux_set_speaker_level_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_set_speaker_level_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_set_speaker_level_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_set_speaker_level_t(l, false)
         return null
     }
@@ -1855,7 +1855,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_set_vad_properties_t vx_message_base_t2vx_req_aux_set_vad_properties_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_set_vad_properties_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_set_vad_properties_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_set_vad_properties_t(l, false)
         return null
     }
@@ -1865,7 +1865,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_aux_start_buffer_capture_t vx_message_base_t2vx_req_aux_start_buffer_capture_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_aux_start_buffer_capture_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_aux_start_buffer_capture_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_aux_start_buffer_capture_t(l, false)
         return null
     }
@@ -1875,7 +1875,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_channel_ban_user_t vx_message_base_t2vx_req_channel_ban_user_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_channel_ban_user_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_channel_ban_user_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_channel_ban_user_t(l, false)
         return null
     }
@@ -1885,7 +1885,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_channel_get_banned_users_t vx_message_base_t2vx_req_channel_get_banned_users_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_channel_get_banned_users_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_channel_get_banned_users_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_channel_get_banned_users_t(l, false)
         return null
     }
@@ -1895,7 +1895,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_channel_kick_user_t vx_message_base_t2vx_req_channel_kick_user_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_channel_kick_user_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_channel_kick_user_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_channel_kick_user_t(l, false)
         return null
     }
@@ -1905,7 +1905,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_channel_mute_all_users_t vx_message_base_t2vx_req_channel_mute_all_users_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_channel_mute_all_users_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_channel_mute_all_users_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_channel_mute_all_users_t(l, false)
         return null
     }
@@ -1915,7 +1915,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_channel_mute_user_t vx_message_base_t2vx_req_channel_mute_user_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_channel_mute_user_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_channel_mute_user_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_channel_mute_user_t(l, false)
         return null
     }
@@ -1925,7 +1925,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_channel_set_lock_mode_t vx_message_base_t2vx_req_channel_set_lock_mode_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_channel_set_lock_mode_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_channel_set_lock_mode_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_channel_set_lock_mode_t(l, false)
         return null
     }
@@ -1935,7 +1935,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_connector_create_t vx_message_base_t2vx_req_connector_create_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_connector_create_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_connector_create_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_connector_create_t(l, false)
         return null
     }
@@ -1945,7 +1945,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_connector_get_local_audio_info_t vx_message_base_t2vx_req_connector_get_local_audio_info_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_connector_get_local_audio_info_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_connector_get_local_audio_info_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_connector_get_local_audio_info_t(l, false)
         return null
     }
@@ -1955,7 +1955,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_connector_initiate_shutdown_t vx_message_base_t2vx_req_connector_initiate_shutdown_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_connector_initiate_shutdown_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_connector_initiate_shutdown_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_connector_initiate_shutdown_t(l, false)
         return null
     }
@@ -1965,7 +1965,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_connector_mute_local_mic_t vx_message_base_t2vx_req_connector_mute_local_mic_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_connector_mute_local_mic_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_connector_mute_local_mic_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_connector_mute_local_mic_t(l, false)
         return null
     }
@@ -1975,7 +1975,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_connector_mute_local_speaker_t vx_message_base_t2vx_req_connector_mute_local_speaker_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_connector_mute_local_speaker_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_connector_mute_local_speaker_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_connector_mute_local_speaker_t(l, false)
         return null
     }
@@ -1985,7 +1985,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_connector_set_local_mic_volume_t vx_message_base_t2vx_req_connector_set_local_mic_volume_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_connector_set_local_mic_volume_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_connector_set_local_mic_volume_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_connector_set_local_mic_volume_t(l, false)
         return null
     }
@@ -1995,7 +1995,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_connector_set_local_speaker_volume_t vx_message_base_t2vx_req_connector_set_local_speaker_volume_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_connector_set_local_speaker_volume_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_connector_set_local_speaker_volume_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_connector_set_local_speaker_volume_t(l, false)
         return null
     }
@@ -2005,7 +2005,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_session_channel_invite_user_t vx_message_base_t2vx_req_session_channel_invite_user_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_session_channel_invite_user_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_session_channel_invite_user_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_session_channel_invite_user_t(l, false)
         return null
     }
@@ -2015,7 +2015,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_session_create_t vx_message_base_t2vx_req_session_create_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_session_create_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_session_create_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_session_create_t(l, false)
         return null
     }
@@ -2025,7 +2025,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_session_media_connect_t vx_message_base_t2vx_req_session_media_connect_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_session_media_connect_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_session_media_connect_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_session_media_connect_t(l, false)
         return null
     }
@@ -2035,7 +2035,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_session_media_disconnect_t vx_message_base_t2vx_req_session_media_disconnect_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_session_media_disconnect_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_session_media_disconnect_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_session_media_disconnect_t(l, false)
         return null
     }
@@ -2045,7 +2045,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_session_mute_local_speaker_t vx_message_base_t2vx_req_session_mute_local_speaker_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_session_mute_local_speaker_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_session_mute_local_speaker_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_session_mute_local_speaker_t(l, false)
         return null
     }
@@ -2055,7 +2055,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_session_send_dtmf_t vx_message_base_t2vx_req_session_send_dtmf_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_session_send_dtmf_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_session_send_dtmf_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_session_send_dtmf_t(l, false)
         return null
     }
@@ -2065,7 +2065,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_session_send_message_t vx_message_base_t2vx_req_session_send_message_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_session_send_message_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_session_send_message_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_session_send_message_t(l, false)
         return null
     }
@@ -2075,7 +2075,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_session_send_notification_t vx_message_base_t2vx_req_session_send_notification_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_session_send_notification_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_session_send_notification_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_session_send_notification_t(l, false)
         return null
     }
@@ -2085,7 +2085,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_session_set_3d_position_t vx_message_base_t2vx_req_session_set_3d_position_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_session_set_3d_position_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_session_set_3d_position_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_session_set_3d_position_t(l, false)
         return null
     }
@@ -2095,7 +2095,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_session_set_local_speaker_volume_t vx_message_base_t2vx_req_session_set_local_speaker_volume_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_session_set_local_speaker_volume_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_session_set_local_speaker_volume_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_session_set_local_speaker_volume_t(l, false)
         return null
     }
@@ -2105,7 +2105,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_session_set_participant_mute_for_me_t vx_message_base_t2vx_req_session_set_participant_mute_for_me_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_session_set_participant_mute_for_me_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_session_set_participant_mute_for_me_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_session_set_participant_mute_for_me_t(l, false)
         return null
     }
@@ -2115,7 +2115,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_session_set_participant_volume_for_me_t vx_message_base_t2vx_req_session_set_participant_volume_for_me_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_session_set_participant_volume_for_me_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_session_set_participant_volume_for_me_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_session_set_participant_volume_for_me_t(l, false)
         return null
     }
@@ -2125,7 +2125,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_session_set_voice_font_t vx_message_base_t2vx_req_session_set_voice_font_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_session_set_voice_font_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_session_set_voice_font_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_session_set_voice_font_t(l, false)
         return null
     }
@@ -2135,7 +2135,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_session_terminate_t vx_message_base_t2vx_req_session_terminate_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_session_terminate_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_session_terminate_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_session_terminate_t(l, false)
         return null
     }
@@ -2145,7 +2145,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_session_text_connect_t vx_message_base_t2vx_req_session_text_connect_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_session_text_connect_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_session_text_connect_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_session_text_connect_t(l, false)
         return null
     }
@@ -2155,7 +2155,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_session_text_disconnect_t vx_message_base_t2vx_req_session_text_disconnect_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_session_text_disconnect_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_session_text_disconnect_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_session_text_disconnect_t(l, false)
         return null
     }
@@ -2165,7 +2165,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_sessiongroup_add_session_t vx_message_base_t2vx_req_sessiongroup_add_session_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_add_session_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_add_session_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_sessiongroup_add_session_t(l, false)
         return null
     }
@@ -2175,7 +2175,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_sessiongroup_control_audio_injection_t vx_message_base_t2vx_req_sessiongroup_control_audio_injection_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_control_audio_injection_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_control_audio_injection_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_sessiongroup_control_audio_injection_t(l, false)
         return null
     }
@@ -2185,7 +2185,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_sessiongroup_control_playback_t vx_message_base_t2vx_req_sessiongroup_control_playback_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_control_playback_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_control_playback_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_sessiongroup_control_playback_t(l, false)
         return null
     }
@@ -2195,7 +2195,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_sessiongroup_control_recording_t vx_message_base_t2vx_req_sessiongroup_control_recording_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_control_recording_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_control_recording_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_sessiongroup_control_recording_t(l, false)
         return null
     }
@@ -2205,7 +2205,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_sessiongroup_create_t vx_message_base_t2vx_req_sessiongroup_create_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_create_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_create_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_sessiongroup_create_t(l, false)
         return null
     }
@@ -2215,7 +2215,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_sessiongroup_get_stats_t vx_message_base_t2vx_req_sessiongroup_get_stats_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_get_stats_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_get_stats_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_sessiongroup_get_stats_t(l, false)
         return null
     }
@@ -2225,7 +2225,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_sessiongroup_remove_session_t vx_message_base_t2vx_req_sessiongroup_remove_session_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_remove_session_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_remove_session_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_sessiongroup_remove_session_t(l, false)
         return null
     }
@@ -2235,7 +2235,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_sessiongroup_reset_focus_t vx_message_base_t2vx_req_sessiongroup_reset_focus_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_reset_focus_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_reset_focus_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_sessiongroup_reset_focus_t(l, false)
         return null
     }
@@ -2245,7 +2245,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_sessiongroup_set_focus_t vx_message_base_t2vx_req_sessiongroup_set_focus_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_set_focus_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_set_focus_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_sessiongroup_set_focus_t(l, false)
         return null
     }
@@ -2255,7 +2255,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_sessiongroup_set_playback_options_t vx_message_base_t2vx_req_sessiongroup_set_playback_options_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_set_playback_options_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_set_playback_options_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_sessiongroup_set_playback_options_t(l, false)
         return null
     }
@@ -2265,7 +2265,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_sessiongroup_set_session_3d_position_t vx_message_base_t2vx_req_sessiongroup_set_session_3d_position_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_set_session_3d_position_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_set_session_3d_position_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_sessiongroup_set_session_3d_position_t(l, false)
         return null
     }
@@ -2275,7 +2275,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_sessiongroup_set_tx_all_sessions_t vx_message_base_t2vx_req_sessiongroup_set_tx_all_sessions_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_set_tx_all_sessions_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_set_tx_all_sessions_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_sessiongroup_set_tx_all_sessions_t(l, false)
         return null
     }
@@ -2285,7 +2285,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_sessiongroup_set_tx_no_session_t vx_message_base_t2vx_req_sessiongroup_set_tx_no_session_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_set_tx_no_session_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_set_tx_no_session_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_sessiongroup_set_tx_no_session_t(l, false)
         return null
     }
@@ -2295,7 +2295,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_sessiongroup_set_tx_session_t vx_message_base_t2vx_req_sessiongroup_set_tx_session_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_set_tx_session_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_set_tx_session_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_sessiongroup_set_tx_session_t(l, false)
         return null
     }
@@ -2305,7 +2305,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_sessiongroup_terminate_t vx_message_base_t2vx_req_sessiongroup_terminate_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_terminate_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_terminate_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_sessiongroup_terminate_t(l, false)
         return null
     }
@@ -2315,7 +2315,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_sessiongroup_unset_focus_t vx_message_base_t2vx_req_sessiongroup_unset_focus_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_unset_focus_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_req_sessiongroup_unset_focus_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_req_sessiongroup_unset_focus_t(l, false)
         return null
     }
@@ -2325,7 +2325,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_anonymous_login_t vx_message_base_t2vx_resp_account_anonymous_login_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_anonymous_login_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_anonymous_login_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_anonymous_login_t(l, false)
         return null
     }
@@ -2335,7 +2335,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_authtoken_login_t vx_message_base_t2vx_resp_account_authtoken_login_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_authtoken_login_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_authtoken_login_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_authtoken_login_t(l, false)
         return null
     }
@@ -2345,7 +2345,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_buddy_delete_t vx_message_base_t2vx_resp_account_buddy_delete_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_buddy_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_buddy_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_buddy_delete_t(l, false)
         return null
     }
@@ -2355,7 +2355,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_buddy_search_t vx_message_base_t2vx_resp_account_buddy_search_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_buddy_search_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_buddy_search_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_buddy_search_t(l, false)
         return null
     }
@@ -2365,7 +2365,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_buddy_set_t vx_message_base_t2vx_resp_account_buddy_set_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_buddy_set_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_buddy_set_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_buddy_set_t(l, false)
         return null
     }
@@ -2375,7 +2375,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_buddygroup_delete_t vx_message_base_t2vx_resp_account_buddygroup_delete_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_buddygroup_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_buddygroup_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_buddygroup_delete_t(l, false)
         return null
     }
@@ -2385,7 +2385,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_buddygroup_set_t vx_message_base_t2vx_resp_account_buddygroup_set_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_buddygroup_set_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_buddygroup_set_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_buddygroup_set_t(l, false)
         return null
     }
@@ -2395,7 +2395,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_channel_add_acl_t vx_message_base_t2vx_resp_account_channel_add_acl_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_add_acl_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_add_acl_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_channel_add_acl_t(l, false)
         return null
     }
@@ -2405,7 +2405,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_channel_add_moderator_t vx_message_base_t2vx_resp_account_channel_add_moderator_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_add_moderator_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_add_moderator_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_channel_add_moderator_t(l, false)
         return null
     }
@@ -2415,7 +2415,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_channel_change_owner_t vx_message_base_t2vx_resp_account_channel_change_owner_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_change_owner_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_change_owner_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_channel_change_owner_t(l, false)
         return null
     }
@@ -2425,7 +2425,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_channel_create_t vx_message_base_t2vx_resp_account_channel_create_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_create_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_create_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_channel_create_t(l, false)
         return null
     }
@@ -2435,7 +2435,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_channel_delete_t vx_message_base_t2vx_resp_account_channel_delete_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_channel_delete_t(l, false)
         return null
     }
@@ -2445,7 +2445,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_channel_favorite_delete_t vx_message_base_t2vx_resp_account_channel_favorite_delete_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_favorite_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_favorite_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_channel_favorite_delete_t(l, false)
         return null
     }
@@ -2455,7 +2455,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_channel_favorite_group_delete_t vx_message_base_t2vx_resp_account_channel_favorite_group_delete_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_favorite_group_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_favorite_group_delete_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_channel_favorite_group_delete_t(l, false)
         return null
     }
@@ -2465,7 +2465,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_channel_favorite_group_set_t vx_message_base_t2vx_resp_account_channel_favorite_group_set_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_favorite_group_set_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_favorite_group_set_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_channel_favorite_group_set_t(l, false)
         return null
     }
@@ -2475,7 +2475,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_channel_favorite_set_t vx_message_base_t2vx_resp_account_channel_favorite_set_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_favorite_set_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_favorite_set_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_channel_favorite_set_t(l, false)
         return null
     }
@@ -2485,7 +2485,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_channel_favorites_get_list_t vx_message_base_t2vx_resp_account_channel_favorites_get_list_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_favorites_get_list_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_favorites_get_list_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_channel_favorites_get_list_t(l, false)
         return null
     }
@@ -2495,7 +2495,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_channel_get_acl_t vx_message_base_t2vx_resp_account_channel_get_acl_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_get_acl_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_get_acl_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_channel_get_acl_t(l, false)
         return null
     }
@@ -2505,7 +2505,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_channel_get_info_t vx_message_base_t2vx_resp_account_channel_get_info_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_get_info_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_get_info_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_channel_get_info_t(l, false)
         return null
     }
@@ -2515,7 +2515,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_channel_get_moderators_t vx_message_base_t2vx_resp_account_channel_get_moderators_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_get_moderators_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_get_moderators_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_channel_get_moderators_t(l, false)
         return null
     }
@@ -2525,7 +2525,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_channel_get_participants_t vx_message_base_t2vx_resp_account_channel_get_participants_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_get_participants_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_get_participants_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_channel_get_participants_t(l, false)
         return null
     }
@@ -2535,7 +2535,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_channel_remove_acl_t vx_message_base_t2vx_resp_account_channel_remove_acl_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_remove_acl_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_remove_acl_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_channel_remove_acl_t(l, false)
         return null
     }
@@ -2545,7 +2545,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_channel_remove_moderator_t vx_message_base_t2vx_resp_account_channel_remove_moderator_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_remove_moderator_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_remove_moderator_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_channel_remove_moderator_t(l, false)
         return null
     }
@@ -2555,7 +2555,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_channel_search_t vx_message_base_t2vx_resp_account_channel_search_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_search_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_search_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_channel_search_t(l, false)
         return null
     }
@@ -2565,7 +2565,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_channel_update_t vx_message_base_t2vx_resp_account_channel_update_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_update_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_channel_update_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_channel_update_t(l, false)
         return null
     }
@@ -2575,7 +2575,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_create_auto_accept_rule_t vx_message_base_t2vx_resp_account_create_auto_accept_rule_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_create_auto_accept_rule_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_create_auto_accept_rule_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_create_auto_accept_rule_t(l, false)
         return null
     }
@@ -2585,7 +2585,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_create_block_rule_t vx_message_base_t2vx_resp_account_create_block_rule_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_create_block_rule_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_create_block_rule_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_create_block_rule_t(l, false)
         return null
     }
@@ -2595,7 +2595,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_delete_auto_accept_rule_t vx_message_base_t2vx_resp_account_delete_auto_accept_rule_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_delete_auto_accept_rule_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_delete_auto_accept_rule_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_delete_auto_accept_rule_t(l, false)
         return null
     }
@@ -2605,7 +2605,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_delete_block_rule_t vx_message_base_t2vx_resp_account_delete_block_rule_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_delete_block_rule_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_delete_block_rule_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_delete_block_rule_t(l, false)
         return null
     }
@@ -2615,7 +2615,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_get_account_t vx_message_base_t2vx_resp_account_get_account_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_get_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_get_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_get_account_t(l, false)
         return null
     }
@@ -2625,7 +2625,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_get_session_fonts_t vx_message_base_t2vx_resp_account_get_session_fonts_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_get_session_fonts_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_get_session_fonts_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_get_session_fonts_t(l, false)
         return null
     }
@@ -2635,7 +2635,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_get_template_fonts_t vx_message_base_t2vx_resp_account_get_template_fonts_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_get_template_fonts_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_get_template_fonts_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_get_template_fonts_t(l, false)
         return null
     }
@@ -2645,7 +2645,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_list_auto_accept_rules_t vx_message_base_t2vx_resp_account_list_auto_accept_rules_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_list_auto_accept_rules_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_list_auto_accept_rules_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_list_auto_accept_rules_t(l, false)
         return null
     }
@@ -2655,7 +2655,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_list_block_rules_t vx_message_base_t2vx_resp_account_list_block_rules_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_list_block_rules_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_list_block_rules_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_list_block_rules_t(l, false)
         return null
     }
@@ -2665,7 +2665,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_list_buddies_and_groups_t vx_message_base_t2vx_resp_account_list_buddies_and_groups_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_list_buddies_and_groups_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_list_buddies_and_groups_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_list_buddies_and_groups_t(l, false)
         return null
     }
@@ -2675,7 +2675,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_login_t vx_message_base_t2vx_resp_account_login_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_login_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_login_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_login_t(l, false)
         return null
     }
@@ -2685,7 +2685,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_logout_t vx_message_base_t2vx_resp_account_logout_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_logout_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_logout_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_logout_t(l, false)
         return null
     }
@@ -2695,7 +2695,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_post_crash_dump_t vx_message_base_t2vx_resp_account_post_crash_dump_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_post_crash_dump_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_post_crash_dump_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_post_crash_dump_t(l, false)
         return null
     }
@@ -2705,7 +2705,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_send_message_t vx_message_base_t2vx_resp_account_send_message_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_send_message_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_send_message_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_send_message_t(l, false)
         return null
     }
@@ -2715,7 +2715,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_send_sms_t vx_message_base_t2vx_resp_account_send_sms_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_send_sms_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_send_sms_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_send_sms_t(l, false)
         return null
     }
@@ -2725,7 +2725,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_send_subscription_reply_t vx_message_base_t2vx_resp_account_send_subscription_reply_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_send_subscription_reply_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_send_subscription_reply_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_send_subscription_reply_t(l, false)
         return null
     }
@@ -2735,7 +2735,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_send_user_app_data_t vx_message_base_t2vx_resp_account_send_user_app_data_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_send_user_app_data_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_send_user_app_data_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_send_user_app_data_t(l, false)
         return null
     }
@@ -2745,7 +2745,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_set_login_properties_t vx_message_base_t2vx_resp_account_set_login_properties_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_set_login_properties_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_set_login_properties_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_set_login_properties_t(l, false)
         return null
     }
@@ -2755,7 +2755,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_set_presence_t vx_message_base_t2vx_resp_account_set_presence_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_set_presence_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_set_presence_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_set_presence_t(l, false)
         return null
     }
@@ -2765,7 +2765,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_update_account_t vx_message_base_t2vx_resp_account_update_account_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_update_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_update_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_update_account_t(l, false)
         return null
     }
@@ -2775,7 +2775,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_account_web_call_t vx_message_base_t2vx_resp_account_web_call_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_account_web_call_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_account_web_call_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_account_web_call_t(l, false)
         return null
     }
@@ -2785,7 +2785,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_capture_audio_start_t vx_message_base_t2vx_resp_aux_capture_audio_start_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_capture_audio_start_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_capture_audio_start_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_capture_audio_start_t(l, false)
         return null
     }
@@ -2795,7 +2795,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_capture_audio_stop_t vx_message_base_t2vx_resp_aux_capture_audio_stop_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_capture_audio_stop_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_capture_audio_stop_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_capture_audio_stop_t(l, false)
         return null
     }
@@ -2805,7 +2805,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_connectivity_info_t vx_message_base_t2vx_resp_aux_connectivity_info_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_connectivity_info_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_connectivity_info_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_connectivity_info_t(l, false)
         return null
     }
@@ -2815,7 +2815,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_create_account_t vx_message_base_t2vx_resp_aux_create_account_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_create_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_create_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_create_account_t(l, false)
         return null
     }
@@ -2825,7 +2825,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_deactivate_account_t vx_message_base_t2vx_resp_aux_deactivate_account_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_deactivate_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_deactivate_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_deactivate_account_t(l, false)
         return null
     }
@@ -2835,7 +2835,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_diagnostic_state_dump_t vx_message_base_t2vx_resp_aux_diagnostic_state_dump_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_diagnostic_state_dump_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_diagnostic_state_dump_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_diagnostic_state_dump_t(l, false)
         return null
     }
@@ -2845,7 +2845,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_get_capture_devices_t vx_message_base_t2vx_resp_aux_get_capture_devices_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_get_capture_devices_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_get_capture_devices_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_get_capture_devices_t(l, false)
         return null
     }
@@ -2855,7 +2855,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_get_mic_level_t vx_message_base_t2vx_resp_aux_get_mic_level_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_get_mic_level_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_get_mic_level_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_get_mic_level_t(l, false)
         return null
     }
@@ -2865,7 +2865,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_get_render_devices_t vx_message_base_t2vx_resp_aux_get_render_devices_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_get_render_devices_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_get_render_devices_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_get_render_devices_t(l, false)
         return null
     }
@@ -2875,7 +2875,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_get_speaker_level_t vx_message_base_t2vx_resp_aux_get_speaker_level_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_get_speaker_level_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_get_speaker_level_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_get_speaker_level_t(l, false)
         return null
     }
@@ -2885,7 +2885,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_get_vad_properties_t vx_message_base_t2vx_resp_aux_get_vad_properties_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_get_vad_properties_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_get_vad_properties_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_get_vad_properties_t(l, false)
         return null
     }
@@ -2895,7 +2895,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_global_monitor_keyboard_mouse_t vx_message_base_t2vx_resp_aux_global_monitor_keyboard_mouse_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_global_monitor_keyboard_mouse_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_global_monitor_keyboard_mouse_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_global_monitor_keyboard_mouse_t(l, false)
         return null
     }
@@ -2905,7 +2905,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_play_audio_buffer_t vx_message_base_t2vx_resp_aux_play_audio_buffer_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_play_audio_buffer_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_play_audio_buffer_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_play_audio_buffer_t(l, false)
         return null
     }
@@ -2915,7 +2915,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_reactivate_account_t vx_message_base_t2vx_resp_aux_reactivate_account_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_reactivate_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_reactivate_account_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_reactivate_account_t(l, false)
         return null
     }
@@ -2925,7 +2925,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_render_audio_modify_t vx_message_base_t2vx_resp_aux_render_audio_modify_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_render_audio_modify_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_render_audio_modify_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_render_audio_modify_t(l, false)
         return null
     }
@@ -2935,7 +2935,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_render_audio_start_t vx_message_base_t2vx_resp_aux_render_audio_start_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_render_audio_start_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_render_audio_start_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_render_audio_start_t(l, false)
         return null
     }
@@ -2945,7 +2945,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_render_audio_stop_t vx_message_base_t2vx_resp_aux_render_audio_stop_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_render_audio_stop_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_render_audio_stop_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_render_audio_stop_t(l, false)
         return null
     }
@@ -2955,7 +2955,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_reset_password_t vx_message_base_t2vx_resp_aux_reset_password_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_reset_password_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_reset_password_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_reset_password_t(l, false)
         return null
     }
@@ -2965,7 +2965,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_set_capture_device_t vx_message_base_t2vx_resp_aux_set_capture_device_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_set_capture_device_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_set_capture_device_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_set_capture_device_t(l, false)
         return null
     }
@@ -2975,7 +2975,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_set_idle_timeout_t vx_message_base_t2vx_resp_aux_set_idle_timeout_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_set_idle_timeout_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_set_idle_timeout_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_set_idle_timeout_t(l, false)
         return null
     }
@@ -2985,7 +2985,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_set_mic_level_t vx_message_base_t2vx_resp_aux_set_mic_level_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_set_mic_level_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_set_mic_level_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_set_mic_level_t(l, false)
         return null
     }
@@ -2995,7 +2995,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_set_render_device_t vx_message_base_t2vx_resp_aux_set_render_device_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_set_render_device_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_set_render_device_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_set_render_device_t(l, false)
         return null
     }
@@ -3005,7 +3005,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_set_speaker_level_t vx_message_base_t2vx_resp_aux_set_speaker_level_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_set_speaker_level_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_set_speaker_level_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_set_speaker_level_t(l, false)
         return null
     }
@@ -3015,7 +3015,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_set_vad_properties_t vx_message_base_t2vx_resp_aux_set_vad_properties_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_set_vad_properties_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_set_vad_properties_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_set_vad_properties_t(l, false)
         return null
     }
@@ -3025,7 +3025,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_aux_start_buffer_capture_t vx_message_base_t2vx_resp_aux_start_buffer_capture_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_start_buffer_capture_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_aux_start_buffer_capture_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_aux_start_buffer_capture_t(l, false)
         return null
     }
@@ -3035,7 +3035,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_channel_ban_user_t vx_message_base_t2vx_resp_channel_ban_user_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_channel_ban_user_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_channel_ban_user_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_channel_ban_user_t(l, false)
         return null
     }
@@ -3045,7 +3045,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_channel_get_banned_users_t vx_message_base_t2vx_resp_channel_get_banned_users_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_channel_get_banned_users_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_channel_get_banned_users_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_channel_get_banned_users_t(l, false)
         return null
     }
@@ -3055,7 +3055,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_channel_kick_user_t vx_message_base_t2vx_resp_channel_kick_user_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_channel_kick_user_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_channel_kick_user_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_channel_kick_user_t(l, false)
         return null
     }
@@ -3065,7 +3065,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_channel_mute_all_users_t vx_message_base_t2vx_resp_channel_mute_all_users_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_channel_mute_all_users_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_channel_mute_all_users_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_channel_mute_all_users_t(l, false)
         return null
     }
@@ -3075,7 +3075,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_channel_mute_user_t vx_message_base_t2vx_resp_channel_mute_user_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_channel_mute_user_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_channel_mute_user_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_channel_mute_user_t(l, false)
         return null
     }
@@ -3085,7 +3085,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_channel_set_lock_mode_t vx_message_base_t2vx_resp_channel_set_lock_mode_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_channel_set_lock_mode_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_channel_set_lock_mode_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_channel_set_lock_mode_t(l, false)
         return null
     }
@@ -3095,7 +3095,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_connector_create_t vx_message_base_t2vx_resp_connector_create_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_connector_create_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_connector_create_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_connector_create_t(l, false)
         return null
     }
@@ -3105,7 +3105,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_connector_get_local_audio_info_t vx_message_base_t2vx_resp_connector_get_local_audio_info_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_connector_get_local_audio_info_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_connector_get_local_audio_info_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_connector_get_local_audio_info_t(l, false)
         return null
     }
@@ -3115,7 +3115,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_connector_initiate_shutdown_t vx_message_base_t2vx_resp_connector_initiate_shutdown_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_connector_initiate_shutdown_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_connector_initiate_shutdown_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_connector_initiate_shutdown_t(l, false)
         return null
     }
@@ -3125,7 +3125,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_connector_mute_local_mic_t vx_message_base_t2vx_resp_connector_mute_local_mic_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_connector_mute_local_mic_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_connector_mute_local_mic_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_connector_mute_local_mic_t(l, false)
         return null
     }
@@ -3135,7 +3135,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_connector_mute_local_speaker_t vx_message_base_t2vx_resp_connector_mute_local_speaker_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_connector_mute_local_speaker_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_connector_mute_local_speaker_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_connector_mute_local_speaker_t(l, false)
         return null
     }
@@ -3145,7 +3145,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_connector_set_local_mic_volume_t vx_message_base_t2vx_resp_connector_set_local_mic_volume_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_connector_set_local_mic_volume_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_connector_set_local_mic_volume_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_connector_set_local_mic_volume_t(l, false)
         return null
     }
@@ -3155,7 +3155,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_connector_set_local_speaker_volume_t vx_message_base_t2vx_resp_connector_set_local_speaker_volume_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_connector_set_local_speaker_volume_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_connector_set_local_speaker_volume_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_connector_set_local_speaker_volume_t(l, false)
         return null
     }
@@ -3165,7 +3165,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_session_channel_invite_user_t vx_message_base_t2vx_resp_session_channel_invite_user_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_session_channel_invite_user_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_session_channel_invite_user_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_session_channel_invite_user_t(l, false)
         return null
     }
@@ -3175,7 +3175,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_session_create_t vx_message_base_t2vx_resp_session_create_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_session_create_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_session_create_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_session_create_t(l, false)
         return null
     }
@@ -3185,7 +3185,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_session_media_connect_t vx_message_base_t2vx_resp_session_media_connect_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_session_media_connect_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_session_media_connect_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_session_media_connect_t(l, false)
         return null
     }
@@ -3195,7 +3195,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_session_media_disconnect_t vx_message_base_t2vx_resp_session_media_disconnect_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_session_media_disconnect_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_session_media_disconnect_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_session_media_disconnect_t(l, false)
         return null
     }
@@ -3205,7 +3205,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_session_mute_local_speaker_t vx_message_base_t2vx_resp_session_mute_local_speaker_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_session_mute_local_speaker_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_session_mute_local_speaker_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_session_mute_local_speaker_t(l, false)
         return null
     }
@@ -3215,7 +3215,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_session_send_dtmf_t vx_message_base_t2vx_resp_session_send_dtmf_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_session_send_dtmf_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_session_send_dtmf_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_session_send_dtmf_t(l, false)
         return null
     }
@@ -3225,7 +3225,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_session_send_message_t vx_message_base_t2vx_resp_session_send_message_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_session_send_message_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_session_send_message_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_session_send_message_t(l, false)
         return null
     }
@@ -3235,7 +3235,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_session_send_notification_t vx_message_base_t2vx_resp_session_send_notification_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_session_send_notification_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_session_send_notification_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_session_send_notification_t(l, false)
         return null
     }
@@ -3245,7 +3245,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_session_set_3d_position_t vx_message_base_t2vx_resp_session_set_3d_position_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_session_set_3d_position_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_session_set_3d_position_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_session_set_3d_position_t(l, false)
         return null
     }
@@ -3255,7 +3255,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_session_set_local_speaker_volume_t vx_message_base_t2vx_resp_session_set_local_speaker_volume_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_session_set_local_speaker_volume_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_session_set_local_speaker_volume_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_session_set_local_speaker_volume_t(l, false)
         return null
     }
@@ -3265,7 +3265,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_session_set_participant_mute_for_me_t vx_message_base_t2vx_resp_session_set_participant_mute_for_me_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_session_set_participant_mute_for_me_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_session_set_participant_mute_for_me_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_session_set_participant_mute_for_me_t(l, false)
         return null
     }
@@ -3275,7 +3275,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_session_set_participant_volume_for_me_t vx_message_base_t2vx_resp_session_set_participant_volume_for_me_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_session_set_participant_volume_for_me_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_session_set_participant_volume_for_me_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_session_set_participant_volume_for_me_t(l, false)
         return null
     }
@@ -3285,7 +3285,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_session_set_voice_font_t vx_message_base_t2vx_resp_session_set_voice_font_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_session_set_voice_font_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_session_set_voice_font_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_session_set_voice_font_t(l, false)
         return null
     }
@@ -3295,7 +3295,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_session_terminate_t vx_message_base_t2vx_resp_session_terminate_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_session_terminate_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_session_terminate_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_session_terminate_t(l, false)
         return null
     }
@@ -3305,7 +3305,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_session_text_connect_t vx_message_base_t2vx_resp_session_text_connect_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_session_text_connect_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_session_text_connect_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_session_text_connect_t(l, false)
         return null
     }
@@ -3315,7 +3315,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_session_text_disconnect_t vx_message_base_t2vx_resp_session_text_disconnect_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_session_text_disconnect_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_session_text_disconnect_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_session_text_disconnect_t(l, false)
         return null
     }
@@ -3325,7 +3325,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_sessiongroup_add_session_t vx_message_base_t2vx_resp_sessiongroup_add_session_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_add_session_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_add_session_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_sessiongroup_add_session_t(l, false)
         return null
     }
@@ -3335,7 +3335,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_sessiongroup_control_audio_injection_t vx_message_base_t2vx_resp_sessiongroup_control_audio_injection_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_control_audio_injection_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_control_audio_injection_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_sessiongroup_control_audio_injection_t(l, false)
         return null
     }
@@ -3345,7 +3345,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_sessiongroup_control_playback_t vx_message_base_t2vx_resp_sessiongroup_control_playback_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_control_playback_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_control_playback_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_sessiongroup_control_playback_t(l, false)
         return null
     }
@@ -3355,7 +3355,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_sessiongroup_control_recording_t vx_message_base_t2vx_resp_sessiongroup_control_recording_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_control_recording_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_control_recording_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_sessiongroup_control_recording_t(l, false)
         return null
     }
@@ -3365,7 +3365,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_sessiongroup_create_t vx_message_base_t2vx_resp_sessiongroup_create_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_create_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_create_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_sessiongroup_create_t(l, false)
         return null
     }
@@ -3375,7 +3375,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_sessiongroup_get_stats_t vx_message_base_t2vx_resp_sessiongroup_get_stats_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_get_stats_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_get_stats_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_sessiongroup_get_stats_t(l, false)
         return null
     }
@@ -3385,7 +3385,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_sessiongroup_remove_session_t vx_message_base_t2vx_resp_sessiongroup_remove_session_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_remove_session_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_remove_session_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_sessiongroup_remove_session_t(l, false)
         return null
     }
@@ -3395,7 +3395,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_sessiongroup_reset_focus_t vx_message_base_t2vx_resp_sessiongroup_reset_focus_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_reset_focus_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_reset_focus_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_sessiongroup_reset_focus_t(l, false)
         return null
     }
@@ -3405,7 +3405,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_sessiongroup_set_focus_t vx_message_base_t2vx_resp_sessiongroup_set_focus_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_set_focus_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_set_focus_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_sessiongroup_set_focus_t(l, false)
         return null
     }
@@ -3415,7 +3415,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_sessiongroup_set_playback_options_t vx_message_base_t2vx_resp_sessiongroup_set_playback_options_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_set_playback_options_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_set_playback_options_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_sessiongroup_set_playback_options_t(l, false)
         return null
     }
@@ -3425,7 +3425,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_sessiongroup_set_session_3d_position_t vx_message_base_t2vx_resp_sessiongroup_set_session_3d_position_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_set_session_3d_position_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_set_session_3d_position_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_sessiongroup_set_session_3d_position_t(l, false)
         return null
     }
@@ -3435,7 +3435,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_sessiongroup_set_tx_all_sessions_t vx_message_base_t2vx_resp_sessiongroup_set_tx_all_sessions_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_set_tx_all_sessions_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_set_tx_all_sessions_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_sessiongroup_set_tx_all_sessions_t(l, false)
         return null
     }
@@ -3445,7 +3445,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_sessiongroup_set_tx_no_session_t vx_message_base_t2vx_resp_sessiongroup_set_tx_no_session_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_set_tx_no_session_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_set_tx_no_session_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_sessiongroup_set_tx_no_session_t(l, false)
         return null
     }
@@ -3455,7 +3455,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_sessiongroup_set_tx_session_t vx_message_base_t2vx_resp_sessiongroup_set_tx_session_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_set_tx_session_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_set_tx_session_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_sessiongroup_set_tx_session_t(l, false)
         return null
     }
@@ -3465,7 +3465,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_sessiongroup_terminate_t vx_message_base_t2vx_resp_sessiongroup_terminate_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_terminate_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_terminate_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_sessiongroup_terminate_t(l, false)
         return null
     }
@@ -3475,7 +3475,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_resp_sessiongroup_unset_focus_t vx_message_base_t2vx_resp_sessiongroup_unset_focus_t(vx_message_base_t object) {
-        Long l = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_unset_focus_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
+        var l: Long = VxClientProxyJNI.vx_message_base_t2vx_resp_sessiongroup_unset_focus_t(vx_message_base_t.getCPtr((vx_message_base_t)object), (vx_message_base_t)object)
         if (l != 0L) return vx_resp_sessiongroup_unset_focus_t(l, false)
         return null
     }
@@ -3501,7 +3501,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_name_value_pair_t vx_name_value_pairs_t_get_list_item(SWIGTYPE_p_p_vx_name_value_pair object, Int n) {
-        Long l = VxClientProxyJNI.vx_name_value_pairs_t_get_list_item(SWIGTYPE_p_p_vx_name_value_pair.getCPtr((SWIGTYPE_p_p_vx_name_value_pair)object), n)
+        var l: Long = VxClientProxyJNI.vx_name_value_pairs_t_get_list_item(SWIGTYPE_p_p_vx_name_value_pair.getCPtr((SWIGTYPE_p_p_vx_name_value_pair)object), n)
         if (l != 0L) return vx_name_value_pair_t(l, false)
         return null
     }
@@ -4127,7 +4127,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_buddy_t vx_resp_account_buddy_search_t_get_buddies_item(vx_resp_account_buddy_search_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_resp_account_buddy_search_t_get_buddies_item(vx_resp_account_buddy_search_t.getCPtr((vx_resp_account_buddy_search_t)object), (vx_resp_account_buddy_search_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_resp_account_buddy_search_t_get_buddies_item(vx_resp_account_buddy_search_t.getCPtr((vx_resp_account_buddy_search_t)object), (vx_resp_account_buddy_search_t)object, n)
         if (l != 0L) return vx_buddy_t(l, false)
         return null
     }
@@ -4137,7 +4137,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_channel_favorite_t vx_resp_account_channel_favorites_get_list_t_get_favorites_item(vx_resp_account_channel_favorites_get_list_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_resp_account_channel_favorites_get_list_t_get_favorites_item(vx_resp_account_channel_favorites_get_list_t.getCPtr((vx_resp_account_channel_favorites_get_list_t)object), (vx_resp_account_channel_favorites_get_list_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_resp_account_channel_favorites_get_list_t_get_favorites_item(vx_resp_account_channel_favorites_get_list_t.getCPtr((vx_resp_account_channel_favorites_get_list_t)object), (vx_resp_account_channel_favorites_get_list_t)object, n)
         if (l != 0L) return vx_channel_favorite_t(l, false)
         return null
     }
@@ -4147,7 +4147,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_channel_favorite_group_t vx_resp_account_channel_favorites_get_list_t_get_groups_item(vx_resp_account_channel_favorites_get_list_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_resp_account_channel_favorites_get_list_t_get_groups_item(vx_resp_account_channel_favorites_get_list_t.getCPtr((vx_resp_account_channel_favorites_get_list_t)object), (vx_resp_account_channel_favorites_get_list_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_resp_account_channel_favorites_get_list_t_get_groups_item(vx_resp_account_channel_favorites_get_list_t.getCPtr((vx_resp_account_channel_favorites_get_list_t)object), (vx_resp_account_channel_favorites_get_list_t)object, n)
         if (l != 0L) return vx_channel_favorite_group_t(l, false)
         return null
     }
@@ -4157,7 +4157,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_participant_t vx_resp_account_channel_get_acl_t_get_participants_item(vx_resp_account_channel_get_acl_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_resp_account_channel_get_acl_t_get_participants_item(vx_resp_account_channel_get_acl_t.getCPtr((vx_resp_account_channel_get_acl_t)object), (vx_resp_account_channel_get_acl_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_resp_account_channel_get_acl_t_get_participants_item(vx_resp_account_channel_get_acl_t.getCPtr((vx_resp_account_channel_get_acl_t)object), (vx_resp_account_channel_get_acl_t)object, n)
         if (l != 0L) return vx_participant_t(l, false)
         return null
     }
@@ -4167,7 +4167,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_participant_t vx_resp_account_channel_get_moderators_t_get_participants_item(vx_resp_account_channel_get_moderators_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_resp_account_channel_get_moderators_t_get_participants_item(vx_resp_account_channel_get_moderators_t.getCPtr((vx_resp_account_channel_get_moderators_t)object), (vx_resp_account_channel_get_moderators_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_resp_account_channel_get_moderators_t_get_participants_item(vx_resp_account_channel_get_moderators_t.getCPtr((vx_resp_account_channel_get_moderators_t)object), (vx_resp_account_channel_get_moderators_t)object, n)
         if (l != 0L) return vx_participant_t(l, false)
         return null
     }
@@ -4177,7 +4177,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_participant_t vx_resp_account_channel_get_participants_t_get_participants_item(vx_resp_account_channel_get_participants_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_resp_account_channel_get_participants_t_get_participants_item(vx_resp_account_channel_get_participants_t.getCPtr((vx_resp_account_channel_get_participants_t)object), (vx_resp_account_channel_get_participants_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_resp_account_channel_get_participants_t_get_participants_item(vx_resp_account_channel_get_participants_t.getCPtr((vx_resp_account_channel_get_participants_t)object), (vx_resp_account_channel_get_participants_t)object, n)
         if (l != 0L) return vx_participant_t(l, false)
         return null
     }
@@ -4187,7 +4187,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_channel_t vx_resp_account_channel_search_t_get_channels_item(vx_resp_account_channel_search_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_resp_account_channel_search_t_get_channels_item(vx_resp_account_channel_search_t.getCPtr((vx_resp_account_channel_search_t)object), (vx_resp_account_channel_search_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_resp_account_channel_search_t_get_channels_item(vx_resp_account_channel_search_t.getCPtr((vx_resp_account_channel_search_t)object), (vx_resp_account_channel_search_t)object, n)
         if (l != 0L) return vx_channel_t(l, false)
         return null
     }
@@ -4197,7 +4197,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_voice_font_t vx_resp_account_get_session_fonts_t_get_session_fonts_item(vx_resp_account_get_session_fonts_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_resp_account_get_session_fonts_t_get_session_fonts_item(vx_resp_account_get_session_fonts_t.getCPtr((vx_resp_account_get_session_fonts_t)object), (vx_resp_account_get_session_fonts_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_resp_account_get_session_fonts_t_get_session_fonts_item(vx_resp_account_get_session_fonts_t.getCPtr((vx_resp_account_get_session_fonts_t)object), (vx_resp_account_get_session_fonts_t)object, n)
         if (l != 0L) return vx_voice_font_t(l, false)
         return null
     }
@@ -4207,7 +4207,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_voice_font_t vx_resp_account_get_template_fonts_t_get_template_fonts_item(vx_resp_account_get_template_fonts_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_resp_account_get_template_fonts_t_get_template_fonts_item(vx_resp_account_get_template_fonts_t.getCPtr((vx_resp_account_get_template_fonts_t)object), (vx_resp_account_get_template_fonts_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_resp_account_get_template_fonts_t_get_template_fonts_item(vx_resp_account_get_template_fonts_t.getCPtr((vx_resp_account_get_template_fonts_t)object), (vx_resp_account_get_template_fonts_t)object, n)
         if (l != 0L) return vx_voice_font_t(l, false)
         return null
     }
@@ -4217,7 +4217,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_auto_accept_rule_t vx_resp_account_list_auto_accept_rules_t_get_auto_accept_rules_item(vx_resp_account_list_auto_accept_rules_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_resp_account_list_auto_accept_rules_t_get_auto_accept_rules_item(vx_resp_account_list_auto_accept_rules_t.getCPtr((vx_resp_account_list_auto_accept_rules_t)object), (vx_resp_account_list_auto_accept_rules_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_resp_account_list_auto_accept_rules_t_get_auto_accept_rules_item(vx_resp_account_list_auto_accept_rules_t.getCPtr((vx_resp_account_list_auto_accept_rules_t)object), (vx_resp_account_list_auto_accept_rules_t)object, n)
         if (l != 0L) return vx_auto_accept_rule_t(l, false)
         return null
     }
@@ -4227,7 +4227,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_block_rule_t vx_resp_account_list_block_rules_t_get_block_rules_item(vx_resp_account_list_block_rules_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_resp_account_list_block_rules_t_get_block_rules_item(vx_resp_account_list_block_rules_t.getCPtr((vx_resp_account_list_block_rules_t)object), (vx_resp_account_list_block_rules_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_resp_account_list_block_rules_t_get_block_rules_item(vx_resp_account_list_block_rules_t.getCPtr((vx_resp_account_list_block_rules_t)object), (vx_resp_account_list_block_rules_t)object, n)
         if (l != 0L) return vx_block_rule_t(l, false)
         return null
     }
@@ -4237,7 +4237,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_buddy_t vx_resp_account_list_buddies_and_groups_t_get_buddies_item(vx_resp_account_list_buddies_and_groups_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_resp_account_list_buddies_and_groups_t_get_buddies_item(vx_resp_account_list_buddies_and_groups_t.getCPtr((vx_resp_account_list_buddies_and_groups_t)object), (vx_resp_account_list_buddies_and_groups_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_resp_account_list_buddies_and_groups_t_get_buddies_item(vx_resp_account_list_buddies_and_groups_t.getCPtr((vx_resp_account_list_buddies_and_groups_t)object), (vx_resp_account_list_buddies_and_groups_t)object, n)
         if (l != 0L) return vx_buddy_t(l, false)
         return null
     }
@@ -4247,7 +4247,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_group_t vx_resp_account_list_buddies_and_groups_t_get_groups_item(vx_resp_account_list_buddies_and_groups_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_resp_account_list_buddies_and_groups_t_get_groups_item(vx_resp_account_list_buddies_and_groups_t.getCPtr((vx_resp_account_list_buddies_and_groups_t)object), (vx_resp_account_list_buddies_and_groups_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_resp_account_list_buddies_and_groups_t_get_groups_item(vx_resp_account_list_buddies_and_groups_t.getCPtr((vx_resp_account_list_buddies_and_groups_t)object), (vx_resp_account_list_buddies_and_groups_t)object, n)
         if (l != 0L) return vx_group_t(l, false)
         return null
     }
@@ -4257,7 +4257,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_connectivity_test_result_t vx_resp_aux_connectivity_info_t_get_test_results_item(vx_resp_aux_connectivity_info_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_resp_aux_connectivity_info_t_get_test_results_item(vx_resp_aux_connectivity_info_t.getCPtr((vx_resp_aux_connectivity_info_t)object), (vx_resp_aux_connectivity_info_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_resp_aux_connectivity_info_t_get_test_results_item(vx_resp_aux_connectivity_info_t.getCPtr((vx_resp_aux_connectivity_info_t)object), (vx_resp_aux_connectivity_info_t)object, n)
         if (l != 0L) return vx_connectivity_test_result_t(l, false)
         return null
     }
@@ -4267,7 +4267,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_state_connector_t vx_resp_aux_diagnostic_state_dump_t_get_state_connectors_item(vx_resp_aux_diagnostic_state_dump_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_resp_aux_diagnostic_state_dump_t_get_state_connectors_item(vx_resp_aux_diagnostic_state_dump_t.getCPtr((vx_resp_aux_diagnostic_state_dump_t)object), (vx_resp_aux_diagnostic_state_dump_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_resp_aux_diagnostic_state_dump_t_get_state_connectors_item(vx_resp_aux_diagnostic_state_dump_t.getCPtr((vx_resp_aux_diagnostic_state_dump_t)object), (vx_resp_aux_diagnostic_state_dump_t)object, n)
         if (l != 0L) return vx_state_connector_t(l, false)
         return null
     }
@@ -4277,7 +4277,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_device_t vx_resp_aux_get_capture_devices_t_get_capture_devices_item(vx_resp_aux_get_capture_devices_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_resp_aux_get_capture_devices_t_get_capture_devices_item(vx_resp_aux_get_capture_devices_t.getCPtr((vx_resp_aux_get_capture_devices_t)object), (vx_resp_aux_get_capture_devices_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_resp_aux_get_capture_devices_t_get_capture_devices_item(vx_resp_aux_get_capture_devices_t.getCPtr((vx_resp_aux_get_capture_devices_t)object), (vx_resp_aux_get_capture_devices_t)object, n)
         if (l != 0L) return vx_device_t(l, false)
         return null
     }
@@ -4287,7 +4287,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_device_t vx_resp_aux_get_render_devices_t_get_render_devices_item(vx_resp_aux_get_render_devices_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_resp_aux_get_render_devices_t_get_render_devices_item(vx_resp_aux_get_render_devices_t.getCPtr((vx_resp_aux_get_render_devices_t)object), (vx_resp_aux_get_render_devices_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_resp_aux_get_render_devices_t_get_render_devices_item(vx_resp_aux_get_render_devices_t.getCPtr((vx_resp_aux_get_render_devices_t)object), (vx_resp_aux_get_render_devices_t)object, n)
         if (l != 0L) return vx_device_t(l, false)
         return null
     }
@@ -4297,7 +4297,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_participant_t vx_resp_channel_get_banned_users_t_get_banned_users_item(vx_resp_channel_get_banned_users_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_resp_channel_get_banned_users_t_get_banned_users_item(vx_resp_channel_get_banned_users_t.getCPtr((vx_resp_channel_get_banned_users_t)object), (vx_resp_channel_get_banned_users_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_resp_channel_get_banned_users_t_get_banned_users_item(vx_resp_channel_get_banned_users_t.getCPtr((vx_resp_channel_get_banned_users_t)object), (vx_resp_channel_get_banned_users_t)object, n)
         if (l != 0L) return vx_participant_t(l, false)
         return null
     }
@@ -4347,7 +4347,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_state_sessiongroup_t vx_state_account_t_get_state_sessiongroups_item(vx_state_account_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_state_account_t_get_state_sessiongroups_item(vx_state_account_t.getCPtr((vx_state_account_t)object), (vx_state_account_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_state_account_t_get_state_sessiongroups_item(vx_state_account_t.getCPtr((vx_state_account_t)object), (vx_state_account_t)object, n)
         if (l != 0L) return vx_state_sessiongroup_t(l, false)
         return null
     }
@@ -4421,7 +4421,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_state_account_t vx_state_connector_t_get_state_accounts_item(vx_state_connector_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_state_connector_t_get_state_accounts_item(vx_state_connector_t.getCPtr((vx_state_connector_t)object), (vx_state_connector_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_state_connector_t_get_state_accounts_item(vx_state_connector_t.getCPtr((vx_state_connector_t)object), (vx_state_connector_t)object, n)
         if (l != 0L) return vx_state_account_t(l, false)
         return null
     }
@@ -4463,7 +4463,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_state_participant_t vx_state_session_t_get_state_participants_item(vx_state_session_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_state_session_t_get_state_participants_item(vx_state_session_t.getCPtr((vx_state_session_t)object), (vx_state_session_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_state_session_t_get_state_participants_item(vx_state_session_t.getCPtr((vx_state_session_t)object), (vx_state_session_t)object, n)
         if (l != 0L) return vx_state_participant_t(l, false)
         return null
     }
@@ -4489,7 +4489,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_state_session_t vx_state_sessiongroup_t_get_state_sessions_item(vx_state_sessiongroup_t object, Int n) {
-        Long l = VxClientProxyJNI.vx_state_sessiongroup_t_get_state_sessions_item(vx_state_sessiongroup_t.getCPtr((vx_state_sessiongroup_t)object), (vx_state_sessiongroup_t)object, n)
+        var l: Long = VxClientProxyJNI.vx_state_sessiongroup_t_get_state_sessions_item(vx_state_sessiongroup_t.getCPtr((vx_state_sessiongroup_t)object), (vx_state_sessiongroup_t)object, n)
         if (l != 0L) return vx_state_session_t(l, false)
         return null
     }
@@ -4579,7 +4579,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_message_base_t vx_wait_for_message(Int n) {
-        Long l = VxClientProxyJNI.vx_wait_for_message(n)
+        var l: Long = VxClientProxyJNI.vx_wait_for_message(n)
         if (l != 0L) return vx_message_base_t(l, false)
         return null
     }
@@ -4601,7 +4601,7 @@ class VxClientProxy
      * Lifted jumps to return sites
      */
     vx_req_base_t xml_to_request(String object) {
-        Long l = VxClientProxyJNI.xml_to_request((String)object)
+        var l: Long = VxClientProxyJNI.xml_to_request((String)object)
         if (l != 0L) return vx_req_base_t(l, false)
         return null
     }

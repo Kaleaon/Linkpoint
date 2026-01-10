@@ -25,10 +25,10 @@ class RemoveNameValuePair : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int i = 21
+        var i: Int = 21
         Iterator<T> it = this.NameValueData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            var i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -36,11 +36,11 @@ class RemoveNameValuePair : SLMessage {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleRemoveNameValuePair(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 74)
@@ -51,7 +51,7 @@ class RemoveNameValuePair : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.TaskData_Field.ID = unpackUUID(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (i in 0 until b) {

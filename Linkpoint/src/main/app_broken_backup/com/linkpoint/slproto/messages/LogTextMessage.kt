@@ -24,10 +24,10 @@ class LogTextMessage : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int i = 5
+        var i: Int = 5
         Iterator<T> it = this.DataBlock_Fields.iterator()
         while (true) {
-            Int i2 = i
+            var i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -35,11 +35,11 @@ class LogTextMessage : SLMessage {
         }
     }
 
-    fun Handle(sLMessageHandler: SLMessageHandler): Unit {
+    fun Handle(sLMessageHandler: SLMessageHandler)  {
         sLMessageHandler.HandleLogTextMessage(this)
     }
 
-    fun PackPayload(byteBuffer: ByteBuffer): Unit {
+    fun PackPayload(byteBuffer: ByteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -121)
@@ -54,7 +54,7 @@ class LogTextMessage : SLMessage {
         }
     }
 
-    fun UnpackPayload(byteBuffer: ByteBuffer): Unit {
+    fun UnpackPayload(byteBuffer: ByteBuffer)  {
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (i in 0 until b) {
             DataBlock dataBlock = DataBlock()

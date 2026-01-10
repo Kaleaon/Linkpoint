@@ -19,18 +19,18 @@ class RebakeAvatarTextures : SLMessage {
         return 20
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleRebakeAvatarTextures(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 87)
         packUUID(byteBuffer, this.TextureData_Field.TextureID)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.TextureData_Field.TextureID = unpackUUID(byteBuffer)
     }
 }

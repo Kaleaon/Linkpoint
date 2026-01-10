@@ -27,11 +27,11 @@ class SoundTrigger : SLMessage {
         return 89
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleSoundTrigger(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.put(Ascii.GS)
         packUUID(byteBuffer, this.SoundData_Field.SoundID)
         packUUID(byteBuffer, this.SoundData_Field.OwnerID)
@@ -42,7 +42,7 @@ class SoundTrigger : SLMessage {
         packFloat(byteBuffer, this.SoundData_Field.Gain)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.SoundData_Field.SoundID = unpackUUID(byteBuffer)
         this.SoundData_Field.OwnerID = unpackUUID(byteBuffer)
         this.SoundData_Field.ObjectID = unpackUUID(byteBuffer)

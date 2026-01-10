@@ -26,7 +26,7 @@ class TerrainPatchHeightMap {
     }
 
     fun equals(Any obj): Boolean {
-        if (!(obj instanceof TerrainPatchHeightMap)) {
+        if (!(obj is TerrainPatchHeightMap)) {
             return false
         }
         TerrainPatchHeightMap terrainPatchHeightMap = (TerrainPatchHeightMap) obj

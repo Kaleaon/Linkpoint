@@ -68,20 +68,20 @@ class BakeLayer {
         SLAvatarParams.AvatarParam avatarParam
         SLAvatarParamColor sLAvatarParamColor
         Int colorAdd
-        Boolean z = false
+        var z: Boolean = false
         if (this.layerName.equals("lipstick")) {
             Debug.Log(String.format("Baking: lipstick start color %08x default %08x", Array<Any>{Integer.valueOf(i), Integer.valueOf(i2)}))
         }
-        Int length = iArr.size
-        Int i3 = 0
-        Int i4 = i
+        var length: Int = iArr.size
+        var i3: Int = 0
+        var i4: Int = i
         while (i3 < length) {
-            Int i5 = iArr[i3]
+            var i5: Int = iArr[i3]
             SLAvatarParams.ParamSet paramSet = SLAvatarParams.paramByIDs.get(Integer.valueOf(i5))
             if (!(paramSet == null || (sLAvatarParamColor = avatarParam.paramColor) == null)) {
                 z = true
                 float paramWeight = bakeProcess.getParamWeight(i5, (avatarParam = (SLAvatarParams.AvatarParam) paramSet.params.get(0)))
-                Int color = sLAvatarParamColor.getColor(paramWeight)
+                var color: Int = sLAvatarParamColor.getColor(paramWeight)
                 if (this.layerName.equals("lipstick")) {
                     Debug.Log(String.format("Baking: lipstick color param weight %ff color %08x", Array<Any>{Float.valueOf(paramWeight), Integer.valueOf(color)}))
                 }
@@ -114,8 +114,8 @@ class BakeLayer {
 
     private Int getNetColor(BakeProcess bakeProcess) {
         IntArray iArr = this.paramIDs
-        Int length = iArr.size
-        Int i = 0
+        var length: Int = iArr.size
+        var i: Int = 0
         while (true) {
             if (i >= length) {
                 z = false
@@ -129,7 +129,7 @@ class BakeLayer {
             i++
         }
         if (z) {
-            Int colorByParamList = this.globalColor != null ? getColorByParamList(bakeProcess, this.globalColor.getParamIDs(), 0, 0) : this.hasFixedColor ? this.fixedColor : 0
+            var colorByParamList: Int = this.globalColor != null ? getColorByParamList(bakeProcess, this.globalColor.getParamIDs(), 0, 0) : this.hasFixedColor ? this.fixedColor : 0
             return getColorByParamList(bakeProcess, this.paramIDs, colorByParamList, colorByParamList)
         } else if (this.globalColor != null) {
             return getColorByParamList(bakeProcess, this.globalColor.getParamIDs(), 0, 0)
@@ -146,18 +146,18 @@ class BakeLayer {
     /* JADX WARNING: Removed duplicated region for block: B:52:0x0243  */
     /* JADX WARNING: Removed duplicated region for block: B:73:? A[RETURN, SYNTHETIC] */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    fun Bake(com.linkpoint.openjpeg.OpenJPEG r21, com.linkpoint.slproto.baker.BakeProcess r22): Unit {
+    fun Bake(com.linkpoint.openjpeg.OpenJPEG r21, com.linkpoint.slproto.baker.BakeProcess r22)  {
         /*
             r20 = this
             r15 = 0
             r0 = r20
             r1 = r22
-            Int r17 = r0.getNetColor(r1)
+            var r17: Int = r0.getNetColor(r1)
             com.linkpoint.openjpeg.OpenJPEG r2 = com.linkpoint.openjpeg.OpenJPEG
             r0 = r21
-            Int r3 = r0.width
+            var r3: Int = r0.width
             r0 = r21
-            Int r4 = r0.height
+            var r4: Int = r0.height
             r5 = 4
             r6 = 4
             r7 = 0
@@ -165,9 +165,9 @@ class BakeLayer {
             r2.<init>(r3, r4, r5, r6, r7, r8)
             com.linkpoint.openjpeg.OpenJPEG r3 = com.linkpoint.openjpeg.OpenJPEG
             r0 = r21
-            Int r4 = r0.width
+            var r4: Int = r0.width
             r0 = r21
-            Int r5 = r0.height
+            var r5: Int = r0.height
             r6 = 4
             r7 = 4
             r8 = 0
@@ -192,7 +192,7 @@ class BakeLayer {
             r18 = r0
             r4 = 0
             r0 = r18
-            Int r0 = r0.size
+            var r0: Int = r0.size
             r19 = r0
             r16 = r4
         L_0x0057:
@@ -220,28 +220,28 @@ class BakeLayer {
             if (r5 == 0) goto L_0x0289
             r14 = 0
             com.linkpoint.slproto.avatar.SLAvatarParamAlpha r4 = r12.paramAlpha
-            Boolean r4 = r4.multiplyBlend
+            var r4: Boolean = r4.multiplyBlend
             if (r4 != 0) goto L_0x0095
             r4 = 3
             r5 = 0
             r3.setComponent(r4, r5)
         L_0x0095:
             r4 = 0
-            Int r4 = (r10 > r4 ? 1 : (r10 == r4 ? 0 : -1))
+            var r4: Int = (r10 > r4 ? 1 : (r10 == r4 ? 0 : -1))
             if (r4 != 0) goto L_0x00a8
             com.linkpoint.slproto.avatar.SLAvatarParamAlpha r4 = r12.paramAlpha
-            Boolean r4 = r4.skipIfZero
+            var r4: Boolean = r4.skipIfZero
             if (r4 == 0) goto L_0x00a8
             r4 = r13
             r5 = r14
         L_0x00a2:
-            Int r6 = r16 + 1
+            var r6: Int = r16 + 1
             r16 = r6
             r13 = r4
             goto L_0x0057
         L_0x00a8:
             com.linkpoint.slproto.avatar.SLAvatarParamAlpha r4 = r12.paramAlpha
-            Boolean r4 = r4.multiplyBlend
+            var r4: Boolean = r4.multiplyBlend
             r13 = r13 | r4
             android.content.res.AssetManager r4 = com.linkpoint.LumiyaApp.getAssetManager()     // Catch:{ Exception -> 0x0139 }
             java.lang.StringBuilder r5 = java.lang.StringBuilder     // Catch:{ Exception -> 0x0139 }
@@ -280,22 +280,22 @@ class BakeLayer {
             java.lang.String r8 = r8.tgaFile     // Catch:{ Exception -> 0x0139 }
             r9 = 3
             r7[r9] = r8     // Catch:{ Exception -> 0x0139 }
-            Int r8 = r4.getWidth()     // Catch:{ Exception -> 0x0139 }
+            var r8: Int = r4.getWidth()     // Catch:{ Exception -> 0x0139 }
             java.lang.Integer r8 = java.lang.Integer.valueOf(r8)     // Catch:{ Exception -> 0x0139 }
             r9 = 4
             r7[r9] = r8     // Catch:{ Exception -> 0x0139 }
-            Int r8 = r4.getHeight()     // Catch:{ Exception -> 0x0139 }
+            var r8: Int = r4.getHeight()     // Catch:{ Exception -> 0x0139 }
             java.lang.Integer r8 = java.lang.Integer.valueOf(r8)     // Catch:{ Exception -> 0x0139 }
             r9 = 5
             r7[r9] = r8     // Catch:{ Exception -> 0x0139 }
-            Int r8 = r4.getNumComponents()     // Catch:{ Exception -> 0x0139 }
+            var r8: Int = r4.getNumComponents()     // Catch:{ Exception -> 0x0139 }
             java.lang.Integer r8 = java.lang.Integer.valueOf(r8)     // Catch:{ Exception -> 0x0139 }
             r9 = 6
             r7[r9] = r8     // Catch:{ Exception -> 0x0139 }
             java.lang.String r6 = java.lang.String.format(r6, r7)     // Catch:{ Exception -> 0x0139 }
             com.linkpoint.Debug.Log(r6)     // Catch:{ Exception -> 0x0139 }
             com.linkpoint.slproto.avatar.SLAvatarParamAlpha r6 = r12.paramAlpha     // Catch:{ Exception -> 0x0139 }
-            Boolean r6 = r6.multiplyBlend     // Catch:{ Exception -> 0x0139 }
+            var r6: Boolean = r6.multiplyBlend     // Catch:{ Exception -> 0x0139 }
             r6 = r6 ^ 1
             r3.blendAlpha(r4, r6)     // Catch:{ Exception -> 0x0139 }
             r5.close()     // Catch:{ Exception -> 0x0139 }
@@ -321,7 +321,7 @@ class BakeLayer {
             java.util.Iterator r6 = r5.iterator()     // Catch:{ DefaultTextureException -> 0x0255 }
             r5 = r4
         L_0x0159:
-            Boolean r4 = r6.hasNext()     // Catch:{ DefaultTextureException -> 0x0280 }
+            var r4: Boolean = r6.hasNext()     // Catch:{ DefaultTextureException -> 0x0280 }
             if (r4 == 0) goto L_0x0282
             java.lang.Object r4 = r6.next()     // Catch:{ DefaultTextureException -> 0x0280 }
             com.linkpoint.openjpeg.OpenJPEG r4 = (com.linkpoint.openjpeg.OpenJPEG) r4     // Catch:{ DefaultTextureException -> 0x0280 }
@@ -333,7 +333,7 @@ class BakeLayer {
             r10 = 0
             r8[r10] = r9     // Catch:{ DefaultTextureException -> 0x0280 }
             r0 = r20
-            Boolean r9 = r0.writeAllChannels     // Catch:{ DefaultTextureException -> 0x0280 }
+            var r9: Boolean = r0.writeAllChannels     // Catch:{ DefaultTextureException -> 0x0280 }
             java.lang.Boolean r9 = java.lang.Boolean.valueOf(r9)     // Catch:{ DefaultTextureException -> 0x0280 }
             r10 = 1
             r8[r10] = r9     // Catch:{ DefaultTextureException -> 0x0280 }
@@ -375,7 +375,7 @@ class BakeLayer {
             com.linkpoint.openjpeg.OpenJPEG r4 = com.linkpoint.openjpeg.OpenJPEG     // Catch:{ Exception -> 0x026f }
             com.linkpoint.openjpeg.OpenJPEG$ImageFormat r6 = com.linkpoint.openjpeg.OpenJPEG.ImageFormat.TGA     // Catch:{ Exception -> 0x026f }
             r0 = r20
-            Boolean r7 = r0.tgaFileIsMask     // Catch:{ Exception -> 0x026f }
+            var r7: Boolean = r0.tgaFileIsMask     // Catch:{ Exception -> 0x026f }
             r8 = 0
             r9 = 0
             r10 = 0
@@ -393,19 +393,19 @@ class BakeLayer {
             r9 = 1
             r7[r9] = r8     // Catch:{ Exception -> 0x026f }
             r0 = r20
-            Boolean r8 = r0.writeAllChannels     // Catch:{ Exception -> 0x026f }
+            var r8: Boolean = r0.writeAllChannels     // Catch:{ Exception -> 0x026f }
             java.lang.Boolean r8 = java.lang.Boolean.valueOf(r8)     // Catch:{ Exception -> 0x026f }
             r9 = 2
             r7[r9] = r8     // Catch:{ Exception -> 0x026f }
-            Int r8 = r4.getWidth()     // Catch:{ Exception -> 0x026f }
+            var r8: Int = r4.getWidth()     // Catch:{ Exception -> 0x026f }
             java.lang.Integer r8 = java.lang.Integer.valueOf(r8)     // Catch:{ Exception -> 0x026f }
             r9 = 3
             r7[r9] = r8     // Catch:{ Exception -> 0x026f }
-            Int r8 = r4.getHeight()     // Catch:{ Exception -> 0x026f }
+            var r8: Int = r4.getHeight()     // Catch:{ Exception -> 0x026f }
             java.lang.Integer r8 = java.lang.Integer.valueOf(r8)     // Catch:{ Exception -> 0x026f }
             r9 = 4
             r7[r9] = r8     // Catch:{ Exception -> 0x026f }
-            Int r8 = r4.getNumComponents()     // Catch:{ Exception -> 0x026f }
+            var r8: Int = r4.getNumComponents()     // Catch:{ Exception -> 0x026f }
             java.lang.Integer r8 = java.lang.Integer.valueOf(r8)     // Catch:{ Exception -> 0x026f }
             r9 = 5
             r7[r9] = r8     // Catch:{ Exception -> 0x026f }
@@ -435,10 +435,10 @@ class BakeLayer {
             r2.blendAlpha(r3, r4)
             if (r15 != 0) goto L_0x0254
             r0 = r20
-            Boolean r3 = r0.isRenderPassBump
+            var r3: Boolean = r0.isRenderPassBump
             if (r3 == 0) goto L_0x0274
             r0 = r20
-            Boolean r3 = r0.writeAllChannels
+            var r3: Boolean = r0.writeAllChannels
             r0 = r21
             r1 = r17
             r0.drawBump(r2, r1, r3, r13)
@@ -466,7 +466,7 @@ class BakeLayer {
             goto L_0x0227
         L_0x0274:
             r0 = r20
-            Boolean r3 = r0.writeAllChannels
+            var r3: Boolean = r0.writeAllChannels
             r0 = r21
             r1 = r17
             r0.draw(r2, r1, r3)
@@ -491,7 +491,7 @@ class BakeLayer {
         throw UnsupportedOperationException("Method not decompiled: com.linkpoint.slproto.baker.BakeLayer.Bake(com.linkpoint.openjpeg.OpenJPEG, com.linkpoint.slproto.baker.BakeProcess):Unit")
     }
 
-    fun BakeAlpha(OpenJPEG openJPEG, BakeProcess bakeProcess): Unit {
+    fun BakeAlpha(OpenJPEG openJPEG, BakeProcess bakeProcess)  {
         if (!this.isRenderPassBump) {
             if (this.tgaTexture != null) {
                 try {

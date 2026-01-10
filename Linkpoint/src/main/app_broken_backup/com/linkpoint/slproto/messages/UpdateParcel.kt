@@ -41,11 +41,11 @@ class UpdateParcel : SLMessage {
         return this.ParcelData_Field.Name.size + 43 + 1 + this.ParcelData_Field.Description.size + 1 + this.ParcelData_Field.MusicURL.size + 4 + 4 + 4 + 4 + 1 + 1 + 1 + 16 + 12 + 4 + 16 + 1 + 1 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleUpdateParcel(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -35)
@@ -72,7 +72,7 @@ class UpdateParcel : SLMessage {
         packBoolean(byteBuffer, this.ParcelData_Field.MaturePublish)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.ParcelData_Field.ParcelID = unpackUUID(byteBuffer)
         this.ParcelData_Field.RegionHandle = unpackLong(byteBuffer)
         this.ParcelData_Field.OwnerID = unpackUUID(byteBuffer)

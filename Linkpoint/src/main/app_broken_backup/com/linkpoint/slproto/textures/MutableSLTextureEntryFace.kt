@@ -8,68 +8,68 @@ class MutableSLTextureEntryFace {
     val MEDIA_MASK: Byte = 1
     val SHINY_MASK: Byte = -64
     val TEX_MAP_MASK: Byte = 6
-    Float glow = 0.0f
+    var glow: Float = 0.0f
     Int hasAttribute
     Byte materialb = 0
     Byte mediab = 0
-    Float offsetU = 1.0f
-    Float offsetV = 1.0f
-    Float repeatU = 1.0f
-    Float repeatV = 1.0f
-    Int rgba = -1
-    Float rotation = 0.0f
+    var offsetU: Float = 1.0f
+    var offsetV: Float = 1.0f
+    var repeatU: Float = 1.0f
+    var repeatV: Float = 1.0f
+    var rgba: Int = -1
+    var rotation: Float = 0.0f
     UUID textureID
 
     MutableSLTextureEntryFace(Int i) {
         this.hasAttribute = i
     }
 
-    fun setGlow(Float f): Unit {
+    fun setGlow(Float f)  {
         this.glow = f
         this.hasAttribute |= 512
     }
 
-    fun setMaterial(Byte b): Unit {
+    fun setMaterial(Byte b)  {
         this.materialb = b
         this.hasAttribute |= 128
     }
 
-    fun setMedia(Byte b): Unit {
+    fun setMedia(Byte b)  {
         this.mediab = b
         this.hasAttribute |= 256
     }
 
-    fun setOffsetU(Float f): Unit {
+    fun setOffsetU(Float f)  {
         this.offsetU = f
         this.hasAttribute |= 16
     }
 
-    fun setOffsetV(Float f): Unit {
+    fun setOffsetV(Float f)  {
         this.offsetV = f
         this.hasAttribute |= 32
     }
 
-    fun setRGBA(Int i): Unit {
+    fun setRGBA(Int i)  {
         this.rgba = i
         this.hasAttribute |= 2
     }
 
-    fun setRepeatU(Float f): Unit {
+    fun setRepeatU(Float f)  {
         this.repeatU = f
         this.hasAttribute |= 4
     }
 
-    fun setRepeatV(Float f): Unit {
+    fun setRepeatV(Float f)  {
         this.repeatV = f
         this.hasAttribute |= 8
     }
 
-    fun setRotation(Float f): Unit {
+    fun setRotation(Float f)  {
         this.rotation = f
         this.hasAttribute |= 64
     }
 
-    fun setTextureID(UUID uuid): Unit {
+    fun setTextureID(UUID uuid)  {
         this.textureID = uuid
         this.hasAttribute |= 1
     }

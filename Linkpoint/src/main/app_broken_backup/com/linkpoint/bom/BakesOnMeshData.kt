@@ -124,9 +124,7 @@ data class BomAvatarConfig(
     /**
      * Get layers that need rebaking
      */
-    fun getStaleB
-
-akes(): List<BomBakeType> {
+    fun getStaleBakes(): List<BomBakeType> {
         return BomBakeType.values().filter { !isBakeValid(it) }
     }
 }

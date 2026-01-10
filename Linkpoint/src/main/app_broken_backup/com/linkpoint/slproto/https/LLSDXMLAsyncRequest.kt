@@ -14,7 +14,7 @@ class LLSDXMLAsyncRequest {
 
     LLSDXMLAsyncRequest(String str, LLSDNode lLSDNode, LLSDXMLResultListener lLSDXMLResultListener) {
         Thread(Runnable() {
-            fun run(): Unit {
+            fun run()  {
                 LLSDNode lLSDNode
                 try {
                     lLSDNode = LLSDXMLRequest().PerformRequest(str, lLSDNode)

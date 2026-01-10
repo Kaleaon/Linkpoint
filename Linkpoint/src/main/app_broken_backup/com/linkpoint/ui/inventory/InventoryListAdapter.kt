@@ -22,13 +22,13 @@ class InventoryListAdapter : CursorAdapter {
         this.avatarAppearance = sLAvatarAppearance
     }
 
-    fun bindView(View view, Context context, Cursor cursor): Unit {
+    fun bindView(View view, Context context, Cursor cursor)  {
         SLInventoryEntry sLInventoryEntry = SLInventoryEntry(cursor)
         ((view as TextView).findViewById(R.id.itemNameTextView)).setText(sLInventoryEntry.name)
-        Int drawableResource = sLInventoryEntry.getDrawableResource()
+        var drawableResource: Int = sLInventoryEntry.getDrawableResource()
         if (drawableResource >= 0) {
             ((view as ImageView).findViewById(R.id.itemTypeIconView)).setImageResource(drawableResource)
-            Int subtypeDrawableResource = sLInventoryEntry.getSubtypeDrawableResource()
+            var subtypeDrawableResource: Int = sLInventoryEntry.getSubtypeDrawableResource()
             if (subtypeDrawableResource >= 0) {
                 ((view as ImageView).findViewById(R.id.itemSubTypeIconView)).setImageResource(subtypeDrawableResource)
             } else {

@@ -26,11 +26,11 @@ class RequestXfer : SLMessage {
         return this.XferID_Field.Filename.size + 9 + 1 + 1 + 1 + 16 + 2 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleRequestXfer(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -100)
@@ -43,7 +43,7 @@ class RequestXfer : SLMessage {
         packShort(byteBuffer, (this as Short).XferID_Field.VFileType)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.XferID_Field.ID = unpackLong(byteBuffer)
         this.XferID_Field.Filename = unpackVariable(byteBuffer, 1)
         this.XferID_Field.FilePath = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE

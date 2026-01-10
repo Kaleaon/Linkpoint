@@ -70,7 +70,7 @@ class AgentPosition {
         return z
     }
 
-    fun set(@NonNull LLVector3 lLVector3, @Nullable LLVector3 lLVector32): Unit {
+    fun set(@NonNull LLVector3 lLVector3, @Nullable LLVector3 lLVector32)  {
         synchronized (this.lock) {
             this.position.set(lLVector3)
             LLVector3 lLVector33 = this.velocity

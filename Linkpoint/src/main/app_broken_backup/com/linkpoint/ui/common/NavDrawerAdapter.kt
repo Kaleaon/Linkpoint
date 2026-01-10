@@ -25,14 +25,14 @@ import java.util.UUID
 
 class NavDrawerAdapter : ArrayAdapter<NavDrawerItem> : AdapterView.OnItemClickListener {
     private NavDrawerItem[] items = {NavDrawerActivityItem(R.id.item_chat, R.attr.MenuIconLocalChatThemed, R.string.nav_chat, ChatNewActivity.class), NavDrawerActivityItem(R.id.item_3d_view, R.attr.MenuIconWorldViewThemed, R.string.nav_3d_view, WorldViewActivity.class), NavDrawerActivityItem(R.id.item_objects, R.attr.MenuIconObjectsThemed, R.string.nav_objects, ObjectListNewActivity.class), NavDrawerActivityItem(R.id.item_inventory, R.attr.MenuIconInventoryThemed, R.string.nav_inventory, InventoryActivity.class), NavDrawerActivityItem(R.id.item_minimap, R.attr.MenuIconMinimapThemed, R.string.nav_minimap, MinimapActivity.class), NavDrawerItem(R.id.item_teleport_home, R.attr.MenuIconHomeThemed, R.string.nav_teleport_home) {
-        fun onClick(Context context): Unit {
-            if (context instanceof Activity) {
+        fun onClick(Context context)  {
+            if (context is Activity) {
                 TeleportHomeDialog.show((Activity) context)
             }
         }
     }, NavDrawerActivityItem(R.id.item_my_avatar, R.attr.MenuIconCardThemed, R.string.nav_my_avatar, MyAvatarActivity.class), NavDrawerActivityItem(R.id.item_people_search, R.attr.MenuIconSearchThemed, R.string.nav_search, SearchGridActivity.class), NavDrawerActivityItem(R.id.item_settings, R.attr.MenuIconSettingsThemed, R.string.nav_settings, SettingsActivity.class), NavDrawerItem(R.id.item_signout, R.attr.MenuIconSignOffThemed, R.string.nav_signout) {
-        fun onClick(Context context): Unit {
-            if (context instanceof Activity) {
+        fun onClick(Context context)  {
+            if (context is Activity) {
                 LogoutDialog.show((Activity) context)
             }
         }
@@ -46,11 +46,11 @@ class NavDrawerAdapter : ArrayAdapter<NavDrawerItem> : AdapterView.OnItemClickLi
             this.activityClass = cls
         }
 
-        fun onClick(Context context): Unit {
+        fun onClick(Context context)  {
             UUID activeAgentID
             Intent intent = Intent(context, this.activityClass)
             intent.addFlags(131072)
-            if ((context instanceof Activity) && (activeAgentID = ActivityUtils.getActiveAgentID(((Activity) context).getIntent())) != null) {
+            if ((context is Activity) && (activeAgentID = ActivityUtils.getActiveAgentID(((Activity) context).getIntent())) != null) {
                 intent.putExtra("activeAgentUUID", activeAgentID.toString())
             }
             context.startActivity(intent)
@@ -68,7 +68,7 @@ class NavDrawerAdapter : ArrayAdapter<NavDrawerItem> : AdapterView.OnItemClickLi
             this.labelId = i3
         }
 
-        fun onClick(Context context): Unit {
+        fun onClick(Context context)  {
         }
     }
 
@@ -91,7 +91,7 @@ class NavDrawerAdapter : ArrayAdapter<NavDrawerItem> : AdapterView.OnItemClickLi
         return view
     }
 
-    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j): Unit {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j)  {
         NavDrawerItem navDrawerItem = (NavDrawerItem) getItem(i)
         if (navDrawerItem != null) {
             navDrawerItem.onClick(adapterView.getContext())

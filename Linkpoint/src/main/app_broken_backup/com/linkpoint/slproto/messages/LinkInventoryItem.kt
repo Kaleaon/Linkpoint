@@ -32,11 +32,11 @@ class LinkInventoryItem : SLMessage {
         return this.InventoryBlock_Field.Name.size + 55 + 1 + this.InventoryBlock_Field.Description.size + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleLinkInventoryItem(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -86)
@@ -52,7 +52,7 @@ class LinkInventoryItem : SLMessage {
         packVariable(byteBuffer, this.InventoryBlock_Field.Description, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.InventoryBlock_Field.CallbackID = unpackInt(byteBuffer)

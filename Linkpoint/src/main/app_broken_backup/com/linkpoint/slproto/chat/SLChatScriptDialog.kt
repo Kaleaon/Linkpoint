@@ -56,13 +56,13 @@ class SLChatScriptDialog : SLChatDialogEvent {
             setOnCancelListener(this)
         }
 
-        fun onCancel(DialogInterface dialogInterface): Unit {
+        fun onCancel(DialogInterface dialogInterface)  {
             SLChatScriptDialog.this.onDialogIgnored(this.userManager)
             dismiss()
         }
 
-        fun onClick(View view): Unit {
-            Int i = 0
+        fun onClick(View view)  {
+            var i: Int = 0
             while (true) {
                 if (i >= SLChatScriptDialog.dialogButtonIds.size) {
                     break
@@ -95,9 +95,9 @@ class SLChatScriptDialog : SLChatDialogEvent {
         this.buttons = strArr
     }
 
-    fun bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, @Nullable ChatEventTimestampUpdater chatEventTimestampUpdater): Unit {
+    fun bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, @Nullable ChatEventTimestampUpdater chatEventTimestampUpdater)  {
         super.bindViewHolder(chatEventViewHolder, userManager, chatEventTimestampUpdater)
-        if (chatEventViewHolder instanceof ChatScriptDialogViewHolder) {
+        if (chatEventViewHolder is ChatScriptDialogViewHolder) {
             ChatScriptDialogViewHolder chatScriptDialogViewHolder = (ChatScriptDialogViewHolder) chatEventViewHolder
             chatScriptDialogViewHolder.setDialogEvent(this)
             if (this.selectedOption != null || this.ignored) {
@@ -143,7 +143,7 @@ class SLChatScriptDialog : SLChatDialogEvent {
         return true
     }
 
-    fun onDialogButton(UserManager userManager, Int i): Unit {
+    fun onDialogButton(UserManager userManager, Int i)  {
         if (i >= 0 && i < this.buttons.size) {
             this.selectedOption = this.buttons[i]
             UUID sourceUUID = this.source.getSourceUUID()
@@ -155,12 +155,12 @@ class SLChatScriptDialog : SLChatDialogEvent {
         }
     }
 
-    fun onDialogIgnored(UserManager userManager): Unit {
+    fun onDialogIgnored(UserManager userManager)  {
         super.onDialogIgnored(userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage)  {
         super.serializeToDatabaseObject(chatMessage)
         try {
             ByteArrayOutputStream byteArrayOutputStream = ByteArrayOutputStream()
@@ -172,7 +172,7 @@ class SLChatScriptDialog : SLChatDialogEvent {
         chatMessage.setDialogSelectedOption(this.selectedOption)
     }
 
-    fun showDialog(Context context, UserManager userManager): Unit {
+    fun showDialog(Context context, UserManager userManager)  {
         ScriptDialogDialog(context, userManager, this.source.getSourceName(userManager), this.text).show()
     }
 }

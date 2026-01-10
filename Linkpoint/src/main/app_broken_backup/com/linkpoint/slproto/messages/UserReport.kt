@@ -38,11 +38,11 @@ class UserReport : SLMessage {
         return this.ReportData_Field.AbuseRegionName.size + 64 + 16 + 1 + this.ReportData_Field.Summary.size + 2 + this.ReportData_Field.Details.size + 1 + this.ReportData_Field.VersionString.size + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleUserReport(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -123)
@@ -62,7 +62,7 @@ class UserReport : SLMessage {
         packVariable(byteBuffer, this.ReportData_Field.VersionString, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ReportData_Field.ReportType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE

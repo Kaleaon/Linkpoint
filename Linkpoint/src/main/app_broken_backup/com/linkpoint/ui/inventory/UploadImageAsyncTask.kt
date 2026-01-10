@@ -57,17 +57,17 @@ class UploadImageAsyncTask : AsyncTask<UploadImageParams, Void, UploadImageResul
     fun doInBackground(UploadImageParams... uploadImageParamsArr): UploadImageResult {
         Bitmap bitmap
         String str
-        Boolean z2 = true
-        String str2 = null
-        Int length = uploadImageParamsArr.size
-        Int i = 0
+        var z2: Boolean = true
+        var str2: String = null
+        var length: Int = uploadImageParamsArr.size
+        var i: Int = 0
         while (i < length) {
             UploadImageParams uploadImageParams = uploadImageParamsArr[i]
             Bitmap bitmap2 = uploadImageParams.bitmap
-            Int width = bitmap2.getWidth()
-            Int height = bitmap2.getHeight()
-            Int highestOneBit = Int.highestOneBit(width)
-            Int highestOneBit2 = Int.highestOneBit(height)
+            var width: Int = bitmap2.getWidth()
+            var height: Int = bitmap2.getHeight()
+            var highestOneBit: Int = Int.highestOneBit(width)
+            var highestOneBit2: Int = Int.highestOneBit(height)
             if (highestOneBit != width) {
                 highestOneBit *= 2
             }
@@ -87,9 +87,9 @@ class UploadImageAsyncTask : AsyncTask<UploadImageParams, Void, UploadImageResul
                 Debug.Printf("UploadImage: scaled bitmap from %d x %d to %d x %d", Int.valueOf(bitmap2.getWidth()), Int.valueOf(bitmap2.getHeight()), Int.valueOf(highestOneBit), Int.valueOf(highestOneBit2))
                 bitmap = Bitmap.createScaledBitmap(bitmap2, highestOneBit, highestOneBit2, true)
             }
-            Int width2 = bitmap.getWidth()
-            Int height2 = bitmap.getHeight()
-            Int i2 = bitmap.hasAlpha() ? 4 : 3
+            var width2: Int = bitmap.getWidth()
+            var height2: Int = bitmap.getHeight()
+            var i2: Int = bitmap.hasAlpha() ? 4 : 3
             OpenJPEG openJPEG = OpenJPEG(width2, height2, i2, i2, 0, 0)
             IntArray iArr = Int[width2]
             for (i3 in 0 until height2) {
@@ -102,7 +102,7 @@ class UploadImageAsyncTask : AsyncTask<UploadImageParams, Void, UploadImageResul
                 UserManager userManager = UserManager.getUserManager(uploadImageParams.agentUUID)
                 SLAgentCircuit activeAgentCircuit = userManager != null ? userManager.getActiveAgentCircuit() : null
                 if (activeAgentCircuit != null) {
-                    String capability = activeAgentCircuit.getCaps().getCapability(SLCaps.SLCapability.NewFileAgentInventory)
+                    var capability: String = activeAgentCircuit.getCaps().getCapability(SLCaps.SLCapability.NewFileAgentInventory)
                     if (capability != null) {
                         LLSDNode PerformRequest = LLSDXMLRequest().PerformRequest(capability, LLSDMap(LLSDMap.LLSDMapEntry("asset_type", LLSDString("texture")), LLSDMap.LLSDMapEntry("description", LLSDString("(No description)")), LLSDMap.LLSDMapEntry("folder_id", LLSDUUID(uploadImageParams.folderID)), LLSDMap.LLSDMapEntry("inventory_type", LLSDString("texture")), LLSDMap.LLSDMapEntry("name", LLSDString(uploadImageParams.name))))
                         if (PerformRequest == null) {
@@ -124,7 +124,7 @@ class UploadImageAsyncTask : AsyncTask<UploadImageParams, Void, UploadImageResul
                                     str = str2
                                     z = z2
                                 } else if (byKey.keyExists("success") && !byKey.byKey("success").asBoolean()) {
-                                    String asString = byKey.byKey("message").asString()
+                                    var asString: String = byKey.byKey("message").asString()
                                     z = false
                                     str = asString
                                 }
@@ -194,7 +194,7 @@ class UploadImageAsyncTask : AsyncTask<UploadImageParams, Void, UploadImageResul
     /* access modifiers changed from: protected */
     /* JADX WARNING: Multi-variable type inference failed */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    fun onPostExecute(com.linkpoint.ui.inventory.UploadImageAsyncTask.UploadImageResult r4): Unit {
+    fun onPostExecute(com.linkpoint.ui.inventory.UploadImageAsyncTask.UploadImageResult r4)  {
         /*
             r3 = this
             r2 = 0
@@ -207,7 +207,7 @@ class UploadImageAsyncTask : AsyncTask<UploadImageParams, Void, UploadImageResul
             r3.progressDialog = r0
         L_0x0010:
             if (r4 == 0) goto L_0x0038
-            Boolean r1 = r4.success
+            var r1: Boolean = r4.success
         L_0x0014:
             if (r1 == 0) goto L_0x003a
             java.util.UUID r1 = r3.agentUUID
@@ -256,7 +256,7 @@ class UploadImageAsyncTask : AsyncTask<UploadImageParams, Void, UploadImageResul
     }
 
     /* access modifiers changed from: protected */
-    fun onPreExecute(): Unit {
+    fun onPreExecute()  {
         super.onPreExecute()
         this.progressDialog = ProgressDialog(this.context)
         this.progressDialog.setMessage(this.context.getString(R.string.uploading_picture))

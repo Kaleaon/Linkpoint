@@ -26,11 +26,11 @@ class UserInfoReply : SLMessage {
         return this.UserData_Field.DirectoryVisibility.size + 2 + 2 + this.UserData_Field.EMail.size + 20
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleUserInfoReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -112)
@@ -40,7 +40,7 @@ class UserInfoReply : SLMessage {
         packVariable(byteBuffer, this.UserData_Field.EMail, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.UserData_Field.IMViaEMail = unpackBoolean(byteBuffer)
         this.UserData_Field.DirectoryVisibility = unpackVariable(byteBuffer, 1)

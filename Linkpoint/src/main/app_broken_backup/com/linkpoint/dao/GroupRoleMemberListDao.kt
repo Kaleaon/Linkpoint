@@ -25,15 +25,15 @@ class GroupRoleMemberListDao : AbstractDao<GroupRoleMemberList, UUID> {
         super(daoConfig, daoSession)
     }
 
-    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'GroupRoleMemberLists' (" + "'GROUP_ID' TEXT PRIMARY KEY ," + "'REQUEST_ID' TEXT NOT NULL ," + "'MUST_REVALIDATE' INTEGER NOT NULL );")
     }
 
-    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
+    fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean)  {
         sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'GroupRoleMemberLists'")
     }
 
-    protected fun bindValues(sQLiteStatement: SQLiteStatement, groupRoleMemberList: GroupRoleMemberList): Unit {
+    protected fun bindValues(sQLiteStatement: SQLiteStatement, groupRoleMemberList: GroupRoleMemberList)  {
         sQLiteStatement.clearBindings()
         UUID groupID = groupRoleMemberList.getGroupID()
         if (groupID != null) {
@@ -52,7 +52,7 @@ class GroupRoleMemberListDao : AbstractDao<GroupRoleMemberList, UUID> {
     }
 
     fun readEntity(cursor: Cursor, i: Int): GroupRoleMemberList {
-        Boolean z = false
+        var z: Boolean = false
         UUID fromString = cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0))
         UUID fromString2 = UUID.fromString(cursor.getString(i + 1))
         if (cursor.getShort(i + 2) != (Short) 0) {
@@ -61,7 +61,7 @@ class GroupRoleMemberListDao : AbstractDao<GroupRoleMemberList, UUID> {
         return GroupRoleMemberList(fromString, fromString2, z)
     }
 
-    fun readEntity(cursor: Cursor, groupRoleMemberList: GroupRoleMemberList, i: Int): Unit {
+    fun readEntity(cursor: Cursor, groupRoleMemberList: GroupRoleMemberList, i: Int)  {
         groupRoleMemberList.setGroupID(cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0)))
         groupRoleMemberList.setRequestID(UUID.fromString(cursor.getString(i + 1)))
         groupRoleMemberList.setMustRevalidate(cursor.getShort(i + 2) != (Short) 0)

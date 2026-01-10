@@ -15,7 +15,7 @@ class PrimDrawParams {
         if (obj == this) {
             return true
         }
-        if (obj == null || !(obj instanceof PrimDrawParams)) {
+        if (obj == null || !(obj is PrimDrawParams)) {
             return false
         }
         PrimDrawParams primDrawParams = (PrimDrawParams) obj
@@ -40,7 +40,7 @@ class PrimDrawParams {
     }
 
     fun hashCode(): Int {
-        Int i = 0
+        var i: Int = 0
         if (this.volumeParams != null) {
             i = this.volumeParams.hashCode() + 0
         }

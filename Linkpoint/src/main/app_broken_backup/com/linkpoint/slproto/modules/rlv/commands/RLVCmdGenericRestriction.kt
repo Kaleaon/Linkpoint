@@ -17,7 +17,7 @@ class RLVCmdGenericRestriction : RLVCommand {
         this.canHaveExceptions = z
     }
 
-    fun Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2): Unit {
+    fun Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2)  {
         String str3
         String str4
         if (str2 == null) {
@@ -50,7 +50,7 @@ class RLVCmdGenericRestriction : RLVCommand {
     }
 
     /* access modifiers changed from: protected */
-    fun HandleForce(RLVController rLVController, UUID uuid, String str): Unit {
+    fun HandleForce(RLVController rLVController, UUID uuid, String str)  {
         Debug.Printf("RLV: force option not supported for restriction '%s'", this.restrictionType.toString())
     }
 }

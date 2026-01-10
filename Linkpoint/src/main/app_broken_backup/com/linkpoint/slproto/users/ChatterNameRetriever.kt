@@ -46,8 +46,8 @@ class ChatterNameRetriever {
 
     /* access modifiers changed from: private */
     /* renamed from: onCurrentLocation */
-    fun m262com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref0(CurrentLocationInfo currentLocationInfo): Unit {
-        String str = null
+    fun m262com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref0(CurrentLocationInfo currentLocationInfo)  {
+        var str: String = null
         ParcelData parcelData = currentLocationInfo.parcelData()
         if (parcelData != null) {
             str = parcelData.getName()
@@ -63,7 +63,7 @@ class ChatterNameRetriever {
 
     /* access modifiers changed from: private */
     /* renamed from: onGroupProfile */
-    fun m264com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref2(GroupProfileReply groupProfileReply): Unit {
+    fun m264com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref2(GroupProfileReply groupProfileReply)  {
         this.resolvedName = SLMessage.stringFromVariableOEM(groupProfileReply.GroupData_Field.Name)
         this.resolvedSecondaryName = SLMessage.stringFromVariableOEM(groupProfileReply.GroupData_Field.Name)
         OnChatterNameUpdated onChatterNameUpdated = (this as OnChatterNameUpdated).listener.get()
@@ -74,7 +74,7 @@ class ChatterNameRetriever {
 
     /* access modifiers changed from: private */
     /* renamed from: onUserName */
-    fun m263com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref1(UserName userName): Unit {
+    fun m263com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref1(UserName userName)  {
         Debug.Printf("Resolved name for %s", userName.getUuid())
         if (GlobalOptions.getInstance().isLegacyUserNames()) {
             this.resolvedName = userName.getUserName()
@@ -89,7 +89,7 @@ class ChatterNameRetriever {
         }
     }
 
-    fun dispose(): Unit {
+    fun dispose()  {
         if (this.subscription != null) {
             this.subscription.unsubscribe()
         }
@@ -103,13 +103,13 @@ class ChatterNameRetriever {
         return this.resolvedSecondaryName
     }
 
-    fun subscribe(): Unit {
+    fun subscribe()  {
         UserManager userManager = this.chatterID.getUserManager()
         if (userManager == null) {
             this.subscription = null
         } else if (this.chatterID.getChatterType() == ChatterID.ChatterType.Local) {
             this.subscription = userManager.getCurrentLocationInfo().subscribe(SubscriptionSingleDataPool.getSingleDataKey(), this.executor, $Lambda$Tr7QBnh_GnHDqFtHSpMdsLw3Yfs(this))
-        } else if (this.chatterID instanceof ChatterID.ChatterIDUser) {
+        } else if (this.chatterID is ChatterID.ChatterIDUser) {
             this.subscription = userManager.getUserNames().subscribe(((ChatterID.ChatterIDUser) this.chatterID).getChatterUUID(), this.executor, Subscription.OnData(this) {
 
                 /* renamed from: -$f0 */
@@ -191,7 +191,7 @@ Method generation error in method: com.linkpoint.slproto.users.-$Lambda$Tr7QBnh_
                 
 */
 
-        } else if (this.chatterID instanceof ChatterID.ChatterIDGroup) {
+        } else if (this.chatterID is ChatterID.ChatterIDGroup) {
             this.subscription = userManager.getCachedGroupProfiles().getPool().subscribe(((ChatterID.ChatterIDGroup) this.chatterID).getChatterUUID(), this.executor, Subscription.OnData(this) {
 
                 /* renamed from: -$f0 */

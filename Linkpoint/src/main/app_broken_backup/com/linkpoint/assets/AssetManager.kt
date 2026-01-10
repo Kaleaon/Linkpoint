@@ -360,6 +360,20 @@ class AssetManager(private val context: Context) {
             url.hashCode().toString()
         }
     }
+    
+    /**
+     * Get cache statistics
+     */
+    fun getCacheStats(): AssetCacheStats {
+        val files = cacheDir.listFiles() ?: emptyArray()
+        
+        return AssetCacheStats(
+            totalSize = files.sumOf { it.length() },
+            fileCount = files.size,
+            oldestFile = files.minOfOrNull { it.lastModified() } ?: 0L,
+            newestFile = files.maxOfOrNull { it.lastModified() } ?: 0L
+        )
+    }
 }
 
 /**
@@ -380,22 +394,3 @@ data class AssetCacheStats(
     val oldestFile: Long,
     val newestFile: Long
 )
-
-/**
- * Extension functions
- */
-
-/**
- * Get cache statistics
- */
-fun AssetManager.getCacheStats(): AssetCacheStats {
-    val cacheDir = File(context.cacheDir, "asset_cache")
-    val files = cacheDir.listFiles() ?: emptyArray()
-    
-    return AssetCacheStats(
-        totalSize = files.sumOf { it.length() },
-        fileCount = files.size,
-        oldestFile = files.minOfOrNull { it.lastModified() } ?: 0L,
-        newestFile = files.maxOfOrNull { it.lastModified() } ?: 0L
-    )
-}

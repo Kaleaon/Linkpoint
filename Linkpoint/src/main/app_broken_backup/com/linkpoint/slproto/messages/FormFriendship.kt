@@ -20,11 +20,11 @@ class FormFriendship : SLMessage {
         return 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleFormFriendship(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 43)
@@ -32,7 +32,7 @@ class FormFriendship : SLMessage {
         packUUID(byteBuffer, this.AgentBlock_Field.DestID)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentBlock_Field.SourceID = unpackUUID(byteBuffer)
         this.AgentBlock_Field.DestID = unpackUUID(byteBuffer)
     }

@@ -16,7 +16,7 @@ import kotlin.math.sqrt
  * - Memory management
  */
 class FilamentPerformanceOptimizer(
-    private val engine: Engine
+    private val engine: Engine,
     private val scene: Scene
 ) {
     companion object {
@@ -55,7 +55,7 @@ class FilamentPerformanceOptimizer(
      * @return List of visible entities
      */
     fun performFrustumCulling(
-        frustum: FrustrumPlanes
+        frustum: FrustrumPlanes,
         entities: List<Int>
     ): List<Int> {
         val visible = mutableListOf<Int>()
@@ -111,11 +111,11 @@ class FilamentPerformanceOptimizer(
         // For each plane, test if the box is completely outside
         try {
             val planes = listOf(
-                frustum.nearPlane
-                frustum.farPlane
-                frustum.leftPlane
-                frustum.rightPlane
-                frustum.topPlane
+                frustum.nearPlane,
+                frustum.farPlane,
+                frustum.leftPlane,
+                frustum.rightPlane,
+                frustum.topPlane,
                 frustum.bottomPlane
             )
             
@@ -179,16 +179,21 @@ class FilamentPerformanceOptimizer(
     fun optimizeFrame() {
         // Update statistics
         updateStatistics()
-        
-
+    }
+    
+    private fun updateStatistics() {
+        // Update performance counters
+        Log.d(TAG, "Stats: $visibleEntities visible, $culledEntities culled")
+    }
+    
     private fun accessFilamentStats() {
         try {
             // Get actual performance statistics from Filament renderer
-            drawCalls = visibleEntities.size
-            triangles = visibleEntities.sumOf { it.triangleCount }
-            Log.v(TAG, "Performance stats: $drawCalls draws, $triangles triangles")
+            drawCalls = visibleEntities
+            Log.v(TAG, "Performance stats: $drawCalls draws")
         } catch (e: Exception) {
             Log.e(TAG, "Error accessing stats", e)
         }
     }
+}
 

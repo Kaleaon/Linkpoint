@@ -92,7 +92,7 @@ class RenderingOptimizer {
         
         // Normalize planes
         for (i in 0..5) {
-            val length = Math.sqrt(
+            val length = sqrt(
                 (frustumPlanes[i][0] * frustumPlanes[i][0] +
                  frustumPlanes[i][1] * frustumPlanes[i][1] +
                  frustumPlanes[i][2] * frustumPlanes[i][2]).toDouble()
@@ -149,7 +149,7 @@ class RenderingOptimizer {
         val dx = cameraPos[0] - objectPos[0]
         val dy = cameraPos[1] - objectPos[1]
         val dz = cameraPos[2] - objectPos[2]
-        return Math.sqrt((dx * dx + dy * dy + dz * dz).toDouble()).toFloat()
+        return sqrt((dx * dx + dy * dy + dz * dz).toDouble()).toFloat()
     }
     
     /**

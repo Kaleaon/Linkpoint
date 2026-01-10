@@ -36,7 +36,7 @@ class AvatarAnimationState : ResourceConsumer {
             this.stoppingAnimation = null
         }
 
-        fun getRunningAnimations(Builder<AvatarRunningSequence> builder, Collection<AvatarRunningAnimation> collection): Unit {
+        fun getRunningAnimations(Builder<AvatarRunningSequence> builder, Collection<AvatarRunningAnimation> collection)  {
             if (this.runningAnimation != null) {
                 builder.add(this.runningAnimation)
                 this.runningAnimation.getRunningAnimations(collection)
@@ -58,8 +58,8 @@ class AvatarAnimationState : ResourceConsumer {
         AnimationCache.getInstance().RequestResource(animationSequenceInfo.animationID, this)
     }
 
-    fun OnResourceReady(obj: Any, z: Boolean): Unit {
-        if (obj instanceof AnimationData) {
+    fun OnResourceReady(obj: Any, z: Boolean)  {
+        if (obj is AnimationData) {
             this.animationData = (AnimationData) obj
             DrawableAvatar drawableAvatar = (DrawableAvatar) this.drawableAvatar.get()
             drawableAvatar?.updateRunningAnimations()
@@ -69,7 +69,7 @@ class AvatarAnimationState : ResourceConsumer {
         }
     }
 
-    fun getRunningAnimations(Builder<AvatarRunningSequence> builder, Collection<AvatarRunningAnimation> collection): Unit {
+    fun getRunningAnimations(Builder<AvatarRunningSequence> builder, Collection<AvatarRunningAnimation> collection)  {
         AnimationPair animationPair = this.animationPair
         if (animationPair == null && this.animationData != null) {
             animationPair = AnimationPair(this.sequenceInfo, this.animationData)
@@ -84,7 +84,7 @@ class AvatarAnimationState : ResourceConsumer {
         return animationPair != null ? animationPair.hasStopped() : false
     }
 
-    fun updateSequenceInfo(@NonNull AnimationSequenceInfo animationSequenceInfo): Unit {
+    fun updateSequenceInfo(@NonNull AnimationSequenceInfo animationSequenceInfo)  {
         this.sequenceInfo = animationSequenceInfo
         this.animationPair = null
     }

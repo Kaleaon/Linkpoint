@@ -25,18 +25,18 @@ class SendXferPacket : SLMessage {
         return this.DataPacket_Field.Data.size + 2 + 13
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleSendXferPacket(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.put(Ascii.DC2)
         packLong(byteBuffer, this.XferID_Field.ID)
         packInt(byteBuffer, this.XferID_Field.Packet)
         packVariable(byteBuffer, this.DataPacket_Field.Data, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.XferID_Field.ID = unpackLong(byteBuffer)
         this.XferID_Field.Packet = unpackInt(byteBuffer)
         this.DataPacket_Field.Data = unpackVariable(byteBuffer, 2)

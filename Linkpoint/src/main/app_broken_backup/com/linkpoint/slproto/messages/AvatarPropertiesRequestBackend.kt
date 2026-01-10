@@ -23,11 +23,11 @@ class AvatarPropertiesRequestBackend : SLMessage {
         return 38
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleAvatarPropertiesRequestBackend(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -86)
@@ -37,7 +37,7 @@ class AvatarPropertiesRequestBackend : SLMessage {
         packBoolean(byteBuffer, this.AgentData_Field.WebProfilesDisabled)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.AvatarID = unpackUUID(byteBuffer)
         this.AgentData_Field.GodLevel = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE

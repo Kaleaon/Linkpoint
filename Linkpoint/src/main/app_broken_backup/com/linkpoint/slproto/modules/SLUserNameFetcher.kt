@@ -36,16 +36,16 @@ class SLUserNameFetcher : SLModule : RequestListener {
     private Runnable threadRunnable = Runnable() {
         /* JADX WARNING: No exception handlers in catch block: Catch:{  } */
         /* Code decompiled incorrectly, please refer to instructions dump. */
-        fun run(): Unit {
+        fun run()  {
             /*
                 r2 = this
             L_0x0000:
                 com.linkpoint.slproto.modules.SLUserNameFetcher r0 = com.linkpoint.slproto.modules.SLUserNameFetcher.this
-                Boolean r0 = r0.threadMustExit
+                var r0: Boolean = r0.threadMustExit
                 if (r0 != 0) goto L_0x002d
             L_0x0008:
                 com.linkpoint.slproto.modules.SLUserNameFetcher r0 = com.linkpoint.slproto.modules.SLUserNameFetcher.this     // Catch:{ InterruptedException -> 0x002c }
-                Boolean r0 = r0.FetchSomeNamesOverHTTP()     // Catch:{ InterruptedException -> 0x002c }
+                var r0: Boolean = r0.FetchSomeNamesOverHTTP()     // Catch:{ InterruptedException -> 0x002c }
                 if (r0 != 0) goto L_0x0008
                 com.linkpoint.slproto.modules.SLUserNameFetcher r0 = com.linkpoint.slproto.modules.SLUserNameFetcher.this     // Catch:{ InterruptedException -> 0x002c }
                 java.util.concurrent.locks.Lock r0 = r0.lock     // Catch:{ InterruptedException -> 0x002c }
@@ -107,9 +107,9 @@ class SLUserNameFetcher : SLModule : RequestListener {
         if (uUIDsToFetch.isEmpty()) {
             return false
         }
-        String str2 = this.caps.getCapability(SLCaps.SLCapability.GetDisplayNames) + "/"
+        var str2: String = this.caps.getCapability(SLCaps.SLCapability.GetDisplayNames) + "/"
         Iterator<T> it = uUIDsToFetch.iterator()
-        Boolean z = true
+        var z: Boolean = true
         while (true) {
             str = str2
             if (it.hasNext()) {
@@ -135,8 +135,8 @@ class SLUserNameFetcher : SLModule : RequestListener {
                     for (i in 0 until byKey.getCount()) {
                         LLSDNode byIndex = byKey.byIndex(i)
                         UUID asUUID = byIndex.byKey("id").asUUID()
-                        String asString = byIndex.byKey("display_name").asString()
-                        String asString2 = byIndex.byKey("username").asString()
+                        var asString: String = byIndex.byKey("display_name").asString()
+                        var asString2: String = byIndex.byKey("username").asString()
                         if (this.userManager != null) {
                             this.userManager.updateUserNames(asUUID, asString2, asString)
                             this.userNameRequests.completeRequest(asUUID)
@@ -189,7 +189,7 @@ class SLUserNameFetcher : SLModule : RequestListener {
         return arrayList
     }
 
-    fun HandleCloseCircuit(): Unit {
+    fun HandleCloseCircuit()  {
         this.threadMustExit = true
         if (this.xmlReq != null) {
             this.xmlReq.InterruptRequest()
@@ -206,7 +206,7 @@ class SLUserNameFetcher : SLModule : RequestListener {
     synchronized Unit HandleUUIDNameReply(UUIDNameReply uUIDNameReply) {
         for (UUIDNameReply.UUIDNameBlock uUIDNameBlock : uUIDNameReply.UUIDNameBlock_Fields) {
             UUID uuid = uUIDNameBlock.ID
-            String str = SLMessage.stringFromVariableOEM(uUIDNameBlock.FirstName) + " " + SLMessage.stringFromVariableOEM(uUIDNameBlock.LastName)
+            var str: String = SLMessage.stringFromVariableOEM(uUIDNameBlock.FirstName) + " " + SLMessage.stringFromVariableOEM(uUIDNameBlock.LastName)
             if (this.userManager != null) {
                 this.userManager.updateUserNames(uuid, str, str)
                 this.userNameRequests.completeRequest(uuid)
@@ -218,7 +218,7 @@ class SLUserNameFetcher : SLModule : RequestListener {
         }
     }
 
-    fun onNewRequest(): Unit {
+    fun onNewRequest()  {
         if (this.workingThread != null) {
             this.lock.lock()
             try {

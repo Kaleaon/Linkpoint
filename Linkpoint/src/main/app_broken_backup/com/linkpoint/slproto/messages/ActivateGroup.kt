@@ -21,11 +21,11 @@ class ActivateGroup : SLMessage {
         return 52
     }
 
-    fun Handle(sLMessageHandler: SLMessageHandler): Unit {
+    fun Handle(sLMessageHandler: SLMessageHandler)  {
         sLMessageHandler.HandleActivateGroup(this)
     }
 
-    fun PackPayload(byteBuffer: ByteBuffer): Unit {
+    fun PackPayload(byteBuffer: ByteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 112)
@@ -34,7 +34,7 @@ class ActivateGroup : SLMessage {
         packUUID(byteBuffer, this.AgentData_Field.GroupID)
     }
 
-    fun UnpackPayload(byteBuffer: ByteBuffer): Unit {
+    fun UnpackPayload(byteBuffer: ByteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)

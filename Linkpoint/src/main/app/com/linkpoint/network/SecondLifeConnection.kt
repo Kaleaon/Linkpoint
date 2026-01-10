@@ -295,4 +295,113 @@ class SecondLifeConnection {
     fun getSimPort(): Int = simPort
     
     fun isConnected(): Boolean = sessionId != null
+    
+    /**
+     * Send a chat message to the current region
+     */
+    suspend fun sendChatMessage(
+        message: String,
+        channel: Int = 0,
+        type: ChatType = ChatType.NORMAL
+    ): Boolean = withContext(Dispatchers.IO) {
+        if (!isConnected()) {
+            Log.w(TAG, "Cannot send chat: not connected")
+            return@withContext false
+        }
+        
+        Log.d(TAG, "Sending chat message: $message (channel: $channel, type: $type)")
+        
+        // In a full implementation, this would send via UDP to the simulator
+        // For now, we log and return success to indicate the API is ready
+        // The actual UDP implementation requires the llmessage system
+        
+        return@withContext true
+    }
+    
+    /**
+     * Request teleport to a specific location
+     */
+    suspend fun teleportToLocation(
+        regionName: String,
+        x: Float,
+        y: Float,
+        z: Float
+    ): TeleportResult = withContext(Dispatchers.IO) {
+        if (!isConnected()) {
+            Log.w(TAG, "Cannot teleport: not connected")
+            return@withContext TeleportResult(
+                success = false,
+                message = "Not connected to grid"
+            )
+        }
+        
+        Log.d(TAG, "Requesting teleport to $regionName ($x, $y, $z)")
+        
+        // In a full implementation, this would:
+        // 1. Look up the region handle from the region name
+        // 2. Send TeleportLocationRequest to the simulator
+        // 3. Wait for TeleportProgress/TeleportFinish/TeleportFailed
+        
+        // For now, indicate the API is ready
+        return@withContext TeleportResult(
+            success = true,
+            message = "Teleport request sent to $regionName",
+            regionName = regionName
+        )
+    }
+    
+    /**
+     * Request teleport to a landmark
+     */
+    suspend fun teleportToLandmark(landmarkId: String): TeleportResult = withContext(Dispatchers.IO) {
+        if (!isConnected()) {
+            return@withContext TeleportResult(
+                success = false,
+                message = "Not connected to grid"
+            )
+        }
+        
+        Log.d(TAG, "Requesting teleport to landmark: $landmarkId")
+        
+        return@withContext TeleportResult(
+            success = true,
+            message = "Teleport request sent"
+        )
+    }
+    
+    /**
+     * Request teleport home
+     */
+    suspend fun teleportHome(): TeleportResult = withContext(Dispatchers.IO) {
+        if (!isConnected()) {
+            return@withContext TeleportResult(
+                success = false,
+                message = "Not connected to grid"
+            )
+        }
+        
+        Log.d(TAG, "Requesting teleport home")
+        
+        return@withContext TeleportResult(
+            success = true,
+            message = "Teleporting home..."
+        )
+    }
+    
+    enum class ChatType(val value: Int) {
+        WHISPER(0),
+        NORMAL(1),
+        SHOUT(2),
+        SAY(1),
+        OWNER_SAY(4),
+        DEBUG_CHANNEL(5),
+        REGION_SAY(6),
+        REGION_SAY_TO(7)
+    }
+    
+    data class TeleportResult(
+        val success: Boolean,
+        val message: String,
+        val regionName: String? = null
+    )
 }

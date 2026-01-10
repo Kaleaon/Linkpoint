@@ -19,7 +19,7 @@ import androidx.annotation.Immutable
 class MuteListData {
     private Ordering<MuteListEntry> ordering = Ordering<MuteListEntry>() {
         fun compare(MuteListEntry muteListEntry, MuteListEntry muteListEntry2): Int {
-            Int viewOrder = muteListEntry.type.getViewOrder() - muteListEntry2.type.getViewOrder()
+            var viewOrder: Int = muteListEntry.type.getViewOrder() - muteListEntry2.type.getViewOrder()
             return viewOrder != 0 ? viewOrder : muteListEntry.name.compareToIgnoreCase(muteListEntry2.name)
         }
     }
@@ -43,16 +43,16 @@ class MuteListData {
             try {
                 BufferedReader bufferedReader = BufferedReader(InputStreamReader(ByteArrayInputStream(bArr)))
                 while (true) {
-                    String readLine = bufferedReader.readLine()
+                    var readLine: String = bufferedReader.readLine()
                     if (readLine == null) {
                         break
                     }
                     SimpleStringParser simpleStringParser = SimpleStringParser(readLine.trim(), " ")
                     try {
-                        Int intToken = simpleStringParser.getIntToken(" ")
-                        String nextToken = simpleStringParser.nextToken(" ")
+                        var intToken: Int = simpleStringParser.getIntToken(" ")
+                        var nextToken: String = simpleStringParser.nextToken(" ")
                         simpleStringParser.skipAllDelimiters(" ")
-                        String nextToken2 = simpleStringParser.nextToken("|")
+                        var nextToken2: String = simpleStringParser.nextToken("|")
                         simpleStringParser.skipAllDelimiters("|")
                         try {
                             i = simpleStringParser.getIntToken(" ")

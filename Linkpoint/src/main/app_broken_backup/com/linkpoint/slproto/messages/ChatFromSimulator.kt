@@ -28,11 +28,11 @@ class ChatFromSimulator : SLMessage {
         return this.ChatData_Field.FromName.size + 1 + 16 + 16 + 1 + 1 + 1 + 12 + 2 + this.ChatData_Field.Message.size + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleChatFromSimulator(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -117)
@@ -46,7 +46,7 @@ class ChatFromSimulator : SLMessage {
         packVariable(byteBuffer, this.ChatData_Field.Message, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.ChatData_Field.FromName = unpackVariable(byteBuffer, 1)
         this.ChatData_Field.SourceID = unpackUUID(byteBuffer)
         this.ChatData_Field.OwnerID = unpackUUID(byteBuffer)

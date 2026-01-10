@@ -31,11 +31,11 @@ class ParcelMediaUpdate : SLMessage {
         return this.DataBlock_Field.MediaURL.size + 1 + 16 + 1 + 4 + this.DataBlockExtended_Field.MediaType.size + 1 + 1 + this.DataBlockExtended_Field.MediaDesc.size + 4 + 4 + 1
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleParcelMediaUpdate(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -92)
@@ -49,7 +49,7 @@ class ParcelMediaUpdate : SLMessage {
         packByte(byteBuffer, (this as Byte).DataBlockExtended_Field.MediaLoop)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.DataBlock_Field.MediaURL = unpackVariable(byteBuffer, 1)
         this.DataBlock_Field.MediaID = unpackUUID(byteBuffer)
         this.DataBlock_Field.MediaAutoScale = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE

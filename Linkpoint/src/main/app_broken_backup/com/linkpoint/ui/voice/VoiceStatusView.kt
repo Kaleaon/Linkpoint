@@ -1,5 +1,7 @@
 package com.linkpoint.ui.voice
 
+import kotlin.math.*
+
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -151,7 +153,7 @@ class VoiceStatusView @JvmOverloads constructor(
         
         currentAudioLevel += step
         
-        if (Math.abs(diff) > 0.5f) {
+        if (abs(diff) > 0.5f) {
             postDelayed({
                 animateToTargetLevel()
             }, ANIMATION_DURATION_MS / 10)

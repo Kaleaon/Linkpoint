@@ -73,8 +73,8 @@ class InventoryFolderAdapter : BaseAdapter : View.OnClickListener {
 
     fun getView(Int i, View view, ViewGroup viewGroup): View {
         SLInventoryEntry sLInventoryEntry
-        Boolean z = true
-        Int i4 = 0
+        var z: Boolean = true
+        var i4: Int = 0
         if (view == null) {
             view = this.inflater.inflate(R.layout.inventory_item, viewGroup, false)
         }
@@ -82,8 +82,8 @@ class InventoryFolderAdapter : BaseAdapter : View.OnClickListener {
         if (item != null) {
             TextView textView = (view as TextView).findViewById(R.id.itemNameTextView)
             textView.setText(item.name)
-            Int i5 = -1
-            Int i6 = -1
+            var i5: Int = -1
+            var i6: Int = -1
             if (item.assetType != SLAssetType.AT_LINK.getTypeCode() || this.database == null) {
                 sLInventoryEntry = item
             } else {
@@ -122,8 +122,8 @@ class InventoryFolderAdapter : BaseAdapter : View.OnClickListener {
             if (this.wornCheckboxes) {
                 if ((item.assetType == SLAssetType.AT_OBJECT.getTypeCode() || (item.isLink() && item.invType == SLInventoryType.IT_OBJECT.getTypeCode()) || item.isWearable() || sLInventoryEntry.assetType == SLAssetType.AT_OBJECT.getTypeCode()) ? true : sLInventoryEntry.isWearable()) {
                     Any whatIsItemWornOn = sLInventoryEntry.whatIsItemWornOn(this.wornAttachments, this.wornWearables, false)
-                    Boolean z2 = whatIsItemWornOn != null
-                    Boolean isBodyPart = whatIsItemWornOn instanceof SLWearableType ? ((SLWearableType) whatIsItemWornOn).isBodyPart() : false
+                    var z2: Boolean = whatIsItemWornOn != null
+                    var isBodyPart: Boolean = whatIsItemWornOn is SLWearableType ? ((SLWearableType) whatIsItemWornOn).isBodyPart() : false
                     if (this.avatarAppearance != null) {
                         if (z2) {
                             if (!sLInventoryEntry.isWearable()) {
@@ -164,21 +164,21 @@ class InventoryFolderAdapter : BaseAdapter : View.OnClickListener {
         return true
     }
 
-    fun onClick(View view): Unit {
+    fun onClick(View view)  {
         if (this.onItemCheckboxClickListener != null) {
             Any tag = view.getTag(R.id.tag_outfit_object)
-            if (tag instanceof SLInventoryEntry) {
+            if (tag is SLInventoryEntry) {
                 this.onItemCheckboxClickListener.onItemCheckboxClicked((SLInventoryEntry) tag)
             }
         }
     }
 
-    fun setAvatarAppearance(@Nullable SLAvatarAppearance sLAvatarAppearance): Unit {
+    fun setAvatarAppearance(@Nullable SLAvatarAppearance sLAvatarAppearance)  {
         this.avatarAppearance = sLAvatarAppearance
         notifyDataSetChanged()
     }
 
-    fun setData(@Nullable InventoryEntryList inventoryEntryList): Unit {
+    fun setData(@Nullable InventoryEntryList inventoryEntryList)  {
         if (inventoryEntryList == null) {
             inventoryEntryList = InventoryEntryList()
         }
@@ -186,26 +186,26 @@ class InventoryFolderAdapter : BaseAdapter : View.OnClickListener {
         notifyDataSetChanged()
     }
 
-    fun setDatabase(InventoryDB inventoryDB): Unit {
+    fun setDatabase(InventoryDB inventoryDB)  {
         this.database = inventoryDB
         notifyDataSetChanged()
     }
 
-    fun setOnItemCheckboxClickListener(@Nullable OnItemCheckboxClickListener onItemCheckboxClickListener2): Unit {
+    fun setOnItemCheckboxClickListener(@Nullable OnItemCheckboxClickListener onItemCheckboxClickListener2)  {
         this.onItemCheckboxClickListener = onItemCheckboxClickListener2
     }
 
-    fun setWornAttachments(@Nullable ImmutableMap<UUID, String> immutableMap): Unit {
+    fun setWornAttachments(@Nullable ImmutableMap<UUID, String> immutableMap)  {
         this.wornAttachments = immutableMap
         notifyDataSetChanged()
     }
 
-    fun setWornOutfitFolder(@Nullable UUID uuid): Unit {
+    fun setWornOutfitFolder(@Nullable UUID uuid)  {
         this.wornOutfitFolder = uuid
         notifyDataSetChanged()
     }
 
-    fun setWornWearables(@Nullable Table<SLWearableType, UUID, SLWearable> table): Unit {
+    fun setWornWearables(@Nullable Table<SLWearableType, UUID, SLWearable> table)  {
         this.wornWearables = table
         notifyDataSetChanged()
     }

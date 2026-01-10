@@ -1,5 +1,7 @@
 package com.linkpoint.slproto.avatar
 
+import kotlin.math.*
+
 import com.linkpoint.render.avatar.AnimationSkeletonData
 import com.linkpoint.slproto.mesh.MeshJointTranslations
 import com.linkpoint.slproto.types.LLVector3
@@ -40,7 +42,7 @@ class SLSkeleton {
             return 0.0f
         }
         double positionZ = (double) (sLSkeletonBone4.getPositionZ() * sLSkeletonBone5.getScaleZ())
-        return (float) (((double) (sLSkeletonBone.getScaleZ() * sLSkeletonBone6.getPositionZ())) + positionZ + ((double) getPelvisToFoot()) + (Math.sqrt(2.0d) * ((double) (sLSkeletonBone2.getPositionZ() * sLSkeletonBone3.getScaleZ()))) + ((double) (sLSkeletonBone3.getPositionZ() * sLSkeletonBone4.getScaleZ())) + ((double) (sLSkeletonBone5.getPositionZ() * sLSkeletonBone6.getScaleZ())))
+        return (float) (((double) (sLSkeletonBone.getScaleZ() * sLSkeletonBone6.getPositionZ())) + positionZ + ((double) getPelvisToFoot()) + (sqrt(2.0d) * ((double) (sLSkeletonBone2.getPositionZ() * sLSkeletonBone3.getScaleZ()))) + ((double) (sLSkeletonBone3.getPositionZ() * sLSkeletonBone4.getScaleZ())) + ((double) (sLSkeletonBone5.getPositionZ() * sLSkeletonBone6.getScaleZ())))
     }
 
     float getPelvisToFoot() {

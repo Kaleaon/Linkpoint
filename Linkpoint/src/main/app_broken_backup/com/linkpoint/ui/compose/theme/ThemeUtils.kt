@@ -1,5 +1,7 @@
 package com.linkpoint.ui.compose.theme
 
+import kotlin.math.*
+
 import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -263,7 +265,7 @@ private fun Color.luminance(): Float {
         return if (component <= 0.03928f) {
             component / 12.92f
         } else {
-            Math.pow(((component + 0.055) / 1.055).toDouble(), 2.4).toFloat()
+            kotlin.math.pow(((component + 0.055) / 1.055).toDouble(), 2.4).toFloat()
         }
     }
     

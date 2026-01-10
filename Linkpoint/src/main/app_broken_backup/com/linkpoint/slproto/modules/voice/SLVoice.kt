@@ -93,7 +93,7 @@ class SLVoice : SLModule {
 
     /* access modifiers changed from: private */
     /* renamed from: onParcelVoiceInfoResult */
-    fun m253com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref3(LLSDNode lLSDNode): Unit {
+    fun m253com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref3(LLSDNode lLSDNode)  {
         if (lLSDNode != null) {
             try {
                 Debug.Printf("SLVoice: parcel voice info '%s'", lLSDNode.serializeToXML())
@@ -105,7 +105,7 @@ class SLVoice : SLModule {
 
     /* access modifiers changed from: private */
     /* renamed from: onProvisionVoiceAccountResult */
-    fun m252com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref2(LLSDNode lLSDNode): Unit {
+    fun m252com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref2(LLSDNode lLSDNode)  {
         if (lLSDNode != null) {
             try {
                 Debug.Printf("SLVoice: result '%s'", lLSDNode.serializeToXML())
@@ -222,11 +222,11 @@ Method generation error in method: com.linkpoint.slproto.modules.voice.-$Lambda$
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceLoginStatusChanged */
-    fun m250com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref0(Boolean bool): Unit {
+    fun m250com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref0(Boolean bool)  {
         this.voiceLoggedIn = bool != null ? bool.booleanValue() : false
     }
 
-    fun HandleCloseCircuit(): Unit {
+    fun HandleCloseCircuit()  {
         this.shutdown = true
         this.voiceLoggedInSubscription.unsubscribe()
         super.HandleCloseCircuit()
@@ -414,7 +414,7 @@ Method generation error in method: com.linkpoint.slproto.modules.voice.-$Lambda$
         }
     }
 
-    fun nearbyVoiceChatRequest(VoiceChannelInfo voiceChannelInfo): Unit {
+    fun nearbyVoiceChatRequest(VoiceChannelInfo voiceChannelInfo)  {
         VoicePluginServiceConnection voicePluginServiceConnection2 = this.voicePluginServiceConnection
         if (this.voiceEnabled && this.voiceLoggedIn && voicePluginServiceConnection2 != null) {
             voicePluginServiceConnection2.addChannel(ChatterID.getLocalChatterID(this.userManager.getUserID()), voiceChannelInfo)
@@ -423,14 +423,14 @@ Method generation error in method: com.linkpoint.slproto.modules.voice.-$Lambda$
     }
 
     @EventHandler
-    fun onGlobalOptionsChanged(GlobalOptions.GlobalOptionsChangedEvent globalOptionsChangedEvent): Unit {
+    fun onGlobalOptionsChanged(GlobalOptions.GlobalOptionsChangedEvent globalOptionsChangedEvent)  {
         updateVoiceEnabledStatus()
     }
 
-    fun onGroupSessionReady(UUID uuid): Unit {
+    fun onGroupSessionReady(UUID uuid)  {
         if (this.requestedGroupChats.remove(uuid) && this.chatSessionRequestURL != null) {
             LLSDXMLAsyncRequest(this.chatSessionRequestURL, LLSDMap(LLSDMap.LLSDMapEntry("method", LLSDString(NotificationCompat.CATEGORY_CALL)), LLSDMap.LLSDMapEntry("session-id", LLSDUUID(uuid))), LLSDXMLAsyncRequest.LLSDXMLResultListener() {
-                fun onLLSDXMLResult(LLSDNode lLSDNode): Unit {
+                fun onLLSDXMLResult(LLSDNode lLSDNode)  {
                     ChatterID groupChatterID = ChatterID.getGroupChatterID(SLVoice.this.userManager.getUserID(), uuid)
                     if (lLSDNode == null) {
                         try {
@@ -440,8 +440,8 @@ Method generation error in method: com.linkpoint.slproto.modules.voice.-$Lambda$
                             Debug.Warning(e)
                         }
                     } else {
-                        String asString = lLSDNode.byKey("voice_credentials").byKey("channel_uri").asString()
-                        String asString2 = lLSDNode.byKey("voice_credentials").byKey("channel_credentials").asString()
+                        var asString: String = lLSDNode.byKey("voice_credentials").byKey("channel_uri").asString()
+                        var asString2: String = lLSDNode.byKey("voice_credentials").byKey("channel_credentials").asString()
                         VoicePluginServiceConnection r3 = SLVoice.this.voicePluginServiceConnection
                         if (SLVoice.this.voiceEnabled && SLVoice.this.voiceLoggedIn && r3 != null) {
                             VoiceChannelInfo voiceChannelInfo = VoiceChannelInfo(asString, false, true)
@@ -453,7 +453,7 @@ Method generation error in method: com.linkpoint.slproto.modules.voice.-$Lambda$
         }
     }
 
-    fun onVoiceChannelStatus(VoiceChannelStatus voiceChannelStatus): Unit {
+    fun onVoiceChannelStatus(VoiceChannelStatus voiceChannelStatus)  {
         this.agentCircuit.execute(Runnable(this, voiceChannelStatus) {
 
             /* renamed from: -$f0 */
@@ -527,7 +527,7 @@ Method generation error in method: com.linkpoint.slproto.modules.voice.-$Lambda$
 
     }
 
-    fun onVoiceLoginStatus(VoicePluginServiceConnection voicePluginServiceConnection2, VoiceLoginStatus voiceLoginStatus): Unit {
+    fun onVoiceLoginStatus(VoicePluginServiceConnection voicePluginServiceConnection2, VoiceLoginStatus voiceLoginStatus)  {
         this.agentCircuit.execute(Runnable(this, voiceLoginStatus, voicePluginServiceConnection2) {
 
             /* renamed from: -$f0 */
@@ -683,8 +683,8 @@ Method generation error in method: com.linkpoint.slproto.modules.voice.-$Lambda$
         return true
     }
 
-    fun setCurrentParcel(Int i): Unit {
-        Boolean z = false
+    fun setCurrentParcel(Int i)  {
+        var z: Boolean = false
         synchronized (this.parcelVoiceChannelLock) {
             if (!(this.parcelVoiceCapURL == null || this.capURL == null || this.requestedParcelID == i)) {
                 this.requestedParcelID = i
@@ -773,16 +773,16 @@ Method generation error in method: com.linkpoint.slproto.modules.voice.-$Lambda$
         }
     }
 
-    fun updateSpatialVoicePosition(): Unit {
+    fun updateSpatialVoicePosition()  {
         VoicePluginServiceConnection voicePluginServiceConnection2 = this.voicePluginServiceConnection
         VoiceChannelInfo voiceChannelInfo = this.connectedVoiceChannel
         if (voicePluginServiceConnection2 != null && voiceChannelInfo != null && voiceChannelInfo.isSpatial) {
             LLVector3d agentGlobalPosition = this.agentCircuit.getAgentGlobalPosition()
             SLModules modules = this.agentCircuit.getModules()
             if (agentGlobalPosition != null && modules != null) {
-                Float agentHeading = modules.avatarControl.getAgentHeading() * 0.017453292f
-                Float cos = Math.toFloat().cos(agentHeading.toDouble())
-                Float sin = Math.toFloat().sin(agentHeading.toDouble())
+                var agentHeading: Float = modules.avatarControl.getAgentHeading() * 0.017453292f
+                var cos: Float = Math.toFloat().cos(agentHeading.toDouble())
+                var sin: Float = Math.toFloat().sin(agentHeading.toDouble())
                 Voice3DVector fromLLCoords = Voice3DVector.fromLLCoords(cos, sin, 0.0f)
                 Voice3DVector fromLLCoords2 = Voice3DVector.fromLLCoords(-sin, cos, 0.0f)
                 Voice3DPosition voice3DPosition = Voice3DPosition(Voice3DVector.fromLLCoords(agentGlobalPosition.toFloat().x, agentGlobalPosition.toFloat().y, agentGlobalPosition.toFloat().z), Voice3DVector(0.0f, 0.0f, 0.0f), fromLLCoords, Voice3DVector.fromLLCoords(0.0f, 0.0f, 1.0f), fromLLCoords2)
@@ -791,7 +791,7 @@ Method generation error in method: com.linkpoint.slproto.modules.voice.-$Lambda$
         }
     }
 
-    fun updateVoiceEnabledStatus(): Unit {
+    fun updateVoiceEnabledStatus()  {
         UIThreadExecutor.getInstance().execute(Runnable(this) {
 
             /* renamed from: -$f0 */

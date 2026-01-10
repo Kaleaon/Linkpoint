@@ -33,15 +33,15 @@ class ModernRenderContext {
     private val mvpMatrix: FloatArray = FloatArray(16)
     
     // Rendering state
-    Float FOVAngle = 60.0f
-    Float aspectRatio = 16.0f / 9.0f
-    Float drawDistance = 256.0f
-    Int frameCount = 0
+    var FOVAngle: Float = 60.0f
+    var aspectRatio: Float = 16.0f / 9.0f
+    var drawDistance: Float = 256.0f
+    var frameCount: Int = 0
     
     // Camera and viewport
-    Float scaleX = 1.0f
-    Float scaleY = 1.0f 
-    Float scaleZ = 1.0f
+    var scaleX: Float = 1.0f
+    var scaleY: Float = 1.0f 
+    var scaleZ: Float = 1.0f
     private val viewport: IntArray = IntArray(4)
     
     constructor() {
@@ -72,7 +72,7 @@ class ModernRenderContext {
         detectAdvancedCapabilities()
         
         // Initialize modern rendering pipeline
-        Boolean success = renderPipeline.initialize()
+        var success: Boolean = renderPipeline.initialize()
         if (!success) {
             Log.e(TAG, "Failed to initialize modern rendering pipeline")
             return false
@@ -90,7 +90,7 @@ class ModernRenderContext {
      * Check for OpenGL ES 3.0+ support (mandatory requirement)
      */
     private fun checkOpenGLVersion(): Boolean {
-        String version = GLES30.glGetString(GLES30.GL_VERSION)
+        var version: String = GLES30.glGetString(GLES30.GL_VERSION)
         Log.i(TAG, "OpenGL ES version: " + version)
         
         if (version == null) {
@@ -104,9 +104,9 @@ class ModernRenderContext {
     /**
      * Detect advanced OpenGL ES capabilities beyond 3.0
      */
-    private fun detectAdvancedCapabilities(): Unit {
-        String version = GLES30.glGetString(GLES30.GL_VERSION)
-        String extensions = GLES30.glGetString(GLES30.GL_EXTENSIONS)
+    private fun detectAdvancedCapabilities()  {
+        var version: String = GLES30.glGetString(GLES30.GL_VERSION)
+        var extensions: String = GLES30.glGetString(GLES30.GL_EXTENSIONS)
         
         // Check for compute shader support (ES 3.1+)
         if (version.contains("OpenGL ES 3.1") || version.contains("OpenGL ES 3.2")) {
@@ -125,7 +125,7 @@ class ModernRenderContext {
     /**
      * Enable modern OpenGL features that improve performance
      */
-    private fun enableModernFeatures(): Unit {
+    private fun enableModernFeatures()  {
         // Enable depth testing (standard for 3D rendering)
         GLES30.glEnable(GLES30.GL_DEPTH_TEST)
         GLES30.glDepthFunc(GLES30.GL_LEQUAL)
@@ -146,7 +146,7 @@ class ModernRenderContext {
     /**
      * Set up projection matrix for perspective rendering
      */
-    fun setupProjection(width: Int, height: Int, fov: Float, near: Float, far: Float): Unit {
+    fun setupProjection(width: Int, height: Int, fov: Float, near: Float, far: Float)  {
         this.aspectRatio = width.toFloat() / height.toFloat()
         this.FOVAngle = fov
         
@@ -165,7 +165,7 @@ class ModernRenderContext {
     /**
      * Set up view matrix for camera positioning
      */
-    fun setupCamera(eyePos: FloatArray, lookAt: FloatArray, up: FloatArray): Unit {
+    fun setupCamera(eyePos: FloatArray, lookAt: FloatArray, up: FloatArray)  {
         Matrix.setLookAtM(viewMatrix, 0, 
             eyePos[0], eyePos[1], eyePos[2],
             lookAt[0], lookAt[1], lookAt[2], 
@@ -175,7 +175,7 @@ class ModernRenderContext {
     /**
      * Begin frame rendering
      */
-    fun beginFrame(): Unit {
+    fun beginFrame()  {
         frameCount++
         
         // Clear frame buffer
@@ -188,7 +188,7 @@ class ModernRenderContext {
     /**
      * End frame rendering
      */
-    fun endFrame(): Unit {
+    fun endFrame()  {
         // Force completion of OpenGL commands
         GLES30.glFlush()
         
@@ -199,36 +199,36 @@ class ModernRenderContext {
     /**
      * Modern matrix operations (replaces legacy GLES10 matrix stack)
      */
-    fun pushMatrix(): Unit {
+    fun pushMatrix()  {
         // Store current model matrix state
         // In modern OpenGL, we manage matrix stack manually
         Log.d(TAG, "Matrix push - managed in application code")
     }
     
-    fun popMatrix(): Unit {
+    fun popMatrix()  {
         // Restore previous model matrix state  
         Log.d(TAG, "Matrix pop - managed in application code")
     }
     
-    fun setModelMatrix(matrix: FloatArray): Unit {
+    fun setModelMatrix(matrix: FloatArray)  {
         System.arraycopy(matrix, 0, modelMatrix, 0, 16)
     }
     
-    fun multiplyMatrix(matrix: FloatArray): Unit {
+    fun multiplyMatrix(matrix: FloatArray)  {
         FloatArray temp = FloatArray(16)
         Matrix.multiplyMM(temp, 0, modelMatrix, 0, matrix, 0)
         System.arraycopy(temp, 0, modelMatrix, 0, 16)
     }
     
-    fun translate(x: Float, y: Float, z: Float): Unit {
+    fun translate(x: Float, y: Float, z: Float)  {
         Matrix.translateM(modelMatrix, 0, x, y, z)
     }
     
-    fun rotate(angle: Float, x: Float, y: Float, z: Float): Unit {
+    fun rotate(angle: Float, x: Float, y: Float, z: Float)  {
         Matrix.rotateM(modelMatrix, 0, angle, x, y, z)
     }
     
-    fun scale(x: Float, y: Float, z: Float): Unit {
+    fun scale(x: Float, y: Float, z: Float)  {
         Matrix.scaleM(modelMatrix, 0, x, y, z)
         this.scaleX = x
         this.scaleY = y 
@@ -261,7 +261,7 @@ class ModernRenderContext {
     /**
      * Render using modern pipeline
      */
-    fun renderWithModernPipeline(params: ModernRenderPipeline.RenderParams): Unit {
+    fun renderWithModernPipeline(params: ModernRenderPipeline.RenderParams)  {
         // Set matrices in render params
         System.arraycopy(modelMatrix, 0, params.modelMatrix, 0, 16)
         System.arraycopy(viewMatrix, 0, params.viewMatrix, 0, 16)
@@ -274,8 +274,8 @@ class ModernRenderContext {
     /**
      * Check OpenGL error and log if found
      */
-    fun checkGLError(operation: String): Unit {
-        Int error = GLES30.glGetError()
+    fun checkGLError(operation: String)  {
+        var error: Int = GLES30.glGetError()
         if (error != GLES30.GL_NO_ERROR) {
             Log.e(TAG, "OpenGL error in " + operation + ": " + error)
         }
@@ -284,7 +284,7 @@ class ModernRenderContext {
     /**
      * Log detected capabilities
      */
-    private fun logCapabilities(): Unit {
+    private fun logCapabilities()  {
         Log.i(TAG, "=== Modern Render Context Capabilities ===")
         Log.i(TAG, "OpenGL ES 3.0 baseline: YES (mandatory)")
         Log.i(TAG, "Compute shaders (ES 3.1+): " + hasComputeShaders)
@@ -306,7 +306,7 @@ class ModernRenderContext {
     /**
      * Cleanup resources
      */
-    fun cleanup(): Unit {
+    fun cleanup()  {
         Log.i(TAG, "Cleaning up Modern Render Context")
         renderPipeline.cleanup()
     }

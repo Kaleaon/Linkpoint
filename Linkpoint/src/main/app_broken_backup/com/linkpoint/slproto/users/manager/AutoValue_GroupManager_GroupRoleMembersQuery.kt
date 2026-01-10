@@ -27,7 +27,7 @@ class AutoValue_GroupManager_GroupRoleMembersQuery : GroupManager.GroupRoleMembe
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof GroupManager.GroupRoleMembersQuery)) {
+        if (!(obj is GroupManager.GroupRoleMembersQuery)) {
             return false
         }
         GroupManager.GroupRoleMembersQuery groupRoleMembersQuery = (GroupManager.GroupRoleMembersQuery) obj

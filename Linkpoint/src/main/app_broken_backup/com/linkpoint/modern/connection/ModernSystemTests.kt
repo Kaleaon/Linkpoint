@@ -37,7 +37,7 @@ class ModernSystemTests {
                 }
                 
                 // Test passes if we get any level of connectivity
-                Boolean testPassed = result.networkAvailable
+                var testPassed: Boolean = result.networkAvailable
                 Log.i(TAG, "Connection diagnostics test " + (testPassed ? "PASSED" : "FAILED"))
                 
                 return testPassed
@@ -70,7 +70,7 @@ class ModernSystemTests {
                     Log.w(TAG, "  Error: " + result.getErrorMessage())
                 }
                 
-                Boolean testPassed = result.isSuccessful() && result.isValid()
+                var testPassed: Boolean = result.isSuccessful() && result.isValid()
                 Log.i(TAG, "Authentication manager test " + (testPassed ? "PASSED" : "FAILED"))
                 
                 return testPassed

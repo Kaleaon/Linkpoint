@@ -1,5 +1,7 @@
 package com.linkpoint.slproto.avatar
 
+import kotlin.math.*
+
 import com.google.common.primitives.UnsignedBytes
 import com.linkpoint.Debug
 import com.linkpoint.openjpeg.OpenJPEG
@@ -110,8 +112,8 @@ class SLPolyMorphData {
             val f2 = if (z && byteBuffer != null) {
                 val texU = asFloatBuffer4.get((i5 * 2) + 0)
                 val texV = asFloatBuffer4.get((i5 * 2) + 1)
-                val pixelX = Math.floor((texU * i.toFloat()).toDouble()).toInt()
-                val pixelY = Math.floor((texV * i2.toFloat()).toDouble()).toInt()
+                val pixelX = floor((texU * i.toFloat()).toDouble()).toInt()
+                val pixelY = floor((texV * i2.toFloat()).toDouble()).toInt()
                 val bufferIndex = pixelX + (pixelY * i) + i3
                 ((byteBuffer.get(bufferIndex).toInt() and UnsignedBytes.MAX_VALUE.toInt()).toFloat() / 255.0f) * f
             } else {

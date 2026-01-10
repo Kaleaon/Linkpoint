@@ -17,7 +17,7 @@ class GLTextTextureCache : GLResourceCache<DrawableTextParams, DrawableTextBitma
     }
 
     /* access modifiers changed from: protected */
-    fun CancelRawResource(resourceConsumer: ResourceConsumer): Unit {
+    fun CancelRawResource(resourceConsumer: ResourceConsumer)  {
         this.drawableTextCache.CancelRequest(resourceConsumer)
     }
 
@@ -32,7 +32,7 @@ class GLTextTextureCache : GLResourceCache<DrawableTextParams, DrawableTextBitma
     }
 
     /* access modifiers changed from: protected */
-    fun RequestRawResource(drawableTextParams: DrawableTextParams, resourceConsumer: ResourceConsumer): Unit {
+    fun RequestRawResource(drawableTextParams: DrawableTextParams, resourceConsumer: ResourceConsumer)  {
         this.drawableTextCache.RequestResource(drawableTextParams, resourceConsumer)
     }
 }

@@ -21,7 +21,7 @@ class TerrainPatchInfo {
     }
 
     fun equals(Any obj): Boolean {
-        if (!(obj instanceof TerrainPatchInfo)) {
+        if (!(obj is TerrainPatchInfo)) {
             return false
         }
         TerrainPatchInfo terrainPatchInfo = (TerrainPatchInfo) obj

@@ -6,17 +6,17 @@ import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 
 abstract class SLTextureEntryFace {
-    Int AttributeAll = -1
-    Int AttributeGlow = 512
-    Int AttributeMaterial = 128
-    Int AttributeMedia = 256
-    Int AttributeOffsetU = 16
-    Int AttributeOffsetV = 32
-    Int AttributeRGBA = 2
-    Int AttributeRepeatU = 4
-    Int AttributeRepeatV = 8
-    Int AttributeRotation = 64
-    Int AttributeTextureID = 1
+    var AttributeAll: Int = -1
+    var AttributeGlow: Int = 512
+    var AttributeMaterial: Int = 128
+    var AttributeMedia: Int = 256
+    var AttributeOffsetU: Int = 16
+    var AttributeOffsetV: Int = 32
+    var AttributeRGBA: Int = 2
+    var AttributeRepeatU: Int = 4
+    var AttributeRepeatV: Int = 8
+    var AttributeRotation: Int = 64
+    var AttributeTextureID: Int = 1
     private InternPool<SLTextureEntryFace> pool = InternPool<>()
 
     fun create(MutableSLTextureEntryFace mutableSLTextureEntryFace): SLTextureEntryFace {

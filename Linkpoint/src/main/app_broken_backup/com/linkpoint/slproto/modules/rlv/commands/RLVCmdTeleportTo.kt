@@ -8,7 +8,7 @@ import com.linkpoint.slproto.types.LLVector3
 import java.util.UUID
 
 class RLVCmdTeleportTo : RLVCommand {
-    fun Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2): Unit {
+    fun Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2)  {
         if (str.equals("force") && str2 != null) {
             Array<String> split = str2.split("/")
             if (split.size >= 3) {

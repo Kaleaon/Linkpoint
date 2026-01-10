@@ -21,7 +21,7 @@ class SortedChatterList {
     }
 
     /* access modifiers changed from: package-private */
-    fun addChatter(ChatterDisplayData chatterDisplayData): Unit {
+    fun addChatter(ChatterDisplayData chatterDisplayData)  {
         Boolean add
         synchronized (this.lock) {
             add = this.chatters.add(chatterDisplayData)
@@ -49,7 +49,7 @@ class SortedChatterList {
     }
 
     /* access modifiers changed from: package-private */
-    fun removeChatter(ChatterDisplayData chatterDisplayData): Unit {
+    fun removeChatter(ChatterDisplayData chatterDisplayData)  {
         Boolean remove
         synchronized (this.lock) {
             remove = this.chatters.remove(chatterDisplayData)
@@ -64,8 +64,8 @@ class SortedChatterList {
     }
 
     /* access modifiers changed from: package-private */
-    fun replaceChatter(ChatterDisplayData chatterDisplayData, ChatterDisplayData chatterDisplayData2): Unit {
-        Boolean z = false
+    fun replaceChatter(ChatterDisplayData chatterDisplayData, ChatterDisplayData chatterDisplayData2)  {
+        var z: Boolean = false
         synchronized (this.lock) {
             if (this.chatters.remove(chatterDisplayData)) {
                 z = true

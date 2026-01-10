@@ -65,7 +65,7 @@ class vx_state_connector_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_p_vx_state_account getState_accounts() {
-        Long l = VxClientProxyJNI.vx_state_connector_t_state_accounts_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_state_connector_t_state_accounts_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_p_vx_state_account(l, false)
         return null
     }

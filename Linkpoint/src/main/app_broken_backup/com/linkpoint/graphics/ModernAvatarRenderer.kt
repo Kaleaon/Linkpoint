@@ -25,9 +25,9 @@ import java.util.UUID
  * - Battery-conscious updates
  */
 class ModernAvatarRenderer(
-    private val context: Context
-    private val animeshManager: AnimeshManager
-    private val bomManager: BakesOnMeshManager
+    private val context: Context,
+    private val animeshManager: AnimeshManager,
+    private val bomManager: BakesOnMeshManager,
     private val envManager: EnhancedEnvironmentManager
 ) {
     
@@ -284,11 +284,11 @@ class ModernAvatarRenderer(
      * Render avatar or animesh object
      */
     fun renderAvatar(
-        objectID: UUID
-        isAnimesh: Boolean
-        bakeIndex: Int
-        mvpMatrix: FloatArray
-        modelMatrix: FloatArray
+        objectID: UUID,
+        isAnimesh: Boolean,
+        bakeIndex: Int,
+        mvpMatrix: FloatArray,
+        modelMatrix: FloatArray,
         normalMatrix: FloatArray
     ) {
         if (!isInitialized) return
@@ -306,10 +306,10 @@ class ModernAvatarRenderer(
             val boneMatrices = animeshManager.getBoneMatrices(objectID)
             if (boneMatrices != null) {
                 GLES32.glUniformMatrix4fv(
-                    uniformLocations["uBoneMatrices"] ?: -1
-                    boneMatrices.size / 16
-                    false
-                    boneMatrices
+                    uniformLocations["uBoneMatrices"] ?: -1,
+                    boneMatrices.size / 16,
+                    false,
+                    boneMatrices,
                     0
                 )
             }
@@ -389,16 +389,16 @@ class ModernAvatarRenderer(
     private fun getUniformLocations() {
         val uniforms = listOf(
             // Matrices
-            "uMVPMatrix", "uModelMatrix", "uViewMatrix", "uProjectionMatrix", "uNormalMatrix"
+            "uMVPMatrix", "uModelMatrix", "uViewMatrix", "uProjectionMatrix", "uNormalMatrix",
             // Skinning
-            "uUseAnimesh", "uBoneMatrices"
+            "uUseAnimesh", "uBoneMatrices",
             // BOM textures
-            "uBakeHead", "uBakeUpperBody", "uBakeLowerBody", "uBakeEyes", "uBakeHair"
-            "uBakeLeftArm", "uBakeLeftLeg", "uBakeAux1", "uActiveBakeIndex"
+            "uBakeHead", "uBakeUpperBody", "uBakeLowerBody", "uBakeEyes", "uBakeHair",
+            "uBakeLeftArm", "uBakeLeftLeg", "uBakeAux1", "uActiveBakeIndex",
             // PBR
-            "uNormalMap", "uMetallicRoughnessMap", "uMetallic", "uRoughness"
+            "uNormalMap", "uMetallicRoughnessMap", "uMetallic", "uRoughness",
             // EEP
-            "uSunDirection", "uSunColor", "uAmbientColor", "uFogColor", "uFogDensity"
+            "uSunDirection", "uSunColor", "uAmbientColor", "uFogColor", "uFogDensity",
             // Camera
             "uCameraPos"
         )
@@ -423,8 +423,7 @@ class ModernAvatarRenderer(
         }
         isInitialized = false
     }
-}
-
+    
     /**
      * Bind Bakes on Mesh textures for the avatar
      */
@@ -482,10 +481,10 @@ class ModernAvatarRenderer(
             val boneTransforms = animeshManager.getBoneTransforms(avatarId)
             if (boneTransforms != null) {
                 GLES32.glUniformMatrix4fv(
-                    uniformLocations["uBoneTransforms"] ?: -1
-                    boneTransforms.size / 16
-                    false
-                    boneTransforms
+                    uniformLocations["uBoneTransforms"] ?: -1,
+                    boneTransforms.size / 16,
+                    false,
+                    boneTransforms,
                     0
                 )
             }
@@ -494,9 +493,9 @@ class ModernAvatarRenderer(
             if (avatarMesh.indexBuffer != 0) {
                 GLES32.glBindBuffer(GLES32.GL_ELEMENT_ARRAY_BUFFER, avatarMesh.indexBuffer)
                 GLES32.glDrawElements(
-                    GLES32.GL_TRIANGLES
-                    avatarMesh.indexCount
-                    GLES32.GL_UNSIGNED_INT
+                    GLES32.GL_TRIANGLES,
+                    avatarMesh.indexCount,
+                    GLES32.GL_UNSIGNED_INT,
                     0
                 )
             } else {
@@ -510,5 +509,13 @@ class ModernAvatarRenderer(
         } catch (e: Exception) {
             Log.e(TAG, "Error drawing avatar mesh", e)
         }
+    }
+    
+    /**
+     * Bind legacy vertex buffers for older mesh formats
+     */
+    private fun bindLegacyVertexBuffers(mesh: Any) {
+        // Stub for legacy vertex buffer binding
+        Log.d(TAG, "Using legacy vertex buffer binding")
     }
 }

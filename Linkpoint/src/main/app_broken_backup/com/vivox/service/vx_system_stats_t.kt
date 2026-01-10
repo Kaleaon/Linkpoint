@@ -50,7 +50,7 @@ class vx_system_stats_t {
      * Lifted jumps to return sites
      */
     vx_stat_sample_t getAr_source_free_buffers() {
-        Long l = VxClientProxyJNI.vx_system_stats_t_ar_source_free_buffers_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_system_stats_t_ar_source_free_buffers_get(this.swigCPtr, this)
         if (l != 0L) return vx_stat_sample_t(l, false)
         return null
     }
@@ -64,7 +64,7 @@ class vx_system_stats_t {
      * Lifted jumps to return sites
      */
     vx_stat_sample_t getAr_source_queue_depth() {
-        Long l = VxClientProxyJNI.vx_system_stats_t_ar_source_queue_depth_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_system_stats_t_ar_source_queue_depth_get(this.swigCPtr, this)
         if (l != 0L) return vx_stat_sample_t(l, false)
         return null
     }
@@ -86,7 +86,7 @@ class vx_system_stats_t {
      * Lifted jumps to return sites
      */
     vx_stat_thread_t getTicker_thread() {
-        Long l = VxClientProxyJNI.vx_system_stats_t_ticker_thread_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_system_stats_t_ticker_thread_get(this.swigCPtr, this)
         if (l != 0L) return vx_stat_thread_t(l, false)
         return null
     }
@@ -96,7 +96,7 @@ class vx_system_stats_t {
      * Lifted jumps to return sites
      */
     vx_stat_thread_t getVp_thread() {
-        Long l = VxClientProxyJNI.vx_system_stats_t_vp_thread_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_system_stats_t_vp_thread_get(this.swigCPtr, this)
         if (l != 0L) return vx_stat_thread_t(l, false)
         return null
     }

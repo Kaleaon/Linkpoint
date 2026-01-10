@@ -21,14 +21,14 @@ class ChatterGroupSubscription : ChatterSubscription {
 
     /* access modifiers changed from: private */
     /* renamed from: onGroupProfile */
-    fun m289com_lumiyaviewer_lumiya_slproto_users_manager_ChatterGroupSubscriptionmthref0(GroupProfileReply groupProfileReply): Unit {
-        String stringFromVariableOEM = SLMessage.stringFromVariableOEM(groupProfileReply.GroupData_Field.Name)
+    fun m289com_lumiyaviewer_lumiya_slproto_users_manager_ChatterGroupSubscriptionmthref0(GroupProfileReply groupProfileReply)  {
+        var stringFromVariableOEM: String = SLMessage.stringFromVariableOEM(groupProfileReply.GroupData_Field.Name)
         if (!Objects.equal(stringFromVariableOEM, this.displayData.displayName)) {
             setChatterDisplayData(this.displayData.withDisplayName(stringFromVariableOEM))
         }
     }
 
-    fun unsubscribe(): Unit {
+    fun unsubscribe()  {
         this.groupProfileSubscription.unsubscribe()
         super.unsubscribe()
     }

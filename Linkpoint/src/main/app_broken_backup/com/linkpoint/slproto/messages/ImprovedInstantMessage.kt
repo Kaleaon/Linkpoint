@@ -38,11 +38,11 @@ class ImprovedInstantMessage : SLMessage {
         return this.MessageBlock_Field.FromAgentName.size + 72 + 2 + this.MessageBlock_Field.Message.size + 2 + this.MessageBlock_Field.BinaryBucket.size + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleImprovedInstantMessage(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -2)
@@ -62,7 +62,7 @@ class ImprovedInstantMessage : SLMessage {
         packVariable(byteBuffer, this.MessageBlock_Field.BinaryBucket, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.MessageBlock_Field.FromGroup = unpackBoolean(byteBuffer)

@@ -20,11 +20,11 @@ class LiveHelpGroupRequest : SLMessage {
         return 36
     }
 
-    fun Handle(sLMessageHandler: SLMessageHandler): Unit {
+    fun Handle(sLMessageHandler: SLMessageHandler)  {
         sLMessageHandler.HandleLiveHelpGroupRequest(this)
     }
 
-    fun PackPayload(byteBuffer: ByteBuffer): Unit {
+    fun PackPayload(byteBuffer: ByteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 123)
@@ -32,7 +32,7 @@ class LiveHelpGroupRequest : SLMessage {
         packUUID(byteBuffer, this.RequestData_Field.AgentID)
     }
 
-    fun UnpackPayload(byteBuffer: ByteBuffer): Unit {
+    fun UnpackPayload(byteBuffer: ByteBuffer)  {
         this.RequestData_Field.RequestID = unpackUUID(byteBuffer)
         this.RequestData_Field.AgentID = unpackUUID(byteBuffer)
     }

@@ -9,14 +9,14 @@ import com.linkpoint.slproto.modules.rlv.RLVController
 import java.util.UUID
 
 class RLVCmdGetOutfit : RLVCommand {
-    fun Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2): Unit {
+    fun Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2)  {
         try {
-            Int parseInt = Int.parseInt(str)
+            var parseInt: Int = Int.parseInt(str)
             SLAvatarAppearance sLAvatarAppearance = rLVController.getModules().avatarAppearance
-            String str3 = ""
+            var str3: String = ""
             for (SLWearableType sLWearableType : SLWearableType[]{SLWearableType.WT_GLOVES, SLWearableType.WT_JACKET, SLWearableType.WT_PANTS, SLWearableType.WT_SHIRT, SLWearableType.WT_SHOES, SLWearableType.WT_SKIRT, SLWearableType.WT_SOCKS, SLWearableType.WT_UNDERPANTS, SLWearableType.WT_UNDERSHIRT, SLWearableType.WT_SKIN, SLWearableType.WT_EYES, SLWearableType.WT_HAIR, SLWearableType.WT_SHAPE, SLWearableType.WT_ALPHA, SLWearableType.WT_TATTOO}) {
                 if (!sLWearableType.isBodyPart()) {
-                    String name = sLWearableType.getName()
+                    var name: String = sLWearableType.getName()
                     if (str2.equals("") || name.equalsIgnoreCase(str2)) {
                         str3 = sLAvatarAppearance.hasWornWearable(sLWearableType) ? str3 + "1" : str3 + "0"
                     }

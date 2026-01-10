@@ -11,9 +11,9 @@ class WindlightDay {
         }
     }
 
-    fun InterpolatePreset(WindlightPreset windlightPreset, Float f): Unit {
-        Int i2 = 0
-        Int length = hourTable.size - 1
+    fun InterpolatePreset(WindlightPreset windlightPreset, Float f)  {
+        var i2: Int = 0
+        var length: Int = hourTable.size - 1
         while (true) {
             if (length < 0) {
                 i = -1
@@ -26,12 +26,12 @@ class WindlightDay {
             }
         }
         if (i != -1) {
-            Int i3 = i + 1
+            var i3: Int = i + 1
             if (i3 < hourTable.size) {
                 i2 = i3
             }
-            Float f2 = hourTable[i]
-            Float f3 = hourTable[i2]
+            var f2: Float = hourTable[i]
+            var f3: Float = hourTable[i2]
             if (f3 < f2) {
                 f3 += 1.0f
             }

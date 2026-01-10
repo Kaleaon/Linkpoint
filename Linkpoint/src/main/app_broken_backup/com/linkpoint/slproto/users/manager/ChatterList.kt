@@ -102,7 +102,7 @@ class ChatterList {
             }
 
             /* access modifiers changed from: protected */
-            fun cancelRequest(@NonNull ChatterListType chatterListType): Unit {
+            fun cancelRequest(@NonNull ChatterListType chatterListType)  {
                 ChatterDisplayDataList chatterDisplayDataList = (ChatterList as ChatterDisplayDataList).this.chatterLists.remove(chatterListType)
                 if (chatterDisplayDataList != null) {
                     chatterDisplayDataList.dispose()
@@ -172,26 +172,26 @@ class ChatterList {
     }
 
     /* access modifiers changed from: package-private */
-    fun notifyListUpdated(ChatterListType chatterListType): Unit {
+    fun notifyListUpdated(ChatterListType chatterListType)  {
         this.chatterListPool.requestUpdate(chatterListType)
     }
 
-    fun updateDistanceToAllUsers(): Unit {
+    fun updateDistanceToAllUsers()  {
         this.nearbyDistancePool.requestUpdateAll()
     }
 
-    fun updateDistanceToUser(UUID uuid): Unit {
+    fun updateDistanceToUser(UUID uuid)  {
         this.nearbyDistancePool.requestUpdate(uuid)
     }
 
-    fun updateList(ChatterListType chatterListType): Unit {
+    fun updateList(ChatterListType chatterListType)  {
         ChatterDisplayDataList chatterDisplayDataList = this.chatterLists.get(chatterListType)
         if (chatterDisplayDataList != null) {
             chatterDisplayDataList.requestRefresh(this.userManager.getDatabaseExecutor())
         }
     }
 
-    fun updateUserTypingStatus(UUID uuid): Unit {
+    fun updateUserTypingStatus(UUID uuid)  {
         this.typingUsersPool.requestUpdate(uuid)
     }
 }

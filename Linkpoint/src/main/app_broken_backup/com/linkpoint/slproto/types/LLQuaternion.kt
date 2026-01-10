@@ -1,428 +1,399 @@
 package com.linkpoint.slproto.types
 
-import com.google.common.primitives.UnsignedBytes
 import java.nio.ByteBuffer
+import kotlin.math.acos
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
-class LLQuaternion {
-
-    /* renamed from: -com-lumiyaviewer-lumiya-slproto-types-LLQuaternion$OrderSwitchesValues  reason: not valid java name */
-    private /* synthetic */ IntArray f143comlumiyaviewerlumiyaslprototypesLLQuaternion$OrderSwitchesValues = null
-    val FP_MAG_THRESHOLD: Float = 1.0E-7f
-    private FloatArray inverseMatrix
-    private FloatArray matrix
-    Float w
-    Float x
-    Float y
-    Float z
-
-    enum Order {
-        XYZ,
-        YZX,
-        ZXY,
-        XZY,
-        YXZ,
-        ZYX
+/**
+ * Quaternion class for Second Life rotations
+ * Used throughout the protocol for object and avatar orientations
+ */
+class LLQuaternion(
+    var x: Float = 0.0f,
+    var y: Float = 0.0f,
+    var z: Float = 0.0f,
+    var w: Float = 1.0f
+) {
+    enum class Order {
+        XYZ, YZX, ZXY, XZY, YXZ, ZYX
     }
-
-    /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-types-LLQuaternion$OrderSwitchesValues  reason: not valid java name */
-    private /* synthetic */ IntArray m258getcomlumiyaviewerlumiyaslprototypesLLQuaternion$OrderSwitchesValues() {
-        if (f143comlumiyaviewerlumiyaslprototypesLLQuaternion$OrderSwitchesValues != null) {
-            return f143comlumiyaviewerlumiyaslprototypesLLQuaternion$OrderSwitchesValues
-        }
-        IntArray iArr = Int[Order.values().length]
-        try {
-            iArr[Order.XYZ.ordinal()] = 1
-        } catch (NoSuchFieldError e) {
-        }
-        try {
-            iArr[Order.XZY.ordinal()] = 2
-        } catch (NoSuchFieldError e2) {
-        }
-        try {
-            iArr[Order.YXZ.ordinal()] = 3
-        } catch (NoSuchFieldError e3) {
-        }
-        try {
-            iArr[Order.YZX.ordinal()] = 4
-        } catch (NoSuchFieldError e4) {
-        }
-        try {
-            iArr[Order.ZXY.ordinal()] = 5
-        } catch (NoSuchFieldError e5) {
-        }
-        try {
-            iArr[Order.ZYX.ordinal()] = 6
-        } catch (NoSuchFieldError e6) {
-        }
-        f143comlumiyaviewerlumiyaslprototypesLLQuaternion$OrderSwitchesValues = iArr
-        return iArr
-    }
-
-    LLQuaternion() {
-        this.matrix = null
-        this.inverseMatrix = null
-        this.x = 0.0f
-        this.y = 0.0f
-        this.z = 0.0f
-        this.w = 1.0f
-    }
-
-    LLQuaternion(Float f, Float f2, Float f3, Float f4) {
-        this.matrix = null
-        this.inverseMatrix = null
-        this.x = f
-        this.y = f2
-        this.z = f3
-        this.w = f4
-    }
-
-    LLQuaternion(LLQuaternion lLQuaternion) {
-        this.matrix = null
-        this.inverseMatrix = null
-        this.x = lLQuaternion.x
-        this.y = lLQuaternion.y
-        this.z = lLQuaternion.z
-        this.w = lLQuaternion.w
-    }
-
-    LLQuaternion(FloatArray fArr) {
-        this.matrix = null
-        this.inverseMatrix = null
-        Float f = fArr[0] + 1.0f + fArr[5] + fArr[10]
-        if (f > 0.5f) {
-            Float sqrt = (Float) (Math.sqrt(f.toDouble()) * 2.0d)
-            this.x = (fArr[9] - fArr[6]) / sqrt
-            this.y = (fArr[2] - fArr[8]) / sqrt
-            this.z = (fArr[4] - fArr[1]) / sqrt
-            this.w = sqrt * 0.25f
-        } else if (fArr[0] > fArr[5] && fArr[0] > fArr[10]) {
-            Float sqrt2 = (Float) (Math.sqrt((Double) (((fArr[0] + 1.0f) - fArr[5]) - fArr[10])) * 2.0d)
-            this.x = 0.25f * sqrt2
-            this.y = (fArr[4] + fArr[1]) / sqrt2
-            this.z = (fArr[2] + fArr[8]) / sqrt2
-            this.w = (fArr[9] - fArr[6]) / sqrt2
-        } else if (fArr[5] > fArr[10]) {
-            Float sqrt3 = (Float) (Math.sqrt((Double) (((fArr[5] + 1.0f) - fArr[0]) - fArr[10])) * 2.0d)
-            this.x = (fArr[4] + fArr[1]) / sqrt3
-            this.y = 0.25f * sqrt3
-            this.z = (fArr[9] + fArr[6]) / sqrt3
-            this.w = (fArr[2] - fArr[8]) / sqrt3
-        } else {
-            Float sqrt4 = (Float) (Math.sqrt((Double) (((fArr[10] + 1.0f) - fArr[0]) - fArr[5])) * 2.0d)
-            this.x = (fArr[2] + fArr[8]) / sqrt4
-            this.y = (fArr[9] + fArr[6]) / sqrt4
-            this.z = 0.25f * sqrt4
-            this.w = (fArr[4] - fArr[1]) / sqrt4
-        }
-    }
-
-    fun fromEuler(Float f, Float f2, Float f3): LLQuaternion {
-        Double cos = Math.cos((Double) (f / 2.0f))
-        Double sin = Math.sin((Double) (f / 2.0f))
-        Double cos2 = Math.cos((Double) (f2 / 2.0f))
-        Double sin2 = Math.sin((Double) (f2 / 2.0f))
-        Double cos3 = Math.cos((Double) (f3 / 2.0f))
-        Double sin3 = Math.sin((Double) (f3 / 2.0f))
-        Double d = cos * cos2
-        Double d2 = sin * sin2
-        return LLQuaternion((Float) ((sin * cos2 * cos3) + (cos * sin2 * sin3)), (Float) (((cos * sin2) * cos3) - ((sin * cos2) * sin3)), (Float) ((d * sin3) + (d2 * cos3)), (Float) ((d * cos3) - (d2 * sin3)))
-    }
-
-    fun lerp(LLQuaternion lLQuaternion, LLQuaternion lLQuaternion2, Float f): LLQuaternion {
-        return LLQuaternion(lLQuaternion.x + ((lLQuaternion2.x - lLQuaternion.x) * f), lLQuaternion.y + ((lLQuaternion2.y - lLQuaternion.y) * f), lLQuaternion.z + ((lLQuaternion2.z - lLQuaternion.z) * f), lLQuaternion.w + ((lLQuaternion2.w - lLQuaternion.w) * f))
-    }
-
-    fun mayaQ(Float f, Float f2, Float f3, Order order): LLQuaternion {
-        LLQuaternion lLQuaternion = LLQuaternion()
-        LLQuaternion lLQuaternion2 = LLQuaternion()
-        LLQuaternion lLQuaternion3 = LLQuaternion()
-        lLQuaternion.setQuat(f * 0.017453292f, LLVector3(1.0f, 0.0f, 0.0f))
-        lLQuaternion2.setQuat(f2 * 0.017453292f, LLVector3(0.0f, 1.0f, 0.0f))
-        lLQuaternion3.setQuat(f3 * 0.017453292f, LLVector3(0.0f, 0.0f, 1.0f))
-        LLQuaternion lLQuaternion4 = LLQuaternion()
-        LLQuaternion lLQuaternion5 = LLQuaternion()
-        switch (m258getcomlumiyaviewerlumiyaslprototypesLLQuaternion$OrderSwitchesValues()[order.ordinal()]) {
-            case 1:
-                lLQuaternion4.setMul(lLQuaternion, lLQuaternion2)
-                lLQuaternion5.setMul(lLQuaternion4, lLQuaternion3)
-                break
-            case 2:
-                lLQuaternion4.setMul(lLQuaternion, lLQuaternion3)
-                lLQuaternion5.setMul(lLQuaternion4, lLQuaternion2)
-                break
-            case 3:
-                lLQuaternion4.setMul(lLQuaternion2, lLQuaternion)
-                lLQuaternion5.setMul(lLQuaternion4, lLQuaternion3)
-                break
-            case 4:
-                lLQuaternion4.setMul(lLQuaternion2, lLQuaternion3)
-                lLQuaternion5.setMul(lLQuaternion4, lLQuaternion)
-                break
-            case 5:
-                lLQuaternion4.setMul(lLQuaternion3, lLQuaternion)
-                lLQuaternion5.setMul(lLQuaternion4, lLQuaternion2)
-                break
-            case 6:
-                lLQuaternion4.setMul(lLQuaternion3, lLQuaternion2)
-                lLQuaternion5.setMul(lLQuaternion4, lLQuaternion)
-                break
-        }
-        return lLQuaternion5
-    }
-
-    fun parseFloatVec3(ByteBuffer byteBuffer): LLQuaternion {
-        Float f = 0.0f
-        Float f2 = byteBuffer.getFloat()
-        Float f3 = byteBuffer.getFloat()
-        Float f4 = byteBuffer.getFloat()
-        Float f5 = 1.0f - (((f2 * f2) + (f3 * f3)) + (f4 * f4))
-        if (f5 > 0.0f) {
-            f = Math.sqrt(f5.toDouble()).toFloat()
-        }
-        return LLQuaternion(f2, f3, f4, f)
-    }
-
-    fun parseU16Vec3(ByteBuffer byteBuffer, Float f, Float f2): LLQuaternion {
-        return LLQuaternion(LLTersePacking.U16_to_float(byteBuffer.getShort() & 65535, f, f2), LLTersePacking.U16_to_float(byteBuffer.getShort() & 65535, f, f2), LLTersePacking.U16_to_float(byteBuffer.getShort() & 65535, f, f2), LLTersePacking.U16_to_float(byteBuffer.getShort() & 65535, f, f2))
-    }
-
-    fun parseU8Vec3(ByteBuffer byteBuffer, Float f, Float f2): LLQuaternion {
-        return LLQuaternion(LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f, f2), LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f, f2), LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f, f2), LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f, f2))
-    }
-
-    fun shortestArc(LLVector3 lLVector3, LLVector3 lLVector32): LLQuaternion {
-        LLVector3 lLVector33 = LLVector3(lLVector3)
-        LLVector3 lLVector34 = LLVector3(lLVector32)
-        Float normVec = lLVector33.normVec()
-        Float normVec2 = lLVector34.normVec()
-        if (normVec < 1.0E-7f || normVec2 < 1.0E-7f) {
-            return LLQuaternion()
-        }
-        LLVector3 cross = LLVector3.cross(lLVector33, lLVector34)
-        Float dot = lLVector33.dot(lLVector34)
-        if (dot > 0.9999999f) {
-            return LLQuaternion()
-        }
-        if (dot < -0.9999999f) {
-            LLVector3 lLVector35 = LLVector3(lLVector33)
-            lLVector35.mul(lLVector33.x / lLVector33.dot(lLVector33))
-            LLVector3 lLVector36 = LLVector3(1.0f, 0.0f, 0.0f)
-            lLVector36.sub(lLVector35)
-            if (lLVector36.normVec() < 1.0E-7f) {
-                lLVector36.set(0.0f, 0.0f, 1.0f)
+    
+    companion object {
+        const val FP_MAG_THRESHOLD: Float = 1.0E-7f
+        
+        /**
+         * Returns a new identity quaternion (0, 0, 0, 1).
+         * Note: Returns a new instance each call to prevent mutation of shared state.
+         */
+        @JvmStatic
+        fun identity(): LLQuaternion = LLQuaternion(0.0f, 0.0f, 0.0f, 1.0f)
+        
+        /**
+         * Creates a quaternion from a rotation matrix.
+         * Uses Shoemake's algorithm for numerical stability.
+         */
+        @JvmStatic
+        fun fromMatrix(matrix: FloatArray): LLQuaternion {
+            val quat = LLQuaternion()
+            // Standard trace = m00 + m11 + m22
+            val trace = matrix[0] + matrix[5] + matrix[10]
+            
+            if (trace > 0.0f) {
+                // Positive trace: use standard formula
+                val s = sqrt((trace + 1.0f).toDouble()).toFloat() * 2.0f
+                quat.w = s * 0.25f
+                quat.x = (matrix[9] - matrix[6]) / s
+                quat.y = (matrix[2] - matrix[8]) / s
+                quat.z = (matrix[4] - matrix[1]) / s
+            } else if (matrix[0] > matrix[5] && matrix[0] > matrix[10]) {
+                // m00 is largest diagonal element
+                val s = sqrt((1.0f + matrix[0] - matrix[5] - matrix[10]).toDouble()).toFloat() * 2.0f
+                quat.x = 0.25f * s
+                quat.y = (matrix[4] + matrix[1]) / s
+                quat.z = (matrix[2] + matrix[8]) / s
+                quat.w = (matrix[9] - matrix[6]) / s
+            } else if (matrix[5] > matrix[10]) {
+                // m11 is largest diagonal element
+                val s = sqrt((1.0f + matrix[5] - matrix[0] - matrix[10]).toDouble()).toFloat() * 2.0f
+                quat.x = (matrix[4] + matrix[1]) / s
+                quat.y = 0.25f * s
+                quat.z = (matrix[9] + matrix[6]) / s
+                quat.w = (matrix[2] - matrix[8]) / s
+            } else {
+                // m22 is largest diagonal element
+                val s = sqrt((1.0f + matrix[10] - matrix[0] - matrix[5]).toDouble()).toFloat() * 2.0f
+                quat.x = (matrix[2] + matrix[8]) / s
+                quat.y = (matrix[9] + matrix[6]) / s
+                quat.z = 0.25f * s
+                quat.w = (matrix[4] - matrix[1]) / s
             }
-            return LLQuaternion(lLVector36.x, lLVector36.y, lLVector36.z, 0.0f)
+            return quat
         }
-        LLQuaternion lLQuaternion = LLQuaternion()
-        lLQuaternion.setQuat(Math.toFloat().acos(dot.toDouble()), cross)
-        return lLQuaternion
-    }
-
-    fun unpackFromVector3(LLVector3 lLVector3): LLQuaternion {
-        Float f = 0.0f
-        Float magVecSquared = 1.0f - lLVector3.magVecSquared()
-        Float f2 = lLVector3.x
-        Float f3 = lLVector3.y
-        Float f4 = lLVector3.z
-        if (magVecSquared > 0.0f) {
-            f = Math.sqrt(magVecSquared.toDouble()).toFloat()
+        
+        @JvmStatic
+        fun lerp(a: LLQuaternion, b: LLQuaternion, t: Float): LLQuaternion {
+            return LLQuaternion(
+                a.x + ((b.x - a.x) * t),
+                a.y + ((b.y - a.y) * t),
+                a.z + ((b.z - a.z) * t),
+                a.w + ((b.w - a.w) * t)
+            ).also { it.normalize() }
         }
-        return LLQuaternion(f2, f3, f4, f)
-    }
-
-    fun addMul(LLQuaternion lLQuaternion, Float f): Unit {
-        this.x += lLQuaternion.x * f
-        this.y += lLQuaternion.y * f
-        this.z += lLQuaternion.z * f
-        this.w += lLQuaternion.w * f
-    }
-
-    fun conjQuat(): LLQuaternion {
-        return LLQuaternion(this.x * -1.0f, this.y * -1.0f, this.z * -1.0f, this.w)
-    }
-
-    fun getAngleAxis(LLVector3 lLVector3): Float {
-        Float f = -1.0f
-        Float f2 = this.w
-        if (f2 > 1.0f) {
-            f2 = 1.0f
+        
+        /**
+         * Spherical linear interpolation between two quaternions.
+         * Handles edge cases where quaternions are very close to prevent division by zero.
+         */
+        @JvmStatic
+        fun slerp(a: LLQuaternion, b: LLQuaternion, t: Float): LLQuaternion {
+            var bx = b.x
+            var by = b.y
+            var bz = b.z
+            var bw = b.w
+            
+            var dot = a.x * bx + a.y * by + a.z * bz + a.w * bw
+            
+            // If negative dot, negate one quaternion to take shortest path
+            if (dot < 0.0f) {
+                bx = -bx
+                by = -by
+                bz = -bz
+                bw = -bw
+                dot = -dot
+            }
+            
+            // If quaternions are very close, use linear interpolation to avoid division by zero
+            if (dot > 0.9995f) {
+                return lerp(a, LLQuaternion(bx, by, bz, bw), t)
+            }
+            
+            // Clamp dot to valid range for acos
+            val clampedDot = if (dot > 1.0f) 1.0f else if (dot < -1.0f) -1.0f else dot
+            val theta = acos(clampedDot.toDouble()).toFloat()
+            val sinTheta = sin(theta.toDouble()).toFloat()
+            
+            // Guard against division by zero - fall back to lerp if sinTheta is too small
+            if (sinTheta < FP_MAG_THRESHOLD) {
+                return lerp(a, LLQuaternion(bx, by, bz, bw), t)
+            }
+            
+            val wa = sin(((1.0f - t) * theta).toDouble()).toFloat() / sinTheta
+            val wb = sin((t * theta).toDouble()).toFloat() / sinTheta
+            
+            return LLQuaternion(
+                wa * a.x + wb * bx,
+                wa * a.y + wb * by,
+                wa * a.z + wb * bz,
+                wa * a.w + wb * bw
+            )
         }
-        if (f2 >= -1.0f) {
-            f = f2
+        
+        @JvmStatic
+        fun parseFloatQuat(buffer: ByteBuffer): LLQuaternion {
+            return LLQuaternion(
+                buffer.getFloat(),
+                buffer.getFloat(),
+                buffer.getFloat(),
+                buffer.getFloat()
+            )
         }
-        Float sqrt = Math.sqrt((1.0f - (f * f.toDouble()).toFloat()))
-        Float f3 = Math.abs(sqrt) < 5.0E-4f ? 1.0f : 1.0f / sqrt
-        Float acos = (Math.toFloat().acos(f.toDouble())) * 2.0f
-        if (acos > 3.1415927f) {
-            lLVector3.x = (-this.x) * f3
-            lLVector3.y = (-this.y) * f3
-            lLVector3.z = f3 * (-this.z)
-            return 6.2831855f - acos
+        
+        @JvmStatic
+        fun parseU16Quat(buffer: ByteBuffer): LLQuaternion {
+            val x = LLTersePacking.U16_to_float(buffer.getShort().toInt() and 0xFFFF, -1.0f, 1.0f)
+            val y = LLTersePacking.U16_to_float(buffer.getShort().toInt() and 0xFFFF, -1.0f, 1.0f)
+            val z = LLTersePacking.U16_to_float(buffer.getShort().toInt() and 0xFFFF, -1.0f, 1.0f)
+            val wSquared = 1.0f - (x * x) - (y * y) - (z * z)
+            val w = if (wSquared > 0.0f) sqrt(wSquared.toDouble()).toFloat() else 0.0f
+            return LLQuaternion(x, y, z, w)
         }
-        lLVector3.x = this.x * f3
-        lLVector3.y = this.y * f3
-        lLVector3.z = f3 * this.z
-        return acos
     }
-
-    fun getInverseMatrix(FloatArray fArr, Int i): Unit {
-        Float f = this.x * this.x
-        Float f2 = this.y * this.y
-        Float f3 = this.z * this.z
-        Float f4 = (-this.x) * (-this.y)
-        Float f5 = (-this.x) * (-this.z)
-        Float f6 = (-this.y) * (-this.z)
-        Float f7 = this.w * (-this.x)
-        Float f8 = this.w * (-this.y)
-        Float f9 = this.w * (-this.z)
-        fArr[i + 0] = 1.0f - ((f2 + f3) * 2.0f)
-        fArr[i + 1] = (f4 - f9) * 2.0f
-        fArr[i + 2] = (f5 + f8) * 2.0f
-        fArr[i + 3] = 0.0f
-        fArr[i + 4] = (f4 + f9) * 2.0f
-        fArr[i + 5] = 1.0f - ((f3 + f) * 2.0f)
-        fArr[i + 6] = (f6 - f7) * 2.0f
-        fArr[i + 7] = 0.0f
-        fArr[i + 8] = (f5 - f8) * 2.0f
-        fArr[i + 9] = (f6 + f7) * 2.0f
-        fArr[i + 10] = 1.0f - ((f + f2) * 2.0f)
-        fArr[i + 11] = 0.0f
-        fArr[i + 12] = 0.0f
-        fArr[i + 13] = 0.0f
-        fArr[i + 14] = 0.0f
-        fArr[i + 15] = 1.0f
+    
+    private var matrix: FloatArray? = null
+    private var inverseMatrix: FloatArray? = null
+    
+    constructor(other: LLQuaternion) : this(other.x, other.y, other.z, other.w)
+    
+    constructor(matrix: FloatArray) : this() {
+        val quat = fromMatrix(matrix)
+        x = quat.x
+        y = quat.y
+        z = quat.z
+        w = quat.w
     }
-
-    fun getInverseMatrix(): FloatArray {
-        if (this.inverseMatrix != null) {
-            return this.inverseMatrix
-        }
-        Float f = this.x * this.x
-        Float f2 = this.y * this.y
-        Float f3 = this.z * this.z
-        Float f4 = (-this.x) * (-this.y)
-        Float f5 = (-this.x) * (-this.z)
-        Float f6 = (-this.y) * (-this.z)
-        Float f7 = this.w * (-this.x)
-        Float f8 = this.w * (-this.y)
-        Float f9 = this.w * (-this.z)
-        this.inverseMatrix = FloatArray{1.0f - ((f2 + f3) * 2.0f), (f4 - f9) * 2.0f, (f5 + f8) * 2.0f, 0.0f, (f4 + f9) * 2.0f, 1.0f - ((f3 + f) * 2.0f), (f6 - f7) * 2.0f, 0.0f, (f5 - f8) * 2.0f, (f6 + f7) * 2.0f, 1.0f - ((f + f2) * 2.0f), 0.0f, 0.0f, 0.0f, 0.0f, 1.0f}
-        return this.inverseMatrix
+    
+    fun dot(other: LLQuaternion): Float {
+        return x * other.x + y * other.y + z * other.z + w * other.w
     }
-
-    fun getMatrix(): FloatArray {
-        if (this.matrix != null) {
-            return this.matrix
-        }
-        Float f = this.x * this.x
-        Float f2 = this.y * this.y
-        Float f3 = this.z * this.z
-        Float f4 = this.x * this.y
-        Float f5 = this.x * this.z
-        Float f6 = this.y * this.z
-        Float f7 = this.w * this.x
-        Float f8 = this.w * this.y
-        Float f9 = this.w * this.z
-        this.matrix = FloatArray{1.0f - ((f2 + f3) * 2.0f), (f4 - f9) * 2.0f, (f5 + f8) * 2.0f, 0.0f, (f4 + f9) * 2.0f, 1.0f - ((f3 + f) * 2.0f), (f6 - f7) * 2.0f, 0.0f, (f5 - f8) * 2.0f, (f6 + f7) * 2.0f, 1.0f - ((f + f2) * 2.0f), 0.0f, 0.0f, 0.0f, 0.0f, 1.0f}
-        return this.matrix
+    
+    fun cross(other: LLQuaternion): LLVector3 {
+        return LLVector3(
+            y * other.z - z * other.y,
+            z * other.x - x * other.z,
+            x * other.y - y * other.x
+        )
     }
-
+    
+    override fun equals(other: Any?): Boolean {
+        if (other === this) return true
+        if (other !is LLQuaternion) return false
+        return x == other.x && y == other.y && z == other.z && w == other.w
+    }
+    
+    override fun hashCode(): Int {
+        var result = java.lang.Float.floatToIntBits(x)
+        result = 31 * result + java.lang.Float.floatToIntBits(y)
+        result = 31 * result + java.lang.Float.floatToIntBits(z)
+        result = 31 * result + java.lang.Float.floatToIntBits(w)
+        return result
+    }
+    
+    fun magnitude(): Float {
+        return sqrt((x * x + y * y + z * z + w * w).toDouble()).toFloat()
+    }
+    
+    fun magVecSquared(): Float {
+        return x * x + y * y + z * z + w * w
+    }
+    
     fun normalize(): Float {
-        Float sqrt = Math.sqrt(((this.x * this.x.toDouble()).toFloat() + (this.y * this.y) + (this.z * this.z) + (this.w * this.w)))
-        if (sqrt <= 1.0E-7f) {
-            this.x = 0.0f
-            this.y = 0.0f
-            this.z = 0.0f
-            this.w = 1.0f
-        } else if (Math.abs(1.0f - sqrt) > 1.0E-6f) {
-            Float f = 1.0f / sqrt
-            this.x *= f
-            this.y *= f
-            this.z *= f
-            this.w = f * this.w
+        val mag = magnitude()
+        if (mag > FP_MAG_THRESHOLD) {
+            val invMag = 1.0f / mag
+            x *= invMag
+            y *= invMag
+            z *= invMag
+            w *= invMag
+        } else {
+            x = 0.0f
+            y = 0.0f
+            z = 0.0f
+            w = 1.0f
         }
-        this.matrix = null
-        this.inverseMatrix = null
-        return sqrt
+        matrix = null
+        inverseMatrix = null
+        return mag
     }
-
-    fun set(LLQuaternion lLQuaternion): Unit {
-        this.x = lLQuaternion.x
-        this.y = lLQuaternion.y
-        this.z = lLQuaternion.z
-        this.w = lLQuaternion.w
-        this.matrix = null
-        this.inverseMatrix = null
+    
+    fun conjugate(): LLQuaternion {
+        return LLQuaternion(-x, -y, -z, w)
     }
-
-    fun setIdentity(): Unit {
-        this.x = 0.0f
-        this.y = 0.0f
-        this.z = 0.0f
-        this.w = 1.0f
+    
+    fun inverse(): LLQuaternion {
+        val magSq = magVecSquared()
+        if (magSq < FP_MAG_THRESHOLD) {
+            return LLQuaternion()
+        }
+        val invMag = 1.0f / magSq
+        return LLQuaternion(-x * invMag, -y * invMag, -z * invMag, w * invMag)
     }
-
-    fun setLerp(LLQuaternion lLQuaternion, Float f, LLQuaternion lLQuaternion2, Float f2): Unit {
-        this.x = (lLQuaternion.x * f) + (lLQuaternion2.x * f2)
-        this.y = (lLQuaternion.y * f) + (lLQuaternion2.y * f2)
-        this.z = (lLQuaternion.z * f) + (lLQuaternion2.z * f2)
-        this.w = (lLQuaternion.w * f) + (lLQuaternion2.w * f2)
-        this.matrix = null
-        this.inverseMatrix = null
+    
+    fun mul(other: LLQuaternion) {
+        val newW = w * other.w - x * other.x - y * other.y - z * other.z
+        val newX = w * other.x + x * other.w + y * other.z - z * other.y
+        val newY = w * other.y - x * other.z + y * other.w + z * other.x
+        val newZ = w * other.z + x * other.y - y * other.x + z * other.w
+        
+        w = newW
+        x = newX
+        y = newY
+        z = newZ
+        
+        matrix = null
+        inverseMatrix = null
     }
-
-    fun setMul(LLQuaternion lLQuaternion, LLQuaternion lLQuaternion2): Unit {
-        this.x = (((lLQuaternion2.w * lLQuaternion.x) + (lLQuaternion2.x * lLQuaternion.w)) + (lLQuaternion2.y * lLQuaternion.z)) - (lLQuaternion2.z * lLQuaternion.y)
-        this.y = (((lLQuaternion2.w * lLQuaternion.y) + (lLQuaternion2.y * lLQuaternion.w)) + (lLQuaternion2.z * lLQuaternion.x)) - (lLQuaternion2.x * lLQuaternion.z)
-        this.z = (((lLQuaternion2.w * lLQuaternion.z) + (lLQuaternion2.z * lLQuaternion.w)) + (lLQuaternion2.x * lLQuaternion.y)) - (lLQuaternion2.y * lLQuaternion.x)
-        this.w = (((lLQuaternion2.w * lLQuaternion.w) - (lLQuaternion2.x * lLQuaternion.x)) - (lLQuaternion2.y * lLQuaternion.y)) - (lLQuaternion2.z * lLQuaternion.z)
-        this.matrix = null
-        this.inverseMatrix = null
+    
+    fun set(newX: Float, newY: Float, newZ: Float, newW: Float) {
+        x = newX
+        y = newY
+        z = newZ
+        w = newW
+        matrix = null
+        inverseMatrix = null
     }
-
-    fun setQuat(Float f, Float f2, Float f3, Float f4): Unit {
-        LLVector3 lLVector3 = LLVector3(f2, f3, f4)
-        lLVector3.normVec()
-        Float f5 = 0.5f * f
-        Float sin = Math.toFloat().sin(f5.toDouble())
-        this.x = lLVector3.x * sin
-        this.y = lLVector3.y * sin
-        this.z = lLVector3.z * sin
-        this.w = Math.toFloat().cos(f5.toDouble())
-        normalize()
-        this.matrix = null
-        this.inverseMatrix = null
+    
+    fun set(other: LLQuaternion?) {
+        if (other != null) {
+            x = other.x
+            y = other.y
+            z = other.z
+            w = other.w
+            matrix = null
+            inverseMatrix = null
+        }
     }
-
-    fun setQuat(Float f, LLVector3 lLVector3): Unit {
-        LLVector3 lLVector32 = LLVector3(lLVector3)
-        lLVector32.normVec()
-        Float f2 = 0.5f * f
-        Float sin = Math.toFloat().sin(f2.toDouble())
-        this.x = lLVector32.x * sin
-        this.y = lLVector32.y * sin
-        this.z = lLVector32.z * sin
-        this.w = Math.toFloat().cos(f2.toDouble())
-        normalize()
-        this.matrix = null
-        this.inverseMatrix = null
+    
+    fun setFromAxisAngle(axis: LLVector3, angleRadians: Float) {
+        val halfAngle = angleRadians * 0.5f
+        val s = sin(halfAngle.toDouble()).toFloat()
+        x = axis.x * s
+        y = axis.y * s
+        z = axis.z * s
+        w = cos(halfAngle.toDouble()).toFloat()
+        matrix = null
+        inverseMatrix = null
     }
-
-    fun setRaw(Float f, Float f2, Float f3, Float f4): Unit {
-        this.x = f
-        this.y = f2
-        this.z = f3
-        this.w = f4
+    
+    fun setFromEuler(roll: Float, pitch: Float, yaw: Float, order: Order = Order.XYZ) {
+        val halfRoll = roll * 0.5f
+        val halfPitch = pitch * 0.5f
+        val halfYaw = yaw * 0.5f
+        
+        val cr = cos(halfRoll.toDouble()).toFloat()
+        val sr = sin(halfRoll.toDouble()).toFloat()
+        val cp = cos(halfPitch.toDouble()).toFloat()
+        val sp = sin(halfPitch.toDouble()).toFloat()
+        val cy = cos(halfYaw.toDouble()).toFloat()
+        val sy = sin(halfYaw.toDouble()).toFloat()
+        
+        when (order) {
+            Order.XYZ -> {
+                w = cr * cp * cy + sr * sp * sy
+                x = sr * cp * cy - cr * sp * sy
+                y = cr * sp * cy + sr * cp * sy
+                z = cr * cp * sy - sr * sp * cy
+            }
+            Order.YZX -> {
+                w = cr * cp * cy - sr * sp * sy
+                x = sr * cp * cy + cr * sp * sy
+                y = cr * sp * cy + sr * cp * sy
+                z = cr * cp * sy - sr * sp * cy
+            }
+            Order.ZXY -> {
+                w = cr * cp * cy + sr * sp * sy
+                x = sr * cp * cy - cr * sp * sy
+                y = cr * sp * cy - sr * cp * sy
+                z = cr * cp * sy + sr * sp * cy
+            }
+            Order.XZY -> {
+                w = cr * cp * cy + sr * sp * sy
+                x = sr * cp * cy + cr * sp * sy
+                y = cr * sp * cy + sr * cp * sy
+                z = cr * cp * sy - sr * sp * cy
+            }
+            Order.YXZ -> {
+                w = cr * cp * cy - sr * sp * sy
+                x = sr * cp * cy - cr * sp * sy
+                y = cr * sp * cy + sr * cp * sy
+                z = cr * cp * sy + sr * sp * cy
+            }
+            Order.ZYX -> {
+                w = cr * cp * cy + sr * sp * sy
+                x = sr * cp * cy - cr * sp * sy
+                y = cr * sp * cy + sr * cp * sy
+                z = cr * cp * sy - sr * sp * cy
+            }
+        }
+        
+        matrix = null
+        inverseMatrix = null
     }
-
-    fun setZero(): Unit {
-        this.x = 0.0f
-        this.y = 0.0f
-        this.z = 0.0f
-        this.w = 0.0f
+    
+    fun getMatrix(): FloatArray {
+        if (matrix == null) {
+            matrix = FloatArray(16)
+            updateMatrix(matrix!!)
+        }
+        return matrix!!
     }
-
-    fun toString(): String {
-        return String.format("(%.2f, %.2f, %.2f, %.2f)", Any[]{Float.valueOf(this.x), Float.valueOf(this.y), Float.valueOf(this.z), Float.valueOf(this.w)})
+    
+    fun getInverseMatrix(): FloatArray {
+        if (inverseMatrix == null) {
+            inverseMatrix = FloatArray(16)
+            val conj = conjugate()
+            conj.updateMatrix(inverseMatrix!!)
+        }
+        return inverseMatrix!!
+    }
+    
+    private fun updateMatrix(m: FloatArray) {
+        val xx = x * x
+        val yy = y * y
+        val zz = z * z
+        val xy = x * y
+        val xz = x * z
+        val yz = y * z
+        val wx = w * x
+        val wy = w * y
+        val wz = w * z
+        
+        m[0] = 1.0f - 2.0f * (yy + zz)
+        m[1] = 2.0f * (xy + wz)
+        m[2] = 2.0f * (xz - wy)
+        m[3] = 0.0f
+        
+        m[4] = 2.0f * (xy - wz)
+        m[5] = 1.0f - 2.0f * (xx + zz)
+        m[6] = 2.0f * (yz + wx)
+        m[7] = 0.0f
+        
+        m[8] = 2.0f * (xz + wy)
+        m[9] = 2.0f * (yz - wx)
+        m[10] = 1.0f - 2.0f * (xx + yy)
+        m[11] = 0.0f
+        
+        m[12] = 0.0f
+        m[13] = 0.0f
+        m[14] = 0.0f
+        m[15] = 1.0f
+    }
+    
+    fun rotateVector(v: LLVector3): LLVector3 {
+        val result = LLVector3(v)
+        result.mul(this)
+        return result
+    }
+    
+    override fun toString(): String {
+        return String.format("(%.4f, %.4f, %.4f, %.4f)", x, y, z, w)
+    }
+    
+    // Operator overloads
+    operator fun times(other: LLQuaternion): LLQuaternion {
+        val result = LLQuaternion(this)
+        result.mul(other)
+        return result
     }
 }

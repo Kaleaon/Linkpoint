@@ -22,7 +22,7 @@ class AutoValue_SLObjectFilterInfo : SLObjectFilterInfo {
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof SLObjectFilterInfo)) {
+        if (!(obj is SLObjectFilterInfo)) {
             return false
         }
         SLObjectFilterInfo sLObjectFilterInfo = (SLObjectFilterInfo) obj
@@ -37,8 +37,8 @@ class AutoValue_SLObjectFilterInfo : SLObjectFilterInfo {
     }
 
     fun hashCode(): Int {
-        Int i = 1231
-        Int hashCode = ((this.showNonDescriptive ? 1231 : 1237) ^ (((this.showAttachments ? 1231 : 1237) ^ ((this.filterText.hashCode() ^ 1000003) * 1000003)) * 1000003)) * 1000003
+        var i: Int = 1231
+        var hashCode: Int = ((this.showNonDescriptive ? 1231 : 1237) ^ (((this.showAttachments ? 1231 : 1237) ^ ((this.filterText.hashCode() ^ 1000003) * 1000003)) * 1000003)) * 1000003
         if (!this.showNonTouchable) {
             i = 1237
         }

@@ -51,8 +51,8 @@ class SLInventoryOpenHelper : DBHandleCache.DBOpenHelper {
     private Boolean initTables(SQLiteDatabase sQLiteDatabase) throws SQLiteException {
         sQLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS DBVersion (Version INTEGER);")
         Cursor query = null
-        Boolean isNewDb = false
-        Boolean needsUpgrade = false
+        var isNewDb: Boolean = false
+        var needsUpgrade: Boolean = false
         
         try {
             query = sQLiteDatabase.query("DBVersion", Array<String>{"Version"}, null, null, null, null, null)

@@ -65,7 +65,7 @@ class vx_state_buddy_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_p_vx_state_buddy_contact getState_buddy_contacts() {
-        Long l = VxClientProxyJNI.vx_state_buddy_t_state_buddy_contacts_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_state_buddy_t_state_buddy_contacts_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_p_vx_state_buddy_contact(l, false)
         return null
     }

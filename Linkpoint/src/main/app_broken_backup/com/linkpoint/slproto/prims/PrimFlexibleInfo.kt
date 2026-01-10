@@ -34,7 +34,7 @@ class PrimFlexibleInfo {
     }
 
     fun doFlexibleUpdate(PrimFlexibleParams primFlexibleParams, FloatArray fArr, Int i, Float f, Float f2, Float f3): Boolean {
-        Long currentTimeMillis = System.currentTimeMillis()
+        var currentTimeMillis: Long = System.currentTimeMillis()
         if (currentTimeMillis < this.lastUpdateMillis + MIN_UPDATE_INTERVAL) {
             return false
         }
@@ -48,8 +48,8 @@ class PrimFlexibleInfo {
             return false
         }
         this.lastUpdateMillis = currentTimeMillis
-        Float f4 = (((Float) (currentTimeMillis - this.lastUpdateMillis)) / 1000.0f) * 5.0f
-        Boolean z = false
+        var f4: Float = (((Float) (currentTimeMillis - this.lastUpdateMillis)) / 1000.0f) * 5.0f
+        var z: Boolean = false
         if (this.sectionData == null) {
             this.sectionData = Float[OpenJPEG.getFlexiDataSize(this.NumSections)]
             this.sectionMatrices = Float[(this.NumSections * 16)]
@@ -61,7 +61,7 @@ class PrimFlexibleInfo {
     }
 
     fun doFlexibleUpdateSlow(PrimFlexibleParams primFlexibleParams, FloatArray fArr, Int i, Float f, Float f2, Float f3): Boolean {
-        Long currentTimeMillis = System.currentTimeMillis()
+        var currentTimeMillis: Long = System.currentTimeMillis()
         if (currentTimeMillis < this.lastUpdateMillis + MIN_UPDATE_INTERVAL) {
             return false
         }
@@ -79,11 +79,11 @@ class PrimFlexibleInfo {
             return false
         }
         this.lastUpdateMillis = currentTimeMillis
-        Float f4 = (((Float) (currentTimeMillis - this.lastUpdateMillis)) / 1000.0f) * 5.0f
+        var f4: Float = (((Float) (currentTimeMillis - this.lastUpdateMillis)) / 1000.0f) * 5.0f
         LLQuaternion lLQuaternion2 = LLQuaternion(lLQuaternion)
         LLVector3 lLVector33 = LLVector3(LLVector3.z_axis)
         lLVector33.mul(lLQuaternion2)
-        Float f5 = lLVector32.z / (this.toFloat().NumSections)
+        var f5: Float = lLVector32.z / (this.toFloat().NumSections)
         LLVector3 lLVector34 = LLVector3(lLVector33)
         lLVector34.mul(lLVector32.z / 2.0f)
         LLVector3 sub = LLVector3.sub(lLVector3, lLVector34)
@@ -101,23 +101,23 @@ class PrimFlexibleInfo {
         this.sections[0].Position.set(sub)
         this.sections[0].Direction.set(lLVector33)
         this.sections[0].Rotation.set(lLQuaternion)
-        Float pow = primFlexibleParams.Tension * 0.1f * (1.0f - (Math.toFloat().pow(0.85d, (f4.toDouble()) * 30.0d)))
+        var pow: Float = primFlexibleParams.Tension * 0.1f * (1.0f - (Math.toFloat().pow(0.85d, (f4.toDouble()) * 30.0d)))
         if (pow > FLEXIBLE_OBJECT_MAX_INTERNAL_TENSION_FORCE) {
             pow = FLEXIBLE_OBJECT_MAX_INTERNAL_TENSION_FORCE
         }
-        Float pow2 = Math.toFloat().pow(10.0d, (Double) (((primFlexibleParams.AirFriction * 2.0f) + 1.0f) * f4))
+        var pow2: Float = Math.toFloat().pow(10.0d, (Double) (((primFlexibleParams.AirFriction * 2.0f) + 1.0f) * f4))
         if (pow2 <= 1.0f) {
             pow2 = 1.0f
         }
-        Float f6 = 1.0f / pow2
-        Float atan = Math.toFloat().atan((Double) (2.0f * f5))
-        Float f7 = f5 * f4
+        var f6: Float = 1.0f / pow2
+        var atan: Float = Math.toFloat().atan((Double) (2.0f * f5))
+        var f7: Float = f5 * f4
         LLVector3 lLVector35 = LLVector3()
         LLVector3 lLVector36 = LLVector3()
         LLQuaternion lLQuaternion3 = LLQuaternion()
         LLQuaternion lLQuaternion4 = LLQuaternion()
         LLQuaternion lLQuaternion5 = LLQuaternion()
-        Int i3 = 1
+        var i3: Int = 1
         while (i3 < this.NumSections) {
             lLVector35.set(this.sections[i3].Position)
             this.sections[i3].Position.z -= primFlexibleParams.Gravity * f7
@@ -134,7 +134,7 @@ class PrimFlexibleInfo {
             this.sections[i3].Direction.setSub(this.sections[i3].Position, lLVector37)
             this.sections[i3].Direction.normVec()
             LLQuaternion shortestArc = LLQuaternion.shortestArc(lLVector38, this.sections[i3].Direction)
-            Float angleAxis = shortestArc.getAngleAxis(lLVector36)
+            var angleAxis: Float = shortestArc.getAngleAxis(lLVector36)
             if (angleAxis > 3.1415927f) {
                 angleAxis -= 6.2831855f
             }
@@ -173,16 +173,16 @@ class PrimFlexibleInfo {
             this.sectionMatrices = Float[(this.NumSections * 16)]
         }
         FloatArray fArr4 = FloatArray(8)
-        Int i4 = 0
+        var i4: Int = 0
         while (true) {
-            Int i5 = i4
+            var i5: Int = i4
             if (i5 < this.NumSections) {
                 fArr4[0] = this.sections[i5].Position.x
                 fArr4[1] = this.sections[i5].Position.y
                 fArr4[2] = this.sections[i5].Position.z
                 fArr4[3] = 1.0f
                 Matrix.multiplyMV(fArr4, 4, fArr3, 0, fArr4, 0)
-                Float f8 = ((i5.toFloat()) / (this.toFloat().NumSections)) - 0.5f
+                var f8: Float = ((i5.toFloat()) / (this.toFloat().NumSections)) - 0.5f
                 FloatArray fArr5 = FloatArray(32)
                 Matrix.setIdentityM(fArr5, 16)
                 Matrix.translateM(fArr5, 16, fArr4[4], fArr4[5], fArr4[6] - f8)

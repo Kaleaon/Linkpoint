@@ -37,10 +37,10 @@ class MapItemReply : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int i = 29
+        var i: Int = 29
         Iterator<T> it = this.Data_Fields.iterator()
         while (true) {
-            Int i2 = i
+            var i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -48,11 +48,11 @@ class MapItemReply : SLMessage {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleMapItemReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -101)
@@ -70,7 +70,7 @@ class MapItemReply : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.Flags = unpackInt(byteBuffer)
         this.RequestData_Field.ItemType = unpackInt(byteBuffer)

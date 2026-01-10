@@ -29,11 +29,11 @@ class Error : SLMessage {
         return this.Data_Field.Token.size + 5 + 16 + 1 + this.Data_Field.System.size + 2 + this.Data_Field.Message.size + 2 + this.Data_Field.Data.size + 20
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleError(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) -89)
@@ -46,7 +46,7 @@ class Error : SLMessage {
         packVariable(byteBuffer, this.Data_Field.Data, 2)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.Data_Field.Code = unpackInt(byteBuffer)
         this.Data_Field.Token = unpackVariable(byteBuffer, 1)

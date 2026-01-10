@@ -36,7 +36,7 @@ class SLXfer {
             this.listener = sLXferCompletionListener
         }
 
-        fun invokeListener(String str, ByteArray bArr): Unit {
+        fun invokeListener(String str, ByteArray bArr)  {
             this.listener.onXferComplete(this.tag, str, bArr)
         }
     }
@@ -52,12 +52,12 @@ class SLXfer {
         this.expectedPacketNum = 0
     }
 
-    fun HandleDataPacket(SLXferManager sLXferManager, SendXferPacket sendXferPacket): Unit {
+    fun HandleDataPacket(SLXferManager sLXferManager, SendXferPacket sendXferPacket)  {
         Int length
-        Int i = 4
+        var i: Int = 4
         Debug.Printf("XferPacket: packetNum %d (0x%x), dataLen %d", Int.valueOf(sendXferPacket.XferID_Field.Packet), Int.valueOf(sendXferPacket.XferID_Field.Packet), Int.valueOf(sendXferPacket.DataPacket_Field.Data.size))
-        Int i2 = Int.MAX_VALUE & sendXferPacket.XferID_Field.Packet
-        Boolean z = (sendXferPacket.XferID_Field.Packet & Int.MIN_VALUE) != 0
+        var i2: Int = Int.MAX_VALUE & sendXferPacket.XferID_Field.Packet
+        var z: Boolean = (sendXferPacket.XferID_Field.Packet & Int.MIN_VALUE) != 0
         if (i2 == this.expectedPacketNum) {
             if (i2 != 0) {
                 i = 0
@@ -90,7 +90,7 @@ class SLXfer {
         }
     }
 
-    fun StartTransfer(SLXferManager sLXferManager): Unit {
+    fun StartTransfer(SLXferManager sLXferManager)  {
         RequestXfer requestXfer = RequestXfer()
         requestXfer.XferID_Field.ID = this.id
         requestXfer.XferID_Field.Filename = SLMessage.stringToVariableOEM(this.fileName)
@@ -103,7 +103,7 @@ class SLXfer {
         sLXferManager.SendMessage(requestXfer)
     }
 
-    fun addListener(SLXferCompletionListener sLXferCompletionListener, Any obj): Unit {
+    fun addListener(SLXferCompletionListener sLXferCompletionListener, Any obj)  {
         this.listeners.add(XferListenerInvocation(obj, sLXferCompletionListener))
     }
 
@@ -115,7 +115,7 @@ class SLXfer {
         return this.fileName
     }
 
-    fun invokeListeners(): Unit {
+    fun invokeListeners()  {
         for (XferListenerInvocation invokeListener : this.listeners) {
             invokeListener.invokeListener(this.fileName, this.receivedData)
         }

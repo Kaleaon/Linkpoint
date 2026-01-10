@@ -28,7 +28,7 @@ class ND_TEST_TYPE {
 
     private ND_TEST_TYPE(String string2) {
         this.swigName = string2
-        Int n = swigNext
+        var n: Int = swigNext
         swigNext = n + 1
         this.swigValue = n
     }
@@ -53,7 +53,7 @@ class ND_TEST_TYPE {
         if (n < swigValues.length && n >= 0 && ND_TEST_TYPE.swigValues[n].swigValue == n) {
             return swigValues[n]
         }
-        Int n2 = 0
+        var n2: Int = 0
         while (n2 < swigValues.length) {
             if (ND_TEST_TYPE.swigValues[n2].swigValue == n) {
                 return swigValues[n2]

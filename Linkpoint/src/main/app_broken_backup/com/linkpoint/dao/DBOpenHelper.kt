@@ -37,16 +37,16 @@ class DBOpenHelper : DevOpenHelper {
         }
     }
 
-    fun onDowngrade(sQLiteDatabase: SQLiteDatabase, oldVersion: Int, newVersion: Int): Unit {
+    fun onDowngrade(sQLiteDatabase: SQLiteDatabase, oldVersion: Int, newVersion: Int)  {
         Debug.Printf("Database downgrade requested from %d to %d", oldVersion, newVersion)
         // Call onUpgrade which will recreate the database if needed
         super.onUpgrade(sQLiteDatabase, oldVersion, newVersion)
     }
 
-    fun onUpgrade(sQLiteDatabase: SQLiteDatabase, oldVersion: Int, newVersion: Int): Unit {
+    fun onUpgrade(sQLiteDatabase: SQLiteDatabase, oldVersion: Int, newVersion: Int)  {
         Debug.Printf("Database upgrade requested from %d to %d", oldVersion, newVersion)
         
-        Boolean upgradeSuccessful = false
+        var upgradeSuccessful: Boolean = false
         if (newVersion == 71) {
             upgradeSuccessful = tryUpgradeTo71(sQLiteDatabase, oldVersion)
         }

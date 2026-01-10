@@ -236,7 +236,7 @@ class ModernWorldActivity : AppCompatActivity {
             Fragment chatFragment = getSupportFragmentManager().findFragmentById(R.id.chat_container);
             if (chatFragment != null) {
                 // Chat is already visible, focus input
-                if (chatFragment instanceof com.linkpoint.ui.chat.ModernChatFragment) {
+                if (chatFragment is com.linkpoint.ui.chat.ModernChatFragment) {
                     ((com.linkpoint.ui.chat.ModernChatFragment) chatFragment).focusChatInput();
                 }
             } else {

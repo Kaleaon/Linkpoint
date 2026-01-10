@@ -33,7 +33,7 @@ class ModernClientDemo {
                 
                 var diagnosticResult = diagnostics.diagnoseAsync().get()
                 
-                Boolean connectionHealthy = diagnosticResult.networkAvailable && 
+                var connectionHealthy: Boolean = diagnosticResult.networkAvailable && 
                     (diagnosticResult.dnsWorking || diagnosticResult.httpsWorking)
                 
                 Log.i(TAG, "Connection test result: " + (connectionHealthy ? "✅ HEALTHY" : "❌ ISSUES DETECTED"))

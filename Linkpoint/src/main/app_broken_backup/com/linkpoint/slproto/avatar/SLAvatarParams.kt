@@ -9,7 +9,7 @@ import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 
 class SLAvatarParams {
-    Int NUM_PARAMS = 218
+    var NUM_PARAMS: Int = 218
     @NonNull
     ImmutableMap<Integer, ParamSet> paramByIDs
     @NonNull

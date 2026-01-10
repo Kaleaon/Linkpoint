@@ -118,7 +118,7 @@ class ModernLinkpointDemo {
     /**
      * Initialize modern Second Life connection
      */
-    fun connectToSecondLife(eventQueueUrl: String, seedCapability: String, authToken: String): Unit {
+    fun connectToSecondLife(eventQueueUrl: String, seedCapability: String, authToken: String)  {
         Log.i(TAG, "Connecting to Second Life with modern protocols...")
         
         if (transport == null) {
@@ -135,14 +135,14 @@ class ModernLinkpointDemo {
             
             // Subscribe to real-time events
             transport.subscribeToEvents("chat", WebSocketEventClient.EventListener() {
-                override fun onEvent(event: WebSocketEventClient.EventMessage): Unit {
+                override fun onEvent(event: WebSocketEventClient.EventMessage)  {
                     Log.d(TAG, "Received chat event: " + event.getData())
                     // Implemented: Process chat message with parsing and display
                 }
             })
         
             transport.subscribeToEvents("objectUpdate", WebSocketEventClient.EventListener() {
-                override fun onEvent(event: WebSocketEventClient.EventMessage): Unit {
+                override fun onEvent(event: WebSocketEventClient.EventMessage)  {
                     Log.d(TAG, "Received object update: " + event.getData())
                     // Implemented: Update 3D world objects with new transforms
                 }
@@ -157,7 +157,7 @@ class ModernLinkpointDemo {
     /**
      * Initialize modern graphics system with OpenGL ES 3.0 baseline
      */
-    fun initializeGraphics(): Unit {
+    fun initializeGraphics()  {
         Log.i(TAG, "Initializing modernized graphics system (ES 3.0+ only)...")
         
         if (renderPipeline == null) {
@@ -167,7 +167,7 @@ class ModernLinkpointDemo {
         
         try {
             // Initialize render pipeline with mandatory OpenGL ES 3.0+ features
-            Boolean success = renderPipeline.initialize()
+            var success: Boolean = renderPipeline.initialize()
             if (success) {
                 if (renderPipeline.isModernPipelineAvailable()) {
                     Log.i(TAG, "Modern PBR rendering pipeline enabled (ES 3.0+)")
@@ -182,8 +182,8 @@ class ModernLinkpointDemo {
             // Initialize modernized texture manager  
             if (textureManager != null) {
                 try {
-                    Int optimalFormat = textureManager.getOptimalTextureFormat()
-                    String formatName = getFormatName(optimalFormat)
+                    var optimalFormat: Int = textureManager.getOptimalTextureFormat()
+                    var formatName: String = getFormatName(optimalFormat)
                     Log.i(TAG, "Optimal texture format: " + formatName + " (ES 3.0 ETC2+ only)")
                     Log.i(TAG, "Legacy JPEG2000 format support removed")
                 } catch (Exception e) {
@@ -202,7 +202,7 @@ class ModernLinkpointDemo {
     /**
      * Load texture with modern transcoding
      */
-    fun loadTexture(textureId: String): Unit {
+    fun loadTexture(textureId: String)  {
         Log.d(TAG, "Loading texture with modern pipeline: " + textureId)
         
         if (textureManager == null) {
@@ -232,7 +232,7 @@ class ModernLinkpointDemo {
     /**
      * Send modern message
      */
-    fun sendMessage(messageType: String, content: String): Unit {
+    fun sendMessage(messageType: String, content: String)  {
         Log.d(TAG, "Sending modern message: " + messageType)
         
         if (transport == null) {
@@ -265,7 +265,7 @@ class ModernLinkpointDemo {
     /**
      * Render frame with modern pipeline
      */
-    fun renderFrame(viewMatrix: FloatArray, projectionMatrix: FloatArray): Unit {
+    fun renderFrame(viewMatrix: FloatArray, projectionMatrix: FloatArray)  {
         if (renderPipeline == null) {
             Log.w(TAG, "Render pipeline not available - frame rendering skipped")
             return
@@ -299,7 +299,7 @@ class ModernLinkpointDemo {
     /**
      * Shutdown modern components
      */
-    fun shutdown(): Unit {
+    fun shutdown()  {
         Log.i(TAG, "Shutting down modern Linkpoint components")
         
         try {
@@ -323,7 +323,7 @@ class ModernLinkpointDemo {
     /**
      * Demonstrate modern authentication with OAuth2
      */
-    fun demonstrateModernAuthentication(username: String, password: String): Unit {
+    fun demonstrateModernAuthentication(username: String, password: String)  {
         Log.i(TAG, "Demonstrating modern OAuth2 authentication...")
         
         if (authManager == null) {
@@ -351,7 +351,7 @@ class ModernLinkpointDemo {
     /**
      * Demonstrate intelligent asset streaming
      */
-    fun demonstrateAssetStreaming(): Unit {
+    fun demonstrateAssetStreaming()  {
         Log.i(TAG, "Demonstrating intelligent asset streaming...")
         
         if (assetManager == null) {
@@ -394,7 +394,7 @@ class ModernLinkpointDemo {
     /**
      * Test modern LLSD codec and protocol compatibility
      */
-    fun testModernLLSDCodec(): Unit {
+    fun testModernLLSDCodec()  {
         Log.i(TAG, "Testing Modern LLSD Codec with LibreMetaverse compatibility...")
         protocolDemo.runFullDemo()
     }
@@ -419,13 +419,13 @@ class ModernLinkpointDemo {
      */
     fun getGraphicsInfo(): String {
         try {
-            Boolean modernPipeline = (renderPipeline != null) && renderPipeline.isModernPipelineAvailable()
+            var modernPipeline: Boolean = (renderPipeline != null) && renderPipeline.isModernPipelineAvailable()
             
-            Int textureFormat = 0
+            var textureFormat: Int = 0
             if (textureManager != null) {
                 textureFormat = textureManager.getOptimalTextureFormat()
             }
-            String formatName = getFormatName(textureFormat)
+            var formatName: String = getFormatName(textureFormat)
             
             return String.format("Modern Pipeline: %s, Optimal Texture: %s", 
                                modernPipeline ? "Available" : "Legacy", formatName)
@@ -439,7 +439,7 @@ class ModernLinkpointDemo {
      * Demonstrate modernized graphics pipeline
      * Shows the removal of OpenGL ES 1.1 compatibility and ES 3.0+ features
      */
-    fun demonstrateModernGraphics(): Unit {
+    fun demonstrateModernGraphics()  {
         Log.i(TAG, "=== Modern Graphics Pipeline Demonstration ===")
         
         // Show capabilities that are now mandatory (ES 3.0+)

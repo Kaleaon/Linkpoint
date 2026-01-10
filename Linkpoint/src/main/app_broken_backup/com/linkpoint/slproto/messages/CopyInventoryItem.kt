@@ -31,10 +31,10 @@ class CopyInventoryItem : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int i = 37
+        var i: Int = 37
         Iterator<T> it = this.InventoryData_Fields.iterator()
         while (true) {
-            Int i2 = i
+            var i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -42,11 +42,11 @@ class CopyInventoryItem : SLMessage {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleCopyInventoryItem(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put(Ascii.CR)
@@ -62,7 +62,7 @@ class CopyInventoryItem : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE

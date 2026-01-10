@@ -24,11 +24,11 @@ class LoadURL : SLMessage {
         return this.Data_Field.ObjectName.length + 1 + 16 + 16 + 1 + 1 + this.Data_Field.Message.length + 1 + this.Data_Field.URL.length + 4
     }
 
-    fun Handle(sLMessageHandler: SLMessageHandler): Unit {
+    fun Handle(sLMessageHandler: SLMessageHandler)  {
         sLMessageHandler.HandleLoadURL(this)
     }
 
-    fun PackPayload(byteBuffer: ByteBuffer): Unit {
+    fun PackPayload(byteBuffer: ByteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -62)
@@ -40,7 +40,7 @@ class LoadURL : SLMessage {
         packVariable(byteBuffer, this.Data_Field.URL, 1)
     }
 
-    fun UnpackPayload(byteBuffer: ByteBuffer): Unit {
+    fun UnpackPayload(byteBuffer: ByteBuffer)  {
         this.Data_Field.ObjectName = unpackVariable(byteBuffer, 1)
         this.Data_Field.ObjectID = unpackUUID(byteBuffer)
         this.Data_Field.OwnerID = unpackUUID(byteBuffer)

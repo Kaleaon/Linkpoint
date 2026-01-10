@@ -33,11 +33,11 @@ class AvatarPropertiesReply : SLMessage {
         return this.PropertiesData_Field.AboutText.size + 50 + 1 + this.PropertiesData_Field.FLAboutText.size + 1 + this.PropertiesData_Field.BornOn.size + 1 + this.PropertiesData_Field.ProfileURL.size + 1 + this.PropertiesData_Field.CharterMember.size + 4 + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleAvatarPropertiesReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -85)
@@ -54,7 +54,7 @@ class AvatarPropertiesReply : SLMessage {
         packInt(byteBuffer, this.PropertiesData_Field.Flags)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.AvatarID = unpackUUID(byteBuffer)
         this.PropertiesData_Field.ImageID = unpackUUID(byteBuffer)

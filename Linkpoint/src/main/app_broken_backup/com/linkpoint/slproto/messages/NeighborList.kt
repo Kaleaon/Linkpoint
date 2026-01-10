@@ -27,18 +27,18 @@ class NeighborList : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int i = 1
+        var i: Int = 1
         for (i2 in 0 until 4) {
             i += this.NeighborBlock_Fields[i2].Name.size + 29 + 1
         }
         return i
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleNeighborList(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.put((Byte) 3)
         for (i in 0 until 4) {
             packIPAddress(byteBuffer, this.NeighborBlock_Fields[i].IP)
@@ -51,7 +51,7 @@ class NeighborList : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         for (i in 0 until 4) {
             this.NeighborBlock_Fields[i].IP = unpackIPAddress(byteBuffer)
             this.NeighborBlock_Fields[i].Port = unpackShort(byteBuffer) & 65535

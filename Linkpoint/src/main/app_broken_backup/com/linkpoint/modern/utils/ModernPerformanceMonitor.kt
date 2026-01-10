@@ -116,7 +116,7 @@ class ModernPerformanceMonitor {
      */
     void endOperation(String operationName) {
         long endTime = SystemClock.elapsedRealtime()
-        Long startTime = operationStartTimes.remove(operationName)
+        var startTime: Long = operationStartTimes.remove(operationName)
         
         if (startTime == null) {
             Log.w(TAG, "No start time found for operation: " + operationName)
@@ -192,7 +192,7 @@ class ModernPerformanceMonitor {
         }
         
         long benchmarkDuration = SystemClock.elapsedRealtime() - benchmarkStartTime
-        String summary = generateBenchmarkSummary(category, categoryMetrics, benchmarkDuration)
+        var summary: String = generateBenchmarkSummary(category, categoryMetrics, benchmarkDuration)
         
         Log.i(TAG, "Completed benchmark for " + category.getDisplayName() + " in " + benchmarkDuration + "ms")
         return BenchmarkResult(category, categoryMetrics, benchmarkDuration, summary)

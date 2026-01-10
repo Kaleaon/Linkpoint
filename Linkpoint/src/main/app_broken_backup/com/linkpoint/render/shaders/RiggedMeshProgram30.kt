@@ -24,7 +24,7 @@ class RiggedMeshProgram30 : PrimProgram {
     }
 
     @TargetApi(18)
-    protected fun bindVariables(): Unit {
+    protected fun bindVariables()  {
         super.bindVariables()
         this.vWeight = GLES20.glGetAttribLocation(this.handle, "vWeight")
         this.vJoint = GLES20.glGetAttribLocation(this.handle, "vJoint")

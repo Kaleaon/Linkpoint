@@ -21,17 +21,17 @@ class SLAvatarParamBuilder {
     SLAvatarParamBuilder() {
     }
 
-    fun buildParams(SLAvatarParams.ParamSet[] paramSetArr, Map<Integer, SLAvatarParams.ParamSet> map): Unit {
+    fun buildParams(SLAvatarParams.ParamSet[] paramSetArr, Map<Integer, SLAvatarParams.ParamSet> map)  {
         try {
             AssetManager assetManager = LumiyaApp.getAssetManager()
             if (assetManager != null) {
                 InputStream open = assetManager.open("character/avatar_params.xml", 3)
                 LLSDNode parseXML = LLSDNode.parseXML(open, "UTF-8")
-                Int count = parseXML.getCount()
+                var count: Int = parseXML.getCount()
                 for (i in 0 until count) {
                     LLSDNode byIndex = parseXML.byIndex(i)
                     LLSDNode byKey = byIndex.byKey("params")
-                    Int count2 = byKey.getCount()
+                    var count2: Int = byKey.getCount()
                     ImmutableList.Builder builder = ImmutableList.builder()
                     for (i2 in 0 until count2) {
                         LLSDNode byIndex2 = byKey.byIndex(i2)

@@ -37,11 +37,11 @@ class EventInfoReply : SLMessage {
         return this.EventData_Field.Creator.size + 5 + 1 + this.EventData_Field.Name.size + 1 + this.EventData_Field.Category.size + 2 + this.EventData_Field.Desc.size + 1 + this.EventData_Field.Date.size + 4 + 4 + 4 + 4 + 1 + this.EventData_Field.SimName.size + 24 + 4 + 20
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleEventInfoReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -76)
@@ -61,7 +61,7 @@ class EventInfoReply : SLMessage {
         packInt(byteBuffer, this.EventData_Field.EventFlags)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.EventData_Field.EventID = unpackInt(byteBuffer)
         this.EventData_Field.Creator = unpackVariable(byteBuffer, 1)

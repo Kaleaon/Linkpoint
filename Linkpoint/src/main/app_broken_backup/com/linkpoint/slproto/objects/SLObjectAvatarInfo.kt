@@ -19,19 +19,19 @@ class SLObjectAvatarInfo : SLObjectInfo {
         this.avatarVisualState = AvatarVisualState(uuid, this, uuid2)
     }
 
-    fun ApplyAvatarAnimation(AvatarAnimation avatarAnimation): Unit {
+    fun ApplyAvatarAnimation(AvatarAnimation avatarAnimation)  {
         this.avatarVisualState.ApplyAvatarAnimation(avatarAnimation)
     }
 
-    fun ApplyAvatarAppearance(AvatarAppearance avatarAppearance): Unit {
+    fun ApplyAvatarAppearance(AvatarAppearance avatarAppearance)  {
         this.avatarVisualState.ApplyAvatarAppearance(avatarAppearance)
     }
 
-    fun ApplyAvatarTextures(SLTextureEntry sLTextureEntry, Boolean z): Unit {
+    fun ApplyAvatarTextures(SLTextureEntry sLTextureEntry, Boolean z)  {
         this.avatarVisualState.ApplyTextures(sLTextureEntry, z)
     }
 
-    fun ApplyAvatarVisualParams(IntArray iArr): Unit {
+    fun ApplyAvatarVisualParams(IntArray iArr)  {
         this.avatarVisualState.ApplyVisualParams(iArr)
     }
 
@@ -58,7 +58,7 @@ class SLObjectAvatarInfo : SLObjectInfo {
         return this.isMyAvatar
     }
 
-    fun onTexturesUpdate(SLTextureEntry sLTextureEntry): Unit {
+    fun onTexturesUpdate(SLTextureEntry sLTextureEntry)  {
         this.avatarVisualState.ApplyTextures(sLTextureEntry, false)
     }
 }

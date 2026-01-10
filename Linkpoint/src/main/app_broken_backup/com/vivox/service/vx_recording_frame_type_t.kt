@@ -15,7 +15,7 @@ class vx_recording_frame_type_t {
 
     private vx_recording_frame_type_t(String string2) {
         this.swigName = string2
-        Int n = swigNext
+        var n: Int = swigNext
         swigNext = n + 1
         this.swigValue = n
     }
@@ -40,7 +40,7 @@ class vx_recording_frame_type_t {
         if (n < swigValues.length && n >= 0 && vx_recording_frame_type_t.swigValues[n].swigValue == n) {
             return swigValues[n]
         }
-        Int n2 = 0
+        var n2: Int = 0
         while (n2 < swigValues.length) {
             if (vx_recording_frame_type_t.swigValues[n2].swigValue == n) {
                 return swigValues[n2]

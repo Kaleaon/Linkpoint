@@ -89,7 +89,7 @@ class DrawableAttachments {
                     z2 = true
                 }
                 gLLoadableBuffer.BindUniformDynamic(renderContext, 1, z2)
-                Int i = 0
+                var i: Int = 0
                 for (DrawableObject DrawRigged30 : this.rigged) {
                     i = DrawRigged30.DrawRigged30(renderContext, 1) | i
                 }
@@ -106,7 +106,7 @@ class DrawableAttachments {
                 }
             }
         }
-        Boolean z3 = false
+        var z3: Boolean = false
         for (Any obj : this.nonRigged.keySet()) {
             FloatArray attachmentMatrix = avatarSkeleton.getAttachmentMatrix(obj.intValue())
             if (attachmentMatrix != null) {

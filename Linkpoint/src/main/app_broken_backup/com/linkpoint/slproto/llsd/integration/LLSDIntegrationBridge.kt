@@ -101,37 +101,37 @@ class LLSDIntegrationBridge {
         }
         
         try {
-            if (externalObject instanceof String) {
+            if (externalObject is String) {
                 return LLSDString((String) externalObject)
-            } else if (externalObject instanceof Integer) {
+            } else if (externalObject is Integer) {
                 return LLSDInt((Integer) externalObject)
-            } else if (externalObject instanceof Double) {
+            } else if (externalObject is Double) {
                 return LLSDDouble(externalObject.toDouble())
-            } else if (externalObject instanceof Float) {
+            } else if (externalObject is Float) {
                 return LLSDDouble((externalObject.toFloat()).doubleValue())
-            } else if (externalObject instanceof Boolean) {
+            } else if (externalObject is Boolean) {
                 return LLSDBoolean((Boolean) externalObject)
-            } else if (externalObject instanceof UUID) {
+            } else if (externalObject is UUID) {
                 return LLSDUUID((UUID) externalObject)
-            } else if (externalObject instanceof URI) {
+            } else if (externalObject is URI) {
                 return LLSDURI((URI) externalObject)
-            } else if (externalObject instanceof Date) {
+            } else if (externalObject is Date) {
                 return LLSDDate((Date) externalObject)
-            } else if (externalObject instanceof List) {
+            } else if (externalObject is List) {
                 List<Object> list = (List<Object>) externalObject
                 LLSDArray array = LLSDArray()
                 for (Object item : list) {
                     array.add(convertExternalToLinkpoint(item))
                 }
                 return array
-            } else if (externalObject instanceof Map) {
+            } else if (externalObject is Map) {
                 Map<String, Object> map = (Map<String, Object>) externalObject
                 Map<String, LLSDNode> nodeMap = HashMap<>()
                 for (Map.Entry<String, Object> entry : map.entrySet()) {
                     nodeMap.put(entry.getKey(), convertExternalToLinkpoint(entry.getValue()))
                 }
                 return LLSDMap(nodeMap)
-            } else if (externalObject instanceof lindenlab.llsd.LLSDUndefined) {
+            } else if (externalObject is lindenlab.llsd.LLSDUndefined) {
                 return LLSDUndefined()
             } else {
                 Log.w(TAG, "Unknown external LLSD type: " + externalObject.getClass().getName())
@@ -188,7 +188,7 @@ class LLSDIntegrationBridge {
     fun parseAuto(String llsdData): LLSDNode {
         try {
             // Simple format detection - enhanced detection coming with @Kaleaon's library
-            String trimmed = llsdData.trim()
+            var trimmed: String = llsdData.trim()
             if (trimmed.startsWith("<?xml") || trimmed.startsWith("<llsd")) {
                 return parseFromXML(llsdData)
             } else if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
@@ -249,7 +249,7 @@ class LLSDIntegrationBridge {
      * Demonstrate @Kaleaon's Kotlin LLSD features (Android-compatible)
      * This shows the enhanced capabilities now available
      */
-    fun demonstrateKotlinFeatures(): Unit {
+    fun demonstrateKotlinFeatures()  {
         try {
             // This would typically be called from Kotlin code, but we can demonstrate from Java
             Log.i(TAG, "Kotlin LLSD features now available!")

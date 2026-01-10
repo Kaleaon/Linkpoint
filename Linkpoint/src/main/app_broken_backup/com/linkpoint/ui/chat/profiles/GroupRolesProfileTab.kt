@@ -75,13 +75,13 @@ class GroupRolesProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoada
 
         fun getView(Int i, View view, ViewGroup viewGroup): View {
             GroupTitlesReply.GroupData groupData
-            Int i2 = 1
+            var i2: Int = 1
             if (view == null) {
                 view = LayoutInflater.from(GroupRolesProfileTab.this.getContext()).inflate(R.layout.group_profile_role_list_item, viewGroup, false)
             }
             GroupRoleDataReply.RoleData item = getItem(i)
             if (item != null) {
-                Int i3 = (!item.RoleID.equals(UUIDPool.ZeroUUID) || this.groupProfile == null) ? item.Members : this.groupProfile.GroupData_Field.GroupMembershipCount
+                var i3: Int = (!item.RoleID.equals(UUIDPool.ZeroUUID) || this.groupProfile == null) ? item.Members : this.groupProfile.GroupData_Field.GroupMembershipCount
                 ((view as TextView).findViewById(R.id.role_name)).setText(SLMessage.stringFromVariableOEM(item.Name))
                 ((view as TextView).findViewById(R.id.role_member_count)).setText(GroupRolesProfileTab.this.getResources().getQuantityString(R.plurals.members, i3, Any[]{Int.valueOf(i3)}))
                 if (this.titlesByRole == null || (groupData = this.titlesByRole.get(item.RoleID)) == null) {
@@ -105,7 +105,7 @@ class GroupRolesProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoada
             return false
         }
 
-        fun setData(@Nullable GroupRoleDataReply groupRoleDataReply, @Nullable GroupTitlesReply groupTitlesReply, @Nullable GroupProfileReply groupProfileReply): Unit {
+        fun setData(@Nullable GroupRoleDataReply groupRoleDataReply, @Nullable GroupTitlesReply groupTitlesReply, @Nullable GroupProfileReply groupProfileReply)  {
             this.data = groupRoleDataReply
             if (groupTitlesReply != null) {
                 this.titlesByRole = HashMap()
@@ -139,7 +139,7 @@ class GroupRolesProfileTab : ChatterReloadableFragment : LoadableMonitor.OnLoada
 
     /* access modifiers changed from: private */
     /* renamed from: onAddNewRoleButton */
-    fun m497com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRolesProfileTabmthref0(View view): Unit {
+    fun m497com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRolesProfileTabmthref0(View view)  {
         if ((getMyGroupPowers() & 16) != 0) {
             DetailsActivity.showEmbeddedDetails(getActivity(), GroupRoleDetailsFragment.class, GroupRoleDetailsFragment.makeSelection(this.chatterID, (UUID) null))
         }
@@ -236,14 +236,14 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$zWKNE
         return inflate
     }
 
-    fun onLoadableDataChanged(): Unit {
+    fun onLoadableDataChanged()  {
         try {
             if (this.myGroupList.get().Groups.get(this.groupRoles.get().GroupData_Field.GroupID) != null && !this.groupTitles.isSubscribed()) {
                 this.groupTitles.subscribe(this.userManager.getGroupTitles().getPool(), this.groupRoles.get().GroupData_Field.GroupID)
             }
         } catch (SubscriptionData.DataNotReadyException e) {
         }
-        Long myGroupPowers = getMyGroupPowers()
+        var myGroupPowers: Long = getMyGroupPowers()
         View view = getView()
         if (view != null) {
             view.findViewById(R.id.add_new_role_button).setVisibility((myGroupPowers & 16) != 0 ? 0 : 8)
@@ -254,9 +254,9 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$zWKNE
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(@Nullable ChatterID chatterID): Unit {
+    fun onShowUser(@Nullable ChatterID chatterID)  {
         this.loadableMonitor.unsubscribeAll()
-        if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDGroup)) {
+        if (this.userManager != null && (chatterID is ChatterID.ChatterIDGroup)) {
             UUID chatterUUID = ((ChatterID.ChatterIDGroup) chatterID).getChatterUUID()
             this.groupRoles.subscribe(this.userManager.getGroupRoles().getPool(), chatterUUID)
             this.groupProfile.subscribe(this.userManager.getCachedGroupProfiles().getPool(), chatterUUID)

@@ -47,7 +47,7 @@ class vx_resp_account_channel_favorites_get_list_t {
      * Lifted jumps to return sites
      */
     vx_resp_base_t getBase() {
-        Long l = VxClientProxyJNI.vx_resp_account_channel_favorites_get_list_t_base_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_account_channel_favorites_get_list_t_base_get(this.swigCPtr, this)
         if (l != 0L) return vx_resp_base_t(l, false)
         return null
     }
@@ -61,7 +61,7 @@ class vx_resp_account_channel_favorites_get_list_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_p_vx_channel_favorite getFavorites() {
-        Long l = VxClientProxyJNI.vx_resp_account_channel_favorites_get_list_t_favorites_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_account_channel_favorites_get_list_t_favorites_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_p_vx_channel_favorite(l, false)
         return null
     }
@@ -75,7 +75,7 @@ class vx_resp_account_channel_favorites_get_list_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_p_vx_channel_favorite_group getGroups() {
-        Long l = VxClientProxyJNI.vx_resp_account_channel_favorites_get_list_t_groups_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_account_channel_favorites_get_list_t_groups_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_p_vx_channel_favorite_group(l, false)
         return null
     }

@@ -12,18 +12,18 @@ class GLSyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
     private val WAIT_FRAMES_AFTER_LOAD: Int = 3
     private var framesWait: Int = 0
 
-    fun GLResourceLoaded(gLLoadable: GLLoadQueue.GLLoadable): Unit {
+    fun GLResourceLoaded(gLLoadable: GLLoadQueue.GLLoadable)  {
         gLLoadable.GLCompleteLoad()
     }
 
-    fun RunLoadQueue(renderContext: RenderContext): Unit {
+    fun RunLoadQueue(renderContext: RenderContext)  {
         GLLoadQueue.GLLoadable gLLoadable
         if (this.framesWait != 0) {
             this.framesWait--
             return
         }
-        Int i = 0
-        Int i2 = 0
+        var i: Int = 0
+        var i2: Int = 0
         while (true) {
             if (!TextureMemoryTracker.canAllocateMemory(0) || (gLLoadable = (GLLoadQueue.GLLoadable) this.loadQueue.poll()) == null) {
                 break
@@ -32,9 +32,9 @@ class GLSyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
                 this.loadQueue.add(gLLoadable)
                 break
             } else {
-                Int GLLoad = gLLoadable.GLLoad(renderContext, this) + i
+                var GLLoad: Int = gLLoadable.GLLoad(renderContext, this) + i
                 this.framesWait = 3
-                Int i3 = i2 + 1
+                var i3: Int = i2 + 1
                 if (i3 >= 16 || GLLoad >= 4194304) {
                     i2 = i3
                     i = GLLoad

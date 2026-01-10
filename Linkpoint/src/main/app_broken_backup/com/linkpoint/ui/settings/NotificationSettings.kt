@@ -47,7 +47,7 @@ class NotificationSettings {
         return ""
     }
 
-    fun Load(SharedPreferences sharedPreferences): Unit {
+    fun Load(SharedPreferences sharedPreferences)  {
         this.notificationEnabled = sharedPreferences.getBoolean(this.type.getEnableKey(), true)
         this.soundEnabled = sharedPreferences.getBoolean(this.type.getPlaySoundKey(), true)
         NotificationSounds notificationSounds = NotificationSounds.defaultSounds.get(this.type)
@@ -88,11 +88,11 @@ class NotificationSettings {
         } else {
             str = "Default"
         }
-        String preferenceValueName = getPreferenceValueName(context, this.blinkColor, R.array.pref_led_color_values, R.array.pref_led_color)
+        var preferenceValueName: String = getPreferenceValueName(context, this.blinkColor, R.array.pref_led_color_values, R.array.pref_led_color)
         if (!this.notificationEnabled) {
             return "Do nothing"
         }
-        String str2 = this.soundEnabled ? "Notify" + ", play sound (" + str + ")" : "Notify"
+        var str2: String = this.soundEnabled ? "Notify" + ", play sound (" + str + ")" : "Notify"
         if (this.blinkAction == LEDAction.None) {
             return str2
         }

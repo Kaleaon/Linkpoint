@@ -169,9 +169,9 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
 
     /* access modifiers changed from: private */
     /* renamed from: onDistance */
-    fun m301com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref2(Float f): Unit {
+    fun m301com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref2(Float f)  {
         if (f != null) {
-            Float floatValue = f.floatValue()
+            var floatValue: Float = f.floatValue()
             if (Float.compare(floatValue, this.displayData.distanceToUser) != 0) {
                 setChatterDisplayData(this.displayData.withDistanceToUser(floatValue))
             }
@@ -180,7 +180,7 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
 
     /* access modifiers changed from: private */
     /* renamed from: onOnlineStatus */
-    fun m300com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref1(Boolean bool): Unit {
+    fun m300com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref1(Boolean bool)  {
         if (bool != null && this.displayData.isOnline != bool.booleanValue()) {
             setChatterDisplayData(this.displayData.withOnlineStatus(bool.booleanValue()))
         }
@@ -188,14 +188,14 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
 
     /* access modifiers changed from: private */
     /* renamed from: onUserName */
-    fun m299com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref0(UserName userName): Unit {
-        String userName2 = GlobalOptions.getInstance().isLegacyUserNames() ? userName.getUserName() : userName.getDisplayName()
+    fun m299com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref0(UserName userName)  {
+        var userName2: String = GlobalOptions.getInstance().isLegacyUserNames() ? userName.getUserName() : userName.getDisplayName()
         if (!Objects.equal(userName2, this.displayData.displayName)) {
             setChatterDisplayData(this.displayData.withDisplayName(userName2))
         }
     }
 
-    fun unsubscribe(): Unit {
+    fun unsubscribe()  {
         this.nameSubscription.unsubscribe()
         this.onlineStatusSubscription.unsubscribe()
         this.distanceSubscription.unsubscribe()

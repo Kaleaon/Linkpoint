@@ -56,7 +56,7 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
         }
 
         fun equals(Any obj): Boolean {
-            if (obj instanceof ChatterIDGroup) {
+            if (obj is ChatterIDGroup) {
                 return super.equals(obj)
             }
             return false
@@ -130,7 +130,7 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
         }
 
         fun equals(Any obj): Boolean {
-            if (obj instanceof ChatterIDLocal) {
+            if (obj is ChatterIDLocal) {
                 return ChatterID.super.equals(obj)
             }
             return false
@@ -174,7 +174,7 @@ abstract class ChatterID : Parcelable, Comparable<ChatterID> {
         }
 
         fun equals(Any obj): Boolean {
-            if (obj instanceof ChatterIDUser) {
+            if (obj is ChatterIDUser) {
                 return super.equals(obj)
             }
             return false
@@ -329,18 +329,18 @@ Method generation error in method: com.linkpoint.slproto.users.-$Lambda$0dEDWURu
         }
 
         fun compareTo(@NonNull ChatterID chatterID): Int {
-            Int compareTo = ChatterID.super.compareTo(chatterID)
+            var compareTo: Int = ChatterID.super.compareTo(chatterID)
             if (compareTo != 0) {
                 return compareTo
             }
-            if (chatterID instanceof ChatterIDWithUUID) {
+            if (chatterID is ChatterIDWithUUID) {
                 return this.uuid.compareTo(((ChatterIDWithUUID) chatterID).uuid)
             }
             return 0
         }
 
         fun equals(Any obj): Boolean {
-            if (!ChatterID.super.equals(obj) || !(obj instanceof ChatterIDWithUUID)) {
+            if (!ChatterID.super.equals(obj) || !(obj is ChatterIDWithUUID)) {
                 return false
             }
             return Objects.equal(this.uuid, ((ChatterIDWithUUID) obj).uuid)
@@ -377,7 +377,7 @@ Method generation error in method: com.linkpoint.slproto.users.-$Lambda$0dEDWURu
             return ChatterID.super.toString() + ":" + (this.uuid != null ? this.uuid.toString() : "null")
         }
 
-        fun writeToParcel(Parcel parcel, Int i): Unit {
+        fun writeToParcel(Parcel parcel, Int i)  {
             ChatterID.super.writeToParcel(parcel, i)
             if (this.uuid != null) {
                 parcel.writeLong(this.uuid.getMostSignificantBits())
@@ -497,7 +497,7 @@ Method generation error in method: com.linkpoint.slproto.users.-$Lambda$0dEDWURu
     }
 
     fun compareTo(@NonNull ChatterID chatterID): Int {
-        Int compareTo = this.agentUUID.compareTo(chatterID.agentUUID)
+        var compareTo: Int = this.agentUUID.compareTo(chatterID.agentUUID)
         return compareTo != 0 ? compareTo : getChatterType().compareTo(chatterID.getChatterType())
     }
 
@@ -506,7 +506,7 @@ Method generation error in method: com.linkpoint.slproto.users.-$Lambda$0dEDWURu
     }
 
     fun equals(Any obj): Boolean {
-        if (obj instanceof ChatterID) {
+        if (obj is ChatterID) {
             return ((ChatterID) obj).agentUUID.equals(this.agentUUID)
         }
         return false
@@ -549,7 +549,7 @@ Method generation error in method: com.linkpoint.slproto.users.-$Lambda$0dEDWURu
         return bundle
     }
 
-    fun toDatabaseObject(Chatter chatter): Unit {
+    fun toDatabaseObject(Chatter chatter)  {
         chatter.setType(getChatterType().ordinal())
         chatter.setUuid(getOptionalChatterUUID())
     }
@@ -558,7 +558,7 @@ Method generation error in method: com.linkpoint.slproto.users.-$Lambda$0dEDWURu
         return "Chatter:" + getChatterType().toString()
     }
 
-    fun writeToParcel(Parcel parcel, Int i): Unit {
+    fun writeToParcel(Parcel parcel, Int i)  {
         parcel.writeLong(this.agentUUID.getMostSignificantBits())
         parcel.writeLong(this.agentUUID.getLeastSignificantBits())
     }

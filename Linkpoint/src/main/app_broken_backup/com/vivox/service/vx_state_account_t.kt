@@ -68,7 +68,7 @@ class vx_state_account_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_p_vx_state_buddy getState_buddies() {
-        Long l = VxClientProxyJNI.vx_state_account_t_state_buddies_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_state_account_t_state_buddies_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_p_vx_state_buddy(l, false)
         return null
     }
@@ -86,7 +86,7 @@ class vx_state_account_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_p_vx_state_buddy_group getState_buddy_groups() {
-        Long l = VxClientProxyJNI.vx_state_account_t_state_buddy_groups_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_state_account_t_state_buddy_groups_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_p_vx_state_buddy_group(l, false)
         return null
     }
@@ -96,7 +96,7 @@ class vx_state_account_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_p_vx_state_sessiongroup getState_sessiongroups() {
-        Long l = VxClientProxyJNI.vx_state_account_t_state_sessiongroups_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_state_account_t_state_sessiongroups_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_p_vx_state_sessiongroup(l, false)
         return null
     }

@@ -73,11 +73,11 @@ class ViewerStats : SLMessage {
         return this.AgentData_Field.SysOS.size + 74 + 1 + this.AgentData_Field.SysCPU.size + 1 + this.AgentData_Field.SysGPU.size + 4 + 12 + 32 + 24 + 1 + (this.MiscStats_Fields.size() * 12)
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleViewerStats(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -125)
@@ -118,7 +118,7 @@ class ViewerStats : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.IP = unpackIPAddress(byteBuffer)

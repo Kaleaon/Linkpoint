@@ -30,7 +30,7 @@ class TeleportProgressDialog : ProgressDialog : DialogInterface.OnCancelListener
         setOnCancelListener(this)
     }
 
-    fun TeleportToLandmark(Context context, UserManager userManager2, UUID uuid, Boolean z): Unit {
+    fun TeleportToLandmark(Context context, UserManager userManager2, UUID uuid, Boolean z)  {
         SLAgentCircuit activeAgentCircuit
         if (userManager2 != null && (activeAgentCircuit = userManager2.getActiveAgentCircuit()) != null && activeAgentCircuit.getModules().rlvController.canTeleportToLandmark()) {
             $Lambda$8gWLFwrhoxKapEC8iWggaUhFR1c.AnonymousClass2 r1 = Runnable(activeAgentCircuit, uuid, context, userManager2) {
@@ -225,8 +225,8 @@ Method generation error in method: com.linkpoint.ui.common.-$Lambda$8gWLFwrhoxKa
     }
 
     @EventHandler
-    fun handleTeleportResult(SLTeleportResultEvent sLTeleportResultEvent): Unit {
-        Boolean isShowing = isShowing()
+    fun handleTeleportResult(SLTeleportResultEvent sLTeleportResultEvent)  {
+        var isShowing: Boolean = isShowing()
         Debug.Log("TeleportResult: success = " + sLTeleportResultEvent.success)
         try {
             dismiss()
@@ -249,7 +249,7 @@ Method generation error in method: com.linkpoint.ui.common.-$Lambda$8gWLFwrhoxKa
         }
     }
 
-    fun onCancel(DialogInterface dialogInterface): Unit {
+    fun onCancel(DialogInterface dialogInterface)  {
         if (this.userManager != null) {
             try {
                 SLAgentCircuit activeAgentCircuit = this.userManager.getActiveAgentCircuit()
@@ -262,14 +262,14 @@ Method generation error in method: com.linkpoint.ui.common.-$Lambda$8gWLFwrhoxKa
         }
     }
 
-    fun onStart(): Unit {
+    fun onStart()  {
         super.onStart()
         if (this.userManager != null) {
             this.userManager.getEventBus().subscribe(this, (Activity) null, this.mHandler)
         }
     }
 
-    fun onStop(): Unit {
+    fun onStop()  {
         if (this.userManager != null) {
             this.userManager.getEventBus().unsubscribe(this)
         }

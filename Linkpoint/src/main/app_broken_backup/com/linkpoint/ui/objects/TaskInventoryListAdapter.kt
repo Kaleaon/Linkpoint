@@ -47,10 +47,10 @@ class TaskInventoryListAdapter : BaseAdapter {
         }
         SLInventoryEntry item = getItem(i)
         ((view as TextView).findViewById(R.id.itemNameTextView)).setText(item.name)
-        Int drawableResource = item.getDrawableResource()
+        var drawableResource: Int = item.getDrawableResource()
         if (drawableResource >= 0) {
             ((view as ImageView).findViewById(R.id.itemTypeIconView)).setImageResource(drawableResource)
-            Int subtypeDrawableResource = item.getSubtypeDrawableResource()
+            var subtypeDrawableResource: Int = item.getSubtypeDrawableResource()
             if (subtypeDrawableResource >= 0) {
                 ((view as ImageView).findViewById(R.id.itemSubTypeIconView)).setImageResource(subtypeDrawableResource)
             } else {
@@ -68,7 +68,7 @@ class TaskInventoryListAdapter : BaseAdapter {
         return false
     }
 
-    fun setData(SLTaskInventory sLTaskInventory): Unit {
+    fun setData(SLTaskInventory sLTaskInventory)  {
         this.taskInventory = sLTaskInventory
         notifyDataSetChanged()
     }

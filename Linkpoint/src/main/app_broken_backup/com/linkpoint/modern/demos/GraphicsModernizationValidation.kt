@@ -12,7 +12,7 @@ import com.linkpoint.modern.samples.ModernLinkpointDemo
 object GraphicsModernizationValidation {
     private val TAG: String = "GraphicsModernization"
     
-    fun validateModernization(context: Context): Unit {
+    fun validateModernization(context: Context)  {
         Log.i(TAG, "==========================================")
         Log.i(TAG, "GRAPHICS ENGINE MODERNIZATION VALIDATION")
         Log.i(TAG, "==========================================")
@@ -39,7 +39,7 @@ object GraphicsModernizationValidation {
             demo.initializeGraphics()
             demo.demonstrateModernGraphics()
             
-            String graphicsInfo = demo.getGraphicsInfo()
+            var graphicsInfo: String = demo.getGraphicsInfo()
             Log.i(TAG, "✅ Modern pipeline initialization: " + graphicsInfo)
             Log.i(TAG, "✅ PBR shader system available")
             Log.i(TAG, "✅ Modern texture formats detected")
@@ -99,7 +99,7 @@ object GraphicsModernizationValidation {
     /**
      * Demonstrate the modernization impact with metrics
      */
-    fun generateModernizationReport(context: Context): Unit {
+    fun generateModernizationReport(context: Context)  {
         Log.i(TAG, "\n=== LINKPOINT GRAPHICS MODERNIZATION REPORT ===")
         Log.i(TAG, "Modernization Date: " + java.text.DateFormat.getDateInstance().format(new java.util.Date()))
         Log.i(TAG, "")

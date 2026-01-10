@@ -46,11 +46,11 @@ class RezRestoreToWorld : SLMessage {
         return this.InventoryData_Field.Name.size + 129 + 1 + this.InventoryData_Field.Description.size + 4 + 4 + 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleRezRestoreToWorld(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -87)
@@ -79,7 +79,7 @@ class RezRestoreToWorld : SLMessage {
         packInt(byteBuffer, this.InventoryData_Field.CRC)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.InventoryData_Field.ItemID = unpackUUID(byteBuffer)

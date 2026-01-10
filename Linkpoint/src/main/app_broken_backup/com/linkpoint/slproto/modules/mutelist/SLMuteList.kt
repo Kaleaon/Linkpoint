@@ -32,7 +32,7 @@ class SLMuteList : SLModule : SLXfer.SLXferCompletionListener {
     private MuteListCachedDataDao muteListCachedDataDao
     private volatile MuteListData muteListData = MuteListData()
     private RequestHandler<SubscriptionSingleKey> muteListRequestHandler = AsyncRequestHandler(this.agentCircuit, SimpleRequestHandler<SubscriptionSingleKey>() {
-        fun onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey): Unit {
+        fun onRequest(@NonNull SubscriptionSingleKey subscriptionSingleKey)  {
             if (SLMuteList.this.muteListResultHandler != null) {
                 SLMuteList.this.muteListResultHandler.onResultData(SubscriptionSingleKey.Value, SLMuteList.this.getMuteList())
             }
@@ -63,7 +63,7 @@ class SLMuteList : SLModule : SLXfer.SLXferCompletionListener {
         Debug.Printf("MuteList: Requested mute list (CRC %08x)", Int.valueOf(muteListRequest.MuteData_Field.MuteCRC))
     }
 
-    fun Block(MuteListEntry muteListEntry): Unit {
+    fun Block(MuteListEntry muteListEntry)  {
         this.muteListData = this.muteListData.Block(muteListEntry)
         Debug.Printf("MuteList: adding entry %s '%s'", muteListEntry.uuid.toString(), muteListEntry.name)
         UpdateMuteListEntry updateMuteListEntry = UpdateMuteListEntry()
@@ -78,7 +78,7 @@ class SLMuteList : SLModule : SLXfer.SLXferCompletionListener {
         this.userManager.muteListPool().requestUpdate(SubscriptionSingleKey.Value)
     }
 
-    fun HandleCircuitReady(): Unit {
+    fun HandleCircuitReady()  {
         super.HandleCircuitReady()
         if (this.muteListCachedDataDao != null) {
             LazyList listLazy = this.muteListCachedDataDao.queryBuilder().listLazy()
@@ -94,7 +94,7 @@ class SLMuteList : SLModule : SLXfer.SLXferCompletionListener {
         }
     }
 
-    fun HandleCloseCircuit(): Unit {
+    fun HandleCloseCircuit()  {
         if (this.userManager != null) {
             this.userManager.muteListPool().detachRequestHandler(this.muteListRequestHandler)
         }
@@ -102,8 +102,8 @@ class SLMuteList : SLModule : SLXfer.SLXferCompletionListener {
     }
 
     @SLMessageHandler
-    fun HandleMuteListUpdate(MuteListUpdate muteListUpdate): Unit {
-        String stringFromVariableOEM = SLMessage.stringFromVariableOEM(muteListUpdate.MuteData_Field.Filename)
+    fun HandleMuteListUpdate(MuteListUpdate muteListUpdate)  {
+        var stringFromVariableOEM: String = SLMessage.stringFromVariableOEM(muteListUpdate.MuteData_Field.Filename)
         Debug.Printf("MuteList: fileName = '%s'", stringFromVariableOEM)
         if (!stringFromVariableOEM.equals("")) {
             this.agentCircuit.getModules().xferManager.RequestXfer(stringFromVariableOEM, ELLPath.LL_PATH_CACHE, true, this, (Any) null)
@@ -111,11 +111,11 @@ class SLMuteList : SLModule : SLXfer.SLXferCompletionListener {
     }
 
     @SLMessageHandler
-    fun HandleUseCachedMuteList(UseCachedMuteList useCachedMuteList): Unit {
+    fun HandleUseCachedMuteList(UseCachedMuteList useCachedMuteList)  {
         Debug.Printf("MuteList: Using cached mute list.", Any[0])
     }
 
-    fun Unblock(MuteListEntry muteListEntry): Unit {
+    fun Unblock(MuteListEntry muteListEntry)  {
         this.muteListData = this.muteListData.Unblock(muteListEntry)
         Debug.Printf("MuteList: removing entry %s '%s'", muteListEntry.uuid.toString(), muteListEntry.name)
         RemoveMuteListEntry removeMuteListEntry = RemoveMuteListEntry()
@@ -143,13 +143,13 @@ class SLMuteList : SLModule : SLXfer.SLXferCompletionListener {
         return this.muteListData.isMutedByName(str)
     }
 
-    fun onXferComplete(Any obj, String str, ByteArray bArr): Unit {
+    fun onXferComplete(Any obj, String str, ByteArray bArr)  {
         if (bArr != null) {
             this.muteListData = MuteListData(bArr)
             if (this.muteListCachedDataDao != null) {
                 CRC32 crc32 = CRC32()
                 crc32.update(bArr)
-                Long value = crc32.getValue()
+                var value: Long = crc32.getValue()
                 this.muteListCachedDataDao.deleteAll()
                 this.muteListCachedDataDao.insert(MuteListCachedData((Long) null, value.toInt(), bArr))
             }

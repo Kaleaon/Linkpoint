@@ -51,7 +51,7 @@ class vx_resp_base_t {
      * Lifted jumps to return sites
      */
     vx_message_base_t getMessage() {
-        Long l = VxClientProxyJNI.vx_resp_base_t_message_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_base_t_message_get(this.swigCPtr, this)
         if (l != 0L) return vx_message_base_t(l, false)
         return null
     }
@@ -61,7 +61,7 @@ class vx_resp_base_t {
      * Lifted jumps to return sites
      */
     vx_req_base_t getRequest() {
-        Long l = VxClientProxyJNI.vx_resp_base_t_request_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_resp_base_t_request_get(this.swigCPtr, this)
         if (l != 0L) return vx_req_base_t(l, false)
         return null
     }

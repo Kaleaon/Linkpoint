@@ -172,7 +172,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$jWSiK
             return false
         }
 
-        fun setData(@Nullable GroupRoleDataReply groupRoleDataReply, Set<UUID> set): Unit {
+        fun setData(@Nullable GroupRoleDataReply groupRoleDataReply, Set<UUID> set)  {
             this.data = groupRoleDataReply
             this.selectedRoles.clear()
             if (set != null) {
@@ -182,13 +182,13 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$jWSiK
             notifyDataSetInvalidated()
         }
 
-        fun toggleChecked(UUID uuid): Unit {
+        fun toggleChecked(UUID uuid)  {
             GroupTitlesReply groupTitlesReply
             if (!uuid.equals(UUIDPool.ZeroUUID) && GroupMemberRolesFragment.this.userManager != null && GroupMemberRolesFragment.this.MemberID != null) {
-                Long r4 = GroupMemberRolesFragment.this.getMyGroupPowers()
+                var r4: Long = GroupMemberRolesFragment.this.getMyGroupPowers()
                 try {
-                    Boolean contains = ((Set) GroupMemberRolesFragment.this.activeRoles.get()).contains(uuid)
-                    Boolean z3 = !this.selectedRoles.contains(uuid)
+                    var contains: Boolean = ((Set) GroupMemberRolesFragment.this.activeRoles.get()).contains(uuid)
+                    var z3: Boolean = !this.selectedRoles.contains(uuid)
                     if (contains == z3) {
                         if (z3) {
                             this.selectedRoles.add(uuid)
@@ -221,8 +221,8 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$jWSiK
                                 z = true
                             }
                         } else if ((r4 & 512) != 0) {
-                            Boolean equals = uuid.equals(((GroupProfileReply) GroupMemberRolesFragment.this.groupProfile.get()).GroupData_Field.OwnerRole)
-                            Boolean equals2 = GroupMemberRolesFragment.this.userManager.getUserID().equals(GroupMemberRolesFragment.this.MemberID)
+                            var equals: Boolean = uuid.equals(((GroupProfileReply) GroupMemberRolesFragment.this.groupProfile.get()).GroupData_Field.OwnerRole)
+                            var equals2: Boolean = GroupMemberRolesFragment.this.userManager.getUserID().equals(GroupMemberRolesFragment.this.MemberID)
                             if (!equals || equals2) {
                                 this.selectedRoles.remove(uuid)
                                 z = true
@@ -251,14 +251,14 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$jWSiK
 
     private Unit closeFragment() {
         FragmentActivity activity = getActivity()
-        if (activity instanceof DetailsActivity) {
+        if (activity is DetailsActivity) {
             ((DetailsActivity) activity).closeDetailsFragment(this)
         }
     }
 
     @Nullable
     private AvatarGroupList.AvatarGroupEntry getMyGroupEntry() {
-        if (!(this.chatterID instanceof ChatterID.ChatterIDGroup)) {
+        if (!(this.chatterID is ChatterID.ChatterIDGroup)) {
             return null
         }
         try {
@@ -287,16 +287,16 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$jWSiK
 
     /* access modifiers changed from: private */
     /* renamed from: onGroupRoleMemberList */
-    fun m459com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMemberRolesFragmentmthref0(UUID uuid): Unit {
-        if (this.userManager != null && (this.chatterID instanceof ChatterID.ChatterIDGroup) && this.MemberID != null) {
+    fun m459com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMemberRolesFragmentmthref0(UUID uuid)  {
+        if (this.userManager != null && (this.chatterID is ChatterID.ChatterIDGroup) && this.MemberID != null) {
             this.activeRoles.subscribe(this.userManager.getChatterList().getGroupManager().getGroupMemberRoleList(), GroupManager.GroupMemberRolesQuery.create(((ChatterID.ChatterIDGroup) this.chatterID).getChatterUUID(), this.MemberID, uuid))
         }
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onMemberNameUpdated */
-    fun m460com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMemberRolesFragmentmthref1(ChatterNameRetriever chatterNameRetriever): Unit {
-        String resolvedName = chatterNameRetriever.getResolvedName()
+    fun m460com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMemberRolesFragmentmthref1(ChatterNameRetriever chatterNameRetriever)  {
+        var resolvedName: String = chatterNameRetriever.getResolvedName()
         if (!Strings.isNullOrEmpty(resolvedName)) {
             setTitle(getString(R.string.member_roles_title_format, resolvedName), (String) null)
             return
@@ -305,8 +305,8 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$jWSiK
     }
 
     /* access modifiers changed from: private */
-    fun updateUnsavedChanges(): Unit {
-        Boolean anyChanges = anyChanges()
+    fun updateUnsavedChanges()  {
+        var anyChanges: Boolean = anyChanges()
         if (anyChanges != this.hasChanged) {
             this.hasChanged = anyChanges
             if (this.undoMenuItem != null) {
@@ -336,7 +336,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$jWSiK
     /* synthetic */ Unit m463lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMemberRolesFragment_9245(DialogInterface dialogInterface, Int i) {
         dialogInterface.dismiss()
         try {
-            if (!(this.adapter == null || this.userManager == null || !(this.chatterID instanceof ChatterID.ChatterIDGroup))) {
+            if (!(this.adapter == null || this.userManager == null || !(this.chatterID is ChatterID.ChatterIDGroup))) {
                 Set<UUID> selectedRoles = this.adapter.getSelectedRoles()
                 Set set = this.activeRoles.get()
                 HashSet hashSet = HashSet(selectedRoles)
@@ -431,13 +431,13 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$jWSiK
         return true
     }
 
-    fun onCreate(@Nullable Bundle bundle): Unit {
+    fun onCreate(@Nullable Bundle bundle)  {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
         setShowChatterTitle(false)
     }
 
-    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater): Unit {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater)  {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.group_member_roles_menu, menu)
         this.undoMenuItem = menu.findItem(R.id.item_undo)
@@ -525,7 +525,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$jWSiK
         return inflate
     }
 
-    fun onLoadableDataChanged(): Unit {
+    fun onLoadableDataChanged()  {
         if (this.adapter != null) {
             this.adapter.setData(this.groupRoles.getData(), this.activeRoles.getData())
         }
@@ -563,7 +563,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$jWSiK
     }
 
     /* access modifiers changed from: protected */
-    fun onShowUser(@Nullable ChatterID chatterID): Unit {
+    fun onShowUser(@Nullable ChatterID chatterID)  {
         this.loadableMonitor.unsubscribeAll()
         if (this.memberNameRetriever != null) {
             this.memberNameRetriever.dispose()
@@ -571,7 +571,7 @@ Method generation error in method: com.linkpoint.ui.chat.profiles.-$Lambda$jWSiK
         }
         this.MemberID = UUIDPool.getUUID(getArguments().getString(MEMBER_ID_KEY))
         setTitle(getString(R.string.member_roles_title_default), (String) null)
-        if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDGroup)) {
+        if (this.userManager != null && (chatterID is ChatterID.ChatterIDGroup)) {
             if (this.MemberID != null) {
                 this.memberNameRetriever = ChatterNameRetriever(ChatterID.getUserChatterID(this.userManager.getUserID(), this.MemberID), ChatterNameRetriever.OnChatterNameUpdated(this) {
 

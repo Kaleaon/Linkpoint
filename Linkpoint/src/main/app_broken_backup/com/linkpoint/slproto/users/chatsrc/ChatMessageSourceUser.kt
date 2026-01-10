@@ -49,18 +49,18 @@ class ChatMessageSourceUser : ChatMessageSource {
         return this.uuid
     }
 
-    fun serializeTo(@NonNull ChatMessage chatMessage): Unit {
+    fun serializeTo(@NonNull ChatMessage chatMessage)  {
         super.serializeTo(chatMessage)
         chatMessage.setSenderUUID(this.uuid)
         chatMessage.setSenderName(this.displayName)
         chatMessage.setSenderLegacyName(this.legacyName)
     }
 
-    fun setDisplayName(@Nullable String str): Unit {
+    fun setDisplayName(@Nullable String str)  {
         this.displayName = str
     }
 
-    fun setLegacyName(@Nullable String str): Unit {
+    fun setLegacyName(@Nullable String str)  {
         this.legacyName = str
     }
 }

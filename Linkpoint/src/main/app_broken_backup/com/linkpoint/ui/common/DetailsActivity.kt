@@ -91,7 +91,7 @@ class DetailsActivity : ConnectedActivity {
             return fragment2
         }
 
-        fun writeToParcel(Parcel parcel, Int i): Unit {
+        fun writeToParcel(Parcel parcel, Int i)  {
             parcel.writeString(this.className)
             if (this.arguments != null) {
                 parcel.writeByte((Byte) 1)
@@ -119,19 +119,19 @@ class DetailsActivity : ConnectedActivity {
             updateTitle()
             return true
         }
-        Boolean onDetailsStackEmpty = onDetailsStackEmpty()
+        var onDetailsStackEmpty: Boolean = onDetailsStackEmpty()
         Debug.Printf("DetailsActivity: goBack, onDetailsStackEmpty: really empty: %b", Boolean.valueOf(onDetailsStackEmpty))
         return !onDetailsStackEmpty
     }
 
-    fun showDetails(Activity activity, FragmentActivityFactory fragmentActivityFactory, Bundle bundle): Unit {
+    fun showDetails(Activity activity, FragmentActivityFactory fragmentActivityFactory, Bundle bundle)  {
         if (!showEmbeddedDetails(activity, fragmentActivityFactory.getFragmentClass(), bundle)) {
             activity.startActivity(fragmentActivityFactory.createIntent(activity, bundle))
         }
     }
 
     fun showEmbeddedDetails(Activity activity, Class<? : Fragment> cls, Bundle bundle): Boolean {
-        if (!(activity instanceof DetailsActivity) || !((DetailsActivity) activity).acceptsDetailFragment(cls)) {
+        if (!(activity is DetailsActivity) || !((DetailsActivity) activity).acceptsDetailFragment(cls)) {
             return false
         }
         ((DetailsActivity) activity).showDetailsFragment(cls, activity.getIntent(), bundle)
@@ -144,7 +144,7 @@ class DetailsActivity : ConnectedActivity {
     }
 
     /* access modifiers changed from: protected */
-    fun addDetailsToStack(FragmentManager fragmentManager): Unit {
+    fun addDetailsToStack(FragmentManager fragmentManager)  {
         Fragment findFragmentById = fragmentManager.findFragmentById(R.id.details)
         if (findFragmentById != null) {
             this.detailsStack.add(DetailsStackEntry(findFragmentById, (DetailsStackEntry) null))
@@ -152,7 +152,7 @@ class DetailsActivity : ConnectedActivity {
     }
 
     /* access modifiers changed from: package-private */
-    fun clearDetailsStack(): Unit {
+    fun clearDetailsStack()  {
         this.detailsStack.clear()
     }
 
@@ -177,7 +177,7 @@ class DetailsActivity : ConnectedActivity {
     fun handleBackPressed(): Boolean {
         FragmentManager supportFragmentManager = getSupportFragmentManager()
         Fragment findFragmentById = supportFragmentManager.findFragmentById(R.id.details)
-        if ((findFragmentById instanceof BackButtonHandler) && findFragmentById.isAdded() && (!findFragmentById.isDetached()) && ((BackButtonHandler) findFragmentById).onBackButtonPressed()) {
+        if ((findFragmentById is BackButtonHandler) && findFragmentById.isAdded() && (!findFragmentById.isDetached()) && ((BackButtonHandler) findFragmentById).onBackButtonPressed()) {
             return true
         }
         if (supportFragmentManager.getBackStackEntryCount() != 0) {
@@ -192,7 +192,7 @@ class DetailsActivity : ConnectedActivity {
     }
 
     /* access modifiers changed from: protected */
-    fun onCreate(Bundle bundle): Unit {
+    fun onCreate(Bundle bundle)  {
         super.onCreate(bundle)
         if (bundle != null) {
             ArrayList parcelableArrayList = bundle.getParcelableArrayList(DETAILS_STACK_TAG)
@@ -218,17 +218,17 @@ class DetailsActivity : ConnectedActivity {
         return false
     }
 
-    fun onFragmentTitleUpdated(): Unit {
+    fun onFragmentTitleUpdated()  {
         updateTitle()
     }
 
     /* access modifiers changed from: protected */
-    fun onPostCreate(@android.support.annotation.Nullable Bundle bundle): Unit {
+    fun onPostCreate(@android.support.annotation.Nullable Bundle bundle)  {
         super.onPostCreate(bundle)
         updateTitle()
     }
 
-    fun onRequestPermissionsResult(Int i, @NonNull Array<String> strArr, @NonNull IntArray iArr): Unit {
+    fun onRequestPermissionsResult(Int i, @NonNull Array<String> strArr, @NonNull IntArray iArr)  {
         super.onRequestPermissionsResult(i, strArr, iArr)
         List<Fragment> fragments = getSupportFragmentManager().getFragments()
         if (fragments != null) {
@@ -239,7 +239,7 @@ class DetailsActivity : ConnectedActivity {
     }
 
     /* access modifiers changed from: protected */
-    fun onSaveInstanceState(Bundle bundle): Unit {
+    fun onSaveInstanceState(Bundle bundle)  {
         bundle.putParcelableArrayList(DETAILS_STACK_TAG, this.detailsStack)
         bundle.putString(DEFAULT_TITLE_TAG, this.defaultTitle)
         bundle.putString(DEFAULT_SUBTITLE_TAG, this.defaultSubTitle)
@@ -247,7 +247,7 @@ class DetailsActivity : ConnectedActivity {
     }
 
     /* access modifiers changed from: protected */
-    fun removeAllDetails(): Unit {
+    fun removeAllDetails()  {
         FragmentManager supportFragmentManager = getSupportFragmentManager()
         if (supportFragmentManager.findFragmentById(R.id.details) != null) {
             clearDetailsStack()
@@ -256,7 +256,7 @@ class DetailsActivity : ConnectedActivity {
     }
 
     /* access modifiers changed from: protected */
-    fun replaceDetailsFragment(FragmentManager fragmentManager, Fragment fragment): Unit {
+    fun replaceDetailsFragment(FragmentManager fragmentManager, Fragment fragment)  {
         FragmentTransaction beginTransaction = fragmentManager.beginTransaction()
         beginTransaction.setCustomAnimations(R.anim.slide_from_right, 0, 0, R.anim.slide_to_right)
         beginTransaction.replace(R.id.details, fragment)
@@ -266,7 +266,7 @@ class DetailsActivity : ConnectedActivity {
     }
 
     /* access modifiers changed from: protected */
-    fun setActivityTitle(@Nullable String str, @Nullable String str2): Unit {
+    fun setActivityTitle(@Nullable String str, @Nullable String str2)  {
         ActionBar supportActionBar = getSupportActionBar()
         Debug.Printf("updateTitle: title '%s' actionBar %s", str, supportActionBar)
         if (supportActionBar != null) {
@@ -279,14 +279,14 @@ class DetailsActivity : ConnectedActivity {
     fun setCurrentDetailsArguments(Class<? : Fragment> cls, Bundle bundle): Boolean {
         Fragment findFragmentById
         FragmentManager supportFragmentManager = getSupportFragmentManager()
-        if (supportFragmentManager == null || (findFragmentById = supportFragmentManager.findFragmentById(R.id.details)) == null || !cls.isInstance(findFragmentById) || !(findFragmentById instanceof ReloadableFragment) || findFragmentById.getArguments() == null) {
+        if (supportFragmentManager == null || (findFragmentById = supportFragmentManager.findFragmentById(R.id.details)) == null || !cls.isInstance(findFragmentById) || !(findFragmentById is ReloadableFragment) || findFragmentById.getArguments() == null) {
             return false
         }
         ((ReloadableFragment) findFragmentById).setFragmentArgs(getIntent(), bundle)
         return true
     }
 
-    fun setDefaultTitle(@Nullable String str, @Nullable String str2): Unit {
+    fun setDefaultTitle(@Nullable String str, @Nullable String str2)  {
         this.defaultTitle = str
         this.defaultSubTitle = str2
         updateTitle()
@@ -299,15 +299,15 @@ class DetailsActivity : ConnectedActivity {
         if (supportFragmentManager == null) {
             return null
         }
-        Boolean isRootDetailsFragment = isRootDetailsFragment(cls)
+        var isRootDetailsFragment: Boolean = isRootDetailsFragment(cls)
         Fragment findFragmentById = supportFragmentManager.findFragmentById(R.id.details)
         Debug.Printf("DetailsActivity: isRootFragment %b existing fragment: %s", Boolean.valueOf(isRootDetailsFragment), findFragmentById)
         if (findFragmentById != null) {
             Debug.Printf("DetailsActivity: is good instance: %b", Boolean.valueOf(cls.isInstance(findFragmentById)))
-            Debug.Printf("DetailsActivity: is reloadable: %b", Boolean.valueOf(findFragmentById instanceof ReloadableFragment))
+            Debug.Printf("DetailsActivity: is reloadable: %b", Boolean.valueOf(findFragmentById is ReloadableFragment))
             Debug.Printf("DetailsActivity: has arguments: %b", findFragmentById.getArguments())
         }
-        if (findFragmentById == null || !findFragmentById.isVisible() || !cls.isInstance(findFragmentById) || !(findFragmentById instanceof ReloadableFragment) || findFragmentById.getArguments() == null) {
+        if (findFragmentById == null || !findFragmentById.isVisible() || !cls.isInstance(findFragmentById) || !(findFragmentById is ReloadableFragment) || findFragmentById.getArguments() == null) {
             if (isRootDetailsFragment) {
                 clearDetailsStack()
             } else {
@@ -316,7 +316,7 @@ class DetailsActivity : ConnectedActivity {
             try {
                 Fragment fragment = (Fragment) cls.newInstance()
                 try {
-                    if (fragment instanceof ReloadableFragment) {
+                    if (fragment is ReloadableFragment) {
                         fragment.setArguments(Bundle())
                         ((ReloadableFragment) fragment).setFragmentArgs(intent, bundle)
                     } else {
@@ -345,7 +345,7 @@ class DetailsActivity : ConnectedActivity {
     /* JADX WARNING: Removed duplicated region for block: B:14:0x007c  */
     /* JADX WARNING: Removed duplicated region for block: B:18:? A[RETURN, SYNTHETIC] */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    fun updateTitle(): Unit {
+    fun updateTitle()  {
         /*
             r7 = this
             r6 = 2
@@ -359,27 +359,27 @@ class DetailsActivity : ConnectedActivity {
             java.lang.Any[] r4 = java.lang.Any[r2]
             r4[r3] = r1
             com.linkpoint.Debug.Printf(r0, r4)
-            Boolean r0 = r1 instanceof com.linkpoint.ui.common.FragmentHasTitle
+            var r0: Boolean = r1 is com.linkpoint.ui.common.FragmentHasTitle
             if (r0 == 0) goto L_0x0082
             java.lang.String r0 = "updateTitle: detailsFragment added %b hidden %b detached %b"
             r4 = 3
             java.lang.Any[] r4 = java.lang.Any[r4]
-            Boolean r5 = r1.isAdded()
+            var r5: Boolean = r1.isAdded()
             java.lang.Boolean r5 = java.lang.Boolean.valueOf(r5)
             r4[r3] = r5
-            Boolean r5 = r1.isHidden()
+            var r5: Boolean = r1.isHidden()
             java.lang.Boolean r5 = java.lang.Boolean.valueOf(r5)
             r4[r2] = r5
-            Boolean r5 = r1.isDetached()
+            var r5: Boolean = r1.isDetached()
             java.lang.Boolean r5 = java.lang.Boolean.valueOf(r5)
             r4[r6] = r5
             com.linkpoint.Debug.Printf(r0, r4)
-            Boolean r0 = r1.isAdded()
+            var r0: Boolean = r1.isAdded()
             if (r0 == 0) goto L_0x0080
-            Boolean r0 = r1.isHidden()
+            var r0: Boolean = r1.isHidden()
             r0 = r0 ^ 1
             if (r0 == 0) goto L_0x0080
-            Boolean r0 = r1.isDetached()
+            var r0: Boolean = r1.isDetached()
             r0 = r0 ^ 1
             if (r0 == 0) goto L_0x0082
             r0 = r1
@@ -411,7 +411,7 @@ class DetailsActivity : ConnectedActivity {
     }
 
     /* access modifiers changed from: protected */
-    fun updateTitleNoDetails(): Unit {
+    fun updateTitleNoDetails()  {
         if (this.defaultTitle != null) {
             setActivityTitle(this.defaultTitle, this.defaultSubTitle)
         }

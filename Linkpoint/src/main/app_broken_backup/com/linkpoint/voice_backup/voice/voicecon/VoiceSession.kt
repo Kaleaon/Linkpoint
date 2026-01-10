@@ -46,7 +46,7 @@ class VoiceSession {
             voiceChannelInfo = VoiceChannelInfo(vx_evt_session_added_t2.getUri(), false, false)
         }
         this.voiceChannelInfo = voiceChannelInfo
-        Boolean bl = vx_evt_session_added_t2.getIncoming() != 0
+        var bl: Boolean = vx_evt_session_added_t2.getIncoming() != 0
         this.isIncoming = bl
         Debug.Printf("Voice: created session: %s (uri %s)", this.handle, this.voiceChannelInfo.voiceChannelURI)
     }
@@ -177,7 +177,7 @@ class VoiceSession {
     public Boolean setLocalMicActive(Boolean bl) {
         Object object = this.stateLock
         synchronized (object) {
-            Boolean bl2 = bl != this.localMicActive
+            var bl2: Boolean = bl != this.localMicActive
             this.localMicActive = bl
             return bl2
         }
@@ -202,7 +202,7 @@ class VoiceSession {
      * Enabled aggressive exception aggregation
      */
     public Boolean setState(VoiceChatInfo.VoiceChatState voiceChatState) {
-        Boolean bl = false
+        var bl: Boolean = false
         Object object = this.stateLock
         synchronized (object) {
             if (this.state != voiceChatState) {

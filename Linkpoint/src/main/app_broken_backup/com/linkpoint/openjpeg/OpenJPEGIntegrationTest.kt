@@ -12,7 +12,7 @@ import java.io.ByteArrayInputStream
 object OpenJPEGIntegrationTest {
     private val TAG: String = "OpenJPEGIntegrationTest"
     
-    fun runIntegrationTests(context: Context): Unit {
+    fun runIntegrationTests(context: Context)  {
         Log.i(TAG, "Starting OpenJPEG integration tests...")
         
         try {
@@ -97,7 +97,7 @@ object OpenJPEGIntegrationTest {
     /**
      * Test texture loading pipeline integration
      */
-    fun testTextureLoadingPipeline(): Unit {
+    fun testTextureLoadingPipeline()  {
         Log.i(TAG, "Testing texture loading pipeline integration...")
         
         try {

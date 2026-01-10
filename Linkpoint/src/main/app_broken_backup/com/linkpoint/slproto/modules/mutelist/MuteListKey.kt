@@ -17,7 +17,7 @@ class MuteListKey {
     }
 
     fun equals(Any obj): Boolean {
-        if (!(obj instanceof MuteListKey)) {
+        if (!(obj is MuteListKey)) {
             return false
         }
         MuteListKey muteListKey = (MuteListKey) obj
@@ -31,7 +31,7 @@ class MuteListKey {
     }
 
     fun hashCode(): Int {
-        Int i = 0
+        var i: Int = 0
         if (this.muteType != null) {
             i = this.muteType.hashCode() + 0
         }

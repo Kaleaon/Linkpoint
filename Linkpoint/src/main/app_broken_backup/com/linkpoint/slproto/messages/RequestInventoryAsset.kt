@@ -23,11 +23,11 @@ class RequestInventoryAsset : SLMessage {
         return 68
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleRequestInventoryAsset(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put(Ascii.SUB)
@@ -37,7 +37,7 @@ class RequestInventoryAsset : SLMessage {
         packUUID(byteBuffer, this.QueryData_Field.ItemID)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
         this.QueryData_Field.AgentID = unpackUUID(byteBuffer)
         this.QueryData_Field.OwnerID = unpackUUID(byteBuffer)

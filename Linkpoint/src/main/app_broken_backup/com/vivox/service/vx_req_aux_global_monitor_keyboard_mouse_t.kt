@@ -46,7 +46,7 @@ class vx_req_aux_global_monitor_keyboard_mouse_t {
      * Lifted jumps to return sites
      */
     vx_req_base_t getBase() {
-        Long l = VxClientProxyJNI.vx_req_aux_global_monitor_keyboard_mouse_t_base_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_req_aux_global_monitor_keyboard_mouse_t_base_get(this.swigCPtr, this)
         if (l != 0L) return vx_req_base_t(l, false)
         return null
     }
@@ -60,7 +60,7 @@ class vx_req_aux_global_monitor_keyboard_mouse_t {
      * Lifted jumps to return sites
      */
     SWIGTYPE_p_int getCodes() {
-        Long l = VxClientProxyJNI.vx_req_aux_global_monitor_keyboard_mouse_t_codes_get(this.swigCPtr, this)
+        var l: Long = VxClientProxyJNI.vx_req_aux_global_monitor_keyboard_mouse_t_codes_get(this.swigCPtr, this)
         if (l != 0L) return SWIGTYPE_p_int(l, false)
         return null
     }

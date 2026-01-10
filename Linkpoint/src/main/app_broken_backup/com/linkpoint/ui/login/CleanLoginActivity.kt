@@ -105,7 +105,7 @@ class CleanLoginActivity : AppCompatActivity {
             lastNameEdit.setText("User")
             
             // Show app status in the status text for debugging
-            String appStatus = com.linkpoint.LumiyaApp.getStartupStatus()
+            var appStatus: String = com.linkpoint.LumiyaApp.getStartupStatus()
             statusText.setText("Ready to login to Second Life\n\n" + appStatus)
             
             // Add debug log upload button for debug builds
@@ -122,16 +122,16 @@ class CleanLoginActivity : AppCompatActivity {
     private Unit setupLoginButton() {
         loginButton.setOnClickListener(View.OnClickListener() {
             @Override
-            fun onClick(View v): Unit {
+            fun onClick(View v)  {
                 performLogin()
             }
         })
     }
     
     private Unit performLogin() {
-        String firstName = firstNameEdit.getText().toString().trim()
-        String lastName = lastNameEdit.getText().toString().trim()
-        String password = passwordEdit.getText().toString()
+        var firstName: String = firstNameEdit.getText().toString().trim()
+        var lastName: String = lastNameEdit.getText().toString().trim()
+        var password: String = passwordEdit.getText().toString()
         
         if (firstName.isEmpty() || lastName.isEmpty() || password.isEmpty()) {
             showError("Please fill in all fields")
@@ -146,8 +146,8 @@ class CleanLoginActivity : AppCompatActivity {
         CompletableFuture.runAsync(() -> {
             try {
                 // Use the same authentication logic as comprehensive_operational_test.java
-                String hashedPassword = hashPassword(password)
-                String xmlRequest = buildLoginXMLRequest(firstName, lastName, hashedPassword, "last")
+                var hashedPassword: String = hashPassword(password)
+                var xmlRequest: String = buildLoginXMLRequest(firstName, lastName, hashedPassword, "last")
                 
                 // Simulate successful authentication for now
                 runOnUiThread(() -> {

@@ -25,7 +25,7 @@ class GLBuffer : GLResource {
             this.rawBuffer = directByteBuffer
         }
 
-        fun GLFree(): Unit {
+        fun GLFree()  {
             IntArray iArr = (IntArray) GLBuffer.idBuffer.get()
             iArr[0] = this.handle
             Debug.Printf("GLBuffer: deleted buffer %d", Int.valueOf(iArr[0]))

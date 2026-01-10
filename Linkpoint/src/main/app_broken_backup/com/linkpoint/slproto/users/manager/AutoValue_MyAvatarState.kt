@@ -17,7 +17,7 @@ class AutoValue_MyAvatarState : MyAvatarState {
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof MyAvatarState)) {
+        if (!(obj is MyAvatarState)) {
             return false
         }
         MyAvatarState myAvatarState = (MyAvatarState) obj
@@ -32,8 +32,8 @@ class AutoValue_MyAvatarState : MyAvatarState {
     }
 
     fun hashCode(): Int {
-        Int i = 1231
-        Int i2 = ((this.isFlying ? 1231 : 1237) ^ (((((this.isSitting ? 1231 : 1237) ^ 1000003) * 1000003) ^ this.sittingOn) * 1000003)) * 1000003
+        var i: Int = 1231
+        var i2: Int = ((this.isFlying ? 1231 : 1237) ^ (((((this.isSitting ? 1231 : 1237) ^ 1000003) * 1000003) ^ this.sittingOn) * 1000003)) * 1000003
         if (!this.hasHUDs) {
             i = 1237
         }

@@ -93,7 +93,7 @@ class PrimPathParams {
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof PrimPathParams)) {
+        if (!(obj is PrimPathParams)) {
             return false
         }
         PrimPathParams primPathParams = (PrimPathParams) obj

@@ -25,7 +25,7 @@ abstract class ChatterListAdapter : BaseAdapter : ListAdapter {
 
     fun getView(Int i, View view, ViewGroup viewGroup): View {
         Any item = getItem(i)
-        if (!(item instanceof ChatterDisplayInfo)) {
+        if (!(item is ChatterDisplayInfo)) {
             return null
         }
         this.viewBuilder.reset()
@@ -34,7 +34,7 @@ abstract class ChatterListAdapter : BaseAdapter : ListAdapter {
     }
 
     /* access modifiers changed from: package-private */
-    fun setUserDistanceInline(Boolean z): Unit {
+    fun setUserDistanceInline(Boolean z)  {
         this.userDistanceInline = z
     }
 }

@@ -19,7 +19,7 @@ class SLVoiceUpgradeEvent : SLChatYesNoEvent {
     /* JADX INFO: super call moved to the top of the method (can break code semantics) */
     SLVoiceUpgradeEvent(ChatMessage chatMessage, @NonNull UUID uuid) {
         super(chatMessage, uuid)
-        Boolean z = false
+        var z: Boolean = false
         this.upgradeURL = chatMessage.getItemName()
         this.isInstall = chatMessage.getAssetType().intValue() != 0 ? true : z
     }
@@ -65,12 +65,12 @@ class SLVoiceUpgradeEvent : SLChatYesNoEvent {
     }
 
     /* access modifiers changed from: protected */
-    fun onNoAction(Context context, UserManager userManager): Unit {
+    fun onNoAction(Context context, UserManager userManager)  {
         super.onNoAction(context, userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    fun onYesAction(Context context, UserManager userManager): Unit {
+    fun onYesAction(Context context, UserManager userManager)  {
         super.onYesAction(context, userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
         Intent intent = Intent("android.intent.action.VIEW")
@@ -78,7 +78,7 @@ class SLVoiceUpgradeEvent : SLChatYesNoEvent {
         context.startActivity(intent)
     }
 
-    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage)  {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setItemName(this.upgradeURL)
         chatMessage.setAssetType(Integer.valueOf(this.isInstall ? 1 : 0))

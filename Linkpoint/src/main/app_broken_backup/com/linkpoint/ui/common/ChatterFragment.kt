@@ -47,7 +47,7 @@ abstract class ChatterFragment : FragmentWithTitle : ChatterNameRetriever.OnChat
             setTitle((String) null, (String) null)
             return
         }
-        String resolvedName = chatterNameRetriever.getResolvedName()
+        var resolvedName: String = chatterNameRetriever.getResolvedName()
         if (resolvedName != null) {
             setTitle(decorateFragmentTitle(resolvedName), (String) null)
         } else {
@@ -60,7 +60,7 @@ abstract class ChatterFragment : FragmentWithTitle : ChatterNameRetriever.OnChat
         return str
     }
 
-    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever): Unit {
+    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever)  {
         Any[] objArr = Any[1]
         objArr[0] = this.chatterID != null ? this.chatterID.toString() : "null"
         Debug.Printf("updateTitle: ChatterNameRetriever: retrieved for %s", objArr)
@@ -77,18 +77,18 @@ abstract class ChatterFragment : FragmentWithTitle : ChatterNameRetriever.OnChat
     /* access modifiers changed from: protected */
     abstract Unit onShowUser(@Nullable ChatterID chatterID2)
 
-    fun onStart(): Unit {
+    fun onStart()  {
         super.onStart()
         setNewUser((ChatterID) getArguments().getParcelable(CHATTER_ID_KEY))
     }
 
-    fun onStop(): Unit {
+    fun onStop()  {
         setNewUser((ChatterID) null)
         super.onStop()
     }
 
     /* access modifiers changed from: package-private */
-    fun setNewUser(@Nullable ChatterID chatterID2): Unit {
+    fun setNewUser(@Nullable ChatterID chatterID2)  {
         UserManager userManager2 = null
         this.chatterID = chatterID2
         if (chatterID2 != null) {
@@ -106,7 +106,7 @@ abstract class ChatterFragment : FragmentWithTitle : ChatterNameRetriever.OnChat
     }
 
     /* access modifiers changed from: protected */
-    fun setShowChatterTitle(Boolean z): Unit {
+    fun setShowChatterTitle(Boolean z)  {
         this.showChatterTitle = z
     }
 }

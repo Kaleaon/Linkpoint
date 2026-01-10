@@ -15,7 +15,7 @@ class VoicePluginMessenger {
     @JvmStatic
     Boolean sendMessage(Messenger messenger, VoicePluginMessageType voicePluginMessageType, VoicePluginMessage voicePluginMessage, Messenger messenger2) {
         Boolean bl
-        Boolean bl2 = bl = false
+        var bl2: Boolean = bl = false
         if (messenger == null) return bl2
         Bundle bundle = Bundle()
         bundle.putString("messageType", voicePluginMessageType.toString())

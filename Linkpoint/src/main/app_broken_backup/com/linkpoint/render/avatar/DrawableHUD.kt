@@ -1,5 +1,7 @@
 package com.linkpoint.render.avatar
 
+import kotlin.math.*
+
 import android.opengl.Matrix
 import com.linkpoint.Debug
 import com.linkpoint.render.DrawableObject
@@ -36,12 +38,12 @@ class DrawableHUD {
         addObject(drawEntryList, sLObjectInfo, MatrixStack(), true)
     }
 
-    private fun addObject(drawEntryList: DrawEntryList, sLObjectInfo: SLObjectInfo, matrixStack: MatrixStack, z: Boolean): Unit {
+    private fun addObject(drawEntryList: DrawEntryList, sLObjectInfo: SLObjectInfo, matrixStack: MatrixStack, z: Boolean)  {
         matrixStack.glPushMatrix()
         processObjectExtents(sLObjectInfo, matrixStack, z)
         InlineListEntry drawListEntry = sLObjectInfo.getDrawListEntry()
         drawEntryList.addEntry(drawListEntry)
-        if (drawListEntry instanceof DrawListPrimEntry) {
+        if (drawListEntry is DrawListPrimEntry) {
             this.hudObjects.add(((DrawListPrimEntry) drawListEntry).getDrawableAttachment(this.drawableStore, this.attachedTo))
         }
         for (LinkedTreeNode firstChild = sLObjectInfo.treeNode.getFirstChild(); firstChild != null; firstChild = firstChild.getNextChild()) {
@@ -53,11 +55,11 @@ class DrawableHUD {
         matrixStack.glPopMatrix()
     }
 
-    private fun processObjectExtents(sLObjectInfo: SLObjectInfo, matrixStack: MatrixStack, z: Boolean): Unit {
+    private fun processObjectExtents(sLObjectInfo: SLObjectInfo, matrixStack: MatrixStack, z: Boolean)  {
         r0 = FloatArray(8)
         Vector3Array objectCoords = sLObjectInfo.getObjectCoords()
-        Int elementOffset = objectCoords.getElementOffset(0)
-        Int elementOffset2 = objectCoords.getElementOffset(1)
+        var elementOffset: Int = objectCoords.getElementOffset(0)
+        var elementOffset2: Int = objectCoords.getElementOffset(1)
         FloatArray data = objectCoords.getData()
         matrixStack.glTranslatef(data[elementOffset + 0], data[elementOffset + 1], data[elementOffset + 2])
         matrixStack.glMultMatrixf(sLObjectInfo.getRotation().getInverseMatrix(), 0)
@@ -74,33 +76,33 @@ class DrawableHUD {
             this.maxPos.y = r0[5]
             this.maxPos.z = r0[6]
         } else {
-            this.minPos.x = Math.min(this.minPos.x, r0[4])
-            this.minPos.y = Math.min(this.minPos.y, r0[5])
-            this.minPos.z = Math.min(this.minPos.z, r0[6])
-            this.maxPos.x = Math.max(this.maxPos.x, r0[4])
-            this.maxPos.y = Math.max(this.maxPos.y, r0[5])
-            this.maxPos.z = Math.max(this.maxPos.z, r0[6])
+            this.minPos.x = min(this.minPos.x, r0[4])
+            this.minPos.y = min(this.minPos.y, r0[5])
+            this.minPos.z = min(this.minPos.z, r0[6])
+            this.maxPos.x = max(this.maxPos.x, r0[4])
+            this.maxPos.y = max(this.maxPos.y, r0[5])
+            this.maxPos.z = max(this.maxPos.z, r0[6])
         }
         r0[0] = data[elementOffset2 + 0] / 2.0f
         r0[1] = data[elementOffset2 + 1] / 2.0f
         r0[2] = data[elementOffset2 + 2] / 2.0f
         r0[3] = 1.0f
         Matrix.multiplyMV(r0, 4, matrixStack.getMatrixData(), matrixStack.getMatrixDataOffset(), r0, 0)
-        this.minPos.x = Math.min(this.minPos.x, r0[4])
-        this.minPos.y = Math.min(this.minPos.y, r0[5])
-        this.minPos.z = Math.min(this.minPos.z, r0[6])
-        this.maxPos.x = Math.max(this.maxPos.x, r0[4])
-        this.maxPos.y = Math.max(this.maxPos.y, r0[5])
-        this.maxPos.z = Math.max(this.maxPos.z, r0[6])
+        this.minPos.x = min(this.minPos.x, r0[4])
+        this.minPos.y = min(this.minPos.y, r0[5])
+        this.minPos.z = min(this.minPos.z, r0[6])
+        this.maxPos.x = max(this.maxPos.x, r0[4])
+        this.maxPos.y = max(this.maxPos.y, r0[5])
+        this.maxPos.z = max(this.maxPos.z, r0[6])
     }
 
     fun Draw(renderContext: RenderContext, f: Float, f2: Float, f3: Float, touchHUDEvent: TouchHUDEvent, z: Boolean): ObjectIntersectInfo {
         ObjectIntersectInfo objectIntersectInfo
         ObjectIntersectInfo objectIntersectInfo2 = null
         renderContext.glModelPushMatrix()
-        Float f4 = (this.minPos.y + this.maxPos.y) / 2.0f
-        Float f5 = (this.minPos.z + this.maxPos.z) / 2.0f
-        Float max = Math.max(this.maxPos.y - this.minPos.y, this.maxPos.z - this.minPos.z)
+        var f4: Float = (this.minPos.y + this.maxPos.y) / 2.0f
+        var f5: Float = (this.minPos.z + this.maxPos.z) / 2.0f
+        var max: Float = max(this.maxPos.y - this.minPos.y, this.maxPos.z - this.minPos.z)
         if (max > 0.001f) {
             max = (1.0f / max) * f
             renderContext.glModelScalef(1.0f, max, max)

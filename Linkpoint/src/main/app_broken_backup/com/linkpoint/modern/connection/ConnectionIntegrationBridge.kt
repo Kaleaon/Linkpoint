@@ -56,7 +56,7 @@ class ConnectionIntegrationBridge {
                     
                     return true
                 } else {
-                    String errorMessage = authReply != null ? authReply.message : 
+                    var errorMessage: String = authReply != null ? authReply.message : 
                         "Unknown authentication error"
                     Log.e(TAG, "Modern connection failed: " + errorMessage)
                     
@@ -154,7 +154,7 @@ class ConnectionIntegrationBridge {
     /**
      * Shutdown the connection manager
      */
-    fun shutdown(): Unit {
+    fun shutdown()  {
         Log.i(TAG, "Shutting down connection integration bridge")
         modernManager.shutdown()
     }

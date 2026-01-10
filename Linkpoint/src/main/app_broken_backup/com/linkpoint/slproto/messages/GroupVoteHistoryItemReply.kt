@@ -50,10 +50,10 @@ class GroupVoteHistoryItemReply : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int length = this.HistoryItemData_Field.TerseDateID.size + 17 + 1 + this.HistoryItemData_Field.StartDateTime.size + 1 + this.HistoryItemData_Field.EndDateTime.size + 16 + 1 + this.HistoryItemData_Field.VoteType.size + 1 + this.HistoryItemData_Field.VoteResult.size + 4 + 4 + 2 + this.HistoryItemData_Field.ProposalText.size + 56 + 1
+        var length: Int = this.HistoryItemData_Field.TerseDateID.size + 17 + 1 + this.HistoryItemData_Field.StartDateTime.size + 1 + this.HistoryItemData_Field.EndDateTime.size + 16 + 1 + this.HistoryItemData_Field.VoteType.size + 1 + this.HistoryItemData_Field.VoteResult.size + 4 + 4 + 2 + this.HistoryItemData_Field.ProposalText.size + 56 + 1
         Iterator<T> it = this.VoteItem_Fields.iterator()
         while (true) {
-            Int i = length
+            var i: Int = length
             if (!it.hasNext()) {
                 return i
             }
@@ -61,11 +61,11 @@ class GroupVoteHistoryItemReply : SLMessage {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleGroupVoteHistoryItemReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 1)
         byteBuffer.put((byte) 106)
@@ -91,7 +91,7 @@ class GroupVoteHistoryItemReply : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
         this.TransactionData_Field.TransactionID = unpackUUID(byteBuffer)

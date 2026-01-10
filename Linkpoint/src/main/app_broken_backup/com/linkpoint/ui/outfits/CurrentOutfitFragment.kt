@@ -45,15 +45,15 @@ class CurrentOutfitFragment : Fragment : LoadableMonitor.OnLoadableDataChangedLi
         SwipeDismissListViewTouchListener swipeDismissListViewTouchListener = SwipeDismissListViewTouchListener(listView, SwipeDismissListViewTouchListener.DismissCallbacks() {
             fun canDismiss(ListView listView, Int i): Boolean {
                 ListAdapter adapter = listView.getAdapter()
-                if (adapter instanceof DismissableAdapter) {
+                if (adapter is DismissableAdapter) {
                     return ((DismissableAdapter) adapter).canDismiss(i)
                 }
                 return false
             }
 
-            fun onDismiss(ListView listView, Int i): Unit {
+            fun onDismiss(ListView listView, Int i)  {
                 ListAdapter adapter = listView.getAdapter()
-                if (adapter instanceof DismissableAdapter) {
+                if (adapter is DismissableAdapter) {
                     ((DismissableAdapter) adapter).onDismiss(i)
                 }
             }
@@ -62,7 +62,7 @@ class CurrentOutfitFragment : Fragment : LoadableMonitor.OnLoadableDataChangedLi
         return inflate
     }
 
-    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j): Unit {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j)  {
         SLAvatarAppearance.WornItem item
         SLAgentCircuit data = this.agentCircuit.getData()
         if (this.listAdapter != null && data != null && (item = this.listAdapter.getItem(i)) != null && item.getIsTouchable() && item.getWornOn() == null) {
@@ -70,7 +70,7 @@ class CurrentOutfitFragment : Fragment : LoadableMonitor.OnLoadableDataChangedLi
         }
     }
 
-    fun onLoadableDataChanged(): Unit {
+    fun onLoadableDataChanged()  {
         if (this.listAdapter != null) {
             SLAgentCircuit data = this.agentCircuit.getData()
             this.listAdapter.setAvatarAppearance(data != null ? data.getModules().avatarAppearance : null)
@@ -78,7 +78,7 @@ class CurrentOutfitFragment : Fragment : LoadableMonitor.OnLoadableDataChangedLi
         }
     }
 
-    fun onStart(): Unit {
+    fun onStart()  {
         super.onStart()
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
@@ -89,7 +89,7 @@ class CurrentOutfitFragment : Fragment : LoadableMonitor.OnLoadableDataChangedLi
         this.loadableMonitor.unsubscribeAll()
     }
 
-    fun onStop(): Unit {
+    fun onStop()  {
         this.loadableMonitor.unsubscribeAll()
         super.onStop()
     }

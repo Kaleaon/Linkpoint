@@ -18,7 +18,7 @@ class GLTerrainTextureCache : GLResourceCache<TerrainPatchInfo, OpenJPEG, GLLoad
     }
 
     /* access modifiers changed from: protected */
-    fun CancelRawResource(resourceConsumer: ResourceConsumer): Unit {
+    fun CancelRawResource(resourceConsumer: ResourceConsumer)  {
         this.terrainTextureCache.CancelRequest(resourceConsumer)
     }
 
@@ -34,7 +34,7 @@ class GLTerrainTextureCache : GLResourceCache<TerrainPatchInfo, OpenJPEG, GLLoad
     }
 
     /* access modifiers changed from: protected */
-    fun RequestRawResource(terrainPatchInfo: TerrainPatchInfo, resourceConsumer: ResourceConsumer): Unit {
+    fun RequestRawResource(terrainPatchInfo: TerrainPatchInfo, resourceConsumer: ResourceConsumer)  {
         this.terrainTextureCache.RequestResource(terrainPatchInfo, resourceConsumer)
     }
 }

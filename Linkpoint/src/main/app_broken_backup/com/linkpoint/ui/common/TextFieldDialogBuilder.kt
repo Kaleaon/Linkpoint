@@ -65,14 +65,14 @@ class TextFieldDialogBuilder {
         return this
     }
 
-    fun show(): Unit {
+    fun show()  {
         AlertDialog.Builder builder = AlertDialog.Builder(this.context)
         builder.setTitle(this.title)
         EditText editText = EditText(this.context)
         editText.setText(this.defaultText)
         editText.setSingleLine(true)
         FrameLayout frameLayout = FrameLayout(this.context)
-        Int applyDimension = TypedValue.toInt().applyDimension(1, 10.0f, this.context.getResources().getDisplayMetrics())
+        var applyDimension: Int = TypedValue.toInt().applyDimension(1, 10.0f, this.context.getResources().getDisplayMetrics())
         FrameLayout.LayoutParams layoutParams = FrameLayout.LayoutParams(-1, -2)
         layoutParams.leftMargin = applyDimension
         layoutParams.rightMargin = applyDimension

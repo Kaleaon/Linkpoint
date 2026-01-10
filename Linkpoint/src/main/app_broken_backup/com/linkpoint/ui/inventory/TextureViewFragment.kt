@@ -45,8 +45,8 @@ class TextureViewFragment : StateAwareFragment {
             this()
         }
 
-        fun OnResourceReady(Any obj, Boolean z): Unit {
-            if (obj instanceof OpenJPEG) {
+        fun OnResourceReady(Any obj, Boolean z)  {
+            if (obj is OpenJPEG) {
                 this.texture = (OpenJPEG) obj
             }
             synchronized (this.textureReady) {
@@ -79,7 +79,7 @@ class TextureViewFragment : StateAwareFragment {
         }
 
         /* access modifiers changed from: protected */
-        fun onPostExecute(Bitmap bitmap): Unit {
+        fun onPostExecute(Bitmap bitmap)  {
             if (!(!TextureViewFragment.this.isFragmentStarted() || TextureViewFragment.this.textureImageView == null || TextureViewFragment.this.loadingLayout == null)) {
                 if (bitmap != null) {
                     TextureViewFragment.this.loadingLayout.showContent((String) null)
@@ -95,7 +95,7 @@ class TextureViewFragment : StateAwareFragment {
         }
 
         /* access modifiers changed from: protected */
-        fun onPreExecute(): Unit {
+        fun onPreExecute()  {
             if (TextureViewFragment.this.isFragmentStarted() && TextureViewFragment.this.loadingLayout != null) {
                 TextureViewFragment.this.loadingLayout.showLoading()
             }
@@ -118,7 +118,7 @@ class TextureViewFragment : StateAwareFragment {
         return inflate
     }
 
-    fun onStart(): Unit {
+    fun onStart()  {
         super.onStart()
         UUID uuid = UUIDPool.getUUID(getArguments().getString(ASSET_UUID_KEY))
         if (uuid != null) {
@@ -131,7 +131,7 @@ class TextureViewFragment : StateAwareFragment {
         }
     }
 
-    fun onStop(): Unit {
+    fun onStop()  {
         if (this.loadAssetImageTask != null) {
             this.loadAssetImageTask.cancel(true)
             this.loadAssetImageTask = null

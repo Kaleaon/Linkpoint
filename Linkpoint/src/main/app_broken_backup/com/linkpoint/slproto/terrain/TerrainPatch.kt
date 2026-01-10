@@ -1,5 +1,7 @@
 package com.linkpoint.slproto.terrain
 
+import kotlin.math.*
+
 import com.linkpoint.utils.BitBuffer
 
 class TerrainPatch {
@@ -175,7 +177,7 @@ class TerrainPatch {
     private fun SetupCosines16() {
         for (i in 0 until 16) {
             for (i2 in 0 until 16) {
-                CosineTable16[(i * 16) + i2] = Math.cos(((i2.toFloat() * 2.0f + 1.0f) * i.toFloat() * 0.09817477f).toDouble()).toFloat()
+                CosineTable16[(i * 16) + i2] = cos(((i2.toFloat() * 2.0f + 1.0f) * i.toFloat() * 0.09817477f).toDouble()).toFloat()
             }
         }
     }

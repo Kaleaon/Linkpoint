@@ -41,11 +41,11 @@ class AvatarAppearance : SLMessage {
         return this.ObjectData_Field.TextureEntry.size + 2 + 21 + 1 + (this.VisualParam_Fields.size() * 1) + 1 + (this.AppearanceData_Fields.size() * 9)
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleAvatarAppearance(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((byte) 0)
         byteBuffer.put((byte) -98)
@@ -64,7 +64,7 @@ class AvatarAppearance : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.Sender_Field.ID = unpackUUID(byteBuffer)
         this.Sender_Field.IsTrial = unpackBoolean(byteBuffer)
         this.ObjectData_Field.TextureEntry = unpackVariable(byteBuffer, 2)

@@ -14,7 +14,7 @@ class NearbyChattersDisplayDataList : ChatterDisplayDataList {
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_NearbyChattersDisplayDataList_807  reason: not valid java name */
     /* synthetic */ Int m332lambda$com_lumiyaviewer_lumiya_slproto_users_manager_NearbyChattersDisplayDataList_807(ChatterDisplayData chatterDisplayData, ChatterDisplayData chatterDisplayData2) {
-        Int compare = Float.compare(chatterDisplayData.distanceToUser, chatterDisplayData2.distanceToUser)
+        var compare: Int = Float.compare(chatterDisplayData.distanceToUser, chatterDisplayData2.distanceToUser)
         return compare != 0 ? compare : chatterDisplayData.compareTo(chatterDisplayData2)
     }
 

@@ -22,11 +22,11 @@ class TeleportLureRequest : SLMessage {
         return 56
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleTeleportLureRequest(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 71)
@@ -36,7 +36,7 @@ class TeleportLureRequest : SLMessage {
         packInt(byteBuffer, this.Info_Field.TeleportFlags)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.Info_Field.AgentID = unpackUUID(byteBuffer)
         this.Info_Field.SessionID = unpackUUID(byteBuffer)
         this.Info_Field.LureID = unpackUUID(byteBuffer)

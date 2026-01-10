@@ -20,10 +20,10 @@ class UUIDGroupNameReply : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int i = 5
+        var i: Int = 5
         Iterator<T> it = this.UUIDNameBlock_Fields.iterator()
         while (true) {
-            Int i2 = i
+            var i2: Int = i
             if (!it.hasNext()) {
                 return i2
             }
@@ -31,11 +31,11 @@ class UUIDGroupNameReply : SLMessage {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleUUIDGroupNameReply(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -18)
@@ -46,7 +46,7 @@ class UUIDGroupNameReply : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (i in 0 until b) {
             UUIDNameBlock uUIDNameBlock = UUIDNameBlock()

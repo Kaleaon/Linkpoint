@@ -23,9 +23,9 @@ class AvatarTextures {
         }
         SLTextureEntryFace GetDefaultTexture = sLTextureEntry.GetDefaultTexture()
         AvatarTextureFaceIndex[] values = AvatarTextureFaceIndex.values()
-        Int length = values.length
-        Int i = 0
-        Boolean z2 = false
+        var length: Int = values.length
+        var i: Int = 0
+        var z2: Boolean = false
         while (i < length) {
             AvatarTextureFaceIndex avatarTextureFaceIndex = values[i]
             SLTextureEntryFace GetFace = sLTextureEntry.GetFace(avatarTextureFaceIndex.ordinal())

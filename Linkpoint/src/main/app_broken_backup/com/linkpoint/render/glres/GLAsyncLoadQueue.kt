@@ -55,7 +55,7 @@ class GLAsyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
 
         @Nullable
         private fun createContext(): EGLContext {
-            Int i = 3
+            var i: Int = 3
             Debug.Printf("TexLoad: create[1]: eglGetError = %d", Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
             EGL10 r2 = GLAsyncLoadQueue.this.egl10
             EGLDisplay r3 = GLAsyncLoadQueue.this.eglDisplay
@@ -82,22 +82,22 @@ class GLAsyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
             return eglCreateContext
         }
 
-        fun run(): Unit {
+        fun run()  {
             RenderContext andSet = this.renderContext.getAndSet((Any) null)
             EGLContext createContext = createContext()
-            Int i = 0
-            Long j = 0
+            var i: Int = 0
+            var j: Long = 0
             Debug.Printf("TexLoad: Signaling context readiness.", Any[0])
             synchronized (GLAsyncLoadQueue.this.contextReadyLock) {
-                Boolean unused = GLAsyncLoadQueue.this.contextFailed = createContext == null
-                Boolean unused2 = GLAsyncLoadQueue.this.contextReady = true
+                var unused: Boolean = GLAsyncLoadQueue.this.contextFailed = createContext == null
+                var unused2: Boolean = GLAsyncLoadQueue.this.contextReady = true
                 GLAsyncLoadQueue.this.contextReadyLock.notifyAll()
             }
             if (createContext != null) {
                 Debug.Printf("TexLoad: thread init: eglGetError = %d", Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
                 Debug.Printf("TexLoad: thread init: rc = %b, eglGetError = %d", Boolean.valueOf(GLAsyncLoadQueue.this.egl10.eglMakeCurrent(GLAsyncLoadQueue.this.eglDisplay, this.eglSurface, this.eglSurface, createContext)), Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
                 while (true) {
-                    Int i2 = i
+                    var i2: Int = i
                     if (GLAsyncLoadQueue.this.mustExit.get()) {
                         break
                     }
@@ -108,7 +108,7 @@ class GLAsyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
                             Thread.sleep(1000)
                             i = i2 + 1
                             if (i >= 10) {
-                                Long uptimeMillis = SystemClock.uptimeMillis()
+                                var uptimeMillis: Long = SystemClock.uptimeMillis()
                                 if (uptimeMillis - j >= AnimationSequenceInfo.MAX_ANIMATION_LENGTH) {
                                     Debug.Printf("TexLoad: invoking GC.", Any[0])
                                     System.gc()
@@ -162,11 +162,11 @@ class GLAsyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
         }
     }
 
-    fun GLResourceLoaded(gLLoadable: GLLoadQueue.GLLoadable): Unit {
+    fun GLResourceLoaded(gLLoadable: GLLoadQueue.GLLoadable)  {
         this.loadedQueue.offer(gLLoadable)
     }
 
-    fun RunLoadQueue(renderContext: RenderContext): Unit {
+    fun RunLoadQueue(renderContext: RenderContext)  {
         while (true) {
             GLLoadQueue.GLLoadable poll = this.loadedQueue.poll()
             poll?.GLCompleteLoad()
@@ -176,7 +176,7 @@ class GLAsyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
         }
     }
 
-    fun StopLoadQueue(): Unit {
+    fun StopLoadQueue()  {
         Debug.Printf("TexLoad: StopLoadQueue called.", Any[0])
         this.mustExit.set(true)
         this.thread.interrupt()
@@ -188,7 +188,7 @@ class GLAsyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
         Debug.Printf("TexLoad: StopLoadQueue exiting.", Any[0])
     }
 
-    fun remove(gLLoadable: GLLoadQueue.GLLoadable): Unit {
+    fun remove(gLLoadable: GLLoadQueue.GLLoadable)  {
         this.loadedQueue.remove(gLLoadable)
         super.remove(gLLoadable)
     }

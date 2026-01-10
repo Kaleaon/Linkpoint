@@ -21,7 +21,7 @@ class AutoValue_PayInfo : PayInfo {
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof PayInfo)) {
+        if (!(obj is PayInfo)) {
             return false
         }
         PayInfo payInfo = (PayInfo) obj

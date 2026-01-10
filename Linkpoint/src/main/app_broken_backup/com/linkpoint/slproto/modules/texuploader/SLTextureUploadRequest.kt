@@ -36,10 +36,10 @@ class SLTextureUploadRequest : Runnable {
         return this.textureID
     }
 
-    fun run(): Unit {
+    fun run()  {
         Response execute
         try {
-            String asString = LLSDXMLRequest().PerformRequest(this.capURL, LLSDUndefined()).byKey("uploader").asString()
+            var asString: String = LLSDXMLRequest().PerformRequest(this.capURL, LLSDUndefined()).byKey("uploader").asString()
             Debug.Log("TextureUploader: uploader URL = " + asString)
             execute = SLHTTPSConnection.getOkHttpClient().newCall(Request.Builder().url(asString).header(HttpHeaders.ACCEPT, "application/llsd+xml").post(RequestBody.create(MEDIA_TYPE_JP2, this.sourceFile)).build()).execute()
             if (execute == null) {
@@ -65,11 +65,11 @@ class SLTextureUploadRequest : Runnable {
         }
     }
 
-    fun setCapURL(String str): Unit {
+    fun setCapURL(String str)  {
         this.capURL = str
     }
 
-    fun setOnUploadComplete(TextureUploadCompleteListener textureUploadCompleteListener): Unit {
+    fun setOnUploadComplete(TextureUploadCompleteListener textureUploadCompleteListener)  {
         this.onUploadComplete = textureUploadCompleteListener
     }
 }

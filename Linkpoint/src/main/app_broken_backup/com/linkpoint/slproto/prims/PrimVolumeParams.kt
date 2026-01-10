@@ -48,7 +48,7 @@ class PrimVolumeParams {
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof PrimVolumeParams)) {
+        if (!(obj is PrimVolumeParams)) {
             return false
         }
         PrimVolumeParams primVolumeParams = (PrimVolumeParams) obj
@@ -80,11 +80,11 @@ class PrimVolumeParams {
     }
 
     fun hashCode(): Int {
-        Int i = (this.SculptType * 17) + 0
+        var i: Int = (this.SculptType * 17) + 0
         if (this.SculptID != null) {
             i += this.SculptID.hashCode() * 3
         }
-        Int hashCode = i + (this.PathParams.hashCode() * 37) + this.ProfileParams.hashCode()
+        var hashCode: Int = i + (this.PathParams.hashCode() * 37) + this.ProfileParams.hashCode()
         return this.FlexiParams != null ? hashCode + this.FlexiParams.hashCode() : hashCode
     }
 
@@ -104,12 +104,12 @@ class PrimVolumeParams {
         return "{Volume: SculptType 0x" + Int.toHexString(this.SculptType) + ", SculptID " + (this.SculptID != null ? this.SculptID.toString() : "null") + ", Path = (" + this.PathParams.toString() + "), Profile = (" + this.ProfileParams.toString() + ")}"
     }
 
-    fun unpackExtraParams(ByteBuffer byteBuffer): Unit {
+    fun unpackExtraParams(ByteBuffer byteBuffer)  {
         try {
             Byte b = byteBuffer.get()
             for (i in 0 until b) {
                 Short s = byteBuffer.getShort()
-                Int i2 = byteBuffer.getInt() + byteBuffer.position()
+                var i2: Int = byteBuffer.getInt() + byteBuffer.position()
                 switch (s) {
                     case 16:
                         this.FlexiParams = PrimFlexibleParams(byteBuffer, i2)

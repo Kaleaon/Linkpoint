@@ -64,7 +64,7 @@ class OnlineNotificationInfo {
         L_0x0013:
             IntArray r0 = m668getcomlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues()
             com.linkpoint.slproto.SLGridConnection$ConnectionState r2 = r10.getConnectionState()
-            Int r2 = r2.ordinal()
+            var r2: Int = r2.ordinal()
             r0 = r0[r2]
             switch(r0) {
                 case 1: goto L_0x0065
@@ -80,7 +80,7 @@ class OnlineNotificationInfo {
         L_0x002d:
             r6.visible = r5
             r6.titleText = r9
-            Boolean r0 = r10.getIsReconnecting()
+            var r0: Boolean = r10.getIsReconnecting()
             if (r0 == 0) goto L_0x004f
             android.content.res.Resources r0 = r8.getResources()
             r1 = 2131296568(0x7f090138, Float:1.8211056E38)
@@ -121,9 +121,9 @@ class OnlineNotificationInfo {
         L_0x0093:
             if (r0 == 0) goto L_0x00d9
             java.lang.String r2 = "(loading)"
-            Boolean r2 = r0.equals(r2)
+            var r2: Boolean = r0.equals(r2)
             if (r2 != 0) goto L_0x00d9
-            Int r1 = r12.nearbyUsers()
+            var r1: Int = r12.nearbyUsers()
             android.content.res.Resources r2 = r8.getResources()
             r3 = 2131296566(0x7f090136, Float:1.8211052E38)
             java.lang.String r2 = r2.getString(r3)
@@ -159,7 +159,7 @@ class OnlineNotificationInfo {
     }
 
     fun equals(Any obj): Boolean {
-        if (!(obj instanceof OnlineNotificationInfo)) {
+        if (!(obj is OnlineNotificationInfo)) {
             return false
         }
         OnlineNotificationInfo onlineNotificationInfo = (OnlineNotificationInfo) obj

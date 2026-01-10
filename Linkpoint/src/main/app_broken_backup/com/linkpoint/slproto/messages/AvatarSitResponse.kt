@@ -32,11 +32,11 @@ class AvatarSitResponse : SLMessage {
         return 67
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleAvatarSitResponse(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.put(Ascii.NAK)
         packUUID(byteBuffer, this.SitObject_Field.ID)
         packBoolean(byteBuffer, this.SitTransform_Field.AutoPilot)
@@ -47,7 +47,7 @@ class AvatarSitResponse : SLMessage {
         packBoolean(byteBuffer, this.SitTransform_Field.ForceMouselook)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.SitObject_Field.ID = unpackUUID(byteBuffer)
         this.SitTransform_Field.AutoPilot = unpackBoolean(byteBuffer)
         this.SitTransform_Field.SitPosition = unpackLLVector3(byteBuffer)

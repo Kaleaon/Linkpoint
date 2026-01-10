@@ -48,7 +48,7 @@ class InventoryManager {
     private RequestHandler<InventoryQuery> queryRequestHandler = RequestHandler<InventoryQuery>() {
         private Map<InventoryQuery, FolderSubscription> folderQueries = ConcurrentHashMap()
 
-        fun onRequest(@NonNull InventoryQuery inventoryQuery): Unit {
+        fun onRequest(@NonNull InventoryQuery inventoryQuery)  {
             FolderSubscription put
             if (inventoryQuery.containsString() != null) {
                 InventoryManager.this.entryListPool.onResultData(inventoryQuery, inventoryQuery.query((SLInventoryEntry) null, InventoryManager.this.inventoryDB))
@@ -64,7 +64,7 @@ class InventoryManager {
             }
         }
 
-        fun onRequestCancelled(@NonNull InventoryQuery inventoryQuery): Unit {
+        fun onRequestCancelled(@NonNull InventoryQuery inventoryQuery)  {
             FolderSubscription folderSubscription = this.folderQueries.get(inventoryQuery)
             if (folderSubscription != null) {
                 folderSubscription.unsubscribe()
@@ -90,20 +90,20 @@ class InventoryManager {
             this(inventoryQuery, uuid)
         }
 
-        fun onData(SLInventoryEntry sLInventoryEntry): Unit {
+        fun onData(SLInventoryEntry sLInventoryEntry)  {
             if (sLInventoryEntry != null) {
                 Debug.Printf("Inventory: folder subscription got name: %s with folderId = '%s'", sLInventoryEntry.name, sLInventoryEntry.uuid)
             }
             InventoryManager.this.entryListPool.onResultData(this.query, this.query.query(sLInventoryEntry, InventoryManager.this.inventoryDB))
         }
 
-        fun onError(Throwable th): Unit {
+        fun onError(Throwable th)  {
             Debug.Printf("Inventory: subscription error: %s", th)
             Debug.Warning(th)
             InventoryManager.this.entryListPool.onResultError(this.query, th)
         }
 
-        fun unsubscribe(): Unit {
+        fun unsubscribe()  {
             this.subscription.unsubscribe()
         }
     }
@@ -313,11 +313,11 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
     }
 
     /* access modifiers changed from: private */
-    fun updateSearchResults(): Unit {
+    fun updateSearchResults()  {
         this.entryListPool.requestUpdateSome($Lambda$JIBenvPHaOomPgMJhTFPuiVXBzY())
     }
 
-    fun copyToClipboard(@Nullable InventoryClipboardEntry inventoryClipboardEntry): Unit {
+    fun copyToClipboard(@Nullable InventoryClipboardEntry inventoryClipboardEntry)  {
         this.clipboardPool.setData(SubscriptionSingleKey.Value, inventoryClipboardEntry)
     }
 
@@ -370,15 +370,15 @@ Method generation error in method: com.linkpoint.slproto.users.manager.-$Lambda$
         return this.searchRunningPool
     }
 
-    fun requestFolderUpdate(@NonNull UUID uuid): Unit {
+    fun requestFolderUpdate(@NonNull UUID uuid)  {
         this.folderEntryPool.requestUpdate(uuid)
     }
 
-    fun setCurrentSessionID(UUID uuid): Unit {
+    fun setCurrentSessionID(UUID uuid)  {
         this.currentSessionID.set(uuid)
     }
 
-    fun setRootFolder(UUID uuid): Unit {
+    fun setRootFolder(UUID uuid)  {
         this.rootFolderID.set(uuid)
     }
 }

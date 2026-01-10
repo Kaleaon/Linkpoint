@@ -48,7 +48,7 @@ class RingtonePreference : Preference {
     }
 
     fun getSummary(): CharSequence {
-        String string = getSharedPreferences().getString(getKey(), (String) null)
+        var string: String = getSharedPreferences().getString(getKey(), (String) null)
         if (string == null) {
             return "Default"
         }

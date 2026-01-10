@@ -30,11 +30,11 @@ class SendPostcard : SLMessage {
         return this.AgentData_Field.To.size + 73 + 1 + this.AgentData_Field.From.size + 1 + this.AgentData_Field.Name.size + 1 + this.AgentData_Field.Subject.size + 2 + this.AgentData_Field.Msg.size + 1 + 1 + 4
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleSendPostcard(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -100)
@@ -51,7 +51,7 @@ class SendPostcard : SLMessage {
         packBoolean(byteBuffer, this.AgentData_Field.MaturePublish)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.AssetID = unpackUUID(byteBuffer)

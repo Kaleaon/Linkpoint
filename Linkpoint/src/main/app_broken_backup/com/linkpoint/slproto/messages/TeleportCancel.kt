@@ -20,11 +20,11 @@ class TeleportCancel : SLMessage {
         return 36
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleTeleportCancel(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 72)
@@ -32,7 +32,7 @@ class TeleportCancel : SLMessage {
         packUUID(byteBuffer, this.Info_Field.SessionID)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.Info_Field.AgentID = unpackUUID(byteBuffer)
         this.Info_Field.SessionID = unpackUUID(byteBuffer)
     }

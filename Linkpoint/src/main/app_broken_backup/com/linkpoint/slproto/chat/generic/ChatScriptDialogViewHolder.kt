@@ -26,9 +26,9 @@ class ChatScriptDialogViewHolder : ChatEventViewHolder : View.OnClickListener {
         this.dialogResultTextView = (TextView) view.findViewById(R.id.dialogResultTextView)
         this.dialogButtonsLayout = view.findViewById(R.id.dialogButtonsLayout)
         this.cardView = (CardView) view.findViewById(R.id.chatMessageCardView)
-        Int i = 0
+        var i: Int = 0
         while (true) {
-            Int i2 = i
+            var i2: Int = i
             if (i2 >= dialogButtonIds.length) {
                 break
             }
@@ -44,7 +44,7 @@ class ChatScriptDialogViewHolder : ChatEventViewHolder : View.OnClickListener {
         }
     }
 
-    fun onClick(View view): Unit {
+    fun onClick(View view)  {
         switch (view.getId()) {
             case R.id.buttonDialogIgnore:
                 if (this.dialogEvent != null) {
@@ -54,7 +54,7 @@ class ChatScriptDialogViewHolder : ChatEventViewHolder : View.OnClickListener {
                 }
                 return
             default:
-                Int i = 0
+                var i: Int = 0
                 while (i < dialogButtonIds.length) {
                     if (view.getId() != dialogButtonIds[i]) {
                         i++
@@ -70,7 +70,7 @@ class ChatScriptDialogViewHolder : ChatEventViewHolder : View.OnClickListener {
         }
     }
 
-    fun setDialogEvent(@Nullable SLChatScriptDialog sLChatScriptDialog): Unit {
+    fun setDialogEvent(@Nullable SLChatScriptDialog sLChatScriptDialog)  {
         this.dialogEvent = sLChatScriptDialog
     }
 }

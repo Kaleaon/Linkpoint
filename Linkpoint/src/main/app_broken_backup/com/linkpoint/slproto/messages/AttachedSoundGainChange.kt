@@ -21,18 +21,18 @@ class AttachedSoundGainChange : SLMessage {
         return 22
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleAttachedSoundGainChange(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.put((byte) -1)
         byteBuffer.put(Ascii.SO)
         packUUID(byteBuffer, this.DataBlock_Field.ObjectID)
         packFloat(byteBuffer, this.DataBlock_Field.Gain)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.DataBlock_Field.ObjectID = unpackUUID(byteBuffer)
         this.DataBlock_Field.Gain = unpackFloat(byteBuffer)
     }

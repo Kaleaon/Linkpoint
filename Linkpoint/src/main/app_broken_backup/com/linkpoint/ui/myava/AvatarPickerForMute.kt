@@ -26,7 +26,7 @@ class AvatarPickerForMute : AvatarPickerFragment {
     }
 
     /* access modifiers changed from: protected */
-    fun onAvatarSelected(ChatterID chatterID, @Nullable String str): Unit {
+    fun onAvatarSelected(ChatterID chatterID, @Nullable String str)  {
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
             SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
@@ -34,7 +34,7 @@ class AvatarPickerForMute : AvatarPickerFragment {
                 activeAgentCircuit.getModules().muteList.Block(MuteListEntry(MuteType.AGENT, chatterID.getOptionalChatterUUID(), str, 15))
             }
             FragmentActivity activity = getActivity()
-            if (activity instanceof DetailsActivity) {
+            if (activity is DetailsActivity) {
                 ((DetailsActivity) activity).closeDetailsFragment(this)
             }
         }

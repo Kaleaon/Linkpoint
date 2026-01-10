@@ -63,7 +63,7 @@ class ButteryProgressBar : View {
             this.mAnimator.setRepeatCount(-1)
             this.mAnimator.setInterpolator(ExponentialInterpolator((ExponentialInterpolator) null))
             this.mAnimator.addUpdateListener(ValueAnimator.AnimatorUpdateListener() {
-                fun onAnimationUpdate(ValueAnimator valueAnimator): Unit {
+                fun onAnimationUpdate(ValueAnimator valueAnimator)  {
                     ButteryProgressBar.this.invalidate()
                 }
             this.mPaint.setColor(this.mBarColor)
@@ -87,15 +87,15 @@ class ButteryProgressBar : View {
     }
 
     /* access modifiers changed from: protected */
-    fun onDraw(Canvas canvas): Unit {
+    fun onDraw(Canvas canvas)  {
         if (this.mAnimator.isStarted()) {
             this.mShadow.draw(canvas)
-            Float floatValue = (this.toFloat().mAnimator.getAnimatedValue()).floatValue()
-            Int width = getWidth()
-            Int i = width >> (this.mSegmentCount - 1)
-            Int i2 = 0
+            var floatValue: Float = (this.toFloat().mAnimator.getAnimatedValue()).floatValue()
+            var width: Int = getWidth()
+            var i: Int = width >> (this.mSegmentCount - 1)
+            var i2: Int = 0
             while (i2 < this.mSegmentCount) {
-                Float f = floatValue * ((Float) (width >> (i2 + 1)))
+                var f: Float = floatValue * ((Float) (width >> (i2 + 1)))
                 canvas.drawRect((f + (this.toFloat().mSolidBarDetentWidth)) - (i.toFloat()), 0.0f, (i2 == 0 ? (Float) (width + i) : 2.0f * f) - (i.toFloat()), this.toFloat().mSolidBarHeight, this.mPaint)
                 i2++
             }
@@ -103,18 +103,18 @@ class ButteryProgressBar : View {
     }
 
     /* access modifiers changed from: protected */
-    fun onLayout(Boolean z, Int i, Int i2, Int i3, Int i4): Unit {
+    fun onLayout(Boolean z, Int i, Int i2, Int i3, Int i4)  {
         if (z) {
-            Int width = getWidth()
+            var width: Int = getWidth()
             this.mShadow.setBounds(0, this.mSolidBarHeight, width, getHeight() - this.mSolidBarHeight)
-            Float f = ((width.toFloat()) / this.mDensity) / 300.0f
+            var f: Float = ((width.toFloat()) / this.mDensity) / 300.0f
             this.mAnimator.setDuration((Long) ((Int) ((((f - 1.0f) * 0.3f) + 1.0f) * 500.0f)))
             this.mSegmentCount = (Int) ((((f - 1.0f) * 0.1f) + 1.0f) * 5.0f)
         }
     }
 
     /* access modifiers changed from: protected */
-    fun onVisibilityChanged(View view, Int i): Unit {
+    fun onVisibilityChanged(View view, Int i)  {
         super.onVisibilityChanged(view, i)
         if (i == 0) {
             start()

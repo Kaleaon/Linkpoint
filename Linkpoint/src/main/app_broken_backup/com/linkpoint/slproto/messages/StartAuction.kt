@@ -26,11 +26,11 @@ class StartAuction : SLMessage {
         return this.ParcelData_Field.Name.size + 33 + 20
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleStartAuction(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -27)
@@ -40,7 +40,7 @@ class StartAuction : SLMessage {
         packVariable(byteBuffer, this.ParcelData_Field.Name, 1)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.ParcelData_Field.ParcelID = unpackUUID(byteBuffer)
         this.ParcelData_Field.SnapshotID = unpackUUID(byteBuffer)

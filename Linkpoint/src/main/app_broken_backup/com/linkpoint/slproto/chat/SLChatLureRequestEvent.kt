@@ -41,7 +41,7 @@ class SLChatLureRequestEvent : SLChatYesNoEvent {
     }
 
     fun getText(Context context, @NonNull UserManager userManager): String {
-        String string = context.getString(R.string.teleport_lure_request_message)
+        var string: String = context.getString(R.string.teleport_lure_request_message)
         return !Strings.isNullOrEmpty(this.text) ? string + ": " + this.text : string + "."
     }
 
@@ -58,12 +58,12 @@ class SLChatLureRequestEvent : SLChatYesNoEvent {
         return true
     }
 
-    fun onYesAction(Context context, UserManager userManager): Unit {
+    fun onYesAction(Context context, UserManager userManager)  {
         super.onYesAction(context, userManager)
         UUID sourceUUID = this.source.getSourceUUID()
         SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
         if (sourceUUID != null && activeAgentCircuit != null) {
-            String regionName = activeAgentCircuit.getRegionName()
+            var regionName: String = activeAgentCircuit.getRegionName()
             if (Strings.isNullOrEmpty(regionName)) {
                 regionName = context.getString(R.string.unknown_region_name)
             }
@@ -71,7 +71,7 @@ class SLChatLureRequestEvent : SLChatYesNoEvent {
         }
     }
 
-    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage): Unit {
+    fun serializeToDatabaseObject(@NonNull ChatMessage chatMessage)  {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

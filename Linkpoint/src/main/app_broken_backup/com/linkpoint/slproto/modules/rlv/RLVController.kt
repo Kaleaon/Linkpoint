@@ -36,14 +36,14 @@ class RLVController : SLModule {
 
     private Unit handleRLVCommand(UUID uuid, String str) {
         Debug.Printf("RLV command: '%s'", str)
-        String str2 = ""
-        String str3 = ""
-        Int indexOf = str.indexOf(61)
+        var str2: String = ""
+        var str3: String = ""
+        var indexOf: Int = str.indexOf(61)
         if (indexOf >= 0) {
             str2 = str.substring(indexOf + 1)
             str = str.substring(0, indexOf)
         }
-        Int indexOf2 = str.indexOf(58)
+        var indexOf2: Int = str.indexOf(58)
         if (indexOf2 >= 0) {
             str3 = str.substring(indexOf2 + 1)
             str = str.substring(0, indexOf2)
@@ -70,8 +70,8 @@ class RLVController : SLModule {
         this.agentCircuit.HandleChatEvent(this.agentCircuit.getLocalChatterID(), SLEnableRLVOfferEvent(chatFromSimulator, this.agentCircuit.getAgentUUID()), true)
     }
 
-    fun HandleGlobalOptionsChange(): Unit {
-        Boolean rLVEnabled = GlobalOptions.getInstance().getRLVEnabled()
+    fun HandleGlobalOptionsChange()  {
+        var rLVEnabled: Boolean = GlobalOptions.getInstance().getRLVEnabled()
         if (rLVEnabled && (!this.RLVEnabled) && this.RLVEnablingOffered && this.RLVEnablingCommand != null) {
             this.RLVEnablingOffered = false
             Debug.Printf("Enabling accepted, original command: '%s'", this.RLVEnablingCommand)
@@ -86,7 +86,7 @@ class RLVController : SLModule {
 
     fun canDetachItem(Int i, UUID uuid): Boolean {
         SLAttachmentPoint sLAttachmentPoint
-        String str = null
+        var str: String = null
         if (!this.RLVEnabled) {
             return true
         }
@@ -160,7 +160,7 @@ class RLVController : SLModule {
         if (chatFromSimulator.ChatData_Field.SourceType != 2 || chatFromSimulator.ChatData_Field.ChatType != 8) {
             return false
         }
-        String stringFromVariableUTF = SLMessage.stringFromVariableUTF(chatFromSimulator.ChatData_Field.Message)
+        var stringFromVariableUTF: String = SLMessage.stringFromVariableUTF(chatFromSimulator.ChatData_Field.Message)
         if (!stringFromVariableUTF.startsWith("@")) {
             return false
         }
@@ -180,9 +180,9 @@ class RLVController : SLModule {
         if (!this.RLVEnabled) {
             return false
         }
-        Int i = improvedInstantMessage.MessageBlock_Field.Dialog
-        String stringFromVariableOEM = SLMessage.stringFromVariableOEM(improvedInstantMessage.MessageBlock_Field.FromAgentName)
-        String stringFromVariableUTF = SLMessage.stringFromVariableUTF(improvedInstantMessage.MessageBlock_Field.Message)
+        var i: Int = improvedInstantMessage.MessageBlock_Field.Dialog
+        var stringFromVariableOEM: String = SLMessage.stringFromVariableOEM(improvedInstantMessage.MessageBlock_Field.FromAgentName)
+        var stringFromVariableUTF: String = SLMessage.stringFromVariableUTF(improvedInstantMessage.MessageBlock_Field.Message)
         Debug.Printf("IM: type %d from '%s' text '%s'", Int.valueOf(i), stringFromVariableOEM, stringFromVariableUTF)
         switch (i) {
             case 0:
@@ -205,7 +205,7 @@ class RLVController : SLModule {
                 if (targetsForRestriction != null) {
                     for (String parseInt : targetsForRestriction) {
                         try {
-                            Int parseInt2 = Int.parseInt(parseInt)
+                            var parseInt2: Int = Int.parseInt(parseInt)
                             ChatFromViewer chatFromViewer = ChatFromViewer()
                             chatFromViewer.AgentData_Field.AgentID = this.circuitInfo.agentID
                             chatFromViewer.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -229,7 +229,7 @@ class RLVController : SLModule {
         return true
     }
 
-    fun sayOnChannel(Int i, String str): Unit {
+    fun sayOnChannel(Int i, String str)  {
         Debug.Printf("RLV reply (%d): '%s'", Int.valueOf(i), str)
         ChatFromViewer chatFromViewer = ChatFromViewer()
         chatFromViewer.AgentData_Field.AgentID = this.circuitInfo.agentID
@@ -241,7 +241,7 @@ class RLVController : SLModule {
         SendMessage(chatFromViewer)
     }
 
-    fun teleportToGlobalPos(UUID uuid, LLVector3 lLVector3): Unit {
+    fun teleportToGlobalPos(UUID uuid, LLVector3 lLVector3)  {
         if (this.RLVEnabled && this.restrictions.isAllowed(RLVRestrictionType.tploc, "", (UUID) null, uuid)) {
             this.agentCircuit.TeleportToGlobalPosition(lLVector3)
         }

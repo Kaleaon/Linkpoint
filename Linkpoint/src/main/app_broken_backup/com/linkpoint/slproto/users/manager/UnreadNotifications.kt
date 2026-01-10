@@ -46,22 +46,22 @@ abstract class UnreadNotifications {
         NotificationType notificationType = null
         NotificationType notificationType2 = null
         UnreadNotificationInfo.UnreadMessageSource unreadMessageSource = null
-        Int i2 = 0
-        Int i3 = 0
+        var i2: Int = 0
+        var i3: Int = 0
         ImmutableList.Builder builder2 = null
-        Boolean z = false
+        var z: Boolean = false
         Iterator<T> it = NotificationType.VALUES_BY_DESCENDING_PRIORITY.iterator()
         while (true) {
             objectPopupNotification = objectPopupNotification2
             builder = builder2
             i = i2
-            Boolean z2 = z
+            var z2: Boolean = z
             if (!it.hasNext()) {
                 break
             }
             UnreadNotificationInfo unreadNotificationInfo = notificationGroups.get((it as NotificationType).next())
             if (unreadNotificationInfo != null) {
-                Int i4 = unreadNotificationInfo.totalUnreadCount() + i
+                var i4: Int = unreadNotificationInfo.totalUnreadCount() + i
                 if (!unreadNotificationInfo.unreadSources().isEmpty()) {
                     if (builder == null) {
                         builder = ImmutableList.builder()

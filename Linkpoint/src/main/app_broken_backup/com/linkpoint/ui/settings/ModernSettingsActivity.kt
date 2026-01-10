@@ -442,7 +442,7 @@ class ModernSettingsActivity : AppCompatActivity {
         
         // Emulator availability check
         EmulatorManager emulatorManager = EmulatorManager(this)
-        Boolean isAvailable = emulatorManager.isAvailable()
+        var isAvailable: Boolean = emulatorManager.isAvailable()
         
         addTextSetting(emulatorSection,
                       "Emulator Tools Status", 
@@ -457,17 +457,17 @@ class ModernSettingsActivity : AppCompatActivity {
                            if (isAvailable) {
                                emulatorManager.getStatus(EmulatorManager.EmulatorCallback() {
                                    @Override
-                                   fun onSuccess(String message): Unit {
+                                   fun onSuccess(String message)  {
                                        runOnUiThread(() -> showToast("Status checked - see notification"))
                                    }
                                    
                                    @Override
-                                   fun onError(String error): Unit {
+                                   fun onError(String error)  {
                                        runOnUiThread(() -> showToast("Status check failed"))
                                    }
                                    
                                    @Override
-                                   fun onStatusUpdate(String status): Unit {
+                                   fun onStatusUpdate(String status)  {
                                        // Update UI if needed
                                    }
                            } else {
@@ -494,20 +494,20 @@ class ModernSettingsActivity : AppCompatActivity {
                            if (isAvailable) {
                                emulatorManager.listAVDs(EmulatorManager.EmulatorCallback() {
                                    @Override
-                                   fun onSuccess(String output): Unit {
+                                   fun onSuccess(String output)  {
                                        runOnUiThread(() -> {
-                                           String summary = EmulatorManager.formatAVDSummary(
+                                           var summary: String = EmulatorManager.formatAVDSummary(
                                                EmulatorManager.parseAVDList(output))
                                            showToast("AVDs: " + summary.split("\n").length + " found")
                                    }
                                    
                                    @Override
-                                   fun onError(String error): Unit {
+                                   fun onError(String error)  {
                                        runOnUiThread(() -> showToast("Failed to list AVDs"))
                                    }
                                    
                                    @Override
-                                   fun onStatusUpdate(String status): Unit {
+                                   fun onStatusUpdate(String status)  {
                                        // Update UI if needed
                                    }
                            } else {

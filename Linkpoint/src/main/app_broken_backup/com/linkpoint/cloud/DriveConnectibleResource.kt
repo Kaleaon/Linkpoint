@@ -95,7 +95,7 @@ abstract class DriveConnectibleResource {
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences((Context)this.this$0.context)
                         bl2 = bl
                         if (sharedPreferences.contains(this.this$0.preferencesKey)) {
-                            String string2 = sharedPreferences.getString(this.this$0.preferencesKey, null)
+                            var string2: String = sharedPreferences.getString(this.this$0.preferencesKey, null)
                             bl2 = bl
                             if (string2 != null) {
                                 Debug.Printf("Resource '%s': has stored DriveId: %s", this.this$0.resourceName, string2)
@@ -135,7 +135,7 @@ abstract class DriveConnectibleResource {
              */
             @Override
             void onResourceReady(@Nullable DriveResource driveResource, @Nullable String string2) {
-                if (driveResource != null && driveResource instanceof DriveFolder) {
+                if (driveResource != null && driveResource is DriveFolder) {
                     driveResource = (DriveFolder)driveResource
                     this.this$0.startSearching((DriveFolder)driveResource)
                     return
@@ -230,7 +230,7 @@ abstract class DriveConnectibleResource {
             @Override
             void onResourceReady(@Nullable DriveResource driveResource, @Nullable String string2) {
                 Debug.Printf("Resource '%s': parent folder ready: %s", this.this$0.resourceName, driveResource)
-                if (driveResource != null && driveResource instanceof DriveFolder) {
+                if (driveResource != null && driveResource is DriveFolder) {
                     driveResource = (DriveFolder)driveResource
                     this.this$0.createResource((DriveFolder)driveResource)
                     return

@@ -1,128 +1,201 @@
 package com.linkpoint.slproto.types
 
-class LLVector4 {
-    val FP_MAG_THRESHOLD: Float = 1.0E-7f
-    Float w
-    Float x
-    Float y
-    Float z
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.sqrt
 
-    LLVector4() {
-        this.x = 0.0f
-        this.y = 0.0f
-        this.z = 0.0f
-        this.w = 0.0f
-    }
-
-    LLVector4(Float f, Float f2, Float f3) {
-        this.x = f
-        this.y = f2
-        this.z = f3
-        this.w = 0.0f
-    }
-
-    LLVector4(Float f, Float f2, Float f3, Float f4) {
-        this.x = f
-        this.y = f2
-        this.z = f3
-        this.w = f4
-    }
-
-    LLVector4(LLVector3 lLVector3) {
-        this.x = lLVector3.x
-        this.y = lLVector3.y
-        this.z = lLVector3.z
-        this.w = 0.0f
-    }
-
-    LLVector4(LLVector4 lLVector4) {
-        this.x = lLVector4.x
-        this.y = lLVector4.y
-        this.z = lLVector4.z
-        this.w = lLVector4.w
-    }
-
-    fun add(LLVector4 lLVector4, LLVector4 lLVector42): LLVector4 {
-        return LLVector4(lLVector4.x + lLVector42.x, lLVector4.y + lLVector42.y, lLVector4.z + lLVector42.z, lLVector4.w + lLVector42.w)
-    }
-
-    fun cross3(LLVector4 lLVector4, LLVector4 lLVector42): LLVector4 {
-        return LLVector4((lLVector4.y * lLVector42.z) - (lLVector4.z * lLVector42.y), (lLVector4.z * lLVector42.x) - (lLVector4.x * lLVector42.z), (lLVector4.x * lLVector42.y) - (lLVector4.y * lLVector42.x), 0.0f)
-    }
-
-    fun sub(LLVector4 lLVector4, LLVector4 lLVector42): LLVector4 {
-        return LLVector4(lLVector4.x - lLVector42.x, lLVector4.y - lLVector42.y, lLVector4.z - lLVector42.z, lLVector4.w - lLVector42.w)
-    }
-
-    fun add(LLVector4 lLVector4): Unit {
-        this.x += lLVector4.x
-        this.y += lLVector4.y
-        this.z += lLVector4.z
-        this.w += lLVector4.w
-    }
-
-    fun clear(): Unit {
-        this.x = 0.0f
-        this.y = 0.0f
-        this.z = 0.0f
-        this.w = 0.0f
-    }
-
-    fun dot3(LLVector4 lLVector4): Float {
-        return (this.x * lLVector4.x) + (this.y * lLVector4.y) + (this.z * lLVector4.z)
-    }
-
-    fun mul(Float f): Unit {
-        this.x *= f
-        this.y *= f
-        this.z *= f
-        this.w *= f
-    }
-
-    fun normalize3(): Float {
-        Float sqrt = Math.sqrt(((this.x * this.x.toDouble()).toFloat() + (this.y * this.y) + (this.z * this.z)))
-        if (sqrt > 1.0E-7f) {
-            Float f = 1.0f / sqrt
-            this.x *= f
-            this.y *= f
-            this.z = f * this.z
-        } else {
-            this.x = 0.0f
-            this.y = 0.0f
-            this.z = 0.0f
+/**
+ * 4D Vector class for Second Life coordinate system
+ * Used for colors (RGBA), homogeneous coordinates, etc.
+ */
+class LLVector4(
+    var x: Float = 0.0f,
+    var y: Float = 0.0f,
+    var z: Float = 0.0f,
+    var w: Float = 0.0f
+) {
+    companion object {
+        const val FP_MAG_THRESHOLD: Float = 1.0E-7f
+        
+        @JvmField
+        val Zero = LLVector4(0.0f, 0.0f, 0.0f, 0.0f)
+        
+        @JvmField
+        val One = LLVector4(1.0f, 1.0f, 1.0f, 1.0f)
+        
+        @JvmStatic
+        fun add(a: LLVector4, b: LLVector4): LLVector4 {
+            return LLVector4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w)
         }
-        return sqrt
+        
+        @JvmStatic
+        fun cross3(a: LLVector4, b: LLVector4): LLVector4 {
+            return LLVector4(
+                (a.y * b.z) - (a.z * b.y),
+                (a.z * b.x) - (a.x * b.z),
+                (a.x * b.y) - (a.y * b.x),
+                0.0f
+            )
+        }
+        
+        @JvmStatic
+        fun sub(a: LLVector4, b: LLVector4): LLVector4 {
+            return LLVector4(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w)
+        }
     }
-
-    fun set(Float f, Float f2, Float f3): Unit {
-        this.x = f
-        this.y = f2
-        this.z = f3
-        this.w = 0.0f
+    
+    constructor(x: Float, y: Float, z: Float) : this(x, y, z, 0.0f)
+    
+    constructor(vec3: LLVector3) : this(vec3.x, vec3.y, vec3.z, 0.0f)
+    
+    constructor(other: LLVector4) : this(other.x, other.y, other.z, other.w)
+    
+    fun add(other: LLVector4) {
+        x += other.x
+        y += other.y
+        z += other.z
+        w += other.w
     }
-
-    fun set(LLVector4 lLVector4): Unit {
-        this.x = lLVector4.x
-        this.y = lLVector4.y
-        this.z = lLVector4.z
-        this.w = lLVector4.w
+    
+    fun clear() {
+        x = 0.0f
+        y = 0.0f
+        z = 0.0f
+        w = 0.0f
     }
-
-    fun setMax(LLVector4 lLVector4): Unit {
-        this.x = Math.max(this.x, lLVector4.x)
-        this.y = Math.max(this.y, lLVector4.y)
-        this.z = Math.max(this.z, lLVector4.z)
-        this.w = Math.max(this.w, lLVector4.w)
+    
+    fun dot3(other: LLVector4): Float {
+        return (x * other.x) + (y * other.y) + (z * other.z)
     }
-
-    fun setMin(LLVector4 lLVector4): Unit {
-        this.x = Math.min(this.x, lLVector4.x)
-        this.y = Math.min(this.y, lLVector4.y)
-        this.z = Math.min(this.z, lLVector4.z)
-        this.w = Math.min(this.w, lLVector4.w)
+    
+    fun dot4(other: LLVector4): Float {
+        return (x * other.x) + (y * other.y) + (z * other.z) + (w * other.w)
     }
-
-    fun toString(): String {
-        return String.format("(%f, %f, %f)", Any[]{Float.valueOf(this.x), Float.valueOf(this.y), Float.valueOf(this.z)})
+    
+    fun mul(scale: Float) {
+        x *= scale
+        y *= scale
+        z *= scale
+        w *= scale
+    }
+    
+    fun normalize3(): Float {
+        val magnitude = sqrt((x * x + y * y + z * z).toDouble()).toFloat()
+        if (magnitude > FP_MAG_THRESHOLD) {
+            val invMag = 1.0f / magnitude
+            x *= invMag
+            y *= invMag
+            z *= invMag
+        } else {
+            x = 0.0f
+            y = 0.0f
+            z = 0.0f
+        }
+        return magnitude
+    }
+    
+    fun normalize4(): Float {
+        val magnitude = sqrt((x * x + y * y + z * z + w * w).toDouble()).toFloat()
+        if (magnitude > FP_MAG_THRESHOLD) {
+            val invMag = 1.0f / magnitude
+            x *= invMag
+            y *= invMag
+            z *= invMag
+            w *= invMag
+        } else {
+            x = 0.0f
+            y = 0.0f
+            z = 0.0f
+            w = 0.0f
+        }
+        return magnitude
+    }
+    
+    fun magVec3(): Float {
+        return sqrt((x * x + y * y + z * z).toDouble()).toFloat()
+    }
+    
+    fun magVec4(): Float {
+        return sqrt((x * x + y * y + z * z + w * w).toDouble()).toFloat()
+    }
+    
+    fun set(newX: Float, newY: Float, newZ: Float) {
+        x = newX
+        y = newY
+        z = newZ
+        w = 0.0f
+    }
+    
+    fun set(newX: Float, newY: Float, newZ: Float, newW: Float) {
+        x = newX
+        y = newY
+        z = newZ
+        w = newW
+    }
+    
+    fun set(other: LLVector4?) {
+        if (other != null) {
+            x = other.x
+            y = other.y
+            z = other.z
+            w = other.w
+        }
+    }
+    
+    fun setMax(other: LLVector4) {
+        x = max(x, other.x)
+        y = max(y, other.y)
+        z = max(z, other.z)
+        w = max(w, other.w)
+    }
+    
+    fun setMin(other: LLVector4) {
+        x = min(x, other.x)
+        y = min(y, other.y)
+        z = min(z, other.z)
+        w = min(w, other.w)
+    }
+    
+    fun toVector3(): LLVector3 {
+        return LLVector3(x, y, z)
+    }
+    
+    override fun equals(other: Any?): Boolean {
+        if (other === this) return true
+        if (other !is LLVector4) return false
+        return x == other.x && y == other.y && z == other.z && w == other.w
+    }
+    
+    override fun hashCode(): Int {
+        var result = java.lang.Float.floatToIntBits(x)
+        result = 31 * result + java.lang.Float.floatToIntBits(y)
+        result = 31 * result + java.lang.Float.floatToIntBits(z)
+        result = 31 * result + java.lang.Float.floatToIntBits(w)
+        return result
+    }
+    
+    override fun toString(): String {
+        return String.format("(%.4f, %.4f, %.4f, %.4f)", x, y, z, w)
+    }
+    
+    // Operator overloads
+    operator fun plus(other: LLVector4): LLVector4 {
+        return LLVector4(x + other.x, y + other.y, z + other.z, w + other.w)
+    }
+    
+    operator fun minus(other: LLVector4): LLVector4 {
+        return LLVector4(x - other.x, y - other.y, z - other.z, w - other.w)
+    }
+    
+    operator fun times(scale: Float): LLVector4 {
+        return LLVector4(x * scale, y * scale, z * scale, w * scale)
+    }
+    
+    operator fun div(scale: Float): LLVector4 {
+        return LLVector4(x / scale, y / scale, z / scale, w / scale)
+    }
+    
+    operator fun unaryMinus(): LLVector4 {
+        return LLVector4(-x, -y, -z, -w)
     }
 }

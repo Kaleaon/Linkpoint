@@ -16,7 +16,7 @@ class AutoValue_UnreadMessageInfo : UnreadMessageInfo {
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof UnreadMessageInfo)) {
+        if (!(obj is UnreadMessageInfo)) {
             return false
         }
         UnreadMessageInfo unreadMessageInfo = (UnreadMessageInfo) obj

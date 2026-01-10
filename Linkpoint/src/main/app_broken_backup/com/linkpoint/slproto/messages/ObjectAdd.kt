@@ -57,11 +57,11 @@ class ObjectAdd : SLMessage {
         return 146
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleObjectAdd(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) 1)
         packUUID(byteBuffer, this.AgentData_Field.AgentID)
@@ -98,7 +98,7 @@ class ObjectAdd : SLMessage {
         packByte(byteBuffer, (this as Byte).ObjectData_Field.State)
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentData_Field.GroupID = unpackUUID(byteBuffer)

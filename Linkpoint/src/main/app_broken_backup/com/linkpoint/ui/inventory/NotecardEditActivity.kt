@@ -1,5 +1,7 @@
 package com.linkpoint.ui.inventory
 
+import kotlin.math.*
+
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
@@ -167,7 +169,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$srzsajEQj
 
     /* access modifiers changed from: private */
     /* renamed from: onAgentCircuit */
-    fun m622com_lumiyaviewer_lumiya_ui_inventory_NotecardEditActivitymthref1(SLAgentCircuit sLAgentCircuit): Unit {
+    fun m622com_lumiyaviewer_lumiya_ui_inventory_NotecardEditActivitymthref1(SLAgentCircuit sLAgentCircuit)  {
         if (sLAgentCircuit != null && !sLAgentCircuit.getModules().rlvController.canViewNotecard()) {
             finish()
         }
@@ -176,7 +178,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$srzsajEQj
 
     /* access modifiers changed from: private */
     /* renamed from: onNotecardLoaded */
-    fun m621com_lumiyaviewer_lumiya_ui_inventory_NotecardEditActivitymthref0(AssetData assetData): Unit {
+    fun m621com_lumiyaviewer_lumiya_ui_inventory_NotecardEditActivitymthref0(AssetData assetData)  {
         if (assetData.getStatus() == 1) {
             try {
                 this.notecard = SLNotecard(assetData.getData(), this.isEditingScript)
@@ -190,11 +192,11 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$srzsajEQj
     }
 
     private Unit saveChanges() {
-        Boolean z = true
+        var z: Boolean = true
         ByteArray bArr = null
         if (this.editMode && this.notecard != null) {
-            String editable = ((EditText) findViewById(R.id.notecardEditTitle)).getText().toString()
-            String editable2 = ((EditText) findViewById(R.id.notecardEditDescription)).getText().toString()
+            var editable: String = ((EditText) findViewById(R.id.notecardEditTitle)).getText().toString()
+            var editable2: String = ((EditText) findViewById(R.id.notecardEditDescription)).getText().toString()
             if (this.noteEntry != null) {
                 z = !(Objects.equal(editable, this.noteEntry.name) ? Objects.equal(editable2, this.noteEntry.description) : false)
             }
@@ -321,10 +323,10 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$srzsajEQj
     }
 
     private Unit updateButtonsForMode() {
-        Boolean z = true
-        Int i2 = 8
+        var z: Boolean = true
+        var i2: Int = 8
         TextKeyListener textKeyListener = null
-        Boolean z2 = this.notecardAssetSubscription.getLoadableStatus() == Loadable.Status.Loading
+        var z2: Boolean = this.notecardAssetSubscription.getLoadableStatus() == Loadable.Status.Loading
         if (this.noteEntry != null && (this.noteEntry.ownerMask & 16384) == 0) {
             z = false
         }
@@ -485,16 +487,16 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$srzsajEQj
     }
 
     /* access modifiers changed from: protected */
-    fun onActivityResult(Int i, Int i2, Intent intent): Unit {
+    fun onActivityResult(Int i, Int i2, Intent intent)  {
         SLInventoryEntry sLInventoryEntry
         switch (i) {
             case 1:
                 if (i2 == -1 && this.editMode && (sLInventoryEntry = (SLInventoryEntry) intent.getParcelableExtra(InventoryFragment.SELECTED_INVENTORY_ENTRY)) != null) {
                     Spanned createSingleEditableAttachment = SLNotecard.createSingleEditableAttachment(sLInventoryEntry)
                     EditText editText = (EditText) findViewById(R.id.notecardEditContents)
-                    Int selectionStart = editText.getSelectionStart()
-                    Int selectionEnd = editText.getSelectionEnd()
-                    editText.getText().replace(Math.min(selectionStart, selectionEnd), Math.max(selectionStart, selectionEnd), createSingleEditableAttachment, 0, createSingleEditableAttachment.length())
+                    var selectionStart: Int = editText.getSelectionStart()
+                    var selectionEnd: Int = editText.getSelectionEnd()
+                    editText.getText().replace(min(selectionStart, selectionEnd), max(selectionStart, selectionEnd), createSingleEditableAttachment, 0, createSingleEditableAttachment.length())
                     return
                 }
                 return
@@ -503,7 +505,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$srzsajEQj
         }
     }
 
-    fun onAttachmentClick(SLInventoryEntry sLInventoryEntry): Unit {
+    fun onAttachmentClick(SLInventoryEntry sLInventoryEntry)  {
         if (sLInventoryEntry.invType == SLInventoryType.IT_LANDMARK.getTypeCode()) {
             CharSequence[] charSequenceArr = {getString(R.string.attachment_action_teleport), getString(R.string.attachment_action_copy)}
             AlertDialog.Builder builder = AlertDialog.Builder(this)
@@ -670,7 +672,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$srzsajEQj
         builder2.create().show()
     }
 
-    fun onClick(View view): Unit {
+    fun onClick(View view)  {
         switch (view.getId()) {
             case R.id.notecardErrorDiscard:
                 this.lastErrorMessage = null
@@ -690,7 +692,7 @@ Method generation error in method: com.linkpoint.ui.inventory.-$Lambda$srzsajEQj
         }
     }
 
-    fun onCreate(Bundle bundle): Unit {
+    fun onCreate(Bundle bundle)  {
         super.onCreate(bundle)
         Intent intent = getIntent()
         if (intent != null) {

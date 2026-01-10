@@ -18,14 +18,14 @@ class SLTextureUploader : SLModule {
         }
     }
 
-    fun BeginUpload(SLTextureUploadRequest sLTextureUploadRequest): Unit {
+    fun BeginUpload(SLTextureUploadRequest sLTextureUploadRequest)  {
         if (this.executor != null && this.capURL != null) {
             sLTextureUploadRequest.setCapURL(this.capURL)
             this.executor.execute(sLTextureUploadRequest)
         }
     }
 
-    fun HandleCloseCircuit(): Unit {
+    fun HandleCloseCircuit()  {
         if (this.executor != null) {
             this.executor.shutdownNow()
             this.executor = null

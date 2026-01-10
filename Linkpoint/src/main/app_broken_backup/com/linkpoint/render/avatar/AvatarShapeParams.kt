@@ -1,5 +1,7 @@
 package com.linkpoint.render.avatar
 
+import kotlin.math.*
+
 import com.linkpoint.Debug
 import com.linkpoint.slproto.messages.AvatarAppearance
 import com.linkpoint.slproto.messages.AvatarAppearance.AppearanceData
@@ -39,7 +41,7 @@ object AvatarShapeParams {
     fun create(avatarShapeParams: AvatarShapeParams, iArr: IntArray): AvatarShapeParams {
         if (iArr.length != 218) {
             Object obj = IntArray(218)
-            System.arraycopy(iArr, 0, obj, 0, Math.min(iArr.length, 218))
+            System.arraycopy(iArr, 0, obj, 0, min(iArr.length, 218))
             Object iArr2
             if (iArr2.length >= 218 || avatarShapeParams == null) {
                 iArr2 = obj
@@ -52,7 +54,7 @@ object AvatarShapeParams {
     }
 
     fun equals(obj: Any): Boolean {
-        return obj instanceof AvatarShapeParams ? Arrays.equals(this.visualParamValues, ((AvatarShapeParams) obj).visualParamValues) : false
+        return obj is AvatarShapeParams ? Arrays.equals(this.visualParamValues, ((AvatarShapeParams) obj).visualParamValues) : false
     }
 
     fun getParamCount(): Int {

@@ -42,7 +42,7 @@ class ChatMessageLoader : ChunkedListLoader<ChatMessage> {
         QueryBuilder orderAsc = z ? where.where(ChatMessageDao.Properties.Id.gt(Long.valueOf(j)), WhereCondition[0]).orderAsc(ChatMessageDao.Properties.Id) : where.where(ChatMessageDao.Properties.Id.lt(Long.valueOf(j)), WhereCondition[0]).orderDesc(ChatMessageDao.Properties.Id)
         orderAsc.limit(i + 1)
         List list = orderAsc.list()
-        Boolean z2 = list.size() > i
+        var z2: Boolean = list.size() > i
         if (z2) {
             list.remove(list.size() - 1)
         }

@@ -52,7 +52,7 @@ class DirectByteBuffer {
     @Throws(IndexOutOfBoundsException::class)
 
     fun zeroDecode(ByteArray bArr, Int i, Int i2, ByteArray bArr2, Int i3, Int i4): Int {
-        Int zeroDecodeArray = zeroDecodeArray(bArr, i, i2, bArr2, i3, i4)
+        var zeroDecodeArray: Int = zeroDecodeArray(bArr, i, i2, bArr2, i3, i4)
         if (zeroDecodeArray >= 0) {
             return zeroDecodeArray
         }
@@ -77,15 +77,15 @@ class DirectByteBuffer {
         return this.buf.asShortBuffer()
     }
 
-    fun copyFrom(Int i, DirectByteBuffer directByteBuffer, Int i2, Int i3): Unit {
+    fun copyFrom(Int i, DirectByteBuffer directByteBuffer, Int i2, Int i3)  {
         copyPart(this.buf, directByteBuffer.buf, i, i2, i3)
     }
 
-    fun copyFromFloat(Int i, DirectByteBuffer directByteBuffer, Int i2, Int i3): Unit {
+    fun copyFromFloat(Int i, DirectByteBuffer directByteBuffer, Int i2, Int i3)  {
         copyPart(this.buf, directByteBuffer.buf, i * 4, i2 * 4, i3 * 4)
     }
 
-    fun copyFromShort(Int i, DirectByteBuffer directByteBuffer, Int i2, Int i3): Unit {
+    fun copyFromShort(Int i, DirectByteBuffer directByteBuffer, Int i2, Int i3)  {
         copyPart(this.buf, directByteBuffer.buf, i * 2, i2 * 2, i3 * 2)
     }
 
@@ -111,8 +111,8 @@ class DirectByteBuffer {
         return this.buf.getShort(i * 2)
     }
 
-    fun loadFromByteArray(Int i, ByteArray bArr, Int i2, Int i3): Unit {
-        Int i4 = i + i3
+    fun loadFromByteArray(Int i, ByteArray bArr, Int i2, Int i3)  {
+        var i4: Int = i + i3
         if (i >= 0 && i <= this.buf.capacity() && i4 >= 0 && i4 <= this.buf.capacity()) {
             copyByteArray(this.buf, i, bArr, i2, i3)
             return
@@ -120,9 +120,9 @@ class DirectByteBuffer {
         throw IndexOutOfBoundsException(String.format("capacity %d, posStart %d, posEnd %d", Any[]{Int.valueOf(this.buf.capacity()), Int.valueOf(i), Int.valueOf(i4)}))
     }
 
-    fun loadFromFloatArray(Int i, FloatArray fArr, Int i2, Int i3): Unit {
-        Int i4 = i * 4
-        Int i5 = (i + i3) * 4
+    fun loadFromFloatArray(Int i, FloatArray fArr, Int i2, Int i3)  {
+        var i4: Int = i * 4
+        var i5: Int = (i + i3) * 4
         if (i4 >= 0 && i4 <= this.buf.capacity() && i5 >= 0 && i5 <= this.buf.capacity()) {
             copyFloatArray(this.buf, i, fArr, i2, i3)
             return
@@ -130,9 +130,9 @@ class DirectByteBuffer {
         throw IndexOutOfBoundsException(String.format("capacity %d, posStart %d, posEnd %d", Any[]{Int.valueOf(this.buf.capacity()), Int.valueOf(i4), Int.valueOf(i5)}))
     }
 
-    fun loadFromShortArray(Int i, ShortArray sArr, Int i2, Int i3): Unit {
-        Int i4 = i * 2
-        Int i5 = (i + i3) * 2
+    fun loadFromShortArray(Int i, ShortArray sArr, Int i2, Int i3)  {
+        var i4: Int = i * 2
+        var i5: Int = (i + i3) * 2
         if (i4 >= 0 && i4 <= this.buf.capacity() && i5 >= 0 && i5 <= this.buf.capacity()) {
             copyShortArray(this.buf, i, sArr, i2, i3)
             return
@@ -140,9 +140,9 @@ class DirectByteBuffer {
         throw IndexOutOfBoundsException(String.format("capacity %d, posStart %d, posEnd %d", Any[]{Int.valueOf(this.buf.capacity()), Int.valueOf(i4), Int.valueOf(i5)}))
     }
 
-    fun loadFromShortArrayOffset(Int i, ShortArray sArr, Int i2, Int i3, Short s): Unit {
-        Int i4 = i * 2
-        Int i5 = (i + i3) * 2
+    fun loadFromShortArrayOffset(Int i, ShortArray sArr, Int i2, Int i3, Short s)  {
+        var i4: Int = i * 2
+        var i5: Int = (i + i3) * 2
         if (i4 >= 0 && i4 <= this.buf.capacity() && i5 >= 0 && i5 <= this.buf.capacity()) {
             copyShortArrayOffset(this.buf, i, sArr, i2, i3, s)
             return
@@ -170,23 +170,23 @@ class DirectByteBuffer {
         return this.buf.position(i * 2)
     }
 
-    fun putFloat(Float f): Unit {
+    fun putFloat(Float f)  {
         this.buf.putFloat(f)
     }
 
-    fun putFloat(Int i, Float f): Unit {
+    fun putFloat(Int i, Float f)  {
         this.buf.putFloat(i * 4, f)
     }
 
-    fun putRawFloat(Int i, Float f): Unit {
+    fun putRawFloat(Int i, Float f)  {
         this.buf.putFloat(i, f)
     }
 
-    fun putRawInt(Int i, Int i2): Unit {
+    fun putRawInt(Int i, Int i2)  {
         this.buf.putInt(i, i2)
     }
 
-    fun putShort(Short s): Unit {
+    fun putShort(Short s)  {
         this.buf.putShort(s)
     }
 
@@ -196,7 +196,7 @@ class DirectByteBuffer {
         ByteBuffer asByteBuffer = asByteBuffer()
         ByteArray bArr = Byte[asByteBuffer.capacity()]
         inputStream.read(bArr)
-        Int position = asByteBuffer.position()
+        var position: Int = asByteBuffer.position()
         asByteBuffer.position(0)
         asByteBuffer.put(bArr)
         asByteBuffer.position(position)

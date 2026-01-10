@@ -25,8 +25,8 @@ class CABundleHelper {
         Int n
         Any object2
         InputStream inputStream
-        Boolean bl = false
-        String string2 = object.getCacheDir().getAbsolutePath()
+        var bl: Boolean = false
+        var string2: String = object.getCacheDir().getAbsolutePath()
         try {
             inputStream = object.getAssets().open("ca-bundle.crt")
             object2 = StringBuilder()

@@ -32,11 +32,11 @@ class TelehubInfo : SLMessage {
         return this.TelehubBlock_Field.ObjectName.size + 17 + 12 + 12 + 4 + 1 + (this.SpawnPointBlock_Fields.size() * 12)
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleTelehubInfo(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 10)
@@ -50,7 +50,7 @@ class TelehubInfo : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.TelehubBlock_Field.ObjectID = unpackUUID(byteBuffer)
         this.TelehubBlock_Field.ObjectName = unpackVariable(byteBuffer, 1)
         this.TelehubBlock_Field.TelehubPos = unpackLLVector3(byteBuffer)

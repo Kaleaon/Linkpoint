@@ -27,10 +27,10 @@ class TeleportFailed : SLMessage {
     }
 
     fun CalcPayloadSize(): Int {
-        Int length = this.Info_Field.Reason.size + 17 + 4 + 1
+        var length: Int = this.Info_Field.Reason.size + 17 + 4 + 1
         Iterator<T> it = this.AlertInfo_Fields.iterator()
         while (true) {
-            Int i = length
+            var i: Int = length
             if (!it.hasNext()) {
                 return i
             }
@@ -39,11 +39,11 @@ class TeleportFailed : SLMessage {
         }
     }
 
-    fun Handle(SLMessageHandler sLMessageHandler): Unit {
+    fun Handle(SLMessageHandler sLMessageHandler)  {
         sLMessageHandler.HandleTeleportFailed(this)
     }
 
-    fun PackPayload(ByteBuffer byteBuffer): Unit {
+    fun PackPayload(ByteBuffer byteBuffer)  {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 74)
@@ -56,7 +56,7 @@ class TeleportFailed : SLMessage {
         }
     }
 
-    fun UnpackPayload(ByteBuffer byteBuffer): Unit {
+    fun UnpackPayload(ByteBuffer byteBuffer)  {
         this.Info_Field.AgentID = unpackUUID(byteBuffer)
         this.Info_Field.Reason = unpackVariable(byteBuffer, 1)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE

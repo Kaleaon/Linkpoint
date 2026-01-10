@@ -29,7 +29,7 @@ class AutoValue_UnreadNotifications : UnreadNotifications {
         if (obj == this) {
             return true
         }
-        if (!(obj instanceof UnreadNotifications)) {
+        if (!(obj is UnreadNotifications)) {
             return false
         }
         UnreadNotifications unreadNotifications = (UnreadNotifications) obj

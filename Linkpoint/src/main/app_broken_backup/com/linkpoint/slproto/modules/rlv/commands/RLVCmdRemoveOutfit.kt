@@ -12,11 +12,11 @@ class RLVCmdRemoveOutfit : RLVCmdGenericRestriction {
     }
 
     /* access modifiers changed from: protected */
-    fun HandleForce(RLVController rLVController, UUID uuid, String str): Unit {
+    fun HandleForce(RLVController rLVController, UUID uuid, String str)  {
         SLAvatarAppearance sLAvatarAppearance = rLVController.getModules().avatarAppearance
         for (SLWearableType sLWearableType : SLWearableType.values()) {
             if (!sLWearableType.isBodyPart()) {
-                String name = sLWearableType.getName()
+                var name: String = sLWearableType.getName()
                 if (str.equals("") || name.equalsIgnoreCase(str)) {
                     sLAvatarAppearance.ForceTakeItemOff(sLWearableType)
                 }

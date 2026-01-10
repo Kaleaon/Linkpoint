@@ -73,10 +73,10 @@ class SLMoveEvents {
     val CONTROL_UP_POS_INDEX: Int = 4
     val CONTROL_YAW_NEG_INDEX: Int = 9
     val CONTROL_YAW_POS_INDEX: Int = 8
-    Int FlyDownward = 16
-    Int FlyUpward = 8
-    Int MoveBackward = 4
-    Int MoveForward = 2
-    Int StrafeLeft = 32
-    Int StrafeRight = 64
+    var FlyDownward: Int = 16
+    var FlyUpward: Int = 8
+    var MoveBackward: Int = 4
+    var MoveForward: Int = 2
+    var StrafeLeft: Int = 32
+    var StrafeRight: Int = 64
 }

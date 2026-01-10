@@ -27,7 +27,7 @@ class SLMessageResponseCacher<Key, MessageType : SLMessage> : ResponseCacher<Key
     /* access modifiers changed from: protected */
     fun loadCached(ByteArray bArr): MessageType {
         ByteBuffer order = ByteBuffer.wrap(bArr).order(ByteOrder.nativeOrder())
-        Int DecodeMessageIDGeneric = SLMessage.DecodeMessageIDGeneric(order)
+        var DecodeMessageIDGeneric: Int = SLMessage.DecodeMessageIDGeneric(order)
         MessageType CreateByID = SLMessageFactory.CreateByID(DecodeMessageIDGeneric)
         if (CreateByID != null) {
             CreateByID.UnpackPayload(order)

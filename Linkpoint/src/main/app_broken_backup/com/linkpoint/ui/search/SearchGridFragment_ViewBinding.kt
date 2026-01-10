@@ -34,13 +34,13 @@ class SearchGridFragment_ViewBinding : Unbinder {
         View findRequiredView2 = Utils.findRequiredView(view, R.id.start_search_button, "method 'onSearchButtonClicked'")
         this.view2131755640 = findRequiredView2
         findRequiredView2.setOnClickListener(DebouncingOnClickListener() {
-            fun doClick(View view): Unit {
+            fun doClick(View view)  {
                 searchGridFragment.onSearchButtonClicked()
             }
     }
 
     @CallSuper
-    fun unbind(): Unit {
+    fun unbind()  {
         SearchGridFragment searchGridFragment = this.target
         if (searchGridFragment == null) {
             throw IllegalStateException("Bindings already cleared.")
