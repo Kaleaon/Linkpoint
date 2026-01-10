@@ -209,6 +209,8 @@ class SecondLifeProtocol(private val context: Context) {
                     <member><name>version</name><value><string>$VIEWER_NAME $VIEWER_VERSION</string></value></member>
                     <member><name>platform</name><value><string>Android</string></value></member>
                     <member><name>platform_version</name><value><string>${android.os.Build.VERSION.RELEASE}</string></value></member>
+                    <member><name>mac</name><value><string>00:00:00:00:00:00</string></value></member>
+                    <member><name>id0</name><value><string>00000000-0000-0000-0000-000000000000</string></value></member>
                     <member><name>agree_to_tos</name><value><boolean>1</boolean></value></member>
                     <member><name>read_critical</name><value><boolean>1</boolean></value></member>
                     <member>
