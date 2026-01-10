@@ -138,6 +138,8 @@ class SecondLifeProtocol(private val context: Context) {
         )
         
         try {
+            Log.d(TAG, "Login request to: $loginUri")
+            
             val request = Request.Builder()
                 .url(loginUri)
                 .post(xmlRequest.toRequestBody("text/xml".toMediaType()))
@@ -148,37 +150,77 @@ class SecondLifeProtocol(private val context: Context) {
             val response = httpClient.newCall(request).execute()
             val responseBody = response.body?.string() ?: ""
             
+            Log.d(TAG, "Login response code: ${response.code}, body length: ${responseBody.length}")
+            
             if (response.isSuccessful) {
                 parseLoginResponse(responseBody, firstName, lastName)
             } else {
                 app.sessionManager.setConnectionState(ConnectionState.ERROR)
-                LoginResult.Failure("Server error: ${response.code}")
+                val serverMessage = extractServerErrorMessage(responseBody)
+                val errorDetail = buildString {
+                    append("Server returned HTTP ${response.code}")
+                    if (serverMessage != null) {
+                        append(": $serverMessage")
+                    }
+                }
+                Log.w(TAG, "Login failed - $errorDetail")
+                LoginResult.Failure(errorDetail, technicalDetails = "URL: $loginUri\nHTTP Status: ${response.code}\nResponse: ${responseBody.take(500)}")
             }
         } catch (e: IOException) {
-            Log.e(TAG, "Login network error", e)
+            Log.e(TAG, "Login network error: ${e.javaClass.simpleName}: ${e.message}", e)
             app.sessionManager.setConnectionState(ConnectionState.ERROR)
-            val errorMessage = when {
-                e.message.isNullOrBlank() -> 
-                    "Unable to connect. Please check your internet connection and try again."
-                e is SocketTimeoutException || e.message!!.contains("timeout", ignoreCase = true) -> 
-                    "Connection timed out. If you're on mobile data, try moving to an area with better signal or switch to Wi-Fi."
-                e is UnknownHostException || e.message!!.contains("host", ignoreCase = true) -> 
-                    "Could not reach server. Please check your internet connection. If on mobile data, try toggling airplane mode."
-                e.message!!.contains("ssl", ignoreCase = true) || e.message!!.contains("certificate", ignoreCase = true) -> 
-                    "Secure connection failed. This may be a temporary network issue. Please try again."
-                e.message!!.contains("reset", ignoreCase = true) || e.message!!.contains("closed", ignoreCase = true) ->
-                    "Connection was interrupted. This often happens on mobile networks. Please try again."
-                e.message!!.contains("failed to connect", ignoreCase = true) ->
-                    "Could not connect to server. Please check your network connection and try again."
-                else -> "Network error: ${e.message}"
+            
+            val technicalDetails = buildString {
+                appendLine("URL: $loginUri")
+                appendLine("Exception: ${e.javaClass.simpleName}")
+                appendLine("Message: ${e.message ?: "none"}")
+                e.cause?.let { cause ->
+                    appendLine("Cause: ${cause.javaClass.simpleName}: ${cause.message}")
+                }
             }
-            LoginResult.Failure(errorMessage)
+            
+            val (errorMessage, errorCode) = when {
+                e is SocketTimeoutException -> 
+                    "Connection timed out after multiple retries. The Second Life servers may be slow or unreachable." to "TIMEOUT"
+                e is UnknownHostException -> 
+                    "Cannot resolve server address. Please check your internet connection and DNS settings." to "DNS_FAILED"
+                e is SSLException -> 
+                    "SSL/TLS connection failed: ${e.message?.take(100) ?: "handshake error"}. This may be a network or certificate issue." to "SSL_ERROR"
+                e.message?.contains("timeout", ignoreCase = true) == true -> 
+                    "Connection timed out. The server is not responding." to "TIMEOUT"
+                e.message?.contains("host", ignoreCase = true) == true -> 
+                    "Could not reach the login server. Check your internet connection." to "HOST_UNREACHABLE"
+                e.message?.contains("reset", ignoreCase = true) == true || 
+                e.message?.contains("closed", ignoreCase = true) == true ->
+                    "Connection was reset by the server or network. Please try again." to "CONNECTION_RESET"
+                e.message?.contains("failed to connect", ignoreCase = true) == true ->
+                    "Failed to connect to ${loginUri.substringAfter("://").substringBefore("/")}. Check network access." to "CONNECTION_FAILED"
+                e.message?.contains("refused", ignoreCase = true) == true ->
+                    "Connection refused by server. The login service may be down." to "CONNECTION_REFUSED"
+                e.message.isNullOrBlank() -> 
+                    "Network error occurred with no details. Please check your internet connection." to "UNKNOWN_NETWORK"
+                else -> 
+                    "Network error: ${e.message}" to "NETWORK_ERROR"
+            }
+            
+            Log.w(TAG, "Login network error [$errorCode]: $errorMessage")
+            LoginResult.Failure(errorMessage, errorCode = errorCode, technicalDetails = technicalDetails)
         } catch (e: Exception) {
-            Log.e(TAG, "Login error", e)
+            Log.e(TAG, "Login unexpected error: ${e.javaClass.simpleName}: ${e.message}", e)
             app.sessionManager.setConnectionState(ConnectionState.ERROR)
-            val errorMessage = e.message?.takeIf { it.isNotBlank() } 
-                ?: "An unexpected error occurred. Please try again."
-            LoginResult.Failure("Error: $errorMessage")
+            
+            val technicalDetails = buildString {
+                appendLine("URL: $loginUri")
+                appendLine("Exception: ${e.javaClass.simpleName}")
+                appendLine("Message: ${e.message ?: "none"}")
+                appendLine("Stack: ${e.stackTrace.take(5).joinToString("\n  ")}")
+            }
+            
+            val errorMessage = when {
+                e.message.isNullOrBlank() -> "An unexpected error occurred during login."
+                else -> "Error: ${e.message}"
+            }
+            LoginResult.Failure(errorMessage, errorCode = "UNEXPECTED", technicalDetails = technicalDetails)
         }
     }
     
@@ -232,13 +274,26 @@ class SecondLifeProtocol(private val context: Context) {
         """.trimIndent()
     }
     
+    /**
+     * Extract error message from non-200 HTTP response
+     */
+    private fun extractServerErrorMessage(responseBody: String): String? {
+        // Try to extract any error message from XML response
+        val messageRegex = """<(?:message|error|fault[Ss]tring)>([^<]+)</""".toRegex()
+        return messageRegex.find(responseBody)?.groupValues?.get(1)?.trim()
+    }
+    
     private fun parseLoginResponse(xml: String, firstName: String, lastName: String): LoginResult {
         val app = LinkpointApp.getInstance()
+        
+        Log.d(TAG, "Parsing login response (${xml.length} chars)")
         
         // Check for login success
         val loginRegex = """<name>login</name>\s*<value><string>([\w]+)</string>""".toRegex()
         val loginMatch = loginRegex.find(xml)
         val loginStatus = loginMatch?.groupValues?.get(1)
+        
+        Log.d(TAG, "Login status in response: $loginStatus")
         
         if (loginStatus == "true") {
             // Extract session info
@@ -250,6 +305,8 @@ class SecondLifeProtocol(private val context: Context) {
             val regionName = extractValue(xml, "region_x")?.let { 
                 "Region ${it.toIntOrNull() ?: 0 / 256}"
             } ?: "Unknown"
+            
+            Log.d(TAG, "Session: $sessionId, Agent: $agentIdStr, Sim: $simIp:$simPort")
             
             val agentId = try { UUID.fromString(agentIdStr) } catch (e: Exception) { UUID.randomUUID() }
             
@@ -276,10 +333,24 @@ class SecondLifeProtocol(private val context: Context) {
         } else {
             // Extract error message - try multiple fields that SL might use
             var errorMessage = extractValue(xml, "message")
+            val errorReason = extractValue(xml, "reason")
+            
+            Log.d(TAG, "Login failure - message: $errorMessage, reason: $errorReason")
             
             // If message is null, empty, or looks like a null literal, try the reason field
             if (errorMessage.isNullOrBlank() || errorMessage.equals("null", ignoreCase = true)) {
-                errorMessage = extractValue(xml, "reason")
+                errorMessage = errorReason
+            }
+            
+            // Determine error code based on reason
+            val errorCode = when (errorReason?.lowercase()) {
+                "key" -> "INVALID_CREDENTIALS"
+                "presence" -> "ALREADY_LOGGED_IN"
+                "update" -> "UPDATE_REQUIRED"
+                "tos" -> "TOS_NOT_ACCEPTED"
+                "critical" -> "CRITICAL_MESSAGE"
+                "optional" -> "OPTIONAL_UPDATE"
+                else -> "LOGIN_REJECTED"
             }
             
             // Provide a user-friendly fallback if we still don't have a message
@@ -293,9 +364,18 @@ class SecondLifeProtocol(private val context: Context) {
                 else -> errorMessage
             }
             
+            val technicalDetails = buildString {
+                appendLine("Reason: ${errorReason ?: "not provided"}")
+                appendLine("Message: ${extractValue(xml, "message") ?: "not provided"}")
+                appendLine("Login status: $loginStatus")
+                // Include relevant response snippet
+                val sanitized = xml.replace(Regex("""<name>passwd</name>\s*<value><string>[^<]+</string>"""), "<name>passwd</name><value><string>[REDACTED]</string>")
+                appendLine("Response preview: ${sanitized.take(800)}")
+            }
+            
             app.sessionManager.setConnectionState(ConnectionState.ERROR)
-            Log.w(TAG, "Login failed: $finalMessage (raw: $errorMessage)")
-            return LoginResult.Failure(finalMessage)
+            Log.w(TAG, "Login failed [$errorCode]: $finalMessage (raw reason: $errorReason)")
+            return LoginResult.Failure(finalMessage, errorCode = errorCode, technicalDetails = technicalDetails)
         }
     }
     
@@ -352,7 +432,11 @@ class SecondLifeProtocol(private val context: Context) {
 
 sealed class LoginResult {
     data class Success(val agentId: UUID, val sessionId: String) : LoginResult()
-    data class Failure(val message: String) : LoginResult()
+    data class Failure(
+        val message: String,
+        val errorCode: String? = null,
+        val technicalDetails: String? = null
+    ) : LoginResult()
 }
 
 sealed class TeleportResult {
