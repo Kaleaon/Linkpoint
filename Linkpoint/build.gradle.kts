@@ -95,8 +95,8 @@ android {
     sourceSets {
         getByName("main") {
             manifest.srcFile("src/main/AndroidManifest.xml")
-            java.setSrcDirs(listOf("src/main/app"))
-            res.srcDirs("src/main/appres")
+            java.setSrcDirs(listOf("src/main/java"))
+            res.srcDirs("src/main/res")
             assets.srcDirs("src/main/assets")
         }
     }
@@ -128,7 +128,7 @@ android {
 }
 
 kotlin {
-    sourceSets["main"].kotlin.setSrcDirs(listOf("src/main/app"))
+    sourceSets["main"].kotlin.setSrcDirs(listOf("src/main/java"))
 }
 
 dependencies {
@@ -214,6 +214,17 @@ dependencies {
     implementation("com.google.android.filament:filament-utils-android:1.66.0")
     implementation("com.google.android.filament:gltfio-android:1.66.0")
     implementation("com.google.android.filament:filamat-android:1.66.0")
+    
+    // AndroidX XR support (for future Android XR devices)
+    // These are placeholders - actual XR libraries will be available when Android XR releases
+    // implementation("androidx.xr:xr-core:1.0.0")
+    // implementation("androidx.xr:xr-compose:1.0.0")
+    
+    // OpenXR loader (for Quest, Pico, etc.)
+    // implementation("org.khronos.openxr:openxr-android:1.0.0")
+    
+    // Google Cardboard SDK - requires local repository or AAR
+    // implementation("com.google.cardboard:sdk:1.21.0")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

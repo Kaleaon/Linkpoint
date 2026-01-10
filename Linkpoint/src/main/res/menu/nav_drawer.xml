@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="none">
+
+        <item
+            android:id="@+id/nav_chat"
+            android:icon="@drawable/ic_chat"
+            android:title="Chat" />
+
+        <item
+            android:id="@+id/nav_inventory"
+            android:icon="@drawable/ic_inventory"
+            android:title="Inventory" />
+
+        <item
+            android:id="@+id/nav_minimap"
+            android:icon="@drawable/ic_minimap"
+            android:title="Minimap" />
+
+        <item
+            android:id="@+id/nav_avatar"
+            android:icon="@drawable/ic_avatar"
+            android:title="My Avatar" />
+
+    </group>
+
+    <item android:title="More">
+        <menu>
+
+            <item
+                android:id="@+id/nav_xr_mode"
+                android:icon="@drawable/ic_xr"
+                android:title="XR Mode" />
+
+            <item
+                android:id="@+id/nav_settings"
+                android:icon="@drawable/ic_settings"
+                android:title="Settings" />
+
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@drawable/ic_logout"
+                android:title="Logout" />
+
+        </menu>
+    </item>
+
+</menu>

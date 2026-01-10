@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <!-- XR Render Container -->
+    <FrameLayout
+        android:id="@+id/xrContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- XR Overlay (minimal) -->
+    <FrameLayout
+        android:id="@+id/xrOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- Exit button (top left, semi-transparent) -->
+        <ImageButton
+            android:id="@+id/btnExitXR"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_close"
+            android:background="@drawable/circle_button_transparent"
+            android:contentDescription="Exit XR" />
+
+    </FrameLayout>
+
+</FrameLayout>
