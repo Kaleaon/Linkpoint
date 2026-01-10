@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -15,6 +16,8 @@ import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.core.GridInfo
 import com.linkpoint.network.LoginResult
+import com.linkpoint.network.NetworkDiagnostics
+import com.linkpoint.network.SSLHelper
 import com.linkpoint.ui.world.WorldViewActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -198,7 +201,8 @@ class LoginActivity : AppCompatActivity() {
     private data class NetworkStatus(
         val isConnected: Boolean,
         val message: String,
-        val details: String
+        val details: String,
+        val networkType: NetworkDiagnostics.NetworkType = NetworkDiagnostics.NetworkType.UNKNOWN
     )
     
     private data class ServerTestResult(
@@ -207,65 +211,78 @@ class LoginActivity : AppCompatActivity() {
         val details: String
     )
     
+    /**
+     * Enhanced network connectivity check using NetworkDiagnostics
+     * Provides detailed network information for better debugging
+     */
     private fun checkNetworkConnectivity(): NetworkStatus {
-        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val network = cm.activeNetwork
+        val networkInfo = NetworkDiagnostics.getNetworkInfo(this)
         
-        if (network == null) {
+        if (!networkInfo.isConnected) {
+            val message = when (networkInfo.type) {
+                NetworkDiagnostics.NetworkType.NONE ->
+                    "No network connection. Please connect to Wi-Fi or enable mobile data."
+                NetworkDiagnostics.NetworkType.WIFI ->
+                    "Connected to Wi-Fi but no internet access. Check your router connection."
+                NetworkDiagnostics.NetworkType.CELLULAR_2G,
+                NetworkDiagnostics.NetworkType.CELLULAR_3G,
+                NetworkDiagnostics.NetworkType.CELLULAR_4G,
+                NetworkDiagnostics.NetworkType.CELLULAR_LTE,
+                NetworkDiagnostics.NetworkType.CELLULAR_5G ->
+                    "Connected to ${networkInfo.displayName} but no internet access. Check your mobile data settings."
+                else ->
+                    "Network connection unavailable. Please check your network settings."
+            }
+            
             return NetworkStatus(
                 isConnected = false,
-                message = "No network connection. Please connect to Wi-Fi or enable mobile data.",
-                details = "ConnectivityManager.activeNetwork returned null"
+                message = message,
+                details = networkInfo.details,
+                networkType = networkInfo.type
             )
         }
         
-        val capabilities = cm.getNetworkCapabilities(network)
-        if (capabilities == null) {
-            return NetworkStatus(
-                isConnected = false,
-                message = "Network connection unavailable. Please check your network settings.",
-                details = "NetworkCapabilities is null for active network"
-            )
+        // Warn about slow network connections
+        val warningMessage = when (networkInfo.type) {
+            NetworkDiagnostics.NetworkType.CELLULAR_2G ->
+                "⚠️ Using 2G connection - login may be very slow. Wi-Fi recommended."
+            NetworkDiagnostics.NetworkType.CELLULAR_3G ->
+                "ℹ️ Using 3G connection - login may take longer than usual."
+            else -> null
         }
         
-        val hasInternet = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-        val hasWifi = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-        val hasCellular = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-        val hasEthernet = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
-        
-        val transportType = when {
-            hasWifi -> "Wi-Fi"
-            hasCellular -> "Mobile Data"
-            hasEthernet -> "Ethernet"
-            else -> "Unknown"
+        val statusMessage = buildString {
+            append("Connected via ${networkInfo.displayName}")
+            if (networkInfo.isMetered) {
+                append(" (metered)")
+            }
+            warningMessage?.let { append("\n$it") }
         }
         
-        val details = buildString {
-            appendLine("Transport: $transportType")
-            appendLine("Has Internet: $hasInternet")
-            appendLine("Has Validated: ${capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)}")
-            appendLine("Has Not Metered: ${capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)}")
-        }
+        Log.d(TAG, "Network check passed: ${networkInfo.displayName}, " +
+            "bandwidth: ${networkInfo.estimatedBandwidthKbps}kbps, " +
+            "timeout multiplier: ${networkInfo.timeoutMultiplier}x")
         
-        if (!hasInternet) {
-            return NetworkStatus(
-                isConnected = false,
-                message = "Connected to $transportType but no internet access. Check your network configuration.",
-                details = details
-            )
-        }
-        
-        Log.d(TAG, "Network check passed: $transportType connected with internet capability")
-        return NetworkStatus(isConnected = true, message = "Connected via $transportType", details = details)
+        return NetworkStatus(
+            isConnected = true,
+            message = statusMessage,
+            details = networkInfo.details,
+            networkType = networkInfo.type
+        )
     }
     
     private suspend fun testServerReachability(loginUri: String): ServerTestResult = withContext(Dispatchers.IO) {
         try {
             val url = java.net.URL(loginUri)
+            
+            // Get network info for adaptive timeout
+            val networkInfo = NetworkDiagnostics.getNetworkInfo(this@LoginActivity)
+            val timeoutMs = (10000 * networkInfo.timeoutMultiplier).toInt()
+            
             val connection = url.openConnection() as java.net.HttpURLConnection
             connection.requestMethod = "HEAD"
-            connection.connectTimeout = 10000
-            connection.readTimeout = 10000
+            connection.connectTimeout = timeoutMs
+            connection.readTimeout = timeoutMs
             connection.instanceFollowRedirects = true
             
             val startTime = System.currentTimeMillis()
@@ -277,44 +294,73 @@ class LoginActivity : AppCompatActivity() {
                 appendLine("URL: $loginUri")
                 appendLine("Response Code: $responseCode")
                 appendLine("Response Time: ${elapsed}ms")
+                appendLine("Network: ${networkInfo.displayName}")
+                appendLine("Timeout Used: ${timeoutMs}ms")
             }
             
             // Accept any response - even 400/405 means server is reachable
             // The actual login will use POST which is what the server expects
-            Log.d(TAG, "Server reachability test: $responseCode in ${elapsed}ms")
+            Log.d(TAG, "Server reachability test: $responseCode in ${elapsed}ms via ${networkInfo.displayName}")
             ServerTestResult(
                 success = true,
-                message = "Server reachable",
+                message = "Server reachable (${elapsed}ms)",
                 details = details
             )
         } catch (e: java.net.UnknownHostException) {
+            val serverHost = loginUri.substringAfter("://").substringBefore("/")
             ServerTestResult(
                 success = false,
-                message = "Cannot resolve server address. DNS lookup failed for ${loginUri.substringAfter("://").substringBefore("/")}",
-                details = "UnknownHostException: ${e.message}"
+                message = "Cannot resolve '$serverHost'. Please check your internet connection.",
+                details = "UnknownHostException: ${e.message}\n\nThis usually means:\n• No internet connection\n• DNS server issues\n• Firewall blocking DNS"
             )
         } catch (e: java.net.SocketTimeoutException) {
+            val networkInfo = NetworkDiagnostics.getNetworkInfo(this@LoginActivity)
+            val suggestion = when (networkInfo.type) {
+                NetworkDiagnostics.NetworkType.CELLULAR_2G, 
+                NetworkDiagnostics.NetworkType.CELLULAR_3G ->
+                    "Your mobile connection is slow. Try using Wi-Fi."
+                else ->
+                    "The server may be busy. Please try again in a moment."
+            }
             ServerTestResult(
                 success = false,
-                message = "Server is not responding. Connection timed out.",
-                details = "SocketTimeoutException: ${e.message}\nURL: $loginUri"
+                message = "Server is not responding. $suggestion",
+                details = "SocketTimeoutException: ${e.message}\nURL: $loginUri\nNetwork: ${networkInfo.displayName}"
+            )
+        } catch (e: javax.net.ssl.SSLHandshakeException) {
+            val sslDiag = SSLHelper.diagnoseSSLIssues(loginUri)
+            val message = buildString {
+                append("SSL handshake failed. ")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    append("On Android ${Build.VERSION.RELEASE}, this may require proper network security configuration. ")
+                }
+                append("If using VPN or proxy, try disabling them.")
+            }
+            ServerTestResult(
+                success = false,
+                message = message,
+                details = buildString {
+                    appendLine("SSLHandshakeException: ${e.message}")
+                    appendLine()
+                    append(sslDiag.toReport())
+                }
             )
         } catch (e: javax.net.ssl.SSLException) {
             ServerTestResult(
                 success = false,
-                message = "SSL/TLS error connecting to server. This may be a certificate or network issue.",
-                details = "SSLException: ${e.message}\nURL: $loginUri"
+                message = "Secure connection failed. Please check your network and try again.",
+                details = "SSLException: ${e.message}\nURL: $loginUri\n\nPossible causes:\n• Unstable network\n• VPN/Proxy interference\n• Certificate issues"
             )
         } catch (e: java.net.ConnectException) {
             ServerTestResult(
                 success = false,
-                message = "Cannot connect to login server. Connection refused or server may be down.",
-                details = "ConnectException: ${e.message}\nURL: $loginUri"
+                message = "Cannot connect to login server. The server may be down for maintenance.",
+                details = "ConnectException: ${e.message}\nURL: $loginUri\n\nCheck status.secondlifegrid.net for server status."
             )
         } catch (e: Exception) {
             ServerTestResult(
                 success = false,
-                message = "Failed to reach login server: ${e.message}",
+                message = "Failed to reach login server: ${e.message?.take(100) ?: "Unknown error"}",
                 details = "${e.javaClass.simpleName}: ${e.message}\nURL: $loginUri"
             )
         }
@@ -369,19 +415,38 @@ class LoginActivity : AppCompatActivity() {
     }
     
     private fun showTechnicalDetailsDialog(failure: LoginResult.Failure) {
+        // Generate comprehensive diagnostic report
+        val networkDiagReport = NetworkDiagnostics.generateDiagnosticReport(this)
+        val sslInfo = buildString {
+            appendLine("TLS Support: ${SSLHelper.getHighestSupportedTLSVersion()}")
+            appendLine("TLS 1.3: ${if (SSLHelper.supportsTLS13()) "Supported" else "Not Supported"}")
+        }
+        
         val details = buildString {
+            appendLine("=== Error Information ===")
             appendLine("Error Code: ${failure.errorCode ?: "UNKNOWN"}")
-            appendLine()
             appendLine("Message: ${failure.message}")
             appendLine()
-            appendLine("--- Technical Details ---")
+            appendLine("=== Technical Details ===")
             appendLine(failure.technicalDetails ?: "No additional details available")
             appendLine()
-            appendLine("--- Device Info ---")
-            appendLine("Android: ${android.os.Build.VERSION.RELEASE} (API ${android.os.Build.VERSION.SDK_INT})")
-            appendLine("Device: ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}")
+            appendLine("=== Device Information ===")
+            appendLine("Android: ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
+            appendLine("Device: ${Build.MANUFACTURER} ${Build.MODEL}")
             appendLine("Grid: ${app.gridManager.getSelectedGrid().name}")
             appendLine("Login URI: ${app.gridManager.getSelectedGrid().loginUri}")
+            appendLine()
+            appendLine("=== SSL/TLS Information ===")
+            append(sslInfo)
+            appendLine()
+            append(networkDiagReport)
+            appendLine()
+            appendLine("=== Troubleshooting Tips ===")
+            appendLine("1. Check your internet connection is stable")
+            appendLine("2. Try switching between Wi-Fi and mobile data")
+            appendLine("3. Disable VPN/Proxy if enabled")
+            appendLine("4. Check status.secondlifegrid.net for server status")
+            appendLine("5. Restart the app and try again")
         }
         
         AlertDialog.Builder(this)

@@ -47,7 +47,9 @@
         android:theme="@style/Theme.Linkpoint"
         android:hardwareAccelerated="true"
         android:largeHeap="true"
-        android:enableOnBackInvokedCallback="true">
+        android:enableOnBackInvokedCallback="true"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:usesCleartextTraffic="false">
 
         <!-- Main Login Activity -->
         <activity

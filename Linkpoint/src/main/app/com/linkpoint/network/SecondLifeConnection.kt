@@ -1,5 +1,7 @@
 package com.linkpoint.network
 
+import android.content.Context
+import android.os.Build
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,16 +14,24 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.IOException
+import java.lang.ref.WeakReference
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.SSLException
+import javax.net.ssl.SSLHandshakeException
+import javax.net.ssl.SSLPeerUnverifiedException
 
 /**
  * Handles Second Life grid authentication and connection
+ * 
+ * Optimized for Android 9+ with:
+ * - Proper SSL/TLS configuration
+ * - Adaptive timeouts based on network conditions
+ * - Enhanced error handling for mobile networks
  */
-class SecondLifeConnection {
+class SecondLifeConnection(context: Context? = null) {
     
     companion object {
         private const val TAG = "SLConnection"
@@ -29,6 +39,11 @@ class SecondLifeConnection {
         // Second Life login URLs
         private const val SL_LOGIN_URL = "https://login.agni.lindenlab.com/cgi-bin/login.cgi"
         private const val BETA_LOGIN_URL = "https://login.aditi.lindenlab.com/cgi-bin/login.cgi"
+        
+        // Base timeout values (will be multiplied by network quality factor)
+        private const val BASE_CONNECT_TIMEOUT_SECONDS = 30L
+        private const val BASE_READ_TIMEOUT_SECONDS = 60L
+        private const val BASE_WRITE_TIMEOUT_SECONDS = 30L
         
         // Grid URLs - HTTPS required for security
         // Note: Some OpenSim grids may not support HTTPS
@@ -46,20 +61,28 @@ class SecondLifeConnection {
         )
     }
     
+    // Keep a weak reference to context for network diagnostics
+    private val contextRef: WeakReference<Context>? = context?.let { WeakReference(it) }
+    
     /**
      * Retry interceptor for handling transient mobile network failures.
-     * LTE/mobile networks often experience brief connection drops that succeed on retry.
+     * Enhanced for Android 9+ with SSL-specific error handling.
      */
-    private class MobileNetworkRetryInterceptor(private val maxRetries: Int = 3) : Interceptor {
+    private class MobileNetworkRetryInterceptor(
+        private val maxRetries: Int = 3,
+        private val initialDelayMs: Long = 500L
+    ) : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response {
             val request = chain.request()
             var lastException: IOException? = null
             
             repeat(maxRetries) { attempt ->
                 try {
-                    // Exponential backoff: 0ms, 500ms, 1500ms
+                    // Exponential backoff with jitter
                     if (attempt > 0) {
-                        val backoffMs = (attempt * 500L)
+                        val baseDelay = initialDelayMs * (1 shl (attempt - 1))
+                        val jitter = (Math.random() * 200).toLong()
+                        val backoffMs = baseDelay + jitter
                         Thread.sleep(backoffMs)
                         Log.d(TAG, "Retry attempt ${attempt + 1}/$maxRetries after ${backoffMs}ms backoff")
                     }
@@ -70,22 +93,46 @@ class SecondLifeConnection {
                 } catch (e: UnknownHostException) {
                     Log.w(TAG, "DNS failure on attempt ${attempt + 1}/$maxRetries: ${e.message}")
                     lastException = e
+                    // DNS failures often resolve quickly
+                    if (attempt < maxRetries - 1) Thread.sleep(100)
+                } catch (e: SSLHandshakeException) {
+                    // Check if transient
+                    val isTransient = e.message?.let { msg ->
+                        msg.contains("Connection reset", ignoreCase = true) ||
+                        msg.contains("closed", ignoreCase = true) ||
+                        msg.contains("timeout", ignoreCase = true)
+                    } ?: false
+                    
+                    if (isTransient) {
+                        Log.w(TAG, "Transient SSL handshake issue on attempt ${attempt + 1}/$maxRetries: ${e.message}")
+                        lastException = e
+                    } else {
+                        Log.e(TAG, "Non-transient SSL handshake error: ${e.message}")
+                        throw e
+                    }
+                } catch (e: SSLPeerUnverifiedException) {
+                    Log.e(TAG, "SSL certificate verification failed: ${e.message}")
+                    throw e // Never retry certificate verification failures
                 } catch (e: SSLException) {
-                    // SSL handshake failures can be transient on mobile networks
-                    if (e.message?.contains("Connection reset", ignoreCase = true) == true ||
-                        e.message?.contains("closed", ignoreCase = true) == true) {
+                    val isTransient = e.message?.let { msg ->
+                        msg.contains("Connection reset", ignoreCase = true) ||
+                        msg.contains("closed", ignoreCase = true) ||
+                        msg.contains("I/O error", ignoreCase = true)
+                    } ?: false
+                    
+                    if (isTransient) {
                         Log.w(TAG, "SSL connection issue on attempt ${attempt + 1}/$maxRetries: ${e.message}")
                         lastException = e
                     } else {
-                        throw e // Non-transient SSL error
+                        throw e
                     }
                 } catch (e: IOException) {
-                    // Check if this is a retryable error
                     val isRetryable = e.message?.let { msg ->
                         msg.contains("timeout", ignoreCase = true) ||
                         msg.contains("reset", ignoreCase = true) ||
                         msg.contains("closed", ignoreCase = true) ||
-                        msg.contains("failed to connect", ignoreCase = true)
+                        msg.contains("failed to connect", ignoreCase = true) ||
+                        msg.contains("ECONNRESET", ignoreCase = true)
                     } ?: false
                     
                     if (isRetryable) {
@@ -102,25 +149,55 @@ class SecondLifeConnection {
     }
     
     /**
-     * OkHttp client optimized for mobile/LTE networks:
-     * - Extended timeouts for high-latency mobile connections
-     * - Connection pooling for efficiency
-     * - Retry interceptor for transient failures
-     * - HTTP/2 support with HTTP/1.1 fallback
+     * Create an OkHttp client with adaptive timeouts and proper SSL configuration
      */
-    private val httpClient = OkHttpClient.Builder()
-        .connectTimeout(45, TimeUnit.SECONDS)  // Extended for LTE latency
-        .readTimeout(90, TimeUnit.SECONDS)     // Extended for slow mobile data
-        .writeTimeout(45, TimeUnit.SECONDS)    // Extended for upload on mobile
-        .retryOnConnectionFailure(true)        // Enable automatic connection retry
-        .connectionPool(ConnectionPool(
-            maxIdleConnections = 5,
-            keepAliveDuration = 5,
-            timeUnit = TimeUnit.MINUTES
-        ))
-        .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
-        .addInterceptor(MobileNetworkRetryInterceptor(maxRetries = 3))
-        .build()
+    private fun createHttpClient(): OkHttpClient {
+        // Get network info for adaptive timeouts if context is available
+        val timeoutMultiplier: Float
+        val retryCount: Int
+        
+        val ctx = contextRef?.get()
+        if (ctx != null) {
+            val networkInfo = NetworkDiagnostics.getNetworkInfo(ctx)
+            timeoutMultiplier = networkInfo.timeoutMultiplier.coerceIn(1.0f, 3.0f)
+            retryCount = networkInfo.recommendedRetries
+            Log.d(TAG, "Creating HTTP client - Network: ${networkInfo.displayName}, " +
+                "Timeout multiplier: ${timeoutMultiplier}x, Retries: $retryCount")
+        } else {
+            // Default values if no context
+            timeoutMultiplier = 1.5f
+            retryCount = 3
+            Log.d(TAG, "Creating HTTP client with default timeouts (no context)")
+        }
+        
+        val connectTimeout = (BASE_CONNECT_TIMEOUT_SECONDS * timeoutMultiplier).toLong().coerceAtMost(90L)
+        val readTimeout = (BASE_READ_TIMEOUT_SECONDS * timeoutMultiplier).toLong().coerceAtMost(180L)
+        val writeTimeout = (BASE_WRITE_TIMEOUT_SECONDS * timeoutMultiplier).toLong().coerceAtMost(90L)
+        
+        val builder = OkHttpClient.Builder()
+            .connectTimeout(connectTimeout, TimeUnit.SECONDS)
+            .readTimeout(readTimeout, TimeUnit.SECONDS)
+            .writeTimeout(writeTimeout, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(true)
+            .connectionPool(ConnectionPool(
+                maxIdleConnections = 5,
+                keepAliveDuration = 5,
+                timeUnit = TimeUnit.MINUTES
+            ))
+            .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
+            .addInterceptor(MobileNetworkRetryInterceptor(
+                maxRetries = retryCount,
+                initialDelayMs = (500 * timeoutMultiplier).toLong()
+            ))
+        
+        // Configure SSL for Android 9+ compatibility
+        SSLHelper.configureSSL(builder, debugMode = false)
+        
+        return builder.build()
+    }
+    
+    // Lazy initialization of HTTP client
+    private val httpClient: OkHttpClient by lazy { createHttpClient() }
     
     private var sessionId: String? = null
     private var agentId: String? = null
