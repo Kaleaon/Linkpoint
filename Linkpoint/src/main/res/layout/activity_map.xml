@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <SurfaceView
+        android:id="@+id/mapSurface"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Search bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:layout_gravity="top"
+        android:background="#80000000">
+
+        <EditText
+            android:id="@+id/searchInput"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:hint="Search region..."
+            android:textColorHint="@color/text_secondary"
+            android:textColor="@color/white"
+            android:background="@drawable/input_background"
+            android:paddingHorizontal="12dp"
+            android:inputType="text"
+            android:imeOptions="actionSearch" />
+
+        <ImageButton
+            android:id="@+id/searchButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:src="@drawable/ic_search"
+            android:background="@drawable/circle_button_accent"
+            android:contentDescription="Search" />
+
+    </LinearLayout>
+
+    <!-- Zoom controls -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="end|center_vertical"
+        android:layout_marginEnd="8dp">
+
+        <ImageButton
+            android:id="@+id/zoomInButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_zoom_in"
+            android:background="@drawable/circle_button"
+            android:contentDescription="Zoom in" />
+
+        <ImageButton
+            android:id="@+id/zoomOutButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:src="@drawable/ic_zoom_out"
+            android:background="@drawable/circle_button"
+            android:contentDescription="Zoom out" />
+
+        <ImageButton
+            android:id="@+id/currentLocationButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:src="@drawable/ic_avatar"
+            android:background="@drawable/circle_button"
+            android:contentDescription="Current location" />
+
+    </LinearLayout>
+
+    <!-- Bottom info panel -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="bottom"
+        android:padding="16dp"
+        android:background="#C0000000">
+
+        <TextView
+            android:id="@+id/regionNameText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Region: (select on map)"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/coordinatesText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Local: 128, 128, 0"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/teleportButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Teleport"
+            android:enabled="false" />
+
+    </LinearLayout>
+
+</FrameLayout>

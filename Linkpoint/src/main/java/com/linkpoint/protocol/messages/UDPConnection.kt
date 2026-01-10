@@ -14,11 +14,25 @@ import java.util.concurrent.atomic.AtomicInteger
  * UDP Connection handler for Second Life protocol
  * Handles reliable and unreliable message transmission
  */
-class UDPConnection(
-    private val simIP: String,
-    private val simPort: Int,
-    private val circuitCode: Int
-) {
+class UDPConnection {
+    
+    private var simIP: String = ""
+    private var simPort: Int = 0
+    private var circuitCode: Int = 0
+    
+    constructor()
+    
+    constructor(simIP: String, simPort: Int, circuitCode: Int) {
+        this.simIP = simIP
+        this.simPort = simPort
+        this.circuitCode = circuitCode
+    }
+    
+    fun configure(simIP: String, simPort: Int, circuitCode: Int) {
+        this.simIP = simIP
+        this.simPort = simPort
+        this.circuitCode = circuitCode
+    }
     companion object {
         private const val TAG = "UDPConnection"
         private const val BUFFER_SIZE = 65535

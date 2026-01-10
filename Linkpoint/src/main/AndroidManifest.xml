@@ -137,6 +137,33 @@
             </intent-filter>
         </activity>
 
+        <!-- Profile Activity -->
+        <activity
+            android:name=".ui.profile.ProfileActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.world.WorldViewActivity" />
+
+        <!-- World Map Activity -->
+        <activity
+            android:name=".ui.map.MapActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:parentActivityName=".ui.world.WorldViewActivity" />
+
+        <!-- Search Activity -->
+        <activity
+            android:name=".ui.search.SearchActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ui.world.WorldViewActivity" />
+
+        <!-- Build/Edit Activity -->
+        <activity
+            android:name=".ui.build.BuildActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".ui.world.WorldViewActivity" />
+
         <!-- Grid Connection Service -->
         <service
             android:name=".services.GridConnectionService"

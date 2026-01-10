@@ -203,6 +203,68 @@ data class LLQuaternion(
         )
     }
     
+    /**
+     * Convert to 4x4 rotation matrix (column-major for OpenGL/Filament)
+     */
+    fun toMatrix(out: FloatArray = FloatArray(16)): FloatArray {
+        val xx = x * x
+        val yy = y * y
+        val zz = z * z
+        val xy = x * y
+        val xz = x * z
+        val yz = y * z
+        val wx = w * x
+        val wy = w * y
+        val wz = w * z
+        
+        out[0] = 1f - 2f * (yy + zz)
+        out[1] = 2f * (xy + wz)
+        out[2] = 2f * (xz - wy)
+        out[3] = 0f
+        
+        out[4] = 2f * (xy - wz)
+        out[5] = 1f - 2f * (xx + zz)
+        out[6] = 2f * (yz + wx)
+        out[7] = 0f
+        
+        out[8] = 2f * (xz + wy)
+        out[9] = 2f * (yz - wx)
+        out[10] = 1f - 2f * (xx + yy)
+        out[11] = 0f
+        
+        out[12] = 0f
+        out[13] = 0f
+        out[14] = 0f
+        out[15] = 1f
+        
+        return out
+    }
+    
+    /**
+     * Convert to Euler angles (pitch, roll, yaw in radians)
+     */
+    fun toEuler(): LLVector3 {
+        // Roll (x-axis rotation)
+        val sinrCosp = 2f * (w * x + y * z)
+        val cosrCosp = 1f - 2f * (x * x + y * y)
+        val roll = kotlin.math.atan2(sinrCosp, cosrCosp)
+        
+        // Pitch (y-axis rotation)
+        val sinp = 2f * (w * y - z * x)
+        val pitch = if (kotlin.math.abs(sinp) >= 1f) {
+            kotlin.math.PI.toFloat() / 2f * kotlin.math.sign(sinp)
+        } else {
+            kotlin.math.asin(sinp)
+        }
+        
+        // Yaw (z-axis rotation)
+        val sinyCosp = 2f * (w * z + x * y)
+        val cosyCosp = 1f - 2f * (y * y + z * z)
+        val yaw = kotlin.math.atan2(sinyCosp, cosyCosp)
+        
+        return LLVector3(pitch, roll, yaw)
+    }
+    
     override fun toString() = "($x, $y, $z, $w)"
 }
 
@@ -243,5 +305,14 @@ data class LLColor4(
         val bi = (b * 255).toInt() and 0xFF
         val ai = (a * 255).toInt() and 0xFF
         return (ai shl 24) or (ri shl 16) or (gi shl 8) or bi
+    }
+    
+    fun lerp(target: LLColor4, t: Float): LLColor4 {
+        return LLColor4(
+            r + (target.r - r) * t,
+            g + (target.g - g) * t,
+            b + (target.b - b) * t,
+            a + (target.a - a) * t
+        )
     }
 }
