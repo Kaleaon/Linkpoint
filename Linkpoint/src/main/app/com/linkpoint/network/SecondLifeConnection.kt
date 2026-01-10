@@ -270,15 +270,33 @@ class SecondLifeConnection {
                 agentId = agentId
             )
         } else {
-            // Extract error message
+            // Extract error message - try both 'message' and 'reason' fields
             val messageRegex = """<name>message</name>\s*<value><string>([^<]+)</string>""".toRegex()
-            val errorMessage = messageRegex.find(xml)?.groupValues?.get(1) ?: "Unknown error"
+            val reasonRegex = """<name>reason</name>\s*<value><string>([^<]+)</string>""".toRegex()
             
-            Log.w(TAG, "Login failed: $errorMessage")
+            var errorMessage = messageRegex.find(xml)?.groupValues?.get(1)
+            
+            // If message is null, empty, or looks like a null literal, try the reason field
+            if (errorMessage.isNullOrBlank() || errorMessage.equals("null", ignoreCase = true)) {
+                errorMessage = reasonRegex.find(xml)?.groupValues?.get(1)
+            }
+            
+            // Provide a user-friendly fallback if we still don't have a message
+            val finalMessage = when {
+                errorMessage.isNullOrBlank() -> "Login failed. Please check your credentials and try again."
+                errorMessage.equals("null", ignoreCase = true) -> "Login failed. Please check your credentials and try again."
+                errorMessage.equals("key", ignoreCase = true) -> "Invalid username or password. Please check your credentials."
+                errorMessage.equals("presence", ignoreCase = true) -> "You appear to be logged in already. Please wait a moment and try again."
+                errorMessage.equals("update", ignoreCase = true) -> "A viewer update is required. Please update the app."
+                errorMessage.equals("optional", ignoreCase = true) -> "Login failed. Please try again."
+                else -> errorMessage
+            }
+            
+            Log.w(TAG, "Login failed: $finalMessage (raw: $errorMessage)")
             
             return LoginResult(
                 success = false,
-                message = errorMessage
+                message = finalMessage
             )
         }
     }

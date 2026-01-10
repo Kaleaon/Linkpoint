@@ -136,8 +136,10 @@ class AuthenticationManager(private val context: Context) {
             
         } catch (e: Exception) {
             Log.e(TAG, "Login failed", e)
-            _authState.value = AuthState.Error("Login failed: ${e.message}", e)
-            LoginResult.Failure("Login failed: ${e.message}", e)
+            val errorMessage = e.message?.takeIf { it.isNotBlank() && !it.equals("null", ignoreCase = true) }
+                ?: "An unexpected error occurred. Please try again."
+            _authState.value = AuthState.Error("Login failed: $errorMessage", e)
+            LoginResult.Failure("Login failed: $errorMessage", e)
             
         } finally {
             loginInProgress.set(false)
