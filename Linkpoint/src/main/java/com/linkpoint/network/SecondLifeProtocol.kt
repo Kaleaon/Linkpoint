@@ -79,7 +79,9 @@ class SecondLifeProtocol(private val context: Context) {
         } catch (e: Exception) {
             Log.e(TAG, "Login error", e)
             app.sessionManager.setConnectionState(ConnectionState.ERROR)
-            LoginResult.Failure("Network error: ${e.message}")
+            val errorMessage = e.message?.takeIf { it.isNotBlank() } 
+                ?: "An unexpected error occurred. Please try again."
+            LoginResult.Failure("Network error: $errorMessage")
         }
     }
     
@@ -175,9 +177,28 @@ class SecondLifeProtocol(private val context: Context) {
             Log.i(TAG, "Login successful!")
             return LoginResult.Success(agentId, sessionId)
         } else {
-            val errorMessage = extractValue(xml, "message") ?: "Unknown error"
+            // Extract error message - try multiple fields that SL might use
+            var errorMessage = extractValue(xml, "message")
+            
+            // If message is null, empty, or looks like a null literal, try the reason field
+            if (errorMessage.isNullOrBlank() || errorMessage.equals("null", ignoreCase = true)) {
+                errorMessage = extractValue(xml, "reason")
+            }
+            
+            // Provide a user-friendly fallback if we still don't have a message
+            val finalMessage = when {
+                errorMessage.isNullOrBlank() -> "Login failed. Please check your credentials and try again."
+                errorMessage.equals("null", ignoreCase = true) -> "Login failed. Please check your credentials and try again."
+                errorMessage.equals("key", ignoreCase = true) -> "Invalid username or password. Please check your credentials."
+                errorMessage.equals("presence", ignoreCase = true) -> "You appear to be logged in already. Please wait a moment and try again."
+                errorMessage.equals("update", ignoreCase = true) -> "A viewer update is required. Please update the app."
+                errorMessage.equals("optional", ignoreCase = true) -> "Login failed. Please try again."
+                else -> errorMessage
+            }
+            
             app.sessionManager.setConnectionState(ConnectionState.ERROR)
-            return LoginResult.Failure(errorMessage)
+            Log.w(TAG, "Login failed: $finalMessage (raw: $errorMessage)")
+            return LoginResult.Failure(finalMessage)
         }
     }
     
