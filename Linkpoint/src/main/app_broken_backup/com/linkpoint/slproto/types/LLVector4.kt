@@ -17,11 +17,19 @@ class LLVector4(
     companion object {
         const val FP_MAG_THRESHOLD: Float = 1.0E-7f
         
-        @JvmField
-        val Zero = LLVector4(0.0f, 0.0f, 0.0f, 0.0f)
+        /**
+         * Returns a new zero vector (0, 0, 0, 0).
+         * Note: Returns a new instance each call to prevent mutation of shared state.
+         */
+        @JvmStatic
+        fun zero(): LLVector4 = LLVector4(0.0f, 0.0f, 0.0f, 0.0f)
         
-        @JvmField
-        val One = LLVector4(1.0f, 1.0f, 1.0f, 1.0f)
+        /**
+         * Returns a new one vector (1, 1, 1, 1).
+         * Note: Returns a new instance each call to prevent mutation of shared state.
+         */
+        @JvmStatic
+        fun one(): LLVector4 = LLVector4(1.0f, 1.0f, 1.0f, 1.0f)
         
         @JvmStatic
         fun add(a: LLVector4, b: LLVector4): LLVector4 {

@@ -15,11 +15,19 @@ class LLVector2(
     companion object {
         const val FP_MAG_THRESHOLD: Float = 1.0E-7f
         
-        @JvmField
-        val Zero = LLVector2(0.0f, 0.0f)
+        /**
+         * Returns a new zero vector (0, 0).
+         * Note: Returns a new instance each call to prevent mutation of shared state.
+         */
+        @JvmStatic
+        fun zero(): LLVector2 = LLVector2(0.0f, 0.0f)
         
-        @JvmField
-        val One = LLVector2(1.0f, 1.0f)
+        /**
+         * Returns a new one vector (1, 1).
+         * Note: Returns a new instance each call to prevent mutation of shared state.
+         */
+        @JvmStatic
+        fun one(): LLVector2 = LLVector2(1.0f, 1.0f)
         
         @JvmStatic
         fun sub(a: LLVector2, b: LLVector2): LLVector2 {
@@ -50,7 +58,9 @@ class LLVector2(
     }
     
     override fun hashCode(): Int {
-        return java.lang.Float.floatToIntBits(x) + java.lang.Float.floatToIntBits(y)
+        var result = java.lang.Float.floatToIntBits(x)
+        result = 31 * result + java.lang.Float.floatToIntBits(y)
+        return result
     }
     
     fun magVec(): Float {
