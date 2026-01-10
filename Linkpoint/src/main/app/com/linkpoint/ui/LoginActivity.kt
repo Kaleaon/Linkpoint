@@ -112,8 +112,13 @@ class LoginActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 val errorMessage = e.message ?: "An unexpected error occurred"
-                statusText.text = "Error: $errorMessage"
-                Toast.makeText(this@LoginActivity, "Connection error: $errorMessage", Toast.LENGTH_LONG).show()
+                statusText.text = "Login failed"
+                // Show a dialog with more details for network errors on mobile
+                androidx.appcompat.app.AlertDialog.Builder(this@LoginActivity)
+                    .setTitle("Login Failed")
+                    .setMessage("Network error: $errorMessage\n\nPlease try again.")
+                    .setPositiveButton("OK", null)
+                    .show()
             } finally {
                 setLoading(false)
             }
@@ -121,15 +126,21 @@ class LoginActivity : AppCompatActivity() {
     }
     
     /**
-     * Check if network is available and has internet capability
+     * Check if network is available and has internet capability.
+     * 
+     * Note: We only require NET_CAPABILITY_INTERNET, not NET_CAPABILITY_VALIDATED,
+     * because validation can be slow or fail on some mobile networks even when
+     * connectivity is actually available. The actual HTTP request will determine
+     * if the connection works.
      */
     private fun isNetworkAvailable(): Boolean {
         val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val network = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
         
-        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-               capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+        // Only require internet capability - validation check is too strict for some LTE networks
+        // where validation may be slow or fail temporarily even though connectivity works
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
     
     private fun setLoading(loading: Boolean) {
