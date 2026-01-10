@@ -107,18 +107,18 @@ class LoginActivity : AppCompatActivity() {
                     statusText.text = "Login successful!"
                     navigateToMain()
                 } else {
-                    statusText.text = "Login failed: ${result.message}"
-                    Toast.makeText(this@LoginActivity, result.message, Toast.LENGTH_LONG).show()
+                    statusText.text = "Login failed"
+                    showLoginErrorDialog(result)
                 }
             } catch (e: Exception) {
                 val errorMessage = e.message ?: "An unexpected error occurred"
                 statusText.text = "Login failed"
-                // Show a dialog with more details for network errors on mobile
-                androidx.appcompat.app.AlertDialog.Builder(this@LoginActivity)
-                    .setTitle("Login Failed")
-                    .setMessage("Network error: $errorMessage\n\nPlease try again.")
-                    .setPositiveButton("OK", null)
-                    .show()
+                showLoginErrorDialog(SecondLifeConnection.LoginResult(
+                    success = false,
+                    message = "Network error: $errorMessage",
+                    errorCode = "EXCEPTION",
+                    technicalDetails = "${e.javaClass.simpleName}: ${e.message}\n${e.stackTrace.take(5).joinToString("\n")}"
+                ))
             } finally {
                 setLoading(false)
             }
@@ -167,5 +167,66 @@ class LoginActivity : AppCompatActivity() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
         finish()
+    }
+    
+    private fun showLoginErrorDialog(result: SecondLifeConnection.LoginResult) {
+        val errorCodeDisplay = result.errorCode?.let { " [$it]" } ?: ""
+        
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Login Failed$errorCodeDisplay")
+            .setMessage(result.message)
+            .setPositiveButton("OK", null)
+        
+        // Add "Details" button if technical details are available
+        if (!result.technicalDetails.isNullOrBlank()) {
+            builder.setNeutralButton("View Details") { _, _ ->
+                showTechnicalDetailsDialog(result)
+            }
+        }
+        
+        // Add retry button for network errors
+        if (result.errorCode?.contains("NETWORK", ignoreCase = true) == true ||
+            result.errorCode?.contains("TIMEOUT", ignoreCase = true) == true ||
+            result.errorCode?.contains("CONNECTION", ignoreCase = true) == true ||
+            result.errorCode?.contains("DNS", ignoreCase = true) == true ||
+            result.errorCode?.contains("SSL", ignoreCase = true) == true) {
+            builder.setNegativeButton("Retry") { _, _ ->
+                attemptLogin()
+            }
+        }
+        
+        builder.show()
+    }
+    
+    private fun showTechnicalDetailsDialog(result: SecondLifeConnection.LoginResult) {
+        val gridName = gridSpinner.text.toString()
+        val loginUrl = SecondLifeConnection.GRIDS[gridName] ?: "Unknown"
+        
+        val details = buildString {
+            appendLine("Error Code: ${result.errorCode ?: "UNKNOWN"}")
+            appendLine()
+            appendLine("Message: ${result.message}")
+            appendLine()
+            appendLine("--- Technical Details ---")
+            appendLine(result.technicalDetails ?: "No additional details available")
+            appendLine()
+            appendLine("--- Device Info ---")
+            appendLine("Android: ${android.os.Build.VERSION.RELEASE} (API ${android.os.Build.VERSION.SDK_INT})")
+            appendLine("Device: ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}")
+            appendLine("Grid: $gridName")
+            appendLine("Login URI: $loginUrl")
+        }
+        
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Technical Details")
+            .setMessage(details)
+            .setPositiveButton("OK", null)
+            .setNeutralButton("Copy") { _, _ ->
+                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                val clip = android.content.ClipData.newPlainText("Login Error Details", details)
+                clipboard.setPrimaryClip(clip)
+                Toast.makeText(this, "Details copied to clipboard", Toast.LENGTH_SHORT).show()
+            }
+            .show()
     }
 }
