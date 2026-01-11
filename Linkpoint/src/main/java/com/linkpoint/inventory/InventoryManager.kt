@@ -5,9 +5,9 @@ import com.linkpoint.assets.AssetType
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlin.coroutines.cancellation.CancellationException
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -85,6 +85,11 @@ class InventoryManager(
     fun getSystemFolder(type: Int): UUID? = systemFolders[type]
     
     /**
+     * Exception thrown when a fetch operation should be retried.
+     */
+    private class RetryableException(message: String) : Exception(message)
+    
+    /**
      * Fetch folder contents with retry support.
      * 
      * The CapabilityManager now handles retries internally with Firestorm-style
@@ -98,49 +103,56 @@ class InventoryManager(
             var attempts = 0
             val maxAttempts = 3
             
-            while (attempts < maxAttempts) {
-                try {
-                    val request = LLSDMap().apply {
-                        this["folders"] = LLSDArray().apply {
-                            add(LLSDMap().apply {
-                                this["folder_id"] = LLSDString(folderId.toString())
-                                this["owner_id"] = LLSDString(agentId.toString())
-                                this["fetch_folders"] = LLSDBoolean(fetchFolders)
-                                this["fetch_items"] = LLSDBoolean(fetchItems)
-                                this["sort_order"] = LLSDInteger(1)
-                            })
+            try {
+                while (attempts < maxAttempts) {
+                    try {
+                        val request = LLSDMap().apply {
+                            this["folders"] = LLSDArray().apply {
+                                add(LLSDMap().apply {
+                                    this["folder_id"] = LLSDString(folderId.toString())
+                                    this["owner_id"] = LLSDString(agentId.toString())
+                                    this["fetch_folders"] = LLSDBoolean(fetchFolders)
+                                    this["fetch_items"] = LLSDBoolean(fetchItems)
+                                    this["sort_order"] = LLSDInteger(1)
+                                })
+                            }
                         }
-                    }
-                    
-                    val response = capabilityManager.request(
-                        CapabilityManager.CAP_FETCH_INVENTORY_DESCENDENTS,
-                        request
-                    )
-                    
-                    if (response is LLSDMap) {
-                        parseInventoryResponse(response)
-                        _isLoading.value = false
-                        return@withContext true
-                    } else {
-                        // Null response - capability manager already retried internally
-                        // Try once more with a delay
+                        
+                        val response = capabilityManager.request(
+                            CapabilityManager.CAP_FETCH_INVENTORY_DESCENDENTS,
+                            request
+                        )
+                        
+                        if (response is LLSDMap) {
+                            parseInventoryResponse(response)
+                            return@withContext true
+                        } else {
+                            // Null response - throw to trigger retry logic
+                            throw RetryableException("Empty response for folder $folderId")
+                        }
+                    } catch (e: CancellationException) {
+                        // Re-throw CancellationException to not interfere with coroutine cancellation
+                        throw e
+                    } catch (e: RetryableException) {
+                        // Handle retryable errors in one place
                         attempts++
                         if (attempts < maxAttempts) {
-                            Log.w(TAG, "Empty response for folder $folderId, retrying (attempt $attempts)")
+                            Log.w(TAG, "${e.message}, retrying (attempt $attempts)")
+                            delay(1000L * attempts)
+                        }
+                    } catch (e: Exception) {
+                        // Other exceptions are also retryable
+                        Log.e(TAG, "Failed to fetch folder: $folderId", e)
+                        attempts++
+                        if (attempts < maxAttempts) {
                             delay(1000L * attempts)
                         }
                     }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to fetch folder: $folderId", e)
-                    attempts++
-                    if (attempts < maxAttempts) {
-                        delay(1000L * attempts)
-                    }
                 }
+                false
+            } finally {
+                _isLoading.value = false
             }
-            
-            _isLoading.value = false
-            false
         }
     }
     

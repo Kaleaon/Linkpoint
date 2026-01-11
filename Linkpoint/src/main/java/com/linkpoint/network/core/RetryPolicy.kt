@@ -2,7 +2,6 @@ package com.linkpoint.network.core
 
 import android.util.Log
 import kotlin.math.min
-import kotlin.math.pow
 import kotlin.random.Random
 
 /**
@@ -260,10 +259,11 @@ class RetryPolicy(
         // Otherwise use exponential backoff (internal delta)
         // Formula: delay = startingDelay * 2^attempt (capped)
         // Based on Firestorm's: delta_min * delta_factor where delta_factor = 1 << retries
-        val exponentialDelay = startingRetryDelayMs * 2.0.pow(currentRetryAttempt.toDouble())
+        // Using bit-shifting for consistency with HttpRequestOptions.calculateRetryDelay
+        val exponentialDelay = startingRetryDelayMs * (1L shl min(currentRetryAttempt, 10))
         
         // Cap at maximum delay
-        val cappedDelay = min(exponentialDelay, maxRetryDelayMs.toDouble()).toLong()
+        val cappedDelay = min(exponentialDelay, maxRetryDelayMs)
         
         // Add jitter to prevent thundering herd
         val jitter = (cappedDelay * jitterFactor * Random.nextFloat()).toLong()

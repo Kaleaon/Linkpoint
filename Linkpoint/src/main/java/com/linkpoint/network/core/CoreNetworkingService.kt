@@ -54,6 +54,19 @@ class CoreNetworkingService(private val context: Context) {
         
         // Maximum concurrent web requests
         private const val MAX_CONCURRENT_REQUESTS = 500
+        
+        // Retryable HTTP status codes - defined once for efficiency
+        private val RETRYABLE_HTTP_CODES = setOf(503, 429, 500, 502, 504)
+        
+        // RFC 1123 date format pattern for Retry-After header parsing
+        private const val RFC_1123_DATE_PATTERN = "EEE, dd MMM yyyy HH:mm:ss zzz"
+        
+        // ThreadLocal SimpleDateFormat to avoid repeated instantiation while maintaining thread safety
+        private val RFC_1123_DATE_FORMAT = object : ThreadLocal<java.text.SimpleDateFormat>() {
+            override fun initialValue(): java.text.SimpleDateFormat {
+                return java.text.SimpleDateFormat(RFC_1123_DATE_PATTERN, java.util.Locale.US)
+            }
+        }
     }
     
     // Components
@@ -436,9 +449,9 @@ class CoreNetworkingService(private val context: Context) {
         }
         
         // Try parsing as HTTP-date (not common, but handle it)
+        // Uses ThreadLocal SimpleDateFormat for efficiency and thread safety
         try {
-            val date = java.text.SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", java.util.Locale.US)
-                .parse(retryAfter)
+            val date = RFC_1123_DATE_FORMAT.get()?.parse(retryAfter)
             if (date != null) {
                 val delayMs = date.time - System.currentTimeMillis()
                 val delaySeconds = (delayMs / 1000).toInt()
@@ -502,7 +515,7 @@ class CoreNetworkingService(private val context: Context) {
                 response = currentClient.newCall(request).execute()
                 
                 // Check for retryable HTTP errors with Retry-After
-                if (response.code in listOf(503, 429, 500, 502, 504)) {
+                if (response.code in RETRYABLE_HTTP_CODES) {
                     lastRetryAfter = parseRetryAfterHeader(response)
                     
                     // For 503, track retry count like Firestorm's mPolicy503Retries

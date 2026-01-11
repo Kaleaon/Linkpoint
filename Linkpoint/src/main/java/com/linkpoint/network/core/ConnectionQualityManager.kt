@@ -173,15 +173,18 @@ class ConnectionQualityManager(private val context: Context) {
     
     /**
      * Notify all listeners of network change.
+     * Creates a snapshot of listeners to avoid holding the lock during callback execution,
+     * which could cause deadlocks if a listener tries to acquire another lock.
      */
     private fun notifyNetworkChange() {
-        synchronized(networkChangeListeners) {
-            networkChangeListeners.forEach { listener ->
-                try {
-                    listener()
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error notifying network change listener", e)
-                }
+        val listeners = synchronized(networkChangeListeners) {
+            networkChangeListeners.toList() // Create a snapshot
+        }
+        listeners.forEach { listener ->
+            try {
+                listener()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error notifying network change listener", e)
             }
         }
     }

@@ -6,6 +6,7 @@ import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import io.grpc.okhttp.OkHttpChannelBuilder
 import okhttp3.ConnectionPool
+import okhttp3.Dispatcher
 import okhttp3.Dns
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
@@ -272,6 +273,7 @@ class GrpcChannelFactory(
             .dns(getCachingDns(options.dnsCacheTimeoutSeconds))
         
         // Configure connection pool based on policy class
+        // maxIdleConnections is a pool-wide limit on idle connections
         val poolConfig = when (options.policyClass) {
             PolicyClass.LOGIN -> ConnectionPool(
                 maxIdleConnections = 1,
@@ -284,12 +286,12 @@ class GrpcChannelFactory(
                 timeUnit = TimeUnit.SECONDS
             )
             PolicyClass.INVENTORY -> ConnectionPool(
-                maxIdleConnections = options.policyClass.perHostConnectionLimit,
+                maxIdleConnections = options.policyClass.maxIdleConnections,
                 keepAliveDuration = 30,
                 timeUnit = TimeUnit.SECONDS
             )
             PolicyClass.ASSET -> ConnectionPool(
-                maxIdleConnections = options.policyClass.perHostConnectionLimit,
+                maxIdleConnections = options.policyClass.maxIdleConnections,
                 keepAliveDuration = 60,
                 timeUnit = TimeUnit.SECONDS
             )
@@ -300,6 +302,13 @@ class GrpcChannelFactory(
             )
         }
         builder.connectionPool(poolConfig)
+        
+        // Configure dispatcher for per-host request limiting
+        // This properly controls concurrent requests to a single host
+        val dispatcher = Dispatcher().apply {
+            maxRequestsPerHost = options.policyClass.maxRequestsPerHost
+        }
+        builder.dispatcher(dispatcher)
         
         // Force HTTP/1.1 for XMLRPC compatibility
         builder.protocols(listOf(Protocol.HTTP_1_1))

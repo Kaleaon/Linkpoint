@@ -267,21 +267,38 @@ data class HttpRequestOptions(
 
 /**
  * Policy classes for request categorization.
- * Different classes can have different connection limits and throttling.
+ * Different classes can have different connection pool sizes and throttling.
  * 
  * Based on Firestorm's HTTP_POLICY_CLASS pattern.
+ * 
+ * Note: OkHttp's connection pool manages idle connections at the pool level.
+ * For per-host request limiting, configure OkHttp's Dispatcher.maxRequestsPerHost.
  */
 enum class PolicyClass(
-    val connectionLimit: Int,
-    val perHostConnectionLimit: Int,
+    /**
+     * Maximum number of idle connections to keep in the pool.
+     * This is a pool-wide limit, not per-host.
+     */
+    val maxIdleConnections: Int,
+    
+    /**
+     * Maximum concurrent requests per host.
+     * Used to configure OkHttp's Dispatcher.maxRequestsPerHost.
+     */
+    val maxRequestsPerHost: Int,
+    
+    /**
+     * Rate limit for requests per second.
+     * 0 means no throttling.
+     */
     val throttleRatePerSecond: Int
 ) {
     /**
      * Default policy for general requests.
      */
     DEFAULT(
-        connectionLimit = 8,
-        perHostConnectionLimit = 4,
+        maxIdleConnections = 8,
+        maxRequestsPerHost = 4,
         throttleRatePerSecond = 0  // No throttling
     ),
     
@@ -289,8 +306,8 @@ enum class PolicyClass(
      * Login operations - single connection, no throttling.
      */
     LOGIN(
-        connectionLimit = 2,
-        perHostConnectionLimit = 1,
+        maxIdleConnections = 2,
+        maxRequestsPerHost = 1,
         throttleRatePerSecond = 0
     ),
     
@@ -298,8 +315,8 @@ enum class PolicyClass(
      * Inventory operations - moderate parallelism.
      */
     INVENTORY(
-        connectionLimit = 4,
-        perHostConnectionLimit = 2,
+        maxIdleConnections = 4,
+        maxRequestsPerHost = 2,
         throttleRatePerSecond = 10  // Max 10 requests/second
     ),
     
@@ -307,8 +324,8 @@ enum class PolicyClass(
      * Asset downloads (textures, mesh) - high parallelism.
      */
     ASSET(
-        connectionLimit = 12,
-        perHostConnectionLimit = 6,
+        maxIdleConnections = 12,
+        maxRequestsPerHost = 6,
         throttleRatePerSecond = 0  // No throttling for assets
     ),
     
@@ -316,8 +333,8 @@ enum class PolicyClass(
      * Event queue - dedicated connection.
      */
     EVENT_QUEUE(
-        connectionLimit = 1,
-        perHostConnectionLimit = 1,
+        maxIdleConnections = 1,
+        maxRequestsPerHost = 1,
         throttleRatePerSecond = 0
     )
 }

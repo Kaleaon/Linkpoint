@@ -72,6 +72,12 @@ class CapabilityManager {
             CAP_GET_MESH,
             CAP_GET_MESH2
         )
+        
+        // Retryable HTTP status codes - defined once for efficiency
+        private val RETRYABLE_HTTP_CODES = setOf(503, 429, 500, 502, 504)
+        
+        // Retryable message patterns for IOException detection
+        private val RETRYABLE_MESSAGE_PATTERNS = listOf("EOF", "reset", "closed", "timeout", "ECONNRESET")
     }
     
     // Request throttler for rate limiting
@@ -289,7 +295,7 @@ class CapabilityManager {
                 val response = client.newCall(requestBuilder.build()).execute()
                 
                 // Check for retryable HTTP errors
-                if (response.code in listOf(503, 429, 500, 502, 504)) {
+                if (response.code in RETRYABLE_HTTP_CODES) {
                     retryAfterSeconds = parseRetryAfterHeader(response)
                     
                     if (attempt < options.retries) {
@@ -350,11 +356,7 @@ class CapabilityManager {
      */
     private fun isRetryableIOException(e: IOException): Boolean {
         val message = e.message ?: return false
-        return message.contains("EOF", ignoreCase = true) ||
-            message.contains("reset", ignoreCase = true) ||
-            message.contains("closed", ignoreCase = true) ||
-            message.contains("timeout", ignoreCase = true) ||
-            message.contains("ECONNRESET", ignoreCase = true)
+        return RETRYABLE_MESSAGE_PATTERNS.any { message.contains(it, ignoreCase = true) }
     }
     
     /**
@@ -413,9 +415,9 @@ class CapabilityManager {
                     }
                     
                     // Handle other HTTP errors with backoff
-                    if (code in listOf(503, 500, 504)) {
+                    if (code in RETRYABLE_HTTP_CODES) {
                         consecutiveErrors++
-                        val retryAfter = response.header("Retry-After")?.toIntOrNull()
+                        val retryAfter = parseRetryAfterHeader(response)
                         val delayMs = options.calculateRetryDelay(consecutiveErrors - 1, retryAfter)
                         Log.w(TAG, "Event queue HTTP $code, retrying in ${delayMs}ms")
                         delay(delayMs)
