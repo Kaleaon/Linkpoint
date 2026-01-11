@@ -50,6 +50,10 @@ class GrpcChannelFactory(
         // Max retry attempts for gRPC
         private const val MAX_RETRY_ATTEMPTS = 5
         
+        // Fixed call timeout - generous to allow for all retries
+        // This is a safety net, not the primary timeout mechanism
+        private const val CALL_TIMEOUT_SECONDS = 300L  // 5 minutes
+        
         // Max message size (10MB)
         private const val MAX_MESSAGE_SIZE = 10 * 1024 * 1024
     }
@@ -132,11 +136,9 @@ class GrpcChannelFactory(
             .connectTimeout(timeouts.connectTimeoutMs, TimeUnit.MILLISECONDS)
             .readTimeout(timeouts.readTimeoutMs, TimeUnit.MILLISECONDS)
             .writeTimeout(timeouts.writeTimeoutMs, TimeUnit.MILLISECONDS)
-            // Overall call timeout
-            .callTimeout(
-                (timeouts.connectTimeoutMs + timeouts.readTimeoutMs + timeouts.writeTimeoutMs),
-                TimeUnit.MILLISECONDS
-            )
+            // Overall call timeout - use fixed generous timeout to allow for all retries
+            // This is a safety net, not the primary timeout mechanism
+            .callTimeout(CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             // Retry on connection failure
             .retryOnConnectionFailure(true)
             // Minimal connection pooling for mobile

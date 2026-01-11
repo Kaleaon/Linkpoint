@@ -361,8 +361,9 @@ class CoreNetworkingService(private val context: Context) {
                     response.close()
                     throw EOFIOException("EOF while reading response body", e)
                 } catch (e: IOException) {
+                    // Always close response on any IOException to prevent resource leaks
+                    response.close()
                     if (NetworkExceptionUtils.isEOFException(e)) {
-                        response.close()
                         throw EOFIOException("EOF while reading response body: ${e.message}", e)
                     }
                     throw e
