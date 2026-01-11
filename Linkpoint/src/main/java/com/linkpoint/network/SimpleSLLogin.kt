@@ -10,6 +10,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.EOFException
+import java.io.IOException
 import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 
@@ -187,12 +189,17 @@ object SimpleSLLogin {
                 .retryOnConnectionFailure(true)  // Auto-retry on connection failures
                 .build()
             
-            // Build request with Connection: close to avoid stale connection issues
-            // This prevents EOF errors from reusing connections that the server has closed
+            // Critical headers to reduce EOF issues with streaming responses:
+            // - Connection: close - Prevents connection reuse
+            // - Accept-Encoding: identity - Disables response body compression (gzip/deflate)
+            //   Disabling compression makes the server more likely to send a simple,
+            //   uncompressed body, which can help avoid or simplify chunked/EOF problems
+            //   seen in ChunkedSource.readChunkSize() when the server closes the connection early
             val request = Request.Builder()
                 .url(loginUri)
                 .post(xmlRequest.toRequestBody("text/xml".toMediaType()))
                 .header("Content-Type", "text/xml")
+                .header("Accept-Encoding", "identity")  // Disable compression to simplify stream handling
                 .header("User-Agent", "$VIEWER_CHANNEL/$VIEWER_VERSION ($VIEWER_PLATFORM)")
                 .header("Connection", "close")  // Prevent connection reuse issues
                 .build()
@@ -202,21 +209,45 @@ object SimpleSLLogin {
             
             // Execute request
             val response = client.newCall(request).execute()
-            val responseBody = response.body?.string() ?: ""
-            val duration = System.currentTimeMillis() - startTime
             
-            Log.d(TAG, "Response received in ${duration}ms, code: ${response.code}")
+            // Use try-finally to ensure response is always closed properly in all paths
+            try {
+                // Read response body with careful handling of EOF errors
+                // EOF can occur during chunked encoding if server closes connection early
+                val responseBody: String
+                try {
+                    responseBody = response.body?.string() ?: ""
+                } catch (e: EOFException) {
+                    // EOF during body reading - will be caught by outer handler for retry
+                    Log.w(TAG, "EOF while reading response body, will retry")
+                    throw e
+                } catch (e: IOException) {
+                    // Check if this is an EOF-related IO error
+                    if (NetworkExceptionUtils.isEOFException(e)) {
+                        Log.w(TAG, "IO error with EOF characteristics while reading body, will retry")
+                        throw EOFException("EOF during response body read: ${e.message}")
+                    }
+                    throw e
+                }
             
-            if (!response.isSuccessful) {
-                return@withContext SimpleLoginResult.Failure(
-                    message = "Login server returned error: HTTP ${response.code}",
-                    errorCode = "HTTP_ERROR",
-                    details = "Status: ${response.code}\nResponse: ${responseBody.take(200)}"
-                )
-            }
+                val duration = System.currentTimeMillis() - startTime
+            
+                Log.d(TAG, "Response received in ${duration}ms, code: ${response.code}")
+            
+                if (!response.isSuccessful) {
+                    return@withContext SimpleLoginResult.Failure(
+                        message = "Login server returned error: HTTP ${response.code}",
+                        errorCode = "HTTP_ERROR",
+                        details = "Status: ${response.code}\nResponse: ${responseBody.take(200)}"
+                    )
+                }
             
                 // Parse response (simple XML parsing like Lumiya)
                 return@withContext parseLoginResponse(responseBody)
+            } finally {
+                // Always close response to avoid resource leaks
+                response.close()
+            }
                 
                 } catch (e: java.net.UnknownHostException) {
                 // DNS errors are not retryable - fail immediately
@@ -289,7 +320,7 @@ object SimpleSLLogin {
                         attemptsMade = attempt
                     )
                 }
-            } catch (e: java.io.EOFException) {
+            } catch (e: EOFException) {
                 // EOFException occurs when the server closes connection unexpectedly
                 // This is usually temporary and should be retried
                 Log.w(TAG, "EOF error during login (attempt $attempt/$maxAttempts) - will retry", e)
