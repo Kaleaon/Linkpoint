@@ -132,7 +132,10 @@ android {
                 "META-INF/NOTICE.txt",
                 "META-INF/INDEX.LIST",
                 "META-INF/*.kotlin_module",
-                "META-INF/io.netty.versions.properties"
+                "META-INF/io.netty.versions.properties",
+                "META-INF/grpc-health.proto",
+                "META-INF/grpc-reflection.proto",
+                "META-INF/services/io.grpc.*"
             )
             pickFirsts += listOf(
                 "**/libjnidispatch.so",
@@ -173,9 +176,20 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation("com.google.android.gms:play-services-base:18.5.0")
     
-    // Networking
+    // Networking - OkHttp
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    
+    // gRPC - Modern networking based on official SL app patterns
+    implementation("io.grpc:grpc-okhttp:1.62.2")
+    implementation("io.grpc:grpc-protobuf-lite:1.62.2")
+    implementation("io.grpc:grpc-stub:1.62.2")
+    implementation("io.grpc:grpc-kotlin-stub:1.4.1")
+    implementation("com.google.protobuf:protobuf-kotlin-lite:3.25.3")
+    
+    // Retrofit for REST API fallback
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     
     // Audio processing
     implementation("androidx.media:media:1.7.0")

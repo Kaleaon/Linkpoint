@@ -49,15 +49,20 @@ object NetworkDiagnostics {
             }
         
         /**
-         * Recommended number of retry attempts based on network type
+         * Recommended number of retry attempts based on network type.
+         * 
+         * Mobile networks, especially LTE, can experience transient connection
+         * issues (EOF, resets) more frequently than Wi-Fi. Increased retry
+         * counts help ensure successful connections on unstable networks.
          */
         val recommendedRetries: Int
             get() = when (type) {
                 NetworkType.WIFI, NetworkType.ETHERNET -> 2
-                NetworkType.CELLULAR_5G, NetworkType.CELLULAR_LTE -> 3
-                NetworkType.CELLULAR_4G, NetworkType.CELLULAR_3G -> 4
-                NetworkType.CELLULAR_2G -> 5
-                else -> 3
+                NetworkType.CELLULAR_5G -> 3
+                NetworkType.CELLULAR_LTE, NetworkType.CELLULAR_4G -> 4  // Increased from 3 for LTE
+                NetworkType.CELLULAR_3G -> 5  // Increased from 4
+                NetworkType.CELLULAR_2G -> 6  // Increased from 5
+                else -> 4  // Default increased from 3
             }
         
         /**

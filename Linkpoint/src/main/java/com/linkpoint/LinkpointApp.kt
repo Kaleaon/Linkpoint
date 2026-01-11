@@ -23,6 +23,10 @@ import com.linkpoint.world.ProfileManager
 import com.linkpoint.world.SearchManager
 import com.linkpoint.world.WorldMap
 import com.linkpoint.xr.XRManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import java.util.UUID
 
 /**
@@ -46,6 +50,9 @@ class LinkpointApp : Application() {
             return instance ?: throw IllegalStateException("Application not initialized")
         }
     }
+    
+    // Application-wide coroutine scope for background operations
+    val applicationScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     
     // Core managers
     lateinit var gridManager: GridManager
@@ -239,7 +246,14 @@ class LinkpointApp : Application() {
         
         xrManager.shutdown()
         renderManager.shutdown()
+        
+        // Shutdown protocol and networking
+        protocol.shutdown()
+        
         sessionManager.disconnect()
+        
+        // Cancel application scope
+        applicationScope.cancel()
     }
     
     /**
