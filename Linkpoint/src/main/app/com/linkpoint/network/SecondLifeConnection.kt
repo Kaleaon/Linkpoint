@@ -93,9 +93,14 @@ class SecondLifeConnection(context: Context? = null) {
                     lastException = e
                 } catch (e: EOFException) {
                     // EOFException occurs when connection is closed before response completes
-                    // Common with HTTP/2 connection issues - always retry
+                    // Common with HTTP/2 connection issues or server-side load balancing
+                    // Always retry with slightly longer delay to let the server recover
                     Log.w(TAG, "EOF/Connection closed on attempt ${attempt + 1}/$maxRetries: ${e.message}")
-                    lastException = IOException("Connection closed unexpectedly (EOF)", e)
+                    lastException = EOFIOException("Server closed connection before response completed", e)
+                    // Add extra delay for EOF errors as they often indicate server-side issues
+                    if (attempt < maxRetries - 1) {
+                        Thread.sleep(NetworkExceptionUtils.EOF_EXTRA_DELAY_MS)
+                    }
                 } catch (e: UnknownHostException) {
                     Log.w(TAG, "DNS failure on attempt ${attempt + 1}/$maxRetries: ${e.message}")
                     lastException = e
@@ -306,8 +311,9 @@ class SecondLifeConnection(context: Context? = null) {
                 e is SSLException -> 
                     "SSL/TLS connection failed: ${e.message?.take(100) ?: "handshake error"}. This may be a network or certificate issue." to "SSL_ERROR"
                 // Handle EOFException - connection closed before response completed
-                e.cause is EOFException || e.message?.contains("EOF", ignoreCase = true) == true ->
-                    "The server closed the connection unexpectedly. This may be a temporary issue - please try again." to "CONNECTION_EOF"
+                // Uses shared utility to check exception type, cause chain, and message indicators
+                NetworkExceptionUtils.isEOFException(e) ->
+                    "The server closed the connection before sending a complete response. This is usually a temporary issue - please try again." to "CONNECTION_EOF"
                 e.message?.contains("timeout", ignoreCase = true) == true -> 
                     "Connection timed out. The server is not responding." to "TIMEOUT"
                 e.message?.contains("host", ignoreCase = true) == true -> 
@@ -661,3 +667,6 @@ class SecondLifeConnection(context: Context? = null) {
         val regionName: String? = null
     )
 }
+
+// Note: EOFIOException and NetworkExceptionUtils are defined in src/main/java/com/linkpoint/network/
+// and shared across the package for consistent EOF error handling.

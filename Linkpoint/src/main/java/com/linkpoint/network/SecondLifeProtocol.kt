@@ -84,9 +84,14 @@ class SecondLifeProtocol(private val context: Context) {
                     lastException = e
                 } catch (e: EOFException) {
                     // EOFException occurs when connection is closed before response completes
-                    // Common with HTTP/2 connection issues - always retry
+                    // Common with HTTP/2 connection issues or server-side load balancing
+                    // Always retry with slightly longer delay to let the server recover
                     Log.w(TAG, "EOF/Connection closed on attempt ${attempt + 1}/$maxRetries: ${e.message}")
-                    lastException = IOException("Connection closed unexpectedly (EOF)", e)
+                    lastException = EOFIOException("Server closed connection before response completed", e)
+                    // Add extra delay for EOF errors as they often indicate server-side issues
+                    if (attempt < maxRetries - 1) {
+                        Thread.sleep(NetworkExceptionUtils.EOF_EXTRA_DELAY_MS)
+                    }
                 } catch (e: UnknownHostException) {
                     Log.w(TAG, "DNS failure on attempt ${attempt + 1}/$maxRetries: ${e.message}")
                     lastException = e
@@ -385,8 +390,22 @@ class SecondLifeProtocol(private val context: Context) {
             }
             
             // EOFException - connection closed before response completed
-            e.cause is EOFException || e.message?.contains("EOF", ignoreCase = true) == true -> {
-                "The server closed the connection unexpectedly. This is often a temporary issue. Please try again." to "CONNECTION_EOF"
+            // Uses shared utility to check exception type, cause chain, and message indicators
+            NetworkExceptionUtils.isEOFException(e) -> {
+                val message = buildString {
+                    append("The server closed the connection before sending a complete response. ")
+                    when (networkInfo.type) {
+                        NetworkDiagnostics.NetworkType.CELLULAR_LTE,
+                        NetworkDiagnostics.NetworkType.CELLULAR_4G,
+                        NetworkDiagnostics.NetworkType.CELLULAR_3G -> {
+                            append("Mobile networks can be unstable. Please try again, or switch to Wi-Fi if available.")
+                        }
+                        else -> {
+                            append("This is usually a temporary issue. Please try again in a moment.")
+                        }
+                    }
+                }
+                message to "CONNECTION_EOF"
             }
             
             // Connection reset/closed errors
