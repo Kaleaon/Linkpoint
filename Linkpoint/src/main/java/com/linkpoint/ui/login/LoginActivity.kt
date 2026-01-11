@@ -693,44 +693,282 @@ class LoginActivity : AppCompatActivity() {
             appendLine("TLS 1.3: ${if (SSLHelper.supportsTLS13()) "Supported" else "Not Supported"}")
         }
         
-        val details = buildString {
+        val grid = app.gridManager.getSelectedGrid()
+        val timestamp = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", java.util.Locale.US).format(java.util.Date())
+        
+        // Build display details (shown in dialog)
+        val displayDetails = buildString {
             appendLine("=== Error Information ===")
             appendLine("Error Code: ${failure.errorCode ?: "UNKNOWN"}")
+            appendLine("Category: ${failure.category}")
             appendLine("Message: ${failure.message}")
+            appendLine("Is Transient: ${failure.isTransient}")
             appendLine()
+            
+            // Show attempt and timing information
+            appendLine("=== Request Statistics ===")
+            appendLine("Attempts Made: ${failure.attemptsMade}")
+            appendLine("Total Time: ${failure.elapsedTimeMs}ms")
+            appendLine()
+            
+            // Show root cause information if available
+            if (failure.rootCauseType != null) {
+                appendLine("=== Root Cause ===")
+                appendLine("Type: ${failure.rootCauseType}")
+                appendLine("Message: ${failure.rootCauseMessage ?: "(no message)"}")
+                appendLine()
+            }
+            
+            // Show exception chain if available
+            if (!failure.exceptionChain.isNullOrBlank()) {
+                appendLine("=== Exception Chain ===")
+                appendLine(failure.exceptionChain)
+                appendLine()
+            }
+            
             appendLine("=== Technical Details ===")
             appendLine(failure.technicalDetails ?: "No additional details available")
             appendLine()
             appendLine("=== Device Information ===")
             appendLine("Android: ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
             appendLine("Device: ${Build.MANUFACTURER} ${Build.MODEL}")
-            appendLine("Grid: ${app.gridManager.getSelectedGrid().name}")
-            appendLine("Login URI: ${app.gridManager.getSelectedGrid().loginUri}")
+            appendLine("Grid: ${grid.name}")
+            appendLine("Login URI: ${grid.loginUri}")
             appendLine()
             appendLine("=== SSL/TLS Information ===")
             append(sslInfo)
             appendLine()
             append(networkDiagReport)
             appendLine()
-            appendLine("=== Troubleshooting Tips ===")
+            
+            // Show dynamic recommendations if available, otherwise use defaults
+            appendLine("=== Recommended Actions ===")
+            if (failure.recommendations.isNotEmpty()) {
+                failure.recommendations.forEachIndexed { idx, rec ->
+                    appendLine("${idx + 1}. $rec")
+                }
+            } else {
+                appendLine("1. Check your internet connection is stable")
+                appendLine("2. Try switching between Wi-Fi and mobile data")
+                appendLine("3. Disable VPN/Proxy if enabled")
+                appendLine("4. Check status.secondlifegrid.net for server status")
+                appendLine("5. Restart the app and try again")
+            }
+        }
+        
+        // Build comprehensive copy report (more detailed for support/debugging)
+        val fullCopyReport = buildComprehensiveErrorReport(failure, grid, networkDiagReport, sslInfo, timestamp)
+        
+        AlertDialog.Builder(this)
+            .setTitle("Technical Details")
+            .setMessage(displayDetails)
+            .setPositiveButton("OK", null)
+            .setNeutralButton("Copy Full Report") { _, _ ->
+                val clipboard = getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                val clip = android.content.ClipData.newPlainText("Linkpoint Login Error Report", fullCopyReport)
+                clipboard.setPrimaryClip(clip)
+                android.widget.Toast.makeText(this, "Full error report copied to clipboard", android.widget.Toast.LENGTH_SHORT).show()
+            }
+            .show()
+    }
+    
+    /**
+     * Build a comprehensive error report for copying/sharing.
+     * This includes everything that happened and what went wrong with the connection.
+     */
+    private fun buildComprehensiveErrorReport(
+        failure: LoginResult.Failure,
+        grid: GridInfo,
+        networkDiagReport: String,
+        sslInfo: String,
+        timestamp: String
+    ): String = buildString {
+        appendLine("╔══════════════════════════════════════════════════════════════════╗")
+        appendLine("║           LINKPOINT LOGIN ERROR REPORT                           ║")
+        appendLine("╚══════════════════════════════════════════════════════════════════╝")
+        appendLine()
+        appendLine("Report Generated: $timestamp")
+        appendLine("App Version: ${com.linkpoint.BuildConfig.VERSION_NAME} (${com.linkpoint.BuildConfig.VERSION_CODE})")
+        appendLine()
+        
+        appendLine("┌──────────────────────────────────────────────────────────────────┐")
+        appendLine("│ WHAT HAPPENED - CONNECTION TIMELINE                              │")
+        appendLine("└──────────────────────────────────────────────────────────────────┘")
+        appendLine()
+        appendLine("1. Login attempt started")
+        appendLine("   → Target: ${grid.name}")
+        appendLine("   → URI: ${grid.loginUri}")
+        appendLine()
+        appendLine("2. Connection attempts: ${failure.attemptsMade}")
+        appendLine("   → Total time spent: ${failure.elapsedTimeMs}ms (${failure.elapsedTimeMs / 1000.0}s)")
+        if (failure.attemptsMade > 1) {
+            appendLine("   → Multiple retry attempts were made with exponential backoff")
+        }
+        appendLine()
+        appendLine("3. Final result: FAILED")
+        appendLine("   → Error Category: ${failure.category}")
+        appendLine("   → Error Code: ${failure.errorCode ?: "UNKNOWN"}")
+        appendLine("   → Is Transient (temporary): ${failure.isTransient}")
+        appendLine()
+        
+        appendLine("┌──────────────────────────────────────────────────────────────────┐")
+        appendLine("│ WHAT WENT WRONG - ERROR DETAILS                                  │")
+        appendLine("└──────────────────────────────────────────────────────────────────┘")
+        appendLine()
+        appendLine("Error Message:")
+        appendLine("  ${failure.message}")
+        appendLine()
+        
+        if (failure.rootCauseType != null) {
+            appendLine("Root Cause Exception:")
+            appendLine("  Type: ${failure.rootCauseType}")
+            appendLine("  Message: ${failure.rootCauseMessage ?: "(no message)"}")
+            appendLine()
+        }
+        
+        if (!failure.exceptionChain.isNullOrBlank()) {
+            appendLine("Full Exception Chain (from outermost to root cause):")
+            failure.exceptionChain.lines().forEach { line ->
+                appendLine("  $line")
+            }
+            appendLine()
+        }
+        
+        appendLine("Error Category Explanation:")
+        when (failure.category) {
+            com.linkpoint.network.NetworkExceptionUtils.ErrorCategory.CONNECTION_CLOSED -> {
+                appendLine("  The server closed the connection before completing the response.")
+                appendLine("  This typically indicates:")
+                appendLine("    • Server is overloaded and dropping connections")
+                appendLine("    • Load balancer timeout or reset")
+                appendLine("    • Network interruption during data transfer")
+                appendLine("    • SSL/TLS handshake was interrupted")
+                appendLine("    • HTTP/2 protocol negotiation failed")
+            }
+            com.linkpoint.network.NetworkExceptionUtils.ErrorCategory.SSL_ERROR -> {
+                appendLine("  A secure connection (SSL/TLS) could not be established.")
+                appendLine("  This typically indicates:")
+                appendLine("    • Certificate validation failed")
+                appendLine("    • TLS version mismatch between client and server")
+                appendLine("    • VPN or proxy interfering with secure connection")
+                appendLine("    • Network security policy blocking the connection")
+            }
+            com.linkpoint.network.NetworkExceptionUtils.ErrorCategory.TIMEOUT -> {
+                appendLine("  The connection or request timed out.")
+                appendLine("  This typically indicates:")
+                appendLine("    • Server is not responding")
+                appendLine("    • Network is too slow or congested")
+                appendLine("    • Firewall is blocking the connection")
+                appendLine("    • Server is under heavy load")
+            }
+            com.linkpoint.network.NetworkExceptionUtils.ErrorCategory.DNS_ERROR -> {
+                appendLine("  Could not resolve the server hostname.")
+                appendLine("  This typically indicates:")
+                appendLine("    • No internet connection")
+                appendLine("    • DNS server is not responding")
+                appendLine("    • The hostname is incorrect")
+                appendLine("    • DNS is being blocked by network policy")
+            }
+            com.linkpoint.network.NetworkExceptionUtils.ErrorCategory.CONNECTION_REFUSED -> {
+                appendLine("  The server refused the connection.")
+                appendLine("  This typically indicates:")
+                appendLine("    • Server is down or not accepting connections")
+                appendLine("    • Wrong port or address")
+                appendLine("    • Firewall blocking the connection")
+                appendLine("    • Server maintenance in progress")
+            }
+            com.linkpoint.network.NetworkExceptionUtils.ErrorCategory.SOCKET_ERROR -> {
+                appendLine("  A low-level socket error occurred.")
+                appendLine("  This typically indicates:")
+                appendLine("    • Network interface issues")
+                appendLine("    • Connection was forcibly closed")
+                appendLine("    • Resource exhaustion")
+            }
+            com.linkpoint.network.NetworkExceptionUtils.ErrorCategory.IO_ERROR -> {
+                appendLine("  An I/O error occurred during communication.")
+                appendLine("  This typically indicates:")
+                appendLine("    • Data corruption during transfer")
+                appendLine("    • Unexpected response format")
+                appendLine("    • Stream was interrupted")
+            }
+            com.linkpoint.network.NetworkExceptionUtils.ErrorCategory.UNKNOWN -> {
+                appendLine("  An unexpected error occurred.")
+                appendLine("  The error could not be classified into a known category.")
+            }
+        }
+        appendLine()
+        
+        if (!failure.technicalDetails.isNullOrBlank()) {
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ DETAILED TECHNICAL INFORMATION                                   │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            failure.technicalDetails.lines().forEach { line ->
+                appendLine(line)
+            }
+            appendLine()
+        }
+        
+        appendLine("┌──────────────────────────────────────────────────────────────────┐")
+        appendLine("│ DEVICE & ENVIRONMENT                                             │")
+        appendLine("└──────────────────────────────────────────────────────────────────┘")
+        appendLine()
+        appendLine("Device Information:")
+        appendLine("  Manufacturer: ${Build.MANUFACTURER}")
+        appendLine("  Model: ${Build.MODEL}")
+        appendLine("  Product: ${Build.PRODUCT}")
+        appendLine("  Android Version: ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
+        appendLine("  Build: ${Build.DISPLAY}")
+        appendLine()
+        appendLine("Target Grid:")
+        appendLine("  Name: ${grid.name}")
+        appendLine("  Login URI: ${grid.loginUri}")
+        appendLine()
+        appendLine("SSL/TLS Capabilities:")
+        sslInfo.lines().forEach { line ->
+            if (line.isNotBlank()) appendLine("  $line")
+        }
+        appendLine()
+        
+        appendLine("┌──────────────────────────────────────────────────────────────────┐")
+        appendLine("│ NETWORK DIAGNOSTICS AT TIME OF ERROR                             │")
+        appendLine("└──────────────────────────────────────────────────────────────────┘")
+        appendLine()
+        networkDiagReport.lines().forEach { line ->
+            appendLine(line)
+        }
+        appendLine()
+        
+        appendLine("┌──────────────────────────────────────────────────────────────────┐")
+        appendLine("│ RECOMMENDED ACTIONS                                              │")
+        appendLine("└──────────────────────────────────────────────────────────────────┘")
+        appendLine()
+        if (failure.recommendations.isNotEmpty()) {
+            failure.recommendations.forEachIndexed { idx, rec ->
+                appendLine("${idx + 1}. $rec")
+            }
+        } else {
             appendLine("1. Check your internet connection is stable")
             appendLine("2. Try switching between Wi-Fi and mobile data")
             appendLine("3. Disable VPN/Proxy if enabled")
             appendLine("4. Check status.secondlifegrid.net for server status")
             appendLine("5. Restart the app and try again")
         }
+        appendLine()
         
-        AlertDialog.Builder(this)
-            .setTitle("Technical Details")
-            .setMessage(details)
-            .setPositiveButton("OK", null)
-            .setNeutralButton("Copy") { _, _ ->
-                val clipboard = getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                val clip = android.content.ClipData.newPlainText("Login Error Details", details)
-                clipboard.setPrimaryClip(clip)
-                android.widget.Toast.makeText(this, "Details copied to clipboard", android.widget.Toast.LENGTH_SHORT).show()
-            }
-            .show()
+        if (failure.isTransient) {
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ NOTE: TRANSIENT ERROR                                            │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            appendLine("This error appears to be temporary. The connection issue may resolve")
+            appendLine("on its own. Please wait a moment and try again.")
+            appendLine()
+        }
+        
+        appendLine("═══════════════════════════════════════════════════════════════════")
+        appendLine("End of Linkpoint Login Error Report")
+        appendLine("═══════════════════════════════════════════════════════════════════")
     }
     
     private fun setLoginInProgress(inProgress: Boolean) {
