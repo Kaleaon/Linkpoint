@@ -4,6 +4,16 @@
 
 Linkpoint is a next-generation Second Life viewer built from the ground up with modern technologies and standards for 2025 and beyond.
 
+> ⚠️ **Important Disclaimer:** This software is not provided or supported by Linden Lab, the makers of Second Life. Linkpoint is an independent, community-developed third-party viewer.
+
+## Third-Party Viewer Compliance
+
+Linkpoint complies with [Linden Lab's Third-Party Viewer Policy](https://secondlife.com/corporate/third-party-viewers).
+
+- 📄 [Privacy Policy](../../PRIVACY_POLICY.md)
+- ✅ [TPV Policy Compliance Documentation](../../THIRD_PARTY_VIEWER_POLICY_COMPLIANCE.md)
+- 💬 **Customer Support:** Community support via [GitHub Issues](https://github.com/Kaleaon/Linkpoint/issues) - no official support provided
+
 ## ✨ Features
 
 ### 🎙️ Modern Voice Chat
@@ -221,7 +231,12 @@ Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md)
 
 This project is licensed under the GPL v2 License - see [LICENSE](LICENSE) file for details.
 
-This project is compatible with Second Life™ protocols but is not affiliated with or endorsed by Linden Lab.
+## ⚖️ Legal & Trademarks
+
+- Second Life is a trademark of Linden Lab.
+- This project is compatible with Second Life™ protocols but is **not affiliated with or endorsed by Linden Lab**.
+- This software is not provided or supported by Linden Lab, the makers of Second Life.
+- Linkpoint complies with [Linden Lab's Third-Party Viewer Policy](https://secondlife.com/corporate/third-party-viewers).
 
 ## 🙏 Acknowledgments
 

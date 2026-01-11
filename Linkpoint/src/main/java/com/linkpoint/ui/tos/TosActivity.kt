@@ -171,10 +171,34 @@ class TosActivity : AppCompatActivity() {
                     a { color: #1a73e8; }
                     .section { background: white; padding: 16px; margin: 16px 0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
                     .important { background: #fff3e0; padding: 12px; border-left: 4px solid #ff9800; margin: 16px 0; }
+                    .disclaimer { background: #e3f2fd; padding: 12px; border-left: 4px solid #2196f3; margin: 16px 0; }
                 </style>
             </head>
             <body>
-                <h1>Second Life Terms of Service</h1>
+                <h1>Terms of Service &amp; Disclosures</h1>
+                
+                <div class="disclaimer">
+                    <strong>Important Disclaimer:</strong> Linkpoint is <strong>not provided or supported by Linden Lab</strong>, the makers of Second Life. This is an independent, community-developed third-party viewer.
+                </div>
+                
+                <div class="section">
+                    <h2>About Linkpoint</h2>
+                    <p><strong>Viewer Name:</strong> Linkpoint</p>
+                    <p><strong>Type:</strong> Third-Party Viewer for Second Life (Android)</p>
+                    <p><strong>Customer Support:</strong> Community support only via <a href="https://github.com/Kaleaon/Linkpoint/issues">GitHub Issues</a>. No official support is provided.</p>
+                    <p><strong>Privacy Policy:</strong> <a href="https://github.com/Kaleaon/Linkpoint/blob/main/PRIVACY_POLICY.md">View Privacy Policy</a></p>
+                </div>
+                
+                <div class="section">
+                    <h2>Mobile Limitations</h2>
+                    <p>As a mobile viewer, Linkpoint has certain limitations compared to desktop viewers:</p>
+                    <ul>
+                        <li>Limited building and editing functionality</li>
+                        <li>Simplified graphics optimized for mobile devices</li>
+                        <li>Touch-based controls instead of keyboard/mouse</li>
+                        <li>Voice chat via WebRTC implementation</li>
+                    </ul>
+                </div>
                 
                 <div class="important">
                     <strong>Important:</strong> By using Linkpoint to access Second Life, you agree to Linden Lab's Terms of Service and Community Standards.
@@ -210,18 +234,33 @@ class TosActivity : AppCompatActivity() {
                 </div>
                 
                 <div class="section">
-                    <h2>Linkpoint Third-Party Viewer Policy</h2>
-                    <p>Linkpoint is a third-party viewer that complies with Linden Lab's Third-Party Viewer Policy.</p>
+                    <h2>Third-Party Viewer Policy</h2>
+                    <p>Linkpoint complies with <a href="https://secondlife.com/corporate/third-party-viewers">Linden Lab's Third-Party Viewer Policy</a>.</p>
                     <p>By using Linkpoint, you also agree to:</p>
                     <ul>
                         <li>Not use the viewer for malicious purposes</li>
                         <li>Not exploit vulnerabilities or bugs</li>
                         <li>Respect the privacy and rights of other users</li>
+                        <li>Not circumvent the Second Life permissions system</li>
+                        <li>Not use export features to copy content you don't own</li>
                     </ul>
                 </div>
                 
-                <div class="important">
-                    <p><strong>Privacy:</strong> Linkpoint stores your login credentials locally on your device if you choose to save them. We do not collect or transmit your password to any third parties.</p>
+                <div class="section">
+                    <h2>Privacy</h2>
+                    <p>Linkpoint stores your login credentials locally on your device if you choose to save them.</p>
+                    <p><strong>What we do NOT do:</strong></p>
+                    <ul>
+                        <li>We do NOT collect analytics or telemetry</li>
+                        <li>We do NOT transmit your credentials to third parties</li>
+                        <li>We do NOT sell or share any user data</li>
+                    </ul>
+                    <p>Your password is encrypted using Android Keystore and stored only on your device.</p>
+                    <p>For full details, see our <a href="https://github.com/Kaleaon/Linkpoint/blob/main/PRIVACY_POLICY.md">Privacy Policy</a>.</p>
+                </div>
+                
+                <div class="disclaimer">
+                    <p><strong>Trademarks:</strong> Second Life is a trademark of Linden Lab. Linkpoint is not affiliated with or endorsed by Linden Lab.</p>
                 </div>
             </body>
             </html>

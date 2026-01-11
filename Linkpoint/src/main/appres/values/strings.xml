@@ -3,6 +3,11 @@
     <string name="app_name">Linkpoint</string>
     <string name="app_description">Second Life Viewer for Android</string>
     
+    <!-- Third-Party Viewer Policy Required Disclosures -->
+    <string name="tpv_disclaimer">This software is not provided or supported by Linden Lab, the makers of Second Life.</string>
+    <string name="tpv_support_info">Community support via GitHub Issues. No official support is provided.</string>
+    <string name="tpv_trademark_notice">Second Life is a trademark of Linden Lab. Linkpoint is not affiliated with or endorsed by Linden Lab.</string>
+    
     <!-- Navigation -->
     <string name="chat">Chat</string>
     <string name="inventory">Inventory</string>
@@ -35,6 +40,8 @@
     <string name="account">Account</string>
     <string name="about">About</string>
     <string name="logout">Logout</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="terms_of_service">Terms of Service</string>
     
     <!-- General -->
     <string name="ok">OK</string>
