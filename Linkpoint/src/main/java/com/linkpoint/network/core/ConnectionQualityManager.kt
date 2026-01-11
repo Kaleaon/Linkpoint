@@ -89,6 +89,9 @@ class ConnectionQualityManager(private val context: Context) {
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
     private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     
+    // Network change listeners (for DNS cache clearing, etc.)
+    private val networkChangeListeners = mutableListOf<() -> Unit>()
+    
     init {
         startMonitoring()
         updateNetworkInfo()
@@ -107,12 +110,16 @@ class ConnectionQualityManager(private val context: Context) {
                 Log.d(TAG, "Network available")
                 _isConnected.value = true
                 updateNetworkInfo()
+                // Notify listeners of network change (for DNS cache clearing, etc.)
+                notifyNetworkChange()
             }
             
             override fun onLost(network: Network) {
                 Log.d(TAG, "Network lost")
                 _isConnected.value = false
                 _quality.value = Quality.UNKNOWN
+                // Notify listeners of network change
+                notifyNetworkChange()
             }
             
             override fun onCapabilitiesChanged(
@@ -142,6 +149,41 @@ class ConnectionQualityManager(private val context: Context) {
             }
         }
         networkCallback = null
+        networkChangeListeners.clear()
+    }
+    
+    /**
+     * Register a listener for network changes.
+     * Used by GrpcChannelFactory to clear DNS cache when network changes.
+     */
+    fun addNetworkChangeListener(listener: () -> Unit) {
+        synchronized(networkChangeListeners) {
+            networkChangeListeners.add(listener)
+        }
+    }
+    
+    /**
+     * Remove a network change listener.
+     */
+    fun removeNetworkChangeListener(listener: () -> Unit) {
+        synchronized(networkChangeListeners) {
+            networkChangeListeners.remove(listener)
+        }
+    }
+    
+    /**
+     * Notify all listeners of network change.
+     */
+    private fun notifyNetworkChange() {
+        synchronized(networkChangeListeners) {
+            networkChangeListeners.forEach { listener ->
+                try {
+                    listener()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error notifying network change listener", e)
+                }
+            }
+        }
     }
     
     /**

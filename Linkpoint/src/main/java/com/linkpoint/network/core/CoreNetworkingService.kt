@@ -324,11 +324,14 @@ class CoreNetworkingService(private val context: Context) {
      * 
      * Always creates a fresh HTTP client to avoid stale connection issues.
      * The Second Life login server can be sensitive to connection reuse.
+     * 
+     * Implements Firestorm-style Retry-After header handling for 503 errors.
      */
     private fun executeLoginRequest(loginUri: String, xmlRequest: String): LoginResult {
         // Always create a fresh client for login to avoid stale connections
         // This is critical for avoiding EOF errors from reused connections
-        val client = channelFactory.createHttpClient()
+        val options = HttpRequestOptions.forLogin()
+        val client = channelFactory.createHttpClient(options)
         
         // Update the cached client reference
         synchronized(connectionLock) {
@@ -349,26 +352,57 @@ class CoreNetworkingService(private val context: Context) {
         Log.d(TAG, "Executing login request to: $loginUri")
         
         // Execute with body retry handling
-        val (response, responseBody) = executeWithBodyRetry(client, request)
+        val (response, responseBody) = executeWithBodyRetry(client, request, options)
         
         if (!response.isSuccessful) {
+            // Extract Retry-After header if present (Firestorm pattern)
+            val retryAfter = parseRetryAfterHeader(response)
+            
             val errorDetails = buildString {
                 appendLine("URL: $loginUri")
                 appendLine("HTTP Status: ${response.code}")
+                if (retryAfter != null) {
+                    appendLine("Retry-After: ${retryAfter}s")
+                }
                 appendLine("Response: ${responseBody.take(500)}")
             }
             
-            // Check for specific HTTP error codes
+            // Check for specific HTTP error codes with enhanced handling
             return when (response.code) {
-                503 -> LoginResult.Failure(
-                    message = "Login service temporarily unavailable. Please try again in a few minutes.",
-                    errorCode = "SERVICE_UNAVAILABLE",
-                    technicalDetails = errorDetails,
-                    shouldRetry = true
-                )
+                503 -> {
+                    // Service Unavailable - use Retry-After if provided
+                    // This is Firestorm's approach: respect server's retry hints
+                    val message = if (retryAfter != null && retryAfter > 0) {
+                        "Login service temporarily unavailable. Please try again in $retryAfter seconds."
+                    } else {
+                        "Login service temporarily unavailable. Please try again in a few minutes."
+                    }
+                    LoginResult.Failure(
+                        message = message,
+                        errorCode = "SERVICE_UNAVAILABLE",
+                        technicalDetails = errorDetails,
+                        shouldRetry = true
+                    )
+                }
                 502, 504 -> LoginResult.Failure(
                     message = "Login gateway error. The server may be overloaded.",
                     errorCode = "GATEWAY_ERROR",
+                    technicalDetails = errorDetails,
+                    shouldRetry = true
+                )
+                429 -> {
+                    // Too Many Requests - definitely use Retry-After
+                    val waitTime = retryAfter ?: 30
+                    LoginResult.Failure(
+                        message = "Too many login attempts. Please wait $waitTime seconds before trying again.",
+                        errorCode = "RATE_LIMITED",
+                        technicalDetails = errorDetails,
+                        shouldRetry = true
+                    )
+                }
+                500 -> LoginResult.Failure(
+                    message = "Internal server error. The login service is experiencing issues.",
+                    errorCode = "INTERNAL_SERVER_ERROR",
                     technicalDetails = errorDetails,
                     shouldRetry = true
                 )
@@ -385,6 +419,39 @@ class CoreNetworkingService(private val context: Context) {
     }
     
     /**
+     * Parse the Retry-After header from a response.
+     * Supports both numeric seconds and HTTP-date formats.
+     * 
+     * Based on Firestorm's mReplyRetryAfter handling.
+     * 
+     * @return Retry delay in seconds, or null if not present/invalid
+     */
+    private fun parseRetryAfterHeader(response: Response): Int? {
+        val retryAfter = response.header("Retry-After") ?: return null
+        
+        // Try parsing as integer (seconds)
+        retryAfter.toIntOrNull()?.let { seconds ->
+            // Cap at 30 seconds like Firestorm does
+            return minOf(seconds, 30)
+        }
+        
+        // Try parsing as HTTP-date (not common, but handle it)
+        try {
+            val date = java.text.SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", java.util.Locale.US)
+                .parse(retryAfter)
+            if (date != null) {
+                val delayMs = date.time - System.currentTimeMillis()
+                val delaySeconds = (delayMs / 1000).toInt()
+                return minOf(maxOf(delaySeconds, 0), 30)  // Cap at 30 seconds
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not parse Retry-After date: $retryAfter")
+        }
+        
+        return null
+    }
+    
+    /**
      * Execute request with retry for EOF during body reading.
      * 
      * EOF errors typically occur when:
@@ -393,38 +460,58 @@ class CoreNetworkingService(private val context: Context) {
      * - Network interruption during data transfer
      * - Server-side rate limiting or overload
      * 
-     * This method implements a robust retry strategy with:
+     * This method implements a robust retry strategy based on Firestorm's patterns:
      * - Fresh client creation on each retry (avoids stale connections)
-     * - Exponential backoff with extra delay for EOF errors
+     * - Exponential backoff with min/max bounds (like Firestorm's mMinRetryBackoff/mMaxRetryBackoff)
+     * - Retry-After header support
+     * - Special handling for 503 errors
      * - Proper resource cleanup on all code paths
      */
     private fun executeWithBodyRetry(
         client: OkHttpClient,
         request: Request,
-        maxRetries: Int = 3  // Increased from 2 to handle flaky connections
+        options: HttpRequestOptions = HttpRequestOptions.forLogin()
     ): Pair<Response, String> {
         var lastException: IOException? = null
         var currentClient = client
+        var lastRetryAfter: Int? = null
         
-        repeat(maxRetries + 1) { attempt ->
+        repeat(options.retries + 1) { attempt ->
             var response: Response? = null
             try {
                 if (attempt > 0) {
-                    // Exponential backoff: 1s, 2s, 4s, ...
-                    val baseDelayMs = 1000L * (1 shl (attempt - 1))
-                    // Add extra delay for EOF errors - server may need time to recover
-                    val eofExtraDelay = NetworkExceptionUtils.EOF_EXTRA_DELAY_MS
-                    val totalDelayMs = baseDelayMs + eofExtraDelay
+                    // Use Firestorm-style retry delay calculation
+                    // Incorporates Retry-After header if available
+                    val delayMs = options.calculateRetryDelay(attempt - 1, lastRetryAfter)
                     
-                    Log.d(TAG, "Body read retry $attempt/$maxRetries after ${totalDelayMs}ms delay " +
-                        "(base: ${baseDelayMs}ms, EOF extra: ${eofExtraDelay}ms)")
+                    // Add extra delay for EOF errors - server may need time to recover
+                    val totalDelayMs = if (lastException is EOFIOException) {
+                        delayMs + NetworkExceptionUtils.EOF_EXTRA_DELAY_MS
+                    } else {
+                        delayMs
+                    }
+                    
+                    Log.d(TAG, "Request retry $attempt/${options.retries} after ${totalDelayMs}ms delay " +
+                        "(base: ${delayMs}ms, retryAfter: ${lastRetryAfter ?: "none"})")
                     Thread.sleep(totalDelayMs)
                     
                     // Create fresh client to avoid reusing potentially stale connections
-                    currentClient = channelFactory.createHttpClient()
+                    currentClient = channelFactory.createHttpClient(options)
                 }
                 
                 response = currentClient.newCall(request).execute()
+                
+                // Check for retryable HTTP errors with Retry-After
+                if (response.code in listOf(503, 429, 500, 502, 504)) {
+                    lastRetryAfter = parseRetryAfterHeader(response)
+                    
+                    // For 503, track retry count like Firestorm's mPolicy503Retries
+                    if (response.code == 503 && attempt < options.retries) {
+                        Log.d(TAG, "503 Service Unavailable, will retry (attempt ${attempt + 1})")
+                        response.close()
+                        throw RetryableHttpException(response.code, "Service temporarily unavailable", lastRetryAfter)
+                    }
+                }
                 
                 // Check if we got a response at all
                 if (response.body == null) {
@@ -455,17 +542,23 @@ class CoreNetworkingService(private val context: Context) {
                 
                 return response to responseBody
                 
+            } catch (e: RetryableHttpException) {
+                // HTTP error that should be retried
+                Log.w(TAG, "Retryable HTTP ${e.code} (attempt ${attempt + 1}/${options.retries + 1})")
+                lastRetryAfter = e.retryAfter
+                lastException = IOException("HTTP ${e.code}: ${e.message}")
+                // Continue to retry
             } catch (e: IOException) {
                 // Ensure response is closed on any error
                 response?.close()
                 
                 if (NetworkExceptionUtils.isEOFException(e) || e is EOFIOException) {
-                    Log.w(TAG, "EOF during request/body read (attempt ${attempt + 1}/${maxRetries + 1}): ${e.message}")
+                    Log.w(TAG, "EOF during request/body read (attempt ${attempt + 1}/${options.retries + 1}): ${e.message}")
                     lastException = if (e is EOFIOException) e else EOFIOException(e.message ?: "EOF error", e)
                     // Continue to retry
                 } else if (isConnectionResetError(e)) {
                     // Treat connection reset as EOF-like - server closed the connection
-                    Log.w(TAG, "Connection reset during request (attempt ${attempt + 1}/${maxRetries + 1}): ${e.message}")
+                    Log.w(TAG, "Connection reset during request (attempt ${attempt + 1}/${options.retries + 1}): ${e.message}")
                     lastException = EOFIOException("Connection reset: ${e.message}", e)
                     // Continue to retry
                 } else {
@@ -475,8 +568,17 @@ class CoreNetworkingService(private val context: Context) {
             }
         }
         
-        throw lastException ?: EOFIOException("Failed after ${maxRetries + 1} attempts")
+        throw lastException ?: EOFIOException("Failed after ${options.retries + 1} attempts")
     }
+    
+    /**
+     * Exception for HTTP errors that should trigger a retry.
+     */
+    private class RetryableHttpException(
+        val code: Int,
+        message: String,
+        val retryAfter: Int?
+    ) : Exception(message)
     
     /**
      * Check if the exception indicates a connection reset error

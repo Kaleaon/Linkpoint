@@ -5,6 +5,7 @@ import com.linkpoint.assets.AssetType
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
@@ -84,42 +85,62 @@ class InventoryManager(
     fun getSystemFolder(type: Int): UUID? = systemFolders[type]
     
     /**
-     * Fetch folder contents
+     * Fetch folder contents with retry support.
+     * 
+     * The CapabilityManager now handles retries internally with Firestorm-style
+     * exponential backoff and Retry-After header support. This method provides
+     * additional retry logic for cases where the capability itself returns null.
      */
     suspend fun fetchFolderContents(folderId: UUID, fetchFolders: Boolean = true, fetchItems: Boolean = true): Boolean {
         _isLoading.value = true
         
         return withContext(Dispatchers.IO) {
-            try {
-                val request = LLSDMap().apply {
-                    this["folders"] = LLSDArray().apply {
-                        add(LLSDMap().apply {
-                            this["folder_id"] = LLSDString(folderId.toString())
-                            this["owner_id"] = LLSDString(agentId.toString())
-                            this["fetch_folders"] = LLSDBoolean(fetchFolders)
-                            this["fetch_items"] = LLSDBoolean(fetchItems)
-                            this["sort_order"] = LLSDInteger(1)
-                        })
+            var attempts = 0
+            val maxAttempts = 3
+            
+            while (attempts < maxAttempts) {
+                try {
+                    val request = LLSDMap().apply {
+                        this["folders"] = LLSDArray().apply {
+                            add(LLSDMap().apply {
+                                this["folder_id"] = LLSDString(folderId.toString())
+                                this["owner_id"] = LLSDString(agentId.toString())
+                                this["fetch_folders"] = LLSDBoolean(fetchFolders)
+                                this["fetch_items"] = LLSDBoolean(fetchItems)
+                                this["sort_order"] = LLSDInteger(1)
+                            })
+                        }
+                    }
+                    
+                    val response = capabilityManager.request(
+                        CapabilityManager.CAP_FETCH_INVENTORY_DESCENDENTS,
+                        request
+                    )
+                    
+                    if (response is LLSDMap) {
+                        parseInventoryResponse(response)
+                        _isLoading.value = false
+                        return@withContext true
+                    } else {
+                        // Null response - capability manager already retried internally
+                        // Try once more with a delay
+                        attempts++
+                        if (attempts < maxAttempts) {
+                            Log.w(TAG, "Empty response for folder $folderId, retrying (attempt $attempts)")
+                            delay(1000L * attempts)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to fetch folder: $folderId", e)
+                    attempts++
+                    if (attempts < maxAttempts) {
+                        delay(1000L * attempts)
                     }
                 }
-                
-                val response = capabilityManager.request(
-                    CapabilityManager.CAP_FETCH_INVENTORY_DESCENDENTS,
-                    request
-                )
-                
-                if (response is LLSDMap) {
-                    parseInventoryResponse(response)
-                    true
-                } else {
-                    false
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to fetch folder: $folderId", e)
-                false
-            } finally {
-                _isLoading.value = false
             }
+            
+            _isLoading.value = false
+            false
         }
     }
     
