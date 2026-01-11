@@ -293,12 +293,24 @@ class CoreNetworkingService(private val context: Context) {
                         )
                     }
                     is RetryPolicy.RetryDecision.Continue -> {
-                        // This shouldn't happen for login, but handle it
+                        // This shouldn't happen for login, return failure
                         Log.w(TAG, "Login: Unexpected Continue decision")
+                        return@withContext LoginResult.Failure(
+                            message = "Unexpected login state",
+                            errorCode = "INTERNAL_ERROR",
+                            shouldRetry = true
+                        )
                     }
                 }
             }
         }
+        
+        // Unreachable - satisfies compiler's return type requirement
+        @Suppress("UNREACHABLE_CODE")
+        LoginResult.Failure(
+            message = "Unreachable code path",
+            errorCode = "UNREACHABLE"
+        )
     }
     
     /**
