@@ -5,18 +5,24 @@ import android.os.Bundle
 import android.view.Choreographer
 import android.view.SurfaceView
 import android.widget.ImageButton
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.filament.*
 import com.google.android.filament.android.DisplayHelper
 import com.google.android.filament.android.UiHelper
 import com.linkpoint.R
+import com.linkpoint.assets.CacheManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
  * Main activity with advanced Filament-based 3D rendering
+ * 
+ * Features quick access to cache management to prevent cache-related failures
  */
 class MainActivity : AppCompatActivity() {
     
@@ -39,6 +45,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var camera: Camera
     
     private var swapChain: SwapChain? = null
+    
+    private lateinit var cacheManager: CacheManager
     
     private val frameCallback = object : Choreographer.FrameCallback {
         override fun doFrame(frameTimeNanos: Long) {
@@ -63,10 +71,21 @@ class MainActivity : AppCompatActivity() {
         surfaceView = findViewById(R.id.surfaceView)
         choreographer = Choreographer.getInstance()
         displayHelper = DisplayHelper(this)
+        cacheManager = CacheManager(this)
         
         setupFilament()
         setupSurface()
         setupNavigation()
+        
+        // Check cache health on startup
+        checkCacheHealth()
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        choreographer.postFrameCallback(frameCallback)
+        // Update cache status indicator
+        updateCacheStatusIndicator()
     }
     
     private fun setupNavigation() {
@@ -85,6 +104,169 @@ class MainActivity : AppCompatActivity() {
         findViewById<ImageButton>(R.id.settingsButton).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
+        
+        // Cache button - quick access to cache management
+        findViewById<ImageButton>(R.id.cacheButton)?.setOnClickListener {
+            showCacheQuickMenu()
+        }
+        
+        // Long-press settings to go directly to cache settings
+        findViewById<ImageButton>(R.id.settingsButton).setOnLongClickListener {
+            showCacheQuickMenu()
+            true
+        }
+    }
+    
+    private fun checkCacheHealth() {
+        lifecycleScope.launch {
+            try {
+                val result = cacheManager.checkAndMaintainCache()
+                if (!result.cacheHealthy) {
+                    // Show warning to user
+                    Toast.makeText(
+                        this@MainActivity,
+                        "⚠️ Cache maintenance performed: ${result.actionTaken}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } catch (e: Exception) {
+                // Silently fail - don't disrupt user experience
+            }
+        }
+    }
+    
+    private fun updateCacheStatusIndicator() {
+        lifecycleScope.launch {
+            try {
+                val stats = cacheManager.getCacheStats()
+                
+                // Update FPS text to show cache status if there's an issue
+                findViewById<TextView>(R.id.fpsText)?.let { fpsText ->
+                    val currentText = fpsText.text.toString()
+                    if (stats.isLowSpace || stats.usagePercent > 95) {
+                        fpsText.text = "$currentText | Cache: ⚠️"
+                    } else if (stats.usagePercent > 80) {
+                        fpsText.text = "$currentText | Cache: ${stats.usagePercent}%"
+                    }
+                }
+            } catch (e: Exception) {
+                // Silently ignore
+            }
+        }
+    }
+    
+    private fun showCacheQuickMenu() {
+        lifecycleScope.launch {
+            try {
+                val stats = cacheManager.getCacheStats()
+                
+                val options = arrayOf(
+                    "📊 Cache Status: ${stats.getFormattedTotalSize()} / ${stats.getFormattedMaxSize()} (${stats.usagePercent}%)",
+                    "🗑️ Clear All Cache",
+                    "🖼️ Clear Textures Only",
+                    "⚙️ Cache Settings"
+                )
+                
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Quick Cache Management")
+                    .setItems(options) { _, which ->
+                        when (which) {
+                            0 -> showDetailedCacheInfo()
+                            1 -> confirmAndClearCache()
+                            2 -> clearTexturesOnly()
+                            3 -> openCacheSettings()
+                        }
+                    }
+                    .setNegativeButton("Close", null)
+                    .show()
+            } catch (e: Exception) {
+                Toast.makeText(this@MainActivity, "Error reading cache", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    
+    private fun showDetailedCacheInfo() {
+        lifecycleScope.launch {
+            try {
+                val stats = cacheManager.getCacheStats()
+                
+                val message = buildString {
+                    appendLine("📦 Total: ${stats.getFormattedTotalSize()} (${stats.totalFileCount} files)")
+                    appendLine("📏 Maximum: ${stats.getFormattedMaxSize()}")
+                    appendLine("📈 Usage: ${stats.usagePercent}%")
+                    appendLine()
+                    appendLine("🖼️ Textures: ${cacheManager.formatSize(stats.texturesSizeBytes)}")
+                    appendLine("🧊 Meshes: ${cacheManager.formatSize(stats.meshesSizeBytes)}")
+                    appendLine("🔊 Sounds: ${cacheManager.formatSize(stats.soundsSizeBytes)}")
+                    appendLine()
+                    appendLine("💾 Device Free: ${cacheManager.formatSize(stats.availableSpaceBytes)}")
+                    if (stats.isLowSpace) {
+                        appendLine()
+                        appendLine("⚠️ WARNING: Device storage is low!")
+                        appendLine("Consider clearing cache to improve performance.")
+                    }
+                    if (stats.usagePercent < 30 && stats.totalFileCount < 200) {
+                        appendLine()
+                        appendLine("💡 TIP: Your cache is small.")
+                        appendLine("Increasing cache size may improve loading speed.")
+                    }
+                }
+                
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Cache Details")
+                    .setMessage(message)
+                    .setPositiveButton("OK", null)
+                    .setNeutralButton("Clear Cache") { _, _ ->
+                        confirmAndClearCache()
+                    }
+                    .show()
+            } catch (e: Exception) {
+                Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    
+    private fun confirmAndClearCache() {
+        AlertDialog.Builder(this)
+            .setTitle("Clear All Cache?")
+            .setMessage("This will delete all cached textures, meshes, and sounds.\n\nAssets will need to be re-downloaded on next use.\n\nContinue?")
+            .setPositiveButton("Clear") { _, _ ->
+                lifecycleScope.launch {
+                    try {
+                        val result = cacheManager.clearAllCache()
+                        Toast.makeText(
+                            this@MainActivity,
+                            "✓ Cleared ${cacheManager.formatSize(result.clearedBytes)}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } catch (e: Exception) {
+                        Toast.makeText(this@MainActivity, "Error clearing cache", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun clearTexturesOnly() {
+        lifecycleScope.launch {
+            try {
+                val result = cacheManager.clearCache(com.linkpoint.assets.CacheableAssetType.TEXTURES)
+                Toast.makeText(
+                    this@MainActivity,
+                    "✓ Cleared ${cacheManager.formatSize(result.clearedBytes)} of textures",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } catch (e: Exception) {
+                Toast.makeText(this@MainActivity, "Error clearing textures", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    
+    private fun openCacheSettings() {
+        val intent = Intent(this, SettingsActivity::class.java)
+        // Could add extra to scroll to cache section
+        startActivity(intent)
     }
     
     private fun setupTouchControls() {

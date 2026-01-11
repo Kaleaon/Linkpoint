@@ -97,6 +97,14 @@
                     android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <CheckBox
+                android:id="@+id/savePasswordCheck"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Remember my password"
+                android:textColor="@android:color/darker_gray"
+                android:layout_marginBottom="16dp" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/loginButton"
                 android:layout_width="match_parent"
@@ -120,6 +128,15 @@
                 android:layout_marginTop="8dp"
                 android:textAlignment="center"
                 android:textColor="@android:color/darker_gray" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="By logging in, you agree to the Second Life Terms of Service"
+                android:textAlignment="center"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="11sp" />
 
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

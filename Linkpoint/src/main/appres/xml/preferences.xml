@@ -42,6 +42,79 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:key="cache_category"
+        android:title="Cache Management"
+        android:iconSpaceReserved="false">
+
+        <Preference
+            android:key="cache_status"
+            android:title="Cache Status"
+            android:summary="Tap to view cache details"
+            android:iconSpaceReserved="false" />
+
+        <SeekBarPreference
+            android:key="disk_cache_size"
+            android:title="Disk Cache Size"
+            android:summary="Maximum storage for cached assets"
+            android:defaultValue="1024"
+            android:max="4096"
+            app:min="128"
+            app:showSeekBarValue="true"
+            android:iconSpaceReserved="false" />
+
+        <SeekBarPreference
+            android:key="memory_cache_size"
+            android:title="Memory Cache Size"
+            android:summary="RAM used for quick access (MB)"
+            android:defaultValue="100"
+            android:max="200"
+            app:min="25"
+            app:showSeekBarValue="true"
+            android:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="cache_textures"
+            android:title="Cache Textures"
+            android:summary="Store downloaded textures locally"
+            android:defaultValue="true"
+            android:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="cache_meshes"
+            android:title="Cache Meshes"
+            android:summary="Store downloaded 3D models locally"
+            android:defaultValue="true"
+            android:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="cache_sounds"
+            android:title="Cache Sounds"
+            android:summary="Store downloaded sounds locally"
+            android:defaultValue="true"
+            android:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="auto_clear_low_space"
+            android:title="Auto-Clear on Low Space"
+            android:summary="Automatically clear cache when device storage is low"
+            android:defaultValue="true"
+            android:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="clear_cache"
+            android:title="Clear All Cache"
+            android:summary="Delete all cached textures, meshes, and data"
+            android:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="clear_textures_cache"
+            android:title="Clear Texture Cache Only"
+            android:summary="Delete cached textures"
+            android:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="Chat"
         android:iconSpaceReserved="false">
 
@@ -104,15 +177,15 @@
         android:iconSpaceReserved="false">
 
         <Preference
-            android:key="logout"
-            android:title="Logout"
-            android:summary="Sign out of Second Life"
+            android:key="view_tos"
+            android:title="Terms of Service"
+            android:summary="View Second Life Terms of Service"
             android:iconSpaceReserved="false" />
 
         <Preference
-            android:key="clear_cache"
-            android:title="Clear Cache"
-            android:summary="Delete cached textures and data"
+            android:key="logout"
+            android:title="Logout"
+            android:summary="Sign out of Second Life"
             android:iconSpaceReserved="false" />
 
     </PreferenceCategory>
