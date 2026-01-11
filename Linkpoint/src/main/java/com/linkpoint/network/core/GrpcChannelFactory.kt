@@ -6,8 +6,12 @@ import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import io.grpc.okhttp.OkHttpChannelBuilder
 import okhttp3.ConnectionPool
+import okhttp3.Dispatcher
+import okhttp3.Dns
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
+import java.net.InetAddress
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -17,7 +21,7 @@ import javax.net.ssl.X509TrustManager
 
 /**
  * Factory for creating gRPC channels with optimal configuration.
- * Based on patterns from the official Second Life app.
+ * Based on patterns from the official Second Life app and Firestorm's llcorehttp.
  * 
  * Features:
  * - Adaptive timeouts based on network quality
@@ -25,6 +29,8 @@ import javax.net.ssl.X509TrustManager
  * - Connection pooling optimized for mobile
  * - Keep-alive configuration
  * - Retry configuration
+ * - DNS caching (like Firestorm's mDNSCacheTimeout)
+ * - Policy-based request options
  */
 class GrpcChannelFactory(
     private val context: Context,
@@ -56,6 +62,88 @@ class GrpcChannelFactory(
         
         // Max message size (10MB)
         private const val MAX_MESSAGE_SIZE = 10 * 1024 * 1024
+        
+        // DNS cache configuration (like Firestorm's mDNSCacheTimeout = -1)
+        // -1 means cache forever, which is optimal for stable hosts like SL servers
+        private const val DNS_CACHE_TIMEOUT_SECONDS = -1
+    }
+    
+    /**
+     * DNS cache implementation based on Firestorm's DNS caching pattern.
+     * Caches DNS lookups to avoid repeated resolution overhead,
+     * especially helpful on mobile networks where DNS can be slow.
+     */
+    private inner class CachingDns(
+        private val cacheTimeoutSeconds: Int = DNS_CACHE_TIMEOUT_SECONDS
+    ) : Dns {
+        private data class CacheEntry(
+            val addresses: List<InetAddress>,
+            val timestamp: Long
+        )
+        
+        private val cache = ConcurrentHashMap<String, CacheEntry>()
+        private val systemDns = Dns.SYSTEM
+        
+        override fun lookup(hostname: String): List<InetAddress> {
+            val now = System.currentTimeMillis()
+            
+            // Check cache
+            val cached = cache[hostname]
+            if (cached != null) {
+                // If cacheTimeoutSeconds is -1, cache forever
+                // Otherwise, check if still valid
+                if (cacheTimeoutSeconds < 0 || 
+                    (now - cached.timestamp) < cacheTimeoutSeconds * 1000L) {
+                    Log.v(TAG, "DNS cache hit for $hostname")
+                    return cached.addresses
+                }
+            }
+            
+            // Cache miss or expired - do lookup
+            Log.d(TAG, "DNS lookup for $hostname (cache ${if (cached == null) "miss" else "expired"})")
+            val startTime = System.currentTimeMillis()
+            val addresses = systemDns.lookup(hostname)
+            val elapsed = System.currentTimeMillis() - startTime
+            
+            Log.d(TAG, "DNS resolved $hostname to ${addresses.size} addresses in ${elapsed}ms")
+            
+            // Cache if caching is enabled (timeout != 0)
+            if (cacheTimeoutSeconds != 0 && addresses.isNotEmpty()) {
+                cache[hostname] = CacheEntry(addresses, now)
+            }
+            
+            return addresses
+        }
+        
+        /**
+         * Clear the DNS cache.
+         * Useful when network changes (e.g., WiFi to mobile).
+         */
+        fun clearCache() {
+            cache.clear()
+            Log.d(TAG, "DNS cache cleared")
+        }
+        
+        /**
+         * Get cache statistics for diagnostics.
+         */
+        fun getCacheStats(): Map<String, Any> = mapOf(
+            "entries" to cache.size,
+            "hosts" to cache.keys.toList()
+        )
+    }
+    
+    // Shared DNS cache for all HTTP clients
+    private val dnsCache = CachingDns()
+    
+    init {
+        // Register for network changes to clear DNS cache
+        // This is important because DNS entries may change when network changes
+        // (e.g., WiFi to mobile, different exit nodes, etc.)
+        qualityManager.addNetworkChangeListener {
+            Log.d(TAG, "Network changed, clearing DNS cache")
+            dnsCache.clearCache()
+        }
     }
     
     // Thread pool for gRPC executor
@@ -128,6 +216,7 @@ class GrpcChannelFactory(
      * - Aggressive connection cleanup to avoid stale connections
      * - Proper keep-alive handling for Second Life login servers
      * - HTTP/1.1 for XMLRPC compatibility
+     * - DNS caching to avoid repeated DNS lookups
      * 
      * EOF errors often occur due to:
      * - Server closing idle connections before client expects
@@ -138,49 +227,148 @@ class GrpcChannelFactory(
      * - Short keep-alive duration to avoid stale connections
      * - Minimal connection pooling
      * - retryOnConnectionFailure enabled
+     * - DNS caching for faster reconnects
      * - Ping interval for connection health checks (via interceptor)
      */
     fun createHttpClient(): OkHttpClient {
+        return createHttpClient(HttpRequestOptions.forLogin())
+    }
+    
+    /**
+     * Create an OkHttpClient with specific request options.
+     * This method allows fine-grained control based on Firestorm's HttpOptions pattern.
+     * 
+     * @param options Configuration options for the HTTP client
+     * @return Configured OkHttpClient instance
+     */
+    fun createHttpClient(options: HttpRequestOptions): OkHttpClient {
         val timeouts = qualityManager.getTimeouts()
+        val multiplier = qualityManager.getTimeoutMultiplier()
         
-        Log.d(TAG, "Creating HTTP client with adaptive timeouts: " +
-            "connect=${timeouts.connectTimeoutMs}ms, " +
-            "read=${timeouts.readTimeoutMs}ms, " +
-            "write=${timeouts.writeTimeoutMs}ms")
+        // Calculate effective timeouts combining base options with network quality
+        val connectTimeoutMs = (options.timeoutSeconds * 1000 * multiplier).toLong()
+        val readTimeoutMs = if (options.transferTimeoutSeconds > 0) {
+            (options.transferTimeoutSeconds * 1000 * multiplier).toLong()
+        } else {
+            timeouts.readTimeoutMs
+        }
+        val writeTimeoutMs = timeouts.writeTimeoutMs
         
-        return OkHttpClient.Builder()
-            .connectTimeout(timeouts.connectTimeoutMs, TimeUnit.MILLISECONDS)
-            .readTimeout(timeouts.readTimeoutMs, TimeUnit.MILLISECONDS)
-            .writeTimeout(timeouts.writeTimeoutMs, TimeUnit.MILLISECONDS)
+        Log.d(TAG, "Creating HTTP client for ${options.policyClass}: " +
+            "connect=${connectTimeoutMs}ms, read=${readTimeoutMs}ms, " +
+            "retries=${options.retries}, dnsCacheTimeout=${options.dnsCacheTimeoutSeconds}s")
+        
+        val builder = OkHttpClient.Builder()
+            .connectTimeout(connectTimeoutMs, TimeUnit.MILLISECONDS)
+            .readTimeout(readTimeoutMs, TimeUnit.MILLISECONDS)
+            .writeTimeout(writeTimeoutMs, TimeUnit.MILLISECONDS)
             // Overall call timeout - use fixed generous timeout to allow for all retries
-            // This is a safety net, not the primary timeout mechanism
             .callTimeout(CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             // Retry on connection failure - critical for handling EOF errors
             .retryOnConnectionFailure(true)
-            // Aggressive connection pool settings to minimize stale connections
-            // - Only 1 idle connection to reduce chance of using stale connection
-            // - Short 15-second keep-alive (SL login servers may close earlier)
-            .connectionPool(ConnectionPool(
+            // Follow redirects based on options
+            .followRedirects(options.followRedirects)
+            .followSslRedirects(options.followRedirects)
+            // DNS caching - key improvement from Firestorm
+            .dns(getCachingDns(options.dnsCacheTimeoutSeconds))
+        
+        // Configure connection pool based on policy class
+        // maxIdleConnections is a pool-wide limit on idle connections
+        val poolConfig = when (options.policyClass) {
+            PolicyClass.LOGIN -> ConnectionPool(
                 maxIdleConnections = 1,
                 keepAliveDuration = 15,
                 timeUnit = TimeUnit.SECONDS
-            ))
-            // Force HTTP/1.1 for XMLRPC compatibility
-            // HTTP/2 can cause issues with some XMLRPC servers
-            .protocols(listOf(Protocol.HTTP_1_1))
-            // Add interceptor to ensure proper headers for connection handling
-            .addNetworkInterceptor { chain ->
-                val originalRequest = chain.request()
-                val request = originalRequest.newBuilder()
-                    // Ensure Connection header is set properly
-                    // Using "close" can help avoid reusing potentially stale connections
-                    // for critical login requests
-                    .header("Connection", "close")
-                    .build()
-                chain.proceed(request)
+            )
+            PolicyClass.EVENT_QUEUE -> ConnectionPool(
+                maxIdleConnections = 1,
+                keepAliveDuration = 60,
+                timeUnit = TimeUnit.SECONDS
+            )
+            PolicyClass.INVENTORY -> ConnectionPool(
+                maxIdleConnections = options.policyClass.maxIdleConnections,
+                keepAliveDuration = 30,
+                timeUnit = TimeUnit.SECONDS
+            )
+            PolicyClass.ASSET -> ConnectionPool(
+                maxIdleConnections = options.policyClass.maxIdleConnections,
+                keepAliveDuration = 60,
+                timeUnit = TimeUnit.SECONDS
+            )
+            else -> ConnectionPool(
+                maxIdleConnections = 4,
+                keepAliveDuration = 30,
+                timeUnit = TimeUnit.SECONDS
+            )
+        }
+        builder.connectionPool(poolConfig)
+        
+        // Configure dispatcher for per-host request limiting
+        // This properly controls concurrent requests to a single host
+        val dispatcher = Dispatcher().apply {
+            maxRequestsPerHost = options.policyClass.maxRequestsPerHost
+        }
+        builder.dispatcher(dispatcher)
+        
+        // Force HTTP/1.1 for XMLRPC compatibility
+        builder.protocols(listOf(Protocol.HTTP_1_1))
+        
+        // Add interceptor for connection handling and tracing
+        builder.addNetworkInterceptor { chain ->
+            val originalRequest = chain.request()
+            val requestBuilder = originalRequest.newBuilder()
+            
+            // For login requests, use Connection: close to avoid stale connections
+            if (options.policyClass == PolicyClass.LOGIN) {
+                requestBuilder.header("Connection", "close")
             }
-            .build()
+            
+            // Add tracing if enabled
+            if (options.traceLevel >= HttpRequestOptions.HTTP_TRACE_BASIC) {
+                Log.d(TAG, "HTTP Request: ${originalRequest.method} ${originalRequest.url}")
+            }
+            
+            val request = requestBuilder.build()
+            val startTime = System.currentTimeMillis()
+            val response = chain.proceed(request)
+            val elapsed = System.currentTimeMillis() - startTime
+            
+            if (options.traceLevel >= HttpRequestOptions.HTTP_TRACE_BASIC) {
+                Log.d(TAG, "HTTP Response: ${response.code} in ${elapsed}ms")
+            }
+            
+            response
+        }
+        
+        return builder.build()
     }
+    
+    /**
+     * Get a DNS resolver with the specified cache timeout.
+     * Uses the shared cache for most timeouts, creates a new one for custom timeouts.
+     */
+    private fun getCachingDns(timeoutSeconds: Int): Dns {
+        return if (timeoutSeconds == DNS_CACHE_TIMEOUT_SECONDS) {
+            dnsCache
+        } else if (timeoutSeconds == 0) {
+            Dns.SYSTEM  // No caching
+        } else {
+            CachingDns(timeoutSeconds)
+        }
+    }
+    
+    /**
+     * Clear the DNS cache.
+     * Should be called when network changes (WiFi to mobile, etc.)
+     */
+    fun clearDnsCache() {
+        dnsCache.clearCache()
+    }
+    
+    /**
+     * Get DNS cache statistics.
+     */
+    fun getDnsCacheStats(): Map<String, Any> = dnsCache.getCacheStats()
     
     /**
      * Create an OkHttpClient optimized for regular API operations (non-login).

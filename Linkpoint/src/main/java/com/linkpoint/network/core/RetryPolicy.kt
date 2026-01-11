@@ -2,7 +2,6 @@ package com.linkpoint.network.core
 
 import android.util.Log
 import kotlin.math.min
-import kotlin.math.pow
 import kotlin.random.Random
 
 /**
@@ -61,11 +60,33 @@ class RetryPolicy(
          * Create a policy for login operations (more patient)
          */
         fun forLogin(): RetryPolicy = RetryPolicy(
-            maxRetryAttempts = 4,
+            maxRetryAttempts = 5,  // Match Firestorm's HTTP_RETRY_COUNT_DEFAULT
             startingRetryDelayMs = 1000L,
             maxRetryDelayMs = 60_000L,
-            errorCountLimit = 4,
+            errorCountLimit = 5,
             errorTimeoutLimitMs = 120_000L  // 2 minutes
+        )
+        
+        /**
+         * Create a policy for inventory operations
+         */
+        fun forInventory(): RetryPolicy = RetryPolicy(
+            maxRetryAttempts = 4,
+            startingRetryDelayMs = 1000L,
+            maxRetryDelayMs = 30_000L,
+            errorCountLimit = 4,
+            errorTimeoutLimitMs = 90_000L
+        )
+        
+        /**
+         * Create a policy for event queue (very patient, many retries)
+         */
+        fun forEventQueue(): RetryPolicy = RetryPolicy(
+            maxRetryAttempts = 10,
+            startingRetryDelayMs = 500L,
+            maxRetryDelayMs = 10_000L,
+            errorCountLimit = 10,
+            errorTimeoutLimitMs = 300_000L  // 5 minutes
         )
     }
     
@@ -79,6 +100,9 @@ class RetryPolicy(
     // Backoff state
     private var currentRetryAttempt = 0
     private var nextRetryDelayMs = startingRetryDelayMs
+    
+    // Retry-After support (Firestorm's mReplyRetryAfter pattern)
+    private var lastRetryAfterMs: Long = 0
     
     /**
      * Result of a retry decision
@@ -99,6 +123,24 @@ class RetryPolicy(
             val degraded: Boolean,
             val message: String
         ) : RetryDecision()
+    }
+    
+    /**
+     * Record a Retry-After hint from the server.
+     * Call this before onError() when a Retry-After header is present.
+     * 
+     * Based on Firestorm's handling in _httppolicy.cpp:
+     * if (op->mReplyRetryAfter > 0 && op->mReplyRetryAfter < 30)
+     *     delta = op->mReplyRetryAfter * U64L(1000000);
+     * 
+     * @param retryAfterSeconds Value from Retry-After header (capped at 30)
+     */
+    @Synchronized
+    fun setRetryAfterHint(retryAfterSeconds: Int) {
+        // Cap at 30 seconds like Firestorm does
+        val capped = minOf(retryAfterSeconds, 30).coerceAtLeast(0)
+        lastRetryAfterMs = capped * 1000L
+        Log.d(TAG, "Retry-After hint set: ${capped}s")
     }
     
     /**
@@ -194,18 +236,34 @@ class RetryPolicy(
         lastErrorTimestamp = 0L
         currentRetryAttempt = 0
         nextRetryDelayMs = startingRetryDelayMs
+        lastRetryAfterMs = 0
         isInErrorState = false
     }
     
     /**
-     * Calculate the next retry delay using exponential backoff with jitter
+     * Calculate the next retry delay using exponential backoff with jitter.
+     * 
+     * If a Retry-After hint was provided by the server, uses that instead
+     * of calculated backoff (Firestorm pattern: external_delta flag).
      */
     private fun calculateNextRetryDelay(): Long {
-        // Exponential backoff: delay = startingDelay * 2^attempt
-        val exponentialDelay = startingRetryDelayMs * 2.0.pow(currentRetryAttempt.toDouble())
+        // If server provided Retry-After, use it (external delta in Firestorm terms)
+        if (lastRetryAfterMs > 0) {
+            val serverDelay = lastRetryAfterMs
+            lastRetryAfterMs = 0  // Clear after using
+            Log.d(TAG, "Using server-provided Retry-After delay: ${serverDelay}ms")
+            nextRetryDelayMs = serverDelay
+            return serverDelay
+        }
+        
+        // Otherwise use exponential backoff (internal delta)
+        // Formula: delay = startingDelay * 2^attempt (capped)
+        // Based on Firestorm's: delta_min * delta_factor where delta_factor = 1 << retries
+        // Using bit-shifting for consistency with HttpRequestOptions.calculateRetryDelay
+        val exponentialDelay = startingRetryDelayMs * (1L shl min(currentRetryAttempt, 10))
         
         // Cap at maximum delay
-        val cappedDelay = min(exponentialDelay, maxRetryDelayMs.toDouble()).toLong()
+        val cappedDelay = min(exponentialDelay, maxRetryDelayMs)
         
         // Add jitter to prevent thundering herd
         val jitter = (cappedDelay * jitterFactor * Random.nextFloat()).toLong()
