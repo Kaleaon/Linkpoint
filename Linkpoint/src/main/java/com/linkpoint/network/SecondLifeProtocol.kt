@@ -90,7 +90,7 @@ class SecondLifeProtocol(private val context: Context) {
                     lastException = EOFIOException("Server closed connection before response completed", e)
                     // Add extra delay for EOF errors as they often indicate server-side issues
                     if (attempt < maxRetries - 1) {
-                        Thread.sleep(300) // Extra delay before retry
+                        Thread.sleep(NetworkExceptionUtils.EOF_EXTRA_DELAY_MS)
                     }
                 } catch (e: UnknownHostException) {
                     Log.w(TAG, "DNS failure on attempt ${attempt + 1}/$maxRetries: ${e.message}")
@@ -390,8 +390,8 @@ class SecondLifeProtocol(private val context: Context) {
             }
             
             // EOFException - connection closed before response completed
-            // Check if e IS an EOFException, if its cause is, or if it's nested deeper in the cause chain
-            e is EOFException || isEOFException(e) -> {
+            // Uses shared utility to check exception type, cause chain, and message indicators
+            NetworkExceptionUtils.isEOFException(e) -> {
                 val message = buildString {
                     append("The server closed the connection before sending a complete response. ")
                     when (networkInfo.type) {
@@ -466,42 +466,6 @@ class SecondLifeProtocol(private val context: Context) {
                 "Network error: ${e.message?.take(100)}. Please try again." to "NETWORK_ERROR"
             }
         }
-    }
-    
-    /**
-     * Check if the exception is an EOFException or has EOFException in its cause chain.
-     * This handles cases where:
-     * - The exception is directly an EOFException or EOFIOException
-     * - The exception's cause is an EOFException
-     * - The EOFException is nested deeper in the cause chain (e.g., wrapped by OkHttp)
-     * - The message contains "EOF" (for wrapped exceptions)
-     */
-    private fun isEOFException(e: Throwable): Boolean {
-        // Check if the exception itself is an EOFException or our custom wrapper
-        if (e is EOFException || e is EOFIOException) return true
-        
-        // Check the message for EOF indicators
-        val message = e.message ?: ""
-        if (message.contains("EOF", ignoreCase = true) ||
-            message.contains("unexpected end", ignoreCase = true) ||
-            message.contains("stream ended", ignoreCase = true) ||
-            message.contains("connection closed unexpectedly", ignoreCase = true) ||
-            message.contains("closed before response", ignoreCase = true)) {
-            return true
-        }
-        
-        // Recursively check the cause chain (limit depth to prevent infinite loops)
-        var cause: Throwable? = e.cause
-        var depth = 0
-        while (cause != null && depth < 10) {
-            if (cause is EOFException || cause is EOFIOException) return true
-            val causeMessage = cause.message ?: ""
-            if (causeMessage.contains("EOF", ignoreCase = true)) return true
-            cause = cause.cause
-            depth++
-        }
-        
-        return false
     }
     
     private fun buildLoginXml(
@@ -731,9 +695,3 @@ enum class ChatType(val value: Int) {
     NORMAL(1),
     SHOUT(2)
 }
-
-/**
- * IOException subclass specifically for EOF errors.
- * This makes it easier to detect and handle connection EOF issues distinctly.
- */
-class EOFIOException(message: String, cause: Throwable? = null) : java.io.IOException(message, cause)
