@@ -145,7 +145,7 @@ object NetworkLogger {
                     write("Device: ${Build.MANUFACTURER} ${Build.MODEL}\n")
                     write("Android: ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})\n")
                     write("Log Level: $logLevel\n")
-                    write("=" * 60 + "\n\n")
+                    write("=".repeat(60) + "\n\n")
                     flush()
                 }
             }
@@ -481,7 +481,7 @@ object NetworkLogger {
             appendLine("Showing last $maxEntries entries:")
             appendLine()
             
-            logBuffer.takeLast(maxEntries).forEach { entry ->
+            logBuffer.toList().takeLast(maxEntries).forEach { entry ->
                 val timestamp = timestampFormat.format(Date(entry.timestamp))
                 appendLine("[$timestamp] [${entry.level}] [${entry.category}]")
                 appendLine(entry.message)
