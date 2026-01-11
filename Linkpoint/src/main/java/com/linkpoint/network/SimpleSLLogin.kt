@@ -10,6 +10,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.EOFException
+import java.io.IOException
 import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 
@@ -215,18 +217,18 @@ object SimpleSLLogin {
             val responseBody: String
             try {
                 responseBody = response.body?.string() ?: ""
-            } catch (e: java.io.EOFException) {
+            } catch (e: EOFException) {
                 // EOF during body reading - wrap and rethrow to be caught by outer handler
                 // This enables the retry logic for chunked encoding EOF errors
                 Log.w(TAG, "EOF while reading response body, will retry")
                 response.close()
                 throw e
-            } catch (e: java.io.IOException) {
+            } catch (e: IOException) {
                 // Check if this is an EOF-related IO error
                 if (NetworkExceptionUtils.isEOFException(e)) {
                     Log.w(TAG, "IO error with EOF characteristics while reading body, will retry")
                     response.close()
-                    throw java.io.EOFException("EOF during response body read: ${e.message}")
+                    throw EOFException("EOF during response body read: ${e.message}")
                 }
                 response.close()
                 throw e
@@ -318,7 +320,7 @@ object SimpleSLLogin {
                         attemptsMade = attempt
                     )
                 }
-            } catch (e: java.io.EOFException) {
+            } catch (e: EOFException) {
                 // EOFException occurs when the server closes connection unexpectedly
                 // This is usually temporary and should be retried
                 Log.w(TAG, "EOF error during login (attempt $attempt/$maxAttempts) - will retry", e)
