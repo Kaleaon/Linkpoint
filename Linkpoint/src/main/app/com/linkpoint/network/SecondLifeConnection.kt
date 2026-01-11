@@ -93,9 +93,14 @@ class SecondLifeConnection(context: Context? = null) {
                     lastException = e
                 } catch (e: EOFException) {
                     // EOFException occurs when connection is closed before response completes
-                    // Common with HTTP/2 connection issues - always retry
+                    // Common with HTTP/2 connection issues or server-side load balancing
+                    // Always retry with slightly longer delay to let the server recover
                     Log.w(TAG, "EOF/Connection closed on attempt ${attempt + 1}/$maxRetries: ${e.message}")
-                    lastException = IOException("Connection closed unexpectedly (EOF)", e)
+                    lastException = EOFIOException("Server closed connection before response completed", e)
+                    // Add extra delay for EOF errors as they often indicate server-side issues
+                    if (attempt < maxRetries - 1) {
+                        Thread.sleep(300) // Extra delay before retry
+                    }
                 } catch (e: UnknownHostException) {
                     Log.w(TAG, "DNS failure on attempt ${attempt + 1}/$maxRetries: ${e.message}")
                     lastException = e
@@ -306,8 +311,9 @@ class SecondLifeConnection(context: Context? = null) {
                 e is SSLException -> 
                     "SSL/TLS connection failed: ${e.message?.take(100) ?: "handshake error"}. This may be a network or certificate issue." to "SSL_ERROR"
                 // Handle EOFException - connection closed before response completed
-                e.cause is EOFException || e.message?.contains("EOF", ignoreCase = true) == true ->
-                    "The server closed the connection unexpectedly. This may be a temporary issue - please try again." to "CONNECTION_EOF"
+                // Check if e IS an EOFException, if its cause is, or if it's nested deeper in the cause chain
+                e is EOFException || e is EOFIOException || isEOFException(e) ->
+                    "The server closed the connection before sending a complete response. This is usually a temporary issue - please try again." to "CONNECTION_EOF"
                 e.message?.contains("timeout", ignoreCase = true) == true -> 
                     "Connection timed out. The server is not responding." to "TIMEOUT"
                 e.message?.contains("host", ignoreCase = true) == true -> 
@@ -539,6 +545,42 @@ class SecondLifeConnection(context: Context? = null) {
         }
     }
     
+    /**
+     * Check if the exception is an EOFException or has EOFException in its cause chain.
+     * This handles cases where:
+     * - The exception is directly an EOFException or EOFIOException
+     * - The exception's cause is an EOFException
+     * - The EOFException is nested deeper in the cause chain (e.g., wrapped by OkHttp)
+     * - The message contains "EOF" (for wrapped exceptions)
+     */
+    private fun isEOFException(e: Throwable): Boolean {
+        // Check if the exception itself is an EOFException or our custom wrapper
+        if (e is EOFException || e is EOFIOException) return true
+        
+        // Check the message for EOF indicators
+        val message = e.message ?: ""
+        if (message.contains("EOF", ignoreCase = true) ||
+            message.contains("unexpected end", ignoreCase = true) ||
+            message.contains("stream ended", ignoreCase = true) ||
+            message.contains("connection closed unexpectedly", ignoreCase = true) ||
+            message.contains("closed before response", ignoreCase = true)) {
+            return true
+        }
+        
+        // Recursively check the cause chain (limit depth to prevent infinite loops)
+        var cause: Throwable? = e.cause
+        var depth = 0
+        while (cause != null && depth < 10) {
+            if (cause is EOFException || cause is EOFIOException) return true
+            val causeMessage = cause.message ?: ""
+            if (causeMessage.contains("EOF", ignoreCase = true)) return true
+            cause = cause.cause
+            depth++
+        }
+        
+        return false
+    }
+    
     private fun md5Hash(input: String): String {
         val md = MessageDigest.getInstance("MD5")
         val digest = md.digest(input.toByteArray())
@@ -661,3 +703,5 @@ class SecondLifeConnection(context: Context? = null) {
         val regionName: String? = null
     )
 }
+
+// Note: EOFIOException is defined in SecondLifeProtocol.kt and shared across the package
