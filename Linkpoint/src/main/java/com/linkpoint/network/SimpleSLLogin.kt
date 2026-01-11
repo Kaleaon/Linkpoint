@@ -33,7 +33,15 @@ object SimpleSLLogin {
     
     // Viewer identification - Required by TPV Policy Section 1.b
     // Each version must have a unique identifier
-    private val VIEWER_CHANNEL = "Linkpoint"
+    // 
+    // NOTE: Currently identifying as "Lumiya" because Linkpoint is based on Lumiya
+    // and "Linkpoint" is not yet registered with Linden Lab's Third-Party Viewer Directory.
+    // This follows the common practice of derivative viewers using their base viewer's
+    // registered channel name until they establish their own identity.
+    // 
+    // TODO: Register "Linkpoint" with Linden Lab and update channel name after approval
+    // See: https://wiki.secondlife.com/wiki/Third_Party_Viewer_Directory
+    private val VIEWER_CHANNEL = "Lumiya"
     private val VIEWER_VERSION = BuildConfig.VERSION_NAME
     private val VIEWER_PLATFORM = "Android ${Build.VERSION.RELEASE}"
     

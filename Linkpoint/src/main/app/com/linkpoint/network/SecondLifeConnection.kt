@@ -190,8 +190,11 @@ class SecondLifeConnection(context: Context? = null) {
             append("<member><name>start</name><value><string>$safeStartLocation</string></value></member>")
             
             // Viewer identification
-            append("<member><name>channel</name><value><string>Linkpoint</string></value></member>")
-            append("<member><name>version</name><value><string>Linkpoint 1.0.0</string></value></member>")
+            // NOTE: Currently identifying as "Lumiya" because Linkpoint is based on Lumiya
+            // and "Linkpoint" is not yet registered with Linden Lab's Third-Party Viewer Directory.
+            // TODO: Register "Linkpoint" with Linden Lab and update channel name after approval
+            append("<member><name>channel</name><value><string>Lumiya</string></value></member>")
+            append("<member><name>version</name><value><string>Lumiya 1.0.0</string></value></member>")
             append("<member><name>platform</name><value><string>Android</string></value></member>")
             append("<member><name>platform_version</name><value><string>${android.os.Build.VERSION.RELEASE}</string></value></member>")
             
