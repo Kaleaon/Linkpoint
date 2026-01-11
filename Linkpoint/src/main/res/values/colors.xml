@@ -13,8 +13,10 @@
     <!-- Background Colors -->
     <color name="background">#1A1A1A</color>
     <color name="background_dark">#1A1A1A</color>
+    <color name="background_light">#FAFAFA</color>
     <color name="surface">#2D2D2D</color>
     <color name="surface_dark">#2D2D2D</color>
+    <color name="surface_light">#FFFFFF</color>
     <color name="overlay_dark">#80000000</color>
     
     <!-- Text Colors -->

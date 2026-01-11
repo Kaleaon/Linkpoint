@@ -114,6 +114,12 @@
             android:exported="false"
             android:parentActivityName=".ui.world.WorldViewActivity" />
 
+        <!-- Terms of Service Activity -->
+        <activity
+            android:name=".ui.tos.TosActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Linkpoint" />
+
         <!-- SLURL Handler -->
         <activity
             android:name=".ui.slurl.SLURLActivity"
