@@ -58,8 +58,62 @@ object SimpleSLLogin {
         data class Failure(
             val message: String,
             val errorCode: String = "LOGIN_FAILED",
-            val details: String? = null
-        ) : SimpleLoginResult()
+            val details: String? = null,
+            /** Error category for classification */
+            val category: NetworkExceptionUtils.ErrorCategory = NetworkExceptionUtils.ErrorCategory.UNKNOWN,
+            /** Root cause exception type name */
+            val rootCauseType: String? = null,
+            /** Root cause message */
+            val rootCauseMessage: String? = null,
+            /** Full exception chain for debugging */
+            val exceptionChain: String? = null,
+            /** Recommended actions for the user */
+            val recommendations: List<String> = emptyList(),
+            /** Whether this error is likely transient */
+            val isTransient: Boolean = false,
+            /** Time elapsed during the failed request(s) */
+            val elapsedTimeMs: Long = 0,
+            /** Number of attempts made */
+            val attemptsMade: Int = 1
+        ) : SimpleLoginResult() {
+            /**
+             * Get a comprehensive error report for debugging.
+             */
+            fun getFullReport(): String = buildString {
+                appendLine("=== Login Error Report ===")
+                appendLine()
+                appendLine("Error Code: $errorCode")
+                appendLine("Category: $category")
+                appendLine("Message: $message")
+                appendLine()
+                appendLine("Attempts Made: $attemptsMade")
+                appendLine("Total Time: ${elapsedTimeMs}ms")
+                appendLine("Is Transient: $isTransient")
+                appendLine()
+                if (rootCauseType != null) {
+                    appendLine("=== Root Cause ===")
+                    appendLine("Type: $rootCauseType")
+                    appendLine("Message: ${rootCauseMessage ?: "(none)"}")
+                    appendLine()
+                }
+                if (!exceptionChain.isNullOrBlank()) {
+                    appendLine("=== Exception Chain ===")
+                    appendLine(exceptionChain)
+                    appendLine()
+                }
+                if (!details.isNullOrBlank()) {
+                    appendLine("=== Technical Details ===")
+                    appendLine(details)
+                    appendLine()
+                }
+                if (recommendations.isNotEmpty()) {
+                    appendLine("=== Recommended Actions ===")
+                    recommendations.forEachIndexed { idx, rec ->
+                        appendLine("${idx + 1}. $rec")
+                    }
+                }
+            }
+        }
     }
     
     /**
@@ -88,6 +142,9 @@ object SimpleSLLogin {
         }
         
         Log.d(TAG, "Simple login for $firstName $lastName to $loginUri (max retries: $validatedRetries)")
+        
+        // Track overall timing for detailed error reporting
+        val overallStartTime = System.currentTimeMillis()
         
         var lastError: Exception? = null
         var attempt = 0
@@ -155,17 +212,34 @@ object SimpleSLLogin {
                 } catch (e: java.net.UnknownHostException) {
                 // DNS errors are not retryable - fail immediately
                 Log.e(TAG, "Cannot resolve login server", e)
+                val elapsedTime = System.currentTimeMillis() - overallStartTime
+                val errorInfo = NetworkExceptionUtils.analyzeException(
+                    e = e,
+                    loginUri = loginUri,
+                    attemptNumber = attempt,
+                    totalAttempts = maxAttempts,
+                    elapsedTimeMs = elapsedTime
+                )
                 return@withContext SimpleLoginResult.Failure(
                     message = "Cannot connect to login server. Check your internet connection.",
                     errorCode = "DNS_ERROR",
-                    details = "DNS resolution failed: ${e.message}"
+                    details = errorInfo.technicalDetails,
+                    category = errorInfo.category,
+                    rootCauseType = errorInfo.rootCauseType,
+                    rootCauseMessage = errorInfo.rootCauseMessage,
+                    exceptionChain = errorInfo.exceptionChain,
+                    recommendations = errorInfo.recommendations,
+                    isTransient = false,
+                    elapsedTimeMs = elapsedTime,
+                    attemptsMade = attempt
                 )
             } catch (e: java.net.SocketTimeoutException) {
                 // Timeout errors can be retried
                 Log.e(TAG, "Login request timed out (attempt $attempt/$maxAttempts)", e)
                 lastError = e
                 if (attempt >= maxAttempts) {
-                    return@withContext createRetryableErrorResult("timeout", e, attempt, validatedRetries)
+                    val elapsedTime = System.currentTimeMillis() - overallStartTime
+                    return@withContext createRetryableErrorResult("timeout", e, attempt, validatedRetries, loginUri, elapsedTime)
                 }
                 // Continue to next retry attempt
                 continue
@@ -176,17 +250,34 @@ object SimpleSLLogin {
                     Log.w(TAG, "SSL EOF error during login (attempt $attempt/$maxAttempts) - will retry", e)
                     lastError = e
                     if (attempt >= maxAttempts) {
-                        return@withContext createRetryableErrorResult("ssl_eof", e, attempt, validatedRetries)
+                        val elapsedTime = System.currentTimeMillis() - overallStartTime
+                        return@withContext createRetryableErrorResult("ssl_eof", e, attempt, validatedRetries, loginUri, elapsedTime)
                     }
                     // Continue to next retry attempt
                     continue
                 } else {
                     // Non-EOF SSL errors are not retryable - fail immediately
                     Log.e(TAG, "SSL error during login", e)
+                    val elapsedTime = System.currentTimeMillis() - overallStartTime
+                    val errorInfo = NetworkExceptionUtils.analyzeException(
+                        e = e,
+                        loginUri = loginUri,
+                        attemptNumber = attempt,
+                        totalAttempts = maxAttempts,
+                        elapsedTimeMs = elapsedTime
+                    )
                     return@withContext SimpleLoginResult.Failure(
                         message = "Secure connection failed. Check your network settings.",
                         errorCode = "SSL_ERROR",
-                        details = "SSL Error: ${e.message}"
+                        details = errorInfo.technicalDetails,
+                        category = errorInfo.category,
+                        rootCauseType = errorInfo.rootCauseType,
+                        rootCauseMessage = errorInfo.rootCauseMessage,
+                        exceptionChain = errorInfo.exceptionChain,
+                        recommendations = errorInfo.recommendations,
+                        isTransient = false,
+                        elapsedTimeMs = elapsedTime,
+                        attemptsMade = attempt
                     )
                 }
             } catch (e: java.io.EOFException) {
@@ -195,7 +286,8 @@ object SimpleSLLogin {
                 Log.w(TAG, "EOF error during login (attempt $attempt/$maxAttempts) - will retry", e)
                 lastError = e
                 if (attempt >= maxAttempts) {
-                    return@withContext createRetryableErrorResult("eof", e, attempt, validatedRetries)
+                    val elapsedTime = System.currentTimeMillis() - overallStartTime
+                    return@withContext createRetryableErrorResult("eof", e, attempt, validatedRetries, loginUri, elapsedTime)
                 }
                 // Continue to next retry attempt
                 continue
@@ -206,17 +298,34 @@ object SimpleSLLogin {
                     Log.w(TAG, "Connection reset error during login (attempt $attempt/$maxAttempts) - will retry", e)
                     lastError = e
                     if (attempt >= maxAttempts) {
-                        return@withContext createRetryableErrorResult("reset", e, attempt, validatedRetries)
+                        val elapsedTime = System.currentTimeMillis() - overallStartTime
+                        return@withContext createRetryableErrorResult("reset", e, attempt, validatedRetries, loginUri, elapsedTime)
                     }
                     // Continue to next retry attempt
                     continue
                 } else {
                     // Non-retryable socket error
                     Log.e(TAG, "Socket error during login", e)
+                    val elapsedTime = System.currentTimeMillis() - overallStartTime
+                    val errorInfo = NetworkExceptionUtils.analyzeException(
+                        e = e,
+                        loginUri = loginUri,
+                        attemptNumber = attempt,
+                        totalAttempts = maxAttempts,
+                        elapsedTimeMs = elapsedTime
+                    )
                     return@withContext SimpleLoginResult.Failure(
                         message = "Network error: ${e.message ?: "Connection failed"}",
                         errorCode = "SOCKET_ERROR",
-                        details = "SocketException: ${e.message}"
+                        details = errorInfo.technicalDetails,
+                        category = errorInfo.category,
+                        rootCauseType = errorInfo.rootCauseType,
+                        rootCauseMessage = errorInfo.rootCauseMessage,
+                        exceptionChain = errorInfo.exceptionChain,
+                        recommendations = errorInfo.recommendations,
+                        isTransient = false,
+                        elapsedTimeMs = elapsedTime,
+                        attemptsMade = attempt
                     )
                 }
             } catch (e: Exception) {
@@ -226,44 +335,94 @@ object SimpleSLLogin {
                     Log.w(TAG, "Transient error during login (attempt $attempt/$maxAttempts) - will retry", e)
                     lastError = e
                     if (attempt >= maxAttempts) {
-                        return@withContext createRetryableErrorResult("transient", e, attempt, validatedRetries)
+                        val elapsedTime = System.currentTimeMillis() - overallStartTime
+                        return@withContext createRetryableErrorResult("transient", e, attempt, validatedRetries, loginUri, elapsedTime)
                     }
                     // Continue to next retry attempt
                     continue
                 } else {
                     // Non-retryable error - fail immediately
                     Log.e(TAG, "Login failed with exception", e)
+                    val elapsedTime = System.currentTimeMillis() - overallStartTime
+                    val errorInfo = NetworkExceptionUtils.analyzeException(
+                        e = e,
+                        loginUri = loginUri,
+                        attemptNumber = attempt,
+                        totalAttempts = maxAttempts,
+                        elapsedTimeMs = elapsedTime
+                    )
                     return@withContext SimpleLoginResult.Failure(
                         message = "Login failed: ${e.message ?: "Unknown error occurred"}",
-                        details = "${e.javaClass.simpleName}: ${e.message ?: "No error details available"}"
+                        errorCode = errorInfo.errorCode,
+                        details = errorInfo.technicalDetails,
+                        category = errorInfo.category,
+                        rootCauseType = errorInfo.rootCauseType,
+                        rootCauseMessage = errorInfo.rootCauseMessage,
+                        exceptionChain = errorInfo.exceptionChain,
+                        recommendations = errorInfo.recommendations,
+                        isTransient = errorInfo.isTransient,
+                        elapsedTimeMs = elapsedTime,
+                        attemptsMade = attempt
                     )
                 }
             }
         }
         
         // If we get here, all retries failed - return the last error
+        val elapsedTime = System.currentTimeMillis() - overallStartTime
+        val errorInfo = lastError?.let { 
+            NetworkExceptionUtils.analyzeException(
+                e = it,
+                loginUri = loginUri,
+                attemptNumber = maxAttempts,
+                totalAttempts = maxAttempts,
+                elapsedTimeMs = elapsedTime
+            )
+        }
         return@withContext SimpleLoginResult.Failure(
             message = "Login failed after $validatedRetries retry attempts",
             errorCode = "MAX_RETRIES_EXCEEDED",
-            details = "Last error: ${lastError?.javaClass?.simpleName}: ${lastError?.message}"
+            details = errorInfo?.technicalDetails ?: "Last error: ${lastError?.javaClass?.simpleName}: ${lastError?.message}",
+            category = errorInfo?.category ?: NetworkExceptionUtils.ErrorCategory.UNKNOWN,
+            rootCauseType = errorInfo?.rootCauseType ?: lastError?.javaClass?.simpleName,
+            rootCauseMessage = errorInfo?.rootCauseMessage ?: lastError?.message,
+            exceptionChain = errorInfo?.exceptionChain,
+            recommendations = errorInfo?.recommendations ?: listOf("Wait and try again", "Check your internet connection"),
+            isTransient = errorInfo?.isTransient ?: true,
+            elapsedTimeMs = elapsedTime,
+            attemptsMade = maxAttempts
         )
     }
     
     /**
      * Helper function to handle retryable errors consistently.
      * Returns appropriate failure result based on error type and retry count.
+     * Now uses NetworkExceptionUtils.analyzeException for comprehensive error details.
      * 
      * @param errorType Type of error ("timeout", "eof", "ssl_eof", "reset", "transient")
      * @param exception The exception that occurred
      * @param attemptNumber The attempt number that failed (1 = first attempt, 2 = first retry, etc.)
      * @param maxRetries The maximum number of retries configured
+     * @param loginUri The login URI being accessed
+     * @param elapsedTimeMs Total elapsed time since login started
      */
     private fun createRetryableErrorResult(
         errorType: String,
         exception: Exception,
         attemptNumber: Int,
-        maxRetries: Int
+        maxRetries: Int,
+        loginUri: String = "",
+        elapsedTimeMs: Long = 0
     ): SimpleLoginResult.Failure {
+        // Use NetworkExceptionUtils for comprehensive error analysis
+        val errorInfo = NetworkExceptionUtils.analyzeException(
+            e = exception,
+            loginUri = loginUri,
+            attemptNumber = attemptNumber,
+            totalAttempts = maxRetries + 1,
+            elapsedTimeMs = elapsedTimeMs
+        )
+        
         val errorCode = when (errorType) {
             "timeout" -> "TIMEOUT"
             "ssl_eof", "eof", "reset" -> "EOF_ERROR"
@@ -280,56 +439,62 @@ object SimpleSLLogin {
             else -> "Login failed: ${exception.message}"
         }
         
+        // Build comprehensive technical details
         val details = buildString {
+            appendLine("=== Error Summary ===")
+            appendLine("Error Type: $errorType")
+            appendLine("Error Code: $errorCode")
+            appendLine("Error Category: ${errorInfo.category}")
+            appendLine("Attempts: $attemptNumber of ${maxRetries + 1}")
+            appendLine("Total Time: ${elapsedTimeMs}ms")
+            appendLine("Is Transient: ${errorInfo.isTransient}")
+            appendLine()
+            
             when (errorType) {
-                "timeout" -> appendLine("Timeout after 30 seconds per attempt, tried $attemptNumber times total")
+                "timeout" -> {
+                    appendLine("=== Timeout Details ===")
+                    appendLine("Timeout after 30 seconds per attempt")
+                    appendLine("Tried $attemptNumber times total")
+                }
                 "ssl_eof" -> {
+                    appendLine("=== SSL EOF Details ===")
                     appendLine("SSLException with EOF: ${exception.message ?: "Connection closed during handshake"}")
-                    appendLine()
                     appendLine("Attempted $attemptNumber times but server kept closing connection.")
                 }
                 "eof" -> {
+                    appendLine("=== EOF Details ===")
                     appendLine("EOFException: ${exception.message ?: "Connection closed by server"}")
-                    appendLine()
                     appendLine("Attempted $attemptNumber times but server kept closing connection.")
                 }
                 "reset" -> {
+                    appendLine("=== Connection Reset Details ===")
                     appendLine("SocketException: ${exception.message ?: "Connection reset by peer"}")
-                    appendLine()
                     appendLine("Attempted $attemptNumber times but connection kept being reset.")
                 }
                 "transient" -> {
+                    appendLine("=== Transient Error Details ===")
                     appendLine("${exception.javaClass.simpleName}: ${exception.message ?: "Unknown error"}")
-                    appendLine()
                     appendLine("Attempted $attemptNumber times but errors persisted.")
-                    appendLine()
-                    appendLine("This appears to be a temporary server or network issue.")
                 }
             }
+            appendLine()
             
-            // Common troubleshooting info for all retryable errors
-            appendLine()
-            appendLine("This error typically occurs when:")
-            appendLine("• The login server is experiencing high load")
-            appendLine("• Network interruption during SSL handshake")
-            appendLine("• Load balancer reset the connection")
-            if (errorType != "reset") {
-                appendLine("• HTTP/2 protocol negotiation issue")
-            } else {
-                appendLine("• Mobile network issues")
-            }
-            appendLine()
-            appendLine("Recommended actions:")
-            appendLine("1. Wait a few moments and try again")
-            appendLine("2. Check status.secondlifegrid.net for server status")
-            appendLine("3. If on mobile data, try switching to Wi-Fi")
-            appendLine("4. If problem persists, the server may be experiencing issues")
+            // Add the comprehensive technical details from error analysis
+            appendLine(errorInfo.technicalDetails)
         }
         
         return SimpleLoginResult.Failure(
             message = baseMessage,
             errorCode = errorCode,
-            details = details
+            details = details,
+            category = errorInfo.category,
+            rootCauseType = errorInfo.rootCauseType,
+            rootCauseMessage = errorInfo.rootCauseMessage,
+            exceptionChain = errorInfo.exceptionChain,
+            recommendations = errorInfo.recommendations,
+            isTransient = errorInfo.isTransient,
+            elapsedTimeMs = elapsedTimeMs,
+            attemptsMade = attemptNumber
         )
     }
     

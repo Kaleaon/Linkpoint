@@ -152,7 +152,15 @@ class SecondLifeProtocol(private val context: Context) {
                     return@withContext LoginResult.Failure(
                         message = simpleResult.message,
                         errorCode = simpleResult.errorCode,
-                        technicalDetails = simpleResult.details
+                        technicalDetails = simpleResult.details,
+                        category = simpleResult.category,
+                        rootCauseType = simpleResult.rootCauseType,
+                        rootCauseMessage = simpleResult.rootCauseMessage,
+                        exceptionChain = simpleResult.exceptionChain,
+                        recommendations = simpleResult.recommendations,
+                        isTransient = simpleResult.isTransient,
+                        elapsedTimeMs = simpleResult.elapsedTimeMs,
+                        attemptsMade = simpleResult.attemptsMade
                     )
                 }
             }
@@ -451,8 +459,62 @@ sealed class LoginResult {
     data class Failure(
         val message: String,
         val errorCode: String? = null,
-        val technicalDetails: String? = null
-    ) : LoginResult()
+        val technicalDetails: String? = null,
+        /** Error category for classification */
+        val category: NetworkExceptionUtils.ErrorCategory = NetworkExceptionUtils.ErrorCategory.UNKNOWN,
+        /** Root cause exception type name */
+        val rootCauseType: String? = null,
+        /** Root cause message */
+        val rootCauseMessage: String? = null,
+        /** Full exception chain for debugging */
+        val exceptionChain: String? = null,
+        /** Recommended actions for the user */
+        val recommendations: List<String> = emptyList(),
+        /** Whether this error is likely transient */
+        val isTransient: Boolean = false,
+        /** Time elapsed during the failed request(s) */
+        val elapsedTimeMs: Long = 0,
+        /** Number of attempts made */
+        val attemptsMade: Int = 1
+    ) : LoginResult() {
+        /**
+         * Get a comprehensive error report for debugging.
+         */
+        fun getFullReport(): String = buildString {
+            appendLine("=== Login Error Report ===")
+            appendLine()
+            appendLine("Error Code: ${errorCode ?: "UNKNOWN"}")
+            appendLine("Category: $category")
+            appendLine("Message: $message")
+            appendLine()
+            appendLine("Attempts Made: $attemptsMade")
+            appendLine("Total Time: ${elapsedTimeMs}ms")
+            appendLine("Is Transient: $isTransient")
+            appendLine()
+            if (rootCauseType != null) {
+                appendLine("=== Root Cause ===")
+                appendLine("Type: $rootCauseType")
+                appendLine("Message: ${rootCauseMessage ?: "(none)"}")
+                appendLine()
+            }
+            if (!exceptionChain.isNullOrBlank()) {
+                appendLine("=== Exception Chain ===")
+                appendLine(exceptionChain)
+                appendLine()
+            }
+            if (!technicalDetails.isNullOrBlank()) {
+                appendLine("=== Technical Details ===")
+                appendLine(technicalDetails)
+                appendLine()
+            }
+            if (recommendations.isNotEmpty()) {
+                appendLine("=== Recommended Actions ===")
+                recommendations.forEachIndexed { idx, rec ->
+                    appendLine("${idx + 1}. $rec")
+                }
+            }
+        }
+    }
 }
 
 sealed class TeleportResult {
