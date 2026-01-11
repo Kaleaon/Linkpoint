@@ -69,6 +69,15 @@ class GrpcChannelFactory(
     }
     
     /**
+     * Cache entry for DNS lookups.
+     * Moved outside of CachingDns because data classes cannot be nested inside inner classes.
+     */
+    private data class DnsCacheEntry(
+        val addresses: List<InetAddress>,
+        val timestamp: Long
+    )
+    
+    /**
      * DNS cache implementation based on Firestorm's DNS caching pattern.
      * Caches DNS lookups to avoid repeated resolution overhead,
      * especially helpful on mobile networks where DNS can be slow.
@@ -76,12 +85,7 @@ class GrpcChannelFactory(
     private inner class CachingDns(
         private val cacheTimeoutSeconds: Int = DNS_CACHE_TIMEOUT_SECONDS
     ) : Dns {
-        private data class CacheEntry(
-            val addresses: List<InetAddress>,
-            val timestamp: Long
-        )
-        
-        private val cache = ConcurrentHashMap<String, CacheEntry>()
+        private val cache = ConcurrentHashMap<String, DnsCacheEntry>()
         private val systemDns = Dns.SYSTEM
         
         override fun lookup(hostname: String): List<InetAddress> {
@@ -109,7 +113,7 @@ class GrpcChannelFactory(
             
             // Cache if caching is enabled (timeout != 0)
             if (cacheTimeoutSeconds != 0 && addresses.isNotEmpty()) {
-                cache[hostname] = CacheEntry(addresses, now)
+                cache[hostname] = DnsCacheEntry(addresses, now)
             }
             
             return addresses

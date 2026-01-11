@@ -237,6 +237,9 @@ class CoreNetworkingService(private val context: Context) {
     /**
      * Perform login with comprehensive retry handling.
      * Uses XMLRPC for Second Life login (required by the protocol).
+     * 
+     * Handles login redirects (indeterminate responses) as per the official
+     * SL viewer's lllogin.cpp implementation.
      */
     suspend fun login(
         loginUri: String,
@@ -263,19 +266,59 @@ class CoreNetworkingService(private val context: Context) {
         
         val startTime = System.currentTimeMillis()
         
+        // Track current URI for redirect handling
+        // Based on official SL viewer's lllogin.cpp redirect loop
+        var currentUri = loginUri
+        var currentRequest = xmlRequest
+        var redirectCount = 0
+        val maxRedirects = 3  // Prevent infinite redirect loops
+        
         while (true) {
             try {
-                val result = executeLoginRequest(loginUri, xmlRequest)
+                val result = executeLoginRequestWithRedirect(currentUri, currentRequest)
                 
-                // Record success
-                loginRetryPolicy.onSuccess()
-                qualityManager.recordRequestResult(true)
-                qualityManager.recordLatency(System.currentTimeMillis() - startTime)
-                
-                stateManager.setStatus(NetworkStateManager.ConnectionStatus.CONNECTED)
-                emitEvent(ConnectionEvent.Connected)
-                
-                return@withContext result
+                when (result) {
+                    is ParsedLoginResponse.Success -> {
+                        // Record success
+                        loginRetryPolicy.onSuccess()
+                        qualityManager.recordRequestResult(true)
+                        qualityManager.recordLatency(System.currentTimeMillis() - startTime)
+                        
+                        stateManager.setStatus(NetworkStateManager.ConnectionStatus.CONNECTED)
+                        emitEvent(ConnectionEvent.Connected)
+                        
+                        return@withContext result.result
+                    }
+                    
+                    is ParsedLoginResponse.Redirect -> {
+                        // Handle redirect (indeterminate response)
+                        // Based on official SL viewer's lllogin.cpp:
+                        // request["uri"] = mAuthResponse["responses"]["next_url"]
+                        redirectCount++
+                        
+                        if (redirectCount > maxRedirects) {
+                            Log.e(TAG, "Too many login redirects ($redirectCount)")
+                            return@withContext LoginResult.Failure(
+                                message = "Too many login redirects",
+                                errorCode = "REDIRECT_LOOP",
+                                technicalDetails = "Max redirects: $maxRedirects, Last URL: ${result.nextUrl}"
+                            )
+                        }
+                        
+                        Log.d(TAG, "Following login redirect to: ${result.nextUrl} (redirect $redirectCount)")
+                        currentUri = result.nextUrl
+                        // Method change would require rebuilding the request
+                        // For now, keep the same request body
+                        
+                        // Brief delay before redirect (prevents hammering)
+                        delay(500)
+                        continue
+                    }
+                    
+                    is ParsedLoginResponse.Failure -> {
+                        return@withContext result.result
+                    }
+                }
                 
             } catch (e: Exception) {
                 Log.e(TAG, "Login error: ${e.javaClass.simpleName}: ${e.message}")
@@ -307,7 +350,7 @@ class CoreNetworkingService(private val context: Context) {
                         return@withContext LoginResult.Failure(
                             message = getUserFriendlyMessage(e),
                             errorCode = getErrorCode(e),
-                            technicalDetails = buildTechnicalDetails(e, loginUri),
+                            technicalDetails = buildTechnicalDetails(e, currentUri),
                             shouldRetry = false
                         )
                     }
@@ -333,20 +376,16 @@ class CoreNetworkingService(private val context: Context) {
     }
     
     /**
-     * Execute a single login request.
-     * 
-     * Always creates a fresh HTTP client to avoid stale connection issues.
-     * The Second Life login server can be sensitive to connection reuse.
-     * 
-     * Implements Firestorm-style Retry-After header handling for 503 errors.
+     * Execute a login request and return parsed response including redirect info.
      */
-    private fun executeLoginRequest(loginUri: String, xmlRequest: String): LoginResult {
+    private fun executeLoginRequestWithRedirect(
+        loginUri: String, 
+        xmlRequest: String
+    ): ParsedLoginResponse {
         // Always create a fresh client for login to avoid stale connections
-        // This is critical for avoiding EOF errors from reused connections
         val options = HttpRequestOptions.forLogin()
         val client = channelFactory.createHttpClient(options)
         
-        // Update the cached client reference
         synchronized(connectionLock) {
             currentHttpClient = client
         }
@@ -357,18 +396,14 @@ class CoreNetworkingService(private val context: Context) {
             .header("Content-Type", "text/xml")
             .header("Accept", "text/xml, application/xml")
             .header("User-Agent", "Linkpoint/1.0.0 (Android)")
-            // Connection: close ensures we don't reuse a potentially stale connection
-            // The GrpcChannelFactory also adds this via interceptor, but explicit is better
             .header("Connection", "close")
             .build()
         
         Log.d(TAG, "Executing login request to: $loginUri")
         
-        // Execute with body retry handling
         val (response, responseBody) = executeWithBodyRetry(client, request, options)
         
         if (!response.isSuccessful) {
-            // Extract Retry-After header if present (Firestorm pattern)
             val retryAfter = parseRetryAfterHeader(response)
             
             val errorDetails = buildString {
@@ -380,55 +415,50 @@ class CoreNetworkingService(private val context: Context) {
                 appendLine("Response: ${responseBody.take(500)}")
             }
             
-            // Check for specific HTTP error codes with enhanced handling
             return when (response.code) {
                 503 -> {
-                    // Service Unavailable - use Retry-After if provided
-                    // This is Firestorm's approach: respect server's retry hints
                     val message = if (retryAfter != null && retryAfter > 0) {
                         "Login service temporarily unavailable. Please try again in $retryAfter seconds."
                     } else {
                         "Login service temporarily unavailable. Please try again in a few minutes."
                     }
-                    LoginResult.Failure(
+                    ParsedLoginResponse.Failure(LoginResult.Failure(
                         message = message,
                         errorCode = "SERVICE_UNAVAILABLE",
                         technicalDetails = errorDetails,
                         shouldRetry = true
-                    )
+                    ))
                 }
-                502, 504 -> LoginResult.Failure(
+                502, 504 -> ParsedLoginResponse.Failure(LoginResult.Failure(
                     message = "Login gateway error. The server may be overloaded.",
                     errorCode = "GATEWAY_ERROR",
                     technicalDetails = errorDetails,
                     shouldRetry = true
-                )
+                ))
                 429 -> {
-                    // Too Many Requests - definitely use Retry-After
                     val waitTime = retryAfter ?: 30
-                    LoginResult.Failure(
+                    ParsedLoginResponse.Failure(LoginResult.Failure(
                         message = "Too many login attempts. Please wait $waitTime seconds before trying again.",
                         errorCode = "RATE_LIMITED",
                         technicalDetails = errorDetails,
                         shouldRetry = true
-                    )
+                    ))
                 }
-                500 -> LoginResult.Failure(
+                500 -> ParsedLoginResponse.Failure(LoginResult.Failure(
                     message = "Internal server error. The login service is experiencing issues.",
                     errorCode = "INTERNAL_SERVER_ERROR",
                     technicalDetails = errorDetails,
                     shouldRetry = true
-                )
-                else -> LoginResult.Failure(
+                ))
+                else -> ParsedLoginResponse.Failure(LoginResult.Failure(
                     message = "Server returned HTTP ${response.code}",
                     errorCode = "HTTP_${response.code}",
                     technicalDetails = errorDetails
-                )
+                ))
             }
         }
         
-        // Parse the login response
-        return parseLoginResponse(responseBody)
+        return parseLoginResponseInternal(responseBody)
     }
     
     /**
@@ -605,42 +635,118 @@ class CoreNetworkingService(private val context: Context) {
     }
     
     /**
-     * Parse login XML response
+     * Result of parsing a login response.
+     * Can indicate success, failure, or a redirect to try a different URI.
+     * 
+     * Based on the official SL viewer's handling of "indeterminate" responses
+     * in lllogin.cpp where the server redirects to a different URI.
+     */
+    sealed class ParsedLoginResponse {
+        data class Success(val result: LoginResult.Success) : ParsedLoginResponse()
+        data class Failure(val result: LoginResult.Failure) : ParsedLoginResponse()
+        data class Redirect(val nextUrl: String, val nextMethod: String) : ParsedLoginResponse()
+    }
+    
+    /**
+     * Parse login XML response.
+     * 
+     * Handles three cases based on the official SL viewer's lllogin.cpp:
+     * 1. login="true" - Success, extract session info
+     * 2. login="indeterminate" - Redirect to next_url with next_method
+     * 3. login="false" or other - Failure with error message
      */
     private fun parseLoginResponse(xml: String): LoginResult {
+        val parsed = parseLoginResponseInternal(xml)
+        return when (parsed) {
+            is ParsedLoginResponse.Success -> parsed.result
+            is ParsedLoginResponse.Failure -> parsed.result
+            is ParsedLoginResponse.Redirect -> {
+                // For now, treat redirect as a specific failure that the caller can handle
+                // In a full implementation, the caller would retry with the new URL
+                Log.w(TAG, "Login redirect to: ${parsed.nextUrl} (method: ${parsed.nextMethod})")
+                LoginResult.Failure(
+                    message = "Login redirect required",
+                    errorCode = "REDIRECT",
+                    technicalDetails = "Next URL: ${parsed.nextUrl}\nNext Method: ${parsed.nextMethod}",
+                    shouldRetry = true
+                )
+            }
+        }
+    }
+    
+    /**
+     * Internal parser that returns the full ParsedLoginResponse
+     * including redirect information.
+     */
+    private fun parseLoginResponseInternal(xml: String): ParsedLoginResponse {
         val loginRegex = """<name>login</name>\s*<value><string>([\w]+)</string>""".toRegex()
         val loginMatch = loginRegex.find(xml)
         val loginStatus = loginMatch?.groupValues?.get(1)
         
-        if (loginStatus == "true") {
-            val sessionId = extractXmlValue(xml, "session_id") ?: ""
-            val agentId = extractXmlValue(xml, "agent_id") ?: ""
-            val simIp = extractXmlValue(xml, "sim_ip") ?: ""
-            val simPort = extractXmlIntValue(xml, "sim_port")
+        return when (loginStatus) {
+            "true" -> {
+                val sessionId = extractXmlValue(xml, "session_id") ?: ""
+                val agentId = extractXmlValue(xml, "agent_id") ?: ""
+                val simIp = extractXmlValue(xml, "sim_ip") ?: ""
+                val simPort = extractXmlIntValue(xml, "sim_port")
+                
+                Log.d(TAG, "Login successful: session=${hideCredential(sessionId)}, agent=$agentId")
+                
+                ParsedLoginResponse.Success(LoginResult.Success(
+                    sessionId = sessionId,
+                    agentId = agentId,
+                    simIp = simIp,
+                    simPort = simPort,
+                    responseXml = xml
+                ))
+            }
             
-            Log.d(TAG, "Login successful: session=$sessionId, agent=$agentId")
+            "indeterminate" -> {
+                // Server is redirecting us to a different URL
+                // This is the official SL viewer's handling from lllogin.cpp:
+                // request["uri"] = mAuthResponse["responses"]["next_url"]
+                // request["method"] = mAuthResponse["responses"]["next_method"]
+                val nextUrl = extractXmlValue(xml, "next_url") ?: ""
+                val nextMethod = extractXmlValue(xml, "next_method") ?: "login_to_simulator"
+                
+                Log.d(TAG, "Login indeterminate - redirect to: $nextUrl (method: $nextMethod)")
+                
+                if (nextUrl.isNotEmpty()) {
+                    ParsedLoginResponse.Redirect(nextUrl, nextMethod)
+                } else {
+                    ParsedLoginResponse.Failure(LoginResult.Failure(
+                        message = "Server requested redirect but provided no URL",
+                        errorCode = "INVALID_REDIRECT",
+                        technicalDetails = "Response preview: ${xml.take(500)}"
+                    ))
+                }
+            }
             
-            return LoginResult.Success(
-                sessionId = sessionId,
-                agentId = agentId,
-                simIp = simIp,
-                simPort = simPort,
-                responseXml = xml
-            )
-        } else {
-            val errorMessage = extractXmlValue(xml, "message") 
-                ?: extractXmlValue(xml, "reason")
-                ?: "Login failed"
-            val errorReason = extractXmlValue(xml, "reason") ?: "unknown"
-            
-            Log.w(TAG, "Login failed: $errorMessage (reason: $errorReason)")
-            
-            return LoginResult.Failure(
-                message = errorMessage,
-                errorCode = mapErrorReason(errorReason),
-                technicalDetails = "Reason: $errorReason\nResponse preview: ${xml.take(500)}"
-            )
+            else -> {
+                val errorMessage = extractXmlValue(xml, "message") 
+                    ?: extractXmlValue(xml, "reason")
+                    ?: "Login failed"
+                val errorReason = extractXmlValue(xml, "reason") ?: "unknown"
+                
+                Log.w(TAG, "Login failed: $errorMessage (reason: $errorReason)")
+                
+                ParsedLoginResponse.Failure(LoginResult.Failure(
+                    message = errorMessage,
+                    errorCode = mapErrorReason(errorReason),
+                    technicalDetails = "Reason: $errorReason\nResponse preview: ${xml.take(500)}"
+                ))
+            }
         }
+    }
+    
+    /**
+     * Hide sensitive credential data for logging.
+     * Shows first 4 chars and last 4 chars with asterisks in between.
+     * Based on the official SL viewer's hidePasswd() pattern.
+     */
+    private fun hideCredential(value: String): String {
+        if (value.length <= 8) return "*".repeat(value.length.coerceAtLeast(4))
+        return "${value.take(4)}****${value.takeLast(4)}"
     }
     
     private fun extractXmlValue(xml: String, name: String): String? {
