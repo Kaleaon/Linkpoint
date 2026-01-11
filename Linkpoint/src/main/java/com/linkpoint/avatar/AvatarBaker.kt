@@ -37,13 +37,22 @@ class AvatarBaker(
         const val BAKE_WIDTH = 512
         const val BAKE_HEIGHT = 512
         
-        // Bake channels
+        // Classic bake channels (avatar layers)
         const val BAKE_HEAD = 0
         const val BAKE_UPPER = 1
         const val BAKE_LOWER = 2
         const val BAKE_EYES = 3
         const val BAKE_SKIRT = 4
         const val BAKE_HAIR = 5
+        
+        // Bakes on Mesh (BoM) channels for mesh bodies/heads
+        const val BAKE_LEFTARM = 6
+        const val BAKE_LEFTLEG = 7
+        const val BAKE_AUX1 = 8     // Often used for mesh head
+        const val BAKE_AUX2 = 9     // Often used for mesh upper body
+        const val BAKE_AUX3 = 10    // Often used for mesh lower body
+        
+        const val NUM_BAKE_CHANNELS = 11
         
         // Texture indices in wearables
         const val TEX_HEAD_BODYPAINT = 0
@@ -80,13 +89,13 @@ class AvatarBaker(
     }
     
     /**
-     * Bake all textures
+     * Bake all textures (classic + BoM)
      */
-    suspend fun bakeAll(): Map<Int, UUID> = withContext(Dispatchers.Default) {
+    suspend fun bakeAll(includeBoM: Boolean = true): Map<Int, UUID> = withContext(Dispatchers.Default) {
         val results = mutableMapOf<Int, UUID>()
         
-        // Bake each channel in parallel
-        val jobs = listOf(
+        // Bake classic channels
+        val classicJobs = listOf(
             async { bakeChannel(BAKE_HEAD) },
             async { bakeChannel(BAKE_UPPER) },
             async { bakeChannel(BAKE_LOWER) },
@@ -94,10 +103,28 @@ class AvatarBaker(
             async { bakeChannel(BAKE_HAIR) }
         )
         
-        jobs.forEachIndexed { index, job ->
+        classicJobs.forEachIndexed { index, job ->
             val textureId = job.await()
             if (textureId != null) {
                 results[index] = textureId
+            }
+        }
+        
+        // Bake BoM channels if requested
+        if (includeBoM) {
+            val bomJobs = listOf(
+                async { bakeChannel(BAKE_LEFTARM) },
+                async { bakeChannel(BAKE_LEFTLEG) },
+                async { bakeChannel(BAKE_AUX1) },
+                async { bakeChannel(BAKE_AUX2) },
+                async { bakeChannel(BAKE_AUX3) }
+            )
+            
+            bomJobs.forEachIndexed { index, job ->
+                val textureId = job.await()
+                if (textureId != null) {
+                    results[index + 6] = textureId  // Offset by 6 for BoM channels
+                }
             }
         }
         
@@ -227,6 +254,62 @@ class AvatarBaker(
                 wearables[WearableType.HAIR]?.let { hair ->
                     hair.textures[0]?.let { texId ->
                         layers.add(BakeLayer(texId, hair.tintColor, BlendMode.NORMAL))
+                    }
+                }
+            }
+            // Bakes on Mesh (BoM) channels
+            BAKE_LEFTARM, BAKE_LEFTLEG -> {
+                // BoM uses same skin textures as upper/lower but for mesh bodies
+                wearables[WearableType.SKIN]?.let { skin ->
+                    val texIndex = if (channel == BAKE_LEFTARM) TEX_UPPER_SHIRT else TEX_LOWER_PANTS
+                    skin.textures[texIndex]?.let { texId ->
+                        layers.add(BakeLayer(texId, null, BlendMode.NORMAL))
+                    }
+                }
+                // Add clothing layers
+                wearables[WearableType.TATTOO]?.let { tattoo ->
+                    val texIndex = if (channel == BAKE_LEFTARM) TEX_UPPER_SHIRT else TEX_LOWER_PANTS
+                    tattoo.textures[texIndex]?.let { texId ->
+                        layers.add(BakeLayer(texId, null, BlendMode.MULTIPLY))
+                    }
+                }
+            }
+            BAKE_AUX1 -> {
+                // Mesh head - use head textures
+                wearables[WearableType.SKIN]?.let { skin ->
+                    skin.textures[TEX_HEAD_BODYPAINT]?.let { texId ->
+                        layers.add(BakeLayer(texId, null, BlendMode.NORMAL))
+                    }
+                }
+                wearables[WearableType.TATTOO]?.let { tattoo ->
+                    tattoo.textures[TEX_HEAD_BODYPAINT]?.let { texId ->
+                        layers.add(BakeLayer(texId, null, BlendMode.MULTIPLY))
+                    }
+                }
+            }
+            BAKE_AUX2 -> {
+                // Mesh upper body - use upper textures
+                wearables[WearableType.SKIN]?.let { skin ->
+                    skin.textures[TEX_UPPER_SHIRT]?.let { texId ->
+                        layers.add(BakeLayer(texId, null, BlendMode.NORMAL))
+                    }
+                }
+                wearables[WearableType.SHIRT]?.let { shirt ->
+                    shirt.textures[TEX_UPPER_SHIRT]?.let { texId ->
+                        layers.add(BakeLayer(texId, shirt.tintColor, BlendMode.NORMAL))
+                    }
+                }
+            }
+            BAKE_AUX3 -> {
+                // Mesh lower body - use lower textures
+                wearables[WearableType.SKIN]?.let { skin ->
+                    skin.textures[TEX_LOWER_PANTS]?.let { texId ->
+                        layers.add(BakeLayer(texId, null, BlendMode.NORMAL))
+                    }
+                }
+                wearables[WearableType.PANTS]?.let { pants ->
+                    pants.textures[TEX_LOWER_PANTS]?.let { texId ->
+                        layers.add(BakeLayer(texId, pants.tintColor, BlendMode.NORMAL))
                     }
                 }
             }
