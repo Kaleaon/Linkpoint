@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.security.MessageDigest
@@ -173,19 +174,27 @@ object SimpleSLLogin {
                 startLocation = startLocation
             )
             
-            // Create simple HTTP client with reasonable timeouts
+            // Create HTTP client configured for Second Life login protocol
+            // Key configuration based on https://wiki.secondlife.com/wiki/Current_login_protocols:
+            // - Force HTTP/1.1 only: SL login server uses XML-RPC over HTTP/1.1
+            // - Using HTTP/2 can cause EOF errors during ALPN negotiation or protocol mismatch
+            // - retryOnConnectionFailure: Handle transient connection issues
             val client = OkHttpClient.Builder()
+                .protocols(listOf(Protocol.HTTP_1_1))  // Force HTTP/1.1 for XML-RPC compatibility
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(true)  // Auto-retry on connection failures
                 .build()
             
-            // Build request
+            // Build request with Connection: close to avoid stale connection issues
+            // This prevents EOF errors from reusing connections that the server has closed
             val request = Request.Builder()
                 .url(loginUri)
                 .post(xmlRequest.toRequestBody("text/xml".toMediaType()))
                 .header("Content-Type", "text/xml")
                 .header("User-Agent", "$VIEWER_CHANNEL/$VIEWER_VERSION ($VIEWER_PLATFORM)")
+                .header("Connection", "close")  // Prevent connection reuse issues
                 .build()
             
             Log.d(TAG, "Sending login request...")

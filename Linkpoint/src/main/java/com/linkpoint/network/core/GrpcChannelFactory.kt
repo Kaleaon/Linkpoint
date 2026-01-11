@@ -314,11 +314,18 @@ class GrpcChannelFactory(
         }
         builder.dispatcher(dispatcher)
         
-        // Enable both HTTP/2 and HTTP/1.1 for best performance
-        // HTTP/2 provides faster login through multiplexing and header compression
-        // Falls back to HTTP/1.1 if server doesn't support HTTP/2
-        // Note: Second Life servers support HTTP/2 - Lumiya uses it for instant login
-        builder.protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
+        // Configure HTTP protocol based on policy class
+        // LOGIN requests MUST use HTTP/1.1 only:
+        // - Second Life login server uses XML-RPC over HTTP/1.1
+        //   (see https://wiki.secondlife.com/wiki/Current_login_protocols)
+        // - HTTP/2 ALPN negotiation can cause EOF errors during protocol mismatch
+        // - Chunked transfer encoding issues occur when HTTP/2 falls back to HTTP/1.1
+        // Other requests can use HTTP/2 for better performance
+        if (options.policyClass == PolicyClass.LOGIN) {
+            builder.protocols(listOf(Protocol.HTTP_1_1))
+        } else {
+            builder.protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
+        }
         
         // Add interceptor for connection handling and tracing
         builder.addNetworkInterceptor { chain ->
