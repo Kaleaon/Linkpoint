@@ -219,8 +219,9 @@ object SimpleSLLogin {
             // Use try-finally to ensure response is always closed properly in all paths
             try {
                 // Read response body with resilient EOF handling
-                // The ChunkedResponseInterceptor pre-buffers the response, but we still
-                // use resilient reading as a secondary safeguard against EOF errors.
+                // Defense-in-depth: The ChunkedResponseInterceptor handles EOF at the network layer,
+                // but readBodyResilient() provides backup handling in case the interceptor misses
+                // edge cases or if EOF occurs after the interceptor's processing.
                 // If we hit EOF during reading and have partial but usable data, we try to use it.
                 val (responseBody, hitEof) = readBodyResilient(response)
                 
@@ -803,7 +804,7 @@ object SimpleSLLogin {
      */
     private class ChunkedResponseInterceptor : Interceptor {
         companion object {
-            private const val TAG = "ChunkedInterceptor"
+            private const val TAG = "ChunkedResponseInterceptor"
             private const val MAX_BUFFER_SIZE = 1024 * 1024L // 1MB max for login responses
         }
         
@@ -855,7 +856,10 @@ object SimpleSLLogin {
             val bufferedBody = buffer.readByteArray()
             
             if (hitEof && bufferedBody.isEmpty()) {
-                // No data recovered, throw to trigger retry
+                // No data recovered at the network layer - this is a hard failure
+                // that should trigger a retry. Unlike readBodyResilient() which runs
+                // after buffering, here we're at the raw network layer and getting
+                // zero bytes with EOF means the connection was dropped immediately.
                 throw EOFException("Server closed connection with no data")
             }
             
