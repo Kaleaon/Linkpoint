@@ -32,14 +32,14 @@ class CacheManager(private val context: Context) {
         const val KEY_CACHE_SOUNDS = "cache_sounds"
         const val KEY_CACHE_ANIMATIONS = "cache_animations"
         
-        // Size limits
-        const val MIN_DISK_CACHE_MB = 128
-        const val MAX_DISK_CACHE_MB = 4096  // 4GB
-        const val DEFAULT_DISK_CACHE_MB = 1024  // 1GB - increased from 500MB for better performance
+        // Size limits - generous limits for smooth performance
+        const val MIN_DISK_CACHE_MB = 512
+        const val MAX_DISK_CACHE_MB = 10240  // 10GB - large cache prevents re-downloading
+        const val DEFAULT_DISK_CACHE_MB = 2048  // 2GB default for good performance
         
-        const val MIN_MEMORY_CACHE_MB = 25
-        const val MAX_MEMORY_CACHE_MB = 200
-        const val DEFAULT_MEMORY_CACHE_MB = 100  // 100MB - increased from 50MB
+        const val MIN_MEMORY_CACHE_MB = 100
+        const val MAX_MEMORY_CACHE_MB = 2048  // 2GB - for devices with plenty of RAM
+        const val DEFAULT_MEMORY_CACHE_MB = 512  // 512MB default - good balance
         
         // Low space threshold (200MB free required)
         const val LOW_SPACE_THRESHOLD_MB = 200

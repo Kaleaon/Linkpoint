@@ -11,27 +11,38 @@ import java.util.UUID
 
 /**
  * Asset caching system with memory and disk levels
+ * 
+ * Now uses CacheManager for configurable cache sizes:
+ * - Memory: 100MB - 2GB (default 512MB)
+ * - Disk: 512MB - 10GB (default 2GB)
  */
 class AssetCache(private val context: Context) {
     
     companion object {
         private const val TAG = "AssetCache"
         private const val DISK_CACHE_DIR = "asset_cache"
-        private const val MAX_DISK_CACHE_MB = 500
-        private const val MAX_MEMORY_CACHE_MB = 50
     }
     
-    // Memory cache (LRU)
-    private val memoryCache: LruCache<String, ByteArray> = object : LruCache<String, ByteArray>(
-        MAX_MEMORY_CACHE_MB * 1024 * 1024
-    ) {
-        override fun sizeOf(key: String, value: ByteArray): Int = value.size
+    // Cache manager for getting configured sizes
+    private val cacheManager by lazy { CacheManager(context) }
+    
+    // Memory cache (LRU) - uses configured size from CacheManager
+    private val memoryCache: LruCache<String, ByteArray> by lazy {
+        val maxMemoryMB = cacheManager.getMemoryCacheSizeMB()
+        Log.i(TAG, "Initializing memory cache: ${maxMemoryMB}MB")
+        object : LruCache<String, ByteArray>(maxMemoryMB * 1024 * 1024) {
+            override fun sizeOf(key: String, value: ByteArray): Int = value.size
+        }
     }
     
     // Disk cache directory
     private val diskCacheDir: File by lazy {
         File(context.cacheDir, DISK_CACHE_DIR).also { it.mkdirs() }
     }
+    
+    // Configured disk cache size in bytes
+    private val maxDiskCacheBytes: Long
+        get() = cacheManager.getDiskCacheSizeMB().toLong() * 1024 * 1024
     
     /**
      * Get an asset from cache (memory first, then disk)
@@ -137,12 +148,14 @@ class AssetCache(private val context: Context) {
     
     /**
      * Prune disk cache if over limit
+     * Uses configured cache size from CacheManager
      */
     suspend fun pruneIfNeeded() = withContext(Dispatchers.IO) {
-        val maxBytes = MAX_DISK_CACHE_MB.toLong() * 1024 * 1024
+        val maxBytes = maxDiskCacheBytes
         var totalSize = diskCacheDir.listFiles()?.sumOf { it.length() } ?: 0
         
         if (totalSize > maxBytes) {
+            Log.i(TAG, "Cache over limit: ${totalSize / 1024 / 1024}MB > ${maxBytes / 1024 / 1024}MB, pruning...")
             // Delete oldest files first
             diskCacheDir.listFiles()
                 ?.sortedBy { it.lastModified() }

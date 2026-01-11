@@ -95,27 +95,27 @@ class SettingsActivity : AppCompatActivity() {
             }
             updateCacheStatus()
             
-            // Disk cache size
+            // Disk cache size (up to 10GB)
             findPreference<SeekBarPreference>("disk_cache_size")?.apply {
                 value = cacheManager.getDiskCacheSizeMB()
-                summary = "Maximum storage: ${value}MB"
+                summary = "Maximum storage: ${formatSizeMB(value)}"
                 setOnPreferenceChangeListener { _, newValue ->
                     val sizeMB = newValue as Int
                     cacheManager.setDiskCacheSizeMB(sizeMB)
-                    summary = "Maximum storage: ${sizeMB}MB"
+                    summary = "Maximum storage: ${formatSizeMB(sizeMB)}"
                     updateCacheStatus()
                     true
                 }
             }
             
-            // Memory cache size
+            // Memory cache size (up to 2GB)
             findPreference<SeekBarPreference>("memory_cache_size")?.apply {
                 value = cacheManager.getMemoryCacheSizeMB()
-                summary = "RAM used: ${value}MB"
+                summary = "RAM used: ${formatSizeMB(value)}"
                 setOnPreferenceChangeListener { _, newValue ->
                     val sizeMB = newValue as Int
                     cacheManager.setMemoryCacheSizeMB(sizeMB)
-                    summary = "RAM used: ${sizeMB}MB"
+                    summary = "RAM used: ${formatSizeMB(sizeMB)}"
                     Toast.makeText(context, "Memory cache size will apply on next restart", Toast.LENGTH_SHORT).show()
                     true
                 }
@@ -355,6 +355,16 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 .setNegativeButton("Cancel", null)
                 .show()
+        }
+        
+        /**
+         * Format MB size to human-readable string (GB for large values)
+         */
+        private fun formatSizeMB(sizeMB: Int): String {
+            return when {
+                sizeMB >= 1024 -> String.format("%.1f GB", sizeMB / 1024.0)
+                else -> "${sizeMB} MB"
+            }
         }
     }
 }

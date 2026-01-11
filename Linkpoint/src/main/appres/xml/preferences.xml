@@ -55,10 +55,10 @@
         <SeekBarPreference
             android:key="disk_cache_size"
             android:title="Disk Cache Size"
-            android:summary="Maximum storage for cached assets"
-            android:defaultValue="1024"
-            android:max="4096"
-            app:min="128"
+            android:summary="Maximum storage for cached assets (MB)"
+            android:defaultValue="2048"
+            android:max="10240"
+            app:min="512"
             app:showSeekBarValue="true"
             android:iconSpaceReserved="false" />
 
@@ -66,9 +66,9 @@
             android:key="memory_cache_size"
             android:title="Memory Cache Size"
             android:summary="RAM used for quick access (MB)"
-            android:defaultValue="100"
-            android:max="200"
-            app:min="25"
+            android:defaultValue="512"
+            android:max="2048"
+            app:min="100"
             app:showSeekBarValue="true"
             android:iconSpaceReserved="false" />
 
