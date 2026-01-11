@@ -98,9 +98,11 @@ object SimpleSLLogin {
             
             if (attempt > 1) {
                 // Calculate exponential backoff delay for retries
+                // Uses NetworkExceptionUtils.EOF_EXTRA_DELAY_MS (500ms) as base
                 // Retry 1 (2nd attempt): 500ms, Retry 2 (3rd attempt): 1000ms, Retry 3 (4th attempt): 2000ms
                 val retryNumber = attempt - 1
-                val delayMs = NetworkExceptionUtils.EOF_EXTRA_DELAY_MS * (1 shl (retryNumber - 1))
+                val exponentialMultiplier = (1 shl (retryNumber - 1))  // 2^(retryNumber-1): 1, 2, 4
+                val delayMs = NetworkExceptionUtils.EOF_EXTRA_DELAY_MS * exponentialMultiplier
                 Log.d(TAG, "Retry $retryNumber/$validatedRetries after ${delayMs}ms delay (EOF error recovery)")
                 kotlinx.coroutines.delay(delayMs)
             }
@@ -169,6 +171,7 @@ object SimpleSLLogin {
                 continue
             } catch (e: javax.net.ssl.SSLException) {
                 // Check if this is an EOF-related SSL error (e.g., connection closed during handshake)
+                // NetworkExceptionUtils.isEOFException() checks for EOF in the exception chain and message
                 if (NetworkExceptionUtils.isEOFException(e)) {
                     Log.w(TAG, "SSL EOF error during login (attempt $attempt/$maxAttempts) - will retry", e)
                     lastError = e
@@ -198,6 +201,7 @@ object SimpleSLLogin {
                 continue
             } catch (e: java.net.SocketException) {
                 // Check if this is a connection reset (EOF-related)
+                // These utilities check exception types, messages, and cause chains for EOF/reset indicators
                 if (NetworkExceptionUtils.isEOFException(e) || NetworkExceptionUtils.isConnectionResetException(e)) {
                     Log.w(TAG, "Connection reset error during login (attempt $attempt/$maxAttempts) - will retry", e)
                     lastError = e
@@ -217,6 +221,7 @@ object SimpleSLLogin {
                 }
             } catch (e: Exception) {
                 // Check if the wrapped exception is EOF-related
+                // isTransientError() checks for EOF, connection reset, and timeout errors
                 if (NetworkExceptionUtils.isEOFException(e) || NetworkExceptionUtils.isTransientError(e)) {
                     Log.w(TAG, "Transient error during login (attempt $attempt/$maxAttempts) - will retry", e)
                     lastError = e
