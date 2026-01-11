@@ -23,6 +23,13 @@
     <string name="nav_settings">Settings</string>
     <string name="nav_xr_mode">XR Mode</string>
     <string name="nav_logout">Logout</string>
+    <string name="cache_management">Cache Management</string>
+    
+    <!-- Bottom Navigation -->
+    <string name="chat">Chat</string>
+    <string name="inventory">Inventory</string>
+    <string name="minimap">Minimap</string>
+    <string name="settings">Settings</string>
     
     <!-- Chat -->
     <string name="type_message">Type a message…</string>

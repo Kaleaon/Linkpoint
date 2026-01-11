@@ -342,11 +342,24 @@ class SettingsActivity : AppCompatActivity() {
                 .setTitle("Logout")
                 .setMessage("Are you sure you want to logout?")
                 .setPositiveButton("Logout") { _, _ ->
-                    // Clear saved credentials
+                    // Clear saved credentials - use correct keys that match LoginActivity
                     requireContext().getSharedPreferences("login_prefs", android.content.Context.MODE_PRIVATE)
                         .edit()
-                        .remove("saved_password")
+                        .remove("encrypted_password")
+                        .remove("password_iv")
+                        .remove("save_password")
                         .apply()
+                    
+                    // Also clear the keystore key for complete security cleanup
+                    try {
+                        val keyStore = java.security.KeyStore.getInstance("AndroidKeyStore")
+                        keyStore.load(null)
+                        if (keyStore.containsAlias("LinkpointLoginKey")) {
+                            keyStore.deleteEntry("LinkpointLoginKey")
+                        }
+                    } catch (e: Exception) {
+                        // Non-critical - keystore cleanup failure doesn't block logout
+                    }
                     
                     // Navigate to login
                     val intent = Intent(requireContext(), LoginActivity::class.java)

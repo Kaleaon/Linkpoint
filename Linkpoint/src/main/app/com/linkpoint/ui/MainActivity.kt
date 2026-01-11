@@ -81,13 +81,6 @@ class MainActivity : AppCompatActivity() {
         checkCacheHealth()
     }
     
-    override fun onResume() {
-        super.onResume()
-        choreographer.postFrameCallback(frameCallback)
-        // Update cache status indicator
-        updateCacheStatusIndicator()
-    }
-    
     private fun setupNavigation() {
         findViewById<ImageButton>(R.id.chatButton).setOnClickListener {
             startActivity(Intent(this, ChatActivity::class.java))
@@ -380,6 +373,8 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         choreographer.postFrameCallback(frameCallback)
+        // Update cache status indicator
+        updateCacheStatusIndicator()
     }
     
     override fun onPause() {

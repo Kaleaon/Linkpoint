@@ -45,6 +45,8 @@ class TosActivity : AppCompatActivity() {
         
         /**
          * Record ToS acceptance
+         * Uses commit() instead of apply() to ensure synchronous persistence
+         * for this critical data - prevents loss if app is killed immediately after
          */
         fun recordTosAcceptance(context: Context) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -52,7 +54,7 @@ class TosActivity : AppCompatActivity() {
                 .putBoolean(KEY_TOS_ACCEPTED, true)
                 .putInt(KEY_TOS_VERSION, CURRENT_TOS_VERSION)
                 .putLong(KEY_TOS_ACCEPT_DATE, System.currentTimeMillis())
-                .apply()
+                .commit() // Use commit() for critical ToS data to ensure synchronous write
         }
         
         /**
@@ -97,10 +99,18 @@ class TosActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "Terms of Service"
         
-        // Configure WebView
+        // Configure WebView with security restrictions
+        // ToS content is static HTML so we can disable JavaScript and file access
         webView.apply {
-            settings.javaScriptEnabled = true
-            settings.domStorageEnabled = true
+            settings.javaScriptEnabled = false  // Disable JS for security - not needed for static ToS
+            settings.domStorageEnabled = false
+            settings.allowFileAccess = false    // Prevent file system access
+            settings.allowContentAccess = false // Prevent content provider access
+            @Suppress("DEPRECATION")
+            settings.allowFileAccessFromFileURLs = false
+            @Suppress("DEPRECATION")
+            settings.allowUniversalAccessFromFileURLs = false
+            settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
@@ -136,6 +146,7 @@ class TosActivity : AppCompatActivity() {
             val tosHtml = buildTosHtml()
             webView.loadDataWithBaseURL(null, tosHtml, "text/html", "UTF-8", null)
         } catch (e: Exception) {
+            android.util.Log.e("TosActivity", "Failed to build local ToS HTML, using fallback", e)
             // Fallback to online ToS
             webView.loadUrl(TOS_URL)
         }

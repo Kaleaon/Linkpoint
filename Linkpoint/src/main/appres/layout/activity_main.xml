@@ -79,7 +79,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_storage"
             android:tint="@android:color/white"
-            android:contentDescription="Cache Management" />
+            android:contentDescription="@string/cache_management" />
 
         <ImageButton
             android:id="@+id/settingsButton"

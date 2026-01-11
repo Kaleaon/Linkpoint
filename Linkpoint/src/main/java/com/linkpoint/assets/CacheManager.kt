@@ -293,12 +293,13 @@ class CacheManager(private val context: Context) {
         var actionTaken = "None"
         var prunedBytes = 0L
         
-        // Check for low space
+        // Check for low space - use less aggressive pruning instead of clearing everything
         if (stats.isLowSpace && isAutoClearOnLowSpaceEnabled()) {
-            val clearResult = clearAllCache()
-            actionTaken = "Auto-cleared due to low space"
-            prunedBytes = clearResult.clearedBytes
-            Log.w(TAG, "Low space detected - cleared cache: ${formatSize(prunedBytes)}")
+            // Prune to 50% instead of clearing everything to preserve recently used assets
+            val pruneResult = pruneCache()
+            actionTaken = "Auto-pruned due to low space"
+            prunedBytes = pruneResult.prunedBytes
+            Log.w(TAG, "Low space detected - pruned cache: ${formatSize(prunedBytes)}")
         } 
         // Check if over limit
         else if (stats.usagePercent > 100) {

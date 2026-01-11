@@ -193,7 +193,12 @@ class LoginActivity : AppCompatActivity() {
             Log.d(TAG, "Password saved securely")
         } catch (e: Exception) {
             Log.w(TAG, "Failed to save password securely: ${e.message}")
-            // Fallback: don't save password if encryption fails
+            // Notify user that password wasn't saved
+            android.widget.Toast.makeText(
+                this,
+                "Could not save password securely. You'll need to enter it next time.",
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
         }
     }
     
