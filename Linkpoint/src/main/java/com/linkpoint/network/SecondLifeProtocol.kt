@@ -34,7 +34,14 @@ class SecondLifeProtocol(private val context: Context) {
     
     companion object {
         private const val TAG = "SLProtocol"
-        private const val VIEWER_NAME = "Linkpoint"
+        // NOTE: Currently identifying as "Lumiya" because Linkpoint is based on Lumiya
+        // and "Linkpoint" is not yet registered with Linden Lab's Third-Party Viewer Directory.
+        // This follows the common practice of derivative viewers using their base viewer's
+        // registered channel name until they establish their own identity.
+        // 
+        // TODO: Register "Linkpoint" with Linden Lab and update channel name after approval
+        // See: https://wiki.secondlife.com/wiki/Third_Party_Viewer_Directory
+        private const val VIEWER_NAME = "Lumiya"
         private const val VIEWER_VERSION = "1.0.0"
         
         /**

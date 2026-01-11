@@ -16,13 +16,18 @@ This is an independent, community-developed viewer for accessing Second Life vir
 - ✅ The viewer does not unduly burden Linden Lab's servers
 
 ### 1.b Unique Viewer Identifier
-- ✅ Linkpoint uses a unique channel name: "Linkpoint"
+- ⚠️ **Temporary Change**: Linkpoint currently identifies as "Lumiya" during development
+- **Reason**: "Linkpoint" is not yet registered in Linden Lab's Third-Party Viewer Directory
+- **Plan**: Register "Linkpoint" as a separate viewer and update channel name after approval
 - ✅ Each version has a unique version number (e.g., "1.0.0")
 - ✅ The viewer identifier is not the same as any Linden Lab viewer
+- **Registration URL**: https://wiki.secondlife.com/wiki/Third_Party_Viewer_Directory
 
 ### 1.c Required Disclosures
-- ✅ **Viewer Name**: Linkpoint
+- ✅ **Viewer Name**: Linkpoint (based on Lumiya)
+- ✅ **Current Channel**: "Lumiya" (temporary, pending Linkpoint registration)
 - ✅ **Disclaimer**: "This software is not provided or supported by Linden Lab, the makers of Second Life."
+- ✅ **Attribution**: Based on Lumiya viewer by Alina Lyvette
 - ✅ **Customer Support**: Community support via GitHub Issues - no official support provided
 - ✅ **Privacy Policy**: See [PRIVACY_POLICY.md](PRIVACY_POLICY.md)
 - ✅ **Limitations**: Mobile-specific limitations documented below
@@ -57,8 +62,9 @@ This is an independent, community-developed viewer for accessing Second Life vir
 
 ### 2.c Security Compliance
 - ✅ Does NOT mask IP or MAC addresses
-- ✅ Uses genuine viewer identifier ("Linkpoint")
-- ✅ Does NOT spoof identity as another viewer
+- ⚠️ Currently uses "Lumiya" as channel name (temporary, pending Linkpoint registration)
+- ✅ Does NOT spoof identity maliciously (Linkpoint is a legitimate Lumiya derivative)
+- ✅ Will use genuine "Linkpoint" identifier after Third-Party Viewer Directory registration
 
 ### 2.d Safety
 - ✅ No malicious code, viruses, or harmful functionality
