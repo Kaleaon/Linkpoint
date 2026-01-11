@@ -343,7 +343,7 @@ class CoreNetworkingService(private val context: Context) {
                 Log.e(TAG, "Login error: ${e.javaClass.simpleName}: ${e.message}")
                 NetworkLogger.logError(currentUri, 
                     if (e is IOException) e else IOException("Login failed: ${e.message}", e),
-                    loginRetryPolicy.attemptCount
+                    loginRetryPolicy.getStats().currentRetryAttempt
                 )
                 qualityManager.recordRequestResult(false)
                 
