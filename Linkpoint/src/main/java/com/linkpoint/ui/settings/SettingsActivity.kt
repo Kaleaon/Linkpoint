@@ -25,6 +25,13 @@ import com.linkpoint.ui.tos.TosActivity
  */
 class SettingsActivity : AppCompatActivity() {
     
+    companion object {
+        // GitHub URLs for compliance documentation
+        private const val GITHUB_BASE_URL = "https://github.com/Kaleaon/Linkpoint"
+        private const val PRIVACY_POLICY_URL = "$GITHUB_BASE_URL/blob/main/PRIVACY_POLICY.md"
+        private const val TPV_COMPLIANCE_URL = "$GITHUB_BASE_URL/blob/main/THIRD_PARTY_VIEWER_POLICY_COMPLIANCE.md"
+    }
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
@@ -185,7 +192,7 @@ class SettingsActivity : AppCompatActivity() {
         private fun openPrivacyPolicy() {
             try {
                 val intent = Intent(Intent.ACTION_VIEW, 
-                    Uri.parse("https://github.com/Kaleaon/Linkpoint/blob/main/PRIVACY_POLICY.md"))
+                    Uri.parse(PRIVACY_POLICY_URL))
                 startActivity(intent)
             } catch (e: Exception) {
                 android.widget.Toast.makeText(
@@ -199,7 +206,7 @@ class SettingsActivity : AppCompatActivity() {
         private fun openTpvCompliance() {
             try {
                 val intent = Intent(Intent.ACTION_VIEW, 
-                    Uri.parse("https://github.com/Kaleaon/Linkpoint/blob/main/THIRD_PARTY_VIEWER_POLICY_COMPLIANCE.md"))
+                    Uri.parse(TPV_COMPLIANCE_URL))
                 startActivity(intent)
             } catch (e: Exception) {
                 android.widget.Toast.makeText(
@@ -213,7 +220,7 @@ class SettingsActivity : AppCompatActivity() {
         private fun openGitHub() {
             try {
                 val intent = Intent(Intent.ACTION_VIEW, 
-                    Uri.parse("https://github.com/Kaleaon/Linkpoint"))
+                    Uri.parse(GITHUB_BASE_URL))
                 startActivity(intent)
             } catch (e: Exception) {
                 android.widget.Toast.makeText(
