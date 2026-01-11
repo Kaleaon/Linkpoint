@@ -13,13 +13,14 @@ import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 
 /**
- * Simple, Lumiya-style login implementation
+ * Simple, Lumiya-style login implementation with automatic EOF retry
  * 
  * This is a SIMPLIFIED version that mimics Lumiya's instant login approach:
  * - Direct HTTP request without pre-validation
  * - No complex state management
- * - No retry loops (one attempt per call)
- * - Fast and simple
+ * - Automatic retry for EOF/transient errors (up to 3 attempts with exponential backoff)
+ * - Fast and simple for successful connections
+ * - Resilient for temporary server issues
  * 
  * Complies with Third-Party Viewer Policy:
  * - Section 1.b: Unique viewer identifier (Linkpoint channel with version)
@@ -62,13 +63,14 @@ object SimpleSLLogin {
     }
     
     /**
-     * Perform simple, Lumiya-style login
+     * Perform simple, Lumiya-style login with automatic retry for EOF errors
      * 
      * @param firstName User's first name
      * @param lastName User's last name
      * @param password User's password (will be truncated to 16 chars per SL protocol)
      * @param loginUri Login server URL
      * @param startLocation "last", "home", or specific location
+     * @param maxRetries Maximum number of retry attempts for EOF errors (default 3)
      * @return Login result
      */
     suspend fun login(
@@ -76,11 +78,26 @@ object SimpleSLLogin {
         lastName: String,
         password: String,
         loginUri: String,
-        startLocation: String = "last"
+        startLocation: String = "last",
+        maxRetries: Int = 3
     ): SimpleLoginResult = withContext(Dispatchers.IO) {
         Log.d(TAG, "Simple login for $firstName $lastName to $loginUri")
         
-        try {
+        var lastError: Exception? = null
+        var attempt = 0
+        
+        while (attempt <= maxRetries) {
+            attempt++
+            
+            if (attempt > 1) {
+                // Calculate exponential backoff delay for retries
+                // First retry: 500ms, second: 1000ms, third: 2000ms
+                val delayMs = NetworkExceptionUtils.EOF_EXTRA_DELAY_MS * (1 shl (attempt - 2))
+                Log.d(TAG, "Retry attempt $attempt after ${delayMs}ms delay (EOF error recovery)")
+                kotlinx.coroutines.delay(delayMs)
+            }
+            
+            try {
             // Build XML request (like Lumiya does)
             val xmlRequest = buildLoginXml(
                 firstName = firstName,
@@ -122,64 +139,181 @@ object SimpleSLLogin {
                 )
             }
             
-            // Parse response (simple XML parsing like Lumiya)
-            return@withContext parseLoginResponse(responseBody)
-            
-        } catch (e: java.net.UnknownHostException) {
-            Log.e(TAG, "Cannot resolve login server", e)
-            return@withContext SimpleLoginResult.Failure(
-                message = "Cannot connect to login server. Check your internet connection.",
-                errorCode = "DNS_ERROR",
-                details = "DNS resolution failed: ${e.message}"
-            )
-        } catch (e: java.net.SocketTimeoutException) {
-            Log.e(TAG, "Login request timed out", e)
-            return@withContext SimpleLoginResult.Failure(
-                message = "Login request timed out. Server may be busy.",
-                errorCode = "TIMEOUT",
-                details = "Timeout after 30 seconds"
-            )
-        } catch (e: javax.net.ssl.SSLException) {
-            Log.e(TAG, "SSL error during login", e)
-            return@withContext SimpleLoginResult.Failure(
-                message = "Secure connection failed. Check your network settings.",
-                errorCode = "SSL_ERROR",
-                details = "SSL Error: ${e.message}"
-            )
-        } catch (e: java.io.EOFException) {
-            // EOFException occurs when the server closes connection unexpectedly
-            // This is usually temporary and happens due to:
-            // - Server load/busy conditions
-            // - Network interruptions during SSL handshake
-            // - Connection reset by load balancer
-            // - HTTP/2 protocol issues on some networks
-            Log.e(TAG, "EOF error during login - server closed connection", e)
-            return@withContext SimpleLoginResult.Failure(
-                message = "The server closed the connection unexpectedly. This is usually temporary - please try again.",
-                errorCode = "EOF_ERROR",
-                details = buildString {
-                    appendLine("EOFException: ${e.message ?: "Connection closed by server"}")
-                    appendLine()
-                    appendLine("This error typically occurs when:")
-                    appendLine("• The login server is experiencing high load")
-                    appendLine("• Network interruption during SSL handshake")
-                    appendLine("• Load balancer reset the connection")
-                    appendLine("• HTTP/2 protocol negotiation issue")
-                    appendLine()
-                    appendLine("Recommended actions:")
-                    appendLine("1. Wait a few seconds and try again")
-                    appendLine("2. Check status.secondlifegrid.net for server status")
-                    appendLine("3. If on mobile data, try switching to Wi-Fi")
-                    appendLine("4. If problem persists, the server may be experiencing issues")
+                // Parse response (simple XML parsing like Lumiya)
+                return@withContext parseLoginResponse(responseBody)
+                
+                } catch (e: java.net.UnknownHostException) {
+                // DNS errors are not retryable - fail immediately
+                Log.e(TAG, "Cannot resolve login server", e)
+                return@withContext SimpleLoginResult.Failure(
+                    message = "Cannot connect to login server. Check your internet connection.",
+                    errorCode = "DNS_ERROR",
+                    details = "DNS resolution failed: ${e.message}"
+                )
+            } catch (e: java.net.SocketTimeoutException) {
+                // Timeout errors can be retried
+                Log.e(TAG, "Login request timed out (attempt $attempt/$maxRetries)", e)
+                lastError = e
+                if (attempt > maxRetries) {
+                    return@withContext SimpleLoginResult.Failure(
+                        message = "Login request timed out after $maxRetries attempts. Server may be busy.",
+                        errorCode = "TIMEOUT",
+                        details = "Timeout after 30 seconds per attempt, tried $maxRetries times"
+                    )
                 }
-            )
-        } catch (e: Exception) {
-            Log.e(TAG, "Login failed with exception", e)
-            return@withContext SimpleLoginResult.Failure(
-                message = "Login failed: ${e.message ?: "Unknown error occurred"}",
-                details = "${e.javaClass.simpleName}: ${e.message ?: "No error details available"}"
-            )
+                // Continue to next retry attempt
+                continue
+            } catch (e: javax.net.ssl.SSLException) {
+                // Check if this is an EOF-related SSL error (e.g., connection closed during handshake)
+                if (NetworkExceptionUtils.isEOFException(e)) {
+                    Log.w(TAG, "SSL EOF error during login (attempt $attempt/$maxRetries) - will retry", e)
+                    lastError = e
+                    if (attempt > maxRetries) {
+                        return@withContext SimpleLoginResult.Failure(
+                            message = "Secure connection failed after $maxRetries attempts. Server closed connection during SSL handshake.",
+                            errorCode = "EOF_ERROR",
+                            details = buildString {
+                                appendLine("SSLException with EOF: ${e.message ?: "Connection closed during handshake"}")
+                                appendLine()
+                                appendLine("Attempted $maxRetries times but server kept closing connection.")
+                                appendLine()
+                                appendLine("This error typically occurs when:")
+                                appendLine("• The login server is experiencing high load")
+                                appendLine("• Network interruption during SSL handshake")
+                                appendLine("• Load balancer reset the connection")
+                                appendLine("• HTTP/2 protocol negotiation issue")
+                                appendLine()
+                                appendLine("Recommended actions:")
+                                appendLine("1. Wait a few moments and try again")
+                                appendLine("2. Check status.secondlifegrid.net for server status")
+                                appendLine("3. If on mobile data, try switching to Wi-Fi")
+                                appendLine("4. If problem persists, the server may be experiencing issues")
+                            }
+                        )
+                    }
+                    // Continue to next retry attempt
+                    continue
+                } else {
+                    // Non-EOF SSL errors are not retryable - fail immediately
+                    Log.e(TAG, "SSL error during login", e)
+                    return@withContext SimpleLoginResult.Failure(
+                        message = "Secure connection failed. Check your network settings.",
+                        errorCode = "SSL_ERROR",
+                        details = "SSL Error: ${e.message}"
+                    )
+                }
+            } catch (e: java.io.EOFException) {
+                // EOFException occurs when the server closes connection unexpectedly
+                // This is usually temporary and should be retried
+                Log.w(TAG, "EOF error during login (attempt $attempt/$maxRetries) - will retry", e)
+                lastError = e
+                if (attempt > maxRetries) {
+                    return@withContext SimpleLoginResult.Failure(
+                        message = "The server closed the connection unexpectedly after $maxRetries attempts. This is usually temporary - please try again.",
+                        errorCode = "EOF_ERROR",
+                        details = buildString {
+                            appendLine("EOFException: ${e.message ?: "Connection closed by server"}")
+                            appendLine()
+                            appendLine("Attempted $maxRetries times but server kept closing connection.")
+                            appendLine()
+                            appendLine("This error typically occurs when:")
+                            appendLine("• The login server is experiencing high load")
+                            appendLine("• Network interruption during SSL handshake")
+                            appendLine("• Load balancer reset the connection")
+                            appendLine("• HTTP/2 protocol negotiation issue")
+                            appendLine()
+                            appendLine("Recommended actions:")
+                            appendLine("1. Wait a few moments and try again")
+                            appendLine("2. Check status.secondlifegrid.net for server status")
+                            appendLine("3. If on mobile data, try switching to Wi-Fi")
+                            appendLine("4. If problem persists, the server may be experiencing issues")
+                        }
+                    )
+                }
+                // Continue to next retry attempt
+                continue
+            } catch (e: java.net.SocketException) {
+                // Check if this is a connection reset (EOF-related)
+                if (NetworkExceptionUtils.isEOFException(e) || NetworkExceptionUtils.isConnectionResetException(e)) {
+                    Log.w(TAG, "Connection reset error during login (attempt $attempt/$maxRetries) - will retry", e)
+                    lastError = e
+                    if (attempt > maxRetries) {
+                        return@withContext SimpleLoginResult.Failure(
+                            message = "Connection was reset after $maxRetries attempts. This is usually temporary - please try again.",
+                            errorCode = "EOF_ERROR",
+                            details = buildString {
+                                appendLine("SocketException: ${e.message ?: "Connection reset by peer"}")
+                                appendLine()
+                                appendLine("Attempted $maxRetries times but connection kept being reset.")
+                                appendLine()
+                                appendLine("This error typically occurs when:")
+                                appendLine("• The login server is experiencing high load")
+                                appendLine("• Network interruption during connection")
+                                appendLine("• Load balancer reset the connection")
+                                appendLine("• Mobile network issues")
+                                appendLine()
+                                appendLine("Recommended actions:")
+                                appendLine("1. Wait a few moments and try again")
+                                appendLine("2. Check status.secondlifegrid.net for server status")
+                                appendLine("3. If on mobile data, try switching to Wi-Fi")
+                                appendLine("4. If problem persists, the server may be experiencing issues")
+                            }
+                        )
+                    }
+                    // Continue to next retry attempt
+                    continue
+                } else {
+                    // Non-retryable socket error
+                    Log.e(TAG, "Socket error during login", e)
+                    return@withContext SimpleLoginResult.Failure(
+                        message = "Network error: ${e.message ?: "Connection failed"}",
+                        errorCode = "SOCKET_ERROR",
+                        details = "SocketException: ${e.message}"
+                    )
+                }
+            } catch (e: Exception) {
+                // Check if the wrapped exception is EOF-related
+                if (NetworkExceptionUtils.isEOFException(e) || NetworkExceptionUtils.isTransientError(e)) {
+                    Log.w(TAG, "Transient error during login (attempt $attempt/$maxRetries) - will retry", e)
+                    lastError = e
+                    if (attempt > maxRetries) {
+                        return@withContext SimpleLoginResult.Failure(
+                            message = "Login failed after $maxRetries attempts: ${e.message ?: "Transient error"}",
+                            errorCode = "EOF_ERROR",
+                            details = buildString {
+                                appendLine("${e.javaClass.simpleName}: ${e.message ?: "Unknown error"}")
+                                appendLine()
+                                appendLine("Attempted $maxRetries times but errors persisted.")
+                                appendLine()
+                                appendLine("This appears to be a temporary server or network issue.")
+                                appendLine()
+                                appendLine("Recommended actions:")
+                                appendLine("1. Wait a few moments and try again")
+                                appendLine("2. Check status.secondlifegrid.net for server status")
+                                appendLine("3. If on mobile data, try switching to Wi-Fi")
+                                appendLine("4. If problem persists, the server may be experiencing issues")
+                            }
+                        )
+                    }
+                    // Continue to next retry attempt
+                    continue
+                } else {
+                    // Non-retryable error - fail immediately
+                    Log.e(TAG, "Login failed with exception", e)
+                    return@withContext SimpleLoginResult.Failure(
+                        message = "Login failed: ${e.message ?: "Unknown error occurred"}",
+                        details = "${e.javaClass.simpleName}: ${e.message ?: "No error details available"}"
+                    )
+                }
+            }
         }
+        
+        // If we get here, all retries failed - return the last error
+        return@withContext SimpleLoginResult.Failure(
+            message = "Login failed after $maxRetries retry attempts",
+            errorCode = "MAX_RETRIES_EXCEEDED",
+            details = "Last error: ${lastError?.javaClass?.simpleName}: ${lastError?.message}"
+        )
     }
     
     /**
