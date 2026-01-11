@@ -24,6 +24,7 @@ import com.linkpoint.R
 import com.linkpoint.core.GridInfo
 import com.linkpoint.network.LoginResult
 import com.linkpoint.network.NetworkDiagnostics
+import com.linkpoint.network.NetworkExceptionUtils.ErrorCategory
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.SSLHelper
 import com.linkpoint.ui.tos.TosActivity
@@ -32,6 +33,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.security.KeyStore
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -694,7 +697,12 @@ class LoginActivity : AppCompatActivity() {
         }
         
         val grid = app.gridManager.getSelectedGrid()
-        val timestamp = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", java.util.Locale.US).format(java.util.Date())
+        val timestamp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z"))
+        } else {
+            @Suppress("SimpleDateFormat")
+            java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", java.util.Locale.US).format(java.util.Date())
+        }
         
         // Build display details (shown in dialog)
         val displayDetails = buildString {
@@ -836,7 +844,7 @@ class LoginActivity : AppCompatActivity() {
         
         appendLine("Error Category Explanation:")
         when (failure.category) {
-            com.linkpoint.network.NetworkExceptionUtils.ErrorCategory.CONNECTION_CLOSED -> {
+            ErrorCategory.CONNECTION_CLOSED -> {
                 appendLine("  The server closed the connection before completing the response.")
                 appendLine("  This typically indicates:")
                 appendLine("    • Server is overloaded and dropping connections")
@@ -845,7 +853,7 @@ class LoginActivity : AppCompatActivity() {
                 appendLine("    • SSL/TLS handshake was interrupted")
                 appendLine("    • HTTP/2 protocol negotiation failed")
             }
-            com.linkpoint.network.NetworkExceptionUtils.ErrorCategory.SSL_ERROR -> {
+            ErrorCategory.SSL_ERROR -> {
                 appendLine("  A secure connection (SSL/TLS) could not be established.")
                 appendLine("  This typically indicates:")
                 appendLine("    • Certificate validation failed")
@@ -853,7 +861,7 @@ class LoginActivity : AppCompatActivity() {
                 appendLine("    • VPN or proxy interfering with secure connection")
                 appendLine("    • Network security policy blocking the connection")
             }
-            com.linkpoint.network.NetworkExceptionUtils.ErrorCategory.TIMEOUT -> {
+            ErrorCategory.TIMEOUT -> {
                 appendLine("  The connection or request timed out.")
                 appendLine("  This typically indicates:")
                 appendLine("    • Server is not responding")
@@ -861,7 +869,7 @@ class LoginActivity : AppCompatActivity() {
                 appendLine("    • Firewall is blocking the connection")
                 appendLine("    • Server is under heavy load")
             }
-            com.linkpoint.network.NetworkExceptionUtils.ErrorCategory.DNS_ERROR -> {
+            ErrorCategory.DNS_ERROR -> {
                 appendLine("  Could not resolve the server hostname.")
                 appendLine("  This typically indicates:")
                 appendLine("    • No internet connection")
@@ -869,7 +877,7 @@ class LoginActivity : AppCompatActivity() {
                 appendLine("    • The hostname is incorrect")
                 appendLine("    • DNS is being blocked by network policy")
             }
-            com.linkpoint.network.NetworkExceptionUtils.ErrorCategory.CONNECTION_REFUSED -> {
+            ErrorCategory.CONNECTION_REFUSED -> {
                 appendLine("  The server refused the connection.")
                 appendLine("  This typically indicates:")
                 appendLine("    • Server is down or not accepting connections")
@@ -877,21 +885,21 @@ class LoginActivity : AppCompatActivity() {
                 appendLine("    • Firewall blocking the connection")
                 appendLine("    • Server maintenance in progress")
             }
-            com.linkpoint.network.NetworkExceptionUtils.ErrorCategory.SOCKET_ERROR -> {
+            ErrorCategory.SOCKET_ERROR -> {
                 appendLine("  A low-level socket error occurred.")
                 appendLine("  This typically indicates:")
                 appendLine("    • Network interface issues")
                 appendLine("    • Connection was forcibly closed")
                 appendLine("    • Resource exhaustion")
             }
-            com.linkpoint.network.NetworkExceptionUtils.ErrorCategory.IO_ERROR -> {
+            ErrorCategory.IO_ERROR -> {
                 appendLine("  An I/O error occurred during communication.")
                 appendLine("  This typically indicates:")
                 appendLine("    • Data corruption during transfer")
                 appendLine("    • Unexpected response format")
                 appendLine("    • Stream was interrupted")
             }
-            com.linkpoint.network.NetworkExceptionUtils.ErrorCategory.UNKNOWN -> {
+            ErrorCategory.UNKNOWN -> {
                 appendLine("  An unexpected error occurred.")
                 appendLine("  The error could not be classified into a known category.")
             }
