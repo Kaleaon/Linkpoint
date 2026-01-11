@@ -335,7 +335,7 @@ class LoginActivity : AppCompatActivity() {
         
         // Perform network check and login
         lifecycleScope.launch {
-            // Pre-flight network connectivity check
+            // Quick network connectivity check (doesn't block on slow networks)
             val networkStatus = checkNetworkConnectivity()
             if (!networkStatus.isConnected) {
                 handleLoginResult(LoginResult.Failure(
@@ -346,21 +346,12 @@ class LoginActivity : AppCompatActivity() {
                 return@launch
             }
             
-            statusText.text = "Connecting to ${grid.name}..."
-            Log.d(TAG, "Starting login to ${grid.loginUri}")
-            
-            // Test if we can reach the login server
-            val serverReachable = testServerReachability(grid.loginUri)
-            if (!serverReachable.success) {
-                handleLoginResult(LoginResult.Failure(
-                    message = serverReachable.message,
-                    errorCode = "SERVER_UNREACHABLE",
-                    technicalDetails = serverReachable.details
-                ))
-                return@launch
-            }
-            
-            statusText.text = "Authenticating with ${grid.name}..."
+            // OPTIMIZATION: Skip server reachability test - go straight to login
+            // The old code did a HEAD request before POST login, which added latency.
+            // Lumiya goes straight to login, which is why it's instant.
+            // The login request itself will fail with appropriate errors if server is down.
+            statusText.text = "Logging into ${grid.name}..."
+            Log.d(TAG, "Starting login to ${grid.loginUri} via ${networkStatus.networkType}")
             
             val result = app.protocol.login(
                 firstName = firstName,

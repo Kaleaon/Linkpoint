@@ -212,6 +212,16 @@ class ConnectionQualityManager(private val context: Context) {
     
     /**
      * Update from network capabilities
+     * 
+     * IMPORTANT: We only require NET_CAPABILITY_INTERNET, NOT NET_CAPABILITY_VALIDATED.
+     * 
+     * NET_CAPABILITY_VALIDATED is too strict and fails intermittently on mobile networks:
+     * - LTE networks where validation is slow or fails temporarily  
+     * - Networks behind captive portals
+     * - Networks where Google's connectivity check is blocked
+     * 
+     * The actual HTTP request will determine if connectivity works.
+     * This matches Lumiya's behavior (which logs in instantly on the same networks).
      */
     private fun updateFromCapabilities(capabilities: NetworkCapabilities) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -221,8 +231,9 @@ class ConnectionQualityManager(private val context: Context) {
             }
         }
         
-        _isConnected.value = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+        // Only require internet capability - NOT validated
+        // Validated check is too strict for many mobile networks
+        _isConnected.value = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
         
         determineQuality()
     }

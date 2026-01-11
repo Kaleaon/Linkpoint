@@ -162,10 +162,18 @@ object NetworkDiagnostics {
             }
         }
         
-        Log.d(TAG, "Network info: $networkType ($subType), metered=$isMetered, bandwidth=$bandwidth")
+        Log.d(TAG, "Network info: $networkType ($subType), metered=$isMetered, bandwidth=$bandwidth, validated=$hasValidated")
         
+        // IMPORTANT: Only require hasInternet, NOT hasValidated
+        // NET_CAPABILITY_VALIDATED is too strict and fails on many mobile networks:
+        // - LTE networks where validation is slow or fails temporarily
+        // - Networks behind captive portals
+        // - Networks where Google's connectivity check is blocked
+        // 
+        // The actual HTTP request will determine if connectivity works.
+        // This matches Lumiya's behavior (which logs in instantly on the same networks).
         return NetworkInfo(
-            isConnected = hasInternet && hasValidated,
+            isConnected = hasInternet,  // Don't require validated!
             type = networkType,
             subType = subType,
             isMetered = isMetered,

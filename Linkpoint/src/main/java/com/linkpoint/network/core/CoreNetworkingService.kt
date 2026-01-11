@@ -973,15 +973,26 @@ class CoreNetworkingService(private val context: Context) {
      * Validate network connection with a fresh check.
      * This is more reliable than just checking the cached isConnected value,
      * as the network callback may not have fired yet.
+     * 
+     * IMPORTANT: We only require NET_CAPABILITY_INTERNET, NOT NET_CAPABILITY_VALIDATED.
+     * 
+     * NET_CAPABILITY_VALIDATED can fail intermittently on mobile networks even when
+     * connectivity is working perfectly. Requiring it causes login to fail on:
+     * - LTE networks where validation is slow or fails temporarily
+     * - Networks behind captive portals before portal authentication
+     * - Networks where Google's connectivity check is blocked
+     * 
+     * The actual HTTP request will determine if the connection works.
+     * This matches Lumiya's behavior (which logs in instantly on the same networks).
      */
     private fun validateNetworkConnection(): Boolean {
-        // First check the cached value
+        // First check the cached value (which may be too strict)
         if (qualityManager.isConnected.value) {
             return true
         }
         
         // If cached value is false, do a fresh network check
-        // This handles cases where the network callback hasn't updated yet
+        // The cached value may require VALIDATED, so do a more lenient check here
         try {
             val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE)
                 as? android.net.ConnectivityManager ?: return false
@@ -989,24 +1000,22 @@ class CoreNetworkingService(private val context: Context) {
             val activeNetwork = connectivityManager.activeNetwork ?: return false
             val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
             
+            // Only require internet capability - NOT validated
+            // Validation is too strict for mobile networks and can cause false negatives
             val hasInternet = capabilities.hasCapability(
                 android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET
             )
-            val isValidated = capabilities.hasCapability(
-                android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
-            )
             
-            val isConnected = hasInternet && isValidated
-            
-            if (isConnected) {
-                Log.d(TAG, "Fresh network check: connected (cached value was false)")
+            if (hasInternet) {
+                Log.d(TAG, "Fresh network check: internet available (skipping validation check)")
             }
             
-            return isConnected
+            return hasInternet
         } catch (e: Exception) {
             Log.e(TAG, "Error checking network connectivity: ${e.message}")
-            // Fall back to cached value on error
-            return qualityManager.isConnected.value
+            // On error, return true to allow the HTTP request to try
+            // The actual request will fail if there's no connectivity
+            return true
         }
     }
     
