@@ -35,6 +35,7 @@ object SimpleSLLogin {
         
         data class Failure(
             val message: String,
+            val errorCode: String = "LOGIN_FAILED",
             val details: String? = null
         ) : SimpleLoginResult()
     }
@@ -95,6 +96,7 @@ object SimpleSLLogin {
             if (!response.isSuccessful) {
                 return@withContext SimpleLoginResult.Failure(
                     message = "Login server returned error: HTTP ${response.code}",
+                    errorCode = "HTTP_ERROR",
                     details = "Status: ${response.code}\nResponse: ${responseBody.take(200)}"
                 )
             }
@@ -106,25 +108,55 @@ object SimpleSLLogin {
             Log.e(TAG, "Cannot resolve login server", e)
             return@withContext SimpleLoginResult.Failure(
                 message = "Cannot connect to login server. Check your internet connection.",
+                errorCode = "DNS_ERROR",
                 details = "DNS resolution failed: ${e.message}"
             )
         } catch (e: java.net.SocketTimeoutException) {
             Log.e(TAG, "Login request timed out", e)
             return@withContext SimpleLoginResult.Failure(
                 message = "Login request timed out. Server may be busy.",
+                errorCode = "TIMEOUT",
                 details = "Timeout after 30 seconds"
             )
         } catch (e: javax.net.ssl.SSLException) {
             Log.e(TAG, "SSL error during login", e)
             return@withContext SimpleLoginResult.Failure(
                 message = "Secure connection failed. Check your network settings.",
+                errorCode = "SSL_ERROR",
                 details = "SSL Error: ${e.message}"
+            )
+        } catch (e: java.io.EOFException) {
+            // EOFException occurs when the server closes connection unexpectedly
+            // This is usually temporary and happens due to:
+            // - Server load/busy conditions
+            // - Network interruptions during SSL handshake
+            // - Connection reset by load balancer
+            // - HTTP/2 protocol issues on some networks
+            Log.e(TAG, "EOF error during login - server closed connection", e)
+            return@withContext SimpleLoginResult.Failure(
+                message = "The server closed the connection unexpectedly. This is usually temporary - please try again.",
+                errorCode = "EOF_ERROR",
+                details = buildString {
+                    appendLine("EOFException: ${e.message ?: "Connection closed by server"}")
+                    appendLine()
+                    appendLine("This error typically occurs when:")
+                    appendLine("• The login server is experiencing high load")
+                    appendLine("• Network interruption during SSL handshake")
+                    appendLine("• Load balancer reset the connection")
+                    appendLine("• HTTP/2 protocol negotiation issue")
+                    appendLine()
+                    appendLine("Recommended actions:")
+                    appendLine("1. Wait a few seconds and try again")
+                    appendLine("2. Check status.secondlifegrid.net for server status")
+                    appendLine("3. If on mobile data, try switching to Wi-Fi")
+                    appendLine("4. If problem persists, the server may be experiencing issues")
+                }
             )
         } catch (e: Exception) {
             Log.e(TAG, "Login failed with exception", e)
             return@withContext SimpleLoginResult.Failure(
-                message = "Login failed: ${e.message}",
-                details = "${e.javaClass.simpleName}: ${e.message}"
+                message = "Login failed: ${e.message ?: "Unknown error occurred"}",
+                details = "${e.javaClass.simpleName}: ${e.message ?: "No error details available"}"
             )
         }
     }
@@ -203,6 +235,7 @@ object SimpleSLLogin {
                 Log.w(TAG, "Login failed: $message")
                 return SimpleLoginResult.Failure(
                     message = message,
+                    errorCode = "LOGIN_REJECTED",
                     details = "Server rejected login"
                 )
             }
@@ -227,6 +260,7 @@ object SimpleSLLogin {
                 Log.e(TAG, "Missing essential fields in login response")
                 return SimpleLoginResult.Failure(
                     message = "Invalid server response - missing session or agent ID",
+                    errorCode = "INVALID_RESPONSE",
                     details = "Response did not contain required fields"
                 )
             }
@@ -244,6 +278,7 @@ object SimpleSLLogin {
             Log.e(TAG, "Failed to parse login response", e)
             return SimpleLoginResult.Failure(
                 message = "Failed to parse server response",
+                errorCode = "PARSE_ERROR",
                 details = "Parsing error: ${e.message}"
             )
         }
