@@ -94,8 +94,13 @@ class SecondLifeProtocol(private val context: Context) {
         // Log network diagnostics before login
         networkingService.logNetworkDiagnostics()
         
-        // Create password hash
-        val passwordHash = "\$1\$${md5Hash(password)}"
+        // Create password hash - IMPORTANT: Must truncate to 16 chars like Lumiya does
+        // This is a Second Life protocol requirement
+        val truncatedPassword = password.trim().take(16)
+        val passwordHash = createPasswordHash(password)
+        
+        Log.d(TAG, "Login details - URI: $loginUri, firstName: $firstName, lastName: $lastName, " +
+            "passwordLen: ${password.length}, truncatedLen: ${truncatedPassword.length}, startLoc: $startLocation")
         
         // Build XMLRPC request
         val xmlRequest = buildLoginXml(
@@ -249,10 +254,28 @@ class SecondLifeProtocol(private val context: Context) {
             .replace("'", "&apos;")
     }
     
+    /**
+     * Create MD5 hash of input string
+     */
     private fun md5Hash(input: String): String {
         val md = MessageDigest.getInstance("MD5")
         val digest = md.digest(input.toByteArray())
         return digest.joinToString("") { "%02x".format(it) }
+    }
+    
+    /**
+     * Create Second Life password hash.
+     * 
+     * IMPORTANT: Second Life protocol requires passwords to be truncated to 16 characters
+     * before MD5 hashing. This matches the official Lumiya implementation and is required
+     * for compatibility with Second Life login servers.
+     * 
+     * @param password The plain text password (will be trimmed and truncated to 16 chars)
+     * @return Password hash in format "$1$<md5_hash>"
+     */
+    fun createPasswordHash(password: String): String {
+        val truncatedPassword = password.trim().take(16)
+        return "\$1\$${md5Hash(truncatedPassword)}"
     }
     
     /**
