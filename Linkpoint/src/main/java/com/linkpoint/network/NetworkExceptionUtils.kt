@@ -12,10 +12,13 @@ object NetworkExceptionUtils {
     
     /**
      * Extra delay in milliseconds before retrying after an EOF error.
-     * EOF errors often indicate server-side issues, so a brief delay
-     * gives the server time to recover.
+     * EOF errors often indicate server-side issues (e.g., load balancer resets,
+     * server overload), so a longer delay gives the server time to recover.
+     * 
+     * Increased from 300ms to 500ms based on mobile network testing where
+     * shorter delays led to repeated EOF errors.
      */
-    const val EOF_EXTRA_DELAY_MS = 300L
+    const val EOF_EXTRA_DELAY_MS = 500L
     
     /**
      * Message indicators that suggest an EOF-related error.

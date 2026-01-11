@@ -52,6 +52,10 @@ class SecondLifeProtocol(private val context: Context) {
         private const val MAX_CONNECT_TIMEOUT_SECONDS = 90L
         private const val MAX_READ_TIMEOUT_SECONDS = 180L
         private const val MAX_WRITE_TIMEOUT_SECONDS = 90L
+        private const val MAX_CALL_TIMEOUT_SECONDS = 300L  // 5 minutes max for entire call
+        
+        // Maximum retries at call level for EOF during body reading
+        private const val MAX_BODY_READ_RETRIES = 2
     }
     
     /**
@@ -161,7 +165,10 @@ class SecondLifeProtocol(private val context: Context) {
     }
     
     /**
-     * Create an OkHttp client with adaptive timeouts based on network conditions
+     * Create an OkHttp client with adaptive timeouts based on network conditions.
+     * 
+     * IMPORTANT: For login requests on mobile networks, we use minimal connection
+     * pooling to avoid stale connection issues that can cause EOF errors.
      */
     private fun createHttpClient(): OkHttpClient {
         // Get network info for adaptive timeouts
@@ -179,18 +186,25 @@ class SecondLifeProtocol(private val context: Context) {
             .coerceAtMost(MAX_READ_TIMEOUT_SECONDS)
         val writeTimeout = (BASE_WRITE_TIMEOUT_SECONDS * timeoutMultiplier).toLong()
             .coerceAtMost(MAX_WRITE_TIMEOUT_SECONDS)
+        // Overall call timeout - prevents indefinite waiting
+        val callTimeout = (connectTimeout + readTimeout + writeTimeout)
+            .coerceAtMost(MAX_CALL_TIMEOUT_SECONDS)
         
-        Log.d(TAG, "Adaptive timeouts - Connect: ${connectTimeout}s, Read: ${readTimeout}s, Write: ${writeTimeout}s")
+        Log.d(TAG, "Adaptive timeouts - Connect: ${connectTimeout}s, Read: ${readTimeout}s, " +
+            "Write: ${writeTimeout}s, Call: ${callTimeout}s")
         
         val builder = OkHttpClient.Builder()
             .connectTimeout(connectTimeout, TimeUnit.SECONDS)
             .readTimeout(readTimeout, TimeUnit.SECONDS)
             .writeTimeout(writeTimeout, TimeUnit.SECONDS)
+            .callTimeout(callTimeout, TimeUnit.SECONDS)
             .retryOnConnectionFailure(true)
+            // Minimal connection pooling for login - mobile networks can have stale
+            // connections that cause EOF errors. Short keep-alive reduces this risk.
             .connectionPool(ConnectionPool(
-                maxIdleConnections = 5,
-                keepAliveDuration = 5,
-                timeUnit = TimeUnit.MINUTES
+                maxIdleConnections = 1,
+                keepAliveDuration = 30,
+                timeUnit = TimeUnit.SECONDS
             ))
             // Force HTTP/1.1 for login requests - HTTP/2 can cause EOFException issues
             // with some XMLRPC servers including Second Life's login.cgi
@@ -208,6 +222,86 @@ class SecondLifeProtocol(private val context: Context) {
     
     // Lazy initialization of HTTP client
     private val httpClient: OkHttpClient by lazy { createHttpClient() }
+    
+    /**
+     * Creates a fresh HTTP client for retry scenarios.
+     * Used when the cached client's connection pool might have stale connections.
+     */
+    private fun createFreshHttpClient(): OkHttpClient {
+        Log.d(TAG, "Creating fresh HTTP client for retry")
+        return createHttpClient()
+    }
+    
+    /**
+     * Execute a request with retry logic for EOF errors during body reading.
+     * 
+     * The MobileNetworkRetryInterceptor handles EOF during connection/request,
+     * but EOF can also occur when reading the response body. This is common on
+     * mobile networks where connections can be interrupted at any point.
+     * 
+     * On EOF during body read:
+     * 1. Close the current response
+     * 2. Wait with exponential backoff
+     * 3. Create a fresh HTTP client (to avoid stale pooled connections)
+     * 4. Retry the entire request
+     * 
+     * @return Pair of Response and body string
+     * @throws IOException if all retries fail
+     */
+    private fun executeRequestWithBodyRetry(
+        request: Request,
+        loginUri: String
+    ): Pair<Response, String> {
+        var lastException: IOException? = null
+        var currentClient = httpClient
+        
+        repeat(MAX_BODY_READ_RETRIES + 1) { attempt ->
+            try {
+                if (attempt > 0) {
+                    // Exponential backoff: 1s, 2s
+                    val delayMs = 1000L * (1 shl (attempt - 1))
+                    Log.d(TAG, "Body read retry $attempt/$MAX_BODY_READ_RETRIES after ${delayMs}ms delay")
+                    Thread.sleep(delayMs)
+                    
+                    // Use fresh client for retries to avoid stale pooled connections
+                    currentClient = createFreshHttpClient()
+                }
+                
+                val response = currentClient.newCall(request).execute()
+                
+                // Try to read the body - this is where EOF can occur on mobile networks
+                val responseBody = try {
+                    response.body?.string() ?: ""
+                } catch (e: EOFException) {
+                    response.close()
+                    throw EOFIOException("EOF while reading response body", e)
+                } catch (e: IOException) {
+                    // Check if this is an EOF-related error
+                    if (NetworkExceptionUtils.isEOFException(e)) {
+                        response.close()
+                        throw EOFIOException("EOF while reading response body: ${e.message}", e)
+                    }
+                    throw e
+                }
+                
+                return response to responseBody
+                
+            } catch (e: IOException) {
+                if (NetworkExceptionUtils.isEOFException(e)) {
+                    Log.w(TAG, "EOF during request/body read (attempt ${attempt + 1}): ${e.message}")
+                    lastException = e
+                    // Continue to retry
+                } else {
+                    // Non-EOF errors should not be retried at this level
+                    throw e
+                }
+            }
+        }
+        
+        // All retries exhausted
+        Log.e(TAG, "All body read retries exhausted for $loginUri")
+        throw lastException ?: EOFIOException("Failed after ${MAX_BODY_READ_RETRIES + 1} attempts")
+    }
     
     /**
      * Perform login to the grid
@@ -245,8 +339,10 @@ class SecondLifeProtocol(private val context: Context) {
                 .header("User-Agent", "$VIEWER_NAME/$VIEWER_VERSION (Android)")
                 .build()
             
-            val response = httpClient.newCall(request).execute()
-            val responseBody = response.body?.string() ?: ""
+            // Execute request with call-level retry for EOF during body reading.
+            // The interceptor handles EOF during connection, but EOF can also occur
+            // when reading the response body on unstable mobile networks.
+            val (response, responseBody) = executeRequestWithBodyRetry(request, loginUri)
             
             Log.d(TAG, "Login response code: ${response.code}, body length: ${responseBody.length}")
             
