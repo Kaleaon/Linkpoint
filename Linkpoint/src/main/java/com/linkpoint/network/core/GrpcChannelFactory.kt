@@ -314,8 +314,11 @@ class GrpcChannelFactory(
         }
         builder.dispatcher(dispatcher)
         
-        // Force HTTP/1.1 for XMLRPC compatibility
-        builder.protocols(listOf(Protocol.HTTP_1_1))
+        // Enable both HTTP/2 and HTTP/1.1 for best performance
+        // HTTP/2 provides faster login through multiplexing and header compression
+        // Falls back to HTTP/1.1 if server doesn't support HTTP/2
+        // Note: Second Life servers support HTTP/2 - Lumiya uses it for instant login
+        builder.protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
         
         // Add interceptor for connection handling and tracing
         builder.addNetworkInterceptor { chain ->
@@ -393,7 +396,8 @@ class GrpcChannelFactory(
                 keepAliveDuration = 30,
                 timeUnit = TimeUnit.SECONDS
             ))
-            .protocols(listOf(Protocol.HTTP_1_1))
+            // Enable HTTP/2 for better performance on API calls
+            .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
             .build()
     }
     
