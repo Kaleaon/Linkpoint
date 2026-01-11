@@ -1,5 +1,17 @@
 # Second Life Open Source Portal Integration - Documentation Index
 
+> ⚠️ **Important Disclaimer:** Linkpoint is not provided or supported by Linden Lab, the makers of Second Life. This is an independent, community-developed third-party viewer.
+
+## Third-Party Viewer Policy Compliance
+
+Linkpoint complies with [Linden Lab's Third-Party Viewer Policy](https://secondlife.com/corporate/third-party-viewers).
+
+- 📄 **[Privacy Policy](PRIVACY_POLICY.md)** - Our data handling practices
+- ✅ **[TPV Compliance](THIRD_PARTY_VIEWER_POLICY_COMPLIANCE.md)** - Full compliance documentation
+- 💬 **Customer Support:** Community support via [GitHub Issues](https://github.com/Kaleaon/Linkpoint/issues) - no official support provided
+
+---
+
 ## Overview
 
 This documentation provides comprehensive guidance for using the Linkpoint mobile application with Second Life's open source ecosystem. Based on research from the Second Life Open Source Portal and integration with leading virtual world technologies, these guides enable developers and users to fully leverage the power of open source virtual world technologies on mobile platforms.

@@ -197,7 +197,18 @@
         <Preference
             android:key="about"
             android:title="About Linkpoint"
-            android:selectable="false"
+            android:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="privacy_policy"
+            android:title="Privacy Policy"
+            android:summary="View our privacy policy"
+            android:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="tpv_compliance"
+            android:title="Third-Party Viewer Compliance"
+            android:summary="View TPV Policy compliance information"
             android:iconSpaceReserved="false" />
 
     </PreferenceCategory>

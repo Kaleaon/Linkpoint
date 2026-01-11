@@ -1,6 +1,8 @@
 package com.linkpoint.network
 
+import android.os.Build
 import android.util.Log
+import com.linkpoint.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -19,10 +21,21 @@ import java.util.concurrent.TimeUnit
  * - No retry loops (one attempt per call)
  * - Fast and simple
  * 
+ * Complies with Third-Party Viewer Policy:
+ * - Section 1.b: Unique viewer identifier (Linkpoint channel with version)
+ * - Section 2.c: Does not spoof viewer identity
+ * - Section 2.e: Credentials only sent to Linden Lab servers
+ * 
  * Use this instead of the overcomplicated CoreNetworkingService.login()
  */
 object SimpleSLLogin {
     private const val TAG = "SimpleSLLogin"
+    
+    // Viewer identification - Required by TPV Policy Section 1.b
+    // Each version must have a unique identifier
+    private val VIEWER_CHANNEL = "Linkpoint"
+    private val VIEWER_VERSION = BuildConfig.VERSION_NAME
+    private val VIEWER_PLATFORM = "Android ${Build.VERSION.RELEASE}"
     
     // Simple result types
     sealed class SimpleLoginResult {
@@ -80,7 +93,7 @@ object SimpleSLLogin {
                 .url(loginUri)
                 .post(xmlRequest.toRequestBody("text/xml".toMediaType()))
                 .header("Content-Type", "text/xml")
-                .header("User-Agent", "Linkpoint/1.0.0 (Android)")
+                .header("User-Agent", "$VIEWER_CHANNEL/$VIEWER_VERSION ($VIEWER_PLATFORM)")
                 .build()
             
             Log.d(TAG, "Sending login request...")
@@ -197,10 +210,11 @@ object SimpleSLLogin {
             append("<member><name>passwd</name><value><string>$safePass</string></value></member>")
             append("<member><name>start</name><value><string>$safeStart</string></value></member>")
             
-            // Viewer info
-            append("<member><name>channel</name><value><string>Linkpoint</string></value></member>")
-            append("<member><name>version</name><value><string>Linkpoint 1.0</string></value></member>")
-            append("<member><name>platform</name><value><string>Android</string></value></member>")
+            // Viewer info - Required by TPV Policy Section 1.b
+            // Uses unique channel and version to identify this viewer
+            append("<member><name>channel</name><value><string>$VIEWER_CHANNEL</string></value></member>")
+            append("<member><name>version</name><value><string>$VIEWER_CHANNEL $VIEWER_VERSION</string></value></member>")
+            append("<member><name>platform</name><value><string>$VIEWER_PLATFORM</string></value></member>")
             append("<member><name>mac</name><value><string>$macAddress</string></value></member>")
             append("<member><name>id0</name><value><string>$id0</string></value></member>")
             
