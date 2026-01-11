@@ -13,6 +13,7 @@ import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import java.io.EOFException
 import java.io.IOException
 import java.lang.ref.WeakReference
 import java.net.SocketTimeoutException
@@ -90,6 +91,11 @@ class SecondLifeConnection(context: Context? = null) {
                 } catch (e: SocketTimeoutException) {
                     Log.w(TAG, "Timeout on attempt ${attempt + 1}/$maxRetries: ${e.message}")
                     lastException = e
+                } catch (e: EOFException) {
+                    // EOFException occurs when connection is closed before response completes
+                    // Common with HTTP/2 connection issues - always retry
+                    Log.w(TAG, "EOF/Connection closed on attempt ${attempt + 1}/$maxRetries: ${e.message}")
+                    lastException = IOException("Connection closed unexpectedly (EOF)", e)
                 } catch (e: UnknownHostException) {
                     Log.w(TAG, "DNS failure on attempt ${attempt + 1}/$maxRetries: ${e.message}")
                     lastException = e
@@ -184,7 +190,9 @@ class SecondLifeConnection(context: Context? = null) {
                 keepAliveDuration = 5,
                 timeUnit = TimeUnit.MINUTES
             ))
-            .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
+            // Force HTTP/1.1 for login requests - HTTP/2 can cause EOFException issues
+            // with some XMLRPC servers including Second Life's login.cgi
+            .protocols(listOf(Protocol.HTTP_1_1))
             .addInterceptor(MobileNetworkRetryInterceptor(
                 maxRetries = retryCount,
                 initialDelayMs = (500 * timeoutMultiplier).toLong()
@@ -297,6 +305,9 @@ class SecondLifeConnection(context: Context? = null) {
                     "Cannot resolve server address. Please check your internet connection and DNS settings." to "DNS_FAILED"
                 e is SSLException -> 
                     "SSL/TLS connection failed: ${e.message?.take(100) ?: "handshake error"}. This may be a network or certificate issue." to "SSL_ERROR"
+                // Handle EOFException - connection closed before response completed
+                e.cause is EOFException || e.message?.contains("EOF", ignoreCase = true) == true ->
+                    "The server closed the connection unexpectedly. This may be a temporary issue - please try again." to "CONNECTION_EOF"
                 e.message?.contains("timeout", ignoreCase = true) == true -> 
                     "Connection timed out. The server is not responding." to "TIMEOUT"
                 e.message?.contains("host", ignoreCase = true) == true -> 

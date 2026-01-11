@@ -357,6 +357,13 @@ class LoginActivity : AppCompatActivity() {
                 message = "Cannot connect to login server. The server may be down for maintenance.",
                 details = "ConnectException: ${e.message}\nURL: $loginUri\n\nCheck status.secondlifegrid.net for server status."
             )
+        } catch (e: java.io.EOFException) {
+            // EOF can happen if server closes connection during handshake
+            ServerTestResult(
+                success = false,
+                message = "Server closed connection unexpectedly. This is usually temporary - please try again.",
+                details = "EOFException: ${e.message}\nURL: $loginUri\n\nThis can happen when:\n• Server is busy\n• Network interruption\n• HTTP/2 connection issues"
+            )
         } catch (e: Exception) {
             ServerTestResult(
                 success = false,
@@ -404,6 +411,7 @@ class LoginActivity : AppCompatActivity() {
         if (failure.errorCode?.contains("NETWORK", ignoreCase = true) == true ||
             failure.errorCode?.contains("TIMEOUT", ignoreCase = true) == true ||
             failure.errorCode?.contains("CONNECTION", ignoreCase = true) == true ||
+            failure.errorCode?.contains("EOF", ignoreCase = true) == true ||
             failure.errorCode?.contains("DNS", ignoreCase = true) == true ||
             failure.errorCode?.contains("SSL", ignoreCase = true) == true) {
             builder.setNegativeButton("Retry") { _, _ ->
