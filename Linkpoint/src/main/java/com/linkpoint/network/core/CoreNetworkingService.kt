@@ -424,9 +424,7 @@ class CoreNetworkingService(private val context: Context) {
             .post(xmlRequest.toRequestBody("text/xml".toMediaType()))
             .header("Content-Type", "text/xml")
             .header("Accept", "text/xml, application/xml")
-            .header("Accept-Encoding", "identity")  // Prevent chunked encoding EOF issues
             .header("User-Agent", "Linkpoint/1.0.0 (Android)")
-            .header("Connection", "close")
             .build()
         
         Log.d(TAG, "Executing login request to: $loginUri")

@@ -332,9 +332,9 @@ class GrpcChannelFactory(
             val originalRequest = chain.request()
             val requestBuilder = originalRequest.newBuilder()
             
-            // For login requests, add headers to avoid stale connections and chunked encoding issues
-            // The Accept-Encoding: identity header prevents chunked transfer encoding EOF errors
-            // which occur in ChunkedSource.readChunkSize() when server closes connection early
+            // For login requests, add headers to avoid stale connections and mitigate chunked encoding issues
+            // The Accept-Encoding: identity header disables response compression, which can help avoid
+            // EOF errors observed in ChunkedSource.readChunkSize() when a server closes the connection early
             if (options.policyClass == PolicyClass.LOGIN) {
                 requestBuilder.header("Connection", "close")
                 requestBuilder.header("Accept-Encoding", "identity")
