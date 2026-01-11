@@ -144,7 +144,7 @@ class SecondLifeProtocol(private val context: Context) {
                     
                     return@withContext LoginResult.Failure(
                         message = simpleResult.message,
-                        errorCode = "LOGIN_FAILED",
+                        errorCode = simpleResult.errorCode,
                         technicalDetails = simpleResult.details
                     )
                 }
