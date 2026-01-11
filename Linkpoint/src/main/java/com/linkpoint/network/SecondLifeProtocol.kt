@@ -160,45 +160,84 @@ class SecondLifeProtocol(private val context: Context) {
         val safePassword = escapeXml(passwordHash)
         val safeStart = escapeXml(startLocation)
         
-        return """
-<?xml version="1.0"?>
-<methodCall>
-    <methodName>login_to_simulator</methodName>
-    <params>
-        <param>
-            <value>
-                <struct>
-                    <member><name>first</name><value><string>$safeFirstName</string></value></member>
-                    <member><name>last</name><value><string>$safeLastName</string></value></member>
-                    <member><name>passwd</name><value><string>$safePassword</string></value></member>
-                    <member><name>start</name><value><string>$safeStart</string></value></member>
-                    <member><name>channel</name><value><string>$VIEWER_NAME</string></value></member>
-                    <member><name>version</name><value><string>$VIEWER_NAME $VIEWER_VERSION</string></value></member>
-                    <member><name>platform</name><value><string>Android</string></value></member>
-                    <member><name>platform_version</name><value><string>${android.os.Build.VERSION.RELEASE}</string></value></member>
-                    <member><name>mac</name><value><string>00:00:00:00:00:00</string></value></member>
-                    <member><name>id0</name><value><string>00000000-0000-0000-0000-000000000000</string></value></member>
-                    <member><name>agree_to_tos</name><value><boolean>1</boolean></value></member>
-                    <member><name>read_critical</name><value><boolean>1</boolean></value></member>
-                    <member>
-                        <name>options</name>
-                        <value>
-                            <array>
-                                <data>
-                                    <value><string>inventory-root</string></value>
-                                    <value><string>inventory-skeleton</string></value>
-                                    <value><string>buddy-list</string></value>
-                                    <value><string>initial-outfit</string></value>
-                                </data>
-                            </array>
-                        </value>
-                    </member>
-                </struct>
-            </value>
-        </param>
-    </params>
-</methodCall>
-        """.trimIndent()
+        // Generate viewer_digest - required by Second Life login server
+        val viewerDigest = UUID.randomUUID().toString()
+        
+        // Generate unique MAC and ID0 for this device session
+        val macAddress = generateMacAddress()
+        val id0 = UUID.randomUUID().toString()
+        
+        // Build XML-RPC request with minimal whitespace for maximum compatibility
+        return buildString {
+            append("<?xml version=\"1.0\"?>")
+            append("<methodCall>")
+            append("<methodName>login_to_simulator</methodName>")
+            append("<params>")
+            append("<param>")
+            append("<value><struct>")
+            
+            // Core login fields
+            append("<member><name>first</name><value><string>$safeFirstName</string></value></member>")
+            append("<member><name>last</name><value><string>$safeLastName</string></value></member>")
+            append("<member><name>passwd</name><value><string>$safePassword</string></value></member>")
+            append("<member><name>start</name><value><string>$safeStart</string></value></member>")
+            
+            // Viewer identification
+            append("<member><name>channel</name><value><string>$VIEWER_NAME</string></value></member>")
+            append("<member><name>version</name><value><string>$VIEWER_NAME $VIEWER_VERSION</string></value></member>")
+            append("<member><name>platform</name><value><string>Android</string></value></member>")
+            append("<member><name>platform_version</name><value><string>${android.os.Build.VERSION.RELEASE}</string></value></member>")
+            
+            // Device identification (required by SL login server)
+            append("<member><name>mac</name><value><string>$macAddress</string></value></member>")
+            append("<member><name>id0</name><value><string>$id0</string></value></member>")
+            append("<member><name>viewer_digest</name><value><string>$viewerDigest</string></value></member>")
+            
+            // Agreements
+            append("<member><name>agree_to_tos</name><value><boolean>1</boolean></value></member>")
+            append("<member><name>read_critical</name><value><boolean>1</boolean></value></member>")
+            
+            // Options array - comprehensive list for full functionality
+            append("<member><name>options</name><value><array><data>")
+            append("<value><string>inventory-root</string></value>")
+            append("<value><string>inventory-skeleton</string></value>")
+            append("<value><string>inventory-lib-root</string></value>")
+            append("<value><string>inventory-lib-owner</string></value>")
+            append("<value><string>inventory-skel-lib</string></value>")
+            append("<value><string>initial-outfit</string></value>")
+            append("<value><string>gestures</string></value>")
+            append("<value><string>display_names</string></value>")
+            append("<value><string>event_categories</string></value>")
+            append("<value><string>event_notifications</string></value>")
+            append("<value><string>classified_categories</string></value>")
+            append("<value><string>adult_compliant</string></value>")
+            append("<value><string>buddy-list</string></value>")
+            append("<value><string>newuser-config</string></value>")
+            append("<value><string>ui-config</string></value>")
+            append("<value><string>advanced-mode</string></value>")
+            append("<value><string>max-agent-groups</string></value>")
+            append("<value><string>map-server-url</string></value>")
+            append("<value><string>voice-config</string></value>")
+            append("<value><string>tutorial_setting</string></value>")
+            append("<value><string>login-flags</string></value>")
+            append("<value><string>global-textures</string></value>")
+            append("</data></array></value></member>")
+            
+            append("</struct></value>")
+            append("</param>")
+            append("</params>")
+            append("</methodCall>")
+        }
+    }
+    
+    /**
+     * Generate a pseudo-MAC address for device identification
+     */
+    private fun generateMacAddress(): String {
+        val random = java.util.Random()
+        return (0..5).joinToString(":") { 
+            String.format("%02X", random.nextInt(256)) 
+        }
     }
     
     private fun escapeXml(input: String): String {
