@@ -91,15 +91,17 @@ object SimpleSLLogin {
         
         var lastError: Exception? = null
         var attempt = 0
+        val maxAttempts = validatedRetries + 1  // First attempt + retries
         
-        while (attempt <= validatedRetries) {
+        while (attempt < maxAttempts) {
             attempt++
             
             if (attempt > 1) {
                 // Calculate exponential backoff delay for retries
-                // Retry 1: 500ms, Retry 2: 1000ms, Retry 3: 2000ms
-                val delayMs = NetworkExceptionUtils.EOF_EXTRA_DELAY_MS * (1 shl (attempt - 2))
-                Log.d(TAG, "Retry attempt $attempt/$validatedRetries after ${delayMs}ms delay (EOF error recovery)")
+                // Retry 1 (2nd attempt): 500ms, Retry 2 (3rd attempt): 1000ms, Retry 3 (4th attempt): 2000ms
+                val retryNumber = attempt - 1
+                val delayMs = NetworkExceptionUtils.EOF_EXTRA_DELAY_MS * (1 shl (retryNumber - 1))
+                Log.d(TAG, "Retry $retryNumber/$validatedRetries after ${delayMs}ms delay (EOF error recovery)")
                 kotlinx.coroutines.delay(delayMs)
             }
             
@@ -158,9 +160,9 @@ object SimpleSLLogin {
                 )
             } catch (e: java.net.SocketTimeoutException) {
                 // Timeout errors can be retried
-                Log.e(TAG, "Login request timed out (attempt $attempt/$validatedRetries)", e)
+                Log.e(TAG, "Login request timed out (attempt $attempt/$maxAttempts)", e)
                 lastError = e
-                if (attempt > validatedRetries) {
+                if (attempt >= maxAttempts) {
                     return@withContext createRetryableErrorResult("timeout", e, attempt, validatedRetries)
                 }
                 // Continue to next retry attempt
@@ -168,9 +170,9 @@ object SimpleSLLogin {
             } catch (e: javax.net.ssl.SSLException) {
                 // Check if this is an EOF-related SSL error (e.g., connection closed during handshake)
                 if (NetworkExceptionUtils.isEOFException(e)) {
-                    Log.w(TAG, "SSL EOF error during login (attempt $attempt/$validatedRetries) - will retry", e)
+                    Log.w(TAG, "SSL EOF error during login (attempt $attempt/$maxAttempts) - will retry", e)
                     lastError = e
-                    if (attempt > validatedRetries) {
+                    if (attempt >= maxAttempts) {
                         return@withContext createRetryableErrorResult("ssl_eof", e, attempt, validatedRetries)
                     }
                     // Continue to next retry attempt
@@ -187,9 +189,9 @@ object SimpleSLLogin {
             } catch (e: java.io.EOFException) {
                 // EOFException occurs when the server closes connection unexpectedly
                 // This is usually temporary and should be retried
-                Log.w(TAG, "EOF error during login (attempt $attempt/$validatedRetries) - will retry", e)
+                Log.w(TAG, "EOF error during login (attempt $attempt/$maxAttempts) - will retry", e)
                 lastError = e
-                if (attempt > validatedRetries) {
+                if (attempt >= maxAttempts) {
                     return@withContext createRetryableErrorResult("eof", e, attempt, validatedRetries)
                 }
                 // Continue to next retry attempt
@@ -197,9 +199,9 @@ object SimpleSLLogin {
             } catch (e: java.net.SocketException) {
                 // Check if this is a connection reset (EOF-related)
                 if (NetworkExceptionUtils.isEOFException(e) || NetworkExceptionUtils.isConnectionResetException(e)) {
-                    Log.w(TAG, "Connection reset error during login (attempt $attempt/$validatedRetries) - will retry", e)
+                    Log.w(TAG, "Connection reset error during login (attempt $attempt/$maxAttempts) - will retry", e)
                     lastError = e
-                    if (attempt > validatedRetries) {
+                    if (attempt >= maxAttempts) {
                         return@withContext createRetryableErrorResult("reset", e, attempt, validatedRetries)
                     }
                     // Continue to next retry attempt
@@ -216,9 +218,9 @@ object SimpleSLLogin {
             } catch (e: Exception) {
                 // Check if the wrapped exception is EOF-related
                 if (NetworkExceptionUtils.isEOFException(e) || NetworkExceptionUtils.isTransientError(e)) {
-                    Log.w(TAG, "Transient error during login (attempt $attempt/$validatedRetries) - will retry", e)
+                    Log.w(TAG, "Transient error during login (attempt $attempt/$maxAttempts) - will retry", e)
                     lastError = e
-                    if (attempt > validatedRetries) {
+                    if (attempt >= maxAttempts) {
                         return@withContext createRetryableErrorResult("transient", e, attempt, validatedRetries)
                     }
                     // Continue to next retry attempt
