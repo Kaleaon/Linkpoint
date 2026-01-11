@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.net.ssl.SSLException
 import com.linkpoint.network.EOFIOException
 import com.linkpoint.network.NetworkExceptionUtils
+import com.linkpoint.network.NetworkLogger
 
 /**
  * Core networking service with comprehensive connection management.
@@ -247,12 +248,23 @@ class CoreNetworkingService(private val context: Context) {
     ): LoginResult = withContext(Dispatchers.IO) {
         Log.d(TAG, "Login request to: $loginUri")
         
+        // Log authentication attempt
+        NetworkLogger.logAuth("Login Attempt", mapOf(
+            "loginUri" to loginUri,
+            "requestLength" to "${xmlRequest.length} bytes"
+        ))
+        
         // Double-check network connectivity before attempting login
         // The network callback may not have updated yet, so do a fresh check
         val networkConnected = validateNetworkConnection()
         
         if (!networkConnected) {
             Log.w(TAG, "Network check failed - no connectivity detected")
+            NetworkLogger.log(
+                NetworkLogger.Level.ERROR,
+                NetworkLogger.Category.CONNECTION,
+                "Login aborted: No network connectivity detected"
+            )
             return@withContext LoginResult.Failure(
                 message = "No network connection available. Please check your internet connection.",
                 errorCode = "NO_NETWORK",
@@ -296,8 +308,15 @@ class CoreNetworkingService(private val context: Context) {
                         // request["uri"] = mAuthResponse["responses"]["next_url"]
                         redirectCount++
                         
+                        NetworkLogger.logRedirect(currentUri, result.nextUrl, redirectCount)
+                        
                         if (redirectCount > maxRedirects) {
                             Log.e(TAG, "Too many login redirects ($redirectCount)")
+                            NetworkLogger.log(
+                                NetworkLogger.Level.ERROR,
+                                NetworkLogger.Category.REDIRECT,
+                                "Too many redirects: $redirectCount > $maxRedirects, last URL: ${result.nextUrl}"
+                            )
                             return@withContext LoginResult.Failure(
                                 message = "Too many login redirects",
                                 errorCode = "REDIRECT_LOOP",
@@ -322,6 +341,10 @@ class CoreNetworkingService(private val context: Context) {
                 
             } catch (e: Exception) {
                 Log.e(TAG, "Login error: ${e.javaClass.simpleName}: ${e.message}")
+                NetworkLogger.logError(currentUri, 
+                    if (e is IOException) e else IOException("Login failed: ${e.message}", e),
+                    loginRetryPolicy.attemptCount
+                )
                 qualityManager.recordRequestResult(false)
                 
                 val isRecoverable = isRecoverableError(e)
@@ -330,6 +353,12 @@ class CoreNetworkingService(private val context: Context) {
                 when (decision) {
                     is RetryPolicy.RetryDecision.Retry -> {
                         Log.d(TAG, "Login: Retrying in ${decision.delayMs}ms (attempt ${decision.attempt})")
+                        NetworkLogger.logRetry(
+                            currentUri,
+                            decision.attempt,
+                            decision.delayMs,
+                            "Login error: ${e.javaClass.simpleName}"
+                        )
                         emitEvent(ConnectionEvent.Reconnecting(decision.attempt, decision.delayMs))
                         delay(decision.delayMs)
                         
@@ -400,8 +429,14 @@ class CoreNetworkingService(private val context: Context) {
             .build()
         
         Log.d(TAG, "Executing login request to: $loginUri")
+        NetworkLogger.logRequest(request, attempt = 0)
         
+        val startTime = System.currentTimeMillis()
         val (response, responseBody) = executeWithBodyRetry(client, request, options)
+        val duration = System.currentTimeMillis() - startTime
+        
+        NetworkLogger.logResponse(response, duration)
+        NetworkLogger.logResponseBody(loginUri, responseBody)
         
         if (!response.isSuccessful) {
             val retryAfter = parseRetryAfterHeader(response)
@@ -536,13 +571,27 @@ class CoreNetworkingService(private val context: Context) {
                     
                     Log.d(TAG, "Request retry $attempt/${options.retries} after ${totalDelayMs}ms delay " +
                         "(base: ${delayMs}ms, retryAfter: ${lastRetryAfter ?: "none"})")
+                    NetworkLogger.logRetry(
+                        request.url.toString(),
+                        attempt,
+                        totalDelayMs,
+                        lastException?.message ?: "Unknown error"
+                    )
                     Thread.sleep(totalDelayMs)
                     
                     // Create fresh client to avoid reusing potentially stale connections
                     currentClient = channelFactory.createHttpClient(options)
                 }
                 
+                // Log the request
+                NetworkLogger.logRequest(request, attempt)
+                val requestStartTime = System.currentTimeMillis()
+                
                 response = currentClient.newCall(request).execute()
+                val requestDuration = System.currentTimeMillis() - requestStartTime
+                
+                // Log the response
+                NetworkLogger.logResponse(response, requestDuration)
                 
                 // Check for retryable HTTP errors with Retry-After
                 if (response.code in RETRYABLE_HTTP_CODES) {
@@ -588,12 +637,19 @@ class CoreNetworkingService(private val context: Context) {
             } catch (e: RetryableHttpException) {
                 // HTTP error that should be retried
                 Log.w(TAG, "Retryable HTTP ${e.code} (attempt ${attempt + 1}/${options.retries + 1})")
+                NetworkLogger.log(
+                    NetworkLogger.Level.WARN,
+                    NetworkLogger.Category.HTTP_ERROR,
+                    "Retryable HTTP ${e.code}: ${e.message}"
+                )
                 lastRetryAfter = e.retryAfter
                 lastException = IOException("HTTP ${e.code}: ${e.message}")
                 // Continue to retry
             } catch (e: IOException) {
                 // Ensure response is closed on any error
                 response?.close()
+                
+                NetworkLogger.logError(request.url.toString(), e, attempt + 1)
                 
                 if (NetworkExceptionUtils.isEOFException(e) || e is EOFIOException) {
                     Log.w(TAG, "EOF during request/body read (attempt ${attempt + 1}/${options.retries + 1}): ${e.message}")

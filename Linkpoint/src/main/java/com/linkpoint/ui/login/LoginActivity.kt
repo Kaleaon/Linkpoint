@@ -1,7 +1,9 @@
 package com.linkpoint.ui.login
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
@@ -15,12 +17,14 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.core.GridInfo
 import com.linkpoint.network.LoginResult
 import com.linkpoint.network.NetworkDiagnostics
+import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.SSLHelper
 import com.linkpoint.ui.tos.TosActivity
 import com.linkpoint.ui.world.WorldViewActivity
@@ -53,6 +57,7 @@ class LoginActivity : AppCompatActivity() {
         private const val KEY_SAVE_PASSWORD = "save_password"
         private const val KEY_ENCRYPTED_PASSWORD = "encrypted_password"
         private const val KEY_PASSWORD_IV = "password_iv"
+        private const val KEY_STORAGE_PERMISSION_REQUESTED = "storage_permission_requested"
         
         // Android Keystore alias for password encryption
         private const val KEYSTORE_ALIAS = "LinkpointLoginKey"
@@ -83,11 +88,41 @@ class LoginActivity : AppCompatActivity() {
         }
     }
     
+    // Storage permission launcher for log file saving
+    private val storagePermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions.values.all { it }
+        if (granted) {
+            Log.i(TAG, "Storage permissions granted - logs will be saved to Downloads/Lumiya Logs/")
+            Toast.makeText(
+                this,
+                "Network logs will be saved to Downloads/Lumiya Logs/",
+                Toast.LENGTH_LONG
+            ).show()
+        } else {
+            Log.w(TAG, "Storage permissions denied - logs will only be in logcat")
+            Toast.makeText(
+                this,
+                "Log saving disabled - grant storage permission in settings to enable",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+        
+        // Mark that we've requested permission
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+            .putBoolean(KEY_STORAGE_PERMISSION_REQUESTED, true)
+            .apply()
+    }
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         
         initViews()
+        
+        // Request storage permissions for log file saving (only once)
+        requestStoragePermissionsIfNeeded()
         
         // Check ToS acceptance first (like Lumiya does)
         if (!TosActivity.hasAcceptedTos(this)) {
@@ -100,6 +135,67 @@ class LoginActivity : AppCompatActivity() {
         
         setupGridSpinner()
         setupListeners()
+    }
+    
+    /**
+     * Request storage permissions for log file saving.
+     * Only requests once per install to avoid annoying users.
+     */
+    private fun requestStoragePermissionsIfNeeded() {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        if (prefs.getBoolean(KEY_STORAGE_PERMISSION_REQUESTED, false)) {
+            return // Already requested
+        }
+        
+        // For Android 13+ (API 33+), we don't need WRITE_EXTERNAL_STORAGE
+        // We use app-specific directory which doesn't require permissions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Log.i(TAG, "Android 13+: Using app-specific directory, no permissions needed")
+            Toast.makeText(
+                this,
+                "Network logs will be saved to Downloads/Lumiya Logs/",
+                Toast.LENGTH_SHORT
+            ).show()
+            prefs.edit().putBoolean(KEY_STORAGE_PERMISSION_REQUESTED, true).apply()
+            return
+        }
+        
+        // For Android 10-12 (API 29-32)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // No permission needed for app-specific directories
+            Log.i(TAG, "Android 10-12: Using app-specific directory, no permissions needed")
+            Toast.makeText(
+                this,
+                "Network logs will be saved to Downloads/Lumiya Logs/",
+                Toast.LENGTH_SHORT
+            ).show()
+            prefs.edit().putBoolean(KEY_STORAGE_PERMISSION_REQUESTED, true).apply()
+            return
+        }
+        
+        // For Android 9 and below, request WRITE_EXTERNAL_STORAGE
+        val permissions = if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            arrayOf(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+        } else {
+            emptyArray()
+        }
+        
+        if (permissions.isNotEmpty()) {
+            val needsRequest = permissions.any {
+                ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+            }
+            
+            if (needsRequest) {
+                Log.i(TAG, "Requesting storage permissions for log file saving")
+                storagePermissionLauncher.launch(permissions)
+            } else {
+                Log.i(TAG, "Storage permissions already granted")
+                prefs.edit().putBoolean(KEY_STORAGE_PERMISSION_REQUESTED, true).apply()
+            }
+        }
     }
     
     private fun initViews() {
