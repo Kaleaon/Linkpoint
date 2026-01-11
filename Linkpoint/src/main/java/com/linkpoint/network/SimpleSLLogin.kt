@@ -189,10 +189,17 @@ object SimpleSLLogin {
             
             // Build request with Connection: close to avoid stale connection issues
             // This prevents EOF errors from reusing connections that the server has closed
+            //
+            // Critical headers to prevent chunked encoding EOF issues:
+            // - Connection: close - Prevents connection reuse
+            // - Accept-Encoding: identity - Prevents chunked transfer encoding from compression
+            //   This is key because the EOF errors occur in ChunkedSource.readChunkSize()
+            //   when the server uses chunked encoding and closes the connection early
             val request = Request.Builder()
                 .url(loginUri)
                 .post(xmlRequest.toRequestBody("text/xml".toMediaType()))
                 .header("Content-Type", "text/xml")
+                .header("Accept-Encoding", "identity")  // Prevent chunked encoding issues
                 .header("User-Agent", "$VIEWER_CHANNEL/$VIEWER_VERSION ($VIEWER_PLATFORM)")
                 .header("Connection", "close")  // Prevent connection reuse issues
                 .build()
@@ -202,7 +209,29 @@ object SimpleSLLogin {
             
             // Execute request
             val response = client.newCall(request).execute()
-            val responseBody = response.body?.string() ?: ""
+            
+            // Read response body with careful handling of EOF errors
+            // EOF can occur during chunked encoding if server closes connection early
+            val responseBody: String
+            try {
+                responseBody = response.body?.string() ?: ""
+            } catch (e: java.io.EOFException) {
+                // EOF during body reading - wrap and rethrow to be caught by outer handler
+                // This enables the retry logic for chunked encoding EOF errors
+                Log.w(TAG, "EOF while reading response body, will retry")
+                response.close()
+                throw e
+            } catch (e: java.io.IOException) {
+                // Check if this is an EOF-related IO error
+                if (NetworkExceptionUtils.isEOFException(e)) {
+                    Log.w(TAG, "IO error with EOF characteristics while reading body, will retry")
+                    response.close()
+                    throw java.io.EOFException("EOF during response body read: ${e.message}")
+                }
+                response.close()
+                throw e
+            }
+            
             val duration = System.currentTimeMillis() - startTime
             
             Log.d(TAG, "Response received in ${duration}ms, code: ${response.code}")
