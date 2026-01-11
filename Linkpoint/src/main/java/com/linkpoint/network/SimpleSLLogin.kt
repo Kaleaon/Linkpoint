@@ -210,53 +210,44 @@ object SimpleSLLogin {
             // Execute request
             val response = client.newCall(request).execute()
             
-            // Read response body with careful handling of EOF errors
-            // EOF can occur during chunked encoding if server closes connection early
-            // Use try-finally to ensure response is always closed properly
-            val responseBody: String
-            var exceptionToRethrow: Exception? = null
+            // Use try-finally to ensure response is always closed properly in all paths
             try {
-                responseBody = response.body?.string() ?: ""
-            } catch (e: EOFException) {
-                // EOF during body reading - will be caught by outer handler for retry
-                Log.w(TAG, "EOF while reading response body, will retry")
-                exceptionToRethrow = e
-                responseBody = ""
-            } catch (e: IOException) {
-                // Check if this is an EOF-related IO error
-                if (NetworkExceptionUtils.isEOFException(e)) {
-                    Log.w(TAG, "IO error with EOF characteristics while reading body, will retry")
-                    exceptionToRethrow = EOFException("EOF during response body read: ${e.message}")
-                } else {
-                    exceptionToRethrow = e
+                // Read response body with careful handling of EOF errors
+                // EOF can occur during chunked encoding if server closes connection early
+                val responseBody: String
+                try {
+                    responseBody = response.body?.string() ?: ""
+                } catch (e: EOFException) {
+                    // EOF during body reading - will be caught by outer handler for retry
+                    Log.w(TAG, "EOF while reading response body, will retry")
+                    throw e
+                } catch (e: IOException) {
+                    // Check if this is an EOF-related IO error
+                    if (NetworkExceptionUtils.isEOFException(e)) {
+                        Log.w(TAG, "IO error with EOF characteristics while reading body, will retry")
+                        throw EOFException("EOF during response body read: ${e.message}")
+                    }
+                    throw e
                 }
-                responseBody = ""
-            } finally {
-                // Always close response when there's an error or when we're done reading
-                if (exceptionToRethrow != null) {
-                    response.close()
+            
+                val duration = System.currentTimeMillis() - startTime
+            
+                Log.d(TAG, "Response received in ${duration}ms, code: ${response.code}")
+            
+                if (!response.isSuccessful) {
+                    return@withContext SimpleLoginResult.Failure(
+                        message = "Login server returned error: HTTP ${response.code}",
+                        errorCode = "HTTP_ERROR",
+                        details = "Status: ${response.code}\nResponse: ${responseBody.take(200)}"
+                    )
                 }
-            }
-            
-            // Rethrow any exception after response is closed
-            if (exceptionToRethrow != null) {
-                throw exceptionToRethrow
-            }
-            
-            val duration = System.currentTimeMillis() - startTime
-            
-            Log.d(TAG, "Response received in ${duration}ms, code: ${response.code}")
-            
-            if (!response.isSuccessful) {
-                return@withContext SimpleLoginResult.Failure(
-                    message = "Login server returned error: HTTP ${response.code}",
-                    errorCode = "HTTP_ERROR",
-                    details = "Status: ${response.code}\nResponse: ${responseBody.take(200)}"
-                )
-            }
             
                 // Parse response (simple XML parsing like Lumiya)
                 return@withContext parseLoginResponse(responseBody)
+            } finally {
+                // Always close response to avoid resource leaks
+                response.close()
+            }
                 
                 } catch (e: java.net.UnknownHostException) {
                 // DNS errors are not retryable - fail immediately
