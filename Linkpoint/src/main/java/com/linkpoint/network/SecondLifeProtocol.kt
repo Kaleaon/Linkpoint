@@ -16,6 +16,7 @@ import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import java.io.EOFException
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -81,6 +82,11 @@ class SecondLifeProtocol(private val context: Context) {
                 } catch (e: SocketTimeoutException) {
                     Log.w(TAG, "Timeout on attempt ${attempt + 1}/$maxRetries: ${e.message}")
                     lastException = e
+                } catch (e: EOFException) {
+                    // EOFException occurs when connection is closed before response completes
+                    // Common with HTTP/2 connection issues - always retry
+                    Log.w(TAG, "EOF/Connection closed on attempt ${attempt + 1}/$maxRetries: ${e.message}")
+                    lastException = IOException("Connection closed unexpectedly (EOF)", e)
                 } catch (e: UnknownHostException) {
                     Log.w(TAG, "DNS failure on attempt ${attempt + 1}/$maxRetries: ${e.message}")
                     lastException = e
@@ -181,7 +187,9 @@ class SecondLifeProtocol(private val context: Context) {
                 keepAliveDuration = 5,
                 timeUnit = TimeUnit.MINUTES
             ))
-            .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
+            // Force HTTP/1.1 for login requests - HTTP/2 can cause EOFException issues
+            // with some XMLRPC servers including Second Life's login.cgi
+            .protocols(listOf(Protocol.HTTP_1_1))
             .addInterceptor(MobileNetworkRetryInterceptor(
                 maxRetries = retryCount,
                 initialDelayMs = (500 * timeoutMultiplier).toLong()
@@ -374,6 +382,11 @@ class SecondLifeProtocol(private val context: Context) {
                         "SSL/TLS error: ${e.message?.take(80) ?: "Connection failed"}. Please try again."
                 }
                 message to "SSL_ERROR"
+            }
+            
+            // EOFException - connection closed before response completed
+            e.cause is EOFException || e.message?.contains("EOF", ignoreCase = true) == true -> {
+                "The server closed the connection unexpectedly. This is often a temporary issue. Please try again." to "CONNECTION_EOF"
             }
             
             // Connection reset/closed errors
