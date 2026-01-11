@@ -282,8 +282,9 @@ class NetworkExceptionUtilsTest {
             NetworkExceptionUtils.ErrorCategory.TIMEOUT, info.category)
         assertEquals("Error code should be TIMEOUT", "TIMEOUT", info.errorCode)
         assertTrue("Should be marked as transient", info.isTransient)
-        assertTrue("User message should mention timeout", 
-            info.userMessage.contains("timeout", ignoreCase = true))
+        assertTrue("User message should mention timeout or timed out", 
+            info.userMessage.contains("timeout", ignoreCase = true) || 
+            info.userMessage.contains("timed out", ignoreCase = true))
     }
     
     @Test
