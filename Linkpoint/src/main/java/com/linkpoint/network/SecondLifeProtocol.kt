@@ -8,6 +8,7 @@ import com.linkpoint.core.RegionInfo
 import com.linkpoint.LinkpointApp
 import com.linkpoint.network.core.CoreNetworkingService
 import com.linkpoint.network.core.NetworkStateManager
+import com.linkpoint.network.NetworkLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -90,12 +91,28 @@ class SecondLifeProtocol(private val context: Context) {
         app.sessionManager.setConnectionState(ConnectionState.CONNECTING)
         
         Log.d(TAG, "Attempting login for $firstName $lastName")
+        NetworkLogger.logProtocol(
+            "Second Life Login",
+            "Grid: $loginUri, User: $firstName $lastName, Start: $startLocation"
+        )
         
         // Log network diagnostics before login
         networkingService.logNetworkDiagnostics()
         
-        // Create password hash
-        val passwordHash = "\$1\$${md5Hash(password)}"
+        // Create password hash - IMPORTANT: Must truncate to 16 chars like Lumiya does
+        // This is a Second Life protocol requirement
+        val truncatedPassword = password.trim().take(16)
+        val passwordHash = createPasswordHash(password)
+        
+        Log.d(TAG, "Login details - URI: $loginUri, firstName: $firstName, lastName: $lastName, " +
+            "passwordLen: ${password.length}, truncatedLen: ${truncatedPassword.length}, startLoc: $startLocation")
+        
+        // Log detailed authentication parameters (without sensitive data)
+        NetworkLogger.logAuth("Password Hash Generation", mapOf(
+            "originalLength" to password.length.toString(),
+            "truncatedLength" to truncatedPassword.length.toString(),
+            "hashFormat" to "\$1\$MD5"
+        ))
         
         // Build XMLRPC request
         val xmlRequest = buildLoginXml(
@@ -116,6 +133,13 @@ class SecondLifeProtocol(private val context: Context) {
                     UUID.randomUUID() 
                 }
                 
+                NetworkLogger.logAuth("Login Success", mapOf(
+                    "agentId" to result.agentId,
+                    "sessionId" to "***REDACTED***",
+                    "simIp" to result.simIp,
+                    "simPort" to result.simPort.toString()
+                ))
+                
                 val regionInfo = RegionInfo(
                     name = "Unknown",
                     handle = 0,
@@ -135,11 +159,17 @@ class SecondLifeProtocol(private val context: Context) {
                 )
                 
                 Log.i(TAG, "Login successful!")
+                NetworkLogger.logProtocol("Login Complete", "Successfully connected to ${result.simIp}:${result.simPort}")
                 LoginResult.Success(agentId, result.sessionId)
             }
             is CoreNetworkingService.LoginResult.Failure -> {
                 app.sessionManager.setConnectionState(ConnectionState.ERROR)
                 Log.w(TAG, "Login failed: ${result.message} [${result.errorCode}]")
+                NetworkLogger.log(
+                    NetworkLogger.Level.ERROR,
+                    NetworkLogger.Category.AUTHENTICATION,
+                    "Login failed: ${result.message} [${result.errorCode}]"
+                )
                 LoginResult.Failure(
                     message = result.message,
                     errorCode = result.errorCode,
@@ -249,10 +279,28 @@ class SecondLifeProtocol(private val context: Context) {
             .replace("'", "&apos;")
     }
     
+    /**
+     * Create MD5 hash of input string
+     */
     private fun md5Hash(input: String): String {
         val md = MessageDigest.getInstance("MD5")
         val digest = md.digest(input.toByteArray())
         return digest.joinToString("") { "%02x".format(it) }
+    }
+    
+    /**
+     * Create Second Life password hash.
+     * 
+     * IMPORTANT: Second Life protocol requires passwords to be truncated to 16 characters
+     * before MD5 hashing. This matches the official Lumiya implementation and is required
+     * for compatibility with Second Life login servers.
+     * 
+     * @param password The plain text password (will be trimmed and truncated to 16 chars)
+     * @return Password hash in format "$1$<md5_hash>"
+     */
+    fun createPasswordHash(password: String): String {
+        val truncatedPassword = password.trim().take(16)
+        return "\$1\$${md5Hash(truncatedPassword)}"
     }
     
     /**

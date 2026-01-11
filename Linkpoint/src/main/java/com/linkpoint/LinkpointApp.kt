@@ -12,6 +12,7 @@ import com.linkpoint.inventory.GestureManager
 import com.linkpoint.inventory.InventoryManager
 import com.linkpoint.inventory.OutfitManager
 import com.linkpoint.network.SecondLifeProtocol
+import com.linkpoint.network.NetworkLogger
 import com.linkpoint.objects.BuildTools
 import com.linkpoint.objects.ObjectManager
 import com.linkpoint.protocol.capabilities.CapabilityManager
@@ -130,6 +131,10 @@ class LinkpointApp : Application() {
         super.onCreate()
         instance = this
         Log.i(TAG, "Linkpoint application starting...")
+        
+        // Initialize network logger first for early debugging
+        NetworkLogger.initialize(this)
+        Log.i(TAG, "Network logger initialized with auto-save to Downloads/Lumiya Logs/")
         
         initializeManagers()
         
