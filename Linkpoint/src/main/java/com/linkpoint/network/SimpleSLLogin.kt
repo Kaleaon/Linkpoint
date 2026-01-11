@@ -5,11 +5,15 @@ import android.util.Log
 import com.linkpoint.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
+import okhttp3.ResponseBody.Companion.toResponseBody
+import okio.Buffer
 import java.io.EOFException
 import java.io.IOException
 import java.security.MessageDigest
@@ -127,7 +131,7 @@ object SimpleSLLogin {
      * @param password User's password (will be truncated to 16 chars per SL protocol)
      * @param loginUri Login server URL
      * @param startLocation "last", "home", or specific location
-     * @param maxRetries Maximum number of retry attempts for EOF errors (1-10, default 3)
+     * @param maxRetries Maximum number of retry attempts for EOF errors (1-10, default 4)
      * @return Login result
      */
     suspend fun login(
@@ -136,7 +140,7 @@ object SimpleSLLogin {
         password: String,
         loginUri: String,
         startLocation: String = "last",
-        maxRetries: Int = 3
+        maxRetries: Int = 4
     ): SimpleLoginResult = withContext(Dispatchers.IO) {
         // Validate maxRetries parameter
         val validatedRetries = maxRetries.coerceIn(1, 10)
@@ -181,12 +185,14 @@ object SimpleSLLogin {
             // - Force HTTP/1.1 only: SL login server uses XML-RPC over HTTP/1.1
             // - Using HTTP/2 can cause EOF errors during ALPN negotiation or protocol mismatch
             // - retryOnConnectionFailure: Handle transient connection issues
+            // - ChunkedResponseInterceptor: Pre-buffers response to handle EOF gracefully
             val client = OkHttpClient.Builder()
                 .protocols(listOf(Protocol.HTTP_1_1))  // Force HTTP/1.1 for XML-RPC compatibility
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)  // Auto-retry on connection failures
+                .addNetworkInterceptor(ChunkedResponseInterceptor())  // Handle EOF during chunked reads
                 .build()
             
             // Critical headers to reduce EOF issues with streaming responses:
@@ -212,22 +218,20 @@ object SimpleSLLogin {
             
             // Use try-finally to ensure response is always closed properly in all paths
             try {
-                // Read response body with careful handling of EOF errors
-                // EOF can occur during chunked encoding if server closes connection early
-                val responseBody: String
-                try {
-                    responseBody = response.body?.string() ?: ""
-                } catch (e: EOFException) {
-                    // EOF during body reading - will be caught by outer handler for retry
-                    Log.w(TAG, "EOF while reading response body, will retry")
-                    throw e
-                } catch (e: IOException) {
-                    // Check if this is an EOF-related IO error
-                    if (NetworkExceptionUtils.isEOFException(e)) {
-                        Log.w(TAG, "IO error with EOF characteristics while reading body, will retry")
-                        throw EOFException("EOF during response body read: ${e.message}")
-                    }
-                    throw e
+                // Read response body with resilient EOF handling
+                // The ChunkedResponseInterceptor pre-buffers the response, but we still
+                // use resilient reading as a secondary safeguard against EOF errors.
+                // If we hit EOF during reading and have partial but usable data, we try to use it.
+                val (responseBody, hitEof) = readBodyResilient(response)
+                
+                // If we hit EOF but the response seems incomplete, retry
+                if (hitEof && !isResponseUsable(responseBody)) {
+                    Log.w(TAG, "EOF during body reading with incomplete response, will retry")
+                    throw EOFException("Incomplete response after EOF")
+                }
+                
+                if (hitEof) {
+                    Log.i(TAG, "Successfully recovered from EOF with usable response (${responseBody.length} chars)")
                 }
             
                 val duration = System.currentTimeMillis() - startTime
@@ -681,6 +685,188 @@ object SimpleSLLogin {
         val random = java.util.Random()
         return (0..5).joinToString(":") { 
             String.format("%02X", random.nextInt(256)) 
+        }
+    }
+    
+    /**
+     * Reads response body resiliently, handling EOF exceptions gracefully.
+     * 
+     * This is critical for handling chunked transfer encoding where the server
+     * may close the connection before sending the final zero-length chunk.
+     * In such cases, we attempt to recover whatever partial data was received.
+     * 
+     * For XML-RPC login responses, a partial response that contains the complete
+     * XML structure (closing tags) can still be parsed successfully.
+     * 
+     * @param response The OkHttp response to read
+     * @return Pair of (body string, whether EOF was encountered)
+     * @throws IOException if reading fails for non-EOF reasons
+     */
+    private fun readBodyResilient(response: Response): Pair<String, Boolean> {
+        val source = response.body?.source() ?: return Pair("", false)
+        val buffer = Buffer()
+        var hitEof = false
+        
+        try {
+            // Buffer the response in chunks
+            // Use a reasonable buffer size for XML-RPC responses
+            val bufferSize = 8192L
+            
+            while (true) {
+                val bytesRead = try {
+                    source.read(buffer, bufferSize)
+                } catch (e: EOFException) {
+                    // EOF during read - this is expected when server closes connection early
+                    Log.w(TAG, "EOF encountered while reading response body, using partial data")
+                    hitEof = true
+                    break
+                } catch (e: IOException) {
+                    // Check if this is an EOF-related error
+                    if (NetworkExceptionUtils.isEOFException(e)) {
+                        Log.w(TAG, "EOF-like error while reading response body: ${e.message}")
+                        hitEof = true
+                        break
+                    }
+                    throw e
+                }
+                
+                if (bytesRead == -1L) {
+                    // Normal end of stream
+                    break
+                }
+            }
+            
+            val bodyString = buffer.readUtf8()
+            
+            if (hitEof && bodyString.isNotEmpty()) {
+                Log.d(TAG, "Recovered ${bodyString.length} chars from partial response")
+            }
+            
+            return Pair(bodyString, hitEof)
+            
+        } finally {
+            try {
+                source.close()
+            } catch (e: Exception) {
+                // Ignore close errors
+            }
+        }
+    }
+    
+    /**
+     * Validates if a partial response contains usable XML data.
+     * 
+     * For login responses, we need at least the key response elements.
+     * A partial response that contains the closing </methodResponse> tag
+     * is likely complete enough to parse.
+     * 
+     * @param body The response body string (potentially partial)
+     * @return true if the body appears to contain complete/usable XML
+     */
+    private fun isResponseUsable(body: String): Boolean {
+        if (body.isBlank()) return false
+        
+        // Check for complete XML-RPC response structure
+        // The login response should have methodResponse closing tag
+        val hasMethodResponse = body.contains("</methodResponse>")
+        val hasStruct = body.contains("<struct>") && body.contains("</struct>")
+        
+        // If we have the closing methodResponse tag, the response is likely complete
+        if (hasMethodResponse) {
+            return true
+        }
+        
+        // Check for login-specific markers that indicate a complete response
+        val hasLoginResult = body.contains("<name>login</name>") && 
+            (body.contains("<string>true</string>") || body.contains("<string>false</string>"))
+        
+        // Even without methodResponse, if we have key login data with struct, try to use it
+        if (hasLoginResult && hasStruct) {
+            Log.d(TAG, "Partial response contains login result, attempting to use it")
+            return true
+        }
+        
+        return false
+    }
+    
+    /**
+     * Network interceptor that pre-buffers response bodies to handle EOF gracefully.
+     * 
+     * This interceptor reads the entire response body into memory before returning
+     * the response to the caller. This allows us to:
+     * 1. Catch EOF exceptions during the buffering phase
+     * 2. Return a complete (or best-effort partial) response body
+     * 3. Avoid EOF exceptions during the caller's response.body.string() call
+     * 
+     * For login responses (which are typically small XML-RPC payloads), this
+     * buffering approach is safe and provides better resilience.
+     */
+    private class ChunkedResponseInterceptor : Interceptor {
+        companion object {
+            private const val TAG = "ChunkedInterceptor"
+            private const val MAX_BUFFER_SIZE = 1024 * 1024L // 1MB max for login responses
+        }
+        
+        override fun intercept(chain: Interceptor.Chain): Response {
+            val request = chain.request()
+            val response = chain.proceed(request)
+            
+            // Only buffer responses with bodies
+            val body = response.body ?: return response
+            val contentType = body.contentType()
+            
+            // Buffer the response body, handling EOF gracefully
+            val buffer = Buffer()
+            var hitEof = false
+            var totalRead = 0L
+            
+            try {
+                val source = body.source()
+                
+                while (totalRead < MAX_BUFFER_SIZE) {
+                    val bytesRead = try {
+                        source.read(buffer, 8192L)
+                    } catch (e: EOFException) {
+                        Log.w(TAG, "EOF during response buffering, using ${buffer.size} bytes")
+                        hitEof = true
+                        break
+                    } catch (e: IOException) {
+                        if (NetworkExceptionUtils.isEOFException(e)) {
+                            Log.w(TAG, "EOF-like error during buffering: ${e.message}")
+                            hitEof = true
+                            break
+                        }
+                        throw e
+                    }
+                    
+                    if (bytesRead == -1L) break
+                    totalRead += bytesRead
+                }
+                
+            } finally {
+                try {
+                    body.close()
+                } catch (e: Exception) {
+                    // Ignore close errors
+                }
+            }
+            
+            // If we hit EOF but have data, create a new response with the buffered data
+            val bufferedBody = buffer.readByteArray()
+            
+            if (hitEof && bufferedBody.isEmpty()) {
+                // No data recovered, throw to trigger retry
+                throw EOFException("Server closed connection with no data")
+            }
+            
+            if (hitEof) {
+                Log.d(TAG, "Recovered ${bufferedBody.size} bytes from chunked response with EOF")
+            }
+            
+            // Return a new response with the buffered body
+            return response.newBuilder()
+                .body(bufferedBody.toResponseBody(contentType))
+                .build()
         }
     }
 }
