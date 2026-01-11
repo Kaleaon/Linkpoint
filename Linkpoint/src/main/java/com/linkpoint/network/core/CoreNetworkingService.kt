@@ -231,10 +231,16 @@ class CoreNetworkingService(private val context: Context) {
     ): LoginResult = withContext(Dispatchers.IO) {
         Log.d(TAG, "Login request to: $loginUri")
         
-        if (!qualityManager.isConnected.value) {
+        // Double-check network connectivity before attempting login
+        // The network callback may not have updated yet, so do a fresh check
+        val networkConnected = validateNetworkConnection()
+        
+        if (!networkConnected) {
+            Log.w(TAG, "Network check failed - no connectivity detected")
             return@withContext LoginResult.Failure(
-                message = "No network connection available",
-                errorCode = "NO_NETWORK"
+                message = "No network connection available. Please check your internet connection.",
+                errorCode = "NO_NETWORK",
+                technicalDetails = buildNetworkDiagnosticsString()
             )
         }
         
@@ -314,31 +320,64 @@ class CoreNetworkingService(private val context: Context) {
     }
     
     /**
-     * Execute a single login request
+     * Execute a single login request.
+     * 
+     * Always creates a fresh HTTP client to avoid stale connection issues.
+     * The Second Life login server can be sensitive to connection reuse.
      */
     private fun executeLoginRequest(loginUri: String, xmlRequest: String): LoginResult {
-        val client = synchronized(connectionLock) {
-            currentHttpClient ?: channelFactory.createHttpClient().also {
-                currentHttpClient = it
-            }
+        // Always create a fresh client for login to avoid stale connections
+        // This is critical for avoiding EOF errors from reused connections
+        val client = channelFactory.createHttpClient()
+        
+        // Update the cached client reference
+        synchronized(connectionLock) {
+            currentHttpClient = client
         }
         
         val request = Request.Builder()
             .url(loginUri)
             .post(xmlRequest.toRequestBody("text/xml".toMediaType()))
             .header("Content-Type", "text/xml")
+            .header("Accept", "text/xml, application/xml")
             .header("User-Agent", "Linkpoint/1.0.0 (Android)")
+            // Connection: close ensures we don't reuse a potentially stale connection
+            // The GrpcChannelFactory also adds this via interceptor, but explicit is better
+            .header("Connection", "close")
             .build()
+        
+        Log.d(TAG, "Executing login request to: $loginUri")
         
         // Execute with body retry handling
         val (response, responseBody) = executeWithBodyRetry(client, request)
         
         if (!response.isSuccessful) {
-            return LoginResult.Failure(
-                message = "Server returned HTTP ${response.code}",
-                errorCode = "HTTP_${response.code}",
-                technicalDetails = "URL: $loginUri\nHTTP Status: ${response.code}\nResponse: ${responseBody.take(500)}"
-            )
+            val errorDetails = buildString {
+                appendLine("URL: $loginUri")
+                appendLine("HTTP Status: ${response.code}")
+                appendLine("Response: ${responseBody.take(500)}")
+            }
+            
+            // Check for specific HTTP error codes
+            return when (response.code) {
+                503 -> LoginResult.Failure(
+                    message = "Login service temporarily unavailable. Please try again in a few minutes.",
+                    errorCode = "SERVICE_UNAVAILABLE",
+                    technicalDetails = errorDetails,
+                    shouldRetry = true
+                )
+                502, 504 -> LoginResult.Failure(
+                    message = "Login gateway error. The server may be overloaded.",
+                    errorCode = "GATEWAY_ERROR",
+                    technicalDetails = errorDetails,
+                    shouldRetry = true
+                )
+                else -> LoginResult.Failure(
+                    message = "Server returned HTTP ${response.code}",
+                    errorCode = "HTTP_${response.code}",
+                    technicalDetails = errorDetails
+                )
+            }
         }
         
         // Parse the login response
@@ -346,54 +385,108 @@ class CoreNetworkingService(private val context: Context) {
     }
     
     /**
-     * Execute request with retry for EOF during body reading
+     * Execute request with retry for EOF during body reading.
+     * 
+     * EOF errors typically occur when:
+     * - Server closes connection before sending complete response
+     * - Load balancer timeout or reset
+     * - Network interruption during data transfer
+     * - Server-side rate limiting or overload
+     * 
+     * This method implements a robust retry strategy with:
+     * - Fresh client creation on each retry (avoids stale connections)
+     * - Exponential backoff with extra delay for EOF errors
+     * - Proper resource cleanup on all code paths
      */
     private fun executeWithBodyRetry(
         client: OkHttpClient,
         request: Request,
-        maxRetries: Int = 2
+        maxRetries: Int = 3  // Increased from 2 to handle flaky connections
     ): Pair<Response, String> {
         var lastException: IOException? = null
         var currentClient = client
         
         repeat(maxRetries + 1) { attempt ->
+            var response: Response? = null
             try {
                 if (attempt > 0) {
-                    val delayMs = 1000L * (1 shl (attempt - 1))
-                    Log.d(TAG, "Body read retry $attempt/$maxRetries after ${delayMs}ms delay")
-                    Thread.sleep(delayMs)
+                    // Exponential backoff: 1s, 2s, 4s, ...
+                    val baseDelayMs = 1000L * (1 shl (attempt - 1))
+                    // Add extra delay for EOF errors - server may need time to recover
+                    val eofExtraDelay = NetworkExceptionUtils.EOF_EXTRA_DELAY_MS
+                    val totalDelayMs = baseDelayMs + eofExtraDelay
+                    
+                    Log.d(TAG, "Body read retry $attempt/$maxRetries after ${totalDelayMs}ms delay " +
+                        "(base: ${baseDelayMs}ms, EOF extra: ${eofExtraDelay}ms)")
+                    Thread.sleep(totalDelayMs)
+                    
+                    // Create fresh client to avoid reusing potentially stale connections
                     currentClient = channelFactory.createHttpClient()
                 }
                 
-                val response = currentClient.newCall(request).execute()
+                response = currentClient.newCall(request).execute()
+                
+                // Check if we got a response at all
+                if (response.body == null) {
+                    response.close()
+                    throw EOFIOException("Server returned empty response body")
+                }
                 
                 val responseBody = try {
-                    response.body?.string() ?: ""
+                    response.body!!.string()
                 } catch (e: EOFException) {
-                    response.close()
                     throw EOFIOException("EOF while reading response body", e)
                 } catch (e: IOException) {
-                    // Always close response on any IOException to prevent resource leaks
-                    response.close()
                     if (NetworkExceptionUtils.isEOFException(e)) {
                         throw EOFIOException("EOF while reading response body: ${e.message}", e)
                     }
                     throw e
                 }
                 
+                // Verify we got a non-empty response for login requests
+                if (responseBody.isEmpty() && request.url.toString().contains("login")) {
+                    throw EOFIOException("Server returned empty login response")
+                }
+                
+                // Success - close response and return
+                // Note: response.body?.string() already consumes and closes the body,
+                // but we call close() on the response for completeness
+                response.close()
+                
                 return response to responseBody
                 
             } catch (e: IOException) {
-                if (NetworkExceptionUtils.isEOFException(e)) {
-                    Log.w(TAG, "EOF during request/body read (attempt ${attempt + 1}): ${e.message}")
-                    lastException = e
+                // Ensure response is closed on any error
+                response?.close()
+                
+                if (NetworkExceptionUtils.isEOFException(e) || e is EOFIOException) {
+                    Log.w(TAG, "EOF during request/body read (attempt ${attempt + 1}/${maxRetries + 1}): ${e.message}")
+                    lastException = if (e is EOFIOException) e else EOFIOException(e.message ?: "EOF error", e)
+                    // Continue to retry
+                } else if (isConnectionResetError(e)) {
+                    // Treat connection reset as EOF-like - server closed the connection
+                    Log.w(TAG, "Connection reset during request (attempt ${attempt + 1}/${maxRetries + 1}): ${e.message}")
+                    lastException = EOFIOException("Connection reset: ${e.message}", e)
+                    // Continue to retry
                 } else {
+                    // Non-EOF error - propagate immediately
                     throw e
                 }
             }
         }
         
         throw lastException ?: EOFIOException("Failed after ${maxRetries + 1} attempts")
+    }
+    
+    /**
+     * Check if the exception indicates a connection reset error
+     */
+    private fun isConnectionResetError(e: IOException): Boolean {
+        val message = e.message ?: return false
+        return message.contains("Connection reset", ignoreCase = true) ||
+            message.contains("ECONNRESET", ignoreCase = true) ||
+            message.contains("connection was reset", ignoreCase = true) ||
+            message.contains("peer reset", ignoreCase = true)
     }
     
     /**
@@ -653,6 +746,62 @@ class CoreNetworkingService(private val context: Context) {
             "Total: ${loginStats.totalErrors}, InError: ${loginStats.isInErrorState}")
         Log.d(TAG, "  Stream Policy - Failures: ${streamStats.failuresInARow}, " +
             "Total: ${streamStats.totalErrors}, InError: ${streamStats.isInErrorState}")
+    }
+    
+    /**
+     * Validate network connection with a fresh check.
+     * This is more reliable than just checking the cached isConnected value,
+     * as the network callback may not have fired yet.
+     */
+    private fun validateNetworkConnection(): Boolean {
+        // First check the cached value
+        if (qualityManager.isConnected.value) {
+            return true
+        }
+        
+        // If cached value is false, do a fresh network check
+        // This handles cases where the network callback hasn't updated yet
+        try {
+            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE)
+                as? android.net.ConnectivityManager ?: return false
+            
+            val activeNetwork = connectivityManager.activeNetwork ?: return false
+            val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
+            
+            val hasInternet = capabilities.hasCapability(
+                android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET
+            )
+            val isValidated = capabilities.hasCapability(
+                android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
+            )
+            
+            val isConnected = hasInternet && isValidated
+            
+            if (isConnected) {
+                Log.d(TAG, "Fresh network check: connected (cached value was false)")
+            }
+            
+            return isConnected
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking network connectivity: ${e.message}")
+            // Fall back to cached value on error
+            return qualityManager.isConnected.value
+        }
+    }
+    
+    /**
+     * Build a diagnostics string for error reporting
+     */
+    private fun buildNetworkDiagnosticsString(): String {
+        val report = qualityManager.getQualityReport()
+        return buildString {
+            appendLine("Network Status:")
+            appendLine("  Connected: ${report.isConnected}")
+            appendLine("  Type: ${report.networkType}")
+            appendLine("  Quality: ${report.quality}")
+            appendLine("  Bandwidth: ${report.estimatedBandwidthKbps}kbps")
+            appendLine("  Error Rate: ${(report.errorRate * 100).toInt()}%")
+        }
     }
     
     private fun emitEvent(event: ConnectionEvent) {

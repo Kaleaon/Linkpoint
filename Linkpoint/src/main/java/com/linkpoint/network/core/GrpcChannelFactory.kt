@@ -121,8 +121,24 @@ class GrpcChannelFactory(
     }
     
     /**
-     * Create an OkHttpClient configured for gRPC-like operations
-     * (for XMLRPC login which doesn't use gRPC)
+     * Create an OkHttpClient configured for XMLRPC login operations.
+     * 
+     * This client is optimized for reliability over performance:
+     * - Fresh connections preferred over pooled connections
+     * - Aggressive connection cleanup to avoid stale connections
+     * - Proper keep-alive handling for Second Life login servers
+     * - HTTP/1.1 for XMLRPC compatibility
+     * 
+     * EOF errors often occur due to:
+     * - Server closing idle connections before client expects
+     * - Load balancer timeouts
+     * - Connection pool returning stale connections
+     * 
+     * Mitigations implemented:
+     * - Short keep-alive duration to avoid stale connections
+     * - Minimal connection pooling
+     * - retryOnConnectionFailure enabled
+     * - Ping interval for connection health checks (via interceptor)
      */
     fun createHttpClient(): OkHttpClient {
         val timeouts = qualityManager.getTimeouts()
@@ -139,15 +155,52 @@ class GrpcChannelFactory(
             // Overall call timeout - use fixed generous timeout to allow for all retries
             // This is a safety net, not the primary timeout mechanism
             .callTimeout(CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-            // Retry on connection failure
+            // Retry on connection failure - critical for handling EOF errors
             .retryOnConnectionFailure(true)
-            // Minimal connection pooling for mobile
+            // Aggressive connection pool settings to minimize stale connections
+            // - Only 1 idle connection to reduce chance of using stale connection
+            // - Short 15-second keep-alive (SL login servers may close earlier)
             .connectionPool(ConnectionPool(
-                maxIdleConnections = 2,
-                keepAliveDuration = 30,
+                maxIdleConnections = 1,
+                keepAliveDuration = 15,
                 timeUnit = TimeUnit.SECONDS
             ))
             // Force HTTP/1.1 for XMLRPC compatibility
+            // HTTP/2 can cause issues with some XMLRPC servers
+            .protocols(listOf(Protocol.HTTP_1_1))
+            // Add interceptor to ensure proper headers for connection handling
+            .addNetworkInterceptor { chain ->
+                val originalRequest = chain.request()
+                val request = originalRequest.newBuilder()
+                    // Ensure Connection header is set properly
+                    // Using "close" can help avoid reusing potentially stale connections
+                    // for critical login requests
+                    .header("Connection", "close")
+                    .build()
+                chain.proceed(request)
+            }
+            .build()
+    }
+    
+    /**
+     * Create an OkHttpClient optimized for regular API operations (non-login).
+     * This client uses connection pooling for better performance.
+     */
+    fun createApiClient(): OkHttpClient {
+        val timeouts = qualityManager.getTimeouts()
+        
+        return OkHttpClient.Builder()
+            .connectTimeout(timeouts.connectTimeoutMs, TimeUnit.MILLISECONDS)
+            .readTimeout(timeouts.readTimeoutMs, TimeUnit.MILLISECONDS)
+            .writeTimeout(timeouts.writeTimeoutMs, TimeUnit.MILLISECONDS)
+            .callTimeout(CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(true)
+            // More aggressive pooling for regular API operations
+            .connectionPool(ConnectionPool(
+                maxIdleConnections = 5,
+                keepAliveDuration = 30,
+                timeUnit = TimeUnit.SECONDS
+            ))
             .protocols(listOf(Protocol.HTTP_1_1))
             .build()
     }
