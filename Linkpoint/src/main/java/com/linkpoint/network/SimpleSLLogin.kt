@@ -247,44 +247,56 @@ object SimpleSLLogin {
     /**
      * Helper function to handle retryable errors consistently.
      * Returns appropriate failure result based on error type and retry count.
+     * 
+     * @param errorType Type of error ("timeout", "eof", "ssl_eof", "reset", "transient")
+     * @param exception The exception that occurred
+     * @param attemptNumber The attempt number that failed (1 = first attempt, 2 = first retry, etc.)
+     * @param maxRetries The maximum number of retries configured
      */
     private fun createRetryableErrorResult(
         errorType: String,
         exception: Exception,
-        attempt: Int,
+        attemptNumber: Int,
         maxRetries: Int
     ): SimpleLoginResult.Failure {
+        val errorCode = when (errorType) {
+            "timeout" -> "TIMEOUT"
+            "ssl_eof", "eof", "reset" -> "EOF_ERROR"
+            "transient" -> "TRANSIENT_ERROR"
+            else -> "LOGIN_FAILED"
+        }
+        
         val baseMessage = when (errorType) {
-            "timeout" -> "Login request timed out after $maxRetries attempts. Server may be busy."
-            "ssl_eof" -> "Secure connection failed after $maxRetries attempts. Server closed connection during SSL handshake."
-            "eof" -> "The server closed the connection unexpectedly after $maxRetries attempts. This is usually temporary - please try again."
-            "reset" -> "Connection was reset after $maxRetries attempts. This is usually temporary - please try again."
-            "transient" -> "Login failed after $maxRetries attempts: ${exception.message ?: "Transient error"}"
+            "timeout" -> "Login request timed out after $maxRetries retries. Server may be busy."
+            "ssl_eof" -> "Secure connection failed after $maxRetries retries. Server closed connection during SSL handshake."
+            "eof" -> "The server closed the connection unexpectedly after $maxRetries retries. This is usually temporary - please try again."
+            "reset" -> "Connection was reset after $maxRetries retries. This is usually temporary - please try again."
+            "transient" -> "Login failed after $maxRetries retries: ${exception.message ?: "Transient error"}"
             else -> "Login failed: ${exception.message}"
         }
         
         val details = buildString {
             when (errorType) {
-                "timeout" -> appendLine("Timeout after 30 seconds per attempt, tried $maxRetries times")
+                "timeout" -> appendLine("Timeout after 30 seconds per attempt, tried $attemptNumber times total")
                 "ssl_eof" -> {
                     appendLine("SSLException with EOF: ${exception.message ?: "Connection closed during handshake"}")
                     appendLine()
-                    appendLine("Attempted $maxRetries times but server kept closing connection.")
+                    appendLine("Attempted $attemptNumber times but server kept closing connection.")
                 }
                 "eof" -> {
                     appendLine("EOFException: ${exception.message ?: "Connection closed by server"}")
                     appendLine()
-                    appendLine("Attempted $maxRetries times but server kept closing connection.")
+                    appendLine("Attempted $attemptNumber times but server kept closing connection.")
                 }
                 "reset" -> {
                     appendLine("SocketException: ${exception.message ?: "Connection reset by peer"}")
                     appendLine()
-                    appendLine("Attempted $maxRetries times but connection kept being reset.")
+                    appendLine("Attempted $attemptNumber times but connection kept being reset.")
                 }
                 "transient" -> {
                     appendLine("${exception.javaClass.simpleName}: ${exception.message ?: "Unknown error"}")
                     appendLine()
-                    appendLine("Attempted $maxRetries times but errors persisted.")
+                    appendLine("Attempted $attemptNumber times but errors persisted.")
                     appendLine()
                     appendLine("This appears to be a temporary server or network issue.")
                 }
@@ -311,7 +323,7 @@ object SimpleSLLogin {
         
         return SimpleLoginResult.Failure(
             message = baseMessage,
-            errorCode = "EOF_ERROR",
+            errorCode = errorCode,
             details = details
         )
     }
