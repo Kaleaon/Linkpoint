@@ -619,10 +619,14 @@ object SimpleSLLogin {
      */
     private fun parseLoginResponse(xml: String): SimpleLoginResult {
         try {
-            // Check for login failure
-            if (xml.contains("<name>login</name><value><string>false</string>")) {
+            // Check for login failure - use regex to handle whitespace variations
+            val loginValueRegex = Regex("<name>login</name>\\s*<value>\\s*<string>([^<]*)</string>")
+            val loginMatch = loginValueRegex.find(xml)
+            val loginValue = loginMatch?.groupValues?.get(1)
+            
+            if (loginValue == "false") {
                 // Extract error message
-                val messageMatch = Regex("<name>message</name><value><string>([^<]+)</string>").find(xml)
+                val messageMatch = Regex("<name>message</name>\\s*<value>\\s*<string>([^<]+)</string>").find(xml)
                 val message = messageMatch?.groupValues?.get(1) ?: "Login failed"
                 
                 Log.w(TAG, "Login failed: $message")
@@ -645,11 +649,18 @@ object SimpleSLLogin {
             
             // Validate we got essential fields
             if (sessionId.isNullOrBlank() || agentId.isNullOrBlank()) {
-                Log.e(TAG, "Missing essential fields in login response")
+                Log.e(TAG, "Missing essential fields in login response. sessionId=${sessionId?.take(8)}, agentId=${agentId?.take(8)}")
+                Log.d(TAG, "Response preview: ${xml.take(500)}")
                 return SimpleLoginResult.Failure(
                     message = "Invalid server response - missing session or agent ID",
                     errorCode = "INVALID_RESPONSE",
-                    details = "Response did not contain required fields"
+                    details = buildString {
+                        appendLine("Response did not contain required fields.")
+                        appendLine("session_id found: ${sessionId != null}")
+                        appendLine("agent_id found: ${agentId != null}")
+                        appendLine("Response length: ${xml.length} chars")
+                        appendLine("Response preview: ${xml.take(300)}")
+                    }
                 )
             }
             
