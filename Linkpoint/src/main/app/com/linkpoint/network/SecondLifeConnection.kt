@@ -100,7 +100,10 @@ class SecondLifeConnection(context: Context? = null) {
         }
         
         // Create password hash (MD5 for SL compatibility)
-        val passwordHash = "\$1\$${md5Hash(password)}"
+        // IMPORTANT: Second Life protocol requires passwords to be truncated to 16 characters
+        // before MD5 hashing. This matches the official Lumiya implementation.
+        val truncatedPassword = password.trim().take(16)
+        val passwordHash = "\$1\$${md5Hash(truncatedPassword)}"
         
         // Build XMLRPC login request
         val xmlRequest = buildLoginXml(
