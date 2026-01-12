@@ -8,22 +8,21 @@ class XMLRPCClient {
    * Build XML-RPC login request
    */
   static buildLoginRequest(params) {
-    const fields = [];
+    // String fields (non-boolean)
+    const stringFields = [];
     
-    // Add all login parameters
-    fields.push({ name: 'first', value: params.firstName });
-    fields.push({ name: 'last', value: params.lastName });
-    fields.push({ name: 'passwd', value: `$1$${params.passwordHash}` });
-    fields.push({ name: 'start', value: params.startLocation || 'last' });
-    fields.push({ name: 'channel', value: params.channel || 'Linkpoint PWA' });
-    fields.push({ name: 'version', value: params.version || '1.0.0' });
-    fields.push({ name: 'platform', value: 'Web' });
-    fields.push({ name: 'platform_version', value: navigator.userAgent });
-    fields.push({ name: 'mac', value: params.macAddress || this.generateMAC() });
-    fields.push({ name: 'id0', value: params.id0 || this.generateID0() });
-    fields.push({ name: 'agree_to_tos', value: 'true' });
-    fields.push({ name: 'read_critical', value: 'true' });
-    fields.push({ name: 'viewer_digest', value: params.viewerDigest || this.generateViewerDigest() });
+    // Add all login parameters as strings
+    stringFields.push({ name: 'first', value: params.firstName });
+    stringFields.push({ name: 'last', value: params.lastName });
+    stringFields.push({ name: 'passwd', value: `$1$${params.passwordHash}` });
+    stringFields.push({ name: 'start', value: params.startLocation || 'last' });
+    stringFields.push({ name: 'channel', value: params.channel || 'Linkpoint PWA' });
+    stringFields.push({ name: 'version', value: params.version || '1.0.0' });
+    stringFields.push({ name: 'platform', value: 'Web' });
+    stringFields.push({ name: 'platform_version', value: navigator.userAgent });
+    stringFields.push({ name: 'mac', value: params.macAddress || this.generateMAC() });
+    stringFields.push({ name: 'id0', value: params.id0 || this.generateID0() });
+    stringFields.push({ name: 'viewer_digest', value: params.viewerDigest || this.generateViewerDigest() });
     
     // Add options array
     const options = [
@@ -59,13 +58,25 @@ class XMLRPCClient {
     xml += '<param>\n';
     xml += '<value><struct>\n';
     
-    // Add all fields
-    for (const field of fields) {
+    // Add all string fields
+    for (const field of stringFields) {
       xml += '<member>\n';
       xml += `<name>${this.escapeXml(field.name)}</name>\n`;
       xml += `<value><string>${this.escapeXml(field.value)}</string></value>\n`;
       xml += '</member>\n';
     }
+    
+    // Add boolean fields - MUST use <boolean>1</boolean> format, NOT <string>true</string>
+    // Second Life's login server requires XML-RPC boolean format per spec
+    xml += '<member>\n';
+    xml += '<name>agree_to_tos</name>\n';
+    xml += '<value><boolean>1</boolean></value>\n';
+    xml += '</member>\n';
+    
+    xml += '<member>\n';
+    xml += '<name>read_critical</name>\n';
+    xml += '<value><boolean>1</boolean></value>\n';
+    xml += '</member>\n';
     
     // Add options array
     xml += '<member>\n';
