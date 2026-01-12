@@ -793,7 +793,8 @@ object SimpleSLLogin {
      * Map login failure reason to a user-friendly error code.
      */
     private fun mapReasonToErrorCode(reason: String?): String {
-        return when (reason?.lowercase()) {
+        val lowerReason = reason?.lowercase()
+        return when (lowerReason) {
             "key" -> "INVALID_CREDENTIALS"
             "presence" -> "ALREADY_LOGGED_IN"
             "update" -> "UPDATE_REQUIRED"

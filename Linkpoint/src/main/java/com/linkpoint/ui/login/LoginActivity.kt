@@ -64,6 +64,9 @@ class LoginActivity : AppCompatActivity() {
         
         // Android Keystore alias for password encryption
         private const val KEYSTORE_ALIAS = "LinkpointLoginKey"
+        
+        // MFA TOTP code length (standard is 6 digits)
+        private const val MFA_CODE_LENGTH = 6
     }
     
     private lateinit var firstNameEdit: EditText
@@ -670,7 +673,7 @@ class LoginActivity : AppCompatActivity() {
             hint = "Enter authenticator code"
             inputType = android.text.InputType.TYPE_CLASS_NUMBER
             maxLines = 1
-            filters = arrayOf(android.text.InputFilter.LengthFilter(6))
+            filters = arrayOf(android.text.InputFilter.LengthFilter(MFA_CODE_LENGTH))
         }
         
         val builder = AlertDialog.Builder(this)
@@ -679,10 +682,10 @@ class LoginActivity : AppCompatActivity() {
             .setView(editText)
             .setPositiveButton("Submit") { _, _ ->
                 val code = editText.text.toString().trim()
-                if (code.length == 6) {
+                if (code.length == MFA_CODE_LENGTH) {
                     attemptLoginWithMFA(code)
                 } else {
-                    Toast.makeText(this, "Please enter a 6-digit code", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Please enter a $MFA_CODE_LENGTH-digit code", Toast.LENGTH_SHORT).show()
                     showMFADialog(mfaResult) // Show again
                 }
             }
