@@ -131,3 +131,5 @@ __pycache__/
 
 # Android SDK files (should not be committed)
 android-sdk/
+test_xml_format.kt
+test_xml_simple.sh
