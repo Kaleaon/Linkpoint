@@ -201,9 +201,15 @@ object SimpleSLLogin {
             //   Disabling compression makes the server more likely to send a simple,
             //   uncompressed body, which can help avoid or simplify chunked/EOF problems
             //   seen in ChunkedSource.readChunkSize() when the server closes the connection early
+            //
+            // IMPORTANT: Use ByteArray.toRequestBody() instead of String.toRequestBody()
+            // because OkHttp automatically adds "charset=utf-8" to the Content-Type header
+            // when using String.toRequestBody(). Second Life's login server returns HTTP 400
+            // if the Content-Type includes a charset parameter - it requires exactly "text/xml".
+            val xmlBytes = xmlRequest.toByteArray(Charsets.UTF_8)
             val request = Request.Builder()
                 .url(loginUri)
-                .post(xmlRequest.toRequestBody("text/xml".toMediaType()))
+                .post(xmlBytes.toRequestBody("text/xml".toMediaType()))
                 .header("Content-Type", "text/xml")
                 .header("Accept-Encoding", "identity")  // Disable compression to simplify stream handling
                 .header("User-Agent", "$VIEWER_CHANNEL/$VIEWER_VERSION ($VIEWER_PLATFORM)")

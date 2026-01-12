@@ -419,9 +419,14 @@ class CoreNetworkingService(private val context: Context) {
             currentHttpClient = client
         }
         
+        // IMPORTANT: Use ByteArray.toRequestBody() instead of String.toRequestBody()
+        // because OkHttp automatically adds "charset=utf-8" to the Content-Type header
+        // when using String.toRequestBody(). Second Life's login server returns HTTP 400
+        // if the Content-Type includes a charset parameter - it requires exactly "text/xml".
+        val xmlBytes = xmlRequest.toByteArray(Charsets.UTF_8)
         val request = Request.Builder()
             .url(loginUri)
-            .post(xmlRequest.toRequestBody("text/xml".toMediaType()))
+            .post(xmlBytes.toRequestBody("text/xml".toMediaType()))
             .header("Content-Type", "text/xml")
             .header("Accept", "text/xml, application/xml")
             .header("User-Agent", "Linkpoint/1.0.0 (Android)")
