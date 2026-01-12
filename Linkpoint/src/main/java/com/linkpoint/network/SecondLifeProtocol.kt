@@ -93,13 +93,24 @@ class SecondLifeProtocol(private val context: Context) {
     
     /**
      * Perform login to the grid
+     * 
+     * @param firstName User's first name
+     * @param lastName User's last name
+     * @param password User's password
+     * @param loginUri Grid login URI
+     * @param startLocation Start location ("last", "home", or specific)
+     * @param mfaToken TOTP code from authenticator app (required after MFARequired result)
+     * @param mfaHash Cached MFA hash from previous successful login (allows skipping MFA)
+     * @return LoginResult (Success, MFARequired, or Failure)
      */
     suspend fun login(
         firstName: String,
         lastName: String,
         password: String,
         loginUri: String,
-        startLocation: String = "last"
+        startLocation: String = "last",
+        mfaToken: String = "",
+        mfaHash: String = ""
     ): LoginResult = withContext(Dispatchers.IO) {
         val app = LinkpointApp.getInstance()
         app.sessionManager.setConnectionState(ConnectionState.CONNECTING)
@@ -113,7 +124,15 @@ class SecondLifeProtocol(private val context: Context) {
         if (USE_SIMPLE_LOGIN) {
             // Use simple Lumiya-style login for instant connection
             Log.d(TAG, "Using SIMPLE login (Lumiya-style)")
-            val simpleResult = SimpleSLLogin.login(firstName, lastName, password, loginUri, startLocation)
+            val simpleResult = SimpleSLLogin.login(
+                firstName = firstName, 
+                lastName = lastName, 
+                password = password, 
+                loginUri = loginUri, 
+                startLocation = startLocation,
+                mfaToken = mfaToken,
+                mfaHash = mfaHash
+            )
             
             when (simpleResult) {
                 is SimpleSLLogin.SimpleLoginResult.Success -> {
@@ -143,7 +162,20 @@ class SecondLifeProtocol(private val context: Context) {
                         regionInfo = regionInfo
                     )
                     
-                    return@withContext LoginResult.Success(agentId, simpleResult.sessionId)
+                    return@withContext LoginResult.Success(
+                        agentId = agentId, 
+                        sessionId = simpleResult.sessionId,
+                        mfaHash = simpleResult.mfaHash
+                    )
+                }
+                is SimpleSLLogin.SimpleLoginResult.MFARequired -> {
+                    app.sessionManager.setConnectionState(ConnectionState.DISCONNECTED)
+                    Log.i(TAG, "MFA required for login: ${simpleResult.message}")
+                    
+                    return@withContext LoginResult.MFARequired(
+                        message = simpleResult.message,
+                        agentId = simpleResult.agentId
+                    )
                 }
                 is SimpleSLLogin.SimpleLoginResult.Failure -> {
                     app.sessionManager.setConnectionState(ConnectionState.ERROR)
@@ -455,7 +487,23 @@ class SecondLifeProtocol(private val context: Context) {
 }
 
 sealed class LoginResult {
-    data class Success(val agentId: UUID, val sessionId: String) : LoginResult()
+    data class Success(
+        val agentId: UUID, 
+        val sessionId: String,
+        /** MFA hash returned by server for future logins (to skip MFA prompt) */
+        val mfaHash: String? = null
+    ) : LoginResult()
+    
+    /**
+     * Multi-Factor Authentication is required.
+     * The user must provide a TOTP code from their authenticator app.
+     * Call login() again with the mfaToken parameter after obtaining the code.
+     */
+    data class MFARequired(
+        val message: String,
+        val agentId: String? = null
+    ) : LoginResult()
+    
     data class Failure(
         val message: String,
         val errorCode: String? = null,

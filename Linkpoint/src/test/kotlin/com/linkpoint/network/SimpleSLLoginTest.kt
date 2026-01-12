@@ -208,4 +208,44 @@ class SimpleSLLoginTest {
         
         assertNotNull("ChunkedResponseInterceptor should exist as inner class", interceptorClass)
     }
+    
+    /**
+     * Tests for MFA (Multi-Factor Authentication) handling.
+     */
+    @Test
+    fun `test MFARequired result type exists`() {
+        // Verify the MFARequired result type exists as a subclass
+        val mfaClass = SimpleSLLogin.SimpleLoginResult::class.sealedSubclasses
+            .find { it.simpleName == "MFARequired" }
+        
+        assertNotNull("MFARequired should exist as a subclass of SimpleLoginResult", mfaClass)
+    }
+    
+    @Test
+    fun `test mapReasonToErrorCode handles mfa_challenge`() {
+        // Access private method via reflection
+        val method = SimpleSLLogin.javaClass.getDeclaredMethod("mapReasonToErrorCode", String::class.java)
+        method.isAccessible = true
+        
+        val result = method.invoke(SimpleSLLogin, "mfa_challenge") as String
+        assertEquals("MFA_REQUIRED", result)
+    }
+    
+    @Test
+    fun `test mapReasonToErrorCode handles null reason`() {
+        val method = SimpleSLLogin.javaClass.getDeclaredMethod("mapReasonToErrorCode", String::class.java)
+        method.isAccessible = true
+        
+        val result = method.invoke(SimpleSLLogin, null) as String
+        assertEquals("LOGIN_REJECTED", result)
+    }
+    
+    @Test
+    fun `test mapReasonToErrorCode handles key reason`() {
+        val method = SimpleSLLogin.javaClass.getDeclaredMethod("mapReasonToErrorCode", String::class.java)
+        method.isAccessible = true
+        
+        val result = method.invoke(SimpleSLLogin, "key") as String
+        assertEquals("INVALID_CREDENTIALS", result)
+    }
 }

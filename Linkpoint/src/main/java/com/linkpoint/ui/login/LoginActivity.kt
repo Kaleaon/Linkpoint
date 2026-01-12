@@ -651,9 +651,78 @@ class LoginActivity : AppCompatActivity() {
                 startActivity(intent)
                 finish()
             }
+            is LoginResult.MFARequired -> {
+                statusText.text = "MFA Required"
+                showMFADialog(result)
+            }
             is LoginResult.Failure -> {
                 statusText.text = "Login failed"
                 showLoginErrorDialog(result)
+            }
+        }
+    }
+    
+    /**
+     * Show dialog for Multi-Factor Authentication code entry.
+     */
+    private fun showMFADialog(mfaResult: LoginResult.MFARequired) {
+        val editText = android.widget.EditText(this).apply {
+            hint = "Enter authenticator code"
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            maxLines = 1
+            filters = arrayOf(android.text.InputFilter.LengthFilter(6))
+        }
+        
+        val builder = AlertDialog.Builder(this)
+            .setTitle("Two-Factor Authentication")
+            .setMessage(mfaResult.message)
+            .setView(editText)
+            .setPositiveButton("Submit") { _, _ ->
+                val code = editText.text.toString().trim()
+                if (code.length == 6) {
+                    attemptLoginWithMFA(code)
+                } else {
+                    Toast.makeText(this, "Please enter a 6-digit code", Toast.LENGTH_SHORT).show()
+                    showMFADialog(mfaResult) // Show again
+                }
+            }
+            .setNegativeButton("Cancel") { _, _ ->
+                statusText.text = "Login cancelled"
+            }
+        
+        builder.show()
+    }
+    
+    /**
+     * Retry login with MFA token.
+     */
+    private fun attemptLoginWithMFA(mfaToken: String) {
+        setLoginInProgress(true)
+        statusText.text = "Verifying authentication code..."
+        
+        lifecycleScope.launch {
+            try {
+                val firstName = firstNameInput.text.toString().trim()
+                val lastName = lastNameInput.text.toString().trim()
+                val password = passwordInput.text.toString()
+                val grid = app.gridManager.getSelectedGrid()
+                val startLocation = getSelectedStartLocation()
+                
+                val result = protocol.login(
+                    firstName = firstName,
+                    lastName = lastName,
+                    password = password,
+                    loginUri = grid.loginUrl,
+                    startLocation = startLocation,
+                    mfaToken = mfaToken
+                )
+                
+                handleLoginResult(result)
+            } catch (e: Exception) {
+                handleLoginResult(LoginResult.Failure(
+                    message = "MFA verification failed: ${e.message}",
+                    errorCode = "MFA_ERROR"
+                ))
             }
         }
     }
