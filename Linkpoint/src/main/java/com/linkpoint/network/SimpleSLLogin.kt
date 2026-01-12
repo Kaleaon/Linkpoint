@@ -565,6 +565,8 @@ object SimpleSLLogin {
         // Generate unique identifiers
         val macAddress = generateMacAddress()
         val id0 = java.util.UUID.randomUUID().toString()
+        // Generate viewer_digest - required by Second Life login server
+        val viewerDigest = java.util.UUID.randomUUID().toString()
         
         // Build XML (minimal, like Lumiya)
         return buildString {
@@ -586,6 +588,8 @@ object SimpleSLLogin {
             append("<member><name>platform</name><value><string>$VIEWER_PLATFORM</string></value></member>")
             append("<member><name>mac</name><value><string>$macAddress</string></value></member>")
             append("<member><name>id0</name><value><string>$id0</string></value></member>")
+            // viewer_digest is required by the Second Life login server
+            append("<member><name>viewer_digest</name><value><string>$viewerDigest</string></value></member>")
             
             // Agreements
             append("<member><name>agree_to_tos</name><value><boolean>1</boolean></value></member>")
