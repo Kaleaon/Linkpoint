@@ -649,8 +649,8 @@ object SimpleSLLogin {
             
             // Validate we got essential fields
             if (sessionId.isNullOrBlank() || agentId.isNullOrBlank()) {
-                Log.e(TAG, "Missing essential fields in login response. sessionId=${sessionId?.take(8)}, agentId=${agentId?.take(8)}")
-                Log.d(TAG, "Response preview: ${xml.take(500)}")
+                Log.e(TAG, "Missing essential fields in login response. sessionId present: ${sessionId != null}, agentId present: ${agentId != null}")
+                Log.d(TAG, "Response length: ${xml.length} chars")
                 return SimpleLoginResult.Failure(
                     message = "Invalid server response - missing session or agent ID",
                     errorCode = "INVALID_RESPONSE",
