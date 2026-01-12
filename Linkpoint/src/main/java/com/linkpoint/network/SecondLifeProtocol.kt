@@ -297,8 +297,8 @@ class SecondLifeProtocol(private val context: Context) {
             append("<member><name>viewer_digest</name><value><string>$viewerDigest</string></value></member>")
             
             // Agreements
-            append("<member><name>agree_to_tos</name><value><boolean>1</boolean></value></member>")
-            append("<member><name>read_critical</name><value><boolean>1</boolean></value></member>")
+            append("<member><name>agree_to_tos</name><value><string>true</string></value></member>")
+            append("<member><name>read_critical</name><value><string>true</string></value></member>")
             
             // Options array - comprehensive list for full functionality
             append("<member><name>options</name><value><array><data>")
