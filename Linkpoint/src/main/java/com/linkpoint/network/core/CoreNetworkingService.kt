@@ -809,14 +809,37 @@ class CoreNetworkingService(private val context: Context) {
         return "${value.take(4)}****${value.takeLast(4)}"
     }
     
+    /**
+     * Extract a value from XML-RPC response by name.
+     * Handles multiple XML value types: <string>, <uuid>, <i4>, <int>.
+     * Second Life login responses may use <uuid> for session_id and agent_id.
+     * 
+     * @param xml The XML response string
+     * @param name The member name to extract
+     * @return The extracted value or null if not found
+     */
     private fun extractXmlValue(xml: String, name: String): String? {
-        val regex = """<name>$name</name>\s*<value><string>([^<]+)</string>""".toRegex()
-        return regex.find(xml)?.groupValues?.get(1)
+        // Try <string> type first (most common)
+        val stringRegex = """<name>$name</name>\s*<value>\s*<string>([^<]*)</string>""".toRegex()
+        stringRegex.find(xml)?.groupValues?.get(1)?.let { return it }
+        
+        // Try <uuid> type (used for session_id, agent_id)
+        val uuidRegex = """<name>$name</name>\s*<value>\s*<uuid>([^<]*)</uuid>""".toRegex()
+        uuidRegex.find(xml)?.groupValues?.get(1)?.let { return it }
+        
+        // Try <i4> type (used for integers like sim_port)
+        val i4Regex = """<name>$name</name>\s*<value>\s*<i4>([^<]*)</i4>""".toRegex()
+        i4Regex.find(xml)?.groupValues?.get(1)?.let { return it }
+        
+        // Try <int> type (alternative integer format)
+        val intRegex = """<name>$name</name>\s*<value>\s*<int>([^<]*)</int>""".toRegex()
+        intRegex.find(xml)?.groupValues?.get(1)?.let { return it }
+        
+        return null
     }
     
     private fun extractXmlIntValue(xml: String, name: String): Int {
-        val regex = """<name>$name</name>\s*<value><i4>(\d+)</i4>""".toRegex()
-        return regex.find(xml)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+        return extractXmlValue(xml, name)?.toIntOrNull() ?: 0
     }
     
     private fun mapErrorReason(reason: String): String {
