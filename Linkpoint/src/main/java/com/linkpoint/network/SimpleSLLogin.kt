@@ -633,20 +633,15 @@ object SimpleSLLogin {
                 )
             }
             
-            // Extract session_id
-            val sessionMatch = Regex("<name>session_id</name><value><string>([^<]+)</string>").find(xml)
-            val sessionId = sessionMatch?.groupValues?.get(1)
+            // Extract session_id - can be <string> or <uuid> type
+            val sessionId = extractXmlValue(xml, "session_id")
             
-            // Extract agent_id
-            val agentMatch = Regex("<name>agent_id</name><value><string>([^<]+)</string>").find(xml)
-            val agentId = agentMatch?.groupValues?.get(1)
+            // Extract agent_id - can be <string> or <uuid> type
+            val agentId = extractXmlValue(xml, "agent_id")
             
             // Extract sim_ip and sim_port
-            val simIpMatch = Regex("<name>sim_ip</name><value><string>([^<]+)</string>").find(xml)
-            val simIp = simIpMatch?.groupValues?.get(1)
-            
-            val simPortMatch = Regex("<name>sim_port</name><value><i4>([^<]+)</i4>").find(xml)
-            val simPort = simPortMatch?.groupValues?.get(1)?.toIntOrNull()
+            val simIp = extractXmlValue(xml, "sim_ip")
+            val simPort = extractXmlValue(xml, "sim_port")?.toIntOrNull()
             
             // Validate we got essential fields
             if (sessionId.isNullOrBlank() || agentId.isNullOrBlank()) {
@@ -690,6 +685,35 @@ object SimpleSLLogin {
             .replace(">", "&gt;")
             .replace("\"", "&quot;")
             .replace("'", "&apos;")
+    }
+    
+    /**
+     * Extract a value from XML-RPC response by name.
+     * Handles multiple XML value types: <string>, <uuid>, <i4>, <int>.
+     * Second Life login responses may use <uuid> for session_id and agent_id.
+     * 
+     * @param xml The XML response string
+     * @param name The member name to extract
+     * @return The extracted value or null if not found
+     */
+    private fun extractXmlValue(xml: String, name: String): String? {
+        // Try <string> type first (most common)
+        val stringRegex = Regex("<name>$name</name>\\s*<value>\\s*<string>([^<]*)</string>")
+        stringRegex.find(xml)?.groupValues?.get(1)?.let { return it }
+        
+        // Try <uuid> type (used for session_id, agent_id)
+        val uuidRegex = Regex("<name>$name</name>\\s*<value>\\s*<uuid>([^<]*)</uuid>")
+        uuidRegex.find(xml)?.groupValues?.get(1)?.let { return it }
+        
+        // Try <i4> type (used for integers like sim_port)
+        val i4Regex = Regex("<name>$name</name>\\s*<value>\\s*<i4>([^<]*)</i4>")
+        i4Regex.find(xml)?.groupValues?.get(1)?.let { return it }
+        
+        // Try <int> type (alternative integer format)
+        val intRegex = Regex("<name>$name</name>\\s*<value>\\s*<int>([^<]*)</int>")
+        intRegex.find(xml)?.groupValues?.get(1)?.let { return it }
+        
+        return null
     }
     
     private fun generateMacAddress(): String {
