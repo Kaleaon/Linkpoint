@@ -705,17 +705,21 @@ class LoginActivity : AppCompatActivity() {
         
         lifecycleScope.launch {
             try {
-                val firstName = firstNameInput.text.toString().trim()
-                val lastName = lastNameInput.text.toString().trim()
-                val password = passwordInput.text.toString()
+                val firstName = firstNameEdit.text.toString().trim()
+                val lastName = lastNameEdit.text.toString().trim()
+                val password = passwordEdit.text.toString()
                 val grid = app.gridManager.getSelectedGrid()
-                val startLocation = getSelectedStartLocation()
+                val startLocation = when (startLocationSpinner.selectedItemPosition) {
+                    0 -> "last"
+                    1 -> "home"
+                    else -> "last"
+                }
                 
-                val result = protocol.login(
+                val result = app.protocol.login(
                     firstName = firstName,
                     lastName = lastName,
                     password = password,
-                    loginUri = grid.loginUrl,
+                    loginUri = grid.loginUri,
                     startLocation = startLocation,
                     mfaToken = mfaToken
                 )
