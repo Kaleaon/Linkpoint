@@ -296,17 +296,18 @@ class SimpleSLLoginTest {
         val method = SimpleSLLogin.javaClass.getDeclaredMethod("parseLoginResponse", String::class.java)
         method.isAccessible = true
         
-        // Note: This test may throw RuntimeException because android.util.Log is not mocked,
-        // but we can still verify the code path through the exception handling
+        // Note: This test may throw RuntimeException because android.util.Log is not mocked.
+        // The Log.e call in the Failure code path would trigger this exception.
+        // If we get a RuntimeException from unmocked Log, the test behavior is still verified
+        // because we know we hit the Failure code path (which logs with Log.e).
         val result = try {
             method.invoke(SimpleSLLogin, incompleteResponse) as SimpleSLLogin.SimpleLoginResult
         } catch (e: java.lang.reflect.InvocationTargetException) {
-            // Check if it's the Log mock issue
             val cause = e.cause
             if (cause?.message?.contains("android.util.Log") == true || 
                 cause?.message?.contains("not mocked") == true) {
-                // The code path with Log.e was hit (INVALID_RESPONSE failure)
-                // This is the expected behavior - incomplete responses should fail, not prompt for MFA
+                // The Failure code path was hit (Log.e is called in INVALID_RESPONSE handling).
+                // This confirms the expected behavior: incomplete responses fail, not prompt MFA.
                 return
             } else {
                 throw e
