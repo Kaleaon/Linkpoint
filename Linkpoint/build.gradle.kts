@@ -122,6 +122,13 @@ android {
         checkReleaseBuilds = false
     }
     
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true  // Return default values for unmocked Android methods like Log
+            isIncludeAndroidResources = true
+        }
+    }
+    
     packaging {
         resources {
             excludes += listOf(
