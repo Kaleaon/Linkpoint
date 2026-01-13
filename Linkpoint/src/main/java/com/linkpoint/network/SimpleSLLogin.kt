@@ -728,7 +728,7 @@ object SimpleSLLogin {
                 val userMessage = when {
                     isExplicitMfa -> serverMessage 
                         ?: "Multi-factor authentication required. Please enter your authenticator code."
-                    else -> "Verification required. Please enter your authenticator code to complete login from this device."
+                    else -> "Verification required to complete login from this device."
                 }
                 
                 Log.i(TAG, "Verification challenge detected (session_id missing, agent_id present). " +
