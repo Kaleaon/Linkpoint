@@ -59,7 +59,19 @@ object SimpleSLLogin {
             val sessionId: String,
             val agentId: String,
             val simIp: String,
-            val simPort: Int
+            val simPort: Int,
+            /** MFA hash returned by server for future logins */
+            val mfaHash: String? = null
+        ) : SimpleLoginResult()
+        
+        /**
+         * MFA (Multi-Factor Authentication) challenge required.
+         * The user must provide a TOTP code from their authenticator app.
+         * After obtaining the code, call login() again with the token parameter.
+         */
+        data class MFARequired(
+            val message: String,
+            val agentId: String? = null
         ) : SimpleLoginResult()
         
         data class Failure(
@@ -132,7 +144,9 @@ object SimpleSLLogin {
      * @param loginUri Login server URL
      * @param startLocation "last", "home", or specific location
      * @param maxRetries Maximum number of retry attempts for EOF errors (1-10, default 4)
-     * @return Login result
+     * @param mfaToken TOTP code from authenticator app (required after MFARequired result)
+     * @param mfaHash Cached MFA hash from previous successful login (allows skipping MFA)
+     * @return Login result (Success, MFARequired, or Failure)
      */
     suspend fun login(
         firstName: String,
@@ -140,7 +154,9 @@ object SimpleSLLogin {
         password: String,
         loginUri: String,
         startLocation: String = "last",
-        maxRetries: Int = 4
+        maxRetries: Int = 4,
+        mfaToken: String = "",
+        mfaHash: String = ""
     ): SimpleLoginResult = withContext(Dispatchers.IO) {
         // Validate maxRetries parameter
         val validatedRetries = maxRetries.coerceIn(1, 10)
@@ -177,7 +193,9 @@ object SimpleSLLogin {
                 firstName = firstName,
                 lastName = lastName,
                 password = password,
-                startLocation = startLocation
+                startLocation = startLocation,
+                mfaToken = mfaToken,
+                mfaHash = mfaHash
             )
             
             // Create HTTP client configured for Second Life login protocol
@@ -550,13 +568,22 @@ object SimpleSLLogin {
     }
     
     /**
-     * Build login XML request (Lumiya-compatible)
+     * Build login XML request (Lumiya-compatible with MFA support)
+     * 
+     * @param firstName User's first name
+     * @param lastName User's last name
+     * @param password User's password
+     * @param startLocation Start location ("last", "home", or specific)
+     * @param mfaToken TOTP code from authenticator app (empty if not responding to MFA challenge)
+     * @param mfaHash Cached MFA hash from previous successful login (empty if not available)
      */
     private fun buildLoginXml(
         firstName: String,
         lastName: String,
         password: String,
-        startLocation: String
+        startLocation: String,
+        mfaToken: String = "",
+        mfaHash: String = ""
     ): String {
         // Create password hash (truncate to 16 chars, then MD5 like Lumiya)
         val truncatedPassword = password.trim().take(16)
@@ -567,6 +594,8 @@ object SimpleSLLogin {
         val safeLast = escapeXml(lastName)
         val safePass = escapeXml(passwordHash)
         val safeStart = escapeXml(startLocation)
+        val safeToken = escapeXml(mfaToken)
+        val safeMfaHash = escapeXml(mfaHash)
         
         // Generate unique identifiers
         val macAddress = generateMacAddress()
@@ -586,6 +615,13 @@ object SimpleSLLogin {
             append("<member><name>last</name><value><string>$safeLast</string></value></member>")
             append("<member><name>passwd</name><value><string>$safePass</string></value></member>")
             append("<member><name>start</name><value><string>$safeStart</string></value></member>")
+            
+            // MFA fields - required by Second Life MFA login flow
+            // See: https://wiki.secondlife.com/wiki/User:Brad_Linden/Login_MFA
+            // - token: TOTP code from authenticator app (empty string if not responding to challenge)
+            // - mfa_hash: Cached hash from previous successful MFA (allows skipping token entry)
+            append("<member><name>token</name><value><string>$safeToken</string></value></member>")
+            append("<member><name>mfa_hash</name><value><string>$safeMfaHash</string></value></member>")
             
             // Viewer info - Required by TPV Policy Section 1.b
             // Uses unique channel and version to identify this viewer
@@ -615,7 +651,13 @@ object SimpleSLLogin {
     }
     
     /**
-     * Parse login response XML (simple extraction like Lumiya)
+     * Parse login response XML (simple extraction like Lumiya with MFA support)
+     * 
+     * Handles the following cases:
+     * 1. Successful login (login=true with session_id)
+     * 2. Login failure (login=false)
+     * 3. MFA challenge (login=false with reason=mfa_challenge)
+     * 4. Missing session_id with agent_id (typically MFA-related)
      */
     private fun parseLoginResponse(xml: String): SimpleLoginResult {
         try {
@@ -624,16 +666,32 @@ object SimpleSLLogin {
             val loginMatch = loginValueRegex.find(xml)
             val loginValue = loginMatch?.groupValues?.get(1)
             
+            // Extract the reason field to check for MFA challenge
+            val reason = extractXmlValue(xml, "reason")
+            
             if (loginValue == "false") {
-                // Extract error message
+                // Check if this is an MFA challenge
+                if (reason == "mfa_challenge") {
+                    val message = extractXmlValue(xml, "message") 
+                        ?: "Multi-factor authentication required. Please enter your authenticator code."
+                    val agentId = extractXmlValue(xml, "agent_id")
+                    
+                    Log.i(TAG, "MFA challenge received for agent: ${agentId?.take(8) ?: "unknown"}...")
+                    return SimpleLoginResult.MFARequired(
+                        message = message,
+                        agentId = agentId
+                    )
+                }
+                
+                // Regular login failure
                 val messageMatch = Regex("<name>message</name>\\s*<value>\\s*<string>([^<]+)</string>").find(xml)
                 val message = messageMatch?.groupValues?.get(1) ?: "Login failed"
                 
-                Log.w(TAG, "Login failed: $message")
+                Log.w(TAG, "Login failed: $message (reason: $reason)")
                 return SimpleLoginResult.Failure(
                     message = message,
-                    errorCode = "LOGIN_REJECTED",
-                    details = "Server rejected login"
+                    errorCode = mapReasonToErrorCode(reason),
+                    details = "Server rejected login. Reason: ${reason ?: "unknown"}"
                 )
             }
             
@@ -647,17 +705,61 @@ object SimpleSLLogin {
             val simIp = extractXmlValue(xml, "sim_ip")
             val simPort = extractXmlValue(xml, "sim_port")?.toIntOrNull()
             
-            // Validate we got essential fields
+            // Extract mfa_hash for future logins (to skip MFA)
+            val mfaHash = extractXmlValue(xml, "mfa_hash")
+            
+            // Check for MFA challenge scenario: agent_id present but session_id missing
+            // This can happen when:
+            // 1. MFA is required but response doesn't explicitly set login=false
+            // 2. Server returned a partial response requiring additional authentication
+            if (sessionId.isNullOrBlank() && !agentId.isNullOrBlank()) {
+                // Check if this is actually an MFA challenge
+                if (reason == "mfa_challenge" || xml.contains("mfa_challenge") || 
+                    xml.contains("authenticator") || xml.contains("multi-factor")) {
+                    val message = extractXmlValue(xml, "message") 
+                        ?: "Multi-factor authentication required. Please enter your authenticator code."
+                    
+                    Log.i(TAG, "MFA challenge detected (session_id missing). Agent: ${agentId.take(8)}...")
+                    return SimpleLoginResult.MFARequired(
+                        message = message,
+                        agentId = agentId
+                    )
+                }
+                
+                // Unknown state: agent_id present but no session_id and not MFA
+                Log.e(TAG, "Unexpected login state: agent_id present but session_id missing. Reason: $reason")
+                Log.d(TAG, "Response length: ${xml.length} chars")
+                return SimpleLoginResult.Failure(
+                    message = extractXmlValue(xml, "message") 
+                        ?: "Login incomplete - additional authentication may be required",
+                    errorCode = "INCOMPLETE_LOGIN",
+                    details = buildString {
+                        appendLine("Server returned agent_id but no session_id.")
+                        appendLine("This typically indicates additional authentication is required.")
+                        appendLine("Reason: ${reason ?: "not specified"}")
+                        appendLine("agent_id: ${agentId.take(8)}...")
+                        appendLine("Response length: ${xml.length} chars")
+                        appendLine("Response preview: ${xml.take(500)}")
+                    },
+                    recommendations = listOf(
+                        "Check if Multi-Factor Authentication (MFA) is enabled on your account",
+                        "Try logging in through the Second Life website first",
+                        "Contact Second Life support if the issue persists"
+                    )
+                )
+            }
+            
+            // Validate we got essential fields for a successful login
             if (sessionId.isNullOrBlank() || agentId.isNullOrBlank()) {
-                Log.e(TAG, "Missing essential fields in login response. sessionId present: ${sessionId != null}, agentId present: ${agentId != null}")
+                Log.e(TAG, "Missing essential fields in login response. sessionId present: ${!sessionId.isNullOrBlank()}, agentId present: ${!agentId.isNullOrBlank()}")
                 Log.d(TAG, "Response length: ${xml.length} chars")
                 return SimpleLoginResult.Failure(
                     message = "Invalid server response - missing session or agent ID",
                     errorCode = "INVALID_RESPONSE",
                     details = buildString {
                         appendLine("Response did not contain required fields.")
-                        appendLine("session_id found: ${sessionId != null}")
-                        appendLine("agent_id found: ${agentId != null}")
+                        appendLine("session_id found: ${!sessionId.isNullOrBlank()}")
+                        appendLine("agent_id found: ${!agentId.isNullOrBlank()}")
                         appendLine("Response length: ${xml.length} chars")
                         appendLine("Response preview: ${xml.take(300)}")
                     }
@@ -665,12 +767,16 @@ object SimpleSLLogin {
             }
             
             Log.i(TAG, "Login successful! Session: ${sessionId.take(8)}..., Agent: ${agentId.take(8)}...")
+            if (!mfaHash.isNullOrBlank()) {
+                Log.d(TAG, "MFA hash received for future logins")
+            }
             
             return SimpleLoginResult.Success(
                 sessionId = sessionId,
                 agentId = agentId,
                 simIp = simIp ?: "127.0.0.1",
-                simPort = simPort ?: 13000
+                simPort = simPort ?: 13000,
+                mfaHash = mfaHash
             )
             
         } catch (e: Exception) {
@@ -680,6 +786,25 @@ object SimpleSLLogin {
                 errorCode = "PARSE_ERROR",
                 details = "Parsing error: ${e.message}"
             )
+        }
+    }
+    
+    /**
+     * Map login failure reason to a user-friendly error code.
+     */
+    private fun mapReasonToErrorCode(reason: String?): String {
+        val lowerReason = reason?.lowercase()
+        return when (lowerReason) {
+            "key" -> "INVALID_CREDENTIALS"
+            "presence" -> "ALREADY_LOGGED_IN"
+            "update" -> "UPDATE_REQUIRED"
+            "tos" -> "TOS_NOT_ACCEPTED"
+            "mfa_challenge" -> "MFA_REQUIRED"
+            "critical" -> "CRITICAL_MESSAGE"
+            "disabled" -> "ACCOUNT_DISABLED"
+            "ban" -> "ACCOUNT_BANNED"
+            null -> "LOGIN_REJECTED"
+            else -> "LOGIN_REJECTED"
         }
     }
     
