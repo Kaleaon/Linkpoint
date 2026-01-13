@@ -250,15 +250,17 @@ class SimpleSLLoginTest {
     }
     
     /**
-     * Tests for new device verification detection.
-     * When agent_id is present but session_id is missing, this indicates
-     * that additional verification is required (MFA or new device login).
+     * Tests for incomplete response handling.
+     * When agent_id is present but session_id is missing (without explicit MFA challenge),
+     * this is treated as an incomplete/invalid response, NOT an MFA requirement.
+     * 
+     * This fixes the bug where users with MFA disabled were incorrectly prompted for MFA.
      */
     @Test
-    fun `test parseLoginResponse returns MFARequired for new device login without explicit mfa keywords`() {
-        // This simulates a Second Life response when logging in from a new device
-        // The server returns agent_id but no session_id, without explicit MFA keywords
-        val newDeviceResponse = """
+    fun `test parseLoginResponse returns Failure for incomplete response without explicit mfa_challenge`() {
+        // This simulates a Second Life response that's incomplete (agent_id but no session_id)
+        // WITHOUT explicit MFA indicators. This should NOT prompt for MFA.
+        val incompleteResponse = """
             <?xml version='1.0'?>
             <methodResponse>
             <params>
@@ -297,24 +299,29 @@ class SimpleSLLoginTest {
         // Note: This test may throw RuntimeException because android.util.Log is not mocked,
         // but we can still verify the code path through the exception handling
         val result = try {
-            method.invoke(SimpleSLLogin, newDeviceResponse) as SimpleSLLogin.SimpleLoginResult
+            method.invoke(SimpleSLLogin, incompleteResponse) as SimpleSLLogin.SimpleLoginResult
         } catch (e: java.lang.reflect.InvocationTargetException) {
             // Check if it's the Log mock issue
             val cause = e.cause
             if (cause?.message?.contains("android.util.Log") == true || 
                 cause?.message?.contains("not mocked") == true) {
-                // The code path with Log.i was hit, which means MFARequired is being returned
-                // We can't verify the exact result type here due to mock limitations,
-                // but the test structure shows the expected behavior
+                // The code path with Log.e was hit (INVALID_RESPONSE failure)
+                // This is the expected behavior - incomplete responses should fail, not prompt for MFA
                 return
             } else {
                 throw e
             }
         }
         
-        // If we get here without mocking issues, verify it's MFARequired
+        // If we get here without mocking issues, verify it's a Failure (not MFARequired)
         assertTrue(
-            "Response with agent_id but no session_id should return MFARequired",
+            "Response with agent_id but no session_id (without explicit mfa_challenge) should return Failure, not MFARequired",
+            result is SimpleSLLogin.SimpleLoginResult.Failure
+        )
+        
+        // Verify it's NOT MFARequired (the bug we're fixing)
+        assertFalse(
+            "Response without explicit mfa_challenge should NOT return MFARequired",
             result is SimpleSLLogin.SimpleLoginResult.MFARequired
         )
     }

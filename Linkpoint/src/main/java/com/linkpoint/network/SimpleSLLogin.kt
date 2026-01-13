@@ -708,37 +708,18 @@ object SimpleSLLogin {
             // Extract mfa_hash for future logins (to skip MFA)
             val mfaHash = extractXmlValue(xml, "mfa_hash")
             
-            // Check for MFA/verification challenge scenario: agent_id present but session_id missing
-            // This can happen when:
-            // 1. MFA (TOTP) is enabled and requires authentication code
-            // 2. New device login detected - Second Life sends email notification and requires verification
-            // 3. Server returned a partial response requiring additional authentication
+            // NOTE: MFA/verification challenges are now handled ONLY via the explicit
+            // `login=false` with `reason=mfa_challenge` check above (lines 672-684).
+            // 
+            // Previously, we had a heuristic here that assumed any response with `agent_id`
+            // but missing `session_id` required MFA verification. This was incorrect because:
+            // 1. Users with MFA DISABLED were getting prompted for MFA codes
+            // 2. The server explicitly indicates MFA via `login=false` + `reason=mfa_challenge`
+            // 3. Missing session_id with agent_id is more likely a parsing error or incomplete
+            //    response, not an indication of MFA requirement
             //
-            // IMPORTANT: The presence of agent_id WITHOUT session_id is the definitive signal
-            // that additional verification is required. Second Life may not always include
-            // explicit "mfa_challenge" text - especially for new device verification scenarios.
-            // The email notification "Your Second Life account has been accessed from a new machine"
-            // confirms this is the new device verification flow.
-            if (sessionId.isNullOrBlank() && !agentId.isNullOrBlank()) {
-                // Determine the appropriate message based on response content
-                val serverMessage = extractXmlValue(xml, "message")
-                val isExplicitMfa = reason == "mfa_challenge" || xml.contains("mfa_challenge") || 
-                    xml.contains("authenticator") || xml.contains("multi-factor")
-                
-                val userMessage = when {
-                    isExplicitMfa -> serverMessage 
-                        ?: "Multi-factor authentication required. Please enter your authenticator code."
-                    else -> "Verification required to complete login from this device."
-                }
-                
-                Log.i(TAG, "Verification challenge detected (session_id missing, agent_id present). " +
-                    "Agent: ${agentId.take(8)}..., explicit_mfa: $isExplicitMfa, reason: $reason")
-                
-                return SimpleLoginResult.MFARequired(
-                    message = userMessage,
-                    agentId = agentId
-                )
-            }
+            // If the server says `login=true` but we're missing session_id, that's an
+            // invalid/incomplete response - not an MFA challenge.
             
             // Validate we got essential fields for a successful login
             if (sessionId.isNullOrBlank() || agentId.isNullOrBlank()) {
