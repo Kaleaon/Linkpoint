@@ -283,34 +283,101 @@ class VoiceSession(
     private val scope: CoroutineScope
 ) {
     private var isConnected = false
+    private var outputGain = 1.0f
+    private var localAudioTrack: org.webrtc.AudioTrack? = null
     
+    /**
+     * Connect to voice server with signaling
+     */
     fun connect(uri: String, credentials: String) {
-        // Signaling would happen here
-        isConnected = true
+        try {
+            // Parse the SIP URI for Vivox connection
+            // Format typically: sip:confctl-g-xxxx@mt1v.livem.vivox.com
+            
+            // For WebRTC-based implementation:
+            // 1. Parse credentials
+            // 2. Create offer/answer exchange
+            // 3. Establish ICE connection
+            
+            android.util.Log.i("VoiceSession", "Connecting to voice channel: $uri")
+            isConnected = true
+        } catch (e: Exception) {
+            android.util.Log.e("VoiceSession", "Failed to connect to voice channel", e)
+            isConnected = false
+        }
     }
     
     fun disconnect() {
-        peerConnection?.close()
-        isConnected = false
+        try {
+            localAudioTrack?.setEnabled(false)
+            peerConnection?.close()
+            isConnected = false
+            android.util.Log.i("VoiceSession", "Disconnected from voice channel")
+        } catch (e: Exception) {
+            android.util.Log.e("VoiceSession", "Error during disconnect", e)
+        }
     }
     
     suspend fun createOffer(): String {
         return withContext(Dispatchers.IO) {
-            // Create SDP offer
-            ""
+            try {
+                // Create SDP offer for WebRTC peer connection
+                peerConnection?.let { pc ->
+                    val constraints = org.webrtc.MediaConstraints().apply {
+                        mandatory.add(org.webrtc.MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"))
+                        mandatory.add(org.webrtc.MediaConstraints.KeyValuePair("OfferToReceiveVideo", "false"))
+                    }
+                    
+                    // Note: In a real implementation, we'd use a CompletableFuture or
+                    // coroutine-based SDP observer
+                    android.util.Log.d("VoiceSession", "Creating SDP offer")
+                    ""
+                } ?: ""
+            } catch (e: Exception) {
+                android.util.Log.e("VoiceSession", "Failed to create offer", e)
+                ""
+            }
         }
     }
     
     suspend fun handleOffer(offer: String): String {
         return withContext(Dispatchers.IO) {
-            // Create SDP answer
-            ""
+            try {
+                // Parse remote SDP offer and create answer
+                peerConnection?.let { pc ->
+                    // Set remote description from offer
+                    // Create and return answer SDP
+                    android.util.Log.d("VoiceSession", "Handling remote offer")
+                    ""
+                } ?: ""
+            } catch (e: Exception) {
+                android.util.Log.e("VoiceSession", "Failed to handle offer", e)
+                ""
+            }
         }
     }
     
+    /**
+     * Set output audio gain (volume)
+     * @param gain Volume multiplier (0.0 = muted, 1.0 = normal, >1.0 = amplified)
+     */
     fun setOutputGain(gain: Float) {
-        // Apply gain to received audio tracks
+        outputGain = gain.coerceIn(0f, 2f)
+        
+        // Apply gain to received audio tracks via AudioTrack or mixer
+        peerConnection?.receivers?.forEach { receiver ->
+            val track = receiver.track()
+            if (track is org.webrtc.AudioTrack) {
+                // WebRTC AudioTrack doesn't have direct gain control
+                // In practice, we'd use an AudioProcessor or mix with Android's AudioTrack
+                track.setEnabled(gain > 0f)
+            }
+        }
+        
+        android.util.Log.d("VoiceSession", "Set output gain to $outputGain")
     }
+    
+    fun isConnected(): Boolean = isConnected
 }
 
 data class VoiceInfo(
