@@ -2,6 +2,19 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!-- Display Settings -->
+    <PreferenceCategory android:title="Display">
+
+        <ListPreference
+            android:key="screen_orientation"
+            android:title="Screen Orientation"
+            android:summary="Choose how the world view is displayed"
+            android:entries="@array/screen_orientation_entries"
+            android:entryValues="@array/screen_orientation_values"
+            android:defaultValue="portrait" />
+
+    </PreferenceCategory>
+
     <!-- Graphics Settings -->
     <PreferenceCategory android:title="Graphics">
 
@@ -120,6 +133,22 @@
 
     <!-- Debug and Diagnostics -->
     <PreferenceCategory android:title="Debug &amp; Diagnostics">
+
+        <SwitchPreferenceCompat
+            android:key="enable_debug_floater"
+            android:title="Debug Report Floater"
+            android:summary="Show floating bug icon to capture debug reports"
+            android:defaultValue="false" />
+
+        <Preference
+            android:key="capture_debug_report"
+            android:title="Capture Debug Report Now"
+            android:summary="Capture current app state for debugging" />
+
+        <Preference
+            android:key="view_debug_reports"
+            android:title="View Debug Reports"
+            android:summary="View saved debug reports" />
 
         <Preference
             android:key="view_crash_logs"

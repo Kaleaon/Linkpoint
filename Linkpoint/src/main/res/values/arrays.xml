@@ -85,4 +85,16 @@
         <item>Shout</item>
     </string-array>
 
+    <string-array name="screen_orientation_entries">
+        <item>Portrait</item>
+        <item>Landscape</item>
+        <item>Auto</item>
+    </string-array>
+
+    <string-array name="screen_orientation_values">
+        <item>portrait</item>
+        <item>landscape</item>
+        <item>auto</item>
+    </string-array>
+
 </resources>
