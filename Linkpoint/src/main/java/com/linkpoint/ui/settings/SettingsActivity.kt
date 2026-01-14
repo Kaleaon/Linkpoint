@@ -1,9 +1,13 @@
 package com.linkpoint.ui.settings
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
@@ -14,6 +18,7 @@ import androidx.preference.SeekBarPreference
 import com.linkpoint.BuildConfig
 import com.linkpoint.R
 import com.linkpoint.ui.tos.TosActivity
+import com.linkpoint.utils.CrashReporter
 
 /**
  * Settings Activity
@@ -22,6 +27,11 @@ import com.linkpoint.ui.tos.TosActivity
  * Includes required disclosures per Third-Party Viewer Policy Section 1.g:
  * - Viewer name and version displayed in About section
  * - Links to Terms of Service and Privacy Policy
+ * 
+ * Also includes debug and diagnostics features:
+ * - Crash log viewing
+ * - Crash reporter status
+ * - Test crash generation
  */
 class SettingsActivity : AppCompatActivity() {
     
@@ -82,11 +92,250 @@ class SettingsActivity : AppCompatActivity() {
             // About section - Required by TPV Policy Section 1.g
             setupAboutSection()
             
+            // Debug and Diagnostics section
+            setupDebugSection()
+            
             // ToS viewing
             findPreference<Preference>("view_tos")?.setOnPreferenceClickListener {
                 startActivity(TosActivity.createIntent(requireContext(), requireAcceptance = false))
                 true
             }
+        }
+        
+        /**
+         * Setup Debug and Diagnostics section for crash log viewing
+         */
+        private fun setupDebugSection() {
+            // View Crash Logs
+            findPreference<Preference>("view_crash_logs")?.setOnPreferenceClickListener {
+                showCrashLogsDialog()
+                true
+            }
+            
+            // Crash Reporter Status
+            findPreference<Preference>("crash_reporter_status")?.apply {
+                updateCrashReporterStatusSummary(this)
+                setOnPreferenceClickListener {
+                    showCrashReporterDiagnostics()
+                    true
+                }
+            }
+            
+            // Test Crash
+            findPreference<Preference>("test_crash")?.setOnPreferenceClickListener {
+                testCrashReporter()
+                true
+            }
+            
+            // Clear Crash Logs
+            findPreference<Preference>("clear_crash_logs")?.setOnPreferenceClickListener {
+                confirmClearCrashLogs()
+                true
+            }
+        }
+        
+        /**
+         * Update the crash reporter status summary
+         */
+        private fun updateCrashReporterStatusSummary(pref: Preference) {
+            val crashReporter = CrashReporter.getInstanceOrNull()
+            if (crashReporter != null) {
+                val diagnostics = crashReporter.getDiagnostics()
+                val statusText = when {
+                    diagnostics.isWorking() -> "✓ Working"
+                    else -> "⚠ Not initialized"
+                }
+                val logsCount = crashReporter.getCrashLogs().size
+                pref.summary = "$statusText • $logsCount crash logs saved"
+            } else {
+                pref.summary = "⚠ Crash reporter not initialized"
+            }
+        }
+        
+        /**
+         * Show crash logs dialog with list of available crash logs
+         */
+        private fun showCrashLogsDialog() {
+            val crashReporter = CrashReporter.getInstanceOrNull()
+            if (crashReporter == null) {
+                Toast.makeText(requireContext(), "Crash reporter not initialized", Toast.LENGTH_SHORT).show()
+                return
+            }
+            
+            val crashLogs = crashReporter.getCrashLogs()
+            
+            if (crashLogs.isEmpty()) {
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Crash Logs")
+                    .setMessage("No crash logs found.\n\nThis is good! It means the app hasn't crashed.")
+                    .setPositiveButton("OK", null)
+                    .show()
+                return
+            }
+            
+            val logNames = crashLogs.map { it.name }.toTypedArray()
+            
+            AlertDialog.Builder(requireContext())
+                .setTitle("Crash Logs (${crashLogs.size})")
+                .setItems(logNames) { _, which ->
+                    val selectedLog = crashLogs[which]
+                    showCrashLogContent(selectedLog.name, crashReporter.readCrashLog(selectedLog))
+                }
+                .setNegativeButton("Close", null)
+                .setNeutralButton("View Summary") { _, _ ->
+                    showCrashSummary(crashReporter.generateCrashSummary())
+                }
+                .show()
+        }
+        
+        /**
+         * Show content of a specific crash log
+         */
+        private fun showCrashLogContent(filename: String, content: String?) {
+            if (content == null) {
+                Toast.makeText(requireContext(), "Failed to read crash log", Toast.LENGTH_SHORT).show()
+                return
+            }
+            
+            AlertDialog.Builder(requireContext())
+                .setTitle(filename)
+                .setMessage(content)
+                .setPositiveButton("Close", null)
+                .setNeutralButton("Copy") { _, _ ->
+                    copyToClipboard("Crash Log", content)
+                    Toast.makeText(requireContext(), "Crash log copied to clipboard", Toast.LENGTH_SHORT).show()
+                }
+                .show()
+        }
+        
+        /**
+         * Show crash summary
+         */
+        private fun showCrashSummary(summary: String) {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Crash Summary")
+                .setMessage(summary)
+                .setPositiveButton("Close", null)
+                .setNeutralButton("Copy") { _, _ ->
+                    copyToClipboard("Crash Summary", summary)
+                    Toast.makeText(requireContext(), "Summary copied to clipboard", Toast.LENGTH_SHORT).show()
+                }
+                .show()
+        }
+        
+        /**
+         * Show crash reporter diagnostics
+         */
+        private fun showCrashReporterDiagnostics() {
+            val crashReporter = CrashReporter.getInstanceOrNull()
+            if (crashReporter == null) {
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Crash Reporter Status")
+                    .setMessage("⚠ Crash Reporter is NOT initialized!\n\nThis means crashes will not be logged.\n\nPossible causes:\n• App initialization failed\n• Storage access issue\n\nTry restarting the app.")
+                    .setPositiveButton("OK", null)
+                    .show()
+                return
+            }
+            
+            val diagnostics = crashReporter.getDiagnostics()
+            val report = diagnostics.toReport()
+            
+            AlertDialog.Builder(requireContext())
+                .setTitle("Crash Reporter Status")
+                .setMessage(report)
+                .setPositiveButton("Close", null)
+                .setNeutralButton("Copy") { _, _ ->
+                    copyToClipboard("Crash Reporter Diagnostics", report)
+                    Toast.makeText(requireContext(), "Diagnostics copied to clipboard", Toast.LENGTH_SHORT).show()
+                }
+                .setNegativeButton("Reinitialize") { _, _ ->
+                    val success = crashReporter.reinitializeStorage()
+                    if (success) {
+                        Toast.makeText(requireContext(), "Crash reporter reinitialized", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "Reinitialization failed", Toast.LENGTH_SHORT).show()
+                    }
+                    // Update the status summary
+                    findPreference<Preference>("crash_reporter_status")?.let {
+                        updateCrashReporterStatusSummary(it)
+                    }
+                }
+                .show()
+        }
+        
+        /**
+         * Test the crash reporter by generating a test exception
+         */
+        private fun testCrashReporter() {
+            val crashReporter = CrashReporter.getInstanceOrNull()
+            if (crashReporter == null) {
+                Toast.makeText(requireContext(), "Crash reporter not initialized", Toast.LENGTH_SHORT).show()
+                return
+            }
+            
+            AlertDialog.Builder(requireContext())
+                .setTitle("Test Crash Reporter")
+                .setMessage("This will generate a non-fatal test exception to verify crash reporting is working.\n\nThe exception will be logged but the app will not crash.")
+                .setPositiveButton("Generate Test Crash") { _, _ ->
+                    try {
+                        // Create a test exception
+                        val testException = RuntimeException("Test crash generated from Settings at ${java.util.Date()}")
+                        crashReporter.reportException(testException, "Settings test crash")
+                        
+                        Toast.makeText(requireContext(), "Test crash report generated", Toast.LENGTH_SHORT).show()
+                        
+                        // Update the status
+                        findPreference<Preference>("crash_reporter_status")?.let {
+                            updateCrashReporterStatusSummary(it)
+                        }
+                    } catch (e: Exception) {
+                        Toast.makeText(requireContext(), "Failed to generate test crash: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+        
+        /**
+         * Confirm and clear all crash logs
+         */
+        private fun confirmClearCrashLogs() {
+            val crashReporter = CrashReporter.getInstanceOrNull()
+            if (crashReporter == null) {
+                Toast.makeText(requireContext(), "Crash reporter not initialized", Toast.LENGTH_SHORT).show()
+                return
+            }
+            
+            val logsCount = crashReporter.getCrashLogs().size
+            
+            if (logsCount == 0) {
+                Toast.makeText(requireContext(), "No crash logs to clear", Toast.LENGTH_SHORT).show()
+                return
+            }
+            
+            AlertDialog.Builder(requireContext())
+                .setTitle("Clear Crash Logs")
+                .setMessage("Delete all $logsCount crash logs?\n\nThis cannot be undone.")
+                .setPositiveButton("Clear All") { _, _ ->
+                    crashReporter.clearCrashLogs()
+                    Toast.makeText(requireContext(), "Crash logs cleared", Toast.LENGTH_SHORT).show()
+                    
+                    // Update the status
+                    findPreference<Preference>("crash_reporter_status")?.let {
+                        updateCrashReporterStatusSummary(it)
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+        
+        /**
+         * Copy text to clipboard
+         */
+        private fun copyToClipboard(label: String, text: String) {
+            val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText(label, text)
+            clipboard.setPrimaryClip(clip)
         }
         
         /**
