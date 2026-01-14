@@ -29,6 +29,7 @@ import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.SSLHelper
 import com.linkpoint.ui.tos.TosActivity
 import com.linkpoint.ui.world.WorldViewActivity
+import com.linkpoint.utils.PermissionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -61,6 +62,7 @@ class LoginActivity : AppCompatActivity() {
         private const val KEY_ENCRYPTED_PASSWORD = "encrypted_password"
         private const val KEY_PASSWORD_IV = "password_iv"
         private const val KEY_STORAGE_PERMISSION_REQUESTED = "storage_permission_requested"
+        private const val KEY_ALL_PERMISSIONS_REQUESTED = "all_permissions_requested"
         
         // Android Keystore alias for password encryption
         private const val KEYSTORE_ALIAS = "LinkpointLoginKey"
@@ -80,6 +82,9 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var statusText: TextView
     
     private val app by lazy { LinkpointApp.getInstance() }
+    
+    // Permission manager for handling runtime permissions
+    private lateinit var permissionManager: PermissionManager
     
     // ToS acceptance result handler
     private val tosLauncher = registerForActivityResult(
@@ -121,14 +126,25 @@ class LoginActivity : AppCompatActivity() {
             .apply()
     }
     
+    // All permissions launcher for startup
+    private val allPermissionsLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        handleAllPermissionsResult(permissions)
+    }
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         
         initViews()
         
-        // Request storage permissions for log file saving (only once)
-        requestStoragePermissionsIfNeeded()
+        // Initialize permission manager
+        permissionManager = PermissionManager(this)
+        permissionManager.registerPermissionLauncher(allPermissionsLauncher)
+        
+        // Request all essential permissions on startup (storage, notifications, etc.)
+        requestAllStartupPermissions()
         
         // Check ToS acceptance first (like Lumiya does)
         if (!TosActivity.hasAcceptedTos(this)) {
@@ -141,6 +157,90 @@ class LoginActivity : AppCompatActivity() {
         
         setupGridSpinner()
         setupListeners()
+    }
+    
+    /**
+     * Handle results from all permissions request
+     */
+    private fun handleAllPermissionsResult(permissions: Map<String, Boolean>) {
+        val granted = permissions.filter { it.value }.keys
+        val denied = permissions.filter { !it.value }.keys
+        
+        if (granted.isNotEmpty()) {
+            Log.i(TAG, "Permissions granted: ${granted.joinToString()}")
+        }
+        
+        if (denied.isNotEmpty()) {
+            Log.w(TAG, "Permissions denied: ${denied.joinToString()}")
+            
+            // Show a user-friendly message about denied permissions
+            val deniedNames = denied.map { permissionManager.getPermissionDisplayName(it) }.distinct()
+            if (deniedNames.isNotEmpty()) {
+                Toast.makeText(
+                    this,
+                    "Some features may be limited. Denied: ${deniedNames.joinToString(", ")}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+        
+        // Mark that we've requested permissions
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+            .putBoolean(KEY_ALL_PERMISSIONS_REQUESTED, true)
+            .apply()
+    }
+    
+    /**
+     * Request all essential permissions on startup.
+     * This includes storage (for logs/cache), notifications, microphone, and Bluetooth.
+     */
+    private fun requestAllStartupPermissions() {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        if (prefs.getBoolean(KEY_ALL_PERMISSIONS_REQUESTED, false)) {
+            Log.i(TAG, "Startup permissions already requested")
+            return
+        }
+        
+        // Get all permissions we need
+        val allPermissions = mutableListOf<String>()
+        
+        // Storage permissions based on Android version
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            allPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            allPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+        } else if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
+            allPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+        // Android 13+ uses scoped storage, no permission needed for app-specific dirs
+        
+        // Notification permission for Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            allPermissions.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        
+        // Microphone for voice chat
+        allPermissions.add(Manifest.permission.RECORD_AUDIO)
+        
+        // Bluetooth for headsets based on Android version
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            allPermissions.add(Manifest.permission.BLUETOOTH_CONNECT)
+        } else {
+            allPermissions.add(Manifest.permission.BLUETOOTH)
+        }
+        
+        // Filter out already granted permissions
+        val permissionsToRequest = allPermissions.filter { permission ->
+            ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED
+        }.toTypedArray()
+        
+        if (permissionsToRequest.isEmpty()) {
+            Log.i(TAG, "All startup permissions already granted")
+            prefs.edit().putBoolean(KEY_ALL_PERMISSIONS_REQUESTED, true).apply()
+            return
+        }
+        
+        Log.i(TAG, "Requesting startup permissions: ${permissionsToRequest.joinToString()}")
+        allPermissionsLauncher.launch(permissionsToRequest)
     }
     
     /**
