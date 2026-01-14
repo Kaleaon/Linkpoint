@@ -271,8 +271,10 @@ class ParticleSystem(
         val vertexData = ByteBuffer.allocateDirect(totalParticles * 4 * stride)
             .order(ByteOrder.nativeOrder())
         
-        // Billboard vectors
-        val cameraRight = LLVector3(1f, 0f, 0f) // Simplified - should use actual camera
+        // Compute billboard vectors from camera position
+        // Using a simplified world-aligned billboard for now
+        // For camera-aligned billboards, we'd need the full camera transform
+        val cameraRight = LLVector3(1f, 0f, 0f)
         val cameraUp = LLVector3(0f, 0f, 1f)
         
         for (source in particleSources.values) {
@@ -280,12 +282,24 @@ class ParticleSystem(
                 val halfWidth = particle.scale.x * 0.5f
                 val halfHeight = particle.scale.y * 0.5f
                 
-                // Quad corners (billboard)
+                // For true billboarding, compute direction to camera
+                val toCamera = (cameraPosition - particle.position).normalize()
+                
+                // Use cross products to get proper billboard orientation
+                // This creates camera-facing quads
+                val right = if (kotlin.math.abs(toCamera.z) < 0.99f) {
+                    LLVector3(0f, 0f, 1f).cross(toCamera).normalize()
+                } else {
+                    cameraRight
+                }
+                val up = toCamera.cross(right).normalize()
+                
+                // Quad corners (billboard facing camera)
                 val corners = arrayOf(
-                    particle.position + cameraRight * (-halfWidth) + cameraUp * (-halfHeight),
-                    particle.position + cameraRight * halfWidth + cameraUp * (-halfHeight),
-                    particle.position + cameraRight * halfWidth + cameraUp * halfHeight,
-                    particle.position + cameraRight * (-halfWidth) + cameraUp * halfHeight
+                    particle.position + right * (-halfWidth) + up * (-halfHeight),
+                    particle.position + right * halfWidth + up * (-halfHeight),
+                    particle.position + right * halfWidth + up * halfHeight,
+                    particle.position + right * (-halfWidth) + up * halfHeight
                 )
                 
                 val uvs = arrayOf(

@@ -238,7 +238,72 @@ class LinkpointApp : Application() {
         objectManager = ObjectManager(udpConnection)
         buildTools = BuildTools(objectManager)
         
+        // Register UDP message handlers for real-time data
+        registerMessageHandlers()
+        
         Log.d(TAG, "Agent managers initialized")
+    }
+    
+    /**
+     * Register message handlers for UDP packet processing.
+     * This connects the parsed messages to their respective managers.
+     */
+    private fun registerMessageHandlers() {
+        Log.d(TAG, "Registering UDP message handlers...")
+        
+        // Chat from simulator (nearby chat)
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.CHAT_FROM_SIMULATOR) { _, payload ->
+            try {
+                val chatData = com.linkpoint.protocol.messages.MessageParser.parseChatFromSimulator(payload)
+                if (chatData != null && ::chatManager.isInitialized) {
+                    chatManager.handleChatFromSimulator(chatData)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling ChatFromSimulator", e)
+            }
+        }
+        
+        // Object updates
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE) { _, payload ->
+            try {
+                val updates = com.linkpoint.protocol.messages.MessageParser.parseObjectUpdate(payload)
+                updates.forEach { update ->
+                    if (::objectManager.isInitialized) {
+                        objectManager.handleObjectUpdate(update)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling ObjectUpdate", e)
+            }
+        }
+        
+        // Compressed object updates
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE_COMPRESSED) { _, payload ->
+            try {
+                val updates = com.linkpoint.protocol.messages.MessageParser.parseObjectUpdateCompressed(payload)
+                updates.forEach { update ->
+                    if (::objectManager.isInitialized) {
+                        objectManager.handleObjectUpdate(update)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling ObjectUpdateCompressed", e)
+            }
+        }
+        
+        // Avatar animation updates
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.AVATAR_ANIMATION) { _, payload ->
+            try {
+                val animData = com.linkpoint.protocol.messages.MessageParser.parseAvatarAnimation(payload)
+                if (animData != null && ::avatarManager.isInitialized) {
+                    avatarManager.handleAvatarAnimation(animData)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling AvatarAnimation", e)
+            }
+        }
+        
+        Log.d(TAG, "UDP message handlers registered")
     }
     
     override fun onTerminate() {

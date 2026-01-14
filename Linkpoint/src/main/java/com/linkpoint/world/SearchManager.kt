@@ -173,13 +173,83 @@ class SearchManager(
     ): SearchResults<LandResult> {
         return withContext(Dispatchers.IO) {
             try {
-                // Would use land search API
-                SearchResults(emptyList(), 0, 0)
+                // Use land search capability
+                val request = LLSDMap().apply {
+                    this["query"] = LLSDString(query)
+                    if (category.isNotEmpty()) {
+                        this["category"] = LLSDString(category)
+                    }
+                    this["sale_type"] = LLSDInteger(when (saleType) {
+                        LandSaleType.ALL -> 0
+                        LandSaleType.FOR_AUCTION -> 1
+                        LandSaleType.FOR_SALE -> 2
+                        LandSaleType.MAINLAND -> 3
+                        LandSaleType.ESTATE -> 4
+                    })
+                    this["min_price"] = LLSDInteger(minPrice)
+                    this["max_price"] = LLSDInteger(if (maxPrice == Int.MAX_VALUE) -1 else maxPrice)
+                    this["min_area"] = LLSDInteger(minArea)
+                    this["max_area"] = LLSDInteger(if (maxArea == Int.MAX_VALUE) -1 else maxArea)
+                    this["start"] = LLSDInteger(start)
+                    this["count"] = LLSDInteger(count)
+                }
+                
+                val response = capabilityManager.request("SearchLand", request)
+                if (response != null) {
+                    parseLandResults(response)
+                } else {
+                    Log.w(TAG, "Land search returned no response")
+                    SearchResults(emptyList(), 0, 0)
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Land search failed", e)
                 SearchResults(emptyList(), 0, 0)
             }
         }
+    }
+    
+    private fun parseLandResults(response: Any): SearchResults<LandResult> {
+        // Parse LLSD response into land results
+        val results = mutableListOf<LandResult>()
+        var totalCount = 0
+        
+        try {
+            if (response is LLSDMap) {
+                totalCount = (response["total_count"] as? LLSDInteger)?.value ?: 0
+                val resultsArray = response["results"] as? LLSDArray
+                if (resultsArray != null) {
+                    val arraySize = resultsArray.size
+                    for (i in 0 until arraySize) {
+                        val item = resultsArray[i] as? LLSDMap ?: continue
+                        val area = (item["area"] as? LLSDInteger)?.value ?: 0
+                        val salePrice = (item["price"] as? LLSDInteger)?.value ?: 0
+                        results.add(LandResult(
+                            parcelId = try {
+                                UUID.fromString((item["parcel_id"] as? LLSDString)?.value ?: "")
+                            } catch (e: Exception) { UUID.randomUUID() },
+                            name = (item["name"] as? LLSDString)?.value ?: "",
+                            description = (item["description"] as? LLSDString)?.value ?: "",
+                            region = (item["region"] as? LLSDString)?.value ?: "",
+                            area = area,
+                            salePrice = salePrice,
+                            pricePerMeter = if (area > 0) salePrice.toFloat() / area else 0f,
+                            saleType = when ((item["sale_type"] as? LLSDInteger)?.value) {
+                                1 -> LandSaleType.FOR_AUCTION
+                                2 -> LandSaleType.FOR_SALE
+                                3 -> LandSaleType.MAINLAND
+                                4 -> LandSaleType.ESTATE
+                                else -> LandSaleType.ALL
+                            },
+                            isAuction = ((item["sale_type"] as? LLSDInteger)?.value ?: 0) == 1
+                        ))
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to parse land results", e)
+        }
+        
+        return SearchResults(results, results.size, totalCount)
     }
     
     /**

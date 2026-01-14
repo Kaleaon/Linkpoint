@@ -49,6 +49,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     // HUD elements
     private lateinit var regionNameText: TextView
     private lateinit var avatarNameText: TextView
+    private lateinit var btnMenu: ImageButton
     private lateinit var btnChat: ImageButton
     private lateinit var btnMinimap: ImageButton
     private lateinit var btnInventory: ImageButton
@@ -154,6 +155,12 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         
         regionNameText = findViewById(R.id.textRegionName)
         avatarNameText = findViewById(R.id.textAvatarName)
+        
+        // Menu button - opens navigation drawer
+        btnMenu = findViewById(R.id.btnMenu)
+        btnMenu.setOnClickListener {
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
         
         btnChat = findViewById(R.id.btnChat)
         btnMinimap = findViewById(R.id.btnMinimap)

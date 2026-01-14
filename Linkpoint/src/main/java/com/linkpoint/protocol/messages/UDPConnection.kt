@@ -7,6 +7,7 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -19,6 +20,8 @@ class UDPConnection {
     private var simIP: String = ""
     private var simPort: Int = 0
     private var circuitCode: Int = 0
+    private var sessionId: UUID = UUID(0, 0)
+    private var agentId: UUID = UUID(0, 0)
     
     constructor()
     
@@ -33,6 +36,30 @@ class UDPConnection {
         this.simPort = simPort
         this.circuitCode = circuitCode
     }
+    
+    /**
+     * Set session information for circuit establishment
+     */
+    fun setSessionInfo(sessionId: UUID, agentId: UUID) {
+        this.sessionId = sessionId
+        this.agentId = agentId
+    }
+    
+    /**
+     * Get the agent ID for this connection
+     */
+    fun getAgentId(): UUID = agentId
+    
+    /**
+     * Get the session ID for this connection
+     */
+    fun getSessionId(): UUID = sessionId
+    
+    /**
+     * Get the circuit code for this connection
+     */
+    fun getCircuitCode(): Int = circuitCode
+    
     companion object {
         private const val TAG = "UDPConnection"
         private const val BUFFER_SIZE = 65535
@@ -72,13 +99,43 @@ class UDPConnection {
             // Send UseCircuitCode message
             sendUseCircuitCode()
             
+            // Wait a moment for the circuit to be established
+            delay(500)
+            
+            // Send CompleteAgentMovement to tell the simulator we're ready
+            sendCompleteAgentMovement()
+            
             isConnected = true
-            Log.i(TAG, "Connected to $simIP:$simPort")
+            Log.i(TAG, "Connected to $simIP:$simPort, circuit established")
             true
         } catch (e: Exception) {
             Log.e(TAG, "Connection failed", e)
             false
         }
+    }
+    
+    /**
+     * Send CompleteAgentMovement message.
+     * This tells the simulator we're ready to receive world data.
+     */
+    suspend fun sendCompleteAgentMovement() {
+        // CompleteAgentMovement message format:
+        // - AgentID (16 bytes, UUID)
+        // - SessionID (16 bytes, UUID)
+        // - CircuitCode (4 bytes, U32)
+        val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
+        
+        // Agent ID
+        payload.putUUID(agentId)
+        
+        // Session ID
+        payload.putUUID(sessionId)
+        
+        // Circuit code
+        payload.putInt(circuitCode)
+        
+        Log.d(TAG, "Sending CompleteAgentMovement")
+        sendPacket(MessageIds.COMPLETE_AGENT_MOVEMENT, payload.array(), reliable = true)
     }
     
     /**
@@ -244,12 +301,34 @@ class UDPConnection {
         sendPacket(0xFFFFFFFF.toInt(), payload, reliable = false)
     }
     
+    /**
+     * Write UUID to ByteBuffer in Second Life format.
+     * SL stores UUIDs as 16 raw bytes in little-endian order.
+     */
+    private fun ByteBuffer.putUUID(uuid: UUID): ByteBuffer {
+        // Second Life UUID format: raw 16 bytes
+        // The UUID is stored as two 64-bit values in big-endian within the little-endian buffer
+        // This matches how they're received/parsed
+        putLong(uuid.mostSignificantBits)
+        putLong(uuid.leastSignificantBits)
+        return this
+    }
+    
     private suspend fun sendUseCircuitCode() {
-        val payload = ByteBuffer.allocate(12).order(ByteOrder.LITTLE_ENDIAN)
+        // UseCircuitCode message format:
+        // - CircuitCode (4 bytes, U32)
+        // - SessionID (16 bytes, UUID)
+        // - AgentID (16 bytes, UUID)
+        val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
         payload.putInt(circuitCode)
-        // Session ID and Agent ID would go here
-        payload.putLong(0) // Placeholder
         
+        // Session ID (UUID)
+        payload.putUUID(sessionId)
+        
+        // Agent ID (UUID)
+        payload.putUUID(agentId)
+        
+        Log.d(TAG, "Sending UseCircuitCode: circuit=$circuitCode, agent=${agentId.toString().take(8)}...")
         sendPacket(MessageIds.USE_CIRCUIT_CODE, payload.array(), reliable = true)
     }
     
@@ -343,11 +422,57 @@ object MessageIds {
     const val USE_CIRCUIT_CODE: Int = 0xFFFF0003.toInt()
     const val COMPLETE_AGENT_MOVEMENT: Int = 0xFFFF00F9.toInt()
     const val LOGOUT_REQUEST: Int = 0xFFFF00FC.toInt()
+    const val CHAT_FROM_SIMULATOR: Int = 0xFFFF00A3.toInt()
+    const val IMPROVED_INSTANT_MESSAGE: Int = 0xFFFF00FE.toInt()
+    const val REGION_HANDSHAKE: Int = 0xFFFF0094.toInt()
+    const val AGENT_MOVEMENT_COMPLETE: Int = 0xFFFF00FA.toInt()
+    const val OBJECT_LINK: Int = 0xFFFF0066.toInt()
+    const val OBJECT_DELINK: Int = 0xFFFF0067.toInt()
+    const val REZ_OBJECT: Int = 0xFFFF0068.toInt()
+    const val DEREZ_OBJECT: Int = 0xFFFF0069.toInt()
+    const val OBJECT_DELETE: Int = 0xFFFF0089.toInt()
+    const val OBJECT_NAME: Int = 0xFFFF008C.toInt()
+    const val OBJECT_DESCRIPTION: Int = 0xFFFF008D.toInt()
+    const val OBJECT_GRAB: Int = 0xFFFF0117.toInt()
+    const val OBJECT_DEGRAB: Int = 0xFFFF0118.toInt()
+    const val AGENT_REQUEST_SIT: Int = 0xFFFF00F5.toInt()
+    const val AGENT_SIT: Int = 0xFFFF00F7.toInt()
+    const val OFFER_FRIENDSHIP: Int = 0xFFFF0039.toInt()
+    const val TERMINATE_FRIENDSHIP: Int = 0xFFFF003A.toInt()
+    const val GRANT_USER_RIGHTS: Int = 0xFFFF003B.toInt()
+    const val FIND_AGENT: Int = 0xFFFF001F.toInt()
+    const val START_LURE: Int = 0xFFFF0040.toInt()
+    const val TELEPORT_LURE_REQUEST: Int = 0xFFFF0041.toInt()
+    const val AVATAR_PROPERTIES_UPDATE: Int = 0xFFFF00A6.toInt()
+    const val GROUP_ROLE_DATA_REQUEST: Int = 0xFFFF0176.toInt()
+    const val ACTIVATE_GROUP: Int = 0xFFFF0177.toInt()
+    const val JOIN_GROUP_REQUEST: Int = 0xFFFF0178.toInt()
+    const val LEAVE_GROUP_REQUEST: Int = 0xFFFF0179.toInt()
+    const val ACCEPT_FRIENDSHIP: Int = 0xFFFF003C.toInt()
+    const val DECLINE_FRIENDSHIP: Int = 0xFFFF003D.toInt()
+    const val IM_VIA_EMAIL: Int = 0xFFFF00FF.toInt()
+    
+    // Parcel messages
+    const val PARCEL_BUY: Int = 0xFFFF00D1.toInt()
+    const val PARCEL_DEED_TO_GROUP: Int = 0xFFFF00D2.toInt()
+    const val PARCEL_RELEASE: Int = 0xFFFF00D3.toInt()
+    const val PARCEL_PROPERTIES_UPDATE: Int = 0xFFFF00D4.toInt()
+    const val PARCEL_RETURN_OBJECTS: Int = 0xFFFF00C9.toInt()
+    const val PARCEL_ACCESS_LIST_UPDATE: Int = 0xFFFF00CF.toInt()
+    const val PARCEL_DISABLE_OBJECTS: Int = 0xFFFF00C9.toInt()
     
     // Medium frequency (0xFFxx)
     const val AGENT_UPDATE: Int = 0xFF04
     const val CHAT_FROM_VIEWER: Int = 0xFF50
     const val INSTANT_MESSAGE: Int = 0xFF4B
+    const val KILL_OBJECT: Int = 0xFF0C
+    const val OBJECT_SELECT: Int = 0xFF09
+    const val OBJECT_DESELECT: Int = 0xFF0A
+    const val MULTIPLE_OBJECT_UPDATE: Int = 0xFF0B
+    const val AGENT_ANIMATION: Int = 0xFF05
+    const val SOUND_TRIGGER: Int = 0xFF1D
+    const val TYPING_START: Int = 0xFF4C
+    const val TYPING_STOP: Int = 0xFF4D
     
     // High frequency (0x00 - 0xFE)
     const val START_PING_CHECK: Int = 0x01
@@ -355,6 +480,7 @@ object MessageIds {
     const val OBJECT_UPDATE: Int = 0x0C
     const val OBJECT_UPDATE_COMPRESSED: Int = 0x0D
     const val OBJECT_UPDATE_CACHED: Int = 0x0E
+    const val IMPROVED_TERSE_OBJECT_UPDATE: Int = 0x0F
     const val AVATAR_ANIMATION: Int = 0x14
     const val COARSE_LOCATION_UPDATE: Int = 0x06
 }

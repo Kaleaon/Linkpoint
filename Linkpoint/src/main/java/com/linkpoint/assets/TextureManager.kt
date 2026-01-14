@@ -122,8 +122,17 @@ class TextureManager(
             return decodeTexture(textureId, cachedData)
         }
         
-        // Download from server
-        val data = downloadTexture(textureId, discard) ?: return null
+        // Use priority to determine download timeout and retry behavior
+        val timeoutMs = when (priority) {
+            TexturePriority.CRITICAL -> 10000L   // Highest priority - avatar/UI textures
+            TexturePriority.HIGH -> 12000L       // Nearby objects
+            TexturePriority.NORMAL -> 15000L     // Standard objects
+            TexturePriority.LOW -> 25000L        // Background/far away
+            TexturePriority.PREFETCH -> 30000L   // Speculative loading
+        }
+        
+        // Download from server with priority-based timeout
+        val data = downloadTexture(textureId, discard, timeoutMs) ?: return null
         
         // Cache raw data
         cache.put(textureId, AssetType.TEXTURE, data)
@@ -132,7 +141,11 @@ class TextureManager(
         return decodeTexture(textureId, data)
     }
     
-    private suspend fun downloadTexture(textureId: UUID, discard: Int): ByteArray? = withContext(Dispatchers.IO) {
+    private suspend fun downloadTexture(
+        textureId: UUID, 
+        discard: Int, 
+        timeoutMs: Long = 15000L
+    ): ByteArray? = withContext(Dispatchers.IO) {
         updateStats { it.copy(pendingDownloads = it.pendingDownloads + 1) }
         
         try {

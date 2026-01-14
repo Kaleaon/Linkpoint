@@ -1,6 +1,7 @@
 package com.linkpoint.objects
 
 import android.util.Log
+import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.ObjectUpdateData
 import com.linkpoint.protocol.messages.TerseUpdateData
 import com.linkpoint.protocol.messages.UDPConnection
@@ -243,14 +244,35 @@ class ObjectManager(
      * Request object properties
      */
     private fun requestObjectProperties(localIds: List<Int>) {
-        // Build ObjectSelect packet
+        if (localIds.isEmpty()) return
+        
         scope.launch {
-            // Would send ObjectSelect message
+            // Build ObjectSelect packet
+            // Format: AgentData block + ObjectData blocks
+            val payload = ByteBuffer.allocate(16 + 4 * localIds.size).order(ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData - placeholder for agent ID (16 bytes)
+            repeat(16) { payload.put(0) }
+            
+            // Object count
+            payload.put(localIds.size.toByte())
+            
+            // ObjectData blocks - local IDs
+            for (localId in localIds) {
+                payload.putInt(localId)
+            }
+            
+            try {
+                udpConnection.sendPacket(MessageIds.OBJECT_SELECT, payload.array(), reliable = true)
+                Log.d(TAG, "Requested properties for ${localIds.size} objects")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to request object properties", e)
+            }
         }
     }
     
     /**
-     * Send object update to server
+     * Send object update to server (position, rotation, scale)
      */
     private fun sendObjectUpdate(
         localId: Int,
@@ -259,8 +281,60 @@ class ObjectManager(
         scale: LLVector3? = null
     ) {
         scope.launch {
-            // Build MultipleObjectUpdate packet
-            // Would send via UDP
+            // MultipleObjectUpdate packet
+            // Determine update type flags
+            var updateType = 0
+            if (position != null) updateType = updateType or 0x01  // Position
+            if (rotation != null) updateType = updateType or 0x02  // Rotation
+            if (scale != null) updateType = updateType or 0x04     // Scale
+            
+            if (updateType == 0) return@launch
+            
+            // Calculate payload size
+            var dataSize = 0
+            if (position != null) dataSize += 12  // 3 floats
+            if (rotation != null) dataSize += 12  // 3 floats (quaternion compressed)
+            if (scale != null) dataSize += 12     // 3 floats
+            
+            val payload = ByteBuffer.allocate(16 + 1 + 4 + 1 + dataSize).order(ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData - placeholder
+            repeat(16) { payload.put(0) }
+            
+            // Number of objects
+            payload.put(1.toByte())
+            
+            // ObjectData block
+            payload.putInt(localId)
+            payload.put(updateType.toByte())
+            
+            // Write position if provided
+            position?.let {
+                payload.putFloat(it.x)
+                payload.putFloat(it.y)
+                payload.putFloat(it.z)
+            }
+            
+            // Write rotation if provided
+            rotation?.let {
+                payload.putFloat(it.x)
+                payload.putFloat(it.y)
+                payload.putFloat(it.z)
+            }
+            
+            // Write scale if provided
+            scale?.let {
+                payload.putFloat(it.x)
+                payload.putFloat(it.y)
+                payload.putFloat(it.z)
+            }
+            
+            try {
+                udpConnection.sendPacket(MessageIds.MULTIPLE_OBJECT_UPDATE, payload.array(), reliable = true)
+                Log.d(TAG, "Sent object update for localId=$localId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to send object update", e)
+            }
         }
     }
     
@@ -273,7 +347,35 @@ class ObjectManager(
         rotation: LLQuaternion = LLQuaternion.identity()
     ) {
         scope.launch {
-            // Would send RezObject message
+            // RezObject message
+            val payload = ByteBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData - placeholder (16 bytes agent, 16 bytes session, 16 bytes group)
+            repeat(48) { payload.put(0) }
+            
+            // RezData
+            payload.putLong(itemId.mostSignificantBits)
+            payload.putLong(itemId.leastSignificantBits)
+            
+            // Position
+            payload.putFloat(position.x)
+            payload.putFloat(position.y)
+            payload.putFloat(position.z)
+            
+            // Rotation
+            payload.putFloat(rotation.x)
+            payload.putFloat(rotation.y)
+            payload.putFloat(rotation.z)
+            
+            // Flags
+            payload.putInt(0)  // RezSelected = false
+            
+            try {
+                udpConnection.sendPacket(MessageIds.REZ_OBJECT, payload.array(), reliable = true)
+                Log.i(TAG, "Sent RezObject for item $itemId at $position")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to rez object", e)
+            }
         }
     }
     
@@ -282,7 +384,29 @@ class ObjectManager(
      */
     fun takeObject(localId: Int, folderId: UUID) {
         scope.launch {
-            // Would send DeRezObject message
+            // DeRezObject message
+            val payload = ByteBuffer.allocate(60).order(ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData - placeholder
+            repeat(48) { payload.put(0) }
+            
+            // DeRezData
+            payload.put(4)  // Destination = Take to inventory
+            payload.putLong(folderId.mostSignificantBits)
+            payload.putLong(folderId.leastSignificantBits)
+            payload.putLong(0)  // TransactionID MSB
+            payload.putLong(0)  // TransactionID LSB
+            
+            // ObjectData
+            payload.put(1)  // Number of objects
+            payload.putInt(localId)
+            
+            try {
+                udpConnection.sendPacket(MessageIds.DEREZ_OBJECT, payload.array(), reliable = true)
+                Log.i(TAG, "Sent DeRezObject for localId=$localId to folder $folderId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to take object", e)
+            }
         }
     }
     
@@ -291,7 +415,31 @@ class ObjectManager(
      */
     fun deleteObject(localId: Int) {
         scope.launch {
-            // Would send ObjectDelete message
+            // ObjectDelete message
+            val payload = ByteBuffer.allocate(25).order(ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData - placeholder
+            repeat(16) { payload.put(0) }
+            
+            // Force
+            payload.put(0)
+            
+            // ObjectData
+            payload.put(1)  // Number of objects
+            payload.putInt(localId)
+            
+            try {
+                udpConnection.sendPacket(MessageIds.OBJECT_DELETE, payload.array(), reliable = true)
+                
+                // Remove from local cache
+                objects.remove(localId)?.let { obj ->
+                    objectsByUUID.remove(obj.fullId)
+                }
+                
+                Log.i(TAG, "Deleted object localId=$localId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to delete object", e)
+            }
         }
     }
     
@@ -302,7 +450,24 @@ class ObjectManager(
         if (localIds.size < 2) return
         
         scope.launch {
-            // Would send ObjectLink message
+            // ObjectLink message
+            val payload = ByteBuffer.allocate(17 + 4 * localIds.size).order(ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData - placeholder
+            repeat(16) { payload.put(0) }
+            
+            // ObjectData
+            payload.put(localIds.size.toByte())
+            for (localId in localIds) {
+                payload.putInt(localId)
+            }
+            
+            try {
+                udpConnection.sendPacket(MessageIds.OBJECT_LINK, payload.array(), reliable = true)
+                Log.i(TAG, "Linked ${localIds.size} objects")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to link objects", e)
+            }
         }
     }
     
@@ -310,8 +475,27 @@ class ObjectManager(
      * Unlink objects
      */
     fun unlinkObjects(localIds: List<Int>) {
+        if (localIds.isEmpty()) return
+        
         scope.launch {
-            // Would send ObjectUnlink message
+            // ObjectDelink message
+            val payload = ByteBuffer.allocate(17 + 4 * localIds.size).order(ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData - placeholder
+            repeat(16) { payload.put(0) }
+            
+            // ObjectData
+            payload.put(localIds.size.toByte())
+            for (localId in localIds) {
+                payload.putInt(localId)
+            }
+            
+            try {
+                udpConnection.sendPacket(MessageIds.OBJECT_DELINK, payload.array(), reliable = true)
+                Log.i(TAG, "Unlinked ${localIds.size} objects")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to unlink objects", e)
+            }
         }
     }
     
@@ -322,7 +506,25 @@ class ObjectManager(
         objects[localId]?.name = name
         
         scope.launch {
-            // Would send ObjectName message
+            // ObjectName message
+            val nameBytes = name.toByteArray(Charsets.UTF_8)
+            val payload = ByteBuffer.allocate(17 + 4 + 1 + nameBytes.size).order(ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData - placeholder
+            repeat(16) { payload.put(0) }
+            
+            // ObjectData
+            payload.put(1)  // Number of objects
+            payload.putInt(localId)
+            payload.put(nameBytes.size.toByte())
+            payload.put(nameBytes)
+            
+            try {
+                udpConnection.sendPacket(MessageIds.OBJECT_NAME, payload.array(), reliable = true)
+                Log.d(TAG, "Set object name: localId=$localId, name=$name")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to set object name", e)
+            }
         }
     }
     
@@ -333,7 +535,25 @@ class ObjectManager(
         objects[localId]?.description = description
         
         scope.launch {
-            // Would send ObjectDescription message
+            // ObjectDescription message
+            val descBytes = description.toByteArray(Charsets.UTF_8)
+            val payload = ByteBuffer.allocate(17 + 4 + 1 + descBytes.size).order(ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData - placeholder
+            repeat(16) { payload.put(0) }
+            
+            // ObjectData
+            payload.put(1)  // Number of objects
+            payload.putInt(localId)
+            payload.put(descBytes.size.toByte())
+            payload.put(descBytes)
+            
+            try {
+                udpConnection.sendPacket(MessageIds.OBJECT_DESCRIPTION, payload.array(), reliable = true)
+                Log.d(TAG, "Set object description: localId=$localId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to set object description", e)
+            }
         }
     }
     
@@ -342,7 +562,47 @@ class ObjectManager(
      */
     fun touchObject(localId: Int, position: LLVector3, normal: LLVector3, binormal: LLVector3) {
         scope.launch {
-            // Would send ObjectGrab/ObjectDeGrab messages
+            // ObjectGrab message
+            val grabPayload = ByteBuffer.allocate(80).order(ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData - placeholder
+            repeat(32) { grabPayload.put(0) }  // Agent + Session ID
+            
+            // ObjectData
+            grabPayload.putInt(localId)
+            
+            // Touch vectors
+            grabPayload.putFloat(position.x)
+            grabPayload.putFloat(position.y)
+            grabPayload.putFloat(position.z)
+            
+            grabPayload.putFloat(normal.x)
+            grabPayload.putFloat(normal.y)
+            grabPayload.putFloat(normal.z)
+            
+            grabPayload.putFloat(binormal.x)
+            grabPayload.putFloat(binormal.y)
+            grabPayload.putFloat(binormal.z)
+            
+            // Face index
+            grabPayload.putInt(0)
+            
+            try {
+                udpConnection.sendPacket(MessageIds.OBJECT_GRAB, grabPayload.array(), reliable = true)
+                
+                // Brief delay then release
+                delay(100)
+                
+                // ObjectDeGrab message
+                val degrabPayload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
+                repeat(32) { degrabPayload.put(0) }  // Agent + Session ID
+                degrabPayload.putInt(localId)
+                
+                udpConnection.sendPacket(MessageIds.OBJECT_DEGRAB, degrabPayload.array(), reliable = true)
+                Log.d(TAG, "Touched object localId=$localId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to touch object", e)
+            }
         }
     }
     
@@ -351,7 +611,32 @@ class ObjectManager(
      */
     fun sitOnObject(localId: Int) {
         scope.launch {
-            // Would send AgentRequestSit message
+            // AgentRequestSit message
+            val payload = ByteBuffer.allocate(44).order(ByteOrder.LITTLE_ENDIAN)
+            
+            // AgentData - placeholder
+            repeat(32) { payload.put(0) }  // Agent + Session ID
+            
+            // TargetObject
+            val obj = objects[localId]
+            if (obj != null) {
+                payload.putLong(obj.fullId.mostSignificantBits)
+                payload.putLong(obj.fullId.leastSignificantBits)
+            } else {
+                repeat(16) { payload.put(0) }
+            }
+            
+            // Offset
+            payload.putFloat(0f)
+            payload.putFloat(0f)
+            payload.putFloat(0f)
+            
+            try {
+                udpConnection.sendPacket(MessageIds.AGENT_REQUEST_SIT, payload.array(), reliable = true)
+                Log.i(TAG, "Requested sit on localId=$localId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to sit on object", e)
+            }
         }
     }
     

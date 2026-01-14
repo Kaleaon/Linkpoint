@@ -4,6 +4,7 @@ import android.util.Log
 import com.linkpoint.protocol.types.LLColor4
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3
+import com.linkpoint.protocol.types.LLVector3d
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
@@ -185,7 +186,8 @@ object MessageParser {
                 hoverTextColor = textColor,
                 mediaUrl = mediaUrl,
                 ownerId = ownerId,
-                nameValue = nameValueStr
+                nameValue = nameValueStr,
+                regionHandle = regionHandle
             )
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse object block", e)
@@ -289,7 +291,8 @@ object MessageParser {
                 hoverTextColor = LLColor4.white(),
                 mediaUrl = "",
                 ownerId = ownerId,
-                nameValue = ""
+                nameValue = "",
+                regionHandle = regionHandle
             )
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse compressed block", e)
@@ -492,8 +495,32 @@ data class ObjectUpdateData(
     val hoverTextColor: LLColor4,
     val mediaUrl: String,
     val ownerId: UUID?,
-    val nameValue: String
-)
+    val nameValue: String,
+    val regionHandle: Long = 0L  // For computing global position
+) {
+    /**
+     * Compute global X position from region handle and local position
+     */
+    fun getGlobalX(): Double {
+        val regionX = ((regionHandle shr 32) and 0xFFFFFFFFL).toDouble()
+        return regionX + position.x
+    }
+    
+    /**
+     * Compute global Y position from region handle and local position
+     */
+    fun getGlobalY(): Double {
+        val regionY = (regionHandle and 0xFFFFFFFFL).toDouble()
+        return regionY + position.y
+    }
+    
+    /**
+     * Get global position as LLVector3d
+     */
+    fun getGlobalPosition(): LLVector3d {
+        return LLVector3d(getGlobalX(), getGlobalY(), position.z.toDouble())
+    }
+}
 
 data class TerseUpdateData(
     val localId: Int,
