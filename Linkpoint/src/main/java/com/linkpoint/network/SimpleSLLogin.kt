@@ -947,10 +947,11 @@ object SimpleSLLogin {
     private class ChunkedResponseInterceptor : Interceptor {
         companion object {
             private const val TAG = "ChunkedResponseInterceptor"
-            // Set to 500MB to handle very large inventory skeleton responses
-            // The Second Life login response includes the complete inventory skeleton
-            // which can be very large for users with extensive inventories
-            private const val MAX_BUFFER_SIZE = 500 * 1024 * 1024L // 500MB max for login responses
+            // Use configurable buffer size from NetworkSettings (3-500 MB)
+            // Falls back to 100MB if settings not initialized
+            private fun getMaxBufferSize(): Long {
+                return NetworkSettings.getBufferSizeBytes()
+            }
         }
         
         override fun intercept(chain: Interceptor.Chain): Response {
@@ -961,6 +962,9 @@ object SimpleSLLogin {
             val body = response.body ?: return response
             val contentType = body.contentType()
             
+            // Get current buffer size setting
+            val maxBufferSize = getMaxBufferSize()
+            
             // Buffer the response body, handling EOF gracefully
             val buffer = Buffer()
             var hitEof = false
@@ -969,7 +973,7 @@ object SimpleSLLogin {
             try {
                 val source = body.source()
                 
-                while (totalRead < MAX_BUFFER_SIZE) {
+                while (totalRead < maxBufferSize) {
                     val bytesRead = try {
                         source.read(buffer, 8192L)
                     } catch (e: EOFException) {

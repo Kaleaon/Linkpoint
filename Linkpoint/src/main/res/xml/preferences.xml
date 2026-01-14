@@ -107,6 +107,15 @@
             android:defaultValue="0"
             app:showSeekBarValue="true" />
 
+        <SeekBarPreference
+            android:key="xml_buffer_size"
+            android:title="Login Buffer Size (MB)"
+            android:summary="Buffer size for login/XML responses (3-500 MB)"
+            android:min="3"
+            android:max="500"
+            android:defaultValue="100"
+            app:showSeekBarValue="true" />
+
     </PreferenceCategory>
 
     <!-- Debug and Diagnostics -->

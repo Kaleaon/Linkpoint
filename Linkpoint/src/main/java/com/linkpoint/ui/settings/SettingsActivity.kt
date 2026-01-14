@@ -32,6 +32,7 @@ import com.linkpoint.utils.CrashReporter
  * - Crash log viewing
  * - Crash reporter status
  * - Test crash generation
+ * - Cache size configuration (3-500 MB)
  */
 class SettingsActivity : AppCompatActivity() {
     
@@ -99,6 +100,27 @@ class SettingsActivity : AppCompatActivity() {
             findPreference<Preference>("view_tos")?.setOnPreferenceClickListener {
                 startActivity(TosActivity.createIntent(requireContext(), requireAcceptance = false))
                 true
+            }
+            
+            // XML buffer size setting (3-500 MB)
+            setupNetworkBufferSettings()
+        }
+        
+        /**
+         * Setup network buffer settings (XML response buffer 3-500 MB)
+         */
+        private fun setupNetworkBufferSettings() {
+            val networkSettings = com.linkpoint.network.NetworkSettings.getInstance(requireContext())
+            
+            // XML buffer size preference
+            findPreference<SeekBarPreference>("xml_buffer_size")?.apply {
+                value = networkSettings.getXmlBufferSizeMB()
+                setOnPreferenceChangeListener { _, newValue ->
+                    val sizeMB = newValue as Int
+                    networkSettings.setXmlBufferSizeMB(sizeMB)
+                    Toast.makeText(requireContext(), "Login buffer set to ${sizeMB}MB", Toast.LENGTH_SHORT).show()
+                    true
+                }
             }
         }
         
