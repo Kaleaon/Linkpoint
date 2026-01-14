@@ -33,6 +33,9 @@ class CapabilityManager {
     companion object {
         private const val TAG = "CapabilityManager"
         
+        // Diagnostic truncation length for URLs in debug reports
+        private const val DIAGNOSTIC_URL_TRUNCATE_LENGTH = 50
+        
         // Common capability names
         const val CAP_SEED = "Seed"
         const val CAP_EVENT_QUEUE = "EventQueueGet"
@@ -524,7 +527,7 @@ class CapabilityManager {
     fun getDiagnostics(): CapabilityDiagnostics {
         return CapabilityDiagnostics(
             isReady = _isReady.value,
-            seedCapability = seedCapability?.take(50)?.plus("..."),
+            seedCapability = seedCapability?.take(DIAGNOSTIC_URL_TRUNCATE_LENGTH)?.plus("..."),
             capabilityCount = capabilities.size,
             availableCapabilities = capabilities.keys.toList().sorted(),
             eventQueueActive = eventQueueJob?.isActive == true,

@@ -37,6 +37,9 @@ class DebugReportService private constructor(private val context: Context) {
         private const val REPORT_PREFIX = "debug_report_"
         private const val REPORT_SUFFIX = ".txt"
         
+        // Truncation length for URLs in debug reports
+        private const val DIAGNOSTIC_URL_TRUNCATE_LENGTH = 50
+        
         @Volatile
         private var instance: DebugReportService? = null
         
@@ -539,7 +542,7 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("Position: (${regionInfo.x}, ${regionInfo.y})")
                         appendLine("Sim IP: ${regionInfo.simIP.ifEmpty { "Not set" }}")
                         appendLine("Sim Port: ${if (regionInfo.simPort > 0) regionInfo.simPort else "Not set"}")
-                        appendLine("Seed Capability: ${regionInfo.seedCapability?.take(50)?.plus("...") ?: "Not set"}")
+                        appendLine("Seed Capability: ${regionInfo.seedCapability?.take(DIAGNOSTIC_URL_TRUNCATE_LENGTH)?.plus("...") ?: "Not set"}")
                         
                         if (regionInfo.name == "Unknown") {
                             appendLine()
@@ -763,6 +766,16 @@ class DebugReportService private constructor(private val context: Context) {
         }
     }
     
+    /**
+     * Format a duration in milliseconds to a human-readable string.
+     * 
+     * @param ms Duration in milliseconds
+     * @return Formatted string with appropriate unit:
+     *         - "Xms" for durations under 1 second
+     *         - "X.Xs" for durations under 1 minute
+     *         - "X.Xm" for durations under 1 hour
+     *         - "X.Xh" for longer durations
+     */
     private fun formatDuration(ms: Long): String {
         return when {
             ms < 1000 -> "${ms}ms"

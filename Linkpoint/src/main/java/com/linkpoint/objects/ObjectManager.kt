@@ -25,6 +25,9 @@ class ObjectManager(
     companion object {
         private const val TAG = "ObjectManager"
         
+        // Diagnostic threshold for "recently updated" objects (5 seconds)
+        private const val RECENT_UPDATE_THRESHOLD_MS = 5000L
+        
         // Object update flags
         const val FLAG_USE_PHYSICS = 0x00000001
         const val FLAG_CREATE_SELECTED = 0x00000002
@@ -726,7 +729,7 @@ class ObjectManager(
         val allObjects = objects.values.toList()
         val now = System.currentTimeMillis()
         
-        val recentlyUpdated = allObjects.count { now - it.lastUpdate < 5000 }
+        val recentlyUpdated = allObjects.count { now - it.lastUpdate < RECENT_UPDATE_THRESHOLD_MS }
         val scriptedCount = allObjects.count { it.isScripted }
         val physicalCount = allObjects.count { it.isPhysical }
         

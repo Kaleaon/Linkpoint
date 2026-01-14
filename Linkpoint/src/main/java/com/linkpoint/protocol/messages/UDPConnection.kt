@@ -562,7 +562,7 @@ class UDPConnection {
             registeredHandlerCount = messageHandlers.size,
             registeredHandlers = getRegisteredHandlerIds(),
             pendingPackets = pendingPacketInfo,
-            socketOpen = socket != null && !socket!!.isClosed,
+            socketOpen = socket?.let { !it.isClosed } ?: false,
             receiveLoopActive = receiveJob?.isActive == true
         )
     }

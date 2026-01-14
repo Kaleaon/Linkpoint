@@ -29,6 +29,9 @@ class AvatarManager(
     companion object {
         private const val TAG = "AvatarManager"
         private const val MAX_AVATARS = 100
+        
+        // Diagnostic threshold for "recently updated" avatars (5 seconds)
+        private const val RECENT_UPDATE_THRESHOLD_MS = 5000L
     }
     
     private val avatars = ConcurrentHashMap<UUID, Avatar>()
@@ -229,7 +232,7 @@ class AvatarManager(
         val allAvatars = avatars.values.toList()
         val now = System.currentTimeMillis()
         
-        val recentlyUpdated = allAvatars.count { now - it.lastUpdate < 5000 }
+        val recentlyUpdated = allAvatars.count { now - it.lastUpdate < RECENT_UPDATE_THRESHOLD_MS }
         val flyingCount = allAvatars.count { it.isFlying }
         val sittingCount = allAvatars.count { it.isSitting }
         val typingCount = allAvatars.count { it.isTyping }
