@@ -115,7 +115,25 @@ class CoreNetworkingService(private val context: Context) {
             val agentId: String,
             val simIp: String,
             val simPort: Int,
-            val responseXml: String
+            val responseXml: String,
+            /** MFA hash returned by server for future logins (to skip MFA prompt) */
+            val mfaHash: String? = null,
+            /** Seed capability URL for fetching all other capabilities */
+            val seedCapability: String? = null,
+            /** Region name from login response */
+            val regionName: String? = null,
+            /** Circuit code for UDP connection */
+            val circuitCode: Int? = null
+        ) : LoginResult()
+        
+        /**
+         * MFA (Multi-Factor Authentication) challenge required.
+         * The user must provide a TOTP code from their authenticator app.
+         * After obtaining the code, call login() again with the token parameter.
+         */
+        data class MFARequired(
+            val message: String,
+            val agentId: String? = null
         ) : LoginResult()
         
         data class Failure(
@@ -703,6 +721,7 @@ class CoreNetworkingService(private val context: Context) {
      */
     sealed class ParsedLoginResponse {
         data class Success(val result: LoginResult.Success) : ParsedLoginResponse()
+        data class MFARequired(val result: LoginResult.MFARequired) : ParsedLoginResponse()
         data class Failure(val result: LoginResult.Failure) : ParsedLoginResponse()
         data class Redirect(val nextUrl: String, val nextMethod: String) : ParsedLoginResponse()
     }
@@ -710,15 +729,17 @@ class CoreNetworkingService(private val context: Context) {
     /**
      * Parse login XML response.
      * 
-     * Handles three cases based on the official SL viewer's lllogin.cpp:
+     * Handles four cases based on the official SL viewer's lllogin.cpp:
      * 1. login="true" - Success, extract session info
      * 2. login="indeterminate" - Redirect to next_url with next_method
-     * 3. login="false" or other - Failure with error message
+     * 3. login="false" with reason="mfa_challenge" - MFA required
+     * 4. login="false" or other - Failure with error message
      */
     private fun parseLoginResponse(xml: String): LoginResult {
         val parsed = parseLoginResponseInternal(xml)
         return when (parsed) {
             is ParsedLoginResponse.Success -> parsed.result
+            is ParsedLoginResponse.MFARequired -> parsed.result
             is ParsedLoginResponse.Failure -> parsed.result
             is ParsedLoginResponse.Redirect -> {
                 // For now, treat redirect as a specific failure that the caller can handle
@@ -737,6 +758,12 @@ class CoreNetworkingService(private val context: Context) {
     /**
      * Internal parser that returns the full ParsedLoginResponse
      * including redirect information.
+     * 
+     * Handles four cases based on the official SL viewer's lllogin.cpp:
+     * 1. login="true" - Success, extract session info
+     * 2. login="indeterminate" - Redirect to next_url with next_method
+     * 3. login="false" with reason="mfa_challenge" - MFA required
+     * 4. login="false" or other - Failure with error message
      */
     private fun parseLoginResponseInternal(xml: String): ParsedLoginResponse {
         val loginRegex = """<name>login</name>\s*<value><string>([\w]+)</string>""".toRegex()
@@ -750,14 +777,30 @@ class CoreNetworkingService(private val context: Context) {
                 val simIp = extractXmlValue(xml, "sim_ip") ?: ""
                 val simPort = extractXmlIntValue(xml, "sim_port")
                 
+                // Extract additional fields for proper functionality
+                val mfaHash = extractXmlValue(xml, "mfa_hash")
+                val seedCapability = extractXmlValue(xml, "seed_capability")
+                val regionName = extractXmlValue(xml, "region_name")
+                val circuitCode = extractXmlIntValue(xml, "circuit_code").let { if (it == 0) null else it }
+                
                 Log.d(TAG, "Login successful: session=${hideCredential(sessionId)}, agent=$agentId")
+                if (seedCapability != null) {
+                    Log.d(TAG, "Seed capability received for textures/assets")
+                }
+                if (mfaHash != null) {
+                    Log.d(TAG, "MFA hash received for future logins")
+                }
                 
                 ParsedLoginResponse.Success(LoginResult.Success(
                     sessionId = sessionId,
                     agentId = agentId,
                     simIp = simIp,
                     simPort = simPort,
-                    responseXml = xml
+                    responseXml = xml,
+                    mfaHash = mfaHash,
+                    seedCapability = seedCapability,
+                    regionName = regionName,
+                    circuitCode = circuitCode
                 ))
             }
             
@@ -778,6 +821,39 @@ class CoreNetworkingService(private val context: Context) {
                         message = "Server requested redirect but provided no URL",
                         errorCode = "INVALID_REDIRECT",
                         technicalDetails = "Response preview: ${xml.take(500)}"
+                    ))
+                }
+            }
+            
+            "false" -> {
+                // Check for MFA challenge
+                val reason = extractXmlValue(xml, "reason")
+                
+                if (reason == "mfa_challenge") {
+                    // MFA required - user needs to provide TOTP code
+                    val message = extractXmlValue(xml, "message") 
+                        ?: "Multi-factor authentication required. Please enter your authenticator code."
+                    val agentId = extractXmlValue(xml, "agent_id")
+                    
+                    Log.i(TAG, "MFA challenge received for agent: ${agentId?.take(8) ?: "unknown"}...")
+                    
+                    ParsedLoginResponse.MFARequired(LoginResult.MFARequired(
+                        message = message,
+                        agentId = agentId
+                    ))
+                } else {
+                    // Regular login failure
+                    val errorMessage = extractXmlValue(xml, "message") 
+                        ?: extractXmlValue(xml, "reason")
+                        ?: "Login failed"
+                    val errorReason = reason ?: "unknown"
+                    
+                    Log.w(TAG, "Login failed: $errorMessage (reason: $errorReason)")
+                    
+                    ParsedLoginResponse.Failure(LoginResult.Failure(
+                        message = errorMessage,
+                        errorCode = mapErrorReason(errorReason),
+                        technicalDetails = "Reason: $errorReason\nResponse preview: ${xml.take(500)}"
                     ))
                 }
             }
@@ -848,6 +924,10 @@ class CoreNetworkingService(private val context: Context) {
             "presence" -> "ALREADY_LOGGED_IN"
             "update" -> "UPDATE_REQUIRED"
             "tos" -> "TOS_NOT_ACCEPTED"
+            "mfa_challenge" -> "MFA_REQUIRED"
+            "critical" -> "CRITICAL_MESSAGE"
+            "disabled" -> "ACCOUNT_DISABLED"
+            "ban" -> "ACCOUNT_BANNED"
             else -> "LOGIN_REJECTED"
         }
     }

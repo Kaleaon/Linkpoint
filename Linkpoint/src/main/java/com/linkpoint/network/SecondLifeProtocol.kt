@@ -43,13 +43,6 @@ class SecondLifeProtocol(private val context: Context) {
         // See: https://wiki.secondlife.com/wiki/Third_Party_Viewer_Directory
         private const val VIEWER_NAME = "Lumiya"
         private const val VIEWER_VERSION = "1.0.0"
-        
-        /**
-         * Use simple Lumiya-style login instead of complex CoreNetworkingService
-         * Set to true for fast, instant login like Lumiya
-         * Set to false for full retry logic and diagnostics (slower, more complex)
-         */
-        private const val USE_SIMPLE_LOGIN = true
     }
     
     // Core networking service with all connection management features
@@ -115,198 +108,127 @@ class SecondLifeProtocol(private val context: Context) {
         val app = LinkpointApp.getInstance()
         app.sessionManager.setConnectionState(ConnectionState.CONNECTING)
         
-        Log.d(TAG, "Attempting login for $firstName $lastName (simple=${USE_SIMPLE_LOGIN})")
+        Log.d(TAG, "Attempting login for $firstName $lastName")
         NetworkLogger.logProtocol(
             "Second Life Login",
-            "Grid: $loginUri, User: $firstName $lastName, Start: $startLocation, Mode: ${if (USE_SIMPLE_LOGIN) "SIMPLE" else "COMPLEX"}"
+            "Grid: $loginUri, User: $firstName $lastName, Start: $startLocation"
         )
         
-        if (USE_SIMPLE_LOGIN) {
-            // Use simple Lumiya-style login for instant connection
-            Log.d(TAG, "Using SIMPLE login (Lumiya-style)")
-            val simpleResult = SimpleSLLogin.login(
-                firstName = firstName, 
-                lastName = lastName, 
-                password = password, 
-                loginUri = loginUri, 
-                startLocation = startLocation,
-                mfaToken = mfaToken,
-                mfaHash = mfaHash
-            )
-            
-            when (simpleResult) {
-                is SimpleSLLogin.SimpleLoginResult.Success -> {
-                    val agentId = try {
-                        UUID.fromString(simpleResult.agentId)
-                    } catch (e: Exception) {
-                        UUID.randomUUID()
-                    }
-                    
-                    Log.i(TAG, "SIMPLE login successful! Agent: ${simpleResult.agentId}")
-                    
-                    val regionInfo = RegionInfo(
-                        name = simpleResult.regionName ?: "Unknown",
-                        handle = 0,
-                        x = 128,
-                        y = 128,
-                        simIP = simpleResult.simIp,
-                        simPort = simpleResult.simPort,
-                        seedCapability = simpleResult.seedCapability
-                    )
-                    
-                    app.sessionManager.onLoginSuccess(
-                        sessionId = simpleResult.sessionId,
-                        agentId = agentId,
-                        secureSessionId = "",
-                        firstName = firstName,
-                        lastName = lastName,
-                        regionInfo = regionInfo
-                    )
-                    
-                    // Initialize agent-specific managers (sets app.agentId)
-                    app.initializeAgentManagers(agentId)
-                    
-                    // Initialize capabilities from seed capability (for textures, meshes, etc.)
-                    // This is critical for rendering - like Lumiya's SLCaps.GetCapabilities()
-                    simpleResult.seedCapability?.let { seedCap ->
-                        Log.i(TAG, "Initializing capabilities from seed...")
-                        app.applicationScope.launch {
-                            try {
-                                val capsInitialized = app.capabilityManager.initialize(seedCap)
-                                if (capsInitialized) {
-                                    Log.i(TAG, "Capabilities initialized - textures and assets ready")
-                                    // Connect texture manager to capability-based fetching
-                                    app.textureManager.onCapabilitiesReady()
-                                } else {
-                                    Log.w(TAG, "Failed to initialize capabilities - textures may not load")
-                                }
-                            } catch (e: Exception) {
-                                Log.e(TAG, "Error initializing capabilities", e)
+        // Log network diagnostics before login
+        networkingService.logNetworkDiagnostics()
+        
+        // Create password hash - IMPORTANT: Must truncate to 16 chars like Lumiya does
+        // This is a Second Life protocol requirement
+        val truncatedPassword = password.trim().take(16)
+        val passwordHash = createPasswordHash(password)
+        
+        Log.d(TAG, "Login details - URI: $loginUri, firstName: $firstName, lastName: $lastName, " +
+            "passwordLen: ${password.length}, truncatedLen: ${truncatedPassword.length}, startLoc: $startLocation")
+        
+        // Log detailed authentication parameters (without sensitive data)
+        NetworkLogger.logAuth("Password Hash Generation", mapOf(
+            "originalLength" to password.length.toString(),
+            "truncatedLength" to truncatedPassword.length.toString(),
+            "hashFormat" to "\$1\$MD5"
+        ))
+        
+        // Build XMLRPC request with MFA support
+        val xmlRequest = buildLoginXml(
+            firstName = firstName,
+            lastName = lastName,
+            passwordHash = passwordHash,
+            startLocation = startLocation,
+            mfaToken = mfaToken,
+            mfaHash = mfaHash
+        )
+        
+        // Use CoreNetworkingService for login with comprehensive retry handling
+        val result = networkingService.login(loginUri, xmlRequest)
+        
+        when (result) {
+            is CoreNetworkingService.LoginResult.Success -> {
+                val agentId = try { 
+                    UUID.fromString(result.agentId) 
+                } catch (e: Exception) { 
+                    UUID.randomUUID() 
+                }
+                
+                Log.i(TAG, "Login successful! Agent: ${result.agentId}")
+                
+                NetworkLogger.logAuth("Login Success", mapOf(
+                    "agentId" to result.agentId,
+                    "sessionId" to "***REDACTED***",
+                    "simIp" to result.simIp,
+                    "simPort" to result.simPort.toString()
+                ))
+                
+                val regionInfo = RegionInfo(
+                    name = result.regionName ?: "Unknown",
+                    handle = 0,
+                    x = 128,
+                    y = 128,
+                    simIP = result.simIp,
+                    simPort = result.simPort,
+                    seedCapability = result.seedCapability
+                )
+                
+                app.sessionManager.onLoginSuccess(
+                    sessionId = result.sessionId,
+                    agentId = agentId,
+                    secureSessionId = "",
+                    firstName = firstName,
+                    lastName = lastName,
+                    regionInfo = regionInfo
+                )
+                
+                // Initialize agent-specific managers (sets app.agentId)
+                app.initializeAgentManagers(agentId)
+                
+                // Initialize capabilities from seed capability (for textures, meshes, etc.)
+                // This is critical for rendering - like Lumiya's SLCaps.GetCapabilities()
+                result.seedCapability?.let { seedCap ->
+                    Log.i(TAG, "Initializing capabilities from seed...")
+                    app.applicationScope.launch {
+                        try {
+                            val capsInitialized = app.capabilityManager.initialize(seedCap)
+                            if (capsInitialized) {
+                                Log.i(TAG, "Capabilities initialized - textures and assets ready")
+                                // Connect texture manager to capability-based fetching
+                                app.textureManager.onCapabilitiesReady()
+                            } else {
+                                Log.w(TAG, "Failed to initialize capabilities - textures may not load")
                             }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error initializing capabilities", e)
                         }
-                    } ?: Log.w(TAG, "No seed capability in login response - textures may not load")
-                    
-                    return@withContext LoginResult.Success(
-                        agentId = agentId, 
-                        sessionId = simpleResult.sessionId,
-                        mfaHash = simpleResult.mfaHash
-                    )
-                }
-                is SimpleSLLogin.SimpleLoginResult.MFARequired -> {
-                    app.sessionManager.setConnectionState(ConnectionState.DISCONNECTED)
-                    Log.i(TAG, "MFA required for login: ${simpleResult.message}")
-                    
-                    return@withContext LoginResult.MFARequired(
-                        message = simpleResult.message,
-                        agentId = simpleResult.agentId
-                    )
-                }
-                is SimpleSLLogin.SimpleLoginResult.Failure -> {
-                    app.sessionManager.setConnectionState(ConnectionState.ERROR)
-                    Log.w(TAG, "SIMPLE login failed: ${simpleResult.message}")
-                    
-                    return@withContext LoginResult.Failure(
-                        message = simpleResult.message,
-                        errorCode = simpleResult.errorCode,
-                        technicalDetails = simpleResult.details,
-                        category = simpleResult.category,
-                        rootCauseType = simpleResult.rootCauseType,
-                        rootCauseMessage = simpleResult.rootCauseMessage,
-                        exceptionChain = simpleResult.exceptionChain,
-                        recommendations = simpleResult.recommendations,
-                        isTransient = simpleResult.isTransient,
-                        elapsedTimeMs = simpleResult.elapsedTimeMs,
-                        attemptsMade = simpleResult.attemptsMade
-                    )
-                }
-            }
-        } else {
-            // Use complex CoreNetworkingService login with full retry logic
-            Log.d(TAG, "Using COMPLEX login (CoreNetworkingService)")
-            
-            // Log network diagnostics before login
-            networkingService.logNetworkDiagnostics()
-            
-            // Create password hash - IMPORTANT: Must truncate to 16 chars like Lumiya does
-            // This is a Second Life protocol requirement
-            val truncatedPassword = password.trim().take(16)
-            val passwordHash = createPasswordHash(password)
-            
-            Log.d(TAG, "Login details - URI: $loginUri, firstName: $firstName, lastName: $lastName, " +
-                "passwordLen: ${password.length}, truncatedLen: ${truncatedPassword.length}, startLoc: $startLocation")
-            
-            // Log detailed authentication parameters (without sensitive data)
-            NetworkLogger.logAuth("Password Hash Generation", mapOf(
-                "originalLength" to password.length.toString(),
-                "truncatedLength" to truncatedPassword.length.toString(),
-                "hashFormat" to "\$1\$MD5"
-            ))
-            
-            // Build XMLRPC request
-            val xmlRequest = buildLoginXml(
-                firstName = firstName,
-                lastName = lastName,
-                passwordHash = passwordHash,
-                startLocation = startLocation
-            )
-            
-            // Use CoreNetworkingService for login with comprehensive retry handling
-            val result = networkingService.login(loginUri, xmlRequest)
-            
-            when (result) {
-                is CoreNetworkingService.LoginResult.Success -> {
-                    val agentId = try { 
-                        UUID.fromString(result.agentId) 
-                    } catch (e: Exception) { 
-                        UUID.randomUUID() 
                     }
-                    
-                    NetworkLogger.logAuth("Login Success", mapOf(
-                        "agentId" to result.agentId,
-                        "sessionId" to "***REDACTED***",
-                        "simIp" to result.simIp,
-                        "simPort" to result.simPort.toString()
-                    ))
-                    
-                    val regionInfo = RegionInfo(
-                        name = "Unknown",
-                        handle = 0,
-                        x = 128,
-                        y = 128,
-                        simIP = result.simIp,
-                        simPort = result.simPort
-                    )
-                    
-                    app.sessionManager.onLoginSuccess(
-                        sessionId = result.sessionId,
-                        agentId = agentId,
-                        secureSessionId = "",
-                        firstName = firstName,
-                        lastName = lastName,
-                        regionInfo = regionInfo
-                    )
-                    
-                    // Initialize agent-specific managers (sets app.agentId)
-                    app.initializeAgentManagers(agentId)
-                    
-                    Log.i(TAG, "Login successful!")
-                    NetworkLogger.logProtocol("Login Complete", "Successfully connected to ${result.simIp}:${result.simPort}")
-                    LoginResult.Success(agentId, result.sessionId)
-                }
-                is CoreNetworkingService.LoginResult.Failure -> {
-                    app.sessionManager.setConnectionState(ConnectionState.ERROR)
-                    Log.w(TAG, "Login failed: ${result.message} [${result.errorCode}]")
-                    NetworkLogger.log(
-                        NetworkLogger.Level.ERROR,
-                        NetworkLogger.Category.AUTHENTICATION,
-                        "Login failed: ${result.message} [${result.errorCode}]"
-                    )
-                    LoginResult.Failure(
-                        message = result.message,
-                        errorCode = result.errorCode,
-                        technicalDetails = result.technicalDetails
-                    )
-                }
+                } ?: Log.w(TAG, "No seed capability in login response - textures may not load")
+                
+                NetworkLogger.logProtocol("Login Complete", "Successfully connected to ${result.simIp}:${result.simPort}")
+                LoginResult.Success(agentId, result.sessionId, result.mfaHash)
+            }
+            is CoreNetworkingService.LoginResult.MFARequired -> {
+                app.sessionManager.setConnectionState(ConnectionState.DISCONNECTED)
+                Log.i(TAG, "MFA required for login: ${result.message}")
+                
+                LoginResult.MFARequired(
+                    message = result.message,
+                    agentId = result.agentId
+                )
+            }
+            is CoreNetworkingService.LoginResult.Failure -> {
+                app.sessionManager.setConnectionState(ConnectionState.ERROR)
+                Log.w(TAG, "Login failed: ${result.message} [${result.errorCode}]")
+                NetworkLogger.log(
+                    NetworkLogger.Level.ERROR,
+                    NetworkLogger.Category.AUTHENTICATION,
+                    "Login failed: ${result.message} [${result.errorCode}]"
+                )
+                LoginResult.Failure(
+                    message = result.message,
+                    errorCode = result.errorCode,
+                    technicalDetails = result.technicalDetails
+                )
             }
         }
     }
@@ -315,12 +237,16 @@ class SecondLifeProtocol(private val context: Context) {
         firstName: String,
         lastName: String,
         passwordHash: String,
-        startLocation: String
+        startLocation: String,
+        mfaToken: String = "",
+        mfaHash: String = ""
     ): String {
         val safeFirstName = escapeXml(firstName)
         val safeLastName = escapeXml(lastName)
         val safePassword = escapeXml(passwordHash)
         val safeStart = escapeXml(startLocation)
+        val safeToken = escapeXml(mfaToken)
+        val safeMfaHash = escapeXml(mfaHash)
         
         // Generate viewer_digest - required by Second Life login server
         val viewerDigest = UUID.randomUUID().toString()
@@ -343,6 +269,13 @@ class SecondLifeProtocol(private val context: Context) {
             append("<member><name>last</name><value><string>$safeLastName</string></value></member>")
             append("<member><name>passwd</name><value><string>$safePassword</string></value></member>")
             append("<member><name>start</name><value><string>$safeStart</string></value></member>")
+            
+            // MFA fields - required by Second Life MFA login flow
+            // See: https://wiki.secondlife.com/wiki/User:Brad_Linden/Login_MFA
+            // - token: TOTP code from authenticator app (empty string if not responding to challenge)
+            // - mfa_hash: Cached hash from previous successful MFA (allows skipping token entry)
+            append("<member><name>token</name><value><string>$safeToken</string></value></member>")
+            append("<member><name>mfa_hash</name><value><string>$safeMfaHash</string></value></member>")
             
             // Viewer identification
             append("<member><name>channel</name><value><string>$VIEWER_NAME</string></value></member>")
