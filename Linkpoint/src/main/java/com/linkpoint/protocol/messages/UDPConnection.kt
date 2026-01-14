@@ -91,6 +91,11 @@ class UDPConnection {
             socket = DatagramSocket()
             socket?.soTimeout = 5000
             
+            // CRITICAL: Set isConnected BEFORE starting receive loop
+            // The receive loop checks this flag in its while condition,
+            // so it must be true before the loop starts or it exits immediately
+            isConnected = true
+            
             // Start receive loop
             receiveJob = scope.launch {
                 receiveLoop()
@@ -105,11 +110,14 @@ class UDPConnection {
             // Send CompleteAgentMovement to tell the simulator we're ready
             sendCompleteAgentMovement()
             
-            isConnected = true
             Log.i(TAG, "Connected to $simIP:$simPort, circuit established")
             true
         } catch (e: Exception) {
             Log.e(TAG, "Connection failed", e)
+            isConnected = false
+            receiveJob?.cancel()
+            socket?.close()
+            socket = null
             false
         }
     }
