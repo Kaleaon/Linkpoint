@@ -73,6 +73,9 @@ class SettingsActivity : AppCompatActivity() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.preferences, rootKey)
             
+            // Display settings
+            setupDisplaySettings()
+            
             // Graphics settings
             findPreference<ListPreference>("graphics_quality")?.setOnPreferenceChangeListener { _, newValue ->
                 updateGraphicsQuality(newValue as String)
@@ -128,6 +131,29 @@ class SettingsActivity : AppCompatActivity() {
          * Setup Debug and Diagnostics section for crash log viewing
          */
         private fun setupDebugSection() {
+            // Debug Floater Toggle
+            findPreference<SwitchPreferenceCompat>("enable_debug_floater")?.setOnPreferenceChangeListener { _, newValue ->
+                val enabled = newValue as Boolean
+                Toast.makeText(
+                    requireContext(),
+                    if (enabled) "Debug floater will appear in world view" else "Debug floater disabled",
+                    Toast.LENGTH_SHORT
+                ).show()
+                true
+            }
+            
+            // Capture Debug Report Now
+            findPreference<Preference>("capture_debug_report")?.setOnPreferenceClickListener {
+                captureDebugReportNow()
+                true
+            }
+            
+            // View Debug Reports
+            findPreference<Preference>("view_debug_reports")?.setOnPreferenceClickListener {
+                showDebugReportsDialog()
+                true
+            }
+            
             // View Crash Logs
             findPreference<Preference>("view_crash_logs")?.setOnPreferenceClickListener {
                 showCrashLogsDialog()
@@ -154,6 +180,101 @@ class SettingsActivity : AppCompatActivity() {
                 confirmClearCrashLogs()
                 true
             }
+        }
+        
+        /**
+         * Capture a debug report immediately
+         */
+        private fun captureDebugReportNow() {
+            val debugService = com.linkpoint.utils.DebugReportService.getInstance(requireContext())
+            debugService.captureDebugReportAsync("Manual capture from Settings") { file ->
+                if (file != null) {
+                    AlertDialog.Builder(requireContext())
+                        .setTitle("Debug Report Captured")
+                        .setMessage("Report saved to:\n${file.name}\n\nWould you like to view it?")
+                        .setPositiveButton("View") { _, _ ->
+                            showDebugReportContent(file.name, debugService.readReport(file))
+                        }
+                        .setNegativeButton("Close", null)
+                        .show()
+                } else {
+                    Toast.makeText(requireContext(), "Failed to capture debug report", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+        
+        /**
+         * Show list of debug reports
+         */
+        private fun showDebugReportsDialog() {
+            val debugService = com.linkpoint.utils.DebugReportService.getInstance(requireContext())
+            val reports = debugService.getDebugReports()
+            
+            if (reports.isEmpty()) {
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Debug Reports")
+                    .setMessage("No debug reports found.\n\nTap the bug floater icon in world view to capture a report, or use 'Capture Debug Report Now' above.")
+                    .setPositiveButton("OK", null)
+                    .show()
+                return
+            }
+            
+            val reportNames = reports.map { it.name }.toTypedArray()
+            
+            AlertDialog.Builder(requireContext())
+                .setTitle("Debug Reports (${reports.size})")
+                .setItems(reportNames) { _, which ->
+                    val selectedReport = reports[which]
+                    showDebugReportContent(selectedReport.name, debugService.readReport(selectedReport))
+                }
+                .setNegativeButton("Close", null)
+                .setNeutralButton("Clear All") { _, _ ->
+                    confirmClearDebugReports()
+                }
+                .show()
+        }
+        
+        /**
+         * Show content of a specific debug report
+         */
+        private fun showDebugReportContent(filename: String, content: String?) {
+            if (content == null) {
+                Toast.makeText(requireContext(), "Failed to read debug report", Toast.LENGTH_SHORT).show()
+                return
+            }
+            
+            AlertDialog.Builder(requireContext())
+                .setTitle(filename)
+                .setMessage(content)
+                .setPositiveButton("Close", null)
+                .setNeutralButton("Copy") { _, _ ->
+                    copyToClipboard("Debug Report", content)
+                    Toast.makeText(requireContext(), "Debug report copied to clipboard", Toast.LENGTH_SHORT).show()
+                }
+                .show()
+        }
+        
+        /**
+         * Confirm and clear all debug reports
+         */
+        private fun confirmClearDebugReports() {
+            val debugService = com.linkpoint.utils.DebugReportService.getInstance(requireContext())
+            val reportsCount = debugService.getDebugReports().size
+            
+            if (reportsCount == 0) {
+                Toast.makeText(requireContext(), "No debug reports to clear", Toast.LENGTH_SHORT).show()
+                return
+            }
+            
+            AlertDialog.Builder(requireContext())
+                .setTitle("Clear Debug Reports")
+                .setMessage("Delete all $reportsCount debug reports?\n\nThis cannot be undone.")
+                .setPositiveButton("Clear All") { _, _ ->
+                    debugService.clearReports()
+                    Toast.makeText(requireContext(), "Debug reports cleared", Toast.LENGTH_SHORT).show()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
         }
         
         /**
@@ -499,6 +620,29 @@ class SettingsActivity : AppCompatActivity() {
                     "Could not open GitHub",
                     android.widget.Toast.LENGTH_SHORT
                 ).show()
+            }
+        }
+        
+        /**
+         * Setup Display settings (screen orientation)
+         */
+        private fun setupDisplaySettings() {
+            findPreference<ListPreference>("screen_orientation")?.apply {
+                // Update summary to show current value
+                summary = entry ?: "Portrait"
+                setOnPreferenceChangeListener { preference, newValue ->
+                    val listPref = preference as ListPreference
+                    val index = listPref.findIndexOfValue(newValue as String)
+                    if (index >= 0) {
+                        listPref.summary = listPref.entries[index]
+                    }
+                    Toast.makeText(
+                        requireContext(),
+                        "Screen orientation will apply when you return to the world view",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    true
+                }
             }
         }
         

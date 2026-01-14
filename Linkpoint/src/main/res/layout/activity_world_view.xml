@@ -69,6 +69,20 @@
 
             </LinearLayout>
 
+            <!-- Debug Report Floating Action Button -->
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnDebugFloater"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/ic_bug_report"
+                android:contentDescription="Capture Debug Report"
+                android:visibility="gone"
+                app:fabSize="mini"
+                app:backgroundTint="@color/design_default_color_error" />
+
             <!-- Bottom Quick Actions -->
             <LinearLayout
                 android:id="@+id/bottomBar"

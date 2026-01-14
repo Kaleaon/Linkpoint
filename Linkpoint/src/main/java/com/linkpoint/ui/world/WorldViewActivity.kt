@@ -1,6 +1,7 @@
 package com.linkpoint.ui.world
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -9,10 +10,13 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
@@ -23,6 +27,7 @@ import com.linkpoint.ui.minimap.MinimapActivity
 import com.linkpoint.ui.avatar.MyAvatarActivity
 import com.linkpoint.ui.settings.SettingsActivity
 import com.linkpoint.ui.xr.XRWorldActivity
+import com.linkpoint.utils.DebugReportService
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -49,17 +54,86 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private lateinit var btnInventory: ImageButton
     private lateinit var btnXR: ImageButton
     
+    // Debug floater button
+    private var debugFloaterButton: FloatingActionButton? = null
+    
     private val app by lazy { LinkpointApp.getInstance() }
     private var isRendering = false
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        applyScreenOrientation()
         setContentView(R.layout.activity_world_view)
         
         initViews()
+        initDebugFloater()
         initRenderer()
         setupNavigation()
         observeState()
+    }
+    
+    /**
+     * Apply screen orientation based on user preference.
+     * Default is portrait to avoid black screen issues in landscape mode.
+     */
+    private fun applyScreenOrientation() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val orientation = prefs.getString("screen_orientation", "portrait") ?: "portrait"
+        
+        requestedOrientation = when (orientation) {
+            "portrait" -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            "landscape" -> ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            "auto" -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
+            else -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
+    }
+    
+    /**
+     * Initialize the debug floater button based on user preference.
+     * When tapped, captures a debug report of the current app state.
+     */
+    private fun initDebugFloater() {
+        debugFloaterButton = findViewById(R.id.btnDebugFloater)
+        
+        debugFloaterButton?.setOnClickListener {
+            captureDebugReport()
+        }
+        
+        // Set initial visibility based on preference
+        updateDebugFloaterVisibility()
+    }
+    
+    /**
+     * Update debug floater visibility based on settings
+     */
+    private fun updateDebugFloaterVisibility() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val showDebugFloater = prefs.getBoolean("enable_debug_floater", false)
+        debugFloaterButton?.visibility = if (showDebugFloater) View.VISIBLE else View.GONE
+    }
+    
+    /**
+     * Capture a debug report when the floater button is tapped
+     */
+    private fun captureDebugReport() {
+        Toast.makeText(this, "Capturing debug report...", Toast.LENGTH_SHORT).show()
+        
+        val debugService = DebugReportService.getInstance(this)
+        debugService.captureDebugReportAsync("Captured via floater button in WorldView") { file ->
+            if (file != null) {
+                Toast.makeText(
+                    this,
+                    "Debug report saved: ${file.name}",
+                    Toast.LENGTH_LONG
+                ).show()
+            } else {
+                Toast.makeText(
+                    this,
+                    "Failed to capture debug report",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
     
     private fun initViews() {
@@ -219,6 +293,8 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     
     override fun onResume() {
         super.onResume()
+        applyScreenOrientation() // Reapply orientation in case user changed setting
+        updateDebugFloaterVisibility() // Update debug floater visibility based on settings
         isRendering = true
         startRenderLoop()
     }
