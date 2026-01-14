@@ -65,6 +65,9 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Initialize currentOrientationPref from SharedPreferences before applying
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        currentOrientationPref = prefs.getString("screen_orientation", "portrait") ?: "portrait"
         applyScreenOrientation()
         setContentView(R.layout.activity_world_view)
         
@@ -84,7 +87,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val orientation = prefs.getString("screen_orientation", "portrait") ?: "portrait"
         
-        // Only apply if preference has changed
+        // Only apply if preference has changed (currentOrientationPref is pre-initialized in onCreate)
         if (orientation == currentOrientationPref) return
         currentOrientationPref = orientation
         

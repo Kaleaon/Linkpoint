@@ -628,8 +628,8 @@ class SettingsActivity : AppCompatActivity() {
          */
         private fun setupDisplaySettings() {
             findPreference<ListPreference>("screen_orientation")?.apply {
-                // Update summary to show current value
-                summary = entry ?: "Portrait"
+                // Update summary to show current value - use first entry as fallback if available
+                summary = entry ?: entries?.takeIf { it.isNotEmpty() }?.get(0) ?: "Portrait"
                 setOnPreferenceChangeListener { preference, newValue ->
                     val listPref = preference as ListPreference
                     val index = listPref.findIndexOfValue(newValue as String)

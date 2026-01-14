@@ -72,8 +72,9 @@ class DebugReportService private constructor(private val context: Context) {
     /**
      * Capture a debug report of the current app state.
      * Returns the file path of the saved report, or null if capture failed.
+     * This is a suspend function to avoid blocking the main thread.
      */
-    fun captureDebugReport(userNote: String = ""): File? {
+    suspend fun captureDebugReport(userNote: String = ""): File? {
         return try {
             val report = generateDebugReport(userNote)
             val file = saveReport(report)
@@ -101,7 +102,7 @@ class DebugReportService private constructor(private val context: Context) {
     /**
      * Generate the debug report content
      */
-    private fun generateDebugReport(userNote: String): String {
+    private suspend fun generateDebugReport(userNote: String): String {
         val timestamp = System.currentTimeMillis()
         val app = try { LinkpointApp.getInstance() } catch (e: Exception) { null }
         
@@ -185,8 +186,8 @@ class DebugReportService private constructor(private val context: Context) {
             appendLine()
             try {
                 val cacheManager = CacheManager(context)
-                // Get cache stats - this runs on IO dispatcher so it's safe
-                val cacheStats = kotlinx.coroutines.runBlocking(Dispatchers.IO) {
+                // Get cache stats using withContext since generateDebugReport is now a suspend function
+                val cacheStats = withContext(Dispatchers.IO) {
                     cacheManager.getCacheStats()
                 }
                 appendLine("Total Cache Size: ${cacheStats.getFormattedTotalSize()} / ${cacheStats.getFormattedMaxSize()} (${cacheStats.usagePercent}%)")
@@ -371,13 +372,7 @@ class DebugReportService private constructor(private val context: Context) {
     
     private fun generateReportFilename(): String {
         val timestamp = System.currentTimeMillis()
-        val dateString = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            java.time.Instant.ofEpochMilli(timestamp)
-                .atZone(java.time.ZoneId.systemDefault())
-                .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))
-        } else {
-            SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US).format(Date(timestamp))
-        }
+        val dateString = formatDateWithPattern(timestamp, "yyyy-MM-dd_HH-mm-ss")
         return "$REPORT_PREFIX$dateString$REPORT_SUFFIX"
     }
     
@@ -439,12 +434,20 @@ class DebugReportService private constructor(private val context: Context) {
     }
     
     private fun formatTimestamp(timestamp: Long): String {
+        return formatDateWithPattern(timestamp, "yyyy-MM-dd HH:mm:ss.SSS Z")
+    }
+    
+    /**
+     * Helper method to format a timestamp with a given pattern.
+     * Handles API level differences for date formatting.
+     */
+    private fun formatDateWithPattern(timestamp: Long, pattern: String): String {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             java.time.Instant.ofEpochMilli(timestamp)
                 .atZone(java.time.ZoneId.systemDefault())
-                .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS Z"))
+                .format(java.time.format.DateTimeFormatter.ofPattern(pattern))
         } else {
-            SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z", Locale.US).format(Date(timestamp))
+            SimpleDateFormat(pattern, Locale.US).format(Date(timestamp))
         }
     }
     
