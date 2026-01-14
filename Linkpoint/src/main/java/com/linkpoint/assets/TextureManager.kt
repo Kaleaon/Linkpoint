@@ -245,8 +245,12 @@ class TextureManager(
     
     /**
      * Called when capabilities are ready after login.
-     * This enables texture fetching via the GetTexture capability,
-     * similar to Lumiya's TextureCache.setFetcher() pattern.
+     * 
+     * Note: The TextureManager already uses capability-based fetching dynamically
+     * via the capabilityUrl property (see buildTextureUrl). This method is primarily
+     * for logging and notification purposes, similar to Lumiya's TextureCache.setFetcher()
+     * pattern where the fetcher is set but the actual fetching logic already supports
+     * the capability URL when available.
      */
     fun onCapabilitiesReady() {
         val textureCapUrl = capabilityUrl

@@ -718,8 +718,7 @@ object SimpleSLLogin {
             val seedCapability = extractXmlValue(xml, "seed_capability")
             
             // Extract region name
-            val regionName = extractXmlValue(xml, "region_name") 
-                ?: extractXmlValue(xml, "first_name") // fallback for some grids
+            val regionName = extractXmlValue(xml, "region_name")
             
             // Extract circuit code for UDP connection
             val circuitCode = extractXmlValue(xml, "circuit_code")?.toIntOrNull()

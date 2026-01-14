@@ -171,13 +171,17 @@ class SecondLifeProtocol(private val context: Context) {
                     simpleResult.seedCapability?.let { seedCap ->
                         Log.i(TAG, "Initializing capabilities from seed...")
                         app.applicationScope.launch {
-                            val capsInitialized = app.capabilityManager.initialize(seedCap)
-                            if (capsInitialized) {
-                                Log.i(TAG, "Capabilities initialized - textures and assets ready")
-                                // Connect texture manager to capability-based fetching
-                                app.textureManager.onCapabilitiesReady()
-                            } else {
-                                Log.w(TAG, "Failed to initialize capabilities - textures may not load")
+                            try {
+                                val capsInitialized = app.capabilityManager.initialize(seedCap)
+                                if (capsInitialized) {
+                                    Log.i(TAG, "Capabilities initialized - textures and assets ready")
+                                    // Connect texture manager to capability-based fetching
+                                    app.textureManager.onCapabilitiesReady()
+                                } else {
+                                    Log.w(TAG, "Failed to initialize capabilities - textures may not load")
+                                }
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Error initializing capabilities", e)
                             }
                         }
                     } ?: Log.w(TAG, "No seed capability in login response - textures may not load")
