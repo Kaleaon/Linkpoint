@@ -19,6 +19,8 @@ import com.linkpoint.objects.BuildTools
 import com.linkpoint.objects.ObjectManager
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.messages.UDPConnection
+import com.linkpoint.protocol.messages.parseRegionHandshake
+import com.linkpoint.protocol.messages.parseAgentMovementComplete
 import com.linkpoint.render.RenderManager
 import com.linkpoint.voice.VoiceManager
 import com.linkpoint.world.ParcelManager
@@ -30,6 +32,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 /**
@@ -255,9 +258,7 @@ class LinkpointApp : Application() {
         // This is why nothing was loading after login - we weren't acknowledging the region handshake
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.REGION_HANDSHAKE) { _, payload ->
             try {
-                val regionData = com.linkpoint.protocol.messages.parseRegionHandshake(
-                    com.linkpoint.protocol.messages.MessageParser, payload
-                )
+                val regionData = com.linkpoint.protocol.messages.MessageParser.parseRegionHandshake(payload)
                 if (regionData != null) {
                     Log.i(TAG, "RegionHandshake received: ${regionData.simName}")
                     
@@ -286,9 +287,7 @@ class LinkpointApp : Application() {
         // AgentMovementComplete - Confirms agent is fully in region
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.AGENT_MOVEMENT_COMPLETE) { _, payload ->
             try {
-                val moveData = com.linkpoint.protocol.messages.parseAgentMovementComplete(
-                    com.linkpoint.protocol.messages.MessageParser, payload
-                )
+                val moveData = com.linkpoint.protocol.messages.MessageParser.parseAgentMovementComplete(payload)
                 if (moveData != null) {
                     Log.i(TAG, "AgentMovementComplete: position=${moveData.position}")
                     
