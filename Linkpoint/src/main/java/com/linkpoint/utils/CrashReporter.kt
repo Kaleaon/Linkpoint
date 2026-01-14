@@ -808,8 +808,18 @@ data class CrashReporterDiagnostics(
         appendLine("  In Memory Queue: $recentCrashesInMemory")
         appendLine()
         if (lastCrashTimestamp != null) {
-            val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US)
-            appendLine("Last Crash: ${dateFormat.format(java.util.Date(lastCrashTimestamp))}")
+            // Use thread-safe formatting
+            val formattedDate = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                java.time.Instant.ofEpochMilli(lastCrashTimestamp)
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+            } else {
+                // SimpleDateFormat for older Android versions (only used locally, not shared)
+                @Suppress("SimpleDateFormat")
+                java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US)
+                    .format(java.util.Date(lastCrashTimestamp))
+            }
+            appendLine("Last Crash: $formattedDate")
         } else {
             appendLine("Last Crash: None recorded")
         }

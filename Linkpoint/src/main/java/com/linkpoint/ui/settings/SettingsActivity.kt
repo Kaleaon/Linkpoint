@@ -135,6 +135,22 @@ class SettingsActivity : AppCompatActivity() {
         }
         
         /**
+         * Helper method to execute action with crash reporter or show error if not available.
+         * Reduces code duplication for crash reporter null checks.
+         */
+        private inline fun withCrashReporter(
+            notAvailableMessage: String = "Crash reporter not initialized",
+            action: (CrashReporter) -> Unit
+        ) {
+            val crashReporter = CrashReporter.getInstanceOrNull()
+            if (crashReporter != null) {
+                action(crashReporter)
+            } else {
+                Toast.makeText(requireContext(), notAvailableMessage, Toast.LENGTH_SHORT).show()
+            }
+        }
+        
+        /**
          * Update the crash reporter status summary
          */
         private fun updateCrashReporterStatusSummary(pref: Preference) {
@@ -155,12 +171,7 @@ class SettingsActivity : AppCompatActivity() {
         /**
          * Show crash logs dialog with list of available crash logs
          */
-        private fun showCrashLogsDialog() {
-            val crashReporter = CrashReporter.getInstanceOrNull()
-            if (crashReporter == null) {
-                Toast.makeText(requireContext(), "Crash reporter not initialized", Toast.LENGTH_SHORT).show()
-                return
-            }
+        private fun showCrashLogsDialog() = withCrashReporter { crashReporter ->
             
             val crashLogs = crashReporter.getCrashLogs()
             
@@ -170,7 +181,7 @@ class SettingsActivity : AppCompatActivity() {
                     .setMessage("No crash logs found.\n\nThis is good! It means the app hasn't crashed.")
                     .setPositiveButton("OK", null)
                     .show()
-                return
+                return@withCrashReporter
             }
             
             val logNames = crashLogs.map { it.name }.toTypedArray()
@@ -266,13 +277,7 @@ class SettingsActivity : AppCompatActivity() {
         /**
          * Test the crash reporter by generating a test exception
          */
-        private fun testCrashReporter() {
-            val crashReporter = CrashReporter.getInstanceOrNull()
-            if (crashReporter == null) {
-                Toast.makeText(requireContext(), "Crash reporter not initialized", Toast.LENGTH_SHORT).show()
-                return
-            }
-            
+        private fun testCrashReporter() = withCrashReporter { crashReporter ->
             AlertDialog.Builder(requireContext())
                 .setTitle("Test Crash Reporter")
                 .setMessage("This will generate a non-fatal test exception to verify crash reporting is working.\n\nThe exception will be logged but the app will not crash.")
@@ -299,18 +304,12 @@ class SettingsActivity : AppCompatActivity() {
         /**
          * Confirm and clear all crash logs
          */
-        private fun confirmClearCrashLogs() {
-            val crashReporter = CrashReporter.getInstanceOrNull()
-            if (crashReporter == null) {
-                Toast.makeText(requireContext(), "Crash reporter not initialized", Toast.LENGTH_SHORT).show()
-                return
-            }
-            
+        private fun confirmClearCrashLogs() = withCrashReporter { crashReporter ->
             val logsCount = crashReporter.getCrashLogs().size
             
             if (logsCount == 0) {
                 Toast.makeText(requireContext(), "No crash logs to clear", Toast.LENGTH_SHORT).show()
-                return
+                return@withCrashReporter
             }
             
             AlertDialog.Builder(requireContext())
