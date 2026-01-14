@@ -108,6 +108,11 @@ class AvatarManager(
     }
     
     /**
+     * Alias for handleAnimationUpdate - handles AvatarAnimation UDP messages
+     */
+    fun handleAvatarAnimation(data: AvatarAnimationData) = handleAnimationUpdate(data)
+    
+    /**
      * Update all avatars
      */
     fun update(deltaTime: Float) {

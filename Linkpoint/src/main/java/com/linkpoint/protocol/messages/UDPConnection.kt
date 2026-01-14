@@ -397,11 +397,16 @@ object MessageIds {
     const val USE_CIRCUIT_CODE: Int = 0xFFFF0003.toInt()
     const val COMPLETE_AGENT_MOVEMENT: Int = 0xFFFF00F9.toInt()
     const val LOGOUT_REQUEST: Int = 0xFFFF00FC.toInt()
+    const val CHAT_FROM_SIMULATOR: Int = 0xFFFF00A3.toInt()
+    const val IMPROVED_INSTANT_MESSAGE: Int = 0xFFFF00FE.toInt()
+    const val REGION_HANDSHAKE: Int = 0xFFFF0094.toInt()
+    const val AGENT_MOVEMENT_COMPLETE: Int = 0xFFFF00FA.toInt()
     
     // Medium frequency (0xFFxx)
     const val AGENT_UPDATE: Int = 0xFF04
     const val CHAT_FROM_VIEWER: Int = 0xFF50
     const val INSTANT_MESSAGE: Int = 0xFF4B
+    const val KILL_OBJECT: Int = 0xFF0C
     
     // High frequency (0x00 - 0xFE)
     const val START_PING_CHECK: Int = 0x01
@@ -409,6 +414,7 @@ object MessageIds {
     const val OBJECT_UPDATE: Int = 0x0C
     const val OBJECT_UPDATE_COMPRESSED: Int = 0x0D
     const val OBJECT_UPDATE_CACHED: Int = 0x0E
+    const val IMPROVED_TERSE_OBJECT_UPDATE: Int = 0x0F
     const val AVATAR_ANIMATION: Int = 0x14
     const val COARSE_LOCATION_UPDATE: Int = 0x06
 }
