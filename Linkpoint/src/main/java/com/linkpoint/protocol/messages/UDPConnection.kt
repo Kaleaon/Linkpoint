@@ -7,6 +7,7 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -19,6 +20,8 @@ class UDPConnection {
     private var simIP: String = ""
     private var simPort: Int = 0
     private var circuitCode: Int = 0
+    private var sessionId: UUID = UUID(0, 0)
+    private var agentId: UUID = UUID(0, 0)
     
     constructor()
     
@@ -32,6 +35,14 @@ class UDPConnection {
         this.simIP = simIP
         this.simPort = simPort
         this.circuitCode = circuitCode
+    }
+    
+    /**
+     * Set session information for circuit establishment
+     */
+    fun setSessionInfo(sessionId: UUID, agentId: UUID) {
+        this.sessionId = sessionId
+        this.agentId = agentId
     }
     companion object {
         private const val TAG = "UDPConnection"
@@ -72,13 +83,45 @@ class UDPConnection {
             // Send UseCircuitCode message
             sendUseCircuitCode()
             
+            // Wait a moment for the circuit to be established
+            delay(500)
+            
+            // Send CompleteAgentMovement to tell the simulator we're ready
+            sendCompleteAgentMovement()
+            
             isConnected = true
-            Log.i(TAG, "Connected to $simIP:$simPort")
+            Log.i(TAG, "Connected to $simIP:$simPort, circuit established")
             true
         } catch (e: Exception) {
             Log.e(TAG, "Connection failed", e)
             false
         }
+    }
+    
+    /**
+     * Send CompleteAgentMovement message.
+     * This tells the simulator we're ready to receive world data.
+     */
+    suspend fun sendCompleteAgentMovement() {
+        // CompleteAgentMovement message format:
+        // - AgentID (16 bytes, UUID)
+        // - SessionID (16 bytes, UUID)
+        // - CircuitCode (4 bytes, U32)
+        val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
+        
+        // Agent ID
+        payload.putLong(agentId.mostSignificantBits)
+        payload.putLong(agentId.leastSignificantBits)
+        
+        // Session ID
+        payload.putLong(sessionId.mostSignificantBits)
+        payload.putLong(sessionId.leastSignificantBits)
+        
+        // Circuit code
+        payload.putInt(circuitCode)
+        
+        Log.d(TAG, "Sending CompleteAgentMovement")
+        sendPacket(MessageIds.COMPLETE_AGENT_MOVEMENT, payload.array(), reliable = true)
     }
     
     /**
@@ -245,11 +288,22 @@ class UDPConnection {
     }
     
     private suspend fun sendUseCircuitCode() {
-        val payload = ByteBuffer.allocate(12).order(ByteOrder.LITTLE_ENDIAN)
+        // UseCircuitCode message format:
+        // - CircuitCode (4 bytes, U32)
+        // - SessionID (16 bytes, UUID)
+        // - AgentID (16 bytes, UUID)
+        val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
         payload.putInt(circuitCode)
-        // Session ID and Agent ID would go here
-        payload.putLong(0) // Placeholder
         
+        // Session ID (UUID as two longs)
+        payload.putLong(sessionId.mostSignificantBits)
+        payload.putLong(sessionId.leastSignificantBits)
+        
+        // Agent ID (UUID as two longs)
+        payload.putLong(agentId.mostSignificantBits)
+        payload.putLong(agentId.leastSignificantBits)
+        
+        Log.d(TAG, "Sending UseCircuitCode: circuit=$circuitCode, agent=${agentId.toString().take(8)}...")
         sendPacket(MessageIds.USE_CIRCUIT_CODE, payload.array(), reliable = true)
     }
     

@@ -320,6 +320,12 @@ class CoreNetworkingService(private val context: Context) {
                         return@withContext result.result
                     }
                     
+                    is ParsedLoginResponse.MFARequired -> {
+                        // MFA challenge - return immediately, user needs to provide TOTP code
+                        Log.i(TAG, "Login requires MFA authentication")
+                        return@withContext result.result
+                    }
+                    
                     is ParsedLoginResponse.Redirect -> {
                         // Handle redirect (indeterminate response)
                         // Based on official SL viewer's lllogin.cpp:

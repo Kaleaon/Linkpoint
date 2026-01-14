@@ -184,6 +184,38 @@ class SecondLifeProtocol(private val context: Context) {
                 // Initialize agent-specific managers (sets app.agentId)
                 app.initializeAgentManagers(agentId)
                 
+                // Configure and connect UDP connection for simulator communication
+                // This is critical for receiving object updates, chat, IMs, etc.
+                val circuitCode = result.circuitCode ?: 0
+                if (circuitCode != 0 && result.simIp.isNotEmpty() && result.simPort > 0) {
+                    Log.i(TAG, "Establishing UDP connection to ${result.simIp}:${result.simPort} with circuit $circuitCode")
+                    app.udpConnection.configure(result.simIp, result.simPort, circuitCode)
+                    
+                    // Set session info for circuit establishment
+                    val sessionUUID = try {
+                        UUID.fromString(result.sessionId)
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Invalid session ID format, using random UUID")
+                        UUID.randomUUID()
+                    }
+                    app.udpConnection.setSessionInfo(sessionUUID, agentId)
+                    
+                    app.applicationScope.launch {
+                        try {
+                            val udpConnected = app.udpConnection.connect()
+                            if (udpConnected) {
+                                Log.i(TAG, "UDP connection established - simulator packets active")
+                            } else {
+                                Log.w(TAG, "Failed to establish UDP connection - simulator features may not work")
+                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error establishing UDP connection", e)
+                        }
+                    }
+                } else {
+                    Log.w(TAG, "Missing circuit code or sim info - UDP connection not established")
+                }
+                
                 // Initialize capabilities from seed capability (for textures, meshes, etc.)
                 // This is critical for rendering - like Lumiya's SLCaps.GetCapabilities()
                 result.seedCapability?.let { seedCap ->
