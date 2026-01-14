@@ -242,6 +242,20 @@ class TextureManager(
         scope.cancel()
         clearDecodedCache()
     }
+    
+    /**
+     * Called when capabilities are ready after login.
+     * This enables texture fetching via the GetTexture capability,
+     * similar to Lumiya's TextureCache.setFetcher() pattern.
+     */
+    fun onCapabilitiesReady() {
+        val textureCapUrl = capabilityUrl
+        if (textureCapUrl != null) {
+            Log.i(TAG, "Texture fetching enabled via capability: ${textureCapUrl.take(50)}...")
+        } else {
+            Log.w(TAG, "GetTexture capability not available - using fallback asset server")
+        }
+    }
 }
 
 enum class TexturePriority(val value: Int) {

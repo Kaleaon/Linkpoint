@@ -61,7 +61,13 @@ object SimpleSLLogin {
             val simIp: String,
             val simPort: Int,
             /** MFA hash returned by server for future logins */
-            val mfaHash: String? = null
+            val mfaHash: String? = null,
+            /** Seed capability URL for fetching all other capabilities */
+            val seedCapability: String? = null,
+            /** Region name from login response */
+            val regionName: String? = null,
+            /** Circuit code for UDP connection */
+            val circuitCode: Int? = null
         ) : SimpleLoginResult()
         
         /**
@@ -708,6 +714,16 @@ object SimpleSLLogin {
             // Extract mfa_hash for future logins (to skip MFA)
             val mfaHash = extractXmlValue(xml, "mfa_hash")
             
+            // Extract seed capability for fetching all other capabilities (textures, meshes, etc.)
+            val seedCapability = extractXmlValue(xml, "seed_capability")
+            
+            // Extract region name
+            val regionName = extractXmlValue(xml, "region_name") 
+                ?: extractXmlValue(xml, "first_name") // fallback for some grids
+            
+            // Extract circuit code for UDP connection
+            val circuitCode = extractXmlValue(xml, "circuit_code")?.toIntOrNull()
+            
             // NOTE: MFA/verification challenges are now handled ONLY via the explicit
             // `login=false` with `reason=mfa_challenge` check above (lines 672-684).
             // 
@@ -742,13 +758,19 @@ object SimpleSLLogin {
             if (!mfaHash.isNullOrBlank()) {
                 Log.d(TAG, "MFA hash received for future logins")
             }
+            if (!seedCapability.isNullOrBlank()) {
+                Log.d(TAG, "Seed capability received for textures/assets")
+            }
             
             return SimpleLoginResult.Success(
                 sessionId = sessionId,
                 agentId = agentId,
                 simIp = simIp ?: "127.0.0.1",
                 simPort = simPort ?: 13000,
-                mfaHash = mfaHash
+                mfaHash = mfaHash,
+                seedCapability = seedCapability,
+                regionName = regionName,
+                circuitCode = circuitCode
             )
             
         } catch (e: Exception) {
