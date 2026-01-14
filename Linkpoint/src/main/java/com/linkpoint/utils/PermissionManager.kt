@@ -29,19 +29,23 @@ class PermissionManager(private val activity: AppCompatActivity) {
         private const val KEY_PERMISSIONS_REQUESTED = "permissions_requested"
         
         /**
-         * Essential permissions required for the app to function properly
+         * Essential permissions required for the app to function properly.
+         * Includes storage permissions for Lumiya Logs directory.
          */
         fun getEssentialPermissions(): Array<String> {
             val permissions = mutableListOf<String>()
             
-            // Storage permissions based on Android version
+            // Storage permissions for Lumiya Logs directory (Downloads/Lumiya Logs/)
+            // Required for saving crash logs and network logs
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                // Android 9 and below: Need WRITE for public Downloads directory
                 permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
             } else if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
+                // Android 10-12: READ permission for compatibility
                 permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
-            // Android 13+ uses scoped storage, no permission needed for app-specific dirs
+            // Android 13+ (API 33+): Uses app-specific external directory, no permission needed
             
             // Notification permission for Android 13+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -49,6 +53,33 @@ class PermissionManager(private val activity: AppCompatActivity) {
             }
             
             return permissions.toTypedArray()
+        }
+        
+        /**
+         * Storage permissions specifically for Lumiya Logs directory
+         */
+        fun getStoragePermissions(): Array<String> {
+            val permissions = mutableListOf<String>()
+            
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            } else if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
+                permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+            
+            return permissions.toTypedArray()
+        }
+        
+        /**
+         * Check if storage permissions for Lumiya Logs are granted
+         */
+        fun areStoragePermissionsGranted(context: Context): Boolean {
+            // Android 13+ doesn't need storage permissions for app-specific dirs
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                return true
+            }
+            return getStoragePermissions().all { isPermissionGranted(context, it) }
         }
         
         /**
@@ -224,8 +255,8 @@ class PermissionManager(private val activity: AppCompatActivity) {
     fun showStorageRationale(onAccept: () -> Unit, onDeny: () -> Unit) {
         showPermissionRationale(
             title = "Storage Permission Required",
-            message = "Linkpoint needs storage access to save login logs, cache textures, " +
-                "and store your chat history. This improves performance and lets you review logs.",
+            message = "Linkpoint needs storage access to save logs to the Downloads/Lumiya Logs/ folder. " +
+                "This includes crash reports and network activity logs for debugging.",
             onAccept = onAccept,
             onDeny = onDeny
         )
