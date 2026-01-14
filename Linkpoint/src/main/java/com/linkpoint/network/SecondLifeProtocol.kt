@@ -145,12 +145,13 @@ class SecondLifeProtocol(private val context: Context) {
                     Log.i(TAG, "SIMPLE login successful! Agent: ${simpleResult.agentId}")
                     
                     val regionInfo = RegionInfo(
-                        name = "Unknown",
+                        name = simpleResult.regionName ?: "Unknown",
                         handle = 0,
                         x = 128,
                         y = 128,
                         simIP = simpleResult.simIp,
-                        simPort = simpleResult.simPort
+                        simPort = simpleResult.simPort,
+                        seedCapability = simpleResult.seedCapability
                     )
                     
                     app.sessionManager.onLoginSuccess(
@@ -161,6 +162,29 @@ class SecondLifeProtocol(private val context: Context) {
                         lastName = lastName,
                         regionInfo = regionInfo
                     )
+                    
+                    // Initialize agent-specific managers (sets app.agentId)
+                    app.initializeAgentManagers(agentId)
+                    
+                    // Initialize capabilities from seed capability (for textures, meshes, etc.)
+                    // This is critical for rendering - like Lumiya's SLCaps.GetCapabilities()
+                    simpleResult.seedCapability?.let { seedCap ->
+                        Log.i(TAG, "Initializing capabilities from seed...")
+                        app.applicationScope.launch {
+                            try {
+                                val capsInitialized = app.capabilityManager.initialize(seedCap)
+                                if (capsInitialized) {
+                                    Log.i(TAG, "Capabilities initialized - textures and assets ready")
+                                    // Connect texture manager to capability-based fetching
+                                    app.textureManager.onCapabilitiesReady()
+                                } else {
+                                    Log.w(TAG, "Failed to initialize capabilities - textures may not load")
+                                }
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Error initializing capabilities", e)
+                            }
+                        }
+                    } ?: Log.w(TAG, "No seed capability in login response - textures may not load")
                     
                     return@withContext LoginResult.Success(
                         agentId = agentId, 
@@ -261,6 +285,9 @@ class SecondLifeProtocol(private val context: Context) {
                         lastName = lastName,
                         regionInfo = regionInfo
                     )
+                    
+                    // Initialize agent-specific managers (sets app.agentId)
+                    app.initializeAgentManagers(agentId)
                     
                     Log.i(TAG, "Login successful!")
                     NetworkLogger.logProtocol("Login Complete", "Successfully connected to ${result.simIp}:${result.simPort}")

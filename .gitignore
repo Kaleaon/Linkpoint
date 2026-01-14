@@ -133,3 +133,6 @@ __pycache__/
 android-sdk/
 test_xml_format.kt
 test_xml_simple.sh
+
+# Decompiled Lumiya reference code (keep only README)
+docs/lumiya_reference/lumiyaviewer/
