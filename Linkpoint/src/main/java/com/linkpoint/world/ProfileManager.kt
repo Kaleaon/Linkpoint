@@ -183,8 +183,20 @@ class ProfileManager(
     suspend fun joinGroup(groupId: UUID): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                // Would send join request
-                true
+                // Use GroupMemberData capability to join group
+                val request = LLSDMap().apply {
+                    this["group_id"] = LLSDString(groupId.toString())
+                    this["action"] = LLSDString("join")
+                }
+                
+                val response = capabilityManager.request("GroupMemberData", request)
+                if (response != null) {
+                    Log.i(TAG, "Successfully joined group $groupId")
+                    true
+                } else {
+                    Log.w(TAG, "Failed to join group $groupId - no response")
+                    false
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to join group", e)
                 false
@@ -198,8 +210,20 @@ class ProfileManager(
     suspend fun leaveGroup(groupId: UUID): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                // Would send leave request
-                true
+                // Use GroupMemberData capability to leave group
+                val request = LLSDMap().apply {
+                    this["group_id"] = LLSDString(groupId.toString())
+                    this["action"] = LLSDString("leave")
+                }
+                
+                val response = capabilityManager.request("GroupMemberData", request)
+                if (response != null) {
+                    Log.i(TAG, "Successfully left group $groupId")
+                    true
+                } else {
+                    Log.w(TAG, "Failed to leave group $groupId - no response")
+                    false
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to leave group", e)
                 false
@@ -208,13 +232,22 @@ class ProfileManager(
     }
     
     /**
-     * Send friendship request
+     * Send friendship request (via ImprovedInstantMessage with dialog type 38)
+     * Note: This should typically be handled by FriendsManager which has UDP access
      */
     suspend fun offerFriendship(agentId: UUID, message: String = ""): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                // Would send friendship offer
-                true
+                // Use ChatSend capability for friendship offer
+                val request = LLSDMap().apply {
+                    this["target_id"] = LLSDString(agentId.toString())
+                    this["dialog"] = LLSDInteger(38)  // IM_FRIENDSHIP_OFFERED
+                    this["message"] = LLSDString(message)
+                }
+                
+                val response = capabilityManager.request("ChatSend", request)
+                Log.i(TAG, "Sent friendship offer to $agentId")
+                response != null
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to offer friendship", e)
                 false
@@ -228,8 +261,16 @@ class ProfileManager(
     suspend fun acceptFriendship(agentId: UUID, transactionId: UUID): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                // Would send accept
-                true
+                // Use ChatSend capability for friendship acceptance
+                val request = LLSDMap().apply {
+                    this["target_id"] = LLSDString(agentId.toString())
+                    this["transaction_id"] = LLSDString(transactionId.toString())
+                    this["dialog"] = LLSDInteger(39)  // IM_FRIENDSHIP_ACCEPTED
+                }
+                
+                val response = capabilityManager.request("ChatSend", request)
+                Log.i(TAG, "Accepted friendship from $agentId")
+                response != null
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to accept friendship", e)
                 false
@@ -243,8 +284,16 @@ class ProfileManager(
     suspend fun declineFriendship(agentId: UUID, transactionId: UUID): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                // Would send decline
-                true
+                // Use ChatSend capability for friendship decline
+                val request = LLSDMap().apply {
+                    this["target_id"] = LLSDString(agentId.toString())
+                    this["transaction_id"] = LLSDString(transactionId.toString())
+                    this["dialog"] = LLSDInteger(40)  // IM_FRIENDSHIP_DECLINED
+                }
+                
+                val response = capabilityManager.request("ChatSend", request)
+                Log.i(TAG, "Declined friendship from $agentId")
+                response != null
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to decline friendship", e)
                 false
@@ -258,8 +307,14 @@ class ProfileManager(
     suspend fun removeFriend(agentId: UUID): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                // Would send remove
-                true
+                // Use FriendshipTerminate capability
+                val request = LLSDMap().apply {
+                    this["friend_id"] = LLSDString(agentId.toString())
+                }
+                
+                val response = capabilityManager.request("FriendshipTerminate", request)
+                Log.i(TAG, "Removed friend $agentId")
+                response != null
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to remove friend", e)
                 false

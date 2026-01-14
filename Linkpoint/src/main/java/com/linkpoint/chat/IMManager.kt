@@ -338,7 +338,53 @@ class IMManager(
      */
     fun sendTypingStart(sessionId: UUID) {
         scope.launch {
-            // Would send typing start
+            try {
+                // Send typing indicator via ImprovedInstantMessage with dialog type
+                val session = sessions[sessionId] ?: return@launch
+                
+                // Get the target - for P2P use first participant, for groups use session ID
+                val targetId = if (session.type == SessionType.P2P && session.participants.isNotEmpty()) {
+                    session.participants.first()
+                } else {
+                    sessionId
+                }
+                
+                val payload = java.nio.ByteBuffer.allocate(100).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+                
+                // AgentData
+                payload.putLong(agentId.mostSignificantBits)
+                payload.putLong(agentId.leastSignificantBits)
+                repeat(16) { payload.put(0) }  // Session ID placeholder
+                
+                // MessageBlock
+                payload.put(0)  // FromGroup
+                payload.putLong(targetId.mostSignificantBits)
+                payload.putLong(targetId.leastSignificantBits)
+                payload.putInt(0)  // ParentEstateID
+                repeat(16) { payload.put(0) }  // RegionID
+                payload.putFloat(0f)  // Position
+                payload.putFloat(0f)
+                payload.putFloat(0f)
+                payload.put(0)  // Offline
+                payload.put(41)  // Dialog = IM_TYPING_START
+                payload.putLong(sessionId.mostSignificantBits)
+                payload.putLong(sessionId.leastSignificantBits)
+                payload.putInt((System.currentTimeMillis() / 1000).toInt())
+                
+                // Empty name and message
+                payload.put(0)  // FromAgentName length
+                payload.putShort(0)  // Message length
+                payload.putShort(0)  // BinaryBucket length
+                
+                udpConnection.sendPacket(
+                    com.linkpoint.protocol.messages.MessageIds.IMPROVED_INSTANT_MESSAGE,
+                    payload.array(),
+                    reliable = false
+                )
+                Log.d(TAG, "Sent typing start to session $sessionId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to send typing start", e)
+            }
         }
     }
     
@@ -347,7 +393,52 @@ class IMManager(
      */
     fun sendTypingStop(sessionId: UUID) {
         scope.launch {
-            // Would send typing stop
+            try {
+                val session = sessions[sessionId] ?: return@launch
+                
+                // Get the target - for P2P use first participant, for groups use session ID
+                val targetId = if (session.type == SessionType.P2P && session.participants.isNotEmpty()) {
+                    session.participants.first()
+                } else {
+                    sessionId
+                }
+                
+                val payload = java.nio.ByteBuffer.allocate(100).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+                
+                // AgentData
+                payload.putLong(agentId.mostSignificantBits)
+                payload.putLong(agentId.leastSignificantBits)
+                repeat(16) { payload.put(0) }  // Session ID placeholder
+                
+                // MessageBlock
+                payload.put(0)  // FromGroup
+                payload.putLong(targetId.mostSignificantBits)
+                payload.putLong(targetId.leastSignificantBits)
+                payload.putInt(0)  // ParentEstateID
+                repeat(16) { payload.put(0) }  // RegionID
+                payload.putFloat(0f)  // Position
+                payload.putFloat(0f)
+                payload.putFloat(0f)
+                payload.put(0)  // Offline
+                payload.put(42)  // Dialog = IM_TYPING_STOP
+                payload.putLong(sessionId.mostSignificantBits)
+                payload.putLong(sessionId.leastSignificantBits)
+                payload.putInt((System.currentTimeMillis() / 1000).toInt())
+                
+                // Empty name and message
+                payload.put(0)
+                payload.putShort(0)
+                payload.putShort(0)
+                
+                udpConnection.sendPacket(
+                    com.linkpoint.protocol.messages.MessageIds.IMPROVED_INSTANT_MESSAGE,
+                    payload.array(),
+                    reliable = false
+                )
+                Log.d(TAG, "Sent typing stop to session $sessionId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to send typing stop", e)
+            }
         }
     }
     

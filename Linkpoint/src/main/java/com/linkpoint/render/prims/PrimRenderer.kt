@@ -459,8 +459,43 @@ class PrimRenderer(
     }
     
     private fun updatePrimMaterial(prim: PrimInstance, textureEntry: ByteArray) {
-        // Parse texture entry and apply textures
-        // This is complex - simplified for now
+        // Parse texture entry to extract texture UUIDs and material properties
+        // Texture entry format:
+        // - Default face texture UUID (16 bytes)
+        // - Face-specific texture overrides (bitfield + UUID pairs)
+        // - RGBA color
+        // - Repeat U/V, Offset U/V, Rotation
+        
+        if (textureEntry.isEmpty()) return
+        
+        try {
+            val buffer = java.nio.ByteBuffer.wrap(textureEntry)
+                .order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            
+            // Extract default texture UUID (first 16 bytes)
+            if (buffer.remaining() >= 16) {
+                val uuidBytes = ByteArray(16)
+                buffer.get(uuidBytes)
+                val defaultTextureId = bytesToUUID(uuidBytes)
+                
+                // Request texture if valid
+                if (defaultTextureId != UUID(0, 0)) {
+                    // Texture loading would be triggered here
+                    Log.d(TAG, "Prim ${prim.localId} default texture: $defaultTextureId")
+                }
+            }
+            
+            // Skip face-specific textures for now (complex bitfield parsing)
+            // A full implementation would parse the complete texture entry
+            
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to parse texture entry for prim ${prim.localId}", e)
+        }
+    }
+    
+    private fun bytesToUUID(bytes: ByteArray): UUID {
+        val buffer = java.nio.ByteBuffer.wrap(bytes).order(java.nio.ByteOrder.BIG_ENDIAN)
+        return UUID(buffer.long, buffer.long)
     }
     
     fun shutdown() {

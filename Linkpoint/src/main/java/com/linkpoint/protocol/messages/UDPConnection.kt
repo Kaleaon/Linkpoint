@@ -436,6 +436,15 @@ object MessageIds {
     const val DECLINE_FRIENDSHIP: Int = 0xFFFF003D.toInt()
     const val IM_VIA_EMAIL: Int = 0xFFFF00FF.toInt()
     
+    // Parcel messages
+    const val PARCEL_BUY: Int = 0xFFFF00D1.toInt()
+    const val PARCEL_DEED_TO_GROUP: Int = 0xFFFF00D2.toInt()
+    const val PARCEL_RELEASE: Int = 0xFFFF00D3.toInt()
+    const val PARCEL_PROPERTIES_UPDATE: Int = 0xFFFF00D4.toInt()
+    const val PARCEL_RETURN_OBJECTS: Int = 0xFFFF00C9.toInt()
+    const val PARCEL_ACCESS_LIST_UPDATE: Int = 0xFFFF00CF.toInt()
+    const val PARCEL_DISABLE_OBJECTS: Int = 0xFFFF00C9.toInt()
+    
     // Medium frequency (0xFFxx)
     const val AGENT_UPDATE: Int = 0xFF04
     const val CHAT_FROM_VIEWER: Int = 0xFF50
