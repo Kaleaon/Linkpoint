@@ -426,6 +426,44 @@ class InventoryManager(
     fun shutdown() {
         scope.cancel()
     }
+    
+    // ==================== DIAGNOSTIC METHODS ====================
+    
+    /**
+     * Get the total count of cached folders
+     */
+    fun getFolderCount(): Int = folders.size
+    
+    /**
+     * Get the total count of cached items
+     */
+    fun getItemCount(): Int = items.size
+    
+    /**
+     * Get comprehensive diagnostic data for debug reports
+     */
+    fun getDiagnostics(): InventoryDiagnostics {
+        return InventoryDiagnostics(
+            folderCount = folders.size,
+            itemCount = items.size,
+            rootFolderId = rootFolderId,
+            systemFolderCount = systemFolders.size,
+            isLoading = _isLoading.value,
+            currentFolderId = _currentFolder.value
+        )
+    }
+    
+    /**
+     * Diagnostic data class for inventory manager state
+     */
+    data class InventoryDiagnostics(
+        val folderCount: Int,
+        val itemCount: Int,
+        val rootFolderId: UUID?,
+        val systemFolderCount: Int,
+        val isLoading: Boolean,
+        val currentFolderId: UUID?
+    )
 }
 
 data class InventoryFolder(

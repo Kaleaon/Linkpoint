@@ -219,6 +219,44 @@ class AvatarManager(
         }
         avatars.clear()
     }
+    
+    // ==================== DIAGNOSTIC METHODS ====================
+    
+    /**
+     * Get comprehensive diagnostic data for debug reports
+     */
+    fun getDiagnostics(): AvatarManagerDiagnostics {
+        val allAvatars = avatars.values.toList()
+        val now = System.currentTimeMillis()
+        
+        val recentlyUpdated = allAvatars.count { now - it.lastUpdate < 5000 }
+        val flyingCount = allAvatars.count { it.isFlying }
+        val sittingCount = allAvatars.count { it.isSitting }
+        val typingCount = allAvatars.count { it.isTyping }
+        
+        return AvatarManagerDiagnostics(
+            totalAvatars = avatars.size,
+            myAgentId = myAgentId,
+            myAvatarLoaded = myAvatar != null,
+            recentlyUpdatedCount = recentlyUpdated,
+            flyingCount = flyingCount,
+            sittingCount = sittingCount,
+            typingCount = typingCount
+        )
+    }
+    
+    /**
+     * Diagnostic data class for avatar manager state
+     */
+    data class AvatarManagerDiagnostics(
+        val totalAvatars: Int,
+        val myAgentId: UUID?,
+        val myAvatarLoaded: Boolean,
+        val recentlyUpdatedCount: Int,
+        val flyingCount: Int,
+        val sittingCount: Int,
+        val typingCount: Int
+    )
 }
 
 class Avatar(

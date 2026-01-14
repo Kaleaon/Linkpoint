@@ -495,6 +495,105 @@ class UDPConnection {
         var timestamp: Long,
         var retries: Int = 0
     )
+    
+    // ==================== DIAGNOSTIC METHODS ====================
+    
+    /**
+     * Check if the UDP connection is currently connected
+     */
+    fun isCurrentlyConnected(): Boolean = isConnected
+    
+    /**
+     * Get the current sequence number (packets sent)
+     */
+    fun getCurrentSequenceNumber(): Int = sequenceNumber.get()
+    
+    /**
+     * Get the number of pending acknowledgments (packets awaiting ACK)
+     */
+    fun getPendingAckCount(): Int = pendingAcks.size
+    
+    /**
+     * Get the number of registered message handlers
+     */
+    fun getRegisteredHandlerCount(): Int = messageHandlers.size
+    
+    /**
+     * Get list of registered message handler IDs for diagnostics
+     */
+    fun getRegisteredHandlerIds(): List<String> {
+        return messageHandlers.keys.map { id ->
+            when (id) {
+                MessageIds.REGION_HANDSHAKE -> "REGION_HANDSHAKE"
+                MessageIds.AGENT_MOVEMENT_COMPLETE -> "AGENT_MOVEMENT_COMPLETE"
+                MessageIds.CHAT_FROM_SIMULATOR -> "CHAT_FROM_SIMULATOR"
+                MessageIds.OBJECT_UPDATE -> "OBJECT_UPDATE"
+                MessageIds.OBJECT_UPDATE_COMPRESSED -> "OBJECT_UPDATE_COMPRESSED"
+                MessageIds.AVATAR_ANIMATION -> "AVATAR_ANIMATION"
+                MessageIds.IMPROVED_TERSE_OBJECT_UPDATE -> "IMPROVED_TERSE_OBJECT_UPDATE"
+                MessageIds.KILL_OBJECT -> "KILL_OBJECT"
+                MessageIds.COARSE_LOCATION_UPDATE -> "COARSE_LOCATION_UPDATE"
+                else -> "0x${id.toString(16).uppercase()}"
+            }
+        }
+    }
+    
+    /**
+     * Get comprehensive diagnostic data for debug reports
+     */
+    fun getDiagnostics(): UDPDiagnostics {
+        val pendingPacketInfo = pendingAcks.values.map { packet ->
+            PendingPacketInfo(
+                seqNum = packet.seqNum,
+                retries = packet.retries,
+                ageMs = System.currentTimeMillis() - packet.timestamp
+            )
+        }
+        
+        return UDPDiagnostics(
+            isConnected = isConnected,
+            simIP = simIP,
+            simPort = simPort,
+            circuitCode = circuitCode,
+            agentId = agentId,
+            sessionId = sessionId,
+            sequenceNumber = sequenceNumber.get(),
+            pendingAckCount = pendingAcks.size,
+            registeredHandlerCount = messageHandlers.size,
+            registeredHandlers = getRegisteredHandlerIds(),
+            pendingPackets = pendingPacketInfo,
+            socketOpen = socket != null && !socket!!.isClosed,
+            receiveLoopActive = receiveJob?.isActive == true
+        )
+    }
+    
+    /**
+     * Diagnostic data class for UDP connection state
+     */
+    data class UDPDiagnostics(
+        val isConnected: Boolean,
+        val simIP: String,
+        val simPort: Int,
+        val circuitCode: Int,
+        val agentId: UUID,
+        val sessionId: UUID,
+        val sequenceNumber: Int,
+        val pendingAckCount: Int,
+        val registeredHandlerCount: Int,
+        val registeredHandlers: List<String>,
+        val pendingPackets: List<PendingPacketInfo>,
+        val socketOpen: Boolean,
+        val receiveLoopActive: Boolean
+    )
+    
+    /**
+     * Info about a pending packet for diagnostics
+     */
+    data class PendingPacketInfo(
+        val seqNum: Int,
+        val retries: Int,
+        val ageMs: Long
+    )
 }
 
 fun interface MessageHandler {
