@@ -97,4 +97,15 @@
         <item>auto</item>
     </string-array>
 
+    <!-- Cache location options -->
+    <string-array name="cache_location_entries">
+        <item>Internal Storage</item>
+        <item>External Storage (SD Card)</item>
+    </string-array>
+
+    <string-array name="cache_location_values">
+        <item>internal</item>
+        <item>external</item>
+    </string-array>
+
 </resources>

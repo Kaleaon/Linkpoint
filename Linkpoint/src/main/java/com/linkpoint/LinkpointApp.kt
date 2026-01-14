@@ -251,6 +251,55 @@ class LinkpointApp : Application() {
     private fun registerMessageHandlers() {
         Log.d(TAG, "Registering UDP message handlers...")
         
+        // RegionHandshake - CRITICAL: Must respond with RegionHandshakeReply for world data to load
+        // This is why nothing was loading after login - we weren't acknowledging the region handshake
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.REGION_HANDSHAKE) { _, payload ->
+            try {
+                val regionData = com.linkpoint.protocol.messages.parseRegionHandshake(
+                    com.linkpoint.protocol.messages.MessageParser, payload
+                )
+                if (regionData != null) {
+                    Log.i(TAG, "RegionHandshake received: ${regionData.simName}")
+                    
+                    // Update session with region info
+                    sessionManager.updateRegionName(regionData.simName)
+                    
+                    // Send RegionHandshakeReply to acknowledge - THIS IS REQUIRED!
+                    applicationScope.launch {
+                        try {
+                            udpConnection.sendRegionHandshakeReply()
+                            Log.i(TAG, "RegionHandshakeReply sent - world data should start loading")
+                            
+                            // Also send AgentThrottle to set bandwidth allocation
+                            udpConnection.sendAgentThrottle()
+                            Log.i(TAG, "AgentThrottle sent - bandwidth configured")
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error sending RegionHandshakeReply", e)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling RegionHandshake", e)
+            }
+        }
+        
+        // AgentMovementComplete - Confirms agent is fully in region
+        udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.AGENT_MOVEMENT_COMPLETE) { _, payload ->
+            try {
+                val moveData = com.linkpoint.protocol.messages.parseAgentMovementComplete(
+                    com.linkpoint.protocol.messages.MessageParser, payload
+                )
+                if (moveData != null) {
+                    Log.i(TAG, "AgentMovementComplete: position=${moveData.position}")
+                    
+                    // Update connection state to fully connected
+                    sessionManager.setConnectionState(com.linkpoint.core.ConnectionState.CONNECTED)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling AgentMovementComplete", e)
+            }
+        }
+        
         // Chat from simulator (nearby chat)
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.CHAT_FROM_SIMULATOR) { _, payload ->
             try {
