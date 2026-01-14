@@ -441,7 +441,7 @@ class DebugReportService private constructor(private val context: Context) {
             appendLine()
             if (app != null) {
                 try {
-                    if (app::objectManager.isInitialized) {
+                    if (app.isObjectManagerInitialized()) {
                         val objDiag = app.objectManager.getDiagnostics()
                         appendLine("Total Objects in Scene: ${objDiag.totalObjects}")
                         appendLine("Objects by UUID: ${objDiag.objectsByUUID}")
@@ -474,7 +474,7 @@ class DebugReportService private constructor(private val context: Context) {
             appendLine()
             if (app != null) {
                 try {
-                    if (app::avatarManager.isInitialized) {
+                    if (app.isAvatarManagerInitialized()) {
                         val avatarDiag = app.avatarManager.getDiagnostics()
                         appendLine("Total Avatars in Scene: ${avatarDiag.totalAvatars}")
                         appendLine("My Agent ID: ${avatarDiag.myAgentId ?: "Not set"}")
@@ -506,7 +506,7 @@ class DebugReportService private constructor(private val context: Context) {
             appendLine()
             if (app != null) {
                 try {
-                    if (app::inventoryManager.isInitialized) {
+                    if (app.isInventoryManagerInitialized()) {
                         val invDiag = app.inventoryManager.getDiagnostics()
                         appendLine("Folders Cached: ${invDiag.folderCount}")
                         appendLine("Items Cached: ${invDiag.itemCount}")

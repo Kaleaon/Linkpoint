@@ -420,4 +420,31 @@ class LinkpointApp : Application() {
      * Get the current region name
      */
     fun getCurrentRegion(): String? = sessionManager.currentRegion.value?.name
+    
+    // ==================== DIAGNOSTIC HELPER METHODS ====================
+    
+    /**
+     * Check if object manager is initialized (for debug reports)
+     */
+    fun isObjectManagerInitialized(): Boolean = ::objectManager.isInitialized
+    
+    /**
+     * Check if avatar manager is initialized (for debug reports)
+     */
+    fun isAvatarManagerInitialized(): Boolean = ::avatarManager.isInitialized
+    
+    /**
+     * Check if inventory manager is initialized (for debug reports)
+     */
+    fun isInventoryManagerInitialized(): Boolean = ::inventoryManager.isInitialized
+    
+    /**
+     * Check if chat manager is initialized (for debug reports)
+     */
+    fun isChatManagerInitialized(): Boolean = ::chatManager.isInitialized
+    
+    /**
+     * Check if IM manager is initialized (for debug reports)
+     */
+    fun isIMManagerInitialized(): Boolean = ::imManager.isInitialized
 }
