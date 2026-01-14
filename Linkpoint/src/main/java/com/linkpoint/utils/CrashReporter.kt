@@ -2,6 +2,7 @@ package com.linkpoint.utils
 
 import android.content.Context
 import android.os.Build
+import android.os.Environment
 import android.util.Log
 import kotlinx.coroutines.*
 import java.io.File
@@ -22,7 +23,7 @@ class CrashReporter private constructor(private val context: Context) {
     
     companion object {
         private const val TAG = "CrashReporter"
-        private const val CRASH_LOG_DIR = "crash_logs"
+        private const val CRASH_LOG_DIR = "Lumiya Logs"
         private const val MAX_CRASH_LOGS = 10
         private const val CRASH_LOG_PREFIX = "crash_"
         private const val CRASH_LOG_SUFFIX = ".txt"
@@ -38,7 +39,7 @@ class CrashReporter private constructor(private val context: Context) {
                 instance ?: CrashReporter(context.applicationContext).also {
                     instance = it
                     it.installUncaughtExceptionHandler()
-                    Log.i(TAG, "CrashReporter initialized")
+                    Log.i(TAG, "CrashReporter initialized, crash logs will be saved to Downloads/$CRASH_LOG_DIR/")
                 }
             }
         }
@@ -247,13 +248,24 @@ class CrashReporter private constructor(private val context: Context) {
     }
     
     /**
-     * Get the crash log directory
+     * Get the crash log directory in Downloads/Lumiya Logs/
      */
     private fun getCrashLogDirectory(): File {
-        val crashDir = File(context.filesDir, CRASH_LOG_DIR)
+        // Use the same directory as NetworkLogger: Downloads/Lumiya Logs/
+        val crashDir = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Android 10+ - use app-specific directory in Downloads
+            File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), CRASH_LOG_DIR)
+        } else {
+            // Android 9 and below - use public Downloads directory
+            @Suppress("DEPRECATION")
+            File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), CRASH_LOG_DIR)
+        }
+        
         if (!crashDir.exists()) {
             crashDir.mkdirs()
         }
+        
+        Log.d(TAG, "Crash log directory: ${crashDir.absolutePath}")
         return crashDir
     }
     
