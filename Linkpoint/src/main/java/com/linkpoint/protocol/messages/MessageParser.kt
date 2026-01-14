@@ -575,3 +575,150 @@ enum class ChatType(val value: Int) {
         fun fromValue(value: Int) = values().find { it.value == value } ?: NORMAL
     }
 }
+
+/**
+ * Parse RegionHandshake message.
+ * This message is sent by the simulator after CompleteAgentMovement
+ * and must be acknowledged with RegionHandshakeReply.
+ */
+fun MessageParser.parseRegionHandshake(data: ByteArray): RegionHandshakeData? {
+    val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+    
+    try {
+        // RegionInfo block
+        val regionFlags = buffer.int
+        val simAccess = buffer.get().toInt() and 0xFF
+        
+        // SimName - variable length string
+        val simNameLen = buffer.get().toInt() and 0xFF
+        val simNameBytes = ByteArray(simNameLen)
+        buffer.get(simNameBytes)
+        val simName = String(simNameBytes, Charsets.UTF_8).trimEnd('\u0000')
+        
+        // SimOwner UUID
+        val simOwnerBytes = ByteArray(16)
+        buffer.get(simOwnerBytes)
+        val simOwner = bytesToUUID(simOwnerBytes)
+        
+        // IsEstateManager
+        val isEstateManager = buffer.get() != 0.toByte()
+        
+        // Water height
+        val waterHeight = buffer.float
+        
+        // Billboard sunset
+        val billableFactor = buffer.float
+        
+        // Cache ID
+        val cacheIdBytes = ByteArray(16)
+        buffer.get(cacheIdBytes)
+        val cacheId = bytesToUUID(cacheIdBytes)
+        
+        // Terrain textures (4 UUIDs)
+        val terrainTextures = (0 until 4).map {
+            val texBytes = ByteArray(16)
+            buffer.get(texBytes)
+            bytesToUUID(texBytes)
+        }
+        
+        // Terrain start/end heights (8 floats)
+        val terrainStartHeight = (0 until 4).map { buffer.float }
+        val terrainHeightRange = (0 until 4).map { buffer.float }
+        
+        // Region UUID (from RegionInfo2 block if present)
+        // For simplicity, we'll generate from cache ID
+        
+        return RegionHandshakeData(
+            regionFlags = regionFlags,
+            simAccess = simAccess,
+            simName = simName,
+            simOwner = simOwner,
+            isEstateManager = isEstateManager,
+            waterHeight = waterHeight,
+            billableFactor = billableFactor,
+            cacheId = cacheId,
+            terrainTextures = terrainTextures
+        )
+    } catch (e: Exception) {
+        Log.e("MessageParser", "Failed to parse RegionHandshake", e)
+        return null
+    }
+}
+
+/**
+ * Helper to convert bytes to UUID - accessible for extension function
+ */
+private fun bytesToUUID(bytes: ByteArray): UUID {
+    val bb = ByteBuffer.wrap(bytes)
+    return UUID(bb.long, bb.long)
+}
+
+/**
+ * Parse AgentMovementComplete message.
+ * Confirms the agent is fully in the region.
+ */
+fun MessageParser.parseAgentMovementComplete(data: ByteArray): AgentMovementCompleteData? {
+    val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+    
+    try {
+        // AgentData block
+        val agentIdBytes = ByteArray(16)
+        buffer.get(agentIdBytes)
+        val agentId = bytesToUUID(agentIdBytes)
+        
+        val sessionIdBytes = ByteArray(16)
+        buffer.get(sessionIdBytes)
+        val sessionId = bytesToUUID(sessionIdBytes)
+        
+        // Data block
+        val positionBytes = ByteArray(12)
+        buffer.get(positionBytes)
+        val position = LLVector3.fromBytes(positionBytes)
+        
+        val lookAtBytes = ByteArray(12)
+        buffer.get(lookAtBytes)
+        val lookAt = LLVector3.fromBytes(lookAtBytes)
+        
+        val regionHandle = buffer.long
+        val timestamp = buffer.int
+        
+        return AgentMovementCompleteData(
+            agentId = agentId,
+            sessionId = sessionId,
+            position = position,
+            lookAt = lookAt,
+            regionHandle = regionHandle,
+            timestamp = timestamp
+        )
+    } catch (e: Exception) {
+        Log.e("MessageParser", "Failed to parse AgentMovementComplete", e)
+        return null
+    }
+}
+
+/**
+ * Data from RegionHandshake message
+ */
+data class RegionHandshakeData(
+    val regionFlags: Int,
+    val simAccess: Int,
+    val simName: String,
+    val simOwner: UUID,
+    val isEstateManager: Boolean,
+    val waterHeight: Float,
+    val billableFactor: Float,
+    val cacheId: UUID,
+    val terrainTextures: List<UUID>
+)
+
+/**
+ * Data from AgentMovementComplete message
+ */
+data class AgentMovementCompleteData(
+    val agentId: UUID,
+    val sessionId: UUID,
+    val position: LLVector3,
+    val lookAt: LLVector3,
+    val regionHandle: Long,
+    val timestamp: Int
+)

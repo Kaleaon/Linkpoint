@@ -19,6 +19,7 @@ import com.linkpoint.BuildConfig
 import com.linkpoint.R
 import com.linkpoint.ui.tos.TosActivity
 import com.linkpoint.utils.CrashReporter
+import kotlinx.coroutines.launch
 
 /**
  * Settings Activity
@@ -99,6 +100,9 @@ class SettingsActivity : AppCompatActivity() {
             // Debug and Diagnostics section
             setupDebugSection()
             
+            // Cache settings
+            setupCacheSettings()
+            
             // ToS viewing
             findPreference<Preference>("view_tos")?.setOnPreferenceClickListener {
                 startActivity(TosActivity.createIntent(requireContext(), requireAcceptance = false))
@@ -107,6 +111,212 @@ class SettingsActivity : AppCompatActivity() {
             
             // XML buffer size setting (3-500 MB)
             setupNetworkBufferSettings()
+        }
+        
+        /**
+         * Setup cache settings - Lumiya-style configurable caches
+         */
+        private fun setupCacheSettings() {
+            val cacheManager = com.linkpoint.assets.CacheManager(requireContext())
+            
+            // Cache location
+            findPreference<ListPreference>("cache_location")?.apply {
+                value = cacheManager.getCacheLocation()
+                setOnPreferenceChangeListener { _, newValue ->
+                    val location = newValue as String
+                    if (location == com.linkpoint.assets.CacheManager.LOCATION_EXTERNAL && 
+                        !cacheManager.isExternalStorageAvailable()) {
+                        Toast.makeText(requireContext(), 
+                            "External storage not available", Toast.LENGTH_SHORT).show()
+                        false
+                    } else {
+                        cacheManager.setCacheLocation(location)
+                        AlertDialog.Builder(requireContext())
+                            .setTitle("Restart Required")
+                            .setMessage("Cache location changed. The app needs to restart for this to take effect.")
+                            .setPositiveButton("OK", null)
+                            .show()
+                        true
+                    }
+                }
+            }
+            
+            // Total disk cache (in GB now)
+            findPreference<SeekBarPreference>("disk_cache_size")?.apply {
+                val currentGB = cacheManager.getDiskCacheSizeMB() / 1024
+                value = currentGB.coerceIn(1, 50)
+                setOnPreferenceChangeListener { _, newValue ->
+                    val sizeGB = newValue as Int
+                    cacheManager.setDiskCacheSizeMB(sizeGB * 1024)
+                    Toast.makeText(requireContext(), "Disk cache set to ${sizeGB}GB", Toast.LENGTH_SHORT).show()
+                    true
+                }
+            }
+            
+            // Memory cache (MB)
+            findPreference<SeekBarPreference>("memory_cache_size")?.apply {
+                value = cacheManager.getMemoryCacheSizeMB()
+                setOnPreferenceChangeListener { _, newValue ->
+                    val sizeMB = newValue as Int
+                    cacheManager.setMemoryCacheSizeMB(sizeMB)
+                    Toast.makeText(requireContext(), 
+                        "Memory cache set to ${sizeMB}MB (restart required)", Toast.LENGTH_SHORT).show()
+                    true
+                }
+            }
+            
+            // Texture memory (RAM dedication)
+            findPreference<SeekBarPreference>("texture_memory")?.apply {
+                value = cacheManager.getTextureMemoryMB()
+                setOnPreferenceChangeListener { _, newValue ->
+                    val sizeMB = newValue as Int
+                    cacheManager.setTextureMemoryMB(sizeMB)
+                    Toast.makeText(requireContext(), 
+                        "Texture RAM set to ${sizeMB}MB", Toast.LENGTH_SHORT).show()
+                    true
+                }
+            }
+            
+            // Texture cache (in GB)
+            findPreference<SeekBarPreference>("texture_cache_size")?.apply {
+                val currentGB = cacheManager.getTextureCacheSizeMB() / 1024
+                value = currentGB.coerceIn(1, 20)
+                setOnPreferenceChangeListener { _, newValue ->
+                    val sizeGB = newValue as Int
+                    cacheManager.setTextureCacheSizeMB(sizeGB * 1024)
+                    Toast.makeText(requireContext(), "Texture cache set to ${sizeGB}GB", Toast.LENGTH_SHORT).show()
+                    true
+                }
+            }
+            
+            // Mesh cache (in GB)
+            findPreference<SeekBarPreference>("mesh_cache_size")?.apply {
+                val currentGB = cacheManager.getMeshCacheSizeMB() / 1024
+                value = currentGB.coerceIn(1, 10)
+                setOnPreferenceChangeListener { _, newValue ->
+                    val sizeGB = newValue as Int
+                    cacheManager.setMeshCacheSizeMB(sizeGB * 1024)
+                    Toast.makeText(requireContext(), "Mesh cache set to ${sizeGB}GB", Toast.LENGTH_SHORT).show()
+                    true
+                }
+            }
+            
+            // Sound cache (in GB)
+            findPreference<SeekBarPreference>("sound_cache_size")?.apply {
+                val currentGB = cacheManager.getSoundCacheSizeMB() / 1024
+                value = currentGB.coerceIn(1, 4)
+                setOnPreferenceChangeListener { _, newValue ->
+                    val sizeGB = newValue as Int
+                    cacheManager.setSoundCacheSizeMB(sizeGB * 1024)
+                    Toast.makeText(requireContext(), "Sound cache set to ${sizeGB}GB", Toast.LENGTH_SHORT).show()
+                    true
+                }
+            }
+            
+            // Animation cache (in GB)
+            findPreference<SeekBarPreference>("animation_cache_size")?.apply {
+                val currentGB = cacheManager.getAnimationCacheSizeMB() / 1024
+                value = currentGB.coerceIn(1, 4)
+                setOnPreferenceChangeListener { _, newValue ->
+                    val sizeGB = newValue as Int
+                    cacheManager.setAnimationCacheSizeMB(sizeGB * 1024)
+                    Toast.makeText(requireContext(), "Animation cache set to ${sizeGB}GB", Toast.LENGTH_SHORT).show()
+                    true
+                }
+            }
+            
+            // Auto-clear on low space
+            findPreference<SwitchPreferenceCompat>("auto_clear_cache")?.apply {
+                isChecked = cacheManager.isAutoClearOnLowSpaceEnabled()
+                setOnPreferenceChangeListener { _, newValue ->
+                    cacheManager.setAutoClearOnLowSpace(newValue as Boolean)
+                    true
+                }
+            }
+            
+            // View cache statistics
+            findPreference<Preference>("view_cache_stats")?.setOnPreferenceClickListener {
+                showCacheStatistics(cacheManager)
+                true
+            }
+            
+            // Clear all cache
+            findPreference<Preference>("clear_cache")?.setOnPreferenceClickListener {
+                confirmClearAllCache(cacheManager)
+                true
+            }
+        }
+        
+        /**
+         * Show cache statistics dialog
+         */
+        private fun showCacheStatistics(cacheManager: com.linkpoint.assets.CacheManager) {
+            kotlinx.coroutines.MainScope().launch {
+                val stats = cacheManager.getCacheStats()
+                val locations = cacheManager.getAvailableCacheLocations()
+                
+                val message = buildString {
+                    appendLine("=== Cache Usage ===")
+                    appendLine()
+                    appendLine("Total: ${stats.getFormattedTotalSize()} / ${stats.getFormattedMaxSize()} (${stats.usagePercent}%)")
+                    appendLine("Files: ${stats.totalFileCount}")
+                    appendLine()
+                    appendLine("=== By Type ===")
+                    appendLine("Textures: ${cacheManager.formatSize(stats.texturesSizeBytes)} (${stats.texturesCount} files)")
+                    appendLine("Meshes: ${cacheManager.formatSize(stats.meshesSizeBytes)} (${stats.meshesCount} files)")
+                    appendLine("Sounds: ${cacheManager.formatSize(stats.soundsSizeBytes)} (${stats.soundsCount} files)")
+                    appendLine("Animations: ${cacheManager.formatSize(stats.animationsSizeBytes)} (${stats.animationsCount} files)")
+                    appendLine("General: ${cacheManager.formatSize(stats.generalSizeBytes)} (${stats.generalCount} files)")
+                    appendLine()
+                    appendLine("=== Storage ===")
+                    appendLine("Current Location: ${cacheManager.getCacheLocation()}")
+                    appendLine("Available Space: ${cacheManager.formatSize(stats.availableSpaceBytes)}")
+                    if (stats.isLowSpace) {
+                        appendLine("⚠️ LOW SPACE WARNING")
+                    }
+                    appendLine()
+                    appendLine("=== Configured Limits ===")
+                    appendLine("Disk Cache: ${cacheManager.getDiskCacheSizeMB() / 1024} GB")
+                    appendLine("Memory Cache: ${cacheManager.getMemoryCacheSizeMB()} MB")
+                    appendLine("Texture Memory: ${cacheManager.getTextureMemoryMB()} MB")
+                    appendLine("Texture Cache: ${cacheManager.getTextureCacheSizeMB() / 1024} GB")
+                    appendLine("Mesh Cache: ${cacheManager.getMeshCacheSizeMB() / 1024} GB")
+                    appendLine("Sound Cache: ${cacheManager.getSoundCacheSizeMB() / 1024} GB")
+                    appendLine("Animation Cache: ${cacheManager.getAnimationCacheSizeMB() / 1024} GB")
+                }
+                
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Cache Statistics")
+                    .setMessage(message)
+                    .setPositiveButton("OK", null)
+                    .setNeutralButton("Copy") { _, _ ->
+                        copyToClipboard("Cache Statistics", message)
+                        Toast.makeText(requireContext(), "Copied to clipboard", Toast.LENGTH_SHORT).show()
+                    }
+                    .show()
+            }
+        }
+        
+        /**
+         * Confirm and clear all cache
+         */
+        private fun confirmClearAllCache(cacheManager: com.linkpoint.assets.CacheManager) {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Clear All Cache")
+                .setMessage("This will delete all cached textures, meshes, sounds, and animations.\n\nThis cannot be undone and may cause slower loading next time you log in.")
+                .setPositiveButton("Clear All") { _, _ ->
+                    kotlinx.coroutines.MainScope().launch {
+                        val result = cacheManager.clearAllCache()
+                        val message = if (result.success) {
+                            "Cleared ${cacheManager.formatSize(result.clearedBytes)} (${result.clearedFiles} files)"
+                        } else {
+                            "Cleared ${cacheManager.formatSize(result.clearedBytes)} with ${result.errors} errors"
+                        }
+                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
         }
         
         /**

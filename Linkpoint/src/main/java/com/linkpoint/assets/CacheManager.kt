@@ -2,6 +2,7 @@ package com.linkpoint.assets
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Environment
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -10,9 +11,12 @@ import java.io.File
 /**
  * Centralized cache management with configurable sizes
  * 
- * Provides:
- * - Configurable disk cache size (128MB - 4GB)
- * - Configurable memory cache size (25MB - 200MB)
+ * Based on Lumiya's cache settings, this provides:
+ * - Configurable disk cache size (128MB - 10GB)
+ * - Configurable memory cache size (100MB - 2GB)  
+ * - Per-asset-type cache size limits (textures, meshes, sounds, animations)
+ * - Cache location selection (internal vs external storage)
+ * - RAM dedication settings for texture memory
  * - Cache statistics and monitoring
  * - One-tap cache clearing
  * - Cache health monitoring to prevent cache-related failures
@@ -32,17 +36,52 @@ class CacheManager(private val context: Context) {
         const val KEY_CACHE_SOUNDS = "cache_sounds"
         const val KEY_CACHE_ANIMATIONS = "cache_animations"
         
+        // Per-asset-type size limit keys
+        const val KEY_TEXTURE_CACHE_SIZE_MB = "texture_cache_size_mb"
+        const val KEY_MESH_CACHE_SIZE_MB = "mesh_cache_size_mb"
+        const val KEY_SOUND_CACHE_SIZE_MB = "sound_cache_size_mb"
+        const val KEY_ANIMATION_CACHE_SIZE_MB = "animation_cache_size_mb"
+        
+        // Cache location key
+        const val KEY_CACHE_LOCATION = "cache_location"
+        
+        // Texture memory (RAM) dedication key
+        const val KEY_TEXTURE_MEMORY_MB = "texture_memory_mb"
+        
         // Size limits - generous limits for smooth performance
-        const val MIN_DISK_CACHE_MB = 512
-        const val MAX_DISK_CACHE_MB = 10240  // 10GB - large cache prevents re-downloading
-        const val DEFAULT_DISK_CACHE_MB = 2048  // 2GB default for good performance
+        // Users can allocate up to 50GB for total disk cache
+        const val MIN_DISK_CACHE_MB = 128
+        const val MAX_DISK_CACHE_MB = 51200  // 50GB - for users with large storage
+        const val DEFAULT_DISK_CACHE_MB = 4096  // 4GB default for good performance
         
         const val MIN_MEMORY_CACHE_MB = 100
-        const val MAX_MEMORY_CACHE_MB = 2048  // 2GB - for devices with plenty of RAM
+        const val MAX_MEMORY_CACHE_MB = 4096  // 4GB - for devices with plenty of RAM
         const val DEFAULT_MEMORY_CACHE_MB = 512  // 512MB default - good balance
         
-        // Low space threshold (200MB free required)
-        const val LOW_SPACE_THRESHOLD_MB = 200
+        // Per-asset-type size limits - each can be several GB
+        const val MIN_TEXTURE_CACHE_MB = 64
+        const val MAX_TEXTURE_CACHE_MB = 20480   // 20GB max for textures
+        const val DEFAULT_TEXTURE_CACHE_MB = 2048  // 2GB for textures
+        
+        const val MIN_MESH_CACHE_MB = 32
+        const val MAX_MESH_CACHE_MB = 10240      // 10GB max for meshes
+        const val DEFAULT_MESH_CACHE_MB = 1024   // 1GB for meshes
+        
+        const val MIN_SOUND_CACHE_MB = 16
+        const val MAX_SOUND_CACHE_MB = 4096      // 4GB max for sounds
+        const val DEFAULT_SOUND_CACHE_MB = 512   // 512MB for sounds
+        
+        const val MIN_ANIMATION_CACHE_MB = 16
+        const val MAX_ANIMATION_CACHE_MB = 4096  // 4GB max for animations
+        const val DEFAULT_ANIMATION_CACHE_MB = 512 // 512MB for animations
+        
+        // Texture memory (RAM) limits - how much RAM for decoded textures
+        const val MIN_TEXTURE_MEMORY_MB = 64
+        const val MAX_TEXTURE_MEMORY_MB = 2048  // 2GB max for texture RAM
+        const val DEFAULT_TEXTURE_MEMORY_MB = 512  // 512MB default
+        
+        // Low space threshold (500MB free required)
+        const val LOW_SPACE_THRESHOLD_MB = 500
         
         // Cache subdirectories
         private const val TEXTURES_DIR = "textures"
@@ -50,9 +89,15 @@ class CacheManager(private val context: Context) {
         private const val SOUNDS_DIR = "sounds"
         private const val ANIMATIONS_DIR = "animations"
         private const val GENERAL_DIR = "asset_cache"
+        
+        // Cache location options
+        const val LOCATION_INTERNAL = "internal"
+        const val LOCATION_EXTERNAL = "external"
     }
     
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    
+    // ========== Total Cache Size Settings ==========
     
     /**
      * Get configured disk cache size in MB
@@ -86,6 +131,186 @@ class CacheManager(private val context: Context) {
         Log.i(TAG, "Memory cache size set to ${clampedSize}MB")
     }
     
+    // ========== Per-Asset-Type Cache Size Settings ==========
+    
+    /**
+     * Get texture cache size limit in MB
+     */
+    fun getTextureCacheSizeMB(): Int {
+        return prefs.getInt(KEY_TEXTURE_CACHE_SIZE_MB, DEFAULT_TEXTURE_CACHE_MB)
+    }
+    
+    /**
+     * Set texture cache size limit in MB
+     */
+    fun setTextureCacheSizeMB(sizeMB: Int) {
+        val clampedSize = sizeMB.coerceIn(MIN_TEXTURE_CACHE_MB, MAX_TEXTURE_CACHE_MB)
+        prefs.edit().putInt(KEY_TEXTURE_CACHE_SIZE_MB, clampedSize).apply()
+        Log.i(TAG, "Texture cache size set to ${clampedSize}MB")
+    }
+    
+    /**
+     * Get mesh cache size limit in MB
+     */
+    fun getMeshCacheSizeMB(): Int {
+        return prefs.getInt(KEY_MESH_CACHE_SIZE_MB, DEFAULT_MESH_CACHE_MB)
+    }
+    
+    /**
+     * Set mesh cache size limit in MB
+     */
+    fun setMeshCacheSizeMB(sizeMB: Int) {
+        val clampedSize = sizeMB.coerceIn(MIN_MESH_CACHE_MB, MAX_MESH_CACHE_MB)
+        prefs.edit().putInt(KEY_MESH_CACHE_SIZE_MB, clampedSize).apply()
+        Log.i(TAG, "Mesh cache size set to ${clampedSize}MB")
+    }
+    
+    /**
+     * Get sound cache size limit in MB
+     */
+    fun getSoundCacheSizeMB(): Int {
+        return prefs.getInt(KEY_SOUND_CACHE_SIZE_MB, DEFAULT_SOUND_CACHE_MB)
+    }
+    
+    /**
+     * Set sound cache size limit in MB
+     */
+    fun setSoundCacheSizeMB(sizeMB: Int) {
+        val clampedSize = sizeMB.coerceIn(MIN_SOUND_CACHE_MB, MAX_SOUND_CACHE_MB)
+        prefs.edit().putInt(KEY_SOUND_CACHE_SIZE_MB, clampedSize).apply()
+        Log.i(TAG, "Sound cache size set to ${clampedSize}MB")
+    }
+    
+    /**
+     * Get animation cache size limit in MB
+     */
+    fun getAnimationCacheSizeMB(): Int {
+        return prefs.getInt(KEY_ANIMATION_CACHE_SIZE_MB, DEFAULT_ANIMATION_CACHE_MB)
+    }
+    
+    /**
+     * Set animation cache size limit in MB
+     */
+    fun setAnimationCacheSizeMB(sizeMB: Int) {
+        val clampedSize = sizeMB.coerceIn(MIN_ANIMATION_CACHE_MB, MAX_ANIMATION_CACHE_MB)
+        prefs.edit().putInt(KEY_ANIMATION_CACHE_SIZE_MB, clampedSize).apply()
+        Log.i(TAG, "Animation cache size set to ${clampedSize}MB")
+    }
+    
+    // ========== Texture Memory (RAM) Dedication ==========
+    
+    /**
+     * Get texture memory (RAM) dedication in MB.
+     * This is separate from disk cache - it's how much RAM to use for decoded textures.
+     */
+    fun getTextureMemoryMB(): Int {
+        return prefs.getInt(KEY_TEXTURE_MEMORY_MB, DEFAULT_TEXTURE_MEMORY_MB)
+    }
+    
+    /**
+     * Set texture memory (RAM) dedication in MB.
+     * Higher values = more textures kept in RAM = faster rendering but more memory.
+     */
+    fun setTextureMemoryMB(sizeMB: Int) {
+        val clampedSize = sizeMB.coerceIn(MIN_TEXTURE_MEMORY_MB, MAX_TEXTURE_MEMORY_MB)
+        prefs.edit().putInt(KEY_TEXTURE_MEMORY_MB, clampedSize).apply()
+        Log.i(TAG, "Texture memory set to ${clampedSize}MB")
+    }
+    
+    // ========== Cache Location Settings ==========
+    
+    /**
+     * Get the configured cache location.
+     * Returns "internal" or "external".
+     */
+    fun getCacheLocation(): String {
+        return prefs.getString(KEY_CACHE_LOCATION, LOCATION_INTERNAL) ?: LOCATION_INTERNAL
+    }
+    
+    /**
+     * Set the cache location.
+     * Note: Changing this requires app restart to take effect.
+     */
+    fun setCacheLocation(location: String) {
+        if (location != LOCATION_INTERNAL && location != LOCATION_EXTERNAL) {
+            Log.w(TAG, "Invalid cache location: $location, using internal")
+            prefs.edit().putString(KEY_CACHE_LOCATION, LOCATION_INTERNAL).apply()
+            return
+        }
+        prefs.edit().putString(KEY_CACHE_LOCATION, location).apply()
+        Log.i(TAG, "Cache location set to $location (requires restart)")
+    }
+    
+    /**
+     * Check if external storage is available for caching.
+     */
+    fun isExternalStorageAvailable(): Boolean {
+        return Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED
+    }
+    
+    /**
+     * Get the base cache directory based on current location setting.
+     */
+    fun getBaseCacheDirectory(): File {
+        return when (getCacheLocation()) {
+            LOCATION_EXTERNAL -> {
+                if (isExternalStorageAvailable()) {
+                    context.getExternalFilesDir("cache") ?: context.cacheDir
+                } else {
+                    Log.w(TAG, "External storage not available, falling back to internal")
+                    context.cacheDir
+                }
+            }
+            else -> context.cacheDir
+        }
+    }
+    
+    /**
+     * Get available cache locations with their details.
+     */
+    fun getAvailableCacheLocations(): List<CacheLocationInfo> {
+        val locations = mutableListOf<CacheLocationInfo>()
+        
+        // Internal storage
+        val internalDir = context.cacheDir
+        val internalStatFs = android.os.StatFs(internalDir.path)
+        locations.add(CacheLocationInfo(
+            id = LOCATION_INTERNAL,
+            name = "Internal Storage",
+            path = internalDir.absolutePath,
+            availableBytes = internalStatFs.availableBytes,
+            totalBytes = internalStatFs.totalBytes,
+            isAvailable = true
+        ))
+        
+        // External storage
+        val externalDir = context.getExternalFilesDir("cache")
+        if (externalDir != null && isExternalStorageAvailable()) {
+            val externalStatFs = android.os.StatFs(externalDir.path)
+            locations.add(CacheLocationInfo(
+                id = LOCATION_EXTERNAL,
+                name = "External Storage (SD Card)",
+                path = externalDir.absolutePath,
+                availableBytes = externalStatFs.availableBytes,
+                totalBytes = externalStatFs.totalBytes,
+                isAvailable = true
+            ))
+        } else {
+            locations.add(CacheLocationInfo(
+                id = LOCATION_EXTERNAL,
+                name = "External Storage (Not Available)",
+                path = "",
+                availableBytes = 0,
+                totalBytes = 0,
+                isAvailable = false
+            ))
+        }
+        
+        return locations
+    }
+    
+    // ========== Auto-Clear Settings ==========
+    
     /**
      * Check if auto-clear on low space is enabled
      */
@@ -99,6 +324,8 @@ class CacheManager(private val context: Context) {
     fun setAutoClearOnLowSpace(enabled: Boolean) {
         prefs.edit().putBoolean(KEY_AUTO_CLEAR_ON_LOW_SPACE, enabled).apply()
     }
+    
+    // ========== Per-Asset-Type Caching Enable/Disable ==========
     
     /**
      * Check if specific asset type caching is enabled
@@ -436,3 +663,38 @@ data class MaintenanceResult(
     val prunedBytes: Long,
     val cacheHealthy: Boolean
 )
+
+/**
+ * Information about a cache location option.
+ * Used in the cache location selection UI.
+ */
+data class CacheLocationInfo(
+    val id: String,
+    val name: String,
+    val path: String,
+    val availableBytes: Long,
+    val totalBytes: Long,
+    val isAvailable: Boolean
+) {
+    /**
+     * Get formatted available space string
+     */
+    fun getFormattedAvailableSpace(): String {
+        return when {
+            availableBytes >= 1024 * 1024 * 1024 -> String.format("%.1f GB free", availableBytes / (1024.0 * 1024 * 1024))
+            availableBytes >= 1024 * 1024 -> String.format("%.0f MB free", availableBytes / (1024.0 * 1024))
+            else -> "Not available"
+        }
+    }
+    
+    /**
+     * Get display text for UI
+     */
+    fun getDisplayText(): String {
+        return if (isAvailable) {
+            "$name (${getFormattedAvailableSpace()})"
+        } else {
+            name
+        }
+    }
+}

@@ -139,6 +139,85 @@ class UDPConnection {
     }
     
     /**
+     * Send RegionHandshakeReply message.
+     * This acknowledges the RegionHandshake and is REQUIRED for the simulator
+     * to start sending world data (objects, textures, etc.).
+     * 
+     * Based on Lumiya's SLAgentCircuit.sendRegionHandshakeReply()
+     */
+    suspend fun sendRegionHandshakeReply(flags: Int = 0) {
+        // RegionHandshakeReply message format:
+        // AgentData block:
+        // - AgentID (16 bytes, UUID)
+        // - SessionID (16 bytes, UUID)
+        // RegionInfo block:
+        // - Flags (4 bytes, U32)
+        val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
+        
+        // Agent ID
+        payload.putUUID(agentId)
+        
+        // Session ID
+        payload.putUUID(sessionId)
+        
+        // Flags (typically 0)
+        payload.putInt(flags)
+        
+        Log.d(TAG, "Sending RegionHandshakeReply")
+        sendPacket(MessageIds.REGION_HANDSHAKE_REPLY, payload.array(), reliable = true)
+    }
+    
+    /**
+     * Send AgentThrottle message to set bandwidth allocations.
+     * This tells the simulator how much bandwidth we want for different data types.
+     * 
+     * Based on Lumiya's SLAgentCircuit.sendAgentThrottle()
+     */
+    suspend fun sendAgentThrottle(
+        resend: Float = 50000f,
+        land: Float = 100000f,
+        wind: Float = 10000f,
+        cloud: Float = 10000f,
+        task: Float = 200000f,
+        texture: Float = 200000f,
+        asset: Float = 100000f
+    ) {
+        // AgentThrottle message format:
+        // AgentData block:
+        // - AgentID (16 bytes, UUID)
+        // - SessionID (16 bytes, UUID)
+        // - CircuitCode (4 bytes, U32)
+        // Throttle block:
+        // - GenCounter (4 bytes, U32)
+        // - Throttles (28 bytes, 7 floats)
+        val payload = ByteBuffer.allocate(36 + 4 + 28).order(ByteOrder.LITTLE_ENDIAN)
+        
+        // Agent ID
+        payload.putUUID(agentId)
+        
+        // Session ID
+        payload.putUUID(sessionId)
+        
+        // Circuit code
+        payload.putInt(circuitCode)
+        
+        // GenCounter (increment each time we send)
+        payload.putInt(1)
+        
+        // Throttles - 7 float values for bandwidth allocation
+        payload.putFloat(resend)    // Resend packets
+        payload.putFloat(land)      // Land/terrain data
+        payload.putFloat(wind)      // Wind data
+        payload.putFloat(cloud)     // Cloud data
+        payload.putFloat(task)      // Object updates (tasks)
+        payload.putFloat(texture)   // Texture data
+        payload.putFloat(asset)     // Asset data
+        
+        Log.d(TAG, "Sending AgentThrottle")
+        sendPacket(MessageIds.AGENT_THROTTLE, payload.array(), reliable = true)
+    }
+    
+    /**
      * Disconnect from the simulator
      */
     fun disconnect() {
@@ -483,4 +562,8 @@ object MessageIds {
     const val IMPROVED_TERSE_OBJECT_UPDATE: Int = 0x0F
     const val AVATAR_ANIMATION: Int = 0x14
     const val COARSE_LOCATION_UPDATE: Int = 0x06
+    
+    // Region/Connection messages
+    const val REGION_HANDSHAKE_REPLY: Int = 0xFFFF0095.toInt()
+    const val AGENT_THROTTLE: Int = 0xFFFF0099.toInt()
 }

@@ -85,6 +85,30 @@ class SessionManager(private val context: Context) {
     }
     
     /**
+     * Update the region name after receiving RegionHandshake.
+     * This updates the region info with the actual name from the simulator.
+     */
+    fun updateRegionName(regionName: String) {
+        val current = _currentRegion.value
+        if (current != null && current.name != regionName) {
+            _currentRegion.value = current.copy(name = regionName)
+            Log.i(TAG, "Region name updated: ${current.name} -> $regionName")
+        } else if (current == null) {
+            // Create minimal region info if we don't have any yet
+            _currentRegion.value = RegionInfo(
+                name = regionName,
+                handle = 0,
+                x = 128,
+                y = 128,
+                simIP = "",
+                simPort = 0,
+                seedCapability = null
+            )
+            Log.i(TAG, "Region info created for: $regionName")
+        }
+    }
+    
+    /**
      * Update connection state
      */
     fun setConnectionState(state: ConnectionState) {

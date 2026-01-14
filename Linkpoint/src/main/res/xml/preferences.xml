@@ -102,6 +102,98 @@
 
     </PreferenceCategory>
 
+    <!-- Cache Settings - Lumiya-style configurable caches -->
+    <PreferenceCategory android:title="Cache &amp; Memory">
+
+        <ListPreference
+            android:key="cache_location"
+            android:title="Cache Location"
+            android:summary="Where to store cached assets"
+            android:entries="@array/cache_location_entries"
+            android:entryValues="@array/cache_location_values"
+            android:defaultValue="internal" />
+
+        <SeekBarPreference
+            android:key="disk_cache_size"
+            android:title="Total Disk Cache (GB)"
+            android:summary="Maximum disk space for all cached assets (up to 50 GB)"
+            android:min="1"
+            android:max="50"
+            android:defaultValue="4"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:key="memory_cache_size"
+            android:title="Memory Cache (MB)"
+            android:summary="RAM for general asset caching (100-4096 MB)"
+            android:min="100"
+            android:max="4096"
+            android:defaultValue="512"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:key="texture_memory"
+            android:title="Texture Memory (MB)"
+            android:summary="RAM dedicated to decoded textures (64-2048 MB)"
+            android:min="64"
+            android:max="2048"
+            android:defaultValue="512"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:key="texture_cache_size"
+            android:title="Texture Cache (GB)"
+            android:summary="Disk space for texture cache (up to 20 GB)"
+            android:min="1"
+            android:max="20"
+            android:defaultValue="2"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:key="mesh_cache_size"
+            android:title="Mesh Cache (GB)"
+            android:summary="Disk space for 3D model cache (up to 10 GB)"
+            android:min="1"
+            android:max="10"
+            android:defaultValue="1"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:key="sound_cache_size"
+            android:title="Sound Cache (GB)"
+            android:summary="Disk space for audio cache (up to 4 GB)"
+            android:min="1"
+            android:max="4"
+            android:defaultValue="1"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:key="animation_cache_size"
+            android:title="Animation Cache (GB)"
+            android:summary="Disk space for animation cache (up to 4 GB)"
+            android:min="1"
+            android:max="4"
+            android:defaultValue="1"
+            app:showSeekBarValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="auto_clear_cache"
+            android:title="Auto-Clear on Low Space"
+            android:summary="Automatically clear cache when storage is low"
+            android:defaultValue="true" />
+
+        <Preference
+            android:key="view_cache_stats"
+            android:title="View Cache Statistics"
+            android:summary="See current cache usage" />
+
+        <Preference
+            android:key="clear_cache"
+            android:title="Clear All Cache"
+            android:summary="Delete all cached textures, meshes, sounds and animations" />
+
+    </PreferenceCategory>
+
     <!-- Network Settings -->
     <PreferenceCategory android:title="Network">
 
