@@ -410,12 +410,44 @@ object MessageIds {
     const val IMPROVED_INSTANT_MESSAGE: Int = 0xFFFF00FE.toInt()
     const val REGION_HANDSHAKE: Int = 0xFFFF0094.toInt()
     const val AGENT_MOVEMENT_COMPLETE: Int = 0xFFFF00FA.toInt()
+    const val OBJECT_LINK: Int = 0xFFFF0066.toInt()
+    const val OBJECT_DELINK: Int = 0xFFFF0067.toInt()
+    const val REZ_OBJECT: Int = 0xFFFF0068.toInt()
+    const val DEREZ_OBJECT: Int = 0xFFFF0069.toInt()
+    const val OBJECT_DELETE: Int = 0xFFFF0089.toInt()
+    const val OBJECT_NAME: Int = 0xFFFF008C.toInt()
+    const val OBJECT_DESCRIPTION: Int = 0xFFFF008D.toInt()
+    const val OBJECT_GRAB: Int = 0xFFFF0117.toInt()
+    const val OBJECT_DEGRAB: Int = 0xFFFF0118.toInt()
+    const val AGENT_REQUEST_SIT: Int = 0xFFFF00F5.toInt()
+    const val AGENT_SIT: Int = 0xFFFF00F7.toInt()
+    const val OFFER_FRIENDSHIP: Int = 0xFFFF0039.toInt()
+    const val TERMINATE_FRIENDSHIP: Int = 0xFFFF003A.toInt()
+    const val GRANT_USER_RIGHTS: Int = 0xFFFF003B.toInt()
+    const val FIND_AGENT: Int = 0xFFFF001F.toInt()
+    const val START_LURE: Int = 0xFFFF0040.toInt()
+    const val TELEPORT_LURE_REQUEST: Int = 0xFFFF0041.toInt()
+    const val AVATAR_PROPERTIES_UPDATE: Int = 0xFFFF00A6.toInt()
+    const val GROUP_ROLE_DATA_REQUEST: Int = 0xFFFF0176.toInt()
+    const val ACTIVATE_GROUP: Int = 0xFFFF0177.toInt()
+    const val JOIN_GROUP_REQUEST: Int = 0xFFFF0178.toInt()
+    const val LEAVE_GROUP_REQUEST: Int = 0xFFFF0179.toInt()
+    const val ACCEPT_FRIENDSHIP: Int = 0xFFFF003C.toInt()
+    const val DECLINE_FRIENDSHIP: Int = 0xFFFF003D.toInt()
+    const val IM_VIA_EMAIL: Int = 0xFFFF00FF.toInt()
     
     // Medium frequency (0xFFxx)
     const val AGENT_UPDATE: Int = 0xFF04
     const val CHAT_FROM_VIEWER: Int = 0xFF50
     const val INSTANT_MESSAGE: Int = 0xFF4B
     const val KILL_OBJECT: Int = 0xFF0C
+    const val OBJECT_SELECT: Int = 0xFF09
+    const val OBJECT_DESELECT: Int = 0xFF0A
+    const val MULTIPLE_OBJECT_UPDATE: Int = 0xFF0B
+    const val AGENT_ANIMATION: Int = 0xFF05
+    const val SOUND_TRIGGER: Int = 0xFF1D
+    const val TYPING_START: Int = 0xFF4C
+    const val TYPING_STOP: Int = 0xFF4D
     
     // High frequency (0x00 - 0xFE)
     const val START_PING_CHECK: Int = 0x01

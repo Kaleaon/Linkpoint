@@ -115,8 +115,26 @@ class ProfileManager(
     ): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                // Would send update to server
-                true
+                // Build profile update request using LLSD
+                val request = LLSDMap().apply {
+                    aboutText?.let { this["sl_about_text"] = LLSDString(it) }
+                    firstLifeText?.let { this["fl_about_text"] = LLSDString(it) }
+                    profileImage?.let { this["sl_image_id"] = LLSDString(it.toString()) }
+                    firstLifeImage?.let { this["fl_image_id"] = LLSDString(it.toString()) }
+                    interests?.let { interestsData ->
+                        this["interests"] = LLSDMap().apply {
+                            this["want_to_mask"] = LLSDInteger(interestsData.wantToMask)
+                            this["want_to_text"] = LLSDString(interestsData.wantToText)
+                            this["skills_mask"] = LLSDInteger(interestsData.skillsMask)
+                            this["skills_text"] = LLSDString(interestsData.skillsText)
+                            this["languages_text"] = LLSDString(interestsData.languagesText)
+                        }
+                    }
+                }
+                
+                // Use AgentProfile capability
+                val response = capabilityManager.request("AgentProfile", request)
+                response != null
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to update profile", e)
                 false

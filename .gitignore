@@ -136,3 +136,6 @@ test_xml_simple.sh
 
 # Decompiled Lumiya reference code (keep only README)
 docs/lumiya_reference/lumiyaviewer/
+
+# Decompiled Lumiya sources (reference only)
+lumiya_decompiled/
