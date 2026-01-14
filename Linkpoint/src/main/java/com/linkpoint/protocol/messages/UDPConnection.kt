@@ -110,12 +110,10 @@ class UDPConnection {
         val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
         
         // Agent ID
-        payload.putLong(agentId.mostSignificantBits)
-        payload.putLong(agentId.leastSignificantBits)
+        payload.putUUID(agentId)
         
         // Session ID
-        payload.putLong(sessionId.mostSignificantBits)
-        payload.putLong(sessionId.leastSignificantBits)
+        payload.putUUID(sessionId)
         
         // Circuit code
         payload.putInt(circuitCode)
@@ -287,6 +285,19 @@ class UDPConnection {
         sendPacket(0xFFFFFFFF.toInt(), payload, reliable = false)
     }
     
+    /**
+     * Write UUID to ByteBuffer in Second Life format.
+     * SL stores UUIDs as 16 raw bytes in little-endian order.
+     */
+    private fun ByteBuffer.putUUID(uuid: UUID): ByteBuffer {
+        // Second Life UUID format: raw 16 bytes
+        // The UUID is stored as two 64-bit values in big-endian within the little-endian buffer
+        // This matches how they're received/parsed
+        putLong(uuid.mostSignificantBits)
+        putLong(uuid.leastSignificantBits)
+        return this
+    }
+    
     private suspend fun sendUseCircuitCode() {
         // UseCircuitCode message format:
         // - CircuitCode (4 bytes, U32)
@@ -295,13 +306,11 @@ class UDPConnection {
         val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
         payload.putInt(circuitCode)
         
-        // Session ID (UUID as two longs)
-        payload.putLong(sessionId.mostSignificantBits)
-        payload.putLong(sessionId.leastSignificantBits)
+        // Session ID (UUID)
+        payload.putUUID(sessionId)
         
-        // Agent ID (UUID as two longs)
-        payload.putLong(agentId.mostSignificantBits)
-        payload.putLong(agentId.leastSignificantBits)
+        // Agent ID (UUID)
+        payload.putUUID(agentId)
         
         Log.d(TAG, "Sending UseCircuitCode: circuit=$circuitCode, agent=${agentId.toString().take(8)}...")
         sendPacket(MessageIds.USE_CIRCUIT_CODE, payload.array(), reliable = true)
