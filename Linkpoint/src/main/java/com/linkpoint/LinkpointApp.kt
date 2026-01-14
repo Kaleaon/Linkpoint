@@ -12,6 +12,7 @@ import com.linkpoint.core.SessionManager
 import com.linkpoint.inventory.GestureManager
 import com.linkpoint.inventory.InventoryManager
 import com.linkpoint.inventory.OutfitManager
+import com.linkpoint.network.NetworkSettings
 import com.linkpoint.network.SecondLifeProtocol
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.objects.BuildTools
@@ -144,6 +145,10 @@ class LinkpointApp : Application() {
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize crash reporter", e)
         }
+        
+        // Initialize network settings (XML buffer size 3-500 MB)
+        NetworkSettings.getInstance(this)
+        Log.i(TAG, "Network settings initialized")
         
         // Initialize network logger first for early debugging
         NetworkLogger.initialize(this)

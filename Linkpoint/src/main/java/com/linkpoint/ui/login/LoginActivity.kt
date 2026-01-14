@@ -27,6 +27,7 @@ import com.linkpoint.network.NetworkDiagnostics
 import com.linkpoint.network.NetworkExceptionUtils.ErrorCategory
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.SSLHelper
+import com.linkpoint.ui.settings.SettingsActivity
 import com.linkpoint.ui.tos.TosActivity
 import com.linkpoint.ui.world.WorldViewActivity
 import com.linkpoint.utils.PermissionManager
@@ -80,6 +81,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var loginButton: Button
     private lateinit var progressBar: ProgressBar
     private lateinit var statusText: TextView
+    private lateinit var btnSettings: ImageButton
     
     private val app by lazy { LinkpointApp.getInstance() }
     
@@ -290,6 +292,19 @@ class LoginActivity : AppCompatActivity() {
         loginButton = findViewById(R.id.buttonLogin)
         progressBar = findViewById(R.id.progressBar)
         statusText = findViewById(R.id.textStatus)
+        
+        // Settings button - accessible before login
+        btnSettings = findViewById(R.id.btnSettings)
+        btnSettings.setOnClickListener {
+            openSettings()
+        }
+    }
+    
+    /**
+     * Open Settings activity. Can be accessed before login.
+     */
+    private fun openSettings() {
+        startActivity(Intent(this, SettingsActivity::class.java))
     }
     
     private fun loadSavedCredentials() {

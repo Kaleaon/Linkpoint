@@ -107,10 +107,64 @@
             android:defaultValue="0"
             app:showSeekBarValue="true" />
 
+        <SeekBarPreference
+            android:key="xml_buffer_size"
+            android:title="Login Buffer Size (MB)"
+            android:summary="Buffer size for login/XML responses (3-500 MB)"
+            android:min="3"
+            android:max="500"
+            android:defaultValue="100"
+            app:showSeekBarValue="true" />
+
+    </PreferenceCategory>
+
+    <!-- Debug and Diagnostics -->
+    <PreferenceCategory android:title="Debug &amp; Diagnostics">
+
+        <Preference
+            android:key="view_crash_logs"
+            android:title="View Crash Logs"
+            android:summary="View saved crash reports for debugging" />
+
+        <Preference
+            android:key="crash_reporter_status"
+            android:title="Crash Reporter Status"
+            android:summary="Check if crash reporting is working" />
+
+        <Preference
+            android:key="test_crash"
+            android:title="Test Crash Reporter"
+            android:summary="Generate a test crash report (non-fatal)" />
+
+        <Preference
+            android:key="clear_crash_logs"
+            android:title="Clear Crash Logs"
+            android:summary="Delete all saved crash reports" />
+
     </PreferenceCategory>
 
     <!-- About -->
     <PreferenceCategory android:title="About">
+
+        <Preference
+            android:key="about"
+            android:title="About Linkpoint"
+            android:summary="Version information and disclaimers" />
+
+        <Preference
+            android:key="view_tos"
+            android:title="Terms of Service"
+            android:summary="View the Terms of Service" />
+
+        <Preference
+            android:key="privacy_policy"
+            android:title="Privacy Policy"
+            android:summary="View the Privacy Policy" />
+
+        <Preference
+            android:key="tpv_compliance"
+            android:title="TPV Policy Compliance"
+            android:summary="Third-Party Viewer Policy compliance" />
 
         <Preference
             android:key="version"
