@@ -3,6 +3,7 @@ package com.linkpoint
 import android.app.Application
 import android.util.Log
 import com.linkpoint.assets.*
+import com.linkpoint.utils.CrashReporter
 import com.linkpoint.avatar.AvatarManager
 import com.linkpoint.chat.ChatManager
 import com.linkpoint.chat.IMManager
@@ -123,6 +124,10 @@ class LinkpointApp : Application() {
     lateinit var voiceManager: VoiceManager
         private set
     
+    // Crash Reporter
+    lateinit var crashReporter: CrashReporter
+        private set
+    
     // Agent ID (set after login)
     var agentId: UUID? = null
         private set
@@ -131,6 +136,14 @@ class LinkpointApp : Application() {
         super.onCreate()
         instance = this
         Log.i(TAG, "Linkpoint application starting...")
+        
+        // Initialize crash reporter first for early crash capture
+        try {
+            crashReporter = CrashReporter.initialize(this)
+            Log.i(TAG, "Crash reporter initialized")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to initialize crash reporter", e)
+        }
         
         // Initialize network logger first for early debugging
         NetworkLogger.initialize(this)
@@ -257,8 +270,22 @@ class LinkpointApp : Application() {
         
         sessionManager.disconnect()
         
+        // Shutdown crash reporter
+        if (::crashReporter.isInitialized) crashReporter.shutdown()
+        
         // Cancel application scope
         applicationScope.cancel()
+    }
+    
+    /**
+     * Report a non-fatal exception
+     */
+    fun reportException(throwable: Throwable, context: String = "") {
+        if (::crashReporter.isInitialized) {
+            crashReporter.reportException(throwable, context)
+        } else {
+            Log.e(TAG, "Exception occurred (crash reporter not initialized): $context", throwable)
+        }
     }
     
     /**
