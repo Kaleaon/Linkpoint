@@ -162,6 +162,9 @@ class SecondLifeProtocol(private val context: Context) {
                         regionInfo = regionInfo
                     )
                     
+                    // Initialize agent-specific managers (sets app.agentId)
+                    app.initializeAgentManagers(agentId)
+                    
                     return@withContext LoginResult.Success(
                         agentId = agentId, 
                         sessionId = simpleResult.sessionId,
@@ -261,6 +264,9 @@ class SecondLifeProtocol(private val context: Context) {
                         lastName = lastName,
                         regionInfo = regionInfo
                     )
+                    
+                    // Initialize agent-specific managers (sets app.agentId)
+                    app.initializeAgentManagers(agentId)
                     
                     Log.i(TAG, "Login successful!")
                     NetworkLogger.logProtocol("Login Complete", "Successfully connected to ${result.simIp}:${result.simPort}")
