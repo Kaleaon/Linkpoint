@@ -10,6 +10,7 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
@@ -251,7 +252,7 @@ class SettingsActivity : AppCompatActivity() {
          * Show cache statistics dialog
          */
         private fun showCacheStatistics(cacheManager: com.linkpoint.assets.CacheManager) {
-            kotlinx.coroutines.MainScope().launch {
+            viewLifecycleOwner.lifecycleScope.launch {
                 val stats = cacheManager.getCacheStats()
                 val locations = cacheManager.getAvailableCacheLocations()
                 
@@ -305,7 +306,7 @@ class SettingsActivity : AppCompatActivity() {
                 .setTitle("Clear All Cache")
                 .setMessage("This will delete all cached textures, meshes, sounds, and animations.\n\nThis cannot be undone and may cause slower loading next time you log in.")
                 .setPositiveButton("Clear All") { _, _ ->
-                    kotlinx.coroutines.MainScope().launch {
+                    viewLifecycleOwner.lifecycleScope.launch {
                         val result = cacheManager.clearAllCache()
                         val message = if (result.success) {
                             "Cleared ${cacheManager.formatSize(result.clearedBytes)} (${result.clearedFiles} files)"
