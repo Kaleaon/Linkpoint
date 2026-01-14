@@ -542,7 +542,10 @@ class DebugReportService private constructor(private val context: Context) {
                         appendLine("Position: (${regionInfo.x}, ${regionInfo.y})")
                         appendLine("Sim IP: ${regionInfo.simIP.ifEmpty { "Not set" }}")
                         appendLine("Sim Port: ${if (regionInfo.simPort > 0) regionInfo.simPort else "Not set"}")
-                        appendLine("Seed Capability: ${regionInfo.seedCapability?.take(DIAGNOSTIC_URL_TRUNCATE_LENGTH)?.plus("...") ?: "Not set"}")
+                        val seedCapDisplay = regionInfo.seedCapability?.let { 
+                            if (it.length > DIAGNOSTIC_URL_TRUNCATE_LENGTH) it.take(DIAGNOSTIC_URL_TRUNCATE_LENGTH) + "..." else it 
+                        } ?: "Not set"
+                        appendLine("Seed Capability: $seedCapDisplay")
                         
                         if (regionInfo.name == "Unknown") {
                             appendLine()

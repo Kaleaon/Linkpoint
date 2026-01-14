@@ -527,7 +527,9 @@ class CapabilityManager {
     fun getDiagnostics(): CapabilityDiagnostics {
         return CapabilityDiagnostics(
             isReady = _isReady.value,
-            seedCapability = seedCapability?.take(DIAGNOSTIC_URL_TRUNCATE_LENGTH)?.plus("..."),
+            seedCapability = seedCapability?.let { 
+                if (it.length > DIAGNOSTIC_URL_TRUNCATE_LENGTH) it.take(DIAGNOSTIC_URL_TRUNCATE_LENGTH) + "..." else it 
+            },
             capabilityCount = capabilities.size,
             availableCapabilities = capabilities.keys.toList().sorted(),
             eventQueueActive = eventQueueJob?.isActive == true,
