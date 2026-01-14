@@ -6,6 +6,8 @@ import android.util.Log
 import com.linkpoint.LinkpointApp
 import com.linkpoint.assets.CacheManager
 import com.linkpoint.network.NetworkLogger
+import com.linkpoint.network.core.ConnectionQualityManager
+import com.linkpoint.network.core.NetworkStateManager
 import kotlinx.coroutines.*
 import java.io.File
 import java.text.SimpleDateFormat
@@ -34,6 +36,9 @@ class DebugReportService private constructor(private val context: Context) {
         private const val MAX_REPORTS = 20
         private const val REPORT_PREFIX = "debug_report_"
         private const val REPORT_SUFFIX = ".txt"
+        
+        // Truncation length for URLs in debug reports
+        private const val DIAGNOSTIC_URL_TRUNCATE_LENGTH = 50
         
         @Volatile
         private var instance: DebugReportService? = null
@@ -258,6 +263,307 @@ class DebugReportService private constructor(private val context: Context) {
             }
             appendLine()
             
+            // ==================== NEW DETAILED DIAGNOSTIC SECTIONS ====================
+            
+            // UDP Connection Status - CRITICAL for understanding why world data isn't loading
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ UDP CONNECTION STATUS (Simulator Protocol)                        │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            if (app != null) {
+                try {
+                    val udpDiag = app.udpConnection.getDiagnostics()
+                    appendLine("UDP Connected: ${udpDiag.isConnected}")
+                    appendLine("Simulator IP: ${udpDiag.simIP.ifEmpty { "Not configured" }}")
+                    appendLine("Simulator Port: ${if (udpDiag.simPort > 0) udpDiag.simPort else "Not configured"}")
+                    appendLine("Circuit Code: ${if (udpDiag.circuitCode != 0) udpDiag.circuitCode else "Not set"}")
+                    appendLine("Socket Open: ${udpDiag.socketOpen}")
+                    appendLine("Receive Loop Active: ${udpDiag.receiveLoopActive}")
+                    appendLine()
+                    appendLine("Packet Statistics:")
+                    appendLine("  Sequence Number (packets sent): ${udpDiag.sequenceNumber}")
+                    appendLine("  Pending ACKs: ${udpDiag.pendingAckCount}")
+                    appendLine("  Registered Handlers: ${udpDiag.registeredHandlerCount}")
+                    appendLine()
+                    if (udpDiag.registeredHandlers.isNotEmpty()) {
+                        appendLine("Registered Message Handlers:")
+                        udpDiag.registeredHandlers.forEach { handler ->
+                            appendLine("  - $handler")
+                        }
+                    } else {
+                        appendLine("⚠️ No message handlers registered - UDP messages won't be processed!")
+                    }
+                    appendLine()
+                    if (udpDiag.pendingAckCount > 0) {
+                        appendLine("Pending Packets (awaiting ACK):")
+                        udpDiag.pendingPackets.take(5).forEach { packet ->
+                            appendLine("  - Seq ${packet.seqNum}: ${packet.retries} retries, ${packet.ageMs}ms old")
+                        }
+                        if (udpDiag.pendingPackets.size > 5) {
+                            appendLine("  ... and ${udpDiag.pendingPackets.size - 5} more")
+                        }
+                    }
+                    
+                    // Diagnostic warnings
+                    if (!udpDiag.isConnected) {
+                        appendLine()
+                        appendLine("⚠️ UDP NOT CONNECTED - World data, objects, and textures won't load!")
+                    }
+                    if (udpDiag.isConnected && !udpDiag.receiveLoopActive) {
+                        appendLine()
+                        appendLine("⚠️ Receive loop not active - Packets from simulator won't be processed!")
+                    }
+                    if (udpDiag.registeredHandlerCount == 0) {
+                        appendLine()
+                        appendLine("⚠️ No handlers registered - RegionHandshake won't be processed!")
+                    }
+                } catch (e: Exception) {
+                    appendLine("UDP diagnostics unavailable: ${e.message}")
+                }
+            } else {
+                appendLine("UDP connection: App not initialized")
+            }
+            appendLine()
+            
+            // Capability Manager Status - CRITICAL for texture/mesh/inventory loading
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ CAPABILITY STATUS (HTTP Services)                                 │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            if (app != null) {
+                try {
+                    val capDiag = app.capabilityManager.getDiagnostics()
+                    appendLine("Capabilities Ready: ${capDiag.isReady}")
+                    appendLine("Total Capabilities: ${capDiag.capabilityCount}")
+                    appendLine("Seed Capability: ${capDiag.seedCapability ?: "Not set"}")
+                    appendLine()
+                    appendLine("Critical Capabilities:")
+                    appendLine("  GetTexture: ${if (capDiag.hasGetTexture) "✓ Available" else "✗ Missing - textures won't load!"}")
+                    appendLine("  GetMesh: ${if (capDiag.hasGetMesh) "✓ Available" else "✗ Missing - meshes won't load!"}")
+                    appendLine("  FetchInventory: ${if (capDiag.hasFetchInventory) "✓ Available" else "✗ Missing"}")
+                    appendLine("  EventQueue: ${if (capDiag.hasEventQueue) "✓ Available" else "✗ Missing"}")
+                    appendLine()
+                    appendLine("Event Queue:")
+                    appendLine("  Active: ${capDiag.eventQueueActive}")
+                    appendLine("  Registered Event Handlers: ${capDiag.eventHandlerCount}")
+                    if (capDiag.registeredEventTypes.isNotEmpty()) {
+                        appendLine("  Event Types: ${capDiag.registeredEventTypes.joinToString(", ")}")
+                    }
+                    appendLine()
+                    if (capDiag.availableCapabilities.isNotEmpty()) {
+                        appendLine("All Available Capabilities:")
+                        capDiag.availableCapabilities.forEach { cap ->
+                            appendLine("  - $cap")
+                        }
+                    } else {
+                        appendLine("⚠️ No capabilities loaded - HTTP services unavailable!")
+                    }
+                    
+                    // Diagnostic warnings
+                    if (!capDiag.isReady) {
+                        appendLine()
+                        appendLine("⚠️ CAPABILITIES NOT READY - Textures, meshes, and inventory won't load!")
+                    }
+                } catch (e: Exception) {
+                    appendLine("Capability diagnostics unavailable: ${e.message}")
+                }
+            } else {
+                appendLine("Capabilities: App not initialized")
+            }
+            appendLine()
+            
+            // Network Quality Manager Status
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ NETWORK QUALITY                                                   │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            if (app != null) {
+                try {
+                    val qualityReport = app.protocol.qualityManager.getQualityReport()
+                    appendLine("Quality Level: ${qualityReport.quality}")
+                    appendLine("Network Connected: ${qualityReport.isConnected}")
+                    appendLine("Network Type: ${qualityReport.networkType}")
+                    appendLine("Average Latency: ${qualityReport.averageLatencyMs}ms")
+                    appendLine("Estimated Bandwidth: ${qualityReport.estimatedBandwidthKbps} kbps")
+                    appendLine("Error Rate: ${String.format("%.1f%%", qualityReport.errorRate * 100)}")
+                    appendLine("Latency Samples: ${qualityReport.sampleCount}")
+                    appendLine("Timeout Multiplier: ${qualityReport.timeoutMultiplier}x")
+                    
+                    if (qualityReport.quality == ConnectionQualityManager.Quality.POOR) {
+                        appendLine()
+                        appendLine("⚠️ Poor network quality - connection issues likely!")
+                    }
+                } catch (e: Exception) {
+                    appendLine("Network quality unavailable: ${e.message}")
+                }
+            } else {
+                appendLine("Network quality: App not initialized")
+            }
+            appendLine()
+            
+            // Network State Manager Status
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ NETWORK STATE                                                     │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            if (app != null) {
+                try {
+                    val stateDetails = app.protocol.stateManager.getConnectionDetails()
+                    appendLine("Connection Status: ${stateDetails.status}")
+                    appendLine("Is Reconnecting: ${stateDetails.isReconnecting}")
+                    appendLine("Connection Faulted: ${stateDetails.isFaulted}")
+                    appendLine("Reset Requested: ${stateDetails.isResetRequested}")
+                    appendLine("Force Reconnect: ${stateDetails.forceReconnect}")
+                    appendLine("Always Reconnect: ${stateDetails.alwaysReconnect}")
+                    appendLine("Logout In Progress: ${stateDetails.logoutInProgress}")
+                    appendLine("Reconnect Count: ${stateDetails.reconnectCount}")
+                    appendLine("Connection Duration: ${formatDuration(stateDetails.connectionDurationMs)}")
+                    appendLine("Last Status Change: ${formatDuration(stateDetails.lastStatusChangeMs)} ago")
+                    appendLine("Connection Instance ID: ${stateDetails.connectionInstanceId.ifEmpty { "Not set" }}")
+                    
+                    if (stateDetails.isFaulted) {
+                        appendLine()
+                        appendLine("⚠️ CONNECTION FAULTED - Manual reconnect may be required!")
+                    }
+                    if (stateDetails.status == NetworkStateManager.ConnectionStatus.ERROR) {
+                        appendLine()
+                        appendLine("⚠️ CONNECTION ERROR STATE")
+                    }
+                } catch (e: Exception) {
+                    appendLine("Network state unavailable: ${e.message}")
+                }
+            } else {
+                appendLine("Network state: App not initialized")
+            }
+            appendLine()
+            
+            // Object Manager Status
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ OBJECT MANAGER STATUS                                             │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            if (app != null) {
+                try {
+                    if (app.isObjectManagerInitialized()) {
+                        val objDiag = app.objectManager.getDiagnostics()
+                        appendLine("Total Objects in Scene: ${objDiag.totalObjects}")
+                        appendLine("Objects by UUID: ${objDiag.objectsByUUID}")
+                        appendLine("Selected Objects: ${objDiag.selectedCount}")
+                        appendLine("Is Editing: ${objDiag.isEditing}")
+                        appendLine("Edit Mode: ${objDiag.editMode}")
+                        appendLine("Recently Updated (last 5s): ${objDiag.recentlyUpdatedCount}")
+                        appendLine("Scripted Objects: ${objDiag.scriptedObjectCount}")
+                        appendLine("Physical Objects: ${objDiag.physicalObjectCount}")
+                        
+                        if (objDiag.totalObjects == 0) {
+                            appendLine()
+                            appendLine("⚠️ NO OBJECTS IN SCENE - World may not be loading!")
+                        }
+                    } else {
+                        appendLine("Object manager not initialized (not logged in)")
+                    }
+                } catch (e: Exception) {
+                    appendLine("Object manager diagnostics unavailable: ${e.message}")
+                }
+            } else {
+                appendLine("Object manager: App not initialized")
+            }
+            appendLine()
+            
+            // Avatar Manager Status
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ AVATAR MANAGER STATUS                                             │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            if (app != null) {
+                try {
+                    if (app.isAvatarManagerInitialized()) {
+                        val avatarDiag = app.avatarManager.getDiagnostics()
+                        appendLine("Total Avatars in Scene: ${avatarDiag.totalAvatars}")
+                        appendLine("My Agent ID: ${avatarDiag.myAgentId ?: "Not set"}")
+                        appendLine("My Avatar Loaded: ${avatarDiag.myAvatarLoaded}")
+                        appendLine("Recently Updated (last 5s): ${avatarDiag.recentlyUpdatedCount}")
+                        appendLine("Flying: ${avatarDiag.flyingCount}")
+                        appendLine("Sitting: ${avatarDiag.sittingCount}")
+                        appendLine("Typing: ${avatarDiag.typingCount}")
+                        
+                        if (avatarDiag.totalAvatars == 0) {
+                            appendLine()
+                            appendLine("⚠️ NO AVATARS IN SCENE - Avatar data may not be loading!")
+                        }
+                    } else {
+                        appendLine("Avatar manager not initialized (not logged in)")
+                    }
+                } catch (e: Exception) {
+                    appendLine("Avatar manager diagnostics unavailable: ${e.message}")
+                }
+            } else {
+                appendLine("Avatar manager: App not initialized")
+            }
+            appendLine()
+            
+            // Inventory Manager Status
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ INVENTORY STATUS                                                  │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            if (app != null) {
+                try {
+                    if (app.isInventoryManagerInitialized()) {
+                        val invDiag = app.inventoryManager.getDiagnostics()
+                        appendLine("Folders Cached: ${invDiag.folderCount}")
+                        appendLine("Items Cached: ${invDiag.itemCount}")
+                        appendLine("Root Folder ID: ${invDiag.rootFolderId ?: "Not set"}")
+                        appendLine("System Folders: ${invDiag.systemFolderCount}")
+                        appendLine("Currently Loading: ${invDiag.isLoading}")
+                        appendLine("Current Folder: ${invDiag.currentFolderId ?: "None"}")
+                    } else {
+                        appendLine("Inventory manager not initialized (not logged in)")
+                    }
+                } catch (e: Exception) {
+                    appendLine("Inventory diagnostics unavailable: ${e.message}")
+                }
+            } else {
+                appendLine("Inventory: App not initialized")
+            }
+            appendLine()
+            
+            // Region Info (detailed)
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ REGION DETAILS                                                    │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            if (app != null) {
+                try {
+                    val regionInfo = app.sessionManager.currentRegion.value
+                    if (regionInfo != null) {
+                        appendLine("Region Name: ${regionInfo.name}")
+                        appendLine("Region Handle: ${regionInfo.handle}")
+                        appendLine("Position: (${regionInfo.x}, ${regionInfo.y})")
+                        appendLine("Sim IP: ${regionInfo.simIP.ifEmpty { "Not set" }}")
+                        appendLine("Sim Port: ${if (regionInfo.simPort > 0) regionInfo.simPort else "Not set"}")
+                        val seedCapDisplay = regionInfo.seedCapability?.let { 
+                            if (it.length > DIAGNOSTIC_URL_TRUNCATE_LENGTH) it.take(DIAGNOSTIC_URL_TRUNCATE_LENGTH) + "..." else it 
+                        } ?: "Not set"
+                        appendLine("Seed Capability: $seedCapDisplay")
+                        
+                        if (regionInfo.name == "Unknown") {
+                            appendLine()
+                            appendLine("⚠️ REGION NAME UNKNOWN - RegionHandshake may not have been received!")
+                        }
+                    } else {
+                        appendLine("No region info available - not connected to a region")
+                    }
+                } catch (e: Exception) {
+                    appendLine("Region info unavailable: ${e.message}")
+                }
+            } else {
+                appendLine("Region info: App not initialized")
+            }
+            appendLine()
+            
+            // ==================== END OF NEW DIAGNOSTIC SECTIONS ====================
+            
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ DEVICE INFORMATION                                                │")
             appendLine("└──────────────────────────────────────────────────────────────────┘")
@@ -460,6 +766,25 @@ class DebugReportService private constructor(private val context: Context) {
             mb >= 1 -> String.format(Locale.US, "%.2f MB", mb)
             kb >= 1 -> String.format(Locale.US, "%.2f KB", kb)
             else -> "$bytes B"
+        }
+    }
+    
+    /**
+     * Format a duration in milliseconds to a human-readable string.
+     * 
+     * @param ms Duration in milliseconds
+     * @return Formatted string with appropriate unit:
+     *         - "Xms" for durations under 1 second
+     *         - "X.Xs" for durations under 1 minute
+     *         - "X.Xm" for durations under 1 hour
+     *         - "X.Xh" for longer durations
+     */
+    private fun formatDuration(ms: Long): String {
+        return when {
+            ms < 1000 -> "${ms}ms"
+            ms < 60000 -> String.format(Locale.US, "%.1fs", ms / 1000.0)
+            ms < 3600000 -> String.format(Locale.US, "%.1fm", ms / 60000.0)
+            else -> String.format(Locale.US, "%.1fh", ms / 3600000.0)
         }
     }
     

@@ -25,6 +25,9 @@ class ObjectManager(
     companion object {
         private const val TAG = "ObjectManager"
         
+        // Diagnostic threshold for "recently updated" objects (5 seconds)
+        private const val RECENT_UPDATE_THRESHOLD_MS = 5000L
+        
         // Object update flags
         const val FLAG_USE_PHYSICS = 0x00000001
         const val FLAG_CREATE_SELECTED = 0x00000002
@@ -706,6 +709,55 @@ class ObjectManager(
         objects.clear()
         objectsByUUID.clear()
     }
+    
+    // ==================== DIAGNOSTIC METHODS ====================
+    
+    /**
+     * Get the total count of objects in the scene
+     */
+    fun getObjectCount(): Int = objects.size
+    
+    /**
+     * Get the count of selected objects
+     */
+    fun getSelectedCount(): Int = _selectedObjects.value.size
+    
+    /**
+     * Get comprehensive diagnostic data for debug reports
+     */
+    fun getDiagnostics(): ObjectManagerDiagnostics {
+        val allObjects = objects.values.toList()
+        val now = System.currentTimeMillis()
+        
+        val recentlyUpdated = allObjects.count { now - it.lastUpdate < RECENT_UPDATE_THRESHOLD_MS }
+        val scriptedCount = allObjects.count { it.isScripted }
+        val physicalCount = allObjects.count { it.isPhysical }
+        
+        return ObjectManagerDiagnostics(
+            totalObjects = objects.size,
+            objectsByUUID = objectsByUUID.size,
+            selectedCount = _selectedObjects.value.size,
+            isEditing = _isEditing.value,
+            editMode = _editMode.value,
+            recentlyUpdatedCount = recentlyUpdated,
+            scriptedObjectCount = scriptedCount,
+            physicalObjectCount = physicalCount
+        )
+    }
+    
+    /**
+     * Diagnostic data class for object manager state
+     */
+    data class ObjectManagerDiagnostics(
+        val totalObjects: Int,
+        val objectsByUUID: Int,
+        val selectedCount: Int,
+        val isEditing: Boolean,
+        val editMode: EditMode,
+        val recentlyUpdatedCount: Int,
+        val scriptedObjectCount: Int,
+        val physicalObjectCount: Int
+    )
 }
 
 data class SceneObject(

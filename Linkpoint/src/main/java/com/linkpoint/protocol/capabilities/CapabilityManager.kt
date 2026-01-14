@@ -33,6 +33,9 @@ class CapabilityManager {
     companion object {
         private const val TAG = "CapabilityManager"
         
+        // Diagnostic truncation length for URLs in debug reports
+        private const val DIAGNOSTIC_URL_TRUNCATE_LENGTH = 50
+        
         // Common capability names
         const val CAP_SEED = "Seed"
         const val CAP_EVENT_QUEUE = "EventQueueGet"
@@ -490,6 +493,71 @@ class CapabilityManager {
         capabilities.clear()
         _isReady.value = false
     }
+    
+    // ==================== DIAGNOSTIC METHODS ====================
+    
+    /**
+     * Get list of all available capability names
+     */
+    fun getAvailableCapabilities(): List<String> = capabilities.keys.toList()
+    
+    /**
+     * Get the total number of capabilities
+     */
+    fun getCapabilityCount(): Int = capabilities.size
+    
+    /**
+     * Check if event queue is active
+     */
+    fun isEventQueueActive(): Boolean = eventQueueJob?.isActive == true
+    
+    /**
+     * Get number of registered event handlers
+     */
+    fun getEventHandlerCount(): Int = eventHandlers.values.sumOf { it.size }
+    
+    /**
+     * Get list of events with registered handlers
+     */
+    fun getRegisteredEventTypes(): List<String> = eventHandlers.keys.toList()
+    
+    /**
+     * Get comprehensive diagnostic data for debug reports
+     */
+    fun getDiagnostics(): CapabilityDiagnostics {
+        return CapabilityDiagnostics(
+            isReady = _isReady.value,
+            seedCapability = seedCapability?.let { 
+                if (it.length > DIAGNOSTIC_URL_TRUNCATE_LENGTH) it.take(DIAGNOSTIC_URL_TRUNCATE_LENGTH) + "..." else it 
+            },
+            capabilityCount = capabilities.size,
+            availableCapabilities = capabilities.keys.toList().sorted(),
+            eventQueueActive = eventQueueJob?.isActive == true,
+            eventHandlerCount = eventHandlers.values.sumOf { it.size },
+            registeredEventTypes = eventHandlers.keys.toList().sorted(),
+            hasGetTexture = hasCapability(CAP_GET_TEXTURE),
+            hasGetMesh = hasCapability(CAP_GET_MESH) || hasCapability(CAP_GET_MESH2),
+            hasFetchInventory = hasCapability(CAP_FETCH_INVENTORY),
+            hasEventQueue = hasCapability(CAP_EVENT_QUEUE)
+        )
+    }
+    
+    /**
+     * Diagnostic data class for capability manager state
+     */
+    data class CapabilityDiagnostics(
+        val isReady: Boolean,
+        val seedCapability: String?,
+        val capabilityCount: Int,
+        val availableCapabilities: List<String>,
+        val eventQueueActive: Boolean,
+        val eventHandlerCount: Int,
+        val registeredEventTypes: List<String>,
+        val hasGetTexture: Boolean,
+        val hasGetMesh: Boolean,
+        val hasFetchInventory: Boolean,
+        val hasEventQueue: Boolean
+    )
 }
 
 fun interface EventHandler {
