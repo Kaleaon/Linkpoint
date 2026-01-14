@@ -96,11 +96,11 @@ class CrashReporter private constructor(private val context: Context) {
         
         val crashReport = createCrashReport(thread, throwable)
         lastCrash = crashReport
-        recentCrashes.offer(crashReport)
+        recentCrashes.add(crashReport)
         
         // Limit queue size
         while (recentCrashes.size > MAX_CRASH_LOGS) {
-            recentCrashes.poll()
+            recentCrashes.remove()
         }
         
         // Save crash log to file synchronously (since app is crashing)
@@ -121,7 +121,7 @@ class CrashReporter private constructor(private val context: Context) {
                     isFatal = false,
                     context = context
                 )
-                recentCrashes.offer(report)
+                recentCrashes.add(report)
                 saveCrashLogAsync(report)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to report exception", e)

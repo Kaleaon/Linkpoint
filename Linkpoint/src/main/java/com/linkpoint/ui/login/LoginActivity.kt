@@ -143,9 +143,6 @@ class LoginActivity : AppCompatActivity() {
         permissionManager = PermissionManager(this)
         permissionManager.registerPermissionLauncher(allPermissionsLauncher)
         
-        // Request all essential permissions on startup (storage, notifications, etc.)
-        requestAllStartupPermissions()
-        
         // Check ToS acceptance first (like Lumiya does)
         if (!TosActivity.hasAcceptedTos(this)) {
             // Show ToS activity
@@ -157,6 +154,9 @@ class LoginActivity : AppCompatActivity() {
         
         setupGridSpinner()
         setupListeners()
+        
+        // Request all essential permissions on startup after UI is fully initialized
+        requestAllStartupPermissions()
     }
     
     /**
@@ -201,32 +201,8 @@ class LoginActivity : AppCompatActivity() {
             return
         }
         
-        // Get all permissions we need
-        val allPermissions = mutableListOf<String>()
-        
-        // Storage permissions based on Android version
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-            allPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            allPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
-        } else if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
-            allPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
-        // Android 13+ uses scoped storage, no permission needed for app-specific dirs
-        
-        // Notification permission for Android 13+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            allPermissions.add(Manifest.permission.POST_NOTIFICATIONS)
-        }
-        
-        // Microphone for voice chat
-        allPermissions.add(Manifest.permission.RECORD_AUDIO)
-        
-        // Bluetooth for headsets based on Android version
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            allPermissions.add(Manifest.permission.BLUETOOTH_CONNECT)
-        } else {
-            allPermissions.add(Manifest.permission.BLUETOOTH)
-        }
+        // Use PermissionManager to get all permissions we need
+        val allPermissions = PermissionManager.getAllPermissions()
         
         // Filter out already granted permissions
         val permissionsToRequest = allPermissions.filter { permission ->
