@@ -185,21 +185,21 @@ class DebugReportService private constructor(private val context: Context) {
             appendLine()
             try {
                 val cacheManager = CacheManager(context)
-                // Get cache stats synchronously for debug report
-                runBlocking {
-                    val cacheStats = cacheManager.getCacheStats()
-                    appendLine("Total Cache Size: ${cacheStats.getFormattedTotalSize()} / ${cacheStats.getFormattedMaxSize()} (${cacheStats.usagePercent}%)")
-                    appendLine("Total Files: ${cacheStats.totalFileCount}")
-                    appendLine("Available Space: ${formatBytes(cacheStats.availableSpaceBytes)}")
-                    appendLine("Low Space Warning: ${if (cacheStats.isLowSpace) "YES ⚠️" else "No"}")
-                    appendLine()
-                    appendLine("Cache Breakdown:")
-                    appendLine("  Textures: ${formatBytes(cacheStats.texturesSizeBytes)} (${cacheStats.texturesCount} files)")
-                    appendLine("  Meshes: ${formatBytes(cacheStats.meshesSizeBytes)} (${cacheStats.meshesCount} files)")
-                    appendLine("  Sounds: ${formatBytes(cacheStats.soundsSizeBytes)} (${cacheStats.soundsCount} files)")
-                    appendLine("  Animations: ${formatBytes(cacheStats.animationsSizeBytes)} (${cacheStats.animationsCount} files)")
-                    appendLine("  General: ${formatBytes(cacheStats.generalSizeBytes)} (${cacheStats.generalCount} files)")
+                // Get cache stats - this runs on IO dispatcher so it's safe
+                val cacheStats = kotlinx.coroutines.runBlocking(Dispatchers.IO) {
+                    cacheManager.getCacheStats()
                 }
+                appendLine("Total Cache Size: ${cacheStats.getFormattedTotalSize()} / ${cacheStats.getFormattedMaxSize()} (${cacheStats.usagePercent}%)")
+                appendLine("Total Files: ${cacheStats.totalFileCount}")
+                appendLine("Available Space: ${formatBytes(cacheStats.availableSpaceBytes)}")
+                appendLine("Low Space Warning: ${if (cacheStats.isLowSpace) "YES ⚠️" else "No"}")
+                appendLine()
+                appendLine("Cache Breakdown:")
+                appendLine("  Textures: ${formatBytes(cacheStats.texturesSizeBytes)} (${cacheStats.texturesCount} files)")
+                appendLine("  Meshes: ${formatBytes(cacheStats.meshesSizeBytes)} (${cacheStats.meshesCount} files)")
+                appendLine("  Sounds: ${formatBytes(cacheStats.soundsSizeBytes)} (${cacheStats.soundsCount} files)")
+                appendLine("  Animations: ${formatBytes(cacheStats.animationsSizeBytes)} (${cacheStats.animationsCount} files)")
+                appendLine("  General: ${formatBytes(cacheStats.generalSizeBytes)} (${cacheStats.generalCount} files)")
             } catch (e: Exception) {
                 appendLine("Cache statistics unavailable: ${e.message}")
             }
@@ -277,7 +277,7 @@ class DebugReportService private constructor(private val context: Context) {
                 val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
                 appendLine("Package: ${context.packageName}")
                 appendLine("Version: ${packageInfo.versionName}")
-                appendLine("Version Code: ${if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) packageInfo.longVersionCode else @Suppress("DEPRECATION") packageInfo.versionCode}")
+                appendLine("Version Code: ${getVersionCode(packageInfo)}")
             } catch (e: Exception) {
                 appendLine("App Info: Unable to retrieve")
             }
@@ -379,6 +379,18 @@ class DebugReportService private constructor(private val context: Context) {
             SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US).format(Date(timestamp))
         }
         return "$REPORT_PREFIX$dateString$REPORT_SUFFIX"
+    }
+    
+    /**
+     * Get version code from package info, handling API level differences
+     */
+    private fun getVersionCode(packageInfo: android.content.pm.PackageInfo): Long {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            packageInfo.longVersionCode
+        } else {
+            @Suppress("DEPRECATION")
+            packageInfo.versionCode.toLong()
+        }
     }
     
     private fun cleanupOldReports() {

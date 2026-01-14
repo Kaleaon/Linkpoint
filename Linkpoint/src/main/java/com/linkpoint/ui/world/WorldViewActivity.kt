@@ -60,6 +60,9 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private val app by lazy { LinkpointApp.getInstance() }
     private var isRendering = false
     
+    // Track current orientation setting to avoid unnecessary changes
+    private var currentOrientationPref: String? = null
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         applyScreenOrientation()
@@ -75,10 +78,15 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     /**
      * Apply screen orientation based on user preference.
      * Default is portrait to avoid black screen issues in landscape mode.
+     * Only changes orientation if the preference has changed.
      */
     private fun applyScreenOrientation() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val orientation = prefs.getString("screen_orientation", "portrait") ?: "portrait"
+        
+        // Only apply if preference has changed
+        if (orientation == currentOrientationPref) return
+        currentOrientationPref = orientation
         
         requestedOrientation = when (orientation) {
             "portrait" -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT

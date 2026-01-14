@@ -60,4 +60,7 @@
     <string name="loading">Loading…</string>
     <string name="error">Error</string>
     <string name="unknown_region">Unknown Region</string>
+    
+    <!-- Debug -->
+    <string name="capture_debug_report">Capture Debug Report</string>
 </resources>
