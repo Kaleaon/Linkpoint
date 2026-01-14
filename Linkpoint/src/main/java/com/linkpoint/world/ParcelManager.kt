@@ -71,6 +71,33 @@ class ParcelManager(
     private var parcelOverlay: ByteArray? = null
     
     /**
+     * Write AgentData block (AgentID + SessionID) to buffer using proper UUID serialization
+     */
+    private fun writeAgentData(buffer: ByteBuffer) {
+        val agentId = udpConnection.getAgentId()
+        val sessionId = udpConnection.getSessionId()
+        
+        // Write UUIDs in big-endian (SL protocol format)
+        buffer.order(ByteOrder.BIG_ENDIAN)
+        buffer.putLong(agentId.mostSignificantBits)
+        buffer.putLong(agentId.leastSignificantBits)
+        buffer.putLong(sessionId.mostSignificantBits)
+        buffer.putLong(sessionId.leastSignificantBits)
+        buffer.order(ByteOrder.LITTLE_ENDIAN)
+    }
+    
+    /**
+     * Write UUID to buffer using proper serialization (big-endian)
+     */
+    private fun writeUUID(buffer: ByteBuffer, uuid: UUID) {
+        val order = buffer.order()
+        buffer.order(ByteOrder.BIG_ENDIAN)
+        buffer.putLong(uuid.mostSignificantBits)
+        buffer.putLong(uuid.leastSignificantBits)
+        buffer.order(order)
+    }
+    
+    /**
      * Handle ParcelOverlay message
      */
     fun handleParcelOverlay(sequence: Int, data: ByteArray) {
@@ -210,8 +237,8 @@ class ParcelManager(
                 // ParcelBuy message
                 val payload = ByteBuffer.allocate(80).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData - placeholder
-                repeat(32) { payload.put(0) }  // Agent + Session ID
+                // AgentData with proper IDs
+                writeAgentData(payload)
                 
                 // Data block
                 payload.putInt(localId)  // ParcelLocalID
@@ -239,11 +266,11 @@ class ParcelManager(
                 // ParcelDeedToGroup message
                 val payload = ByteBuffer.allocate(56).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData - placeholder
-                repeat(32) { payload.put(0) }  // Agent + Session ID
+                // AgentData with proper IDs
+                writeAgentData(payload)
                 
                 // Data block
-                repeat(16) { payload.put(0) }  // GroupID placeholder - use proper one
+                writeUUID(payload, groupId)
                 payload.putInt(localId)  // LocalID
                 
                 udpConnection.sendPacket(MessageIds.PARCEL_DEED_TO_GROUP, payload.array(), reliable = true)
@@ -263,8 +290,8 @@ class ParcelManager(
                 // ParcelRelease message
                 val payload = ByteBuffer.allocate(40).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData - placeholder
-                repeat(32) { payload.put(0) }  // Agent + Session ID
+                // AgentData with proper IDs
+                writeAgentData(payload)
                 
                 // Data block
                 payload.putInt(localId)
@@ -286,8 +313,8 @@ class ParcelManager(
                 // ParcelPropertiesUpdate message with sale info
                 val payload = ByteBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData - placeholder
-                repeat(32) { payload.put(0) }
+                // AgentData with proper IDs
+                writeAgentData(payload)
                 
                 // ParcelData block
                 payload.putInt(localId)
@@ -313,8 +340,8 @@ class ParcelManager(
                 // ParcelReturnObjects / ParcelDisableObjects message
                 val payload = ByteBuffer.allocate(50).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                repeat(32) { payload.put(0) }  // Agent + Session ID placeholder
+                // AgentData with proper IDs
+                writeAgentData(payload)
                 
                 // ParcelData
                 payload.putInt(localId)
@@ -426,8 +453,8 @@ class ParcelManager(
                 // ParcelAccessListUpdate message
                 val payload = ByteBuffer.allocate(80).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                repeat(32) { payload.put(0) }
+                // AgentData with proper IDs
+                writeAgentData(payload)
                 
                 // Data block
                 payload.putInt(0)  // Flags - add to access
@@ -438,8 +465,7 @@ class ParcelManager(
                 
                 // List block
                 payload.put(1)  // Entry count
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
+                writeUUID(payload, agentId)
                 payload.putInt((hours * 3600).toInt())  // Time in seconds
                 payload.putInt(1)  // Flags - access allowed
                 
@@ -459,8 +485,8 @@ class ParcelManager(
             try {
                 val payload = ByteBuffer.allocate(80).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                repeat(32) { payload.put(0) }
+                // AgentData with proper IDs
+                writeAgentData(payload)
                 
                 // Data block
                 payload.putInt(1)  // Flags - remove from access
@@ -471,8 +497,7 @@ class ParcelManager(
                 
                 // List block
                 payload.put(1)
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
+                writeUUID(payload, agentId)
                 payload.putInt(0)
                 payload.putInt(0)
                 
@@ -492,8 +517,8 @@ class ParcelManager(
             try {
                 val payload = ByteBuffer.allocate(80).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                repeat(32) { payload.put(0) }
+                // AgentData with proper IDs
+                writeAgentData(payload)
                 
                 // Data block  
                 payload.putInt(2)  // Flags - ban list
@@ -504,8 +529,7 @@ class ParcelManager(
                 
                 // List block
                 payload.put(1)
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
+                writeUUID(payload, agentId)
                 payload.putInt(0)  // Permanent
                 payload.putInt(1)  // Flags - banned
                 
@@ -525,8 +549,8 @@ class ParcelManager(
             try {
                 val payload = ByteBuffer.allocate(80).order(ByteOrder.LITTLE_ENDIAN)
                 
-                // AgentData
-                repeat(32) { payload.put(0) }
+                // AgentData with proper IDs
+                writeAgentData(payload)
                 
                 // Data block
                 payload.putInt(3)  // Flags - remove from ban
@@ -537,8 +561,7 @@ class ParcelManager(
                 
                 // List block
                 payload.put(1)
-                payload.putLong(agentId.mostSignificantBits)
-                payload.putLong(agentId.leastSignificantBits)
+                writeUUID(payload, agentId)
                 payload.putInt(0)
                 payload.putInt(0)
                 

@@ -44,6 +44,22 @@ class UDPConnection {
         this.sessionId = sessionId
         this.agentId = agentId
     }
+    
+    /**
+     * Get the agent ID for this connection
+     */
+    fun getAgentId(): UUID = agentId
+    
+    /**
+     * Get the session ID for this connection
+     */
+    fun getSessionId(): UUID = sessionId
+    
+    /**
+     * Get the circuit code for this connection
+     */
+    fun getCircuitCode(): Int = circuitCode
+    
     companion object {
         private const val TAG = "UDPConnection"
         private const val BUFFER_SIZE = 65535
