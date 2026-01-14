@@ -283,8 +283,9 @@ class SettingsActivity : AppCompatActivity() {
                 .setMessage("This will generate a non-fatal test exception to verify crash reporting is working.\n\nThe exception will be logged but the app will not crash.")
                 .setPositiveButton("Generate Test Crash") { _, _ ->
                     try {
-                        // Create a test exception
-                        val testException = RuntimeException("Test crash generated from Settings at ${java.util.Date()}")
+                        // Create a test exception with current timestamp
+                        val timestamp = System.currentTimeMillis()
+                        val testException = RuntimeException("Test crash generated from Settings at $timestamp")
                         crashReporter.reportException(testException, "Settings test crash")
                         
                         Toast.makeText(requireContext(), "Test crash report generated", Toast.LENGTH_SHORT).show()

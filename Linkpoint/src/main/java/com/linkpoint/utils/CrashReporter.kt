@@ -506,8 +506,15 @@ class CrashReporter private constructor(private val context: Context) {
      * Generate a unique filename for the crash log
      */
     private fun generateCrashLogFilename(timestamp: Long): String {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
-        val dateString = dateFormat.format(Date(timestamp))
+        // Thread-safe: each call creates its own local formatter
+        val dateString = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            java.time.Instant.ofEpochMilli(timestamp)
+                .atZone(java.time.ZoneId.systemDefault())
+                .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))
+        } else {
+            // Local SimpleDateFormat for older Android (thread-safe since it's a local variable)
+            SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US).format(Date(timestamp))
+        }
         return "$CRASH_LOG_PREFIX$dateString$CRASH_LOG_SUFFIX"
     }
     
@@ -641,8 +648,14 @@ class CrashReporter private constructor(private val context: Context) {
     }
     
     private fun formatTimestamp(timestamp: Long): String {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
-        return dateFormat.format(Date(timestamp))
+        // Thread-safe: each call creates its own local formatter
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            java.time.Instant.ofEpochMilli(timestamp)
+                .atZone(java.time.ZoneId.systemDefault())
+                .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        } else {
+            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date(timestamp))
+        }
     }
     
     /**
@@ -669,14 +682,22 @@ data class CrashReport(
     val memoryInfo: MemoryInfo
 ) {
     fun toFormattedString(): String {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z", Locale.US)
+        // Thread-safe: each call creates its own local formatter
+        val formattedTimestamp = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            java.time.Instant.ofEpochMilli(timestamp)
+                .atZone(java.time.ZoneId.systemDefault())
+                .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS Z"))
+        } else {
+            java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z", java.util.Locale.US)
+                .format(java.util.Date(timestamp))
+        }
         
         return buildString {
             appendLine("╔══════════════════════════════════════════════════════════════════╗")
             appendLine("║               LINKPOINT CRASH REPORT                             ║")
             appendLine("╚══════════════════════════════════════════════════════════════════╝")
             appendLine()
-            appendLine("Timestamp: ${dateFormat.format(Date(timestamp))}")
+            appendLine("Timestamp: $formattedTimestamp")
             appendLine("Fatal: $isFatal")
             if (context.isNotEmpty()) {
                 appendLine("Context: $context")
