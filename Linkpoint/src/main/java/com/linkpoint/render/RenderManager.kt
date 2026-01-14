@@ -17,6 +17,11 @@ class RenderManager(private val context: Context) {
     
     companion object {
         private const val TAG = "RenderManager"
+        
+        init {
+            // Load Filament native libraries before any Engine operations
+            Filament.init()
+        }
     }
     
     // Filament components
