@@ -303,6 +303,7 @@ class UDPConnection {
     private suspend fun receiveLoop() {
         val buffer = ByteArray(BUFFER_SIZE)
         var packetCount = 0
+        val maxVerbosePackets = 10000  // Stop verbose logging after this many packets
         
         while (isConnected) {
             try {
@@ -312,8 +313,8 @@ class UDPConnection {
                 if (datagram.length > 0) {
                     packetCount++
                     val data = buffer.copyOf(datagram.length)
-                    // Log first few packets and then periodically
-                    if (packetCount <= 10 || packetCount % 100 == 0) {
+                    // Log first 10 packets, then every 100th up to 10000
+                    if (packetCount <= 10 || (packetCount % 100 == 0 && packetCount <= maxVerbosePackets)) {
                         Log.d(TAG, "Received packet #$packetCount: ${data.size} bytes from ${datagram.address}:${datagram.port}")
                     }
                     processPacket(data)

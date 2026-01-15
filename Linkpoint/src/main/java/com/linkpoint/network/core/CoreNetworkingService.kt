@@ -839,7 +839,6 @@ class CoreNetworkingService(private val context: Context) {
                 val mfaHash = llsd.getString("mfa_hash")
                 val seedCapability = llsd.getString("seed_capability")
                 val regionName = llsd.getString("region_name")
-                    ?: extractRegionFromLookAt(llsd)  // Try to get from look_at if available
                 val circuitCode = llsd.getInt("circuit_code")
                 
                 Log.i(TAG, "LLSD Login successful:")
@@ -850,8 +849,19 @@ class CoreNetworkingService(private val context: Context) {
                 Log.i(TAG, "  Region: $regionName")
                 Log.i(TAG, "  Seed Capability: ${seedCapability?.take(60)}...")
                 
+                // Validate required fields - if missing, return a failure instead of invalid credentials
                 if (agentId.isEmpty() || sessionId.isEmpty()) {
-                    Log.w(TAG, "Warning: Missing required login fields (agent_id or session_id)")
+                    Log.e(TAG, "Missing required login fields (agent_id or session_id)")
+                    Log.d(TAG, "Available LLSD keys: ${llsd.value.keys.joinToString(", ")}")
+                    return ParsedLoginResponse.Failure(LoginResult.Failure(
+                        message = "Login response missing required fields",
+                        errorCode = "INVALID_RESPONSE",
+                        technicalDetails = "Missing: ${if (agentId.isEmpty()) "agent_id " else ""}${if (sessionId.isEmpty()) "session_id " else ""}\nAvailable keys: ${llsd.value.keys.joinToString(", ")}"
+                    ))
+                }
+                
+                if (simIp.isEmpty() || simPort == 0) {
+                    Log.w(TAG, "Missing simulator connection info (sim_ip or sim_port)")
                     Log.d(TAG, "Available LLSD keys: ${llsd.value.keys.joinToString(", ")}")
                 }
                 
@@ -933,19 +943,6 @@ class CoreNetworkingService(private val context: Context) {
                 ))
             }
         }
-    }
-    
-    /**
-     * Extract region name from look_at or home fields if region_name is not present.
-     */
-    private fun extractRegionFromLookAt(llsd: LLSDMap): String? {
-        // Try to get region from "home" field which may contain region info
-        val home = llsd.getString("home")
-        if (home != null && home.contains("region_handle")) {
-            // Parse the look_at/home string if possible
-            return null // For now, return null - region name comes from RegionHandshake
-        }
-        return null
     }
     
     /**
