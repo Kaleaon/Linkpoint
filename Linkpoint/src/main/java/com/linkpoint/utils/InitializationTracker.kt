@@ -24,7 +24,7 @@ object InitializationTracker {
     // Phase tracking (thread-safe collections and volatile for cross-thread access)
     @Volatile private var currentPhase: Phase = Phase.NOT_STARTED
     private val phaseTimings = java.util.concurrent.ConcurrentHashMap<Phase, Long>()
-    // Boolean: true = completed, false = started (failure tracked separately)
+    // Completed phases (true = completed)
     private val phaseCompletions = java.util.concurrent.ConcurrentHashMap<Phase, Boolean>()
     private val phasesFailed = java.util.concurrent.ConcurrentHashMap.newKeySet<Phase>()
     
@@ -91,7 +91,7 @@ object InitializationTracker {
     fun startPhase(phase: Phase, message: String = "") {
         currentPhase = phase
         phaseTimings[phase] = System.currentTimeMillis()
-        phaseCompletions[phase] = false
+        phaseCompletions.remove(phase)
         
         val msg = if (message.isNotEmpty()) "$phase: $message" else "$phase started"
         logEvent(EventType.PHASE_START, phase, msg)
@@ -114,7 +114,7 @@ object InitializationTracker {
      * Record a phase failing.
      */
     fun failPhase(phase: Phase, reason: String) {
-        phaseCompletions[phase] = false
+        phaseCompletions.remove(phase)
         phasesFailed.add(phase)
         val duration = phaseTimings[phase]?.let { System.currentTimeMillis() - it } ?: 0
         
@@ -185,13 +185,15 @@ object InitializationTracker {
         val errors = events.count { it.type == EventType.ERROR }
         
         // Get completed phases (phaseCompletions[phase] == true)
-        val completedPhases = phaseCompletions.filter { it.value == true }.keys.toList()
+        val completedPhases = phaseCompletions.keys.toList()
         
         // Get failed phases (tracked in phasesFailed set)
         val failedPhasesList = phasesFailed.toList()
         
         // Get pending phases (started but not completed or failed)
-        val pendingPhases = phaseCompletions.filter { it.value == false && !phasesFailed.contains(it.key) }.keys.toList()
+        val pendingPhases = phaseTimings.keys.filter { phase ->
+            !phasesFailed.contains(phase) && !phaseCompletions.containsKey(phase)
+        }
         
         return InitializationDiagnostics(
             sessionStartTime = sessionStartTime,
