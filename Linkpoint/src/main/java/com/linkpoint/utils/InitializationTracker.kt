@@ -91,6 +91,7 @@ object InitializationTracker {
     fun startPhase(phase: Phase, message: String = "") {
         currentPhase = phase
         phaseTimings[phase] = System.currentTimeMillis()
+        phasesFailed.remove(phase)
         phaseCompletions.remove(phase)
         
         val msg = if (message.isNotEmpty()) "$phase: $message" else "$phase started"
