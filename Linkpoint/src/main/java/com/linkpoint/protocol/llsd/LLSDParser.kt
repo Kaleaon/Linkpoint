@@ -7,7 +7,8 @@ import java.nio.ByteOrder
 import java.util.*
 
 /**
- * LLSD Parser - handles Binary, XML, and Notation formats
+ * LLSD Parser - handles Binary, XML, and Notation formats.
+ * See https://wiki.secondlife.com/wiki/LLSD for canonical formatting details.
  */
 object LLSDParser {
     
@@ -211,10 +212,8 @@ object LLSDParser {
                 LLSDBinary(bytes) to endPos
             }
             "date" -> {
-                val date = try {
-                    java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).parse(content)
-                } catch (e: Exception) { Date() }
-                LLSDDate(date ?: Date()) to endPos
+                val date = parseLlsdDate(content) ?: Date()
+                LLSDDate(date) to endPos
             }
             "uri" -> LLSDURI(content) to endPos
             "map" -> {
@@ -269,5 +268,23 @@ object LLSDParser {
             .replace("&amp;", "&")
             .replace("&quot;", "\"")
             .replace("&apos;", "'")
+    }
+
+    private fun parseLlsdDate(value: String): Date? {
+        val patterns = listOf(
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        )
+        for (pattern in patterns) {
+            val formatter = java.text.SimpleDateFormat(pattern, Locale.US).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+            }
+            try {
+                return formatter.parse(value)
+            } catch (e: Exception) {
+                // Try the next pattern.
+            }
+        }
+        return null
     }
 }

@@ -1,6 +1,6 @@
 # LLSD Cross-Language Library Strategy
 
-Linden Lab Structured Data (LLSD) remains central to Second Life protocol messaging. Standardizing LLSD encoders/decoders across languages provides consistent behavior and simplifies interoperability. This document evaluates the benefits of per-language LLSD libraries and outlines implementation plans leveraging existing assets such as the `LLSD-Kotlin` repository.
+Linden Lab Structured Data (LLSD) (https://wiki.secondlife.com/wiki/LLSD) remains central to Second Life protocol messaging. Standardizing LLSD encoders/decoders across languages provides consistent behavior and simplifies interoperability. This document evaluates the benefits of per-language LLSD libraries and outlines implementation plans leveraging existing assets such as the `LLSD-Kotlin` repository.
 
 ## Why Per-Language LLSD Libraries Help
 
