@@ -106,6 +106,474 @@ To view recent logs: adb logcat LumiyaApp:* ModernLinkpointDemo:* AutoLogUploade
 === END OF LOG ===
 ```
 
+## Recent Debug Report Sample (2026-01-15)
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║               LINKPOINT DEBUG REPORT                              ║
+╚══════════════════════════════════════════════════════════════════╝
+
+Timestamp: 2026-01-15 15:35:28.144 -0600
+Report ID: 0583bec0-8b41-4592-82fb-8aa63a36abd8
+
+┌──────────────────────────────────────────────────────────────────┐
+│ USER NOTE                                                         │
+└──────────────────────────────────────────────────────────────────┘
+
+Manual capture from Settings
+
+┌──────────────────────────────────────────────────────────────────┐
+│ CONNECTION STATUS                                                 │
+└──────────────────────────────────────────────────────────────────┘
+
+Connected: true
+Current Region: Unknown
+Agent ID: f496d6bf-8235-4ebf-bd56-4f7f0464a27a
+Avatar Name: Kaleaon Resident
+Connection State: CONNECTED
+
+┌──────────────────────────────────────────────────────────────────┐
+│ NETWORK ACTIVITY & PACKET STATUS                                  │
+└──────────────────────────────────────────────────────────────────┘
+
+HTTP Requests: 2
+HTTP Responses: 2
+Errors: 0
+Warnings: 0
+Retries: 0
+Timeouts: 0
+Redirects: 0
+
+No recent network errors detected
+
+┌──────────────────────────────────────────────────────────────────┐
+│ CACHE STATISTICS                                                  │
+└──────────────────────────────────────────────────────────────────┘
+
+Total Cache Size: 0.0 KB / 4.0 GB (0%)
+Total Files: 0
+Available Space: 364.14 GB
+Low Space Warning: No
+
+Cache Breakdown:
+  Textures: 0 B (0 files)
+  Meshes: 0 B (0 files)
+  Sounds: 0 B (0 files)
+  Animations: 0 B (0 files)
+  General: 0 B (0 files)
+
+┌──────────────────────────────────────────────────────────────────┐
+│ ASSET CACHE MEMORY                                                │
+└──────────────────────────────────────────────────────────────────┘
+
+Memory Cache:
+  Size: 0 B / 512.00 MB
+  Hit Count: 0
+  Miss Count: 0
+  Hit Rate: 0.0%
+
+Disk Cache:
+  Size: 0 B
+  Asset Count: 0
+
+┌──────────────────────────────────────────────────────────────────┐
+│ TEXTURE LOADING STATUS                                            │
+└──────────────────────────────────────────────────────────────────┘
+
+Pending Downloads: 0
+Downloaded: 0
+Downloaded Bytes: 0 B
+Failed Downloads: 0
+Decoded: 0
+Decode Failures: 0
+
+┌──────────────────────────────────────────────────────────────────┐
+│ UDP CONNECTION STATUS (Simulator Protocol)                        │
+└──────────────────────────────────────────────────────────────────┘
+
+UDP Connected: true
+Simulator IP: 18.237.183.71
+Simulator Port: 13028
+Circuit Code: 607348304
+Socket Open: true
+Receive Loop Active: true
+
+Packet Statistics:
+  Sequence Number (packets sent): 2
+  Pending ACKs: 2
+  Registered Handlers: 6
+
+Registered Message Handlers:
+  - AVATAR_ANIMATION
+  - AGENT_MOVEMENT_COMPLETE
+  - REGION_HANDSHAKE
+  - CHAT_FROM_SIMULATOR
+  - OBJECT_UPDATE
+  - OBJECT_UPDATE_COMPRESSED
+
+Pending Packets (awaiting ACK):
+  - Seq 0: 2 retries, 162ms old
+  - Seq 1: 2 retries, 162ms old
+
+┌──────────────────────────────────────────────────────────────────┐
+│ CAPABILITY STATUS (HTTP Services)                                 │
+└──────────────────────────────────────────────────────────────────┘
+
+Capabilities Ready: true
+Total Capabilities: 12
+Seed Capability: https://simhost-0f86877b1547cafa3.agni.secondlife....
+
+Initialization Status:
+  Completed: true
+  Duration: 469ms
+  Attempts: 1
+
+Critical Capabilities:
+  GetTexture: ✓ Available
+  GetMesh: ✓ Available
+  FetchInventory: ✓ Available
+  EventQueue: ✓ Available
+
+Event Queue:
+  Active: true
+  Registered Event Handlers: 3
+  Event Types: ChatterBoxInvitation, ChatterBoxSessionEventReply, ChatterBoxSessionStartReply
+
+All Available Capabilities:
+  - AgentState
+  - AvatarPickerSearch
+  - ChatSessionRequest
+  - EnvironmentSettings
+  - EventQueueGet
+  - ExtEnvironment
+  - FetchInventory2
+  - FetchInventoryDescendents2
+  - FetchLib2
+  - GetMesh
+  - GetMesh2
+  - GetTexture
+
+┌──────────────────────────────────────────────────────────────────┐
+│ NETWORK QUALITY                                                   │
+└──────────────────────────────────────────────────────────────────┘
+
+Quality Level: POOR
+Network Connected: true
+Network Type: WIFI
+Average Latency: 6353ms
+Estimated Bandwidth: 38619 kbps
+Error Rate: 0.0%
+Latency Samples: 1
+Timeout Multiplier: 2.0x
+
+⚠️ Poor network quality - connection issues likely!
+
+┌──────────────────────────────────────────────────────────────────┐
+│ NETWORK STATE                                                     │
+└──────────────────────────────────────────────────────────────────┘
+
+Connection Status: CONNECTED
+Is Reconnecting: false
+Connection Faulted: false
+Reset Requested: false
+Force Reconnect: false
+Always Reconnect: true
+Logout In Progress: false
+Reconnect Count: 0
+Connection Duration: 33.5s
+Last Status Change: 10.2s ago
+Connection Instance ID: 946d314a
+
+┌──────────────────────────────────────────────────────────────────┐
+│ OBJECT MANAGER STATUS                                             │
+└──────────────────────────────────────────────────────────────────┘
+
+Total Objects in Scene: 0
+Objects by UUID: 0
+Selected Objects: 0
+Is Editing: false
+Edit Mode: POSITION
+Recently Updated (last 5s): 0
+Scripted Objects: 0
+Physical Objects: 0
+
+⚠️ NO OBJECTS IN SCENE - World may not be loading!
+
+┌──────────────────────────────────────────────────────────────────┐
+│ AVATAR MANAGER STATUS                                             │
+└──────────────────────────────────────────────────────────────────┘
+
+Total Avatars in Scene: 0
+My Agent ID: f496d6bf-8235-4ebf-bd56-4f7f0464a27a
+My Avatar Loaded: false
+Recently Updated (last 5s): 0
+Flying: 0
+Sitting: 0
+Typing: 0
+
+⚠️ NO AVATARS IN SCENE - Avatar data may not be loading!
+
+┌──────────────────────────────────────────────────────────────────┐
+│ INVENTORY STATUS                                                  │
+└──────────────────────────────────────────────────────────────────┘
+
+Folders Cached: 0
+Items Cached: 0
+Root Folder ID: Not set
+System Folders: 0
+Currently Loading: false
+Current Folder: None
+
+┌──────────────────────────────────────────────────────────────────┐
+│ REGION DETAILS                                                    │
+└──────────────────────────────────────────────────────────────────┘
+
+Region Name: Unknown
+Region Handle: 0
+Position: (128, 128)
+Sim IP: 18.237.183.71
+Sim Port: 13028
+Seed Capability: https://simhost-0f86877b1547cafa3.agni.secondlife....
+
+⚠️ REGION NAME UNKNOWN - RegionHandshake may not have been received!
+
+┌──────────────────────────────────────────────────────────────────┐
+│ MESH MANAGER STATUS                                               │
+└──────────────────────────────────────────────────────────────────┘
+
+Pending Downloads: 0
+Downloaded: 0
+Downloaded Bytes: 0 B
+Download Failed: 0
+Parse Failed: 0
+Has Mesh Capability: ✓ Yes
+
+┌──────────────────────────────────────────────────────────────────┐
+│ TEXTURE MANAGER DETAILED STATUS                                   │
+└──────────────────────────────────────────────────────────────────┘
+
+Has Texture Capability: ✓ Yes
+Pending Downloads: 0
+Downloaded: 0
+Downloaded Bytes: 0 B
+Download Failed: 0
+Decoded: 0
+Decode Failed: 0
+
+Cache Status:
+  Cached Textures: 0
+  Pending Requests: 0
+  Download Queue: 0
+  Active Downloads: 0
+
+JPEG2000 Decoding:
+  Attempts: 0
+  Successes: 0
+
+┌──────────────────────────────────────────────────────────────────┐
+│ RENDER MANAGER STATUS (Filament)                                  │
+└──────────────────────────────────────────────────────────────────┘
+
+Initialized: true
+XR Mode: false
+Viewport: 1080 x 2126
+Frame Count: 334
+Time Since Last Frame: 4.3s
+
+Filament Components:
+  Engine: ✓
+  Renderer: ✓
+  Scene: ✓
+  View: ✓
+  Camera: ✓
+  SwapChain: ✗
+
+Initialization Time: 2026-01-15 15:35:18.117 -0600
+
+⚠️ NO SWAP CHAIN - Rendering not visible!
+
+┌──────────────────────────────────────────────────────────────────┐
+│ DEVICE INFORMATION                                                │
+└──────────────────────────────────────────────────────────────────┘
+
+Manufacturer: Google
+Model: Pixel 10 Pro XL
+Device: mustang
+Android Version: 16
+SDK Version: 36
+Build ID: BP4A.251205.006.E1
+
+┌──────────────────────────────────────────────────────────────────┐
+│ APP INFORMATION                                                   │
+└──────────────────────────────────────────────────────────────────┘
+
+Package: com.linkpoint.debug
+Version: 1.0.0-DEBUG
+Version Code: 1
+
+┌──────────────────────────────────────────────────────────────────┐
+│ MEMORY USAGE                                                      │
+└──────────────────────────────────────────────────────────────────┘
+
+Total Memory: 38.43 MB
+Used Memory: 16.59 MB
+Free Memory: 21.84 MB
+Max Memory: 512.00 MB
+Memory Usage: 3%
+
+┌──────────────────────────────────────────────────────────────────┐
+│ XR STATUS                                                         │
+└──────────────────────────────────────────────────────────────────┘
+
+XR Available: false
+
+┌──────────────────────────────────────────────────────────────────┐
+│ CRASH REPORTER STATUS                                             │
+└──────────────────────────────────────────────────────────────────┘
+
+Status: INITIALIZED_WITH_EXTERNAL
+Crash Logs: 0
+Storage: Primary: /data/user/0/com.linkpoint.debug/files/crash_logs, External: /storage/emulated/0/Android/data/com.linkpoint.debug/files/Download/Lumiya Logs (Status: INITIALIZED_WITH_EXTERNAL)
+
+┌──────────────────────────────────────────────────────────────────┐
+│ THREAD INFORMATION                                                │
+└──────────────────────────────────────────────────────────────────┘
+
+Active Thread Count: 54
+Current Thread: DefaultDispatcher-worker-4
+
+┌──────────────────────────────────────────────────────────────────┐
+│ INITIALIZATION TIMELINE                                           │
+└──────────────────────────────────────────────────────────────────┘
+
+Session Duration: 16.6s
+Current Phase: UDP_CONNECTED
+Total Events: 14
+Warnings: 0
+Errors: 0
+
+Completed Phases:
+  ✓ LOGIN_HTTP_REQUEST
+  ✓ CAPABILITIES_FETCHING
+  ✓ SESSION_SETUP
+  ✓ UDP_CONNECTING
+  ✓ LOGIN_SUCCESS
+
+Pending Phases:
+  ⏳ LOGIN_STARTING
+  ⏳ CAPABILITIES_READY
+  ⏳ UDP_CONNECTED
+
+Recent Events (last 20):
+[0ms] • Session tracking started
+[0ms] ▶ LOGIN_STARTING: Login for Kaleaon Resident
+[17ms] ▶ LOGIN_HTTP_REQUEST: Sending login request
+[6372ms] ✓ LOGIN_HTTP_REQUEST: Login response received (6355ms)
+[6372ms] ▶ LOGIN_SUCCESS: Processing login success
+[6373ms] ▶ SESSION_SETUP: Setting up session
+[6379ms] ✓ SESSION_SETUP: Session and managers initialized (6ms)
+[6379ms] ▶ UDP_CONNECTING: Connecting to 18.237.183.71:13028
+[6379ms] ▶ CAPABILITIES_FETCHING: Fetching capabilities from seed
+[6379ms] ✓ LOGIN_SUCCESS: Login completed, waiting for world data (7ms)
+[6854ms] ✓ CAPABILITIES_FETCHING: 12 capabilities loaded (475ms)
+[6854ms] ▶ CAPABILITIES_READY: Capabilities available for use
+[6888ms] ✓ UDP_CONNECTING: UDP connected (509ms)
+[6888ms] ▶ UDP_CONNECTED: Waiting for simulator messages
+
+┌──────────────────────────────────────────────────────────────────┐
+│ RECENT NETWORK LOG (Last 30 entries)                              │
+└──────────────────────────────────────────────────────────────────┘
+
+=== Network Activity Log ===
+Log Level: DEBUG
+Total Entries: 9
+Showing last 30 entries:
+
+[2026-01-15 15:35:11.623] [DEBUG] [PROTOCOL]
+📡 Protocol: Second Life Login - Grid: https://login.agni.lindenlab.com/cgi-bin/login.cgi, User: Kaleaon Resident, Start: last
+
+[2026-01-15 15:35:11.638] [INFO] [AUTH]
+🔑 Auth: Password Hash Generation
+  originalLength: 16
+  truncatedLength: 16
+  hashFormat: ***REDACTED***
+
+[2026-01-15 15:35:11.639] [INFO] [AUTH]
+🔑 Auth: Login Attempt
+  loginUri: https://login.agni.lindenlab.com/cgi-bin/login.cgi
+  requestLength: 2483 bytes
+
+[2026-01-15 15:35:11.645] [DEBUG] [HTTP_REQ]
+→ POST https://login.agni.lindenlab.com/cgi-bin/login.cgi
+Headers:
+  Content-Type: text/xml
+  Accept: text/xml, application/xml
+  User-Agent: Linkpoint/1.0.0 (Android)
+Content-Length: 2483 bytes
+Content-Type: text/xml
+
+[2026-01-15 15:35:11.646] [DEBUG] [HTTP_REQ]
+→ POST https://login.agni.lindenlab.com/cgi-bin/login.cgi
+Headers:
+  Content-Type: text/xml
+  Accept: text/xml, application/xml
+  User-Agent: Linkpoint/1.0.0 (Android)
+Content-Length: 2483 bytes
+Content-Type: text/xml
+
+[2026-01-15 15:35:17.139] [DEBUG] [HTTP_RESP]
+← 200 OK (5493ms)
+URL: https://login.agni.lindenlab.com/cgi-bin/login.cgi
+Protocol: http/1.1
+Headers:
+  Content-Type: application/llsd+xml
+  X-LL-Request-Id: aWldi1WYSzDkEDO8NIJmdQAAAcA
+  X-Frame-Options: SAMEORIGIN
+  X-XSS-Protection: 1; mode=block
+  X-Content-Type-Options: nosniff
+  Expires: Thu, 15 Jan 2026 21:35:12 GMT
+  Cache-Control: max-age=0, no-cache, no-store
+  Pragma: no-cache
+  Date: Thu, 15 Jan 2026 21:35:12 GMT
+  Transfer-Encoding: chunked
+  Connection: close
+  Connection: Transfer-Encoding
+Content-Type: application/llsd+xml
+
+[2026-01-15 15:35:17.633] [DEBUG] [HTTP_RESP]
+← 200 OK (5986ms)
+URL: https://login.agni.lindenlab.com/cgi-bin/login.cgi
+Protocol: http/1.1
+Headers:
+  Content-Type: application/llsd+xml
+  X-LL-Request-Id: aWldi1WYSzDkEDO8NIJmdQAAAcA
+  X-Frame-Options: SAMEORIGIN
+  X-XSS-Protection: 1; mode=block
+  X-Content-Type-Options: nosniff
+  Expires: Thu, 15 Jan 2026 21:35:12 GMT
+  Cache-Control: max-age=0, no-cache, no-store
+  Pragma: no-cache
+  Date: Thu, 15 Jan 2026 21:35:12 GMT
+  Transfer-Encoding: chunked
+  Connection: close
+  Connection: Transfer-Encoding
+Content-Type: application/llsd+xml
+
+[2026-01-15 15:35:17.995] [INFO] [AUTH]
+🔑 Auth: Login Success
+  agentId: f496d6bf-8235-4ebf-bd56-4f7f0464a27a
+  sessionId: ***REDACTED***
+  simIp: 18.237.183.71
+  simPort: 13028
+
+[2026-01-15 15:35:18.001] [DEBUG] [PROTOCOL]
+📡 Protocol: Login Complete - Successfully connected to 18.237.183.71:13028
+
+═══════════════════════════════════════════════════════════════════
+End of Debug Report
+═══════════════════════════════════════════════════════════════════
+```
+
 ## Configuration
 
 The system is configured in `AutoLogUploader.java`:
