@@ -62,6 +62,9 @@ class CapabilityManager {
         const val CAP_AVATAR_PICKER = "AvatarPickerSearch"
         const val CAP_SEARCH_STATIC = "SearchStatRequest"
         
+        // Voice moderation capability (Project Voice Moderation)
+        const val CAP_VOICE_MODERATION = "VoiceModeration"
+        
         // Capabilities that are inventory-related (for throttling)
         private val INVENTORY_CAPS = setOf(
             CAP_FETCH_INVENTORY,

@@ -14,6 +14,14 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Voice chat manager using WebRTC
  * Handles spatial voice for regions and P2P voice calls
+ * 
+ * Implements Second Life WebRTC Voice protocol with moderation support:
+ * - Spatial voice channels (region/parcel)
+ * - P2P voice calls
+ * - Voice moderation (mute/unmute participants)
+ * - Region owners, estate managers, and parcel owners can moderate
+ * 
+ * @see https://wiki.secondlife.com/wiki/WebRTC_Voice
  */
 class VoiceManager(
     private val context: Context,
@@ -21,6 +29,12 @@ class VoiceManager(
 ) {
     companion object {
         private const val TAG = "VoiceManager"
+        
+        // Moderation permissions
+        const val MODERATION_NONE = 0
+        const val MODERATION_PARCEL_OWNER = 1
+        const val MODERATION_ESTATE_MANAGER = 2
+        const val MODERATION_REGION_OWNER = 4
     }
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -43,6 +57,20 @@ class VoiceManager(
     
     private val _speakingParticipants = MutableStateFlow<Set<UUID>>(emptySet())
     val speakingParticipants: StateFlow<Set<UUID>> = _speakingParticipants
+    
+    // Voice participants with mute state
+    private val _participants = MutableStateFlow<Map<UUID, VoiceParticipant>>(emptyMap())
+    val participants: StateFlow<Map<UUID, VoiceParticipant>> = _participants
+    
+    // Moderation state
+    private val _canModerate = MutableStateFlow(false)
+    val canModerate: StateFlow<Boolean> = _canModerate
+    
+    private val _moderationLevel = MutableStateFlow(MODERATION_NONE)
+    val moderationLevel: StateFlow<Int> = _moderationLevel
+    
+    private val _allMuted = MutableStateFlow(false)
+    val allMuted: StateFlow<Boolean> = _allMuted
     
     // Audio settings
     private var inputGain = 1.0f
@@ -223,6 +251,232 @@ class VoiceManager(
         activeSessions.remove(callId)
     }
     
+    // =====================================================================
+    // Voice Moderation Features (Project Voice Moderation)
+    // Per SL Wiki: https://wiki.secondlife.com/wiki/WebRTC_Voice
+    // =====================================================================
+    
+    /**
+     * Update moderation permissions for current channel
+     * Called when entering a new parcel or when permissions change
+     * 
+     * @param isParcelOwner True if user owns the parcel
+     * @param isEstateManager True if user is estate manager
+     * @param isRegionOwner True if user owns the region
+     * @param hasGroupModerateAbility True if user has group 'Moderate Group Chat' ability
+     */
+    fun updateModerationPermissions(
+        isParcelOwner: Boolean = false,
+        isEstateManager: Boolean = false,
+        isRegionOwner: Boolean = false,
+        hasGroupModerateAbility: Boolean = false
+    ) {
+        var level = MODERATION_NONE
+        
+        if (isParcelOwner || hasGroupModerateAbility) {
+            level = level or MODERATION_PARCEL_OWNER
+        }
+        if (isEstateManager) {
+            level = level or MODERATION_ESTATE_MANAGER
+        }
+        if (isRegionOwner) {
+            level = level or MODERATION_REGION_OWNER
+        }
+        
+        _moderationLevel.value = level
+        _canModerate.value = level != MODERATION_NONE
+        
+        Log.i(TAG, "Moderation permissions updated: level=$level, canModerate=${_canModerate.value}")
+    }
+    
+    /**
+     * Mute a specific participant in the voice channel
+     * Requires moderation permissions
+     * 
+     * @param participantId UUID of the participant to mute
+     * @return True if mute was successful
+     */
+    suspend fun muteParticipant(participantId: UUID): Boolean {
+        if (!_canModerate.value) {
+            Log.w(TAG, "Cannot mute participant: no moderation permissions")
+            return false
+        }
+        
+        val currentParticipants = _participants.value.toMutableMap()
+        val participant = currentParticipants[participantId] ?: return false
+        
+        // Send moderation request via capability
+        val success = sendModerationRequest(participantId, mute = true)
+        
+        if (success) {
+            currentParticipants[participantId] = participant.copy(isMutedByModerator = true)
+            _participants.value = currentParticipants
+            Log.i(TAG, "Muted participant: $participantId")
+        }
+        
+        return success
+    }
+    
+    /**
+     * Unmute a specific participant in the voice channel
+     * Requires moderation permissions
+     * 
+     * @param participantId UUID of the participant to unmute
+     * @return True if unmute was successful
+     */
+    suspend fun unmuteParticipant(participantId: UUID): Boolean {
+        if (!_canModerate.value) {
+            Log.w(TAG, "Cannot unmute participant: no moderation permissions")
+            return false
+        }
+        
+        val currentParticipants = _participants.value.toMutableMap()
+        val participant = currentParticipants[participantId] ?: return false
+        
+        val success = sendModerationRequest(participantId, mute = false)
+        
+        if (success) {
+            currentParticipants[participantId] = participant.copy(isMutedByModerator = false)
+            _participants.value = currentParticipants
+            Log.i(TAG, "Unmuted participant: $participantId")
+        }
+        
+        return success
+    }
+    
+    /**
+     * Mute all participants in the voice channel
+     * New arrivals will also be muted until unmuted
+     * Requires moderation permissions
+     * 
+     * @return True if operation was successful
+     */
+    suspend fun muteAllParticipants(): Boolean {
+        if (!_canModerate.value) {
+            Log.w(TAG, "Cannot mute all: no moderation permissions")
+            return false
+        }
+        
+        val success = sendModerationRequest(null, mute = true, muteAll = true)
+        
+        if (success) {
+            _allMuted.value = true
+            // Update all participants to muted state
+            val mutedParticipants = _participants.value.mapValues { (_, p) ->
+                p.copy(isMutedByModerator = true)
+            }
+            _participants.value = mutedParticipants
+            Log.i(TAG, "Muted all participants")
+        }
+        
+        return success
+    }
+    
+    /**
+     * Unmute all participants in the voice channel
+     * Requires moderation permissions
+     * 
+     * @return True if operation was successful
+     */
+    suspend fun unmuteAllParticipants(): Boolean {
+        if (!_canModerate.value) {
+            Log.w(TAG, "Cannot unmute all: no moderation permissions")
+            return false
+        }
+        
+        val success = sendModerationRequest(null, mute = false, muteAll = true)
+        
+        if (success) {
+            _allMuted.value = false
+            // Update all participants to unmuted state
+            val unmutedParticipants = _participants.value.mapValues { (_, p) ->
+                p.copy(isMutedByModerator = false)
+            }
+            _participants.value = unmutedParticipants
+            Log.i(TAG, "Unmuted all participants")
+        }
+        
+        return success
+    }
+    
+    /**
+     * Send moderation request to the server via capability
+     */
+    private suspend fun sendModerationRequest(
+        participantId: UUID?,
+        mute: Boolean,
+        muteAll: Boolean = false
+    ): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val params = LLSDMap().apply {
+                put("mute", LLSDBoolean(mute))
+                if (muteAll) {
+                    put("mute_all", LLSDBoolean(true))
+                } else if (participantId != null) {
+                    put("participant_id", LLSDString(participantId.toString()))
+                }
+            }
+            
+            val response = capabilityManager.request(
+                CapabilityManager.CAP_VOICE_MODERATION,
+                params
+            )
+            
+            (response as? LLSDMap)?.getBoolean("success") ?: false
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to send moderation request", e)
+            false
+        }
+    }
+    
+    /**
+     * Add a participant to the voice channel
+     * Called when a new participant joins
+     */
+    fun addParticipant(participant: VoiceParticipant) {
+        val currentParticipants = _participants.value.toMutableMap()
+        
+        // If all are muted, new arrivals should also be muted
+        val finalParticipant = if (_allMuted.value) {
+            participant.copy(isMutedByModerator = true)
+        } else {
+            participant
+        }
+        
+        currentParticipants[participant.agentId] = finalParticipant
+        _participants.value = currentParticipants
+    }
+    
+    /**
+     * Remove a participant from the voice channel
+     * Called when a participant leaves
+     */
+    fun removeParticipant(agentId: UUID) {
+        val currentParticipants = _participants.value.toMutableMap()
+        currentParticipants.remove(agentId)
+        _participants.value = currentParticipants
+        
+        // Also update speaking set
+        val speaking = _speakingParticipants.value.toMutableSet()
+        speaking.remove(agentId)
+        _speakingParticipants.value = speaking
+    }
+    
+    /**
+     * Update speaking state for a participant
+     */
+    fun updateSpeakingState(agentId: UUID, isSpeaking: Boolean) {
+        val speaking = _speakingParticipants.value.toMutableSet()
+        if (isSpeaking) {
+            speaking.add(agentId)
+        } else {
+            speaking.remove(agentId)
+        }
+        _speakingParticipants.value = speaking
+    }
+    
+    // =====================================================================
+    
     private fun createSession(channelUri: String): VoiceSession {
         val iceServers = listOf(
             PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer()
@@ -391,4 +645,18 @@ data class VoiceAccountInfo(
     val username: String,
     val password: String,
     val voiceServerUri: String
+)
+
+/**
+ * Represents a participant in a voice channel
+ * Used for voice moderation features
+ */
+data class VoiceParticipant(
+    val agentId: UUID,
+    val displayName: String,
+    val isSpeaking: Boolean = false,
+    val isMutedByModerator: Boolean = false,
+    val isSelfMuted: Boolean = false,
+    val volume: Float = 1.0f,
+    val energy: Float = 0f  // Voice energy level for speaking indicator
 )
