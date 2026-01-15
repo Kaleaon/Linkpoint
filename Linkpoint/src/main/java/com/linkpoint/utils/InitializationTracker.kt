@@ -24,8 +24,8 @@ object InitializationTracker {
     // Phase tracking (thread-safe collections and volatile for cross-thread access)
     @Volatile private var currentPhase: Phase = Phase.NOT_STARTED
     private val phaseTimings = java.util.concurrent.ConcurrentHashMap<Phase, Long>()
-    // Tri-state: null = in progress, false = failed, true = completed
-    private val phaseCompletions = java.util.concurrent.ConcurrentHashMap<Phase, Boolean?>()
+    // Boolean: true = completed, false = started (failure tracked separately)
+    private val phaseCompletions = java.util.concurrent.ConcurrentHashMap<Phase, Boolean>()
     private val phasesFailed = java.util.concurrent.ConcurrentHashMap.newKeySet<Phase>()
     
     enum class Phase {
@@ -91,7 +91,7 @@ object InitializationTracker {
     fun startPhase(phase: Phase, message: String = "") {
         currentPhase = phase
         phaseTimings[phase] = System.currentTimeMillis()
-        phaseCompletions[phase] = null // null = in progress
+        phaseCompletions[phase] = false
         
         val msg = if (message.isNotEmpty()) "$phase: $message" else "$phase started"
         logEvent(EventType.PHASE_START, phase, msg)
@@ -114,7 +114,7 @@ object InitializationTracker {
      * Record a phase failing.
      */
     fun failPhase(phase: Phase, reason: String) {
-        phaseCompletions[phase] = false // false = failed
+        phaseCompletions[phase] = false
         phasesFailed.add(phase)
         val duration = phaseTimings[phase]?.let { System.currentTimeMillis() - it } ?: 0
         
@@ -190,8 +190,8 @@ object InitializationTracker {
         // Get failed phases (tracked in phasesFailed set)
         val failedPhasesList = phasesFailed.toList()
         
-        // Get pending phases (started but value is null - in progress)
-        val pendingPhases = phaseCompletions.filter { it.value == null }.keys.toList()
+        // Get pending phases (started but not completed or failed)
+        val pendingPhases = phaseCompletions.filter { it.value == false && !phasesFailed.contains(it.key) }.keys.toList()
         
         return InitializationDiagnostics(
             sessionStartTime = sessionStartTime,
@@ -239,13 +239,12 @@ object InitializationTracker {
             appendLine("Phase Summary:")
             Phase.values().forEach { phase ->
                 val started = phaseTimings.containsKey(phase)
-                val completionState = phaseCompletions[phase]
                 val failed = phasesFailed.contains(phase)
                 
                 val status = when {
-                    completionState == true -> "✓ Complete"
+                    phaseCompletions[phase] == true -> "✓ Complete"
                     failed -> "✗ Failed"
-                    completionState == null && started -> "⏳ In Progress"
+                    started -> "⏳ In Progress"
                     else -> "○ Not Started"
                 }
                 
