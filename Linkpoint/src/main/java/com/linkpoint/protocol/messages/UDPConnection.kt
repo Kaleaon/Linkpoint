@@ -390,14 +390,15 @@ class UDPConnection {
     
     /**
      * Write UUID to ByteBuffer in Second Life format.
-     * SL stores UUIDs as 16 raw bytes in little-endian order.
+     * SL stores UUIDs as 16 raw bytes in big-endian order, even in little-endian blocks.
      */
     private fun ByteBuffer.putUUID(uuid: UUID): ByteBuffer {
-        // Second Life UUID format: raw 16 bytes
-        // The UUID is stored as two 64-bit values in big-endian within the little-endian buffer
-        // This matches how they're received/parsed
+        // UUID fields are big-endian while the rest of the block uses little-endian.
+        val originalOrder = order()
+        order(ByteOrder.BIG_ENDIAN)
         putLong(uuid.mostSignificantBits)
         putLong(uuid.leastSignificantBits)
+        order(originalOrder)
         return this
     }
     

@@ -128,7 +128,16 @@ object LLSDParser {
      */
     fun parseXML(xml: String): LLSDValue {
         // Simple XML parser for LLSD
-        val cleaned = xml.trim()
+        var cleaned = xml.trim()
+        
+        // Strip XML declaration if present so we can parse the <llsd> root element
+        if (cleaned.startsWith("<?xml", ignoreCase = true)) {
+            val declEnd = cleaned.indexOf("?>")
+            if (declEnd == -1) {
+                return LLSDUndefined
+            }
+            cleaned = cleaned.substring(declEnd + 2).trimStart()
+        }
         
         return try {
             parseXMLElement(cleaned, 0).first
