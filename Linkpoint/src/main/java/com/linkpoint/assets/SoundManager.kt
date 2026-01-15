@@ -97,6 +97,7 @@ class SoundManager(
         )
         
         if (streamId != 0) {
+            soundPlayCount.incrementAndGet()
             playingSounds[streamId] = SoundPlayback(
                 streamId = streamId,
                 soundId = soundId,
@@ -147,8 +148,16 @@ class SoundManager(
     private suspend fun loadSound(soundId: UUID): Int? {
         loadedSounds[soundId]?.let { return it }
         
+        soundLoadAttempts.incrementAndGet()
+        
         return withContext(Dispatchers.IO) {
-            val data = cache.get(soundId, AssetType.SOUND) ?: return@withContext null
+            val data = cache.get(soundId, AssetType.SOUND)
+            if (data == null) {
+                lastError = "Sound not in cache: $soundId"
+                lastErrorTime = System.currentTimeMillis()
+                soundLoadFailures.incrementAndGet()
+                return@withContext null
+            }
             
             // Write to temp file (SoundPool requires file)
             val tempFile = File(context.cacheDir, "sound_$soundId.ogg")
@@ -164,6 +173,9 @@ class SoundManager(
                 poolId
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to load sound: $soundId", e)
+                lastError = "${e.javaClass.simpleName}: ${e.message}"
+                lastErrorTime = System.currentTimeMillis()
+                soundLoadFailures.incrementAndGet()
                 null
             } finally {
                 tempFile.delete()

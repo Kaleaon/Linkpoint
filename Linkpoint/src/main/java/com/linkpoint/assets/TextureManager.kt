@@ -168,11 +168,15 @@ class TextureManager(
                 data
             } else {
                 Log.w(TAG, "Texture download failed: ${response.code}")
+                lastError = "HTTP ${response.code}: Download failed"
+                lastErrorTime = System.currentTimeMillis()
                 updateStats { it.copy(failedCount = it.failedCount + 1) }
                 null
             }
         } catch (e: Exception) {
             Log.e(TAG, "Texture download error: $textureId", e)
+            lastError = "${e.javaClass.simpleName}: ${e.message}"
+            lastErrorTime = System.currentTimeMillis()
             updateStats { it.copy(failedCount = it.failedCount + 1) }
             null
         } finally {
@@ -191,7 +195,12 @@ class TextureManager(
         return try {
             // Check if it's JPEG2000 (J2K/JP2)
             val bitmap = if (isJPEG2000(data)) {
-                decodeJPEG2000(data)
+                j2kDecodeAttempts.incrementAndGet()
+                val result = decodeJPEG2000(data)
+                if (result != null) {
+                    j2kDecodeSuccesses.incrementAndGet()
+                }
+                result
             } else {
                 // Try standard formats (PNG, JPEG)
                 BitmapFactory.decodeByteArray(data, 0, data.size)
@@ -204,6 +213,8 @@ class TextureManager(
             bitmap
         } catch (e: Exception) {
             Log.e(TAG, "Texture decode error: $textureId", e)
+            lastError = "Decode: ${e.javaClass.simpleName}: ${e.message}"
+            lastErrorTime = System.currentTimeMillis()
             updateStats { it.copy(decodeFailedCount = it.decodeFailedCount + 1) }
             null
         }

@@ -76,16 +76,22 @@ class AnimationManager(
         // Check built-in
         builtInAnimations[animId]?.let { return it }
         
+        loadAttempts.incrementAndGet()
+        
         // Check cache
-        cache.get(animId, AssetType.ANIMATION)?.let { data ->
-            val anim = parseAnimation(animId, data)
-            if (anim != null) {
-                loadedAnimations[animId] = anim
-            }
-            return anim
+        val data = cache.get(animId, AssetType.ANIMATION)
+        if (data == null) {
+            lastError = "Animation not in cache: $animId"
+            lastErrorTime = System.currentTimeMillis()
+            loadFailures.incrementAndGet()
+            return null
         }
         
-        return null
+        val anim = parseAnimation(animId, data)
+        if (anim != null) {
+            loadedAnimations[animId] = anim
+        }
+        return anim
     }
     
     /**
@@ -199,6 +205,9 @@ class AnimationManager(
             )
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse animation: $animId", e)
+            lastError = "Parse: ${e.javaClass.simpleName}: ${e.message}"
+            lastErrorTime = System.currentTimeMillis()
+            parseFailures.incrementAndGet()
             return null
         }
     }

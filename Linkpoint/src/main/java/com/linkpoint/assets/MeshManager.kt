@@ -116,7 +116,12 @@ class MeshManager(
             val headerBytes = data.copyOfRange(0, headerEnd)
             val header = LLSDParser.parseBinary(headerBytes)
             
-            if (header !is LLSDMap) return null
+            if (header !is LLSDMap) {
+                lastError = "Invalid mesh header - not an LLSDMap"
+                lastErrorTime = System.currentTimeMillis()
+                parseFailCount.incrementAndGet()
+                return null
+            }
             
             // Get LOD data offset/size
             val lodKey = when (lod) {
@@ -126,9 +131,22 @@ class MeshManager(
                 MeshLOD.LOW -> "lowest_lod"
             }
             
-            val lodMap = header.getMap(lodKey) ?: header.getMap("high_lod") ?: return null
-            val offset = lodMap.getInt("offset") ?: return null
-            val size = lodMap.getInt("size") ?: return null
+            val lodMap = header.getMap(lodKey) ?: header.getMap("high_lod")
+            if (lodMap == null) {
+                lastError = "Missing LOD map in mesh header"
+                lastErrorTime = System.currentTimeMillis()
+                parseFailCount.incrementAndGet()
+                return null
+            }
+            
+            val offset = lodMap.getInt("offset")
+            val size = lodMap.getInt("size")
+            if (offset == null || size == null) {
+                lastError = "Missing offset/size in LOD map"
+                lastErrorTime = System.currentTimeMillis()
+                parseFailCount.incrementAndGet()
+                return null
+            }
             
             // Extract and decompress LOD data
             val compressedData = data.copyOfRange(headerEnd + offset, headerEnd + offset + size)
@@ -138,6 +156,9 @@ class MeshManager(
             return parseMeshGeometry(meshId, decompressed, header)
         } catch (e: Exception) {
             Log.e(TAG, "Mesh parse error: $meshId", e)
+            lastError = "Parse: ${e.javaClass.simpleName}: ${e.message}"
+            lastErrorTime = System.currentTimeMillis()
+            parseFailCount.incrementAndGet()
             return null
         }
     }
