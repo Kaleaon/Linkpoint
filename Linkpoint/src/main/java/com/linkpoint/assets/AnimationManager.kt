@@ -253,6 +253,7 @@ class AnimationManager(
         val lastError: String?,
         val lastErrorTimeAgo: Long?
     )
+}
 
 data class AnimationData(
     val animId: UUID,

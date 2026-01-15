@@ -277,6 +277,7 @@ class SoundManager(
         val lastError: String?,
         val lastErrorTimeAgo: Long?
     )
+}
 
 data class SoundPlayback(
     val streamId: Int,

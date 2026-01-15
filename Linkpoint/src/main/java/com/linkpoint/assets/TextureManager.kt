@@ -337,6 +337,7 @@ class TextureManager(
         val lastError: String?,
         val lastErrorTimeAgo: Long?
     )
+}
 
 enum class TexturePriority(val value: Int) {
     CRITICAL(0),    // Avatar skin, UI elements
