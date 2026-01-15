@@ -252,10 +252,8 @@ class CapabilityManager {
             
             val llsd = LLSDParser.parseXML(body)
             if (llsd is LLSDMap) {
-                llsd.value.mapNotNull { (key, value) ->
-                    if (value is LLSDString && value.value.isNotEmpty()) {
-                        key to value.value
-                    } else null
+                llsd.value.keys.mapNotNull { key ->
+                    llsd.getString(key)?.takeIf { it.isNotEmpty() }?.let { key to it }
                 }.toMap()
             } else null
         } catch (e: Exception) {
