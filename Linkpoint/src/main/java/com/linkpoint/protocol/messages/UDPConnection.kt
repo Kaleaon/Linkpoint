@@ -302,6 +302,7 @@ class UDPConnection {
     
     private suspend fun receiveLoop() {
         val buffer = ByteArray(BUFFER_SIZE)
+        var packetCount = 0
         
         while (isConnected) {
             try {
@@ -309,7 +310,12 @@ class UDPConnection {
                 socket?.receive(datagram)
                 
                 if (datagram.length > 0) {
+                    packetCount++
                     val data = buffer.copyOf(datagram.length)
+                    // Log first few packets and then periodically
+                    if (packetCount <= 10 || packetCount % 100 == 0) {
+                        Log.d(TAG, "Received packet #$packetCount: ${data.size} bytes from ${datagram.address}:${datagram.port}")
+                    }
                     processPacket(data)
                 }
             } catch (e: java.net.SocketTimeoutException) {
@@ -382,7 +388,14 @@ class UDPConnection {
         
         // Dispatch to handler
         val payload = decoded.copyOfRange(offset, decoded.size - if (hasAcks) 1 + (decoded[decoded.size - 1].toInt() and 0xFF) * 4 else 0)
-        messageHandlers[messageId]?.onMessage(messageId, payload)
+        val handler = messageHandlers[messageId]
+        if (handler != null) {
+            handler.onMessage(messageId, payload)
+        } else {
+            // Log unhandled messages for diagnostics
+            val msgIdHex = "0x${Integer.toHexString(messageId).uppercase()}"
+            Log.v(TAG, "Unhandled message: $msgIdHex (${payload.size} bytes)")
+        }
     }
     
     private suspend fun sendAck(seqNum: Int) {
