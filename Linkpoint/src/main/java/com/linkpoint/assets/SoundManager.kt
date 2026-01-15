@@ -233,12 +233,12 @@ class SoundManager(
     
     // ==================== DIAGNOSTIC METHODS ====================
     
-    // Tracking for diagnostics
+    // Tracking for diagnostics (volatile for thread safety)
     private var soundLoadAttempts = java.util.concurrent.atomic.AtomicInteger(0)
     private var soundLoadFailures = java.util.concurrent.atomic.AtomicInteger(0)
     private var soundPlayCount = java.util.concurrent.atomic.AtomicInteger(0)
-    private var lastError: String? = null
-    private var lastErrorTime: Long = 0
+    @Volatile private var lastError: String? = null
+    @Volatile private var lastErrorTime: Long = 0
     
     /**
      * Get comprehensive diagnostic data for debug reports

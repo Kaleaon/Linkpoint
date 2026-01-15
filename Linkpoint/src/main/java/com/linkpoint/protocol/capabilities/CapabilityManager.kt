@@ -152,12 +152,12 @@ class CapabilityManager {
     // Event handlers
     private val eventHandlers = ConcurrentHashMap<String, MutableList<EventHandler>>()
     
-    // Initialization tracking for diagnostics
-    private var initializationStartTime: Long = 0
-    private var initializationEndTime: Long = 0
-    private var lastInitializationError: String? = null
-    private var lastInitializationAttempts: Int = 0
-    private var lastSeedCapabilityUsed: String? = null
+    // Initialization tracking for diagnostics (volatile for thread safety)
+    @Volatile private var initializationStartTime: Long = 0
+    @Volatile private var initializationEndTime: Long = 0
+    @Volatile private var lastInitializationError: String? = null
+    @Volatile private var lastInitializationAttempts: Int = 0
+    @Volatile private var lastSeedCapabilityUsed: String? = null
     
     /**
      * Initialize capabilities from seed

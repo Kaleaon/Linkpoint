@@ -846,7 +846,7 @@ class DebugReportService private constructor(private val context: Context) {
                     appendLine()
                 }
                 
-                // Recent events
+                // Recent events (show last 20 from the available events)
                 appendLine("Recent Events (last 20):")
                 initDiag.recentEvents.takeLast(20).forEach { event ->
                     val icon = when (event.type) {

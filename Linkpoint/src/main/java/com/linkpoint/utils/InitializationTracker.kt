@@ -19,14 +19,14 @@ object InitializationTracker {
     private const val MAX_EVENTS = 200
     
     private val events = ConcurrentLinkedQueue<InitEvent>()
-    private var sessionStartTime: Long = 0
+    @Volatile private var sessionStartTime: Long = 0
     
-    // Phase tracking
-    private var currentPhase: Phase = Phase.NOT_STARTED
-    private val phaseTimings = mutableMapOf<Phase, Long>()
-    // Tri-state: null = not started, false = in progress, true = completed, "failed" tracked separately
-    private val phaseCompletions = mutableMapOf<Phase, Boolean?>()
-    private val phasesFailed = mutableSetOf<Phase>()
+    // Phase tracking (thread-safe collections and volatile for cross-thread access)
+    @Volatile private var currentPhase: Phase = Phase.NOT_STARTED
+    private val phaseTimings = java.util.concurrent.ConcurrentHashMap<Phase, Long>()
+    // Tri-state: null = in progress, false = failed, true = completed
+    private val phaseCompletions = java.util.concurrent.ConcurrentHashMap<Phase, Boolean?>()
+    private val phasesFailed = java.util.concurrent.ConcurrentHashMap.newKeySet<Phase>()
     
     enum class Phase {
         NOT_STARTED,

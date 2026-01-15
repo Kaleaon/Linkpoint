@@ -216,13 +216,13 @@ class RenderManager(private val context: Context) {
     
     // ==================== DIAGNOSTIC METHODS ====================
     
-    // Tracking for diagnostics
+    // Tracking for diagnostics (volatile for thread safety)
     private var frameCount = java.util.concurrent.atomic.AtomicLong(0)
-    private var lastFrameTime: Long = 0
-    private var initializationTime: Long = 0
-    private var lastInitializationError: String? = null
-    private var viewportWidth: Int = 0
-    private var viewportHeight: Int = 0
+    @Volatile private var lastFrameTime: Long = 0
+    @Volatile private var initializationTime: Long = 0
+    @Volatile private var lastInitializationError: String? = null
+    @Volatile private var viewportWidth: Int = 0
+    @Volatile private var viewportHeight: Int = 0
     
     /**
      * Get comprehensive diagnostic data for debug reports

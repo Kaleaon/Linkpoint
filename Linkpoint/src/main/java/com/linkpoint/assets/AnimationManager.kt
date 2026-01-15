@@ -219,12 +219,12 @@ class AnimationManager(
     
     // ==================== DIAGNOSTIC METHODS ====================
     
-    // Tracking for diagnostics
+    // Tracking for diagnostics (volatile for thread safety)
     private var loadAttempts = java.util.concurrent.atomic.AtomicInteger(0)
     private var loadFailures = java.util.concurrent.atomic.AtomicInteger(0)
     private var parseFailures = java.util.concurrent.atomic.AtomicInteger(0)
-    private var lastError: String? = null
-    private var lastErrorTime: Long = 0
+    @Volatile private var lastError: String? = null
+    @Volatile private var lastErrorTime: Long = 0
     
     /**
      * Get comprehensive diagnostic data for debug reports
