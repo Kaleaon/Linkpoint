@@ -159,46 +159,74 @@ class CapabilityManager {
         seedCapability = seedCap
         Log.i(TAG, "Initializing capabilities from seed...")
         
-        try {
-            val caps = requestCapabilities(seedCap, listOf(
-                CAP_EVENT_QUEUE,
-                CAP_FETCH_INVENTORY,
-                CAP_FETCH_LIB_INVENTORY,
-                CAP_FETCH_INVENTORY_DESCENDENTS,
-                CAP_GET_TEXTURE,
-                CAP_GET_MESH,
-                CAP_GET_MESH2,
-                CAP_VIEW_STATS,
-                CAP_AGENT_STATE,
-                CAP_UPDATE_AGENT_INFO,
-                CAP_UPLOAD_BAKED_TEXTURE,
-                CAP_OBJECT_MEDIA,
-                CAP_PARCEL_VOICE,
-                CAP_PROVISION_VOICE,
-                CAP_CHAT_PASS,
-                CAP_ENVIRONMENT,
-                CAP_EXT_ENVIRONMENT,
-                CAP_AVATAR_PICKER,
-                CAP_SEARCH_STATIC
-            ))
-            
-            caps?.forEach { (name, url) ->
-                capabilities[name] = url
-                Log.d(TAG, "Capability: $name -> $url")
+        val capNames = listOf(
+            CAP_EVENT_QUEUE,
+            CAP_FETCH_INVENTORY,
+            CAP_FETCH_LIB_INVENTORY,
+            CAP_FETCH_INVENTORY_DESCENDENTS,
+            CAP_GET_TEXTURE,
+            CAP_GET_MESH,
+            CAP_GET_MESH2,
+            CAP_VIEW_STATS,
+            CAP_AGENT_STATE,
+            CAP_UPDATE_AGENT_INFO,
+            CAP_UPLOAD_BAKED_TEXTURE,
+            CAP_OBJECT_MEDIA,
+            CAP_PARCEL_VOICE,
+            CAP_PROVISION_VOICE,
+            CAP_CHAT_PASS,
+            CAP_ENVIRONMENT,
+            CAP_EXT_ENVIRONMENT,
+            CAP_AVATAR_PICKER,
+            CAP_SEARCH_STATIC
+        )
+        val options = HttpRequestOptions.forLogin()
+        var caps: Map<String, String>? = null
+        var lastException: Exception? = null
+        
+        for (attempt in 0..options.retries) {
+            try {
+                if (attempt > 0) {
+                    val delayMs = options.calculateRetryDelay(attempt - 1)
+                    Log.w(TAG, "Retrying seed capability request (attempt ${attempt + 1}/${options.retries + 1}) after ${delayMs}ms")
+                    delay(delayMs)
+                }
+                
+                caps = requestCapabilities(seedCap, capNames)
+                if (!caps.isNullOrEmpty()) {
+                    break
+                }
+                
+                lastException = Exception("Seed capability returned no entries")
+            } catch (e: Exception) {
+                lastException = e
             }
-            
-            // Start event queue
-            getCapability(CAP_EVENT_QUEUE)?.let { eqUrl ->
-                startEventQueue(eqUrl)
-            }
-            
-            _isReady.value = true
-            Log.i(TAG, "Capabilities initialized: ${capabilities.size} caps")
-            true
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize capabilities", e)
-            false
         }
+        
+        val resolvedCaps = caps ?: run {
+            _isReady.value = false
+            Log.e(TAG, "Failed to initialize capabilities", lastException)
+            return@withContext false
+        }
+        if (resolvedCaps.isEmpty()) {
+            _isReady.value = false
+            Log.e(TAG, "Failed to initialize capabilities", lastException)
+            return@withContext false
+        }
+        
+        resolvedCaps.forEach { (name, url) ->
+            capabilities[name] = url
+            Log.d(TAG, "Capability: $name -> $url")
+        }
+        
+        // Start event queue
+        getCapability(CAP_EVENT_QUEUE)?.let { eqUrl ->
+            startEventQueue(eqUrl)
+        }
+        
+        _isReady.value = true
+        Log.i(TAG, "Capabilities initialized: ${capabilities.size} caps")
+        true
     }
     
     /**
