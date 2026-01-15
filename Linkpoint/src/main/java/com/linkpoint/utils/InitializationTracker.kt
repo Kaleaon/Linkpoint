@@ -256,7 +256,14 @@ object InitializationTracker {
     
     private fun formatTimestamp(timestamp: Long): String {
         if (timestamp == 0L) return "Not started"
-        return SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date(timestamp))
+        // Use DateTimeFormatter for API 26+ (thread-safe), fallback to creating new SimpleDateFormat (also thread-safe since we create new instance each call)
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            java.time.Instant.ofEpochMilli(timestamp)
+                .atZone(java.time.ZoneId.systemDefault())
+                .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"))
+        } else {
+            SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date(timestamp))
+        }
     }
     
     /**
