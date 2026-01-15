@@ -252,32 +252,43 @@ class LinkpointApp : Application() {
      * This connects the parsed messages to their respective managers.
      */
     private fun registerMessageHandlers() {
-        Log.d(TAG, "Registering UDP message handlers...")
+        Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+        Log.i(TAG, "║ REGISTERING UDP MESSAGE HANDLERS")
+        Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         
         // RegionHandshake - CRITICAL: Must respond with RegionHandshakeReply for world data to load
         // This is why nothing was loading after login - we weren't acknowledging the region handshake
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.REGION_HANDSHAKE) { _, payload ->
+            Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+            Log.i(TAG, "║ ⭐ REGION_HANDSHAKE RECEIVED (CRITICAL MESSAGE)")
+            Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+            Log.d(TAG, "RegionHandshake payload size: ${payload.size} bytes")
             try {
                 val regionData = com.linkpoint.protocol.messages.MessageParser.parseRegionHandshake(payload)
                 if (regionData != null) {
-                    Log.i(TAG, "RegionHandshake received: ${regionData.simName}")
+                    Log.i(TAG, "RegionHandshake parsed: simName='${regionData.simName}'")
                     
                     // Update session with region info
                     sessionManager.updateRegionName(regionData.simName)
+                    Log.d(TAG, "Session region name updated to: ${regionData.simName}")
                     
                     // Send RegionHandshakeReply to acknowledge - THIS IS REQUIRED!
                     applicationScope.launch {
                         try {
+                            Log.d(TAG, "Sending RegionHandshakeReply...")
                             udpConnection.sendRegionHandshakeReply()
-                            Log.i(TAG, "RegionHandshakeReply sent - world data should start loading")
+                            Log.i(TAG, "✓ RegionHandshakeReply SENT - world data should start loading")
                             
                             // Also send AgentThrottle to set bandwidth allocation
+                            Log.d(TAG, "Sending AgentThrottle...")
                             udpConnection.sendAgentThrottle()
-                            Log.i(TAG, "AgentThrottle sent - bandwidth configured")
+                            Log.i(TAG, "✓ AgentThrottle SENT - bandwidth configured")
                         } catch (e: Exception) {
-                            Log.e(TAG, "Error sending RegionHandshakeReply", e)
+                            Log.e(TAG, "✗ Error sending RegionHandshakeReply/AgentThrottle", e)
                         }
                     }
+                } else {
+                    Log.w(TAG, "RegionHandshake parse returned null - payload may be malformed")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling RegionHandshake", e)
@@ -286,6 +297,9 @@ class LinkpointApp : Application() {
         
         // AgentMovementComplete - Confirms agent is fully in region
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.AGENT_MOVEMENT_COMPLETE) { _, payload ->
+            Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+            Log.i(TAG, "║ ⭐ AGENT_MOVEMENT_COMPLETE RECEIVED")
+            Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
             try {
                 val moveData = com.linkpoint.protocol.messages.MessageParser.parseAgentMovementComplete(payload)
                 if (moveData != null) {
@@ -293,6 +307,9 @@ class LinkpointApp : Application() {
                     
                     // Update connection state to fully connected
                     sessionManager.setConnectionState(com.linkpoint.core.ConnectionState.CONNECTED)
+                    Log.i(TAG, "✓ Connection state set to CONNECTED - agent is in world")
+                } else {
+                    Log.w(TAG, "AgentMovementComplete parse returned null")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling AgentMovementComplete", e)
@@ -311,10 +328,18 @@ class LinkpointApp : Application() {
             }
         }
         
-        // Object updates
+        // Object updates - track counts for diagnostics
+        var objectUpdateCount = 0
+        var compressedObjectUpdateCount = 0
+        
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE) { _, payload ->
             try {
                 val updates = com.linkpoint.protocol.messages.MessageParser.parseObjectUpdate(payload)
+                objectUpdateCount += updates.size
+                // Log occasionally to avoid spam
+                if (objectUpdateCount <= 5 || objectUpdateCount % 100 == 0) {
+                    Log.d(TAG, "OBJECT_UPDATE received: ${updates.size} objects (total: $objectUpdateCount)")
+                }
                 updates.forEach { update ->
                     if (::objectManager.isInitialized) {
                         objectManager.handleObjectUpdate(update)
@@ -329,6 +354,11 @@ class LinkpointApp : Application() {
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.OBJECT_UPDATE_COMPRESSED) { _, payload ->
             try {
                 val updates = com.linkpoint.protocol.messages.MessageParser.parseObjectUpdateCompressed(payload)
+                compressedObjectUpdateCount += updates.size
+                // Log occasionally to avoid spam
+                if (compressedObjectUpdateCount <= 5 || compressedObjectUpdateCount % 100 == 0) {
+                    Log.d(TAG, "OBJECT_UPDATE_COMPRESSED received: ${updates.size} objects (total: $compressedObjectUpdateCount)")
+                }
                 updates.forEach { update ->
                     if (::objectManager.isInitialized) {
                         objectManager.handleObjectUpdate(update)
@@ -351,7 +381,10 @@ class LinkpointApp : Application() {
             }
         }
         
-        Log.d(TAG, "UDP message handlers registered")
+        Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+        Log.i(TAG, "║ UDP MESSAGE HANDLERS REGISTERED: ${udpConnection.getRegisteredHandlerCount()}")
+        Log.i(TAG, "║ Handlers: ${udpConnection.getRegisteredHandlerIds().joinToString(", ")}")
+        Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
     }
     
     override fun onTerminate() {
@@ -447,4 +480,42 @@ class LinkpointApp : Application() {
      * Check if IM manager is initialized (for debug reports)
      */
     fun isIMManagerInitialized(): Boolean = ::imManager.isInitialized
+    
+    /**
+     * Check if texture manager is initialized (for debug reports)
+     * Note: TextureManager is initialized early, so this is always true after app init
+     */
+    fun isTextureManagerInitialized(): Boolean = ::textureManager.isInitialized
+    
+    /**
+     * Check if mesh manager is initialized (for debug reports)
+     * Note: MeshManager is initialized early, so this is always true after app init
+     */
+    fun isMeshManagerInitialized(): Boolean = ::meshManager.isInitialized
+    
+    /**
+     * Check if render manager is initialized (for debug reports)
+     * Note: RenderManager is initialized early, so this is always true after app init
+     */
+    fun isRenderManagerInitialized(): Boolean = ::renderManager.isInitialized
+    
+    /**
+     * Check if animation manager is initialized (for debug reports)
+     */
+    fun isAnimationManagerInitialized(): Boolean = ::animationManager.isInitialized
+    
+    /**
+     * Check if sound manager is initialized (for debug reports)
+     */
+    fun isSoundManagerInitialized(): Boolean = ::soundManager.isInitialized
+    
+    /**
+     * Check if gesture manager is initialized (for debug reports)
+     */
+    fun isGestureManagerInitialized(): Boolean = ::gestureManager.isInitialized
+    
+    /**
+     * Check if outfit manager is initialized (for debug reports)
+     */
+    fun isOutfitManagerInitialized(): Boolean = ::outfitManager.isInitialized
 }

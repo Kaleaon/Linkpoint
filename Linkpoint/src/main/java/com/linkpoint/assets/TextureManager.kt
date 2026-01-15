@@ -273,7 +273,59 @@ class TextureManager(
             Log.w(TAG, "GetTexture capability not available - using fallback asset server")
         }
     }
-}
+    
+    // ==================== DIAGNOSTIC METHODS ====================
+    
+    // Additional tracking for diagnostics
+    private var lastError: String? = null
+    private var lastErrorTime: Long = 0
+    private var j2kDecodeAttempts = java.util.concurrent.atomic.AtomicInteger(0)
+    private var j2kDecodeSuccesses = java.util.concurrent.atomic.AtomicInteger(0)
+    
+    /**
+     * Get comprehensive diagnostic data for debug reports
+     */
+    fun getDiagnostics(): TextureManagerDiagnostics {
+        val currentStats = _stats.value
+        return TextureManagerDiagnostics(
+            pendingDownloads = currentStats.pendingDownloads,
+            downloadedCount = currentStats.downloadedCount,
+            downloadedBytes = currentStats.downloadedBytes,
+            failedCount = currentStats.failedCount,
+            decodedCount = currentStats.decodedCount,
+            decodeFailedCount = currentStats.decodeFailedCount,
+            cachedTextureCount = textureCache.size,
+            pendingRequestCount = pendingTextures.size,
+            downloadQueueSize = downloadQueue.size,
+            activeDownloads = activeDownloads.get(),
+            hasTextureCapability = capabilityUrl != null,
+            j2kDecodeAttempts = j2kDecodeAttempts.get(),
+            j2kDecodeSuccesses = j2kDecodeSuccesses.get(),
+            lastError = lastError,
+            lastErrorTimeAgo = if (lastErrorTime > 0) System.currentTimeMillis() - lastErrorTime else null
+        )
+    }
+    
+    /**
+     * Diagnostic data class for texture manager state
+     */
+    data class TextureManagerDiagnostics(
+        val pendingDownloads: Int,
+        val downloadedCount: Int,
+        val downloadedBytes: Long,
+        val failedCount: Int,
+        val decodedCount: Int,
+        val decodeFailedCount: Int,
+        val cachedTextureCount: Int,
+        val pendingRequestCount: Int,
+        val downloadQueueSize: Int,
+        val activeDownloads: Int,
+        val hasTextureCapability: Boolean,
+        val j2kDecodeAttempts: Int,
+        val j2kDecodeSuccesses: Int,
+        val lastError: String?,
+        val lastErrorTimeAgo: Long?
+    )
 
 enum class TexturePriority(val value: Int) {
     CRITICAL(0),    // Avatar skin, UI elements

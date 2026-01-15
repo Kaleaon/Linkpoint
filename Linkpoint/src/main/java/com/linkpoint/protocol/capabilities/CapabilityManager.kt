@@ -152,12 +152,28 @@ class CapabilityManager {
     // Event handlers
     private val eventHandlers = ConcurrentHashMap<String, MutableList<EventHandler>>()
     
+    // Initialization tracking for diagnostics
+    private var initializationStartTime: Long = 0
+    private var initializationEndTime: Long = 0
+    private var lastInitializationError: String? = null
+    private var lastInitializationAttempts: Int = 0
+    private var lastSeedCapabilityUsed: String? = null
+    
     /**
      * Initialize capabilities from seed
      */
     suspend fun initialize(seedCap: String): Boolean = withContext(Dispatchers.IO) {
         seedCapability = seedCap
-        Log.i(TAG, "Initializing capabilities from seed...")
+        lastSeedCapabilityUsed = seedCap
+        initializationStartTime = System.currentTimeMillis()
+        lastInitializationError = null
+        lastInitializationAttempts = 0
+        
+        Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+        Log.i(TAG, "║ CAPABILITY INITIALIZATION STARTING")
+        Log.i(TAG, "╠══════════════════════════════════════════════════════════════════")
+        Log.i(TAG, "║ Seed URL: ${seedCap.take(80)}...")
+        Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         
         val capNames = listOf(
             CAP_EVENT_QUEUE,
@@ -180,12 +196,16 @@ class CapabilityManager {
             CAP_AVATAR_PICKER,
             CAP_SEARCH_STATIC
         )
+        
+        Log.d(TAG, "Requesting ${capNames.size} capabilities from seed...")
+        
         val options = HttpRequestOptions.forLogin()
         var seedCaps: Map<String, String>? = null
         var lastException: Exception? = null
         
         // Retry seed caps request (initial attempt + retries)
         for (attempt in 0..options.retries) {
+            lastInitializationAttempts = attempt + 1
             try {
                 if (attempt > 0) {
                     val delayMs = options.calculateRetryDelay(attempt - 1)
@@ -193,36 +213,68 @@ class CapabilityManager {
                     delay(delayMs)
                 }
                 
+                Log.d(TAG, "Seed capability request attempt ${attempt + 1}...")
                 seedCaps = requestCapabilities(seedCap, capNames)
+                
                 if (!seedCaps.isNullOrEmpty()) {
+                    Log.i(TAG, "Seed capability request succeeded with ${seedCaps.size} capabilities")
                     break
                 }
                 
-                lastException = Exception("Seed capability returned no entries for $seedCap")
+                lastException = Exception("Seed capability returned no entries")
+                lastInitializationError = "Seed capability returned empty response"
+                Log.w(TAG, "Seed capability response was empty on attempt ${attempt + 1}")
             } catch (e: Exception) {
                 lastException = e
+                lastInitializationError = "Exception: ${e.javaClass.simpleName}: ${e.message}"
+                Log.e(TAG, "Seed capability request failed on attempt ${attempt + 1}", e)
             }
         }
         
         val resolvedCaps = seedCaps
         if (resolvedCaps.isNullOrEmpty()) {
             _isReady.value = false
-            Log.e(TAG, "Failed to initialize capabilities", lastException)
+            initializationEndTime = System.currentTimeMillis()
+            val duration = initializationEndTime - initializationStartTime
+            Log.e(TAG, "╔══════════════════════════════════════════════════════════════════")
+            Log.e(TAG, "║ CAPABILITY INITIALIZATION FAILED")
+            Log.e(TAG, "╠══════════════════════════════════════════════════════════════════")
+            Log.e(TAG, "║ Duration: ${duration}ms")
+            Log.e(TAG, "║ Attempts: $lastInitializationAttempts")
+            Log.e(TAG, "║ Last Error: $lastInitializationError")
+            Log.e(TAG, "║ Seed URL: ${seedCap.take(80)}...")
+            Log.e(TAG, "╚══════════════════════════════════════════════════════════════════")
             return@withContext false
         }
         
         resolvedCaps.forEach { (name, url) ->
             capabilities[name] = url
-            Log.d(TAG, "Capability: $name -> $url")
+            Log.d(TAG, "Capability: $name -> ${url.take(60)}...")
         }
         
         // Start event queue
-        getCapability(CAP_EVENT_QUEUE)?.let { eqUrl ->
+        val eqUrl = getCapability(CAP_EVENT_QUEUE)
+        if (eqUrl != null) {
+            Log.i(TAG, "Starting EventQueue from capability...")
             startEventQueue(eqUrl)
+        } else {
+            Log.w(TAG, "⚠️ EventQueueGet capability not available - events won't work!")
         }
         
+        initializationEndTime = System.currentTimeMillis()
+        val duration = initializationEndTime - initializationStartTime
+        
         _isReady.value = true
-        Log.i(TAG, "Capabilities initialized: ${capabilities.size} caps")
+        Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+        Log.i(TAG, "║ CAPABILITY INITIALIZATION SUCCESS")
+        Log.i(TAG, "╠══════════════════════════════════════════════════════════════════")
+        Log.i(TAG, "║ Duration: ${duration}ms")
+        Log.i(TAG, "║ Capabilities loaded: ${capabilities.size}")
+        Log.i(TAG, "║ EventQueue: ${if (eqUrl != null) "AVAILABLE" else "MISSING"}")
+        Log.i(TAG, "║ GetTexture: ${if (hasCapability(CAP_GET_TEXTURE)) "✓" else "✗"}")
+        Log.i(TAG, "║ GetMesh: ${if (hasCapability(CAP_GET_MESH) || hasCapability(CAP_GET_MESH2)) "✓" else "✗"}")
+        Log.i(TAG, "║ FetchInventory: ${if (hasCapability(CAP_FETCH_INVENTORY)) "✓" else "✗"}")
+        Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
         true
     }
     
@@ -241,23 +293,84 @@ class CapabilityManager {
         
         val xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><llsd>${requestBody.toXML()}</llsd>"
         
+        Log.d(TAG, "Requesting capabilities from: ${seedUrl.take(80)}...")
+        Log.d(TAG, "Request body length: ${xml.length} bytes")
+        
         try {
             val request = Request.Builder()
                 .url(seedUrl)
                 .post(xml.toRequestBody("application/llsd+xml".toMediaType()))
                 .build()
             
+            val startTime = System.currentTimeMillis()
             val response = httpClient.newCall(request).execute()
-            val body = response.body?.string() ?: return@withContext null
+            val elapsed = System.currentTimeMillis() - startTime
             
-            val llsd = LLSDParser.parseXML(body)
+            Log.d(TAG, "Seed capability response: HTTP ${response.code} in ${elapsed}ms")
+            
+            if (!response.isSuccessful) {
+                Log.e(TAG, "Seed capability request failed with HTTP ${response.code}: ${response.message}")
+                lastInitializationError = "HTTP ${response.code}: ${response.message}"
+                response.close()
+                return@withContext null
+            }
+            
+            val body = response.body?.string()
+            response.close()
+            
+            if (body.isNullOrEmpty()) {
+                Log.e(TAG, "Seed capability response body is empty")
+                lastInitializationError = "Empty response body"
+                return@withContext null
+            }
+            
+            Log.d(TAG, "Response body length: ${body.length} bytes")
+            
+            // Log first few chars for debugging (don't log full body for security)
+            val preview = body.take(200).replace("\n", " ").replace("\r", "")
+            Log.d(TAG, "Response preview: $preview...")
+            
+            val llsd = try {
+                LLSDParser.parseXML(body)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to parse LLSD from seed capability response", e)
+                lastInitializationError = "LLSD parse error: ${e.message}"
+                return@withContext null
+            }
+            
             if (llsd is LLSDMap) {
-                llsd.value.keys.mapNotNull { key ->
+                val result = llsd.value.keys.mapNotNull { key ->
                     llsd.getString(key)?.takeIf { it.isNotEmpty() }?.let { key to it }
                 }.toMap()
-            } else null
+                
+                Log.d(TAG, "Parsed ${result.size} capabilities from response")
+                
+                if (result.isEmpty()) {
+                    Log.w(TAG, "LLSD response parsed successfully but contained no capability URLs")
+                    lastInitializationError = "LLSD contained no capability URLs"
+                }
+                
+                result
+            } else {
+                Log.e(TAG, "LLSD response is not a map, got: ${llsd?.javaClass?.simpleName}")
+                lastInitializationError = "LLSD response is not a map"
+                null
+            }
+        } catch (e: java.net.SocketTimeoutException) {
+            Log.e(TAG, "Seed capability request timed out", e)
+            lastInitializationError = "Socket timeout: ${e.message}"
+            null
+        } catch (e: java.net.UnknownHostException) {
+            Log.e(TAG, "Cannot resolve seed capability host", e)
+            lastInitializationError = "DNS resolution failed: ${e.message}"
+            null
+        } catch (e: java.io.IOException) {
+            Log.e(TAG, "IO error requesting capabilities", e)
+            lastInitializationError = "IO error: ${e.message}"
+            null
         } catch (e: Exception) {
             Log.e(TAG, "Failed to request capabilities", e)
+            lastInitializationError = "Exception: ${e.javaClass.simpleName}: ${e.message}"
             null
         }
     }
@@ -548,6 +661,14 @@ class CapabilityManager {
      * Get comprehensive diagnostic data for debug reports
      */
     fun getDiagnostics(): CapabilityDiagnostics {
+        val initDurationMs = if (initializationEndTime > 0 && initializationStartTime > 0) {
+            initializationEndTime - initializationStartTime
+        } else if (initializationStartTime > 0) {
+            System.currentTimeMillis() - initializationStartTime // Still in progress
+        } else {
+            0L
+        }
+        
         return CapabilityDiagnostics(
             isReady = _isReady.value,
             seedCapability = seedCapability?.let { 
@@ -561,7 +682,12 @@ class CapabilityManager {
             hasGetTexture = hasCapability(CAP_GET_TEXTURE),
             hasGetMesh = hasCapability(CAP_GET_MESH) || hasCapability(CAP_GET_MESH2),
             hasFetchInventory = hasCapability(CAP_FETCH_INVENTORY),
-            hasEventQueue = hasCapability(CAP_EVENT_QUEUE)
+            hasEventQueue = hasCapability(CAP_EVENT_QUEUE),
+            // New initialization tracking fields
+            initializationAttempts = lastInitializationAttempts,
+            lastInitializationError = lastInitializationError,
+            initializationDurationMs = initDurationMs,
+            initializationComplete = initializationEndTime > 0
         )
     }
     
@@ -579,7 +705,12 @@ class CapabilityManager {
         val hasGetTexture: Boolean,
         val hasGetMesh: Boolean,
         val hasFetchInventory: Boolean,
-        val hasEventQueue: Boolean
+        val hasEventQueue: Boolean,
+        // New initialization tracking fields
+        val initializationAttempts: Int = 0,
+        val lastInitializationError: String? = null,
+        val initializationDurationMs: Long = 0,
+        val initializationComplete: Boolean = false
     )
 }
 

@@ -184,11 +184,15 @@ class SecondLifeProtocol(private val context: Context) {
                 // Initialize agent-specific managers (sets app.agentId)
                 app.initializeAgentManagers(agentId)
                 
+                Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+                Log.i(TAG, "║ POST-LOGIN INITIALIZATION SEQUENCE STARTING")
+                Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
+                
                 // Configure and connect UDP connection for simulator communication
                 // This is critical for receiving object updates, chat, IMs, etc.
                 val circuitCode = result.circuitCode ?: 0
                 if (circuitCode != 0 && result.simIp.isNotEmpty() && result.simPort > 0) {
-                    Log.i(TAG, "Establishing UDP connection to ${result.simIp}:${result.simPort} with circuit $circuitCode")
+                    Log.i(TAG, "[STEP 1/2] Establishing UDP connection to ${result.simIp}:${result.simPort} with circuit $circuitCode")
                     app.udpConnection.configure(result.simIp, result.simPort, circuitCode)
                     
                     // Set session info for circuit establishment
@@ -202,39 +206,52 @@ class SecondLifeProtocol(private val context: Context) {
                     
                     app.applicationScope.launch {
                         try {
+                            Log.d(TAG, "[STEP 1/2] UDP connect() starting...")
                             val udpConnected = app.udpConnection.connect()
                             if (udpConnected) {
-                                Log.i(TAG, "UDP connection established - simulator packets active")
+                                Log.i(TAG, "[STEP 1/2] ✓ UDP connection established - simulator packets active")
+                                Log.i(TAG, "[STEP 1/2] Registered handlers: ${app.udpConnection.getRegisteredHandlerIds()}")
                             } else {
-                                Log.w(TAG, "Failed to establish UDP connection - simulator features may not work")
+                                Log.w(TAG, "[STEP 1/2] ✗ Failed to establish UDP connection - simulator features may not work")
                             }
                         } catch (e: Exception) {
-                            Log.e(TAG, "Error establishing UDP connection", e)
+                            Log.e(TAG, "[STEP 1/2] ✗ Error establishing UDP connection", e)
                         }
                     }
                 } else {
-                    Log.w(TAG, "Missing circuit code or sim info - UDP connection not established")
+                    Log.w(TAG, "[STEP 1/2] ✗ Missing circuit code or sim info - UDP connection not established")
+                    Log.w(TAG, "  circuitCode=$circuitCode, simIp=${result.simIp}, simPort=${result.simPort}")
                 }
                 
                 // Initialize capabilities from seed capability (for textures, meshes, etc.)
                 // This is critical for rendering - like Lumiya's SLCaps.GetCapabilities()
                 result.seedCapability?.let { seedCap ->
-                    Log.i(TAG, "Initializing capabilities from seed...")
+                    Log.i(TAG, "[STEP 2/2] Initializing capabilities from seed...")
+                    Log.d(TAG, "[STEP 2/2] Seed URL: ${seedCap.take(80)}...")
                     app.applicationScope.launch {
                         try {
+                            Log.d(TAG, "[STEP 2/2] capabilityManager.initialize() starting...")
                             val capsInitialized = app.capabilityManager.initialize(seedCap)
                             if (capsInitialized) {
-                                Log.i(TAG, "Capabilities initialized - textures and assets ready")
+                                Log.i(TAG, "[STEP 2/2] ✓ Capabilities initialized - textures and assets ready")
+                                Log.i(TAG, "[STEP 2/2] Capabilities loaded: ${app.capabilityManager.getCapabilityCount()}")
                                 // Connect texture manager to capability-based fetching
                                 app.textureManager.onCapabilitiesReady()
+                                Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
+                                Log.i(TAG, "║ POST-LOGIN INITIALIZATION COMPLETE - WORLD SHOULD START LOADING")
+                                Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
                             } else {
-                                Log.w(TAG, "Failed to initialize capabilities - textures may not load")
+                                Log.w(TAG, "[STEP 2/2] ✗ Failed to initialize capabilities - textures may not load")
+                                Log.w(TAG, "[STEP 2/2] Check CapabilityManager logs for detailed error information")
                             }
                         } catch (e: Exception) {
-                            Log.e(TAG, "Error initializing capabilities", e)
+                            Log.e(TAG, "[STEP 2/2] ✗ Error initializing capabilities", e)
                         }
                     }
-                } ?: Log.w(TAG, "No seed capability in login response - textures may not load")
+                } ?: run {
+                    Log.w(TAG, "[STEP 2/2] ✗ No seed capability in login response - textures may not load")
+                    Log.w(TAG, "  seedCapability was null in login response")
+                }
                 
                 NetworkLogger.logProtocol("Login Complete", "Successfully connected to ${result.simIp}:${result.simPort}")
                 LoginResult.Success(agentId, result.sessionId, result.mfaHash)
