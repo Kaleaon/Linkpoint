@@ -108,6 +108,13 @@ class SecondLifeProtocol(private val context: Context) {
         val app = LinkpointApp.getInstance()
         app.sessionManager.setConnectionState(ConnectionState.CONNECTING)
         
+        // Start initialization tracking
+        com.linkpoint.utils.InitializationTracker.startSession()
+        com.linkpoint.utils.InitializationTracker.startPhase(
+            com.linkpoint.utils.InitializationTracker.Phase.LOGIN_STARTING,
+            "Login for $firstName $lastName"
+        )
+        
         Log.d(TAG, "Attempting login for $firstName $lastName")
         NetworkLogger.logProtocol(
             "Second Life Login",
@@ -143,10 +150,24 @@ class SecondLifeProtocol(private val context: Context) {
         )
         
         // Use CoreNetworkingService for login with comprehensive retry handling
+        com.linkpoint.utils.InitializationTracker.startPhase(
+            com.linkpoint.utils.InitializationTracker.Phase.LOGIN_HTTP_REQUEST,
+            "Sending login request"
+        )
+        
         val result = networkingService.login(loginUri, xmlRequest)
         
         when (result) {
             is CoreNetworkingService.LoginResult.Success -> {
+                com.linkpoint.utils.InitializationTracker.completePhase(
+                    com.linkpoint.utils.InitializationTracker.Phase.LOGIN_HTTP_REQUEST,
+                    "Login response received"
+                )
+                com.linkpoint.utils.InitializationTracker.startPhase(
+                    com.linkpoint.utils.InitializationTracker.Phase.LOGIN_SUCCESS,
+                    "Processing login success"
+                )
+                
                 val agentId = try { 
                     UUID.fromString(result.agentId) 
                 } catch (e: Exception) { 
@@ -172,6 +193,11 @@ class SecondLifeProtocol(private val context: Context) {
                     seedCapability = result.seedCapability
                 )
                 
+                com.linkpoint.utils.InitializationTracker.startPhase(
+                    com.linkpoint.utils.InitializationTracker.Phase.SESSION_SETUP,
+                    "Setting up session"
+                )
+                
                 app.sessionManager.onLoginSuccess(
                     sessionId = result.sessionId,
                     agentId = agentId,
@@ -184,6 +210,11 @@ class SecondLifeProtocol(private val context: Context) {
                 // Initialize agent-specific managers (sets app.agentId)
                 app.initializeAgentManagers(agentId)
                 
+                com.linkpoint.utils.InitializationTracker.completePhase(
+                    com.linkpoint.utils.InitializationTracker.Phase.SESSION_SETUP,
+                    "Session and managers initialized"
+                )
+                
                 Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
                 Log.i(TAG, "║ POST-LOGIN INITIALIZATION SEQUENCE STARTING")
                 Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
@@ -192,6 +223,11 @@ class SecondLifeProtocol(private val context: Context) {
                 // This is critical for receiving object updates, chat, IMs, etc.
                 val circuitCode = result.circuitCode ?: 0
                 if (circuitCode != 0 && result.simIp.isNotEmpty() && result.simPort > 0) {
+                    com.linkpoint.utils.InitializationTracker.startPhase(
+                        com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTING,
+                        "Connecting to ${result.simIp}:${result.simPort}"
+                    )
+                    
                     Log.i(TAG, "[STEP 1/2] Establishing UDP connection to ${result.simIp}:${result.simPort} with circuit $circuitCode")
                     app.udpConnection.configure(result.simIp, result.simPort, circuitCode)
                     
@@ -209,16 +245,36 @@ class SecondLifeProtocol(private val context: Context) {
                             Log.d(TAG, "[STEP 1/2] UDP connect() starting...")
                             val udpConnected = app.udpConnection.connect()
                             if (udpConnected) {
+                                com.linkpoint.utils.InitializationTracker.completePhase(
+                                    com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTING,
+                                    "UDP connected"
+                                )
+                                com.linkpoint.utils.InitializationTracker.startPhase(
+                                    com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTED,
+                                    "Waiting for simulator messages"
+                                )
                                 Log.i(TAG, "[STEP 1/2] ✓ UDP connection established - simulator packets active")
                                 Log.i(TAG, "[STEP 1/2] Registered handlers: ${app.udpConnection.getRegisteredHandlerIds()}")
                             } else {
+                                com.linkpoint.utils.InitializationTracker.failPhase(
+                                    com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTING,
+                                    "UDP connect() returned false"
+                                )
                                 Log.w(TAG, "[STEP 1/2] ✗ Failed to establish UDP connection - simulator features may not work")
                             }
                         } catch (e: Exception) {
+                            com.linkpoint.utils.InitializationTracker.failPhase(
+                                com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTING,
+                                "Exception: ${e.message}"
+                            )
                             Log.e(TAG, "[STEP 1/2] ✗ Error establishing UDP connection", e)
                         }
                     }
                 } else {
+                    com.linkpoint.utils.InitializationTracker.failPhase(
+                        com.linkpoint.utils.InitializationTracker.Phase.UDP_CONNECTING,
+                        "Missing circuit code or sim info"
+                    )
                     Log.w(TAG, "[STEP 1/2] ✗ Missing circuit code or sim info - UDP connection not established")
                     Log.w(TAG, "  circuitCode=$circuitCode, simIp=${result.simIp}, simPort=${result.simPort}")
                 }
@@ -226,6 +282,10 @@ class SecondLifeProtocol(private val context: Context) {
                 // Initialize capabilities from seed capability (for textures, meshes, etc.)
                 // This is critical for rendering - like Lumiya's SLCaps.GetCapabilities()
                 result.seedCapability?.let { seedCap ->
+                    com.linkpoint.utils.InitializationTracker.startPhase(
+                        com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_FETCHING,
+                        "Fetching capabilities from seed"
+                    )
                     Log.i(TAG, "[STEP 2/2] Initializing capabilities from seed...")
                     Log.d(TAG, "[STEP 2/2] Seed URL: ${seedCap.take(80)}...")
                     app.applicationScope.launch {
@@ -233,6 +293,14 @@ class SecondLifeProtocol(private val context: Context) {
                             Log.d(TAG, "[STEP 2/2] capabilityManager.initialize() starting...")
                             val capsInitialized = app.capabilityManager.initialize(seedCap)
                             if (capsInitialized) {
+                                com.linkpoint.utils.InitializationTracker.completePhase(
+                                    com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_FETCHING,
+                                    "${app.capabilityManager.getCapabilityCount()} capabilities loaded"
+                                )
+                                com.linkpoint.utils.InitializationTracker.startPhase(
+                                    com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_READY,
+                                    "Capabilities available for use"
+                                )
                                 Log.i(TAG, "[STEP 2/2] ✓ Capabilities initialized - textures and assets ready")
                                 Log.i(TAG, "[STEP 2/2] Capabilities loaded: ${app.capabilityManager.getCapabilityCount()}")
                                 // Connect texture manager to capability-based fetching
@@ -241,17 +309,34 @@ class SecondLifeProtocol(private val context: Context) {
                                 Log.i(TAG, "║ POST-LOGIN INITIALIZATION COMPLETE - WORLD SHOULD START LOADING")
                                 Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
                             } else {
+                                com.linkpoint.utils.InitializationTracker.failPhase(
+                                    com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_FETCHING,
+                                    "initialize() returned false - see CapabilityManager logs"
+                                )
                                 Log.w(TAG, "[STEP 2/2] ✗ Failed to initialize capabilities - textures may not load")
                                 Log.w(TAG, "[STEP 2/2] Check CapabilityManager logs for detailed error information")
                             }
                         } catch (e: Exception) {
+                            com.linkpoint.utils.InitializationTracker.failPhase(
+                                com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_FETCHING,
+                                "Exception: ${e.message}"
+                            )
                             Log.e(TAG, "[STEP 2/2] ✗ Error initializing capabilities", e)
                         }
                     }
                 } ?: run {
+                    com.linkpoint.utils.InitializationTracker.failPhase(
+                        com.linkpoint.utils.InitializationTracker.Phase.CAPABILITIES_FETCHING,
+                        "No seed capability in login response"
+                    )
                     Log.w(TAG, "[STEP 2/2] ✗ No seed capability in login response - textures may not load")
                     Log.w(TAG, "  seedCapability was null in login response")
                 }
+                
+                com.linkpoint.utils.InitializationTracker.completePhase(
+                    com.linkpoint.utils.InitializationTracker.Phase.LOGIN_SUCCESS,
+                    "Login completed, waiting for world data"
+                )
                 
                 NetworkLogger.logProtocol("Login Complete", "Successfully connected to ${result.simIp}:${result.simPort}")
                 LoginResult.Success(agentId, result.sessionId, result.mfaHash)
@@ -266,6 +351,10 @@ class SecondLifeProtocol(private val context: Context) {
                 )
             }
             is CoreNetworkingService.LoginResult.Failure -> {
+                com.linkpoint.utils.InitializationTracker.failPhase(
+                    com.linkpoint.utils.InitializationTracker.Phase.LOGIN_HTTP_REQUEST,
+                    "Login failed: ${result.message}"
+                )
                 app.sessionManager.setConnectionState(ConnectionState.ERROR)
                 Log.w(TAG, "Login failed: ${result.message} [${result.errorCode}]")
                 NetworkLogger.log(

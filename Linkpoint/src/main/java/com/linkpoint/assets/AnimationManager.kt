@@ -207,7 +207,43 @@ class AnimationManager(
         scope.cancel()
         loadedAnimations.clear()
     }
-}
+    
+    // ==================== DIAGNOSTIC METHODS ====================
+    
+    // Tracking for diagnostics
+    private var loadAttempts = java.util.concurrent.atomic.AtomicInteger(0)
+    private var loadFailures = java.util.concurrent.atomic.AtomicInteger(0)
+    private var parseFailures = java.util.concurrent.atomic.AtomicInteger(0)
+    private var lastError: String? = null
+    private var lastErrorTime: Long = 0
+    
+    /**
+     * Get comprehensive diagnostic data for debug reports
+     */
+    fun getDiagnostics(): AnimationManagerDiagnostics {
+        return AnimationManagerDiagnostics(
+            loadedAnimationCount = loadedAnimations.size,
+            builtInAnimationCount = builtInAnimations.size,
+            loadAttempts = loadAttempts.get(),
+            loadFailures = loadFailures.get(),
+            parseFailures = parseFailures.get(),
+            lastError = lastError,
+            lastErrorTimeAgo = if (lastErrorTime > 0) System.currentTimeMillis() - lastErrorTime else null
+        )
+    }
+    
+    /**
+     * Diagnostic data class for animation manager state
+     */
+    data class AnimationManagerDiagnostics(
+        val loadedAnimationCount: Int,
+        val builtInAnimationCount: Int,
+        val loadAttempts: Int,
+        val loadFailures: Int,
+        val parseFailures: Int,
+        val lastError: String?,
+        val lastErrorTimeAgo: Long?
+    )
 
 data class AnimationData(
     val animId: UUID,

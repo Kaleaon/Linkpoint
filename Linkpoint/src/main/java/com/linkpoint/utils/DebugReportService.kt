@@ -808,6 +808,62 @@ class DebugReportService private constructor(private val context: Context) {
             appendLine("Current Thread: ${Thread.currentThread().name}")
             appendLine()
             
+            // Initialization Timeline - CRITICAL for diagnosing "world not loading" issues
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ INITIALIZATION TIMELINE                                           │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            try {
+                val initDiag = InitializationTracker.getDiagnostics()
+                appendLine("Session Duration: ${formatDuration(initDiag.sessionDurationMs)}")
+                appendLine("Current Phase: ${initDiag.currentPhase}")
+                appendLine("Total Events: ${initDiag.totalEvents}")
+                appendLine("Warnings: ${initDiag.warningCount}")
+                appendLine("Errors: ${initDiag.errorCount}")
+                appendLine()
+                
+                if (initDiag.completedPhases.isNotEmpty()) {
+                    appendLine("Completed Phases:")
+                    initDiag.completedPhases.forEach { phase ->
+                        appendLine("  ✓ $phase")
+                    }
+                    appendLine()
+                }
+                
+                if (initDiag.failedPhases.isNotEmpty()) {
+                    appendLine("Failed Phases:")
+                    initDiag.failedPhases.forEach { phase ->
+                        appendLine("  ✗ $phase")
+                    }
+                    appendLine()
+                }
+                
+                if (initDiag.pendingPhases.isNotEmpty()) {
+                    appendLine("Pending Phases:")
+                    initDiag.pendingPhases.forEach { phase ->
+                        appendLine("  ⏳ $phase")
+                    }
+                    appendLine()
+                }
+                
+                // Recent events
+                appendLine("Recent Events (last 20):")
+                initDiag.recentEvents.takeLast(20).forEach { event ->
+                    val icon = when (event.type) {
+                        InitializationTracker.EventType.PHASE_START -> "▶"
+                        InitializationTracker.EventType.PHASE_COMPLETE -> "✓"
+                        InitializationTracker.EventType.ERROR -> "✗"
+                        InitializationTracker.EventType.WARNING -> "⚠"
+                        InitializationTracker.EventType.CRITICAL -> "⭐"
+                        InitializationTracker.EventType.INFO -> "•"
+                    }
+                    appendLine("[${event.relativeMs}ms] $icon ${event.message}")
+                }
+            } catch (e: Exception) {
+                appendLine("Initialization timeline unavailable: ${e.message}")
+            }
+            appendLine()
+            
             // Recent network log excerpt for debugging loading issues
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
             appendLine("│ RECENT NETWORK LOG (Last 30 entries)                              │")

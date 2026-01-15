@@ -259,6 +259,10 @@ class LinkpointApp : Application() {
         // RegionHandshake - CRITICAL: Must respond with RegionHandshakeReply for world data to load
         // This is why nothing was loading after login - we weren't acknowledging the region handshake
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.REGION_HANDSHAKE) { _, payload ->
+            com.linkpoint.utils.InitializationTracker.startPhase(
+                com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
+                "Processing RegionHandshake"
+            )
             Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
             Log.i(TAG, "║ ⭐ REGION_HANDSHAKE RECEIVED (CRITICAL MESSAGE)")
             Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
@@ -267,6 +271,7 @@ class LinkpointApp : Application() {
                 val regionData = com.linkpoint.protocol.messages.MessageParser.parseRegionHandshake(payload)
                 if (regionData != null) {
                     Log.i(TAG, "RegionHandshake parsed: simName='${regionData.simName}'")
+                    com.linkpoint.utils.InitializationTracker.logInfo("Region: ${regionData.simName}")
                     
                     // Update session with region info
                     sessionManager.updateRegionName(regionData.simName)
@@ -277,6 +282,14 @@ class LinkpointApp : Application() {
                         try {
                             Log.d(TAG, "Sending RegionHandshakeReply...")
                             udpConnection.sendRegionHandshakeReply()
+                            com.linkpoint.utils.InitializationTracker.completePhase(
+                                com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
+                                "Reply sent to ${regionData.simName}"
+                            )
+                            com.linkpoint.utils.InitializationTracker.startPhase(
+                                com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_REPLIED,
+                                "Waiting for world data"
+                            )
                             Log.i(TAG, "✓ RegionHandshakeReply SENT - world data should start loading")
                             
                             // Also send AgentThrottle to set bandwidth allocation
@@ -284,19 +297,32 @@ class LinkpointApp : Application() {
                             udpConnection.sendAgentThrottle()
                             Log.i(TAG, "✓ AgentThrottle SENT - bandwidth configured")
                         } catch (e: Exception) {
+                            com.linkpoint.utils.InitializationTracker.failPhase(
+                                com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
+                                "Failed to send reply: ${e.message}"
+                            )
                             Log.e(TAG, "✗ Error sending RegionHandshakeReply/AgentThrottle", e)
                         }
                     }
                 } else {
+                    com.linkpoint.utils.InitializationTracker.logWarning("RegionHandshake parse returned null")
                     Log.w(TAG, "RegionHandshake parse returned null - payload may be malformed")
                 }
             } catch (e: Exception) {
+                com.linkpoint.utils.InitializationTracker.failPhase(
+                    com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
+                    "Parse error: ${e.message}"
+                )
                 Log.e(TAG, "Error handling RegionHandshake", e)
             }
         }
         
         // AgentMovementComplete - Confirms agent is fully in region
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.AGENT_MOVEMENT_COMPLETE) { _, payload ->
+            com.linkpoint.utils.InitializationTracker.startPhase(
+                com.linkpoint.utils.InitializationTracker.Phase.AGENT_MOVEMENT_COMPLETE,
+                "Agent fully in region"
+            )
             Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
             Log.i(TAG, "║ ⭐ AGENT_MOVEMENT_COMPLETE RECEIVED")
             Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
@@ -304,14 +330,33 @@ class LinkpointApp : Application() {
                 val moveData = com.linkpoint.protocol.messages.MessageParser.parseAgentMovementComplete(payload)
                 if (moveData != null) {
                     Log.i(TAG, "AgentMovementComplete: position=${moveData.position}")
+                    com.linkpoint.utils.InitializationTracker.logInfo("Position: ${moveData.position}")
                     
                     // Update connection state to fully connected
                     sessionManager.setConnectionState(com.linkpoint.core.ConnectionState.CONNECTED)
+                    
+                    com.linkpoint.utils.InitializationTracker.completePhase(
+                        com.linkpoint.utils.InitializationTracker.Phase.AGENT_MOVEMENT_COMPLETE,
+                        "Agent at ${moveData.position}"
+                    )
+                    com.linkpoint.utils.InitializationTracker.startPhase(
+                        com.linkpoint.utils.InitializationTracker.Phase.FULLY_CONNECTED,
+                        "Agent is now in world"
+                    )
+                    com.linkpoint.utils.InitializationTracker.logCritical(
+                        "FULLY CONNECTED - World loading should begin"
+                    )
+                    
                     Log.i(TAG, "✓ Connection state set to CONNECTED - agent is in world")
                 } else {
+                    com.linkpoint.utils.InitializationTracker.logWarning("AgentMovementComplete parse returned null")
                     Log.w(TAG, "AgentMovementComplete parse returned null")
                 }
             } catch (e: Exception) {
+                com.linkpoint.utils.InitializationTracker.failPhase(
+                    com.linkpoint.utils.InitializationTracker.Phase.AGENT_MOVEMENT_COMPLETE,
+                    "Parse error: ${e.message}"
+                )
                 Log.e(TAG, "Error handling AgentMovementComplete", e)
             }
         }

@@ -218,7 +218,53 @@ class SoundManager(
         loadedSounds.clear()
         playingSounds.clear()
     }
-}
+    
+    // ==================== DIAGNOSTIC METHODS ====================
+    
+    // Tracking for diagnostics
+    private var soundLoadAttempts = java.util.concurrent.atomic.AtomicInteger(0)
+    private var soundLoadFailures = java.util.concurrent.atomic.AtomicInteger(0)
+    private var soundPlayCount = java.util.concurrent.atomic.AtomicInteger(0)
+    private var lastError: String? = null
+    private var lastErrorTime: Long = 0
+    
+    /**
+     * Get comprehensive diagnostic data for debug reports
+     */
+    fun getDiagnostics(): SoundManagerDiagnostics {
+        return SoundManagerDiagnostics(
+            loadedSoundCount = loadedSounds.size,
+            playingSoundCount = playingSounds.size,
+            maxStreams = MAX_STREAMS,
+            masterVolume = masterVolume,
+            effectsVolume = soundEffectsVolume,
+            ambientVolume = ambientVolume,
+            loadAttempts = soundLoadAttempts.get(),
+            loadFailures = soundLoadFailures.get(),
+            totalPlays = soundPlayCount.get(),
+            listenerPosition = "${listenerPosition.x}, ${listenerPosition.y}, ${listenerPosition.z}",
+            lastError = lastError,
+            lastErrorTimeAgo = if (lastErrorTime > 0) System.currentTimeMillis() - lastErrorTime else null
+        )
+    }
+    
+    /**
+     * Diagnostic data class for sound manager state
+     */
+    data class SoundManagerDiagnostics(
+        val loadedSoundCount: Int,
+        val playingSoundCount: Int,
+        val maxStreams: Int,
+        val masterVolume: Float,
+        val effectsVolume: Float,
+        val ambientVolume: Float,
+        val loadAttempts: Int,
+        val loadFailures: Int,
+        val totalPlays: Int,
+        val listenerPosition: String,
+        val lastError: String?,
+        val lastErrorTimeAgo: Long?
+    )
 
 data class SoundPlayback(
     val streamId: Int,
