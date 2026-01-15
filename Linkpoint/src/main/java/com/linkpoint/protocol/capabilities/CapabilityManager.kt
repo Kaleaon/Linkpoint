@@ -62,6 +62,9 @@ class CapabilityManager {
         const val CAP_AVATAR_PICKER = "AvatarPickerSearch"
         const val CAP_SEARCH_STATIC = "SearchStatRequest"
         
+        // Voice moderation capability (Project Voice Moderation)
+        const val CAP_VOICE_MODERATION = "VoiceModeration"
+        
         // Capabilities that are inventory-related (for throttling)
         private val INVENTORY_CAPS = setOf(
             CAP_FETCH_INVENTORY,
@@ -280,14 +283,22 @@ class CapabilityManager {
     
     /**
      * Request capabilities from seed
+     * 
+     * Per Second Life protocol specification:
+     * - POST an LLSD array of strings (capability names) to the seed capability URL
+     * - Receive an LLSD map of capability names to URLs
+     * 
+     * See: https://wiki.secondlife.com/wiki/SeedCapability
      */
     private suspend fun requestCapabilities(
         seedUrl: String,
         capNames: List<String>
     ): Map<String, String>? = withContext(Dispatchers.IO) {
-        val requestBody = LLSDMap().apply {
+        // IMPORTANT: Seed capability expects an LLSD array of capability names, NOT a map
+        // This was the root cause of "Seed capability returned empty response" errors
+        val requestBody = LLSDArray().apply {
             capNames.forEach { name ->
-                this[name] = LLSDString("")
+                add(LLSDString(name))
             }
         }
         

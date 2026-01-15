@@ -186,8 +186,12 @@ class TextureManager(
     
     private fun buildTextureUrl(textureId: UUID, discard: Int): String {
         // Use capability URL if available, otherwise fall back to asset server
+        // Per official SL viewer (lltexturefetch.cpp), the URL format is:
+        // http_url + "/?texture_id=" + uuid
+        // Note: discard_level is NOT passed as a query parameter - the SL protocol
+        // uses HTTP Range headers for progressive/partial image loading instead.
         return capabilityUrl?.let {
-            "$it?texture_id=$textureId&discard_level=$discard"
+            "$it?texture_id=$textureId"
         } ?: "https://asset-cdn.glb.agni.lindenlab.com/?texture_id=$textureId"
     }
     
