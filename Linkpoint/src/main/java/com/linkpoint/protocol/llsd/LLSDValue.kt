@@ -158,7 +158,11 @@ data class LLSDMap(val value: MutableMap<String, LLSDValue> = mutableMapOf()) : 
     operator fun get(key: String): LLSDValue? = value[key]
     operator fun set(key: String, llsdValue: LLSDValue) { value[key] = llsdValue }
     
-    fun getString(key: String): String? = (value[key] as? LLSDString)?.value
+    fun getString(key: String): String? = when (val entry = value[key]) {
+        is LLSDString -> entry.value
+        is LLSDURI -> entry.value
+        else -> null
+    }
     fun getInt(key: String): Int? = (value[key] as? LLSDInteger)?.value
     fun getReal(key: String): Double? = (value[key] as? LLSDReal)?.value
     fun getBoolean(key: String): Boolean? = (value[key] as? LLSDBoolean)?.value
