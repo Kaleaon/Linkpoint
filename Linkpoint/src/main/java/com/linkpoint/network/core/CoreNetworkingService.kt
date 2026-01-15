@@ -851,17 +851,25 @@ class CoreNetworkingService(private val context: Context) {
                 
                 // Validate required fields - if missing, return a failure instead of invalid credentials
                 if (agentId.isEmpty() || sessionId.isEmpty()) {
-                    Log.e(TAG, "Missing required login fields (agent_id or session_id)")
+                    val missingFields = listOfNotNull(
+                        if (agentId.isEmpty()) "agent_id" else null,
+                        if (sessionId.isEmpty()) "session_id" else null
+                    ).joinToString(", ")
+                    Log.e(TAG, "Missing required login fields: $missingFields")
                     Log.d(TAG, "Available LLSD keys: ${llsd.value.keys.joinToString(", ")}")
                     return ParsedLoginResponse.Failure(LoginResult.Failure(
                         message = "Login response missing required fields",
                         errorCode = "INVALID_RESPONSE",
-                        technicalDetails = "Missing: ${if (agentId.isEmpty()) "agent_id " else ""}${if (sessionId.isEmpty()) "session_id " else ""}\nAvailable keys: ${llsd.value.keys.joinToString(", ")}"
+                        technicalDetails = "Missing: $missingFields\nAvailable keys: ${llsd.value.keys.joinToString(", ")}"
                     ))
                 }
                 
                 if (simIp.isEmpty() || simPort == 0) {
-                    Log.w(TAG, "Missing simulator connection info (sim_ip or sim_port)")
+                    val missingSimInfo = listOfNotNull(
+                        if (simIp.isEmpty()) "sim_ip" else null,
+                        if (simPort == 0) "sim_port" else null
+                    ).joinToString(", ")
+                    Log.w(TAG, "Missing simulator connection info: $missingSimInfo")
                     Log.d(TAG, "Available LLSD keys: ${llsd.value.keys.joinToString(", ")}")
                 }
                 
