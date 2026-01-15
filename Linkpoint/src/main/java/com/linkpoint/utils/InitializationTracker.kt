@@ -24,7 +24,7 @@ object InitializationTracker {
     // Phase tracking (thread-safe collections and volatile for cross-thread access)
     @Volatile private var currentPhase: Phase = Phase.NOT_STARTED
     private val phaseTimings = java.util.concurrent.ConcurrentHashMap<Phase, Long>()
-    // Completed phases (true = completed)
+    // Track completed phases.
     private val phaseCompletions = java.util.concurrent.ConcurrentHashMap<Phase, Boolean>()
     private val phasesFailed = java.util.concurrent.ConcurrentHashMap.newKeySet<Phase>()
     
@@ -103,7 +103,7 @@ object InitializationTracker {
      * Record a phase completing successfully.
      */
     fun completePhase(phase: Phase, message: String = "") {
-        phaseCompletions[phase] = true // true = completed
+        phaseCompletions[phase] = true
         val duration = phaseTimings[phase]?.let { System.currentTimeMillis() - it } ?: 0
         
         val msg = if (message.isNotEmpty()) "$phase: $message (${duration}ms)" else "$phase completed (${duration}ms)"
