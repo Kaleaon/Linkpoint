@@ -271,17 +271,10 @@ class VoiceManager(
         isRegionOwner: Boolean = false,
         hasGroupModerateAbility: Boolean = false
     ) {
-        var level = MODERATION_NONE
-        
-        if (isParcelOwner || hasGroupModerateAbility) {
-            level = level or MODERATION_PARCEL_OWNER
-        }
-        if (isEstateManager) {
-            level = level or MODERATION_ESTATE_MANAGER
-        }
-        if (isRegionOwner) {
-            level = level or MODERATION_REGION_OWNER
-        }
+        // Calculate moderation level using bitwise OR
+        val level = (if (isParcelOwner || hasGroupModerateAbility) MODERATION_PARCEL_OWNER else 0) or
+                    (if (isEstateManager) MODERATION_ESTATE_MANAGER else 0) or
+                    (if (isRegionOwner) MODERATION_REGION_OWNER else 0)
         
         _moderationLevel.value = level
         _canModerate.value = level != MODERATION_NONE

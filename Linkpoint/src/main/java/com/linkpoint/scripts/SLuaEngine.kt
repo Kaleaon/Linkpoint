@@ -6,21 +6,25 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * SLua (Server-side Lua) Script Engine
+ * SLua Script Engine
  * 
- * Provides support for the new Luau-based scripting in Second Life.
- * SLua is based on Luau (Roblox's Lua variant) and offers:
+ * Provides support for the new scripting system in Second Life.
+ * 
+ * Terminology:
+ * - **SLua**: Second Life's name for the new scripting system/language
+ * - **Luau**: The underlying runtime engine (Roblox's fork of Lua 5.1)
+ * 
+ * SLua (powered by Luau) offers:
  * - Better performance than LSL/Mono (up to 50% less memory)
  * - Modern language features (coroutines, tables, type inference)
- * - Dynamic event handling
+ * - Dynamic event handling with multiple handlers per event
  * - Gradual typing support
  * 
- * This engine handles incoming script events from SLua-compiled scripts
+ * This engine handles incoming script events from SLua scripts
  * running on the server. The viewer doesn't execute Lua code directly -
  * it receives events and state updates from the simulator.
  * 
  * @see https://wiki.secondlife.com/wiki/SLua_Alpha
- * @see https://wiki.secondlife.com/wiki/Luau_Alpha
  */
 class SLuaEngine {
     
@@ -250,9 +254,17 @@ class SLuaEngine {
     }
     
     /**
-     * llSetTimerEvent - Set timer
+     * llSetTimerEvent - Set a repeating timer
+     * 
+     * Per LSL specification, llSetTimerEvent creates a repeating timer that
+     * fires every 'sec' seconds until cancelled (by calling with sec <= 0).
+     * The timer is automatically cancelled when the script is unregistered.
+     * 
+     * @param scriptId The script to set the timer for
+     * @param sec Timer interval in seconds. Set to 0 or negative to cancel.
      */
     fun llSetTimerEvent(scriptId: UUID, sec: Float) {
+        // Cancel any existing timer for this script
         timers[scriptId]?.cancel()
         
         if (sec <= 0) {
@@ -260,6 +272,9 @@ class SLuaEngine {
             return
         }
         
+        // Create a repeating timer - the loop runs while the coroutine is active
+        // and is automatically cancelled when the scope is cancelled or the
+        // timer is explicitly cancelled via llSetTimerEvent(scriptId, 0)
         timers[scriptId] = scope.launch {
             while (isActive) {
                 delay((sec * 1000).toLong())
