@@ -35,6 +35,10 @@ class CapabilityManager {
         
         // Diagnostic truncation length for URLs in debug reports
         private const val DIAGNOSTIC_URL_TRUNCATE_LENGTH = 50
+        private const val SEED_CAP_HEADER_PREVIEW_BYTES = 64
+        private const val SEED_CAP_ASCII_CHECK_BYTES = 16
+        private const val SEED_CAP_RESPONSE_PREVIEW_CHARS = 200
+        private const val UTF8_BOM = '\uFEFF'
         
         // Common capability names
         const val CAP_SEED = "Seed"
@@ -310,6 +314,7 @@ class CapabilityManager {
         try {
             val request = Request.Builder()
                 .url(seedUrl)
+                .header("Accept", "application/llsd+xml, application/llsd+binary")
                 .post(xml.toRequestBody("application/llsd+xml".toMediaType()))
                 .build()
             
@@ -327,30 +332,69 @@ class CapabilityManager {
             }
             
             // Use try-finally to ensure response is always closed
-            val body: String?
+            val contentType = response.header("Content-Type") ?: ""
+            val bodyBytes: ByteArray?
             try {
-                body = response.body?.string()
+                bodyBytes = response.body?.bytes()
             } finally {
                 response.close()
             }
             
-            if (body.isNullOrEmpty()) {
+            if (bodyBytes == null || bodyBytes.isEmpty()) {
                 Log.e(TAG, "Seed capability response body is empty")
                 lastInitializationError = "Empty response body"
                 return@withContext null
             }
             
-            Log.d(TAG, "Response body length: ${body.length} bytes")
+            Log.d(TAG, "Response body length: ${bodyBytes.size} bytes")
             
             // Log first few chars for debugging (don't log full body for security)
-            val preview = body.take(200).replace("\n", " ").replace("\r", "")
-            Log.d(TAG, "Response preview: $preview...")
+            val isXmlContentType = contentType.contains("xml", ignoreCase = true)
+            val previewSize = minOf(bodyBytes.size, SEED_CAP_HEADER_PREVIEW_BYTES)
+            val headerBytes = bodyBytes.copyOfRange(0, previewSize)
+            val asciiCheckSize = minOf(headerBytes.size, SEED_CAP_ASCII_CHECK_BYTES)
+            val isAscii = headerBytes.copyOfRange(0, asciiCheckSize).all { byte ->
+                val code = byte.toInt() and 0xFF
+                code == '\t'.code || code == '\n'.code || code == '\r'.code || code in ' '.code..'~'.code
+            }
+            val shouldInspectText = isXmlContentType || isAscii
+            val headerText = if (shouldInspectText) {
+                runCatching { headerBytes.toString(Charsets.UTF_8) }.getOrNull()
+            } else {
+                null
+            }
+            val trimmedHeader = headerText?.trimStart(UTF8_BOM, ' ', '\n', '\r', '\t')
+            val looksLikeXml = trimmedHeader?.startsWith("<?xml", ignoreCase = true) == true ||
+                trimmedHeader?.startsWith("<llsd", ignoreCase = true) == true
+            val bodyText = if (looksLikeXml || isXmlContentType) {
+                runCatching { bodyBytes.toString(Charsets.UTF_8) }.getOrNull()
+            } else {
+                null
+            }
+            if (bodyText != null) {
+                val preview = bodyText.take(SEED_CAP_RESPONSE_PREVIEW_CHARS)
+                    .replace("\n", " ")
+                    .replace("\r", "")
+                Log.d(TAG, "Response preview: $preview...")
+            } else {
+                Log.d(TAG, "Response preview: <binary LLSD omitted>")
+            }
             
             val llsd = try {
-                LLSDParser.parseXML(body)
+                if (looksLikeXml && bodyText != null) {
+                    LLSDParser.parseXML(bodyText)
+                } else {
+                    LLSDParser.parse(bodyBytes)
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to parse LLSD from seed capability response", e)
                 lastInitializationError = "LLSD parse error: ${e.message}"
+                return@withContext null
+            }
+            
+            if (llsd == LLSDUndefined) {
+                Log.e(TAG, "Seed capability response is not valid XML or binary LLSD")
+                lastInitializationError = "LLSD parse error: invalid format"
                 return@withContext null
             }
             

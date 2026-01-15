@@ -402,11 +402,11 @@ class VoiceManager(
     ): Boolean = withContext(Dispatchers.IO) {
         try {
             val params = LLSDMap().apply {
-                put("mute", LLSDBoolean(mute))
+                this["mute"] = LLSDBoolean(mute)
                 if (muteAll) {
-                    put("mute_all", LLSDBoolean(true))
+                    this["mute_all"] = LLSDBoolean(true)
                 } else if (participantId != null) {
-                    put("participant_id", LLSDString(participantId.toString()))
+                    this["participant_id"] = LLSDString(participantId.toString())
                 }
             }
             
