@@ -269,17 +269,19 @@ class UDPConnection {
         
         // Determine message ID size
         val messageBytes = when {
-            messageId < 0xFF -> byteArrayOf(messageId.toByte())
-            messageId < 0xFFFF -> {
-                byteArrayOf(0xFF.toByte(), (messageId shr 8).toByte(), messageId.toByte())
+            messageId <= 0xFF -> byteArrayOf(messageId.toByte())
+            messageId in 0xFF00..0xFFFF -> {
+                byteArrayOf(0xFF.toByte(), (messageId and 0xFF).toByte())
             }
-            else -> {
-                byteArrayOf(0xFF.toByte(), 0xFF.toByte(), 
-                    (messageId shr 24).toByte(), 
-                    (messageId shr 16).toByte(),
-                    (messageId shr 8).toByte(), 
-                    messageId.toByte())
+            messageId ushr 16 == 0xFFFF -> {
+                byteArrayOf(
+                    0xFF.toByte(),
+                    0xFF.toByte(),
+                    ((messageId shr 8) and 0xFF).toByte(),
+                    (messageId and 0xFF).toByte()
+                )
             }
+            else -> byteArrayOf(messageId.toByte())
         }
         
         val packet = header.array() + messageBytes + payload
@@ -364,16 +366,16 @@ class UDPConnection {
                 offset++
                 id
             }
-            decoded.size > offset + 2 && decoded[offset + 1] != 0xFF.toByte() -> {
-                val id = ((decoded[offset + 1].toInt() and 0xFF) shl 8) or 
-                         (decoded[offset + 2].toInt() and 0xFF)
-                offset += 3
+            decoded.size > offset + 1 && decoded[offset + 1] != 0xFF.toByte() -> {
+                val id = (0xFF00 or (decoded[offset + 1].toInt() and 0xFF))
+                offset += 2
                 id
             }
-            decoded.size > offset + 5 -> {
-                val id = ByteBuffer.wrap(decoded, offset + 2, 4).order(ByteOrder.BIG_ENDIAN).int
-                offset += 6
-                id
+            decoded.size > offset + 3 -> {
+                val id = ((decoded[offset + 2].toInt() and 0xFF) shl 8) or
+                    (decoded[offset + 3].toInt() and 0xFF)
+                offset += 4
+                (0xFFFF shl 16) or id
             }
             else -> return
         }
@@ -385,7 +387,7 @@ class UDPConnection {
     
     private suspend fun sendAck(seqNum: Int) {
         val payload = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(seqNum).array()
-        sendPacket(0xFFFFFFFF.toInt(), payload, reliable = false)
+        sendPacket(MessageIds.PACKET_ACK, payload, reliable = false)
     }
     
     /**
@@ -674,4 +676,5 @@ object MessageIds {
     // Region/Connection messages
     const val REGION_HANDSHAKE_REPLY: Int = 0xFFFF0095.toInt()
     const val AGENT_THROTTLE: Int = 0xFFFF0099.toInt()
+    const val PACKET_ACK: Int = 0xFFFF00FB.toInt()
 }
