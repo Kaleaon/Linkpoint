@@ -287,9 +287,9 @@ class TextureManager(
     
     // ==================== DIAGNOSTIC METHODS ====================
     
-    // Additional tracking for diagnostics
-    private var lastError: String? = null
-    private var lastErrorTime: Long = 0
+    // Additional tracking for diagnostics (volatile for thread safety)
+    @Volatile private var lastError: String? = null
+    @Volatile private var lastErrorTime: Long = 0
     private var j2kDecodeAttempts = java.util.concurrent.atomic.AtomicInteger(0)
     private var j2kDecodeSuccesses = java.util.concurrent.atomic.AtomicInteger(0)
     

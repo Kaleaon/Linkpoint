@@ -24,7 +24,9 @@ object InitializationTracker {
     // Phase tracking
     private var currentPhase: Phase = Phase.NOT_STARTED
     private val phaseTimings = mutableMapOf<Phase, Long>()
-    private val phaseCompletions = mutableMapOf<Phase, Boolean>()
+    // Tri-state: null = not started, false = in progress, true = completed, "failed" tracked separately
+    private val phaseCompletions = mutableMapOf<Phase, Boolean?>()
+    private val phasesFailed = mutableSetOf<Phase>()
     
     enum class Phase {
         NOT_STARTED,
@@ -72,6 +74,7 @@ object InitializationTracker {
         events.clear()
         phaseTimings.clear()
         phaseCompletions.clear()
+        phasesFailed.clear()
         sessionStartTime = System.currentTimeMillis()
         currentPhase = Phase.NOT_STARTED
         
@@ -88,7 +91,7 @@ object InitializationTracker {
     fun startPhase(phase: Phase, message: String = "") {
         currentPhase = phase
         phaseTimings[phase] = System.currentTimeMillis()
-        phaseCompletions[phase] = false
+        phaseCompletions[phase] = null // null = in progress
         
         val msg = if (message.isNotEmpty()) "$phase: $message" else "$phase started"
         logEvent(EventType.PHASE_START, phase, msg)
@@ -99,7 +102,7 @@ object InitializationTracker {
      * Record a phase completing successfully.
      */
     fun completePhase(phase: Phase, message: String = "") {
-        phaseCompletions[phase] = true
+        phaseCompletions[phase] = true // true = completed
         val duration = phaseTimings[phase]?.let { System.currentTimeMillis() - it } ?: 0
         
         val msg = if (message.isNotEmpty()) "$phase: $message (${duration}ms)" else "$phase completed (${duration}ms)"
@@ -111,7 +114,8 @@ object InitializationTracker {
      * Record a phase failing.
      */
     fun failPhase(phase: Phase, reason: String) {
-        phaseCompletions[phase] = false
+        phaseCompletions[phase] = false // false = failed
+        phasesFailed.add(phase)
         val duration = phaseTimings[phase]?.let { System.currentTimeMillis() - it } ?: 0
         
         val msg = "$phase FAILED after ${duration}ms: $reason"
@@ -180,16 +184,14 @@ object InitializationTracker {
         val warnings = events.count { it.type == EventType.WARNING }
         val errors = events.count { it.type == EventType.ERROR }
         
-        // Get completed/failed phases
-        val completedPhases = phaseCompletions.filter { it.value }.keys.toList()
-        val failedPhases = phaseTimings.keys.filter { phase ->
-            phaseCompletions[phase] == false && phaseTimings[phase] != null
-        }
+        // Get completed phases (phaseCompletions[phase] == true)
+        val completedPhases = phaseCompletions.filter { it.value == true }.keys.toList()
         
-        // Get pending phases (started but not completed/failed)
-        val pendingPhases = phaseTimings.keys.filter { phase ->
-            !phaseCompletions.containsKey(phase)
-        }
+        // Get failed phases (tracked in phasesFailed set)
+        val failedPhasesList = phasesFailed.toList()
+        
+        // Get pending phases (started but value is null - in progress)
+        val pendingPhases = phaseCompletions.filter { it.value == null }.keys.toList()
         
         return InitializationDiagnostics(
             sessionStartTime = sessionStartTime,
@@ -200,7 +202,7 @@ object InitializationTracker {
             warningCount = warnings,
             errorCount = errors,
             completedPhases = completedPhases,
-            failedPhases = failedPhases,
+            failedPhases = failedPhasesList,
             pendingPhases = pendingPhases,
             recentEvents = events.toList().takeLast(30)
         )
@@ -233,23 +235,17 @@ object InitializationTracker {
             appendLine("─".repeat(60))
             appendLine()
             
-            // Phase summary
+            // Phase summary - simplified to avoid O(n²) complexity
             appendLine("Phase Summary:")
             Phase.values().forEach { phase ->
                 val started = phaseTimings.containsKey(phase)
-                val completed = phaseCompletions[phase] == true
-                val duration = phaseTimings[phase]?.let { 
-                    if (completed) {
-                        events.find { it.phase == phase && it.type == EventType.PHASE_COMPLETE }?.relativeMs?.minus(
-                            events.find { it.phase == phase && it.type == EventType.PHASE_START }?.relativeMs ?: 0
-                        ) ?: 0
-                    } else null
-                }
+                val completionState = phaseCompletions[phase]
+                val failed = phasesFailed.contains(phase)
                 
                 val status = when {
-                    completed -> "✓ Complete${duration?.let { " (${it}ms)" } ?: ""}"
-                    started && phaseCompletions[phase] == false -> "✗ Failed"
-                    started -> "⏳ In Progress"
+                    completionState == true -> "✓ Complete"
+                    failed -> "✗ Failed"
+                    completionState == null && started -> "⏳ In Progress"
                     else -> "○ Not Started"
                 }
                 

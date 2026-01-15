@@ -315,8 +315,13 @@ class CapabilityManager {
                 return@withContext null
             }
             
-            val body = response.body?.string()
-            response.close()
+            // Use try-finally to ensure response is always closed
+            val body: String?
+            try {
+                body = response.body?.string()
+            } finally {
+                response.close()
+            }
             
             if (body.isNullOrEmpty()) {
                 Log.e(TAG, "Seed capability response body is empty")

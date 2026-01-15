@@ -287,13 +287,13 @@ class MeshManager(
     
     // ==================== DIAGNOSTIC METHODS ====================
     
-    // Tracking variables for diagnostics
+    // Tracking variables for diagnostics (volatile for thread safety)
     private val downloadCount = java.util.concurrent.atomic.AtomicInteger(0)
     private val downloadFailCount = java.util.concurrent.atomic.AtomicInteger(0)
     private val parseFailCount = java.util.concurrent.atomic.AtomicInteger(0)
     private val downloadedBytes = java.util.concurrent.atomic.AtomicLong(0)
-    private var lastError: String? = null
-    private var lastErrorTime: Long = 0
+    @Volatile private var lastError: String? = null
+    @Volatile private var lastErrorTime: Long = 0
     
     /**
      * Get comprehensive diagnostic data for debug reports
