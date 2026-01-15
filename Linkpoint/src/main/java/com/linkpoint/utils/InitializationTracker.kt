@@ -244,7 +244,7 @@ object InitializationTracker {
                 val failed = phasesFailed.contains(phase)
                 
                 val status = when {
-                    phaseCompletions[phase] == true -> "✓ Complete"
+                    phaseCompletions.containsKey(phase) -> "✓ Complete"
                     failed -> "✗ Failed"
                     started -> "⏳ In Progress"
                     else -> "○ Not Started"
