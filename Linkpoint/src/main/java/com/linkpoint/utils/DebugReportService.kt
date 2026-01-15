@@ -337,6 +337,17 @@ class DebugReportService private constructor(private val context: Context) {
                     appendLine("Total Capabilities: ${capDiag.capabilityCount}")
                     appendLine("Seed Capability: ${capDiag.seedCapability ?: "Not set"}")
                     appendLine()
+                    
+                    // New initialization tracking section
+                    appendLine("Initialization Status:")
+                    appendLine("  Completed: ${capDiag.initializationComplete}")
+                    appendLine("  Duration: ${capDiag.initializationDurationMs}ms")
+                    appendLine("  Attempts: ${capDiag.initializationAttempts}")
+                    if (capDiag.lastInitializationError != null) {
+                        appendLine("  Last Error: ${capDiag.lastInitializationError}")
+                    }
+                    appendLine()
+                    
                     appendLine("Critical Capabilities:")
                     appendLine("  GetTexture: ${if (capDiag.hasGetTexture) "✓ Available" else "✗ Missing - textures won't load!"}")
                     appendLine("  GetMesh: ${if (capDiag.hasGetMesh) "✓ Available" else "✗ Missing - meshes won't load!"}")
@@ -363,6 +374,9 @@ class DebugReportService private constructor(private val context: Context) {
                     if (!capDiag.isReady) {
                         appendLine()
                         appendLine("⚠️ CAPABILITIES NOT READY - Textures, meshes, and inventory won't load!")
+                        if (capDiag.lastInitializationError != null) {
+                            appendLine("⚠️ LAST ERROR: ${capDiag.lastInitializationError}")
+                        }
                     }
                 } catch (e: Exception) {
                     appendLine("Capability diagnostics unavailable: ${e.message}")
@@ -562,6 +576,157 @@ class DebugReportService private constructor(private val context: Context) {
             }
             appendLine()
             
+            // ==================== MESH MANAGER STATUS ====================
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ MESH MANAGER STATUS                                               │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            if (app != null) {
+                try {
+                    if (app.isMeshManagerInitialized()) {
+                        val meshDiag = app.meshManager.getDiagnostics()
+                        appendLine("Pending Downloads: ${meshDiag.pendingDownloads}")
+                        appendLine("Downloaded: ${meshDiag.downloadedCount}")
+                        appendLine("Downloaded Bytes: ${formatBytes(meshDiag.downloadedBytes)}")
+                        appendLine("Download Failed: ${meshDiag.downloadFailedCount}")
+                        appendLine("Parse Failed: ${meshDiag.parseFailedCount}")
+                        appendLine("Has Mesh Capability: ${if (meshDiag.hasMeshCapability) "✓ Yes" else "✗ No"}")
+                        
+                        if (meshDiag.lastError != null) {
+                            appendLine()
+                            appendLine("Last Error: ${meshDiag.lastError}")
+                            meshDiag.lastErrorTimeAgo?.let { 
+                                appendLine("Error Time: ${formatDuration(it)} ago")
+                            }
+                        }
+                        
+                        if (!meshDiag.hasMeshCapability) {
+                            appendLine()
+                            appendLine("⚠️ NO MESH CAPABILITY - Mesh objects won't load!")
+                        }
+                        if (meshDiag.downloadFailedCount > 0 || meshDiag.parseFailedCount > 0) {
+                            appendLine()
+                            appendLine("⚠️ MESH ERRORS DETECTED - Some meshes may not display!")
+                        }
+                    } else {
+                        appendLine("Mesh manager not initialized")
+                    }
+                } catch (e: Exception) {
+                    appendLine("Mesh diagnostics unavailable: ${e.message}")
+                }
+            } else {
+                appendLine("Mesh manager: App not initialized")
+            }
+            appendLine()
+            
+            // ==================== TEXTURE MANAGER DETAILED STATUS ====================
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ TEXTURE MANAGER DETAILED STATUS                                   │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            if (app != null) {
+                try {
+                    if (app.isTextureManagerInitialized()) {
+                        val texDiag = app.textureManager.getDiagnostics()
+                        appendLine("Has Texture Capability: ${if (texDiag.hasTextureCapability) "✓ Yes" else "✗ No"}")
+                        appendLine("Pending Downloads: ${texDiag.pendingDownloads}")
+                        appendLine("Downloaded: ${texDiag.downloadedCount}")
+                        appendLine("Downloaded Bytes: ${formatBytes(texDiag.downloadedBytes)}")
+                        appendLine("Download Failed: ${texDiag.failedCount}")
+                        appendLine("Decoded: ${texDiag.decodedCount}")
+                        appendLine("Decode Failed: ${texDiag.decodeFailedCount}")
+                        appendLine()
+                        appendLine("Cache Status:")
+                        appendLine("  Cached Textures: ${texDiag.cachedTextureCount}")
+                        appendLine("  Pending Requests: ${texDiag.pendingRequestCount}")
+                        appendLine("  Download Queue: ${texDiag.downloadQueueSize}")
+                        appendLine("  Active Downloads: ${texDiag.activeDownloads}")
+                        appendLine()
+                        appendLine("JPEG2000 Decoding:")
+                        appendLine("  Attempts: ${texDiag.j2kDecodeAttempts}")
+                        appendLine("  Successes: ${texDiag.j2kDecodeSuccesses}")
+                        
+                        if (texDiag.lastError != null) {
+                            appendLine()
+                            appendLine("Last Error: ${texDiag.lastError}")
+                            texDiag.lastErrorTimeAgo?.let { 
+                                appendLine("Error Time: ${formatDuration(it)} ago")
+                            }
+                        }
+                        
+                        if (!texDiag.hasTextureCapability) {
+                            appendLine()
+                            appendLine("⚠️ NO TEXTURE CAPABILITY - Using fallback asset server!")
+                        }
+                        if (texDiag.failedCount > 5 || texDiag.decodeFailedCount > 5) {
+                            appendLine()
+                            appendLine("⚠️ HIGH TEXTURE FAILURE RATE - Connection or decode issues!")
+                        }
+                    } else {
+                        appendLine("Texture manager not initialized")
+                    }
+                } catch (e: Exception) {
+                    appendLine("Texture diagnostics unavailable: ${e.message}")
+                }
+            } else {
+                appendLine("Texture manager: App not initialized")
+            }
+            appendLine()
+            
+            // ==================== RENDER MANAGER STATUS ====================
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ RENDER MANAGER STATUS (Filament)                                  │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            if (app != null) {
+                try {
+                    if (app.isRenderManagerInitialized()) {
+                        val renderDiag = app.renderManager.getDiagnostics()
+                        appendLine("Initialized: ${renderDiag.isInitialized}")
+                        appendLine("XR Mode: ${renderDiag.isXRMode}")
+                        appendLine("Viewport: ${renderDiag.viewportWidth} x ${renderDiag.viewportHeight}")
+                        appendLine("Frame Count: ${renderDiag.frameCount}")
+                        renderDiag.timeSinceLastFrame?.let {
+                            appendLine("Time Since Last Frame: ${formatDuration(it)}")
+                        }
+                        appendLine()
+                        appendLine("Filament Components:")
+                        appendLine("  Engine: ${if (renderDiag.hasEngine) "✓" else "✗"}")
+                        appendLine("  Renderer: ${if (renderDiag.hasRenderer) "✓" else "✗"}")
+                        appendLine("  Scene: ${if (renderDiag.hasScene) "✓" else "✗"}")
+                        appendLine("  View: ${if (renderDiag.hasView) "✓" else "✗"}")
+                        appendLine("  Camera: ${if (renderDiag.hasCamera) "✓" else "✗"}")
+                        appendLine("  SwapChain: ${if (renderDiag.hasSwapChain) "✓" else "✗"}")
+                        
+                        if (renderDiag.initializationTime > 0) {
+                            appendLine()
+                            appendLine("Initialization Time: ${formatTimestamp(renderDiag.initializationTime)}")
+                        }
+                        
+                        if (renderDiag.lastInitializationError != null) {
+                            appendLine()
+                            appendLine("⚠️ INITIALIZATION ERROR: ${renderDiag.lastInitializationError}")
+                        }
+                        
+                        if (!renderDiag.isInitialized) {
+                            appendLine()
+                            appendLine("⚠️ RENDERER NOT INITIALIZED - No 3D rendering!")
+                        }
+                        if (renderDiag.isInitialized && !renderDiag.hasSwapChain) {
+                            appendLine()
+                            appendLine("⚠️ NO SWAP CHAIN - Rendering not visible!")
+                        }
+                    } else {
+                        appendLine("Render manager not initialized")
+                    }
+                } catch (e: Exception) {
+                    appendLine("Render diagnostics unavailable: ${e.message}")
+                }
+            } else {
+                appendLine("Render manager: App not initialized")
+            }
+            appendLine()
+            
             // ==================== END OF NEW DIAGNOSTIC SECTIONS ====================
             
             appendLine("┌──────────────────────────────────────────────────────────────────┐")
@@ -641,6 +806,62 @@ class DebugReportService private constructor(private val context: Context) {
             appendLine()
             appendLine("Active Thread Count: ${Thread.activeCount()}")
             appendLine("Current Thread: ${Thread.currentThread().name}")
+            appendLine()
+            
+            // Initialization Timeline - CRITICAL for diagnosing "world not loading" issues
+            appendLine("┌──────────────────────────────────────────────────────────────────┐")
+            appendLine("│ INITIALIZATION TIMELINE                                           │")
+            appendLine("└──────────────────────────────────────────────────────────────────┘")
+            appendLine()
+            try {
+                val initDiag = InitializationTracker.getDiagnostics()
+                appendLine("Session Duration: ${formatDuration(initDiag.sessionDurationMs)}")
+                appendLine("Current Phase: ${initDiag.currentPhase}")
+                appendLine("Total Events: ${initDiag.totalEvents}")
+                appendLine("Warnings: ${initDiag.warningCount}")
+                appendLine("Errors: ${initDiag.errorCount}")
+                appendLine()
+                
+                if (initDiag.completedPhases.isNotEmpty()) {
+                    appendLine("Completed Phases:")
+                    initDiag.completedPhases.forEach { phase ->
+                        appendLine("  ✓ $phase")
+                    }
+                    appendLine()
+                }
+                
+                if (initDiag.failedPhases.isNotEmpty()) {
+                    appendLine("Failed Phases:")
+                    initDiag.failedPhases.forEach { phase ->
+                        appendLine("  ✗ $phase")
+                    }
+                    appendLine()
+                }
+                
+                if (initDiag.pendingPhases.isNotEmpty()) {
+                    appendLine("Pending Phases:")
+                    initDiag.pendingPhases.forEach { phase ->
+                        appendLine("  ⏳ $phase")
+                    }
+                    appendLine()
+                }
+                
+                // Recent events (show last 20 from the available events)
+                appendLine("Recent Events (last 20):")
+                initDiag.recentEvents.takeLast(20).forEach { event ->
+                    val icon = when (event.type) {
+                        InitializationTracker.EventType.PHASE_START -> "▶"
+                        InitializationTracker.EventType.PHASE_COMPLETE -> "✓"
+                        InitializationTracker.EventType.ERROR -> "✗"
+                        InitializationTracker.EventType.WARNING -> "⚠"
+                        InitializationTracker.EventType.CRITICAL -> "⭐"
+                        InitializationTracker.EventType.INFO -> "•"
+                    }
+                    appendLine("[${event.relativeMs}ms] $icon ${event.message}")
+                }
+            } catch (e: Exception) {
+                appendLine("Initialization timeline unavailable: ${e.message}")
+            }
             appendLine()
             
             // Recent network log excerpt for debugging loading issues

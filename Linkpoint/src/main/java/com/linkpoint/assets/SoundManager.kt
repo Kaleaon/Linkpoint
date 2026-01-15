@@ -97,6 +97,7 @@ class SoundManager(
         )
         
         if (streamId != 0) {
+            soundPlayCount.incrementAndGet()
             playingSounds[streamId] = SoundPlayback(
                 streamId = streamId,
                 soundId = soundId,
@@ -147,8 +148,16 @@ class SoundManager(
     private suspend fun loadSound(soundId: UUID): Int? {
         loadedSounds[soundId]?.let { return it }
         
+        soundLoadAttempts.incrementAndGet()
+        
         return withContext(Dispatchers.IO) {
-            val data = cache.get(soundId, AssetType.SOUND) ?: return@withContext null
+            val data = cache.get(soundId, AssetType.SOUND)
+            if (data == null) {
+                lastError = "Sound not in cache: $soundId"
+                lastErrorTime = System.currentTimeMillis()
+                soundLoadFailures.incrementAndGet()
+                return@withContext null
+            }
             
             // Write to temp file (SoundPool requires file)
             val tempFile = File(context.cacheDir, "sound_$soundId.ogg")
@@ -164,6 +173,9 @@ class SoundManager(
                 poolId
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to load sound: $soundId", e)
+                lastError = "${e.javaClass.simpleName}: ${e.message}"
+                lastErrorTime = System.currentTimeMillis()
+                soundLoadFailures.incrementAndGet()
                 null
             } finally {
                 tempFile.delete()
@@ -218,7 +230,53 @@ class SoundManager(
         loadedSounds.clear()
         playingSounds.clear()
     }
-}
+    
+    // ==================== DIAGNOSTIC METHODS ====================
+    
+    // Tracking for diagnostics (volatile for thread safety)
+    private var soundLoadAttempts = java.util.concurrent.atomic.AtomicInteger(0)
+    private var soundLoadFailures = java.util.concurrent.atomic.AtomicInteger(0)
+    private var soundPlayCount = java.util.concurrent.atomic.AtomicInteger(0)
+    @Volatile private var lastError: String? = null
+    @Volatile private var lastErrorTime: Long = 0
+    
+    /**
+     * Get comprehensive diagnostic data for debug reports
+     */
+    fun getDiagnostics(): SoundManagerDiagnostics {
+        return SoundManagerDiagnostics(
+            loadedSoundCount = loadedSounds.size,
+            playingSoundCount = playingSounds.size,
+            maxStreams = MAX_STREAMS,
+            masterVolume = masterVolume,
+            effectsVolume = soundEffectsVolume,
+            ambientVolume = ambientVolume,
+            loadAttempts = soundLoadAttempts.get(),
+            loadFailures = soundLoadFailures.get(),
+            totalPlays = soundPlayCount.get(),
+            listenerPosition = "${listenerPosition.x}, ${listenerPosition.y}, ${listenerPosition.z}",
+            lastError = lastError,
+            lastErrorTimeAgo = if (lastErrorTime > 0) System.currentTimeMillis() - lastErrorTime else null
+        )
+    }
+    
+    /**
+     * Diagnostic data class for sound manager state
+     */
+    data class SoundManagerDiagnostics(
+        val loadedSoundCount: Int,
+        val playingSoundCount: Int,
+        val maxStreams: Int,
+        val masterVolume: Float,
+        val effectsVolume: Float,
+        val ambientVolume: Float,
+        val loadAttempts: Int,
+        val loadFailures: Int,
+        val totalPlays: Int,
+        val listenerPosition: String,
+        val lastError: String?,
+        val lastErrorTimeAgo: Long?
+    )
 
 data class SoundPlayback(
     val streamId: Int,

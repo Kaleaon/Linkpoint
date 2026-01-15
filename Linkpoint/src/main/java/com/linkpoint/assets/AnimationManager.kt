@@ -76,16 +76,22 @@ class AnimationManager(
         // Check built-in
         builtInAnimations[animId]?.let { return it }
         
+        loadAttempts.incrementAndGet()
+        
         // Check cache
-        cache.get(animId, AssetType.ANIMATION)?.let { data ->
-            val anim = parseAnimation(animId, data)
-            if (anim != null) {
-                loadedAnimations[animId] = anim
-            }
-            return anim
+        val data = cache.get(animId, AssetType.ANIMATION)
+        if (data == null) {
+            lastError = "Animation not in cache: $animId"
+            lastErrorTime = System.currentTimeMillis()
+            loadFailures.incrementAndGet()
+            return null
         }
         
-        return null
+        val anim = parseAnimation(animId, data)
+        if (anim != null) {
+            loadedAnimations[animId] = anim
+        }
+        return anim
     }
     
     /**
@@ -199,6 +205,9 @@ class AnimationManager(
             )
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse animation: $animId", e)
+            lastError = "Parse: ${e.javaClass.simpleName}: ${e.message}"
+            lastErrorTime = System.currentTimeMillis()
+            parseFailures.incrementAndGet()
             return null
         }
     }
@@ -207,7 +216,43 @@ class AnimationManager(
         scope.cancel()
         loadedAnimations.clear()
     }
-}
+    
+    // ==================== DIAGNOSTIC METHODS ====================
+    
+    // Tracking for diagnostics (volatile for thread safety)
+    private var loadAttempts = java.util.concurrent.atomic.AtomicInteger(0)
+    private var loadFailures = java.util.concurrent.atomic.AtomicInteger(0)
+    private var parseFailures = java.util.concurrent.atomic.AtomicInteger(0)
+    @Volatile private var lastError: String? = null
+    @Volatile private var lastErrorTime: Long = 0
+    
+    /**
+     * Get comprehensive diagnostic data for debug reports
+     */
+    fun getDiagnostics(): AnimationManagerDiagnostics {
+        return AnimationManagerDiagnostics(
+            loadedAnimationCount = loadedAnimations.size,
+            builtInAnimationCount = builtInAnimations.size,
+            loadAttempts = loadAttempts.get(),
+            loadFailures = loadFailures.get(),
+            parseFailures = parseFailures.get(),
+            lastError = lastError,
+            lastErrorTimeAgo = if (lastErrorTime > 0) System.currentTimeMillis() - lastErrorTime else null
+        )
+    }
+    
+    /**
+     * Diagnostic data class for animation manager state
+     */
+    data class AnimationManagerDiagnostics(
+        val loadedAnimationCount: Int,
+        val builtInAnimationCount: Int,
+        val loadAttempts: Int,
+        val loadFailures: Int,
+        val parseFailures: Int,
+        val lastError: String?,
+        val lastErrorTimeAgo: Long?
+    )
 
 data class AnimationData(
     val animId: UUID,

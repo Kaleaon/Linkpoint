@@ -79,6 +79,8 @@ class RenderManager(private val context: Context) {
                     
                     override fun onResized(width: Int, height: Int) {
                         view?.viewport = Viewport(0, 0, width, height)
+                        viewportWidth = width
+                        viewportHeight = height
                         updateProjection(width, height)
                     }
                 }
@@ -97,11 +99,13 @@ class RenderManager(private val context: Context) {
             setupDefaultLighting()
             
             isInitialized = true
+            initializationTime = System.currentTimeMillis()
             Log.i(TAG, "Filament engine initialized successfully")
             return true
             
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize Filament", e)
+            lastInitializationError = "${e.javaClass.simpleName}: ${e.message}"
             shutdown()
             return false
         }
@@ -149,6 +153,8 @@ class RenderManager(private val context: Context) {
         if (renderer.beginFrame(swapChain, System.nanoTime())) {
             renderer.render(view)
             renderer.endFrame()
+            frameCount.incrementAndGet()
+            lastFrameTime = System.currentTimeMillis()
         }
     }
     
@@ -207,6 +213,58 @@ class RenderManager(private val context: Context) {
      * Get the Filament scene
      */
     fun getScene(): Scene? = scene
+    
+    // ==================== DIAGNOSTIC METHODS ====================
+    
+    // Tracking for diagnostics (volatile for thread safety)
+    private var frameCount = java.util.concurrent.atomic.AtomicLong(0)
+    @Volatile private var lastFrameTime: Long = 0
+    @Volatile private var initializationTime: Long = 0
+    @Volatile private var lastInitializationError: String? = null
+    @Volatile private var viewportWidth: Int = 0
+    @Volatile private var viewportHeight: Int = 0
+    
+    /**
+     * Get comprehensive diagnostic data for debug reports
+     */
+    fun getDiagnostics(): RenderManagerDiagnostics {
+        return RenderManagerDiagnostics(
+            isInitialized = isInitialized,
+            isXRMode = isXRMode,
+            hasEngine = engine != null,
+            hasRenderer = renderer != null,
+            hasScene = scene != null,
+            hasView = view != null,
+            hasCamera = camera != null,
+            hasSwapChain = swapChain != null,
+            viewportWidth = viewportWidth,
+            viewportHeight = viewportHeight,
+            frameCount = frameCount.get(),
+            timeSinceLastFrame = if (lastFrameTime > 0) System.currentTimeMillis() - lastFrameTime else null,
+            initializationTime = initializationTime,
+            lastInitializationError = lastInitializationError
+        )
+    }
+    
+    /**
+     * Diagnostic data class for render manager state
+     */
+    data class RenderManagerDiagnostics(
+        val isInitialized: Boolean,
+        val isXRMode: Boolean,
+        val hasEngine: Boolean,
+        val hasRenderer: Boolean,
+        val hasScene: Boolean,
+        val hasView: Boolean,
+        val hasCamera: Boolean,
+        val hasSwapChain: Boolean,
+        val viewportWidth: Int,
+        val viewportHeight: Int,
+        val frameCount: Long,
+        val timeSinceLastFrame: Long?,
+        val initializationTime: Long,
+        val lastInitializationError: String?
+    )
     
     /**
      * Shutdown rendering

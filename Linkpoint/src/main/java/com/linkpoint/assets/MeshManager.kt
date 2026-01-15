@@ -61,7 +61,13 @@ class MeshManager(
     private suspend fun downloadAndParseMesh(meshId: UUID, lod: MeshLOD): MeshData? {
         val meshUrl = capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH2)
             ?: capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH)
-            ?: return null
+        
+        if (meshUrl == null) {
+            lastError = "No mesh capability available"
+            lastErrorTime = System.currentTimeMillis()
+            downloadFailCount.incrementAndGet()
+            return null
+        }
         
         val url = "$meshUrl?mesh_id=$meshId"
         
@@ -71,10 +77,22 @@ class MeshManager(
             
             if (!response.isSuccessful) {
                 Log.w(TAG, "Mesh download failed: ${response.code}")
+                lastError = "HTTP ${response.code}: ${response.message}"
+                lastErrorTime = System.currentTimeMillis()
+                downloadFailCount.incrementAndGet()
                 return null
             }
             
-            val data = response.body?.bytes() ?: return null
+            val data = response.body?.bytes()
+            if (data == null) {
+                lastError = "Empty response body"
+                lastErrorTime = System.currentTimeMillis()
+                downloadFailCount.incrementAndGet()
+                return null
+            }
+            
+            downloadCount.incrementAndGet()
+            downloadedBytes.addAndGet(data.size.toLong())
             
             // Cache raw data
             cache.put(meshId, AssetType.MESH, data)
@@ -82,6 +100,9 @@ class MeshManager(
             return parseMesh(meshId, data, lod)
         } catch (e: Exception) {
             Log.e(TAG, "Mesh download error: $meshId", e)
+            lastError = "${e.javaClass.simpleName}: ${e.message}"
+            lastErrorTime = System.currentTimeMillis()
+            downloadFailCount.incrementAndGet()
             return null
         }
     }
@@ -95,7 +116,12 @@ class MeshManager(
             val headerBytes = data.copyOfRange(0, headerEnd)
             val header = LLSDParser.parseBinary(headerBytes)
             
-            if (header !is LLSDMap) return null
+            if (header !is LLSDMap) {
+                lastError = "Invalid mesh header - not an LLSDMap"
+                lastErrorTime = System.currentTimeMillis()
+                parseFailCount.incrementAndGet()
+                return null
+            }
             
             // Get LOD data offset/size
             val lodKey = when (lod) {
@@ -105,9 +131,22 @@ class MeshManager(
                 MeshLOD.LOW -> "lowest_lod"
             }
             
-            val lodMap = header.getMap(lodKey) ?: header.getMap("high_lod") ?: return null
-            val offset = lodMap.getInt("offset") ?: return null
-            val size = lodMap.getInt("size") ?: return null
+            val lodMap = header.getMap(lodKey) ?: header.getMap("high_lod")
+            if (lodMap == null) {
+                lastError = "Missing LOD map in mesh header"
+                lastErrorTime = System.currentTimeMillis()
+                parseFailCount.incrementAndGet()
+                return null
+            }
+            
+            val offset = lodMap.getInt("offset")
+            val size = lodMap.getInt("size")
+            if (offset == null || size == null) {
+                lastError = "Missing offset/size in LOD map"
+                lastErrorTime = System.currentTimeMillis()
+                parseFailCount.incrementAndGet()
+                return null
+            }
             
             // Extract and decompress LOD data
             val compressedData = data.copyOfRange(headerEnd + offset, headerEnd + offset + size)
@@ -117,6 +156,9 @@ class MeshManager(
             return parseMeshGeometry(meshId, decompressed, header)
         } catch (e: Exception) {
             Log.e(TAG, "Mesh parse error: $meshId", e)
+            lastError = "Parse: ${e.javaClass.simpleName}: ${e.message}"
+            lastErrorTime = System.currentTimeMillis()
+            parseFailCount.incrementAndGet()
             return null
         }
     }
@@ -242,7 +284,49 @@ class MeshManager(
         scope.cancel()
         pendingMeshes.clear()
     }
-}
+    
+    // ==================== DIAGNOSTIC METHODS ====================
+    
+    // Tracking variables for diagnostics (volatile for thread safety)
+    private val downloadCount = java.util.concurrent.atomic.AtomicInteger(0)
+    private val downloadFailCount = java.util.concurrent.atomic.AtomicInteger(0)
+    private val parseFailCount = java.util.concurrent.atomic.AtomicInteger(0)
+    private val downloadedBytes = java.util.concurrent.atomic.AtomicLong(0)
+    @Volatile private var lastError: String? = null
+    @Volatile private var lastErrorTime: Long = 0
+    
+    /**
+     * Get comprehensive diagnostic data for debug reports
+     */
+    fun getDiagnostics(): MeshManagerDiagnostics {
+        val getMeshCap = capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH2)
+            ?: capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH)
+        
+        return MeshManagerDiagnostics(
+            pendingDownloads = pendingMeshes.size,
+            downloadedCount = downloadCount.get(),
+            downloadedBytes = downloadedBytes.get(),
+            downloadFailedCount = downloadFailCount.get(),
+            parseFailedCount = parseFailCount.get(),
+            hasMeshCapability = getMeshCap != null,
+            lastError = lastError,
+            lastErrorTimeAgo = if (lastErrorTime > 0) System.currentTimeMillis() - lastErrorTime else null
+        )
+    }
+    
+    /**
+     * Diagnostic data class for mesh manager state
+     */
+    data class MeshManagerDiagnostics(
+        val pendingDownloads: Int,
+        val downloadedCount: Int,
+        val downloadedBytes: Long,
+        val downloadFailedCount: Int,
+        val parseFailedCount: Int,
+        val hasMeshCapability: Boolean,
+        val lastError: String?,
+        val lastErrorTimeAgo: Long?
+    )
 
 enum class MeshLOD {
     HIGHEST, HIGH, MEDIUM, LOW
