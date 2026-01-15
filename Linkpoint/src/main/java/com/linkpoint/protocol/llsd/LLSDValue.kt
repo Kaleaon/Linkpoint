@@ -5,8 +5,9 @@ import java.nio.ByteOrder
 import java.util.*
 
 /**
- * LLSD (Linden Lab Structured Data) value types
- * Based on the official Second Life LLSD specification
+ * LLSD (Linden Lab Structured Data) value types.
+ * Based on the official Second Life LLSD specification:
+ * https://wiki.secondlife.com/wiki/LLSD
  */
 sealed class LLSDValue {
     abstract fun toXML(): String
