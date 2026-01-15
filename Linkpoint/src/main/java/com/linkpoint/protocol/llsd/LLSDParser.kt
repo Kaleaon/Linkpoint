@@ -133,9 +133,10 @@ object LLSDParser {
         // Strip XML declaration if present so we can parse the <llsd> root element
         if (cleaned.startsWith("<?xml", ignoreCase = true)) {
             val declEnd = cleaned.indexOf("?>")
-            if (declEnd != -1) {
-                cleaned = cleaned.substring(declEnd + 2).trimStart()
+            if (declEnd == -1) {
+                return LLSDUndefined
             }
+            cleaned = cleaned.substring(declEnd + 2).trimStart()
         }
         
         return try {

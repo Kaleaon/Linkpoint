@@ -181,9 +181,10 @@ class CapabilityManager {
             CAP_SEARCH_STATIC
         )
         val options = HttpRequestOptions.forLogin()
-        var caps: Map<String, String>? = null
+        var seedCaps: Map<String, String>? = null
         var lastException: Exception? = null
         
+        // Retry seed caps request (initial attempt + retries)
         for (attempt in 0..options.retries) {
             try {
                 if (attempt > 0) {
@@ -192,23 +193,19 @@ class CapabilityManager {
                     delay(delayMs)
                 }
                 
-                caps = requestCapabilities(seedCap, capNames)
-                if (!caps.isNullOrEmpty()) {
+                seedCaps = requestCapabilities(seedCap, capNames)
+                if (!seedCaps.isNullOrEmpty()) {
                     break
                 }
                 
-                lastException = Exception("Seed capability returned no entries")
+                lastException = Exception("Seed capability returned no entries for $seedCap")
             } catch (e: Exception) {
                 lastException = e
             }
         }
         
-        val resolvedCaps = caps ?: run {
-            _isReady.value = false
-            Log.e(TAG, "Failed to initialize capabilities", lastException)
-            return@withContext false
-        }
-        if (resolvedCaps.isEmpty()) {
+        val resolvedCaps = seedCaps
+        if (resolvedCaps.isNullOrEmpty()) {
             _isReady.value = false
             Log.e(TAG, "Failed to initialize capabilities", lastException)
             return@withContext false
