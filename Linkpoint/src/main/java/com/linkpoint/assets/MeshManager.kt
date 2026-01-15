@@ -327,6 +327,7 @@ class MeshManager(
         val lastError: String?,
         val lastErrorTimeAgo: Long?
     )
+}
 
 enum class MeshLOD {
     HIGHEST, HIGH, MEDIUM, LOW
