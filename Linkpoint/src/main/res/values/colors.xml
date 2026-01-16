@@ -51,4 +51,83 @@
     <!-- Friend Status Colors -->
     <color name="online_status">#4CAF50</color>
     <color name="offline_status">#757575</color>
+    
+    <!-- CleverFerret Theme Colors - Material 3 Dark Theme with elegant gold accents -->
+    <color name="cleverferret_primary">#E5A00D</color>
+    <color name="cleverferret_primary_dark">#CC8A00</color>
+    <color name="cleverferret_on_primary">#1E1E1E</color>
+    <color name="cleverferret_secondary">#B8860B</color>
+    <color name="cleverferret_on_secondary">#1E1E1E</color>
+    <color name="cleverferret_background">#1E1E1E</color>
+    <color name="cleverferret_surface">#2A2A2A</color>
+    <color name="cleverferret_on_surface">#E6E1E5</color>
+    <color name="cleverferret_on_surface_variant">#CAC4D0</color>
+    
+    <!-- ==================== CLEVERFERRET THEME PACKS ==================== -->
+    
+    <!-- Navy + Gold Theme - Elegant and Professional -->
+    <color name="navy_gold_primary">#D4AF37</color>
+    <color name="navy_gold_primary_dark">#B8860B</color>
+    <color name="navy_gold_on_primary">#0A1630</color>
+    <color name="navy_gold_secondary">#C5A572</color>
+    <color name="navy_gold_on_secondary">#0A1630</color>
+    <color name="navy_gold_background">#0A1630</color>
+    <color name="navy_gold_surface">#0D1B36</color>
+    <color name="navy_gold_on_surface">#E6EAF2</color>
+    <color name="navy_gold_on_surface_variant">#B3BFD6</color>
+    
+    <!-- Royal Purple + Silver Theme - Regal and Modern -->
+    <color name="royal_silver_primary">#C0C0C0</color>
+    <color name="royal_silver_primary_dark">#71706E</color>
+    <color name="royal_silver_on_primary">#1A0F2E</color>
+    <color name="royal_silver_secondary">#6B4BA3</color>
+    <color name="royal_silver_on_secondary">#FFFFFF</color>
+    <color name="royal_silver_background">#1A0F2E</color>
+    <color name="royal_silver_surface">#2D1B4E</color>
+    <color name="royal_silver_on_surface">#F0ECF5</color>
+    <color name="royal_silver_on_surface_variant">#D1C4E0</color>
+    
+    <!-- Forest Green + Copper Theme - Natural and Warm -->
+    <color name="forest_copper_primary">#B87333</color>
+    <color name="forest_copper_primary_dark">#964B00</color>
+    <color name="forest_copper_on_primary">#0D1F12</color>
+    <color name="forest_copper_secondary">#C46210</color>
+    <color name="forest_copper_on_secondary">#0D1F12</color>
+    <color name="forest_copper_background">#0D1F12</color>
+    <color name="forest_copper_surface">#1A3520</color>
+    <color name="forest_copper_on_surface">#E8F5E9</color>
+    <color name="forest_copper_on_surface_variant">#C8E6C9</color>
+    
+    <!-- Burgundy + Rose Gold Theme - Luxurious and Elegant -->
+    <color name="burgundy_rosegold_primary">#B76E79</color>
+    <color name="burgundy_rosegold_primary_dark">#9B6B6F</color>
+    <color name="burgundy_rosegold_on_primary">#2B0D1A</color>
+    <color name="burgundy_rosegold_secondary">#C9ADA7</color>
+    <color name="burgundy_rosegold_on_secondary">#2B0D1A</color>
+    <color name="burgundy_rosegold_background">#2B0D1A</color>
+    <color name="burgundy_rosegold_surface">#4A1629</color>
+    <color name="burgundy_rosegold_on_surface">#FFF0F5</color>
+    <color name="burgundy_rosegold_on_surface_variant">#FFD6E5</color>
+    
+    <!-- Charcoal + Champagne Theme - Sophisticated and Subtle -->
+    <color name="charcoal_champagne_primary">#F7E7CE</color>
+    <color name="charcoal_champagne_primary_dark">#D4C5B0</color>
+    <color name="charcoal_champagne_on_primary">#1C1C1E</color>
+    <color name="charcoal_champagne_secondary">#DDD0B4</color>
+    <color name="charcoal_champagne_on_secondary">#1C1C1E</color>
+    <color name="charcoal_champagne_background">#1C1C1E</color>
+    <color name="charcoal_champagne_surface">#2C2C2E</color>
+    <color name="charcoal_champagne_on_surface">#F2F2F7</color>
+    <color name="charcoal_champagne_on_surface_variant">#E5E5EA</color>
+    
+    <!-- Slate + Gunmetal Theme - Modern and Industrial -->
+    <color name="slate_gunmetal_primary">#6B7F8A</color>
+    <color name="slate_gunmetal_primary_dark">#3E4E57</color>
+    <color name="slate_gunmetal_on_primary">#0F1419</color>
+    <color name="slate_gunmetal_secondary">#AAA9AD</color>
+    <color name="slate_gunmetal_on_secondary">#0F1419</color>
+    <color name="slate_gunmetal_background">#0F1419</color>
+    <color name="slate_gunmetal_surface">#1A232B</color>
+    <color name="slate_gunmetal_on_surface">#ECF0F5</color>
+    <color name="slate_gunmetal_on_surface_variant">#CFD8E0</color>
 </resources>
