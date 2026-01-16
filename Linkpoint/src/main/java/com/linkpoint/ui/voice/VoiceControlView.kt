@@ -9,8 +9,10 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 /**
@@ -29,6 +31,9 @@ class VoiceControlView @JvmOverloads constructor(
     private val voiceManager by lazy { 
         LinkpointApp.getInstance().voiceManager 
     }
+    
+    // Lifecycle-aware coroutine scope for this view
+    private val viewScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     var onVoiceToggleListener: ((Boolean) -> Unit)? = null
     var onMuteToggleListener: ((Boolean) -> Unit)? = null
@@ -53,7 +58,6 @@ class VoiceControlView @JvmOverloads constructor(
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun toggleVoice() {
         val isConnected = voiceManager.isConnected.value
         if (isConnected) {
@@ -61,7 +65,7 @@ class VoiceControlView @JvmOverloads constructor(
             onVoiceToggleListener?.invoke(false)
         } else {
             // Voice connection is async, so we launch a coroutine
-            GlobalScope.launch {
+            viewScope.launch {
                 voiceManager.joinParcelVoice()
             }
             onVoiceToggleListener?.invoke(true)
@@ -119,5 +123,10 @@ class VoiceControlView @JvmOverloads constructor(
      */
     fun isVoiceMuted(): Boolean {
         return voiceManager.isMuted.value
+    }
+    
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        viewScope.cancel()
     }
 }
