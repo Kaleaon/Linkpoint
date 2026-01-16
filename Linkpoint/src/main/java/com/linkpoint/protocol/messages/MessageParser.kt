@@ -9,8 +9,12 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
 
+private val MESSAGE_BYTE_ORDER = ByteOrder.LITTLE_ENDIAN
+
 /**
- * Parses Second Life UDP messages
+ * Parses Second Life UDP message payloads.
+ *
+ * Payload fields are little-endian per message templates; UUIDs are raw big-endian bytes.
  */
 object MessageParser {
     
@@ -21,7 +25,7 @@ object MessageParser {
      */
     fun parseObjectUpdate(data: ByteArray): List<ObjectUpdateData> {
         val results = mutableListOf<ObjectUpdateData>()
-        val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+        val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
         
         try {
             val regionHandle = buffer.long
@@ -200,7 +204,7 @@ object MessageParser {
      */
     fun parseObjectUpdateCompressed(data: ByteArray): List<ObjectUpdateData> {
         val results = mutableListOf<ObjectUpdateData>()
-        val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+        val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
         
         try {
             val regionHandle = buffer.long
@@ -228,7 +232,7 @@ object MessageParser {
             val compressedData = ByteArray(dataLen)
             buffer.get(compressedData)
             
-            val cb = ByteBuffer.wrap(compressedData).order(ByteOrder.LITTLE_ENDIAN)
+            val cb = ByteBuffer.wrap(compressedData).order(MESSAGE_BYTE_ORDER)
             
             // Full ID
             val fullIdBytes = ByteArray(16)
@@ -305,7 +309,7 @@ object MessageParser {
      */
     fun parseTerseObjectUpdate(data: ByteArray): List<TerseUpdateData> {
         val results = mutableListOf<TerseUpdateData>()
-        val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+        val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
         
         try {
             val regionHandle = buffer.long
@@ -334,7 +338,7 @@ object MessageParser {
     private fun parseTerseBlock(data: ByteArray): TerseUpdateData? {
         if (data.size < 30) return null
         
-        val bb = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+        val bb = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
         
         val localId = bb.int
         val state = bb.get().toInt() and 0xFF
@@ -377,7 +381,7 @@ object MessageParser {
      * Parse AvatarAnimation message
      */
     fun parseAvatarAnimation(data: ByteArray): AvatarAnimationData? {
-        val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+        val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
         
         try {
             val agentIdBytes = ByteArray(16)
@@ -415,7 +419,7 @@ object MessageParser {
      * Parse ChatFromSimulator message
      */
     fun parseChatFromSimulator(data: ByteArray): ChatData? {
-        val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+        val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
         
         try {
             // From name (variable)
@@ -471,7 +475,7 @@ object MessageParser {
     }
     
     private fun bytesToUUID(bytes: ByteArray): UUID {
-        val bb = ByteBuffer.wrap(bytes)
+        val bb = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN)
         return UUID(bb.long, bb.long)
     }
 }
@@ -582,7 +586,7 @@ enum class ChatType(val value: Int) {
  * and must be acknowledged with RegionHandshakeReply.
  */
 fun MessageParser.parseRegionHandshake(data: ByteArray): RegionHandshakeData? {
-    val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+    val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
     
     try {
         // RegionInfo block
@@ -649,7 +653,7 @@ fun MessageParser.parseRegionHandshake(data: ByteArray): RegionHandshakeData? {
  * Helper to convert bytes to UUID - accessible for extension function
  */
 private fun bytesToUUID(bytes: ByteArray): UUID {
-    val bb = ByteBuffer.wrap(bytes)
+    val bb = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN)
     return UUID(bb.long, bb.long)
 }
 
@@ -658,7 +662,7 @@ private fun bytesToUUID(bytes: ByteArray): UUID {
  * Confirms the agent is fully in the region.
  */
 fun MessageParser.parseAgentMovementComplete(data: ByteArray): AgentMovementCompleteData? {
-    val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+    val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
     
     try {
         // AgentData block

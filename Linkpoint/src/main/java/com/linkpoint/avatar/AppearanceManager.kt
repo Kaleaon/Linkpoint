@@ -26,6 +26,7 @@ class AppearanceManager(
 ) {
     companion object {
         private const val TAG = "AppearanceManager"
+        private val MESSAGE_BYTE_ORDER = ByteOrder.LITTLE_ENDIAN
         
         // Visual parameter count (218 params in current SL protocol)
         const val VISUAL_PARAM_COUNT = 218
@@ -133,6 +134,7 @@ class AppearanceManager(
      * 
      * This is the UDP message that tells the simulator what your avatar looks like.
      * Other avatars will receive this information and render you accordingly.
+     * Message block fields are little-endian; UUID bytes remain big-endian.
      */
     suspend fun sendAgentSetAppearance(bakedTextures: Map<Int, UUID>) {
         val serial = serialNum.incrementAndGet()
@@ -145,7 +147,7 @@ class AppearanceManager(
         val wearableCount = bakedTextures.size
         val payloadSize = 48 + 1 + (wearableCount * 17) + 1 + VISUAL_PARAM_COUNT
         
-        val payload = ByteBuffer.allocate(payloadSize).order(ByteOrder.BIG_ENDIAN)
+        val payload = ByteBuffer.allocate(payloadSize).order(MESSAGE_BYTE_ORDER)
         
         // AgentData block
         payload.putUUID(agentId)
@@ -183,7 +185,7 @@ class AppearanceManager(
         // WearableData: Count (1) + N * (ItemID (16) + WearableType (1))
         
         val payloadSize = 32 + 1 + wearables.size * 17
-        val payload = ByteBuffer.allocate(payloadSize).order(ByteOrder.BIG_ENDIAN)
+        val payload = ByteBuffer.allocate(payloadSize).order(MESSAGE_BYTE_ORDER)
         
         // AgentData
         payload.putUUID(agentId)
@@ -247,6 +249,9 @@ data class WearableEntry(
  * Extension function to put UUID into ByteBuffer.
  */
 private fun ByteBuffer.putUUID(uuid: UUID) {
+    val originalOrder = order()
+    order(ByteOrder.BIG_ENDIAN)
     putLong(uuid.mostSignificantBits)
     putLong(uuid.leastSignificantBits)
+    order(originalOrder)
 }

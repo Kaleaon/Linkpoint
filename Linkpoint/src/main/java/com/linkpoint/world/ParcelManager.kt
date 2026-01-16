@@ -71,19 +71,21 @@ class ParcelManager(
     private var parcelOverlay: ByteArray? = null
     
     /**
-     * Write AgentData block (AgentID + SessionID) to buffer using proper UUID serialization
+     * Write AgentData block (AgentID + SessionID) with UUIDs in big-endian bytes.
+     * Message block fields remain little-endian per SL templates.
      */
     private fun writeAgentData(buffer: ByteBuffer) {
         val agentId = udpConnection.getAgentId()
         val sessionId = udpConnection.getSessionId()
         
         // Write UUIDs in big-endian (SL protocol format)
+        val originalOrder = buffer.order()
         buffer.order(ByteOrder.BIG_ENDIAN)
         buffer.putLong(agentId.mostSignificantBits)
         buffer.putLong(agentId.leastSignificantBits)
         buffer.putLong(sessionId.mostSignificantBits)
         buffer.putLong(sessionId.leastSignificantBits)
-        buffer.order(ByteOrder.LITTLE_ENDIAN)
+        buffer.order(originalOrder)
     }
     
     /**

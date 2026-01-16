@@ -12,8 +12,10 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * UDP Connection handler for Second Life protocol
- * Handles reliable and unreliable message transmission
+ * UDP Connection handler for Second Life protocol.
+ *
+ * Packet headers (flags/sequence/message number) are big-endian network order, while message bodies
+ * are little-endian per SL message templates; UUIDs remain raw big-endian bytes.
  */
 class UDPConnection {
     
@@ -65,6 +67,9 @@ class UDPConnection {
         private const val BUFFER_SIZE = 65535
         private const val ACK_TIMEOUT_MS = 1000L
         private const val MAX_RETRIES = 5
+        private const val PACKET_HEADER_SIZE = 6
+        private val HEADER_BYTE_ORDER = ByteOrder.BIG_ENDIAN
+        private val BODY_BYTE_ORDER = ByteOrder.LITTLE_ENDIAN
         
         // Packet flags
         const val FLAG_ZEROCODED = 0x80
@@ -176,14 +181,14 @@ class UDPConnection {
      * Send CompleteAgentMovement message.
      * This tells the simulator we're ready to receive world data.
      * 
-     * NOTE: Second Life protocol uses network byte order (big-endian) for all fields.
+     * NOTE: Second Life message blocks use little-endian encoding; UUID bytes remain big-endian.
      */
     suspend fun sendCompleteAgentMovement() {
         // CompleteAgentMovement message format:
-        // - AgentID (16 bytes, UUID) - big-endian
-        // - SessionID (16 bytes, UUID) - big-endian
-        // - CircuitCode (4 bytes, U32) - big-endian
-        val payload = ByteBuffer.allocate(36).order(ByteOrder.BIG_ENDIAN)
+        // - AgentID (16 bytes, UUID) - raw bytes (big-endian UUID)
+        // - SessionID (16 bytes, UUID) - raw bytes (big-endian UUID)
+        // - CircuitCode (4 bytes, U32) - little-endian
+        val payload = ByteBuffer.allocate(36).order(BODY_BYTE_ORDER)
         
         // Agent ID
         payload.putUUID(agentId)
@@ -205,16 +210,16 @@ class UDPConnection {
      * 
      * Based on Lumiya's SLAgentCircuit.sendRegionHandshakeReply()
      * 
-     * NOTE: Second Life protocol uses network byte order (big-endian) for all fields.
+     * NOTE: Second Life message blocks use little-endian encoding; UUID bytes remain big-endian.
      */
     suspend fun sendRegionHandshakeReply(flags: Int = 0) {
         // RegionHandshakeReply message format:
         // AgentData block:
-        // - AgentID (16 bytes, UUID) - big-endian
-        // - SessionID (16 bytes, UUID) - big-endian
+        // - AgentID (16 bytes, UUID) - raw bytes (big-endian UUID)
+        // - SessionID (16 bytes, UUID) - raw bytes (big-endian UUID)
         // RegionInfo block:
-        // - Flags (4 bytes, U32) - big-endian
-        val payload = ByteBuffer.allocate(36).order(ByteOrder.BIG_ENDIAN)
+        // - Flags (4 bytes, U32) - little-endian
+        val payload = ByteBuffer.allocate(36).order(BODY_BYTE_ORDER)
         
         // Agent ID
         payload.putUUID(agentId)
@@ -235,7 +240,7 @@ class UDPConnection {
      * 
      * Based on Lumiya's SLAgentCircuit.sendAgentThrottle()
      * 
-     * NOTE: Second Life protocol uses network byte order (big-endian) for all fields.
+     * NOTE: Second Life message blocks use little-endian encoding; UUID bytes remain big-endian.
      */
     suspend fun sendAgentThrottle(
         resend: Float = 50000f,
@@ -248,13 +253,13 @@ class UDPConnection {
     ) {
         // AgentThrottle message format:
         // AgentData block:
-        // - AgentID (16 bytes, UUID) - big-endian
-        // - SessionID (16 bytes, UUID) - big-endian
-        // - CircuitCode (4 bytes, U32) - big-endian
+        // - AgentID (16 bytes, UUID) - raw bytes (big-endian UUID)
+        // - SessionID (16 bytes, UUID) - raw bytes (big-endian UUID)
+        // - CircuitCode (4 bytes, U32) - little-endian
         // Throttle block:
-        // - GenCounter (4 bytes, U32) - big-endian
-        // - Throttles (28 bytes, 7 floats) - big-endian
-        val payload = ByteBuffer.allocate(36 + 4 + 28).order(ByteOrder.BIG_ENDIAN)
+        // - GenCounter (4 bytes, U32) - little-endian
+        // - Throttles (28 bytes, 7 floats) - little-endian
+        val payload = ByteBuffer.allocate(36 + 4 + 28).order(BODY_BYTE_ORDER)
         
         // Agent ID
         payload.putUUID(agentId)
@@ -318,7 +323,7 @@ class UDPConnection {
         // - ControlFlags (4 bytes, U32)
         // - Flags (1 byte)
         
-        val payload = ByteBuffer.allocate(114).order(ByteOrder.BIG_ENDIAN)
+        val payload = ByteBuffer.allocate(114).order(BODY_BYTE_ORDER)
         
         // AgentID
         payload.putUUID(agentId)
@@ -433,7 +438,7 @@ class UDPConnection {
      * Based on LibreMetaverse NetworkManager.HandleStartPingCheck()
      */
     suspend fun handleStartPingCheck(pingId: Byte, oldestUnacked: Int) {
-        val payload = ByteBuffer.allocate(5).order(ByteOrder.BIG_ENDIAN)
+        val payload = ByteBuffer.allocate(5).order(BODY_BYTE_ORDER)
         payload.put(pingId)
         payload.putInt(getOldestUnackedSequence())
         
@@ -476,7 +481,7 @@ class UDPConnection {
             lastAckFlush = System.currentTimeMillis()
         }
         
-        val payload = ByteBuffer.allocate(1 + acksToSend.size * 4).order(ByteOrder.BIG_ENDIAN)
+        val payload = ByteBuffer.allocate(1 + acksToSend.size * 4).order(BODY_BYTE_ORDER)
         payload.put(acksToSend.size.toByte())
         acksToSend.forEach { payload.putInt(it) }
         
@@ -510,7 +515,10 @@ class UDPConnection {
     }
     
     /**
-     * Send a packet
+     * Send a packet.
+     *
+     * The payload must already be encoded in little-endian message order; the header and message
+     * number are written in network (big-endian) order.
      */
     suspend fun sendPacket(
         messageId: Int,
@@ -527,12 +535,12 @@ class UDPConnection {
         if (reliable) flags = flags or FLAG_RELIABLE
         if (zerocoded) flags = flags or FLAG_ZEROCODED
         
-        val header = ByteBuffer.allocate(6).order(ByteOrder.BIG_ENDIAN)
+        val header = ByteBuffer.allocate(PACKET_HEADER_SIZE).order(HEADER_BYTE_ORDER)
         header.put(flags.toByte())
         header.putInt(seqNum)
         header.put(0.toByte()) // Extra header byte
         
-        // Determine message ID size
+        // Determine message ID size (network order, per SL/PyOGP packet layout).
         val messageBytes = when {
             messageId <= 0xFF -> byteArrayOf(messageId.toByte())
             messageId in 0xFF00..0xFFFF -> {
@@ -618,13 +626,13 @@ class UDPConnection {
     }
     
     private fun processPacket(data: ByteArray) {
-        if (data.size < 6) {
-            Log.w(TAG, "⚠️ Packet too small: ${data.size} bytes (minimum 6)")
+        if (data.size < PACKET_HEADER_SIZE) {
+            Log.w(TAG, "⚠️ Packet too small: ${data.size} bytes (minimum $PACKET_HEADER_SIZE)")
             return
         }
         
         val flags = data[0].toInt() and 0xFF
-        val seqNum = ByteBuffer.wrap(data, 1, 4).order(ByteOrder.BIG_ENDIAN).int
+        val seqNum = ByteBuffer.wrap(data, 1, 4).order(HEADER_BYTE_ORDER).int
         
         val isZerocoded = (flags and FLAG_ZEROCODED) != 0
         val isReliable = (flags and FLAG_RELIABLE) != 0
@@ -650,10 +658,10 @@ class UDPConnection {
             if (numAcks > 0) {
                 Log.d(TAG, "   Contains $numAcks ACK(s)")
                 val ackStart = decoded.size - 1 - numAcks * 4
-                if (ackStart > 6) {
+                if (ackStart > PACKET_HEADER_SIZE) {
                     for (i in 0 until numAcks) {
                         val offset = ackStart + i * 4
-                        val ackSeq = ByteBuffer.wrap(decoded, offset, 4).order(ByteOrder.BIG_ENDIAN).int
+                        val ackSeq = ByteBuffer.wrap(decoded, offset, 4).order(HEADER_BYTE_ORDER).int
                         pendingAcks.remove(ackSeq)
                         Log.d(TAG, "   ACK for packet #$ackSeq")
                     }
@@ -669,7 +677,7 @@ class UDPConnection {
         }
         
         // Parse message ID
-        var offset = 6
+        var offset = PACKET_HEADER_SIZE
         val messageId = when {
             decoded[offset] != 0xFF.toByte() -> {
                 val id = decoded[offset].toInt() and 0xFF
@@ -736,7 +744,7 @@ class UDPConnection {
     }
     
     private suspend fun sendAck(seqNum: Int) {
-        val payload = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(seqNum).array()
+        val payload = ByteBuffer.allocate(4).order(BODY_BYTE_ORDER).putInt(seqNum).array()
         sendPacket(MessageIds.PACKET_ACK, payload, reliable = false)
     }
     
@@ -756,12 +764,12 @@ class UDPConnection {
     
     private suspend fun sendUseCircuitCode() {
         // UseCircuitCode message format:
-        // - CircuitCode (4 bytes, U32) - big-endian per SL protocol
-        // - SessionID (16 bytes, UUID) - big-endian per SL protocol
-        // - AgentID (16 bytes, UUID) - big-endian per SL protocol
+        // - CircuitCode (4 bytes, U32) - little-endian
+        // - SessionID (16 bytes, UUID) - raw bytes (big-endian UUID)
+        // - AgentID (16 bytes, UUID) - raw bytes (big-endian UUID)
         //
-        // NOTE: Second Life protocol uses network byte order (big-endian) for all fields
-        val payload = ByteBuffer.allocate(36).order(ByteOrder.BIG_ENDIAN)
+        // NOTE: Second Life message blocks use little-endian encoding; UUID bytes remain big-endian.
+        val payload = ByteBuffer.allocate(36).order(BODY_BYTE_ORDER)
         payload.putInt(circuitCode)
         
         // Session ID (UUID)
@@ -801,8 +809,8 @@ class UDPConnection {
     private fun zeroencode(data: ByteArray): ByteArray {
         val result = mutableListOf<Byte>()
         var i = 0
-        // Skip header (first 6 bytes)
-        while (i < 6 && i < data.size) {
+        // Skip header (packet header is always network order)
+        while (i < PACKET_HEADER_SIZE && i < data.size) {
             result.add(data[i])
             i++
         }
@@ -826,8 +834,8 @@ class UDPConnection {
     private fun zerodecode(data: ByteArray): ByteArray {
         val result = mutableListOf<Byte>()
         var i = 0
-        // Skip header (first 6 bytes)
-        while (i < 6 && i < data.size) {
+        // Skip header (packet header is always network order)
+        while (i < PACKET_HEADER_SIZE && i < data.size) {
             result.add(data[i])
             i++
         }
