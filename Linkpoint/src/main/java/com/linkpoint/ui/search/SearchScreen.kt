@@ -63,7 +63,7 @@ enum class SearchCategory(val displayName: String, val icon: ImageVector) {
 /**
  * Generic search result
  */
-sealed class SearchResult {
+sealed class ComposeSearchResult {
     abstract val id: UUID
     abstract val name: String
     abstract val description: String
@@ -73,7 +73,7 @@ sealed class SearchResult {
         override val name: String,
         override val description: String = "",
         val isOnline: Boolean = false
-    ) : SearchResult()
+    ) : ComposeSearchResult()
     
     data class PlaceResult(
         override val id: UUID,
@@ -81,7 +81,7 @@ sealed class SearchResult {
         override val description: String = "",
         val traffic: Int = 0,
         val slurl: String = ""
-    ) : SearchResult()
+    ) : ComposeSearchResult()
     
     data class GroupResult(
         override val id: UUID,
@@ -89,7 +89,7 @@ sealed class SearchResult {
         override val description: String = "",
         val memberCount: Int = 0,
         val isOpen: Boolean = true
-    ) : SearchResult()
+    ) : ComposeSearchResult()
     
     data class EventResult(
         override val id: UUID,
@@ -97,7 +97,7 @@ sealed class SearchResult {
         override val description: String = "",
         val location: String = "",
         val dateTime: String = ""
-    ) : SearchResult()
+    ) : ComposeSearchResult()
 }
 
 /**
@@ -112,10 +112,10 @@ sealed class SearchResult {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    results: List<SearchResult>,
+    results: List<ComposeSearchResult>,
     isLoading: Boolean = false,
     onSearch: (String, SearchCategory) -> Unit,
-    onResultClick: (SearchResult) -> Unit,
+    onResultClick: (ComposeSearchResult) -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -232,7 +232,7 @@ fun SearchScreen(
  */
 @Composable
 fun SearchResultCard(
-    result: SearchResult,
+    result: ComposeSearchResult,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -259,10 +259,10 @@ fun SearchResultCard(
             ) {
                 Icon(
                     imageVector = when (result) {
-                        is SearchResult.PersonResult -> Icons.Default.Person
-                        is SearchResult.PlaceResult -> Icons.Default.LocationOn
-                        is SearchResult.GroupResult -> Icons.Default.Group
-                        is SearchResult.EventResult -> Icons.Default.Event
+                        is ComposeSearchResult.PersonResult -> Icons.Default.Person
+                        is ComposeSearchResult.PlaceResult -> Icons.Default.LocationOn
+                        is ComposeSearchResult.GroupResult -> Icons.Default.Group
+                        is ComposeSearchResult.EventResult -> Icons.Default.Event
                     },
                     contentDescription = null,
                     modifier = Modifier.size(28.dp),
@@ -282,13 +282,13 @@ fun SearchResultCard(
                 
                 // Type-specific subtitle
                 val subtitle = when (result) {
-                    is SearchResult.PersonResult -> 
+                    is ComposeSearchResult.PersonResult -> 
                         if (result.isOnline) "Online" else result.description.ifBlank { "Offline" }
-                    is SearchResult.PlaceResult -> 
+                    is ComposeSearchResult.PlaceResult -> 
                         if (result.traffic > 0) "Traffic: ${result.traffic}" else result.description
-                    is SearchResult.GroupResult -> 
+                    is ComposeSearchResult.GroupResult -> 
                         "${result.memberCount} members" + if (result.isOpen) " • Open" else ""
-                    is SearchResult.EventResult -> 
+                    is ComposeSearchResult.EventResult -> 
                         result.dateTime.ifBlank { result.location }
                 }
                 
