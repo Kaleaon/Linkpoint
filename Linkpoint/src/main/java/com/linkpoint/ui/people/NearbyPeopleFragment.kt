@@ -98,8 +98,7 @@ class NearbyPeopleFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                // TODO: Implement getNearbyUsers() in WorldMap
-                val nearbyUsers = emptyList<NearbyUser>()
+                val nearbyUsers = worldMap.getNearbyUsers()
                 
                 val filteredUsers = when (currentTab) {
                     TabType.ALL -> nearbyUsers

@@ -189,6 +189,34 @@ class WorldMap(
     }
     
     /**
+     * Get nearby users
+     * Returns list of users within the specified range, sorted by distance
+     * 
+     * @param maxDistance Maximum distance in meters to search for users (default 96m - reasonable default search radius)
+     * @param maxResults Maximum number of results to return (default 100)
+     * @return List of nearby users sorted by distance
+     */
+    suspend fun getNearbyUsers(maxDistance: Float = 96f, maxResults: Int = 100): List<NearbyUser> {
+        require(maxDistance > 0) { "maxDistance must be positive" }
+        require(maxResults > 0) { "maxResults must be positive" }
+        
+        // Note: Using Dispatchers.IO because the full implementation will perform
+        // network I/O to query the simulator for nearby avatar data
+        return withContext(Dispatchers.IO) {
+            // TODO: This needs to be implemented properly by querying the simulator
+            // for nearby avatars using the ObjectUpdate messages and avatar positions.
+            // The implementation should:
+            // 1. Query the simulator for avatar positions within maxDistance
+            // 2. Calculate distances from current position
+            // 3. Check friend status using FriendsManager
+            // 4. Sort by distance and limit to maxResults
+            // For now, returning an empty list until the full protocol implementation
+            // is complete.
+            emptyList()
+        }
+    }
+    
+    /**
      * Clear cached tiles
      */
     fun clearCache() {
@@ -229,3 +257,21 @@ data class RegionSearchResult(
     val access: Int,
     val mapImageId: UUID?
 )
+
+/**
+ * Represents a nearby user/avatar in the virtual world
+ * @param agentId Unique identifier for the user/avatar
+ * @param name Display name of the user
+ * @param distance Distance in meters from the current user (must be non-negative)
+ * @param isFriend Whether this user is in the current user's friends list
+ */
+data class NearbyUser(
+    val agentId: UUID,
+    val name: String,
+    val distance: Float,
+    val isFriend: Boolean
+) {
+    init {
+        require(distance >= 0) { "Distance must be non-negative, got $distance" }
+    }
+}
