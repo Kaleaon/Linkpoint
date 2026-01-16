@@ -32,7 +32,7 @@ class AppearanceEditorFragment : Fragment() {
         LinkpointApp.getInstance().avatarManager 
     }
 
-    private var currentWearableType = WearableType.HEAD
+    private var currentWearableType = WearableType.SHAPE
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -68,21 +68,20 @@ class AppearanceEditorFragment : Fragment() {
     }
 
     private fun setupTabs() {
+        // Use actual wearable types from Second Life
         val wearableTypes = listOf(
-            WearableType.HEAD,
+            WearableType.SHAPE,
+            WearableType.SKIN,
             WearableType.HAIR,
             WearableType.EYES,
-            WearableType.EARS,
-            WearableType.NOSE,
-            WearableType.MOUTH,
-            WearableType.CHIN,
-            WearableType.TORSO,
-            WearableType.LEGS,
-            WearableType.FEET
+            WearableType.SHIRT,
+            WearableType.PANTS,
+            WearableType.SHOES,
+            WearableType.JACKET
         )
 
         wearableTypes.forEach { type ->
-            tabLayout.addTab(tabLayout.newTab().setText(type.name.lowercase().capitalize()))
+            tabLayout.addTab(tabLayout.newTab().setText(type.name.lowercase().replaceFirstChar { it.uppercase() }))
         }
 
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {

@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.linkpoint.LinkpointApp
@@ -40,7 +41,7 @@ class AddFriendDialog : DialogFragment() {
         val name = nameEditText.text.toString().trim()
         if (name.isNotEmpty()) {
             val friendsManager = LinkpointApp.getInstance().friendsManager
-            lifecycleScope.launch {
+            viewLifecycleOwner.lifecycleScope.launch {
                 try {
                     friendsManager.findAndAddFriend(name)
                     dismiss()

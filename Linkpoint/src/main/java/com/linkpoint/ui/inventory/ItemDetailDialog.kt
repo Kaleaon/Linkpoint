@@ -77,7 +77,7 @@ class ItemDetailDialog : DialogFragment() {
         if (mask and 0x00000020 != 0) permissions.add("Everyone Copy")
         if (mask and 0x00000080 != 0) permissions.add("Everyone Modify")
         if (mask and 0x00000100 != 0) permissions.add("Everyone Transfer")
-        return permissions.ifEmpty { "None" }.joinToString(", ")
+        return if (permissions.isEmpty()) "None" else permissions.joinToString(", ")
     }
 
     companion object {

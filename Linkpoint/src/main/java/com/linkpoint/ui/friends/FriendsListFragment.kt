@@ -15,6 +15,7 @@ import com.google.android.material.tabs.TabLayout
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.world.Friend
+import com.linkpoint.world.FriendEvent
 import com.linkpoint.world.FriendshipOffer
 import com.linkpoint.world.FriendsManager
 import kotlinx.coroutines.launch
@@ -139,13 +140,14 @@ class FriendsListFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             friendsManager.friendsFlow.collect { event ->
                 when (event) {
-                    is FriendsManager.FriendEvent.OfferReceived -> {
+                    is FriendEvent.OfferReceived -> {
                         // Show friendship offer dialog
                         showFriendshipOfferDialog(event.offer)
                     }
-                    is FriendsManager.FriendEvent.Added,
-                    is FriendsManager.FriendEvent.Removed,
-                    is FriendsManager.FriendEvent.StatusChanged -> {
+                    is FriendEvent.Added,
+                    is FriendEvent.Removed,
+                    is FriendEvent.OnlineStatusChanged,
+                    is FriendEvent.RightsChanged -> {
                         // Refresh friends list
                         loadFriends()
                     }

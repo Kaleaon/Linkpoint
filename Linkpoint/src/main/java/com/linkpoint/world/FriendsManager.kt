@@ -1,5 +1,6 @@
 package com.linkpoint.world
 
+import android.os.Parcelable
 import android.util.Log
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.parcelize.Parcelize
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
@@ -547,6 +549,7 @@ class FriendsManager(
     }
 }
 
+@Parcelize
 data class Friend(
     val agentId: UUID,
     val name: String,
@@ -554,19 +557,20 @@ data class Friend(
     val rightsHas: Int,
     var isOnline: Boolean = false,
     var lastSeenTime: Long = System.currentTimeMillis()
-) {
+) : Parcelable {
     val canSeeOnline: Boolean get() = (rightsHas and FriendsManager.RIGHTS_ONLINE_STATUS) != 0
     val canTrack: Boolean get() = (rightsHas and FriendsManager.RIGHTS_MAP_LOCATION) != 0
     val canModifyObjects: Boolean get() = (rightsHas and FriendsManager.RIGHTS_MODIFY_OBJECTS) != 0
 }
 
+@Parcelize
 data class FriendshipOffer(
     val transactionId: UUID,
     val fromAgentId: UUID,
     val fromName: String,
     val message: String,
     val timestamp: Long
-)
+) : Parcelable
 
 sealed class FriendEvent {
     data class Added(val friend: Friend) : FriendEvent()
