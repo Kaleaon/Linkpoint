@@ -248,17 +248,18 @@ class AvatarController {
     
     fun fixedUpdate(dt: Float, input: InputState) {
         // Calculate movement direction (avoid normalizing zero vector)
+        // Deadzone threshold: 0.01f squared length ≈ 0.1 actual length
         val speed = if (isFlying) flySpeed else walkSpeed
         val rawMoveDir = Vector3(input.moveX, 0f, -input.moveY)
-        val moveDir = if (rawMoveDir.len2() > 0.001f) rawMoveDir.nor() else Vector3.Zero
+        val moveDir = if (rawMoveDir.len2() > 0.01f) rawMoveDir.nor() else Vector3.Zero
         
         // Apply movement
         if (isFlying) {
             velocity.x = moveDir.x * speed
             velocity.z = moveDir.z * speed
-            // Vertical movement in fly mode (separate from horizontal)
-            // Use a dedicated fly up/down input or vertical component
-            velocity.y *= 0.9f  // Gradual stop when no vertical input
+            // Vertical movement in fly mode: use joystick Y axis for altitude control
+            // Push forward (positive Y) to ascend, pull back (negative Y) to descend
+            velocity.y = input.moveY * speed
         } else {
             velocity.x = moveDir.x * speed
             velocity.z = moveDir.z * speed

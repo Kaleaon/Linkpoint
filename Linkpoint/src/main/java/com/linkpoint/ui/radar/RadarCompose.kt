@@ -90,18 +90,28 @@ fun Radar(
         remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
     }
     
-    val textPaint = remember {
+    val textPaint = remember(textColor) {
         android.graphics.Paint().apply {
-            color = android.graphics.Color.WHITE
+            color = android.graphics.Color.argb(
+                (textColor.alpha * 255).toInt(),
+                (textColor.red * 255).toInt(),
+                (textColor.green * 255).toInt(),
+                (textColor.blue * 255).toInt()
+            )
             textSize = 24f
             textAlign = android.graphics.Paint.Align.CENTER
             isAntiAlias = true
         }
     }
     
-    val directionPaint = remember {
+    val directionPaint = remember(textColor) {
         android.graphics.Paint().apply {
-            color = android.graphics.Color.WHITE
+            color = android.graphics.Color.argb(
+                (textColor.alpha * 255).toInt(),
+                (textColor.red * 255).toInt(),
+                (textColor.green * 255).toInt(),
+                (textColor.blue * 255).toInt()
+            )
             textSize = 28f
             textAlign = android.graphics.Paint.Align.CENTER
             isAntiAlias = true

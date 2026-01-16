@@ -10,6 +10,10 @@ import kotlinx.serialization.json.Json
  * Theme packs are JSON-serializable for easy import/export.
  * 
  * Based on CleverFerret's theming system with metallic accent colors.
+ * 
+ * Note: This class uses android.graphics.Color for color parsing. While the data class
+ * itself is serializable to JSON, the parseColor() method requires Android framework.
+ * For cross-platform usage, consider using pure Kotlin hex parsing instead.
  */
 @Serializable
 data class ThemePack(
