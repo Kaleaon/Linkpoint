@@ -47,4 +47,8 @@
     <!-- Voice Status Colors -->
     <color name="voice_connected">#4CAF50</color>
     <color name="voice_disconnected">#757575</color>
+    
+    <!-- Friend Status Colors -->
+    <color name="online_status">#4CAF50</color>
+    <color name="offline_status">#757575</color>
 </resources>
