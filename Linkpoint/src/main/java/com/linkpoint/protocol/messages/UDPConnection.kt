@@ -476,7 +476,7 @@ class UDPConnection {
             lastAckFlush = System.currentTimeMillis()
         }
         
-        val payload = ByteBuffer.allocate(1 + acksToSend.size * 4).order(ByteOrder.BIG_ENDIAN)
+        val payload = ByteBuffer.allocate(1 + acksToSend.size * 4).order(ByteOrder.LITTLE_ENDIAN)
         payload.put(acksToSend.size.toByte())
         acksToSend.forEach { payload.putInt(it) }
         
@@ -736,7 +736,7 @@ class UDPConnection {
     }
     
     private suspend fun sendAck(seqNum: Int) {
-        val payload = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(seqNum).array()
+        val payload = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(seqNum).array()
         sendPacket(MessageIds.PACKET_ACK, payload, reliable = false)
     }
     

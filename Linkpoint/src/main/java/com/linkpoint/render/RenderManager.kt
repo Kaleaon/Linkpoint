@@ -70,11 +70,7 @@ class RenderManager(private val context: Context) {
                     override fun onNativeWindowChanged(surface: Surface) {
                         swapChain?.let { engine?.destroySwapChain(it) }
                         swapChain = engine?.createSwapChain(surface)
-                        renderer?.let { render ->
-                            this@RenderManager.surfaceView?.display?.let { display ->
-                                displayHelper?.attach(render, display)
-                            }
-                        }
+                        attachDisplayHelper()
                     }
                     
                     override fun onDetachedFromSurface() {
@@ -152,11 +148,7 @@ class RenderManager(private val context: Context) {
         val surface = surfaceView?.holder?.surface
         if (surface != null && surface.isValid) {
             swapChain = engine?.createSwapChain(surface)
-            renderer?.let { render ->
-                surfaceView?.display?.let { display ->
-                    displayHelper?.attach(render, display)
-                }
-            }
+            attachDisplayHelper()
             val width = surfaceView?.width ?: 0
             val height = surfaceView?.height ?: 0
             if (width > 0 && height > 0) {
@@ -167,6 +159,14 @@ class RenderManager(private val context: Context) {
             }
         }
         return swapChain
+    }
+
+    private fun attachDisplayHelper() {
+        renderer?.let { render ->
+            surfaceView?.display?.let { display ->
+                displayHelper?.attach(render, display)
+            }
+        }
     }
     
     /**
