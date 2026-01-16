@@ -66,11 +66,6 @@ class UDPConnection {
         private const val ACK_TIMEOUT_MS = 1000L
         private const val MAX_RETRIES = 5
         
-        // Packet logging limits
-        private const val LOG_FIRST_N_PACKETS = 10
-        private const val LOG_EVERY_NTH_PACKET = 100
-        private const val LOG_MAX_PACKETS = 10000
-        
         // Packet flags
         const val FLAG_ZEROCODED = 0x80
         const val FLAG_RELIABLE = 0x40
@@ -93,32 +88,63 @@ class UDPConnection {
      */
     suspend fun connect(): Boolean = withContext(Dispatchers.IO) {
         try {
+            Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
+            Log.i(TAG, "║ INITIATING UDP CONNECTION                                          ║")
+            Log.i(TAG, "║ Target: $simIP:$simPort                                               ║")
+            Log.i(TAG, "║ Circuit Code: $circuitCode                                                ║")
+            Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
+            
             socket = DatagramSocket()
             socket?.soTimeout = 5000
+            
+            Log.i(TAG, "✓ Datagram socket created")
             
             // CRITICAL: Set isConnected BEFORE starting receive loop
             // The receive loop checks this flag in its while condition,
             // so it must be true before the loop starts or it exits immediately
             isConnected = true
             
+            Log.i(TAG, "✓ isConnected flag set to true")
+            
             // Start receive loop
             receiveJob = scope.launch {
                 receiveLoop()
             }
             
+            Log.i(TAG, "✓ Receive loop started")
+            
             // Send UseCircuitCode message
+            Log.i(TAG, "→ Sending UseCircuitCode...")
             sendUseCircuitCode()
+            Log.i(TAG, "✓ UseCircuitCode sent")
             
             // Wait a moment for the circuit to be established
+            Log.d(TAG, "  Waiting 500ms for circuit establishment...")
             delay(500)
             
-            // Send CompleteAgentMovement to tell the simulator we're ready
-            sendCompleteAgentMovement()
+            // Send AgentThrottle to set bandwidth allocation
+            // This is CRITICAL - must be sent before CompleteAgentMovement
+            Log.i(TAG, "→ Sending AgentThrottle (bandwidth configuration)...")
+            sendAgentThrottle()
+            Log.i(TAG, "✓ AgentThrottle sent")
             
-            Log.i(TAG, "Connected to $simIP:$simPort, circuit established")
+            // Wait a moment
+            Log.d(TAG, "  Waiting 200ms after AgentThrottle...")
+            delay(200)
+            
+            // Send CompleteAgentMovement to tell the simulator we're ready
+            Log.i(TAG, "→ Sending CompleteAgentMovement...")
+            sendCompleteAgentMovement()
+            Log.i(TAG, "✓ CompleteAgentMovement sent")
+            
+            Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
+            Log.i(TAG, "║ UDP CONNECTION ESTABLISHED                                         ║")
+            Log.i(TAG, "║ Waiting for simulator to send RegionHandshake...                    ║")
+            Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
+            
             true
         } catch (e: Exception) {
-            Log.e(TAG, "Connection failed", e)
+            Log.e(TAG, "❌ Connection failed", e)
             isConnected = false
             receiveJob?.cancel()
             socket?.close()
@@ -313,7 +339,13 @@ class UDPConnection {
     
     private suspend fun receiveLoop() {
         val buffer = ByteArray(BUFFER_SIZE)
-        var packetCount = 0
+        var packetsReceived = 0
+        var totalBytesReceived = 0L
+        
+        Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
+        Log.i(TAG, "║ UDP RECEIVE LOOP STARTED                                            ║")
+        Log.i(TAG, "║ Will log all incoming packets for debugging                          ║")
+        Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
         
         while (isConnected) {
             try {
@@ -321,28 +353,47 @@ class UDPConnection {
                 socket?.receive(datagram)
                 
                 if (datagram.length > 0) {
-                    packetCount++
+                    packetsReceived++
+                    totalBytesReceived += datagram.length
+                    
                     val data = buffer.copyOf(datagram.length)
-                    // Log first N packets, then every Nth packet up to max limit
-                    if (packetCount <= LOG_FIRST_N_PACKETS || 
-                        (packetCount % LOG_EVERY_NTH_PACKET == 0 && packetCount <= LOG_MAX_PACKETS)) {
-                        Log.d(TAG, "Received packet #$packetCount: ${data.size} bytes from ${datagram.address}:${datagram.port}")
+                    
+                    // Log packet reception
+                    Log.i(TAG, "📦 PACKET RECEIVED #${packetsReceived}: ${datagram.length} bytes from ${datagram.address}:${datagram.port}")
+                    
+                    // Log raw hex for first few packets (for debugging)
+                    if (packetsReceived <= 10) {
+                        val hexPreview = data.take(32).joinToString(" ") { "%02X".format(it) }
+                        Log.d(TAG, "   Raw preview: $hexPreview")
                     }
+                    
                     processPacket(data)
                 }
             } catch (e: java.net.SocketTimeoutException) {
                 // Normal timeout, continue
+                if (packetsReceived == 0) {
+                    Log.w(TAG, "⚠️ No packets received yet, waiting...")
+                }
                 resendPendingPackets()
             } catch (e: Exception) {
                 if (isConnected) {
-                    Log.e(TAG, "Receive error", e)
+                    Log.e(TAG, "❌ Receive error", e)
                 }
             }
         }
+        
+        Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
+        Log.i(TAG, "║ UDP RECEIVE LOOP STOPPED                                             ║")
+        Log.i(TAG, "║ Total packets received: $packetsReceived                                 ║")
+        Log.i(TAG, "║ Total bytes received: $totalBytesReceived                                   ║")
+        Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
     }
     
     private fun processPacket(data: ByteArray) {
-        if (data.size < 6) return
+        if (data.size < 6) {
+            Log.w(TAG, "⚠️ Packet too small: ${data.size} bytes (minimum 6)")
+            return
+        }
         
         val flags = data[0].toInt() and 0xFF
         val seqNum = ByteBuffer.wrap(data, 1, 4).order(ByteOrder.BIG_ENDIAN).int
@@ -351,20 +402,33 @@ class UDPConnection {
         val isReliable = (flags and FLAG_RELIABLE) != 0
         val hasAcks = (flags and FLAG_ACK) != 0
         
+        // Log packet details
+        val flagsStr = buildString {
+            if (isZerocoded) append("[ZERO]")
+            if (isReliable) append("[RELIABLE]")
+            if (hasAcks) append("[ACK]")
+        }
+        Log.d(TAG, "   Packet #$seqNum $flagsStr - ${data.size} bytes")
+        
         var decoded = data
         if (isZerocoded) {
             decoded = zerodecode(data)
+            Log.d(TAG, "   Zero-decoded: ${decoded.size} bytes")
         }
         
         // Handle acks at end of packet
         if (hasAcks && decoded.size > 1) {
             val numAcks = decoded[decoded.size - 1].toInt() and 0xFF
-            val ackStart = decoded.size - 1 - numAcks * 4
-            if (ackStart > 6) {
-                for (i in 0 until numAcks) {
-                    val offset = ackStart + i * 4
-                    val ackSeq = ByteBuffer.wrap(decoded, offset, 4).order(ByteOrder.BIG_ENDIAN).int
-                    pendingAcks.remove(ackSeq)
+            if (numAcks > 0) {
+                Log.d(TAG, "   Contains $numAcks ACK(s)")
+                val ackStart = decoded.size - 1 - numAcks * 4
+                if (ackStart > 6) {
+                    for (i in 0 until numAcks) {
+                        val offset = ackStart + i * 4
+                        val ackSeq = ByteBuffer.wrap(decoded, offset, 4).order(ByteOrder.BIG_ENDIAN).int
+                        pendingAcks.remove(ackSeq)
+                        Log.d(TAG, "   ACK for packet #$ackSeq")
+                    }
                 }
             }
         }
@@ -395,18 +459,51 @@ class UDPConnection {
                 offset += 4
                 (0xFFFF shl 16) or id
             }
-            else -> return
+            else -> {
+                Log.w(TAG, "   ⚠️ Could not parse message ID")
+                return
+            }
         }
+        
+        // Get message name for logging
+        val messageName = getMessageName(messageId)
+        Log.i(TAG, "   📨 Message: $messageName (0x${messageId.toString(16).uppercase()})")
         
         // Dispatch to handler
         val payload = decoded.copyOfRange(offset, decoded.size - if (hasAcks) 1 + (decoded[decoded.size - 1].toInt() and 0xFF) * 4 else 0)
+        
         val handler = messageHandlers[messageId]
         if (handler != null) {
-            handler.onMessage(messageId, payload)
+            Log.d(TAG, "   → Dispatching to handler (${payload.size} bytes payload)")
+            try {
+                handler.onMessage(messageId, payload)
+                Log.d(TAG, "   ✓ Handler executed successfully")
+            } catch (e: Exception) {
+                Log.e(TAG, "   ✗ Handler failed", e)
+            }
         } else {
-            // Log unhandled messages for diagnostics
-            val msgIdHex = "0x${Integer.toHexString(messageId).uppercase()}"
-            Log.v(TAG, "Unhandled message: $msgIdHex (${payload.size} bytes)")
+            Log.w(TAG, "   ⚠️ No handler registered for message: $messageName")
+        }
+    }
+    
+    private fun getMessageName(messageId: Int): String {
+        return when (messageId) {
+            MessageIds.USE_CIRCUIT_CODE -> "UseCircuitCode"
+            MessageIds.COMPLETE_AGENT_MOVEMENT -> "CompleteAgentMovement"
+            MessageIds.REGION_HANDSHAKE -> "⭐ RegionHandshake"
+            MessageIds.REGION_HANDSHAKE_REPLY -> "RegionHandshakeReply"
+            MessageIds.AGENT_THROTTLE -> "AgentThrottle"
+            MessageIds.AGENT_MOVEMENT_COMPLETE -> "AgentMovementComplete"
+            MessageIds.CHAT_FROM_SIMULATOR -> "ChatFromSimulator"
+            MessageIds.OBJECT_UPDATE -> "ObjectUpdate"
+            MessageIds.OBJECT_UPDATE_COMPRESSED -> "ObjectUpdateCompressed"
+            MessageIds.IMPROVED_TERSE_OBJECT_UPDATE -> "ImprovedTerseObjectUpdate"
+            MessageIds.AVATAR_ANIMATION -> "AvatarAnimation"
+            MessageIds.COARSE_LOCATION_UPDATE -> "CoarseLocationUpdate"
+            MessageIds.KILL_OBJECT -> "KillObject"
+            MessageIds.START_PING_CHECK -> "StartPingCheck"
+            MessageIds.COMPLETE_PING_CHECK -> "CompletePingCheck"
+            else -> "Unknown(0x${messageId.toString(16).uppercase()})"
         }
     }
     
@@ -417,11 +514,10 @@ class UDPConnection {
     
     /**
      * Write UUID to ByteBuffer in Second Life format.
-     * UUIDs are always stored as 16 raw bytes in big-endian order per SL protocol.
-     * This method temporarily switches to BIG_ENDIAN (if not already) and restores after.
+     * SL stores UUIDs as 16 raw bytes in big-endian order, even in little-endian blocks.
      */
     private fun ByteBuffer.putUUID(uuid: UUID): ByteBuffer {
-        // Ensure UUID bytes are in big-endian order (standard for SL protocol)
+        // UUID fields are big-endian while the rest of the block uses little-endian.
         val originalOrder = order()
         order(ByteOrder.BIG_ENDIAN)
         putLong(uuid.mostSignificantBits)
