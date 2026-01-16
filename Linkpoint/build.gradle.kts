@@ -7,6 +7,9 @@ plugins {
     id("org.jetbrains.kotlin.plugin.parcelize") version "1.9.22"
 }
 
+// Configuration for libGDX native libraries
+val natives by configurations.creating
+
 // Load keystore properties if available
 val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties()
@@ -250,6 +253,29 @@ dependencies {
     implementation("com.github.manalkaff:JetStick:1.2")  // Virtual joystick for avatar movement
     implementation("io.github.thechance101:chart:Beta-0.0.5")  // Charts including RadarChart
     
+    // SceneView - Compose wrapper for Filament 3D/AR rendering
+    implementation("io.github.sceneview:sceneview:2.3.3")
+    
+    // libGDX - Cross-platform game engine for game logic and input handling
+    val gdxVersion = "1.12.1"
+    implementation("com.badlogicgames.gdx:gdx:$gdxVersion")
+    implementation("com.badlogicgames.gdx:gdx-backend-android:$gdxVersion")
+    natives("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a")
+    natives("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a")
+    natives("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86")
+    natives("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86_64")
+    
+    // KTX - Kotlin extensions for libGDX
+    val ktxVersion = "1.12.1-rc1"
+    implementation("io.github.libktx:ktx-app:$ktxVersion")           // Application utilities
+    implementation("io.github.libktx:ktx-async:$ktxVersion")         // Coroutines support
+    implementation("io.github.libktx:ktx-collections:$ktxVersion")   // Collection extensions
+    implementation("io.github.libktx:ktx-graphics:$ktxVersion")      // Graphics utilities
+    implementation("io.github.libktx:ktx-log:$ktxVersion")           // Logging
+    implementation("io.github.libktx:ktx-math:$ktxVersion")          // Math operators
+    implementation("io.github.libktx:ktx-assets:$ktxVersion")        // Asset management
+    implementation("io.github.libktx:ktx-assets-async:$ktxVersion")  // Async asset loading
+    
     // Compose debugging
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
@@ -289,5 +315,23 @@ fun getGitHash(): String {
         process.inputStream.bufferedReader().readText().trim()
     } catch (e: Exception) {
         "unknown"
+    }
+}
+
+// Task to copy libGDX native libraries
+tasks.register<Copy>("copyNatives") {
+    doFirst {
+        file("libs/armeabi-v7a/").mkdirs()
+        file("libs/arm64-v8a/").mkdirs()
+        file("libs/x86/").mkdirs()
+        file("libs/x86_64/").mkdirs()
+    }
+    
+    natives.asFileTree.forEach { jarFile ->
+        copy {
+            from(zipTree(jarFile))
+            into("libs/${jarFile.nameWithoutExtension.substringAfterLast("natives-")}")
+            include("*.so")
+        }
     }
 }
