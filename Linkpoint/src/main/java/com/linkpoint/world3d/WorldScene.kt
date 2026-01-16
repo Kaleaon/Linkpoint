@@ -33,6 +33,7 @@ import io.github.sceneview.rememberNodes
 import io.github.sceneview.rememberRenderer
 import io.github.sceneview.rememberScene
 import io.github.sceneview.rememberView
+import com.google.android.filament.Engine
 
 /**
  * Compose-based 3D World View using SceneView (Filament wrapper).
@@ -84,21 +85,14 @@ fun WorldScene(
     // Camera manipulator for user interaction
     val cameraManipulator = rememberCameraManipulator()
     
-    // Environment (skybox + IBL)
-    val environment = rememberEnvironment(environmentLoader) {
-        worldState.environmentHdrPath?.let { hdrPath ->
-            try {
-                environmentLoader.createHDREnvironment(assetFileLocation = hdrPath)
-            } catch (e: Exception) {
-                null
-            }
-        }
-    }
+    // Environment (skybox + IBL) - uses default environment from SceneView
+    // Custom HDR environment loading can be implemented later if needed
+    val environment = rememberEnvironment(environmentLoader)
     
     // Dynamic nodes from world state
     val childNodes = rememberNodes {
         worldState.modelNodes.forEach { modelData ->
-            add(createModelNode(modelLoader, materialLoader, modelData))
+            add(createModelNode(engine, modelLoader, materialLoader, modelData))
         }
     }
     
@@ -156,6 +150,7 @@ fun WorldScene(
  * Creates a ModelNode from world model data.
  */
 private fun createModelNode(
+    engine: Engine,
     modelLoader: ModelLoader,
     materialLoader: MaterialLoader,
     modelData: WorldModelData
@@ -172,7 +167,7 @@ private fun createModelNode(
         }
     } catch (e: Exception) {
         // Return empty node if model fails to load
-        Node()
+        Node(engine = engine)
     }
 }
 

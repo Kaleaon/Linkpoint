@@ -20,12 +20,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.linkpoint.voice.VoiceManager
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 /**
  * Compose version of the VoiceControlView.
@@ -123,14 +125,17 @@ fun VoiceControl(
     connectedColor: Color = Color(0xFF4CAF50),
     disconnectedColor: Color = Color(0xFF757575)
 ) {
+    val scope = rememberCoroutineScope()
     VoiceControl(
         isConnected = voiceManager.isConnected,
         isMuted = voiceManager.isMuted,
         onVoiceToggle = { shouldConnect ->
-            if (shouldConnect) {
-                voiceManager.joinParcelVoice()
-            } else {
-                voiceManager.leaveVoice()
+            scope.launch {
+                if (shouldConnect) {
+                    voiceManager.joinParcelVoice()
+                } else {
+                    voiceManager.leaveVoice()
+                }
             }
         },
         onMuteToggle = { shouldMute ->
