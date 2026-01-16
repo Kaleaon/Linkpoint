@@ -197,6 +197,9 @@ class WorldMap(
      * @return List of nearby users sorted by distance
      */
     suspend fun getNearbyUsers(maxDistance: Float = 96f, maxResults: Int = 100): List<NearbyUser> {
+        require(maxDistance > 0) { "maxDistance must be positive" }
+        require(maxResults > 0) { "maxResults must be positive" }
+        
         return withContext(Dispatchers.IO) {
             // TODO: This needs to be implemented properly by querying the simulator
             // for nearby avatars using the ObjectUpdate messages and avatar positions.
@@ -255,10 +258,18 @@ data class RegionSearchResult(
 
 /**
  * Represents a nearby user/avatar in the virtual world
+ * @param agentId Unique identifier for the user/avatar
+ * @param name Display name of the user
+ * @param distance Distance in meters from the current user (must be non-negative)
+ * @param isFriend Whether this user is in the current user's friends list
  */
 data class NearbyUser(
     val agentId: UUID,
     val name: String,
     val distance: Float,
     val isFriend: Boolean
-)
+) {
+    init {
+        require(distance >= 0) { "Distance must be non-negative, got $distance" }
+    }
+}
