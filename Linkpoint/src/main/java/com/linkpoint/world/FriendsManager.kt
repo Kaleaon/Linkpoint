@@ -166,6 +166,40 @@ class FriendsManager(
     fun getAllFriends(): List<Friend> = friends.values.toList()
     
     /**
+     * Find and add a friend by name
+     */
+    suspend fun findAndAddFriend(name: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                // Use directory lookup to find agent
+                val lookupResponse = capabilityManager.getCapability("AgentDomain")?.let {
+                    capabilityManager.get(it, mapOf("names" to name))
+                }
+                
+                if (lookupResponse != null) {
+                    val agentId = UUID.fromString(lookupResponse.getString("agent_id") ?: return@withContext false)
+                    sendFriendshipOffer(agentId)
+                    true
+                } else {
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to find friend", e)
+                false
+            }
+        }
+    }
+    
+    /**
+     * Send IM to friend
+     */
+    suspend fun sendIM(friendAgentId: UUID, message: String) {
+        // This would be handled by IMManager
+        // For now, just log
+        Log.i(TAG, "Send IM to $friendAgentId: $message")
+    }
+    
+    /**
      * Get friend by ID
      */
     fun getFriend(agentId: UUID): Friend? = friends[agentId]
@@ -508,7 +542,8 @@ data class Friend(
     val name: String,
     val rightsGiven: Int,
     val rightsHas: Int,
-    var isOnline: Boolean = false
+    var isOnline: Boolean = false,
+    var lastSeenTime: Long = System.currentTimeMillis()
 ) {
     val canSeeOnline: Boolean get() = (rightsHas and FriendsManager.RIGHTS_ONLINE_STATUS) != 0
     val canTrack: Boolean get() = (rightsHas and FriendsManager.RIGHTS_MAP_LOCATION) != 0
