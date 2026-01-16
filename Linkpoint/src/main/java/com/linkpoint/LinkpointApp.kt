@@ -199,7 +199,6 @@ class LinkpointApp : Application() {
         searchManager = SearchManager(capabilityManager)
         profileManager = ProfileManager(capabilityManager)
         parcelManager = ParcelManager(udpConnection)
-        friendsManager = FriendsManager(capabilityManager, udpConnection)
         
         // Voice
         voiceManager = VoiceManager(this, capabilityManager)
@@ -212,6 +211,9 @@ class LinkpointApp : Application() {
      */
     fun initializeAgentManagers(agentId: UUID) {
         this.agentId = agentId
+        
+        // Initialize friendsManager here since it requires agentId
+        friendsManager = FriendsManager(udpConnection, capabilityManager, agentId)
         
         Log.d(TAG, "Initializing agent-specific managers for $agentId")
         

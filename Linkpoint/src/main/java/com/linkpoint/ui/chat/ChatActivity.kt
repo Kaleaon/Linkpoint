@@ -34,10 +34,10 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var messageInput: EditText
     private lateinit var sendButton: ImageButton
-    private lateinit var adapter: ChatAdapter
+    private lateinit var adapter: ActivityChatAdapter
     
-    private val messages = mutableListOf<ChatMessage>()
-    private var currentChannel = ChatChannel.LOCAL
+    private val messages = mutableListOf<ActivityChatMessage>()
+    private var currentChannel = ActivityChatChannel.LOCAL
     
     private val app by lazy { LinkpointApp.getInstance() }
     
@@ -61,7 +61,7 @@ class ChatActivity : AppCompatActivity() {
         messageInput = findViewById(R.id.messageInput)
         sendButton = findViewById(R.id.sendButton)
         
-        adapter = ChatAdapter(messages)
+        adapter = ActivityChatAdapter(messages)
         recyclerView.layoutManager = LinearLayoutManager(this).apply {
             stackFromEnd = true
         }
@@ -77,11 +77,11 @@ class ChatActivity : AppCompatActivity() {
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
                 currentChannel = when (tab.position) {
-                    0 -> ChatChannel.LOCAL
-                    1 -> ChatChannel.IM
-                    2 -> ChatChannel.GROUP
-                    3 -> ChatChannel.NEARBY
-                    else -> ChatChannel.LOCAL
+                    0 -> ActivityChatChannel.LOCAL
+                    1 -> ActivityChatChannel.IM
+                    2 -> ActivityChatChannel.GROUP
+                    3 -> ActivityChatChannel.NEARBY
+                    else -> ActivityChatChannel.LOCAL
                 }
                 loadMessages()
             }
@@ -121,15 +121,15 @@ class ChatActivity : AppCompatActivity() {
             else -> ChatType.NORMAL to text
         }
         
-        val message = ChatMessage(
+        val message = ActivityChatMessage(
             id = UUID.randomUUID().toString(),
             sender = app.sessionManager.getAvatarName().ifEmpty { "You" },
             content = displayText,
             timestamp = System.currentTimeMillis(),
             type = when (chatType) {
-                ChatType.SHOUT -> MessageType.SHOUT
-                ChatType.WHISPER -> MessageType.WHISPER
-                else -> if (text.startsWith("/me ")) MessageType.EMOTE else MessageType.NORMAL
+                ChatType.SHOUT -> ActivityMessageType.SHOUT
+                ChatType.WHISPER -> ActivityMessageType.WHISPER
+                else -> if (text.startsWith("/me ")) ActivityMessageType.EMOTE else ActivityMessageType.NORMAL
             },
             channel = currentChannel
         )
@@ -145,12 +145,12 @@ class ChatActivity : AppCompatActivity() {
     }
     
     private fun addSystemMessage(text: String) {
-        val message = ChatMessage(
+        val message = ActivityChatMessage(
             id = UUID.randomUUID().toString(),
             sender = "System",
             content = text,
             timestamp = System.currentTimeMillis(),
-            type = MessageType.SYSTEM,
+            type = ActivityMessageType.SYSTEM,
             channel = currentChannel
         )
         
@@ -167,24 +167,25 @@ class ChatActivity : AppCompatActivity() {
     }
 }
 
-enum class ChatChannel {
+// Local classes to avoid conflicts with chat module classes
+enum class ActivityChatChannel {
     LOCAL, IM, GROUP, NEARBY
 }
 
-enum class MessageType {
+enum class ActivityMessageType {
     NORMAL, WHISPER, SHOUT, EMOTE, SYSTEM, OBJECT
 }
 
-data class ChatMessage(
+data class ActivityChatMessage(
     val id: String,
     val sender: String,
     val content: String,
     val timestamp: Long,
-    val type: MessageType,
-    val channel: ChatChannel
+    val type: ActivityMessageType,
+    val channel: ActivityChatChannel
 )
 
-class ChatAdapter(private val messages: List<ChatMessage>) : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
+class ActivityChatAdapter(private val messages: List<ActivityChatMessage>) : RecyclerView.Adapter<ActivityChatAdapter.ViewHolder>() {
     
     private val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
     
@@ -209,11 +210,11 @@ class ChatAdapter(private val messages: List<ChatMessage>) : RecyclerView.Adapte
         
         // Style based on message type
         val textColor = when (message.type) {
-            MessageType.SYSTEM -> 0xFF888888.toInt()
-            MessageType.WHISPER -> 0xFF9999FF.toInt()
-            MessageType.SHOUT -> 0xFFFF6666.toInt()
-            MessageType.EMOTE -> 0xFF66FF66.toInt()
-            MessageType.OBJECT -> 0xFFFFAA00.toInt()
+            ActivityMessageType.SYSTEM -> 0xFF888888.toInt()
+            ActivityMessageType.WHISPER -> 0xFF9999FF.toInt()
+            ActivityMessageType.SHOUT -> 0xFFFF6666.toInt()
+            ActivityMessageType.EMOTE -> 0xFF66FF66.toInt()
+            ActivityMessageType.OBJECT -> 0xFFFFAA00.toInt()
             else -> 0xFFFFFFFF.toInt()
         }
         holder.messageText.setTextColor(textColor)
