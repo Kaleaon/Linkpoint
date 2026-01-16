@@ -252,7 +252,8 @@ class ObjectManager(
         scope.launch {
             // Build ObjectSelect packet
             // Format: AgentData block + ObjectData blocks
-            val payload = ByteBuffer.allocate(16 + 4 * localIds.size).order(ByteOrder.LITTLE_ENDIAN)
+            // NOTE: Second Life protocol uses network byte order (big-endian) for all fields
+            val payload = ByteBuffer.allocate(16 + 4 * localIds.size).order(ByteOrder.BIG_ENDIAN)
             
             // AgentData - placeholder for agent ID (16 bytes)
             repeat(16) { payload.put(0) }
@@ -299,7 +300,8 @@ class ObjectManager(
             if (rotation != null) dataSize += 12  // 3 floats (quaternion compressed)
             if (scale != null) dataSize += 12     // 3 floats
             
-            val payload = ByteBuffer.allocate(16 + 1 + 4 + 1 + dataSize).order(ByteOrder.LITTLE_ENDIAN)
+            // NOTE: Second Life protocol uses network byte order (big-endian) for all fields
+            val payload = ByteBuffer.allocate(16 + 1 + 4 + 1 + dataSize).order(ByteOrder.BIG_ENDIAN)
             
             // AgentData - placeholder
             repeat(16) { payload.put(0) }
@@ -351,7 +353,8 @@ class ObjectManager(
     ) {
         scope.launch {
             // RezObject message
-            val payload = ByteBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN)
+            // NOTE: Second Life protocol uses network byte order (big-endian) for all fields
+            val payload = ByteBuffer.allocate(100).order(ByteOrder.BIG_ENDIAN)
             
             // AgentData - placeholder (16 bytes agent, 16 bytes session, 16 bytes group)
             repeat(48) { payload.put(0) }
@@ -388,7 +391,8 @@ class ObjectManager(
     fun takeObject(localId: Int, folderId: UUID) {
         scope.launch {
             // DeRezObject message
-            val payload = ByteBuffer.allocate(60).order(ByteOrder.LITTLE_ENDIAN)
+            // NOTE: Second Life protocol uses network byte order (big-endian) for all fields
+            val payload = ByteBuffer.allocate(60).order(ByteOrder.BIG_ENDIAN)
             
             // AgentData - placeholder
             repeat(48) { payload.put(0) }
@@ -419,7 +423,8 @@ class ObjectManager(
     fun deleteObject(localId: Int) {
         scope.launch {
             // ObjectDelete message
-            val payload = ByteBuffer.allocate(25).order(ByteOrder.LITTLE_ENDIAN)
+            // NOTE: Second Life protocol uses network byte order (big-endian) for all fields
+            val payload = ByteBuffer.allocate(25).order(ByteOrder.BIG_ENDIAN)
             
             // AgentData - placeholder
             repeat(16) { payload.put(0) }
@@ -454,7 +459,8 @@ class ObjectManager(
         
         scope.launch {
             // ObjectLink message
-            val payload = ByteBuffer.allocate(17 + 4 * localIds.size).order(ByteOrder.LITTLE_ENDIAN)
+            // NOTE: Second Life protocol uses network byte order (big-endian) for all fields
+            val payload = ByteBuffer.allocate(17 + 4 * localIds.size).order(ByteOrder.BIG_ENDIAN)
             
             // AgentData - placeholder
             repeat(16) { payload.put(0) }
@@ -482,7 +488,8 @@ class ObjectManager(
         
         scope.launch {
             // ObjectDelink message
-            val payload = ByteBuffer.allocate(17 + 4 * localIds.size).order(ByteOrder.LITTLE_ENDIAN)
+            // NOTE: Second Life protocol uses network byte order (big-endian) for all fields
+            val payload = ByteBuffer.allocate(17 + 4 * localIds.size).order(ByteOrder.BIG_ENDIAN)
             
             // AgentData - placeholder
             repeat(16) { payload.put(0) }
@@ -510,8 +517,9 @@ class ObjectManager(
         
         scope.launch {
             // ObjectName message
+            // NOTE: Second Life protocol uses network byte order (big-endian) for all fields
             val nameBytes = name.toByteArray(Charsets.UTF_8)
-            val payload = ByteBuffer.allocate(17 + 4 + 1 + nameBytes.size).order(ByteOrder.LITTLE_ENDIAN)
+            val payload = ByteBuffer.allocate(17 + 4 + 1 + nameBytes.size).order(ByteOrder.BIG_ENDIAN)
             
             // AgentData - placeholder
             repeat(16) { payload.put(0) }
@@ -539,8 +547,9 @@ class ObjectManager(
         
         scope.launch {
             // ObjectDescription message
+            // NOTE: Second Life protocol uses network byte order (big-endian) for all fields
             val descBytes = description.toByteArray(Charsets.UTF_8)
-            val payload = ByteBuffer.allocate(17 + 4 + 1 + descBytes.size).order(ByteOrder.LITTLE_ENDIAN)
+            val payload = ByteBuffer.allocate(17 + 4 + 1 + descBytes.size).order(ByteOrder.BIG_ENDIAN)
             
             // AgentData - placeholder
             repeat(16) { payload.put(0) }
@@ -566,7 +575,8 @@ class ObjectManager(
     fun touchObject(localId: Int, position: LLVector3, normal: LLVector3, binormal: LLVector3) {
         scope.launch {
             // ObjectGrab message
-            val grabPayload = ByteBuffer.allocate(80).order(ByteOrder.LITTLE_ENDIAN)
+            // NOTE: Second Life protocol uses network byte order (big-endian) for all fields
+            val grabPayload = ByteBuffer.allocate(80).order(ByteOrder.BIG_ENDIAN)
             
             // AgentData - placeholder
             repeat(32) { grabPayload.put(0) }  // Agent + Session ID
@@ -597,7 +607,7 @@ class ObjectManager(
                 delay(100)
                 
                 // ObjectDeGrab message
-                val degrabPayload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
+                val degrabPayload = ByteBuffer.allocate(36).order(ByteOrder.BIG_ENDIAN)
                 repeat(32) { degrabPayload.put(0) }  // Agent + Session ID
                 degrabPayload.putInt(localId)
                 
@@ -615,7 +625,8 @@ class ObjectManager(
     fun sitOnObject(localId: Int) {
         scope.launch {
             // AgentRequestSit message
-            val payload = ByteBuffer.allocate(44).order(ByteOrder.LITTLE_ENDIAN)
+            // NOTE: Second Life protocol uses network byte order (big-endian) for all fields
+            val payload = ByteBuffer.allocate(44).order(ByteOrder.BIG_ENDIAN)
             
             // AgentData - placeholder
             repeat(32) { payload.put(0) }  // Agent + Session ID

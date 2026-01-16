@@ -785,9 +785,8 @@ class CoreNetworkingService(private val context: Context) {
      * 4. login="false" or other - Failure with error message
      */
     private fun parseLoginResponseInternal(xml: String): ParsedLoginResponse {
-        // Log response preview for debugging
+        // Log basic metadata for debugging (length only, no sensitive body content)
         Log.d(TAG, "Parsing login response (${xml.length} bytes)")
-        Log.d(TAG, "Response preview: ${xml.take(300)}")
         
         // Try to parse using LLSD parser first (preferred for application/llsd+xml responses)
         val llsdResult = try {
@@ -856,7 +855,9 @@ class CoreNetworkingService(private val context: Context) {
                         if (sessionId.isEmpty()) "session_id" else null
                     ).joinToString(", ")
                     Log.e(TAG, "Missing required login fields: $missingFields")
-                    Log.d(TAG, "Available LLSD keys: ${llsd.value.keys.joinToString(", ")}")
+                    if (Log.isLoggable(TAG, Log.DEBUG)) {
+                        Log.d(TAG, "Available LLSD keys: ${llsd.value.keys.joinToString(", ")}")
+                    }
                     return ParsedLoginResponse.Failure(LoginResult.Failure(
                         message = "Login response missing required fields",
                         errorCode = "INVALID_RESPONSE",
@@ -870,7 +871,9 @@ class CoreNetworkingService(private val context: Context) {
                         if (simPort == 0) "sim_port" else null
                     ).joinToString(", ")
                     Log.w(TAG, "Missing simulator connection info: $missingSimInfo")
-                    Log.d(TAG, "Available LLSD keys: ${llsd.value.keys.joinToString(", ")}")
+                    if (Log.isLoggable(TAG, Log.DEBUG)) {
+                        Log.d(TAG, "Available LLSD keys: ${llsd.value.keys.joinToString(", ")}")
+                    }
                 }
                 
                 ParsedLoginResponse.Success(LoginResult.Success(
@@ -937,7 +940,9 @@ class CoreNetworkingService(private val context: Context) {
             else -> {
                 // Unable to determine login status from LLSD
                 Log.w(TAG, "LLSD Login status not recognized: $loginStatus")
-                Log.d(TAG, "Available LLSD keys: ${llsd.value.keys.joinToString(", ")}")
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Available LLSD keys: ${llsd.value.keys.joinToString(", ")}")
+                }
                 
                 val errorMessage = llsd.getString("message") 
                     ?: llsd.getString("reason")

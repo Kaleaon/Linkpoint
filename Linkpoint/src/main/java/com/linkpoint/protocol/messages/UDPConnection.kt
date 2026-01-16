@@ -536,10 +536,10 @@ class UDPConnection {
         val payload = ByteBuffer.allocate(36).order(ByteOrder.BIG_ENDIAN)
         payload.putInt(circuitCode)
         
-        // Session ID (UUID) - already big-endian in putUUID
+        // Session ID (UUID)
         payload.putUUID(sessionId)
         
-        // Agent ID (UUID) - already big-endian in putUUID
+        // Agent ID (UUID)
         payload.putUUID(agentId)
         
         Log.d(TAG, "Sending UseCircuitCode: circuit=$circuitCode, agent=${agentId.toString().take(8)}...")
