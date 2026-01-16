@@ -143,11 +143,24 @@ class RenderManager(private val context: Context) {
         )
     }
 
-    private fun ensureSwapChain(): SwapChain? {
+    private fun ensureSwapChain(engine: Engine): SwapChain? {
         swapChain?.let { return it }
         val surface = surfaceView?.holder?.surface
-        if (surface != null && surface.isValid) {
-            swapChain = engine?.createSwapChain(surface)
+        if (surface == null || !surface.isValid) {
+            if (!swapChainWarningLogged) {
+                Log.w(TAG, "SwapChain unavailable - surface not ready")
+                swapChainWarningLogged = true
+            }
+            return null
+        }
+        swapChain = engine.createSwapChain(surface)
+        if (swapChain == null) {
+            if (!swapChainWarningLogged) {
+                Log.w(TAG, "SwapChain creation failed")
+                swapChainWarningLogged = true
+            }
+        } else {
+            swapChainWarningLogged = false
             attachDisplayHelper()
             val width = surfaceView?.width ?: 0
             val height = surfaceView?.height ?: 0
@@ -162,11 +175,18 @@ class RenderManager(private val context: Context) {
     }
 
     private fun attachDisplayHelper() {
-        renderer?.let { render ->
-            surfaceView?.display?.let { display ->
-                displayHelper?.attach(render, display)
+        val render = renderer
+        val display = surfaceView?.display
+        val helper = displayHelper
+        if (render == null || display == null || helper == null) {
+            if (!displayAttachWarningLogged) {
+                Log.w(TAG, "DisplayHelper attach skipped - renderer/display/helper not ready")
+                displayAttachWarningLogged = true
             }
+            return
         }
+        displayAttachWarningLogged = false
+        helper.attach(render, display)
     }
     
     /**
@@ -178,7 +198,7 @@ class RenderManager(private val context: Context) {
         val engine = this.engine ?: return
         val renderer = this.renderer ?: return
         val view = this.view ?: return
-        val swapChain = ensureSwapChain() ?: return
+        val swapChain = ensureSwapChain(engine) ?: return
         
         if (renderer.beginFrame(swapChain, System.nanoTime())) {
             renderer.render(view)
@@ -197,7 +217,7 @@ class RenderManager(private val context: Context) {
         val engine = this.engine ?: return
         val renderer = this.renderer ?: return
         val view = this.view ?: return
-        val swapChain = ensureSwapChain() ?: return
+        val swapChain = ensureSwapChain(engine) ?: return
         
         if (renderer.beginFrame(swapChain, xrData.predictedDisplayTime)) {
             // Left eye
@@ -253,6 +273,8 @@ class RenderManager(private val context: Context) {
     @Volatile private var lastInitializationError: String? = null
     @Volatile private var viewportWidth: Int = 0
     @Volatile private var viewportHeight: Int = 0
+    @Volatile private var swapChainWarningLogged: Boolean = false
+    @Volatile private var displayAttachWarningLogged: Boolean = false
     
     /**
      * Get comprehensive diagnostic data for debug reports
