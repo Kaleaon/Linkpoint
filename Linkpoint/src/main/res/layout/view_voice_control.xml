@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:background="@drawable/voice_control_background">
+
+    <!-- Voice toggle button -->
+    <ImageButton
+        android:id="@+id/voice_toggle_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_voice_off"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/toggle_voice"
+        android:tint="?attr/colorOnSurface" />
+
+    <!-- Voice status text -->
+    <TextView
+        android:id="@+id/voice_status_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="8dp"
+        android:text="Voice Off"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="?attr/colorOnSurfaceVariant" />
+
+    <!-- Mute toggle button -->
+    <ImageButton
+        android:id="@+id/voice_mute_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/ic_mic_on"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/toggle_mute"
+        android:tint="?attr/colorOnSurface" />
+
+</LinearLayout>

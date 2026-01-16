@@ -41,6 +41,33 @@
     
     <!-- Inventory -->
     <string name="inventory_empty">This folder is empty</string>
+    <string name="inventory_root">My Inventory</string>
+    <string name="inventory_load_failed">Failed to load inventory</string>
+    <string name="inventory_error">Error: %s</string>
+    <string name="unknown_folder">Unknown Folder</string>
+    <string name="folder_icon">Folder icon</string>
+    <string name="item_icon">Item icon</string>
+    <string name="permissions">Permissions</string>
+    <string name="navigate_back">Navigate back</string>
+    <string name="navigate_to_folder">Navigate to folder</string>
+    <string name="navigate_to_root">Navigate to root</string>
+    <string name="name">Name</string>
+    <string name="type">Type</string>
+    <string name="inventory_type">Inventory Type</string>
+    <string name="description">Description</string>
+    <string name="no_description">No description</string>
+    <string name="creation_date">Creation Date</string>
+    <string name="sale_info">Sale Info</string>
+    <string name="close">Close</string>
+    <string name="wear">Wear</string>
+    <string name="copy">Copy</string>
+    <string name="delete">Delete</string>
+    <string name="properties">Properties</string>
+    <string name="item_properties">Item Properties</string>
+    <string name="asset_id">Asset ID</string>
+    <string name="item_id">Item ID</string>
+    <string name="parent_id">Parent ID</string>
+    <string name="flags">Flags</string>
     
     <!-- Settings -->
     <string name="settings_graphics">Graphics</string>
@@ -63,4 +90,22 @@
     
     <!-- Debug -->
     <string name="capture_debug_report">Capture Debug Report</string>
+
+    <!-- Objects -->
+    <string name="object_properties">Object Properties</string>
+    <string name="position">Position</string>
+    <string name="rotation">Rotation</string>
+    <string name="scale">Scale</string>
+    <string name="full_id">Full ID</string>
+    <string name="owner_id">Owner ID</string>
+    <string name="creator_id">Creator ID</string>
+    <string name="edit">Edit</string>
+    <string name="avatar">Avatar</string>
+    <string name="wearable_icon">Wearable icon</string>
+    <string name="no_wearables_available">No wearables available</string>
+    <string name="error_loading_wearables">Error loading wearables: %s</string>
+
+    <!-- Voice -->
+    <string name="toggle_voice">Toggle voice</string>
+    <string name="toggle_mute">Toggle mute</string>
 </resources>

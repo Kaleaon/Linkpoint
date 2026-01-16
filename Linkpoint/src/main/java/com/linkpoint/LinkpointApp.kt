@@ -258,6 +258,7 @@ class LinkpointApp : Application() {
         
         // RegionHandshake - CRITICAL: Must respond with RegionHandshakeReply for world data to load
         // This is why nothing was loading after login - we weren't acknowledging the region handshake
+        // Register handlers for all critical packets
         udpConnection.registerHandler(com.linkpoint.protocol.messages.MessageIds.REGION_HANDSHAKE) { _, payload ->
             com.linkpoint.utils.InitializationTracker.startPhase(
                 com.linkpoint.utils.InitializationTracker.Phase.REGION_HANDSHAKE_RECEIVED,
