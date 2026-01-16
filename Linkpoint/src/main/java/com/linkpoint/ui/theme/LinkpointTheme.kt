@@ -44,24 +44,47 @@ fun LinkpointTheme(
     val linkpointColors = themePack.toComposeColors()
     
     // Create Material 3 color scheme from ThemePack colors
-    val colorScheme = darkColorScheme(
-        primary = linkpointColors.primary,
-        onPrimary = linkpointColors.onPrimary,
-        primaryContainer = linkpointColors.primaryVariant,
-        onPrimaryContainer = linkpointColors.onPrimary,
-        secondary = linkpointColors.secondary,
-        onSecondary = linkpointColors.onSecondary,
-        secondaryContainer = linkpointColors.secondary,
-        onSecondaryContainer = linkpointColors.onSecondary,
-        background = linkpointColors.background,
-        onBackground = linkpointColors.onSurface,
-        surface = linkpointColors.surface,
-        onSurface = linkpointColors.onSurface,
-        surfaceVariant = linkpointColors.surfaceVariant,
-        onSurfaceVariant = linkpointColors.onSurfaceVariant,
-        error = linkpointColors.error,
-        onError = linkpointColors.onError
-    )
+    // Support both dark and light themes based on system preference
+    val colorScheme = if (darkTheme) {
+        darkColorScheme(
+            primary = linkpointColors.primary,
+            onPrimary = linkpointColors.onPrimary,
+            primaryContainer = linkpointColors.primaryVariant,
+            onPrimaryContainer = linkpointColors.onPrimary,
+            secondary = linkpointColors.secondary,
+            onSecondary = linkpointColors.onSecondary,
+            secondaryContainer = linkpointColors.secondary,
+            onSecondaryContainer = linkpointColors.onSecondary,
+            background = linkpointColors.background,
+            onBackground = linkpointColors.onSurface,
+            surface = linkpointColors.surface,
+            onSurface = linkpointColors.onSurface,
+            surfaceVariant = linkpointColors.surfaceVariant,
+            onSurfaceVariant = linkpointColors.onSurfaceVariant,
+            error = linkpointColors.error,
+            onError = linkpointColors.onError
+        )
+    } else {
+        // Light theme - invert some colors for better contrast
+        lightColorScheme(
+            primary = linkpointColors.primary,
+            onPrimary = linkpointColors.onPrimary,
+            primaryContainer = linkpointColors.primaryVariant,
+            onPrimaryContainer = linkpointColors.onPrimary,
+            secondary = linkpointColors.secondary,
+            onSecondary = linkpointColors.onSecondary,
+            secondaryContainer = linkpointColors.secondary,
+            onSecondaryContainer = linkpointColors.onSecondary,
+            background = linkpointColors.onSurface,  // Inverted for light
+            onBackground = linkpointColors.background,
+            surface = linkpointColors.onSurface,  // Inverted for light
+            onSurface = linkpointColors.background,
+            surfaceVariant = linkpointColors.onSurfaceVariant,
+            onSurfaceVariant = linkpointColors.surface,
+            error = linkpointColors.error,
+            onError = linkpointColors.onError
+        )
+    }
     
     CompositionLocalProvider(
         LocalLinkpointColors provides linkpointColors,

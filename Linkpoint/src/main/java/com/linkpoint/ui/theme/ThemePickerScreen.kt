@@ -361,7 +361,15 @@ fun ColorSwatch(
 }
 
 /**
- * Simple theme selector for use in settings or dialogs.
+ * Horizontal scrollable theme selector for use in settings screens or dialogs.
+ * 
+ * Displays themes as circular color swatches in a horizontal row.
+ * The selected theme is highlighted with a border.
+ * 
+ * @param themes List of available theme packs to display
+ * @param selectedThemeId ID of the currently selected theme
+ * @param onThemeSelected Callback invoked when a theme is tapped
+ * @param modifier Optional modifier for the selector row
  */
 @Composable
 fun ThemeSelector(

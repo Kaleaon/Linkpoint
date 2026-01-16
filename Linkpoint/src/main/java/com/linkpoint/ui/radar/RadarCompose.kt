@@ -1,11 +1,20 @@
 package com.linkpoint.ui.radar
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -20,21 +29,28 @@ import kotlin.math.sin
 /**
  * Compose version of the RadarView that displays nearby avatars and objects.
  * 
+ * Features an animated sweeping effect inspired by real radar displays.
+ * Uses trigonometry and Compose animations for smooth radar sweep.
+ * 
  * The radar shows:
  * - Your position (center)
+ * - Animated sweep effect
  * - Nearby avatars as dots (green for friends, blue for others)
  * - Distance rings
  * - Cardinal directions
  * 
- * Migrated from the original View-based RadarView.
+ * Based on: https://proandroiddev.com/extraordinary-animations-using-trigonometry-and-coroutines-radar-animation
  * 
  * @param modifier Modifier for the radar
  * @param size Size of the radar (diameter)
  * @param range Radar range in meters
  * @param heading Current heading in radians
  * @param blips List of radar blips to display
+ * @param enableSweepAnimation Whether to show the animated radar sweep
+ * @param sweepDurationMs Duration of one full sweep rotation in milliseconds
  * @param backgroundColor Background color of the radar
  * @param gridColor Color of the grid lines
+ * @param sweepColor Color of the radar sweep
  * @param selfColor Color of the self indicator
  * @param friendColor Color of friend blips
  * @param strangerColor Color of stranger blips
@@ -47,14 +63,33 @@ fun Radar(
     range: Float = 96f,
     heading: Float = 0f,
     blips: List<RadarBlip> = emptyList(),
+    enableSweepAnimation: Boolean = true,
+    sweepDurationMs: Int = 2000,
     backgroundColor: Color = Color(0xB4000000),  // 180 alpha black
     gridColor: Color = Color(0x64FFFFFF),  // 100 alpha white
+    sweepColor: Color = Color(0xFF00FF00),  // Green sweep
     textColor: Color = Color.White,
     selfColor: Color = Color.Yellow,
     friendColor: Color = Color.Green,
     strangerColor: Color = Color.Cyan,
     objectColor: Color = Color.Red
 ) {
+    // Animated sweep angle using infinite transition
+    val sweepAngle by if (enableSweepAnimation) {
+        val infiniteTransition = rememberInfiniteTransition(label = "radarSweep")
+        infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 360f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = sweepDurationMs, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "sweepAngle"
+        )
+    } else {
+        remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
+    }
+    
     val textPaint = remember {
         android.graphics.Paint().apply {
             color = android.graphics.Color.WHITE
@@ -87,6 +122,17 @@ fun Radar(
             radius = radius,
             center = Offset(centerX, centerY)
         )
+        
+        // Draw animated radar sweep (if enabled)
+        if (enableSweepAnimation) {
+            drawRadarSweep(
+                centerX = centerX,
+                centerY = centerY,
+                radius = radius,
+                sweepAngle = sweepAngle,
+                sweepColor = sweepColor
+            )
+        }
         
         // Draw range rings
         drawRangeRings(
@@ -131,6 +177,51 @@ fun Radar(
             )
         }
     }
+}
+
+/**
+ * Draws the animated radar sweep effect.
+ * Creates a gradient arc that rotates around the center, simulating a radar scan.
+ */
+private fun DrawScope.drawRadarSweep(
+    centerX: Float,
+    centerY: Float,
+    radius: Float,
+    sweepAngle: Float,
+    sweepColor: Color
+) {
+    // Draw sweep arc with gradient fade effect
+    val sweepGradient = Brush.sweepGradient(
+        0f to sweepColor.copy(alpha = 0f),
+        0.15f to sweepColor.copy(alpha = 0.3f),
+        0.16f to sweepColor.copy(alpha = 0.6f),
+        0.17f to sweepColor.copy(alpha = 0.8f),
+        1f to sweepColor.copy(alpha = 0f),
+        center = Offset(centerX, centerY)
+    )
+    
+    rotate(degrees = sweepAngle - 90f, pivot = Offset(centerX, centerY)) {
+        drawArc(
+            brush = sweepGradient,
+            startAngle = 0f,
+            sweepAngle = 60f,
+            useCenter = true,
+            topLeft = Offset(centerX - radius, centerY - radius),
+            size = Size(radius * 2, radius * 2)
+        )
+    }
+    
+    // Draw sweep line
+    val sweepRadians = Math.toRadians(sweepAngle.toDouble())
+    val lineEndX = centerX + radius * cos(sweepRadians).toFloat()
+    val lineEndY = centerY + radius * sin(sweepRadians).toFloat()
+    
+    drawLine(
+        color = sweepColor.copy(alpha = 0.8f),
+        start = Offset(centerX, centerY),
+        end = Offset(lineEndX, lineEndY),
+        strokeWidth = 2f
+    )
 }
 
 private fun DrawScope.drawRangeRings(
@@ -256,7 +347,13 @@ private fun DrawScope.drawBlip(
 }
 
 /**
- * Preview helper: Create sample blips for testing
+ * Creates sample radar blips for testing and previews.
+ * 
+ * This utility function generates a list of demo blips representing
+ * different entity types (friend, stranger, object) at various positions.
+ * Useful for @Preview composables and UI testing.
+ * 
+ * @return List of sample RadarBlip objects for demonstration
  */
 fun createSampleBlips(): List<RadarBlip> {
     return listOf(
