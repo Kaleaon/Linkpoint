@@ -185,6 +185,13 @@ class RegionCrossingManager(
     
     /**
      * Get neighboring region that would be entered if moving in given direction.
+     * 
+     * @param localX Region-local X coordinate in meters (0-256 range).
+     *               Values < 0 indicate moving west, values >= 256 indicate moving east.
+     * @param localY Region-local Y coordinate in meters (0-256 range).
+     *               Values < 0 indicate moving south, values >= 256 indicate moving north.
+     * @return The region handle of the neighbor region, or null if staying in current region
+     *         or no child connection exists to the neighbor.
      */
     fun getNeighborRegion(localX: Float, localY: Float): Long? {
         val currentHandle = _currentRegion.value?.handle ?: return null

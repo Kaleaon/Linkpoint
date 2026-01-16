@@ -29,6 +29,9 @@ class MuteManager(context: Context) {
         private const val KEY_MUTED_OBJECTS = "muted_objects"
         private const val KEY_MUTED_GROUPS = "muted_groups"
         private const val KEY_MUTED_NAMES = "muted_names"
+        
+        // Serialization format: id|name|type|flags|timestamp
+        private const val MUTE_ENTRY_FIELD_COUNT = 5
     }
     
     /**
@@ -324,7 +327,7 @@ class MuteManager(context: Context) {
     private fun parseMuteEntry(serialized: String): MuteEntry? {
         return try {
             val parts = serialized.split("|")
-            if (parts.size >= 5) {
+            if (parts.size >= MUTE_ENTRY_FIELD_COUNT) {
                 MuteEntry(
                     id = UUID.fromString(parts[0]),
                     name = parts[1],
