@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="1" android:layout_width="-2" android:layout_height="-2" style="@style/RtlOverlay.Widget.AppCompat.ActionBar.TitleItem"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:ellipsize="3" android:id="@2131230765" android:layout_width="-2" android:layout_height="-2" android:singleLine="true" />
+    <TextView android:ellipsize="3" android:id="@2131230764" android:visibility="2" android:layout_width="-2" android:layout_height="-2" android:layout_marginTop="@2131099660" android:singleLine="true" />
+</LinearLayout>

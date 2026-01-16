@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="1" android:id="@2131230905" android:layout_width="-1" android:layout_height="-2"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:gravity="0x00800013" android:orientation="0" android:id="@2131230903" android:paddingLeft="?2130903155" android:paddingTop="@2131099685" android:paddingRight="?2130903155" android:layout_width="-1" android:layout_height="-2">
+        <ImageView android:id="@16908294" android:layout_width="32.0dip" android:layout_height="32.0dip" android:layout_marginRight="8.0dip" android:src="@0" android:scaleType="3" android:layout_marginEnd="8.0dip" />
+        <androidx.appcompat.widget.DialogTitle android:ellipsize="3" android:layout_gravity="0x00800003" android:id="@2131230781" android:layout_width="-1" android:layout_height="-2" android:singleLine="true" android:textAlignment="5" style="?16842843" />
+    </LinearLayout>
+    <android.widget.Space android:id="@2131230902" android:visibility="2" android:layout_width="-1" android:layout_height="@2131099686" />
+</LinearLayout>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <set android:ordering="1">
+        <objectAnimator android:interpolator="@17563659" android:duration="166" android:valueFrom="" android:valueTo="" android:valueType="2" android:propertyName="" />
+        <objectAnimator android:interpolator="@2131361793" android:duration="333" android:valueFrom="" android:valueTo="" android:valueType="2" android:propertyName="" />
+    </set>
+    <set android:ordering="1">
+        <objectAnimator android:interpolator="@17563659" android:duration="133" android:valueFrom="0.0" android:valueTo="0.0" android:propertyName="" />
+        <objectAnimator android:interpolator="@2131361792" android:duration="33" android:valueFrom="0.0" android:valueTo="1.0" android:propertyName="" />
+    </set>
+</set>

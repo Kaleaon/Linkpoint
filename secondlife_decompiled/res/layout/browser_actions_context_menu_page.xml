@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.browser.browseractions.BrowserActionsFallbackMenuView android:layout_gravity="0x00000011" android:orientation="1" android:id="@2131230792" android:background="@2131034151" android:layout_width="-2" android:layout_height="-2" android:minWidth="280.0dip"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <TextView android:textSize="13.0sp" android:textStyle="0x00000001" android:textColor="@2131034154" android:ellipsize="3" android:gravity="0x00000011" android:id="@2131230788" android:layout_width="-1" android:layout_height="-2" android:layout_marginTop="10.0dip" android:layout_marginBottom="10.0dip" android:maxLines="1" android:paddingStart="20.0dip" android:paddingEnd="20.0dip" />
+    <View android:background="@2131034152" android:layout_width="-1" android:layout_height="1.0dip" />
+    <ListView android:id="@2131230791" android:paddingTop="8.0dip" android:paddingBottom="8.0dip" android:layout_width="-1" android:layout_height="-2" android:divider="@0" android:dividerHeight="0.0dip" />
+</androidx.browser.browseractions.BrowserActionsFallbackMenuView>
