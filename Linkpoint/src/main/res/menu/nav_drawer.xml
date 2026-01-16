@@ -46,12 +46,12 @@
         <item
             android:id="@+id/nav_search"
             android:icon="@drawable/ic_search"
-            android:title="Search" />
+            android:title="@string/nav_search" />
 
         <item
             android:id="@+id/nav_world_map"
             android:icon="@drawable/ic_home"
-            android:title="World Map" />
+            android:title="@string/nav_world_map" />
 
     </group>
 

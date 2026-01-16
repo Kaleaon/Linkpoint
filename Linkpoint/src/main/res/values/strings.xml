@@ -202,4 +202,11 @@
     <string name="reset_camera">Reset Camera</string>
     <string name="focus_on_avatar">Focus on Avatar</string>
     <string name="mouselook">Mouselook</string>
+
+    <!-- Navigation -->
+    <string name="nav_search">Search</string>
+    <string name="nav_world_map">World Map</string>
+    <string name="set_as_active_group">Set as Active Group</string>
+    <string name="gestures_not_available">Gestures not available</string>
+    <string name="no_active_gestures">No active gestures</string>
 </resources>

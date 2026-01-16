@@ -20,7 +20,7 @@
         style="?attr/materialButtonOutlinedStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Set as Active Group"
+        android:text="@string/set_as_active_group"
         android:layout_marginBottom="8dp" />
 
     <Button

@@ -390,13 +390,13 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
      */
     private fun showGesturesPopup() {
         if (!app.isGestureManagerInitialized()) {
-            Toast.makeText(this, "Gestures not available", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.gestures_not_available, Toast.LENGTH_SHORT).show()
             return
         }
         
         val gestures = app.gestureManager.getActiveGestures()
         if (gestures.isEmpty()) {
-            Toast.makeText(this, "No active gestures", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.no_active_gestures, Toast.LENGTH_SHORT).show()
             return
         }
         

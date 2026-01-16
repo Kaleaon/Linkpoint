@@ -100,7 +100,8 @@ class TeleportHistoryActivity : AppCompatActivity() {
 
     private fun teleportTo(entry: TeleportHistoryEntry) {
         Toast.makeText(this, "Teleporting to ${entry.regionName}...", Toast.LENGTH_SHORT).show()
-        // Would trigger teleport via capabilities
+        // TODO: Implement teleport via CapabilityManager.request("TeleportLocation", ...)
+        // The teleport would use the SLURL format: secondlife://RegionName/x/y/z
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

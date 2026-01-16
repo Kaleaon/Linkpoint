@@ -237,10 +237,12 @@ class GroupsManager(
                 if (response is LLSDMap) {
                     UUID.fromString(response.getString("session_id"))
                 } else {
+                    Log.w(TAG, "Using groupId as fallback session ID for group $groupId")
                     groupId // Fallback: use group ID as session ID
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to create chat session", e)
+                Log.w(TAG, "Using groupId as fallback session ID for group $groupId")
                 groupId
             }
         }

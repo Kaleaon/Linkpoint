@@ -104,8 +104,12 @@ class RadarActivity : AppCompatActivity() {
         for (avatar in app.avatarManager.getAllAvatars()) {
             if (avatar.agentId == myAvatar?.agentId) continue
             
-            val isFriend = if (::app.isInitialized && app.agentId != null) {
-                app.friendsManager.isFriend(avatar.agentId)
+            val isFriend = if (app.agentId != null) {
+                try {
+                    app.friendsManager.isFriend(avatar.agentId)
+                } catch (e: Exception) {
+                    false
+                }
             } else {
                 false
             }
