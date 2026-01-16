@@ -299,6 +299,10 @@ class LinkpointApp : Application() {
         // HUD manager
         hudManager = HUDManager(objectManager, udpConnection, agentId)
         
+        // Connect WorldMap to AvatarManager and FriendsManager for nearby users
+        worldMap.setAvatarManagerProvider { avatarManager }
+        worldMap.setFriendsManagerProvider { friendsManager }
+        
         // Register UDP message handlers for real-time data
         registerMessageHandlers()
         

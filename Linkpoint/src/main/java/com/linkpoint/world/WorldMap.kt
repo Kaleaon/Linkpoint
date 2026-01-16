@@ -33,9 +33,30 @@ class WorldMap(
         const val ZOOM_AREA = 2
         const val ZOOM_REGION = 3
         const val ZOOM_DETAIL = 4
+        
+        // Default search radius for nearby users (meters)
+        private const val DEFAULT_NEARBY_RADIUS = 96f
     }
     
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    
+    // Avatar and friends managers - set after login via setters
+    private var avatarManagerProvider: (() -> com.linkpoint.avatar.AvatarManager?)? = null
+    private var friendsManagerProvider: (() -> FriendsManager?)? = null
+    
+    /**
+     * Set the avatar manager provider (called after login)
+     */
+    fun setAvatarManagerProvider(provider: () -> com.linkpoint.avatar.AvatarManager?) {
+        avatarManagerProvider = provider
+    }
+    
+    /**
+     * Set the friends manager provider (called after login)
+     */
+    fun setFriendsManagerProvider(provider: () -> FriendsManager?) {
+        friendsManagerProvider = provider
+    }
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .build()
@@ -190,12 +211,49 @@ class WorldMap(
     
     /**
      * Get nearby users/avatars in the current region
-     * This would typically be populated from ObjectManager's avatar tracking
+     * Returns avatars from AvatarManager, with friend status from FriendsManager
+     * 
+     * @param maxDistance Maximum distance in meters to search for users (default 96m)
+     * @param maxResults Maximum number of results to return (default 100)
+     * @return List of nearby users sorted by distance
      */
-    suspend fun getNearbyUsers(): List<NearbyUser> {
-        // For now return empty list - this should be populated from 
-        // ObjectManager avatar data in a real implementation
-        return emptyList()
+    suspend fun getNearbyUsers(maxDistance: Float = DEFAULT_NEARBY_RADIUS, maxResults: Int = 100): List<NearbyUser> {
+        return withContext(Dispatchers.IO) {
+            val avatarManager = avatarManagerProvider?.invoke()
+            val friendsManager = friendsManagerProvider?.invoke()
+            
+            if (avatarManager == null) {
+                Log.w(TAG, "getNearbyUsers: AvatarManager not available")
+                return@withContext emptyList()
+            }
+            
+            val myAvatar = avatarManager.getMyAvatar()
+            val myPosition = myAvatar?.position ?: return@withContext emptyList()
+            
+            // Get all avatars except ourselves
+            val allAvatars = avatarManager.getAllAvatars()
+                .filter { it.agentId != myAvatar.agentId }
+            
+            // Convert avatars to NearbyUser with distance and friend status
+            allAvatars
+                .map { avatar ->
+                    val distance = avatar.position.distance(myPosition)
+                    val isFriend = friendsManager?.isFriend(avatar.agentId) ?: false
+                    val displayName = avatar.displayName ?: avatar.userName ?: "Unknown"
+                    
+                    NearbyUser(
+                        agentId = avatar.agentId,
+                        name = displayName,
+                        distance = distance,
+                        isFriend = isFriend,
+                        position = floatArrayOf(avatar.position.x, avatar.position.y, avatar.position.z),
+                        profilePictureId = null // Could be populated from profile data if available
+                    )
+                }
+                .filter { it.distance <= maxDistance }
+                .sortedBy { it.distance }
+                .take(maxResults)
+        }
     }
     
     /**
