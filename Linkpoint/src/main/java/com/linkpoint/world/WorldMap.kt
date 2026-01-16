@@ -192,7 +192,7 @@ class WorldMap(
      * Get nearby users
      * Returns list of users within the specified range, sorted by distance
      * 
-     * @param maxDistance Maximum distance in meters to search for users (default 96m - typical draw distance)
+     * @param maxDistance Maximum distance in meters to search for users (default 96m - reasonable default search radius)
      * @param maxResults Maximum number of results to return (default 100)
      * @return List of nearby users sorted by distance
      */
@@ -200,6 +200,8 @@ class WorldMap(
         require(maxDistance > 0) { "maxDistance must be positive" }
         require(maxResults > 0) { "maxResults must be positive" }
         
+        // Note: Using Dispatchers.IO because the full implementation will perform
+        // network I/O to query the simulator for nearby avatar data
         return withContext(Dispatchers.IO) {
             // TODO: This needs to be implemented properly by querying the simulator
             // for nearby avatars using the ObjectUpdate messages and avatar positions.
