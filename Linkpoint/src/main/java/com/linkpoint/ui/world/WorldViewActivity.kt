@@ -519,6 +519,11 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 when (state) {
                     ConnectionState.CONNECTED -> {
                         avatarNameText.text = app.sessionManager.getAvatarName()
+                        
+                        // Cache landmarks from inventory after first successful login
+                        if (app.startLocationManager.isFirstLoginComplete()) {
+                            fetchAndCacheLandmarks()
+                        }
                     }
                     ConnectionState.DISCONNECTED -> {
                         finish() // Return to login
@@ -533,6 +538,58 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 regionNameText.text = region?.name ?: "Unknown Region"
             }
         }
+    }
+    
+    /**
+     * Fetch landmarks from inventory and cache them for start location selection.
+     */
+    private fun fetchAndCacheLandmarks() {
+        if (!app.isInventoryManagerInitialized()) {
+            android.util.Log.d(TAG, "Inventory manager not initialized, skipping landmark caching")
+            return
+        }
+        
+        lifecycleScope.launch {
+            try {
+                val landmarks = app.inventoryManager.fetchLandmarks()
+                if (landmarks.isNotEmpty()) {
+                    // Convert to InventoryLandmarkInfo and cache
+                    val landmarkInfos = landmarks.mapNotNull { item ->
+                        // Parse landmark asset to get region info
+                        // For now, use the item name and description as region info
+                        com.linkpoint.core.InventoryLandmarkInfo(
+                            itemId = item.itemId.toString(),
+                            assetId = item.assetId.toString(),
+                            name = item.name,
+                            description = item.description,
+                            regionName = extractRegionFromDescription(item.description, item.name),
+                            x = 128,
+                            y = 128,
+                            z = 25
+                        )
+                    }
+                    
+                    app.startLocationManager.cacheLandmarksFromInventory(landmarkInfos)
+                    android.util.Log.i(TAG, "Cached ${landmarkInfos.size} landmarks from inventory")
+                }
+            } catch (e: Exception) {
+                android.util.Log.w(TAG, "Failed to cache landmarks: ${e.message}")
+            }
+        }
+    }
+    
+    /**
+     * Extract region name from landmark description or name.
+     */
+    private fun extractRegionFromDescription(description: String, name: String): String {
+        // Landmarks often have format: "Region Name (128, 128, 25)"
+        val regionPattern = Regex("^([^(]+)")
+        val match = regionPattern.find(description)
+        if (match != null) {
+            return match.groupValues[1].trim()
+        }
+        // Fall back to using the landmark name
+        return name.substringBefore(" (").trim()
     }
     
     override fun onNavigationItemSelected(item: MenuItem): Boolean {

@@ -242,7 +242,12 @@ class StartLocationManager(private val context: Context) {
         for (pattern in patterns) {
             val match = pattern.find(slurl)
             if (match != null) {
-                val regionName = java.net.URLDecoder.decode(match.groupValues[1], Charsets.UTF_8)
+                val regionName = try {
+                    java.net.URLDecoder.decode(match.groupValues[1], Charsets.UTF_8.name())
+                } catch (e: Exception) {
+                    // If decoding fails, use the raw value
+                    match.groupValues[1]
+                }
                 val x = match.groupValues.getOrNull(2)?.toIntOrNull() ?: 128
                 val y = match.groupValues.getOrNull(3)?.toIntOrNull() ?: 128
                 val z = match.groupValues.getOrNull(4)?.toIntOrNull() ?: 25

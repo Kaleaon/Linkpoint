@@ -611,6 +611,27 @@ class InventoryManager(
         }
     }
     
+    /**
+     * Get all landmarks from the cached inventory.
+     * Returns items of type LANDMARK (asset type 3).
+     */
+    fun getLandmarks(): List<InventoryItem> {
+        return items.values.filter { it.assetType == 3 }
+            .sortedByDescending { it.creationDate }
+    }
+    
+    /**
+     * Fetch landmarks folder and return landmark items.
+     * Fetches the system landmarks folder if not already cached.
+     */
+    suspend fun fetchLandmarks(): List<InventoryItem> {
+        val landmarkFolder = systemFolders[FOLDER_TYPE_LANDMARK]
+        if (landmarkFolder != null) {
+            fetchFolderContents(landmarkFolder, fetchFolders = false, fetchItems = true)
+        }
+        return getLandmarks()
+    }
+    
     fun shutdown() {
         scope.cancel()
     }
