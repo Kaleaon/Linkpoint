@@ -20,8 +20,6 @@ class NearbyPeopleAdapter(
     private val onUserLongClick: (NearbyUser) -> Unit
 ) : ListAdapter<NearbyUser, NearbyPeopleAdapter.UserViewHolder>(DiffCallback()) {
 
-    private val distanceFormat = DecimalFormat("0.0")
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_nearby_user, parent, false)
@@ -44,6 +42,8 @@ class NearbyPeopleAdapter(
         private val userName: TextView = itemView.findViewById(R.id.user_name)
         private val userDistance: TextView = itemView.findViewById(R.id.user_distance)
         private val friendBadge: View = itemView.findViewById(R.id.friend_badge)
+        
+        private val distanceFormat = DecimalFormat("0.0")
 
         fun bind(user: NearbyUser) {
             userName.text = user.name

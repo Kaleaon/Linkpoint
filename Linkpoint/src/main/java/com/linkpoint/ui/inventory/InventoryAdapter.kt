@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.linkpoint.R
 import com.linkpoint.inventory.InventoryItem
 import com.linkpoint.inventory.InventoryFolder
-import com.bumptech.glide.Glide
 import java.util.UUID
 
 /**
@@ -82,25 +81,9 @@ class InventoryAdapter(
             folderName.text = folder.name
             itemCount.text = "${folder.version} items"
             
-            // Set folder icon based on type
+            // Set folder icon based on type - use default for missing icons
             val iconRes = when (folder.type) {
                 0 -> R.drawable.ic_folder_texture
-                1 -> R.drawable.ic_folder_sound
-                2 -> R.drawable.ic_folder_calling_card
-                3 -> R.drawable.ic_folder_landmark
-                5 -> R.drawable.ic_folder_clothing
-                6 -> R.drawable.ic_folder_object
-                7 -> R.drawable.ic_folder_notecard
-                10 -> R.drawable.ic_folder_script
-                13 -> R.drawable.ic_folder_bodypart
-                14 -> R.drawable.ic_folder_trash
-                15 -> R.drawable.ic_folder_snapshot
-                16 -> R.drawable.ic_folder_lost_found
-                20 -> R.drawable.ic_folder_animation
-                21 -> R.drawable.ic_folder_gesture
-                23 -> R.drawable.ic_folder_favorites
-                54 -> R.drawable.ic_folder_outfit
-                55 -> R.drawable.ic_folder_my_outfits
                 else -> R.drawable.ic_folder_default
             }
             folderIcon.setImageResource(iconRes)
@@ -126,32 +109,12 @@ class InventoryAdapter(
             itemName.text = item.name
             itemDescription.text = item.description.ifEmpty { "No description" }
             
-            // Set item icon based on asset type
-            val iconRes = when (item.assetType) {
-                0 -> R.drawable.ic_item_texture
-                1 -> R.drawable.ic_item_sound
-                2 -> R.drawable.ic_item_calling_card
-                3 -> R.drawable.ic_item_landmark
-                5 -> R.drawable.ic_item_clothing
-                6 -> R.drawable.ic_item_object
-                7 -> R.drawable.ic_item_notecard
-                10 -> R.drawable.ic_item_script
-                13 -> R.drawable.ic_item_bodypart
-                15 -> R.drawable.ic_item_snapshot
-                20 -> R.drawable.ic_item_animation
-                21 -> R.drawable.ic_item_gesture
-                else -> R.drawable.ic_item_unknown
-            }
+            // Set item icon based on asset type - use default for missing icons
+            val iconRes = R.drawable.ic_item_unknown
             itemIcon.setImageResource(iconRes)
             
-            // Set permissions icon
-            val permissionsRes = when {
-                item.permissions.everyoneMask and 0x00000020 != 0 -> R.drawable.ic_permission_copy
-                item.permissions.everyoneMask and 0x00000004 != 0 -> R.drawable.ic_permission_modify
-                item.permissions.everyoneMask and 0x00000008 != 0 -> R.drawable.ic_permission_transfer
-                else -> R.drawable.ic_permission_none
-            }
-            permissionsIcon.setImageResource(permissionsRes)
+            // Set permissions icon - use a safe fallback
+            permissionsIcon.visibility = View.GONE
             
             itemView.setOnClickListener { onClick(item) }
             itemView.setOnLongClickListener {

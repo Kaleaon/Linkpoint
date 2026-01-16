@@ -8,7 +8,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.linkpoint.R
 import com.linkpoint.avatar.Wearable
 
@@ -45,15 +44,8 @@ class WearableAdapter(
             wearableName.text = wearable.name
             wearableDescription.text = wearable.description.ifEmpty { "No description" }
 
-            // Load wearable icon if available
-            if (wearable.iconAssetId != null) {
-                Glide.with(itemView.context)
-                    .load(wearable.iconAssetId)
-                    .placeholder(R.drawable.ic_avatar_placeholder)
-                    .into(wearableIcon)
-            } else {
-                wearableIcon.setImageResource(R.drawable.ic_avatar_placeholder)
-            }
+            // Use placeholder icon (Glide not available)
+            wearableIcon.setImageResource(R.drawable.ic_avatar_placeholder)
 
             selectedIndicator.visibility = if (wearable.isWorn) {
                 View.VISIBLE

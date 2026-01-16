@@ -4,6 +4,7 @@ import java.io.FileInputStream
 plugins {
     id("com.android.application") version "8.1.4"
     id("org.jetbrains.kotlin.android") version "1.9.22"
+    id("org.jetbrains.kotlin.plugin.parcelize") version "1.9.22"
 }
 
 // Load keystore properties if available

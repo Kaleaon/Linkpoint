@@ -214,6 +214,26 @@ class AvatarManager(
         avatar.skeleton.updateBoneMatrices()
     }
     
+    /**
+     * Get wearables of a specific type from the current avatar's outfit
+     * Stub implementation - would need full outfit manager integration
+     */
+    suspend fun getWearables(type: WearableType): List<Wearable> {
+        // This is a stub - in a full implementation, this would fetch
+        // wearables from the outfit manager or inventory
+        return emptyList()
+    }
+    
+    /**
+     * Wear a specific wearable item
+     * Stub implementation - would need full outfit manager integration
+     */
+    suspend fun wear(wearable: Wearable) {
+        // This is a stub - in a full implementation, this would
+        // trigger the outfit manager to wear the item
+        android.util.Log.i("AvatarManager", "Wear: ${wearable.name}")
+    }
+    
     fun shutdown() {
         scope.cancel()
         avatars.values.forEach { avatar ->

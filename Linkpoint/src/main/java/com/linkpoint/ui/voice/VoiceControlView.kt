@@ -9,6 +9,11 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 /**
  * Voice control widget for toggling voice chat
@@ -26,6 +31,9 @@ class VoiceControlView @JvmOverloads constructor(
     private val voiceManager by lazy { 
         LinkpointApp.getInstance().voiceManager 
     }
+    
+    // Lifecycle-aware coroutine scope for this view
+    private val viewScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     var onVoiceToggleListener: ((Boolean) -> Unit)? = null
     var onMuteToggleListener: ((Boolean) -> Unit)? = null
@@ -51,27 +59,30 @@ class VoiceControlView @JvmOverloads constructor(
     }
 
     private fun toggleVoice() {
-        val isConnected = voiceManager.isConnected()
+        val isConnected = voiceManager.isConnected.value
         if (isConnected) {
-            voiceManager.disconnect()
+            voiceManager.leaveVoice()
             onVoiceToggleListener?.invoke(false)
         } else {
-            voiceManager.connect()
+            // Voice connection is async, so we launch a coroutine
+            viewScope.launch {
+                voiceManager.joinParcelVoice()
+            }
             onVoiceToggleListener?.invoke(true)
         }
         updateVoiceUI()
     }
 
     private fun toggleMute() {
-        val isMuted = voiceManager.isMuted()
+        val isMuted = voiceManager.isMuted.value
         voiceManager.setMuted(!isMuted)
         onMuteToggleListener?.invoke(!isMuted)
         updateVoiceUI()
     }
 
     private fun updateVoiceUI() {
-        val isConnected = voiceManager.isConnected()
-        val isMuted = voiceManager.isMuted()
+        val isConnected = voiceManager.isConnected.value
+        val isMuted = voiceManager.isMuted.value
 
         // Update toggle button
         if (isConnected) {
@@ -104,13 +115,18 @@ class VoiceControlView @JvmOverloads constructor(
      * Check if voice is connected
      */
     fun isVoiceConnected(): Boolean {
-        return voiceManager.isConnected()
+        return voiceManager.isConnected.value
     }
 
     /**
      * Check if voice is muted
      */
     fun isVoiceMuted(): Boolean {
-        return voiceManager.isMuted()
+        return voiceManager.isMuted.value
+    }
+    
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        viewScope.cancel()
     }
 }

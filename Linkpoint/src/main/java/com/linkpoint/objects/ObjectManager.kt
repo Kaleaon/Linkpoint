@@ -1,5 +1,6 @@
 package com.linkpoint.objects
 
+import android.os.Parcelable
 import android.util.Log
 import com.linkpoint.protocol.messages.MessageIds
 import com.linkpoint.protocol.messages.ObjectUpdateData
@@ -10,6 +11,7 @@ import com.linkpoint.protocol.types.LLVector3
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.parcelize.Parcelize
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
@@ -771,6 +773,7 @@ class ObjectManager(
     )
 }
 
+@Parcelize
 data class SceneObject(
     val localId: Int,
     val fullId: UUID,
@@ -793,7 +796,7 @@ data class SceneObject(
     var name: String = "",
     var description: String = "",
     var lastUpdate: Long = 0
-) {
+) : Parcelable {
     val isPhysical: Boolean get() = (updateFlags and ObjectManager.FLAG_USE_PHYSICS) != 0
     val isPhantom: Boolean get() = (updateFlags and ObjectManager.FLAG_PHANTOM) != 0
     val isTemporary: Boolean get() = (updateFlags and ObjectManager.FLAG_TEMPORARY) != 0

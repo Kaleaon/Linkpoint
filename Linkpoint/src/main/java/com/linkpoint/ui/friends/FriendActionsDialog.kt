@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
@@ -46,7 +47,7 @@ class FriendActionsDialog : DialogFragment() {
     private fun sendIM() {
         // Open IM with friend
         val friendsManager = LinkpointApp.getInstance().friendsManager
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             friendsManager.sendIM(friend.agentId, "")
         }
     }
@@ -54,15 +55,15 @@ class FriendActionsDialog : DialogFragment() {
     private fun viewProfile() {
         // View friend's profile
         val profileManager = LinkpointApp.getInstance().profileManager
-        lifecycleScope.launch {
-            profileManager.loadProfile(friend.agentId)
+        viewLifecycleOwner.lifecycleScope.launch {
+            profileManager.getAvatarProfile(friend.agentId)
         }
     }
 
     private fun teleportTo() {
         // Teleport to friend's location
         val friendsManager = LinkpointApp.getInstance().friendsManager
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             friendsManager.teleportTo(friend.agentId)
         }
     }
@@ -70,7 +71,7 @@ class FriendActionsDialog : DialogFragment() {
     private fun removeFriend() {
         // Remove friend
         val friendsManager = LinkpointApp.getInstance().friendsManager
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             friendsManager.removeFriend(friend.agentId)
         }
     }

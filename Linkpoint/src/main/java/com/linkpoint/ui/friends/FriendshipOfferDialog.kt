@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
@@ -44,7 +45,7 @@ class FriendshipOfferDialog : DialogFragment() {
 
     private fun acceptOffer() {
         val friendsManager = LinkpointApp.getInstance().friendsManager
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             friendsManager.acceptFriendship(offer.transactionId)
             dismiss()
         }
@@ -52,7 +53,7 @@ class FriendshipOfferDialog : DialogFragment() {
 
     private fun declineOffer() {
         val friendsManager = LinkpointApp.getInstance().friendsManager
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             friendsManager.declineFriendship(offer.transactionId)
             dismiss()
         }
