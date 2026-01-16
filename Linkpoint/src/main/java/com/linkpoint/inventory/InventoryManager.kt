@@ -1,5 +1,6 @@
 package com.linkpoint.inventory
 
+import android.os.Parcelable
 import android.util.Log
 import com.linkpoint.assets.AssetType
 import com.linkpoint.protocol.capabilities.CapabilityManager
@@ -7,6 +8,7 @@ import com.linkpoint.protocol.llsd.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.cancellation.CancellationException
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -300,6 +302,22 @@ class InventoryManager(
     fun getFolder(folderId: UUID): InventoryFolder? = folders[folderId]
     
     /**
+     * Get all subfolders of a folder (cached)
+     */
+    fun getFolders(parentId: UUID): List<InventoryFolder> {
+        return folders.values.filter { it.parentId == parentId }
+            .sortedBy { it.name }
+    }
+    
+    /**
+     * Get all items in a folder (cached)
+     */
+    fun getItems(parentId: UUID): List<InventoryItem> {
+        return items.values.filter { it.parentId == parentId }
+            .sortedBy { it.name }
+    }
+    
+    /**
      * Move item to folder
      */
     suspend fun moveItem(itemId: UUID, newParentId: UUID): Boolean {
@@ -466,14 +484,16 @@ class InventoryManager(
     )
 }
 
+@Parcelize
 data class InventoryFolder(
     val folderId: UUID,
     val parentId: UUID,
     val name: String,
     val type: Int,
     val version: Int
-)
+) : Parcelable
 
+@Parcelize
 data class InventoryItem(
     val itemId: UUID,
     val assetId: UUID,
@@ -486,11 +506,12 @@ data class InventoryItem(
     val permissions: ItemPermissions,
     val saleInfo: SaleInfo,
     val creationDate: Int
-) {
+) : Parcelable {
     val assetTypeEnum: AssetType
         get() = AssetType.fromValue(assetType)
 }
 
+@Parcelize
 data class ItemPermissions(
     val baseMask: Int,
     val ownerMask: Int,
@@ -499,7 +520,7 @@ data class ItemPermissions(
     val nextOwnerMask: Int,
     val ownerId: UUID,
     val creatorId: UUID
-) {
+) : Parcelable {
     companion object {
         const val PERM_TRANSFER = 0x00002000
         const val PERM_MODIFY = 0x00004000
@@ -512,10 +533,11 @@ data class ItemPermissions(
     val canCopy: Boolean get() = (ownerMask and PERM_COPY) != 0
 }
 
+@Parcelize
 data class SaleInfo(
     val saleType: Int,
     val salePrice: Int
-)
+) : Parcelable
 
 sealed class InventoryNode {
     abstract val name: String

@@ -189,6 +189,16 @@ class WorldMap(
     }
     
     /**
+     * Get nearby users/avatars in the current region
+     * This would typically be populated from ObjectManager's avatar tracking
+     */
+    suspend fun getNearbyUsers(): List<NearbyUser> {
+        // For now return empty list - this should be populated from 
+        // ObjectManager avatar data in a real implementation
+        return emptyList()
+    }
+    
+    /**
      * Clear cached tiles
      */
     fun clearCache() {

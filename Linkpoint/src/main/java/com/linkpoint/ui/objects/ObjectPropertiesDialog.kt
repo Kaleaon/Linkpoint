@@ -49,14 +49,12 @@ class ObjectPropertiesDialog : DialogFragment() {
             "X: ${"%.2f".format(obj.scale.x)}, Y: ${"%.2f".format(obj.scale.y)}, Z: ${"%.2f".format(obj.scale.z)}"
         view.findViewById<TextView>(R.id.obj_full_id).text = obj.fullId.toString()
         view.findViewById<TextView>(R.id.obj_owner_id).text = obj.ownerId.toString()
-        view.findViewById<TextView>(R.string.obj_creator_id).text = obj.creatorId.toString()
         
         // Flags
         val flagsText = buildString {
             if (obj.updateFlags and com.linkpoint.objects.ObjectManager.FLAG_PHANTOM != 0) append("Phantom, ")
-            if (obj.updateFlags and com.linkpoint.objects.ObjectManager.FLAG_PHYSICS != 0) append("Physics, ")
+            if (obj.updateFlags and com.linkpoint.objects.ObjectManager.FLAG_USE_PHYSICS != 0) append("Physics, ")
             if (obj.updateFlags and com.linkpoint.objects.ObjectManager.FLAG_SCRIPTED != 0) append("Scripted, ")
-            if (obj.updateFlags and com.linkpoint.objects.ObjectManager.FLAG_TEMPORARY != 0) append("Temporary, ")
             if (obj.updateFlags and com.linkpoint.objects.ObjectManager.FLAG_INVENTORY_EMPTY == 0) append("Has Inventory, ")
         }.dropLastWhile { it == ',' || it == ' ' }
         

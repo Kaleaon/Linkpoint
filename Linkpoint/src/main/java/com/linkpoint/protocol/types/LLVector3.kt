@@ -1,5 +1,7 @@
 package com.linkpoint.protocol.types
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.sqrt
@@ -7,11 +9,12 @@ import kotlin.math.sqrt
 /**
  * Second Life Vector3 type
  */
+@Parcelize
 data class LLVector3(
     val x: Float = 0f,
     val y: Float = 0f,
     val z: Float = 0f
-) {
+) : Parcelable {
     companion object {
         fun zero() = LLVector3(0f, 0f, 0f)
         fun one() = LLVector3(1f, 1f, 1f)
@@ -82,12 +85,13 @@ data class LLVector3(
 /**
  * Second Life Quaternion type
  */
+@Parcelize
 data class LLQuaternion(
     val x: Float = 0f,
     val y: Float = 0f,
     val z: Float = 0f,
     val w: Float = 1f
-) {
+) : Parcelable {
     companion object {
         fun identity() = LLQuaternion(0f, 0f, 0f, 1f)
         
@@ -271,12 +275,13 @@ data class LLQuaternion(
 /**
  * Second Life Color4 type
  */
+@Parcelize
 data class LLColor4(
     val r: Float = 1f,
     val g: Float = 1f,
     val b: Float = 1f,
     val a: Float = 1f
-) {
+) : Parcelable {
     companion object {
         fun white() = LLColor4(1f, 1f, 1f, 1f)
         fun black() = LLColor4(0f, 0f, 0f, 1f)

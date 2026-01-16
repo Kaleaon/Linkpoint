@@ -172,13 +172,14 @@ class FriendsManager(
         return withContext(Dispatchers.IO) {
             try {
                 // Use directory lookup to find agent
-                val lookupResponse = capabilityManager.getCapability("AgentDomain")?.let {
-                    capabilityManager.get(it, mapOf("names" to name))
-                }
+                val lookupResponse = capabilityManager.request(
+                    "AgentDomain",
+                    LLSDMap().apply { this["names"] = LLSDString(name) }
+                )
                 
-                if (lookupResponse != null) {
+                if (lookupResponse is LLSDMap) {
                     val agentId = UUID.fromString(lookupResponse.getString("agent_id") ?: return@withContext false)
-                    sendFriendshipOffer(agentId)
+                    offerFriendship(agentId)
                     true
                 } else {
                     false
@@ -197,6 +198,15 @@ class FriendsManager(
         // This would be handled by IMManager
         // For now, just log
         Log.i(TAG, "Send IM to $friendAgentId: $message")
+    }
+    
+    /**
+     * Teleport to a friend's location
+     */
+    suspend fun teleportTo(friendAgentId: UUID) {
+        // This would request teleport via capability
+        // For now, just log
+        Log.i(TAG, "Teleport to friend: $friendAgentId")
     }
     
     /**

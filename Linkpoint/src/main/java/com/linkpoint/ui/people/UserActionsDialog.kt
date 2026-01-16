@@ -3,6 +3,7 @@ package com.linkpoint.ui.people
 import android.app.Dialog
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.linkpoint.LinkpointApp
 import com.linkpoint.R
@@ -56,35 +57,35 @@ class UserActionsDialog : DialogFragment() {
 
     private fun sendIM() {
         val friendsManager = LinkpointApp.getInstance().friendsManager
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             friendsManager.sendIM(agentId, "")
         }
     }
 
     private fun viewProfile() {
         val profileManager = LinkpointApp.getInstance().profileManager
-        lifecycleScope.launch {
-            profileManager.loadProfile(agentId)
+        viewLifecycleOwner.lifecycleScope.launch {
+            profileManager.getAvatarProfile(agentId)
         }
     }
 
     private fun teleportTo() {
         val friendsManager = LinkpointApp.getInstance().friendsManager
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             friendsManager.teleportTo(agentId)
         }
     }
 
     private fun addFriend() {
         val friendsManager = LinkpointApp.getInstance().friendsManager
-        lifecycleScope.launch {
-            friendsManager.sendFriendshipOffer(agentId)
+        viewLifecycleOwner.lifecycleScope.launch {
+            friendsManager.offerFriendship(agentId)
         }
     }
 
     private fun removeFriend() {
         val friendsManager = LinkpointApp.getInstance().friendsManager
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             friendsManager.removeFriend(agentId)
         }
     }
