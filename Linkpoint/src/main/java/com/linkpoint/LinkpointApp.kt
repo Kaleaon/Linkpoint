@@ -28,6 +28,11 @@ import com.linkpoint.world.ParcelManager
 import com.linkpoint.world.ProfileManager
 import com.linkpoint.world.SearchManager
 import com.linkpoint.world.WorldMap
+import com.linkpoint.groups.GroupsManager
+import com.linkpoint.animesh.AnimeshManager
+import com.linkpoint.bom.BakesOnMeshManager
+import com.linkpoint.teleport.TeleportManager
+import com.linkpoint.hud.HUDManager
 import com.linkpoint.xr.XRManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -119,6 +124,22 @@ class LinkpointApp : Application() {
     lateinit var parcelManager: ParcelManager
         private set
     lateinit var friendsManager: FriendsManager
+        private set
+    lateinit var groupsManager: GroupsManager
+        private set
+    
+    // Animesh and BoM (modern features)
+    lateinit var animeshManager: AnimeshManager
+        private set
+    lateinit var bomManager: BakesOnMeshManager
+        private set
+    
+    // Teleport
+    lateinit var teleportManager: TeleportManager
+        private set
+    
+    // HUD
+    lateinit var hudManager: HUDManager
         private set
     
     // Objects
@@ -215,11 +236,14 @@ class LinkpointApp : Application() {
         // Initialize friendsManager here since it requires agentId
         friendsManager = FriendsManager(udpConnection, capabilityManager, agentId)
         
+        // Initialize groupsManager
+        groupsManager = GroupsManager(udpConnection, capabilityManager, agentId)
+        
         Log.d(TAG, "Initializing agent-specific managers for $agentId")
         
         // Avatar manager
         avatarManager = AvatarManager(
-            this, meshManager, textureManager, animationManager, capabilityManager
+            this, meshManager, textureManager, animationManager, capabilityManager, udpConnection
         )
         avatarManager.setMyAgentId(agentId)
         
@@ -246,6 +270,16 @@ class LinkpointApp : Application() {
         // Object manager
         objectManager = ObjectManager(udpConnection)
         buildTools = BuildTools(objectManager)
+        
+        // Modern features: Animesh and Bakes on Mesh
+        animeshManager = AnimeshManager(meshManager, animationManager)
+        bomManager = BakesOnMeshManager(capabilityManager, textureManager)
+        
+        // Teleport manager
+        teleportManager = TeleportManager(udpConnection, capabilityManager, agentId)
+        
+        // HUD manager
+        hudManager = HUDManager(objectManager, udpConnection, agentId)
         
         // Register UDP message handlers for real-time data
         registerMessageHandlers()
@@ -570,4 +604,29 @@ class LinkpointApp : Application() {
      * Check if outfit manager is initialized (for debug reports)
      */
     fun isOutfitManagerInitialized(): Boolean = ::outfitManager.isInitialized
+    
+    /**
+     * Check if groups manager is initialized (for debug reports)
+     */
+    fun isGroupsManagerInitialized(): Boolean = ::groupsManager.isInitialized
+    
+    /**
+     * Check if animesh manager is initialized (for debug reports)
+     */
+    fun isAnimeshManagerInitialized(): Boolean = ::animeshManager.isInitialized
+    
+    /**
+     * Check if BoM manager is initialized (for debug reports)
+     */
+    fun isBomManagerInitialized(): Boolean = ::bomManager.isInitialized
+    
+    /**
+     * Check if teleport manager is initialized (for debug reports)
+     */
+    fun isTeleportManagerInitialized(): Boolean = ::teleportManager.isInitialized
+    
+    /**
+     * Check if HUD manager is initialized (for debug reports)
+     */
+    fun isHudManagerInitialized(): Boolean = ::hudManager.isInitialized
 }

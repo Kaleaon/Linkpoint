@@ -22,9 +22,11 @@ import com.linkpoint.LinkpointApp
 import com.linkpoint.R
 import com.linkpoint.core.ConnectionState
 import com.linkpoint.ui.chat.ChatActivity
+import com.linkpoint.ui.friends.FriendsActivity
 import com.linkpoint.ui.inventory.InventoryActivity
 import com.linkpoint.ui.minimap.MinimapActivity
 import com.linkpoint.ui.avatar.MyAvatarActivity
+import com.linkpoint.ui.people.NearbyPeopleActivity
 import com.linkpoint.ui.settings.SettingsActivity
 import com.linkpoint.ui.xr.XRWorldActivity
 import com.linkpoint.utils.DebugReportService
@@ -54,6 +56,29 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private lateinit var btnMinimap: ImageButton
     private lateinit var btnInventory: ImageButton
     private lateinit var btnXR: ImageButton
+    
+    // HUD overlay for Second Life HUD attachments
+    private lateinit var hudOverlay: com.linkpoint.hud.HUDOverlayView
+    
+    // Joysticks
+    private lateinit var joystickMove: JoystickView
+    private lateinit var joystickCamera: JoystickView
+    
+    // Movement control buttons
+    private lateinit var btnFly: ImageButton
+    private lateinit var btnRun: ImageButton
+    private lateinit var btnJump: ImageButton
+    private lateinit var btnSit: ImageButton
+    
+    // Action buttons
+    private lateinit var btnGestures: ImageButton
+    private lateinit var btnFriends: ImageButton
+    private lateinit var btnNearby: ImageButton
+    
+    // Movement controller (lazy init after login)
+    private val movementController by lazy {
+        app.avatarManager.movementController
+    }
     
     // Debug floater button
     private var debugFloaterButton: FloatingActionButton? = null
@@ -188,6 +213,262 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         
         // Show/hide XR button based on availability
         btnXR.visibility = if (app.isXRAvailable()) View.VISIBLE else View.GONE
+        
+        // Initialize HUD overlay for Second Life HUD attachments
+        initHudOverlay()
+        
+        // Initialize joysticks
+        initJoysticks()
+        
+        // Initialize movement control buttons
+        initMovementControls()
+        
+        // Initialize action buttons
+        initActionButtons()
+    }
+    
+    /**
+     * Initialize the HUD overlay for displaying Second Life HUD attachments.
+     */
+    private fun initHudOverlay() {
+        hudOverlay = findViewById(R.id.hudOverlay)
+        
+        // Connect to HUD manager if available
+        if (app.isHudManagerInitialized()) {
+            hudOverlay.hudManager = app.hudManager
+            
+            hudOverlay.listener = object : com.linkpoint.hud.HUDOverlayView.HUDInteractionListener {
+                override fun onHUDTouched(hudLocalId: Int, touchPosition: com.linkpoint.protocol.types.LLVector3) {
+                    app.hudManager.touchHUD(hudLocalId, touchPosition)
+                }
+                
+                override fun onHUDLongPressed(hudLocalId: Int) {
+                    // Show HUD options menu
+                    showHUDOptionsMenu(hudLocalId)
+                }
+            }
+            
+            // Observe HUD visibility changes
+            lifecycleScope.launch {
+                app.hudManager.hudsVisible.collectLatest { visible ->
+                    hudOverlay.visibility = if (visible) View.VISIBLE else View.GONE
+                }
+            }
+        }
+    }
+    
+    /**
+     * Show options menu for a HUD.
+     */
+    private fun showHUDOptionsMenu(hudLocalId: Int) {
+        if (!app.isHudManagerInitialized()) return
+        
+        val hud = app.hudManager.getHUD(hudLocalId) ?: return
+        
+        val options = arrayOf(
+            getString(R.string.hide_huds),
+            getString(R.string.close)
+        )
+        
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(hud.name)
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> app.hudManager.setHUDsVisible(false)
+                }
+            }
+            .show()
+    }
+    
+    /**
+     * Initialize joystick controls for movement and camera.
+     */
+    private fun initJoysticks() {
+        joystickMove = findViewById(R.id.joystickMove)
+        joystickCamera = findViewById(R.id.joystickCamera)
+        
+        // Movement joystick listener
+        joystickMove.listener = object : JoystickView.JoystickListener {
+            override fun onJoystickMoved(x: Float, y: Float) {
+                // Forward the input to the movement controller
+                if (app.isAvatarManagerInitialized()) {
+                    movementController.setJoystickInput(x, y)
+                }
+            }
+            
+            override fun onJoystickReleased() {
+                // Stop movement when joystick is released
+                if (app.isAvatarManagerInitialized()) {
+                    movementController.setJoystickInput(0f, 0f)
+                }
+            }
+        }
+        
+        // Camera/rotation joystick listener
+        joystickCamera.listener = object : JoystickView.JoystickListener {
+            override fun onJoystickMoved(x: Float, y: Float) {
+                // Forward the rotation input
+                if (app.isAvatarManagerInitialized()) {
+                    movementController.setRotationInput(x)
+                    // Y could be used for camera pitch if needed
+                }
+            }
+            
+            override fun onJoystickReleased() {
+                if (app.isAvatarManagerInitialized()) {
+                    movementController.setRotationInput(0f)
+                }
+            }
+        }
+    }
+    
+    /**
+     * Initialize movement control buttons (fly, run, jump, sit).
+     */
+    private fun initMovementControls() {
+        btnFly = findViewById(R.id.btnFly)
+        btnRun = findViewById(R.id.btnRun)
+        btnJump = findViewById(R.id.btnJump)
+        btnSit = findViewById(R.id.btnSit)
+        
+        btnFly.setOnClickListener {
+            if (app.isAvatarManagerInitialized()) {
+                movementController.toggleFly()
+                val isFlying = movementController.isFlying.value
+                Toast.makeText(
+                    this,
+                    if (isFlying) R.string.flying_enabled else R.string.flying_disabled,
+                    Toast.LENGTH_SHORT
+                ).show()
+                updateFlyButtonState(isFlying)
+            }
+        }
+        
+        btnRun.setOnClickListener {
+            if (app.isAvatarManagerInitialized()) {
+                movementController.toggleRun()
+                val isRunning = movementController.isRunning.value
+                Toast.makeText(
+                    this,
+                    if (isRunning) R.string.running_enabled else R.string.running_disabled,
+                    Toast.LENGTH_SHORT
+                ).show()
+                updateRunButtonState(isRunning)
+            }
+        }
+        
+        btnJump.setOnClickListener {
+            if (app.isAvatarManagerInitialized()) {
+                movementController.jump()
+            }
+        }
+        
+        btnSit.setOnClickListener {
+            if (app.isAvatarManagerInitialized()) {
+                if (movementController.isSitting.value) {
+                    movementController.standUp()
+                } else {
+                    movementController.sitOnGround()
+                }
+            }
+        }
+        
+        // Observe movement state changes
+        lifecycleScope.launch {
+            if (app.isAvatarManagerInitialized()) {
+                movementController.isFlying.collectLatest { isFlying ->
+                    updateFlyButtonState(isFlying)
+                }
+            }
+        }
+        
+        lifecycleScope.launch {
+            if (app.isAvatarManagerInitialized()) {
+                movementController.isRunning.collectLatest { isRunning ->
+                    updateRunButtonState(isRunning)
+                }
+            }
+        }
+        
+        lifecycleScope.launch {
+            if (app.isAvatarManagerInitialized()) {
+                movementController.isSitting.collectLatest { isSitting ->
+                    updateSitButtonState(isSitting)
+                }
+            }
+        }
+    }
+    
+    /**
+     * Initialize action buttons (gestures, friends, nearby).
+     */
+    private fun initActionButtons() {
+        btnGestures = findViewById(R.id.btnGestures)
+        btnFriends = findViewById(R.id.btnFriends)
+        btnNearby = findViewById(R.id.btnNearby)
+        
+        btnGestures.setOnClickListener {
+            showGesturesPopup()
+        }
+        
+        btnFriends.setOnClickListener {
+            startActivity(Intent(this, FriendsActivity::class.java))
+        }
+        
+        btnNearby.setOnClickListener {
+            startActivity(Intent(this, NearbyPeopleActivity::class.java))
+        }
+    }
+    
+    /**
+     * Update fly button visual state.
+     */
+    private fun updateFlyButtonState(isFlying: Boolean) {
+        btnFly.alpha = if (isFlying) 1.0f else 0.6f
+        btnFly.isSelected = isFlying
+    }
+    
+    /**
+     * Update run button visual state.
+     */
+    private fun updateRunButtonState(isRunning: Boolean) {
+        btnRun.alpha = if (isRunning) 1.0f else 0.6f
+        btnRun.isSelected = isRunning
+    }
+    
+    /**
+     * Update sit button visual state.
+     */
+    private fun updateSitButtonState(isSitting: Boolean) {
+        btnSit.alpha = if (isSitting) 1.0f else 0.6f
+        btnSit.isSelected = isSitting
+    }
+    
+    /**
+     * Show gestures popup menu.
+     */
+    private fun showGesturesPopup() {
+        if (!app.isGestureManagerInitialized()) {
+            Toast.makeText(this, R.string.gestures_not_available, Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        val gestures = app.gestureManager.getActiveGestures()
+        if (gestures.isEmpty()) {
+            Toast.makeText(this, R.string.no_active_gestures, Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        // Show a popup menu with active gestures
+        val gestureNames = gestures.map { it.name }.toTypedArray()
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.gestures)
+            .setItems(gestureNames) { _, which ->
+                val gesture = gestures[which]
+                app.gestureManager.activateGesture(gesture.id)
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
     
     private fun initRenderer() {
@@ -258,6 +539,13 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             R.id.nav_inventory -> startActivity(Intent(this, InventoryActivity::class.java))
             R.id.nav_minimap -> startActivity(Intent(this, MinimapActivity::class.java))
             R.id.nav_avatar -> startActivity(Intent(this, MyAvatarActivity::class.java))
+            R.id.nav_friends -> startActivity(Intent(this, FriendsActivity::class.java))
+            R.id.nav_groups -> startActivity(Intent(this, com.linkpoint.ui.groups.GroupsActivity::class.java))
+            R.id.nav_nearby -> startActivity(Intent(this, NearbyPeopleActivity::class.java))
+            R.id.nav_radar -> startActivity(Intent(this, com.linkpoint.ui.radar.RadarActivity::class.java))
+            R.id.nav_search -> startActivity(Intent(this, com.linkpoint.ui.search.SearchActivity::class.java))
+            R.id.nav_world_map -> startActivity(Intent(this, com.linkpoint.ui.map.MapActivity::class.java))
+            R.id.nav_teleport_home -> teleportHome()
             R.id.nav_settings -> startActivity(Intent(this, SettingsActivity::class.java))
             R.id.nav_xr_mode -> {
                 if (app.isXRAvailable()) {
@@ -271,6 +559,34 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         
         drawerLayout.closeDrawer(GravityCompat.START)
         return true
+    }
+    
+    /**
+     * Teleport home (to user's home location).
+     */
+    private fun teleportHome() {
+        lifecycleScope.launch {
+            try {
+                if (app.isTeleportManagerInitialized()) {
+                    val result = app.teleportManager.teleportHome()
+                    when (result) {
+                        is com.linkpoint.teleport.TeleportResult.Pending -> {
+                            Toast.makeText(this@WorldViewActivity, R.string.teleporting_home, Toast.LENGTH_SHORT).show()
+                        }
+                        is com.linkpoint.teleport.TeleportResult.Failure -> {
+                            Toast.makeText(this@WorldViewActivity, "Failed: ${result.message}", Toast.LENGTH_SHORT).show()
+                        }
+                        else -> {}
+                    }
+                } else {
+                    // Fallback to session manager
+                    app.sessionManager.teleportHome()
+                    Toast.makeText(this@WorldViewActivity, R.string.teleporting_home, Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this@WorldViewActivity, "Failed to teleport: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
     
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

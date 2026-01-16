@@ -8,6 +8,7 @@ import com.linkpoint.assets.MeshManager
 import com.linkpoint.assets.TextureManager
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.messages.AvatarAnimationData
+import com.linkpoint.protocol.messages.UDPConnection
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3
 import kotlinx.coroutines.*
@@ -24,7 +25,8 @@ class AvatarManager(
     private val meshManager: MeshManager,
     private val textureManager: TextureManager,
     private val animationManager: AnimationManager,
-    private val capabilityManager: CapabilityManager
+    private val capabilityManager: CapabilityManager,
+    private val udpConnection: UDPConnection? = null
 ) {
     companion object {
         private const val TAG = "AvatarManager"
@@ -41,6 +43,11 @@ class AvatarManager(
     private var myAgentId: UUID? = null
     private var myAvatar: Avatar? = null
     
+    // Movement controller for the local avatar
+    val movementController: MovementController by lazy {
+        MovementController(udpConnection ?: throw IllegalStateException("UDP connection required for movement"))
+    }
+    
     private val _avatarCount = MutableStateFlow(0)
     val avatarCount: StateFlow<Int> = _avatarCount
     
@@ -49,6 +56,11 @@ class AvatarManager(
      */
     fun setMyAgentId(agentId: UUID) {
         myAgentId = agentId
+        // Initialize movement controller with session info
+        if (udpConnection != null) {
+            movementController.setSessionInfo(agentId, UUID(0, 0)) // Session ID would be set from login
+            movementController.startMovementUpdates()
+        }
     }
     
     /**
@@ -236,6 +248,9 @@ class AvatarManager(
     
     fun shutdown() {
         scope.cancel()
+        if (udpConnection != null) {
+            movementController.shutdown()
+        }
         avatars.values.forEach { avatar ->
             avatar.animator.stopAll()
             avatar.baker.shutdown()
