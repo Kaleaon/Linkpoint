@@ -203,8 +203,9 @@ class HUDOverlayView @JvmOverloads constructor(
 }
 
 // Extension property to store screen bounds on HUDObject
+// Using ConcurrentHashMap for thread safety since bounds may be accessed from multiple threads
 private var HUDObject.screenBounds: RectF?
     get() = screenBoundsMap[this.localId]
     set(value) { screenBoundsMap[this.localId] = value }
 
-private val screenBoundsMap = mutableMapOf<Int, RectF?>()
+private val screenBoundsMap = java.util.concurrent.ConcurrentHashMap<Int, RectF?>()

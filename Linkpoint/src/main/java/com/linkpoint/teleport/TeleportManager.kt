@@ -36,6 +36,10 @@ class TeleportManager(
     private val agentId: UUID
 ) : EventHandler {
     
+    // Get session ID from UDP connection
+    private val sessionId: UUID
+        get() = udpConnection.getSessionId()
+    
     companion object {
         private const val TAG = "TeleportManager"
         
@@ -163,7 +167,8 @@ class TeleportManager(
                 // AgentData
                 payload.putLong(agentId.mostSignificantBits)
                 payload.putLong(agentId.leastSignificantBits)
-                repeat(16) { payload.put(0) } // Session ID placeholder
+                payload.putLong(sessionId.mostSignificantBits)
+                payload.putLong(sessionId.leastSignificantBits)
                 
                 // Info
                 payload.putLong(landmarkId.mostSignificantBits)
@@ -200,7 +205,8 @@ class TeleportManager(
                 // AgentData
                 payload.putLong(agentId.mostSignificantBits)
                 payload.putLong(agentId.leastSignificantBits)
-                repeat(16) { payload.put(0) } // Session ID placeholder
+                payload.putLong(sessionId.mostSignificantBits)
+                payload.putLong(sessionId.leastSignificantBits)
                 
                 // Flags
                 payload.putInt(TELEPORT_FLAGS_VIA_HOME)
@@ -229,7 +235,8 @@ class TeleportManager(
                 // AgentData
                 payload.putLong(agentId.mostSignificantBits)
                 payload.putLong(agentId.leastSignificantBits)
-                repeat(16) { payload.put(0) } // Session ID placeholder
+                payload.putLong(sessionId.mostSignificantBits)
+                payload.putLong(sessionId.leastSignificantBits)
                 
                 // Info - target agent
                 payload.putLong(targetAgentId.mostSignificantBits)
@@ -264,7 +271,8 @@ class TeleportManager(
                 // AgentData
                 payload.putLong(agentId.mostSignificantBits)
                 payload.putLong(agentId.leastSignificantBits)
-                repeat(16) { payload.put(0) } // Session ID placeholder
+                payload.putLong(sessionId.mostSignificantBits)
+                payload.putLong(sessionId.leastSignificantBits)
                 
                 // Info
                 payload.putLong(lure.senderId.mostSignificantBits)
@@ -360,7 +368,8 @@ class TeleportManager(
             // AgentData
             payload.putLong(agentId.mostSignificantBits)
             payload.putLong(agentId.leastSignificantBits)
-            repeat(16) { payload.put(0) } // Session ID placeholder
+            payload.putLong(sessionId.mostSignificantBits)
+                payload.putLong(sessionId.leastSignificantBits)
             
             // Info
             payload.putLong(0) // Region handle (0 = resolve by name)
@@ -472,7 +481,7 @@ class TeleportManager(
         for (pattern in patterns) {
             val match = pattern.find(slurl)
             if (match != null) {
-                val regionName = java.net.URLDecoder.decode(match.groupValues[1], "UTF-8")
+                val regionName = java.net.URLDecoder.decode(match.groupValues[1], Charsets.UTF_8)
                 val x = match.groupValues.getOrNull(2)?.toFloatOrNull() ?: 128f
                 val y = match.groupValues.getOrNull(3)?.toFloatOrNull() ?: 128f
                 val z = match.groupValues.getOrNull(4)?.toFloatOrNull() ?: 25f
