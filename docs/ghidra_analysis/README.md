@@ -25,6 +25,28 @@ This directory contains the results of analyzing Second Life viewer APKs using G
 - `Second_Life_APK_Networking_Standards.md` - Extracted networking standards
 - `Unified_Viewer_Networking_Standards.md` - Unified standards from all viewers
 
+### Login Implementation Analysis
+- `Viewer_Login_Implementation_Analysis.md` - Comprehensive comparison of how major viewers handle login:
+  - Alchemy Viewer (C++)
+  - Firestorm Viewer (C++)
+  - Lumiya Viewer (Java/Android)
+  - LibreMetaverse (C#)
+  - Linkpoint (Kotlin/Android)
+
+### Linkpoint Alignment Documents
+- `Linkpoint_Alignment_Recommendations.md` - Login protocol alignment recommendations
+- `Linkpoint_Full_Operational_Alignment.md` - **Complete operational alignment guide**:
+  - Login protocol fixes
+  - UDP protocol (LLUDP) implementation
+  - Capabilities (CAPS) requirements
+  - Inventory system alignment
+  - Avatar system requirements
+  - Chat & messaging alignment
+  - Asset system requirements
+  - World/scene handling
+  - Voice system integration
+  - Priority implementation checklist
+
 ### Lumiya APK Analysis
 - `source_structure_comparison.json` - Comparison of source file structures
 - `dex_structure_analysis.json` - Analysis of the DEX file structure  
