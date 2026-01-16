@@ -20,14 +20,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.linkpoint.voice.VoiceManager
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 /**
  * Compose version of the VoiceControlView.
@@ -37,7 +35,8 @@ import kotlinx.coroutines.launch
  * 
  * @param isConnected StateFlow of voice connection status
  * @param isMuted StateFlow of mute status
- * @param onVoiceToggle Callback when voice toggle is clicked
+ * @param onVoiceToggle Callback when voice toggle is clicked (receives desired connection state).
+ *                      The callback is responsible for handling async operations internally.
  * @param onMuteToggle Callback when mute toggle is clicked
  * @param connectedColor Color when voice is connected
  * @param disconnectedColor Color when voice is disconnected
@@ -47,7 +46,7 @@ import kotlinx.coroutines.launch
 fun VoiceControl(
     isConnected: StateFlow<Boolean>,
     isMuted: StateFlow<Boolean>,
-    onVoiceToggle: suspend (Boolean) -> Unit,
+    onVoiceToggle: (Boolean) -> Unit,
     onMuteToggle: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     connectedColor: Color = Color(0xFF4CAF50),  // Green
@@ -55,7 +54,6 @@ fun VoiceControl(
 ) {
     val connected by isConnected.collectAsState()
     val muted by isMuted.collectAsState()
-    val scope = rememberCoroutineScope()
     
     Surface(
         modifier = modifier,
@@ -70,11 +68,7 @@ fun VoiceControl(
         ) {
             // Voice toggle button
             IconButton(
-                onClick = {
-                    scope.launch {
-                        onVoiceToggle(!connected)
-                    }
-                }
+                onClick = { onVoiceToggle(!connected) }
             ) {
                 Icon(
                     imageVector = if (connected) Icons.Default.VolumeUp else Icons.Default.VolumeOff,

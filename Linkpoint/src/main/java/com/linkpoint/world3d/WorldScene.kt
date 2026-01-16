@@ -104,7 +104,12 @@ fun WorldScene(
     
     // Update nodes when world state changes
     DisposableEffect(worldState.modelNodes) {
-        onDispose { }
+        // Nodes are automatically managed by SceneView through rememberNodes
+        // This effect tracks model state changes for future cleanup if needed
+        onDispose {
+            // SceneView handles node cleanup automatically when composable leaves composition
+            // Additional cleanup (e.g., canceling pending loads) can be added here
+        }
     }
     
     Box(modifier = modifier.fillMaxSize()) {

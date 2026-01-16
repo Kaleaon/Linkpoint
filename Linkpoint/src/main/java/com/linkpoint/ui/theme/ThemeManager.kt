@@ -228,7 +228,21 @@ class ThemeManager private constructor(private val context: Context) {
     }
     
     /**
-     * Export a theme to a shareable file
+     * Export a theme to a shareable file.
+     * 
+     * Note: This requires FileProvider configuration in AndroidManifest.xml:
+     * ```xml
+     * <provider
+     *     android:name="androidx.core.content.FileProvider"
+     *     android:authorities="${applicationId}.fileprovider"
+     *     android:exported="false"
+     *     android:grantUriPermissions="true">
+     *     <meta-data
+     *         android:name="android.support.FILE_PROVIDER_PATHS"
+     *         android:resource="@xml/file_paths" />
+     * </provider>
+     * ```
+     * And res/xml/file_paths.xml with cache-path for "theme_exports".
      */
     suspend fun exportTheme(theme: ThemePack): Result<Uri> = withContext(Dispatchers.IO) {
         try {
@@ -237,7 +251,7 @@ class ThemeManager private constructor(private val context: Context) {
             val exportFile = File(exportDir, "${theme.id}$THEME_FILE_EXTENSION")
             exportFile.writeText(theme.toJson())
             
-            // Get content URI for sharing
+            // Get content URI for sharing (requires FileProvider in manifest)
             val uri = FileProvider.getUriForFile(
                 context,
                 "${context.packageName}.fileprovider",

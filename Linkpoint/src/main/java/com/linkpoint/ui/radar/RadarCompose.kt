@@ -90,18 +90,28 @@ fun Radar(
         remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
     }
     
-    val textPaint = remember {
+    // Helper function to convert Compose Color to Android Color int
+    fun toAndroidColor(color: Color): Int {
+        return android.graphics.Color.argb(
+            (color.alpha * 255).toInt(),
+            (color.red * 255).toInt(),
+            (color.green * 255).toInt(),
+            (color.blue * 255).toInt()
+        )
+    }
+    
+    val textPaint = remember(textColor) {
         android.graphics.Paint().apply {
-            color = android.graphics.Color.WHITE
+            color = toAndroidColor(textColor)
             textSize = 24f
             textAlign = android.graphics.Paint.Align.CENTER
             isAntiAlias = true
         }
     }
     
-    val directionPaint = remember {
+    val directionPaint = remember(textColor) {
         android.graphics.Paint().apply {
-            color = android.graphics.Color.WHITE
+            color = toAndroidColor(textColor)
             textSize = 28f
             textAlign = android.graphics.Paint.Align.CENTER
             isAntiAlias = true
