@@ -189,6 +189,20 @@ class WorldMap(
     }
     
     /**
+     * Get nearby users
+     * Returns list of users within a certain range
+     */
+    suspend fun getNearbyUsers(): List<NearbyUser> {
+        return withContext(Dispatchers.IO) {
+            // TODO: This needs to be implemented properly by querying the simulator
+            // for nearby avatars using the ObjectUpdate messages and avatar positions.
+            // For now, returning an empty list until the full protocol implementation
+            // is complete.
+            emptyList()
+        }
+    }
+    
+    /**
      * Clear cached tiles
      */
     fun clearCache() {
@@ -228,4 +242,14 @@ data class RegionSearchResult(
     val gridY: Int,
     val access: Int,
     val mapImageId: UUID?
+)
+
+/**
+ * Represents a nearby user/avatar in the virtual world
+ */
+data class NearbyUser(
+    val agentId: UUID,
+    val name: String,
+    val distance: Float,
+    val isFriend: Boolean
 )
