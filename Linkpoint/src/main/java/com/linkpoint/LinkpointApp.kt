@@ -23,6 +23,7 @@ import com.linkpoint.protocol.messages.parseRegionHandshake
 import com.linkpoint.protocol.messages.parseAgentMovementComplete
 import com.linkpoint.render.RenderManager
 import com.linkpoint.voice.VoiceManager
+import com.linkpoint.world.FriendsManager
 import com.linkpoint.world.ParcelManager
 import com.linkpoint.world.ProfileManager
 import com.linkpoint.world.SearchManager
@@ -117,6 +118,8 @@ class LinkpointApp : Application() {
         private set
     lateinit var parcelManager: ParcelManager
         private set
+    lateinit var friendsManager: FriendsManager
+        private set
     
     // Objects
     lateinit var objectManager: ObjectManager
@@ -196,6 +199,7 @@ class LinkpointApp : Application() {
         searchManager = SearchManager(capabilityManager)
         profileManager = ProfileManager(capabilityManager)
         parcelManager = ParcelManager(udpConnection)
+        friendsManager = FriendsManager(capabilityManager, udpConnection)
         
         // Voice
         voiceManager = VoiceManager(this, capabilityManager)
