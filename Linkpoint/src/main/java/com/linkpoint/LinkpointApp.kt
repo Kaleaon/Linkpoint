@@ -9,6 +9,9 @@ import com.linkpoint.chat.ChatManager
 import com.linkpoint.chat.IMManager
 import com.linkpoint.core.GridManager
 import com.linkpoint.core.SessionManager
+import com.linkpoint.core.StartLocationManager
+import com.linkpoint.core.DestinationGuide
+import com.linkpoint.core.AvatarSelectionManager
 import com.linkpoint.inventory.GestureManager
 import com.linkpoint.inventory.InventoryManager
 import com.linkpoint.inventory.OutfitManager
@@ -70,6 +73,12 @@ class LinkpointApp : Application() {
     lateinit var gridManager: GridManager
         private set
     lateinit var sessionManager: SessionManager
+        private set
+    lateinit var startLocationManager: StartLocationManager
+        private set
+    lateinit var destinationGuide: DestinationGuide
+        private set
+    lateinit var avatarSelectionManager: AvatarSelectionManager
         private set
     lateinit var renderManager: RenderManager
         private set
@@ -194,6 +203,15 @@ class LinkpointApp : Application() {
         
         // Session management (active connection state)
         sessionManager = SessionManager(this)
+        
+        // Start location management (landmarks, destinations)
+        startLocationManager = StartLocationManager(this)
+        
+        // Destination guide (themed locations)
+        destinationGuide = DestinationGuide(this)
+        
+        // Avatar selection management
+        avatarSelectionManager = AvatarSelectionManager(this)
         
         // Protocol components
         capabilityManager = CapabilityManager()
@@ -504,6 +522,9 @@ class LinkpointApp : Application() {
         
         // Shutdown protocol and networking
         protocol.shutdown()
+        
+        // Shutdown destination guide
+        destinationGuide.shutdown()
         
         sessionManager.disconnect()
         
