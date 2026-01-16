@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.lumiyaviewer.lumiya" platformBuildVersionCode="26" platformBuildVersionName="8.0.0">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission-sdk-23 android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission-sdk-23 android:name="android.permission.NFC"/>
+    <uses-feature android:name="android.hardware.screen.landscape" android:required="false"/>
+    <uses-feature android:name="android.software.vr.mode" android:required="false"/>
+    <uses-feature android:name="android.hardware.vr.high_performance" android:required="false"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <application android:allowBackup="true" android:fullBackupContent="@xml/backup_rules" android:icon="@mipmap/ic_lumiya_launcher" android:installLocation="auto" android:label="@string/app_name" android:name="com.lumiyaviewer.lumiya.LumiyaApp" android:supportsRtl="true" android:theme="@style/Theme.Lumiya">
+        <activity android:clearTaskOnLaunch="true" android:label="@string/app_name" android:launchMode="singleTask" android:name="com.lumiyaviewer.lumiya.ui.login.LoginActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:label="Second Life Terms of Service" android:name="com.lumiyaviewer.lumiya.ui.login.TOSActivity"/>
+        <activity android:label="@string/app_name" android:name="com.lumiyaviewer.lumiya.ui.chat.ChatNewActivity" android:windowSoftInputMode="adjustResize"/>
+        <activity android:icon="@drawable/inv_folder" android:label="@string/inventory_activity_title" android:name="com.lumiyaviewer.lumiya.ui.inventory.InventoryActivity"/>
+        <activity android:label="@string/objects_activity_title" android:name="com.lumiyaviewer.lumiya.ui.objects.ObjectListNewActivity"/>
+        <activity android:label="Lumiya Viewer settings" android:name="com.lumiyaviewer.lumiya.ui.settings.SettingsActivity"/>
+        <activity android:label="Lumiya Viewer: Streaming media" android:name="com.lumiyaviewer.lumiya.ui.media.StreamingMediaActivity" android:theme="@style/Theme.AppCompat.Dialog"/>
+        <activity android:label="World View" android:name="com.lumiyaviewer.lumiya.ui.render.WorldViewActivity" android:theme="@style/Theme.Lumiya.NoActionBar"/>
+        <activity android:enableVrMode="@string/gvr_vr_mode_component" android:label="VR View" android:name="com.lumiyaviewer.lumiya.ui.render.CardboardActivity" android:screenOrientation="landscape" android:theme="@style/Theme.Lumiya.NoActionBar">
+            <intent-filter>
+                <action android:name="com.lumiyaviewer.lumiya.ui.render.CardboardActivity"/>
+                <category android:name="com.google.intent.category.CARDBOARD"/>
+                <category android:name="com.google.intent.category.DAYDREAM"/>
+            </intent-filter>
+        </activity>
+        <activity android:label="VR View" android:name="com.lumiyaviewer.lumiya.ui.render.CardboardTransitionActivity" android:theme="@style/Theme.Lumiya.NoActionBar"/>
+        <activity android:label="Minimap" android:name="com.lumiyaviewer.lumiya.ui.minimap.MinimapActivity"/>
+        <activity android:label="Notecard" android:name="com.lumiyaviewer.lumiya.ui.inventory.NotecardEditActivity"/>
+        <activity android:label="Manage grids" android:name="com.lumiyaviewer.lumiya.ui.grids.ManageGridsActivity"/>
+        <activity android:label="Manage accounts" android:name="com.lumiyaviewer.lumiya.ui.accounts.ManageAccountsActivity"/>
+        <activity android:label="Search" android:name="com.lumiyaviewer.lumiya.ui.search.SearchGridActivity"/>
+        <activity android:label="My avatar" android:name="com.lumiyaviewer.lumiya.ui.myava.MyAvatarActivity"/>
+        <activity android:label="What's new" android:name="com.lumiyaviewer.lumiya.ui.login.WhatsNewActivity"/>
+        <activity android:exported="true" android:label="@string/app_name" android:name="com.lumiyaviewer.lumiya.ui.login.TeleportSLURLActivity" android:theme="@style/Theme.AppCompat.Dialog">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="http"/>
+                <data android:host="maps.secondlife.com"/>
+                <data android:pathPrefix="/secondlife"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="secondlife"/>
+            </intent-filter>
+        </activity>
+        <service android:name="com.lumiyaviewer.lumiya.GridConnectionService"/>
+        <service android:name="com.lumiyaviewer.lumiya.StreamingMediaService"/>
+        <provider android:authorities="com.lumiyaviewer.files" android:exported="false" android:grantUriPermissions="true" android:name="android.support.v4.content.FileProvider">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths"/>
+        </provider>
+        <meta-data android:name="android.support.VERSION" android:value="26.1.0"/>
+        <meta-data android:name="android.arch.lifecycle.VERSION" android:value="27.0.0-SNAPSHOT"/>
+    </application>
+</manifest>
