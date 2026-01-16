@@ -112,11 +112,12 @@ class RegionCrossingManager(
             }
             Log.d(TAG, "✓ Connected to new region")
             
-            // 2. Fetch new capabilities
-            Log.d(TAG, "Step 2: Fetching capabilities...")
-            capabilityManager.setSeedCapability(seedCapability)
-            capabilityManager.fetchCapabilities()
-            Log.d(TAG, "✓ Capabilities fetched")
+            // 2. Initialize capabilities from new seed
+            Log.d(TAG, "Step 2: Initializing capabilities...")
+            if (!capabilityManager.initialize(seedCapability)) {
+                throw Exception("Failed to initialize capabilities")
+            }
+            Log.d(TAG, "✓ Capabilities initialized")
             
             // 3. Update current region info
             val newRegion = RegionInfo(
