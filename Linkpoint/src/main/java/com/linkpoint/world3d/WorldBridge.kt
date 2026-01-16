@@ -258,8 +258,9 @@ class AvatarController {
             velocity.x = moveDir.x * speed
             velocity.z = moveDir.z * speed
             // Vertical movement in fly mode: use joystick Y axis for altitude control
-            // Push forward (positive Y) to ascend, pull back (negative Y) to descend
-            velocity.y = input.moveY * speed
+            // Joystick forward = negative Y, so negate for intuitive control
+            // Push forward to ascend, pull back to descend
+            velocity.y = -input.moveY * speed
         } else {
             velocity.x = moveDir.x * speed
             velocity.z = moveDir.z * speed
