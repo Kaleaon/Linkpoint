@@ -134,13 +134,11 @@
     <string name="last_seen_minutes">%d min ago</string>
     <string name="last_seen_hours">%d hours ago</string>
     <string name="last_seen_days">%d days ago</string>
-    <string name="cancel">Cancel</string>
     <string name="add">Add</string>
 
     <!-- Nearby People -->
     <string name="nearby_people">Nearby People</string>
     <string name="all">All</string>
-    <string name="friends">Friends</string>
     <string name="strangers">Strangers</string>
     <string name="no_nearby_people">No nearby people</string>
     <string name="no_nearby_friends">No nearby friends</string>

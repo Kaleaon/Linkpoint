@@ -139,3 +139,6 @@ docs/lumiya_reference/lumiyaviewer/
 
 # Decompiled Lumiya sources (reference only)
 lumiya_decompiled/
+
+# Decompiled Second Life viewer (reference only)
+secondlife_decompiled/

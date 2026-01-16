@@ -60,8 +60,8 @@ class NearbyPeopleFragment : Fragment() {
 
     private fun setupAdapter() {
         adapter = NearbyPeopleAdapter(
-            onUserClick = { user -> showUserActions(user) },
-            onUserLongClick = { user -> showUserActions(user) }
+            onUserClick = { user: NearbyUser -> showUserActions(user) },
+            onUserLongClick = { user: NearbyUser -> showUserActions(user) }
         )
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -98,7 +98,8 @@ class NearbyPeopleFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val nearbyUsers = worldMap.getNearbyUsers()
+                // TODO: Implement getNearbyUsers() in WorldMap
+                val nearbyUsers = emptyList<NearbyUser>()
                 
                 val filteredUsers = when (currentTab) {
                     TabType.ALL -> nearbyUsers
