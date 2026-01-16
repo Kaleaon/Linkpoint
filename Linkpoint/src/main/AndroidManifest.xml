@@ -187,6 +187,12 @@
             android:exported="false"
             android:parentActivityName=".ui.world.WorldViewActivity" />
 
+        <!-- Teleport History Activity -->
+        <activity
+            android:name=".ui.teleport.TeleportHistoryActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.world.WorldViewActivity" />
+
         <!-- Build/Edit Activity -->
         <activity
             android:name=".ui.build.BuildActivity"

@@ -29,6 +29,8 @@ import com.linkpoint.world.ProfileManager
 import com.linkpoint.world.SearchManager
 import com.linkpoint.world.WorldMap
 import com.linkpoint.groups.GroupsManager
+import com.linkpoint.animesh.AnimeshManager
+import com.linkpoint.bom.BakesOnMeshManager
 import com.linkpoint.xr.XRManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -122,6 +124,12 @@ class LinkpointApp : Application() {
     lateinit var friendsManager: FriendsManager
         private set
     lateinit var groupsManager: GroupsManager
+        private set
+    
+    // Animesh and BoM (modern features)
+    lateinit var animeshManager: AnimeshManager
+        private set
+    lateinit var bomManager: BakesOnMeshManager
         private set
     
     // Objects
@@ -252,6 +260,10 @@ class LinkpointApp : Application() {
         // Object manager
         objectManager = ObjectManager(udpConnection)
         buildTools = BuildTools(objectManager)
+        
+        // Modern features: Animesh and Bakes on Mesh
+        animeshManager = AnimeshManager(meshManager, animationManager)
+        bomManager = BakesOnMeshManager(capabilityManager, textureManager)
         
         // Register UDP message handlers for real-time data
         registerMessageHandlers()
@@ -581,4 +593,14 @@ class LinkpointApp : Application() {
      * Check if groups manager is initialized (for debug reports)
      */
     fun isGroupsManagerInitialized(): Boolean = ::groupsManager.isInitialized
+    
+    /**
+     * Check if animesh manager is initialized (for debug reports)
+     */
+    fun isAnimeshManagerInitialized(): Boolean = ::animeshManager.isInitialized
+    
+    /**
+     * Check if BoM manager is initialized (for debug reports)
+     */
+    fun isBomManagerInitialized(): Boolean = ::bomManager.isInitialized
 }
