@@ -57,6 +57,9 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private lateinit var btnInventory: ImageButton
     private lateinit var btnXR: ImageButton
     
+    // HUD overlay for Second Life HUD attachments
+    private lateinit var hudOverlay: com.linkpoint.hud.HUDOverlayView
+    
     // Joysticks
     private lateinit var joystickMove: JoystickView
     private lateinit var joystickCamera: JoystickView
@@ -211,6 +214,9 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         // Show/hide XR button based on availability
         btnXR.visibility = if (app.isXRAvailable()) View.VISIBLE else View.GONE
         
+        // Initialize HUD overlay for Second Life HUD attachments
+        initHudOverlay()
+        
         // Initialize joysticks
         initJoysticks()
         
@@ -219,6 +225,59 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         
         // Initialize action buttons
         initActionButtons()
+    }
+    
+    /**
+     * Initialize the HUD overlay for displaying Second Life HUD attachments.
+     */
+    private fun initHudOverlay() {
+        hudOverlay = findViewById(R.id.hudOverlay)
+        
+        // Connect to HUD manager if available
+        if (app.isHudManagerInitialized()) {
+            hudOverlay.hudManager = app.hudManager
+            
+            hudOverlay.listener = object : com.linkpoint.hud.HUDOverlayView.HUDInteractionListener {
+                override fun onHUDTouched(hudLocalId: Int, touchPosition: com.linkpoint.protocol.types.LLVector3) {
+                    app.hudManager.touchHUD(hudLocalId, touchPosition)
+                }
+                
+                override fun onHUDLongPressed(hudLocalId: Int) {
+                    // Show HUD options menu
+                    showHUDOptionsMenu(hudLocalId)
+                }
+            }
+            
+            // Observe HUD visibility changes
+            lifecycleScope.launch {
+                app.hudManager.hudsVisible.collectLatest { visible ->
+                    hudOverlay.visibility = if (visible) View.VISIBLE else View.GONE
+                }
+            }
+        }
+    }
+    
+    /**
+     * Show options menu for a HUD.
+     */
+    private fun showHUDOptionsMenu(hudLocalId: Int) {
+        if (!app.isHudManagerInitialized()) return
+        
+        val hud = app.hudManager.getHUD(hudLocalId) ?: return
+        
+        val options = arrayOf(
+            getString(R.string.hide_huds),
+            getString(R.string.close)
+        )
+        
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(hud.name)
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> app.hudManager.setHUDsVisible(false)
+                }
+            }
+            .show()
     }
     
     /**
@@ -508,8 +567,22 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     private fun teleportHome() {
         lifecycleScope.launch {
             try {
-                app.sessionManager.teleportHome()
-                Toast.makeText(this@WorldViewActivity, "Teleporting home...", Toast.LENGTH_SHORT).show()
+                if (app.isTeleportManagerInitialized()) {
+                    val result = app.teleportManager.teleportHome()
+                    when (result) {
+                        is com.linkpoint.teleport.TeleportResult.Pending -> {
+                            Toast.makeText(this@WorldViewActivity, R.string.teleporting_home, Toast.LENGTH_SHORT).show()
+                        }
+                        is com.linkpoint.teleport.TeleportResult.Failure -> {
+                            Toast.makeText(this@WorldViewActivity, "Failed: ${result.message}", Toast.LENGTH_SHORT).show()
+                        }
+                        else -> {}
+                    }
+                } else {
+                    // Fallback to session manager
+                    app.sessionManager.teleportHome()
+                    Toast.makeText(this@WorldViewActivity, R.string.teleporting_home, Toast.LENGTH_SHORT).show()
+                }
             } catch (e: Exception) {
                 Toast.makeText(this@WorldViewActivity, "Failed to teleport: ${e.message}", Toast.LENGTH_SHORT).show()
             }

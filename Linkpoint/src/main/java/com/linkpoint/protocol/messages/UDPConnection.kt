@@ -995,6 +995,17 @@ object MessageIds {
     const val DECLINE_FRIENDSHIP: Int = 0xFFFF003D.toInt()
     const val IM_VIA_EMAIL: Int = 0xFFFF00FF.toInt()
     
+    // Teleport messages
+    const val TELEPORT_LOCATION_REQUEST: Int = 0xFFFF0042.toInt()
+    const val TELEPORT_LANDMARK_REQUEST: Int = 0xFFFF0043.toInt()
+    const val TELEPORT_HOME_REQUEST: Int = 0xFFFF0044.toInt()
+    const val TELEPORT_CANCEL: Int = 0xFFFF0045.toInt()
+    const val TELEPORT_LOCAL: Int = 0xFFFF0046.toInt()
+    const val TELEPORT_REQUEST: Int = 0xFFFF0047.toInt()
+    const val TELEPORT_FINISH: Int = 0xFFFF0048.toInt()
+    const val TELEPORT_FAILED: Int = 0xFFFF0049.toInt()
+    const val TELEPORT_PROGRESS: Int = 0xFFFF004A.toInt()
+    
     // Parcel messages
     const val PARCEL_BUY: Int = 0xFFFF00D1.toInt()
     const val PARCEL_DEED_TO_GROUP: Int = 0xFFFF00D2.toInt()

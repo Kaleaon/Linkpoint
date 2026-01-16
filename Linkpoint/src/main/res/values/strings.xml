@@ -209,4 +209,22 @@
     <string name="set_as_active_group">Set as Active Group</string>
     <string name="gestures_not_available">Gestures not available</string>
     <string name="no_active_gestures">No active gestures</string>
+    
+    <!-- Teleport -->
+    <string name="teleport_not_available">Teleport not available</string>
+    <string name="teleporting_home">Teleporting home…</string>
+    <string name="teleport_failed">Teleport failed</string>
+    <string name="teleport_in_progress">Teleporting…</string>
+    <string name="teleport_arrived">Arrived at %s</string>
+    <string name="send_teleport_offer">Send Teleport Offer</string>
+    <string name="accept_teleport">Accept Teleport</string>
+    <string name="decline_teleport">Decline Teleport</string>
+    <string name="teleport_offer_from">Teleport offer from %s</string>
+    
+    <!-- HUD -->
+    <string name="show_huds">Show HUDs</string>
+    <string name="hide_huds">Hide HUDs</string>
+    <string name="huds_hidden">HUDs hidden</string>
+    <string name="huds_visible">HUDs visible</string>
+    <string name="no_huds_attached">No HUDs attached</string>
 </resources>

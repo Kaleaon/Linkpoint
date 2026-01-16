@@ -17,7 +17,13 @@
             android:layout_height="match_parent"
             android:background="#000000" />
 
-        <!-- HUD Overlay -->
+        <!-- HUD Objects Overlay (rendered on top of 3D world) -->
+        <com.linkpoint.hud.HUDOverlayView
+            android:id="@+id/hudOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- UI Overlay -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
