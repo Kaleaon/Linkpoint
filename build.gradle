@@ -18,10 +18,10 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // AGP 8.1.4 keeps compatibility with the checked-in SDK tooling
-        classpath 'com.android.tools.build:gradle:8.1.4'
-        // Kotlin Gradle plugin - Updated to 1.9.22 for latest features
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22'
+        // AGP 8.6.1 required for latest AndroidX Compose BOM dependencies
+        classpath 'com.android.tools.build:gradle:8.6.1'
+        // Kotlin Gradle plugin - Updated to 2.1.0 for compatibility with latest libraries
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0'
         // Hilt dependency injection - Disabled (not currently used)
         // classpath 'com.google.dagger:hilt-android-gradle-plugin:2.48'
     }

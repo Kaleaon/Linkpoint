@@ -6,6 +6,11 @@
     <color name="primary_light">#7AB3E8</color>
     <color name="accent">#00BCD4</color>
     
+    <!-- Aliases for compatibility with older layouts -->
+    <color name="colorPrimary">@color/primary</color>
+    <color name="colorPrimaryDark">@color/primary_dark</color>
+    <color name="colorAccent">@color/accent</color>
+    
     <!-- Standard Colors -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>

@@ -2,9 +2,10 @@ import java.util.Properties
 import java.io.FileInputStream
 
 plugins {
-    id("com.android.application") version "8.1.4"
-    id("org.jetbrains.kotlin.android") version "1.9.22"
-    id("org.jetbrains.kotlin.plugin.parcelize") version "1.9.22"
+    id("com.android.application") version "8.6.1"
+    id("org.jetbrains.kotlin.android") version "2.1.0"
+    id("org.jetbrains.kotlin.plugin.parcelize") version "2.1.0"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.1.0"
 }
 
 // Configuration for libGDX native libraries
@@ -19,8 +20,8 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.linkpoint"
-    compileSdk = 34
-    buildToolsVersion = "34.0.0"
+    compileSdk = 35
+    buildToolsVersion = "35.0.0"
     
     defaultConfig {
         applicationId = "com.linkpoint"
@@ -106,10 +107,6 @@ android {
         dataBinding = false
         compose = true
         prefab = true  // Enable Prefab for native dependencies
-    }
-    
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.10"
     }
     
     sourceSets {
@@ -212,16 +209,13 @@ dependencies {
     // implementation("lindenlab:llsd:1.0")
     
     // Kotlin support
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.22")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:2.1.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     
     // Back-compat libs
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
-    
-    // UI components
-    implementation("com.astuetz:pagerslidingtabstrip:1.0.1")
     
     // Preferences
     implementation("androidx.preference:preference-ktx:1.2.1")
@@ -302,7 +296,7 @@ dependencies {
 
     // Testing
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
     testImplementation("com.squareup.okhttp3:okhttp:4.12.0")  // For integration tests
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
