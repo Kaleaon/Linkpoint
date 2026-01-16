@@ -3,13 +3,17 @@ package com.linkpoint.render.environment
 import android.content.Context
 import android.util.Log
 import com.google.android.filament.*
+import com.linkpoint.protocol.llsd.LLSDArray
+import com.linkpoint.protocol.llsd.LLSDInteger
+import com.linkpoint.protocol.llsd.LLSDMap
+import com.linkpoint.protocol.llsd.LLSDReal
+import com.linkpoint.protocol.llsd.LLSDValue
 import com.linkpoint.protocol.types.LLColor4
 import com.linkpoint.protocol.types.LLVector3
-import java.nio.ByteBuffer
 
 /**
  * Renders sky and atmosphere effects
- * Supports both legacy Windlight and EEP (Extended Environment Project)
+ * Supports both legacy Windlight and EEP (Environmental Enhancement Project)
  */
 class SkyRenderer(
     private val context: Context,
@@ -85,7 +89,7 @@ class SkyRenderer(
     }
     
     /**
-     * Apply EEP settings from server
+     * Apply EEP settings from server (EnvironmentSettings/ExtEnvironment).
      */
     fun applyEEP(settings: EEPSettings) {
         // Convert EEP settings to sky preset
@@ -252,7 +256,7 @@ data class SkyPreset(
 }
 
 /**
- * EEP (Extended Environment Project) settings from server
+ * Environmental Enhancement Project (EEP) settings from LLSD/OSD data.
  */
 data class EEPSettings(
     val name: String,
@@ -269,4 +273,98 @@ data class EEPSettings(
     val sunScale: Float,
     val ambientScale: Float,
     val moonScale: Float
-)
+) {
+    companion object {
+        const val KEY_NAME = "name"
+        const val KEY_SUN_DIRECTION = "sun_direction"
+        const val KEY_SUN_DIR = "sun_dir"
+        const val KEY_MOON_DIRECTION = "moon_direction"
+        const val KEY_MOON_DIR = "moon_dir"
+        const val KEY_SUNLIGHT_COLOR = "sunlight_color"
+        const val KEY_AMBIENT = "ambient"
+        const val KEY_AMBIENT_COLOR = "ambient_color"
+        const val KEY_BLUE_HORIZON = "blue_horizon"
+        const val KEY_BLUE_DENSITY = "blue_density"
+        const val KEY_HAZE_HORIZON = "haze_horizon"
+        const val KEY_HAZE_DENSITY = "haze_density"
+        const val KEY_CLOUD_COLOR = "cloud_color"
+        const val KEY_CLOUD_COVERAGE = "cloud_coverage"
+        const val KEY_SUN_SCALE = "sun_scale"
+        const val KEY_AMBIENT_SCALE = "ambient_scale"
+        const val KEY_MOON_SCALE = "moon_scale"
+        private val DEFAULT_AMBIENT_COLOR = LLColor4(0.5f, 0.5f, 0.5f, 1f)
+        private val DEFAULT_BLUE_DENSITY = LLColor4(0.2f, 0.3f, 0.5f, 1f)
+
+        fun fromEepOsd(map: LLSDMap): EEPSettings {
+            val defaults = SkyPreset.DEFAULT
+            return EEPSettings(
+                name = map.getString(KEY_NAME) ?: "EEP",
+                sunDirection = map.getVector3(KEY_SUN_DIRECTION, KEY_SUN_DIR) ?: defaults.sunDirection,
+                moonDirection = map.getVector3(KEY_MOON_DIRECTION, KEY_MOON_DIR) ?: LLVector3.zero(),
+                sunlightColor = map.getColor4(KEY_SUNLIGHT_COLOR) ?: defaults.sunColor,
+                ambientColor = map.getColor4(KEY_AMBIENT, KEY_AMBIENT_COLOR) ?: DEFAULT_AMBIENT_COLOR,
+                blueHorizon = map.getColor4(KEY_BLUE_HORIZON) ?: defaults.horizonColor,
+                blueDensity = map.getColor4(KEY_BLUE_DENSITY) ?: DEFAULT_BLUE_DENSITY,
+                hazeHorizon = map.getFloatValue(KEY_HAZE_HORIZON) ?: 0f,
+                hazeDensity = map.getFloatValue(KEY_HAZE_DENSITY) ?: 0f,
+                cloudColor = map.getColor4(KEY_CLOUD_COLOR) ?: defaults.cloudColor,
+                cloudCoverage = map.getFloatValue(KEY_CLOUD_COVERAGE) ?: defaults.cloudCoverage,
+                sunScale = map.getFloatValue(KEY_SUN_SCALE) ?: 1f,
+                ambientScale = map.getFloatValue(KEY_AMBIENT_SCALE) ?: 1f,
+                moonScale = map.getFloatValue(KEY_MOON_SCALE) ?: 1f
+            )
+        }
+
+        private fun LLSDMap.getVector3(vararg keys: String): LLVector3? {
+            for (key in keys) {
+                val vector = getArray(key)?.toVector3()
+                if (vector != null) return vector
+            }
+            return null
+        }
+
+        private fun LLSDMap.getColor4(vararg keys: String): LLColor4? {
+            for (key in keys) {
+                val color = getArray(key)?.toColor4()
+                if (color != null) return color
+            }
+            return null
+        }
+
+        private fun LLSDMap.getFloatValue(vararg keys: String): Float? {
+            for (key in keys) {
+                val realValue = getReal(key) ?: getInt(key)?.toDouble()
+                if (realValue != null) return realValue.toFloat()
+            }
+            return null
+        }
+
+        private fun LLSDArray.toVector3(): LLVector3? {
+            val x = getFloat(0) ?: return null
+            val y = getFloat(1) ?: return null
+            val z = getFloat(2) ?: return null
+            return LLVector3(x, y, z)
+        }
+
+        private fun LLSDArray.toColor4(): LLColor4? {
+            val r = getFloat(0) ?: return null
+            val g = getFloat(1) ?: return null
+            val b = getFloat(2) ?: return null
+            val a = getFloat(3) ?: 1f
+            return LLColor4(r, g, b, a)
+        }
+
+        private fun LLSDArray.getFloat(index: Int): Float? {
+            if (index < 0 || index >= size) return null
+            return this[index].asFloat()
+        }
+
+        private fun LLSDValue?.asFloat(): Float? {
+            return when (this) {
+                is LLSDReal -> value.toFloat()
+                is LLSDInteger -> value.toFloat()
+                else -> null
+            }
+        }
+    }
+}
