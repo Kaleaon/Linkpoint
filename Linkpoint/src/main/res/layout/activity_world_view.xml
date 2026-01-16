@@ -83,6 +83,115 @@
                 app:fabSize="mini"
                 app:backgroundTint="@color/design_default_color_error" />
 
+            <!-- Movement Joystick (Left side) -->
+            <com.linkpoint.ui.world.JoystickView
+                android:id="@+id/joystickMove"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="80dp" />
+
+            <!-- Camera/Rotation Joystick (Right side) -->
+            <com.linkpoint.ui.world.JoystickView
+                android:id="@+id/joystickCamera"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="80dp" />
+
+            <!-- Movement Control Buttons (Right side, above camera joystick) -->
+            <LinearLayout
+                android:id="@+id/movementButtons"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_above="@id/joystickCamera"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:orientation="vertical"
+                android:gravity="end">
+
+                <ImageButton
+                    android:id="@+id/btnFly"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="8dp"
+                    android:src="@drawable/ic_fly"
+                    android:background="@drawable/circle_button"
+                    android:contentDescription="@string/fly" />
+
+                <ImageButton
+                    android:id="@+id/btnRun"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="8dp"
+                    android:src="@drawable/ic_run"
+                    android:background="@drawable/circle_button"
+                    android:contentDescription="@string/run" />
+
+                <ImageButton
+                    android:id="@+id/btnJump"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="8dp"
+                    android:src="@drawable/ic_jump"
+                    android:background="@drawable/circle_button"
+                    android:contentDescription="@string/jump" />
+
+                <ImageButton
+                    android:id="@+id/btnSit"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_sit"
+                    android:background="@drawable/circle_button"
+                    android:contentDescription="@string/sit" />
+
+            </LinearLayout>
+
+            <!-- Vertical Action Buttons (Left side, above movement joystick) -->
+            <LinearLayout
+                android:id="@+id/actionButtons"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_above="@id/joystickMove"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="16dp"
+                android:orientation="vertical"
+                android:gravity="start">
+
+                <ImageButton
+                    android:id="@+id/btnGestures"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="8dp"
+                    android:src="@drawable/ic_gesture"
+                    android:background="@drawable/circle_button"
+                    android:contentDescription="@string/gestures" />
+
+                <ImageButton
+                    android:id="@+id/btnFriends"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="8dp"
+                    android:src="@drawable/ic_friends"
+                    android:background="@drawable/circle_button"
+                    android:contentDescription="@string/friends" />
+
+                <ImageButton
+                    android:id="@+id/btnNearby"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_nearby"
+                    android:background="@drawable/circle_button"
+                    android:contentDescription="@string/nearby" />
+
+            </LinearLayout>
+
             <!-- Bottom Quick Actions -->
             <LinearLayout
                 android:id="@+id/bottomBar"

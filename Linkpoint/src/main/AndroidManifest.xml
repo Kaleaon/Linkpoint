@@ -169,6 +169,24 @@
             android:windowSoftInputMode="adjustResize"
             android:parentActivityName=".ui.world.WorldViewActivity" />
 
+        <!-- Friends Activity -->
+        <activity
+            android:name=".ui.friends.FriendsActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.world.WorldViewActivity" />
+
+        <!-- Groups Activity -->
+        <activity
+            android:name=".ui.groups.GroupsActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.world.WorldViewActivity" />
+
+        <!-- Nearby People Activity -->
+        <activity
+            android:name=".ui.people.NearbyPeopleActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.world.WorldViewActivity" />
+
         <!-- Build/Edit Activity -->
         <activity
             android:name=".ui.build.BuildActivity"

@@ -147,4 +147,59 @@
     <string name="error_loading_nearby_people">Error loading nearby people: %s</string>
     <string name="distance_meters">%sm away</string>
     <string name="user_avatar">User avatar</string>
+
+    <!-- Movement Controls -->
+    <string name="fly">Fly</string>
+    <string name="run">Run</string>
+    <string name="jump">Jump</string>
+    <string name="sit">Sit</string>
+    <string name="stand">Stand</string>
+    <string name="crouch">Crouch</string>
+    <string name="gestures">Gestures</string>
+    <string name="nearby">Nearby</string>
+    <string name="flying_enabled">Flying enabled</string>
+    <string name="flying_disabled">Flying disabled</string>
+    <string name="running_enabled">Running enabled</string>
+    <string name="running_disabled">Running disabled</string>
+
+    <!-- Groups -->
+    <string name="groups">Groups</string>
+    <string name="my_groups">My Groups</string>
+    <string name="join_group">Join Group</string>
+    <string name="leave_group">Leave Group</string>
+    <string name="group_chat">Group Chat</string>
+    <string name="group_info">Group Info</string>
+    <string name="no_groups">No groups yet</string>
+    <string name="group_notices">Group Notices</string>
+    <string name="group_members">Group Members</string>
+    <string name="group_roles">Roles</string>
+    <string name="group_name">Group Name</string>
+    <string name="group_description">Group Description</string>
+
+    <!-- Teleport -->
+    <string name="teleport">Teleport</string>
+    <string name="teleport_home">Teleport Home</string>
+    <string name="teleport_history">Teleport History</string>
+    <string name="no_teleport_history">No teleport history</string>
+    <string name="landmarks">Landmarks</string>
+    <string name="set_home">Set Home</string>
+    <string name="home_set">Home location set</string>
+
+    <!-- Notifications -->
+    <string name="notifications">Notifications</string>
+    <string name="no_notifications">No notifications</string>
+    <string name="mark_all_read">Mark All Read</string>
+    <string name="clear_all">Clear All</string>
+
+    <!-- Radar -->
+    <string name="radar">Radar</string>
+    <string name="show_avatars">Show Avatars</string>
+    <string name="show_objects">Show Objects</string>
+    <string name="scan_radius">Scan Radius</string>
+
+    <!-- Camera -->
+    <string name="camera_controls">Camera Controls</string>
+    <string name="reset_camera">Reset Camera</string>
+    <string name="focus_on_avatar">Focus on Avatar</string>
+    <string name="mouselook">Mouselook</string>
 </resources>

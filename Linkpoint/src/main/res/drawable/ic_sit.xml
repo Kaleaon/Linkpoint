@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorControlNormal">
+    <!-- Sitting person icon (chair with person) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M9,5c1.11,0 2,-0.89 2,-2s-0.89,-2 -2,-2 -2,0.89 -2,2 0.89,2 2,2zM5.75,8.5H9.5l2,2.5 2,-2.5h3.75C18.22,8.5 19,9.28 19,10.25v3.5c0,0.97 -0.78,1.75 -1.75,1.75H14v6h-4v-6H6.75c-0.97,0 -1.75,-0.78 -1.75,-1.75v-3.5c0,-0.97 0.78,-1.75 1.75,-1.75z"/>
+</vector>

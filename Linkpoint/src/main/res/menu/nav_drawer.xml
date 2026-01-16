@@ -6,22 +6,47 @@
         <item
             android:id="@+id/nav_chat"
             android:icon="@drawable/ic_chat"
-            android:title="Chat" />
+            android:title="@string/nav_chat" />
 
         <item
             android:id="@+id/nav_inventory"
             android:icon="@drawable/ic_inventory"
-            android:title="Inventory" />
+            android:title="@string/nav_inventory" />
 
         <item
             android:id="@+id/nav_minimap"
             android:icon="@drawable/ic_minimap"
-            android:title="Minimap" />
+            android:title="@string/nav_minimap" />
 
         <item
             android:id="@+id/nav_avatar"
             android:icon="@drawable/ic_avatar"
-            android:title="My Avatar" />
+            android:title="@string/nav_avatar" />
+
+        <item
+            android:id="@+id/nav_friends"
+            android:icon="@drawable/ic_friends"
+            android:title="@string/friends" />
+
+        <item
+            android:id="@+id/nav_groups"
+            android:icon="@drawable/ic_people"
+            android:title="@string/groups" />
+
+        <item
+            android:id="@+id/nav_nearby"
+            android:icon="@drawable/ic_nearby"
+            android:title="@string/nearby_people" />
+
+        <item
+            android:id="@+id/nav_search"
+            android:icon="@drawable/ic_search"
+            android:title="Search" />
+
+        <item
+            android:id="@+id/nav_world_map"
+            android:icon="@drawable/ic_home"
+            android:title="World Map" />
 
     </group>
 
@@ -29,19 +54,24 @@
         <menu>
 
             <item
+                android:id="@+id/nav_teleport_home"
+                android:icon="@drawable/ic_home"
+                android:title="@string/teleport_home" />
+
+            <item
                 android:id="@+id/nav_xr_mode"
                 android:icon="@drawable/ic_xr"
-                android:title="XR Mode" />
+                android:title="@string/nav_xr_mode" />
 
             <item
                 android:id="@+id/nav_settings"
                 android:icon="@drawable/ic_settings"
-                android:title="Settings" />
+                android:title="@string/nav_settings" />
 
             <item
                 android:id="@+id/nav_logout"
                 android:icon="@drawable/ic_logout"
-                android:title="Logout" />
+                android:title="@string/nav_logout" />
 
         </menu>
     </item>
