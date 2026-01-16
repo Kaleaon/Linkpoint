@@ -165,6 +165,7 @@ data class LLSDMap(val value: MutableMap<String, LLSDValue> = mutableMapOf()) : 
         else -> null
     }
     fun getInt(key: String): Int? = (value[key] as? LLSDInteger)?.value
+    fun getLong(key: String): Long? = (value[key] as? LLSDInteger)?.value?.toLong()
     fun getReal(key: String): Double? = (value[key] as? LLSDReal)?.value
     fun getBoolean(key: String): Boolean? = (value[key] as? LLSDBoolean)?.value
     fun getUUID(key: String): UUID? = (value[key] as? LLSDUUID)?.value

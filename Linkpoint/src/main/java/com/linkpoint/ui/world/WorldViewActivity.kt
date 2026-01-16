@@ -463,9 +463,11 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         val gestureNames = gestures.map { it.name }.toTypedArray()
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle(R.string.gestures)
-            .setItems(gestureNames) { _, which ->
+            .setItems(gestureNames) { dialog, which ->
                 val gesture = gestures[which]
-                app.gestureManager.activateGesture(gesture.id)
+                lifecycleScope.launch {
+                    app.gestureManager.activateGesture(gesture.id)
+                }
             }
             .setNegativeButton(R.string.cancel, null)
             .show()

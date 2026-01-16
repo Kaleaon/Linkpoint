@@ -268,11 +268,27 @@ class GestureManager(
         _activeGesturesList.value = activeGestures.keys.toList()
     }
     
+    /**
+     * Get list of active gestures with their data
+     */
+    fun getActiveGestures(): List<GestureInfo> {
+        return activeGestures.map { (id, data) ->
+            GestureInfo(id, data.trigger, data.key, data.mask)
+        }
+    }
+    
     fun shutdown() {
         scope.cancel()
         stopAllGestures()
     }
 }
+
+data class GestureInfo(
+    val id: UUID,
+    val name: String,
+    val key: Int,
+    val mask: Int
+)
 
 data class GestureData(
     val assetId: UUID,

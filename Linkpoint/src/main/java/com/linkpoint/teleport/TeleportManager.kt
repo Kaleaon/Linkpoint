@@ -408,7 +408,7 @@ class TeleportManager(
     
     private fun handleTeleportProgress(body: LLSDMap) {
         val message = body.getString("message") ?: "Teleporting..."
-        val flags = body.getInteger("flags") ?: 0
+        val flags = body.getInt("flags") ?: 0
         
         _progressMessage.value = message
         Log.d(TAG, "Teleport progress: $message (flags=$flags)")

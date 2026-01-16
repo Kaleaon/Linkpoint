@@ -96,7 +96,7 @@ class RadarActivity : AppCompatActivity() {
         } else {
             0f
         }
-        radarView.setHeading(heading)
+        radarView.heading = heading
         
         val blips = mutableListOf<RadarBlip>()
         
