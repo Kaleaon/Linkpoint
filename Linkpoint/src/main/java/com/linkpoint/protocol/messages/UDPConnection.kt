@@ -176,14 +176,14 @@ class UDPConnection {
      * Send CompleteAgentMovement message.
      * This tells the simulator we're ready to receive world data.
      * 
-     * NOTE: Second Life protocol uses network byte order (big-endian) for all fields.
+     * NOTE: Second Life message blocks use little-endian encoding; UUID bytes remain big-endian.
      */
     suspend fun sendCompleteAgentMovement() {
         // CompleteAgentMovement message format:
-        // - AgentID (16 bytes, UUID) - big-endian
-        // - SessionID (16 bytes, UUID) - big-endian
-        // - CircuitCode (4 bytes, U32) - big-endian
-        val payload = ByteBuffer.allocate(36).order(ByteOrder.BIG_ENDIAN)
+        // - AgentID (16 bytes, UUID) - raw bytes (big-endian UUID)
+        // - SessionID (16 bytes, UUID) - raw bytes (big-endian UUID)
+        // - CircuitCode (4 bytes, U32) - little-endian
+        val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
         
         // Agent ID
         payload.putUUID(agentId)
@@ -205,16 +205,16 @@ class UDPConnection {
      * 
      * Based on Lumiya's SLAgentCircuit.sendRegionHandshakeReply()
      * 
-     * NOTE: Second Life protocol uses network byte order (big-endian) for all fields.
+     * NOTE: Second Life message blocks use little-endian encoding; UUID bytes remain big-endian.
      */
     suspend fun sendRegionHandshakeReply(flags: Int = 0) {
         // RegionHandshakeReply message format:
         // AgentData block:
-        // - AgentID (16 bytes, UUID) - big-endian
-        // - SessionID (16 bytes, UUID) - big-endian
+        // - AgentID (16 bytes, UUID) - raw bytes (big-endian UUID)
+        // - SessionID (16 bytes, UUID) - raw bytes (big-endian UUID)
         // RegionInfo block:
-        // - Flags (4 bytes, U32) - big-endian
-        val payload = ByteBuffer.allocate(36).order(ByteOrder.BIG_ENDIAN)
+        // - Flags (4 bytes, U32) - little-endian
+        val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
         
         // Agent ID
         payload.putUUID(agentId)
@@ -235,7 +235,7 @@ class UDPConnection {
      * 
      * Based on Lumiya's SLAgentCircuit.sendAgentThrottle()
      * 
-     * NOTE: Second Life protocol uses network byte order (big-endian) for all fields.
+     * NOTE: Second Life message blocks use little-endian encoding; UUID bytes remain big-endian.
      */
     suspend fun sendAgentThrottle(
         resend: Float = 50000f,
@@ -248,13 +248,13 @@ class UDPConnection {
     ) {
         // AgentThrottle message format:
         // AgentData block:
-        // - AgentID (16 bytes, UUID) - big-endian
-        // - SessionID (16 bytes, UUID) - big-endian
-        // - CircuitCode (4 bytes, U32) - big-endian
+        // - AgentID (16 bytes, UUID) - raw bytes (big-endian UUID)
+        // - SessionID (16 bytes, UUID) - raw bytes (big-endian UUID)
+        // - CircuitCode (4 bytes, U32) - little-endian
         // Throttle block:
-        // - GenCounter (4 bytes, U32) - big-endian
-        // - Throttles (28 bytes, 7 floats) - big-endian
-        val payload = ByteBuffer.allocate(36 + 4 + 28).order(ByteOrder.BIG_ENDIAN)
+        // - GenCounter (4 bytes, U32) - little-endian
+        // - Throttles (28 bytes, 7 floats) - little-endian
+        val payload = ByteBuffer.allocate(36 + 4 + 28).order(ByteOrder.LITTLE_ENDIAN)
         
         // Agent ID
         payload.putUUID(agentId)
@@ -318,7 +318,7 @@ class UDPConnection {
         // - ControlFlags (4 bytes, U32)
         // - Flags (1 byte)
         
-        val payload = ByteBuffer.allocate(114).order(ByteOrder.BIG_ENDIAN)
+        val payload = ByteBuffer.allocate(114).order(ByteOrder.LITTLE_ENDIAN)
         
         // AgentID
         payload.putUUID(agentId)
@@ -433,7 +433,7 @@ class UDPConnection {
      * Based on LibreMetaverse NetworkManager.HandleStartPingCheck()
      */
     suspend fun handleStartPingCheck(pingId: Byte, oldestUnacked: Int) {
-        val payload = ByteBuffer.allocate(5).order(ByteOrder.BIG_ENDIAN)
+        val payload = ByteBuffer.allocate(5).order(ByteOrder.LITTLE_ENDIAN)
         payload.put(pingId)
         payload.putInt(getOldestUnackedSequence())
         
@@ -756,12 +756,12 @@ class UDPConnection {
     
     private suspend fun sendUseCircuitCode() {
         // UseCircuitCode message format:
-        // - CircuitCode (4 bytes, U32) - big-endian per SL protocol
-        // - SessionID (16 bytes, UUID) - big-endian per SL protocol
-        // - AgentID (16 bytes, UUID) - big-endian per SL protocol
+        // - CircuitCode (4 bytes, U32) - little-endian
+        // - SessionID (16 bytes, UUID) - raw bytes (big-endian UUID)
+        // - AgentID (16 bytes, UUID) - raw bytes (big-endian UUID)
         //
-        // NOTE: Second Life protocol uses network byte order (big-endian) for all fields
-        val payload = ByteBuffer.allocate(36).order(ByteOrder.BIG_ENDIAN)
+        // NOTE: Second Life message blocks use little-endian encoding; UUID bytes remain big-endian.
+        val payload = ByteBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN)
         payload.putInt(circuitCode)
         
         // Session ID (UUID)

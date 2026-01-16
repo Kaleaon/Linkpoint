@@ -35,6 +35,7 @@ class RenderManager(private val context: Context) {
     // Helpers
     private var uiHelper: UiHelper? = null
     private var displayHelper: DisplayHelper? = null
+    private var surfaceView: SurfaceView? = null
     
     // State
     private var isInitialized = false
@@ -49,6 +50,7 @@ class RenderManager(private val context: Context) {
      */
     fun initialize(surfaceView: SurfaceView): Boolean {
         if (isInitialized) return true
+        this.surfaceView = surfaceView
         
         try {
             Log.d(TAG, "Initializing Filament engine...")
@@ -68,9 +70,15 @@ class RenderManager(private val context: Context) {
                     override fun onNativeWindowChanged(surface: Surface) {
                         swapChain?.let { engine?.destroySwapChain(it) }
                         swapChain = engine?.createSwapChain(surface)
+                        renderer?.let { render ->
+                            this@RenderManager.surfaceView?.display?.let { display ->
+                                displayHelper?.attach(render, display)
+                            }
+                        }
                     }
                     
                     override fun onDetachedFromSurface() {
+                        displayHelper?.detach()
                         swapChain?.let {
                             engine?.destroySwapChain(it)
                             swapChain = null
@@ -138,6 +146,28 @@ class RenderManager(private val context: Context) {
             Camera.Fov.VERTICAL
         )
     }
+
+    private fun ensureSwapChain(): SwapChain? {
+        swapChain?.let { return it }
+        val surface = surfaceView?.holder?.surface
+        if (surface != null && surface.isValid) {
+            swapChain = engine?.createSwapChain(surface)
+            renderer?.let { render ->
+                surfaceView?.display?.let { display ->
+                    displayHelper?.attach(render, display)
+                }
+            }
+            val width = surfaceView?.width ?: 0
+            val height = surfaceView?.height ?: 0
+            if (width > 0 && height > 0) {
+                view?.viewport = Viewport(0, 0, width, height)
+                viewportWidth = width
+                viewportHeight = height
+                updateProjection(width, height)
+            }
+        }
+        return swapChain
+    }
     
     /**
      * Render a frame
@@ -148,7 +178,7 @@ class RenderManager(private val context: Context) {
         val engine = this.engine ?: return
         val renderer = this.renderer ?: return
         val view = this.view ?: return
-        val swapChain = this.swapChain ?: return
+        val swapChain = ensureSwapChain() ?: return
         
         if (renderer.beginFrame(swapChain, System.nanoTime())) {
             renderer.render(view)
@@ -167,7 +197,7 @@ class RenderManager(private val context: Context) {
         val engine = this.engine ?: return
         val renderer = this.renderer ?: return
         val view = this.view ?: return
-        val swapChain = this.swapChain ?: return
+        val swapChain = ensureSwapChain() ?: return
         
         if (renderer.beginFrame(swapChain, xrData.predictedDisplayTime)) {
             // Left eye
@@ -273,6 +303,7 @@ class RenderManager(private val context: Context) {
         Log.i(TAG, "Shutting down render manager")
         
         uiHelper?.detach()
+        displayHelper?.detach()
         
         engine?.let { eng ->
             swapChain?.let { eng.destroySwapChain(it) }
@@ -291,6 +322,7 @@ class RenderManager(private val context: Context) {
         swapChain = null
         uiHelper = null
         displayHelper = null
+        surfaceView = null
         
         isInitialized = false
     }

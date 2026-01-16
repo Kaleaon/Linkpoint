@@ -397,6 +397,8 @@ class LinkpointApp : Application() {
                     
                     // Update connection state to fully connected
                     sessionManager.setConnectionState(com.linkpoint.core.ConnectionState.CONNECTED)
+                    udpConnection.startAgentUpdates()
+                    Log.i(TAG, "✓ AgentUpdate loop started")
                     
                     com.linkpoint.utils.InitializationTracker.completePhase(
                         com.linkpoint.utils.InitializationTracker.Phase.AGENT_MOVEMENT_COMPLETE,
