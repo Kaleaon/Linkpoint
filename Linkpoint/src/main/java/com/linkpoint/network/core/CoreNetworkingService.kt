@@ -25,6 +25,13 @@ import javax.net.ssl.SSLException
 import com.linkpoint.network.EOFIOException
 import com.linkpoint.network.NetworkExceptionUtils
 import com.linkpoint.network.NetworkLogger
+import com.linkpoint.protocol.llsd.LLSDParser
+import com.linkpoint.protocol.llsd.LLSDMap
+import com.linkpoint.protocol.llsd.LLSDString
+import com.linkpoint.protocol.llsd.LLSDInteger
+import com.linkpoint.protocol.llsd.LLSDUUID
+import com.linkpoint.protocol.llsd.LLSDBoolean
+import com.linkpoint.protocol.llsd.LLSDUndefined
 
 /**
  * Core networking service with comprehensive connection management.
@@ -765,6 +772,12 @@ class CoreNetworkingService(private val context: Context) {
      * Internal parser that returns the full ParsedLoginResponse
      * including redirect information.
      * 
+     * IMPORTANT: Second Life login responses use LLSD XML format (Content-Type: application/llsd+xml),
+     * NOT XML-RPC format. The LLSD format has structure like:
+     * <llsd><map><key>login</key><string>true</string>...</map></llsd>
+     * 
+     * This method uses the proper LLSDParser to parse the response correctly.
+     * 
      * Handles four cases based on the official SL viewer's lllogin.cpp:
      * 1. login="true" - Success, extract session info
      * 2. login="indeterminate" - Redirect to next_url with next_method
@@ -772,6 +785,184 @@ class CoreNetworkingService(private val context: Context) {
      * 4. login="false" or other - Failure with error message
      */
     private fun parseLoginResponseInternal(xml: String): ParsedLoginResponse {
+        // Log basic metadata for debugging (length only, no sensitive body content)
+        Log.d(TAG, "Parsing login response (${xml.length} bytes)")
+        
+        // Try to parse using LLSD parser first (preferred for application/llsd+xml responses)
+        val llsdResult = try {
+            val parsed = LLSDParser.parseXML(xml)
+            if (parsed is LLSDMap) parsed else null
+        } catch (e: Exception) {
+            Log.w(TAG, "LLSD parsing failed, trying legacy XML-RPC parsing: ${e.message}")
+            null
+        }
+        
+        // If LLSD parsing succeeded, use it
+        if (llsdResult != null) {
+            return parseLoginFromLLSD(llsdResult, xml)
+        }
+        
+        // Fall back to legacy XML-RPC regex parsing
+        Log.d(TAG, "Using legacy XML-RPC parsing")
+        return parseLoginFromXmlRpc(xml)
+    }
+    
+    /**
+     * Parse login response from LLSD map structure.
+     * This is the correct format for Second Life login responses (Content-Type: application/llsd+xml).
+     */
+    private fun parseLoginFromLLSD(llsd: LLSDMap, originalXml: String): ParsedLoginResponse {
+        // Extract login status
+        val loginValue = llsd["login"]
+        val loginStatus = when (loginValue) {
+            is LLSDString -> loginValue.value
+            is LLSDBoolean -> if (loginValue.value) "true" else "false"
+            else -> null
+        }
+        
+        Log.d(TAG, "LLSD login status: $loginStatus")
+        
+        return when (loginStatus) {
+            "true" -> {
+                // Extract values from LLSD map
+                val sessionId = llsd.getString("session_id") 
+                    ?: (llsd["session_id"] as? LLSDUUID)?.value?.toString() 
+                    ?: ""
+                val agentId = llsd.getString("agent_id") 
+                    ?: (llsd["agent_id"] as? LLSDUUID)?.value?.toString() 
+                    ?: ""
+                val simIp = llsd.getString("sim_ip") ?: ""
+                val simPort = llsd.getInt("sim_port") ?: 0
+                
+                // Additional fields
+                val mfaHash = llsd.getString("mfa_hash")
+                val seedCapability = llsd.getString("seed_capability")
+                val regionName = llsd.getString("region_name")
+                val circuitCode = llsd.getInt("circuit_code")
+                
+                Log.i(TAG, "LLSD Login successful:")
+                Log.i(TAG, "  Agent ID: $agentId")
+                Log.i(TAG, "  Session ID: ${hideCredential(sessionId)}")
+                Log.i(TAG, "  Sim: $simIp:$simPort")
+                Log.i(TAG, "  Circuit Code: $circuitCode")
+                Log.i(TAG, "  Region: $regionName")
+                Log.i(TAG, "  Seed Capability: ${seedCapability?.take(60)}...")
+                
+                // Validate required fields - if missing, return a failure instead of invalid credentials
+                if (agentId.isEmpty() || sessionId.isEmpty()) {
+                    val missingFields = listOfNotNull(
+                        if (agentId.isEmpty()) "agent_id" else null,
+                        if (sessionId.isEmpty()) "session_id" else null
+                    ).joinToString(", ")
+                    Log.e(TAG, "Missing required login fields: $missingFields")
+                    if (Log.isLoggable(TAG, Log.DEBUG)) {
+                        Log.d(TAG, "Available LLSD keys: ${llsd.value.keys.joinToString(", ")}")
+                    }
+                    return ParsedLoginResponse.Failure(LoginResult.Failure(
+                        message = "Login response missing required fields",
+                        errorCode = "INVALID_RESPONSE",
+                        technicalDetails = "Missing: $missingFields\nAvailable keys: ${llsd.value.keys.joinToString(", ")}"
+                    ))
+                }
+                
+                if (simIp.isEmpty() || simPort == 0) {
+                    val missingSimInfo = listOfNotNull(
+                        if (simIp.isEmpty()) "sim_ip" else null,
+                        if (simPort == 0) "sim_port" else null
+                    ).joinToString(", ")
+                    Log.w(TAG, "Missing simulator connection info: $missingSimInfo")
+                    if (Log.isLoggable(TAG, Log.DEBUG)) {
+                        Log.d(TAG, "Available LLSD keys: ${llsd.value.keys.joinToString(", ")}")
+                    }
+                }
+                
+                ParsedLoginResponse.Success(LoginResult.Success(
+                    sessionId = sessionId,
+                    agentId = agentId,
+                    simIp = simIp,
+                    simPort = simPort,
+                    responseXml = originalXml,
+                    mfaHash = mfaHash,
+                    seedCapability = seedCapability,
+                    regionName = regionName,
+                    circuitCode = circuitCode
+                ))
+            }
+            
+            "indeterminate" -> {
+                val nextUrl = llsd.getString("next_url") ?: ""
+                val nextMethod = llsd.getString("next_method") ?: "login_to_simulator"
+                
+                Log.d(TAG, "LLSD Login indeterminate - redirect to: $nextUrl (method: $nextMethod)")
+                
+                if (nextUrl.isNotEmpty()) {
+                    ParsedLoginResponse.Redirect(nextUrl, nextMethod)
+                } else {
+                    ParsedLoginResponse.Failure(LoginResult.Failure(
+                        message = "Server requested redirect but provided no URL",
+                        errorCode = "INVALID_REDIRECT",
+                        technicalDetails = "Response preview: ${originalXml.take(500)}"
+                    ))
+                }
+            }
+            
+            "false" -> {
+                val reason = llsd.getString("reason")
+                
+                if (reason == "mfa_challenge") {
+                    val message = llsd.getString("message") 
+                        ?: "Multi-factor authentication required. Please enter your authenticator code."
+                    val agentIdStr = llsd.getString("agent_id") 
+                        ?: (llsd["agent_id"] as? LLSDUUID)?.value?.toString()
+                    
+                    Log.i(TAG, "LLSD MFA challenge received for agent: ${agentIdStr?.take(8) ?: "unknown"}...")
+                    
+                    ParsedLoginResponse.MFARequired(LoginResult.MFARequired(
+                        message = message,
+                        agentId = agentIdStr
+                    ))
+                } else {
+                    val errorMessage = llsd.getString("message") 
+                        ?: llsd.getString("reason")
+                        ?: "Login failed"
+                    val errorReason = reason ?: "unknown"
+                    
+                    Log.w(TAG, "LLSD Login failed: $errorMessage (reason: $errorReason)")
+                    
+                    ParsedLoginResponse.Failure(LoginResult.Failure(
+                        message = errorMessage,
+                        errorCode = mapErrorReason(errorReason),
+                        technicalDetails = "Reason: $errorReason\nResponse preview: ${originalXml.take(500)}"
+                    ))
+                }
+            }
+            
+            else -> {
+                // Unable to determine login status from LLSD
+                Log.w(TAG, "LLSD Login status not recognized: $loginStatus")
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Available LLSD keys: ${llsd.value.keys.joinToString(", ")}")
+                }
+                
+                val errorMessage = llsd.getString("message") 
+                    ?: llsd.getString("reason")
+                    ?: "Login failed - unrecognized response format"
+                val errorReason = llsd.getString("reason") ?: "unknown"
+                
+                ParsedLoginResponse.Failure(LoginResult.Failure(
+                    message = errorMessage,
+                    errorCode = mapErrorReason(errorReason),
+                    technicalDetails = "LLSD keys: ${llsd.value.keys.joinToString(", ")}\nResponse preview: ${originalXml.take(500)}"
+                ))
+            }
+        }
+    }
+    
+    /**
+     * Legacy XML-RPC parsing for backwards compatibility.
+     * This handles older style responses that may use XML-RPC format.
+     */
+    private fun parseLoginFromXmlRpc(xml: String): ParsedLoginResponse {
         val loginRegex = """<name>login</name>\s*<value><string>([\w]+)</string>""".toRegex()
         val loginMatch = loginRegex.find(xml)
         val loginStatus = loginMatch?.groupValues?.get(1)
@@ -789,7 +980,7 @@ class CoreNetworkingService(private val context: Context) {
                 val regionName = extractXmlValue(xml, "region_name")
                 val circuitCode = extractXmlIntValue(xml, "circuit_code").let { if (it == 0) null else it }
                 
-                Log.d(TAG, "Login successful: session=${hideCredential(sessionId)}, agent=$agentId")
+                Log.d(TAG, "XML-RPC Login successful: session=${hideCredential(sessionId)}, agent=$agentId")
                 if (seedCapability != null) {
                     Log.d(TAG, "Seed capability received for textures/assets")
                 }
@@ -811,14 +1002,10 @@ class CoreNetworkingService(private val context: Context) {
             }
             
             "indeterminate" -> {
-                // Server is redirecting us to a different URL
-                // This is the official SL viewer's handling from lllogin.cpp:
-                // request["uri"] = mAuthResponse["responses"]["next_url"]
-                // request["method"] = mAuthResponse["responses"]["next_method"]
                 val nextUrl = extractXmlValue(xml, "next_url") ?: ""
                 val nextMethod = extractXmlValue(xml, "next_method") ?: "login_to_simulator"
                 
-                Log.d(TAG, "Login indeterminate - redirect to: $nextUrl (method: $nextMethod)")
+                Log.d(TAG, "XML-RPC Login indeterminate - redirect to: $nextUrl (method: $nextMethod)")
                 
                 if (nextUrl.isNotEmpty()) {
                     ParsedLoginResponse.Redirect(nextUrl, nextMethod)
@@ -832,29 +1019,26 @@ class CoreNetworkingService(private val context: Context) {
             }
             
             "false" -> {
-                // Check for MFA challenge
                 val reason = extractXmlValue(xml, "reason")
                 
                 if (reason == "mfa_challenge") {
-                    // MFA required - user needs to provide TOTP code
                     val message = extractXmlValue(xml, "message") 
                         ?: "Multi-factor authentication required. Please enter your authenticator code."
                     val agentId = extractXmlValue(xml, "agent_id")
                     
-                    Log.i(TAG, "MFA challenge received for agent: ${agentId?.take(8) ?: "unknown"}...")
+                    Log.i(TAG, "XML-RPC MFA challenge received for agent: ${agentId?.take(8) ?: "unknown"}...")
                     
                     ParsedLoginResponse.MFARequired(LoginResult.MFARequired(
                         message = message,
                         agentId = agentId
                     ))
                 } else {
-                    // Regular login failure
                     val errorMessage = extractXmlValue(xml, "message") 
                         ?: extractXmlValue(xml, "reason")
                         ?: "Login failed"
                     val errorReason = reason ?: "unknown"
                     
-                    Log.w(TAG, "Login failed: $errorMessage (reason: $errorReason)")
+                    Log.w(TAG, "XML-RPC Login failed: $errorMessage (reason: $errorReason)")
                     
                     ParsedLoginResponse.Failure(LoginResult.Failure(
                         message = errorMessage,
@@ -870,7 +1054,7 @@ class CoreNetworkingService(private val context: Context) {
                     ?: "Login failed"
                 val errorReason = extractXmlValue(xml, "reason") ?: "unknown"
                 
-                Log.w(TAG, "Login failed: $errorMessage (reason: $errorReason)")
+                Log.w(TAG, "XML-RPC Login failed: $errorMessage (reason: $errorReason)")
                 
                 ParsedLoginResponse.Failure(LoginResult.Failure(
                     message = errorMessage,
@@ -892,15 +1076,21 @@ class CoreNetworkingService(private val context: Context) {
     }
     
     /**
-     * Extract a value from XML-RPC response by name.
-     * Handles multiple XML value types: <string>, <uuid>, <i4>, <int>.
-     * Second Life login responses may use <uuid> for session_id and agent_id.
+     * Extract a value from XML-RPC or LLSD response by name.
+     * Handles multiple XML value types: <string>, <uuid>, <i4>, <int>, <integer>.
+     * 
+     * Second Life responses can come in two formats:
+     * 1. XML-RPC: <name>key</name><value><string>val</string></value>
+     * 2. LLSD: <key>key</key><string>val</string>
+     * 
+     * This method tries both patterns for compatibility.
      * 
      * @param xml The XML response string
      * @param name The member name to extract
      * @return The extracted value or null if not found
      */
     private fun extractXmlValue(xml: String, name: String): String? {
+        // XML-RPC format: <name>key</name><value><type>val</type></value>
         // Try <string> type first (most common)
         val stringRegex = """<name>$name</name>\s*<value>\s*<string>([^<]*)</string>""".toRegex()
         stringRegex.find(xml)?.groupValues?.get(1)?.let { return it }
@@ -916,6 +1106,21 @@ class CoreNetworkingService(private val context: Context) {
         // Try <int> type (alternative integer format)
         val intRegex = """<name>$name</name>\s*<value>\s*<int>([^<]*)</int>""".toRegex()
         intRegex.find(xml)?.groupValues?.get(1)?.let { return it }
+        
+        // LLSD format: <key>key</key><type>val</type>
+        // This is the format used by Second Life login responses (Content-Type: application/llsd+xml)
+        val llsdStringRegex = """<key>$name</key>\s*<string>([^<]*)</string>""".toRegex()
+        llsdStringRegex.find(xml)?.groupValues?.get(1)?.let { return it }
+        
+        val llsdUuidRegex = """<key>$name</key>\s*<uuid>([^<]*)</uuid>""".toRegex()
+        llsdUuidRegex.find(xml)?.groupValues?.get(1)?.let { return it }
+        
+        val llsdIntegerRegex = """<key>$name</key>\s*<integer>([^<]*)</integer>""".toRegex()
+        llsdIntegerRegex.find(xml)?.groupValues?.get(1)?.let { return it }
+        
+        // LLSD URI type (used for seed_capability and other URLs)
+        val llsdUriRegex = """<key>$name</key>\s*<uri>([^<]*)</uri>""".toRegex()
+        llsdUriRegex.find(xml)?.groupValues?.get(1)?.let { return it }
         
         return null
     }
