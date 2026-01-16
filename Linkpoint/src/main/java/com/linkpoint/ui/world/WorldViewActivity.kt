@@ -483,6 +483,7 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             R.id.nav_friends -> startActivity(Intent(this, FriendsActivity::class.java))
             R.id.nav_groups -> startActivity(Intent(this, com.linkpoint.ui.groups.GroupsActivity::class.java))
             R.id.nav_nearby -> startActivity(Intent(this, NearbyPeopleActivity::class.java))
+            R.id.nav_radar -> startActivity(Intent(this, com.linkpoint.ui.radar.RadarActivity::class.java))
             R.id.nav_search -> startActivity(Intent(this, com.linkpoint.ui.search.SearchActivity::class.java))
             R.id.nav_world_map -> startActivity(Intent(this, com.linkpoint.ui.map.MapActivity::class.java))
             R.id.nav_teleport_home -> teleportHome()

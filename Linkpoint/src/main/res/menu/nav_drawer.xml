@@ -39,6 +39,11 @@
             android:title="@string/nearby_people" />
 
         <item
+            android:id="@+id/nav_radar"
+            android:icon="@drawable/ic_radar"
+            android:title="@string/radar" />
+
+        <item
             android:id="@+id/nav_search"
             android:icon="@drawable/ic_search"
             android:title="Search" />
