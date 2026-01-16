@@ -1031,4 +1031,26 @@ object MessageIds {
     
     // Packet ACK is high frequency (0xFB)
     const val PACKET_ACK: Int = 0xFB
+    
+    // Inventory messages
+    const val MOVE_INVENTORY_ITEM: Int = 0xFFFF0109.toInt()
+    const val COPY_INVENTORY_ITEM: Int = 0xFFFF010A.toInt()
+    const val REMOVE_INVENTORY_ITEM: Int = 0xFFFF010B.toInt()
+    const val CREATE_INVENTORY_FOLDER: Int = 0xFFFF010C.toInt()
+    const val UPDATE_INVENTORY_FOLDER: Int = 0xFFFF010D.toInt()
+    const val MOVE_INVENTORY_FOLDER: Int = 0xFFFF010E.toInt()
+    const val REMOVE_INVENTORY_FOLDER: Int = 0xFFFF010F.toInt()
+    const val UPDATE_INVENTORY_ITEM: Int = 0xFFFF0107.toInt()
+    const val FETCH_INVENTORY_REPLY: Int = 0xFFFF0120.toInt()
+    const val PURGE_INVENTORY_DESCENDENTS: Int = 0xFFFF0110.toInt()
+    
+    // Attachment messages
+    const val REZ_SINGLE_ATTACHMENT_FROM_INV: Int = 0xFFFF0184.toInt()
+    const val REZ_MULTIPLE_ATTACHMENTS_FROM_INV: Int = 0xFFFF0185.toInt()
+    const val DETACH_ATTACHMENT_INTO_INV: Int = 0xFFFF0186.toInt()
+    
+    // Agent appearance
+    const val AGENT_SET_APPEARANCE: Int = 0xFFFF0054.toInt()
+    const val AGENT_WEARABLES_UPDATE: Int = 0xFFFF00A1.toInt()
+    const val AGENT_IS_NOW_WEARING: Int = 0xFFFF00A2.toInt()
 }

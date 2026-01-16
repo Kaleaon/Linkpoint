@@ -69,11 +69,31 @@ class CapabilityManager {
         // Voice moderation capability (Project Voice Moderation)
         const val CAP_VOICE_MODERATION = "VoiceModeration"
         
+        // Inventory operations (added for full viewer compliance)
+        const val CAP_CREATE_INVENTORY_CATEGORY = "CreateInventoryCategory"
+        const val CAP_MOVE_INVENTORY_ITEM = "MoveItemsToTrash"  // Uses AISv3
+        const val CAP_UPDATE_INVENTORY_ITEM = "UpdateInventoryItem"
+        const val CAP_INVENTORY_API = "InventoryAPIv3"  // AISv3 endpoint
+        
+        // Display names
+        const val CAP_GET_DISPLAY_NAMES = "GetDisplayNames"
+        const val CAP_SET_DISPLAY_NAME = "SetDisplayName"
+        
+        // Simulator features
+        const val CAP_SIMULATOR_FEATURES = "SimulatorFeatures"
+        const val CAP_AGENT_PREFERENCES = "AgentPreferences"
+        const val CAP_UPDATE_AGENT_LANGUAGE = "UpdateAgentLanguage"
+        
+        // Render materials (PBR)
+        const val CAP_RENDER_MATERIALS = "RenderMaterials"
+        
         // Capabilities that are inventory-related (for throttling)
         private val INVENTORY_CAPS = setOf(
             CAP_FETCH_INVENTORY,
             CAP_FETCH_LIB_INVENTORY,
-            CAP_FETCH_INVENTORY_DESCENDENTS
+            CAP_FETCH_INVENTORY_DESCENDENTS,
+            CAP_CREATE_INVENTORY_CATEGORY,
+            CAP_INVENTORY_API
         )
         
         // Capabilities that are asset-related

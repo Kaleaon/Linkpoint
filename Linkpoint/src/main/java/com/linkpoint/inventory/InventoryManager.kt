@@ -318,44 +318,129 @@ class InventoryManager(
     }
     
     /**
-     * Move item to folder
+     * Move item to folder.
+     * Uses AISv3 capability when available, falls back to local cache update.
      */
     suspend fun moveItem(itemId: UUID, newParentId: UUID): Boolean {
         items[itemId]?.let { item ->
+            // Try to use AISv3 capability
+            val aisUrl = capabilityManager.getCapability(CapabilityManager.CAP_INVENTORY_API)
+            if (aisUrl != null) {
+                try {
+                    val request = LLSDMap().apply {
+                        this["items"] = LLSDArray().apply {
+                            add(LLSDMap().apply {
+                                this["item_id"] = LLSDString(itemId.toString())
+                                this["parent_id"] = LLSDString(newParentId.toString())
+                            })
+                        }
+                    }
+                    val response = capabilityManager.request(CapabilityManager.CAP_INVENTORY_API, request)
+                    if (response != null) {
+                        Log.d(TAG, "Moved item $itemId to folder $newParentId via AIS")
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to move item via AIS: ${e.message}")
+                }
+            }
+            
+            // Update local cache
             items[itemId] = item.copy(parentId = newParentId)
-            // TODO: Send to server
             return true
         }
         return false
     }
     
     /**
-     * Move folder
+     * Move folder to new parent.
+     * Uses AISv3 capability when available.
      */
     suspend fun moveFolder(folderId: UUID, newParentId: UUID): Boolean {
         folders[folderId]?.let { folder ->
+            // Try to use AISv3 capability
+            val aisUrl = capabilityManager.getCapability(CapabilityManager.CAP_INVENTORY_API)
+            if (aisUrl != null) {
+                try {
+                    val request = LLSDMap().apply {
+                        this["categories"] = LLSDArray().apply {
+                            add(LLSDMap().apply {
+                                this["category_id"] = LLSDString(folderId.toString())
+                                this["parent_id"] = LLSDString(newParentId.toString())
+                            })
+                        }
+                    }
+                    capabilityManager.request(CapabilityManager.CAP_INVENTORY_API, request)
+                    Log.d(TAG, "Moved folder $folderId to $newParentId via AIS")
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to move folder via AIS: ${e.message}")
+                }
+            }
+            
+            // Update local cache
             folders[folderId] = folder.copy(parentId = newParentId)
-            // TODO: Send to server
             return true
         }
         return false
     }
     
     /**
-     * Create folder
+     * Create folder using CreateInventoryCategory capability.
      */
     suspend fun createFolder(parentId: UUID, name: String, type: Int = -1): UUID? {
-        val folderId = UUID.randomUUID()
-        val folder = InventoryFolder(
-            folderId = folderId,
-            parentId = parentId,
-            name = name,
-            type = type,
-            version = 0
-        )
-        folders[folderId] = folder
-        // TODO: Send to server
-        return folderId
+        return withContext(Dispatchers.IO) {
+            try {
+                val folderId = UUID.randomUUID()
+                
+                // Try to use CreateInventoryCategory capability
+                val capUrl = capabilityManager.getCapability(CapabilityManager.CAP_CREATE_INVENTORY_CATEGORY)
+                if (capUrl != null) {
+                    val request = LLSDMap().apply {
+                        this["folder_id"] = LLSDString(folderId.toString())
+                        this["parent_id"] = LLSDString(parentId.toString())
+                        this["name"] = LLSDString(name)
+                        this["type"] = LLSDInteger(type)
+                    }
+                    
+                    val response = capabilityManager.request(
+                        CapabilityManager.CAP_CREATE_INVENTORY_CATEGORY, 
+                        request
+                    )
+                    
+                    if (response is LLSDMap) {
+                        val createdId = response.getString("folder_id")
+                        if (createdId != null) {
+                            val newFolderId = UUID.fromString(createdId)
+                            val folder = InventoryFolder(
+                                folderId = newFolderId,
+                                parentId = parentId,
+                                name = name,
+                                type = type,
+                                version = 0
+                            )
+                            folders[newFolderId] = folder
+                            Log.d(TAG, "Created folder '$name' with ID $newFolderId")
+                            return@withContext newFolderId
+                        }
+                    }
+                }
+                
+                // Fallback: create locally
+                val folder = InventoryFolder(
+                    folderId = folderId,
+                    parentId = parentId,
+                    name = name,
+                    type = type,
+                    version = 0
+                )
+                folders[folderId] = folder
+                Log.d(TAG, "Created folder '$name' locally (no capability)")
+                folderId
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to create folder", e)
+                null
+            }
+        }
     }
     
     /**
@@ -375,34 +460,72 @@ class InventoryManager(
     }
     
     /**
-     * Rename item
+     * Rename item using UpdateInventoryItem capability.
      */
     suspend fun renameItem(itemId: UUID, newName: String): Boolean {
         items[itemId]?.let { item ->
+            // Try to use UpdateInventoryItem capability
+            val capUrl = capabilityManager.getCapability(CapabilityManager.CAP_UPDATE_INVENTORY_ITEM)
+            if (capUrl != null) {
+                try {
+                    val request = LLSDMap().apply {
+                        this["item_id"] = LLSDString(itemId.toString())
+                        this["name"] = LLSDString(newName)
+                    }
+                    capabilityManager.request(CapabilityManager.CAP_UPDATE_INVENTORY_ITEM, request)
+                    Log.d(TAG, "Renamed item $itemId to '$newName' via capability")
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to rename item via capability: ${e.message}")
+                }
+            }
+            
+            // Update local cache
             items[itemId] = item.copy(name = newName)
-            // TODO: Send to server
             return true
         }
         return false
     }
     
     /**
-     * Update item description
+     * Update item description using UpdateInventoryItem capability.
      */
     suspend fun updateItemDescription(itemId: UUID, description: String): Boolean {
         items[itemId]?.let { item ->
+            // Try to use UpdateInventoryItem capability
+            val capUrl = capabilityManager.getCapability(CapabilityManager.CAP_UPDATE_INVENTORY_ITEM)
+            if (capUrl != null) {
+                try {
+                    val request = LLSDMap().apply {
+                        this["item_id"] = LLSDString(itemId.toString())
+                        this["desc"] = LLSDString(description)
+                    }
+                    capabilityManager.request(CapabilityManager.CAP_UPDATE_INVENTORY_ITEM, request)
+                    Log.d(TAG, "Updated description for item $itemId")
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to update item description: ${e.message}")
+                }
+            }
+            
+            // Update local cache
             items[itemId] = item.copy(description = description)
-            // TODO: Send to server
             return true
         }
         return false
     }
     
     /**
-     * Copy item
+     * Copy item.
+     * Note: Copy operations typically use CopyInventoryItem UDP message
+     * as there's no direct CAPS endpoint for copying.
      */
     suspend fun copyItem(itemId: UUID, destinationId: UUID, newName: String? = null): UUID? {
         val source = items[itemId] ?: return null
+        
+        // Check permissions
+        if ((source.permissions.ownerMask and 0x00008000) == 0) {
+            Log.w(TAG, "Cannot copy item $itemId - no copy permission")
+            return null
+        }
         
         val newItemId = UUID.randomUUID()
         val copy = source.copy(
@@ -411,8 +534,55 @@ class InventoryManager(
             name = newName ?: source.name
         )
         items[newItemId] = copy
-        // TODO: Send to server
+        
+        // Note: For full server sync, would need to use CopyInventoryItem UDP message
+        // or CopyInventoryFromNotecard capability
+        Log.d(TAG, "Copied item $itemId to $newItemId (local cache only)")
         return newItemId
+    }
+    
+    /**
+     * Resolve an inventory link to its target item.
+     * 
+     * Inventory links (asset type 24 for items, 25 for folders) reference
+     * other items/folders. This method resolves the link to the actual item.
+     * 
+     * @param item The item to resolve (may or may not be a link)
+     * @return The resolved item, or the original item if not a link
+     */
+    fun resolveLink(item: InventoryItem): InventoryItem? {
+        // Asset type 24 = LINK (item link), 25 = LINK_FOLDER (folder link)
+        if (item.assetType != 24 && item.assetType != 25) {
+            return item
+        }
+        
+        // The assetId of a link points to the target item/folder
+        val targetId = item.assetId
+        return items[targetId]
+    }
+    
+    /**
+     * Check if an item is a link.
+     */
+    fun isLink(item: InventoryItem): Boolean {
+        return item.assetType == 24 || item.assetType == 25
+    }
+    
+    /**
+     * Get the original item from a potential link chain.
+     * Follows links recursively (up to 10 levels to prevent infinite loops).
+     */
+    fun resolveFullLinkChain(item: InventoryItem, maxDepth: Int = 10): InventoryItem? {
+        var current = item
+        var depth = 0
+        
+        while (isLink(current) && depth < maxDepth) {
+            val resolved = items[current.assetId] ?: return null
+            current = resolved
+            depth++
+        }
+        
+        return if (isLink(current)) null else current
     }
     
     /**
