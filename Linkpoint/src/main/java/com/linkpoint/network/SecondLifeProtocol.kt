@@ -3,6 +3,9 @@ package com.linkpoint.network
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import com.linkpoint.auth.CrashTracker
+import com.linkpoint.auth.DeviceIdentifier
+import com.linkpoint.auth.MfaHashStorage
 import com.linkpoint.core.ConnectionState
 import com.linkpoint.core.RegionInfo
 import com.linkpoint.LinkpointApp
@@ -28,6 +31,12 @@ import java.util.UUID
  * - Automatic reconnection
  * - Network diagnostics
  * 
+ * Enhanced with official viewer compliance:
+ * - Persistent device identifiers (MAC, ID0)
+ * - Crash tracking (last_exec_event)
+ * - MFA hash storage
+ * - Pre-hashed password support
+ * 
  * Based on patterns from the official Second Life app.
  */
 class SecondLifeProtocol(private val context: Context) {
@@ -47,6 +56,15 @@ class SecondLifeProtocol(private val context: Context) {
     
     // Core networking service with all connection management features
     private val networkingService = CoreNetworkingService(context)
+    
+    // Device identification (persistent across sessions) - matches official viewer behavior
+    private val deviceIdentifier = DeviceIdentifier(context)
+    
+    // Crash tracking for last_exec_event parameter - matches official viewer behavior
+    private val crashTracker = CrashTracker(context)
+    
+    // MFA hash storage for skipping MFA on trusted devices
+    private val mfaHashStorage = MfaHashStorage(context)
     
     // Expose connection quality and state for UI
     val qualityManager get() = networkingService.qualityManager
@@ -82,6 +100,36 @@ class SecondLifeProtocol(private val context: Context) {
                 }
             }
         }
+    }
+    
+    /**
+     * Record that the app has started (for crash tracking).
+     * Call this from Application.onCreate().
+     */
+    fun recordAppStart() {
+        crashTracker.recordAppStart()
+    }
+    
+    /**
+     * Record a clean shutdown (for crash tracking).
+     * Call this when the user logs out properly.
+     */
+    fun recordCleanShutdown() {
+        crashTracker.recordCleanShutdown()
+    }
+    
+    /**
+     * Get stored MFA hash for a user (to skip MFA prompt).
+     */
+    fun getStoredMfaHash(username: String): String? {
+        return mfaHashStorage.getMfaHash(username)
+    }
+    
+    /**
+     * Store MFA hash after successful MFA verification.
+     */
+    fun storeMfaHash(username: String, mfaHash: String) {
+        mfaHashStorage.saveMfaHash(username, mfaHash)
     }
     
     /**
@@ -386,12 +434,13 @@ class SecondLifeProtocol(private val context: Context) {
         val safeToken = escapeXml(mfaToken)
         val safeMfaHash = escapeXml(mfaHash)
         
-        // Generate viewer_digest - required by Second Life login server
-        val viewerDigest = UUID.randomUUID().toString()
+        // Use persistent device identifiers (matches official viewer behavior)
+        val viewerDigest = deviceIdentifier.getViewerDigest()
+        val macAddress = deviceIdentifier.getMacAddress()
+        val id0 = deviceIdentifier.getId0()
         
-        // Generate unique MAC and ID0 for this device session
-        val macAddress = generateMacAddress()
-        val id0 = UUID.randomUUID().toString()
+        // Get last execution status for crash reporting (matches official viewer behavior)
+        val lastExecEvent = crashTracker.getLastExecStatus()
         
         // Build XML-RPC request with minimal whitespace for maximum compatibility
         return buildString {
@@ -421,39 +470,54 @@ class SecondLifeProtocol(private val context: Context) {
             append("<member><name>platform</name><value><string>Android</string></value></member>")
             append("<member><name>platform_version</name><value><string>${android.os.Build.VERSION.RELEASE}</string></value></member>")
             
-            // Device identification (required by SL login server)
+            // Device identification (persistent, hashed - matches official viewer behavior)
             append("<member><name>mac</name><value><string>$macAddress</string></value></member>")
             append("<member><name>id0</name><value><string>$id0</string></value></member>")
             append("<member><name>viewer_digest</name><value><string>$viewerDigest</string></value></member>")
             
-            // Agreements
+            // Agreements and status
             append("<member><name>agree_to_tos</name><value><string>true</string></value></member>")
             append("<member><name>read_critical</name><value><string>true</string></value></member>")
             
-            // Options array - comprehensive list for full functionality
+            // Last execution event - tracks previous app exit status for crash reporting
+            // Required by official protocol, all desktop viewers send this
+            append("<member><name>last_exec_event</name><value><i4>$lastExecEvent</i4></value></member>")
+            
+            // Options array - comprehensive list matching official viewers
             append("<member><name>options</name><value><array><data>")
+            // Core inventory options
             append("<value><string>inventory-root</string></value>")
             append("<value><string>inventory-skeleton</string></value>")
             append("<value><string>inventory-lib-root</string></value>")
             append("<value><string>inventory-lib-owner</string></value>")
             append("<value><string>inventory-skel-lib</string></value>")
+            // Avatar and UI options
             append("<value><string>initial-outfit</string></value>")
             append("<value><string>gestures</string></value>")
             append("<value><string>display_names</string></value>")
-            append("<value><string>event_categories</string></value>")
-            append("<value><string>event_notifications</string></value>")
-            append("<value><string>classified_categories</string></value>")
             append("<value><string>adult_compliant</string></value>")
             append("<value><string>buddy-list</string></value>")
             append("<value><string>newuser-config</string></value>")
             append("<value><string>ui-config</string></value>")
             append("<value><string>advanced-mode</string></value>")
+            // Events and classifieds
+            append("<value><string>event_categories</string></value>")
+            append("<value><string>event_notifications</string></value>")
+            append("<value><string>classified_categories</string></value>")
+            // Server configuration
             append("<value><string>max-agent-groups</string></value>")
             append("<value><string>map-server-url</string></value>")
             append("<value><string>voice-config</string></value>")
-            append("<value><string>tutorial_setting</string></value>")
+            append("<value><string>tutorial_settings</string></value>")  // Fixed: was tutorial_setting (singular)
             append("<value><string>login-flags</string></value>")
             append("<value><string>global-textures</string></value>")
+            // OpenSim compatibility options
+            append("<value><string>avatar_picker_url</string></value>")
+            append("<value><string>classified_fee</string></value>")
+            append("<value><string>currency</string></value>")
+            append("<value><string>destination_guide_url</string></value>")
+            append("<value><string>profile-server-url</string></value>")
+            append("<value><string>search</string></value>")
             append("</data></array></value></member>")
             
             append("</struct></value>")
@@ -463,15 +527,7 @@ class SecondLifeProtocol(private val context: Context) {
         }
     }
     
-    /**
-     * Generate a pseudo-MAC address for device identification
-     */
-    private fun generateMacAddress(): String {
-        val random = java.util.Random()
-        return (0..5).joinToString(":") { 
-            String.format("%02X", random.nextInt(256)) 
-        }
-    }
+    // Note: generateMacAddress() removed - now using DeviceIdentifier for persistent IDs
     
     private fun escapeXml(input: String): String {
         return input
@@ -495,13 +551,23 @@ class SecondLifeProtocol(private val context: Context) {
      * Create Second Life password hash.
      * 
      * IMPORTANT: Second Life protocol requires passwords to be truncated to 16 characters
-     * before MD5 hashing. This matches the official Lumiya implementation and is required
+     * before MD5 hashing. This matches the official viewer implementation and is required
      * for compatibility with Second Life login servers.
      * 
+     * Supports already-hashed passwords: If the input is already in $1$<md5> format
+     * (35 characters starting with $1$), it is returned unchanged. This matches
+     * LibreMetaverse, Firestorm, and other official viewer behavior.
+     * 
      * @param password The plain text password (will be trimmed and truncated to 16 chars)
+     *                 OR an already-hashed password in $1$<md5> format
      * @return Password hash in format "$1$<md5_hash>"
      */
     fun createPasswordHash(password: String): String {
+        // Support already-hashed passwords (35 chars: "$1$" + 32 hex)
+        // This matches LibreMetaverse/Firestorm behavior
+        if (password.length == 35 && password.startsWith("\$1\$")) {
+            return password
+        }
         val truncatedPassword = password.trim().take(16)
         return "\$1\$${md5Hash(truncatedPassword)}"
     }

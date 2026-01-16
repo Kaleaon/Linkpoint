@@ -71,15 +71,34 @@ class UDPConnection {
         const val FLAG_RELIABLE = 0x40
         const val FLAG_RESENT = 0x20
         const val FLAG_ACK = 0x10
+        
+        // Agent update interval (matches official viewers - 10 updates/sec)
+        private const val AGENT_UPDATE_INTERVAL_MS = 100L
+        
+        // ACK batching configuration
+        private const val MAX_ACKS_PER_PACKET = 10
+        private const val ACK_FLUSH_INTERVAL_MS = 100L
     }
     
     private var socket: DatagramSocket? = null
     private var receiveJob: Job? = null
+    private var agentUpdateJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     
     private val sequenceNumber = AtomicInteger(0)
     private val pendingAcks = ConcurrentHashMap<Int, PendingPacket>()
     private val messageHandlers = ConcurrentHashMap<Int, MessageHandler>()
+    
+    // ACK batching for efficiency (matches official viewer behavior)
+    private val pendingAckIds = mutableListOf<Int>()
+    @Volatile private var lastAckFlush = System.currentTimeMillis()
+    
+    // Current agent state for AgentUpdate messages
+    @Volatile private var currentPosition = floatArrayOf(128f, 128f, 25f)
+    @Volatile private var currentRotation = floatArrayOf(0f, 0f, 0f, 1f) // quaternion
+    @Volatile private var currentLookAt = floatArrayOf(1f, 0f, 0f)
+    @Volatile private var agentState: Int = 0
+    @Volatile private var controlFlags: Int = 0
     
     private var isConnected = false
     
@@ -263,14 +282,223 @@ class UDPConnection {
     }
     
     /**
+     * Send AgentUpdate message.
+     * 
+     * This is CRITICAL for movement and interaction in Second Life.
+     * Official viewers send this approximately 10 times per second.
+     * The simulator uses this to update the agent's position and camera.
+     * 
+     * Based on LibreMetaverse AgentManager.SendAgentUpdate() and
+     * Firestorm LLAgent::sendAgentUpdate()
+     */
+    suspend fun sendAgentUpdate(
+        bodyRotation: FloatArray = currentRotation,
+        headRotation: FloatArray = currentRotation,
+        state: Int = agentState,
+        cameraCenter: FloatArray = currentPosition,
+        cameraAtAxis: FloatArray = currentLookAt,
+        cameraLeftAxis: FloatArray = floatArrayOf(-currentLookAt[1], currentLookAt[0], 0f),
+        cameraUpAxis: FloatArray = floatArrayOf(0f, 0f, 1f),
+        far: Float = 128f,
+        controlFlags: Int = this.controlFlags,
+        flags: Int = 0
+    ) {
+        // AgentUpdate message format (High frequency, ID 0x04):
+        // AgentData block:
+        // - AgentID (16 bytes, UUID)
+        // - SessionID (16 bytes, UUID)
+        // - BodyRotation (12 bytes, packed quaternion - 3 floats, w computed)
+        // - HeadRotation (12 bytes, packed quaternion)
+        // - State (1 byte)
+        // - CameraCenter (12 bytes, Vector3)
+        // - CameraAtAxis (12 bytes, Vector3)
+        // - CameraLeftAxis (12 bytes, Vector3)
+        // - CameraUpAxis (12 bytes, Vector3)
+        // - Far (4 bytes, F32)
+        // - ControlFlags (4 bytes, U32)
+        // - Flags (1 byte)
+        
+        val payload = ByteBuffer.allocate(114).order(ByteOrder.BIG_ENDIAN)
+        
+        // AgentID
+        payload.putUUID(agentId)
+        
+        // SessionID
+        payload.putUUID(sessionId)
+        
+        // Body rotation (packed quaternion - x, y, z, w computed on server)
+        payload.putFloat(bodyRotation[0])
+        payload.putFloat(bodyRotation[1])
+        payload.putFloat(bodyRotation[2])
+        
+        // Head rotation
+        payload.putFloat(headRotation[0])
+        payload.putFloat(headRotation[1])
+        payload.putFloat(headRotation[2])
+        
+        // State (0 = standing, 1 = sitting, etc.)
+        payload.put(state.toByte())
+        
+        // Camera center
+        payload.putFloat(cameraCenter[0])
+        payload.putFloat(cameraCenter[1])
+        payload.putFloat(cameraCenter[2])
+        
+        // Camera at axis (look direction)
+        payload.putFloat(cameraAtAxis[0])
+        payload.putFloat(cameraAtAxis[1])
+        payload.putFloat(cameraAtAxis[2])
+        
+        // Camera left axis
+        payload.putFloat(cameraLeftAxis[0])
+        payload.putFloat(cameraLeftAxis[1])
+        payload.putFloat(cameraLeftAxis[2])
+        
+        // Camera up axis
+        payload.putFloat(cameraUpAxis[0])
+        payload.putFloat(cameraUpAxis[1])
+        payload.putFloat(cameraUpAxis[2])
+        
+        // Far distance
+        payload.putFloat(far)
+        
+        // Control flags (movement, etc.)
+        payload.putInt(controlFlags)
+        
+        // Flags
+        payload.put(flags.toByte())
+        
+        sendPacket(MessageIds.AGENT_UPDATE, payload.array(), reliable = false)
+    }
+    
+    /**
+     * Update agent position for AgentUpdate messages.
+     * Call this when the avatar moves.
+     */
+    fun updateAgentPosition(x: Float, y: Float, z: Float) {
+        currentPosition = floatArrayOf(x, y, z)
+    }
+    
+    /**
+     * Update agent rotation for AgentUpdate messages.
+     * @param rotation Quaternion as [x, y, z, w]
+     */
+    fun updateAgentRotation(rotation: FloatArray) {
+        if (rotation.size >= 4) {
+            currentRotation = rotation.copyOf()
+        }
+    }
+    
+    /**
+     * Update camera look-at direction.
+     */
+    fun updateLookAt(x: Float, y: Float, z: Float) {
+        currentLookAt = floatArrayOf(x, y, z)
+    }
+    
+    /**
+     * Set control flags (for movement).
+     */
+    fun setControlFlags(flags: Int) {
+        controlFlags = flags
+    }
+    
+    /**
+     * Start sending periodic AgentUpdate messages.
+     * This is required for proper operation in Second Life.
+     */
+    fun startAgentUpdates() {
+        agentUpdateJob?.cancel()
+        agentUpdateJob = scope.launch {
+            Log.d(TAG, "Starting periodic AgentUpdate messages")
+            while (isConnected) {
+                sendAgentUpdate()
+                delay(AGENT_UPDATE_INTERVAL_MS)
+            }
+        }
+    }
+    
+    /**
+     * Stop sending periodic AgentUpdate messages.
+     */
+    fun stopAgentUpdates() {
+        agentUpdateJob?.cancel()
+        agentUpdateJob = null
+    }
+    
+    /**
+     * Handle StartPingCheck message from simulator.
+     * We must respond with CompletePingCheck to maintain the connection.
+     * 
+     * Based on LibreMetaverse NetworkManager.HandleStartPingCheck()
+     */
+    suspend fun handleStartPingCheck(pingId: Byte, oldestUnacked: Int) {
+        val payload = ByteBuffer.allocate(5).order(ByteOrder.BIG_ENDIAN)
+        payload.put(pingId)
+        payload.putInt(getOldestUnackedSequence())
+        
+        Log.d(TAG, "Responding to ping check $pingId")
+        sendPacket(MessageIds.COMPLETE_PING_CHECK, payload.array(), reliable = false)
+    }
+    
+    /**
+     * Get oldest unacknowledged sequence number for ping response.
+     */
+    private fun getOldestUnackedSequence(): Int {
+        return pendingAcks.keys.minOrNull() ?: 0
+    }
+    
+    /**
+     * Queue an ACK for batching (more efficient than individual ACKs).
+     * This matches official viewer behavior.
+     */
+    fun queueAck(sequenceNumber: Int) {
+        synchronized(pendingAckIds) {
+            pendingAckIds.add(sequenceNumber)
+            
+            // Flush if we have enough ACKs or enough time has passed
+            if (pendingAckIds.size >= MAX_ACKS_PER_PACKET || 
+                System.currentTimeMillis() - lastAckFlush > ACK_FLUSH_INTERVAL_MS) {
+                scope.launch { flushAcks() }
+            }
+        }
+    }
+    
+    /**
+     * Send batched ACKs.
+     */
+    private suspend fun flushAcks() {
+        val acksToSend: List<Int>
+        synchronized(pendingAckIds) {
+            if (pendingAckIds.isEmpty()) return
+            acksToSend = pendingAckIds.toList()
+            pendingAckIds.clear()
+            lastAckFlush = System.currentTimeMillis()
+        }
+        
+        val payload = ByteBuffer.allocate(1 + acksToSend.size * 4).order(ByteOrder.BIG_ENDIAN)
+        payload.put(acksToSend.size.toByte())
+        acksToSend.forEach { payload.putInt(it) }
+        
+        Log.d(TAG, "Sending ${acksToSend.size} batched ACKs")
+        sendPacket(MessageIds.PACKET_ACK, payload.array(), reliable = false)
+    }
+    
+    /**
      * Disconnect from the simulator
      */
     fun disconnect() {
         isConnected = false
+        agentUpdateJob?.cancel()
         receiveJob?.cancel()
+        
+        // Flush any remaining ACKs
+        scope.launch { flushAcks() }
+        
         socket?.close()
         socket = null
         pendingAcks.clear()
+        synchronized(pendingAckIds) { pendingAckIds.clear() }
         Log.i(TAG, "Disconnected")
     }
     
@@ -800,5 +1028,29 @@ object MessageIds {
     // Region/Connection messages
     const val REGION_HANDSHAKE_REPLY: Int = 0xFFFF0095.toInt()
     const val AGENT_THROTTLE: Int = 0xFFFF0099.toInt()
-    const val PACKET_ACK: Int = 0xFFFF00FB.toInt()
+    
+    // Packet ACK is high frequency (0xFB)
+    const val PACKET_ACK: Int = 0xFB
+    
+    // Inventory messages
+    const val MOVE_INVENTORY_ITEM: Int = 0xFFFF0109.toInt()
+    const val COPY_INVENTORY_ITEM: Int = 0xFFFF010A.toInt()
+    const val REMOVE_INVENTORY_ITEM: Int = 0xFFFF010B.toInt()
+    const val CREATE_INVENTORY_FOLDER: Int = 0xFFFF010C.toInt()
+    const val UPDATE_INVENTORY_FOLDER: Int = 0xFFFF010D.toInt()
+    const val MOVE_INVENTORY_FOLDER: Int = 0xFFFF010E.toInt()
+    const val REMOVE_INVENTORY_FOLDER: Int = 0xFFFF010F.toInt()
+    const val UPDATE_INVENTORY_ITEM: Int = 0xFFFF0107.toInt()
+    const val FETCH_INVENTORY_REPLY: Int = 0xFFFF0120.toInt()
+    const val PURGE_INVENTORY_DESCENDENTS: Int = 0xFFFF0110.toInt()
+    
+    // Attachment messages
+    const val REZ_SINGLE_ATTACHMENT_FROM_INV: Int = 0xFFFF0184.toInt()
+    const val REZ_MULTIPLE_ATTACHMENTS_FROM_INV: Int = 0xFFFF0185.toInt()
+    const val DETACH_ATTACHMENT_INTO_INV: Int = 0xFFFF0186.toInt()
+    
+    // Agent appearance
+    const val AGENT_SET_APPEARANCE: Int = 0xFFFF0054.toInt()
+    const val AGENT_WEARABLES_UPDATE: Int = 0xFFFF00A1.toInt()
+    const val AGENT_IS_NOW_WEARING: Int = 0xFFFF00A2.toInt()
 }
