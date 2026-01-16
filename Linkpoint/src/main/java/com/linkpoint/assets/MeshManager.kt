@@ -337,7 +337,10 @@ data class MeshData(
     val meshId: UUID,
     val faces: List<MeshFace>,
     val skinData: SkinData? = null
-)
+) {
+    val hasSkinData: Boolean get() = skinData != null
+    val skinJointNames: List<String> get() = skinData?.jointNames ?: emptyList()
+}
 
 data class MeshFace(
     val positions: FloatArray,

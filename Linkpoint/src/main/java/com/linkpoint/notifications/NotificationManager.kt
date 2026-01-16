@@ -238,7 +238,7 @@ class NotificationManager(
     }
     
     private fun handleTransaction(body: LLSDMap) {
-        val amount = body.getInteger("amount") ?: return
+        val amount = body.getInt("amount") ?: return
         val description = body.getString("description") ?: "Transaction"
         val success = body.getBoolean("success") ?: true
         

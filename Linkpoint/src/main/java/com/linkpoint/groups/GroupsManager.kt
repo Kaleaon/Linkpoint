@@ -73,7 +73,7 @@ class GroupsManager(
             if (item is LLSDMap) {
                 val groupId = UUID.fromString(item.getString("GroupID") ?: continue)
                 val groupName = item.getString("GroupName") ?: "Unknown Group"
-                val contribution = item.getInteger("Contribution") ?: 0
+                val contribution = item.getInt("Contribution") ?: 0
                 val insigniaId = item.getString("GroupInsigniaID")?.let { UUID.fromString(it) }
                 val acceptNotices = item.getBoolean("AcceptNotices") ?: true
                 val powers = item.getLong("GroupPowers") ?: 0L

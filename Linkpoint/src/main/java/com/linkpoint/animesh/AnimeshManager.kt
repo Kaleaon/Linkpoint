@@ -5,7 +5,7 @@ import com.linkpoint.assets.AnimationManager
 import com.linkpoint.assets.MeshManager
 import com.linkpoint.avatar.AvatarAnimator
 import com.linkpoint.avatar.AvatarSkeleton
-import com.linkpoint.protocol.messages.ObjectUpdate
+import com.linkpoint.protocol.messages.ObjectUpdateData
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3
 import kotlinx.coroutines.*
@@ -89,16 +89,16 @@ class AnimeshManager(
     /**
      * Handle object update that may be animesh.
      */
-    fun handleObjectUpdate(update: ObjectUpdate) {
-        if (isAnimesh(update.objectFlags)) {
-            Log.d(TAG, "Animesh object detected: ${update.id}")
+    fun handleObjectUpdate(update: ObjectUpdateData) {
+        if (isAnimesh(update.updateFlags)) {
+            Log.d(TAG, "Animesh object detected: ${update.fullId}")
             updateAnimeshObject(
-                objectId = update.id,
+                objectId = update.fullId,
                 localId = update.localId,
                 position = update.position,
                 rotation = update.rotation,
                 scale = update.scale,
-                meshAssetId = update.sculptTextureId, // Mesh uses sculptTexture field
+                meshAssetId = null, // TODO: Extract mesh ID from update data
                 animationAssetId = null // Animation comes separately
             )
         }

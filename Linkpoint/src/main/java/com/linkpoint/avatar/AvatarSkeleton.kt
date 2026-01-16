@@ -11,7 +11,7 @@ import java.io.InputStreamReader
  * Avatar skeleton with bones and transforms
  * Based on Second Life's standard avatar skeleton
  */
-class AvatarSkeleton(context: Context) {
+class AvatarSkeleton(context: Context?) {
     
     companion object {
         private const val TAG = "AvatarSkeleton"
@@ -61,7 +61,11 @@ class AvatarSkeleton(context: Context) {
     private var rootBone: Bone? = null
     
     init {
-        loadDefaultSkeleton(context)
+        if (context != null) {
+            loadDefaultSkeleton(context)
+        } else {
+            createDefaultSkeleton()
+        }
     }
     
     private fun loadDefaultSkeleton(context: Context) {

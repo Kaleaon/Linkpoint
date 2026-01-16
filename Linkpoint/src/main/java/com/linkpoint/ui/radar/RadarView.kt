@@ -205,13 +205,6 @@ class RadarView @JvmOverloads constructor(
     fun setRadarRange(meters: Float) {
         range = meters
     }
-    
-    /**
-     * Set the current heading (avatar facing direction).
-     */
-    fun setHeading(radians: Float) {
-        heading = radians
-    }
 }
 
 /**
